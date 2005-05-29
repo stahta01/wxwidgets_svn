@@ -6,7 +6,7 @@
 // Created:     02/10/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ROWLAYOUTPL_G__
@@ -23,7 +23,7 @@ Simple implementation of a plugin which handles row layout
 requests sent from a frame layout.
 */
 
-class WXDLLIMPEXP_FL cbRowLayoutPlugin : public cbPluginBase
+class WXFL_DECLSPEC cbRowLayoutPlugin : public cbPluginBase
 {
     DECLARE_DYNAMIC_CLASS( cbRowLayoutPlugin )
 protected:

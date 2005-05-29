@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_FRAME_H_
 #define _WX_UNIV_FRAME_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univframe.h"
 #endif
 
@@ -44,7 +44,7 @@ public:
                 const wxString& name = wxFrameNameStr);
 
     virtual wxPoint GetClientAreaOrigin() const;
-    virtual bool Enable(bool enable = true);
+    virtual bool Enable(bool enable = TRUE);
 
 #if wxUSE_STATUSBAR
     virtual wxStatusBar* CreateStatusBar(int number = 1,
@@ -55,8 +55,8 @@ public:
 
 #if wxUSE_TOOLBAR
     // create main toolbar bycalling OnCreateToolBar()
-    virtual wxToolBar* CreateToolBar(long style = -1,
-                                     wxWindowID id = wxID_ANY,
+    virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER|wxTB_HORIZONTAL,
+                                     wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
     virtual void PositionToolBar();
 #endif // wxUSE_TOOLBAR
@@ -69,7 +69,6 @@ public:
 
 protected:
     void OnSize(wxSizeEvent& event);
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
 
     virtual void DoGetClientSize(int *width, int *height) const;
     virtual void DoSetClientSize(int width, int height);

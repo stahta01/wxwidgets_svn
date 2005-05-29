@@ -3,14 +3,14 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GTKSLIDERH__
 #define __GTKSLIDERH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -60,11 +60,9 @@ public:
     virtual void SetThumbLength(int lenPixels);
     virtual int GetThumbLength() const;
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
     void GtkDisableEvents();
     void GtkEnableEvents();
 

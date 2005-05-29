@@ -2,8 +2,7 @@
 // Name:        table.cpp
 // Purpose:     Utilities for manipulating tables
 // Author:      Julian Smart
-// Modified by: Wlodzimiez ABX Skiba 2003/2004 Unicode support
-//              Ron Lee
+// Modified by:
 // Created:     01/01/99
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
@@ -22,6 +21,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+#include "wx/wx.h"
 #endif
 
 #include "wx/hash.h"
@@ -43,11 +43,11 @@
 #include "table.h"
 
 ColumnData TableData[40];
-bool inTabular = false;
+bool inTabular = FALSE;
 
-bool startRows = false;
-bool tableVerticalLineLeft = false;
-bool tableVerticalLineRight = false;
+bool startRows = FALSE;
+bool tableVerticalLineLeft = FALSE;
+bool tableVerticalLineRight = FALSE;
 int noColumns = 0;   // Current number of columns in table
 int ruleTop = 0;
 int ruleBottom = 0;
@@ -58,71 +58,71 @@ int currentRowNumber = 0;
  *
  */
 
-bool ParseTableArgument(wxChar *value)
+bool ParseTableArgument(char *value)
 {
   noColumns = 0;
   int i = 0;
-  int len = wxStrlen(value);
-  bool isBorder = false;
+  int len = strlen(value);
+  bool isBorder = FALSE;
   while (i < len)
   {
     int ch = value[i];
     if (ch == '|')
     {
       i ++;
-      isBorder = true;
+      isBorder = TRUE;
     }
     else if (ch == 'l')
     {
       TableData[noColumns].leftBorder = isBorder;
-      TableData[noColumns].rightBorder = false;
+      TableData[noColumns].rightBorder = FALSE;
       TableData[noColumns].justification = 'l';
       TableData[noColumns].width = 2000; // Estimate
-      TableData[noColumns].absWidth = false;
+      TableData[noColumns].absWidth = FALSE;
 //      TableData[noColumns].spacing = ??
       noColumns ++;
       i ++;
-      isBorder = false;
+      isBorder = FALSE;
     }
     else if (ch == 'c')
     {
       TableData[noColumns].leftBorder = isBorder;
-      TableData[noColumns].rightBorder = false;
+      TableData[noColumns].rightBorder = FALSE;
       TableData[noColumns].justification = 'c';
       TableData[noColumns].width = defaultTableColumnWidth; // Estimate
-      TableData[noColumns].absWidth = false;
+      TableData[noColumns].absWidth = FALSE;
 //      TableData[noColumns].spacing = ??
       noColumns ++;
       i ++;
-      isBorder = false;
+      isBorder = FALSE;
     }
     else if (ch == 'r')
     {
       TableData[noColumns].leftBorder = isBorder;
-      TableData[noColumns].rightBorder = false;
+      TableData[noColumns].rightBorder = FALSE;
       TableData[noColumns].justification = 'r';
       TableData[noColumns].width = 2000; // Estimate
-      TableData[noColumns].absWidth = false;
+      TableData[noColumns].absWidth = FALSE;
 //      TableData[noColumns].spacing = ??
       noColumns ++;
       i ++;
-      isBorder = false;
+      isBorder = FALSE;
     }
     else if (ch == 'p')
     {
       i ++;
       int j = 0;
-      wxChar numberBuf[50];
+      char numberBuf[50];
       ch = value[i];
       if (ch == '{')
       {
         i++;
         ch = value[i];
       }
-
+        
       while ((i < len) && (isdigit(ch) || ch == '.'))
       {
-        numberBuf[j] = (wxChar)ch;
+        numberBuf[j] = ch;
         j ++;
         i ++;
         ch = value[i];
@@ -134,26 +134,26 @@ bool ParseTableArgument(wxChar *value)
       j ++; i++;
       numberBuf[j] = 0;
       if (value[i] == '}') i++;
-
+      
       TableData[noColumns].leftBorder = isBorder;
-      TableData[noColumns].rightBorder = false;
+      TableData[noColumns].rightBorder = FALSE;
       TableData[noColumns].justification = 'l';
       TableData[noColumns].width = 20*ParseUnitArgument(numberBuf);
-      TableData[noColumns].absWidth = true;
+      TableData[noColumns].absWidth = TRUE;
 //      TableData[noColumns].spacing = ??
       noColumns ++;
-      isBorder = false;
+      isBorder = FALSE;
     }
     else
     {
-      wxChar *buf = new wxChar[wxStrlen(value) + 80];
-      wxSnprintf(buf, wxStrlen(value) + 80, _T("Tabular first argument \"%s\" too complex!"), value);
+      char *buf = new char[strlen(value) + 80];
+      sprintf(buf, "Tabular first argument \"%s\" too complex!", value);
       OnError(buf);
       delete[] buf;
-      return false;
+      return FALSE;
     }
   }
   if (isBorder)
-    TableData[noColumns-1].rightBorder = true;
-  return true;
+    TableData[noColumns-1].rightBorder = TRUE;
+  return TRUE;
 }

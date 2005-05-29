@@ -37,6 +37,9 @@ MRESULT EXPENTRY wxGaugeWndProc(
     wxGauge*                        pGauge = (wxGauge *)::WinQueryWindowULong( hWnd
                                                                               ,QWL_USER
                                                                              );
+    wxWindowOS2*                    pWindow = NULL;
+    MRESULT                         rc = (MRESULT)0;
+    bool                            bProcessed = FALSE;
     HPS                             hPS;
     RECTL                           vRect;
     RECTL                           vRect2;
@@ -154,8 +157,8 @@ bool wxGauge::Create(
 #endif
     if (pParent)
         pParent->AddChild(this);
-    m_backgroundColour.Set(wxString(wxT("LIGHT GREY")));
-    m_foregroundColour.Set(wxString(wxT("NAVY")));
+    m_backgroundColour.Set(wxString("LIGHT GREY"));
+    m_foregroundColour.Set(wxString("NAVY"));
 
     m_nRangeMax   = nRange;
     m_nGaugePos   = 0;

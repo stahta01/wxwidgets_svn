@@ -18,52 +18,52 @@ No parent class.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxClassInfo::wxClassInfo}\label{wxclassinfoctor}
+\membersection{wxClassInfo::wxClassInfo}\label{wxclassinfoconstr}
 
-\func{}{wxClassInfo}{\param{const wxChar * }{className}, \param{const wxClassInfo * }{baseClass1}, \param{const wxClassInfo * }{baseClass2},
+\func{}{wxClassInfo}{\param{char* }{className}, \param{char* }{baseClass1}, \param{char* }{baseClass2},
  \param{int}{ size}, \param{wxObjectConstructorFn }{fn}}
 
 Constructs a wxClassInfo object. The supplied macros implicitly construct objects of this
 class, so there is no need to create such objects explicitly in an application.
 
-\membersection{wxClassInfo::CreateObject}\label{wxclassinfocreateobject}
+\membersection{wxClassInfo::CreateObject}
 
 \func{wxObject*}{CreateObject}{\void}
 
 Creates an object of the appropriate kind. Returns NULL if the class has not been declared
 dynamically creatable (typically, it is an abstract class).
 
-\membersection{wxClassInfo::FindClass}\label{wxclassinfofindclass}
+\membersection{wxClassInfo::FindClass}
 
-\func{static wxClassInfo *}{FindClass}{\param{wxChar * }{name}}
+\func{static wxClassInfo *}{FindClass}{\param{char* }{name}}
 
 Finds the wxClassInfo object for a class of the given string name.
 
-\membersection{wxClassInfo::GetBaseClassName1}\label{wxclassinfogetbaseclassname1}
+\membersection{wxClassInfo::GetBaseClassName1}
 
-\constfunc{wxChar *}{GetBaseClassName1}{\void}
+\constfunc{char*}{GetBaseClassName1}{\void}
 
 Returns the name of the first base class (NULL if none).
 
-\membersection{wxClassInfo::GetBaseClassName2}\label{wxclassinfogetbaseclassname2}
+\membersection{wxClassInfo::GetBaseClassName2}
 
-\constfunc{wxChar *}{GetBaseClassName2}{\void}
+\constfunc{char*}{GetBaseClassName2}{\void}
 
 Returns the name of the second base class (NULL if none).
 
-\membersection{wxClassInfo::GetClassName}\label{wxclassinfogetclassname}
+\membersection{wxClassInfo::GetClassName}
 
-\constfunc{wxChar *}{GetClassName}{\void}
+\constfunc{char *}{GetClassName}{\void}
 
 Returns the string form of the class name.
 
-\membersection{wxClassInfo::GetSize}\label{wxclassinfogetsize}
+\membersection{wxClassInfo::GetSize}
 
 \constfunc{int}{GetSize}{\void}
 
 Returns the size of the class.
 
-\membersection{wxClassInfo::InitializeClasses}\label{wxclassinfoinitializeclasses}
+\membersection{wxClassInfo::InitializeClasses}
 
 \func{static void}{InitializeClasses}{\void}
 
@@ -74,6 +74,6 @@ of IsKindOf. Called in base wxWidgets library initialization.
 
 \func{bool}{IsKindOf}{\param{wxClassInfo* }{info}}
 
-Returns true if this class is a kind of (inherits from) the given class.
+Returns TRUE if this class is a kind of (inherits from) the given class.
 
 

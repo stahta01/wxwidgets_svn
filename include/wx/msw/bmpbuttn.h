@@ -12,13 +12,12 @@
 #ifndef _WX_BMPBUTTN_H_
 #define _WX_BMPBUTTN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "bmpbuttn.h"
 #endif
 
 #include "wx/button.h"
 #include "wx/bitmap.h"
-#include "wx/brush.h"
 
 #define wxDEFAULT_BUTTON_MARGIN 4
 
@@ -48,27 +47,19 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxButtonNameStr);
 
+#if WXWIN_COMPATIBILITY
+    wxBitmap *GetBitmap() const { return (wxBitmap *) & m_bmp; }
+#endif
+
     // Implementation
-    virtual bool SetBackgroundColour(const wxColour& colour);
     virtual void SetDefault();
     virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
     virtual void DrawFace( WXHDC dc, int left, int top, int right, int bottom, bool sel );
     virtual void DrawButtonFocus( WXHDC dc, int left, int top, int right, int bottom, bool sel );
     virtual void DrawButtonDisable( WXHDC dc, int left, int top, int right, int bottom, bool with_marg );
 
-protected:
-    virtual wxSize DoGetBestSize() const;
-
-    // invalidate m_brushDisabled when system colours change
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
-
-
-    // the brush we use to draw disabled buttons
-    wxBrush m_brushDisabled;
-
-
-    DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxBitmapButton)
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapButton)
 };
 
 #endif

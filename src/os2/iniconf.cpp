@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     10/09/99
 // Copyright:   David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -60,7 +60,7 @@ wxIniConfig::wxIniConfig(const wxString& strAppName,
     m_strLocalFilename = localFilename;
     if (m_strLocalFilename.IsEmpty())
     {
-        m_strLocalFilename = GetAppName() + wxT(".ini");
+        m_strLocalFilename = GetAppName() + ".ini";
     }
 
     // append the extension if none given and it's not an absolute file name
@@ -68,11 +68,11 @@ wxIniConfig::wxIniConfig(const wxString& strAppName,
     if ( !wxIsPathSeparator(m_strLocalFilename[(size_t) 0]) &&
         m_strLocalFilename.Find('.') == wxNOT_FOUND )
     {
-        m_strLocalFilename << wxT(".ini");
+        m_strLocalFilename << ".ini";
     }
 
     // set root path
-    SetPath(wxT(""));
+    SetPath("");
 }
 
 wxIniConfig::~wxIniConfig()
@@ -105,7 +105,7 @@ void wxIniConfig::SetPath(const wxString& strPath)
   m_strPath.Empty();
   if ( nPartsCount == 0 ) {
     // go to the root
-    m_strGroup = (wxChar*)PATH_SEP_REPLACE;
+    m_strGroup = PATH_SEP_REPLACE;
   }
   else {
     // translate
@@ -120,7 +120,7 @@ void wxIniConfig::SetPath(const wxString& strPath)
   // other functions assume that all this is true, i.e. there are no trailing
   // underscores at the end except if the group is the root one
   wxASSERT( (m_strPath.IsEmpty() || m_strPath.Last() != PATH_SEP_REPLACE) &&
-            (m_strGroup == wxString((wxChar)PATH_SEP_REPLACE) ||
+            (m_strGroup == wxString(PATH_SEP_REPLACE) ||
              m_strGroup.Last() != PATH_SEP_REPLACE) );
 }
 
@@ -131,14 +131,14 @@ const wxString& wxIniConfig::GetPath() const
   // always return abs path
   s_str = wxCONFIG_PATH_SEPARATOR;
 
-  if ( m_strGroup == wxString((wxChar)PATH_SEP_REPLACE) ) {
+  if ( m_strGroup == wxString(PATH_SEP_REPLACE) ) {
     // we're at the root level, nothing to do
   }
   else {
     s_str << m_strGroup;
     if ( !m_strPath.IsEmpty() )
       s_str << wxCONFIG_PATH_SEPARATOR;
-    for ( const wxChar *p = m_strPath; *p != '\0'; p++ ) {
+    for ( const char *p = m_strPath; *p != '\0'; p++ ) {
       s_str << (*p == PATH_SEP_REPLACE ? wxCONFIG_PATH_SEPARATOR : *p);
     }
   }
@@ -162,7 +162,7 @@ wxString wxIniConfig::GetKeyName(const wxString& szKey) const
 {
   wxString strKey;
 
-  if (m_strGroup != wxString((wxChar)PATH_SEP_REPLACE))
+  if ( m_strGroup != wxString(PATH_SEP_REPLACE) )
     strKey << m_strGroup << PATH_SEP_REPLACE;
   if ( !m_strPath.IsEmpty() )
     strKey << m_strPath << PATH_SEP_REPLACE;
@@ -179,28 +179,28 @@ wxString wxIniConfig::GetKeyName(const wxString& szKey) const
 // not implemented
 bool wxIniConfig::GetFirstGroup(wxString& str, long& lIndex) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
 bool wxIniConfig::GetNextGroup (wxString& str, long& lIndex) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
 bool wxIniConfig::GetFirstEntry(wxString& str, long& lIndex) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
 bool wxIniConfig::GetNextEntry (wxString& str, long& lIndex) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
@@ -212,28 +212,28 @@ bool wxIniConfig::GetNextEntry (wxString& str, long& lIndex) const
 // not implemented
 size_t wxIniConfig::GetNumberOfEntries(bool bRecursive) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return (size_t)-1;
 }
 
 size_t wxIniConfig::GetNumberOfGroups(bool bRecursive) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return (size_t)-1;
 }
 
 bool wxIniConfig::HasGroup(const wxString& strName) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
 bool wxIniConfig::HasEntry(const wxString& strName) const
 {
-  wxFAIL_MSG(wxT("not implemeted"));
+  wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
@@ -264,20 +264,20 @@ bool wxIniConfig::Read(const wxString& szKey, wxString *pstr) const
   wxConfigPathChanger path(this, szKey);
   wxString strKey = GetPrivateKeyName(path.Name());
 
-  wxChar szBuf[1024]; // @@ should dynamically allocate memory...
+  char szBuf[1024]; // @@ should dynamically allocate memory...
 
   // first look in the private INI file
 
   // NB: the lpDefault param to GetPrivateProfileString can't be NULL
 //  GetPrivateProfileString(m_strGroup, strKey, "",
 //                          szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
-  if ( ::IsEmpty((PSZ)szBuf) ) {
+  if ( ::IsEmpty(szBuf) ) {
     // now look in win.ini
     wxString strKey = GetKeyName(path.Name());
 //    GetProfileString(m_strGroup, strKey, "", szBuf, WXSIZEOF(szBuf));
   }
 
-  if ( ::IsEmpty((PSZ)szBuf) ) {
+  if ( ::IsEmpty(szBuf) ) {
     return FALSE;
   }
   else {
@@ -292,20 +292,20 @@ bool wxIniConfig::Read(const wxString& szKey, wxString *pstr,
   wxConfigPathChanger path(this, szKey);
   wxString strKey = GetPrivateKeyName(path.Name());
 
-  wxChar szBuf[1024]; // @@ should dynamically allocate memory...
+  char szBuf[1024]; // @@ should dynamically allocate memory...
 
   // first look in the private INI file
 
   // NB: the lpDefault param to GetPrivateProfileString can't be NULL
 //  GetPrivateProfileString(m_strGroup, strKey, "",
 //                          szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
-  if ( ::IsEmpty((PSZ)szBuf) ) {
+  if ( ::IsEmpty(szBuf) ) {
     // now look in win.ini
     wxString strKey = GetKeyName(path.Name());
 //    GetProfileString(m_strGroup, strKey, "", szBuf, WXSIZEOF(szBuf));
   }
 
-  if ( ::IsEmpty((PSZ)szBuf) ) {
+  if ( ::IsEmpty(szBuf) ) {
     *pstr = szDefault;
     return FALSE;
   }
@@ -363,8 +363,8 @@ bool wxIniConfig::Write(const wxString& szKey, const wxString& szValue)
 bool wxIniConfig::Write(const wxString& szKey, long lValue)
 {
   // ltoa() is not ANSI :-(
-  wxChar szBuf[40];   // should be good for sizeof(long) <= 16 (128 bits)
-  wxSprintf(szBuf, wxT("%ld"), lValue);
+  char szBuf[40];   // should be good for sizeof(long) <= 16 (128 bits)
+  sprintf(szBuf, "%ld", lValue);
 
   return Write(szKey, szBuf);
 }
@@ -430,7 +430,7 @@ bool wxIniConfig::DeleteAll()
 //  WriteProfileString(GetVendorName(), NULL, NULL);
 
   // then delete our own ini file
-  wxChar szBuf[MAX_PATH];
+  char szBuf[MAX_PATH];
   size_t nRc = 0; // = GetWindowsDirectory(szBuf, WXSIZEOF(szBuf));
   if ( nRc == 0 )
   {
@@ -438,11 +438,11 @@ bool wxIniConfig::DeleteAll()
   }
   else if ( nRc > WXSIZEOF(szBuf) )
   {
-    wxFAIL_MSG(_("buffer is too small for Windows directory."));
+    wxFAIL_MSG("buffer is too small for Windows directory.");
   }
 
   wxString strFile = szBuf;
-  strFile << wxT('\\') << m_strLocalFilename;
+  strFile << '\\' << m_strLocalFilename;
 
   if ( !wxRemoveFile(strFile) ) {
     wxLogSysError(_("Can't delete the INI file '%s'"), strFile.c_str());

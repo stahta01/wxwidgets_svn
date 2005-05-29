@@ -25,15 +25,14 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers)
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
 
-#include "wx/gizmos/ledctrl.h"
+#include "../../../include/wx/gizmos/ledctrl.h"
 #include "wx/sizer.h"
 #include "wx/panel.h"
-#include "wx/numdlg.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -46,8 +45,6 @@ public:
 
     void OnIncrement();
     void OnDecrement();
-    void OnSmallIncrement();
-    void OnSmallDecrement();
     void OnSetValue();
     void OnAlignLeft();
     void OnAlignCenter();
@@ -56,7 +53,6 @@ public:
 
 private:
     wxLEDNumberCtrl    *m_led;
-    wxBoxSizer         *m_sizer;
 };
 
 // Define a new application type, each program should derive a class from wxApp
@@ -84,8 +80,6 @@ public:
     void OnQuit(wxCommandEvent& event);
     void OnIncrement(wxCommandEvent& event);
     void OnDecrement(wxCommandEvent& event);
-    void OnSmallIncrement(wxCommandEvent& event);
-    void OnSmallDecrement(wxCommandEvent& event);
     void OnSetValue(wxCommandEvent& event);
     void OnAlignLeft(wxCommandEvent& event);
     void OnAlignCenter(wxCommandEvent& event);
@@ -96,7 +90,7 @@ public:
 private:
     MyPanel  *m_panel;
 
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
@@ -108,12 +102,10 @@ private:
 enum
 {
     // menu items
-    LED_Quit = wxID_EXIT,
+    LED_Quit = 1,
 
-    LED_Edit_Increment = wxID_HIGHEST + 1,
+    LED_Edit_Increment,
     LED_Edit_Decrement,
-    LED_Edit_Small_Increment,
-    LED_Edit_Small_Decrement,
     LED_Edit_SetValue,
     LED_Edit_AlignLeft,
     LED_Edit_AlignCenter,
@@ -123,22 +115,23 @@ enum
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
     // (where it is special and put into the "Apple" menu)
-    LED_About = wxID_ABOUT
+    LED_About = wxID_ABOUT,
+
+    MY_PANEL,
+    MY_LED
 };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-// the event tables connect the wxWidgets events with the functions (event
+// the event tables connect the wxWindows events with the functions (event
 // handlers) which process them. It can be also done at run-time, but for the
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(LED_Quit,  MyFrame::OnQuit)
     EVT_MENU(LED_Edit_Increment, MyFrame::OnIncrement)
     EVT_MENU(LED_Edit_Decrement, MyFrame::OnDecrement)
-    EVT_MENU(LED_Edit_Small_Increment, MyFrame::OnSmallIncrement)
-    EVT_MENU(LED_Edit_Small_Decrement, MyFrame::OnSmallDecrement)
     EVT_MENU(LED_Edit_SetValue, MyFrame::OnSetValue)
     EVT_MENU(LED_Edit_AlignLeft, MyFrame::OnAlignLeft)
     EVT_MENU(LED_Edit_AlignCenter, MyFrame::OnAlignCenter)
@@ -147,7 +140,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(LED_About, MyFrame::OnAbout)
 END_EVENT_TABLE()
 
-// Create a new application object: this macro will allow wxWidgets to create
+// Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
 // static object for many reasons) and also declares the accessor function
 // wxGetApp() which will return the reference of the right type (i.e. MyApp and
@@ -167,16 +160,16 @@ bool MyApp::OnInit()
 {
     // create the main application window
     MyFrame *frame = new MyFrame(_T("LED App"),
-                                 wxDefaultPosition, wxSize(450, 120));
+                                 wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
-    frame->Show(true);
+    frame->Show(TRUE);
 
     // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned false here, the
+    // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -185,7 +178,7 @@ bool MyApp::OnInit()
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-       : wxFrame(NULL, wxID_ANY, title, pos, size, style)
+       : wxFrame(NULL, -1, title, pos, size, style)
 {
 #if wxUSE_MENUS
     // create a menu bar
@@ -198,10 +191,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     menuFile->Append(LED_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     wxMenu *editMenu = new wxMenu;
-    editMenu->Append(LED_Edit_Increment, _T("&Increment LED (1)\tCtrl-I"));
-    editMenu->Append(LED_Edit_Small_Increment, _T("&Increment LED (0.01)\tAlt-I"));
-    editMenu->Append(LED_Edit_Decrement, _T("&Decrement LED (1)\tCtrl-D"));
-    editMenu->Append(LED_Edit_Small_Decrement, _T("&Decrement LED (0.01)\tAlt-D"));
+    editMenu->Append(LED_Edit_Increment, _T("&Increment LED\tCtrl-I"));
+    editMenu->Append(LED_Edit_Decrement, _T("&Decrement LED\tCtrl-D"));
     editMenu->Append(LED_Edit_SetValue, _T("&Set LED Value...\tCtrl-S"));
     editMenu->AppendSeparator();
     editMenu->AppendRadioItem(LED_Edit_AlignLeft, _T("Align &Left"));
@@ -210,7 +201,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     editMenu->AppendSeparator();
     editMenu->AppendCheckItem(LED_Edit_DrawFaded, _T("Draw &Faded\tCtrl-F"));
 
-    editMenu->Check(LED_Edit_DrawFaded, true);
+    editMenu->Check(LED_Edit_DrawFaded, TRUE);
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
@@ -230,51 +221,41 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
-void MyFrame::OnIncrement(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnIncrement(wxCommandEvent& event)
 {
     m_panel->OnIncrement();
 }
 
-void MyFrame::OnDecrement(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnDecrement(wxCommandEvent& event)
 {
     m_panel->OnDecrement();
 }
 
-void MyFrame::OnSmallIncrement(wxCommandEvent& WXUNUSED(event))
-{
-    m_panel->OnSmallIncrement();
-}
-
-void MyFrame::OnSmallDecrement(wxCommandEvent& WXUNUSED(event))
-{
-    m_panel->OnSmallDecrement();
-}
-
-void MyFrame::OnSetValue(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSetValue(wxCommandEvent& event)
 {
     m_panel->OnSetValue();
 }
 
-void MyFrame::OnAlignLeft(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnAlignLeft(wxCommandEvent& event)
 {
     m_panel->OnAlignLeft();
 }
 
-void MyFrame::OnAlignCenter(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnAlignCenter(wxCommandEvent& event)
 {
     m_panel->OnAlignCenter();
 }
 
-void MyFrame::OnAlignRight(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnAlignRight(wxCommandEvent& event)
 {
     m_panel->OnAlignRight();
 }
 
-void MyFrame::OnDrawFaded(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnDrawFaded(wxCommandEvent& event)
 {
     m_panel->OnDrawFaded();
 }
@@ -293,70 +274,50 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 // --------------------------------------------------------------------------
 
 MyPanel::MyPanel(wxFrame *frame)
-                : wxPanel(frame, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN)
+                : wxPanel(frame, MY_PANEL)
 {
-    m_led = new wxLEDNumberCtrl(this, wxID_ANY,
-                                wxDefaultPosition, wxDefaultSize,
-                                wxLED_ALIGN_LEFT|wxLED_DRAW_FADED|wxFULL_REPAINT_ON_RESIZE);
+    m_led = new wxLEDNumberCtrl(this, MY_LED,
+                                wxPoint(20, 20), wxSize(300, 200),
+                                wxLED_ALIGN_LEFT | wxLED_DRAW_FADED);
 
-    m_led->SetValue(_T("01.23 7-8-9"));
-
-    m_sizer = new wxBoxSizer(wxVERTICAL);
-    m_sizer->Add(m_led, 1, wxEXPAND|wxALL, 10);
-    m_sizer->Fit(this);
-
-    SetSizer(m_sizer);
-    SetAutoLayout(true);
+    m_led->SetValue(_T("50"));
 }
 
 void MyPanel::OnIncrement()
 {
     wxString strValue = m_led->GetValue();
+    if ( strValue == _T("99") )
+        return;
 
-    double dValue;
-    strValue.ToDouble(&dValue);
-    dValue += 1.0;
-    m_led->SetValue(wxString::Format(_T("%.2f"), dValue));
+    long lValue;
+    strValue.ToLong(&lValue);
+    ++lValue;
+    m_led->SetValue(wxString::Format(_T("%ld"), lValue));
 }
 
 void MyPanel::OnDecrement()
 {
     wxString strValue = m_led->GetValue();
 
-    double dValue;
-    strValue.ToDouble(&dValue);
-    dValue -= 1.0;
-    m_led->SetValue(wxString::Format(_T("%.2f"), dValue));
-}
+    long lValue;
+    strValue.ToLong(&lValue);
+    if (lValue == 0)
+        return;
 
-void MyPanel::OnSmallIncrement()
-{
-    wxString strValue = m_led->GetValue();
-
-    double dValue;
-    strValue.ToDouble(&dValue);
-    dValue += 0.01;
-    m_led->SetValue(wxString::Format(_T("%.2f"), dValue));
-}
-
-void MyPanel::OnSmallDecrement()
-{
-    wxString strValue = m_led->GetValue();
-
-    double dValue;
-    strValue.ToDouble(&dValue);
-    dValue -= 0.01;
-    m_led->SetValue(wxString::Format(_T("%.2f"), dValue));
+    --lValue;
+    m_led->SetValue(wxString::Format(_T("%ld"), lValue));
 }
 
 void MyPanel::OnSetValue()
 {
     wxString strValue = m_led->GetValue();
 
-    strValue = ::wxGetTextFromUser(_T("Please enter a number for LED display"), _T("Please enter a number"), strValue, this);
+    long lValue;
+    strValue.ToLong(&lValue);
+    lValue = ::wxGetNumberFromUser(_T("Please enter a number between 0 and 99"), _T(""), _T("Please enter a number"), lValue, 0, 99, this);
 
-    if (strValue != _T(""))
-        m_led->SetValue(strValue);
+    if (lValue != -1)
+        m_led->SetValue(wxString::Format(_T("%ld"), lValue));
 }
 
 void MyPanel::OnAlignLeft()

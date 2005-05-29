@@ -12,9 +12,7 @@
 #ifndef _WX_DCMEMORY_H_BASE_
 #define _WX_DCMEMORY_H_BASE_
 
-#if defined(__WXPALMOS__)
-#include "wx/palmos/dcmemory.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
 #include "wx/msw/dcmemory.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/dcmemory.h"
@@ -26,10 +24,10 @@
 #include "wx/mgl/dcmemory.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/dcmemory.h"
-#elif defined(__WXCOCOA__)
-#include "wx/cocoa/dcmemory.h"
 #elif defined(__WXPM__)
 #include "wx/os2/dcmemory.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/dcmemory.h"
 #endif
 
 #endif

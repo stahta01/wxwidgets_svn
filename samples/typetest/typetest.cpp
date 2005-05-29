@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        typetest.cpp
-// Purpose:     Types wxWidgets sample
+// Purpose:     Types wxWindows sample
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:       wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +24,8 @@
 #include "wx/wx.h"
 #endif
 
+#include "wx/time.h"
+#include "wx/date.h"
 #include "wx/variant.h"
 #include "wx/mimetype.h"
 
@@ -56,6 +58,10 @@ IMPLEMENT_APP    (MyApp)
 IMPLEMENT_DYNAMIC_CLASS    (MyApp, wxApp)
 
 BEGIN_EVENT_TABLE(MyApp, wxApp)
+#if wxUSE_TIMEDATE
+    EVT_MENU(TYPES_DATE,      MyApp::DoDateDemo)
+    EVT_MENU(TYPES_TIME,      MyApp::DoTimeDemo)
+#endif // wxUSE_TIMEDATE
     EVT_MENU(TYPES_VARIANT,   MyApp::DoVariantDemo)
     EVT_MENU(TYPES_BYTEORDER, MyApp::DoByteOrderDemo)
 #if wxUSE_UNICODE
@@ -71,13 +77,10 @@ BEGIN_EVENT_TABLE(MyApp, wxApp)
     EVT_MENU(TYPES_MIME, MyApp::DoMIMEDemo)
 END_EVENT_TABLE()
 
-wxString file_name = _T("test_wx.dat");
-wxString file_name2 = wxString(_T("test_wx2.dat"));
-
 bool MyApp::OnInit()
 {
     // Create the main frame window
-    MyFrame *frame = new MyFrame((wxFrame *) NULL, _T("wxWidgets Types Demo"),
+    MyFrame *frame = new MyFrame((wxFrame *) NULL, _T("wxWindows Types Demo"),
                                  wxPoint(50, 50), wxSize(450, 340));
 
     // Give it an icon
@@ -91,6 +94,10 @@ bool MyApp::OnInit()
     file_menu->Append(TYPES_QUIT, _T("E&xit\tAlt-X"));
 
     wxMenu *test_menu = new wxMenu;
+#if wxUSE_TIMEDATE
+    test_menu->Append(TYPES_DATE, _T("&Date test"));
+    test_menu->Append(TYPES_TIME, _T("&Time test"));
+#endif // wxUSE_TIMEDATE
     test_menu->Append(TYPES_VARIANT, _T("&Variant test"));
     test_menu->Append(TYPES_BYTEORDER, _T("&Byteorder test"));
 #if wxUSE_UNICODE
@@ -111,15 +118,14 @@ bool MyApp::OnInit()
     menu_bar->Append(test_menu, _T("&Tests"));
     frame->SetMenuBar(menu_bar);
 
-    m_textCtrl = new wxTextCtrl(frame, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+    m_textCtrl = new wxTextCtrl(frame, -1, _T(""), wxPoint(0, 0), wxDefaultSize, wxTE_MULTILINE);
 
     // Show the frame
-    frame->Show(true);
+    frame->Show(TRUE);
 
     SetTopWindow(frame);
 
-    return true;
+    return TRUE;
 }
 
 void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
@@ -132,7 +138,7 @@ void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
     textCtrl.WriteText( _T("Writing to ofstream and wxFileOutputStream:\n") );
 
     wxSTD ofstream std_file_output( "test_std.dat" );
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     wxBufferedOutputStream buf_output( file_output );
     wxTextOutputStream text_output( buf_output );
 
@@ -141,31 +147,31 @@ void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
     tmp.Printf( _T("Signed int: %d\n"), si );
     textCtrl.WriteText( tmp );
     text_output << si << _T("\n");
-    std_file_output << si << "\n";
+    std_file_output << si << _T("\n");
 
     unsigned int ui = 0xFFFFFFFF;
     tmp.Printf( _T("Unsigned int: %u\n"), ui );
     textCtrl.WriteText( tmp );
     text_output << ui << _T("\n");
-    std_file_output << ui << "\n";
+    std_file_output << ui << _T("\n");
 
     double d = 2.01234567890123456789;
     tmp.Printf( _T("Double: %f\n"), d );
     textCtrl.WriteText( tmp );
     text_output << d << _T("\n");
-    std_file_output << d << "\n";
+    std_file_output << d << _T("\n");
 
     float f = (float)0.00001;
     tmp.Printf( _T("Float: %f\n"), f );
     textCtrl.WriteText( tmp );
     text_output << f << _T("\n");
-    std_file_output << f << "\n";
+    std_file_output << f << _T("\n");
 
     wxString str( _T("Hello!") );
     tmp.Printf( _T("String: %s\n"), str.c_str() );
     textCtrl.WriteText( tmp );
     text_output << str << _T("\n");
-    std_file_output << str.ToAscii() << "\n";
+    std_file_output << str.c_str() << _T("\n");
 
     textCtrl.WriteText( _T("\nReading from ifstream:\n") );
 
@@ -187,17 +193,19 @@ void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
     tmp.Printf( _T("Float: %f\n"), f );
     textCtrl.WriteText( tmp );
 
+    // Why doesn't this work?
+#if 0
     char std_buf[200];
     std_file_input >> std_buf;
-    str = wxString::FromAscii(std_buf);
-    tmp.Printf( _T("String: %s\n"), str.c_str() );
+    tmp.Printf( _T("String: %s\n"), std_buf );
     textCtrl.WriteText( tmp );
+#endif
 
     textCtrl.WriteText( _T("\nReading from wxFileInputStream:\n") );
 
     buf_output.Sync();
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
     wxBufferedInputStream buf_input( file_input );
     wxTextInputStream text_input( file_input );
 
@@ -285,13 +293,13 @@ void MyApp::DoStreamDemo2(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Writing number 0 to 9 to buffered wxFileOutputStream:\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     wxBufferedOutputStream buf_output( file_output );
     for (ch = 0; ch < 10; ch++)
         buf_output.Write( &ch, 1 );
     buf_output.Sync();
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
     for (ch2 = 0; ch2 < 10; ch2++)
     {
         file_input.Read( &ch, 1 );
@@ -302,7 +310,7 @@ void MyApp::DoStreamDemo2(wxCommandEvent& WXUNUSED(event))
     textCtrl.WriteText( _T("Writing number 0 to 9 to buffered wxFileOutputStream, then\n") );
     textCtrl.WriteText( _T("seeking back to #3 and writing 0:\n\n") );
 
-    wxFileOutputStream file_output2( file_name2 );
+    wxFileOutputStream file_output2( wxString(_T("test_wx2.dat")) );
     wxBufferedOutputStream buf_output2( file_output2 );
     for (ch = 0; ch < 10; ch++)
         buf_output2.Write( &ch, 1 );
@@ -311,7 +319,7 @@ void MyApp::DoStreamDemo2(wxCommandEvent& WXUNUSED(event))
     buf_output2.Write( &ch, 1 );
     buf_output2.Sync();
 
-    wxFileInputStream file_input2( file_name2 );
+    wxFileInputStream file_input2( wxString(_T("test_wx2.dat")) );
     for (ch2 = 0; ch2 < 10; ch2++)
     {
         file_input2.Read( &ch, 1 );
@@ -329,7 +337,7 @@ void MyApp::DoStreamDemo2(wxCommandEvent& WXUNUSED(event))
     textCtrl.WriteText( _T("Reading number 0 to 9 from buffered wxFileInputStream, then\n") );
     textCtrl.WriteText( _T("seeking back to #3 and reading the 0:\n\n") );
 
-    wxFileInputStream file_input3( file_name2 );
+    wxFileInputStream file_input3( wxString(_T("test_wx2.dat")) );
     wxBufferedInputStream buf_input3( file_input3 );
     for (ch2 = 0; ch2 < 10; ch2++)
     {
@@ -357,7 +365,7 @@ void MyApp::DoStreamDemo3(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Writing number 0 to 9 to wxFileOutputStream:\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     for (ch = 0; ch < 10; ch++)
         file_output.Write( &ch, 1 );
 
@@ -365,7 +373,7 @@ void MyApp::DoStreamDemo3(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Reading 0 to 10 to wxFileInputStream:\n\n") );
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
     for (ch2 = 0; ch2 < 11; ch2++)
     {
         file_input.Read( &ch, 1 );
@@ -414,7 +422,7 @@ void MyApp::DoStreamDemo3(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Reading 0 to 10 to wxFFileInputStream:\n\n") );
 
-    wxFFileInputStream ffile_input( file_name );
+    wxFFileInputStream ffile_input( wxString(_T("test_wx.dat")) );
     for (ch2 = 0; ch2 < 11; ch2++)
     {
         ffile_input.Read( &ch, 1 );
@@ -462,7 +470,7 @@ void MyApp::DoStreamDemo3(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Reading 0 to 10 to buffered wxFFileInputStream:\n\n") );
 
-    wxFFileInputStream ffile_input2( file_name );
+    wxFFileInputStream ffile_input2( wxString(_T("test_wx.dat")) );
     wxBufferedInputStream buf_input( ffile_input2 );
     for (ch2 = 0; ch2 < 11; ch2++)
     {
@@ -519,7 +527,7 @@ void MyApp::DoStreamDemo4(wxCommandEvent& WXUNUSED(event))
     // bigger than buffer
     textCtrl.WriteText( _T("Writing 2000x 1 to wxFileOutputStream.\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     for (int i = 0; i < 2000; i++)
     {
         char ch = 1;
@@ -528,7 +536,7 @@ void MyApp::DoStreamDemo4(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Opening with a buffered wxFileInputStream:\n\n") );
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
     wxBufferedInputStream buf_input( file_input );
 
     textCtrl.WriteText( _T("wxBufferedInputStream.GetLastError() returns: ") );
@@ -658,13 +666,13 @@ void MyApp::DoStreamDemo5(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Writing number 0 to 9 to wxFileOutputStream:\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     for (ch = 0; ch < 10; ch++)
         file_output.Write( &ch, 1 );
 
     file_output.Sync();
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
 
     ch = file_input.Peek();
     str.Printf( wxT("First char peeked: %d\n"), (int) ch );
@@ -729,11 +737,12 @@ void MyApp::DoStreamDemo6(wxCommandEvent& WXUNUSED(event))
     textCtrl.WriteText( _T("\nTesting Ungetch():\n\n") );
 
     char ch = 0;
+    size_t pos = 0;
     wxString str;
 
     textCtrl.WriteText( _T("Writing number 0 to 9 to wxFileOutputStream...\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     for (ch = 0; ch < 10; ch++)
         file_output.Write( &ch, 1 );
 
@@ -741,52 +750,52 @@ void MyApp::DoStreamDemo6(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Reading char from wxFileInputStream:\n\n") );
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
 
     ch = file_input.GetC();
-    size_t pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading another char from wxFileInputStream:\n\n") );
 
     ch = file_input.GetC();
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading yet another char from wxFileInputStream:\n\n") );
 
     ch = file_input.GetC();
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Now calling Ungetch( 5 ) from wxFileInputStream...\n\n") );
 
     file_input.Ungetch( 5 );
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Now at position %d\n\n"), (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading char from wxFileInputStream:\n\n") );
 
     ch = file_input.GetC();
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading another char from wxFileInputStream:\n\n") );
 
     ch = file_input.GetC();
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Now calling Ungetch( 5 ) from wxFileInputStream again...\n\n") );
 
     file_input.Ungetch( 5 );
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Now at position %d\n\n"), (int) pos );
     textCtrl.WriteText( str );
 
@@ -795,7 +804,7 @@ void MyApp::DoStreamDemo6(wxCommandEvent& WXUNUSED(event))
     file_input.SeekI( 3 );
 
     ch = file_input.GetC();
-    pos = (size_t)file_input.TellI();
+    pos = file_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 }
@@ -808,11 +817,12 @@ void MyApp::DoStreamDemo7(wxCommandEvent& WXUNUSED(event))
     textCtrl.WriteText( _T("\nTesting Ungetch() in buffered input stream:\n\n") );
 
     char ch = 0;
+    size_t pos = 0;
     wxString str;
 
     textCtrl.WriteText( _T("Writing number 0 to 9 to wxFileOutputStream...\n\n") );
 
-    wxFileOutputStream file_output( file_name );
+    wxFileOutputStream file_output( wxString(_T("test_wx.dat")) );
     for (ch = 0; ch < 10; ch++)
         file_output.Write( &ch, 1 );
 
@@ -820,53 +830,53 @@ void MyApp::DoStreamDemo7(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( _T("Reading char from wxBufferedInputStream via wxFileInputStream:\n\n") );
 
-    wxFileInputStream file_input( file_name );
+    wxFileInputStream file_input( wxString(_T("test_wx.dat")) );
     wxBufferedInputStream buf_input( file_input );
 
     ch = buf_input.GetC();
-    size_t pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading another char from wxBufferedInputStream:\n\n") );
 
     ch = buf_input.GetC();
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading yet another char from wxBufferedInputStream:\n\n") );
 
     ch = buf_input.GetC();
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Now calling Ungetch( 5 ) from wxBufferedInputStream...\n\n") );
 
     buf_input.Ungetch( 5 );
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Now at position %d\n\n"), (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading char from wxBufferedInputStream:\n\n") );
 
     ch = buf_input.GetC();
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Reading another char from wxBufferedInputStream:\n\n") );
 
     ch = buf_input.GetC();
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 
     textCtrl.WriteText( _T("Now calling Ungetch( 5 ) from wxBufferedInputStream again...\n\n") );
 
     buf_input.Ungetch( 5 );
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Now at position %d\n\n"), (int) pos );
     textCtrl.WriteText( str );
 
@@ -875,7 +885,7 @@ void MyApp::DoStreamDemo7(wxCommandEvent& WXUNUSED(event))
     buf_input.SeekI( 3 );
 
     ch = buf_input.GetC();
-    pos = (size_t)buf_input.TellI();
+    pos = buf_input.TellI();
     str.Printf( wxT("Read char: %d. Now at position %d\n\n"), (int) ch, (int) pos );
     textCtrl.WriteText( str );
 }
@@ -894,6 +904,11 @@ void MyApp::DoUnicodeDemo(wxCommandEvent& WXUNUSED(event))
     printf( "\n\nConversion with wxConvLocal:\n" );
     wxConvCurrent = &wxConvLocal;
     printf( (const char*) str.mbc_str() );
+#if defined(__WXGTK__)
+    printf( "\n\nConversion with wxConvGdk:\n" );
+    wxConvCurrent = &wxConvGdk;
+    printf( (const char*) str.mbc_str() );
+#endif
     printf( "\n\nConversion with wxConvLibc:\n" );
     wxConvCurrent = &wxConvLibc;
     printf( (const char*) str.mbc_str() );
@@ -955,13 +970,13 @@ void MyApp::DoMIMEDemo(wxCommandEvent& WXUNUSED(event))
             wxFileType::MessageParameters params(filename, type);
             filetype->GetOpenCommand(&open, params);
 
-            textCtrl << _T("MIME information about extension '") << ext << _T('\n')
+            textCtrl << _T("MIME information about extension '") << ext << _T("'\n")
                      << _T("\tMIME type: ") << ( !type ? wxT("unknown")
-                                                   : type.c_str() ) << _T('\n')
-                     << _T("\tDescription: ") << ( !desc ? wxEmptyString : desc.c_str() )
-                        << _T('\n')
+                                                   : type.c_str() ) << '\n'
+                     << _T("\tDescription: ") << ( !desc ? wxT("") : desc.c_str() )
+                        << '\n'
                      << _T("\tCommand to open: ") << ( !open ? wxT("no") : open.c_str() )
-                        << _T('\n');
+                        << '\n';
 
             delete filetype;
         }
@@ -976,31 +991,185 @@ void MyApp::DoByteOrderDemo(wxCommandEvent& WXUNUSED(event))
     textCtrl.Clear();
     textCtrl << _T("\nTest byte order macros:\n\n");
 
-    #if wxBYTE_ORDER == wxLITTLE_ENDIAN
+    if (wxBYTE_ORDER == wxLITTLE_ENDIAN)
         textCtrl << _T("This is a little endian system.\n\n");
-    #else
+    else
         textCtrl << _T("This is a big endian system.\n\n");
-    #endif
 
     wxString text;
 
     wxInt32 var = 0xF1F2F3F4;
-    text = wxEmptyString;
+    text = _T("");
     text.Printf( _T("Value of wxInt32 is now: %#x.\n\n"), var );
     textCtrl.WriteText( text );
 
-    text = wxEmptyString;
+    text = _T("");
     text.Printf( _T("Value of swapped wxInt32 is: %#x.\n\n"), wxINT32_SWAP_ALWAYS( var ) );
     textCtrl.WriteText( text );
 
-    text = wxEmptyString;
+    text = _T("");
     text.Printf( _T("Value of wxInt32 swapped on little endian is: %#x.\n\n"), wxINT32_SWAP_ON_LE( var ) );
     textCtrl.WriteText( text );
 
-    text = wxEmptyString;
+    text = _T("");
     text.Printf( _T("Value of wxInt32 swapped on big endian is: %#x.\n\n"), wxINT32_SWAP_ON_BE( var ) );
     textCtrl.WriteText( text );
 }
+
+#if wxUSE_TIMEDATE
+
+void MyApp::DoTimeDemo(wxCommandEvent& WXUNUSED(event))
+{
+    wxTextCtrl& textCtrl = * GetTextCtrl();
+
+    textCtrl.Clear();
+    textCtrl << _T("\nTest class wxTime:\n");
+    wxTime now;
+    textCtrl << _T("It is now ") << (wxString) now << _T("\n");
+}
+
+void MyApp::DoDateDemo(wxCommandEvent& WXUNUSED(event))
+{
+    wxTextCtrl& textCtrl = * GetTextCtrl();
+
+    textCtrl.Clear();
+    textCtrl << _T("\nTest class wxDate") << _T("\n");
+
+    // Various versions of the constructors
+    // and various output
+
+    wxDate x(10,20,1962);
+
+    textCtrl << x.FormatDate(wxFULL) << _T("  (full)\n");
+
+    // constuctor with a string, just printing the day of the week
+    wxDate y(_T("8/8/1988"));
+
+    textCtrl << y.FormatDate(wxDAY) << _T("  (just day)\n");
+
+    // constructor with a julian
+    wxDate z( 2450000L );
+    textCtrl << z.FormatDate(wxFULL) << _T("  (full)\n");
+
+    // using date addition and subtraction
+    wxDate a = x + 10;
+    textCtrl << a.FormatDate(wxFULL) << _T("  (full)\n");
+    a = a - 25;
+    textCtrl << a.FormatDate(wxEUROPEAN) << _T("  (European)\n");
+
+    // Using subtraction of two date objects
+    wxDate a1 = wxString(_T("7/13/1991"));
+    wxDate a2 = a1 + 14;
+    textCtrl << (a1-a2) << _T("\n");
+    textCtrl << (a2+=10) << _T("\n");
+
+    a1++;
+    textCtrl << _T("Tomorrow= ") << a1.FormatDate(wxFULL) << _T("\n");
+
+    wxDate tmpDate1(_T("08/01/1991"));
+    wxDate tmpDate2(_T("07/14/1991"));
+    textCtrl << _T("a1 (7-14-91) < 8-01-91 ? ==> ") << ((a1 < tmpDate1) ? _T("TRUE") : _T("FALSE")) << _T("\n");
+    textCtrl << _T("a1 (7-14-91) > 8-01-91 ? ==> ") << ((a1 > tmpDate1) ? _T("TRUE") : _T("FALSE")) << _T("\n");
+    textCtrl << _T("a1 (7-14-91)== 7-14-91 ? ==> ") << ((a1==tmpDate2) ? _T("TRUE") : _T("FALSE")) << _T("\n");
+
+    wxDate a3 = a1;
+    textCtrl << _T("a1 (7-14-91)== a3 (7-14-91) ? ==> ") << ((a1==a3) ? _T("TRUE") : _T("FALSE")) << _T("\n");
+    wxDate a4 = a1;
+    textCtrl << _T("a1 (7-14-91)== a4 (7-15-91) ? ==> ") << ((a1==++a4) ? _T("TRUE") : _T("FALSE")) << _T("\n");
+
+    wxDate a5 = wxString(_T("today"));
+    textCtrl << _T("Today is: ") << a5 << _T("\n");
+    a4 = _T("TODAY");
+    textCtrl << _T("Today (a4) is: ") << a4 << _T("\n");
+
+    textCtrl << _T("Today + 4 is: ") << (a4+=4) << _T("\n");
+    a4 = _T("TODAY");
+    textCtrl << _T("Today - 4 is: ") << (a4-=4) << _T("\n");
+
+    textCtrl << _T("=========== Leap Year Test ===========\n");
+    a1 = _T("1/15/1992");
+    textCtrl << a1.FormatDate(wxFULL) << _T("  ") << ((a1.IsLeapYear()) ? _T("Leap") : _T("non-Leap"));
+    textCtrl << _T("  ") << _T("day of year:  ") << a1.GetDayOfYear() << _T("\n");
+
+    a1 = _T("2/16/1993");
+    textCtrl << a1.FormatDate(wxFULL) << _T("  ") << ((a1.IsLeapYear()) ? _T("Leap") : _T("non-Leap"));
+    textCtrl << _T("  ") << _T("day of year:  ") << a1.GetDayOfYear() << _T("\n");
+
+    textCtrl << _T("================== string assignment test ====================\n");
+    wxString date_string=a1;
+    textCtrl << _T("a1 as a string (s/b 2/16/1993) ==> ") << date_string << _T("\n");
+
+    textCtrl << _T("================== SetFormat test ============================\n");
+    a1.SetFormat(wxFULL);
+    textCtrl << _T("a1 (s/b FULL format) ==> ") << a1 << _T("\n");
+    a1.SetFormat(wxEUROPEAN);
+    textCtrl << _T("a1 (s/b EUROPEAN format) ==> ") << a1 << _T("\n");
+
+    textCtrl << _T("================== SetOption test ============================\n");
+    textCtrl << _T("Date abbreviation ON\n");
+
+    a1.SetOption(wxDATE_ABBR);
+    a1.SetFormat(wxMONTH);
+    textCtrl << _T("a1 (s/b MONTH format) ==> ") << a1 << _T("\n");
+    a1.SetFormat(wxDAY);
+    textCtrl << _T("a1 (s/b DAY format) ==> ") << a1 << _T("\n");
+    a1.SetFormat(wxFULL);
+    textCtrl << _T("a1 (s/b FULL format) ==> ") << a1 << _T("\n");
+    a1.SetFormat(wxEUROPEAN);
+    textCtrl << _T("a1 (s/b EUROPEAN format) ==> ") << a1 << _T("\n");
+    textCtrl << _T("Century suppression ON\n");
+    a1.SetOption(wxNO_CENTURY);
+    a1.SetFormat(wxMDY);
+    textCtrl << _T("a1 (s/b MDY format) ==> ") << a1 << _T("\n");
+    textCtrl << _T("Century suppression OFF\n");
+    a1.SetOption(wxNO_CENTURY,FALSE);
+    textCtrl << _T("a1 (s/b MDY format) ==> ") << a1 << _T("\n");
+    textCtrl << _T("Century suppression ON\n");
+    a1.SetOption(wxNO_CENTURY);
+    textCtrl << _T("a1 (s/b MDY format) ==> ") << a1 << _T("\n");
+    a1.SetFormat(wxFULL);
+    textCtrl << _T("a1 (s/b FULL format) ==> ") << a1 << _T("\n");
+
+    textCtrl << _T("\n=============== Version 4.0 Enhancement Test =================\n");
+
+    wxDate v4(_T("11/26/1966"));
+    textCtrl << _T("\n---------- Set Stuff -----------\n");
+    textCtrl << _T("First, 'Set' to today...") << _T("\n");
+    textCtrl << _T("Before 'Set' => ") << v4 << _T("\n");
+    textCtrl << _T("After  'Set' => ") << v4.Set() << _T("\n\n");
+
+    textCtrl << _T("Set to 11/26/66 => ") << v4.Set(11,26,1966) << _T("\n");
+    textCtrl << _T("Current Julian  => ") << v4.GetJulianDate() << _T("\n");
+    textCtrl << _T("Set to Julian 2450000L => ") << v4.Set(2450000L) << _T("\n");
+    textCtrl << _T("See! => ") << v4.GetJulianDate() << _T("\n");
+
+    textCtrl << _T("---------- Add Stuff -----------\n");
+    textCtrl << _T("Start => ") << v4 << _T("\n");
+    textCtrl << _T("Add 4 Weeks => ") << v4.AddWeeks(4) << _T("\n");
+    textCtrl << _T("Sub 1 Month => ") << v4.AddMonths(-1) << _T("\n");
+    textCtrl << _T("Add 2 Years => ") << v4.AddYears(2) << _T("\n");
+
+    textCtrl << _T("---------- Misc Stuff -----------\n");
+    textCtrl << _T("The date aboves' day of the month is => ") << v4.GetDay() << _T("\n");
+    textCtrl << _T("There are ") << v4.GetDaysInMonth() << _T(" days in this month.\n");
+    textCtrl << _T("The first day of this month lands on ") << v4.GetFirstDayOfMonth() << _T("\n");
+    textCtrl << _T("This day happens to be ") << v4.GetDayOfWeekName() << _T("\n");
+    textCtrl << _T("the ") << v4.GetDayOfWeek() << _T(" day of the week,") << _T("\n");
+    textCtrl << _T("on the ") << v4.GetWeekOfYear() << _T(" week of the year,") << _T("\n");
+    textCtrl << _T("on the ") << v4.GetWeekOfMonth() << _T(" week of the month, ") << _T("\n");
+    textCtrl << _T("(which is ") << v4.GetMonthName() << _T(")\n");
+    textCtrl << _T("the ")<< v4.GetMonth() << _T("th month in the year.\n");
+    textCtrl << _T("The year alone is ") << v4.GetYear() << _T("\n");
+
+    textCtrl << _T("---------- First and Last Stuff -----------\n");
+    v4.Set();
+    textCtrl << _T("The first date of this month is ") << v4.GetMonthStart() << _T("\n");
+    textCtrl << _T("The last date of this month is ") << v4.GetMonthEnd() << _T("\n");
+    textCtrl << _T("The first date of this year is ") << v4.GetYearStart() << _T("\n");
+    textCtrl << _T("The last date of this year is ") << v4.GetYearEnd() << _T("\n");
+}
+
+#endif // wxUSE_TIMEDATE
 
 void MyApp::DoVariantDemo(wxCommandEvent& WXUNUSED(event) )
 {
@@ -1025,12 +1194,14 @@ void MyApp::DoVariantDemo(wxCommandEvent& WXUNUSED(event) )
     long l = var1;
 
     // suppress compile warnings about unused variables
-    wxUnusedVar(l);
-    wxUnusedVar(v);
+    if ( l < v )
+    {
+        ;
+    }
 
-    wxArrayString stringArray;
-    stringArray.Add(_T("one")); stringArray.Add(_T("two")); stringArray.Add(_T("three"));
-    var1 = stringArray;
+    wxStringList stringList;
+    stringList.Add(_T("one")); stringList.Add(_T("two")); stringList.Add(_T("three"));
+    var1 = stringList;
     textCtrl << _T("var1 = ") << var1.MakeString() << _T("\n");
 
     var1.ClearList();
@@ -1046,18 +1217,6 @@ void MyApp::DoVariantDemo(wxCommandEvent& WXUNUSED(event) )
     {
         textCtrl << _T("var1[") << (int) i << _T("] (type ") << var1[i].GetType() << _T(") = ") << var1[i].MakeString() << _T("\n");
     }
-
-    var1 = wxVariant(new wxFont(wxSystemSettings::GetFont(wxSYS_OEM_FIXED_FONT)));
-    textCtrl << _T("var1 = (wxfont)\"");
-    wxFont* font = wxGetVariantCast(var1,wxFont);
-    if (font)
-    {
-        textCtrl << font->GetNativeFontInfoDesc() << _T("\"\n");
-    }
-    else
-    {
-        textCtrl << _T("(null)\"\n");
-    }
 }
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -1067,21 +1226,21 @@ END_EVENT_TABLE()
 
 // My frame constructor
 MyFrame::MyFrame(wxFrame *parent, const wxString& title,
-    const wxPoint& pos, const wxSize& size)
-    : wxFrame(parent, wxID_ANY, title, pos, size)
+       const wxPoint& pos, const wxSize& size):
+  wxFrame(parent, -1, title, pos, size)
 {}
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )
 {
-    Close(true);
+  Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    wxMessageDialog dialog(this, _T("Tests various wxWidgets types"),
-        _T("About Types"), wxYES_NO|wxCANCEL);
+  wxMessageDialog dialog(this, _T("Tests various wxWindows types"),
+      _T("About Types"), wxYES_NO|wxCANCEL);
 
-    dialog.ShowModal();
+  dialog.ShowModal();
 }
 
 

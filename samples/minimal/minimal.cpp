@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        minimal.cpp
-// Purpose:     Minimal wxWidgets sample
+// Purpose:     Minimal wxWindows sample
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
@@ -25,7 +25,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers)
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -34,10 +34,9 @@
 // resources
 // ----------------------------------------------------------------------------
 
-// the application icon (under Windows and OS/2 it is in resources and even
-// though we could still include the XPM here it would be unused)
-#if !defined(__WXMSW__) && !defined(__WXPM__)
-    #include "../sample.xpm"
+// the application icon (under Windows and OS/2 it is in resources)
+#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
+    #include "mondrian.xpm"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -62,14 +61,15 @@ class MyFrame : public wxFrame
 {
 public:
     // ctor(s)
-    MyFrame(const wxString& title);
+    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+            long style = wxDEFAULT_FRAME_STYLE);
 
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
@@ -81,7 +81,7 @@ private:
 enum
 {
     // menu items
-    Minimal_Quit = wxID_EXIT,
+    Minimal_Quit = 1,
 
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
@@ -90,10 +90,10 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-// the event tables connect the wxWidgets events with the functions (event
+// the event tables connect the wxWindows events with the functions (event
 // handlers) which process them. It can be also done at run-time, but for the
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -101,7 +101,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Minimal_About, MyFrame::OnAbout)
 END_EVENT_TABLE()
 
-// Create a new application object: this macro will allow wxWidgets to create
+// Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
 // static object for many reasons) and also implements the accessor function
 // wxGetApp() which will return the reference of the right type (i.e. MyApp and
@@ -120,16 +120,17 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
     // create the main application window
-    MyFrame *frame = new MyFrame(_T("Minimal wxWidgets App"));
+    MyFrame *frame = new MyFrame(_T("Minimal wxWindows App"),
+                                 wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
-    frame->Show(true);
+    frame->Show(TRUE);
 
     // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned false here, the
+    // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -137,25 +138,25 @@ bool MyApp::OnInit()
 // ----------------------------------------------------------------------------
 
 // frame constructor
-MyFrame::MyFrame(const wxString& title)
-       : wxFrame(NULL, wxID_ANY, title)
+MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+       : wxFrame(NULL, -1, title, pos, size, style)
 {
     // set the frame icon
-    SetIcon(wxICON(sample));
+    SetIcon(wxICON(mondrian));
 
 #if wxUSE_MENUS
     // create a menu bar
-    wxMenu *fileMenu = new wxMenu;
+    wxMenu *menuFile = new wxMenu;
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append(Minimal_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    fileMenu->Append(Minimal_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
+    menuFile->Append(Minimal_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, _T("&File"));
+    menuBar->Append(menuFile, _T("&File"));
     menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
@@ -165,7 +166,7 @@ MyFrame::MyFrame(const wxString& title)
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(_T("Welcome to wxWidgets!"));
+    SetStatusText(_T("Welcome to wxWindows!"));
 #endif // wxUSE_STATUSBAR
 }
 
@@ -174,8 +175,8 @@ MyFrame::MyFrame(const wxString& title)
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))

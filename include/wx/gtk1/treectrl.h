@@ -6,13 +6,13 @@
 // Created:     08/08/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Denis Pershin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TREECTRL_H_
 #define _WX_TREECTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "treectrl.h"
 #endif
 
@@ -70,6 +70,15 @@ static const int wxTREE_HITTEST_ONITEM  = wxTREE_HITTEST_ONITEMICON |
 // NB: all the following flags are for compatbility only and will be removed in
 //     next versions
 
+// flags for deprecated `Expand(int action)'
+enum
+{
+    wxTREE_EXPAND_EXPAND,
+    wxTREE_EXPAND_COLLAPSE,
+    wxTREE_EXPAND_COLLAPSE_RESET,
+    wxTREE_EXPAND_TOGGLE
+};
+
 // flags for deprecated InsertItem() variant
 #define wxTREE_INSERT_FIRST 0xFFFF0001
 #define wxTREE_INSERT_LAST  0xFFFF0002
@@ -92,7 +101,7 @@ public:
 
   // conversion to/from either real (system-dependent) tree item id or
   // to "long" which used to be the type for tree item ids in previous
-  // versions of wxWidgets
+  // versions of wxWindows
 
   // for wxTreeCtrl usage only
   wxTreeItemId(GtkTreeItem *itemId) { m_itemId = itemId; }
@@ -136,7 +145,7 @@ public:
   // --------
   wxTreeCtrl() { Init(); }
 
-  wxTreeCtrl(wxWindow *parent, wxWindowID id = wxID_ANY,
+  wxTreeCtrl(wxWindow *parent, wxWindowID id = -1,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
@@ -147,7 +156,7 @@ public:
 
   virtual ~wxTreeCtrl();
 
-    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
+    bool Create(wxWindow *parent, wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
@@ -226,14 +235,14 @@ public:
     // number of children
     // ------------------
 
-        // if 'recursively' is false, only immediate children count, otherwise
+        // if 'recursively' is FALSE, only immediate children count, otherwise
         // the returned number is the number of all items in this branch
-    size_t GetChildrenCount(const wxTreeItemId& item, bool recursively = true);
+    size_t GetChildrenCount(const wxTreeItemId& item, bool recursively = TRUE);
 
     // navigation
     // ----------
 
-    // wxTreeItemId.IsOk() will return false if there is no such item
+    // wxTreeItemId.IsOk() will return FALSE if there is no such item
 
         // get the root tree item
     wxTreeItemId GetRootItem() const;
@@ -333,7 +342,7 @@ public:
         // edited simultaneously)
     wxTextCtrl* GetEditControl() const;
         // end editing and accept or discard the changes to item label
-    void EndEditLabel(const wxTreeItemId& item, bool discardChanges = false);
+    void EndEditLabel(const wxTreeItemId& item, bool discardChanges = FALSE);
 
         // sort the children of this item using the specified callback function
         // (it should return -1, 0 or +1 as usual), if it's not specified
@@ -347,7 +356,7 @@ public:
     // ----------
 
     // these methods are deprecated and will be removed in future versions of
-    // wxWidgets, they're here for compatibility only, don't use them in new
+    // wxWindows, they're here for compatibility only, don't use them in new
     // code (the comments indicate why these methods are now useless and how to
     // replace them)
 

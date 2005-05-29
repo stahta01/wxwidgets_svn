@@ -1,16 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        test.cpp
 // Purpose:     wxHtml testing example
-// Author:      Vaclav Slavik
-// Created:     1999-07-07
-// RCS-ID:      $Id$
-// Copyright:   (c) Vaclav Slavik
-// Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-    #pragma implementation
-    #pragma interface
+    #pragma implementation "test.cpp"
+    #pragma interface "test.cpp"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -20,8 +15,8 @@
     #pragma hdrstop
 #endif
 
-// For all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -33,8 +28,6 @@
 #include "wx/fs_inet.h"
 #include "wx/filedlg.h"
 
-#include "../../sample.xpm"
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -43,31 +36,23 @@
 class MyApp : public wxApp
 {
 public:
-    virtual bool OnInit();
-};
+ // override base class virtuals
+ // ----------------------------
 
-// Define a new html window type: this is a wrapper for handling wxHtmlWindow events
-class MyHtmlWindow : public wxHtmlWindow
-{
-public:
-    MyHtmlWindow(wxWindow *parent) : wxHtmlWindow( parent ) { }
-
-    virtual wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType WXUNUSED(type),
-                                             const wxString& WXUNUSED(url),
-                                             wxString *WXUNUSED(redirect)) const;
-
-private:
-    DECLARE_NO_COPY_CLASS(MyHtmlWindow)
+ // this one is called on application startup and is a good place for the app
+ // initialization (doing it here and not in the ctor allows to have an error
+ // return: if OnInit() returns false, the application terminates)
+   virtual bool OnInit();
 };
 
 // Define a new frame type: this is going to be our main frame
 class MyFrame : public wxFrame
 {
 public:
-    // ctor(s)
+ // ctor(s)
     MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 
-    // event handlers (these functions should _not_ be virtual)
+  // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
     void OnPageOpen(wxCommandEvent& event);
     void OnBack(wxCommandEvent& event);
@@ -75,27 +60,25 @@ public:
     void OnProcessor(wxCommandEvent& event);
 
 private:
-    MyHtmlWindow *m_Html;
-    wxHtmlProcessor *m_Processor;
-
-    // Any class wishing to process wxWidgets events must use this macro
-    DECLARE_EVENT_TABLE()
+     wxHtmlWindow *m_Html;
+     wxHtmlProcessor *m_Processor;
+ // any class wishing to process wxWindows events must use this macro
+ DECLARE_EVENT_TABLE()
 };
 
 
 class BoldProcessor : public wxHtmlProcessor
 {
-public:
-    virtual wxString Process(const wxString& s) const
-    {
-        wxString r(s);
-        r.Replace(wxT("<b>"), wxEmptyString);
-        r.Replace(wxT("<B>"), wxEmptyString);
-        r.Replace(wxT("</b>"), wxEmptyString);
-        r.Replace(wxT("</B>"), wxEmptyString);
-
-        return r;
-    }
+    public:
+        virtual wxString Process(const wxString& s) const
+        {
+            wxString r(s);
+            r.Replace(wxT("<b>"), wxEmptyString);
+            r.Replace(wxT("<B>"), wxEmptyString);
+            r.Replace(wxT("</b>"), wxEmptyString);
+            r.Replace(wxT("</B>"), wxEmptyString);
+            return r;
+        }       
 };
 
 // ----------------------------------------------------------------------------
@@ -103,168 +86,153 @@ public:
 // ----------------------------------------------------------------------------
 
 // IDs for the controls and the menu commands
-enum
-{
+   enum
+   {
     // menu items
-    ID_PageOpen = wxID_HIGHEST,
-    ID_Back,
-    ID_Forward,
-    ID_Processor
-};
+   Minimal_Quit = 1,
+   Minimal_PageOpen,
+   Minimal_Back,
+   Minimal_Forward,
+   Minimal_Processor,
+   
+    // controls start here (the numbers are, of course, arbitrary)
+   Minimal_Text = 1000
+   };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_EXIT,  MyFrame::OnQuit)
-    EVT_MENU(ID_PageOpen, MyFrame::OnPageOpen)
-    EVT_MENU(ID_Back, MyFrame::OnBack)
-    EVT_MENU(ID_Forward, MyFrame::OnForward)
-    EVT_MENU(ID_Processor, MyFrame::OnProcessor)
-END_EVENT_TABLE()
-
-IMPLEMENT_APP(MyApp)
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// the application class
-// ----------------------------------------------------------------------------
-
-// `Main program' equivalent: the program execution "starts" here
-bool MyApp::OnInit()
-{
+// the event tables connect the wxWindows events with the functions (event
+// handlers) which process them. It can be also done at run-time, but for the
+// simple menu events like this the static method is much simpler.
+   BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+   EVT_MENU(Minimal_Quit,  MyFrame::OnQuit)
+   EVT_MENU(Minimal_PageOpen, MyFrame::OnPageOpen)
+   EVT_MENU(Minimal_Back, MyFrame::OnBack)
+   EVT_MENU(Minimal_Forward, MyFrame::OnForward)
+   EVT_MENU(Minimal_Processor, MyFrame::OnProcessor)
+   END_EVENT_TABLE()
+   
+   // Create a new application object: this macro will allow wxWindows to create
+   // the application object during program execution (it's better than using a
+   // static object for many reasons) and also declares the accessor function
+   // wxGetApp() which will return the reference of the right type (i.e. MyApp and
+   // not wxApp)
+   IMPLEMENT_APP(MyApp)
+   
+   // ============================================================================
+   // implementation
+   // ============================================================================
+   
+   // ----------------------------------------------------------------------------
+   // the application class
+   // ----------------------------------------------------------------------------
+   // `Main program' equivalent: the program execution "starts" here
+   bool MyApp::OnInit()
+   {
 #if wxUSE_SYSTEM_OPTIONS
-    wxSystemOptions::SetOption(wxT("no-maskblt"), 1);
+     wxSystemOptions::SetOption(wxT("no-maskblt"), 1);
 #endif
 
-    wxInitAllImageHandlers();
+     wxInitAllImageHandlers();
 #if wxUSE_FS_INET && wxUSE_STREAMS && wxUSE_SOCKETS
-    wxFileSystem::AddHandler(new wxInternetFSHandler);
+     wxFileSystem::AddHandler(new wxInternetFSHandler);
 #endif
 
-    SetVendorName(wxT("wxWidgets"));
-    SetAppName(wxT("wxHtmlTest"));
-    // the following call to wxConfig::Get will use it to create an object...
+      SetVendorName(wxT("wxWindows"));
+      SetAppName(wxT("wxHtmlTest")); 
+      // the following call to wxConfig::Get will use it to create an object...
 
     // Create the main application window
-    MyFrame *frame = new MyFrame(_("wxHtmlWindow testing application"),
-        wxDefaultPosition, wxSize(640, 480));
+      MyFrame *frame = new MyFrame(_("wxHtmlWindow testing application"),
+         wxPoint(50, 50), wxSize(640, 480));
+   
+    // Show it and tell the application that it's our main window
+    // @@@ what does it do exactly, in fact? is it necessary here?
+      frame->Show(TRUE);
+      SetTopWindow(frame);
 
-    frame->Show();
-
-    return true /* continue running */;
-}
+   
+    // success: wxApp::OnRun() will be called which will enter the main message
+    // loop and the application will run. If we returned FALSE here, the
+    // application would exit immediately.
+       return TRUE;
+   }
 
 // ----------------------------------------------------------------------------
 // main frame
 // ----------------------------------------------------------------------------
 
+
 // frame constructor
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-   : wxFrame((wxFrame *)NULL, wxID_ANY, title, pos, size,
-             wxDEFAULT_FRAME_STYLE, wxT("html_test_app"))
-{
+   MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+   : wxFrame((wxFrame *)NULL, -1, title, pos, size, wxDEFAULT_FRAME_STYLE, 
+             wxT("html_test_app"))
+   {
     // create a menu bar
-    wxMenu *menuFile = new wxMenu;
-    wxMenu *menuNav = new wxMenu;
+      wxMenu *menuFile = new wxMenu;
+      wxMenu *menuNav = new wxMenu;
 
-    menuFile->Append(ID_PageOpen, _("&Open HTML page..."));
-    menuFile->AppendSeparator();
-    menuFile->Append(ID_Processor, _("&Remove bold attribute"),
-                     wxEmptyString, wxITEM_CHECK);
-
-    menuFile->AppendSeparator();
-    menuFile->Append(wxID_EXIT, _("&Close frame"));
-    menuNav->Append(ID_Back, _("Go &BACK"));
-    menuNav->Append(ID_Forward, _("Go &FORWARD"));
+      menuFile->Append(Minimal_PageOpen, _("&Open HTML page..."));
+      menuFile->AppendSeparator();
+      menuFile->Append(Minimal_Processor, _("&Remove bold attribute"), wxT(""), TRUE);
+      
+      menuFile->AppendSeparator();
+      menuFile->Append(Minimal_Quit, _("&Close frame"));
+      menuNav->Append(Minimal_Back, _("Go &BACK"));
+      menuNav->Append(Minimal_Forward, _("Go &FORWARD"));
 
     // now append the freshly created menu to the menu bar...
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(menuFile, _("&File"));
-    menuBar->Append(menuNav, _("&Navigate"));
+      wxMenuBar *menuBar = new wxMenuBar;
+      menuBar->Append(menuFile, _("&File"));
+      menuBar->Append(menuNav, _("&Navigate"));
 
     // ... and attach this menu bar to the frame
-    SetMenuBar(menuBar);
+      SetMenuBar(menuBar);
+   
+      CreateStatusBar(1);
 
-    SetIcon(wxIcon(sample_xpm));
-
-#if wxUSE_ACCEL
-    // Create convenient accelerators for Back and Forward navigation
-    wxAcceleratorEntry entries[2];
-    entries[0].Set(wxACCEL_ALT, WXK_LEFT, ID_Back);
-    entries[1].Set(wxACCEL_ALT, WXK_RIGHT, ID_Forward);
-
-    wxAcceleratorTable accel(WXSIZEOF(entries), entries);
-    SetAcceleratorTable(accel);
-#endif // wxUSE_ACCEL
-
-#if wxUSE_STATUSBAR
-    CreateStatusBar(2);
-#endif // wxUSE_STATUSBAR
-
-    m_Processor = new BoldProcessor;
-    m_Processor->Enable(false);
-    m_Html = new MyHtmlWindow(this);
-    m_Html->SetRelatedFrame(this, _("HTML : %s"));
-#if wxUSE_STATUSBAR
-    m_Html->SetRelatedStatusBar(0);
-#endif // wxUSE_STATUSBAR
-    m_Html->ReadCustomization(wxConfig::Get());
-    m_Html->LoadFile(wxFileName(wxT("test.htm")));
-    m_Html->AddProcessor(m_Processor);
-}
+      m_Processor = new BoldProcessor;
+      m_Processor->Enable(FALSE);
+      m_Html = new wxHtmlWindow(this);
+      m_Html->SetRelatedFrame(this, _("HTML : %s"));
+      m_Html->SetRelatedStatusBar(0);
+      m_Html->ReadCustomization(wxConfig::Get());
+      m_Html->LoadPage(wxT("test.htm"));
+      m_Html->AddProcessor(m_Processor);
+   }
 
 
 // event handlers
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    m_Html->WriteCustomization(wxConfig::Get());
-    delete wxConfig::Set(NULL);
-
-    // true is to force the frame to close
-    Close(true);
+ // TRUE is to force the frame to close
+ m_Html -> WriteCustomization(wxConfig::Get());
+ delete wxConfig::Set(NULL);
+ Close(TRUE);
 }
 
 void MyFrame::OnPageOpen(wxCommandEvent& WXUNUSED(event))
 {
-    wxString p = wxFileSelector(_("Open HTML document"), wxEmptyString,
-        wxEmptyString, wxEmptyString, wxT("HTML files|*.htm"));
-
-    if (p != wxEmptyString)
-        m_Html->LoadPage(p);
+  wxString p = wxFileSelector(_("Open HTML document"), wxT(""), wxT(""), wxT(""), wxT("HTML files|*.htm"));
+  if (p != wxEmptyString)
+    m_Html -> LoadPage(p);
 }
 
 void MyFrame::OnBack(wxCommandEvent& WXUNUSED(event))
 {
-    if (!m_Html->HistoryBack())
-    {
-        wxMessageBox(_("You reached prehistory era!"));
-    }
+if (!m_Html -> HistoryBack()) wxMessageBox(_("You reached prehistory era!"));
 }
 
 void MyFrame::OnForward(wxCommandEvent& WXUNUSED(event))
 {
-    if (!m_Html->HistoryForward())
-    {
-        wxMessageBox(_("No more items in history!"));
-    }
+if (!m_Html -> HistoryForward()) wxMessageBox(_("No more items in history!"));
 }
 
 void MyFrame::OnProcessor(wxCommandEvent& WXUNUSED(event))
 {
     m_Processor->Enable(!m_Processor->IsEnabled());
     m_Html->LoadPage(m_Html->GetOpenedPage());
-}
-
-wxHtmlOpeningStatus MyHtmlWindow::OnOpeningURL(wxHtmlURLType WXUNUSED(type),
-                                               const wxString& url,
-                                               wxString *WXUNUSED(redirect)) const
-{
-    GetRelatedFrame()->SetStatusText(url + _T(" lately opened"),1);
-    return wxHTML_OPEN;
 }

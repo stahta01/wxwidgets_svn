@@ -49,7 +49,7 @@ bool wxStaticBox::Create(
     wxPoint                         vPos(0,0);
     wxSize                          vSize(0,0);
 
-    if (!OS2CreateControl( wxT("STATIC")
+    if (!OS2CreateControl( "STATIC"
                           ,SS_GROUPBOX
                           ,vPos
                           ,vSize
@@ -66,7 +66,7 @@ bool wxStaticBox::Create(
 
     wxColour                        vColour;
 
-    vColour.Set(wxString(wxT("BLACK")));
+    vColour.Set(wxString("BLACK"));
 
     LONG                            lColor = (LONG)vColour.GetPixel();
 
@@ -96,12 +96,11 @@ wxSize wxStaticBox::DoGetBestSize() const
     int                             nCx;
     int                             nCy;
     int                             wBox;
-    wxFont                          vFont = GetFont();
 
     wxGetCharSize( GetHWND()
                   ,&nCx
                   ,&nCy
-                  ,&vFont
+                  ,(wxFont*)&GetFont()
                  );
     GetTextExtent( wxGetWindowText(m_hWnd)
                   ,&wBox

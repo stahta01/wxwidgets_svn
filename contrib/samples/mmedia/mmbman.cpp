@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-  #pragma implementation "mmbman.h"
+  #pragma implementation "mmbman.cpp"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -72,29 +72,29 @@ class MMBoardSoundFile: public MMBoardFile {
 public:
     MMBoardSoundFile(const wxString& filename);
     ~MMBoardSoundFile();
-
+    
     bool NeedWindow();
-
+    
     void SetWindow(wxWindow *window);
-
+    
     void Play();
     void Pause();
     void Resume();
     void Stop();
-
+    
     MMBoardTime GetPosition();
     MMBoardTime GetLength();
     void SetPosition(MMBoardTime btime);
-
+    
     bool IsStopped();
     bool IsPaused();
-
+    
     wxString GetStringType();
     wxString GetStringInformation();
-
+    
 protected:
     wxSoundFileStream *GetDecoder();
-
+    
     wxSoundStream *m_output_stream;
     wxInputStream *m_input_stream;
     wxSoundFileStream *m_file_stream;
@@ -107,26 +107,26 @@ class MMBoardVideoFile: public MMBoardFile {
 public:
     MMBoardVideoFile(const wxString& filename);
     ~MMBoardVideoFile();
-
+    
     bool NeedWindow();
-
+    
     void SetWindow(wxWindow *window);
-
+    
     void Play();
     void Pause();
     void Resume();
     void Stop();
-
+    
     MMBoardTime GetPosition();
     MMBoardTime GetLength();
     void SetPosition(MMBoardTime btime);
-
+    
     bool IsStopped();
     bool IsPaused();
-
+    
     wxString GetStringType();
     wxString GetStringInformation();
-
+    
 protected:
     wxWindow *m_output_window;
     wxVideoBaseDriver *m_video_driver;
@@ -148,14 +148,14 @@ MMBoardSoundFile::MMBoardSoundFile(const wxString& filename)
 {
     m_input_stream = new wxFileInputStream(filename);
     m_output_stream = MMBoardManager::OpenSoundStream();
-
+    
     m_file_stream = GetDecoder();
-
+    
     if (!m_file_stream) {
         SetError(MMBoard_UnknownFile);
         return;
     }
-
+    
     // Compute length
     wxUint32 length, seconds;
 
@@ -177,25 +177,25 @@ MMBoardSoundFile::~MMBoardSoundFile()
 wxSoundFileStream *MMBoardSoundFile::GetDecoder()
 {
     wxSoundFileStream *f_stream;
-
+    
     // First, we try a Wave decoder
     f_stream = new wxSoundWave(*m_input_stream, *m_output_stream);
     m_file_type = MMBoard_WAVE;
     if (f_stream->CanRead())
         return f_stream;
     delete f_stream;
-
+    
     // Then, a AIFF decoder
     f_stream = new wxSoundAiff(*m_input_stream, *m_output_stream);
     m_file_type = MMBoard_AIFF;
     if (f_stream->CanRead())
         return f_stream;
     delete f_stream;
-
+    
     m_file_type = MMBoard_UNKNOWNTYPE;
-
+    
     // TODO: automate
-
+    
     return NULL;
 }
 
@@ -218,17 +218,17 @@ MMBoardTime MMBoardSoundFile::GetPosition()
 {
     wxUint32 length, seconds;
     MMBoardTime file_time;
-
+    
     file_time.seconds = file_time.minutes = file_time.hours = 0;
     if (m_file_stream->IsStopped())
         return file_time;
-
+    
     length = m_file_stream->GetPosition();
     seconds = m_file_stream->GetSoundFormat().GetTimeFromBytes(length);
     file_time.seconds = seconds % 60;
     file_time.minutes = (seconds / 60) % 60;
     file_time.hours   = seconds / 3600;
-
+    
     return file_time;
 }
 
@@ -245,10 +245,10 @@ void MMBoardSoundFile::SetPosition(MMBoardTime btime)
 
 bool MMBoardSoundFile::NeedWindow()
 {
-    return false;
+    return FALSE;
 }
 
-void MMBoardSoundFile::SetWindow(wxWindow *WXUNUSED(window))
+void MMBoardSoundFile::SetWindow(wxWindow *window)
 {
 }
 
@@ -277,50 +277,39 @@ wxString MMBoardSoundFile::GetStringType()
     switch (m_file_type) {
         case MMBoard_WAVE:
             return wxString(wxT("WAVE file"));
-            #if 0
-            // break is not reachable after return
             break;
-            #endif
         case MMBoard_AIFF:
             return wxString(wxT("AIFF file"));
-            #if 0
-            // break is not reachable after return
             break;
-            #endif
-        #if 0
-        // default moved outside switch for those compilers
-        // which complain about lack of return in function
         default:
             return wxString(wxT("Unknown file"));
             break;
-        #endif
     }
-    return wxString(wxT("Unknown file"));
 }
 
 wxString MMBoardSoundFile::GetStringInformation()
 {
     wxString info;
     wxSoundFormatBase *format;
-
+    
     format = &(m_file_stream->GetSoundFormat());
-
+    
     info = wxT("Data encoding: ");
     switch (format->GetType()) {
     case wxSOUND_PCM: {
         wxSoundFormatPcm *pcm_format = (wxSoundFormatPcm *)format;
-
-    info += wxString::Format(wxT("PCM %s %s\n"),
+      
+	info += wxString::Format(wxT("PCM %s %s\n"),
                                  pcm_format->Signed() ? wxT("signed") : wxT("unsigned"),
                                  pcm_format->GetOrder() == wxLITTLE_ENDIAN ? wxT("little endian") : wxT("big endian"));
-    info += wxString::Format(wxT("Sampling rate: %d\n")
-                 wxT("Bits per sample: %d\n")
-                 wxT("Number of channels: %d\n"),
-                 pcm_format->GetSampleRate(),
-                 pcm_format->GetBPS(),
-                 pcm_format->GetChannels());
-
-    break;
+	info += wxString::Format(wxT("Sampling rate: %d\n")
+				 wxT("Bits per sample: %d\n")
+				 wxT("Number of channels: %d\n"),
+				 pcm_format->GetSampleRate(),
+				 pcm_format->GetBPS(),
+				 pcm_format->GetChannels());
+	
+	break;
     }
     case wxSOUND_MSADPCM: {
         wxSoundFormatMSAdpcm *adpcm_format = (wxSoundFormatMSAdpcm *)format;
@@ -334,13 +323,13 @@ wxString MMBoardSoundFile::GetStringInformation()
     }
     case wxSOUND_ULAW: {
         wxSoundFormatUlaw *ulaw_format = (wxSoundFormatUlaw *)format;
-        info += wxT("ULAW\n");
-        info += wxString::Format(wxT("Sampling rate: %d\n"), ulaw_format->GetSampleRate());
-        break;
+	info += wxT("ULAW\n");
+	info += wxString::Format(wxT("Sampling rate: %d\n"), ulaw_format->GetSampleRate());
+	break;
     }
     default:
         info += wxT("Unknown");
-        break;
+	break;
     }
     return info;
 }
@@ -354,15 +343,12 @@ wxString MMBoardSoundFile::GetStringInformation()
 MMBoardVideoFile::MMBoardVideoFile(const wxString& filename)
 {
     m_output_window = NULL;
-
+  
 #if defined(__UNIX__)
     m_video_driver = new wxVideoXANIM(filename);
-#elif defined(__WINDOWS__) && !defined(__MINGW32__) && !defined(__WATCOMC__)
-    // versions of Open Watcom and MinGW tested against this source does not
-    // deliver "digitalv.h" required in this feature
+#elif defined(__WIN32__)
     m_video_driver = new wxVideoWindows(filename);
 #else
-    wxUnusedVar(filename);
     m_video_driver = NULL;
     SetError(MMBoard_UnknownFile);
 #endif
@@ -376,7 +362,7 @@ MMBoardVideoFile::~MMBoardVideoFile()
 
 bool MMBoardVideoFile::NeedWindow()
 {
-    return true;
+    return TRUE;
 }
 
 void MMBoardVideoFile::SetWindow(wxWindow *window)
@@ -426,14 +412,14 @@ MMBoardTime MMBoardVideoFile::GetLength()
     int frameTime;
 
     frameTime = (int)( m_video_driver->GetNbFrames() / m_video_driver->GetFrameRate());
-
+    
     btime.seconds = frameTime % 60;
     btime.minutes = (frameTime / 60) % 60;
     btime.hours   = frameTime / 3600;
     return btime;
 }
 
-void MMBoardVideoFile::SetPosition(MMBoardTime WXUNUSED(btime))
+void MMBoardVideoFile::SetPosition(MMBoardTime btime)
 {
 }
 
@@ -457,12 +443,12 @@ wxString MMBoardVideoFile::GetStringInformation()
     wxString info;
 
     info = wxT("Video codec: ");
-    info += m_video_driver->GetMovieCodec() + _T("\n");
+    info += m_video_driver->GetMovieCodec() + "\n";
     info += wxT("Audio codec: ");
     info += m_video_driver->GetAudioCodec();
-    info += wxString::Format(_T(" Sample rate: %d Channels: %d\n"), m_video_driver->GetSampleRate(),
+    info += wxString::Format(" Sample rate: %d Channels: %d\n", m_video_driver->GetSampleRate(),
                              m_video_driver->GetBPS());
-    info += wxString::Format(_T(" Frame rate: %.01f"), m_video_driver->GetFrameRate());
+    info += wxString::Format(" Frame rate: %.01f", m_video_driver->GetFrameRate());
     return info;
 }
 
@@ -523,7 +509,7 @@ wxSoundStream *MMBoardManager::OpenSoundStream()
     return new wxSoundStreamWin();
 #endif
 
-  wxMessageBox(_T("You are trying to open a multimedia but you have not devices"), _T("Error"), wxOK | wxICON_ERROR, NULL);
+  wxMessageBox("You are trying to open a multimedia but you have not devices", "Error", wxOK | wxICON_ERROR, NULL);
 
   return NULL;
 }

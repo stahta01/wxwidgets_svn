@@ -1,33 +1,32 @@
-
-import  wx
-import  wx.grid as  gridlib
+from wxPython.wx import *
+from wxPython.grid import *
 
 #---------------------------------------------------------------------------
 
-class HugeTable(gridlib.PyGridTableBase):
+class HugeTable(wxPyGridTableBase):
+
+    """
+    This is all it takes to make a custom data table to plug into a
+    wxGrid.  There are many more methods that can be overridden, but
+    the ones shown below are the required ones.  This table simply
+    provides strings containing the row and column values.
+    """
 
     def __init__(self, log):
-        gridlib.PyGridTableBase.__init__(self)
+        wxPyGridTableBase.__init__(self)
         self.log = log
 
-        self.odd=gridlib.GridCellAttr()
+        self.odd=wxGridCellAttr()
         self.odd.SetBackgroundColour("sky blue")
-        self.even=gridlib.GridCellAttr()
+        self.even=wxGridCellAttr()
         self.even.SetBackgroundColour("sea green")
 
-    def GetAttr(self, row, col, kind):
-        attr = [self.even, self.odd][row % 2]
+     def GetAttr(self, row, col, kind):
+        attr = [self.even,self.odd][row%2]
         attr.IncRef()
         return attr
 
-
-    
-    # This is all it takes to make a custom data table to plug into a
-    # wxGrid.  There are many more methods that can be overridden, but
-    # the ones shown below are the required ones.  This table simply
-    # provides strings containing the row and column values.
-    
-    def GetNumberRows(self):
+   def GetNumberRows(self):
         return 10000
 
     def GetNumberCols(self):
@@ -47,9 +46,9 @@ class HugeTable(gridlib.PyGridTableBase):
 
 
 
-class HugeTableGrid(gridlib.Grid):
+class HugeTableGrid(wxGrid):
     def __init__(self, parent, log):
-        gridlib.Grid.__init__(self, parent, -1)
+        wxGrid.__init__(self, parent, -1)
 
         table = HugeTable(log)
 
@@ -58,18 +57,21 @@ class HugeTableGrid(gridlib.Grid):
         # a reference to it and call it's Destroy method later.
         self.SetTable(table, True)
 
-        self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightDown)  
+        EVT_GRID_CELL_RIGHT_CLICK(self, self.OnRightDown)  #added
 
-    def OnRightDown(self, event):
+    def OnRightDown(self, event):                          #added
         print "hello"
-        print self.GetSelectedRows()
+        print self.GetSelectedRows()                       #added
+
+
+
 
 
 #---------------------------------------------------------------------------
 
-class TestFrame(wx.Frame):
+class TestFrame(wxFrame):
     def __init__(self, parent, log):
-        wx.Frame.__init__(self, parent, -1, "Huge (virtual) Table Demo", size=(640,480))
+        wxFrame.__init__(self, parent, -1, "Huge (virtual) Table Demo", size=(640,480))
         grid = HugeTableGrid(self, log)
 
         grid.SetReadOnly(5,5, True)
@@ -78,7 +80,7 @@ class TestFrame(wx.Frame):
 
 if __name__ == '__main__':
     import sys
-    app = wx.PySimpleApp()
+    app = wxPySimpleApp()
     frame = TestFrame(None, sys.stdout)
     frame.Show(True)
     app.MainLoop()

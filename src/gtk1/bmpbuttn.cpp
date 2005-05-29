@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "bmpbuttn.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/defs.h"
 
@@ -45,7 +42,6 @@ extern bool   g_blockEventsOnDrag;
 // "clicked"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_bmpbutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
     if (g_isIdle)
@@ -58,13 +54,11 @@ static void gtk_bmpbutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxBitma
     event.SetEventObject(button);
     button->GetEventHandler()->ProcessEvent(event);
 }
-}
 
 //-----------------------------------------------------------------------------
 // "enter"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_bmpbutton_enter_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
     if (!button->m_hasVMT) return;
@@ -72,13 +66,11 @@ static void gtk_bmpbutton_enter_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
 
     button->HasFocus();
 }
-}
 
 //-----------------------------------------------------------------------------
 // "leave"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_bmpbutton_leave_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
     if (!button->m_hasVMT) return;
@@ -86,13 +78,11 @@ static void gtk_bmpbutton_leave_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
 
     button->NotFocus();
 }
-}
 
 //-----------------------------------------------------------------------------
 // "pressed"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_bmpbutton_press_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
     if (!button->m_hasVMT) return;
@@ -100,20 +90,17 @@ static void gtk_bmpbutton_press_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
 
     button->StartSelect();
 }
-}
 
 //-----------------------------------------------------------------------------
 // "released"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_bmpbutton_release_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
     button->EndSelect();
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -147,19 +134,31 @@ bool wxBitmapButton::Create( wxWindow *parent,
         return FALSE;
     }
 
-    m_bmpNormal = bitmap;
+    m_bmpNormal   =
+    m_bmpDisabled =
+    m_bmpFocus    =
+    m_bmpSelected = bitmap;
 
     m_widget = gtk_button_new();
 
+#if (GTK_MINOR_VERSION > 0)
     if (style & wxNO_BORDER)
        gtk_button_set_relief( GTK_BUTTON(m_widget), GTK_RELIEF_NONE );
+#endif
 
     if (m_bmpNormal.Ok())
     {
+        wxSize newSize = size;
+        int border = (style & wxNO_BORDER) ? 4 : 10;
+        if (newSize.x == -1)
+            newSize.x = m_bmpNormal.GetWidth()+border;
+        if (newSize.y == -1)
+            newSize.y = m_bmpNormal.GetHeight()+border;
+        SetSize( newSize.x, newSize.y );
         OnSetBitmap();
     }
 
-    gtk_signal_connect_after( GTK_OBJECT(m_widget), "clicked",
+    gtk_signal_connect( GTK_OBJECT(m_widget), "clicked",
       GTK_SIGNAL_FUNC(gtk_bmpbutton_clicked_callback), (gpointer*)this );
 
     gtk_signal_connect( GTK_OBJECT(m_widget), "enter",
@@ -173,7 +172,11 @@ bool wxBitmapButton::Create( wxWindow *parent,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    SetBackgroundColour( parent->GetBackgroundColour() );
+
+    Show( TRUE );
 
     return TRUE;
 }
@@ -200,20 +203,18 @@ wxString wxBitmapButton::GetLabel() const
     return wxControl::GetLabel();
 }
 
-void wxBitmapButton::DoApplyWidgetStyle(GtkRcStyle *style)
+void wxBitmapButton::ApplyWidgetStyle()
 {
     if ( !BUTTON_CHILD(m_widget) )
         return;
 
-    wxButton::DoApplyWidgetStyle(style);
+    wxButton::ApplyWidgetStyle();
 }
 
 void wxBitmapButton::OnSetBitmap()
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid bitmap button") );
 
-    InvalidateBestSize();
-    
     wxBitmap the_one;
     if (!m_isEnabled)
         the_one = m_bmpDisabled;
@@ -246,36 +247,15 @@ void wxBitmapButton::OnSetBitmap()
     if (child == NULL)
     {
         // initial bitmap
-        GtkWidget *pixmap;
-#ifdef __WXGTK20__
-        if (the_one.HasPixbuf())
-            pixmap = gtk_image_new_from_pixbuf(the_one.GetPixbuf());
-        else
-            pixmap = gtk_image_new_from_pixmap(the_one.GetPixmap(), mask);
-#else
-        pixmap = gtk_pixmap_new(the_one.GetPixmap(), mask);
-#endif
+        GtkWidget *pixmap = gtk_pixmap_new(the_one.GetPixmap(), mask);
         gtk_widget_show(pixmap);
         gtk_container_add(GTK_CONTAINER(m_widget), pixmap);
     }
     else
     {   // subsequent bitmaps
-#ifdef __WXGTK20__
-        GtkImage *pixmap = GTK_IMAGE(child);
-        if (the_one.HasPixbuf())
-            gtk_image_set_from_pixbuf(pixmap, the_one.GetPixbuf());
-        else
-            gtk_image_set_from_pixmap(pixmap, the_one.GetPixmap(), mask);
-#else
-        GtkPixmap *pixmap = GTK_PIXMAP(child);
-        gtk_pixmap_set(pixmap, the_one.GetPixmap(), mask);
-#endif
+        GtkPixmap *g_pixmap = GTK_PIXMAP(child);
+        gtk_pixmap_set(g_pixmap, the_one.GetPixmap(), mask);
     }
-}
-
-wxSize wxBitmapButton::DoGetBestSize() const
-{
-    return wxControl::DoGetBestSize();
 }
 
 bool wxBitmapButton::Enable( bool enable )

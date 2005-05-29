@@ -4,7 +4,7 @@
 // Date: 08/26/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "sndg72x.cpp"
@@ -105,7 +105,7 @@ bool wxSoundFormatG72X::operator !=(const wxSoundFormatBase& frmt2) const
     wxSoundFormatG72X *g72x = (wxSoundFormatG72X *)&frmt2;
     
     if (frmt2.GetType() != wxSOUND_G72X)
-        return true;
+        return TRUE;
     
     return (g72x->m_srate != m_srate || g72x->m_g72x_type != m_g72x_type);
 }
@@ -197,7 +197,7 @@ bool wxSoundStreamG72X::SetSoundFormat(const wxSoundFormatBase& format)
 {
     if (format.GetType() != wxSOUND_G72X) {
         m_snderror = wxSOUND_INVFRMT;
-        return false;
+        return FALSE;
     }
     
     wxSoundFormatPcm pcm;
@@ -211,7 +211,7 @@ bool wxSoundStreamG72X::SetSoundFormat(const wxSoundFormatBase& format)
     pcm.SetSampleRate(g72x->GetSampleRate());
     pcm.SetBPS(16);
     pcm.SetChannels(1); // Only mono supported
-    pcm.Signed(true);
+    pcm.Signed(TRUE);
     pcm.SetOrder(wxBYTE_ORDER);
 
     // Look for the correct codec to use and set its bit width
@@ -236,7 +236,7 @@ bool wxSoundStreamG72X::SetSoundFormat(const wxSoundFormatBase& format)
     // Let the router finish the work
     m_router->SetSoundFormat(pcm);
     
-    return true;
+    return TRUE;
 }
 
 #define BYTE_SIZE 8

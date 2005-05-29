@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Program:     wxWidgets Widgets Sample
+// Program:     wxWindows Widgets Sample
 // Name:        gauge.cpp
 // Purpose:     Part of the widgets sample showing wxGauge
 // Author:      Vadim Zeitlin
@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/timer.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/combobox.h"
@@ -42,7 +41,7 @@
 #include "wx/sizer.h"
 
 #include "widgets.h"
-#if wxUSE_GAUGE
+#if 1
 #include "icons/gauge.xpm"
 
 // ----------------------------------------------------------------------------
@@ -71,10 +70,8 @@ enum
 class GaugeWidgetsPage : public WidgetsPage
 {
 public:
-    GaugeWidgetsPage(wxBookCtrl *book, wxImageList *imaglist);
+    GaugeWidgetsPage(wxNotebook *notebook, wxImageList *imaglist);
     virtual ~GaugeWidgetsPage();
-
-    virtual wxControl *GetWidget() const { return m_gauge; }
 
 protected:
     // event handlers
@@ -146,8 +143,8 @@ BEGIN_EVENT_TABLE(GaugeWidgetsPage, WidgetsPage)
 
     EVT_UPDATE_UI(GaugePage_CurValueText, GaugeWidgetsPage::OnUpdateUICurValueText)
 
-    EVT_CHECKBOX(wxID_ANY, GaugeWidgetsPage::OnCheckOrRadioBox)
-    EVT_RADIOBOX(wxID_ANY, GaugeWidgetsPage::OnCheckOrRadioBox)
+    EVT_CHECKBOX(-1, GaugeWidgetsPage::OnCheckOrRadioBox)
+    EVT_RADIOBOX(-1, GaugeWidgetsPage::OnCheckOrRadioBox)
 
     EVT_TIMER(GaugePage_Timer, GaugeWidgetsPage::OnProgressTimer)
 END_EVENT_TABLE()
@@ -158,9 +155,9 @@ END_EVENT_TABLE()
 
 IMPLEMENT_WIDGETS_PAGE(GaugeWidgetsPage, _T("Gauge"));
 
-GaugeWidgetsPage::GaugeWidgetsPage(wxBookCtrl *book,
-                                   wxImageList *imaglist)
-                 :WidgetsPage(book)
+GaugeWidgetsPage::GaugeWidgetsPage(wxNotebook *notebook,
+                                       wxImageList *imaglist)
+                  : WidgetsPage(notebook)
 {
     imaglist->Add(wxBitmap(gauge_xpm));
 
@@ -178,7 +175,7 @@ GaugeWidgetsPage::GaugeWidgetsPage(wxBookCtrl *book,
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
-    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
+    wxStaticBox *box = new wxStaticBox(this, -1, _T("&Set style"));
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
@@ -191,15 +188,14 @@ GaugeWidgetsPage::GaugeWidgetsPage(wxBookCtrl *book,
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
-        _T("&Change gauge value"));
+    wxStaticBox *box2 = new wxStaticBox(this, -1, _T("&Change gauge value"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxTextCtrl *text;
     wxSizer *sizerRow = CreateSizerWithTextAndLabel(_T("Current value"),
                                                     GaugePage_CurValueText,
                                                     &text);
-    text->SetEditable(false);
+    text->SetEditable(FALSE);
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
@@ -237,6 +233,7 @@ GaugeWidgetsPage::GaugeWidgetsPage(wxBookCtrl *book,
     // final initializations
     Reset();
 
+    SetAutoLayout(TRUE);
     SetSizer(sizerTop);
 
     sizerTop->Fit(this);
@@ -253,8 +250,8 @@ GaugeWidgetsPage::~GaugeWidgetsPage()
 
 void GaugeWidgetsPage::Reset()
 {
-    m_chkVert->SetValue(false);
-    m_chkSmooth->SetValue(false);
+    m_chkVert->SetValue(FALSE);
+    m_chkSmooth->SetValue(FALSE);
 }
 
 void GaugeWidgetsPage::CreateGauge()
@@ -274,7 +271,7 @@ void GaugeWidgetsPage::CreateGauge()
     {
         val = m_gauge->GetValue();
 
-        m_sizerGauge->Detach( m_gauge );
+        m_sizerGauge->Remove(m_gauge);
         delete m_gauge;
     }
 
@@ -335,7 +332,6 @@ void GaugeWidgetsPage::OnButtonSetRange(wxCommandEvent& WXUNUSED(event))
     if ( !m_textRange->GetValue().ToULong(&val) )
         return;
 
-    m_range = val;
     m_gauge->SetRange(val);
 }
 
@@ -365,7 +361,7 @@ void GaugeWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
     event.Enable( m_chkVert->GetValue() || m_chkSmooth->GetValue() );
 }
 
-void GaugeWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void GaugeWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateGauge();
 }
@@ -405,4 +401,3 @@ void GaugeWidgetsPage::StopTimer()
 }
 
 #endif
-    // wxUSE_GAUGE

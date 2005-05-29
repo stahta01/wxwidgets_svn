@@ -15,9 +15,6 @@ reached. This is documented in \helpref{wxFile::Eof}{wxfileeof} and
 classes reflects this difference, i.e. wxFileInputStream will report
 wxSTREAM\_EOF after having read the last byte whereas wxFFileInputStream
 will report wxSTREAM\_EOF after trying to read {\it past} the last byte.
-Related to EOF behavior, note that \helpref{SeekO()}{wxoutputstreamseeko} 
-can seek beyond the end of the stream (file) and will thus not return 
-{\it wxInvalidOffset} for that.
 
 \wxheading{Derived from}
 
@@ -36,7 +33,7 @@ can seek beyond the end of the stream (file) and will thus not return
 % ----------
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFileOutputStream::wxFileOutputStream}\label{wxfileoutputstreamctor}
+\membersection{wxFileOutputStream::wxFileOutputStream}
 
 \func{}{wxFileOutputStream}{\param{const wxString\&}{ ofileName}}
 
@@ -51,15 +48,15 @@ Initializes a file stream in write-only mode using the file I/O object {\it file
 
 Initializes a file stream in write-only mode using the file descriptor {\it fd}.
 
-\membersection{wxFileOutputStream::\destruct{wxFileOutputStream}}\label{wxfileoutputstreamdtor}
+\membersection{wxFileOutputStream::\destruct{wxFileOutputStream}}
 
 \func{}{\destruct{wxFileOutputStream}}{\void}
 
 Destructor.
 
-\membersection{wxFileOutputStream::Ok}\label{wxfileoutputstreamok}
+\membersection{wxFileOutputStream::Ok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if the stream is initialized and ready.
+Returns TRUE if the stream is initialized and ready.
 

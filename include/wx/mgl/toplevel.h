@@ -11,7 +11,7 @@
 #ifndef __WX_TOPLEVEL_H__
 #define __WX_TOPLEVEL_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "toplevel.h"
 #endif
 

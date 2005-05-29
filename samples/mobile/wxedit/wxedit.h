@@ -8,10 +8,10 @@
 #define __wxedit_H__
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-    #pragma interface "wxedit.h"
+    #pragma interface "wxedit.cpp"
 #endif
 
-// Include wxWidgets' headers
+// Include wxWindows' headers
 
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
@@ -50,15 +50,15 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE );
-
+    
 private:
     void CreateMyMenuBar();
-
+    
 private:
     wxTextCtrl     *m_text;
     wxString        m_filename;
     wxArrayString   m_history;
-
+    
 private:
     void OnAbout( wxCommandEvent &event );
     void OnNew( wxCommandEvent &event );
@@ -66,23 +66,23 @@ private:
     void OnSave( wxCommandEvent &event );
     void OnSaveAs( wxCommandEvent &event );
     void OnQuit( wxCommandEvent &event );
-
+    
     void OnCopy( wxCommandEvent &event );
     void OnCut( wxCommandEvent &event );
     void OnPaste( wxCommandEvent &event );
     void OnDelete( wxCommandEvent &event );
-
+    
     void OnLastFiles( wxCommandEvent &event );
-
+    
     void MakeHistory();
     void AddToHistory( const wxString &fname );
-
+    
     bool Save();
     bool Discard();
-
+    
     void OnUpdateUI( wxUpdateUIEvent &event );
     void OnCloseWindow( wxCloseEvent &event );
-
+    
 private:
     DECLARE_EVENT_TABLE()
 };
@@ -94,8 +94,8 @@ private:
 class MyApp: public wxApp
 {
 public:
-    MyApp(){};
-
+    MyApp();
+    
     virtual bool OnInit();
     virtual int OnExit();
 };

@@ -13,4 +13,3 @@ EXPORTS
     _SHBrowseForFolderA@4 = SHBrowseForFolderA
     _Shell_NotifyIconA@8 = Shell_NotifyIconA
 
-

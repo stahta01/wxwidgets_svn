@@ -11,7 +11,6 @@
 
 #include "wx/defs.h"
 #include "wx/stream.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndcodec.h"
 
@@ -21,7 +20,7 @@
 // Codec router class
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundRouterStream: public wxSoundStreamCodec {
+class WXDLLEXPORT wxSoundRouterStream: public wxSoundStreamCodec {
  public:
   wxSoundRouterStream(wxSoundStream& sndio);
   ~wxSoundRouterStream();
@@ -99,7 +98,7 @@ public:
     
     // You should use this function to test whether this file codec can read
     // the stream you passed to it.
-    virtual bool CanRead() { return false; }
+    virtual bool CanRead() { return FALSE; }
     
 protected:
     wxSoundRouterStream m_codec; 

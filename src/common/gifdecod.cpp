@@ -8,7 +8,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "gifdecod.h"
 #endif
 
@@ -21,7 +21,6 @@
 
 #ifndef WX_PRECOMP
 #  include "wx/defs.h"
-#  include "wx/palette.h"
 #endif
 
 #if wxUSE_STREAMS && wxUSE_GIF
@@ -116,7 +115,7 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
     image->Create(GetWidth(), GetHeight());
 
     if (!image->Ok())
-        return false;
+        return FALSE;
 
     pal = GetPalette();
     src = GetData();
@@ -143,7 +142,7 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
         image->SetMaskColour(255, 0, 255);
     }
     else
-        image->SetMask(false);
+        image->SetMask(FALSE);
 
 #if wxUSE_PALETTE
     if (pal)
@@ -171,7 +170,7 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
         *(dst++) = pal[3 * (*src) + 2];
     }
 
-    return true;
+    return TRUE;
 }
 
 
@@ -208,27 +207,27 @@ bool wxGIFDecoder::IsAnimation() const          { return (m_nimages > 1); }
 bool wxGIFDecoder::GoFirstFrame()
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     m_image = 1;
     m_pimage = m_pfirst;
-    return true;
+    return TRUE;
 }
 
 bool wxGIFDecoder::GoLastFrame()
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     m_image = m_nimages;
     m_pimage = m_plast;
-    return true;
+    return TRUE;
 }
 
 bool wxGIFDecoder::GoNextFrame(bool cyclic)
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((m_image < m_nimages) || (cyclic))
     {
@@ -241,16 +240,16 @@ bool wxGIFDecoder::GoNextFrame(bool cyclic)
             m_pimage = m_pfirst;
         }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 bool wxGIFDecoder::GoPrevFrame(bool cyclic)
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((m_image > 1) || (cyclic))
     {
@@ -263,32 +262,30 @@ bool wxGIFDecoder::GoPrevFrame(bool cyclic)
             m_pimage = m_plast;
         }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 bool wxGIFDecoder::GoFrame(int which)
 {
+    int i;
+
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((which >= 1) && (which <= m_nimages))
     {
-        m_image = 1;
         m_pimage = m_pfirst;
 
-        while (m_image < which)
-        {
-            m_image++;
+        for (i = 0; i < which; i++)
             m_pimage = m_pimage->next;
-        }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 
@@ -614,16 +611,16 @@ as an End of Information itself)
 
 
 // CanRead:
-//  Returns true if the file looks like a valid GIF, false otherwise.
+//  Returns TRUE if the file looks like a valid GIF, FALSE otherwise.
 //
 bool wxGIFDecoder::CanRead()
 {
     unsigned char buf[3];
 
     if ( !m_f->Read(buf, WXSIZEOF(buf)) )
-        return false;
+        return FALSE;
 
-    m_f->SeekI(-(wxFileOffset)WXSIZEOF(buf), wxFromCurrent);
+    m_f->SeekI(-(off_t)WXSIZEOF(buf), wxFromCurrent);
 
     return memcmp(buf, "GIF", WXSIZEOF(buf)) == 0;
 }
@@ -665,7 +662,7 @@ int wxGIFDecoder::ReadGIF()
 
     if (memcmp(buf + 3, "89a", 3) < 0)
     {
-        m_anim = false;
+        m_anim = FALSE;
     }
 
     /* read logical screen descriptor block (LSDB) */
@@ -703,7 +700,7 @@ int wxGIFDecoder::ReadGIF()
     pprev = NULL;
     pimg  = NULL;
 
-    bool done = false;
+    bool done = FALSE;
 
     while(!done)
     {
@@ -729,7 +726,7 @@ int wxGIFDecoder::ReadGIF()
         /* end of data? */
         if (type == 0x3B)
         {
-            done = true;
+            done = TRUE;
         }
         else
         /* extension block? */
@@ -754,7 +751,7 @@ int wxGIFDecoder::ReadGIF()
                     transparent = buf[4];
 
                 /* read disposal method */
-                disposal = ((buf[1] & 0x1C) >> 2) - 1;
+                disposal = (buf[1] & 0x1C) - 1;
             }
             else
             /* other extension, skip */
@@ -764,7 +761,7 @@ int wxGIFDecoder::ReadGIF()
                     m_f->SeekI(i, wxFromCurrent);
                     if (m_f->Eof())
                     {
-                        done = true;
+                        done = TRUE;
                         break;
                     }
                 }
@@ -859,7 +856,7 @@ int wxGIFDecoder::ReadGIF()
 
             /* if this is not an animated GIF, exit after first image */
             if (!m_anim)
-                done = true;
+                done = TRUE;
         }
     }
 
@@ -908,8 +905,8 @@ int wxGIFDecoder::ReadGIF()
             if ((buf[8] & 0x80) == 0x80)
             {
                 ncolors = 2 << (buf[8] & 0x07);
-                wxFileOffset pos = m_f->TellI();
-                wxFileOffset numBytes = 3 * ncolors;
+                off_t pos = m_f->TellI();
+                off_t numBytes = 3 * ncolors;
                 m_f->SeekI(numBytes, wxFromCurrent);
                 if (m_f->TellI() != (pos + numBytes))
                 {

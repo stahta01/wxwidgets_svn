@@ -12,7 +12,7 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "colour.h"
 #endif
 #include "wx/object.h"
@@ -25,8 +25,7 @@ public:
       // default
     wxColour();
       // from RGB
-    wxColour(unsigned char red, unsigned char green, unsigned char blue)
-        { Set(red, green, blue); }
+    wxColour(unsigned char red, unsigned char green, unsigned char blue);
     wxColour(unsigned long colRGB) { Set(colRGB); }
 
       // implicit conversion from the colour name
@@ -55,6 +54,11 @@ public:
     // accessors
     bool Ok() const { return m_isInit; }
 
+    // Let's remove this inelegant function
+#if WXWIN_COMPATIBILITY
+    void Get(unsigned char *r, unsigned char *g, unsigned char *b) const;
+#endif
+
     unsigned char Red() const { return m_red; }
     unsigned char Green() const { return m_green; }
     unsigned char Blue() const { return m_blue; }
@@ -69,18 +73,14 @@ public:
     }
     bool operator != (const wxColour& colour) const { return !(*this == colour); }
 
-    void InitFromName(const wxString& colourName);
-
-protected:
-
-    // Helper function
-    void Init();
-
 private:
     bool m_isInit;
     unsigned char m_red;
     unsigned char m_blue;
     unsigned char m_green;
+
+    // helper func
+    void InitFromName(const wxString& colourName);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxColour)

@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univbutton.h"
 #endif
 
@@ -41,7 +41,6 @@
 #include "wx/univ/inphand.h"
 #include "wx/univ/theme.h"
 #include "wx/univ/colschem.h"
-#include "wx/stockitem.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -64,44 +63,27 @@ IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
 void wxButton::Init()
 {
     m_isPressed =
-    m_isDefault = false;
+    m_isDefault = FALSE;
 }
 
 bool wxButton::Create(wxWindow *parent,
                       wxWindowID id,
                       const wxBitmap& bitmap,
-                      const wxString &lbl,
+                      const wxString &label,
                       const wxPoint &pos,
                       const wxSize &size,
                       long style,
                       const wxValidator& validator,
                       const wxString &name)
 {
-    wxString label(lbl);
-    if (label.empty() && wxIsStockID(id))
-        label = wxGetStockLabel(id);
+    // center label by default
+    if ( !(style & wxALIGN_MASK) )
+    {
+        style |= wxALIGN_CENTRE_HORIZONTAL | wxALIGN_CENTRE_VERTICAL;
+    }
 
-    long ctrl_style = style & !wxBU_ALIGN_MASK;
-
-    wxASSERT_MSG( (ctrl_style & wxALIGN_MASK) == 0,
-                  _T("Some style conflicts with align flags") );
-
-    if((style & wxBU_RIGHT) == wxBU_RIGHT)
-        ctrl_style |= wxALIGN_RIGHT;
-    else if((style & wxBU_LEFT) == wxBU_LEFT)
-        ctrl_style |= wxALIGN_LEFT;
-    else
-        ctrl_style |= wxALIGN_CENTRE_HORIZONTAL;
-
-    if((style & wxBU_TOP) == wxBU_TOP)
-        ctrl_style |= wxALIGN_TOP;
-    else if((style & wxBU_BOTTOM) == wxBU_BOTTOM)
-        ctrl_style |= wxALIGN_BOTTOM;
-    else
-        ctrl_style |= wxALIGN_CENTRE_VERTICAL;
-
-    if ( !wxControl::Create(parent, id, pos, size, ctrl_style, validator, name) )
-        return false;
+    if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
+        return FALSE;
 
     SetLabel(label);
     SetImageLabel(bitmap);
@@ -109,7 +91,7 @@ bool wxButton::Create(wxWindow *parent,
 
     CreateInputHandler(wxINP_HANDLER_BUTTON);
 
-    return true;
+    return TRUE;
 }
 
 wxButton::~wxButton()
@@ -131,11 +113,8 @@ wxSize wxButtonBase::GetDefaultSize()
 
         // this corresponds more or less to wxMSW standard in Win32 theme (see
         // wxWin32Renderer::AdjustSize())
-//        s_sizeBtn.x = 8*dc.GetCharWidth();
-//        s_sizeBtn.y = (11*dc.GetCharHeight())/10 + 2;
-        // Otto Wyss, Patch 664399
-        s_sizeBtn.x = dc.GetCharWidth()*10 + 2;
-        s_sizeBtn.y = dc.GetCharHeight()*11/10 + 2;
+        s_sizeBtn.x = 8*dc.GetCharWidth();
+        s_sizeBtn.y = (11*dc.GetCharHeight())/10 + 2;
     }
 
     return s_sizeBtn;
@@ -157,11 +136,6 @@ wxSize wxButton::DoGetBestClientSize() const
         width += m_bitmap.GetWidth() + 2*m_marginBmpX;
     }
 
-    // The default size should not be adjusted, so the code is moved into the
-    // renderer. This is conceptual wrong but currently the only solution.
-    // (Otto Wyss, Patch 664399)
-
-/*
     // for compatibility with other ports, the buttons default size is never
     // less than the standard one, but not when display not PDAs.
     if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
@@ -173,7 +147,7 @@ wxSize wxButton::DoGetBestClientSize() const
                 width = szDef.x;
         }
     }
-*/
+
     return wxSize(width, height);
 }
 
@@ -197,7 +171,7 @@ bool wxButton::DoDrawBackground(wxDC& dc)
     wxSize size = GetSize();
     rect.width = size.x;
     rect.height = size.y;
-
+    
     if ( GetBackgroundBitmap().Ok() )
     {
         // get the bitmap and the flags
@@ -212,7 +186,7 @@ bool wxButton::DoDrawBackground(wxDC& dc)
                                       rect, GetStateFlags());
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -223,7 +197,7 @@ void wxButton::Press()
 {
     if ( !m_isPressed )
     {
-        m_isPressed = true;
+        m_isPressed = TRUE;
 
         Refresh();
     }
@@ -233,7 +207,7 @@ void wxButton::Release()
 {
     if ( m_isPressed )
     {
-        m_isPressed = false;
+        m_isPressed = FALSE;
 
         Refresh();
     }
@@ -275,7 +249,7 @@ bool wxButton::PerformAction(const wxControlAction& action,
     else
         return wxControl::PerformAction(action, numArg, strArg);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -293,13 +267,13 @@ void wxButton::SetImageMargins(wxCoord x, wxCoord y)
 {
     m_marginBmpX = x + 2;
     m_marginBmpY = y + 2;
-
+    
     SetBestSize(wxDefaultSize);
 }
 
 void wxButton::SetDefault()
 {
-    m_isDefault = true;
+    m_isDefault = TRUE;
 }
 
 // ============================================================================
@@ -310,7 +284,7 @@ wxStdButtonInputHandler::wxStdButtonInputHandler(wxInputHandler *handler)
                        : wxStdInputHandler(handler)
 {
     m_winCapture = NULL;
-    m_winHasMouse = false;
+    m_winHasMouse = FALSE;
 }
 
 bool wxStdButtonInputHandler::HandleKey(wxInputConsumer *consumer,
@@ -322,7 +296,7 @@ bool wxStdButtonInputHandler::HandleKey(wxInputConsumer *consumer,
     {
         consumer->PerformAction(wxACTION_BUTTON_TOGGLE);
 
-        return true;
+        return TRUE;
     }
 
     return wxStdInputHandler::HandleKey(consumer, event, pressed);
@@ -345,11 +319,11 @@ bool wxStdButtonInputHandler::HandleMouse(wxInputConsumer *consumer,
         {
             m_winCapture = consumer->GetInputWindow();
             m_winCapture->CaptureMouse();
-            m_winHasMouse = true;
+            m_winHasMouse = TRUE;
 
             consumer->PerformAction(wxACTION_BUTTON_PRESS);
 
-            return true;
+            return TRUE;
         }
         else if ( event.LeftUp() )
         {
@@ -364,7 +338,7 @@ bool wxStdButtonInputHandler::HandleMouse(wxInputConsumer *consumer,
                 // this will generate a click event
                 consumer->PerformAction(wxACTION_BUTTON_TOGGLE);
 
-                return true;
+                return TRUE;
             }
             //else: the mouse was released outside the window, this doesn't
             //      count as a click
@@ -386,46 +360,46 @@ bool wxStdButtonInputHandler::HandleMouseMove(wxInputConsumer *consumer,
         if ( event.Leaving() )
         {
             // remember that the mouse is now outside
-            m_winHasMouse = false;
+            m_winHasMouse = FALSE;
 
             // we do have a pressed button, so release it
-            consumer->GetInputWindow()->SetCurrent(false);
+            consumer->GetInputWindow()->SetCurrent(FALSE);
             consumer->PerformAction(wxACTION_BUTTON_RELEASE);
 
-            return true;
+            return TRUE;
         }
         // and entering it back should make it pressed again if it had been
         // pressed
         else if ( event.Entering() )
         {
             // the mouse is (back) inside the button
-            m_winHasMouse = true;
+            m_winHasMouse = TRUE;
 
             // we did have a pressed button which we released when leaving the
             // window, press it again
-            consumer->GetInputWindow()->SetCurrent(true);
+            consumer->GetInputWindow()->SetCurrent(TRUE);
             consumer->PerformAction(wxACTION_BUTTON_PRESS);
 
-            return true;
+            return TRUE;
         }
     }
 
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool wxStdButtonInputHandler::HandleFocus(wxInputConsumer * WXUNUSED(consumer),
-                                          const wxFocusEvent& WXUNUSED(event))
+bool wxStdButtonInputHandler::HandleFocus(wxInputConsumer *consumer,
+                                          const wxFocusEvent& event)
 {
-    // buttons change appearance when they get/lose focus, so return true to
+    // buttons change appearance when they get/lose focus, so return TRUE to
     // refresh
-    return true;
+    return TRUE;
 }
 
 bool wxStdButtonInputHandler::HandleActivation(wxInputConsumer *consumer,
-                                               bool WXUNUSED(activated))
+                                               bool activated)
 {
     // the default button changes appearance when the app is [de]activated, so
-    // return true to refresh
+    // return TRUE to refresh
     return wxStaticCast(consumer->GetInputWindow(), wxButton)->IsDefault();
 }
 

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     22.10.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "controlwithitems.h"
 #endif
 
@@ -32,14 +32,13 @@
 
 #ifndef WX_PRECOMP
     #include "wx/ctrlsub.h"
-    #include "wx/arrstr.h"
 #endif
 
 // ============================================================================
-// wxItemContainerImmutable implementation
+// implementation
 // ============================================================================
 
-wxItemContainerImmutable::~wxItemContainerImmutable()
+wxItemContainer::~wxItemContainer()
 {
     // this destructor is required for Darwin
 }
@@ -48,7 +47,7 @@ wxItemContainerImmutable::~wxItemContainerImmutable()
 // selection
 // ----------------------------------------------------------------------------
 
-wxString wxItemContainerImmutable::GetStringSelection() const
+wxString wxItemContainer::GetStringSelection() const
 {
     wxString s;
     int sel = GetSelection();
@@ -56,38 +55,6 @@ wxString wxItemContainerImmutable::GetStringSelection() const
         s = GetString(sel);
 
     return s;
-}
-
-bool wxItemContainerImmutable::SetStringSelection(const wxString& s)
-{
-    const int sel = FindString(s);
-    if ( sel == wxNOT_FOUND )
-        return false;
-
-    SetSelection(sel);
-
-    return true;
-}
-
-wxArrayString wxItemContainerImmutable::GetStrings() const
-{
-    wxArrayString result;
-
-    const size_t count = GetCount();
-    result.Alloc(count);
-    for ( size_t n = 0; n < count; n++ )
-        result.Add(GetString(n));
-
-    return result;
-}
-
-// ============================================================================
-// wxItemContainer implementation
-// ============================================================================
-
-wxItemContainer::~wxItemContainer()
-{
-    // this destructor is required for Darwin
 }
 
 // ----------------------------------------------------------------------------
@@ -101,25 +68,6 @@ void wxItemContainer::Append(const wxArrayString& strings)
     {
         Append(strings[n]);
     }
-}
-
-int wxItemContainer::Insert(const wxString& item, int pos, void *clientData)
-{
-    int n = DoInsert(item, pos);
-    if ( n != wxNOT_FOUND )
-        SetClientData(n, clientData);
-
-    return n;
-}
-
-int
-wxItemContainer::Insert(const wxString& item, int pos, wxClientData *clientData)
-{
-    int n = DoInsert(item, pos);
-    if ( n != wxNOT_FOUND )
-        SetClientObject(n, clientData);
-
-    return n;
 }
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 #ifndef _WX_FONTENUM_H_
 #define _WX_FONTENUM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "fontenum.h"
 #endif
 
@@ -24,12 +24,12 @@ class wxFontEnumerator: public wxObject
 {
 DECLARE_CLASS(wxFontEnumerator)
 public:
-    wxFontEnumerator() {}
+    wxFontEnumerator() {};
 
     // Enumerate the fonts.
     bool Enumerate();
 
-    // Stop enumeration if false is returned.
+    // Stop enumeration if FALSE is returned.
     // By default, the enumerator stores the facenames in a list for
     // retrieval via GetFacenames().
     virtual bool OnFont(const wxFont& font);

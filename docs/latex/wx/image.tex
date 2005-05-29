@@ -8,27 +8,12 @@ it can be used for basic image manipulation.
 
 A wxImage cannot (currently) be drawn directly to a \helpref{wxDC}{wxdc}. Instead, 
 a platform-specific \helpref{wxBitmap}{wxbitmap} object must be created from it using
-the \helpref{wxBitmap::wxBitmap(wxImage,int depth)}{wxbitmapctor} constructor. 
+the \helpref{wxBitmap::wxBitmap(wxImage,int depth)}{wxbitmapconstr} constructor. 
 This bitmap can then
 be drawn in a device context, using \helpref{wxDC::DrawBitmap}{wxdcdrawbitmap}.
 
 One colour value of the image may be used as a mask colour which will lead to the automatic
 creation of a \helpref{wxMask}{wxmask} object associated to the bitmap object.
-
-\wxheading{Alpha channel support}
-
-Starting from wxWidgets 2.5.0 wxImage supports alpha channel data, that is in
-addition to a byte for the red, green and blue colour components for each pixel
-it also stores a byte representing the pixel opacity. An alpha value of $0$
-corresponds to a transparent pixel (null opacity) while a value of $255$
-means that the pixel is 100\% opaque.
-
-Unlike RGB data, not all images have an alpha channel and before using 
-\helpref{GetAlpha}{wximagegetalpha} you should check if this image contains
-an alpha channel with \helpref{HasAlpha}{wximagehasalpha}. Note that currently only
-images loaded from PNG files with transparency information will have an alpha
-channel but alpha support will be added to the other formats as well (as well
-as support for saving images with alpha channel which also isn't implemented).
 
 \wxheading{Available image handlers}
 
@@ -40,7 +25,7 @@ handler with \helpref{wxImage::AddHandler}{wximageaddhandler} or
 \twocolwidtha{5cm}%
 \begin{twocollist}
 \twocolitem{\indexit{wxBMPHandler}}{For loading and saving, always installed.}
-\twocolitem{\indexit{wxPNGHandler}}{For loading (including alpha support) and saving.}
+\twocolitem{\indexit{wxPNGHandler}}{For loading and saving.}
 \twocolitem{\indexit{wxJPEGHandler}}{For loading and saving.}
 \twocolitem{\indexit{wxGIFHandler}}{Only for loading, due to legal issues.}
 \twocolitem{\indexit{wxPCXHandler}}{For loading and saving (see below).}
@@ -75,8 +60,7 @@ PNM format, {\bf wxPNMHandler} will always save as raw RGB.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxImage::wxImage}\label{wximagector}
+\membersection{wxImage::wxImage}\label{wximageconstr}
 
 \func{}{wxImage}{\void}
 
@@ -93,15 +77,14 @@ instead.) Constructs an image from a platform-dependent bitmap. This preserves
 mask information so that bitmaps and images can be converted back
 and forth without loss in that respect.
 
-\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}, \param{bool}{ clear=true}}
+\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}}
 
-Creates an image with the given width and height.  If {\it clear} is true, the new image will be initialized to black.
-Otherwise, the image data will be uninitialized.
+Creates an image with the given width and height.
 
-\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}, \param{unsigned char*}{ data}, \param{bool}{ static\_data = \false}}
+\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}, \param{unsigned char*}{ data}, \param{bool}{ static\_data=FALSE}}
 
 Creates an image from given data with the given width and height. If 
-{\it static\_data} is true, then wxImage will not delete the actual
+{\it static\_data} is TRUE, then wxImage will not delete the actual
 image data in its destructor, otherwise it will free it by calling
 {\it free()}.
 
@@ -116,10 +99,6 @@ Loads an image from a file.
 \func{}{wxImage}{\param{wxInputStream\& }{stream}, \param{const wxString\&}{ mimetype}, \param{int}{ index = -1}}
 
 Loads an image from an input stream.
-
-\func{}{wxImage}{\param{const char** }{xpmData}}
-
-Creates an image from XPM data.
 
 \wxheading{Parameters}
 
@@ -155,8 +134,6 @@ Creates an image from XPM data.
 This is only used by GIF, ICO and TIFF handlers. The default value (-1) means 
 "choose the default image" and is interpreted as the first image (index=0) by 
 the GIF and TIFF handler and as the largest and most colourful one by the ICO handler.}
-
-\docparam{xpmData}{A pointer to XPM image data.}
 
 \wxheading{Remarks}
 
@@ -195,23 +172,17 @@ platform-dependent bitmap}
 \perlnote{Constructors supported by wxPerl are:\par
 \begin{itemize}
 \item{Wx::Image->new( bitmap )}
-\item{Wx::Image->new( icon )}
 \item{Wx::Image->new( width, height )}
-\item{Wx::Image->new( width, height, data )}
-\item{Wx::Image->new( file, type, index )}
-\item{Wx::Image->new( file, mimetype, index )}
-\item{Wx::Image->new( stream, type, index )}
-\item{Wx::Image->new( stream, mimetype, index )}
+\item{Wx::Image->new( name, type )}
+\item{Wx::Image->new( name, mimetype )}
 \end{itemize}
 }
 
-
-\membersection{wxImage::\destruct{wxImage}}\label{wximagedtor}
+\membersection{wxImage::\destruct{wxImage}}
 
 \func{}{\destruct{wxImage}}{\void}
 
 Destructor.
-
 
 \membersection{wxImage::AddHandler}\label{wximageaddhandler}
 
@@ -228,18 +199,16 @@ of a given handler class in an application session.}
 
 \func{bool}{CanRead}{\param{const wxString\&}{ filename}}
 
-returns true if the current image handlers can read this file
+returns TRUE if the current image handlers can read this file
 
 \pythonnote{In wxPython this static method is named {\tt wxImage\_AddHandler}.}
-
-\membersection{wxImage::CleanUpHandlers}\label{wximagecleanuphandlers}
+\membersection{wxImage::CleanUpHandlers}
 
 \func{static void}{CleanUpHandlers}{\void}
 
 Deletes all image handlers.
 
 This function is called by wxWidgets on exit.
-
 
 \membersection{wxImage::ComputeHistogram}\label{wximagecomputehistogram}
 
@@ -267,31 +236,12 @@ WX_DECLARE_EXPORTED_HASH_MAP(unsigned long, wxImageHistogramEntry,
 
 Returns number of colours in the histogram.
 
-
-\membersection{wxImage::ConvertAlphaToMask}\label{wximageconvertalphatomask}
-
-\func{bool}{ConvertAlphaToMask}{\param{unsigned char}{ threshold = $128$}}
-
-If the image has alpha channel, this method converts it to mask. All pixels
-with alpha value less than \arg{threshold} are replaced with mask colour
-and the alpha channel is removed. Mask colour is chosen automatically using
-\helpref{FindFirstUnusedColour}{wximagefindfirstunusedcolour}.
-
-If the image image doesn't have alpha channel,
-ConvertAlphaToMask does nothing.
-
-\wxheading{Return value}
-
-\false if FindFirstUnusedColour returns \false, \true otherwise. 
-
-
 \membersection{wxImage::ConvertToBitmap}\label{wximageconverttobitmap}
 
 \constfunc{wxBitmap}{ConvertToBitmap}{\void}
 
-Deprecated, use equivalent \helpref{wxBitmap constructor}{wxbitmapctor}
+Deprecated, use equivalent \helpref{wxBitmap constructor}{wxbitmapconstr}
 (which takes wxImage and depth as its arguments) instead.
-
 
 \membersection{wxImage::ConvertToMono}\label{wxbitmapconverttomono}
 
@@ -301,20 +251,17 @@ Returns monochromatic version of the image. The returned image has white
 colour where the original has {\it (r,g,b)} colour and black colour 
 everywhere else.
 
-
 \membersection{wxImage::Copy}\label{wximagecopy}
 
 \constfunc{wxImage}{Copy}{\void}
 
 Returns an identical copy of the image.
 
-
 \membersection{wxImage::Create}\label{wximagecreate}
 
-\func{bool}{Create}{\param{int}{ width}, \param{int}{ height}, \param{bool}{ clear=true}}
+\func{bool}{Create}{\param{int}{ width}, \param{int}{ height}}
 
-Creates a fresh image.  If {\it clear} is true, the new image will be initialized to black.
-Otherwise, the image data will be uninitialized.
+Creates a fresh image.
 
 \wxheading{Parameters}
 
@@ -324,15 +271,13 @@ Otherwise, the image data will be uninitialized.
 
 \wxheading{Return value}
 
-true if the call succeeded, false otherwise.
-
+TRUE if the call succeeded, FALSE otherwise.
 
 \membersection{wxImage::Destroy}\label{wximagedestroy}
 
-\func{void}{Destroy}{\void}
+\func{bool}{Destroy}{\void}
 
 Destroys the image data.
-
 
 \membersection{wxImage::FindFirstUnusedColour}\label{wximagefindfirstunusedcolour}
 
@@ -351,15 +296,14 @@ order) by 1 until an unused colour is found or the colour space exhausted.
 
 \wxheading{Return value}
 
-Returns false if there is no unused colour left, true on success.
+Returns FALSE if there is no unused colour left, TRUE on success.
 
 \wxheading{Notes}
 
 Note that this method involves computing the histogram, which is
 computationally intensive operation.
 
-
-\membersection{wxImage::FindHandler}\label{wximagefindhandler}
+\membersection{wxImage::FindHandler}
 
 \func{static wxImageHandler*}{FindHandler}{\param{const wxString\& }{name}}
 
@@ -393,57 +337,11 @@ A pointer to the handler if found, NULL otherwise.
 
 \helpref{wxImageHandler}{wximagehandler}
 
-
-\membersection{wxImage::GetImageExtWildcard}\label{wximagegetimageextwildcard}
-
-\func{static wxString}{GetImageExtWildcard}{\void}
-
-Iterates all registered wxImageHandler objects, and returns a string containing file extension masks
-suitable for passing to file open/save dialog boxes.
-
-\wxheading{Return value}
-
-The format of the returned string is "(*.ext1;*.ext2)|*.ext1;*.ext2".
-
-It is usually a good idea to prepend a description before passing the result to the dialog.
-
-Example:
-
-\begin{verbatim}
-    wxFileDialog FileDlg( this, "Choose Image", ::wxGetWorkingDirectory(), "", _("Image Files ") + wxImage::GetImageExtWildcard(), wxOPEN );
-\end{verbatim}
-
-\wxheading{See also}
-
-\helpref{wxImageHandler}{wximagehandler}
-
-
-\membersection{wxImage::GetAlpha}\label{wximagegetalpha}
-
-\constfunc{unsigned char}{GetAlpha}{\param{int}{ x}, \param{int}{ y}}
-
-Returns the alpha value for the given pixel. This function may only be called
-for the images with alpha channel, use \helpref{HasAlpha}{wximagehasalpha} to
-check for this.
-
-The returned value is the {\it opacity} of the image, i.e. the value of $0$
-corresponds to the transparent pixels while the value of $255$ -- to the opaque
-ones.
-
-\constfunc{unsigned char *}{GetAlpha}{\void}
-
-Returns pointer to the array storing the alpha values for this image. This
-pointer is {\tt NULL} for the images without the alpha channel. If the image
-does have it, this pointer may be used to directly manipulate the alpha values
-which are stored as the \helpref{RGB}{wximagegetdata} ones.
-
-
 \membersection{wxImage::GetBlue}\label{wximagegetblue}
 
 \constfunc{unsigned char}{GetBlue}{\param{int}{ x}, \param{int}{ y}}
 
 Returns the blue intensity at the given coordinate.
-
 
 \membersection{wxImage::GetData}\label{wximagegetdata}
 
@@ -451,22 +349,16 @@ Returns the blue intensity at the given coordinate.
 
 Returns the image data as an array. This is most often used when doing
 direct image manipulation. The return value points to an array of
-characters in RGBRGBRGB$\ldots$ format in the top-to-bottom, left-to-right
-order, that is the first RGB triplet corresponds to the pixel first pixel of
-the first row, the second one --- to the second pixel of the first row and so
-on until the end of the first row, with second row following after it and so
-on.
+characters in RGBRGBRGB$\ldots$ format.
 
 You should not delete the returned pointer nor pass it to
 \helpref{wxImage::SetData}{wximagesetdata}.
-
 
 \membersection{wxImage::GetGreen}\label{wximagegetgreen}
 
 \constfunc{unsigned char}{GetGreen}{\param{int}{ x}, \param{int}{ y}}
 
 Returns the green intensity at the given coordinate.
-
 
 \membersection{wxImage::GetImageCount}\label{wximagegetimagecount}
 
@@ -505,8 +397,7 @@ available images.
 Number of available images. For most image handlers, this is 1 (exceptions
 are TIFF and ICO formats).
 
-
-\membersection{wxImage::GetHandlers}\label{wximagegethandlers}
+\membersection{wxImage::GetHandlers}
 
 \func{static wxList\&}{GetHandlers}{\void}
 
@@ -516,13 +407,11 @@ Returns the static list of image format handlers.
 
 \helpref{wxImageHandler}{wximagehandler}
 
-
 \membersection{wxImage::GetHeight}\label{wximagegetheight}
 
 \constfunc{int}{GetHeight}{\void}
 
 Gets the height of the image in pixels.
-
 
 \membersection{wxImage::GetMaskBlue}\label{wximagegetmaskblue}
 
@@ -530,28 +419,17 @@ Gets the height of the image in pixels.
 
 Gets the blue value of the mask colour.
 
-
 \membersection{wxImage::GetMaskGreen}\label{wximagegetmaskgreen}
 
 \constfunc{unsigned char}{GetMaskGreen}{\void}
 
 Gets the green value of the mask colour.
 
-
 \membersection{wxImage::GetMaskRed}\label{wximagegetmaskred}
 
 \constfunc{unsigned char}{GetMaskRed}{\void}
 
 Gets the red value of the mask colour.
-
-
-\membersection{wxImage::GetOrFindMaskColour}\label{wximagegetgetorsetmaskcolour}
-
-\constfunc{bool}{GetOrFindMaskColour}{\param{unsigned char}{ *r}, \param{unsigned char}{ *g}, \param{unsigned char}{ *b}}
-
-Get the current mask colour or find a suitable unused colour that could be 
-used as a mask colour. Returns {\tt true} if the image currently has a mask.
-
 
 \membersection{wxImage::GetPalette}\label{wximagegetpalette}
 
@@ -562,13 +440,11 @@ used when converting to wxBitmap under Windows.
 
 Eventually wxImage handlers will set the palette if one exists in the image file.
 
-
 \membersection{wxImage::GetRed}\label{wximagegetred}
 
 \constfunc{unsigned char}{GetRed}{\param{int}{ x}, \param{int}{ y}}
 
 Returns the red intensity at the given coordinate.
-
 
 \membersection{wxImage::GetSubImage}\label{wximagegetsubimage}
 
@@ -576,7 +452,6 @@ Returns the red intensity at the given coordinate.
 
 Returns a sub image of the current one as long as the rect belongs entirely to 
 the image.
-
 
 \membersection{wxImage::GetWidth}\label{wximagegetwidth}
 
@@ -588,24 +463,11 @@ Gets the width of the image in pixels.
 
 \helpref{wxImage::GetHeight}{wximagegetheight}
 
-
-\membersection{wxImage::HasAlpha}\label{wximagehasalpha}
-
-\constfunc{bool}{HasAlpha}{\void}
-
-Returns true if this image has alpha channel, false otherwise.
-
-\wxheading{See also}
-
-\helpref{GetAlpha}{wximagegetalpha}, \helpref{SetAlpha}{wximagesetalpha}
-
-
 \membersection{wxImage::HasMask}\label{wximagehasmask}
 
 \constfunc{bool}{HasMask}{\void}
 
-Returns true if there is a mask active, false otherwise.
-
+Returns TRUE if there is a mask active, FALSE otherwise.
 
 \membersection{wxImage::GetOption}\label{wximagegetoption}
 
@@ -622,44 +484,23 @@ used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
 \helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
 \helpref{wxImage::HasOption}{wximagehasoption}
 
-
 \membersection{wxImage::GetOptionInt}\label{wximagegetoptionint}
 
 \constfunc{int}{GetOptionInt}{\param{const wxString\&}{ name}}
 
 Gets a user-defined option as an integer. The function is case-insensitive to {\it name}.
 
-If the given option is not present, the function returns $0$. Use 
-\helpref{wxImage::HasOption}{wximagehasoption} is $0$ is a possibly valid value
-for the option.
-
-Options for wxPNGHandler
-\twocolwidtha{5cm}%
-\begin{twocollist}
-\twocolitem{wxIMAGE\_OPTION\_PNG\_FORMAT}{Format for saving a PNG file.}
-\twocolitem{wxIMAGE\_OPTION\_PNG\_BITDEPTH}{Bit depth for every channel (R/G/B/A).}
-\end{twocollist}
-
-Supported values for wxIMAGE\_OPTION\_PNG\_FORMAT:
-\twocolwidtha{5cm}%
-\begin{twocollist}
-\twocolitem{wxPNG\_TYPE\_COLOUR}{Stores RGB image.}
-\twocolitem{wxPNG\_TYPE\_GREY}{Stores grey image, converts from RGB.}
-\twocolitem{wxPNG\_TYPE\_GREY\_RED}{Stores grey image, uses red value as grey.}
-\end{twocollist}
-
-
 \wxheading{See also}
 
 \helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOption}{wximagegetoption}
-
+\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
+\helpref{wxImage::HasOption}{wximagehasoption}
 
 \membersection{wxImage::HasOption}\label{wximagehasoption}
 
 \constfunc{bool}{HasOption}{\param{const wxString\&}{ name}}
 
-Returns true if the given option is present. The function is case-insensitive to {\it name}.
+Returns TRUE if the given option is present. The function is case-insensitive to {\it name}.
 
 \wxheading{See also}
 
@@ -667,18 +508,7 @@ Returns true if the given option is present. The function is case-insensitive to
 \helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
 \helpref{wxImage::GetOptionInt}{wximagegetoptionint}
 
-
-\membersection{wxImage::InitAlpha}\label{wximageinitalpha}
-
-\func{void}{InitAlpha}{\void}
-
-Initializes the image alpha channel data. It is an error to call it
-if the image already has alpha data. If it doesn't, alpha data will be
-by default initialized to all pixels being fully opaque. But if the image has a
-a mask colour, all mask pixels will be completely transparent.
-
-
-\membersection{wxImage::InitStandardHandlers}\label{wximageinitstandardhandlers}
+\membersection{wxImage::InitStandardHandlers}
 
 \func{static void}{InitStandardHandlers}{\void}
 
@@ -693,8 +523,7 @@ the user.
 \helpref{wxImageHandler}{wximagehandler}, 
 \helpref{wxInitAllImageHandlers}{wxinitallimagehandlers}
 
-
-\membersection{wxImage::InsertHandler}\label{wximageinserthandler}
+\membersection{wxImage::InsertHandler}
 
 \func{static void}{InsertHandler}{\param{wxImageHandler*}{ handler}}
 
@@ -706,16 +535,6 @@ of a given handler class in an application session.}
 \wxheading{See also}
 
 \helpref{wxImageHandler}{wximagehandler}
-
-
-\membersection{wxImage::IsTransparent}\label{wximageistransparent}
-
-\constfunc{bool}{IsTransparent}{\param{int }{x}, \param{int }{y}, \param{unsigned char}{ threshold = $128$}}
-
-Returns \true if the given pixel is transparent, i.e. either has the mask
-colour if this image has a mask or if this image has alpha channel and alpha
-value of this pixel is strictly less than \arg{threshold}.
-
 
 \membersection{wxImage::LoadFile}\label{wximageloadfile}
 
@@ -777,8 +596,8 @@ hotspot for loaded cursor file:
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise. If the optional index parameter is out of range,
-false is returned and a call to wxLogError() takes place.
+TRUE if the operation succeeded, FALSE otherwise. If the optional index parameter is out of range,
+FALSE is returned and a call to wxLogError() takes place.
 
 \wxheading{See also}
 
@@ -802,15 +621,13 @@ mimetype from a file}
 }
 
 
-
 \membersection{wxImage::Ok}\label{wximageok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if image data is present.
+Returns TRUE if image data is present.
 
-
-\membersection{wxImage::RemoveHandler}\label{wximageremovehandler}
+\membersection{wxImage::RemoveHandler}
 
 \func{static bool}{RemoveHandler}{\param{const wxString\& }{name}}
 
@@ -821,81 +638,11 @@ is not deleted.
 
 \wxheading{Return value}
 
-true if the handler was found and removed, false otherwise.
+TRUE if the handler was found and removed, FALSE otherwise.
 
 \wxheading{See also}
 
 \helpref{wxImageHandler}{wximagehandler}
-
-
-\membersection{wxImage::Mirror}\label{wximagemirror}
-
-\constfunc{wxImage}{Mirror}{\param{bool}{ horizontally = true}}
-
-Returns a mirrored copy of the image. The parameter {\it horizontally}
-indicates the orientation.
-
-
-\membersection{wxImage::Replace}\label{wximagereplace}
-
-\func{void}{Replace}{\param{unsigned char}{ r1}, \param{unsigned char}{ g1}, \param{unsigned char}{ b1},
-\param{unsigned char}{ r2}, \param{unsigned char}{ g2}, \param{unsigned char}{ b2}}
-
-Replaces the colour specified by {\it r1,g1,b1} by the colour {\it r2,g2,b2}.
-
-
-\membersection{wxImage::Rescale}\label{wximagerescale}
-
-\func{wxImage \&}{Rescale}{\param{int}{ width}, \param{int}{ height}}
-
-Changes the size of the image in-place by scaling it: after a call to this function, 
-the image will have the given width and height.
-
-Returns the (modified) image itself.
-
-\wxheading{See also}
-
-\helpref{Scale}{wximagescale}
-
-
-\membersection{wxImage::Resize}\label{wximageresize}
-
-\func{wxImage \&}{Resize}{\param{const wxSize\&}{ size}, \param{const wxPoint&}{ pos}, \param{int}{ red = -1}, \param{int}{ green = -1}, \param{int}{ blue = -1}}
-
-Changes the size of the image in-place without scaling it by adding either a border 
-with the given colour or cropping as necessary. The image is pasted into a new 
-image with the given {\it size} and background colour at the position {\it pos} 
-relative to the upper left of the new image. If {\it red = green = blue = -1} 
-then use either the  current mask colour if set or find, use, and set a 
-suitable mask colour for any newly exposed areas.
-
-Returns the (modified) image itself.
-
-\wxheading{See also}
-
-\helpref{Size}{wximagesize}
-
-
-\membersection{wxImage::Rotate}\label{wximagerotate}
-
-\func{wxImage}{Rotate}{\param{double}{ angle}, \param{const wxPoint\& }{rotationCentre},
- \param{bool}{ interpolating = true}, \param{wxPoint*}{ offsetAfterRotation = NULL}}
-
-Rotates the image about the given point, by {\it angle} radians. Passing true
-to {\it interpolating} results in better image quality, but is slower. If the
-image has a mask, then the mask colour is used for the uncovered pixels in the
-rotated image background. Else, black (rgb 0, 0, 0) will be used.
-
-Returns the rotated image, leaving this image intact.
-
-
-\membersection{wxImage::Rotate90}\label{wximagerotate90}
-
-\constfunc{wxImage}{Rotate90}{\param{bool}{ clockwise = true}}
-
-Returns a copy of the image rotated 90 degrees in the direction
-indicated by {\it clockwise}.
-
 
 \membersection{wxImage::SaveFile}\label{wximagesavefile}
 
@@ -942,7 +689,7 @@ Saves an image in the given stream.
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise.
+TRUE if the operation succeeded, FALSE otherwise.
 
 \wxheading{Remarks}
 
@@ -978,6 +725,51 @@ mimetype to the named file}
 \end{itemize}
 }
 
+\membersection{wxImage::Mirror}\label{wximagemirror}
+
+\constfunc{wxImage}{Mirror}{\param{bool}{ horizontally = TRUE}}
+
+Returns a mirrored copy of the image. The parameter {\it horizontally}
+indicates the orientation.
+
+\membersection{wxImage::Replace}\label{wximagereplace}
+
+\func{void}{Replace}{\param{unsigned char}{ r1}, \param{unsigned char}{ g1}, \param{unsigned char}{ b1},
+\param{unsigned char}{ r2}, \param{unsigned char}{ g2}, \param{unsigned char}{ b2}}
+
+Replaces the colour specified by {\it r1,g1,b1} by the colour {\it r2,g2,b2}.
+
+\membersection{wxImage::Rescale}\label{wximagerescale}
+
+\func{wxImage \&}{Rescale}{\param{int}{ width}, \param{int}{ height}}
+
+Changes the size of the image in-place: after a call to this function, the
+image will have the given width and height.
+
+Returns the (modified) image itself.
+
+\wxheading{See also}
+
+\helpref{Scale}{wximagescale}
+
+\membersection{wxImage::Rotate}\label{wximagerotate}
+
+\func{wxImage}{Rotate}{\param{double}{ angle}, \param{const wxPoint\& }{rotationCentre},
+ \param{bool}{ interpolating = TRUE}, \param{wxPoint*}{ offsetAfterRotation = NULL}}
+
+Rotates the image about the given point, by {\it angle} radians. Passing TRUE
+to {\it interpolating} results in better image quality, but is slower. If the
+image has a mask, then the mask colour is used for the uncovered pixels in the
+rotated image background. Else, black (rgb 0, 0, 0) will be used.
+
+Returns the rotated image, leaving this image intact.
+
+\membersection{wxImage::Rotate90}\label{wximagerotate90}
+
+\constfunc{wxImage}{Rotate90}{\param{bool}{ clockwise = TRUE}}
+
+Returns a copy of the image rotated 90 degrees in the direction
+indicated by {\it clockwise}.
 
 \membersection{wxImage::Scale}\label{wximagescale}
 
@@ -1013,43 +805,6 @@ Example:
 
 \helpref{Rescale}{wximagerescale}
 
-
-\membersection{wxImage::Size}\label{wximagesize}
-
-\constfunc{wxImage}{Size}{\param{const wxSize\&}{ size}, \param{const wxPoint&}{ pos}, \param{int}{ red = -1}, \param{int}{ green = -1}, \param{int}{ blue = -1}}
-
-Returns a resized version of this image without scaling it by adding either a border 
-with the given colour or cropping as necessary. The image is pasted into a new 
-image with the given {\it size} and background colour at the position {\it pos} 
-relative to the upper left of the new image. If {\it red = green = blue = -1} 
-then use either the current mask colour if set or find, use, and set a 
-suitable mask colour for any newly exposed areas.
-
-\wxheading{See also}
-
-\helpref{Resize}{wximageresize}
-
-
-\membersection{wxImage::SetAlpha}\label{wximagesetalpha}
-
-\func{void}{SetAlpha}{\param{unsigned char *}{alpha = {\tt NULL}},\param{bool}{ static\_data = \false}}
-
-This function is similar to \helpref{SetData}{wximagesetdata} and has similar
-restrictions. The pointer passed to it may however be {\tt NULL} in which case
-the function will allocate the alpha array internally -- this is useful to add
-alpha channel data to an image which doesn't have any. If the pointer is not 
-{\tt NULL}, it must have one byte for each image pixel and be allocated with 
-{\tt malloc()}. wxImage takes ownership of the pointer and will free it unless
-\arg{static\_data} parameter is set.to \true -- in this case the caller should
-do it.
-
-\func{void}{SetAlpha}{\param{int }{x}, \param{int }{y}, \param{unsigned char }{alpha}}
-
-Sets the alpha value for the given pixel. This function should only be called
-if the image has alpha channel data, use \helpref{HasAlpha}{wximagehasalpha} to
-check for this.
-
-
 \membersection{wxImage::SetData}\label{wximagesetdata}
 
 \func{void}{SetData}{\param{unsigned char*}{data}}
@@ -1058,28 +813,24 @@ Sets the image data without performing checks. The data given must have
 the size (width*height*3) or results will be unexpected. Don't use this
 method if you aren't sure you know what you are doing.
 
-The data must have been allocated with {\tt malloc()}, {\large {\bf NOT}} with
-{\tt operator new}.
+The data must have been allocated with malloc(), NOT with operator new.
 
 After this call the pointer to the data is owned by the wxImage object,
 that will be responsible for deleting it.
 Do not pass to this function a pointer obtained through
 \helpref{wxImage::GetData}{wximagegetdata}.
 
-
 \membersection{wxImage::SetMask}\label{wximagesetmask}
 
-\func{void}{SetMask}{\param{bool}{ hasMask = true}}
+\func{void}{SetMask}{\param{bool}{ hasMask = TRUE}}
 
 Specifies whether there is a mask or not. The area of the mask is determined by the current mask colour.
-
 
 \membersection{wxImage::SetMaskColour}\label{wximagesetmaskcolour}
 
 \func{void}{SetMaskColour}{\param{unsigned char }{red}, \param{unsigned char }{green}, \param{unsigned char }{blue}}
 
 Sets the mask colour for this image (and tells the image to use the mask).
-
 
 \membersection{wxImage::SetMaskFromImage}\label{wximagesetmaskfromimage}
 
@@ -1099,15 +850,14 @@ in {\it mask} has given RGB value.
 
 \wxheading{Return value}
 
-Returns false if {\it mask} does not have same dimensions as the image or if
-there is no unused colour left. Returns true if the mask was successfully 
+Returns FALSE if {\it mask} does not have same dimensions as the image or if
+there is no unused colour left. Returns TRUE if the mask was successfully 
 applied.
 
 \wxheading{Notes}
 
 Note that this method involves computing the histogram, which is
 computationally intensive operation.
-
 
 \membersection{wxImage::SetOption}\label{wximagesetoption}
 
@@ -1126,14 +876,12 @@ used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
 \helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
 \helpref{wxImage::HasOption}{wximagehasoption}
 
-
 \membersection{wxImage::SetPalette}\label{wximagesetpalette}
 
 \func{void}{SetPalette}{\param{const wxPalette\&}{ palette}}
 
 Associates a palette with the image. The palette may be used when converting
 wxImage to wxBitmap (MSW only at present) or in file save operations (none as yet).
-
 
 \membersection{wxImage::SetRGB}\label{wximagesetrgb}
 
@@ -1145,17 +893,7 @@ data, but in some cases this might be too slow so that the data will have to
 be set directly. In that case you will have to get access to the image data 
 using the \helpref{GetData}{wximagegetdata} method.
 
-
-\membersection{wxImage::SetRGB}\label{wximagesetrgbrect}
-
-\func{void}{SetRGB}{\param{wxRect \& }{rect}, \param{unsigned char }{red}, \param{unsigned char }{green}, \param{unsigned char }{blue}}
-
-Sets the colour of the pixels within the given rectangle. This routine performs
-bounds-checks for the coordinate so it can be considered a safe way to manipulate the
-data.
-
-
-\membersection{wxImage::operator $=$}\label{wximageassign}
+\membersection{wxImage::operator $=$}
 
 \func{wxImage\& }{operator $=$}{\param{const wxImage\& }{image}}
 
@@ -1171,8 +909,7 @@ counter. It is a fast operation.
 
 Returns 'this' object.
 
-
-\membersection{wxImage::operator $==$}\label{wximageequal}
+\membersection{wxImage::operator $==$}
 
 \constfunc{bool}{operator $==$}{\param{const wxImage\& }{image}}
 
@@ -1185,10 +922,9 @@ equal (a fast test).
 
 \wxheading{Return value}
 
-Returns true if the images were effectively equal, false otherwise.
+Returns TRUE if the images were effectively equal, FALSE otherwise.
 
-
-\membersection{wxImage::operator $!=$}\label{wximagenotequal}
+\membersection{wxImage::operator $!=$}
 
 \constfunc{bool}{operator $!=$}{\param{const wxImage\& }{image}}
 
@@ -1201,7 +937,7 @@ unequal (a fast test).
 
 \wxheading{Return value}
 
-Returns true if the images were unequal, false otherwise.
+Returns TRUE if the images were unequal, FALSE otherwise.
 
 \section{\class{wxImageHandler}}\label{wximagehandler}
 
@@ -1234,35 +970,30 @@ created by IJG.)
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxImageHandler::wxImageHandler}\label{wximagehandlerctor}
+\membersection{wxImageHandler::wxImageHandler}\label{wximagehandlerconstr}
 
 \func{}{wxImageHandler}{\void}
 
 Default constructor. In your own default constructor, initialise the members
 m\_name, m\_extension and m\_type.
 
-
-\membersection{wxImageHandler::\destruct{wxImageHandler}}\label{wximagehandlerdtor}
+\membersection{wxImageHandler::\destruct{wxImageHandler}}
 
 \func{}{\destruct{wxImageHandler}}{\void}
 
 Destroys the wxImageHandler object.
 
-
-\membersection{wxImageHandler::GetName}\label{wximagehandlergetname}
+\membersection{wxImageHandler::GetName}
 
 \constfunc{wxString}{GetName}{\void}
 
 Gets the name of this handler.
 
-
-\membersection{wxImageHandler::GetExtension}\label{wximagehandlergetextension}
+\membersection{wxImageHandler::GetExtension}
 
 \constfunc{wxString}{GetExtension}{\void}
 
 Gets the file extension associated with this handler.
-
 
 \membersection{wxImageHandler::GetImageCount}\label{wximagehandlergetimagecount}
 
@@ -1279,24 +1010,21 @@ available images.
 Number of available images. For most image handlers, this is 1 (exceptions
 are TIFF and ICO formats).
 
-
-\membersection{wxImageHandler::GetType}\label{wximagehandlergettype}
+\membersection{wxImageHandler::GetType}
 
 \constfunc{long}{GetType}{\void}
 
 Gets the image type associated with this handler.
 
-
-\membersection{wxImageHandler::GetMimeType}\label{wximagehandlergetmimetype}
+\membersection{wxImageHandler::GetMimeType}
 
 \constfunc{wxString}{GetMimeType}{\void}
 
 Gets the MIME type associated with this handler.
 
-
 \membersection{wxImageHandler::LoadFile}\label{wximagehandlerloadfile}
 
-\func{bool}{LoadFile}{\param{wxImage* }{image}, \param{wxInputStream\&}{ stream}, \param{bool}{ verbose=true}, \param{int}{ index=0}}
+\func{bool}{LoadFile}{\param{wxImage* }{image}, \param{wxInputStream\&}{ stream}, \param{bool}{ verbose=TRUE}, \param{int}{ index=0}}
 
 Loads a image from a stream, putting the resulting data into {\it image}. If the image file contains
 more than one image and the image handler is capable of retrieving these individually, {\it index}
@@ -1308,20 +1036,19 @@ indicates which image to read from the stream.
 
 \docparam{stream}{Opened input stream for reading image data.}
 
-\docparam{verbose}{If set to true, errors reported by the image handler will produce wxLogMessages.}
+\docparam{verbose}{If set to TRUE, errors reported by the image handler will produce wxLogMessages.}
 
 \docparam{index}{The index of the image in the file (starting from zero).}
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise.
+TRUE if the operation succeeded, FALSE otherwise.
 
 \wxheading{See also}
 
 \helpref{wxImage::LoadFile}{wximageloadfile}, 
 \helpref{wxImage::SaveFile}{wximagesavefile}, 
 \helpref{wxImageHandler::SaveFile}{wximagehandlersavefile}
-
 
 \membersection{wxImageHandler::SaveFile}\label{wximagehandlersavefile}
 
@@ -1337,7 +1064,7 @@ Saves a image in the output stream.
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise.
+TRUE if the operation succeeded, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -1345,8 +1072,7 @@ true if the operation succeeded, false otherwise.
 \helpref{wxImage::SaveFile}{wximagesavefile}, 
 \helpref{wxImageHandler::LoadFile}{wximagehandlerloadfile}
 
-
-\membersection{wxImageHandler::SetName}\label{wximagehandlersetname}
+\membersection{wxImageHandler::SetName}
 
 \func{void}{SetName}{\param{const wxString\& }{name}}
 
@@ -1356,8 +1082,7 @@ Sets the handler name.
 
 \docparam{name}{Handler name.}
 
-
-\membersection{wxImageHandler::SetExtension}\label{wximagehandlersetextension}
+\membersection{wxImageHandler::SetExtension}
 
 \func{void}{SetExtension}{\param{const wxString\& }{extension}}
 
@@ -1366,7 +1091,6 @@ Sets the handler extension.
 \wxheading{Parameters}
 
 \docparam{extension}{Handler extension.}
-
 
 \membersection{wxImageHandler::SetMimeType}\label{wximagehandlersetmimetype}
 
@@ -1378,8 +1102,7 @@ Sets the handler MIME type.
 
 \docparam{mimename}{Handler MIME type.}
 
-
-\membersection{wxImageHandler::SetType}\label{wximagehandlersettype}
+\membersection{wxImageHandler::SetType}
 
 \func{void}{SetType}{\param{long }{type}}
 

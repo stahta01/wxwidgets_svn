@@ -77,12 +77,12 @@ can be any combination of the following values:
 
 \twocolwidtha{5cm}
 \begin{twocollist}\itemsep=0pt
-\twocolitem{wxLIST\_MASK\_STATE}{{\bf GetState} is valid.}
-\twocolitem{wxLIST\_MASK\_TEXT}{{\bf GetText} is valid.}
-\twocolitem{wxLIST\_MASK\_IMAGE}{{\bf GetImage} is valid.}
-\twocolitem{wxLIST\_MASK\_DATA}{{\bf GetData} is valid.}
-\twocolitem{wxLIST\_MASK\_WIDTH}{{\bf GetWidth} is valid.}
-\twocolitem{wxLIST\_MASK\_FORMAT}{{\bf GetFormat} is valid.}
+\twocolitem{wxLIST\_MASK\_STATE}{The {\bf GetState} is valid.}
+\twocolitem{wxLIST\_MASK\_TEXT}{The {\bf GetText} is valid.}
+\twocolitem{wxLIST\_MASK\_IMAGE}{The {\bf GetImage} is valid.}
+\twocolitem{wxLIST\_MASK\_DATA}{The {\bf GetData} is valid.}
+\twocolitem{wxLIST\_MASK\_WIDTH}{The {\bf GetWidth} is valid.}
+\twocolitem{wxLIST\_MASK\_FORMAT}{The {\bf GetAlign} is valid.}
 \end{twocollist}
 
 \membersection{wxListItem::GetState}\label{wxlistitemgetstate}
@@ -124,7 +124,7 @@ Meaningful only for column headers in report mode. Returns the column width.
 \func{void}{SetAlign}{\param{wxListColumnFormat }{align}}
 
 Sets the alignment for the item. See also
-\helpref{wxListItem::GetAlign}{wxlistitemgetalign}
+\helpref{wxListItem::SetAlign}{wxlistitemsetalign}
 
 \membersection{wxListItem::SetBackgroundColour}\label{wxlistitemsetbackgroundcolour}
 
@@ -162,7 +162,7 @@ Sets the zero-based item position.
 
 \func{void}{SetImage}{\param{int }{image}}
 
-Sets the zero-based index of the image associated with the item
+Returns the zero-based index of the image associated with the item
 into the image list.
 
 \membersection{wxListItem::SetMask}\label{wxlistitemsetmask}
@@ -178,7 +178,7 @@ Sets the mask of valid fields. See \helpref{wxListItem::GetMask}{wxlistitemgetma
 Sets the item state flags (note that the valid state flags are influenced
 by the value of the state mask, see
 \helpref{wxListItem::SetStateMask}{wxlistitemsetstatemask}).
-See \helpref{wxListItem::GetState}{wxlistitemgetstate} for valid flag
+See \helpref{wxListItem::GetState}{wxlistitemsetstate} for valid flag
 values.
 
 \membersection{wxListItem::SetStateMask}\label{wxlistitemsetstatemask}

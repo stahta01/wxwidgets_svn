@@ -9,12 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dc.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/dc.h"
 #include "wx/dcmemory.h"
@@ -23,19 +20,30 @@
     IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
 
 //-----------------------------------------------------------------------------
+// constants
+//-----------------------------------------------------------------------------
+
+#define mm2inches        0.0393700787402
+#define inches2mm        25.4
+#define mm2twips         56.6929133859
+#define twips2mm         0.0176388888889
+#define mm2pt            2.83464566929
+#define pt2mm            0.352777777778
+
+//-----------------------------------------------------------------------------
 // wxDC
 //-----------------------------------------------------------------------------
 
 wxDC::wxDC()
 {
-    m_ok = false;
+    m_ok = FALSE;
 
     m_mm_to_pix_x = 1.0;
     m_mm_to_pix_y = 1.0;
 
     m_backgroundMode = wxTRANSPARENT;
 
-    m_isInteractive = false;
+    m_isInteractive = FALSE;
 }
 
 void wxDC::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y)
@@ -43,7 +51,7 @@ void wxDC::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y)
     wxCHECK_RET( Ok(), "invalid dc" );
     wxCHECK_RET( icon.Ok(), "invalid icon" );
 
-    DoDrawBitmap(icon, x, y, true);
+    DoDrawBitmap(icon, x, y, TRUE);
 }
 
 void wxDC::DoDrawBitmap( const wxBitmap& bitmap, wxCoord x, wxCoord y, bool useMask )
@@ -72,11 +80,16 @@ void wxDC::DoDrawBitmap( const wxBitmap& bitmap, wxCoord x, wxCoord y, bool useM
 
 void wxDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
 {
-    m_clipping = true;
+    m_clipping = TRUE;
     m_clipX1 = x;
     m_clipY1 = y;
     m_clipX2 = x + width;
     m_clipY2 = y + height;
+}
+
+void wxDC::DestroyClippingRegion()
+{
+    m_clipping = FALSE;
 }
 
 void wxDC::DoGetSize( int* width, int* height ) const
@@ -128,8 +141,8 @@ void wxDC::SetMapMode( int mode )
     }
     if (mode != wxMM_TEXT)
     {
-        m_needComputeScaleX = true;
-        m_needComputeScaleY = true;
+        m_needComputeScaleX = TRUE;
+        m_needComputeScaleY = TRUE;
     }
 }
 

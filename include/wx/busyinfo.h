@@ -4,17 +4,21 @@
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
 // RCS-ID:      $Id$
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __INFOWIN_H__
 #define __INFOWIN_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "busyinfo.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #include "wx/frame.h"
 
@@ -24,9 +28,6 @@ class WXDLLEXPORT wxInfoFrame : public wxFrame
 {
 public:
     wxInfoFrame(wxWindow *parent, const wxString& message);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxInfoFrame)
 };
 
 
@@ -45,8 +46,6 @@ public:
 
 private:
     wxInfoFrame *m_InfoFrame;
-
-    DECLARE_NO_COPY_CLASS(wxBusyInfo)
 };
 
 

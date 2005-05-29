@@ -7,10 +7,10 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
 //              (c) 2001 Ron Lee <ron@debian.org>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "object.h"
 #endif
 
@@ -22,8 +22,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/hash.h"
-    #include "wx/object.h"
+#include "wx/hash.h"
 #endif
 
 #include <string.h>
@@ -33,6 +32,9 @@
 #endif
 
 #if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
+    // for wxObject::Dump
+    #include "wx/ioswrap.h"
+
     #if defined(__VISAGECPP__)
         #define DEBUG_PRINTF(NAME) { static int raz=0; \
             printf( #NAME " %i\n",raz); fflush(stdout); raz++; }
@@ -48,30 +50,9 @@
     #pragma optimize("", off)
 #endif
 
-#if wxUSE_EXTENDED_RTTI
-const wxClassInfo* wxObject::ms_classParents[] = { NULL } ;
- wxObject* wxVariantToObjectConverterwxObject ( wxxVariant &data )
-{ return data.wxTEMPLATED_MEMBER_CALL(Get , wxObject*) ; }
- wxObject* wxVariantOfPtrToObjectConverterwxObject ( wxxVariant &data )
-{ return &data.wxTEMPLATED_MEMBER_CALL(Get , wxObject) ; }
- wxxVariant wxObjectToVariantConverterwxObject ( wxObject *data )
- { return wxxVariant( dynamic_cast<wxObject*> (data)  ) ; }
- wxClassInfo wxObject::ms_classInfo(ms_classParents , wxEmptyString , wxT("wxObject"),
-            (int) sizeof(wxObject),                              \
-            (wxObjectConstructorFn) 0   ,
-            (wxPropertyInfo*) NULL,(wxHandlerInfo*) NULL,0 , 0 ,
-            0 , wxVariantOfPtrToObjectConverterwxObject , wxVariantToObjectConverterwxObject , wxObjectToVariantConverterwxObject);
- template<> void wxStringReadValue(const wxString & , wxObject * & ){assert(0) ;}
- template<> void wxStringWriteValue(wxString & , wxObject* const & ){assert(0) ;}
- template<> void wxStringReadValue(const wxString & , wxObject & ){assert(0) ;}
- template<> void wxStringWriteValue(wxString & , wxObject const & ){assert(0) ;}
- wxClassTypeInfo s_typeInfo(wxT_OBJECT_PTR , &wxObject::ms_classInfo , NULL , NULL , typeid(wxObject*).name() ) ;
- wxClassTypeInfo s_typeInfowxObject(wxT_OBJECT , &wxObject::ms_classInfo , NULL , NULL , typeid(wxObject).name() ) ;
-#else
-wxClassInfo wxObject::ms_classInfo( wxT("wxObject"), 0, 0,
+wxClassInfo wxObject::sm_classwxObject( wxT("wxObject"), 0, 0,
                                         (int) sizeof(wxObject),
                                         (wxObjectConstructorFn) 0 );
-#endif
 
 // restore optimizations
 #if defined __VISUALC__ && __VISUALC__ >= 1300
@@ -81,25 +62,10 @@ wxClassInfo wxObject::ms_classInfo( wxT("wxObject"), 0, 0,
 wxClassInfo* wxClassInfo::sm_first = NULL;
 wxHashTable* wxClassInfo::sm_classTable = NULL;
 
-// when using XTI, this method is already implemented inline inside
-// DECLARE_DYNAMIC_CLASS but otherwise we intentionally make this function
-// non-inline because this allows us to have a non-inline virtual function in
-// all wx classes and this solves linking problems for HP-UX native toolchain
-// and possibly others (we could make dtor non-inline as well but it's more
-// useful to keep it inline than this function)
-#if !wxUSE_EXTENDED_RTTI
-
-wxClassInfo *wxObject::GetClassInfo() const
-{
-    return &wxObject::ms_classInfo;
-}
-
-#endif // wxUSE_EXTENDED_RTTI
-
 // These are here so we can avoid 'always true/false' warnings
-// by referring to these instead of true/false
-const bool wxTrue = true;
-const bool wxFalse = false;
+// by referring to these instead of TRUE/FALSE
+const bool wxTrue = TRUE;
+const bool wxFalse = FALSE;
 
 // Is this object a kind of (a subclass of) 'info'?
 // E.g. is wxWindow a kind of wxObject?
@@ -108,18 +74,29 @@ const bool wxFalse = false;
 bool wxObject::IsKindOf(wxClassInfo *info) const
 {
     wxClassInfo *thisInfo = GetClassInfo();
-    return (thisInfo) ? thisInfo->IsKindOf(info) : false ;
+    return (thisInfo) ? thisInfo->IsKindOf(info) : FALSE ;
 }
 
+#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
+void wxObject::Dump(wxSTD ostream& str)
+{
+    if (GetClassInfo() && GetClassInfo()->GetClassName())
+        str << GetClassInfo()->GetClassName();
+    else
+        str << _T("unknown object class");
+}
+#endif
+
+
 #if defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING && defined( new )
-    #undef new
+	#undef new
 #endif
 
 
 #ifdef _WX_WANT_NEW_SIZET_WXCHAR_INT
 void *wxObject::operator new ( size_t size, const wxChar *fileName, int lineNum )
 {
-    return wxDebugAlloc(size, (wxChar*) fileName, lineNum, true);
+    return wxDebugAlloc(size, (wxChar*) fileName, lineNum, TRUE);
 }
 #endif
 
@@ -147,21 +124,21 @@ void wxObject::operator delete ( void *buf, const wxChar *WXUNUSED(fileName), in
 #ifdef _WX_WANT_ARRAY_NEW_SIZET_WXCHAR_INT
 void *wxObject::operator new[] ( size_t size, const wxChar* fileName, int lineNum )
 {
-    return wxDebugAlloc(size, (wxChar*) fileName, lineNum, true, true);
+    return wxDebugAlloc(size, (wxChar*) fileName, lineNum, TRUE, TRUE);
 }
 #endif
 
 #ifdef _WX_WANT_ARRAY_DELETE_VOID
 void wxObject::operator delete[] ( void *buf )
 {
-    wxDebugFree(buf, true);
+    wxDebugFree(buf, TRUE);
 }
 #endif
 
 #ifdef _WX_WANT_ARRAY_DELETE_VOID_WXCHAR_INT
 void wxObject::operator delete[] (void * buf, const wxChar*  WXUNUSED(fileName), int WXUNUSED(lineNum) )
 {
-    wxDebugFree(buf, true);
+    wxDebugFree(buf, TRUE);
 }
 #endif
 
@@ -193,7 +170,6 @@ wxClassInfo::~wxClassInfo()
             info = info->m_next;
         }
     }
-    Unregister();
 }
 
 wxClassInfo *wxClassInfo::FindClass(const wxChar *className)
@@ -214,45 +190,70 @@ wxClassInfo *wxClassInfo::FindClass(const wxChar *className)
     }
 }
 
-void wxClassInfo::CleanUp()
+// a tiny InitializeClasses() helper
+/* static */
+inline wxClassInfo *wxClassInfo::GetBaseByName(const wxChar *name)
 {
-    if ( sm_classTable )
-    {
-        delete sm_classTable;
-        sm_classTable = NULL;
-    }
+    if ( !name )
+        return NULL;
+
+    wxClassInfo *classInfo = (wxClassInfo *)sm_classTable->Get(name);
+
+    // this must be fixed, other things risk work wrongly later if you get this
+    wxASSERT_MSG( classInfo,
+                  wxString::Format
+                  (
+                    _T("base class '%s' is unknown to wxWindows RTTI"),
+                    name
+                  ) );
+
+    return classInfo;
 }
 
-void wxClassInfo::Register()
+// Set pointers to base class(es) to speed up IsKindOf
+void wxClassInfo::InitializeClasses()
 {
-    if ( !sm_classTable )
-    {
-        sm_classTable = new wxHashTable(wxKEY_STRING);
-    }
-
     // using IMPLEMENT_DYNAMIC_CLASS() macro twice (which may happen if you
     // link any object module twice mistakenly) will break this function
     // because it will enter an infinite loop and eventually die with "out of
     // memory" - as this is quite hard to detect if you're unaware of this,
     // try to do some checks here
-    wxASSERT_MSG( sm_classTable->Get(m_className) == NULL,
-                  _T("class already in RTTI table - have you used IMPLEMENT_DYNAMIC_CLASS() twice (may be by linking some object module(s) twice)?") );
 
-    sm_classTable->Put(m_className, (wxObject *)this);
-}
+#ifdef __WXDEBUG__
+    static const size_t nMaxClasses = 10000;    // more than we'll ever have
+    size_t nClass = 0;
+#endif
 
-void wxClassInfo::Unregister()
-{
-    if ( sm_classTable )
+    sm_classTable = new wxHashTable(wxKEY_STRING);
+
+        // Index all class infos by their class name
+
+    wxClassInfo *info;
+    for(info = sm_first; info; info = info->m_next)
     {
-        sm_classTable->Delete(m_className);
-        if ( sm_classTable->GetCount() == 0 )
+        if (info->m_className)
         {
-            delete sm_classTable;
-            sm_classTable = NULL;
+            wxASSERT_MSG( ++nClass < nMaxClasses,
+                          _T("an infinite loop detected - have you used IMPLEMENT_DYNAMIC_CLASS() twice (may be by linking some object module(s) twice)?") );
+            sm_classTable->Put(info->m_className, (wxObject *)info);
         }
     }
+
+        // Set base pointers for each wxClassInfo
+
+    for(info = sm_first; info; info = info->m_next)
+    {
+        info->m_baseInfo1 = GetBaseByName(info->GetBaseClassName1());
+        info->m_baseInfo2 = GetBaseByName(info->GetBaseClassName2());
+    }
 }
+
+void wxClassInfo::CleanUpClasses()
+{
+    delete wxClassInfo::sm_classTable;
+    wxClassInfo::sm_classTable = NULL;
+}
+
 
 wxObject *wxCreateDynamicObject(const wxChar *name)
 {
@@ -363,3 +364,34 @@ wxObject::CloneRefData(const wxObjectRefData * WXUNUSED(data)) const
 
     return NULL;
 }
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
+
+#if defined(__DARWIN__) && defined(WXMAKINGDLL)
+
+extern "C" {
+    void __initialize_Cplusplus(void);
+    void wxWindowsDylibInit(void);
+};
+
+// Dynamic shared library (dylib) initialization routine
+//   required to initialize static C++ objects bacause of lazy dynamic linking
+//   http://developer.apple.com/techpubs/macosx/Essentials/
+//          SystemOverview/Frameworks/Dynamic_Shared_Libraries.html
+
+void wxWindowsDylibInit()
+{
+    // The function __initialize_Cplusplus() must be called from the shared
+    // library initialization routine to cause the static C++ objects in
+    // the library to be initialized (reference number 2441683).
+
+    // This only seems to be necessary if the library initialization routine
+    // needs to use the static C++ objects
+    __initialize_Cplusplus();
+}
+
+#endif
+
+// vi:sts=4:sw=4:et

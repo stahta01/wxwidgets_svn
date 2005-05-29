@@ -25,13 +25,12 @@
     #pragma hdrstop
 #endif
 
-#include "wx/process.h"
-
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
     #include "wx/defs.h"
     #include "wx/string.h"
+    #include "wx/process.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -45,7 +44,6 @@
 // ----------------------------------------------------------------------------
 // wxMMedia2 headers
 
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/vidbase.h"
 
 // ----------------------------------------------------------------------------
@@ -67,7 +65,7 @@ typedef struct wxXANIMinternal {
 // ----------------------------------------------------------------------------
 // Class definition
 
-class WXDLLIMPEXP_MMEDIA wxVideoXANIM : public wxVideoBaseDriver {
+class WXDLLEXPORT wxVideoXANIM : public wxVideoBaseDriver {
     DECLARE_DYNAMIC_CLASS(wxVideoXANIM)
  protected:
     // Remember the state of the subprocess

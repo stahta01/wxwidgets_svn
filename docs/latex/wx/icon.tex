@@ -51,7 +51,7 @@ For more information please see \helpref{Bitmap and icon overview}{wxbitmapoverv
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxIcon::wxIcon}\label{wxiconctor}
+\membersection{wxIcon::wxIcon}\label{wxiconconstr}
 
 \func{}{wxIcon}{\void}
 
@@ -80,14 +80,10 @@ Creates a new icon.
 
 Creates an icon from XPM data.
 
-\func{}{wxIcon}{\param{const wxString\& }{name}, \param{wxBitmapType}{ type},
+\func{}{wxIcon}{\param{const wxString\& }{name}, \param{long}{ type},
   \param{int}{ desiredWidth = -1}, \param{int}{ desiredHeight = -1}}
 
 Loads an icon from a file or resource.
-
-\func{}{wxIcon}{\param{const wxIconLocation\& }{loc}}
-
-Loads an icon from the specified \helpref{location}{wxiconlocation}.
 
 \wxheading{Parameters}
 
@@ -110,9 +106,6 @@ screen is used.}
 
 \docparam{name}{This can refer to a resource name under MS Windows, or a filename under MS Windows and X.
 Its meaning is determined by the {\it flags} parameter.}
-
-\docparam{loc}{The object describing the location of the native icon, see 
-\helpref{wxIconLocation}{wxiconlocation}.}
 
 \docparam{type}{May be one of the following:
 
@@ -208,7 +201,7 @@ must have mask colour set.
 \end{itemize}
 }
 
-\membersection{wxIcon::\destruct{wxIcon}}\label{wxicondtor}
+\membersection{wxIcon::\destruct{wxIcon}}
 
 \func{}{\destruct{wxIcon}}{\void}
 
@@ -222,7 +215,7 @@ destroyed automatically by wxWidgets when the application exits.
 
 Do not delete an icon that is selected into a memory device context.
 
-\membersection{wxIcon::GetDepth}\label{wxicongetdepth}
+\membersection{wxIcon::GetDepth}
 
 \constfunc{int}{GetDepth}{\void}
 
@@ -247,7 +240,7 @@ Gets the width of the icon in pixels.
 
 \membersection{wxIcon::LoadFile}\label{wxiconloadfile}
 
-\func{bool}{LoadFile}{\param{const wxString\&}{ name}, \param{wxBitmapType}{ type}}
+\func{bool}{LoadFile}{\param{const wxString\&}{ name}, \param{long}{ type}}
 
 Loads an icon from a file or resource.
 
@@ -271,22 +264,22 @@ The validity of these flags depends on the platform and wxWidgets configuration.
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise.
+TRUE if the operation succeeded, FALSE otherwise.
 
 \wxheading{See also}
 
-\helpref{wxIcon::wxIcon}{wxiconctor}
+\helpref{wxIcon::wxIcon}{wxiconconstr}
 
 \membersection{wxIcon::Ok}\label{wxiconok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if icon data is present.
+Returns TRUE if icon data is present.
 
 \begin{comment}
 \membersection{wxIcon::SaveFile}\label{wxiconsavefile}
 
-\func{bool}{SaveFile}{\param{const wxString\& }{name}, \param{wxBitmapType}{ type}, \param{wxPalette* }{palette = NULL}}
+\func{bool}{SaveFile}{\param{const wxString\& }{name}, \param{int}{ type}, \param{wxPalette* }{palette = NULL}}
 
 Saves an icon in the named file.
 
@@ -310,7 +303,7 @@ The validity of these flags depends on the platform and wxWidgets configuration.
 
 \wxheading{Return value}
 
-true if the operation succeeded, false otherwise.
+TRUE if the operation succeeded, FALSE otherwise.
 
 \wxheading{Remarks}
 
@@ -341,7 +334,17 @@ Sets the height member (does not affect the icon data).
 
 \docparam{height}{Icon height in pixels.}
 
-\membersection{wxIcon::SetWidth}\label{wxiconsetwidth}
+\membersection{wxIcon::SetOk}
+
+\func{void}{SetOk}{\param{int }{isOk}}
+
+Sets the validity member (does not affect the icon data).
+
+\wxheading{Parameters}
+
+\docparam{isOk}{Validity flag.}
+
+\membersection{wxIcon::SetWidth}
 
 \func{void}{SetWidth}{\param{int }{width}}
 
@@ -351,7 +354,7 @@ Sets the width member (does not affect the icon data).
 
 \docparam{width}{Icon width in pixels.}
 
-\membersection{wxIcon::operator $=$}\label{wxiconassign}
+\membersection{wxIcon::operator $=$}
 
 \func{wxIcon\& }{operator $=$}{\param{const wxIcon\& }{icon}}
 
@@ -367,7 +370,7 @@ counter. It is a fast operation.
 
 Returns 'this' object.
 
-\membersection{wxIcon::operator $==$}\label{wxiconequal}
+\membersection{wxIcon::operator $==$}
 
 \func{bool}{operator $==$}{\param{const wxIcon\& }{icon}}
 
@@ -380,9 +383,9 @@ equal (a fast test).
 
 \wxheading{Return value}
 
-Returns true if the icons were effectively equal, false otherwise.
+Returns TRUE if the icons were effectively equal, FALSE otherwise.
 
-\membersection{wxIcon::operator $!=$}\label{wxiconnotequal}
+\membersection{wxIcon::operator $!=$}
 
 \func{bool}{operator $!=$}{\param{const wxIcon\& }{icon}}
 
@@ -395,6 +398,6 @@ unequal (a fast test).
 
 \wxheading{Return value}
 
-Returns true if the icons were unequal, false otherwise.
+Returns TRUE if the icons were unequal, FALSE otherwise.
 
 

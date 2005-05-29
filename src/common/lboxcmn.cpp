@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     22.10.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "listboxbase.h"
 #endif
 
@@ -32,8 +32,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/listbox.h"
-    #include "wx/dynarray.h"
-    #include "wx/arrstr.h"
 #endif
 
 // ============================================================================
@@ -79,12 +77,12 @@ void wxListBoxBase::Set(int nItems, const wxString* items, void **clientData)
 bool wxListBoxBase::SetStringSelection(const wxString& s, bool select)
 {
     int sel = FindString(s);
-    wxCHECK_MSG( sel != wxNOT_FOUND, false,
+    wxCHECK_MSG( sel != -1, FALSE,
                  wxT("invalid string in SetStringSelection") );
 
     SetSelection(sel, select);
 
-    return true;
+    return TRUE;
 }
 
 void wxListBoxBase::DeselectAll(int itemToLeaveSelected)
@@ -105,7 +103,7 @@ void wxListBoxBase::DeselectAll(int itemToLeaveSelected)
     else // single selection
     {
         int sel = GetSelection();
-        if ( sel != wxNOT_FOUND && sel != itemToLeaveSelected )
+        if ( sel != -1 && sel != itemToLeaveSelected )
         {
             Deselect(sel);
         }
@@ -118,7 +116,7 @@ void wxListBoxBase::DeselectAll(int itemToLeaveSelected)
 
 void wxListBoxBase::Command(wxCommandEvent& event)
 {
-    SetSelection(event.GetInt(), event.GetExtraLong() != 0);
+    SetSelection(event.m_commandInt, event.m_extraLong != 0);
     (void)ProcessEvent(event);
 }
 
@@ -130,7 +128,7 @@ void wxListBoxBase::SetFirstItem(const wxString& s)
 {
     int n = FindString(s);
 
-    wxCHECK_RET( n != wxNOT_FOUND, wxT("invalid string in wxListBox::SetFirstItem") );
+    wxCHECK_RET( n != -1, wxT("invalid string in wxListBox::SetFirstItem") );
 
     DoSetFirstItem(n);
 }

@@ -4,7 +4,7 @@ rem Purpose:   create wxWindows makefiles for all compilers
 rem Author:    Vadim Zeitlin
 rem Created:   14.07.99
 rem Copyright: (c) 1999 Vadim Zeitlin
-rem Licence:   wxWindows Licence
+rem Licence:   wxWindows licence
 rem Version:   $Id$
 rem
 rem Makefile to create the makefiles for all compilers from the templates using
@@ -28,7 +28,7 @@ goto end
 :ok
 rem Let's assume that you have tmake in your PATH but let override it with
 rem TMAKE env var
-set TM=call tmake
+set TM=tmake
 if "x%TMAKE%" == "x" goto skip2
 set TM=%TMAKE%
 

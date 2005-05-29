@@ -44,7 +44,7 @@ class LifeCanvas : public wxWindow
 {
 public:
     // ctor and dtor
-    LifeCanvas(wxWindow* parent, Life* life, bool interactive = true);
+    LifeCanvas(wxWindow* parent, Life* life, bool interactive = TRUE);
     ~LifeCanvas();
 
     // view management
@@ -57,7 +57,7 @@ public:
     void DrawCell(wxInt32 i, wxInt32 j, bool alive);
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 
     // draw a cell (parametrized by DC)
@@ -92,9 +92,9 @@ private:
     wxInt32      m_viewportY;       // first visible cell (y coord)
     wxInt32      m_viewportW;       // number of visible cells (w)
     wxInt32      m_viewportH;       // number of visible cells (h)
-    int          m_thumbX;          // horiz. scrollbar thumb position
-    int          m_thumbY;          // vert. scrollbar thumb position
-    wxInt32      m_mi, m_mj;        // last mouse position
+    int          m_thumbX;          // horiz. scrollbar thumb position 
+    int          m_thumbY;          // vert. scrollbar thumb position 
+    wxInt32      m_mi, m_mj;        // last mouse position 
 };
 
 
@@ -109,7 +109,7 @@ public:
     LifeNavigator(wxWindow *parent);
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 
     // event handlers
@@ -133,7 +133,7 @@ public:
     void UpdateUI();
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 
     // event handlers
@@ -151,7 +151,7 @@ private:
     void OnStop();
     void OnStep();
 
-    Life           *m_life;
+    Life           *m_life;  
     LifeCanvas     *m_canvas;
     LifeNavigator  *m_navigator;
     wxStaticText   *m_text;

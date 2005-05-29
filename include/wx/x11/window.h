@@ -12,7 +12,7 @@
 #ifndef _WX_WINDOW_H_
 #define _WX_WINDOW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "window.h"
 #endif
 
@@ -64,6 +64,8 @@ public:
         const wxRect *rect = (const wxRect *) NULL );
     virtual void Update();
     
+    virtual void Clear();
+    
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );
     
@@ -82,10 +84,9 @@ public:
     virtual void ScrollWindow( int dx, int dy,
         const wxRect* rect = (wxRect *) NULL );
     
-    virtual void DoSetSizeHints(int minW, int minH,
+    virtual void SetSizeHints(int minW, int minH,
         int maxW = -1, int maxH = -1,
         int incW = -1, int incH = -1);
-
 #if wxUSE_DRAG_AND_DROP
     virtual void SetDropTarget( wxDropTarget *dropTarget );
 #endif // wxUSE_DRAG_AND_DROP
@@ -145,10 +146,17 @@ public:
     static void DoChangeForegroundColour(WXWindow widget, wxColour& foregroundColour);
     static void DoChangeBackgroundColour(WXWindow widget, wxColour& backgroundColour, bool changeArmColour = FALSE);
     
+    // For implementation purposes - sometimes decorations make the client area
+    // smaller
+    virtual wxPoint GetClientAreaOrigin() const;
+    
     // I don't want users to override what's done in idle so everything that
     // has to be done in idle time in order for wxX11 to work is done in
     // OnInternalIdle
     virtual void OnInternalIdle();
+    
+    // For compatibility across platforms (not in event table)
+    void OnIdle(wxIdleEvent& WXUNUSED(event)) {}
     
 protected:
     // Responds to colour changes: passes event on to children.

@@ -17,12 +17,9 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textctrl.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XtParent XTPARENT
@@ -32,6 +29,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fstream.h>
 #include <ctype.h>
 
 #include "wx/textctrl.h"
@@ -97,8 +95,8 @@ static void wxTextWindowActivateProc(Widget w, XtPointer clientData, XmAnyCallba
 wxTextCtrl::wxTextCtrl()
 {
     m_tempCallbackStruct = (void*) NULL;
-    m_modified = false;
-    m_processedDefault = false;
+    m_modified = FALSE;
+    m_processedDefault = FALSE;
 }
 
 bool wxTextCtrl::Create(wxWindow *parent,
@@ -110,14 +108,24 @@ bool wxTextCtrl::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
-
     m_tempCallbackStruct = (void*) NULL;
-    m_modified = false;
-    m_processedDefault = false;
+    m_modified = FALSE;
+    m_processedDefault = FALSE;
+    //    m_backgroundColour = parent->GetBackgroundColour();
+    m_backgroundColour = * wxWHITE;
+    m_foregroundColour = parent->GetForegroundColour();
 
-    m_backgroundColour = *wxWHITE;
+    SetName(name);
+    SetValidator(validator);
+    if (parent)
+        parent->AddChild(this);
+
+    m_windowStyle = style;
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -133,7 +141,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
         XtSetArg (args[1], XmNwordWrap, wantWordWrap ? True : False);
 
         m_mainWidget = (WXWidget) XmCreateScrolledText(parentWidget,
-                                                       wxConstCast(name.c_str(), char),
+                                                       (char*)name.c_str(),
                                                        args, 2);
 
         XtVaSetValues ((Widget) m_mainWidget,
@@ -146,7 +154,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
     {
         m_mainWidget = (WXWidget)XtVaCreateManagedWidget
                                  (
-                                  wxConstCast(name.c_str(), char),
+                                  (char*)name.c_str(),
                                   xmTextWidgetClass,
                                   parentWidget,
                                   NULL
@@ -173,15 +181,22 @@ bool wxTextCtrl::Create(wxWindow *parent,
                       NULL);
     }
 
-    if ( !value.empty() )
+    if ( !!value )
     {
+#if 0
+        // don't do this because it is just linking the text to a source
+        // string which is unsafe. MB
+        //
+        XmTextSetString ((Widget) m_mainWidget, (char*)value.c_str());
+#else
         // do this instead... MB
         //
         XtVaSetValues( (Widget) m_mainWidget,
-                       XmNvalue, wxConstCast(value.c_str(), char),
+                       XmNvalue, (char *)value.c_str(),
                        NULL);
+#endif
     }
-
+    
     // install callbacks
     XtAddCallback((Widget) m_mainWidget, XmNvalueChangedCallback, (XtCallbackProc)wxTextWindowChangedProc, (XtPointer)this);
 
@@ -194,24 +209,20 @@ bool wxTextCtrl::Create(wxWindow *parent,
     XtAddCallback((Widget) m_mainWidget, XmNlosingFocusCallback, (XtCallbackProc)wxTextWindowLoseFocusProc, (XtPointer)this);
 
     // font
-    ChangeFont(false);
+    m_font = parent->GetFont();
+    ChangeFont(FALSE);
 
-    wxSize best = GetBestSize();
-    if( size.x != -1 ) best.x = size.x;
-    if( size.y != -1 ) best.y = size.y;
-
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, best.x, best.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
 
-    return true;
+    return TRUE;
 }
 
 WXWidget wxTextCtrl::GetTopWidget() const
 {
-    return IsMultiLine() ? (WXWidget)XtParent((Widget)m_mainWidget)
-                         : m_mainWidget;
+    return ((m_windowStyle & wxTE_MULTILINE) ? (WXWidget) XtParent((Widget) m_mainWidget) : m_mainWidget);
 }
 
 wxString wxTextCtrl::GetValue() const
@@ -248,21 +259,22 @@ wxString wxTextCtrl::GetValue() const
 
 void wxTextCtrl::SetValue(const wxString& value)
 {
-    m_inSetValue = true;
+    m_inSetValue = TRUE;
 
+#if 0
+    // don't do this because it is just linking the text to a source
+    // string which is unsafe. MB
+    //
+    XmTextSetString ((Widget) m_mainWidget, (char*)value.c_str());
+#else
     // do this instead... MB
     //
-    // with (at least) OpenMotif 2.1 this causes a lot of flicker
-#if 0
     XtVaSetValues( (Widget) m_mainWidget,
-                   XmNvalue, wxConstCast(value.c_str(), char),
+                   XmNvalue, (char *)value.c_str(),
                    NULL);
 #endif
 
-    Clear();
-    AppendText( value );
-
-    m_inSetValue = false;
+    m_inSetValue = FALSE;
 }
 
 // Clipboard operations
@@ -316,13 +328,13 @@ void wxTextCtrl::Redo()
 bool wxTextCtrl::CanUndo() const
 {
     // No Undo in Motif
-    return false;
+    return FALSE;
 }
 
 bool wxTextCtrl::CanRedo() const
 {
     // No Redo in Motif
-    return false;
+    return FALSE;
 }
 
 // If the return values from and to are the same, there is no
@@ -354,7 +366,7 @@ void wxTextCtrl::SetInsertionPoint(long pos)
 
 void wxTextCtrl::SetInsertionPointEnd()
 {
-    wxTextPos pos = GetLastPosition();
+    long pos = GetLastPosition();
     SetInsertionPoint(pos);
 }
 
@@ -363,7 +375,7 @@ long wxTextCtrl::GetInsertionPoint() const
     return (long) XmTextGetInsertionPosition ((Widget) m_mainWidget);
 }
 
-wxTextPos wxTextCtrl::GetLastPosition() const
+long wxTextCtrl::GetLastPosition() const
 {
     return (long) XmTextGetLastPosition ((Widget) m_mainWidget);
 }
@@ -371,7 +383,7 @@ wxTextPos wxTextCtrl::GetLastPosition() const
 void wxTextCtrl::Replace(long from, long to, const wxString& value)
 {
     XmTextReplace ((Widget) m_mainWidget, (XmTextPosition) from, (XmTextPosition) to,
-        wxConstCast(value.c_str(), char));
+        (char*) (const char*) value);
 }
 
 void wxTextCtrl::Remove(long from, long to)
@@ -390,32 +402,109 @@ void wxTextCtrl::SetSelection(long from, long to)
                       (Time) 0);
 }
 
+bool wxTextCtrl::LoadFile(const wxString& file)
+{
+    if (!wxFileExists(file))
+        return FALSE;
+
+    m_fileName = file;
+
+    Clear();
+
+    Widget textWidget = (Widget) m_mainWidget;
+    FILE *fp = 0;
+
+    struct stat statb;
+    if ((stat ((char*) (const char*) file, &statb) == -1) || (statb.st_mode & S_IFMT) != S_IFREG ||
+        !(fp = fopen ((char*) (const char*) file, "r")))
+    {
+        return FALSE;
+    }
+    else
+    {
+        long len = statb.st_size;
+        char *text;
+        if (!(text = XtMalloc ((unsigned) (len + 1))))
+        {
+            fclose (fp);
+            return FALSE;
+        }
+        if (fread (text, sizeof (char), len, fp) != (size_t) len)
+        {
+        }
+        fclose (fp);
+
+        text[len] = 0;
+        XmTextSetString (textWidget, text);
+        //      m_textPosition = len;
+        XtFree (text);
+        m_modified = FALSE;
+        return TRUE;
+    }
+}
+
+// If file is null, try saved file name first
+// Returns TRUE if succeeds.
+bool wxTextCtrl::SaveFile(const wxString& file)
+{
+    wxString theFile(file);
+    if (theFile == "")
+        theFile = m_fileName;
+    if (theFile == "")
+        return FALSE;
+    m_fileName = theFile;
+
+    Widget textWidget = (Widget) m_mainWidget;
+    FILE *fp;
+
+    if (!(fp = fopen ((char*) (const char*) theFile, "w")))
+    {
+        return FALSE;
+    }
+    else
+    {
+        char *text = XmTextGetString (textWidget);
+        long len = XmTextGetLastPosition (textWidget);
+
+        if (fwrite (text, sizeof (char), len, fp) != (size_t) len)
+        {
+            // Did not write whole file
+        }
+        // Make sure newline terminates the file
+        if (text[len - 1] != '\n')
+            fputc ('\n', fp);
+
+        fclose (fp);
+        XtFree (text);
+        m_modified = FALSE;
+        return TRUE;
+    }
+}
+
 void wxTextCtrl::WriteText(const wxString& text)
 {
-    long textPosition = GetInsertionPoint() + text.length();
-    XmTextInsert ((Widget) m_mainWidget, GetInsertionPoint(),
-                  wxConstCast(text.c_str(), char));
+    long textPosition = GetInsertionPoint() + strlen (text);
+    XmTextInsert ((Widget) m_mainWidget, GetInsertionPoint(), (char*) (const char*) text);
     XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
     SetInsertionPoint(textPosition);
     XmTextShowPosition ((Widget) m_mainWidget, textPosition);
-    m_modified = true;
+    m_modified = TRUE;
 }
 
 void wxTextCtrl::AppendText(const wxString& text)
 {
-    wxTextPos textPosition = GetLastPosition() + text.length();
-    XmTextInsert ((Widget) m_mainWidget, GetLastPosition(),
-                  wxConstCast(text.c_str(), char));
+    long textPosition = GetLastPosition() + strlen(text);
+    XmTextInsert ((Widget) m_mainWidget, GetLastPosition(), (char*) (const char*) text);
     XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
     SetInsertionPoint(textPosition);
     XmTextShowPosition ((Widget) m_mainWidget, textPosition);
-    m_modified = true;
+    m_modified = TRUE;
 }
 
 void wxTextCtrl::Clear()
 {
     XmTextSetString ((Widget) m_mainWidget, "");
-    m_modified = false;
+    m_modified = FALSE;
 }
 
 bool wxTextCtrl::IsModified() const
@@ -423,15 +512,10 @@ bool wxTextCtrl::IsModified() const
     return m_modified;
 }
 
-// Makes modified or unmodified
-void wxTextCtrl::MarkDirty()
-{
-    m_modified = true;
-}
-
+// Makes 'unmodified'
 void wxTextCtrl::DiscardEdits()
 {
-    m_modified = false;
+    m_modified = FALSE;
 }
 
 int wxTextCtrl::GetNumberOfLines() const
@@ -442,7 +526,7 @@ int wxTextCtrl::GetNumberOfLines() const
     {
         long i = 0;
         int currentLine = 0;
-        bool finished = false;
+        bool finished = FALSE;
         while (!finished)
         {
             int ch = s[i];
@@ -453,7 +537,7 @@ int wxTextCtrl::GetNumberOfLines() const
             }
             else if (ch == 0)
             {
-                finished = true;
+                finished = TRUE;
             }
             else
                 i++;
@@ -488,7 +572,7 @@ bool wxTextCtrl::PositionToXY(long pos, long *x, long *y) const
     if ( y )
         *y = yy;
 
-    return true;
+    return TRUE;
 }
 
 void wxTextCtrl::ShowPosition(long pos)
@@ -551,7 +635,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
     // Indicates that we should generate a normal command, because
     // we're letting default behaviour happen (otherwise it's vetoed
     // by virtue of overriding OnChar)
-    m_processedDefault = true;
+    m_processedDefault = TRUE;
 
     if (m_tempCallbackStruct)
     {
@@ -588,12 +672,11 @@ void wxTextCtrl::ChangeBackgroundColour()
             NULL);
         wxColour backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
         if (hsb)
-            wxDoChangeBackgroundColour((WXWidget) hsb, backgroundColour, true);
+            DoChangeBackgroundColour((WXWidget) hsb, backgroundColour, TRUE);
         if (vsb)
-            wxDoChangeBackgroundColour((WXWidget) vsb, backgroundColour, true);
+            DoChangeBackgroundColour((WXWidget) vsb, backgroundColour, TRUE);
 
-        // MBN: why change parent background?
-        // DoChangeBackgroundColour((WXWidget) parent, m_backgroundColour, true);
+        DoChangeBackgroundColour((WXWidget) parent, m_backgroundColour, TRUE);
     }
 }
 
@@ -618,7 +701,7 @@ void wxTextCtrl::ChangeForegroundColour()
             if (vsb)
             DoChangeForegroundColour((WXWidget) vsb, m_foregroundColour);
         */
-        wxDoChangeForegroundColour((WXWidget) parent, m_foregroundColour);
+        DoChangeForegroundColour((WXWidget) parent, m_foregroundColour);
     }
 }
 
@@ -651,41 +734,6 @@ void wxTextCtrl::DoSendEvents(void *wxcbs, long keycode)
     // do it after the (user) event handlers processed the events because
     // otherwise GetValue() would return incorrect (not yet updated value)
     m_tempCallbackStruct = NULL;
-}
-
-wxSize wxDoGetSingleTextCtrlBestSize( Widget textWidget,
-                                      const wxWindow* window )
-{
-    Dimension xmargin, ymargin, highlight, shadow;
-    char* value;
-
-    XtVaGetValues( textWidget,
-                   XmNmarginWidth, &xmargin,
-                   XmNmarginHeight, &ymargin,
-                   XmNvalue, &value,
-                   XmNhighlightThickness, &highlight,
-                   XmNshadowThickness, &shadow,
-                   NULL );
-
-    if( !value )
-        value = "|";
-
-    int x, y;
-    window->GetTextExtent( value, &x, &y );
-
-    if( x < 100 ) x = 100;
-
-    return wxSize( x + 2 * xmargin + 2 * highlight + 2 * shadow,
-                   // MBN: +2 necessary: Lesstif bug or mine?
-                   y + 2 * ymargin + 2 * highlight + 2 * shadow + 2 );
-}
-
-wxSize wxTextCtrl::DoGetBestSize() const
-{
-    if( IsSingleLine() )
-        return wxDoGetSingleTextCtrlBestSize( (Widget)m_mainWidget, this );
-    else
-        return wxWindow::DoGetBestSize();
 }
 
 // ----------------------------------------------------------------------------
@@ -756,14 +804,14 @@ wxTextWindowChangedProc (Widget w, XtPointer clientData, XtPointer WXUNUSED(ptr)
         return;
 
     wxTextCtrl *tw = (wxTextCtrl *) clientData;
-    tw->SetModified(true);
+    tw->SetModified(TRUE);
 }
 
 static void
 wxTextWindowModifyProc (Widget WXUNUSED(w), XtPointer clientData, XmTextVerifyCallbackStruct *cbs)
 {
     wxTextCtrl *tw = (wxTextCtrl *) clientData;
-    tw->m_processedDefault = false;
+    tw->m_processedDefault = FALSE;
 
     // First, do some stuff if it's a password control: in this case, we need
     // to store the string inside the class because GetValue() can't retrieve
@@ -782,9 +830,6 @@ wxTextWindowModifyProc (Widget WXUNUSED(w), XtPointer clientData, XmTextVerifyCa
             cbs->text->ptr[i] = '\0';
         }
     }
-
-    if(tw->InSetValue())
-        return;
 
     // If we're already within an OnChar, return: probably a programmatic
     // insertion.

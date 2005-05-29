@@ -10,7 +10,7 @@
 #ifndef _WX_IMAGBMP_H_
 #define _WX_IMAGBMP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagbmp.h"
 #endif
 
@@ -25,12 +25,10 @@
 #define wxIMAGE_OPTION_CUR_HOTSPOT_X  wxT("HotSpotX")
 #define wxIMAGE_OPTION_CUR_HOTSPOT_Y  wxT("HotSpotY")
 
-#if WXWIN_COMPATIBILITY_2_4
-    // Do not use these macros, they are deprecated
-    #define wxBMP_FORMAT    wxIMAGE_OPTION_BMP_FORMAT
-    #define wxCUR_HOTSPOT_X wxIMAGE_OPTION_CUR_HOTSPOT_X
-    #define wxCUR_HOTSPOT_Y wxIMAGE_OPTION_CUR_HOTSPOT_Y
-#endif
+// Do not use these macros, they are deprecated!! :
+#define wxBMP_FORMAT    wxIMAGE_OPTION_BMP_FORMAT
+#define wxCUR_HOTSPOT_X wxIMAGE_OPTION_CUR_HOTSPOT_X
+#define wxCUR_HOTSPOT_Y wxIMAGE_OPTION_CUR_HOTSPOT_Y
 
 
 enum
@@ -63,15 +61,15 @@ public:
     };
 
 #if wxUSE_STREAMS
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
     virtual bool DoCanRead( wxInputStream& stream );
 
 protected:
     bool SaveDib(wxImage *image, wxOutputStream& stream, bool verbose,
                  bool IsBmp, bool IsMask);
     bool DoLoadDib(wxImage *image, int width, int height, int bpp, int ncolors,
-                   int comp, wxFileOffset bmpOffset, wxInputStream& stream,
+                   int comp, off_t bmpOffset, wxInputStream& stream,
                    bool verbose, bool IsBmp, bool hasPalette);
     bool LoadDib(wxImage *image, wxInputStream& stream, bool verbose, bool IsBmp);
 #endif // wxUSE_STREAMS
@@ -97,8 +95,8 @@ public:
     };
 
 #if wxUSE_STREAMS
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
     virtual bool DoLoadFile( wxImage *image, wxInputStream& stream, bool verbose, int index );
     virtual bool DoCanRead( wxInputStream& stream );
     virtual int GetImageCount( wxInputStream& stream );
@@ -152,8 +150,8 @@ public:
 
 
 #if wxUSE_STREAMS
-    virtual bool SaveFile( wxImage *WXUNUSED(image), wxOutputStream& WXUNUSED(stream), bool WXUNUSED(verbose=true) ){return false ;};
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool SaveFile( wxImage *WXUNUSED(image), wxOutputStream& WXUNUSED(stream), bool WXUNUSED(verbose=TRUE) ){return FALSE ;};
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
     virtual bool DoCanRead( wxInputStream& stream );
     virtual int GetImageCount( wxInputStream& stream );
 #endif // wxUSE_STREAMS

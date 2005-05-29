@@ -31,7 +31,7 @@
     #include "wx/wx.h"
 #endif
 
-#if wxUSE_SPINCTRL
+#if wxUSE_SPINBTN
 
 #include "wx/spinctrl.h"
 #include "wx/os2/private.h"
@@ -50,8 +50,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
-    EVT_SPIN(wxID_ANY, wxSpinCtrl::OnSpinChange)
     EVT_SET_FOCUS(wxSpinCtrl::OnSetFocus)
+    EVT_SPIN(-1, wxSpinCtrl::OnSpinChange)
 END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // constants
@@ -73,7 +73,8 @@ MRESULT EXPENTRY wxSpinCtrlWndProc(
     wxSpinCtrl*                    pSpin = (wxSpinCtrl *)::WinQueryWindowULong( hWnd
                                                                                ,QWL_USER
                                                                               );
-
+    bool                            bProccesed = FALSE;
+    MRESULT                         rc = (MRESULT)0;
     //
     // Forward some messages (the key ones only so far) to the spin ctrl
     //
@@ -132,7 +133,7 @@ bool wxSpinCtrl::Create(
 {
     SWP                             vSwp;
 
-    if (vId == wxID_ANY)
+    if (vId == -1)
         m_windowId = NewControlId();
     else
         m_windowId = vId;
@@ -174,7 +175,7 @@ bool wxSpinCtrl::Create(
                                       );
     if (m_hWnd == 0)
     {
-        return false;
+        return FALSE;
     }
     m_hWndBuddy = m_hWnd; // One in the same for OS/2
     if(pParent)
@@ -207,21 +208,20 @@ bool wxSpinCtrl::Create(
     fnWndProcSpinCtrl = (WXFARPROC)::WinSubclassWindow(m_hWnd, (PFNWP)wxSpinCtrlWndProc);
     m_svAllSpins.Add(this);
     delete pTextFont;
-    return true;
+    return TRUE;
 } // end of wxSpinCtrl::Create
 
 wxSize wxSpinCtrl::DoGetBestSize() const
 {
     wxSize                          vSizeBtn = wxSpinButton::DoGetBestSize();
     int                             nHeight;
-    wxFont                          vFont = (wxFont)GetFont();
 
     vSizeBtn.x += DEFAULT_ITEM_WIDTH + MARGIN_BETWEEN;
 
     wxGetCharSize( GetHWND()
                   ,NULL
                   ,&nHeight
-                  ,&vFont
+                  ,(wxFont*)&GetFont()
                  );
     nHeight = EDIT_HEIGHT_FROM_CHAR_HEIGHT(nHeight);
 
@@ -302,10 +302,10 @@ bool wxSpinCtrl::Enable(
 {
     if (!wxControl::Enable(bEnable))
     {
-        return false;
+        return FALSE;
     }
     ::WinEnableWindow(GetHwnd(), bEnable);
-    return true;
+    return TRUE;
 } // end of wxSpinCtrl::Enable
 
 wxSpinCtrl* wxSpinCtrl::GetSpinForTextCtrl(
@@ -347,7 +347,7 @@ void wxSpinCtrl::OnChar (
   wxKeyEvent&                       rEvent
 )
 {
-    switch (rEvent.GetKeyCode())
+    switch (rEvent.KeyCode())
     {
         case WXK_RETURN:
             {
@@ -357,7 +357,7 @@ void wxSpinCtrl::OnChar (
                 wxString                    sVal = wxGetWindowText(m_hWndBuddy);
 
                 InitCommandEvent(vEvent);
-                vEvent.SetString(sVal);
+                vEvent.SetString((char*)sVal.c_str());
                 vEvent.SetInt(GetValue());
                 if (GetEventHandler()->ProcessEvent(vEvent))
                     return;
@@ -434,7 +434,7 @@ bool wxSpinCtrl::ProcessTextCommand(
 
             wxString                sVal = wxGetWindowText(m_hWndBuddy);
 
-            vEvent.SetString(sVal);
+            vEvent.SetString((char*)sVal.c_str());
             vEvent.SetInt(GetValue());
             return (GetEventHandler()->ProcessEvent(vEvent));
         }
@@ -456,7 +456,7 @@ bool wxSpinCtrl::ProcessTextCommand(
     //
     // Not processed
     //
-    return false;
+    return FALSE;
 } // end of wxSpinCtrl::ProcessTextCommand
 
 void wxSpinCtrl::SetFocus()
@@ -471,13 +471,14 @@ bool wxSpinCtrl::SetFont(
     if (!wxWindowBase::SetFont(rFont))
     {
         // nothing to do
-        return false;
+        return FALSE;
     }
 
+    WXHANDLE                        hFont = GetFont().GetResourceHandle();
     wxOS2SetFont( m_hWnd
                  ,rFont
                 );
-    return true;
+    return TRUE;
 } // end of wxSpinCtrl::SetFont
 
 void wxSpinCtrl::SetValue(
@@ -486,7 +487,7 @@ void wxSpinCtrl::SetValue(
 {
     long                            lVal;
 
-    lVal = atol((char*)rsText.c_str());
+    lVal = atol(rsText.c_str());
     wxSpinButton::SetValue(lVal);
 } // end of wxSpinCtrl::SetValue
 
@@ -496,9 +497,9 @@ bool wxSpinCtrl::Show(
 {
     if (!wxControl::Show(bShow))
     {
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 } // end of wxSpinCtrl::Show
 
 void wxSpinCtrl::SetSelection (
@@ -507,7 +508,7 @@ void wxSpinCtrl::SetSelection (
 )
 {
     //
-    // If from and to are both -1, it means (in wxWidgets) that all text should
+    // If from and to are both -1, it means (in wxWindows) that all text should
     // be selected - translate into Windows convention
     //
     if ((lFrom == -1) && (lTo == -1))
@@ -517,4 +518,4 @@ void wxSpinCtrl::SetSelection (
     ::WinSendMsg(m_hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), (MPARAM)0);
 } // end of wxSpinCtrl::SetSelection
 
-#endif //wxUSE_SPINCTRL
+#endif //wxUSE_SPINBTN

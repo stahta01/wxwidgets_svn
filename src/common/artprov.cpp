@@ -13,7 +13,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "artprov.h"
 #endif
 
@@ -32,9 +32,10 @@
 #include "wx/artprov.h"
 #include "wx/hashmap.h"
 #include "wx/module.h"
-#if wxUSE_IMAGE
 #include "wx/image.h"
-#endif
+
+// For the purposes of forcing this module to link
+extern char g_ArtProviderModule;
 
 // ===========================================================================
 // implementation
@@ -48,7 +49,15 @@ WX_DEFINE_LIST(wxArtProvidersList);
 // Cache class - stores already requested bitmaps
 // ----------------------------------------------------------------------------
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
+
 WX_DECLARE_EXPORTED_STRING_HASH_MAP(wxBitmap, wxArtProviderBitmapsHash);
+
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 class WXDLLEXPORT wxArtProviderCache
 {
@@ -72,17 +81,20 @@ bool wxArtProviderCache::GetBitmap(const wxString& full_id, wxBitmap* bmp)
     wxArtProviderBitmapsHash::iterator entry = m_bitmapsHash.find(full_id);
     if ( entry == m_bitmapsHash.end() )
     {
-        return false;
+        return FALSE;
     }
     else
     {
         *bmp = entry->second;
-        return true;
+        return TRUE;
     }
 }
 
 void wxArtProviderCache::Clear()
 {
+    // Hack to make the default provider link
+    // with the application
+    g_ArtProviderModule = 0;
     m_bitmapsHash.clear();
 }
 
@@ -110,6 +122,7 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     if ( !sm_providers )
     {
         sm_providers = new wxArtProvidersList;
+        sm_providers->DeleteContents(TRUE);
         sm_cache = new wxArtProviderCache;
     }
 
@@ -119,32 +132,29 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
 
 /*static*/ bool wxArtProvider::PopProvider()
 {
-    wxCHECK_MSG( sm_providers, false, _T("no wxArtProvider exists") );
-    wxCHECK_MSG( sm_providers->GetCount() > 0, false, _T("wxArtProviders stack is empty") );
+    wxCHECK_MSG( sm_providers, FALSE, _T("no wxArtProvider exists") );
+    wxCHECK_MSG( sm_providers->GetCount() > 0, FALSE, _T("wxArtProviders stack is empty") );
 
-    delete sm_providers->GetFirst()->GetData();
-    sm_providers->Erase(sm_providers->GetFirst());
+    sm_providers->DeleteNode(sm_providers->GetFirst());
     sm_cache->Clear();
-    return true;
+    return TRUE;
 }
 
 /*static*/ bool wxArtProvider::RemoveProvider(wxArtProvider *provider)
 {
-    wxCHECK_MSG( sm_providers, false, _T("no wxArtProvider exists") );
+    wxCHECK_MSG( sm_providers, FALSE, _T("no wxArtProvider exists") );
 
     if ( sm_providers->DeleteObject(provider) )
     {
-        delete provider;
         sm_cache->Clear();
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 /*static*/ void wxArtProvider::CleanUpProviders()
 {
-    WX_CLEAR_LIST(wxArtProvidersList, *sm_providers);
     wxDELETE(sm_providers);
     wxDELETE(sm_cache);
 }
@@ -163,13 +173,12 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     wxBitmap bmp;
     if ( !sm_cache->GetBitmap(hashId, &bmp) )
     {
-        for (wxArtProvidersList::compatibility_iterator node = sm_providers->GetFirst();
+        for (wxArtProvidersList::Node *node = sm_providers->GetFirst();
              node; node = node->GetNext())
         {
             bmp = node->GetData()->CreateBitmap(id, client, size);
             if ( bmp.Ok() )
             {
-#if wxUSE_IMAGE
                 if ( size != wxDefaultSize &&
                      (bmp.GetWidth() != size.x || bmp.GetHeight() != size.y) )
                 {
@@ -177,7 +186,6 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
                     img.Rescale(size.x, size.y);
                     bmp = wxBitmap(img);
                 }
-#endif
                 break;
             }
         }
@@ -203,51 +211,6 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     return icon;
 }
 
-#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
-    #include <gtk/gtk.h>
-    extern GtkIconSize wxArtClientToIconSize(const wxArtClient& client);
-#endif // defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
-
-/*static*/ wxSize wxArtProvider::GetSizeHint(const wxArtClient& client,
-                                         bool platform_dependent)
-{
-    if (!platform_dependent)
-    {
-        wxArtProvidersList::compatibility_iterator node = sm_providers->GetFirst();
-        if (node)
-            return node->GetData()->DoGetSizeHint(client);
-    }
-
-        // else return platform dependent size
-
-#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
-    // Gtk has specific sizes for each client, see artgtk.cpp
-    GtkIconSize gtk_size = wxArtClientToIconSize(client);
-    // no size hints for this client
-    if (gtk_size == GTK_ICON_SIZE_INVALID)
-        return wxDefaultSize;
-    gint width, height;
-    gtk_icon_size_lookup( gtk_size, &width, &height);
-    return wxSize(width, height);
-#else // !GTK+ 2
-    // NB: These size hints may have to be adjusted per platform
-    if (client == wxART_TOOLBAR)
-        return wxSize(16, 15);
-    else if (client == wxART_MENU)
-        return wxSize(16, 15);
-    else if (client == wxART_FRAME_ICON)
-        return wxSize(16, 15);
-    else if (client == wxART_CMN_DIALOG || client == wxART_MESSAGE_BOX)
-        return wxSize(32, 32);
-    else if (client == wxART_HELP_BROWSER)
-        return wxSize(16, 15);
-    else if (client == wxART_BUTTON)
-        return wxSize(16, 15);
-    else // wxART_OTHER or perhaps a user's client, no specified size
-        return wxDefaultSize;      
-#endif // GTK+ 2/else
-}
-
 
 class wxArtProviderModule: public wxModule
 {
@@ -255,8 +218,7 @@ public:
     bool OnInit()
     {
         wxArtProvider::InitStdProvider();
-        wxArtProvider::InitNativeProvider();
-        return true;
+        return TRUE;
     }
     void OnExit()
     {

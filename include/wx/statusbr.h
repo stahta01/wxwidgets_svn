@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     05.02.00
 // RCS-ID:      $Id$
-// Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_STATUSBR_H_BASE_
 #define _WX_STATUSBR_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "statbar.h"
 #endif
 
@@ -21,18 +21,8 @@
 #if wxUSE_STATUSBAR
 
 #include "wx/list.h"
-#include "wx/dynarray.h"
 
 WX_DECLARE_LIST(wxString, wxListString);
-
-// ----------------------------------------------------------------------------
-// wxStatusBar constants
-// ----------------------------------------------------------------------------
-
-// style flags for fields
-#define wxSB_NORMAL    0x0000
-#define wxSB_FLAT      0x0001
-#define wxSB_RAISED    0x0002
 
 // ----------------------------------------------------------------------------
 // wxStatusBar: a window near the bottom of the frame used for status info
@@ -73,15 +63,6 @@ public:
     // -2 grows twice as much as one with width -1 &c)
     virtual void SetStatusWidths(int n, const int widths[]);
 
-    // field styles
-    // ------------
-
-    // Set the field style. Use either wxSB_NORMAL (default) for a standard 3D
-    // border around a field, wxSB_FLAT for no border around a field, so that it
-    // appears flat or wxSB_POPOUT to make the field appear raised.
-    // Setting field styles only works on wxMSW
-    virtual void SetStatusStyles(int n, const int styles[]);
-
     // geometry
     // --------
 
@@ -96,7 +77,7 @@ public:
     virtual int GetBorderY() const = 0;
 
     // don't want status bars to accept the focus at all
-    virtual bool AcceptsFocus() const { return false; }
+    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
     // set the widths array to NULL
@@ -107,11 +88,6 @@ protected:
 
     // reset the widths
     void ReinitWidths() { FreeWidths(); InitWidths(); }
-
-    // same, for field styles
-    void InitStyles();
-    void FreeStyles();
-    void ReinitStyles() { FreeStyles(); InitStyles(); }
 
     // same, for text stacks
     void InitStacks();
@@ -132,14 +108,9 @@ protected:
     // width otherwise
     int       *m_statusWidths;
 
-    // the styles of the fields
-    int       *m_statusStyles;
-
     // stacks of previous values for PushStatusText/PopStatusText
     // this is created on demand, use GetStatusStack/GetOrCreateStatusStack
     wxListString **m_statusTextStacks;
-
-    DECLARE_NO_COPY_CLASS(wxStatusBarBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -148,23 +119,23 @@ protected:
 
 #if defined(__WXUNIVERSAL__)
     #define wxStatusBarUniv wxStatusBar
+    #define sm_classwxStatusBarUniv sm_classwxStatusBar
 
     #include "wx/univ/statusbr.h"
-#elif defined(__WXPALMOS__)
-    #define wxStatusBarPalm wxStatusBar
-
-    #include "wx/palmos/statusbr.h"
 #elif defined(__WIN32__) && wxUSE_NATIVE_STATUSBAR
     #define wxStatusBar95 wxStatusBar
+    #define sm_classwxStatusBar95 sm_classwxStatusBar
 
     #include "wx/msw/statbr95.h"
 #elif defined(__WXMAC__)
     #define wxStatusBarMac wxStatusBar
+    #define sm_classwxStatusBarMac sm_classwxStatusBar
 
     #include "wx/generic/statusbr.h"
     #include "wx/mac/statusbr.h"
 #else
     #define wxStatusBarGeneric wxStatusBar
+    #define sm_classwxStatusBarGeneric sm_classwxStatusBar
 
     #include "wx/generic/statusbr.h"
 #endif

@@ -1,24 +1,29 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/validate.h
+// Name:        validate.h
 // Purpose:     wxValidator class
 // Author:      Julian Smart
 // Modified by:
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_VALIDATE_H_
-#define _WX_VALIDATE_H_
+#ifndef _WX_VALIDATEH__
+#define _WX_VALIDATEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "validate.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_VALIDATORS
+#if defined(wxUSE_VALIDATORS) && !wxUSE_VALIDATORS
+    // wxWindows is compiled without support for wxValidator, but we still
+    // want to be able to pass wxDefaultValidator to the functions which take
+    // a wxValidator parameter to avoid using "#if wxUSE_VALIDATORS"
+    // everywhere
+    class WXDLLEXPORT wxValidator;
+    #define wxDefaultValidator (*((wxValidator *)NULL))
+#else // wxUSE_VALIDATORS
 
 #include "wx/event.h"
 
@@ -50,17 +55,17 @@ public:
     virtual wxObject *Clone() const
         { return (wxValidator *)NULL; }
     bool Copy(const wxValidator& val)
-        { m_validatorWindow = val.m_validatorWindow; return true; }
+        { m_validatorWindow = val.m_validatorWindow; return TRUE; }
 
     // Called when the value in the window must be validated.
     // This function can pop up an error message.
-    virtual bool Validate(wxWindow *WXUNUSED(parent)) { return false; };
+    virtual bool Validate(wxWindow *WXUNUSED(parent)) { return FALSE; };
 
     // Called to transfer data to the window
-    virtual bool TransferToWindow() { return false; }
+    virtual bool TransferToWindow() { return FALSE; }
 
     // Called to transfer data from the window
-    virtual bool TransferFromWindow() { return false; };
+    virtual bool TransferFromWindow() { return FALSE; };
 
     // accessors
     wxWindow *GetWindow() const { return (wxWindow *)m_validatorWindow; }
@@ -69,7 +74,7 @@ public:
     // validators beep by default if invalid key is pressed, these functions
     // allow to change it
     static bool IsSilent() { return ms_isSilent; }
-    static void SetBellOnError(bool doIt = true) { ms_isSilent = doIt; }
+    static void SetBellOnError(bool doIt = TRUE) { ms_isSilent = doIt; }
 
 protected:
     wxWindowBase *m_validatorWindow;
@@ -81,22 +86,9 @@ private:
     DECLARE_NO_COPY_CLASS(wxValidator)
 };
 
-extern WXDLLEXPORT_DATA(const wxValidator) wxDefaultValidator;
+WXDLLEXPORT_DATA(extern const wxValidator) wxDefaultValidator;
 
-#define wxVALIDATOR_PARAM(val) val
+#endif // wxUSE_VALIDATORS
 
-#else // !wxUSE_VALIDATORS
-    // wxWidgets is compiled without support for wxValidator, but we still
-    // want to be able to pass wxDefaultValidator to the functions which take
-    // a wxValidator parameter to avoid using "#if wxUSE_VALIDATORS"
-    // everywhere
-    class WXDLLEXPORT wxValidator;
-    #define wxDefaultValidator (*((wxValidator *)NULL))
-
-    // this macro allows to avoid warnings about unused parameters when
-    // wxUSE_VALIDATORS == 0
-    #define wxVALIDATOR_PARAM(val)
-#endif // wxUSE_VALIDATORS/!wxUSE_VALIDATORS
-
-#endif // _WX_VALIDATE_H_
-
+#endif
+    // _WX_VALIDATEH__

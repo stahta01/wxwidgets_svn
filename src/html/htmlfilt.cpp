@@ -4,11 +4,11 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "htmlfilt.h"
 #endif
 
@@ -77,7 +77,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxHtmlFilterPlainText, wxHtmlFilter)
 
 bool wxHtmlFilterPlainText::CanRead(const wxFSFile& WXUNUSED(file)) const
 {
-    return true;
+    return TRUE;
 }
 
 
@@ -90,9 +90,9 @@ wxString wxHtmlFilterPlainText::ReadFile(const wxFSFile& file) const
     if (s == NULL) return wxEmptyString;
     ReadString(doc, s, wxConvISO8859_1);
 
-    doc.Replace(wxT("&"), wxT("&amp;"), true);
-    doc.Replace(wxT("<"), wxT("&lt;"), true);
-    doc.Replace(wxT(">"), wxT("&gt;"), true);
+    doc.Replace(wxT("&"), wxT("&amp;"), TRUE);
+    doc.Replace(wxT("<"), wxT("&lt;"), TRUE);
+    doc.Replace(wxT(">"), wxT("&gt;"), TRUE);
     doc2 = wxT("<HTML><BODY><PRE>\n") + doc + wxT("\n</PRE></BODY></HTML>");
     return doc2;
 }
@@ -165,12 +165,12 @@ wxString wxHtmlFilterHTML::ReadFile(const wxFSFile& file) const
         return wxEmptyString;
     }
 
-    // NB: We convert input file to wchar_t here in Unicode mode, based on
+    // NB: We convert input file to wchar_t here in Unicode mode, based on 
     //     either Content-Type header or <meta> tags. In ANSI mode, we don't
     //     do it as it is done by wxHtmlParser (for this reason, we add <meta>
     //     tag if we used Content-Type header).
 #if wxUSE_UNICODE
-    int charsetPos;
+    int charsetPos;    
     if ((charsetPos = file.GetMimeType().Find(_T("; charset="))) != wxNOT_FOUND)
     {
         wxString charset = file.GetMimeType().Mid(charsetPos + 10);
@@ -219,7 +219,7 @@ class wxHtmlFilterModule : public wxModule
         {
             wxHtmlWindow::AddFilter(new wxHtmlFilterHTML);
             wxHtmlWindow::AddFilter(new wxHtmlFilterImage);
-            return true;
+            return TRUE;
         }
         virtual void OnExit() {}
 };

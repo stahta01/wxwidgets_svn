@@ -10,10 +10,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>
+#include "wx/wx.h"
 #include "wx/utils.h"
 #include "wx/list.h"
 #include "wx/hash.h"
-#include "wx/tokenzr.h"
 #include "wxhlpblk.h"
 
 /*
@@ -45,12 +45,12 @@ class TexMacroDef: public wxObject
 {
  public:
   int no_args;
-  wxChar *name;
+  char *name;
   bool ignore;
   int forbidden;
   int macroId;
 
-  TexMacroDef(int the_id, const wxChar *the_name, int n, bool ig, bool forbidLevel = FORBID_OK);
+  TexMacroDef(int the_id, const char *the_name, int n, bool ig, bool forbidLevel = FORBID_OK);
   ~TexMacroDef(void);
 };
 
@@ -106,7 +106,7 @@ class TexChunk
   int type;
 //  char *name;
   TexMacroDef *def;
-  wxChar *value;
+  char *value;
   int macroId;
   int no_args;
   int argn;
@@ -130,39 +130,39 @@ class TexTopic: public wxObject
   // to find there's only one page in it. We might force a book to be used if
   // a top-level topic has no children (?)
   bool hasChildren;
-  wxChar *filename;
+  char *filename;
   wxStringList *keywords;
-  TexTopic(wxChar *f = NULL);
+  TexTopic(char *f = NULL);
   ~TexTopic(void);
 };
 extern wxHashTable TopicTable;
-void AddKeyWordForTopic(wxChar *topic, wxChar *entry, wxChar *filename = NULL);
+void AddKeyWordForTopic(char *topic, char *entry, char *filename = NULL);
 void ClearKeyWordTable(void);
 
-extern wxChar wxTex2RTFBuffer[];
+extern char wxTex2RTFBuffer[];
 extern TexChunk     *TopLevel;
 extern wxHashTable  MacroDefs;
 extern wxStringList IgnorableInputFiles; // Ignorable \input files, e.g. psbox.tex
 
-bool read_a_line(wxChar *buf);
-bool TexLoadFile(wxChar *filename);
-int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos,
-           wxChar *environment = NULL, bool parseArgToBrace = true, TexChunk *customMacroArgs = NULL);
-int ParseMacroBody(const wxChar *macro_name, TexChunk *parent, int no_args,
-           wxChar *buffer, int pos, wxChar *environment = NULL, bool parseArgToBrace = true, TexChunk *customMacroArgs = NULL);
+bool read_a_line(char *buf);
+bool TexLoadFile(char *filename);
+int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos,
+           char *environment = NULL, bool parseArgToBrace = TRUE, TexChunk *customMacroArgs = NULL);
+int ParseMacroBody(const char *macro_name, TexChunk *parent, int no_args,
+           char *buffer, int pos, char *environment = NULL, bool parseArgToBrace = TRUE, TexChunk *customMacroArgs = NULL);
 void TraverseDocument(void);
-void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode = NULL, bool childrenOnly = false);
-#define TraverseChildrenFromChunk(arg) TraverseFromChunk(arg, NULL, true)
+void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode = NULL, bool childrenOnly = FALSE);
+#define TraverseChildrenFromChunk(arg) TraverseFromChunk(arg, NULL, TRUE)
 void SetCurrentOutput(FILE *fd);
 void SetCurrentOutputs(FILE *fd1, FILE *fd2);
 extern FILE *CurrentOutput1;
 extern FILE *CurrentOutput2;
-void AddMacroDef(int the_id, const wxChar *name, int n, bool ignore = false, bool forbidden = false);
+void AddMacroDef(int the_id, const char *name, int n, bool ignore = FALSE, bool forbidden = FALSE);
 void TexInitialize(int bufSize);
 void TexCleanUp(void);
-void TexOutput(const wxChar *s, bool ordinaryText = false);
-wxChar *GetArgData(TexChunk *chunk);
-wxChar *GetArgData(void);             // Get the string for the current argument
+void TexOutput(const char *s, bool ordinaryText = FALSE);
+char *GetArgData(TexChunk *chunk);
+char *GetArgData(void);             // Get the string for the current argument
 int GetNoArgs(void);                // Get the number of arguments for the current macro
 TexChunk *GetArgChunk(void);        // Get the chunk for the current argument
 TexChunk *GetTopLevelChunk(void);   // Get the chunk for the top level
@@ -170,15 +170,15 @@ TexChunk *GetNextChunk(void);       // Look ahead to the next chunk
 bool IsArgOptional(void);           // Is this argument an optional argument?
 void DefineDefaultMacros(void);     // Optional set of default macros
 int GetCurrentColumn(void);         // number of characters on current line
-wxChar *ConvertCase(wxChar *s);         // Convert case, according to upperCaseNames setting.
+char *ConvertCase(char *s);         // Convert case, according to upperCaseNames setting.
 extern wxPathList TexPathList;      // Path list, can be used for file searching.
 
 #if !WXWIN_COMPATIBILITY_2
-extern bool StringMatch(const wxChar *one, const wxChar *two, bool subString = true, bool exact = false);
+extern bool StringMatch(const wxChar *one, const wxChar *two, bool subString = TRUE, bool exact = FALSE);
 #endif
 
 // Define a variable value from the .ini file
-wxChar *RegisterSetting(wxChar *settingName, wxChar *settingValue, bool interactive = true);
+char *RegisterSetting(char *settingName, char *settingValue, bool interactive = TRUE);
 
 // Major document styles
 #define LATEX_REPORT    1
@@ -192,9 +192,9 @@ extern TexChunk *DocumentAuthor;
 extern TexChunk *DocumentDate;
 extern int DocumentStyle;
 extern int MinorDocumentStyle;
-extern wxChar *BibliographyStyleString;
-extern wxChar *DocumentStyleString;
-extern wxChar *MinorDocumentStyleString;
+extern char *BibliographyStyleString;
+extern char *DocumentStyleString;
+extern char *MinorDocumentStyleString;
 
 extern int normalFont;
 extern int smallFont;
@@ -217,11 +217,11 @@ extern int sectionFont;
 extern int subsectionFont;
 extern int titleFont;
 extern int authorFont;
-extern bool winHelp;  // Output in Windows Help format if true, linear otherwise
+extern bool winHelp;  // Output in Windows Help format if TRUE, linear otherwise
 extern bool isInteractive;
 extern bool runTwice;
 extern int convertMode;
-extern bool checkCurlyBraces;
+extern bool checkCurleyBraces;
 extern bool checkSyntax;
 extern bool stopRunning;
 extern int  mirrorMargins;
@@ -236,42 +236,42 @@ extern bool useWord; // Insert Word table of contents, etc. etc.
 extern bool indexSubsections; // put subsections in index
 extern bool compatibilityMode;
 extern bool generateHPJ;      // Generate WinHelp HPJ file
-extern wxChar *winHelpTitle;    // Title for Windows Help file
+extern char *winHelpTitle;    // Title for Windows Help file
 extern int defaultTableColumnWidth;
-extern wxChar *bitmapMethod;
+extern char *bitmapMethod;
 extern bool truncateFilenames; // Truncate for DOS
 extern int  winHelpVersion;    // Version e.g. 4 for Win95
 extern bool winHelpContents;   // Generate .cnt file
 extern bool htmlIndex;         // Generate .htx HTML index file
 extern bool htmlFrameContents; // Use frames for HTML contents page
-extern wxChar *htmlStylesheet; // Use this CSS stylesheet for HTML pages
+extern char *htmlStylesheet;   // Use this CSS stylesheet for HTML pages
 extern int  contentsDepth;     // Depth of contents for linear RTF files
 extern bool upperCaseNames;    // Filenames; default is lower case
-extern wxChar *backgroundImageString; // HTML background image
-extern wxChar *backgroundColourString; // HTML background colour
-extern wxChar *textColourString; // HTML text colour
-extern wxChar *linkColourString; // HTML link colour
-extern wxChar *followedLinkColourString; // HTML followed link colour
+extern char *backgroundImageString; // HTML background image
+extern char *backgroundColourString; // HTML background colour
+extern char *textColourString; // HTML text colour
+extern char *linkColourString; // HTML link colour
+extern char *followedLinkColourString; // HTML followed link colour
 extern bool combineSubSections; // Stop splitting files below section
 extern bool htmlWorkshopFiles;  // generate HTML Help Workshop project files
 extern bool ignoreBadRefs;      // Don't insert (REF NOT FOUND)
-extern wxChar *htmlFaceName;      // HTML face name
+extern char *htmlFaceName;      // HTML face name
 
 // Names to help with internationalisation
-extern wxChar *ContentsNameString;
-extern wxChar *AbstractNameString;
-extern wxChar *GlossaryNameString;
-extern wxChar *ReferencesNameString;
-extern wxChar *FiguresNameString;
-extern wxChar *TablesNameString;
-extern wxChar *FigureNameString;
-extern wxChar *TableNameString;
-extern wxChar *IndexNameString;
-extern wxChar *ChapterNameString;
-extern wxChar *SectionNameString;
-extern wxChar *SubsectionNameString;
-extern wxChar *SubsubsectionNameString;
-extern wxChar *UpNameString;
+extern char *ContentsNameString;
+extern char *AbstractNameString;
+extern char *GlossaryNameString;
+extern char *ReferencesNameString;
+extern char *FiguresNameString;
+extern char *TablesNameString;
+extern char *FigureNameString;
+extern char *TableNameString;
+extern char *IndexNameString;
+extern char *ChapterNameString;
+extern char *SectionNameString;
+extern char *SubsectionNameString;
+extern char *SubsubsectionNameString;
+extern char *UpNameString;
 
 /*
  * HTML button identifiers: what kind of browse buttons
@@ -316,24 +316,26 @@ extern TexChunk *      CentreHeaderEven;
 extern TexChunk *      CentreFooterEven;
 extern TexChunk *      RightHeaderEven;
 extern TexChunk *      RightFooterEven;
-extern wxChar *        PageStyle;
+extern char *          PageStyle;
 
 // Repeat the currentSection, either real (Chapter) or simulated (References)
 extern void OutputCurrentSection(void);
-extern void OutputCurrentSectionToString(wxChar *buf);
-extern void OutputChunkToString(TexChunk *chunk, wxChar *buf);
+extern void OutputCurrentSectionToString(char *buf);
+extern void OutputChunkToString(TexChunk *chunk, char *buf);
+
+extern char *fakeCurrentSection;
 
 // Called by Tex2Any to simulate a section
-extern void FakeCurrentSection(wxChar *fakeSection, bool addToContents = true);
+extern void FakeCurrentSection(char *fakeSection, bool addToContents = TRUE);
 
 /*
  * Local to Tex2Any library
  *
  */
  
-extern wxChar *currentArgData;
-extern bool haveArgData; // If true, we're simulating the data.
-void StartSimulateArgument(wxChar *data);
+extern char *currentArgData;
+extern bool haveArgData; // If TRUE, we're simulating the data.
+void StartSimulateArgument(char *data);
 void EndSimulateArgument(void);
 
 /*
@@ -345,7 +347,7 @@ void EndSimulateArgument(void);
 void OnMacro(int macroId, int no_args, bool start);
 
 // Called on start/end of argument examination.
-// Return true at the start of an argument to traverse
+// Return TRUE at the start of an argument to traverse
 // (output) the argument.
 bool OnArgument(int macroId, int arg_no, bool start);
 
@@ -356,13 +358,13 @@ void DefaultOnMacro(int macroId, int no_args, bool start);
 bool DefaultOnArgument(int macroId, int arg_no, bool start);
 
 // Called on error
-void OnError(const wxChar *msg);
+void OnError(const char *msg);
 
 // Called for information
-void OnInform(const wxChar *msg);
+void OnInform(const char *msg);
 
 // Special yield wrapper
-void Tex2RTFYield(bool force = false);
+void Tex2RTFYield(bool force = FALSE);
 
 /*
  * Useful utilities
@@ -371,13 +373,13 @@ void Tex2RTFYield(bool force = false);
 
 // Look for \label macro, use this ref name if found or
 // make up a topic name otherwise.
-wxChar *FindTopicName(TexChunk *chunk);
+char *FindTopicName(TexChunk *chunk);
 // Force the current topic to be this (e.g. force 'references' label).
-void ForceTopicName(const wxChar *name);
+void ForceTopicName(const char *name);
 void ResetTopicCounter(void);
 
 // Parse unit eg. 14, 12pt, 34cm and return value in points.
-int ParseUnitArgument(wxChar *unitArg);
+int ParseUnitArgument(char *unitArg);
 
 // Set small, large, normal etc. point sizes for reference size
 void SetFontSizes(int pointSize);
@@ -388,7 +390,7 @@ void SetFontSizes(int pointSize);
  *
  */
  
-void StripExtension(wxChar *buffer);
+void StripExtension(char *buffer);
 
 /*
  * Reference structure
@@ -398,11 +400,11 @@ void StripExtension(wxChar *buffer);
 class TexRef: public wxObject
 {
  public:
-  wxChar *refLabel;      // Reference label
-  wxChar *refFile;       // Reference filename (can be NULL)
-  wxChar *sectionNumber; // Section or figure number (as a string)
-  wxChar *sectionName; // name e.g. 'section'
-  TexRef(const wxChar *label, const wxChar *file, const wxChar *section, const wxChar *sectionN = NULL);
+  char *refLabel;      // Reference label
+  char *refFile;       // Reference filename (can be NULL)
+  char *sectionNumber; // Section or figure number (as a string)
+  char *sectionName; // name e.g. 'section'
+  TexRef(const char *label, const char *file, const char *section, const char *sectionN = NULL);
   ~TexRef(void);
 };
 
@@ -411,15 +413,15 @@ class TexRef: public wxObject
  *
  */
  
-void AddTexRef(wxChar *name, wxChar *file = NULL, wxChar *sectionName = NULL,
+void AddTexRef(char *name, char *file = NULL, char *sectionName = NULL,
          int chapter = 0, int section = 0, int subsection = 0, int subsubsection = 0);
 
 /*
  * Read and write reference file (.ref), to resolve refs for second pass.
  *
  */
-void WriteTexReferences(wxChar *filename);
-void ReadTexReferences(wxChar *filename);
+void WriteTexReferences(char *filename);
+void ReadTexReferences(char *filename);
 
 /*
  * Bibliography stuff
@@ -429,33 +431,33 @@ void ReadTexReferences(wxChar *filename);
 class BibEntry: public wxObject
 {
  public:
-  wxChar *key;
+  char *key;
 
   /*
    * book, inbook, article, phdthesis, inproceedings, techreport
    */
-  wxChar *type;
+  char *type;
 
   /*
    * Possible fields
    *
    */
-  wxChar *editor;
-  wxChar *title;
-  wxChar *booktitle;
-  wxChar *author;
-  wxChar *journal;
-  wxChar *volume;
-  wxChar *number;
-  wxChar *year;
-  wxChar *month;
-  wxChar *pages;
-  wxChar *chapter;
-  wxChar *publisher;
-  wxChar *address;
-  wxChar *institution;
-  wxChar *organization;
-  wxChar *comment;
+  char *editor;
+  char *title;
+  char *booktitle;
+  char *author;
+  char *journal;
+  char *volume;
+  char *number;
+  char *year;
+  char *month;
+  char *pages;
+  char *chapter;
+  char *publisher;
+  char *address;
+  char *institution;
+  char *organization;
+  char *comment;
 
   inline BibEntry(void)
   {
@@ -483,11 +485,11 @@ class BibEntry: public wxObject
 extern wxList BibList;
 extern wxStringList CitationList;
 
-bool ReadBib(wxChar *filename);
+bool ReadBib(char *filename);
 void OutputBib(void);
 void ResolveBibReferences(void);
-void AddCitation(wxChar *citeKey);
-TexRef *FindReference(wxChar *key);
+void AddCitation(char *citeKey);
+TexRef *FindReference(char *key);
 
 /*
  * Ability to customize, or at least suppress unknown macro errors
@@ -503,25 +505,25 @@ extern wxList CustomMacroList;
 class CustomMacro: public wxObject
 {
  public:
-  wxChar *macroName;
-  wxChar *macroBody;
+  char *macroName;
+  char *macroBody;
   int noArgs;
-  inline CustomMacro(wxChar *name, int args, wxChar *body)
+  inline CustomMacro(char *name, int args, char *body)
   {
     noArgs = args;
-    macroName = wxStrcpy(new wxChar[wxStrlen(name) + 1], name);
+    macroName = copystring(name);
     if (body)
-      macroBody = wxStrcpy(new wxChar[wxStrlen(body) + 1], body);
+      macroBody = copystring(body);
     else
       macroBody = NULL;
   }
   ~CustomMacro();
 };
 
-bool ReadCustomMacros(wxChar *filename);
+bool ReadCustomMacros(char *filename);
 void ShowCustomMacros(void);
-CustomMacro *FindCustomMacro(wxChar *name);
-wxChar *ParseMultifieldString(wxChar *s, int *pos);
+CustomMacro *FindCustomMacro(char *name);
+char *ParseMultifieldString(char *s, int *pos);
 
 /*
  * Colour table stuff
@@ -531,20 +533,20 @@ wxChar *ParseMultifieldString(wxChar *s, int *pos);
 class ColourTableEntry: public wxObject
 {
  public:
-  wxChar *name;
+  char *name;
   unsigned int red;
   unsigned int green;
   unsigned int blue;
 
-  ColourTableEntry(const wxChar *theName, unsigned int r,  unsigned int g,  unsigned int b);
+  ColourTableEntry(const char *theName, unsigned int r,  unsigned int g,  unsigned int b);
   ~ColourTableEntry(void);
 };
 
 extern wxList ColourTable;
-extern void AddColour(const wxChar *theName, unsigned int r,  unsigned int g,  unsigned int b);
-extern int FindColourPosition(wxChar *theName);
+extern void AddColour(const char *theName, unsigned int r,  unsigned int g,  unsigned int b);
+extern int FindColourPosition(char *theName);
 // Converts e.g. "red" -> "#FF0000"
-extern bool FindColourHTMLString(wxChar *theName, wxChar *buf);
+extern bool FindColourHTMLString(char *theName, char *buf);
 extern void InitialiseColourTable(void);
 
 #define ltABSTRACT          1

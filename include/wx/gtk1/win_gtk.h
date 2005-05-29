@@ -1,6 +1,6 @@
 /* ///////////////////////////////////////////////////////////////////////////
 // Name:        win_gtk.h
-// Purpose:     wxWidgets's GTK base widget = GtkPizza
+// Purpose:     wxWindows's GTK base widget = GtkPizza
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
@@ -82,7 +82,7 @@ struct _GtkPizzaClass
 				     GtkAdjustment  *vadjustment);
 };
 
-GtkType    gtk_pizza_get_type        (void);
+guint      gtk_pizza_get_type        (void);
 GtkWidget* gtk_pizza_new             (void);
 
 void       gtk_pizza_set_shadow_type (GtkPizza          *pizza,

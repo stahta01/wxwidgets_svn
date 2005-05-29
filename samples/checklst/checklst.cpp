@@ -34,10 +34,6 @@
 #include  "wx/menuitem.h"
 #include  "wx/checklst.h"
 
-#if !wxUSE_CHECKLISTBOX
-    #error "This sample can't be built without wxUSE_CHECKLISTBOX"
-#endif // wxUSE_CHECKLISTBOX
-
 // Define a new application type
 class CheckListBoxApp: public wxApp
 {
@@ -52,24 +48,17 @@ public:
     // ctor & dtor
     CheckListBoxFrame(wxFrame *frame, const wxChar *title,
                       int x, int y, int w, int h);
-    virtual ~CheckListBoxFrame(){};
+    virtual ~CheckListBoxFrame();
 
     // notifications
-    void OnQuit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-
-    void OnCheckFirstItem(wxCommandEvent& event);
-    void OnUncheckFirstItem(wxCommandEvent& event);
-    void OnToggleFirstItem(wxCommandEvent& event);
+    void OnQuit           (wxCommandEvent& event);
+    void OnAbout          (wxCommandEvent& event);
     void OnToggleSelection(wxCommandEvent& event);
-    void OnAddItems(wxCommandEvent& event);
-
-    void OnListboxSelect(wxCommandEvent& event);
-    void OnCheckboxToggle(wxCommandEvent& event);
+    void OnListboxSelect  (wxCommandEvent& event);
+    void OnCheckboxToggle (wxCommandEvent& event);
     void OnListboxDblClick(wxCommandEvent& event);
-
-    void OnButtonUp(wxCommandEvent& event);
-    void OnButtonDown(wxCommandEvent& event);
+    void OnButtonUp       (wxCommandEvent& event);
+    void OnButtonDown     (wxCommandEvent& event);
 
 private:
     void CreateCheckListbox(long flags = 0);
@@ -89,12 +78,7 @@ enum
 {
     Menu_About = 100,
     Menu_Quit,
-
-    Menu_CheckFirst,
-    Menu_UncheckFirst,
-    Menu_ToggleFirst,
     Menu_Selection,
-    Menu_AddItems,
 
     Control_First = 1000,
     Control_Listbox,
@@ -106,11 +90,7 @@ BEGIN_EVENT_TABLE(CheckListBoxFrame, wxFrame)
     EVT_MENU(Menu_About, CheckListBoxFrame::OnAbout)
     EVT_MENU(Menu_Quit, CheckListBoxFrame::OnQuit)
 
-    EVT_MENU(Menu_CheckFirst, CheckListBoxFrame::OnCheckFirstItem)
-    EVT_MENU(Menu_UncheckFirst, CheckListBoxFrame::OnUncheckFirstItem)
-    EVT_MENU(Menu_ToggleFirst, CheckListBoxFrame::OnToggleFirstItem)
     EVT_MENU(Menu_Selection, CheckListBoxFrame::OnToggleSelection)
-    EVT_MENU(Menu_AddItems, CheckListBoxFrame::OnAddItems)
 
     EVT_LISTBOX(Control_Listbox, CheckListBoxFrame::OnListboxSelect)
     EVT_CHECKLISTBOX(Control_Listbox, CheckListBoxFrame::OnCheckboxToggle)
@@ -128,27 +108,25 @@ bool CheckListBoxApp::OnInit(void)
     CheckListBoxFrame *pFrame = new CheckListBoxFrame
                                     (
                                      NULL,
-                                     _T("wxWidgets Checklistbox Sample"),
+                                     _T("wxWindows Checklistbox Sample"),
                                      50, 50, 480, 320
                                     );
     SetTopWindow(pFrame);
 
-    return true;
+    return TRUE;
 }
 
 // main frame constructor
 CheckListBoxFrame::CheckListBoxFrame(wxFrame *frame,
                                      const wxChar *title,
                                      int x, int y, int w, int h)
-                 : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h))
+                 : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h))
 {
-#if wxUSE_STATUSBAR
     // create the status line
     const int widths[] = { -1, 60 };
     CreateStatusBar(2);
     SetStatusWidths(2, widths);
     wxLogStatus(this, _T("no selection"));
-#endif // wxUSE_STATUSBAR
 
     // Make a menubar
     // --------------
@@ -161,12 +139,6 @@ CheckListBoxFrame::CheckListBoxFrame(wxFrame *frame,
 
     // listbox submenu
     wxMenu *menuList = new wxMenu;
-    menuList->Append(Menu_CheckFirst, _T("Check the first item\tCtrl-C"));
-    menuList->Append(Menu_UncheckFirst, _T("Uncheck the first item\tCtrl-U"));
-    menuList->Append(Menu_ToggleFirst, _T("Toggle the first item\tCtrl-T"));
-    menuList->AppendSeparator();
-    menuList->AppendCheckItem(Menu_AddItems, _T("Add more items\tCtrl-A"));
-    menuList->AppendSeparator();
     menuList->AppendCheckItem(Menu_Selection, _T("Multiple selection\tCtrl-M"));
 
     // put it all together
@@ -176,7 +148,7 @@ CheckListBoxFrame::CheckListBoxFrame(wxFrame *frame,
     SetMenuBar(menu_bar);
 
     // make a panel with some controls
-    m_panel = new wxPanel(this, wxID_ANY, wxPoint(0, 0),
+    m_panel = new wxPanel(this, -1, wxPoint(0, 0),
                           wxSize(400, 200), wxTAB_TRAVERSAL);
 
     CreateCheckListbox();
@@ -198,13 +170,13 @@ CheckListBoxFrame::CheckListBoxFrame(wxFrame *frame,
     mainsizer->Add( bottomsizer, 0, wxCENTER );
 
     // tell frame to make use of sizer (or constraints, if any)
-    m_panel->SetAutoLayout( true );
+    m_panel->SetAutoLayout( TRUE );
     m_panel->SetSizer( mainsizer );
 
     // don't allow frame to get smaller than what the sizers tell ye
     mainsizer->SetSizeHints( this );
 
-    Show(true);
+    Show(TRUE);
 }
 
 void CheckListBoxFrame::CreateCheckListbox(long flags)
@@ -247,52 +219,27 @@ void CheckListBoxFrame::CreateCheckListbox(long flags)
     m_pListBox->Select(3);
 }
 
+CheckListBoxFrame::~CheckListBoxFrame()
+{
+}
+
 void CheckListBoxFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void CheckListBoxFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(wxT("Demo of wxCheckListBox control\n(c) Vadim Zeitlin 1998-2002"),
+    wxMessageBox(wxT("Demo of wxCheckListBox control\n© Vadim Zeitlin 1998-2002"),
                  wxT("About wxCheckListBox"),
                  wxICON_INFORMATION, this);
-}
-
-void CheckListBoxFrame::OnCheckFirstItem(wxCommandEvent& WXUNUSED(event))
-{
-    if ( !m_pListBox->IsEmpty() )
-        m_pListBox->Check(0);
-}
-
-void CheckListBoxFrame::OnUncheckFirstItem(wxCommandEvent& WXUNUSED(event))
-{
-    if ( !m_pListBox->IsEmpty() )
-        m_pListBox->Check(0, false);
-}
-
-void CheckListBoxFrame::OnToggleFirstItem(wxCommandEvent& WXUNUSED(event))
-{
-    if ( !m_pListBox->IsEmpty() )
-        m_pListBox->Check(0, !m_pListBox->IsChecked(0));
-}
-
-void CheckListBoxFrame::OnAddItems(wxCommandEvent& WXUNUSED(event))
-{
-    static size_t s_nItem = 0;
-    wxArrayString items;
-    items.Add(wxString::Format(_T("New item %lu"), (unsigned long)++s_nItem));
-    items.Add(wxString::Format(_T("New item %lu"), (unsigned long)++s_nItem));
-    items.Add(wxString::Format(_T("New item %lu"), (unsigned long)++s_nItem));
-
-    m_pListBox->InsertItems(items, 0);//m_pListBox->GetCount());
 }
 
 void CheckListBoxFrame::OnToggleSelection(wxCommandEvent& event)
 {
     wxSizer *sizer = m_panel->GetSizer();
 
-    sizer->Detach( m_pListBox );
+    sizer->Remove(m_pListBox);
     delete m_pListBox;
 
     CreateCheckListbox(event.IsChecked() ? wxLB_EXTENDED : 0);
@@ -306,35 +253,13 @@ void CheckListBoxFrame::OnListboxSelect(wxCommandEvent& event)
 {
     int nSel = event.GetSelection();
     wxLogStatus(this, wxT("Item %d selected (%schecked)"), nSel,
-                      m_pListBox->IsChecked(nSel) ? wxT("") : wxT("not "));
+                      m_pListBox->IsChecked(nSel) ? _T("") : wxT("not "));
 }
 
 void CheckListBoxFrame::OnListboxDblClick(wxCommandEvent& WXUNUSED(event))
 {
-    int selection = -1;
-    if(m_pListBox->GetWindowStyle() & wxLB_EXTENDED)
-    {
-        wxArrayInt list;
-        m_pListBox->GetSelections(list);
-        if(list.Count()==1)
-        {
-            selection = list.Item(0);
-        }
-    }
-    else
-    {
-        selection = m_pListBox->GetSelection();
-    }
-
     wxString strSelection;
-    if ( selection != -1 )
-    {
-        strSelection.Printf(wxT("Item %d double clicked"), selection);
-    }
-    else
-    {
-        strSelection = wxT("List double clicked in multiple selection mode");
-    }
+    strSelection.sprintf(wxT("Item %d double clicked"), m_pListBox->GetSelection());
     wxMessageDialog dialog(this, strSelection, wxT("wxCheckListBox message"), wxICON_INFORMATION);
     dialog.ShowModal();
 }
@@ -349,30 +274,17 @@ void CheckListBoxFrame::OnCheckboxToggle(wxCommandEvent& event)
 
 void CheckListBoxFrame::OnButtonUp(wxCommandEvent& WXUNUSED(event))
 {
-    OnButtonMove(true);
+    OnButtonMove(TRUE);
 }
 
 void CheckListBoxFrame::OnButtonDown(wxCommandEvent& WXUNUSED(event))
 {
-    OnButtonMove(false);
+    OnButtonMove(FALSE);
 }
 
 void CheckListBoxFrame::OnButtonMove(bool up)
 {
-    int selection = -1;
-    if(m_pListBox->GetWindowStyle() & wxLB_EXTENDED)
-    {
-        wxArrayInt list;
-        m_pListBox->GetSelections(list);
-        if(list.Count()==1)
-        {
-            selection = list.Item(0);
-        }
-    }
-    else
-    {
-        selection = m_pListBox->GetSelection();
-    }
+    int selection = m_pListBox->GetSelection();
     if ( selection != -1 )
     {
         wxString label = m_pListBox->GetString(selection);
@@ -406,20 +318,16 @@ void CheckListBoxFrame::OnButtonMove(bool up)
     }
     else
     {
-        wxLogStatus(this, wxT("Please select single item"));
+        wxLogStatus(this, wxT("Please select an item"));
     }
 }
 
-// not implemented in ports other than (native) MSW yet
-#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
 void CheckListBoxFrame::AdjustColour(size_t index)
 {
+    // not implemented in ports other than (native) MSW yet
+#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
     // even items have grey backround, odd ones - white
     unsigned char c = index % 2 ? 255 : 200;
     m_pListBox->GetItem(index)->SetBackgroundColour(wxColor(c, c, c));
-}
-#else
-void CheckListBoxFrame::AdjustColour(size_t WXUNUSED(index))
-{
-}
 #endif // wxMSW
+}

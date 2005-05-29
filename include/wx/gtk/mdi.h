@@ -11,7 +11,7 @@
 #ifndef __MDIH__
 #define __MDIH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -22,6 +22,8 @@
 #include "wx/panel.h"
 #include "wx/frame.h"
 #include "wx/toolbar.h"
+
+#if wxUSE_MDI_ARCHITECTURE
 
 //-----------------------------------------------------------------------------
 // classes
@@ -74,7 +76,7 @@ public:
     virtual wxMDIClientWindow *OnCreateClient();
 
     virtual void Cascade() {}
-    virtual void Tile(wxOrientation WXUNUSED(orient) = wxHORIZONTAL) {}
+    virtual void Tile() {}
     virtual void ArrangeIcons() {}
     virtual void ActivateNext();
     virtual void ActivatePrevious();
@@ -144,7 +146,7 @@ public:
 #endif
 
     // no size hints
-    virtual void DoSetSizeHints( int WXUNUSED(minW),
+    virtual void SetSizeHints( int WXUNUSED(minW),
                                int WXUNUSED(minH),
                                int WXUNUSED(maxW) = -1,
                                int WXUNUSED(maxH) = -1,
@@ -152,32 +154,27 @@ public:
                                int WXUNUSED(incH) = -1) {}
 
 #if wxUSE_TOOLBAR
-    // no toolbar
+    // no toolbar bars
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
                                        wxWindowID WXUNUSED(id),
                                        const wxString& WXUNUSED(name) )
         { return (wxToolBar*)NULL; }
     virtual wxToolBar *GetToolBar() const { return (wxToolBar*)NULL; }
-#endif // wxUSE_TOOLBAR
+#endif
 
     // no icon
-    virtual void SetIcon(const wxIcon& icon)
-        { wxTopLevelWindowBase::SetIcon(icon); }
-    virtual void SetIcons(const wxIconBundle& icons )
-        { wxTopLevelWindowBase::SetIcons(icons); }
+    void SetIcon( const wxIcon &icon ) { m_icons = wxIconBundle( icon ); }
+    void SetIcons( const wxIconBundle &icons ) { m_icons = icons; }
 
     // no title
     void SetTitle( const wxString &title );
     wxString GetTitle() const { return m_title; }
 
     // no maximize etc
-    virtual void Maximize( bool WXUNUSED(maximize) = true ) { }
-    virtual bool IsMaximized() const { return true; }
-    virtual void Iconize(bool WXUNUSED(iconize) = true) { }
-    virtual bool IsIconized() const { return false; }
+    virtual void Maximize( bool WXUNUSED(maximize) ) {}
     virtual void Restore() {}
 
-    virtual bool IsTopLevel() const { return false; }
+    virtual bool IsTopLevel() const { return FALSE; }
 
     void OnActivate( wxActivateEvent& event );
     void OnMenuHighlight( wxMenuEvent& event );
@@ -216,6 +213,8 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxMDIClientWindow)
 };
+
+#endif // if USE_MDI...
 
 #endif // __MDIH__
 

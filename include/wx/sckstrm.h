@@ -11,7 +11,7 @@
 #ifndef __SCK_STREAM_H__
 #define __SCK_STREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -21,52 +21,46 @@
 
 #include "wx/socket.h"
 
-class WXDLLIMPEXP_NET wxSocketOutputStream : public wxOutputStream
+class WXDLLEXPORT wxSocketOutputStream : public wxOutputStream
 {
  public:
   wxSocketOutputStream(wxSocketBase& s);
   ~wxSocketOutputStream();
 
-  wxFileOffset SeekO( wxFileOffset WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
+  off_t SeekO( off_t WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
     { return -1; }
-  wxFileOffset TellO() const
+  off_t TellO() const
     { return -1; }
 
  protected:
   wxSocketBase *m_o_socket;
 
   size_t OnSysWrite(const void *buffer, size_t bufsize);
-
-    DECLARE_NO_COPY_CLASS(wxSocketOutputStream)
 };
 
-class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
+class WXDLLEXPORT wxSocketInputStream : public wxInputStream
 {
  public:
   wxSocketInputStream(wxSocketBase& s);
   ~wxSocketInputStream();
 
-  wxFileOffset SeekI( wxFileOffset WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
+  off_t SeekI( off_t WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
     { return -1; }
-  wxFileOffset TellI() const
+  off_t TellI() const
     { return -1; }
 
  protected:
   wxSocketBase *m_i_socket;
 
   size_t OnSysRead(void *buffer, size_t bufsize);
-
-    DECLARE_NO_COPY_CLASS(wxSocketInputStream)
 };
 
-class WXDLLIMPEXP_NET wxSocketStream : public wxSocketInputStream,
+class WXDLLEXPORT wxSocketStream : public wxSocketInputStream,
                    public wxSocketOutputStream
 {
  public:
   wxSocketStream(wxSocketBase& s);
   ~wxSocketStream();
-
-  DECLARE_NO_COPY_CLASS(wxSocketStream)
 };
 
 #endif

@@ -6,7 +6,7 @@
 // Created:     14.10.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "statbar.h"
 #endif
 
@@ -29,7 +29,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
     #include "wx/statusbr.h"
 #endif //WX_PRECOMP
 
@@ -54,22 +53,12 @@ wxStatusBarBase::wxStatusBarBase()
 
     InitWidths();
     InitStacks();
-    InitStyles();
 }
 
 wxStatusBarBase::~wxStatusBarBase()
 {
     FreeWidths();
     FreeStacks();
-    FreeStyles();
-
-    // notify the frame that it doesn't have a status bar any longer to avoid
-    // dangling pointers
-    wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-    if ( frame && frame->GetStatusBar() == this )
-    {
-        frame->SetStatusBar(NULL);
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -87,20 +76,6 @@ void wxStatusBarBase::FreeWidths()
 }
 
 // ----------------------------------------------------------------------------
-// styles array handling
-// ----------------------------------------------------------------------------
-
-void wxStatusBarBase::InitStyles()
-{
-    m_statusStyles = NULL;
-}
-
-void wxStatusBarBase::FreeStyles()
-{
-    delete [] m_statusStyles;
-}
-
-// ----------------------------------------------------------------------------
 // field widths
 // ----------------------------------------------------------------------------
 
@@ -108,7 +83,7 @@ void wxStatusBarBase::SetFieldsCount(int number, const int *widths)
 {
     wxCHECK_RET( number > 0, _T("invalid field number in SetFieldsCount") );
 
-    bool refresh = false;
+    bool refresh = FALSE;
 
     if ( number != m_nFields )
     {
@@ -137,31 +112,11 @@ void wxStatusBarBase::SetFieldsCount(int number, const int *widths)
             m_statusTextStacks = newStacks;
         }
 
-        // Resize styles array
-        if (m_statusStyles)
-        {
-            int *oldStyles = m_statusStyles;
-            m_statusStyles = new int[number];
-            int i, max = wxMin(number, m_nFields);
-
-            // copy old styles
-            for (i = 0; i < max; ++i)
-                m_statusStyles[i] = oldStyles[i];
-
-            // initialize new styles to wxSB_NORMAL
-            for (i = max; i < number; ++i)
-                m_statusStyles[i] = wxSB_NORMAL;
-
-            // free old styles
-            delete [] oldStyles;
-        }
-
-
         m_nFields = number;
 
         ReinitWidths();
 
-        refresh = true;
+        refresh = TRUE;
     }
     //else: keep the old m_statusWidths if we had them
 
@@ -170,7 +125,7 @@ void wxStatusBarBase::SetFieldsCount(int number, const int *widths)
         SetStatusWidths(number, widths);
 
         // already done from SetStatusWidths()
-        refresh = false;
+        refresh = FALSE;
     }
 
     if ( refresh )
@@ -190,25 +145,6 @@ void wxStatusBarBase::SetStatusWidths(int WXUNUSED_UNLESS_DEBUG(n),
     for ( int i = 0; i < m_nFields; i++ )
     {
         m_statusWidths[i] = widths[i];
-    }
-
-    // update the display after the widths changed
-    Refresh();
-}
-
-void wxStatusBarBase::SetStatusStyles(int WXUNUSED_UNLESS_DEBUG(n),
-                                      const int styles[])
-{
-    wxCHECK_RET( styles, _T("NULL pointer in SetStatusStyles") );
-
-    wxASSERT_MSG( n == m_nFields, _T("field number mismatch") );
-
-    if ( !m_statusStyles )
-        m_statusStyles = new int[m_nFields];
-
-    for ( int i = 0; i < m_nFields; i++ )
-    {
-        m_statusStyles[i] = styles[i];
     }
 
     // update the display after the widths changed
@@ -252,7 +188,16 @@ wxArrayInt wxStatusBarBase::CalculateAbsWidths(wxCoord widthTotal) const
         }
 
         // the amount of extra width we have per each var width field
-        int widthExtra = widthTotal - nTotalWidth;
+        int nVarWidth;
+        if ( nVarCount )
+        {
+            int widthExtra = widthTotal - nTotalWidth;
+            nVarWidth = widthExtra > 0 ? widthExtra / nVarCount : 0;
+        }
+        else // no var width fields at all
+        {
+            nVarWidth = 0;
+        }
 
         // do fill the array
         for ( i = 0; i < m_nFields; i++ )
@@ -263,10 +208,7 @@ wxArrayInt wxStatusBarBase::CalculateAbsWidths(wxCoord widthTotal) const
             }
             else
             {
-                int nVarWidth = widthExtra > 0 ? (widthExtra * -m_statusWidths[i]) / nVarCount : 0;
-                nVarCount += m_statusWidths[i];
-                widthExtra -= nVarWidth;
-                widths.Add(nVarWidth);
+                widths.Add(-m_statusWidths[i]*nVarWidth);
             }
         }
     }
@@ -285,15 +227,14 @@ void wxStatusBarBase::InitStacks()
 
 void wxStatusBarBase::FreeStacks()
 {
-    if ( !m_statusTextStacks )
-        return;
+    if(!m_statusTextStacks) return;
+    size_t i;
 
-    for ( size_t i = 0; i < (size_t)m_nFields; ++i )
+    for(i = 0; i < (size_t)m_nFields; ++i)
     {
-        if ( m_statusTextStacks[i] )
+        if(m_statusTextStacks[i])
         {
-            wxListString& t = *m_statusTextStacks[i];
-            WX_CLEAR_LIST(wxListString, t);
+            m_statusTextStacks[i]->Clear();
             delete m_statusTextStacks[i];
         }
     }
@@ -308,11 +249,11 @@ void wxStatusBarBase::FreeStacks()
 void wxStatusBarBase::PushStatusText(const wxString& text, int number)
 {
     wxListString* st = GetOrCreateStatusStack(number);
-    // This long-winded way around avoids an internal compiler error
-    // in VC++ 6 with RTTI enabled
-    wxString tmp1(GetStatusText(number));
-    wxString* tmp = new wxString(tmp1);
-    st->Insert(tmp);
+    // Temporary variables used here to avoid an internal compiler error
+    // in VC++ 6 in _AFXDLL mode
+    wxString statusText(GetStatusText(number));
+    wxString* s = new wxString(statusText);
+    st->Insert(s);
     SetStatusText(text, number);
 }
 
@@ -320,11 +261,10 @@ void wxStatusBarBase::PopStatusText(int number)
 {
     wxListString *st = GetStatusStack(number);
     wxCHECK_RET( st, _T("Unbalanced PushStatusText/PopStatusText") );
-    wxListString::compatibility_iterator top = st->GetFirst();
+    wxListString::Node *top = st->GetFirst();
 
     SetStatusText(*top->GetData(), number);
-    delete top->GetData();
-    st->Erase(top);
+    st->DeleteNode(top);
     if(st->GetCount() == 0)
     {
         delete st;
@@ -352,6 +292,7 @@ wxListString *wxStatusBarBase::GetOrCreateStatusStack(int i)
     if(!m_statusTextStacks[i])
     {
         m_statusTextStacks[i] = new wxListString();
+        m_statusTextStacks[i]->DeleteContents(TRUE);
     }
 
     return m_statusTextStacks[i];

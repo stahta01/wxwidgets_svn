@@ -13,7 +13,7 @@
 #ifndef __PRINTPSH__
 #define __PRINTPSH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "printps.h"
 #endif
 
@@ -31,10 +31,10 @@ public:
     wxPostScriptPrinter(wxPrintDialogData *data = (wxPrintDialogData *) NULL);
     virtual ~wxPostScriptPrinter();
 
-    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true);
+    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = TRUE);
     virtual wxDC* PrintDialog(wxWindow *parent);
     virtual bool Setup(wxWindow *parent);
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxPostScriptPrinter)
 };

@@ -17,7 +17,7 @@
 // headers
 // -----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "treebase.h"
 #endif
 
@@ -37,6 +37,7 @@
 #include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
 #include "wx/dcclient.h"
+#include "wx/msgdlg.h"
 
 
 // ----------------------------------------------------------------------------
@@ -61,9 +62,6 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_ACTIVATED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_END_DRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_MENU)
 
 // ----------------------------------------------------------------------------
 // Tree event
@@ -76,28 +74,8 @@ wxTreeEvent::wxTreeEvent(wxEventType commandType, int id)
            : wxNotifyEvent(commandType, id)
 {
     m_itemOld = 0l;
-    m_editCancelled = false;
+    m_editCancelled = FALSE;
 }
-
-wxTreeEvent::wxTreeEvent(const wxTreeEvent & event)
-           : wxNotifyEvent(event)
-{
-    m_evtKey = event.m_evtKey;
-    m_item = event.m_item;
-    m_itemOld = event.m_itemOld;
-    m_pointDrag = event.m_pointDrag;
-    m_label = event.m_label;
-    m_editCancelled = event.m_editCancelled;
-}
-
-#if WXWIN_COMPATIBILITY_2_2
-
-int wxTreeEvent::GetCode() const
-{
-    return m_evtKey.GetKeyCode();
-}
-
-#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL
 

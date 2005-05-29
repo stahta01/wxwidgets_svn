@@ -7,13 +7,13 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   &  Vadim Zeitlin
 //                       Ballueder@usa.net     <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _FILECONF_H
 #define   _FILECONF_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "fileconf.h"
 #endif
 
@@ -23,7 +23,6 @@
 
 #include "wx/textfile.h"
 #include "wx/string.h"
-#include "wx/confbase.h"
 
 // ----------------------------------------------------------------------------
 // wxFileConfig
@@ -89,20 +88,16 @@
   in the entries it reads: for example, if you have an entry
     score_file = $HOME/.score
   a call to Read(&str, "score_file") will return a complete path to .score file
-  unless the expansion was previously disabled with SetExpandEnvVars(false) call
+  unless the expansion was previousle disabled with SetExpandEnvVars(FALSE) call
   (it's on by default, the current status can be retrieved with
    IsExpandingEnvVars function).
 */
-class WXDLLIMPEXP_BASE wxFileConfigGroup;
-class WXDLLIMPEXP_BASE wxFileConfigEntry;
-class WXDLLIMPEXP_BASE wxFileConfigLineList;
+class WXDLLEXPORT wxFileConfigGroup;
+class WXDLLEXPORT wxFileConfigEntry;
+class WXDLLEXPORT wxFileConfigLineList;
+class WXDLLEXPORT wxInputStream;
 
-#if wxUSE_STREAMS
-class WXDLLIMPEXP_BASE wxInputStream;
-class WXDLLIMPEXP_BASE wxOutputStream;
-#endif // wxUSE_STREAMS
-
-class WXDLLIMPEXP_BASE wxFileConfig : public wxConfigBase
+class WXDLLEXPORT wxFileConfig : public wxConfigBase
 {
 public:
   // construct the "standard" full name for global (system-wide) and
@@ -113,7 +108,7 @@ public:
   // Unix   /etc/file.ext           ~/.file
   // Win    %windir%\file.ext   %USERPROFILE%\file.ext
   //
-  // where file is the basename of szFile, ext is its extension
+  // where file is the basename of szFile, ext is it's extension
   // or .conf (Unix) or .ini (Win) if it has none
   static wxString GetGlobalFileName(const wxChar *szFile);
   static wxString GetLocalFileName(const wxChar *szFile);
@@ -121,16 +116,15 @@ public:
   // ctor & dtor
     // New constructor: one size fits all. Specify wxCONFIG_USE_LOCAL_FILE or
     // wxCONFIG_USE_GLOBAL_FILE to say which files should be used.
-  wxFileConfig(const wxString& appName = wxEmptyString,
-               const wxString& vendorName = wxEmptyString,
-               const wxString& localFilename = wxEmptyString,
-               const wxString& globalFilename = wxEmptyString,
-               long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
-               wxMBConv& conv = wxConvUTF8);
+  wxFileConfig(const wxString& appName = wxT(""),
+               const wxString& vendorName = wxT(""),
+               const wxString& localFilename = wxT(""),
+               const wxString& globalFilename = wxT(""),
+               long style = wxCONFIG_USE_LOCAL_FILE);
 
 #if wxUSE_STREAMS
     // ctor that takes an input stream.
-  wxFileConfig(wxInputStream &inStream, wxMBConv& conv = wxConvUTF8);
+  wxFileConfig(wxInputStream &inStream);
 #endif // wxUSE_STREAMS
 
     // dtor will save unsaved data
@@ -153,28 +147,20 @@ public:
   virtual bool GetFirstEntry(wxString& str, long& lIndex) const;
   virtual bool GetNextEntry (wxString& str, long& lIndex) const;
 
-  virtual size_t GetNumberOfEntries(bool bRecursive = false) const;
-  virtual size_t GetNumberOfGroups(bool bRecursive = false) const;
+  virtual size_t GetNumberOfEntries(bool bRecursive = FALSE) const;
+  virtual size_t GetNumberOfGroups(bool bRecursive = FALSE) const;
 
   virtual bool HasGroup(const wxString& strName) const;
   virtual bool HasEntry(const wxString& strName) const;
 
-  virtual bool Flush(bool bCurrentOnly = false);
+  virtual bool Flush(bool bCurrentOnly = FALSE);
 
   virtual bool RenameEntry(const wxString& oldName, const wxString& newName);
   virtual bool RenameGroup(const wxString& oldName, const wxString& newName);
 
-  virtual bool DeleteEntry(const wxString& key, bool bGroupIfEmptyAlso = true);
+  virtual bool DeleteEntry(const wxString& key, bool bGroupIfEmptyAlso = TRUE);
   virtual bool DeleteGroup(const wxString& szKey);
   virtual bool DeleteAll();
-
-  // additional, wxFileConfig-specific, functionality
-#if wxUSE_STREAMS
-  // save the entire config file text to the given stream, note that the text
-  // won't be saved again in dtor when Flush() is called if you use this method
-  // as it won't be "changed" any more
-  virtual bool Save(wxOutputStream& os, wxMBConv& conv = wxConvUTF8);
-#endif // wxUSE_STREAMS
 
 public:
   // functions to work with this list
@@ -209,38 +195,26 @@ private:
   // the same as SetPath("/")
   void SetRootPath();
 
-  // set/test the dirty flag
-  void SetDirty() { m_isDirty = true; }
-  void ResetDirty() { m_isDirty = false; }
-  bool IsDirty() const { return m_isDirty; }
-
-
   // member variables
   // ----------------
-  wxFileConfigLineList *m_linesHead,    // head of the linked list
-                       *m_linesTail;    // tail
+  wxFileConfigLineList *m_linesHead,        // head of the linked list
+                       *m_linesTail;        // tail
 
-  wxString    m_strLocalFile,           // local  file name passed to ctor
-              m_strGlobalFile;          // global
-  wxString    m_strPath;                // current path (not '/' terminated)
+  wxString    m_strLocalFile,     // local  file name passed to ctor
+              m_strGlobalFile;    // global
+  wxString    m_strPath;          // current path (not '/' terminated)
 
   wxFileConfigGroup *m_pRootGroup,      // the top (unnamed) group
                     *m_pCurrentGroup;   // the current group
 
-  wxMBConv   &m_conv;
-
 #ifdef __UNIX__
-  int m_umask;                          // the umask to use for file creation
+  int m_umask;                    // the umask to use for file creation
 #endif // __UNIX__
-
-  bool m_isDirty;                       // if true, we have unsaved changes
-
-  DECLARE_NO_COPY_CLASS(wxFileConfig)
 };
 
 #endif
   // wxUSE_CONFIG
 
-#endif
+#endif  
   //_FILECONF_H
 

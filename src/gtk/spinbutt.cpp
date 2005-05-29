@@ -8,20 +8,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinbutt.h"
     #pragma implementation "spinbutbase.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/spinbutt.h"
 
 #if wxUSE_SPINBTN
 
 #include "wx/utils.h"
-#include "wx/math.h"
+
+#include <math.h>
+
 #include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
@@ -43,7 +42,6 @@ static const float sensitivity = 0.02;
 // "value_changed"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_spinbutt_callback( GtkWidget *WXUNUSED(widget), wxSpinButton *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -99,7 +97,6 @@ static void gtk_spinbutt_callback( GtkWidget *WXUNUSED(widget), wxSpinButton *wi
         win->GetEventHandler()->ProcessEvent( event2 );
     }
 }
-}
 
 //-----------------------------------------------------------------------------
 // wxSpinButton
@@ -150,7 +147,11 @@ bool wxSpinButton::Create(wxWindow *parent,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(new_size);
+    PostCreation();
+
+    SetBackgroundColour( parent->GetBackgroundColour() );
+
+    Show( TRUE );
 
     return TRUE;
 }
@@ -225,20 +226,15 @@ bool wxSpinButton::IsOwnGtkWindow( GdkWindow *window )
     return GTK_SPIN_BUTTON(m_widget)->panel == window;
 }
 
-wxSize wxSpinButton::DoGetBestSize() const
+void wxSpinButton::ApplyWidgetStyle()
 {
-    wxSize best(15, 26); // FIXME
-    CacheBestSize(best);
-    return best;
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
-// static
-wxVisualAttributes
-wxSpinButton::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
+wxSize wxSpinButton::DoGetBestSize() const
 {
-    // TODO: overload to accept functions like gtk_spin_button_new?
-    // Until then use a similar type
-    return GetDefaultAttributesFromGTKWidget(gtk_button_new);
+    return wxSize(15, 26);
 }
 
 #endif

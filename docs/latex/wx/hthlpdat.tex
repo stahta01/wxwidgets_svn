@@ -53,17 +53,29 @@ Returns page's URL based on its (file)name.
 
 Returns array with help books info.
 
-\membersection{wxHtmlHelpData::GetContentsArray}\label{wxhtmlhelpdatagetcontentsarray}
+\membersection{wxHtmlHelpData::GetContents}\label{wxhtmlhelpdatagetcontents}
 
-\func{const wxHtmlHelpDataItems\&}{GetContentsArray}{\void}
+\func{wxHtmlContentsItem*}{GetContents}{\void}
 
-Returns reference to array with contents entries.
+Returns contents lists pointer.
 
-\membersection{wxHtmlHelpData::GetIndexArray}\label{wxhtmlhelpdatagetindexarray}
+\membersection{wxHtmlHelpData::GetContentsCnt}\label{wxhtmlhelpdatagetcontentscnt}
 
-\func{const wxHtmlHelpDataItems\&}{GetIndexArray}{\void}
+\func{int}{GetContentsCnt}{\void}
 
-Returns reference to array with index entries.
+Returns size of contents list.
+
+\membersection{wxHtmlHelpData::GetIndex}\label{wxhtmlhelpdatagetindex}
+
+\func{wxHtmlContentsItem*}{GetIndex}{\void}
+
+Returns pointer to index items list.
+
+\membersection{wxHtmlHelpData::GetIndexCnt}\label{wxhtmlhelpdatagetindexcnt}
+
+\func{int}{GetIndexCnt}{\void}
+
+Returns size of index list.
 
 \membersection{wxHtmlHelpData::SetTempDir}\label{wxhtmlhelpdatasettempdir}
 

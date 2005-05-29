@@ -9,16 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinbutt.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#include "wx/defs.h"
-
-#if wxUSE_SPINBTN
 
 #include "wx/spinbutt.h"
 #include "wx/spinctrl.h"
@@ -81,7 +74,7 @@ class wxArrowButton : public wxControl
 {
     friend class wxArrowButtonTimer;
 public:
-    wxArrowButton( int increment )
+    wxArrowButton( int increment ) 
         : m_increment( increment ),
           m_timer( 0 ) {}
 
@@ -190,7 +183,7 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
                             ArrowDirection d,
                             const wxPoint& pos, const wxSize& size )
 {
-    int arrow_dir = XmARROW_UP;
+    int arrow_dir;
 
     switch( d )
     {
@@ -216,7 +209,6 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
         parentWidget,
         XmNarrowDirection, arrow_dir,
         XmNborderWidth, 0,
-        XmNshadowThickness, 0,
         NULL );
 
     XtAddCallback( (Widget) m_mainWidget,
@@ -232,9 +224,7 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
     AttachWidget( parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, size.x, size.y );
 
-    SetForegroundColour( parent->GetBackgroundColour() );
-
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -276,12 +266,14 @@ bool wxSpinButton::Create( wxWindow *parent, wxWindowID id,
 
     if( !wxControl::Create( parent, id, pos, newSize, style ) )
     {
-        return false;
+        return FALSE;
     }
 
     SetName(name);
 
-    m_windowId = ( id == wxID_ANY ) ? NewControlId() : id;
+    InitBase();
+
+    m_windowId = ( id == -1 ) ? NewControlId() : id;
 
     bool isVert = IsVertical();
     wxPoint pt1, pt2;
@@ -293,7 +285,7 @@ bool wxSpinButton::Create( wxWindow *parent, wxWindowID id,
                                 isVert ? wxARROW_DOWN : wxARROW_LEFT,
                                 pt2, sz2, -1 );
 
-    return true;
+    return TRUE;
 }
 
 wxSpinButton::~wxSpinButton()
@@ -372,7 +364,7 @@ void wxSpinButton::Increment( int delta )
 
 wxSize wxSpinButton::DoGetBestSize() const
 {
-    return IsVertical() ? wxSize( 20, 30 ) : wxSize( 30, 20 );
+    return IsVertical() ? wxSize( 24, 34 ) : wxSize( 34, 24 );
 }
 
 // Attributes
@@ -407,5 +399,3 @@ void wxSpinButton::ChangeForegroundColour()
 {
     // TODO
 }
-
-#endif // wxUSE_SPINBTN

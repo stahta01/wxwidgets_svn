@@ -6,7 +6,7 @@
 // Created:     20.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "gaugeuniv.h"
 #endif
 
@@ -65,12 +65,12 @@ bool wxGauge::Create(wxWindow *parent,
     if ( !wxGaugeBase::Create(parent, id, range, pos, size, style,
                               validator, name) )
     {
-        return false;
+        return FALSE;
     }
 
     SetBestSize(size);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -104,12 +104,12 @@ wxSize wxGauge::DoGetBestClientSize() const
     if ( IsVertical() )
     {
         size.x = (3*size.y) / 2 + 2;
-        size.y = wxDefaultCoord;
+        size.y = -1;
     }
     else
     {
         size.y = (3*size.x) / 2 + 2;
-        size.x = wxDefaultCoord;
+        size.x = -1;
     }
 
     return size;

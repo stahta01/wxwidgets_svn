@@ -4,23 +4,23 @@
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
@@ -58,7 +58,7 @@ typedef unsigned char tidata;
 /*
  * Encode a run of pixels.
  */
-static int
+static int LINKAGEMODE
 PackBitsEncode(TIFF* tif, tidata_t buf, tsize_t cc, tsample_t s)
 {
 	u_char* bp = (u_char*) buf;
@@ -109,16 +109,16 @@ PackBitsEncode(TIFF* tif, tidata_t buf, tsize_t cc, tsample_t s)
 				state = RUN;
 				if (n > 128) {
 					*op++ = (tidata) -127;
-					*op++ = (tidataval_t) b;
+					*op++ = b;
 					n -= 128;
 					goto again;
 				}
 				*op++ = (tidataval_t)(-(n-1));
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 			} else {
 				lastliteral = op;
 				*op++ = 0;
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 				state = LITERAL;
 			}
 			break;
@@ -127,32 +127,32 @@ PackBitsEncode(TIFF* tif, tidata_t buf, tsize_t cc, tsample_t s)
 				state = LITERAL_RUN;
 				if (n > 128) {
 					*op++ = (tidata) -127;
-					*op++ = (tidataval_t) b;
+					*op++ = b;
 					n -= 128;
 					goto again;
 				}
 				*op++ = (tidataval_t)(-(n-1));	/* encode run */
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 			} else {			/* extend literal */
 				if (++(*lastliteral) == 127)
 					state = BASE;
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 			}
 			break;
 		case RUN:		/* last object was run */
 			if (n > 1) {
 				if (n > 128) {
 					*op++ = (tidata) -127;
-					*op++ = (tidataval_t) b;
+					*op++ = b;
 					n -= 128;
 					goto again;
 				}
 				*op++ = (tidataval_t)(-(n-1));
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 			} else {
 				lastliteral = op;
 				*op++ = 0;
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 				state = LITERAL;
 			}
 			break;
@@ -185,46 +185,22 @@ PackBitsEncode(TIFF* tif, tidata_t buf, tsize_t cc, tsample_t s)
  * the decoder if data is read, for example, by scanlines
  * when it was encoded by strips.
  */
-static int
+static int LINKAGEMODE
 PackBitsEncodeChunk(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 {
-#if defined(__hpux) && defined(__LP64__)
-	tsize_t rowsize = (tsize_t)(unsigned long) tif->tif_data;
-#else
 	tsize_t rowsize = (tsize_t) tif->tif_data;
-#endif
 
 	assert(rowsize > 0);
-    
-#ifdef YCBCR_SUPPORT
-	/* 
-	 * YCBCR data isn't really separable into rows, so we
-	 * might as well encode the whole tile/strip as one chunk.
-	 */
-	if( tif->tif_dir.td_photometric == PHOTOMETRIC_YCBCR ) {
-#if defined(__hpux) && defined(__LP64__)
-		rowsize = (tsize_t)(unsigned long) tif->tif_data;
-#else
-		rowsize = (tsize_t) tif->tif_data;
-#endif
-	}
-#endif
-
 	while ((long)cc > 0) {
-		int	chunk = rowsize;
-		
-		if( cc < chunk )
-		    chunk = cc;
-
-		if (PackBitsEncode(tif, bp, chunk, s) < 0)
-		    return (-1);
-		bp += chunk;
-		cc -= chunk;
+		if (PackBitsEncode(tif, bp, rowsize, s) < 0)
+			return (-1);
+		bp += rowsize;
+		cc -= rowsize;
 	}
 	return (1);
 }
 
-static int
+static int LINKAGEMODE
 PackBitsDecode(TIFF* tif, tidata_t op, tsize_t occ, tsample_t s)
 {
 	char *bp;
@@ -246,29 +222,13 @@ PackBitsDecode(TIFF* tif, tidata_t op, tsize_t occ, tsample_t s)
 		if (n < 0) {		/* replicate next byte -n+1 times */
 			if (n == -128)	/* nop */
 				continue;
-                        n = -n + 1;
-                        if( occ < n )
-                        {
-                            TIFFWarning(tif->tif_name,
-                                        "PackBitsDecode: discarding %d bytes "
-                                        "to avoid buffer overrun",
-                                        n - occ);
-                            n = occ;
-                        }
+			n = -n + 1;
 			occ -= n;
 			b = *bp++, cc--;
 			while (n-- > 0)
-				*op++ = (tidataval_t) b;
+				*op++ = b;
 		} else {		/* copy next n+1 bytes literally */
-			if (occ < n + 1)
-                        {
-                            TIFFWarning(tif->tif_name,
-                                        "PackBitsDecode: discarding %d bytes "
-                                        "to avoid buffer overrun",
-                                        n - occ + 1);
-                            n = occ - 1;
-                        }
-                        _TIFFmemcpy(op, bp, ++n);
+			_TIFFmemcpy(op, bp, ++n);
 			op += n; occ -= n;
 			bp += n; cc -= n;
 		}
@@ -281,6 +241,7 @@ PackBitsDecode(TIFF* tif, tidata_t op, tsize_t occ, tsample_t s)
 		    (long) tif->tif_row);
 		return (0);
 	}
+	/* check for buffer overruns? */
 	return (1);
 }
 

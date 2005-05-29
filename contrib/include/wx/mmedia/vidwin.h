@@ -15,10 +15,6 @@
     #pragma interface "vidwin.h"
 #endif
 
-#if defined(__WINDOWS__) && !defined(__MINGW32__) && !defined(__WATCOMC__)
-// versions of Open Watcom and MinGW tested against this source does not
-// deliver "digitalv.h" required in this feature
-
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -30,7 +26,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/stream.h"
@@ -40,7 +36,6 @@
 // ----------------------------------------------------------------------------
 // wxMMedia2 headers
 
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/vidbase.h"
 
 // ----------------------------------------------------------------------------
@@ -58,7 +53,7 @@ typedef struct VIDW_Internal {
 // ----------------------------------------------------------------------------
 // Class definition
 
-class WXDLLIMPEXP_MMEDIA wxVideoWindows : public wxVideoBaseDriver {
+class WXDLLEXPORT wxVideoWindows : public wxVideoBaseDriver {
     DECLARE_DYNAMIC_CLASS(wxVideoWindows)
 protected:
     struct VIDW_Internal *m_internal;
@@ -94,7 +89,7 @@ public:
     // Return the total number of frames in the movie
     wxUint32 GetNbFrames() const;
     
-    bool IsCapable(wxVideoType v_type) const;
+    bool IsCapable(wxVideoType v_type);
     
     bool AttachOutput(wxWindow& output);
     void DetachOutput(void);
@@ -102,7 +97,5 @@ public:
     bool IsPaused() const;
     bool IsStopped() const;
 };
-
-#endif
 
 #endif

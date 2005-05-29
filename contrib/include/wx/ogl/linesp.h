@@ -6,7 +6,7 @@
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGL_LINESP_H_
@@ -16,12 +16,11 @@
 #pragma interface "linesp.h"
 #endif
 
-
-class WXDLLIMPEXP_OGL wxLineShape;
-class WXDLLIMPEXP_OGL wxLineControlPoint: public wxControlPoint
+class wxLineShape;
+class wxLineControlPoint: public wxControlPoint
 {
   DECLARE_DYNAMIC_CLASS(wxLineControlPoint)
-  friend class WXDLLIMPEXP_OGL wxLineShape;
+  friend class wxLineShape;
  public:
 
   wxLineControlPoint(wxShapeCanvas *the_canvas = NULL, wxShape *object = NULL, double size = 0.0,
@@ -52,8 +51,8 @@ public:
 /*
  * Temporary arc label object
  */
-
-class WXDLLIMPEXP_OGL wxLabelShape: public wxRectangleShape
+ 
+class wxLabelShape: public wxRectangleShape
 {
   DECLARE_DYNAMIC_CLASS(wxLabelShape)
 
@@ -68,7 +67,7 @@ class WXDLLIMPEXP_OGL wxLabelShape: public wxRectangleShape
   void OnDragLeft(bool draw, double x, double y, int keys=0, int attachment = 0);
   void OnBeginDragLeft(double x, double y, int keys=0, int attachment = 0);
   void OnEndDragLeft(double x, double y, int keys=0, int attachment = 0);
-  bool OnMovePre(wxDC& dc, double x, double y, double old_x, double old_y, bool display = true);
+  bool OnMovePre(wxDC& dc, double x, double y, double old_x, double old_y, bool display = TRUE);
 
 public:
   wxLineShape*      m_lineShape;

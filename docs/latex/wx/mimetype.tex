@@ -23,7 +23,7 @@ If GNOME or KDE desktop environment is installed, then wxMimeTypesManager
 gathers MIME information from respective files (e.g. .kdelnk files under KDE).
 
 NB: Currently, wxMimeTypesManager is limited to reading MIME type information
-but it will support modifying it as well in future versions.
+but it will support modifying it as well in the future versions.
 
 \wxheading{Global objects}
 
@@ -51,7 +51,7 @@ No base class.
 
 \latexignore{\rtfignore{\wxheading{Function groups}}}
 
-\membersection{Helper functions}\label{mimehelperfunctions}
+\membersection{Helper functions}
 
 All of these functions are static (i.e. don't need a wxMimeTypesManager object
 to call them) and provide some useful operations for string representations of
@@ -60,7 +60,7 @@ types using wxString functions.
 
 \helpref{IsOfType}{wxmimetypesmanagerisoftype}
 
-\membersection{Constructor and destructor}\label{mimeconstructordestructor}
+\membersection{Constructor and destructor}
 
 NB: You won't normally need to use more than one wxMimeTypesManager object in a
 program.
@@ -68,7 +68,7 @@ program.
 \helpref{wxMimeTypesManager}{wxmimetypesmanagerctor}\\
 \helpref{\destruct{wxMimeTypesManager}}{wxmimetypesmanagerdtor}
 
-\membersection{Query database}\label{mimequerydatabase}
+\membersection{Query database}
 
 These functions are the heart of this class: they allow to find a \helpref{file type}{wxfiletype} object
 from either file extension or MIME type.
@@ -140,7 +140,7 @@ is unknown.
 
 \func{bool}{IsOfType}{\param{const wxString\&}{ mimeType}, \param{const wxString\&}{ wildcard}}
 
-This function returns true if either the given {\it mimeType} is exactly the
+This function returns TRUE if either the given {\it mimeType} is exactly the
 same as {\it wildcard} or if it has the same category and the subtype of
 {\it wildcard} is '*'. Note that the '*' wildcard is not allowed in
 {\it mimeType} itself.
@@ -150,7 +150,7 @@ necessary to convert the strings to the same case before calling it.
 
 \membersection{wxMimeTypesManager::ReadMailcap}\label{wxmimetypesmanagerreadmailcap}
 
-\func{bool}{ReadMailcap}{\param{const wxString\&}{ filename}, \param{bool}{ fallback = false}}
+\func{bool}{ReadMailcap}{\param{const wxString\&}{ filename}, \param{bool}{ fallback = FALSE}}
 
 Load additional file containing information about MIME types and associated
 information in mailcap format. See metamail(1) and mailcap(5) for more
@@ -160,9 +160,9 @@ information.
 overriding the settings found in the standard files: normally, entries from
 files loaded with ReadMailcap will override the entries from files loaded
 previously (and the standard ones are loaded in the very beginning), but this
-will not happen if this parameter is set to true (default is false).
+will not happen if this parameter is set to TRUE (default is FALSE).
 
-The return value is true if there were no errors in the file or false
+The return value is TRUE if there were no errors in the file or FALSE
 otherwise.
 
 \membersection{wxMimeTypesManager::ReadMimeTypes}\label{wxmimetypesmanagerreadmimetypes}
@@ -173,6 +173,6 @@ Load additional file containing information about MIME types and associated
 information in mime.types file format. See metamail(1) and mailcap(5) for more
 information.
 
-The return value is true if there were no errors in the file or false
+The return value is TRUE if there were no errors in the file or FALSE
 otherwise.
 

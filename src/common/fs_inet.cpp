@@ -3,10 +3,10 @@
 // Purpose:     HTTP and FTP file system
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fs_inet.h"
 #endif
 
@@ -42,7 +42,7 @@ class wxTemporaryFileInputStream : public wxFileInputStream
 public:
     wxTemporaryFileInputStream(const wxString& filename) :
         wxFileInputStream(filename), m_filename(filename) {}
-
+    
     ~wxTemporaryFileInputStream()
     {
         // NB: copied from wxFileInputStream dtor, we need to do it before
@@ -52,7 +52,7 @@ public:
             delete m_file;
             m_file_destroy = false;
         }
-        wxRemoveFile(m_filename);
+        wxRemoveFile(m_filename);        
     }
 
 protected:
@@ -67,11 +67,11 @@ protected:
 static wxString StripProtocolAnchor(const wxString& location)
 {
     wxString myloc(location.BeforeLast(wxT('#')));
-    if (myloc.empty()) myloc = location.AfterFirst(wxT(':'));
+    if (myloc.IsEmpty()) myloc = location.AfterFirst(wxT(':'));
     else myloc = myloc.AfterFirst(wxT(':'));
 
     // fix malformed url:
-    if (!myloc.Left(2).IsSameAs(wxT("//")))
+    if (myloc.Left(2) != wxT("//"))
     {
         if (myloc.GetChar(0) != wxT('/')) myloc = wxT("//") + myloc;
         else myloc = wxT("/") + myloc;
@@ -84,24 +84,19 @@ static wxString StripProtocolAnchor(const wxString& location)
 
 bool wxInternetFSHandler::CanOpen(const wxString& location)
 {
-#if wxUSE_URL
     wxString p = GetProtocol(location);
     if ((p == wxT("http")) || (p == wxT("ftp")))
     {
         wxURL url(p + wxT(":") + StripProtocolAnchor(location));
         return (url.GetError() == wxURL_NOERR);
     }
-#endif
-    return false;
+
+    return FALSE;
 }
 
 
-wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
-                                        const wxString& location)
+wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& location)
 {
-#if !wxUSE_URL
-    return NULL;
-#else
     wxString right =
         GetProtocol(location) + wxT(":") + StripProtocolAnchor(location);
 
@@ -121,7 +116,7 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
                 s->Read(sout);
             }
             delete s;
-
+    
             return new wxFSFile(new wxTemporaryFileInputStream(tmpfile),
                                 right,
                                 content,
@@ -134,9 +129,13 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
     }
 
     return (wxFSFile*) NULL; // incorrect URL
-#endif
 }
 
+
+
+wxInternetFSHandler::~wxInternetFSHandler()
+{
+}
 
 class wxFileSystemInternetModule : public wxModule
 {
@@ -146,7 +145,7 @@ class wxFileSystemInternetModule : public wxModule
         virtual bool OnInit()
         {
             wxFileSystem::AddHandler(new wxInternetFSHandler);
-            return true;
+            return TRUE;
         }
         virtual void OnExit() {}
 };

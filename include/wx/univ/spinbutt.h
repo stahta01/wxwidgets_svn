@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_SPINBUTT_H_
 #define _WX_UNIV_SPINBUTT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univspinbutt.h"
 #endif
 
@@ -32,14 +32,14 @@ class WXDLLEXPORT wxSpinButton : public wxSpinButtonBase,
 public:
     wxSpinButton();
     wxSpinButton(wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
+                 wxWindowID id = -1,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
                  long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
                  const wxString& name = wxSPIN_BUTTON_NAME);
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
@@ -77,7 +77,7 @@ protected:
     // normalize the value to fit into min..max range
     int NormalizeValue(int value) const;
 
-    // change the value by +1/-1 and send the event, return true if value was
+    // change the value by +1/-1 and send the event, return TRUE if value was
     // changed
     bool ChangeValue(int inc);
 

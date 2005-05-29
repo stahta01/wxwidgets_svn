@@ -3,15 +3,15 @@
 // Purpose:     implementation of wxTextBuffer class
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
-// Copyright:   (c) 1998-2001 wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) 1998-2001 wxWindows team
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // headers
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textbuf.h"
 #endif
 
@@ -43,7 +43,7 @@
 //   - Mac when compiling with CodeWarrior (__WXMAC__)
 
 const wxTextFileType wxTextBuffer::typeDefault =
-#if defined(__WINDOWS__) || defined(__DOS__) || defined(__PALMOS__)
+#if defined(__WINDOWS__) || defined(__DOS__)
   wxTextFileType_Dos;
 #elif defined(__UNIX__)
   wxTextFileType_Unix;
@@ -63,7 +63,7 @@ const wxChar *wxTextBuffer::GetEOL(wxTextFileType type)
             wxFAIL_MSG(wxT("bad buffer type in wxTextBuffer::GetEOL."));
             // fall through nevertheless - we must return something...
 
-        case wxTextFileType_None: return wxEmptyString;
+        case wxTextFileType_None: return wxT("");
         case wxTextFileType_Unix: return wxT("\n");
         case wxTextFileType_Dos:  return wxT("\r\n");
         case wxTextFileType_Mac:  return wxT("\r");
@@ -77,7 +77,7 @@ wxString wxTextBuffer::Translate(const wxString& text, wxTextFileType type)
         return text;
 
     // nor if it is empty
-    if ( text.empty() )
+    if ( text.IsEmpty() )
         return text;
 
     wxString eol = GetEOL(type), result;
@@ -143,12 +143,11 @@ wxTextBuffer::wxTextBuffer(const wxString& strBufferName)
             : m_strBufferName(strBufferName)
 {
     m_nCurLine = 0;
-    m_isOpened = false;
+    m_isOpened = FALSE;
 }
 
 wxTextBuffer::~wxTextBuffer()
 {
-    // required here for Darwin
 }
 
 // ----------------------------------------------------------------------------
@@ -170,16 +169,16 @@ bool wxTextBuffer::Create(const wxString& strBufferName)
 bool wxTextBuffer::Create()
 {
     // buffer name must be either given in ctor or in Create(const wxString&)
-    wxASSERT( !m_strBufferName.empty() );
+    wxASSERT( !m_strBufferName.IsEmpty() );
 
     // if the buffer already exists do nothing
-    if ( Exists() ) return false;
-
+    if ( Exists() ) return FALSE;
+  
     if ( !OnOpen(m_strBufferName, WriteAccess) )
-        return false;
+        return FALSE;
 
     OnClose();
-    return true;
+    return TRUE;
 }
 
 bool wxTextBuffer::Open(const wxString& strBufferName, wxMBConv& conv)
@@ -192,11 +191,11 @@ bool wxTextBuffer::Open(const wxString& strBufferName, wxMBConv& conv)
 bool wxTextBuffer::Open(wxMBConv& conv)
 {
     // buffer name must be either given in ctor or in Open(const wxString&)
-    wxASSERT( !m_strBufferName.empty() );
+    wxASSERT( !m_strBufferName.IsEmpty() );
 
     // open buffer in read-only mode
     if ( !OnOpen(m_strBufferName, ReadAccess) )
-        return false;
+        return FALSE;
 
     // read buffer into memory
     m_isOpened = OnRead(conv);
@@ -276,9 +275,9 @@ bool wxTextBuffer::Close()
     m_aTypes.Clear();
     m_aLines.Clear();
     m_nCurLine = 0;
-    m_isOpened = false;
+    m_isOpened = FALSE;
 
-    return true;
+    return TRUE;
 }
 
 bool wxTextBuffer::Write(wxTextFileType typeNew, wxMBConv& conv)

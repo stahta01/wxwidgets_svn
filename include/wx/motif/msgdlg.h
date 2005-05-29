@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/msgdlg.h
+// Name:        msgdlg.h
 // Purpose:     wxMessageDialog class. Use generic version if no
 //              platform-specific implementation.
 // Author:      Julian Smart
@@ -13,7 +13,7 @@
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "msgdlg.h"
 #endif
 
@@ -26,26 +26,27 @@
 
 WXDLLEXPORT_DATA(extern const char*) wxMessageBoxCaptionStr;
 
-class WXDLLEXPORT wxMessageDialog: public wxDialog, public wxMessageDialogBase
+class WXDLLEXPORT wxMessageDialog: public wxDialog
 {
     DECLARE_DYNAMIC_CLASS(wxMessageDialog)
-
+        
 public:
     wxMessageDialog(wxWindow *parent,
         const wxString& message,
         const wxString& caption = wxMessageBoxCaptionStr,
         long style = wxOK | wxCENTRE,
         const wxPoint& pos = wxDefaultPosition);
-
+    
     int ShowModal();
-
+    
     // implementation only from now on
     // called by the Motif callback
     void SetResult(long result) { m_result = result; }
-
+    
 protected:
     wxString    m_caption;
     wxString    m_message;
+    long        m_dialogStyle;
     wxWindow *  m_parent;
     long        m_result;
 };

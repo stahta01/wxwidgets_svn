@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +52,7 @@ public:
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
-    bool OnClose(bool deleteWindow = true);
+    bool OnClose(bool deleteWindow = TRUE);
     
     void OnCut(wxCommandEvent& event);
     
@@ -73,7 +73,7 @@ public:
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
-    bool OnClose(bool deleteWindow = true);
+    bool OnClose(bool deleteWindow = TRUE);
 };
 
 #endif

@@ -12,7 +12,7 @@
 #ifndef _WX_REGION_H_
 #define _WX_REGION_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "region.h"
 #endif
 
@@ -74,12 +74,9 @@ public:
 
     wxRegion( size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
 
-    wxRegion( const wxBitmap& bmp)
-    {
-        Union(bmp);
-    }
     wxRegion( const wxBitmap& bmp,
-              const wxColour& transColour, int tolerance = 0)
+              const wxColour& transColour = wxNullColour,
+              int   tolerance = 0)
     {
         Union(bmp, transColour, tolerance);
     }
@@ -130,13 +127,12 @@ public:
     wxBitmap ConvertToBitmap() const;
 
     // Use the non-transparent pixels of a wxBitmap for the region to combine
-    // with this region.  First version takes transparency from bitmap's mask,
-    // second lets the user specify the colour to be treated as transparent
+    // with this region.  If the bitmap has a mask then it will be used,
+    // otherwise the colour to be treated as transparent may be specified,
     // along with an optional tolerance value.
-    // NOTE: implemented in common/rgncmn.cpp
-    bool Union(const wxBitmap& bmp);
     bool Union(const wxBitmap& bmp,
-               const wxColour& transColour, int tolerance = 0);
+               const wxColour& transColour = wxNullColour,
+               int   tolerance = 0);
 
 
 public:
@@ -151,7 +147,7 @@ protected:
     void InitRect(wxCoord x, wxCoord y, wxCoord w, wxCoord h);
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxRegion)
+    DECLARE_DYNAMIC_CLASS(wxRegion);
 };
 
 // ----------------------------------------------------------------------------
@@ -186,7 +182,7 @@ private:
     wxRegion m_region;
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxRegionIterator)
+    DECLARE_DYNAMIC_CLASS(wxRegionIterator);
 };
 
 #endif

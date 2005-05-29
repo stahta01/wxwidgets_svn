@@ -13,7 +13,7 @@
 #ifndef _WX_TOGGLEBUTTON_H_
 #define _WX_TOGGLEBUTTON_H_
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxCheckBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxCheckBoxNameStr;
 
 // Checkbox item (single checkbox)
 class WXDLLEXPORT wxToggleButton : public wxControl
@@ -45,15 +45,14 @@ public:
     virtual bool GetValue() const ;
 
     virtual bool MSWCommand(WXUINT param, WXWORD id);
+    virtual void SetLabel(const wxString& label);
     virtual void Command(wxCommandEvent& event);
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    virtual wxBorder GetDefaultBorder() const;
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxToggleButton)
+    DECLARE_DYNAMIC_CLASS(wxToggleButton)
 };
 
 #endif // _WX_TOGGLEBUTTON_H_

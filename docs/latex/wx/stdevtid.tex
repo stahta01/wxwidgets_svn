@@ -2,14 +2,13 @@
 
 wxWidgets defines a special identifier value {\tt wxID\_ANY} which is used in
 the following two situations:
-
 \begin{itemize}
-\item when creating a new window you may specify {\tt wxID\_ANY} to let
-wxWidgets assign an unused identifier to it automatically
-\item when installing an event handler using either the event table
-macros or \helpref{wxEvtHandler::Connect}{wxevthandlerconnect},
-you may use it to indicate that you want to handle the events
-coming from any control, regardless of its identifier
+    \item when creating a new window you may specify {\tt wxID\_ANY} to let
+          wxWidgets assign an unused identifier to it automatically
+    \item when installing an event handler using either the event table
+          macros or \helpref{wxEvtHandler::Connect}{wxevthandlerconnect}
+          you may use it to indicate that you want to handle the events
+          coming from any control, regardless of its identifier
 \end{itemize}
 
 wxWidgets also defines a few standard command identifiers which may be used by
@@ -48,19 +47,6 @@ own constants in this range.
     wxID_FIND,
     wxID_DUPLICATE,
     wxID_SELECTALL,
-    wxID_DELETE,
-    wxID_REPLACE,
-    wxID_REPLACE_ALL,
-    wxID_PROPERTIES,
-
-    wxID_VIEW_DETAILS,
-    wxID_VIEW_LARGEICONS,
-    wxID_VIEW_SMALLICONS,
-    wxID_VIEW_LIST,
-    wxID_VIEW_SORTDATE,
-    wxID_VIEW_SORTNAME,
-    wxID_VIEW_SORTSIZE,
-    wxID_VIEW_SORTTYPE,
 
     wxID_FILE1 = 5050,
     wxID_FILE2,
@@ -91,29 +77,6 @@ own constants in this range.
     wxID_ABORT,
     wxID_RETRY,
     wxID_IGNORE,
-
-    wxID_UP,
-    wxID_DOWN,
-    wxID_HOME,
-    wxID_REFRESH,
-    wxID_STOP,
-    wxID_INDEX,
-
-    wxID_BOLD,
-    wxID_ITALIC,
-    wxID_JUSTIFY_CENTER,
-    wxID_JUSTIFY_FILL,
-    wxID_JUSTIFY_RIGHT,
-    wxID_JUSTIFY_LEFT,
-    wxID_UNDERLINE,
-    wxID_INDENT,
-    wxID_UNINDENT,
-    wxID_ZOOM_100,
-    wxID_ZOOM_FIT,
-    wxID_ZOOM_IN,
-    wxID_ZOOM_OUT,
-    wxID_UNDELETE,
-    wxID_REVERT_TO_SAVED,
 
     // System menu IDs (used by wxUniv):
     wxID_SYSTEM_MENU = 5200,

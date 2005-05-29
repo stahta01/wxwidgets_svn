@@ -88,11 +88,10 @@ public:
 		}
 	};
 
-	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
-
 private:
 	int refCount;
 	CellBuffer cb;
+	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 	charClassification charClass[256];
 	char stylingMask;
 	int endStyled;
@@ -116,7 +115,6 @@ public:
 	int dbcsCodePage;
 	int tabInChars;
 	int indentInChars;
-	int actualIndentInChars;
 	bool useTabs;
 	bool tabIndents;
 	bool backspaceUnindents;
@@ -156,7 +154,6 @@ public:
 	int GetColumn(int position);
 	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
-	static char *TransformLineEnds(int *pLenOut, const char *s, size_t len, int eolMode);
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
 	bool IsReadOnly() { return cb.IsReadOnly(); }
@@ -193,9 +190,7 @@ public:
 	void Indent(bool forwards);
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);
 	int NextWordStart(int pos, int delta);
-	int NextWordEnd(int pos, int delta);
 	int Length() { return cb.Length(); }
-	void Allocate(int newSize) { cb.Allocate(newSize*2); }
 	long FindText(int minPos, int maxPos, const char *s,
 		bool caseSensitive, bool word, bool wordStart, bool regExp, bool posix, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
@@ -204,8 +199,7 @@ public:
 
 	void ChangeCase(Range r, bool makeUpperCase);
 
-	void SetDefaultCharClasses(bool includeWordClass);
-	void SetCharClasses(const unsigned char *chars, charClassification newCharClass);
+	void SetWordChars(unsigned char *chars);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
 	bool SetStyleFor(int length, char style);
@@ -213,7 +207,6 @@ public:
 	int GetEndStyled() { return endStyled; }
 	bool EnsureStyledTo(int pos);
 	int GetStyleClock() { return styleClock; }
-	void IncrementStyleClock();
 
 	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
 	int GetLineState(int line) { return cb.GetLineState(line); }
@@ -227,10 +220,9 @@ public:
 	bool IsWordPartSeparator(char ch);
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
-	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
+	int ExtendStyleRange(int pos, int delta);
 	int ParaUp(int pos);
 	int ParaDown(int pos);
-	int IndentSize() { return actualIndentInChars; }
 
 private:
 	charClassification WordCharClass(unsigned char ch);
@@ -242,6 +234,8 @@ private:
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
+
+	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
 /**

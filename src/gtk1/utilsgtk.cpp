@@ -3,17 +3,13 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/utils.h"
 #include "wx/string.h"
 
-#include "wx/apptrait.h"
 #include "wx/intl.h"
 #include "wx/log.h"
 
@@ -56,14 +52,11 @@ extern GtkWidget *wxGetRootWindow();
 //----------------------------------------------------------------------------
 // misc.
 //----------------------------------------------------------------------------
-#ifndef __EMX__
-// on OS/2, we use the wxBell from wxBase library
 
 void wxBell()
 {
     gdk_beep();
 }
-#endif
 
 /* Don't synthesize KeyUp events holding down a key and producing
    KeyDown events with autorepeat. */
@@ -80,43 +73,6 @@ bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
     return FALSE;
 }
 #endif
-
-#ifdef __WXGTK20__
-// Escapes string so that it is valid Pango markup XML string:
-wxString wxEscapeStringForPangoMarkup(const wxString& str)
-{
-    size_t len = str.length();
-    wxString out;
-    out.Alloc(len);
-    for (size_t i = 0; i < len; i++)
-    {
-        wxChar c = str[i];
-        switch (c)
-        {
-            case _T('&'):
-                out << _T("&amp;");
-                break;
-            case _T('<'):
-                out << _T("&lt;");
-                break;
-            case _T('>'):
-                out << _T("&gt;");
-                break;
-            case _T('\''):
-                out << _T("&apos;");
-                break;
-            case _T('"'):
-                out << _T("&quot;");
-                break;
-            default:
-                out << c;
-                break;
-        }
-    }
-    return out;
-}
-#endif
-
 
 // ----------------------------------------------------------------------------
 // display characterstics
@@ -165,23 +121,12 @@ int wxDisplayDepth()
     return gdk_window_get_visual( wxGetRootWindow()->window )->depth;
 }
 
-wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-    static wxToolkitInfo info;
-#ifdef __WXGTK20__
-    info.shortName = _T("gtk2");
-#else
-    info.shortName = _T("gtk");
-#endif
-    info.name = _T("wxGTK");
-#ifdef __WXUNIVERSAL__
-    info.shortName << _T("univ");
-    info.name << _T("/wxUniversal");
-#endif
-    info.versionMajor = gtk_major_version;
-    info.versionMinor = gtk_minor_version;
-    info.os = wxGTK;
-    return info;
+  if (majorVsn) *majorVsn = GTK_MAJOR_VERSION;
+  if (minorVsn) *minorVsn = GTK_MINOR_VERSION;
+
+  return wxGTK;
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
@@ -194,8 +139,7 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 // subprocess routines
 // ----------------------------------------------------------------------------
 
-extern "C" {
-static
+extern "C"
 void GTK_EndProcessDetector(gpointer data, gint source,
                             GdkInputCondition WXUNUSED(condition) )
 {
@@ -225,7 +169,6 @@ void GTK_EndProcessDetector(gpointer data, gint source,
    gdk_input_remove(proc_data->tag);
 
    wxHandleProcessTermination(proc_data);
-}
 }
 
 int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)

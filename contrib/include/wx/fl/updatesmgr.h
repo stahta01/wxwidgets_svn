@@ -6,7 +6,7 @@
 // Created:     19/10/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __UPDATESMGR_G__
@@ -23,7 +23,7 @@ This class implements slightly optimized logic for refreshing
 the areas of frame layout that actually need to be updated.
 */
 
-class WXDLLIMPEXP_FL cbSimpleUpdatesMgr : public cbUpdatesManagerBase
+class WXFL_DECLSPEC cbSimpleUpdatesMgr : public cbUpdatesManagerBase
 {
     DECLARE_DYNAMIC_CLASS( cbSimpleUpdatesMgr )
 protected:

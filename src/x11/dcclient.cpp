@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dcclient.h"
 #endif
 
@@ -23,14 +23,12 @@
 
 #include "wx/x11/private.h"
 
-#include "wx/math.h"
+#include <math.h>
 
 #if wxUSE_UNICODE
 #include "glib.h"
 #include "pango/pangox.h"
-#ifdef HAVE_PANGO_XFT
-    #include "pango/pangoxft.h"
-#endif
+#include "pango/pangoxft.h"
 
 #include "pango_x.cpp"
 #endif
@@ -129,11 +127,11 @@ static GC wxGetPoolGC( Window window, wxPoolGCType type )
             wxGCPool[i].m_gc = XCreateGC( wxGlobalDisplay(), window, 0, NULL );
             XSetGraphicsExposures( wxGlobalDisplay(), wxGCPool[i].m_gc, FALSE );
             wxGCPool[i].m_type = type;
-            wxGCPool[i].m_used = false;
+            wxGCPool[i].m_used = FALSE;
         }
         if ((!wxGCPool[i].m_used) && (wxGCPool[i].m_type == type))
         {
-            wxGCPool[i].m_used = true;
+            wxGCPool[i].m_used = TRUE;
             return wxGCPool[i].m_gc;
         }
     }
@@ -149,7 +147,7 @@ static void wxFreePoolGC( GC gc )
     {
         if (wxGCPool[i].m_gc == gc)
         {
-            wxGCPool[i].m_used = false;
+            wxGCPool[i].m_used = FALSE;
             return;
         }
     }
@@ -171,10 +169,10 @@ wxWindowDC::wxWindowDC()
     m_textGC = (WXGC *) NULL;
     m_bgGC = (WXGC *) NULL;
     m_cmap = (WXColormap *) NULL;
-    m_isMemDC = false;
-    m_isScreenDC = false;
+    m_isMemDC = FALSE;
+    m_isScreenDC = FALSE;
     m_owner = (wxWindow *)NULL;
-
+    
 #if wxUSE_UNICODE
     m_context = (PangoContext *)NULL;
     m_fontdesc = (PangoFontDescription *)NULL;
@@ -192,8 +190,8 @@ wxWindowDC::wxWindowDC( wxWindow *window )
     m_bgGC = (WXGC *) NULL;
     m_cmap = (WXColormap *) NULL;
     m_owner = (wxWindow *)NULL;
-    m_isMemDC = false;
-    m_isScreenDC = false;
+    m_isMemDC = FALSE;
+    m_isScreenDC = FALSE;
     m_font = window->GetFont();
 
     m_window = (WXWindow*) window->GetMainWindow();
@@ -202,13 +200,13 @@ wxWindowDC::wxWindowDC( wxWindow *window )
     if (!m_window)
     {
          // don't report problems
-         m_ok = true;
+         m_ok = TRUE;
 
          return;
     }
 
     m_display = (WXDisplay *) wxGlobalDisplay();
-
+    
 #if wxUSE_UNICODE
     m_context = wxTheApp->GetPangoContext();
     m_fontdesc = window->GetFont().GetNativeFontInfo()->description;
@@ -236,7 +234,7 @@ wxWindowDC::~wxWindowDC()
 
 void wxWindowDC::SetUpDC()
 {
-    m_ok = true;
+    m_ok = TRUE;
 
     wxASSERT_MSG( !m_penGC, wxT("GCs already created") );
 
@@ -267,9 +265,6 @@ void wxWindowDC::SetUpDC()
     m_backgroundBrush = *wxWHITE_BRUSH;
     m_backgroundBrush.GetColour().CalcPixel( m_cmap );
     unsigned long bg_col = m_backgroundBrush.GetColour().GetPixel();
-
-    m_textForegroundColour = *wxBLACK;
-    m_textBackgroundColour = *wxWHITE;
 
     /* m_textGC */
     m_textForegroundColour.CalcPixel( m_cmap );
@@ -302,7 +297,7 @@ void wxWindowDC::SetUpDC()
     /* m_bgGC */
     XSetForeground( (Display*) m_display, (GC) m_bgGC, bg_col );
     XSetBackground( (Display*) m_display, (GC) m_bgGC, bg_col );
-
+    
     XSetFillStyle( (Display*) m_display, (GC) m_bgGC, FillSolid );
 
     /* ROPs */
@@ -320,7 +315,7 @@ void wxWindowDC::SetUpDC()
     {
         int xscreen = DefaultScreen( (Display*) m_display );
         Window xroot = RootWindow( (Display*) m_display, xscreen );
-
+    
         hatch_bitmap    = hatches;
         hatch_bitmap[0] = XCreateBitmapFromData( (Display*) m_display, xroot, bdiag_bits, bdiag_width, bdiag_height );
         hatch_bitmap[1] = XCreateBitmapFromData( (Display*) m_display, xroot, cdiag_bits, cdiag_width, cdiag_height );
@@ -338,7 +333,7 @@ void wxWindowDC::DoGetSize( int* width, int* height ) const
     m_owner->GetSize(width, height);
 }
 
-extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
+extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y, 
                           const wxColour & col, int style);
 
 bool wxWindowDC::DoFloodFill(wxCoord x, wxCoord y,
@@ -358,7 +353,7 @@ bool wxWindowDC::DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const
     memdc.SelectObject(wxNullBitmap);
     wxImage image(bitmap.ConvertToImage());
     col->Set(image.GetRed(0, 0), image.GetGreen(0, 0), image.GetBlue(0, 0));
-    return true;
+    return TRUE;
 }
 
 void wxWindowDC::DoDrawLine( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2 )
@@ -377,8 +372,8 @@ void wxWindowDC::DoDrawLine( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2 )
             points[1].x = x2;
             points[1].y = y2;
             DrawLines( 2, points, 0, 0 );
-
-            // XDrawLine( (Display*) m_display, (Window) m_window,
+            
+            // XDrawLine( (Display*) m_display, (Window) m_window, 
             //    (GC) m_penGC, XLOG2DEV(x1), YLOG2DEV(y1), XLOG2DEV(x2), YLOG2DEV(y2) );
         }
 
@@ -457,30 +452,30 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCo
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                                      
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+                    
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0 );
             } else
             if (IS_15_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 15, m_deviceOriginY % 15 );
-
+                                      
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+                    
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (IS_16_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 16, m_deviceOriginY % 16 );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (m_brush.GetStyle() == wxSTIPPLE)
@@ -488,10 +483,10 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCo
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                                      
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+                    
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             }
             else
@@ -505,10 +500,10 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCo
         {
             XDrawArc( (Display*) m_display, (Window) m_window,
                (GC) m_penGC, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+               
             XDrawLine( (Display*) m_display, (Window) m_window,
                (GC) m_penGC, xx1, yy1, xxc, yyc );
-
+               
             XDrawLine( (Display*) m_display, (Window) m_window,
                (GC) m_penGC, xxc, yyc, xx2, yy2 );
         }
@@ -543,30 +538,30 @@ void wxWindowDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, wxCoord
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_textGC, xx, yy, ww, hh, start, end );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0 );
             } else
             if (IS_15_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 15, m_deviceOriginY % 15 );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, start, end );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (IS_16_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 16, m_deviceOriginY % 16 );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, start, end );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (m_brush.GetStyle() == wxSTIPPLE)
@@ -574,10 +569,10 @@ void wxWindowDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, wxCoord
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, start, end );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             }
             else
@@ -621,7 +616,7 @@ void wxWindowDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord 
     {
         xpoints[i].x = XLOG2DEV (points[i].x + xoffset);
         xpoints[i].y = YLOG2DEV (points[i].y + yoffset);
-
+        
         CalcBoundingBox( points[i].x + xoffset, points[i].y + yoffset );
     }
     XDrawLines( (Display*) m_display, (Window) m_window, (GC) m_penGC, xpoints, n, 0 );
@@ -642,7 +637,7 @@ void wxWindowDC::DoDrawPolygon( int n, wxPoint points[],
     {
         xpoints[i].x = XLOG2DEV (points[i].x + xoffset);
         xpoints[i].y = YLOG2DEV (points[i].y + yoffset);
-
+        
         CalcBoundingBox (points[i].x + xoffset, points[i].y + yoffset);
     }
 
@@ -650,36 +645,36 @@ void wxWindowDC::DoDrawPolygon( int n, wxPoint points[],
     {
         if (m_brush.GetStyle() != wxTRANSPARENT)
         {
-
+        
             if ((m_brush.GetStyle() == wxSTIPPLE_MASK_OPAQUE) && (m_brush.GetStipple()->GetMask()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillPolygon( (Display*) m_display, (Window) m_window,
                     (GC) m_textGC, xpoints, n, Complex, 0);
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0 );
             } else
             if (IS_15_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 15, m_deviceOriginY % 15 );
-
+                
                 XFillPolygon( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xpoints, n, Complex, 0);
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (IS_16_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 16, m_deviceOriginY % 16 );
-
+                
                 XFillPolygon( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xpoints, n, Complex, 0);
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (m_brush.GetStyle() == wxSTIPPLE)
@@ -687,10 +682,10 @@ void wxWindowDC::DoDrawPolygon( int n, wxPoint points[],
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillPolygon( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xpoints, n, Complex, 0);
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             }
             else
@@ -728,7 +723,7 @@ void wxWindowDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord h
     // CMB: handle -ve width and/or height
     if (ww < 0) { ww = -ww; xx = xx - ww; }
     if (hh < 0) { hh = -hh; yy = yy - hh; }
-
+    
     if (m_window)
     {
         if (m_brush.GetStyle() != wxTRANSPARENT)
@@ -738,30 +733,30 @@ void wxWindowDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord h
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillRectangle( (Display*) m_display, (Window) m_window,
                     (GC) m_textGC, xx, yy, ww, hh );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0 );
             } else
             if (IS_15_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 15, m_deviceOriginY % 15 );
-
+                
                 XFillRectangle( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (IS_16_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 16, m_deviceOriginY % 16 );
-
+                
                 XFillRectangle( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (m_brush.GetStyle() == wxSTIPPLE)
@@ -769,10 +764,10 @@ void wxWindowDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord h
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillRectangle( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             }
             else
@@ -795,125 +790,7 @@ void wxWindowDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord h
 
 void wxWindowDC::DoDrawRoundedRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius )
 {
-    wxCHECK_RET( Ok(), wxT("invalid window dc") );
-
-    if (radius < 0.0) radius = - radius * ((width < height) ? width : height);
-
-    wxCoord xx = XLOG2DEV(x);
-    wxCoord yy = YLOG2DEV(y);
-    wxCoord ww = m_signX * XLOG2DEVREL(width);
-    wxCoord hh = m_signY * YLOG2DEVREL(height);
-    wxCoord rr = XLOG2DEVREL((wxCoord)radius);
-
-    // CMB: handle -ve width and/or height
-    if (ww < 0) { ww = -ww; xx = xx - ww; }
-    if (hh < 0) { hh = -hh; yy = yy - hh; }
-
-    // CMB: if radius is zero use DrawRectangle() instead to avoid
-    // X drawing errors with small radii
-    if (rr == 0)
-    {
-            XDrawRectangle( (Display*) m_display, (Window) m_window,
-                (GC) m_penGC, x, y, width, height);
-        return;
-    }
-
-    // CMB: draw nothing if transformed w or h is 0
-    if (ww == 0 || hh == 0) return;
-
-    // CMB: adjust size if outline is drawn otherwise the result is
-    // 1 pixel too wide and high
-    if (m_pen.GetStyle() != wxTRANSPARENT)
-    {
-        ww--;
-        hh--;
-    }
-
-    if (m_window)
-    {
-        // CMB: ensure dd is not larger than rectangle otherwise we
-        // get an hour glass shape
-        wxCoord dd = 2 * rr;
-        if (dd > ww) dd = ww;
-        if (dd > hh) dd = hh;
-        rr = dd / 2;
-
-        if (m_brush.GetStyle() != wxTRANSPARENT)
-        {
-            if ((m_brush.GetStyle() == wxSTIPPLE_MASK_OPAQUE) && (m_brush.GetStipple()->GetMask()))
-            {
-                XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
-                              m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
-                              m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx+rr, yy, ww-dd+1, hh );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx, yy+rr, ww, hh-dd+1 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx, yy, dd, dd, 90*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_textGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-                XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0);
-            } else
-            if (IS_15_PIX_HATCH(m_brush.GetStyle()))
-            {
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, m_deviceOriginX % 15, m_deviceOriginY % 15 );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+rr, yy, ww-dd+1, hh );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+rr, ww, hh-dd+1 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy, dd, dd, 90*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0);
-            } else
-            if (IS_16_PIX_HATCH(m_brush.GetStyle()))
-            {
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, m_deviceOriginX % 16, m_deviceOriginY % 16 );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+rr, yy, ww-dd+1, hh );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+rr, ww, hh-dd+1 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy, dd, dd, 90*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0);
-            } else
-            if (m_brush.GetStyle() == wxSTIPPLE)
-            {
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
-                              m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
-                              m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+rr, yy, ww-dd+1, hh );
-                XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+rr, ww, hh-dd+1 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy, dd, dd, 90*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-                XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-                XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0);
-            }
-            else
-            {
-               XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+rr, yy, ww-dd+1, hh );
-               XFillRectangle( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+rr, ww, hh-dd+1 );
-               XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy, dd, dd, 90*64, 90*64 );
-               XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-               XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-               XFillArc( (Display*) m_display, (Window) m_window, (GC) m_brushGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-            }
-        }
-     if (m_pen.GetStyle() != wxTRANSPARENT)
-        {
-            XDrawLine( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx+rr+1, yy, xx+ww-rr, yy );
-            XDrawLine( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx+rr+1, yy+hh, xx+ww-rr, yy+hh );
-            XDrawLine( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx, yy+rr+1, xx, yy+hh-rr );
-            XDrawLine( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx+ww, yy+rr+1, xx+ww, yy+hh-rr );
-            XDrawArc( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx, yy, dd, dd, 90*64, 90*64 );
-            XDrawArc( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx+ww-dd, yy, dd, dd, 0, 90*64 );
-            XDrawArc( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx+ww-dd, yy+hh-dd, dd, dd, 270*64, 90*64 );
-            XDrawArc( (Display*) m_display, (Window) m_window, (GC) m_penGC, xx, yy+hh-dd, dd, dd, 180*64, 90*64 );
-        }
-    }
-
-    // this ignores the radius
-    CalcBoundingBox( x, y );
-    CalcBoundingBox( x + width, y + height );
+   // later
 }
 
 void wxWindowDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
@@ -938,30 +815,30 @@ void wxWindowDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord hei
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_textGC, xx, yy, ww, hh, 0, 360*64 );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_textGC, 0, 0 );
             } else
             if (IS_15_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 15, m_deviceOriginY % 15 );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, 0, 360*64 );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (IS_16_PIX_HATCH(m_brush.GetStyle()))
             {
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % 16, m_deviceOriginY % 16 );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, 0, 360*64 );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             } else
             if (m_brush.GetStyle() == wxSTIPPLE)
@@ -969,10 +846,10 @@ void wxWindowDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord hei
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC,
                                       m_deviceOriginX % m_brush.GetStipple()->GetWidth(),
                                       m_deviceOriginY % m_brush.GetStipple()->GetHeight() );
-
+                
                 XFillArc( (Display*) m_display, (Window) m_window,
                     (GC) m_brushGC, xx, yy, ww, hh, 0, 360*64 );
-
+                
                 XSetTSOrigin( (Display*) m_display, (GC) m_brushGC, 0, 0 );
             }
             else
@@ -995,7 +872,7 @@ void wxWindowDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord hei
 
 void wxWindowDC::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y)
 {
-    DoDrawBitmap(icon, x, y, true);
+    DoDrawBitmap(icon, x, y, TRUE);
 }
 
 #if wxUSE_NANOX
@@ -1006,7 +883,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
     wxCHECK_RET( bitmap.Ok(), wxT("invalid bitmap") );
-
+    
     bool is_mono = (bitmap.GetBitmap() != NULL);
 
     /* scale/translate size and position */
@@ -1078,7 +955,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
         GrCopyArea(bufPixmap, gc, 0, 0, w, h, (Window) m_window,
                   0, 0, GR_MODE_COPY);
 #endif
-
+            
         // Copy src to buffer using selected raster op (none selected
         // in DrawBitmap, so just use Gxcopy)
         GrCopyArea(bufPixmap, gc, 0, 0, w, h, pixmap,
@@ -1089,7 +966,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
         GrSetGCForeground(gc, BLACK);
         GrCopyArea(bufPixmap, gc, 0, 0, w, h, maskPixmap,
                     0, 0, GR_MODE_AND);
-
+                       
         // set unmasked area in dest to BLACK
         GrSetGCBackground(gc, BLACK);
         GrSetGCForeground(gc, WHITE);
@@ -1125,7 +1002,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
     wxCHECK_RET( bitmap.Ok(), wxT("invalid bitmap") );
-
+    
     bool is_mono = (bitmap.GetBitmap() != NULL);
 
     // scale/translate size and position
@@ -1173,7 +1050,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     // apply mask if any
     WXPixmap mask = NULL;
     if (use_bitmap.GetMask()) mask = use_bitmap.GetMask()->GetBitmap();
-
+    
         if (useMask && mask)
         {
             WXPixmap new_mask = NULL;
@@ -1214,7 +1091,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                     XSetClipMask( (Display*) m_display, (GC) m_penGC, (Pixmap) mask );
                 XSetClipOrigin( (Display*) m_display, (GC) m_penGC, xx, yy );
             }
-
+            
             if (new_mask)
                XFreePixmap( (Display*) m_display, (Pixmap) new_mask );
         }
@@ -1259,11 +1136,11 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
       of the source dc, but scales correctly on the target dc and
       knows about possible mask information in a memory dc. */
 
-    wxCHECK_MSG( Ok(), false, wxT("invalid window dc") );
+    wxCHECK_MSG( Ok(), FALSE, wxT("invalid window dc") );
 
-    wxCHECK_MSG( source, false, wxT("invalid source dc") );
+    wxCHECK_MSG( source, FALSE, wxT("invalid source dc") );
 
-    if (!m_window) return false;
+    if (!m_window) return FALSE;
 
     // transform the source DC coords to the device ones
     xsrc = source->XLOG2DEV(xsrc);
@@ -1272,19 +1149,19 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
     wxClientDC *srcDC = (wxClientDC*)source;
     wxMemoryDC *memDC = (wxMemoryDC*)source;
 
-    bool use_bitmap_method = false;
-    bool is_mono = false;
+    bool use_bitmap_method = FALSE;
+    bool is_mono = FALSE;
 
-    // TODO: use the mask origin when drawing transparently
+    // TODO: use the mask origin when drawing transparently 
     if (xsrcMask == -1 && ysrcMask == -1)
     {
         xsrcMask = xsrc;
         ysrcMask = ysrc;
     }
-
+    
     if (srcDC->m_isMemDC)
     {
-        if (!memDC->m_selected.Ok()) return false;
+        if (!memDC->m_selected.Ok()) return FALSE;
 
         /* we use the "XCopyArea" way to copy a memory dc into
            y different window if the memory dc BOTH
@@ -1297,15 +1174,15 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
            /* we HAVE TO use the direct way for memory dcs
               that have mask since the XCopyArea doesn't know
               about masks */
-            use_bitmap_method = true;
+            use_bitmap_method = TRUE;
         }
         else if (memDC->m_selected.GetDepth() == 1)
         {
            /* we HAVE TO use the direct way for memory dcs
               that are bitmaps because XCopyArea doesn't cope
               with different bit depths */
-            is_mono = true;
-            use_bitmap_method = true;
+            is_mono = TRUE;
+            use_bitmap_method = TRUE;
         }
         else if ((xsrc == 0) && (ysrc == 0) &&
                  (width == memDC->m_selected.GetWidth()) &&
@@ -1315,11 +1192,11 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
               in the memory dc is copied in which case XCopyArea
               wouldn't be able able to boost performace by reducing
               the area to be scaled */
-            use_bitmap_method = true;
+            use_bitmap_method = TRUE;
         }
         else
         {
-            use_bitmap_method = false;
+            use_bitmap_method = FALSE;
         }
     }
 
@@ -1339,7 +1216,7 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
         wxRegion tmp( xx,yy,ww,hh );
         tmp.Intersect( m_currentClippingRegion );
         if (tmp.IsEmpty())
-            return true;
+            return TRUE;
     }
 
     int old_logical_func = m_logicalFunction;
@@ -1418,7 +1295,7 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
                     XSetClipMask( (Display*) m_display, (GC) m_penGC, (Pixmap) mask );
                 XSetClipOrigin( (Display*) m_display, (GC) m_penGC, xx, yy );
             }
-
+            
             if (new_mask)
                XFreePixmap( (Display*) m_display, (Pixmap) new_mask );
         }
@@ -1485,7 +1362,7 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
             bitmap = image;
 
             // draw scaled bitmap
-            XCopyArea( (Display*) m_display, (Window) bitmap.GetPixmap(), (Window) m_window,
+            XCopyArea( (Display*) m_display, (Window) bitmap.GetPixmap(), (Window) m_window, 
                        (GC) m_penGC, 0, 0, width, height, xx, yy );
         }
         else
@@ -1494,15 +1371,15 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
 
             // copy including child window contents
             XSetSubwindowMode( (Display*) m_display, (GC) m_penGC, IncludeInferiors );
-            XCopyArea( (Display*) m_display, (Window) srcDC->GetWindow(), (Window) m_window,
+            XCopyArea( (Display*) m_display, (Window) srcDC->GetWindow(), (Window) m_window, 
                        (GC) m_penGC, xsrc, ysrc, width, height, xx, yy );
             XSetSubwindowMode( (Display*) m_display, (GC) m_penGC, ClipByChildren );
         }
     }
 
     SetLogicalFunction( old_logical_func );
-
-    return true;
+    
+    return TRUE;
 }
 
 void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
@@ -1517,28 +1394,28 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 #if wxUSE_UNICODE
     PangoLayout *layout = pango_layout_new(m_context);
     pango_layout_set_font_description(layout, m_fontdesc);
-
+    
     const wxCharBuffer data = wxConvUTF8.cWC2MB( text );
     pango_layout_set_text(layout, (const char*) data, strlen( (const char*) data ));
-
+    
     // Measure layout.
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
     wxCoord width = w;
     wxCoord height = h;
-
+    
     // Draw layout.
     x11_draw_layout( (Drawable) m_window, (GC) m_textGC, x, y, layout, m_textForegroundColour );
-
+    
     g_object_unref( G_OBJECT( layout ) );
-
+    
     CalcBoundingBox (x + width, y + height);
     CalcBoundingBox (x, y);
 #else
     XFontStruct *xfont = (XFontStruct*) m_font.GetFontStruct( m_scaleY, m_display );
 
     wxCHECK_RET( xfont, wxT("invalid font") );
-
+    
     // First draw a rectangle representing the text background, if a text
     // background is specified
     if (m_textBackgroundColour.Ok () && (m_backgroundMode != wxTRANSPARENT))
@@ -1559,7 +1436,6 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
         cx = overall_return.width;
         cy = ascent + descent;
         m_textBackgroundColour.CalcPixel(m_cmap);
-        m_textForegroundColour.CalcPixel(m_cmap);
         XSetForeground ((Display*) m_display, (GC) m_textGC, m_textBackgroundColour.GetPixel());
         XFillRectangle( (Display*) m_display, (Window) m_window,
                     (GC) m_textGC, x, y, cx, cy );
@@ -1572,7 +1448,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
     if ((xfont->min_byte1 == 0) && (xfont->max_byte1 == 0))
 #endif
     {
-        XDrawString( (Display*) m_display, (Window) m_window,
+        XDrawString( (Display*) m_display, (Window) m_window, 
             (GC) m_textGC, x, y + XFontStructGetAscent(xfont), text.c_str(), text.Len() );
     }
 
@@ -1586,7 +1462,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 
     width = wxCoord(width / m_scaleX);
     height = wxCoord(height / m_scaleY);
-
+    
     CalcBoundingBox (x + width, y + height);
     CalcBoundingBox (x, y);
 #endif
@@ -1602,15 +1478,15 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
                                 wxCoord *descent, wxCoord *externalLeading,
                                 wxFont *font ) const
 {
-    wxCHECK_RET( Ok(), wxT("invalid dc") );
+    wxCHECK_RET( Ok(), "invalid dc" );
 
-    if (string.empty())
+    if (string.IsEmpty())
     {
         if (width) (*width) = 0;
         if (height) (*height) = 0;
         return;
     }
-
+    
 #if wxUSE_UNICODE
     PangoLayout *layout = pango_layout_new( m_context );
 
@@ -1618,15 +1494,15 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
         pango_layout_set_font_description( layout, font->GetNativeFontInfo()->description );
     else
         pango_layout_set_font_description(layout, m_fontdesc);
-
+        
     const wxCharBuffer data = wxConvUTF8.cWC2MB( string );
     pango_layout_set_text(layout, (const char*) data, strlen( (const char*) data ));
-
+ 
     // Measure text.
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
-
-    if (width) (*width) = (wxCoord) w;
+    
+    if (width) (*width) = (wxCoord) w; 
     if (height) (*height) = (wxCoord) h;
     if (descent)
     {
@@ -1634,18 +1510,18 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
         (*descent) = 0;
     }
     if (externalLeading) (*externalLeading) = 0;  // ??
-
+    
     g_object_unref( G_OBJECT( layout ) );
 #else
     wxFont fontToUse = m_font;
     if (font) fontToUse = *font;
 
-    wxCHECK_RET( fontToUse.Ok(), wxT("invalid font") );
+    wxCHECK_RET( fontToUse.Ok(), "invalid font" );
 
     XFontStruct *xfont = (XFontStruct*) fontToUse.GetFontStruct( m_scaleY, m_display );
 
     wxCHECK_RET( xfont, wxT("invalid font") );
-
+    
     int direction, ascent, descent2;
     XCharStruct overall;
 
@@ -1665,24 +1541,26 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
 
 wxCoord wxWindowDC::GetCharWidth() const
 {
-    wxCHECK_MSG( Ok(), 0, wxT("invalid dc") );
-
+    wxCHECK_MSG( Ok(), 0, "invalid dc" );
+    
 #if wxUSE_UNICODE
     PangoLayout *layout = pango_layout_new( m_context );
-
-    if (m_fontdesc)
-	pango_layout_set_font_description(layout, m_fontdesc);
-    else
-	pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
-	
+    
+    if (!m_fontdesc)
+    {
+        char *crash = NULL;
+        *crash = 0;
+    }
+    
+    pango_layout_set_font_description(layout, m_fontdesc);
     pango_layout_set_text(layout, "H", 1 );
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
     g_object_unref( G_OBJECT( layout ) );
-
+    
     return w;
 #else
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("invalid font") );
+    wxCHECK_MSG( m_font.Ok(), 0, "invalid font" );
 
     XFontStruct *xfont = (XFontStruct*) m_font.GetFontStruct( m_scaleY, m_display );
 
@@ -1690,33 +1568,36 @@ wxCoord wxWindowDC::GetCharWidth() const
 
     int direction, ascent, descent;
     XCharStruct overall;
-
+    
     XTextExtents( xfont, "H", 1, &direction, &ascent, &descent, &overall );
-
+        
     return (wxCoord)(overall.width / m_scaleX);
 #endif
 }
 
 wxCoord wxWindowDC::GetCharHeight() const
 {
-    wxCHECK_MSG( Ok(), 0, wxT("invalid dc") );
-
+    wxCHECK_MSG( Ok(), 0, "invalid dc" );
+    
 #if wxUSE_UNICODE
     PangoLayout *layout = pango_layout_new( m_context );
-
-    if (m_fontdesc)
-	pango_layout_set_font_description(layout, m_fontdesc);
-    else
-	pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
-	
+    
+    if (!m_fontdesc)
+    {
+        char *crash = NULL;
+        *crash = 0;
+    }
+    
+    pango_layout_set_font_description(layout, m_fontdesc);
+    
     pango_layout_set_text(layout, "H", 1 );
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
     g_object_unref( G_OBJECT( layout ) );
-
+    
     return h;
 #else
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("invalid font") );
+    wxCHECK_MSG( m_font.Ok(), 0, "invalid font" );
 
     XFontStruct *xfont = (XFontStruct*) m_font.GetFontStruct( m_scaleY, m_display );
 
@@ -1724,9 +1605,9 @@ wxCoord wxWindowDC::GetCharHeight() const
 
     int direction, ascent, descent;
     XCharStruct overall;
-
+    
     XTextExtents( xfont, "H", 1, &direction, &ascent, &descent, &overall );
-
+        
     return (wxCoord)((ascent+descent) / m_scaleY);
 #endif
 }
@@ -1763,15 +1644,9 @@ void wxWindowDC::Clear()
 
 void wxWindowDC::SetFont( const wxFont &font )
 {
-    wxCHECK_RET( Ok(), wxT("invalid dc") );
+    wxCHECK_RET( Ok(), "invalid dc" );
 
     m_font = font;
-    
-    return;
-    
-#if wxUSE_UNICODE
-    m_fontdesc = font.GetNativeFontInfo()->description;
-#endif
 }
 
 void wxWindowDC::SetPen( const wxPen &pen )
@@ -1915,7 +1790,7 @@ void wxWindowDC::SetBrush( const wxBrush &brush )
 
     m_brush.GetColour().CalcPixel( m_cmap );
     XSetForeground( (Display*) m_display, (GC) m_brushGC, m_brush.GetColour().GetPixel() );
-
+    
     XSetFillStyle( (Display*) m_display, (GC) m_brushGC, FillSolid );
 
     if ((m_brush.GetStyle() == wxSTIPPLE) && (m_brush.GetStipple()->Ok()))
@@ -1938,7 +1813,7 @@ void wxWindowDC::SetBrush( const wxBrush &brush )
         XSetStipple( (Display*) m_display, (GC) m_textGC, (Pixmap) m_brush.GetStipple()->GetMask()->GetBitmap() );
     }
 
-    if (m_brush.IsHatch())
+    if (IS_HATCH(m_brush.GetStyle()))
     {
         XSetFillStyle( (Display*) m_display, (GC) m_brushGC, FillStippled );
         int num = m_brush.GetStyle() - wxBDIAGONAL_HATCH;
@@ -1983,7 +1858,7 @@ void wxWindowDC::SetBackground( const wxBrush &brush )
         }
     }
 
-    if (m_backgroundBrush.IsHatch())
+    if (IS_HATCH(m_backgroundBrush.GetStyle()))
     {
         XSetFillStyle( (Display*) m_display, (GC) m_bgGC, FillStippled );
         int num = m_backgroundBrush.GetStyle() - wxBDIAGONAL_HATCH;
@@ -1993,7 +1868,7 @@ void wxWindowDC::SetBackground( const wxBrush &brush )
 
 void wxWindowDC::SetLogicalFunction( int function )
 {
-    wxCHECK_RET( Ok(), wxT("invalid dc") );
+    wxCHECK_RET( Ok(), "invalid dc" );
 
     int x_function;
 
@@ -2003,7 +1878,7 @@ void wxWindowDC::SetLogicalFunction( int function )
     // VZ: shouldn't this be a CHECK?
     if (!m_window)
         return;
-
+        
     switch (function)
     {
     case wxCLEAR:
@@ -2064,7 +1939,7 @@ void wxWindowDC::SetLogicalFunction( int function )
     // operations (i.e. DrawText/DrawRotatedText).
     // True, but mono-bitmaps use the m_textGC and they use ROPs as well.
     XSetFunction( (Display*) m_display, (GC) m_textGC, x_function );
-
+    
     m_logicalFunction = function;
 }
 
@@ -2292,9 +2167,9 @@ wxClientDC::wxClientDC( wxWindow *window )
           : wxWindowDC( window )
 {
     wxCHECK_RET( window, _T("NULL window in wxClientDC::wxClientDC") );
-
+    
     m_window = (WXWindow*) window->GetClientAreaWindow();
-
+    
     // Adjust the client area when the wxWindow is not using 2 X11 windows.
     if (m_window == (WXWindow*) window->GetMainWindow())
     {
@@ -2358,7 +2233,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 bool wxDCModule::OnInit()
 {
     wxInitGCPool();
-    return true;
+    return TRUE;
 }
 
 void wxDCModule::OnExit()

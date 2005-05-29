@@ -11,11 +11,11 @@
 #ifndef _WX_GIFDECOD_H
 #define _WX_GIFDECOD_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "gifdecod.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if wxUSE_STREAMS && wxUSE_GIF
 
@@ -78,8 +78,6 @@ public:
     unsigned char *pal;             /* palette */
     GIFImage *next;                 /* next image */
     GIFImage *prev;                 /* prev image */
-
-    DECLARE_NO_COPY_CLASS(GIFImage)
 };
 
 
@@ -136,13 +134,13 @@ public:
     // move through the animation
     bool GoFirstFrame();
     bool GoLastFrame();
-    bool GoNextFrame(bool cyclic = false);
-    bool GoPrevFrame(bool cyclic = false);
+    bool GoNextFrame(bool cyclic = FALSE);
+    bool GoPrevFrame(bool cyclic = FALSE);
     bool GoFrame(int which);
 
 public:
     // constructor, destructor, etc.
-    wxGIFDecoder(wxInputStream *s, bool anim = false);
+    wxGIFDecoder(wxInputStream *s, bool anim = FALSE);
     ~wxGIFDecoder();
     bool CanRead();
     int ReadGIF();
@@ -150,8 +148,6 @@ public:
 
     // convert current frame to wxImage
     bool ConvertToImage(wxImage *image) const;
-
-    DECLARE_NO_COPY_CLASS(wxGIFDecoder)
 };
 
 

@@ -25,7 +25,7 @@ Objects:
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxPalette::wxPalette}\label{wxpalettector}
+\membersection{wxPalette::wxPalette}\label{wxpaletteconstr}
 
 \func{}{wxPalette}{\void}
 
@@ -60,7 +60,7 @@ red, blue or green component.
 \perlnote{In wxPerl the third constructor form takes as parameters
   3 array references ( they must be of the same length ).}
 
-\membersection{wxPalette::\destruct{wxPalette}}\label{wxpalettedtor}
+\membersection{wxPalette::\destruct{wxPalette}}
 
 \func{}{\destruct{wxPalette}}{\void}
 
@@ -86,17 +86,11 @@ red, blue or green component.
 
 \wxheading{Return value}
 
-true if the creation was successful, false otherwise.
+TRUE if the creation was successful, FALSE otherwise.
 
 \wxheading{See also}
 
-\helpref{wxPalette::wxPalette}{wxpalettector}
-
-\membersection{wxPalette::GetColoursCount}\label{wxpalettegetcolourscount}
-
-\constfunc{int}{GetColoursCount}{\void}
-
-Returns number of entries in palette.
+\helpref{wxPalette::wxPalette}{wxpaletteconstr}
 
 \membersection{wxPalette::GetPixel}\label{wxpalettegetpixel}
 
@@ -123,7 +117,7 @@ The nearest palette index.
 
 \membersection{wxPalette::GetRGB}\label{wxpalettegetrgb}
 
-\constfunc{bool}{GetRGB}{\param{int}{ pixel}, \param{const unsigned char* }{red}, \param{const unsigned char* }{green},\rtfsp
+\constfunc{bool}{GetPixel}{\param{int}{ pixel}, \param{const unsigned char* }{red}, \param{const unsigned char* }{green},\rtfsp
  \param{const unsigned char* }{blue}}
 
 Returns RGB values for a given palette index.
@@ -140,7 +134,7 @@ Returns RGB values for a given palette index.
 
 \wxheading{Return value}
 
-true if the operation was successful.
+TRUE if the operation was successful.
 
 \wxheading{See also}
 
@@ -153,7 +147,7 @@ true if the operation was successful.
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if palette data is present.
+Returns TRUE if palette data is present.
 
 \membersection{wxPalette::operator $=$}\label{wxpaletteassignment}
 

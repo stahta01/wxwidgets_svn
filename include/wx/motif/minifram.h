@@ -14,7 +14,7 @@
 #ifndef _WX_MINIFRAM_H_
 #define _WX_MINIFRAM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "minifram.h"
 #endif
 

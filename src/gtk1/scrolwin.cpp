@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        gtk/scrolwin.cpp
 // Purpose:     wxScrolledWindow implementation
-// Author:      Robert Roebling
+// Author:      Julian Smart
 // Modified by: Ron Lee
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Robert Roebling
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "scrolwin.h"
 #endif
 
@@ -28,9 +28,10 @@
     #pragma hdrstop
 #endif
 
-#include "wx/scrolwin.h"
 #include "wx/utils.h"
 #include "wx/dcclient.h"
+
+#include "wx/scrolwin.h"
 #include "wx/panel.h"
 #include "wx/sizer.h"
 
@@ -72,7 +73,6 @@ extern bool g_isIdle;
 // "value_changed" from m_vAdjust
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_scrolled_window_vscroll_callback( GtkAdjustment *adjust,
                                                   SCROLLBAR_CBACK_ARG
                                                   wxScrolledWindow *win )
@@ -83,17 +83,15 @@ static void gtk_scrolled_window_vscroll_callback( GtkAdjustment *adjust,
     if (g_blockEventsOnDrag) return;
 
     if (!win->m_hasVMT) return;
-    
+
     win->GtkVScroll( adjust->value,
             GET_SCROLL_TYPE(GTK_SCROLLED_WINDOW(win->m_widget)->vscrollbar) );
-}
 }
 
 //-----------------------------------------------------------------------------
 // "value_changed" from m_hAdjust
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_scrolled_window_hscroll_callback( GtkAdjustment *adjust,
                                                   SCROLLBAR_CBACK_ARG
                                                   wxScrolledWindow *win )
@@ -107,13 +105,11 @@ static void gtk_scrolled_window_hscroll_callback( GtkAdjustment *adjust,
     win->GtkHScroll( adjust->value,
             GET_SCROLL_TYPE(GTK_SCROLLED_WINDOW(win->m_widget)->hscrollbar) );
 }
-}
 
 //-----------------------------------------------------------------------------
 // "button_press_event" from scrollbar
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
                                                  GdkEventButton *gdk_event,
                                                  wxWindowGTK *win)
@@ -130,13 +126,11 @@ static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
 
     return FALSE;
 }
-}
 
 //-----------------------------------------------------------------------------
 // "button_release_event" from scrollbar
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint gtk_scrollbar_button_release_callback( GtkRange *widget,
                                                    GdkEventButton *WXUNUSED(gdk_event),
                                                    wxWindowGTK *win)
@@ -174,7 +168,6 @@ static gint gtk_scrollbar_button_release_callback( GtkRange *widget,
     win->m_isScrolling = FALSE;
 
     return FALSE;
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -295,7 +288,7 @@ bool wxScrolledWindow::Create(wxWindow *parent,
     GtkHConnectEvent();
 
     // these handlers block mouse events to any window during scrolling such as
-    // motion events and prevent GTK and wxWidgets from fighting over where the
+    // motion events and prevent GTK and wxWindows from fighting over where the
     // slider should be
 
     gtk_signal_connect( GTK_OBJECT(scrolledWindow->vscrollbar), "button_press_event",
@@ -333,62 +326,10 @@ void wxScrolledWindow::DoSetVirtualSize( int x, int y )
     wxPanel::DoSetVirtualSize( x, y );
     AdjustScrollbars();
 
+#if wxUSE_CONSTRAINTS
     if (GetAutoLayout())
         Layout();
-}
-
-// wxWindow's GetBestVirtualSize returns the actual window size,
-// whereas we want to return the virtual size
-wxSize wxScrolledWindow::GetBestVirtualSize() const
-{
-    wxSize  clientSize( GetClientSize() );
-    if (GetSizer())
-    {
-        wxSize minSize( GetSizer()->CalcMin() );
-
-        return wxSize( wxMax( clientSize.x, minSize.x ), wxMax( clientSize.y, minSize.y ) );
-    }
-    else
-        return clientSize;
-}
-
-// return the size best suited for the current window
-// (this isn't a virtual size, this is a sensible size for the window)
-wxSize wxScrolledWindow::DoGetBestSize() const
-{
-    wxSize best;
-
-    if ( GetSizer() )
-    {
-        wxSize b = GetSizer()->GetMinSize();
-
-        // Only use the content to set the window size in the direction
-        // where there's no scrolling; otherwise we're going to get a huge
-        // window in the direction in which scrolling is enabled
-        int ppuX, ppuY;
-        GetScrollPixelsPerUnit(& ppuX, & ppuY);
-
-        wxSize minSize;
-        if ( GetMinSize().IsFullySpecified() )
-            minSize = GetMinSize();
-        else
-            minSize = GetSize();
-
-        if (ppuX > 0)
-            b.x = minSize.x;
-        if (ppuY > 0)
-            b.y = minSize.y;
-        best = b;
-    }
-    else
-        return wxWindow::DoGetBestSize();
-
-    // Add any difference between size and client size
-    wxSize diff = GetSize() - GetClientSize();
-    best.x += wxMax(0, diff.x);
-    best.y += wxMax(0, diff.y);
-
-    return best;
+#endif
 }
 
 /*
@@ -413,12 +354,9 @@ void wxScrolledWindow::SetScrollbars( int pixelsPerUnitX, int pixelsPerUnitY,
 
     // Setting hints here should arguably be deprecated, but without it
     // a sizer might override this manual scrollbar setting in old code.
-    // m_targetWindow->SetVirtualSizeHints( noUnitsX * pixelsPerUnitX, noUnitsY * pixelsPerUnitY );
+    m_targetWindow->SetVirtualSizeHints( noUnitsX * pixelsPerUnitX, noUnitsY * pixelsPerUnitY );
 
-    int w = noUnitsX * pixelsPerUnitX;
-    int h = noUnitsY * pixelsPerUnitY;
-    m_targetWindow->SetVirtualSize( w ? w : wxDefaultCoord,
-                                    h ? h : wxDefaultCoord);
+    m_targetWindow->SetVirtualSize( noUnitsX * pixelsPerUnitX, noUnitsY * pixelsPerUnitY );
 
     if (!noRefresh)
     {
@@ -436,25 +374,17 @@ void wxScrolledWindow::AdjustScrollbars()
 
     m_targetWindow->GetClientSize( &w, &h );
     m_targetWindow->GetVirtualSize( &vw, &vh );
-    
+
     if (m_xScrollPixelsPerLine == 0)
     {
         m_hAdjust->upper = 1.0;
-        m_hAdjust->page_increment = 1.0;
         m_hAdjust->page_size = 1.0;
     }
     else
     {
-        m_hAdjust->upper = (vw+m_xScrollPixelsPerLine-1) / m_xScrollPixelsPerLine;
-        m_hAdjust->page_size = w / m_xScrollPixelsPerLine;
-        m_hAdjust->page_increment = w / m_xScrollPixelsPerLine;
+        m_hAdjust->upper = vw / m_xScrollPixelsPerLine;
+        m_hAdjust->page_size = (w / m_xScrollPixelsPerLine);
 
-        // Special case. When client and virtual size are very close but
-        // the client is big enough, kill scrollbar.
-        
-        if ((m_hAdjust->page_size < m_hAdjust->upper) && (w >= vw)) 
-            m_hAdjust->page_size += 1.0;
-        
         // If the scrollbar hits the right side, move the window
         // right to keep it from over extending.
 
@@ -474,17 +404,12 @@ void wxScrolledWindow::AdjustScrollbars()
     if (m_yScrollPixelsPerLine == 0)
     {
         m_vAdjust->upper = 1.0;
-        m_vAdjust->page_increment = 1.0;
         m_vAdjust->page_size = 1.0;
     }
     else
     {
-        m_vAdjust->upper = (vh+m_yScrollPixelsPerLine-1) / m_yScrollPixelsPerLine;
-        m_vAdjust->page_size = h / m_yScrollPixelsPerLine;
-        m_vAdjust->page_increment = h / m_yScrollPixelsPerLine;
-        
-        if ((m_vAdjust->page_size < m_vAdjust->upper) && (h >= vh)) 
-            m_vAdjust->page_size += 1.0;
+        m_vAdjust->upper = vh / m_yScrollPixelsPerLine;
+        m_vAdjust->page_size = (h / m_yScrollPixelsPerLine);
 
         if ((m_vAdjust->value != 0.0) && (m_vAdjust->value + m_vAdjust->page_size > m_vAdjust->upper))
         {
@@ -499,8 +424,8 @@ void wxScrolledWindow::AdjustScrollbars()
         }
     }
 
-    m_xScrollLinesPerPage = (int)(m_hAdjust->page_increment + 0.5);
-    m_yScrollLinesPerPage = (int)(m_vAdjust->page_increment + 0.5);
+    m_xScrollLinesPerPage = (int)(m_hAdjust->page_size + 0.5);
+    m_yScrollLinesPerPage = (int)(m_vAdjust->page_size + 0.5);
 
     gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "changed" );
     gtk_signal_emit_by_name( GTK_OBJECT(m_hAdjust), "changed" );
@@ -517,14 +442,14 @@ void wxScrolledWindow::SetTargetWindow( wxWindow *target, bool WXUNUSED(pushEven
     m_targetWindow = target;
 }
 
-wxWindow *wxScrolledWindow::GetTargetWindow() const
+wxWindow *wxScrolledWindow::GetTargetWindow()
 {
     return m_targetWindow;
 }
 
 // Override this function if you don't want to have wxScrolledWindow
 // automatically change the origin according to the scroll position.
-void wxScrolledWindow::DoPrepareDC(wxDC& dc)
+void wxScrolledWindow::PrepareDC(wxDC& dc)
 {
     dc.SetDeviceOrigin( -m_xScrollPosition * m_xScrollPixelsPerLine,
                         -m_yScrollPosition * m_yScrollPixelsPerLine );
@@ -633,7 +558,7 @@ void wxScrolledWindow::Scroll( int x_pos, int y_pos )
 
         m_targetWindow->ScrollWindow( (old_x-m_xScrollPosition)*m_xScrollPixelsPerLine, 0 );
 
-        // Just update the scrollbar, don't send any wxWidgets event
+        // Just update the scrollbar, don't send any wxWindows event
         GtkHDisconnectEvent();
         gtk_signal_emit_by_name( GTK_OBJECT(m_hAdjust), "value_changed" );
         GtkHConnectEvent();
@@ -652,7 +577,7 @@ void wxScrolledWindow::Scroll( int x_pos, int y_pos )
 
         m_targetWindow->ScrollWindow( 0, (old_y-m_yScrollPosition)*m_yScrollPixelsPerLine );
 
-        // Just update the scrollbar, don't send any wxWidgets event
+        // Just update the scrollbar, don't send any wxWindows event
         GtkVDisconnectEvent();
         gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "value_changed" );
         GtkVConnectEvent();
@@ -854,14 +779,14 @@ void wxScrolledWindow::SetScrollPos( int orient, int pos, bool refresh )
     {
         if (orient == wxHORIZONTAL)
         {
-            // Just update the scrollbar, don't send any wxWidgets event
+            // Just update the scrollbar, don't send any wxWindows event
             GtkHDisconnectEvent();
             gtk_signal_emit_by_name( GTK_OBJECT(m_hAdjust), "value_changed" );
             GtkHConnectEvent();
         }
         else
         {
-            // Just update the scrollbar, don't send any wxWidgets event
+            // Just update the scrollbar, don't send any wxWindows event
             GtkVDisconnectEvent();
             gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "value_changed" );
             GtkVConnectEvent();
@@ -917,12 +842,19 @@ bool wxScrolledWindow::Layout()
 // Default OnSize resets scrollbars, if any
 void wxScrolledWindow::OnSize(wxSizeEvent& WXUNUSED(event))
 {
-    if ( m_targetWindow->GetAutoLayout() )
+    if( GetAutoLayout() || m_targetWindow->GetAutoLayout() )
     {
-        wxSize size = m_targetWindow->GetBestVirtualSize();
-        
-        // This will call ::Layout() and ::AdjustScrollbars()
-        SetVirtualSize( size );
+        if( m_targetWindow != this )
+            m_targetWindow->FitInside();
+
+        FitInside();
+
+        // FIXME:  Something is really weird here...  This should be
+        // called by FitInside above (and apparently is), yet the
+        // scrollsub sample will get the scrollbar wrong if resized
+        // quickly.  This masks the bug, but is surely not the right
+        // answer at all.
+        AdjustScrollbars();
     }
     else
     {
@@ -979,7 +911,7 @@ void wxScrolledWindow::OnChar(wxKeyEvent& event)
         yScrollOld = GetScrollPos(wxVERTICAL);
 
     int dsty;
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_PAGEUP:
         case WXK_PRIOR:

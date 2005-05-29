@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999, 2000
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "sndwin.cpp"
@@ -51,10 +51,10 @@ wxList *wxSoundHandleList = NULL;
 
 static inline wxSoundStreamWin *wxFindSoundFromHandle(WXHWND hWnd)
 {
-  wxObjectList::compatibility_iterator node = wxSoundHandleList->Find((long)hWnd);
+  wxNode *node = wxSoundHandleList->Find((long)hWnd);
   if (!node)
     return NULL;
-  return (wxSoundStreamWin *)node->GetData();
+  return (wxSoundStreamWin *)node->Data();
 }
 
 struct _wxSoundInternal {
@@ -81,7 +81,7 @@ wxSoundStreamWin::wxSoundStreamWin()
 {
   wxSoundFormatPcm pcm;
 
-  m_production_started = false;
+  m_production_started = FALSE;
   m_internal = new wxSoundInternal;
   if (!m_internal) {
     m_snderror = wxSOUND_MEMERROR;
@@ -94,10 +94,10 @@ wxSoundStreamWin::wxSoundStreamWin()
   CreateSndWindow();
   SetSoundFormat(pcm);
 
-  m_internal->m_input_enabled = false;
-  m_internal->m_output_enabled = false;
+  m_internal->m_input_enabled = FALSE;
+  m_internal->m_output_enabled = FALSE;
 
-  m_waiting_for = false;
+  m_waiting_for = FALSE;
 
   if (!OpenDevice(wxSOUND_OUTPUT)) {
     m_snderror = wxSOUND_NOERROR; //next call to OpenDevice won't do this
@@ -122,10 +122,14 @@ wxSoundStreamWin::~wxSoundStreamWin()
 // -----------------------------------------------------------------------
 // _wxSoundHandlerWndProc: Window callback to handle buffer completion
 // -----------------------------------------------------------------------
-LRESULT APIENTRY _EXPORT 
+/*
+LRESULT APIENTRY _EXPORT
+*/
+
+LRESULT WXDLLEXPORT APIENTRY _EXPORT 
 
  _wxSoundHandlerWndProc(HWND hWnd, UINT message,
-                 WPARAM wParam, LPARAM WXUNUSED(lParam))
+                 WPARAM wParam, LPARAM lParam)
 {
   wxSoundStreamWin *sndwin;
 
@@ -155,13 +159,13 @@ void wxSoundStreamWin::CreateSndWindow()
 {
   FARPROC proc = MakeProcInstance((FARPROC)_wxSoundHandlerWndProc,
                                   wxGetInstance());
-  // NB: class name must be kept in sync with wxCanvasClassName in 
-  // src/msw/app.cpp!
-  m_internal->m_sndWin = ::CreateWindow(wxT("wxWindowClass"), NULL, 0,
-                    0, 0, 0, 0, NULL, (HMENU) NULL,
+  int error;
+
+  m_internal->m_sndWin = ::CreateWindow(wxCanvasClassName, NULL, 0,
+					0, 0, 0, 0, NULL, (HMENU) NULL,
                                         wxGetInstance(), NULL);
 
-  GetLastError();
+  error = GetLastError();
 
   ::SetWindowLong(m_internal->m_sndWin, GWL_WNDPROC, (LONG)proc);
 
@@ -200,7 +204,7 @@ bool wxSoundStreamWin::OpenDevice(int mode)
 
   if (!m_sndformat) {
     m_snderror = wxSOUND_INVFRMT;
-    return false;
+    return FALSE;
   }
     
   pcm = (wxSoundFormatPcm *)m_sndformat;
@@ -226,13 +230,13 @@ bool wxSoundStreamWin::OpenDevice(int mode)
 
     if (result != MMSYSERR_NOERROR) {
       m_snderror = wxSOUND_INVDEV;
-      return false;
+      return FALSE;
     }
 
     m_output_frag_out  = WXSOUND_MAX_QUEUE-1;
     m_current_frag_out = 0;
 
-    m_internal->m_output_enabled = true;
+    m_internal->m_output_enabled = TRUE;
   }
   // -----------------------------------
   // Open the driver for Input operation
@@ -247,29 +251,29 @@ bool wxSoundStreamWin::OpenDevice(int mode)
 
     if (result != MMSYSERR_NOERROR) {
       m_snderror = wxSOUND_INVDEV;
-      return false;
+      return FALSE;
     }
 
     m_current_frag_in = WXSOUND_MAX_QUEUE-1;
     m_input_frag_in   = 0;
 
-    m_internal->m_input_enabled = true;
+    m_internal->m_input_enabled = TRUE;
   }
 
   if (mode & wxSOUND_OUTPUT) {
     if (!AllocHeaders(wxSOUND_OUTPUT)) {
       CloseDevice();
-      return false;
+      return FALSE;
     }
   }
   if (mode & wxSOUND_INPUT) {
     if (!AllocHeaders(wxSOUND_INPUT)) {
       CloseDevice();
-      return false;
+      return FALSE;
     }
   }
 
-  return true;
+  return TRUE;
 }
 
 // -------------------------------------------------------------------------
@@ -280,13 +284,13 @@ void wxSoundStreamWin::CloseDevice()
 {
   if (m_internal->m_output_enabled) {
     FreeHeaders(wxSOUND_OUTPUT);
-    m_internal->m_output_enabled = false;
+    m_internal->m_output_enabled = FALSE;
     waveOutClose(m_internal->m_devout);
   }
 
   if (m_internal->m_input_enabled) {
     FreeHeaders(wxSOUND_INPUT);
-    m_internal->m_input_enabled  = false;
+    m_internal->m_input_enabled  = FALSE;
     waveInClose(m_internal->m_devin);
   }
 }
@@ -382,8 +386,8 @@ wxSoundInfoHeader *wxSoundStreamWin::AllocHeader(int mode)
 // AllocHeaders() allocates WXSOUND_MAX_QUEUE (= 128) blocks for an operation
 // queue. It uses AllocHeader() for each element.
 //
-// Once it has allocated all blocks, it returns true and if an error occured
-// it returns false.
+// Once it has allocated all blocks, it returns TRUE and if an error occured
+// it returns FALSE.
 // -------------------------------------------------------------------------
 bool wxSoundStreamWin::AllocHeaders(int mode)
 {
@@ -401,10 +405,10 @@ bool wxSoundStreamWin::AllocHeaders(int mode)
     headers[i] = AllocHeader(mode);
     if (!headers[i]) {
       FreeHeaders(mode);
-      return false;
+      return FALSE;
     }
   }
-  return true;
+  return TRUE;
 }
 
 // -------------------------------------------------------------------------
@@ -483,11 +487,11 @@ void wxSoundStreamWin::WaitFor(wxSoundInfoHeader *info)
         // PROBLEM //
         return;
     }
-    m_waiting_for = true;
+    m_waiting_for = TRUE;
     // Else, we wait for its termination
     while (info->m_playing || info->m_recording)
       wxYield();
-    m_waiting_for = false;
+    m_waiting_for = FALSE;
 }
 
 // -------------------------------------------------------------------------
@@ -509,18 +513,18 @@ bool wxSoundStreamWin::AddToQueue(wxSoundInfoHeader *info)
         result = waveInAddBuffer(m_internal->m_devin,
                                  info->m_header, sizeof(WAVEHDR));
         if (result == MMSYSERR_NOERROR)
-            info->m_recording = true;
+            info->m_recording = TRUE;
         else
-            return false;
+            return FALSE;
     } else if (info->m_mode == wxSOUND_OUTPUT) {
         result = waveOutWrite(m_internal->m_devout,
                               info->m_header, sizeof(WAVEHDR));
         if (result == MMSYSERR_NOERROR)
-      info->m_playing = true;
+      info->m_playing = TRUE;
         else
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 // -------------------------------------------------------------------------
@@ -531,8 +535,8 @@ bool wxSoundStreamWin::AddToQueue(wxSoundInfoHeader *info)
 // -------------------------------------------------------------------------
 void wxSoundStreamWin::ClearHeader(wxSoundInfoHeader *info)
 {
-  info->m_playing   = false;
-  info->m_recording = false;
+  info->m_playing   = FALSE;
+  info->m_recording = FALSE;
   info->m_position  = 0;
   info->m_size      = GetBestSize();
 }
@@ -553,7 +557,7 @@ wxSoundInfoHeader *wxSoundStreamWin::NextFragmentOutput()
       WaitFor(m_headers_play[m_current_frag_out]);
   }
   if (m_current_frag_out == m_output_frag_out)
-    m_queue_filled = true;
+    m_queue_filled = TRUE;
   return m_headers_play[m_current_frag_out];
 }
 
@@ -613,7 +617,7 @@ wxSoundInfoHeader *wxSoundStreamWin::NextFragmentInput()
 
     // We reached the writer position: the queue is full.
     if (m_current_frag_in == m_input_frag_in)
-        m_queue_filled = true;
+        m_queue_filled = TRUE;
     
     return header;
 }
@@ -660,7 +664,7 @@ wxSoundStream& wxSoundStreamWin::Read(void *buffer, wxUint32 len)
 // fragment finished. It reinitializes the parameters of the fragment and
 // sends an event to the clients.
 // -------------------------------------------------------------------------
-void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 WXUNUSED(dev_handle), int flag)
+void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 dev_handle, int flag)
 {
     wxSoundInfoHeader *info;
     
@@ -673,7 +677,7 @@ void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 WXUNUSED(dev_handle), int flag)
         info = m_headers_play[m_output_frag_out];
         // Clear header to tell the system the buffer is free now
         ClearHeader(info);
-        m_queue_filled = false;
+        m_queue_filled = FALSE;
         if (!m_waiting_for)
             // Try to requeue a new buffer.
             OnSoundEvent(wxSOUND_OUTPUT);
@@ -682,19 +686,19 @@ void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 WXUNUSED(dev_handle), int flag)
             return;
 
         // Recording completed
-        m_headers_rec[m_input_frag_in]->m_recording = false;
+        m_headers_rec[m_input_frag_in]->m_recording = FALSE;
         // Queue pointer: writer
         m_input_frag_in = (m_input_frag_in + 1) % WXSOUND_MAX_QUEUE;
         if (!m_waiting_for)
             OnSoundEvent(wxSOUND_INPUT);
-        m_queue_filled = false;
+        m_queue_filled = FALSE;
     }
 }
 
 // -------------------------------------------------------------------------
 // SetSoundFormat()
 // -------------------------------------------------------------------------
-bool wxSoundStreamWin::SetSoundFormat(const wxSoundFormatBase& base)
+bool wxSoundStreamWin::SetSoundFormat(wxSoundFormatBase& base)
 {
   // TODO: detect best format
   return wxSoundStream::SetSoundFormat(base);
@@ -706,17 +710,17 @@ bool wxSoundStreamWin::SetSoundFormat(const wxSoundFormatBase& base)
 bool wxSoundStreamWin::StartProduction(int evt)
 {
   if (!m_internal)
-    return false;
+    return FALSE;
 
   if ((m_internal->m_output_enabled && (evt & wxSOUND_OUTPUT)) ||
       (m_internal->m_input_enabled && (evt & wxSOUND_INPUT)))
     CloseDevice();
 
   if (!OpenDevice(evt))
-    return false;
+    return FALSE;
 
-  m_production_started = true;
-  m_queue_filled = false;
+  m_production_started = TRUE;
+  m_queue_filled = FALSE;
   // Send a dummy event to start.
   if (evt & wxSOUND_OUTPUT)
     OnSoundEvent(wxSOUND_OUTPUT);
@@ -729,7 +733,7 @@ bool wxSoundStreamWin::StartProduction(int evt)
     waveInStart(m_internal->m_devin);
   }
 
-  return true;
+  return TRUE;
 }
 
 // -------------------------------------------------------------------------
@@ -739,13 +743,13 @@ bool wxSoundStreamWin::StopProduction()
 {
     if (!m_production_started) {
         m_snderror = wxSOUND_NOTSTARTED;
-        return false;
+        return FALSE;
     }
     
     m_snderror = wxSOUND_NOERROR;
-    m_production_started = false;
+    m_production_started = FALSE;
     CloseDevice();
-    return true;
+    return TRUE;
 }
 
 // -------------------------------------------------------------------------
@@ -761,7 +765,7 @@ bool wxSoundStreamWin::QueueFilled() const
 // wxSoundWinModule
 // --------------------------------------------------------------------------
 
-class wxSoundWinModule : public wxModule {
+class WXDLLEXPORT wxSoundWinModule : public wxModule {
    DECLARE_DYNAMIC_CLASS(wxSoundWinModule)
  public:
    bool OnInit();
@@ -772,7 +776,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxSoundWinModule, wxModule)
 
 bool wxSoundWinModule::OnInit() {
   wxSoundHandleList = new wxList(wxKEY_INTEGER);
-  return true;
+  return TRUE;
 }
 
 void wxSoundWinModule::OnExit() {

@@ -58,25 +58,6 @@ public:
                ,rsName
               );
     }
-    wxListBox( wxWindow*            pParent
-              ,wxWindowID           vId
-              ,const wxPoint&       rPos
-              ,const wxSize&        rSize
-              ,const wxArrayString& asChoices
-              ,long                 lStyle = 0
-              ,const wxValidator&   rValidator = wxDefaultValidator
-              ,const wxString&      rsName = wxListBoxNameStr)
-    {
-        Create( pParent
-               ,vId
-               ,rPos
-               ,rSize
-               ,asChoices
-               ,lStyle
-               ,rValidator
-               ,rsName
-              );
-    }
 
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId
@@ -87,15 +68,6 @@ public:
                 ,long               lStyle = 0
                 ,const wxValidator& rValidator = wxDefaultValidator
                 ,const wxString&    rsName = wxListBoxNameStr
-               );
-    bool Create( wxWindow*            pParent
-                ,wxWindowID           vId
-                ,const wxPoint&       rPos
-                ,const wxSize&        rSize
-                ,const wxArrayString& asChoices
-                ,long                 lStyle = 0
-                ,const wxValidator&   rValidator = wxDefaultValidator
-                ,const wxString&      rsName = wxListBoxNameStr
                );
 
     virtual ~wxListBox();
@@ -114,8 +86,8 @@ public:
     virtual int           FindString(const wxString& rsString) const;
 
     virtual bool          IsSelected(int n) const;
-    virtual void          DoSetSelection( int  n
-                                       ,bool bSelect
+    virtual void          SetSelection( int  n
+                                       ,bool bSelect = TRUE
                                       );
     virtual int           GetSelection(void) const;
     virtual int           GetSelections(wxArrayInt& raSelections) const;
@@ -173,6 +145,21 @@ protected:
 #endif
 
 private:
+#if wxUSE_WX_RESOURCES
+#  if wxUSE_OWNER_DRAWN
+    virtual wxControl*    CreateItem( const wxItemResource*  pChildResource
+                                     ,const wxItemResource*  pParentResource
+                                     ,const wxResourceTable* pTable = (const wxResourceTable *) NULL
+                                    )
+    {
+        return(wxWindowBase::CreateItem( pChildResource
+                                        ,pParentResource
+                                        ,pTable
+                                       )
+              );
+    }
+#  endif
+#endif
     DECLARE_DYNAMIC_CLASS(wxListBox)
 }; // end of wxListBox
 

@@ -11,13 +11,11 @@
 #ifndef __GTKLISTBOXH__
 #define __GTKLISTBOXH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "listbox.h"
 #endif
 
 #include "wx/list.h"
-
-class WXDLLIMPEXP_BASE wxSortedArrayString;
 
 //-----------------------------------------------------------------------------
 // wxListBox
@@ -41,32 +39,12 @@ public:
 #endif // wxUSE_CHECKLISTBOX
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-    wxListBox( wxWindow *parent, wxWindowID id,
-            const wxPoint& pos,
-            const wxSize& size,
-            const wxArrayString& choices,
-            long style = 0,
-            const wxValidator& validator = wxDefaultValidator,
-            const wxString& name = wxListBoxNameStr )
-    {
-#if wxUSE_CHECKLISTBOX
-        m_hasCheckBoxes = FALSE;
-#endif // wxUSE_CHECKLISTBOX
-        Create(parent, id, pos, size, choices, style, validator, name);
-    }
     virtual ~wxListBox();
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int n = 0, const wxString choices[] = (const wxString *) NULL,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
-    bool Create(wxWindow *parent, wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
@@ -81,7 +59,7 @@ public:
     virtual int FindString(const wxString& s) const;
 
     virtual bool IsSelected(int n) const;
-    virtual void DoSetSelection(int n, bool select);
+    virtual void SetSelection(int n, bool select = TRUE);
     virtual int GetSelection() const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
 
@@ -96,16 +74,13 @@ public:
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);
     virtual wxClientData* DoGetItemClientObject(int n) const;
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation from now on
 
     void GtkAddItem( const wxString &item, int pos=-1 );
     int GtkGetIndex( GtkWidget *item ) const;
     GtkWidget *GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
-    void DoApplyWidgetStyle(GtkRcStyle *style);
+    void ApplyWidgetStyle();
     void OnInternalIdle();
 
 #if wxUSE_TOOLTIPS
@@ -129,10 +104,6 @@ protected:
 
     // return the string label for the given item
     wxString GetRealLabel(struct _GList *item) const;
-
-    // Widgets that use the style->base colour for the BG colour should
-    // override this and return true.
-    virtual bool UseGTKStyleBase() const { return true; }
 
 private:
     // this array is only used for controls with wxCB_SORT style, so only

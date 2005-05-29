@@ -12,14 +12,11 @@
 #ifndef _WX_DOCH__
 #define _WX_DOCH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "docview.h"
 #endif
 
 #include "wx/defs.h"
-
-#if wxUSE_DOC_VIEW_ARCHITECTURE
-
 #include "wx/list.h"
 #include "wx/cmndata.h"
 #include "wx/string.h"
@@ -40,7 +37,7 @@ class WXDLLEXPORT wxFileHistory;
 class WXDLLEXPORT wxConfigBase;
 
 #if wxUSE_STD_IOSTREAM
-  #include "wx/iosfwrap.h"
+  #include "wx/ioswrap.h"
 #else
   #include "wx/stream.h"
 #endif
@@ -72,7 +69,7 @@ public:
     ~wxDocument();
 
     // accessors
-    void SetFilename(const wxString& filename, bool notifyViews = false);
+    void SetFilename(const wxString& filename, bool notifyViews = FALSE);
     wxString GetFilename() const { return m_documentFile; }
 
     void SetTitle(const wxString& title) { m_documentTitle = title; };
@@ -82,7 +79,7 @@ public:
     wxString GetDocumentName() const { return m_documentTypeName; }
 
     bool GetDocumentSaved() const { return m_savedYet; }
-    void SetDocumentSaved(bool saved = true) { m_savedYet = saved; }
+    void SetDocumentSaved(bool saved = TRUE) { m_savedYet = saved; }
 
     virtual bool Close();
     virtual bool Save();
@@ -97,15 +94,15 @@ public:
     virtual wxInputStream& LoadObject(wxInputStream& stream);
 #endif
 
-    // Called by wxWidgets
+    // Called by wxWindows
     virtual bool OnSaveDocument(const wxString& filename);
     virtual bool OnOpenDocument(const wxString& filename);
     virtual bool OnNewDocument();
     virtual bool OnCloseDocument();
 
-    // Prompts for saving if about to close a modified document. Returns true
+    // Prompts for saving if about to close a modified document. Returns TRUE
     // if ok to close the document (may have saved in the meantime, or set
-    // modified to false)
+    // modified to FALSE)
     virtual bool OnSaveModified();
 
     // Called by framework if created automatically by the default document
@@ -161,16 +158,9 @@ protected:
     wxDocument*           m_documentParent;
     wxCommandProcessor*   m_commandProcessor;
     bool                  m_savedYet;
-
-    // Called by OnSaveDocument and OnOpenDocument to implement standard
-    // Save/Load behavior. Re-implement in derived class for custom
-    // behavior.
-    virtual bool DoSaveDocument(const wxString& file);
-    virtual bool DoOpenDocument(const wxString& file);
-
+    
 private:
     DECLARE_ABSTRACT_CLASS(wxDocument)
-    DECLARE_NO_COPY_CLASS(wxDocument)
 };
 
 class WXDLLEXPORT wxView: public wxEvtHandler
@@ -193,20 +183,25 @@ public:
     virtual void OnDraw(wxDC *dc) = 0;
     virtual void OnPrint(wxDC *dc, wxObject *info);
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
-    virtual void OnClosingDocument() {}
+    virtual void OnClosingDocument() {};
     virtual void OnChangeFilename();
 
     // Called by framework if created automatically by the default document
     // manager class: gives view a chance to initialise
-    virtual bool OnCreate(wxDocument *WXUNUSED(doc), long WXUNUSED(flags)) { return true; };
+    virtual bool OnCreate(wxDocument *WXUNUSED(doc), long WXUNUSED(flags)) { return TRUE; };
 
     // Checks if the view is the last one for the document; if so, asks user
     // to confirm save data (if modified). If ok, deletes itself and returns
-    // true.
-    virtual bool Close(bool deleteWindow = true);
+    // TRUE.
+    virtual bool Close(bool deleteWindow = TRUE);
 
     // Override to do cleanup/veto close
     virtual bool OnClose(bool deleteWindow);
+
+#if WXWIN_COMPATIBILITY
+    // Defeat compiler warning
+    bool OnClose() { return wxEvtHandler::OnClose(); }
+#endif
 
     // Extend event processing to search the document's event table
     virtual bool ProcessEvent(wxEvent& event);
@@ -226,10 +221,9 @@ protected:
     wxDocument*       m_viewDocument;
     wxString          m_viewTypeName;
     wxWindow*         m_viewFrame;
-
+    
 private:
     DECLARE_ABSTRACT_CLASS(wxView)
-    DECLARE_NO_COPY_CLASS(wxView)
 };
 
 // Represents user interface (and other) properties of documents and views
@@ -260,10 +254,6 @@ public:
     virtual wxDocument *CreateDocument(const wxString& path, long flags = 0);
     virtual wxView *CreateView(wxDocument *doc, long flags = 0);
 
-    // Helper method for CreateDocument; also allows you to do your own document
-    // creation
-    virtual bool InitDocument(wxDocument* doc, const wxString& path, long flags = 0);
-
     wxString GetDefaultExtension() const { return m_defaultExt; };
     wxString GetDescription() const { return m_description; }
     wxString GetDirectory() const { return m_directory; };
@@ -282,9 +272,6 @@ public:
 
     bool IsVisible() const { return ((m_flags & wxTEMPLATE_VISIBLE) == wxTEMPLATE_VISIBLE); }
 
-    wxClassInfo* GetDocClassInfo() const { return m_docClassInfo; }
-    wxClassInfo* GetViewClassInfo() const { return m_viewClassInfo; }
-
     virtual bool FileMatchesTemplate(const wxString& path);
 
 protected:
@@ -300,24 +287,19 @@ protected:
     // For dynamic creation of appropriate instances.
     wxClassInfo*      m_docClassInfo;
     wxClassInfo*      m_viewClassInfo;
-
-    // Called by CreateDocument and CreateView to create the actual document/view object.
-    // By default uses the ClassInfo provided to the constructor. Override these functions
-    // to provide a different method of creation.
-    virtual wxDocument *DoCreateDocument();
-    virtual wxView *DoCreateView();
-
+    
 private:
     DECLARE_CLASS(wxDocTemplate)
-    DECLARE_NO_COPY_CLASS(wxDocTemplate)
 };
 
 // One object of this class may be created in an application, to manage all
 // the templates and documents.
 class WXDLLEXPORT wxDocManager: public wxEvtHandler
 {
+    DECLARE_DYNAMIC_CLASS(wxDocManager)
+
 public:
-    wxDocManager(long flags = wxDEFAULT_DOCMAN_FLAGS, bool initialize = true);
+    wxDocManager(long flags = wxDEFAULT_DOCMAN_FLAGS, bool initialize = TRUE);
     ~wxDocManager();
 
     virtual bool Initialize();
@@ -331,6 +313,7 @@ public:
     void OnFileSave(wxCommandEvent& event);
     void OnFileSaveAs(wxCommandEvent& event);
     void OnPrint(wxCommandEvent& event);
+    void OnPrintSetup(wxCommandEvent& event);
     void OnPreview(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
@@ -346,6 +329,7 @@ public:
     void OnUpdateRedo(wxUpdateUIEvent& event);
 
     void OnUpdatePrint(wxUpdateUIEvent& event);
+    void OnUpdatePrintSetup(wxUpdateUIEvent& event);
     void OnUpdatePreview(wxUpdateUIEvent& event);
 
     // Extend event processing to search the view's event table
@@ -361,11 +345,11 @@ public:
     virtual bool FlushDoc(wxDocument *doc);
     virtual wxDocTemplate *MatchTemplate(const wxString& path);
     virtual wxDocTemplate *SelectDocumentPath(wxDocTemplate **templates,
-            int noTemplates, wxString& path, long flags, bool save = false);
+            int noTemplates, wxString& path, long flags, bool save = FALSE);
     virtual wxDocTemplate *SelectDocumentType(wxDocTemplate **templates,
-            int noTemplates, bool sort = false);
+            int noTemplates, bool sort = FALSE);
     virtual wxDocTemplate *SelectViewType(wxDocTemplate **templates,
-            int noTemplates, bool sort = false);
+            int noTemplates, bool sort = FALSE);
     virtual wxDocTemplate *FindTemplateForPath(const wxString& path);
 
     void AssociateTemplate(wxDocTemplate *temp);
@@ -381,17 +365,14 @@ public:
     void RemoveDocument(wxDocument *doc);
 
     // closes all currently open documents
-    bool CloseDocuments(bool force = true);
-
-    // closes the specified document
-    bool CloseDocument(wxDocument* doc, bool force = false);
+    bool CloseDocuments(bool force = TRUE);
 
     // Clear remaining documents and templates
-    bool Clear(bool force = true);
+    bool Clear(bool force = TRUE);
 
     // Views or windows should inform the document manager
     // when a view is going in or out of focus
-    virtual void ActivateView(wxView *view, bool activate = true);
+    virtual void ActivateView(wxView *view, bool activate = TRUE, bool deleting = FALSE);
     virtual wxView *GetCurrentView() const;
 
     wxList& GetDocuments() { return m_docs; }
@@ -408,9 +389,9 @@ public:
 
     // File history management
     virtual void AddFileToHistory(const wxString& file);
-    virtual void RemoveFileFromHistory(size_t i);
-    virtual size_t GetHistoryFilesCount() const;
-    virtual wxString GetHistoryFile(size_t i) const;
+    virtual void RemoveFileFromHistory(int i);
+    virtual int GetNoHistoryFiles() const;
+    virtual wxString GetHistoryFile(int i) const;
     virtual void FileHistoryUseMenu(wxMenu *menu);
     virtual void FileHistoryRemoveMenu(wxMenu *menu);
 #if wxUSE_CONFIG
@@ -421,14 +402,11 @@ public:
     virtual void FileHistoryAddFilesToMenu();
     virtual void FileHistoryAddFilesToMenu(wxMenu* menu);
 
-    wxString GetLastDirectory() const { return m_lastDirectory; }
-    void SetLastDirectory(const wxString& dir) { m_lastDirectory = dir; }
+    inline wxString GetLastDirectory() const { return m_lastDirectory; }
+    inline void SetLastDirectory(const wxString& dir) { m_lastDirectory = dir; }
 
     // Get the current document manager
     static wxDocManager* GetDocumentManager() { return sm_docManager; }
-
-    // deprecated, use GetHistoryFilesCount() instead
-    wxDEPRECATED( size_t GetNoHistoryFiles() const );
 
 protected:
     long              m_flags;
@@ -442,14 +420,7 @@ protected:
     static wxDocManager* sm_docManager;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxDocManager)
-    DECLARE_NO_COPY_CLASS(wxDocManager)
 };
-
-inline size_t wxDocManager::GetNoHistoryFiles() const
-{
-    return GetHistoryFilesCount();
-}
 
 // ----------------------------------------------------------------------------
 // A default child frame
@@ -467,7 +438,7 @@ public:
                     const wxSize& size = wxDefaultSize,
                     long type = wxDEFAULT_FRAME_STYLE,
                     const wxString& name = wxT("frame"));
-    ~wxDocChildFrame(){}
+    ~wxDocChildFrame();
 
     // Extend event processing to search the view's event table
     virtual bool ProcessEvent(wxEvent& event);
@@ -488,7 +459,6 @@ protected:
 private:
     DECLARE_CLASS(wxDocChildFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocChildFrame)
 };
 
 // ----------------------------------------------------------------------------
@@ -522,7 +492,6 @@ protected:
 private:
     DECLARE_CLASS(wxDocParentFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocParentFrame)
 };
 
 // ----------------------------------------------------------------------------
@@ -546,7 +515,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDocPrintout)
-    DECLARE_NO_COPY_CLASS(wxDocPrintout)
 };
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
@@ -557,13 +525,13 @@ private:
 class WXDLLEXPORT wxFileHistory : public wxObject
 {
 public:
-    wxFileHistory(size_t maxFiles = 9, wxWindowID idBase = wxID_FILE1);
+    wxFileHistory(int maxFiles = 9);
     ~wxFileHistory();
 
     // Operations
     virtual void AddFileToHistory(const wxString& file);
-    virtual void RemoveFileFromHistory(size_t i);
-    virtual int GetMaxFiles() const { return (int)m_fileMaxFiles; }
+    virtual void RemoveFileFromHistory(int i);
+    virtual int GetMaxFiles() const { return m_fileMaxFiles; }
     virtual void UseMenu(wxMenu *menu);
 
     // Remove menu from the list (MDI child may be closing)
@@ -578,36 +546,27 @@ public:
     virtual void AddFilesToMenu(wxMenu* menu); // Single menu
 
     // Accessors
-    virtual wxString GetHistoryFile(size_t i) const;
-    virtual size_t GetCount() const { return m_fileHistoryN; }
+    virtual wxString GetHistoryFile(int i) const;
 
-    const wxList& GetMenus() const { return m_fileMenus; }
+    // A synonym for GetNoHistoryFiles
+    virtual int GetCount() const { return m_fileHistoryN; }
+    int GetNoHistoryFiles() const { return m_fileHistoryN; }
 
-    // deprecated, use GetCount() instead
-    wxDEPRECATED( size_t GetNoHistoryFiles() const );
+    wxList& GetMenus() const { return (wxList&) m_fileMenus; }
 
 protected:
     // Last n files
     wxChar**          m_fileHistory;
     // Number of files saved
-    size_t            m_fileHistoryN;
+    int               m_fileHistoryN;
     // Menus to maintain (may need several for an MDI app)
     wxList            m_fileMenus;
     // Max files to maintain
-    size_t            m_fileMaxFiles;
-
+    int               m_fileMaxFiles;
+    
 private:
-    // The ID of the first history menu item (Doesn't have to be wxID_FILE1)
-    wxWindowID m_idBase;
-
     DECLARE_DYNAMIC_CLASS(wxFileHistory)
-    DECLARE_NO_COPY_CLASS(wxFileHistory)
 };
-
-inline size_t wxFileHistory::GetNoHistoryFiles() const
-{
-    return m_fileHistoryN;
-}
 
 #if wxUSE_STD_IOSTREAM
 // For compatibility with existing file formats:
@@ -619,8 +578,6 @@ bool WXDLLEXPORT wxTransferStreamToFile(wxSTD istream& stream, const wxString& f
 // converts from/to a stream to/from a temporary file.
 bool WXDLLEXPORT wxTransferFileToStream(const wxString& filename, wxOutputStream& stream);
 bool WXDLLEXPORT wxTransferStreamToFile(wxInputStream& stream, const wxString& filename);
-#endif // wxUSE_STD_IOSTREAM
-
-#endif // wxUSE_DOC_VIEW_ARCHITECTURE
+#endif
 
 #endif // _WX_DOCH__

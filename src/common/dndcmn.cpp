@@ -4,15 +4,15 @@
 // Modified by:
 // Created:     19.10.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets Team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows Team
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dndbase.h"
 #endif
 

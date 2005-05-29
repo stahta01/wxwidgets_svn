@@ -13,7 +13,12 @@
 #ifndef _WX_DYNAMICSASH_H_
 #define _WX_DYNAMICSASH_H_
 
-#include "wx/gizmos/gizmos.h"
+#ifdef GIZMOISDLL
+#define GIZMODLLEXPORT WXDLLEXPORT
+#else
+#define GIZMODLLEXPORT
+#endif
+
 
 /*
 
@@ -61,14 +66,18 @@
 */
 
 
-#include "wx/event.h"
-#include "wx/window.h"
+#include <wx/event.h>
+#include <wx/window.h>
+class wxScrollBar;
 
-class WXDLLIMPEXP_CORE wxScrollBar;
 
-// ----------------------------------------------------------------------------
-// dynamic sash styles
-// ----------------------------------------------------------------------------
+#define wxEVT_DYNAMIC_SASH_BASE             (((int)('d' - 'a') << 11) | ((int)('s' - 'a') << 6) | ((int)('h' - 'a') << 1))
+#define wxEVT_DYNAMIC_SASH_SPLIT            (wxEVT_DYNAMIC_SASH_BASE + 1)
+#define wxEVT_DYNAMIC_SASH_UNIFY            (wxEVT_DYNAMIC_SASH_BASE + 2)
+
+#define EVT_DYNAMIC_SASH_SPLIT(id, func)    EVT_CUSTOM(wxEVT_DYNAMIC_SASH_SPLIT, (id), (func))
+#define EVT_DYNAMIC_SASH_UNIFY(id, func)    EVT_CUSTOM(wxEVT_DYNAMIC_SASH_UNIFY, (id), (func))
+
 
 /*
     wxDS_MANAGE_SCROLLBARS is a default style of wxDynamicSashWindow which
@@ -85,26 +94,6 @@ class WXDLLIMPEXP_CORE wxScrollBar;
 */
 #define wxDS_DRAG_CORNER        0x0020
 
-/*
-    Default style for wxDynamicSashWindow.
- */
-#define wxDS_DEFAULT            wxDS_MANAGE_SCROLLBARS | wxDS_DRAG_CORNER
-
-// ----------------------------------------------------------------------------
-// dynamic sash events
-// ----------------------------------------------------------------------------
-
-extern WXDLLIMPEXP_GIZMOS const wxEventType wxEVT_DYNAMIC_SASH_SPLIT;
-extern WXDLLIMPEXP_GIZMOS const wxEventType wxEVT_DYNAMIC_SASH_UNIFY;
-
-#define EVT_DYNAMIC_SASH_SPLIT(id, func) \
-    wx__DECLARE_EVT1(wxEVT_DYNAMIC_SASH_SPLIT, id, \
-                        wxDynamicSashSplitEventHandler(func))
-
-#define EVT_DYNAMIC_SASH_UNIFY(id, func) \
-    wx__DECLARE_EVT1(wxEVT_DYNAMIC_SASH_UNIFY, id, \
-                        wxDynamicSashUnifyEventHandler(func))
-
 
 /*
     wxDynamicSashSplitEvents are sent to your view by wxDynamicSashWindow
@@ -113,12 +102,10 @@ extern WXDLLIMPEXP_GIZMOS const wxEventType wxEVT_DYNAMIC_SASH_UNIFY;
     a child of the wxDynamicSashWindow.  wxDynamicSashWindow will
     automatically reparent it to the proper place in its window hierarchy.
 */
-class WXDLLIMPEXP_GIZMOS wxDynamicSashSplitEvent : public wxCommandEvent
-{
+class GIZMODLLEXPORT wxDynamicSashSplitEvent : public wxCommandEvent {
 public:
     wxDynamicSashSplitEvent();
-    wxDynamicSashSplitEvent(const wxDynamicSashSplitEvent& event)
-        : wxCommandEvent(event) { }
+    wxDynamicSashSplitEvent(const wxDynamicSashSplitEvent& event): wxCommandEvent(event) { }
     wxDynamicSashSplitEvent(wxObject *target);
 
     virtual wxEvent* Clone() const { return new wxDynamicSashSplitEvent(*this); }
@@ -137,8 +124,7 @@ private:
     the scrollbars' event handlers connected to your view's event handler
     class.
 */
-class WXDLLIMPEXP_GIZMOS wxDynamicSashUnifyEvent : public wxCommandEvent
-{
+class GIZMODLLEXPORT wxDynamicSashUnifyEvent : public wxCommandEvent {
 public:
     wxDynamicSashUnifyEvent();
     wxDynamicSashUnifyEvent(const wxDynamicSashUnifyEvent& event): wxCommandEvent(event) {}
@@ -147,43 +133,29 @@ public:
     virtual wxEvent* Clone() const { return new wxDynamicSashUnifyEvent(*this); }
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxDynamicSashUnifyEvent)
+    DECLARE_DYNAMIC_CLASS(wxDynamicSashUnifyEvent);
 };
 
 typedef void (wxEvtHandler::*wxDynamicSashSplitEventFunction)(wxDynamicSashSplitEvent&);
-typedef void (wxEvtHandler::*wxDynamicSashUnifyEventFunction)(wxDynamicSashUnifyEvent&);
+typedef void (wxEvtHandler::*wxDynamicSashUnifyEventFunction)(wxDynamicSashSplitEvent&);
 
-#define wxDynamicSashSplitEventHandler(func) \
-    (wxObjectEventFunction)(wxEventFunction) \
-        wxStaticCastEvent(wxDynamicSashSplitEventFunction, &func)
+/*
+    wxDynamicSashWindow.  See above.
+*/
+extern const wxChar* GIZMODLLEXPORT wxDynamicSashWindowNameStr;
 
-#define wxDynamicSashUnifyEventHandler(func) \
-    (wxObjectEventFunction)(wxEventFunction) \
-        wxStaticCastEvent(wxDynamicSashUnifyEventFunction, &func)
-
-#define wx__DECLARE_TREEEVT(evt, id, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_TREE_ ## evt, id, wxTreeEventHandler(fn))
-
-// ----------------------------------------------------------------------------
-// wxDynamicSashWindow itself
-// ----------------------------------------------------------------------------
-
-WXDLLIMPEXP_GIZMOS extern const wxChar* wxDynamicSashWindowNameStr;
-
-class WXDLLIMPEXP_GIZMOS wxDynamicSashWindow : public wxWindow
-{
+class GIZMODLLEXPORT wxDynamicSashWindow : public wxWindow {
 public:
     wxDynamicSashWindow();
     wxDynamicSashWindow(wxWindow *parent, wxWindowID id,
                         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-                        long style = wxDS_DEFAULT,
+                        long style = wxCLIP_CHILDREN | wxDS_MANAGE_SCROLLBARS | wxDS_DRAG_CORNER,
                         const wxString& name = wxDynamicSashWindowNameStr);
     virtual ~wxDynamicSashWindow();
 
     virtual bool Create(wxWindow *parent, wxWindowID id,
-                        const wxPoint& pos = wxDefaultPosition,
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxDS_DEFAULT,
+                        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+                        long style = wxCLIP_CHILDREN | wxDS_MANAGE_SCROLLBARS | wxDS_DRAG_CORNER,
                         const wxString& name = wxDynamicSashWindowNameStr);
     virtual wxScrollBar *GetHScrollBar(const wxWindow *child) const;
     virtual wxScrollBar *GetVScrollBar(const wxWindow *child) const;
@@ -198,5 +170,5 @@ private:
     DECLARE_DYNAMIC_CLASS(wxDynamicSashWindow)
 };
 
-#endif // _WX_DYNAMICSASH_H_
 
+#endif

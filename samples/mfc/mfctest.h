@@ -1,8 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        mfctest.h
-// Purpose:     Sample to demonstrate mixing MFC and wxWidgets code
+// Purpose:     Header for MFC test app
 // Author:      Julian Smart
-// Id:          $Id$
+// Modified by:
+// Created:
+// RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -40,6 +42,7 @@ class CDummyWindow: public CWnd
 /////////////////////////////////////////////////////////////////////////////
 
 // CTheApp:
+// See hello.cpp for the code to the InitInstance member function.
 //
 class CTheApp : public CWinApp
 {
@@ -47,7 +50,7 @@ public:
     BOOL InitInstance();
     int ExitInstance();
 
-    // Override this to provide wxWidgets message loop
+    // Override this to provide wxWindows message loop
     // compatibility
     BOOL PreTranslateMessage(MSG *msg);
     BOOL OnIdle(LONG lCount);

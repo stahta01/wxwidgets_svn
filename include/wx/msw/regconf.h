@@ -12,34 +12,32 @@
 #ifndef   _REGCONF_H
 #define   _REGCONF_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "regconf.h"
 #endif
 
 #ifndef   _REGISTRY_H
   #include "wx/msw/registry.h"
 #endif
-
 #include "wx/object.h"
-#include "wx/confbase.h"
 
 // ----------------------------------------------------------------------------
 // wxRegConfig
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxRegConfig : public wxConfigBase
+class WXDLLEXPORT wxRegConfig : public wxConfigBase
 {
 public:
   // ctor & dtor
     // will store data in HKLM\appName and HKCU\appName
-  wxRegConfig(const wxString& appName = wxEmptyString,
-              const wxString& vendorName = wxEmptyString,
-              const wxString& localFilename = wxEmptyString,
-              const wxString& globalFilename = wxEmptyString,
-              long style = wxCONFIG_USE_GLOBAL_FILE);
+  wxRegConfig(const wxString& appName = _T(""),
+              const wxString& vendorName = _T(""),
+              const wxString& localFilename = _T(""),
+              const wxString& globalFilename = _T(""),
+              long style = 0);
 
     // dtor will save unsaved data
-  virtual ~wxRegConfig(){}
+  virtual ~wxRegConfig();
 
   // implement inherited pure virtual functions
   // ------------------------------------------
@@ -62,17 +60,17 @@ public:
 
     // get number of entries/subgroups in the current group, with or without
     // it's subgroups
-  virtual size_t GetNumberOfEntries(bool bRecursive = false) const;
-  virtual size_t GetNumberOfGroups(bool bRecursive = false) const;
+  virtual size_t GetNumberOfEntries(bool bRecursive = FALSE) const;
+  virtual size_t GetNumberOfGroups(bool bRecursive = FALSE) const;
 
-  virtual bool Flush(bool WXUNUSED(bCurrentOnly) = false) { return true; }
+  virtual bool Flush(bool WXUNUSED(bCurrentOnly) = FALSE) { return TRUE; }
 
   // rename
   virtual bool RenameEntry(const wxString& oldName, const wxString& newName);
   virtual bool RenameGroup(const wxString& oldName, const wxString& newName);
 
   // delete
-  virtual bool DeleteEntry(const wxString& key, bool bGroupIfEmptyAlso = true);
+  virtual bool DeleteEntry(const wxString& key, bool bGroupIfEmptyAlso = TRUE);
   virtual bool DeleteGroup(const wxString& key);
   virtual bool DeleteAll();
 

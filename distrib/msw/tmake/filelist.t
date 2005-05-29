@@ -7,27 +7,7 @@
 #! Version: $Id$
 #!#############################################################################
 #${
-    use lib './lib';
-    use wxFileInfo;
-
     open(FILELIST, "filelist.txt") or die "Can't open filelist file: $!\n";
-
-    #! maps file types to array names, for example an entry of the form
-    #!      FooH => 'wxXYZ' means that all files with type "FooH" will be
-    #! added to an array named @wxXYZ
-    my %type_2_array = (
-                         Common    => "wxCommon",
-                         Generic   => "wxGeneric",
-                         GenericH  => "wxGenericInclude",
-                         HTML      => "wxHtml",
-                         HtmlH     => "wxHtmlInclude",
-                         Motif     => "wxMotif",
-                         MotifH    => "wxMotifInclude",
-                         ProtoH    => "wxProtocolInclude",
-                         Unix      => "wxUnix",
-                         UnixH     => "wxUnixInclude",
-                         WXH       => "wxWxInclude",
-                       );
 
     line: while ( defined($_ = <FILELIST>) ) {
         chomp;
@@ -36,7 +16,7 @@
         next line if ( $_ eq "" or /^#/ );
 
         #! if ( $verbose ) {
-        #!      print STDERR "Processing line: '$_'\n";
+        #!     print STDERR "Processing line: '$_'\n";
         #! }
 
         my @fields = split /\t/;
@@ -55,10 +35,6 @@
         if ( $verbose ) {
             print STDERR "File $filename: type '$filetype', flags '$fileflags'\n";
         }
-
-        #! save all information in @wxALL
-        my $fileinfo = new wxFileInfo( $filename, $filetype, $fileflags );
-        push @wxALL, $fileinfo;
 
         #! this is a bit stupid but all templates are written using the old
         #! single letter flags which became so unreadable that I decided to
@@ -83,8 +59,6 @@
             $wxMSW{$filename} = $fileflags;
         } elsif ( $filetype eq "Mac" ) {
             $wxMAC{$filename} = $fileflags;
-        } elsif ( $filetype eq "Cocoa" ) {
-            $wxCOCOA{$filename} = $fileflags;
         } elsif ( $filetype eq "Motif" ) {
             $wxMOTIF{$filename} = $fileflags;
         } elsif ( $filetype eq "GTK" ) {
@@ -113,8 +87,6 @@
             $wxHTMLINCLUDE{$filename} = $fileflags;
         } elsif ( $filetype eq "MacH" ) {
             $wxMACINCLUDE{$filename} = $fileflags;
-        } elsif ( $filetype eq "CocoaH" ) {
-            $wxCOCOAINCLUDE{$filename} = $fileflags;
         } elsif ( $filetype eq "MotifH" ) {
             $wxMOTIFINCLUDE{$filename} = $fileflags;
         } elsif ( $filetype eq "MSWH" && $fileflags =~ m/O/ ) {
@@ -137,8 +109,6 @@
             $wxGENERICINCLUDE{$filename} = $fileflags;
         } elsif ( $filetype eq "MacR" ) {
             $wxMACRESOURCE{$filename} = $fileflags;
-        } elsif ( $filetype eq "CocoaR" ) {
-            $wxCOCOARESOURCE{$filename} = $fileflags;
         } else {
             warn "Unknown file type $filetype for $filename, ignoring.\n";
             next line;
@@ -147,4 +117,4 @@
 
     close(FILELIST);
 #$}
-#! vim:sw=4:ts=4:list:et:ft=perl
+#! vim:sw=4:ts=4:list:et

@@ -10,13 +10,13 @@
 // Copyright:   (c) Julian Smart 1993
 //              (c) Guilhem Lavaux 1997, 1998
 //              (c) 2000 Guillermo Rodriguez <guille@iies.es>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SCKIPC_H
 #define _WX_SCKIPC_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "sckipc.h"
 #endif
 
@@ -53,10 +53,10 @@
  *
  */
 
-class WXDLLIMPEXP_NET wxTCPServer;
-class WXDLLIMPEXP_NET wxTCPClient;
+class WXDLLEXPORT wxTCPServer;
+class WXDLLEXPORT wxTCPClient;
 
-class WXDLLIMPEXP_NET wxTCPConnection: public wxConnectionBase
+class WXDLLEXPORT wxTCPConnection: public wxConnectionBase
 {
   DECLARE_DYNAMIC_CLASS(wxTCPConnection)
 
@@ -79,8 +79,8 @@ public:
   virtual bool Disconnect(void);
 
   // Callbacks to BOTH - override at will
-  // Default behaviour is to delete connection and return true
-  virtual bool OnDisconnect(void) { delete this; return true; }
+  // Default behaviour is to delete connection and return TRUE
+  virtual bool OnDisconnect(void) { delete this; return TRUE; }
 
   // To enable the compressor (NOTE: not implemented!)
   void Compress(bool on);
@@ -102,8 +102,6 @@ private:
   //
   virtual bool Execute(const wxString& str)
     { return Execute(str, -1, wxIPC_TEXT); }
-
-    DECLARE_NO_COPY_CLASS(wxTCPConnection)
 };
 
 class wxTCPServer: public wxServerBase
@@ -116,7 +114,7 @@ public:
   wxTCPServer();
   virtual ~wxTCPServer();
 
-  // Returns false on error (e.g. port number is already in use)
+  // Returns FALSE on error (e.g. port number is already in use)
   virtual bool Create(const wxString& serverName);
 
   // Callbacks to SERVER - override at will
@@ -129,8 +127,6 @@ protected:
   // the name of the file associated to the Unix domain socket, may be empty
   wxString m_filename;
 #endif // __UNIX_LIKE__
-
-    DECLARE_NO_COPY_CLASS(wxTCPServer)
 };
 
 class wxTCPClient: public wxClientBase

@@ -48,29 +48,6 @@ class WXDLLEXPORT wxComboBox : public wxChoice
               );
     }
 
-  inline wxComboBox( wxWindow*            pParent
-                    ,wxWindowID           vId
-                    ,const wxString&      rsValue
-                    ,const wxPoint&       rPos
-                    ,const wxSize&        rSize
-                    ,const wxArrayString& asChoices
-                    ,long                 lStyle = 0
-                    ,const wxValidator&   rValidator = wxDefaultValidator
-                    ,const wxString&      rsName = wxComboBoxNameStr
-                   )
-    {
-        Create( pParent
-               ,vId
-               ,rsValue
-               ,rPos
-               ,rSize
-               ,asChoices
-               ,lStyle
-               ,rValidator
-               ,rsName
-              );
-    }
-
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId
                 ,const wxString&    rsValue = wxEmptyString
@@ -81,17 +58,6 @@ class WXDLLEXPORT wxComboBox : public wxChoice
                 ,long               lStyle = 0
                 ,const wxValidator& rValidator = wxDefaultValidator
                 ,const wxString&    rsName = wxComboBoxNameStr
-               );
-
-    bool Create( wxWindow*            pParent
-                ,wxWindowID           vId
-                ,const wxString&      rsValue
-                ,const wxPoint&       rPos
-                ,const wxSize&        rSize
-                ,const wxArrayString& asChoices
-                ,long                 lStyle = 0
-                ,const wxValidator&   rValidator = wxDefaultValidator
-                ,const wxString&      rsName = wxComboBoxNameStr
                );
 
     //
@@ -110,7 +76,7 @@ class WXDLLEXPORT wxComboBox : public wxChoice
     virtual void        SetInsertionPoint(long lPos);
     virtual void        SetInsertionPointEnd(void);
     virtual long        GetInsertionPoint(void) const;
-    virtual wxTextPos   GetLastPosition(void) const;
+    virtual long        GetLastPosition(void) const;
     virtual void        Replace( long            lFrom
                                 ,long            lTo
                                 ,const wxString& rsValue

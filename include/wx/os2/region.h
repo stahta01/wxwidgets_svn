@@ -15,8 +15,6 @@
 #include "wx/list.h"
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
-#include "wx/bitmap.h"
-#include "wx/os2/private.h"
 
 class WXDLLEXPORT wxRect;
 class WXDLLEXPORT wxPoint;
@@ -46,14 +44,15 @@ public:
             );
     wxRegion(const wxRect& rRect);
     wxRegion(WXHRGN hRegion, WXHDC hPS); // Hangs on to this region
-    wxRegion( const wxBitmap& bmp)
+    wxRegion( const wxBitmap& rBmp
+             ,const wxColour& rTransColour = wxNullColour
+             ,int             nTolerance = 0
+            )
     {
-        Union(bmp);
-    }
-    wxRegion( const wxBitmap& bmp,
-              const wxColour& transColour, int tolerance = 0)
-    {
-        Union(bmp, transColour, tolerance);
+        Union( rBmp
+              ,rTransColour
+              ,nTolerance
+             );
     }
 
     wxRegion();
@@ -181,22 +180,6 @@ public:
     wxRegionContain Contains( wxCoord lX
                              ,wxCoord lY
                             ) const;
-
-    //
-    // Convert the region to a B&W bitmap with the black pixels being inside
-    // the region.
-    //
-    wxBitmap        ConvertToBitmap(void) const;
-
-    // Use the non-transparent pixels of a wxBitmap for the region to combine
-    // with this region.  First version takes transparency from bitmap's mask,
-    // second lets the user specify the colour to be treated as transparent
-    // along with an optional tolerance value.
-    // NOTE: implemented in common/rgncmn.cpp
-    bool Union(const wxBitmap& bmp);
-    bool Union(const wxBitmap& bmp,
-               const wxColour& transColour, int tolerance = 0);
-
     //
     // Does the region contain the point pt?
     //
@@ -215,6 +198,23 @@ public:
     // Does the region contain the rectangle rect?
     //
     wxRegionContain Contains(const wxRect& rRect) const;
+
+    //
+    // Convert the region to a B&W bitmap with the black pixels being inside
+    // the region.
+    //
+    wxBitmap ConvertToBitmap(void) const;
+
+    //
+    // Use the non-transparent pixels of a wxBitmap for the region to combine
+    // with this region.  If the bitmap has a mask then it will be used,
+    // otherwise the colour to be treated as transparent may be specified,
+    // along with an optional tolerance value.
+    //
+    bool Union( const wxBitmap& rBmp
+               ,const wxColour& rTransColour = wxNullColour
+               ,int             nTolerance = 0
+              );
 
     //
     // Internal

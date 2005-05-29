@@ -13,7 +13,7 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "cshelp.h"
 #endif
 
@@ -56,8 +56,6 @@ public:
 
 //// Data
     wxContextHelp* m_contextHelp;
-
-    DECLARE_NO_COPY_CLASS(wxContextHelpEvtHandler)
 };
 
 // ============================================================================
@@ -77,7 +75,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxContextHelp, wxObject)
 
 wxContextHelp::wxContextHelp(wxWindow* win, bool beginHelp)
 {
-    m_inHelp = false;
+    m_inHelp = FALSE;
 
     if (beginHelp)
         BeginContextHelp(win);
@@ -91,21 +89,21 @@ wxContextHelp::~wxContextHelp()
 
 // Not currently needed, but on some systems capture may not work as
 // expected so we'll leave it here for now.
-#ifdef __WXMOTIF__
+#if 0
 static void wxPushOrPopEventHandlers(wxContextHelp* help, wxWindow* win, bool push)
 {
     if (push)
         win->PushEventHandler(new wxContextHelpEvtHandler(help));
     else
-        win->PopEventHandler(true);
+        win->PopEventHandler();
 
-    wxWindowList::compatibility_iterator node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow* child = node->GetData();
+        wxWindow* child = (wxWindow*) node->Data();
         wxPushOrPopEventHandlers(help, child, push);
 
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 #endif
@@ -116,7 +114,7 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
     if (!win)
         win = wxTheApp->GetTopWindow();
     if (!win)
-        return false;
+        return FALSE;
 
     wxCursor cursor(wxCURSOR_QUESTION_ARROW);
     wxCursor oldCursor = win->GetCursor();
@@ -126,13 +124,10 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
     //    wxSetCursor(cursor);
 #endif
 
-    m_status = false;
+    m_status = FALSE;
 
-#ifdef __WXMOTIF__
-    wxPushOrPopEventHandlers(this, win, true);
-#else
     win->PushEventHandler(new wxContextHelpEvtHandler(this));
-#endif
+    //wxPushOrPopEventHandlers(this, win, TRUE);
 
     win->CaptureMouse();
 
@@ -140,11 +135,8 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
 
     win->ReleaseMouse();
 
-#ifdef __WXMOTIF__
-    wxPushOrPopEventHandlers(this, win, false);
-#else
-    win->PopEventHandler(true);
-#endif
+    win->PopEventHandler(TRUE);
+    //wxPushOrPopEventHandlers(this, win, FALSE);
 
     win->SetCursor(oldCursor);
 
@@ -152,32 +144,32 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
     {
         wxPoint pt;
         wxWindow* winAtPtr = wxFindWindowAtPointer(pt);
-
-#if 0
+    /*
         if (winAtPtr)
         {
-            printf("Picked %s (%d)\n", winAtPtr->GetName().c_str(),
-                   winAtPtr->GetId());
+    wxString msg;
+        msg.Printf("Picked %s (%d)", (const char*) winAtPtr->GetName(), winAtPtr->GetId());
+        cout << msg << '\n';
         }
-#endif
+    */
 
         if (winAtPtr)
             DispatchEvent(winAtPtr, pt);
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxContextHelp::EndContextHelp()
 {
-    m_inHelp = false;
+    m_inHelp = FALSE;
 
-    return true;
+    return TRUE;
 }
 
 bool wxContextHelp::EventLoop()
 {
-    m_inHelp = true;
+    m_inHelp = TRUE;
 
     while ( m_inHelp )
     {
@@ -191,16 +183,16 @@ bool wxContextHelp::EventLoop()
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxContextHelpEvtHandler::ProcessEvent(wxEvent& event)
 {
     if (event.GetEventType() == wxEVT_LEFT_DOWN)
     {
-        m_contextHelp->SetStatus(true);
+        m_contextHelp->SetStatus(TRUE);
         m_contextHelp->EndContextHelp();
-        return true;
+        return TRUE;
     }
 
     if ((event.GetEventType() == wxEVT_CHAR) ||
@@ -208,31 +200,31 @@ bool wxContextHelpEvtHandler::ProcessEvent(wxEvent& event)
         (event.GetEventType() == wxEVT_ACTIVATE) ||
         (event.GetEventType() == wxEVT_MOUSE_CAPTURE_CHANGED))
     {
-        // May have already been set to true by a left-click
-        //m_contextHelp->SetStatus(false);
+        // May have already been set to TRUE by a left-click
+        //m_contextHelp->SetStatus(FALSE);
         m_contextHelp->EndContextHelp();
-        return true;
+        return TRUE;
     }
 
     if ((event.GetEventType() == wxEVT_PAINT) ||
         (event.GetEventType() == wxEVT_ERASE_BACKGROUND))
     {
         event.Skip();
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 // Dispatch the help event to the relevant window
 bool wxContextHelp::DispatchEvent(wxWindow* win, const wxPoint& pt)
 {
     wxWindow* subjectOfHelp = win;
-    bool eventProcessed = false;
+    bool eventProcessed = FALSE;
     while (subjectOfHelp && !eventProcessed)
     {
         wxHelpEvent helpEvent(wxEVT_HELP, subjectOfHelp->GetId(), pt) ;
-        helpEvent.SetEventObject(subjectOfHelp);
+        helpEvent.SetEventObject(this);
 
         eventProcessed = win->GetEventHandler()->ProcessEvent(helpEvent);
 
@@ -332,35 +324,30 @@ wxHelpProvider::~wxHelpProvider()
 
 wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 {
-    wxLongToStringHashMap::iterator it = m_hashWindows.find((long)window);
+    bool wasFound;
+    wxString text = m_hashWindows.Get((long)window, &wasFound);
+    if ( !wasFound )
+        text = m_hashIds.Get(window->GetId());
 
-    if ( it == m_hashWindows.end() )
-    {
-        it = m_hashIds.find(window->GetId());
-        if ( it == m_hashIds.end() )
-            return wxEmptyString;
-    }
-
-    return it->second;
+    return text;
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowBase *window, const wxString& text)
 {
-    m_hashWindows.erase((long)window);
-    m_hashWindows[(long)window] = text;
+    m_hashWindows.Delete((long)window);
+    m_hashWindows.Put((long)window, text);
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 {
-    wxLongToStringHashMap::key_type key = (wxLongToStringHashMap::key_type)id;
-    m_hashIds.erase(key);
-    m_hashIds[key] = text;
+    m_hashIds.Delete((long)id);
+    m_hashIds.Put(id, text);
 }
 
 // removes the association
 void wxSimpleHelpProvider::RemoveHelp(wxWindowBase* window)
 {
-    m_hashWindows.erase((long)window);
+    m_hashWindows.Delete((long)window);
 }
 
 bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
@@ -382,13 +369,11 @@ bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
     {
         s_tipWindow = new wxTipWindow((wxWindow *)window, text, 100, & s_tipWindow);
 
-        return true;
+        return TRUE;
     }
-#else
-    wxUnusedVar(window);
 #endif // wxUSE_TIPWINDOW
 
-    return false;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -413,7 +398,7 @@ bool wxHelpControllerHelpProvider::ShowHelp(wxWindowBase *window)
             // If the help controller is capable of popping up the text...
             else if (m_helpController->DisplayTextPopup(text, wxGetMousePosition()))
             {
-                return true;
+                return TRUE;
             }
             else
             // ...else use the default method.
@@ -424,13 +409,13 @@ bool wxHelpControllerHelpProvider::ShowHelp(wxWindowBase *window)
 
     }
 
-    return false;
+    return FALSE;
 }
 
 // Convenience function for turning context id into wxString
 wxString wxContextId(int id)
 {
-    return wxString::Format(_T("%d"), id);
+    return wxString(IntToString(id));
 }
 
 // ----------------------------------------------------------------------------
@@ -455,7 +440,7 @@ bool wxHelpProviderModule::OnInit()
     // since it could pull in extra code
     // wxHelpProvider::Set(new wxSimpleHelpProvider);
 
-    return true;
+    return TRUE;
 }
 
 void wxHelpProviderModule::OnExit()

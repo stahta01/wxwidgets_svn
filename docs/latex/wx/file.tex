@@ -6,7 +6,7 @@
 %% Created:     14.01.02 (extracted from file.tex)
 %% RCS-ID:      $Id$
 %% Copyright:   (c) Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxFile}}\label{wxfile}
@@ -18,10 +18,6 @@ between platforms and compilers. wxFile also automatically closes the file in
 its destructor making it unnecessary to worry about forgetting to do it.
 wxFile is a wrapper around {\tt file descriptor.} - see also 
 \helpref{wxFFile}{wxffile} for a wrapper around {\tt FILE} structure.
-
-{\tt wxFileOffset} is used by the wxFile functions which require offsets as 
-parameter or return them. If the platform supports it, wxFileOffset if a typedef
-for a native 64 bit integer, else a 32 bit integer is used for wxFileOffset.
 
 \wxheading{Derived from}
 
@@ -74,7 +70,7 @@ Will fail if the file already exists, else create and open it atomically.  Usefu
 \end{twocollist}
 
 Other constants defined elsewhere but used by wxFile functions are wxInvalidOffset which represents an
-invalid value of type {\it wxFileOffset} and is returned by functions returning {\it wxFileOffset} on error and the seek
+invalid value of type {\it off\_t} and is returned by functions returning {\it off\_t} on error and the seek
 mode constants used with \helpref{Seek()}{wxfileseek}:
 
 \twocolwidtha{7cm}
@@ -86,7 +82,7 @@ mode constants used with \helpref{Seek()}{wxfileseek}:
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFile::wxFile}\label{wxfilector}
+\membersection{wxFile::wxFile}\label{wxfileconstr}
 
 \func{}{wxFile}{\void}
 
@@ -111,7 +107,7 @@ Associates the file with the given file descriptor, which has already been opene
 
 \docparam{fd}{An existing file descriptor (see \helpref{Attach()}{wxfileattach} for the list of predefined descriptors)}
 
-\membersection{wxFile::\destruct{wxFile}}\label{wxfiledtor}
+\membersection{wxFile::\destruct{wxFile}}
 
 \func{}{\destruct{wxFile}}{\void}
 
@@ -145,9 +141,9 @@ Closes the file.
 
 \membersection{wxFile::Create}\label{wxfilecreate}
 
-\func{bool}{Create}{\param{const char*}{ filename}, \param{bool}{ overwrite = false}, \param{int }{access = wxS\_DEFAULT}}
+\func{bool}{Create}{\param{const char*}{ filename}, \param{bool}{ overwrite = FALSE}, \param{int }{access = wxS\_DEFAULT}}
 
-Creates a file for writing. If the file already exists, setting {\bf overwrite} to true
+Creates a file for writing. If the file already exists, setting {\bf overwrite} to TRUE
 will ensure it is overwritten.
 
 \membersection{wxFile::Detach}\label{wxfiledetach}
@@ -155,7 +151,7 @@ will ensure it is overwritten.
 \func{void}{Detach}{\void}
 
 Get back a file descriptor from wxFile object - the caller is responsible for closing the file if this
-descriptor is opened. \helpref{IsOpened()}{wxfileisopened} will return false after call to Detach().
+descriptor is opened. \helpref{IsOpened()}{wxfileisopened} will return FALSE after call to Detach().
 
 \membersection{wxFile::fd}\label{wxfilefd}
 
@@ -167,12 +163,12 @@ Returns the file descriptor associated with the file.
 
 \constfunc{bool}{Eof}{\void}
 
-Returns true if the end of the file has been reached.
+Returns TRUE if the end of the file has been reached.
 
 Note that the behaviour of the file pointer based class 
 \helpref{wxFFile}{wxffile} is different as \helpref{wxFFile::Eof}{wxffileeof} 
-will return true here only if an attempt has been made to read 
-{\it past} the last byte of the file, while wxFile::Eof() will return true
+will return TRUE here only if an attempt has been made to read 
+{\it past} the last byte of the file, while wxFile::Eof() will return TRUE
 even before such attempt is made if the file pointer is at the last position
 in the file.
 
@@ -187,7 +183,7 @@ of using Eof() as this will not work for special files under Unix.
 
 \func{static bool}{Exists}{\param{const char*}{ filename}}
 
-Returns true if the given name specifies an existing regular file (not a
+Returns TRUE if the given name specifies an existing regular file (not a
 directory or a link)
 
 \membersection{wxFile::Flush}\label{wxfileflush}
@@ -200,32 +196,15 @@ Note that wxFile::Flush is not implemented on some Windows compilers
 due to a missing fsync function, which reduces the usefulness of this function
 (it can still be called but it will do nothing on unsupported compilers).
 
-\membersection{wxFile::GetKind}\label{wxfilegetfilekind}
-
-\constfunc{wxFileKind}{GetKind}{\void}
-
-Returns the type of the file. Possible return values are:
-
-\begin{verbatim}
-enum wxFileKind
-{
-  wxFILE_KIND_UNKNOWN,
-  wxFILE_KIND_DISK,     // a file supporting seeking to arbitrary offsets
-  wxFILE_KIND_TERMINAL, // a tty
-  wxFILE_KIND_PIPE      // a pipe
-};
-
-\end{verbatim}
-
 \membersection{wxFile::IsOpened}\label{wxfileisopened}
 
 \constfunc{bool}{IsOpened}{\void}
 
-Returns true if the file has been opened.
+Returns TRUE if the file has been opened.
 
 \membersection{wxFile::Length}\label{wxfilelength}
 
-\constfunc{wxFileOffset}{Length}{\void}
+\constfunc{off\_t}{Length}{\void}
 
 Returns the length of the file.
 
@@ -233,7 +212,7 @@ Returns the length of the file.
 
 \func{bool}{Open}{\param{const char*}{ filename}, \param{wxFile::OpenMode}{ mode = wxFile::read}}
 
-Opens the file, returning true if successful.
+Opens the file, returning TRUE if successful.
 
 \wxheading{Parameters}
 
@@ -243,7 +222,7 @@ Opens the file, returning true if successful.
 
 \membersection{wxFile::Read}\label{wxfileread}
 
-\func{size\_t}{Read}{\param{void*}{ buffer}, \param{size\_t}{ count}}
+\func{off\_t}{Read}{\param{void*}{ buffer}, \param{off\_t}{ count}}
 
 Reads the specified number of bytes into a buffer, returning the actual number read.
 
@@ -259,7 +238,7 @@ The number of bytes read, or the symbol {\bf wxInvalidOffset} (-1) if there was 
 
 \membersection{wxFile::Seek}\label{wxfileseek}
 
-\func{wxFileOffset}{Seek}{\param{wxFileOffset }{ofs}, \param{wxSeekMode }{mode = wxFromStart}}
+\func{off\_t}{Seek}{\param{off\_t }{ofs}, \param{wxSeekMode }{mode = wxFromStart}}
 
 Seeks to the specified position.
 
@@ -275,7 +254,7 @@ The actual offset position achieved, or wxInvalidOffset on failure.
 
 \membersection{wxFile::SeekEnd}\label{wxfileseekend}
 
-\func{wxFileOffset}{SeekEnd}{\param{wxFileOffset }{ofs = 0}}
+\func{off\_t}{SeekEnd}{\param{off\_t }{ofs = 0}}
 
 Moves the file pointer to the specified number of bytes before the end of the file.
 
@@ -289,14 +268,14 @@ The actual offset position achieved, or wxInvalidOffset on failure.
 
 \membersection{wxFile::Tell}\label{wxfiletell}
 
-\constfunc{wxFileOffset}{Tell}{\void}
+\constfunc{off\_t}{Tell}{\void}
 
 Returns the current position or wxInvalidOffset if file is not opened or if another
 error occurred.
 
 \membersection{wxFile::Write}\label{wxfilewrite}
 
-\func{size\_t}{Write}{\param{const void*}{ buffer}, \param{wxFileOffset}{ count}}
+\func{size\_t}{Write}{\param{const void*}{ buffer}, \param{off\_t}{ count}}
 
 Writes the specified number of bytes from a buffer.
 
@@ -312,14 +291,10 @@ the number of bytes actually written
 
 \membersection{wxFile::Write}\label{wxfilewrites}
 
-\func{bool}{Write}{\param{const wxString\& }{s}, \param{wxMBConv\&}{ conv = wxConvUTF8}}
+\func{bool}{Write}{\param{const wxString\& }{s}, \param{wxMBConv\&}{ conv = wxConvLibc}}
 
-Writes the contents of the string to the file, returns true on success.
+Writes the contents of the string to the file, returns TRUE on success.
 
 The second argument is only meaningful in Unicode build of wxWidgets when
 {\it conv} is used to convert {\it s} to multibyte representation.
-
-Note that this method only works with {\tt NUL}-terminated strings, if you want
-to write data with embedded {\tt NUL}s to the file you should use the other 
-\helpref{Write() overload}{wxfilewrite}.
 

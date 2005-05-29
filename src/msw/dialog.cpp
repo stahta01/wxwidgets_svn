@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dialog.h"
 #endif
 
@@ -40,113 +40,47 @@
 
 #include "wx/msw/private.h"
 #include "wx/log.h"
-#include "wx/evtloop.h"
-#include "wx/ptr_scpd.h"
 
-#include "wx/msw/wrapcdlg.h"
-
-#if defined(__SMARTPHONE__) && defined(__WXWINCE__)
-    #include "wx/msw/wince/resources.h"
-#endif // __SMARTPHONE__ && __WXWINCE__
-
-#if wxUSE_TOOLBAR && defined(__POCKETPC__)
-#include "wx/toolbar.h"
+#if wxUSE_COMMON_DIALOGS && !defined(__WXMICROWIN__)
+    #include <commdlg.h>
 #endif
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// default dialog pos and size
+
+#define wxDIALOG_DEFAULT_X 300
+#define wxDIALOG_DEFAULT_Y 300
+
+#define wxDIALOG_DEFAULT_WIDTH 500
+#define wxDIALOG_DEFAULT_HEIGHT 500
+
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+// all modal dialogs currently shown
+static wxWindowList wxModalDialogs;
 
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxDialogStyle )
-
-wxBEGIN_FLAGS( wxDialogStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-
-    // dialog styles
-    wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
-    wxFLAGS_MEMBER(wxSTAY_ON_TOP)
-    wxFLAGS_MEMBER(wxCAPTION)
-    wxFLAGS_MEMBER(wxTHICK_FRAME)
-    wxFLAGS_MEMBER(wxSYSTEM_MENU)
-    wxFLAGS_MEMBER(wxRESIZE_BORDER)
-    wxFLAGS_MEMBER(wxRESIZE_BOX)
-    wxFLAGS_MEMBER(wxCLOSE_BOX)
-    wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
-    wxFLAGS_MEMBER(wxMINIMIZE_BOX)
-wxEND_FLAGS( wxDialogStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxDialog, wxTopLevelWindow,"wx/dialog.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxDialog)
-    wxPROPERTY( Title, wxString, SetTitle, GetTitle, wxString() , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY_FLAGS( WindowStyle , wxDialogStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxDialog)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_6( wxDialog , wxWindow* , Parent , wxWindowID , Id , wxString , Title , wxPoint , Position , wxSize , Size , long , WindowStyle)
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
-#endif
 
 BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
     EVT_BUTTON(wxID_OK, wxDialog::OnOK)
     EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
     EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
 
+    EVT_CHAR_HOOK(wxDialog::OnCharHook)
+
     EVT_SYS_COLOUR_CHANGED(wxDialog::OnSysColourChanged)
 
     EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
-
-// ----------------------------------------------------------------------------
-// wxDialogModalData
-// ----------------------------------------------------------------------------
-
-// this is simply a container for any data we need to implement modality which
-// allows us to avoid changing wxDialog each time the implementation changes
-class wxDialogModalData
-{
-public:
-    wxDialogModalData(wxDialog *dialog) : m_evtLoop(dialog) { }
-
-    void RunLoop()
-    {
-        m_evtLoop.Run();
-    }
-
-    void ExitLoop()
-    {
-        m_evtLoop.Exit();
-    }
-
-private:
-    wxModalEventLoop m_evtLoop;
-};
-
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 // ============================================================================
 // implementation
@@ -159,12 +93,12 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 void wxDialog::Init()
 {
     m_oldFocus = (wxWindow *)NULL;
-    m_isShown = false;
-    m_modalData = NULL;
-    m_endModalCalled = false;
-#if wxUSE_TOOLBAR && defined(__POCKETPC__)
-    m_dialogToolBar = NULL;
-#endif
+
+    m_isShown = FALSE;
+
+    m_windowDisabler = (wxWindowDisabler *)NULL;
+
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 }
 
 bool wxDialog::Create(wxWindow *parent,
@@ -175,6 +109,8 @@ bool wxDialog::Create(wxWindow *parent,
                       long style,
                       const wxString& name)
 {
+    Init();
+
     SetExtraStyle(GetExtraStyle() | wxTOPLEVEL_EX_DIALOG);
 
     // save focus before doing anything which can potentially change it
@@ -184,57 +120,78 @@ bool wxDialog::Create(wxWindow *parent,
     style |= wxTAB_TRAVERSAL;
 
     if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return false;
-
-    if ( !m_hasFont )
+        return FALSE;
+    if (!m_hasFont)
         SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
-#if defined(__SMARTPHONE__) && defined(__WXWINCE__)
-    SetLeftMenu(wxID_OK, _("OK"));
-#endif
-#if wxUSE_TOOLBAR && defined(__POCKETPC__)
-    CreateToolBar();
-#endif
-
-    return true;
+    return TRUE;
 }
 
-// deprecated ctor
-wxDialog::wxDialog(wxWindow *parent,
-                   const wxString& title,
-                   bool WXUNUSED(modal),
-                   int x,
-                   int y,
-                   int w,
-                   int h,
-                   long style,
-                   const wxString& name)
+void wxDialog::SetModal(bool flag)
 {
-    Init();
+    if ( flag )
+    {
+        m_windowStyle |= wxDIALOG_MODAL;
 
-    Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h), style, name);
-}
+        wxModelessWindows.DeleteObject(this);
+    }
+    else
+    {
+        m_windowStyle &= ~wxDIALOG_MODAL;
 
-void wxDialog::SetModal(bool WXUNUSED(flag))
-{
-    // nothing to do, obsolete method
+        wxModelessWindows.Append(this);
+    }
 }
 
 wxDialog::~wxDialog()
 {
-    m_isBeingDeleted = true;
+    m_isBeingDeleted = TRUE;
 
     // this will also reenable all the other windows for a modal dialog
-    Show(false);
+    Show(FALSE);
+}
+
+// ----------------------------------------------------------------------------
+// kbd handling
+// ----------------------------------------------------------------------------
+
+// By default, pressing escape cancels the dialog
+void wxDialog::OnCharHook(wxKeyEvent& event)
+{
+    if (GetHWND())
+    {
+        // "Esc" works as an accelerator for the "Cancel" button, but it
+        // shouldn't close the dialog which doesn't have any cancel button
+        if ( (event.m_keyCode == WXK_ESCAPE) && FindWindow(wxID_CANCEL) )
+        {
+            wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+            cancelEvent.SetEventObject( this );
+            GetEventHandler()->ProcessEvent(cancelEvent);
+
+            // ensure that there is another message for this window so the
+            // ShowModal loop will exit and won't get stuck in GetMessage().
+            ::PostMessage(GetHwnd(), WM_NULL, 0, 0);
+
+            return;
+        }
+    }
+
+    // We didn't process this event.
+    event.Skip();
 }
 
 // ----------------------------------------------------------------------------
 // showing the dialogs
 // ----------------------------------------------------------------------------
 
+bool wxDialog::IsModal() const
+{
+    return (GetWindowStyleFlag() & wxDIALOG_MODAL) != 0;
+}
+
 bool wxDialog::IsModalShowing() const
 {
-    return IsModal();
+    return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
 }
 
 wxWindow *wxDialog::FindSuitableParent() const
@@ -259,30 +216,91 @@ wxWindow *wxDialog::FindSuitableParent() const
     return parent;
 }
 
+void wxDialog::DoShowModal()
+{
+    wxCHECK_RET( !IsModalShowing(), _T("DoShowModal() called twice") );
+    wxCHECK_RET( IsModal(), _T("can't DoShowModal() modeless dialog") );
+
+    wxModalDialogs.Append(this);
+
+    wxWindow *parent = GetParent();
+
+    wxWindow* oldFocus = m_oldFocus;
+
+    // We have to remember the HWND because we need to check
+    // the HWND still exists (oldFocus can be garbage when the dialog
+    // exits, if it has been destroyed)
+    HWND hwndOldFocus = 0;
+    if (oldFocus)
+        hwndOldFocus = (HWND) oldFocus->GetHWND();
+
+    // remember where the focus was
+    if ( !oldFocus )
+    {
+        oldFocus = parent;
+        if ( parent )
+            hwndOldFocus = GetHwndOf(parent);
+    }
+
+    // disable all other app windows
+    wxASSERT_MSG( !m_windowDisabler, _T("disabling windows twice?") );
+
+    m_windowDisabler = new wxWindowDisabler(this);
+
+    // before entering the modal loop, reset the "is in OnIdle()" flag (see
+    // comment in app.cpp)
+    extern bool wxIsInOnIdleFlag;
+    bool wasInOnIdle = wxIsInOnIdleFlag;
+    wxIsInOnIdleFlag = FALSE;
+
+    // enter the modal loop
+    while ( IsModalShowing() )
+    {
+#if wxUSE_THREADS
+        wxMutexGuiLeaveOrEnter();
+#endif // wxUSE_THREADS
+
+        while ( !wxTheApp->Pending() && wxTheApp->ProcessIdle() )
+            ;
+
+        // a message came or no more idle processing to do
+        wxTheApp->DoMessage();
+    }
+
+    wxIsInOnIdleFlag = wasInOnIdle;
+
+    // and restore focus
+    // Note that this code MUST NOT access the dialog object's data
+    // in case the object has been deleted (which will be the case
+    // for a modal dialog that has been destroyed before calling EndModal).
+    if ( oldFocus && (oldFocus != this) && ::IsWindow(hwndOldFocus))
+    {
+        // This is likely to prove that the object still exists
+        if (wxFindWinFromHandle((WXHWND) hwndOldFocus) == oldFocus)
+            oldFocus->SetFocus();
+    }
+}
+
 bool wxDialog::Show(bool show)
 {
-    if ( show == IsShown() )
-        return false;
-
-    if ( !show && m_modalData )
+    if ( !show )
     {
-        // we need to do this before calling wxDialogBase version because if we
-        // had disabled other app windows, they must be reenabled right now as
+        // if we had disabled other app windows, reenable them back now because
         // if they stay disabled Windows will activate another window (one
-        // which is enabled, anyhow) when we're hidden in the base class Show()
-        // and we will lose activation
-        m_modalData->ExitLoop();
+        // which is enabled, anyhow) and we will lose activation
+        if ( m_windowDisabler )
+        {
+            delete m_windowDisabler;
+            m_windowDisabler = NULL;
+        }
     }
 
-    if ( show )
+    // ShowModal() may be called for already shown dialog
+    if ( !wxDialogBase::Show(show) && !(show && IsModal()) )
     {
-        // this usually will result in TransferDataToWindow() being called
-        // which will change the controls values so do it before showing as
-        // otherwise we could have some flicker
-        InitDialog();
+        // nothing to do
+        return FALSE;
     }
-
-    wxDialogBase::Show(show);
 
     if ( show )
     {
@@ -293,90 +311,54 @@ bool wxDialog::Show(bool show)
         // NB: normally we should call it just the first time but doing it
         //     every time is simpler than keeping a flag
         Layout();
+
+        // usually will result in TransferDataToWindow() being called
+        InitDialog();
     }
 
-    return true;
+    if ( IsModal() )
+    {
+        if ( show )
+        {
+            // modal dialog needs a parent window, so try to find one
+            if ( !GetParent() )
+            {
+                m_parent = FindSuitableParent();
+            }
+
+            DoShowModal();
+        }
+        else // end of modal dialog
+        {
+            // this will cause IsModalShowing() return FALSE and our local
+            // message loop will terminate
+            wxModalDialogs.DeleteObject(this);
+        }
+    }
+
+    return TRUE;
 }
 
-void wxDialog::Raise()
-{
-    ::SetForegroundWindow(GetHwnd());
-}
-
-// show dialog modally
+// a special version for Show(TRUE) for modal dialogs which returns return code
 int wxDialog::ShowModal()
 {
-    wxASSERT_MSG( !IsModal(), _T("wxDialog::ShowModal() reentered?") );
-
-    m_endModalCalled = false;
-
-    Show();
-
-    // EndModal may have been called from InitDialog handler (called from
-    // inside Show()), which would cause an infinite loop if we didn't take it
-    // into account
-    if ( !m_endModalCalled )
+    if ( !IsModal() )
     {
-        // modal dialog needs a parent window, so try to find one
-        wxWindow *parent = GetParent();
-        if ( !parent )
-        {
-            parent = FindSuitableParent();
-        }
-
-        // remember where the focus was
-        wxWindow *oldFocus = m_oldFocus;
-        if ( !oldFocus )
-        {
-            // VZ: do we really want to do this?
-            oldFocus = parent;
-        }
-
-        // We have to remember the HWND because we need to check
-        // the HWND still exists (oldFocus can be garbage when the dialog
-        // exits, if it has been destroyed)
-        HWND hwndOldFocus = oldFocus ? GetHwndOf(oldFocus) : NULL;
-
-
-        // enter and run the modal loop
-        {
-            wxDialogModalDataTiedPtr modalData(&m_modalData,
-                                               new wxDialogModalData(this));
-            modalData->RunLoop();
-        }
-
-
-        // and restore focus
-        // Note that this code MUST NOT access the dialog object's data
-        // in case the object has been deleted (which will be the case
-        // for a modal dialog that has been destroyed before calling EndModal).
-        if ( oldFocus && (oldFocus != this) && ::IsWindow(hwndOldFocus))
-        {
-            // This is likely to prove that the object still exists
-            if (wxFindWinFromHandle((WXHWND) hwndOldFocus) == oldFocus)
-                oldFocus->SetFocus();
-        }
+        SetModal(TRUE);
     }
+
+    Show(TRUE);
 
     return GetReturnCode();
 }
 
+// NB: this function (surprizingly) may be called for both modal and modeless
+//     dialogs and should work for both of them
 void wxDialog::EndModal(int retCode)
 {
-    wxASSERT_MSG( IsModal(), _T("EndModal() called for non modal dialog") );
-
-    m_endModalCalled = true;
     SetReturnCode(retCode);
 
-    Hide();
-}
-
-void wxDialog::EndDialog(int rc)
-{
-    if ( IsModal() )
-        EndModal(rc);
-    else
-        Hide();
+    Show(FALSE);
 }
 
 // ----------------------------------------------------------------------------
@@ -388,7 +370,7 @@ void wxDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
   if ( Validate() && TransferDataFromWindow() )
   {
-      EndDialog(wxID_OK);
+      EndModal(wxID_OK);
   }
 }
 
@@ -402,7 +384,7 @@ void wxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
 
 void wxDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
-    EndDialog(wxID_CANCEL);
+    EndModal(wxID_CANCEL);
 }
 
 void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
@@ -437,87 +419,25 @@ void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 
 void wxDialog::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event))
 {
+#if wxUSE_CTL3D
+    Ctl3dColorChange();
+#else
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
     Refresh();
-}
-
-#ifdef __POCKETPC__
-// Responds to the OK button in a PocketPC titlebar. This
-// can be overridden, or you can change the id used for
-// sending the event, by calling SetAffirmativeId.
-bool wxDialog::DoOK()
-{
-    wxButton *btn = wxDynamicCast(FindWindow(GetAffirmativeId()), wxButton);
-
-    if ( btn && btn->IsEnabled() )
-    {
-        // If we have this button, press it
-        btn->MSWCommand(BN_CLICKED, 0 /* unused */);
-        return true;
-    }
-    else
-    {
-        wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, GetAffirmativeId());
-        event.SetEventObject(this);
-
-        return GetEventHandler()->ProcessEvent(event);
-    }
-}
 #endif
-
-#if wxUSE_TOOLBAR && defined(__POCKETPC__)
-// create main toolbar by calling OnCreateToolBar()
-wxToolBar* wxDialog::CreateToolBar(long style, wxWindowID winid, const wxString& name)
-{
-    m_dialogToolBar = OnCreateToolBar(style, winid, name);
-
-    return m_dialogToolBar;
 }
-
-// return a new toolbar
-wxToolBar *wxDialog::OnCreateToolBar(long style,
-                                       wxWindowID winid,
-                                       const wxString& name)
-{
-    return new wxToolMenuBar(this, winid,
-                         wxDefaultPosition, wxDefaultSize,
-                         style, name);
-}
-#endif
 
 // ---------------------------------------------------------------------------
 // dialog window proc
 // ---------------------------------------------------------------------------
 
-WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
+long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-    WXLRESULT rc = 0;
-    bool processed = false;
+    long rc = 0;
+    bool processed = FALSE;
 
     switch ( message )
     {
-#ifdef __WXWINCE__
-        // react to pressing the OK button in the title
-        case WM_COMMAND:
-        {
-            switch ( LOWORD(wParam) )
-            {
-#ifdef __POCKETPC__
-                case IDOK:
-                    processed = DoOK();
-                    if (!processed)
-                        processed = !Close();
-#endif
-#ifdef __SMARTPHONE__
-                case IDM_LEFT:
-                case IDM_RIGHT:
-                    processed = HandleCommand( LOWORD(wParam) , 0 , NULL );
-                    break;
-#endif // __SMARTPHONE__
-            }
-            break;
-        }
-#endif
         case WM_CLOSE:
             // if we can't close, tell the system that we processed the
             // message - otherwise it would close us
@@ -532,10 +452,10 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
             // help with it - so we have to refresh it manually which certainly
             // creates flicker but at least doesn't show garbage on the screen
             rc = wxWindow::MSWWindowProc(message, wParam, lParam);
-            processed = true;
-            if ( HasFlag(wxFULL_REPAINT_ON_RESIZE) )
+            processed = TRUE;
+            if ( !HasFlag(wxNO_FULL_REPAINT_ON_RESIZE) )
             {
-                ::InvalidateRect(GetHwnd(), NULL, false /* erase bg */);
+                ::InvalidateRect(GetHwnd(), NULL, FALSE /* erase bg */);
             }
             break;
 
@@ -544,7 +464,7 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
             // we want to override the busy cursor for modal dialogs:
             // typically, wxBeginBusyCursor() is called and then a modal dialog
             // is shown, but the modal dialog shouldn't have hourglass cursor
-            if ( IsModal() && wxIsBusy() )
+            if ( IsModalShowing() && wxIsBusy() )
             {
                 // set our cursor for all windows (but see below)
                 wxCursor cursor = m_cursor;
@@ -555,14 +475,14 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
 
                 // in any case, stop here and don't let wxWindow process this
                 // message (it would set the busy cursor)
-                processed = true;
+                processed = TRUE;
 
-                // but return false to tell the child window (if the event
+                // but return FALSE to tell the child window (if the event
                 // comes from one of them and not from ourselves) that it can
                 // set its own cursor if it has one: thus, standard controls
                 // (e.g. text ctrl) still have correct cursors in a dialog
                 // invoked while wxIsBusy()
-                rc = false;
+                rc = FALSE;
             }
             break;
 #endif // __WXMICROWIN__
@@ -573,4 +493,19 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
 
     return rc;
 }
+
+#if wxUSE_CTL3D
+
+// Define for each class of dialog and control
+WXHBRUSH wxDialog::OnCtlColor(WXHDC WXUNUSED(pDC),
+                              WXHWND WXUNUSED(pWnd),
+                              WXUINT WXUNUSED(nCtlColor),
+                              WXUINT message,
+                              WXWPARAM wParam,
+                              WXLPARAM lParam)
+{
+    return (WXHBRUSH)Ctl3dCtlColorEx(message, wParam, lParam);
+}
+
+#endif // wxUSE_CTL3D
 

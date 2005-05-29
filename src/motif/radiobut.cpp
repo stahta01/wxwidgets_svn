@@ -9,12 +9,9 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "radiobut.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
@@ -28,8 +25,12 @@
 #ifdef __VMS__
 #pragma message disable nosimpint
 #endif
+#include <Xm/Label.h>
+#include <Xm/LabelG.h>
 #include <Xm/ToggleB.h>
 #include <Xm/ToggleBG.h>
+#include <Xm/RowColumn.h>
+#include <Xm/Form.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
@@ -52,16 +53,28 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
                            const wxValidator& validator,
                            const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
+    SetName(name);
+    SetValidator(validator);
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    m_font = parent->GetFont();
+
+    if (parent) parent->AddChild(this);
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
+
+    m_windowStyle = style ;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
     wxString label1(wxStripMenuCodes(label));
 
-    wxXmString text( label1 );
+    XmString text = XmStringCreateSimple ((char*) (const char*) label1);
 
-    WXFontType fontType = m_font.GetFontType(XtDisplay(parentWidget));
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay(parentWidget));
 
     Widget radioButtonWidget = XtVaCreateManagedWidget ("toggle",
 #if wxUSE_GADGETS
@@ -69,27 +82,26 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
 #else
         xmToggleButtonWidgetClass, parentWidget,
 #endif
-        wxFont::GetFontTag(), fontType,
-        XmNlabelString, text(),
+        XmNfontList, fontList,
+        XmNlabelString, text,
         XmNfillOnSelect, True,
         XmNindicatorType, XmONE_OF_MANY, // diamond-shape
         NULL);
+    XmStringFree (text);
 
-    XtAddCallback (radioButtonWidget,
-                   XmNvalueChangedCallback,
-                   (XtCallbackProc)wxRadioButtonCallback,
-                   (XtPointer)this);
+    XtAddCallback (radioButtonWidget, XmNvalueChangedCallback, (XtCallbackProc) wxRadioButtonCallback,
+        (XtPointer) this);
 
     m_mainWidget = (WXWidget) radioButtonWidget;
 
     XtManageChild (radioButtonWidget);
 
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, size.x, size.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
 
-    //copied from mac/radiobut.cpp (from here till "return true;")
+    //copied from mac/radiobut.cpp (from here till "return TRUE;")
     m_cycle = this ;
   
     if (HasFlag(wxRB_GROUP))
@@ -100,7 +112,7 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
     {
         /* search backward for last group start */
         wxRadioButton *chief = (wxRadioButton*) NULL;
-        wxWindowList::compatibility_iterator node = parent->GetChildren().GetLast();
+        wxWindowList::Node *node = parent->GetChildren().GetLast();
         while (node)
         {
             wxWindow *child = node->GetData();
@@ -113,7 +125,7 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
         }
         AddInCycle( chief ) ;
     }
-    return true;
+    return TRUE;
 }
 
 void wxRadioButton::SetValue(bool value)
@@ -121,9 +133,9 @@ void wxRadioButton::SetValue(bool value)
     if (GetValue() == value)
         return;
 
-    m_inSetValue = true;
-    XmToggleButtonSetState ((Widget) m_mainWidget, (Boolean) value, False);
-    m_inSetValue = false;
+    m_inSetValue = TRUE;
+    XmToggleButtonSetState ((Widget) m_mainWidget, (Boolean) value, FALSE);
+    m_inSetValue = FALSE;
 
     ClearSelections();
 }
@@ -136,8 +148,13 @@ bool wxRadioButton::GetValue() const
 
 void wxRadioButton::Command (wxCommandEvent & event)
 {
-    SetValue ( (event.GetInt() != 0) );
+    SetValue ( (event.m_commandInt != 0) );
     ProcessCommand (event);
+}
+
+void wxRadioButton::ChangeFont(bool keepOriginalSize)
+{
+    wxWindow::ChangeFont(keepOriginalSize);
 }
 
 void wxRadioButton::ChangeBackgroundColour()
@@ -145,11 +162,16 @@ void wxRadioButton::ChangeBackgroundColour()
     wxWindow::ChangeBackgroundColour();
 
     // What colour should this be?
-    int selectPixel = wxBLACK->AllocColour(XtDisplay((Widget)m_mainWidget));
+    int selectPixel = wxBLACK->AllocColour(wxGetDisplay());
 
     XtVaSetValues ((Widget) GetMainWidget(),
           XmNselectColor, selectPixel,
           NULL);
+}
+
+void wxRadioButton::ChangeForegroundColour()
+{
+    wxWindow::ChangeForegroundColour();
 }
 
 void wxRadioButtonCallback (Widget w, XtPointer clientData,
@@ -164,19 +186,19 @@ void wxRadioButtonCallback (Widget w, XtPointer clientData,
 
     //based on mac/radiobut.cpp
     wxRadioButton* old = item->ClearSelections();
-    item->SetValue(true);
+    item->SetValue(TRUE);
 
     if ( old )
     {
         wxCommandEvent event(wxEVT_COMMAND_RADIOBUTTON_SELECTED,
                              old->GetId() );
         event.SetEventObject(old);
-        event.SetInt( false );
+        event.SetInt( FALSE );
         old->ProcessCommand(event);
     }
     wxCommandEvent event2(wxEVT_COMMAND_RADIOBUTTON_SELECTED, item->GetId() );
     event2.SetEventObject(item);
-    event2.SetInt( true );
+    event2.SetInt( TRUE );
     item->ProcessCommand(event2);
 }
 
@@ -213,7 +235,7 @@ wxRadioButton* wxRadioButton::ClearSelections()
             if ( cycle->GetValue() )
             {
                 old = cycle;
-                cycle->SetValue(false);
+                cycle->SetValue(FALSE);
             }
             cycle = cycle->NextInCycle();
         }

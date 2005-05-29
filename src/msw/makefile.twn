@@ -104,6 +104,7 @@ COMMONOBJS = \
   $(COMMDIR)/module.$(OBJSUFF) \
   $(COMMDIR)/mimetype.$(OBJSUFF) \
   $(COMMDIR)/object.$(OBJSUFF) \
+  $(COMMDIR)/odbc.$(OBJSUFF) \
   $(COMMDIR)/process.$(OBJSUFF) \
   $(COMMDIR)/prntbase.$(OBJSUFF) \
   $(COMMDIR)/resource.$(OBJSUFF) \
@@ -178,6 +179,7 @@ MSWOBJS = \
   font.$(OBJSUFF) \
   fontdlg.$(OBJSUFF) \
   frame.$(OBJSUFF) \
+  gaugemsw.$(OBJSUFF) \
   gauge95.$(OBJSUFF) \
   gdiobj.$(OBJSUFF) \
   helpwin.$(OBJSUFF) \

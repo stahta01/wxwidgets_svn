@@ -68,6 +68,7 @@ public:
            virtual void SendSizeEvent(void);
            virtual void SetIcon(const wxIcon& rIcon);
            virtual void SetIcons(const wxIconBundle& rIcons);
+                   bool SetShape(const wxRegion& rRegion);
 
            virtual bool Show(bool bShow = TRUE);
            virtual bool ShowFullScreen( bool bShow
@@ -131,7 +132,7 @@ protected:
                                 ) const;
 
     //
-    // Translate wxWidgets flags into OS flags
+    // Translate wxWindows flags into OS flags
     //
     virtual WXDWORD OS2GetStyle( long     lFlag
                                 ,WXDWORD* pdwExstyle
@@ -172,6 +173,11 @@ protected:
 
     DECLARE_EVENT_TABLE()
 }; // end of CLASS wxTopLevelWindowOS2
+
+//
+// List of all frames and modeless dialogs
+//
+extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
 
 #endif // _WX_MSW_TOPLEVEL_H_
 
