@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     23.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CARET_H_
 #define _WX_CARET_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "caret.h"
 #endif
 
@@ -45,7 +45,7 @@ protected:
     {
         wxCaretBase::Init();
 
-        m_hasCaret = false;
+        m_hasCaret = FALSE;
     }
 
     // override base class virtuals
@@ -59,8 +59,6 @@ protected:
 
 private:
     bool m_hasCaret;
-
-    DECLARE_NO_COPY_CLASS(wxCaret)
 };
 
 #endif // _WX_CARET_H_

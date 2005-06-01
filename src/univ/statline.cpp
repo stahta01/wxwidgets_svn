@@ -6,7 +6,7 @@
 // Created:     25.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univstatline.h"
 #endif
 
@@ -56,13 +56,13 @@ bool wxStaticLine::Create(wxWindow *parent,
                           const wxString &name)
 {
     if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return false;
+        return FALSE;
 
     wxSize sizeReal = AdjustSize(size);
     if ( sizeReal != size )
         SetSize(sizeReal);
 
-    return true;
+    return TRUE;
 }
 
 void wxStaticLine::DoDraw(wxControlRenderer *renderer)

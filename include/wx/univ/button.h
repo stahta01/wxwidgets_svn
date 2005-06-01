@@ -6,13 +6,13 @@
 // Created:     15.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_BUTTON_H_
 #define _WX_UNIV_BUTTON_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univbutton.h"
 #endif
 
@@ -40,7 +40,7 @@ public:
     wxButton(wxWindow *parent,
              wxWindowID id,
              const wxBitmap& bitmap,
-             const wxString& label = wxEmptyString,
+             const wxString& label,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
@@ -51,10 +51,10 @@ public:
 
         Create(parent, id, bitmap, label, pos, size, style, validator, name);
     }
-    
+
     wxButton(wxWindow *parent,
              wxWindowID id,
-             const wxString& label = wxEmptyString,
+             const wxString& label,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
@@ -68,7 +68,7 @@ public:
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
-                const wxString& label = wxEmptyString,
+                const wxString& label,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
@@ -78,11 +78,11 @@ public:
         return Create(parent, id, wxNullBitmap, label,
                       pos, size, style, validator, name);
     }
-    
+
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxBitmap& bitmap,
-                const wxString& label = wxEmptyString,
+                const wxString& label,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
@@ -113,7 +113,7 @@ protected:
     virtual bool DoDrawBackground(wxDC& dc);
     virtual void DoDraw(wxControlRenderer *renderer);
 
-    virtual bool CanBeHighlighted() const { return true; }
+    virtual bool CanBeHighlighted() const { return TRUE; }
 
     // common part of all ctors
     void Init();

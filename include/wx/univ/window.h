@@ -8,13 +8,13 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_WINDOW_H_
 #define _WX_UNIV_WINDOW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univwindow.h"
 #endif
 
@@ -26,6 +26,30 @@ class WXDLLEXPORT wxMenu;
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxRenderer;
 class WXDLLEXPORT wxScrollBar;
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// control state flags used in wxRenderer and wxColourScheme
+enum
+{
+    wxCONTROL_DISABLED   = 0x00000001,  // control is disabled
+    wxCONTROL_FOCUSED    = 0x00000002,  // currently has keyboard focus
+    wxCONTROL_PRESSED    = 0x00000004,  // (button) is pressed
+    wxCONTROL_ISDEFAULT  = 0x00000008,  // only applies to the buttons
+    wxCONTROL_ISSUBMENU  = wxCONTROL_ISDEFAULT, // only for menu items
+    wxCONTROL_CURRENT    = 0x00000010,  // mouse is currently over the control
+    wxCONTROL_SELECTED   = 0x00000020,  // selected item in e.g. listbox
+    wxCONTROL_CHECKED    = 0x00000040,  // (check/radio button) is checked
+    wxCONTROL_CHECKABLE  = 0x00000080,  // (menu) item can be checked
+
+    wxCONTROL_FLAGS_MASK = 0x000000ff,
+
+    // this is a pseudo flag not used directly by wxRenderer but rather by some
+    // controls internally
+    wxCONTROL_DIRTY      = 0x80000000
+};
 
 #ifdef __WXX11__
 #define wxUSE_TWO_WINDOWS 1
@@ -73,8 +97,6 @@ public:
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
 
-    virtual ~wxWindow();
-
     // background pixmap support
     // -------------------------
 
@@ -93,8 +115,8 @@ public:
                               int pos,
                               int page,
                               int range,
-                              bool refresh = true );
-    virtual void SetScrollPos(int orient, int pos, bool refresh = true);
+                              bool refresh = TRUE );
+    virtual void SetScrollPos(int orient, int pos, bool refresh = TRUE);
     virtual int GetScrollPos(int orient) const;
     virtual int GetScrollThumb(int orient) const;
     virtual int GetScrollRange(int orient) const;
@@ -128,8 +150,8 @@ public:
     // return all state flags at once (combination of wxCONTROL_XXX values)
     int GetStateFlags() const;
 
-    // set the "highlighted" flag and return true if it changed
-    virtual bool SetCurrent(bool doit = true);
+    // set the "highlighted" flag and return TRUE if it changed
+    virtual bool SetCurrent(bool doit = TRUE);
 
     // get the scrollbar (may be NULL) for the given orientation
     wxScrollBar *GetScrollbar(int orient) const
@@ -140,22 +162,38 @@ public:
     // methods used by wxColourScheme to choose the colours for this window
     // --------------------------------------------------------------------
 
-    // return true if this is a panel/canvas window which contains other
+    // return TRUE if this is a panel/canvas window which contains other
     // controls only
-    virtual bool IsCanvasWindow() const { return false; }
+    virtual bool IsCanvasWindow() const { return FALSE; }
 
-    // return true if this control can be highlighted when the mouse is over
+    // return TRUE if this a container window which contains the other items:
+    // e.g, a listbox, listctrl, treectrl, ... and FALSE if it is a monolithic
+    // control (e.g. a button, checkbox, ...)
+    virtual bool IsContainerWindow() const { return FALSE; }
+
+    // returns TRUE if the control has "transparent" areas such
+    // as a wxStaticText and wxCheckBox and the background should
+    // be adapted from a parent window
+    virtual bool HasTransparentBackground() { return FALSE; }
+    
+    // to be used with function above: transparent windows get
+    // their background from parents that return TRUE here,
+    // so this is mostly for wxPanel, wxTopLevelWindow etc.
+    virtual bool ProvidesBackground() const { return FALSE; }
+
+    // return TRUE if this control can be highlighted when the mouse is over
     // it (the theme decides itself whether it is really highlighted or not)
-    virtual bool CanBeHighlighted() const { return false; }
+    virtual bool CanBeHighlighted() const { return FALSE; }
 
-    // return true if we should use the colours/fonts returned by the
+    // return TRUE if we should use the colours/fonts returned by the
     // corresponding GetXXX() methods instead of the default ones
+    bool UseBgCol() const { return m_hasBgCol; }
     bool UseFgCol() const { return m_hasFgCol; }
     bool UseFont() const { return m_hasFont; }
 
-    // return true if this window serves as a container for the other windows
+    // return TRUE if this window serves as a container for the other windows
     // only and doesn't get any input itself
-    virtual bool IsStaticBox() const { return false; }
+    virtual bool IsStaticBox() const { return FALSE; }
 
     // returns the (low level) renderer to use for drawing the control by
     // querying the current theme
@@ -172,20 +210,17 @@ public:
 
     // erase part of the control
     virtual void EraseBackground(wxDC& dc, const wxRect& rect);
-
+    
     // overridden base class methods
     // -----------------------------
 
     // the rect coordinates are, for us, in client coords, but if no rect is
     // specified, the entire window is refreshed
-    virtual void Refresh(bool eraseBackground = true,
+    virtual void Refresh(bool eraseBackground = TRUE,
                          const wxRect *rect = (const wxRect *) NULL);
 
     // we refresh the window when it is dis/enabled
-    virtual bool Enable(bool enable = true);
-
-    // should we use the standard control colours or not?
-    virtual bool ShouldInheritColours() const { return false; }
+    virtual bool Enable(bool enable = TRUE);
 
 protected:
     // common part of all ctors
@@ -200,7 +235,7 @@ protected:
 
     // event handlers
     void OnSize(wxSizeEvent& event);
-    void OnNcPaint(wxNcPaintEvent& event);
+    void OnNcPaint(wxPaintEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnErase(wxEraseEvent& event);
 
@@ -213,7 +248,7 @@ protected:
     void OnKeyUp(wxKeyEvent& event);
 #endif // wxUSE_MENUS
 
-    // draw the control background, return true if done
+    // draw the control background, return TRUE if done
     virtual bool DoDrawBackground(wxDC& dc);
 
     // draw the controls border
@@ -241,12 +276,12 @@ protected:
 
     // the renderer we use
     wxRenderer *m_renderer;
-
+    
     // background bitmap info
     wxBitmap  m_bitmapBg;
     int       m_alignBgBitmap;
     wxStretch m_stretchBgBitmap;
-
+    
     // old size
     wxSize m_oldSize;
 
@@ -255,7 +290,7 @@ protected:
 
 #ifdef __WXMSW__
     // override MSWWindowProc() to process WM_NCHITTEST
-    WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+    long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 #endif // __WXMSW__
 
 private:

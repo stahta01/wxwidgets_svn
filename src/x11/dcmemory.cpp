@@ -9,7 +9,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dcmemory.h"
 #endif
 
@@ -59,7 +59,7 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
         }
         else
         {
-            m_window = m_selected.GetBitmap();
+//            m_window = m_selected.GetBitmap();
         }
 
         m_isMemDC = TRUE;

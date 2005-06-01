@@ -12,7 +12,7 @@
 #ifndef _WX_DCSCREEN_H_
 #define _WX_DCSCREEN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dcscreen.h"
 #endif
 
@@ -25,15 +25,15 @@ public:
     wxScreenDC();
 
     // Compatibility with X's requirements for drawing on top of all windows
-    static bool StartDrawingOnTop(wxWindow* WXUNUSED(window)) { return true; }
-    static bool StartDrawingOnTop(wxRect* WXUNUSED(rect) = NULL) { return true; }
-    static bool EndDrawingOnTop() { return true; }
+    static bool StartDrawingOnTop(wxWindow* WXUNUSED(window)) { return TRUE; }
+    static bool StartDrawingOnTop(wxRect* WXUNUSED(rect) = NULL) { return TRUE; }
+    static bool EndDrawingOnTop() { return TRUE; }
 
 protected:
     virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxScreenDC)
+    DECLARE_DYNAMIC_CLASS(wxScreenDC)
 };
 
 #endif

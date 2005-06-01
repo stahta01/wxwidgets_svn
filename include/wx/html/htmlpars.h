@@ -4,14 +4,14 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef _WX_HTMLPARS_H_
 #define _WX_HTMLPARS_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmlpars.h"
 #endif
 
@@ -23,10 +23,10 @@
 #include "wx/hash.h"
 #include "wx/fontenc.h"
 
-class WXDLLIMPEXP_BASE wxMBConv;
-class WXDLLIMPEXP_HTML wxHtmlParser;
-class WXDLLIMPEXP_HTML wxHtmlTagHandler;
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
+class WXDLLEXPORT wxMBConv;
+class WXDLLEXPORT wxHtmlParser;
+class WXDLLEXPORT wxHtmlTagHandler;
+class WXDLLEXPORT wxHtmlEntitiesParser;
 
 class wxHtmlTextPieces;
 class wxHtmlParserState;
@@ -43,7 +43,7 @@ enum wxHtmlURLType
 // the document and divide it into blocks of tags (where one block
 // consists of starting and ending tag and of text between these
 // 2 tags.
-class WXDLLIMPEXP_HTML wxHtmlParser : public wxObject
+class WXDLLEXPORT wxHtmlParser : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlParser)
 
@@ -57,7 +57,7 @@ public:
     wxFileSystem* GetFS() const { return m_FS; }
 
     // Opens file if the parser is allowed to open given URL (may be forbidden
-    // for security reasons)
+    // for security reasons)    
     virtual wxFSFile *OpenURL(wxHtmlURLType type, const wxString& url) const;
 
     // You can simply call this method when you need parsed output.
@@ -72,9 +72,9 @@ public:
     virtual void InitParser(const wxString& source);
     // This must be called after Parse().
     virtual void DoneParser();
-
+    
     // May be called during parsing to immediately return from Parse().
-    virtual void StopParsing() { m_stopParsing = true; }
+    virtual void StopParsing() { m_stopParsing = TRUE; }
 
     // Parses the m_Source from begin_pos to end_pos-1.
     // (in noparams version it parses whole m_Source)
@@ -93,7 +93,7 @@ public:
     // adds handler to the list & hash table of handlers.
     virtual void AddTagHandler(wxHtmlTagHandler *handler);
 
-    // Forces the handler to handle additional tags (not returned by GetSupportedTags).
+    // Forces the handler to handle additional tags (not returned by GetSupportedTags). 
     // The handler should already be in use by this parser.
     // Example: you want to parse following pseudo-html structure:
     //   <myitems>
@@ -111,30 +111,27 @@ public:
 
     wxString* GetSource() {return &m_Source;}
     void SetSource(const wxString& src);
-
+    
     // Sets HTML source and remebers current parser's state so that it can
-    // later be restored. This is useful for on-line modifications of
+    // later be restored. This is useful for on-line modifications of 
     // HTML source (for example, <pre> handler replaces spaces with &nbsp;
     // and newlines with <br>)
     virtual void SetSourceAndSaveState(const wxString& src);
-    // Restores parser's state from stack or returns false if the stack is
+    // Restores parser's state from stack or returns FALSE if the stack is
     // empty
     virtual bool RestoreState();
-
+    
     // Parses HTML string 'markup' and extracts charset info from <meta> tag
     // if present. Returns empty string if the tag is missing.
     // For wxHTML's internal use.
     static wxString ExtractCharsetInformation(const wxString& markup);
-
-    // Returns entity parser object, used to substitute HTML &entities;
-    wxHtmlEntitiesParser *GetEntitiesParser() const { return m_entitiesParser; }
 
 protected:
     // DOM structure
     void CreateDOMTree();
     void DestroyDOMTree();
     void CreateDOMSubTree(wxHtmlTag *cur,
-                          int begin_pos, int end_pos,
+                          int begin_pos, int end_pos, 
                           wxHtmlTagsCache *cache);
 
     // Adds text to the output.
@@ -150,6 +147,9 @@ protected:
     // ignored if no hander is found.
     // Derived class is *responsible* for filling in m_Handlers table.
     virtual void AddTag(const wxHtmlTag& tag);
+    
+    // Returns entity parser object, used to substitute HTML &entities;
+    wxHtmlEntitiesParser *GetEntitiesParser() const { return m_entitiesParser; }
 
 protected:
     // DOM tree:
@@ -159,9 +159,9 @@ protected:
     size_t m_CurTextPiece;
 
     wxString m_Source;
-
+    
     wxHtmlParserState *m_SavedStates;
-
+    
     // handlers that handle particular tags. The table is accessed by
     // key = tag's name.
     // This attribute MUST be filled by derived class otherwise it would
@@ -174,16 +174,14 @@ protected:
     wxList m_HandlersList;
     wxHashTable m_HandlersHash;
 
-    DECLARE_NO_COPY_CLASS(wxHtmlParser)
-
     // class for opening files (file system)
     wxFileSystem *m_FS;
     // handlers stack used by PushTagHandler and PopTagHandler
     wxList *m_HandlersStack;
-
+    
     // entity parse
     wxHtmlEntitiesParser *m_entitiesParser;
-
+    
     // flag indicating that the parser should stop
     bool m_stopParsing;
 };
@@ -197,7 +195,7 @@ protected:
 //    (using it's public methods)
 // 2. Parser parses source between starting and ending tag
 // 3. Handler restores original state of the parser
-class WXDLLIMPEXP_HTML wxHtmlTagHandler : public wxObject
+class WXDLLEXPORT wxHtmlTagHandler : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlTagHandler)
 
@@ -208,7 +206,7 @@ public:
     // NOTE : each _instance_ of handler is guaranteed to be called
     // only by one parser. This means you don't have to care about
     // reentrancy.
-    virtual void SetParser(wxHtmlParser *parser)
+    virtual void SetParser(wxHtmlParser *parser) 
         { m_Parser = parser; }
 
     // Returns list of supported tags. The list is in uppercase and
@@ -219,36 +217,34 @@ public:
 
     // This is hadling core method. It does all the Steps 1-3.
     // To process step 2, you can call ParseInner()
-    // returned value : true if it called ParseInner(),
-    //                  false etherwise
+    // returned value : TRUE if it called ParseInner(),
+    //                  FALSE etherwise
     virtual bool HandleTag(const wxHtmlTag& tag) = 0;
 
 protected:
     // parses input between beginning and ending tag.
     // m_Parser must be set.
-    void ParseInner(const wxHtmlTag& tag)
+    void ParseInner(const wxHtmlTag& tag) 
         { m_Parser->DoParsing(tag.GetBeginPos(), tag.GetEndPos1()); }
 
     wxHtmlParser *m_Parser;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTagHandler)
 };
 
 
 // This class is used to parse HTML entities in strings. It can handle
 // both named entities and &#xxxx entries where xxxx is Unicode code.
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser : public wxObject
+class WXDLLEXPORT wxHtmlEntitiesParser : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlEntitiesParser)
 
 public:
     wxHtmlEntitiesParser();
     virtual ~wxHtmlEntitiesParser();
-
+    
     // Sets encoding of output string.
     // Has no effect if wxUSE_WCHAR_T==0 or wxUSE_UNICODE==1
     void SetEncoding(wxFontEncoding encoding);
-
+    
     // Parses entities in input and replaces them with respective characters
     // (with respect to output encoding)
     wxString Parse(const wxString& input);
@@ -268,8 +264,6 @@ protected:
     wxMBConv *m_conv;
     wxFontEncoding m_encoding;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxHtmlEntitiesParser)
 };
 
 

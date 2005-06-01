@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/pen.h
+// Name:        pen.h
 // Purpose:     wxPen class
 // Author:      David Webster
 // Modified by:
@@ -46,8 +46,8 @@ class WXDLLEXPORT wxPen : public wxGDIObject
 public:
     wxPen();
     wxPen( const wxColour& rColour
-          ,int             nWidth = 1
-          ,int             nStyle = wxSOLID
+          ,int             nWidth
+          ,int             nStyle
          );
     wxPen( const wxBitmap& rStipple
           ,int             nWidth
@@ -55,12 +55,9 @@ public:
     inline wxPen(const wxPen& rPen) { Ref(rPen); }
     ~wxPen();
 
-    inline wxPen& operator =  (const wxPen& rPen)
-        { if (*this == rPen) return (*this); Ref(rPen); return *this; }
-    inline bool   operator == (const wxPen& rPen) const
-        { return m_refData == rPen.m_refData; }
-    inline bool   operator != (const wxPen& rPen) const
-        { return m_refData != rPen.m_refData; }
+    inline wxPen& operator =  (const wxPen& rPen) { if (*this == rPen) return (*this); Ref(rPen); return *this; }
+    inline bool   operator == (const wxPen& rPen) { return m_refData == rPen.m_refData; }
+    inline bool   operator != (const wxPen& rPen) { return m_refData != rPen.m_refData; }
 
     virtual bool Ok(void) const { return (m_refData != NULL); }
 

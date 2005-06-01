@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
-//              wxWidgets itself, it may contain identifiers which don't start
+//              wxWindows itself, it may contain identifiers which don't start
 //              with "wx".
 // Author:      Julian Smart
 // Modified by:
@@ -20,9 +20,8 @@
 #define INCL_WINSYS
 #define INCL_SHLERRORS
 #include <os2.h>
-#if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS) && !defined(FCF_CLOSEBUTTON)
-/* struct missing in "os2emx.h" - luckily FCF_CLOSEBUTTON was added in the
-   same version of os2emx.h as SPBCDATA type, so we can do the test above. */
+#if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
+/* struct missing in "os2emx.h" */
  typedef struct _SPBCDATA {
    ULONG     cbSize;       /*  Size of control block. */
    ULONG     ulTextLimit;  /*  Entryfield text limit. */
@@ -45,6 +44,19 @@ class WXDLLEXPORT wxBitmap;
 // ---------------------------------------------------------------------------
 // private constants
 // ---------------------------------------------------------------------------
+
+// Conversion
+static const double METRIC_CONVERSION_CONSTANT = 0.0393700787;
+
+// Scaling factors for various unit conversions
+static const double mm2inches = (METRIC_CONVERSION_CONSTANT);
+static const double inches2mm = (1/METRIC_CONVERSION_CONSTANT);
+
+static const double mm2twips = (METRIC_CONVERSION_CONSTANT*1440);
+static const double twips2mm = (1/(METRIC_CONVERSION_CONSTANT*1440));
+
+static const double mm2pt = (METRIC_CONVERSION_CONSTANT*72);
+static const double pt2mm = (1/(METRIC_CONVERSION_CONSTANT*72));
 
 //
 // Constant strings for control names and classes
@@ -232,7 +244,7 @@ extern LONG APIENTRY wxSubclassedGenericControlProc(WXHWND hWnd, WXDWORD message
 #define GetHfont()              ((HFONT)GetHFONT())
 #define GetHfontOf(font)        ((HFONT)(font).GetHFONT())
 
-// OS/2 convention of the mask is opposed to the wxWidgets one, so we need
+// OS/2 convention of the mask is opposed to the wxWindows one, so we need
 // to invert the mask each time we pass one/get one to/from Windows
 extern HBITMAP wxInvertMask(HBITMAP hbmpMask, int w = 0, int h = 0);
 
@@ -243,6 +255,9 @@ extern HBITMAP wxInvertMask(HBITMAP hbmpMask, int w = 0, int h = 0);
 // The MakeProcInstance version of the function wxSubclassedGenericControlProc
 WXDLLEXPORT_DATA(extern int) wxGenericControlSubClassProc;
 WXDLLEXPORT_DATA(extern wxChar*) wxBuffer;
+
+#ifdef __WXPM__
+
 WXDLLEXPORT_DATA(extern HINSTANCE) wxhInstance;
 
 // ---------------------------------------------------------------------------
@@ -254,7 +269,10 @@ extern "C"
 WXDLLEXPORT HINSTANCE wxGetInstance();
 }
 
-WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
+WXDLLEXPORT void wxDrawBorder( HPS     hPS
+                              ,RECTL&  rRect
+                              ,WXDWORD dwStyle
+                             );
 
 #include "wx/thread.h"
 static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
@@ -270,12 +288,7 @@ static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
 }
 #define WinSendMsg MySendMsg
 
-#ifdef __WXPM__
-
-WXDLLEXPORT void wxDrawBorder( HPS     hPS
-                              ,RECTL&  rRect
-                              ,WXDWORD dwStyle
-                             );
+WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
 
 WXDLLEXPORT wxWindow* wxFindWinFromHandle(WXHWND hWnd);
 
@@ -303,7 +316,7 @@ WXDLLEXPORT wxFont wxCreateFontFromLogFont( LOGFONT*      pLogFont
                                            ,PFONTMETRICS  pFM
                                            ,PFACENAMEDESC pFace
                                           );
-WXDLLEXPORT int    wxGpiStrcmp(wxChar* s0, wxChar* s1);
+WXDLLEXPORT int    wxGpiStrcmp(char* s0, char* s1);
 
 WXDLLEXPORT void wxSliderEvent(WXHWND control, WXWORD wParam, WXWORD pos);
 WXDLLEXPORT void wxScrollBarEvent(WXHWND hbar, WXWORD wParam, WXWORD pos);
@@ -354,10 +367,7 @@ WXDLLEXPORT extern wxBitmap wxDisableBitmap( const wxBitmap& rBmp
                                             ,long            lColor
                                            );
 
-#include "wx/colour.h"
-
-WXDLLEXPORT extern COLORREF wxColourToRGB(const wxColour& rColor);
-
 #endif // __WXPM__
 
 #endif // _WX_PRIVATE_H_
+

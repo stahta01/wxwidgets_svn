@@ -31,7 +31,6 @@
 #include "wx/statline.h"
 #include "wx/wfstream.h"
 #include "wx/filedlg.h"
-#include "wx/stockitem.h"
 
 #include "life.h"
 #include "game.h"
@@ -67,15 +66,18 @@
 // constants
 // --------------------------------------------------------------------------
 
-// IDs for the controls and the menu commands. Exluding those already defined
-// by wxWidgets, such as wxID_NEW.
+// IDs for the controls and the menu commands
 enum
 {
     // timer
-    ID_TIMER = wxID_HIGHEST,
+    ID_TIMER = 1001,
 
     // file menu
+    ID_NEW,
+    ID_OPEN,
     ID_SAMPLES,
+    ID_ABOUT,
+    ID_EXIT,
 
     // view menu
     ID_SHOWNAV,
@@ -85,45 +87,48 @@ enum
     ID_SOUTH,
     ID_EAST,
     ID_WEST,
+    ID_ZOOMIN,
+    ID_ZOOMOUT,
     ID_INFO,
 
     // game menu
     ID_START,
     ID_STEP,
+    ID_STOP,
     ID_TOPSPEED,
 
     // speed selection slider
-    ID_SLIDER
+    ID_SLIDER,
 };
 
 // --------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // --------------------------------------------------------------------------
 
 // Event tables
 BEGIN_EVENT_TABLE(LifeFrame, wxFrame)
-    EVT_MENU            (wxID_NEW,     LifeFrame::OnMenu)
-    EVT_MENU            (wxID_OPEN,    LifeFrame::OnOpen)
-    EVT_MENU            (ID_SAMPLES,   LifeFrame::OnSamples)
-    EVT_MENU            (wxID_ABOUT,   LifeFrame::OnMenu)
-    EVT_MENU            (wxID_EXIT,    LifeFrame::OnMenu)
-    EVT_MENU            (ID_SHOWNAV,   LifeFrame::OnMenu)
-    EVT_MENU            (ID_ORIGIN,    LifeFrame::OnNavigate)
-    EVT_BUTTON          (ID_CENTER,    LifeFrame::OnNavigate)
-    EVT_BUTTON          (ID_NORTH,     LifeFrame::OnNavigate)
-    EVT_BUTTON          (ID_SOUTH,     LifeFrame::OnNavigate)
-    EVT_BUTTON          (ID_EAST,      LifeFrame::OnNavigate)
-    EVT_BUTTON          (ID_WEST,      LifeFrame::OnNavigate)
-    EVT_MENU            (wxID_ZOOM_IN, LifeFrame::OnZoom)
-    EVT_MENU            (wxID_ZOOM_OUT,LifeFrame::OnZoom)
-    EVT_MENU            (ID_INFO,      LifeFrame::OnMenu)
-    EVT_MENU            (ID_START,     LifeFrame::OnMenu)
-    EVT_MENU            (ID_STEP,      LifeFrame::OnMenu)
-    EVT_MENU            (wxID_STOP,    LifeFrame::OnMenu)
-    EVT_MENU            (ID_TOPSPEED,  LifeFrame::OnMenu)
-    EVT_COMMAND_SCROLL  (ID_SLIDER,    LifeFrame::OnSlider)
-    EVT_TIMER           (ID_TIMER,     LifeFrame::OnTimer)
-    EVT_CLOSE           (              LifeFrame::OnClose)
+    EVT_MENU            (ID_NEW,      LifeFrame::OnMenu)
+    EVT_MENU            (ID_OPEN,     LifeFrame::OnOpen)
+    EVT_MENU            (ID_SAMPLES,  LifeFrame::OnSamples)
+    EVT_MENU            (ID_ABOUT,    LifeFrame::OnMenu)
+    EVT_MENU            (ID_EXIT,     LifeFrame::OnMenu)
+    EVT_MENU            (ID_SHOWNAV,  LifeFrame::OnMenu)
+    EVT_MENU            (ID_ORIGIN,   LifeFrame::OnNavigate)
+    EVT_BUTTON          (ID_CENTER,   LifeFrame::OnNavigate)
+    EVT_BUTTON          (ID_NORTH,    LifeFrame::OnNavigate)
+    EVT_BUTTON          (ID_SOUTH,    LifeFrame::OnNavigate)
+    EVT_BUTTON          (ID_EAST,     LifeFrame::OnNavigate)
+    EVT_BUTTON          (ID_WEST,     LifeFrame::OnNavigate)
+    EVT_MENU            (ID_ZOOMIN,   LifeFrame::OnZoom)
+    EVT_MENU            (ID_ZOOMOUT,  LifeFrame::OnZoom)
+    EVT_MENU            (ID_INFO,     LifeFrame::OnMenu)
+    EVT_MENU            (ID_START,    LifeFrame::OnMenu)
+    EVT_MENU            (ID_STEP,     LifeFrame::OnMenu)
+    EVT_MENU            (ID_STOP,     LifeFrame::OnMenu)
+    EVT_MENU            (ID_TOPSPEED, LifeFrame::OnMenu)
+    EVT_COMMAND_SCROLL  (ID_SLIDER,   LifeFrame::OnSlider)
+    EVT_TIMER           (ID_TIMER,    LifeFrame::OnTimer)
+    EVT_CLOSE           (             LifeFrame::OnClose)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(LifeNavigator, wxMiniFrame)
@@ -152,7 +157,7 @@ IMPLEMENT_APP(LifeApp)
 
 // some shortcuts
 #define ADD_TOOL(id, bmp, tooltip, help) \
-    toolBar->AddTool(id, bmp, wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, (wxObject *)NULL, tooltip, help)
+    toolBar->AddTool(id, bmp, wxNullBitmap, FALSE, -1, -1, (wxObject *)0, tooltip, help)
 
 
 // --------------------------------------------------------------------------
@@ -166,7 +171,7 @@ bool LifeApp::OnInit()
     LifeFrame *frame = new LifeFrame();
 
     // show it and tell the application that it's our main window
-    frame->Show(true);
+    frame->Show(TRUE);
     SetTopWindow(frame);
 
     // just for Motif
@@ -175,7 +180,7 @@ bool LifeApp::OnInit()
 #endif
 
     // enter the main message loop and run the app
-    return true;
+    return TRUE;
 }
 
 // --------------------------------------------------------------------------
@@ -183,31 +188,27 @@ bool LifeApp::OnInit()
 // --------------------------------------------------------------------------
 
 // frame constructor
-LifeFrame::LifeFrame() : 
-  wxFrame( (wxFrame *) NULL, wxID_ANY, _("Life!"), wxDefaultPosition ),
-  m_navigator(NULL)
+LifeFrame::LifeFrame() : wxFrame((wxFrame *)0, -1, _("Life!"), wxPoint(200, 200))
 {
     // frame icon
     SetIcon(wxICON(mondrian));
 
     // menu bar
-    wxMenu *menuFile = new wxMenu(wxMENU_TEAROFF);
-    wxMenu *menuView = new wxMenu(wxMENU_TEAROFF);
-    wxMenu *menuGame = new wxMenu(wxMENU_TEAROFF);
-    wxMenu *menuHelp = new wxMenu(wxMENU_TEAROFF);
+    wxMenu *menuFile = new wxMenu(_T(""), wxMENU_TEAROFF);
+    wxMenu *menuView = new wxMenu(_T(""), wxMENU_TEAROFF);
+    wxMenu *menuGame = new wxMenu(_T(""), wxMENU_TEAROFF);
 
-    menuFile->Append(wxID_NEW, wxGetStockLabel(wxID_NEW), _("Start a new game"));
-    menuFile->Append(wxID_OPEN, wxGetStockLabel(wxID_OPEN), _("Open an existing Life pattern"));
+    menuFile->Append(ID_NEW, _("&New"), _("Start a new game"));
+    menuFile->Append(ID_OPEN, _("&Open..."), _("Open an existing Life pattern"));
     menuFile->Append(ID_SAMPLES, _("&Sample game..."), _("Select a sample configuration"));
-#if ! (defined(__SMARTPHONE__) || defined(__POCKETPC__))
     menuFile->AppendSeparator();
-    menuFile->Append(wxID_EXIT, wxGetStockLabel(wxID_EXIT, true, _T("Alt-X")), _("Quit this program"));
+    menuFile->Append(ID_ABOUT, _("&About...\tCtrl-A"), _("Show about dialog"));
+    menuFile->AppendSeparator();
+    menuFile->Append(ID_EXIT, _("E&xit\tAlt-X"), _("Quit this program"));
 
-    menuView->Append(ID_SHOWNAV, _("Navigation &toolbox"), _("Show or hide toolbox"), wxITEM_CHECK);
-    menuView->Check(ID_SHOWNAV, true);
+    menuView->Append(ID_SHOWNAV, _("Navigation &toolbox"), _("Show or hide toolbox"), TRUE);
+    menuView->Check (ID_SHOWNAV, TRUE);
     menuView->AppendSeparator();
-#endif
-
     menuView->Append(ID_ORIGIN, _("&Absolute origin"), _("Go to (0, 0)"));
     menuView->Append(ID_CENTER, _("&Center of mass"), _("Find center of mass"));
     menuView->Append(ID_NORTH, _("&North"), _("Find northernmost cell"));
@@ -215,24 +216,21 @@ LifeFrame::LifeFrame() :
     menuView->Append(ID_EAST, _("&East"), _("Find easternmost cell"));
     menuView->Append(ID_WEST, _("&West"), _("Find westernmost cell"));
     menuView->AppendSeparator();
-    menuView->Append(wxID_ZOOM_IN, wxGetStockLabel(wxID_ZOOM_IN, true, _T("Ctrl-I")), _("Zoom in"));
-    menuView->Append(wxID_ZOOM_OUT, wxGetStockLabel(wxID_ZOOM_OUT, true, _T("Ctrl-O")), _("Zoom out"));
-    menuView->Append(ID_INFO, _("&Description\tCtrl-D"), _("View pattern description"));
+    menuView->Append(ID_ZOOMIN, _("Zoom &in\tCtrl-I"), _("Zoom in"));
+    menuView->Append(ID_ZOOMOUT, _("Zoom &out\tCtrl-O"), _("Zoom out"));
+    menuView->Append(ID_INFO, _("&Description...\tCtrl-D"), _("View pattern description"));
 
     menuGame->Append(ID_START, _("&Start\tCtrl-S"), _("Start"));
     menuGame->Append(ID_STEP, _("&Next\tCtrl-N"), _("Single step"));
-    menuGame->Append(wxID_STOP, wxGetStockLabel(wxID_STOP, true, _T("Ctrl-T")), _("Stop"));
-    menuGame->Enable(wxID_STOP, false);
+    menuGame->Append(ID_STOP, _("S&top\tCtrl-T"), _("Stop"));
+    menuGame->Enable(ID_STOP, FALSE);
     menuGame->AppendSeparator();
     menuGame->Append(ID_TOPSPEED, _("T&op speed!"), _("Go as fast as possible"));
-
-    menuHelp->Append(wxID_ABOUT, _("&About\tCtrl-A"), _("Show about dialog"));
 
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(menuFile, _("&File"));
     menuBar->Append(menuView, _("&View"));
     menuBar->Append(menuGame, _("&Game"));
-    menuBar->Append(menuHelp, _("&Help"));
     SetMenuBar(menuBar);
 
     // tool bar
@@ -250,33 +248,28 @@ LifeFrame::LifeFrame() :
     toolBar->SetMargins(5, 5);
     toolBar->SetToolBitmapSize(wxSize(16, 16));
 
-    ADD_TOOL(wxID_NEW, tbBitmaps[0], wxGetStockLabel(wxID_NEW, false), _("Start a new game"));
-#ifndef __POCKETPC__
-    ADD_TOOL(wxID_OPEN, tbBitmaps[1], wxGetStockLabel(wxID_OPEN, false), _("Open an existing Life pattern"));
-
+    ADD_TOOL(ID_NEW, tbBitmaps[0], _("New"), _("Start a new game"));
+    ADD_TOOL(ID_OPEN, tbBitmaps[1], _("Open"), _("Open an existing Life pattern"));
     toolBar->AddSeparator();
-    ADD_TOOL(wxID_ZOOM_IN, tbBitmaps[2], wxGetStockLabel(wxID_ZOOM_IN, false), _("Zoom in"));
-    ADD_TOOL(wxID_ZOOM_OUT, tbBitmaps[3], wxGetStockLabel(wxID_ZOOM_OUT, false), _("Zoom out"));
+    ADD_TOOL(ID_ZOOMIN, tbBitmaps[2], _("Zoom in"), _("Zoom in"));
+    ADD_TOOL(ID_ZOOMOUT, tbBitmaps[3], _("Zoom out"), _("Zoom out"));
     ADD_TOOL(ID_INFO, tbBitmaps[4], _("Description"), _("Show description"));
     toolBar->AddSeparator();
-#endif
     ADD_TOOL(ID_START, tbBitmaps[5], _("Start"), _("Start"));
-    ADD_TOOL(wxID_STOP, tbBitmaps[6], wxGetStockLabel(wxID_STOP, false), _("Stop"));
+    ADD_TOOL(ID_STOP, tbBitmaps[6], _("Stop"), _("Stop"));
 
     toolBar->Realize();
-    toolBar->EnableTool(wxID_STOP, false);    // must be after Realize() !
+    toolBar->EnableTool(ID_STOP, FALSE);    // must be after Realize() !
 
-#if wxUSE_STATUSBAR
     // status bar
     CreateStatusBar(2);
     SetStatusText(_("Welcome to Life!"));
-#endif // wxUSE_STATUSBAR
 
     // game and timer
     m_life     = new Life();
     m_timer    = new wxTimer(this, ID_TIMER);
-    m_running  = false;
-    m_topspeed = false;
+    m_running  = FALSE;
+    m_topspeed = FALSE;
     m_interval = 500;
     m_tics     = 0;
 
@@ -285,14 +278,14 @@ LifeFrame::LifeFrame() :
     // and thus updating the text would result in a refresh of the canvas
     // if they belong to the same parent.
 
-    wxPanel *panel1 = new wxPanel(this, wxID_ANY);
-    wxPanel *panel2 = new wxPanel(this, wxID_ANY);
+    wxPanel *panel1 = new wxPanel(this, -1);
+    wxPanel *panel2 = new wxPanel(this, -1);
 
     // canvas
     m_canvas = new LifeCanvas(panel1, m_life);
 
     // info panel
-    m_text = new wxStaticText(panel2, wxID_ANY,
+    m_text = new wxStaticText(panel2, -1,
         wxEmptyString,
         wxDefaultPosition,
         wxDefaultSize,
@@ -301,7 +294,7 @@ LifeFrame::LifeFrame() :
     wxSlider *slider = new wxSlider(panel2, ID_SLIDER,
         5, 1, 10,
         wxDefaultPosition,
-        wxSize(200, wxDefaultCoord),
+        wxSize(200, -1),
         wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
     UpdateInfoText();
@@ -311,36 +304,31 @@ LifeFrame::LifeFrame() :
     wxBoxSizer *sizer2 = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *sizer3 = new wxBoxSizer(wxVERTICAL);
 
-#if wxUSE_STATLINE
-    sizer1->Add( new wxStaticLine(panel1, wxID_ANY), 0, wxGROW );
-#endif // wxUSE_STATLINE
+    sizer1->Add( new wxStaticLine(panel1, -1), 0, wxGROW );
     sizer1->Add( m_canvas, 1, wxGROW | wxALL, 2 );
-#if wxUSE_STATLINE
-    sizer1->Add( new wxStaticLine(panel1, wxID_ANY), 0, wxGROW );
-#endif // wxUSE_STATLINE
+    sizer1->Add( new wxStaticLine(panel1, -1), 0, wxGROW );
     panel1->SetSizer( sizer1 );
+    panel1->SetAutoLayout( TRUE );
     sizer1->Fit( panel1 );
 
     sizer2->Add( m_text, 0, wxGROW | wxTOP, 4 );
     sizer2->Add( slider, 0, wxCENTRE | wxALL, 4 );
 
     panel2->SetSizer( sizer2 );
+    panel2->SetAutoLayout( TRUE );
     sizer2->Fit( panel2 );
 
     sizer3->Add( panel1, 1, wxGROW );
     sizer3->Add( panel2, 0, wxGROW );
     SetSizer( sizer3 );
-
-#ifndef __WXWINCE__
+    SetAutoLayout( TRUE );
     sizer3->Fit( this );
 
     // set minimum frame size
     sizer3->SetSizeHints( this );
 
-    // navigator frame - not appropriate for small devices
+    // navigator frame
     m_navigator = new LifeNavigator(this);
-#endif
-
 }
 
 LifeFrame::~LifeFrame()
@@ -366,18 +354,17 @@ void LifeFrame::UpdateUI()
 {
     // start / stop
     GetToolBar()->EnableTool(ID_START, !m_running);
-    GetToolBar()->EnableTool(wxID_STOP,  m_running);
-    GetMenuBar()->Enable(ID_START, !m_running);
-    GetMenuBar()->Enable(ID_STEP,  !m_running);
-    GetMenuBar()->Enable(wxID_STOP,  m_running);
-    GetMenuBar()->Enable(ID_TOPSPEED, !m_topspeed);
+    GetToolBar()->EnableTool(ID_STOP,  m_running);
+    GetMenuBar()->GetMenu(2)->Enable(ID_START, !m_running);
+    GetMenuBar()->GetMenu(2)->Enable(ID_STEP,  !m_running);
+    GetMenuBar()->GetMenu(2)->Enable(ID_STOP,  m_running);
 
     // zooming
     int cellsize = m_canvas->GetCellSize();
-    GetToolBar()->EnableTool(wxID_ZOOM_IN,  cellsize < 32);
-    GetToolBar()->EnableTool(wxID_ZOOM_OUT, cellsize > 1);
-    GetMenuBar()->Enable(wxID_ZOOM_IN,  cellsize < 32);
-    GetMenuBar()->Enable(wxID_ZOOM_OUT, cellsize > 1);
+    GetToolBar()->EnableTool(ID_ZOOMIN,  cellsize < 32);
+    GetToolBar()->EnableTool(ID_ZOOMOUT, cellsize > 1);
+    GetMenuBar()->GetMenu(1)->Enable(ID_ZOOMIN,  cellsize < 32);
+    GetMenuBar()->GetMenu(1)->Enable(ID_ZOOMOUT, cellsize > 1);
 }
 
 // Event handlers -----------------------------------------------------------
@@ -387,7 +374,7 @@ void LifeFrame::OnMenu(wxCommandEvent& event)
 {
     switch (event.GetId())
     {
-        case wxID_NEW:
+        case ID_NEW:
         {
             // stop if it was running
             OnStop();
@@ -397,30 +384,29 @@ void LifeFrame::OnMenu(wxCommandEvent& event)
             UpdateInfoText();
             break;
         }
-        case wxID_ABOUT:
+        case ID_ABOUT:
         {
             LifeAboutDialog dialog(this);
             dialog.ShowModal();
             break;
         }
-        case wxID_EXIT:
+        case ID_EXIT:
         {
-            // true is to force the frame to close
-            Close(true);
+            // TRUE is to force the frame to close
+            Close(TRUE);
             break;
         }
-        case ID_SHOWNAV:
+        case ID_SHOWNAV :
         {
             bool checked = GetMenuBar()->GetMenu(1)->IsChecked(ID_SHOWNAV);
-            if (m_navigator)
-                m_navigator->Show(checked);
+            m_navigator->Show(checked);
             break;
         }
         case ID_INFO:
         {
             wxString desc = m_life->GetDescription();
-
-            if ( desc.empty() )
+            
+            if ( desc.IsEmpty() )
                 desc = _("Not available");
 
             // should we make the description editable here?
@@ -430,13 +416,13 @@ void LifeFrame::OnMenu(wxCommandEvent& event)
         }
         case ID_START   : OnStart(); break;
         case ID_STEP    : OnStep(); break;
-        case wxID_STOP  : OnStop(); break;
+        case ID_STOP    : OnStop(); break;
         case ID_TOPSPEED:
         {
-            m_running = true;
-            m_topspeed = true;
+            m_running = TRUE;
+            m_topspeed = TRUE;
             UpdateUI();
-            while (m_running && m_topspeed)
+            while (m_running && m_topspeed)           
             {
                 OnStep();
                 wxYield();
@@ -450,8 +436,8 @@ void LifeFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog filedlg(this,
                          _("Choose a file to open"),
-                         wxEmptyString,
-                         wxEmptyString,
+                         _(""),
+                         _(""),
                          _("Life patterns (*.lif)|*.lif|All files (*.*)|*.*"),
                          wxOPEN | wxFILE_MUST_EXIST);
 
@@ -503,12 +489,12 @@ void LifeFrame::OnZoom(wxCommandEvent& event)
 {
     int cellsize = m_canvas->GetCellSize();
 
-    if ((event.GetId() == wxID_ZOOM_IN) && cellsize < 32)
+    if ((event.GetId() == ID_ZOOMIN) && cellsize < 32)
     {
         m_canvas->SetCellSize(cellsize * 2);
         UpdateUI();
     }
-    else if ((event.GetId() == wxID_ZOOM_OUT) && cellsize > 1)
+    else if ((event.GetId() == ID_ZOOMOUT) && cellsize > 1)
     {
         m_canvas->SetCellSize(cellsize / 2);
         UpdateUI();
@@ -521,14 +507,11 @@ void LifeFrame::OnNavigate(wxCommandEvent& event)
 
     switch (event.GetId())
     {
-        case ID_NORTH:  c = m_life->FindNorth(); break;
+		case ID_NORTH:  c = m_life->FindNorth(); break;
         case ID_SOUTH:  c = m_life->FindSouth(); break;
         case ID_WEST:   c = m_life->FindWest(); break;
         case ID_EAST:   c = m_life->FindEast(); break;
         case ID_CENTER: c = m_life->FindCenter(); break;
-        default :
-            wxFAIL;
-            // Fall through!
         case ID_ORIGIN: c.i = c.j = 0; break;
     }
 
@@ -544,7 +527,7 @@ void LifeFrame::OnSlider(wxScrollEvent& event)
         OnStop();
         OnStart();
     }
-
+    
     UpdateInfoText();
 }
 
@@ -560,7 +543,7 @@ void LifeFrame::OnClose(wxCloseEvent& WXUNUSED(event))
     // more pending events, and this in turn won't ever happen
     // if the timer is running faster than the window can redraw.
     OnStop();
-    Destroy();
+    Destroy();   
 }
 
 void LifeFrame::OnStart()
@@ -568,7 +551,7 @@ void LifeFrame::OnStart()
     if (!m_running)
     {
         m_timer->Start(m_interval);
-        m_running = true;
+        m_running = TRUE;
         UpdateUI();
     }
 }
@@ -578,8 +561,8 @@ void LifeFrame::OnStop()
     if (m_running)
     {
         m_timer->Stop();
-        m_running = false;
-        m_topspeed = false;
+        m_running = FALSE;
+        m_topspeed = FALSE;
         UpdateUI();
     }
 }
@@ -601,29 +584,29 @@ void LifeFrame::OnStep()
 // --------------------------------------------------------------------------
 
 LifeNavigator::LifeNavigator(wxWindow *parent)
-             : wxMiniFrame(parent, wxID_ANY,
+             : wxMiniFrame(parent, -1,
                            _("Navigation"),
                            wxDefaultPosition,
                            wxDefaultSize,
                            wxCAPTION | wxSIMPLE_BORDER)
 {
-    wxPanel    *panel  = new wxPanel(this, wxID_ANY);
+    wxPanel    *panel  = new wxPanel(this, -1);
     wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 
     // create bitmaps and masks for the buttons
     wxBitmap
         bmpn = wxBITMAP(north),
-        bmpw = wxBITMAP(west),
+        bmpw = wxBITMAP(west),  
         bmpc = wxBITMAP(center),
-        bmpe = wxBITMAP(east),
+        bmpe = wxBITMAP(east),  
         bmps = wxBITMAP(south);
 
 #if !defined(__WXGTK__) && !defined(__WXMOTIF__) && !defined(__WXMAC__)
     bmpn.SetMask(new wxMask(bmpn, *wxLIGHT_GREY));
     bmpw.SetMask(new wxMask(bmpw, *wxLIGHT_GREY));
     bmpc.SetMask(new wxMask(bmpc, *wxLIGHT_GREY));
-    bmpe.SetMask(new wxMask(bmpe, *wxLIGHT_GREY));
+    bmpe.SetMask(new wxMask(bmpe, *wxLIGHT_GREY)); 
     bmps.SetMask(new wxMask(bmps, *wxLIGHT_GREY));
 #endif
 
@@ -653,6 +636,7 @@ LifeNavigator::LifeNavigator(wxWindow *parent)
 
     // set the panel and miniframe size
     panel->SetSizer(sizer1);
+    panel->SetAutoLayout(TRUE);
 
     sizer1->Fit(panel);
     SetClientSize(panel->GetSize());
@@ -669,7 +653,7 @@ LifeNavigator::LifeNavigator(wxWindow *parent)
     Move(x, y);
 
     // done
-    Show(true);
+    Show(TRUE);
 }
 
 void LifeNavigator::OnClose(wxCloseEvent& event)
@@ -688,14 +672,8 @@ void LifeNavigator::OnClose(wxCloseEvent& event)
 
 // canvas constructor
 LifeCanvas::LifeCanvas(wxWindow *parent, Life *life, bool interactive)
-          : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxSize(100, 100),
-            wxFULL_REPAINT_ON_RESIZE
-#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
-            |wxSUNKEN_BORDER
-#else
-            |wxSIMPLE_BORDER
-#endif
-            )
+          : wxWindow(parent, -1, wxPoint(0, 0), wxSize(100, 100),
+            wxSUNKEN_BORDER)
 {
     m_life        = life;
     m_interactive = interactive;
@@ -710,12 +688,12 @@ LifeCanvas::LifeCanvas(wxWindow *parent, Life *life, bool interactive)
         SetCursor(*wxCROSS_CURSOR);
 
     // reduce flicker if wxEVT_ERASE_BACKGROUND is not available
-    SetBackgroundColour(*wxWHITE);
+    SetBackgroundColour(*wxWHITE);       
 }
 
 LifeCanvas::~LifeCanvas()
 {
-    delete m_life;
+    delete m_life;   
 }
 
 // recenter at the given position
@@ -725,7 +703,7 @@ void LifeCanvas::Recenter(wxInt32 i, wxInt32 j)
     m_viewportY = j - m_viewportH / 2;
 
     // redraw everything
-    Refresh(false);
+    Refresh(FALSE);
 }
 
 // set the cell size and refresh display
@@ -742,7 +720,7 @@ void LifeCanvas::SetCellSize(int cellsize)
     GetClientSize(&w, &h);
     m_viewportW = (w + m_cellsize - 1) / m_cellsize;
     m_viewportH = (h + m_cellsize - 1) / m_cellsize;
-
+    
     // recenter
     m_viewportX = cx - m_viewportW / 2;
     m_viewportY = cy - m_viewportH / 2;
@@ -755,8 +733,8 @@ void LifeCanvas::SetCellSize(int cellsize)
         m_thumbX = m_viewportW;
         m_thumbY = m_viewportH;
     }
-
-    Refresh(false);
+    
+    Refresh(FALSE);
 }
 
 // draw a cell
@@ -798,14 +776,14 @@ void LifeCanvas::DrawChanged()
 
     size_t ncells;
     LifeCell *cells;
-    bool done = false;
+    bool done = FALSE;
 
     m_life->BeginFind(m_viewportX,
                       m_viewportY,
                       m_viewportX + m_viewportW,
                       m_viewportY + m_viewportH,
-                      true);
-
+                      TRUE);
+   
     dc.BeginDrawing();
 
     if (m_cellsize == 1)
@@ -830,7 +808,7 @@ void LifeCanvas::DrawChanged()
 }
 
 // event handlers
-void LifeCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
+void LifeCanvas::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
     wxRect  rect = GetUpdateRegion().GetBox();
@@ -850,9 +828,10 @@ void LifeCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     size_t ncells;
     LifeCell *cells;
+    bool done = FALSE;
 
-    m_life->BeginFind(i0, j0, i1, j1, false);
-    bool done = m_life->FindMore(&cells, &ncells);
+    m_life->BeginFind(i0, j0, i1, j1, FALSE);
+    done = m_life->FindMore(&cells, &ncells);
 
     // erase all damaged cells and draw the grid
     dc.BeginDrawing();
@@ -906,12 +885,10 @@ void LifeCanvas::OnMouse(wxMouseEvent& event)
     wxInt32 i = XToCell( event.GetX() );
     wxInt32 j = YToCell( event.GetY() );
 
-#if wxUSE_STATUSBAR
     // set statusbar text
     wxString msg;
     msg.Printf(_("Cell: (%d, %d)"), i, j);
     ((LifeFrame *) wxGetApp().GetTopWindow())->SetStatusText(msg, 1);
-#endif // wxUSE_STATUSBAR
 
     // NOTE that wxMouseEvent::LeftDown() and wxMouseEvent::LeftIsDown()
     // have different semantics. The first one is used to signal that the
@@ -932,7 +909,7 @@ void LifeCanvas::OnMouse(wxMouseEvent& event)
     {
         // yes: start a new action and toggle this cell
         m_status = (m_life->IsAlive(i, j)? MOUSE_ERASING : MOUSE_DRAWING);
-
+            
         m_mi = i;
         m_mj = j;
         m_life->SetCell(i, j, m_status == MOUSE_DRAWING);
@@ -960,12 +937,12 @@ void LifeCanvas::OnMouse(wxMouseEvent& event)
 
         ii = m_mi;
         jj = m_mj;
-
+  
         if (ai > aj)
         {
             // iterate over i
-            d = aj - (ai >> 1);
-
+            d = aj - (ai >> 1);        
+               
             while (ii != i)
             {
                 m_life->SetCell(ii, jj, alive);
@@ -973,7 +950,7 @@ void LifeCanvas::OnMouse(wxMouseEvent& event)
                 if (d >= 0)
                 {
                     jj += sj;
-                    d  -= ai;
+                    d  -= ai;   
                 }
                 ii += si;
                 d  += aj;
@@ -991,7 +968,7 @@ void LifeCanvas::OnMouse(wxMouseEvent& event)
                 if (d >= 0)
                 {
                     ii += si;
-                    d  -= aj;
+                    d  -= aj;   
                 }
                 jj += sj;
                 d  += ai;
@@ -1041,7 +1018,7 @@ void LifeCanvas::OnSize(wxSizeEvent& event)
 
 void LifeCanvas::OnScroll(wxScrollWinEvent& event)
 {
-    WXTYPE type = (WXTYPE)event.GetEventType();
+    WXTYPE type = event.GetEventType();
     int pos     = event.GetPosition();
     int orient  = event.GetOrientation();
 
@@ -1114,7 +1091,7 @@ void LifeCanvas::OnScroll(wxScrollWinEvent& event)
 #endif
 
     if (scrollinc == 0) return;
-
+    
     // scroll the window and adjust the viewport
     if (orient == wxHORIZONTAL)
     {
@@ -1123,7 +1100,7 @@ void LifeCanvas::OnScroll(wxScrollWinEvent& event)
     }
     else
     {
-        m_viewportY += scrollinc;
+        m_viewportY += scrollinc;    
         ScrollWindow( 0, -m_cellsize * scrollinc, (const wxRect *) NULL);
     }
 }

@@ -6,7 +6,7 @@
 // Created:     2001-07-10
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "sysopt.h"
 #endif
 
@@ -28,55 +28,94 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_SYSTEM_OPTIONS
-
 #ifndef WX_PRECOMP
     #include "wx/list.h"
 #endif
 
+#if wxUSE_SYSTEM_OPTIONS
+
 #include "wx/string.h"
 #include "wx/sysopt.h"
-#include "wx/arrstr.h"
+#include "wx/module.h"
 
 // ----------------------------------------------------------------------------
-// private globals
+// private classes
 // ----------------------------------------------------------------------------
 
-static wxArrayString gs_optionNames,
-                     gs_optionValues;
+// the module which is used to clean up wxSystemOptions data (this is a
+// singleton class so it can't be done in the dtor)
+class wxSystemOptionsModule : public wxModule
+{
+    friend class WXDLLEXPORT wxSystemOptions;
+public:
+    virtual bool OnInit();
+    virtual void OnExit();
 
-// ============================================================================
-// wxSystemOptions implementation
-// ============================================================================
+private:
+    DECLARE_DYNAMIC_CLASS(wxSystemOptionsModule)
+
+    static wxArrayString   sm_optionNames;
+    static wxArrayString   sm_optionValues;
+};
+
+// ===========================================================================
+// implementation
+// ===========================================================================
+
+// ----------------------------------------------------------------------------
+// wxSystemOptionsModule
+// ----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxSystemOptionsModule, wxModule)
+
+wxArrayString wxSystemOptionsModule::sm_optionNames;
+wxArrayString wxSystemOptionsModule::sm_optionValues;
+
+bool wxSystemOptionsModule::OnInit()
+{
+    return TRUE;
+}
+
+void wxSystemOptionsModule::OnExit()
+{
+    sm_optionNames.Clear();
+    sm_optionValues.Clear();
+}
+
+// ----------------------------------------------------------------------------
+// wxSystemOptions
+// ----------------------------------------------------------------------------
 
 // Option functions (arbitrary name/value mapping)
 void wxSystemOptions::SetOption(const wxString& name, const wxString& value)
 {
-    int idx = gs_optionNames.Index(name, false);
+    int idx = wxSystemOptionsModule::sm_optionNames.Index(name, FALSE);
     if (idx == wxNOT_FOUND)
     {
-        gs_optionNames.Add(name);
-        gs_optionValues.Add(value);
+        wxSystemOptionsModule::sm_optionNames.Add(name);
+        wxSystemOptionsModule::sm_optionValues.Add(value);
     }
     else
     {
-        gs_optionNames[idx] = name;
-        gs_optionValues[idx] = value;
+        wxSystemOptionsModule::sm_optionNames[idx] = name;
+        wxSystemOptionsModule::sm_optionValues[idx] = value;
     }
 }
 
 void wxSystemOptions::SetOption(const wxString& name, int value)
 {
-    SetOption(name, wxString::Format(wxT("%d"), value));
+    wxString valStr;
+    valStr.Printf(wxT("%d"), value);
+    SetOption(name, valStr);
 }
 
 wxString wxSystemOptions::GetOption(const wxString& name)
 {
-    int idx = gs_optionNames.Index(name, false);
+    int idx = wxSystemOptionsModule::sm_optionNames.Index(name, FALSE);
     if (idx == wxNOT_FOUND)
         return wxEmptyString;
     else
-        return gs_optionValues[idx];
+        return wxSystemOptionsModule::sm_optionValues[idx];
 }
 
 int wxSystemOptions::GetOptionInt(const wxString& name)
@@ -86,8 +125,9 @@ int wxSystemOptions::GetOptionInt(const wxString& name)
 
 bool wxSystemOptions::HasOption(const wxString& name)
 {
-    return gs_optionNames.Index(name, false) != wxNOT_FOUND;
+    return (wxSystemOptionsModule::sm_optionNames.Index(name, FALSE) != wxNOT_FOUND);
 }
 
-#endif // wxUSE_SYSTEM_OPTIONS
+#endif
+    // wxUSE_SYSTEM_OPTIONS
 

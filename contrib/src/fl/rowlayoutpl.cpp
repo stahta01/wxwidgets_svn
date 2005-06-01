@@ -8,7 +8,7 @@
 // Copyright:   (c) Aleksandras Gluchovas
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
+ 
 #ifdef __GNUG__
     #pragma implementation "rowlayoutpl.h"
 #endif
@@ -61,10 +61,10 @@ void cbRowLayoutPlugin::CheckIfAtTheBoundary( cbBarInfo* pTheBar, cbRowInfo& row
     // In this case we need to check if the pBarNode appears to be inserted
     // chain of fixed-bars on the very right or left side of the row,
     // then all the white-space, such chain should be eliminated,
-    // and the resulting chain justified to the right or the left
+    // and the resulting chain justified to the right or the left 
     // side of the row
 
-    if ( !pTheBar->IsFixed() || rowInfo.mHasOnlyFixedBars )
+    if ( !pTheBar->IsFixed() || rowInfo.mHasOnlyFixedBars ) 
 
         return;
 
@@ -76,7 +76,7 @@ void cbRowLayoutPlugin::CheckIfAtTheBoundary( cbBarInfo* pTheBar, cbRowInfo& row
 
     do
     {
-        if ( !pBar->IsFixed() )
+        if ( !pBar->IsFixed() ) 
             break;
 
         wxRect& bounds = pBar->mBounds;
@@ -91,15 +91,15 @@ void cbRowLayoutPlugin::CheckIfAtTheBoundary( cbBarInfo* pTheBar, cbRowInfo& row
     }
     while( 1 );
 
-    // slide fixed bars to the left on the left side relative to the pBarNode
+    // slide fixed bars to the left on the left side relative to the pBarNode   
 
     pBar = rowInfo.mBars[0];
 
     prevX = 0;
-
+    
     do
     {
-        if ( pBar->IsFixed() )
+        if ( pBar->IsFixed() ) 
 
             break;
 
@@ -120,12 +120,8 @@ void cbRowLayoutPlugin::ExpandNotFixedBars( cbRowInfo* pRow )
 {
     ApplyLengthRatios( pRow );
 
-    #if 1
-
    // FIXME:: something's wrong?
    return;
-
-    #else
 
     double freeSpc = (double)GetRowFreeSpace( pRow );
 
@@ -152,26 +148,22 @@ void cbRowLayoutPlugin::ExpandNotFixedBars( cbRowInfo* pRow )
         {
             bar.mLenRatio = bar.mLenRatio/(pcntSum);
 
-            bar.mBounds.width =
-
+            bar.mBounds.width = 
+                
                 wxMax( mpPane->mProps.mMinCBarDim.x, int( freeSpc*bar.mLenRatio ) );
         }
-
+        
         bar.mBounds.x = curX;
         curX = bar.mBounds.x + bar.mBounds.width;
     }
-    #endif
 }
 
-void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* WXUNUSED(pRow), cbBarInfo* WXUNUSED(pTheBar) )
+void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* pRow, cbBarInfo* pTheBar )
 {
-    return;
-
-#if 0
-
-    // TBD: Makes following code unreachable
+    return;  // TBD: Makes following code unreachable
 
     // pTheBar is not-fixed
+
 
     // FIXME:: what is this for??
 
@@ -211,16 +203,13 @@ void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* WXUNUSED(pRow), cbBar
 
         pTheBar->mBounds.width = freeSpc * (1.0 - pcntSum);
 #endif
-
-#endif
-
 }
 
 void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
                                         cbBarInfo* pTheBar, cbRowInfo* pRow )
 {
-    cbBarInfo* pFromBar;
-    cbBarInfo* pTillBar;
+    cbBarInfo* pFromBar = NULL;
+    cbBarInfo* pTillBar = NULL;
 
     if ( pTheBar->mBounds.x > from )
     {
@@ -260,7 +249,7 @@ void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
       {
             pBar->mBounds.width =
                 wxMax( mpPane->mProps.mMinCBarDim.x,
-                       (int)( ((double)freeSpc) * (pBar->mLenRatio/pcntSum) )
+                       int( double(freeSpc) * (pBar->mLenRatio/pcntSum) )
                      );
       }
         pBar = pBar->mpNext;
@@ -270,7 +259,7 @@ void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
 
     pBar      = pFromBar;
     int prevX = from;
-    bool hasNotFixedBars = false;
+    bool hasNotFixedBars = FALSE;
 
     while ( pBar != pTillBar )
     {
@@ -278,7 +267,7 @@ void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
 
         if ( !pBar->IsFixed() )
         {
-            hasNotFixedBars = true;
+            hasNotFixedBars = TRUE;
 
             freeSpc -= bounds.width;
         }
@@ -286,7 +275,7 @@ void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
         bounds.x = prevX;
 
         prevX = bounds.x + bounds.width;
-
+        
         pBar = pBar->mpNext;
     }
 
@@ -389,10 +378,10 @@ void cbRowLayoutPlugin::RecalcLengthRatios( cbRowInfo* pRow )
     // attach remainder (the result of lost precision) to the
     // last not-fixed bar
 
-#if !defined(__EXPERIMENTAL)
+#if !defined(__EXPERIMENTAL)    
 
     if ( pLastNotFixed )
-
+        
         pLastNotFixed->mLenRatio += pcntLeft;
 #endif
 
@@ -400,11 +389,11 @@ void cbRowLayoutPlugin::RecalcLengthRatios( cbRowInfo* pRow )
 
 void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
 {
-    size_t i;
     double pcntSum = 0;
 
     // FOR NOW:: all-in-one
 
+    size_t i = 0;
     for ( i = 0; i != pRow->mBars.Count(); ++i )
     {
         if ( !pRow->mBars[i]->IsFixed() )
@@ -413,13 +402,13 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
 
     /*
     pBar = node_to_first_bar_node( pRow );
-
+    
     while( pBar )
     {
         cbBarInfo& bar = node_to_bar( pBar );
 
         if ( !bar.IsFixed() )
-
+        
             bar.mLenRatio = pcntSum / bar.mLenRatio;
 
         pBar = pBar->Next();
@@ -437,29 +426,26 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
     // is returned right back to the row - so that it would retain
     // it's original dimensions in this row (this is kind of AI...)
     //
-    // The problem is - when it's remvoed, the sum of
+    // The problem is - when it's remvoed, the sum of 
     // mLenRatio's is not in "balance", i.e. is < 1.0,
     // it's possible to restore balance, but instead of that
-    // we artifically ajdust freeSpc value in a way that it would
+    // we artifically ajdust freeSpc value in a way that it would 
     // look like total of mLetRatio's is 1.0, thus original
     // len. ratios are _preserved_:
 
-    if (pcntSum == 0.0)
-        pcntSum = 1.0;
-
     double unit = freeSpc / pcntSum;
 
-    bool haveSquished = false;
+    bool haveSquished = FALSE;
 
     for ( i = 0; i != pRow->mBars.Count(); ++i )
     {
         if ( !pRow->mBars[i]->IsFixed() )
         {
-            cbBarInfo& bar = *pRow->mBars[i];
-
+            cbBarInfo& bar = *pRow->mBars[i];   
+            
             if ( int( unit * bar.mLenRatio ) < mpPane->mProps.mMinCBarDim.x )
             {
-                haveSquished = true;
+                haveSquished = TRUE;
 
                 bar.mBounds.width = -1; // mark as "squished"
 
@@ -469,6 +455,9 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
             }
         }
     }  // for
+
+    if (pcntSum == 0.0)
+        pcntSum = 1.0;
 
     if ( haveSquished )
         unit = freeSpc / pcntSum;
@@ -487,8 +476,8 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
             else
                 bar.mBounds.width = int( unit * bar.mLenRatio );
 
-            // a little bit of AI:
-            // memorize bar's height and width, when docked in
+            // a little bit of AI: 
+            // memorize bar's height and width, when docked in 
             // the current orientation - by making the current
             // dimensions to be "preffered" ones for this docking state
 
@@ -507,37 +496,37 @@ void cbRowLayoutPlugin::DetectBarHandles( cbRowInfo* pRow )
 {
     // first pass from left to right (detect left-side handles)
 
-    bool foundNotFixed = false;
+    bool foundNotFixed = FALSE;
 
     size_t i;
     for ( i = 0; i != pRow->mBars.Count(); ++i )
     {
         cbBarInfo& bar = *pRow->mBars[i];
-
-        bar.mHasLeftHandle = false;
+        
+        bar.mHasLeftHandle = FALSE;
 
         if ( !bar.IsFixed() )
         {
             if ( foundNotFixed )
-
+        
                 if ( bar.mpPrev &&
                      bar.mpPrev->IsFixed() )
+                
+                    bar.mHasLeftHandle = TRUE;
 
-                    bar.mHasLeftHandle = true;
-
-            foundNotFixed = true;
+            foundNotFixed = TRUE;
         }
     }
 
     // pass from right to left (detect right-side handles)
 
-    foundNotFixed = false;
+    foundNotFixed = FALSE;
 
     cbBarInfo* pBar = pRow->mBars[ pRow->mBars.Count() - 1 ];
 
     while( pBar )
     {
-        pBar->mHasRightHandle = false;
+        pBar->mHasRightHandle = FALSE;
 
         if ( !pBar->IsFixed() )
         {
@@ -545,9 +534,9 @@ void cbRowLayoutPlugin::DetectBarHandles( cbRowInfo* pRow )
 
                 if ( pBar->mpNext )
 
-                     pBar->mHasRightHandle = true;
+                     pBar->mHasRightHandle = TRUE;
 
-            foundNotFixed = true;
+            foundNotFixed = TRUE;
         }
 
         pBar = pBar->mpPrev;
@@ -560,7 +549,7 @@ void cbRowLayoutPlugin::RelayoutNotFixedBarsAround( cbBarInfo* pTheBar, cbRowInf
     {
         if (  !pTheBar->IsFixed() )
         {
-            // this bar the first in the row, move it's
+            // this bar the first in the row, move it's 
             // left edge to the very left
             pTheBar->mBounds.width += pTheBar->mBounds.x;
             pTheBar->mBounds.x      = 0;
@@ -573,7 +562,7 @@ void cbRowLayoutPlugin::RelayoutNotFixedBarsAround( cbBarInfo* pTheBar, cbRowInf
     {
         if ( !pTheBar->IsFixed() )
         {
-            // this bar is the last one, move it's
+            // this bar is the last one, move it's 
             // right edge to the very right
 
             pTheBar->mBounds.width = mpPane->mPaneWidth - pTheBar->mBounds.x;
@@ -611,7 +600,7 @@ int cbRowLayoutPlugin::CalcRowHeight( cbRowInfo& row )
 
     size_t i;
     for ( i = 0; i != row.mBars.Count(); ++i )
-
+    
         maxHeight = wxMax( maxHeight, row.mBars[i]->mBounds.height );
 
     return maxHeight;
@@ -678,7 +667,7 @@ void cbRowLayoutPlugin::SlideRightSideBars( cbBarInfo* pTheBar )
     }
 }
 
-void cbRowLayoutPlugin::ShiftLeftTrashold( cbBarInfo* WXUNUSED(pTheBar), cbRowInfo& row )
+void cbRowLayoutPlugin::ShiftLeftTrashold( cbBarInfo* pTheBar, cbRowInfo& row )
 {
     wxRect& first = row.mBars[0]->mBounds;
 
@@ -778,8 +767,8 @@ void cbRowLayoutPlugin::ShiftRightTrashold( cbBarInfo* pTheBar, cbRowInfo& row )
                 }
             }
 
-            int leftShift = ( rightOverflow > leftFreeSpc )
-                            ? leftFreeSpc
+            int leftShift = ( rightOverflow > leftFreeSpc ) 
+                            ? leftFreeSpc 
                             : rightOverflow;
 
             theBar.x -= leftShift;
@@ -796,7 +785,7 @@ void cbRowLayoutPlugin::ShiftRightTrashold( cbBarInfo* pTheBar, cbRowInfo& row )
     } while(1);
 }
 
-void cbRowLayoutPlugin::InsertBefore( cbBarInfo* pBeforeBar,
+void cbRowLayoutPlugin::InsertBefore( cbBarInfo* pBeforeBar, 
                                       cbBarInfo* pTheBar,
                                       cbRowInfo& row        )
 {
@@ -834,7 +823,7 @@ void cbRowLayoutPlugin::DoInsertBar( cbBarInfo* pTheBar, cbRowInfo& row )
             InsertBefore( &bar, pTheBar, row );
             return;
         }
-
+        
         else
         // if bar hits the right edge
         if ( theBar.x <= cur.x + cur.width )
@@ -926,14 +915,14 @@ void cbRowLayoutPlugin::OnInsertBar( cbInsertBarEvent& event )
 
         DetectBarHandles( pIntoRow );
 
-        // do proportional resizing of not-fixed bars
+        // do proportional resizing of not-fixed bars 
         ApplyLengthRatios( pIntoRow );
     }
 
     // adjust the bar's docking state
 
-    // a little bit of AI:
-    // memorize bar's height and width, when docked in
+    // a little bit of AI: 
+    // memorize bar's height and width, when docked in 
     // the current orientation - by making the current
     // dimensions to be "preferred" ones for this docking state
 
@@ -962,8 +951,8 @@ void cbRowLayoutPlugin::OnRemoveBar ( cbRemoveBarEvent& event )
 
     // rest bar information after removing it from the row
     pBar->mpRow           = NULL;
-    pBar->mHasLeftHandle  = false;
-    pBar->mHasRightHandle = false;
+    pBar->mHasLeftHandle  = FALSE;
+    pBar->mHasRightHandle = FALSE;
 
     mpPane->InitLinksForRow( pRow ); // relink "mpNext/mpPrev"s
 
@@ -982,7 +971,7 @@ void cbRowLayoutPlugin::OnRemoveBar ( cbRemoveBarEvent& event )
         // force repainting of bars, in the row, from which the bar was removed
 
         // FIXME:: really needed?
-        pRow->mBars[0]->mUMgrData.SetDirty(true);
+        pRow->mBars[0]->mUMgrData.SetDirty(TRUE);
 
         // re-setup mHasOnlyFixedBars flag for the row information
         event.mpPane->SyncRowFlags( pRow );
@@ -1004,7 +993,7 @@ void cbRowLayoutPlugin::OnLayoutRow( cbLayoutRowEvent& event )
 
     if ( !pRow->mHasOnlyFixedBars )
     {
-        // do proportional resizing of not-fixed bars
+        // do proportional resizing of not-fixed bars 
         ApplyLengthRatios( pRow );
     }
 
@@ -1051,7 +1040,7 @@ void cbRowLayoutPlugin::OnLayoutRows( cbLayoutRowsEvent& event )
         cbRowInfo& row = *mpPane->GetRowList()[ i ];
         //mpPane->CalcLengthRatios(& row);
 
-        // setup "has-handle" flags for rows, which depend on the existence
+        // setup "has-handle" flags for rows, which depend on the existance 
         // of not-fixed bars in the row
 
         if ( !row.mHasOnlyFixedBars )
@@ -1059,22 +1048,22 @@ void cbRowLayoutPlugin::OnLayoutRows( cbLayoutRowsEvent& event )
             if ( mpPane->mAlignment == FL_ALIGN_TOP ||
                  mpPane->mAlignment == FL_ALIGN_LEFT   )
             {
-                row.mHasLowerHandle = true;
+                row.mHasLowerHandle = TRUE;
 
-                row.mHasUpperHandle = false;
+                row.mHasUpperHandle = FALSE; 
             }
             else
             {
-                row.mHasUpperHandle = true;
+                row.mHasUpperHandle = TRUE;
 
-                row.mHasLowerHandle = false;
+                row.mHasLowerHandle = FALSE; 
             }
         }
         else
         {
             // otherwise, rows with fixed-bars only, have no height-resizing handles
-            row.mHasUpperHandle = false;
-            row.mHasLowerHandle = false;
+            row.mHasUpperHandle = FALSE; 
+            row.mHasLowerHandle = FALSE; 
         }
 
         // setup vertical positions for items in the row
@@ -1109,6 +1098,8 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
     // FIXME:: Next line not used.
     //int     newHeight      = pTheRow->mRowHeight;
 
+    int     freeSpc        = 0;
+
     if ( forUpperHandle )
     {
         // calculate available free space from above,
@@ -1116,8 +1107,10 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
 
         cbRowInfo* pRow = pTheRow->mpPrev;
 
-        while( pRow )
+        while( pRow ) 
         {
+            freeSpc += pRow->mRowHeight - event.mpPane->GetMinimalRowHeight( pRow );
+
             pRow = pRow->mpPrev;
         }
     }
@@ -1128,8 +1121,10 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
 
         cbRowInfo* pRow = pTheRow->mpNext;
 
-        while( pRow )
+        while( pRow ) 
         {
+            freeSpc += pRow->mRowHeight - mpPane->GetMinimalRowHeight( pRow );
+
             pRow = pRow->mpNext;
         }
     }
@@ -1162,7 +1157,7 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
             {
                 int prevHeight = pRow->mRowHeight;
 
-                int newHeight  = wxMax( event.mpPane->GetMinimalRowHeight( pRow ),
+                int newHeight  = wxMax( event.mpPane->GetMinimalRowHeight( pRow ), 
                                         prevHeight - needed );
 
                 if ( newHeight != prevHeight )
@@ -1195,7 +1190,7 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
             {
                 int prevHeight = pRow->mRowHeight;
 
-                int newHeight  = wxMax( event.mpPane->GetMinimalRowHeight( pRow ),
+                int newHeight  = wxMax( event.mpPane->GetMinimalRowHeight( pRow ), 
                                         prevHeight - needed );
 
                 if ( newHeight != prevHeight )
@@ -1211,12 +1206,12 @@ void cbRowLayoutPlugin::OnResizeRow( cbResizeRowEvent& event )
     }
 
     if ( forUpperHandle )
-
+    
         event.mpPane->SetRowHeight( pTheRow, pTheRow->mRowHeight + (-ofs) );
     else
         event.mpPane->SetRowHeight( pTheRow, pTheRow->mRowHeight +   ofs  );
 
-    mpLayout->RecalcLayout(false);
+    mpLayout->RecalcLayout(FALSE);
 
     mpLayout->GetUpdatesManager().OnFinishChanges();
     mpLayout->GetUpdatesManager().UpdateNow();

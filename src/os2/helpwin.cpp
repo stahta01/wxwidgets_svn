@@ -32,7 +32,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxWinHelpController, wxHelpControllerBase)
 
 wxWinHelpController::wxWinHelpController()
 {
-    m_helpFile = wxEmptyString;
+    m_helpFile = "";
 }
 
 wxWinHelpController::~wxWinHelpController()
@@ -96,7 +96,7 @@ bool wxWinHelpController::DisplayBlock(long block)
 
     wxString str = m_helpFile;
     size_t len = str.Length();
-    if (!(str[(size_t)(len-1)] == wxT('p') && str[(size_t)(len-2)] == wxT('l') && str[(size_t)(len-3)] == wxT('h') && str[(size_t)(len-4)] == wxT('.')))
+    if (!(str[(size_t)(len-1)] == 'p' && str[(size_t)(len-2)] == 'l' && str[(size_t)(len-3)] == 'h' && str[(size_t)(len-4)] == '.'))
       str += wxT(".hlp");
 
     if (wxTheApp->GetTopWindow())
@@ -108,10 +108,9 @@ bool wxWinHelpController::DisplayBlock(long block)
     return FALSE;
 }
 
-bool wxWinHelpController::KeywordSearch(const wxString& k,
-                                        wxHelpSearchMode WXUNUSED(mode))
+bool wxWinHelpController::KeywordSearch(const wxString& k)
 {
-    if (m_helpFile == wxEmptyString) return FALSE;
+    if (m_helpFile == "") return FALSE;
 
     wxString str = m_helpFile;
     size_t len = str.Length();

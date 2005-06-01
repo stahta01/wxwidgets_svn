@@ -6,7 +6,7 @@
 %% Created:     ~1997
 %% RCS-ID:      $Id$
 %% Copyright:   (c) wxWidgets team
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxFTP}}\label{wxftp}
@@ -30,7 +30,7 @@ Example of using wxFTP for file downloading:
     ftp.SetUser("user");
     ftp.SetPassword("password");
 
-    if ( !ftp.Connect("ftp.wxwindows.org") )
+    if ( !ftp.Connect("ftp.wxwidgets.org") )
     {
         wxLogError("Couldn't connect");
         return;
@@ -44,7 +44,7 @@ Example of using wxFTP for file downloading:
     }
     else
     {
-        size_t size = in->GetSize();
+        size_t size = in->StreamSize();
         char *data = new char[size];
         if ( !in->Read(data, size) )
         {
@@ -103,30 +103,26 @@ enum TransferMode
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxFTP::wxFTP}\label{wxftpctor}
+\membersection{wxFTP::wxFTP}
 
 \func{}{wxFTP}{\void}
 
 Default constructor.
 
-
-\membersection{wxFTP::\destruct{wxFTP}}\label{wxftpdtor}
+\membersection{wxFTP::\destruct{wxFTP}}
 
 \func{}{\destruct{wxFTP}}{\void}
 
 Destructor will close the connection if connected.
 
-
 \membersection{wxFTP::Abort}\label{wxftpabort}
 
 \func{bool}{Abort}{\void}
 
-Aborts the download currently in process, returns \true if ok, \false 
-if an error occurred.
+Aborts the download currently in process, returns {\tt TRUE} if ok, {\tt FALSE} 
+if an error occured.
 
-
-\membersection{wxFTP::CheckCommand}\label{wxftpcheckcommand}
+\membersection{wxFTP::CheckCommand}
 
 \func{bool}{CheckCommand}{\param{const wxString\&}{ command}, \param{char }{ret}}
 
@@ -135,8 +131,7 @@ the expected result.
 
 \wxheading{Return value}
 
-true if the command has been sent successfully, else false.
-
+TRUE if the command has been sent successfully, else FALSE.
 
 \membersection{wxFTP::SendCommand}\label{wxftpsendcommand}
 
@@ -145,8 +140,7 @@ true if the command has been sent successfully, else false.
 Send the specified {\it command} to the FTP server and return the first
 character of the return code.
 
-
-\membersection{wxFTP::GetLastResult}\label{wxftpgetlastresult}
+\membersection{wxFTP::GetLastResult}
 
 \func{const wxString\&}{GetLastResult}{\void}
 
@@ -155,32 +149,28 @@ command.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::ChDir}\label{wxftpchdir}
+\membersection{wxFTP::ChDir}
 
 \func{bool}{ChDir}{\param{const wxString\&}{ dir}}
 
 Change the current FTP working directory.
-Returns true if successful.
+Returns TRUE if successful.
 
-
-\membersection{wxFTP::MkDir}\label{wxftpmkdir}
+\membersection{wxFTP::MkDir}
 
 \func{bool}{MkDir}{\param{const wxString\&}{ dir}}
 
 Create the specified directory in the current FTP working directory.
-Returns true if successful.
+Returns TRUE if successful.
 
-
-\membersection{wxFTP::RmDir}\label{wxftprmdir}
+\membersection{wxFTP::RmDir}
 
 \func{bool}{RmDir}{\param{const wxString\&}{ dir}}
 
 Remove the specified directory from the current FTP working directory.
-Returns true if successful.
+Returns TRUE if successful.
 
-
-\membersection{wxFTP::Pwd}\label{wxftppwd}
+\membersection{wxFTP::Pwd}
 
 \func{wxString}{Pwd}{\void}
 
@@ -188,50 +178,35 @@ Returns the current FTP working directory.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::Rename}\label{wxftprename}
+\membersection{wxFTP::Rename}
 
 \func{bool}{Rename}{\param{const wxString\&}{ src}, \param{const wxString\&}{ dst}}
 
-Rename the specified {\it src} element to {\it dst}. Returns true if successful.
+Rename the specified {\it src} element to {\it dst}. Returns TRUE if successful.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::RmFile}\label{wxftprmfile}
+\membersection{wxFTP::RmFile}
 
 \func{bool}{RmFile}{\param{const wxString\&}{ path}}
 
-Delete the file specified by {\it path}. Returns true if successful.
+Delete the file specified by {\it path}. Returns TRUE if successful.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::SetAscii}\label{wxftpsetascii}
+\membersection{wxFTP::SetAscii}
 
 \func{bool}{SetAscii}{\void}
 
 Sets the transfer mode to ASCII. It will be used for the next transfer.
 
-
-\membersection{wxFTP::SetBinary}\label{wxftpsetbinary}
+\membersection{wxFTP::SetBinary}
 
 \func{bool}{SetBinary}{\void}
 
 Sets the transfer mode to binary (IMAGE). It will be used for the next transfer.
 
-
-\membersection{wxFTP::SetPassive}\label{wxftpsetpassive}
-
-\func{void}{SetPassive}{\param{bool }{pasv}}
-
-If \arg{pasv} is \true, passive connection to the FTP server is used. This is
-the default as it works with practically all firewalls. If the server doesn't
-support passive move, you may call this function with \false argument to use
-active connection.
-
-
-\membersection{wxFTP::SetTransferMode}\label{wxftpsettransfermode}
+\membersection{wxFTP::SetTransferMode}
 
 \func{bool}{SetTransferMode}{\param{TransferMode }{mode}}
 
@@ -242,8 +217,7 @@ If this function is never called, binary transfer mode is used by default.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::SetUser}\label{wxftpsetuser}
+\membersection{wxFTP::SetUser}
 
 \func{void}{SetUser}{\param{const wxString\&}{ user}}
 
@@ -259,8 +233,7 @@ This parameter can be included in a URL if you want to use the URL manager.
 For example, you can use: "ftp://a\_user:a\_password@a.host:service/a\_directory/a\_file"
 to specify a user and a password.
 
-
-\membersection{wxFTP::SetPassword}\label{wxftpsetpassword}
+\membersection{wxFTP::SetPassword}
 
 \func{void}{SetPassword}{\param{const wxString\&}{ passwd}}
 
@@ -280,13 +253,11 @@ to specify a user and a password.
 
 % ----------------------------------------------------------------------------
 
-
 \membersection{wxFTP::FileExists}\label{wxftpfileexists}
 
 \func{bool}{FileExists}{\param{const wxString\&}{ filename}}
 
-Returns \true if the given remote file exists, \false otherwise.
-
+Returns {\tt TRUE} if the given remote file exists, {\tt FALSE} otherwise.
 
 \membersection{wxFTP::GetFileSize}\label{wxftpgetfilesize}
 
@@ -296,7 +267,6 @@ Returns the file size in bytes or $-1$ if the file doesn't exist or the size
 couldn't be determined. Notice that this size can be approximative size only
 and shouldn't be used for allocating the buffer in which the remote file is
 copied, for example.
-
 
 \membersection{wxFTP::GetDirList}\label{wxftpgetdirlist}
 
@@ -325,13 +295,12 @@ winamp~1 exe    520196 02-25-1999  19:28  winamp204.exe
         1 file(s)           520 196 bytes
 \end{verbatim}
 
-Return value: true if the file list was successfully retrieved, false
+Return value: TRUE if the file list was successfully retrieved, FALSE
 otherwise.
 
 \wxheading{See also}
 
 \helpref{GetFilesList}{wxftpgetfileslist}
-
 
 \membersection{wxFTP::GetFilesList}\label{wxftpgetfileslist}
 
@@ -342,13 +311,12 @@ directory (optionally only of the files matching the {\it wildcard}, all files
 by default). This list always has the same format and contains one full
 (including the directory path) file name per line.
 
-Return value: true if the file list was successfully retrieved, false
+Return value: TRUE if the file list was successfully retrieved, FALSE
 otherwise.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::GetOutputStream}\label{wxftpgetoutputstream}
+\membersection{wxFTP::GetOutputStream}
 
 \func{wxOutputStream *}{GetOutputStream}{\param{const wxString\&}{ file}}
 
@@ -366,14 +334,13 @@ An initialized write-only stream.
 
 % ----------------------------------------------------------------------------
 
-
-\membersection{wxFTP::GetInputStream}\label{wxftpgetinputstream}
+\membersection{wxFTP::GetInputStream}\label{wxftpgetinput}
 
 \func{wxInputStream *}{GetInputStream}{\param{const wxString\&}{ path}}
 
-Creates a new input stream on the specified path. You can use all but the seek
+Creates a new input stream on the the specified path. You can use all but the seek
 functionality of wxStream. Seek isn't available on all streams. For example,
-HTTP or FTP streams do not deal with it. Other functions like Tell
+http or ftp streams do not deal with it. Other functions like Tell
 are not available for this sort of stream, at present.
 You will be notified when the EOF is reached by an error.
 
@@ -398,9 +365,9 @@ send new commands without reconnecting.
   ftp.ChDir("a_directory");
   in_stream = ftp.GetInputStream("a_file_to_get");
 
-  data = new char[in_stream->GetSize()];
+  data = new char[in_stream->StreamSize()];
 
-  in_stream->Read(data, in_stream->GetSize());
+  in_stream->Read(data, in_stream->StreamSize());
   if (in_stream->LastError() != wxStream_NOERROR) {
     // Do something.
   }

@@ -20,9 +20,9 @@
 // headers
 //----------------------------------------------------------------------------
 
-//! wxWidgets headers
+//! wxWindows headers
 
-//! wxWidgets/contrib headers
+//! wxWindows/contrib headers
 #include <wx/stc/stc.h>  // styled text control
 
 //! application headers
@@ -45,7 +45,7 @@ class Edit: public wxStyledTextCtrl {
 
 public:
     //! constructor
-    Edit (wxWindow *parent, wxWindowID id = wxID_ANY,
+    Edit (wxWindow *parent, wxWindowID id = -1,
           const wxPoint &pos = wxDefaultPosition,
           const wxSize &size = wxDefaultSize,
           long style = wxSUNKEN_BORDER|wxVSCROLL

@@ -6,7 +6,7 @@
 // Created:     01.03.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 #define DEBUG_PRINTF(NAME)   { static int raz=0; \
   printf( #NAME " %i\n",raz); fflush(stdout);       \
@@ -39,7 +39,6 @@
 
 #include "wx/fontutil.h"
 #include "wx/fontmap.h"
-#include "wx/encinfo.h"
 
 #include "wx/tokenzr.h"
 
@@ -240,7 +239,7 @@ bool wxTestFontEncoding(
     vLogFont.fsFontUse = FATTR_FONTUSE_OUTLINE |      // only outline fonts allowed
                          FATTR_FONTUSE_TRANSFORMABLE; // may be transformed
 
-    wxStrncpy((wxChar*)vLogFont.szFacename, rInfo.facename.c_str(), WXSIZEOF(vLogFont.szFacename));
+    strncpy(vLogFont.szFacename, rInfo.facename.c_str(), sizeof(vLogFont.szFacename));
 
     if (!::GpiCreateLogFont( hPS
                             ,NULL
@@ -392,6 +391,7 @@ void wxFillLogFont(
     // font, so now we need to generate an ID
     //
     long                            lNumLids = ::GpiQueryNumberSetIds(*phPS);
+    long                            lGpiError;
 
     if(lNumLids )
     {
@@ -413,7 +413,7 @@ void wxFillLogFont(
         }
         if (*pflId == 0L)
             *pflId = 1L;
-        for(unsigned long LCNum = 0; LCNum < (unsigned long)lNumLids; LCNum++)
+        for(unsigned long LCNum = 0; LCNum < lNumLids; LCNum++)
             if(alIds[LCNum] == *pflId)
                ++*pflId;
         if(*pflId > 254)  // wow, no id available!
@@ -447,7 +447,7 @@ void wxFillLogFont(
     {
         vError = ::WinGetLastError(vHabmain);
     }
-    sFaceName = (wxChar*)zFacename;
+    sFaceName = zFacename;
     *pbInternalPS = bInternalPS;
 
     //
@@ -464,13 +464,18 @@ void wxOS2SelectMatchingFontByName(
 )
 {
     int                             i;
+    int                             nDiff0;
     int                             nPointSize;
+    int                             nDiff;
     int                             nIs;
+    int                             nMinDiff;
     int                             nMinDiff0;
+    int                             nApirc;
     int                             anDiff[16];
     int                             anMinDiff[16];
     int                             nIndex = 0;
-    wxChar                          zFontFaceName[FACESIZE];
+    STR8                            zFn;
+    char                            zFontFaceName[FACESIZE];
     wxString                        sFaceName;
     USHORT                          usWeightClass;
     int                             fsSelection = 0;
@@ -565,7 +570,7 @@ void wxOS2SelectMatchingFontByName(
         int                         nEmHeight = 0;
         int                         nXHeight = 0;
 
-        anDiff[0] = wxGpiStrcmp((wxChar*)pFM[i].szFacename, zFontFaceName);
+        anDiff[0] = wxGpiStrcmp(pFM[i].szFacename, zFontFaceName);
         anDiff[1] = abs(pFM[i].lEmHeight - nPointSize);
         anDiff[2] = abs(pFM[i].usWeightClass -  usWeightClass);
         anDiff[3] = abs((pFM[i].fsSelection & 0x2f) -  fsSelection);
@@ -641,7 +646,7 @@ void wxOS2SelectMatchingFontByName(
     pFattrs->fsType          = 0;
     pFattrs->lMaxBaselineExt = 0;
     pFattrs->lAveCharWidth   = 0;
-    wxStrcpy((wxChar*)pFattrs->szFacename, (wxChar*)pFM[nIndex].szFacename);
+    wxStrcpy(pFattrs->szFacename, pFM[nIndex].szFacename);
     if (pFont->GetWeight() == wxNORMAL)
         pFattrs->fsSelection = 0;
     else
@@ -669,8 +674,8 @@ wxFont wxCreateFontFromLogFont(
 } // end of wxCreateFontFromLogFont
 
 int wxGpiStrcmp(
-  wxChar*                           s0
-, wxChar*                           s1
+  char*                             s0
+, char*                             s1
 )
 {   int                             l0;
     int                             l1;
@@ -691,8 +696,8 @@ int wxGpiStrcmp(
     else if(s1 == NULL)
         return 32;
 
-    l0 = wxStrlen(s0);
-    l1 = wxStrlen(s1);
+    l0 = strlen(s0);
+    l1 = strlen(s1);
     l  = l0;
     if(l0 != l1)
     {
@@ -705,7 +710,7 @@ int wxGpiStrcmp(
         d = s0[i]-s1[i];
         if(!d)
             continue;
-        d1 = wxToupper(s0[i]) - wxToupper(s1[i]);
+        d1 = toupper(s0[i]) - toupper(s1[i]);
         if(!d1)
             continue;
         rc += abs(d);

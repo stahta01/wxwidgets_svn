@@ -7,12 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "popupwin.h"
 #endif
 
 #include "wx/defs.h"
-#include "wx/log.h"
 
 #if wxUSE_POPUPWIN
 
@@ -31,9 +30,7 @@
 BEGIN_EVENT_TABLE(wxPopupWindow,wxPopupWindowBase)
 END_EVENT_TABLE()
 
-wxPopupWindow::~wxPopupWindow()
-{
-}
+IMPLEMENT_DYNAMIC_CLASS(wxPopupWindow, wxWindow)
 
 bool wxPopupWindow::Create( wxWindow *parent, int style )
 {
@@ -59,7 +56,6 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     int xscreen = DefaultScreen( xdisplay );
     Visual *xvisual = DefaultVisual( xdisplay, xscreen );
     Window xparent = RootWindow( xdisplay, xscreen );
-    Colormap cm = DefaultColormap( xdisplay, xscreen);
     
 #if wxUSE_TWO_WINDOWS
     bool need_two_windows = 
@@ -74,12 +70,6 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     
     XSetWindowAttributes xattributes;
     long xattributes_mask = 0;
-
-    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
-    m_backgroundColour.CalcPixel( (WXColormap) cm);
-    
-    m_foregroundColour = *wxBLACK;
-    m_foregroundColour.CalcPixel( (WXColormap) cm);
     
     xattributes_mask |= CWBackPixel;
     xattributes.background_pixel = m_backgroundColour.GetPixel();

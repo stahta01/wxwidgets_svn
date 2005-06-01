@@ -45,20 +45,20 @@ wxr2xml::~wxr2xml()
 bool wxr2xml::Convert(wxString wxrfile, wxString xmlfile)
 {
     bool result;
-    result = m_xmlfile.Open(xmlfile.c_str(), _T("w+t"));
-    wxASSERT_MSG(result, _T("Couldn't create XML file"));
+    result = m_xmlfile.Open(xmlfile.c_str(), "w+t");
+    wxASSERT_MSG(result, "Couldn't create XML file");
     if (!result)
-        return false;
+        return FALSE;
 
     result = m_table.ParseResourceFile(wxrfile);
-    wxASSERT_MSG(result, _T("Couldn't Load WXR file"));
+    wxASSERT_MSG(result, "Couldn't Load WXR file");
     if (!result)
-        return false;
+        return FALSE;
     // Write basic xml header
-    m_xmlfile.Write(_T("<?xml version=\"1.0\" ?>\n"));
-    m_xmlfile.Write(_T("<resource>\n"));
+    m_xmlfile.Write("<?xml version=\"1.0\" ?>\n");
+    m_xmlfile.Write("<resource>\n");
     result = ParseResources();
-    m_xmlfile.Write(_T("</resource>\n"));
+    m_xmlfile.Write("</resource>\n");
 
     m_xmlfile.Close();
 
@@ -68,93 +68,91 @@ bool wxr2xml::Convert(wxString wxrfile, wxString xmlfile)
 bool wxr2xml::ParseResources()
 {
     m_table.BeginFind();
-    wxHashTable::Node *node;
+    wxNode *node;
 
-    node = m_table.Next();
-    while (node)
+    while ((node = m_table.Next())) 
         {
-        wxItemResource *res = (wxItemResource *) node->GetData();
+        wxItemResource *res = (wxItemResource *) node->Data();
         wxString resType(res->GetType());
-        if (resType == _T("wxDialog"))
+        if (resType == "wxDialog")
             ParseDialog(res);
-        else if (resType == _T("wxPanel"))
+        else if (resType == "wxPanel")
             ParsePanel(res);
-        else if (resType == _T("wxPanel"))
+        else if (resType == "wxPanel")
             ParsePanel(res);
-        else if (resType == _T("wxMenu"))
+        else if (resType == "wxMenu")
             ParseMenuBar(res);
-        else if (resType == _T("wxBitmap"))
+        else if (resType == "wxBitmap")
             ParseBitmap(res);
         else
-            wxLogError(_T("Found unsupported resource ") + resType);
-        node = m_table.Next();
+            wxLogError("Found unsupported resource " + resType);
     }
-    return true;
+    return TRUE;
 }
 
 void wxr2xml::ParsePanel(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t<object class=\"wxPanel\""));
+    m_xmlfile.Write("\t<object class=\"wxPanel\"");
     PanelStuff(res);
     WriteControlInfo(res);
-    m_xmlfile.Write(_T("\n"));
+    m_xmlfile.Write("\n");
     ParseControls(res);
-    m_xmlfile.Write(_T("\t</object>\n\n"));
+    m_xmlfile.Write("\t</object>\n\n");
 }
 
 void wxr2xml::ParseDialog(wxItemResource * res)
 {
     PanelStuff(res);
-    m_xmlfile.Write(_T("\t<object class=\"wxDialog\""));
+    m_xmlfile.Write("\t<object class=\"wxDialog\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetTitle(res));
 
-    m_xmlfile.Write(_T("\n"));
+    m_xmlfile.Write("\n");
     ParseControls(res);
-    m_xmlfile.Write(_T("\t</object>\n\n"));
+    m_xmlfile.Write("\t</object>\n\n");
 }
 
 void wxr2xml::ParseControls(wxItemResource * res)
 {
-    wxNode *node = res->GetChildren().GetFirst();
-    while (node)
+    wxNode *node = res->GetChildren().First();
+    while (node) 
         {
-        wxItemResource *res = (wxItemResource *) node->GetData();
+        wxItemResource *res = (wxItemResource *) node->Data();
         wxString resType(res->GetType());
-        if (resType == _T("wxButton"))
+        if (resType == "wxButton")
             ParseButton(res);
-        else if ((resType == _T("wxTextCtrl")) | (resType == _T("wxText"))
-         | (resType == _T("wxMultiText")))
+        else if ((resType == "wxTextCtrl") | (resType == "wxText")
+         | (resType == "wxMultiText"))
             ParseTextCtrl(res);
-        else if (resType == _T("wxCheckBox"))
+        else if (resType == "wxCheckBox")
             ParseCheckBox(res);
-        else if (resType == _T("wxRadioBox"))
+        else if (resType == "wxRadioBox")
             ParseRadioBox(res);
-        else if (resType == _T("wxListBox"))
+        else if (resType == "wxListBox")
             ParseListBox(res);
-        else if ((resType == _T("wxStaticText")) | (resType == _T("wxMessage")))
+        else if ((resType == "wxStaticText") | (resType == "wxMessage"))
             ParseStaticText(res);
-        else if (resType == _T("wxChoice"))
+        else if (resType == "wxChoice")
             ParseChoice(res);
-        else if (resType == _T("wxGauge"))
+        else if (resType == "wxGauge")
            ParseGauge(res);
-        else if (resType == _T("wxSlider"))
+        else if (resType == "wxSlider")
             ParseSlider(res);
-        else if (resType == _T("wxComboBox"))
+        else if (resType == "wxComboBox")
             ParseComboBox(res);
-        else if (resType == _T("wxRadioButton"))
+        else if (resType == "wxRadioButton")
             ParseRadioButton(res);
-        else if (resType == _T("wxStaticBitmap"))
+        else if (resType == "wxStaticBitmap")
             ParseStaticBitmap(res);
-        else if (resType == _T("wxScrollBar"))
+        else if (resType == "wxScrollBar")
             ParseScrollBar(res);
-        else if ((resType == _T("wxStaticBox")) | (resType == _T("wxGroupBox")))
+        else if ((resType == "wxStaticBox") | (resType == "wxGroupBox"))
             ParseStaticBox(res);
-        else if (resType == _T("wxBitmapButton"))
+        else if (resType == "wxBitmapButton")
             ParseBitmapButton(res);
         else
-            wxLogError(_T("Found unsupported resource ") + resType);
-        node = node->GetNext();
+            wxLogError("Found unsupported resource " + resType);
+        node = node->Next();
         }
 }
 
@@ -163,7 +161,7 @@ void wxr2xml::ParseControls(wxItemResource * res)
 void wxr2xml::WriteControlInfo(wxItemResource * res)
 {
     m_xmlfile.Write(GenerateName(res));
-    m_xmlfile.Write(_T(">\n"));
+    m_xmlfile.Write(">\n");
     m_xmlfile.Write(GetPosition(res));
     m_xmlfile.Write(GetSize(res));
     m_xmlfile.Write(GetStyles(res));
@@ -174,9 +172,9 @@ wxString wxr2xml::GetSize(wxItemResource * res)
 {
     wxString msg;
     if (m_dlgunits)
-        msg << _T("\t\t\t\t<size>") << res->GetWidth() << _T(",") << res->GetHeight() << _T("d</size>\n");
+        msg << "\t\t\t\t<size>" << res->GetWidth() << "," << res->GetHeight() << "d</size>\n";
     else
-        msg << _T("\t\t\t\t<size>") << res->GetWidth() << _T(",") << res->GetHeight() << _T("</size>\n");
+        msg << "\t\t\t\t<size>" << res->GetWidth() << "," << res->GetHeight() << "</size>\n";
     return msg;
 }
 
@@ -184,196 +182,196 @@ wxString wxr2xml::GetPosition(wxItemResource * res)
 {
     wxString msg;
     if (m_dlgunits)
-        msg << _T("\t\t\t\t<pos>") << res->GetX() << _T(",") << res->GetY() << _T("d</pos>\n");
+        msg << "\t\t\t\t<pos>" << res->GetX() << "," << res->GetY() << "d</pos>\n";
     else
-        msg << _T("\t\t\t\t<pos>") << res->GetX() << _T(",") << res->GetY() << _T("</pos>\n");
+        msg << "\t\t\t\t<pos>" << res->GetX() << "," << res->GetY() << "</pos>\n";
     return msg;
 }
 
 void wxr2xml::ParseButton(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxButton\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxButton\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseTextCtrl(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxTextCtrl\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxTextCtrl\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetValue4(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 
 }
 
 wxString wxr2xml::GetTitle(wxItemResource * res)
 {
     wxString msg;
-    msg = _T("\t\t\t\t<title>") + res->GetTitle() + _T("</title>");
+    msg = _T("\t\t\t\t<title>" + res->GetTitle() + "</title>");
     return msg;
 }
 
 wxString wxr2xml::GetValue4(wxItemResource * res)
 {
     wxString msg;
-    msg = _T("\t\t\t\t<value>") + res->GetValue4() + _T("</value>\n");
+    msg = _T("\t\t\t\t<value>" + res->GetValue4() + "</value>\n");
     return msg;
 }
 
 void wxr2xml::ParseCheckBox(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxCheckBox\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxCheckBox\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
     m_xmlfile.Write(GetCheckStatus(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 wxString wxr2xml::GetLabel(wxItemResource * res)
 {
-    return _T("\t\t\t\t<label>") + res->GetTitle() + _T("</label>\n");
+    return _T("\t\t\t\t<label>" + res->GetTitle() + "</label>\n");
 }
 
 void wxr2xml::ParseRadioBox(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxRadioBox\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxRadioBox\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
     // Add radio box items
     WriteStringList(res);
     // Value1
     m_xmlfile.Write(GetDimension(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseListBox(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxListBox\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxListBox\"");
     WriteControlInfo(res);
     WriteStringList(res);
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseStaticText(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxStaticText\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxStaticText\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseStaticBox(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxStaticBox\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxStaticBox\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::WriteStringList(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t\t<content>\n"));
+    m_xmlfile.Write("\t\t\t\t<content>\n");
     for (wxStringListNode * node = res->GetStringValues().GetFirst();
         node;node = node->GetNext()) {
         const wxString s1 = node->GetData();
-        m_xmlfile.Write(_T("\t\t\t\t\t<item>") + s1 + _T("</item>\n"));
+        m_xmlfile.Write("\t\t\t\t\t<item>" + s1 + "</item>\n");
     }
-    m_xmlfile.Write(_T("\t\t\t\t</content>\n"));
+    m_xmlfile.Write("\t\t\t\t</content>\n");
 }
 
 void wxr2xml::ParseChoice(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxChoice\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxChoice\"");
     WriteControlInfo(res);
     // Add choice items
     WriteStringList(res);
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseGauge(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxGauge\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxGauge\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetValue1(res));
     m_xmlfile.Write(GetRange(res));
-    m_xmlfile.Write(_T("\n\t\t\t</object>\n"));
+    m_xmlfile.Write("\n\t\t\t</object>\n");
 }
 
 wxString wxr2xml::GetValue1(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<value>") << res->GetValue1() << _T("</value>\n");
+    msg << "\t\t\t\t<value>" << res->GetValue1() << "</value>\n";
     return msg;
 }
 
 wxString wxr2xml::GetRange(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<range>") << res->GetValue2() << _T("</range>");
+    msg << "\t\t\t\t<range>" << res->GetValue2() << "</range>";
     return msg;
 }
 
 void wxr2xml::ParseSlider(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxSlider\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxSlider\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetValue1(res));
     m_xmlfile.Write(GetMax(res));
     m_xmlfile.Write(GetMin(res));
-    m_xmlfile.Write(_T("\n\t\t\t</object>\n"));
+    m_xmlfile.Write("\n\t\t\t</object>\n");
 }
 
 wxString wxr2xml::GetMax(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<max>") << res->GetValue3() << _T("</max>\n");
+    msg << "\t\t\t\t<max>" << res->GetValue3() << "</max>\n";
     return msg;
 }
 
 wxString wxr2xml::GetMin(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<min>") << res->GetValue2() << _T("</min>");
+    msg << "\t\t\t\t<min>" << res->GetValue2() << "</min>";
     return msg;
 }
 
 void wxr2xml::ParseComboBox(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxComboBox\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxComboBox\"");
     WriteControlInfo(res);
     // Add combo items
     WriteStringList(res);
-    m_xmlfile.Write(_T("\n\t\t\t</object>\n"));
+    m_xmlfile.Write("\n\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseRadioButton(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxRadioButton\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxRadioButton\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetLabel(res));
 
     wxString msg;
     m_xmlfile.Write(GetValue1(res));
     m_xmlfile.Write(GetCheckStatus(res));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::ParseScrollBar(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxScrollBar\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxScrollBar\"");
     WriteControlInfo(res);
     m_xmlfile.Write(GetValue1(res));
-    m_xmlfile.Write(_T("\t\t\t\t<thumbsize>")+GetValue2(res)+_T("</thumbsize>\n"));
-    m_xmlfile.Write(_T("\t\t\t\t<range>")+GetValue3(res)+_T("</range>\n"));
-    m_xmlfile.Write(_T("\t\t\t\t<pagesize>")+GetValue5(res)+_T("</pagesize>\n"));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t\t<thumbsize>"+GetValue2(res)+"</thumbsize>\n");
+    m_xmlfile.Write("\t\t\t\t<range>"+GetValue3(res)+"</range>\n");
+    m_xmlfile.Write("\t\t\t\t<pagesize>"+GetValue5(res)+"</pagesize>\n");
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 wxString wxr2xml::GetCheckStatus(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<checked>") << res->GetValue1() << _T("</checked>\n");
+    msg << "\t\t\t\t<checked>" << res->GetValue1() << "</checked>\n";
     return msg;
 }
 
@@ -385,158 +383,158 @@ wxString wxr2xml::GetStyles(wxItemResource * res)
     restype = res->GetType();
     style = res->GetStyle();
 
-    s = _T("\t\t\t\t<style>");
+    s = "\t\t\t\t<style>";
 
     // Common styles for all controls
     if (style & wxSIMPLE_BORDER)
-        s += _T("wxSIMPLE_BORDER|");
+        s += "wxSIMPLE_BORDER|";
     if (style & wxSUNKEN_BORDER)
-        s += _T("wxSUNKEN_BORDER|");
+        s += "wxSUNKEN_BORDER|";
     if (style & wxSIMPLE_BORDER)
-        s += _T("wxSIMPLE_BORDER|");
+        s += "wxSIMPLE_BORDER|";
     if (style & wxDOUBLE_BORDER)
-        s += _T("wxDOUBLE_BORDER|");
+        s += "wxDOUBLE_BORDER|";
     if (style & wxRAISED_BORDER)
-        s += _T("wxRAISED_BORDER|");
+        s += "wxRAISED_BORDER|";
     if (style & wxTRANSPARENT_WINDOW)
-        s += _T("wxTRANSPARENT_WINDOW|");
+        s += "wxTRANSPARENT_WINDOW|";
     if (style & wxWANTS_CHARS)
-        s += _T("wxWANTS_CHARS|");
+        s += "wxWANTS_CHARS|";
     if (style & wxNO_FULL_REPAINT_ON_RESIZE)
-        s += _T("wxNO_FULL_REPAINT_ON_RESIZE|");
+        s += "wxNO_FULL_REPAINT_ON_RESIZE|";
 
-    if (restype == _T("wxDialog"))
+    if (restype == "wxDialog") 
         {
         if (style & wxDIALOG_MODAL)
-            s += _T("wxDIALOG_MODAL|");
+            s += "wxDIALOG_MODAL|";
         if (style & wxDEFAULT_DIALOG_STYLE)
-            s += _T("wxDEFAULT_DIALOG_STYLE|");
+            s += "wxDEFAULT_DIALOG_STYLE|";
         if (style & wxDIALOG_MODELESS)
-            s += _T("wxDIALOG_MODELESS|");
+            s += "wxDIALOG_MODELESS|";
         if (style & wxNO_3D)
-            s += _T("wxNO_3D|");
+            s += "wxNO_3D|";
         if (style & wxTAB_TRAVERSAL)
-            s += _T("wxTAB_TRAVERSAL|");
+            s += "wxTAB_TRAVERSAL|";
         if (style & wxWS_EX_VALIDATE_RECURSIVELY)
-            s += _T("wxWS_EX_VALIDATE_RECURSIVELY|");
+            s += "wxWS_EX_VALIDATE_RECURSIVELY|";
         if (style & wxSTAY_ON_TOP)
-            s += _T("wxSTAY_ON_TOP|");
+            s += "wxSTAY_ON_TOP|";
         if (style & wxCAPTION)
-            s += _T("wxCAPTION|");
+            s += "wxCAPTION|";
         if (style & wxTHICK_FRAME)
-            s += _T("wxTHICK_FRAME|");
+            s += "wxTHICK_FRAME|";
         if (style & wxRESIZE_BOX)
-            s += _T("wxRESIZE_BOX|");
+            s += "wxRESIZE_BOX|";
         if (style & wxRESIZE_BORDER)
-            s += _T("wxRESIZE_BORDER|");
+            s += "wxRESIZE_BORDER|";
         if (style & wxSYSTEM_MENU)
-            s += _T("wxSYSTEM_MENU|");
+            s += "wxSYSTEM_MENU|";
         if (style & wxCLIP_CHILDREN)
-            s += _T("wxCLIP_CHILDREN|");
+            s += "wxCLIP_CHILDREN|";
         }
 
-    if (restype == _T("wxPanel"))
+    if (restype == "wxPanel") 
         {
         if (style & wxCLIP_CHILDREN)
-            s += _T("wxCLIP_CHILDREN|");
+            s += "wxCLIP_CHILDREN|";
         if (style & wxNO_3D)
-            s += _T("wxNO_3D|");
+            s += "wxNO_3D|";
         if (style & wxTAB_TRAVERSAL)
-            s += _T("wxTAB_TRAVERSAL|");
+            s += "wxTAB_TRAVERSAL|";
         if (style & wxWS_EX_VALIDATE_RECURSIVELY)
-            s += _T("wxWS_EX_VALIDATE_RECURSIVELY|");
+            s += "wxWS_EX_VALIDATE_RECURSIVELY|";
         }
 
-    if (restype == _T("wxComboBox"))
+    if (restype == "wxComboBox") 
         {
         if (style & wxCB_SORT)
-            s += _T("wxCB_SORT|");
+            s += "wxCB_SORT|";
         if (style & wxCB_SIMPLE)
-            s += _T("wxCB_SIMPLE|");
+            s += "wxCB_SIMPLE|";
         if (style & wxCB_READONLY)
-            s += _T("wxCB_READONLY|");
+            s += "wxCB_READONLY|";
         if (style & wxCB_DROPDOWN)
-            s += _T("wxCB_DROPDOWN|");
+            s += "wxCB_DROPDOWN|";
         }
 
-    if (restype == _T("wxGauge"))
+    if (restype == "wxGauge") 
         {
         if (style & wxGA_HORIZONTAL)
-            s += _T("wxGA_HORIZONTAL|");
+            s += "wxGA_HORIZONTAL|";
         if (style & wxGA_VERTICAL)
-            s += _T("wxGA_VERTICAL|");
+            s += "wxGA_VERTICAL|";
         if (style & wxGA_PROGRESSBAR)
-            s += _T("wxGA_PROGRESSBAR|");
+            s += "wxGA_PROGRESSBAR|";
     // windows only
         if (style & wxGA_SMOOTH)
-            s += _T("wxGA_SMOOTH|");
+            s += "wxGA_SMOOTH|";
         }
 
-    if (restype == _T("wxRadioButton"))
+    if (restype == "wxRadioButton") 
         {
         if (style & wxRB_GROUP)
-        s += _T("wxRB_GROUP|");
+        s += "wxRB_GROUP|";
         }
 
-    if (restype == _T("wxStaticText"))
+    if (restype == "wxStaticText") 
         {
         if (style & wxST_NO_AUTORESIZE)
-            s += _T("wxST_NO_AUTORESIZEL|");
+            s += "wxST_NO_AUTORESIZEL|";
         }
 
-    if (restype == _T("wxRadioBox"))
+    if (restype == "wxRadioBox") 
         {
         if (style & wxRA_HORIZONTAL)
-            s += _T("wxRA_HORIZONTAL|");
+            s += "wxRA_HORIZONTAL|";
         if (style & wxRA_SPECIFY_COLS)
-            s += _T("wxRA_SPECIFY_COLS|");
+            s += "wxRA_SPECIFY_COLS|";
         if (style & wxRA_SPECIFY_ROWS)
-            s += _T("wxRA_SPECIFY_ROWS|");
+            s += "wxRA_SPECIFY_ROWS|";
         if (style & wxRA_VERTICAL)
-            s += _T("wxRA_VERTICAL|");
+            s += "wxRA_VERTICAL|";
         }
 
-    if (restype == _T("wxListBox"))
+    if (restype == "wxListBox") 
         {
         if (style & wxLB_SINGLE)
-            s += _T("wxLB_SINGLE|");
+            s += "wxLB_SINGLE|";
         if (style & wxLB_MULTIPLE)
-            s += _T("wxLB_MULTIPLE|");
+            s += "wxLB_MULTIPLE|";
         if (style & wxLB_EXTENDED)
-            s += _T("wxLB_EXTENDED|");
+            s += "wxLB_EXTENDED|";
         if (style & wxLB_HSCROLL)
-            s += _T("wxLB_HSCROLL|");
+            s += "wxLB_HSCROLL|";
         if (style & wxLB_ALWAYS_SB)
-            s += _T("wxLB_ALWAYS_SB|");
+            s += "wxLB_ALWAYS_SB|";
         if (style & wxLB_NEEDED_SB)
-            s += _T("wxLB_NEEDED_SB|");
+            s += "wxLB_NEEDED_SB|";
         if (style & wxLB_SORT)
-        s += _T("wxLB_SORT|");
+        s += "wxLB_SORT|";
         }
 
-    if (restype == _T("wxTextCtrl"))
+    if (restype == "wxTextCtrl") 
         {
         if (style & wxTE_PROCESS_ENTER)
-            s += _T("wxTE_PROCESS_ENTER|");
+            s += "wxTE_PROCESS_ENTER|";
         if (style & wxTE_PROCESS_TAB)
-            s += _T("wxTE_PROCESS_TAB|");
+            s += "wxTE_PROCESS_TAB|";
         if (style & wxTE_MULTILINE)
-            s += _T("wxTE_MULTILINE|");
+            s += "wxTE_MULTILINE|";
         if (style & wxTE_PASSWORD)
-            s += _T("wxTE_PASSWORD|");
+            s += "wxTE_PASSWORD|";
         if (style & wxTE_READONLY)
-            s += _T("wxTE_READONLY|");
+            s += "wxTE_READONLY|";
         if (style & wxHSCROLL)
-            s += _T("wxHSCROLL|");
+            s += "wxHSCROLL|";
         }
 
 
-    if (restype == _T("wxScrollBar"))
+    if (restype == "wxScrollBar")
         {
         if (style & wxSB_HORIZONTAL)
-            s += _T("wxSB_HORIZONTAL|");
-        if (style & wxSB_VERTICAL)
-            s += _T("wxSB_VERTICAL|");
+            s += "wxSB_HORIZONTAL|";
+        if (style & wxSB_VERTICAL)  
+            s += "wxSB_VERTICAL|";
         }
 
     int l;
@@ -547,14 +545,14 @@ wxString wxr2xml::GetStyles(wxItemResource * res)
     // Trim off last |
     s = s.Truncate(l - 1);
 
-    s += _T("</style>\n");
+    s += "</style>\n";
     return s;
 }
 
 wxString wxr2xml::GetDimension(wxItemResource * res)
 {
     wxString msg;
-    msg << _T("\t\t\t\t<dimension>") << res->GetValue1() << _T("</dimension>\n");
+    msg << "\t\t\t\t<dimension>" << res->GetValue1() << "</dimension>\n";
     return msg;
 }
 
@@ -573,85 +571,85 @@ wxString wxr2xml::GenerateName(wxItemResource * res)
         name += res->GetName();
     }
 
-    name += _T("\"");
+    name += "\"";
     return name;
 }
 
 void wxr2xml::ParseMenuBar(wxItemResource * res)
 {
     wxItemResource *child;
-    wxNode *node = res->GetChildren().GetFirst();
+    wxNode *node = res->GetChildren().First();
     // Get Menu Bar Name
-    m_xmlfile.Write(_T("\t<object class=\"wxMenuBar\" "));
+    m_xmlfile.Write("\t<object class=\"wxMenuBar\" ");
     m_xmlfile.Write(GenerateName(res));
-    m_xmlfile.Write(_T(">\n"));
+    m_xmlfile.Write(">\n");
     while (node) {
-        child = (wxItemResource *) node->GetData();
+        child = (wxItemResource *) node->Data();
         ParseMenu(child);
-        node = node->GetNext();
+        node = node->Next();
     }
 
-    m_xmlfile.Write(_T("\t</object> \n\n"));
+    m_xmlfile.Write("\t</object> \n\n");
 }
 
 void wxr2xml::ParseMenu(wxItemResource * res)
 {
     wxItemResource *child;
-    wxNode *node = res->GetChildren().GetFirst();
-    // Get Menu
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxMenu\" "));
+    wxNode *node = res->GetChildren().First();
+    // Get Menu 
+    m_xmlfile.Write("\t\t\t<object class=\"wxMenu\" ");
     wxString menuname;
-    menuname << _T("name = \"menu_") << res->GetValue1() << _T("\"");
+    menuname << "name = \"menu_" << res->GetValue1() << "\"";
     m_xmlfile.Write(menuname);
-    m_xmlfile.Write(_T(">\n"));
-    m_xmlfile.Write(_T("\t\t\t\t<label>")
-        + FixMenuString(res->GetTitle()) + _T("</label>\n"));
-    if (res->GetValue4() != _T(""))
-        m_xmlfile.Write(_T("\t\t\t\t<help>") + res->GetValue4() +
-        _T("</help>\n"));
+    m_xmlfile.Write(">\n");
+    m_xmlfile.Write("\t\t\t\t<label>"
+        + FixMenuString(res->GetTitle()) + "</label>\n");
+    if (res->GetValue4() != "")
+        m_xmlfile.Write("\t\t\t\t<help>" + res->GetValue4() +
+        "</help>\n");
     // Read in menu items and additional menus
     while (node) {
-        child = (wxItemResource *) node->GetData();
-        if (!child->GetChildren().GetFirst())
+        child = (wxItemResource *) node->Data();
+        if (!child->GetChildren().First())
             ParseMenuItem(child);
         else
             ParseMenu(child);
-            node = node->GetNext();
+            node = node->Next();
     }
-    m_xmlfile.Write(_T("\t\t\t</object> \n"));
+    m_xmlfile.Write("\t\t\t</object> \n");
 }
 
 void wxr2xml::ParseMenuItem(wxItemResource * res)
 {
     // Get Menu Item or Separator
-    if (res->GetTitle() == _T("")) {
-        m_xmlfile.Write(_T("\t\t\t<object class=\"separator\"/>\n"));
+    if (res->GetTitle() == "") {
+        m_xmlfile.Write("\t\t\t<object class=\"separator\"/>\n");
     } else {
-        m_xmlfile.Write(_T("\t\t\t\t<object class=\"wxMenuItem\" "));
+        m_xmlfile.Write("\t\t\t\t<object class=\"wxMenuItem\" ");
         wxString menuname;
-        menuname << _T("name = \"menuitem_") << res->GetValue1() << _T("\"");
+        menuname << "name = \"menuitem_" << res->GetValue1() << "\"";
         m_xmlfile.Write(menuname);
-        m_xmlfile.Write(_T(">\n"));
-            m_xmlfile.Write(_T("\t\t\t<label>")
-            + FixMenuString(res->GetTitle()) + _T("</label>\n"));
-        if (res->GetValue4() != _T(""))
-            m_xmlfile.Write(_T("\t\t\t<help>") +
-        res->GetValue4() + _T("</help>\n"));
+        m_xmlfile.Write(">\n");
+            m_xmlfile.Write("			<label>"
+            + FixMenuString(res->GetTitle()) + "</label>\n");
+        if (res->GetValue4() != "")
+            m_xmlfile.Write("			<help>" +
+        res->GetValue4() + "</help>\n");
         if (res->GetValue2())
-            m_xmlfile.Write(_T("\t\t\t\t<checkable>1</checkable>\n"));
-        m_xmlfile.Write(_T("\t\t\t</object> \n"));
+            m_xmlfile.Write("\t\t\t\t<checkable>1</checkable>\n");
+        m_xmlfile.Write("\t\t\t</object> \n");
     }
 }
 
 wxString wxr2xml::FixMenuString(wxString phrase)
 {
-    phrase.Replace(_T("&"), _T("$"));
+    phrase.Replace("&", "$");
     return phrase;
 }
 
 void wxr2xml::ParseStaticBitmap(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxStaticBitmap\""));
+    m_xmlfile.Write("\t\t\t<object class=\"wxStaticBitmap\"");
     WriteControlInfo(res);
     // value4 holds bitmap name
     wxString bitmapname;
@@ -660,15 +658,15 @@ void wxr2xml::ParseStaticBitmap(wxItemResource * res)
     bitmap = wxResourceCreateBitmap(bitmapname, &m_table);
     bitmapname += _T(".bmp");
     bitmap.SaveFile(bitmapname, wxBITMAP_TYPE_BMP);
-    m_xmlfile.Write(_T("\n\t\t\t\t<bitmap>") + bitmapname + _T("</bitmap>"));
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\n\t\t\t\t<bitmap>" + bitmapname + "</bitmap>");
+    m_xmlfile.Write("\t\t\t</object>\n");
     // bitmap5
 }
 //Parse a bitmap resource
 void wxr2xml::ParseBitmap(wxItemResource * res)
 {
-    m_xmlfile.Write(_T("\t<object class=\"wxBitmap\" "));
-    m_xmlfile.Write(GenerateName(res)+_T(">"));
+    m_xmlfile.Write("\t<object class=\"wxBitmap\" ");
+    m_xmlfile.Write(GenerateName(res)+">");
     wxString bitmapname;
     bitmapname = res->GetName();
     wxBitmap bitmap;
@@ -676,22 +674,22 @@ void wxr2xml::ParseBitmap(wxItemResource * res)
     bitmapname += _T(".bmp");
     bitmap.SaveFile(bitmapname, wxBITMAP_TYPE_BMP);
     m_xmlfile.Write(bitmapname);
-    m_xmlfile.Write(_T("</object>\n\n"));
+    m_xmlfile.Write("</object>\n\n");
 }
 
 void wxr2xml::PanelStuff(wxItemResource * res)
 {
     if ((res->GetResourceStyle() & wxRESOURCE_DIALOG_UNITS) != 0)
-        m_dlgunits = true;
+        m_dlgunits = TRUE;
     else
-        m_dlgunits = false;
+        m_dlgunits = FALSE;
 
     // If this is true ignore fonts, background color and use system
     // defaults instead
     if ((res->GetResourceStyle() & wxRESOURCE_USE_DEFAULTS) != 0)
-        m_systemdefaults = true;
+        m_systemdefaults = TRUE;
     else
-        m_systemdefaults = false;
+        m_systemdefaults = FALSE;
 
 }
 
@@ -720,8 +718,8 @@ wxString wxr2xml::GetValue5(wxItemResource *res)
 
 void wxr2xml::ParseBitmapButton(wxItemResource *res)
 {
-
-    m_xmlfile.Write(_T("\t\t\t<object class=\"wxBitmapButton\""));
+    
+    m_xmlfile.Write("\t\t\t<object class=\"wxBitmapButton\"");
     WriteControlInfo(res);
     // value4 holds bitmap name
     wxString bitmapname;
@@ -730,9 +728,9 @@ void wxr2xml::ParseBitmapButton(wxItemResource *res)
     bitmap = wxResourceCreateBitmap(bitmapname, &m_table);
     bitmapname += _T(".bmp");
     bitmap.SaveFile(bitmapname, wxBITMAP_TYPE_BMP);
-    m_xmlfile.Write(_T("\t\t\t\t<bitmap>") + bitmapname + _T("</bitmap>\n"));
-
-    m_xmlfile.Write(_T("\t\t\t</object>\n"));
+    m_xmlfile.Write("\t\t\t\t<bitmap>" + bitmapname + "</bitmap>\n");
+    
+    m_xmlfile.Write("\t\t\t</object>\n");
 }
 
 void wxr2xml::WriteFontInfo(wxItemResource *res)
@@ -745,21 +743,21 @@ void wxr2xml::WriteFontInfo(wxItemResource *res)
     if (!font.GetRefData())
         return;
 
-    m_xmlfile.Write(_T("\t\t\t<font>\n"));
+    m_xmlfile.Write("\t\t\t<font>\n");
     //Get font point size,font family,weight,font style,underline
     int pt;
     wxString msg;
     pt=font.GetPointSize();
-    msg<<_T("\t\t\t\t<size>")<<pt<<_T("</size>\n");
+    msg<<"\t\t\t\t<size>"<<pt<<"</size>\n";
     m_xmlfile.Write(msg);
     GetFontFace(font);
     GetFontStyle(font);
     GetFontWeight(font);
-
+    
     if (font.GetUnderlined())
-        m_xmlfile.Write(_T("\t\t\t\t<underlined>1</underlined>\n"));
-
-    m_xmlfile.Write(_T("\t\t\t</font>\n"));
+        m_xmlfile.Write("\t\t\t\t<underlined>1</underlined>\n");
+    
+    m_xmlfile.Write("\t\t\t</font>\n");
 }
 
 //WARNING possible make here
@@ -767,28 +765,28 @@ void wxr2xml::WriteFontInfo(wxItemResource *res)
 void wxr2xml::GetFontFace(wxFont font)
 {
     int family=font.GetFamily();
-
+    
     switch (family)
         {
         case wxDEFAULT:
             break;
         case wxDECORATIVE:
-            m_xmlfile.Write(_T("\t\t\t\t<face>decorative</face>\n"));
+            m_xmlfile.Write("\t\t\t\t<face>decorative</face>\n");
             break;
         case wxROMAN:
-            m_xmlfile.Write(_T("\t\t\t\t<face>roman</face>\n"));
+            m_xmlfile.Write("\t\t\t\t<face>roman</face>\n");
             break;
         case wxSCRIPT:
-            m_xmlfile.Write(_T("\t\t\t\t<face>script</face>\n"));
+            m_xmlfile.Write("\t\t\t\t<face>script</face>\n");
             break;
         case wxSWISS:
-            m_xmlfile.Write(_T("\t\t\t\t<face>swiss</face>\n"));
+            m_xmlfile.Write("\t\t\t\t<face>swiss</face>\n");
             break;
         case wxMODERN:
-            m_xmlfile.Write(_T("\t\t\t\t<face>modern</face>\n"));
+            m_xmlfile.Write("\t\t\t\t<face>modern</face>\n");
             break;
         default:
-            wxLogError(_T("Unknown font face"));
+            wxLogError("Unknown font face");
         }
 }
 
@@ -803,13 +801,13 @@ void wxr2xml::GetFontStyle(wxFont font)
         case wxNORMAL:
             break;
         case wxITALIC:
-            m_xmlfile.Write(_T("<style>italic</style>\n"));
+            m_xmlfile.Write("<style>italic</style>\n");
             break;
         case wxSLANT:
-            m_xmlfile.Write(_T("<style>slant</style>\n"));
+            m_xmlfile.Write("<style>slant</style>\n");
             break;
         default:
-            wxLogError(_T("Unknown font style"));
+            wxLogError("Unknown font style");
         }
 }
 
@@ -823,12 +821,12 @@ void wxr2xml::GetFontWeight(wxFont font)
         case wxNORMAL:
             break;
         case wxLIGHT:
-            m_xmlfile.Write(_T("\t\t\t\t<weight>light</weight>\n"));
+            m_xmlfile.Write("\t\t\t\t<weight>light</weight>\n");
             break;
         case wxBOLD:
-            m_xmlfile.Write(_T("\t\t\t\t<weight>bold</weight>\n"));
+            m_xmlfile.Write("\t\t\t\t<weight>bold</weight>\n");
             break;
         default:
-            wxLogError(_T("Unknown font weight"));
+            wxLogError("Unknown font weight");
         }
 }

@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "gdiobj.h"
 #endif
 
@@ -31,7 +31,7 @@ class WXDLLEXPORT wxGDIObject: public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxGDIObject)
 public:
-    inline wxGDIObject() { m_visible = false; };
+    inline wxGDIObject() { m_visible = FALSE; };
     inline ~wxGDIObject() {};
     
     inline bool IsNull() const { return (m_refData == 0); }

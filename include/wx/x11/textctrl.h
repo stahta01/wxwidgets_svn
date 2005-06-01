@@ -11,20 +11,12 @@
 #ifndef __X11TEXTCTRLH__
 #define __X11TEXTCTRLH__
 
-// Set to 1 to use wxUniv's implementation, 0
-// to use wxX11's.
-#define wxUSE_UNIV_TEXTCTRL 1
-
-#if wxUSE_UNIV_TEXTCTRL
-#include "wx/univ/textctrl.h"
-#else
-
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "textctrl.h"
 #endif
 
 #include "wx/scrolwin.h"
-#include "wx/arrstr.h"
+#include "wx/dynarray.h"
 #include "wx/datetime.h"
 
 //-----------------------------------------------------------------------------
@@ -101,7 +93,6 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString &name = wxTextCtrlNameStr);
-    virtual ~wxTextCtrl();
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -133,12 +124,9 @@ public:
     // more readable flag testing methods
     // ----------------------------------
 
-#if 0
-    // it seems now in wxTextCtrlBase
     bool IsSingleLine() const { return !(GetWindowStyle() & wxTE_MULTILINE); }
-#endif
     bool IsPassword() const { return (GetWindowStyle() & wxTE_PASSWORD) != 0; }
-    bool WrapLines() const { return false; }
+    bool WrapLines() const { return FALSE; }
 
     // If the return values from and to are the same, there is no selection.
     virtual void GetSelection(long* from, long* to) const;
@@ -183,18 +171,18 @@ public:
     virtual void Redo() {}
 
     virtual bool CanUndo() const    { return (m_undos.GetCount() > 0); }
-    virtual bool CanRedo() const    { return false; }
+    virtual bool CanRedo() const    { return FALSE; }
 
     // Insertion point
     virtual void SetInsertionPoint(long pos);
     virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
-    virtual wxTextPos GetLastPosition() const;
+    virtual long GetLastPosition() const;
 
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
 
-    virtual bool Enable( bool enable = true );
+    virtual bool Enable( bool enable = TRUE );
 
     void OnCut(wxCommandEvent& event);
     void OnCopy(wxCommandEvent& event);
@@ -212,7 +200,7 @@ public:
     bool SetForegroundColour(const wxColour& colour);
     bool SetBackgroundColour(const wxColour& colour);
 
-    void SetModified() { m_modified = true; }
+    void SetModified() { m_modified = TRUE; }
 
     virtual void Freeze();
     virtual void Thaw();
@@ -260,13 +248,13 @@ public:
     void OnEraseBackground( wxEraseEvent &event );
     void OnMouse( wxMouseEvent &event );
     void OnChar( wxKeyEvent &event );
+    void OnIdle( wxIdleEvent &event );
     void OnSetFocus( wxFocusEvent& event );
     void OnKillFocus( wxFocusEvent& event );
 
-    void OnInternalIdle();
     void RefreshLine( int n );
     void RefreshDown( int n );
-    void MoveCursor( int new_x, int new_y, bool shift = false, bool centre = false );
+    void MoveCursor( int new_x, int new_y, bool shift = FALSE, bool centre = FALSE );
     void MyAdjustScrollbars();
 
 protected:
@@ -370,6 +358,13 @@ private:
 // wxTextCtrl types
 // ----------------------------------------------------------------------------
 
+// wxTextPos is the position in the text
+typedef long wxTextPos;
+
+// wxTextCoord is the line or row number (which should have been unsigned but
+// is long for backwards compatibility)
+typedef long wxTextCoord;
+
 class WXDLLEXPORT wxStdTextCtrlInputHandler : public wxStdInputHandler
 {
 public:
@@ -377,10 +372,10 @@ public:
 
     virtual bool HandleKey(wxInputConsumer *consumer,
                            const wxKeyEvent& event,
-                           bool pressed) { return false; }
-    virtual bool HandleMouse(wxInputConsumer *consumer, const wxMouseEvent& event) { return false; }
-    virtual bool HandleMouseMove(wxInputConsumer *consumer, const wxMouseEvent& event) { return false; }
-    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event) { return false; }
+                           bool pressed) { return FALSE; }
+    virtual bool HandleMouse(wxInputConsumer *consumer, const wxMouseEvent& event) { return FALSE; }
+    virtual bool HandleMouseMove(wxInputConsumer *consumer, const wxMouseEvent& event) { return FALSE; }
+    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event) { return FALSE; }
 
 protected:
     // get the position of the mouse click
@@ -390,8 +385,5 @@ protected:
     wxTextCtrl *m_winCapture;
 };
 
-#endif
-// wxUSE_UNIV_TEXTCTRL
-
-#endif // __X11TEXTCTRLH__
+#endif // __GTKTEXTCTRLH__
 

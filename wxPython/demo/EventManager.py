@@ -9,109 +9,107 @@
 # Licence:     wxWindows license
 #---------------------------------------------------------------------------
 
-import  wx
-import  wx.lib.evtmgr   as  em
+from wxPython.wx import *
+from wxPython.lib.evtmgr import eventManager
 
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.log = log
 
         fsize    = self.GetFont().GetPointSize()
-        f1 = wx.Font(fsize+0, wx.SWISS, wx.NORMAL, wx.NORMAL)
-        f2 = wx.Font(fsize+2, wx.SWISS, wx.NORMAL, wx.BOLD)
-        f3 = wx.Font(fsize+6, wx.SWISS, wx.NORMAL, wx.BOLD)
+        f1 = wxFont(fsize+0, wxSWISS, wxNORMAL, wxNORMAL)
+        f2 = wxFont(fsize+2, wxSWISS, wxNORMAL, wxBOLD)
+        f3 = wxFont(fsize+6, wxSWISS, wxNORMAL, wxBOLD)
 
-        title1 = wx.StaticText(self, -1, 'EventManager')
+        title1 = wxStaticText(self, -1, 'EventManager')
         title1.SetFont(f3)
         txt = """\
         This demo shows  (1) basic uses and features of the EventManager, as well
         as  (2) how it helps with a real-world task: creating independent, object-
         oriented components."""
-        message0 = wx.StaticText(self, -1, txt)
+        message0 = wxStaticText(self, -1, txt)
         message0.SetFont(f1)
 
-        title2 = wx.StaticText(self, -1, 'Event Listeners')
+        title2 = wxStaticText(self, -1, 'Event Listeners')
         title2.SetFont(f2)
 
         txt = """\
         These objects listen to motion events from the target window, using the ability
         to register one event with multiple listeners.  They also register for mouse events
         on themselves to implement toggle-button functionality."""
-        message1 = wx.StaticText(self, -1, txt)
+        message1 = wxStaticText(self, -1, txt)
         message1.SetFont(f1)
 
-        title3 = wx.StaticText(self, -1, 'Target Window')
+        title3 = wxStaticText(self, -1, 'Target Window')
         title3.SetFont(f2)
 
         txt = """\
         A passive window that's used as an event generator.  Move the mouse over it to
         send events to the listeners above."""
-        message2 = wx.StaticText(self, -1, txt)
+        message2 = wxStaticText(self, -1, txt)
         message2.SetFont(f1)
 
-        targetPanel = Tile(self, log, bgColor=wx.Colour(80,10,10), active=0)
-        buttonPanel = wx.Panel(self ,-1)
-        sizer       = wx.BoxSizer(wx.HORIZONTAL)
+        targetPanel = Tile(self, log, bgColor=wxColor(80,10,10), active=0)
+        buttonPanel = wxPanel(self ,-1)
+        sizer       = wxBoxSizer(wxHORIZONTAL)
         target      = targetPanel.tile
 
-        sizer.Add((0,0), 1)
+        sizer.Add(0,0,1)
         for factor in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]:
-            sizer.Add(Tile(buttonPanel, log, factor-0.05, target), 0, wx.ALIGN_CENTER)
-            sizer.Add((0,0),1)
-            sizer.Add(Tile(buttonPanel, log, factor,      target), 0, wx.ALIGN_CENTER)
-            sizer.Add((0,0),1)
+            sizer.Add(Tile(buttonPanel, log, factor-0.05, target), 0, wxALIGN_CENTER)
+            sizer.Add(0,0,1)
+            sizer.Add(Tile(buttonPanel, log, factor,      target), 0, wxALIGN_CENTER)
+            sizer.Add(0,0,1)
 
+        buttonPanel.SetAutoLayout(1)
         buttonPanel.SetSizer(sizer)
         sizer.Fit(buttonPanel)
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(title1,      0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 6)
-        sizer.Add(message0,    0, wx.ALIGN_CENTER | wx.ALL, 6)
-        sizer.Add(title2,      0, wx.ALIGN_CENTER | wx.LEFT | wx.TOP    | wx.RIGHT, 16)
-        sizer.Add(message1,    0, wx.ALIGN_CENTER | wx.ALL, 6)
-        sizer.Add(buttonPanel, 0, wx.EXPAND       | wx.LEFT | wx.BOTTOM | wx.RIGHT, 16)
-        sizer.Add(title3,      0, wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT, 16)
-        sizer.Add(message2,    0, wx.ALIGN_CENTER | wx.ALL, 6)
-        sizer.Add(targetPanel, 2, wx.EXPAND       | wx.LEFT | wx.BOTTOM | wx.RIGHT, 16)
+        sizer = wxBoxSizer(wxVERTICAL)
+        sizer.Add(title1,      0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 6)
+        sizer.Add(message0,    0, wxALIGN_CENTER | wxALL, 6)
+        sizer.Add(title2,      0, wxALIGN_CENTER | wxLEFT | wxTOP    | wxRIGHT, 16)
+        sizer.Add(message1,    0, wxALIGN_CENTER | wxALL, 6)
+        sizer.Add(buttonPanel, 0, wxEXPAND       | wxLEFT | wxBOTTOM | wxRIGHT, 16)
+        sizer.Add(title3,      0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 16)
+        sizer.Add(message2,    0, wxALIGN_CENTER | wxALL, 6)
+        sizer.Add(targetPanel, 2, wxEXPAND       | wxLEFT | wxBOTTOM | wxRIGHT, 16)
+        self.SetAutoLayout(1)
         self.SetSizer(sizer)
 
 
 
-class Tile(wx.Window):
+class Tile(wxPanel):
     """
     This outer class is responsible for changing
     its border color in response to certain mouse
     events over its contained 'InnerTile'.
     """
-    normal = wx.Colour(150,150,150)
-    active = wx.Colour(250,245,245)
-    hover  = wx.Colour(210,220,210)
+    normal = wxColor(150,150,150)
+    active = wxColor(250,245,245)
+    hover  = wxColor(210,220,210)
 
     def __init__(self, parent, log, factor=1, thingToWatch=None, bgColor=None, active=1, size=(38,38), borderWidth=3):
-        wx.Window.__init__(self, parent, -1, size=size, style=wx.CLIP_CHILDREN)
+        wxPanel.__init__(self, parent, -1, size=size, style=wxCLIP_CHILDREN)
         self.tile = InnerTile(self, log, factor, thingToWatch, bgColor)
         self.log  = log
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.tile, 1, wx.EXPAND | wx.ALL, borderWidth)
+        sizer = wxBoxSizer(wxHORIZONTAL)
+        sizer.Add(self.tile, 1, wxEXPAND | wxALL, borderWidth)
+        self.SetAutoLayout(1)
         self.SetSizer(sizer)
         self.Layout()
-        em.eventManager.Register(self.doLayout, wx.EVT_SIZE, self)
         self.SetBackgroundColour(Tile.normal)
         if active:
             # Register myself for mouse events over self.tile in order to
             # create typical button/hyperlink visual effects.
-            em.eventManager.Register(self.setHover,  wx.EVT_ENTER_WINDOW, self.tile)
-            em.eventManager.Register(self.setNormal, wx.EVT_LEAVE_WINDOW, self.tile)
-            em.eventManager.Register(self.setActive, wx.EVT_LEFT_DOWN,    self.tile)
-            em.eventManager.Register(self.setHover,  wx.EVT_LEFT_UP,      self.tile)
+            eventManager.Register(self.setHover,  EVT_ENTER_WINDOW, self.tile)
+            eventManager.Register(self.setNormal, EVT_LEAVE_WINDOW, self.tile)
+            eventManager.Register(self.setActive, EVT_LEFT_DOWN,    self.tile)
+            eventManager.Register(self.setHover,  EVT_LEFT_UP,      self.tile)
 
-
-    def doLayout(self, event):
-        self.Layout()
-        
 
     def setHover(self, event):
         self.SetBackgroundColour(Tile.hover)
@@ -129,11 +127,11 @@ class Tile(wx.Window):
 
 
 
-class InnerTile(wx.Window):
-    IDLE_COLOR  = wx.Colour( 80, 10, 10)
-    START_COLOR = wx.Colour(200, 70, 50)
-    FINAL_COLOR = wx.Colour( 20, 80,240)
-    OFF_COLOR   = wx.Colour(185,190,185)
+class InnerTile(wxPanel):
+    IDLE_COLOR  = wxColor( 80, 10, 10)
+    START_COLOR = wxColor(200, 70, 50)
+    FINAL_COLOR = wxColor( 20, 80,240)
+    OFF_COLOR   = wxColor(185,190,185)
     # Some pre-computation.
     DELTAS            = map(lambda a,b: b-a, START_COLOR.Get(), FINAL_COLOR.Get())
     START_COLOR_TUPLE = START_COLOR.Get()
@@ -143,7 +141,7 @@ class InnerTile(wx.Window):
     events over the 'thingToWatch'.
     """
     def __init__(self, parent, log, factor, thingToWatch=None, bgColor=None):
-        wx.Window.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.log=log
         if bgColor:
             self.SetBackgroundColour(bgColor)
@@ -153,16 +151,16 @@ class InnerTile(wx.Window):
             self.state        = 0
             self.toggleOnOff()
             # Watch for the mouse click to enable/disable myself.
-            em.eventManager.Register(self.toggleOnOff, wx.EVT_LEFT_UP, self)
+            eventManager.Register(self.toggleOnOff, EVT_LEFT_UP, self)
 
 
     def toggleOnOff(self, event=None):
         # Implement being on or off by registering and
         # de-registering self.makeColor() from the event manager.
         if self.state:
-            em.eventManager.DeregisterListener(self.makeColor)
+            eventManager.DeregisterListener(self.makeColor)
         else:
-            em.eventManager.Register(self.makeColor, wx.EVT_MOTION, self.thingToWatch)
+            eventManager.Register(self.makeColor, EVT_MOTION, self.thingToWatch)
         self.state = 1 - self.state
         self.resetColor()
 
@@ -190,7 +188,7 @@ class InnerTile(wx.Window):
         r = InnerTile.START_COLOR_TUPLE[0] + (InnerTile.DELTAS[0] * percent)
         g = InnerTile.START_COLOR_TUPLE[1] + (InnerTile.DELTAS[1] * percent)
         b = InnerTile.START_COLOR_TUPLE[2] + (InnerTile.DELTAS[2] * percent)
-        self.setColor(wx.Colour(int(r), int(g), int(b)))
+        self.setColor(wxColor(int(r), int(g), int(b)))
 
 
 
@@ -285,5 +283,5 @@ by Robb Shecter (robb@acm.org)
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

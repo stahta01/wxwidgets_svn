@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,12 +15,9 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "font.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/font.h"
 #include "wx/fontutil.h"
@@ -97,7 +94,7 @@ public:
     void SetEncoding(wxFontEncoding encoding);
 
     void SetNoAntiAliasing( bool no = TRUE ) { m_noAA = no; }
-    bool GetNoAntiAliasing() const { return m_noAA; }
+    bool GetNoAntiAliasing() { return m_noAA; }
 
     // and this one also modifies all the other font data fields
     void SetNativeFontInfo(const wxNativeFontInfo& info);
@@ -235,13 +232,15 @@ void wxFontRefData::InitFromNative()
 
     // init fields
     m_faceName = wxGTK_CONV_BACK( pango_font_description_get_family( desc ) );
-
+    
     // Pango sometimes needs to have a size
     int pango_size = pango_font_description_get_size( desc );
     if (pango_size == 0)
         pango_font_description_set_size( desc, 12 * PANGO_SCALE);
 
     m_pointSize = pango_font_description_get_size( desc ) / PANGO_SCALE;
+    
+    // wxPrintf( wxT("face %s m_pointSize %d\n"), m_faceName.c_str(), m_pointSize );
 
     switch (pango_font_description_get_style( desc ))
     {
@@ -256,19 +255,26 @@ void wxFontRefData::InitFromNative()
             break;
     }
 
-    PangoWeight pango_weight = pango_font_description_get_weight( desc );
-
-    if (pango_weight >= 600)
+    switch (pango_font_description_get_weight( desc ))
     {
-        m_weight = wxFONTWEIGHT_BOLD;
-    }
-    else if (pango_weight < 350)
-    {
-        m_weight = wxFONTWEIGHT_LIGHT;
-    }
-    else
-    {
-        m_weight = wxFONTWEIGHT_NORMAL;
+        case PANGO_WEIGHT_ULTRALIGHT:
+            m_weight = wxFONTWEIGHT_LIGHT;
+            break;
+        case PANGO_WEIGHT_LIGHT:
+            m_weight = wxFONTWEIGHT_LIGHT;
+            break;
+        case PANGO_WEIGHT_NORMAL:
+            m_weight = wxFONTWEIGHT_NORMAL;
+            break;
+        case PANGO_WEIGHT_BOLD:
+            m_weight = wxFONTWEIGHT_BOLD;
+            break;
+        case PANGO_WEIGHT_ULTRABOLD:
+            m_weight = wxFONTWEIGHT_BOLD;
+            break;
+        case PANGO_WEIGHT_HEAVY:
+            m_weight = wxFONTWEIGHT_BOLD;
+            break;
     }
 
     if (m_faceName == wxT("monospace"))
@@ -767,28 +773,23 @@ wxFontEncoding wxFont::GetEncoding() const
     return M_FONTDATA->m_encoding;
 }
 
-bool wxFont::GetNoAntiAliasing() const
+bool wxFont::GetNoAntiAliasing()
 {
     wxCHECK_MSG( Ok(), wxFONTENCODING_DEFAULT, wxT("invalid font") );
 
     return M_FONTDATA->m_noAA;
 }
 
-const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
+wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
     wxCHECK_MSG( Ok(), (wxNativeFontInfo *)NULL, wxT("invalid font") );
 
-#ifndef __WXGTK20__
-    if ( !M_FONTDATA->HasNativeFont() )
-    {
-        // NB: this call has important side-effect: it not only finds
-        //     GdkFont representation, it also initializes m_nativeFontInfo
-        //     by calling its SetXFontName method
+#ifndef __WXGTK20__  // ???
+    if ( M_FONTDATA->m_nativeFontInfo.GetXFontName().empty() )
         GetInternalFont();
-    }
 #endif
 
-    return &(M_FONTDATA->m_nativeFontInfo);
+    return new wxNativeFontInfo(M_FONTDATA->m_nativeFontInfo);
 }
 
 bool wxFont::IsFixedWidth() const
@@ -862,7 +863,7 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     M_FONTDATA->SetEncoding(encoding);
 }
 
-void wxFont::DoSetNativeFontInfo( const wxNativeFontInfo& info )
+void wxFont::SetNativeFontInfo( const wxNativeFontInfo& info )
 {
     Unshare();
 
@@ -880,7 +881,6 @@ void wxFont::SetNoAntiAliasing( bool no )
 // get internal representation of font
 // ----------------------------------------------------------------------------
 
-#ifndef __WXGTK20__
 static GdkFont *g_systemDefaultGuiFont = (GdkFont*) NULL;
 
 // this is also used from tbargtk.cpp and tooltip.cpp, hence extern
@@ -892,13 +892,13 @@ extern GdkFont *GtkGetDefaultGuiFont()
         GtkStyle *def = gtk_rc_get_style( widget );
         if (def)
         {
-            g_systemDefaultGuiFont = gdk_font_ref( def->font );
+            g_systemDefaultGuiFont = gdk_font_ref( GET_STYLE_FONT(def) );
         }
         else
         {
             def = gtk_widget_get_default_style();
             if (def)
-                g_systemDefaultGuiFont = gdk_font_ref( def->font );
+                g_systemDefaultGuiFont = gdk_font_ref( GET_STYLE_FONT(def) );
         }
         gtk_widget_destroy( widget );
     }
@@ -917,6 +917,19 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
 
     wxCHECK_MSG( Ok(), font, wxT("invalid font") )
 
+#ifdef __WXGTK20__
+    if (*this == wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT))
+    {
+        font = GtkGetDefaultGuiFont();
+    }
+    else
+    {
+        PangoFontDescription *
+            font_description = GetNativeFontInfo()->description;
+
+        font = gdk_font_from_description( font_description );
+    }
+#else // GTK 1.x
     long int_scale = long(scale * 100.0 + 0.5); // key for fontlist
     int point_scale = (int)((M_FONTDATA->m_pointSize * 10 * int_scale) / 100);
 
@@ -936,7 +949,7 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
         if ( !font )
         {
             // do we have the XLFD?
-            if ( int_scale == 100 && M_FONTDATA->HasNativeFont() )
+            if ( M_FONTDATA->HasNativeFont() )
             {
                 font = wxLoadFont(M_FONTDATA->m_nativeFontInfo.GetXFontName());
             }
@@ -953,10 +966,11 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
                                                M_FONTDATA->m_faceName,
                                                M_FONTDATA->m_encoding,
                                                &xfontname);
-                // NB: wxFont::GetNativeFontInfo relies on this
-                //     side-effect of GetInternalFont
-                if ( int_scale == 100 )
+                if ( font )
+                {
                     M_FONTDATA->m_nativeFontInfo.SetXFontName(xfontname);
+                    M_FONTDATA->InitFromNative();
+                }
             }
         }
 
@@ -965,6 +979,7 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
             list[int_scale] = font;
         }
     }
+#endif  // GTK 2.0/1.x
 
     // it's quite useless to make it a wxCHECK because we're going to crash
     // anyhow...
@@ -972,5 +987,4 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
 
     return font;
 }
-#endif  // not GTK 2.0
 

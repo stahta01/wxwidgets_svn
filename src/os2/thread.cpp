@@ -6,7 +6,7 @@
 // Created:     04/22/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Neis (2003)
-//
+//                         
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +26,6 @@
 #include <stdio.h>
 
 #include "wx/app.h"
-#include "wx/apptrait.h"
 #include "wx/module.h"
 #include "wx/intl.h"
 #include "wx/utils.h"
@@ -62,7 +61,7 @@ static ULONG                        s_ulIdMainThread = 1;
 wxMutex*                            p_wxMainMutex;
 
 // OS2 substitute for Tls pointer the current parent thread object
-wxThread*                           m_pThread;    // pointer to the wxWidgets thread object
+wxThread*                           m_pThread;    // pointer to the wxWindows thread object
 
 // if it's FALSE, some secondary thread is holding the GUI lock
 static bool gs_bGuiOwnedByMainThread = TRUE;
@@ -383,7 +382,7 @@ public:
 private:
     // Threads in OS/2 have only an ID, so m_hThread is both it's handle and ID
     // PM also has no real Tls mechanism to index pointers by so we'll just
-    // keep track of the wxWidgets parent object here.
+    // keep track of the wxWindows parent object here.
     TID                             m_hThread;    // handle and ID of the thread
     wxThreadState                   m_eState;     // state, see wxThreadState enum
     unsigned int                    m_nPriority;  // thread priority in "wx" units
@@ -410,21 +409,18 @@ void wxThreadInternal::OS2ThreadStart(
     }
     else // do run thread
     {
-        wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-        unsigned long ulHab;
-        if (traits)
-            traits->InitializeGui(ulHab);
+        HAB     vHab;
+        vHab = ::WinInitialize(0);
         dwRet = (DWORD)pThread->Entry();
-        if (traits)
-            traits->TerminateGui(ulHab);
+        ::WinTerminate(vHab);
 
-        // enter m_critsect before changing the thread state
-        pThread->m_critsect.Enter();
+	// enter m_critsect before changing the thread state
+	pThread->m_critsect.Enter();
 
-        bWasCancelled = pThread->m_internal->GetState() == STATE_CANCELED;
+	bWasCancelled = pThread->m_internal->GetState() == STATE_CANCELED;
 
-        pThread->m_internal->SetState(STATE_EXITED);
-        pThread->m_critsect.Leave();
+	pThread->m_internal->SetState(STATE_EXITED);
+	pThread->m_critsect.Leave();
     }
     pThread->OnExit();
 
@@ -443,7 +439,7 @@ void wxThreadInternal::SetPriority(
   unsigned int                      nPriority
 )
 {
-    // translate wxWidgets priority to the PM one
+    // translate wxWindows priority to the PM one
     ULONG                           ulOS2_PriorityClass;
     ULONG                           ulOS2_SubPriority;
     ULONG                           ulrc;
@@ -480,12 +476,12 @@ bool wxThreadInternal::Create(
 )
 {
     int                          tid;
-
+    
     if (!uStackSize)
       uStackSize = 131072;
     pThread->m_critsect.Enter();
     tid = _beginthread(wxThreadInternal::OS2ThreadStart,
-                             NULL, uStackSize, pThread);
+			     NULL, uStackSize, pThread);
     if(tid == -1)
     {
         wxLogSysError(_("Can't create thread"));
@@ -662,9 +658,9 @@ wxThreadError wxThread::Resume()
 {
     if (m_internal->GetState() == STATE_NEW)
     {
-        m_internal->SetState(STATE_RUNNING);
+	m_internal->SetState(STATE_RUNNING);
         m_critsect.Leave();
-        return wxTHREAD_NO_ERROR;
+	return wxTHREAD_NO_ERROR;
     }
 
     wxCriticalSectionLocker         lock((wxCriticalSection &)m_critsect);
@@ -734,7 +730,7 @@ wxThreadError wxThread::Delete(ExitCode *pRc)
         {
             // set flag for wxIsWaitingForThread()
             gs_bWaitingForThread = TRUE;
-        }
+	}
 
         // ask the thread to terminate
         if ( shouldCancel )
@@ -744,7 +740,7 @@ wxThreadError wxThread::Delete(ExitCode *pRc)
             m_internal->Cancel();
         }
 
-#if 0
+#if wxUSE_GUI
         // we can't just wait for the thread to terminate because it might be
         // calling some GUI functions and so it will never terminate before we
         // process the Windows messages that result from these functions
@@ -762,41 +758,41 @@ wxThreadError wxThread::Delete(ExitCode *pRc)
             }
 
             result = ::DosWaitThread(&hThread, DCWW_NOWAIT);
-            // FIXME: We ought to have a message processing loop here!!
+	    // FIXME: We ought to have a message processing loop here!!
 
             switch ( result )
-            {
-                case ERROR_INTERRUPT:
-                case ERROR_THREAD_NOT_TERMINATED:
-                    break;
-                case ERROR_INVALID_THREADID:
+	    {
+  	        case ERROR_INTERRUPT:
+		case ERROR_THREAD_NOT_TERMINATED:
+		    break;
+		case ERROR_INVALID_THREADID:
                 case NO_ERROR:
                     // thread we're waiting for just terminated
-                    // or even does not exist any more.
-                    result = NO_ERROR;
-                    break;
+  		    // or even does not exist any more.
+		    result = NO_ERROR;
+		    break;
                 default:
                     wxFAIL_MSG(wxT("unexpected result of DosWaitThread"));
             }
-            if ( IsMain() )
-            {
-                // event processing - needed if we are the main thread
-                // to give other threads a chance to do remaining GUI
-                // processing and terminate cleanly.
-                wxTheApp->HandleSockets();
-                if (wxTheApp->Pending())
-                  if ( !wxTheApp->DoMessage() )
-                  {
-                      // WM_QUIT received: kill the thread
-                      Kill();
+	    if ( IsMain() )
+	    {
+		// event processing - needed if we are the main thread
+		// to give other threads a chance to do remaining GUI
+		// processing and terminate cleanly.
+		wxTheApp->HandleSockets();
+		if (wxTheApp->Pending())
+		  if ( !wxTheApp->DoMessage() )
+		  {
+		      // WM_QUIT received: kill the thread
+		      Kill();
 
-                      return wxTHREAD_KILLED;
-                  }
-                  else
-                    wxUsleep(10);
-            }
-            else
-                wxUsleep(10);
+		      return wxTHREAD_KILLED;
+		  }
+		  else
+		    wxUsleep(10);
+	    }
+	    else
+	        wxUsleep(10);
         } while ( result != NO_ERROR );
 #else // !wxUSE_GUI
         // simply wait for the thread to terminate

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,21 +28,29 @@
 #error Sorry, this sample is only appropriate under Windows.
 #endif
 
+#include "wx/resource.h"
+
 #include <ctype.h>
 #include "nativdlg.h"
 #include "resource.h"
 
+// Declare two frames
+MyFrame   *frame = NULL;
+
 IMPLEMENT_APP(MyApp)
+
+// Testing of ressources
+MyApp::MyApp()
+{
+}
 
 bool MyApp::OnInit(void)
 {
   // Create the main frame window
-  MyFrame   *frame = new MyFrame(NULL, wxID_ANY, _T("wxWidgets Native Dialog Sample"), wxPoint(0, 0), wxSize(300, 250));
+  frame = new MyFrame(NULL, -1, _T("wxWindows Native Dialog Sample"), wxPoint(0, 0), wxSize(300, 250));
 
-#if wxUSE_STATUSBAR
   // Give it a status line
   frame->CreateStatusBar(2);
-#endif // wxUSE_STATUSBAR
 
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
@@ -58,13 +66,13 @@ bool MyApp::OnInit(void)
   frame->SetMenuBar(menu_bar);
 
   // Make a panel
-  frame->panel = new wxWindow(frame, wxID_ANY, wxPoint(0, 0), wxSize(400, 400), 0, _T("MyMainFrame"));
-  frame->Show(true);
+  frame->panel = new wxWindow(frame, -1, wxPoint(0, 0), wxSize(400, 400), 0, _T("MyMainFrame"));
+  frame->Show(TRUE);
 
   // Return the main frame window
   SetTopWindow(frame);
 
-  return true;
+  return TRUE;
 }
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -79,22 +87,20 @@ MyFrame::MyFrame(wxWindow *parent, const wxWindowID id, const wxString& title, c
   panel = NULL;
 }
 
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnQuit(wxCommandEvent& event)
 {
-  Close(true);
+    Close(TRUE);
 }
 
-void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnTest1(wxCommandEvent& event)
 {
-#if ( defined(__WXOS2__) || defined(__WXMSW__) ) && !defined(__WXUNIVERSAL__)
-    MyDialog dialog;
-    if (dialog.LoadNativeDialog(this, _T("dialog1")))
-    {
-        dialog.ShowModal();
-    }
-#else
-    wxMessageBox(_T("No native dialog support"),_T("Platform limitation"));
-#endif
+      MyDialog *dialog = new MyDialog;
+      if (dialog->LoadNativeDialog(this, _T("dialog1")))
+      {
+        dialog->SetModal(TRUE);
+        dialog->ShowModal();
+      }
+      dialog->Close(TRUE);
 }
 
 BEGIN_EVENT_TABLE(MyDialog, wxDialog)
@@ -103,12 +109,12 @@ BEGIN_EVENT_TABLE(MyDialog, wxDialog)
 END_EVENT_TABLE()
 
 
-void MyDialog::OnOk(wxCommandEvent& WXUNUSED(event))
+void MyDialog::OnOk(wxCommandEvent& event)
 {
   EndModal(wxID_OK);
 }
 
-void MyDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+void MyDialog::OnCancel(wxCommandEvent& event)
 {
   EndModal(wxID_CANCEL);
 }

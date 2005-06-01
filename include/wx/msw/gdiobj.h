@@ -12,7 +12,7 @@
 #ifndef _WX_GDIOBJ_H_
 #define _WX_GDIOBJ_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "gdiobj.h"
 #endif
 
@@ -36,15 +36,15 @@ class WXDLLEXPORT wxGDIRefData : public wxObjectRefData
 class WXDLLEXPORT wxGDIObject : public wxObject
 {
 public:
-    wxGDIObject() { m_visible = false; };
+    wxGDIObject() { m_visible = FALSE; };
 
     // Creates the resource
-    virtual bool RealizeResource() { return false; };
+    virtual bool RealizeResource() { return FALSE; };
 
     // Frees the resource
-    virtual bool FreeResource(bool WXUNUSED(force) = false) { return false; }
+    virtual bool FreeResource(bool WXUNUSED(force) = FALSE) { return FALSE; }
 
-    virtual bool IsFree() const { return false; }
+    virtual bool IsFree() const { return FALSE; }
 
     bool IsNull() const { return (m_refData == 0); }
 
@@ -55,7 +55,7 @@ public:
     virtual void SetVisible(bool v) { m_visible = v; }
 
 protected:
-    bool m_visible; // true only if we should delete this object ourselves
+    bool m_visible; // TRUE only if we should delete this object ourselves
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGDIObject)

@@ -12,13 +12,12 @@
 #ifndef _WX_TOKENZRH
 #define _WX_TOKENZRH
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "tokenzr.h"
 #endif
 
 #include "wx/object.h"
 #include "wx/string.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -42,7 +41,7 @@ enum wxStringTokenizerMode
 // wxStringTokenizer: replaces infamous strtok() and has some other features
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxStringTokenizer : public wxObject
+class WXDLLEXPORT wxStringTokenizer : public wxObject
 {
 public:
     // ctors and initializers
@@ -124,7 +123,7 @@ protected:
 
 // the function takes the same parameters as wxStringTokenizer ctor and returns
 // the array containing all tokens
-wxArrayString WXDLLIMPEXP_BASE
+wxArrayString WXDLLEXPORT
 wxStringTokenize(const wxString& str,
                  const wxString& delims = wxDEFAULT_DELIMITERS,
                  wxStringTokenizerMode mode = wxTOKEN_DEFAULT);

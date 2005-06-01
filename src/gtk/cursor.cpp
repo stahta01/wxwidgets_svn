@@ -7,12 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+
+#ifdef __GNUG__
 #pragma implementation "cursor.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/cursor.h"
 #include "wx/utils.h"
@@ -263,18 +261,18 @@ wxCursor::wxCursor( const wxImage & image )
         wxColour tmp = fg;
         fg = bg;
         bg = tmp;
-	}							 
-
+	}
+	
     int hotSpotX;
     int hotSpotY;
 
-    if (image.HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_X))
-        hotSpotX = image.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X);
+    if (image.HasOption(wxCUR_HOTSPOT_X))
+        hotSpotX = image.GetOptionInt(wxCUR_HOTSPOT_X);
     else
         hotSpotX = 0;
 
-    if (image.HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y))
-        hotSpotY = image.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_Y);
+    if (image.HasOption(wxCUR_HOTSPOT_Y))
+        hotSpotY = image.GetOptionInt(wxCUR_HOTSPOT_Y);
     else
         hotSpotY = 0;
 
@@ -367,7 +365,7 @@ void wxEndBusyCursor()
     gs_savedCursor = wxNullCursor;
 
     if (wxTheApp)
-        wxTheApp->ProcessIdle();
+        wxTheApp->SendIdleEvents();
 }
 
 void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )

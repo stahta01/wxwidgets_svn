@@ -10,30 +10,17 @@
 #ifndef _WX_IMAGPNG_H_
 #define _WX_IMAGPNG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagpng.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/image.h"
 
 //-----------------------------------------------------------------------------
 // wxPNGHandler
 //-----------------------------------------------------------------------------
 
 #if wxUSE_LIBPNG
-
-#include "wx/image.h"
-
-#define wxIMAGE_OPTION_PNG_FORMAT    wxT("PngFormat")
-#define wxIMAGE_OPTION_PNG_BITDEPTH  wxT("PngBitDepth")
-
-enum
-{
-    wxPNG_TYPE_COLOUR = 0,
-    wxPNG_TYPE_GREY = 2,
-    wxPNG_TYPE_GREY_RED = 3
-};
-
 class WXDLLEXPORT wxPNGHandler: public wxImageHandler
 {
 public:
@@ -46,17 +33,16 @@ public:
     }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
     virtual bool DoCanRead( wxInputStream& stream );
 #endif
 
 private:
     DECLARE_DYNAMIC_CLASS(wxPNGHandler)
 };
-
 #endif
-  // wxUSE_LIBPNG
+
 
 #endif
   // _WX_IMAGPNG_H_

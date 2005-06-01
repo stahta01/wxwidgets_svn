@@ -39,25 +39,7 @@
     #error "menu sample requires wxUSE_MENUS=1"
 #endif // wxUSE_MENUS
 
-// not all ports have support for EVT_CONTEXT_MENU yet, don't define
-// USE_CONTEXT_MENU for those which don't
-#if defined(__WXMOTIF__) || defined(__WXPM__) || defined(__WXX11__) || defined(__WXMGL__)
-    #define USE_CONTEXT_MENU 0
-#else
-    #define USE_CONTEXT_MENU 1
-#endif
-
-// this sample is usefull when new port is developed
-// and usually new port has majority of flags turned off
-#if wxUSE_LOG && wxUSE_TEXTCTRL
-    #define USE_LOG_WINDOW 1
-#else
-    #define USE_LOG_WINDOW 0
-#endif
-
-#if wxUSE_OWNER_DRAWN
 #include "copy.xpm"
-#endif
 
 // ----------------------------------------------------------------------------
 // classes
@@ -82,9 +64,7 @@ public:
 
 protected:
     void OnQuit(wxCommandEvent& event);
-#if USE_LOG_WINDOW
     void OnClearLog(wxCommandEvent& event);
-#endif
 
     void OnAbout(wxCommandEvent& event);
 
@@ -97,13 +77,8 @@ protected:
     void OnCheckMenuItem(wxCommandEvent& event);
     void OnEnableMenuItem(wxCommandEvent& event);
     void OnGetLabelMenuItem(wxCommandEvent& event);
-#if wxUSE_TEXTDLG
     void OnSetLabelMenuItem(wxCommandEvent& event);
-#endif
     void OnGetMenuItemInfo(wxCommandEvent& event);
-#if wxUSE_TEXTDLG
-    void OnFindMenuItem(wxCommandEvent& event);
-#endif
 
     void OnAppendMenu(wxCommandEvent& event);
     void OnInsertMenu(wxCommandEvent& event);
@@ -112,37 +87,23 @@ protected:
     void OnEnableMenu(wxCommandEvent& event);
     void OnGetLabelMenu(wxCommandEvent& event);
     void OnSetLabelMenu(wxCommandEvent& event);
-#if wxUSE_TEXTDLG
-    void OnFindMenu(wxCommandEvent& event);
-#endif
 
     void OnTestNormal(wxCommandEvent& event);
     void OnTestCheck(wxCommandEvent& event);
     void OnTestRadio(wxCommandEvent& event);
 
-    void OnUpdateSubMenuNormal(wxUpdateUIEvent& event);
-    void OnUpdateSubMenuCheck(wxUpdateUIEvent& event);
-    void OnUpdateSubMenuRadio(wxUpdateUIEvent& event);
-
-#if USE_CONTEXT_MENU
-    void OnContextMenu(wxContextMenuEvent& event);
+#ifdef __WXMSW__
+    void OnContextMenu(wxContextMenuEvent& event)
+        { ShowContextMenu(ScreenToClient(event.GetPosition())); }
 #else
     void OnRightUp(wxMouseEvent& event)
         { ShowContextMenu(event.GetPosition()); }
 #endif
 
     void OnMenuOpen(wxMenuEvent& event)
-        {
-#if USE_LOG_WINDOW
-            LogMenuOpenOrClose(event, _T("opened")); event.Skip();
-#endif
-        }
+        { LogMenuOpenOrClose(event, _T("opened")); }
     void OnMenuClose(wxMenuEvent& event)
-        {
-#if USE_LOG_WINDOW
-          LogMenuOpenOrClose(event, _T("closed")); event.Skip();
-#endif
-       }
+        { LogMenuOpenOrClose(event, _T("closed")); }
 
     void OnUpdateCheckMenuItemUI(wxUpdateUIEvent& event);
 
@@ -162,10 +123,8 @@ private:
     // the count of dummy menus already created
     size_t m_countDummy;
 
-#if USE_LOG_WINDOW
     // the control used for logging
     wxTextCtrl *m_textctrl;
-#endif
 
     // the previous log target
     wxLog *m_logOld;
@@ -198,10 +157,8 @@ private:
 
 enum
 {
-    Menu_File_Quit = wxID_EXIT,
-#if USE_LOG_WINDOW
+    Menu_File_Quit = 100,
     Menu_File_ClearLog,
-#endif
 
     Menu_MenuBar_Toggle = 200,
     Menu_MenuBar_Append,
@@ -209,10 +166,7 @@ enum
     Menu_MenuBar_Delete,
     Menu_MenuBar_Enable,
     Menu_MenuBar_GetLabel,
-#if wxUSE_TEXTDLG
     Menu_MenuBar_SetLabel,
-    Menu_MenuBar_FindMenu,
-#endif
 
     Menu_Menu_Append = 300,
     Menu_Menu_AppendSub,
@@ -221,13 +175,8 @@ enum
     Menu_Menu_Enable,
     Menu_Menu_Check,
     Menu_Menu_GetLabel,
-#if wxUSE_TEXTDLG
     Menu_Menu_SetLabel,
-#endif
     Menu_Menu_GetInfo,
-#if wxUSE_TEXTDLG
-    Menu_Menu_FindItem,
-#endif
 
     Menu_Test_Normal = 400,
     Menu_Test_Check,
@@ -235,20 +184,13 @@ enum
     Menu_Test_Radio2,
     Menu_Test_Radio3,
 
-    Menu_SubMenu = 450,
-    Menu_SubMenu_Normal,
-    Menu_SubMenu_Check,
-    Menu_SubMenu_Radio1,
-    Menu_SubMenu_Radio2,
-    Menu_SubMenu_Radio3,
-
     Menu_Dummy_First = 500,
     Menu_Dummy_Second,
     Menu_Dummy_Third,
     Menu_Dummy_Fourth,
     Menu_Dummy_Last,
 
-    Menu_Help_About = wxID_ABOUT,
+    Menu_Help_About = 1000,
 
     Menu_Popup_ToBeDeleted = 2000,
     Menu_Popup_ToBeGreyed,
@@ -264,9 +206,7 @@ enum
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_File_Quit,     MyFrame::OnQuit)
-#if USE_LOG_WINDOW
     EVT_MENU(Menu_File_ClearLog, MyFrame::OnClearLog)
-#endif
 
     EVT_MENU(Menu_Help_About, MyFrame::OnAbout)
 
@@ -276,10 +216,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_MenuBar_Delete,   MyFrame::OnDeleteMenu)
     EVT_MENU(Menu_MenuBar_Enable,   MyFrame::OnEnableMenu)
     EVT_MENU(Menu_MenuBar_GetLabel, MyFrame::OnGetLabelMenu)
-#if wxUSE_TEXTDLG
     EVT_MENU(Menu_MenuBar_SetLabel, MyFrame::OnSetLabelMenu)
-    EVT_MENU(Menu_MenuBar_FindMenu, MyFrame::OnFindMenu)
-#endif
 
     EVT_MENU(Menu_Menu_Append,    MyFrame::OnAppendMenuItem)
     EVT_MENU(Menu_Menu_AppendSub, MyFrame::OnAppendSubMenu)
@@ -288,13 +225,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_Menu_Enable,    MyFrame::OnEnableMenuItem)
     EVT_MENU(Menu_Menu_Check,     MyFrame::OnCheckMenuItem)
     EVT_MENU(Menu_Menu_GetLabel,  MyFrame::OnGetLabelMenuItem)
-#if wxUSE_TEXTDLG
     EVT_MENU(Menu_Menu_SetLabel,  MyFrame::OnSetLabelMenuItem)
-#endif
     EVT_MENU(Menu_Menu_GetInfo,   MyFrame::OnGetMenuItemInfo)
-#if wxUSE_TEXTDLG
-    EVT_MENU(Menu_Menu_FindItem,  MyFrame::OnFindMenuItem)
-#endif
 
     EVT_MENU(Menu_Test_Normal,    MyFrame::OnTestNormal)
     EVT_MENU(Menu_Test_Check,     MyFrame::OnTestCheck)
@@ -302,17 +234,11 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_Test_Radio2,    MyFrame::OnTestRadio)
     EVT_MENU(Menu_Test_Radio3,    MyFrame::OnTestRadio)
 
-    EVT_UPDATE_UI(Menu_SubMenu_Normal,    MyFrame::OnUpdateSubMenuNormal)
-    EVT_UPDATE_UI(Menu_SubMenu_Check,     MyFrame::OnUpdateSubMenuCheck)
-    EVT_UPDATE_UI(Menu_SubMenu_Radio1,    MyFrame::OnUpdateSubMenuRadio)
-    EVT_UPDATE_UI(Menu_SubMenu_Radio2,    MyFrame::OnUpdateSubMenuRadio)
-    EVT_UPDATE_UI(Menu_SubMenu_Radio3,    MyFrame::OnUpdateSubMenuRadio)
-
     EVT_MENU_RANGE(Menu_Dummy_First, Menu_Dummy_Last, MyFrame::OnDummy)
 
     EVT_UPDATE_UI(Menu_Menu_Check, MyFrame::OnUpdateCheckMenuItemUI)
 
-#if USE_CONTEXT_MENU
+#ifdef __WXMSW__
     EVT_CONTEXT_MENU(MyFrame::OnContextMenu)
 #else
     EVT_RIGHT_UP(MyFrame::OnRightUp)
@@ -325,7 +251,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MyEvtHandler, wxEvtHandler)
-    EVT_MENU(wxID_ANY, MyEvtHandler::OnMenuEvent)
+    EVT_MENU(-1, MyEvtHandler::OnMenuEvent)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -345,15 +271,15 @@ bool MyApp::OnInit()
     // Create the main frame window
     MyFrame* frame = new MyFrame;
 
-    frame->Show(true);
+    frame->Show(TRUE);
 
 #if wxUSE_STATUSBAR
-    frame->SetStatusText(_T("Welcome to wxWidgets menu sample"));
+    frame->SetStatusText(_T("Welcome to wxWindows menu sample"));
 #endif // wxUSE_STATUSBAR
 
     SetTopWindow(frame);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -362,11 +288,10 @@ bool MyApp::OnInit()
 
 // Define my frame constructor
 MyFrame::MyFrame()
-       : wxFrame((wxFrame *)NULL, wxID_ANY, _T("wxWidgets menu sample"))
+       : wxFrame((wxFrame *)NULL, -1, _T("wxWindows menu sample"),
+                 wxDefaultPosition, wxSize(400, 250))
 {
-#if USE_LOG_WINDOW
     m_textctrl = NULL;
-#endif
     m_menu = NULL;
     m_countDummy = 0;
     m_logOld = NULL;
@@ -378,15 +303,11 @@ MyFrame::MyFrame()
     // create the menubar
     wxMenu *fileMenu = new wxMenu;
 
-#if USE_LOG_WINDOW
     wxMenuItem *item = new wxMenuItem(fileMenu, Menu_File_ClearLog,
                                       _T("Clear &log\tCtrl-L"));
-#if wxUSE_OWNER_DRAWN
     item->SetBitmap(copy_xpm);
-#endif
     fileMenu->Append(item);
     fileMenu->AppendSeparator();
-#endif
     fileMenu->Append(Menu_File_Quit, _T("E&xit\tAlt-X"), _T("Quit menu sample"));
 
     wxMenu *menubarMenu = new wxMenu;
@@ -397,29 +318,15 @@ MyFrame::MyFrame()
     menubarMenu->Append(Menu_MenuBar_Delete, _T("&Delete menu\tCtrl-D"),
                         _T("Delete the last menu from the menubar"));
     menubarMenu->Append(Menu_MenuBar_Toggle, _T("&Toggle menu\tCtrl-T"),
-                        _T("Toggle the first menu in the menubar"), true);
+                        _T("Toggle the first menu in the menubar"), TRUE);
     menubarMenu->AppendSeparator();
     menubarMenu->Append(Menu_MenuBar_Enable, _T("&Enable menu\tCtrl-E"),
-                        _T("Enable or disable the last menu"), true);
+                        _T("Enable or disable the last menu"), TRUE);
     menubarMenu->AppendSeparator();
     menubarMenu->Append(Menu_MenuBar_GetLabel, _T("&Get menu label\tCtrl-G"),
                         _T("Get the label of the last menu"));
-#if wxUSE_TEXTDLG
     menubarMenu->Append(Menu_MenuBar_SetLabel, _T("&Set menu label\tCtrl-S"),
                         _T("Change the label of the last menu"));
-    menubarMenu->AppendSeparator();
-    menubarMenu->Append(Menu_MenuBar_FindMenu, _T("&Find menu from label\tCtrl-F"),
-                        _T("Find a menu by searching for its label"));
-#endif
-
-    wxMenu* subMenu = new wxMenu;
-    subMenu->Append(Menu_SubMenu_Normal, _T("&Normal submenu item"), _T("Disabled submenu item"));
-    subMenu->AppendCheckItem(Menu_SubMenu_Check, _T("&Unchecked submenu item"), _T("Unchecked submenu item"));
-    subMenu->AppendRadioItem(Menu_SubMenu_Radio1, _T("Radio item &1"), _T("Radio item"));
-    subMenu->AppendRadioItem(Menu_SubMenu_Radio2, _T("Radio item &2"), _T("Radio item"));
-    subMenu->AppendRadioItem(Menu_SubMenu_Radio3, _T("Radio item &3"), _T("Radio item"));
-
-    menubarMenu->Append(Menu_SubMenu, _T("Submenu"), subMenu);
 
     wxMenu *menuMenu = new wxMenu;
     menuMenu->Append(Menu_Menu_Append, _T("&Append menu item\tAlt-A"),
@@ -432,19 +339,17 @@ MyFrame::MyFrame()
                      _T("Delete the last menu item from the last menu"));
     menuMenu->AppendSeparator();
     menuMenu->Append(Menu_Menu_Enable, _T("&Enable menu item\tAlt-E"),
-                     _T("Enable or disable the last menu item"), true);
+                     _T("Enable or disable the last menu item"), TRUE);
     menuMenu->Append(Menu_Menu_Check, _T("&Check menu item\tAlt-C"),
-                     _T("Check or uncheck the last menu item"), true);
+                     _T("Check or uncheck the last menu item"), TRUE);
+    menuMenu->AppendSeparator();
+    menuMenu->Append(Menu_Menu_GetLabel, _T("&Get menu item label\tAlt-G"),
+                     _T("Get the label of the last menu item"));
+    menuMenu->Append(Menu_Menu_SetLabel, _T("&Set menu item label\tAlt-S"),
+                     _T("Change the label of the last menu item"));
     menuMenu->AppendSeparator();
     menuMenu->Append(Menu_Menu_GetInfo, _T("Get menu item in&fo\tAlt-F"),
                      _T("Show the state of the last menu item"));
-    menuMenu->Append(Menu_Menu_SetLabel, _T("Set menu item label\tAlt-L"),
-                     _T("Set the label of a menu item"));
-#if wxUSE_TEXTDLG
-    menuMenu->AppendSeparator();
-    menuMenu->Append(Menu_Menu_FindItem, _T("Find menu item from label"),
-                     _T("Find a menu item by searching for its label"));
-#endif
 
     wxMenu *testMenu = new wxMenu;
     testMenu->Append(Menu_Test_Normal, _T("&Normal item"));
@@ -467,10 +372,10 @@ MyFrame::MyFrame()
     menuBar->Append(helpMenu, _T("&Help"));
 
     // these items should be initially checked
-    menuBar->Check(Menu_MenuBar_Toggle, true);
-    menuBar->Check(Menu_MenuBar_Enable, true);
-    menuBar->Check(Menu_Menu_Enable, true);
-    menuBar->Check(Menu_Menu_Check, false);
+    menuBar->Check(Menu_MenuBar_Toggle, TRUE);
+    menuBar->Check(Menu_MenuBar_Enable, TRUE);
+    menuBar->Check(Menu_Menu_Enable, TRUE);
+    menuBar->Check(Menu_Menu_Check, FALSE);
 
     // associate the menu bar with the frame
     SetMenuBar(menuBar);
@@ -478,12 +383,11 @@ MyFrame::MyFrame()
     // intercept all menu events and log them in this custom event handler
     PushEventHandler(new MyEvtHandler(this));
 
-#if USE_LOG_WINDOW
     // create the log text window
-    m_textctrl = new wxTextCtrl(this, wxID_ANY, _T(""),
+    m_textctrl = new wxTextCtrl(this, -1, _T(""),
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_MULTILINE);
-    m_textctrl->SetEditable(false);
+    m_textctrl->SetEditable(FALSE);
 
     wxLog::SetTimestamp(NULL);
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_textctrl));
@@ -493,7 +397,6 @@ MyFrame::MyFrame()
                  _T("The commands from \"Menubar\" menu work with the ")
                  _T("menubar itself.\n\n")
                  _T("Right click the band below to test popup menus.\n"));
-#endif
 }
 
 MyFrame::~MyFrame()
@@ -501,12 +404,10 @@ MyFrame::~MyFrame()
     delete m_menu;
 
     // delete the event handler installed in ctor
-    PopEventHandler(true);
+    PopEventHandler(TRUE);
 
-#if USE_LOG_WINDOW
     // restore old logger
     delete wxLog::SetActiveTarget(m_logOld);
-#endif
 }
 
 wxMenu *MyFrame::CreateDummyMenu(wxString *title)
@@ -514,11 +415,11 @@ wxMenu *MyFrame::CreateDummyMenu(wxString *title)
     wxMenu *menu = new wxMenu;
     menu->Append(Menu_Dummy_First, _T("&First item\tCtrl-F1"));
     menu->AppendSeparator();
-    menu->AppendCheckItem(Menu_Dummy_Second, _T("&Second item\tCtrl-F2"));
+    menu->Append(Menu_Dummy_Second, _T("&Second item\tCtrl-F2"), _T(""), TRUE);
 
     if ( title )
     {
-        title->Printf(_T("Dummy menu &%u"), (unsigned)++m_countDummy);
+        title->Printf(wxT("Dummy menu &%u"), (unsigned)++m_countDummy);
     }
 
     return menu;
@@ -529,10 +430,10 @@ wxMenuItem *MyFrame::GetLastMenuItem() const
     wxMenuBar *menubar = GetMenuBar();
     wxMenu *menu = menubar->GetMenu(menubar->GetMenuCount() - 1);
 
-    wxMenuItemList::compatibility_iterator node = menu->GetMenuItems().GetLast();
+    wxMenuItemList::Node *node = menu->GetMenuItems().GetLast();
     if ( !node )
     {
-        wxLogWarning(_T("No last item in the last menu!"));
+        wxLogWarning(wxT("No last item in the last menu!"));
 
         return NULL;
     }
@@ -548,11 +449,11 @@ void MyFrame::LogMenuEvent(const wxCommandEvent& event)
     if ( !GetMenuBar()->FindItem(id) )
         return;
 
-    wxString msg = wxString::Format(_T("Menu command %d"), id);
+    wxString msg = wxString::Format(wxT("Menu command %d"), id);
     if ( GetMenuBar()->FindItem(id)->IsCheckable() )
     {
-        msg += wxString::Format(_T(" (the item is currently %schecked)"),
-                                event.IsChecked() ? _T("") : _T("not "));
+        msg += wxString::Format(wxT(" (the item is currently %schecked)"),
+                                event.IsChecked() ? "" : "not ");
     }
 
     wxLogMessage(msg);
@@ -564,20 +465,18 @@ void MyFrame::LogMenuEvent(const wxCommandEvent& event)
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
-#if USE_LOG_WINDOW
 void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
 {
     m_textctrl->Clear();
 }
-#endif
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    (void)wxMessageBox(_T("wxWidgets menu sample\n(c) 1999-2001 Vadim Zeitlin"),
-                       _T("About wxWidgets menu sample"),
+    (void)wxMessageBox(_T("wxWindows menu sample\n© 1999-2001 Vadim Zeitlin"),
+                       _T("About wxWindows menu sample"),
                        wxICON_INFORMATION);
 }
 
@@ -589,7 +488,7 @@ void MyFrame::OnDeleteMenu(wxCommandEvent& WXUNUSED(event))
     if ( count == 2 )
     {
         // don't let delete the first 2 menus
-        wxLogError(_T("Can't delete any more menus"));
+        wxLogError(wxT("Can't delete any more menus"));
     }
     else
     {
@@ -642,11 +541,10 @@ void MyFrame::OnGetLabelMenu(wxCommandEvent& WXUNUSED(event))
 
     wxCHECK_RET( count, _T("no last menu?") );
 
-    wxLogMessage(_T("The label of the last menu item is '%s'"),
+    wxLogMessage(wxT("The label of the last menu item is '%s'"),
                  mbar->GetLabelTop(count - 1).c_str());
 }
 
-#if wxUSE_TEXTDLG
 void MyFrame::OnSetLabelMenu(wxCommandEvent& WXUNUSED(event))
 {
     wxMenuBar *mbar = GetMenuBar();
@@ -668,40 +566,9 @@ void MyFrame::OnSetLabelMenu(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void MyFrame::OnFindMenu(wxCommandEvent& WXUNUSED(event))
-{
-    wxMenuBar *mbar = GetMenuBar();
-    size_t count = mbar->GetMenuCount();
-
-    wxCHECK_RET( count, _T("no last menu?") );
-
-    wxString label = wxGetTextFromUser
-                     (
-                        _T("Enter label to search for: "),
-                        _T("Find menu"),
-                        _T(""),
-                        this
-                     );
-
-    if ( !label.empty() )
-    {
-        int index = mbar->FindMenu(label);
-
-        if (index == wxNOT_FOUND)
-        {
-            wxLogWarning(_T("No menu with label '%s'"), label.c_str());
-        }
-        else
-        {
-            wxLogMessage(_T("Menu %d has label '%s'"), index, label.c_str());
-        }
-    }
-}
-#endif
-
 void MyFrame::OnDummy(wxCommandEvent& event)
 {
-    wxLogMessage(_T("Dummy item #%d"), event.GetId() - Menu_Dummy_First + 1);
+    wxLogMessage(wxT("Dummy item #%d"), event.GetId() - Menu_Dummy_First + 1);
 }
 
 void MyFrame::OnAppendMenuItem(wxCommandEvent& WXUNUSED(event))
@@ -711,14 +578,14 @@ void MyFrame::OnAppendMenuItem(wxCommandEvent& WXUNUSED(event))
 
     menu->AppendSeparator();
     menu->Append(Menu_Dummy_Third, _T("&Third dummy item\tCtrl-F3"),
-                 _T("Checkable item"), true);
+                 _T("Checkable item"), TRUE);
 }
 
 void MyFrame::OnAppendSubMenu(wxCommandEvent& WXUNUSED(event))
 {
     wxMenuBar *menubar = GetMenuBar();
 
-    wxMenu *menu = menubar->GetMenu(menubar->GetMenuCount() - 2);
+    wxMenu *menu = menubar->GetMenu(menubar->GetMenuCount() - 1);
 
     menu->Append(Menu_Dummy_Last, _T("&Dummy sub menu"),
                  CreateDummyMenu(NULL), _T("Dummy sub menu help"));
@@ -732,7 +599,7 @@ void MyFrame::OnDeleteMenuItem(wxCommandEvent& WXUNUSED(event))
     size_t count = menu->GetMenuItemCount();
     if ( !count )
     {
-        wxLogWarning(_T("No items to delete!"));
+        wxLogWarning(wxT("No items to delete!"));
     }
     else
     {
@@ -782,12 +649,11 @@ void MyFrame::OnGetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
 
     if ( item )
     {
-        wxLogMessage(_T("The label of the last menu item is '%s'"),
+        wxLogMessage(wxT("The label of the last menu item is '%s'"),
                      item->GetLabel().c_str());
     }
 }
 
-#if wxUSE_TEXTDLG
 void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
 {
     wxMenuItem *item = GetLastMenuItem();
@@ -801,7 +667,6 @@ void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
                             item->GetLabel(),
                             this
                          );
-        label.Replace( _T("\\t"), _T("\t") );
 
         if ( !label.empty() )
         {
@@ -809,7 +674,6 @@ void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
         }
     }
 }
-#endif
 
 void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
 {
@@ -820,7 +684,7 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
         wxString msg;
         msg << _T("The item is ") << (item->IsEnabled() ? _T("enabled")
                                                     : _T("disabled"))
-            << _T('\n');
+            << '\n';
 
         if ( item->IsCheckable() )
         {
@@ -836,11 +700,11 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
 
             int flags = accel->GetFlags();
             if ( flags & wxACCEL_ALT )
-                msg << _T("Alt-");
+                msg << wxT("Alt-");
             if ( flags & wxACCEL_CTRL )
-                msg << _T("Ctrl-");
+                msg << wxT("Ctrl-");
             if ( flags & wxACCEL_SHIFT )
-                msg << _T("Shift-");
+                msg << wxT("Shift-");
 
             int code = accel->GetKeyCode();
             switch ( code )
@@ -857,7 +721,7 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
                 case WXK_F10:
                 case WXK_F11:
                 case WXK_F12:
-                    msg << _T('F') << code - WXK_F1 + 1;
+                    msg << wxT('F') << code - WXK_F1 + 1;
                     break;
 
                 // if there are any other keys wxGetAccelFromString() may return,
@@ -871,7 +735,7 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
                         break;
                     }
 
-                    wxFAIL_MSG( _T("unknown keyboard accel") );
+                    wxFAIL_MSG( wxT("unknown keyboard accel") );
             }
 
             delete accel;
@@ -886,44 +750,6 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-#if wxUSE_TEXTDLG
-void MyFrame::OnFindMenuItem(wxCommandEvent& WXUNUSED(event))
-{
-    wxMenuBar *mbar = GetMenuBar();
-    size_t count = mbar->GetMenuCount();
-
-    wxCHECK_RET( count, _T("no last menu?") );
-
-    wxString label = wxGetTextFromUser
-                     (
-                        _T("Enter label to search for: "),
-                        _T("Find menu item"),
-                        _T(""),
-                        this
-                     );
-
-    if ( !label.empty() )
-    {
-        size_t menuindex;
-        int index = wxNOT_FOUND;
-
-        for (menuindex = 0; (menuindex < count) && (index == wxNOT_FOUND); ++menuindex)
-        {
-            index = mbar->FindMenuItem(mbar->GetMenu(menuindex)->GetTitle(), label);
-        }
-        if (index == wxNOT_FOUND)
-        {
-            wxLogWarning(_T("No menu item with label '%s'"), label.c_str());
-        }
-        else
-        {
-            wxLogMessage(_T("Menu item %d in menu %lu has label '%s'"),
-                         index, (unsigned long)menuindex, label.c_str());
-        }
-    }
-}
-#endif
-
 void MyFrame::ShowContextMenu(const wxPoint& pos)
 {
     wxMenu menu(_T("Test popup"));
@@ -931,15 +757,14 @@ void MyFrame::ShowContextMenu(const wxPoint& pos)
     menu.Append(Menu_Help_About, _T("&About"));
     menu.Append(Menu_Popup_Submenu, _T("&Submenu"), CreateDummyMenu(NULL));
     menu.Append(Menu_Popup_ToBeDeleted, _T("To be &deleted"));
-    menu.AppendCheckItem(Menu_Popup_ToBeChecked, _T("To be &checked"));
-    menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"),
-                _T("This menu item should be initially greyed out"));
+    menu.Append(Menu_Popup_ToBeChecked, _T("To be &checked"), _T(""), TRUE);
+    menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"));
     menu.AppendSeparator();
     menu.Append(Menu_File_Quit, _T("E&xit"));
 
     menu.Delete(Menu_Popup_ToBeDeleted);
-    menu.Check(Menu_Popup_ToBeChecked, true);
-    menu.Enable(Menu_Popup_ToBeGreyed, false);
+    menu.Check(Menu_Popup_ToBeChecked, TRUE);
+    menu.Enable(Menu_Popup_ToBeGreyed, FALSE);
 
     PopupMenu(&menu, pos.x, pos.y);
 
@@ -951,7 +776,7 @@ void MyFrame::ShowContextMenu(const wxPoint& pos)
 #endif // 0
 }
 
-void MyFrame::OnTestNormal(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnTestNormal(wxCommandEvent& event)
 {
     wxLogMessage(_T("Normal item selected"));
 }
@@ -968,66 +793,20 @@ void MyFrame::OnTestRadio(wxCommandEvent& event)
                  event.GetId() - Menu_Test_Radio1 + 1);
 }
 
-#if USE_LOG_WINDOW
 void MyFrame::LogMenuOpenOrClose(const wxMenuEvent& event, const wxChar *what)
 {
-    wxString msg;
-    msg << _T("A ")
-        << ( event.IsPopup() ? _T("popup ") : _T("") )
-        << _T("menu has been ")
-        << what
-        << _T(".");
-
-    wxLogStatus(this, msg.c_str());
-}
-#endif
-
-void MyFrame::OnUpdateSubMenuNormal(wxUpdateUIEvent& event)
-{
-    event.Enable(false);
+    wxLogStatus(this, _T("A %smenu has been %s."),
+                event.IsPopup() ? _T("popup ") : _T(""), what);
 }
 
-void MyFrame::OnUpdateSubMenuCheck(wxUpdateUIEvent& event)
+void MyFrame::OnSize(wxSizeEvent& event)
 {
-    event.Enable(true);
-    event.Check(true);
-}
-
-void MyFrame::OnUpdateSubMenuRadio(wxUpdateUIEvent& event)
-{
-    int which = (event.GetId() - Menu_SubMenu_Radio1 + 1);
-    if (which == 2)
-        event.Check(true);
-    else
-        event.Check(false);
-}
-
-#if USE_CONTEXT_MENU
-void MyFrame::OnContextMenu(wxContextMenuEvent& event)
-{
-    wxPoint point = event.GetPosition();
-    // If from keyboard
-    if (point.x == -1 && point.y == -1) {
-        wxSize size = GetSize();
-        point.x = size.x / 2;
-        point.y = size.y / 2;
-    } else {
-        point = ScreenToClient(point);
-    }
-    ShowContextMenu(point);
-}
-#endif
-
-void MyFrame::OnSize(wxSizeEvent& WXUNUSED(event))
-{
-#if USE_LOG_WINDOW
     if ( !m_textctrl )
         return;
 
     // leave a band below for popup menu testing
     wxSize size = GetClientSize();
     m_textctrl->SetSize(0, 0, size.x, (3*size.y)/4);
-#endif
 
     // this is really ugly but we have to do it as we can't just call
     // event.Skip() because wxFrameBase would make the text control fill the

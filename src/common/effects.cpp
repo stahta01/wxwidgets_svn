@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "effects.h"
 #endif
 
@@ -122,5 +122,5 @@ bool wxEffects::TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap)
     }
 #endif // wxUSE_PALETTE
 
-    return true;
+    return TRUE;
 }

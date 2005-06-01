@@ -13,7 +13,7 @@
 #ifndef _WX_CHECKLST_H_
 #define _WX_CHECKLST_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "checklst.h"
 #endif
 
@@ -35,14 +35,6 @@ public:
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxListBoxNameStr);
 
-    wxCheckListBox(wxWindow *parent, wxWindowID id,
-        const wxPoint& pos,
-        const wxSize& size,
-        const wxArrayString& choices,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr);
-
     bool Create(wxWindow *parent, wxWindowID id,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -51,17 +43,9 @@ public:
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxListBoxNameStr);
     
-    bool Create(wxWindow *parent, wxWindowID id,
-        const wxPoint& pos,
-        const wxSize& size,
-        const wxArrayString& choices,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr);
-    
     // items may be checked
     bool IsChecked(size_t uiIndex) const;
-    void Check(size_t uiIndex, bool bCheck = true);
+    void Check(size_t uiIndex, bool bCheck = TRUE);
 
     // override base class functions
     virtual int DoAppend(const wxString& item);

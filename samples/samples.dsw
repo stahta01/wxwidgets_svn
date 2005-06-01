@@ -411,7 +411,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ipcclient"=.\ipc\ipc_client.dsp - Package Owner=<4>
+Project: "ipcclient"=.\ipc\client.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -423,7 +423,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ipcserver"=.\ipc\ipc_server.dsp - Package Owner=<4>
+Project: "ipcserver"=.\ipc\server.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -555,6 +555,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "newgrid"=.\newgrid\newgrid.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "notebook"=.\notebook\notebook.dsp - Package Owner=<4>
 
 Package=<5>
@@ -615,6 +627,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "proplist"=.\proplist\proplist.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "propsize"=.\propsize\propsize.dsp - Package Owner=<4>
 
 Package=<5>
@@ -628,6 +652,18 @@ Package=<4>
 ###############################################################################
 
 Project: "regtest"=.\regtest\regtest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "resource"=.\resource\resource.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -687,7 +723,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "socketclient"=.\sockets\sockets_client.dsp - Package Owner=<4>
+Project: "socketclient"=.\sockets\client.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -699,7 +735,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "socketserver"=.\sockets\sockets_server.dsp - Package Owner=<4>
+Project: "socketserver"=.\sockets\server.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -783,7 +819,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "treectrl"=.\treectrl\treectrl.dsp - Package Owner=<4>
+Project: "treetest"=.\treectrl\treetest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "treelay"=.\treelay\treelay.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

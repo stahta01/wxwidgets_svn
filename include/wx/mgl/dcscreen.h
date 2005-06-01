@@ -10,7 +10,7 @@
 #ifndef __WX_DCSCREEN_H__
 #define __WX_DCSCREEN_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dcscreen.h"
 #endif
 

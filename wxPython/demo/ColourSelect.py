@@ -15,48 +15,45 @@
 #              - use sizers
 #              - other minor "improvements"
 #----------------------------------------------------------------------------
-# 
 
-import  wx
-import  wx.lib.colourselect as  csel
+from wxPython.wx import *
+from wxPython.lib.colourselect import *
 
 #----------------------------------------------------------------------------
 
-class TestColourSelect(wx.Panel):
+class TestColourSelect(wxPanel):
     def __init__(self, parent, log):
         self.log = log
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.SetAutoLayout(True)
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        mainSizer = wxBoxSizer(wxVERTICAL)
         self.SetSizer(mainSizer)
-        t = wx.StaticText(self, -1,
+        t = wxStaticText(self, -1,
                          "This example uses a colour selection control based on the wxButton\n"
                          "and wxColourDialog Classes.  Click Button to get Colour Values")
-        mainSizer.Add(t, 0, wx.ALL, 3)
+        mainSizer.Add(t, 0, wxALL, 3)
 
-        b = wx.Button(self, -1, "Show All Colours")
-        self.Bind(wx.EVT_BUTTON, self.OnShowAll, id=b.GetId())
-        mainSizer.Add(b, 0, wx.ALL, 3)
+        b = wxButton(self, -1, "Show All Colours")
+        EVT_BUTTON(self, b.GetId(), self.OnShowAll)
+        mainSizer.Add(b, 0, wxALL, 3)
 
-        buttonSizer = wx.FlexGridSizer(1, 2) # sizer to contain all the example buttons
+        buttonSizer = wxFlexGridSizer(1, 2) # sizer to contain all the example buttons
 
         # show a button with all default values
-        self.colourDefaults = csel.ColourSelect(self, -1)
-
-        self.Bind(csel.EVT_COLOURSELECT, self.OnSelectColour, id=self.colourDefaults.GetId())
-        
+        self.colourDefaults = ColourSelect(self, -1)
+        EVT_COLOURSELECT(self.colourDefaults, self.colourDefaults.GetId(), self.OnSelectColour)
         buttonSizer.AddMany([
-            (wx.StaticText(self, -1, "Default Colour/Size"), 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
-            (self.colourDefaults, 0, wx.ALL, 3),
+            (wxStaticText(self, -1, "Default Colour/Size"), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL),
+            (self.colourDefaults, 0, wxALL, 3),
             ])
 
         # build several examples of buttons with different colours and sizes
         buttonData = [
-            ("Default Size",         (255, 255, 0),   wx.DefaultSize, ""),
+            ("Default Size",         (255, 255, 0),   wxDefaultSize, ""),
             ("Another Size",         (255, 0, 255),   (60, 20),      ""),
-            ("Another Colour",       (0, 255, 0),     wx.DefaultSize, ""),
+            ("Another Colour",       (0, 255, 0),     wxDefaultSize, ""),
             ("Larger Size",          (0, 0, 255),     (60, 60),      ""),
-            ("With a Label",         (127, 0, 255),   wx.DefaultSize, "Colour..."),
+            ("With a Label",         (127, 0, 255),   wxDefaultSize, "Colour..."),
             ("Another Colour/Label", (255, 100, 130), (120, -1),     "Choose Colour..."),
             ]
 
@@ -64,17 +61,15 @@ class TestColourSelect(wx.Panel):
 
         # build each button and save a reference to it
         for name, color, size, label in buttonData:
-            b = csel.ColourSelect(self, -1, label, color, size = size)
-
-            b.Bind(csel.EVT_COLOURSELECT, self.OnSelectColour)
+            b = ColourSelect(self, -1, label, color, size = size)
+            EVT_COLOURSELECT(b, b.GetId(), self.OnSelectColour)
             self.buttonRefs.append((name, b))  # store reference to button
-
             buttonSizer.AddMany([
-                (wx.StaticText(self, -1, name), 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
-                (b, 0, wx.ALL, 3),
+                (wxStaticText(self, -1, name), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL),
+                (b, 0, wxALL, 3),
                 ])
 
-        mainSizer.Add(buttonSizer, 0, wx.ALL, 3)
+        mainSizer.Add(buttonSizer, 0, wxALL, 3)
         self.Layout()
 
     def OnSelectColour(self, event):
@@ -104,13 +99,17 @@ def runTest(frame, nb, log):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 overview = """\
-A coloured button that when clicked allows the user to select a colour from the wxColourDialog.
+
 """
-
-
-if __name__ == '__main__':
-    import sys,os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
-

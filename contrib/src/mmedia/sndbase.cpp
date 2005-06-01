@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999, 2000
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "sndbase.cpp"
@@ -35,8 +35,8 @@ wxSoundFormatBase::~wxSoundFormatBase()
 
 wxSoundFormatBase *wxSoundFormatBase::Clone() const
 {
-    wxLogFatalError(wxT("In wxSoundFormatBase::Clone() but I should")
-                    wxT(" not be there"));
+    wxLogFatalError(wxT("In wxSoundFormatBase::Clone() but I should"
+                        " not be there"));
     return NULL;
 }
 
@@ -73,7 +73,7 @@ wxSoundStream::~wxSoundStream()
 // important function of the wxSoundStream class. It prepares the stream to
 // receive or send the data in a strict format. Normally, the sound stream
 // should be ready to accept any format it is asked to manage but in certain
-// cases, it really cannot: in that case it returns false. To have more
+// cases, it really cannot: in that case it returns FALSE. To have more
 // details in the functionnalities of SetSoundFormat see
 // wxSoundRouterStream::SetSoundFormat()
 // --------------------------------------------------------------------------
@@ -85,7 +85,7 @@ bool wxSoundStream::SetSoundFormat(const wxSoundFormatBase& format)
     
     // create a new one by cloning the format passed in parameter
     m_sndformat = format.Clone();
-    return true;
+    return TRUE;
 }
 
 

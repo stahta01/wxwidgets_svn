@@ -79,9 +79,9 @@ static inline FIND_DATA FindFirst(
     FIND_DATA                   hDir = HDIR_CREATE;
     FIND_ATTR                   rc;
 
-    rc = ::DosFindFirst( (PSZ)rsSpec.c_str()
+    rc = ::DosFindFirst( rsSpec.c_str()
                         ,&hDir
-                        ,0x37 // was: FILE_NORMAL
+			,0x37 // was: FILE_NORMAL
                         ,pFinddata
                         ,sizeof(FILEFINDBUF3)
                         ,&ulFindCount
@@ -110,7 +110,7 @@ static const wxChar* GetNameFromFindData(
   FIND_STRUCT*                      pFinddata
 )
 {
-    return (wxChar*)pFinddata->achName;
+    return pFinddata->achName;
 }
 
 static const FIND_ATTR GetAttrFromFindData(
@@ -213,7 +213,7 @@ bool wxDirData::Read(
   wxString*                         psFilename
 )
 {
-    bool                            bFirst = false;
+    bool                            bFirst = FALSE;
 
     FILEFINDBUF3                    vFinddata;
     #define PTR_TO_FINDDATA (&vFinddata)
@@ -234,12 +234,12 @@ bool wxDirData::Read(
         m_vFinddata = FindFirst( sFilespec
                                 ,PTR_TO_FINDDATA
                                );
-        bFirst = true;
+        bFirst = TRUE;
     }
 
     if ( !IsFindDataOk(m_vFinddata) )
     {
-        return false;
+        return FALSE;
     }
 
     const wxChar*                   zName;
@@ -249,7 +249,7 @@ bool wxDirData::Read(
     {
         if (bFirst)
         {
-            bFirst = false;
+            bFirst = FALSE;
         }
         else
         {
@@ -257,7 +257,7 @@ bool wxDirData::Read(
                           ,PTR_TO_FINDDATA
                          ))
             {
-                return false;
+                return FALSE;
             }
         }
 
@@ -309,7 +309,7 @@ bool wxDirData::Read(
         *psFilename = zName;
         break;
     }
-    return true;
+    return TRUE;
 } // end of wxDirData::Read
 
 // ----------------------------------------------------------------------------
@@ -321,7 +321,7 @@ bool wxDir::Exists(
   const wxString&                   rsDir
 )
 {
-    return wxDirExists(rsDir);
+    return wxPathExists(rsDir);
 } // end of wxDir::Exists
 
 // ----------------------------------------------------------------------------
@@ -343,7 +343,7 @@ bool wxDir::Open(
 {
     delete M_DIR;
     m_data = new wxDirData(rsDirname);
-    return true;
+    return TRUE;
 } // end of wxDir::Open
 
 bool wxDir::IsOpened() const
@@ -388,7 +388,7 @@ bool wxDir::GetFirst(
 , int                               nFlags
 ) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
     M_DIR->Rewind();
     M_DIR->SetFileSpec(rsFilespec);
     M_DIR->SetFlags(nFlags);
@@ -399,8 +399,8 @@ bool wxDir::GetNext(
   wxString*                         psFilename
 ) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
-    wxCHECK_MSG( psFilename, false, _T("bad pointer in wxDir::GetNext()") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( psFilename, FALSE, _T("bad pointer in wxDir::GetNext()") );
     return M_DIR->Read(psFilename);
 } // end of wxDir::GetNext
 

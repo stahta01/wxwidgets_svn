@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@
 
 #include "wx/toolbar.h"
 
-#if !defined(__WXMSW__)
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     #include "mondrian.xpm"
 #endif
 
@@ -109,8 +109,8 @@ bool MyApp::OnInit()
 {
     // Create the main frame window
 
-    frame = new MyFrame((wxFrame *)NULL, wxID_ANY, _T("MDI Demo"),
-                        wxDefaultPosition, wxSize(500, 400),
+    frame = new MyFrame((wxFrame *)NULL, -1, _T("MDI Demo"),
+                        wxPoint(-1, -1), wxSize(500, 400),
                         wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
 #ifdef __WXMSW__
 #if 0
@@ -145,15 +145,13 @@ bool MyApp::OnInit()
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
 
-#if wxUSE_STATUSBAR
     frame->CreateStatusBar();
-#endif // wxUSE_STATUSBAR
 
-    frame->Show(true);
+    frame->Show(TRUE);
 
     SetTopWindow(frame);
 
-    return true;
+    return TRUE;
 }
 
 // ---------------------------------------------------------------------------
@@ -170,14 +168,12 @@ MyFrame::MyFrame(wxWindow *parent,
        : wxMDIParentFrame(parent, id, title, pos, size,
                           style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
-    textWindow = new wxTextCtrl(this, wxID_ANY, _T("A help window"),
+    textWindow = new wxTextCtrl(this, -1, _T("A help window"),
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_MULTILINE | wxSUNKEN_BORDER);
 
-#if wxUSE_TOOLBAR
     CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
     InitToolBar(GetToolBar());
-#endif // wxUSE_TOOLBAR
 
     // Accelerators
     wxAcceleratorEntry entries[3];
@@ -213,7 +209,7 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    (void)wxMessageBox(_T("wxWidgets 2.0 MDI Demo\n")
+    (void)wxMessageBox(_T("wxWindows 2.0 MDI Demo\n")
                        _T("Author: Julian Smart (c) 1997\n")
                        _T("Usage: mdi.exe"), _T("About MDI Demo"));
 }
@@ -221,7 +217,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
 {
     // Make another frame, containing a canvas
-    MyChild *subframe = new MyChild(frame, _T("Canvas Frame"));
+    MyChild *subframe = new MyChild(frame, _T("Canvas Frame"),
+                                    wxPoint(-1, -1), wxSize(-1, -1),
+                                    wxDEFAULT_FRAME_STYLE);
 
     wxString title;
     title.Printf(_T("Canvas Frame %d"), ++gs_nFrames);
@@ -262,10 +260,8 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
     // Associate the menu bar with the frame
     subframe->SetMenuBar(menu_bar);
 
-#if wxUSE_STATUSBAR
     subframe->CreateStatusBar();
     subframe->SetStatusText(title);
-#endif // wxUSE_STATUSBAR
 
     int width, height;
     subframe->GetClientSize(&width, &height);
@@ -276,16 +272,10 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
     // Give it scrollbars
     canvas->SetScrollbars(20, 20, 50, 50);
 
-    subframe->Show(true);
+    subframe->Show(TRUE);
 }
 
-void MyFrame::OnSize(wxSizeEvent& 
-                                  #ifdef __WXUNIVERSAL__
-                                  event
-                                  #else
-                                  WXUNUSED(event)
-                                  #endif
-                                  )
+void MyFrame::OnSize(wxSizeEvent& event)
 {
     int w, h;
     GetClientSize(&w, &h);
@@ -301,7 +291,6 @@ void MyFrame::OnSize(wxSizeEvent&
 #endif
 }
 
-#if wxUSE_TOOLBAR
 void MyFrame::InitToolBar(wxToolBar* toolBar)
 {
     wxBitmap* bitmaps[8];
@@ -318,24 +307,24 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
     int width = 24;
     int currentX = 5;
 
-    toolBar->AddTool( MDI_NEW_WINDOW, *(bitmaps[0]), wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("New file"));
+    toolBar->AddTool( MDI_NEW_WINDOW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("New file"));
     currentX += width + 5;
-    toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Open file"));
+    toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Open file"));
     currentX += width + 5;
-    toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Save file"));
-    currentX += width + 5;
-    toolBar->AddSeparator();
-    toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Copy"));
-    currentX += width + 5;
-    toolBar->AddTool(4, *bitmaps[4], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Cut"));
-    currentX += width + 5;
-    toolBar->AddTool(5, *bitmaps[5], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Paste"));
+    toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Save file"));
     currentX += width + 5;
     toolBar->AddSeparator();
-    toolBar->AddTool(6, *bitmaps[6], wxNullBitmap, false, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Print"));
+    toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Copy"));
+    currentX += width + 5;
+    toolBar->AddTool(4, *bitmaps[4], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Cut"));
+    currentX += width + 5;
+    toolBar->AddTool(5, *bitmaps[5], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Paste"));
     currentX += width + 5;
     toolBar->AddSeparator();
-    toolBar->AddTool( MDI_ABOUT, *bitmaps[7], wxNullBitmap, true, currentX, wxDefaultCoord, (wxObject *) NULL, _T("Help"));
+    toolBar->AddTool(6, *bitmaps[6], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, _T("Print"));
+    currentX += width + 5;
+    toolBar->AddSeparator();
+    toolBar->AddTool(7, *bitmaps[7], wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, _T("Help"));
 
     toolBar->Realize();
 
@@ -343,7 +332,6 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
     for (i = 0; i < 8; i++)
         delete bitmaps[i];
 }
-#endif // wxUSE_TOOLBAR
 
 // ---------------------------------------------------------------------------
 // MyCanvas
@@ -351,14 +339,14 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
 
 // Define a constructor for my canvas
 MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size)
-        : wxScrolledWindow(parent, wxID_ANY, pos, size,
+        : wxScrolledWindow(parent, -1, pos, size,
                            wxSUNKEN_BORDER |
                            wxNO_FULL_REPAINT_ON_RESIZE |
                            wxVSCROLL | wxHSCROLL)
 {
     SetBackgroundColour(wxColour(_T("WHITE")));
 
-    m_dirty = false;
+    m_dirty = FALSE;
 }
 
 // Define the repainting behaviour
@@ -403,7 +391,7 @@ void MyCanvas::OnEvent(wxMouseEvent& event)
         dc.SetPen(*wxBLACK_PEN);
         dc.DrawLine(xpos, ypos, pt.x, pt.y);
 
-        m_dirty = true;
+        m_dirty = TRUE;
     }
 
     xpos = pt.x;
@@ -414,9 +402,11 @@ void MyCanvas::OnEvent(wxMouseEvent& event)
 // MyChild
 // ---------------------------------------------------------------------------
 
-MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title)
-       : wxMDIChildFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
-                         wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
+MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title,
+                 const wxPoint& pos, const wxSize& size,
+                 const long style)
+       : wxMDIChildFrame(parent, -1, title, pos, size,
+                         style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
     canvas = (MyCanvas *) NULL;
     my_children.Append(this);
@@ -432,7 +422,7 @@ MyChild::~MyChild()
 
 void MyChild::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void MyChild::OnRefresh(wxCommandEvent& WXUNUSED(event))

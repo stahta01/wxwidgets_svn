@@ -43,26 +43,26 @@ GENERICOBJS= $(GENDIR)\busyinfo.obj \
 		$(GENDIR)\numdlgg.obj \
 		$(GENDIR)\panelg.obj \
 		$(GENDIR)\progdlgg.obj \
-		$(GENDIR)\renderg.obj \
+		$(GENDIR)\prop.obj \
+		$(GENDIR)\propform.obj \
+		$(GENDIR)\proplist.obj \
 		$(GENDIR)\sashwin.obj \
 		$(GENDIR)\scrlwing.obj \
-		$(GENDIR)\selstore.obj \
 		$(GENDIR)\spinctlg.obj \
 		$(GENDIR)\splash.obj \
 		$(GENDIR)\splitter.obj \
 		$(GENDIR)\statusbr.obj \
+		$(GENDIR)\tbarsmpl.obj \
 		$(GENDIR)\textdlgg.obj \
 		$(GENDIR)\tipdlg.obj \
 		$(GENDIR)\tipwin.obj \
 		$(GENDIR)\treectlg.obj \
+		$(GENDIR)\treelay.obj \
 		$(GENDIR)\wizard.obj
 
-COMMONOBJS = $(COMMDIR)\accesscmn.obj \
-		$(COMMDIR)\appbase.obj \
-		$(COMMDIR)\appcmn.obj \
+COMMONOBJS = $(COMMDIR)\appcmn.obj \
 		$(COMMDIR)\artprov.obj \
 		$(COMMDIR)\artstd.obj \
-                $(COMMDIR)\bookctrl.obj \
 		$(COMMDIR)\choiccmn.obj \
 		$(COMMDIR)\clipcmn.obj \
 		$(COMMDIR)\clntdata.obj \
@@ -74,7 +74,6 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\cshelp.obj \
 		$(COMMDIR)\ctrlcmn.obj \
 		$(COMMDIR)\ctrlsub.obj \
-		$(COMMDIR)\datacmn.obj \
 		$(COMMDIR)\datetime.obj \
 		$(COMMDIR)\datstrm.obj \
 		$(COMMDIR)\db.obj \
@@ -87,7 +86,6 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\dobjcmn.obj \
 		$(COMMDIR)\docmdi.obj \
 		$(COMMDIR)\docview.obj \
-		$(COMMDIR)\dpycmn.obj \
 		$(COMMDIR)\dseldlg.obj \
 		$(COMMDIR)\dynarray.obj \
 		$(COMMDIR)\dynlib.obj \
@@ -103,8 +101,6 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\filefn.obj \
 		$(COMMDIR)\filename.obj \
 		$(COMMDIR)\filesys.obj \
-		$(COMMDIR)\fldlgcmn.obj \
-		$(COMMDIR)\fmapbase.obj \
 		$(COMMDIR)\fontcmn.obj \
 		$(COMMDIR)\fontmap.obj \
 		$(COMMDIR)\framecmn.obj \
@@ -134,7 +130,6 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\imagtiff.obj \
 		$(COMMDIR)\imagxpm.obj \
 		$(COMMDIR)\intl.obj \
-		$(COMMDIR)\init.obj \
 		$(COMMDIR)\ipcbase.obj \
 		$(COMMDIR)\layout.obj \
 		$(COMMDIR)\lboxcmn.obj \
@@ -150,6 +145,7 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\mstream.obj \
 		$(COMMDIR)\nbkbase.obj \
 		$(COMMDIR)\object.obj \
+		$(COMMDIR)\odbc.obj \
 		$(COMMDIR)\paper.obj \
 		$(COMMDIR)\popupcmn.obj \
 		$(COMMDIR)\prntbase.obj \
@@ -158,7 +154,7 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\quantize.obj \
 		$(COMMDIR)\radiocmn.obj \
 		$(COMMDIR)\regex.obj \
-		$(COMMDIR)\rendcmn.obj  \
+		$(COMMDIR)\resource.obj \
 		$(COMMDIR)\rgncmn.obj \
 		$(COMMDIR)\sckaddr.obj \
 		$(COMMDIR)\sckfile.obj \
@@ -168,12 +164,10 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\sizer.obj \
 		$(COMMDIR)\socket.obj \
 		$(COMMDIR)\statbar.obj \
-		$(COMMDIR)\stopwatch.obj \
 		$(COMMDIR)\strconv.obj \
 		$(COMMDIR)\stream.obj \
 		$(COMMDIR)\string.obj \
 		$(COMMDIR)\sysopt.obj \
-		$(COMMDIR)\taskbarcmn.obj \
 		$(COMMDIR)\tbarbase.obj \
 		$(COMMDIR)\textbuf.obj \
 		$(COMMDIR)\textcmn.obj \
@@ -193,6 +187,7 @@ COMMONOBJS = $(COMMDIR)\accesscmn.obj \
 		$(COMMDIR)\wfstream.obj \
 		$(COMMDIR)\wincmn.obj \
 		$(COMMDIR)\wxchar.obj \
+		$(COMMDIR)\wxexpr.obj \
 		$(COMMDIR)\xpmdecod.obj \
 		$(COMMDIR)\zipstrm.obj \
 		$(COMMDIR)\zstream.obj
@@ -219,10 +214,8 @@ HTMLOBJS = $(HTMLDIR)\helpctrl.obj \
 		$(HTMLDIR)\winpars.obj
 
 MSWOBJS = $(MSWDIR)\accel.obj \
-		$(MSWDIR)\ole\access.obj \
 		$(MSWDIR)\app.obj \
 		$(MSWDIR)\ole\automtn.obj \
-		$(MSWDIR)\basemsw.obj \
 		$(MSWDIR)\bitmap.obj \
 		$(MSWDIR)\bmpbuttn.obj \
 		$(MSWDIR)\brush.obj \
@@ -236,6 +229,7 @@ MSWOBJS = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\colour.obj \
 		$(MSWDIR)\combobox.obj \
 		$(MSWDIR)\control.obj \
+		$(MSWDIR)\curico.obj \
 		$(MSWDIR)\cursor.obj \
 		$(MSWDIR)\data.obj \
 		$(MSWDIR)\ole\dataobj.obj \
@@ -248,9 +242,9 @@ MSWOBJS = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\dialog.obj \
 		$(MSWDIR)\dialup.obj \
 		$(MSWDIR)\dib.obj \
+		$(MSWDIR)\dibutils.obj \
 		$(MSWDIR)\dir.obj \
 		$(MSWDIR)\dirdlg.obj \
-		$(MSWDIR)\display.obj \
 		$(MSWDIR)\dragimag.obj \
 		$(MSWDIR)\ole\dropsrc.obj \
 		$(MSWDIR)\ole\droptgt.obj \
@@ -301,7 +295,6 @@ MSWOBJS = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\radiobut.obj \
 		$(MSWDIR)\regconf.obj \
 		$(MSWDIR)\region.obj \
-		$(MSWDIR)\renderer.obj \
 		$(MSWDIR)\registry.obj \
 		$(MSWDIR)\scrolbar.obj \
 		$(MSWDIR)\settings.obj \
@@ -326,7 +319,6 @@ MSWOBJS = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\treectrl.obj \
 		$(MSWDIR)\utils.obj \
 		$(MSWDIR)\utilsexc.obj \
-		$(MSWDIR)\utilsgui.obj \
 		$(MSWDIR)\ole\uuid.obj \
 		$(MSWDIR)\uxtheme.obj \
 		$(MSWDIR)\volume.obj \
@@ -340,7 +332,6 @@ all: MAKEARCHDIR MAKELIBS PCH $(LIBTARGET) zlib png jpeg tiff regex
 
 MAKEARCHDIR:
     @if not exist $(MSWINCDIR)\setup.h copy $(MSWINCDIR)\setup0.h $(MSWINCDIR)\setup.h
-    @if not exist $(ARCHINCDIR)\wx\setup.h mkdir $(ARCHINCDIR)
     @if not exist $(ARCHINCDIR)\wx\setup.h mkdir $(ARCHINCDIR)\wx
     @if not exist $(ARCHINCDIR)\wx\setup.h copy $(MSWINCDIR)\setup.h $(ARCHINCDIR)\wx\setup.h
     @if not exist $(WXOUTDIR)\nul mkdir $(WXOUTDIR)

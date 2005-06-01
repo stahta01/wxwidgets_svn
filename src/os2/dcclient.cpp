@@ -70,7 +70,7 @@ static RECT        g_paintStruct;
 #ifdef __WXDEBUG__
     // a global variable which we check to verify that wxPaintDC are only
     // created in resopnse to WM_PAINT message - doing this from elsewhere is a
-    // common programming error among wxWidgets programmers and might lead to
+    // common programming error among wxWindows programmers and might lead to
     // very subtle and difficult to debug refresh/repaint bugs.
     int g_isPainting = 0;
 #endif // __WXDEBUG__
@@ -87,7 +87,6 @@ wxWindowDC::wxWindowDC()
 {
     m_pCanvas = NULL;
     m_PageSize.cx = m_PageSize.cy = 0;
-
 }
 
 wxWindowDC::wxWindowDC(
@@ -119,13 +118,13 @@ wxWindowDC::wxWindowDC(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Unable to create presentation space. Error: %s\n"), sError.c_str());
+        wxLogError("Unable to create presentation space. Error: %s\n", sError.c_str());
     }
     ::GpiAssociate(m_hPS, NULLHANDLE);
     ::GpiAssociate(m_hPS, m_hDC);
 
     //
-    // Set the wxWidgets color table
+    // Set the wxWindows color table
     //
     if (!::GpiCreateLogColorTable( m_hPS
                                   ,0L
@@ -137,7 +136,7 @@ wxWindowDC::wxWindowDC(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Unable to set current color table. Error: %s\n"), sError.c_str());
+        wxLogError("Unable to set current color table. Error: %s\n", sError.c_str());
     }
     ::GpiCreateLogColorTable( m_hPS
                              ,0L
@@ -154,6 +153,7 @@ wxWindowDC::wxWindowDC(
 
 void wxWindowDC::InitDC()
 {
+    wxColour                        vColor;
 
     //
     // The background mode is only used for text background and is set in
@@ -166,10 +166,9 @@ void wxWindowDC::InitDC()
     //
     SetBackground(wxBrush(m_pCanvas->GetBackgroundColour(), wxSOLID));
 
-    wxColour vColor( wxT("BLACK") );
+    vColor.InitFromName("BLACK");
     m_pen.SetColour(vColor);
-
-    vColor.Set( wxT("WHITE") );
+    vColor.Set("WHITE");
     m_brush.SetColour(vColor);
     InitializePalette();
     wxFont*                         pFont = new wxFont( 12
@@ -180,7 +179,7 @@ void wxWindowDC::InitDC()
     SetFont(*pFont);
     delete pFont;
     //
-    // OS/2 default vertical character alignment needs to match the other OS's
+    // OS/2 default vertical character allignment needs to match the other OS's
     //
     ::GpiSetTextAlignment((HPS)GetHPS(), TA_NORMAL_HORIZ, TA_BOTTOM);
 
@@ -226,7 +225,7 @@ wxClientDC::wxClientDC(
                           ,PU_PELS | GPIF_LONG | GPIA_ASSOC
                          );
 
-    // Set the wxWidgets color table
+    // Set the wxWindows color table
     if (!::GpiCreateLogColorTable( m_hPS
                                   ,0L
                                   ,LCOLF_CONSECRGB
@@ -237,7 +236,7 @@ wxClientDC::wxClientDC(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Unable to set current color table. Error: %s\n"), sError.c_str());
+        wxLogError("Unable to set current color table. Error: %s\n", sError.c_str());
     }
     ::GpiCreateLogColorTable( m_hPS
                              ,0L

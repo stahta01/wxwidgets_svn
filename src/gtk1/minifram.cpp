@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "minifram.h"
+#ifdef __GNUG__
+#pragma implementation "minifram.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/minifram.h"
 
@@ -69,7 +66,6 @@ static void DrawFrame( GtkWidget *widget, int x, int y, int w, int h )
 // "expose_event" of m_mainWidget
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_window_own_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_event, wxFrame *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -110,14 +106,12 @@ static void gtk_window_own_expose_callback( GtkWidget *widget, GdkEventExpose *g
         dc.DrawText( win->GetTitle(), 6, 3 );
     }
 }
-}
 
 //-----------------------------------------------------------------------------
 // "draw" of m_mainWidget
 //-----------------------------------------------------------------------------
 
 #ifndef __WXGTK20__
-extern "C" {
 static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNUSED(rect), wxFrame *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -157,14 +151,12 @@ static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNU
         dc.DrawText( win->GetTitle(), 6, 3 );
     }
 }
-}
 #endif
 
 //-----------------------------------------------------------------------------
 // "button_press_event" of m_mainWidget
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxMiniFrame *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -208,13 +200,11 @@ static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton 
 
     return TRUE;
 }
-}
 
 //-----------------------------------------------------------------------------
 // "button_release_event" of m_mainWidget
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxMiniFrame *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -243,13 +233,11 @@ static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButto
 
     return TRUE;
 }
-}
 
 //-----------------------------------------------------------------------------
 // "motion_notify_event" of m_mainWidget
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion *gdk_event, wxMiniFrame *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -278,19 +266,16 @@ static gint gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion
 
     return TRUE;
 }
-}
 
 //-----------------------------------------------------------------------------
 // "clicked" of X system button
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_button_clicked_callback( GtkWidget *WXUNUSED(widget), wxMiniFrame *mf )
 {
     if (g_isIdle) wxapp_install_idle_handler();
 
     mf->Close();
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -399,17 +384,6 @@ bool wxMiniFrame::Create( wxWindow *parent, wxWindowID id, const wxString &title
       GTK_SIGNAL_FUNC(gtk_window_motion_notify_callback), (gpointer)this );
 
     return TRUE;
-}
-
-void wxMiniFrame::SetTitle( const wxString &title )
-{
-    wxFrame::SetTitle( title );
-    
-#ifdef __WXGTK20__
-    gdk_window_invalidate_rect( GTK_PIZZA(m_mainWidget)->bin_window, NULL, true );
-#else
-    gtk_widget_draw( m_mainWidget, (GdkRectangle*) NULL );
-#endif
 }
 
 #endif

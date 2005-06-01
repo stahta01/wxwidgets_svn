@@ -6,22 +6,19 @@
 // Created:     06.01.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_POPUPWIN_H_BASE_
 #define _WX_POPUPWIN_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "popupwinbase.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_POPUPWIN
-
 #include "wx/window.h"
 
+#if wxUSE_POPUPWIN
 // ----------------------------------------------------------------------------
 // wxPopupWindow: a special kind of top level window used for popup menus,
 // combobox popups and such.
@@ -48,10 +45,6 @@ public:
     // the point must be given in screen coordinates!
     virtual void Position(const wxPoint& ptOrigin,
                           const wxSize& size);
-
-    virtual bool IsTopLevel() const { return true; }
-
-    DECLARE_NO_COPY_CLASS(wxPopupWindowBase)
 };
 
 
@@ -64,8 +57,6 @@ public:
     #include "wx/gtk/popupwin.h"
 #elif __WXX11__
     #include "wx/x11/popupwin.h"
-#elif __WXMOTIF__
-    #include "wx/motif/popupwin.h"
 #elif __WXMGL__
     #include "wx/mgl/popupwin.h"
 #else
@@ -100,15 +91,12 @@ public:
     //
     // VZ: where is this used??
     virtual bool CanDismiss()
-        { return true; }
+        { return TRUE; }
 
-    // called when a mouse is pressed while the popup is shown: return true
+    // called when a mouse is pressed while the popup is shown: return TRUE
     // from here to prevent its normal processing by the popup (which consists
     // in dismissing it if the mouse is cilcked outside it)
     virtual bool ProcessLeftDown(wxMouseEvent& event);
-
-    // Overridden to grab the input on some plaforms
-    virtual bool Show( bool show = true );
 
 protected:
     // common part of all ctors
@@ -124,14 +112,6 @@ protected:
     // remove our event handlers
     void PopHandlers();
 
-    // get alerted when child gets deleted from under us
-    void OnDestroy(wxWindowDestroyEvent& event);
-
-#ifdef __WXMSW__
-    // check if the mouse needs captured or released
-    void OnIdle(wxIdleEvent& event);
-#endif
-    
     // the child of this popup if any
     wxWindow *m_child;
 
@@ -146,9 +126,7 @@ protected:
     wxPopupWindowHandler *m_handlerPopup;
     wxPopupFocusHandler  *m_handlerFocus;
 
-    DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxPopupTransientWindow)
-    DECLARE_NO_COPY_CLASS(wxPopupTransientWindow)
 };
 
 #if wxUSE_COMBOBOX && defined(__WXUNIVERSAL__)

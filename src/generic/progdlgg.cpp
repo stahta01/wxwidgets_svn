@@ -6,7 +6,7 @@
 // Created:     09.05.1999
 // RCS-ID:      $Id$
 // Copyright:   (c) Karsten Ballüder
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "progdlgg.h"
 #endif
 
@@ -35,38 +35,23 @@
     #include "wx/frame.h"
     #include "wx/button.h"
     #include "wx/stattext.h"
-    #include "wx/sizer.h"
+    #include "wx/layout.h"
     #include "wx/event.h"
     #include "wx/gauge.h"
     #include "wx/intl.h"
+    #include "wx/settings.h"
     #include "wx/dcclient.h"
     #include "wx/timer.h"
 #endif
 
 #include "wx/generic/progdlgg.h"
-#include "wx/settings.h"
-
-// ---------------------------------------------------------------------------
-// macros
-// ---------------------------------------------------------------------------
-
-/* Macro for avoiding #ifdefs when value have to be different depending on size of
-   device we display on - take it from something like wxDesktopPolicy in the future
- */
-
-#if defined(__SMARTPHONE__)
-    #define wxLARGESMALL(large,small) small
-#else
-    #define wxLARGESMALL(large,small) large
-#endif
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
-#define LAYOUT_MARGIN wxLARGESMALL(8,2)
-
-static const int wxID_SKIP = 32000;  // whatever
+#define LAYOUT_X_MARGIN 8
+#define LAYOUT_Y_MARGIN 8
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -81,7 +66,6 @@ static void SetTimeLabel(unsigned long val, wxStaticText *label);
 
 BEGIN_EVENT_TABLE(wxProgressDialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, wxProgressDialog::OnCancel)
-    EVT_BUTTON(wxID_SKIP, wxProgressDialog::OnSkip)
 
     EVT_CLOSE(wxProgressDialog::OnClose)
 END_EVENT_TABLE()
@@ -101,37 +85,27 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
                                    int maximum,
                                    wxWindow *parent,
                                    int style)
-                : wxDialog(parent, wxID_ANY, title),
-                  m_skip(false),
-                  m_delay(3),
-                  m_hasAbortButton(false),
-                  m_hasSkipButton(false)
+                : wxDialog(parent, -1, title)
 {
     // we may disappear at any moment, let the others know about it
     SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
+
     m_windowStyle |= style;
 
-    m_hasAbortButton = (style & wxPD_CAN_ABORT) != 0;
-    m_hasSkipButton = (style & wxPD_CAN_SKIP) != 0;
-
-    bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
+    bool hasAbortButton = (style & wxPD_CAN_ABORT) != 0;
 
 #if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
     // we have to remove the "Close" button from the title bar then as it is
     // confusing to have it - it doesn't work anyhow
     //
     // FIXME: should probably have a (extended?) window style for this
-    if ( !m_hasAbortButton )
+    if ( !hasAbortButton )
     {
-        EnableCloseButton(false);
+        EnableCloseButton(FALSE);
     }
 #endif // wxMSW
 
-#if defined(__SMARTPHONE__)
-    SetLeftMenu();
-#endif
-
-    m_state = m_hasAbortButton ? Continue : Uncancelable;
+    m_state = hasAbortButton ? Continue : Uncancelable;
     m_maximum = maximum;
 
 #if defined(__WXMSW__) || defined(__WXPM__)
@@ -141,44 +115,59 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
     m_maximum /= m_factor;
 #endif // __WXMSW__
 
-    m_parentTop = wxGetTopLevelParent(parent);
+    m_parentTop = parent;
+    while ( m_parentTop && m_parentTop->GetParent() )
+    {
+        m_parentTop = m_parentTop->GetParent();
+    }
+
+    wxLayoutConstraints *c;
 
     wxClientDC dc(this);
     dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
     long widthText;
     dc.GetTextExtent(message, &widthText, NULL, NULL, NULL, NULL);
 
-    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-
-    m_msg = new wxStaticText(this, wxID_ANY, message);
-    sizer->Add(m_msg, 0, wxLEFT | wxTOP, 2*LAYOUT_MARGIN);
+    m_msg = new wxStaticText(this, -1, message);
+    c = new wxLayoutConstraints;
+    c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
+    c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
+    c->width.AsIs();
+    c->height.AsIs();
+    m_msg->SetConstraints(c);
 
     wxSize sizeDlg,
            sizeLabel = m_msg->GetSize();
-    sizeDlg.y = 2*LAYOUT_MARGIN + sizeLabel.y;
+    sizeDlg.y = 2*LAYOUT_Y_MARGIN + sizeLabel.y;
+
+    wxWindow *lastWindow = m_msg;
 
     if ( maximum > 0 )
     {
-        int gauge_style = wxGA_HORIZONTAL;
-        if ( ( style & wxPD_SMOOTH ) == wxPD_SMOOTH )
-            gauge_style |= wxGA_SMOOTH;
-        m_gauge = new wxGauge(this, wxID_ANY, m_maximum,
+        // note that we can't use wxGA_SMOOTH because it happens to also mean
+        // wxDIALOG_MODAL and will cause the dialog to be modal. Have an extra
+        // style argument to wxProgressDialog, perhaps.
+        m_gauge = new wxGauge(this, -1, m_maximum,
                               wxDefaultPosition, wxDefaultSize,
-                              gauge_style );
+                              wxGA_HORIZONTAL);
 
-        sizer->Add(m_gauge, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 2*LAYOUT_MARGIN);
+        c = new wxLayoutConstraints;
+        c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
+        c->top.Below(m_msg, 2*LAYOUT_Y_MARGIN);
+        c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+        c->height.AsIs();
+        m_gauge->SetConstraints(c);
         m_gauge->SetValue(0);
+        lastWindow = m_gauge;
 
         wxSize sizeGauge = m_gauge->GetSize();
-        sizeDlg.y += 2*LAYOUT_MARGIN + sizeGauge.y;
+        sizeDlg.y += 2*LAYOUT_Y_MARGIN + sizeGauge.y;
     }
     else
         m_gauge = (wxGauge *)NULL;
 
     // create the estimated/remaining/total time zones if requested
     m_elapsed = m_estimated = m_remaining = (wxStaticText*)NULL;
-    m_display_estimated = m_last_timeupdate = m_break = 0;
-    m_ctdelay = 0;
 
     // if we are going to have at least one label, remmeber it in this var
     wxStaticText *label = NULL;
@@ -191,7 +180,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
         nTimeLabels++;
 
         label =
-        m_elapsed = CreateLabel(_("Elapsed time : "), sizer);
+        m_elapsed = CreateLabel(_("Elapsed time : "), &lastWindow);
     }
 
     if ( style & wxPD_ESTIMATED_TIME )
@@ -199,7 +188,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
         nTimeLabels++;
 
         label =
-        m_estimated = CreateLabel(_("Estimated time : "), sizer);
+        m_estimated = CreateLabel(_("Estimated time : "), &lastWindow);
     }
 
     if ( style & wxPD_REMAINING_TIME )
@@ -207,69 +196,51 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
         nTimeLabels++;
 
         label =
-        m_remaining = CreateLabel(_("Remaining time : "), sizer);
+        m_remaining = CreateLabel(_("Remaining time : "), &lastWindow);
     }
 
     if ( nTimeLabels > 0 )
     {
         // set it to the current time
         m_timeStart = wxGetCurrentTime();
-        sizeDlg.y += nTimeLabels * (label->GetSize().y + LAYOUT_MARGIN);
+        sizeDlg.y += nTimeLabels * (label->GetSize().y + LAYOUT_Y_MARGIN);
     }
 
-#if defined(__SMARTPHONE__)
-    if ( m_hasSkipButton )
-        SetRightMenu(wxID_SKIP, _("Skip"));
-    if ( m_hasAbortButton )
-        SetLeftMenu(wxID_CANCEL);
-#else
-    m_btnAbort = m_btnSkip = (wxButton *)NULL;
-    bool sizeDlgModified = false;
-    wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    if ( hasAbortButton )
+    {
+        m_btnAbort = new wxButton(this, wxID_CANCEL, _("Cancel"));
+        c = new wxLayoutConstraints;
 
-    const int sizerFlags =
+        // Windows dialogs usually have buttons in the lower right corner
 #if defined(__WXMSW__) || defined(__WXPM__)
-                           wxALIGN_RIGHT | wxALL
+        c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
 #else // !MSW
-                           wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxTOP
+        c->centreX.SameAs(this, wxCentreX);
 #endif // MSW/!MSW
-                           ;
+        c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
 
-    if ( m_hasSkipButton )
+        c->width.AsIs();
+        c->height.AsIs();
+
+        m_btnAbort->SetConstraints(c);
+
+        sizeDlg.y += 2*LAYOUT_Y_MARGIN + wxButton::GetDefaultSize().y;
+    }
+    else // no "Cancel" button
     {
-        m_btnSkip = new wxButton(this, wxID_SKIP, _("Skip"));
-
-        // Windows dialogs usually have buttons in the lower right corner
-        buttonSizer->Add(m_btnSkip, 0, sizerFlags, LAYOUT_MARGIN);
-        sizeDlg.y += 2*LAYOUT_MARGIN + wxButton::GetDefaultSize().y;
-        sizeDlgModified = true;
+        m_btnAbort = (wxButton *)NULL;
     }
 
-    if ( m_hasAbortButton )
-    {
-        m_btnAbort = new wxButton(this, wxID_CANCEL);
+    SetAutoLayout(TRUE);
+    Layout();
 
-        // Windows dialogs usually have buttons in the lower right corner
-        buttonSizer->Add(m_btnAbort, 0, sizerFlags, LAYOUT_MARGIN);
-        if(!sizeDlgModified)
-            sizeDlg.y += 2*LAYOUT_MARGIN + wxButton::GetDefaultSize().y;
-    }
+    sizeDlg.y += 2*LAYOUT_Y_MARGIN;
 
-    sizer->Add(buttonSizer, 0, sizerFlags, LAYOUT_MARGIN );
-#endif // __SMARTPHONE__/!__SMARTPHONE__
-
-    SetSizerAndFit(sizer);
-
-    if (!isPda)
-    {
-        sizeDlg.y += 2*LAYOUT_MARGIN;
-
-        // try to make the dialog not square but rectangular of reasonable width
-        sizeDlg.x = (wxCoord)wxMax(widthText, 4*sizeDlg.y/3);
-        sizeDlg.x *= 3;
-        sizeDlg.x /= 2;
-        SetClientSize(sizeDlg);
-    }
+    // try to make the dialog not square but rectangular of reasonabel width
+    sizeDlg.x = (wxCoord)wxMax(widthText, 4*sizeDlg.y/3);
+    sizeDlg.x *= 3;
+    sizeDlg.x /= 2;
+    SetClientSize(sizeDlg);
 
     Centre(wxCENTER_FRAME | wxBOTH);
 
@@ -280,12 +251,12 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
     else
     {
         if ( m_parentTop )
-            m_parentTop->Disable();
+            m_parentTop->Enable(FALSE);
         m_winDisabler = NULL;
     }
 
-    Show();
-    Enable();
+    Show(TRUE);
+    Enable(TRUE); // enable this window
 
     // this one can be initialized even if the others are unknown for now
     //
@@ -295,34 +266,43 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
         SetTimeLabel(0, m_elapsed);
     }
 
-    Update();
+    // Update the display (especially on X, GTK)
+    wxYield();
+
+#ifdef __WXMAC__
+    MacUpdateImmediately();
+#endif
 }
 
 wxStaticText *wxProgressDialog::CreateLabel(const wxString& text,
-                                            wxSizer *sizer)
+                                            wxWindow **lastWindow)
 {
-    wxBoxSizer *locsizer = new wxBoxSizer(wxLARGESMALL(wxHORIZONTAL,wxVERTICAL));
+    wxLayoutConstraints *c;
 
-    wxStaticText *dummy = new wxStaticText(this, wxID_ANY, text);
-    wxStaticText *label = new wxStaticText(this, wxID_ANY, _("unknown"));
+    wxStaticText *label = new wxStaticText(this, -1, _("unknown"));
+    c = new wxLayoutConstraints;
 
-    // select placement most native or nice on target GUI
-#if defined(__SMARTPHONE__)
-    // label and time to the left in two rows
-    locsizer->Add(dummy, 1, wxALIGN_LEFT);
-    locsizer->Add(label, 1, wxALIGN_LEFT);
-    sizer->Add(locsizer, 0, wxALIGN_LEFT | wxTOP | wxLEFT, LAYOUT_MARGIN);
-#elif defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__)
-    // label and time centered in one row
-    locsizer->Add(dummy, 1, wxLARGESMALL(wxALIGN_RIGHT,wxALIGN_LEFT));
-    locsizer->Add(label, 1, wxALIGN_LEFT | wxLEFT, LAYOUT_MARGIN);
-    sizer->Add(locsizer, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, LAYOUT_MARGIN);
-#else
-    // label and time to the right in one row
-    sizer->Add(locsizer, 0, wxALIGN_RIGHT | wxRIGHT | wxTOP, LAYOUT_MARGIN);
-    locsizer->Add(dummy);
-    locsizer->Add(label, 0, wxLEFT, LAYOUT_MARGIN);
-#endif
+    // VZ: I like the labels be centered - if the others don't mind, you may
+    //     remove "#ifdef __WXMSW__" and use it for all ports
+#if defined(__WXMSW__) || defined(__WXPM__)
+    c->left.SameAs(this, wxCentreX, LAYOUT_X_MARGIN);
+#else // !MSW
+    c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+#endif // MSW/!MSW
+    c->top.Below(*lastWindow, LAYOUT_Y_MARGIN);
+    c->width.AsIs();
+    c->height.AsIs();
+    label->SetConstraints(c);
+
+    wxStaticText *dummy = new wxStaticText(this, -1, text);
+    c = new wxLayoutConstraints;
+    c->right.LeftOf(label);
+    c->top.SameAs(label, wxTop, 0);
+    c->width.AsIs();
+    c->height.AsIs();
+    dummy->SetConstraints(c);
+
+    *lastWindow = label;
 
     return label;
 }
@@ -332,7 +312,7 @@ wxStaticText *wxProgressDialog::CreateLabel(const wxString& text,
 // ----------------------------------------------------------------------------
 
 bool
-wxProgressDialog::Update(int value, const wxString& newmsg, bool *skip)
+wxProgressDialog::Update(int value, const wxString& newmsg)
 {
     wxASSERT_MSG( value == -1 || m_gauge, wxT("cannot update non existent dialog") );
 
@@ -342,98 +322,56 @@ wxProgressDialog::Update(int value, const wxString& newmsg, bool *skip)
 
     wxASSERT_MSG( value <= m_maximum, wxT("invalid progress value") );
 
-    // fill up the gauge if value == maximum because this means that the dialog
-    // is going to close and the gauge shouldn't be partly empty in this case
-    if ( m_gauge && value <= m_maximum )
+    if ( m_gauge && value < m_maximum )
     {
-        m_gauge->SetValue(value == m_maximum ? value : value + 1);
+        m_gauge->SetValue(value + 1);
     }
 
-    if ( !newmsg.empty() && newmsg != m_msg->GetLabel() )
+    if ( !newmsg.IsEmpty() )
     {
         m_msg->SetLabel(newmsg);
 
-        wxYieldIfNeeded() ;
+        wxYield();
     }
 
     if ( (m_elapsed || m_remaining || m_estimated) && (value != 0) )
     {
         unsigned long elapsed = wxGetCurrentTime() - m_timeStart;
-        if (    m_last_timeupdate < elapsed
-             || value == m_maximum
-           )
-        {
-            m_last_timeupdate = elapsed;
-            unsigned long estimated = m_break +
-                  (unsigned long)(( (double) (elapsed-m_break) * m_maximum ) / ((double)value)) ;
-            if (    estimated > m_display_estimated
-                 && m_ctdelay >= 0
-               )
-            {
-                ++m_ctdelay;
-            }
-            else if (    estimated < m_display_estimated
-                      && m_ctdelay <= 0
-                    )
-            {
-                --m_ctdelay;
-            }
-            else
-            {
-                m_ctdelay = 0;
-            }
-            if (    m_ctdelay >= m_delay          // enough confirmations for a higher value
-                 || m_ctdelay <= (m_delay*-1)     // enough confirmations for a lower value
-                 || value == m_maximum            // to stay consistent
-                 || elapsed > m_display_estimated // to stay consistent
-                 || ( elapsed > 0 && elapsed < 4 ) // additional updates in the beginning
-               )
-            {
-                m_display_estimated = estimated;
-                m_ctdelay = 0;
-            }
-        }
-
-        long display_remaining = m_display_estimated - elapsed;
-        if ( display_remaining < 0 )
-        {
-            display_remaining = 0;
-        }
+        unsigned long estimated = (unsigned long)( ( (double) elapsed * m_maximum ) 
+            / ((double)value) ) ;
+        unsigned long remaining = estimated - elapsed;
 
         SetTimeLabel(elapsed, m_elapsed);
-        SetTimeLabel(m_display_estimated, m_estimated);
-        SetTimeLabel(display_remaining, m_remaining);
+        SetTimeLabel(estimated, m_estimated);
+        SetTimeLabel(remaining, m_remaining);
     }
 
     if ( value == m_maximum )
     {
-        if ( m_state == Finished )
-        {
-            // ignore multiple calls to Update(m_maximum): it may sometimes be
-            // troublesome to ensure that Update() is not called twice with the
-            // same value (e.g. because of the rounding errors) and if we don't
-            // return now we're going to generate asserts below
-            return true;
-        }
-
-        // so that we return true below and that out [Cancel] handler knew what
+        // so that we return TRUE below and that out [Cancel] handler knew what
         // to do
         m_state = Finished;
         if( !(GetWindowStyle() & wxPD_AUTO_HIDE) )
         {
-            EnableClose();
-            DisableSkip();
+            if ( m_btnAbort )
+            {
+                // tell the user what he should do...
+                m_btnAbort->SetLabel(_("Close"));
+            }
 #if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
-            EnableCloseButton();
+            else // enable the button to give the user a way to close the dlg
+            {
+                EnableCloseButton(TRUE);
+            }
 #endif // __WXMSW__
 
-            if ( newmsg.empty() )
+            if ( !newmsg )
             {
                 // also provide the finishing message if the application didn't
                 m_msg->SetLabel(_("Done."));
             }
 
-            wxYieldIfNeeded() ;
+            wxYield();
 
             (void)ShowModal();
         }
@@ -449,20 +387,13 @@ wxProgressDialog::Update(int value, const wxString& newmsg, bool *skip)
     }
     else
     {
-        // we have to yield because not only we want to update the display but
-        // also to process the clicks on the cancel and skip buttons
-        wxYieldIfNeeded() ;
-
-        if ( (m_skip) && (skip != NULL) && (*skip == false) )
-        {
-            *skip = true;
-            m_skip = false;
-            EnableSkip();
-        }
+        // update the display
+        wxYield();
     }
 
-    // update the display in case yielding above didn't do it
-    Update();
+#ifdef __WXMAC__
+    MacUpdateImmediately();
+#endif
 
     return m_state != Canceled;
 }
@@ -470,12 +401,10 @@ wxProgressDialog::Update(int value, const wxString& newmsg, bool *skip)
 void wxProgressDialog::Resume()
 {
     m_state = Continue;
-    m_ctdelay = m_delay; // force an update of the elapsed/estimated/remaining time
-    m_break += wxGetCurrentTime()-m_timeStop;
 
-    EnableAbort();
-    EnableSkip();
-    m_skip = false;
+    // it may have been disabled by OnCancel(), so enable it back to let the
+    // user interrupt us again if needed
+    m_btnAbort->Enable();
 }
 
 bool wxProgressDialog::Show( bool show )
@@ -507,20 +436,10 @@ void wxProgressDialog::OnCancel(wxCommandEvent& event)
         // will handle it
         m_state = Canceled;
 
-        // update the buttons state immediately so that the user knows that the
+        // update the button state immediately so that the user knows that the
         // request has been noticed
-        DisableAbort();
-        DisableSkip();
-
-        // save the time when the dialog was stopped
-        m_timeStop = wxGetCurrentTime();
+        m_btnAbort->Disable();
     }
-}
-
-void wxProgressDialog::OnSkip(wxCommandEvent& WXUNUSED(event))
-{
-    DisableSkip();
-    m_skip = true;
 }
 
 void wxProgressDialog::OnClose(wxCloseEvent& event)
@@ -528,7 +447,7 @@ void wxProgressDialog::OnClose(wxCloseEvent& event)
     if ( m_state == Uncancelable )
     {
         // can't close this dialog
-        event.Veto();
+        event.Veto(TRUE);
     }
     else if ( m_state == Finished )
     {
@@ -539,10 +458,6 @@ void wxProgressDialog::OnClose(wxCloseEvent& event)
     {
         // next Update() will notice it
         m_state = Canceled;
-        DisableAbort();
-        DisableSkip();
-
-        m_timeStop = wxGetCurrentTime();
     }
 }
 
@@ -566,7 +481,7 @@ void wxProgressDialog::ReenableOtherWindows()
     else
     {
         if ( m_parentTop )
-            m_parentTop->Enable();
+            m_parentTop->Enable(TRUE);
     }
 }
 
@@ -586,54 +501,6 @@ static void SetTimeLabel(unsigned long val, wxStaticText *label)
 
         if ( s != label->GetLabel() )
             label->SetLabel(s);
-    }
-}
-
-void wxProgressDialog::EnableSkip(bool enable)
-{
-    if(m_hasSkipButton)
-    {
-#ifdef __SMARTPHONE__
-        if(enable)
-            SetRightMenu(wxID_SKIP, _("Skip"));
-        else
-            SetRightMenu();
-#else
-        if(m_btnSkip)
-            m_btnSkip->Enable(enable);
-#endif
-    }
-}
-
-void wxProgressDialog::EnableAbort(bool enable)
-{
-    if(m_hasAbortButton)
-    {
-#ifdef __SMARTPHONE__
-        if(enable)
-            SetLeftMenu(wxID_CANCEL); // stock buttons makes Cancel label
-        else
-            SetLeftMenu();
-#else
-        if(m_btnAbort)
-            m_btnAbort->Enable(enable);
-#endif
-    }
-}
-
-void wxProgressDialog::EnableClose()
-{
-    if(m_hasAbortButton)
-    {
-#ifdef __SMARTPHONE__
-        SetLeftMenu(wxID_CANCEL, _("Close"));
-#else
-        if(m_btnAbort)
-        {
-            m_btnAbort->Enable();
-            m_btnAbort->SetLabel(_("Close"));
-        }
-#endif
     }
 }
 

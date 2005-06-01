@@ -1,137 +1,104 @@
 
-import  wx
-import  wx.lib.buttons  as  buttons
+from wxPython.wx import *
+from wxPython.lib.buttons import *
 
 import images
-
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.log = log
-        ##self.SetBackgroundColour("sky blue")
 
-        sizer = wx.FlexGridSizer(1, 3, 20, 20)
-
-        # A regular button, selected as the default button
-        b = wx.Button(self, -1, "A real button")
+        sizer = wxFlexGridSizer(1, 3, 20, 20)
+        b = wxButton(self, -1, "A real button")
         b.SetDefault()
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         sizer.Add(b)
 
-        # Same thing, but NOT set as the default button
-        b = wx.Button(self, -1, "non-default")
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxButton(self, -1, "non-default")
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         sizer.Add(b)
-        sizer.Add((10,10))
+        sizer.Add(10,10)
 
-        # Plain old text button based off GenButton()
-        b = buttons.GenButton(self, -1, 'Hello')
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenButton(self, -1, 'Hello')
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         sizer.Add(b)
 
-        # Plain old text button, disabled.
-        b = buttons.GenButton(self, -1, 'disabled')
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenButton(self, -1, 'disabled')
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         b.Enable(False)
         sizer.Add(b)
 
-        # This time, we let the botton be as big as it can be.
-        # Also, this one is fancier, with custom colors and bezel size.
-        b = buttons.GenButton(self, -1, 'bigger')
-        self.Bind(wx.EVT_BUTTON, self.OnBiggerButton, b)
-        b.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD, False))
+        b = wxGenButton(self, -1, 'bigger')
+        EVT_BUTTON(self, b.GetId(), self.OnBiggerButton)
+        b.SetFont(wxFont(20, wxSWISS, wxNORMAL, wxBOLD, False))
         b.SetBezelWidth(5)
         ###b.SetBestSize()
-        b.SetMinSize(wx.DefaultSize)
         b.SetBackgroundColour("Navy")
-        b.SetForegroundColour(wx.WHITE)
+        b.SetForegroundColour(wxWHITE)
         b.SetToolTipString("This is a BIG button...")
-        # let the sizer set best size
-        sizer.Add(b, flag=wx.ADJUST_MINSIZE) 
+        sizer.Add(b, flag=wxADJUST_MINSIZE)  # let the sizer set best size
 
-        # An image button
         bmp = images.getTest2Bitmap()
-        b = buttons.GenBitmapButton(self, -1, bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenBitmapButton(self, -1, bmp)
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         sizer.Add(b)
 
-        # An image button, disabled.
         bmp = images.getTest2Bitmap()
-        b = buttons.GenBitmapButton(self, -1, bmp)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenBitmapButton(self, -1, bmp)
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         sizer.Add(b)
         b.Enable(False)
 
-        # An image button, using a mask to get rid of the
-        # undesireable part of the image
-        b = buttons.GenBitmapButton(self, -1, None)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenBitmapButton(self, -1, None)
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         bmp = images.getBulb1Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapLabel(bmp)
         bmp = images.getBulb2Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapSelected(bmp)
         b.SetBestSize()
         sizer.Add(b)
 
-        # A toggle button
-        b = buttons.GenToggleButton(self, -1, "Toggle Button")
-        self.Bind(wx.EVT_BUTTON, self.OnToggleButton, b)
+        b = wxGenToggleButton(self, -1, "Toggle Button")
+        EVT_BUTTON(self, b.GetId(), self.OnToggleButton)
         sizer.Add(b)
 
-        # An image toggle button
-        b = buttons.GenBitmapToggleButton(self, -1, None)
-        self.Bind(wx.EVT_BUTTON, self.OnToggleButton, b)
+        b = wxGenBitmapToggleButton(self, -1, None)
+        EVT_BUTTON(self, b.GetId(), self.OnToggleButton)
         bmp = images.getBulb1Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapLabel(bmp)
         bmp = images.getBulb2Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapSelected(bmp)
         b.SetToggle(True)
         b.SetBestSize()
         sizer.Add(b)
 
-        # A bitmap button with text.
-        b = buttons.GenBitmapTextButton(self, -1, None, "Bitmapped Text", size = (200, 45))
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        b = wxGenBitmapTextButton(self, -1, None, "Bitmapped Text", size = (200, 45))
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
         bmp = images.getBulb1Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapLabel(bmp)
         bmp = images.getBulb2Bitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
+        mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapSelected(bmp)
         b.SetUseFocusIndicator(False)
         b.SetBestSize()
         sizer.Add(b)
 
-
-        # a flat text button
-        b = buttons.GenButton(self, -1, 'Flat buttons too!', style=wx.BORDER_NONE)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
-        sizer.Add(b, flag=wx.ALIGN_CENTER_VERTICAL)
-
-        # A flat image button
-        bmp = images.getTest2Bitmap()
-        bmp.SetMaskColour("blue")
-        b = buttons.GenBitmapButton(self, -1, bmp, style=wx.BORDER_NONE)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
-        sizer.Add(b)
-        ##b.SetBackgroundColour("sky blue")
-        ##b.SetBackgroundColour("pink")
-
-
-        border = wx.BoxSizer(wx.VERTICAL)
-        border.Add(sizer, 0, wx.ALL, 25)
+        border = wxBoxSizer(wxVERTICAL)
+        border.Add(sizer, 0, wxALL, 25)
         self.SetSizer(border)
 
 
@@ -164,10 +131,13 @@ def runTest(frame, nb, log):
 #----------------------------------------------------------------------
 
 
-overview = buttons.__doc__
+import wxPython.lib.buttons
+overview = wxPython.lib.buttons.__doc__
+
+
 
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

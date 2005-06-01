@@ -4,7 +4,7 @@
 #                           All rights reserved.
 #
 # Description:   Generic makefile for the SciTech wxApplet library
-# License:       wxWindows license
+# Licence: wxWindows license
 #
 #############################################################################
 

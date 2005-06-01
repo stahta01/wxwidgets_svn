@@ -96,20 +96,17 @@ void MarkerHandleSet::RemoveHandle(int handle) {
 	}
 }
 
-bool MarkerHandleSet::RemoveNumber(int markerNum) {
-	bool performedDeletion = false;
+void MarkerHandleSet::RemoveNumber(int markerNum) {
 	MarkerHandleNumber **pmhn = &root;
 	while (*pmhn) {
 		MarkerHandleNumber *mhn = *pmhn;
 		if (mhn->number == markerNum) {
 			*pmhn = mhn->next;
 			delete mhn;
-			performedDeletion = true;
 		} else {
 			pmhn = &((*pmhn)->next);
 		}
 	}
-	return performedDeletion;
 }
 
 void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
@@ -309,18 +306,13 @@ void LineVector::MergeMarkers(int pos) {
 	}
 }
 
-void LineVector::DeleteMark(int line, int markerNum, bool all) {
+void LineVector::DeleteMark(int line, int markerNum) {
 	if (linesData[line].handleSet) {
 		if (markerNum == -1) {
 			delete linesData[line].handleSet;
 			linesData[line].handleSet = 0;
 		} else {
-			bool performedDeletion = 
-				linesData[line].handleSet->RemoveNumber(markerNum);
-			while (all && performedDeletion) {
-				performedDeletion = 
-					linesData[line].handleSet->RemoveNumber(markerNum);
-			}
+			linesData[line].handleSet->RemoveNumber(markerNum);
 			if (linesData[line].handleSet->Length() == 0) {
 				delete linesData[line].handleSet;
 				linesData[line].handleSet = 0;
@@ -450,9 +442,6 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
-	if (currentAction < savePoint) {
-		savePoint = -1;
-	}
 	if (currentAction >= 1) {
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
@@ -638,11 +627,21 @@ void CellBuffer::RoomFor(int insertionLength) {
 	//Platform::DebugPrintf("need room %d %d\n", gaplen, insertionLength);
 	if (gaplen <= insertionLength) {
 		//Platform::DebugPrintf("need room %d %d\n", gaplen, insertionLength);
+		GapTo(length);
 		if (growSize * 6 < size)
 			growSize *= 2;
 		int newSize = size + insertionLength + growSize;
-		Allocate(newSize);
+		//Platform::DebugPrintf("moved gap %d\n", newSize);
+		char *newBody = new char[newSize];
+		memcpy(newBody, body, size);
+		delete []body;
+		body = newBody;
+		gaplen += newSize - size;
+		part2body = body + gaplen;
+		size = newSize;
+		//Platform::DebugPrintf("end need room %d %d - size=%d length=%d\n", gaplen, insertionLength,size,length);
 	}
+
 }
 
 // To make it easier to write code that uses ByteAt, a position outside the range of the buffer
@@ -792,19 +791,6 @@ int CellBuffer::Length() {
 	return ByteLength() / 2;
 }
 
-void CellBuffer::Allocate(int newSize) {
-	if (newSize > length) {
-		GapTo(length);
-		char *newBody = new char[newSize];
-		memcpy(newBody, body, length);
-		delete []body;
-		body = newBody;
-		gaplen += newSize - size;
-		part2body = body + gaplen;
-		size = newSize;
-	}
-}
-
 int CellBuffer::Lines() {
 	//Platform::DebugPrintf("Lines = %d\n", lv.lines);
 	return lv.lines;
@@ -844,7 +830,7 @@ int CellBuffer::AddMark(int line, int markerNum) {
 
 void CellBuffer::DeleteMark(int line, int markerNum) {
 	if ((line >= 0) && (line < lv.lines)) {
-		lv.DeleteMark(line, markerNum, false);
+		lv.DeleteMark(line, markerNum);
 	}
 }
 
@@ -860,7 +846,7 @@ int CellBuffer::GetMark(int line) {
 
 void CellBuffer::DeleteAllMarks(int markerNum) {
 	for (int line = 0; line < lv.lines; line++) {
-		lv.DeleteMark(line, markerNum, true);
+		lv.DeleteMark(line, markerNum);
 	}
 }
 

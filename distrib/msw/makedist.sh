@@ -1,7 +1,7 @@
 #! /bin/bash
 # makedist.sh
 #
-# Build wxWidgets 2 for Windows distribution.
+# Build wxWindows 2 for Windows distribution.
 # This builds all required binaries and documents before calling
 # zipdist.sh to make the archives.
 #
@@ -19,7 +19,7 @@
 # - update the readmes, change log, manual version etc.
 # - update version.h
 # - update distrib/msw/wisetop.txt, wisebott.txt with the correct version
-#   number, plus any hard-wired wxWidgets paths
+#   number, plus any hard-wired wxWindows paths
 # - test on a variety of compilers
 #
 # TODO:
@@ -96,8 +96,11 @@ check_files() {
 build_docs() {
     cd "$SRC/src/msw"
     echo "---------------------------------"
-    echo "Building wxWidgets documents"
+    echo "Building wxWindows documents"
     nmake -f makefile.vc cleandocs docs
+
+    cd "$SRC/utils/dialoged/src"
+    nmake -f makefile.vc html htmlhelp htb hlp pdfrtf
 
     cd "$SRC/utils/tex2rtf/src"
     nmake -f makefile.vc html htmlhelp htb hlp pdfrtf
@@ -113,9 +116,10 @@ build_docs() {
 # This has to be interactive at present.
 build_pdf() {
     echo "---------------------------------"
-    echo "Building wxWidgets PDF documents"
+    echo "Building wxWindows PDF documents"
     if [ -e "$WORDEXE" ]; then
         "$WORDEXE" "$WXWIN\\docs\\pdf\\wx.rtf"
+        "$WORDEXE" "$WXWIN\\docs\\pdf\\dialoged.rtf"
         "$WORDEXE" "$WXWIN\\docs\\pdf\\tex2rtf.rtf"
         "$WORDEXE" "$WXWIN\\contrib\\docs\\pdf\\ogl.rtf"
         "$WORDEXE" "$WXWIN\\contrib\\docs\\mmedia\\ogl.rtf"
@@ -124,14 +128,23 @@ build_pdf() {
     fi
 }
 
-# Build wxWidgets
+# Build wxWindows
 build_wxwin_vc() {
     echo "---------------------------------"
-    echo "Building wxWidgets using VC++"
+    echo "Building wxWindows using VC++"
     cd "$SRC/src"
-    echo Building wxWidgets Release library in `pwd`
+    echo Building wxWindows Release library in `pwd`
     echo Command: msdev wxvc.dsw /useenv /make "wxvc - Win32 Release" /rebuild
     msdev wxvc.dsw /useenv /make "wxvc - Win32 Release" /rebuild | egrep -v "$WARNINGS"
+}
+
+build_dialog_editor() {
+    echo "---------------------------------"
+    echo "Building Dialog Editor using VC++"
+    cd "$SRC/utils/dialoged/src"
+    msdev DialogEdVC.dsw /useenv /make "DialogEdVC - Win32 Release" /rebuild | egrep -v "$WARNINGS" | tee $TMPDIR/buildlog.txt
+
+    check_compile "Dialog Editor"
 }
 
 build_tex2rtf() {
@@ -153,11 +166,15 @@ build_life() {
 }
 
 build_executables() {
+    build_dialog_editor
     build_tex2rtf
     build_life
 }
 
 copy_files() {
+    cp "$SRC/utils/dialoged/src/Release/dialoged.exe" "$SRC/bin"
+    cp "$SRC/docs/winhelp/dialoged.hlp" "$SRC/docs/winhelp/dialoged.cnt" "$SRC/bin"
+
     cp "$SRC/utils/tex2rtf/src/Release/tex2rtf.exe" "$SRC/bin"
     cp "$SRC/docs/winhelp/tex2rtf.hlp" "$SRC/docs/winhelp/tex2rtf.cnt" "$SRC/bin"
 

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@
 
 // Normally, new is automatically defined to be the
 // debugging version. If not, this does it.
-#if !defined(new) && defined(WXDEBUG_NEW) && wxUSE_MEMORY_TRACING && wxUSE_GLOBAL_MEMORY_OPERATORS
+#if !defined(new) && defined(WXDEBUG_NEW)
 #define new WXDEBUG_NEW
 #endif
 
@@ -70,29 +70,20 @@ bool MyApp::OnInit(void)
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
 
-  file_menu->Append(wxID_EXIT, _T("E&xit"));
+  file_menu->Append(wxID_EXIT, "E&xit");
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, _T("File"));
+  menu_bar->Append(file_menu, "File");
   frame->SetMenuBar(menu_bar);
 
   // Make a panel with a message
   wxPanel *panel = new wxPanel(frame);
 
-  (void)new wxStaticText(panel, wxID_ANY, _T("Hello, this is a minimal debugging wxWidgets program!"), wxPoint(10, 10));
+  (void)new wxStaticText(panel, -1, "Hello, this is a minimal debugging wxWindows program!", wxPoint(10, 10));
 
   // Show the frame
-  frame->Show(true);
+  frame->Show(TRUE);
 
-#if wxUSE_MEMORY_TRACING
   wxDebugContext::SetCheckpoint();
-#endif
-
-  // object allocation
-  wxBrush* brush = new wxBrush(*wxRED);
-  wxBitmap* bitmap = new wxBitmap(100, 100);
-
-  // non-object allocation
-  char *ordinaryNonObject = new char[1000];
 
   wxString *thing = new wxString;
 
@@ -100,9 +91,11 @@ bool MyApp::OnInit(void)
   wxDateTime* date = new wxDateTime;
 #endif // wxUSE_DATETIME
 
+  // non-object allocation
+  char *ordinaryNonObject = new char[1000];
+
   const char *data = (const char*) thing ;
 
-#if wxUSE_MEMORY_TRACING
   // On MSW, Dump() crashes if using wxLogGui,
   // so use wxLogStderr instead.
   wxLog* oldLog = wxLog::SetActiveTarget(new wxLogStderr);
@@ -113,14 +106,13 @@ bool MyApp::OnInit(void)
 
   // Set back to wxLogGui
   delete wxLog::SetActiveTarget(oldLog);
-#endif
 
   // Don't delete these objects, to force wxApp to flag a memory leak.
 //  delete thing;
 //  delete date;
 //  delete[] ordinaryNonObject;
-
-  return true;
+  
+  return TRUE;
 }
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -129,12 +121,12 @@ END_EVENT_TABLE()
 
 // My frame constructor
 MyFrame::MyFrame(wxFrame *parent):
-  wxFrame(parent, wxID_ANY, _T("MemCheck wxWidgets Sample"), wxDefaultPosition, wxSize(400, 200))
+  wxFrame(parent, -1, "MemCheck wxWindows Sample", wxPoint(-1, -1), wxSize(400, 200))
 {}
 
 // Intercept menu commands
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 

@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -42,7 +42,6 @@
     #include "wx/slider.h"
     #include "wx/textctrl.h"
     #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
 
     #include "wx/settings.h"
 #endif // WX_PRECOMP
@@ -51,7 +50,6 @@
 #include "wx/spinbutt.h"
 #include "wx/toplevel.h"
 #include "wx/artprov.h"
-#include "wx/image.h"
 
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
@@ -167,8 +165,7 @@ public:
                                    const wxString& label,
                                    const wxBitmap& bitmap,
                                    const wxRect& rect,
-                                   int flags = 0,
-                                   long style = 0);
+                                   int flags);
 
     virtual void DrawTextLine(wxDC& dc,
                               const wxString& text,
@@ -187,25 +184,21 @@ public:
 
     virtual void DrawSliderShaft(wxDC& dc,
                                  const wxRect& rect,
-                                 int lenThumb,
                                  wxOrientation orient,
                                  int flags = 0,
-                                 long style = 0,
                                  wxRect *rectShaft = NULL);
     virtual void DrawSliderThumb(wxDC& dc,
                                  const wxRect& rect,
                                  wxOrientation orient,
-                                 int flags = 0,
-                                 long style = 0);
-    virtual void DrawSliderTicks(wxDC& WXUNUSED(dc),
-                                 const wxRect& WXUNUSED(rect),
-                                 int WXUNUSED(lenThumb),
-                                 wxOrientation WXUNUSED(orient),
-                                 int WXUNUSED(start),
-                                 int WXUNUSED(end),
-                                 int WXUNUSED(step) = 1,
-                                 int WXUNUSED(flags) = 0,
-                                 long WXUNUSED(style) = 0)
+                                 int flags = 0);
+    virtual void DrawSliderTicks(wxDC& dc,
+                                 const wxRect& rect,
+                                 const wxSize& sizeThumb,
+                                 wxOrientation orient,
+                                 int start,
+                                 int end,
+                                 int step,
+                                 int flags)
     {
         // we don't have the ticks in GTK version
     }
@@ -230,7 +223,7 @@ public:
     virtual void DrawStatusField(wxDC& dc,
                                  const wxRect& rect,
                                  const wxString& label,
-                                 int flags = 0, int style = 0);
+                                 int flags = 0);
 
     virtual void DrawFrameTitleBar(wxDC& dc,
                                    const wxRect& rect,
@@ -312,11 +305,8 @@ public:
     virtual wxCoord GetSliderDim() const { return 15; }
     virtual wxCoord GetSliderTickLen() const { return 0; }
     virtual wxRect GetSliderShaftRect(const wxRect& rect,
-                                      int lenThumb,
-                                      wxOrientation orient,
-                                      long style = 0) const;
+                                      wxOrientation orient) const;
     virtual wxSize GetSliderThumbSize(const wxRect& rect,
-                                      int lenThumb,
                                       wxOrientation orient) const;
     virtual wxSize GetProgressBarStep() const { return wxSize(16, 32); }
 
@@ -329,7 +319,6 @@ public:
     // helpers for "wxBitmap wxColourScheme::Get()"
     void DrawCheckBitmap(wxDC& dc, const wxRect& rect);
     void DrawUncheckBitmap(wxDC& dc, const wxRect& rect, bool isPressed);
-    void DrawUndeterminedBitmap(wxDC& dc, const wxRect& rect, bool isPressed);
 
 protected:
     // DrawBackground() helpers
@@ -449,7 +438,7 @@ protected:
                         const wxString& label,
                         int flags,
                         int indexAccel,
-                        const wxString& accel = wxEmptyString,
+                        const wxString& accel = _T(""),
                         const wxBitmap& bitmap = wxNullBitmap,
                         const wxGTKMenuGeometryInfo *geometryInfo = NULL);
 
@@ -470,9 +459,9 @@ private:
           m_penHighlight;
 
     // the checkbox bitmaps: first row is for the normal, second for the
-    // pressed state and the columns are for checked, unchecked and
-    // undeterminated respectively
-    wxBitmap m_bitmapsCheckbox[2][3];
+    // pressed state and the columns are for checked and unchecked status
+    // respectively
+    wxBitmap m_bitmapsCheckbox[2][2];
 
     // the line wrap bitmap (drawn at the end of wrapped lines)
     wxBitmap m_bmpLineWrap;
@@ -536,7 +525,7 @@ protected:
         wxStdScrollBarInputHandler::Press(scrollbar, doIt);
     }
 
-    virtual bool IsAllowedButton(int WXUNUSED(button)) { return true; }
+    virtual bool IsAllowedButton(int WXUNUSED(button)) { return TRUE; }
 
     bool IsArrow() const
     {
@@ -594,7 +583,7 @@ protected:
 // wxGTKTheme
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY_PTR(wxInputHandler *, wxArrayHandlers);
+WX_DEFINE_ARRAY(wxInputHandler *, wxArrayHandlers);
 
 class wxGTKTheme : public wxTheme
 {
@@ -778,7 +767,7 @@ wxColour wxGTKColourScheme::GetBackground(wxWindow *win) const
         col = win->GetBackgroundColour();
     }
 
-    if ( !win->ShouldInheritColours() )
+    if ( win->IsContainerWindow() )
     {
         // doesn't depend on the state
         if ( !col.Ok() )
@@ -983,7 +972,7 @@ void wxGTKRenderer::DrawAntiRaisedBorder(wxDC& dc, wxRect *rect)
 void wxGTKRenderer::DrawBorder(wxDC& dc,
                                wxBorder border,
                                const wxRect& rectTotal,
-                               int WXUNUSED(flags),
+                               int flags,
                                wxRect *rectIn)
 {
     size_t width;
@@ -1084,7 +1073,7 @@ wxRect wxGTKRenderer::GetBorderDimensions(wxBorder border) const
 bool wxGTKRenderer::AreScrollbarsInsideBorder() const
 {
     // no, the scrollbars are outside the border in GTK+
-    return false;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1334,7 +1323,7 @@ void wxGTKRenderer::DrawCheckItem(wxDC& dc,
     rectBitmap.width = GetCheckBitmapSize().x;
 
     // never draw the focus rect around the check indicators here
-    DrawCheckButton(dc, wxEmptyString, bitmap, rectBitmap, flags & ~wxCONTROL_FOCUSED);
+    DrawCheckButton(dc, _T(""), bitmap, rectBitmap, flags & ~wxCONTROL_FOCUSED);
 
     wxRect rectLabel = rect;
     wxCoord shift = rectBitmap.width + 2*GetCheckItemMargin();
@@ -1346,35 +1335,6 @@ void wxGTKRenderer::DrawCheckItem(wxDC& dc,
 // ----------------------------------------------------------------------------
 // check/radion buttons
 // ----------------------------------------------------------------------------
-
-void wxGTKRenderer::DrawUndeterminedBitmap(wxDC& dc,
-                                           const wxRect& rectTotal,
-                                           bool isPressed)
-{
-    // FIXME: For sure it is not GTK look but it is better than nothing.
-    // Show me correct look and I will immediatelly make it better (ABX)
-    wxRect rect = rectTotal;
-
-    wxColour col1, col2;
-
-    if ( isPressed )
-    {
-        col1 = wxSCHEME_COLOUR(m_scheme, SHADOW_DARK);
-        col2 = wxSCHEME_COLOUR(m_scheme, CONTROL_PRESSED);
-    }
-    else
-    {
-        col1 = wxSCHEME_COLOUR(m_scheme, SHADOW_DARK);
-        col2 = wxSCHEME_COLOUR(m_scheme, SHADOW_IN);
-    }
-
-    dc.SetPen(*wxTRANSPARENT_PEN);
-    dc.SetBrush(wxBrush(col1, wxSOLID));
-    dc.DrawRectangle(rect);
-    rect.Deflate(1);
-    dc.SetBrush(wxBrush(col2, wxSOLID));
-    dc.DrawRectangle(rect);
-}
 
 void wxGTKRenderer::DrawUncheckBitmap(wxDC& dc,
                                       const wxRect& rectTotal,
@@ -1436,13 +1396,13 @@ void wxGTKRenderer::DrawRadioBitmap(wxDC& dc,
     DrawUpZag(dc, x, xRight, yMid, y);
     DrawUpZag(dc, x + 1, xRight - 1, yMid, y + 1);
 
-    bool drawIt = true;
+    bool drawIt = TRUE;
     if ( flags & wxCONTROL_CHECKED )
         dc.SetPen(m_penBlack);
     else if ( flags & wxCONTROL_PRESSED )
         dc.SetPen(wxPen(wxSCHEME_COLOUR(m_scheme, CONTROL_PRESSED), 0, wxSOLID));
     else // unchecked and unpressed
-        drawIt = false;
+        drawIt = FALSE;
 
     if ( drawIt )
         DrawUpZag(dc, x + 2, xRight - 2, yMid, y + 2);
@@ -1455,14 +1415,14 @@ void wxGTKRenderer::DrawRadioBitmap(wxDC& dc,
     DrawDownZag(dc, x + 1, xRight - 1, yMid, yBottom - 1);
 
     if ( !(flags & wxCONTROL_CHECKED) )
-        drawIt = true; // with the same pen
+        drawIt = TRUE; // with the same pen
     else if ( flags & wxCONTROL_PRESSED )
     {
         dc.SetPen(wxPen(wxSCHEME_COLOUR(m_scheme, CONTROL_PRESSED), 0, wxSOLID));
-        drawIt = true;
+        drawIt = TRUE;
     }
     else // checked and unpressed
-        drawIt = false;
+        drawIt = FALSE;
 
     if ( drawIt )
         DrawDownZag(dc, x + 2, xRight - 2, yMid, yBottom - 2);
@@ -1501,7 +1461,7 @@ wxBitmap wxGTKRenderer::GetCheckBitmap(int flags)
         rect.height = size.y;
         for ( int i = 0; i < 2; i++ )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 2; j++ )
                 m_bitmapsCheckbox[i][j].Create(rect.width, rect.height);
         }
 
@@ -1513,32 +1473,18 @@ wxBitmap wxGTKRenderer::GetCheckBitmap(int flags)
 
         // normal unchecked
         dc.SelectObject(m_bitmapsCheckbox[0][1]);
-        DrawUncheckBitmap(dc, rect, false);
-
-        // normal undeterminated
-        dc.SelectObject(m_bitmapsCheckbox[0][2]);
-        DrawUndeterminedBitmap(dc, rect, false);
+        DrawUncheckBitmap(dc, rect, FALSE);
 
         // pressed checked
         m_bitmapsCheckbox[1][0] = m_bitmapsCheckbox[0][0];
 
         // pressed unchecked
         dc.SelectObject(m_bitmapsCheckbox[1][1]);
-        DrawUncheckBitmap(dc, rect, true);
-
-        // pressed undeterminated
-        dc.SelectObject(m_bitmapsCheckbox[1][2]);
-        DrawUndeterminedBitmap(dc, rect, true);
+        DrawUncheckBitmap(dc, rect, TRUE);
     }
 
-    int row = flags & wxCONTROL_PRESSED
-                  ? 1
-                  : 0;
-    int col = flags & wxCONTROL_CHECKED
-                  ? 0
-                  : ( flags & wxCONTROL_UNDETERMINED
-                          ? 2
-                          : 1 );
+    int row = flags & wxCONTROL_PRESSED ? 1 : 0;
+    int col = flags & wxCONTROL_CHECKED ? 0 : 1;
 
     return m_bitmapsCheckbox[row][col];
 }
@@ -1633,7 +1579,7 @@ void wxGTKRenderer::DoDrawCheckOrRadioBitmap(wxDC& dc,
         rectLabel.SetRight(rect.GetRight());
     }
 
-    dc.DrawBitmap(bitmap, xBmp, yBmp, true /* use mask */);
+    dc.DrawBitmap(bitmap, xBmp, yBmp, TRUE /* use mask */);
 
     DrawLabel(dc, label, rectLabel, flags,
               wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL, indexAccel);
@@ -1664,10 +1610,6 @@ void wxGTKRenderer::DrawRadioButton(wxDC& dc,
         dc.SetBackground(*wxLIGHT_GREY_BRUSH);
         dc.Clear();
         DrawRadioBitmap(dc, rect, flags);
-
-        // must unselect the bitmap before setting a mask for it because of the
-        // MSW limitations
-        dc.SelectObject(wxNullBitmap);
         bitmap.SetMask(new wxMask(bitmap, *wxLIGHT_GREY));
     }
 
@@ -1679,8 +1621,7 @@ void wxGTKRenderer::DrawToolBarButton(wxDC& dc,
                                       const wxString& label,
                                       const wxBitmap& bitmap,
                                       const wxRect& rectOrig,
-                                      int flags,
-                                      long WXUNUSED(style))
+                                      int flags)
 {
     // we don't draw the separators at all
     if ( !label.empty() || bitmap.Ok() )
@@ -1709,7 +1650,7 @@ void wxGTKRenderer::DrawToolBarButton(wxDC& dc,
 // text control
 // ----------------------------------------------------------------------------
 
-wxRect wxGTKRenderer::GetTextTotalArea(const wxTextCtrl * WXUNUSED(text),
+wxRect wxGTKRenderer::GetTextTotalArea(const wxTextCtrl *text,
                                        const wxRect& rect) const
 {
     wxRect rectTotal = rect;
@@ -1787,23 +1728,13 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
                             int flags,
                             int indexAccel)
 {
-    #define SELECT_FOR_VERTICAL(X,Y) ( isVertical ? Y : X )
-    #define REVERSE_FOR_VERTICAL(X,Y) \
-        SELECT_FOR_VERTICAL(X,Y)      \
-        ,                             \
-        SELECT_FOR_VERTICAL(Y,X)
-
     wxRect rect = rectOrig;
-
-    bool isVertical = ( dir == wxLEFT ) || ( dir == wxRIGHT );
 
     // the current tab is drawn indented (to the top for default case) and
     // bigger than the other ones
     const wxSize indent = GetTabIndent();
     if ( flags & wxCONTROL_SELECTED )
     {
-        rect.Inflate( SELECT_FOR_VERTICAL( indent.x , 0),
-                      SELECT_FOR_VERTICAL( 0, indent.y ));
         switch ( dir )
         {
             default:
@@ -1811,17 +1742,19 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
                 // fall through
 
             case wxTOP:
+                rect.Inflate(indent.x, 0);
                 rect.y -= indent.y;
-                // fall through
+                rect.height += indent.y;
+                break;
+
             case wxBOTTOM:
+                rect.Inflate(indent.x, 0);
                 rect.height += indent.y;
                 break;
 
             case wxLEFT:
-                rect.x -= indent.x;
-                // fall through
             case wxRIGHT:
-                rect.width += indent.x;
+                wxFAIL_MSG(_T("TODO"));
                 break;
         }
     }
@@ -1839,129 +1772,87 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
         rectBorder.Deflate(4, 3);
         if ( dir == wxBOTTOM )
             rectBorder.Offset(0, -1);
-        if ( dir == wxRIGHT )
-            rectBorder.Offset(-1, 0);
 
         DrawRect(dc, &rectBorder, m_penBlack);
     }
 
     // draw the text, image and the focus around them (if necessary)
-    wxRect rectLabel( REVERSE_FOR_VERTICAL(rect.x,rect.y),
-                      REVERSE_FOR_VERTICAL(rect.width,rect.height)
-                    );
+    wxRect rectLabel = rect;
     rectLabel.Deflate(1, 1);
-    if ( isVertical )
-    {
-        // draw it horizontally into memory and rotate for screen
-        wxMemoryDC dcMem;
-        wxBitmap bitmapRotated,
-                 bitmapMem( rectLabel.x + rectLabel.width,
-                            rectLabel.y + rectLabel.height );
-        dcMem.SelectObject(bitmapMem);
-        dcMem.SetBackground(dc.GetBackground());
-        dcMem.SetFont(dc.GetFont());
-        dcMem.SetTextForeground(dc.GetTextForeground());
-        dcMem.Clear();
-        bitmapRotated = wxBitmap( wxImage( bitmap.ConvertToImage() ).Rotate90(dir==wxLEFT) );
-        dcMem.DrawLabel(label, bitmapRotated, rectLabel, wxALIGN_CENTRE, indexAccel);
-        dcMem.SelectObject(wxNullBitmap);
-        bitmapMem = bitmapMem.GetSubBitmap(rectLabel);
-        bitmapMem = wxBitmap(wxImage(bitmapMem.ConvertToImage()).Rotate90(dir==wxRIGHT));
-        dc.DrawBitmap(bitmapMem, rectLabel.y, rectLabel.x, false);
-    }
-    else
-    {
-        dc.DrawLabel(label, bitmap, rectLabel, wxALIGN_CENTRE, indexAccel);
-    }
+    dc.DrawLabel(label, bitmap, rectLabel, wxALIGN_CENTRE, indexAccel);
 
     // now draw the tab itself
-    wxCoord x = SELECT_FOR_VERTICAL(rect.x,rect.y),
-            y = SELECT_FOR_VERTICAL(rect.y,rect.x),
-            x2 = SELECT_FOR_VERTICAL(rect.GetRight(),rect.GetBottom()),
-            y2 = SELECT_FOR_VERTICAL(rect.GetBottom(),rect.GetRight());
+    wxCoord x = rect.x,
+            y = rect.y,
+            x2 = rect.GetRight(),
+            y2 = rect.GetBottom();
     switch ( dir )
     {
         default:
-            // default is top
-        case wxLEFT:
-            // left orientation looks like top but IsVertical makes x and y reversed
         case wxTOP:
-            // top is not vertical so use coordinates in written order
             dc.SetPen(m_penHighlight);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y2),
-                        REVERSE_FOR_VERTICAL(x, y));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y),
-                        REVERSE_FOR_VERTICAL(x2, y));
+            dc.DrawLine(x, y2, x, y);
+            dc.DrawLine(x + 1, y, x2, y);
 
             dc.SetPen(m_penBlack);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y2),
-                        REVERSE_FOR_VERTICAL(x2, y));
+            dc.DrawLine(x2, y2, x2, y);
 
             dc.SetPen(m_penDarkGrey);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2 - 1, y2),
-                        REVERSE_FOR_VERTICAL(x2 - 1, y + 1));
+            dc.DrawLine(x2 - 1, y2, x2 - 1, y + 1);
 
             if ( flags & wxCONTROL_SELECTED )
             {
                 dc.SetPen(m_penLightGrey);
 
                 // overwrite the part of the border below this tab
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y2 + 1),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y2 + 1));
+                dc.DrawLine(x + 1, y2 + 1, x2 - 1, y2 + 1);
 
                 // and the shadow of the tab to the left of us
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y + 2),
-                            REVERSE_FOR_VERTICAL(x + 1, y2 + 1));
+                dc.DrawLine(x + 1, y + 2, x + 1, y2 + 1);
             }
             break;
 
-        case wxRIGHT:
-            // right orientation looks like bottom but IsVertical makes x and y reversed
         case wxBOTTOM:
-            // bottom is not vertical so use coordinates in written order
             dc.SetPen(m_penHighlight);
 
             // we need to continue one pixel further to overwrite the corner of
             // the border for the selected tab
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y - (flags & wxCONTROL_SELECTED ? 1 : 0)),
-                        REVERSE_FOR_VERTICAL(x, y2));
+            dc.DrawLine(x, y - (flags & wxCONTROL_SELECTED ? 1 : 0),
+                        x, y2);
 
             // it doesn't work like this (TODO: implement it properly)
 #if 0
             // erase the corner of the tab to the right
             dc.SetPen(m_penLightGrey);
-            dc.DrawPoint(REVERSE_FOR_VERTICAL(x2 - 1, y - 2));
-            dc.DrawPoint(REVERSE_FOR_VERTICAL(x2 - 2, y - 2));
-            dc.DrawPoint(REVERSE_FOR_VERTICAL(x2 - 2, y - 1));
+            dc.DrawPoint(x2 - 1, y - 2);
+            dc.DrawPoint(x2 - 2, y - 2);
+            dc.DrawPoint(x2 - 2, y - 1);
 #endif // 0
 
             dc.SetPen(m_penBlack);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y2),
-                        REVERSE_FOR_VERTICAL(x2, y2));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y),
-                        REVERSE_FOR_VERTICAL(x2, y2));
+            dc.DrawLine(x + 1, y2, x2, y2);
+            dc.DrawLine(x2, y, x2, y2);
 
             dc.SetPen(m_penDarkGrey);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + 2, y2 - 1),
-                        REVERSE_FOR_VERTICAL(x2 - 1, y2 - 1));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2 - 1, y),
-                        REVERSE_FOR_VERTICAL(x2 - 1, y2));
+            dc.DrawLine(x + 2, y2 - 1, x2 - 1, y2 - 1);
+            dc.DrawLine(x2 - 1, y, x2 - 1, y2);
 
             if ( flags & wxCONTROL_SELECTED )
             {
                 dc.SetPen(m_penLightGrey);
 
                 // overwrite the part of the (double!) border above this tab
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y - 1),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y - 1));
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y - 2),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y - 2));
+                dc.DrawLine(x + 1, y - 1, x2 - 1, y - 1);
+                dc.DrawLine(x + 1, y - 2, x2 - 1, y - 2);
 
                 // and the shadow of the tab to the left of us
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y2 - 1),
-                            REVERSE_FOR_VERTICAL(x + 1, y - 1));
+                dc.DrawLine(x + 1, y2 - 1, x + 1, y - 1);
             }
             break;
+
+        case wxLEFT:
+        case wxRIGHT:
+            wxFAIL_MSG(_T("TODO"));
     }
 }
 
@@ -1970,14 +1861,13 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 wxSize wxGTKRenderer::GetSliderThumbSize(const wxRect& rect,
-                                         int lenThumb,
                                          wxOrientation orient) const
 {
     static const wxCoord SLIDER_THUMB_LENGTH = 30;
 
     wxSize size;
 
-    wxRect rectShaft = GetSliderShaftRect(rect, lenThumb, orient);
+    wxRect rectShaft = GetSliderShaftRect(rect, orient);
     if ( orient == wxHORIZONTAL )
     {
         size.x = wxMin(SLIDER_THUMB_LENGTH, rectShaft.width);
@@ -1993,19 +1883,15 @@ wxSize wxGTKRenderer::GetSliderThumbSize(const wxRect& rect,
 }
 
 wxRect wxGTKRenderer::GetSliderShaftRect(const wxRect& rect,
-                                         int WXUNUSED(lenThumb),
-                                         wxOrientation WXUNUSED(orient),
-                                         long WXUNUSED(style)) const
+                                         wxOrientation WXUNUSED(orient)) const
 {
     return rect.Deflate(2*BORDER_THICKNESS, 2*BORDER_THICKNESS);
 }
 
 void wxGTKRenderer::DrawSliderShaft(wxDC& dc,
                                     const wxRect& rectOrig,
-                                    int WXUNUSED(lenThumb),
-                                    wxOrientation WXUNUSED(orient),
+                                    wxOrientation orient,
                                     int flags,
-                                    long WXUNUSED(style),
                                     wxRect *rectShaft)
 {
     wxRect rect = rectOrig;
@@ -2032,8 +1918,7 @@ void wxGTKRenderer::DrawSliderShaft(wxDC& dc,
 void wxGTKRenderer::DrawSliderThumb(wxDC& dc,
                                     const wxRect& rectOrig,
                                     wxOrientation orient,
-                                    int WXUNUSED(flags),
-                                    long WXUNUSED(style))
+                                    int flags)
 {
     // draw the thumb border
     wxRect rect = rectOrig;
@@ -2251,7 +2136,7 @@ wxMenuGeometryInfo *wxGTKRenderer::GetMenuGeometry(wxWindow *win,
             widthAccelMax = 0,
             widthBmpMax = MENU_LEFT_MARGIN;
 
-    for ( wxMenuItemList::compatibility_iterator node = menu.GetMenuItems().GetFirst();
+    for ( wxMenuItemList::Node *node = menu.GetMenuItems().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -2323,16 +2208,15 @@ wxMenuGeometryInfo *wxGTKRenderer::GetMenuGeometry(wxWindow *win,
 // status bar
 // ----------------------------------------------------------------------------
 
-wxSize
-wxGTKRenderer::GetStatusBarBorders(wxCoord * WXUNUSED(borderBetweenFields)) const
+wxSize wxGTKRenderer::GetStatusBarBorders(wxCoord *borderBetweenFields) const
 {
-    return wxSize(0,0);
+    return wxSize(0, 0);
 }
 
-void wxGTKRenderer::DrawStatusField(wxDC& WXUNUSED(dc),
-                                    const wxRect& WXUNUSED(rect),
-                                    const wxString& WXUNUSED(label),
-                                    int WXUNUSED(flags), int WXUNUSED(style))
+void wxGTKRenderer::DrawStatusField(wxDC& dc,
+                                    const wxRect& rect,
+                                    const wxString& label,
+                                    int flags)
 {
 }
 
@@ -2361,7 +2245,7 @@ void wxGTKRenderer::InitComboBitmaps()
         wxCONTROL_DISABLED,
     };
 
-    wxRect rect(sizeArrow);
+    wxRect rect(wxPoint(0, 0), sizeArrow);
 
     wxMemoryDC dc;
     for ( n = ComboState_Normal; n < ComboState_Max; n++ )
@@ -2401,7 +2285,7 @@ void wxGTKRenderer::GetComboBitmaps(wxBitmap *bmpNormal,
 void wxGTKRenderer::DoDrawBackground(wxDC& dc,
                                      const wxColour& col,
                                      const wxRect& rect,
-                                     wxWindow * WXUNUSED(window))
+                                     wxWindow *window )
 {
     wxBrush brush(col, wxSOLID);
     dc.SetBrush(brush);
@@ -2747,7 +2631,7 @@ void wxGTKRenderer::DrawScrollbarThumb(wxDC& dc,
 void wxGTKRenderer::DrawScrollbarShaft(wxDC& dc,
                                        wxOrientation orient,
                                        const wxRect& rect,
-                                       int WXUNUSED(flags))
+                                       int flags)
 {
     wxRect rectBar = rect;
     DrawThumbBorder(dc, &rectBar, orient);
@@ -2853,78 +2737,70 @@ void wxGTKRenderer::AdjustSize(wxSize *size, const wxWindow *window)
 // top level windows
 // ----------------------------------------------------------------------------
 
-void wxGTKRenderer::DrawFrameTitleBar(wxDC& WXUNUSED(dc),
-                                      const wxRect& WXUNUSED(rect),
-                                      const wxString& WXUNUSED(title),
-                                      const wxIcon& WXUNUSED(icon),
-                                      int WXUNUSED(flags),
-                                      int WXUNUSED(specialButton),
-                                      int WXUNUSED(specialButtonFlag))
+void wxGTKRenderer::DrawFrameTitleBar(wxDC& dc,
+                                      const wxRect& rect,
+                                      const wxString& title,
+                                      const wxIcon& icon,
+                                      int flags,
+                                      int specialButton,
+                                      int specialButtonFlag)
 {
 }
 
-void wxGTKRenderer::DrawFrameBorder(wxDC& WXUNUSED(dc),
-                                    const wxRect& WXUNUSED(rect),
-                                    int WXUNUSED(flags))
+void wxGTKRenderer::DrawFrameBorder(wxDC& dc,
+                                    const wxRect& rect,
+                                    int flags)
 {
 }
 
-void wxGTKRenderer::DrawFrameBackground(wxDC& WXUNUSED(dc),
-                                        const wxRect& WXUNUSED(rect),
-                                        int WXUNUSED(flags))
+void wxGTKRenderer::DrawFrameBackground(wxDC& dc,
+                                        const wxRect& rect,
+                                        int flags)
 {
 }
 
-void wxGTKRenderer::DrawFrameTitle(wxDC& WXUNUSED(dc),
-                                   const wxRect& WXUNUSED(rect),
-                                   const wxString& WXUNUSED(title),
-                                   int WXUNUSED(flags))
+void wxGTKRenderer::DrawFrameTitle(wxDC& dc,
+                                   const wxRect& rect,
+                                   const wxString& title,
+                                   int flags)
 {
 }
 
-void wxGTKRenderer::DrawFrameIcon(wxDC& WXUNUSED(dc),
-                                  const wxRect& WXUNUSED(rect),
-                                  const wxIcon& WXUNUSED(icon),
-                                  int WXUNUSED(flags))
+void wxGTKRenderer::DrawFrameIcon(wxDC& dc,
+                                  const wxRect& rect,
+                                  const wxIcon& icon,
+                                  int flags)
 {
 }
 
-void wxGTKRenderer::DrawFrameButton(wxDC& WXUNUSED(dc),
-                                    wxCoord WXUNUSED(x),
-                                    wxCoord WXUNUSED(y),
-                                    int WXUNUSED(button),
-                                    int WXUNUSED(flags))
+void wxGTKRenderer::DrawFrameButton(wxDC& dc,
+                                    wxCoord x, wxCoord y,
+                                    int button,
+                                    int flags)
 {
 }
 
-wxRect
-wxGTKRenderer::GetFrameClientArea(const wxRect& rect,
-                                  int WXUNUSED(flags)) const
+wxRect wxGTKRenderer::GetFrameClientArea(const wxRect& rect, int flags) const
 {
     return rect;
 }
 
-wxSize
-wxGTKRenderer::GetFrameTotalSize(const wxSize& clientSize,
-                                 int WXUNUSED(flags)) const
+wxSize wxGTKRenderer::GetFrameTotalSize(const wxSize& clientSize, int flags) const
 {
     return clientSize;
 }
 
-wxSize wxGTKRenderer::GetFrameMinSize(int WXUNUSED(flags)) const
+wxSize wxGTKRenderer::GetFrameMinSize(int flags) const
 {
     return wxSize(0,0);
 }
 
 wxSize wxGTKRenderer::GetFrameIconSize() const
 {
-    return wxSize(wxDefaultCoord, wxDefaultCoord);
+    return wxSize(-1, -1);
 }
 
-int
-wxGTKRenderer::HitTestFrame(const wxRect& WXUNUSED(rect),
-                            const wxPoint& WXUNUSED(pt),
-                            int WXUNUSED(flags)) const
+int wxGTKRenderer::HitTestFrame(const wxRect& rect, const wxPoint& pt, int flags) const
 {
     return wxHT_TOPLEVEL_CLIENT_AREA;
 }
@@ -3226,11 +3102,11 @@ wxGTKInputHandler::wxGTKInputHandler(wxGTKRenderer *renderer)
     m_renderer = renderer;
 }
 
-bool wxGTKInputHandler::HandleKey(wxInputConsumer * WXUNUSED(control),
-                                  const wxKeyEvent& WXUNUSED(event),
-                                  bool WXUNUSED(pressed))
+bool wxGTKInputHandler::HandleKey(wxInputConsumer *control,
+                                  const wxKeyEvent& event,
+                                  bool pressed)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxGTKInputHandler::HandleMouse(wxInputConsumer *control,
@@ -3241,10 +3117,10 @@ bool wxGTKInputHandler::HandleMouse(wxInputConsumer *control,
     {
         control->GetInputWindow()->SetFocus();
 
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 bool wxGTKInputHandler::HandleMouseMove(wxInputConsumer *control,
@@ -3252,18 +3128,18 @@ bool wxGTKInputHandler::HandleMouseMove(wxInputConsumer *control,
 {
     if ( event.Entering() )
     {
-        control->GetInputWindow()->SetCurrent(true);
+        control->GetInputWindow()->SetCurrent(TRUE);
     }
     else if ( event.Leaving() )
     {
-        control->GetInputWindow()->SetCurrent(false);
+        control->GetInputWindow()->SetCurrent(FALSE);
     }
     else
     {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -3281,11 +3157,11 @@ bool wxGTKCheckboxInputHandler::HandleKey(wxInputConsumer *control,
         {
             control->PerformAction(wxACTION_CHECKBOX_TOGGLE);
 
-            return true;
+            return TRUE;
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -3375,7 +3251,7 @@ bool wxGTKTextCtrlInputHandler::HandleKey(wxInputConsumer *control,
         {
             control->PerformAction(action);
 
-            return true;
+            return TRUE;
         }
     }
 

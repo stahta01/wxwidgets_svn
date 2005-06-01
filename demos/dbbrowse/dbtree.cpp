@@ -36,9 +36,9 @@
 //----------------------------------------------------------------------------------------
 //-- Global functions --------------------------------------------------------------------
 //----------------------------------------------------------------------------------------
-static inline const wxChar *bool2String(bool b)
+static inline const char *bool2String(bool b)
 {
-    return b ? wxEmptyString : _T("not ");
+    return b ? "" : "not ";
 }
 
 //----------------------------------------------------------------------------------------
@@ -65,9 +65,8 @@ DBTree::DBTree(wxWindow *parent)  : wxTreeCtrl(parent)
 DBTree::DBTree(wxWindow *parent, const wxWindowID id,const wxPoint& pos, const wxSize& size, long style)
 : wxTreeCtrl(parent, id, pos, size, style)
 {
-    const int image_size = 16;
     // Make an image list containing small icons
-    p_imageListNormal = new wxImageList(image_size, image_size, true);
+    p_imageListNormal = new wxImageList(16, 16, TRUE);
     // should correspond to TreeIc_xxx enum
 #if !defined(__WXMSW__)
 #include "bitmaps/logo.xpm"
@@ -81,16 +80,16 @@ DBTree::DBTree(wxWindow *parent, const wxWindowID id,const wxPoint& pos, const w
 #include "bitmaps/d_open.xpm"
 #include "bitmaps/d_closed.xpm"
 #endif
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(aLogo)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DsnClosed)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DsnOpen)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(TAB)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(VIEW)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(COL)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(KEY)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(KEYF)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DocOpen)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DocOpen)).ConvertToImage().Rescale(image_size, image_size)));
+    p_imageListNormal->Add(wxICON(aLogo));
+    p_imageListNormal->Add(wxICON(DsnClosed));
+    p_imageListNormal->Add(wxICON(DsnOpen));
+    p_imageListNormal->Add(wxICON(TAB));
+    p_imageListNormal->Add(wxICON(VIEW));
+    p_imageListNormal->Add(wxICON(COL));
+    p_imageListNormal->Add(wxICON(KEY));
+    p_imageListNormal->Add(wxICON(KEYF));
+    p_imageListNormal->Add(wxICON(DocOpen));
+    p_imageListNormal->Add(wxICON(DocOpen));
     SetImageList(p_imageListNormal);
     ct_BrowserDB = NULL;
     popupMenu1   = NULL;
@@ -104,7 +103,7 @@ DBTree::~DBTree()
 
     //  delete (pDoc->db_Br+i_Which);
     // wxLogMessage("DBTree::~DBTree() - Vor  OnCloseDB()");
-    (pDoc->db_Br+i_Which)->OnCloseDB(false);
+    (pDoc->db_Br+i_Which)->OnCloseDB(FALSE);
     // wxLogMessage("DBTree::~DBTree() - Nach OnCloseDB()");
     (pDoc->db_Br+i_Which)->db_BrowserDB = NULL;
     (pDoc->db_Br+i_Which)->ct_BrowserDB = NULL;
@@ -128,28 +127,28 @@ int DBTree::OnPopulate()
     wxString SQL_TYPE, DB_TYPE;
     SetFont(* pDoc->ft_Doc);
     //---------------------------------------------------------------------------------------
-    if ((pDoc->db_Br+i_Which)->Initialize(false))
+    if ((pDoc->db_Br+i_Which)->Initialize(FALSE))
     {
         wxStopWatch sw;
         wxBeginBusyCursor();
-        ct_BrowserDB = (pDoc->db_Br+i_Which)->OnGetCatalog(false);
+        ct_BrowserDB = (pDoc->db_Br+i_Which)->OnGetCatalog(FALSE);
         if (ct_BrowserDB)
         { // Use the wxDatabase Information
-            Temp0.Printf(_T("%s - (%s) (%s)"), s_DSN.c_str(),ct_BrowserDB->catalog, ct_BrowserDB->schema);
-            Root = AddRoot(Temp0,TreeIc_DsnOpen,TreeIc_DsnOpen,new DBTreeData(_T("Root")));
+            Temp0.Printf("%s - (%s) (%s)", s_DSN.c_str(),ct_BrowserDB->catalog, ct_BrowserDB->schema);
+            Root = AddRoot(Temp0,TreeIc_DsnOpen,TreeIc_DsnOpen,new DBTreeData("Root"));
             for (x=0;x<ct_BrowserDB->numTables;x++)
             {
                 wxYield();
                 TableType = 0; // TABLE = 1 ; VIEW = 2 ; 0 We are not interested in
-                if (!wxStrcmp((ct_BrowserDB->pTableInf+x)->tableType,_T("TABLE")))    // only TABLES
+                if (!wxStrcmp((ct_BrowserDB->pTableInf+x)->tableType,"TABLE"))    // only TABLES
                     TableType = 1;
-                if (!wxStrcmp((ct_BrowserDB->pTableInf+x)->tableType,_T("VIEW")))     // and  VIEWS
+                if (!wxStrcmp((ct_BrowserDB->pTableInf+x)->tableType,"VIEW"))     // and  VIEWS
                     TableType = 2;
                 if (TableType)    // only TABLES or Views
                 {
-                    Temp1.Printf(_T("TN(%s"),(ct_BrowserDB->pTableInf+x)->tableName);
+                    Temp1.Printf("TN(%s",(ct_BrowserDB->pTableInf+x)->tableName);
                     //----
-                    (ct_BrowserDB->pTableInf+x)->pColInf = (pDoc->db_Br+i_Which)->OnGetColumns((ct_BrowserDB->pTableInf+x)->tableName,(ct_BrowserDB->pTableInf+x)->numCols,false);
+                    (ct_BrowserDB->pTableInf+x)->pColInf = (pDoc->db_Br+i_Which)->OnGetColumns((ct_BrowserDB->pTableInf+x)->tableName,(ct_BrowserDB->pTableInf+x)->numCols,FALSE);
                     //----
                     if ((ct_BrowserDB->pTableInf+x)->pColInf)
                     {
@@ -167,37 +166,37 @@ int DBTree::OnPopulate()
                         }
                         for (y=0;y<(ct_BrowserDB->pTableInf+x)->numCols;y++)
                         {
-                            Temp1.Printf(_T("FN(%s"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
+                            Temp1.Printf("FN(%s",((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
                             // Here is where we find out if the Column is a Primary / Foreign Key
                             if (((ct_BrowserDB->pTableInf+x)->pColInf+y)->PkCol != 0)  // Primary Key
                             {
-                                Temp2.Printf(_T("(%d) - %s"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->PkCol,((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
+                                Temp2.Printf("(%d) - %s",((ct_BrowserDB->pTableInf+x)->pColInf+y)->PkCol,((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
                                 Docu = AppendItem(Folder,Temp2,TreeIc_KEY,TreeIc_KEY,new DBTreeData(Temp1));
                                 Temp2 = ((ct_BrowserDB->pTableInf+x)->pColInf+y)->PkTableName;
-                                if (Temp2.empty())
+                                if (Temp2 == "")
                                     Temp2 = _("None");
                                 Temp2.Printf(_("This Primary Key is used in the following Tables : %s"),Temp2.c_str());
-                                Funkt = AppendItem(Docu,Temp2,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData(_T("KEY")));
+                                Funkt = AppendItem(Docu,Temp2,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData("KEY"));
                             }
                             else
                             {
                                 if (((ct_BrowserDB->pTableInf+x)->pColInf+y)->FkCol != 0) // Foreign Key
                                 {
-                                    Temp2.Printf(_T("(%d) - %s"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->FkCol,((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
+                                    Temp2.Printf("(%d) - %s",((ct_BrowserDB->pTableInf+x)->pColInf+y)->FkCol,((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName);
                                     Docu = AppendItem(Folder,Temp2,TreeIc_KEYF,TreeIc_KEYF,new DBTreeData(Temp1));
                                     Temp2.Printf(_("This Foreign Key comes from the following Table : %s"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->FkTableName);
-                                    Funkt = AppendItem(Docu,Temp2,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData(_T("KEYF")));
+                                    Funkt = AppendItem(Docu,Temp2,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData("KEYF"));
                                 }
                                 else
                                     Docu = AppendItem(Folder,((ct_BrowserDB->pTableInf+x)->pColInf+y)->colName,TreeIc_COL,TreeIc_COL,new DBTreeData(Temp1));
                             }
-                            SQL_TYPE.Printf(_T("SQL_C_???? (%d)"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->sqlDataType);
-                            DB_TYPE.Printf(_T("DB_DATA_TYPE_???? (%d)"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->dbDataType);
+                            SQL_TYPE.Printf("SQL_C_???? (%d)",((ct_BrowserDB->pTableInf+x)->pColInf+y)->sqlDataType);
+                            DB_TYPE.Printf("DB_DATA_TYPE_???? (%d)",((ct_BrowserDB->pTableInf+x)->pColInf+y)->dbDataType);
                             for (i=1;i<=(pDoc->db_Br+i_Which)->i_SqlTyp[0];i++)
                             {
                                 if (((ct_BrowserDB->pTableInf+x)->pColInf+y)->sqlDataType == (pDoc->db_Br+i_Which)->i_SqlTyp[i])
                                 {
-                                    SQL_TYPE.Printf(_T("%s(%d) ; "),(pDoc->db_Br+i_Which)->s_SqlTyp[i].c_str(),(pDoc->db_Br+i_Which)->i_SqlTyp[i]);
+                                    SQL_TYPE.Printf("%s(%d) ; ",(pDoc->db_Br+i_Which)->s_SqlTyp[i].c_str(),(pDoc->db_Br+i_Which)->i_SqlTyp[i]);
                                 }
                             } // for (i=1;i<=i_SqlTyp[0];i++)
                             wxYield();
@@ -205,14 +204,14 @@ int DBTree::OnPopulate()
                             {
                                 if (((ct_BrowserDB->pTableInf+x)->pColInf+y)->dbDataType == (pDoc->db_Br+i_Which)->i_dbTyp[i])
                                 {
-                                    DB_TYPE.Printf(_T("%s(%d)"),(pDoc->db_Br+i_Which)->s_dbTyp[i].c_str(),(pDoc->db_Br+i_Which)->i_dbTyp[i]);
+                                    DB_TYPE.Printf("%s(%d)",(pDoc->db_Br+i_Which)->s_dbTyp[i].c_str(),(pDoc->db_Br+i_Which)->i_dbTyp[i]);
                                 }
                             } // for (i=1;i<=i_dbTyp[0];i++)
                             wxYield();
                             SQL_TYPE += DB_TYPE;
                             Funkt = AppendItem(Docu,SQL_TYPE,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData(SQL_TYPE));
-                            SQL_TYPE.Printf(_T("%10s %d,%d"),((ct_BrowserDB->pTableInf+x)->pColInf+y)->typeName,
-                                ((ct_BrowserDB->pTableInf+x)->pColInf+y)->columnLength,((ct_BrowserDB->pTableInf+x)->pColInf+y)->decimalDigits);
+                            SQL_TYPE.Printf("%10s %d,%d",((ct_BrowserDB->pTableInf+x)->pColInf+y)->typeName,
+                                ((ct_BrowserDB->pTableInf+x)->pColInf+y)->columnSize,((ct_BrowserDB->pTableInf+x)->pColInf+y)->decimalDigits);
                             Funkt = AppendItem(Docu,SQL_TYPE,TreeIc_DocClosed,TreeIc_DocOpen,new DBTreeData(SQL_TYPE));
                         }  // for (y=0;y<(ct_BrowserDB->pTableInf+x)->numCols;y++)
                     }   // if ((ct_BrowserDB->pTableInf+x)->pColInf)
@@ -221,10 +220,8 @@ int DBTree::OnPopulate()
                     z++;
 //                    if (z % 10 == 0)
                     {
-#if wxUSE_STATUSBAR
                         Temp0.Printf(_("-I-> DBTree::OnPopulate(%s) - Table %6d (from %d) has been read."),(ct_BrowserDB->pTableInf+x)->tableName,z,ct_BrowserDB->numTables);
                         pDoc->p_MainFrame->SetStatusText(Temp0, 0);
-#endif // wxUSE_STATUSBAR
                     }
                     wxYield();
                 }    // if ((ct_BrowserDB->pTableInf+x)->tableType == "TABLE" or VIEW)
@@ -237,10 +234,8 @@ int DBTree::OnPopulate()
         wxEndBusyCursor();
         Temp0.Printf(_("-I-> DBTree::OnPopulate() - %6d Tables have been read. - Time needed : %ld ms"),z,sw.Time());
         wxLogMessage(Temp0);
-#if wxUSE_STATUSBAR
         pDoc->p_MainFrame->SetStatusText(Temp0, 0);
-#endif // wxUSE_STATUSBAR
-    }       // if((pDoc->db_Br+i_Which)->Initialize(false))
+    }       // if((pDoc->db_Br+i_Which)->Initialize(FALSE))
     else
     {
         wxLogMessage(_("\n-E-> DBTree::OnPopulate() : A valid Pointer could not be created : Failed"));
@@ -250,12 +245,12 @@ int DBTree::OnPopulate()
     Expand(Root);
     //---------------------------------------------------------------------------------------
     popupMenu1 = NULL;
-    popupMenu1 = new wxMenu;
+    popupMenu1 = new wxMenu("");
     popupMenu1->Append(DATA_DB, _("Make wxDB.cpp/h "));
     popupMenu1->AppendSeparator();
     popupMenu1->Append(DATA_TABLE_ALL, _("Make all wxTable.cpp/h classes"));
     popupMenu2 = NULL;
-    popupMenu2 = new wxMenu;
+    popupMenu2 = new wxMenu("");
     popupMenu2->Append(DATA_SHOW, _("Show Data"));
     popupMenu2->AppendSeparator();
     popupMenu2->Append(DATA_TABLE, _("Make wxTable.cpp/h "));
@@ -268,18 +263,16 @@ void DBTree::OnSelChanged(wxTreeEvent& WXUNUSED(event))
 {
     int i;
     Temp0.Empty();
-#if wxUSE_STATUSBAR
     pDoc->p_MainFrame->SetStatusText(Temp0,0);
-#endif // wxUSE_STATUSBAR
     // Get the Information that we need
     wxTreeItemId itemId = GetSelection();
     DBTreeData *item = (DBTreeData *)GetItemData(itemId);
     if ( item != NULL )
     {
         int Treffer = 0;
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         //-------------------------------------------------------------------------------------
-        if (Temp1.Contains(_T("ODBC-")))
+        if (Temp1.Contains("ODBC-"))
         {
             Temp1 = Temp1.Mid(5,wxSTRING_MAXLEN);
             for (i=0;i<pDoc->i_DSN;i++)
@@ -323,16 +316,16 @@ void DBTree::OnRightSelect(wxTreeEvent& WXUNUSED(event))
     if ( item != NULL )
     {
         int Treffer = 0;
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         //--------------------------------------------------------------------------------------
-        if (!wxStrcmp(_T("Root"),Temp1))
+        if (!wxStrcmp("Root",Temp1))
         {
             PopupMenu(popupMenu1,TreePos.x,TreePos.y);
             Treffer++;
         }
         for (i=0;i<ct_BrowserDB->numTables;i++)
         {
-            Temp2.Printf(_T("TN(%s"),(ct_BrowserDB->pTableInf+i)->tableName);
+            Temp2.Printf("TN(%s",(ct_BrowserDB->pTableInf+i)->tableName);
             if (!wxStrcmp(Temp2,Temp1))
             {
                 PopupMenu(popupMenu2,TreePos.x,TreePos.y);
@@ -361,7 +354,7 @@ void DBTree::OnRightSelect(wxTreeEvent& WXUNUSED(event))
 }
 
 //----------------------------------------------------------------------------------------
-void DBTree::OnDBGrid(wxCommandEvent& WXUNUSED(event))
+void DBTree::OnDBGrid(wxCommandEvent& event)
 {
     int i;
     // Get the Information that we need
@@ -369,10 +362,10 @@ void DBTree::OnDBGrid(wxCommandEvent& WXUNUSED(event))
     DBTreeData *item = (DBTreeData *)GetItemData(itemId);
     if ( item != NULL )
     {
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         for (i=0;i<ct_BrowserDB->numTables;i++)
         {
-            Temp2.Printf(_T("TN(%s"),(ct_BrowserDB->pTableInf+i)->tableName);
+            Temp2.Printf("TN(%s",(ct_BrowserDB->pTableInf+i)->tableName);
             if (!wxStrcmp(Temp2,Temp1))
             {
                 // Temp0.Printf("(%d) Here is where a GridCtrl for >%s< will be called! ",i,(ct_BrowserDB->pTableInf+i)->tableName);
@@ -384,7 +377,7 @@ void DBTree::OnDBGrid(wxCommandEvent& WXUNUSED(event))
 }
 
 //----------------------------------------------------------------------------------------
-void DBTree::OnDBClass(wxCommandEvent& WXUNUSED(event))
+void DBTree::OnDBClass(wxCommandEvent& event)
 {
     // int i;
     // Get the Information that we need
@@ -398,7 +391,7 @@ void DBTree::OnDBClass(wxCommandEvent& WXUNUSED(event))
 }
 
 //----------------------------------------------------------------------------------------
-void DBTree::OnTableClass(wxCommandEvent& WXUNUSED(event))
+void DBTree::OnTableClass(wxCommandEvent& event)
 {
     int i;
     // Get the Information that we need
@@ -406,10 +399,10 @@ void DBTree::OnTableClass(wxCommandEvent& WXUNUSED(event))
     DBTreeData *item = (DBTreeData *)GetItemData(itemId);
     if ( item != NULL )
     {
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         for (i=0;i<ct_BrowserDB->numTables;i++)
         {
-            Temp2.Printf(_T("TN(%s"),(ct_BrowserDB->pTableInf+i)->tableName);
+            Temp2.Printf("TN(%s",(ct_BrowserDB->pTableInf+i)->tableName);
             if (!wxStrcmp(Temp2,Temp1))
             {
                 Temp0.Printf(_("(%d) Here is where a wxTable Class for >%s< will be made! "),i,(ct_BrowserDB->pTableInf+i)->tableName);
@@ -420,7 +413,7 @@ void DBTree::OnTableClass(wxCommandEvent& WXUNUSED(event))
 }
 
 //----------------------------------------------------------------------------------------
-void DBTree::OnTableClassAll(wxCommandEvent& WXUNUSED(event))
+void DBTree::OnTableClassAll(wxCommandEvent& event)
 {
     // int i;
     // Get the Information that we need

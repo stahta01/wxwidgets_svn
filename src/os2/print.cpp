@@ -21,32 +21,32 @@
 
 #if wxUSE_PRINTING_ARCHITECTURE
 
-#include "wx/os2/printos2.h"
+#include "wx/os2/print.h"
 #include "wx/generic/prntdlgg.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxOS2Printer, wxPrinterBase)
-IMPLEMENT_CLASS(wxOS2PrintPreview, wxPrintPreviewBase)
+IMPLEMENT_DYNAMIC_CLASS(wxPrinter, wxPrinterBase)
+IMPLEMENT_CLASS(wxPrintPreview, wxPrintPreviewBase)
 
 /*
  * Printer
  */
 
-wxOS2Printer::wxOS2Printer(wxPrintDialogData *data):
-  wxPrinterBase(data)
+wxPrinter::wxPrinter(wxPrintData *data):
+  wxPrinterBase((wxPrintDialogData*)data)
 {
 }
 
-wxOS2Printer::~wxOS2Printer()
+wxPrinter::~wxPrinter()
 {
 }
 
-bool wxOS2Printer::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
+bool wxPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
 {
     // TODO. See wxPostScriptPrinter::Print for hints.
     return FALSE;
 }
 
-wxDC* wxOS2Printer::PrintDialog(wxWindow *parent)
+wxDC* wxPrinter::PrintDialog(wxWindow *parent)
 {
 // TODO:
 /*
@@ -56,7 +56,7 @@ wxDC* wxOS2Printer::PrintDialog(wxWindow *parent)
     return NULL;
 }
 
-bool wxOS2Printer::Setup(wxWindow *parent)
+bool wxPrinter::Setup(wxWindow *parent)
 {
 // TODO:
 /*
@@ -71,32 +71,26 @@ bool wxOS2Printer::Setup(wxWindow *parent)
  * Print preview
  */
 
-wxOS2PrintPreview::wxOS2PrintPreview(wxPrintout *printout, wxPrintout *printoutForPrinting, wxPrintDialogData *data):
+wxPrintPreview::wxPrintPreview(wxPrintout *printout, wxPrintout *printoutForPrinting, wxPrintData *data):
   wxPrintPreviewBase(printout, printoutForPrinting, data)
 {
     DetermineScaling();
 }
 
-wxOS2PrintPreview::wxOS2PrintPreview(wxPrintout *printout, wxPrintout *printoutForPrinting, wxPrintData *data):
-  wxPrintPreviewBase(printout, printoutForPrinting, data)
-{
-    DetermineScaling();
-}
-
-wxOS2PrintPreview::~wxOS2PrintPreview()
+wxPrintPreview::~wxPrintPreview()
 {
 }
 
-bool wxOS2PrintPreview::Print(bool interactive)
+bool wxPrintPreview::Print(bool interactive)
 {
     if (!m_printPrintout)
         return FALSE;
-//    wxOS2Printer printer(&m_printData);
+//    wxPrinter printer(&m_printData);
 //    return printer.Print(m_previewFrame, m_printPrintout, interactive);
     return FALSE;
 }
 
-void wxOS2PrintPreview::DetermineScaling()
+void wxPrintPreview::DetermineScaling()
 {
     // TODO
 }

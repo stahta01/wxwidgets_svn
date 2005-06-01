@@ -23,7 +23,6 @@
     #include "wx/scrolwin.h"
 #endif
 
-#include "wx/stockitem.h"
 #include "wx/os2/private.h"
 
 #define BUTTON_HEIGHT_FROM_CHAR_HEIGHT(cy) (11*EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)/10)
@@ -44,7 +43,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
 bool wxButton::Create(
   wxWindow*                         pParent
 , wxWindowID                        vId
-, const wxString&                   rsLbl
+, const wxString&                   rsLabel
 , const wxPoint&                    rPos
 , const wxSize&                     rSize
 , long                              lStyle
@@ -52,12 +51,6 @@ bool wxButton::Create(
 , const wxString&                   rsName
 )
 {
-    wxString rsLabel(rsLbl);
-    if (rsLabel.empty() && wxIsStockID(vId))
-        rsLabel = wxGetStockLabel(vId);
-
-    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
-
     SetName(rsName);
 #if wxUSE_VALIDATORS
     SetValidator(rValidator);
@@ -80,7 +73,7 @@ bool wxButton::Create(
 
     m_hWnd = (WXHWND)::WinCreateWindow( GetHwndOf(pParent)   // Parent handle
                                        ,WC_BUTTON            // A Button class window
-                                       ,(PSZ)sLabel.c_str()  // Button text
+                                       ,(PSZ)rsLabel.c_str() // Button text
                                        ,lStyle               // Button style
                                        ,0, 0, 0, 0           // Location and size
                                        ,GetHwndOf(pParent)   // Owner handle
@@ -141,7 +134,6 @@ wxSize wxButton::DoGetBestSize() const
     int                             nWidthButton;
     int                             nWidthChar;
     int                             nHeightChar;
-    wxFont                          vFont = (wxFont)GetFont();
 
     GetTextExtent( rsLabel
                   ,&nWidthButton
@@ -151,7 +143,7 @@ wxSize wxButton::DoGetBestSize() const
     wxGetCharSize( GetHWND()
                   ,&nWidthChar
                   ,&nHeightChar
-                  ,&vFont
+                  ,(wxFont*)&GetFont()
                  );
 
     //
@@ -167,7 +159,7 @@ wxSize wxButton::DoGetBestSize() const
     //
     // Need a little extra to make it look right
     //
-    nHeightButton += (int)(nHeightChar/1.5);
+    nHeightButton += nHeightChar/1.5;
 
     if (!HasFlag(wxBU_EXACTFIT))
     {
@@ -238,7 +230,7 @@ void wxButton::SetDefault()
     wxCHECK_RET( pParent, _T("button without parent?") );
 
     //
-    // Set this one as the default button both for wxWidgets and Windows
+    // Set this one as the default button both for wxWindows and Windows
     //
     wxWindow*                       pWinOldDefault = pParent->SetDefaultItem(this);
 

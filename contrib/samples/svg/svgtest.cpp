@@ -39,13 +39,14 @@ USERC("svg.rc");
 #include <wx/toolbar.h>
 #include <wx/svg/dcsvg.h>
 
-#include "mondrian.xpm"
-
+#ifndef __WXMSW__
+#include "mondrian.xpm"									     
+#endif									    
 #include "bitmaps/new.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/help.xpm"
 #include "SVGlogo24.xpm"
-
+									     
 class MyChild;
 
 // Define a new application
@@ -83,7 +84,7 @@ class MyCanvas : public wxScrolledWindow
 {
     public:
         int m_index ;
-
+   
         MyChild * m_child ;
         MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size);
         virtual void OnDraw(wxDC& dc);
@@ -160,7 +161,7 @@ bool MyApp::OnInit()
     frame = new MyFrame((wxFrame *)NULL, -1, wxT("SVG Demo"),
         wxPoint(-1, -1), wxSize(500, 400),
         wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-
+        
 
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
@@ -179,11 +180,9 @@ bool MyApp::OnInit()
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
 
-#if wxUSE_STATUSBAR
     frame->CreateStatusBar();
-#endif // wxUSE_STATUSBAR
 
-    frame->Show(true);
+    frame->Show(TRUE);
 
     SetTopWindow(frame);
 
@@ -218,22 +217,22 @@ void MyFrame::OnClose(wxCloseEvent& event)
         event.Skip();
         return ;
     }
-    if ( m_children.GetCount () < 1 )
+    if ( m_children.Number () < 1 )
     {
         event.Skip();
         return ;
     }
     // now try the children
-    wxObjectList::compatibility_iterator pNode = m_children.GetFirst ();
-    wxObjectList::compatibility_iterator pNext ;
+    wxNode * pNode = m_children.GetFirst ();
+    wxNode * pNext ;
     MyChild * pChild ;
     while ( pNode )
     {
         pNext = pNode -> GetNext ();
-        pChild = (MyChild*) pNode -> GetData ();
+        pChild = (MyChild*) pNode -> Data ();
         if (pChild -> Close ())
         {
-            m_children.Erase(pNode) ;
+            delete pNode ;
         }
         else
         {
@@ -254,9 +253,9 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    (void)wxMessageBox(wxT("wxWidgets 2.0 SVG 1.0 Test\n")
-        wxT("Author: Chris Elliott (c) 2002\n")
-        wxT("Usage: svg.exe \nClick File | New to show tests\n\n"), wxT("About SVG Test"));
+    (void)wxMessageBox(wxT("wxWindows 2.0 SVG 1.0 Test\n"
+        "Author: Chris Elliott (c) 2002\n"
+        "Usage: svg.exe \nClick File | New to show tests\n\n"), wxT("About SVG Test"));
 }
 
 
@@ -269,7 +268,7 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
         wxPoint(-1, -1), wxSize(-1, -1),
         wxDEFAULT_FRAME_STYLE )   ) ;
 
-    subframe = (MyChild *) m_children.GetLast() -> GetData ();
+    subframe = (MyChild *) m_children.GetLast() -> Data ();
     wxString title;
     title.Printf(wxT("SVG Test Window %d"), nWinCreated );
     // counts number of children previously, even if now closed
@@ -302,13 +301,12 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
 }
 
 
-void MyFrame::OnSize(wxSizeEvent& event)
+void MyFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 {
     int w, h;
     GetClientSize(&w, &h);
 
     GetClientWindow()->SetSize(0, 0, w, h);
-    event.Skip();
 }
 
 
@@ -328,8 +326,8 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
     currentX += width + 5;
     toolBar->AddTool( MDI_SAVE, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, wxT("Save test in SVG format"));
     currentX += width + 5;
-    toolBar->AddSeparator();
-    toolBar->AddTool(MDI_ABOUT, *bitmaps[2], wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, wxT("Help"));
+    toolBar->AddSeparator();      
+    toolBar->AddTool(MDI_ABOUT, *bitmaps[2], wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, wxT("Help"));
 
     toolBar->Realize();
 
@@ -342,7 +340,7 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
 void MyFrame::FileSavePicture (wxCommandEvent & WXUNUSED(event) )
 {
     MyChild * pChild = (MyChild *)GetActiveChild ();
-    if (pChild == NULL)
+    if (pChild == NULL) 
     {
         return ;
     }
@@ -384,7 +382,7 @@ MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size)
 wxSUNKEN_BORDER|wxVSCROLL|wxHSCROLL)
 {
     m_child = (MyChild *) parent ;
-    SetBackgroundColour(wxColour(_T("WHITE")));
+    SetBackgroundColour(wxColour("WHITE"));
     m_index = m_child->m_frame->nWinCreated % 7 ;
 }
 
@@ -393,9 +391,7 @@ wxSUNKEN_BORDER|wxVSCROLL|wxHSCROLL)
 void MyCanvas::OnDraw(wxDC& dc)
 {
     // vars to use ...
-#if wxUSE_STATUSBAR
     wxString s ;
-#endif // wxUSE_STATUSBAR
     wxPen wP ;
     wxBrush wB ;
     wxPoint points[6];
@@ -405,7 +401,7 @@ void MyCanvas::OnDraw(wxDC& dc)
     dc.SetFont(*wxSWISS_FONT);
     dc.SetPen(*wxGREEN_PEN);
 
-
+    
     switch (m_index)
     {
         default:
@@ -421,9 +417,7 @@ void MyCanvas::OnDraw(wxDC& dc)
             dc.DrawPoint (25,15) ;
             dc.DrawLine(50, 30, 200, 30);
             dc.DrawSpline(50, 200, 50, 100, 200, 10);
-#if wxUSE_STATUSBAR
             s = wxT("Green Cross, Cyan Line and spline");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 1:
@@ -431,10 +425,10 @@ void MyCanvas::OnDraw(wxDC& dc)
             dc.SetBrush(*wxCYAN_BRUSH);
             dc.SetPen(*wxRED_PEN);
             dc.DrawRectangle(10, 10, 100, 70);
-            wB = wxBrush (_T("DARK ORCHID"), wxTRANSPARENT);
+            wB = wxBrush ("DARK ORCHID", wxTRANSPARENT);
             dc.SetBrush (wB);
             dc.DrawRoundedRectangle(50, 50, 100, 70, 20);
-            dc.SetBrush (wxBrush(_T("GOLDENROD"), wxSOLID) );
+            dc.SetBrush (wxBrush("GOLDENROD", wxSOLID) );
             dc.DrawEllipse(100, 100, 100, 50);
 
             points[0].x = 100; points[0].y = 200;
@@ -446,9 +440,7 @@ void MyCanvas::OnDraw(wxDC& dc)
 
             dc.DrawPolygon(5, points);
             dc.DrawLines (6, points, 160);
-#if wxUSE_STATUSBAR
             s = wxT("Blue rectangle, red edge, clear rounded rectangle, gold ellipse, gold and clear stars");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 2:
@@ -457,10 +449,10 @@ void MyCanvas::OnDraw(wxDC& dc)
             dc.DrawLine(45,30,55,30);
             dc.DrawText(wxT("This is a Swiss-style string"), 50, 30);
             wC = dc.GetTextForeground() ;
-            dc.SetTextForeground (_T("FIREBRICK"));
-
+            dc.SetTextForeground ("FIREBRICK");
+                                 
             // no effect in msw ??
-            dc.SetTextBackground (_T("WHEAT"));
+            dc.SetTextBackground ("WHEAT");
             dc.DrawText(wxT("This is a Red string"), 50, 200);
             dc.DrawRotatedText(wxT("This is a 45 deg string"), 50, 200, 45);
             dc.DrawRotatedText(wxT("This is a 90 deg string"), 50, 200, 90);
@@ -468,26 +460,24 @@ void MyCanvas::OnDraw(wxDC& dc)
             dc.SetFont(wF);
             dc.SetTextForeground (wC) ;
             dc.DrawText(wxT("This is a Times-style string"), 50, 60);
-#if wxUSE_STATUSBAR
             s = wxT("Swiss, Times text; red text, rotated and colored orange");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 3 :
             // four arcs start and end points, center
             dc.SetBrush(*wxGREEN_BRUSH);
-            dc.DrawArc ( 200,300, 370,230, 300,300 );
+            dc.DrawArc ( 200,300, 370,230, 300.0,300.0 );
             dc.SetBrush(*wxBLUE_BRUSH);
-            dc.DrawArc ( 270-50, 270-86, 270-86, 270-50, 270,270 );
+            dc.DrawArc ( 270-50, 270-86, 270-86, 270-50, 270.0,270.0 );
             dc.SetDeviceOrigin(-10,-10);
-            dc.DrawArc ( 270-50, 270-86, 270-86, 270-50, 270,270 );
+            dc.DrawArc ( 270-50, 270-86, 270-86, 270-50, 270.0,270.0 );
             dc.SetDeviceOrigin(0,0);
 
-            wP.SetColour (_T("CADET BLUE"));
+            wP.SetColour ("CADET BLUE");
             dc.SetPen(wP);
-            dc.DrawArc ( 75,125, 110, 40, 75, 75 );
+            dc.DrawArc ( 75,125, 110, 40, 75.0, 75.0 );
 
-            wP.SetColour (_T("SALMON"));
+            wP.SetColour ("SALMON");
             dc.SetPen(wP);
             dc.SetBrush(*wxRED_BRUSH);
             //top left corner, width and height, start and end angle
@@ -498,25 +488,21 @@ void MyCanvas::OnDraw(wxDC& dc)
             wP.SetWidth(3);
             dc.SetPen(wP);
                                  //wxTRANSPARENT));
-            dc.SetBrush (wxBrush (_T("SALMON"),wxSOLID)) ;
+            dc.SetBrush (wxBrush ("SALMON",wxSOLID)) ;
             dc.DrawEllipticArc(300,  0,200,100, 0.0,145.0) ;
                                  //same end point
             dc.DrawEllipticArc(300, 50,200,100,90.0,145.0) ;
             dc.DrawEllipticArc(300,100,200,100,90.0,345.0) ;
 
-#if wxUSE_STATUSBAR
             s = wxT("This is an arc test page");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 4:
             dc.DrawCheckMark ( 30,30,25,25);
-            dc.SetBrush (wxBrush (_T("SALMON"),wxTRANSPARENT));
+            dc.SetBrush (wxBrush ("SALMON",wxTRANSPARENT));
             dc.DrawCheckMark ( 80,50,75,75);
             dc.DrawRectangle ( 80,50,75,75);
-#if wxUSE_STATUSBAR
             s = wxT("Two check marks");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 5:
@@ -545,24 +531,18 @@ void MyCanvas::OnDraw(wxDC& dc)
             dc.SetMapMode (wxMM_METRIC) ; //svg ignores this
             dc.DrawLine(0, 0, 200, 200);
             dc.DrawLine(200, 0, 0, 200);
-            dc.DrawText(wxT("This is an 18pt string in MapMode"), 50, 60);
-#if wxUSE_STATUSBAR
+            dc.DrawText(wxT("This is an 18pt string in MapMode"), 50, 60); 
             s = wxT("Scaling test page");
-#endif // wxUSE_STATUSBAR
             break ;
 
         case 6:
-            dc.DrawIcon( wxIcon(mondrian_xpm), 10, 10 );
-            dc.DrawBitmap ( wxBitmap(svgbitmap_xpm), 50,15);
-#if wxUSE_STATUSBAR
+            dc.DrawIcon( wxICON(mondrian), 10, 10 );
+            dc.DrawBitmap ( wxBITMAP (svgbitmap), 50,15);
             s = wxT("Icon and Bitmap ");
-#endif // wxUSE_STATUSBAR
             break ;
 
     }
-#if wxUSE_STATUSBAR
     m_child->SetStatusText(s);
-#endif // wxUSE_STATUSBAR
 }
 
 
@@ -579,10 +559,8 @@ const long style)
 {
 
     m_frame = (MyFrame *) parent ;
-#if wxUSE_STATUSBAR
     CreateStatusBar();
-    SetStatusText(title);
-#endif // wxUSE_STATUSBAR
+    SetStatusText(title);    
 
     int w, h ;
     GetClientSize ( &w, &h );

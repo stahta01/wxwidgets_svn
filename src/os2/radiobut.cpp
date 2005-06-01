@@ -201,7 +201,7 @@ void wxRadioButton::SetFocus()
     // generates BN_CLICKED which leads to showing another dialog and so on
     // without end!
     //
-    // to avoid this, we drop the pseudo BN_CLICKED events generated when the
+    // to aviod this, we drop the pseudo BN_CLICKED events generated when the
     // button gains focus
     m_bFocusJustSet = TRUE;
 
@@ -212,8 +212,7 @@ void wxRadioButton::SetLabel(
   const wxString&                   rsLabel
 )
 {
-    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
-    ::WinSetWindowText((HWND)GetHWND(), (const char *)sLabel.c_str());
+    ::WinSetWindowText((HWND)GetHWND(), (const char *)rsLabel.c_str());
 } // end of wxRadioButton::SetLabel
 
 void wxRadioButton::SetValue(
@@ -224,9 +223,9 @@ void wxRadioButton::SetValue(
     if (bValue)
     {
         const wxWindowList&         rSiblings = GetParent()->GetChildren();
-        wxWindowList::compatibility_iterator nodeThis = rSiblings.Find(this);
+        wxWindowList::Node*         pNodeThis = rSiblings.Find(this);
 
-        wxCHECK_RET(nodeThis, _T("radio button not a child of its parent?"));
+        wxCHECK_RET(pNodeThis, _T("radio button not a child of its parent?"));
 
         //
         // If it's not the first item of the group ...
@@ -236,11 +235,11 @@ void wxRadioButton::SetValue(
             //
             // ...turn off all radio buttons before this one
             //
-            for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
-                  nodeBefore;
-                  nodeBefore = nodeBefore->GetPrevious() )
+            for ( wxWindowList::Node* pNodeBefore = pNodeThis->GetPrevious();
+                  pNodeBefore;
+                  pNodeBefore = pNodeBefore->GetPrevious() )
             {
-                wxRadioButton*      pBtn = wxDynamicCast( nodeBefore->GetData()
+                wxRadioButton*      pBtn = wxDynamicCast( pNodeBefore->GetData()
                                                          ,wxRadioButton
                                                         );
                 if (!pBtn)
@@ -266,11 +265,11 @@ void wxRadioButton::SetValue(
         //
         // ... and all after this one
         //
-        for (wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
-             nodeAfter;
-             nodeAfter = nodeAfter->GetNext())
+        for (wxWindowList::Node* pNodeAfter = pNodeThis->GetNext();
+             pNodeAfter;
+             pNodeAfter = pNodeAfter->GetNext())
         {
-            wxRadioButton*          pBtn = wxDynamicCast( nodeAfter->GetData()
+            wxRadioButton*          pBtn = wxDynamicCast( pNodeAfter->GetData()
                                                          ,wxRadioButton
                                                         );
 

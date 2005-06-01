@@ -1,5 +1,5 @@
-                 All about wxWidgets Version Numbers
-                 ===================================
+All about wxWidgets Version Numbers
+===================================
 
 1. Where to update the version numbers:
 
@@ -30,11 +30,8 @@
 Version: $Id$
 
 $Log$
-Revision 1.3  2004/05/04 08:26:58  JS
+Revision 1.1.2.1  2004/05/04 08:52:33  JS
 Name change replacements
-
-Revision 1.2  2003/11/18 16:38:48  DS
-Horizontally aligned header (Like other technotes).
 
 Revision 1.1  2001/06/08 04:26:35  RD
 move the tech note to a correctly named file

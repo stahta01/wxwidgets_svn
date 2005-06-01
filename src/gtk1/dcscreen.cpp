@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dcscreen.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/dcscreen.h"
 #include "wx/window.h"
@@ -41,12 +38,6 @@ wxScreenDC::wxScreenDC()
     m_cmap = gdk_colormap_get_system();
     m_window = GDK_ROOT_PARENT();
 
-#ifdef __WXGTK20__
-    m_context = gdk_pango_context_get();
-    m_layout = pango_layout_new( m_context );
-//    m_fontdesc = pango_font_description_copy( widget->style->font_desc );
-#endif
-
     m_isScreenDC = TRUE;
 
     SetUpDC();
@@ -67,19 +58,47 @@ wxScreenDC::~wxScreenDC()
     EndDrawingOnTop();
 }
 
-bool wxScreenDC::StartDrawingOnTop( wxWindow * )
+bool wxScreenDC::StartDrawingOnTop( wxWindow *window )
 {
-    return true;
+    if (!window) return StartDrawingOnTop();
+
+    int x = 0;
+    int y = 0;
+    window->GetPosition( &x, &y );
+    int w = 0;
+    int h = 0;
+    window->GetSize( &w, &h );
+    window->ClientToScreen( &x, &y );
+
+    wxRect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.width = 0;
+    rect.height = 0;
+
+    return StartDrawingOnTop( &rect );
 }
 
-bool wxScreenDC::StartDrawingOnTop( wxRect * )
+bool wxScreenDC::StartDrawingOnTop( wxRect *rect )
 {
-    return true;
+    int x = 0;
+    int y = 0;
+    int width = gdk_screen_width();
+    int height = gdk_screen_height();
+    if (rect)
+    {
+        x = rect->x;
+        y = rect->y;
+        width = rect->width;
+        height = rect->height;
+    }
+
+    return TRUE;
 }
 
 bool wxScreenDC::EndDrawingOnTop()
 {
-    return true;
+    return TRUE;
 }
 
 void wxScreenDC::DoGetSize(int *width, int *height) const

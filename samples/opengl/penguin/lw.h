@@ -61,15 +61,13 @@ typedef struct {
 extern "C" {
 #endif
 
-#if wxUSE_GLCANVAS
-bool       lw_is_lwobject(const char     *lw_file);
+int       lw_is_lwobject(const char     *lw_file);
 lwObject *lw_object_read(const char     *lw_file);
 void      lw_object_free(      lwObject *lw_object);
 void      lw_object_show(const lwObject *lw_object);
 
 GLfloat   lw_object_radius(const lwObject *lw_object);
 void      lw_object_scale (lwObject *lw_object, GLfloat scale);
-#endif
 
 #ifdef __cplusplus
 }

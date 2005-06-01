@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "colordlg.h"
 #endif
 
@@ -42,14 +42,17 @@
     #include "wx/msgdlg.h"
 #endif
 
-#if wxUSE_COLOURDLG && !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
+#include <windows.h>
+
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
+    #include <commdlg.h>
+#endif
 
 #include "wx/msw/private.h"
 #include "wx/colordlg.h"
 #include "wx/cmndata.h"
-#include "wx/math.h"
-#include "wx/msw/wrapcdlg.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -67,11 +70,10 @@ IMPLEMENT_DYNAMIC_CLASS(wxColourDialog, wxDialog)
 // colour dialog hook proc
 // ----------------------------------------------------------------------------
 
-UINT_PTR CALLBACK
-wxColourDialogHookProc(HWND hwnd,
-                       UINT uiMsg,
-                       WPARAM WXUNUSED(wParam),
-                       LPARAM lParam)
+UINT CALLBACK wxColourDialogHookProc(HWND hwnd,
+                                     UINT uiMsg,
+                                     WPARAM WXUNUSED(wParam),
+                                     LPARAM lParam)
 {
     if ( uiMsg == WM_INITDIALOG )
     {
@@ -114,7 +116,7 @@ bool wxColourDialog::Create(wxWindow *parent, wxColourData *data)
     if (data)
         m_colourData = *data;
 
-    return true;
+    return TRUE;
 }
 
 int wxColourDialog::ShowModal()
@@ -125,17 +127,12 @@ int wxColourDialog::ShowModal()
 
     int i;
     for (i = 0; i < 16; i++)
-    {
-        if (m_colourData.m_custColours[i].Ok())
-            custColours[i] = wxColourToRGB(m_colourData.m_custColours[i]);
-        else
-            custColours[i] = RGB(255,255,255);
-    }
+      custColours[i] = wxColourToRGB(m_colourData.custColours[i]);
 
     chooseColorStruct.lStructSize = sizeof(CHOOSECOLOR);
     if ( m_parent )
         chooseColorStruct.hwndOwner = GetHwndOf(m_parent);
-    chooseColorStruct.rgbResult = wxColourToRGB(m_colourData.m_dataColour);
+    chooseColorStruct.rgbResult = wxColourToRGB(m_colourData.dataColour);
     chooseColorStruct.lpCustColors = custColours;
 
     chooseColorStruct.Flags = CC_RGBINIT | CC_ENABLEHOOK;
@@ -149,9 +146,10 @@ int wxColourDialog::ShowModal()
     bool success = ::ChooseColor(&(chooseColorStruct)) != 0;
 
     // Try to highlight the correct window (the parent)
+    HWND hWndParent = 0;
     if (GetParent())
     {
-      HWND hWndParent = (HWND) GetParent()->GetHWND();
+      hWndParent = (HWND) GetParent()->GetHWND();
       if (hWndParent)
         ::BringWindowToTop(hWndParent);
     }
@@ -160,10 +158,10 @@ int wxColourDialog::ShowModal()
     // Restore values
     for (i = 0; i < 16; i++)
     {
-      wxRGBToColour(m_colourData.m_custColours[i], custColours[i]);
+      wxRGBToColour(m_colourData.custColours[i], custColours[i]);
     }
 
-    wxRGBToColour(m_colourData.m_dataColour, chooseColorStruct.rgbResult);
+    wxRGBToColour(m_colourData.dataColour, chooseColorStruct.rgbResult);
 
     return success ? wxID_OK : wxID_CANCEL;
 }
@@ -198,10 +196,10 @@ void wxColourDialog::DoSetSize(int x, int y,
                                int WXUNUSED(width), int WXUNUSED(height),
                                int WXUNUSED(sizeFlags))
 {
-    if ( x != wxDefaultCoord )
+    if ( x != -1 )
         m_pos.x = x;
 
-    if ( y != wxDefaultCoord )
+    if ( y != -1 )
         m_pos.y = y;
 
     // ignore the size params - we can't change the size of a standard dialog
@@ -228,4 +226,3 @@ void wxColourDialog::DoGetClientSize(int *width, int *height) const
         *height = 299;
 }
 
-#endif // wxUSE_COLOURDLG && !(__SMARTPHONE__ && __WXWINCE__)

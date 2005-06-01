@@ -12,7 +12,7 @@
 #ifndef _WX_SPINBUTT_H_
 #define _WX_SPINBUTT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "spinbutt.h"
 #endif
 
@@ -58,7 +58,7 @@ public:
     // Implementation
     virtual void Command(wxCommandEvent& event)
         { (void)ProcessCommand(event); };
-    virtual void ChangeFont(bool keepOriginalSize = true);
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
 public:

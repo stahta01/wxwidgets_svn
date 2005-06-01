@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx_cw_d.h
-// Purpose:     wxWidgets definitions for CodeWarrior builds (Debug)
+// Purpose:     wxWindows definitions for CodeWarrior builds (Debug)
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     12/10/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CW__
@@ -20,17 +20,13 @@
 #error "profiling is not supported in debug versions"
 #else
 #ifdef __cplusplus
-    #ifdef __MACH__
-        #include "wxshlb_Mach++_d.mch"
-    #elif __POWERPC__
-        #include "wxshlb_Carbon++_d.mch"
-    #endif
+	#if __POWERPC__
+		#include <wxshlb_Carbon++_d.mch>
+	#endif
 #else
-    #ifdef __MACH__
-        #include "wxshlb_Mach_d.mch"
-    #elif __POWERPC__
-        #include "wxshlb_Carbon_d.mch"
-    #endif
+	#if __POWERPC__
+		#include <wxshlb_Carbon_d.mch>
+	#endif
 #endif
 #endif
 

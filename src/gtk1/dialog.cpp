@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dialog.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/dialog.h"
 #include "wx/frame.h"
@@ -177,6 +174,12 @@ bool wxDialog::IsModal() const
 
 void wxDialog::SetModal( bool WXUNUSED(flag) )
 {
+/*
+  if (flag)
+    m_windowStyle |= wxDIALOG_MODAL;
+  else
+    if (m_windowStyle & wxDIALOG_MODAL) m_windowStyle -= wxDIALOG_MODAL;
+*/
     wxFAIL_MSG( wxT("wxDialog:SetModal obsolete now") );
 }
 

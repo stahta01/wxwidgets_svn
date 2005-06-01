@@ -32,21 +32,18 @@ a reference to your application object) to be visible to other files.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
+\membersection{wxApp::wxApp}
 
-\membersection{wxApp::wxApp}\label{wxappctor}
-
-\func{}{wxApp}{\void}
+\func{void}{wxApp}{\void}
 
 Constructor. Called implicitly with a definition of a wxApp object.
 
+\membersection{wxApp::\destruct{wxApp}}
 
-\membersection{wxApp::\destruct{wxApp}}\label{wxappdtor}
-
-\func{}{\destruct{wxApp}}{\void}
+\func{void}{\destruct{wxApp}}{\void}
 
 Destructor. Will be called implicitly on program exit if the wxApp
 object is created on the stack.
-
 
 \membersection{wxApp::argc}\label{wxappargc}
 
@@ -54,13 +51,11 @@ object is created on the stack.
 
 Number of command line arguments (after environment-specific processing).
 
-
 \membersection{wxApp::argv}\label{wxappargv}
 
-\member{wxChar **}{argv}
+\member{char **}{argv}
 
 Command line arguments (after environment-specific processing).
-
 
 \membersection{wxApp::CreateLogTarget}\label{wxappcreatelogtarget}
 
@@ -73,10 +68,9 @@ implementation returns a new wxLogGui class.
 
 \helpref{wxLog}{wxlog}
 
-
 \membersection{wxApp::Dispatch}\label{wxappdispatch}
 
-\func{virtual void}{Dispatch}{\void}
+\func{void}{Dispatch}{\void}
 
 Dispatches the next event in the windowing system event queue.
 
@@ -91,27 +85,16 @@ This can be used for programming event loops, e.g.
 
 \helpref{wxApp::Pending}{wxapppending}
 
-
-\membersection{wxApp::ExitMainLoop}\label{wxappexitmainloop}
-
-\func{virtual void}{ExitMainLoop}{\void}
-
-Call this to explicitly exit the main message (event) loop.
-You should normally exit the main loop (and the application) by deleting
-the top window.
-
-
 \membersection{wxApp::FilterEvent}\label{wxappfilterevent}
 
 \func{int}{FilterEvent}{\param{wxEvent\& }{event}}
 
 This function is called before processing any event and allows the application
 to preempt the processing of some events. If this method returns $-1$ the event
-is processed normally, otherwise either {\tt true} or {\tt false} should be
+is processed normally, otherwise either {\tt TRUE} or {\tt FALSE} should be
 returned and the event processing stops immediately considering that the event
 had been already processed (for the former return value) or that it is not
 going to be processed at all (for the latter one).
-
 
 \membersection{wxApp::GetAppName}\label{wxappgetappname}
 
@@ -124,6 +107,15 @@ Returns the application name.
 wxWidgets sets this to a reasonable default before
 calling \helpref{wxApp::OnInit}{wxapponinit}, but the application can reset it at will.
 
+\membersection{wxApp::GetAuto3D}\label{wxappgetauto3d}
+
+\constfunc{bool}{GetAuto3D}{\void}
+
+Returns TRUE if 3D control mode is on, FALSE otherwise.
+
+\wxheading{See also}
+
+\helpref{wxApp::SetAuto3D}{wxappsetauto3d}
 
 \membersection{wxApp::GetClassName}\label{wxappgetclassname}
 
@@ -136,31 +128,17 @@ manner to refer to the application.
 
 \helpref{wxApp::SetClassName}{wxappsetclassname}
 
-
 \membersection{wxApp::GetExitOnFrameDelete}\label{wxappgetexitonframedelete}
 
 \constfunc{bool}{GetExitOnFrameDelete}{\void}
 
-Returns true if the application will exit when the top-level window is deleted, false
+Returns TRUE if the application will exit when the top-level window is deleted, FALSE
 otherwise.
 
 \wxheading{See also}
 
 \helpref{wxApp::SetExitOnFrameDelete}{wxappsetexitonframedelete},\\
 \helpref{wxApp shutdown overview}{wxappshutdownoverview}
-
-
-\membersection{wxApp::GetInstance}\label{wxappgetinstance}
-
-\func{static wxAppConsole *}{GetInstance}{\void}
-
-Returns the one and only global application object.
-Usually \texttt{wxTheApp} is usead instead.
-
-\wxheading{See also}
-
-\helpref{wxApp::SetInstance}{wxappsetinstance}
-
 
 \membersection{wxApp::GetTopWindow}\label{wxappgettopwindow}
 
@@ -177,18 +155,16 @@ function will find the first top-level window (frame or dialog) and return that.
 
 \helpref{SetTopWindow}{wxappsettopwindow}
 
-
 \membersection{wxApp::GetUseBestVisual}\label{wxappgetusebestvisual}
 
 \constfunc{bool}{GetUseBestVisual}{\void}
 
-Returns true if the application will use the best visual on systems that support
-different visuals, false otherwise.
+Returns TRUE if the application will use the best visual on systems that support
+different visuals, FALSE otherwise.
 
 \wxheading{See also}
 
 \helpref{SetUseBestVisual}{wxappsetusebestvisual}
-
 
 \membersection{wxApp::GetVendorName}\label{wxappgetvendorname}
 
@@ -196,33 +172,27 @@ different visuals, false otherwise.
 
 Returns the application's vendor name.
 
+\membersection{wxApp::ExitMainLoop}\label{wxappexitmainloop}
 
-\membersection{wxApp::IsActive}\label{wxappisactive}
+\func{void}{ExitMainLoop}{\void}
 
-\constfunc{bool}{IsActive}{\void}
+Call this to explicitly exit the main message (event) loop.
+You should normally exit the main loop (and the application) by deleting
+the top window.
 
-Returns \true if the application is active, i.e. if one of its windows is
-currently in the foreground. If this function returns \false and you need to
-attract users attention to the application, you may use 
-\helpref{wxTopLevelWindow::RequestUserAttention}{wxtoplevelwindowrequestuserattention} 
-to do it.
+\membersection{wxApp::Initialized}\label{wxappinitialized}
 
+\func{bool}{Initialized}{\void}
 
-\membersection{wxApp::IsMainLoopRunning}\label{wxappismainlooprunning}
-
-\func{static bool}{IsMainLoopRunning}{\void}
-
-Returns \true if the main event loop is currently running, i.e. if the
-application is inside \helpref{OnRun}{wxapponrun}.
-
-This can be useful to test whether the events can be dispatched. For example,
-if this function returns \false, non-blocking sockets cannot be used because
-the events from them would never be processed.
-
+Returns TRUE if the application has been initialized (i.e. if\rtfsp
+\helpref{wxApp::OnInit}{wxapponinit} has returned successfully).  This can be useful for error
+message routines to determine which method of output is best for the
+current state of the program (some windowing systems may not like
+dialogs to pop up before the main loop has been entered).
 
 \membersection{wxApp::MainLoop}\label{wxappmainloop}
 
-\func{virtual int}{MainLoop}{\void}
+\func{int}{MainLoop}{\void}
 
 Called by wxWidgets on creation of the application. Override this if you wish
 to provide your own (environment-dependent) main loop.
@@ -267,13 +237,12 @@ Returns 0 under X, and the wParam of the WM\_QUIT message under Windows.
 %%\helpref{wxKeyEvent}{wxkeyevent}, \helpref{wxWindow::OnChar}{wxwindowonchar},\rtfsp
 %%\helpref{wxWindow::OnCharHook}{wxwindowoncharhook}, \helpref{wxDialog::OnCharHook}{wxdialogoncharhook}
 
-
 \membersection{wxApp::OnAssert}\label{wxapponassert}
 
 \func{void}{OnAssert}{\param{const wxChar }{*file}, \param{int }{line}, \param{const wxChar }{*cond}, \param{const wxChar }{*msg}}
 
 This function is called when an assert failure occurs, i.e. the condition
-specified in \helpref{wxASSERT}{wxassert} macro evaluated to {\tt false}.
+specified in \helpref{wxASSERT}{wxassert} macro evaluated to {\tt FALSE}.
 It is only called in debug mode (when {\tt \_\_WXDEBUG\_\_} is defined) as
 asserts are not left in the release code at all.
 
@@ -282,9 +251,9 @@ the user to stop the program, continue or ignore all subsequent asserts.
 
 \wxheading{Parameters}
 
-\docparam{file}{the name of the source file where the assert occurred}
+\docparam{file}{the name of the source file where the assert occured}
 
-\docparam{line}{the line number in this file where the assert occurred}
+\docparam{line}{the line number in this file where the assert occured}
 
 \docparam{cond}{the condition of the failed assert in string form}
 
@@ -293,6 +262,14 @@ the user to stop the program, continue or ignore all subsequent asserts.
 be {\tt NULL} if just \helpref{wxASSERT}{wxassert} or \helpref{wxFAIL}{wxfail} 
 was used}
 
+\membersection{wxApp::OnExit}\label{wxapponexit}
+
+\func{int}{OnExit}{\void}
+
+Provide this member function for any processing which needs to be
+done as the application is about to exit. OnExit is called after
+destroying all application windows and controls, but before
+wxWidgets cleanup.
 
 \membersection{wxApp::OnCmdLineError}\label{wxapponcmdlineerror}
 
@@ -302,13 +279,12 @@ Called when command line parsing fails (i.e. an incorrect command line option
 was specified by the user). The default behaviour is to show the program usage
 text and abort the program.
 
-Return {\tt true} to continue normal execution or {\tt false} to return 
-{\tt false} from \helpref{OnInit}{wxapponinit} thus terminating the program.
+Return {\tt TRUE} to continue normal execution or {\tt FALSE} to return 
+{\tt FALSE} from \helpref{OnInit}{wxapponinit} thus terminating the program.
 
 \wxheading{See also}
 
 \helpref{OnInitCmdLine}{wxapponinitcmdline}
-
 
 \membersection{wxApp::OnCmdLineHelp}\label{wxapponcmdlinehelp}
 
@@ -317,13 +293,12 @@ Return {\tt true} to continue normal execution or {\tt false} to return
 Called when the help option ({\tt --help}) was specified on the command line.
 The default behaviour is to show the program usage text and abort the program.
 
-Return {\tt true} to continue normal execution or {\tt false} to return 
-{\tt false} from \helpref{OnInit}{wxapponinit} thus terminating the program.
+Return {\tt TRUE} to continue normal execution or {\tt FALSE} to return 
+{\tt FALSE} from \helpref{OnInit}{wxapponinit} thus terminating the program.
 
 \wxheading{See also}
 
 \helpref{OnInitCmdLine}{wxapponinitcmdline}
-
 
 \membersection{wxApp::OnCmdLineParsed}\label{wxapponcmdlineparsed}
 
@@ -336,46 +311,12 @@ set from the command line.
 Don't forget to call the base class version unless you want to suppress
 processing of the standard command line options.
 
-Return {\tt true} to continue normal execution or {\tt false} to return 
-{\tt false} from \helpref{OnInit}{wxapponinit} thus terminating the program.
+Return {\tt TRUE} to continue normal execution or {\tt FALSE} to return 
+{\tt FALSE} from \helpref{OnInit}{wxapponinit} thus terminating the program.
 
 \wxheading{See also}
 
 \helpref{OnInitCmdLine}{wxapponinitcmdline}
-
-
-\membersection{wxApp::OnExceptionInMainLoop}\label{wxapponexceptioninmainloop}
-
-\func{virtual bool}{OnExceptionInMainLoop}{\void}
-
-This function is called if an unhandled exception occurs inside the main
-application event loop. It can return \true to ignore the exception and to
-continue running the loop or \false to exit the loop and terminate the
-program. In the latter case it can also use C++ \texttt{throw} keyword to
-rethrow the current exception.
-
-The default behaviour of this function is the latter in all ports except under
-Windows where a dialog is shown to the user which allows him to choose between
-the different options. You may override this function in your class to do
-something more appropriate.
-
-Finally note that if the exception is rethrown from here, it can be caught in 
-\helpref{OnUnhandledException}{wxapponunhandledexception}.
-
-
-\membersection{wxApp::OnExit}\label{wxapponexit}
-
-\func{virtual int}{OnExit}{\void}
-
-Override this member function for any processing which needs to be
-done as the application is about to exit. OnExit is called after
-destroying all application windows and controls, but before
-wxWidgets cleanup. Note that it is not called at all if 
-\helpref{OnInit}{wxapponinit} failed.
-
-The return value of this function is currently ignored, return the same value
-as returned by the base class method if you override it.
-
 
 \membersection{wxApp::OnFatalException}\label{wxapponfatalexception}
 
@@ -392,7 +333,7 @@ work and, in fact, probably won't.
 
 \wxheading{See also}
 
-\helpref{wxHandleFatalExceptions}{wxhandlefatalexceptions}
+\helpref{wxHandleFatalExcetions}{wxhandlefatalexceptions}
 
 %% VZ: the wxApp event handler are private and should not be documented here!
 %%
@@ -429,7 +370,7 @@ work and, in fact, probably won't.
 %%
 %%Use the EVT\_END\_SESSION event table macro to handle query end session events.
 %%
-%%The default handler calls \helpref{wxWindow::Close}{wxwindowclose} with a true argument
+%%The default handler calls \helpref{wxWindow::Close}{wxwindowclose} with a TRUE argument
 %%(forcing the application to close itself silently).
 %%
 %%\wxheading{Remarks}
@@ -443,7 +384,7 @@ work and, in fact, probably won't.
 %%\helpref{wxWindow::Close}{wxwindowclose},\rtfsp
 %%\helpref{wxWindow::OnCloseWindow}{wxwindowonclosewindow},\rtfsp
 %%\helpref{wxCloseEvent}{wxcloseevent},\rtfsp
-
+%%\helpref{wxApp::OnQueryEndSession}{wxapponqueryendsession}
 
 \membersection{wxApp::OnInit}\label{wxapponinit}
 
@@ -451,17 +392,13 @@ work and, in fact, probably won't.
 
 This must be provided by the application, and will usually create the
 application's main window, optionally calling 
-\helpref{wxApp::SetTopWindow}{wxappsettopwindow}. You may use 
-\helpref{OnExit}{wxapponexit} to clean up anything initialized here, provided
-that the function returns \true.
+\helpref{wxApp::SetTopWindow}{wxappsettopwindow}.
 
 Notice that if you want to to use the command line processing provided by
 wxWidgets you have to call the base class version in the derived class
 OnInit().
 
-Return \true to continue processing, \false to exit the application
-immediately.
-
+Return TRUE to continue processing, FALSE to exit the application.
 
 \membersection{wxApp::OnInitCmdLine}\label{wxapponinitcmdline}
 
@@ -471,33 +408,41 @@ Called from \helpref{OnInit}{wxapponinit} and may be used to initialize the
 parser with the command line options for this application. The base class
 versions adds support for a few standard options only.
 
-\membersection{wxApp::OnRun}\label{wxapponrun}
+\membersection{wxApp::OnQueryEndSession}\label{wxapponqueryendsession}
 
-\func{virtual int}{OnRun}{\void}
+\func{void}{OnQueryEndSession}{\param{wxCloseEvent\& }{event}}
 
-This virtual function is where the execution of a program written in wxWidgets
-starts. The default implementation just enters the main loop and starts
-handling the events until it terminates, either because 
-\helpref{ExitMainLoop}{wxappexitmainloop} has been explicitly called or because
-the last frame has been deleted and 
-\helpref{GetExitOnFrameDelete}{wxappgetexitonframedelete} flag is \true (this
-is the default).
+This is an event handler function called when the operating system or GUI session is
+about to close down. Typically, an application will try to save unsaved documents
+at this point.
 
-The return value of this function becomes the exit code of the program, so it
-should return $0$ in case of successful termination.
+If \helpref{wxCloseEvent::CanVeto}{wxcloseeventcanveto} returns TRUE, the application
+is allowed to veto the shutdown by calling \helpref{wxCloseEvent::Veto}{wxcloseeventveto}.
+The application might veto the shutdown after prompting for documents to be saved, and the
+user has cancelled the save.
 
+Use the EVT\_QUERY\_END\_SESSION event table macro to handle query end session events.
 
-\membersection{wxApp::OnUnhandledException}\label{wxapponunhandledexception}
+You should check whether the application is forcing the deletion of the window
+using \helpref{wxCloseEvent::GetForce}{wxcloseeventgetforce}. If this is TRUE,
+destroy the window using \helpref{wxWindow::Destroy}{wxwindowdestroy}.
+If not, it is up to you whether you respond by destroying the window.
 
-\func{virtual void}{OnUnhandledException}{\void}
+The default handler calls \helpref{wxWindow::Close}{wxwindowclose} on the top-level window,
+and vetoes the shutdown if Close returns FALSE. This will be sufficient for many applications.
 
-This function is called when an unhandled C++ exception occurs inside 
-\helpref{OnRun()}{wxapponrun} (the exceptions which occur during the program
-startup and shutdown might not be caught at all).
-Note that the exception type is lost by now, so if you want to really handle
-the exception you should override \helpref{OnRun()}{wxapponrun} and put a
-try/catch clause around the call to the base class version there.
+\wxheading{Remarks}
 
+Under X, OnQueryEndSession is called in response to the `save session' event.
+
+Under Windows, OnQueryEndSession is called in response to the WM\_QUERYENDSESSION message.
+
+\wxheading{See also}
+
+\helpref{wxWindow::Close}{wxwindowclose},\rtfsp
+\helpref{wxCloseEvent}{wxcloseevent}
+%% GD: OnXXX functions are not documented
+%%\helpref{wxApp::OnEndSession}{wxapponendsession}
 
 \membersection{wxApp::ProcessMessage}\label{wxappprocessmessage}
 
@@ -505,8 +450,8 @@ try/catch clause around the call to the base class version there.
 
 Windows-only function for processing a message. This function
 is called from the main message loop, checking for windows that
-may wish to process it. The function returns true if the message
-was processed, false otherwise. If you use wxWidgets with another class
+may wish to process it. The function returns TRUE if the message
+was processed, FALSE otherwise. If you use wxWidgets with another class
 library with its own message loop, you should make sure that this
 function is called to allow wxWidgets to receive messages. For example,
 to allow co-existence with the Microsoft Foundation Classes, override
@@ -517,42 +462,42 @@ the PreTranslateMessage function:
 BOOL CTheApp::PreTranslateMessage(MSG *msg)
 {
   if (wxTheApp && wxTheApp->ProcessMessage((WXMSW *)msg))
-    return true;
+    return TRUE;
   else
     return CWinApp::PreTranslateMessage(msg);
 }
 \end{verbatim}
 
-
 \membersection{wxApp::Pending}\label{wxapppending}
 
-\func{virtual bool}{Pending}{\void}
+\func{bool}{Pending}{\void}
 
-Returns true if unprocessed events are in the window system event queue.
+Returns TRUE if unprocessed events are in the window system event queue.
 
 \wxheading{See also}
 
 \helpref{wxApp::Dispatch}{wxappdispatch}
 
-
 \membersection{wxApp::SendIdleEvents}\label{wxappsendidleevents}
 
-\func{bool}{SendIdleEvents}{\param{wxWindow*}{ win}, \param{wxIdleEvent\& }{event}}
+\func{bool}{SendIdleEvents}{\void}
+
+Sends idle events to all top-level windows.
+
+\func{bool}{SendIdleEvents}{\param{wxWindow*}{ win}}
 
 Sends idle events to a window and its children.
-
-Please note that this function is internal to wxWidgets and shouldn't be used
-by user code.
 
 \wxheading{Remarks}
 
 These functions poll the top-level windows, and their children, for idle event processing.
-If true is returned, more OnIdle processing is requested by one or more window.
+If TRUE is returned, more OnIdle processing is requested by one or more window.
 
 \wxheading{See also}
 
+%% GD: OnXXX functions are not documented
+%%\helpref{wxApp::OnIdle}{wxapponidle}
 \helpref{wxIdleEvent}{wxidleevent}
-
 
 \membersection{wxApp::SetAppName}\label{wxappsetappname}
 
@@ -566,6 +511,24 @@ wxWidgets.
 
 \helpref{wxApp::GetAppName}{wxappgetappname}
 
+\membersection{wxApp::SetAuto3D}\label{wxappsetauto3d}
+
+\func{void}{SetAuto3D}{\param{const bool}{ auto3D}}
+
+Switches automatic 3D controls on or off.
+
+\wxheading{Parameters}
+
+\docparam{auto3D}{If TRUE, all controls will be created with 3D appearances unless
+overridden for a control or dialog. The default is TRUE}
+
+\wxheading{Remarks}
+
+This has an effect on Windows only.
+
+\wxheading{See also}
+
+\helpref{wxApp::GetAuto3D}{wxappgetauto3d}
 
 \membersection{wxApp::SetClassName}\label{wxappsetclassname}
 
@@ -578,7 +541,6 @@ manner to refer to the application.
 
 \helpref{wxApp::GetClassName}{wxappgetclassname}
 
-
 \membersection{wxApp::SetExitOnFrameDelete}\label{wxappsetexitonframedelete}
 
 \func{void}{SetExitOnFrameDelete}{\param{bool}{ flag}}
@@ -588,30 +550,13 @@ top-level frame is deleted.
 
 \wxheading{Parameters}
 
-\docparam{flag}{If true (the default), the application will exit when the top-level frame is
-deleted. If false, the application will continue to run.}
+\docparam{flag}{If TRUE (the default), the application will exit when the top-level frame is
+deleted. If FALSE, the application will continue to run.}
 
 \wxheading{See also}
 
 \helpref{wxApp::GetExitOnFrameDelete}{wxappgetexitonframedelete},\\
 \helpref{wxApp shutdown overview}{wxappshutdownoverview}
-
-
-\membersection{wxApp::SetInstance}\label{wxappsetinstance}
-
-\func{static void}{SetInstance}{\param{wxAppConsole* }{app}}
-
-Allows external code to modify global \texttt{wxTheApp}, but you should really
-know what you're doing if you call it.
-
-\wxheading{Parameters}
-
-\docparam{app}{Replacement for the global application object.}
-
-\wxheading{See also}
-
-\helpref{wxApp::GetInstance}{wxappgetinstance}
-
 
 \membersection{wxApp::SetTopWindow}\label{wxappsettopwindow}
 
@@ -633,7 +578,6 @@ needs to use the top window.
 \helpref{wxApp::GetTopWindow}{wxappgettopwindow}, \helpref{wxApp::OnInit}{wxapponinit}
 
 
-
 \membersection{wxApp::SetVendorName}\label{wxappsetvendorname}
 
 \func{void}{SetVendorName}{\param{const wxString\& }{name}}
@@ -645,7 +589,6 @@ wxWidgets.
 \wxheading{See also}
 
 \helpref{wxApp::GetVendorName}{wxappgetvendorname}
-
 
 \membersection{wxApp::SetUseBestVisual}\label{wxappsetusebestvisual}
 
@@ -663,23 +606,11 @@ This function currently only has effect under GTK.
 
 \wxheading{Parameters}
 
-\docparam{flag}{If true, the app will use the best visual.}
-
-
-\membersection{wxApp::HandleEvent}\label{wxapphandleevent}
-
-\constfunc{virtual void}{HandleEvent}{\param{wxEvtHandler}{ *handler}, \param{wxEventFunction}{ func}, \param{wxEvent\& }{event}}
-
-This function simply invokes the given method \arg{func} of the specified
-event handler \arg{handler} with the \arg{event} as parameter. It exists solely
-to allow to catch the C++ exceptions which could be thrown by all event
-handlers in the application in one place: if you want to do this, override this
-function in your wxApp-derived class and add try/catch clause(s) to it.
-
+\docparam{flag}{If TRUE, the app will use the best visual.}
 
 \membersection{wxApp::Yield}\label{wxappyield}
 
-\func{bool}{Yield}{\param{bool}{ onlyIfNeeded = false}}
+\func{bool}{Yield}{\param{bool}{ onlyIfNeeded = FALSE}}
 
 Yields control to pending messages in the windowing system. This can be useful, for example, when a
 time-consuming process writes to a text window. Without an occasional
@@ -699,7 +630,7 @@ messages immediately (otherwise it will be done during the next idle loop
 iteration), call \helpref{wxLog::FlushActive}{wxlogflushactive}.
 
 Calling Yield() recursively is normally an error and an assert failure is
-raised in debug build if such situation is detected. However if the 
-{\it onlyIfNeeded} parameter is {\tt true}, the method will just silently
-return {\tt false} instead.
+raised in debug build if such situation is detected. However if the the 
+{\it onlyIfNeeded} parameter is {\tt TRUE}, the method will just silently
+return {\tt FALSE} instead.
 

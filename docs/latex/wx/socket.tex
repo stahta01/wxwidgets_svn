@@ -6,20 +6,13 @@
 %% Created:     1999
 %% RCS-ID:      $Id$
 %% Copyright:   (c) wxWidgets team
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxSocketBase}}\label{wxsocketbase}
 
 wxSocketBase is the base class for all socket-related objects, and it
 defines all basic IO functionality.
-
-Note: (Workaround for implementation limitation for wxWidgets up to 2.5.x)
-If you want to use sockets or derived classes such as wxFTP in a secondary thread,
-call wxSocketBase::Initialize() (undocumented) from the main thread before creating 
-any sockets - in wxApp::OnInit for example. 
-See http://wiki.wxwidgets.org/wiki.pl?WxSocket or
-http://www.litwindow.com/knowhow/knowhow.html for more details.
 
 \wxheading{Derived from}
 
@@ -109,13 +102,13 @@ a \helpref{wxSocketEvent}{wxsocketevent} argument.
 
 \latexignore{\rtfignore{\wxheading{Function groups}}}
 
-\membersection{Construction and destruction}\label{socketconstruction}
+\membersection{Construction and destruction}
 
 \helpref{wxSocketBase}{wxsocketbaseconstruct}\\
 \helpref{\destruct{wxSocketBase}}{wxsocketbasedestruct}\\
 \helpref{Destroy}{wxsocketbasedestroy}
 
-\membersection{Socket state}\label{socketstate}
+\membersection{Socket state}
 
 Functions to retrieve current state and miscellaneous info.
 
@@ -131,7 +124,7 @@ Functions to retrieve current state and miscellaneous info.
 \helpref{SaveState}{wxsocketbasesavestate}\\
 \helpref{RestoreState}{wxsocketbaserestorestate}
 
-\membersection{Basic IO}\label{socketbasicio}
+\membersection{Basic IO}
 
 Functions that perform basic IO functionality.
 
@@ -163,7 +156,7 @@ Functions that allow applications to customize socket IO as needed.
 \helpref{SetFlags}{wxsocketbasesetflags}\\
 \helpref{SetTimeout}{wxsocketbasesettimeout}
 
-\membersection{Handling socket events}\label{socketevents}
+\membersection{Handling socket events}
 
 Functions that allow applications to receive socket events.
 
@@ -172,6 +165,14 @@ Functions that allow applications to receive socket events.
 \helpref{GetClientData}{wxsocketbasegetclientdata}\\
 \helpref{SetClientData}{wxsocketbasesetclientdata}\\
 \helpref{SetEventHandler}{wxsocketbaseseteventhandler}
+
+Callback functions are also available, but they are provided for backwards
+compatibility only. Their use is strongly discouraged in favour of events,
+and should be considered deprecated. Callbacks may be unsupported in future
+releases of wxWidgets.
+
+\helpref{Callback}{wxsocketbasecallback}\\
+\helpref{CallbackData}{wxsocketbasecallbackdata}
 
 
 % ---------------------------------------------------------------------------
@@ -200,6 +201,67 @@ Destructor. Do not destroy a socket using the delete operator directly;
 use \helpref{Destroy}{wxsocketbasedestroy} instead. Also, do not create
 socket objects in the stack.
 
+%
+% Callback
+%
+\membersection{wxSocketBase::Callback}\label{wxsocketbasecallback}
+
+\func{wxSocketBase::wxSockCbk}{Callback}{\param{wxSocketBase::wxSockCbk}{ callback}}
+
+You can setup a callback function to be called when an event occurs.
+The function will be called only for those events for which notification
+has been enabled with \helpref{Notify}{wxsocketbasenotify} and 
+\helpref{SetNotify}{wxsocketbasesetnotify}. The prototype of the
+callback must be as follows:
+
+\begin{verbatim}
+void SocketCallback(wxSocketBase& sock, wxSocketNotify evt, char *cdata);
+\end{verbatim}
+
+The first parameter is a reference to the socket object in which the
+event occurred. The second parameter tells you which event occurred.
+(See \helpref{wxSocket events}{wxsocketbase}). The third parameter
+is the user data you specified using \helpref{CallbackData}{wxsocketbasecallbackdata}.
+
+\wxheading{Return value}
+
+A pointer to the previous callback.
+
+\wxheading{Remark/Warning}
+
+Note that callbacks are now deprecated and unsupported, and they remain
+for backwards compatibility only. Use events instead.
+
+\wxheading{See also}
+
+\helpref{wxSocketBase::CallbackData}{wxsocketbasecallbackdata}, 
+\helpref{wxSocketBase::SetNotify}{wxsocketbasesetnotify}, 
+\helpref{wxSocketBase::Notify}{wxsocketbasenotify}
+
+%
+% CallbackData
+%
+\membersection{wxSocketBase::CallbackData}\label{wxsocketbasecallbackdata}
+
+\func{char *}{CallbackData}{\param{char *}{cdata}}
+
+This function sets the the user data which will be passed to a
+callback function set via \helpref{Callback}{wxsocketbasecallback}.
+
+\wxheading{Return value}
+
+A pointer to the previous user data.
+
+\wxheading{Remark/Warning}
+
+Note that callbacks are now deprecated and unsupported, and they remain
+for backwards compatibility only. Use events instead.
+
+\wxheading{See also}
+
+\helpref{wxSocketBase::Callback}{wxsocketbasecallback}, 
+\helpref{wxSocketBase::SetNotify}{wxsocketbasesetnotify}, 
+\helpref{wxSocketBase::Notify}{wxsocketbasenotify}
 
 %
 % Close
@@ -240,7 +302,7 @@ Destroy calls \helpref{Close}{wxsocketbaseclose} automatically.
 
 \wxheading{Return value}
 
-Always true.
+Always TRUE.
 
 %
 % Discard
@@ -254,7 +316,7 @@ always returns immediately and its operation is not affected by IO flags.
 
 Use \helpref{LastCount}{wxsocketbaselastcount} to verify the number of bytes actually discarded.
 
-If you use \helpref{Error}{wxsocketbaseerror}, it will always return false.
+If you use \helpref{Error}{wxsocketbaseerror}, it will always return FALSE.
 
 %
 % Error
@@ -263,7 +325,7 @@ If you use \helpref{Error}{wxsocketbaseerror}, it will always return false.
 
 \constfunc{bool}{Error}{\void}
 
-Returns true if an error occurred in the last IO operation.
+Returns TRUE if an error occurred in the last IO operation.
 
 Use this function to check for an error condition after one of the
 following calls: Discard, Peek, Read, ReadMsg, Unread, Write, WriteMsg.
@@ -291,7 +353,7 @@ address, local port, ...).
 
 \wxheading{Return value}
 
-true if no error happened, false otherwise.
+TRUE if no error happened, FALSE otherwise.
 
 %
 % GetFlags
@@ -315,7 +377,7 @@ address field contains the complete peer host address of the socket
 
 \wxheading{Return value}
 
-true if no error happened, false otherwise.
+TRUE if no error happened, FALSE otherwise.
 
 %
 % InterruptWait
@@ -346,7 +408,7 @@ socket destruction), so you don't need to use it in these cases.
 
 \constfunc{bool}{IsConnected}{\void}
 
-Returns true if the socket is connected.
+Returns TRUE if the socket is connected.
 
 %
 % IsData
@@ -368,7 +430,7 @@ is set, in which case the operation might still block).
 %
 \constfunc{bool}{IsDisconnected}{\void}
 
-Returns true if the socket is not connected.
+Returns TRUE if the socket is not connected.
 
 \membersection{wxSocketBase::LastCount}\label{wxsocketbaselastcount}
 
@@ -396,7 +458,7 @@ Please note that this function merely returns the last error code,
 but it should not be used to determine if an error has occurred (this
 is because successful operations do not change the LastError value).
 Use \helpref{Error}{wxsocketbaseerror} first, in order to determine
-if the last IO call failed. If this returns true, use LastError
+if the last IO call failed. If this returns TRUE, use LastError
 to discover the cause of the error.
 
 %
@@ -407,9 +469,9 @@ to discover the cause of the error.
 \func{void}{Notify}{\param{bool}{ notify}}
 
 According to the {\it notify} value, this function enables
-or disables socket events. If {\it notify} is true, the events
+or disables socket events. If {\it notify} is TRUE, the events
 configured with \helpref{SetNotify}{wxsocketbasesetnotify} will
-be sent to the application. If {\it notify} is false; no events
+be sent to the application. If {\it notify} is FALSE; no events
 will be sent.
 
 % 
@@ -419,15 +481,15 @@ will be sent.
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if the socket is initialized and ready and false in other
+Returns TRUE if the socket is initialized and ready and FALSE in other
 cases.
 
 \wxheading{Remark/Warning}
 
-For \helpref{wxSocketClient}{wxsocketclient}, Ok won't return true unless
+For \helpref{wxSocketClient}{wxsocketclient}, Ok won't return TRUE unless
 the client is connected to a server.
 
-For \helpref{wxSocketServer}{wxsocketserver}, Ok will return true if the
+For \helpref{wxSocketServer}{wxsocketserver}, Ok will return TRUE if the
 server could bind to the specified address and is already listening for
 new connections.
 
@@ -461,7 +523,9 @@ This function saves the current state of the socket in a stack. Socket
 state includes flags, as set with \helpref{SetFlags}{wxsocketbasesetflags},
 event mask, as set with \helpref{SetNotify}{wxsocketbasesetnotify} and 
 \helpref{Notify}{wxsocketbasenotify}, user data, as set with 
-\helpref{SetClientData}{wxsocketbasesetclientdata}.
+\helpref{SetClientData}{wxsocketbasesetclientdata}, and asynchronous
+callback settings, as set with \helpref{Callback}{wxsocketbasecallback} 
+and \helpref{CallbackData}{wxsocketbasecallbackdata}.
 
 Calls to SaveState and RestoreState can be nested.
 
@@ -522,7 +586,6 @@ The following flags can be used:
 \twocolitem{{\bf wxSOCKET\_NOWAIT}}{Read/write as much data as possible and return immediately.}
 \twocolitem{{\bf wxSOCKET\_WAITALL}}{Wait for all required data to be read/written unless an error occurs.}
 \twocolitem{{\bf wxSOCKET\_BLOCK}}{Block the GUI (do not yield) while reading/writing data.}
-\twocolitem{{\bf wxSOCKET\_REUSEADDR}}{Allows the use of an in-use port (wxServerSocket only)}
 \end{twocollist}
 
 A brief overview on how to use these flags follows.
@@ -556,13 +619,6 @@ during IO calls, so the GUI will remain blocked until the operation
 completes. If it is not used, then the application must take extra
 care to avoid unwanted reentrance.
 
-The {\bf wxSOCKET\_REUSEADDR} flag controls the use of the SO\_REUSEADDR standard
-setsockopt() flag. This flag allows the socket to bind to a port that is already in use.
-This is mostly used on UNIX-based systems to allow rapid starting and stopping of a server - 
-otherwise you may have to wait several minutes for the port to become available.
-This option can have surprising platform dependent behavior, check the documentation for
-your platform's implementation of setsockopt().
-
 So:
 
 {\bf wxSOCKET\_NONE} will try to read at least SOME data, no matter how much.
@@ -575,8 +631,6 @@ the data.
 
 {\bf wxSOCKET\_BLOCK} has nothing to do with the previous flags and
 it controls whether the GUI blocks.
-
-{\bf wxSOCKET\_REUSEADDR} controls special platform-specific behavior for wxServerSocket.
 
 %
 % SetNotify
@@ -601,7 +655,7 @@ For example:
 
 \begin{verbatim}
   sock.SetNotify(wxSOCKET_INPUT_FLAG | wxSOCKET_LOST_FLAG);
-  sock.Notify(true);
+  sock.Notify(TRUE);
 \end{verbatim}
 
 In this example, the user will be notified about incoming socket data and
@@ -745,7 +799,7 @@ in the incoming queue. This function is not affected by wxSocket flags.
 
 If you use \helpref{LastCount}{wxsocketbaselastcount}, it will always return {\it nbytes}.
 
-If you use \helpref{Error}{wxsocketbaseerror}, it will always return false.
+If you use \helpref{Error}{wxsocketbaseerror}, it will always return FALSE.
 
 \wxheading{Parameters}
 
@@ -770,7 +824,7 @@ Returns a reference to the current object.
 
 \func{bool}{Wait}{\param{long}{ seconds = -1}, \param{long}{ millisecond = 0}}
 
-This function waits until any of the following conditions is true:
+This function waits until any of the following conditions is TRUE:
                                             
 \begin{itemize}
 \item The socket becomes readable.
@@ -793,8 +847,8 @@ as set with \helpref{SetTimeout}{wxsocketbasesettimeout}.}
 
 \wxheading{Return value}
 
-Returns true when any of the above conditions is satisfied,
-false if the timeout was reached.
+Returns TRUE when any of the above conditions is satisfied,
+FALSE if the timeout was reached.
 
 \wxheading{See also}
 
@@ -825,7 +879,7 @@ as set with \helpref{SetTimeout}{wxsocketbasesettimeout}.}
 
 \wxheading{Return value}
 
-Returns true if the connection was lost, false if the timeout was reached.
+Returns TRUE if the connection was lost, FALSE if the timeout was reached.
 
 \wxheading{See also}
 
@@ -855,7 +909,7 @@ as set with \helpref{SetTimeout}{wxsocketbasesettimeout}.}
 
 \wxheading{Return value}
 
-Returns true if the socket becomes readable, false on timeout.
+Returns TRUE if the socket becomes readable, FALSE on timeout.
 
 \wxheading{See also}
 
@@ -885,7 +939,7 @@ as set with \helpref{SetTimeout}{wxsocketbasesettimeout}.}
 
 \wxheading{Return value}
 
-Returns true if the socket becomes writable, false on timeout.
+Returns TRUE if the socket becomes writable, FALSE on timeout.
 
 \wxheading{See also}
 
@@ -992,7 +1046,7 @@ For a detailed explanation, see \helpref{wxSocketBase::SetFlags}{wxsocketbaseset
 %
 % wxSocketClient
 %
-\membersection{wxSocketClient::wxSocketClient}\label{wxsocketclientctor}
+\membersection{wxSocketClient::wxSocketClient}
 
 \func{}{wxSocketClient}{\param{wxSocketFlags}{ flags = wxSOCKET\_NONE}}
 
@@ -1005,7 +1059,7 @@ Constructor.
 %
 % ~wxSocketClient
 %
-\membersection{wxSocketClient::\destruct{wxSocketClient}}\label{wxsocketclientdtor}
+\membersection{wxSocketClient::\destruct{wxSocketClient}}
 
 \func{}{\destruct{wxSocketClient}}{\void}
 
@@ -1016,16 +1070,16 @@ Destructor. Please see \helpref{wxSocketBase::Destroy}{wxsocketbasedestroy}.
 %
 \membersection{wxSocketClient::Connect}\label{wxsocketclientconnect}
 
-\func{bool}{Connect}{\param{wxSockAddress\&}{ address}, \param{bool}{ wait = true}}
+\func{bool}{Connect}{\param{wxSockAddress\&}{ address}, \param{bool}{ wait = TRUE}}
 
 Connects to a server using the specified address.
 
-If {\it wait} is true, Connect will wait until the connection
+If {\it wait} is TRUE, Connect will wait until the connection
 completes. {\bf Warning:} This will block the GUI.
 
-If {\it wait} is false, Connect will try to establish the connection and
+If {\it wait} is FALSE, Connect will try to establish the connection and
 return immediately, without blocking the GUI. When used this way, even if
-Connect returns false, the connection request can be completed later.
+Connect returns FALSE, the connection request can be completed later.
 To detect this, use \helpref{WaitOnConnect}{wxsocketclientwaitonconnect},
 or catch {\bf wxSOCKET\_CONNECTION} events (for successful establishment)
 and {\bf wxSOCKET\_LOST} events (for connection failure).
@@ -1034,16 +1088,16 @@ and {\bf wxSOCKET\_LOST} events (for connection failure).
 
 \docparam{address}{Address of the server.}
 
-\docparam{wait}{If true, waits for the connection to complete.}
+\docparam{wait}{If TRUE, waits for the connection to complete.}
 
 \wxheading{Return value}
 
-Returns true if the connection is established and no error occurs.
+Returns TRUE if the connection is established and no error occurs.
 
-If {\it wait} was true, and Connect returns false, an error occurred
+If {\it wait} was TRUE, and Connect returns FALSE, an error occurred
 and the connection failed.
 
-If {\it wait} was false, and Connect returns false, you should still
+If {\it wait} was FALSE, and Connect returns FALSE, you should still
 be prepared to handle the completion of this connection request, either
 with \helpref{WaitOnConnect}{wxsocketclientwaitonconnect} or by
 watching {\bf wxSOCKET\_CONNECTION} and {\bf wxSOCKET\_LOST} events.
@@ -1063,7 +1117,7 @@ watching {\bf wxSOCKET\_CONNECTION} and {\bf wxSOCKET\_LOST} events.
 
 Wait until a connection request completes, or until the specified timeout
 elapses. Use this function after issuing a call
-to \helpref{Connect}{wxsocketclientconnect} with {\it wait} set to false.
+to \helpref{Connect}{wxsocketclientconnect} with {\it wait} set to FALSE.
 
 \wxheading{Parameters}
 
@@ -1075,22 +1129,22 @@ as set with \helpref{SetTimeout}{wxsocketbasesettimeout}.}
 
 \wxheading{Return value}
 
-WaitOnConnect returns true if the connection request completes. This
+WaitOnConnect returns TRUE if the connection request completes. This
 does not necessarily mean that the connection was successfully established;
 it might also happen that the connection was refused by the peer. Use 
 \helpref{IsConnected}{wxsocketbaseisconnected} to distinguish between
 these two situations.
 
-If the timeout elapses, WaitOnConnect returns false.
+If the timeout elapses, WaitOnConnect returns FALSE.
 
 These semantics allow code like this:
 
 \begin{verbatim}
 // Issue the connection request
-client->Connect(addr, false);
+client->Connect(addr, FALSE);
 
 // Wait until the request completes or until we decide to give up
-bool waitmore = true; 
+bool waitmore = TRUE; 
 while ( !client->WaitOnConnect(seconds, millis) && waitmore )
 {
     // possibly give some feedback to the user,
@@ -1138,7 +1192,7 @@ to member functions that take a wxSocketEvent argument.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxSocketEvent::wxSocketEvent}\label{wxsocketeventctor}
+\membersection{wxSocketEvent::wxSocketEvent}
 
 \func{}{wxSocketEvent}{\param{int}{ id = 0}}
 

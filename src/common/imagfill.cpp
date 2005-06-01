@@ -35,7 +35,7 @@
 
 static bool LINKAGEMODE MatchPixel(wxImage *img, int x, int y, int w, int h, const wxColour& c)
 {
-    if ((x<0)||(x>=w)||(y<0)||(y>=h)) return false;
+    if ((x<0)||(x>=w)||(y<0)||(y>=h)) return FALSE;
 
     unsigned char r = img->GetRed(x,y);
     unsigned char g = img->GetGreen(x,y);
@@ -45,16 +45,16 @@ static bool LINKAGEMODE MatchPixel(wxImage *img, int x, int y, int w, int h, con
 
 static bool LINKAGEMODE MatchBoundaryPixel(wxImage *img, int x, int y, int w, int h, const wxColour & fill, const wxColour& bound)
 {
-    if ((x<0)||(x>=w)||(y<0)||(y>=h)) return true;
+    if ((x<0)||(x>=w)||(y<0)||(y>=h)) return TRUE;
 
     unsigned char r = img->GetRed(x,y);
     unsigned char g = img->GetGreen(x,y);
     unsigned char b = img->GetBlue(x,y);
     if ( fill.Red() == r && fill.Green() == g && fill.Blue() == b )
-        return true;
+        return TRUE;
     if ( bound.Red() == r && bound.Green() == g && bound.Blue() == b )
-        return true;
-    return false;
+        return TRUE;
+    return FALSE;
 }
 
 
@@ -280,14 +280,14 @@ bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
                    const wxColour& col, int style)
 {
     if (dc->GetBrush().GetStyle() == wxTRANSPARENT)
-        return true;
+        return TRUE;
 
     int height = 0;
     int width  = 0;
     dc->GetSize(&width, &height);
 
     //it would be nice to fail if we don't get a sensible size...
-    wxCHECK_MSG(width >= 1 && height >= 1, false,
+    wxCHECK_MSG(width >= 1 && height >= 1, FALSE,
                 wxT("In FloodFill, dc.GetSize routine failed, method not supported by this DC"));
 
     //this is much faster than doing the individual pixels
@@ -305,7 +305,7 @@ bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
     dc->Blit(0, 0, width, height, &memdc, 0, 0);
     memdc.SelectObject(wxNullBitmap);
 
-    return true;
+    return TRUE;
 }
 
 #endif // wxUSE_IMAGE

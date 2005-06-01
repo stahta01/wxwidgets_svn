@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_CHOICE_H_
 #define _WX_UNIV_CHOICE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univchoice.h"
 #endif
 
@@ -34,25 +34,11 @@ public:
     {
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-    wxChoice(wxWindow *parent, wxWindowID id,
-            const wxPoint& pos,
-            const wxSize& size,
-            const wxArrayString& choices,
-            long style = 0,
-            const wxValidator& validator = wxDefaultValidator,
-            const wxString& name = wxChoiceNameStr);
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int n = 0, const wxString choices[] = (wxString *) NULL,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxChoiceNameStr);
-    bool Create(wxWindow *parent, wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxChoiceNameStr);

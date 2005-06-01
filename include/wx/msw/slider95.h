@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/slider95.h
-// Purpose:     wxSlider class, using the Win95 (and later) trackbar control
+// Purpose:     wxSlider95 class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
@@ -9,60 +9,55 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_SLIDER95_H_
-#define _WX_SLIDER95_H_
+#ifndef _SLIDER95_H_
+#define _SLIDER95_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "slider95.h"
 #endif
 
-class WXDLLEXPORT wxSubwindows;
-
 // Slider
-class WXDLLEXPORT wxSlider : public wxSliderBase
+class WXDLLEXPORT wxSlider95 : public wxSliderBase
 {
 public:
-    wxSlider() { Init(); }
+    wxSlider95();
 
-    wxSlider(wxWindow *parent,
-             wxWindowID id,
-             int value,
-             int minValue,
-             int maxValue,
-             const wxPoint& pos = wxDefaultPosition,
-             const wxSize& size = wxDefaultSize,
-             long style = wxSL_HORIZONTAL,
-             const wxValidator& validator = wxDefaultValidator,
-             const wxString& name = wxSliderNameStr)
+    wxSlider95(wxWindow *parent, wxWindowID id,
+            int value, int minValue, int maxValue,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxSL_HORIZONTAL,
+            const wxValidator& validator = wxDefaultValidator,
+            const wxString& name = wxSliderNameStr)
     {
-        Init();
-
-        (void)Create(parent, id, value, minValue, maxValue,
-                     pos, size, style, validator, name);
+        Create(parent, id, value, minValue, maxValue, pos, size, style, validator, name);
     }
 
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                int value,
-                int minValue, int maxValue,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxSL_HORIZONTAL,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxSliderNameStr);
+    ~wxSlider95();
 
-    virtual ~wxSlider();
+    bool Create(wxWindow *parent, wxWindowID id,
+            int value, int minValue, int maxValue,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxSL_HORIZONTAL,
+            const wxValidator& validator = wxDefaultValidator,
+            const wxString& name = wxSliderNameStr);
 
-    // slider methods
     virtual int GetValue() const;
     virtual void SetValue(int);
+
+    void GetSize(int *w, int *h) const;
+
+    void GetPosition(int *x, int *y) const;
+
+    bool Show(bool show = TRUE);
 
     void SetRange(int minValue, int maxValue);
 
     int GetMin() const { return m_rangeMin; }
     int GetMax() const { return m_rangeMax; }
 
-    // Win32-specific slider methods
+    // For trackbars only
     void SetTickFreq(int n, int pos);
     int GetTickFreq() const { return m_tickFreq; }
     void SetPageSize(int pageSize);
@@ -78,64 +73,36 @@ public:
     int GetThumbLength() const;
     void SetTick(int tickPos);
 
-    // implementation only from now on
-    WXHWND GetStaticMin() const;
-    WXHWND GetStaticMax() const;
-    WXHWND GetEditValue() const;
+    // IMPLEMENTATION
+    WXHWND GetStaticMin() const { return m_staticMin; }
+    WXHWND GetStaticMax() const { return m_staticMax; }
+    WXHWND GetEditValue() const { return m_staticValue; }
     virtual bool ContainsHWND(WXHWND hWnd) const;
 
-    // we should let background show through the slider (and its labels)
-    virtual bool HasTransparentBackground() { return true; }
-
-
     void Command(wxCommandEvent& event);
+    virtual WXHBRUSH OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
+            WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
     virtual bool MSWOnScroll(int orientation, WXWORD wParam,
                              WXWORD pos, WXHWND control);
 
-    virtual bool Show(bool show = true);
-    virtual bool Enable(bool show = true);
-    virtual bool SetFont(const wxFont& font);
-
 protected:
-    // common part of all ctors
-    void Init();
-
-    // format an integer value as string
-    static wxString Format(int n) { return wxString::Format(_T("%d"), n); }
-
-    // get the boundig box for the slider and possible labels
-    wxRect GetBoundingBox() const;
-
-    // get the height and, if the pointer is not NULL, width of our labels
-    int GetLabelsSize(int *width = NULL) const;
-
-
-    // overridden base class virtuals
-    virtual void DoGetPosition(int *x, int *y) const;
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual void DoMoveWindow(int x, int y, int width, int height);
-    virtual wxSize DoGetBestSize() const;
-
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
-
-
-    // the labels windows, if any
-    wxSubwindows *m_labels;
-
+    WXHWND        m_staticMin;
+    WXHWND        m_staticMax;
+    WXHWND        m_staticValue;
     int           m_rangeMin;
     int           m_rangeMax;
     int           m_pageSize;
     int           m_lineSize;
     int           m_tickFreq;
 
-    // flag needed to detect whether we're getting THUMBRELEASE event because
-    // of dragging the thumb or scrolling the mouse wheel
-    bool m_isDragging;
+    virtual void DoGetSize(int *width, int *height) const;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSlider)
+    virtual void DoSetSize(int x, int y,
+                           int width, int height,
+                           int sizeFlags = wxSIZE_AUTO);
+
+    DECLARE_DYNAMIC_CLASS(wxSlider95)
 };
 
-#endif // _WX_SLIDER95_H_
-
+#endif
+    // _SLIDER95_H_

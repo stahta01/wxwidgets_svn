@@ -6,10 +6,10 @@
 // Created:     26/04/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "sckaddr.h"
 #endif
 
@@ -42,17 +42,16 @@
 #include "wx/sckaddr.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxSockAddress, wxObject)
-IMPLEMENT_ABSTRACT_CLASS(wxIPaddress, wxSockAddress)
-IMPLEMENT_DYNAMIC_CLASS(wxIPV4address, wxIPaddress)
-#if wxUSE_IPV6
-IMPLEMENT_DYNAMIC_CLASS(wxIPV6address, wxIPaddress)
+IMPLEMENT_DYNAMIC_CLASS(wxIPV4address, wxSockAddress)
+#ifdef ENABLE_IPV6
+IMPLEMENT_DYNAMIC_CLASS(wxIPV6address, wxSockAddress)
 #endif
-#if defined(__UNIX__) && !defined(__WINDOWS__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 IMPLEMENT_DYNAMIC_CLASS(wxUNIXaddress, wxSockAddress)
 #endif
 
 // ---------------------------------------------------------------------------
-// wxSockAddress
+// wxIPV4address
 // ---------------------------------------------------------------------------
 
 void wxSockAddress::Init()
@@ -103,34 +102,15 @@ void wxSockAddress::Clear()
 }
 
 // ---------------------------------------------------------------------------
-// wxIPaddress
-// ---------------------------------------------------------------------------
-
-wxIPaddress::wxIPaddress()
-            : wxSockAddress()
-{
-}
-
-wxIPaddress::wxIPaddress(const wxIPaddress& other)
-            : wxSockAddress(other)
-{
-}
-
-wxIPaddress::~wxIPaddress()
-{
-}
-
-// ---------------------------------------------------------------------------
 // wxIPV4address
 // ---------------------------------------------------------------------------
 
 wxIPV4address::wxIPV4address()
-             : wxIPaddress()
 {
 }
 
 wxIPV4address::wxIPV4address(const wxIPV4address& other)
-             : wxIPaddress(other)
+             : wxSockAddress(other)
 {
 }
 
@@ -141,10 +121,10 @@ wxIPV4address::~wxIPV4address()
 bool wxIPV4address::Hostname(const wxString& name)
 {
   // Some people are sometimes fool.
-  if (name.empty())
+  if (name == wxT(""))
   {
     wxLogWarning( _("Trying to solve a NULL hostname: giving up") );
-    return false;
+    return FALSE;
   }
   m_origHostname = name;
   return (GAddress_INET_SetHostName(m_address, name.mb_str()) == GSOCK_NOERROR);
@@ -175,17 +155,12 @@ bool wxIPV4address::LocalHost()
   return (GAddress_INET_SetHostName(m_address, "localhost") == GSOCK_NOERROR);
 }
 
-bool wxIPV4address::IsLocalHost() const
-{
-  return (Hostname() == wxT("localhost") || IPAddress() == wxT("127.0.0.1"));
-}
-
 bool wxIPV4address::AnyAddress()
 {
   return (GAddress_INET_SetAnyAddress(m_address) == GSOCK_NOERROR);
 }
 
-wxString wxIPV4address::Hostname() const
+wxString wxIPV4address::Hostname()
 {
    char hostname[1024];
 
@@ -194,9 +169,21 @@ wxString wxIPV4address::Hostname() const
    return wxString::FromAscii(hostname);
 }
 
-unsigned short wxIPV4address::Service() const
+unsigned short wxIPV4address::Service()
 {
   return GAddress_INET_GetPort(m_address);
+}
+
+wxString wxIPV4address::IPAddress() const
+{
+    unsigned long raw =  GAddress_INET_GetHostAddress(m_address);
+    return wxString::Format(
+        _T("%u.%u.%u.%u"),
+        (unsigned char)(raw & 0xff),
+        (unsigned char)((raw>>8) & 0xff),
+        (unsigned char)((raw>>16) & 0xff),
+        (unsigned char)((raw>>24) & 0xff)
+        );
 }
 
 wxSockAddress *wxIPV4address::Clone() const
@@ -206,36 +193,18 @@ wxSockAddress *wxIPV4address::Clone() const
     return addr;
 }
 
-wxString wxIPV4address::IPAddress() const
-{
-    unsigned long raw =  GAddress_INET_GetHostAddress(m_address);
-    return wxString::Format(
-        _T("%u.%u.%u.%u"),
-        (unsigned char)((raw>>24) & 0xff),
-        (unsigned char)((raw>>16) & 0xff),
-        (unsigned char)((raw>>8) & 0xff),
-        (unsigned char)(raw & 0xff)
-        );
-}
-
-bool wxIPV4address::operator==(wxIPV4address& addr)
-{
-    if(Hostname().Cmp(addr.Hostname().c_str()) == 0 && Service() == addr.Service()) return true;
-    return false;
-}
-
-#if wxUSE_IPV6
+#if 0
 // ---------------------------------------------------------------------------
 // wxIPV6address
 // ---------------------------------------------------------------------------
 
 wxIPV6address::wxIPV6address()
-  : wxIPaddress()
+  : wxSockAddress()
 {
 }
 
 wxIPV6address::wxIPV6address(const wxIPV6address& other)
-             : wxIPaddress(other)
+             : wxSockAddress(other)
 {
 }
 
@@ -245,22 +214,17 @@ wxIPV6address::~wxIPV6address()
 
 bool wxIPV6address::Hostname(const wxString& name)
 {
-  if (name.empty())
-  {
-    wxLogWarning( _("Trying to solve a NULL hostname: giving up") );
-    return false;
-  }
-  return (GAddress_INET_SetHostName(m_address, name.mb_str()) == GSOCK_NOERROR);
+  return (GAddress_INET_SetHostName(m_address, name.fn_str()) == GSOCK_NOERROR);
 }
 
-bool wxIPV6address::Hostname(unsigned char[16] WXUNUSED(addr))
+bool wxIPV6address::Hostname(unsigned char addr[16])
 {
-  return true;
+  return TRUE;
 }
 
-bool wxIPV6address::Service(const wxString& name)
+bool wxIPV6address::Service(const char *name)
 {
-  return (GAddress_INET_SetPortName(m_address, name.mb_str(), "tcp") == GSOCK_NOERROR);
+  return (GAddress_INET_SetPortName(m_address, name.fn_str()) == GSOCK_NOERROR);
 }
 
 bool wxIPV6address::Service(unsigned short port)
@@ -273,45 +237,19 @@ bool wxIPV6address::LocalHost()
   return (GAddress_INET_SetHostName(m_address, "localhost") == GSOCK_NOERROR);
 }
 
-bool wxIPV6address::IsLocalHost() const
+const wxString& wxIPV6address::Hostname()
 {
-  return (Hostname() == wxT("localhost") || IPAddress() == wxT("127.0.0.1"));
+  return wxString(GAddress_INET_GetHostName(m_address));
 }
 
-bool wxIPV6address::AnyAddress()
-{
-  return (GAddress_INET_SetAnyAddress(m_address) == GSOCK_NOERROR);
-}
-
-wxString wxIPV6address::IPAddress() const
-{
-    unsigned long raw =  GAddress_INET_GetHostAddress(m_address);
-    return wxString::Format(
-        _T("%u.%u.%u.%u"),
-        (unsigned char)((raw>>24) & 0xff),
-        (unsigned char)((raw>>16) & 0xff),
-        (unsigned char)((raw>>8) & 0xff),
-        (unsigned char)(raw & 0xff)
-        );
-}
-
-wxString wxIPV6address::Hostname() const
-{
-   char hostname[1024];
-
-   hostname[0] = 0;
-   GAddress_INET_GetHostName(m_address, hostname, 1024);
-   return wxString::FromAscii(hostname);
-}
-
-unsigned short wxIPV6address::Service() const
+unsigned short wxIPV6address::Service()
 {
   return GAddress_INET_GetPort(m_address);
 }
 
-#endif // wxUSE_IPV6
+#endif // 0
 
-#if defined(__UNIX__) && !defined(__WINDOWS__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 
 // ---------------------------------------------------------------------------
 // wxUNIXaddress
@@ -342,7 +280,7 @@ wxString wxUNIXaddress::Filename()
 
   path[0] = 0;
   GAddress_UNIX_GetPath(m_address, path, 1024);
-
+  
   return wxString::FromAscii(path);
 }
 

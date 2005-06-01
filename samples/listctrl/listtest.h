@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -13,12 +13,7 @@
 class MyApp: public wxApp
 {
 public:
-    MyApp() { }
-
     virtual bool OnInit();
-
-private:
-    DECLARE_NO_COPY_CLASS(MyApp)
 };
 
 class MyListCtrl: public wxListCtrl
@@ -48,10 +43,8 @@ public:
     void OnEndLabelEdit(wxListEvent& event);
     void OnDeleteItem(wxListEvent& event);
     void OnDeleteAllItems(wxListEvent& event);
-#if WXWIN_COMPATIBILITY_2_4
     void OnGetInfo(wxListEvent& event);
     void OnSetInfo(wxListEvent& event);
-#endif
     void OnSelected(wxListEvent& event);
     void OnDeselected(wxListEvent& event);
     void OnListKeyDown(wxListEvent& event);
@@ -73,7 +66,6 @@ private:
 
     wxListItemAttr m_attr;
 
-    DECLARE_NO_COPY_CLASS(MyListCtrl)
     DECLARE_EVENT_TABLE()
 };
 
@@ -82,9 +74,7 @@ class MyFrame: public wxFrame
 {
 public:
     MyFrame(const wxChar *title, int x, int y, int w, int h);
-    virtual ~MyFrame();
-
-    void DoSize();
+    ~MyFrame();
 
 protected:
     void OnSize(wxSizeEvent& event);
@@ -98,7 +88,6 @@ protected:
     void OnSmallIconView(wxCommandEvent& event);
     void OnSmallIconTextView(wxCommandEvent& event);
     void OnVirtualView(wxCommandEvent& event);
-    void OnSmallVirtualView(wxCommandEvent& event);
 
     void OnFocusLast(wxCommandEvent& event);
     void OnToggleFirstSel(wxCommandEvent& event);
@@ -116,10 +105,8 @@ protected:
     void OnShowSelInfo(wxCommandEvent& event);
     void OnFreeze(wxCommandEvent& event);
     void OnThaw(wxCommandEvent& event);
-    void OnToggleLines(wxCommandEvent& event);
 
     void OnUpdateShowColInfo(wxUpdateUIEvent& event);
-    void OnUpdateToggleMultiSel(wxUpdateUIEvent& event);
 
     wxImageList *m_imageListNormal;
     wxImageList *m_imageListSmall;
@@ -130,24 +117,16 @@ protected:
 
 private:
     // recreate the list control with the new flags
-    void RecreateList(long flags, bool withText = true);
+    void RecreateList(long flags, bool withText = TRUE);
 
     // fill the control with items depending on the view
     void InitWithListItems();
     void InitWithReportItems();
-    void InitWithIconItems(bool withText, bool sameIcon = false);
+    void InitWithIconItems(bool withText, bool sameIcon = FALSE);
     void InitWithVirtualItems();
-
-    // return true if the control is not in virtual view, give an error message
-    // and return false if it is
-    bool CheckNonVirtual() const;
-
 
     wxLog *m_logOld;
 
-    bool m_smallVirtual;
-
-    DECLARE_NO_COPY_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
 };
 
@@ -155,17 +134,16 @@ private:
 // IDs for the menu commands
 enum
 {
-    LIST_ABOUT = wxID_ABOUT,
-    LIST_QUIT = wxID_EXIT,
+    LIST_ABOUT,
+    LIST_QUIT,
 
-    LIST_LIST_VIEW = wxID_HIGHEST,
+    LIST_LIST_VIEW,
     LIST_ICON_VIEW,
     LIST_ICON_TEXT_VIEW,
     LIST_SMALL_ICON_VIEW,
     LIST_SMALL_ICON_TEXT_VIEW,
     LIST_REPORT_VIEW,
     LIST_VIRTUAL_VIEW,
-    LIST_SMALL_VIRTUAL_VIEW,
 
     LIST_DESELECT_ALL,
     LIST_SELECT_ALL,
@@ -183,7 +161,6 @@ enum
     LIST_FOCUS_LAST,
     LIST_FREEZE,
     LIST_THAW,
-    LIST_TOGGLE_LINES,
 
     LIST_CTRL                   = 1000
 };

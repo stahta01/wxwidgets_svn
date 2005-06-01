@@ -13,16 +13,13 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "menuitem.h"
 #endif
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/defs.h"
 
@@ -90,6 +87,18 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
 
 wxMenuItem::~wxMenuItem()
 {
+}
+
+// misc
+// ----
+
+// delete the sub menu
+void wxMenuItem::DeleteSubMenu()
+{
+    wxASSERT( m_subMenu != NULL );
+
+    delete m_subMenu;
+    m_subMenu = NULL;
 }
 
 // change item state
@@ -167,9 +176,9 @@ void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMen
     m_menuBar = menuBar;
     m_topMenu = topMenu;
 
-    if (GetId() == -3)
+    if (GetId() == -2)
     {
-        // Id=-3 identifies a Title item.
+        // Id=-2 identifies a Title item.
         m_buttonWidget = (WXWidget) XtVaCreateManagedWidget
             (wxStripMenuCodes(m_text),
             xmLabelGadgetClass, (Widget) menu, NULL);
@@ -226,14 +235,14 @@ void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMen
             (XtCallbackProc) wxMenuItemDisarmCallback,
             (XtPointer) this);
     }
-    else if (GetId() == wxID_SEPARATOR)
+    else if (GetId() == -1)
     {
         m_buttonWidget = (WXWidget) XtVaCreateManagedWidget ("separator",
             xmSeparatorGadgetClass, (Widget) menu, NULL);
     }
     else if (m_subMenu)
     {
-        m_buttonWidget = m_subMenu->CreateMenu (menuBar, menu, topMenu, m_text, true);
+        m_buttonWidget = m_subMenu->CreateMenu (menuBar, menu, topMenu, m_text, TRUE);
         m_subMenu->SetButtonWidget(m_buttonWidget);
         XtAddCallback ((Widget) m_buttonWidget,
             XmNcascadingCallback,
@@ -246,7 +255,7 @@ void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMen
 
 void wxMenuItem::DestroyItem(bool full)
 {
-    if (GetId() == -3)
+    if (GetId() == -2)
     {
         ;      // Nothing
 
@@ -267,7 +276,7 @@ void wxMenuItem::DestroyItem(bool full)
                 wxMenuItemDisarmCallback, (XtPointer) this);
         }
     }
-    else if (GetId() == wxID_SEPARATOR)
+    else if (GetId() == -1)
     {
         ;      // Nothing
 
@@ -329,42 +338,29 @@ void wxMenuItemCallback (Widget WXUNUSED(w), XtPointer clientData,
     wxMenuItem *item = (wxMenuItem *) clientData;
     if (item)
     {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, item->GetId());
-        event.SetInt( item->GetId() );
-
         if (item->IsCheckable())
         {
-            Boolean isChecked = false;
-            XtVaGetValues ((Widget) item->GetButtonWidget(),
-                           XmNset, & isChecked,
-                           NULL);
+            Boolean isChecked = FALSE;
+            XtVaGetValues ((Widget) item->GetButtonWidget(), XmNset, & isChecked, NULL);
 
             // only set the flag, don't actually check anything
             item->wxMenuItemBase::Check(isChecked);
-            event.SetInt(isChecked);
         }
-
         if (item->GetMenuBar() && item->GetMenuBar()->GetMenuBarFrame())
         {
-            event.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
+            wxCommandEvent commandEvent(wxEVT_COMMAND_MENU_SELECTED, item->GetId());
+            commandEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
+            commandEvent.SetInt( item->GetId() );
 
-            item->GetMenuBar()->GetMenuBarFrame()
-                ->GetEventHandler()->ProcessEvent(event);
+            item->GetMenuBar()->GetMenuBarFrame()->GetEventHandler()->ProcessEvent(commandEvent);
         }
-        // this is the child of a popup menu
         else if (item->GetTopMenu())
         {
+            wxCommandEvent event (wxEVT_COMMAND_MENU_SELECTED, item->GetId());
             event.SetEventObject(item->GetTopMenu());
+            event.SetInt( item->GetId() );
 
             item->GetTopMenu()->ProcessCommand (event);
-
-            // Since PopupMenu under Motif still grab right mouse
-            // button events after it was closed, we need to delete
-            // the associated widgets to allow next PopUpMenu to
-            // appear; this needs to be done there because doing it in
-            // a WorkProc as before may cause crashes if a menu item causes
-            // the parent window of the menu to be destroyed
-            item->GetTopMenu()->DestroyWidgetAndDetach();
         }
     }
 }
@@ -380,8 +376,7 @@ void wxMenuItemArmCallback (Widget WXUNUSED(w), XtPointer clientData,
             wxMenuEvent menuEvent(wxEVT_MENU_HIGHLIGHT, item->GetId());
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
-            item->GetMenuBar()->GetMenuBarFrame()
-                ->GetEventHandler()->ProcessEvent(menuEvent);
+            item->GetMenuBar()->GetMenuBarFrame()->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }
@@ -400,8 +395,7 @@ wxMenuItemDisarmCallback (Widget WXUNUSED(w), XtPointer clientData,
             wxMenuEvent menuEvent(wxEVT_MENU_HIGHLIGHT, -1);
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
-            item->GetMenuBar()->GetMenuBarFrame()
-                ->GetEventHandler()->ProcessEvent(menuEvent);
+            item->GetMenuBar()->GetMenuBarFrame()->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }

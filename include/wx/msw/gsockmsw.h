@@ -23,84 +23,35 @@
 #include "gsocket.h"
 #endif
 
-#include "wx/msw/wrapwin.h"
-
-#if defined(__CYGWIN__)
-    //CYGWIN gives annoying warning about runtime stuff if we don't do this
-#   define USE_SYS_TYPES_FD_SET
-#   include <sys/types.h>
-#endif
-
-#if defined(__WXWINCE__) || defined(__CYGWIN__)
+#include <windows.h>
 #include <winsock.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-class GSocketGUIFunctionsTableConcrete: public GSocketGUIFunctionsTable
-{
-public:
-    virtual bool OnInit();
-    virtual void OnExit();
-    virtual bool CanUseEventLoop();
-    virtual bool Init_Socket(GSocket *socket);
-    virtual void Destroy_Socket(GSocket *socket);
-    virtual void Enable_Events(GSocket *socket);
-    virtual void Disable_Events(GSocket *socket);
-};
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
 
 /* Definition of GSocket */
-class GSocket
+struct _GSocket
 {
-public:
-  GSocket();
-  ~GSocket();
-  bool IsOk() { return m_ok; }
-  void Close();
-  void Shutdown();
-  GSocketError SetLocal(GAddress *address);
-  GSocketError SetPeer(GAddress *address);
-  GAddress *GetLocal();
-  GAddress *GetPeer();
-  GSocketError SetServer();
-  GSocket *WaitConnection();
-  bool SetReusable();
-  GSocketError Connect(GSocketStream stream);
-  GSocketError SetNonOriented();
-  int Read(char *buffer, int size);
-  int Write(const char *buffer, int size);
-  GSocketEventFlags Select(GSocketEventFlags flags);
-  void SetNonBlocking(bool non_block);
-  void SetTimeout(unsigned long millis);
-  GSocketError WXDLLIMPEXP_NET GetError();
-  void SetCallback(GSocketEventFlags flags,
-    GSocketCallback callback, char *cdata);
-  void UnsetCallback(GSocketEventFlags flags);
-  GSocketError GetSockOpt(int level, int optname,
-    void *optval, int *optlen);
-  GSocketError SetSockOpt(int level, int optname,
-    const void *optval, int optlen);
-protected:
-  GSocketError Input_Timeout();
-  GSocketError Output_Timeout();
-  GSocketError Connect_Timeout();
-  int Recv_Stream(char *buffer, int size);
-  int Recv_Dgram(char *buffer, int size);
-  int Send_Stream(const char *buffer, int size);
-  int Send_Dgram(const char *buffer, int size);
-  bool m_ok;
-
-/* TODO: Make these protected */
-public:
   SOCKET m_fd;
   GAddress *m_local;
   GAddress *m_peer;
   GSocketError m_error;
 
   /* Attributes */
-  bool m_non_blocking;
-  bool m_server;
-  bool m_stream;
-  bool m_establishing;
-  bool m_reusable;
+  int m_non_blocking;
+  int m_server;
+  int m_stream;
+  int m_oriented;
+  int m_establishing;
   struct timeval m_timeout;
 
   /* Callbacks */
@@ -109,10 +60,6 @@ public:
   char *m_data[GSOCK_MAX_EVENT];
   int m_msgnumber;
 };
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Definition of GAddress */
 struct _GAddress
@@ -126,6 +73,25 @@ struct _GAddress
   GSocketError m_error;
 };
 
+/* Input / output */
+
+GSocketError _GSocket_Input_Timeout(GSocket *socket);
+GSocketError _GSocket_Output_Timeout(GSocket *socket);
+GSocketError _GSocket_Connect_Timeout(GSocket *socket);
+int _GSocket_Recv_Stream(GSocket *socket, char *buffer, int size);
+int _GSocket_Recv_Dgram(GSocket *socket, char *buffer, int size);
+int _GSocket_Send_Stream(GSocket *socket, const char *buffer, int size);
+int _GSocket_Send_Dgram(GSocket *socket, const char *buffer, int size);
+
+/* Callbacks */
+
+int  _GSocket_GUI_Init(GSocket *socket);
+void _GSocket_GUI_Destroy(GSocket *socket);
+
+LRESULT CALLBACK _GSocket_Internal_WinProc(HWND, UINT, WPARAM, LPARAM);
+
+void _GSocket_Enable_Events(GSocket *socket);
+void _GSocket_Disable_Events(GSocket *socket);
 
 /* GAddress */
 

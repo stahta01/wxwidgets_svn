@@ -43,7 +43,7 @@ void Text2RTF(TexChunk *chunk);
  *
  */
 
-void PushEnvironmentStyle(wxChar *style);
+void PushEnvironmentStyle(char *style);
 
 void PopEnvironmentStyle(void);
 
@@ -51,10 +51,10 @@ void PopEnvironmentStyle(void);
 void WriteEnvironmentStyles(void);
 
 // Called on start/end of macro examination
-void DefaultRtfOnMacro(wxChar *name, int no_args, bool start);
+void DefaultRtfOnMacro(char *name, int no_args, bool start);
 
 // Called on start/end of argument examination
-bool DefaultRtfOnArgument(wxChar *macro_name, int arg_no, bool start);
+bool DefaultRtfOnArgument(char *macro_name, int arg_no, bool start);
 
 // Reset memory of which levels have 'books' (for WinHelp 4 contents file)
 void ResetContentsLevels(int level);

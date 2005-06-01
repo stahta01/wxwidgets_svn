@@ -12,7 +12,7 @@
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "brush.h"
 #endif
 
@@ -26,13 +26,13 @@ class WXDLLEXPORT wxBrush;
 // wxBrush
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxBrush : public wxBrushBase
+class WXDLLEXPORT wxBrush : public wxGDIObject
 {
 public:
     wxBrush();
-    wxBrush(const wxColour& col, int style = wxSOLID);
+    wxBrush(const wxColour& col, int style);
     wxBrush(const wxBitmap& stipple);
-    wxBrush(const wxBrush& brush) : wxBrushBase(brush) { Ref(brush); }
+    wxBrush(const wxBrush& brush) { Ref(brush); }
     virtual ~wxBrush();
 
     virtual void SetColour(const wxColour& col);
@@ -45,7 +45,7 @@ public:
     bool operator!=(const wxBrush& brush) const { return !(*this == brush); }
 
     wxColour GetColour() const;
-    virtual int GetStyle() const;
+    int GetStyle() const;
     wxBitmap *GetStipple() const;
 
     bool Ok() const { return m_refData != NULL; }

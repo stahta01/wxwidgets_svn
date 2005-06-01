@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "checklst.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/defs.h"
 
@@ -46,19 +43,6 @@ wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
 {
     m_hasCheckBoxes = TRUE;
     wxListBox::Create( parent, id, pos, size, nStrings, choices, style, validator, name );
-}
-
-wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
-                               const wxPoint& pos,
-                               const wxSize& size,
-                               const wxArrayString& choices,
-                               long style,
-                               const wxValidator& validator,
-                               const wxString& name )
-{
-    m_hasCheckBoxes = TRUE;
-    wxListBox::Create( parent, id, pos, size, choices,
-                       style, validator, name );
 }
 
 bool wxCheckListBox::IsChecked( int index ) const

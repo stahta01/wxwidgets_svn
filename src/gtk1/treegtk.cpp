@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "treectrl.h"
 #endif
 
@@ -496,7 +496,7 @@ printf("begin insert\n");
   const wxBitmap *bmp;
   const wxImageList *list;
   if ((list = GetImageList(wxIMAGE_LIST_NORMAL)) != NULL)
-    if ((bmp = list->GetBitmapPtr(image)) != NULL)
+    if ((bmp = list->GetBitmap(image)) != NULL)
       if (bmp->Ok()) {
         GdkBitmap *mask = NULL;
         if (bmp->GetMask())

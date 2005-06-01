@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univcombobox.h"
 #endif
 
@@ -71,7 +71,7 @@ class wxComboButton : public wxBitmapButton
 {
 public:
     wxComboButton(wxComboControl *combo)
-        : wxBitmapButton(combo->GetParent(), wxID_ANY, wxNullBitmap,
+        : wxBitmapButton(combo->GetParent(), -1, wxNullBitmap,
                          wxDefaultPosition, wxDefaultSize,
                          wxBORDER_NONE | wxBU_EXACTFIT)
     {
@@ -93,7 +93,7 @@ public:
     }
 
 protected:
-    void OnButton(wxCommandEvent& WXUNUSED(event)) { m_combo->ShowPopup(); }
+    void OnButton(wxCommandEvent& event) { m_combo->ShowPopup(); }
 
     virtual wxSize DoGetBestClientSize() const
     {
@@ -122,14 +122,9 @@ public:
     virtual ~wxComboListBox();
 
     // implement wxComboPopup methods
-    virtual bool SetSelection(const wxString& s);
+    virtual bool SetSelection(const wxString& value);
     virtual wxControl *GetControl() { return this; }
     virtual void OnShow();
-    virtual wxCoord GetBestWidth() const;
-
-    // fix virtual function hiding
-    virtual void SetSelection(int n) { DoSetSelection(n, true); }
-    void SetSelection(int n, bool select) { DoSetSelection(n, select); }
 
 protected:
     // we shouldn't return height too big from here
@@ -184,12 +179,12 @@ private:
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxComboButton, wxButton)
-    EVT_BUTTON(wxID_ANY, wxComboButton::OnButton)
+    EVT_BUTTON(-1, wxComboButton::OnButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxComboListBox, wxListBox)
-    EVT_LISTBOX(wxID_ANY, wxComboListBox::OnSelect)
-    EVT_LISTBOX_DCLICK(wxID_ANY, wxComboListBox::OnSelect)
+    EVT_LISTBOX(-1, wxComboListBox::OnSelect)
+    EVT_LISTBOX_DCLICK(-1, wxComboListBox::OnSelect)
     EVT_MOTION(wxComboListBox::OnMouseMove)
     EVT_LEFT_UP(wxComboListBox::OnLeftUp)
 END_EVENT_TABLE()
@@ -202,7 +197,7 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxComboTextCtrl, wxTextCtrl)
     EVT_KEY_DOWN(wxComboTextCtrl::OnKey)
     EVT_KEY_UP(wxComboTextCtrl::OnKey)
-    EVT_TEXT(wxID_ANY, wxComboTextCtrl::OnText)
+    EVT_TEXT(-1, wxComboTextCtrl::OnText)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
@@ -219,7 +214,7 @@ void wxComboControl::Init()
 {
     m_popup = (wxComboPopup *)NULL;
     m_winPopup = (wxPopupComboWindow *)NULL;
-    m_isPopupShown = false;
+    m_isPopupShown = FALSE;
     m_btn = NULL;
     m_text = NULL;
 }
@@ -238,7 +233,7 @@ bool wxComboControl::Create(wxWindow *parent,
     style &= ~wxBORDER_NONE;
     style |= wxBORDER_SUNKEN;
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     // create the text control and the button as our siblings (*not* children),
     // don't care about size/position here - they will be set in DoMoveWindow()
@@ -250,10 +245,10 @@ bool wxComboControl::Create(wxWindow *parent,
 
     // for compatibility with the other ports, the height specified is the
     // combined height of the combobox itself and the popup
-    if ( size.y == wxDefaultCoord )
+    if ( size.y == -1 )
     {
         // ok, use default height for popup too
-        m_heightPopup = wxDefaultCoord;
+        m_heightPopup = -1;
     }
     else
     {
@@ -269,20 +264,20 @@ bool wxComboControl::Create(wxWindow *parent,
 
     // have to disable this window to avoid interfering it with message
     // processing to the text and the button... but pretend it is enabled to
-    // make IsEnabled() return true
-    wxControl::Enable(false); // don't use non virtual Disable() here!
-    m_isEnabled = true;
+    // make IsEnabled() return TRUE
+    wxControl::Enable(FALSE); // don't use non virtual Disable() here!
+    m_isEnabled = TRUE;
 
     CreateInputHandler(wxINP_HANDLER_COMBOBOX);
 
-    return true;
+    return TRUE;
 }
 
 wxComboControl::~wxComboControl()
 {
     // as the button and the text control are the parent's children and not
     // ours, we have to delete them manually - they are not deleted
-    // automatically by wxWidgets when we're deleted
+    // automatically by wxWindows when we're deleted
     delete m_btn;
     delete m_text;
 
@@ -294,7 +289,7 @@ wxComboControl::~wxComboControl()
 // ----------------------------------------------------------------------------
 
 void wxComboControl::DoSetSize(int x, int y,
-                               int width, int WXUNUSED(height),
+                               int width, int height,
                                int sizeFlags)
 {
     // combo height is always fixed
@@ -305,15 +300,8 @@ wxSize wxComboControl::DoGetBestClientSize() const
 {
     wxSize sizeBtn = m_btn->GetBestSize(),
            sizeText = m_text->GetBestSize();
-    wxCoord widthPopup = 0;
 
-    if (m_popup)
-    {
-        widthPopup = m_popup->GetBestWidth();
-    }
-
-    return wxSize(wxMax(sizeText.x + g_comboMargin + sizeBtn.x, widthPopup),
-                  wxMax(sizeBtn.y, sizeText.y));
+    return wxSize(sizeText.x + g_comboMargin + sizeBtn.x, wxMax(sizeBtn.y, sizeText.y));
 }
 
 void wxComboControl::DoMoveWindow(int x, int y, int width, int height)
@@ -342,18 +330,18 @@ void wxComboControl::DoMoveWindow(int x, int y, int width, int height)
 bool wxComboControl::Enable(bool enable)
 {
     if ( !wxControl::Enable(enable) )
-        return false;
+        return FALSE;
 
     m_btn->Enable(enable);
     m_text->Enable(enable);
 
-    return true;
+    return TRUE;
 }
 
 bool wxComboControl::Show(bool show)
 {
     if ( !wxControl::Show(show) )
-        return false;
+        return FALSE;
 
     if (m_btn)
         m_btn->Show(show);
@@ -361,13 +349,13 @@ bool wxComboControl::Show(bool show)
     if (m_text)
         m_text->Show(show);
 
-    return true;
+    return TRUE;
 }
 
 #if wxUSE_TOOLTIPS
 void wxComboControl::DoSetToolTip(wxToolTip *tooltip)
 {
-    wxControl::DoSetToolTip(tooltip);
+    wxControl::DoSetToolTip(tooltip);    
 
     // Set tool tip for button and text box
     if (m_text && m_btn)
@@ -405,7 +393,7 @@ void wxComboControl::ShowPopup()
 
     // size and position the popup window correctly
     m_winPopup->SetSize(GetSize().x,
-                        m_heightPopup == wxDefaultCoord ? control->GetBestSize().y
+                        m_heightPopup == -1 ? control->GetBestSize().y
                                             : m_heightPopup);
     wxSize sizePopup = m_winPopup->GetClientSize();
     control->SetSize(0, 0, sizePopup.x, sizePopup.y);
@@ -426,7 +414,7 @@ void wxComboControl::ShowPopup()
     m_text->SelectAll();
     m_popup->SetSelection(m_text->GetValue());
 
-    m_isPopupShown = true;
+    m_isPopupShown = TRUE;
 }
 
 void wxComboControl::HidePopup()
@@ -436,7 +424,7 @@ void wxComboControl::HidePopup()
 
     m_winPopup->Dismiss();
 
-    m_isPopupShown = false;
+    m_isPopupShown = FALSE;
 }
 
 void wxComboControl::OnSelect(const wxString& value)
@@ -461,7 +449,7 @@ wxComboTextCtrl::wxComboTextCtrl(wxComboControl *combo,
                                  const wxString& value,
                                  long style,
                                  const wxValidator& validator)
-               : wxTextCtrl(combo->GetParent(), wxID_ANY, value,
+               : wxTextCtrl(combo->GetParent(), -1, value,
                             wxDefaultPosition, wxDefaultSize,
                             wxBORDER_NONE | style,
                             validator)
@@ -524,7 +512,7 @@ void wxComboTextCtrl::OnKey(wxKeyEvent& event)
 // ----------------------------------------------------------------------------
 
 wxComboListBox::wxComboListBox(wxComboControl *combo, int style)
-              : wxListBox(combo->GetPopupWindow(), wxID_ANY,
+              : wxListBox(combo->GetPopupWindow(), -1,
                           wxDefaultPosition, wxDefaultSize,
                           0, NULL,
                           wxBORDER_SIMPLE | wxLB_INT_HEIGHT | style),
@@ -553,10 +541,10 @@ bool wxComboListBox::SetSelection(const wxString& value)
     else if ( !FindItem(value) )
     {
         // no match att all
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxComboListBox::OnSelect(wxCommandEvent& event)
@@ -576,13 +564,13 @@ void wxComboListBox::OnSelect(wxCommandEvent& event)
         event2.SetId(m_combo->GetId());
         m_combo->ProcessEvent(event2);
     }
-    //else: ignore the events resulting from just moving the mouse initially
+    //else: ignore the events resultign from just moving the mouse initially
 }
 
 void wxComboListBox::OnShow()
 {
     // nobody clicked us yet
-    m_clicked = false;
+    m_clicked = FALSE;
 }
 
 bool wxComboListBox::PerformAction(const wxControlAction& action,
@@ -595,7 +583,7 @@ bool wxComboListBox::PerformAction(const wxControlAction& action,
         // we don't let the listbox handle this as instead of just using the
         // single key presses, as usual, we use the text ctrl value as prefix
         // and this is done by wxComboControl itself
-        return true;
+        return TRUE;
     }
 
     return wxListBox::PerformAction(action, numArg, strArg);
@@ -604,7 +592,7 @@ bool wxComboListBox::PerformAction(const wxControlAction& action,
 void wxComboListBox::OnLeftUp(wxMouseEvent& event)
 {
     // we should dismiss the combo now
-    m_clicked = true;
+    m_clicked = TRUE;
 
     event.Skip();
 }
@@ -614,7 +602,7 @@ void wxComboListBox::OnMouseMove(wxMouseEvent& event)
     // while a wxComboListBox is shown, it always has capture, so if it doesn't
     // we're about to go away anyhow (normally this shouldn't happen at all,
     // but I don't put assert here as it just might do on other platforms and
-    // it doesn't break anything anyhow)
+    // it doesn't break anythign anyhow)
     if ( this == wxWindow::GetCapture() )
     {
         if ( HitTest(event.GetPosition()) == wxHT_WINDOW_INSIDE )
@@ -625,12 +613,6 @@ void wxComboListBox::OnMouseMove(wxMouseEvent& event)
         //      captures the mouse to be able to detect when it must be
         //      dismissed, so don't call Skip()
     }
-}
-
-wxCoord wxComboListBox::GetBestWidth() const
-{
-    wxSize size = wxListBox::GetBestSize();
-    return size.x;
 }
 
 wxSize wxComboListBox::DoGetBestClientSize() const
@@ -659,44 +641,13 @@ void wxComboBox::Init()
     m_lbox = (wxListBox *)NULL;
 }
 
-wxComboBox::wxComboBox(wxWindow *parent,
-                       wxWindowID id,
-                       const wxString& value,
-                       const wxPoint& pos,
-                       const wxSize& size,
-                       const wxArrayString& choices,
-                       long style,
-                       const wxValidator& validator,
-                       const wxString& name)
-{
-    Init();
-
-    Create(parent, id, value, pos, size, choices, style, validator, name);
-}
-
-bool wxComboBox::Create(wxWindow *parent,
-                        wxWindowID id,
-                        const wxString& value,
-                        const wxPoint& pos,
-                        const wxSize& size,
-                        const wxArrayString& choices,
-                        long style,
-                        const wxValidator& validator,
-                        const wxString& name)
-{
-    wxCArrayString chs(choices);
-
-    return Create(parent, id, value, pos, size, chs.GetCount(),
-                  chs.GetStrings(), style, validator, name);
-}
-
 bool wxComboBox::Create(wxWindow *parent,
                         wxWindowID id,
                         const wxString& value,
                         const wxPoint& pos,
                         const wxSize& size,
                         int n,
-                        const wxString choices[],
+                        const wxString *choices,
                         long style,
                         const wxValidator& validator,
                         const wxString& name)
@@ -704,7 +655,7 @@ bool wxComboBox::Create(wxWindow *parent,
     if ( !wxComboControl::Create(parent, id, value, pos, size, style,
                                  validator, name) )
     {
-        return false;
+        return FALSE;
     }
 
     wxComboListBox *combolbox =
@@ -714,7 +665,7 @@ bool wxComboBox::Create(wxWindow *parent,
 
     SetPopupControl(combolbox);
 
-    return true;
+    return TRUE;
 }
 
 wxComboBox::~wxComboBox()
@@ -765,7 +716,7 @@ long wxComboBox::GetInsertionPoint() const
     return GetText()->GetInsertionPoint();
 }
 
-wxTextPos wxComboBox::GetLastPosition() const
+long wxComboBox::GetLastPosition() const
 {
     return GetText()->GetLastPosition();
 }
@@ -834,9 +785,9 @@ int wxComboBox::FindString(const wxString& s) const
     return GetLBox()->FindString(s);
 }
 
-void wxComboBox::SetSelection(int n)
+void wxComboBox::Select(int n)
 {
-    wxCHECK_RET( (n >= 0) && (n < GetCount()), _T("invalid index in wxComboBox::Select") );
+	wxCHECK_RET( (n >= 0) && (n < GetCount()), _T("invalid index in wxComboBox::Select ") );
 
     GetLBox()->SetSelection(n);
     GetText()->SetValue(GetLBox()->GetString(n));
@@ -847,9 +798,9 @@ int wxComboBox::GetSelection() const
 #if 1 // FIXME:: What is the correct behavior?
     // if the current value isn't one of the listbox strings, return -1
     return GetLBox()->GetSelection();
-#else
-    // Why oh why is this done this way?
-    // It is not because the value displayed in the text can be found
+#else    
+    // Why oh why is this done this way? 
+    // It is not because the value displayed in the text can be found 
     // in the list that it is the item that is selected!
     return FindString(GetText()->GetValue());
 #endif
@@ -858,18 +809,6 @@ int wxComboBox::GetSelection() const
 int wxComboBox::DoAppend(const wxString& item)
 {
     return GetLBox()->Append(item);
-}
-
-int wxComboBox::DoInsert(const wxString& item, int pos)
-{
-    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
-
-    if (pos == GetCount())
-        return DoAppend(item);
-
-    GetLBox()->Insert(item, pos);
-    return pos;
 }
 
 void wxComboBox::DoSetItemClientData(int n, void* clientData)
@@ -892,69 +831,6 @@ wxClientData* wxComboBox::DoGetItemClientObject(int n) const
     return GetLBox()->GetClientObject(n);
 }
 
-bool wxComboBox::IsEditable() const
-{
-    return GetText() != NULL && (!HasFlag(wxCB_READONLY) || GetText()->IsEditable());
-}
-
-void wxComboBox::Undo()
-{
-    if (IsEditable())
-        GetText()->Undo();
-}
-
-void wxComboBox::Redo()
-{
-    if (IsEditable())
-        GetText()->Redo();
-}
-
-void wxComboBox::SelectAll()
-{
-    GetText()->SelectAll();
-}
-
-bool wxComboBox::CanCopy() const
-{
-    if (GetText() != NULL)
-        return GetText()->CanCopy();
-    else
-        return false;
-}
-
-bool wxComboBox::CanCut() const
-{
-    if (GetText() != NULL)
-        return GetText()->CanCut();
-    else
-        return false;
-}
-
-bool wxComboBox::CanPaste() const
-{
-    if (IsEditable())
-        return GetText()->CanPaste();
-    else
-        return false;
-}
-
-bool wxComboBox::CanUndo() const
-{
-    if (IsEditable())
-        return GetText()->CanUndo();
-    else
-        return false;
-}
-
-bool wxComboBox::CanRedo() const
-{
-    if (IsEditable())
-        return GetText()->CanRedo();
-    else
-        return false;
-}
-
-
 // ----------------------------------------------------------------------------
 // input handling
 // ----------------------------------------------------------------------------
@@ -976,14 +852,14 @@ bool wxComboControl::PerformAction(const wxControlAction& action,
                                    long numArg,
                                    const wxString& strArg)
 {
-    bool processed = false;
+    bool processed = FALSE;
     if ( action == wxACTION_COMBOBOX_POPUP )
     {
         if ( !m_isPopupShown )
         {
             ShowPopup();
 
-            processed = true;
+            processed = TRUE;
         }
     }
     else if ( action == wxACTION_COMBOBOX_DISMISS )
@@ -992,7 +868,7 @@ bool wxComboControl::PerformAction(const wxControlAction& action,
         {
             HidePopup();
 
-            processed = true;
+            processed = TRUE;
         }
     }
 
@@ -1002,7 +878,7 @@ bool wxComboControl::PerformAction(const wxControlAction& action,
         return wxControl::PerformAction(action, numArg, strArg);
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1032,11 +908,11 @@ bool wxStdComboBoxInputHandler::HandleKey(wxInputConsumer *consumer,
                 break;
         }
 
-        if ( !action.IsEmpty() )
+        if ( !!action )
         {
             consumer->PerformAction(action);
 
-            return true;
+            return TRUE;
         }
     }
 

@@ -9,12 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "accel.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/setup.h"
 #include "wx/accel.h"
@@ -102,7 +99,7 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
     bool eventAltDown = event.AltDown();
     bool eventCtrlDown = event.ControlDown();
     bool eventShiftDown = event.ShiftDown();
-    int  eventKeyCode = event.GetKeyCode();
+    int  eventKeyCode = event.KeyCode();
 
     bool accAltDown = ((GetFlags() & wxACCEL_ALT) == wxACCEL_ALT);
     bool accCtrlDown = ((GetFlags() & wxACCEL_CTRL) == wxACCEL_CTRL);

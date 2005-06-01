@@ -12,54 +12,19 @@
 #ifndef   _WX_OLEUTILS_H
 #define   _WX_OLEUTILS_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "oleutils.h"
 #endif
 
 #include "wx/defs.h"
 
-#if wxUSE_OLE
-
-// get IUnknown, REFIID &c
-#include <ole2.h>
-#include "wx/intl.h"
+#if wxUSE_NORLANDER_HEADERS
+    #include <ole2.h>
+#endif
 
 // ============================================================================
 // General purpose functions and macros
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// initialize/cleanup OLE
-// ----------------------------------------------------------------------------
-
-// call OleInitialize() or CoInitialize[Ex]() depending on the platform
-//
-// return true if ok, false otherwise
-inline bool wxOleInitialize()
-{
-    // we need to initialize OLE library
-#ifdef __WXWINCE__
-    if ( FAILED(::CoInitializeEx(NULL, COINIT_MULTITHREADED)) )
-#else
-    if ( FAILED(::OleInitialize(NULL)) )
-#endif
-    {
-        wxLogError(_("Cannot initialize OLE"));
-
-        return false;
-    }
-
-    return true;
-}
-
-inline void wxOleUninitialize()
-{
-#ifdef __WXWINCE__
-    ::CoUninitialize();
-#else
-    ::OleUninitialize();
-#endif
-}
 
 // ----------------------------------------------------------------------------
 // misc helper functions/macros
@@ -75,7 +40,7 @@ inline void ReleaseInterface(IUnknown *pIUnk)
 // release the interface pointer (if !NULL) and make it NULL
 #define   RELEASE_AND_NULL(p)   if ( (p) != NULL ) { p->Release(); p = NULL; };
 
-// return true if the iid is in the array
+// return TRUE if the iid is in the array
 extern bool IsIidFromList(REFIID riid, const IID *aIids[], size_t nCount);
 
 // ============================================================================
@@ -109,7 +74,7 @@ public:
 
     operator ULONG&() { return m_Value; }
     ULONG& operator=(ULONG value) { m_Value = value; return m_Value;  }
-
+    
     wxAutoULong& operator++() { ++m_Value; return *this; }
     const wxAutoULong operator++( int ) { wxAutoULong temp = *this; ++m_Value; return temp; }
 
@@ -197,60 +162,11 @@ void wxLogQueryInterface(const wxChar *szInterface, REFIID riid);
 void wxLogAddRef (const wxChar *szInterface, ULONG cRef);
 void wxLogRelease(const wxChar *szInterface, ULONG cRef);
 
-#else   //!__WXDEBUG__
+#else   //!WXDEBUG
   #define   wxLogQueryInterface(szInterface, riid)
   #define   wxLogAddRef(szInterface, cRef)
   #define   wxLogRelease(szInterface, cRef)
-#endif  //__WXDEBUG__
-
-// wrapper around BSTR type (by Vadim Zeitlin)
-
-class WXDLLEXPORT wxBasicString
-{
-public:
-    // ctors & dtor
-    wxBasicString(const char *sz);
-    wxBasicString(const wxString& str);
-    ~wxBasicString();
-
-    void Init(const char* sz);
-
-    // accessors
-    // just get the string
-    operator BSTR() const { return m_wzBuf; }
-    // retrieve a copy of our string - caller must SysFreeString() it later!
-    BSTR Get() const { return SysAllocString(m_wzBuf); }
-
-private:
-    // @@@ not implemented (but should be)
-    wxBasicString(const wxBasicString&);
-    wxBasicString& operator=(const wxBasicString&);
-
-    OLECHAR *m_wzBuf;     // actual string
-};
-
-// Convert variants
-class WXDLLEXPORT wxVariant;
-
-bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant) ;
-bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant) ;
-
-// Convert string to Unicode
-BSTR wxConvertStringToOle(const wxString& str);
-
-// Convert string from BSTR to wxString
-wxString wxConvertStringFromOle(BSTR bStr);
-
-#else // !wxUSE_OLE
-
-// ----------------------------------------------------------------------------
-// stub functions to avoid #if wxUSE_OLE in the main code
-// ----------------------------------------------------------------------------
-
-inline bool wxOleInitialize() { return false; }
-inline void wxOleUninitialize() { }
-
-#endif // wxUSE_OLE/!wxUSE_OLE
+#endif  //WXDEBUG
 
 #endif  //_WX_OLEUTILS_H
 

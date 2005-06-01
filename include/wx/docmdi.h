@@ -6,19 +6,19 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DOCMDI_H_
 #define _WX_DOCMDI_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "docmdi.h"
 #endif
 
 #include "wx/defs.h"
 
-#if wxUSE_MDI_ARCHITECTURE
+#if wxUSE_MDI_ARCHITECTURE && wxUSE_DOC_VIEW_ARCHITECTURE
 
 #include "wx/docview.h"
 #include "wx/mdi.h"
@@ -30,12 +30,7 @@
 class WXDLLEXPORT wxDocMDIParentFrame: public wxMDIParentFrame
 {
 public:
-    wxDocMDIParentFrame();
     wxDocMDIParentFrame(wxDocManager *manager, wxFrame *parent, wxWindowID id,
-        const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
-
-    bool Create(wxDocManager *manager, wxFrame *parent, wxWindowID id,
         const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
 
@@ -49,13 +44,11 @@ public:
     void OnCloseWindow(wxCloseEvent& event);
 
 protected:
-    void Init();
     wxDocManager *m_docManager;
 
 private:
     DECLARE_CLASS(wxDocMDIParentFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocMDIParentFrame)
 };
 
 /*
@@ -65,21 +58,10 @@ private:
 class WXDLLEXPORT wxDocMDIChildFrame: public wxMDIChildFrame
 {
 public:
-    wxDocMDIChildFrame();
     wxDocMDIChildFrame(wxDocument *doc, wxView *view, wxMDIParentFrame *frame, wxWindowID id,
         const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
         long type = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
     ~wxDocMDIChildFrame();
-
-    bool Create(wxDocument *doc,
-                wxView *view,
-                wxMDIParentFrame *frame,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long type = wxDEFAULT_FRAME_STYLE,
-                const wxString& name = wxFrameNameStr);
 
     // Extend event processing to search the view's event table
     virtual bool ProcessEvent(wxEvent& event);
@@ -92,16 +74,14 @@ public:
     inline void SetDocument(wxDocument *doc) { m_childDocument = doc; }
     inline void SetView(wxView *view) { m_childView = view; }
     bool Destroy() { m_childView = (wxView *)NULL; return wxMDIChildFrame::Destroy(); }
-
+    
 protected:
-    void Init();
     wxDocument*       m_childDocument;
     wxView*           m_childView;
 
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxDocMDIChildFrame)
-    DECLARE_NO_COPY_CLASS(wxDocMDIChildFrame)
 };
 
 #endif

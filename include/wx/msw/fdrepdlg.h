@@ -2,14 +2,14 @@
 // Name:        wx/msw/fdrepdlg.h
 // Purpose:     wxFindReplaceDialog class
 // Author:      Markus Greither
-// Modified by: 31.07.01: VZ: integrated into wxWidgets
+// Modified by: 31.07.01: VZ: integrated into wxWindows
 // Created:     23/03/2001
 // RCS-ID:
 // Copyright:   (c) Markus Greither
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "mswfdrepdlg.h"
 #endif
 
@@ -39,7 +39,7 @@ public:
     wxFindReplaceDialogImpl *GetImpl() const { return m_impl; }
 
     // override some base class virtuals
-    virtual bool Show(bool show = true);
+    virtual bool Show(bool show = TRUE);
     virtual void SetTitle( const wxString& title);
     virtual wxString GetTitle() const;
 
@@ -57,7 +57,6 @@ protected:
     wxFindReplaceDialogImpl *m_impl;
 
     DECLARE_DYNAMIC_CLASS(wxFindReplaceDialog)
-    DECLARE_NO_COPY_CLASS(wxFindReplaceDialog)
 };
 
 

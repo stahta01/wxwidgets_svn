@@ -6,13 +6,13 @@
 // Created:     15.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_STATBOX_H_
 #define _WX_UNIV_STATBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univstatbox.h"
 #endif
 
@@ -26,7 +26,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize)
     {
-        Create(parent, wxID_ANY, label, pos, size);
+        Create(parent, -1, label, pos, size);
     }
 
     wxStaticBox(wxWindow *parent, wxWindowID id,
@@ -51,6 +51,8 @@ public:
     // take account of this
     virtual wxPoint GetBoxAreaOrigin() const;
 
+    virtual bool HasTransparentBackground() { return TRUE; }
+    
 protected:
     // draw the control
     virtual void DoDraw(wxControlRenderer *renderer);
@@ -58,9 +60,9 @@ protected:
     // get the size of the border
     wxRect GetBorderGeometry() const;
 
-    // returning true from here ensures that we act as a container window for
+    // returning TRUE from here ensures that we act as a container window for
     // our children
-    virtual bool IsStaticBox() const { return true; }
+    virtual bool IsStaticBox() const { return TRUE; }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)

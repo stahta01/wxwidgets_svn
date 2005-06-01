@@ -5,8 +5,8 @@
 %% Modified by:
 %% Created:     07.11.02
 %% RCS-ID:      $Id$
-%% Copyright:   (c) 2002 Vadim Zeitlin <vadim@wxwindows.org>
-%% License:     wxWindows license
+%% Copyright:   (c) 2002 Vadim Zeitlin <vadim@wxwidgets.org>
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxListView}}\label{wxlistview}
@@ -88,7 +88,7 @@ Returns the currently focused item or $-1$ if none.
 \constfunc{long}{GetNextSelected}{\param{long }{item}}
 
 Used together with \helpref{GetFirstSelected}{wxlistviewgetfirstselected} to
-iterate over all selected items in the control.
+iterate oevr all selected items in the control.
 
 \wxheading{Return value}
 
@@ -99,8 +99,8 @@ Returns the next selected item or $-1$ if there are no more of them.
 
 \func{bool}{IsSelected}{\param{long }{index}}
 
-Returns {\tt true} if the item with the given {\it index} is selected, 
-{\tt false} otherwise.
+Returns {\tt TRUE} if the item with the given {\it index} is selected, 
+{\tt FALSE} otherwise.
 
 \wxheading{See also}
 
@@ -110,7 +110,7 @@ Returns {\tt true} if the item with the given {\it index} is selected,
 
 \membersection{wxListView::Select}\label{wxlistviewselect}
 
-\func{void}{Select}{long n, \param{bool }{on = true}}
+\func{void}{Select}{long n, \param{bool }{on = TRUE}}
 
 Selects or unselects the given item.
 
@@ -118,7 +118,7 @@ Selects or unselects the given item.
 
 \docparam{n}{the item to select or unselect}
 
-\docparam{on}{if {\tt true} (default), selects the item, otherwise unselects it}
+\docparam{on}{if {\tt TRUE} (default), selects the item, otherwise unselects it}
 
 \wxheading{See also}
 

@@ -41,6 +41,9 @@ void wxFrameView::OnIdle( wxIdleEvent& event)
 
     if ( mDoToolUpdates )
     {
+        int o = 0;  //glt
+        ++o;
+
         // TBD::
     }
 }
@@ -80,7 +83,7 @@ void wxFrameView::Deactivate()
 
 void wxFrameView::CreateLayout()
 {
-    mpLayout = new wxFrameLayout( GetParentFrame(), mpFrameMgr->GetClientWindow(), false );
+    mpLayout = new wxFrameLayout( GetParentFrame(), mpFrameMgr->GetClientWindow(), FALSE );
 }
 
 wxFrameLayout* wxFrameView::GetLayout()
@@ -150,7 +153,7 @@ void wxFrameViewSerializer::Serialize( wxObject* pObj, wxObjectStorage& store )
 
 /***** Implementation for class wxFrameManager *****/
 
-void wxFrameManager::DoSerialize( wxObjectStorage& WXUNUSED(store) )
+void wxFrameManager::DoSerialize( wxObjectStorage& store )
 {
 #if 0
     store.AddInitialRef( mpFrameWnd );
@@ -168,13 +171,13 @@ void wxFrameManager::DestroyViews()
 {
     DeactivateCurrentView();
 
-    wxObjectList::compatibility_iterator pNode = mViews.GetFirst();
+    wxNode* pNode = mViews.First();
 
     while ( pNode )
     {
-        delete (wxFrameView*)pNode->GetData();
+        delete (wxFrameView*)pNode->Data();
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     if ( mActiveViewNo != -1 && GetParentFrame() )
@@ -184,17 +187,17 @@ void wxFrameManager::DestroyViews()
 
 int wxFrameManager::GetViewNo( wxFrameView* pView )
 {
-    wxObjectList::compatibility_iterator pNode = mViews.GetFirst();
+    wxNode* pNode = mViews.First();
     int n = 0;
 
     while ( pNode )
     {
-        if ( (wxFrameView*)pNode->GetData() == pView )
+        if ( (wxFrameView*)pNode->Data() == pView )
 
             return n;
 
         ++n;
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     return -1;
@@ -208,7 +211,7 @@ void wxFrameManager::EnableMenusForView( wxFrameView* pView, bool enable )
     if ( !pMenuBar )
         return;
 
-    wxStringList::compatibility_iterator pNode = pView->mTopMenus.GetFirst();
+    wxStringListNode* pNode = pView->mTopMenus.GetFirst();
 
     int i;
     while ( pNode )
@@ -225,19 +228,19 @@ void wxFrameManager::EnableMenusForView( wxFrameView* pView, bool enable )
 
 void wxFrameManager::SyncAllMenus()
 {
-    wxObjectList::compatibility_iterator pNode = mViews.GetFirst();
+    wxNode* pNode = mViews.First();
     int i = 0;
 
     while ( pNode )
     {
         if ( i != mActiveViewNo )
 
-            EnableMenusForView( (wxFrameView*)pNode->GetData(), false );
+            EnableMenusForView( (wxFrameView*)pNode->GetData(), FALSE );
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
-    EnableMenusForView( GetView( mActiveViewNo ), true );
+    EnableMenusForView( GetView( mActiveViewNo ), TRUE );
 }
 
 /*** public methods ***/
@@ -261,16 +264,16 @@ void wxFrameManager::Init( wxWindow* pMainFrame, const wxString& settingsFile )
     mSettingsFile = settingsFile;
     mpFrameWnd    = pMainFrame;
 
-    wxObjectList::compatibility_iterator pNode = mViews.GetFirst();
+    wxNode* pNode = mViews.First();
 
     while ( pNode )
     {
-        wxFrameView* pView = (wxFrameView*)pNode->GetData();
+        wxFrameView* pView = (wxFrameView*)pNode->Data();
 
         pView->OnInit();
         pView->OnInitMenus();
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     if ( !ReloadViews() )
@@ -278,19 +281,19 @@ void wxFrameManager::Init( wxWindow* pMainFrame, const wxString& settingsFile )
         // if loading of settings file failed (e.g. was not found), 
         // do recreation of items in each view
 
-        pNode = mViews.GetFirst();
+        pNode = mViews.First();
 
         while ( pNode )
         {
-            wxFrameView* pView = (wxFrameView*)pNode->GetData();
+            wxFrameView* pView = (wxFrameView*)pNode->Data();
 
             pView->OnRecreate();
 
-            pNode = pNode->GetNext();
+            pNode = pNode->Next();
         }
     }
 
-    if ( mActiveViewNo >= (int)mViews.GetCount() )
+    if ( mActiveViewNo >= mViews.Number() )
         mActiveViewNo = -1;
 
     ActivateView( GetView( ( mActiveViewNo == -1 ) ? 0 : mActiveViewNo ) );
@@ -305,10 +308,10 @@ void wxFrameManager::AddView( wxFrameView* pFrmView )
     pFrmView->mpFrameMgr = this; // back ref.
 }
 
-void wxFrameManager::RemoveView( wxFrameView* WXUNUSED(pFrmView) )
+void wxFrameManager::RemoveView( wxFrameView* pFrmView )
 {
     // TBD::
-    wxFAIL_MSG( _T("wxFrameManager::RemoveView() has not been implemented yet.") );
+    wxFAIL_MSG("wxFrameManager::RemoveView() has not been implemented yet.");
 }
 
 int wxFrameManager::GetActiveViewNo()
@@ -318,15 +321,15 @@ int wxFrameManager::GetActiveViewNo()
 
 wxFrameView* wxFrameManager::GetActiveView()
 {
-    wxObjectList::compatibility_iterator pNode = mViews.Item( mActiveViewNo );
+    wxNode* pNode = mViews.Nth( mActiveViewNo );
 
-    if ( pNode ) return (wxFrameView*)pNode->GetData();
+    if ( pNode ) return (wxFrameView*)pNode->Data();
             else return NULL;
 }
 
-wxObjectList::compatibility_iterator wxFrameManager::GetActiveViewNode()
+wxNode* wxFrameManager::GetActiveViewNode()
 {
-    return mViews.Item( mActiveViewNo );
+    return mViews.Nth( mActiveViewNo );
 }
 
 wxFrame* wxFrameManager::GetParentFrame()
@@ -341,9 +344,9 @@ wxWindow* wxFrameManager::GetParentWindow()
 
 wxFrameView* wxFrameManager::GetView( int viewNo )
 {
-    wxObjectList::compatibility_iterator pNode = mViews.Item( viewNo );
+    wxNode* pNode = mViews.Nth( viewNo );
 
-    if ( pNode ) return (wxFrameView*)pNode->GetData();
+    if ( pNode ) return (wxFrameView*)pNode->Data();
             else return NULL;
 }
 
@@ -368,7 +371,7 @@ void wxFrameManager::ActivateView( wxFrameView* pFrmView )
 
     GetParentFrame()->PushEventHandler( pFrmView );
 
-    EnableMenusForView( pFrmView, true );
+    EnableMenusForView( pFrmView, TRUE );
 }
 
 void wxFrameManager::SetClinetWindow( wxWindow* pFrameClient )
@@ -402,7 +405,7 @@ void wxFrameManager::DeactivateCurrentView()
     if ( pView->mpLayout )
         pView->mpLayout->Deactivate();
 
-    EnableMenusForView( pView, false );
+    EnableMenusForView( pView, FALSE );
 }
 
 void wxFrameManager::SaveViewsNow()
@@ -420,12 +423,12 @@ void wxFrameManager::SaveViewsNow()
 
 bool wxFrameManager::ReloadViews()
 {
-    return false;
+    return FALSE;
 
     // TBD: ????
 #if 0
     if ( mSettingsFile == "" || !wxFileExists( mSettingsFile ) ) 
-        return false;
+        return FALSE;
 
     DestroyViews();
 
@@ -435,12 +438,12 @@ bool wxFrameManager::ReloadViews()
     mStore.SetDataStream( stm );
     DoSerialize( mStore );
 
-    return true;
+    return TRUE;
 #endif
 }
 
 bool wxFrameManager::ViewsAreLoaded()
 {
-    return ( mViews.GetCount() != 0 );
+    return ( mViews.Number() != 0 );
 }
 

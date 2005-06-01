@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     31.05.01 (extracted from other files)
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_ACCEL_H_BASE_
@@ -62,7 +62,7 @@ public:
         Set(entry.m_flags, entry.m_keyCode, entry.m_command, entry.m_item);
         return *this;
     }
-
+    
     void Set(int flags, int keyCode, int cmd, wxMenuItem *item = NULL)
     {
         m_flags = flags;
@@ -94,7 +94,7 @@ public:
     // Implementation use only
     bool MatchesEvent(const wxKeyEvent& event) const;
 #endif
-
+    
 private:
     int m_flags;    // combination of wxACCEL_XXX constants
     int m_keyCode;  // ASCII or virtual keycode
@@ -122,13 +122,13 @@ private:
     #include "wx/gtk/accel.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/accel.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/generic/accel.h"
 #elif defined(__WXPM__)
     #include "wx/os2/accel.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/accel.h"
 #endif
 
-extern WXDLLEXPORT_DATA(wxAcceleratorTable) wxNullAcceleratorTable;
+WXDLLEXPORT_DATA(extern wxAcceleratorTable) wxNullAcceleratorTable;
 
 #endif // wxUSE_ACCEL
 

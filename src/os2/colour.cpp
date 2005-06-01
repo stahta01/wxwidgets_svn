@@ -12,10 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/colour.h"
-#endif
-
 #include "wx/gdicmn.h"
 #define INCL_GPI
 #define INCL_PM
@@ -25,16 +21,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
 // Colour
 
-void wxColour::Init()
-{
-    m_bIsInit = false;
-    m_vPixel = 0;
-    m_cRed = m_cBlue = m_cGreen = 0;
-} // end of wxColour::Init
-
 wxColour::wxColour ()
 {
-    Init();
+    m_bIsInit = FALSE;
+    m_vPixel = 0;
+    m_cRed = m_cBlue = m_cGreen = 0;
 } // end of wxColour::wxColour
 
 wxColour::wxColour (
@@ -43,14 +34,22 @@ wxColour::wxColour (
 , unsigned char                     cBlue
 )
 {
-    Set(cRed, cGreen, cBlue);
+    m_cRed    = cRed;
+    m_cGreen  = cGreen;
+    m_cBlue   = cBlue;
+    m_bIsInit = TRUE;
+    m_vPixel  = OS2RGB (m_cRed, m_cGreen, m_cBlue);
 } // end of wxColour::wxColour
 
-wxColour::wxColour(
+wxColour::wxColour (
   const wxColour&                   rCol
 )
 {
-    *this = rCol;
+    m_cRed    = rCol.m_cRed;
+    m_cGreen  = rCol.m_cGreen;
+    m_cBlue   = rCol.m_cBlue;
+    m_bIsInit = rCol.m_bIsInit;
+    m_vPixel  = rCol.m_vPixel;
 } // end of wxColour::wxColour
 
 wxColour& wxColour::operator =(
@@ -69,26 +68,30 @@ void wxColour::InitFromName(
   const wxString&                   sCol
 )
 {
-    if ( wxTheColourDatabase )
+    wxColour*                       pTheColour = wxTheColourDatabase->FindColour(sCol);
+
+    if (pTheColour)
     {
-        wxColour col = wxTheColourDatabase->Find(sCol);
-        if ( col.Ok() )
-        {
-            *this = col;
-            return;
-        }
+        m_cRed    = pTheColour->Red();
+        m_cGreen  = pTheColour->Green();
+        m_cBlue   = pTheColour->Blue();
+        m_bIsInit = TRUE;
     }
-
-    // leave invalid
-    Init();
-
+    else
+    {
+        m_cRed = 0;
+        m_cGreen = 0;
+        m_cBlue = 0;
+        m_bIsInit = FALSE;
+    }
+    m_vPixel = OS2RGB (m_cRed, m_cGreen, m_cBlue);
 } // end of wxColour::InitFromName
 
-wxColour::~wxColour()
+wxColour::~wxColour ()
 {
 } // end of wxColour::~wxColour
 
-void wxColour::Set(
+void wxColour::Set (
   unsigned char                     cRed
 , unsigned char                     cGreen
 , unsigned char                     cBlue
@@ -97,6 +100,23 @@ void wxColour::Set(
     m_cRed    = cRed;
     m_cGreen  = cGreen;
     m_cBlue   = cBlue;
-    m_bIsInit = true;
+    m_bIsInit = TRUE;
     m_vPixel  = OS2RGB (m_cRed, m_cGreen, m_cBlue);
 } // end of wxColour::Set
+
+//
+// Obsolete
+//
+#if WXWIN_COMPATIBILITY
+void wxColour::Get (
+  unsigned char*                   pRed
+, unsigned char*                   pGreen
+, unsigned char*                   pBlue
+) const
+{
+    *Red   = m_cRed;
+    *Green = m_cGreen;
+    *Blue  = m_cBlue;
+} // end of wxColour::Get
+#endif
+

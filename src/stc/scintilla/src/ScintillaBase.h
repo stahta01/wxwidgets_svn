@@ -65,7 +65,6 @@ protected:
 	void AutoCompleteStart(int lenEntered, const char *list);
 	void AutoCompleteCancel();
 	void AutoCompleteMove(int delta);
-	int AutoCompleteGetCurrent();
 	void AutoCompleteCharacterAdded(char ch);
 	void AutoCompleteCharacterDeleted();
 	void AutoCompleteCompleted();

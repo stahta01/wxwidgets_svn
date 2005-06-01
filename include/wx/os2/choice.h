@@ -44,27 +44,6 @@ public:
               );
     }
 
-    inline wxChoice( wxWindow*            pParent
-                    ,wxWindowID           vId
-                    ,const wxPoint&       rPos
-                    ,const wxSize&        rSize
-                    ,const wxArrayString& asChoices
-                    ,long                 lStyle = 0
-                    ,const wxValidator&   rValidator = wxDefaultValidator
-                    ,const wxString&      rsName = wxChoiceNameStr
-                   )
-    {
-        Create( pParent
-               ,vId
-               ,rPos
-               ,rSize
-               ,asChoices
-               ,lStyle
-               ,rValidator
-               ,rsName
-              );
-    }
-
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId
                 ,const wxPoint&     rPos = wxDefaultPosition
@@ -76,21 +55,10 @@ public:
                 ,const wxString&    rsName = wxChoiceNameStr
                );
 
-    bool Create( wxWindow*            pParent
-                ,wxWindowID           vId
-                ,const wxPoint&       rPos
-                ,const wxSize&        rSize
-                ,const wxArrayString& asChoices
-                ,long                 lStyle = 0
-                ,const wxValidator&   rValidator = wxDefaultValidator
-                ,const wxString&      rsName = wxChoiceNameStr
-               );
-
     //
     // Implement base class virtuals
     //
     virtual int      DoAppend(const wxString& rsItem);
-    virtual int      DoInsert(const wxString& rsItem, int pos);
     virtual void     Delete(int n);
     virtual void     Clear(void);
 

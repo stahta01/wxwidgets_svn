@@ -11,7 +11,7 @@
 #ifndef __GTKCHECKLISTH__
 #define __GTKCHECKLISTH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -41,13 +41,6 @@ public:
             const wxSize& size = wxDefaultSize,
             int nStrings = 0,
             const wxString *choices = (const wxString *)NULL,
-            long style = 0,
-            const wxValidator& validator = wxDefaultValidator,
-            const wxString& name = wxListBoxNameStr);
-    wxCheckListBox(wxWindow *parent, wxWindowID id,
-            const wxPoint& pos,
-            const wxSize& size,
-            const wxArrayString& choices,
             long style = 0,
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxListBoxNameStr);

@@ -6,7 +6,7 @@
 // Created:     22/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleskandars Gluchovas
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -37,8 +37,8 @@ void spVisitor::VisitAll( spContext& atContext,
                           bool sortContent
                         )
 {
-    mSiblingSkipped = false;
-    mChildSkipped   = false;
+    mSiblingSkipped = FALSE;
+    mChildSkipped   = FALSE;
     mContextMask    = SP_CTX_ANY; // FIXME:: should be an arg.
 
     if ( sortContent && !atContext.IsSorted() )
@@ -56,7 +56,7 @@ void spVisitor::VisitAll( spContext& atContext,
     for( size_t i = 0; i != members.size(); ++i )
     {
         if ( mSiblingSkipped )
-
+        
             return;
 
         if ( !mChildSkipped )
@@ -84,12 +84,12 @@ void spVisitor::RemoveCurrentContext()
 
 void spVisitor::SkipSiblings()
 {
-    mSiblingSkipped = true;
+    mSiblingSkipped = TRUE;
 }
 
 void spVisitor::SkipChildren()
 {
-    mChildSkipped = true;
+    mChildSkipped = TRUE;
 }
 
 void spVisitor::SetFilter( int contextMask )
@@ -109,14 +109,14 @@ bool spComment::StartsParagraph() const
     return mStartsPar;
 }
 
-wxString& spComment::GetText()
+string& spComment::GetText()
 {
-    return m_Text;
+    return mText;
 }
 
-wxString spComment::GetText() const
+string spComment::GetText() const
 {
-    return m_Text;
+    return mText;
 }
 
 /***** Implementation for class spContext *****/
@@ -125,7 +125,7 @@ spContext::spContext()
 
     : mpParent        ( NULL ),
       mpFirstOccurence( NULL ),
-      mAlreadySorted  ( false ),
+      mAlreadySorted  ( FALSE ),
 
       mSrcLineNo    (-1),
       mSrcOffset    (-1),
@@ -140,8 +140,8 @@ spContext::spContext()
 
       mVisibility( SP_VIS_PRIVATE ),
 
-      mIsVirtualContext         ( false ),
-      mVirtualContextHasChildren( false ),
+      mIsVirtualContext         ( FALSE ),
+      mVirtualContextHasChildren( FALSE ),
 
       mpUserData( NULL )
 {}
@@ -149,7 +149,7 @@ spContext::spContext()
 void spContext::RemoveChildren()
 {
     for( size_t i = 0; i != mMembers.size(); ++i )
-
+    
         delete mMembers[i];
 
     mMembers.erase( mMembers.begin(), mMembers.end() );
@@ -160,7 +160,7 @@ spContext::~spContext()
     RemoveChildren();
 
     for( size_t i = 0; i != mComments.size(); ++i )
-
+    
         delete mComments[i];
 }
 
@@ -201,7 +201,7 @@ void spContext::RemoveChild( spContext* pChild )
             return;
         }
 
-    // the given child should exist on the parent's list
+    // the given child should exist on the parent's list 
     wxASSERT( 0 );
 }
 
@@ -209,8 +209,8 @@ spContext* spContext::GetEnclosingContext( int mask )
 {
     spContext* cur = this->GetParent();
 
-    while ( cur && !(cur->GetContextType() & mask) )
-
+    while ( cur && !(cur->GetContextType() & mask) ) 
+        
         cur = cur->GetParent();
 
     return cur;
@@ -246,7 +246,7 @@ string spContext::GetFooterOfVirtualContextBody()
 }
 
 
-void spContext::SetVirtualContextBody( const string& body,
+void spContext::SetVirtualContextBody( const string& body, 
                                        bool          hasChildren,
                                        const string& footer )
 {
@@ -257,26 +257,29 @@ void spContext::SetVirtualContextBody( const string& body,
 
     // atuomaticllay becomes virtual context
 
-    mIsVirtualContext   = true;
+    mIsVirtualContext   = TRUE;
 }
 
-wxString spContext::GetBody( spContext* pCtx )
+string spContext::GetBody( spContext* pCtx )
 {
-    if ( ( pCtx == NULL || pCtx == this ) && mIsVirtualContext )
+    if ( ( pCtx == NULL || pCtx == this ) && mIsVirtualContext ) 
+        
         return mVirtualContextBody;
 
     if ( GetParent() )
+
         return GetParent()->GetBody( ( pCtx != NULL ) ? pCtx : this );
     else
-        return wxEmptyString; // source-fragment cannot be found
+        return ""; // source-fragment cannot be found
 }
 
-wxString spContext::GetHeader( spContext* pCtx )
+string spContext::GetHeader( spContext* pCtx )
 {
     if ( GetParent() )
+
         return GetParent()->GetHeader( ( pCtx != NULL ) ? pCtx : this );
     else
-        return wxEmptyString; // source-fragment cannot be found
+        return ""; // source-fragment cannot be found
 }
 
 bool spContext::IsFirstOccurence()
@@ -286,7 +289,7 @@ bool spContext::IsFirstOccurence()
 
 spContext* spContext::GetFirstOccurence()
 {
-    // this object should not itself be
+    // this object should not itself be 
     // the first occurence of the context
     wxASSERT( mpFirstOccurence != 0 );
 
@@ -319,7 +322,7 @@ spContext* spContext::FindContext( const string& identifier,
     {
         spContext& member = *mMembers[i];
 
-        if ( member.GetName() == identifier &&
+        if ( member.GetName() == identifier && 
              ( contextType & member.GetContextType() )
            )
 
@@ -327,7 +330,7 @@ spContext* spContext::FindContext( const string& identifier,
 
         if ( searchSubMembers )
         {
-            spContext* result =
+            spContext* result = 
                 member.FindContext( identifier, contextType, 1 );
 
             if ( result ) return result;
@@ -411,21 +414,21 @@ void spClass::SortMembers()
 
 spOperation::spOperation()
 
-    : mHasDefinition( false )
+    : mHasDefinition( FALSE )
 {
     mIsConstant =
     mIsVirtual =
     mHasDefinition = false;
 }
 
-wxString spOperation::GetFullName(MarkupTagsT tags)
+string spOperation::GetFullName(MarkupTagsT tags)
 {
-    wxString txt = tags[TAG_BOLD].start + m_RetType;
-    txt += _T(" ");
-    txt += m_Name;
-    txt += _T("( ");
+    string txt = tags[TAG_BOLD].start + mRetType;
+    txt += " ";
+    txt += mName;
+    txt += "( ";
     txt += tags[TAG_BOLD].end;
-
+    
     for( size_t i = 0; i != mMembers.size(); ++i )
     {
         // DBG::
@@ -434,24 +437,24 @@ wxString spOperation::GetFullName(MarkupTagsT tags)
         spParameter& param = *((spParameter*)mMembers[i]);
 
         if ( i != 0 )
-            txt += _T(", ");
-
+            txt += ", ";
+        
         txt += tags[TAG_BOLD].start;
-
-        txt += param.m_Type;
+        
+        txt += param.mType;
 
         txt += tags[TAG_BOLD].end;
         txt += tags[TAG_ITALIC].start;
 
-        txt += _T(" ");
-        txt += param.m_Name;
+        txt += " ";
+        txt += param.mName;
 
-        if ( !param.m_InitVal.empty() )
+        if ( param.mInitVal != "" )
         {
-            txt += _T(" = ");
+            txt += " = ";
             txt += tags[TAG_BOLD].start;
 
-            txt += param.m_InitVal;
+            txt += param.mInitVal;
 
             txt += tags[TAG_BOLD].end;
         }
@@ -470,33 +473,33 @@ wxString spOperation::GetFullName(MarkupTagsT tags)
 
 /***** Implemenentation for class spPreprocessorLine *****/
 
-wxString spPreprocessorLine::CPP_GetIncludedFileNeme() const
+string spPreprocessorLine::CPP_GetIncludedFileNeme() const
 {
     wxASSERT( GetStatementType() == SP_PREP_DEF_INCLUDE_FILE );
 
     size_t i = 0;
 
-    while( i < m_Line.length() && m_Line[i] != _T('"') && m_Line[i] != _T('<') )
-
+    while( i < mLine.length() && mLine[i] != '"' && mLine[i] != '<' ) 
+        
         ++i;
 
     ++i;
 
     size_t start = i;
 
-    while( i < m_Line.length() && m_Line[i] != _T('"') && m_Line[i] != _T('>') )
+    while( i < mLine.length() && mLine[i] != '"' && mLine[i] != '>' ) 
 
         ++i;
 
-    if ( start < m_Line.length() )
+    if ( start < mLine.length() )
     {
-        wxString fname;
-        fname.append( m_Line, start, ( i - start ) );
+        string fname;
+        fname.append( mLine, start, ( i - start ) );
 
         return fname;
     }
     else
-        return wxEmptyString; // syntax error probably
+        return ""; // syntax error probably
 }
 
 
@@ -530,7 +533,7 @@ spFile* SourceParserBase::ParseFile( const char* fname )
 
     FILE* fp = fopen( fname, "rt" );
 
-    if ( !fp ) return NULL;
+    if ( (int)fp == -1 || !fp ) return NULL;
 
     int sz = fread( mpFileBuf, 1, mFileBufSz, fp );
 
@@ -564,7 +567,7 @@ void spContext::Dump(const wxString& indent) const
     }
 }
 
-void spContext::DumpThis(const wxString& WXUNUSED(indent)) const
+void spContext::DumpThis(const wxString& indent) const
 {
     wxFAIL_MSG("abstract base class can't be found in parser tree!");
 }
@@ -572,19 +575,19 @@ void spContext::DumpThis(const wxString& WXUNUSED(indent)) const
 void spParameter::DumpThis(const wxString& indent) const
 {
     wxLogDebug("%sparam named '%s' of type '%s'",
-               indent.c_str(), m_Name.c_str(), m_Type.c_str());
+               indent.c_str(), mName.c_str(), mType.c_str());
 }
 
 void spAttribute::DumpThis(const wxString& indent) const
 {
     wxLogDebug("%svariable named '%s' of type '%s'",
-               indent.c_str(), m_Name.c_str(), m_Type.c_str());
+               indent.c_str(), mName.c_str(), mType.c_str());
 }
 
 void spOperation::DumpThis(const wxString& indent) const
 {
     wxString protection;
-    if ( !mScope.empty() ) {
+    if ( !!mScope ) {
         switch ( mVisibility ) {
             case SP_VIS_PUBLIC:
                 protection = "public";
@@ -606,16 +609,12 @@ void spOperation::DumpThis(const wxString& indent) const
         protection = "global";
     }
 
-    wxString constStr,virtualStr;
-    if(mIsConstant) constStr = _T("const ");
-    if(mIsVirtual) virtualStr = _T("virtual ");
-
     wxLogDebug("%s%s%s%s function named '%s::%s' of type '%s'",
                indent.c_str(),
-               constStr.c_str(),
-               virtualStr.c_str(),
+               mIsConstant ? "const " : "",
+               mIsVirtual ? "virtual " : "",
                protection.c_str(),
-               mScope.c_str(), m_Name.c_str(), m_RetType.c_str());
+               mScope.c_str(), mName.c_str(), mRetType.c_str());
 }
 
 void spPreprocessorLine::DumpThis(const wxString& indent) const
@@ -647,10 +646,10 @@ void spPreprocessorLine::DumpThis(const wxString& indent) const
 void spClass::DumpThis(const wxString& indent) const
 {
     wxString base;
-    for ( StrListT::const_iterator i = m_SuperClassNames.begin();
-          i != m_SuperClassNames.end();
+    for ( StrListT::const_iterator i = mSuperClassNames.begin();
+          i != mSuperClassNames.end();
           i++ ) {
-        if ( !base.empty() )
+        if ( !!base )
             base += ", ";
         base += *i;
     }
@@ -686,25 +685,25 @@ void spClass::DumpThis(const wxString& indent) const
 
     wxLogDebug("%s%s named '%s' (base classes: %s)",
                indent.c_str(), kind.c_str(),
-               m_Name.c_str(), base.c_str());
+               mName.c_str(), base.c_str());
 }
 
 void spEnumeration::DumpThis(const wxString& indent) const
 {
     wxLogDebug("%senum named '%s'",
-               indent.c_str(), m_Name.c_str());
+               indent.c_str(), mName.c_str());
 }
 
 void spTypeDef::DumpThis(const wxString& indent) const
 {
     wxLogDebug("%stypedef %s = %s",
-               indent.c_str(), m_Name.c_str(), m_OriginalType.c_str());
+               indent.c_str(), mName.c_str(), mOriginalType.c_str());
 }
 
 void spFile::DumpThis(const wxString& indent) const
 {
     wxLogDebug("%sfile '%s'",
-               indent.c_str(), m_FileName.c_str());
+               indent.c_str(), mFileName.c_str());
 }
 
 #endif // __WXDEBUG__

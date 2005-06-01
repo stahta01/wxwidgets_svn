@@ -55,13 +55,24 @@ public:
     //
     // Implement base class virtuals
     //
-    virtual wxMenuItem* DoAppend(wxMenuItem* pItem);
-    virtual wxMenuItem* DoInsert( size_t      nPos
+    virtual bool        DoAppend(wxMenuItem* pItem);
+    virtual bool        DoInsert( size_t      nPos
                                  ,wxMenuItem* pItem
                                 );
     virtual wxMenuItem* DoRemove(wxMenuItem* pItem);
     virtual void        Break(void);
     virtual void        SetTitle(const wxString& rTitle);
+
+#if wxUSE_MENU_CALLBACK
+    wxMenu( const wxString&  rTitle
+           ,const wxFunction fnFunc
+          )
+          : wxMenuBase(rTitle)
+    {
+        Init();
+        Callback(fnFunc);
+    }
+#endif // wxUSE_MENU_CALLBACK
 
     //
     // Implementation only from now on
@@ -194,7 +205,6 @@ public:
     wxMenuBar( int            n
               ,wxMenu*        vMenus[]
               ,const wxString sTitles[]
-              ,long           lStyle = 0
              );
     virtual ~wxMenuBar();
 
@@ -232,6 +242,16 @@ public:
     virtual wxString    GetLabelTop(size_t nPos) const;
 
     //
+    // Compatibility: these functions are deprecated
+    //
+#if WXWIN_COMPATIBILITY
+    void          SetEventHandler(wxEvtHandler* pHandler) { m_pEventHandler = pHandler; }
+    wxEvtHandler* GetEventHandler(void) { return m_pEventHandler; }
+    bool          Enabled(int nId) const { return IsEnabled(nId); }
+    bool          Checked(int nId) const { return IsChecked(nId); }
+#endif // WXWIN_COMPATIBILITY
+
+    //
     // Implementation from now on
     //
     WXHMENU                   Create(void);
@@ -245,7 +265,7 @@ public:
     const wxAcceleratorTable& GetAccelTable(void) const { return m_vAccelTable; }
 
     //
-    // Update the accel table (must be called after adding/deleting a menu)
+    // Update the accel table (must be called after adding/deletign a menu)
     //
     void                      RebuildAccelTable(void);
 #endif // wxUSE_ACCEL
@@ -265,6 +285,10 @@ protected:
     // Common part of all ctors
     //
     void                      Init(void);
+
+#if WXWIN_COMPATIBILITY
+    wxEvtHandler*                   m_pEventHandler;
+#endif // WXWIN_COMPATIBILITY
 
     wxArrayString m_titles;
 

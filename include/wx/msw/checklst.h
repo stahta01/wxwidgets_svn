@@ -12,7 +12,7 @@
 #ifndef   __CHECKLST__H_
 #define   __CHECKLST__H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "checklst.h"
 #endif
 
@@ -36,25 +36,11 @@ public:
                  long style = 0,
                  const wxValidator& validator = wxDefaultValidator,
                  const wxString& name = wxListBoxNameStr);
-  wxCheckListBox(wxWindow *parent, wxWindowID id,
-                 const wxPoint& pos,
-                 const wxSize& size,
-                 const wxArrayString& choices,
-                 long style = 0,
-                 const wxValidator& validator = wxDefaultValidator,
-                 const wxString& name = wxListBoxNameStr);
 
   bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int n = 0, const wxString choices[] = NULL,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
-  bool Create(wxWindow *parent, wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
@@ -66,7 +52,7 @@ public:
 
   // items may be checked
   virtual bool IsChecked(size_t uiIndex) const;
-  virtual void Check(size_t uiIndex, bool bCheck = true);
+  virtual void Check(size_t uiIndex, bool bCheck = TRUE);
 
   // return the index of the item at this position or wxNOT_FOUND
   int HitTest(const wxPoint& pt) const { return DoHitTestItem(pt.x, pt.y); }
@@ -88,13 +74,11 @@ protected:
   void OnKeyDown(wxKeyEvent& event);
   void OnLeftClick(wxMouseEvent& event);
 
-  wxSize DoGetBestSize() const;
-
 private:
   size_t    m_nItemHeight;  // height of checklistbox items (the same for all)
 
   DECLARE_EVENT_TABLE()
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckListBox)
+  DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
 
 #endif    //_CHECKLST_H

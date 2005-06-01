@@ -6,7 +6,7 @@
 // Created:     25.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univbmpbuttn.h"
 #endif
 
@@ -64,13 +64,13 @@ bool wxBitmapButton::Create(wxWindow *parent,
     // we add wxBU_EXACTFIT because the bitmap buttons are not the standard
     // ones and so shouldn't be forced to be of the standard size which is
     // typically too big for them
-    if ( !wxButton::Create(parent, id, bitmap, wxEmptyString,
+    if ( !wxButton::Create(parent, id, bitmap, _T(""),
                            pos, size, style | wxBU_EXACTFIT, validator, name) )
-        return false;
+        return FALSE;
 
     m_bmpNormal = bitmap;
 
-    return true;
+    return TRUE;
 }
 
 void wxBitmapButton::OnSetBitmap()
@@ -103,21 +103,21 @@ bool wxBitmapButton::ChangeBitmap(const wxBitmap& bmp)
     {
         m_bitmap = bitmap;
 
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 bool wxBitmapButton::Enable(bool enable)
 {
     if ( !wxButton::Enable(enable) )
-        return false;
+        return FALSE;
 
     if ( !enable && ChangeBitmap(m_bmpDisabled) )
         Refresh();
 
-    return true;
+    return TRUE;
 }
 
 bool wxBitmapButton::SetCurrent(bool doit)

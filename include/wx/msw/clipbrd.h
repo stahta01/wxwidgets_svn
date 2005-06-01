@@ -12,7 +12,7 @@
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "clipbrd.h"
 #endif
 
@@ -52,7 +52,7 @@ WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDataObject;
-class WXDLLEXPORT wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 
@@ -76,7 +76,7 @@ public:
     virtual bool AddData( wxDataObject *data );
 
     // ask if data in correct format is available
-    virtual bool IsSupported( const wxDataFormat& format );
+    virtual bool IsSupported( wxDataFormat format );
 
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );
@@ -90,11 +90,10 @@ public:
     virtual bool Flush();
 
     // X11 has two clipboards which get selected by this call. Empty on MSW.
-    void UsePrimarySelection( bool WXUNUSED(primary) = false ) { }
+    void UsePrimarySelection( bool WXUNUSED(primary) = FALSE ) { }
 
 private:
     bool m_clearOnExit;
-    bool m_isOpened;
 };
 
 #endif // wxUSE_CLIPBOARD

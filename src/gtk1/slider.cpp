@@ -7,19 +7,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "slider.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/slider.h"
 
 #if wxUSE_SLIDER
 
 #include "wx/utils.h"
-#include "wx/math.h"
+
+#include <math.h>
+
 #include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
@@ -41,7 +40,6 @@ static const float sensitivity = 0.02;
 // "value_changed"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_slider_callback( GtkAdjustment *adjust,
                                  SCROLLBAR_CBACK_ARG
                                  wxSlider *win )
@@ -72,7 +70,6 @@ static void gtk_slider_callback( GtkAdjustment *adjust,
     cevent.SetEventObject( win );
     cevent.SetInt( value );
     win->GetEventHandler()->ProcessEvent( cevent );
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -134,11 +131,6 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     m_adjust = gtk_range_get_adjustment( GTK_RANGE(m_widget) );
 
-#ifdef __WXGTK20__
-    if (style & wxSL_INVERSE)
-        gtk_range_set_inverted( GTK_RANGE(m_widget), TRUE );
-#endif
-
     GtkEnableEvents();
 
     SetRange( minValue, maxValue );
@@ -146,7 +138,11 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    SetBackgroundColour( parent->GetBackgroundColour() );
+
+    Show( TRUE );
 
     return TRUE;
 }
@@ -270,6 +266,12 @@ bool wxSlider::IsOwnGtkWindow( GdkWindow *window )
 #endif
 }
 
+void wxSlider::ApplyWidgetStyle()
+{
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
+}
+
 void wxSlider::GtkDisableEvents()
 {
     gtk_signal_disconnect_by_func( GTK_OBJECT(m_adjust),
@@ -283,13 +285,6 @@ void wxSlider::GtkEnableEvents()
                         "value_changed",
                         GTK_SIGNAL_FUNC(gtk_slider_callback),
                         (gpointer) this );
-}
-
-// static
-wxVisualAttributes
-wxSlider::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_vscale_new);
 }
 
 #endif

@@ -25,14 +25,15 @@
 #include "wx/wx.h"
 #endif
 
+#include "wx/log.h"
+
 #if !wxUSE_GLCANVAS
-    #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
+#error Please set wxUSE_GLCANVAS to 1 in setup.h.
 #endif
 
 #include "cube.h"
-#include "../../sample.xpm"
 
-#ifndef __WXMSW__     // for StopWatch, see remark below
+#ifndef __WXMSW__     // for wxStopWatch, see remark below
   #if defined(__WXMAC__) && !defined(__DARWIN__)
     #include <utime.h>
     #include <unistd.h>
@@ -54,37 +55,31 @@
 class ScanCodeCtrl : public wxTextCtrl
 {
 public:
-    ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
-        const wxPoint& pos, const wxSize& size );
-
-    void OnChar( wxKeyEvent& WXUNUSED(event) )
-    {
-        // Do nothing
-    }
-
-    void OnKeyDown(wxKeyEvent& event);
-
+  ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
+                const wxPoint& pos, const wxSize& size );
+  void OnChar( wxKeyEvent& event ) { } /* do nothing */
+  void OnKeyDown(wxKeyEvent& event);
 private:
-
-    // Any class wishing to process wxWidgets events must use this macro
-    DECLARE_EVENT_TABLE()
+// any class wishing to process wxWindows events must use this macro
+  DECLARE_EVENT_TABLE()
 };
-
 BEGIN_EVENT_TABLE( ScanCodeCtrl, wxTextCtrl )
-    EVT_CHAR( ScanCodeCtrl::OnChar )
-    EVT_KEY_DOWN( ScanCodeCtrl::OnKeyDown )
+  EVT_CHAR( ScanCodeCtrl::OnChar )
+  EVT_KEY_DOWN( ScanCodeCtrl::OnKeyDown )
 END_EVENT_TABLE()
 
 ScanCodeCtrl::ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
-    const wxPoint& pos, const wxSize& size )
-    : wxTextCtrl( parent, id, wxEmptyString, pos, size )
-{
-    SetValue( wxString::Format(wxT("0x%04x"), code) );
+                             const wxPoint& pos, const wxSize& size )
+                  : wxTextCtrl( parent, id, "", pos, size )
+{ wxString buf;
+  buf.Printf( "0x%04x", code );
+  SetValue( buf );
 }
 
 void ScanCodeCtrl::OnKeyDown( wxKeyEvent& event )
-{
-    SetValue( wxString::Format(wxT("0x%04x"), event.GetKeyCode()) );
+{ wxString buf;
+  buf.Printf( "0x%04x", event.KeyCode() );
+  SetValue( buf );
 }
 
 /*------------------------------------------------------------------
@@ -94,41 +89,39 @@ void ScanCodeCtrl::OnKeyDown( wxKeyEvent& event )
 class ScanCodeDialog : public wxDialog
 {
 public:
-    ScanCodeDialog( wxWindow* parent, wxWindowID id, const int code,
-        const wxString &descr, const wxString& title );
-    int GetValue();
-
+  ScanCodeDialog( wxWindow* parent, wxWindowID id, const int code,
+                  const wxString &descr, const wxString& title );
+  int GetValue();
 private:
-
-    ScanCodeCtrl       *m_ScanCode;
-    wxTextCtrl         *m_Description;
+  ScanCodeCtrl       *m_ScanCode;
+  wxTextCtrl         *m_Description;
 };
 
 ScanCodeDialog::ScanCodeDialog( wxWindow* parent, wxWindowID id,
-    const int code, const wxString &descr, const wxString& title )
-    : wxDialog( parent, id, title, wxDefaultPosition, wxSize(96*2,76*2) )
+               const int code, const wxString &descr, const wxString& title )
+          : wxDialog( parent, id, title, wxPoint(-1, -1), wxSize(96*2,76*2) )
 {
-    new wxStaticText( this, wxID_ANY, _T("Scancode"), wxPoint(4*2,3*2),
-        wxSize(31*2,12*2) );
-    m_ScanCode = new ScanCodeCtrl( this, wxID_ANY, code, wxPoint(37*2,6*2),
-        wxSize(53*2,14*2) );
+  new wxStaticText( this, -1, "Scancode", wxPoint(4*2,3*2),
+                    wxSize(31*2,12*2) );
+  m_ScanCode = new ScanCodeCtrl( this, -1, code, wxPoint(37*2,6*2),
+                                 wxSize(53*2,14*2) );
 
-    new wxStaticText( this, wxID_ANY, _T("Description"), wxPoint(4*2,24*2),
-        wxSize(32*2,12*2) );
-    m_Description = new wxTextCtrl( this, wxID_ANY, descr, wxPoint(37*2,27*2),
-        wxSize(53*2,14*2) );
+  new wxStaticText( this, -1, "Description", wxPoint(4*2,24*2),
+                    wxSize(32*2,12*2) );
+  m_Description = new wxTextCtrl( this, -1, descr, wxPoint(37*2,27*2),
+                                  wxSize(53*2,14*2) );
 
-    new wxButton( this, wxID_OK, _T("Ok"), wxPoint(20*2,50*2), wxSize(20*2,13*2) );
-    new wxButton( this, wxID_CANCEL, _T("Cancel"), wxPoint(44*2,50*2),
-        wxSize(25*2,13*2) );
+  new wxButton( this, wxID_OK, "Ok", wxPoint(20*2,50*2), wxSize(20*2,13*2) );
+  new wxButton( this, wxID_CANCEL, "Cancel", wxPoint(44*2,50*2),
+                wxSize(25*2,13*2) );
 }
 
 int ScanCodeDialog::GetValue()
 {
-    int code;
-    wxString buf = m_ScanCode->GetValue();
-    wxSscanf( buf.c_str(), _T("%i"), &code );
-    return code;
+  int code;
+  wxString buf = m_ScanCode->GetValue();
+  sscanf( buf.c_str(), "%i", &code );
+  return( code );
 }
 
 /*----------------------------------------------------------------------
@@ -136,7 +129,7 @@ int ScanCodeDialog::GetValue()
   in time (in sec)  (because current version of wxGetElapsedTime doesn´t
   works right with glibc-2.1 and linux, at least for me)
 -----------------------------------------------------------------------*/
-unsigned long StopWatch( unsigned long *sec_base )
+unsigned long wxStopWatch( unsigned long *sec_base )
 {
   unsigned long secs,msec;
 
@@ -168,12 +161,12 @@ unsigned long StopWatch( unsigned long *sec_base )
 -----------------------------------------------------------------*/
 
 BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
-    EVT_SIZE(TestGLCanvas::OnSize)
-    EVT_PAINT(TestGLCanvas::OnPaint)
-    EVT_ERASE_BACKGROUND(TestGLCanvas::OnEraseBackground)
-    EVT_KEY_DOWN( TestGLCanvas::OnKeyDown )
-    EVT_KEY_UP( TestGLCanvas::OnKeyUp )
-    EVT_ENTER_WINDOW( TestGLCanvas::OnEnterWindow )
+  EVT_SIZE(TestGLCanvas::OnSize)
+  EVT_PAINT(TestGLCanvas::OnPaint)
+  EVT_ERASE_BACKGROUND(TestGLCanvas::OnEraseBackground)
+  EVT_KEY_DOWN( TestGLCanvas::OnKeyDown )
+  EVT_KEY_UP( TestGLCanvas::OnKeyUp )
+  EVT_ENTER_WINDOW( TestGLCanvas::OnEnterWindow )
 END_EVENT_TABLE()
 
 unsigned long  TestGLCanvas::m_secbase = 0;
@@ -182,22 +175,22 @@ unsigned long  TestGLCanvas::m_xsynct;
 unsigned long  TestGLCanvas::m_gsynct;
 
 TestGLCanvas::TestGLCanvas(wxWindow *parent, wxWindowID id,
-    const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+  wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style, name )
 {
-    m_init = false;
+    m_init = FALSE;
     m_gllist = 0;
     m_rleft = WXK_LEFT;
     m_rright = WXK_RIGHT;
 }
 
-TestGLCanvas::TestGLCanvas(wxWindow *parent, const TestGLCanvas *other,
+TestGLCanvas::TestGLCanvas(wxWindow *parent, const TestGLCanvas &other,
     wxWindowID id, const wxPoint& pos, const wxSize& size, long style,
-    const wxString& name )
-    : wxGLCanvas(parent, other->GetContext(), id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name)
+    const wxString& name ) :
+      wxGLCanvas(parent, other.GetContext(), id, pos, size, style, name  )
 {
-    m_init = false;
-    m_gllist = other->m_gllist; // share display list
+    m_init = FALSE;
+    m_gllist = other.m_gllist;    /* share display list */
     m_rleft = WXK_LEFT;
     m_rright = WXK_RIGHT;
 }
@@ -215,69 +208,67 @@ void TestGLCanvas::Render()
 #endif
 
     SetCurrent();
-    // Init OpenGL once, but after SetCurrent
+    /* init OpenGL once, but after SetCurrent */
     if (!m_init)
     {
         InitGL();
-        m_init = true;
+        m_init = TRUE;
     }
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+    glFrustum(-0.5F, 0.5F, -0.5F, 0.5F, 1.0F, 3.0F);
     glMatrixMode(GL_MODELVIEW);
 
     /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if( m_gllist == 0 )
-    {
-        m_gllist = glGenLists( 1 );
-        glNewList( m_gllist, GL_COMPILE_AND_EXECUTE );
-        /* draw six faces of a cube */
-        glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f, 1.0f);
-        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glVertex3f(-0.5f,-0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
+  if( m_gllist == 0 )
+  {
+    m_gllist = glGenLists( 1 );
+    glNewList( m_gllist, GL_COMPILE_AND_EXECUTE );
+    /* draw six faces of a cube */
+    glBegin(GL_QUADS);
+    glNormal3f( 0.0F, 0.0F, 1.0F);
+    glVertex3f( 0.5F, 0.5F, 0.5F); glVertex3f(-0.5F, 0.5F, 0.5F);
+    glVertex3f(-0.5F,-0.5F, 0.5F); glVertex3f( 0.5F,-0.5F, 0.5F);
 
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glVertex3f( 0.5f, 0.5f,-0.5f); glVertex3f( 0.5f,-0.5f,-0.5f);
+    glNormal3f( 0.0F, 0.0F,-1.0F);
+    glVertex3f(-0.5F,-0.5F,-0.5F); glVertex3f(-0.5F, 0.5F,-0.5F);
+    glVertex3f( 0.5F, 0.5F,-0.5F); glVertex3f( 0.5F,-0.5F,-0.5F);
 
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glVertex3f(-0.5f, 0.5f,-0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+    glNormal3f( 0.0F, 1.0F, 0.0F);
+    glVertex3f( 0.5F, 0.5F, 0.5F); glVertex3f( 0.5F, 0.5F,-0.5F);
+    glVertex3f(-0.5F, 0.5F,-0.5F); glVertex3f(-0.5F, 0.5F, 0.5F);
 
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glVertex3f( 0.5f,-0.5f, 0.5f); glVertex3f(-0.5f,-0.5f, 0.5f);
+    glNormal3f( 0.0F,-1.0F, 0.0F);
+    glVertex3f(-0.5F,-0.5F,-0.5F); glVertex3f( 0.5F,-0.5F,-0.5F);
+    glVertex3f( 0.5F,-0.5F, 0.5F); glVertex3f(-0.5F,-0.5F, 0.5F);
 
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glVertex3f( 0.5f,-0.5f,-0.5f); glVertex3f( 0.5f, 0.5f,-0.5f);
+    glNormal3f( 1.0F, 0.0F, 0.0F);
+    glVertex3f( 0.5F, 0.5F, 0.5F); glVertex3f( 0.5F,-0.5F, 0.5F);
+    glVertex3f( 0.5F,-0.5F,-0.5F); glVertex3f( 0.5F, 0.5F,-0.5F);
 
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glVertex3f(-0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glEnd();
+    glNormal3f(-1.0F, 0.0F, 0.0F);
+    glVertex3f(-0.5F,-0.5F,-0.5F); glVertex3f(-0.5F,-0.5F, 0.5F);
+    glVertex3f(-0.5F, 0.5F, 0.5F); glVertex3f(-0.5F, 0.5F,-0.5F);
+    glEnd();
 
-        glEndList();
-    }
-    else
-    {
-        glCallList(m_gllist);
-    }
+    glEndList();
+  }
+  else
+    glCallList( m_gllist );
 
-    glFlush();
-    SwapBuffers();
+  glFlush();
+  SwapBuffers();
 }
 
-void TestGLCanvas::OnEnterWindow( wxMouseEvent& WXUNUSED(event) )
+void TestGLCanvas::OnEnterWindow( wxMouseEvent& event )
 {
     SetFocus();
 }
 
-void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
+void TestGLCanvas::OnPaint( wxPaintEvent& event )
 {
     Render();
 }
@@ -299,7 +290,7 @@ void TestGLCanvas::OnSize(wxSizeEvent& event)
     }
 }
 
-void TestGLCanvas::OnEraseBackground(wxEraseEvent& WXUNUSED(event))
+void TestGLCanvas::OnEraseBackground(wxEraseEvent& event)
 {
   // Do nothing, to avoid flashing.
 }
@@ -310,15 +301,15 @@ void TestGLCanvas::InitGL()
 
     /* set viewing projection */
     glMatrixMode(GL_PROJECTION);
-    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+    glFrustum(-0.5F, 0.5F, -0.5F, 0.5F, 1.0F, 3.0F);
 
     /* position viewer */
     glMatrixMode(GL_MODELVIEW);
-    glTranslatef(0.0f, 0.0f, -2.0f);
+    glTranslatef(0.0F, 0.0F, -2.0F);
 
     /* position object */
-    glRotatef(30.0f, 1.0f, 0.0f, 0.0f);
-    glRotatef(30.0f, 0.0f, 1.0f, 0.0f);
+    glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
+    glRotatef(30.0F, 0.0F, 1.0F, 0.0F);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
@@ -366,14 +357,14 @@ void TestGLCanvas::Action( long code, unsigned long lasttime,
 
 void TestGLCanvas::OnKeyDown( wxKeyEvent& event )
 {
-    long evkey = event.GetKeyCode();
+    long evkey = event.KeyCode();
     if (evkey == 0) return;
 
     if (!m_TimeInitialized)
     {
         m_TimeInitialized = 1;
-        m_xsynct = event.GetTimestamp();
-        m_gsynct = StopWatch(&m_secbase);
+        m_xsynct = event.m_timeStamp;
+        m_gsynct = wxStopWatch(&m_secbase);
 
         m_Key = evkey;
         m_StartTime = 0;
@@ -381,7 +372,7 @@ void TestGLCanvas::OnKeyDown( wxKeyEvent& event )
         m_LastRedraw = 0;
     }
 
-    unsigned long currTime = event.GetTimestamp() - m_xsynct;
+    unsigned long currTime = event.m_timeStamp - m_xsynct;
 
     if (evkey != m_Key)
     {
@@ -394,9 +385,9 @@ void TestGLCanvas::OnKeyDown( wxKeyEvent& event )
         Action( m_Key, m_LastTime-m_StartTime, currTime-m_StartTime );
 
 #if defined(__WXMAC__) && !defined(__DARWIN__)
-        m_LastRedraw = currTime;    // StopWatch() doesn't work on Mac...
+        m_LastRedraw = currTime;    // wxStopWatch() doesn't work on Mac...
 #else
-        m_LastRedraw = StopWatch(&m_secbase) - m_gsynct;
+        m_LastRedraw = wxStopWatch(&m_secbase) - m_gsynct;
 #endif
         m_LastTime = currTime;
     }
@@ -419,8 +410,8 @@ void TestGLCanvas::Rotate( GLfloat deg )
     SetCurrent();
 
     glMatrixMode(GL_MODELVIEW);
-    glRotatef((GLfloat)deg, 0.0f, 0.0f, 1.0f);
-    Refresh(false);
+    glRotatef((GLfloat)deg, 0.0F, 0.0F, 1.0F);
+    Refresh(FALSE);
 }
 
 
@@ -436,86 +427,65 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 // My frame constructor
-MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos,
-    const wxSize& size, long style)
-    : wxFrame(parent, wxID_ANY, title, pos, size, style)
+MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
+                 const wxSize& size, long style)
+         : wxFrame(frame, -1, title, pos, size, style)
 {
     m_canvas = NULL;
-    SetIcon(wxIcon(sample_xpm));
 }
 
 // Intercept menu commands
-void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
+void MyFrame::OnExit(wxCommandEvent& event)
 {
-    // true is to force the frame to close
-    Close(true);
+    Destroy();
 }
 
-/*static*/ MyFrame *MyFrame::Create(MyFrame *parentFrame, bool isCloneWindow)
+void MyFrame::OnNewWindow(wxCommandEvent& event)
 {
-    wxString str = wxT("wxWidgets OpenGL Cube Sample");
-    if (isCloneWindow) str += wxT(" - Clone");
+  MyFrame *frame = new MyFrame(NULL, "Cube OpenGL Demo Clone",
+                               wxPoint(50, 50), wxSize(400, 300));
+  // Give it an icon
+#ifdef __WXMSW__
+  frame->SetIcon(wxIcon("mondrian"));
+#endif
 
-    MyFrame *frame = new MyFrame(NULL, str, wxDefaultPosition,
-        wxSize(400, 300));
+  // Make a menubar
+  wxMenu *winMenu = new wxMenu;
 
-    // Make a menubar
-    wxMenu *winMenu = new wxMenu;
+  winMenu->Append(wxID_EXIT, "&Close");
+  winMenu->Append(ID_NEW_WINDOW, "&New" );
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(winMenu, "&Window");
 
-    winMenu->Append(wxID_EXIT, _T("&Close"));
-    winMenu->Append(ID_NEW_WINDOW, _T("&New") );
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(winMenu, _T("&Window"));
+  winMenu = new wxMenu;
+  winMenu->Append(ID_DEF_ROTATE_LEFT_KEY, "Rotate &left");
+  winMenu->Append(ID_DEF_ROTATE_RIGHT_KEY, "Rotate &right");
+  menuBar->Append(winMenu, "&Key");
 
-    winMenu = new wxMenu;
-    winMenu->Append(ID_DEF_ROTATE_LEFT_KEY, _T("Rotate &left"));
-    winMenu->Append(ID_DEF_ROTATE_RIGHT_KEY, _T("Rotate &right"));
-    menuBar->Append(winMenu, _T("&Key"));
+  frame->SetMenuBar(menuBar);
 
-    frame->SetMenuBar(menuBar);
+  frame->m_canvas = new TestGLCanvas( frame, *m_canvas, -1,
+               wxDefaultPosition, wxDefaultSize );
 
-    if (parentFrame)
-    {
-        frame->m_canvas = new TestGLCanvas( frame, parentFrame->m_canvas,
-            wxID_ANY, wxDefaultPosition, wxDefaultSize );
-    }
-    else
-    {
-        frame->m_canvas = new TestGLCanvas(frame, wxID_ANY,
-            wxDefaultPosition, wxDefaultSize);
-    }
-
-    // Show the frame
-    frame->Show(true);
-
-    return frame;
+  // Show the frame
+  frame->Show(TRUE);
 }
 
-void MyFrame::OnNewWindow( wxCommandEvent& WXUNUSED(event) )
+void MyFrame::OnDefRotateLeftKey(wxCommandEvent& event)
 {
-    (void) Create(this, true);
+  ScanCodeDialog dial( this, -1, m_canvas->m_rleft,
+                       wxString("Left"), "Define key" );
+  int result = dial.ShowModal();
+  if( result == wxID_OK )
+    m_canvas->m_rleft = dial.GetValue();
 }
-
-void MyFrame::OnDefRotateLeftKey( wxCommandEvent& WXUNUSED(event) )
+void MyFrame::OnDefRotateRightKey(wxCommandEvent& event)
 {
-    ScanCodeDialog dial( this, wxID_ANY, m_canvas->m_rleft,
-        wxString(_T("Left")), _T("Define key") );
-
-    int result = dial.ShowModal();
-
-    if( result == wxID_OK )
-        m_canvas->m_rleft = dial.GetValue();
-}
-
-void MyFrame::OnDefRotateRightKey( wxCommandEvent& WXUNUSED(event) )
-{
-    ScanCodeDialog dial( this, wxID_ANY, m_canvas->m_rright,
-        wxString(_T("Right")), _T("Define key") );
-
-    int result = dial.ShowModal();
-
-    if( result == wxID_OK )
-        m_canvas->m_rright = dial.GetValue();
+  ScanCodeDialog dial( this, -1, m_canvas->m_rright,
+                       wxString("Right"), "Define key" );
+  int result = dial.ShowModal();
+  if( result == wxID_OK )
+    m_canvas->m_rright = dial.GetValue();
 }
 
 /*------------------------------------------------------------------
@@ -524,10 +494,37 @@ void MyFrame::OnDefRotateRightKey( wxCommandEvent& WXUNUSED(event) )
 
 IMPLEMENT_APP(MyApp)
 
-bool MyApp::OnInit()
+bool MyApp::OnInit(void)
 {
-    // Create the main frame window
-    (void) MyFrame::Create(NULL);
+  wxLog::SetTraceMask(wxTraceMessages);
 
-    return true;
+  // Create the main frame window
+  MyFrame *frame = new MyFrame(NULL, "Cube OpenGL Demo", wxPoint(50, 50),
+                               wxSize(400, 300));
+  // Give it an icon
+#ifdef wx_msw
+  frame->SetIcon(wxIcon("mondrian"));
+#endif
+
+  // Make a menubar
+  wxMenu *winMenu = new wxMenu;
+
+  winMenu->Append(wxID_EXIT, "&Close");
+  winMenu->Append(ID_NEW_WINDOW, "&New" );
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(winMenu, "&Window");
+
+  winMenu = new wxMenu;
+  winMenu->Append(ID_DEF_ROTATE_LEFT_KEY, "Rotate &left");
+  winMenu->Append(ID_DEF_ROTATE_RIGHT_KEY, "Rotate &right");
+  menuBar->Append(winMenu, "&Key");
+
+  frame->SetMenuBar(menuBar);
+
+  frame->m_canvas = new TestGLCanvas(frame, -1, wxDefaultPosition, wxDefaultSize);
+
+  // Show the frame
+  frame->Show(TRUE);
+
+  return TRUE;
 }

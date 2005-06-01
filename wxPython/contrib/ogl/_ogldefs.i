@@ -12,19 +12,61 @@
 
 
 //---------------------------------------------------------------------------
+
+
+class wxOGLConstraint;
+class wxBitmapShape;
+class wxDiagram;
+class wxDrawnShape;
+class wxCircleShape;
+class wxCompositeShape;
+class wxDividedShape;
+class wxDivisionShape;
+class wxEllipseShape;
+class wxLineShape;
+class wxPolygonShape;
+class wxRectangleShape;
+class wxPseudoMetaFile;
+class wxShape;
+class wxShapeCanvas;
+class wxShapeEvtHandler;
+class wxTextShape;
+class wxControlPoint;
+
+class wxPyOGLConstraint;
+class wxPyBitmapShape;
+class wxPyDiagram;
+class wxPyDrawnShape;
+class wxPyCircleShape;
+class wxPyCompositeShape;
+class wxPyDividedShape;
+class wxPyDivisionShape;
+class wxPyEllipseShape;
+class wxPyLineShape;
+class wxPyPolygonShape;
+class wxPyRectangleShape;
+class wxPyPseudoMetaFile;
+class wxPyShape;
+class wxPyShapeCanvas;
+class wxPyShapeEvtHandler;
+class wxPyTextShape;
+class wxPyControlPoint;
+
+
+//---------------------------------------------------------------------------
 // Typemaps just for OGL
 
 
 // OOR Support
-%typemap(out) wxPyShape*                { $result = wxPyMake_wxShapeEvtHandler($1, $owner); }
-%typemap(out) wxPyShapeEvtHandler*      { $result = wxPyMake_wxShapeEvtHandler($1, $owner); }
-%typemap(out) wxPyDivisionShape*        { $result = wxPyMake_wxShapeEvtHandler($1, $owner); }
+%typemap(python, out) wxPyShape*                { $target = wxPyMake_wxShapeEvtHandler($source); }
+%typemap(python, out) wxPyShapeEvtHandler*      { $target = wxPyMake_wxShapeEvtHandler($source); }
+%typemap(python, out) wxPyDivisionShape*        { $target = wxPyMake_wxShapeEvtHandler($source); }
 
-%typemap(out) wxPyShapeCanvas*          { $result = wxPyMake_wxObject($1, $owner); }
-%typemap(out) wxDiagram*                { $result = wxPyMake_wxObject($1, $owner); }
-%typemap(out) wxOGLConstraint*          { $result = wxPyMake_wxObject($1, $owner); }
-%typemap(out) wxPseudoMetaFile*         { $result = wxPyMake_wxObject($1, $owner); }
-%typemap(out) wxArrowHead*              { $result = wxPyMake_wxObject($1, $owner); }
+%typemap(python, out) wxPyShapeCanvas*          { $target = wxPyMake_wxObject($source); }
+%typemap(python, out) wxDiagram*                { $target = wxPyMake_wxObject($source); }
+%typemap(python, out) wxOGLConstraint*          { $target = wxPyMake_wxObject($source); }
+%typemap(python, out) wxPseudoMetaFile*         { $target = wxPyMake_wxObject($source); }
+%typemap(python, out) wxArrowHead*              { $target = wxPyMake_wxObject($source); }
 
 
 
@@ -32,58 +74,58 @@
 // wxOGL doesn't use a ref-counted copy of pens and brushes, so we'll
 // use the pen and brush lists to simulate that...
 
-%typemap(in) wxPen* {
+%typemap(python, in) wxPen* {
     wxPen* temp;
-    if ($input) {
-        if ($input == Py_None) { temp = NULL; }
-        else if (! wxPyConvertSwigPtr($input, (void **) &temp, wxT("wxPen"))) {
-            PyErr_SetString(PyExc_TypeError, "Type error, expected wxPen.");
+    if ($source) {
+        if ($source == Py_None) { temp = NULL; }
+        else if (SWIG_GetPtrObj($source, (void **) &temp,"_wxPen_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxPen_p.");
         return NULL;
         }
     }
     if (temp)
-        $1 = wxThePenList->FindOrCreatePen(temp->GetColour(),
-                                           temp->GetWidth(),
-                                           temp->GetStyle());
+        $target = wxThePenList->FindOrCreatePen(temp->GetColour(),
+                                                temp->GetWidth(),
+                                                temp->GetStyle());
     else
-        $1 = NULL;
+        $target = NULL;
 }
 
-%typemap(in) wxBrush* {
+%typemap(python, in) wxBrush* {
     wxBrush* temp;
-    if ($input) {
-        if ($input == Py_None) { temp = NULL; }
-        else if (! wxPyConvertSwigPtr($input, (void **) &temp, wxT("wxBrush"))) {
-            PyErr_SetString(PyExc_TypeError, "Type error, expected wxBrush.");
+    if ($source) {
+        if ($source == Py_None) { temp = NULL; }
+        else if (SWIG_GetPtrObj($source, (void **) &temp,"_wxBrush_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxBrush_p.");
         return NULL;
         }
     }
     if (temp)
-        $1 = wxTheBrushList->FindOrCreateBrush(temp->GetColour(), temp->GetStyle());
+        $target = wxTheBrushList->FindOrCreateBrush(temp->GetColour(), temp->GetStyle());
     else
-        $1 = NULL;
+        $target = NULL;
 }
 
 
-%typemap(in) wxFont* {
+%typemap(python, in) wxFont* {
     wxFont* temp;
-    if ($input) {
-        if ($input == Py_None) { temp = NULL; }
-        else if (! wxPyConvertSwigPtr($input, (void **) &temp, wxT("wxFont"))) {
-            PyErr_SetString(PyExc_TypeError, "Type error, expected wxFont.");
+    if ($source) {
+        if ($source == Py_None) { temp = NULL; }
+        else if (SWIG_GetPtrObj($source, (void **) &temp,"_wxFont_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxFont_p.");
         return NULL;
         }
     }
     if (temp)
-        $1 = wxTheFontList->FindOrCreateFont(temp->GetPointSize(),
-                                             temp->GetFamily(),
-                                             temp->GetStyle(),
-                                             temp->GetWeight(),
-                                             temp->GetUnderlined(),
-                                             temp->GetFaceName(),
-                                             temp->GetEncoding());
+        $target = wxTheFontList->FindOrCreateFont(temp->GetPointSize(),
+                                                  temp->GetFamily(),
+                                                  temp->GetStyle(),
+                                                  temp->GetWeight(),
+                                                  temp->GetUnderlined(),
+                                                  temp->GetFaceName(),
+                                                  temp->GetEncoding());
     else
-        $1 = NULL;
+        $target = NULL;
 }
 
 

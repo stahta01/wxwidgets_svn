@@ -12,7 +12,7 @@
 #ifndef _WX_TIMER_H_
 #define _WX_TIMER_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "timer.h"
 #endif
 
@@ -22,11 +22,11 @@ friend void wxProcessTimer(wxTimer& timer);
 
 public:
     wxTimer() { Init(); }
-    wxTimer(wxEvtHandler *owner, int id = wxID_ANY) : wxTimerBase(owner, id)
+    wxTimer(wxEvtHandler *owner, int id = -1) : wxTimerBase(owner, id)
         { Init(); }
     ~wxTimer();
 
-    virtual bool Start(int milliseconds = -1, bool oneShot = false);
+    virtual bool Start(int milliseconds = -1, bool oneShot = FALSE);
     virtual void Stop();
 
     virtual bool IsRunning() const { return m_id != 0; }
@@ -34,10 +34,10 @@ public:
 protected:
     void Init();
 
-    unsigned long m_id;
+    long m_id;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTimer)
+    DECLARE_ABSTRACT_CLASS(wxTimer)
 };
 
 #endif

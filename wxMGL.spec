@@ -1,6 +1,6 @@
 %define pref /usr
-%define ver 2.6.1
-%define ver2 2.6
+%define ver 2.4.2
+%define ver2 2.4
 %define rel 1
 
 Summary: The SciTech MGL port of the wxWindows library
@@ -58,7 +58,7 @@ fi
 
 mkdir obj-shared
 cd obj-shared
-../configure --prefix=%{pref} --with-mgl --disable-fs_inet
+../configure --prefix=%{pref} --enable-soname --with-mgl --disable-fs_inet
 $MAKE
 cd ..
 
@@ -84,16 +84,35 @@ rm -rf $RPM_BUILD_ROOT
 %postun
 /sbin/ldconfig
 
+%post devel
+# Install wx-config if there isn't any
+if test ! -f %{_bindir}/wx-config ; then
+    ln -sf wxmgl-%{ver2}-config %{_bindir}/wx-config
+fi
+
+%preun devel
+# Remove wx-config if it points to this package
+if test -f %{_bindir}/wx-config -a -f /usr/bin/md5sum ; then
+  SUM1=`md5sum %{_bindir}/wxmgl-%{ver2}-config | cut -c 0-32`
+  SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`
+  if test "x$SUM1" = "x$SUM2" ; then
+    rm -f %{_bindir}/wx-config
+  fi
+fi
+
+
 %files -f wxstd.lang
 %defattr(-,root,root)
 %doc COPYING.LIB *.txt
+%dir %{_datadir}/wx
+%{_datadir}/wx/*
 %{_libdir}/libwx_mgl*-%{ver2}*.so.*
 
 %files devel
 %defattr(-,root,root)
 %{_libdir}/libwx_mgl*-%{ver2}*.so
-%dir %{_includedir}/wx-*
-%{_includedir}/wx-*/*
+%dir %{_includedir}/wx
+%{_includedir}/wx/*
 %dir %{_libdir}/wx
 %{_libdir}/wx/*
 %{_bindir}/wxmgl*-config

@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_STATBMP_H_
 #define _WX_UNIV_STATBMP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univstatbmp.h"
 #endif
 
@@ -22,7 +22,7 @@
 // wxStaticBitmap
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
+class wxStaticBitmap : public wxStaticBitmapBase
 {
 public:
     wxStaticBitmap()
@@ -35,7 +35,7 @@ public:
                    const wxSize& size = wxDefaultSize,
                    long style = 0)
     {
-        Create(parent, wxID_ANY, label, pos, size, style);
+        Create(parent, -1, label, pos, size, style);
     }
 
     wxStaticBitmap(wxWindow *parent,
@@ -63,7 +63,7 @@ public:
 
     wxIcon GetIcon() const;
 
-    virtual bool HasTransparentBackground() { return true; }
+    virtual bool HasTransparentBackground() { return TRUE; }
     
 private:
     virtual void DoDraw(wxControlRenderer *renderer);

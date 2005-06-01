@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "statusbr.h"
 #endif
 
@@ -66,6 +66,10 @@ void wxStatusBarGeneric::Init()
 
 wxStatusBarGeneric::~wxStatusBarGeneric()
 {
+    // VZ: what is this for? please comment...
+#ifdef __WXMSW__
+    SetFont(wxNullFont);
+#endif // MSW
 }
 
 bool wxStatusBarGeneric::Create(wxWindow *parent,
@@ -76,16 +80,18 @@ bool wxStatusBarGeneric::Create(wxWindow *parent,
   if ( !wxWindow::Create(parent, id,
                          wxDefaultPosition, wxDefaultSize,
                          style | wxTAB_TRAVERSAL, name) )
-      return false;
+      return FALSE;
 
   // The status bar should have a themed background
-  SetThemeEnabled( true );
+  SetThemeEnabled( TRUE );
 
-  InitColours();
-  
-#ifdef __WXPM__
-  SetFont(*wxSMALL_FONT);
+  // Don't wish this to be found as a child
+#ifndef __WXMAC__
+  parent->GetChildren().DeleteObject(this);
 #endif
+  InitColours();
+
+  SetFont(m_defaultStatusBarFont);
 
   // Set the height according to the font and the border size
   wxClientDC dc(this);
@@ -96,29 +102,11 @@ bool wxStatusBarGeneric::Create(wxWindow *parent,
 
   int height = (int)( (11*y)/10 + 2*GetBorderY());
 
-  SetSize(wxDefaultCoord, wxDefaultCoord, wxDefaultCoord, height);
+  SetSize(-1, -1, -1, height);
 
   SetFieldsCount(1);
 
-  return true;
-}
-
-
-wxSize wxStatusBarGeneric::DoGetBestSize() const
-{
-    int width, height;
-
-    // best width is the width of the parent
-    GetParent()->GetClientSize(&width, NULL);
-
-    // best height is as calculated above in Create
-    wxClientDC dc((wxWindow*)this);
-    dc.SetFont(GetFont());
-    wxCoord y;
-    dc.GetTextExtent(_T("X"), NULL, &y );
-    height = (int)( (11*y)/10 + 2*GetBorderY());
-
-    return wxSize(width, height);
+  return TRUE;
 }
 
 void wxStatusBarGeneric::SetFieldsCount(int number, const int *widths)
@@ -132,13 +120,12 @@ void wxStatusBarGeneric::SetFieldsCount(int number, const int *widths)
     for (i = m_nFields - 1; i >= number; --i)
         m_statusStrings.RemoveAt(i);
 
-    // forget the old cached pixel widths
-    m_widthsAbs.Empty();
-
-    wxStatusBarBase::SetFieldsCount(number, widths);
+    m_nFields = number;
 
     wxASSERT_MSG( m_nFields == (int)m_statusStrings.GetCount(),
                   _T("This really should never happen, can we do away with m_nFields here?") );
+
+    SetStatusWidths(number, widths);
 }
 
 void wxStatusBarGeneric::SetStatusText(const wxString& text, int number)
@@ -146,16 +133,12 @@ void wxStatusBarGeneric::SetStatusText(const wxString& text, int number)
     wxCHECK_RET( (number >= 0) && (number < m_nFields),
                  _T("invalid status bar field index") );
 
-    wxString oldText = m_statusStrings[number];
-    if (oldText != text)
-    {
-        m_statusStrings[number] = text;
+    m_statusStrings[number] = text;
 
-        wxRect rect;
-        GetFieldRect(number, rect);
+    wxRect rect;
+    GetFieldRect(number, rect);
 
-        Refresh( true, &rect );
-    }
+    Refresh( TRUE, &rect );
 }
 
 wxString wxStatusBarGeneric::GetStatusText(int n) const
@@ -262,52 +245,43 @@ void wxStatusBarGeneric::DrawField(wxDC& dc, int i)
     wxRect rect;
     GetFieldRect(i, rect);
 
-    int style = wxSB_NORMAL;
-    if (m_statusStyles)
-        style = m_statusStyles[i];
+    // Draw border
+    // Have grey background, plus 3-d border -
+    // One black rectangle.
+    // Inside this, left and top sides - dark grey. Bottom and right -
+    // white.
 
-    if (style != wxSB_FLAT)
-    {
-        // Draw border
-        // For wxSB_NORMAL:
-        // Have grey background, plus 3-d border -
-        // One black rectangle.
-        // Inside this, left and top sides - dark grey. Bottom and right -
-        // white.
-        // Reverse it for wxSB_RAISED
+    dc.SetPen(m_hilightPen);
 
-        dc.SetPen((style == wxSB_RAISED) ? m_mediumShadowPen : m_hilightPen);
+#ifndef __WXPM__
 
-    #ifndef __WXPM__
+    // Right and bottom white lines
+    dc.DrawLine(rect.x + rect.width, rect.y,
+                rect.x + rect.width, rect.y + rect.height);
+    dc.DrawLine(rect.x + rect.width, rect.y + rect.height,
+                rect.x, rect.y + rect.height);
 
-        // Right and bottom lines
-        dc.DrawLine(rect.x + rect.width, rect.y,
-                    rect.x + rect.width, rect.y + rect.height);
-        dc.DrawLine(rect.x + rect.width, rect.y + rect.height,
-                    rect.x, rect.y + rect.height);
+    dc.SetPen(m_mediumShadowPen);
 
-        dc.SetPen((style == wxSB_RAISED) ? m_hilightPen : m_mediumShadowPen);
+    // Left and top grey lines
+    dc.DrawLine(rect.x, rect.y + rect.height,
+           rect.x, rect.y);
+    dc.DrawLine(rect.x, rect.y,
+        rect.x + rect.width, rect.y);
+#else
 
-        // Left and top lines
-        dc.DrawLine(rect.x, rect.y + rect.height,
-               rect.x, rect.y);
-        dc.DrawLine(rect.x, rect.y,
-            rect.x + rect.width, rect.y);
-    #else
+    dc.DrawLine(rect.x + rect.width, rect.height + 2,
+                rect.x, rect.height + 2);
+    dc.DrawLine(rect.x + rect.width, rect.y,
+                rect.x + rect.width, rect.y + rect.height);
 
-        dc.DrawLine(rect.x + rect.width, rect.height + 2,
-                    rect.x, rect.height + 2);
-        dc.DrawLine(rect.x + rect.width, rect.y,
-                    rect.x + rect.width, rect.y + rect.height);
-
-        dc.SetPen((style == wxSB_RAISED) ? m_hilightPen : m_mediumShadowPen);
-        dc.DrawLine(rect.x, rect.y,
-                    rect.x + rect.width, rect.y);
-        dc.DrawLine(rect.x, rect.y + rect.height,
-                   rect.x, rect.y);
+    dc.SetPen(m_mediumShadowPen);
+    dc.DrawLine(rect.x, rect.y,
+                rect.x + rect.width, rect.y);
+    dc.DrawLine(rect.x, rect.y + rect.height,
+                rect.x, rect.y);
 
 #endif
-    }
 
     DrawFieldText(dc, i);
 }
@@ -315,7 +289,7 @@ void wxStatusBarGeneric::DrawField(wxDC& dc, int i)
   // Get the position and size of the field's internal bounding rectangle
 bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 {
-    wxCHECK_MSG( (n >= 0) && (n < m_nFields), false,
+    wxCHECK_MSG( (n >= 0) && (n < m_nFields), FALSE,
                  _T("invalid status bar field index") );
 
     // FIXME: workarounds for OS/2 bugs have nothing to do here (VZ)
@@ -349,14 +323,14 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
     rect.width = m_widthsAbs[n] - 2*m_borderX;
     rect.height = height - 2*m_borderY;
 
-    return true;
+    return TRUE;
 }
 
 // Initialize colours
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#if defined(__WIN95__) || defined(__WXMAC__)
+#if defined(__WIN95__)
     wxColour mediumShadowColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 
@@ -364,17 +338,23 @@ void wxStatusBarGeneric::InitColours()
     m_hilightPen = wxPen(hilightColour, 1, wxSOLID);
 #elif defined(__WXPM__)
     m_mediumShadowPen = wxPen(wxColour(127, 127, 127), 1, wxSOLID);
-    m_hilightPen = wxPen(_T("WHITE"), 1, wxSOLID);
+    m_hilightPen = wxPen("WHITE", 1, wxSOLID);
 
     wxColour                        vColour;
 
-    vColour.Set(wxString(_T("LIGHT GREY")));
+    vColour.Set(wxString("LIGHT GREY"));
     SetBackgroundColour(vColour);
-    vColour.Set(wxString(_T("BLACK")));
+    vColour.Set(wxString("BLACK"));
     SetForegroundColour(vColour);
+    m_defaultStatusBarFont = *wxSMALL_FONT;
 #else
     m_mediumShadowPen = wxPen("GREY", 1, wxSOLID);
     m_hilightPen = wxPen("WHITE", 1, wxSOLID);
+#endif
+
+#ifndef __WXPM__
+    m_defaultStatusBarFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 #endif
 }
 
@@ -382,6 +362,7 @@ void wxStatusBarGeneric::InitColours()
 void wxStatusBarGeneric::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
     InitColours();
+    Refresh();
 
     // Propagate the event to the non-top-level children
     wxWindow::OnSysColourChanged(event);
@@ -397,7 +378,7 @@ void wxStatusBarGeneric::SetMinHeight(int height)
 
     if ( height > (11*y)/10 )
     {
-        SetSize(wxDefaultCoord, wxDefaultCoord, wxDefaultCoord, height + 2*m_borderY);
+        SetSize(-1, -1, -1, height + 2*m_borderY);
     }
 }
 
@@ -429,10 +410,10 @@ void wxStatusBarGeneric::OnLeftDown(wxMouseEvent& event)
     }
     else
     {
-        event.Skip( true );
+        event.Skip( TRUE );
     }
 #else
-    event.Skip( true );
+    event.Skip( TRUE );
 #endif
 }
 
@@ -463,10 +444,10 @@ void wxStatusBarGeneric::OnRightDown(wxMouseEvent& event)
     }
     else
     {
-        event.Skip( true );
+        event.Skip( TRUE );
     }
 #else
-    event.Skip( true );
+    event.Skip( TRUE );
 #endif
 }
 

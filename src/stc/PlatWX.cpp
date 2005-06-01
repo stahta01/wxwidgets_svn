@@ -1,5 +1,5 @@
 // Scintilla source code edit control
-// PlatWX.cxx - implementation of platform facilities on wxWidgets
+// PlatWX.cxx - implementation of platform facilities on wxWindows
 // Copyright 1998-1999 by Neil Hodgson <neilh@scintilla.org>
 //                        Robin Dunn <robin@aldunn.com>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -18,15 +18,19 @@
 #include "wx/stc/stc.h"
 
 
+#ifdef __WXGTK__
+#include <gtk/gtk.h>
+#endif
+
 
 Point Point::FromLong(long lpoint) {
     return Point(lpoint & 0xFFFF, lpoint >> 16);
 }
 
 wxRect wxRectFromPRectangle(PRectangle prc) {
-    wxRect r(prc.left, prc.top,
-             prc.Width(), prc.Height());
-    return r;
+    wxRect rc(prc.left, prc.top,
+              prc.right-prc.left, prc.bottom-prc.top);
+    return rc;
 }
 
 PRectangle PRectangleFromwxRect(wxRect rc) {
@@ -36,9 +40,7 @@ PRectangle PRectangleFromwxRect(wxRect rc) {
 
 wxColour wxColourFromCA(const ColourAllocated& ca) {
     ColourDesired cd(ca.AsLong());
-    return wxColour((unsigned char)cd.GetRed(),
-                    (unsigned char)cd.GetGreen(),
-                    (unsigned char)cd.GetBlue());
+    return wxColour(cd.GetRed(), cd.GetGreen(), cd.GetBlue());
 }
 
 //----------------------------------------------------------------------
@@ -98,29 +100,98 @@ Font::Font() {
 Font::~Font() {
 }
 
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic, bool extraFontFlag) {
+void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+    wxFontEncoding encoding;
 
     Release();
 
-    // The minus one is done because since Scintilla uses SC_SHARSET_DEFAULT
-    // internally and we need to have wxFONENCODING_DEFAULT == SC_SHARSET_DEFAULT
-    // so we adjust the encoding before passing it to Scintilla.  See also
-    // wxStyledTextCtrl::StyleSetCharacterSet
-    wxFontEncoding encoding = (wxFontEncoding)(characterSet-1);
-    
+    switch (characterSet) {
+        default:
+        case wxSTC_CHARSET_ANSI:
+        case wxSTC_CHARSET_DEFAULT:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_BALTIC:
+            encoding = wxFONTENCODING_ISO8859_13;
+            break;
+
+        case wxSTC_CHARSET_CHINESEBIG5:
+            encoding = wxFONTENCODING_CP950;
+            break;
+
+        case wxSTC_CHARSET_EASTEUROPE:
+            encoding = wxFONTENCODING_ISO8859_2;
+            break;
+
+        case wxSTC_CHARSET_GB2312:
+            encoding = wxFONTENCODING_CP936;
+            break;
+
+        case wxSTC_CHARSET_GREEK:
+            encoding = wxFONTENCODING_ISO8859_7;
+            break;
+
+        case wxSTC_CHARSET_HANGUL:
+            encoding = wxFONTENCODING_CP949;
+            break;
+
+        case wxSTC_CHARSET_MAC:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_OEM:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_RUSSIAN:
+            encoding = wxFONTENCODING_KOI8;
+            break;
+
+        case wxSTC_CHARSET_SHIFTJIS:
+            encoding = wxFONTENCODING_CP932;
+            break;
+
+        case wxSTC_CHARSET_SYMBOL:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_TURKISH:
+            encoding = wxFONTENCODING_ISO8859_9;
+            break;
+
+        case wxSTC_CHARSET_JOHAB:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_HEBREW:
+            encoding = wxFONTENCODING_ISO8859_8;
+            break;
+
+        case wxSTC_CHARSET_ARABIC:
+            encoding = wxFONTENCODING_ISO8859_6;
+            break;
+
+        case wxSTC_CHARSET_VIETNAMESE:
+            encoding = wxFONTENCODING_DEFAULT;
+            break;
+
+        case wxSTC_CHARSET_THAI:
+            encoding = wxFONTENCODING_ISO8859_11;
+            break;
+    }
+
     wxFontEncodingArray ea = wxEncodingConverter::GetPlatformEquivalents(encoding);
     if (ea.GetCount())
         encoding = ea[0];
 
-    wxFont* font = new wxFont(size,
+    id = new wxFont(size,
                     wxDEFAULT,
                     italic ? wxITALIC :  wxNORMAL,
                     bold ? wxBOLD : wxNORMAL,
                     false,
                     stc2wx(faceName),
                     encoding);
-    font->SetNoAntiAliasing(!extraFontFlag);
-    id = font;
 }
 
 
@@ -374,18 +445,42 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font, int ybase,
 
 void SurfaceImpl::MeasureWidths(Font &font, const char *s, int len, int *positions) {
 
-    wxString   str = stc2wx(s, len);
-    wxArrayInt tpos;
-
+    wxString str = stc2wx(s, len);
     SetFont(font);
 
-    hdc->GetPartialTextExtents(str, tpos);
+#ifndef __WXMAC__
+    // Calculate the position of each character based on the widths of
+    // the previous characters
+    int* tpos = new int[len+1];
+    int totalWidth = 0;
+    size_t i;
+    for (i=0; i<str.Length(); i++) {
+        int w, h;
+        hdc->GetTextExtent(str[i], &w, &h);
+        totalWidth += w;
+        tpos[i] = totalWidth;
+    }
+#else
+    // Instead of a running total, remeasure from the begining of the
+    // text for each character's position.  This is because with AA fonts
+    // on OS X widths can be fractions of pixels wide when more than one
+    // are drawn together, so the sum of all character widths is not necessarily
+    // (and probably not) the same as the whole string width.
+    int* tpos = new int[len+1];
+    size_t i;
+    for (i=0; i<str.Length(); i++) {
+        int w, h;
+        hdc->GetTextExtent(str.Left(i+1), &w, &h);
+        tpos[i] = w;
+    }
+#endif
+
 
 #if wxUSE_UNICODE
     // Map the widths for UCS-2 characters back to the UTF-8 input string
     // NOTE:  I don't think this is right for when sizeof(wxChar) > 2, ie wxGTK2
     // so figure it out and fix it!
-    size_t i = 0;
+    i = 0;
     size_t ui = 0;
     while ((int)i < len) {
         unsigned char uch = (unsigned char)s[i];
@@ -403,12 +498,10 @@ void SurfaceImpl::MeasureWidths(Font &font, const char *s, int len, int *positio
 #else
 
     // If not unicode then just use the widths we have
-#if wxUSE_STL
-    std::copy(tpos.begin(), tpos.end(), positions);
-#else
-    memcpy(positions, tpos.begin(), len * sizeof(int));
+    memcpy(positions, tpos, len * sizeof(*tpos));
 #endif
-#endif
+
+    delete [] tpos;
 }
 
 
@@ -462,7 +555,7 @@ int SurfaceImpl::ExternalLeading(Font &font) {
 
 int SurfaceImpl::Height(Font &font) {
     SetFont(font);
-    return hdc->GetCharHeight() + 1;
+    return hdc->GetCharHeight();
 }
 
 int SurfaceImpl::AverageCharWidth(Font &font) {
@@ -505,7 +598,7 @@ Window::~Window() {
 
 void Window::Destroy() {
     if (id) {
-        Show(false);
+        Show(FALSE);
         GETWIN(id)->Destroy();
     }
     id = 0;
@@ -612,40 +705,17 @@ public:
     wxSTCListBox(wxWindow* parent, wxWindowID id,
                  const wxPoint& pos, const wxSize& size,
                  long style)
-        : wxListView()
-    {
-#ifdef __WXMSW__
-        Hide(); // don't flicker as we move it around...
-#endif
-        Create(parent, id, pos, size, style);
-    }
-
+        : wxListView(parent, id, pos, size, style)
+    {}
 
     void OnFocus(wxFocusEvent& event) {
         GetParent()->SetFocus();
         event.Skip();
     }
 
-    void OnKillFocus(wxFocusEvent& WXUNUSED(event)) {
+    void OnKillFocus(wxFocusEvent& event) {
         // Do nothing.  Prevents base class from resetting the colors...
     }
-
-#ifdef __WXMAC__
-    // For some reason I don't understand yet the focus doesn't really leave
-    // the listbox like it should, so if we get any events feed them back to
-    // the wxSTC
-    void OnKeyDown(wxKeyEvent& event) {
-        GetGrandParent()->GetEventHandler()->ProcessEvent(event);
-    }
-    void OnChar(wxKeyEvent& event) {
-        GetGrandParent()->GetEventHandler()->ProcessEvent(event);
-    }
-
-    // And we need to force the focus back when being destroyed
-    ~wxSTCListBox() {
-        GetGrandParent()->SetFocus();
-    }
-#endif
 
 private:
     DECLARE_EVENT_TABLE()
@@ -654,146 +724,12 @@ private:
 BEGIN_EVENT_TABLE(wxSTCListBox, wxListView)
     EVT_SET_FOCUS( wxSTCListBox::OnFocus)
     EVT_KILL_FOCUS(wxSTCListBox::OnKillFocus)
-#ifdef __WXMAC__
-    EVT_KEY_DOWN(  wxSTCListBox::OnKeyDown)
-    EVT_CHAR(      wxSTCListBox::OnChar)
-#endif
 END_EVENT_TABLE()
 
 
 
-#if wxUSE_POPUPWIN //-----------------------------------   
-#include <wx/popupwin.h>
 
-
-//
-// TODO: Refactor these two classes to have a common base (or a mix-in) to get
-// rid of the code duplication.  (Either that or convince somebody to
-// implement wxPopupWindow for the Mac!!)
-//
-// In the meantime, be careful to duplicate any changes as needed...
-//    
-    
-// A popup window to place the wxSTCListBox upon    
-class wxSTCListBoxWin : public wxPopupWindow
-{
-private:
-    wxListView*         lv;
-    CallBackAction      doubleClickAction;
-    void*               doubleClickActionData;
-public:
-    wxSTCListBoxWin(wxWindow* parent, wxWindowID id) :
-        wxPopupWindow(parent, wxBORDER_NONE)
-    {
-        SetBackgroundColour(*wxBLACK);  // for our simple border
-
-        lv = new wxSTCListBox(parent, id, wxDefaultPosition, wxDefaultSize,
-                              wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER | wxBORDER_NONE);
-        lv->SetCursor(wxCursor(wxCURSOR_ARROW));
-        lv->InsertColumn(0, wxEmptyString);
-        lv->InsertColumn(1, wxEmptyString);
-
-        // NOTE: We need to fool the wxListView into thinking that it has the
-        // focus so it will use the normal selection colour and will look
-        // "right" to the user.  But since the wxPopupWindow or its children
-        // can't receive focus then we have to pull a fast one and temporarily
-        // parent the listctrl on the STC window and then call SetFocus and
-        // then reparent it back to the popup. 
-        lv->SetFocus();
-        lv->Reparent(this);
-#ifdef __WXMSW__
-        lv->Show();
-#endif
-    }
-
-
-    // Set position in client coords
-    virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO) {
-        if (x != wxDefaultCoord) {
-            GetParent()->ClientToScreen(&x, NULL);
-        }
-        if (y != wxDefaultCoord) {
-            GetParent()->ClientToScreen(NULL, &y);
-        }
-        wxPopupWindow::DoSetSize(x, y, width, height, sizeFlags);
-    }
-
-    // return position as if it were in client coords
-    virtual void DoGetPosition( int *x, int *y ) const {
-        int sx, sy;
-        wxPopupWindow::DoGetPosition(&sx, &sy);
-        GetParent()->ScreenToClient(&sx, &sy);
-        if (x) *x = sx;
-        if (y) *y = sy;
-    }
-
-
-    bool Destroy() {
-        if ( !wxPendingDelete.Member(this) )
-            wxPendingDelete.Append(this);
-        return true;
-    }
-
-
-    int IconWidth() {
-        wxImageList* il = lv->GetImageList(wxIMAGE_LIST_SMALL);
-        if (il != NULL) {
-            int w, h;
-            il->GetSize(0, w, h);
-            return w;
-        }
-        return 0;
-    }
-
-
-    void SetDoubleClickAction(CallBackAction action, void *data) {
-        doubleClickAction = action;
-        doubleClickActionData = data;
-    }
-
-
-    void OnFocus(wxFocusEvent& event) {
-        GetParent()->SetFocus();
-        event.Skip();
-    }
-
-    void OnSize(wxSizeEvent& event) {
-        // resize the child
-        wxSize sz = GetSize();
-        sz.x -= 2;
-        sz.y -= 2;
-        lv->SetSize(1, 1, sz.x, sz.y);
-        // reset the column widths
-        lv->SetColumnWidth(0, IconWidth()+4);
-        lv->SetColumnWidth(1, sz.x - 2 - lv->GetColumnWidth(0) -
-                           wxSystemSettings::GetMetric(wxSYS_VSCROLL_X));
-        event.Skip();
-    }
-
-    void OnActivate(wxListEvent& WXUNUSED(event)) {
-        doubleClickAction(doubleClickActionData);
-    }
-
-    wxListView* GetLB() { return lv; }
-
-private:
-    DECLARE_EVENT_TABLE()
-
-};
-
-BEGIN_EVENT_TABLE(wxSTCListBoxWin, wxPopupWindow)
-    EVT_SET_FOCUS          (          wxSTCListBoxWin::OnFocus)
-    EVT_SIZE               (          wxSTCListBoxWin::OnSize)
-    EVT_LIST_ITEM_ACTIVATED(wxID_ANY, wxSTCListBoxWin::OnActivate)
-END_EVENT_TABLE()
-
-    
-
-#else // wxUSE_POPUPWIN -----------------------------------
-
-// A normal window to place the wxSTCListBox upon.
+// A window to place the wxSTCListBox upon
 class wxSTCListBoxWin : public wxWindow {
 private:
     wxListView*         lv;
@@ -801,9 +737,10 @@ private:
     void*               doubleClickActionData;
 public:
     wxSTCListBoxWin(wxWindow* parent, wxWindowID id) :
-        wxWindow(parent, id, wxDefaultPosition, wxSize(0,0), wxSIMPLE_BORDER )
+        wxWindow(parent, id, wxDefaultPosition, wxSize(0,0), wxNO_BORDER )
     {
 
+        SetBackgroundColour(*wxBLACK);
         lv = new wxSTCListBox(this, id, wxDefaultPosition, wxDefaultSize,
                               wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER | wxNO_BORDER);
         lv->SetCursor(wxCursor(wxCURSOR_ARROW));
@@ -817,26 +754,18 @@ public:
         Hide();
     }
 
-
+    
     // On OSX and (possibly others) there can still be pending
     // messages/events for the list control when Scintilla wants to
     // close it, so do a pending delete of it instead of destroying
     // immediately.
     bool Destroy() {
-#ifdef __WXMAC__
-        // The bottom edge of this window is not getting properly
-        // refreshed upon deletion, so help it out...
-        wxWindow* p = GetParent();
-        wxRect r(GetPosition(), GetSize());
-        r.SetHeight(r.GetHeight()+1);
-        p->Refresh(false, &r);
-#endif
         if ( !wxPendingDelete.Member(this) )
             wxPendingDelete.Append(this);
-        return true;
+        return TRUE;
     }
 
-
+    
     int IconWidth() {
         wxImageList* il = lv->GetImageList(wxIMAGE_LIST_SMALL);
         if (il != NULL) {
@@ -860,9 +789,9 @@ public:
     }
 
     void OnSize(wxSizeEvent& event) {
-        // resize the child
+        // resize the child, leaving a 1 pixel border
         wxSize sz = GetClientSize();
-        lv->SetSize(sz);
+        lv->SetSize(1, 1, sz.x-2, sz.y-2);
         // reset the column widths
         lv->SetColumnWidth(0, IconWidth()+4);
         lv->SetColumnWidth(1, sz.x - 2 - lv->GetColumnWidth(0) -
@@ -870,15 +799,7 @@ public:
         event.Skip();
     }
 
-#ifdef __WXMAC__
-    virtual bool Show(bool show = true) {
-        bool rv = wxWindow::Show(show);
-        GetParent()->Refresh(false);
-        return rv;
-    }
-#endif
-    
-    void OnActivate(wxListEvent& WXUNUSED(event)) {
+    void OnActivate(wxListEvent& event) {
         doubleClickAction(doubleClickActionData);
     }
 
@@ -890,12 +811,11 @@ private:
 
 
 BEGIN_EVENT_TABLE(wxSTCListBoxWin, wxWindow)
-    EVT_SET_FOCUS          (          wxSTCListBoxWin::OnFocus)
-    EVT_SIZE               (          wxSTCListBoxWin::OnSize)
-    EVT_LIST_ITEM_ACTIVATED(wxID_ANY, wxSTCListBoxWin::OnActivate)
+    EVT_SET_FOCUS          (    wxSTCListBoxWin::OnFocus)
+    EVT_SIZE               (    wxSTCListBoxWin::OnSize)
+    EVT_LIST_ITEM_ACTIVATED(-1, wxSTCListBoxWin::OnActivate)
 END_EVENT_TABLE()
 
-#endif // wxUSE_POPUPWIN -----------------------------------
 
 
 inline wxSTCListBoxWin* GETLBW(WindowID win) {
@@ -935,6 +855,7 @@ public:
     virtual int GetSelection();
     virtual int Find(const char *prefix);
     virtual void GetValue(int n, char *value, int len);
+    virtual void Sort();
     virtual void RegisterImage(int type, const char *xpm_data);
     virtual void ClearRegisteredImages();
     virtual void SetDoubleClickAction(CallBackAction, void *);
@@ -1056,10 +977,10 @@ int ListBoxImpl::Length() {
 
 
 void ListBoxImpl::Select(int n) {
-    bool select = true;
+    bool select = TRUE;
     if (n == -1) {
         n = 0;
-        select = false;
+        select = FALSE;
     }
     GETLB(id)->Focus(n);
     GETLB(id)->Select(n, select);
@@ -1073,7 +994,7 @@ int ListBoxImpl::GetSelection() {
 
 int ListBoxImpl::Find(const char *WXUNUSED(prefix)) {
     // No longer used
-    return wxNOT_FOUND;
+    return -1;
 }
 
 
@@ -1087,15 +1008,17 @@ void ListBoxImpl::GetValue(int n, char *value, int len) {
     value[len-1] = '\0';
 }
 
+void ListBoxImpl::Sort() {
+}
+
 
 void ListBoxImpl::RegisterImage(int type, const char *xpm_data) {
     wxMemoryInputStream stream(xpm_data, strlen(xpm_data)+1);
-    wxImage img(stream, wxBITMAP_TYPE_XPM);
-    wxBitmap bmp(img);
+    wxBitmap bmp(wxImage(stream, wxBITMAP_TYPE_XPM));
 
     if (! imgList) {
         // assumes all images are the same size
-        imgList = new wxImageList(bmp.GetWidth(), bmp.GetHeight(), true);
+        imgList = new wxImageList(bmp.GetWidth(), bmp.GetHeight(), TRUE);
         imgTypeMap = new wxArrayInt;
     }
 
@@ -1197,7 +1120,7 @@ unsigned int Platform::DoubleClickTime() {
 }
 
 bool Platform::MouseButtonBounce() {
-    return false;
+	return FALSE;
 }
 void Platform::DebugDisplay(const char *s) {
     wxLogDebug(stc2wx(s));
@@ -1259,31 +1182,31 @@ void Platform::DebugPrintf(const char *format, ...) {
 static bool assertionPopUps = true;
 
 bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
-    bool ret = assertionPopUps;
-    assertionPopUps = assertionPopUps_;
-    return ret;
+	bool ret = assertionPopUps;
+	assertionPopUps = assertionPopUps_;
+	return ret;
 }
 
 void Platform::Assert(const char *c, const char *file, int line) {
-    char buffer[2000];
-    sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
-    if (assertionPopUps) {
-        /*int idButton = */
-        wxMessageBox(stc2wx(buffer),
-                     wxT("Assertion failure"),
-                     wxICON_HAND | wxOK);
-//      if (idButton == IDRETRY) {
-//          ::DebugBreak();
-//      } else if (idButton == IDIGNORE) {
-//          // all OK
-//      } else {
-//          abort();
-//      }
-    } else {
-        strcat(buffer, "\r\n");
-        Platform::DebugDisplay(buffer);
-        abort();
-    }
+	char buffer[2000];
+	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
+	if (assertionPopUps) {
+            /*int idButton = */
+            wxMessageBox(stc2wx(buffer),
+                         wxT("Assertion failure"),
+                         wxICON_HAND | wxOK);
+//  		if (idButton == IDRETRY) {
+//  			::DebugBreak();
+//  		} else if (idButton == IDIGNORE) {
+//  			// all OK
+//  		} else {
+//  			abort();
+//  		}
+	} else {
+		strcat(buffer, "\r\n");
+		Platform::DebugDisplay(buffer);
+		abort();
+	}
 }
 
 
@@ -1325,46 +1248,17 @@ double ElapsedTime::Duration(bool reset) {
 //----------------------------------------------------------------------
 
 #if wxUSE_UNICODE
-
-#include "UniConversion.h"
-
-// Convert using Scintilla's functions instead of wx's, Scintilla's are more
-// forgiving and won't assert...
-
 wxString stc2wx(const char* str, size_t len)
 {
-    if (!len)
-        return wxEmptyString;
+    char *buffer=new char[len+1];
+    strncpy(buffer, str, len);
+    buffer[len]=0;
 
-    size_t wclen = UCS2Length(str, len);
-    wxWCharBuffer buffer(wclen+1);
+    wxString cstr(buffer, wxConvUTF8);
 
-    size_t actualLen = UCS2FromUTF8(str, len, buffer.data(), wclen+1);
-    return wxString(buffer.data(), actualLen);
+    delete[] buffer;
+    return cstr;
 }
-
-
-
-wxString stc2wx(const char* str)
-{
-    return stc2wx(str, strlen(str));
-}
-
-
-const wxWX2MBbuf wx2stc(const wxString& str)
-{
-    const wchar_t* wcstr = str.c_str();
-    size_t wclen         = str.length();
-    size_t len           = UTF8Length(wcstr, wclen);
-
-    wxCharBuffer buffer(len+1);
-    UTF8FromUCS2(wcstr, wclen, buffer.data(), len);
-
-    // TODO check NULL termination!!
-
-    return buffer;
-}
-
 #endif
 
 

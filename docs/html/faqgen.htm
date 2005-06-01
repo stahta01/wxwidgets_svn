@@ -1,3 +1,4 @@
+
 <HTML>
 
 <HEAD>
@@ -41,7 +42,6 @@ See also <a href="faq.htm">top-level FAQ page</a>.
 <li><a href="#jave">What about Java?</a></li>
 <li><a href="#dotnet">What about .NET/Mono?</a></li>
 <li><a href="#help">How can I help the project?</a></li>
-<li><a href="#newport">How do I start a new port?</a></li>
 </ul>
 <hr>
 
@@ -53,8 +53,8 @@ so your program will take on the native &#39;look and feel&#39; that users are f
 
 Although GUI applications are mostly built programmatically, there are several dialog editors to help
 build attractive dialogs and panels. Robert Roebling&#39;s <a href="http://www.roebling.com">wxDesigner</a>
-and Anthemion Software&#39;s <a href="http://www.anthemion.co.uk/dialogblocks/" target=_new>DialogBlocks</a>
-are two commercial examples, but there are others: see the <a href="lnk_tool.htm">Useful Tools</a> page.<P>
+and Anthemion Software's <a href="http://www.anthemion.co.uk/dialogblocks/" target=_new>DialogBlocks</a>
+are two commercial examples, but there are others: see the <a href="lnk_tools.htm">Useful Tools</a> page.<P>
 
 You don&#39;t have to use C++ to use wxWidgets: there is a <a href="http://wxpython.org">Python interface</a> for wxWidgets 2,
 and also a <a href="http://wxperl.sourceforge.net" target=_top>Perl interface</a>.
@@ -139,10 +139,10 @@ platform-independent code, such as the wxTreeCtrl and wxListCtrl classes.<P>
 No. This is a much-discussed topic that has (many times) ended with the conclusion that it is in
 wxWidgets&#39; best interests to avoid use of templates. Not all compilers can handle
 templates adequately so it would dramatically reduce the number of compilers
-and platforms that could be supported. It would also be undesirable to make
+and platforms that could be supported. It would also be undersirable to make
 wxWidgets dependent on another large library that may have to be downloaded and installed.
 In addition, use of templates can lead to executable bloat, which is something
-wxWidgets 2 is strenuously trying to avoid.<P>
+wxWidgets 2 is strenously trying to avoid.<P>
 
 The standard C++ string class is not used, again because it is not available to all compilers,
 and it is not necessarily a very efficient implementation. Also, we retain more flexibility
@@ -276,29 +276,29 @@ from Java, and the level of interest in wxWidgets is as high as ever.<P>
 Microsoft is spending a lot on promoting the .NET initiative, which
 is a set of languages, APIs and web service components for Windows.
 Ximian has started an open source version of .NET, mostly for Linux.
-C&#35; is Microsoft&#39;s alternative to Java, supporting &#39;managed code&#39;,
+C&#35; is Microsoft's alternative to Java, supporting 'managed code',
 garbage collection and various other Java-like language features.<P>
 
 Although this may be attractive to some developers, there
 is a variety of reasons why the .NET/Mono combination is unlikely
 to make wxWidgets redundant. Please note that the following comments
-are Julian Smart&#39;s opinions.<P>
+are Julian Smart's opinions.<P>
 
 <ol>
 <li>Not everyone wants or needs net services.
 <li>C++ will be used for a long time to come; compared with C++, C&#35; is a recent development and its future is not certain.
 <li>Mono Forms may only target Winelib (at least to begin with), so the end result is not as native as
-wxWidgets (I&#39;m aware there is GTK&#35; for use with the C&#35; language).
+wxWidgets (I'm aware there is GTK&#35; for use with the C&#35; language).
 <li>C&#35; is usually byte-compiled and therefore slower. Plus, .NET adds a layer of overhead to the client computer
 that wxWidgets does not require.
-<li>Mono hasn&#39;t proven its long-term viability yet (it&#39;s a complex system of components); wxWidgets is ready now.
+<li>Mono hasn't proven its long-term viability yet (it's a complex system of components); wxWidgets is ready now.
 <li>You may not wish to buy into Microsoft marketing spin and APIs.
 <li>Microsoft may at some point sue developers of non-Microsoft .NET implementations. After all,
-platform-independence is not in Microsoft&#39;s interest.
+platform-independence is not in Microsoft's interest.
 <li>.NET might never be implemented on some platforms, especially Mac and embedded variants of Linux.
 <li>wxPython and other language variants provide further reasons for wxWidgets to continue.
-<li>The same issue exists for Qt: if Qt sales remain strong, it&#39;s a good indication that
-the market for a C++-based approach is still there. (Either that, or everyone&#39;s turning to wxWidgets!)
+<li>The same issue exists for Qt: if Qt sales remain strong, it's a good indication that
+the market for a C++-based approach is still there. (Either that, or everyone's turning to wxWidgets!)
 </ol>
 
 There is nothing to stop folk from developing a C&#35; version of the wxWidgets API;
@@ -312,60 +312,6 @@ Update: a <a href="http://wxnet.sourceforge.net/" target=_new>wx.NET</a> project
 Please check out the <a href="http://www.wxwidgets.org/develop2.htm">Community</a> pages,
 in particular the <a href="projects.htm">suggested projects</a>, and
 mail the developers&#39; mailing list with your own suggestions.<P>
-
-<H3><a name="newport">How do I start a new port?</a></H3>
-
-Please subscribe to the wx-dev <a href="maillst2.htm">developers&#39; mailing list</a> and
-ask if anyone else is interested in helping with the port, or
-has specific suggestions. Also please read the <a href="standard.htm">coding standards</a>.
-
-<P>
-Each port consists of a platform-specific part (e.g. src/msw, include/wx/msw),
-a generic set of widgets and dialogs for when the port doesn&#39;t support
-them natively (src/generic, include/wx/generic) and the common code
-that all ports use (src/common, include/wx). By browsing the source
-you should get a good idea of the general pattern.<P>
-
-Take a port that most closely matches your port, and strip out
-the implementation so you have a skeleton port that compiles. Ask on wx-dev
-first for the wxStubs port - however, any such predefined skeleton
-port may be out of date, so make a judgement on whether to use it.
-Perhaps it will still save you time to clean up wxStubs, and
-others may benefit from this too.<P>
-
-You will need to define a symbol for the new port, e.g. __WXXBOX__.
-Look at files such as wx/defs.h, wx/wxchar.h for areas where you&#39;ll
-need to add to existing conditionals to set up wide character
-support and other issues. If the GUI runs on a Unix variant,
-define the __UNIX__ variable in your makefile.<P>
-
-Then you can start implementing the port, starting with
-wxWindow, wxTopLevelWindow, wxFrame, wxDialog so you
-can get the minimal sample running as soon as possible.<P>
-
-If GDI objects (wxPen, wxBrush, etc.) are not concepts in your
-native GUI, you may wish to use very generic versions of
-some of these - see the wxX11 port.<P>
-
-Consider using the wxUniversal widget set as a quick way
-to implement wxWidgets on your platform. You only need
-to define some basic classes such as device contexts,
-wxWindow, wxTopLevelWindow, GDI objects etc. and
-the actual widgets will be drawn for you. See wxX11,
-wxMGL, and wxMSW/Univ for sample wxUniversal ports.<P>
-
-To begin with, you can use whatever makefiles or project
-files work for you. Look at existing makefiles to see what
-generic/common/Unix files need to be included. Later, you&#39;ll want to integrate support
-for your port into configure (Unix-like systems and gcc under Windows),
-and bakefile (for other makefiles on Windows).<P>
-
-Submit your port as patches via SourceForge; you might
-wish to separate it into one patch that touches common headers
-and source files, and another containing the port-specific code, to make
-it much easier for us to review and apply the patches.<P>
-
-Good luck!
 
 </font>
 

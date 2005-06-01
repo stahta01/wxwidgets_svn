@@ -12,7 +12,7 @@
 #ifndef _WX_DCMEMORY_H_
 #define _WX_DCMEMORY_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dcmemory.h"
 #endif
 
@@ -38,7 +38,7 @@ protected:
     void Init();
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMemoryDC)
+    DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 
 #endif

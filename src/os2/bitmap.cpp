@@ -194,7 +194,7 @@ wxBitmap::wxBitmap(
         //
         // We assume that it is in XBM format which is not quite the same as
         // the format CreateBitmap() wants because the order of bytes in the
-        // line is reversed!
+        // line is inversed!
         //
         const size_t                nBytesPerLine = (nWidth + 7) / 8;
         const size_t                nPadding = nBytesPerLine % 2;
@@ -383,6 +383,10 @@ bool wxBitmap::Create(
     }
     SetHBITMAP((WXHBITMAP)hBmp);
 
+#if WXWIN_COMPATIBILITY_2
+    GetBitmapData()->m_bOk = hBmp != 0;
+#endif // WXWIN_COMPATIBILITY_2
+
     return Ok();
 } // end of wxBitmap::Create
 
@@ -412,6 +416,8 @@ bool wxBitmap::LoadFile(
 , long                              lType
 )
 {
+    HPS                             hPs = NULLHANDLE;
+
     UnRef();
 
     wxBitmapHandler*                pHandler = wxDynamicCast( FindHandler(lType)
@@ -451,7 +457,8 @@ bool wxBitmap::Create(
 
     if (!pHandler)
     {
-        wxLogDebug(wxT("Failed to create bitmap: no bitmap handler for type %ld defined."), lType);
+        wxLogDebug(wxT("Failed to create bitmap: no bitmap handler for "
+                       "type %d defined."), lType);
 
         return(FALSE);
     }
@@ -695,9 +702,9 @@ bool wxBitmap::CreateFromImage (
                                   ,PU_PELS | GPIA_ASSOC
                                  );
 
-        POINTL                      vPoint[4] = { {0, nOrigin},
-                                                  {nWidth, nHeight},
-                                                  {0, 0}, {nWidth, nHeight}
+        POINTL                      vPoint[4] = { 0, nOrigin,
+                                                  nWidth, nHeight,
+                                                  0, 0, nWidth, nHeight
                                                 };
 
 
@@ -796,9 +803,9 @@ bool wxBitmap::CreateFromImage (
                                       ,&vSize
                                       ,PU_PELS | GPIA_ASSOC
                                      );
-            POINTL vPoint2[4] = { {0, nOrigin},
-                                  {nWidth, nHeight},
-                                  {0, 0}, {nWidth, nHeight}
+            POINTL vPoint2[4] = { 0, nOrigin,
+                                  nWidth, nHeight,
+                                  0, 0, nWidth, nHeight
                                 };
             ::GpiBitBlt( hPSScreen
                         ,hPS
@@ -856,11 +863,12 @@ wxImage wxBitmap::ConvertToImage() const
     BITMAPINFOHEADER2               vDIBh;
     BITMAPINFO2                     vDIBInfo;
     HPS                             hPSMem;
+    HPS                             hPS;
     HBITMAP                         hBitmap;
     HBITMAP                         hOldBitmap;
     DEVOPENSTRUC                    vDop  = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
     SIZEL                           vSizlPage = {0,0};
-    HDC                             hDCMem = NULLHANDLE;;
+    HDC                             hDCMem;
 
     vImage.Create( nWidth
                   ,nHeight
@@ -1088,9 +1096,9 @@ wxBitmap wxBitmap::GetSubBitmap(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0, 0}, {rRect.width, rRect.height},
-                                                  {rRect.x, rRect.y},
-                                                  {rRect.x + rRect.width, rRect.y + rRect.height}
+    POINTL                          vPoint[4] = { 0, 0, rRect.width, rRect.height,
+                                                  rRect.x, rRect.y,
+                                                  rRect.x + rRect.width, rRect.y + rRect.height
                                                 };
 
     ::GpiSetBitmap(hPSSrc, (HBITMAP) GetHBITMAP());
@@ -1162,6 +1170,17 @@ void wxBitmap::SetQuality(
 
     GetBitmapData()->m_nQuality = nQ;
 } // end of wxBitmap::SetQuality
+
+#if WXWIN_COMPATIBILITY_2
+void wxBitmap::SetOk(
+  bool                              bOk
+)
+{
+    EnsureHasData();
+
+    GetBitmapData()->m_bOk = bOk;
+} // end of wxBitmap::SetOk
+#endif // WXWIN_COMPATIBILITY_2
 
 void wxBitmap::SetPalette(
   const wxPalette&                  rPalette
@@ -1250,8 +1269,8 @@ bool wxMask::Create(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0 ,0}, {rBitmap.GetWidth(), rBitmap.GetHeight()},
-                                                  {0, 0}, {rBitmap.GetWidth(), rBitmap.GetHeight()}
+    POINTL                          vPoint[4] = { 0 ,0, rBitmap.GetWidth(), rBitmap.GetHeight(),
+                                                  0, 0, rBitmap.GetWidth(), rBitmap.GetHeight()
                                                 };
 
     if (m_hMaskBitmap)
@@ -1351,6 +1370,9 @@ bool wxMask::Create(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
+    POINTL                          vPoint[4] = { 0 ,0, rBitmap.GetWidth(), rBitmap.GetHeight(),
+                                                  0, 0, rBitmap.GetWidth(), rBitmap.GetHeight()
+                                                };
 
     if (m_hMaskBitmap)
     {
@@ -1553,8 +1575,8 @@ HBITMAP wxInvertMask(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0 ,0}, {nWidth, nHeight},
-                                                  {0, 0}, {nWidth, nHeight}
+    POINTL                          vPoint[4] = { 0 ,0, nWidth, nHeight,
+                                                  0, 0, nWidth, nHeight
                                                 };
 
     memset(&vBmih, '\0', 16);

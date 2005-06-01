@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "gauge.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/gauge.h"
 
@@ -55,9 +52,10 @@ bool wxGauge::Create( wxWindow *parent,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
-    SetBestSize(size);
-    
+    PostCreation();
+
+    Show( TRUE );
+
     return TRUE;
 }
 
@@ -68,17 +66,6 @@ void wxGauge::DoSetGauge()
 
     gtk_progress_bar_update( GTK_PROGRESS_BAR(m_widget),
                              m_rangeMax ? ((float)m_gaugePos)/m_rangeMax : 0.);
-}
-
-wxSize wxGauge::DoGetBestSize() const
-{
-    wxSize best;
-    if (HasFlag(wxGA_VERTICAL))
-        best = wxSize(28, 100);
-    else
-        best = wxSize(100, 28);
-    CacheBestSize(best);
-    return best;
 }
 
 void wxGauge::SetRange( int range )
@@ -109,21 +96,10 @@ int wxGauge::GetValue() const
     return m_gaugePos;
 }
 
-wxVisualAttributes wxGauge::GetDefaultAttributes() const
+void wxGauge::ApplyWidgetStyle()
 {
-    // Visible gauge colours use a different colour state
-    return GetDefaultAttributesFromGTKWidget(m_widget,
-                                             UseGTKStyleBase(),
-                                             GTK_STATE_ACTIVE);
-
-}
-
-// static
-wxVisualAttributes
-wxGauge::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_progress_bar_new,
-                                             false, GTK_STATE_ACTIVE);
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
 #endif // wxUSE_GAUGE

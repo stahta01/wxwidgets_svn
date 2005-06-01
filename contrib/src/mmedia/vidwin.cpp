@@ -18,9 +18,7 @@
 #include "wx/wx.h"
 #endif
 
-#if defined(__WINDOWS__) && !defined(__MINGW32__) && !defined(__WATCOMC__)
-// versions of Open Watcom and MinGW tested against this source does not
-// deliver "digitalv.h" required in this feature
+#if defined(__WINDOWS__) && !defined(__GNUWIN32__)
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -49,10 +47,10 @@ wxVideoWindows::wxVideoWindows(wxInputStream& str)
   : wxVideoBaseDriver(str)
 {
     m_internal    = new wxVIDWinternal;
-    m_remove_file = true;
-    m_filename    = wxGetTempFileName(_T("wxvid"));
-    m_paused      = false;
-    m_stopped     = true;
+    m_remove_file = TRUE;
+    m_filename    = wxGetTempFileName("wxvid");
+    m_paused      = FALSE;
+    m_stopped     = TRUE;
     m_frameRate   = 1.0;
     
     wxFileOutputStream temp_file(m_filename);
@@ -65,10 +63,10 @@ wxVideoWindows::wxVideoWindows(const wxString& filename)
   : wxVideoBaseDriver(filename)
 {
     m_internal    = new wxVIDWinternal;
-    m_remove_file = false;
+    m_remove_file = FALSE;
     m_filename    = filename;
-    m_paused      = false;
-    m_stopped     = true;
+    m_paused      = FALSE;
+    m_stopped     = TRUE;
     m_frameRate   = 1.0;
     OpenFile();
 }
@@ -86,13 +84,14 @@ void wxVideoWindows::OpenFile()
     MCI_DGV_OPEN_PARMS openStruct;
     MCI_DGV_SET_PARMS setStruct;
     MCI_STATUS_PARMS statusStruct;
+    DWORD ret;
 
-    openStruct.lpstrDeviceType = _T("avivideo");
-    openStruct.lpstrElementName = (wxChar *)m_filename.c_str();
+    openStruct.lpstrDeviceType = "avivideo";
+    openStruct.lpstrElementName = (LPSTR)(m_filename.mb_str());
     openStruct.hWndParent = 0;
     
-    mciSendCommand(0, MCI_OPEN,
-             MCI_OPEN_ELEMENT|MCI_DGV_OPEN_PARENT|MCI_OPEN_TYPE|MCI_DGV_OPEN_32BIT,
+    ret = mciSendCommand(0, MCI_OPEN,
+			 MCI_OPEN_ELEMENT|MCI_DGV_OPEN_PARENT|MCI_OPEN_TYPE|MCI_DGV_OPEN_32BIT,
                          (DWORD)(LPVOID)&openStruct);
     m_internal->m_dev_id = openStruct.wDeviceID;
 
@@ -100,20 +99,20 @@ void wxVideoWindows::OpenFile()
     setStruct.dwCallback = 0;
     setStruct.dwTimeFormat = MCI_FORMAT_FRAMES;
 
-    mciSendCommand(m_internal->m_dev_id, MCI_SET, MCI_SET_TIME_FORMAT,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_SET, MCI_SET_TIME_FORMAT,
                          (DWORD)(LPVOID)&setStruct);
 
 
     statusStruct.dwCallback = 0;
     statusStruct.dwItem = MCI_DGV_STATUS_FRAME_RATE;
-    mciSendCommand(m_internal->m_dev_id, MCI_STATUS,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_STATUS,
                          MCI_STATUS_ITEM,
                          (DWORD)(LPVOID)&statusStruct);
 
     m_frameRate = ((double)statusStruct.dwReturn) / 1000;
 
     statusStruct.dwItem = MCI_DGV_STATUS_BITSPERSAMPLE;
-    mciSendCommand(m_internal->m_dev_id, MCI_STATUS, MCI_STATUS_ITEM,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_STATUS, MCI_STATUS_ITEM,
                          (DWORD)(LPVOID)&statusStruct);
     m_bps = statusStruct.dwReturn;
 
@@ -122,16 +121,16 @@ void wxVideoWindows::OpenFile()
 bool wxVideoWindows::Pause()
 {
     if (m_paused || m_stopped)
-        return true;
-    m_paused = true;
+        return TRUE;
+    m_paused = TRUE;
     return (mciSendCommand(m_internal->m_dev_id, MCI_PAUSE, MCI_WAIT, 0) == 0);
 }
 
 bool wxVideoWindows::Resume()
 {
     if (!m_paused || m_stopped)
-        return true;
-    m_paused = false;
+        return TRUE;
+    m_paused = FALSE;
     return (mciSendCommand(m_internal->m_dev_id, MCI_RESUME, 0, 0) == 0);
 }
 
@@ -149,15 +148,15 @@ bool wxVideoWindows::GetSize(wxSize& size) const
 {
     size.SetWidth(200);
     size.SetHeight(200);
-    return true;
+    return TRUE;
 }
 
-bool wxVideoWindows::SetSize(wxSize WXUNUSED(size))
+bool wxVideoWindows::SetSize(wxSize size)
 {
-    return true;
+    return TRUE;
 }
 
-bool wxVideoWindows::IsCapable(wxVideoType v_type) const
+bool wxVideoWindows::IsCapable(wxVideoType v_type)
 {
     return (v_type == wxVIDEO_MSAVI);
 }
@@ -167,12 +166,12 @@ bool wxVideoWindows::AttachOutput(wxWindow& output)
     MCI_DGV_WINDOW_PARMS win_struct;
     
     if (!wxVideoBaseDriver::AttachOutput(output))
-        return false;
+        return FALSE;
     
     win_struct.hWnd = (HWND)output.GetHWND();
     mciSendCommand(m_internal->m_dev_id, MCI_WINDOW,
-           MCI_DGV_WINDOW_HWND, (DWORD)(LPVOID)&win_struct);
-    return true;
+		   MCI_DGV_WINDOW_HWND, (DWORD)(LPVOID)&win_struct);
+    return TRUE;
 }
 
 void wxVideoWindows::DetachOutput()
@@ -183,14 +182,14 @@ void wxVideoWindows::DetachOutput()
     
     win_struct.hWnd = 0;
     mciSendCommand(m_internal->m_dev_id, MCI_WINDOW,
-           MCI_DGV_WINDOW_HWND, (DWORD)(LPVOID)&win_struct);
+		   MCI_DGV_WINDOW_HWND, (DWORD)(LPVOID)&win_struct);
 }
 
 bool wxVideoWindows::Play()
 {
     if (!m_stopped)
-        return false;
-    m_stopped = false;
+        return FALSE;
+    m_stopped = FALSE;
     return (mciSendCommand(m_internal->m_dev_id, MCI_PLAY, 0, NULL) == 0);
 }
 
@@ -199,10 +198,10 @@ bool wxVideoWindows::Stop()
     MCI_SEEK_PARMS seekStruct;
 
     if (m_stopped)
-        return false;
-    m_stopped = true;
+        return FALSE;
+    m_stopped = TRUE;
     if (::mciSendCommand(m_internal->m_dev_id, MCI_STOP, MCI_WAIT, NULL) != 0)
-      return false;
+      return FALSE;
 
     seekStruct.dwCallback = 0;
     seekStruct.dwTo = 0;

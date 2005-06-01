@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file XPM.cxx
- ** Define a class that holds data in the X Pixmap (XPM) format.
+ ** Define a class that holds data in the X Pixmap (XPM) format,
  **/
 // Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -13,10 +13,6 @@
 #include "XPM.h"
 
 static const char *NextField(const char *s) {
-	// In case there are leading spaces in the string
-	while (*s && *s == ' ') {
-		s++;
-	}
 	while (*s && *s != ' ') {
 		s++;
 	}
@@ -37,7 +33,7 @@ static size_t MeasureLength(const char *s) {
 ColourAllocated XPM::ColourFromCode(int ch) {
 	return colourCodeTable[ch]->allocated;
 #ifdef SLOW
-	for (int i=0; i<nColours; i++) {
+	for (int i=0;i<nColours;i++) {
 		if (codes[i] == ch) {
 			return colours[i].allocated;
 		}
@@ -53,13 +49,13 @@ void XPM::FillRun(Surface *surface, int code, int startX, int y, int x) {
 	}
 }
 
-XPM::XPM(const char *textForm) :
-	data(0), codes(0), colours(0), lines(0) {
+XPM::XPM(const char *textForm) : 
+	data(0),	codes(0), colours(0), lines(0) {
 	Init(textForm);
 }
 
 XPM::XPM(const char * const *linesForm) :
-	data(0), codes(0), colours(0), lines(0) {
+	data(0),	codes(0), colours(0), lines(0) {
 	Init(linesForm);
 }
 
@@ -74,10 +70,8 @@ void XPM::Init(const char *textForm) {
 	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
 		// Build the lines form out of the text form
 		const char **linesForm = LinesFormFromTextForm(textForm);
-		if (linesForm != 0) {
-			Init(linesForm);
-			delete []linesForm;
-		}
+		Init(linesForm);
+		delete []linesForm;
 	} else {
 		// It is really in line form
 		Init(reinterpret_cast<const char * const *>(textForm));
@@ -122,7 +116,7 @@ void XPM::Init(const char * const *linesForm) {
 		*nextBit++ = '\0';
 	}
 
-	for (int code=0; code<256; code++) {
+	for (int code=0;code<256; code++) {
 		colourCodeTable[code] = 0;
 	}
 
@@ -155,7 +149,7 @@ void XPM::RefreshColourPalette(Palette &pal, bool want) {
 	if (!data || !codes || !colours || !lines) {
 		return;
 	}
-	for (int i=0; i<nColours; i++) {
+	for (int i=0;i<nColours;i++) {
 		pal.WantFind(colours[i], want);
 	}
 }
@@ -164,7 +158,7 @@ void XPM::CopyDesiredColours() {
 	if (!data || !codes || !colours || !lines) {
 		return;
 	}
-	for (int i=0; i<nColours; i++) {
+	for (int i=0;i<nColours;i++) {
 		colours[i].Copy();
 	}
 }
@@ -196,11 +190,9 @@ const char **XPM::LinesFormFromTextForm(const char *textForm) {
 	const char **linesForm = 0;
 	int countQuotes = 0;
 	int strings=1;
-	int j=0;
-	for (; countQuotes < (2*strings) && textForm[j] != '\0'; j++) {
+	for (int j=0; countQuotes < (2*strings); j++) {
 		if (textForm[j] == '\"') {
 			if (countQuotes == 0) {
-				// First field: width, height, number of colors, chars per pixel
 				const char *line0 = textForm + j + 1;
 				// Skip width
 				line0 = NextField(line0);
@@ -210,23 +202,12 @@ const char **XPM::LinesFormFromTextForm(const char *textForm) {
 				// Add 1 line for each colour
 				strings += atoi(line0);
 				linesForm = new const char *[strings];
-				if (linesForm == 0) {
-					break;	// Memory error!
-				}
 			}
-			if (countQuotes / 2 >= strings) {
-				break;	// Bad height or number of colors!
-			}
-			if ((countQuotes & 1) == 0) {
+			if (linesForm && ((countQuotes & 1) == 0)) {
 				linesForm[countQuotes / 2] = textForm + j + 1;
 			}
 			countQuotes++;
 		}
-	}
-	if (textForm[j] == '\0' || countQuotes / 2 > strings) {
-		// Malformed XPM! Height + number of colors too high or too low
-		delete []linesForm;
-		linesForm = 0;
 	}
 	return linesForm;
 }
@@ -241,7 +222,7 @@ XPMSet::~XPMSet() {
 }
 
 void XPMSet::Clear() {
-	for (int i = 0; i < len; i++) {
+	for (int i=0;i<maximum;i++) {
 		delete set[i];
 	}
 	delete []set;
@@ -258,34 +239,34 @@ void XPMSet::Add(int id, const char *textForm) {
 	width = -1;
 
 	// Replace if this id already present
-	for (int i = 0; i < len; i++) {
+	for (int i=0;i<maximum;i++) {
 		if (set[i]->GetId() == id) {
 			set[i]->Init(textForm);
 			return;
 		}
 	}
 
-	// Not present, so add to end
+	// No present, so add to end
 	XPM *pxpm = new XPM(textForm);
 	if (pxpm) {
 		pxpm->SetId(id);
 		pxpm->CopyDesiredColours();
 		if (len == maximum) {
-			maximum += 64;
-			XPM **setNew = new XPM *[maximum];
-			for (int i = 0; i < len; i++) {
+			int lenNew = len + 100;
+			XPM **setNew = new XPM *[lenNew];
+			for (int i=0; i<maximum; i++) {
 				setNew[i] = set[i];
 			}
 			delete []set;
 			set = setNew;
 		}
-		set[len] = pxpm;
-		len++;
+		set[maximum] = pxpm;
+		maximum++;
 	}
 }
 
 XPM *XPMSet::Get(int id) {
-	for (int i = 0; i < len; i++) {
+	for (int i=0;i<maximum;i++) {
 		if (set[i]->GetId() == id) {
 			return set[i];
 		}
@@ -295,7 +276,7 @@ XPM *XPMSet::Get(int id) {
 
 int XPMSet::GetHeight() {
 	if (height < 0) {
-		for (int i = 0; i < len; i++) {
+		for (int i=0; i<maximum; i++) {
 			if (height < set[i]->GetHeight()) {
 				height = set[i]->GetHeight();
 			}
@@ -306,7 +287,7 @@ int XPMSet::GetHeight() {
 
 int XPMSet::GetWidth() {
 	if (width < 0) {
-		for (int i = 0; i < len; i++) {
+		for (int i=0; i<maximum; i++) {
 			if (width < set[i]->GetWidth()) {
 				width = set[i]->GetWidth();
 			}

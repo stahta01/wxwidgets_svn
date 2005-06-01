@@ -15,9 +15,6 @@ reached. This is documented in \helpref{wxFile::Eof}{wxfileeof} and
 classes reflects this difference, i.e. wxFileInputStream will report
 wxSTREAM\_EOF after having read the last byte whereas wxFFileInputStream
 will report wxSTREAM\_EOF after trying to read {\it past} the last byte.
-Related to EOF behavior, note that \helpref{SeekI()}{wxinputstreamseeki} 
-can seek beyond the end of the stream (file) and will thus not return 
-{\it wxInvalidOffset} for that.
 
 \wxheading{Derived from}
 
@@ -36,11 +33,11 @@ can seek beyond the end of the stream (file) and will thus not return
 % ----------
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFFileInputStream::wxFFileInputStream}\label{wxffileinputstreamctor}
+\membersection{wxFFileInputStream::wxFFileInputStream}
 
-\func{}{wxFFileInputStream}{\param{const wxString\&}{ filename}, \param{const wxChar *}{ mode = "rb"}}
+\func{}{wxFFileInputStream}{\param{const wxString\&}{ ifileName}}
 
-Opens the specified file using its {\it filename} name using the specified mode.
+Opens the specified file using its {\it ifilename} name in read-only mode.
 
 \func{}{wxFFileInputStream}{\param{wxFFile\&}{ file}}
 
@@ -50,17 +47,17 @@ Initializes a file stream in read-only mode using the file I/O object {\it file}
 
 Initializes a file stream in read-only mode using the specified file pointer {\it fp}.
 
-\membersection{wxFFileInputStream::\destruct{wxFFileInputStream}}\label{wxffileinputstreamdtor}
+\membersection{wxFFileInputStream::\destruct{wxFFileInputStream}}
 
 \func{}{\destruct{wxFFileInputStream}}{\void}
 
 Destructor.
 
-\membersection{wxFFileInputStream::Ok}\label{wxffileinputstreamok}
+\membersection{wxFFileInputStream::Ok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if the stream is initialized and ready.
+Returns TRUE if the stream is initialized and ready.
 
 % -----------------------------------------------------------------------------
 % wxFFileOutputStream
@@ -79,9 +76,6 @@ reached. This is documented in \helpref{wxFile::Eof}{wxfileeof} and
 classes reflects this difference, i.e. wxFileInputStream will report
 wxSTREAM\_EOF after having read the last byte whereas wxFFileInputStream
 will report wxSTREAM\_EOF after trying to read {\it past} the last byte.
-Related to EOF behavior, note that \helpref{SeekO()}{wxoutputstreamseeko} 
-can seek beyond the end of the stream (file) and will thus not return 
-{\it wxInvalidOffset} for that.
 
 \wxheading{Derived from}
 
@@ -100,11 +94,12 @@ can seek beyond the end of the stream (file) and will thus not return
 % ----------
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFFileOutputStream::wxFFileOutputStream}\label{wxffileoutputstreamctor}
+\membersection{wxFFileOutputStream::wxFFileOutputStream}
 
-\func{}{wxFFileOutputStream}{\param{const wxString\&}{ filename}, \param{const wxChar *}{ mode="w+b"}}
+\func{}{wxFFileOutputStream}{\param{const wxString\&}{ ofileName}}
 
-Opens the file with the given {\it filename} name in the specified mode.
+Creates a new file with {\it ofilename} name and initializes the stream in
+write-only mode. 
 
 \func{}{wxFFileOutputStream}{\param{wxFFile\&}{ file}}
 
@@ -114,22 +109,22 @@ Initializes a file stream in write-only mode using the file I/O object {\it file
 
 Initializes a file stream in write-only mode using the file descriptor {\it fp}.
 
-\membersection{wxFFileOutputStream::\destruct{wxFFileOutputStream}}\label{wxffileoutputstreamdtor}
+\membersection{wxFFileOutputStream::\destruct{wxFFileOutputStream}}
 
 \func{}{\destruct{wxFFileOutputStream}}{\void}
 
 Destructor.
 
-\membersection{wxFFileOutputStream::Ok}\label{wxffileoutputstreamok}
+\membersection{wxFFileOutputStream::Ok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if the stream is initialized and ready.
+Returns TRUE if the stream is initialized and ready.
 
 % -----------------------------------------------------------------------------
 % wxFFileStream
 % -----------------------------------------------------------------------------
-\section{\class{wxFFileStream}}\label{wxffilestream}
+\section{\class{wxFFileStream}}
 
 \wxheading{Derived from}
 
@@ -145,7 +140,7 @@ Returns true if the stream is initialized and ready.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFFileStream::wxFFileStream}\label{wxffilestreamctor}
+\membersection{wxFFileStream::wxFFileStream}
 
 \func{}{wxFFileStream}{\param{const wxString\&}{ iofileName}}
 

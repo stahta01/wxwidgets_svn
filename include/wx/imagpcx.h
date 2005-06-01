@@ -10,7 +10,7 @@
 #ifndef _WX_IMAGPCX_H_
 #define _WX_IMAGPCX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagpcx.h"
 #endif
 
@@ -34,8 +34,8 @@ public:
     }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
     virtual bool DoCanRead( wxInputStream& stream );
 #endif // wxUSE_STREAMS
 

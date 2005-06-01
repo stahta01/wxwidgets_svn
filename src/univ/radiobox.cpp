@@ -6,7 +6,7 @@
 // Created:     11.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univradiobox.h"
 #endif
 
@@ -34,7 +34,6 @@
     #include "wx/radiobox.h"
     #include "wx/radiobut.h"
     #include "wx/validate.h"
-    #include "wx/arrstr.h"
 #endif
 
 #include "wx/tooltip.h"
@@ -74,7 +73,7 @@ public:
         {
             if ( m_radio->OnKeyDown((wxKeyEvent &)event) )
             {
-                return true;
+                return TRUE;
             }
         }
 
@@ -102,37 +101,6 @@ void wxRadioBox::Init()
     m_majorDim = 0;
 }
 
-wxRadioBox::wxRadioBox(wxWindow *parent, wxWindowID id, const wxString& title,
-                       const wxPoint& pos, const wxSize& size,
-                       const wxArrayString& choices,
-                       int majorDim, long style,
-                       const wxValidator& val, const wxString& name)
-{
-    wxCArrayString chs(choices);
-
-    Init();
-
-    (void)Create(parent, id, title, pos, size, chs.GetCount(),
-                 chs.GetStrings(), majorDim, style, val, name);
-}
-
-bool wxRadioBox::Create(wxWindow *parent,
-                        wxWindowID id,
-                        const wxString& title,
-                        const wxPoint& pos,
-                        const wxSize& size,
-                        const wxArrayString& choices,
-                        int majorDim,
-                        long style,
-                        const wxValidator& val,
-                        const wxString& name)
-{
-    wxCArrayString chs(choices);
-
-    return Create(parent, id, title, pos, size, chs.GetCount(),
-                  chs.GetStrings(), majorDim, style, val, name);
-}
-
 bool wxRadioBox::Create(wxWindow *parent,
                         wxWindowID id,
                         const wxString& title,
@@ -142,7 +110,7 @@ bool wxRadioBox::Create(wxWindow *parent,
                         const wxString *choices,
                         int majorDim,
                         long style,
-                        const wxValidator& wxVALIDATOR_PARAM(val),
+                        const wxValidator& val,
                         const wxString& name)
 {
     // for compatibility with the other ports which don't handle (yet?)
@@ -169,7 +137,7 @@ bool wxRadioBox::Create(wxWindow *parent,
     }
 
     if ( !wxStaticBox::Create(parent, id, title, pos, size, style, name) )
-        return false;
+        return FALSE;
 
 #if wxUSE_VALIDATORS
     SetValidator(val);
@@ -185,15 +153,10 @@ bool wxRadioBox::Create(wxWindow *parent,
         SetClientSize(DoGetBestClientSize());
     }
 
-    // Need to move the radiobox in order to move the radio buttons
-    wxPoint actualPos = GetPosition();
-    wxSize actualSize = GetSize();
-    DoMoveWindow(actualPos.x, actualPos.y, actualSize.x, actualSize.y);
-
     // radiobox should already have selection so select at least one item
     SetSelection(0);
 
-    return true;
+    return TRUE;
 }
 
 wxRadioBox::~wxRadioBox()
@@ -205,7 +168,7 @@ wxRadioBox::~wxRadioBox()
     size_t count = m_buttons.GetCount();
     for ( size_t n = 0; n < count; n++ )
     {
-        m_buttons[n]->PopEventHandler(true /* delete it */);
+        m_buttons[n]->PopEventHandler(TRUE /* delete it */);
 
         delete m_buttons[n];
     }
@@ -246,7 +209,7 @@ void wxRadioBox::Append(int count, const wxString *choices)
     {
         // make the first button in the box the start of new group by giving it
         // wxRB_GROUP style
-        wxRadioButton *btn = new wxRadioButton(parent, wxID_ANY, choices[n],
+        wxRadioButton *btn = new wxRadioButton(parent, -1, choices[n],
                                                wxDefaultPosition,
                                                wxDefaultSize,
                                                n == 0 ? wxRB_GROUP : 0);
@@ -273,7 +236,7 @@ void wxRadioBox::SetSelection(int n)
     btn->SetFocus();
 
     // this will also unselect the previously selected button in our group
-    btn->SetValue(true);
+    btn->SetValue(TRUE);
 }
 
 int wxRadioBox::GetSelection() const
@@ -309,7 +272,7 @@ void wxRadioBox::OnRadioButton(wxEvent& event)
 
 wxString wxRadioBox::GetString(int n) const
 {
-    wxCHECK_MSG( IsValid(n), wxEmptyString,
+    wxCHECK_MSG( IsValid(n), _T(""),
                  _T("invalid index in wxRadioBox::GetString") );
 
     return m_buttons[n]->GetLabel();
@@ -322,18 +285,18 @@ void wxRadioBox::SetString(int n, const wxString& label)
     m_buttons[n]->SetLabel(label);
 }
 
-bool wxRadioBox::Enable(int n, bool enable)
+void wxRadioBox::Enable(int n, bool enable)
 {
-    wxCHECK_MSG( IsValid(n), false, _T("invalid index in wxRadioBox::Enable") );
+    wxCHECK_RET( IsValid(n), _T("invalid index in wxRadioBox::Enable") );
 
-    return m_buttons[n]->Enable(enable);
+    m_buttons[n]->Enable(enable);
 }
 
-bool wxRadioBox::Show(int n, bool show)
+void wxRadioBox::Show(int n, bool show)
 {
-    wxCHECK_MSG( IsValid(n), false, _T("invalid index in wxRadioBox::Show") );
+    wxCHECK_RET( IsValid(n), _T("invalid index in wxRadioBox::Show") );
 
-    return m_buttons[n]->Show(show);
+    m_buttons[n]->Show(show);
 }
 
 // ----------------------------------------------------------------------------
@@ -343,7 +306,7 @@ bool wxRadioBox::Show(int n, bool show)
 bool wxRadioBox::Enable(bool enable)
 {
     if ( !wxStaticBox::Enable(enable) )
-        return false;
+        return FALSE;
 
     // also enable/disable the buttons
     size_t count = m_buttons.GetCount();
@@ -352,13 +315,13 @@ bool wxRadioBox::Enable(bool enable)
         Enable(n, enable);
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxRadioBox::Show(bool show)
 {
     if ( !wxStaticBox::Show(show) )
-        return false;
+        return FALSE;
 
     // also show/hide the buttons
     size_t count = m_buttons.GetCount();
@@ -367,7 +330,7 @@ bool wxRadioBox::Show(bool show)
         Show(n, show);
     }
 
-    return true;
+    return TRUE;
 }
 
 wxString wxRadioBox::GetLabel() const
@@ -517,7 +480,7 @@ bool wxRadioBox::OnKeyDown(wxKeyEvent& event)
             break;
 
         default:
-            return false;
+            return FALSE;
     }
 
     int selOld = GetSelection();
@@ -530,7 +493,7 @@ bool wxRadioBox::OnKeyDown(wxKeyEvent& event)
         SendRadioEvent();
     }
 
-    return true;
+    return TRUE;
 }
 
 #endif // wxUSE_RADIOBOX

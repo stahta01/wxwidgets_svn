@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +29,10 @@ wxBitmap  *g_TestBitmap = (wxBitmap *) NULL;
 
 IMPLEMENT_APP(MyApp)
 
+MyApp::MyApp()
+{
+}
+
 bool MyApp::OnInit(void)
 {
   wxImage::AddHandler(new wxPNGHandler);
@@ -36,10 +40,8 @@ bool MyApp::OnInit(void)
   // Create the main frame window
   frame = new MyFrame((wxFrame *) NULL, _T("wxPNGBitmap Demo"), wxPoint(0, 0), wxSize(300, 300));
 
-#if wxUSE_STATUSBAR
   // Give it a status line
   frame->CreateStatusBar(2);
-#endif // wxUSE_STATUSBAR
 
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
@@ -64,13 +66,11 @@ bool MyApp::OnInit(void)
 //  canvas->SetScrollbars(20, 20, 50, 50, 4, 4);
   frame->canvas = canvas;
 
-  frame->Show(true);
+  frame->Show(TRUE);
 
-#if wxUSE_STATUSBAR
-  frame->SetStatusText(_T("Hello, wxWidgets"));
-#endif // wxUSE_STATUSBAR
+  frame->SetStatusText(_T("Hello, wxWindows"));
 
-  return true;
+  return TRUE;
 }
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -82,7 +82,7 @@ END_EVENT_TABLE()
 
 // Define my frame constructor
 MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size):
-  wxFrame(frame, wxID_ANY, title, pos, size)
+  wxFrame(frame, -1, title, pos, size)
 {
   canvas = (MyCanvas *) NULL;
 }
@@ -99,7 +99,7 @@ MyFrame::~MyFrame()
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -115,9 +115,9 @@ void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
                                wxT("png"), wxT("PNG files (*.png)|*.png") );
 
   if (f == _T(""))  return;
-
+  
   wxBitmap *backstore = new wxBitmap( 150, 150 );
-
+  
   wxMemoryDC memDC;
   memDC.SelectObject( *backstore );
   memDC.Clear();
@@ -128,11 +128,11 @@ void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
   memDC.DrawLine( 0, 0, 0, 10 );
   memDC.SetTextForeground( *wxWHITE );
   memDC.DrawText( _T("This is a memory dc."), 10, 10 );
-
+  
   memDC.SelectObject( wxNullBitmap );
-
+  
   backstore->SaveFile( f, wxBITMAP_TYPE_PNG, (wxPalette*)NULL );
-
+  
   delete backstore;
 }
 
@@ -165,7 +165,11 @@ END_EVENT_TABLE()
 
 // Define a constructor for my canvas
 MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size):
- wxScrolledWindow(parent, wxID_ANY, pos, size)
+ wxScrolledWindow(parent, -1, pos, size)
+{
+}
+
+MyCanvas::~MyCanvas(void)
 {
 }
 
@@ -191,7 +195,7 @@ void MyCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     memDC.SelectObject(* g_TestBitmap);
 
     // Normal, non-transparent blitting
-    dc.Blit(20, 20, g_TestBitmap->GetWidth(), g_TestBitmap->GetHeight(), & memDC, 0, 0, wxCOPY, false);
+    dc.Blit(20, 20, g_TestBitmap->GetWidth(), g_TestBitmap->GetHeight(), & memDC, 0, 0, wxCOPY, FALSE);
 
     memDC.SelectObject(wxNullBitmap);
   }
@@ -203,7 +207,7 @@ void MyCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     // Transparent blitting if there's a mask in the bitmap
     dc.Blit(20 + g_TestBitmap->GetWidth() + 20, 20, g_TestBitmap->GetWidth(), g_TestBitmap->GetHeight(), & memDC,
-      0, 0, wxCOPY, true);
+      0, 0, wxCOPY, TRUE);
 
     memDC.SelectObject(wxNullBitmap);
   }

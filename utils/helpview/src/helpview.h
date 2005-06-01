@@ -16,10 +16,20 @@
 #pragma interface "help.cpp"
 #endif
 
-#define hvVERSION 1.04
+#define hvVERSION 1.02
 
-#if wxUSE_IPC
+// If 1, start a server to allow this to be used
+// as an external help viewer.
+#if defined(__WXMAC__) && !defined(__UNIX__)
+#define hvUSE_IPC 0
+#else
+#define hvUSE_IPC 1
+#endif
+
+#if hvUSE_IPC
 #include <wx/ipc.h>
+
+class hvConnection;
 class hvServer;
 #endif
 
@@ -37,34 +47,29 @@ public:
 
     /// Clean up the application's data.
     virtual int OnExit();
-
-#ifdef __WXMAC__
-    /// Respond to Apple Event for opening a document
-    virtual void MacOpenFile(const wxString& filename);
-#endif
-
+    
     /// Prompt the user for a book to open
     bool OpenBook(wxHtmlHelpController* controller);
 
     /// Returns the help controller.
     wxHtmlHelpController* GetHelpController() { return m_helpController; }
 
-#if wxUSE_IPC
+#if hvUSE_IPC
     /// Returns the list of connections.
     wxList& GetConnections() { return m_connections; }
 #endif
 
 private:
     wxHtmlHelpController*   m_helpController;
-
-#if wxUSE_IPC
+    
+#if hvUSE_IPC
     wxList                  m_connections;
     hvServer*               m_server;
 #endif
-
+    
 };
 
-#if wxUSE_IPC
+#if hvUSE_IPC
 class hvConnection : public wxConnection
 {
 public:

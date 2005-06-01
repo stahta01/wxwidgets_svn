@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tokenzr.h"
 #endif
 
@@ -29,7 +29,6 @@
 #endif
 
 #include "wx/tokenzr.h"
-#include "wx/arrstr.h"
 
 // Required for wxIs... functions
 #include <ctype.h>
@@ -102,11 +101,11 @@ void wxStringTokenizer::Reinit(const wxString& str)
 // do we have more of them?
 bool wxStringTokenizer::HasMoreTokens() const
 {
-    wxCHECK_MSG( IsOk(), false, _T("you should call SetString() first") );
+    wxCHECK_MSG( IsOk(), FALSE, _T("you should call SetString() first") );
 
     if ( m_string.find_first_not_of(m_delims) == wxString::npos )
     {
-        // no non empty tokens left, but in 2 cases we still may return true if
+        // no non empty tokens left, but in 2 cases we still may return TRUE if
         // GetNextToken() wasn't called yet for this empty token:
         //
         //   a) in wxTOKEN_RET_EMPTY_ALL mode we always do it
@@ -115,13 +114,13 @@ bool wxStringTokenizer::HasMoreTokens() const
         //      token just before it
         return (m_mode == wxTOKEN_RET_EMPTY_ALL) ||
                (m_mode == wxTOKEN_RET_EMPTY && m_pos == 0)
-                    ? m_hasMore : false;
+                    ? m_hasMore : FALSE;
     }
     else
     {
         // there are non delimiter characters left, hence we do have more
         // tokens
-        return true;
+        return TRUE;
     }
 }
 
@@ -181,7 +180,7 @@ wxString wxStringTokenizer::GetNextToken()
 
             // no more tokens in this string, even in wxTOKEN_RET_EMPTY_ALL
             // mode (we will return the trailing one right now in this case)
-            m_hasMore = false;
+            m_hasMore = FALSE;
         }
         else
         {

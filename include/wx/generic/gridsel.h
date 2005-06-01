@@ -11,18 +11,18 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #ifndef __WXGRIDSEL_H__
 #define __WXGRIDSEL_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "gridsel.h"
 #endif
 
 #include "wx/grid.h"
 
-class WXDLLIMPEXP_ADV wxGridSelection{
+class WXDLLEXPORT wxGridSelection{
 public:
     wxGridSelection( wxGrid * grid, wxGrid::wxGridSelectionModes sel =
                      wxGrid::wxGridSelectCells );
@@ -31,24 +31,24 @@ public:
     void SetSelectionMode(wxGrid::wxGridSelectionModes selmode);
     wxGrid::wxGridSelectionModes GetSelectionMode() { return m_selectionMode; }
     void SelectRow( int row,
-                    bool ControlDown = false,  bool ShiftDown = false,
-                    bool AltDown = false, bool MetaDown = false );
+                    bool ControlDown = FALSE,  bool ShiftDown = FALSE,
+                    bool AltDown = FALSE, bool MetaDown = FALSE );
     void SelectCol( int col,
-                    bool ControlDown = false,  bool ShiftDown = false,
-                    bool AltDown = false, bool MetaDown = false );
+                    bool ControlDown = FALSE,  bool ShiftDown = FALSE,
+                    bool AltDown = FALSE, bool MetaDown = FALSE );
     void SelectBlock( int topRow, int leftCol,
                       int bottomRow, int rightCol,
-                      bool ControlDown = false,  bool ShiftDown = false,
-                      bool AltDown = false, bool MetaDown = false,
-                      bool sendEvent = true );
+                      bool ControlDown = FALSE,  bool ShiftDown = FALSE,
+                      bool AltDown = FALSE, bool MetaDown = FALSE,
+                      bool sendEvent = TRUE );
     void SelectCell( int row, int col,
-                     bool ControlDown = false,  bool ShiftDown = false,
-                     bool AltDown = false, bool MetaDown = false,
-                     bool sendEvent = true );
+                     bool ControlDown = FALSE,  bool ShiftDown = FALSE,
+                     bool AltDown = FALSE, bool MetaDown = FALSE,
+                     bool sendEvent = TRUE );
     void ToggleCellSelection( int row, int col,
-                              bool ControlDown = false,
-                              bool ShiftDown = false,
-                              bool AltDown = false, bool MetaDown = false );
+                              bool ControlDown = FALSE, 
+                              bool ShiftDown = FALSE,
+                              bool AltDown = FALSE, bool MetaDown = FALSE );
     void ClearSelection();
 
     void UpdateRows( size_t pos, int numRows );
@@ -82,11 +82,8 @@ private:
     wxGrid                              *m_grid;
     wxGrid::wxGridSelectionModes        m_selectionMode;
 
-    friend class WXDLLIMPEXP_ADV wxGrid;
-
-    DECLARE_NO_COPY_CLASS(wxGridSelection)
+    friend class WXDLLEXPORT wxGrid;
 };
 
 #endif  // #ifdef __WXGRIDSEL_H__
-#endif  // #ifndef wxUSE_GRID
-
+#endif  // #ifndef wxUSE_NEW_GRID

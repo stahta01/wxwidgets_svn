@@ -1,15 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
 // Name:        matrix.cpp
 // Purpose:     wxTransformMatrix class
 // Author:      Chris Breeze, Julian Smart
 // Modified by: Klaas Holwerda
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "matrix.h"
 #endif
 
@@ -25,16 +24,16 @@
 
 #ifndef WX_PRECOMP
 #include "wx/defs.h"
-#include "wx/math.h"
 #endif
 
 #include "wx/matrix.h"
+#include <math.h>
 
-static const double pi = M_PI;
+static const double pi = 3.1415926535;
 
 wxTransformMatrix::wxTransformMatrix(void)
 {
-    m_isIdentity = false;
+    m_isIdentity = FALSE;
 
     Identity();
 }
@@ -77,8 +76,8 @@ void wxTransformMatrix::operator = (const wxTransformMatrix& mat)
 
 bool wxTransformMatrix::operator == (const wxTransformMatrix& mat)
 {
-    if (m_isIdentity==true && mat.m_isIdentity==true)
-        return true;
+    if (m_isIdentity==TRUE && mat.m_isIdentity==TRUE)
+        return TRUE;
 
     int i, j;
     for (i = 0; i < 3; i++)
@@ -86,10 +85,10 @@ bool wxTransformMatrix::operator == (const wxTransformMatrix& mat)
         for (j = 0; j < 3; j++)
         {
             if (m_matrix[i][j] != mat.m_matrix[i][j])
-                return false;
+                return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 bool wxTransformMatrix::operator != (const wxTransformMatrix& mat)
@@ -148,11 +147,11 @@ bool wxTransformMatrix::Invert(void)
             }
         }
         m_isIdentity = IsIdentity1();
-        return true;
+        return TRUE;
     }
     else
     {
-        return false;
+        return FALSE;
     }
 }
 
@@ -161,9 +160,9 @@ bool wxTransformMatrix::Identity(void)
 {
     m_matrix[0][0] = m_matrix[1][1] = m_matrix[2][2] = 1.0;
     m_matrix[1][0] = m_matrix[2][0] = m_matrix[0][1] = m_matrix[2][1] = m_matrix[0][2] = m_matrix[1][2] = 0.0;
-    m_isIdentity = true;
+    m_isIdentity = TRUE;
 
-    return true;
+    return TRUE;
 }
 
 // Scale by scale (isotropic scaling i.e. the same in x and y):
@@ -183,7 +182,7 @@ bool wxTransformMatrix::Scale(double scale)
     }
     m_isIdentity = IsIdentity1();
 
-    return true;
+    return TRUE;
 }
 
 
@@ -269,12 +268,12 @@ wxTransformMatrix&  wxTransformMatrix::Mirror(bool x, bool y)
     if (x)
     {
         temp.m_matrix[1][1] = -1;
-        temp.m_isIdentity=false;
+        temp.m_isIdentity=FALSE;
     }
     if (y)
     {
         temp.m_matrix[0][0] = -1;
-        temp.m_isIdentity=false;
+        temp.m_isIdentity=FALSE;
     }
 
     *this = temp * (*this);
@@ -297,7 +296,7 @@ bool wxTransformMatrix::Translate(double dx, double dy)
 
     m_isIdentity = IsIdentity1();
 
-    return true;
+    return TRUE;
 }
 
 // Rotate clockwise by the given number of degrees:
@@ -307,7 +306,7 @@ bool wxTransformMatrix::Translate(double dx, double dy)
 bool wxTransformMatrix::Rotate(double degrees)
 {
     Rotate(-degrees,0,0);
-    return true;
+    return TRUE;
 }
 
 // counter clockwise rotate around a point
@@ -385,13 +384,13 @@ bool wxTransformMatrix::TransformPoint(double x, double y, double& tx, double& t
 {
     if (IsIdentity())
     {
-        tx = x; ty = y; return true;
+        tx = x; ty = y; return TRUE;
     }
 
     tx = x * m_matrix[0][0] + y * m_matrix[1][0] + m_matrix[2][0];
     ty = x * m_matrix[0][1] + y * m_matrix[1][1] + m_matrix[2][1];
 
-    return true;
+    return TRUE;
 }
 
 // Transform a point from device to logical coordinates.
@@ -408,18 +407,18 @@ bool wxTransformMatrix::InverseTransformPoint(double x, double y, double& tx, do
 {
     if (IsIdentity())
     {
-        tx = x; ty = y; return true;
+        tx = x; ty = y; return TRUE;
     }
 
     double z = (1.0 - m_matrix[0][2] * x - m_matrix[1][2] * y) / m_matrix[2][2];
     if (z == 0.0)
     {
 //      z = 0.0000001;
-        return false;
+        return FALSE;
     }
     tx = x * m_matrix[0][0] + y * m_matrix[1][0] + z * m_matrix[2][0];
     ty = x * m_matrix[0][1] + y * m_matrix[1][1] + z * m_matrix[2][1];
-    return true;
+    return TRUE;
 }
 
 wxTransformMatrix& wxTransformMatrix::operator*=(const double& t)

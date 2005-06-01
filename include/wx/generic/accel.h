@@ -10,7 +10,7 @@
 #ifndef _WX_GENERIC_ACCEL_H_
 #define _WX_GENERIC_ACCEL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "accel.h"
 #endif
 
@@ -33,12 +33,10 @@ public:
     wxAcceleratorTable& operator=(const wxAcceleratorTable& accel)
       { if ( m_refData != accel.m_refData ) Ref(accel); return *this; }
 
-#if WXWIN_COMPATIBILITY_2_4
     bool operator==(const wxAcceleratorTable& accel) const
-        { return m_refData == accel.m_refData; }
+        { return m_refData == accel.m_refData; } // FIXME: this is wrong (VZ)
     bool operator!=(const wxAcceleratorTable& accel) const
         { return !(*this == accel); }
-#endif
 
     bool Ok() const;
 

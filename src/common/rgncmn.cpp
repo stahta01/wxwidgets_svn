@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "rgncmn.h"
 #endif
 
@@ -23,9 +23,7 @@
 
 #include "wx/region.h"
 #include "wx/bitmap.h"
-#if wxUSE_IMAGE
 #include "wx/image.h"
-#endif
 #include "wx/dcmemory.h"
 
 
@@ -50,19 +48,35 @@ wxBitmap wxRegion::ConvertToBitmap() const
 
 //---------------------------------------------------------------------------
 
-#if wxUSE_IMAGE
-static bool DoRegionUnion(wxRegion& region,
-                          const wxImage& image,
-                          unsigned char loR,
-                          unsigned char loG,
-                          unsigned char loB,
-                          int tolerance)
+bool wxRegion::Union(const wxBitmap& bmp,
+                     const wxColour& transColour,
+                     int   tolerance)
 {
+    unsigned char loR, loG, loB;
     unsigned char hiR, hiG, hiB;
 
-    hiR = (unsigned char)wxMin(0xFF, loR + tolerance);
-    hiG = (unsigned char)wxMin(0xFF, loG + tolerance);
-    hiB = (unsigned char)wxMin(0xFF, loB + tolerance);
+    wxCHECK_MSG((bmp.GetMask() != NULL) || transColour.Ok(),
+                FALSE,
+                wxT("Either the bitmap should have a mask or a colour should be given."));
+
+    wxImage image = bmp.ConvertToImage();
+
+    if (image.HasMask())
+    {
+        loR = image.GetMaskRed();
+        loG = image.GetMaskGreen();
+        loB = image.GetMaskBlue();
+    }
+    else
+    {
+        loR = transColour.Red();
+        loG = transColour.Green();
+        loB = transColour.Blue();
+    }
+
+    hiR = wxMin(0xFF, loR + tolerance);
+    hiG = wxMin(0xFF, loG + tolerance);
+    hiB = wxMin(0xFF, loB + tolerance);
 
     // Loop through the image row by row, pixel by pixel, building up
     // rectangles to add to the region.
@@ -94,61 +108,12 @@ static bool DoRegionUnion(wxRegion& region,
             if (x > x0) {
                 rect.x = x0;
                 rect.width = x - x0;
-                region.Union(rect);
+                Union(rect);
             }
         }
     }
 
-    return true;
+    return TRUE;
 }
-
-
-bool wxRegion::Union(const wxBitmap& bmp)
-{
-    if (bmp.GetMask())
-    {
-        wxImage image = bmp.ConvertToImage();
-        wxASSERT_MSG( image.HasMask(), _T("wxBitmap::ConvertToImage doesn't preserve mask?") );
-        return DoRegionUnion(*this, image,
-                             image.GetMaskRed(),
-                             image.GetMaskGreen(),
-                             image.GetMaskBlue(),
-                             0);
-    }
-    else
-    {
-        return Union(0, 0, bmp.GetWidth(), bmp.GetHeight());
-    }
-}
-
-bool wxRegion::Union(const wxBitmap& bmp,
-                     const wxColour& transColour,
-                     int   tolerance)
-{
-    wxImage image = bmp.ConvertToImage();
-    return DoRegionUnion(*this, image,
-                         transColour.Red(),
-                         transColour.Green(),
-                         transColour.Blue(),
-                         tolerance);
-}
-
-#else
-
-bool wxRegion::Union(const wxBitmap& WXUNUSED(bmp))
-{
-    // No wxImage support
-    return false;
-}
-
-bool wxRegion::Union(const wxBitmap& WXUNUSED(bmp),
-                     const wxColour& WXUNUSED(transColour),
-                     int   WXUNUSED(tolerance))
-{
-    // No wxImage support
-    return false;
-}
-
-#endif
 
 //---------------------------------------------------------------------------

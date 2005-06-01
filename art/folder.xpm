@@ -1,7 +1,7 @@
 /* XPM */
 static char *folder_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"16 15 112 2",
+"16 16 112 2",
 "r  c #F7FAFD",
 "%. c #3562AF",
 "=. c #3F6AB2",
@@ -129,5 +129,6 @@ static char *folder_xpm[] = {
 "  _ ` ' R E W z ] Z P [ ^ / {   ",
 "  } |  .' R ..V X.o.O.P [ +.@.  ",
 "  #.$.%.&.*.=.-.;.:.>.,.<.1.*.  ",
+"                                ",
 "                                "
 };

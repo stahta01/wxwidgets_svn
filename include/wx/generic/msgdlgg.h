@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/msgdlgg.h
+// Name:        msgdlgg.h
 // Purpose:     Generic wxMessageDialog
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __MSGDLGH_G__
 #define __MSGDLGH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "msgdlgg.h"
 #endif
 
@@ -22,9 +22,9 @@
 // type is an 'or' (|) of wxOK, wxCANCEL, wxYES_NO
 // Returns wxYES/NO/OK/CANCEL
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxMessageBoxCaptionStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
 
-class WXDLLEXPORT wxGenericMessageDialog: public wxDialog, public wxMessageDialogBase
+class WXDLLEXPORT wxGenericMessageDialog: public wxDialog
 {
 DECLARE_DYNAMIC_CLASS(wxGenericMessageDialog)
 
@@ -38,6 +38,8 @@ public:
     void OnCancel(wxCommandEvent& event);
 
 private:
+    long m_dialogStyle;
+
     DECLARE_EVENT_TABLE()
 };
 
@@ -45,4 +47,5 @@ private:
 #define wxMessageDialog wxGenericMessageDialog
 #endif
 
-#endif // __MSGDLGH_G__
+#endif
+	// __MSGDLGH_G__

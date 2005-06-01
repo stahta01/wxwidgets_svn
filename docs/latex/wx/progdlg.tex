@@ -16,7 +16,7 @@ progress bar. Optionally, it can display an ABORT button.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxProgressDialog::wxProgressDialog}\label{wxprogressdialogctor}
+\membersection{wxProgressDialog::wxProgressDialog}\label{wxprogressdialogconstr}
 
 \func{}{wxProgressDialog}{\param{const wxString\& }{title},
  \param{const wxString\& }{message},\rtfsp
@@ -49,13 +49,9 @@ window is disabled, but not to the other ones.}
 \twocolitem{{\bf wxPD\_AUTO\_HIDE}}{Causes the progress dialog to disappear
 from screen as soon as the maximum value of the progress meter has been
 reached.}
-\twocolitem{{\bf wxPD\_SMOOTH}}{Causes smooth progress of the gauge control.}
 \twocolitem{{\bf wxPD\_CAN\_ABORT}}{This flag tells the dialog that it should have a
 "Cancel" button which the user may press. If this happens, the next call to 
- \helpref{Update()}{wxprogressdialogupdate} will return false.}
-\twocolitem{{\bf wxPD\_CAN\_SKIP}}{This flag tells the dialog that it should have a
-"Skip" button which the user may press. If this happens, the next call to 
- \helpref{Update()}{wxprogressdialogupdate} will return true in its skip parameter.}
+ \helpref{Update()}{wxprogressdialogupdate} will return FALSE.}
 \twocolitem{{\bf wxPD\_ELAPSED\_TIME}}{This flag tells the dialog that it should show elapsed time (since creating the dialog).}
 \twocolitem{{\bf wxPD\_ESTIMATED\_TIME}}{This flag tells the dialog that it should show estimated time.}
 \twocolitem{{\bf wxPD\_REMAINING\_TIME}}{This flag tells the dialog that it should show remaining time.}
@@ -64,7 +60,7 @@ reached.}
 \end{twocollist}%
 }
 
-\membersection{wxProgressDialog::\destruct{wxProgressDialog}}\label{wxprogressdialogdtor}
+\membersection{wxProgressDialog::\destruct{wxProgressDialog}}
 
 \func{}{\destruct{wxMessageDialog}}{\void}
 
@@ -79,26 +75,23 @@ ABORT.
 
 \membersection{wxProgressDialog::Update}\label{wxprogressdialogupdate}
 
-\func{virtual bool}{Update}{
+\func{bool}{Update}{
   \param{int }{value},\rtfsp
-  \param{const wxString\& }{newmsg = ""},\rtfsp
-  \param{bool *}{skip = NULL}}
+  \param{const wxString\& }{newmsg = ""}}
 
 Updates the dialog, setting the progress bar to the new value and, if
 given changes the message above it. Returns true unless the Cancel button
 has been pressed.
 
-If false is returned, the application can either immediately destroy the dialog
+If FALSE is returned, the application can either immediately destroy the dialog
 or ask the user for the confirmation and if the abort is not confirmed the
 dialog may be resumed with \helpref{Resume}{wxprogressdialogresume} function.
 
 \wxheading{Parameters}
 
-\docparam{value}{The new value of the progress meter. It should be less than or
-equal to the maximum value given to the constructor and the dialog is closed if
-it is equal to the maximum.}
+\docparam{value}{The new value of the progress meter. It must be strictly less
+than the maximum value given to the constructor (i.e., as usual in C, the
+index runs from $0$ to $maximum-1$).}
 \docparam{newmsg}{The new messages for the progress dialog text, if it is
 empty (which is the default) the message is not changed.}
-\docparam{skip}{If "Skip" button was pressed since last 
-\helpref{Update}{wxprogressdialogupdate} call the skip is true.}
 
