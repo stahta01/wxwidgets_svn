@@ -152,10 +152,9 @@ bool wxWindowsPrintNativeData::TransferTo( wxPrintData &data )
     HGLOBAL hDevNames = (HGLOBAL)(DWORD) m_devNames;
 
     if (!hDevMode)
-    {
         return false;
-    }
-    else
+
+    if ( hDevMode )
     {
         LPDEVMODE devMode = (LPDEVMODE)GlobalLock(hDevMode);
 
@@ -222,7 +221,7 @@ bool wxWindowsPrintNativeData::TransferTo( wxPrintData &data )
                 data.SetPaperId( wxPAPER_NONE );
                 data.SetPaperSize( wxSize(0,0) );
                 m_customWindowsPaperId = 0;
-
+                
                 GlobalUnlock(hDevMode);
                 return false;
             }

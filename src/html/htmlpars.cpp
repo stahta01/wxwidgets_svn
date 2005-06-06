@@ -309,10 +309,14 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
         }
         else if (m_CurTag)
         {
-            if (m_CurTag->HasEnding())
-                begin_pos = m_CurTag->GetEndPos2();
-            else
-                begin_pos = m_CurTag->GetBeginPos();
+            // Add tag:
+            if (m_CurTag)
+            {
+                if (m_CurTag->HasEnding())
+                    begin_pos = m_CurTag->GetEndPos2();
+                else
+                    begin_pos = m_CurTag->GetBeginPos();
+            }
             wxHtmlTag *t = m_CurTag;
             m_CurTag = m_CurTag->GetNextTag();
             AddTag(*t);

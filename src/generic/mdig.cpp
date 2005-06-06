@@ -344,7 +344,6 @@ void wxGenericMDIParentFrame::DoHandleMenu(wxCommandEvent &event)
                 {
 #if 1   // What's best? Delayed deleting or immediate deleting?
                     delete m_pActiveChild;
-                    m_pActiveChild = NULL;
 #else
                     ActivateNext();
 

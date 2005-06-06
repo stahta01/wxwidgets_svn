@@ -443,17 +443,14 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
                                coords2.GetRow(), coords2.GetCol(),
                                topRow, leftCol, bottomRow, rightCol ) )
         {
-            case 1:
-                return;
-
-            case -1:
-                m_blockSelectionTopLeft.RemoveAt(n);
-                m_blockSelectionBottomRight.RemoveAt(n);
-                n--; count--;
-                break;
-
-            default:
-                break;
+          case 1:
+            return;
+          case -1:
+            m_blockSelectionTopLeft.RemoveAt(n);
+            m_blockSelectionBottomRight.RemoveAt(n);
+            n--; count--;
+          default:
+            ;
         }
     }
 
@@ -468,16 +465,13 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
                                    m_rowSelection[n], m_grid->GetNumberCols()-1,
                                    topRow, leftCol, bottomRow, rightCol ) )
             {
-                case 1:
-                    return;
-
-                case -1:
-                    m_rowSelection.RemoveAt(n);
-                    n--; count--;
-                    break;
-
-                default:
-                    break;
+              case 1:
+                return;
+              case -1:
+                m_rowSelection.RemoveAt(n);
+                n--; count--;
+              default:
+                ;
             }
         }
     }
@@ -490,16 +484,13 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
                                    m_grid->GetNumberRows()-1, m_colSelection[n],
                                    topRow, leftCol, bottomRow, rightCol ) )
             {
-                case 1:
-                    return;
-
-                case -1:
-                    m_colSelection.RemoveAt(n);
-                    n--; count--;
-                    break;
-
-                default:
-                    break;
+              case 1:
+                return;
+              case -1:
+                m_colSelection.RemoveAt(n);
+                n--; count--;
+              default:
+                ;
             }
         }
     }

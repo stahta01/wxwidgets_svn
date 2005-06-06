@@ -11907,87 +11907,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-    ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-    echo "$as_me:$LINENO: checking whether we are using the Sun C compiler" >&5
-echo $ECHO_N "checking whether we are using the Sun C compiler... $ECHO_C" >&6
-if test "${bakefile_cv_c_compiler___SUNPRO_C+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-             #ifndef __SUNPRO_C
-                choke me
-             #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bakefile_cv_c_compiler___SUNPRO_C=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bakefile_cv_c_compiler___SUNPRO_C=no
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-
-fi
-echo "$as_me:$LINENO: result: $bakefile_cv_c_compiler___SUNPRO_C" >&5
-echo "${ECHO_T}$bakefile_cv_c_compiler___SUNPRO_C" >&6
-    ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-    if test "x$bakefile_cv_c_compiler___SUNPRO_C" = "xyes"; then
-        :; SUNCC=yes
-    else
-        :;
-    fi
-
-
-
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -12932,87 +12851,6 @@ ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-
-
-    ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    echo "$as_me:$LINENO: checking whether we are using the Sun C++ compiler" >&5
-echo $ECHO_N "checking whether we are using the Sun C++ compiler... $ECHO_C" >&6
-if test "${bakefile_cv_cxx_compiler___SUNPRO_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-             #ifndef __SUNPRO_CC
-                choke me
-             #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bakefile_cv_cxx_compiler___SUNPRO_CC=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bakefile_cv_cxx_compiler___SUNPRO_CC=no
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-
-
-fi
-echo "$as_me:$LINENO: result: $bakefile_cv_cxx_compiler___SUNPRO_CC" >&5
-echo "${ECHO_T}$bakefile_cv_cxx_compiler___SUNPRO_CC" >&6
-    ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    if test "x$bakefile_cv_cxx_compiler___SUNPRO_CC" = "xyes"; then
-        :; SUNCXX=yes
-    else
-        :;
-    fi
 
 
 
@@ -38856,80 +38694,10 @@ _ACEOF
 fi
 
 
-if test "$wxUSE_GUI" = "yes" -a "$wxUSE_JOYSTICK" = "yes"; then
-    wxUSE_JOYSTICK=no
+if test "$wxUSE_GUI" = "yes"; then
+          if test "$wxUSE_JOYSTICK" = "yes"; then
 
-        if test "$TOOLKIT" = "MSW"; then
-        wxUSE_JOYSTICK=yes
-
-        elif test "$TOOLKIT" = "MAC" -o "$TOOLKIT" = "COCOA"; then
-        if test "$USE_DARWIN" = 1; then
-                        echo "$as_me:$LINENO: checking headers have declarations needed for joystick support" >&5
-echo $ECHO_N "checking headers have declarations needed for joystick support... $ECHO_C" >&6
-            ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-            cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
- #include <IOKit/hid/IOHIDLib.h>
-int
-main ()
-{
- IOHIDQueueInterface *qi = NULL;
-                              IOHIDCallbackFunction cb = NULL;
-                              qi->setEventCallout(NULL, cb, NULL, NULL);
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-   wxUSE_JOYSTICK=yes
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-            ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-            echo "$as_me:$LINENO: result: $wxUSE_JOYSTICK" >&5
-echo "${ECHO_T}$wxUSE_JOYSTICK" >&6
-        fi
-
-        else
+                if test "$TOOLKIT" != "MAC" -a "$TOOLKIT" != "COCOA" -a "$TOOLKIT" != "MSW"; then
 
 for ac_header in linux/joystick.h
 do
@@ -39075,22 +38843,32 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- wxUSE_JOYSTICK=yes
+
 fi
 
 done
 
-    fi
+            if test "$ac_cv_header_linux_joystick_h" != "yes"; then
+                wxUSE_JOYSTICK=no
+                { echo "$as_me:$LINENO: WARNING: Joystick not supported by this system... disabled" >&5
+echo "$as_me: WARNING: Joystick not supported by this system... disabled" >&2;}
+            fi
+        else
+                      if test "$USE_DARWIN" != 1 -a "$TOOLKIT" != "MSW"; then
+                wxUSE_JOYSTICK=no
+                { echo "$as_me:$LINENO: WARNING: Joystick not supported by this system... disabled" >&5
+echo "$as_me: WARNING: Joystick not supported by this system... disabled" >&2;}
+           fi
+        fi
 
-    if test "$wxUSE_JOYSTICK" = "yes"; then
-        cat >>confdefs.h <<\_ACEOF
+
+        if test "$wxUSE_JOYSTICK" = "yes"; then
+            cat >>confdefs.h <<\_ACEOF
 #define wxUSE_JOYSTICK 1
 _ACEOF
 
-        SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS joytest"
-    else
-        { echo "$as_me:$LINENO: WARNING: Joystick not supported by this system... disabled" >&5
-echo "$as_me: WARNING: Joystick not supported by this system... disabled" >&2;}
+            SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS joytest"
+        fi
     fi
 fi
 
@@ -42984,12 +42762,6 @@ echo "${ECHO_T}gcc" >&6
         DEPSFLAG_MWCC="-MM"
         echo "$as_me:$LINENO: result: mwcc" >&5
 echo "${ECHO_T}mwcc" >&6
-    elif test "x$SUNCC" = "xyes"; then
-        DEPSMODE=suncc
-        DEPS_TRACKING=1
-        DEPSFLAG_SUNCC="-xM1"
-        echo "$as_me:$LINENO: result: suncc" >&5
-echo "${ECHO_T}suncc" >&6
     else
         echo "$as_me:$LINENO: result: none" >&5
 echo "${ECHO_T}none" >&6
@@ -43010,7 +42782,6 @@ DEPSMODE=${DEPSMODE}
 DEPSDIR=.deps
 DEPSFLAG_GCC="${DEPSFLAG_GCC}"
 DEPSFLAG_MWCC="${DEPSFLAG_MWCC}"
-DEPSFLAG_SUNCC="${DEPSFLAG_SUNCC}"
 
 mkdir -p ${D}DEPSDIR
 
@@ -43072,28 +42843,6 @@ elif test ${D}DEPSMODE = mwcc ; then
         prevarg="${D}arg"
     done
     ${D}* ${D}DEPSFLAG_MWCC >${D}{DEPSDIR}/${D}{objfile}.d
-    exit 0
-elif test ${D}DEPSMODE = suncc; then
-    ${D}* || exit
-    # Run compiler again with deps flag and redirect into the dep file.
-    # It doesn't work if the '-o FILE' option is used, but without it the
-    # dependency file will contain the wrong name for the object. So it is
-    # removed from the command line, and the dep file is fixed with sed.
-    cmd=""
-    while test ${D}# -gt 0; do
-        case "${D}1" in
-            -o )
-                shift
-                objfile=${D}1
-            ;;
-            * )
-                eval arg${D}#=\\${D}1
-                cmd="${D}cmd \\${D}arg${D}#"
-            ;;
-        esac
-        shift
-    done
-    eval "${D}cmd ${D}DEPSFLAG_SUNCC" | sed "s|.*:|${D}objfile:|" >${D}{DEPSDIR}/${D}{objfile}.d
     exit 0
 else
     ${D}*

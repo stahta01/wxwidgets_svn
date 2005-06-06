@@ -125,7 +125,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton,wxButton)
 void wxBitmapButton::Init()
 {
     m_hasFocus =
-    m_isSelected = false;
+    m_isSelected = FALSE;
 }
 
 bool wxBitmapButton::Create( wxWindow *parent,
@@ -137,14 +137,14 @@ bool wxBitmapButton::Create( wxWindow *parent,
                              const wxValidator& validator,
                              const wxString &name )
 {
-    m_needParent = true;
-    m_acceptsFocus = true;
+    m_needParent = TRUE;
+    m_acceptsFocus = TRUE;
 
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxBitmapButton creation failed") );
-        return false;
+        return FALSE;
     }
 
     m_bmpNormal = bitmap;
@@ -175,7 +175,7 @@ bool wxBitmapButton::Create( wxWindow *parent,
 
     PostCreation(size);
 
-    return true;
+    return TRUE;
 }
 
 void wxBitmapButton::SetDefault()
@@ -195,7 +195,7 @@ void wxBitmapButton::SetLabel( const wxString &label )
 
 wxString wxBitmapButton::GetLabel() const
 {
-    wxCHECK_MSG( m_widget != NULL, wxEmptyString, wxT("invalid button") );
+    wxCHECK_MSG( m_widget != NULL, wxT(""), wxT("invalid button") );
 
     return wxControl::GetLabel();
 }
@@ -213,7 +213,7 @@ void wxBitmapButton::OnSetBitmap()
     wxCHECK_RET( m_widget != NULL, wxT("invalid bitmap button") );
 
     InvalidateBestSize();
-
+    
     wxBitmap the_one;
     if (!m_isEnabled)
         the_one = m_bmpDisabled;
@@ -222,7 +222,19 @@ void wxBitmapButton::OnSetBitmap()
     else if (m_hasFocus)
         the_one = m_bmpFocus;
     else
-        the_one = m_bmpNormal;
+    {
+        if (m_isSelected)
+        {
+            the_one = m_bmpSelected;
+        }
+        else
+        {
+            if (m_hasFocus)
+                the_one = m_bmpFocus;
+            else
+                the_one = m_bmpNormal;
+        }
+    }
 
     if (!the_one.Ok()) the_one = m_bmpNormal;
     if (!the_one.Ok()) return;
@@ -269,34 +281,34 @@ wxSize wxBitmapButton::DoGetBestSize() const
 bool wxBitmapButton::Enable( bool enable )
 {
     if ( !wxWindow::Enable(enable) )
-        return false;
+        return FALSE;
 
     OnSetBitmap();
 
-    return true;
+    return TRUE;
 }
 
 void wxBitmapButton::HasFocus()
 {
-    m_hasFocus = true;
+    m_hasFocus = TRUE;
     OnSetBitmap();
 }
 
 void wxBitmapButton::NotFocus()
 {
-    m_hasFocus = false;
+    m_hasFocus = FALSE;
     OnSetBitmap();
 }
 
 void wxBitmapButton::StartSelect()
 {
-    m_isSelected = true;
+    m_isSelected = TRUE;
     OnSetBitmap();
 }
 
 void wxBitmapButton::EndSelect()
 {
-    m_isSelected = false;
+    m_isSelected = FALSE;
     OnSetBitmap();
 }
 
