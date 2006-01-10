@@ -99,16 +99,8 @@ wxEventType wxNewEventType();
 %constant wxEventType wxEVT_NAVIGATION_KEY;
 %constant wxEventType wxEVT_KEY_DOWN;
 %constant wxEventType wxEVT_KEY_UP;
-
-%{
-#if ! wxUSE_HOTKEY
-#define wxEVT_HOTKEY -9999
-#endif
-%}
-
 %constant wxEventType wxEVT_HOTKEY;
-
-
+    
 // Set cursor event
 %constant wxEventType wxEVT_SET_CURSOR;
 

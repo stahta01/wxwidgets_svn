@@ -182,9 +182,6 @@ mkdir -p $DMGROOT
 mkdir -p $DMGAPPS/Docs
 mkdir -p $DMGAPPS/Samples
 
-if [ ! -d $DESTDIR ]; then
-  mkdir $DESTDIR
-fi
 
 pushd $BUILDROOT
 
@@ -629,7 +626,7 @@ EOF
     $PROGDIR/../makedmg $DMGAPPS $DMGDIR $dmgname
 
     echo Moving $DMGDIR/$dmgname.dmg to $DESTDIR
-    mv $DMGDIR/$dmgname.dmg  $DESTDIR/$dmgname.dmg
+    mv $DMGDIR/$dmgname.dmg  $DESTDIR
 fi
 
 

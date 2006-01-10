@@ -1386,24 +1386,25 @@ SWIG_Python_GetTypeList() {
 #define  SWIGTYPE_ptrdiff_t swig_types[44] 
 #define  SWIGTYPE_std__ptrdiff_t swig_types[45] 
 #define  SWIGTYPE_p_wxRegion swig_types[46] 
-#define  SWIGTYPE_p_wxLanguageInfo swig_types[47] 
-#define  SWIGTYPE_p_wxWindowDC swig_types[48] 
-#define  SWIGTYPE_p_wxPrintData swig_types[49] 
-#define  SWIGTYPE_p_wxBrushList swig_types[50] 
-#define  SWIGTYPE_p_wxFontList swig_types[51] 
-#define  SWIGTYPE_p_wxPen swig_types[52] 
-#define  SWIGTYPE_p_wxBufferedPaintDC swig_types[53] 
-#define  SWIGTYPE_p_wxPaintDC swig_types[54] 
-#define  SWIGTYPE_p_wxPenList swig_types[55] 
-#define  SWIGTYPE_p_int swig_types[56] 
-#define  SWIGTYPE_p_wxMetaFile swig_types[57] 
-#define  SWIGTYPE_p_wxRendererNative swig_types[58] 
-#define  SWIGTYPE_p_unsigned_long swig_types[59] 
-#define  SWIGTYPE_p_wxNativeFontInfo swig_types[60] 
-#define  SWIGTYPE_p_wxEncodingConverter swig_types[61] 
-#define  SWIGTYPE_p_wxSplitterRenderParams swig_types[62] 
-#define  SWIGTYPE_p_wxColourDatabase swig_types[63] 
-static swig_type_info *swig_types[65];
+#define  SWIGTYPE_p_wxConfigBase swig_types[47] 
+#define  SWIGTYPE_p_wxLanguageInfo swig_types[48] 
+#define  SWIGTYPE_p_wxWindowDC swig_types[49] 
+#define  SWIGTYPE_p_wxPrintData swig_types[50] 
+#define  SWIGTYPE_p_wxBrushList swig_types[51] 
+#define  SWIGTYPE_p_wxFontList swig_types[52] 
+#define  SWIGTYPE_p_wxPen swig_types[53] 
+#define  SWIGTYPE_p_wxBufferedPaintDC swig_types[54] 
+#define  SWIGTYPE_p_wxPaintDC swig_types[55] 
+#define  SWIGTYPE_p_wxPenList swig_types[56] 
+#define  SWIGTYPE_p_int swig_types[57] 
+#define  SWIGTYPE_p_wxMetaFile swig_types[58] 
+#define  SWIGTYPE_p_wxRendererNative swig_types[59] 
+#define  SWIGTYPE_p_unsigned_long swig_types[60] 
+#define  SWIGTYPE_p_wxNativeFontInfo swig_types[61] 
+#define  SWIGTYPE_p_wxEncodingConverter swig_types[62] 
+#define  SWIGTYPE_p_wxSplitterRenderParams swig_types[63] 
+#define  SWIGTYPE_p_wxColourDatabase swig_types[64] 
+static swig_type_info *swig_types[66];
 
 /* -------- TYPES TABLE (END) -------- */
 
@@ -5004,6 +5005,65 @@ static PyObject *_wrap_Bitmap_CopyFromCursor(PyObject *, PyObject *args, PyObjec
     {
         resultobj = result ? Py_True : Py_False; Py_INCREF(resultobj);
     }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_Bitmap_GetQuality(PyObject *, PyObject *args, PyObject *kwargs) {
+    PyObject *resultobj;
+    wxBitmap *arg1 = (wxBitmap *) 0 ;
+    int result;
+    PyObject * obj0 = 0 ;
+    char *kwnames[] = {
+        (char *) "self", NULL 
+    };
+    
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"O:Bitmap_GetQuality",kwnames,&obj0)) goto fail;
+    SWIG_Python_ConvertPtr(obj0, (void **)&arg1, SWIGTYPE_p_wxBitmap, SWIG_POINTER_EXCEPTION | 0);
+    if (SWIG_arg_fail(1)) SWIG_fail;
+    {
+        PyThreadState* __tstate = wxPyBeginAllowThreads();
+        result = (int)(arg1)->GetQuality();
+        
+        wxPyEndAllowThreads(__tstate);
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    {
+        resultobj = SWIG_From_int((int)(result)); 
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_Bitmap_SetQuality(PyObject *, PyObject *args, PyObject *kwargs) {
+    PyObject *resultobj;
+    wxBitmap *arg1 = (wxBitmap *) 0 ;
+    int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    char *kwnames[] = {
+        (char *) "self",(char *) "q", NULL 
+    };
+    
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO:Bitmap_SetQuality",kwnames,&obj0,&obj1)) goto fail;
+    SWIG_Python_ConvertPtr(obj0, (void **)&arg1, SWIGTYPE_p_wxBitmap, SWIG_POINTER_EXCEPTION | 0);
+    if (SWIG_arg_fail(1)) SWIG_fail;
+    {
+        arg2 = (int)(SWIG_As_int(obj1)); 
+        if (SWIG_arg_fail(2)) SWIG_fail;
+    }
+    {
+        PyThreadState* __tstate = wxPyBeginAllowThreads();
+        (arg1)->SetQuality(arg2);
+        
+        wxPyEndAllowThreads(__tstate);
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
     fail:
     return NULL;
@@ -9516,6 +9576,35 @@ static PyObject *_wrap_FontMapper_GetEncodingFromName(PyObject *, PyObject *args
         if (temp1)
         delete arg1;
     }
+    return NULL;
+}
+
+
+static PyObject *_wrap_FontMapper_SetConfig(PyObject *, PyObject *args, PyObject *kwargs) {
+    PyObject *resultobj;
+    wxFontMapper *arg1 = (wxFontMapper *) 0 ;
+    wxConfigBase *arg2 = (wxConfigBase *) 0 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    char *kwnames[] = {
+        (char *) "self",(char *) "config", NULL 
+    };
+    
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO:FontMapper_SetConfig",kwnames,&obj0,&obj1)) goto fail;
+    SWIG_Python_ConvertPtr(obj0, (void **)&arg1, SWIGTYPE_p_wxFontMapper, SWIG_POINTER_EXCEPTION | 0);
+    if (SWIG_arg_fail(1)) SWIG_fail;
+    SWIG_Python_ConvertPtr(obj1, (void **)&arg2, SWIGTYPE_p_wxConfigBase, SWIG_POINTER_EXCEPTION | 0);
+    if (SWIG_arg_fail(2)) SWIG_fail;
+    {
+        PyThreadState* __tstate = wxPyBeginAllowThreads();
+        (arg1)->SetConfig(arg2);
+        
+        wxPyEndAllowThreads(__tstate);
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
     return NULL;
 }
 
@@ -22338,6 +22427,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Bitmap_SetDepth", (PyCFunction) _wrap_Bitmap_SetDepth, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"Bitmap_SetSize", (PyCFunction) _wrap_Bitmap_SetSize, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"Bitmap_CopyFromCursor", (PyCFunction) _wrap_Bitmap_CopyFromCursor, METH_VARARGS | METH_KEYWORDS, NULL},
+	 { (char *)"Bitmap_GetQuality", (PyCFunction) _wrap_Bitmap_GetQuality, METH_VARARGS | METH_KEYWORDS, NULL},
+	 { (char *)"Bitmap_SetQuality", (PyCFunction) _wrap_Bitmap_SetQuality, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"Bitmap___eq__", (PyCFunction) _wrap_Bitmap___eq__, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"Bitmap___ne__", (PyCFunction) _wrap_Bitmap___ne__, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"Bitmap_swigregister", Bitmap_swigregister, METH_VARARGS, NULL},
@@ -22483,6 +22574,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"FontMapper_GetEncodingName", (PyCFunction) _wrap_FontMapper_GetEncodingName, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"FontMapper_GetEncodingDescription", (PyCFunction) _wrap_FontMapper_GetEncodingDescription, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"FontMapper_GetEncodingFromName", (PyCFunction) _wrap_FontMapper_GetEncodingFromName, METH_VARARGS | METH_KEYWORDS, NULL},
+	 { (char *)"FontMapper_SetConfig", (PyCFunction) _wrap_FontMapper_SetConfig, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"FontMapper_SetConfigPath", (PyCFunction) _wrap_FontMapper_SetConfigPath, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"FontMapper_GetDefaultConfigPath", (PyCFunction) _wrap_FontMapper_GetDefaultConfigPath, METH_VARARGS | METH_KEYWORDS, NULL},
 	 { (char *)"FontMapper_GetAltForEncoding", (PyCFunction) _wrap_FontMapper_GetAltForEncoding, METH_VARARGS | METH_KEYWORDS, NULL},
@@ -23279,6 +23371,7 @@ static swig_type_info _swigt__p_wxLocale[] = {{"_p_wxLocale", 0, "wxLocale *", 0
 static swig_type_info _swigt__ptrdiff_t[] = {{"_ptrdiff_t", 0, "ptrdiff_t", 0, 0, 0, 0},{"_ptrdiff_t", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
 static swig_type_info _swigt__std__ptrdiff_t[] = {{"_std__ptrdiff_t", 0, "std::ptrdiff_t", 0, 0, 0, 0},{"_std__ptrdiff_t", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
 static swig_type_info _swigt__p_wxRegion[] = {{"_p_wxRegion", 0, "wxRegion *", 0, 0, 0, 0},{"_p_wxRegion", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
+static swig_type_info _swigt__p_wxConfigBase[] = {{"_p_wxConfigBase", 0, "wxConfigBase *", 0, 0, 0, 0},{"_p_wxConfigBase", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
 static swig_type_info _swigt__p_wxLanguageInfo[] = {{"_p_wxLanguageInfo", 0, "wxLanguageInfo *", 0, 0, 0, 0},{"_p_wxLanguageInfo", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
 static swig_type_info _swigt__p_wxWindowDC[] = {{"_p_wxWindowDC", 0, "wxWindowDC *", 0, 0, 0, 0},{"_p_wxWindowDC", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
 static swig_type_info _swigt__p_wxPrintData[] = {{"_p_wxPrintData", 0, "wxPrintData *", 0, 0, 0, 0},{"_p_wxPrintData", 0, 0, 0, 0, 0, 0},{0, 0, 0, 0, 0, 0, 0}};
@@ -23345,6 +23438,7 @@ _swigt__p_wxLocale,
 _swigt__ptrdiff_t, 
 _swigt__std__ptrdiff_t, 
 _swigt__p_wxRegion, 
+_swigt__p_wxConfigBase, 
 _swigt__p_wxLanguageInfo, 
 _swigt__p_wxWindowDC, 
 _swigt__p_wxPrintData, 

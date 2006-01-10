@@ -286,13 +286,14 @@ destructor.", "");
     // window attributes
     // -----------------
 
-    //DocDeclStr(
-    //    virtual void , SetTitle( const wxString& title),
-    //    "Sets the window's title. Applicable only to frames and dialogs.", "");
+    DocDeclStr(
+        virtual void , SetTitle( const wxString& title),
+        "Sets the window's title. Applicable only to frames and dialogs.", "");
     
-    //DocDeclStr(
-    //    virtual wxString , GetTitle() const,
-    //    "Gets the window's title. Applicable only to frames and dialogs.", "");    
+    DocDeclStr(
+        virtual wxString , GetTitle() const,
+        "Gets the window's title. Applicable only to frames and dialogs.", "");
+    
 
     DocDeclStr(
         virtual void , SetLabel(const wxString& label),

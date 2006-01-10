@@ -98,11 +98,6 @@ instance.", "");
 };
 
 
-wxColour wxGetColourFromUser(wxWindow *parent = (wxWindow *)NULL,
-                             const wxColour& colInit = wxNullColour,
-                             const wxString& caption = wxPyEmptyString);
-
-
 //--------------------------------------------------------------------------------
 
 
@@ -593,11 +588,6 @@ results with via the `wx.FontData` returned by `GetFontData`.", "");
         "Returns a reference to the internal `wx.FontData` used by the
 wx.FontDialog.", "");    
 };
-
-
-wxFont wxGetFontFromUser(wxWindow *parent = NULL,
-                         const wxFont& fontInit = wxNullFont,
-                         const wxString& caption = wxPyEmptyString);
 
 
 //---------------------------------------------------------------------------

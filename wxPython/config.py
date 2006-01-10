@@ -37,10 +37,10 @@ import distutils.command.clean
 #----------------------------------------------------------------------
 
 VER_MAJOR        = 2      # The first three must match wxWidgets
-VER_MINOR        = 7
-VER_RELEASE      = 0
-VER_SUBREL       = 0      # wxPython release num for x.y.z release of wxWidgets
-VER_FLAGS        = "pre"  # release flags, such as prerelease or RC num, etc.
+VER_MINOR        = 6
+VER_RELEASE      = 2
+VER_SUBREL       = 1      # wxPython release num for x.y.z release of wxWidgets
+VER_FLAGS        = ""     # release flags, such as prerelease or RC num, etc.
 
 DESCRIPTION      = "Cross platform GUI toolkit for Python"
 AUTHOR           = "Robin Dunn"
@@ -87,6 +87,7 @@ BUILD_DLLWIDGET = 0# Build a module that enables unknown wx widgets
                    # to be loaded from a DLL and to be used from Python.
 
                    # Internet Explorer wrapper (experimental)
+BUILD_IEWIN = 0 #(os.name == 'nt')
 BUILD_ACTIVEX = (os.name == 'nt')  # new version of IEWIN and more
 
 
@@ -256,7 +257,7 @@ WXPYTHON_TYPE_TABLE = '_wxPython_table'
 
 # Boolean (int) flags
 for flag in [ 'BUILD_ACTIVEX', 'BUILD_ANIMATE', 'BUILD_DLLWIDGET',
-              'BUILD_GIZMOS', 'BUILD_GLCANVAS', 
+              'BUILD_GIZMOS', 'BUILD_GLCANVAS', 'BUILD_IEWIN',
               'BUILD_OGL', 'BUILD_STC',     
              'CORE_ONLY', 'PREP_ONLY', 'USE_SWIG', 'UNICODE',
              'UNDEF_NDEBUG', 'NO_SCRIPTS', 'NO_HEADERS', 'BUILD_RENAMERS',
@@ -651,6 +652,7 @@ if CORE_ONLY:
     BUILD_STC = 0
     BUILD_GIZMOS = 0
     BUILD_DLLWIDGET = 0
+    BUILD_IEWIN = 0
     BUILD_ACTIVEX = 0
     BUILD_ANIMATE = 0
 
