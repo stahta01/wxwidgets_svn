@@ -12,6 +12,10 @@
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
+#ifdef __GNUG__
+#pragma interface "stattext.h"
+#endif
+
 #include "wx/control.h"
 
 class WXDLLEXPORT wxStaticText : public wxStaticTextBase

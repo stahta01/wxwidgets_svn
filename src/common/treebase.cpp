@@ -17,6 +17,10 @@
 // headers
 // -----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "treebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,8 +30,14 @@
 
 #if wxUSE_TREECTRL
 
-#include "wx/treectrl.h"
-#include "wx/imaglist.h"
+#include "wx/treebase.h"
+#include "wx/settings.h"
+#include "wx/log.h"
+#include "wx/intl.h"
+#include "wx/dynarray.h"
+#include "wx/arrimpl.cpp"
+#include "wx/dcclient.h"
+
 
 // ----------------------------------------------------------------------------
 // events
@@ -80,49 +90,14 @@ wxTreeEvent::wxTreeEvent(const wxTreeEvent & event)
     m_editCancelled = event.m_editCancelled;
 }
 
-// ----------------------------------------------------------------------------
-// wxTreeCtrlBase
-// ----------------------------------------------------------------------------
+#if WXWIN_COMPATIBILITY_2_2
 
-wxTreeCtrlBase::~wxTreeCtrlBase()
+int wxTreeEvent::GetCode() const
 {
-    if (m_ownsImageListNormal)
-        delete m_imageListNormal;
-    if (m_ownsImageListState)
-        delete m_imageListState;
+    return m_evtKey.GetKeyCode();
 }
 
-wxSize wxTreeCtrlBase::DoGetBestSize() const
-{
-    wxSize size;
-
-    // this doesn't really compute the total bounding rectangle of all items
-    // but a not too bad guess of it which has the advantage of not having to
-    // examine all (potentially hundreds or thousands) items in the control
-    for ( wxTreeItemId item = GetRootItem();
-          item.IsOk();
-          item = GetLastChild(item) )
-    {
-        wxRect rect;
-
-        // last parameter is "true" to get only the dimensions of the text
-        // label, we don't want to get the entire item width as it's determined
-        // by the current size
-        if ( GetBoundingRect(item, rect, true) )
-        {
-            if ( size.x < rect.x + rect.width )
-                size.x = rect.x + rect.width;
-            if ( size.y < rect.y + rect.height )
-                size.y = rect.y + rect.height;
-        }
-    }
-
-    // need some minimal size even for empty tree
-    if ( !size.x || !size.y )
-        size = wxControl::DoGetBestSize();
-
-    return size;
-}
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL
 

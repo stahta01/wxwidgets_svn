@@ -11,6 +11,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sashwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -31,7 +35,6 @@
 #include <stdlib.h>
 
 #include "wx/dcscreen.h"
-#include "wx/dcclient.h"
 #include "wx/sashwin.h"
 #include "wx/laywin.h"
 
@@ -277,11 +280,11 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
 
         dragRect = wxRect(x, y, newWidth, newHeight);
 
-        wxSashEvent eventSash(GetId(), edge);
-        eventSash.SetEventObject(this);
-        eventSash.SetDragStatus(status);
-        eventSash.SetDragRect(dragRect);
-        GetEventHandler()->ProcessEvent(eventSash);
+        wxSashEvent event(GetId(), edge);
+        event.SetEventObject(this);
+        event.SetDragStatus(status);
+        event.SetDragRect(dragRect);
+        GetEventHandler()->ProcessEvent(event);
     }
     else if ( event.LeftUp() )
     {

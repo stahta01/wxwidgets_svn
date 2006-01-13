@@ -12,6 +12,10 @@
 #ifndef _WX_REGION_H_
 #define _WX_REGION_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "region.h"
+#endif
+
 #include "wx/list.h"
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
@@ -87,8 +91,8 @@ public:
 
     bool Ok() const { return m_refData != NULL; }
 
-    bool operator == ( const wxRegion& region ) const;
-    bool operator != ( const wxRegion& region ) const { return !(*this == region); }
+    bool operator == ( const wxRegion& region );
+    bool operator != ( const wxRegion& region ) { return !(*this == region); }
 
     void Clear();
 

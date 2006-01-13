@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "printwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -218,7 +222,7 @@ void wxMacCarbonPrintData::TransferFrom( wxPageSetupData *data )
 
 void wxMacCarbonPrintData::TransferTo( wxPageSetupData* data )
 {
-    PMRect rPaper;
+	PMRect rPaper;
     OSStatus err = PMGetUnadjustedPaperRect(m_macPageFormat, &rPaper);
     if ( err == noErr )
     {
@@ -230,7 +234,7 @@ void wxMacCarbonPrintData::TransferTo( wxPageSetupData* data )
 	            (int)(((double) rPage.left - rPaper.left ) * pt2mm) ,
 	            (int)(((double) rPage.top - rPaper.top ) * pt2mm) ) ) ;
 	        
-	    data->SetMinMarginBottomRight( wxPoint (
+	        data->SetMinMarginBottomRight( wxPoint (
                 (wxCoord)(((double) rPaper.right - rPage.right ) * pt2mm),
                 (wxCoord)(((double) rPaper.bottom - rPage.bottom ) * pt2mm)) ) ;
 
@@ -248,6 +252,7 @@ void wxMacCarbonPrintData::TransferTo( wxPageSetupData* data )
             if ( data->GetMarginBottomRight().y < data->GetMinMarginBottomRight().y )
                 data->SetMarginBottomRight( wxPoint( data->GetMarginBottomRight().x ,
                     data->GetMinMarginBottomRight().y) );
+
 	    }
 	}
 }
@@ -286,9 +291,13 @@ void wxMacCarbonPrintData::TransferFrom( wxPrintDialogData* data )
     PMSetFirstPage( m_macPrintSettings , data->GetFromPage() , false ) ;
 
     if (data->GetAllPages() || data->GetFromPage() == 0)
-        PMSetLastPage( m_macPrintSettings , (UInt32) kPMPrintAllPages, true ) ;
-    else
-        PMSetLastPage( m_macPrintSettings , (UInt32) data->GetToPage() , false ) ;
+    {
+    	PMSetLastPage( m_macPrintSettings , (UInt32) kPMPrintAllPages, true ) ;
+	}
+	else
+	{
+    	PMSetLastPage( m_macPrintSettings , (UInt32) data->GetToPage() , false ) ;
+	}
 }
 
 /*
@@ -306,13 +315,13 @@ wxMacPrinter::~wxMacPrinter(void)
 
 bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
 {
-    sm_abortIt = false;
+    sm_abortIt = FALSE;
     sm_abortWindow = NULL;
-
+    
     if (!printout)
-        return false;
-
-    printout->SetIsPreview(false);
+        return FALSE;
+    
+    printout->SetIsPreview(FALSE);
     if (m_printDialogData.GetMinPage() < 1)
         m_printDialogData.SetMinPage(1);
     if (m_printDialogData.GetMaxPage() < 1)
@@ -333,74 +342,73 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
     {
         dc = new wxPrinterDC( m_printDialogData.GetPrintData() ) ;
     }
-
+    
+    
     // May have pressed cancel.
     if (!dc || !dc->Ok())
     {
-        if (dc)
-            delete dc;
-        return false;
+        if (dc) delete dc;
+        return FALSE;
     }
-
+    
     // on the mac we have always pixels as addressing mode with 72 dpi
+    
     printout->SetPPIScreen(72, 72);
     PMResolution res;
     wxMacCarbonPrintData* nativeData = (wxMacCarbonPrintData*)
           (m_printDialogData.GetPrintData().GetNativeData());
     PMGetResolution((PMPageFormat) (nativeData->m_macPageFormat), &res);
     printout->SetPPIPrinter(int(res.hRes), int(res.vRes));
-
-    // Set printout parameters
+    
+    // Set printout parameters  
     printout->SetDC(dc);
-
+    
     int w, h;
     wxCoord ww, hh;
     dc->GetSize(&w, &h);
     printout->SetPageSizePixels((int)w, (int)h);
     dc->GetSizeMM(&ww, &hh);
     printout->SetPageSizeMM((int)ww, (int)hh);
-
+    
     // Create an abort window
     wxBeginBusyCursor();
-
+    
     printout->OnPreparePrinting();
-
+    
     // Get some parameters from the printout, if defined
     int fromPage, toPage;
     int minPage, maxPage;
     printout->GetPageInfo(&minPage, &maxPage, &fromPage, &toPage);
-
+    
     if (maxPage == 0)
     {
         wxEndBusyCursor();
-        return false;
+        return FALSE;
     }
-
+    
     // Only set min and max, because from and to have been
     // set by the user
     m_printDialogData.SetMinPage(minPage);
     m_printDialogData.SetMaxPage(maxPage);
-
+    
     wxWindow *win = CreateAbortWindow(parent, printout);
     wxSafeYield(win,true);
-
+    
     if (!win)
     {
         wxEndBusyCursor();
         wxMessageBox(wxT("Sorry, could not create an abort dialog."), wxT("Print Error"), wxOK, parent);
         delete dc;
-
-        return false;
+        return FALSE;
     }
-
     sm_abortWindow = win;
-    sm_abortWindow->Show(true);
+    sm_abortWindow->Show(TRUE);
     wxSafeYield(win,true);
-
+    
     printout->OnBeginPrinting();
-
-    bool keepGoing = true;
-
+    
+    bool keepGoing = TRUE;
+    
     int copyCount;
     for (copyCount = 1; copyCount <= m_printDialogData.GetNoCopies(); copyCount ++)
     {
@@ -412,15 +420,14 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
         }
         if (sm_abortIt)
             break;
-
+        
         int pn;
-        for (pn = m_printDialogData.GetFromPage(); 
-        keepGoing && (pn <= m_printDialogData.GetToPage()) && printout->HasPage(pn);
+        for (pn = m_printDialogData.GetFromPage(); keepGoing && (pn <= m_printDialogData.GetToPage()) && printout->HasPage(pn);
         pn++)
         {
             if (sm_abortIt)
             {
-                keepGoing = false;
+                keepGoing = FALSE;
                 break;
             }
             else
@@ -446,7 +453,7 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
     
     if (sm_abortWindow)
     {
-        sm_abortWindow->Show(false);
+        sm_abortWindow->Show(FALSE);
         delete sm_abortWindow;
         sm_abortWindow = NULL;
     }
@@ -455,7 +462,7 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
     
     delete dc;
     
-    return true;
+    return TRUE;
 }
 
 wxDC* wxMacPrinter::PrintDialog(wxWindow *parent)
@@ -478,16 +485,17 @@ bool wxMacPrinter::Setup(wxWindow *parent)
 {
 #if 0
     wxPrintDialog dialog(parent, & m_printDialogData);
-    dialog.GetPrintDialogData().SetSetupDialog(true);
+    dialog.GetPrintDialogData().SetSetupDialog(TRUE);
     
     int ret = dialog.ShowModal();
     
     if (ret == wxID_OK)
+    {
         m_printDialogData = dialog.GetPrintDialogData();
+    }
     
     return (ret == wxID_OK);
 #endif
-
     return wxID_CANCEL;
 }
 
@@ -516,8 +524,7 @@ wxMacPrintPreview::~wxMacPrintPreview(void)
 bool wxMacPrintPreview::Print(bool interactive)
 {
     if (!m_printPrintout)
-        return false;
-
+        return FALSE;
     wxMacPrinter printer(&m_printDialogData);
     return printer.Print(m_previewFrame, m_printPrintout, interactive);
 }
@@ -553,11 +560,10 @@ void wxMacPrintPreview::DetermineScaling(void)
     {
         m_isOk = false ;
     }
-
     // At 100%, the page should look about page-size on the screen.
     // m_previewScale = (float)((float)screenWidth/(float)printerWidth);
     // m_previewScale = m_previewScale * (float)((float)screenXRes/(float)printerXRes);
-
+    
     m_previewScale = 1 ; 
 }
 

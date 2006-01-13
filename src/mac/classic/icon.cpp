@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "icon.h"
+#endif
+
 #include "wx/icon.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap)

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpbuttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,7 +30,6 @@
 
 #include "wx/msw/private.h"
 #include "wx/image.h"
-#include "wx/msw/uxtheme.h"
 
 // ----------------------------------------------------------------------------
 // macros
@@ -88,8 +91,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
 
 BEGIN_EVENT_TABLE(wxBitmapButton, wxBitmapButtonBase)
     EVT_SYS_COLOUR_CHANGED(wxBitmapButton::OnSysColourChanged)
-    EVT_ENTER_WINDOW(wxBitmapButton::OnMouseEnterOrLeave)
-    EVT_LEAVE_WINDOW(wxBitmapButton::OnMouseEnterOrLeave)
 END_EVENT_TABLE()
 
 /*
@@ -124,8 +125,8 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
 
     if ( style & wxBU_AUTODRAW )
     {
-        m_marginX =
-        m_marginY = 4;
+        m_marginX = wxDEFAULT_BUTTON_MARGIN;
+        m_marginY = wxDEFAULT_BUTTON_MARGIN;
     }
 
     if (id == wxID_ANY)
@@ -197,34 +198,6 @@ void wxBitmapButton::OnSysColourChanged(wxSysColourChangedEvent& event)
     event.Skip();
 }
 
-void wxBitmapButton::OnMouseEnterOrLeave(wxMouseEvent& event)
-{
-    if ( IsEnabled() && m_bmpHover.Ok() )
-        Refresh();
-
-    event.Skip();
-}
-
-void wxBitmapButton::OnSetBitmap()
-{
-    // if the focus bitmap is specified but hover one isn't, use the focus
-    // bitmap for hovering as well if this is consistent with the current
-    // Windows version look and feel
-    //
-    // rationale: this is compatible with the old wxGTK behaviour and also
-    // makes it much easier to do "the right thing" for all platforms (some of
-    // them, such as Windows XP, have "hot" buttons while others don't)
-    if ( !m_bmpHover.Ok() &&
-            m_bmpFocus.Ok() &&
-                wxUxThemeEngine::GetIfActive() )
-    {
-        m_bmpHover = m_bmpFocus;
-    }
-
-    // this will redraw us
-    wxBitmapButtonBase::OnSetBitmap();
-}
-
 // VZ: should be at the very least less than wxDEFAULT_BUTTON_MARGIN
 #define FOCUS_MARGIN 3
 
@@ -248,12 +221,10 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 
 
     // choose the bitmap to use depending on the button state
-    wxBitmap *bitmap;
+    wxBitmap* bitmap;
 
     if ( isSelected && m_bmpSelected.Ok() )
         bitmap = &m_bmpSelected;
-    else if ( m_bmpHover.Ok() && IsMouseInWindow() )
-        bitmap = &m_bmpHover;
     else if ((state & ODS_FOCUS) && m_bmpFocus.Ok())
         bitmap = &m_bmpFocus;
     else if ((state & ODS_DISABLED) && m_bmpDisabled.Ok())
@@ -304,7 +275,8 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     }
 
     // draw the bitmap
-    wxDCTemp dst((WXHDC)hDC);
+    wxDC dst;
+    dst.SetHDC((WXHDC) hDC, false);
     dst.DrawBitmap(*bitmap, x1, y1, true);
 
     // draw focus / disabled state, if auto-drawing
@@ -329,6 +301,8 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 }
 
 // GRG Feb/2000, support for bmp buttons with Win95/98 standard LNF
+
+#if defined(__WIN95__)
 
 void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
     int right, int bottom, bool sel )
@@ -384,6 +358,73 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
     DeleteObject(penDkShadow);
     DeleteObject(brushFace);
 }
+
+#else
+
+void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
+    int right, int bottom, bool sel )
+{
+    HPEN oldp;
+    HPEN penBorder;
+    HPEN penLight;
+    HPEN penShadow;
+    HBRUSH brushFace;
+
+    // create needed pens and brush
+    penBorder = CreatePen(PS_SOLID, 0, GetSysColor(COLOR_WINDOWFRAME));
+    penShadow = CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
+    penLight  = CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNHIGHLIGHT));
+    brushFace = CreateSolidBrush(COLOR_BTNFACE);
+
+    // draw the rectangle
+    RECT rect;
+    rect.left   = left;
+    rect.right  = right;
+    rect.top    = top;
+    rect.bottom = bottom;
+    FillRect((HDC) dc, &rect, brushFace);
+
+    // draw the border
+    oldp = (HPEN) SelectObject( (HDC) dc, penBorder);
+    MoveToEx((HDC) dc,left+1,top,NULL);LineTo((HDC) dc,right-1,top);
+    MoveToEx((HDC) dc,left,top+1,NULL);LineTo((HDC) dc,left,bottom-1);
+    MoveToEx((HDC) dc,left+1,bottom-1,NULL);LineTo((HDC) dc,right-1,bottom-1);
+    MoveToEx((HDC) dc,right-1,top+1,NULL);LineTo((HDC) dc,right-1,bottom-1);
+
+    SelectObject( (HDC) dc, penShadow);
+    if (sel)
+    {
+        MoveToEx((HDC) dc,left+1    ,bottom-2   ,NULL);
+        LineTo((HDC) dc,  left+1    ,top+1);
+        LineTo((HDC) dc,  right-2   ,top+1);
+    }
+    else
+    {
+        MoveToEx((HDC) dc,left+1    ,bottom-2   ,NULL);
+        LineTo((HDC) dc,  right-2   ,bottom-2);
+        LineTo((HDC) dc,  right-2   ,top);
+
+        MoveToEx((HDC) dc,left+2    ,bottom-3   ,NULL);
+        LineTo((HDC) dc,  right-3   ,bottom-3);
+        LineTo((HDC) dc,  right-3   ,top+1);
+
+        SelectObject( (HDC) dc, penLight);
+
+        MoveToEx((HDC) dc,left+1    ,bottom-2   ,NULL);
+        LineTo((HDC) dc,  left+1    ,top+1);
+        LineTo((HDC) dc,  right-2   ,top+1);
+    }
+
+    // delete allocated resources
+    SelectObject((HDC) dc,oldp);
+    DeleteObject(penBorder);
+    DeleteObject(penLight);
+    DeleteObject(penShadow);
+    DeleteObject(brushFace);
+}
+
+#endif // defined(__WIN95__)
+
 
 void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right,
     int bottom, bool WXUNUSED(sel) )
@@ -462,3 +503,4 @@ wxSize wxBitmapButton::DoGetBestSize() const
 }
 
 #endif // wxUSE_BMPBUTTON
+

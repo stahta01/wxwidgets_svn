@@ -11,6 +11,10 @@
 #ifndef __LISTCTRLH_G__
 #define __LISTCTRLH_G__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "listctrl.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #ifdef __WXMAC__
@@ -114,8 +118,10 @@ public:
     wxColour GetItemTextColour( long item ) const;
     void SetItemBackgroundColour( long item, const wxColour &col);
     wxColour GetItemBackgroundColour( long item ) const;
+#if wxABI_VERSION >= 20602
     void SetItemFont( long item, const wxFont &f);
     wxFont GetItemFont( long item ) const;
+#endif
     int GetSelectedItemCount() const;
     wxColour GetTextColour() const;
     void SetTextColour(const wxColour& col);

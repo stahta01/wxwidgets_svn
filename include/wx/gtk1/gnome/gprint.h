@@ -11,6 +11,10 @@
 #ifndef __gprint_H__
 #define __gprint_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 // Include wxWindows' headers
 
 #include "wx/defs.h"

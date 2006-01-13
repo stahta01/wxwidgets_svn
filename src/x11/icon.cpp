@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "icon.h"
+#endif
+
 #include "wx/icon.h"
 #include "wx/window.h"
 

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "radioboxbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -34,24 +38,16 @@
 // implementation
 // ============================================================================
 
-void wxRadioBoxBase::SetMajorDim(int majorDim, long style)
+int wxRadioBoxBase::FindString(const wxString& s) const
 {
-    wxCHECK_RET( majorDim != 0, _T("major radiobox dimension can't be 0") );
-
-    m_majorDim = majorDim;
-
-    int minorDim = (GetCount() + m_majorDim - 1) / m_majorDim;
-
-    if ( style & wxRA_SPECIFY_COLS )
+    int count = GetCount();
+    for ( int n = 0; n < count; n++ )
     {
-        m_numCols = majorDim;
-        m_numRows = minorDim;
+        if ( GetString(n) == s )
+            return n;
     }
-    else // wxRA_SPECIFY_ROWS
-    {
-        m_numCols = minorDim;
-        m_numRows = majorDim;
-    }
+
+    return wxNOT_FOUND;
 }
 
 int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
@@ -164,4 +160,24 @@ void wxRadioBoxBase::SetNumberOfRowsOrCols(int WXUNUSED(n))
 
 #endif // WXWIN_COMPATIBILITY_2_4
 
+#if WXWIN_COMPATIBILITY_2_2
+
+int wxRadioBoxBase::Number() const
+{
+    return GetCount();
+}
+
+wxString wxRadioBoxBase::GetLabel(int n) const
+{
+    return GetString(n);
+}
+
+void wxRadioBoxBase::SetLabel(int n, const wxString& label)
+{
+    SetString(n, label);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 #endif // wxUSE_RADIOBOX
+

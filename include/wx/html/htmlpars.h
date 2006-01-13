@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLPARS_H_
 #define _WX_HTMLPARS_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlpars.h"
+#endif
 
 #include "wx/defs.h"
 #if wxUSE_HTML
@@ -99,7 +104,7 @@ public:
     // handler can handle only 'myitems' (e.g. it's GetSupportedTags returns "MYITEMS")
     // you can call PushTagHandler(handler, "IT") when you find <myitems>
     // and call PopTagHandler() when you find </myitems>
-    void PushTagHandler(wxHtmlTagHandler *handler, const wxString& tags);
+    void PushTagHandler(wxHtmlTagHandler *handler, wxString tags);
 
     // Restores state before last call to PushTagHandler
     void PopTagHandler();

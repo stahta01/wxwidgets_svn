@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+#pragma implementation "choice.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -183,25 +187,13 @@ wxChoice::~wxChoice()
         m_clientDataDict.DestroyData();
 }
 
-static inline wxChar* MYcopystring(const wxChar* s)
+int wxChoice::DoAppend(const wxString& item)
 {
-    wxChar* copy = new wxChar[wxStrlen(s) + 1];
-    return wxStrcpy(copy, s);
-}
-
-int wxChoice::DoInsert(const wxString& item, int pos)
-{
-#ifndef XmNpositionIndex
-    wxCHECK_MSG( pos == GetCount(), -1, wxT("insert not implemented"));
-#endif
     Widget w = XtVaCreateManagedWidget (wxStripMenuCodes(item),
 #if wxUSE_GADGETS
         xmPushButtonGadgetClass, (Widget) m_menuWidget,
 #else
         xmPushButtonWidgetClass, (Widget) m_menuWidget,
-#endif
-#ifdef XmNpositionIndex
-        XmNpositionIndex, pos,
 #endif
         NULL);
 
@@ -210,7 +202,7 @@ int wxChoice::DoInsert(const wxString& item, int pos)
     if( m_font.Ok() )
         wxDoChangeFont( w, m_font );
 
-    m_widgetArray.Insert(w, pos);
+    m_widgetArray.Add(w);
 
     char mnem = wxFindMnemonic (item);
     if (mnem != 0)
@@ -229,16 +221,18 @@ int wxChoice::DoInsert(const wxString& item, int pos)
             XmNlabelString, text(),
             NULL);
     }
-    // need to ditch wxStringList for wxArrayString
-    m_stringList.Insert(pos, MYcopystring(item));
+    m_stringList.Add(item);
     m_noStrings ++;
 
-    return pos;
+    return GetCount() - 1;
 }
 
-int wxChoice::DoAppend(const wxString& item)
+int wxChoice::DoInsert(const wxString& item, int pos)
 {
-    return DoInsert(item, GetCount());
+    wxCHECK_MSG(false, -1, wxT("insert not implemented"));
+
+//    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
+//    if (pos == GetCount()) return DoAppend(item);
 }
 
 void wxChoice::Delete(int n)
@@ -288,7 +282,7 @@ int wxChoice::GetSelection() const
     wxXmString freeMe(text);
     wxString s = wxXmStringToString( text );
 
-    if (!s.empty())
+    if (!s.IsEmpty())
     {
         int i = 0;
         for (wxStringList::compatibility_iterator node = m_stringList.GetFirst ();
@@ -339,6 +333,21 @@ void wxChoice::SetSelection(int n)
     m_inSetValue = false;
 }
 
+int wxChoice::FindString(const wxString& s) const
+{
+    int i = 0;
+    for (wxStringList::compatibility_iterator node = m_stringList.GetFirst();
+         node; node = node->GetNext ())
+    {
+        if (s == node->GetData())
+            return i;
+
+        i++;
+    }
+
+    return wxNOT_FOUND;
+}
+
 wxString wxChoice::GetString(int n) const
 {
     wxStringList::compatibility_iterator node = m_stringList.Item(n);
@@ -352,7 +361,7 @@ void wxChoice::SetColumns(int n)
 {
     if (n<1) n = 1 ;
 
-    short numColumns = (short)n ;
+    short numColumns = n ;
     Arg args[3];
 
     XtSetArg(args[0], XmNnumColumns, numColumns);

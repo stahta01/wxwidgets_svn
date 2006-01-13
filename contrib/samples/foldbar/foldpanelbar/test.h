@@ -12,6 +12,10 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "test.cpp"
+#endif
+
 /*!
  * Includes
  */

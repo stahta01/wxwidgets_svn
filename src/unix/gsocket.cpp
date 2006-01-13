@@ -12,6 +12,10 @@
  * -------------------------------------------------------------------------
  */
 
+/*
+ * PLEASE don't put C++ comments here - this is a C source file.
+ */
+
 #if defined(__WATCOMC__)
 #include "wx/wxprec.h"
 #include <errno.h>
@@ -23,7 +27,7 @@
 #endif
 
 #if defined(__VISAGECPP__)
-#define BSD_SELECT /* use Berkeley Sockets select */
+#define BSD_SELECT /* use Berkley Sockets select */
 #endif
 
 #if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
@@ -179,11 +183,7 @@ int _System soclose(int);
 
 #ifndef __GSOCKET_STANDALONE__
 #  include "wx/unix/gsockunx.h"
-#  include "wx/unix/private.h"
 #  include "wx/gsocket.h"
-#if wxUSE_THREADS && (defined(HAVE_GETHOSTBYNAME) || defined(HAVE_GETSERVBYNAME))
-#  include "wx/thread.h"
-#endif
 #else
 #  include "gsockunx.h"
 #  include "gsocket.h"
@@ -191,175 +191,6 @@ int _System soclose(int);
 #    define WXUNUSED(x)
 #  endif
 #endif /* __GSOCKET_STANDALONE__ */
-
-#if defined(HAVE_GETHOSTBYNAME)
-static struct hostent * deepCopyHostent(struct hostent *h,
-					const struct hostent *he,
-					char *buffer, int size, int *err)
-{
-  memcpy(h, he, sizeof(struct hostent));
-  int len = strlen(h->h_name);
-  if (len > size)
-    len = size - 1;
-  memcpy(buffer, h->h_name, len);
-  buffer[len] = '\0';
-  h->h_name = buffer;
-  buffer += len + 1;
-  size -= len + 1;
-  len = h->h_length;
-  for (char **p = h->h_addr_list; *p != 0; p++) {
-    if (size < len){
-      *err = ENOMEM;
-      return NULL;
-    }
-    memcpy(buffer, *p, len);
-    *p = buffer;
-    buffer += len;
-    size -= len;
-  }
-  for (char **q = h->h_aliases; size > 0 && *q != 0; q++){
-    len = strlen(*q);
-    if (len > size)
-      len = size - 1;
-    memcpy(buffer, *q, len);
-    buffer[len] = '\0';
-    *q = buffer;
-    buffer += len + 1;
-    size -= len + 1;
-  }
-  return h;
-}
-#endif
-
-struct hostent * wxGethostbyname_r(const char *hostname, struct hostent *h,
-				   void *buffer, int size, int *err)
-
-{
-  struct hostent *he;
-  *err = 0;
-#if defined(HAVE_FUNC_GETHOSTBYNAME_R_6)
-  if (gethostbyname_r(hostname, h, (char*)buffer, size, &he, err))
-    he = NULL;
-#elif defined(HAVE_FUNC_GETHOSTBYNAME_R_5)
-  he = gethostbyname_r(hostname, h, (char*)buffer, size, err);
-#elif defined(HAVE_FUNC_GETHOSTBYNAME_R_3)
-  if (gethostbyname_r(hostname, h, (struct hostent_data*) buffer))
-  {
-    he = NULL;
-    *err = h_errno;
-  }
-  else
-    he = h;
-#elif defined(HAVE_GETHOSTBYNAME)
-#if wxUSE_THREADS
-  static wxMutex nameLock;
-  wxMutexLocker locker(nameLock);
-#endif
-  he = gethostbyname(hostname);
-  if (!he)
-    *err = h_errno;
-  else
-    he = deepCopyHostent(h, he, (char*)buffer, size, err);
-#endif
-  return he;
-}
-
-struct hostent * wxGethostbyaddr_r(const char *addr_buf, int buf_size,
-				   int proto, struct hostent *h,
-				   void *buffer, int size, int *err)
-{
-  struct hostent *he;
-  *err = 0;
-#if defined(HAVE_FUNC_GETHOSTBYNAME_R_6)
-  if (gethostbyaddr_r(addr_buf, buf_size, proto, h,
-		      (char*)buffer, size, &he, err))
-    he = NULL;
-#elif defined(HAVE_FUNC_GETHOSTBYNAME_R_5)
-  he = gethostbyaddr_r(addr_buf, buf_size, proto, h, (char*)buffer, size, err);
-#elif defined(HAVE_FUNC_GETHOSTBYNAME_R_3)
-  if (gethostbyaddr_r(addr_buf, buf_size, proto, h,
-			(struct hostent_data*) buffer))
-  {
-    he = NULL;
-    *err = h_errno;
-  }
-  else
-    he = h;
-#elif defined(HAVE_GETHOSTBYNAME)
-#if wxUSE_THREADS
-  static wxMutex addrLock;
-  wxMutexLocker locker(addrLock);
-#endif
-  he = gethostbyaddr(addr_buf, buf_size, proto);
-  if (!he)
-    *err = h_errno;
-  else
-    he = deepCopyHostent(h, he, (char*)buffer, size, err);
-#endif
-  return he;
-}
-
-#if defined(HAVE_GETHOSTBYNAME)
-static struct servent * deepCopyServent(struct servent *s,
-					const struct servent *se,
-					char *buffer, int size)
-{
-  memcpy(s, se, sizeof(struct servent));
-  int len = strlen(s->s_name);
-  if (len > size)
-    len = size - 1;
-  memcpy(buffer, s->s_name, len);
-  buffer[len] = '\0';
-  s->s_name = buffer;
-  buffer += len + 1;
-  size -= len + 1;
-  len = strlen(s->s_proto);
-  if (len > size)
-    len = size - 1;
-  memcpy(buffer, s->s_proto, len);
-  buffer[len] = '\0';
-  s->s_proto = buffer;
-  buffer += len + 1;
-  size -= len + 1;
-  for (char **q = s->s_aliases; size > 0 && *q != 0; q++){
-    len = strlen(*q);
-    if (len > size)
-      len = size - 1;
-    memcpy(buffer, *q, len);
-    buffer[len] = '\0';
-    *q = buffer;
-    buffer += len + 1;
-    size -= len + 1;
-  }
-  return s;
-}
-#endif
-
-struct servent *wxGetservbyname_r(const char *port, const char *protocol,
-				  struct servent *serv, void *buffer, int size)
-{
-  struct servent *se;
-#if defined(HAVE_FUNC_GETSERVBYNAME_R_6)
-  if (getservbyname_r(port, protocol, serv, (char*)buffer, size, &se))
-    se = NULL;
-#elif defined(HAVE_FUNC_GETSERVBYNAME_R_5)
-  se = getservbyname_r(port, protocol, serv, (char*)buffer, size);
-#elif defined(HAVE_FUNC_GETSERVBYNAME_R_4)
-  if (getservbyname_r(port, protocol, serv, (struct servent_data*) buffer))
-    se = NULL;
-  else
-    se = serv;
-#elif defined(HAVE_GETSERVBYNAME)
-#if wxUSE_THREADS
-  static wxMutex servLock;
-  wxMutexLocker locker(servLock);
-#endif
-  se = getservbyname(port, protocol);
-  if (se)
-    se = deepCopyServent(serv, se, (char*)buffer, size);
-#endif
-  return se;
-}
 
 /* debugging helpers */
 #ifdef __GSOCKET_DEBUG__
@@ -785,7 +616,6 @@ GSocket *GSocket::WaitConnection()
     m_error = GSOCK_MEMERR;
     return NULL;
   }
-
   err = _GAddress_translate_from(connection->m_peer, &from, fromlen);
   if (err != GSOCK_NOERROR)
   {
@@ -793,7 +623,6 @@ GSocket *GSocket::WaitConnection()
     m_error = err;
     return NULL;
   }
-
 #if defined(__EMX__) || defined(__VISAGECPP__)
   ioctl(connection->m_fd, FIONBIO, (char*)&arg, sizeof(arg));
 #else
@@ -807,13 +636,10 @@ GSocket *GSocket::WaitConnection()
 bool GSocket::SetReusable()
 {
     /* socket must not be null, and must not be in use/already bound */
-    if (this && m_fd == INVALID_SOCKET)
-    {
+    if (this && m_fd == INVALID_SOCKET) {
         m_reusable = true;
-
         return true;
     }
-
     return false;
 }
 
@@ -898,11 +724,13 @@ GSocketError GSocket::Connect(GSocketStream stream)
    * non-blocking, it just shouldn't be called prior to knowing there is a
    * connection _if_ blocking sockets are being used.
    * If connect above returns 0, we are already connected and need to make the
-   * call to Enable_Events now.
+   * call to Enable_Events now.  
    */
-
+  
   if (m_non_blocking || ret == 0)
+  {
     gs_gui_functions->Enable_Events(this);
+  }
 
   if (ret == -1)
   {
@@ -953,7 +781,6 @@ GSocketError GSocket::Connect(GSocketStream stream)
      */
     Close();
     m_error = GSOCK_IOERR;
-
     return GSOCK_IOERR;
   }
 
@@ -1045,33 +872,28 @@ int GSocket::Read(char *buffer, int size)
   Disable(GSOCK_INPUT);
 
   /* If the socket is blocking, wait for data (with a timeout) */
-  if (Input_Timeout() == GSOCK_TIMEDOUT) {
-    m_error = GSOCK_TIMEDOUT;
-    /* Don't return here immediately, otherwise socket events would not be
-     * re-enabled! */
+  if (Input_Timeout() == GSOCK_TIMEDOUT)
+    /* We no longer return here immediately, otherwise socket events would not be re-enabled! */
     ret = -1;
-  }
-  else
-  {
+  else {
     /* Read the data */
     if (m_stream)
       ret = Recv_Stream(buffer, size);
     else
       ret = Recv_Dgram(buffer, size);
+  }
 
-    /* If recv returned zero, then the connection is lost, and errno is not set.
-     * Otherwise, recv has returned an error (-1), in which case we have lost the
-     * socket only if errno does _not_ indicate that there may be more data to read.
-     */
-    if (ret == 0)
+  /* If recv returned zero, then the connection is lost, and errno is not set.
+   * Otherwise, recv has returned an error (-1), in which case we have lost the
+   * socket only if errno does _not_ indicate that there may be more data to read.
+   */
+  if (ret == 0)
+    m_error = GSOCK_IOERR;
+  else if (ret == -1) {
+    if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
+      m_error = GSOCK_WOULDBLOCK;
+    else
       m_error = GSOCK_IOERR;
-    else if (ret == -1)
-    {
-      if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
-        m_error = GSOCK_WOULDBLOCK;
-      else
-        m_error = GSOCK_IOERR;
-    }
   }
 
   /* Enable events again now that we are done processing */
@@ -1129,7 +951,6 @@ int GSocket::Write(const char *buffer, int size)
      * will further OUTPUT events be posted.
      */
     Enable(GSOCK_OUTPUT);
-
     return -1;
   }
 
@@ -1160,18 +981,18 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
 
     if (m_fd == -1)
         return (GSOCK_LOST_FLAG & flags);
-
+    
     /* Do not use a static struct, Linux can garble it */
     tv.tv_sec = m_timeout / 1000;
     tv.tv_usec = (m_timeout % 1000) * 1000;
 
-    wxFD_ZERO(&readfds);
-    wxFD_ZERO(&writefds);
-    wxFD_ZERO(&exceptfds);
-    wxFD_SET(m_fd, &readfds);
+    FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+    FD_ZERO(&exceptfds);
+    FD_SET(m_fd, &readfds);
     if (flags & GSOCK_OUTPUT_FLAG || flags & GSOCK_CONNECTION_FLAG)
-      wxFD_SET(m_fd, &writefds);
-    wxFD_SET(m_fd, &exceptfds);
+      FD_SET(m_fd, &writefds);
+    FD_SET(m_fd, &exceptfds);
 
     /* Check 'sticky' CONNECTION flag first */
     result |= (GSOCK_CONNECTION_FLAG & m_detected);
@@ -1194,7 +1015,7 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
     }
 
     /* Check for readability */
-    if (wxFD_ISSET(m_fd, &readfds))
+    if (FD_ISSET(m_fd, &readfds))
     {
       char c;
 
@@ -1228,7 +1049,7 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
     }
 
     /* Check for writability */
-    if (wxFD_ISSET(m_fd, &writefds))
+    if (FD_ISSET(m_fd, &writefds))
     {
       if (m_establishing && !m_server)
       {
@@ -1259,7 +1080,7 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
     }
 
     /* Check for exceptions and errors (is this useful in Unices?) */
-    if (wxFD_ISSET(m_fd, &exceptfds))
+    if (FD_ISSET(m_fd, &exceptfds))
     {
       m_establishing = false;
       m_detected = GSOCK_LOST_FLAG;
@@ -1273,8 +1094,10 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
   }
   else
   {
+
     assert(this);
     return flags & m_detected;
+
   }
 }
 
@@ -1387,8 +1210,9 @@ GSocketError GSocket::GetSockOpt(int level, int optname,
                                 void *optval, int *optlen)
 {
     if (getsockopt(m_fd, level, optname, (char*)optval, (SOCKOPTLEN_T*)optlen) == 0)
+    {
         return GSOCK_NOERROR;
-
+    }
     return GSOCK_OPTERR;
 }
 
@@ -1396,8 +1220,9 @@ GSocketError GSocket::SetSockOpt(int level, int optname,
                                 const void *optval, int optlen)
 {
     if (setsockopt(m_fd, level, optname, (const char*)optval, optlen) == 0)
+    {
         return GSOCK_NOERROR;
-
+    }
     return GSOCK_OPTERR;
 }
 
@@ -1436,8 +1261,8 @@ GSocketError GSocket::Input_Timeout()
 
   if (!m_non_blocking)
   {
-    wxFD_ZERO(&readfds);
-    wxFD_SET(m_fd, &readfds);
+    FD_ZERO(&readfds);
+    FD_SET(m_fd, &readfds);
     ret = select(m_fd + 1, &readfds, NULL, NULL, &tv);
     if (ret == 0)
     {
@@ -1445,7 +1270,6 @@ GSocketError GSocket::Input_Timeout()
       m_error = GSOCK_TIMEDOUT;
       return GSOCK_TIMEDOUT;
     }
-
     if (ret == -1)
     {
       GSocket_Debug(( "GSocket_Input_Timeout, select returned -1\n" ));
@@ -1457,7 +1281,6 @@ GSocketError GSocket::Input_Timeout()
       return GSOCK_TIMEDOUT;
     }
   }
-
   return GSOCK_NOERROR;
 }
 
@@ -1479,8 +1302,8 @@ GSocketError GSocket::Output_Timeout()
 
   if (!m_non_blocking)
   {
-    wxFD_ZERO(&writefds);
-    wxFD_SET(m_fd, &writefds);
+    FD_ZERO(&writefds);
+    FD_SET(m_fd, &writefds);
     ret = select(m_fd + 1, NULL, &writefds, NULL, &tv);
     if (ret == 0)
     {
@@ -1488,7 +1311,6 @@ GSocketError GSocket::Output_Timeout()
       m_error = GSOCK_TIMEDOUT;
       return GSOCK_TIMEDOUT;
     }
-
     if (ret == -1)
     {
       GSocket_Debug(( "GSocket_Output_Timeout, select returned -1\n" ));
@@ -1499,13 +1321,10 @@ GSocketError GSocket::Output_Timeout()
       m_error = GSOCK_TIMEDOUT;
       return GSOCK_TIMEDOUT;
     }
-
-    if ( ! wxFD_ISSET(m_fd, &writefds) )
-    {
+    if ( ! FD_ISSET(m_fd, &writefds) ) {
         GSocket_Debug(( "GSocket_Output_Timeout is buggy!\n" ));
     }
-    else
-    {
+    else {
         GSocket_Debug(( "GSocket_Output_Timeout seems correct\n" ));
     }
   }
@@ -1523,9 +1342,7 @@ int GSocket::Recv_Stream(char *buffer, int size)
   do
   {
     ret = recv(m_fd, buffer, size, GSOCKET_MSG_NOSIGNAL);
-  }
-  while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
-
+  } while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
   return ret;
 }
 
@@ -1541,8 +1358,7 @@ int GSocket::Recv_Dgram(char *buffer, int size)
   do
   {
     ret = recvfrom(m_fd, buffer, size, 0, &from, (WX_SOCKLEN_T *) &fromlen);
-  }
-  while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
+  } while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
 
   if (ret == -1)
     return -1;
@@ -1557,7 +1373,6 @@ int GSocket::Recv_Dgram(char *buffer, int size)
       return -1;
     }
   }
-
   err = _GAddress_translate_from(m_peer, &from, fromlen);
   if (err != GSOCK_NOERROR)
   {
@@ -1579,8 +1394,7 @@ int GSocket::Send_Stream(const char *buffer, int size)
   do
   {
     ret = send(m_fd, (char *)buffer, size, GSOCKET_MSG_NOSIGNAL);
-  }
-  while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
+  } while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
 
   UNMASK_SIGNAL();
 
@@ -1611,8 +1425,7 @@ int GSocket::Send_Dgram(const char *buffer, int size)
   do
   {
     ret = sendto(m_fd, (char *)buffer, size, 0, addr, len);
-  }
-  while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
+  } while (ret == -1 && errno == EINTR); /* Loop until not interrupted */
 
   UNMASK_SIGNAL();
 
@@ -1720,11 +1533,9 @@ void GSocket::Detected_Write()
 GSocket *GSocket_new(void)
 {
     GSocket *newsocket = new GSocket();
-    if (newsocket->IsOk())
+    if(newsocket->IsOk())
         return newsocket;
-
     delete newsocket;
-
     return NULL;
 }
 
@@ -1864,7 +1675,6 @@ GSocketError _GAddress_translate_from(GAddress *address,
     address->m_error = GSOCK_MEMERR;
     return GSOCK_MEMERR;
   }
-
   memcpy(address->m_addr, addr, len);
 
   return GSOCK_NOERROR;
@@ -1944,26 +1754,16 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
     struct in_addr *array_addr;
 
     /* It is a real name, we solve it */
-    struct hostent h;
-#if defined(HAVE_FUNC_GETHOSTBYNAME_R_3)
-    struct hostent_data buffer;
-#else
-    char buffer[1024];
-#endif
-    int err;
-    he = wxGethostbyname_r(hostname, &h, (void*)&buffer, sizeof(buffer), &err);
-    if (he == NULL)
+    if ((he = gethostbyname(hostname)) == NULL)
     {
       /* Reset to invalid address */
       addr->s_addr = INADDR_NONE;
       address->m_error = GSOCK_NOHOST;
       return GSOCK_NOHOST;
     }
-
     array_addr = (struct in_addr *) *(he->h_addr_list);
     addr->s_addr = array_addr[0].s_addr;
   }
-
   return GSOCK_NOERROR;
 }
 
@@ -2002,14 +1802,11 @@ GSocketError GAddress_INET_SetPortName(GAddress *address, const char *port,
     return GSOCK_INVPORT;
   }
 
-#if defined(HAVE_FUNC_GETSERVBYNAME_R_4)
-    struct servent_data buffer;
+#if defined(__WXPM__) && defined(__EMX__)
+  se = getservbyname(port, (char*)protocol);
 #else
-  char buffer[1024];
+  se = getservbyname(port, protocol);
 #endif
-  struct servent serv;
-  se = wxGetservbyname_r(port, protocol, &serv,
-			 (void*)&buffer, sizeof(buffer));
   if (!se)
   {
     /* the cast to int suppresses compiler warnings about subscript having the
@@ -2059,15 +1856,7 @@ GSocketError GAddress_INET_GetHostName(GAddress *address, char *hostname, size_t
   addr = (struct sockaddr_in *)address->m_addr;
   addr_buf = (char *)&(addr->sin_addr);
 
-  struct hostent temphost;
-#if defined(HAVE_FUNC_GETHOSTBYNAME_R_3)
-  struct hostent_data buffer;
-#else
-  char buffer[1024];
-#endif
-  int err;
-  he = wxGethostbyaddr_r(addr_buf, sizeof(addr->sin_addr), AF_INET, &temphost,
-			 (void*)&buffer, sizeof(buffer), &err);
+  he = gethostbyaddr(addr_buf, sizeof(addr->sin_addr), AF_INET);
   if (he == NULL)
   {
     address->m_error = GSOCK_NOHOST;

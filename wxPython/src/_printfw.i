@@ -132,8 +132,6 @@ public:
     //       prepared to remove them...
     
     // PostScript-specific data
-// WXWIN_COMPATIBILITY_2_4
-#if 0
     const wxString& GetPrinterCommand();
     const wxString& GetPrinterOptions();
     const wxString& GetPreviewCommand();
@@ -152,7 +150,6 @@ public:
     void SetPrinterTranslateX(long x);
     void SetPrinterTranslateY(long y);
     void SetPrinterTranslation(long x, long y);
-#endif
 
 };
 
@@ -251,10 +248,9 @@ public:
     bool GetPrintToFile() const;
 
     // WXWIN_COMPATIBILITY_2_4
-#if 0
     bool GetSetupDialog() const;
     void SetSetupDialog(bool flag);
-#endif
+
     void SetFromPage(int v);
     void SetToPage(int v);
     void SetMinPage(int v);

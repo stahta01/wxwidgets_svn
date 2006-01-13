@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "zstream.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -131,17 +135,15 @@ size_t wxZlibInputStream::OnSysRead(void *buffer, size_t size)
         break;
 
     case Z_STREAM_END:
-      if (m_inflate->avail_out) {
-        // Unread any data taken from past the end of the deflate stream, so that
-        // any additional data can be read from the underlying stream (the crc
-        // in a gzip for example)
-        if (m_inflate->avail_in) {
-          m_parent_i_stream->Reset();
-          m_parent_i_stream->Ungetch(m_inflate->next_in, m_inflate->avail_in);
-          m_inflate->avail_in = 0;
-        }
-        m_lasterror = wxSTREAM_EOF;
+      // Unread any data taken from past the end of the deflate stream, so that
+      // any additional data can be read from the underlying stream (the crc
+      // in a gzip for example)
+      if (m_inflate->avail_in) {
+        m_parent_i_stream->Reset();
+        m_parent_i_stream->Ungetch(m_inflate->next_in, m_inflate->avail_in);
+        m_inflate->avail_in = 0;
       }
+      m_lasterror = wxSTREAM_EOF;
       break;
 
     case Z_BUF_ERROR:

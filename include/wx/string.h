@@ -262,7 +262,7 @@ protected:
     // initializes the string to the empty value (must be called only from
     // ctors, use Reinit() otherwise)
   void Init() { m_pchData = (wxChar *)wxEmptyString; }
-    // initializes the string with (a part of) C-string
+    // initializaes the string with (a part of) C-string
   void InitWith(const wxChar *psz, size_t nPos = 0, size_t nLen = npos);
     // as Init, but also frees old data
   void Reinit() { GetStringData()->Unlock(); Init(); }
@@ -671,10 +671,7 @@ public:
   wxString(const wxWCharBuffer& psz) : wxStringBase(psz.data()) { }
 #else // ANSI
     // from C string (for compilers using unsigned char)
-  wxString(const unsigned char* psz)
-      : wxStringBase((const char*)psz) { }
-    // from part of C string (for compilers using unsigned char)
-  wxString(const unsigned char* psz, size_t nLength)
+  wxString(const unsigned char* psz, size_t nLength = npos)
       : wxStringBase((const char*)psz, nLength) { }
 
 #if wxUSE_WCHAR_T
@@ -934,19 +931,16 @@ public:
     { *this = str + *this; return *this; }
 
     // non-destructive concatenation
-      // two strings
-  friend wxString WXDLLIMPEXP_BASE operator+(const wxString& string1,
-                                             const wxString& string2);
-      // string with a single char
+      //
+  friend wxString WXDLLIMPEXP_BASE operator+(const wxString& string1,  const wxString& string2);
+      //
   friend wxString WXDLLIMPEXP_BASE operator+(const wxString& string, wxChar ch);
-      // char with a string
+      //
   friend wxString WXDLLIMPEXP_BASE operator+(wxChar ch, const wxString& string);
-      // string with C string
-  friend wxString WXDLLIMPEXP_BASE operator+(const wxString& string,
-                                             const wxChar *psz);
-      // C string with string
-  friend wxString WXDLLIMPEXP_BASE operator+(const wxChar *psz,
-                                             const wxString& string);
+      //
+  friend wxString WXDLLIMPEXP_BASE operator+(const wxString& string, const wxChar *psz);
+      //
+  friend wxString WXDLLIMPEXP_BASE operator+(const wxChar *psz, const wxString& string);
 
   // stream-like functions
       // insert an int into string
@@ -961,6 +955,7 @@ public:
       // insert an unsigned long into string
   wxString& operator<<(unsigned long ul)
     { return (*this) << Format(_T("%lu"), ul); }
+#if wxABI_VERSION >= 20603
 #if defined wxLongLong_t && !defined wxLongLongIsLong
       // insert a long long if they exist and aren't longs
   wxString& operator<<(wxLongLong_t ll)
@@ -974,6 +969,7 @@ public:
       const wxChar *fmt = _T("%") wxLongLongFmtSpec _T("u");
       return (*this) << Format(fmt , ull);
     }
+#endif
 #endif
       // insert a float into string
   wxString& operator<<(float f)
@@ -1078,7 +1074,7 @@ public:
         // convert to a double
     bool ToDouble(double *val) const;
 
-  // formatted input/output
+  // formated input/output
     // as sprintf(), returns the number of characters written or < 0 on error
     // (take 'this' into account in attribute parameter count)
   int Printf(const wxChar *pszFormat, ...) ATTRIBUTE_PRINTF_2;
@@ -1304,7 +1300,6 @@ wxString WXDLLIMPEXP_BASE operator+(const wxString& string, wxChar ch);
 wxString WXDLLIMPEXP_BASE operator+(wxChar ch, const wxString& string);
 wxString WXDLLIMPEXP_BASE operator+(const wxString& string, const wxChar *psz);
 wxString WXDLLIMPEXP_BASE operator+(const wxChar *psz, const wxString& string);
-
 
 // define wxArrayString, for compatibility
 #if WXWIN_COMPATIBILITY_2_4 && !wxUSE_STL

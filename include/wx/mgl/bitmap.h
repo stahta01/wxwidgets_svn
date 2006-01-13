@@ -6,8 +6,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_BITMAP_H__
 #define __WX_BITMAP_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "bitmap.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"

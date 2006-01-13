@@ -14,6 +14,10 @@
 #ifndef _WX_UNIV_WINDOW_H_
 #define _WX_UNIV_WINDOW_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univwindow.h"
+#endif
+
 #include "wx/bitmap.h"      // for m_bitmapBg
 
 class WXDLLEXPORT wxControlRenderer;
@@ -250,9 +254,13 @@ protected:
     bool m_isCurrent:1;
 
 #ifdef __WXMSW__
+
+#if wxABI_VERSION >= 20602
 public:
+#endif
     // override MSWWindowProc() to process WM_NCHITTEST
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+
 #endif // __WXMSW__
 
 private:
@@ -273,3 +281,4 @@ private:
 };
 
 #endif // _WX_UNIV_WINDOW_H_
+

@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fontdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -60,7 +64,7 @@ wxFontDialog::~wxFontDialog()
     // empty
 }
 
-void wxFontDialog::SetData(const wxFontData& fontdata)
+void wxFontDialog::SetData(wxFontData& fontdata)
 {
     m_fontData = fontdata;
 }

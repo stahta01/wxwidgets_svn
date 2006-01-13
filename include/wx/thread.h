@@ -22,6 +22,11 @@
 
 #if wxUSE_THREADS
 
+// only for wxUSE_THREADS - otherwise we'd get undefined symbols
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "thread.h"
+#endif
+
 // Windows headers define it
 #ifdef Yield
     #undef Yield
@@ -324,19 +329,19 @@ public:
     wxCondError Wait();
 
     // exactly as Wait() except that it may also return if the specified
-    // timeout elapses even if the condition hasn't been signalled: in this
+    // timeout ellapses even if the condition hasn't been signalled: in this
     // case, the return value is false, otherwise (i.e. in case of a normal
     // return) it is true
     //
-    // the timeout parameter specifies an interval that needs to be waited for
-    // in milliseconds
+    // the timeeout parameter specifies a interval that needs to be waited in
+    // milliseconds
     wxCondError WaitTimeout(unsigned long milliseconds);
 
     // NB: the associated mutex may or may not be locked by the calling thread
     //
     // this method unblocks one thread if any are blocking on the condition.
     // if no thread is blocking in Wait(), then the signal is NOT remembered
-    // The thread which was blocking on Wait() will then reacquire the lock
+    // The thread which was blocking on Wait(), will then reacquire the lock
     // on the associated mutex object before returning
     wxCondError Signal();
 
@@ -344,7 +349,7 @@ public:
     //
     // this method unblocks all threads if any are blocking on the condition.
     // if no thread is blocking in Wait(), then the signal is NOT remembered
-    // The threads which were blocking on Wait() will then reacquire the lock
+    // The threads which were blocking on Wait(), will then reacquire the lock
     // on the associated mutex object before returning.
     wxCondError Broadcast();
 
@@ -387,7 +392,7 @@ public:
     wxSemaError TryWait();
 
     // same as Wait(), but as a timeout limit, returns wxSEMA_NO_ERROR if the
-    // semaphore was acquired and wxSEMA_TIMEOUT if the timeout has elapsed
+    // semaphore was acquired and wxSEMA_TIMEOUT if the timeout has ellapsed
     wxSemaError WaitTimeout(unsigned long milliseconds);
 
     // increments the semaphore count and signals one of the waiting threads
@@ -436,7 +441,7 @@ public:
         // Returns true if current thread is the main thread.
     static bool IsMain();
 
-        // Release the rest of our time slice letting the other threads run
+        // Release the rest of our time slice leting the other threads run
     static void Yield();
 
         // Sleep during the specified period of time in milliseconds
@@ -502,9 +507,9 @@ public:
     ExitCode Wait();
 
         // kills the thread without giving it any chance to clean up - should
-        // not be used under normal circumstances, use Delete() instead.
-        // It is a dangerous function that should only be used in the most
-        // extreme cases!
+        // not be used in normal circumstances, use Delete() instead. It is a
+        // dangerous function that should only be used in the most extreme
+        // cases!
         //
         // The wxThread object is deleted by Kill() if the thread is
         // detachable, but you still have to delete it manually for joinable
@@ -733,7 +738,7 @@ public:
 
 #if wxUSE_THREADS
 
-#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__OS2__) || defined(__EMX__)
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXPM__) || defined(__EMX__)
     // unlock GUI if there are threads waiting for and lock it back when
     // there are no more of them - should be called periodically by the main
     // thread
@@ -742,8 +747,10 @@ public:
     // returns true if the main thread has GUI lock
     extern bool WXDLLIMPEXP_BASE wxGuiOwnedByMainThread();
 
+#ifndef __WXPM__
     // wakes up the main thread if it's sleeping inside ::GetMessage()
     extern void WXDLLIMPEXP_BASE wxWakeUpMainThread();
+#endif // !OS/2
 
     // return true if the main thread is waiting for some other to terminate:
     // wxApp then should block all "dangerous" messages
@@ -753,3 +760,4 @@ public:
 #endif // wxUSE_THREADS
 
 #endif // _WX_THREAD_H_
+

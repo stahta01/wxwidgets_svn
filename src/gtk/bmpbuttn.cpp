@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpbuttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -187,6 +191,13 @@ void wxBitmapButton::SetLabel( const wxString &label )
     wxCHECK_RET( m_widget != NULL, wxT("invalid button") );
 
     wxControl::SetLabel( label );
+}
+
+wxString wxBitmapButton::GetLabel() const
+{
+    wxCHECK_MSG( m_widget != NULL, wxEmptyString, wxT("invalid button") );
+
+    return wxControl::GetLabel();
 }
 
 void wxBitmapButton::DoApplyWidgetStyle(GtkRcStyle *style)

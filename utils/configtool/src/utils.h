@@ -14,6 +14,10 @@
  * \brief A file of utility functions and classes.
  */
 
+#ifdef __GNUG__
+// #pragma interface
+#endif
+
 #ifndef _AP_UTILS_H_
 #define _AP_UTILS_H_
 

@@ -31,6 +31,10 @@
 #define OLD_GETCOLUMNS 1
 #define EXPERIMENTAL_WXDB_FUNCTIONS 1
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "db.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/string.h"
 
@@ -376,10 +380,10 @@ struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
 class WXDLLIMPEXP_ODBC wxDbColFor
 {
 public:
-    wxString       s_Field;              // Formatted String for Output
-    wxString       s_Format[7];          // Formatted Objects - TIMESTAMP has the biggest (7)
-    wxString       s_Amount[7];          // Formatted Objects - amount of things that can be formatted
-    int            i_Amount[7];          // Formatted Objects - TT MM YYYY HH MM SS m
+    wxString       s_Field;              // Formated String for Output
+    wxString       s_Format[7];          // Formated Objects - TIMESTAMP has the biggest (7)
+    wxString       s_Amount[7];          // Formated Objects - amount of things that can be formatted
+    int            i_Amount[7];          // Formated Objects - TT MM YYYY HH MM SS m
     int            i_Nation;             // 0 = timestamp , 1=EU, 2=UK, 3=International, 4=US
     int            i_dbDataType;         // conversion of the 'sqlDataType' to the generic data type used by these classes
     SWORD          i_sqlDataType;

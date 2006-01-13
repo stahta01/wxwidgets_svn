@@ -40,6 +40,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "mimetype.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -649,7 +653,7 @@ void wxMimeTypesManagerImpl::LoadGnomeMimeTypesFromMimeFile(const wxString& file
 
     const wxChar *pc;
     size_t nLineCount = textfile.GetLineCount();
-    for ( size_t nLine = 0; /* nothing */; nLine++ )
+    for ( size_t nLine = 0;; nLine++ )
     {
         if ( nLine < nLineCount )
         {
@@ -805,7 +809,7 @@ void wxMimeTypesManagerImpl::GetGnomeMimeInfo(const wxString& sExtraDir)
 {
     wxArrayString dirs;
 
-    wxString gnomedir = wxGetenv( wxT("GNOMEDIR") );
+    wxString gnomedir = wxGetenv( wxT("GNOMEDIR") );;
     if (!gnomedir.empty())
     {
         gnomedir << wxT("/share");
@@ -1384,9 +1388,9 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
     wxString strExtensions = m_manager->GetExtension(m_index[0]);
     extensions.Empty();
 
-    // one extension in the space or comma-delimited list
+    // one extension in the space or comma delimitid list
     wxString strExt;
-    for ( const wxChar *p = strExtensions; /* nothing */; p++ ) {
+    for ( const wxChar *p = strExtensions;; p++ ) {
         if ( *p == wxT(' ') || *p == wxT(',') || *p == wxT('\0') ) {
             if ( !strExt.empty() ) {
                 extensions.Add(strExt);
@@ -1417,10 +1421,7 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
 // could adjust the code to ask confirmation if it already exists and
 // overwriteprompt is true, but this is currently ignored as *Associate* has
 // no overwrite prompt
-bool
-wxFileTypeImpl::SetCommand(const wxString& cmd,
-                           const wxString& verb,
-                           bool WXUNUSED(overwriteprompt))
+bool wxFileTypeImpl::SetCommand(const wxString& cmd, const wxString& verb, bool overwriteprompt /*= true*/)
 {
     wxArrayString strExtensions;
     wxString strDesc, strIcon;
@@ -1444,7 +1445,7 @@ wxFileTypeImpl::SetCommand(const wxString& cmd,
 }
 
 // ignore index on the grouds that we only have one icon in a Unix file
-bool wxFileTypeImpl::SetDefaultIcon(const wxString& strIcon, int WXUNUSED(index))
+bool wxFileTypeImpl::SetDefaultIcon(const wxString& strIcon /*= wxEmptyString*/, int /*index = 0*/)
 {
     if (strIcon.empty()) return false;
     wxArrayString strExtensions;

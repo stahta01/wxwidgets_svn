@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma interface "wxole.h"
+#endif
+
 #ifndef _WX_OLE_H_
 #define _WX_OLE_H_
 

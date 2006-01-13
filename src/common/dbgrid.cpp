@@ -11,6 +11,10 @@
 // Branched From : dbgrid.cpp,v 1.18 2000/12/19 13:00:58
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dbgrid.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -723,7 +727,7 @@ bool wxDbGridTableBase::Writeback() const
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_EXPORTED_OBJARRAY(keyarray)
+WX_DEFINE_EXPORTED_OBJARRAY(keyarray);
 
 #endif  // #if wxUSE_GRID
 #endif  // #if wxUSE_ODBC

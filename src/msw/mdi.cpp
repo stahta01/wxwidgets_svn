@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "mdi.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -797,22 +801,7 @@ wxMDIChildFrame::~wxMDIChildFrame()
 bool wxMDIChildFrame::Show(bool show)
 {
     m_needsInitialShow = false;
-
-    if (!wxFrame::Show(show))
-        return false;
-
-    // KH: Without this call, new MDI children do not become active.
-    // This was added here after the same BringWindowToTop call was
-    // removed from wxTopLevelWindow::Show (November 2005)
-    if ( show )
-        ::BringWindowToTop(GetHwnd());
-
-    // we need to refresh the MDI frame window menu to include (or exclude if
-    // we've been hidden) this frame
-    wxMDIParentFrame *parent = (wxMDIParentFrame *)GetParent();
-    MDISetMenu(parent->GetClientWindow(), NULL, NULL);
-
-    return true;
+    return wxFrame::Show(show);
 }
 
 // Set the client size (i.e. leave the calculation of borders etc.
@@ -1097,7 +1086,7 @@ bool wxMDIChildFrame::HandleMDIActivate(long WXUNUSED(activate),
 bool wxMDIChildFrame::HandleWindowPosChanging(void *pos)
 {
     WINDOWPOS *lpPos = (WINDOWPOS *)pos;
-
+#if defined(__WIN95__)
     if (!(lpPos->flags & SWP_NOSIZE))
     {
         RECT rectClient;
@@ -1119,6 +1108,7 @@ bool wxMDIChildFrame::HandleWindowPosChanging(void *pos)
         }
 #endif
     }
+#endif // Win95
 
     return false;
 }
@@ -1136,14 +1126,14 @@ bool wxMDIChildFrame::HandleGetMinMaxInfo(void *mmInfo)
         minHeight = GetMinHeight();
 
     // but allow GetSizeHints() to set the min size
-    if ( minWidth != wxDefaultCoord )
+    if ( minWidth != -1 )
     {
         info->ptMinTrackSize.x = minWidth;
 
         processed = true;
     }
 
-    if ( minHeight != wxDefaultCoord )
+    if ( minHeight != -1 )
     {
         info->ptMinTrackSize.y = minHeight;
 
@@ -1204,10 +1194,10 @@ void wxMDIChildFrame::MSWDestroyWindow()
 // style when a child is maximised (a double border looks silly.)
 bool wxMDIChildFrame::ResetWindowStyle(void *vrect)
 {
+#if defined(__WIN95__)
     RECT *rect = (RECT *)vrect;
     wxMDIParentFrame* pFrameWnd = (wxMDIParentFrame *)GetParent();
     wxMDIChildFrame* pChild = pFrameWnd->GetActiveChild();
-
     if (!pChild || (pChild == this))
     {
         HWND hwndClient = GetWinHwnd(pFrameWnd->GetClientWindow());
@@ -1239,6 +1229,7 @@ bool wxMDIChildFrame::ResetWindowStyle(void *vrect)
             return true;
         }
     }
+#endif // Win95
 
     return false;
 }
@@ -1267,7 +1258,11 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
     if ( style & wxVSCROLL )
         msStyle |= WS_VSCROLL;
 
+#if defined(__WIN95__)
     DWORD exStyle = WS_EX_CLIENTEDGE;
+#else
+    DWORD exStyle = 0;
+#endif
 
     wxWindowCreationHook hook(this);
     m_hWnd = (WXHWND)::CreateWindowEx
@@ -1378,16 +1373,13 @@ void wxMDIChildFrame::OnIdle(wxIdleEvent& event)
 
 static void MDISetMenu(wxWindow *win, HMENU hmenuFrame, HMENU hmenuWindow)
 {
-    if ( hmenuFrame || hmenuWindow )
-    {
-        if ( !::SendMessage(GetWinHwnd(win),
-                            WM_MDISETMENU,
-                            (WPARAM)hmenuFrame,
-                            (LPARAM)hmenuWindow) )
-        {
-            wxLogLastError(_T("SendMessage(WM_MDISETMENU)"));
-        }
-    }
+    ::SendMessage(GetWinHwnd(win), WM_MDISETMENU,
+#ifdef __WIN32__
+                  (WPARAM)hmenuFrame, (LPARAM)hmenuWindow
+#else
+                  0, MAKELPARAM(hmenuFrame, hmenuWindow)
+#endif
+                 );
 
     // update menu bar of the parent window
     wxWindow *parent = win->GetParent();
@@ -1488,3 +1480,4 @@ static void UnpackMDIActivate(WXWPARAM wParam, WXLPARAM lParam,
 }
 
 #endif // wxUSE_MDI && !defined(__WXUNIVERSAL__)
+

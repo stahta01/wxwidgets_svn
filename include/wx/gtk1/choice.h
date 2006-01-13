@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/choice.h
+// Name:        choice.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKCHOICEH__
 #define __GTKCHOICEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "choice.h"
+#endif
 
 class WXDLLIMPEXP_BASE wxSortedArrayString;
 class WXDLLIMPEXP_BASE wxArrayString;
@@ -66,11 +70,13 @@ public:
     void Clear();
 
     int GetSelection() const;
+#if wxABI_VERSION >= 20602
     int GetCurrentSelection() const { return GetSelection(); }
+#endif
     void SetSelection( int n );
 
     virtual int GetCount() const;
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    int FindString( const wxString& string ) const;
     wxString GetString( int n ) const;
     void SetString( int n, const wxString& string );
 
@@ -102,8 +108,8 @@ private:
     wxSortedArrayString *m_strings;
 
 public:
-    // this circumvents a GTK+ 2.0 bug so that the selection is
-    // invalidated properly
+    // this circumvents a GTK+ 2.0 bug so that the selection is 
+    // invalidated properly 
     int m_selection_hack;
 
 private:

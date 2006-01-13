@@ -1,12 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_choicbk.cpp
+// Name:        xh_choicbk.cpp
 // Purpose:     XRC resource for wxChoicebook
 // Author:      Vaclav Slavik
 // Created:     2000/03/21
-// RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_choicbk.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -29,19 +32,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxChoicebookXmlHandler, wxXmlResourceHandler)
 wxChoicebookXmlHandler::wxChoicebookXmlHandler()
 : wxXmlResourceHandler(), m_isInside(false), m_choicebook(NULL)
 {
-    XRC_ADD_STYLE(wxBK_DEFAULT);
-    XRC_ADD_STYLE(wxBK_LEFT);
-    XRC_ADD_STYLE(wxBK_RIGHT);
-    XRC_ADD_STYLE(wxBK_TOP);
-    XRC_ADD_STYLE(wxBK_BOTTOM);
-
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxCHB_DEFAULT);
     XRC_ADD_STYLE(wxCHB_LEFT);
     XRC_ADD_STYLE(wxCHB_RIGHT);
     XRC_ADD_STYLE(wxCHB_TOP);
     XRC_ADD_STYLE(wxCHB_BOTTOM);
-#endif
 
     AddWindowStyles();
 }

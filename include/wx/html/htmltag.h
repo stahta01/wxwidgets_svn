@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLTAG_H_
 #define _WX_HTMLTAG_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmltag.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -109,6 +114,12 @@ public:
 
     // Returns string containing all params.
     wxString GetAllParams() const;
+
+#if WXWIN_COMPATIBILITY_2_2
+    // return true if this is ending tag (</something>) or false
+    // if it isn't (<something>)
+    wxDEPRECATED( bool IsEnding() const );
+#endif
 
     // return true if this there is matching ending tag
     inline bool HasEnding() const {return m_End1 >= 0;}

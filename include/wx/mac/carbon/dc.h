@@ -12,6 +12,10 @@
 #ifndef _WX_DC_H_
 #define _WX_DC_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dc.h"
+#endif
+
 #include "wx/pen.h"
 #include "wx/brush.h"
 #include "wx/icon.h"
@@ -287,11 +291,9 @@ protected:
     double       m_mm_to_pix_x,m_mm_to_pix_y;
     // not yet used
     bool         m_needComputeScaleX,m_needComputeScaleY;
-#if !wxMAC_USE_CORE_GRAPHICS
     // If un-scrolled is non-zero or d.o. changes with scrolling.
     // Set using SetInternalDeviceOrigin().
     long         m_internalDeviceOriginX,m_internalDeviceOriginY;
-#endif
      // To be set by external classes such as wxScrolledWindow
      // using SetDeviceOrigin()
     long         m_externalDeviceOriginX,m_externalDeviceOriginY;

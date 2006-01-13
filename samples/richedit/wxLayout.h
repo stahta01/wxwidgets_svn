@@ -3,6 +3,10 @@
 #ifndef __WXLAYOUTH__
 #define __WXLAYOUTH__
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "wx/wx.h"
 
 #include "wxllist.h"

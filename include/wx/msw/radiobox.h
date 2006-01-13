@@ -12,6 +12,10 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "radiobox.h"
+#endif
+
 #include "wx/statbox.h"
 
 class WXDLLEXPORT wxSubwindows;
@@ -90,8 +94,8 @@ public:
     virtual void SetString(int n, const wxString& label);
     virtual bool Enable(int n, bool enable = true);
     virtual bool Show(int n, bool show = true);
-    virtual bool IsItemEnabled(int n) const;
-    virtual bool IsItemShown(int n) const;
+    virtual int GetColumnCount() const { return GetNumHor(); }
+    virtual int GetRowCount() const { return GetNumVer(); }
 
     // override some base class methods
     virtual bool Show(bool show = true);
@@ -114,6 +118,10 @@ public:
     void Command(wxCommandEvent& event);
 
     void SendNotificationEvent();
+
+    // get the number of buttons per column/row
+    int GetNumVer() const;
+    int GetNumHor() const;
 
 protected:
     // common part of all ctors
@@ -138,6 +146,9 @@ protected:
 
 #ifndef __WXWINCE__
     virtual WXHRGN MSWGetRegionWithoutChildren();
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg,
+                                    WXWPARAM wParam,
+                                    WXLPARAM lParam);
 #endif // __WXWINCE__
 
 
@@ -148,6 +159,10 @@ protected:
     // corresponding quantity should be computed
     int *m_radioWidth;
     int *m_radioHeight;
+
+    // the number of elements in major dimension (i.e. number of columns if
+    // wxRA_SPECIFY_COLS or the number of rows if wxRA_SPECIFY_ROWS)
+    int m_majorDim;
 
     // currently selected button or wxNOT_FOUND if none
     int m_selectedButton;

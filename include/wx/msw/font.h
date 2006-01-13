@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/font.h
+// Name:        font.h
 // Purpose:     wxFont class
 // Author:      Julian Smart
 // Modified by:
@@ -12,7 +12,11 @@
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
 
-#include "wx/gdicmn.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "font.h"
+#endif
+
+#include <wx/gdicmn.h>
 
 // ----------------------------------------------------------------------------
 // wxFont
@@ -154,4 +158,5 @@ private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 
-#endif // _WX_FONT_H_
+#endif
+    // _WX_FONT_H_

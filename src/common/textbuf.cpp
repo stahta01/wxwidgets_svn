@@ -3,7 +3,6 @@
 // Purpose:     implementation of wxTextBuffer class
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
-// RCS-ID:      $Id$
 // Copyright:   (c) 1998-2001 wxWidgets team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +10,10 @@
 // ============================================================================
 // headers
 // ============================================================================
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textbuf.h"
+#endif
 
 #include  "wx/wxprec.h"
 
@@ -46,7 +49,7 @@ const wxTextFileType wxTextBuffer::typeDefault =
   wxTextFileType_Unix;
 #elif defined(__WXMAC__)
   wxTextFileType_Mac;
-#elif defined(__OS2__)
+#elif defined(__WXPM__)
   wxTextFileType_Os2;
 #else
   wxTextFileType_None;
@@ -248,7 +251,9 @@ wxTextFileType wxTextBuffer::GuessType() const
                                                     ? wxTextFileType_##t1   \
                                                     : wxTextFileType_##t2
 
-#if !defined(__WATCOMC__) || wxCHECK_WATCOM_VERSION(1,4)
+        // Watcom C++ doesn't seem to be able to handle the macro
+        // VS: Watcom 11 doesn't have a problem...
+#if !(defined(__WATCOMC__) && (__WATCOMC__ < 1100))
         if ( nDos > nUnix )
             return GREATER_OF(Dos, Mac);
         else if ( nDos < nUnix )
@@ -282,3 +287,4 @@ bool wxTextBuffer::Write(wxTextFileType typeNew, wxMBConv& conv)
 }
 
 #endif // wxUSE_TEXTBUFFER
+

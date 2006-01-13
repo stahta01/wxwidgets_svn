@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -192,26 +192,10 @@ protected:
     HANDLE m_handle;
 };
 
-// a template to make initializing Windows styructs less painful: it zeroes all
-// the struct fields and also sets cbSize member to the correct value (and so
-// can be only used with structures which have this member...)
-template <class T>
-struct WinStruct : public T
-{
-    WinStruct()
-    {
-        ::ZeroMemory(this, sizeof(T));
-
-        // explicit qualification is required here for this to be valid C++
-        this->cbSize = sizeof(T);
-    }
-};
-
-
 #if wxUSE_GUI
 
-#include "wx/gdicmn.h"
-#include "wx/colour.h"
+#include <wx/gdicmn.h>
+#include <wx/colour.h>
 
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
@@ -357,6 +341,22 @@ inline RECT wxGetClientRect(HWND hwnd)
 // ---------------------------------------------------------------------------
 // small helper classes
 // ---------------------------------------------------------------------------
+
+// a template to make initializing Windows styructs less painful: it zeroes all
+// the struct fields and also sets cbSize member to the correct value (and so
+// can be only used with structures which have this member...)
+template <class T>
+struct WinStruct : public T
+{
+    WinStruct()
+    {
+        ::ZeroMemory(this, sizeof(T));
+
+        // explicit qualification is required here for this to be valid C++
+        this->cbSize = sizeof(T);
+    }
+};
+
 
 // create an instance of this class and use it as the HDC for screen, will
 // automatically release the DC going out of scope

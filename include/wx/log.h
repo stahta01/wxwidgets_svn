@@ -12,6 +12,10 @@
 #ifndef _WX_LOG_H_
 #define _WX_LOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "log.h"
+#endif
+
 #include "wx/defs.h"
 
 // ----------------------------------------------------------------------------
@@ -284,6 +288,8 @@ private:
 // "trivial" derivations of wxLog
 // ----------------------------------------------------------------------------
 
+#if wxABI_VERSION > 20601
+
 // log everything to a buffer
 class WXDLLIMPEXP_BASE wxLogBuffer : public wxLog
 {
@@ -307,6 +313,7 @@ private:
     DECLARE_NO_COPY_CLASS(wxLogBuffer)
 };
 
+#endif // wxABI_VERSION
 
 // log everything to a "FILE *", stderr by default
 class WXDLLIMPEXP_BASE wxLogStderr : public wxLog
@@ -554,15 +561,12 @@ DECLARE_LOG_FUNCTION2(SysError, long, lErrCode);
     DECLARE_LOG_FUNCTION2(Trace, wxTraceMask, mask);
 #else   //!debug
     // these functions do nothing in release builds
-
-    // note that leaving out "fmt" in the vararg functions provokes a warning
-    // from SGI CC: "the last argument of the varargs function is unnamed"
     inline void wxVLogDebug(const wxChar *, va_list) { }
-    inline void wxLogDebug(const wxChar *fmt, ...) { wxUnusedVar(fmt); }
+    inline void wxLogDebug(const wxChar *, ...) { }
     inline void wxVLogTrace(wxTraceMask, const wxChar *, va_list) { }
-    inline void wxLogTrace(wxTraceMask, const wxChar *fmt, ...) { wxUnusedVar(fmt); }
+    inline void wxLogTrace(wxTraceMask, const wxChar *, ...) { }
     inline void wxVLogTrace(const wxChar *, const wxChar *, va_list) { }
-    inline void wxLogTrace(const wxChar *, const wxChar *fmt, ...) { wxUnusedVar(fmt); }
+    inline void wxLogTrace(const wxChar *, const wxChar *, ...) { }
 #endif // debug/!debug
 
 // wxLogFatalError helper: show the (fatal) error to the user in a safe way,

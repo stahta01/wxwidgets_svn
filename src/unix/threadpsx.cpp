@@ -21,6 +21,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -170,8 +174,7 @@ private:
     friend class wxConditionInternal;
 };
 
-#if defined(HAVE_PTHREAD_MUTEXATTR_T) && \
-        wxUSE_UNIX && !defined(HAVE_PTHREAD_MUTEXATTR_SETTYPE_DECL)
+#ifdef HAVE_PTHREAD_MUTEXATTR_T
 // on some systems pthread_mutexattr_settype() is not in the headers (but it is
 // in the library, otherwise we wouldn't compile this code at all)
 extern "C" int pthread_mutexattr_settype(pthread_mutexattr_t *, int);
@@ -761,7 +764,7 @@ void *wxThreadInternal::PthreadStart(wxThread *thread)
 
         wxLogTrace(TRACE_THREADS,
                    _T("Thread %ld Entry() returned %lu."),
-                   THR_ID(pthread), wxPtrToUInt(pthread->m_exitcode));
+                   THR_ID(pthread), (unsigned long)pthread->m_exitcode);
 
         {
             wxCriticalSectionLocker lock(thread->m_critsect);
@@ -773,21 +776,12 @@ void *wxThreadInternal::PthreadStart(wxThread *thread)
         }
     }
 
-    // NB: pthread_cleanup_push/pop() are macros and pop contains the matching
-    //     '}' for the '{' in push, so they must be used in the same block!
+    // NB: at least under Linux, pthread_cleanup_push/pop are macros and pop
+    //     contains the matching '}' for the '{' in push, so they must be used
+    //     in the same block!
 #ifdef wxHAVE_PTHREAD_CLEANUP
-    #ifdef __DECCXX
-        // under Tru64 we get a warning from macro expansion
-        #pragma message save
-        #pragma message disable(declbutnotref)
-    #endif
-
     // remove the cleanup handler without executing it
     pthread_cleanup_pop(FALSE);
-
-    #ifdef __DECCXX
-        #pragma message restore
-    #endif
 #endif // wxHAVE_PTHREAD_CLEANUP
 
     if ( dontRunAtAll )
@@ -1068,13 +1062,7 @@ wxThread::wxThread(wxThreadKind kind)
     m_isDetached = kind == wxTHREAD_DETACHED;
 }
 
-#ifdef HAVE_PTHREAD_ATTR_SETSTACKSIZE
-    #define WXUNUSED_STACKSIZE(identifier)  identifier
-#else
-    #define WXUNUSED_STACKSIZE(identifier)  WXUNUSED(identifier)
-#endif
-
-wxThreadError wxThread::Create(unsigned int WXUNUSED_STACKSIZE(stackSize))
+wxThreadError wxThread::Create(unsigned int WXUNUSED(stackSize))
 {
     if ( m_internal->GetState() != STATE_NEW )
     {
@@ -1085,11 +1073,6 @@ wxThreadError wxThread::Create(unsigned int WXUNUSED_STACKSIZE(stackSize))
     // set up the thread attribute: right now, we only set thread priority
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-
-#ifdef HAVE_PTHREAD_ATTR_SETSTACKSIZE
-    if (stackSize)
-      pthread_attr_setstacksize(&attr, stackSize);
-#endif
 
 #ifdef HAVE_THREAD_PRIORITY_FUNCTIONS
     int policy;
@@ -1225,21 +1208,42 @@ void wxThread::SetPriority(unsigned int prio)
         case STATE_PAUSED:
 #ifdef HAVE_THREAD_PRIORITY_FUNCTIONS
 #if defined(__LINUX__)
-            // On Linux, pthread_setschedparam with SCHED_OTHER does not allow
-            // a priority other than 0.  Instead, we use the BSD setpriority
-            // which alllows us to set a 'nice' value between 20 to -20.  Only
-            // super user can set a value less than zero (more negative yields
-            // higher priority).  setpriority set the static priority of a
-            // process, but this is OK since Linux is configured as a thread
-            // per process.
-            //
-            // FIXME this is not true for 2.6!!
-
-            // map wx priorites WXTHREAD_MIN_PRIORITY..WXTHREAD_MAX_PRIORITY
-            // to Unix priorities 20..-20
-            if ( setpriority(PRIO_PROCESS, 0, -(2*prio)/5 + 20) == -1 )
+// On Linux, pthread_setschedparam with SCHED_OTHER does not allow
+// a priority other than 0.  Instead, we use the BSD setpriority
+// which alllows us to set a 'nice' value between 20 to -20.  Only
+// super user can set a value less than zero (more negative yields
+// higher priority).  setpriority set the static priority of a process,
+// but this is OK since Linux is configured as a thread per process.
             {
-                wxLogError(_("Failed to set thread priority %d."), prio);
+                float   fPrio;
+                float	pSpan;
+                int		iPrio;
+
+                // Map Wx priorites (WXTHREAD_MIN_PRIORITY -
+                // WXTHREAD_MAX_PRIORITY) into BSD priorities (20 - -20).
+                // Do calculation of values instead of hard coding them
+                // to make maintenance easier.
+
+                pSpan = ((float)(WXTHREAD_MAX_PRIORITY - WXTHREAD_MIN_PRIORITY)) / 2.0;
+
+                // prio starts as ...................  // value =>  (0) >=  p  <=  (n)
+
+                fPrio = ((float)prio) -  pSpan;        // value =>  (-n) >=  p  <=  (+n)
+
+                fPrio = 0.0 - fPrio;                   // value =>  (+n) <=  p  >=  (-n)
+
+                fPrio = fPrio * (20. / pSpan) + .5;    // value =>  (20) <=  p  >=  (-20)
+
+                iPrio = (int)fPrio;
+
+                // Clamp prio from 20 - -20;
+                iPrio = (iPrio > 20)  ?  20 : iPrio;
+                iPrio = (iPrio < -20) ? -20 : iPrio;
+
+                if (setpriority(PRIO_PROCESS, 0, iPrio) == -1)
+                {
+                    wxLogError(_("Failed to set thread priority %d."), prio);
+                }
             }
 #else // __LINUX__
             {
@@ -1420,14 +1424,13 @@ wxThreadError wxThread::Kill()
         default:
 #ifdef HAVE_PTHREAD_CANCEL
             if ( pthread_cancel(m_internal->GetId()) != 0 )
-#endif // HAVE_PTHREAD_CANCEL
+#endif
             {
                 wxLogError(_("Failed to terminate a thread."));
 
                 return wxTHREAD_MISC_ERROR;
             }
 
-#ifdef HAVE_PTHREAD_CANCEL
             if ( m_isDetached )
             {
                 // if we use cleanup function, this will be done from
@@ -1447,7 +1450,6 @@ wxThreadError wxThread::Kill()
             }
 
             return wxTHREAD_NO_ERROR;
-#endif // HAVE_PTHREAD_CANCEL
     }
 }
 
@@ -1532,8 +1534,7 @@ wxThread::~wxThread()
     if ( m_internal->GetState() != STATE_EXITED &&
          m_internal->GetState() != STATE_NEW )
     {
-        wxLogDebug(_T("The thread %ld is being destroyed although it is still running! The application may crash."),
-                   (long)GetId());
+        wxLogDebug(_T("The thread %ld is being destroyed although it is still running! The application may crash."), GetId());
     }
 
     m_critsect.Leave();

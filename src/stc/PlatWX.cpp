@@ -6,12 +6,12 @@
 
 #include <ctype.h>
 
-#include "wx/wx.h"
-#include "wx/encconv.h"
-#include "wx/listctrl.h"
-#include "wx/mstream.h"
-#include "wx/image.h"
-#include "wx/imaglist.h"
+#include <wx/wx.h>
+#include <wx/encconv.h>
+#include <wx/listctrl.h>
+#include <wx/mstream.h>
+#include <wx/image.h>
+#include <wx/imaglist.h>
 
 #include "Platform.h"
 #include "PlatWX.h"
@@ -601,7 +601,7 @@ void Window::SetCursor(Cursor curs) {
 
 
 void Window::SetTitle(const char *s) {
-    GETWIN(id)->SetLabel(stc2wx(s));
+    GETWIN(id)->SetTitle(stc2wx(s));
 }
 
 

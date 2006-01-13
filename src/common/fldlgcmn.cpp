@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "filedlg.h"
+#endif
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
@@ -34,8 +38,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxFileDialogBase, wxDialog)
 
 void wxFileDialogBase::Init()
 {
-    m_filterIndex =
-    m_dialogStyle = 0;
+    m_filterIndex = m_dialogStyle = 0;
+    m_parent = NULL;
 }
 
 bool wxFileDialogBase::Create(wxWindow *parent,

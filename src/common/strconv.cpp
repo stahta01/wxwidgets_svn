@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/strconv.cpp
+// Name:        strconv.cpp
 // Purpose:     Unicode conversion classes
 // Author:      Ove Kaaven, Robert Roebling, Vadim Zeitlin, Vaclav Slavik,
 //              Ryan Norton, Fredrik Roubert (UTF7)
@@ -19,6 +19,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "strconv.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -53,6 +57,10 @@
     #define wxHAVE_WIN32_MB2WC
 #endif // __WIN32__ but !__WXMICROWIN__
 
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __SALFORDC__
     #include <clib.h>
 #endif
@@ -78,8 +86,33 @@
 
 #define TRACE_STRCONV _T("strconv")
 
-#if SIZEOF_WCHAR_T == 2
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+#define BSWAP_UCS4(str, len) { unsigned _c; for (_c=0; _c<len; _c++) str[_c]=wxUINT32_SWAP_ALWAYS(str[_c]); }
+#define BSWAP_UTF16(str, len) { unsigned _c; for (_c=0; _c<len; _c++) str[_c]=wxUINT16_SWAP_ALWAYS(str[_c]); }
+
+#if SIZEOF_WCHAR_T == 4
+    #define WC_NAME         "UCS4"
+    #define WC_BSWAP         BSWAP_UCS4
+    #ifdef WORDS_BIGENDIAN
+      #define WC_NAME_BEST  "UCS-4BE"
+    #else
+      #define WC_NAME_BEST  "UCS-4LE"
+    #endif
+#elif SIZEOF_WCHAR_T == 2
+    #define WC_NAME         "UTF16"
+    #define WC_BSWAP         BSWAP_UTF16
     #define WC_UTF16
+    #ifdef WORDS_BIGENDIAN
+      #define WC_NAME_BEST  "UTF-16BE"
+    #else
+      #define WC_NAME_BEST  "UTF-16LE"
+    #endif
+#else // sizeof(wchar_t) != 2 nor 4
+    // does this ever happen?
+    #error "Unknown sizeof(wchar_t): please report this to wx-dev@lists.wxwindows.org"
 #endif
 
 // ============================================================================
@@ -527,7 +560,7 @@ size_t wxMBConvUTF7::WC2MB(char *buf, const wchar_t *psz, size_t n) const
             {
                 // BASE64 encode string
                 unsigned int lsb, d, l;
-                for (d = 0, l = 0; /*nothing*/; psz++)
+                for (d = 0, l = 0;; psz++)
                 {
                     for (lsb = 0; lsb < 2; lsb ++)
                     {
@@ -657,7 +690,7 @@ size_t wxMBConvUTF8::MB2WC(wchar_t *buf, const char *psz, size_t n) const
                     }
 #else // !WC_UTF16
                     if (buf)
-                        *buf++ = (wchar_t)res;
+                        *buf++ = res;
                     len++;
 #endif // WC_UTF16/!WC_UTF16
                 }
@@ -678,7 +711,7 @@ size_t wxMBConvUTF8::MB2WC(wchar_t *buf, const char *psz, size_t n) const
                         len += pa;
 #else
                         if (buf)
-                            *buf++ = (wchar_t)(wxUnicodePUA + (unsigned char)*opsz);
+                            *buf++ = wxUnicodePUA + (unsigned char)*opsz;
                         opsz++;
                         len++;
 #endif
@@ -690,11 +723,11 @@ size_t wxMBConvUTF8::MB2WC(wchar_t *buf, const char *psz, size_t n) const
                     {
                         if ( buf && len + 3 < n )
                         {
-                            unsigned char on = *opsz;
+                            unsigned char n = *opsz;
                             *buf++ = L'\\';
-                            *buf++ = (wchar_t)( L'0' + on / 0100 );
-                            *buf++ = (wchar_t)( L'0' + (on % 0100) / 010 );
-                            *buf++ = (wchar_t)( L'0' + on % 010 );
+                            *buf++ = (wchar_t)( L'0' + n / 0100 );
+                            *buf++ = (wchar_t)( L'0' + (n % 0100) / 010 );
+                            *buf++ = (wchar_t)( L'0' + n % 010 );
                         }
                         opsz++;
                         len += 4;
@@ -906,7 +939,7 @@ size_t wxMBConvUTF16straight::MB2WC(wchar_t *buf, const char *psz, size_t n) con
             return pa;
 
         if (buf)
-            *buf++ = (wchar_t)cc;
+            *buf++ = cc;
         len++;
         psz += pa * sizeof(wxUint16);
     }
@@ -966,7 +999,7 @@ size_t wxMBConvUTF16swap::MB2WC(wchar_t *buf, const char *psz, size_t n) const
             return pa;
 
         if (buf)
-            *buf++ = (wchar_t)cc;
+            *buf++ = cc;
 
         len++;
         psz += pa * sizeof(wxUint16);
@@ -1167,7 +1200,7 @@ size_t wxMBConvUTF32straight::MB2WC(wchar_t *buf, const char *psz, size_t n) con
     while (*(wxUint32*)psz && (!buf || len < n))
     {
         if (buf)
-            *buf++ = (wchar_t)(*(wxUint32*)psz);
+            *buf++ = *(wxUint32*)psz;
         len++;
         psz += sizeof(wxUint32);
     }
@@ -1280,19 +1313,6 @@ size_t wxMBConvUTF32swap::WC2MB(char *buf, const wchar_t *psz, size_t n) const
 
 #define ICONV_CHAR_CAST(x)  ((ICONV_CONST char **)(x))
 
-#define ICONV_T_INVALID ((iconv_t)-1)
-
-#if SIZEOF_WCHAR_T == 4
-    #define WC_BSWAP    wxUINT32_SWAP_ALWAYS
-    #define WC_ENC      wxFONTENCODING_UTF32
-#elif SIZEOF_WCHAR_T == 2
-    #define WC_BSWAP    wxUINT16_SWAP_ALWAYS
-    #define WC_ENC      wxFONTENCODING_UTF16
-#else // sizeof(wchar_t) != 2 nor 4
-    // does this ever happen?
-    #error "Unknown sizeof(wchar_t): please report this to wx-dev@lists.wxwindows.org"
-#endif
-
 // ----------------------------------------------------------------------------
 // wxMBConv_iconv: encapsulates an iconv character set
 // ----------------------------------------------------------------------------
@@ -1307,7 +1327,7 @@ public:
     virtual size_t WC2MB(char *buf, const wchar_t *psz, size_t n) const;
 
     bool IsOk() const
-        { return (m2w != ICONV_T_INVALID) && (w2m != ICONV_T_INVALID); }
+        { return (m2w != (iconv_t)-1) && (w2m != (iconv_t)-1); }
 
 protected:
     // the iconv handlers used to translate from multibyte to wide char and in
@@ -1322,7 +1342,7 @@ protected:
 private:
     // the name (for iconv_open()) of a wide char charset -- if none is
     // available on this machine, it will remain NULL
-    static wxString ms_wcCharsetName;
+    static const char *ms_wcCharsetName;
 
     // true if the wide char encoding we use (i.e. ms_wcCharsetName) has
     // different endian-ness than the native one
@@ -1341,7 +1361,7 @@ WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_iconv( const wxChar* name )
     return result;
 }
 
-wxString wxMBConv_iconv::ms_wcCharsetName;
+const char *wxMBConv_iconv::ms_wcCharsetName = NULL;
 bool wxMBConv_iconv::ms_wcNeedsSwap = false;
 
 wxMBConv_iconv::wxMBConv_iconv(const wxChar *name)
@@ -1351,118 +1371,91 @@ wxMBConv_iconv::wxMBConv_iconv(const wxChar *name)
     const wxCharBuffer cname(wxString(name).ToAscii());
 
     // check for charset that represents wchar_t:
-    if ( ms_wcCharsetName.empty() )
+    if (ms_wcCharsetName == NULL)
     {
-        wxLogTrace(TRACE_STRCONV, _T("Looking for wide char codeset:"));
+        ms_wcNeedsSwap = false;
 
-#if wxUSE_FONTMAP
-        const wxChar **names = wxFontMapperBase::GetAllEncodingNames(WC_ENC);
-#else // !wxUSE_FONTMAP
-        static const wxChar *names[] =
+        // try charset with explicit bytesex info (e.g. "UCS-4LE"):
+        ms_wcCharsetName = WC_NAME_BEST;
+        m2w = iconv_open(ms_wcCharsetName, cname);
+
+        if (m2w == (iconv_t)-1)
         {
-#if SIZEOF_WCHAR_T == 4
-            _T("UCS-4"),
-#elif SIZEOF_WCHAR_T = 2
-            _T("UCS-2"),
-#endif
-            NULL
-        };
-#endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+            // try charset w/o bytesex info (e.g. "UCS4")
+            // and check for bytesex ourselves:
+            ms_wcCharsetName = WC_NAME;
+            m2w = iconv_open(ms_wcCharsetName, cname);
 
-        for ( ; *names && ms_wcCharsetName.empty(); ++names )
-        {
-            const wxString nameCS(*names);
-
-            // first try charset with explicit bytesex info (e.g. "UCS-4LE"):
-            wxString nameXE(nameCS);
-            #ifdef WORDS_BIGENDIAN
-                nameXE += _T("BE");
-            #else // little endian
-                nameXE += _T("LE");
-            #endif
-
-            wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
-                       nameXE.c_str());
-
-            m2w = iconv_open(nameXE.ToAscii(), cname);
-            if ( m2w == ICONV_T_INVALID )
+            // last bet, try if it knows WCHAR_T pseudo-charset
+            if (m2w == (iconv_t)-1)
             {
-                // try charset w/o bytesex info (e.g. "UCS4")
-                wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
-                           nameCS.c_str());
-                m2w = iconv_open(nameCS.ToAscii(), cname);
+                ms_wcCharsetName = "WCHAR_T";
+                m2w = iconv_open(ms_wcCharsetName, cname);
+            }
 
-                // and check for bytesex ourselves:
-                if ( m2w != ICONV_T_INVALID )
+            if (m2w != (iconv_t)-1)
+            {
+                char    buf[2], *bufPtr;
+                wchar_t wbuf[2], *wbufPtr;
+                size_t  insz, outsz;
+                size_t  res;
+
+                buf[0] = 'A';
+                buf[1] = 0;
+                wbuf[0] = 0;
+                insz = 2;
+                outsz = SIZEOF_WCHAR_T * 2;
+                wbufPtr = wbuf;
+                bufPtr = buf;
+
+                res = iconv(m2w, ICONV_CHAR_CAST(&bufPtr), &insz,
+                            (char**)&wbufPtr, &outsz);
+
+                if (ICONV_FAILED(res, insz))
                 {
-                    char    buf[2], *bufPtr;
-                    wchar_t wbuf[2], *wbufPtr;
-                    size_t  insz, outsz;
-                    size_t  res;
-
-                    buf[0] = 'A';
-                    buf[1] = 0;
-                    wbuf[0] = 0;
-                    insz = 2;
-                    outsz = SIZEOF_WCHAR_T * 2;
-                    wbufPtr = wbuf;
-                    bufPtr = buf;
-
-                    res = iconv(m2w, ICONV_CHAR_CAST(&bufPtr), &insz,
-                                (char**)&wbufPtr, &outsz);
-
-                    if (ICONV_FAILED(res, insz))
-                    {
-                        wxLogLastError(wxT("iconv"));
-                        wxLogError(_("Conversion to charset '%s' doesn't work."),
-                                   nameCS.c_str());
-                    }
-                    else // ok, can convert to this encoding, remember it
-                    {
-                        ms_wcCharsetName = nameCS;
-                        ms_wcNeedsSwap = wbuf[0] != (wchar_t)buf[0];
-                    }
+                    ms_wcCharsetName = NULL;
+                    wxLogLastError(wxT("iconv"));
+                    wxLogError(_("Conversion to charset '%s' doesn't work."), name);
+                }
+                else
+                {
+                    ms_wcNeedsSwap = wbuf[0] != (wchar_t)buf[0];
                 }
             }
-            else // use charset not requiring byte swapping
+            else
             {
-                ms_wcCharsetName = nameXE;
+                ms_wcCharsetName = NULL;
+
+                // VS: we must not output an error here, since wxWidgets will safely
+                //     fall back to using wxEncodingConverter.
+                wxLogTrace(TRACE_STRCONV, wxT("Impossible to convert to/from charset '%s' with iconv, falling back to wxEncodingConverter."), name);
             }
         }
-
         wxLogTrace(TRACE_STRCONV,
-                   wxT("iconv wchar_t charset is \"%s\"%s"),
-                   ms_wcCharsetName.empty() ? _T("<none>")
-                                            : ms_wcCharsetName.c_str(),
-                   ms_wcNeedsSwap ? _T(" (needs swap)")
-                                  : _T(""));
+                   wxT("wchar_t charset is '%s', needs swap: %i"),
+                   ms_wcCharsetName ? ms_wcCharsetName : "<none>", ms_wcNeedsSwap);
     }
     else // we already have ms_wcCharsetName
     {
-        m2w = iconv_open(ms_wcCharsetName.ToAscii(), cname);
+        m2w = iconv_open(ms_wcCharsetName, cname);
     }
 
-    if ( ms_wcCharsetName.empty() )
+    // NB: don't ever pass NULL to iconv_open(), it may crash!
+    if ( ms_wcCharsetName )
     {
-        w2m = ICONV_T_INVALID;
+        w2m = iconv_open( cname, ms_wcCharsetName);
     }
     else
     {
-        w2m = iconv_open(cname, ms_wcCharsetName.ToAscii());
-        if ( w2m == ICONV_T_INVALID )
-        {
-            wxLogTrace(TRACE_STRCONV,
-                       wxT("\"%s\" -> \"%s\" works but not the converse!?"),
-                       ms_wcCharsetName.c_str(), cname.data());
-        }
+        w2m = (iconv_t)-1;
     }
 }
 
 wxMBConv_iconv::~wxMBConv_iconv()
 {
-    if ( m2w != ICONV_T_INVALID )
+    if ( m2w != (iconv_t)-1 )
         iconv_close(m2w);
-    if ( w2m != ICONV_T_INVALID )
+    if ( w2m != (iconv_t)-1 )
         iconv_close(w2m);
 }
 
@@ -1496,8 +1489,7 @@ size_t wxMBConv_iconv::MB2WC(wchar_t *buf, const char *psz, size_t n) const
         if (ms_wcNeedsSwap)
         {
             // convert to native endianness
-            for ( unsigned i = 0; i < res; i++ )
-                buf[n] = WC_BSWAP(buf[i]);
+            WC_BSWAP(buf /* _not_ bufPtr */, res)
         }
 
         // NB: iconv was given only strlen(psz) characters on input, and so
@@ -1541,8 +1533,7 @@ size_t wxMBConv_iconv::WC2MB(char *buf, const wchar_t *psz, size_t n) const
     wxMutexLocker lock(wxConstCast(this, wxMBConv_iconv)->m_iconvMutex);
 #endif
 
-    size_t inlen = wxWcslen(psz);
-    size_t inbuf = inlen * SIZEOF_WCHAR_T;
+    size_t inbuf = wxWcslen(psz) * SIZEOF_WCHAR_T;
     size_t outbuf = n;
     size_t res, cres;
 
@@ -1551,13 +1542,13 @@ size_t wxMBConv_iconv::WC2MB(char *buf, const wchar_t *psz, size_t n) const
     if (ms_wcNeedsSwap)
     {
         // need to copy to temp buffer to switch endianness
-        // (doing WC_BSWAP twice on the original buffer won't help, as it
+        // this absolutely doesn't rock!
+        // (no, doing WC_BSWAP twice on the original buffer won't help, as it
         //  could be in read-only memory, or be accessed in some other thread)
-        tmpbuf = (wchar_t *)malloc(inbuf + SIZEOF_WCHAR_T);
-        for ( size_t i = 0; i < inlen; i++ )
-            tmpbuf[n] = WC_BSWAP(psz[i]);
-        tmpbuf[inlen] = L'\0';
-        psz = tmpbuf;
+        tmpbuf=(wchar_t*)malloc((inbuf+1)*SIZEOF_WCHAR_T);
+        memcpy(tmpbuf,psz,(inbuf+1)*SIZEOF_WCHAR_T);
+        WC_BSWAP(tmpbuf, inbuf)
+        psz=tmpbuf;
     }
 
     if (buf)
@@ -1595,6 +1586,7 @@ size_t wxMBConv_iconv::WC2MB(char *buf, const wchar_t *psz, size_t n) const
 
     if (ICONV_FAILED(cres, inbuf))
     {
+        //VS: it is ok if iconv fails, hence trace only
         wxLogTrace(TRACE_STRCONV, wxT("iconv failed: %s"), wxSysErrorMsg(wxSysErrorCode()));
         return (size_t)-1;
     }
@@ -2849,3 +2841,5 @@ WXDLLIMPEXP_DATA_BASE(wxMBConv) wxConvLibc,
                                 wxConvUTF8;
 
 #endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
+
+

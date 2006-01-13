@@ -10,6 +10,10 @@
 #ifndef __GTKMENUH__
 #define __GTKMENUH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "menu.h"
+#endif
+
 //-----------------------------------------------------------------------------
 // wxMenuBar
 //-----------------------------------------------------------------------------

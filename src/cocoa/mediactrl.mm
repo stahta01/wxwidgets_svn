@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/mediactrl.cpp
+// Name:        mac/cocoa/mediactrl.cpp
 // Purpose:     Built-in Media Backends for Cocoa
 // Author:      Ryan Norton <wxprojects@comcast.net>
 // Modified by:
@@ -16,6 +16,10 @@
 //---------------------------------------------------------------------------
 // Pre-compiled header stuff
 //---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mediactrl.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -64,11 +68,11 @@ public:
     wxQTMediaBackend();
     ~wxQTMediaBackend();
 
-    virtual bool CreateControl(wxControl* ctrl, wxWindow* parent,
+    virtual bool CreateControl(wxControl* ctrl, wxWindow* parent, 
                                      wxWindowID id,
-                                     const wxPoint& pos,
+                                     const wxPoint& pos, 
                                      const wxSize& size,
-                                     long style,
+                                     long style, 
                                      const wxValidator& validator,
                                      const wxString& name);
 
@@ -95,7 +99,7 @@ public:
     void FinishLoad();
 
     wxSize m_bestSize;              //Original movie size
-    Movie m_movie;                  //QT Movie handle/instance
+    Movie m_movie;     			//QT Movie handle/instance
     NSMovieView* m_movieview;       //NSMovieView instance
     wxControl* m_ctrl;              //Parent control
     bool m_bVideo;                  //Whether or not we have video
@@ -108,7 +112,7 @@ public:
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
 // wxQTMediaBackend
-//
+// 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 IMPLEMENT_DYNAMIC_CLASS(wxQTMediaBackend, wxMediaBackend);
@@ -147,10 +151,10 @@ public:
         if (!m_bPaused)
         {
             if(!IsMovieDone(m_movie))
-                MoviesTask(m_movie, MOVIE_DELAY);
+                MoviesTask(m_movie, MOVIE_DELAY); 
             else
             {
-                wxMediaEvent theEvent(wxEVT_MEDIA_STOP,
+                wxMediaEvent theEvent(wxEVT_MEDIA_STOP, 
                                       m_parent->m_ctrl->GetId());
                 m_parent->m_ctrl->ProcessEvent(theEvent);
 
@@ -161,7 +165,7 @@ public:
                     wxASSERT(::GetMoviesError() == noErr);
 
                     //send the event to our child
-                    wxMediaEvent theEvent(wxEVT_MEDIA_FINISHED,
+                    wxMediaEvent theEvent(wxEVT_MEDIA_FINISHED, 
                                           m_parent->m_ctrl->GetId());
                     m_parent->m_ctrl->ProcessEvent(theEvent);
                 }
@@ -208,21 +212,21 @@ wxQTMediaBackend::~wxQTMediaBackend()
 // 1) Intializes QuickTime
 // 2) Creates the control window
 //---------------------------------------------------------------------------
-bool wxQTMediaBackend::CreateControl(wxControl* inctrl, wxWindow* parent,
+bool wxQTMediaBackend::CreateControl(wxControl* inctrl, wxWindow* parent, 
                                      wxWindowID wid,
-                                     const wxPoint& pos,
+                                     const wxPoint& pos, 
                                      const wxSize& size,
-                                     long style,
+                                     long style, 
                                      const wxValidator& validator,
                                      const wxString& name)
 {
     EnterMovies();
-
+    
     wxMediaCtrl* ctrl = (wxMediaCtrl*) inctrl;
 
     //Create the control base
     wxASSERT(ctrl->CreateBase(parent,wid,pos,size,style, validator, name));
-
+    
     //Create the NSMovieView
     ctrl->SetNSView(NULL);
     NSMovieView* theView = [[NSMovieView alloc] initWithFrame: ctrl->MakeDefaultNSRect(size)];
@@ -251,7 +255,7 @@ bool wxQTMediaBackend::Load(const wxString& fileName)
 {
     return Load(
                 wxURI(
-                    wxString( wxT("file://") ) + fileName
+                    wxString( wxT("file://") ) + fileName 
                      )
                );
 }
@@ -371,7 +375,7 @@ bool wxQTMediaBackend::Stop()
     ::StopMovie(m_movie);
     if(::GetMoviesError() != noErr)
         return false;
-
+    
     ::GoToBeginningOfMovie(m_movie);
     return ::GetMoviesError() == noErr;
 }
@@ -446,7 +450,7 @@ wxLongLong wxQTMediaBackend::GetDuration()
 //---------------------------------------------------------------------------
 wxMediaState wxQTMediaBackend::GetState()
 {
-    if ( !m_timer || (m_timer->IsRunning() == false &&
+    if ( !m_timer || (m_timer->IsRunning() == false && 
                       m_timer->GetPaused() == false) )
         return wxMEDIASTATE_STOPPED;
 
@@ -492,7 +496,7 @@ void wxQTMediaBackend::Move(int x, int y, int w, int h)
 
 
 //in source file that contains stuff you don't directly use
-#include "wx/html/forcelnk.h"
+#include <wx/html/forcelnk.h>
 FORCE_LINK_ME(basewxmediabackends);
 
 #endif //wxUSE_MEDIACTRL

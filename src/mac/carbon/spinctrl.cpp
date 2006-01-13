@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "spinctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_SPINCTRL
@@ -50,15 +54,6 @@ protected:
         if ( m_spin->GetTextValue(&val) )
         {
             m_spin->GetSpinButton()->SetValue(val);
-
-            // If we're already processing a text update from m_spin,
-            // don't send it again, since we could end up recursing
-            // infinitely.
-            if (event.GetId() == m_spin->GetId())
-            {
-                event.Skip();
-                return;
-            }
 
             // Send event that the text was manually changed
             wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, m_spin->GetId());

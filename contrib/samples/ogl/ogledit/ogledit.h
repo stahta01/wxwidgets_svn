@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface
+#endif
+
 #ifndef _OGLSAMPLE_OGLEDIT_H_
 #define _OGLSAMPLE_OGLEDIT_H_
 

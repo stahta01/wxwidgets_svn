@@ -12,6 +12,10 @@
 #ifndef _WX_CTRLSUB_H_BASE_
 #define _WX_CTRLSUB_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "controlwithitems.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CONTROLS
@@ -44,22 +48,7 @@ public:
     virtual wxString GetString(int n) const = 0;
     wxArrayString GetStrings() const;
     virtual void SetString(int n, const wxString& s) = 0;
-
-    // finding string natively is either case sensitive or insensitive
-    // but never both so fall back to this base version for not
-    // supported search type
-    virtual int FindString(const wxString& s, bool bCase = false) const
-    {
-        int count = GetCount();
-
-        for ( int i = 0; i < count ; i ++ )
-        {
-            if (GetString(i).IsSameAs( s , bCase ))
-                return i;
-        }
-
-        return wxNOT_FOUND;
-    }
+    virtual int FindString(const wxString& s) const = 0;
 
 
     // selection
@@ -134,6 +123,12 @@ public:
     bool HasClientUntypedData() const
         { return m_clientDataItemsType == wxClientData_Void; }
 
+#if WXWIN_COMPATIBILITY_2_2
+    // compatibility - these functions are deprecated, use the new ones
+    // instead
+    wxDEPRECATED( int Number() const );
+#endif // WXWIN_COMPATIBILITY_2_2
+
 protected:
     virtual int DoAppend(const wxString& item) = 0;
     virtual int DoInsert(const wxString& item, int pos) = 0;
@@ -197,7 +192,6 @@ protected:
     virtual void SetInitialBestSize(const wxSize& WXUNUSED(size)) { }
 
 private:
-    DECLARE_ABSTRACT_CLASS(wxControlWithItems)
     DECLARE_NO_COPY_CLASS(wxControlWithItems)
 };
 
@@ -206,6 +200,16 @@ private:
 // inline functions
 // ----------------------------------------------------------------------------
 
+#if WXWIN_COMPATIBILITY_2_2
+
+inline int wxItemContainer::Number() const
+{
+    return GetCount();
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 #endif // wxUSE_CONTROLS
 
 #endif // _WX_CTRLSUB_H_BASE_
+

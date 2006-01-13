@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "timer.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,7 +30,7 @@
 
 #include "wx/motif/private.h"
 
-IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler);
 
 WX_DECLARE_VOIDPTR_HASH_MAP(wxTimer*, wxTimerHashMap);
 

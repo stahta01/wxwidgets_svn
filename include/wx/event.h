@@ -12,6 +12,17 @@
 #ifndef _WX_EVENT_H__
 #define _WX_EVENT_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma interface "event.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/clntdata.h"
@@ -211,7 +222,9 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_PAGEDOWN, 305)
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_THUMBTRACK, 306)
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_THUMBRELEASE, 307)
+#if wxABI_VERSION >= 20601
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_CHANGED, 308)
+#endif
 
         // Scroll events from wxWindow
     DECLARE_EVENT_TYPE(wxEVT_SCROLLWIN_TOP, 320)
@@ -504,6 +517,14 @@ private:
 };
 #endif
 
+#ifdef __VISUALC__
+    // 'this' : used in base member initializer list (for m_commandString)
+    #if _MSC_VER > 1100
+        #pragma warning(push)
+    #endif
+    #pragma warning(disable:4355)
+#endif
+
 class WXDLLIMPEXP_CORE wxCommandEvent : public wxEvent
 {
 public:
@@ -565,6 +586,10 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxCommandEvent)
 };
+
+#if defined(__VISUALC__) && (_MSC_VER > 1100)
+    #pragma warning(pop)
+#endif
 
 #if WXWIN_COMPATIBILITY_2_4
 inline void wxCommandEventStringHelper::operator=(const wxString &str)
@@ -935,22 +960,11 @@ public:
     wxKeyEvent(wxEventType keyType = wxEVT_NULL);
     wxKeyEvent(const wxKeyEvent& evt);
 
-    // can be used check if the key event has exactly the given modifiers:
-    // "GetModifiers() = wxMOD_CONTROL" is easier to write than "ControlDown()
-    // && !MetaDown() && !AltDown() && !ShiftDown()"
-    int GetModifiers() const
-    {
-        return (m_controlDown ? wxMOD_CONTROL : 0) |
-               (m_shiftDown ? wxMOD_SHIFT : 0) |
-               (m_metaDown ? wxMOD_META : 0) |
-               (m_altDown ? wxMOD_ALT : 0);
-    }
-
     // Find state of shift/control keys
     bool ControlDown() const { return m_controlDown; }
-    bool ShiftDown() const { return m_shiftDown; }
     bool MetaDown() const { return m_metaDown; }
     bool AltDown() const { return m_altDown; }
+    bool ShiftDown() const { return m_shiftDown; }
 
     // "Cmd" is a pseudo key which is Control for PC and Unix platforms but
     // Apple ("Command") key under Macs: it makes often sense to use it instead
@@ -1040,13 +1054,10 @@ public:
 
     long          m_keyCode;
 
-    // TODO: replace those with a single m_modifiers bitmask of wxMOD_XXX?
     bool          m_controlDown;
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
-
-    // FIXME: what is this for? relation to m_rawXXX?
     bool          m_scanCode;
 
 #if wxUSE_UNICODE
@@ -1088,7 +1099,7 @@ public:
 
     wxSize GetSize() const { return m_size; }
     wxRect GetRect() const { return m_rect; }
-    void SetRect(const wxRect& rect) { m_rect = rect; }
+    void SetRect(wxRect rect) { m_rect = rect; }
 
     virtual wxEvent *Clone() const { return new wxSizeEvent(*this); }
 
@@ -1128,7 +1139,7 @@ public:
     wxPoint GetPosition() const { return m_pos; }
     void SetPosition(const wxPoint& pos) { m_pos = pos; }
     wxRect GetRect() const { return m_rect; }
-    void SetRect(const wxRect& rect) { m_rect = rect; }
+    void SetRect(wxRect rect) { m_rect = rect; }
 
     virtual wxEvent *Clone() const { return new wxMoveEvent(*this); }
 
@@ -2772,7 +2783,12 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
 #define EVT_SCROLL_PAGEDOWN(func) wx__DECLARE_EVT0(wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler(func))
 #define EVT_SCROLL_THUMBTRACK(func) wx__DECLARE_EVT0(wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler(func))
 #define EVT_SCROLL_THUMBRELEASE(func) wx__DECLARE_EVT0(wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler(func))
+#if wxABI_VERSION >= 20601
 #define EVT_SCROLL_CHANGED(func) wx__DECLARE_EVT0(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(func))
+#define wx__EVT_SCROLL_CHANGED(func) EVT_SCROLL_CHANGED(func)
+#else
+#define wx__EVT_SCROLL_CHANGED(func)
+#endif
 
 #define EVT_SCROLL(func) \
     EVT_SCROLL_TOP(func) \
@@ -2783,7 +2799,7 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
     EVT_SCROLL_PAGEDOWN(func) \
     EVT_SCROLL_THUMBTRACK(func) \
     EVT_SCROLL_THUMBRELEASE(func) \
-    EVT_SCROLL_CHANGED(func)
+    wx__EVT_SCROLL_CHANGED(func)
 
 // Scrolling from wxSlider and wxScrollBar, with an id
 #define EVT_COMMAND_SCROLL_TOP(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_TOP, winid, wxScrollEventHandler(func))
@@ -2794,7 +2810,12 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
 #define EVT_COMMAND_SCROLL_PAGEDOWN(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_PAGEDOWN, winid, wxScrollEventHandler(func))
 #define EVT_COMMAND_SCROLL_THUMBTRACK(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_THUMBTRACK, winid, wxScrollEventHandler(func))
 #define EVT_COMMAND_SCROLL_THUMBRELEASE(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_THUMBRELEASE, winid, wxScrollEventHandler(func))
+#if wxABI_VERSION >= 20601
 #define EVT_COMMAND_SCROLL_CHANGED(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_CHANGED, winid, wxScrollEventHandler(func))
+#define wx__EVT_COMMAND_SCROLL_CHANGED(winid, func) EVT_COMMAND_SCROLL_CHANGED(winid, func)
+#else
+#define wx__EVT_COMMAND_SCROLL_CHANGED(winid, func)
+#endif
 
 #define EVT_COMMAND_SCROLL(winid, func) \
     EVT_COMMAND_SCROLL_TOP(winid, func) \
@@ -2805,12 +2826,20 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
     EVT_COMMAND_SCROLL_PAGEDOWN(winid, func) \
     EVT_COMMAND_SCROLL_THUMBTRACK(winid, func) \
     EVT_COMMAND_SCROLL_THUMBRELEASE(winid, func) \
-    EVT_COMMAND_SCROLL_CHANGED(winid, func)
+    wx__EVT_COMMAND_SCROLL_CHANGED(winid, func)
 
 // compatibility macros for the old name, to be deprecated in 2.8
+//
+// note that simply #defines suffice for the macro names as they're only
+// present in the source code and macros are enough to maintain source
+// backwards compatibility, but that we have to ensure that we also have
+// wxEVT_SCROLL_ENDSCROLL inside the library for binary backwards compatibility
+// and this is done in event.cpp
+#if wxABI_VERSION >= 20601
 #define wxEVT_SCROLL_ENDSCROLL wxEVT_SCROLL_CHANGED
 #define EVT_COMMAND_SCROLL_ENDSCROLL EVT_COMMAND_SCROLL_CHANGED
 #define EVT_SCROLL_ENDSCROLL EVT_SCROLL_CHANGED
+#endif
 
 // Convenience macros for commonly-used commands
 #define EVT_CHECKBOX(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_CHECKBOX_CLICKED, winid, wxCommandEventHandler(func))
@@ -2903,7 +2932,7 @@ extern WXDLLIMPEXP_BASE wxList *wxPendingEvents;
 
 // Find a window with the focus, that is also a descendant of the given window.
 // This is used to determine the window to initially send commands to.
-WXDLLIMPEXP_CORE wxWindow* wxFindFocusDescendant(wxWindow* ancestor);
+wxWindow* wxFindFocusDescendant(wxWindow* ancestor);
 
 #endif // wxUSE_GUI
 

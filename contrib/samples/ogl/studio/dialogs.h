@@ -12,6 +12,10 @@
 #ifndef _STUDIO_DIALOGS_H_
 #define _STUDIO_DIALOGS_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface
+#endif
+
 #include <wx/wx.h>
 #include <wx/notebook.h>
 

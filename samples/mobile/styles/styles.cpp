@@ -5,6 +5,10 @@
 // Copyright:
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "styles.h"
+#endif
+
 // For compilers that support precompilation
 #include "wx/wxprec.h"
 

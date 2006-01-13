@@ -12,6 +12,10 @@
 #ifndef _WX_FONTDLG_H_
 #define _WX_FONTDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fontdlg.h"
+#endif
+
 #include "wx/dialog.h"
 #include "wx/cmndata.h"
 
@@ -34,7 +38,7 @@ public:
     wxFontData& GetFontData() { return m_fontData; }
     bool IsShown() const;
     void OnPanelClose();
-    void SetData(const wxFontData& data);
+    void SetData(wxFontData& data);
 
 protected:
     wxWindow*   m_dialogParent;

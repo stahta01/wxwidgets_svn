@@ -13,7 +13,7 @@ include ../../../build/msw/config.gcc
 ### Variables: ###
 
 CPPDEPS = -MT$@ -MF$@.d -MD
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = \
 	gcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\..\lib\gcc_$(LIBTYPE_SUFFIX)$(CFG)
@@ -34,7 +34,7 @@ PENGUIN_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG) \
 	-Wno-ctor-dtor-privacy $(CPPFLAGS) $(CXXFLAGS)
 PENGUIN_OBJECTS =  \
 	$(OBJS)\penguin_penguin.o \
-	$(OBJS)\penguin_dxfrenderer.o \
+	$(OBJS)\penguin_lw.o \
 	$(OBJS)\penguin_trackball.o \
 	$(OBJS)\penguin_penguin_rc.o
 
@@ -225,12 +225,12 @@ endif
 
 data: 
 	if not exist $(OBJS) mkdir $(OBJS)
-	for %%f in (penguin.dxf.gz) do if not exist $(OBJS)\%%f copy .\%%f $(OBJS)
+	for %%f in (penguin.lwo) do if not exist $(OBJS)\%%f copy .\%%f $(OBJS)
 
 $(OBJS)\penguin_penguin.o: ./penguin.cpp
 	$(CXX) -c -o $@ $(PENGUIN_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\penguin_dxfrenderer.o: ./dxfrenderer.cpp
+$(OBJS)\penguin_lw.o: ./lw.cpp
 	$(CXX) -c -o $@ $(PENGUIN_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\penguin_trackball.o: ./trackball.c

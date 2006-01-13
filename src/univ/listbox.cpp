@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univlistbox.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -84,7 +88,6 @@ wxListBox::wxListBox(wxWindow *parent,
                      long style,
                      const wxValidator& validator,
                      const wxString &name)
-          :wxScrollHelper(this)
 {
     Init();
 
@@ -135,6 +138,8 @@ bool wxListBox::Create(wxWindow *parent,
     if ( !wxControl::Create(parent, id, pos, size, style,
                             validator, name) )
         return false;
+
+    SetWindow(this);
 
     m_strings = new wxArrayString;
 

@@ -172,6 +172,7 @@ wxGetPasswordFromUser = wx._misc.GetPasswordFromUser
 wxGetSingleChoice = wx._misc.GetSingleChoice
 wxGetSingleChoiceIndex = wx._misc.GetSingleChoiceIndex
 wxMessageBox = wx._misc.MessageBox
+wxGetNumberFromUser = wx._misc.GetNumberFromUser
 wxColourDisplay = wx._misc.ColourDisplay
 wxDisplayDepth = wx._misc.DisplayDepth
 wxGetDisplayDepth = wx._misc.GetDisplayDepth

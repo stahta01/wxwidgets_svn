@@ -207,6 +207,10 @@ int wxAppConsole::OnExit()
     delete wxConfigBase::Set((wxConfigBase *) NULL);
 #endif // wxUSE_CONFIG
 
+    // use Set(NULL) and not Get() to avoid creating a message output object on
+    // demand when we just want to delete it
+    delete wxMessageOutput::Set(NULL);
+
     return 0;
 }
 
@@ -318,6 +322,17 @@ wxAppConsole::HandleEvent(wxEvtHandler *handler,
 {
     // by default, simply call the handler
     (handler->*func)(event);
+}
+
+bool
+wxAppConsole::OnExceptionInMainLoop()
+{
+    throw;
+
+    // some compilers are too stupid to know that we never return after throw
+#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
+    return false;
+#endif
 }
 
 #endif // wxUSE_EXCEPTIONS
@@ -706,11 +721,7 @@ static wxString GetAssertStackTrace()
     protected:
         virtual void OnStackFrame(const wxStackFrame& frame)
         {
-            m_stackTrace << wxString::Format
-                            (
-                              _T("[%02d] "),
-                              wx_truncate_cast(int, frame.GetLevel())
-                            );
+            m_stackTrace << wxString::Format(_T("[%02d] "), frame.GetLevel());
 
             wxString name = frame.GetName();
             if ( !name.empty() )
@@ -719,7 +730,11 @@ static wxString GetAssertStackTrace()
             }
             else
             {
-                m_stackTrace << wxString::Format(_T("%p"), frame.GetAddress());
+                m_stackTrace << wxString::Format
+                                (
+                                    _T("0x%08lx"),
+                                    (unsigned long)frame.GetAddress()
+                                );
             }
 
             if ( frame.HasSourceLocation() )

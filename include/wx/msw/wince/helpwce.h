@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/wince/helpwce.h
+// Name:        helpwce.h
 // Purpose:     Help system: Windows CE help implementation
 // Author:      Julian Smart
 // Modified by:
@@ -12,6 +12,10 @@
 #ifndef _WX_HELPWCE_H_
 #define _WX_HELPWCE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpwce.cpp"
+#endif
+
 #if wxUSE_HELP
 
 #include "wx/helpbase.h"
@@ -19,7 +23,7 @@
 class WXDLLEXPORT wxWinceHelpController : public wxHelpControllerBase
 {
 public:
-    wxWinceHelpController(wxWindow* parentWindow = NULL): wxHelpControllerBase(parentWindow) {}
+    wxWinceHelpController() {}
     virtual ~wxWinceHelpController() {}
 
     // Must call this to set the filename
@@ -46,7 +50,7 @@ protected:
     // View topic, or just the HTML file
     bool ViewURL(const wxString& topic = wxEmptyString);
 
-private:
+protected:
     wxString m_helpFile;
 
     DECLARE_CLASS(wxWinceHelpController)
@@ -56,3 +60,4 @@ private:
 
 #endif
 // _WX_HELPWCE_H_
+

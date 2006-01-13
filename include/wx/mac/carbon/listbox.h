@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/listbox.h
+// Name:        listbox.h
 // Purpose:     wxListBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,8 +9,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_LISTBOX_H_
 #define _WX_LISTBOX_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listbox.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // simple types
@@ -80,7 +85,7 @@ public:
     virtual int GetCount() const;
     virtual wxString GetString(int n) const;
     virtual void SetString(int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString(const wxString& s) const;
 
     virtual bool IsSelected(int n) const;
     virtual void DoSetSelection(int n, bool select);

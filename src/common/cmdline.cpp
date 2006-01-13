@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cmdline.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -120,7 +124,7 @@ struct wxCmdLineOption
     void SetStrVal(const wxString& val)
         { Check(wxCMD_LINE_VAL_STRING); m_strVal = val; m_hasVal = true; }
 #if wxUSE_DATETIME
-    void SetDateVal(const wxDateTime& val)
+    void SetDateVal(const wxDateTime val)
         { Check(wxCMD_LINE_VAL_DATE); m_dateVal = val; m_hasVal = true; }
 #endif // wxUSE_DATETIME
 
@@ -166,8 +170,8 @@ WX_DECLARE_OBJARRAY(wxCmdLineParam, wxArrayParams);
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_OBJARRAY(wxArrayOptions)
-WX_DEFINE_OBJARRAY(wxArrayParams)
+WX_DEFINE_OBJARRAY(wxArrayOptions);
+WX_DEFINE_OBJARRAY(wxArrayParams);
 
 // the parser internal state
 struct wxCmdLineParserData
@@ -241,10 +245,7 @@ void wxCmdLineParserData::SetArguments(const wxString& cmdLine)
 {
     m_arguments.clear();
 
-    if(wxTheApp && wxTheApp->argc > 0)
-        m_arguments.push_back(wxTheApp->argv[0]);
-    else
-        m_arguments.push_back(wxEmptyString);
+    m_arguments.push_back(wxTheApp ? wxTheApp->argv[0] : _T(""));
 
     wxArrayString args = wxCmdLineParser::ConvertStringToArgs(cmdLine);
 
@@ -1223,3 +1224,4 @@ wxArrayString wxCmdLineParser::ConvertStringToArgs(const wxChar *p)
 
     return args;
 }
+

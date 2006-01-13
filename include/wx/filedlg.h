@@ -16,6 +16,10 @@
 
 #if wxUSE_FILEDLG
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlg.h"
+#endif
+
 #include "wx/dialog.h"
 #include "wx/arrstr.h"
 
@@ -109,6 +113,7 @@ public:
 protected:
     wxString      m_message;
     long          m_dialogStyle;
+    wxWindow     *m_parent;
     wxString      m_dir;
     wxString      m_path;       // Full path
     wxString      m_fileName;

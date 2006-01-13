@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/palette.cpp
+// Name:        palette.cpp
 // Purpose:     wxPalette
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "palette.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -52,29 +56,29 @@ wxPalette::~wxPalette()
 bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue)
 {
     UnRef();
-
+    
     m_refData = new wxPaletteRefData;
-
+    
     M_PALETTEDATA->m_count = n ;
     M_PALETTEDATA->m_palette = new wxColour[n] ;
-
+    
     for ( int i = 0 ; i < n ; ++i)
     {
         M_PALETTEDATA->m_palette[i].Set( red[i] , green[i] , blue[i] ) ;
     }
-
-    return false;
+    
+    return FALSE;
 }
 
-int wxPalette::GetPixel(unsigned char red, unsigned char green, unsigned char blue) const
+int wxPalette::GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const
 {
     if ( !m_refData )
-        return wxNOT_FOUND;
-
+        return -1;
+    
     long bestdiff = 3 * 256 ;
     long bestpos = 0 ;
     long currentdiff ;
-
+    
     for ( int i = 0  ; i < M_PALETTEDATA->m_count ; ++i )
     {
         const wxColour& col = &M_PALETTEDATA->m_palette[i] ;
@@ -84,28 +88,29 @@ int wxPalette::GetPixel(unsigned char red, unsigned char green, unsigned char bl
             bestdiff = currentdiff ;
             bestpos = i ;
             if ( bestdiff == 0 )
-                break ;
+                break ; 
         }
     }
-
+    
     return bestpos;
 }
 
 bool wxPalette::GetRGB(int index, unsigned char *red, unsigned char *green, unsigned char *blue) const
 {
     if ( !m_refData )
-        return false;
-
+        return FALSE;
+    
     if (index < 0 || index >= M_PALETTEDATA->m_count)
-        return false;
-
+        return FALSE;
+    
     const wxColour& col = &M_PALETTEDATA->m_palette[index] ;
     *red = col.Red() ;
     *green = col.Green() ;
     *blue = col.Blue() ;
-
-    return true;
+    
+    return TRUE;
 }
 
 #endif
 // wxUSE_PALETTE
+

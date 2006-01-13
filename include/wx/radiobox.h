@@ -12,6 +12,10 @@
 #ifndef _WX_RADIOBOX_H_BASE_
 #define _WX_RADIOBOX_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "radioboxbase.h"
+#endif
+
 #if wxUSE_RADIOBOX
 
 #include "wx/ctrlsub.h"
@@ -27,22 +31,20 @@ extern WXDLLEXPORT_DATA(const wxChar*) wxRadioBoxNameStr;
 class WXDLLEXPORT wxRadioBoxBase : public wxItemContainerImmutable
 {
 public:
-    // change/query the individual radio button state
+    // change the individual radio button state
     virtual bool Enable(int n, bool enable = true) = 0;
     virtual bool Show(int n, bool show = true) = 0;
 
-    // NB: these functions are stubbed here for now but should become pure
-    //     virtual once all ports implement them
-    virtual bool IsItemEnabled(int WXUNUSED(n)) const { return true; }
-    virtual bool IsItemShown(int WXUNUSED(n)) const { return true; }
-
-    // return number of columns/rows in this radiobox
-    int GetColumnCount() const { return m_numCols; }
-    int GetRowCount() const { return m_numRows; }
+    // layout parameters
+    virtual int GetColumnCount() const = 0;
+    virtual int GetRowCount() const = 0;
 
     // return the item above/below/to the left/right of the given one
     int GetNextItem(int item, wxDirection dir, long style) const;
 
+
+    // implement some of wxItemContainerImmutable functions
+    virtual int FindString(const wxString& s) const;
 
     // deprecated functions
     // --------------------
@@ -52,29 +54,12 @@ public:
     wxDEPRECATED( void SetNumberOfRowsOrCols(int n) );
 #endif // WXWIN_COMPATIBILITY_2_4
 
-protected:
-    wxRadioBoxBase()
-    {
-        m_majorDim = 0;
-    }
-
-    // return the number of items in major direction (which depends on whether
-    // we have wxRA_SPECIFY_COLS or wxRA_SPECIFY_ROWS style)
-    int GetMajorDim() const { return m_majorDim; }
-
-    // sets m_majorDim and also updates m_numCols/Rows
-    //
-    // the style parameter should be the style of the radiobox itself
-    void SetMajorDim(int majorDim, long style);
-
-
-private:
-    // the number of elements in major dimension (i.e. number of columns if
-    // wxRA_SPECIFY_COLS or the number of rows if wxRA_SPECIFY_ROWS) and also
-    // the number of rows/columns calculated from it
-    int m_majorDim,
-        m_numCols,
-        m_numRows;
+    // for compatibility only, don't use these methods in new code!
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( int Number() const );
+    wxDEPRECATED( wxString GetLabel(int n) const );
+    wxDEPRECATED( void SetLabel(int n, const wxString& label) );
+#endif // WXWIN_COMPATIBILITY_2_2
 };
 
 #if defined(__WXUNIVERSAL__)

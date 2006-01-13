@@ -7,6 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+/*
+   We don't put pragma implement in this file because it is already present in
+   src/common/image.cpp
+*/
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 

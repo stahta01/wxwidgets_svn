@@ -13,6 +13,10 @@
 #ifndef _WX_EFFECTS_H_
 #define _WX_EFFECTS_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "effects.h"
+#endif
+
 /*
  * wxEffects: various 3D effects
  */
@@ -57,7 +61,7 @@ public:
     void DrawSunkenEdge(wxDC& dc, const wxRect& rect, int borderSize = 1);
 
     // Tile a bitmap
-    bool TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap);
+    bool TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap);
 
 protected:
     wxColour    m_highlightColour;  // Usually white

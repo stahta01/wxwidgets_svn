@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -20,44 +20,7 @@
 #define INCL_WINSYS
 #define INCL_SHLERRORS
 #define INCL_DOS
-#define INCL_WINATOM
-#define INCL_WIN
 #include <os2.h>
-
-#if wxONLY_WATCOM_EARLIER_THAN(1,4)
-    inline HATOMTBL APIENTRY WinQuerySystemAtomTable(VOID){return NULL;}
-    inline ULONG APIENTRY WinQueryAtomName(HATOMTBL,ATOM,PCSZ,ULONG){return 0;}
-    inline LONG APIENTRY GpiPointArc(HPS,PPOINTL){return GPI_ERROR;}
-    inline BOOL APIENTRY WinDrawPointer(HPS,LONG,LONG,HPOINTER,ULONG){return FALSE;}
-    inline HPOINTER APIENTRY WinCreatePointerIndirect(HWND,PPOINTERINFO){return NULLHANDLE;}
-    inline BOOL APIENTRY WinGetMaxPosition(HWND,PSWP){return FALSE;}
-    inline BOOL APIENTRY WinGetMinPosition(HWND,PSWP,PPOINTL){return FALSE;}
-#endif
-
-#if defined(__WATCOMC__) && defined(__WXMOTIF__)
-    #include <os2def.h>
-    #define I_NEED_OS2_H
-    #include <X11/Xmd.h>
-
-    // include this header from here for many of the GUI related code
-    #if wxUSE_GUI
-        extern "C" {
-            #include <Xm/VendorSP.h>
-        }
-    #endif
-
-    // provide Unix-like pipe()
-    #include <types.h>
-    #include <tcpustd.h>
-    #include <sys/time.h>
-    // Use ::DosCreatePipe or ::DosCreateNPipe under OS/2
-    // for more see http://posix2.sourceforge.net/guide.html
-    inline int pipe( int WXUNUSED(filedes)[2] )
-    {
-        wxFAIL_MSG(wxT("Implement first"));
-        return -1;
-    }
-#endif
 
 #if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS) && !defined(HAVE_SPBCDATA)
 
@@ -74,7 +37,6 @@
 
 #endif
 
-#include "wx/dlimpexp.h"
 #include "wx/fontenc.h"
 
 class WXDLLEXPORT wxFont;

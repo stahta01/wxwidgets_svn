@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -88,9 +92,9 @@ void gdk_wx_draw_bitmap(GdkDrawable  *drawable,
                         gint         width,
                         gint         height)
 {
-    wxCHECK_RET( drawable, _T("NULL drawable in gdk_wx_draw_bitmap") );
-    wxCHECK_RET( src, _T("NULL src in gdk_wx_draw_bitmap") );
-    wxCHECK_RET( gc, _T("NULL gc in gdk_wx_draw_bitmap") );
+    g_return_if_fail (drawable != NULL);
+    g_return_if_fail (src != NULL);
+    g_return_if_fail (gc != NULL);
 
 #ifdef __WXGTK20__
     gint src_width, src_height;
@@ -538,10 +542,10 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2,
         radius1 = 0.0;
         radius2 = 360.0;
     }
-    else if ( wxIsNullDouble(radius) )
+    else
+    if (radius == 0.0)
     {
-        radius1 =
-        radius2 = 0.0;
+        radius1 = radius2 = 0.0;
     }
     else
     {
@@ -1133,15 +1137,15 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     if (is_mono)
     {
 #ifdef __WXGTK20__
-        GdkPixmap *bitmap2 = gdk_pixmap_new( wxGetRootWindow()->window, ww, hh, -1 );
-        GdkGC *gc = gdk_gc_new( bitmap2 );
+        GdkPixmap *bitmap = gdk_pixmap_new( wxGetRootWindow()->window, ww, hh, -1 );
+        GdkGC *gc = gdk_gc_new( bitmap );
         gdk_gc_set_foreground( gc, m_textForegroundColour.GetColor() );
         gdk_gc_set_background( gc, m_textBackgroundColour.GetColor() );
-        gdk_wx_draw_bitmap( bitmap2, gc, use_bitmap.GetBitmap(), 0, 0, 0, 0, -1, -1 );
+        gdk_wx_draw_bitmap( bitmap, gc, use_bitmap.GetBitmap(), 0, 0, 0, 0, -1, -1 );
 
-        gdk_draw_drawable( m_window, m_textGC, bitmap2, 0, 0, xx, yy, -1, -1 );
+        gdk_draw_drawable( m_window, m_textGC, bitmap, 0, 0, xx, yy, -1, -1 );
 
-        gdk_bitmap_unref( bitmap2 );
+        gdk_bitmap_unref( bitmap );
         gdk_gc_unref( gc );
 #else
         gdk_wx_draw_bitmap( m_window, m_textGC, use_bitmap.GetBitmap(), 0, 0, xx, yy, -1, -1 );
@@ -1606,7 +1610,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 
 void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, double angle )
 {
-    if ( wxIsNullDouble(angle) )
+    if (angle == 0.0)
     {
         DrawText(text, x, y);
         return;
@@ -1883,6 +1887,14 @@ void wxWindowDC::SetFont( const wxFont &font )
         {
             PangoContext *oldContext = m_context;
 
+            // We might want to use the X11 context for faster
+            // rendering on screen.
+            // MR: Lets not want to do this, as this introduces libpangox dependancy.
+#if 0
+            if (m_font.GetNoAntiAliasing())
+                m_context = m_owner->GtkGetPangoX11Context();
+            else
+#endif
             m_context = m_owner->GtkGetPangoDefaultContext();
 
             // If we switch back/forth between different contexts
@@ -2358,15 +2370,18 @@ void wxWindowDC::Destroy()
 
 void wxWindowDC::ComputeScaleAndOrigin()
 {
-    const wxRealPoint origScale(m_scaleX, m_scaleY);
+    /* CMB: copy scale to see if it changes */
+    double origScaleX = m_scaleX;
+    double origScaleY = m_scaleY;
 
     wxDC::ComputeScaleAndOrigin();
 
-    // if scale has changed call SetPen to recalulate the line width
-    if ( wxRealPoint(m_scaleX, m_scaleY) != origScale && m_pen.Ok() )
+    /* CMB: if scale has changed call SetPen to recalulate the line width */
+    if ((m_scaleX != origScaleX || m_scaleY != origScaleY) &&
+        (m_pen.Ok()))
     {
-        // this is a bit artificial, but we need to force wxDC to think the pen
-        // has changed
+        /* this is a bit artificial, but we need to force wxDC to think
+           the pen has changed */
         wxPen pen = m_pen;
         m_pen = wxNullPen;
         SetPen( pen );

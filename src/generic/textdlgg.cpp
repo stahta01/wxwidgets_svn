@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textdlgg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -173,7 +177,7 @@ void wxTextEntryDialog::SetTextValidator( long style )
     m_textctrl->SetValidator( validator );
 }
 
-void wxTextEntryDialog::SetTextValidator( const wxTextValidator& validator )
+void wxTextEntryDialog::SetTextValidator( wxTextValidator& validator )
 {
     m_textctrl->SetValidator( validator );
 }

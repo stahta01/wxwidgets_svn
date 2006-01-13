@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -223,7 +227,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
     // Disable GTK's broken events ...
     gtk_signal_disconnect( GTK_OBJECT(combo->entry), combo->entry_change_id );
-    // ... and add surrogate handler.
+    // ... and add surogate handler.
     combo->entry_change_id = gtk_signal_connect (GTK_OBJECT (combo->entry), "changed",
                   (GtkSignalFunc) gtk_dummy_callback, combo);
 
@@ -533,7 +537,7 @@ void wxComboBox::SetString(int n, const wxString &text)
     InvalidateBestSize();
 }
 
-int wxComboBox::FindString( const wxString &item, bool bCase ) const
+int wxComboBox::FindString( const wxString &item ) const
 {
     wxCHECK_MSG( m_widget != NULL, wxNOT_FOUND, wxT("invalid combobox") );
 
@@ -550,7 +554,7 @@ int wxComboBox::FindString( const wxString &item, bool bCase ) const
 #else
         wxString str( label->label );
 #endif
-        if (item.IsSameAs( str , bCase ) )
+        if (item == str)
             return count;
 
         count++;
@@ -850,12 +854,12 @@ void wxComboBox::OnChar( wxKeyEvent &event )
     if ( event.GetKeyCode() == WXK_RETURN )
     {
         // GTK automatically selects an item if its in the list
-        wxCommandEvent eventEnter(wxEVT_COMMAND_TEXT_ENTER, GetId());
-        eventEnter.SetString( GetValue() );
-        eventEnter.SetInt( GetSelection() );
-        eventEnter.SetEventObject( this );
+        wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, GetId());
+        event.SetString( GetValue() );
+        event.SetInt( GetSelection() );
+        event.SetEventObject( this );
 
-        if (!GetEventHandler()->ProcessEvent( eventEnter ))
+        if (!GetEventHandler()->ProcessEvent( event ))
         {
             // This will invoke the dialog default action, such
             // as the clicking the default button.

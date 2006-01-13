@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "joystick.h"
+#endif
+
 #include "wx/setup.h"
 
 #include "wx/joystick.h"
@@ -88,7 +92,7 @@ bool wxJoystick::IsOk() const
     return FALSE;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;

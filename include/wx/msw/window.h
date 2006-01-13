@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/window.h
-// Purpose:     wxWindowMSW class
+// Purpose:     wxWindow class
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin on 13.05.99: complete refont of message handling,
 //              elimination of Default(), ...
@@ -12,6 +12,21 @@
 
 #ifndef _WX_WINDOW_H_
 #define _WX_WINDOW_H_
+
+// ---------------------------------------------------------------------------
+// headers
+// ---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "window.h"
+#endif
+
+// [at least] some version of Windows send extra mouse move messages after
+// a mouse click or a key press - to temporarily fix this problem, set the
+// define below to 1
+//
+// a better solution should be found later...
+#define wxUSE_MOUSEEVENT_HACK 0
 
 // ---------------------------------------------------------------------------
 // constants
@@ -62,8 +77,8 @@ public:
                 const wxString& name = wxPanelNameStr);
 
     // implement base class pure virtuals
-    virtual void SetLabel(const wxString& label);
-    virtual wxString GetLabel() const;
+    virtual void SetTitle( const wxString& title);
+    virtual wxString GetTitle() const;
 
     virtual void Raise();
     virtual void Lower();
@@ -270,7 +285,9 @@ public:
                              WXWORD pos, WXHWND control);
 
     // child control notifications
+#ifdef __WIN95__
     virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
+#endif // __WIN95__
 
     // owner-drawn controls need to process these messages
     virtual bool MSWOnDrawItem(int id, WXDRAWITEMSTRUCT *item);
@@ -417,6 +434,13 @@ protected:
     int                   m_xThumbSize;
     int                   m_yThumbSize;
 
+#if wxUSE_MOUSEEVENT_HACK
+    // the coordinates of the last mouse event and the type of it
+    long                  m_lastMouseX,
+                          m_lastMouseY;
+    int                   m_lastMouseEvent;
+#endif // wxUSE_MOUSEEVENT_HACK
+
     // implement the base class pure virtuals
     virtual void DoClientToScreen( int *x, int *y ) const;
     virtual void DoScreenToClient( int *x, int *y ) const;
@@ -467,13 +491,8 @@ protected:
     // the background, false otherwise (i.e. the system should erase it)
     bool DoEraseBackground(WXHDC hDC);
 
-    // generate WM_CHANGEUISTATE if it's needed for the OS we're running under
-    //
-    // action should be one of the UIS_XXX constants
-    // state should be one or more of the UISF_XXX constants
-    // if action == UIS_INITIALIZE then it doesn't seem to matter what we use
-    // for state as the system will decide for us what needs to be set
-    void MSWUpdateUIState(int action, int state = 0);
+    // generate WM_UPDATEUISTATE if it's needed for the OS we're running under
+    void MSWUpdateUIState();
 
 private:
     // common part of all ctors
@@ -483,7 +502,10 @@ private:
     bool HandleMove(int x, int y);
     bool HandleMoving(wxRect& rect);
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
+
+#ifdef __WIN95__
     bool HandleNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
+#endif // __WIN95__
 
     // list of disabled children before last call to our Disable()
     wxWindowList *m_childrenDisabled;
@@ -552,4 +574,5 @@ WX_DECLARE_HASH(wxWindowMSW, wxWindowList, wxWinHashTable);
 
 extern wxWinHashTable *wxWinHandleHash;
 
-#endif // _WX_WINDOW_H_
+#endif
+    // _WX_WINDOW_H_

@@ -63,8 +63,7 @@ public:
     bool GetValue() const;
 
     // Set the label
-    virtual void SetLabel(const wxString& label) { wxControl::SetLabel(label); }
-    virtual void SetLabel(const wxBitmap& label);
+    void SetLabel(const wxBitmap& label);
     bool Enable(bool enable = TRUE);
 
     static wxVisualAttributes

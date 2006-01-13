@@ -12,6 +12,10 @@
 #ifndef _WX_CHOICE_H_
 #define _WX_CHOICE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "choice.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // Choice item
 // ----------------------------------------------------------------------------
@@ -73,6 +77,7 @@ public:
     virtual int GetSelection() const;
     virtual void SetSelection(int n);
 
+    virtual int FindString(const wxString& s) const;
     virtual wxString GetString(int n) const;
     virtual void SetString(int n, const wxString& s);
 

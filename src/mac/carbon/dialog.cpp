@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dialog.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/dialog.h"
@@ -19,11 +23,10 @@
 
 #include "wx/mac/uma.h"
 
-
 // Lists to keep track of windows, so we can disable/enable them
 // for modal dialogs
 wxList wxModalDialogs;
-
+//wxList wxModelessWindows;  // Frames and modeless dialogs
 extern wxList wxPendingDelete;
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
@@ -40,66 +43,60 @@ BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
   EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
-
 void wxDialog::Init()
 {
     m_isModalStyle = false;
 }
 
-bool wxDialog::Create( wxWindow *parent,
-    wxWindowID id,
-    const wxString& title,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name )
+bool wxDialog::Create(wxWindow *parent, wxWindowID id,
+           const wxString& title,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
-    SetExtraStyle( GetExtraStyle() | wxTOPLEVEL_EX_DIALOG );
+    SetExtraStyle(GetExtraStyle() | wxTOPLEVEL_EX_DIALOG);
 
-    // All dialogs should really have this style...
+    // All dialogs should really have this style
     style |= wxTAB_TRAVERSAL;
 
-    // ...but not these styles
-    style &= ~(wxYES | wxOK | wxNO); // | wxCANCEL
-
-    if ( !wxTopLevelWindow::Create( parent, id, title, pos, size, style, name ) )
-        return false;
+    if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style & ~(wxYES|wxOK|wxNO /*|wxCANCEL*/) , name) )
+        return FALSE;
 
     HIViewRef growBoxRef = 0 ;
-    OSStatus err = HIViewFindByID( HIViewGetRoot( (WindowRef)m_macWindow ), kHIViewWindowGrowBoxID, &growBoxRef  );
+    OSStatus err = HIViewFindByID( HIViewGetRoot( (WindowRef) m_macWindow ) , kHIViewWindowGrowBoxID , &growBoxRef );
     if ( err == noErr && growBoxRef != 0 )
-        HIGrowBoxViewSetTransparent( growBoxRef, true ) ;
-
-    return true;
+        HIGrowBoxViewSetTransparent( growBoxRef , true ) ;
+    
+    return TRUE;
 }
 
-void wxDialog::SetModal( bool flag )
+void wxDialog::SetModal(bool flag)
 {
     if ( flag )
     {
         m_isModalStyle = true;
 
-        wxModelessWindows.DeleteObject( this );
-
+        wxModelessWindows.DeleteObject(this);
 #if TARGET_CARBON
-        SetWindowModality( (WindowRef)MacGetWindowRef(), kWindowModalityAppModal, NULL ) ;
+        SetWindowModality( (WindowRef) MacGetWindowRef() , kWindowModalityAppModal , NULL ) ;
 #endif
     }
     else
     {
         m_isModalStyle = false;
 
-        wxModelessWindows.Append( this );
+        wxModelessWindows.Append(this);
     }
 }
 
 wxDialog::~wxDialog()
 {
-    m_isBeingDeleted = true;
-    Show(false);
+    m_isBeingDeleted = TRUE;
+    Show(FALSE);
 }
 
-// By default, pressing escape cancels the dialog; on mac command-stop does the same thing
+// By default, pressing escape cancels the dialog , on mac command-stop does the same thing
 void wxDialog::OnCharHook(wxKeyEvent& event)
 {
     if (( event.m_keyCode == WXK_ESCAPE ||
@@ -114,7 +111,6 @@ void wxDialog::OnCharHook(wxKeyEvent& event)
 
         return;
     }
-
     // We didn't process this event.
     event.Skip();
 }
@@ -134,12 +130,16 @@ bool wxDialog::IsModalShowing() const
 bool wxDialog::Show(bool show)
 {
     if ( !wxDialogBase::Show(show) )
+    {
         // nothing to do
-        return false;
+        return FALSE;
+    }
 
     if ( show )
+    {
         // usually will result in TransferDataToWindow() being called
         InitDialog();
+    }
 
     if ( m_isModalStyle )
     {
@@ -149,13 +149,13 @@ bool wxDialog::Show(bool show)
         }
         else // end of modal dialog
         {
-            // this will cause IsModalShowing() return false and our local
+            // this will cause IsModalShowing() return FALSE and our local
             // message loop will terminate
             wxModalDialogs.DeleteObject(this);
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 #if !TARGET_CARBON
@@ -164,7 +164,7 @@ extern bool s_macIsInModalLoop ;
 
 void wxDialog::DoShowModal()
 {
-    wxCHECK_RET( !IsModalShowing(), wxT("DoShowModal() called twice") );
+    wxCHECK_RET( !IsModalShowing(), _T("DoShowModal() called twice") );
 
     wxModalDialogs.Append(this);
 
@@ -177,7 +177,6 @@ void wxDialog::DoShowModal()
     bool formerModal = s_macIsInModalLoop ;
     s_macIsInModalLoop = true ;
 #endif
-
     while ( IsModalShowing() )
     {
         wxTheApp->MacDoOneEvent() ;
@@ -193,14 +192,15 @@ void wxDialog::DoShowModal()
 }
 
 
-// Replacement for Show(true) for modal dialogs - returns return code
+// Replacement for Show(TRUE) for modal dialogs - returns return code
 int wxDialog::ShowModal()
 {
     if ( !m_isModalStyle )
-        SetModal(true);
+    {
+        SetModal(TRUE);
+    }
 
-    Show(true);
-
+    Show(TRUE);
     return GetReturnCode();
 }
 
@@ -209,7 +209,7 @@ int wxDialog::ShowModal()
 void wxDialog::EndModal(int retCode)
 {
     SetReturnCode(retCode);
-    Show(false);
+    Show(FALSE);
     SetModal(false);
 }
 
@@ -217,14 +217,15 @@ void wxDialog::EndModal(int retCode)
 void wxDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
   if ( Validate() && TransferDataFromWindow() )
+  {
       EndModal(wxID_OK);
+  }
 }
 
 void wxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
 {
   if (Validate())
-      TransferDataFromWindow();
-
+    TransferDataFromWindow();
   // TODO probably need to disable the Apply button until things change again
 }
 

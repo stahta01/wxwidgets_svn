@@ -6,6 +6,10 @@
  * $Id$
  *******************************************************************/
 
+#ifdef __GNUG__
+#   pragma implementation "wxlparser.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__

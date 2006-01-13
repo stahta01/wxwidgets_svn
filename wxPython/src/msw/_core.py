@@ -675,12 +675,8 @@ HT_MAX = _core_.HT_MAX
 MOD_NONE = _core_.MOD_NONE
 MOD_ALT = _core_.MOD_ALT
 MOD_CONTROL = _core_.MOD_CONTROL
-MOD_ALTGR = _core_.MOD_ALTGR
 MOD_SHIFT = _core_.MOD_SHIFT
-MOD_META = _core_.MOD_META
 MOD_WIN = _core_.MOD_WIN
-MOD_CMD = _core_.MOD_CMD
-MOD_ALL = _core_.MOD_ALL
 UPDATE_UI_NONE = _core_.UPDATE_UI_NONE
 UPDATE_UI_RECURSE = _core_.UPDATE_UI_RECURSE
 UPDATE_UI_FROMIDLE = _core_.UPDATE_UI_FROMIDLE
@@ -2176,6 +2172,7 @@ class PyImageHandler(ImageHandler):
     `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
     `SetExtension` from your constructor.
 
+
     """
     def __repr__(self):
         return "<%s.%s; proxy of C++ wxPyImageHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
@@ -2205,6 +2202,7 @@ class PyImageHandler(ImageHandler):
         To activate your handler create an instance of it and pass it to
         `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
         `SetExtension` from your constructor.
+
 
         """
         newobj = _core_.new_PyImageHandler(*args, **kwargs)
@@ -8094,6 +8092,22 @@ class Window(EvtHandler):
         """
         return _core_.Window_IsBeingDeleted(*args, **kwargs)
 
+    def SetTitle(*args, **kwargs):
+        """
+        SetTitle(self, String title)
+
+        Sets the window's title. Applicable only to frames and dialogs.
+        """
+        return _core_.Window_SetTitle(*args, **kwargs)
+
+    def GetTitle(*args, **kwargs):
+        """
+        GetTitle(self) -> String
+
+        Gets the window's title. Applicable only to frames and dialogs.
+        """
+        return _core_.Window_GetTitle(*args, **kwargs)
+
     def SetLabel(*args, **kwargs):
         """
         SetLabel(self, String label)
@@ -10875,6 +10889,14 @@ class MenuItem(Object):
         """SetAccel(self, AcceleratorEntry accel)"""
         return _core_.MenuItem_SetAccel(*args, **kwargs)
 
+    def SetBitmap(*args, **kwargs):
+        """SetBitmap(self, Bitmap bitmap)"""
+        return _core_.MenuItem_SetBitmap(*args, **kwargs)
+
+    def GetBitmap(*args, **kwargs):
+        """GetBitmap(self) -> Bitmap"""
+        return _core_.MenuItem_GetBitmap(*args, **kwargs)
+
     def SetFont(*args, **kwargs):
         """SetFont(self, Font font)"""
         return _core_.MenuItem_SetFont(*args, **kwargs)
@@ -10935,14 +10957,6 @@ class MenuItem(Object):
     def ResetOwnerDrawn(*args, **kwargs):
         """ResetOwnerDrawn(self)"""
         return _core_.MenuItem_ResetOwnerDrawn(*args, **kwargs)
-
-    def SetBitmap(*args, **kwargs):
-        """SetBitmap(self, Bitmap bitmap)"""
-        return _core_.MenuItem_SetBitmap(*args, **kwargs)
-
-    def GetBitmap(*args, **kwargs):
-        """GetBitmap(self) -> Bitmap"""
-        return _core_.MenuItem_GetBitmap(*args, **kwargs)
 
 
 class MenuItemPtr(MenuItem):
@@ -11568,6 +11582,14 @@ class SizerItem(Object):
         isn't any.
         """
         return _core_.SizerItem_GetUserData(*args, **kwargs)
+
+    def SetUserData(*args, **kwargs):
+        """
+        SetUserData(self, PyObject userData)
+
+        Associate a Python object with this sizer item.
+        """
+        return _core_.SizerItem_SetUserData(*args, **kwargs)
 
 
 class SizerItemPtr(SizerItem):

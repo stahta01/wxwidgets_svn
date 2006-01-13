@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "calctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -59,8 +63,6 @@ BEGIN_EVENT_TABLE(wxCalendarCtrl, wxControl)
 
     EVT_LEFT_DOWN(wxCalendarCtrl::OnClick)
     EVT_LEFT_DCLICK(wxCalendarCtrl::OnDClick)
-
-    EVT_SYS_COLOUR_CHANGED(wxCalendarCtrl::OnSysColourChanged)
 END_EVENT_TABLE()
 
 #if wxUSE_EXTENDED_RTTI
@@ -177,15 +179,8 @@ void wxCalendarCtrl::Init()
         m_attrs[n] = NULL;
     }
 
-    InitColours();
-}
-
-void wxCalendarCtrl::InitColours()
-{
     m_colHighlightFg = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT);
     m_colHighlightBg = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-    m_colBackground = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
-    m_colSorrounding = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
 
     m_colHolidayFg = *wxRED;
     // don't set m_colHolidayBg - by default, same as our bg colour
@@ -240,7 +235,7 @@ bool wxCalendarCtrl::Create(wxWindow *parent,
 
     // Since we don't paint the whole background make sure that the platform
     // will use the right one.
-    SetBackgroundColour(m_colBackground);
+    SetBackgroundColour(*wxWHITE);
 
     SetHolidayAttrs();
 
@@ -1024,7 +1019,7 @@ void wxCalendarCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
 
         for ( int wd = 0; wd < 7; wd++ )
         {
-            dc.SetTextBackground(m_colBackground);
+            dc.SetTextBackground(*wxWHITE);
             if ( IsDateShown(date) )
             {
                 // don't use wxDate::Format() which prepends 0s
@@ -1043,7 +1038,7 @@ void wxCalendarCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
                 {
                     // surrounding week or out-of-range
                     // draw "disabled"
-                    dc.SetTextForeground(m_colSorrounding);
+                    dc.SetTextForeground(*wxLIGHT_GREY);
                     changedColours = true;
                 }
                 else
@@ -1610,20 +1605,6 @@ void wxCalendarCtrl::OnYearTextChange(wxCommandEvent& event)
 {
     SetUserChangedYear();
     OnYearChange(event);
-}
-
-// Responds to colour changes, and passes event on to children.
-void wxCalendarCtrl::OnSysColourChanged(wxSysColourChangedEvent& event)
-{
-    // reinit colours
-    InitColours();
-
-    // Propagate the event to the children
-    wxControl::OnSysColourChanged(event);
-
-    // Redraw control area
-    SetBackgroundColour(m_colBackground);
-    Refresh();
 }
 
 // ----------------------------------------------------------------------------

@@ -461,10 +461,6 @@ SOURCE=.\common\event.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\evtloopcmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\extended.c
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
@@ -1042,10 +1038,6 @@ SOURCE=.\generic\tipwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\treebkg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
@@ -1074,15 +1066,7 @@ SOURCE=.\html\helpdata.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\html\helpdlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\html\helpfrm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\html\helpwnd.cpp
 # End Source File
 # Begin Source File
 
@@ -1655,26 +1639,6 @@ SOURCE=.\msw\window.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\richtext\richtextbuffer.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextctrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtexthtml.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextstyles.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextxml.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xml\xml.cpp
 # End Source File
 # Begin Source File
@@ -1732,10 +1696,6 @@ SOURCE=.\xrc\xh_gauge.cpp
 # Begin Source File
 
 SOURCE=.\xrc\xh_gdctl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_grid.cpp
 # End Source File
 # Begin Source File
 
@@ -1836,10 +1796,6 @@ SOURCE=.\xrc\xh_toolb.cpp
 # Begin Source File
 
 SOURCE=.\xrc\xh_tree.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_treebk.cpp
 # End Source File
 # Begin Source File
 
@@ -2539,10 +2495,6 @@ SOURCE=..\include\wx\laywin.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\link.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\list.h
 # End Source File
 # Begin Source File
@@ -2752,22 +2704,6 @@ SOURCE=..\include\wx\region.h
 # Begin Source File
 
 SOURCE=..\include\wx\renderer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextbuffer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextctrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextstyles.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextxml.h
 # End Source File
 # Begin Source File
 
@@ -2983,10 +2919,6 @@ SOURCE=..\include\wx\treebase.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\treebook.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\treectrl.h
 # End Source File
 # Begin Source File
@@ -3159,10 +3091,6 @@ SOURCE=..\include\wx\xrc\xh_gdctl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\xrc\xh_grid.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\xrc\xh_html.h
 # End Source File
 # Begin Source File
@@ -3260,10 +3188,6 @@ SOURCE=..\include\wx\xrc\xh_toolb.h
 # Begin Source File
 
 SOURCE=..\include\wx\xrc\xh_tree.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_treebk.h
 # End Source File
 # Begin Source File
 
@@ -3643,10 +3567,6 @@ SOURCE=..\include\wx\msw\radiobut.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msw\rcdefs.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\msw\regconf.h
 # End Source File
 # Begin Source File
@@ -3935,15 +3855,7 @@ SOURCE=..\include\wx\html\helpdata.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\html\helpdlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\html\helpfrm.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\html\helpwnd.h
 # End Source File
 # Begin Source File
 

@@ -12,6 +12,10 @@
 #ifndef _WX_ACCEL_H_
 #define _WX_ACCEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "accel.h"
+#endif
+
 #include "wx/string.h"
 #include "wx/event.h"
 
@@ -33,9 +37,9 @@ public:
 
     wxAcceleratorTable& operator = (const wxAcceleratorTable& accel)
     { if (*this == accel) return (*this); Ref(accel); return *this; }
-    bool operator == (const wxAcceleratorTable& accel) const
+    bool operator == (const wxAcceleratorTable& accel)
     { return m_refData == accel.m_refData; }
-    bool operator != (const wxAcceleratorTable& accel) const
+    bool operator != (const wxAcceleratorTable& accel)
     { return m_refData != accel.m_refData; }
 
     bool Ok() const;

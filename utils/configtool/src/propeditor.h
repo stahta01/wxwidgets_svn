@@ -12,6 +12,10 @@
 #ifndef _CT_PROPEDITOR_H_
 #define _CT_PROPEDITOR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "propeditor.cpp"
+#endif
+
 #include "wx/splitter.h"
 #include "wx/grid.h"
 

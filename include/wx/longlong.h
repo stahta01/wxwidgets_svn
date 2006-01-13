@@ -13,6 +13,10 @@
 #ifndef _WX_LONGLONG_H
 #define _WX_LONGLONG_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "longlong.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/string.h"
 
@@ -139,10 +143,10 @@ public:
     // accessors
         // get high part
     long GetHi() const
-        { return wx_truncate_cast(long, m_ll >> 32); }
+        { return (long)(m_ll >> 32); }
         // get low part
     unsigned long GetLo() const
-        { return wx_truncate_cast(unsigned long, m_ll); }
+        { return (unsigned long)m_ll; }
 
         // get absolute value
     wxLongLongNative Abs() const { return wxLongLongNative(*this).Abs(); }
@@ -151,17 +155,19 @@ public:
         // convert to native long long
     wxLongLong_t GetValue() const { return m_ll; }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     long ToLong() const
     {
         wxASSERT_MSG( (m_ll >= LONG_MIN) && (m_ll <= LONG_MAX),
                       _T("wxLongLong to long conversion loss of precision") );
 
-        return wx_truncate_cast(long, m_ll);
+        return (long)m_ll;
     }
 
+#if wxABI_VERSION >= 20602
         // convert to double
-    double ToDouble() const { return wx_truncate_cast(double, m_ll); }
+    double ToDouble() const { return m_ll; }
+#endif // ABI >= 2.6.2
 
     // don't provide implicit conversion to wxLongLong_t or we will have an
     // ambiguity for all arithmetic operations
@@ -342,21 +348,21 @@ public:
     // accessors
         // get high part
     unsigned long GetHi() const
-        { return wx_truncate_cast(unsigned long, m_ll >> 32); }
+        { return (unsigned long)(m_ll >> 32); }
         // get low part
     unsigned long GetLo() const
-        { return wx_truncate_cast(unsigned long, m_ll); }
+        { return (unsigned long)m_ll; }
 
         // convert to native ulong long
     wxULongLong_t GetValue() const { return m_ll; }
 
-        // convert to ulong with range checking in debug mode (only!)
+        // convert to ulong with range checking in the debug mode (only!)
     unsigned long ToULong() const
     {
         wxASSERT_MSG( m_ll <= LONG_MAX,
                       _T("wxULongLong to long conversion loss of precision") );
 
-        return wx_truncate_cast(unsigned long, m_ll);
+        return (unsigned long)m_ll;
     }
 
     // operations
@@ -580,7 +586,7 @@ public:
         return *this;
     }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     long ToLong() const
     {
         wxASSERT_MSG( (m_hi == 0l) || (m_hi == -1l),
@@ -589,8 +595,10 @@ public:
         return (long)m_lo;
     }
 
+#if wxABI_VERSION >= 20602
         // convert to double
     double ToDouble() const;
+#endif // ABI >= 2.6.2
 
     // operations
         // addition
@@ -778,7 +786,7 @@ public:
         // get low part
     unsigned long GetLo() const { return m_lo; }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     unsigned long ToULong() const
     {
         wxASSERT_MSG( m_hi == 0ul,

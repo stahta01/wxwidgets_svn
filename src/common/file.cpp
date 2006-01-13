@@ -14,6 +14,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "file.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -213,9 +217,11 @@ bool wxFile::Create(const wxChar *szFileName, bool bOverwrite, int accessMode)
         wxLogSysError(_("can't create file '%s'"), szFileName);
         return false;
     }
-
-    Attach(fd);
-    return true;
+    else
+    {
+        Attach(fd);
+        return true;
+    }
 }
 
 // open the file
@@ -265,9 +271,10 @@ bool wxFile::Open(const wxChar *szFileName, OpenMode mode, int accessMode)
         wxLogSysError(_("can't open file '%s'"), szFileName);
         return false;
     }
-
-    Attach(fd);
-    return true;
+    else {
+        Attach(fd);
+        return true;
+    }
 }
 
 // close

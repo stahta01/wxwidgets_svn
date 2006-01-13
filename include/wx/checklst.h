@@ -20,13 +20,7 @@
 // wxCheckListBox: a listbox whose items may be checked
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxCheckListBoxBase : public
-                                              #ifdef __WXWINCE__
-                                                  // keep virtuals synchronised
-                                                  wxListBoxBase
-                                              #else
-                                                  wxListBox
-                                              #endif
+class WXDLLEXPORT wxCheckListBoxBase : public wxListBox
 {
 public:
     wxCheckListBoxBase() { }
@@ -40,8 +34,6 @@ public:
 
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/checklst.h"
-#elif defined(__WXWINCE__)
-    #include "wx/msw/wince/checklst.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/checklst.h"
 #elif defined(__WXMOTIF__)

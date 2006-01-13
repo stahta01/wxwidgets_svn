@@ -12,6 +12,10 @@
 #ifndef _WX_GENERIC_GRIDCTRL_H_
 #define _WX_GENERIC_GRIDCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gridctrl.h"
+#endif
+
 #if wxUSE_GRID
 
 #include "wx/grid.h"
@@ -28,8 +32,8 @@
 class WXDLLIMPEXP_ADV wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
 {
 public:
-    wxGridCellDateTimeRenderer(const wxString& outformat = wxDefaultDateTimeFormat,
-                               const wxString& informat = wxDefaultDateTimeFormat);
+    wxGridCellDateTimeRenderer(wxString outformat = wxDefaultDateTimeFormat,
+                               wxString informat = wxDefaultDateTimeFormat);
 
     // draw the string right aligned
     virtual void Draw(wxGrid& grid,
@@ -50,7 +54,7 @@ public:
     virtual void SetParameters(const wxString& params);
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
     wxString m_iformat;
     wxString m_oformat;
@@ -85,7 +89,7 @@ public:
     virtual void SetParameters(const wxString& params);
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
     wxArrayString m_choices;
 };
@@ -149,7 +153,7 @@ public:
 private:
     wxArrayString GetTextLines( wxGrid& grid,
                                 wxDC& dc,
-                                const wxGridCellAttr& attr,
+                                wxGridCellAttr& attr,
                                 const wxRect& rect,
                                 int row, int col);
 

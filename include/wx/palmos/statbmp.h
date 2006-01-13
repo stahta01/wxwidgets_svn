@@ -12,6 +12,10 @@
 #ifndef _WX_STATBMP_H_
 #define _WX_STATBMP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "statbmp.h"
+#endif
+
 #include "wx/control.h"
 #include "wx/icon.h"
 #include "wx/bitmap.h"

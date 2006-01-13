@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -746,13 +750,6 @@ void wxComboBox::GetSelection(long* from, long* to) const
 int wxComboBox::GetSelection() const
 {
     return wxChoice::GetSelection();
-}
-
-void wxComboBox::Clear()
-{
-    wxChoice::Clear();
-    m_selectionOld = -1;
-    m_value.clear();
 }
 
 // ----------------------------------------------------------------------------

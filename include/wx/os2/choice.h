@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/choice.h
+// Name:        choice.h
 // Purpose:     wxChoice class
 // Author:      David Webster
 // Modified by:
@@ -98,6 +98,7 @@ public:
     virtual int      GetSelection(void) const ;
     virtual void     SetSelection(int n);
 
+    virtual int      FindString(const wxString& rsStr) const;
     virtual wxString GetString(int n) const ;
     virtual void     SetString( int n
                                ,const wxString& rsStr

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:     wxComboBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "combobox.h"
+#endif
 
 #include "wx/combobox.h"
 #include "wx/button.h"
@@ -486,9 +490,9 @@ void wxComboBox::SetSelection(int n)
     }
 }
 
-int wxComboBox::FindString(const wxString& s, bool bCase ) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    return m_choice->FindString( s , bCase );
+    return m_choice->FindString( s );
 }
 
 wxString wxComboBox::GetString(int n) const
@@ -581,3 +585,4 @@ void wxComboBox::MacHandleControlClick( WXWidget WXUNUSED(control) , wxInt16 WXU
     event.SetString(GetStringSelection());
     ProcessCommand(event);
 }
+

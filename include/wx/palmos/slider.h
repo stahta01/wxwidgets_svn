@@ -12,6 +12,10 @@
 #ifndef _SLIDERPALM_H_
 #define _SLIDERPALM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "slider.h"
+#endif
+
 // Slider
 class WXDLLEXPORT wxSlider : public wxSliderBase
 {

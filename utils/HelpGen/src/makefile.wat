@@ -196,7 +196,7 @@ __LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -247,26 +247,26 @@ $(OBJS)\HelpGen.exe :  $(HELPGEN_OBJECTS)
 	wlink @$(OBJS)\HelpGen.lbc
 
 $(OBJS)\HelpGen_HelpGen.obj :  .AUTODEPEND .\HelpGen.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_cjparser.obj :  .AUTODEPEND .\cjparser.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_docripper.obj :  .AUTODEPEND .\docripper.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_ifcontext.obj :  .AUTODEPEND .\ifcontext.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_markup.obj :  .AUTODEPEND .\markup.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_scriptbinder.obj :  .AUTODEPEND .\scriptbinder.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_sourcepainter.obj :  .AUTODEPEND .\sourcepainter.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 
 $(OBJS)\HelpGen_srcparser.obj :  .AUTODEPEND .\srcparser.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(HELPGEN_CXXFLAGS) $<
 

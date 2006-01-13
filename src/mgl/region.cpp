@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      src/mgl/region.cpp
+// Name:      region.cpp
 // Purpose:   Region handling for wxWidgets/MGL
 // Author:    Vaclav Slavik
 // RCS-ID:    $Id$
 // Copyright: (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:   wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "region.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -72,7 +76,7 @@ wxRegion::wxRegion()
 }
 
 wxRegion::wxRegion(wxCoord x, wxCoord y, wxCoord w, wxCoord h)
-{
+{    
     m_refData = new wxRegionRefData;
     MGLRect rect(x, y, x + w, y + h);
     M_REGION = rect;
@@ -126,7 +130,7 @@ void wxRegion::Clear()
 // Outer bounds of region
 void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const
 {
-    if (m_refData)
+    if (m_refData) 
     {
         rect_t rect;
         rect = M_REGION.getBounds();
@@ -134,8 +138,8 @@ void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const
         y = rect.top;
         w = rect.right - rect.left;
         h = rect.bottom - rect.top;
-    }
-    else
+    } 
+    else 
     {
         x = y = w = h = 0;
     }
@@ -151,10 +155,8 @@ wxRect wxRegion::GetBox() const
 // Is region empty?
 bool wxRegion::Empty() const
 {
-    if (!m_refData)
-        return true;
-
-    return (bool)(M_REGION.isEmpty());
+    if (!m_refData) return TRUE;
+    return M_REGION.isEmpty();
 }
 
 //-----------------------------------------------------------------------------
@@ -165,7 +167,7 @@ bool wxRegion::Offset(wxCoord x, wxCoord y)
 {
     AllocExclusive();
     M_REGION.offset(x, y);
-    return true;
+    return TRUE;
 }
 
 // Union rectangle or region with this.
@@ -173,14 +175,14 @@ bool wxRegion::Union(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 {
     AllocExclusive();
     M_REGION += MGLRect(x, y, x + width, y + height);
-    return true;
+    return TRUE;
 }
 
 bool wxRegion::Union(const wxRegion& region)
 {
     AllocExclusive();
     M_REGION += M_REGION_OF(region);
-    return true;
+    return TRUE;
 }
 
 // Intersect rectangle or region with this.
@@ -188,14 +190,14 @@ bool wxRegion::Intersect(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 {
     AllocExclusive();
     M_REGION &= MGLRect(x, y, x + width, y + height);
-    return true;
+    return TRUE;
 }
 
 bool wxRegion::Intersect(const wxRegion& region)
 {
     AllocExclusive();
     M_REGION &= M_REGION_OF(region);
-    return true;
+    return TRUE;
 }
 
 // Subtract rectangle or region from this:
@@ -204,14 +206,14 @@ bool wxRegion::Subtract(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 {
     AllocExclusive();
     M_REGION -= MGLRect(x, y, x + width, y + height);
-    return true;
+    return TRUE;
 }
 
 bool wxRegion::Subtract(const wxRegion& region)
 {
     AllocExclusive();
     M_REGION -= M_REGION_OF(region);
-    return true;
+    return TRUE;
 }
 
 // XOR: the union of two combined regions except for any overlapping areas.
@@ -222,7 +224,7 @@ bool wxRegion::Xor(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
     MGLRegion rg1 = M_REGION + rect,
               rg2 = M_REGION & rect;
     M_REGION = rg1 - rg2;
-    return true;
+    return TRUE;    
 }
 
 bool wxRegion::Xor(const wxRegion& region)
@@ -231,7 +233,7 @@ bool wxRegion::Xor(const wxRegion& region)
     MGLRegion rg1 = M_REGION + M_REGION_OF(region),
               rg2 = M_REGION & M_REGION_OF(region);
     M_REGION = rg1 - rg2;
-    return true;
+    return TRUE;
 }
 
 
@@ -265,11 +267,11 @@ wxRegionContain wxRegion::Contains(wxCoord x, wxCoord y, wxCoord w, wxCoord h) c
 
     MGLRect rect(x, y, x + w, y + h);
     MGLRegion rg;
-
+    
     // 1) is the rectangle entirely covered by the region?
     rg = MGLRegion(rect) - M_REGION;
     if (rg.isEmpty()) return wxInRegion;
-
+    
     // 2) is the rectangle completely outside the region?
     rg = M_REGION & rect; // intersection
     if (rg.isEmpty()) return wxOutRegion;
@@ -298,7 +300,7 @@ public:
     virtual bool OnInit()
     {
         gs_mutexIterator = new wxMutex();
-        return true;
+        return TRUE;
     }
     virtual void OnExit()
     {
@@ -315,7 +317,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxMglRegionModule, wxModule)
  */
 wxRegionIterator::wxRegionIterator() : m_currentNode(NULL)
 {
-    m_rects.DeleteContents(true);
+    m_rects.DeleteContents(TRUE);
 }
 
 wxRegionIterator::~wxRegionIterator()
@@ -327,23 +329,23 @@ wxRegionIterator::~wxRegionIterator()
  */
 wxRegionIterator::wxRegionIterator(const wxRegion& region)
 {
-    m_rects.DeleteContents(true);
+    m_rects.DeleteContents(TRUE);
     Reset(region);
 }
 
 /*
  * Reset iterator for a new /e region.
  */
-
+ 
 
 static wxRegionRectList *gs_rectList;
 
 static void MGLAPI wxMGL_region_callback(const rect_t *r)
 {
-    gs_rectList->Append(new wxRect(r->left, r->top,
+    gs_rectList->Append(new wxRect(r->left, r->top, 
                                    r->right - r->left, r->bottom - r->top));
 }
-
+ 
 void wxRegionIterator::Reset(const wxRegion& region)
 {
     m_currentNode = NULL;
@@ -352,7 +354,7 @@ void wxRegionIterator::Reset(const wxRegion& region)
     if (!region.Empty())
     {
 #if wxUSE_THREADS
-        wxMutexLocker lock(*gs_mutexIterator);
+        wxMutexLocker(*gs_mutexIterator);
 #endif
         gs_rectList = &m_rects;
         M_REGION_OF(region).traverse(wxMGL_region_callback);

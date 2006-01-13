@@ -73,7 +73,6 @@ class GridFrame : public wxFrame
     void SelectRow(wxCommandEvent& event);
     void SelectAll(wxCommandEvent& event);
     void OnAddToSelectToggle(wxCommandEvent& event);
-    void OnShowSelection(wxCommandEvent& event);
 
     void OnLabelLeftClick( wxGridEvent& );
     void OnCellLeftClick( wxGridEvent& );
@@ -138,7 +137,6 @@ public:
         ID_BUGS_TABLE,
         ID_SMALL_GRID,
         ID_SELECT_UNSELECT,
-        ID_SHOW_SELECTION,
         ID_SELECT_ALL,
         ID_SELECT_ROW,
         ID_SELECT_COL,

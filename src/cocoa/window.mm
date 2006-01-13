@@ -4,9 +4,9 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2002/12/26
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2002 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -308,8 +308,8 @@ void wxWindowCocoa::Init()
     m_cocoaNSView = NULL;
     m_cocoaHider = NULL;
     m_wxCocoaScrollView = NULL;
-    m_isBeingDeleted = false;
-    m_isInPaint = false;
+    m_isBeingDeleted = FALSE;
+    m_isInPaint = FALSE;
     m_shouldBeEnabled = true;
 }
 
@@ -335,7 +335,7 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID winid,
         SetInitialFrameRect(pos,size);
     }
 
-    return true;
+    return TRUE;
 }
 
 // Destructor
@@ -439,7 +439,7 @@ bool wxWindowCocoa::Cocoa_drawRect(const NSRect &rect)
         wxLogDebug(wxT("Paint event recursion!"));
         return false;
     }
-    m_isInPaint = true;
+    m_isInPaint = TRUE;
 
     // Set m_updateRegion
     const NSRect *rects = &rect; // The bounding box of the region
@@ -459,7 +459,7 @@ bool wxWindowCocoa::Cocoa_drawRect(const NSRect &rect)
     wxPaintEvent event(m_windowId);
     event.SetEventObject(this);
     bool ret = GetEventHandler()->ProcessEvent(event);
-    m_isInPaint = false;
+    m_isInPaint = FALSE;
     return ret;
 }
 
@@ -580,9 +580,9 @@ bool wxWindowCocoa::Cocoa_resetCursorRects()
 {
     if(!m_cursor.GetNSCursor())
         return false;
-
-    [GetNSView() addCursorRect: [GetNSView() visibleRect]  cursor: m_cursor.GetNSCursor()];
-
+    
+    [GetNSView() addCursorRect: [GetNSView() visibleRect]  cursor: m_cursor.GetNSCursor()];    
+        
     return true;
 }
 
@@ -679,7 +679,7 @@ void wxWindowCocoa::DoSetSize(int x, int y, int width, int height, int sizeFlags
 
     AdjustForParentClientOrigin(x,y,sizeFlags);
 
-    wxSize size(wxDefaultSize);
+    wxSize size(-1,-1);
 
     if((width==-1)&&!(sizeFlags&wxSIZE_ALLOW_MINUS_ONE))
     {
@@ -849,18 +849,7 @@ void wxWindow::DoSetClientSize(int width, int height)
 
 void wxWindow::CocoaSetWxWindowSize(int width, int height)
 {
-    wxWindowCocoa::DoSetSize(wxDefaultCoord,wxDefaultCoord,width,height,wxSIZE_USE_EXISTING);
-}
-
-void wxWindow::SetLabel(const wxString& WXUNUSED(label))
-{
-    // TODO
-}
-
-wxString wxWindow::GetLabel() const
-{
-    // TODO
-    return wxEmptyString;
+    wxWindowCocoa::DoSetSize(-1,-1,width,height,wxSIZE_USE_EXISTING);
 }
 
 int wxWindow::GetCharHeight() const
@@ -944,7 +933,7 @@ void wxWindow::DoSetVirtualSize( int x, int y )
 bool wxWindow::SetFont(const wxFont& font)
 {
     // TODO
-    return true;
+    return TRUE;
 }
 
 static int CocoaRaiseWindowCompareFunction(id first, id second, void *target)
@@ -990,7 +979,7 @@ void wxWindow::Lower()
 
 bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
 {
-    return false;
+    return FALSE;
 }
 
 // Get the window with the focus
@@ -1045,3 +1034,4 @@ wxWindow* wxFindWindowAtPointer(wxPoint& pt)
     pt = wxGetMousePosition();
     return NULL;
 }
+

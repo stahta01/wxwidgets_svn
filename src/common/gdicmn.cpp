@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gdicmn.h"
+#endif
+
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
 #endif

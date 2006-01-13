@@ -1130,18 +1130,27 @@ enum wxHitTest
 };
 
 
-
-enum wxKeyModifier
+%{
+#if ! wxUSE_HOTKEY
+enum wxHotkeyModifier
 {
-    wxMOD_NONE,
-    wxMOD_ALT,
-    wxMOD_CONTROL,
-    wxMOD_ALTGR,
-    wxMOD_SHIFT,
-    wxMOD_META,
-    wxMOD_WIN,
-    wxMOD_CMD,
-    wxMOD_ALL       
+    wxMOD_NONE = 0,
+    wxMOD_ALT = 1,
+    wxMOD_CONTROL = 2,
+    wxMOD_SHIFT = 4,
+    wxMOD_WIN = 8
+};
+#define wxEVT_HOTKEY 9999
+#endif
+%}
+
+enum wxHotkeyModifier
+{
+    wxMOD_NONE = 0,
+    wxMOD_ALT = 1,
+    wxMOD_CONTROL = 2,
+    wxMOD_SHIFT = 4,
+    wxMOD_WIN = 8
 };
 
 

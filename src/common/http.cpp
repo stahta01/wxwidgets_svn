@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "http.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -142,7 +146,13 @@ bool wxHTTP::ParseHeaders()
     ClearHeaders();
     m_read = true;
 
-    for ( ;; )
+#if defined(__VISAGECPP__)
+// VA just can't stand while(1)
+    bool bOs2var = true;
+    while(bOs2var)
+#else
+    while (1)
+#endif
     {
         m_perr = ReadLine(this, line);
         if (m_perr != wxPROTO_NOERR)

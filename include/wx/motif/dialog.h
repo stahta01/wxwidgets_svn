@@ -12,6 +12,10 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dialog.h"
+#endif
+
 class WXDLLEXPORT wxEventLoop;
 
 // Dialog boxes
@@ -75,7 +79,7 @@ public:
     void OnCloseWindow(wxCloseEvent& event);
 
 private:
-    virtual bool XmDoCreateTLW(wxWindow* parent,
+    virtual bool DoCreate(wxWindow* parent,
                                wxWindowID id,
                                const wxString& title,
                                const wxPoint& pos,
@@ -95,6 +99,11 @@ protected:
 
     virtual void DoSetClientSize(int width, int height);
 
+#if wxCHECK_VERSION(2,7,0)
+    #error "Remove DoDestroy(), it was only kept for binary backwards compatibility"
+#endif
+
+    virtual void DoDestroy();
 
 private:
     DECLARE_EVENT_TABLE()

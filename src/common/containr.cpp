@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "containr.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -39,9 +43,6 @@
 #ifdef __WXMSW__
     #include "wx/radiobut.h"
 #endif
-
-// trace mask for focus messages
-#define TRACE_FOCUS _T("focus")
 
 // ============================================================================
 // implementation
@@ -132,13 +133,13 @@ void wxControlContainer::SetLastFocus(wxWindow *win)
 
         if ( win )
         {
-            wxLogTrace(TRACE_FOCUS, _T("Set last focus to %s(%s)"),
+            wxLogTrace(_T("focus"), _T("Set last focus to %s(%s)"),
                        win->GetClassInfo()->GetClassName(),
                        win->GetLabel().c_str());
         }
         else
         {
-            wxLogTrace(TRACE_FOCUS, _T("No more last focus"));
+            wxLogTrace(_T("focus"), _T("No more last focus"));
         }
     }
 
@@ -522,8 +523,8 @@ void wxControlContainer::HandleOnWindowDestroy(wxWindowBase *child)
 
 bool wxControlContainer::DoSetFocus()
 {
-    wxLogTrace(TRACE_FOCUS, _T("SetFocus on wxPanel 0x%p."),
-               m_winParent->GetHandle());
+    wxLogTrace(_T("focus"), _T("SetFocus on wxPanel 0x%08lx."),
+               (unsigned long)m_winParent->GetHandle());
 
     if (m_inSetFocus)
         return true;
@@ -563,8 +564,8 @@ bool wxControlContainer::DoSetFocus()
 
 void wxControlContainer::HandleOnFocus(wxFocusEvent& event)
 {
-    wxLogTrace(TRACE_FOCUS, _T("OnFocus on wxPanel 0x%p, name: %s"),
-               m_winParent->GetHandle(),
+    wxLogTrace(_T("focus"), _T("OnFocus on wxPanel 0x%08lx, name: %s"),
+               (unsigned long)m_winParent->GetHandle(),
                m_winParent->GetName().c_str() );
 
     DoSetFocus();
@@ -593,9 +594,9 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
         // It might happen that the window got reparented
         if ( (*childLastFocused)->GetParent() == win )
         {
-            wxLogTrace(TRACE_FOCUS,
-                       _T("SetFocusToChild() => last child (0x%p)."),
-                       (*childLastFocused)->GetHandle());
+            wxLogTrace(_T("focus"),
+                       _T("SetFocusToChild() => last child (0x%08lx)."),
+                       (unsigned long)(*childLastFocused)->GetHandle());
 
             // not SetFocusFromKbd(): we're restoring focus back to the old
             // window and not setting it as the result of a kbd action
@@ -629,9 +630,9 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
             }
 #endif
 
-            wxLogTrace(TRACE_FOCUS,
-                       _T("SetFocusToChild() => first child (0x%p)."),
-                       child->GetHandle());
+            wxLogTrace(_T("focus"),
+                       _T("SetFocusToChild() => first child (0x%08lx)."),
+                       (unsigned long)child->GetHandle());
 
             *childLastFocused = child;
             child->SetFocusFromKbd();

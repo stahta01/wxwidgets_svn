@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "settings.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/settings.h"
@@ -27,14 +31,10 @@
 
 wxColour wxSystemSettingsNative::GetColour(wxSystemColour index)
 {
-    int major, minor;
-    wxColour resultColor;
-    RGBColor macRGB;
-    ThemeBrush colorBrushID;
-
+    int major,minor;
     wxGetOsVersion( &major, &minor );
 
-    switch ( index )
+    switch( index )
     {
         case wxSYS_COLOUR_SCROLLBAR :
         case wxSYS_COLOUR_BACKGROUND:
@@ -47,21 +47,22 @@ wxColour wxSystemSettingsNative::GetColour(wxSystemColour index)
         case wxSYS_COLOUR_INACTIVEBORDER:
         case wxSYS_COLOUR_BTNFACE:
         case wxSYS_COLOUR_MENUBAR:
-            resultColor = wxColor( 0xDD, 0xDD, 0xDD );
+            return wxColor( 0xDD , 0xDD , 0xDD ) ;
             break ;
 
         case wxSYS_COLOUR_LISTBOX :
+        {
             if (major >= 10)
-                resultColor = *wxWHITE ;
+                return *wxWHITE ;
             else
-                resultColor = wxColor( 0xEE, 0xEE, 0xEE );
+                return wxColor( 0xEE , 0xEE , 0xEE ) ;
             break ;
-
+        }
         case wxSYS_COLOUR_BTNSHADOW:
             if (major >= 10)
-                resultColor = wxColor( 0xBE, 0xBE, 0xBE );
+                return wxColor( 0xBE , 0xBE , 0xBE ) ;
             else
-                resultColor = wxColor( 0x44, 0x44, 0x44 );
+                return wxColor( 0x44 , 0x44 , 0x44 ) ;
             break ;
 
         case wxSYS_COLOUR_BTNTEXT:
@@ -70,69 +71,53 @@ wxColour wxSystemSettingsNative::GetColour(wxSystemColour index)
         case wxSYS_COLOUR_CAPTIONTEXT:
         case wxSYS_COLOUR_INFOTEXT:
         case wxSYS_COLOUR_INACTIVECAPTIONTEXT:
-            resultColor = *wxBLACK;
+            return *wxBLACK;
             break ;
-
         case wxSYS_COLOUR_HIGHLIGHT:
-
-#if 0 && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
-            // NB: enable this case as desired
-            colorBrushID = kThemeBrushAlternatePrimaryHighlightColor;
-#else
-            colorBrushID = kThemeBrushPrimaryHighlightColor;
-#endif
-
-            GetThemeBrushAsColor( colorBrushID, 32, true, &macRGB );
-            resultColor = wxColor( macRGB.red >> 8, macRGB.green >> 8, macRGB.blue >> 8 );
+            {
+                RGBColor hilite ;
+                GetThemeBrushAsColor( kThemeBrushPrimaryHighlightColor, 32, true, &hilite );
+                return wxColor( hilite.red >> 8 , hilite.green >> 8  , hilite.blue >> 8  ) ;
+            }
             break ;
-
         case wxSYS_COLOUR_BTNHIGHLIGHT:
         case wxSYS_COLOUR_GRAYTEXT:
-            resultColor = wxColor( 0xCC, 0xCC, 0xCC );
+            return wxColor( 0xCC , 0xCC , 0xCC ) ;
             break ;
 
         case wxSYS_COLOUR_3DDKSHADOW:
-            resultColor = wxColor( 0x44, 0x44, 0x44 );
+            return wxColor( 0x44 , 0x44 , 0x44 ) ;
             break ;
-
         case wxSYS_COLOUR_3DLIGHT:
-            resultColor = wxColor( 0xCC, 0xCC, 0xCC );
+            return wxColor( 0xCC , 0xCC , 0xCC ) ;
             break ;
-
         case wxSYS_COLOUR_HIGHLIGHTTEXT :
-#if 0 && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
-            // NB: enable this case as desired
-            resultColor = *wxWHITE ;
-#else
-            GetThemeBrushAsColor( kThemeBrushPrimaryHighlightColor, 32, true, &macRGB );
-            if ((macRGB.red + macRGB.green + macRGB.blue) == 0)
-                resultColor = *wxWHITE ;
-            else
-                resultColor = *wxBLACK ;
-#endif
+            {
+                RGBColor hilite ;
+                GetThemeBrushAsColor( kThemeBrushPrimaryHighlightColor, 32, true, &hilite );
+                if ( ( hilite.red + hilite.green + hilite.blue ) == 0 )
+                        return *wxWHITE ;
+                else
+                        return *wxBLACK ;
+            }
             break ;
-
         case wxSYS_COLOUR_INFOBK :
         case wxSYS_COLOUR_APPWORKSPACE:
-            resultColor = *wxWHITE ;
+            return *wxWHITE ;
             break ;
 
         case wxSYS_COLOUR_HOTLIGHT:
         case wxSYS_COLOUR_GRADIENTACTIVECAPTION:
         case wxSYS_COLOUR_GRADIENTINACTIVECAPTION:
         case wxSYS_COLOUR_MENUHILIGHT:
-            // TODO:
-            resultColor = *wxBLACK;
-            break ;
+            // TODO
+            return *wxBLACK;
 
-        // case wxSYS_COLOUR_MAX:
-        default:
-            resultColor = *wxWHITE;
-            // wxCHECK_MSG( index >= wxSYS_COLOUR_MAX, false, _T("unknown system colour index") );
+        case wxSYS_COLOUR_MAX:
+            wxFAIL_MSG( _T("unknown system colour index") );
             break ;
     }
-
-    return resultColor;
+    return *wxWHITE;
 }
 
 // ----------------------------------------------------------------------------
@@ -147,13 +132,14 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
         case wxSYS_SYSTEM_FONT :
         case wxSYS_DEVICE_DEFAULT_FONT :
         case wxSYS_DEFAULT_GUI_FONT :
-            return *wxSMALL_FONT ;
+            {
+                return *wxSMALL_FONT ;
+            } ;
             break ;
 
         default :
             break ;
     }
-
     return *wxNORMAL_FONT;
 }
 
@@ -166,10 +152,10 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
 {
     int value;
 
-    switch ( index )
+    switch ( index)
     {
         case wxSYS_MOUSE_BUTTONS:
-            // we emulate a two button mouse (ctrl + click = right button)
+            // we emulate a two button mouse (ctrl + click = right button )
             return 2;
 
         // TODO case wxSYS_BORDER_X:
@@ -184,7 +170,9 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
         // TODO case wxSYS_EDGE_Y:
 
         case wxSYS_HSCROLL_ARROW_X:
+            return 16;
         case wxSYS_HSCROLL_ARROW_Y:
+            return 16;
         case wxSYS_HTHUMB_X:
             return 16;
 
@@ -196,11 +184,10 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
         // TODO case wxSYS_WINDOWMIN_Y:
 
         case wxSYS_SCREEN_X:
-            wxDisplaySize( &value, NULL );
+            wxDisplaySize(&value, NULL);
             return value;
-
         case wxSYS_SCREEN_Y:
-            wxDisplaySize( NULL, &value );
+            wxDisplaySize(NULL, &value);
             return value;
 
         // TODO case wxSYS_FRAMESIZE_X:
@@ -209,28 +196,31 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
         // TODO case wxSYS_SMALLICON_Y:
 
         case wxSYS_HSCROLL_Y:
+            return 16;
         case wxSYS_VSCROLL_X:
+            return 16;
         case wxSYS_VSCROLL_ARROW_X:
+            return 16;
         case wxSYS_VSCROLL_ARROW_Y:
+            return 16;
         case wxSYS_VTHUMB_Y:
             return 16;
+
+        // TODO case wxSYS_CAPTION_Y:
+        // TODO case wxSYS_MENU_Y:
+        // TODO case wxSYS_NETWORK_PRESENT:
 
         case wxSYS_PENWINDOWS_PRESENT:
             return 0;
 
+        // TODO case wxSYS_SHOW_SOUNDS:
+
         case wxSYS_SWAP_BUTTONS:
             return 0;
 
-        // TODO: case wxSYS_CAPTION_Y:
-        // TODO: case wxSYS_MENU_Y:
-        // TODO: case wxSYS_NETWORK_PRESENT:
-        // TODO: case wxSYS_SHOW_SOUNDS:
-
         default:
-            // unsupported metric
-            break;
+            break;  // unsupported metric
     }
-
     return -1;
 }
 

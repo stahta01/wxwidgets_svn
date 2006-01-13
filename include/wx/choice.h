@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "choicebase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CHOICE

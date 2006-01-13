@@ -12,6 +12,10 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "radiobox.h"
+#endif
+
 // List box item
 class WXDLLEXPORT wxBitmap ;
 
@@ -66,6 +70,10 @@ public:
     virtual bool Enable(int item, bool enable = true);
     virtual bool Show(int item, bool show = true);
 
+    virtual int GetColumnCount() const ;
+    virtual int GetRowCount() const ;
+
+
     virtual bool Enable(bool enable = true);
     virtual wxString GetLabel() const;
     virtual void SetLabel(const wxString& label) ;
@@ -83,6 +91,7 @@ public:
 protected:
     wxRadioButton        *m_radioButtonCycle;
 
+    int               m_majorDim ;
     int               m_noItems;
     int               m_noRowsOrCols;
 

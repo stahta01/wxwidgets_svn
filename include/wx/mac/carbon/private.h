@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -270,6 +270,7 @@ public :
             ReleaseEvent( m_eventRef ) ;
             m_release = false ;
             m_eventRef = NULL ;
+
         }
         OSStatus err = MacCreateEvent( NULL , inClassID, inKind,inWhen,inAttributes,&m_eventRef) ;
         if ( err == noErr )
@@ -334,13 +335,9 @@ public :
     {
         return EventTimeToTicks( GetTime() ) ;
     }
-    OSStatus SetCurrentTime( )
+    OSStatus SetTime( EventTime inWhen = 0 /*now*/ )
     {
-        return ::SetEventTime( m_eventRef , GetCurrentEventTime() ) ;
-    }
-    OSStatus SetTime( EventTime when )
-    {
-        return ::SetEventTime( m_eventRef , when ) ;
+        return ::SetEventTime( m_eventRef , inWhen ? inWhen : GetCurrentEventTime() ) ;
     }
     operator EventRef () { return m_eventRef; }
 
@@ -462,7 +459,6 @@ void wxMacNativeToPoint( const Point *n , wxPoint* wx ) ;
 wxWindow *              wxFindControlFromMacControl(ControlRef inControl ) ;
 wxTopLevelWindowMac*    wxFindWinFromMacWindow( WindowRef inWindow ) ;
 wxMenu*                 wxFindMenuFromMacMenu(MenuRef inMenuRef) ;
-
 int                     wxMacCommandToId( UInt32 macCommandId ) ;
 UInt32                  wxIdToMacCommand( int wxId ) ;
 wxMenu*                 wxFindMenuFromMacCommand( const HICommand &macCommandId , wxMenuItem* &item ) ;
@@ -581,7 +577,7 @@ public :
     // where is in native window relative coordinates
     virtual void SetNeedsDisplay( Rect* where = NULL ) ;
 
-    // if rect = NULL, entire view
+	// if rect = NULL, entire view
     virtual void ScrollRect( wxRect *rect , int dx , int dy ) ;
 
     // in native parent window relative coordinates
@@ -592,7 +588,7 @@ public :
 
     virtual void GetRectInWindowCoords( Rect *r ) ;
     virtual void GetBestRect( Rect *r ) ;
-    virtual void SetLabel( const wxString &title ) ;
+    virtual void SetTitle( const wxString &title ) ;
     // converts from Toplevel-Content relative to local
     static void Convert( wxPoint *pt , wxMacControl *convert , wxMacControl *to ) ;
 
@@ -809,7 +805,7 @@ private :
 
 // toplevel.cpp
 
-ControlRef wxMacFindControlUnderMouse( wxTopLevelWindowMac* toplevelWindow, const Point& location , WindowRef window , ControlPartCode *outPart ) ;
+ControlRef wxMacFindControlUnderMouse( wxTopLevelWindowMac* toplevelWindow, Point location , WindowRef window , ControlPartCode *outPart ) ;
 
 #endif // wxUSE_GUI
 

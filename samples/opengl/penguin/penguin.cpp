@@ -2,12 +2,17 @@
 // Name:        penguin.cpp
 // Purpose:     wxGLCanvas demo program
 // Author:      Robert Roebling
-// Modified by: Sandro Sigala
+// Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -37,24 +42,28 @@
 
 #include "../../sample.xpm"
 
-// ---------------------------------------------------------------------------
-// MyApp
-// ---------------------------------------------------------------------------
+#define VIEW_ASPECT 1.3
 
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
     // Create the main frame window
-    MyFrame *frame = new MyFrame(NULL, wxT("wxWidgets Penguin Sample"),
+    MyFrame *frame = new MyFrame(NULL, wxT("wxWidgets OpenGL Penguin Sample"),
         wxDefaultPosition, wxDefaultSize);
 
-#if wxUSE_ZLIB
-    if (wxFileExists(wxT("penguin.dxf.gz")))
-        frame->GetCanvas()->LoadDXF(wxT("penguin.dxf.gz"));
-#else
-    if (wxFileExists(wxT("penguin.dxf")))
-        frame->GetCanvas()->LoadDXF(wxT("penguin.dxf"));
-#endif
+    /* Make a menubar */
+    wxMenu *fileMenu = new wxMenu;
+
+    fileMenu->Append(wxID_EXIT, wxT("E&xit"));
+    wxMenuBar *menuBar = new wxMenuBar;
+    menuBar->Append(fileMenu, wxT("&File"));
+    frame->SetMenuBar(menuBar);
+
+    frame->SetCanvas( new TestGLCanvas(frame, wxID_ANY, wxDefaultPosition,
+        wxSize(200, 200), wxSUNKEN_BORDER) );
+
+    /* Load file wiht mesh data */
+    frame->GetCanvas()->LoadLWO( wxT("penguin.lwo") );
 
     /* Show the frame */
     frame->Show(true);
@@ -64,74 +73,25 @@ bool MyApp::OnInit()
 
 IMPLEMENT_APP(MyApp)
 
-// ---------------------------------------------------------------------------
-// MyFrame
-// ---------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_OPEN, MyFrame::OnMenuFileOpen)
-    EVT_MENU(wxID_EXIT, MyFrame::OnMenuFileExit)
-    EVT_MENU(wxID_HELP, MyFrame::OnMenuHelpAbout)
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 END_EVENT_TABLE()
 
-// MyFrame constructor
+/* My frame constructor */
 MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
     const wxSize& size, long style)
     : wxFrame(frame, wxID_ANY, title, pos, size, style)
 {
+    m_canvas = NULL;
     SetIcon(wxIcon(sample_xpm));
-
-    // Make the "File" menu
-    wxMenu *fileMenu = new wxMenu;
-    fileMenu->Append(wxID_OPEN, wxT("&Open..."));
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, wxT("E&xit\tALT-X"));
-    // Make the "Help" menu
-    wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(wxID_HELP, wxT("&About..."));
-
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(fileMenu, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
-    SetMenuBar(menuBar);
-
-    m_canvas = new TestGLCanvas(this, wxID_ANY, wxDefaultPosition,
-        wxSize(300, 300), wxSUNKEN_BORDER);
 }
 
-// File|Open... command
-void MyFrame::OnMenuFileOpen( wxCommandEvent& WXUNUSED(event) )
-{
-    wxString filename = wxFileSelector(wxT("Choose DXF Model"), wxT(""), wxT(""), wxT(""),
-#if wxUSE_ZLIB
-        wxT("DXF Drawing (*.dxf;*.dxf.gz)|*.dxf;*.dxf.gz|All files (*.*)|*.*"),
-#else
-        wxT("DXF Drawing (*.dxf)|*.dxf)|All files (*.*)|*.*"),
-#endif
-        wxOPEN);
-    if (!filename.IsEmpty())
-    {
-        m_canvas->LoadDXF(filename);
-        m_canvas->Refresh(false);
-    }
-}
-
-// File|Exit command
-void MyFrame::OnMenuFileExit( wxCommandEvent& WXUNUSED(event) )
+/* Intercept menu commands */
+void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
 {
     // true is to force the frame to close
     Close(true);
 }
-
-// Help|About... command
-void MyFrame::OnMenuHelpAbout( wxCommandEvent& WXUNUSED(event) )
-{
-    wxMessageBox(wxT("OpenGL Penguin Sample (c) Robert Roebling, Sandro Sigala et al"));
-}
-
-// ---------------------------------------------------------------------------
-// TestGLCanvas
-// ---------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
     EVT_SIZE(TestGLCanvas::OnSize)
@@ -144,22 +104,18 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxGLCanvas(parent, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name)
 {
-    m_gldata.initialized = false;
-
-    // initialize view matrix
-    m_gldata.beginx = 0.0f;
-    m_gldata.beginy = 0.0f;
-    m_gldata.zoom   = 45.0f;
-    trackball(m_gldata.quat, 0.0f, 0.0f, 0.0f, 0.0f);
+    block = false;
 }
 
 TestGLCanvas::~TestGLCanvas()
 {
+    /* destroy mesh */
+    lw_object_free(info.lwobject);
 }
 
 void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
-    // must always be here
+    /* must always be here */
     wxPaintDC dc(this);
 
 #ifndef __WXMOTIF__
@@ -169,25 +125,31 @@ void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
     SetCurrent();
 
     // Initialize OpenGL
-    if (!m_gldata.initialized)
+    if (info.do_init)
     {
         InitGL();
-        ResetProjectionMode();
-        m_gldata.initialized = true;
+        info.do_init = false;
     }
+
+    // View
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    gluPerspective( info.zoom, VIEW_ASPECT, 1.0, 100.0 );
+    glMatrixMode( GL_MODELVIEW );
 
     // Clear
     glClearColor( 0.3f, 0.4f, 0.6f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Transformations
-    glLoadIdentity();
-    glTranslatef( 0.0f, 0.0f, -20.0f );
     GLfloat m[4][4];
-    build_rotmatrix( m, m_gldata.quat );
+    glLoadIdentity();
+    glTranslatef( 0.0f, 0.0f, -30.0f );
+    build_rotmatrix( m,info.quat );
     glMultMatrixf( &m[0][0] );
 
-    m_renderer.Render();
+    // Draw object
+    lw_object_show( info.lwobject );
 
     // Flush
     glFlush();
@@ -200,61 +162,67 @@ void TestGLCanvas::OnSize(wxSizeEvent& event)
 {
     // this is also necessary to update the context on some platforms
     wxGLCanvas::OnSize(event);
-    // Reset the OpenGL view aspect
-    ResetProjectionMode();
+
+    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+    int w, h;
+    GetClientSize(&w, &h);
+#ifndef __WXMOTIF__
+    if ( GetContext() )
+#endif
+    {
+        SetCurrent();
+        glViewport(0, 0, (GLint) w, (GLint) h);
+    }
 }
 
 void TestGLCanvas::OnEraseBackground(wxEraseEvent& WXUNUSED(event))
 {
-    // Do nothing, to avoid flashing on MSW
+    /* Do nothing, to avoid flashing on MSW */
 }
 
-// Load the DXF file.  If the zlib support is compiled in wxWidgets,
-// supports also the ".dxf.gz" gzip compressed files.
-void TestGLCanvas::LoadDXF(const wxString& filename)
+void TestGLCanvas::LoadLWO(const wxString &filename)
 {
-    wxFileInputStream stream(filename);
-    if (stream.Ok())
-#if wxUSE_ZLIB
-    {
-        if (filename.Right(3).Lower() == wxT(".gz"))
-        {
-            wxZlibInputStream zstream(stream);
-            m_renderer.Load(zstream);
-        } else
-        {
-            m_renderer.Load(stream);
-        }
-    }
-#else
-    {
-        m_renderer.Load(stream);
-    }
-#endif
+    /* test if lightwave object */
+    if (!lw_is_lwobject(filename.mb_str())) return;
+
+    /* read lightwave object */
+    lwObject *lwobject = lw_object_read(filename.mb_str());
+
+    /* scale */
+    lw_object_scale(lwobject, 10.0 / lw_object_radius(lwobject));
+
+    /* set up mesh info */
+    info.do_init = true;
+    info.lwobject = lwobject;
+    info.beginx = 0.0f;
+    info.beginy = 0.0f;
+    info.zoom   = 45.0f;
+    trackball( info.quat, 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
-void TestGLCanvas::OnMouse(wxMouseEvent& event)
+void TestGLCanvas::OnMouse( wxMouseEvent& event )
 {
-    if (event.Dragging())
+
+    if ( event.Dragging() )
     {
-        wxSize sz(GetClientSize());
+        wxSize sz( GetClientSize() );
 
         /* drag in progress, simulate trackball */
         float spin_quat[4];
         trackball(spin_quat,
-            (2.0*m_gldata.beginx - sz.x) / sz.x,
-            (sz.y - 2.0*m_gldata.beginy) / sz.y,
-            (2.0*event.GetX() - sz.x)    / sz.x,
-            (sz.y - 2.0*event.GetY())    / sz.y);
+            (2.0*info.beginx -       sz.x) / sz.x,
+            (     sz.y - 2.0*info.beginy) / sz.y,
+            (     2.0*event.GetX() - sz.x) / sz.x,
+            (    sz.y - 2.0*event.GetY()) / sz.y);
 
-        add_quats(spin_quat, m_gldata.quat, m_gldata.quat);
+        add_quats( spin_quat, info.quat, info.quat );
 
         /* orientation has changed, redraw mesh */
         Refresh(false);
     }
 
-    m_gldata.beginx = event.GetX();
-    m_gldata.beginy = event.GetY();
+    info.beginx = event.GetX();
+    info.beginy = event.GetY();
 }
 
 void TestGLCanvas::InitGL()
@@ -292,20 +260,3 @@ void TestGLCanvas::InitGL()
     glEnable(GL_COLOR_MATERIAL);
 }
 
-void TestGLCanvas::ResetProjectionMode()
-{
-    int w, h;
-    GetClientSize(&w, &h);
-#ifndef __WXMOTIF__
-    if ( GetContext() )
-#endif
-    {
-        SetCurrent();
-        glViewport(0, 0, (GLint) w, (GLint) h);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(45.0f, (GLfloat)w/h, 1.0, 100.0);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-    }
-}

@@ -12,6 +12,10 @@
 #ifndef _WX_GAUGE_H_BASE_
 #define _WX_GAUGE_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gaugebase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_GAUGE
@@ -88,8 +92,12 @@ protected:
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/gauge.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/gauge95.h"
-    #define wxGauge wxGauge95
+    #ifdef __WIN95__
+        #include "wx/msw/gauge95.h"
+        #define wxGauge wxGauge95
+    #else // !__WIN95__
+        // Gauge no longer supported on 16-bit Windows
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/gauge.h"
 #elif defined(__WXGTK__)

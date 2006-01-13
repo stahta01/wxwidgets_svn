@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xml.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -594,42 +598,33 @@ bool wxXmlDocument::Load(wxInputStream& stream, const wxString& encoding)
 
 // write string to output:
 inline static void OutputString(wxOutputStream& stream, const wxString& str,
-                                wxMBConv *convMem = NULL,
-                                wxMBConv *convFile = NULL)
-{
-    if (str.empty())
-        return;
-
 #if wxUSE_UNICODE
-    wxUnusedVar(convMem);
-
+    wxMBConv * WXUNUSED(convMem),
+#else
+    wxMBConv *convMem,
+#endif
+    wxMBConv *convFile)
+{
+    if (str.empty()) return;
+#if wxUSE_UNICODE
     const wxWX2MBbuf buf(str.mb_str(*(convFile ? convFile : &wxConvUTF8)));
     stream.Write((const char*)buf, strlen((const char*)buf));
-#else // !wxUSE_UNICODE
-    if ( convFile && convMem )
+#else
+    if ( convFile == NULL )
+        stream.Write(str.mb_str(), str.Len());
+    else
     {
         wxString str2(str.wc_str(*convMem), *convFile);
         stream.Write(str2.mb_str(), str2.Len());
     }
-    else // no conversions to do
-    {
-        stream.Write(str.mb_str(), str.Len());
-    }
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
 }
-
-// flags for OutputStringEnt()
-enum
-{
-    XML_ESCAPE_QUOTES = 1
-};
 
 // Same as above, but create entities first.
 // Translates '<' to "&lt;", '>' to "&gt;" and '&' to "&amp;"
 static void OutputStringEnt(wxOutputStream& stream, const wxString& str,
-                            wxMBConv *convMem = NULL,
-                            wxMBConv *convFile = NULL,
-                            int flags = 0)
+                            wxMBConv *convMem, wxMBConv *convFile,
+                            bool escapeQuotes = false)
 {
     wxString buf;
     size_t i, last, len;
@@ -642,25 +637,24 @@ static void OutputStringEnt(wxOutputStream& stream, const wxString& str,
         c = str.GetChar(i);
         if (c == wxT('<') || c == wxT('>') ||
             (c == wxT('&') && str.Mid(i+1, 4) != wxT("amp;")) ||
-            ((flags & XML_ESCAPE_QUOTES) && c == wxT('"')))
+            (escapeQuotes && c == wxT('"')))
         {
             OutputString(stream, str.Mid(last, i - last), convMem, convFile);
             switch (c)
             {
                 case wxT('<'):
-                    OutputString(stream, wxT("&lt;"));
+                    OutputString(stream, wxT("&lt;"), NULL, NULL);
                     break;
                 case wxT('>'):
-                    OutputString(stream, wxT("&gt;"));
+                    OutputString(stream, wxT("&gt;"), NULL, NULL);
                     break;
                 case wxT('&'):
-                    OutputString(stream, wxT("&amp;"));
+                    OutputString(stream, wxT("&amp;"), NULL, NULL);
                     break;
                 case wxT('"'):
-                    OutputString(stream, wxT("&quot;"));
+                    OutputString(stream, wxT("&quot;"), NULL, NULL);
                     break;
-                default:
-                    break;
+                default: break;
             }
             last = i + 1;
         }
@@ -673,7 +667,7 @@ inline static void OutputIndentation(wxOutputStream& stream, int indent)
     wxString str = wxT("\n");
     for (int i = 0; i < indent; i++)
         str << wxT(' ') << wxT(' ');
-    OutputString(stream, str);
+    OutputString(stream, str, NULL, NULL);
 }
 
 static void OutputNode(wxOutputStream& stream, wxXmlNode *node, int indent,
@@ -689,22 +683,23 @@ static void OutputNode(wxOutputStream& stream, wxXmlNode *node, int indent,
             break;
 
         case wxXML_ELEMENT_NODE:
-            OutputString(stream, wxT("<"));
-            OutputString(stream, node->GetName());
+            OutputString(stream, wxT("<"), NULL, NULL);
+            OutputString(stream, node->GetName(), NULL, NULL);
 
             prop = node->GetProperties();
             while (prop)
             {
-                OutputString(stream, wxT(" ") + prop->GetName() +  wxT("=\""));
+                OutputString(stream, wxT(" ") + prop->GetName() +  wxT("=\""),
+                             NULL, NULL);
                 OutputStringEnt(stream, prop->GetValue(), convMem, convFile,
-                                XML_ESCAPE_QUOTES);
-                OutputString(stream, wxT("\""));
+                                true/*escapeQuotes*/);
+                OutputString(stream, wxT("\""), NULL, NULL);
                 prop = prop->GetNext();
             }
 
             if (node->GetChildren())
             {
-                OutputString(stream, wxT(">"));
+                OutputString(stream, wxT(">"), NULL, NULL);
                 prev = NULL;
                 n = node->GetChildren();
                 while (n)
@@ -717,18 +712,18 @@ static void OutputNode(wxOutputStream& stream, wxXmlNode *node, int indent,
                 }
                 if (prev && prev->GetType() != wxXML_TEXT_NODE)
                     OutputIndentation(stream, indent);
-                OutputString(stream, wxT("</"));
-                OutputString(stream, node->GetName());
-                OutputString(stream, wxT(">"));
+                OutputString(stream, wxT("</"), NULL, NULL);
+                OutputString(stream, node->GetName(), NULL, NULL);
+                OutputString(stream, wxT(">"), NULL, NULL);
             }
             else
-                OutputString(stream, wxT("/>"));
+                OutputString(stream, wxT("/>"), NULL, NULL);
             break;
 
         case wxXML_COMMENT_NODE:
-            OutputString(stream, wxT("<!--"));
+            OutputString(stream, wxT("<!--"), NULL, NULL);
             OutputString(stream, node->GetContent(), convMem, convFile);
-            OutputString(stream, wxT("-->"));
+            OutputString(stream, wxT("-->"), NULL, NULL);
             break;
 
         default:
@@ -758,10 +753,10 @@ bool wxXmlDocument::Save(wxOutputStream& stream) const
 
     s.Printf(wxT("<?xml version=\"%s\" encoding=\"%s\"?>\n"),
              GetVersion().c_str(), GetFileEncoding().c_str());
-    OutputString(stream, s);
+    OutputString(stream, s, NULL, NULL);
 
     OutputNode(stream, GetRoot(), 0, convMem, convFile);
-    OutputString(stream, wxT("\n"));
+    OutputString(stream, wxT("\n"), NULL, NULL);
 
     if ( convFile )
         delete convFile;

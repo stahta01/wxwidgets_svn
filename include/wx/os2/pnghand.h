@@ -12,6 +12,10 @@
 #ifndef _WX_PNGHAND_H_
 #define _WX_PNGHAND_H_
 
+#ifdef __GNUG__
+#pragma interface "pnghand.h"
+#endif
+
 class WXDLLEXPORT wxPNGFileHandler: public wxBitmapHandler
 {
     DECLARE_DYNAMIC_CLASS(wxPNGFileHandler)

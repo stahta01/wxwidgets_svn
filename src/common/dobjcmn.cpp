@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dataobjbase.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -38,7 +42,7 @@
 
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxSimpleDataObjectList)
+WX_DEFINE_LIST(wxSimpleDataObjectList);
 
 // ----------------------------------------------------------------------------
 // globals
@@ -276,8 +280,7 @@ static wxMBConvUTF16 sUTF16Converter ;
 
 static inline wxMBConv& GetConv(const wxDataFormat& format)
 {
-    return format == wxDF_UNICODETEXT ? (wxMBConv&) sUTF16Converter
-                                      : (wxMBConv&) wxConvLocal;
+    return format == wxDF_UNICODETEXT ? sUTF16Converter : (wxMBConv&) wxConvLocal;
 }
 
 size_t wxTextDataObject::GetDataSize(const wxDataFormat& format) const

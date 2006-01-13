@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlwin.h"
+#pragma implementation "htmlproc.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -135,10 +141,10 @@ private:
 //-----------------------------------------------------------------------------
 
 WX_DECLARE_OBJARRAY(wxHtmlHistoryItem, wxHtmlHistoryArray);
-WX_DEFINE_OBJARRAY(wxHtmlHistoryArray)
+WX_DEFINE_OBJARRAY(wxHtmlHistoryArray);
 
 WX_DECLARE_LIST(wxHtmlProcessor, wxHtmlProcessorList);
-WX_DEFINE_LIST(wxHtmlProcessorList)
+WX_DEFINE_LIST(wxHtmlProcessorList);
 
 //-----------------------------------------------------------------------------
 // wxHtmlWindow
@@ -235,7 +241,7 @@ void wxHtmlWindow::SetRelatedStatusBar(int bar)
 
 
 
-void wxHtmlWindow::SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes)
+void wxHtmlWindow::SetFonts(wxString normal_face, wxString fixed_face, const int *sizes)
 {
     wxString op = m_OpenedPage;
 

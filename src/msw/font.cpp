@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "font.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -562,7 +566,7 @@ void wxNativeFontInfo::SetUnderlined(bool underlined)
     lf.lfUnderline = underlined;
 }
 
-void wxNativeFontInfo::SetFaceName(const wxString& facename)
+void wxNativeFontInfo::SetFaceName(wxString facename)
 {
     wxStrncpy(lf.lfFaceName, facename, WXSIZEOF(lf.lfFaceName));
 }

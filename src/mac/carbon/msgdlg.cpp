@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "msgdlg.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/app.h"
@@ -100,7 +104,7 @@ int wxMessageDialog::ShowModal()
 
 #else
     short result ;
-    
+
 #if TARGET_CARBON
     if ( UMAGetSystemVersion() >= 0x1000 )
     {
@@ -310,7 +314,7 @@ int wxMessageDialog::ShowModal()
         }
     }
 #endif
-    
+
     return resultbutton ;
 }
 

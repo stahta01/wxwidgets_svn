@@ -1,11 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/choice.cpp
+// Name:        choice.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "choice.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -334,9 +339,9 @@ void wxChoice::Delete( int n )
     }
 }
 
-int wxChoice::FindString( const wxString &string, bool bCase ) const
+int wxChoice::FindString( const wxString &string ) const
 {
-    wxCHECK_MSG( m_widget != NULL, wxNOT_FOUND, wxT("invalid choice") );
+    wxCHECK_MSG( m_widget != NULL, -1, wxT("invalid choice") );
 
     // If you read this code once and you think you understand
     // it, then you are very wrong. Robert Roebling.
@@ -360,7 +365,7 @@ int wxChoice::FindString( const wxString &string, bool bCase ) const
 #else
          wxString tmp( label->label );
 #endif
-        if (string.IsSameAs( tmp, bCase ))
+        if (string == tmp)
             return count;
 
         child = child->next;
@@ -372,7 +377,7 @@ int wxChoice::FindString( const wxString &string, bool bCase ) const
 
 int wxChoice::GetSelection() const
 {
-    wxCHECK_MSG( m_widget != NULL, wxNOT_FOUND, wxT("invalid choice") );
+    wxCHECK_MSG( m_widget != NULL, -1, wxT("invalid choice") );
 
     return m_selection_hack;
 

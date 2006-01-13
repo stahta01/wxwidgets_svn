@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "window.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -317,11 +321,11 @@ void wxWindowPalm::Lower()
 {
 }
 
-void wxWindowPalm::SetLabel( const wxString& WXUNUSED(label))
+void wxWindowPalm::SetTitle( const wxString& title)
 {
 }
 
-wxString wxWindowPalm::GetLabel() const
+wxString wxWindowPalm::GetTitle() const
 {
     return wxEmptyString;
 }
@@ -751,3 +755,5 @@ bool wxWindowPalm::UnregisterHotKey(int hotkeyId)
 }
 
 #endif // wxUSE_HOTKEY
+
+

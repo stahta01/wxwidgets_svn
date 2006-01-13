@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#   pragma implementation "dialup.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -676,9 +680,7 @@ wxDialUpManagerImpl::CheckIfconfig()
         wxString tmpfile = wxGetTempFileName( wxT("_wxdialuptest") );
         wxString cmd = wxT("/bin/sh -c \'");
         cmd << m_IfconfigPath;
-#if defined(__AIX__) || \
-    defined(__OSF__) || \
-    defined(__SOLARIS__) || defined (__SUNOS__)
+#if defined(__AIX__) || defined(__SOLARIS__) || defined (__SUNOS__)
         // need to add -a flag
         cmd << wxT(" -a");
 #elif defined(__LINUX__) || defined(__SGI__)
@@ -793,12 +795,7 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
     cmd << m_PingPath << wxT(' ');
 #if defined(__SOLARIS__) || defined (__SUNOS__)
     // nothing to add to ping command
-#elif defined(__AIX__) || \
-      defined (__BSD__) || \
-      defined(__LINUX__) || \
-      defined(__OSF__) || \
-      defined(__SGI__) || \
-      defined(__VMS)
+#elif defined(__AIX__) || defined(__LINUX__) || defined (__BSD__) || defined(__VMS) || defined(__SGI__)
     cmd << wxT("-c 1 "); // only ping once
 #elif defined(__HPUX__)
     cmd << wxT("64 1 "); // only ping once (need also specify the packet size)

@@ -11,6 +11,10 @@
 #ifndef __BMPBUTTONH__
 #define __BMPBUTTONH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 // ----------------------------------------------------------------------------
 // wxBitmapButton
 // ----------------------------------------------------------------------------
@@ -44,6 +48,7 @@ public:
                 const wxString& name = wxButtonNameStr);
 
     void SetLabel( const wxString &label );
+    wxString GetLabel() const;
     virtual void SetLabel( const wxBitmap& bitmap ) { SetBitmapLabel(bitmap); }
 
     virtual void SetDefault();

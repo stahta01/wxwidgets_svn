@@ -12,6 +12,10 @@
 #ifndef __WXGRID_H__
 #define __WXGRID_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "grid.h"
+#endif
+
 #include "wx/hashmap.h"
 #include "wx/panel.h"
 #include "wx/scrolwin.h"
@@ -178,13 +182,13 @@ public:
 
 protected:
     // set the text colours before drawing
-    void SetTextColoursAndFont(const wxGrid& grid,
-                               const wxGridCellAttr& attr,
+    void SetTextColoursAndFont(wxGrid& grid,
+                               wxGridCellAttr& attr,
                                wxDC& dc,
                                bool isSelected);
 
     // calc the string extent for given string/font
-    wxSize DoGetBestSize(const wxGridCellAttr& attr,
+    wxSize DoGetBestSize(wxGridCellAttr& attr,
                          wxDC& dc,
                          const wxString& text);
 };
@@ -210,7 +214,7 @@ public:
         { return new wxGridCellNumberRenderer; }
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 };
 
 class WXDLLIMPEXP_ADV wxGridCellFloatRenderer : public wxGridCellStringRenderer
@@ -243,7 +247,7 @@ public:
     virtual wxGridCellRenderer *Clone() const;
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
 private:
     // formatting parameters
@@ -1173,7 +1177,7 @@ public:
     //
     void StringToLines( const wxString& value, wxArrayString& lines );
 
-    void GetTextBoxSize( const wxDC& dc,
+    void GetTextBoxSize( wxDC& dc,
                          const wxArrayString& lines,
                          long *width, long *height );
 

@@ -7,6 +7,10 @@
 #ifndef __wxedit_H__
 #define __wxedit_H__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "wxedit.h"
+#endif
+
 // Include wxWidgets' headers
 
 #ifndef WX_PRECOMP

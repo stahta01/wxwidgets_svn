@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "filedlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -114,12 +118,16 @@ int wxFileDialog::ShowModal()
         parentWindow = wxTheApp->GetTopWindow();
 
     wxString str = wxGetTextFromUser(m_message, _("File"), m_fileName, parentWindow);
-    if (str.empty())
+    if (str)
+    {
+        m_fileName = str;
+        m_fileNames.Add(str);
+        return wxID_OK;
+    }
+    else
+    {
         return wxID_CANCEL;
-
-    m_fileName = str;
-    m_fileNames.Add(str);
-    return wxID_OK;
+    }
 }
 
 void wxFileDialog::GetFilenames(wxArrayString& files) const

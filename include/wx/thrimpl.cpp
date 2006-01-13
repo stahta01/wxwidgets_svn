@@ -64,12 +64,12 @@ wxMutexError wxMutex::Unlock()
 // wxConditionInternal
 // --------------------------------------------------------------------------
 
-#if defined(__WXMSW__) || defined(__OS2__) || defined(__EMX__)
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__EMX__)
 // Win32 and OS/2 don't have explicit support for the POSIX condition
 // variables and their events/event semaphores have quite different semantics,
 // so we reimplement the conditions from scratch using the mutexes and
 // semaphores
-#if defined(__OS2__) || defined(__EMX__)
+#if defined(__WXPM__) || defined(__EMX__)
 void InterlockedIncrement(LONG *num)
 {
   ::DosEnterCritSec();
@@ -148,7 +148,7 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     wxSemaError err = m_semaphore.WaitTimeout(milliseconds);
 
-    if ( err == wxSEMA_TIMEOUT )
+    if ( err == wxSEMA_BUSY )
     {
         // another potential race condition exists here it is caused when a
         // 'waiting' thread timesout, and returns from WaitForSingleObject, but
@@ -174,9 +174,7 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     m_mutex.Lock();
 
-    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR
-                                  : err == wxSEMA_TIMEOUT ? wxCOND_TIMEOUT
-                                                          : wxCOND_MISC_ERROR;
+    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR : wxCOND_MISC_ERROR;
 }
 
 wxCondError wxConditionInternal::Signal()

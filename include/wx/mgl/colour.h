@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/colour.h
+// Name:        colour.h
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
@@ -12,46 +12,44 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "colour.h"
+#endif
 #include "wx/object.h"
 
 // Colour
 class WXDLLEXPORT wxColour: public wxObject
 {
 public:
-    // constructors
-    // ------------
-
-    // default
+    // ctors
+      // default
     wxColour();
-
-    // from separate RGB
+      // from RGB
     wxColour(unsigned char red, unsigned char green, unsigned char blue)
         { Set(red, green, blue); }
-
-    // from packed RGB
     wxColour(unsigned long colRGB) { Set(colRGB); }
 
-    // implicit conversion from the colour name
+      // implicit conversion from the colour name
     wxColour(const wxString &colourName) { InitFromName(colourName); }
     wxColour(const char *colourName) { InitFromName(colourName); }
 
 
-    // copy ctors and assignment operators
+      // copy ctors and assignment operators
     wxColour(const wxColour& col);
     wxColour& operator = (const wxColour& col);
 
-    // dtor
+      // dtor
     ~wxColour();
 
     // Set() functions
     void Set(unsigned char red, unsigned char green, unsigned char blue);
     void Set(unsigned long colRGB)
     {
-        // we don't need to know sizeof(long) here because we assume that the three
-        // least significant bytes contain the R, G and B values
-        Set((unsigned char)colRGB,
-            (unsigned char)(colRGB >> 8),
-            (unsigned char)(colRGB >> 16));
+      // we don't need to know sizeof(long) here because we assume that the three
+      // least significant bytes contain the R, G and B values
+      Set((unsigned char)colRGB,
+          (unsigned char)(colRGB >> 8),
+          (unsigned char)(colRGB >> 16));
     }
 
     // accessors
@@ -64,10 +62,10 @@ public:
     // comparison
     bool operator == (const wxColour& colour) const
     {
-        return (m_red == colour.m_red &&
-                m_green == colour.m_green &&
-                m_blue == colour.m_blue &&
-                m_isInit == colour.m_isInit);
+      return (m_red == colour.m_red &&
+              m_green == colour.m_green &&
+              m_blue == colour.m_blue &&
+              m_isInit == colour.m_isInit);
     }
     bool operator != (const wxColour& colour) const { return !(*this == colour); }
 

@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "brush.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -72,7 +76,7 @@ wxBrush& wxBrush::operator=(const wxBrush& brush)
 
 bool wxBrush::operator==(const wxBrush& brush) const
 {
-    return false;
+    return FALSE;
 }
 
 wxObjectRefData *wxBrush::CreateRefData() const
@@ -128,3 +132,5 @@ void wxBrush::SetStyle(int style)
 void wxBrush::SetStipple(const wxBitmap& stipple)
 {
 }
+
+

@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -56,8 +60,9 @@ bool wxStaticBox::Create( wxWindow *parent,
         return FALSE;
     }
 
-    m_widget = gtk_frame_new(NULL);
-    SetLabel(label);
+    wxControl::SetLabel(label);
+
+    m_widget = gtk_frame_new(m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 
     m_parent->DoAddChild( this );
 
@@ -72,17 +77,18 @@ bool wxStaticBox::Create( wxWindow *parent,
     else // wxALIGN_LEFT
         xalign = 0.0;
 
-    if ( style & (wxALIGN_RIGHT | wxALIGN_CENTER) ) // left alignment is default
+    if ( xalign )
         gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.5);
 
     return TRUE;
 }
 
-void wxStaticBox::SetLabel( const wxString& label )
+void wxStaticBox::SetLabel( const wxString &label )
 {
-    wxCHECK_RET( m_widget != NULL, wxT("invalid staticbox") );
+    wxControl::SetLabel( label );
 
-    GTKSetLabelForFrame(GTK_FRAME(m_widget), label);
+    gtk_frame_set_label( GTK_FRAME( m_widget ),
+                         m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 }
 
 void wxStaticBox::DoApplyWidgetStyle(GtkRcStyle *style)

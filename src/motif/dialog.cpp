@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:     wxDialog class
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dialog.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -105,6 +109,7 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     m_foregroundColour = *wxBLACK;
 
     Widget dialogShell = (Widget) m_mainWidget;
+    Widget shell = XtParent(dialogShell) ;
 
     SetTitle( title );
 
@@ -112,33 +117,32 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     ChangeFont(false);
 
     // Can't remember what this was about... but I think it's necessary.
-#if wxUSE_INVISIBLE_RESIZE
-    if (pos.x > -1)
-        XtVaSetValues(dialogShell, XmNx, pos.x,
-        NULL);
-    if (pos.y > -1)
-        XtVaSetValues(dialogShell, XmNy, pos.y,
-        NULL);
+    if (wxUSE_INVISIBLE_RESIZE)
+    {
+        if (pos.x > -1)
+            XtVaSetValues(dialogShell, XmNx, pos.x,
+            NULL);
+        if (pos.y > -1)
+            XtVaSetValues(dialogShell, XmNy, pos.y,
+            NULL);
 
-    if (size.x > -1)
-        XtVaSetValues(dialogShell, XmNwidth, size.x, NULL);
-    if (size.y > -1)
-        XtVaSetValues(dialogShell, XmNheight, size.y, NULL);
-#endif
+        if (size.x > -1)
+            XtVaSetValues(dialogShell, XmNwidth, size.x, NULL);
+        if (size.y > -1)
+            XtVaSetValues(dialogShell, XmNheight, size.y, NULL);
+    }
 
     // Positioning of the dialog doesn't work properly unless the dialog
     // is managed, so we manage without mapping to the screen.
     // To show, we map the shell (actually it's parent).
-#if !wxUSE_INVISIBLE_RESIZE
-    Widget shell = XtParent(dialogShell) ;
-    XtVaSetValues(shell, XmNmappedWhenManaged, False, NULL);
-#endif
+    if (!wxUSE_INVISIBLE_RESIZE)
+        XtVaSetValues(shell, XmNmappedWhenManaged, False, NULL);
 
-#if !wxUSE_INVISIBLE_RESIZE
-    XtManageChild(dialogShell);
-    SetSize(pos.x, pos.y, size.x, size.y);
-#endif
-
+    if (!wxUSE_INVISIBLE_RESIZE)
+    {
+        XtManageChild(dialogShell);
+        SetSize(pos.x, pos.y, size.x, size.y);
+    }
     XtAddEventHandler(dialogShell,ExposureMask,False,
         wxUniversalRepaintProc, (XtPointer) this);
 
@@ -147,12 +151,12 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     return true;
 }
 
-bool wxDialog::XmDoCreateTLW(wxWindow* parent,
-                             wxWindowID WXUNUSED(id),
-                             const wxString& WXUNUSED(title),
-                             const wxPoint& WXUNUSED(pos),
-                             const wxSize& WXUNUSED(size),
-                             long WXUNUSED(style),
+bool wxDialog::DoCreate(wxWindow* parent,
+                             wxWindowID id,
+                             const wxString& title,
+                             const wxPoint& pos,
+                             const wxSize& size,
+                             long style,
                              const wxString& name)
 {
     Widget parentWidget = (Widget) 0;
@@ -192,12 +196,27 @@ bool wxDialog::XmDoCreateTLW(wxWindow* parent,
     return true;
 }
 
+void wxDialog::DoDestroy()
+{
+}
+
 void wxDialog::SetModal(bool flag)
 {
+#ifdef __VMS
+#pragma message disable codcauunr
+#endif
    if ( flag )
-       wxModelessWindows.DeleteObject(this);
-   else
-       wxModelessWindows.Append(this);
+        m_windowStyle |= wxDIALOG_MODAL ;
+    else
+        if ( m_windowStyle & wxDIALOG_MODAL )
+            m_windowStyle -= wxDIALOG_MODAL ;
+
+        wxModelessWindows.DeleteObject(this);
+        if (!flag)
+            wxModelessWindows.Append(this);
+#ifdef __VMS
+#pragma message enable codcauunr
+#endif
 }
 
 wxDialog::~wxDialog()
@@ -213,13 +232,10 @@ wxDialog::~wxDialog()
     }
 
     m_modalShowing = false;
-
-#if !wxUSE_INVISIBLE_RESIZE
-    if (m_mainWidget)
+    if (!wxUSE_INVISIBLE_RESIZE && m_mainWidget)
     {
         XtUnmapWidget((Widget) m_mainWidget);
     }
-#endif
 
     PreDestroy();
 
@@ -291,23 +307,21 @@ bool wxDialog::Show( bool show )
 
     if (show)
     {
-#if !wxUSE_INVISIBLE_RESIZE
-        XtMapWidget(XtParent((Widget) m_mainWidget));
-#else
-        XtManageChild((Widget)m_mainWidget) ;
-#endif
+        if (!wxUSE_INVISIBLE_RESIZE)
+            XtMapWidget(XtParent((Widget) m_mainWidget));
+        else
+            XtManageChild((Widget)m_mainWidget) ;
 
-        XRaiseWindow( XtDisplay( (Widget)m_mainWidget ),
+        XRaiseWindow( XtDisplay( (Widget)m_mainWidget ), 
                       XtWindow( (Widget)m_mainWidget) );
 
     }
     else
     {
-#if !wxUSE_INVISIBLE_RESIZE
-        XtUnmapWidget(XtParent((Widget) m_mainWidget));
-#else
-        XtUnmanageChild((Widget)m_mainWidget) ;
-#endif
+        if (!wxUSE_INVISIBLE_RESIZE)
+            XtUnmapWidget(XtParent((Widget) m_mainWidget));
+        else
+            XtUnmanageChild((Widget)m_mainWidget) ;
 
         XFlush(XtDisplay((Widget)m_mainWidget));
         XSync(XtDisplay((Widget)m_mainWidget), False);

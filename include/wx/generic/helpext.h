@@ -12,6 +12,10 @@
 
 #if wxUSE_HELP
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#   pragma interface "wxexthlp.h"
+#endif
+
 #include "wx/helpbase.h"
 
 /// Path separator.
@@ -55,7 +59,7 @@ class WXDLLIMPEXP_ADV wxExtHelpController : public wxHelpControllerBase
 {
 DECLARE_CLASS(wxExtHelpController)
    public:
-   wxExtHelpController(wxWindow* parentWindow = NULL);
+   wxExtHelpController();
    ~wxExtHelpController();
 
    /** Tell it which browser to use.

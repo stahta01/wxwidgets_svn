@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menuitem.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -158,8 +162,7 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
 // Motif-specific
 // ----------------------------------------------------------------------------
 
-void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar,
-                             wxMenu * topMenu, size_t index)
+void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu)
 {
     m_menuBar = menuBar;
     m_topMenu = topMenu;
@@ -178,18 +181,12 @@ void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar,
         {
             m_buttonWidget = (WXWidget) XtVaCreateManagedWidget (strName,
                 xmToggleButtonGadgetClass, (Widget) menu,
-#ifdef XmNpositionIndex
-                XmNpositionIndex, index,
-#endif
                 NULL);
             XtVaSetValues ((Widget) m_buttonWidget, XmNset, (Boolean) IsChecked(), NULL);
         }
         else
             m_buttonWidget = (WXWidget) XtVaCreateManagedWidget (strName,
             xmPushButtonGadgetClass, (Widget) menu,
-#ifdef XmNpositionIndex
-            XmNpositionIndex, index,
-#endif
             NULL);
         char mnem = wxFindMnemonic (m_text);
         if (mnem != 0)
@@ -232,15 +229,11 @@ void wxMenuItem::CreateItem (WXWidget menu, wxMenuBar * menuBar,
     else if (GetId() == wxID_SEPARATOR)
     {
         m_buttonWidget = (WXWidget) XtVaCreateManagedWidget ("separator",
-            xmSeparatorGadgetClass, (Widget) menu,
-#ifndef XmNpositionIndex
-            XmNpositionIndex, index,
-#endif
-            NULL);
+            xmSeparatorGadgetClass, (Widget) menu, NULL);
     }
     else if (m_subMenu)
     {
-        m_buttonWidget = m_subMenu->CreateMenu (menuBar, menu, topMenu, index, m_text, true);
+        m_buttonWidget = m_subMenu->CreateMenu (menuBar, menu, topMenu, m_text, true);
         m_subMenu->SetButtonWidget(m_buttonWidget);
         XtAddCallback ((Widget) m_buttonWidget,
             XmNcascadingCallback,

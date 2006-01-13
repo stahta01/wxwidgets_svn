@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "intl.h"
+#endif
+
 #if defined(__BORLAND__) && !defined(__WXDEBUG__)
     // There's a bug in Borland's compiler that breaks wxLocale with -O2,
     // so make sure that flag is not used for this file:
@@ -502,7 +506,7 @@ private:
     wxPluralFormsNodePtr m_plural;
 };
 
-wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator)
+wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator);
 
 void wxPluralFormsCalculator::init(wxPluralFormsToken::Number nplurals,
                                    wxPluralFormsNode* plural)
@@ -1132,16 +1136,13 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
     return false;
 
   // get the file size (assume it is less than 4Gb...)
-  wxFileOffset lenFile = fileMsg.Length();
-  if ( lenFile == wxInvalidOffset )
+  wxFileOffset nSize = fileMsg.Length();
+  if ( nSize == wxInvalidOffset )
     return false;
-
-  size_t nSize = wx_truncate_cast(size_t, lenFile);
-  wxASSERT_MSG( nSize == lenFile + size_t(0), _T("message catalog bigger than 4GB?") );
 
   // read the whole file in memory
   m_pData = new size_t8[nSize];
-  if ( fileMsg.Read(m_pData, nSize) != lenFile ) {
+  if ( fileMsg.Read(m_pData, (size_t)nSize) != nSize ) {
     wxDELETEA(m_pData);
     return false;
   }
@@ -1254,14 +1255,10 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
     if ( convertEncoding )
     {
         if ( m_charset.empty() )
-        {
             inputConv = wxConvCurrent;
-        }
         else
-        {
             inputConv =
             csConv = new wxCSConv(m_charset);
-        }
     }
     else // no need to convert the encoding
     {
@@ -1270,7 +1267,7 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
         inputConv = wxConvCurrent;
 #else // !wxUSE_UNICODE
         inputConv = NULL;
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
     }
 
     // conversion to apply to msgid strings before looking them up: we only
@@ -1324,11 +1321,11 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
         wxString msgid(data, *inputConv);
 #else // ASCII
         wxString msgid;
-        #if wxUSE_WCHAR_T
-            if ( inputConv && sourceConv )
-                msgid = wxString(inputConv->cMB2WC(data), *sourceConv);
-            else
-        #endif
+#if wxUSE_WCHAR_T
+        if ( inputConv && sourceConv )
+            msgid = wxString(inputConv->cMB2WC(data), *sourceConv);
+        else
+#endif
             msgid = data;
 #endif // wxUSE_UNICODE
 
@@ -1424,7 +1421,7 @@ const wxChar *wxMsgCatalog::GetString(const wxChar *sz, size_t n) const
 
 #include "wx/arrimpl.cpp"
 WX_DECLARE_EXPORTED_OBJARRAY(wxLanguageInfo, wxLanguageInfoArray);
-WX_DEFINE_OBJARRAY(wxLanguageInfoArray)
+WX_DEFINE_OBJARRAY(wxLanguageInfoArray);
 
 wxLanguageInfoArray *wxLocale::ms_languagesDB = NULL;
 
@@ -1600,70 +1597,13 @@ bool wxLocale::Init(int language, int flags)
     wxString locale;
 
     // Set the locale:
-#if defined(__OS2__)
-    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
-#elif defined(__UNIX__) && !defined(__WXMAC__)
-    if (language != wxLANGUAGE_DEFAULT)
+#if defined(__UNIX__) && !defined(__WXMAC__)
+    if (language == wxLANGUAGE_DEFAULT)
+        locale = wxEmptyString;
+    else
         locale = info->CanonicalName;
 
     wxMB2WXbuf retloc = wxSetlocaleTryUTF(LC_ALL, locale);
-
-    const wxString langOnly = locale.Left(2);
-    if ( !retloc )
-    {
-        // Some C libraries don't like xx_YY form and require xx only
-        retloc = wxSetlocaleTryUTF(LC_ALL, langOnly);
-    }
-
-#if wxUSE_FONTMAP
-    // some systems (e.g. FreeBSD and HP-UX) don't have xx_YY aliases but
-    // require the full xx_YY.encoding form, so try using UTF-8 because this is
-    // the only thing we can do generically
-    //
-    // TODO: add encodings applicable to each language to the lang DB and try
-    //       them all in turn here
-    if ( !retloc )
-    {
-        const wxChar **names =
-            wxFontMapperBase::GetAllEncodingNames(wxFONTENCODING_UTF8);
-        while ( *names )
-        {
-            retloc = wxSetlocale(LC_ALL, locale + _T('.') + *names++);
-            if ( retloc )
-                break;
-        }
-    }
-#endif // wxUSE_FONTMAP
-
-    if ( !retloc )
-    {
-        // Some C libraries (namely glibc) still use old ISO 639,
-        // so will translate the abbrev for them
-        wxString localeAlt;
-        if ( langOnly == wxT("he") )
-            localeAlt = wxT("iw") + locale.Mid(3);
-        else if ( langOnly == wxT("id") )
-            localeAlt = wxT("in") + locale.Mid(3);
-        else if ( langOnly == wxT("yi") )
-            localeAlt = wxT("ji") + locale.Mid(3);
-        else if ( langOnly == wxT("nb") )
-            localeAlt = wxT("no_NO");
-        else if ( langOnly == wxT("nn") )
-            localeAlt = wxT("no_NY");
-
-        if ( !localeAlt.empty() )
-        {
-            retloc = wxSetlocaleTryUTF(LC_ALL, localeAlt);
-            if ( !retloc )
-                retloc = wxSetlocaleTryUTF(LC_ALL, locale.Left(2));
-        }
-    }
-
-    if ( !retloc )
-    {
-        wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
-        return false;
-    }
 
 #ifdef __AIX__
     // at least in AIX 5.2 libc is buggy and the string returned from setlocale(LC_ALL)
@@ -1677,6 +1617,40 @@ bool wxLocale::Init(int language, int flags)
         *p = _T('\0');
 #endif // __AIX__
 
+    if ( !retloc )
+    {
+        // Some C libraries don't like xx_YY form and require xx only
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
+    }
+    if ( !retloc )
+    {
+        // Some C libraries (namely glibc) still use old ISO 639,
+        // so will translate the abbrev for them
+        wxString mid = locale.Mid(0,2);
+        if (mid == wxT("he"))
+            locale = wxT("iw") + locale.Mid(3);
+        else if (mid == wxT("id"))
+            locale = wxT("in") + locale.Mid(3);
+        else if (mid == wxT("yi"))
+            locale = wxT("ji") + locale.Mid(3);
+        else if (mid == wxT("nb"))
+            locale = wxT("no_NO");
+        else if (mid == wxT("nn"))
+            locale = wxT("no_NY");
+
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale);
+    }
+    if ( !retloc )
+    {
+        // (This time, we changed locale in previous if-branch, so try again.)
+        // Some C libraries don't like xx_YY form and require xx only
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
+    }
+    if ( !retloc )
+    {
+        wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
+        return false;
+    }
 #elif defined(__WIN32__)
 
     #if wxUSE_UNICODE && (defined(__VISUALC__) || defined(__MINGW32__))
@@ -1794,6 +1768,8 @@ bool wxLocale::Init(int language, int flags)
         wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
         return false;
     }
+#elif defined(__WXPM__)
+    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
 #else
     return false;
     #define WX_NO_LOCALE_SUPPORT
@@ -3569,9 +3545,10 @@ void wxLocale::InitLanguagesDB()
    LNG(wxLANGUAGE_ZHUANG,                     "za"   , 0              , 0                                 , "Zhuang")
    LNG(wxLANGUAGE_ZULU,                       "zu"   , 0              , 0                                 , "Zulu")
 
-}
+};
 #undef LNG
 
 // --- --- --- generated code ends here --- --- ---
 
 #endif // wxUSE_INTL
+

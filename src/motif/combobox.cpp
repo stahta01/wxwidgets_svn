@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:     wxComboBox class
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -116,9 +120,7 @@ wxComboBox::~wxComboBox()
         m_clientDataDict.DestroyData();
 }
 
-void wxComboBox::DoSetSize(int x, int y,
-                           int width, int WXUNUSED(height),
-                           int sizeFlags)
+void wxComboBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
     // Necessary so it doesn't call wxChoice::SetSize
     wxWindow::DoSetSize(x, y, width, DoGetBestSize().y, sizeFlags);
@@ -146,7 +148,7 @@ void wxComboBox::SetValue(const wxString& value)
     m_inSetValue = false;
 }
 
-void wxComboBox::SetString(int WXUNUSED(n), const wxString& WXUNUSED(s))
+void wxComboBox::SetString(int n, const wxString& s)
 {
     wxFAIL_MSG( wxT("wxComboBox::SetString only implemented for Motif 2.0") );
 }
@@ -224,10 +226,8 @@ wxString wxComboBox::GetString(int n) const
         return wxEmptyString;
 }
 
-int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    // FIXME: back to base class for not supported value of bCase
-
     int *pos_list = NULL;
     int count = 0;
     wxXmString text( s );
@@ -241,7 +241,7 @@ int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
         return pos;
     }
 
-    return wxNOT_FOUND;
+    return -1;
 }
 
 // Clipboard operations

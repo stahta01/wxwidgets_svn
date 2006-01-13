@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/listbox.h
+// Name:        listbox.h
 // Purpose:     wxListBox class
 // Author:      David Webster
 // Modified by:
@@ -20,7 +20,7 @@
     class WXDLLEXPORT wxOwnerDrawn;
 
     // define the array of list box items
-    #include  "wx/dynarray.h"
+    #include  <wx/dynarray.h>
 
     WX_DEFINE_EXPORTED_ARRAY_PTR(wxOwnerDrawn *, wxListBoxItemsArray);
 #endif // wxUSE_OWNER_DRAWN
@@ -108,7 +108,10 @@ public:
 
     virtual int           GetCount(void) const;
     virtual wxString      GetString(int n) const;
-    virtual void          SetString(int n, const wxString& rsString);
+    virtual void          SetString( int             n
+                                    ,const wxString& rsString
+                                   );
+    virtual int           FindString(const wxString& rsString) const;
 
     virtual bool          IsSelected(int n) const;
     virtual void          DoSetSelection( int  n
@@ -173,4 +176,5 @@ private:
     DECLARE_DYNAMIC_CLASS(wxListBox)
 }; // end of wxListBox
 
-#endif // _WX_LISTBOX_H_
+#endif
+    // _WX_LISTBOX_H_

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/utils.cpp
+// Name:        msw/utils.cpp
 // Purpose:     Various utilities
 // Author:      Julian Smart
 // Modified by:
@@ -111,13 +111,8 @@
 // ----------------------------------------------------------------------------
 
 // In the WIN.INI file
-#if (!defined(USE_NET_API) && !defined(__WXWINCE__)) || defined(__WXMICROWIN__)
 static const wxChar WX_SECTION[] = wxT("wxWindows");
-#endif
-
-#if (!defined(USE_NET_API) && !defined(__WXWINCE__))
 static const wxChar eUSERNAME[]  = wxT("UserName");
-#endif
 
 // ============================================================================
 // implementation
@@ -268,8 +263,8 @@ bool wxGetUserId(wxChar *WXUNUSED_IN_WINCE(buf),
 
     // Can't assume we have NIS (PC-NFS) or some other ID daemon
     // So we ...
-    if ( (user = wxGetenv(wxT("USER"))) == NULL &&
-         (user = wxGetenv(wxT("LOGNAME"))) == NULL )
+    if (  (user = wxGetenv(wxT("USER"))) == NULL &&
+            (user = wxGetenv(wxT("LOGNAME"))) == NULL )
     {
         // Use wxWidgets configuration data (comming soon)
         GetProfileString(WX_SECTION, eUSERID, default_id, buf, maxSize - 1);
@@ -1559,3 +1554,4 @@ wxCreateHiddenWindow(LPCTSTR *pclassname, LPCTSTR classname, WNDPROC wndproc)
 
     return hwnd;
 }
+

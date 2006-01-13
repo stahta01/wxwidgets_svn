@@ -12,6 +12,10 @@
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "combobox.h"
+#endif
+
 #include "wx/choice.h"
 
 #if wxUSE_COMBOBOX
@@ -96,7 +100,7 @@ public:
     virtual int GetSelection() const;
     virtual void GetSelection(long* from, long* to) const;
     virtual void SetEditable(bool editable);
-    virtual void Clear();
+    virtual void Clear() { wxChoice::Clear(); m_selectionOld = -1; }
 
     virtual void Undo() ;
     virtual void Redo() ;

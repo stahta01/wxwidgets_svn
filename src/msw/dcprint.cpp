@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -180,8 +184,10 @@ bool wxPrinterDC::StartDoc(const wxString& message)
     else
         docinfo.lpszOutput = (const wxChar *) filename;
 
+#if defined(__WIN95__)
     docinfo.lpszDatatype = NULL;
     docinfo.fwType = 0;
+#endif
 
     if (!m_hDC)
         return false;

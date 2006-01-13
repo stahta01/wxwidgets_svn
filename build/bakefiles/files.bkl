@@ -72,7 +72,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/unix/execute.h
     wx/unix/mimetype.h
     wx/unix/pipe.h
-    wx/unix/private.h
     wx/unix/stackwalk.h
     wx/unix/stdpaths.h
 </set>
@@ -231,7 +230,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/os2/apptrait.h
     wx/os2/mimetype.h
     wx/os2/stdpaths.h
-    wx/os2/chkconf.h
 </set>
 
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
@@ -395,7 +393,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/ipcbase.h
     wx/isql.h
     wx/isqlext.h
-    wx/link.h
     wx/list.h
     wx/listimpl.cpp
     wx/log.h
@@ -559,7 +556,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/dpycmn.cpp
     src/common/dseldlg.cpp
     src/common/effects.cpp
-    src/common/evtloopcmn.cpp
     src/common/fddlgcmn.cpp
     src/common/fldlgcmn.cpp
     src/common/fontcmn.cpp
@@ -630,7 +626,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/generic/textdlgg.cpp
     src/generic/tipwin.cpp
     src/generic/treectlg.cpp
-    src/generic/treebkg.cpp
     src/generic/vlbox.cpp
     src/generic/vscroll.cpp
 </set>
@@ -797,7 +792,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/tooltip.h
     wx/toplevel.h
     wx/treebase.h
-    wx/treebook.h
     wx/treectrl.h
     wx/valgen.h
     wx/vidmode.h
@@ -1303,6 +1297,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/msw/bmpbuttn.cpp
     src/msw/button.cpp
     src/msw/checkbox.cpp
+    src/msw/checklst.cpp
     src/msw/choice.cpp
     src/msw/colordlg.cpp
     src/msw/combobox.cpp
@@ -1352,6 +1347,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/msw/button.h
     wx/msw/caret.h
     wx/msw/checkbox.h
+    wx/msw/checklst.h
     wx/msw/choice.h
     wx/msw/clipbrd.h
     wx/msw/colordlg.h
@@ -1467,12 +1463,10 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 
 <!-- Files used only by desktop MSW port, but *not* WindowsCE one: -->
 <set var="MSW_DESKTOP_SRC" hints="files">
-    src/msw/checklst.cpp
     src/msw/fdrepdlg.cpp
     src/msw/fontdlg.cpp
 </set>
 <set var="MSW_DESKTOP_HDR" hints="files">
-    wx/msw/checklst.h
     wx/msw/fdrepdlg.h
     wx/msw/fontdlg.h
     wx/msw/helpbest.h
@@ -1485,7 +1479,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/generic/dirdlgg.cpp
     src/generic/fdrepdlg.cpp
     src/generic/fontdlgg.cpp
-    src/msw/wince/checklst.cpp
     src/msw/wince/choicece.cpp
     src/msw/wince/crt.cpp
     src/msw/wince/filedlgwce.cpp
@@ -1498,7 +1491,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="WINCE_HDR" hints="files">
     wx/generic/fdrepdlg.h
     wx/generic/fontdlgg.h
-    wx/msw/wince/checklst.h
     wx/msw/wince/choicece.h
     wx/msw/wince/helpwce.h
     wx/msw/wince/libraries.h
@@ -1548,7 +1540,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/mgl/app.h
     wx/mgl/bitmap.h
     wx/mgl/brush.h
-    wx/mgl/chkconf.h
     wx/mgl/clipbrd.h
     wx/mgl/colour.h
     wx/mgl/cursor.h
@@ -1613,7 +1604,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/os2/dcprint.cpp
     src/os2/dcscreen.cpp
     src/os2/dialog.cpp
-    src/os2/display.cpp
     src/os2/dnd.cpp
     src/os2/evtloop.cpp
     src/os2/filedlg.cpp
@@ -1695,7 +1685,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/os2/dcprint.h
     wx/os2/dcscreen.h
     wx/os2/dialog.h
-    wx/os2/display.h
     wx/os2/dnd.h
     wx/os2/filedlg.h
     wx/os2/font.h
@@ -1807,7 +1796,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/mac/carbon/dirdlg.cpp
     src/mac/carbon/display.cpp
     src/mac/carbon/dnd.cpp
-    src/mac/carbon/evtloop.cpp
     src/mac/carbon/filedlg.cpp
     src/mac/carbon/font.cpp
     src/mac/carbon/fontdlg.cpp
@@ -1894,7 +1882,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/mac/dirdlg.h
     wx/mac/display.h
     wx/mac/dnd.h
-    wx/mac/evtloop.h
     wx/mac/filedlg.h
     wx/mac/font.h
     wx/mac/fontdlg.h
@@ -1982,7 +1969,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/mac/carbon/dirdlg.h
     wx/mac/carbon/display.h
     wx/mac/carbon/dnd.h
-    wx/mac/carbon/evtloop.h
     wx/mac/carbon/filedlg.h
     wx/mac/carbon/font.h
     wx/mac/carbon/fontdlg.h
@@ -2360,11 +2346,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/generic/splash.cpp
     src/generic/tipdlg.cpp
     src/generic/wizard.cpp
-    src/richtext/richtextctrl.cpp
-    src/richtext/richtextbuffer.cpp
-    src/richtext/richtextstyles.cpp
-    src/richtext/richtextxml.cpp
-    src/richtext/richtexthtml.cpp
 </set>
 
 <set var="ADVANCED_CMN_HDR" hints="files">
@@ -2393,10 +2374,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/tipdlg.h
     wx/wave.h
     wx/wizard.h
-    wx/richtext/richtextctrl.h
-    wx/richtext/richtextbuffer.h
-    wx/richtext/richtextstyles.h
-    wx/richtext/richtextxml.h
 </set>
 
 <set var="ADVANCED_CMN_NATIVE_HDR" hints="files">
@@ -2549,9 +2526,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     $(HTML_SRC_PLATFORM)
     src/html/helpctrl.cpp
     src/html/helpdata.cpp
-    src/html/helpdlg.cpp
     src/html/helpfrm.cpp
-    src/html/helpwnd.cpp
     src/html/htmlcell.cpp
     src/html/htmlfilt.cpp
     src/html/htmlpars.cpp
@@ -2575,9 +2550,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="HTML_HDR" hints="files">
     wx/html/helpctrl.h
     wx/html/helpdata.h
-    wx/html/helpdlg.h
     wx/html/helpfrm.h
-    wx/html/helpwnd.h
     wx/html/htmlcell.h
     wx/html/htmldefs.h
     wx/html/htmlfilt.h
@@ -2615,7 +2588,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/xrc/xh_mdi.cpp
     src/xrc/xh_gauge.cpp
     src/xrc/xh_gdctl.cpp
-    src/xrc/xh_grid.cpp
     src/xrc/xh_html.cpp
     src/xrc/xh_listb.cpp
     src/xrc/xh_listbk.cpp
@@ -2640,7 +2612,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/xrc/xh_tglbtn.cpp
     src/xrc/xh_toolb.cpp
     src/xrc/xh_tree.cpp
-    src/xrc/xh_treebk.cpp
     src/xrc/xh_unkwn.cpp
     src/xrc/xh_wizrd.cpp
     src/xrc/xmlres.cpp
@@ -2663,7 +2634,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/xrc/xh_mdi.h
     wx/xrc/xh_gauge.h
     wx/xrc/xh_gdctl.h
-    wx/xrc/xh_grid.h
     wx/xrc/xh_html.h
     wx/xrc/xh_listb.h
     wx/xrc/xh_listbk.h
@@ -2688,7 +2658,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/xrc/xh_tglbtn.h
     wx/xrc/xh_toolb.h
     wx/xrc/xh_tree.h
-    wx/xrc/xh_treebk.h
     wx/xrc/xh_unkwn.h
     wx/xrc/xh_wizrd.h
     wx/xrc/xmlres.h
@@ -3032,7 +3001,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
         $(BASE_MAC_SRC)
         $(BASE_OS2_SRC)
         $(BASE_MSDOS_SRC)
-        $(BASE_PALMOS_SRC)
         $(BASE_AND_GUI_CMN_SRC)
         $(BASE_AND_GUI_UNIX_SRC)
         $(BASE_AND_GUI_MAC_SRC)

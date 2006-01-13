@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -131,13 +135,10 @@ static bool AlphaBlt(HDC hdcDst,
                      const wxBitmap& bmpSrc);
 
 #ifdef wxHAVE_RAW_BITMAP
-
-// our (limited) AlphaBlend() replacement for Windows versions not providing it
+// our (limited) AlphaBlend() replacement
 static void
-wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h,
-             int srcX, int srcY, const wxBitmap& bmp);
-
-#endif // wxHAVE_RAW_BITMAP
+wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h, int srcX, int srcY, const wxBitmap& bmp);
+#endif
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -257,6 +258,23 @@ wxColourChanger::~wxColourChanger()
 // ---------------------------------------------------------------------------
 // wxDC
 // ---------------------------------------------------------------------------
+
+// Default constructor
+wxDC::wxDC()
+{
+    m_canvas = NULL;
+
+    m_oldBitmap = 0;
+    m_oldPen = 0;
+    m_oldBrush = 0;
+    m_oldFont = 0;
+#if wxUSE_PALETTE
+    m_oldPalette = 0;
+#endif // wxUSE_PALETTE
+
+    m_bOwnsDC = false;
+    m_hDC = 0;
+}
 
 wxDC::~wxDC()
 {
@@ -1743,7 +1761,7 @@ bool wxDC::DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) con
     static int maxWidth = -1;
     int fit = 0;
     SIZE sz = {0,0};
-    int stlen = text.length();
+    int stlen = text.Length();
 
     if (maxLenText == -1)
     {
@@ -2268,14 +2286,12 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     return success;
 }
 
-void wxDC::GetDeviceSize(int *width, int *height) const
+void wxDC::DoGetSize(int *w, int *h) const
 {
     WXMICROWIN_CHECK_HDC
 
-    if ( width )
-        *width = ::GetDeviceCaps(GetHdc(), HORZRES);
-    if ( height )
-        *height = ::GetDeviceCaps(GetHdc(), VERTRES);
+    if ( w ) *w = ::GetDeviceCaps(GetHdc(), HORZRES);
+    if ( h ) *h = ::GetDeviceCaps(GetHdc(), VERTRES);
 }
 
 void wxDC::DoGetSizeMM(int *w, int *h) const
@@ -2527,8 +2543,6 @@ static bool AlphaBlt(HDC hdcDst,
 
         wxLogLastError(_T("AlphaBlend"));
     }
-#else
-    wxUnusedVar(hdcSrc);
 #endif // defined(AC_SRC_OVER)
 
     // AlphaBlend() unavailable of failed: use our own (probably much slower)
@@ -2550,9 +2564,7 @@ static bool AlphaBlt(HDC hdcDst,
 #ifdef wxHAVE_RAW_BITMAP
 
 static void
-wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
-             int w, int h,
-             int srcX, int srcY, const wxBitmap& bmpSrc)
+wxAlphaBlend(HDC hdcDst, int xDst, int yDst, int w, int h, int srcX, int srcY, const wxBitmap& bmpSrc)
 {
     // get the destination DC pixels
     wxBitmap bmpDst(w, h, 32 /* force creating RGBA DIB */);

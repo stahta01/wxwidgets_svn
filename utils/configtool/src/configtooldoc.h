@@ -12,6 +12,10 @@
 #ifndef _CT_CONFIGTOOLDOC_H_
 #define _CT_CONFIGTOOLDOC_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "configtooldoc.cpp"
+#endif
+
 #include "wx/docview.h"
 #include "wx/cmdproc.h"
 

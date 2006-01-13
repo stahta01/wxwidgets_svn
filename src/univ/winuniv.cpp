@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univwindow.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -339,7 +343,7 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
     }
     else
     {
-        // Draw background ourselves
+        // Draw background ouselves
         EraseBackground( dc, rect );
     }
 

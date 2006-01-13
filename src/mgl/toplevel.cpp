@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/toplevel.cpp
+// Name:        toplevel.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -14,6 +14,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -48,11 +52,11 @@ extern int g_openDialogs;
 
 void wxTopLevelWindowMGL::Init()
 {
-    m_isShown = false;
-    m_isIconized = false;
-    m_isMaximized = false;
-    m_fsIsShowing = false;
-    m_sizeSet = false;
+    m_isShown = FALSE;
+    m_isIconized = FALSE;
+    m_isMaximized = FALSE;
+    m_fsIsShowing = FALSE;
+    m_sizeSet = FALSE;
 }
 
 bool wxTopLevelWindowMGL::Create(wxWindow *parent,
@@ -66,27 +70,27 @@ bool wxTopLevelWindowMGL::Create(wxWindow *parent,
     // always create a frame of some reasonable, even if arbitrary, size (at
     // least for MSW compatibility)
     wxSize size = sizeOrig;
-    if ( size.x == wxDefaultCoord || size.y == wxDefaultCoord )
+    if ( size.x == -1 || size.y == -1 )
     {
         wxSize sizeDefault = GetDefaultSize();
-        if ( size.x == wxDefaultCoord )
+        if ( size.x == -1 )
             size.x = sizeDefault.x;
-        if ( size.y == wxDefaultCoord )
+        if ( size.y == -1 )
             size.y = sizeDefault.y;
     }
-
+    
     // for default positioning, centre the first top level window and
     // cascade any addtional ones from there.
     wxPoint pos = posOrig;
-    if ( pos.x == wxDefaultCoord || pos.y == wxDefaultCoord )
+    if ( pos.x == -1 || pos.y == -1 )
     {
         wxSize sizeDisplay = wxGetDisplaySize();
         static wxPoint nextPos((sizeDisplay.x - size.x) / 2,
                                (sizeDisplay.y - size.y) / 2);
 
-        if ( pos.x == wxDefaultCoord )
+        if ( pos.x == -1 )
             pos.x = nextPos.x;
-        if ( pos.y == wxDefaultCoord )
+        if ( pos.y == -1 )
             pos.y = nextPos.y;
         if ( pos.x + size.x > sizeDisplay.x || pos.y + size.y > sizeDisplay.y )
             pos = wxPoint();
@@ -103,12 +107,12 @@ bool wxTopLevelWindowMGL::Create(wxWindow *parent,
     wxTopLevelWindows.Append(this);
     m_title = title;
 
-    return true;
+    return TRUE;
 }
 
 wxTopLevelWindowMGL::~wxTopLevelWindowMGL()
 {
-    m_isBeingDeleted = true;
+    m_isBeingDeleted = TRUE;
 
     wxTopLevelWindows.DeleteObject(this);
 
@@ -124,7 +128,7 @@ wxTopLevelWindowMGL::~wxTopLevelWindowMGL()
 
 bool wxTopLevelWindowMGL::ShowFullScreen(bool show, long style)
 {
-    if (show == m_fsIsShowing) return false; // return what?
+    if (show == m_fsIsShowing) return FALSE; // return what?
 
     m_fsIsShowing = show;
 
@@ -147,11 +151,11 @@ bool wxTopLevelWindowMGL::ShowFullScreen(bool show, long style)
     else
     {
         m_windowStyle = m_fsSaveStyle;
-        SetSize(m_fsSaveFrame.x, m_fsSaveFrame.y,
+        SetSize(m_fsSaveFrame.x, m_fsSaveFrame.y, 
                 m_fsSaveFrame.width, m_fsSaveFrame.height);
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxTopLevelWindowMGL::Show(bool show)
@@ -162,7 +166,7 @@ bool wxTopLevelWindowMGL::Show(bool show)
     // so that the frame can adjust itself (think auto layout or single child)
     if ( !m_sizeSet )
     {
-        m_sizeSet = true;
+        m_sizeSet = TRUE;
         wxSizeEvent event(GetSize(), GetId());
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
@@ -184,7 +188,7 @@ void wxTopLevelWindowMGL::Maximize(bool maximize)
 
     if ( maximize && !m_isMaximized )
     {
-        m_isMaximized = true;
+        m_isMaximized = TRUE;
 
         GetPosition(&m_savedFrame.x, &m_savedFrame.y);
         GetSize(&m_savedFrame.width, &m_savedFrame.height);
@@ -193,8 +197,8 @@ void wxTopLevelWindowMGL::Maximize(bool maximize)
     }
     else if ( !maximize && m_isMaximized )
     {
-        m_isMaximized = false;
-        SetSize(m_savedFrame.x, m_savedFrame.y,
+        m_isMaximized = FALSE;
+        SetSize(m_savedFrame.x, m_savedFrame.y, 
                 m_savedFrame.width, m_savedFrame.height);
     }
 }
@@ -208,11 +212,11 @@ void wxTopLevelWindowMGL::Restore()
 {
     if ( IsIconized() )
     {
-        Iconize(false);
+        Iconize(FALSE);
     }
     if ( IsMaximized() )
     {
-        Maximize(false);
+        Maximize(FALSE);
     }
 }
 

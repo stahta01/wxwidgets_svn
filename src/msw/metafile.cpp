@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "metafile.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -241,16 +245,6 @@ void wxMetafileDC::GetTextExtent(const wxString& string, long *x, long *y,
         *descent = tm.tmDescent;
     if ( externalLeading )
         *externalLeading = tm.tmExternalLeading;
-}
-
-void wxMetafileDC::DoGetSize(int *width, int *height) const
-{
-    wxCHECK_RET( m_refData, _T("invalid wxMetafileDC") );
-
-    if ( width )
-        *width = M_METAFILEDATA->m_width;
-    if ( height )
-        *height = M_METAFILEDATA->m_height;
 }
 
 wxMetafile *wxMetafileDC::Close()

@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "notebook.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -79,7 +83,7 @@ public:
 
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxGtkNotebookPagesList)
+WX_DEFINE_LIST(wxGtkNotebookPagesList);
 
 
 //-----------------------------------------------------------------------------
@@ -339,11 +343,11 @@ bool wxNotebook::Create(wxWindow *parent, wxWindowID id,
 
     m_parent->DoAddChild( this );
 
-    if (m_windowStyle & wxBK_RIGHT)
+    if (m_windowStyle & wxNB_RIGHT)
         gtk_notebook_set_tab_pos( GTK_NOTEBOOK(m_widget), GTK_POS_RIGHT );
-    if (m_windowStyle & wxBK_LEFT)
+    if (m_windowStyle & wxNB_LEFT)
         gtk_notebook_set_tab_pos( GTK_NOTEBOOK(m_widget), GTK_POS_LEFT );
-    if (m_windowStyle & wxBK_BOTTOM)
+    if (m_windowStyle & wxNB_BOTTOM)
         gtk_notebook_set_tab_pos( GTK_NOTEBOOK(m_widget), GTK_POS_BOTTOM );
 
     gtk_signal_connect( GTK_OBJECT(m_widget), "key_press_event",
@@ -660,7 +664,13 @@ bool wxNotebook::InsertPage( size_t position,
     gtk_signal_connect( GTK_OBJECT(win->m_widget), "size_allocate",
       GTK_SIGNAL_FUNC(gtk_page_size_callback), (gpointer)win );
 
-    gtk_notebook_insert_page( notebook, win->m_widget, nb_page->m_box, position );
+#ifndef __VMS
+   // On VMS position is unsigned and thus always positive
+   if (position < 0)
+        gtk_notebook_append_page( notebook, win->m_widget, nb_page->m_box );
+    else
+#endif
+     gtk_notebook_insert_page( notebook, win->m_widget, nb_page->m_box, position );
 
     nb_page->m_page = (GtkNotebookPage*) g_list_last(notebook->children)->data;
 
@@ -706,7 +716,13 @@ bool wxNotebook::InsertPage( size_t position,
     gtk_widget_show( GTK_WIDGET(nb_page->m_label) );
     if (select && (m_pagesData.GetCount() > 1))
     {
-      SetSelection( position );
+#ifndef __VMS
+   // On VMS position is unsigned and thus always positive
+        if (position < 0)
+            SetSelection( GetPageCount()-1 );
+        else
+#endif
+            SetSelection( position );
     }
 
     gtk_signal_connect( GTK_OBJECT(m_widget), "switch_page",
@@ -736,15 +752,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
     const gint y = m_widget->allocation.y;
 
     const size_t count = GetPageCount();
-    size_t i = 0;
-
-#ifdef __WXGTK20__
-    GtkNotebook * notebook = GTK_NOTEBOOK(m_widget);
-    if (gtk_notebook_get_scrollable(notebook));
-        i = g_list_position( notebook->children, notebook->first_tab );
-#endif
-
-    for ( ; i < count; i++ )
+    for ( size_t i = 0; i < count; i++ )
     {
         wxGtkNotebookPage* nb_page = GetNotebookPage(i);
         GtkWidget *box = nb_page->m_box;

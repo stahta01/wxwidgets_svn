@@ -12,6 +12,10 @@
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "brush.h"
+#endif
+
 #include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"

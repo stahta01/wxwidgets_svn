@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "matrix.h"
+#endif
+
 // Note: this is intended to be used in wxDC at some point to replace
 // the current system of scaling/translation. It is not yet used.
 
@@ -71,7 +75,7 @@ void wxTransformMatrix::operator = (const wxTransformMatrix& mat)
     m_isIdentity = mat.m_isIdentity;
 }
 
-bool wxTransformMatrix::operator == (const wxTransformMatrix& mat) const
+bool wxTransformMatrix::operator == (const wxTransformMatrix& mat)
 {
     if (m_isIdentity && mat.m_isIdentity)
         return true;
@@ -81,14 +85,14 @@ bool wxTransformMatrix::operator == (const wxTransformMatrix& mat) const
     {
         for (j = 0; j < 3; j++)
         {
-            if ( !wxIsSameDouble(m_matrix[i][j], mat.m_matrix[i][j]) )
+            if (m_matrix[i][j] != mat.m_matrix[i][j])
                 return false;
         }
     }
     return true;
 }
 
-bool wxTransformMatrix::operator != (const wxTransformMatrix& mat) const
+bool wxTransformMatrix::operator != (const wxTransformMatrix& mat)
 {
     return (! ((*this) == mat));
 }
@@ -129,22 +133,27 @@ bool wxTransformMatrix::Invert(void)
 
     // now divide by the determinant
     double det = m_matrix[0][0] * inverseMatrix[0][0] + m_matrix[0][1] * inverseMatrix[1][0] + m_matrix[0][2] * inverseMatrix[2][0];
-    if ( wxIsNullDouble(det) )
-        return false;
-
-    inverseMatrix[0][0] /= det; inverseMatrix[1][0] /= det; inverseMatrix[2][0] /= det;
-    inverseMatrix[0][1] /= det; inverseMatrix[1][1] /= det; inverseMatrix[2][1] /= det;
-    inverseMatrix[0][2] /= det; inverseMatrix[1][2] /= det; inverseMatrix[2][2] /= det;
-
-    for (int i = 0; i < 3; i++)
+    if (det != 0.0)
     {
-        for (int j = 0; j < 3; j++)
+        inverseMatrix[0][0] /= det; inverseMatrix[1][0] /= det; inverseMatrix[2][0] /= det;
+        inverseMatrix[0][1] /= det; inverseMatrix[1][1] /= det; inverseMatrix[2][1] /= det;
+        inverseMatrix[0][2] /= det; inverseMatrix[1][2] /= det; inverseMatrix[2][2] /= det;
+
+        int i, j;
+        for (i = 0; i < 3; i++)
         {
-            m_matrix[i][j] = inverseMatrix[i][j];
+            for (j = 0; j < 3; j++)
+            {
+                m_matrix[i][j] = inverseMatrix[i][j];
+            }
         }
+        m_isIdentity = IsIdentity1();
+        return true;
     }
-    m_isIdentity = IsIdentity1();
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 // Make into identity matrix
@@ -190,8 +199,8 @@ wxTransformMatrix&  wxTransformMatrix::Scale(const double &xs, const double &ys,
 
     if (m_isIdentity)
     {
-        double tx = xc*(1-xs);
-        double ty = yc*(1-ys);
+        double tx  =xc*(1-xs);
+        double ty  =yc*(1-ys);
         r00 = xs;
         r10 = 0;
         r20 = tx;
@@ -199,10 +208,10 @@ wxTransformMatrix&  wxTransformMatrix::Scale(const double &xs, const double &ys,
         r11 = ys;
         r21 = ty;
     }
-    else if ( !wxIsNullDouble(xc) || !wxIsNullDouble(yc) )
+    else if (xc!=0 || yc!=0)
     {
-        double tx = xc*(1-xs);
-        double ty = yc*(1-ys);
+        double tx  =xc*(1-xs);
+        double ty  =yc*(1-ys);
         r00 = xs * m_matrix[0][0];
         r10 = xs * m_matrix[1][0];
         r20 = xs * m_matrix[2][0] + tx;
@@ -315,8 +324,8 @@ wxTransformMatrix&  wxTransformMatrix::Rotate(const double &degrees, const doubl
 
     if (m_isIdentity)
     {
-        double tx = x*(1-c)+y*s;
-        double ty = y*(1-c)-x*s;
+        double tx  = x*(1-c)+y*s;
+        double ty  = y*(1-c)-x*s;
         r00 = c ;
         r10 = -s;
         r20 = tx;
@@ -324,10 +333,10 @@ wxTransformMatrix&  wxTransformMatrix::Rotate(const double &degrees, const doubl
         r11 = c;
         r21 = ty;
     }
-    else if ( !wxIsNullDouble(x) || !wxIsNullDouble(y) )
+    else if (x!=0 || y!=0)
     {
-        double tx = x*(1-c)+y*s;
-        double ty = y*(1-c)-x*s;
+        double tx  = x*(1-c)+y*s;
+        double ty  = y*(1-c)-x*s;
         r00 = c * m_matrix[0][0] - s * m_matrix[0][1] + tx * m_matrix[0][2];
         r10 = c * m_matrix[1][0] - s * m_matrix[1][1] + tx * m_matrix[1][2];
         r20 = c * m_matrix[2][0] - s * m_matrix[2][1] + tx;// * m_matrix[2][2];
@@ -399,15 +408,15 @@ bool wxTransformMatrix::InverseTransformPoint(double x, double y, double& tx, do
 {
     if (IsIdentity())
     {
-        tx = x;
-        ty = y;
-        return true;
+        tx = x; ty = y; return true;
     }
 
-    const double z = (1.0 - m_matrix[0][2] * x - m_matrix[1][2] * y) / m_matrix[2][2];
-    if ( wxIsNullDouble(z) )
+    double z = (1.0 - m_matrix[0][2] * x - m_matrix[1][2] * y) / m_matrix[2][2];
+    if (z == 0.0)
+    {
+//      z = 0.0000001;
         return false;
-
+    }
     tx = x * m_matrix[0][0] + y * m_matrix[1][0] + z * m_matrix[2][0];
     ty = x * m_matrix[0][1] + y * m_matrix[1][1] + z * m_matrix[2][1];
     return true;
@@ -551,7 +560,7 @@ double wxTransformMatrix::Get_scaleX()
 {
     double scale_factor;
     double rot_angle = CheckInt(atan2(m_matrix[1][0],m_matrix[0][0])*180/pi);
-    if ( !wxIsSameDouble(rot_angle, 90) && !wxIsSameDouble(rot_angle, -90) )
+    if (rot_angle != 90 && rot_angle != -90)
         scale_factor = m_matrix[0][0]/cos((rot_angle/180)*pi);
     else
         scale_factor = m_matrix[0][0]/sin((rot_angle/180)*pi);  // er kan nl. niet door 0 gedeeld worden !
@@ -567,7 +576,7 @@ double wxTransformMatrix::Get_scaleY()
 {
     double scale_factor;
     double rot_angle = CheckInt(atan2(m_matrix[1][0],m_matrix[0][0])*180/pi);
-    if ( !wxIsSameDouble(rot_angle, 90) && !wxIsSameDouble(rot_angle, -90) )
+    if (rot_angle != 90 && rot_angle != -90)
        scale_factor = m_matrix[1][1]/cos((rot_angle/180)*pi);
     else
        scale_factor = m_matrix[1][1]/sin((rot_angle/180)*pi);   // er kan nl. niet door 0 gedeeld worden !

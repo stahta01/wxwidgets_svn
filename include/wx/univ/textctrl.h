@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univtextctrl.h"
+#endif
+
 class WXDLLEXPORT wxCaret;
 class WXDLLEXPORT wxTextCtrlCommandProcessor;
 
@@ -66,14 +70,13 @@ class WXDLLEXPORT wxTextCtrlCommandProcessor;
 // wxTextCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase,
-                               public wxScrollHelper
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase, public wxScrollHelper
 {
 public:
     // creation
     // --------
 
-    wxTextCtrl() : wxScrollHelper(this) { Init(); }
+    wxTextCtrl() { Init(); }
 
     wxTextCtrl(wxWindow *parent,
                wxWindowID id,
@@ -83,7 +86,6 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxTextCtrlNameStr)
-        : wxScrollHelper(this) 
     {
         Init();
 

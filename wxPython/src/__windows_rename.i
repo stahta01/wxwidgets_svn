@@ -110,7 +110,6 @@
 %rename(TaskBarIconEvent)                   wxTaskBarIconEvent;
 %rename(ColourData)                         wxColourData;
 %rename(ColourDialog)                       wxColourDialog;
-%rename(GetColourFromUser)                  wxGetColourFromUser;
 %rename(DirDialog)                          wxDirDialog;
 %rename(FileDialog)                         wxFileDialog;
 %rename(CHOICEDLG_STYLE)                    wxCHOICEDLG_STYLE;
@@ -121,7 +120,6 @@
 %rename(PasswordEntryDialog)                wxPasswordEntryDialog;
 %rename(FontData)                           wxFontData;
 %rename(FontDialog)                         wxFontDialog;
-%rename(GetFontFromUser)                    wxGetFontFromUser;
 %rename(MessageDialog)                      wxMessageDialog;
 %rename(ProgressDialog)                     wxProgressDialog;
 %rename(FR_DOWN)                            wxFR_DOWN;

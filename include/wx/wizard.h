@@ -72,7 +72,9 @@ public:
     // wxNullBitmap from here - the default one will be used then.
     virtual wxBitmap GetBitmap() const { return m_bitmap; }
 
-#if wxUSE_VALIDATORS
+    // due to a typo in #if condition, the validation functions were disabled
+    // in 2.6.[01] releases so check for wxABI_VERSION here
+#if wxUSE_VALIDATORS && (wxABI_VERSION >= 20602)
     // Override the base functions to allow a validator to be assigned to this page.
     virtual bool TransferDataToWindow()
     {
@@ -221,6 +223,16 @@ public:
     // Set border around page area. Default is 0 if you add at least one
     // page to GetPageAreaSizer and 5 if you don't.
     virtual void SetBorder(int border) = 0;
+
+    // wxWizard should be created using "new wxWizard" now, not with Create()
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( static wxWizard *Create(wxWindow *parent,
+                                          int id = wxID_ANY,
+                                          const wxString& title = wxEmptyString,
+                                          const wxBitmap& bitmap = wxNullBitmap,
+                                          const wxPoint& pos = wxDefaultPosition,
+                                          const wxSize& size = wxDefaultSize) );
+#endif // WXWIN_COMPATIBILITY_2_2
 
     // the methods below may be overridden by the derived classes to provide
     // custom logic for determining the pages order

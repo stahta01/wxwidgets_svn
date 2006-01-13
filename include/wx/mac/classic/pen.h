@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/pen.h
+// Name:        wx/mac/pen.h
 // Purpose:     wxPen class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_PEN_H_
 #define _WX_PEN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "pen.h"
+#endif
 
 #include "wx/gdiobj.h"
 #include "wx/colour.h"
@@ -58,8 +62,8 @@ public:
   ~wxPen();
 
   inline wxPen& operator = (const wxPen& pen) { if (*this == pen) return (*this); Ref(pen); return *this; }
-  inline bool operator == (const wxPen& pen) const { return m_refData == pen.m_refData; }
-  inline bool operator != (const wxPen& pen) const { return m_refData != pen.m_refData; }
+  inline bool operator == (const wxPen& pen) { return m_refData == pen.m_refData; }
+  inline bool operator != (const wxPen& pen) { return m_refData != pen.m_refData; }
 
   virtual bool Ok() const { return (m_refData != NULL) ; }
 

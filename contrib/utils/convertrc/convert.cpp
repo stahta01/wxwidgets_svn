@@ -5,6 +5,10 @@
 3.  Converts portions of an .RC file into a wxr file
 */
 
+#ifdef __GNUG__
+#pragma implementation "convert.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 

@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sound.h"
+#pragma implementation "soundbase.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -447,8 +452,7 @@ wxSound::~wxSound()
     Free();
 }
 
-bool wxSound::Create(const wxString& fileName,
-                     bool WXUNUSED_UNLESS_DEBUG(isResource))
+bool wxSound::Create(const wxString& fileName, bool isResource)
 {
     wxASSERT_MSG( !isResource,
              _T("Loading sound from resources is only supported on Windows") );

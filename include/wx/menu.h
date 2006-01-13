@@ -12,6 +12,10 @@
 #ifndef _WX_MENU_H_BASE_
 #define _WX_MENU_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "menubase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_MENUS
@@ -475,9 +479,6 @@ public:
 
     // don't want menu bars to accept the focus by tabbing to them
     virtual bool AcceptsFocusFromKeyboard() const { return false; }
-
-    // update all menu item states in all menus
-    virtual void UpdateMenus();
 
 protected:
     // the list of all our menus

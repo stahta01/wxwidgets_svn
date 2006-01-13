@@ -14,6 +14,10 @@
 
 #if wxUSE_DISPLAY
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "displaybase.h"
+#endif
+
 #include "wx/dynarray.h"
 #include "wx/vidmode.h"
 

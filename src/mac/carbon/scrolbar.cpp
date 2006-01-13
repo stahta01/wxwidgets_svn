@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "scrolbar.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -24,29 +28,28 @@ IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
 BEGIN_EVENT_TABLE(wxScrollBar, wxControl)
 END_EVENT_TABLE()
 
-
-bool wxScrollBar::Create(wxWindow *parent,
-    wxWindowID id,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxValidator& validator,
-    const wxString& name)
+// Scrollbar
+bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
+           const wxPoint& pos,
+           const wxSize& size, long style,
+           const wxValidator& validator,
+           const wxString& name)
 {
-    m_macIsUserPane = false ;
-
+    m_macIsUserPane = FALSE ;
+    
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
 
     m_peer = new wxMacControl(this) ;
-    verify_noerr( CreateScrollBarControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds ,
+    verify_noerr ( CreateScrollBarControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds , 
     0 , 0 , 100 , 1 , true /* liveTracking */ , GetwxMacLiveScrollbarActionProc() , m_peer->GetControlRefAddr() ) );
+    
 
-    MacPostControlCreate( pos, size ) ;
+    MacPostControlCreate(pos,size) ;
 
-    return true;
+    return TRUE;
 }
 
 wxScrollBar::~wxScrollBar()
@@ -63,7 +66,8 @@ int wxScrollBar::GetThumbPosition() const
     return m_peer->GetValue() ;
 }
 
-void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageSize, bool refresh)
+void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageSize,
+    bool refresh)
 {
     m_pageSize = pageSize;
     m_viewSize = thumbSize;
@@ -77,47 +81,44 @@ void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageS
     m_peer->SetViewSize( m_viewSize ) ;
 }
 
+
 void wxScrollBar::Command(wxCommandEvent& event)
 {
     SetThumbPosition(event.GetInt());
     ProcessCommand(event);
 }
 
-void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown )
+void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) 
 {
     int position = m_peer->GetValue() ;
     int minPos = m_peer->GetMinimum() ;
     int maxPos = m_peer->GetMaximum() ;
-
+    
     wxEventType scrollEvent = wxEVT_NULL;
     int nScrollInc = 0;
-
+    
     // all events have already been reported during mouse down, except for THUMBRELEASE
-    if ( !mouseStillDown && controlpart != kControlIndicatorPart )
+    if ( !mouseStillDown && controlpart !=kControlIndicatorPart )
         return ;
-
-    switch ( controlpart )
+    
+    switch( controlpart )
     {
     case kControlUpButtonPart :
         nScrollInc = -1;
         scrollEvent = wxEVT_SCROLL_LINEUP;
         break ;
-
     case kControlDownButtonPart :
         nScrollInc = 1;
         scrollEvent = wxEVT_SCROLL_LINEDOWN;
         break ;
-
     case kControlPageUpPart :
         nScrollInc = -m_pageSize;
         scrollEvent = wxEVT_SCROLL_PAGEUP;
         break ;
-
     case kControlPageDownPart :
         nScrollInc = m_pageSize;
         scrollEvent = wxEVT_SCROLL_PAGEDOWN;
         break ;
-
     case kControlIndicatorPart :
         nScrollInc = 0 ;
         if ( mouseStillDown )
@@ -125,91 +126,97 @@ void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart 
         else
             scrollEvent = wxEVT_SCROLL_THUMBRELEASE;
         break ;
-
     default :
         wxFAIL_MSG(wxT("illegal scrollbar selector"));
         break ;
     }
-
+    
     int new_pos = position + nScrollInc;
-
+    
     if (new_pos < minPos)
         new_pos = minPos;
-    else if (new_pos > maxPos)
+    if (new_pos > maxPos)
         new_pos = maxPos;
-
     if ( nScrollInc )
         SetThumbPosition(new_pos);
-
+    
     wxScrollEvent event(scrollEvent, m_windowId);
     if ( m_windowStyle & wxHORIZONTAL )
+    {
         event.SetOrientation( wxHORIZONTAL ) ;
+    }
     else
+    {
         event.SetOrientation( wxVERTICAL ) ;
-
+    }
     event.SetPosition(new_pos);
     event.SetEventObject( this );
-
     wxWindow* window = GetParent() ;
     if (window && window->MacIsWindowScrollbar(this) )
+    {
         // this is hardcoded
         window->MacOnScroll(event);
+    }
     else
         GetEventHandler()->ProcessEvent(event);
 }
 
-wxInt32 wxScrollBar::MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF mevent )
+wxInt32 wxScrollBar::MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF mevent ) 
 {
     int position = m_peer->GetValue() ;
     int minPos = m_peer->GetMinimum() ;
     int maxPos = m_peer->GetMaximum() ;
-
+    
     wxEventType scrollEvent = wxEVT_NULL;
     int nScrollInc = 0;
-
+    
     wxMacCarbonEvent cEvent( (EventRef) mevent ) ;
-    ControlPartCode controlpart = cEvent.GetParameter<ControlPartCode>(kEventParamControlPart, typeControlPartCode) ;
-
+    ControlPartCode controlpart = cEvent.GetParameter<ControlPartCode>(kEventParamControlPart,typeControlPartCode) ;
+    
     // all events have already been reported during mouse down, except for THUMBRELEASE
-    if ( controlpart != kControlIndicatorPart )
+    if ( controlpart !=kControlIndicatorPart )
         return eventNotHandledErr ;
-
-    switch ( controlpart )
+    
+    switch( controlpart )
     {
     case kControlIndicatorPart :
         nScrollInc = 0 ;
         scrollEvent = wxEVT_SCROLL_THUMBRELEASE;
         break ;
-
     default :
         wxFAIL_MSG(wxT("illegal scrollbar selector"));
         break ;
     }
-
+    
     int new_pos = position + nScrollInc;
-
+    
     if (new_pos < minPos)
         new_pos = minPos;
-    else if (new_pos > maxPos)
+    if (new_pos > maxPos)
         new_pos = maxPos;
-
     if ( nScrollInc )
         SetThumbPosition(new_pos);
-
+    
     wxScrollEvent event(scrollEvent, m_windowId);
     if ( m_windowStyle & wxHORIZONTAL )
-        event.SetOrientation( wxHORIZONTAL );
+    {
+        event.SetOrientation( wxHORIZONTAL ) ;
+    }
     else
-        event.SetOrientation( wxVERTICAL );
-
+    {
+        event.SetOrientation( wxVERTICAL ) ;
+    }
     event.SetPosition(new_pos);
     event.SetEventObject( this );
     wxWindow* window = GetParent() ;
     if (window && window->MacIsWindowScrollbar(this) )
+    {
         // this is hardcoded
         window->MacOnScroll(event);
+    }
     else
         GetEventHandler()->ProcessEvent(event);
-
     return noErr ;
 }
+
+

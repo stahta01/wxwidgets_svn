@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_menu.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -44,9 +48,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
 
         wxMenuBar *p_bar = wxDynamicCast(m_parent, wxMenuBar);
         if (p_bar)
-        {
             p_bar->Append(menu, title);
-        }
         else
         {
             wxMenu *p_menu = wxDynamicCast(m_parent, wxMenu);

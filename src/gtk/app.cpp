@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
+
 #ifdef __VMS
 // vms_jackets.h should for proper working be included before anything else
 # include <vms_jackets.h>
@@ -72,7 +76,6 @@
     #include <unistd.h>
 #endif // HAVE_POLL/!HAVE_POLL
 
-#include "wx/unix/private.h"
 #include "wx/gtk/win_gtk.h"
 
 #include <gtk/gtk.h>
@@ -307,23 +310,23 @@ int wxPoll(wxPollFd *ufds, unsigned int nfds, int timeout)
     fd_set readfds;
     fd_set writefds;
     fd_set exceptfds;
-    wxFD_ZERO(&readfds);
-    wxFD_ZERO(&writefds);
-    wxFD_ZERO(&exceptfds);
+    FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+    FD_ZERO(&exceptfds);
 
     unsigned int i;
     for ( i = 0; i < nfds; i++ )
     {
-        wxASSERT_MSG( ufds[i].fd < wxFD_SETSIZE, _T("fd out of range") );
+        wxASSERT_MSG( ufds[i].fd < FD_SETSIZE, _T("fd out of range") );
 
         if ( ufds[i].events & G_IO_IN )
-            wxFD_SET(ufds[i].fd, &readfds);
+            FD_SET(ufds[i].fd, &readfds);
 
         if ( ufds[i].events & G_IO_PRI )
-            wxFD_SET(ufds[i].fd, &exceptfds);
+            FD_SET(ufds[i].fd, &exceptfds);
 
         if ( ufds[i].events & G_IO_OUT )
-            wxFD_SET(ufds[i].fd, &writefds);
+            FD_SET(ufds[i].fd, &writefds);
 
         if ( ufds[i].fd > fdMax )
             fdMax = ufds[i].fd;
@@ -337,13 +340,13 @@ int wxPoll(wxPollFd *ufds, unsigned int nfds, int timeout)
     {
         ufds[i].revents = 0;
 
-        if ( wxFD_ISSET(ufds[i].fd, &readfds ) )
+        if ( FD_ISSET(ufds[i].fd, &readfds ) )
             ufds[i].revents |= G_IO_IN;
 
-        if ( wxFD_ISSET(ufds[i].fd, &exceptfds ) )
+        if ( FD_ISSET(ufds[i].fd, &exceptfds ) )
             ufds[i].revents |= G_IO_PRI;
 
-        if ( wxFD_ISSET(ufds[i].fd, &writefds ) )
+        if ( FD_ISSET(ufds[i].fd, &writefds ) )
             ufds[i].revents |= G_IO_OUT;
     }
 

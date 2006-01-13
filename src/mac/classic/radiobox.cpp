@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/radiobox.cpp
+// Name:        radiobox.cpp
 // Purpose:     wxRadioBox
 // Author:      Stefan Csomor
 // Modified by: JS Lair (99/11/15) first implementation
@@ -8,6 +8,11 @@
 // Copyright:   (c) Stefan Csomor
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "radioboxbase.h"
+#pragma implementation "radiobox.h"
+#endif
 
 //-------------------------------------------------------------------------------------
 //         headers
@@ -47,6 +52,7 @@ wxRadioBox::wxRadioBox()
 {
     m_noItems = 0;
     m_noRowsOrCols = 0;
+    m_majorDim = 0 ;
     m_radioButtonCycle = NULL;
 }
 
@@ -113,7 +119,10 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
     m_noRowsOrCols = majorDim;
     m_radioButtonCycle = NULL;
 
-    SetMajorDim(majorDim == 0 ? n : majorDim, style);
+    if (majorDim==0)
+        m_majorDim = n ;
+    else
+        m_majorDim = majorDim ;
 
     Rect bounds ;
     Str255 title ;
@@ -465,7 +474,7 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
     current=m_radioButtonCycle;
     for ( i = 0 ; i < m_noItems; i++)
     {
-        if (i&&((i%GetMajorDim())==0)) // not to do for the zero button!
+        if (i&&((i%m_majorDim)==0)) // not to do for the zero button!
         {
             if (m_windowStyle & wxRA_VERTICAL)
             {
@@ -522,10 +531,43 @@ wxSize wxRadioBox::DoGetBestSize() const
         totHeight = totHeight + 10; //how many exactly should this be to meet the HIG?
     }
     // handle radio box title as well
-    GetTextExtent(GetLabel(), &eachWidth, NULL);
+    GetTextExtent(GetTitle(), &eachWidth, NULL);
     eachWidth  = (int)(eachWidth + RADIO_SIZE) + 3 * charWidth ;
     if (totWidth < eachWidth)
         totWidth = eachWidth;
 
     return wxSize(totWidth, totHeight);
+}
+//-------------------------------------------------------------------------------------
+//         ¥ GetNumVer
+//-------------------------------------------------------------------------------------
+// return the number of buttons in the vertical direction
+
+int wxRadioBox::GetRowCount() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return m_majorDim;
+    }
+    else
+    {
+        return (m_noItems + m_majorDim - 1)/m_majorDim;
+    }
+}
+
+//-------------------------------------------------------------------------------------
+//         ¥ GetNumHor
+//-------------------------------------------------------------------------------------
+// return the number of buttons in the horizontal direction
+
+int wxRadioBox::GetColumnCount() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return (m_noItems + m_majorDim - 1)/m_majorDim;
+    }
+    else
+    {
+        return m_majorDim;
+    }
 }

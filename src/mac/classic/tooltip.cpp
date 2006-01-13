@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "tooltip.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_TOOLTIPS

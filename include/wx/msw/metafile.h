@@ -12,6 +12,10 @@
 #ifndef _WX_METAFIILE_H_
 #define _WX_METAFIILE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "metafile.h"
+#endif
+
 #include "wx/dc.h"
 #include "wx/gdiobj.h"
 
@@ -107,8 +111,6 @@ public:
     void SetWindowsMappingMode(int mm) { m_windowsMappingMode = mm; }
 
 protected:
-    virtual void DoGetSize(int *width, int *height) const;
-
     int           m_windowsMappingMode;
     wxMetafile*   m_metaFile;
 

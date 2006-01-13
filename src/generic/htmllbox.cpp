@@ -151,7 +151,7 @@ private:
 class wxHtmlListBoxStyle : public wxDefaultHtmlRenderingStyle
 {
 public:
-    wxHtmlListBoxStyle(const wxHtmlListBox& hlbox) : m_hlbox(hlbox) { }
+    wxHtmlListBoxStyle(wxHtmlListBox& hlbox) : m_hlbox(hlbox) { }
 
     virtual wxColour GetSelectedTextColour(const wxColour& colFg)
     {

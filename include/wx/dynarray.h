@@ -12,6 +12,11 @@
 #ifndef   _DYNARRAY_H
 #define   _DYNARRAY_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && \
+    !(defined(__MINGW32__) && __GNUC__ == 3 && __GNUC_MINOR__ == 2)
+#pragma interface "dynarray.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_STL
@@ -400,8 +405,8 @@ public:                                                               \
       { reverse_iterator tmp = *this; --m_ptr; return tmp; }          \
     itor& operator--() { ++m_ptr; return *this; }                     \
     const itor operator--(int) { itor tmp = *this; ++m_ptr; return tmp; }\
-    bool operator ==(const itor& it) const { return m_ptr == it.m_ptr; }\
-    bool operator !=(const itor& it) const { return m_ptr != it.m_ptr; }\
+    bool operator ==(const itor& it) { return m_ptr == it.m_ptr; }    \
+    bool operator !=(const itor& it) { return m_ptr != it.m_ptr; }    \
   };                                                                  \
                                                                       \
   class const_reverse_iterator                                        \
@@ -433,8 +438,8 @@ public:                                                               \
       { itor tmp = *this; --m_ptr; return tmp; }                      \
     itor& operator--() { ++m_ptr; return *this; }                     \
     const itor operator--(int) { itor tmp = *this; ++m_ptr; return tmp; }\
-    bool operator ==(const itor& it) const { return m_ptr == it.m_ptr; }\
-    bool operator !=(const itor& it) const { return m_ptr != it.m_ptr; }\
+    bool operator ==(const itor& it) { return m_ptr == it.m_ptr; }    \
+    bool operator !=(const itor& it) { return m_ptr != it.m_ptr; }    \
   };                                                                  \
                                                                       \
   name(size_type n, const_reference v) { assign(n, v); }              \
@@ -967,10 +972,10 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 // append all element of one array to another one
 #define WX_APPEND_ARRAY(array, other)                                         \
     {                                                                         \
-        size_t wxAAcnt = (other).size();                                      \
-        for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
+        size_t count = (other).size();                                        \
+        for ( size_t n = 0; n < count; n++ )                                  \
         {                                                                     \
-            (array).push_back((other)[wxAAn]);                                \
+            (array).push_back((other)[n]);                                    \
         }                                                                     \
     }
 
@@ -982,10 +987,10 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 //     count on it)!
 #define WX_CLEAR_ARRAY(array)                                                 \
     {                                                                         \
-        size_t wxAAcnt = (array).size();                                      \
-        for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
+        size_t count = (array).size();                                        \
+        for ( size_t n = 0; n < count; n++ )                                  \
         {                                                                     \
-            delete (array)[wxAAn];                                            \
+            delete (array)[n];                                                \
         }                                                                     \
                                                                               \
         (array).clear();                                                      \

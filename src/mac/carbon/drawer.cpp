@@ -12,6 +12,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "control.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/mac/private.h"

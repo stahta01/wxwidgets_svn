@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/combobox.h
+// Name:        combobox.h
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
@@ -8,8 +8,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKCOMBOBOXH__
 #define __GTKCOMBOBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -83,9 +88,11 @@ public:
     void Clear();
     void Delete( int n );
 
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString( const wxString &item ) const;
     int GetSelection() const;
+#if wxABI_VERSION >= 20602
     int GetCurrentSelection() const;
+#endif
     wxString GetString( int n ) const;
     wxString GetStringSelection() const;
     int GetCount() const;

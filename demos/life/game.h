@@ -12,6 +12,10 @@
 #ifndef _LIFE_GAME_H_
 #define _LIFE_GAME_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "game.h"
+#endif
+
 // for compilers that support precompilation, includes "wx/wx.h"
 #include "wx/wxprec.h"
 

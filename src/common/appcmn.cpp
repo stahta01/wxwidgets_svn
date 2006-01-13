@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/appcmn.cpp
+// Name:        common/appcmn.cpp
 // Purpose:     wxAppConsole and wxAppBase methods common to all platforms
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "appbase.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -61,7 +65,7 @@ WX_CHECK_BUILD_OPTIONS("wxCore")
 // ----------------------------------------------------------------------------
 
 // this defines wxEventLoopPtr
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoop)
+wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoop);
 
 // ============================================================================
 // wxAppBase implementation
@@ -77,7 +81,9 @@ wxAppBase::wxAppBase()
     m_useBestVisual = false;
     m_isActive = true;
 
+#if wxUSE_EVTLOOP_IN_APP
     m_mainLoop = NULL;
+#endif // wxUSE_EVTLOOP_IN_APP
 
     // We don't want to exit the app if the user code shows a dialog from its
     // OnInit() -- but this is what would happen if we set m_exitOnFrameDelete
@@ -260,37 +266,51 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
 
 int wxAppBase::MainLoop()
 {
+#if wxUSE_EVTLOOP_IN_APP
     wxEventLoopTiedPtr mainLoop(&m_mainLoop, new wxEventLoop);
 
     return m_mainLoop->Run();
+#else // !wxUSE_EVTLOOP_IN_APP
+    return 0;
+#endif // wxUSE_EVTLOOP_IN_APP/!wxUSE_EVTLOOP_IN_APP
 }
 
 void wxAppBase::ExitMainLoop()
 {
+#if wxUSE_EVTLOOP_IN_APP
     // we should exit from the main event loop, not just any currently active
     // (e.g. modal dialog) event loop
     if ( m_mainLoop && m_mainLoop->IsRunning() )
     {
         m_mainLoop->Exit(0);
     }
+#endif // wxUSE_EVTLOOP_IN_APP
 }
 
 bool wxAppBase::Pending()
 {
+#if wxUSE_EVTLOOP_IN_APP
     // use the currently active message loop here, not m_mainLoop, because if
     // we're showing a modal dialog (with its own event loop) currently the
     // main event loop is not running anyhow
     wxEventLoop * const loop = wxEventLoop::GetActive();
 
     return loop && loop->Pending();
+#else // wxUSE_EVTLOOP_IN_APP
+    return false;
+#endif // wxUSE_EVTLOOP_IN_APP/!wxUSE_EVTLOOP_IN_APP
 }
 
 bool wxAppBase::Dispatch()
 {
+#if wxUSE_EVTLOOP_IN_APP
     // see comment in Pending()
     wxEventLoop * const loop = wxEventLoop::GetActive();
 
     return loop && loop->Dispatch();
+#else // wxUSE_EVTLOOP_IN_APP
+    return true;
+#endif // wxUSE_EVTLOOP_IN_APP/!wxUSE_EVTLOOP_IN_APP
 }
 
 // ----------------------------------------------------------------------------
@@ -355,10 +375,6 @@ void wxAppBase::SetActive(bool active, wxWindow * WXUNUSED(lastFocus))
 
     (void)ProcessEvent(event);
 }
-
-// ----------------------------------------------------------------------------
-// idle handling
-// ----------------------------------------------------------------------------
 
 void wxAppBase::DeletePendingObjects()
 {
@@ -450,24 +466,6 @@ void wxAppBase::OnIdle(wxIdleEvent& WXUNUSED(event))
 #endif // wxUSE_LOG
 
 }
-
-// ----------------------------------------------------------------------------
-// exceptions support
-// ----------------------------------------------------------------------------
-
-#if wxUSE_EXCEPTIONS
-
-bool wxAppBase::OnExceptionInMainLoop()
-{
-    throw;
-
-    // some compilers are too stupid to know that we never return after throw
-#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
-    return false;
-#endif
-}
-
-#endif // wxUSE_EXCEPTIONS
 
 // ----------------------------------------------------------------------------
 // wxGUIAppTraitsBase
@@ -587,13 +585,13 @@ void wxGUIAppTraitsBase::RemoveFromPendingDelete(wxObject *object)
 #elif defined(__UNIX__) || defined(__DARWIN__) || defined(__OS2__)
     #include "wx/unix/gsockunx.h"
 #elif defined(__WXMAC__)
-    #include <MacHeaders.c>
-    #define OTUNIXERRORS 1
-    #include <OpenTransport.h>
-    #include <OpenTransportProviders.h>
-    #include <OpenTptInternet.h>
+  #include <MacHeaders.c>
+  #define OTUNIXERRORS 1
+  #include <OpenTransport.h>
+  #include <OpenTransportProviders.h>
+  #include <OpenTptInternet.h>
 
-    #include "wx/mac/gsockmac.h"
+  #include "wx/mac/gsockmac.h"
 #else
     #error "Must include correct GSocket header here"
 #endif
@@ -611,3 +609,4 @@ GSocketGUIFunctionsTable* wxGUIAppTraitsBase::GetSocketGUIFunctionsTable()
 }
 
 #endif
+

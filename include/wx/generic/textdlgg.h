@@ -12,6 +12,10 @@
 #ifndef __TEXTDLGH_G__
 #define __TEXTDLGH_G__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textdlgg.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_TEXTDLG
@@ -47,7 +51,7 @@ public:
     wxString GetValue() const { return m_value; }
 
 #if wxUSE_VALIDATORS
-    void SetTextValidator( const wxTextValidator& validator );
+    void SetTextValidator( wxTextValidator& validator );
     void SetTextValidator( long style = wxFILTER_NONE );
     wxTextValidator* GetTextValidator() { return (wxTextValidator*)m_textctrl->GetValidator(); }
 #endif

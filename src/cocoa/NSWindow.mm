@@ -193,21 +193,11 @@ wxMenuBar* wxCocoaNSWindow::GetAppMenuBar(wxCocoaNSWindow *win)
 {
 }
 
-- (BOOL)canBecomeKeyWindow;
 - (BOOL)canBecomeMainWindow;
 @end // wxPoserNSwindow
 
 WX_IMPLEMENT_POSER(wxPoserNSWindow);
 @implementation wxPoserNSWindow : NSWindow
-
-- (BOOL)canBecomeKeyWindow
-{
-    bool canBecome = false;
-    wxCocoaNSWindow *tlw = wxCocoaNSWindow::GetFromCocoa(self);
-    if(!tlw || !tlw->Cocoa_canBecomeKeyWindow(canBecome))
-        canBecome = [super canBecomeKeyWindow];
-    return canBecome;
-}
 
 - (BOOL)canBecomeMainWindow
 {

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_notbk.cpp
+// Name:        xh_notbk.cpp
 // Purpose:     XRC resource for wxNotebook
 // Author:      Vaclav Slavik
 // Created:     2000/03/21
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_notbk.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -29,19 +33,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookXmlHandler, wxXmlResourceHandler)
 wxNotebookXmlHandler::wxNotebookXmlHandler()
 : wxXmlResourceHandler(), m_isInside(false), m_notebook(NULL)
 {
-    XRC_ADD_STYLE(wxBK_DEFAULT);
-    XRC_ADD_STYLE(wxBK_LEFT);
-    XRC_ADD_STYLE(wxBK_RIGHT);
-    XRC_ADD_STYLE(wxBK_TOP);
-    XRC_ADD_STYLE(wxBK_BOTTOM);
-
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxNB_DEFAULT);
     XRC_ADD_STYLE(wxNB_LEFT);
     XRC_ADD_STYLE(wxNB_RIGHT);
     XRC_ADD_STYLE(wxNB_TOP);
     XRC_ADD_STYLE(wxNB_BOTTOM);
-#endif
 
     XRC_ADD_STYLE(wxNB_FIXEDWIDTH);
     XRC_ADD_STYLE(wxNB_MULTILINE);

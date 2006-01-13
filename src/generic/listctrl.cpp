@@ -23,6 +23,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -137,8 +142,9 @@ static const int MARGIN_BETWEEN_ROWS = 6;
 // when autosizing the columns, add some slack
 static const int AUTOSIZE_COL_MARGIN = 10;
 
-// default width for the header columns
+// default and minimal widths for the header columns
 static const int WIDTH_COL_DEFAULT = 80;
+static const int WIDTH_COL_MIN = 10;
 
 // the space between the image and the text in the report mode
 static const int IMAGE_MARGIN_IN_REPORT_MODE = 5;
@@ -284,7 +290,7 @@ private:
 
 WX_DECLARE_LIST(wxListItemData, wxListItemDataList);
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxListItemDataList)
+WX_DEFINE_LIST(wxListItemDataList);
 
 class wxListLineData
 {
@@ -361,7 +367,7 @@ public:
     void GetItem( int index, wxListItem &info );
 
     wxString GetText(int index) const;
-    void SetText( int index, const wxString& s );
+    void SetText( int index, const wxString s );
 
     wxListItemAttr *GetAttr() const;
     void SetAttr(wxListItemAttr *attr);
@@ -412,7 +418,7 @@ private:
 
 WX_DECLARE_EXPORTED_OBJARRAY(wxListLineData, wxListLineDataArray);
 #include "wx/arrimpl.cpp"
-WX_DEFINE_OBJARRAY(wxListLineDataArray)
+WX_DEFINE_OBJARRAY(wxListLineDataArray);
 
 //-----------------------------------------------------------------------------
 //  wxListHeaderWindow (internal)
@@ -465,7 +471,7 @@ private:
 
     // generate and process the list event of the given type, return true if
     // it wasn't vetoed, i.e. if we should proceed
-    bool SendListEvent(wxEventType type, const wxPoint& pos);
+    bool SendListEvent(wxEventType type, wxPoint pos);
 
     DECLARE_DYNAMIC_CLASS(wxListHeaderWindow)
     DECLARE_EVENT_TABLE()
@@ -520,7 +526,7 @@ private:
 
 WX_DECLARE_LIST(wxListHeaderData, wxListHeaderDataList);
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxListHeaderDataList)
+WX_DEFINE_LIST(wxListHeaderDataList);
 
 class wxListMainWindow : public wxScrolledWindow
 {
@@ -718,7 +724,7 @@ public:
     // send out a wxListEvent
     void SendNotify( size_t line,
                      wxEventType command,
-                     const wxPoint& point = wxDefaultPosition );
+                     wxPoint point = wxDefaultPosition );
 
     // override base class virtual to reset m_lineHeight when the font changes
     virtual bool SetFont(const wxFont& font)
@@ -1078,7 +1084,11 @@ void wxListHeaderData::SetHeight( int h )
 
 void wxListHeaderData::SetWidth( int w )
 {
-    m_width = w < 0 ? WIDTH_COL_DEFAULT : w;
+    m_width = w;
+    if (m_width < 0)
+        m_width = WIDTH_COL_DEFAULT;
+    else if (m_width < WIDTH_COL_MIN)
+        m_width = WIDTH_COL_MIN;
 }
 
 void wxListHeaderData::SetFormat( int format )
@@ -1364,7 +1374,7 @@ wxString wxListLineData::GetText(int index) const
     return s;
 }
 
-void wxListLineData::SetText( int index, const wxString& s )
+void wxListLineData::SetText( int index, const wxString s )
 {
     wxListItemDataList::compatibility_iterator node = m_items.Item( index );
     if (node)
@@ -2008,7 +2018,7 @@ void wxListHeaderWindow::OnSetFocus( wxFocusEvent &WXUNUSED(event) )
     m_owner->Update();
 }
 
-bool wxListHeaderWindow::SendListEvent(wxEventType type, const wxPoint& pos)
+bool wxListHeaderWindow::SendListEvent(wxEventType type, wxPoint pos)
 {
     wxWindow *parent = GetParent();
     wxListEvent le( type, parent->GetId() );
@@ -2800,7 +2810,7 @@ void wxListMainWindow::HighlightAll( bool on )
 
 void wxListMainWindow::SendNotify( size_t line,
                                    wxEventType command,
-                                   const wxPoint& point )
+                                   wxPoint point )
 {
     wxListEvent le( command, GetParent()->GetId() );
     le.SetEventObject( GetParent() );

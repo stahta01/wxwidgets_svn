@@ -1,16 +1,14 @@
-import sys, os, glob
-from distutils.dep_util import newer
-from distutils.spawn import spawn
+import os, glob, shutil
 
-poFiles = glob.glob("*.po")
-
-for po in poFiles:
-   mo = os.path.splitext(po)[0] + '.mo'
-   if mo != 'wxstd.mo':
-       if newer(po, mo):
-           cmd = 'msgfmt --verbose -o %s %s' % (mo, po)
-           print cmd
-           spawn(cmd.split())
-           print
-       else:
-           print "%s is up to date" % mo
+wx_dir = os.environ["WXWIN"]
+locale_dir = os.path.join(wx_dir, "locale")
+print "WX Locale dir is: " + locale_dir
+for mo in glob.glob(os.path.join(locale_dir, "*.mo")):
+    mofile = os.path.basename(mo)
+    moname = os.path.splitext(mofile)[0]
+    modir = os.path.join(locale_dir, moname, "LC_MESSAGES")
+    print "Making: " + modir
+    if not os.path.exists(modir):
+        os.makedirs(modir)
+    shutil.copyfile(os.path.join(locale_dir, mofile), os.path.join(modir, "wxstd.mo"))
+    

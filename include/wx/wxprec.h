@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wxprec.h
+// Name:        wxprec.h
 // Purpose:     Includes the appropriate files for precompiled headers
 // Author:      Julian Smart
 // Modified by:
@@ -36,7 +36,7 @@
 
 #ifdef WX_PRECOMP
 
-// include "wx/wxchar.h" first to ensure that UNICODE macro is correctly set
+// include <wx/wxchar.h> first to ensure that UNICODE macro is correctly set
 // _before_ including <windows.h>
 #include "wx/wxchar.h"
 
@@ -48,16 +48,6 @@
 // include all PalmOS headers at once
 #ifdef __WXPALMOS__
 #   include <PalmOS.h>
-#endif
-
-// include <os2.h>
-#ifdef __OS2__
-#   include "wx/os2/private.h"
-#endif
-
-// include mgl headers
-#ifdef __WXMGL__
-#   include "wx/mgl/private.h"
 #endif
 
 // include the most common wx headers

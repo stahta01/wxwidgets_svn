@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/radiobox.cpp
+// Name:        radiobox.cpp
 // Purpose:     wxRadioBox
 // Author:      David Webster
 // Modified by:
@@ -46,11 +46,10 @@ MRESULT EXPENTRY wxRadioBoxWndProc( HWND   hWnd
 // global vars
 // ---------------------------------------------------------------------------
 
+// the pointer to standard radio button wnd proc
 extern void  wxAssociateWinWithHandle( HWND         hWnd
                                       ,wxWindowOS2* pWin
                                      );
-extern void wxRemoveHandleAssociation( wxWindowOS2 *pWin );
-// the pointer to standard radio button & box wnd procs
 static WXFARPROC                    fnWndProcRadioBtn = NULL;
 static WXFARPROC                    fnWndProcRadioBox = NULL;
 
@@ -67,7 +66,9 @@ wxRadioBox::wxRadioBox()
 {
     m_nSelectedButton = -1;
     m_nNoItems = 0;
+    m_nNoRowsOrCols = 0;
     m_ahRadioButtons = NULL;
+    m_nMajorDim = 0;
     m_pnRadioWidth = NULL;
     m_pnRadioHeight = NULL;
 } // end of wxRadioBox::wxRadioBox
@@ -76,17 +77,11 @@ wxRadioBox::~wxRadioBox()
 {
     m_isBeingDeleted = true;
 
-    if (m_hWnd)
-        wxRemoveHandleAssociation(this);
     if (m_ahRadioButtons)
     {
-        for (int i = 0; i < m_nNoItems; i++)
-        {
-            wxWindow* pWin = wxFindWinFromHandle((WXHWND)m_ahRadioButtons[i]);
-            wxRemoveHandleAssociation(pWin);
-
+        int                         i;
+        for (i = 0; i < m_nNoItems; i++)
             ::WinDestroyWindow((HWND)m_ahRadioButtons[i]);
-	}
         delete[] m_ahRadioButtons;
     }
     if (m_pnRadioWidth)
@@ -94,6 +89,143 @@ wxRadioBox::~wxRadioBox()
     if (m_pnRadioHeight)
         delete[] m_pnRadioHeight;
 } // end of wxRadioBox::~wxRadioBox
+
+void wxRadioBox::AdjustButtons( int nX,
+                                int nY,
+                                int nWidth,
+                                int nHeight,
+                                int WXUNUSED(nSizeFlags) )
+{
+    wxSize vMaxSize;
+    int    nXOffset = nX;
+    int    nYOffset = nY + nHeight;
+    int    nCx1;
+    int    nCy1;
+    int    nStartX;
+    int    nStartY;
+    int    nMaxWidth;
+    int    nMaxHeight;
+    wxFont vFont = GetFont();
+
+    wxGetCharSize( m_hWnd
+                  ,&nCx1
+                  ,&nCy1
+                  ,&vFont
+                 );
+    vMaxSize   = GetMaxButtonSize();
+    nMaxWidth  = vMaxSize.x;
+    nMaxHeight = vMaxSize.y;
+
+    nXOffset += nCx1;
+    nYOffset -= (nMaxHeight + ((3*nCy1)/2));
+
+    nStartX = nXOffset;
+    nStartY = nYOffset;
+
+    for (int i = 0; i < m_nNoItems; i++)
+    {
+        //
+        // The last button in the row may be wider than the other ones as the
+        // radiobox may be wider than the sum of the button widths (as it
+        // happens, for example, when the radiobox label is very long)
+        //
+        bool                        bIsLastInTheRow;
+
+        if (m_windowStyle & wxRA_SPECIFY_COLS)
+        {
+            //
+            // Item is the last in its row if it is a multiple of the number of
+            // columns or if it is just the last item
+            //
+            int                     n = i + 1;
+
+            bIsLastInTheRow = ((n % m_nMajorDim) == 0) || (n == m_nNoItems);
+        }
+        else // winRA_SPECIFY_ROWS
+        {
+            //
+            // Item is the last in the row if it is in the last columns
+            //
+            bIsLastInTheRow = i >= (m_nNoItems/m_nMajorDim) * m_nMajorDim;
+        }
+
+        //
+        // Is this the start of new row/column?
+        //
+        if (i && (i % m_nMajorDim == 0))
+        {
+            if (m_windowStyle & wxRA_SPECIFY_ROWS)
+            {
+
+                //
+                // Start of new column
+                //
+                nYOffset = nStartY;
+                nXOffset += nMaxWidth + nCx1;
+            }
+            else // start of new row
+            {
+                nXOffset = nStartX;
+                nYOffset -= nMaxHeight;
+                if (m_pnRadioWidth[0] > 0L)
+                    nYOffset -= nCy1/2;
+            }
+        }
+
+        int                         nWidthBtn;
+
+        if (bIsLastInTheRow)
+        {
+            //
+            // Make the button go to the end of radio box
+            //
+            nWidthBtn = nStartX + nWidth - nXOffset - (2 * nCx1);
+            if (nWidthBtn < nMaxWidth)
+                nWidthBtn = nMaxWidth;
+        }
+        else
+        {
+            //
+            // Normal button, always of the same size
+            //
+            nWidthBtn = nMaxWidth;
+        }
+
+        //
+        // Make all buttons of the same, maximal size - like this they
+        // cover the radiobox entirely and the radiobox tooltips are always
+        // shown (otherwise they are not when the mouse pointer is in the
+        // radiobox part not belonging to any radiobutton)
+        //
+        ::WinSetWindowPos( (HWND)m_ahRadioButtons[i]
+                          ,HWND_BOTTOM
+                          ,(LONG)nXOffset
+                          ,(LONG)nYOffset
+                          ,(LONG)nWidthBtn
+                          ,(LONG)nMaxHeight
+                          ,SWP_ZORDER | SWP_SIZE | SWP_MOVE | SWP_SHOW
+                         );
+        //
+        // Where do we put the next button?
+        //
+        if (m_windowStyle & wxRA_SPECIFY_ROWS)
+        {
+            //
+            // Below this one
+            //
+            nYOffset -= nMaxHeight;
+            if (m_pnRadioWidth[0] > 0)
+                nYOffset -= nCy1/2;
+        }
+        else
+        {
+            //
+            // To the right of this one
+            //
+            nXOffset += nWidthBtn + nCx1;
+        }
+    }
+} // end of wxRadioBox::AdjustButtons
 
 void wxRadioBox::Command (
   wxCommandEvent&                   rEvent
@@ -153,12 +285,14 @@ bool wxRadioBox::Create(
 {
     wxColour                        vColour;
     LONG                            lColor;
-    HWND                            hWndParent = GetHwndOf(pParent);
 
     vColour.Set(wxString(wxT("BLACK")));
     m_backgroundColour = pParent->GetBackgroundColour();
     m_nSelectedButton = -1;
     m_nNoItems = 0;
+
+    m_nMajorDim     = nMajorDim == 0 ? nNum : nMajorDim;
+    m_nNoRowsOrCols = nMajorDim;
 
     //
     // Common initialization
@@ -183,11 +317,10 @@ bool wxRadioBox::Create(
     wxAssociateWinWithHandle(m_hWnd, this);
 
     //
-    // Now we can set m_nNoItems and let SetMajorDim set m_numCols/m_numRows
+    // Some radio boxes test consecutive id.
     //
     m_nNoItems = nNum;
-    SetMajorDim(nMajorDim == 0 ? nNum : nMajorDim, lStyle);
-
+    (void)NewControlId();
     m_ahRadioButtons = new WXHWND[nNum];
     m_pnRadioWidth   = new int[nNum];
     m_pnRadioHeight  = new int[nNum];
@@ -195,42 +328,41 @@ bool wxRadioBox::Create(
     for (int i = 0; i < nNum; i++)
     {
         m_pnRadioWidth[i] = m_pnRadioHeight[i] = -1;
-        long                        lStyleBtn = BS_AUTORADIOBUTTON | WS_VISIBLE;
+
+        long                        lStyleBtn = BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE;
         int                         nNewId = NewControlId();
 
         if (i == 0)
-            lStyleBtn |= WS_GROUP | WS_TABSTOP;
+            lStyleBtn |= WS_GROUP;
 
-        wxString                    sLabel = ::wxPMTextToLabel(asChoices[i]);
-
-        HWND                        hWndBtn = (WXHWND)::WinCreateWindow ( hWndParent,
-                                                                          WC_BUTTON,
-                                                                          sLabel.c_str(),
-                                                                          lStyleBtn,
-                                                                          0, 0, 0, 0,
-                                                                          hWndParent,
-                                                                          HWND_BOTTOM,
-                                                                          (HMENU)nNewId,
-                                                                          NULL,
-                                                                          NULL
+        HWND                        hWndBtn = (WXHWND)::WinCreateWindow ( GetHwndOf(pParent)
+                                                                         ,WC_BUTTON
+                                                                         ,::wxPMTextToLabel(asChoices[i])
+                                                                         ,lStyleBtn
+                                                                         ,0, 0, 0, 0
+                                                                         ,GetWinHwnd(pParent)
+                                                                         ,HWND_BOTTOM
+                                                                         ,(HMENU)nNewId
+                                                                         ,NULL
+                                                                         ,NULL
                                                                         );
-        if (!hWndBtn)
-        {
-            return false;
-        }
         lColor = (LONG)vColour.GetPixel();
         ::WinSetPresParam( hWndBtn
                           ,PP_FOREGROUNDCOLOR
                           ,sizeof(LONG)
                           ,(PVOID)&lColor
                          );
-
         lColor = (LONG)m_backgroundColour.GetPixel();
+
         ::WinSetPresParam( hWndBtn
                           ,PP_BACKGROUNDCOLOR
                           ,sizeof(LONG)
                           ,(PVOID)&lColor
                          );
+        if (!hWndBtn)
+        {
+            return false;
+        }
         m_ahRadioButtons[i] = (WXHWND)hWndBtn;
         SubclassRadioButton((WXHWND)hWndBtn);
         wxAssociateWinWithHandle(hWndBtn, this);
@@ -244,17 +376,18 @@ bool wxRadioBox::Create(
     //
     // Create a dummy control to end the group.
     //
-    (void)::WinCreateWindow ( hWndParent,
-                              WC_BUTTON,
-                              "",
-                              WS_GROUP,
-                              0, 0, 0, 0,
-                              hWndParent,
-                              HWND_TOP,
-                              (HMENU)NewControlId(),
-                              NULL,
-                              NULL
+    (void)::WinCreateWindow ( GetHwndOf(pParent)
+                             ,WC_BUTTON
+                             ,""
+                             ,WS_GROUP
+                             ,0, 0, 0, 0
+                             ,GetWinHwnd(pParent)
+                             ,HWND_TOP
+                             ,(HMENU)NewControlId()
+                             ,NULL
+                             ,NULL
                             );
+    SetFont(*wxSMALL_FONT);
     fnWndProcRadioBox = (WXFARPROC)::WinSubclassWindow( GetHwnd()
                                                        ,(PFNWP)wxRadioBoxWndProc
                                                       );
@@ -286,7 +419,7 @@ bool wxRadioBox::Create(
 wxSize wxRadioBox::DoGetBestSize() const
 {
     return (GetTotalButtonSize(GetMaxButtonSize()));
-} // end of wxRadioBox::DoGetBestSize
+} // end of WinGuiBase_CRadioBox::DoGetBestSize
 
 void wxRadioBox::DoSetSize(
   int                               nX
@@ -296,9 +429,6 @@ void wxRadioBox::DoSetSize(
 , int                               nSizeFlags
 )
 {
-    //
-    // Input parameters assume wxWidgets coordinate system
-    //
     int                             nCurrentX;
     int                             nCurrentY;
     int                             nWidthOld;
@@ -373,19 +503,22 @@ void wxRadioBox::DoSetSize(
             nHeight = nHeightOld;
     }
 
-    //
-    // Now convert to OS/2 coordinate system
-    //
     wxWindowOS2*                    pParent = (wxWindowOS2*)GetParent();
+
     if (pParent)
-        nYy = GetOS2ParentHeight(pParent) - nYy - nHeight;
+    {
+        int                         nOS2Height = GetOS2ParentHeight(pParent);
+
+        nYy = nOS2Height - (nYy + nHeight);
+        nYOffset = nYy + nHeight;
+    }
     else
     {
         RECTL                       vRect;
+
         ::WinQueryWindowRect(HWND_DESKTOP, &vRect);
-        nYy = vRect.yTop - nYy - nHeight;
+        nYy = vRect.yTop - (nYy + nHeight);
     }
-    nYOffset = nYy + nHeight;
     ::WinSetWindowPos( GetHwnd()
                       ,HWND_TOP
                       ,(LONG)nXx
@@ -430,23 +563,24 @@ void wxRadioBox::DoSetSize(
             //
             int                  n = i + 1;
 
-            bIsLastInTheRow = ((n % GetMajorDim()) == 0) || (n == m_nNoItems);
+            bIsLastInTheRow = ((n % m_nMajorDim) == 0) || (n == m_nNoItems);
         }
         else // winRA_SPECIFY_ROWS
         {
             //
             // Item is the last in the row if it is in the last columns
             //
-            bIsLastInTheRow = i >= (m_nNoItems/GetMajorDim()) * GetMajorDim();
+            bIsLastInTheRow = i >= (m_nNoItems/m_nMajorDim) * m_nMajorDim;
         }
 
         //
         // Is this the start of new row/column?
         //
-        if (i && (i % GetMajorDim() == 0))
+        if (i && (i % m_nMajorDim == 0))
         {
             if (m_windowStyle & wxRA_SPECIFY_ROWS)
             {
+
                 //
                 // Start of new column
                 //
@@ -537,12 +671,31 @@ bool wxRadioBox::Enable(
     return true;
 } // end of wxRadioBox::Enable
 
+int wxRadioBox::FindString(
+  const wxString&                   rsStr
+) const
+{
+    for (int i = 0; i < m_nNoItems; i++)
+    {
+        if (rsStr == wxGetWindowText(m_ahRadioButtons[i]) )
+            return i;
+    }
+    return wxNOT_FOUND;
+} // end of wxRadioBox::FindString
+
+int wxRadioBox::GetColumnCount() const
+{
+    return GetNumHor();
+} // end of wxRadioBox::GetColumnCount
+
 int wxRadioBox::GetCount() const
 {
     return m_nNoItems;
 } // end of wxRadioBox::GetCount
 
-wxString wxRadioBox::GetLabel(int nItem) const
+wxString wxRadioBox::GetLabel(
+  int                               nItem
+) const
 {
     wxCHECK_MSG( IsValid(nItem), wxEmptyString, wxT("invalid radiobox index") );
 
@@ -588,15 +741,95 @@ wxSize wxRadioBox::GetMaxButtonSize() const
     return maxsize;
 } // end of wxRadioBox::GetMaxButtonSize
 
+int wxRadioBox::GetNumHor() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return (m_nNoItems + m_nMajorDim - 1)/m_nMajorDim;
+    }
+    else
+    {
+        return m_nMajorDim;
+    }
+} // end of wxRadioBox::GetNumHor
+
+int wxRadioBox::GetNumVer() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return m_nMajorDim;
+    }
+    else
+    {
+        return (m_nNoItems + m_nMajorDim - 1)/m_nMajorDim;
+    }
+} // end of wxRadioBox::GetNumVer
+
+void wxRadioBox::GetPosition( int* pnX,
+                              int* WXUNUSED(pnY) ) const
+{
+    wxWindowOS2*                    pParent = GetParent();
+    RECT                            vRect = { -1, -1, -1, -1 };
+    POINTL                          vPoint;
+    int                             i;
+
+    for (i = 0; i < m_nNoItems; i++)
+        wxFindMaxSize( m_ahRadioButtons[i]
+                      ,&vRect
+                     );
+    if (m_hWnd)
+        wxFindMaxSize( m_hWnd
+                      ,&vRect
+                     );
+
+    //
+    // Since we now have the absolute screen coords, if there's a parent we
+    // must subtract its top left corner
+    //
+    vPoint.x = vRect.xLeft;
+    vPoint.y = vRect.yTop;
+    if (pParent)
+    {
+        SWP                             vSwp;
+
+        ::WinQueryWindowPos((HWND)pParent->GetHWND(), &vSwp);
+        vPoint.x = vSwp.x;
+        vPoint.y = vSwp.y;
+    }
+
+    //
+    // We may be faking the client origin. So a window that's really at (0, 30)
+    // may appear (to wxWin apps) to be at (0, 0).
+    //
+    if (GetParent())
+    {
+        wxPoint                     vPt(GetParent()->GetClientAreaOrigin());
+
+        vPoint.x = vPt.x;
+        vPoint.y = vPt.y;
+    }
+    if (pnX)
+        *pnX = vPoint.y;
+} // end of wxRadioBox::GetPosition
+
+int wxRadioBox::GetRowCount() const
+{
+    return GetNumVer();
+} // end of wxRadioBox::GetRowCount
+
 // Get single selection, for single choice list items
 int wxRadioBox::GetSelection() const
 {
     return m_nSelectedButton;
 } // end of wxRadioBox::GetSelection
 
-void wxRadioBox::GetSize( int* pnWidth, int* pnHeight ) const
+void wxRadioBox::GetSize(
+  int*                              pnWidth
+, int*                              pnHeight
+) const
 {
     RECT                            vRect;
+    int                             i;
 
     vRect.xLeft   = -1;
     vRect.xRight  = -1;
@@ -608,7 +841,7 @@ void wxRadioBox::GetSize( int* pnWidth, int* pnHeight ) const
                       ,&vRect
                      );
 
-    for (int i = 0; i < m_nNoItems; i++)
+    for (i = 0; i < m_nNoItems; i++)
         wxFindMaxSize( m_ahRadioButtons[i]
                       ,&vRect
                      );
@@ -624,7 +857,6 @@ wxString wxRadioBox::GetString(
   int                               nNum
 ) const
 {
-    wxCHECK_MSG( IsValid(nNum), wxString(""), wxT("invalid radiobox index") );
     return wxGetWindowText(m_ahRadioButtons[nNum]);
 } // end of wxRadioBox::GetString
 
@@ -649,8 +881,8 @@ wxSize wxRadioBox::GetTotalButtonSize( const wxSize& rSizeBtn ) const
 
     nCx1 = GetCharWidth();
     nCy1 = GetCharHeight();
-    nHeight = GetRowCount() * rSizeBtn.y + (2 * nCy1);
-    nWidth  = GetColumnCount() * (rSizeBtn.x + nCx1) + nCx1;
+    nHeight = GetNumVer() * rSizeBtn.y + (2 * nCy1);
+    nWidth  = GetNumHor() * (rSizeBtn.x + nCx1) + nCx1;
 
     //
     // And also wide enough for its label
@@ -703,6 +935,7 @@ bool wxRadioBox::OS2Command( WXUINT uCmd,
     {
         if (wId == GetId())
             return true;
+
 
         for (int i = 0; i < m_nNoItems; i++)
         {
@@ -804,9 +1037,11 @@ void wxRadioBox::SetString(
     ::WinSetWindowText((HWND)m_ahRadioButtons[nItem], (PSZ)rsLabel.c_str());
 } // end of wxRadioBox::SetString
 
-bool wxRadioBox::SetStringSelection(const wxString& rsStr)
+bool wxRadioBox::SetStringSelection(
+  const wxString&                   rsStr
+)
 {
-    int nSel = FindString(rsStr);
+    int                             nSel = FindString(rsStr);
 
     if (nSel > -1)
     {
@@ -951,14 +1186,17 @@ MRESULT wxRadioBtnWndProc(
                             );
 } // end of wxRadioBtnWndProc
 
-MRESULT EXPENTRY wxRadioBoxWndProc( HWND hWnd,
-                                    UINT uMessage,
-                                    MPARAM wParam,
-                                    MPARAM lParam )
+MRESULT EXPENTRY wxRadioBoxWndProc(
+  HWND                              hWnd
+, UINT                              uMessage
+, MPARAM                            wParam
+, MPARAM                            lParam
+)
 {
-    return (fnWndProcRadioBox( hWnd,
-                               (ULONG)uMessage,
-                               (MPARAM)wParam,
-                               (MPARAM)lParam )
+    return (fnWndProcRadioBox( hWnd
+                              ,(ULONG)uMessage
+                              ,(MPARAM)wParam
+                              ,(MPARAM)lParam
+                             )
            );
 } // end of wxRadioBoxWndProc

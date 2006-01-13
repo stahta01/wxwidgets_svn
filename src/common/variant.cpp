@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "variant.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -36,7 +40,6 @@ using namespace std ;
 
 #include "wx/string.h"
 #include "wx/tokenzr.h"
-#include "wx/math.h"
 
 #include "wx/variant.h"
 
@@ -56,7 +59,7 @@ public:
     wxVariantDataList(const wxList& list);
     ~wxVariantDataList();
 
-    wxList& GetValue() { return m_value; }
+    wxList& GetValue() const { return (wxList&) m_value; }
     void SetValue(const wxList& value) ;
 
     virtual void Copy(wxVariantData& data);
@@ -455,7 +458,7 @@ bool wxVariantDataReal::Eq(wxVariantData& data) const
 
     wxVariantDataReal& otherData = (wxVariantDataReal&) data;
 
-    return wxIsSameDouble(otherData.m_value, m_value);
+    return (otherData.m_value == m_value);
 }
 
 #if wxUSE_STD_IOSTREAM
@@ -875,7 +878,7 @@ bool wxVariantDataVoidPtr::Write(wxSTD ostream& str) const
 
 bool wxVariantDataVoidPtr::Write(wxString& str) const
 {
-    str.Printf(wxT("%p"), m_value);
+    str.Printf(wxT("%ld"), (long) m_value);
     return true;
 }
 
@@ -979,7 +982,7 @@ bool wxVariantDataWxObjectPtr::Write(wxSTD ostream& str) const
 
 bool wxVariantDataWxObjectPtr::Write(wxString& str) const
 {
-    str.Printf(wxT("%s(%p)"), GetType().c_str(), m_value);
+    str.Printf(wxT("%s(%ld)"), GetType().c_str(), (long) m_value);
     return true;
 }
 
@@ -1392,8 +1395,8 @@ bool wxVariant::operator== (double value) const
     double thisValue;
     if (!Convert(&thisValue))
         return false;
-
-    return wxIsSameDouble(value, thisValue);
+    else
+        return (value == thisValue);
 }
 
 bool wxVariant::operator!= (double value) const
@@ -1935,7 +1938,7 @@ wxStringList& wxVariant::GetStringList() const
 void wxVariant::NullList()
 {
     SetData(new wxVariantDataList());
-}
+};
 
 // Append to list
 void wxVariant::Append(const wxVariant& value)

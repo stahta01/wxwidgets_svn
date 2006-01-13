@@ -16,12 +16,15 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gdicmn.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/list.h"
 #include "wx/string.h"
 #include "wx/fontenc.h"
 #include "wx/hashmap.h"
-#include "wx/math.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -214,10 +217,10 @@ public:
     bool operator==(const wxSize& sz) const { return x == sz.x && y == sz.y; }
     bool operator!=(const wxSize& sz) const { return x != sz.x || y != sz.y; }
 
-    wxSize operator+(const wxSize& sz) const { return wxSize(x + sz.x, y + sz.y); }
-    wxSize operator-(const wxSize& sz) const { return wxSize(x - sz.x, y - sz.y); }
-    wxSize operator/(int i) const { return wxSize(x / i, y / i); }
-    wxSize operator*(int i) const { return wxSize(x * i, y * i); }
+    wxSize operator+(const wxSize& sz) { return wxSize(x + sz.x, y + sz.y); }
+    wxSize operator-(const wxSize& sz) { return wxSize(x - sz.x, y - sz.y); }
+    wxSize operator/(const int i) { return wxSize(x / i, y / i); }
+    wxSize operator*(const int i) { return wxSize(x * i, y * i); }
 
     wxSize& operator+=(const wxSize& sz) { x += sz.x; y += sz.y; return *this; }
     wxSize& operator-=(const wxSize& sz) { x -= sz.x; y -= sz.y; return *this; }
@@ -270,13 +273,9 @@ public:
     wxRealPoint operator+(const wxRealPoint& pt) const { return wxRealPoint(x + pt.x, y + pt.y); }
     wxRealPoint operator-(const wxRealPoint& pt) const { return wxRealPoint(x - pt.x, y - pt.y); }
 
-    bool operator==(const wxRealPoint& pt) const
-    {
-        return wxIsSameDouble(x, pt.x) && wxIsSameDouble(y, pt.y);
-    }
-    bool operator!=(const wxRealPoint& pt) const { return !(*this == pt); }
+    bool operator==(const wxRealPoint& pt) const { return x == pt.x && y == pt.y; }
+    bool operator!=(const wxRealPoint& pt) const { return x != pt.x || y != pt.y; }
 };
-
 
 class WXDLLEXPORT wxPoint
 {

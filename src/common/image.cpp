@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/image.cpp
+// Name:        image.cpp
 // Purpose:     wxImage
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "image.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -380,7 +384,7 @@ wxImage wxImage::ShrinkBy( int xFactor , int yFactor ) const
         }
     }
 
-    // In case this is a cursor, make sure the hotspot is scaled accordingly:
+    // In case this is a cursor, make sure the hotspot is scalled accordingly:
     if ( HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_X) )
         image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X,
                 (GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X))/xFactor);
@@ -466,7 +470,7 @@ wxImage wxImage::Scale( int width, int height ) const
         y += y_delta;
     }
 
-    // In case this is a cursor, make sure the hotspot is scaled accordingly:
+    // In case this is a cursor, make sure the hotspot is scalled accordingly:
     if ( HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_X) )
         image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X,
                 (GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X)*width)/old_width);
@@ -1763,36 +1767,29 @@ wxString wxImage::GetImageExtWildcard()
 
 wxImage::HSVValue wxImage::RGBtoHSV(const RGBValue& rgb)
 {
+    double hue, saturation, value;
+
     const double red = rgb.red / 255.0,
                  green = rgb.green / 255.0,
                  blue = rgb.blue / 255.0;
 
-    // find the min and max intensity (and remember which one was it for the
-    // latter)
     double minimumRGB = red;
-    if ( green < minimumRGB )
+    if (green < minimumRGB)
         minimumRGB = green;
-    if ( blue < minimumRGB )
+
+    if (blue < minimumRGB)
         minimumRGB = blue;
 
-    enum { RED, GREEN, BLUE } chMax = RED;
     double maximumRGB = red;
-    if ( green > maximumRGB )
-    {
-        chMax = GREEN;
+    if (green > maximumRGB)
         maximumRGB = green;
-    }
-    if ( blue > maximumRGB )
-    {
-        chMax = BLUE;
+
+    if (blue > maximumRGB)
         maximumRGB = blue;
-    }
 
-    const double value = maximumRGB;
+    value = maximumRGB;
 
-    double hue = 0.0, saturation;
-    const double deltaRGB = maximumRGB - minimumRGB;
-    if ( wxIsNullDouble(deltaRGB) )
+    if (maximumRGB == minimumRGB)
     {
         // Gray has no color
         hue = 0.0;
@@ -1800,31 +1797,21 @@ wxImage::HSVValue wxImage::RGBtoHSV(const RGBValue& rgb)
     }
     else
     {
-        switch ( chMax )
-        {
-            case RED:
-                hue = (green - blue) / deltaRGB;
-                break;
-
-            case GREEN:
-                hue = 2.0 + (blue - red) / deltaRGB;
-                break;
-
-            case BLUE:
-                hue = 4.0 + (red - green) / deltaRGB;
-                break;
-
-            default:
-                wxFAIL_MSG(wxT("hue not specified"));
-                break;
-        }
-
-        hue /= 6.0;
-
-        if ( hue < 0.0 )
-            hue += 1.0;
+        double deltaRGB = maximumRGB - minimumRGB;
 
         saturation = deltaRGB / maximumRGB;
+
+        if ( red == maximumRGB )
+            hue = (green - blue) / deltaRGB;
+        else if (green == maximumRGB)
+            hue = 2.0 + (blue - red) / deltaRGB;
+        else
+            hue = 4.0 + (red - green) / deltaRGB;
+
+        hue = hue / 6.0;
+
+        if (hue < 0.0)
+            hue = hue + 1.0;
     }
 
     return HSVValue(hue, saturation, value);
@@ -1834,14 +1821,13 @@ wxImage::RGBValue wxImage::HSVtoRGB(const HSVValue& hsv)
 {
     double red, green, blue;
 
-    if ( wxIsNullDouble(hsv.saturation) )
+    if ( hsv.saturation == 0.0 )
     {
-        // Grey
-        red = hsv.value;
+        red = hsv.value; //Grey
         green = hsv.value;
-        blue = hsv.value;
+        blue = hsv.value; 
     }
-    else // not grey
+    else
     {
         double hue = hsv.hue * 6.0;      // sector 0 to 5
         int i = (int)floor(hue);
@@ -1907,7 +1893,7 @@ void wxImage::RotateHue(double angle)
 
     wxASSERT (angle >= -1.0 && angle <= 1.0);
     count = M_IMGDATA->m_width * M_IMGDATA->m_height;
-    if ( count > 0 && !wxIsNullDouble(angle) )
+    if (count > 0 && angle != 0.0)
     {
         srcBytePtr = M_IMGDATA->m_data;
         dstBytePtr = srcBytePtr;
@@ -2191,20 +2177,20 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
     wxRealPoint p3 = rotated_point (GetWidth(), 0, cos_angle, sin_angle, p0);
     wxRealPoint p4 = rotated_point (GetWidth(), GetHeight(), cos_angle, sin_angle, p0);
 
-    int x1a = (int) floor (wxMin (wxMin(p1.x, p2.x), wxMin(p3.x, p4.x)));
-    int y1a = (int) floor (wxMin (wxMin(p1.y, p2.y), wxMin(p3.y, p4.y)));
-    int x2a = (int) ceil (wxMax (wxMax(p1.x, p2.x), wxMax(p3.x, p4.x)));
-    int y2a = (int) ceil (wxMax (wxMax(p1.y, p2.y), wxMax(p3.y, p4.y)));
+    int x1 = (int) floor (wxMin (wxMin(p1.x, p2.x), wxMin(p3.x, p4.x)));
+    int y1 = (int) floor (wxMin (wxMin(p1.y, p2.y), wxMin(p3.y, p4.y)));
+    int x2 = (int) ceil (wxMax (wxMax(p1.x, p2.x), wxMax(p3.x, p4.x)));
+    int y2 = (int) ceil (wxMax (wxMax(p1.y, p2.y), wxMax(p3.y, p4.y)));
 
     // Create rotated image
-    wxImage rotated (x2a - x1a + 1, y2a - y1a + 1, false);
+    wxImage rotated (x2 - x1 + 1, y2 - y1 + 1, false);
     // With alpha channel
     if (has_alpha)
         rotated.SetAlpha();
 
     if (offset_after_rotation != NULL)
     {
-        *offset_after_rotation = wxPoint (x1a, y1a);
+        *offset_after_rotation = wxPoint (x1, y1);
     }
 
     // GRG: The rotated (destination) image is always accessed
@@ -2246,7 +2232,7 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
         {
             for (x = 0; x < rotated.GetWidth(); x++)
             {
-                wxRealPoint src = rotated_point (x + x1a, y + y1a, cos_angle, -sin_angle, p0);
+                wxRealPoint src = rotated_point (x + x1, y + y1, cos_angle, -sin_angle, p0);
 
                 if (-0.25 < src.x && src.x < GetWidth() - 0.75 &&
                     -0.25 < src.y && src.y < GetHeight() - 0.75)
@@ -2254,6 +2240,8 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                     // interpolate using the 4 enclosing grid-points.  Those
                     // points can be obtained using floor and ceiling of the
                     // exact coordinates of the point
+                        // C.M. 2000-02-17:  when the point is near the border, special care is required.
+
                     int x1, y1, x2, y2;
 
                     if (0 < src.x && src.x < GetWidth() - 1)
@@ -2303,7 +2291,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y1] + x1);
+                        {
+                            unsigned char *p = alpha[y1] + x1;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d2 < gs_Epsilon)
                     {
@@ -2313,7 +2304,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y1] + x2);
+                        {
+                            unsigned char *p = alpha[y1] + x2;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d3 < gs_Epsilon)
                     {
@@ -2323,7 +2317,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y2] + x2);
+                        {
+                            unsigned char *p = alpha[y2] + x2;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d4 < gs_Epsilon)
                     {
@@ -2333,7 +2330,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y2] + x1);
+                        {
+                            unsigned char *p = alpha[y2] + x1;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else
                     {
@@ -2362,10 +2362,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
 
                         if (has_alpha)
                         {
-                            v1 = alpha[y1] + (x1);
-                            v2 = alpha[y1] + (x2);
-                            v3 = alpha[y2] + (x2);
-                            v4 = alpha[y2] + (x1);
+                            unsigned char *v1 = alpha[y1] + (x1);
+                            unsigned char *v2 = alpha[y1] + (x2);
+                            unsigned char *v3 = alpha[y2] + (x2);
+                            unsigned char *v4 = alpha[y2] + (x1);
 
                             *(alpha_dst++) = (unsigned char)
                                 ( (w1 * *v1 + w2 * *v2 +
@@ -2392,7 +2392,7 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
         {
             for (x = 0; x < rotated.GetWidth(); x++)
             {
-                wxRealPoint src = rotated_point (x + x1a, y + y1a, cos_angle, -sin_angle, p0);
+                wxRealPoint src = rotated_point (x + x1, y + y1, cos_angle, -sin_angle, p0);
 
                 const int xs = wxCint (src.x);      // wxCint rounds to the
                 const int ys = wxCint (src.y);      // closest integer
@@ -2406,7 +2406,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                     *(dst++) = *p;
 
                     if (has_alpha)
-                        *(alpha_dst++) = *(alpha[ys] + (xs));
+                    {
+                        unsigned char *p = alpha[ys] + (xs);
+                        *(alpha_dst++) = *p;
+                    }
                 }
                 else
                 {

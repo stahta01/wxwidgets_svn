@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "minifram.h"
+#endif
+
 #include "wx/minifram.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMiniFrame, wxFrame)

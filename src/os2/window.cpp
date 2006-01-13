@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/window.cpp
+// Name:        windows.cpp
 // Purpose:     wxWindow
 // Author:      David Webster
 // Modified by:
@@ -410,7 +410,9 @@ bool wxWindowOS2::Create( wxWindow*       pParent,
         pParent->AddChild(this);
         hParent = GetWinHwnd(pParent);
 
-        if (pParent->IsKindOf(CLASSINFO(wxScrolledWindow)))
+        if ( pParent->IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
+             pParent->IsKindOf(CLASSINFO(wxScrolledWindow))
+           )
             ulCreateFlags |= WS_CLIPSIBLINGS;
     }
 
@@ -574,15 +576,15 @@ void wxWindowOS2::Lower()
     ::WinSetWindowPos(GetHwnd(), HWND_BOTTOM, 0, 0, 0, 0, SWP_ZORDER | SWP_DEACTIVATE);
 } // end of wxWindowOS2::Lower
 
-void wxWindowOS2::SetLabel( const wxString& label )
+void wxWindowOS2::SetTitle( const wxString& rTitle )
 {
-    ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
-} // end of wxWindowOS2::SetLabel
+    ::WinSetWindowText(GetHwnd(), (PSZ)rTitle.c_str());
+} // end of wxWindowOS2::SetTitle
 
-wxString wxWindowOS2::GetLabel() const
+wxString wxWindowOS2::GetTitle() const
 {
     return wxGetWindowText(GetHWND());
-} // end of wxWindowOS2::GetLabel
+} // end of wxWindowOS2::GetTitle
 
 void wxWindowOS2::DoCaptureMouse()
 {
@@ -1302,7 +1304,7 @@ void wxWindowOS2::DoGetPosition(
     //
     // Return parameters assume wxWidgets coordinate system
     //
-    HWND                            hWnd;
+    HWND                            hWnd = GetHwnd();
     SWP                             vSwp;
     POINTL                          vPoint;
     wxWindow*                       pParent = GetParent();
@@ -1550,7 +1552,9 @@ void wxWindowOS2::DoMoveWindow(
         // which will cause the scrollbars to be displayed via the SetScrollbar
         // call in CWindow.
         //
-        if (IsKindOf(CLASSINFO(wxScrolledWindow)))
+        if ( IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
+             IsKindOf(CLASSINFO(wxScrolledWindow))
+           )
         {
             int                     nAdjustWidth  = 0;
             int                     nAdjustHeight = 0;
@@ -1678,7 +1682,6 @@ void wxWindowOS2::DoSetClientSize( int nWidth,
     int nY;
 
     GetPosition(&nX, &nY);
-
     DoMoveWindow( nX, nY, nWidth, nHeight );
 
     wxSize size( nWidth, nHeight );
@@ -1742,7 +1745,7 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
 
     hPS = ::WinGetPS(GetHwnd());
 
-    l = rString.length();
+    l = rString.Length();
     if (l > 0L)
     {
         pStr = (PCH)rString.c_str();
@@ -1750,12 +1753,12 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
         //
         // In world coordinates.
         //
-        bRc = ::GpiQueryTextBox( hPS,
-                                 l,
-                                 pStr,
-                                 TXTBOX_COUNT,// return maximum information
-                                 avPoint      // array of coordinates points
-                                );
+        bRc = ::GpiQueryTextBox( hPS
+                                ,l
+                                ,pStr
+                                ,TXTBOX_COUNT // return maximum information
+                                ,avPoint      // array of coordinates points
+                               );
         if (bRc)
         {
             vPtMin.x = avPoint[0].x;
@@ -1843,7 +1846,9 @@ bool wxWindowOS2::IsMouseInWindow() const
 // ---------------------------------------------------------------------------
 //
 #if wxUSE_MENUS_NATIVE
-bool wxWindowOS2::DoPopupMenu( wxMenu* pMenu, int nX, int nY )
+bool wxWindowOS2::DoPopupMenu( wxMenu* pMenu,
+                               int nX,
+                               int nY )
 {
     HWND hWndOwner = GetHwnd();
     HWND hWndParent = GetHwnd();
@@ -2912,7 +2917,7 @@ void wxAssociateWinWithHandle(
 
     if (pOldWin && (pOldWin != pWin))
     {
-        wxString  Newstr(pWin->GetClassInfo()->GetClassName());
+        wxString Newstr(pWin->GetClassInfo()->GetClassName());
         wxString Oldstr(pOldWin->GetClassInfo()->GetClassName());
         wxLogError( _T("Bug! New window of class %s has same HWND %X as old window of class %s"),
                     Newstr.c_str(),
@@ -3751,12 +3756,14 @@ bool wxWindowOS2::HandleEraseBkgnd( WXHDC hDC )
     return true;
 } // end of wxWindowOS2::HandleEraseBkgnd
 
-void wxWindowOS2::OnEraseBackground(wxEraseEvent& rEvent)
+void wxWindowOS2::OnEraseBackground(
+  wxEraseEvent&                     rEvent
+)
 {
-    RECTL   vRect;
-    HPS     hPS = rEvent.GetDC()->GetHPS();
-    APIRET  rc;
-    LONG    lColor = m_backgroundColour.GetPixel();
+    RECTL                           vRect;
+    HPS                             hPS = rEvent.m_dc->m_hPS;
+    APIRET                          rc;
+    LONG                            lColor = m_backgroundColour.GetPixel();
 
     rc = ::WinQueryWindowRect(GetHwnd(), &vRect);
     rc = ::WinFillRect(hPS, &vRect, lColor);
@@ -3809,15 +3816,25 @@ bool wxWindowOS2::HandleGetMinMaxInfo( PSWP pSwp )
     switch(pSwp->fl)
     {
         case SWP_MAXIMIZE:
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
             ::WinGetMaxPosition(GetHwnd(), pSwp);
             m_maxWidth = pSwp->cx;
             m_maxHeight = pSwp->cy;
+#endif
             break;
 
         case SWP_MINIMIZE:
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
             ::WinGetMinPosition(GetHwnd(), pSwp, &vPoint);
             m_minWidth = pSwp->cx;
             m_minHeight = pSwp->cy;
+#else
+            wxUnusedVar(vPoint);
+#endif
             break;
 
         default:
@@ -3876,7 +3893,7 @@ bool wxWindowOS2::HandleSysCommand( WXWPARAM wParam,
 // ---------------------------------------------------------------------------
 // mouse events
 // ---------------------------------------------------------------------------
-//TODO: check against MSW
+//TODO!!! check against MSW
 void wxWindowOS2::InitMouseEvent(
   wxMouseEvent&                     rEvent
 , int                               nX
@@ -4260,39 +4277,39 @@ int wxWindowOS2::GetOS2ParentHeight( wxWindowOS2* pParent )
 {
     if (pParent)
     {
-    //
-    // Case 1
-    //
+        //
+        // Case 1
+        //
         if (pParent->IsKindOf(CLASSINFO(wxDialog)))
             return(pParent->GetClientSize().y);
 
-    //
-    // Case 2 -- if we are one of the separately built standard Frame
-    //           children, like a statusbar, menubar, or toolbar we want to
-    //           use the frame, itself, for positioning.  Otherwise we are
-    //           child window and want to use the Frame's client.
-    //
+        //
+        // Case 2 -- if we are one of the separately built standard Frame
+        //           children, like a statusbar, menubar, or toolbar we want to
+        //           use the frame, itself, for positioning.  Otherwise we are
+        //           child window and want to use the Frame's client.
+        //
         else if (pParent->IsKindOf(CLASSINFO(wxFrame)))
         {
             if (IsKindOf(CLASSINFO(wxStatusBar)) ||
                 IsKindOf(CLASSINFO(wxMenuBar))   ||
                 IsKindOf(CLASSINFO(wxToolBar))
-               )
+                )
             {
                 if (IsKindOf(CLASSINFO(wxToolBar)))
                 {
-                    wxFrame*        pFrame = wxDynamicCast(GetParent(), wxFrame);
+                    wxFrame*            pFrame = wxDynamicCast(GetParent(), wxFrame);
 
                     if (pFrame->GetToolBar() == this)
                         return(pParent->GetSize().y);
                     else
-                        return(pParent->GetClientSize().y);
+                      return(pParent->GetClientSize().y);
                 }
                 else
                     return(pParent->GetSize().y);
             }
             else
-                return(pParent->GetClientSize().y);
+              return(pParent->GetClientSize().y);
         }
         //
         // Case -- this is for any window that is the sole child of a Frame.
@@ -5008,21 +5025,25 @@ static void TranslateKbdEventToMouse(
 
 // Find the wxWindow at the current mouse position, returning the mouse
 // position.
-wxWindow* wxFindWindowAtPointer(wxPoint& WXUNUSED(rPt))
+wxWindow* wxFindWindowAtPointer(
+  wxPoint&                          WXUNUSED(rPt)
+)
 {
     return wxFindWindowAtPoint(wxGetMousePosition());
 }
 
-wxWindow* wxFindWindowAtPoint(const wxPoint& rPt)
+wxWindow* wxFindWindowAtPoint(
+  const wxPoint&                    rPt
+)
 {
-    POINTL vPt2;
+    POINTL                          vPt2;
 
     vPt2.x = rPt.x;
     vPt2.y = rPt.y;
 
-    HWND      hWndHit = ::WinWindowFromPoint(HWND_DESKTOP, &vPt2, FALSE);
-    wxWindow* pWin = wxFindWinFromHandle((WXHWND)hWndHit) ;
-    HWND      hWnd = hWndHit;
+    HWND                            hWndHit = ::WinWindowFromPoint(HWND_DESKTOP, &vPt2, FALSE);
+    wxWindow*                       pWin = wxFindWinFromHandle((WXHWND)hWndHit) ;
+    HWND                            hWnd = hWndHit;
 
     //
     // Try to find a window with a wxWindow associated with it

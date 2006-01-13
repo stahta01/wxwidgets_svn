@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "framebase.h"
+#endif
+
 #include "wx/toplevel.h"      // the base class
 
 // the default names for various classs
@@ -172,6 +176,11 @@ public:
     // show help text (typically in the statusbar); show is false
     // if you are hiding the help, true otherwise
     virtual void DoGiveHelp(const wxString& text, bool show);
+
+#if WXWIN_COMPATIBILITY_2_2
+    // call this to simulate a menu command
+    wxDEPRECATED( bool Command(int winid) );
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // the frame main menu/status/tool bars

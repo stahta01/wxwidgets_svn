@@ -53,10 +53,6 @@ static Atom _NET_SUPPORTED = 0;
     if (name == 0) name = XInternAtom((display), #name, False)
 
 
-// X11 Window is an int type, so use the macro to suppress warnings when
-// converting to it
-#define WindowCast(w) (Window)(wxPtrToUInt(w))
-
 // Is the window mapped?
 static bool IsMapped(Display *display, Window window)
 {
@@ -163,7 +159,7 @@ void wxSetIconsX11( WXDisplay* display, WXWindow window,
         }
 
         XChangeProperty( (Display*)display,
-                         WindowCast(window),
+                         (Window)window,
                          _NET_WM_ICON,
                          XA_CARDINAL, 32,
                          PropModeReplace,
@@ -173,10 +169,10 @@ void wxSetIconsX11( WXDisplay* display, WXWindow window,
     else
     {
         XDeleteProperty( (Display*)display,
-                         WindowCast(window),
+                         (Window)window,
                          _NET_WM_ICON );
     }
-#endif // !wxUSE_NANOX
+#endif
 }
 
 
@@ -190,7 +186,7 @@ void wxSetIconsX11( WXDisplay* display, WXWindow window,
 //     fullscreen is to remove decorations, resize it to cover entire screen
 //     and set WIN_LAYER_ABOVE_DOCK.
 //
-//     This doesn't always work, though. Specifically, at least kwin from
+//     This doesn't always work, though. Specifically, at least kwin from 
 //     KDE 3 ignores the hint. The only way to make kwin accept our request
 //     is to emulate the way Qt does it. That is, unmap the window, set
 //     _NET_WM_WINDOW_TYPE to _KDE_NET_WM_WINDOW_TYPE_OVERRIDE (KDE extension),
@@ -202,13 +198,13 @@ void wxSetIconsX11( WXDisplay* display, WXWindow window,
 //     window state which provides cleanest and simplest possible way of
 //     making a window fullscreen. WM-spec is a de-facto standard adopted
 //     by GNOME and KDE folks, but _NET_WM_STATE_FULLSCREEN isn't yet widely
-//     supported. As of January 2003, only GNOME 2's default WM Metacity
+//     supported. As of January 2003, only GNOME 2's default WM Metacity 
 //     implements, KDE will support it from version 3.2. At toolkits level,
 //     GTK+ >= 2.1.2 uses it as the only method of making windows fullscreen
 //     (that's why wxGTK will *not* switch to using gtk_window_fullscreen
 //     unless it has better compatibility with older WMs).
 //
-//
+//     
 //     This is what wxWidgets does in wxSetFullScreenStateX11:
 //       1) if _NET_WM_STATE_FULLSCREEN is supported, use it
 //       2) otherwise try WM-specific hacks (KDE, IceWM)
@@ -224,7 +220,7 @@ static void wxWinHintsSetLayer(Display *display, Window rootWnd,
                                Window window, int layer)
 {
     wxX11ErrorsSuspender noerrors(display);
-
+    
     XEvent xev;
 
     wxMAKE_ATOM( _WIN_LAYER, display );
@@ -268,7 +264,7 @@ static bool wxQueryWMspecSupport(Display *display, Window rootWnd, Atom feature)
 {
     wxMAKE_ATOM(_NET_SUPPORTING_WM_CHECK, display);
     wxMAKE_ATOM(_NET_SUPPORTED, display);
-
+      
     // FIXME: We may want to cache these checks. Note that we can't simply
     //        remember the results in global variable because the WM may go
     //        away and be replaced by another one! One possible approach
@@ -283,21 +279,21 @@ static bool wxQueryWMspecSupport(Display *display, Window rootWnd, Atom feature)
     //        is replaced by another one). This is what GTK+ 2 does.
     //        Let's do it only if it is needed, it requires changes to
     //        the event loop.
-
+  
     Atom type;
     Window *wins;
     Atom *atoms;
     int format;
     unsigned long after;
     unsigned long nwins, natoms;
-
+    
     // Is the WM ICCCM supporting?
     XGetWindowProperty(display, rootWnd,
                        _NET_SUPPORTING_WM_CHECK, 0, LONG_MAX,
                        False, XA_WINDOW, &type, &format, &nwins,
                        &after, (unsigned char **)&wins);
     if ( type != XA_WINDOW || nwins <= 0 || wins[0] == None )
-       return false;
+       return FALSE;
     XFree(wins);
 
     // Query for supported features:
@@ -306,7 +302,7 @@ static bool wxQueryWMspecSupport(Display *display, Window rootWnd, Atom feature)
                        False, XA_ATOM, &type, &format, &natoms,
                        &after, (unsigned char **)&atoms);
     if ( type != XA_ATOM || atoms == NULL )
-        return false;
+        return FALSE;
 
     // Lookup the feature we want:
     for (unsigned i = 0; i < natoms; i++)
@@ -314,11 +310,11 @@ static bool wxQueryWMspecSupport(Display *display, Window rootWnd, Atom feature)
         if ( atoms[i] == feature )
         {
             XFree(atoms);
-            return true;
+            return TRUE;
         }
     }
     XFree(atoms);
-    return false;
+    return FALSE;
 }
 #endif
 
@@ -330,7 +326,7 @@ static void wxWMspecSetState(Display *display, Window rootWnd,
                              Window window, int operation, Atom state)
 {
     wxMAKE_ATOM(_NET_WM_STATE, display);
-
+  
     if ( IsMapped(display, window) )
     {
         XEvent xev;
@@ -345,7 +341,7 @@ static void wxWMspecSetState(Display *display, Window rootWnd,
         xev.xclient.data.l[0] = operation;
         xev.xclient.data.l[1] = state;
         xev.xclient.data.l[2] = None;
-
+  
         XSendEvent(display, rootWnd,
                    False,
                    SubstructureRedirectMask | SubstructureNotifyMask,
@@ -371,7 +367,7 @@ static void wxWMspecSetFullscreen(Display *display, Window rootWnd,
 static bool wxKwinRunning(Display *display, Window rootWnd)
 {
     wxMAKE_ATOM(KWIN_RUNNING, display);
-
+    
     long *data;
     Atom type;
     int format;
@@ -381,7 +377,7 @@ static bool wxKwinRunning(Display *display, Window rootWnd)
                            &type, &format, &nitems, &after,
                            (unsigned char**)&data) != Success)
     {
-        return false;
+        return FALSE;
     }
 
     bool retval = (type == KWIN_RUNNING &&
@@ -390,7 +386,7 @@ static bool wxKwinRunning(Display *display, Window rootWnd)
     return retval;
 }
 
-// KDE's kwin is Qt-centric so much than no normal method of fullscreen
+// KDE's kwin is Qt-centric so much than no normal method of fullscreen 
 // mode will work with it. We have to carefully emulate the Qt way.
 static void wxSetKDEFullscreen(Display *display, Window rootWnd,
                                Window w, bool fullscreen, wxRect *origRect)
@@ -418,7 +414,7 @@ static void wxSetKDEFullscreen(Display *display, Window rootWnd,
 
     // it is necessary to unmap the window, otherwise kwin will ignore us:
     XSync(display, False);
-
+    
     bool wasMapped = IsMapped(display, w);
     if (wasMapped)
     {
@@ -427,7 +423,7 @@ static void wxSetKDEFullscreen(Display *display, Window rootWnd,
     }
 
     XChangeProperty(display, w, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,
-                    PropModeReplace, (unsigned char *) &data[0], lng);
+	                PropModeReplace, (unsigned char *) &data, lng);
     XSync(display, False);
 
     if (wasMapped)
@@ -435,8 +431,8 @@ static void wxSetKDEFullscreen(Display *display, Window rootWnd,
         XMapRaised(display, w);
         XSync(display, False);
     }
-
-    wxWMspecSetState(display, rootWnd, w,
+    
+    wxWMspecSetState(display, rootWnd, w, 
                      fullscreen ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE,
                      _NET_WM_STATE_STAYS_ON_TOP);
     XSync(display, False);
@@ -446,8 +442,8 @@ static void wxSetKDEFullscreen(Display *display, Window rootWnd,
         // NB: like many other WMs, kwin ignores the first request for a window
         //     position change after the window was mapped. This additional
         //     move+resize event will ensure that the window is restored in
-        //     exactly the same position as before it was made fullscreen
-        //     (because wxTopLevelWindow::ShowFullScreen will call SetSize, thus
+	//     exactly the same position as before it was made fullscreen
+	//     (because wxTopLevelWindow::ShowFullScreen will call SetSize, thus
         //     setting the position for the second time).
         XMoveResizeWindow(display, w,
                           origRect->x, origRect->y,
@@ -460,7 +456,7 @@ static void wxSetKDEFullscreen(Display *display, Window rootWnd,
 wxX11FullScreenMethod wxGetFullScreenMethodX11(WXDisplay* display,
                                                WXWindow rootWindow)
 {
-    Window root = WindowCast(rootWindow);
+    Window root = (Window)rootWindow;
     Display *disp = (Display*)display;
 
     // if WM supports _NET_WM_STATE_FULLSCREEN from wm-spec 1.2, use it:
@@ -471,7 +467,7 @@ wxX11FullScreenMethod wxGetFullScreenMethodX11(WXDisplay* display,
                    _T("detected _NET_WM_STATE_FULLSCREEN support"));
         return wxX11_FS_WMSPEC;
     }
-
+    
     // if the user is running KDE's kwin WM, use a legacy hack because
     // kwin doesn't understand any other method:
     if (wxKwinRunning(disp, root))
@@ -479,7 +475,7 @@ wxX11FullScreenMethod wxGetFullScreenMethodX11(WXDisplay* display,
         wxLogTrace(_T("fullscreen"), _T("detected kwin"));
         return wxX11_FS_KDE;
     }
-
+    
     // finally, fall back to ICCCM heuristic method:
     wxLogTrace(_T("fullscreen"), _T("unknown WM, using _WIN_LAYER"));
     return wxX11_FS_GENERIC;
@@ -494,8 +490,8 @@ void wxSetFullScreenStateX11(WXDisplay* display, WXWindow rootWindow,
     // NB: please see the comment under "Fullscreen mode:" title above
     //     for implications of changing this code.
 
-    Window wnd = WindowCast(window);
-    Window root = WindowCast(rootWindow);
+    Window wnd = (Window)window;
+    Window root = (Window)rootWindow;
     Display *disp = (Display*)display;
 
     if (method == wxX11_FS_AUTODETECT)
@@ -537,7 +533,7 @@ int wxCharCodeXToWX(KeySym keySym)
         case XK_Control_L:
         case XK_Control_R:
             id = WXK_CONTROL; break;
-        case XK_Meta_L:
+        case XK_Meta_L:  
         case XK_Meta_R:
             id = WXK_ALT; break;
         case XK_BackSpace:
@@ -699,7 +695,7 @@ KeySym wxCharCodeWXToX(int id)
         case WXK_RETURN:        keySym = XK_Return; break;
         case WXK_SHIFT:         keySym = XK_Shift_L; break;
         case WXK_CONTROL:       keySym = XK_Control_L; break;
-        case WXK_ALT:           keySym = XK_Meta_L; break;
+        case WXK_ALT:           keySym = XK_Meta_L; break;            
         case WXK_MENU :         keySym = XK_Menu; break;
         case WXK_PAUSE:         keySym = XK_Pause; break;
         case WXK_ESCAPE:        keySym = XK_Escape; break;
@@ -770,7 +766,7 @@ KeySym wxCharCodeWXToX(int id)
 // check current state of a key
 // ----------------------------------------------------------------------------
 
-#include "wx/app.h"
+#include <wx/app.h>
 
 bool wxGetKeyState(wxKeyCode key)
 {
@@ -786,7 +782,7 @@ bool wxGetKeyState(wxKeyCode key)
 #else
 #error  Add code to get the DISPLAY for this platform
 #endif
-
+    
     int iKey = wxCharCodeWXToX(key);
     int          iKeyMask = 0;
     Window       wDummy1, wDummy2;
@@ -796,7 +792,7 @@ bool wxGetKeyState(wxKeyCode key)
     KeyCode keyCode = XKeysymToKeycode(pDisplay,iKey);
     if (keyCode == NoSymbol)
         return false;
-
+    
     for (int i = 0; i < 8; ++i)
     {
         if ( map->modifiermap[map->max_keypermod * i] == keyCode)
@@ -804,11 +800,16 @@ bool wxGetKeyState(wxKeyCode key)
             iKeyMask = 1 << i;
         }
     }
-
+    
     XQueryPointer(pDisplay, DefaultRootWindow(pDisplay), &wDummy1, &wDummy2,
                   &iDummy3, &iDummy4, &iDummy5, &iDummy6, &iMask );
     XFreeModifiermap(map);
     return (iMask & iKeyMask) != 0;
 }
 
-#endif // __WXX11__ || __WXGTK__ || __WXMOTIF__
+#endif
+
+
+
+
+

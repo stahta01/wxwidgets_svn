@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLWIN_H_
 #define _WX_HTMLWIN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlwin.h"
+#endif
 
 #include "wx/defs.h"
 #if wxUSE_HTML
@@ -85,7 +90,7 @@ public:
     // it is NOT address/filename of HTML document. If you want to
     // specify document location, use LoadPage() istead
     // Return value : false if an error occurred, true otherwise
-    virtual bool SetPage(const wxString& source);
+    bool SetPage(const wxString& source);
 
     // Append to current page
     bool AppendToPage(const wxString& source);
@@ -123,7 +128,7 @@ public:
 #endif // wxUSE_STATUSBAR
 
     // Sets fonts to be used when displaying HTML page.
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face,
+    void SetFonts(wxString normal_face, wxString fixed_face,
                   const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system

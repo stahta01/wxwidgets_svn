@@ -9,35 +9,36 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "button.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/button.h"
 #include "wx/panel.h"
 #include "wx/stockitem.h"
 
-#include "wx/mac/uma.h"
-
 IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
 
+#include "wx/mac/uma.h"
+// Button
 
-bool wxButton::Create(wxWindow *parent,
-    wxWindowID id,
-    const wxString& lbl,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxValidator& validator,
-    const wxString& name)
+bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& lbl,
+           const wxPoint& pos,
+           const wxSize& size, long style,
+           const wxValidator& validator,
+           const wxString& name)
 {
     wxString label(lbl);
     if (label.empty() && wxIsStockID(id))
         label = wxGetStockLabel(id);
-
-    m_macIsUserPane = false ;
-
+    
+    m_macIsUserPane = FALSE ;
+    
     if ( !wxButtonBase::Create(parent, id, pos, size, style, validator, name) )
         return false;
-
+    
     m_label = label ;
 
     Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
@@ -47,13 +48,13 @@ bool wxButton::Create(wxWindow *parent,
         ControlButtonContentInfo info ;
         info.contentType = kControlContentIconRef ;
         GetIconRef(kOnSystemDisk, kSystemIconsCreator, kHelpIcon, &info.u.iconRef);
-        verify_noerr ( CreateRoundButtonControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds , kControlRoundButtonNormalSize ,
+        verify_noerr ( CreateRoundButtonControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds , kControlRoundButtonNormalSize , 
             &info , m_peer->GetControlRefAddr() ) );
     }
     else if ( label.Find('\n' ) == wxNOT_FOUND && label.Find('\r' ) == wxNOT_FOUND)
     {
 #if TARGET_API_MAC_OSX
-        // Button height is static in Mac, can't be changed, so we need to force it here
+        //Button height is static in Mac, can't be changed, so we need to force it here
         if ( GetWindowVariant() == wxWINDOW_VARIANT_NORMAL || GetWindowVariant() == wxWINDOW_VARIANT_LARGE )
         {
             bounds.bottom = bounds.top + 20 ;
@@ -70,38 +71,36 @@ bool wxButton::Create(wxWindow *parent,
             m_maxHeight = 15 ;
         }
 #endif
-
         verify_noerr ( CreatePushButtonControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds , CFSTR("") , m_peer->GetControlRefAddr() ) );
     }
     else
     {
         ControlButtonContentInfo info ;
         info.contentType = kControlNoContent ;
-        verify_noerr(CreateBevelButtonControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds, CFSTR(""),
+        verify_noerr(CreateBevelButtonControl( MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds,CFSTR(""),
             kControlBevelButtonLargeBevel , kControlBehaviorPushbutton , &info , 0 , 0 , 0 , m_peer->GetControlRefAddr() ) );
     }
-
-    wxASSERT_MSG( m_peer != NULL && m_peer->Ok() , wxT("No valid Mac control") ) ;
-
-    MacPostControlCreate(pos, size) ;
-
-    return true;
+    
+    wxASSERT_MSG( m_peer != NULL && m_peer->Ok() , wxT("No valid mac control") ) ;
+    
+    MacPostControlCreate(pos,size) ;
+    
+  return TRUE;
 }
 
 void wxButton::SetDefault()
 {
     wxWindow *parent = GetParent();
     wxButton *btnOldDefault = NULL;
-
     if ( parent )
     {
-        btnOldDefault = wxDynamicCast(parent->GetDefaultItem(), wxButton);
+        btnOldDefault = wxDynamicCast(parent->GetDefaultItem(),
+           wxButton);
         parent->SetDefaultItem(this);
     }
 
     if ( btnOldDefault )
         btnOldDefault->m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 0 ) ;
-
     m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 1 ) ;
 }
 
@@ -109,30 +108,26 @@ wxSize wxButton::DoGetBestSize() const
 {
     if ( GetId() == wxID_HELP )
         return wxSize( 20 , 20 ) ;
-
+        
     wxSize sz = GetDefaultSize() ;
+
     int charspace = 8 ;
-
-    switch (GetWindowVariant())
+    if ( GetWindowVariant() == wxWINDOW_VARIANT_NORMAL || GetWindowVariant() == wxWINDOW_VARIANT_LARGE )
     {
-    	case wxWINDOW_VARIANT_NORMAL:
-    	case wxWINDOW_VARIANT_LARGE:
-            sz.y = 20 ;
-            charspace = 10 ;
-            break;
-
-    	case wxWINDOW_VARIANT_SMALL:
-            sz.y = 17 ;
-            break;
-
-    	case wxWINDOW_VARIANT_MINI:
-            sz.y = 15 ;
-            break;
-
-        default:
-            break;
+        sz.y = 20 ;
+        charspace = 10 ;
     }
-
+    else if ( GetWindowVariant() == wxWINDOW_VARIANT_SMALL )
+    {
+        sz.y = 17 ;
+        charspace = 8 ;
+    }
+    else if ( GetWindowVariant() == wxWINDOW_VARIANT_MINI )
+    {
+        sz.y = 15 ;
+        charspace = 8 ;
+    }
+  
     Rect    bestsize = { 0 , 0 , 0 , 0 } ;
     m_peer->GetBestRect( &bestsize ) ;
   
@@ -146,8 +141,8 @@ wxSize wxButton::DoGetBestSize() const
         wBtn = bestsize.right - bestsize.left ;
         sz.y = bestsize.bottom - bestsize.top ;
     }
-
-    if ((wBtn > sz.x) || ( GetWindowStyle() & wxBU_EXACTFIT)) 
+    
+    if (wBtn > sz.x || ( GetWindowStyle() & wxBU_EXACTFIT) ) 
         sz.x = wBtn;
 
     return sz ;
@@ -157,14 +152,14 @@ wxSize wxButton::GetDefaultSize()
 {
     int wBtn = 70 ; 
     int hBtn = 20 ;
-
+    
     return wxSize(wBtn, hBtn);
 }
 
 void wxButton::Command (wxCommandEvent & event)
 {
     m_peer->Flash(kControlButtonPart) ;
-    ProcessCommand(event);
+    ProcessCommand (event);
 }
 
 wxInt32 wxButton::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF WXUNUSED(event) ) 
@@ -172,7 +167,6 @@ wxInt32 wxButton::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, m_windowId );
     event.SetEventObject(this);
     ProcessCommand(event);
-
-    return noErr;
+    return noErr ;
 }
 

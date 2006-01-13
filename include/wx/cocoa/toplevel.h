@@ -103,8 +103,6 @@ public:
     virtual void DoMoveWindow(int x, int y, int width, int height);
     virtual void DoGetSize(int *width, int *height) const;
     virtual void DoGetPosition(int *x, int *y) const;
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
 
 
 // Things I may/may not do
@@ -113,6 +111,7 @@ public:
 //    virtual void Clear() ;
 //    virtual void Raise();
 //    virtual void Lower();
+//    virtual void SetTitle( const wxString& title);
 protected:
     // is the frame currently iconized?
     bool m_iconized;

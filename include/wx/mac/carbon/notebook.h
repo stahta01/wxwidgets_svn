@@ -11,6 +11,10 @@
 #ifndef _WX_NOTEBOOK_H_
 #define _WX_NOTEBOOK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "notebook.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -28,6 +32,9 @@ class WXDLLEXPORT wxWindow;
 // wxNotebook
 // ----------------------------------------------------------------------------
 
+// @@@ this class should really derive from wxTabCtrl, but the interface is not
+//     exactly the same, so I can't do it right now and instead we reimplement
+//     part of wxTabCtrl here
 class wxNotebook : public wxNotebookBase
 {
 public:
@@ -76,14 +83,24 @@ public:
   virtual void SetPadding(const wxSize& padding);
     // sets the size of the tabs (assumes all tabs are the same size)
   virtual void SetTabSize(const wxSize& sz);
-
-  // hit test
+    // hit test
   virtual int HitTest(const wxPoint& pt, long *flags = NULL) const;
-  
-  // calculate size for wxNotebookSizer
+
+    // calculate size for wxNotebookSizer
   wxSize CalcSizeFromPage(const wxSize& sizePage) const;
   wxRect GetPageRect() const ;
+/*
+    // get number of pages in the dialog
+  int GetPageCount() const;
 
+    // cycle thru the tabs
+  void AdvanceSelection(bool bForward = true);
+
+
+    // currently it's always 1 because wxGTK doesn't support multi-row
+    // tab controls
+  int GetRowCount() const;
+*/
   // operations
   // ----------
     // remove all pages
@@ -94,7 +111,10 @@ public:
                   const wxString& strText,
                   bool bSelect = false,
                   int imageId = -1);
-
+/*
+    // get the panel which represents the given page
+  wxNotebookPage *GetPage(int nPage) { return m_aPages[nPage]; }
+*/
   // callbacks
   // ---------
   void OnSize(wxSizeEvent& event);

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/palette.h
+// Name:        palette.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Created:     2001/03/11
@@ -8,8 +8,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_PALETTE_H__
 #define __WX_PALETTE_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "palette.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -42,7 +47,7 @@ public:
     virtual bool Ok() const;
 
     bool Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
-    int GetPixel(unsigned char red, unsigned char green, unsigned char blue) const;
+    int GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const;
     bool GetRGB(int pixel, unsigned char *red, unsigned char *green, unsigned char *blue) const;
 
     // implementation

@@ -216,7 +216,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -281,44 +281,44 @@ $(OBJS)\wxconfigtool_sample.res :  .AUTODEPEND .\..\..\..\samples\sample.rc
 	wrc -q -ad -bt=nt -r -fo=$^@   -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  -i=.\..\..\..\include -i=$(SETUPHDIR) -i=. $(__DLLFLAG_p) -i=.\..\..\..\samples $<
 
 $(OBJS)\wxconfigtool_wxconfigtool.obj :  .AUTODEPEND .\wxconfigtool.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_appsettings.obj :  .AUTODEPEND .\appsettings.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_configitem.obj :  .AUTODEPEND .\configitem.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_configitemselector.obj :  .AUTODEPEND .\configitemselector.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_configtooldoc.obj :  .AUTODEPEND .\configtooldoc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_configtoolview.obj :  .AUTODEPEND .\configtoolview.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_configtree.obj :  .AUTODEPEND .\configtree.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_custompropertydialog.obj :  .AUTODEPEND .\custompropertydialog.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_htmlparser.obj :  .AUTODEPEND .\htmlparser.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_mainframe.obj :  .AUTODEPEND .\mainframe.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_propeditor.obj :  .AUTODEPEND .\propeditor.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_property.obj :  .AUTODEPEND .\property.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_settingsdialog.obj :  .AUTODEPEND .\settingsdialog.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 
 $(OBJS)\wxconfigtool_utils.obj :  .AUTODEPEND .\utils.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(WXCONFIGTOOL_CXXFLAGS) $<
 

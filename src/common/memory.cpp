@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "memory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -21,6 +25,10 @@
 #endif
 
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+// #pragma implementation
+#endif
 
 #ifndef WX_PRECOMP
 #include "wx/utils.h"
@@ -907,11 +915,10 @@ private:
 
 static MemoryCriticalSection memLocker;
 
-#endif // USE_THREADSAFE_MEMORY_ALLOCATION
+#endif
 
-
-#ifdef __WXDEBUG__
 #if !(defined(__WXMSW__) && (defined(WXUSINGDLL) || defined(WXMAKINGDLL_BASE)))
+#ifdef __WXDEBUG__
 #if wxUSE_GLOBAL_MEMORY_OPERATORS
 void * operator new (size_t size, wxChar * fileName, int lineNum)
 {
@@ -944,8 +951,8 @@ void operator delete[] (void * buf)
   wxDebugFree(buf, true);
 }
 #endif // wxUSE_ARRAY_MEMORY_OPERATORS
-#endif // wxUSE_GLOBAL_MEMORY_OPERATORS
 #endif // !(defined(__WXMSW__) && (defined(WXUSINGDLL) || defined(WXMAKINGDLL_BASE)))
+#endif // wxUSE_GLOBAL_MEMORY_OPERATORS
 
 // TODO: store whether this is a vector or not.
 void * wxDebugAlloc(size_t size, wxChar * fileName, int lineNum, bool isObject, bool WXUNUSED(isVect) )

@@ -11,6 +11,10 @@
 #ifndef _WX_HTMPRINT_H_
 #define _WX_HTMPRINT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmprint.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HTML & wxUSE_PRINTING_ARCHITECTURE
@@ -53,7 +57,7 @@ public:
     void SetHtmlText(const wxString& html, const wxString& basepath = wxEmptyString, bool isdir = true);
 
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = NULL);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system
     // default size; use either specified or default font
@@ -143,7 +147,7 @@ public:
             // You can set different header/footer for odd and even pages
 
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = NULL);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system
     // default size; use either specified or default font
@@ -242,7 +246,7 @@ public:
             // pg is one of wxPAGE_ODD, wxPAGE_EVEN and wx_PAGE_ALL constants.
             // You can set different header/footer for odd and even pages
 
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = 0);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = 0);
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used)
 
     // Sets font sizes to be relative to the given size or the system

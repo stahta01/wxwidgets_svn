@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/mdi.h
+// Name:        gtk/mdi.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __MDIH__
 #define __MDIH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -140,11 +145,11 @@ public:
 
     // no size hints
     virtual void DoSetSizeHints( int WXUNUSED(minW),
-                                 int WXUNUSED(minH),
-                                 int WXUNUSED(maxW) = wxDefaultCoord,
-                                 int WXUNUSED(maxH) = wxDefaultCoord,
-                                 int WXUNUSED(incW) = wxDefaultCoord,
-                                 int WXUNUSED(incH) = wxDefaultCoord) {}
+                               int WXUNUSED(minH),
+                               int WXUNUSED(maxW) = -1,
+                               int WXUNUSED(maxH) = -1,
+                               int WXUNUSED(incW) = -1,
+                               int WXUNUSED(incH) = -1) {}
 
 #if wxUSE_TOOLBAR
     // no toolbar
@@ -162,7 +167,8 @@ public:
         { wxTopLevelWindowBase::SetIcons(icons); }
 
     // no title
-    virtual void SetTitle( const wxString &title );
+    void SetTitle( const wxString &title );
+    wxString GetTitle() const { return m_title; }
 
     // no maximize etc
     virtual void Maximize( bool WXUNUSED(maximize) = true ) { }
@@ -212,3 +218,4 @@ private:
 };
 
 #endif // __MDIH__
+

@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -43,7 +47,7 @@ FORCE_LINK_ME(m_image)
 
 WX_DECLARE_OBJARRAY(int, CoordArray);
 #include "wx/arrimpl.cpp" // this is a magic incantation which must be done!
-WX_DEFINE_OBJARRAY(CoordArray)
+WX_DEFINE_OBJARRAY(CoordArray);
 
 
 // ---------------------------------------------------------------------------
@@ -645,7 +649,7 @@ TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
                                           str, w, h,
                                           m_WParser->GetPixelScale(),
                                           al, mn);
-                m_WParser->ApplyStateToCell(cel);
+                cel->SetLink(m_WParser->GetLink());
                 cel->SetId(tag.GetParam(wxT("id"))); // may be empty
                 m_WParser->GetContainer()->InsertCell(cel);
                 if (str)
@@ -692,13 +696,12 @@ TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
                 }
                 if (cel != NULL && tag.HasParam(wxT("HREF")))
                 {
-                    wxString target;
-                    if (tag.HasParam(wxT("TARGET")))
-                        target = tag.GetParam(wxT("TARGET"));
-                    cel->SetLink(wxHtmlLinkInfo(tag.GetParam(wxT("HREF")), target));
+                    wxString tmp = tag.GetParam(wxT("HREF"));
+                    wxString target = wxEmptyString;
+                    if (tag.HasParam(wxT("TARGET"))) target = tag.GetParam(wxT("TARGET"));
+                    cel->SetLink( wxHtmlLinkInfo(tmp, target));
                 }
-                if (cel != NULL)
-                    m_WParser->GetContainer()->InsertCell( cel );
+                if (cel != NULL) m_WParser->GetContainer()->InsertCell( cel );
             }
         }
 

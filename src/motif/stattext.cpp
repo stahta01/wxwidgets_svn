@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "stattext.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -32,7 +36,7 @@
 
 #include "wx/motif/private.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl);
 
 bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
            const wxString& label,

@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "treectrl.h"
+#endif
+
 #include "wx/stubs/textctrl.h"
 #include "wx/treebase.h"
 #include "wx/stubs/treectrl.h"

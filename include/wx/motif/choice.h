@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/choice.h
+// Name:        choice.h
 // Purpose:     wxChoice class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CHOICE_H_
 #define _WX_CHOICE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+#pragma interface "choice.h"
+#endif
 
 #include "wx/clntdata.h"
 
@@ -29,7 +33,7 @@ class WXDLLEXPORT wxChoice: public wxChoiceBase
 public:
     wxChoice();
     ~wxChoice();
-
+    
     wxChoice(wxWindow *parent, wxWindowID id,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -41,7 +45,7 @@ public:
         Init();
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-
+    
     wxChoice(wxWindow *parent, wxWindowID id,
         const wxPoint& pos,
         const wxSize& size,
@@ -80,6 +84,7 @@ public:
     virtual wxClientData* DoGetItemClientObject(int n) const;
     virtual int GetSelection() const;
     virtual void Delete(int n);
+    virtual int FindString(const wxString& s) const;
     virtual void Clear();
     virtual void SetString(int n, const wxString& s);
     virtual wxString GetString(int n) const;
@@ -88,12 +93,12 @@ public:
     virtual void SetSelection(int n);
     virtual void SetColumns(int n = 1 );
     virtual int GetColumns() const ;
-
-    // Original API
+    
+    // Original API    
     virtual void Command(wxCommandEvent& event);
-
+    
     void SetFocus();
-
+    
     // Implementation
     virtual void ChangeFont(bool keepOriginalSize = true);
     virtual void ChangeBackgroundColour();
@@ -119,7 +124,7 @@ protected:
     WXWidget      m_formWidget;
     wxStringList  m_stringList;
     wxClientDataDictionary m_clientDataDict;
-
+     
     virtual void DoSetSize(int x, int y,
         int width, int height,
         int sizeFlags = wxSIZE_AUTO);

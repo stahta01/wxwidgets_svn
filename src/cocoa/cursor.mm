@@ -9,6 +9,10 @@
 // Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "cursor.h"
+#endif
+
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
     #include "wx/icon.h"

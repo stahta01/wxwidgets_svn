@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sizer.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -20,7 +24,6 @@
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/intl.h"
-    #include "wx/math.h"
 #endif // WX_PRECOMP
 
 #include "wx/sizer.h"
@@ -47,7 +50,7 @@ IMPLEMENT_CLASS(wxStaticBoxSizer, wxBoxSizer)
 IMPLEMENT_CLASS(wxStdDialogButtonSizer, wxBoxSizer)
 #endif
 
-WX_DEFINE_EXPORTED_LIST( wxSizerItemList )
+WX_DEFINE_EXPORTED_LIST( wxSizerItemList );
 
 /*
     TODO PROPERTIES
@@ -266,7 +269,7 @@ wxSize wxSizerItem::CalcMin()
 
         // if we have to preserve aspect ratio _AND_ this is
         // the first-time calculation, consider ret to be initial size
-        if ( (m_flag & wxSHAPED) && wxIsNullDouble(m_ratio) )
+        if ((m_flag & wxSHAPED) && !m_ratio)
             SetRatio(m_minSize);
     }
     else if ( IsWindow() )
@@ -296,10 +299,8 @@ wxSize wxSizerItem::GetMinSizeWithBorder() const
 }
 
 
-void wxSizerItem::SetDimension( const wxPoint& pos_, const wxSize& size_ )
+void wxSizerItem::SetDimension( wxPoint pos, wxSize size )
 {
-    wxPoint pos = pos_;
-    wxSize size = size_;
     if (m_flag & wxSHAPED)
     {
         // adjust aspect ratio
@@ -1747,7 +1748,11 @@ wxStdDialogButtonSizer::wxStdDialogButtonSizer()
     // If we are going to use vertical buttons, we should
     // put the sizer to the right of other controls in the dialog,
     // and that's beyond the scope of this sizer.
-#ifndef __WXWINCE__
+    // 
+    // It also looks rubbish on GPE and other standard GTK
+    // dialogs also just use normal buttons side by side
+    // under GPE
+#if 0
     bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
     // If we have a PDA screen, put yes/no button over
     // all other buttons, otherwise on the left side.
@@ -1844,28 +1849,33 @@ void wxStdDialogButtonSizer::Realize()
         // Extra space around and at the right
         Add(12, 24);
 #elif defined(__WXGTK20__)
+        bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
+    
+        int space_step = 3;
+        if (is_pda) space_step = 0;
+    
         Add(0, 0, 0, wxLEFT, 9);
         if (m_buttonHelp)
-            Add((wxWindow*)m_buttonHelp, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, 3);
+            Add((wxWindow*)m_buttonHelp, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, space_step);
 
         // extra whitespace between help and cancel/ok buttons
         Add(0, 0, 1, wxEXPAND, 0);
 
         if (m_buttonNegative){
-            Add((wxWindow*)m_buttonNegative, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, 3);
+            Add((wxWindow*)m_buttonNegative, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, space_step);
         }
 
         if (m_buttonCancel){
-            Add((wxWindow*)m_buttonCancel, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, 3);
+            Add((wxWindow*)m_buttonCancel, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, space_step);
             // Cancel or help should be default
             // m_buttonCancel->SetDefaultButton();
         }
 
         if (m_buttonApply)
-            Add((wxWindow*)m_buttonApply, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, 3);
+            Add((wxWindow*)m_buttonApply, 0, wxALIGN_CENTRE | wxLEFT | wxRIGHT, space_step);
 
         if (m_buttonAffirmative)
-            Add((wxWindow*)m_buttonAffirmative, 0, wxALIGN_CENTRE | wxLEFT, 6);
+            Add((wxWindow*)m_buttonAffirmative, 0, wxALIGN_CENTRE | wxLEFT, 2*space_step);
 #elif defined(__WXMSW__)
         // Windows
 

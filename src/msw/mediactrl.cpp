@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/mediactrl.cpp
+// Name:        msw/mediactrl.cpp
 // Purpose:     Built-in Media Backends for Windows
 // Author:      Ryan Norton <wxprojects@comcast.net>
 // Modified by:
@@ -24,6 +24,10 @@
 //---------------------------------------------------------------------------
 // Pre-compiled header stuff
 //---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mediactrl.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -161,23 +165,23 @@ struct IMediaEvent : public IDispatch
 
 enum ReadyStateConstants
 {
-    amvUninitialized  = 0,
-    amvLoading        = 1,
+    amvUninitialized    = 0,
+    amvLoading    = 1,
     amvInteractive    = 3,
-    amvComplete       = 4
+    amvComplete    = 4
 };
 
 enum StateConstants
 {
     amvNotLoaded    = -1,
-    amvStopped      = 0,
-    amvPaused       = 1,
-    amvRunning      = 2
+    amvStopped    = 0,
+    amvPaused    = 1,
+    amvRunning    = 2
 };
 
 enum DisplayModeConstants
 {
-    amvTime      = 0,
+    amvTime    = 0,
     amvFrames    = 1
 };
 
@@ -1350,7 +1354,7 @@ public:
         m_hwnd = hwnd;
 
         m_qtb->m_ctrl->Connect(m_qtb->m_ctrl->GetId(),
-            wxEVT_ERASE_BACKGROUND,
+            wxEVT_ERASE_BACKGROUND, 
             wxEraseEventHandler(wxQTMediaEvtHandler::OnEraseBackground),
             NULL, this
                               );
@@ -1376,7 +1380,7 @@ private:
 //
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-IMPLEMENT_DYNAMIC_CLASS(wxAMMediaBackend, wxMediaBackend)
+IMPLEMENT_DYNAMIC_CLASS(wxAMMediaBackend, wxMediaBackend);
 
 //---------------------------------------------------------------------------
 // Usual debugging macros
@@ -2180,7 +2184,7 @@ void wxAMMediaBackend::Move(int WXUNUSED(x), int WXUNUSED(y),
 //
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-IMPLEMENT_DYNAMIC_CLASS(wxMCIMediaBackend, wxMediaBackend)
+IMPLEMENT_DYNAMIC_CLASS(wxMCIMediaBackend, wxMediaBackend);
 
 //---------------------------------------------------------------------------
 // Usual debugging macros for MCI returns
@@ -2708,7 +2712,7 @@ LRESULT CALLBACK wxMCIMediaBackend::OnNotifyWndProc(HWND hWnd, UINT nMsg,
 // with this backend are treated as playable anyway - not verifyed though.
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-IMPLEMENT_DYNAMIC_CLASS(wxQTMediaBackend, wxMediaBackend)
+IMPLEMENT_DYNAMIC_CLASS(wxQTMediaBackend, wxMediaBackend);
 
 //Time between timer calls - this is the Apple recommondation to the TCL
 //team I believe
@@ -3536,10 +3540,12 @@ void wxQTMediaEvtHandler::OnEraseBackground(wxEraseEvent& evt)
 //---------------------------------------------------------------------------
 
 //in source file that contains stuff you don't directly use
-#include "wx/html/forcelnk.h"
-FORCE_LINK_ME(basewxmediabackends)
+#include <wx/html/forcelnk.h>
+FORCE_LINK_ME(basewxmediabackends);
 
 //---------------------------------------------------------------------------
 //  End wxMediaCtrl Compilation Guard and this file
 //---------------------------------------------------------------------------
 #endif //wxUSE_MEDIACTRL
+
+

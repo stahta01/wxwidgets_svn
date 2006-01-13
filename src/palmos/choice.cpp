@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choice.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -189,6 +193,11 @@ void wxChoice::SetSelection(int n)
 // ----------------------------------------------------------------------------
 
 int wxChoice::GetCount() const
+{
+    return 0;
+}
+
+int wxChoice::FindString(const wxString& s) const
 {
     return 0;
 }

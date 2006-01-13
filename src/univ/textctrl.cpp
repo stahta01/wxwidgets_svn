@@ -117,6 +117,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtextctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -634,6 +638,9 @@ void wxTextCtrl::Init()
 
     m_heightLine =
     m_widthAvg = -1;
+
+    // init wxScrollHelper
+    SetWindow(this);
 
     // init the undo manager
     m_cmdProcessor = new wxTextCtrlCommandProcessor(this);

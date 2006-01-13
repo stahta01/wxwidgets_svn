@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "datstrm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -19,7 +23,6 @@
 #if wxUSE_STREAMS
 
 #include "wx/datstrm.h"
-#include "wx/math.h"
 
 // ---------------------------------------------------------------------------
 // wxDataInputStream
@@ -79,13 +82,16 @@ wxUint8 wxDataInputStream::Read8()
   return (wxUint8)buf;
 }
 
+// Must be at global scope for VC++ 5
+extern "C" double ConvertFromIeeeExtended(const unsigned char *bytes);
+
 double wxDataInputStream::ReadDouble()
 {
 #if wxUSE_APPLE_IEEE
   char buf[10];
 
   m_input->Read(buf, 10);
-  return ConvertFromIeeeExtended((const wxInt8 *)buf);
+  return ConvertFromIeeeExtended((unsigned char *)buf);
 #else
   return 0.0;
 #endif
@@ -319,12 +325,15 @@ void wxDataOutputStream::WriteString(const wxString& string)
       m_output->Write(buf, len);
 }
 
+// Must be at global scope for VC++ 5
+extern "C" void ConvertToIeeeExtended(double num, unsigned char *bytes);
+
 void wxDataOutputStream::WriteDouble(double d)
 {
   char buf[10];
 
 #if wxUSE_APPLE_IEEE
-  ConvertToIeeeExtended(d, (wxInt8 *)buf);
+  ConvertToIeeeExtended(d, (unsigned char *)buf);
 #else
 #if !defined(__VMS__) && !defined(__GNUG__)
 # pragma warning "wxDataOutputStream::WriteDouble() not using IeeeExtended - will not work!"

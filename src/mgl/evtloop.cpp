@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/evtloop.cpp
+// Name:        mgl/evtloop.cpp
 // Purpose:     implements wxEventLoop for MGL
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -10,6 +10,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "evtloop.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -39,19 +43,19 @@ public:
     wxEventLoopImpl()
         {
             SetExitCode(0);
-            SetKeepLooping(true);
+            SetKeepLooping(TRUE);
         }
 
     // process an event
     void Dispatch();
 
-    // generate an idle event, return true if more idle time requested
+    // generate an idle event, return TRUE if more idle time requested
     bool SendIdleEvent();
 
     // set/get the exit code
     void SetExitCode(int exitcode) { m_exitcode = exitcode; }
     int GetExitCode() const { return m_exitcode; }
-
+    
     void SetKeepLooping(bool k) { m_keepLooping = k; }
     bool GetKeepLooping() const { return m_keepLooping; }
 
@@ -59,7 +63,7 @@ private:
 
     // the exit code of the event loop
     int m_exitcode;
-    // false if the loop should end
+    // FALSE if the loop should end
     bool m_keepLooping;
 };
 
@@ -87,7 +91,7 @@ void wxEventLoopImpl::Dispatch()
         PM_sleep(10);
     }
     // end of EVT_halt
-
+    
     MGL_wmProcessEvent(g_winMng, &evt);
 }
 
@@ -104,6 +108,8 @@ bool wxEventLoopImpl::SendIdleEvent()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+
 wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
@@ -115,8 +121,9 @@ int wxEventLoop::Run()
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
     m_impl = new wxEventLoopImpl;
-
-    wxEventLoopActivator activate(this);
+    
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
 
     for ( ;; )
     {
@@ -141,6 +148,8 @@ int wxEventLoop::Run()
     delete m_impl;
     m_impl = NULL;
 
+    ms_activeLoop = oldLoop;
+
     return exitcode;
 }
 
@@ -149,8 +158,8 @@ void wxEventLoop::Exit(int rc)
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
     m_impl->SetExitCode(rc);
-    m_impl->SetKeepLooping(false);
-
+    m_impl->SetKeepLooping(FALSE);
+    
     // Send a dummy event so that the app won't block in EVT_halt if there
     // are no user-generated events in the queue:
     EVT_post(0, EVT_USEREVT, 0, 0);
@@ -162,18 +171,18 @@ void wxEventLoop::Exit(int rc)
 
 bool wxEventLoop::Pending() const
 {
-    // update the display here, so that wxYield refreshes display and
+    // update the display here, so that wxYield refreshes display and 
     // changes take effect immediately, not after emptying events queue:
     MGL_wmUpdateDC(g_winMng);
-
+    
     // is there an event in the queue?
     event_t evt;
-    return (bool)(EVT_peekNext(&evt, EVT_EVERYEVT));
+    return EVT_peekNext(&evt, EVT_EVERYEVT);
 }
 
 bool wxEventLoop::Dispatch()
 {
-    wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
+    wxCHECK_MSG( IsRunning(), FALSE, _T("can't call Dispatch() if not running") );
 
     m_impl->Dispatch();
     return m_impl->GetKeepLooping();

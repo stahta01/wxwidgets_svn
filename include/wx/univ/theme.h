@@ -14,6 +14,10 @@
 #ifndef _WX_UNIV_THEME_H_
 #define _WX_UNIV_THEME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "theme.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxTheme
 // ----------------------------------------------------------------------------

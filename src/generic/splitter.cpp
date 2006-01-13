@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "splitter.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -23,7 +27,6 @@
     #include "wx/utils.h"
     #include "wx/log.h"
 
-    #include "wx/dcclient.h"
     #include "wx/dcscreen.h"
 
     #include "wx/window.h"
@@ -73,7 +76,7 @@ BEGIN_EVENT_TABLE(wxSplitterWindow, wxWindow)
     WX_EVENT_TABLE_CONTROL_CONTAINER(wxSplitterWindow)
 END_EVENT_TABLE()
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxSplitterWindow)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxSplitterWindow);
 
 bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos,
@@ -293,9 +296,9 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
                 m_windowOne = m_windowTwo;
                 m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
-                wxSplitterEvent eventUnsplit(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
-                eventUnsplit.m_data.win = removedWindow;
-                (void)DoSendEvent(eventUnsplit);
+                wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
+                event.m_data.win = removedWindow;
+                (void)DoSendEvent(event);
                 SetSashPositionAndNotify(0);
             }
             else if ( posSashNew == GetWindowSize() )
@@ -304,9 +307,9 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
                 wxWindow *removedWindow = m_windowTwo;
                 m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
-                wxSplitterEvent eventUnsplit(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
-                eventUnsplit.m_data.win = removedWindow;
-                (void)DoSendEvent(eventUnsplit);
+                wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
+                event.m_data.win = removedWindow;
+                (void)DoSendEvent(event);
                 SetSashPositionAndNotify(0);
             }
             else

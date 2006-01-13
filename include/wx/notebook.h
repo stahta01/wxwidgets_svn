@@ -12,6 +12,10 @@
 #ifndef _WX_NOTEBOOK_H_BASE_
 #define _WX_NOTEBOOK_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "notebookbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -115,15 +119,8 @@ public:
     {
     }
 
-    wxNotebookEvent(const wxNotebookEvent& event)
-        : wxBookCtrlBaseEvent(event)
-    {
-    }
-
-    virtual wxEvent *Clone() const { return new wxNotebookEvent(*this); }
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxNotebookEvent)
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNotebookEvent)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()

@@ -12,6 +12,10 @@
 #ifndef _WX_SOCKET_H_
 #define _WX_SOCKET_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "socket.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_SOCKETS
@@ -230,7 +234,7 @@ class WXDLLIMPEXP_NET wxSocketServer : public wxSocketBase
   DECLARE_CLASS(wxSocketServer)
 
 public:
-  wxSocketServer(const wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
+  wxSocketServer(wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
 
   wxSocketBase* Accept(bool wait = true);
   bool AcceptWith(wxSocketBase& socket, bool wait = true);
@@ -272,12 +276,12 @@ class WXDLLIMPEXP_NET wxDatagramSocket : public wxSocketBase
   DECLARE_CLASS(wxDatagramSocket)
 
 public:
-  wxDatagramSocket(const wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
+  wxDatagramSocket(wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
 
   wxDatagramSocket& RecvFrom( wxSockAddress& addr,
                               void* buf,
                               wxUint32 nBytes );
-  wxDatagramSocket& SendTo( const wxSockAddress& addr,
+  wxDatagramSocket& SendTo( wxSockAddress& addr,
                             const void* buf,
                             wxUint32 nBytes );
 

@@ -12,6 +12,10 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "textctrl.h"
+#endif
+
 // Single-line text item
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {

@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dirdlg.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_DIRDLG

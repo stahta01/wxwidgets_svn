@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_LISTBOX_H_
 #define _WX_UNIV_LISTBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univlistbox.h"
+#endif
+
 #include "wx/scrolwin.h"    // for wxScrollHelper
 #include "wx/dynarray.h"
 #include "wx/arrstr.h"
@@ -52,7 +56,7 @@ class WXDLLEXPORT wxListBox : public wxListBoxBase, public wxScrollHelper
 {
 public:
     // ctors and such
-    wxListBox() : wxScrollHelper(this) { Init(); }
+    wxListBox() { Init(); }
     wxListBox(wxWindow *parent,
               wxWindowID id,
               const wxPoint& pos = wxDefaultPosition,
@@ -61,7 +65,6 @@ public:
               long style = 0,
               const wxValidator& validator = wxDefaultValidator,
               const wxString& name = wxListBoxNameStr )
-        : wxScrollHelper(this)
     {
         Init();
 
@@ -104,8 +107,8 @@ public:
     virtual wxString GetString(int n) const
         { return m_strings->Item(n); }
     virtual void SetString(int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const
-        { return m_strings->Index(s, bCase); }
+    virtual int FindString(const wxString& s) const
+        { return m_strings->Index(s); }
 
     virtual bool IsSelected(int n) const
         { return m_selections.Index(n) != wxNOT_FOUND; }

@@ -3,10 +3,15 @@
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
-// RCS-ID:      $Id$
+// Id:
 // Copyright:   (c) 1998 Robert Roebling and Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "paletteg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -83,12 +88,12 @@ wxPalette& wxPalette::operator = (const wxPalette& palette)
     return *this;
 }
 
-bool wxPalette::operator == (const wxPalette& palette) const
+bool wxPalette::operator == (const wxPalette& palette)
 {
     return m_refData == palette.m_refData;
 }
 
-bool wxPalette::operator != (const wxPalette& palette) const
+bool wxPalette::operator != (const wxPalette& palette)
 {
     return m_refData != palette.m_refData;
 }
@@ -120,11 +125,11 @@ bool wxPalette::Create(int n,
     return true;
 }
 
-int wxPalette::GetPixel( unsigned char red,
-                         unsigned char green,
-                         unsigned char blue ) const
+int wxPalette::GetPixel( const unsigned char red,
+                         const unsigned char green,
+                         const unsigned char blue ) const
 {
-    if (!m_refData) return wxNOT_FOUND;
+    if (!m_refData) return false;
 
     int closest = 0;
     double d,distance = 1000.0; // max. dist is 256
@@ -158,3 +163,5 @@ bool wxPalette::GetRGB(int pixel,
 }
 
 #endif // wxUSE_PALETTE
+
+

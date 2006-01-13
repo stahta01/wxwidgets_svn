@@ -208,7 +208,7 @@ __LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -256,5 +256,5 @@ data : .SYMBOLIC
 	for %f in (testdata.fc) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
 
 $(OBJS)\console_console.obj :  .AUTODEPEND .\console.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CONSOLE_CXXFLAGS) $<
+	$(CXX) -zq -fo=$^@ $(CONSOLE_CXXFLAGS) $<
 

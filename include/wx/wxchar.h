@@ -14,6 +14,10 @@
 #ifndef _WX_WXCHAR_H_
 #define _WX_WXCHAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "wxchar.h"
+#endif
+
 #include "wx/defs.h"        /* for wxUSE_UNICODE */
 
 #if defined(HAVE_STRTOK_R) && defined(__DARWIN__) && defined(_MSL_USING_MW_C_HEADERS) && _MSL_USING_MW_C_HEADERS
@@ -141,17 +145,9 @@
     #define wxHAVE_TCHAR_SUPPORT
 #endif /* compilers with (good) TCHAR support */
 
-#if defined(__MWERKS__)
-    /* Metrowerks only has wide char support for OS X >= 10.3 */
-    #if !defined(__DARWIN__) || \
-         (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
-        #define wxHAVE_MWERKS_UNICODE
-    #endif
-
-    #ifdef wxHAVE_MWERKS_UNICODE
-        #define HAVE_WPRINTF
-    #endif
-#endif /* __MWERKS__ */
+#ifdef __MWERKS__
+    #define HAVE_WPRINTF
+#endif
 
 #ifdef wxHAVE_TCHAR_SUPPORT
     /* get TCHAR definition if we've got it */
@@ -397,6 +393,7 @@
     #define wxMbstowcs mbstowcs
     #define wxWcstombs wcstombs
 #else /* !TCHAR-aware compilers */
+
     /*
         There are 2 unrelated problems with these functions under Mac:
             a) Metrowerks MSL CRT implements them strictly in C99 sense and
@@ -428,19 +425,9 @@
         #define wxWcstombs wcstombs
     #endif
 
-    /* 
-       The system C library on Mac OS X 10.2 and below does not support
-       unicode: in other words all wide-character functions such as towupper et
-       al. do simply not exist so we need to provide our own in that context,
-       except for the wchar_t definition/typedef itself.
-       
-       We need to do this for both project builder and CodeWarrior as
-       the latter uses the system C library in Mach builds for wide character
-       support, which as mentioned does not exist on 10.2 and below.
-    */
-    #if wxUSE_UNICODE && \
-        defined(__DARWIN__) && \
-            ( MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_2 )
+    /* No UNICODE in the c library except wchar_t typedef on mac OSX 10.2 and less - roll our own */
+    #if !defined(__MWERKS__) && wxUSE_UNICODE && defined(__DARWIN__) && ( MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_2 )
+
         /* we need everything! */
         #define wxNEED_WX_STRING_H
         #define wxNEED_WX_CTYPE_H
@@ -857,14 +844,14 @@ WXDLLIMPEXP_BASE bool wxOKlibc(); /* for internal use */
  */
 #ifndef wxVsnprintf_
     #if wxUSE_UNICODE
-        #ifdef wxHAVE_MWERKS_UNICODE
+        #if defined(__MWERKS__)
             #define HAVE_WCSRTOMBS 1
             #define HAVE_VSWPRINTF 1
-        #endif /* Metrowerks with Unicode support */
+        #endif
         #if defined(__WATCOMC__)
             #define wxVsnprintf_    _vsnwprintf
             #define wxSnprintf_     _snwprintf
-        #endif /* Watcom */
+        #endif
         #if defined(HAVE__VSNWPRINTF)
             #define wxVsnprintf_    _vsnwprintf
         /* MinGW?MSVCRT has the wrong vswprintf */
@@ -1244,13 +1231,13 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
             return szRet;
         }
 
-    #else /* !wxUSE_UNICODE */
+    #else //!wxUSE_UNICODE
     #   define wxTmemchr memchr
     #   define wxTmemcmp memcmp
     #   define wxTmemcpy memcpy
     #   define wxTmemmove memmove
     #   define wxTmemset memset
-    #endif /* wxUSE_UNICODE/!wxUSE_UNICODE */
+    #endif
 
 #endif /*__cplusplus*/
 

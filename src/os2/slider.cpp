@@ -495,7 +495,6 @@ void wxSlider::DoSetSize(
 
     if (nOS2Height < 0)
         nOS2Height = 20;
-    CacheBestSize(wxSize(nWidth,nOS2Height));
 
     if (pParent)
     {

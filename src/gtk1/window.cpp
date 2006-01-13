@@ -7,6 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "window.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -133,7 +138,7 @@ extern GtkContainerClass *pizza_parent_class;
 
    All windows must have a widget, with which they interact with other under-
    lying GTK widgets. It is this widget, e.g. that has to be resized etc and
-   the wxWindow class has a member variable called m_widget which holds a
+   thw wxWindow class has a member variable called m_widget which holds a
    pointer to this widget. When the window class represents a GTK native widget,
    this is (in most cases) the only GTK widget the class manages. E.g. the
    wxStaticText class handles only a GtkLabel widget a pointer to which you
@@ -173,27 +178,27 @@ extern GtkContainerClass *pizza_parent_class;
 
    III)
 
-   Singularily the most broken code in GTK is the code that is supposed to
+   Singularily the most broken code in GTK is the code that is supposes to
    inform subwindows (child windows) about new positions. Very often, duplicate
    events are sent without changes in size or position, equally often no
    events are sent at all (All this is due to a bug in the GtkContainer code
    which got fixed in GTK 1.2.6). For that reason, wxGTK completely ignores
    GTK's own system and it simply waits for size events for toplevel windows
    and then iterates down the respective size events to all window. This has
-   the disadvantage that windows might get size events before the GTK widget
+   the disadvantage, that windows might get size events before the GTK widget
    actually has the reported size. This doesn't normally pose any problem, but
-   the OpenGL drawing routines rely on correct behaviour. Therefore, I have
+   the OpenGl drawing routines rely on correct behaviour. Therefore, I have
    added the m_nativeSizeEvents flag, which is true only for the OpenGL canvas,
    i.e. the wxGLCanvas will emit a size event, when (and not before) the X11
-   window that is used for OpenGL output really has that size (as reported by
+   window that is used for OpenGl output really has that size (as reported by
    GTK).
 
    IV)
 
    If someone at some point of time feels the immense desire to have a look at,
-   change or attempt to optimise the Refresh() logic, this person will need an
-   intimate understanding of what "draw" and "expose" events are and what
-   they are used for, in particular when used in connection with GTK's
+   change or attempt to optimse the Refresh() logic, this person will need an
+   intimate understanding of what a "draw" and what an "expose" events are and
+   what there are used for, in particular when used in connection with GTK's
    own windowless widgets. Beware.
 
    V)
@@ -205,7 +210,7 @@ extern GtkContainerClass *pizza_parent_class;
    and ending with the youngest generation (speaking of parent and child windows).
    Also don't forget that cursors (like much else) are connected to GdkWindows,
    not GtkWidgets and that the "window" field of a GtkWidget might very well
-   point to the GdkWindow of the parent widget (-> "window-less widget") and
+   point to the GdkWindow of the parent widget (-> "window less widget") and
    that the two obviously have very different meanings.
 
 */
@@ -238,10 +243,8 @@ wxWindowGTK *g_focusWindowLast = (wxWindowGTK*) NULL;
 wxWindowGTK *g_delayedFocus = (wxWindowGTK*) NULL;
 
 // hack: we need something to pass to gtk_menu_popup, so we store the time of
-// the last click here (extern: used from gtk/menu.cpp)
-#ifndef __WXGTK20__
-guint32 wxGtkTimeLastClick = 0;
-#endif
+// the last click here
+static guint32 gs_timeLastClick = 0;
 
 extern bool g_mainThreadLocked;
 
@@ -560,7 +563,7 @@ static int gtk_window_expose_callback( GtkWidget *widget,
     win->GtkSendPaintEvents();
 
 
-    // Let parent window draw window-less widgets
+    // Let parent window draw window less widgets
     (* GTK_WIDGET_CLASS (pizza_parent_class)->expose_event) (widget, gdk_event);
 #else
     // This gets called immediately after an expose event
@@ -1061,7 +1064,7 @@ wxTranslateGTKKeyEventToWx(wxKeyEvent& event,
             }
 
             // we want to always get the same key code when the same key is
-            // pressed regardless of the state of the modifiers, i.e. on a
+            // pressed regardless of the state of the modifies, i.e. on a
             // standard US keyboard pressing '5' or '%' ('5' key with
             // Shift) should result in the same key code in OnKeyDown():
             // '5' (although OnChar() will get either '5' or '%').
@@ -1235,7 +1238,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
             const char* string = gdk_event->string;
         #endif
 
-        // Implement OnCharHook by checking ancestor top level windows
+        // Implement OnCharHook by checking ancesteror top level windows
         wxWindow *parent = win;
         while (parent && !parent->IsTopLevel())
             parent = parent->GetParent();
@@ -1313,7 +1316,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
 
             event.m_keyCode = key_code;
 
-            // Implement OnCharHook by checking ancestor top level windows
+            // Implement OnCharHook by checking ancesteror top level windows
             wxWindow *parent = win;
             while (parent && !parent->IsTopLevel())
                 parent = parent->GetParent();
@@ -1338,7 +1341,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
     // win is a control: tab can be propagated up
     if ( !ret &&
          ((gdk_event->keyval == GDK_Tab) || (gdk_event->keyval == GDK_ISO_Left_Tab)) &&
-// VZ: testing for wxTE_PROCESS_TAB shouldn't be done here - the control may
+// VZ: testing for wxTE_PROCESS_TAB shouldn't be done here the control may
 //     have this style, yet choose not to process this particular TAB in which
 //     case TAB must still work as a navigational character
 // JS: enabling again to make consistent with other platforms
@@ -1390,9 +1393,9 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
 
         if ( btnCancel )
         {
-            wxCommandEvent eventClick(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
-            eventClick.SetEventObject(btnCancel);
-            ret = btnCancel->GetEventHandler()->ProcessEvent(eventClick);
+            wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+            event.SetEventObject(btnCancel);
+            ret = btnCancel->GetEventHandler()->ProcessEvent(event);
         }
     }
 
@@ -1488,7 +1491,7 @@ static gint gtk_window_key_release_callback( GtkWidget *widget,
     wxKeyEvent event( wxEVT_KEY_UP );
     if ( !wxTranslateGTKKeyEventToWx(event, win, gdk_event) )
     {
-        // unknown key pressed, ignore (the event would be useless anyhow)
+        // unknown key pressed, ignore (the event would be useless anyhow
         return FALSE;
     }
 
@@ -1675,7 +1678,7 @@ static gint gtk_window_button_press_callback( GtkWidget *widget,
 */
     }
 
-    // GDK sends surplus button down events
+    // GDK sends surplus button down event
     // before a double click event. We
     // need to filter these out.
     if (gdk_event->type == GDK_BUTTON_PRESS)
@@ -1791,19 +1794,19 @@ static gint gtk_window_button_press_callback( GtkWidget *widget,
 
     AdjustEventButtonState(event);
 
-    // wxListBox actually gets mouse events from the item, so we need to give it
+    // wxListBox actually get mouse events from the item, so we need to give it
     // a chance to correct this
     win->FixUpMouseEvent(widget, event.m_x, event.m_y);
 
-    // find the correct window to send the event to: it may be a different one
-    // from the one which got it at GTK+ level because some controls don't have
+    // find the correct window to send the event too: it may be a different one
+    // from the one which got it at GTK+ level because some control don't have
     // their own X window and thus cannot get any events.
     if ( !g_captureWindow )
         win = FindWindowForMouseEvent(win, event.m_x, event.m_y);
 
-#ifndef __WXGTK20__
-    wxGtkTimeLastClick = gdk_event->time;
+    gs_timeLastClick = gdk_event->time;
 
+#ifndef __WXGTK20__
     if (event_type == wxEVT_LEFT_DCLICK)
     {
         // GTK 1.2 crashes when intercepting double
@@ -1815,7 +1818,7 @@ static gint gtk_window_button_press_callback( GtkWidget *widget,
             return FALSE;
         }
     }
-#endif // !__WXGTK20__
+#endif
 
     if (win->GetEventHandler()->ProcessEvent( event ))
     {
@@ -1960,11 +1963,11 @@ static gint gtk_window_motion_notify_callback( GtkWidget *widget,
             // the mouse changed window
             g_captureWindowHasMouse = hasMouse;
 
-            wxMouseEvent eventM(g_captureWindowHasMouse ? wxEVT_ENTER_WINDOW
-                                                        : wxEVT_LEAVE_WINDOW);
-            InitMouseEvent(win, eventM, gdk_event);
-            eventM.SetEventObject(win);
-            win->GetEventHandler()->ProcessEvent(eventM);
+            wxMouseEvent event(g_captureWindowHasMouse ? wxEVT_ENTER_WINDOW
+                                                       : wxEVT_LEAVE_WINDOW);
+            InitMouseEvent(win, event, gdk_event);
+            event.SetEventObject(win);
+            win->GetEventHandler()->ProcessEvent(event);
         }
     }
     else // no capture
@@ -2755,6 +2758,7 @@ void wxWindowGTK::Init()
 
 #ifdef __WXGTK20__
     m_imData = NULL;
+    m_x11Context = NULL;
     m_dirtyTabOrder = false;
 #else
 #ifdef HAVE_XIM
@@ -4054,7 +4058,7 @@ void wxWindowGTK::Update()
     GtkUpdate();
 
     // when we call Update() we really want to update the window immediately on
-    // screen, even if it means flushing the entire queue and hence slowing down
+    // screen, even if itmeans flushing the entire queue and hence slowing down
     // everything -- but it should still be done, it's just that Update() should
     // be called very rarely
     gdk_flush();
@@ -4311,6 +4315,12 @@ PangoContext *wxWindowGTK::GtkGetPangoDefaultContext()
 {
     return gtk_widget_get_pango_context( m_widget );
 }
+
+// MR: Returns the same as GtkGetPangoDefaultContext until the symbol can be removed in 2.7.x
+PangoContext *wxWindowGTK::GtkGetPangoX11Context()
+{
+    return gtk_widget_get_pango_context( m_widget );
+}
 #endif
 
 GtkRcStyle *wxWindowGTK::CreateWidgetStyle(bool forceStyle)
@@ -4436,6 +4446,120 @@ bool wxWindowGTK::SetBackgroundStyle(wxBackgroundStyle style)
     }
     return true;
 }
+
+//-----------------------------------------------------------------------------
+// Pop-up menu stuff
+//-----------------------------------------------------------------------------
+
+#if wxUSE_MENUS_NATIVE
+
+extern "C" WXDLLIMPEXP_CORE
+void gtk_pop_hide_callback( GtkWidget *WXUNUSED(widget), bool* is_waiting  )
+{
+    *is_waiting = FALSE;
+}
+
+WXDLLIMPEXP_CORE void SetInvokingWindow( wxMenu *menu, wxWindow* win )
+{
+    menu->SetInvokingWindow( win );
+
+    wxMenuItemList::compatibility_iterator node = menu->GetMenuItems().GetFirst();
+    while (node)
+    {
+        wxMenuItem *menuitem = node->GetData();
+        if (menuitem->IsSubMenu())
+        {
+            SetInvokingWindow( menuitem->GetSubMenu(), win );
+        }
+
+        node = node->GetNext();
+    }
+}
+
+extern "C" WXDLLIMPEXP_CORE
+void wxPopupMenuPositionCallback( GtkMenu *menu,
+                                  gint *x, gint *y,
+#ifdef __WXGTK20__
+                                  gboolean * WXUNUSED(whatever),
+#endif
+                                  gpointer user_data )
+{
+    // ensure that the menu appears entirely on screen
+    GtkRequisition req;
+    gtk_widget_get_child_requisition(GTK_WIDGET(menu), &req);
+
+    wxSize sizeScreen = wxGetDisplaySize();
+    wxPoint *pos = (wxPoint*)user_data;
+
+    gint xmax = sizeScreen.x - req.width,
+         ymax = sizeScreen.y - req.height;
+
+    *x = pos->x < xmax ? pos->x : xmax;
+    *y = pos->y < ymax ? pos->y : ymax;
+}
+
+bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
+{
+    wxCHECK_MSG( m_widget != NULL, false, wxT("invalid window") );
+
+    wxCHECK_MSG( menu != NULL, false, wxT("invalid popup-menu") );
+
+    // NOTE: if you change this code, you need to update
+    //       the same code in taskbar.cpp as well. This
+    //       is ugly code duplication, I know,
+
+    SetInvokingWindow( menu, this );
+
+    menu->UpdateUI();
+
+    bool is_waiting = true;
+
+    gulong handler = gtk_signal_connect( GTK_OBJECT(menu->m_menu),
+                                         "hide",
+                                         GTK_SIGNAL_FUNC(gtk_pop_hide_callback),
+                                         (gpointer)&is_waiting );
+
+    wxPoint pos;
+    gpointer userdata;
+    GtkMenuPositionFunc posfunc;
+    if ( x == -1 && y == -1 )
+    {
+        // use GTK's default positioning algorithm
+        userdata = NULL;
+        posfunc = NULL;
+    }
+    else
+    {
+        pos = ClientToScreen(wxPoint(x, y));
+        userdata = &pos;
+        posfunc = wxPopupMenuPositionCallback;
+    }
+
+    gtk_menu_popup(
+                  GTK_MENU(menu->m_menu),
+                  (GtkWidget *) NULL,           // parent menu shell
+                  (GtkWidget *) NULL,           // parent menu item
+                  posfunc,                      // function to position it
+                  userdata,                     // client data
+                  0,                            // button used to activate it
+#ifdef __WXGTK20__
+                  gtk_get_current_event_time()
+#else
+                  gs_timeLastClick              // the time of activation
+#endif
+                );
+
+    while (is_waiting)
+    {
+        gtk_main_iteration();
+    }
+
+    gtk_signal_disconnect(GTK_OBJECT(menu->m_menu), handler);
+
+    return true;
+}
+
+#endif // wxUSE_MENUS_NATIVE
 
 #if wxUSE_DRAG_AND_DROP
 
@@ -4609,38 +4733,55 @@ void wxWindowGTK::SetScrollbar( int orient, int pos, int thumbVisible,
         gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "changed" );
 }
 
-void wxWindowGTK::GtkUpdateScrollbar(int orient)
-{
-    GtkAdjustment *adj = orient == wxHORIZONTAL ? m_hAdjust : m_vAdjust;
-    GtkSignalFunc fn = orient == wxHORIZONTAL
-                        ? (GtkSignalFunc)gtk_window_hscroll_callback
-                        : (GtkSignalFunc)gtk_window_vscroll_callback;
-
-    gtk_signal_disconnect_by_func(GTK_OBJECT(adj), fn, (gpointer)this);
-    gtk_signal_emit_by_name(GTK_OBJECT(adj), "value_changed");
-    gtk_signal_connect(GTK_OBJECT(adj), "value_changed", fn, (gpointer)this);
-}
-
 void wxWindowGTK::SetScrollPos( int orient, int pos, bool WXUNUSED(refresh) )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
+
     wxCHECK_RET( m_wxwindow != NULL, wxT("window needs client area for scrolling") );
 
-    GtkAdjustment *adj = orient == wxHORIZONTAL ? m_hAdjust : m_vAdjust;
-
-    float fpos = (float)pos;
-    if (fpos > adj->upper - adj->page_size)
-        fpos = adj->upper - adj->page_size;
-    if (fpos < 0.0)
-        fpos = 0.0;
-    *(orient == wxHORIZONTAL ? &m_oldHorizontalPos : &m_oldVerticalPos) = fpos;
-
-    if (fabs(fpos-adj->value) < 0.2)
-        return;
-    adj->value = fpos;
-
-    if ( m_wxwindow->window )
+    if (orient == wxHORIZONTAL)
     {
+        float fpos = (float)pos;
+        if (fpos > m_hAdjust->upper - m_hAdjust->page_size) fpos = m_hAdjust->upper - m_hAdjust->page_size;
+        if (fpos < 0.0) fpos = 0.0;
+        m_oldHorizontalPos = fpos;
+
+        if (fabs(fpos-m_hAdjust->value) < 0.2) return;
+        m_hAdjust->value = fpos;
+    }
+    else
+    {
+        float fpos = (float)pos;
+        if (fpos > m_vAdjust->upper - m_vAdjust->page_size) fpos = m_vAdjust->upper - m_vAdjust->page_size;
+        if (fpos < 0.0) fpos = 0.0;
+        m_oldVerticalPos = fpos;
+
+        if (fabs(fpos-m_vAdjust->value) < 0.2) return;
+        m_vAdjust->value = fpos;
+    }
+
+    if (m_wxwindow->window)
+    {
+        if (orient == wxHORIZONTAL)
+        {
+            gtk_signal_disconnect_by_func( GTK_OBJECT(m_hAdjust),
+                (GtkSignalFunc) gtk_window_hscroll_callback, (gpointer) this );
+
+            gtk_signal_emit_by_name( GTK_OBJECT(m_hAdjust), "value_changed" );
+
+            gtk_signal_connect( GTK_OBJECT(m_hAdjust), "value_changed",
+                (GtkSignalFunc) gtk_window_hscroll_callback, (gpointer) this );
+        }
+        else
+        {
+            gtk_signal_disconnect_by_func( GTK_OBJECT(m_vAdjust),
+                (GtkSignalFunc) gtk_window_vscroll_callback, (gpointer) this );
+
+            gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "value_changed" );
+
+            gtk_signal_connect( GTK_OBJECT(m_vAdjust), "value_changed",
+                (GtkSignalFunc) gtk_window_vscroll_callback, (gpointer) this );
+        }
     }
 }
 
@@ -4718,11 +4859,6 @@ void wxWindowGTK::ScrollWindow( int dx, int dy, const wxRect* WXUNUSED(rect) )
     m_clipPaintRegion = false;
 }
 
-void wxWindowGTK::SetWindowStyleFlag( long style )
-{
-    // Updates the internal variable. NB: Now m_windowStyle bits carry the _new_ style values already
-    wxWindowBase::SetWindowStyleFlag(style);
-}
 
 // Find the wxWindow at the current mouse position, also returning the mouse
 // position.
@@ -4762,7 +4898,6 @@ wxPoint wxGetMousePosition()
     return wxPoint(rootX, rootY);
 
 }
-
 // Needed for implementing e.g. combobox on wxGTK within a modal dialog.
 void wxAddGrab(wxWindow* window)
 {
@@ -4804,3 +4939,4 @@ void wxWinModule::OnExit()
         gdk_gc_unref( g_eraseGC );
 }
 
+// vi:sts=4:sw=4:et

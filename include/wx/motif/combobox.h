@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/combobox.h
+// Name:        combobox.h
 // Purpose:     wxComboBox class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
 
 #include "wx/choice.h"
 
@@ -76,7 +80,7 @@ public:
     virtual void Clear();
     virtual int GetSelection() const ;
     virtual void SetSelection(int n);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString(const wxString& s) const;
     virtual wxString GetString(int n) const ;
     virtual void SetString(int n, const wxString& s);
 

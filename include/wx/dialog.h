@@ -12,6 +12,10 @@
 #ifndef _WX_DIALOG_H_BASE_
 #define _WX_DIALOG_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dialogbase.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/containr.h"
 #include "wx/toplevel.h"
@@ -46,9 +50,11 @@ public:
     void SetAffirmativeId(int affirmativeId) { m_affirmativeId = affirmativeId; }
     int GetAffirmativeId() const { return m_affirmativeId; }
 
-    // Identifier for Esc key translation
-    void SetEscapeId(int escapeId) { m_escapeId = escapeId; }
-    int GetEscapeId() const { return m_escapeId; }
+#if wxABI_VERSION > 20601
+    // just a stub for 2.6, this allows the code using it to build with both
+    // 2.7 and 2.6 (even though it only really works with 2.7)
+    int GetEscapeId() const { return wxID_ANY; }
+#endif
 
 #if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
     // splits text up at newlines and places the
@@ -68,9 +74,6 @@ protected:
 
     // The identifier for the affirmative button (usually wxID_OK)
     int m_affirmativeId;
-
-    // The identifier for cancel button (usually wxID_CANCEL)
-    int m_escapeId;
 
     DECLARE_NO_COPY_CLASS(wxDialogBase)
     DECLARE_EVENT_TABLE()

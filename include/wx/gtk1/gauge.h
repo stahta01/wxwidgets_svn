@@ -7,8 +7,13 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -81,6 +86,11 @@ public:
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
+
+    // obsolete functions, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return true; }
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // common part of all ctors

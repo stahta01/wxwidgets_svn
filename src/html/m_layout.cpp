@@ -6,6 +6,9 @@
 // Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
 
 #include "wx/wxprec.h"
 
@@ -392,42 +395,6 @@ TAG_HANDLER_END(BLOCKQUOTE)
 
 
 
-TAG_HANDLER_BEGIN(SUBSUP, "SUB,SUP")
-
-    TAG_HANDLER_PROC(tag)
-    {
-        bool issub = (tag.GetName() == wxT("SUB"));
-        wxHtmlScriptMode oldmode = m_WParser->GetScriptMode();
-        int oldbase = m_WParser->GetScriptBaseline();
-        int oldsize = m_WParser->GetFontSize();
-
-        wxHtmlContainerCell *cont = m_WParser->GetContainer();
-        wxHtmlCell *c = cont->GetLastChild();
-
-        m_WParser->SetScriptMode(issub ? wxHTML_SCRIPT_SUB : wxHTML_SCRIPT_SUP);
-        m_WParser->SetScriptBaseline(oldbase + c->GetScriptBaseline());
-
-        // select smaller font
-        m_WParser->SetFontSize(m_WParser->GetFontSize()-2);
-        cont->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        ParseInner(tag);
-
-        // restore font size
-        m_WParser->SetFontSize(oldsize);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        // restore base and alignment
-        m_WParser->SetScriptBaseline(oldbase);
-        m_WParser->SetScriptMode(oldmode);
-
-        return true;
-    }
-
-TAG_HANDLER_END(SUBSUP)
-
-
 // Tag handler for tags that we have to ignore, otherwise non-text data
 // would show up as text:
 TAG_HANDLER_BEGIN(DoNothing, "SCRIPT")
@@ -441,8 +408,6 @@ TAG_HANDLER_END(DoNothing)
 
 
 
-
-
 TAGS_MODULE_BEGIN(Layout)
 
     TAGS_MODULE_ADD(P)
@@ -452,7 +417,6 @@ TAGS_MODULE_BEGIN(Layout)
     TAGS_MODULE_ADD(TITLE)
     TAGS_MODULE_ADD(BODY)
     TAGS_MODULE_ADD(BLOCKQUOTE)
-    TAGS_MODULE_ADD(SUBSUP)
     TAGS_MODULE_ADD(DoNothing)
 
 TAGS_MODULE_END(Layout)

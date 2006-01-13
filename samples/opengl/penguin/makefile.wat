@@ -205,7 +205,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -225,7 +225,7 @@ PENGUIN_CXXFLAGS = $(__DEBUGINFO_0) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG_5) &
 	$(__RTTIFLAG_7) $(__EXCEPTIONSFLAG_8) $(CPPFLAGS) $(CXXFLAGS)
 PENGUIN_OBJECTS =  &
 	$(OBJS)\penguin_penguin.obj &
-	$(OBJS)\penguin_dxfrenderer.obj &
+	$(OBJS)\penguin_lw.obj &
 	$(OBJS)\penguin_trackball.obj
 
 
@@ -260,12 +260,12 @@ $(OBJS)\penguin.exe :  $(PENGUIN_OBJECTS) $(OBJS)\penguin_penguin.res
 
 data : .SYMBOLIC 
 	if not exist $(OBJS) mkdir $(OBJS)
-	for %f in (penguin.dxf.gz) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
+	for %f in (penguin.lwo) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
 
 $(OBJS)\penguin_penguin.obj :  .AUTODEPEND .\penguin.cpp
 	$(CXX) -zq -fo=$^@ $(PENGUIN_CXXFLAGS) $<
 
-$(OBJS)\penguin_dxfrenderer.obj :  .AUTODEPEND .\dxfrenderer.cpp
+$(OBJS)\penguin_lw.obj :  .AUTODEPEND .\lw.cpp
 	$(CXX) -zq -fo=$^@ $(PENGUIN_CXXFLAGS) $<
 
 $(OBJS)\penguin_trackball.obj :  .AUTODEPEND .\trackball.c

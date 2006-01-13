@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xmlres.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -42,7 +46,7 @@
 #include "wx/xrc/xmlres.h"
 
 #include "wx/arrimpl.cpp"
-WX_DEFINE_OBJARRAY(wxXmlResourceDataRecords)
+WX_DEFINE_OBJARRAY(wxXmlResourceDataRecords);
 
 
 wxXmlResource *wxXmlResource::ms_instance = NULL;
@@ -679,7 +683,7 @@ wxObject *wxXmlResource::CreateResFromNode(wxXmlNode *node, wxObject *parent,
 
 #include "wx/listimpl.cpp"
 WX_DECLARE_LIST(wxXmlSubclassFactory, wxXmlSubclassFactoriesList);
-WX_DEFINE_LIST(wxXmlSubclassFactoriesList)
+WX_DEFINE_LIST(wxXmlSubclassFactoriesList);
 
 wxXmlSubclassFactoriesList *wxXmlResource::ms_subclassFactories = NULL;
 
@@ -790,6 +794,7 @@ void wxXmlResourceHandler::AddWindowStyles()
     XRC_ADD_STYLE(wxALWAYS_SHOW_SB);
     XRC_ADD_STYLE(wxWS_EX_BLOCK_EVENTS);
     XRC_ADD_STYLE(wxWS_EX_VALIDATE_RECURSIVELY);
+    XRC_ADD_STYLE(wxALWAYS_SHOW_SB);
 }
 
 
@@ -937,7 +942,7 @@ float wxXmlResourceHandler::GetFloat(const wxString& param, float defaultv)
     setlocale(LC_NUMERIC, prevlocale);
 #endif
 
-    return wx_truncate_cast(float, value);
+    return value;
 }
 
 

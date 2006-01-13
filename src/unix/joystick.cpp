@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "joystick.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -28,7 +32,6 @@
 
 #include "wx/event.h"
 #include "wx/window.h"
-#include "wx/unix/private.h"
 
 enum {
     wxJS_AXIS_X = 0,
@@ -88,7 +91,7 @@ void* wxJoystickThread::Entry()
     fd_set read_fds;
     struct timeval time_out = {0, 0};
 
-    wxFD_ZERO(&read_fds);
+    FD_ZERO(&read_fds);
     while (true)
     {
         if (TestDestroy())
@@ -101,9 +104,9 @@ void* wxJoystickThread::Entry()
         else
             time_out.tv_usec = 10 * 1000; // check at least every 10 msec in blocking case
 
-        wxFD_SET(m_device, &read_fds);
+        FD_SET(m_device, &read_fds);
         select(m_device+1, &read_fds, NULL, NULL, &time_out);
-        if (wxFD_ISSET(m_device, &read_fds))
+        if (FD_ISSET(m_device, &read_fds))
         {
             memset(&j_evt, 0, sizeof(j_evt));
             read(m_device, &j_evt, sizeof(j_evt));
@@ -283,7 +286,7 @@ bool wxJoystick::IsOk() const
     return (m_device != -1);
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     wxString dev_name;
     int fd, j;

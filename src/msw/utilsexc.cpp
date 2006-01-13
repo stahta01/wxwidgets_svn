@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -483,16 +487,16 @@ size_t wxPipeOutputStream::OnSysWrite(const void *buffer, size_t len)
 #if wxUSE_IPC
 
 // connect to the given server via DDE and ask it to execute the command
-bool
-wxExecuteDDE(const wxString& ddeServer,
-             const wxString& ddeTopic,
-             const wxString& ddeCommand)
+static bool wxExecuteDDE(const wxString& ddeServer,
+                         const wxString& ddeTopic,
+                         const wxString& ddeCommand)
 {
     bool ok wxDUMMY_INITIALIZE(false);
 
     wxDDEClient client;
-    wxConnectionBase *
-        conn = client.MakeConnection(wxEmptyString, ddeServer, ddeTopic);
+    wxConnectionBase *conn = client.MakeConnection(wxEmptyString,
+                                                   ddeServer,
+                                                   ddeTopic);
     if ( !conn )
     {
         ok = false;
@@ -952,3 +956,4 @@ long wxExecute(wxChar **argv, int flags, wxProcess *handler)
 
     return wxExecute(command, flags, handler);
 }
+

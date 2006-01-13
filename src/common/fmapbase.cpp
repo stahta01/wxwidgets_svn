@@ -154,23 +154,23 @@ static const wxChar* gs_encodingDescs[] =
 // and the internal names (these are not translated on purpose!)
 static const wxChar* gs_encodingNames[WXSIZEOF(gs_encodingDescs)][10] =
 {
-    // names from the columns correspond to these OS:
-    //      Linux        Solaris and IRIX       HP-UX             AIX
-    { _T("ISO-8859-1"),  _T("ISO8859-1"),  _T("iso88591"),  _T("8859-1"), wxT("iso_8859_1"), NULL },
-    { _T("ISO-8859-2"),  _T("ISO8859-2"),  _T("iso88592"),  _T("8859-2"), NULL },
-    { _T("ISO-8859-3"),  _T("ISO8859-3"),  _T("iso88593"),  _T("8859-3"), NULL },
-    { _T("ISO-8859-4"),  _T("ISO8859-4"),  _T("iso88594"),  _T("8859-4"), NULL },
-    { _T("ISO-8859-5"),  _T("ISO8859-5"),  _T("iso88595"),  _T("8859-5"), NULL },
-    { _T("ISO-8859-6"),  _T("ISO8859-6"),  _T("iso88596"),  _T("8859-6"), NULL },
-    { _T("ISO-8859-7"),  _T("ISO8859-7"),  _T("iso88597"),  _T("8859-7"), NULL },
-    { _T("ISO-8859-8"),  _T("ISO8859-8"),  _T("iso88598"),  _T("8859-8"), NULL },
-    { _T("ISO-8859-9"),  _T("ISO8859-9"),  _T("iso88599"),  _T("8859-9"), NULL },
-    { _T("ISO-8859-10"), _T("ISO8859-10"), _T("iso885910"), _T("8859-10"), NULL },
-    { _T("ISO-8859-11"), _T("ISO8859-11"), _T("iso885911"), _T("8859-11"), NULL },
-    { _T("ISO-8859-12"), _T("ISO8859-12"), _T("iso885912"), _T("8859-12"), NULL },
-    { _T("ISO-8859-13"), _T("ISO8859-13"), _T("iso885913"), _T("8859-13"), NULL },
-    { _T("ISO-8859-14"), _T("ISO8859-14"), _T("iso885914"), _T("8859-14"), NULL },
-    { _T("ISO-8859-15"), _T("ISO8859-15"), _T("iso885915"), _T("8859-15"), NULL },
+    // names from the first column are used under Linux, from the second one
+    // under Solaris and IRIX and from the third one -- under AIX
+    { wxT( "ISO-8859-1" ), wxT( "ISO8859-1" ), wxT( "8859-1" ), wxT("iso_8859_1"), NULL },
+    { wxT( "ISO-8859-2" ), wxT( "ISO8859-2" ), wxT( "8859-2" ), NULL },
+    { wxT( "ISO-8859-3" ), wxT( "ISO8859-3" ), wxT( "8859-3" ), NULL },
+    { wxT( "ISO-8859-4" ), wxT( "ISO8859-4" ), wxT( "8859-4" ), NULL },
+    { wxT( "ISO-8859-5" ), wxT( "ISO8859-5" ), wxT( "8859-5" ), NULL },
+    { wxT( "ISO-8859-6" ), wxT( "ISO8859-6" ), wxT( "8859-6" ), NULL },
+    { wxT( "ISO-8859-7" ), wxT( "ISO8859-7" ), wxT( "8859-7" ), NULL },
+    { wxT( "ISO-8859-8" ), wxT( "ISO8859-8" ), wxT( "8859-8" ), NULL },
+    { wxT( "ISO-8859-9" ), wxT( "ISO8859-9" ), wxT( "8859-9" ), NULL },
+    { wxT( "ISO-8859-10" ), wxT( "ISO8859-10" ), wxT( "8859-10" ), NULL },
+    { wxT( "ISO-8859-11" ), wxT( "ISO8859-11" ), wxT( "8859-11" ), NULL },
+    { wxT( "ISO-8859-12" ), wxT( "ISO8859-12" ), wxT( "8859-12" ), NULL },
+    { wxT( "ISO-8859-13" ), wxT( "ISO8859-13" ), wxT( "8859-13" ), NULL },
+    { wxT( "ISO-8859-14" ), wxT( "ISO8859-14" ), wxT( "8859-14" ), NULL },
+    { wxT( "ISO-8859-15" ), wxT( "ISO8859-15" ), wxT( "8859-15" ), NULL },
 
     // although koi8-ru is not strictly speaking the same as koi8-r,
     // they are similar enough to make mapping it to koi8 better than
@@ -193,12 +193,12 @@ static const wxChar* gs_encodingNames[WXSIZEOF(gs_encodingDescs)][10] =
     { wxT( "WINDOWS-1257" ),wxT( "CP-1257" ), NULL },
     { wxT( "WINDOWS-437" ), wxT( "CP-437" ), NULL },
 
-    { wxT( "UTF-7" ), wxT("utf7"), NULL },
-    { wxT( "UTF-8" ), wxT("utf8"), NULL },
-    { wxT( "UTF-16" ), wxT("UCS-2"), wxT("UCS2"), NULL },
-    { wxT( "UTF-16BE" ), wxT("UCS-2BE"), NULL },
-    { wxT( "UTF-16LE" ), wxT("UCS-2LE"), NULL },
-    { wxT( "UTF-32" ), wxT( "UCS-4" ), wxT("UCS4"), NULL },
+    { wxT( "UTF-7" ), NULL },
+    { wxT( "UTF-8" ), NULL },
+    { wxT( "UTF-16" ), NULL },
+    { wxT( "UTF-16BE" ), NULL },
+    { wxT( "UTF-16LE" ), NULL },
+    { wxT( "UTF-32" ), wxT( "UCS-4" ), NULL },
     { wxT( "UTF-32BE" ), wxT( "UCS-4BE" ), NULL },
     { wxT( "UTF-32LE" ), wxT( "UCS-4LE" ), NULL },
 
@@ -208,8 +208,8 @@ static const wxChar* gs_encodingNames[WXSIZEOF(gs_encodingDescs)][10] =
     { wxT( "US-ASCII" ), wxT( "ASCII" ), wxT("C"), wxT("POSIX"), wxT("ANSI_X3.4-1968"),
       wxT("646"), wxT("roman8"), wxT( "" ), NULL },
 
-    { wxT( "BIG5" ), wxT("big5"), NULL },
-    { wxT( "SJIS" ), wxT( "SHIFT-JIS" ), wxT( "SHIFT_JIS" ), NULL },
+    { wxT( "BIG5" ), NULL },
+    { wxT( "shift-jis" ), wxT( "shift_jis" ), wxT( "sjis" ), NULL },
     { wxT( "GB2312" ), NULL },
 };
 
@@ -247,15 +247,16 @@ wxFontMapper *wxFontMapperBase::sm_instance = NULL;
 wxFontMapperBase::wxFontMapperBase()
 {
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
-    m_configDummy = NULL;
+    m_config = NULL;
+    m_configIsDummy = false;
 #endif // wxUSE_CONFIG
 }
 
 wxFontMapperBase::~wxFontMapperBase()
 {
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
-    if ( m_configDummy )
-        delete m_configDummy;
+    if ( m_configIsDummy )
+        delete m_config;
 #endif // wxUSE_CONFIG
 }
 
@@ -321,23 +322,51 @@ void wxFontMapperBase::SetConfigPath(const wxString& prefix)
 
 wxConfigBase *wxFontMapperBase::GetConfig()
 {
-    wxConfigBase *config = wxConfig::Get(false);
-
-    // If there is no global configuration, use an internal memory configuration
-    if ( !config )
+    if ( !m_config )
     {
-        if ( !m_configDummy )
-            m_configDummy = new wxMemoryConfig;
-        config = m_configDummy;
+        // try the default
+        m_config = wxConfig::Get(false /*don't create on demand*/ );
 
-        // FIXME: ideally, we should add keys from dummy config to a real one later,
+        if ( !m_config )
+        {
+            // we still want to have a config object because otherwise we would
+            // keep asking the user the same questions in the interactive mode,
+            // so create a dummy config which won't write to any files/registry
+            // but will allow us to remember the results of the questions at
+            // least during this run
+            m_config = new wxMemoryConfig;
+            m_configIsDummy = true;
+            // VS: we can't call wxConfig::Set(m_config) here because that would
+            //     disable automatic wxConfig instance creation if this code was
+            //     called before wxApp::OnInit (this happens in wxGTK -- it sets
+            //     default wxFont encoding in wxApp::Initialize())
+        }
+    }
+
+    if ( m_configIsDummy && wxConfig::Get(false) != NULL )
+    {
+        // VS: in case we created dummy m_config (see above), we want to switch back
+        //     to the real one as soon as one becomes available.
+        delete m_config;
+        m_config = wxConfig::Get(false);
+        m_configIsDummy = false;
+        // FIXME: ideally, we should add keys from dummy config to the real one now,
         //        but it is a low-priority task because typical wxWin application
         //        either doesn't use wxConfig at all or creates wxConfig object in
         //        wxApp::OnInit(), before any real interaction with the user takes
         //        place...
     }
+    // KH: Always update the config object to the current one (if one exists), otherwise
+    // if a new config object is created, we continue to use the old one (which was
+    // almost certainly deleted).
+    // Caching of the config object was removed in 2.7, but added and removed
+    // member variables. This solution is convoluted but does not change any headers.
+    else if ( wxConfig::Get(false) != NULL )
+    {
+        m_config = wxConfig::Get();
+    }
 
-    return config;
+    return m_config;
 }
 
 const wxString& wxFontMapperBase::GetConfigPath()
@@ -553,7 +582,7 @@ wxFontMapperBase::NonInteractiveCharsetToEncoding(const wxString& charset)
                 if ( *p == wxT('-') )
                     p++;
 
-                unsigned int value;
+                int value;
                 if ( wxSscanf(p, wxT("%u"), &value) == 1 )
                 {
                     if ( value >= 1250 )

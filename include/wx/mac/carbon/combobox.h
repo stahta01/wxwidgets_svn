@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/combobox.h
+// Name:        combobox.h
 // Purpose:     wxComboBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
 
 #include "wx/choice.h"
 
@@ -89,7 +93,7 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
     virtual int GetSelection() const ;
     int GetCurrentSelection() const { return GetSelection(); }
     virtual void SetSelection(int n);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString(const wxString& s) const;
     virtual wxString GetString(int n) const ;
     virtual wxString GetStringSelection() const ;
     virtual void SetString(int n, const wxString& s) ;

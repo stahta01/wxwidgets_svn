@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -42,14 +46,17 @@
 #include "wx/dynarray.h"
 #include "wx/imaglist.h"
 #include "wx/settings.h"
-#include "wx/treectrl.h"
+#include "wx/msw/treectrl.h"
 #include "wx/msw/dragimag.h"
 
 // macros to hide the cast ugliness
 // --------------------------------
 
-// get HTREEITEM from wxTreeItemId
-#define HITEM(item)     ((HTREEITEM)(((item).m_pItem)))
+// ptr is the real item id, i.e. wxTreeItemId::m_pItem
+#define HITEM_PTR(ptr)     (HTREEITEM)(ptr)
+
+// item here is a wxTreeItemId
+#define HITEM(item)     HITEM_PTR((item).m_pItem)
 
 // the native control doesn't support multiple selections under MSW and we
 // have 2 ways to emulate them: either using TVS_CHECKBOXES style and let
@@ -310,11 +317,6 @@ public:
     {
         m_tree = tree;
     }
-
-    // give it a virtual dtor: not really needed as the class is never used
-    // polymorphically and not even allocated on heap at all, but this is safer
-    // (in case it ever is) and silences the compiler warnings for now
-    virtual ~wxTreeTraversal() { }
 
     // do traverse the tree: visit all items (recursively by default) under the
     // given one; return true if all items were traversed or false if the
@@ -611,6 +613,9 @@ bool wxTreeTraversal::Traverse(const wxTreeItemId& root, bool recursively)
 
 void wxTreeCtrl::Init()
 {
+    m_imageListNormal = NULL;
+    m_imageListState = NULL;
+    m_ownsImageListNormal = m_ownsImageListState = false;
     m_textCtrl = NULL;
     m_hasAnyAttr = false;
     m_dragImage = NULL;
@@ -774,6 +779,9 @@ wxTreeCtrl::~wxTreeCtrl()
     // delete user data to prevent memory leaks
     // also deletes hidden root node storage.
     DeleteAllItems();
+
+    if (m_ownsImageListNormal) delete m_imageListNormal;
+    if (m_ownsImageListState) delete m_imageListState;
 }
 
 // ----------------------------------------------------------------------------
@@ -832,6 +840,16 @@ void wxTreeCtrl::SetIndent(unsigned int indent)
     TreeView_SetIndent(GetHwnd(), indent);
 }
 
+wxImageList *wxTreeCtrl::GetImageList() const
+{
+    return m_imageListNormal;
+}
+
+wxImageList *wxTreeCtrl::GetStateImageList() const
+{
+    return m_imageListState;
+}
+
 void wxTreeCtrl::SetAnyImageList(wxImageList *imageList, int which)
 {
     // no error return
@@ -854,6 +872,18 @@ void wxTreeCtrl::SetStateImageList(wxImageList *imageList)
     if (m_ownsImageListState) delete m_imageListState;
     SetAnyImageList(m_imageListState = imageList, TVSIL_STATE);
     m_ownsImageListState = false;
+}
+
+void wxTreeCtrl::AssignImageList(wxImageList *imageList)
+{
+    SetImageList(imageList);
+    m_ownsImageListNormal = true;
+}
+
+void wxTreeCtrl::AssignStateImageList(wxImageList *imageList)
+{
+    SetStateImageList(imageList);
+    m_ownsImageListState = true;
 }
 
 size_t wxTreeCtrl::GetChildrenCount(const wxTreeItemId& item,
@@ -1606,11 +1636,11 @@ size_t wxTreeCtrl::GetSelections(wxArrayTreeItemIds& selections) const
 // Usual operations
 // ----------------------------------------------------------------------------
 
-wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
-                                       const wxTreeItemId& hInsertAfter,
-                                       const wxString& text,
-                                       int image, int selectedImage,
-                                       wxTreeItemData *data)
+wxTreeItemId wxTreeCtrl::DoInsertItem(const wxTreeItemId& parent,
+                                      wxTreeItemId hInsertAfter,
+                                      const wxString& text,
+                                      int image, int selectedImage,
+                                      wxTreeItemData *data)
 {
     wxCHECK_MSG( parent.IsOk() || !TreeView_GetRoot(GetHwnd()),
                  wxTreeItemId(),
@@ -1683,6 +1713,20 @@ wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
 // for compatibility only
 #if WXWIN_COMPATIBILITY_2_4
 
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    const wxString& text,
+                                    int image, int selImage,
+                                    long insertAfter)
+{
+    return DoInsertItem(parent, wxTreeItemId((void *)insertAfter), text,
+                        image, selImage, NULL);
+}
+
+wxImageList *wxTreeCtrl::GetImageList(int) const
+{
+    return GetImageList();
+}
+
 void wxTreeCtrl::SetImageList(wxImageList *imageList, int)
 {
     SetImageList(imageList);
@@ -1713,40 +1757,59 @@ wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
         return TVI_ROOT;
     }
 
-    return DoInsertAfter(wxTreeItemId(), wxTreeItemId(),
-                           text, image, selectedImage, data);
+    return DoInsertItem(wxTreeItemId(), wxTreeItemId(),
+                        text, image, selectedImage, data);
 }
 
-wxTreeItemId wxTreeCtrl::DoInsertItem(const wxTreeItemId& parent,
-                                      size_t index,
-                                      const wxString& text,
-                                      int image, int selectedImage,
-                                      wxTreeItemData *data)
+wxTreeItemId wxTreeCtrl::PrependItem(const wxTreeItemId& parent,
+                                     const wxString& text,
+                                     int image, int selectedImage,
+                                     wxTreeItemData *data)
 {
-    wxTreeItemId idPrev;
-    if ( index == (size_t)-1 )
+    return DoInsertItem(parent, TVI_FIRST,
+                        text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    const wxTreeItemId& idPrevious,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    return DoInsertItem(parent, idPrevious, text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    size_t index,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    // find the item from index
+    wxTreeItemIdValue cookie;
+    wxTreeItemId idPrev, idCur = GetFirstChild(parent, cookie);
+    while ( index != 0 && idCur.IsOk() )
     {
-        // special value: append to the end
-        idPrev = TVI_LAST;
-    }
-    else // find the item from index
-    {
-        wxTreeItemIdValue cookie;
-        wxTreeItemId idCur = GetFirstChild(parent, cookie);
-        while ( index != 0 && idCur.IsOk() )
-        {
-            index--;
+        index--;
 
-            idPrev = idCur;
-            idCur = GetNextChild(parent, cookie);
-        }
-
-        // assert, not check: if the index is invalid, we will append the item
-        // to the end
-        wxASSERT_MSG( index == 0, _T("bad index in wxTreeCtrl::InsertItem") );
+        idPrev = idCur;
+        idCur = GetNextChild(parent, cookie);
     }
 
-    return DoInsertAfter(parent, idPrev, text, image, selectedImage, data);
+    // assert, not check: if the index is invalid, we will append the item
+    // to the end
+    wxASSERT_MSG( index == 0, _T("bad index in wxTreeCtrl::InsertItem") );
+
+    return DoInsertItem(parent, idPrev, text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::AppendItem(const wxTreeItemId& parent,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    return DoInsertItem(parent, TVI_LAST,
+                        text, image, selectedImage, data);
 }
 
 void wxTreeCtrl::Delete(const wxTreeItemId& item)
@@ -1774,7 +1837,7 @@ void wxTreeCtrl::DeleteChildren(const wxTreeItemId& item)
     size_t nCount = children.Count();
     for ( size_t n = 0; n < nCount; n++ )
     {
-        if ( !TreeView_DeleteItem(GetHwnd(), HITEM(children[n])) )
+        if ( !TreeView_DeleteItem(GetHwnd(), HITEM_PTR(children[n])) )
         {
             wxLogLastError(wxT("TreeView_DeleteItem"));
         }
@@ -1886,9 +1949,9 @@ void wxTreeCtrl::UnselectAll()
         for ( size_t n = 0; n < count; n++ )
         {
 #if wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-            SetItemCheck(HITEM(selections[n]), false);
+            SetItemCheck(HITEM_PTR(selections[n]), false);
 #else // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-            ::UnselectItem(GetHwnd(), HITEM(selections[n]));
+            ::UnselectItem(GetHwnd(), HITEM_PTR(selections[n]));
 #endif // wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE/!wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
         }
 
@@ -1940,6 +2003,16 @@ void wxTreeCtrl::SelectItem(const wxTreeItemId& item, bool select)
         }
         //else: program vetoed the change
     }
+}
+
+void wxTreeCtrl::UnselectItem(const wxTreeItemId& item)
+{
+    SelectItem(item, false);
+}
+
+void wxTreeCtrl::ToggleItemSelection(const wxTreeItemId& item)
+{
+    SelectItem(item, !IsSelected(item));
 }
 
 void wxTreeCtrl::EnsureVisible(const wxTreeItemId& item)
@@ -2014,7 +2087,7 @@ void wxTreeCtrl::DoEndEditLabel(bool discardChanges)
     DeleteTextCtrl();
 }
 
-wxTreeItemId wxTreeCtrl::DoTreeHitTest(const wxPoint& point, int& flags)
+wxTreeItemId wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
 {
     TV_HITTESTINFO hitTestInfo;
     hitTestInfo.pt.x = (int)point.x;
@@ -2106,6 +2179,12 @@ int CALLBACK wxTreeSortHelper::Compare(LPARAM pItem1,
 
     return tree->OnCompareItems(GetIdFromData(tree, pItem1),
                                 GetIdFromData(tree, pItem2));
+}
+
+int wxTreeCtrl::OnCompareItems(const wxTreeItemId& item1,
+                               const wxTreeItemId& item2)
+{
+    return wxStrcmp(GetItemText(item1), GetItemText(item2));
 }
 
 void wxTreeCtrl::SortChildren(const wxTreeItemId& item)
@@ -2287,7 +2366,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                         size_t count = GetSelections(selections);
                         if ( count == 0 ||
                              count > 1 ||
-                             HITEM(selections[0]) != htItem )
+                             HITEM_PTR(selections[0]) != htItem )
                         {
                             // clear the previously selected items, if the
                             // user clicked outside of the present selection.
@@ -2429,7 +2508,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
         {
             // TreeView_GetItemRect() will return false if item is not visible,
             // which may happen perfectly well
-            if ( TreeView_GetItemRect(GetHwnd(), HITEM(selections[n]),
+            if ( TreeView_GetItemRect(GetHwnd(), HITEM_PTR(selections[n]),
                                       &rect, TRUE) )
             {
                 ::InvalidateRect(GetHwnd(), &rect, FALSE);
@@ -3150,5 +3229,14 @@ int wxTreeCtrl::GetState(const wxTreeItemId& node)
 
     return STATEIMAGEMASKTOINDEX(tvi.state);
 }
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxTreeItemId wxTreeCtrl::GetParent(const wxTreeItemId& item) const
+{
+    return GetItemParent( item );
+}
+
+#endif  // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL

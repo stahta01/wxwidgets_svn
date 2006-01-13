@@ -14,6 +14,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "window.h"
+#endif
+
 #include "wx/font.h"
 
 struct window_t;
@@ -48,16 +52,10 @@ public:
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
 
-    // implement base class (pure) virtual methods
-    // -------------------------------------------
-
-    virtual void SetLabel( const wxString &WXUNUSED(label) ) {}
-    virtual wxString GetLabel() const { return wxEmptyString; }
-
     virtual void Raise();
     virtual void Lower();
 
-    virtual bool Show(bool show = true);
+    virtual bool Show(bool show = TRUE);
 
     virtual void SetFocus();
 
@@ -65,7 +63,7 @@ public:
 
     virtual void WarpPointer(int x, int y);
 
-    virtual void Refresh(bool eraseBackground = true,
+    virtual void Refresh(bool eraseBackground = TRUE,
                          const wxRect *rect = (const wxRect *) NULL);
     virtual void Update();
     virtual void Clear();
@@ -73,7 +71,7 @@ public:
     virtual void Thaw();
 
     virtual bool SetCursor(const wxCursor &cursor);
-    virtual bool SetFont(const wxFont &font) { m_font = font; return true; }
+    virtual bool SetFont(const wxFont &font) { m_font = font; return TRUE; }
 
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
@@ -92,12 +90,12 @@ public:
     virtual void DragAcceptFiles(bool accept);
 
     virtual WXWidget GetHandle() const { return m_wnd; }
-
+    
     void SetMGLwindow_t(struct window_t *wnd);
 
     // implementation from now on
     // --------------------------
-
+    
     void OnInternalIdle();
 
 protected:
@@ -128,13 +126,13 @@ protected:
     // ::MoveWindow() except for composite controls which will want to arrange
     // themselves inside the given rectangle
     virtual void DoMoveWindow(int x, int y, int width, int height);
-
+    
 private:
     // common part of all ctors
     void Init();
     // counterpart to SetFocus
     void KillFocus();
-
+    
     MGLDevCtx *m_paintMGLDC;
     friend class wxPaintDC;
 
@@ -149,4 +147,5 @@ public:
 };
 
 
-#endif // _WX_WINDOW_H_
+#endif
+    // _WX_WINDOW_H_

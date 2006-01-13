@@ -7,8 +7,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKTOPLEVELH__
 #define __GTKTOPLEVELH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
+
 
 //-----------------------------------------------------------------------------
 // wxTopLevelWindowGTK
@@ -43,9 +49,9 @@ public:
     virtual ~wxTopLevelWindowGTK();
 
     // implement base class pure virtuals
-    virtual void Maximize(bool maximize = true);
+    virtual void Maximize(bool maximize = TRUE);
     virtual bool IsMaximized() const;
-    virtual void Iconize(bool iconize = true);
+    virtual void Iconize(bool iconize = TRUE);
     virtual bool IsIconized() const;
     virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons);
@@ -56,11 +62,11 @@ public:
 
     virtual bool SetShape(const wxRegion& region);
 
+#if wxABI_VERSION >= 20602
     virtual void RequestUserAttention(int flags = wxUSER_ATTENTION_INFO);
+#endif
 
-    virtual void SetWindowStyleFlag( long style );
-
-    virtual bool Show(bool show = true);
+    virtual bool Show(bool show = TRUE);
 
     virtual void Raise();
 
@@ -89,6 +95,7 @@ public:
     // do *not* call this to iconize the frame, this is a private function!
     void SetIconizeState(bool iconic);
 
+    wxString      m_title;
     int           m_miniEdge,
                   m_miniTitle;
     GtkWidget    *m_mainWidget;
@@ -103,10 +110,6 @@ public:
     long          m_gdkFunc,
                   m_gdkDecor;
 
-    // private gtk_timeout_add result for mimicing wxUSER_ATTENTION_INFO and
-    // wxUSER_ATTENTION_ERROR difference, -2 for no hint, -1 for ERROR hint, rest for GtkTimeout handle.
-    int m_urgency_hint;
-
 protected:
     // common part of all ctors
     void Init();
@@ -118,8 +121,6 @@ protected:
 
     virtual void DoSetClientSize(int width, int height);
     virtual void DoGetClientSize( int *width, int *height ) const;
-
-    wxString      m_title;
 
     // is the frame currently iconized?
     bool m_isIconized;

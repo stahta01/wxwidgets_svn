@@ -139,7 +139,6 @@ WXDLLEXPORT_DATA(const wxChar *) wxTreeCtrlNameStr = wxT("treeCtrl");
 WXDLLEXPORT_DATA(const wxChar *) wxEnhDialogNameStr = wxT("Shell");
 WXDLLEXPORT_DATA(const wxChar *) wxToolBarNameStr = wxT("toolbar");
 WXDLLEXPORT_DATA(const wxChar *) wxVirtListBoxNameStr = wxT("virtListBox");
-WXDLLEXPORT_DATA(const wxChar *) wxDataViewCtrlNameStr = wxT("dataviewCtrl");
 
 // Default messages
 WXDLLEXPORT_DATA(const wxChar *) wxGetTextFromUserPromptStr = wxT("Input Text");
@@ -149,7 +148,7 @@ WXDLLEXPORT_DATA(const wxChar *) wxFileSelectorPromptStr = wxT("Select a file");
 
 // Other default strings
 WXDLLEXPORT_DATA(const wxChar *) wxFileSelectorDefaultWildcardStr =
-#if defined(__WXMSW__) || defined(__OS2__)
+#if defined(__WXMSW__) || defined(__WXOS2__)
     wxT("*.*")
 #else // Unix/Mac
     wxT("*")
@@ -158,7 +157,7 @@ WXDLLEXPORT_DATA(const wxChar *) wxFileSelectorDefaultWildcardStr =
 WXDLLEXPORT_DATA(const wxChar *) wxDirDialogNameStr = wxT("wxDirCtrl");
 WXDLLEXPORT_DATA(const wxChar *) wxDirDialogDefaultFolderStr = wxT("/");
 
-#if defined(__WXMSW__) || defined(__OS2__)
+#if defined(__WXMSW__) || defined(__WXOS2__)
 WXDLLEXPORT_DATA(const wxChar *) wxUserResourceStr = wxT("TEXT");
 #endif
 

@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_PEN_H__
 #define __WX_PEN_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "pen.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -40,14 +45,14 @@ public:
     bool operator != (const wxPen& pen) const;
 
     void SetColour(const wxColour &colour);
-    void SetColour(unsigned char red, unsigned char green, unsigned char blue);
+    void SetColour(int red, int green, int blue);
     void SetCap(int capStyle);
     void SetJoin(int joinStyle);
     void SetStyle(int style);
     void SetWidth(int width);
     void SetDashes(int number_of_dashes, const wxDash *dash);
     void SetStipple(const wxBitmap& stipple);
-
+    
     wxColour &GetColour() const;
     int GetCap() const;
     int GetJoin() const;
@@ -57,7 +62,7 @@ public:
     int GetDashCount() const;
     wxDash* GetDash() const;
     wxBitmap *GetStipple() const;
-
+    
     bool Ok() const;
 
     // implementation:
@@ -68,7 +73,7 @@ protected:
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
-private:
+private:    
     DECLARE_DYNAMIC_CLASS(wxPen)
 };
 

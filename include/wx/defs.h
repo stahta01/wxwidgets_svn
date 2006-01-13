@@ -1,5 +1,5 @@
 /**
-*  Name:        wx/defs.h
+*  Name:        defs.h
 *  Purpose:     Declarations/definitions common to all wx source files
 *  Author:      Julian Smart and others
 *  Modified by: Ryan Norton (Converted to C)
@@ -65,13 +65,18 @@
 #ifdef __VISUALC__
     /*  the only "real" warning here is 4244 but there are just too many of them */
     /*  in our code... one day someone should go and fix them but until then... */
-#   pragma warning(disable:4097)    /*  typedef used as class */
 #   pragma warning(disable:4201)    /*  nonstandard extension used: nameless struct/union */
 #   pragma warning(disable:4244)    /*  conversion from double to float */
-#   pragma warning(disable:4355)    /* 'this' used in base member initializer list */
+#   pragma warning(disable:4710)    /*  function not inlined */
+#   pragma warning(disable:4097)    /*  typedef used as class */
 #   pragma warning(disable:4511)    /*  copy ctor couldn't be generated */
 #   pragma warning(disable:4512)    /*  operator=() couldn't be generated */
-#   pragma warning(disable:4710)    /*  function not inlined */
+#ifndef WIN32
+#   pragma warning(disable:4135)    /*  conversion between different integral types */
+#   pragma warning(disable:4769)    /*  assignment of near pointer to long integer */
+/*  This one is really annoying, since it occurs for each cast to (HANDLE)... */
+#   pragma warning(disable:4305)    /*  truncation of long to near ptr */
+#endif
 #endif /*  __VISUALC__ */
 
 /*  suppress some Salford C++ warnings */
@@ -87,19 +92,6 @@
 #ifdef __BORLANDC__
 #   pragma warn -inl                /*  Functions containing reserved words and certain constructs are not expanded inline */
 #endif /*  __BORLANDC__ */
-
-/*
-   g++ gives a warning when a class has private dtor if it has no friends but
-   this is a perfectly valid situation for a ref-counted class which destroys
-   itself when its ref count drops to 0, so provide a macro to suppress this
-   warning
- */
-#ifdef __GNUG__
-#   define wxSUPPRESS_GCC_PRIVATE_DTOR_WARNING(name) \
-        friend class wxDummyFriendFor ## name;
-#else /* !g++ */
-#   define wxSUPPRESS_GCC_PRIVATE_DTOR_WARNING(name)
-#endif
 
 /*  ---------------------------------------------------------------------------- */
 /*  wxWidgets version and compatibility defines */
@@ -159,7 +151,7 @@
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x500)
         /*  Borland 5.0+ supports bool */
         #define HAVE_BOOL
-    #elif wxCHECK_WATCOM_VERSION(1,0)
+    #elif defined(__WATCOMC__) && (__WATCOMC__ >= 1100)
         /*  Watcom 11+ supports bool */
         #define HAVE_BOOL
     #elif defined(__DIGITALMARS__)
@@ -260,11 +252,10 @@ typedef int wxWindowID;
     #if defined(__VISUALC__) && (__VISUALC__ >= 1100)
         /*  VC++ 6.0 and 5.0 have C++ casts (what about earlier versions?) */
         #define HAVE_CXX_CASTS
-    #elif defined(__MINGW32__) || defined(__CYGWIN32__)
-        #if wxCHECK_GCC_VERSION(2, 95)
-            /*  GCC 2.95 has C++ casts, what about earlier versions? */
-            #define HAVE_CXX_CASTS
-        #endif
+    #elif ( defined(__MINGW32__) || defined(__CYGWIN32__) ) \
+          && wxCHECK_GCC_VERSION(2, 95)
+        /*  GCC 2.95 has C++ casts, what about earlier versions? */
+        #define HAVE_CXX_CASTS
     #endif
 #endif /*  !HAVE_CXX_CASTS */
 
@@ -306,40 +297,44 @@ typedef int wxWindowID;
    truncate from a larger to smaller type, static_cast<> can't be used for it
    as it results in warnings when using some compilers (SGI mipspro for example)
  */
-#if defined(__INTELC__) && defined(__cplusplus)
-    template <typename T, typename X>
-    inline T wx_truncate_cast_impl(X x)
-    {
-        #pragma warning(push)
-        /* implicit conversion of a 64-bit integral type to a smaller integral type */
-        #pragma warning(disable: 1682)
-        /* conversion from "X" to "T" may lose significant bits */
-        #pragma warning(disable: 810)
+#if defined(__cplusplus) && wxABI_VERSION >= 20603
+    #if defined(__INTELC__)
+        template <typename T, typename X>
+        inline T wx_truncate_cast_impl(X x)
+        {
+            #pragma warning(push)
+            /* implicit conversion of a 64-bit integral type to a smaller integral type */
+            #pragma warning(disable: 1682)
+            /* conversion from "X" to "T" may lose significant bits */
+            #pragma warning(disable: 810)
 
-        return x;
+            return x;
 
-        #pragma warning(pop)
-    }
+            #pragma warning(pop)
+        }
 
-    #define wx_truncate_cast(t, x) wx_truncate_cast_impl<t>(x)
+        #define wx_truncate_cast(t, x) wx_truncate_cast_impl<t>(x)
 
-#elif defined(__cplusplus) && defined(__VISUALC__) && __VISUALC__ >= 1310
-    template <typename T, typename X>
-    inline T wx_truncate_cast_impl(X x)
-    {
-        #pragma warning(push)
-        /* conversion from 'X' to 'T', possible loss of data */
-        #pragma warning(disable: 4267)
+    #elif defined(__VISUALC__) && __VISUALC__ >= 1310
+        template <typename T, typename X>
+        inline T wx_truncate_cast_impl(X x)
+        {
+            #pragma warning(push)
+            /* conversion from 'X' to 'T', possible loss of data */
+            #pragma warning(disable: 4267)
 
-        return x;
+            return x;
 
-        #pragma warning(pop)
-    }
+            #pragma warning(pop)
+        }
 
-    #define wx_truncate_cast(t, x) wx_truncate_cast_impl<t>(x)
-#else
+        #define wx_truncate_cast(t, x) wx_truncate_cast_impl<t>(x)
+    #else
+        #define wx_truncate_cast(t, x) ((t)(x))
+    #endif
+#else  /* defined(__cplusplus) && wxABI_VERSION >= 20603 */
     #define wx_truncate_cast(t, x) ((t)(x))
-#endif
+#endif /* defined(__cplusplus) && wxABI_VERSION >= 20603 */
 
 /* for consistency with wxStatic/DynamicCast defined in wx/object.h */
 #define wxConstCast(obj, className) wx_const_cast(className *, obj)
@@ -886,43 +881,29 @@ inline wxUIntPtr wxPtrToUInt(const void *p)
     /*
        VC++ 7.1 gives warnings about casts such as below even when they're
        explicit with /Wp64 option, suppress them as we really know what we're
-       doing here. Same thing with icc with -Wall.
+       doing here
      */
-#if defined(__VISUALC__) || defined(__INTELC__)
-    #pragma warning(push)
-    #ifdef __VISUALC__
-        /* pointer truncation from '' to '' */
-        #pragma warning(disable: 4311)
-    #elif defined(__INTELC__)
-        /* conversion from pointer to same-sized integral type */
-        #pragma warning(disable: 1684)
-    #endif
+#ifdef __VISUALC__
+    #pragma warning(disable: 4311) /* pointer truncation from '' to '' */
 #endif
 
     return wx_reinterpret_cast(wxUIntPtr, p);
 
-#if defined(__VISUALC__) || defined(__INTELC__)
-    #pragma warning(pop)
+#ifdef __VISUALC__
+    #pragma warning(default: 4311)
 #endif
 }
 
 inline void *wxUIntToPtr(wxUIntPtr p)
 {
-#if defined(__VISUALC__) || defined(__INTELC__)
-    #pragma warning(push)
-    #ifdef __VISUALC__
-        /* conversion to type of greater size */
-        #pragma warning(disable: 4312)
-    #elif defined(__INTELC__)
-        /* invalid type conversion: "wxUIntPtr={unsigned long}" to "void *" */
-        #pragma warning(disable: 171)
-    #endif
+#ifdef __VISUALC__
+    #pragma warning(disable: 4312) /* conversion to type of greater size */
 #endif
 
     return wx_reinterpret_cast(void *, p);
 
-#if defined(__VISUALC__) || defined(__INTELC__)
-    #pragma warning(pop)
+#ifdef __VISUALC__
+    #pragma warning(default: 4312)
 #endif
 }
 #endif /*__cplusplus*/
@@ -1544,58 +1525,37 @@ enum wxBorder
 #define wxSP_WRAP             0x2000
 
 /*
- * wxBookCtrl flags (common for wxNotebook, wxListbook, wxChoicebook, wxTreebook)
- */
-
-#define wxBK_DEFAULT          0x0000
-#define wxBK_TOP              0x0010
-#define wxBK_BOTTOM           0x0020
-#define wxBK_LEFT             0x0040
-#define wxBK_RIGHT            0x0080
-#define wxBK_ALIGN_MASK       ( wxBK_TOP | wxBK_BOTTOM | wxBK_LEFT | wxBK_RIGHT )
-
-/*
  * wxNotebook flags
  */
-#if WXWIN_COMPATIBILITY_2_6
-/* Use common book wxBK_* flags for describing alignment */
-#define wxNB_DEFAULT          wxBK_DEFAULT
-#define wxNB_TOP              wxBK_TOP
-#define wxNB_BOTTOM           wxBK_BOTTOM
-#define wxNB_LEFT             wxBK_LEFT
-#define wxNB_RIGHT            wxBK_RIGHT
-#endif
-
-#define wxNB_FIXEDWIDTH       0x0100
-#define wxNB_MULTILINE        0x0200
-#define wxNB_NOPAGETHEME      0x0400
-#define wxNB_FLAT             0x0800
+#define wxNB_FIXEDWIDTH       0x0010
+#define wxNB_TOP              0x0000    /*  default */
+#define wxNB_LEFT             0x0020
+#define wxNB_RIGHT            0x0040
+#define wxNB_BOTTOM           0x0080
+#define wxNB_MULTILINE        0x0100
+#define wxNB_NOPAGETHEME      0x0200
+#define wxNB_FLAT             0x0400
+#define wxNB_DEFAULT          wxNB_TOP
 
 /*
  * wxListbook flags
  */
-#if WXWIN_COMPATIBILITY_2_6
-/* Use common book wxBK_* flags for describing alignment */
-#define wxLB_DEFAULT          wxBK_DEFAULT
-#define wxLB_TOP              wxBK_TOP
-#define wxLB_BOTTOM           wxBK_BOTTOM
-#define wxLB_LEFT             wxBK_LEFT
-#define wxLB_RIGHT            wxBK_RIGHT
-#define wxLB_ALIGN_MASK       wxBK_ALIGN_MASK
-#endif
+#define wxLB_DEFAULT          0x0
+#define wxLB_TOP              0x1
+#define wxLB_BOTTOM           0x2
+#define wxLB_LEFT             0x4
+#define wxLB_RIGHT            0x8
+#define wxLB_ALIGN_MASK       0xf
 
 /*
  * wxChoicebook flags
  */
-#if WXWIN_COMPATIBILITY_2_6
-/* Use common book wxBK_* flags for describing alignment */
-#define wxCHB_DEFAULT          wxBK_DEFAULT
-#define wxCHB_TOP              wxBK_TOP
-#define wxCHB_BOTTOM           wxBK_BOTTOM
-#define wxCHB_LEFT             wxBK_LEFT
-#define wxCHB_RIGHT            wxBK_RIGHT
-#define wxCHB_ALIGN_MASK       wxBK_ALIGN_MASK
-#endif
+#define wxCHB_DEFAULT         0x0
+#define wxCHB_TOP             0x1
+#define wxCHB_BOTTOM          0x2
+#define wxCHB_LEFT            0x4
+#define wxCHB_RIGHT           0x8
+#define wxCHB_ALIGN_MASK      0xf
 
 /*
  * wxTabCtrl flags
@@ -1883,8 +1843,11 @@ enum wxHitTest
 #define wxSIZE_ALLOW_MINUS_ONE  0x0004
 /*  Don't do parent client adjustments (for implementation only) */
 #define wxSIZE_NO_ADJUSTMENTS   0x0008
+
+#if wxABI_VERSION >= 20602
 /*  Change the window position even if it seems to be already correct */
 #define wxSIZE_FORCE            0x0010
+#endif // 2.6.2+
 
 /*  ---------------------------------------------------------------------------- */
 /*  GDI descriptions */
@@ -2163,23 +2126,16 @@ enum wxKeyCode
     WXK_SPECIAL20
 };
 
-/* This enum contains bit mask constants used in wxKeyEvent */
-enum wxKeyModifier
+#if wxUSE_HOTKEY
+enum wxHotkeyModifier
 {
-    wxMOD_NONE      = 0x0000,
-    wxMOD_ALT       = 0x0001,
-    wxMOD_CONTROL   = 0x0002,
-    wxMOD_ALTGR     = wxMOD_ALT | wxMOD_CONTROL,
-    wxMOD_SHIFT     = 0x0004,
-    wxMOD_META      = 0x0008,
-    wxMOD_WIN       = wxMOD_META,
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-    wxMOD_CMD       = wxMOD_META,
-#else
-    wxMOD_CMD       = wxMOD_CONTROL,
-#endif
-    wxMOD_ALL       = 0xffff
+    wxMOD_NONE = 0,
+    wxMOD_ALT = 1,
+    wxMOD_CONTROL = 2,
+    wxMOD_SHIFT = 4,
+    wxMOD_WIN = 8
 };
+#endif
 
 /*  Mapping modes (same values as used by Windows, don't change) */
 enum
@@ -2637,11 +2593,6 @@ typedef int             (__stdcall *WXFARPROC)();
 #endif /*  __WIN32__ */
 
 
-#if defined(__OS2__)
-typedef unsigned long   DWORD;
-typedef unsigned short  WORD;
-#endif
-
 #if defined(__WXPM__) || defined(__EMX__)
 #ifdef __WXPM__
 /*  Stand-ins for OS/2 types, to avoid #including all of os2.h */
@@ -2702,6 +2653,8 @@ typedef unsigned long   HCURSOR;
 typedef unsigned long   HINSTANCE;
 typedef unsigned long   HIMAGELIST;
 typedef unsigned long   HGLOBAL;
+typedef unsigned long   DWORD;
+typedef unsigned short  WORD;
 #endif /*  WXPM || EMX */
 
 #if defined (__WXPM__)

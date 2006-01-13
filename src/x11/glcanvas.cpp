@@ -10,6 +10,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "glcanvas.h"
+#endif
+
 #include "wx/setup.h"
 
 #if wxUSE_GLCANVAS
@@ -128,7 +132,7 @@ void wxGLContext::SetCurrent()
     { 
         Display* display = (Display*) wxGetDisplay();
         glXMakeCurrent(display, (Window) wxGetClientAreaWindow(m_window), 
-                       m_glContext );
+                       m_glContext );;
     }
 }
 

@@ -187,7 +187,6 @@ wx/ipc.h
 wx/ipcbase.h
 wx/isql.h
 wx/isqlext.h
-wx/link.h
 wx/list.h
 wx/listimpl.cpp
 wx/log.h
@@ -245,7 +244,6 @@ wx/unix/apptrait.h
 wx/unix/execute.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
-wx/unix/private.h
 wx/unix/stackwalk.h
 wx/unix/stdpaths.h
 wx/fs_inet.h

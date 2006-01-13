@@ -6,6 +6,9 @@
 // CVSID: $Id$
 // wxWindows licence
 // --------------------------------------------------------------------------
+#ifdef __GNUG__
+#pragma implementation "sndoss.cpp"
+#endif
 
 // --------------------------------------------------------------------------
 // System dependent headers

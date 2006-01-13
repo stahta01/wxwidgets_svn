@@ -12,6 +12,10 @@
 #ifndef _WX_PRNTBASEH__
 #define _WX_PRNTBASEH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "prntbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -95,7 +99,6 @@ public:
 
     static void SetPrintFactory( wxPrintFactory *factory );
     static wxPrintFactory *GetFactory();
-private:
     static wxPrintFactory *m_factory;
 };
 

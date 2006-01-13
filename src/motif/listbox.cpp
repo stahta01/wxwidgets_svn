@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/listbox.cpp
+// Name:        listbox.cpp
 // Purpose:     wxListBox
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listbox.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -306,10 +310,8 @@ int wxDoFindStringInList(Widget w, const wxString& s)
         return -1;
 }
 
-int wxListBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
+int wxListBox::FindString(const wxString& s) const
 {
-    // FIXME: back to base class for not supported value of bCase
-
     return wxDoFindStringInList( (Widget)m_mainWidget, s );
 }
 
@@ -714,3 +716,4 @@ wxSize wxListBox::DoGetBestSize() const
 {
     return wxDoGetListBoxBestSize( (Widget)m_mainWidget, this );
 }
+

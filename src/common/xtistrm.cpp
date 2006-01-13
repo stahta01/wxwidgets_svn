@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xtistrm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -840,7 +844,7 @@ void wxCodeDepersister::SetConnect(int eventSourceObjectID,
     }
 }
 
-#include "wx/arrimpl.cpp"
+#include <wx/arrimpl.cpp>
 
 WX_DEFINE_OBJARRAY(wxxVariantArray);
 

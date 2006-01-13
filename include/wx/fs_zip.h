@@ -10,6 +10,10 @@
 #ifndef _WX_FS_ZIP_H_
 #define _WX_FS_ZIP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fs_zip.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_FILESYSTEM && wxUSE_FS_ZIP && wxUSE_STREAMS
@@ -33,7 +37,9 @@ class WXDLLIMPEXP_BASE wxZipFSHandler : public wxFileSystemHandler
         virtual wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location);
         virtual wxString FindFirst(const wxString& spec, int flags = 0);
         virtual wxString FindNext();
+#if wxABI_VERSION >= 20602 /* 2.6.2+ only */
         void Cleanup();
+#endif
         ~wxZipFSHandler();
 
     private:

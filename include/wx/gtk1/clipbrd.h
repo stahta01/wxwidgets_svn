@@ -11,6 +11,10 @@
 #ifndef __GTKCLIPBOARDH__
 #define __GTKCLIPBOARDH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #if wxUSE_CLIPBOARD
 
 #include "wx/object.h"

@@ -68,7 +68,10 @@ public:
     // Override in order to recreate the pen
     //
     void SetColour(const wxColour& rColour);
-    void SetColour(unsigned char cRed, unsigned char cGreen, unsigned char cBlue);
+    void SetColour( unsigned char cRed
+                   ,unsigned char cGreen
+                   ,unsigned char cBlue
+                  );
 
     void SetWidth(int nWidth);
     void SetStyle(int nStyle);
@@ -97,7 +100,7 @@ public:
     // Useful helper: create the brush resource
     //
     bool     RealizeResource(void);
-    bool     FreeResource(bool bForce = false);
+    bool     FreeResource(bool bForce = FALSE);
     WXHANDLE GetResourceHandle(void);
     bool     IsFree(void) const;
     void     Unshare(void);

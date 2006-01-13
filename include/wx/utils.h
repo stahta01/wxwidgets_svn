@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/utils.h
+// Name:        utils.h
 // Purpose:     Miscellaneous utilities
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma interface "utils.h"
+#endif
+
 #include "wx/object.h"
 #include "wx/list.h"
 #include "wx/filefn.h"
@@ -26,9 +37,7 @@ class WXDLLIMPEXP_BASE wxArrayString;
 // wxLongLong
 #include "wx/longlong.h"
 
-#ifdef __WATCOMC__
-    #include <direct.h>
-#elif defined(__X__)
+#ifdef __X__
     #include <dirent.h>
     #include <unistd.h>
 #endif
@@ -52,13 +61,16 @@ class WXDLLIMPEXP_CORE wxPoint;
 #define wxMax(a,b)            (((a) > (b)) ? (a) : (b))
 #define wxMin(a,b)            (((a) < (b)) ? (a) : (b))
 
-// wxGetFreeMemory can return huge amount of memory on 32-bit platforms as well
-// so to always use long long for its result type on all platforms which
-// support it
-#if wxUSE_LONGLONG
-    typedef wxLongLong wxMemorySize;
+// wxGetFreeMemory can return huge amount of memory on 64-bit platforms
+// define wxMemorySize according to the type which best fits your platform
+#if wxUSE_LONGLONG && defined(__WIN64__)
+    // 64 bit Windowses have sizeof(long) only 32 bit long
+    // we need to use wxLongLong to express memory sizes
+    #define wxMemorySize wxLongLong
 #else
-    typedef long wxMemorySize;
+    // 64 bit UNIX has sizeof(long) = 64
+    // assume 32 bit platforms cannnot return more than 32bits of
+    #define wxMemorySize long
 #endif
 
 // ----------------------------------------------------------------------------
@@ -115,6 +127,8 @@ WXDLLEXPORT bool wxGetKeyState(wxKeyCode key);
 WXDLLEXPORT bool wxSetDetectableAutoRepeat( bool flag );
 
 
+#if wxABI_VERSION > 20602
+
 // wxMouseState is used to hold information about button and modifier state
 // and is what is returned from wxGetMouseState.
 class WXDLLEXPORT wxMouseState
@@ -133,12 +147,12 @@ public:
     bool        LeftDown()    { return m_leftDown; }
     bool        MiddleDown()  { return m_middleDown; }
     bool        RightDown()   { return m_rightDown; }
-    
+
     bool        ControlDown() { return m_controlDown; }
     bool        ShiftDown()   { return m_shiftDown; }
     bool        AltDown()     { return m_altDown; }
     bool        MetaDown()    { return m_metaDown; }
-    bool        CmdDown() 
+    bool        CmdDown()
     {
 #if defined(__WXMAC__) || defined(__WXCOCOA__)
         return MetaDown();
@@ -158,7 +172,7 @@ public:
     void        SetShiftDown(bool down)   { m_shiftDown = down; }
     void        SetAltDown(bool down)     { m_altDown = down; }
     void        SetMetaDown(bool down)    { m_metaDown = down; }
-        
+
 private:
     wxCoord     m_x;
     wxCoord     m_y;
@@ -177,6 +191,7 @@ private:
 // Returns the current state of the mouse position, buttons and modifers
 WXDLLEXPORT wxMouseState wxGetMouseState();
 
+#endif // wxABI_VERSION > 2.6.2
 
 // ----------------------------------------------------------------------------
 // Window ID management
@@ -271,13 +286,6 @@ WXDLLIMPEXP_BASE long wxExecute(const wxString& command,
                                 wxArrayString& output,
                                 wxArrayString& error,
                                 int flags = 0);
-
-#if defined(__WXMSW__) && wxUSE_IPC
-// ask a DDE server to execute the DDE request with given parameters
-WXDLLIMPEXP_BASE bool wxExecuteDDE(const wxString& ddeServer,
-                                   const wxString& ddeTopic,
-                                   const wxString& ddeCommand);
-#endif // __WXMSW__ && wxUSE_IPC
 
 enum wxSignal
 {
@@ -388,14 +396,10 @@ WXDLLIMPEXP_BASE bool wxHandleFatalExceptions(bool doit = true);
 
 #endif // wxUSE_ON_FATAL_EXCEPTION
 
-// flags for wxLaunchDefaultBrowser
-enum
-{
-    wxBROWSER_NEW_WINDOW = 1
-};
-
+#if wxABI_VERSION >= 20601
 // Launch url in the user's default internet browser
-WXDLLIMPEXP_BASE bool wxLaunchDefaultBrowser(const wxString& url, int flags = 0);
+WXDLLIMPEXP_BASE bool wxLaunchDefaultBrowser(const wxString& url);
+#endif
 
 // ----------------------------------------------------------------------------
 // Environment variables
@@ -624,6 +628,22 @@ WXDLLIMPEXP_BASE bool wxYieldIfNeeded();
 // ----------------------------------------------------------------------------
 // Error message functions used by wxWidgets (deprecated, use wxLog)
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+
+// Format a message on the standard error (UNIX) or the debugging
+// stream (Windows)
+wxDEPRECATED( WXDLLIMPEXP_BASE void wxDebugMsg(const wxChar *fmt ...) ATTRIBUTE_PRINTF_1 );
+
+// Non-fatal error (continues)
+extern WXDLLIMPEXP_DATA_BASE(const wxChar*) wxInternalErrorStr;
+wxDEPRECATED( WXDLLIMPEXP_BASE void wxError(const wxString& msg, const wxString& title = wxInternalErrorStr) );
+
+// Fatal error (exits)
+extern WXDLLIMPEXP_DATA_BASE(const wxChar*) wxFatalErrorStr;
+wxDEPRECATED( WXDLLIMPEXP_BASE void wxFatalError(const wxString& msg, const wxString& title = wxFatalErrorStr) );
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif
     // _WX_UTILSH__

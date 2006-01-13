@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "docview.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -656,18 +660,14 @@ void wxView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 
 void wxView::OnChangeFilename()
 {
-    // GetFrame can return wxWindow rather than wxTopLevelWindow due to
-    // generic MDI implementation so use SetLabel rather than SetTitle.
-    // It should cause SetTitle() for top level windows.
-    wxWindow *win = GetFrame();
-    if (!win) return;
+    if (GetFrame() && GetDocument())
+    {
+        wxString title;
 
-    wxDocument *doc = GetDocument();
-    if (!doc) return;
+        GetDocument()->GetPrintableName(title);
 
-    wxString name;
-    doc->GetPrintableName(name);
-    win->SetLabel(name);
+        GetFrame()->SetTitle(title);
+    }
 }
 
 void wxView::SetDocument(wxDocument *doc)
@@ -2219,10 +2219,10 @@ void wxFileHistory::RemoveFileFromHistory(size_t i)
         // delete the last separator too if no more files are left
         if ( m_fileHistoryN == 1 )
         {
-            wxMenuItemList::compatibility_iterator nodeLast = menu->GetMenuItems().GetLast();
-            if ( nodeLast )
+            wxMenuItemList::compatibility_iterator node = menu->GetMenuItems().GetLast();
+            if ( node )
             {
-                wxMenuItem *menuItem = nodeLast->GetData();
+                wxMenuItem *menuItem = node->GetData();
                 if ( menuItem->IsSeparator() )
                 {
                     menu->Delete(menuItem);
@@ -2445,3 +2445,4 @@ bool wxTransferStreamToFile(wxInputStream& stream, const wxString& filename)
 #endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
 
 #endif // wxUSE_DOC_VIEW_ARCHITECTURE
+

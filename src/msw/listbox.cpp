@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -348,12 +352,8 @@ void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
     InvalidateBestSize();
 }
 
-int wxListBox::FindString(const wxString& s, bool bCase) const
+int wxListBox::FindString(const wxString& s) const
 {
-    // back to base class search for not native search type
-    if (bCase)
-       return wxItemContainerImmutable::FindString( s, bCase );
-
     int pos = ListBox_FindStringExact(GetHwnd(), -1, s);
     if (pos == LB_ERR)
         return wxNOT_FOUND;
@@ -776,19 +776,16 @@ bool wxListBox::MSWOnMeasure(WXMEASUREITEMSTRUCT *item)
     HDC hdc = CreateIC(wxT("DISPLAY"), NULL, NULL, 0);
 #endif
 
-    {
-        wxDCTemp dc((WXHDC)hdc);
-        dc.SetFont(GetFont());
+    wxDC dc;
+    dc.SetHDC((WXHDC)hdc);
+    dc.SetFont(GetFont());
 
-        pStruct->itemHeight = dc.GetCharHeight() + 2*OWNER_DRAWN_LISTBOX_EXTRA_SPACE;
-        pStruct->itemWidth  = dc.GetCharWidth();
-    }
+    pStruct->itemHeight = dc.GetCharHeight() + 2*OWNER_DRAWN_LISTBOX_EXTRA_SPACE;
+    pStruct->itemWidth  = dc.GetCharWidth();
 
-#ifdef __WXWINCE__
-    ReleaseDC(NULL, hdc);
-#else
+    dc.SetHDC(0);
+
     DeleteDC(hdc);
-#endif
 
     return true;
 }

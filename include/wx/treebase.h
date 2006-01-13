@@ -12,6 +12,10 @@
 #ifndef _WX_TREEBASE_H_
 #define _WX_TREEBASE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "treebase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -123,19 +127,11 @@ protected:
 
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxTreeItemIdValue, wxArrayTreeItemIdsBase);
 
-// this is a wrapper around the array class defined above which allow to wok
-// with vaue of natural wxTreeItemId type instead of using wxTreeItemIdValue
-// and does it without any loss of efficiency
 class WXDLLEXPORT wxArrayTreeItemIds : public wxArrayTreeItemIdsBase
 {
 public:
     void Add(const wxTreeItemId& id)
         { wxArrayTreeItemIdsBase::Add(id.m_pItem); }
-    void Insert(const wxTreeItemId& id, size_t pos)
-        { wxArrayTreeItemIdsBase::Insert(id.m_pItem, pos); }
-    wxTreeItemId Item(size_t i) const
-        { return wxTreeItemId(wxArrayTreeItemIdsBase::Item(i)); }
-    wxTreeItemId operator[](size_t i) const { return Item(i); }
 };
 
 // ----------------------------------------------------------------------------
@@ -299,6 +295,11 @@ public:
         // Set the tooltip for the item (for EVT\_TREE\_ITEM\_GETTOOLTIP events)
     void SetToolTip(const wxString& toolTip) { m_label = toolTip; }
     wxString GetToolTip() { return m_label; }
+
+#if WXWIN_COMPATIBILITY_2_2
+    // for compatibility only, don't use
+    wxDEPRECATED( int GetCode() const);
+#endif // WXWIN_COMPATIBILITY_2_2
 
 private:
     // not all of the members are used (or initialized) for all events

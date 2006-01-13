@@ -14,6 +14,10 @@
 #ifndef _WX_TOPLEVEL_BASE_H_
 #define _WX_TOPLEVEL_BASE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevelbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -154,10 +158,13 @@ public:
     // return true if the frame is in fullscreen mode
     virtual bool IsFullScreen() const = 0;
 
-    // the title of the top level window: the text which the
-    // window shows usually at the top of the frame/dialog in dedicated bar
+    /*
+       for now we already have them in wxWindow, but this is wrong: these
+       methods really only make sense for wxTopLevelWindow!
+
     virtual void SetTitle(const wxString& title) = 0;
     virtual wxString GetTitle() const = 0;
+     */
 
     // Set the shape of the window to the given region.
     // Returns true if the platform supports this feature (and the

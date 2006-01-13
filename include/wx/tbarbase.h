@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbarbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_TOOLBAR
@@ -193,6 +197,15 @@ public:
     // add tool to/remove it from a toolbar
     virtual void Detach() { m_tbar = (wxToolBarBase *)NULL; }
     virtual void Attach(wxToolBarBase *tbar) { m_tbar = tbar; }
+
+    // compatibility only, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( const wxBitmap& GetBitmap1() const );
+    wxDEPRECATED( const wxBitmap& GetBitmap2() const );
+
+    wxDEPRECATED( void SetBitmap1(const wxBitmap& bmp) );
+    wxDEPRECATED( void SetBitmap2(const wxBitmap& bmp) );
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     wxToolBarBase *m_tbar;  // the toolbar to which we belong (may be NULL)

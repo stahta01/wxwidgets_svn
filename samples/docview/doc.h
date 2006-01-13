@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma interface
+#endif
+
 #ifndef __DOCSAMPLEH__
 #define __DOCSAMPLEH__
 
@@ -32,7 +36,7 @@ public:
     wxList lines;
 
     DoodleSegment(void){};
-    DoodleSegment(const DoodleSegment& seg);
+    DoodleSegment(DoodleSegment& seg);
     ~DoodleSegment(void);
 
     void Draw(wxDC *dc);

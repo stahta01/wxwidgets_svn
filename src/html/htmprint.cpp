@@ -8,6 +8,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -89,7 +94,7 @@ void wxHtmlDCRenderer::SetHtmlText(const wxString& html, const wxString& basepat
 }
 
 
-void wxHtmlDCRenderer::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlDCRenderer::SetFonts(wxString normal_face, wxString fixed_face,
                                 const int *sizes)
 {
     m_Parser->SetFonts(normal_face, fixed_face, sizes);
@@ -452,7 +457,7 @@ void wxHtmlPrintout::SetMargins(float top, float bottom, float left, float right
 
 
 
-void wxHtmlPrintout::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlPrintout::SetFonts(wxString normal_face, wxString fixed_face,
                               const int *sizes)
 {
     m_Renderer->SetFonts(normal_face, fixed_face, sizes);
@@ -628,7 +633,7 @@ void wxHtmlEasyPrinting::SetFooter(const wxString& footer, int pg)
 }
 
 
-void wxHtmlEasyPrinting::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlEasyPrinting::SetFonts(wxString normal_face, wxString fixed_face,
                                   const int *sizes)
 {
     m_fontMode = FontMode_Explicit;

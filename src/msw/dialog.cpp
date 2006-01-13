@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -143,7 +147,7 @@ private:
     wxModalEventLoop m_evtLoop;
 };
 
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData)
+wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 // ============================================================================
 // implementation

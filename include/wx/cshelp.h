@@ -12,6 +12,10 @@
 #ifndef _WX_CSHELPH__
 #define _WX_CSHELPH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "cshelp.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HELP
@@ -137,8 +141,8 @@ private:
     static wxHelpProvider *ms_helpProvider;
 };
 
-WX_DECLARE_EXPORTED_HASH_MAP( wxUIntPtr, wxString, wxIntegerHash,
-                              wxIntegerEqual, wxSimpleHelpProviderHashMap );
+WX_DECLARE_EXPORTED_HASH_MAP( long, wxString, wxIntegerHash, wxIntegerEqual,
+                              wxLongToStringHashMap );
 
 // wxSimpleHelpProvider is an implementation of wxHelpProvider which supports
 // only plain text help strings and shows the string associated with the
@@ -156,8 +160,8 @@ public:
 protected:
     // we use 2 hashes for storing the help strings associated with windows
     // and the ids
-    wxSimpleHelpProviderHashMap m_hashWindows,
-                                m_hashIds;
+    wxLongToStringHashMap m_hashWindows,
+                          m_hashIds;
 };
 
 // wxHelpControllerHelpProvider is an implementation of wxHelpProvider which supports

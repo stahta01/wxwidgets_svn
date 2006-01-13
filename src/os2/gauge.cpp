@@ -214,8 +214,6 @@ bool wxGauge::Create(
             ,nWidth
             ,nHeight
            );
-    m_nWidth  = nWidth;     // Save for GetBestSize
-    m_nHeight = nHeight;
     ::WinShowWindow((HWND)GetHWND(), TRUE);
     delete pTextFont;
     return TRUE;
@@ -306,7 +304,4 @@ void wxGauge::SetValue(
     ::WinInvalidateRect(GetHwnd(), &vRect, FALSE);
 } // end of wxGauge::SetValue
 
-wxSize wxGauge::DoGetBestSize() const
-{
-    return wxSize(m_nWidth,m_nHeight);
-}
+

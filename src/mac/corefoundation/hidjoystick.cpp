@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "joystick.h"
+#endif
+
 //===========================================================================
 //  DECLARATIONS
 //===========================================================================
@@ -276,7 +280,7 @@ int wxJoystick::GetNumberAxes() const
 // is all devices with the kHIDUsage_GD_Joystick or kHIDUsage_GD_GamePad
 // identifiers.
 //---------------------------------------------------------------------------
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {    
     return 
         wxHIDDevice::GetCount(kHIDPage_GenericDesktop, kHIDUsage_GD_Joystick) +

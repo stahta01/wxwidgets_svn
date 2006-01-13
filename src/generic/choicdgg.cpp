@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/choicdgg.cpp
+// Name:        choicdgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by: 03.11.00: VZ to add wxArrayString and multiple sel functions
@@ -12,6 +12,10 @@
 // ============================================================================
 // declarations
 // ============================================================================
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicdgg.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -32,7 +36,6 @@
     #include "wx/dialog.h"
     #include "wx/button.h"
     #include "wx/listbox.h"
-    #include "wx/checklst.h"
     #include "wx/stattext.h"
     #include "wx/intl.h"
     #include "wx/sizer.h"
@@ -263,6 +266,7 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
     styleDlg &= ~wxRESIZE_BORDER;
     styleDlg &= ~wxCAPTION;
 #endif
+
 #ifdef __WXMAC__
     if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg & (~wxCANCEL) ) )
         return false;
@@ -280,9 +284,12 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
 #else
     topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(10,0) );
 #endif
+    
     // 2) list box
-    m_listbox = CreateList(n,choices,styleLbox);
-
+    m_listbox = new wxListBox( this, wxID_LISTBOX,
+                               wxDefaultPosition, wxDefaultSize,
+                               n, choices,
+                               styleLbox );
     if ( n > 0 )
         m_listbox->SetSelection(0);
 
@@ -302,7 +309,7 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
     topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
 #endif
 #endif
-    
+
     // 4) buttons
     topsizer->Add( CreateButtonSizer( styleDlg & (wxOK|wxCANCEL) ), 0, wxEXPAND | wxALL, 10 );
 
@@ -336,26 +343,13 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
                   styleDlg, pos, styleLbox);
 }
 
-wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-    return new wxListBox( this, wxID_LISTBOX,
-                          wxDefaultPosition, wxDefaultSize,
-                          n, choices,
-                          styleLbox );
-}
-
 // ----------------------------------------------------------------------------
 // wxSingleChoiceDialog
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxSingleChoiceDialog, wxDialog)
     EVT_BUTTON(wxID_OK, wxSingleChoiceDialog::OnOK)
-#ifndef __SMARTPHONE__
     EVT_LISTBOX_DCLICK(wxID_LISTBOX, wxSingleChoiceDialog::OnListBoxDClick)
-#endif
-#ifdef __WXWINCE__
-    EVT_JOY_BUTTON_DOWN(wxSingleChoiceDialog::OnJoystickButtonDown)
-#endif
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxSingleChoiceDialog, wxDialog)
@@ -430,24 +424,14 @@ void wxSingleChoiceDialog::SetSelection(int sel)
 
 void wxSingleChoiceDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
-    DoChoice();
+    m_selection = m_listbox->GetSelection();
+    m_stringSelection = m_listbox->GetStringSelection();
+    if ( m_listbox->HasClientUntypedData() )
+        SetClientData(m_listbox->GetClientData(m_selection));
+    EndModal(wxID_OK);
 }
 
-#ifndef __SMARTPHONE__
 void wxSingleChoiceDialog::OnListBoxDClick(wxCommandEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-#ifdef __WXWINCE__
-void wxSingleChoiceDialog::OnJoystickButtonDown(wxJoystickEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-void wxSingleChoiceDialog::DoChoice()
 {
     m_selection = m_listbox->GetSelection();
     m_stringSelection = m_listbox->GetStringSelection();
@@ -523,17 +507,5 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
 
     return true;
 }
-
-#if wxUSE_CHECKLISTBOX
-
-wxListBoxBase *wxMultiChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-    return new wxCheckListBox( this, wxID_LISTBOX,
-                               wxDefaultPosition, wxDefaultSize,
-                               n, choices,
-                               styleLbox );
-}
-
-#endif // wxUSE_CHECKLISTBOX
 
 #endif // wxUSE_CHOICEDLG

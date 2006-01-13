@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dirdlg.cpp
+// Name:        dirdlg.cpp
 // Purpose:     wxDirDialog
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dirdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,7 +30,7 @@
 
 #if wxUSE_DIRDLG && (!defined(__WXWINCE__) || defined(__HANDHELDPC__))
 
-#if !defined(__GNUWIN32_OLD__) && wxUSE_OLE
+#if defined(__WIN95__) && !defined(__GNUWIN32_OLD__) && wxUSE_OLE
 
 #ifndef WX_PRECOMP
     #include "wx/utils.h"

@@ -309,12 +309,6 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
       ;;
 
       *-*-darwin* )
-        AC_BAKEFILE_CREATE_FILE_SHARED_LD_SH
-        chmod +x shared-ld-sh
-
-        SHARED_LD_MODULE_CC="`pwd`/shared-ld-sh -bundle -headerpad_max_install_names -o"
-        SHARED_LD_MODULE_CXX="$SHARED_LD_MODULE_CC"
-
         dnl Most apps benefit from being fully binded (its faster and static
         dnl variables initialized at startup work).
         dnl This can be done either with the exe linker flag -Wl,-bind_at_load
@@ -322,9 +316,9 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
         dnl "-init _wxWindowsDylibInit" not useful with lazy linking solved
 
         dnl If using newer dev tools then there is a -single_module flag that
-        dnl we can use to do this for dylibs, otherwise we'll need to use a helper
+        dnl we can use to do this, otherwise we'll need to use a helper
         dnl script.  Check the version of gcc to see which way we can go:
-        AC_CACHE_CHECK([for gcc 3.1 or later], bakefile_cv_gcc31, [
+        AC_CACHE_CHECK([for gcc 3.1 or later], wx_cv_gcc31, [
            AC_TRY_COMPILE([],
                [
                    #if (__GNUC__ < 3) || \
@@ -333,21 +327,28 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
                    #endif
                ],
                [
-                   bakefile_cv_gcc31=yes
+                   wx_cv_gcc31=yes
                ],
                [
-                   bakefile_cv_gcc31=no
+                   wx_cv_gcc31=no
                ]
            )
         ])
-        if test "$bakefile_cv_gcc31" = "no"; then
+        if test "$wx_cv_gcc31" = "no"; then
+            AC_BAKEFILE_CREATE_FILE_SHARED_LD_SH
+            chmod +x shared-ld-sh
+
             dnl Use the shared-ld-sh helper script
             SHARED_LD_CC="`pwd`/shared-ld-sh -dynamiclib -headerpad_max_install_names -o"
+            SHARED_LD_MODULE_CC="`pwd`/shared-ld-sh -bundle -headerpad_max_install_names -o"
             SHARED_LD_CXX="$SHARED_LD_CC"
+            SHARED_LD_MODULE_CXX="$SHARED_LD_MODULE_CC"
         else
             dnl Use the -single_module flag and let the linker do it for us
             SHARED_LD_CC="\${CC} -dynamiclib -single_module -headerpad_max_install_names -o"
+            SHARED_LD_MODULE_CC="\${CC} -bundle -single_module -headerpad_max_install_names -o"
             SHARED_LD_CXX="\${CXX} -dynamiclib -single_module -headerpad_max_install_names -o"
+            SHARED_LD_MODULE_CXX="\${CXX} -bundle -single_module -headerpad_max_install_names -o"
         fi
 
         if test "x$GCC" == "xyes"; then
@@ -360,29 +361,29 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
 
       *-*-aix* )
         if test "x$GCC" = "xyes"; then
-            dnl at least gcc 2.95 warns that -fPIC is ignored when
-            dnl compiling each and every file under AIX which is annoying,
-            dnl so don't use it there (it's useless as AIX runs on
-            dnl position-independent architectures only anyhow)
-            PIC_FLAG=""
+	    dnl at least gcc 2.95 warns that -fPIC is ignored when
+	    dnl compiling each and every file under AIX which is annoying,
+	    dnl so don't use it there (it's useless as AIX runs on
+	    dnl position-independent architectures only anyhow)
+	    PIC_FLAG=""
 
-            dnl -bexpfull is needed by AIX linker to export all symbols (by
-            dnl default it doesn't export any and even with -bexpall it
-            dnl doesn't export all C++ support symbols, e.g. vtable
-            dnl pointers) but it's only available starting from 5.1 (with
-            dnl maintenance pack 2, whatever this is), see
-            dnl http://www-128.ibm.com/developerworks/eserver/articles/gnu.html
-            case "${BAKEFILE_HOST}" in
-                *-*-aix5* )
-                    LD_EXPFULL="-Wl,-bexpfull"
-                    ;;
-            esac
+	    dnl -bexpfull is needed by AIX linker to export all symbols (by
+	    dnl default it doesn't export any and even with -bexpall it
+	    dnl doesn't export all C++ support symbols, e.g. vtable
+	    dnl pointers) but it's only available starting from 5.1 (with
+	    dnl maintenance pack 2, whatever this is), see
+	    dnl http://www-128.ibm.com/developerworks/eserver/articles/gnu.html
+	    case "${BAKEFILE_HOST}" in
+		*-*-aix5* )
+		    LD_EXPFULL="-Wl,-bexpfull"
+		    ;;
+	    esac
 
-            SHARED_LD_CC="\$(CC) -shared $LD_EXPFULL -o"
-            SHARED_LD_CXX="\$(CXX) -shared $LD_EXPFULL -o"
-        else
-            dnl FIXME: makeC++SharedLib is obsolete, what should we do for
-            dnl        recent AIX versions?
+	    SHARED_LD_CC="\$(CC) -shared $LD_EXPFULL -o"
+	    SHARED_LD_CXX="\$(CXX) -shared $LD_EXPFULL -o"
+	else
+	    dnl FIXME: makeC++SharedLib is obsolete, what should we do for
+	    dnl        recent AIX versions?
             AC_CHECK_PROG(AIX_CXX_LD, makeC++SharedLib,
                           makeC++SharedLib, /usr/lpp/xlC/bin/makeC++SharedLib)
             SHARED_LD_CC="$AIX_CC_LD -p 0 -o"
@@ -403,7 +404,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
             PIC_FLAG="-KPIC"
         fi
       ;;
-
+      
       *-*-cygwin* | *-*-mingw32* )
         PIC_FLAG=""
         SHARED_LD_CC="\$(CC) -shared -o"
@@ -418,7 +419,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
         AC_BAKEFILE_CREATE_FILE_DLLAR_SH
         chmod +x dllar.sh
       ;;
-
+      
       powerpc-apple-macos* | \
       *-*-freebsd* | *-*-openbsd* | *-*-netbsd* | *-*-k*bsd*-gnu | \
       *-*-sunos4* | \
@@ -542,16 +543,8 @@ AC_DEFUN([AC_BAKEFILE_DEPS],
         DEPSMODE=unixcc
         DEPSFLAG="-M"
         AC_MSG_RESULT([SGI cc])
-    elif test "x$HPCC" = "xyes"; then
-        DEPSMODE=unixcc
-        DEPSFLAG="+make"
-        AC_MSG_RESULT([HP cc])
-    elif test "x$COMPAQCC" = "xyes"; then
-        DEPSMODE=gcc
-        DEPSFLAG="-MD"
-        AC_MSG_RESULT([Compaq cc])
     else
-        DEPS_TRACKING=0
+	DEPS_TRACKING=0
         AC_MSG_RESULT([none])
     fi
 
@@ -559,7 +552,7 @@ AC_DEFUN([AC_BAKEFILE_DEPS],
         AC_BAKEFILE_CREATE_FILE_BK_DEPS
         chmod +x bk-deps
     fi
-
+    
     AC_SUBST(DEPS_TRACKING)
 ])
 
@@ -611,20 +604,26 @@ dnl ---------------------------------------------------------------------------
 
 AC_DEFUN([AC_BAKEFILE_RES_COMPILERS],
 [
+    RESCOMP=
+    SETFILE=
+
     case ${BAKEFILE_HOST} in 
         *-*-cygwin* | *-*-mingw32* )
             dnl Check for win32 resources compiler:
-            AC_CHECK_TOOL(WINDRES, windres)
+            if test "$build" != "$host" ; then
+                RESCOMP=$host_alias-windres
+            else
+                AC_CHECK_PROG(RESCOMP, windres, windres, windres)
+            fi
          ;;
  
       *-*-darwin* | powerpc-apple-macos* )
-            AC_CHECK_PROG(REZ, Rez, Rez, /Developer/Tools/Rez)
+            AC_CHECK_PROG(RESCOMP, Rez, Rez, /Developer/Tools/Rez)
             AC_CHECK_PROG(SETFILE, SetFile, SetFile, /Developer/Tools/SetFile)
         ;;
     esac
 
-    AC_SUBST(WINDRES)
-    AC_SUBST(REZ)
+    AC_SUBST(RESCOMP)
     AC_SUBST(SETFILE)
 ])
 
@@ -643,15 +642,6 @@ AC_DEFUN([AC_BAKEFILE_PRECOMP_HEADERS],
                   [bk_use_pch="$enableval"])
 
     GCC_PCH=0
-
-    case ${BAKEFILE_HOST} in 
-        *-*-cygwin* )
-            dnl PCH support is broken in cygwin gcc because of unportable
-            dnl assumptions about mmap() in gcc code which make PCH generation
-            dnl fail erratically; disable PCH completely until this is fixed
-            bk_use_pch="no"
-            ;;
-    esac
 
     if test "x$bk_use_pch" = "x" -o "x$bk_use_pch" = "xyes" ; then
         if test "x$GCC" = "xyes"; then
@@ -1281,12 +1271,7 @@ if test ${D}DEPSMODE = gcc ; then
         sed -e "s,${D}depobjname:,${D}objfile:,g" ${D}depfile >${D}{DEPSDIR}/${D}{objfile}.d
         rm -f ${D}depfile
     else
-        # "g++ -MMD -o fooobj.o foosrc.cpp" produces fooobj.d
         depfile=\`basename ${D}objfile | sed -e 's/\\..*${D}/.d/g'\`
-        if test ! -f ${D}depfile ; then
-            # "cxx -MD -o fooobj.o foosrc.cpp" creates fooobj.o.d (Compaq C++)
-            depfile="${D}objfile.d"
-        fi
         if test -f ${D}depfile ; then
             sed -e "/^${D}objfile/!s,${D}depobjname:,${D}objfile:,g" ${D}depfile >${D}{DEPSDIR}/${D}{objfile}.d
             rm -f ${D}depfile

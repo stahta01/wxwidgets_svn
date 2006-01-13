@@ -83,8 +83,8 @@ the following methods::
 To activate your handler create an instance of it and pass it to
 `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
 `SetExtension` from your constructor.
-", "");
 
+", "");
 class wxPyImageHandler: public wxImageHandler {
 public:
     %pythonAppend wxPyImageHandler() "self._SetSelf(self)"

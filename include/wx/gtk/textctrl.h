@@ -11,6 +11,10 @@
 #ifndef __GTKTEXTCTRLH__
 #define __GTKTEXTCTRLH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrl.h"
+#endif
+
 //-----------------------------------------------------------------------------
 // wxTextCtrl
 //-----------------------------------------------------------------------------

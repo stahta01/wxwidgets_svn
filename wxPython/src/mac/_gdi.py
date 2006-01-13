@@ -1597,6 +1597,13 @@ class FontMapper(object):
         return _gdi_.FontMapper_GetEncodingFromName(*args, **kwargs)
 
     GetEncodingFromName = staticmethod(GetEncodingFromName)
+    def SetConfig(*args, **kwargs):
+        """SetConfig(self, ConfigBase config)"""
+        return _gdi_.FontMapper_SetConfig(*args, **kwargs)
+
+    SetConfig = wx._deprecated(SetConfig,
+        "Set a config object for the whole app instead, with `wx.Config.Set`.")
+
     def SetConfigPath(*args, **kwargs):
         """SetConfigPath(self, String prefix)"""
         return _gdi_.FontMapper_SetConfigPath(*args, **kwargs)

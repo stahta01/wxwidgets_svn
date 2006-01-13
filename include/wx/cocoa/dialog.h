@@ -102,10 +102,6 @@ protected:
     void OnOK(wxCommandEvent& event);
     void OnApply(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
-
-    // end either modal or modeless dialog
-    void EndDialog(int rc);
-
 };
 
 #endif // _WX_COCOA_DIALOG_H_

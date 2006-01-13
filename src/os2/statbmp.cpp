@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "statbmp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -121,14 +125,15 @@ bool wxStaticBitmap::Create( wxWindow*         pParent,
     }
     wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static bitmap") );
     m_pImage = ConvertImage(rBitmap);
-    ::WinSendMsg(   m_hWnd,
-                    SM_SETHANDLE,
-                    MPFROMHWND(rBitmap.GetHandle()),
-                    (MPARAM)0);
+
 
     // Subclass again for purposes of dialog editing mode
     SubclassWin(m_hWnd);
     SetSize(nX, nY, m_pImage->GetWidth(), m_pImage->GetHeight());
+   ::WinSendMsg(   m_hWnd,
+                   SM_SETHANDLE,
+                   MPFROMHWND(rBitmap.GetHandle()),
+                   (MPARAM)0);
 
     return true;
 } // end of wxStaticBitmap::Create

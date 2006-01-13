@@ -116,6 +116,11 @@
 #    ifndef __WIN32__
 #        define __WIN32__
 #    endif
+
+    /* this means Win95-style UI, i.e. Win9x/NT 4+: always true now */
+#    if !defined(__WIN95__)
+#        define __WIN95__
+#    endif
 #endif /* Win32 */
 
 #if defined(__WXMSW__) || defined(__WIN32__)
@@ -123,6 +128,12 @@
 #       define __WINDOWS__
 #   endif
 #endif
+
+#ifdef __WINE__
+#   ifndef __WIN95__
+#       define __WIN95__
+#   endif
+#endif /* WINE */
 
 /* detect MS SmartPhone */
 #if defined( WIN32_PLATFORM_WFSP )
@@ -247,8 +258,6 @@
 #   define wxWATCOM_VERSION(major,minor) 0
 #   define wxCHECK_WATCOM_VERSION(major,minor) 0
 #   define wxONLY_WATCOM_EARLIER_THAN(major,minor) 0
-#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
-#   error "Only Open Watcom is supported in this release"
 #else
 #   define wxWATCOM_VERSION(major,minor) ( major * 100 + minor * 10 + 1100 )
 #   define wxCHECK_WATCOM_VERSION(major,minor) ( __WATCOMC__ >= wxWATCOM_VERSION(major,minor) )
@@ -402,16 +411,14 @@
        __DARWIN__ for Darwin related corrections (wxMac, wxMotif)
      */
 #elif defined(__OS2__)
-
-    /* wxOS2 vs. non wxOS2 ports on OS2 platform */
-#    if !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__)
-#        ifndef __WXPM__
-#            define __WXPM__
-#        endif
-#    endif
-
 #    if defined(__IBMCPP__)
 #        define __VISAGEAVER__ __IBMCPP__
+#    endif
+#    ifndef __WXOS2__
+#        define __WXOS2__
+#    endif
+#    ifndef __WXPM__
+#        define __WXPM__
 #    endif
 
     /* Place other OS/2 compiler environment defines here */
@@ -450,7 +457,7 @@
 #        define __VISUALC__ _MSC_VER
 #    elif defined(__BCPLUSPLUS__) && !defined(__BORLANDC__)
 #        define __BORLANDC__
-#    elif defined(__WATCOMC__)
+#      elif defined(__WATCOMC__)
 #    elif defined(__SC__)
 #        define __SYMANTECC__
 #    endif  /* compiler */
@@ -480,10 +487,6 @@
 #    else
 #         define __SYMANTEC__
 #    endif
-#endif
-
-#ifdef __INTEL_COMPILER
-#   define __INTELC__
 #endif
 
 /*
@@ -521,9 +524,9 @@
  */
 #if ( defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || \
     ( defined( __CYGWIN__ ) && defined( __WINDOWS__ ) ) || \
-      wxCHECK_WATCOM_VERSION(1,0) ) && \
+      (defined(__WATCOMC__) && __WATCOMC__ >= 1200) ) && \
     !defined(__DOS__) && \
-    !defined(__WXPM__) && \
+    !defined(__WXOS2__) && \
     !defined(__WXMOTIF__) && \
     !defined(__WXGTK__) && \
     !defined(__WXX11__) && \

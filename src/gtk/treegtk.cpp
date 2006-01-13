@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -717,7 +721,7 @@ long wxTreeCtrl::GetChild(long item) const {
 
   p = findGtkTreeItem(item);
   GList *list = gtk_container_children(GTK_CONTAINER(p));
-  next = GTK_TREE_ITEM(list->data);
+  next = GTK_TREE_ITEM(list->data);;
 
   if (next != NULL)
     return (long)gtk_object_get_data(GTK_OBJECT(next), "id");
@@ -729,7 +733,7 @@ long wxTreeCtrl::GetFirstVisibleItem(void) const {
   GtkTreeItem *next = NULL;
 
   GList *list = gtk_container_children(GTK_CONTAINER(m_anchor));
-  next = GTK_TREE_ITEM(list->data);
+  next = GTK_TREE_ITEM(list->data);;
 //  gtk_container_foreach(GTK_CONTAINER(m_anchor), gtk_treectrl_next_visible_callback, &next);
 
   if (next != NULL)
@@ -744,7 +748,7 @@ long wxTreeCtrl::GetNextVisibleItem(long item) const {
 
   p = findGtkTreeItem(item);
   GList *list = gtk_container_children(GTK_CONTAINER(p));
-  next = GTK_TREE_ITEM(list->data);
+  next = GTK_TREE_ITEM(list->data);;
 //  gtk_container_foreach(GTK_CONTAINER(p), gtk_treectrl_next_visible_callback, &next);
 
   if (next != NULL)

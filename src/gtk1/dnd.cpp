@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dnd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -506,13 +510,7 @@ GdkAtom wxDropTarget::GetMatchingPair()
     GList *child = m_dragContext->targets;
     while (child)
     {
-        // in GTK+ 1.x GdkAtom was a gulong, but now it's a pointer
-        GdkAtom formatAtom =
-#ifdef __WXGTK20__
-                             (GdkAtom)(child->data);
-#else
-                             GPOINTER_TO_INT(child->data);
-#endif
+        GdkAtom formatAtom = (GdkAtom) GPOINTER_TO_INT(child->data);
         wxDataFormat format( formatAtom );
 
 #ifdef __WXDEBUG__

@@ -12,7 +12,7 @@
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = \
 	vc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)$(DIR_SUFFIX_CPU)
 LIBDIRNAME = .\..\..\lib\vc$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
@@ -271,7 +271,7 @@ $(OBJS):
 
 ### Targets: ###
 
-all: $(OBJS)\internat.exe bg cs de fr ka pl ru sv ja ja_JP.EUC-JP
+all: $(OBJS)\internat.exe bg cs de fr ja ka pl ru sv
 
 clean: 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -302,6 +302,10 @@ fr:
 	if not exist $(OBJS)\fr mkdir $(OBJS)\fr
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\fr\%f copy .\fr\%f $(OBJS)\fr
 
+ja: 
+	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
+	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
+
 ka: 
 	if not exist $(OBJS)\ka mkdir $(OBJS)\ka
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ka\%f copy .\ka\%f $(OBJS)\ka
@@ -317,14 +321,6 @@ ru:
 sv: 
 	if not exist $(OBJS)\sv mkdir $(OBJS)\sv
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\sv\%f copy .\sv\%f $(OBJS)\sv
-
-ja: 
-	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
-
-ja_JP.EUC-JP: 
-	if not exist $(OBJS)\ja_JP.EUC-JP mkdir $(OBJS)\ja_JP.EUC-JP
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja_JP.EUC-JP\%f copy .\ja_JP.EUC-JP\%f $(OBJS)\ja_JP.EUC-JP
 
 $(OBJS)\internat_internat.obj: .\internat.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(INTERNAT_CXXFLAGS) $**

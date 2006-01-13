@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/frame.cpp
+// Name:        motif/frame.cpp
 // Purpose:     wxFrame
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -184,8 +188,7 @@ bool wxFrame::Create(wxWindow *parent,
 
     PreResize();
 
-    wxSize newSize(width, height);
-    wxSizeEvent sizeEvent(newSize, GetId());
+    wxSizeEvent sizeEvent(wxSize(width, height), GetId());
     sizeEvent.SetEventObject(this);
 
     GetEventHandler()->ProcessEvent(sizeEvent);
@@ -193,11 +196,11 @@ bool wxFrame::Create(wxWindow *parent,
     return true;
 }
 
-bool wxFrame::XmDoCreateTLW(wxWindow* WXUNUSED(parent),
-                            wxWindowID WXUNUSED(id),
-                            const wxString& WXUNUSED(title),
-                            const wxPoint& WXUNUSED(pos),
-                            const wxSize& WXUNUSED(size),
+bool wxFrame::DoCreate(wxWindow* parent,
+                            wxWindowID id,
+                            const wxString& title,
+                            const wxPoint& pos,
+                            const wxSize& size,
                             long style,
                             const wxString& name)
 {
@@ -261,6 +264,10 @@ bool wxFrame::XmDoCreateTLW(wxWindow* WXUNUSED(parent),
     wxModelessWindows.Append( this );
 
     return true;
+}
+
+void wxFrame::DoDestroy()
+{
 }
 
 wxFrame::~wxFrame()
@@ -331,7 +338,7 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
     {
         int sbw, sbh;
         m_frameStatusBar->GetSize(& sbw, & sbh);
-        yy = (Dimension)(yy - sbh);
+        yy -= sbh;
     }
 #if wxUSE_TOOLBAR
     if (m_frameToolBar)
@@ -339,9 +346,9 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
         int tbw, tbh;
         m_frameToolBar->GetSize(& tbw, & tbh);
         if (m_frameToolBar->GetWindowStyleFlag() & wxTB_VERTICAL)
-            xx = (Dimension)(xx - tbw);
+            xx -= tbw;
         else
-            yy = (Dimension)(yy - tbh);
+            yy -= tbh;
     }
 #endif // wxUSE_TOOLBAR
 
@@ -386,8 +393,7 @@ void wxFrame::DoSetClientSize(int width, int height)
     }
     PreResize();
 
-    wxSize newSize(width, height);
-    wxSizeEvent sizeEvent(newSize, GetId());
+    wxSizeEvent sizeEvent(wxSize(width, height), GetId());
     sizeEvent.SetEventObject(this);
 
     GetEventHandler()->ProcessEvent(sizeEvent);

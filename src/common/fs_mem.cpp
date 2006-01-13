@@ -6,6 +6,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+#pragma implementation "fs_mem.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -41,7 +53,7 @@ class MemFSHashObj : public wxObject
             InitTime();
         }
 
-        MemFSHashObj(const wxMemoryOutputStream& stream)
+        MemFSHashObj(wxMemoryOutputStream& stream)
         {
             m_Len = stream.GetSize();
             m_Data = new char[m_Len];

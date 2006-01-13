@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        utils/configtool/src/settingsdialog.cpp
+// Name:        settingsdialog.cpp
 // Purpose:     Settings dialog
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "settingsdialog.h"
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -88,7 +92,7 @@ void ctSettingsDialog::CreateControls()
     wxBoxSizer* item2 = new wxBoxSizer(wxVERTICAL);
     item1->SetSizer(item2);
 
-    m_notebook = new wxNotebook(item1, wxID_ANY, wxDefaultPosition, wxSize(200, 200), wxBK_TOP);
+    m_notebook = new wxNotebook(item1, wxID_ANY, wxDefaultPosition, wxSize(200, 200), wxNB_TOP);
     ctGeneralSettingsDialog* item4 = new ctGeneralSettingsDialog(m_notebook, ID_GENERAL_SETTINGS_DIALOG, wxDefaultPosition, wxSize(100, 80), 0);
     m_notebook->AddPage(item4, _("General"));
     ctLocationSettingsDialog* item11 = new ctLocationSettingsDialog(m_notebook, ID_LOCATION_SETTINGS_DIALOG, wxDefaultPosition, wxSize(100, 80), 0);

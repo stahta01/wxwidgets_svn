@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "scrolbar.h"
+#endif
+
 #include "wx/defs.h"
 
 #ifndef WX_PRECOMP

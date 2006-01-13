@@ -16,6 +16,10 @@
 
 #if wxUSE_OWNER_DRAWN
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "ownerdrw.h"
+#endif
+
 #include "wx/bitmap.h"
 #include "wx/colour.h"
 #include "wx/font.h"
@@ -153,8 +157,7 @@ private:
   static size_t ms_nLastMarginWidth;    // handy for aligning all items
 
   bool      m_bCheckable,   // used only for menu or check listbox items
-            m_bOwnerDrawn,  // true if something is non standard
-            m_isMenuItem;   // true if this is a menu item
+            m_bOwnerDrawn;  // true if something is non standard
 
   wxFont    m_font;         // font to use for drawing
   wxColour  m_colText,      // color ----"---"---"----

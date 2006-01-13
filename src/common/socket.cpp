@@ -13,6 +13,10 @@
 // Declarations
 // ==========================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "socket.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -95,7 +99,7 @@ public:
 public:
   wxSocketState() : wxObject() {}
 
-  DECLARE_NO_COPY_CLASS(wxSocketState)
+    DECLARE_NO_COPY_CLASS(wxSocketState)
 };
 
 // ==========================================================================
@@ -762,7 +766,7 @@ bool wxSocketBase::WaitForRead(long seconds, long milliseconds)
     return true;
 
   // Note that GSOCK_INPUT_LOST has to be explicitly passed to
-  // _Wait because of the semantics of WaitForRead: a return
+  // _Wait becuase of the semantics of WaitForRead: a return
   // value of true means that a GSocket_Read call will return
   // immediately, not that there is actually data to read.
 
@@ -1053,7 +1057,7 @@ wxUint32 wxSocketBase::GetPushback(void *buffer, wxUint32 size, bool peek)
 // Ctor
 // --------------------------------------------------------------------------
 
-wxSocketServer::wxSocketServer(const wxSockAddress& addr_man,
+wxSocketServer::wxSocketServer(wxSockAddress& addr_man,
                                wxSocketFlags flags)
               : wxSocketBase(flags, wxSOCKET_SERVER)
 {
@@ -1260,7 +1264,7 @@ bool wxSocketClient::WaitOnConnect(long seconds, long milliseconds)
 
 /* NOTE: experimental stuff - might change */
 
-wxDatagramSocket::wxDatagramSocket( const wxSockAddress& addr,
+wxDatagramSocket::wxDatagramSocket( wxSockAddress& addr,
                                     wxSocketFlags flags )
                 : wxSocketBase( flags, wxSOCKET_DATAGRAM )
 {
@@ -1300,7 +1304,7 @@ wxDatagramSocket& wxDatagramSocket::RecvFrom( wxSockAddress& addr,
     return (*this);
 }
 
-wxDatagramSocket& wxDatagramSocket::SendTo( const wxSockAddress& addr,
+wxDatagramSocket& wxDatagramSocket::SendTo( wxSockAddress& addr,
                                             const void* buf,
                                             wxUint32 nBytes )
 {

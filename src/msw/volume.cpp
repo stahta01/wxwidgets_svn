@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fsvolume.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -143,7 +147,7 @@ static unsigned GetBasicFlags(const wxChar* filename)
     }
 
     //-----------------------------------------------------------------------
-    // The following most likely will not modify anything not set above,
+    // The following will most likely will not modify anything not set above,
     // and will not work at all for network shares or empty CD ROM drives.
     // But it is a good check if the Win API ever gets better about reporting
     // this information.

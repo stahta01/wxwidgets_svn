@@ -9,8 +9,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MSW_DC_H_
-#define _WX_MSW_DC_H_
+#ifndef _WX_DC_H_
+#define _WX_DC_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dc.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -40,12 +44,10 @@ public:
 };
 #endif
 
-// this is an ABC: use one of the derived classes to create a DC associated
-// with a window, screen, printer and so on
 class WXDLLEXPORT wxDC : public wxDCBase
 {
 public:
-    wxDC(WXHDC hDC) { Init(); m_hDC = hDC; }
+    wxDC();
     ~wxDC();
 
     // implement base class pure virtuals
@@ -140,26 +142,6 @@ public:
 #endif
 
 protected:
-    void Init()
-    {
-        m_canvas = NULL;
-        m_bOwnsDC = false;
-        m_hDC = NULL;
-
-        m_oldBitmap = NULL;
-        m_oldPen = NULL;
-        m_oldBrush = NULL;
-        m_oldFont = NULL;
-
-#if wxUSE_PALETTE
-        m_oldPalette = NULL;
-#endif // wxUSE_PALETTE
-    }
-
-    // create an uninitialized DC: this should be only used by the derived
-    // classes
-    wxDC() { Init(); }
-
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE);
 
@@ -208,6 +190,7 @@ protected:
     virtual void DoGetClippingBox(wxCoord *x, wxCoord *y,
                                   wxCoord *w, wxCoord *h) const;
 
+    virtual void DoGetSize(int *width, int *height) const;
     virtual void DoGetSizeMM(int* width, int* height) const;
 
     virtual void DoDrawLines(int n, wxPoint points[],
@@ -236,17 +219,6 @@ protected:
 
     // common part of DoSetClippingRegion() and DoSetClippingRegionAsRegion()
     void SetClippingHrgn(WXHRGN hrgn);
-
-    // implementation of DoGetSize() for wxScreen/PrinterDC: this simply
-    // returns the size of the entire device this DC is associated with
-    //
-    // notice that we intentionally put it in a separate function instead of
-    // DoGetSize() itself because we want it to remain pure virtual both
-    // because each derived class should take care to define it as needed (this
-    // implementation is not at all always appropriate) and because we want
-    // wxDC to be an ABC to prevent it from being created directly
-    void GetDeviceSize(int *width, int *height) const;
-
 
     // MSW-specific member variables
     // -----------------------------
@@ -291,29 +263,12 @@ protected:
 class WXDLLEXPORT wxDCTemp : public wxDC
 {
 public:
-    wxDCTemp(WXHDC hdc) : wxDC(hdc)
-    {
-    }
-
-    virtual ~wxDCTemp()
-    {
-        // prevent base class dtor from freeing it
-        SetHDC((WXHDC)NULL);
-    }
-
-    virtual void DoGetSize(int *w, int *h) const
-    {
-        wxFAIL_MSG( _T("no way to retrieve the size of generic DC") );
-
-        if ( w )
-            *w = 0;
-        if ( h )
-            *h = 0;
-    }
+    wxDCTemp(WXHDC hdc) { SetHDC(hdc); }
+    virtual ~wxDCTemp() { SetHDC((WXHDC)NULL); }
 
 private:
     DECLARE_NO_COPY_CLASS(wxDCTemp)
 };
 
-#endif // _WX_MSW_DC_H_
-
+#endif
+    // _WX_DC_H_

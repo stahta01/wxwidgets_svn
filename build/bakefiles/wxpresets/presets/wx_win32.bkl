@@ -112,7 +112,7 @@ FIXME: this template has (at least) the following bugs:
     </if>
 
     <if cond="not isdefined('WX_VERSION')">
-        <set var="WX_VERSION_DEFAULT" overwrite="0">27</set>
+        <set var="WX_VERSION_DEFAULT" overwrite="0">26</set>
         <option name="WX_VERSION">
             <default-value>$(WX_VERSION_DEFAULT)</default-value>
             <description>
@@ -195,7 +195,7 @@ FIXME: this template has (at least) the following bugs:
         <if cond="value in ['net','xml', 'odbc']">
             <sys-lib>wxbase$(WX_VERSION)$(WXLIBPOSTFIX)_$(value)</sys-lib>
         </if>
-        <if cond="value not in ['base','net', 'odbc', 'xml']">
+        <if cond="value not in ['base','net','xml']">
             <sys-lib>wx$(WXPORT)$(WX_VERSION)$(WXLIBPOSTFIX)_$(value)</sys-lib>
         </if>
     </define-tag>

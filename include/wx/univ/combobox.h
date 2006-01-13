@@ -36,6 +36,10 @@
 #ifndef _WX_UNIV_COMBOBOX_H_
 #define _WX_UNIV_COMBOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univcombobox.h"
+#endif
+
 class WXDLLEXPORT wxComboControl;
 class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxPopupComboWindow;
@@ -296,7 +300,7 @@ public:
     virtual int GetCount() const;
     virtual wxString GetString(int n) const;
     virtual void SetString(int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString(const wxString& s) const;
     virtual void SetSelection(int n);
     virtual int GetSelection() const;
 

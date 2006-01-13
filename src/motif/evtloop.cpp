@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/evtloop.cpp
+// Name:        motif/evtloop.cpp
 // Purpose:     implements wxEventLoop for Motif
 // Author:      Mattia Barbon
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "evtloop.h"
+#endif
 
 #ifdef __VMS
 #define XtParent XTPARENT
@@ -42,7 +46,6 @@
 #pragma message enable nosimpint
 #endif
 
-#include "wx/unix/private.h"
 #include "wx/motif/private.h"
 
 static bool CheckForKeyUp(XEvent* event);
@@ -96,6 +99,8 @@ bool wxEventLoopImpl::SendIdleMessage()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+
 wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
@@ -106,7 +111,8 @@ int wxEventLoop::Run()
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    wxEventLoopActivator activate(this);
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
 
     m_impl = new wxEventLoopImpl;
     m_impl->SetKeepGoing( true );
@@ -120,6 +126,8 @@ int wxEventLoop::Run()
     int exitcode = m_impl->GetExitCode();
     delete m_impl;
     m_impl = NULL;
+
+    ms_activeLoop = oldLoop;
 
     return exitcode;
 }
@@ -252,7 +260,7 @@ bool CheckForAccelerator(XEvent* event)
         wxWindow* win = NULL;
 
         // Find the first wxWindow that corresponds to this event window
-        while (widget && ((win = wxGetWindowFromTable(widget))!=NULL))
+        while (widget && !(win = wxGetWindowFromTable(widget)))
             widget = XtParent(widget);
 
         if (!widget || !win)
@@ -286,7 +294,7 @@ bool CheckForKeyDown(XEvent* event)
         wxWindow* win = NULL;
 
         // Find the first wxWindow that corresponds to this event window
-        while (widget && ((win = wxGetWindowFromTable(widget))!=NULL))
+        while (widget && !(win = wxGetWindowFromTable(widget)))
             widget = XtParent(widget);
 
         if (!widget || !win)
@@ -312,7 +320,7 @@ bool CheckForKeyUp(XEvent* event)
         wxWindow* win = NULL;
 
         // Find the first wxWindow that corresponds to this event window
-        while (widget && ((win = wxGetWindowFromTable(widget))!=NULL))
+        while (widget && !(win = wxGetWindowFromTable(widget)))
                 widget = XtParent(widget);
 
         if (!widget || !win)
@@ -405,7 +413,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxIdlePipeModule)
 };
 
-IMPLEMENT_DYNAMIC_CLASS(wxIdlePipeModule, wxModule)
+IMPLEMENT_DYNAMIC_CLASS(wxIdlePipeModule, wxModule);
 
 static void wxInputCallback( XtPointer, int* fd, XtInputId* )
 {
@@ -420,8 +428,8 @@ static void wxInputCallback( XtPointer, int* fd, XtInputId* )
         timeout.tv_sec = 0;
         timeout.tv_usec = 0;
 
-        wxFD_ZERO( &in );
-        wxFD_SET( *fd, &in );
+        FD_ZERO( &in );
+        FD_SET( *fd, &in );
 
         if( select( *fd + 1, &in, NULL, NULL, &timeout ) <= 0 )
             break;
@@ -441,8 +449,8 @@ static void wxBreakDispatch()
     timeout.tv_sec = 0;
     timeout.tv_usec = 0;
 
-    wxFD_ZERO( &in );
-    wxFD_SET( idleFds[0], &in );
+    FD_ZERO( &in );
+    FD_SET( idleFds[0], &in );
 
     if( select( idleFds[0] + 1, &in, NULL, NULL, &timeout ) > 0 )
         return;
@@ -467,7 +475,7 @@ bool wxAddIdleCallback()
 {
     if (!wxInitIdleFds())
         return false;
-
+    
     // install input handler for wxWakeUpIdle
     XtAppAddInput((XtAppContext) wxTheApp->GetAppContext(),
                   idleFds[0],

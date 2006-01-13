@@ -16,6 +16,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "uri.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,7 +33,7 @@
 // definitions
 // ---------------------------------------------------------------------------
 
-IMPLEMENT_CLASS(wxURI, wxObject)
+IMPLEMENT_CLASS(wxURI, wxObject);
 
 // ===========================================================================
 // implementation
@@ -113,7 +117,7 @@ wxChar wxURI::TranslateEscape(const wxChar* s)
 {
     wxASSERT_MSG( IsHex(s[0]) && IsHex(s[1]), wxT("Invalid escape sequence!"));
 
-    return wx_truncate_cast(wxChar, (CharToHex(s[0]) << 4 ) | CharToHex(s[1]));
+    return (wxChar)( CharToHex(s[0]) << 4 ) | CharToHex(s[1]);
 }
 
 wxString wxURI::Unescape(const wxString& uri)

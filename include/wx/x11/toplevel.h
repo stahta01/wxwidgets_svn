@@ -12,6 +12,10 @@
 #ifndef _WX_X11_TOPLEVEL_H_
 #define _WX_X11_TOPLEVEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowX11
 // ----------------------------------------------------------------------------
@@ -46,30 +50,30 @@ public:
     virtual ~wxTopLevelWindowX11();
 
     // implement base class pure virtuals
-    virtual void Maximize(bool maximize = true);
+    virtual void Maximize(bool maximize = TRUE);
     virtual bool IsMaximized() const;
-    virtual void Iconize(bool iconize = true);
+    virtual void Iconize(bool iconize = TRUE);
     virtual bool IsIconized() const;
     virtual void SetIcon(const wxIcon& icon) { SetIcons( wxIconBundle( icon ) ); }
     virtual void SetIcons(const wxIconBundle& icons);
     virtual void Restore();
 
-    virtual bool Show( bool show = true );
+    virtual bool Show( bool show = TRUE );
 
     virtual bool ShowFullScreen( bool show, long style = wxFULLSCREEN_ALL );
     virtual bool IsFullScreen() const { return m_fsIsShowing; }
 
     virtual void SetTitle( const wxString& title);
     virtual wxString GetTitle() const;
-
+    
     // implementation
-    void SetNeedResizeInIdle( bool set = true )
+    void SetNeedResizeInIdle( bool set = TRUE )
         { m_needResizeInIdle = set; }
     void SetConfigureGeometry( int x, int y, int width, int height )
         { m_x = x; m_y = y; m_width = width; m_height = height; }
 
     virtual bool SetShape(const wxRegion& region);
-
+    
 protected:
     // common part of all ctors
     void Init();
@@ -92,7 +96,7 @@ protected:
         int width, int height,
         int sizeFlags = wxSIZE_AUTO);
     virtual void DoGetPosition( int *x, int *y ) const;
-
+    
     // Is the frame currently iconized?
     bool m_iconized;
 
@@ -106,7 +110,7 @@ protected:
     bool                  m_fsIsMaximized;
     bool                  m_fsIsShowing;
     wxString              m_title;
-
+    
     // Geometry
     int                   m_x,m_y,m_width,m_height;
 };
@@ -115,3 +119,4 @@ protected:
 //extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
 
 #endif // _WX_X11_TOPLEVEL_H_
+

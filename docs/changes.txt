@@ -2,24 +2,14 @@
 wxWidgets Change Log - For more verbose changes, see the manual
 ---------------------------------------------------------------
 
-INCOMPATIBLE CHANGES SINCE 2.6.x
-================================
-
-- wxFontData::GetColour() now returns a const colour
-- wxDC objects can't be created directly now (this never worked, now it doesn't
-  even compile)
-- For all wxInputStreams, Eof() becomes true after an attempt has been made
-  to read _past_ the end of file.
-
-
-2.7.0
+2.6.3
 -----
 
 All:
 
-- wxLaunchDefaultBrowser() now supports wxBROWSER_NEW_WINDOW flag
-- Added wxStringTokenizer::GetLastDelimiter(); improved documentation
-- wxGetWorkingDirectory() deprecated. Use wxGetCwd() instead.
+- Fixed crash when loading message catalogs in Unicode build.
+- Spurious error message from wxLaunchDefaultBrowser fixed.
+- Compilation fixes for (more strict) g++ 4.1
 - Speed improvements to wxRegEx when matching is done in a loop such as
   during a search and replace.
 - Fix regerror and regfree name conficts when built-in regex and system regex
@@ -27,41 +17,20 @@ All:
 
 All (GUI):
 
-- Added wxTreeBook.
-- Added wxKeyEvent::GetModifiers()
-- Added wxDialog::SetEscapeId().
-- wxItemContainerImmutable::FindString unified (affects wxRadioBox, wxListBox,
-  wxComboBox and wxChoice).
-- wxWindow::Fit() now works correctly for frames and dialogs too.
-- Added access to the border size between pages and controller in book
-  based controls (wxBookCtrlBase::Get/SetInternalBorder).
-- Added initial wxRichTextCtrl implementation.
-- All book based controls (notebook, treebook etc.) share now the same
-  options for orientation (wxBK_TOP, wxBK_DEFAULT, ...) instead of duplicated
-  wxLB_TOP, wxNB_TOP, wxCHB_TOP, wxTBK_TOP.
-- Added parent window parameter to wxHelpController constructor
-  and added SetParentWindow/GetParentWindow.
-- wxMultiChoiceDialog uses now wxCheckListBox if possible, wxListBox if not.
-- Added wxBitmapButton::SetHoverBitmap()
-- Access to titles through Get/SetTitle is available now only for top level
-  windows (wxDialog, wxFrame).
-- Fixed memory leak of pending events in wxEvtHandler
-- Added wxRadioBox::IsItemEnabled/Shown()
 - Added space after list item number in wxHTML.
-- Implemented <sub> and <sup> handling in wxHTML (based on patch
-  by Sandro Sigala)
-- Added caption parameter to wxGetFontFromUser and wxGetColourFromUser.
-- Added wxGetMouseState function.
-- wxCalendarCtrl positioning fixes for dimensions other than best size.
-- wxCalendarCtrl colour schema changed and adjusted to system settings.
+- wxCalendarCtrl: drawing and positioning fixes.
 
-wxMSW:
+wxGTK:
 
-- wxFileDialog respects absence of wxCHANGE_DIR flag under NT (Brad Anderson).
-- Switching page of a hidden notebook doesn't lose focus (Jamie Gadd).
-- Removed wxImageList *GetImageList(int) const.
+- Fixed problem with choice editor in wxGrid whereby the editor
+  lost focus when the combobox menu was shown.
+- Fixed problem trying to print from a preview, whereby wrong printer
+  class was used.
+- Worked around pango crashes in strncmp on Solaris 10.
+
+wxMSW
+
 - Fixed MDI context menu problem.
-- Removed __WIN95__ define
 - Create msw/rcdefs.h in setup.h's directory, which can be included by
   resource files. It containts platform/compiler specific defines (such as
   target cpu) which can be used in #ifs in .rc files.
@@ -73,16 +42,10 @@ wxMSW:
 - wxStatusBar::GetFieldRect now returns correct values under XP.
 - wxStatusBar no longer corrupts surrounding windows on resize.
 
-wxGTK:
+wxWinCE:
 
-- wxEVT_MENU_CLOSE and wxEVT_MENU_OPENED for popup menus are now generated
-- Implemented wxCURSOR_BLANK support
-- wxSlider generates all scroll events now and not only wxEVT_SCROLL_THUMBTRACK
-- Fixed problem with choice editor in wxGrid whereby the editor
-  lost focus when the combobox menu was shown.
-- Fixed problem trying to print from a preview, whereby wrong printer
-  class was used.
-- Worked around pango crashes in strncmp on Solaris 10.
+- ::wxGetUserName() implemented.
+- Fixed wxFileDialog breakage on WinCE in previous version.
 
 wxMac:
 
@@ -99,7 +62,7 @@ wxMac:
 - Corrected wxExecute.
 - Now makes use of full printer resolution.
 - Corrected CGImage handling in wxBitmap.
-- Now uses simple hide/show transition for top-level windows.
+- Now uses simple hide/how transition for top-level windows.
 - Uses reasonable temporary path for wxFileName::CreateTempFileName.
 - Added support for default key handling (escape, enter, command-period) even
   if there is no control on the frame or dialog that has the focus.
@@ -114,18 +77,10 @@ wxMac:
 - Fixed wxZipInputStream read error on wxSocketInputStream which signals the
   end of file with an error.
 
-wxWinCE:
+wxODBC
 
-- Pressing build-in joystick on WinCE phones fires wxEVT_JOY_BUTTON_DOWN event.
-- Native wxCheckListBox implementation.
-- All wxTopLevelWindows resizes accordingly to SIP visibility.
-- ::wxGetUserName() implemented.
-- wxDisplay enumeration support.
-- Fixed wxFileDialog breakage on WinCE due to incorrect structure size.
-
-Unix:
-
-- NO_GCC_PRAGMA is not used any more, remove checks for it if you used it.
+- wxDb::DBMS() was incorrectly indicating that DB2 databases were
+  dBase databases.
 
 
 2.6.2
@@ -2618,3 +2573,5 @@ At this point, the following has been achieved:
 - utils/wxprop classes working (except maybe wxPropertyFormView)
   in preparation for use in Dialog Editor.
 - GNU-WIN32 compilation verified (a month or so ago).
+
+

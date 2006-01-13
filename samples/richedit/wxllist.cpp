@@ -21,6 +21,10 @@
 
  */
 
+#ifdef __GNUG__
+#   pragma implementation "wxllist.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__

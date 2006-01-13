@@ -12,6 +12,10 @@
 #ifndef _WX_MOTIF_MENUITEM_H
 #define _WX_MOTIF_MENUITEM_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "menuitem.h"
+#endif
+
 #include "wx/bitmap.h"
 
 class WXDLLEXPORT wxMenuBar;
@@ -44,8 +48,7 @@ public:
     virtual const wxBitmap& GetBitmap() const { return m_bitmap; }
     
     // implementation from now on
-    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu,
-                     size_t index);
+    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu);
     void DestroyItem(bool full);
     
     WXWidget GetButtonWidget() const { return m_buttonWidget; }

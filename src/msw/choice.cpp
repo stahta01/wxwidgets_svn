@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin to derive from wxChoiceBase
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choice.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -331,7 +335,7 @@ int wxChoice::GetCount() const
     return (int)SendMessage(GetHwnd(), CB_GETCOUNT, 0, 0);
 }
 
-int wxChoice::FindString(const wxString& s, bool bCase) const
+int wxChoice::FindString(const wxString& s) const
 {
 #if defined(__WATCOMC__) && defined(__WIN386__)
     // For some reason, Watcom in WIN386 mode crashes in the CB_FINDSTRINGEXACT message.
@@ -340,7 +344,7 @@ int wxChoice::FindString(const wxString& s, bool bCase) const
     for ( int i = 0; i < count; i++ )
     {
         // as CB_FINDSTRINGEXACT is case insensitive, be case insensitive too
-        if ( GetString(i).IsSameAs(s, bCase) )
+        if ( GetString(i).IsSameAs(s, false) )
             return i;
     }
 
@@ -350,26 +354,21 @@ int wxChoice::FindString(const wxString& s, bool bCase) const
    //passed to SendMessage, so we have to do it ourselves in that case
    if ( s.empty() )
    {
-       int count = GetCount();
-       for ( int i = 0; i < count; i++ )
-       {
-         if ( GetString(i).empty() )
-             return i;
-       }
+     int count = GetCount();
+     for ( int i = 0; i < count; i++ )
+     {
+       if ( GetString(i).empty() )
+           return i;
+     }
 
-       return wxNOT_FOUND;
-   }
-   else if (bCase)
-   {
-       // back to base class search for not native search type
-       return wxItemContainerImmutable::FindString( s, bCase );
+     return wxNOT_FOUND;
    }
    else
    {
-       int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
-                                  (WPARAM)-1, (LPARAM)s.c_str());
+     int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
+                                (WPARAM)-1, (LPARAM)s.c_str());
 
-       return pos == LB_ERR ? wxNOT_FOUND : pos;
+     return pos == LB_ERR ? wxNOT_FOUND : pos;
    }
 #endif // Watcom/!Watcom
 }
@@ -680,3 +679,4 @@ WXHBRUSH wxChoice::MSWControlColor(WXHDC hDC, WXHWND hWnd)
 }
 
 #endif // wxUSE_CHOICE && !(__SMARTPHONE__ && __WXWINCE__)
+

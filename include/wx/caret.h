@@ -16,6 +16,10 @@
 
 #if wxUSE_CARET
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "caret.h"
+#endif
+
 // ---------------------------------------------------------------------------
 // forward declarations
 // ---------------------------------------------------------------------------

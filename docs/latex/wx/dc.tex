@@ -6,10 +6,8 @@ so a window can have a device context associated with it, and a printer also has
 In this way, the same piece of code may write to a number of different devices,
 if the device context is used as a parameter.
 
-Notice that wxDC is an abstract base class and can't be created directly,
-please use \helpref{wxPaintDC}{wxpaintdc}, \helpref{wxClientDC}{wxclientdc}, 
-\helpref{wxWindowDC}{wxwindowdc}, \helpref{wxScreenDC}{wxscreendc}, 
-\helpref{wxMemoryDC}{wxmemorydc} or \helpref{wxPrinterDC}{wxprinterdc}.
+Derived types of wxDC have documentation for specific features
+only, so refer to this section for most device context information.
 
 % VZ: we should really document them instead of this lame excuse, but I don't
 %     have time for it now, when it is done please remove this
@@ -31,6 +29,20 @@ them.
 \helpref{Overview}{dcoverview}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
+
+
+\membersection{wxDC::wxDC}\label{wxdcctor}
+
+\func{}{wxDC}{\void}
+
+Constructor.
+
+
+\membersection{wxDC::\destruct{wxDC}}\label{wxdcdtor}
+
+\func{}{\destruct{wxDC}}{\void}
+
+Destructor.
 
 
 \membersection{wxDC::BeginDrawing}\label{wxdcbegindrawing}
@@ -647,10 +659,7 @@ rectangle are returned as a tuple.}
 
 \constfunc{const wxFont\&}{GetFont}{\void}
 
-Gets the current font. Notice that even although each device context object has
-some default font after creation, this method would return a \texttt{wxNullFont} 
-initially and only after calling \helpref{wxDC::SetFont}{wxdcsetfont} a valid
-font is returned.
+Gets the current font (see \helpref{wxDC::SetFont}{wxdcsetfont}).
 
 
 \membersection{wxDC::GetLogicalFunction}\label{wxdcgetlogicalfunction}

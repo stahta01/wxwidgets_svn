@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "geometry.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -202,14 +206,14 @@ void wxPoint2DInt::SetVectorAngle( wxDouble degrees )
 
 wxDouble wxPoint2DDouble::GetVectorAngle() const
 {
-    if ( wxIsNullDouble(m_x) )
+    if ( m_x == 0 )
     {
         if ( m_y >= 0 )
             return 90;
         else
             return 270;
     }
-    if ( wxIsNullDouble(m_y) )
+    if ( m_y == 0 )
     {
         if ( m_x >= 0 )
             return 0;

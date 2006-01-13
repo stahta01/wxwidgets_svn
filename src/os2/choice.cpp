@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      David Webster
 // Modified by:
@@ -194,10 +194,38 @@ int wxChoice::GetCount() const
     return((int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)));
 } // end of wxChoice::GetCount
 
-void wxChoice::SetString( int n, const wxString& rsStr )
+int wxChoice::FindString(
+  const wxString&                   rsStr
+) const
 {
-    LONG  nIndexType = 0;
-    void* pData;
+    int                             nPos;
+    int                             nTextLength;
+    PSZ                             zStr;
+    int                             nItemCount;
+
+    nItemCount = (int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0));
+    for (nPos = 0; nPos < nItemCount; nPos++)
+    {
+        nTextLength = (int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXTLENGTH, (MPARAM)nPos, (MPARAM)0));
+        zStr = new char[nTextLength + 1];
+        ::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXT, MPFROM2SHORT((SHORT)nPos, (SHORT)nTextLength), (MPARAM)zStr);
+        if (rsStr == (wxChar*)zStr)
+        {
+            delete [] zStr;
+            break;
+        }
+        delete [] zStr;
+    }
+    return nPos;
+} // end of wxChoice::FindString
+
+void wxChoice::SetString(
+  int                               n
+, const wxString&                   rsStr
+)
+{
+    LONG                            nIndexType = 0;
+    void*                           pData;
 
     if ( m_clientDataItemsType != wxClientData_None )
     {
@@ -228,11 +256,13 @@ void wxChoice::SetString( int n, const wxString& rsStr )
     }
 } // end of wxChoice::SetString
 
-wxString wxChoice::GetString(int n) const
+wxString wxChoice::GetString(
+  int                               n
+) const
 {
-    int      nLen = 0;
-    wxString sStr = wxEmptyString;
-    wxChar*  zBuf;
+    int                             nLen = 0;
+    wxString                        sStr = wxEmptyString;
+    wxChar*                         zBuf;
 
     nLen = (size_t)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXTLENGTH, (MPARAM)n, (MPARAM)0));
     if (nLen != LIT_ERROR && nLen > 0)

@@ -6,7 +6,7 @@
 // Created:     2003/08/02 (stubs from 22.03.2003)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_PEN_H__
@@ -39,9 +39,9 @@ public:
 
     inline wxPen& operator = (const wxPen& pen)
     {   if (*this == pen) return (*this); Ref(pen); return *this; }
-    inline bool operator == (const wxPen& pen) const
+    inline bool operator == (const wxPen& pen)
     {   return m_refData == pen.m_refData; }
-    inline bool operator != (const wxPen& pen) const
+    inline bool operator != (const wxPen& pen)
     {   return m_refData != pen.m_refData; }
 
     virtual bool Ok() const { return (m_refData != NULL) ; }

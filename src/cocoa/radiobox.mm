@@ -103,6 +103,17 @@ bool wxRadioBox::Show(int n, bool show)
     return false;
 }
 
+    // layout parameters
+int wxRadioBox::GetColumnCount() const
+{
+    return 0;
+}
+
+int wxRadioBox::GetRowCount() const
+{
+    return 0;
+}
+
 wxSize wxRadioBox::DoGetBestSize() const
 {
     return wxSize(50,50);

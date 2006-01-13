@@ -22,6 +22,10 @@
 
 #if wxUSE_SPINBTN
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "spinctlg.h"
+#endif
+
 class WXDLLEXPORT wxSpinButton;
 class WXDLLEXPORT wxTextCtrl;
 

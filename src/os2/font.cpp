@@ -691,7 +691,7 @@ void wxNativeFontInfo::SetUnderlined(
 } // end of wxNativeFontInfo::SetUnderlined
 
 void wxNativeFontInfo::SetFaceName(
-  const wxString&                   sFacename
+  wxString                          sFacename
 )
 {
     wxStrncpy((wxChar*)fa.szFacename, sFacename, WXSIZEOF(fa.szFacename));

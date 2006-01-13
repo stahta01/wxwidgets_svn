@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_TOPLEVEL_H_
 #define _WX_MSW_TOPLEVEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW
 // ----------------------------------------------------------------------------
@@ -46,8 +50,6 @@ public:
     virtual ~wxTopLevelWindowMSW();
 
     // implement base class pure virtuals
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
     virtual void Maximize(bool maximize = true);
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
@@ -86,11 +88,6 @@ public:
     bool HandleCommand(WXWORD id, WXWORD cmd, WXHWND control);
 #endif // __SMARTPHONE__ && __WXWINCE__
 
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    // Soft Input Panel (SIP) change notification
-    virtual bool HandleSettingChange(WXWPARAM wParam, WXLPARAM lParam);
-#endif
-
 protected:
     // common part of all ctors
     void Init();
@@ -115,9 +112,6 @@ protected:
 
     // choose the right parent to use with CreateWindow()
     virtual WXHWND MSWGetParent() const;
-
-    // window proc for the frames
-    WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
     // is the window currently iconized?
     bool m_iconized;
@@ -171,14 +165,9 @@ protected:
     void ReloadAllButtons();
 #endif // __SMARTPHONE__ && __WXWINCE__
 
-private:
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    void* m_activateInfo;
-#endif
-
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxTopLevelWindowMSW)
 };
 
 #endif // _WX_MSW_TOPLEVEL_H_
+

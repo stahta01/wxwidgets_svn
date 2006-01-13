@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/frame.cpp
+// Name:        frame.cpp
 // Purpose:     wxFrame
 // Author:      David Webster
 // Modified by:
@@ -238,8 +238,13 @@ wxStatusBar* wxFrame::OnCreateStatusBar(
                         ,nHeight
                        );
 
-    ::WinSetParent( pStatusBar->GetHWND(), m_hFrame, FALSE );
-    ::WinSetOwner( pStatusBar->GetHWND(), m_hFrame);
+    ::WinSetParent( pStatusBar->GetHWND()
+                   ,m_hFrame
+                   ,FALSE
+                  );
+    ::WinSetOwner( pStatusBar->GetHWND()
+                  ,m_hFrame
+                 );
     //
     // to show statusbar
     //
@@ -293,7 +298,7 @@ void wxFrame::PositionStatusBar()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(_T("Error setting parent for StatusBar. Error: %s\n"), sError.c_str());
+            wxLogError(_T("Error setting parent for StautsBar. Error: %s\n"), sError.c_str());
             return;
         }
     }
@@ -301,15 +306,24 @@ void wxFrame::PositionStatusBar()
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_TOOLBAR
-wxToolBar* wxFrame::OnCreateToolBar( long lStyle, wxWindowID vId, const wxString& rsName )
+wxToolBar* wxFrame::OnCreateToolBar(
+  long                              lStyle
+, wxWindowID                        vId
+, const wxString&                   rsName
+)
 {
     wxToolBar*                      pToolBar = wxFrameBase::OnCreateToolBar( lStyle
                                                                             ,vId
                                                                             ,rsName
                                                                            );
 
-    ::WinSetParent( pToolBar->GetHWND(), m_hFrame, FALSE);
-    ::WinSetOwner( pToolBar->GetHWND(), m_hFrame);
+    ::WinSetParent( pToolBar->GetHWND()
+                   ,m_hFrame
+                   ,FALSE
+                  );
+    ::WinSetOwner( pToolBar->GetHWND()
+                  ,m_hFrame
+                 );
     return pToolBar;
 } // end of WinGuiBase_CFrame::OnCreateToolBar
 #endif
@@ -857,12 +871,17 @@ bool wxFrame::HandlePaint()
 
                 ::WinQueryWindowRect(GetHwnd(), &vRect3);
 
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
+
                 static const int    nIconWidth = 32;
                 static const int    nIconHeight = 32;
                 int                 nIconX = (int)((vRect3.xRight - nIconWidth)/2);
                 int                 nIconY = (int)((vRect3.yBottom + nIconHeight)/2);
 
                 ::WinDrawPointer(hPs, nIconX, nIconY, hIcon, DP_NORMAL);
+#endif
             }
             ::WinEndPaint(hPs);
         }

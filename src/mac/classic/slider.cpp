@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "slider.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_SLIDER

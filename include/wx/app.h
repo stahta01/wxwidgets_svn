@@ -34,7 +34,13 @@ class WXDLLIMPEXP_BASE wxCmdLineParser;
 class WXDLLIMPEXP_BASE wxLog;
 class WXDLLIMPEXP_BASE wxMessageOutput;
 
-#if wxUSE_GUI
+// wxUSE_EVTLOOP_IN_APP is a temporary hack needed until all ports are updated
+// to use wxEventLoop, otherwise we get linking errors on wxMac, it's going to
+// disappear a.s.a.p.
+#ifdef __WXMAC__
+    #define wxUSE_EVTLOOP_IN_APP 0
+#else
+    #define wxUSE_EVTLOOP_IN_APP 1
     class WXDLLEXPORT wxEventLoop;
 #endif
 
@@ -109,6 +115,20 @@ public:
     // however extreme care should be taken if you don't want this function to
     // crash.
     virtual void OnFatalException() { }
+
+#if wxUSE_EXCEPTIONS
+    // function called if an uncaught exception is caught inside the main
+    // event loop: it may return true to continue running the event loop or
+    // false to stop it (in the latter case it may rethrow the exception as
+    // well)
+    virtual bool OnExceptionInMainLoop();
+
+    // Called when an unhandled C++ exception occurs inside OnRun(): note that
+    // the exception type is lost by now, so if you really want to handle the
+    // exception you should override OnRun() and put a try/catch around
+    // MainLoop() call there
+    virtual void OnUnhandledException() { }
+#endif // wxUSE_EXCEPTIONS
 
     // Called from wxExit() function, should terminate the application a.s.a.p.
     virtual void Exit();
@@ -217,12 +237,6 @@ public:
     virtual void HandleEvent(wxEvtHandler *handler,
                              wxEventFunction func,
                              wxEvent& event) const;
-
-    // Called when an unhandled C++ exception occurs inside OnRun(): note that
-    // the exception type is lost by now, so if you really want to handle the
-    // exception you should override OnRun() and put a try/catch around
-    // MainLoop() call there or use OnExceptionInMainLoop()
-    virtual void OnUnhandledException() { }
 #endif // wxUSE_EXCEPTIONS
 
     // process all events in the wxPendingEvents list -- it is necessary to
@@ -367,8 +381,12 @@ public:
         // (already) be dispatched
     static bool IsMainLoopRunning()
     {
+#if wxUSE_EVTLOOP_IN_APP
         wxAppBase *app = wx_static_cast(wxAppBase *, GetInstance());
         return app && app->m_mainLoop != NULL;
+#else
+        return false;
+#endif
     }
 
         // execute the main GUI loop, the function returns when the loop ends
@@ -412,14 +430,8 @@ public:
         // Returns true if more idle time is requested.
     virtual bool SendIdleEvents(wxWindow* win, wxIdleEvent& event);
 
-
-#if wxUSE_EXCEPTIONS
-    // Function called if an uncaught exception is caught inside the main
-    // event loop: it may return true to continue running the event loop or
-    // false to stop it (in the latter case it may rethrow the exception as
-    // well)
-    virtual bool OnExceptionInMainLoop();
-#endif // wxUSE_EXCEPTIONS
+        // Perform standard OnIdle behaviour: call from port's OnIdle
+    void OnIdle(wxIdleEvent& event);
 
 
     // top level window functions
@@ -499,9 +511,6 @@ public:
     // returns true if the program is successfully initialized
     bool Initialized() { return true; }
 
-    // perform standard OnIdle behaviour, ensure that this is always called
-    void OnIdle(wxIdleEvent& event);
-
 
 protected:
     // delete all objects in wxPendingDelete list
@@ -511,9 +520,11 @@ protected:
     virtual wxAppTraits *CreateTraits();
 
 
+#if wxUSE_EVTLOOP_IN_APP
     // the main event loop of the application (may be NULL if the loop hasn't
     // been started yet or has already terminated)
     wxEventLoop *m_mainLoop;
+#endif // wxUSE_EVTLOOP_IN_APP
 
     // the main top level window (may be NULL)
     wxWindow *m_topWindow;
@@ -529,11 +540,11 @@ protected:
         Yes
     } m_exitOnFrameDelete;
 
-    // true if the app wants to use the best visual on systems where
+    // true if the apps whats to use the best visual on systems where
     // more than one are available (Sun, SGI, XFree86 4.0 ?)
     bool m_useBestVisual;
 
-    // does any of our windows have focus?
+    // does any of our windows has focus?
     bool m_isActive;
 
 
@@ -624,7 +635,7 @@ public:
 #define IMPLEMENT_WXWIN_MAIN_CONSOLE \
         int main(int argc, char **argv) { return wxEntry(argc, argv); }
 
-// port-specific header could have defined it already in some special way
+// port-specific header could have defined it already in some special wau
 #ifndef IMPLEMENT_WXWIN_MAIN
     #define IMPLEMENT_WXWIN_MAIN IMPLEMENT_WXWIN_MAIN_CONSOLE
 #endif // defined(IMPLEMENT_WXWIN_MAIN)
@@ -650,7 +661,6 @@ public:
     }                                                                       \
     wxAppInitializer                                                        \
         wxTheAppInitializer((wxAppInitializerFunction) wxCreateApp);        \
-    DECLARE_APP(appname)                                                    \
     appname& wxGetApp() { return *(appname *)wxTheApp; }
 
 // Same as IMPLEMENT_APP() normally but doesn't include themes support in
@@ -673,14 +683,6 @@ public:
 // this macro can be used multiple times and just allows you to use wxGetApp()
 // function
 #define DECLARE_APP(appname) extern appname& wxGetApp();
-
-
-// declare the stuff defined by IMPLEMENT_APP() macro, it's not really needed
-// anywhere else but at the very least it suppresses icc warnings about
-// defining extern symbols without prior declaration, and it shouldn't do any
-// harm
-extern wxAppConsole *wxCreateApp();
-extern wxAppInitializer wxTheAppInitializer;
 
 #endif // _WX_APP_H_BASE_
 

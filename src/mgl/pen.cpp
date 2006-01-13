@@ -1,11 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/pen.cpp
+// Name:        pen.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "pen.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -93,7 +98,7 @@ wxPen::wxPen(const wxColour &colour, int width, int style)
 wxPen::wxPen(const wxBitmap& stipple, int width)
 {
     wxCHECK_RET( stipple.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8,
+    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     m_refData = new wxPenRefData();
@@ -138,7 +143,7 @@ void wxPen::SetDashes(int number_of_dashes, const wxDash *dash)
     M_PENDATA->m_dash = (wxDash *)dash; /* TODO */
 }
 
-void wxPen::SetColour(unsigned char red, unsigned char green, unsigned char blue)
+void wxPen::SetColour(int red, int green, int blue)
 {
     AllocExclusive();
     M_PENDATA->m_colour.Set(red, green, blue);
@@ -165,7 +170,7 @@ void wxPen::SetStyle(int style)
 void wxPen::SetStipple(const wxBitmap& stipple)
 {
     wxCHECK_RET( stipple.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8,
+    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     AllocExclusive();
@@ -179,20 +184,20 @@ void wxPen::SetWidth(int width)
     M_PENDATA->m_width = width;
 }
 
-int wxPen::GetDashes(wxDash **ptr) const
+int wxPen::GetDashes(wxDash **ptr) const 
 {
-     *ptr = (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*) NULL);
+     *ptr = (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*) NULL); 
      return (M_PENDATA ? M_PENDATA->m_countDashes : 0);
 }
 
-int wxPen::GetDashCount() const
-{
-    return (M_PENDATA->m_countDashes);
+int wxPen::GetDashCount() const 
+{ 
+    return (M_PENDATA->m_countDashes); 
 }
 
-wxDash* wxPen::GetDash() const
-{
-    return (wxDash*)M_PENDATA->m_dash;
+wxDash* wxPen::GetDash() const 
+{ 
+    return (wxDash*)M_PENDATA->m_dash; 
 }
 
 int wxPen::GetCap() const
@@ -259,3 +264,4 @@ wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }
+

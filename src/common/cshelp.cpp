@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cshelp.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -330,11 +334,9 @@ wxHelpProvider::~wxHelpProvider()
 // wxSimpleHelpProvider
 // ----------------------------------------------------------------------------
 
-#define WINHASH_KEY(w) wxPtrToUInt(w)
-
 wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 {
-    wxSimpleHelpProviderHashMap::iterator it = m_hashWindows.find(WINHASH_KEY(window));
+    wxLongToStringHashMap::iterator it = m_hashWindows.find((long)window);
 
     if ( it == m_hashWindows.end() )
     {
@@ -348,13 +350,13 @@ wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 
 void wxSimpleHelpProvider::AddHelp(wxWindowBase *window, const wxString& text)
 {
-    m_hashWindows.erase(WINHASH_KEY(window));
-    m_hashWindows[WINHASH_KEY(window)] = text;
+    m_hashWindows.erase((long)window);
+    m_hashWindows[(long)window] = text;
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 {
-    wxSimpleHelpProviderHashMap::key_type key = (wxSimpleHelpProviderHashMap::key_type)id;
+    wxLongToStringHashMap::key_type key = (wxLongToStringHashMap::key_type)id;
     m_hashIds.erase(key);
     m_hashIds[key] = text;
 }
@@ -362,7 +364,7 @@ void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 // removes the association
 void wxSimpleHelpProvider::RemoveHelp(wxWindowBase* window)
 {
-    m_hashWindows.erase(WINHASH_KEY(window));
+    m_hashWindows.erase((long)window);
 }
 
 bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)

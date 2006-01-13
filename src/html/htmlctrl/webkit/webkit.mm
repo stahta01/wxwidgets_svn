@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "webkit.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 #include "wx/splitter.h"
@@ -468,7 +472,7 @@ void wxWebKitCtrl::MacVisibilityChanged(){
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
     if (frame == [sender mainFrame]){
-        webKitWindow->SetLabel(wxStringWithNSString( title ));
+        webKitWindow->SetTitle(wxStringWithNSString( title ));
     }
 }
 @end

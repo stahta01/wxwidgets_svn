@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "accel.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -112,3 +116,4 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
         (eventShiftDown == accShiftDown) &&
         ((eventKeyCode == accKeyCode || eventKeyCode == accKeyCode2))) ;
 }
+

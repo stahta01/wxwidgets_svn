@@ -9,6 +9,7 @@
 // License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -16,6 +17,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicece.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -223,7 +228,7 @@ bool wxChoice::CreateAndInit(wxWindow *parent,
     if ( style & wxSP_WRAP )
         spiner_style |= UDS_WRAP;
 
-    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, wxEmptyString, 0) )
+    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, _T(""), 0) )
         return false;
 
     // subclass the text ctrl to be able to intercept some events
@@ -414,12 +419,8 @@ int wxChoice::GetCount() const
     return (int)::SendMessage(GetBuddyHwnd(), LB_GETCOUNT, 0, 0);
 }
 
-int wxChoice::FindString(const wxString& s, bool bCase) const
+int wxChoice::FindString(const wxString& s) const
 {
-    // back to base class search for not native search type
-    if (bCase)
-       return wxItemContainerImmutable::FindString( s, bCase );
-
     int pos = (int)::SendMessage(GetBuddyHwnd(), LB_FINDSTRINGEXACT,
                                (WPARAM)-1, (LPARAM)s.c_str());
 

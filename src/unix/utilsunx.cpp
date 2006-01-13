@@ -15,6 +15,8 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include <pwd.h>
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -33,9 +35,6 @@
 #include "wx/wfstream.h"
 
 #include "wx/unix/execute.h"
-#include "wx/unix/private.h"
-
-#include <pwd.h>
 
 #if wxUSE_STREAMS
 
@@ -123,12 +122,6 @@
 #ifdef HAVE_UNAME
     #include <sys/utsname.h> // for uname()
 #endif // HAVE_UNAME
-
-// Used by wxGetFreeMemory().
-#ifdef __SGI__
-    #include <sys/sysmp.h>
-    #include <sys/sysinfo.h>   // for SAGET and MINFO structures
-#endif
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -432,10 +425,8 @@ bool wxPipeInputStream::CanRead() const
     const int fd = m_file->fd();
 
     fd_set readfds;
-
-    wxFD_ZERO(&readfds);
-    wxFD_SET(fd, &readfds);
-
+    FD_ZERO(&readfds);
+    FD_SET(fd, &readfds);
     switch ( select(fd + 1, &readfds, NULL, NULL, &tv) )
     {
         case -1:
@@ -463,7 +454,13 @@ bool wxPipeInputStream::CanRead() const
 // wxExecute: the real worker function
 // ----------------------------------------------------------------------------
 
-long wxExecute(wxChar **argv, int flags, wxProcess *process)
+#ifdef __VMS
+    #pragma message disable codeunreachable
+#endif
+               
+long wxExecute(wxChar **argv,
+               int flags,
+               wxProcess *process)
 {
     // for the sync execution, we return -1 to indicate failure, but for async
     // case we return 0 which is never a valid PID
@@ -612,7 +609,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
         }
 
         execvp (*mb_argv, mb_argv);
-
+       
         fprintf(stderr, "execvp(");
         // CS changed ppc to ppc_ as ppc is not available under mac os CW Mach-O
         for ( char **ppc_ = mb_argv; *ppc_; ppc_++ )
@@ -680,10 +677,12 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
         return traits->WaitForChild(execData);
     }
 
-#if !defined(__VMS) && !defined(__INTEL_COMPILER)
     return ERROR_RETURN_CODE;
-#endif
 }
+
+#ifdef __VMS
+    #pragma message enable codeunreachable
+#endif
 
 #undef ERROR_RETURN_CODE
 #undef ARGS_CLEANUP
@@ -916,10 +915,6 @@ wxMemorySize wxGetFreeMemory()
     }
 #elif defined(__SUN__) && defined(_SC_AVPHYS_PAGES)
     return (wxMemorySize)(sysconf(_SC_AVPHYS_PAGES)*sysconf(_SC_PAGESIZE));
-#elif defined(__SGI__)
-    struct rminfo realmem;
-    if ( sysmp(MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0 )
-        return ((wxMemorySize)realmem.physmem * sysconf(_SC_PAGESIZE));
 //#elif defined(__FREEBSD__) -- might use sysctl() to find it out, probably
 #endif
 
@@ -1079,6 +1074,40 @@ bool wxHandleFatalExceptions(bool doit)
 }
 
 #endif // wxUSE_ON_FATAL_EXCEPTION
+
+// ----------------------------------------------------------------------------
+// error and debug output routines (deprecated, use wxLog)
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+
+void wxDebugMsg( const char *format, ... )
+{
+  va_list ap;
+  va_start( ap, format );
+  vfprintf( stderr, format, ap );
+  fflush( stderr );
+  va_end(ap);
+}
+
+void wxError( const wxString &msg, const wxString &title )
+{
+  wxFprintf( stderr, _("Error ") );
+  if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+  if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+  wxFprintf( stderr, wxT(".\n") );
+}
+
+void wxFatalError( const wxString &msg, const wxString &title )
+{
+  wxFprintf( stderr, _("Error ") );
+  if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+  if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+  wxFprintf( stderr, wxT(".\n") );
+  exit(3); // the same exit code as for abort()
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_BASE
 

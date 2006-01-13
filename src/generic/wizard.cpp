@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/wizard.cpp
+// Name:        generic/wizard.cpp
 // Purpose:     generic implementation of wxWizard class
 // Author:      Vadim Zeitlin
 // Modified by: Robert Cavanaugh
@@ -20,6 +20,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "wizardg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -263,6 +267,13 @@ wxSize wxWizardSizer::SiblingSize(wxSizerItem *child)
 // generic wxWizard implementation
 // ----------------------------------------------------------------------------
 
+#if wxCHECK_VERSION(2, 7, 0)
+    #error "Fix wxGTK vs. wxMSW difference other way"
+#else
+    WX_DEFINE_ARRAY_PTR(wxWizard *, wxModelessWizards);
+    wxModelessWizards modelessWizards;
+#endif
+
 void wxWizard::Init()
 {
     m_posWizard = wxDefaultPosition;
@@ -274,7 +285,7 @@ void wxWizard::Init()
     m_calledSetBorder = false;
     m_border = 0;
     m_started = false;
-    m_wasModal = false;
+    modelessWizards.Add(this);
 }
 
 bool wxWizard::Create(wxWindow *parent,
@@ -389,7 +400,7 @@ void wxWizard::AddButtonRow(wxBoxSizer *mainColumn)
     // was created before the 'next' button.
 
     bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-    int buttonStyle = isPda ? wxBU_EXACTFIT : 0;
+    int buttonStyle = isPda ? wxBU_EXACTFIT : 0;    
 
     wxBoxSizer *buttonRow = new wxBoxSizer(wxHORIZONTAL);
 #ifdef __WXMAC__
@@ -454,10 +465,10 @@ void wxWizard::DoCreateControls()
         return;
 
     bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-
+    
     // Horizontal stretching, and if not PDA, border all around
     int mainColumnSizerFlags = isPda ? wxEXPAND : wxALL|wxEXPAND ;
-
+    
     // wxWindow::SetSizer will be called at end
     wxBoxSizer *windowSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -470,10 +481,10 @@ void wxWizard::DoCreateControls()
     );
 
     AddBitmapRow(mainColumn);
-
+    
     if (!isPda)
         AddStaticLine(mainColumn);
-
+    
     AddButtonRow(mainColumn);
 
     // wxWindow::SetSizer should be followed by wxWindow::Fit, but
@@ -490,7 +501,7 @@ void wxWizard::SetPageSize(const wxSize& size)
 void wxWizard::FinishLayout()
 {
     bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-
+    
     // Set to enable wxWizardSizer::GetMaxChildSize
     m_started = true;
 
@@ -657,7 +668,7 @@ bool wxWizard::RunWizard(wxWizardPage *firstPage)
     // can't return false here because there is no old page
     (void)ShowPage(firstPage, true /* forward */);
 
-    m_wasModal = true;
+    modelessWizards.Remove(this);
 
     return ShowModal() == wxID_OK;
 }
@@ -699,7 +710,7 @@ wxSize wxWizard::GetManualPageSize() const
         DEFAULT_PAGE_WIDTH = wxSystemSettings::GetMetric(wxSYS_SCREEN_X) / 2;
         DEFAULT_PAGE_HEIGHT = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y) / 2;
     }
-
+    
     wxSize totalPageSize(DEFAULT_PAGE_WIDTH,DEFAULT_PAGE_HEIGHT);
 
     totalPageSize.IncTo(m_sizePage);
@@ -801,16 +812,36 @@ void wxWizard::OnWizEvent(wxWizardEvent& event)
         }
     }
 
-    if ( ( !m_wasModal ) &&
+    if ( ( modelessWizards.Index(this) != wxNOT_FOUND ) &&
          event.IsAllowed() &&
          ( event.GetEventType() == wxEVT_WIZARD_FINISHED ||
            event.GetEventType() == wxEVT_WIZARD_CANCEL
          )
        )
     {
+        modelessWizards.Remove(this);
         Destroy();
     }
 }
+
+// ----------------------------------------------------------------------------
+// our public interface
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+
+/* static */
+wxWizard *wxWizardBase::Create(wxWindow *parent,
+                               int id,
+                               const wxString& title,
+                               const wxBitmap& bitmap,
+                               const wxPoint& pos,
+                               const wxSize& WXUNUSED(size))
+{
+    return new wxWizard(parent, id, title, bitmap, pos);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 // ----------------------------------------------------------------------------
 // wxWizardEvent

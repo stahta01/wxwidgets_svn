@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,7 +29,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_LISTCTRL
+#if wxUSE_LISTCTRL && defined(__WIN95__)
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -119,7 +124,7 @@ public:
     }
 
     // init with conversion
-    void Init(const LV_ITEM_OTHER& item)
+    void Init(LV_ITEM_OTHER& item)
     {
         // avoid unnecessary dynamic memory allocation, jjust make m_pItem
         // point to our own m_item
@@ -361,10 +366,6 @@ bool wxListCtrl::Create(wxWindow *parent,
     // explicitly say that we want to use Unicode because otherwise we get ANSI
     // versions of _some_ messages (notably LVN_GETDISPINFOA) in MSLU build
     wxSetCCUnicodeFormat(GetHwnd());
-
-    // We must set the default text colour to the system/theme color, otherwise
-    // GetTextColour will always return black
-    SetTextColour(GetDefaultAttributes().colFg);
 
     // for comctl32.dll v 4.70+ we want to have some non default extended
     // styles because it's prettier (and also because wxGTK does it like this)
@@ -663,7 +664,7 @@ bool wxListCtrl::GetColumn(int col, wxListItem& item) const
 }
 
 // Sets information about this column
-bool wxListCtrl::SetColumn(int col, const wxListItem& item)
+bool wxListCtrl::SetColumn(int col, wxListItem& item)
 {
     LV_COLUMN lvCol;
     wxConvertToMSWListCol(col, item, lvCol);
@@ -788,15 +789,12 @@ bool wxListCtrl::SetItem(wxListItem& info)
             data->lParam = info.m_data;
 
         // attributes
-        if ( info.HasAttributes() )
+        if (info.HasAttributes())
         {
-            const wxListItemAttr& attrNew = *info.GetAttributes();
-
-            // don't overwrite the already set attributes if we have them
-            if ( data->attr )
-                data->attr->AssignFrom(attrNew);
+            if (data->attr)
+                *data->attr = *info.GetAttributes();
             else
-                data->attr = new wxListItemAttr(attrNew);
+                data->attr = new wxListItemAttr(*info.GetAttributes());
         };
     };
 
@@ -1493,7 +1491,7 @@ long wxListCtrl::HitTest(const wxPoint& point, int& flags)
 
 // Inserts an item, returning the index of the new item if successful,
 // -1 otherwise.
-long wxListCtrl::InsertItem(const wxListItem& info)
+long wxListCtrl::InsertItem(wxListItem& info)
 {
     wxASSERT_MSG( !IsVirtual(), _T("can't be used with virtual controls") );
 
@@ -1566,7 +1564,7 @@ long wxListCtrl::InsertItem(long index, const wxString& label, int imageIndex)
 }
 
 // For list view mode (only), inserts a column.
-long wxListCtrl::InsertColumn(long col, const wxListItem& item)
+long wxListCtrl::InsertColumn(long col, wxListItem& item)
 {
     LV_COLUMN lvCol;
     wxConvertToMSWListCol(col, item, lvCol);
@@ -1659,7 +1657,7 @@ int CALLBACK wxInternalDataCompareFunc(LPARAM lParam1, LPARAM lParam2,  LPARAM l
 
     return internalData->user_fn(d1, d2, internalData->data);
 
-}
+};
 
 bool wxListCtrl::SortItems(wxListCtrlCompare fn, long data)
 {
@@ -2588,20 +2586,20 @@ static wxListItemInternalData *wxGetInternalData(HWND hwnd, long itemId)
         return NULL;
 
     return (wxListItemInternalData *) it.lParam;
-}
+};
 
 static
 wxListItemInternalData *wxGetInternalData(const wxListCtrl *ctl, long itemId)
 {
     return wxGetInternalData(GetHwndOf(ctl), itemId);
-}
+};
 
 static wxListItemAttr *wxGetInternalDataAttr(wxListCtrl *ctl, long itemId)
 {
     wxListItemInternalData *data = wxGetInternalData(ctl, itemId);
 
     return data ? data->attr : NULL;
-}
+};
 
 static void wxDeleteInternalData(wxListCtrl* ctl, long itemId)
 {
@@ -2769,7 +2767,7 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl,
             // pszText is not const, hence the cast
             lvItem.pszText = (wxChar *)info.m_text.c_str();
             if ( lvItem.pszText )
-                lvItem.cchTextMax = info.m_text.length();
+                lvItem.cchTextMax = info.m_text.Length();
             else
                 lvItem.cchTextMax = 0;
         }

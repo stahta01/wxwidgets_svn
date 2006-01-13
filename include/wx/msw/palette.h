@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/palette.h
+// Name:        palette.h
 // Purpose:     wxPalette class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_PALETTE_H_
 #define _WX_PALETTE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "palette.h"
+#endif
 
 #include "wx/gdiobj.h"
 
@@ -39,7 +43,7 @@ public:
   wxPalette(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
   ~wxPalette(void);
   bool Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
-  int GetPixel(unsigned char red, unsigned char green, unsigned char blue) const;
+  int GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const;
   bool GetRGB(int pixel, unsigned char *red, unsigned char *green, unsigned char *blue) const;
 
   virtual bool Ok(void) const { return (m_refData != NULL) ; }

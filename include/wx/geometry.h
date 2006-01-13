@@ -4,13 +4,17 @@
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     08/05/99
-// RCS-ID:      $Id$
+// RCS-ID:
 // Copyright:   (c) 1999 Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GEOMETRY_H_
 #define _WX_GEOMETRY_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "geometry.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -19,6 +23,14 @@
 #include "wx/utils.h"
 #include "wx/gdicmn.h"
 #include "wx/math.h"
+
+#ifdef __WXMSW__
+    #define wxMulDivInt32( a , b , c ) ::MulDiv( a , b , c )
+#elif defined( __WXMAC__ )
+    #define wxMulDivInt32( a , b , c ) ( (wxInt32) ( ( (wxInt64)(a) * (wxInt64)(b) ) / (wxInt64)(c) ) )
+#else
+    #define wxMulDivInt32( a , b , c ) ((wxInt32)((a)*(((wxDouble)b)/((wxDouble)c))))
+#endif
 
 class WXDLLIMPEXP_BASE wxDataInputStream;
 class WXDLLIMPEXP_BASE wxDataOutputStream;
@@ -441,12 +453,12 @@ inline wxPoint2DDouble& wxPoint2DDouble::operator/=(const wxPoint2DDouble& pt)
 
 inline bool wxPoint2DDouble::operator==(const wxPoint2DDouble& pt) const
 {
-    return wxIsSameDouble(m_x, pt.m_x) && wxIsSameDouble(m_y, pt.m_y);
+    return m_x == pt.m_x && m_y == pt.m_y;
 }
 
 inline bool wxPoint2DDouble::operator!=(const wxPoint2DDouble& pt) const
 {
-    return !(*this == pt);
+    return m_x != pt.m_x || m_y != pt.m_y;
 }
 
 inline wxPoint2DDouble operator+(const wxPoint2DDouble& pt1 , const wxPoint2DDouble& pt2)
@@ -582,9 +594,9 @@ public:
         { return ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
                 ( ( m_y <= rect.m_y ) && ( rect.m_y + rect.m_height <= m_y + m_height ) ) ); }
     inline bool IsEmpty() const
-        { return m_width <= 0 || m_height <= 0; }
+        { return ( m_width <= 0 || m_height <= 0 ); }
     inline bool HaveEqualSize( const wxRect2DDouble &rect ) const
-        { return wxIsSameDouble(rect.m_width, m_width) && wxIsSameDouble(rect.m_height, m_height); }
+        { return ( rect.m_width == m_width && rect.m_height == m_height ); }
 
     inline void Inset( wxDouble x , wxDouble y )
         { m_x += x; m_y += y; m_width -= 2 * x; m_height -= 2 * y; }
@@ -619,9 +631,9 @@ public:
                 m_width *= ((wxDouble)num)/((wxDouble)denum); m_height *= ((wxDouble)num)/((wxDouble)denum);}
 
     wxRect2DDouble& operator = (const wxRect2DDouble& rect);
-    inline bool operator == (const wxRect2DDouble& rect) const
-        { return wxIsSameDouble(m_x, rect.m_x) && wxIsSameDouble(m_y, rect.m_y) && HaveEqualSize(rect); }
-    inline bool operator != (const wxRect2DDouble& rect) const
+    inline bool operator == (const wxRect2DDouble& rect)
+        { return (m_x==rect.m_x && m_y==rect.m_y && m_width==rect.m_width && m_height==rect.m_height); }
+    inline bool operator != (const wxRect2DDouble& rect)
         { return !(*this == rect); }
 
     wxDouble  m_x;

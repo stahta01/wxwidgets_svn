@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/toplevel.cpp
+// Name:        msw/toplevel.cpp
 // Purpose:     implements wxTopLevelWindow for MSW
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -144,14 +148,6 @@ void wxTopLevelWindowMSW::Init()
 #if defined(__SMARTPHONE__) && defined(__WXWINCE__)
     m_MenuBarHWND = 0;
 #endif
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    SHACTIVATEINFO* info = new SHACTIVATEINFO;
-    wxZeroMemory(*info);
-    info->cbSize = sizeof(SHACTIVATEINFO);
-
-    m_activateInfo = (void*) info;
-#endif
 }
 
 WXDWORD wxTopLevelWindowMSW::MSWGetStyle(long style, WXDWORD *exflags) const
@@ -213,7 +209,7 @@ WXDWORD wxTopLevelWindowMSW::MSWGetStyle(long style, WXDWORD *exflags) const
     if ( style & wxMAXIMIZE_BOX )
         msflags |= WS_MAXIMIZEBOX;
 
-#ifndef __WXWINCE__
+#ifndef __WXWINCE__    
     if ( style & wxSYSTEM_MENU )
         msflags |= WS_SYSMENU;
 #endif
@@ -310,63 +306,6 @@ WXHWND wxTopLevelWindowMSW::MSWGetParent() const
     }
 
     return (WXHWND)hwndParent;
-}
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-bool wxTopLevelWindowMSW::HandleSettingChange(WXWPARAM wParam, WXLPARAM lParam)
-{
-    SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
-    if (!info) return false;
-    return SHHandleWMSettingChange(GetHwnd(), wParam, lParam, info) == TRUE;
-}
-#endif
-
-WXLRESULT wxTopLevelWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
-{
-    WXLRESULT rc = 0;
-    bool processed = false;
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    switch ( message )
-    {
-        case WM_ACTIVATE:
-        {
-            SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
-            if (info)
-            {
-                DWORD flags = 0;
-                if (GetExtraStyle() & wxTOPLEVEL_EX_DIALOG) flags = SHA_INPUTDIALOG;
-                SHHandleWMActivate(GetHwnd(), wParam, lParam, info, flags);
-            }
-
-            // This implicitly sends a wxEVT_ACTIVATE_APP event
-            if (wxTheApp)
-                wxTheApp->SetActive(wParam != 0, FindFocus());
-
-            break;
-        }
-        case WM_SETTINGCHANGE:
-        {
-            processed = HandleSettingChange(wParam,lParam);
-            break;
-        }
-        case WM_HIBERNATE:
-        {
-            if (wxTheApp)
-            {
-                wxActivateEvent event(wxEVT_HIBERNATE, true, wxID_ANY);
-                event.SetEventObject(wxTheApp);
-                processed = wxTheApp->ProcessEvent(event);
-            }
-            break;
-        }
-    }
-#endif
-
-    if ( !processed )
-        rc = wxTopLevelWindowBase::MSWWindowProc(message, wParam, lParam);
-
-    return rc;
 }
 
 bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
@@ -479,11 +418,11 @@ bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
     }
 
     SubclassWin(m_hWnd);
-
+    
 #ifdef __SMARTPHONE__
     // Work around title non-display glitch
     Show(false);
-#endif
+#endif    
 
     return true;
 #endif // __WXMICROWIN__/!__WXMICROWIN__
@@ -594,7 +533,17 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
     // focus rectangles) work under Win2k+
     if ( ret )
     {
-        MSWUpdateUIState(UIS_INITIALIZE);
+        static int s_needToUpdate = -1;
+        if ( s_needToUpdate == -1 )
+        {
+            int verMaj, verMin;
+            s_needToUpdate = wxGetOsVersion(&verMaj, &verMin) == wxWINDOWS_NT &&
+                                verMaj >= 5;
+        }
+
+        if ( s_needToUpdate )
+            ::SendMessage(GetHwnd(), WM_CHANGEUISTATE,
+                          MAKEWPARAM(UIS_INITIALIZE, 0), 0);
     }
 
     // Note: if we include PocketPC in this test, dialogs can fail to show up,
@@ -615,12 +564,6 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
 
 wxTopLevelWindowMSW::~wxTopLevelWindowMSW()
 {
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
-    delete info;
-    m_activateInfo = NULL;
-#endif
-
     // after destroying an owned window, Windows activates the next top level
     // window in Z order but it may be different from our owner (to reproduce
     // this simply Alt-TAB to another application and back before closing the
@@ -689,6 +632,25 @@ bool wxTopLevelWindowMSW::Show(bool show)
         frame->GetMenuBar()->AddAdornments(GetWindowStyleFlag());
 #endif
 
+    if ( show )
+    {
+        ::BringWindowToTop(GetHwnd());
+
+        wxActivateEvent event(wxEVT_ACTIVATE, true, m_windowId);
+        event.SetEventObject( this );
+        GetEventHandler()->ProcessEvent(event);
+    }
+    else // hide
+    {
+        // Try to highlight the correct window (the parent)
+        if ( GetParent() )
+        {
+            HWND hWndParent = GetHwndOf(GetParent());
+            if (hWndParent)
+                ::BringWindowToTop(hWndParent);
+        }
+    }
+
     return true;
 }
 
@@ -705,8 +667,8 @@ void wxTopLevelWindowMSW::Maximize(bool maximize)
     }
     else // hidden
     {
-        // we can't maximize the hidden frame because it shows it as well,
-        // so just remember that we should do it later in this case
+        // we can't maximize the hidden frame because it shows it as well, so
+        // just remember that we should do it later in this case
         m_maximizeOnShow = maximize;
 
         // after calling Maximize() the client code expects to get the frame
@@ -715,8 +677,7 @@ void wxTopLevelWindowMSW::Maximize(bool maximize)
         // it's shown, so return our size as it will be then in this case
         if ( maximize )
         {
-            // unfortunately we don't know which display we're on yet so we
-            // have to use the default one
+            // we don't know which display we're on yet so use the default one
             SetSize(wxGetClientDisplayRect().GetSize());
         }
         //else: can't do anything in this case, we don't have the old size
@@ -869,16 +830,6 @@ bool wxTopLevelWindowMSW::ShowFullScreen(bool show, long style)
 // wxTopLevelWindowMSW misc
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowMSW::SetTitle( const wxString& title)
-{
-    SetLabel(title);
-}
-
-wxString wxTopLevelWindowMSW::GetTitle() const
-{
-    return GetLabel();
-}
-
 void wxTopLevelWindowMSW::SetIcon(const wxIcon& icon)
 {
     SetIcons( wxIconBundle( icon ) );
@@ -888,7 +839,7 @@ void wxTopLevelWindowMSW::SetIcons(const wxIconBundle& icons)
 {
     wxTopLevelWindowBase::SetIcons(icons);
 
-#if !defined(__WXMICROWIN__)
+#if defined(__WIN95__) && !defined(__WXMICROWIN__)
     const wxIcon& sml = icons.GetIcon( wxSize( 16, 16 ) );
     if( sml.Ok() && sml.GetWidth() == 16 && sml.GetHeight() == 16 )
     {
@@ -902,7 +853,7 @@ void wxTopLevelWindowMSW::SetIcons(const wxIconBundle& icons)
         ::SendMessage( GetHwndOf( this ), WM_SETICON, ICON_BIG,
                        (LPARAM)GetHiconOf(big) );
     }
-#endif // !__WXMICROWIN__
+#endif // __WIN95__
 }
 
 bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
@@ -1094,55 +1045,40 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
 LONG APIENTRY _EXPORT
 wxDlgProc(HWND hDlg,
           UINT message,
-          WPARAM wParam,
-          LPARAM lParam)
+          WPARAM WXUNUSED(wParam),
+          LPARAM WXUNUSED(lParam))
 {
-    switch ( message )
+    if ( message == WM_INITDIALOG )
     {
-        case WM_INITDIALOG:
-        {
-            // under CE, add a "Ok" button in the dialog title bar and make it full
-            // screen
-            //
-            // TODO: find the window for this HWND, and take into account
-            // wxMAXIMIZE and wxCLOSE_BOX. For now, assume both are present.
-            //
-            // Standard SDK doesn't have aygshell.dll: see
-            // include/wx/msw/wince/libraries.h
+        // under CE, add a "Ok" button in the dialog title bar and make it full
+        // screen
+        //
+        // TODO: find the window for this HWND, and take into account
+        // wxMAXIMIZE and wxCLOSE_BOX. For now, assume both are present.
+        //
+        // Standard SDK doesn't have aygshell.dll: see
+        // include/wx/msw/wince/libraries.h
 #if defined(__WXWINCE__) && !defined(__WINCE_STANDARDSDK__) && !defined(__HANDHELDPC__)
-            SHINITDLGINFO shidi;
-            shidi.dwMask = SHIDIM_FLAGS;
-            shidi.dwFlags = SHIDIF_SIZEDLG // take account of the SIP or menubar
+        SHINITDLGINFO shidi;
+        shidi.dwMask = SHIDIM_FLAGS;
+        shidi.dwFlags = SHIDIF_SIZEDLG // take account of the SIP or menubar
 #ifndef __SMARTPHONE__
-                            | SHIDIF_DONEBUTTON
+                        | SHIDIF_DONEBUTTON
 #endif
                         ;
-            shidi.hDlg = hDlg;
-            SHInitDialog( &shidi );
+        shidi.hDlg = hDlg;
+        SHInitDialog( &shidi );
 #else // no SHInitDialog()
-            wxUnusedVar(hDlg);
+        wxUnusedVar(hDlg);
 #endif
-            // for WM_INITDIALOG, returning TRUE tells system to set focus to
-            // the first control in the dialog box, but as we set the focus
-            // ourselves, we return FALSE for it as well
-            return FALSE;
-        }
-
-        case WM_SETTINGCHANGE:
-        {
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-            wxTopLevelWindow *tlw = wxDynamicCast(wxGetWindowFromHWND(hDlg), wxTopLevelWindow);
-            if(tlw) return tlw->HandleSettingChange(wParam,lParam) ? TRUE : FALSE;
-#else
-            wxUnusedVar(wParam);
-            wxUnusedVar(lParam);
-#endif
-            break;
-        }
     }
 
     // for almost all messages, returning FALSE means that we didn't process
     // the message
+    //
+    // for WM_INITDIALOG, returning TRUE tells system to set focus to
+    // the first control in the dialog box, but as we set the focus
+    // ourselves, we return FALSE for it as well
     return FALSE;
 }
 
@@ -1221,3 +1157,5 @@ HWND wxTLWHiddenParentModule::GetHWND()
 
     return ms_hwnd;
 }
+
+

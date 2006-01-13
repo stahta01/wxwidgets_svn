@@ -12,6 +12,10 @@
 #ifndef _WX_HELPBASEH__
 #define _WX_HELPBASEH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HELP
@@ -35,7 +39,7 @@ enum wxHelpSearchMode
 class WXDLLEXPORT wxHelpControllerBase: public wxObject
 {
 public:
-    inline wxHelpControllerBase(wxWindow* parentWindow = NULL) { m_parentWindow = parentWindow; }
+    inline wxHelpControllerBase() {}
     inline ~wxHelpControllerBase() {}
 
     // Must call this to set the filename and server name.
@@ -88,14 +92,6 @@ public:
     virtual bool Quit() = 0;
     virtual void OnQuit() {}
 
-    /// Set the window that can optionally be used for the help window's parent.
-    virtual void SetParentWindow(wxWindow* win) { m_parentWindow = win; }
-
-    /// Get the window that can optionally be used for the help window's parent.
-    virtual wxWindow* GetParentWindow() const { return m_parentWindow; }
-
-protected:
-    wxWindow* m_parentWindow;
 private:
     DECLARE_CLASS(wxHelpControllerBase)
 };

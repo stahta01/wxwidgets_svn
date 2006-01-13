@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "process.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -42,6 +46,15 @@ IMPLEMENT_DYNAMIC_CLASS(wxProcessEvent, wxEvent)
 // ----------------------------------------------------------------------------
 // wxProcess creation
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxProcess::wxProcess(wxEvtHandler *parent, bool redirect)
+{
+    Init(parent, wxID_ANY, redirect ? wxPROCESS_REDIRECT : wxPROCESS_DEFAULT);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 void wxProcess::Init(wxEvtHandler *parent, int id, int flags)
 {

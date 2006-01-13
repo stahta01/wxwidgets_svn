@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlcell.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -90,8 +94,6 @@ wxHtmlCell::wxHtmlCell() : wxObject()
     m_Next = NULL;
     m_Parent = NULL;
     m_Width = m_Height = m_Descent = 0;
-    m_ScriptMode = wxHTML_SCRIPT_NORMAL;        // <sub> or <sup> mode
-    m_ScriptBaseline = 0;                       // <sub> or <sup> baseline
     m_CanLiveOnPagebreak = true;
     m_Link = NULL;
 }
@@ -101,21 +103,6 @@ wxHtmlCell::~wxHtmlCell()
     delete m_Link;
 }
 
-// Update the descent value when whe are in a <sub> or <sup>.
-// prevbase is the parent base
-void wxHtmlCell::SetScriptMode(wxHtmlScriptMode mode, long previousBase)
-{
-    m_ScriptMode = mode;
-
-    if (mode == wxHTML_SCRIPT_SUP)
-        m_ScriptBaseline = previousBase - (m_Height + 1) / 2;
-    else if (mode == wxHTML_SCRIPT_SUB)
-        m_ScriptBaseline = previousBase + (m_Height + 1) / 6;
-    else
-        m_ScriptBaseline = 0;
-
-    m_Descent += m_ScriptBaseline;
-}
 
 void wxHtmlCell::OnMouseClick(wxWindow *parent, int x, int y,
                               const wxMouseEvent& event)
@@ -269,7 +256,7 @@ bool wxHtmlCell::IsBefore(wxHtmlCell *cell) const
 
 IMPLEMENT_ABSTRACT_CLASS(wxHtmlWordCell, wxHtmlCell)
 
-wxHtmlWordCell::wxHtmlWordCell(const wxString& word, const wxDC& dc) : wxHtmlCell()
+wxHtmlWordCell::wxHtmlWordCell(const wxString& word, wxDC& dc) : wxHtmlCell()
 {
     m_Word = word;
     dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
@@ -289,7 +276,7 @@ void wxHtmlWordCell::SetPreviousWord(wxHtmlWordCell *cell)
 // Splits m_Word into up to three parts according to selection, returns
 // substring before, in and after selection and the points (in relative coords)
 // where s2 and s3 start:
-void wxHtmlWordCell::Split(const wxDC& dc,
+void wxHtmlWordCell::Split(wxDC& dc,
                            const wxPoint& selFrom, const wxPoint& selTo,
                            unsigned& pos1, unsigned& pos2) const
 {
@@ -354,7 +341,7 @@ void wxHtmlWordCell::Split(const wxDC& dc,
     pos2 = j;
 }
 
-void wxHtmlWordCell::SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const
+void wxHtmlWordCell::SetSelectionPrivPos(wxDC& dc, wxHtmlSelection *s) const
 {
     unsigned p1, p2;
 
@@ -663,6 +650,8 @@ void wxHtmlContainerCell::Layout(int w)
        return;
     }
 
+    wxHtmlCell *cell = m_Cells,
+               *line = m_Cells;
     wxHtmlCell *nextCell;
     long xpos = 0, ypos = m_IndentTop;
     int xdelta = 0, ybasicpos = 0, ydiff;
@@ -709,8 +698,6 @@ void wxHtmlContainerCell::Layout(int w)
     s_width = m_Width - s_indent - ((m_IndentRight < 0) ? (-m_IndentRight * m_Width / 100) : m_IndentRight);
 
     // my own layouting:
-    wxHtmlCell *cell = m_Cells,
-               *line = m_Cells;
     while (cell != NULL)
     {
         switch (m_AlignVer)

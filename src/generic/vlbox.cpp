@@ -577,7 +577,7 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
 void wxVListBox::OnLeftDown(wxMouseEvent& event)
 {
     SetFocus();
-
+    
     int item = HitTest(event.GetPosition());
 
     if ( item != wxNOT_FOUND )
@@ -599,9 +599,9 @@ void wxVListBox::OnLeftDown(wxMouseEvent& event)
     }
 }
 
-void wxVListBox::OnLeftDClick(wxMouseEvent& eventMouse)
+void wxVListBox::OnLeftDClick(wxMouseEvent& event)
 {
-    int item = HitTest(eventMouse.GetPosition());
+    int item = HitTest(event.GetPosition());
     if ( item != wxNOT_FOUND )
     {
         wxCommandEvent event(wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, GetId());

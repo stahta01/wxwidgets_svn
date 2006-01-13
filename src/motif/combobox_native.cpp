@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/combobox_native.cpp
+// Name:        combobox_native.cpp
 // Purpose:     wxComboBox class
 // Author:      Julian Smart, Ian Brown
 // Modified by:
@@ -166,7 +166,7 @@ wxComboBox::~wxComboBox()
         m_clientDataDict.DestroyData();
 }
 
-void wxComboBox::DoSetSize(int x, int y, int width, int WXUNUSED(height), int sizeFlags)
+void wxComboBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
     // Necessary so it doesn't call wxChoice::SetSize
     wxWindow::DoSetSize(x, y, width, DoGetBestSize().y, sizeFlags);
@@ -292,10 +292,8 @@ wxString wxComboBox::GetString(int n) const
     return wxDoGetStringInList( GetXmList(this), n );
 }
 
-int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    // FIXME: back to base class for not supported value of bCase
-
     return wxDoFindStringInList( GetXmList( this ), s );
 }
 

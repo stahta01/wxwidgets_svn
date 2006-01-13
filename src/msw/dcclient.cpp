@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -52,7 +56,7 @@ struct WXDLLEXPORT wxPaintDCInfo
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_OBJARRAY(wxArrayDCInfo)
+WX_DEFINE_OBJARRAY(wxArrayDCInfo);
 
 // ----------------------------------------------------------------------------
 // macros

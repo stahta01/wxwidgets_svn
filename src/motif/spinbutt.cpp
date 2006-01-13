@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/spinbutt.cpp
+// Name:        spinbutt.cpp
 // Purpose:     wxSpinButton
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinbutt.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -182,8 +186,7 @@ void wxArrowButton::StopTimerCallback( Widget w, XtPointer clientData,
     btn->m_timer = 0;
 }
 
-bool wxArrowButton::Create( wxSpinButton* parent,
-                            wxWindowID WXUNUSED(id),
+bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
                             ArrowDirection d,
                             const wxPoint& pos, const wxSize& size )
 {
@@ -238,10 +241,10 @@ bool wxArrowButton::Create( wxSpinButton* parent,
 // wxSpinButton
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
-IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl);
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent);
 
-static void CalcSizes( const wxPoint& pt, const wxSize& sz,
+static void CalcSizes( wxPoint pt, wxSize sz,
                        wxPoint& pt1, wxSize& sz1,
                        wxPoint& pt2, wxSize& sz2,
                        bool isVertical )
@@ -310,12 +313,19 @@ void wxSpinButton::DoMoveWindow(int x, int y, int width, int height)
     m_down->SetSize( pt2.x, pt2.y, sz2.x, sz2.y );
 }
 
-void wxSpinButton::DoSetSize(int x, int y, int width, int height, int sizeFlags)
+void wxSpinButton::DoSetSize(int x, int y, int width, int height,
+                             int sizeFlags)
 {
-    if ( (sizeFlags & wxSIZE_ALLOW_MINUS_ONE) && width == -1 )
+#ifdef __VMS__
+#pragma message disable codcauunr
+#endif
+    if( sizeFlags & wxSIZE_USE_EXISTING && width == -1 )
         width = GetSize().x;
-    if ( (sizeFlags & wxSIZE_ALLOW_MINUS_ONE) && height == -1 )
+    if( sizeFlags & wxSIZE_USE_EXISTING && height == -1 )
         height = GetSize().y;
+#ifdef __VMS__
+#pragma message enable codcauunr
+#endif
 
     wxControl::DoSetSize(x, y, width, height, 0);
 }

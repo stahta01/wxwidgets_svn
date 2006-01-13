@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/activex.cpp
+// Name:        msw/ole/activex.cpp
 // Purpose:     wxActiveXContainer implementation
 // Author:      Ryan Norton <wxprojects@comcast.net>, Lindsay Mathieson <???>
 // Modified by:
@@ -24,7 +24,6 @@
 #endif
 
 #include "wx/dcclient.h"
-#include "wx/math.h"
 #include "wx/msw/ole/activex.h"
 
 
@@ -59,21 +58,21 @@
         if (! ppvObject)\
         {\
             return E_FAIL;\
-        }\
+        };\
         const char *desc = NULL;\
         cls::_GetInterface(this, iid, ppvObject, desc);\
         if (! *ppvObject)\
         {\
             return E_NOINTERFACE;\
-        }\
+        };\
         ((IUnknown * )(*ppvObject))->AddRef();\
         return S_OK;\
-    }\
+    };\
     ULONG STDMETHODCALLTYPE cls::AddRef()\
     {\
         InterlockedIncrement(&refCount.l);\
         return refCount.l;\
-    }\
+    };\
     ULONG STDMETHODCALLTYPE cls::Release()\
     {\
         if (refCount.l > 0)\
@@ -83,7 +82,7 @@
             {\
                 delete this;\
                 return 0;\
-            }\
+            };\
             return refCount.l;\
         }\
         else\
@@ -93,7 +92,7 @@
     {\
         InterlockedIncrement(&lockCount.l);\
         return lockCount.l;\
-    }\
+    };\
     ULONG STDMETHODCALLTYPE cls::ReleaseLock()\
     {\
         if (lockCount.l > 0)\
@@ -207,7 +206,7 @@ public:
             case DISPID_AMBIENT_SILENT:
                 V_BOOL(pVarResult)= TRUE;
                 return S_OK;
-#ifndef __WINE__
+
             case DISPID_AMBIENT_APPEARANCE:
                 pVarResult->vt = VT_BOOL;
                 pVarResult->boolVal = m_bAmbientAppearance;
@@ -242,7 +241,7 @@ public:
                 pVarResult->vt = VT_BOOL;
                 pVarResult->boolVal = m_bAmbientShowHatching;
                 break;
-#endif
+
             default:
                 return DISP_E_MEMBERNOTFOUND;
         }
@@ -326,7 +325,7 @@ public:
         if (! SUCCEEDED(hr))
         {
             return E_UNEXPECTED;
-        }
+        };
 
         hr = QueryInterface(IID_IOleInPlaceUIWindow, (void **) ppDoc);
         if (! SUCCEEDED(hr))
@@ -334,7 +333,7 @@ public:
             (*ppFrame)->Release();
             *ppFrame = NULL;
             return E_UNEXPECTED;
-        }
+        };
 
         RECT rect;
         ::GetClientRect(m_hWndParent, &rect);
@@ -343,13 +342,13 @@ public:
             lprcPosRect->left = lprcPosRect->top = 0;
             lprcPosRect->right = rect.right;
             lprcPosRect->bottom = rect.bottom;
-        }
+        };
         if (lprcClipRect)
         {
             lprcClipRect->left = lprcClipRect->top = 0;
             lprcClipRect->right = rect.right;
             lprcClipRect->bottom = rect.bottom;
-        }
+        };
 
         memset(lpFrameInfo, 0, sizeof(OLEINPLACEFRAMEINFO));
         lpFrameInfo->cb = sizeof(OLEINPLACEFRAMEINFO);
@@ -399,8 +398,8 @@ public:
         case OLEGETMONIKER_UNASSIGN     : return "OLEGETMONIKER_UNASSIGN";
         case OLEGETMONIKER_TEMPFORUSER  : return "OLEGETMONIKER_TEMPFORUSER";
         default                         : return "Bad Enum";
-        }
-    }
+        };
+    };
 
     const char *OleGetWhicMonikerStr(DWORD dwWhichMoniker)
     {
@@ -410,8 +409,8 @@ public:
         case OLEWHICHMK_OBJREL      : return "OLEWHICHMK_OBJREL";
         case OLEWHICHMK_OBJFULL     : return "OLEWHICHMK_OBJFULL";
         default                     : return "Bad Enum";
-        }
-    }
+        };
+    };
     STDMETHOD(GetMoniker)(DWORD, DWORD, IMoniker **){return E_FAIL;}
     HRESULT STDMETHODCALLTYPE GetContainer(LPOLECONTAINER * ppContainer)
     {
@@ -438,9 +437,7 @@ public:
     HRESULT STDMETHODCALLTYPE LockContainer(BOOL){return S_OK;}
     //********************IOleItemContainer***************************
     HRESULT STDMETHODCALLTYPE
-    #if defined(__WXWINCE__)
-    GetObject
-    #elif defined(_UNICODE)
+    #ifdef _UNICODE
     GetObjectW
     #else
     GetObjectA
@@ -538,11 +535,11 @@ public:
                 return E_FAIL;
 
             m_window->m_docView->SetInPlaceSite(inPlaceSite);
-        }
+        };
 
         m_window->m_docView->UIActivate(TRUE);
         return S_OK;
-    }
+    };
 
 
 protected:
@@ -581,7 +578,7 @@ DEFINE_OLE_TABLE(FrameSite)
     OLE_IINTERFACE(IOleDocumentSite)
     OLE_IINTERFACE(IAdviseSink)
     OLE_IINTERFACE(IOleControlSite)
-END_OLE_TABLE
+END_OLE_TABLE;
 
 
 wxActiveXContainer::wxActiveXContainer(wxWindow * parent, REFIID iid, IUnknown* pUnk)
@@ -744,7 +741,7 @@ static void PixelsToHimetric(SIZEL &sz)
     };
 
 #define HIMETRIC_INCH   2540
-#define CONVERT(x, logpixels)   wxMulDivInt32(HIMETRIC_INCH, (x), (logpixels))
+#define CONVERT(x, logpixels)   MulDiv(HIMETRIC_INCH, (x), (logpixels))
 
     sz.cx = CONVERT(sz.cx, logX);
     sz.cy = CONVERT(sz.cy, logY);
@@ -802,11 +799,7 @@ void wxActiveXContainer::OnPaint(wxPaintEvent& WXUNUSED(event))
         posRect.right = w;
         posRect.bottom = h;
 
-#if defined(_WIN32_WCE) && _WIN32_WCE < 400
-        ::InvalidateRect(m_oleObjectHWND, NULL, false);
-#else
         ::RedrawWindow(m_oleObjectHWND, NULL, NULL, RDW_INTERNALPAINT);
-#endif
         RECTL *prcBounds = (RECTL *) &posRect;
         m_viewObject->Draw(DVASPECT_CONTENT, -1, NULL, NULL, NULL,
             (HDC)dc.GetHDC(), prcBounds, NULL, NULL, 0);

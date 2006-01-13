@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFILEDLGH__
 #define __GTKFILEDLGH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlggtk.h"
+#endif
 
 #include "wx/generic/filedlgg.h"
 

@@ -12,12 +12,17 @@
 #ifndef __WXSIZER_H__
 #define __WXSIZER_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "sizer.h"
+#endif
+
 #include "wx/defs.h"
 
 #include "wx/button.h"
 #include "wx/window.h"
 #include "wx/frame.h"
 #include "wx/dialog.h"
+#include "wx/bookctrl.h"
 
 //---------------------------------------------------------------------------
 // classes
@@ -54,19 +59,14 @@ public:
 
     wxSizerFlags& Align(int alignment) // combination of wxAlignment values
     {
-        m_flags &= ~wxALIGN_MASK;
+        m_flags &= wxALL;
         m_flags |= alignment;
 
         return *this;
     }
 
-    wxSizerFlags& Expand()
-    {
-        m_flags |= wxEXPAND;
-        return *this;
-    }
-
     // some shortcuts for Align()
+    wxSizerFlags& Expand() { return Align(wxEXPAND); }
     wxSizerFlags& Centre() { return Align(wxCENTRE); }
     wxSizerFlags& Center() { return Centre(); }
     wxSizerFlags& Left() { return Align(wxALIGN_LEFT); }
@@ -86,14 +86,7 @@ public:
     wxSizerFlags& Border(int direction = wxALL)
     {
         // FIXME: default border size shouldn't be hardcoded
-#ifdef __SMARTPHONE__
-        // no borders by default on limited size screen
-        wxUnusedVar(direction);
-
-        return *this;
-#else
         return Border(direction, 5);
-#endif
     }
 
 
@@ -195,7 +188,7 @@ public:
 
     virtual wxSize GetSize() const;
     virtual wxSize CalcMin();
-    virtual void SetDimension( const wxPoint& pos, const wxSize& size );
+    virtual void SetDimension( wxPoint pos, wxSize size );
 
     wxSize GetMinSize() const
         { return m_minSize; }
@@ -255,8 +248,10 @@ public:
     void Show(bool show);
     bool IsShown() const;
 
+#if wxABI_VERSION > 20602
     void SetUserData(wxObject* userData)
         { delete m_userData; m_userData = userData; }
+#endif
     wxObject* GetUserData() const
         { return m_userData; }
     wxPoint GetPosition() const
@@ -419,24 +414,24 @@ public:
 
     void SetMinSize( int width, int height )
         { DoSetMinSize( width, height ); }
-    void SetMinSize( const wxSize& size )
+    void SetMinSize( wxSize size )
         { DoSetMinSize( size.x, size.y ); }
 
     // Searches recursively
     bool SetItemMinSize( wxWindow *window, int width, int height )
         { return DoSetItemMinSize( window, width, height ); }
-    bool SetItemMinSize( wxWindow *window, const wxSize& size )
+    bool SetItemMinSize( wxWindow *window, wxSize size )
         { return DoSetItemMinSize( window, size.x, size.y ); }
 
     // Searches recursively
     bool SetItemMinSize( wxSizer *sizer, int width, int height )
         { return DoSetItemMinSize( sizer, width, height ); }
-    bool SetItemMinSize( wxSizer *sizer, const wxSize& size )
+    bool SetItemMinSize( wxSizer *sizer, wxSize size )
         { return DoSetItemMinSize( sizer, size.x, size.y ); }
 
     bool SetItemMinSize( size_t index, int width, int height )
         { return DoSetItemMinSize( index, width, height ); }
-    bool SetItemMinSize( size_t index, const wxSize& size )
+    bool SetItemMinSize( size_t index, wxSize size )
         { return DoSetItemMinSize( index, size.x, size.y ); }
 
     wxSize GetSize() const

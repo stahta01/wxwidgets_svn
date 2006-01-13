@@ -9,6 +9,10 @@
 #ifndef _WX_SNDCODEC_H
 #define _WX_SNDCODEC_H
 
+#ifdef __GNUG__
+#pragma interface "sndcodec.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"

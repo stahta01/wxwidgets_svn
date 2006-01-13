@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_ENHMETA_H_
 #define _WX_MSW_ENHMETA_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "enhmeta.h"
+#endif
+
 #include "wx/dc.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -87,12 +91,6 @@ public:
     wxEnhMetaFile *Close();
 
 private:
-    virtual void DoGetSize(int *width, int *height) const;
-
-    // size passed to ctor and returned by DoGetSize()
-    int m_width,
-        m_height;
-
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxEnhMetaFileDC)
 };
 

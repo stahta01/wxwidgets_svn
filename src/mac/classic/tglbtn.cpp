@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+#pragma implementation "button.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/tglbtn.h"
 

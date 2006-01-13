@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tbargtk.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -428,16 +432,15 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
                 {
                     wxToolBarToolsList::compatibility_iterator node
                         = wxToolBarToolsList::compatibility_iterator();
-                    if ( pos )
-                        node = m_tools.Item(pos - 1);
+                    if ( pos ) node = m_tools.Item(pos - 1);
 
                     while ( node )
                     {
-                        wxToolBarTool *toolNext = (wxToolBarTool *)node->GetData();
-                        if ( !toolNext->IsRadio() )
+                        wxToolBarTool *tool = (wxToolBarTool *)node->GetData();
+                        if ( !tool->IsRadio() )
                             break;
 
-                        widget = toolNext->m_item;
+                        widget = tool->m_item;
 
                         node = node->GetPrevious();
                     }

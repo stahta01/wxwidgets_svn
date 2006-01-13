@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/window.cpp
+// Name:        common/window.cpp
 // Purpose:     common (to all ports) wxWindow functions
 // Author:      Julian Smart, Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "windowbase.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -80,19 +84,6 @@
 
 #if wxUSE_SYSTEM_OPTIONS
     #include "wx/sysopt.h"
-#endif
-
-// For reporting compile- and runtime version of GTK+ in the ctrl+alt+mclick dialog.
-// The gtk includes don't pull any other headers in, at least not on my system - MR
-#ifdef __WXGTK__
-    #ifdef __WXGTK20__
-        #include <gtk/gtkversion.h>
-    #else
-        #include <gtk/gtkfeatures.h>
-    #endif
-    extern const unsigned int gtk_major_version;
-    extern const unsigned int gtk_minor_version;
-    extern const unsigned int gtk_micro_version;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -541,9 +532,9 @@ void wxWindowBase::Centre(int direction)
 // fits the window around the children
 void wxWindowBase::Fit()
 {
-    if ( !GetChildren().empty() )
+    if ( GetChildren().GetCount() > 0 )
     {
-        SetClientSize(GetBestSize());
+        SetSize(GetBestSize());
     }
     //else: do nothing if we have no children
 }
@@ -592,7 +583,7 @@ wxSize wxWindowBase::DoGetBestSize() const
 
     if ( m_windowSizer )
     {
-        best = GetWindowSizeForVirtualSize(m_windowSizer->GetMinSize());
+        best = m_windowSizer->GetMinSize();
     }
 #if wxUSE_CONSTRAINTS
     else if ( m_constraints )
@@ -834,14 +825,14 @@ void wxWindowBase::DoSetVirtualSize( int x, int y )
 
 wxSize wxWindowBase::DoGetVirtualSize() const
 {
-    // we should use the entire client area so if it is greater than our
-    // virtual size, expand it to fit (otherwise if the window is big enough we
-    // wouldn't be using parts of it)
+    if ( m_virtualSize.IsFullySpecified() )
+        return m_virtualSize;
+
     wxSize size = GetClientSize();
-    if ( m_virtualSize.x > size.x )
+    if ( m_virtualSize.x != wxDefaultCoord )
         size.x = m_virtualSize.x;
 
-    if ( m_virtualSize.y >= size.y )
+    if ( m_virtualSize.y != wxDefaultCoord )
         size.y = m_virtualSize.y;
 
     return size;
@@ -2249,82 +2240,12 @@ void wxWindowBase::OnInitDialog( wxInitDialogEvent &WXUNUSED(event) )
     UpdateWindowUI(wxUPDATE_UI_RECURSE);
 }
 
-// methods for drawing the sizers in a visible way
-#ifdef __WXDEBUG__
-
-static void DrawSizers(wxWindowBase *win);
-
-static void DrawBorder(wxWindowBase *win, const wxRect& rect, bool fill = false)
-{
-    wxClientDC dc((wxWindow *)win);
-    dc.SetPen(*wxRED_PEN);
-    dc.SetBrush(fill ? wxBrush(*wxRED, wxCROSSDIAG_HATCH): *wxTRANSPARENT_BRUSH);
-    dc.DrawRectangle(rect.Deflate(1, 1));
-}
-
-static void DrawSizer(wxWindowBase *win, wxSizer *sizer)
-{
-    const wxSizerItemList& items = sizer->GetChildren();
-    for ( wxSizerItemList::const_iterator i = items.begin(),
-                                        end = items.end();
-          i != end;
-          ++i )
-    {
-        wxSizerItem *item = *i;
-        if ( item->IsSizer() )
-        {
-            DrawBorder(win, item->GetRect().Deflate(2));
-            DrawSizer(win, item->GetSizer());
-        }
-        else if ( item->IsSpacer() )
-        {
-            DrawBorder(win, item->GetRect().Deflate(2), true);
-        }
-        else if ( item->IsWindow() )
-        {
-            DrawSizers(item->GetWindow());
-        }
-    }
-}
-
-static void DrawSizers(wxWindowBase *win)
-{
-    wxSizer *sizer = win->GetSizer();
-    if ( sizer )
-    {
-        DrawBorder(win, win->GetClientSize());
-        DrawSizer(win, sizer);
-    }
-    else // no sizer, still recurse into the children
-    {
-        const wxWindowList& children = win->GetChildren();
-        for ( wxWindowList::const_iterator i = children.begin(),
-                                         end = children.end();
-              i != end;
-              ++i )
-        {
-            DrawSizers(*i);
-        }
-    }
-}
-
-#endif // __WXDEBUG__
-
-// process special middle clicks
+// process Ctrl-Alt-mclick
 void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 {
+#if wxUSE_MSGDLG
     if ( event.ControlDown() && event.AltDown() )
     {
-#ifdef __WXDEBUG__
-        // Ctrl-Alt-Shift-mclick makes the sizers visible in debug builds
-        if ( event.ShiftDown() )
-        {
-            DrawSizers(this);
-            return;
-        }
-#endif // __WXDEBUG__
-
-#if wxUSE_MSGDLG
         // don't translate these strings
         wxString port;
 
@@ -2363,7 +2284,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 
         wxMessageBox(wxString::Format(
                                       _T(
-                                        "       wxWidgets Library (%s port)\nVersion %d.%d.%d%s%s, compiled at %s %s%s\n   Copyright (c) 1995-2005 wxWidgets team"
+                                        "       wxWidgets Library (%s port)\nVersion %u.%u.%u%s%s, compiled at %s %s\n   Copyright (c) 1995-2005 wxWidgets team"
                                         ),
                                       port.c_str(),
                                       wxMAJOR_VERSION,
@@ -2380,12 +2301,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
                                       wxEmptyString,
 #endif
                                       __TDATE__,
-                                      __TTIME__,
-#ifdef __WXGTK__
-                                      wxString::Format(_T("\nagainst GTK+ %d.%d.%d. Runtime GTK+ version: %d.%d.%d"), GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION, gtk_major_version, gtk_minor_version, gtk_micro_version).c_str()
-#else
-                                      ""
-#endif
+                                      __TTIME__
                                      ),
                      _T("wxWidgets information"),
                      wxICON_INFORMATION | wxOK,
@@ -2434,8 +2350,8 @@ wxAccessible* wxWindowBase::CreateAccessible()
 
 #if wxUSE_STL
 
-#include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxWindowList)
+#include <wx/listimpl.cpp>
+WX_DEFINE_LIST(wxWindowList);
 
 #else
 
@@ -2590,7 +2506,7 @@ bool wxWindowBase::TryValidator(wxEvent& wxVALIDATOR_PARAM(event))
 
 bool wxWindowBase::TryParent(wxEvent& event)
 {
-    // carry on up the parent-child hierarchy if the propagation count hasn't
+    // carry on up the parent-child hierarchy if the propgation count hasn't
     // reached zero yet
     if ( event.ShouldPropagate() )
     {

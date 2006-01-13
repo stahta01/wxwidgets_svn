@@ -286,7 +286,6 @@ wx/ipc.h
 wx/ipcbase.h
 wx/isql.h
 wx/isqlext.h
-wx/link.h
 wx/list.h
 wx/listimpl.cpp
 wx/log.h
@@ -344,7 +343,6 @@ wx/unix/apptrait.h
 wx/unix/execute.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
-wx/unix/private.h
 wx/unix/stackwalk.h
 wx/unix/stdpaths.h
 wx/fs_inet.h
@@ -383,7 +381,6 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/config.h
 %{_includedir}/wx-%{ver2}/wx/containr.h
 %{_includedir}/wx-%{ver2}/wx/datetime.h
-%{_includedir}/wx-%{ver2}/wx/datetime.inl
 %{_includedir}/wx-%{ver2}/wx/datstrm.h
 %{_includedir}/wx-%{ver2}/wx/dde.h
 %{_includedir}/wx-%{ver2}/wx/debug.h
@@ -436,6 +433,7 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/platform.h
 %{_includedir}/wx-%{ver2}/wx/process.h
 %{_includedir}/wx-%{ver2}/wx/ptr_scpd.h
+%{_includedir}/wx-%{ver2}/wx/recguard.h
 %{_includedir}/wx-%{ver2}/wx/regex.h
 %{_includedir}/wx-%{ver2}/wx/scopeguard.h
 %{_includedir}/wx-%{ver2}/wx/snglinst.h
@@ -633,6 +631,10 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %dir %{_includedir}/wx-%{ver2}
 %{_libdir}/libwx_base*-%{ver2}.so
 %{_libdir}/libwx_base*-%{ver2}.a
+%dir %{_datadir}/bakefile/presets
+%{_datadir}/bakefile/presets/wx.bkl
+%{_datadir}/bakefile/presets/wx_unix.bkl
+%{_datadir}/bakefile/presets/wx_win32.bkl
 %if %{unicode}
     %{_libdir}/libwxregexu-%{ver2}.a
 %endif

@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "checkbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -33,13 +37,14 @@
 #pragma message enable nosimpint
 #endif
 
-#include "wx/motif/private.h"
-
 // define symbols that are missing in old versions of Motif.
-#if wxCHECK_MOTIF_VERSION( 2, 0 )
-    #define wxHAS_3STATE 1
-#else
-    #define wxHAS_3STATE 0
+#if (XmVersion < 2000)
+#define XmNtoggleMode 0
+#define XmTOGGLE_INDETERMINATE 1
+#define XmTOGGLE_BOOLEAN 2
+#define XmUNSET 3
+#define XmSET 4
+#define XmINDETERMINATE 5
 #endif
 
 
@@ -73,9 +78,7 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
         XmNrecomputeSize, False,
         // XmNindicatorOn, XmINDICATOR_CHECK_BOX,
         // XmNfillOnSelect, False,
-#if wxHAS_3STATE
         XmNtoggleMode, Is3State() ? XmTOGGLE_INDETERMINATE : XmTOGGLE_BOOLEAN,
-#endif
         NULL);
     
     XtAddCallback( (Widget)m_mainWidget,
@@ -166,7 +169,6 @@ void wxCheckBox::DoSet3StateValue(wxCheckBoxState state)
 {
     m_inSetValue = true;
 
-#if wxHAS_3STATE
     unsigned char value;
 
     switch (state)
@@ -180,17 +182,12 @@ void wxCheckBox::DoSet3StateValue(wxCheckBoxState state)
     XtVaSetValues( (Widget) m_mainWidget,
                    XmNset, value,
                    NULL );
-#else
-    XmToggleButtonSetState ((Widget) m_mainWidget,
-                            state == wxCHK_CHECKED, True);
-#endif
 
     m_inSetValue = false;
 }
 
 wxCheckBoxState wxCheckBox::DoGet3StateValue() const
 {
-#if wxHAS_3STATE
     unsigned char value = 0;
 
     XtVaGetValues( (Widget) m_mainWidget,
@@ -206,9 +203,6 @@ wxCheckBoxState wxCheckBox::DoGet3StateValue() const
 
     // impossible...
     return wxCHK_UNDETERMINED;
-#else
-    return wxCheckBoxState(XmToggleButtonGetState ((Widget) m_mainWidget));
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

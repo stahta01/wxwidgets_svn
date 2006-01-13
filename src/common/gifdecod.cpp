@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gifdecod.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -675,11 +679,6 @@ int wxGIFDecoder::ReadGIF()
     m_screenw = buf[0] + 256 * buf[1];
     m_screenh = buf[2] + 256 * buf[3];
 
-    if ((m_screenw == 0) || (m_screenh == 0))
-    {
-        return wxGIF_INVFORMAT;
-    }
-
     /* load global color map if available */
     if ((buf[4] & 0x80) == 0x80)
     {
@@ -706,7 +705,7 @@ int wxGIFDecoder::ReadGIF()
 
     bool done = false;
 
-    while (!done)
+    while(!done)
     {
         type = (unsigned char)m_f->GetC();
 
@@ -802,7 +801,7 @@ int wxGIFDecoder::ReadGIF()
             pimg->w = buf[4] + 256 * buf[5];
             pimg->h = buf[6] + 256 * buf[7];
 
-            if ((pimg->w == 0) || (pimg->w > m_screenw) || (pimg->h == 0) || (pimg->h > m_screenh))
+            if (pimg->w == 0 || pimg->h == 0)
             {
                 Destroy();
                 return wxGIF_INVFORMAT;
@@ -848,11 +847,6 @@ int wxGIFDecoder::ReadGIF()
 
             /* get initial code size from first byte in raster data */
             bits = (unsigned char)m_f->GetC();
-            if (bits == 0)
-            {
-                Destroy();
-                return wxGIF_INVFORMAT;
-            }
 
             /* decode image */
             int result = dgif(pimg, interl, bits);
@@ -869,7 +863,7 @@ int wxGIFDecoder::ReadGIF()
         }
     }
 
-    if (m_nimages <= 0)
+    if (m_nimages == 0)
     {
         Destroy();
         return wxGIF_INVFORMAT;
