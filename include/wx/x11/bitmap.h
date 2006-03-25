@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "bitmap.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/string.h"
@@ -78,9 +82,11 @@ public:
     wxBitmap( const char bits[], int width, int height, int depth = 1 );
     wxBitmap( const char **bits ) { (void)CreateFromXpm(bits); }
     wxBitmap( char **bits ) { (void)CreateFromXpm((const char **)bits); }
+    wxBitmap( const wxBitmap& bmp );
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
     virtual ~wxBitmap();
 
+    wxBitmap& operator = ( const wxBitmap& bmp );
     bool operator == ( const wxBitmap& bmp ) const;
     bool operator != ( const wxBitmap& bmp ) const;
     bool Ok() const;

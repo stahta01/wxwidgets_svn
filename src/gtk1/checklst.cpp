@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/checklst.cpp
+// Name:        checklst.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,13 +7,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "checklst.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
 
 #if wxUSE_CHECKLISTBOX
 
 #include "wx/checklst.h"
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -26,19 +32,19 @@ IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox,wxListBox)
 
 wxCheckListBox::wxCheckListBox() : wxListBox()
 {
-    m_hasCheckBoxes = true;
+    m_hasCheckBoxes = TRUE;
 }
 
 wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
                                const wxPoint& pos,
                                const wxSize& size,
-                               int nStrings,
+                               int nStrings, 
                                const wxString *choices,
                                long style,
                                const wxValidator& validator,
                                const wxString& name )
 {
-    m_hasCheckBoxes = true;
+    m_hasCheckBoxes = TRUE;
     wxListBox::Create( parent, id, pos, size, nStrings, choices, style, validator, name );
 }
 
@@ -50,14 +56,14 @@ wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
                                const wxValidator& validator,
                                const wxString& name )
 {
-    m_hasCheckBoxes = true;
+    m_hasCheckBoxes = TRUE;
     wxListBox::Create( parent, id, pos, size, choices,
                        style, validator, name );
 }
 
-bool wxCheckListBox::IsChecked(unsigned int index) const
+bool wxCheckListBox::IsChecked( int index ) const
 {
-    wxCHECK_MSG( m_list != NULL, false, wxT("invalid checklistbox") );
+    wxCHECK_MSG( m_list != NULL, FALSE, wxT("invalid checklistbox") );
 
     GList *child = g_list_nth( m_list->children, index );
     if (child)
@@ -71,10 +77,10 @@ bool wxCheckListBox::IsChecked(unsigned int index) const
     }
 
     wxFAIL_MSG(wxT("wrong checklistbox index"));
-    return false;
+    return FALSE;
 }
 
-void wxCheckListBox::Check(unsigned int index, bool check )
+void wxCheckListBox::Check( int index, bool check )
 {
     wxCHECK_RET( m_list != NULL, wxT("invalid checklistbox") );
 

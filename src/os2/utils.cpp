@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      David Webster
 // Modified by:
@@ -13,6 +13,7 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/utils.h"
     #include "wx/app.h"
 #endif  //WX_PRECOMP
@@ -58,17 +59,18 @@ static const wxChar eHOSTNAME[]  = _T("HostName");
 // functions beyond those provided by WinSock
 
 // Get full hostname (eg. DoDo.BSn-Germany.crg.de)
-bool wxGetHostName( wxChar* zBuf, int nMaxSize )
+bool wxGetHostName(
+  wxChar*                           zBuf
+, int                               nMaxSize
+)
 {
-    if (!zBuf) return false;
-
-#if defined(wxUSE_NET_API) && wxUSE_NET_API
-    char           zServer[256];
-    char           zComputer[256];
-    unsigned long  ulLevel = 0;
-    unsigned char* zBuffer = NULL;
-    unsigned long  ulBuffer = 256;
-    unsigned long* pulTotalAvail = NULL;
+#if wxUSE_NET_API
+    char                            zServer[256];
+    char                            zComputer[256];
+    unsigned long                   ulLevel = 0;
+    unsigned char*                  zBuffer = NULL;
+    unsigned long                   ulBuffer = 256;
+    unsigned long*                  pulTotalAvail = NULL;
 
     NetBios32GetInfo( (const unsigned char*)zServer
                      ,(const unsigned char*)zComputer
@@ -79,8 +81,8 @@ bool wxGetHostName( wxChar* zBuf, int nMaxSize )
                     );
     strcpy(zBuf, zServer);
 #else
-    wxChar*        zSysname;
-    const wxChar*  zDefaultHost = _T("noname");
+    wxChar*                         zSysname;
+    const wxChar*                   zDefaultHost = _T("noname");
 
     if ((zSysname = wxGetenv(_T("SYSTEM_NAME"))) == NULL)
     {
@@ -93,13 +95,9 @@ bool wxGetHostName( wxChar* zBuf, int nMaxSize )
                                );
     }
     else
-    {
         wxStrncpy(zBuf, zSysname, nMaxSize - 1);
-    }
-
     zBuf[nMaxSize] = _T('\0');
 #endif
-
     return *zBuf ? true : false;
 }
 
@@ -302,6 +300,62 @@ void wxFlushEvents()
 //  wxYield();
 }
 
+#if WXWIN_COMPATIBILITY_2_2
+
+// Output a debug mess., in a system dependent fashion.
+void wxDebugMsg(
+  const wxChar*                     zFmt ...
+)
+{
+    va_list                         vAp;
+    static wxChar                   zBuffer[512];
+
+    if (!wxTheApp->GetWantDebugOutput())
+        return ;
+    va_start(vAp, zFmt);
+    sprintf(zBuffer, zFmt, vAp) ;
+    va_end(vAp);
+}
+
+// Non-fatal error: pop up message box and (possibly) continue
+void wxError(
+  const wxString&                   rMsg
+, const wxString&                   rTitle
+)
+{
+    wxChar *wxBuffer = new wxChar[256];
+    wxSprintf(wxBuffer, "%s\nContinue?", WXSTRINGCAST rMsg);
+    if (::WinMessageBox( HWND_DESKTOP
+                        ,NULL
+                        ,(PSZ)wxBuffer
+                        ,(PSZ)WXSTRINGCAST rTitle
+                        ,0
+                        ,MB_ICONEXCLAMATION | MB_YESNO
+                       ) == MBID_YES)
+    delete[] wxBuffer;
+    wxExit();
+}
+
+// Fatal error: pop up message box and abort
+void wxFatalError(
+  const wxString&                   rMsg
+, const wxString&                   rTitle
+)
+{
+    unsigned long                   ulRc;
+
+    ulRc = ::WinMessageBox( HWND_DESKTOP
+                           ,NULL
+                           ,WXSTRINGCAST rMsg
+                           ,WXSTRINGCAST rTitle
+                           ,0
+                           ,MB_NOICON | MB_OK
+                          );
+    DosExit(EXIT_PROCESS, ulRc);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 // Emit a beeeeeep
 void wxBell()
 {
@@ -444,9 +498,9 @@ wxChar* wxGetUserHome ( const wxString &rUser )
     return (wxChar*)wxEmptyString; // No home known!
 }
 
-wxString wxPMErrorToStr(ERRORID vError)
+wxString WXDLLEXPORT wxPMErrorToStr(ERRORID vError)
 {
-    wxString sError;
+    wxString                        sError;
 
     //
     // Remove the high order byte -- it is useless
@@ -497,7 +551,7 @@ wxString wxPMErrorToStr(ERRORID vError)
         default:
             sError = wxT("Unknown error");
     }
-    return sError;
+    return(sError);
 } // end of wxPMErrorToStr
 
 // replacement for implementation in unix/utilsunx.cpp,

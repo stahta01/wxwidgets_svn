@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/private.h
+// Name:        wx/gtk/private.h
 // Purpose:     wxGTK private macros, functions &c
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -23,15 +23,43 @@
     #define GTK_CHECK_VERSION(a, b, c) 0
 #endif
 
-#define wxGTK_CONV(s) s.c_str()
-#define wxGTK_CONV_BACK(s) s
+#ifdef __WXGTK20__
+#if wxUSE_UNICODE
+    #define wxGTK_CONV(s) wxConvUTF8.cWX2MB(s)
+    #define wxGTK_CONV_BACK(s) wxConvUTF8.cMB2WX(s)
+#else
+    #define wxGTK_CONV(s) wxConvUTF8.cWC2MB( wxConvLocal.cWX2WC(s) )
+    #define wxGTK_CONV_BACK(s)  wxConvLocal.cWC2WX( (wxConvUTF8.cMB2WC( s ) ) )
+#endif
+#else
+    #define wxGTK_CONV(s) s.c_str()
+    #define wxGTK_CONV_BACK(s) s
+#endif
 
+
+// GTK+ 2.0 compatibility define is broken when used from C++ as it
+// casts enum to int implicitly
+#ifdef __WXGTK20__
+    #undef gtk_signal_disconnect_by_func
+    #define gtk_signal_disconnect_by_func(object,func,data) \
+        gtk_signal_compat_matched((object), (func), (data), \
+                                  (GSignalMatchType)(G_SIGNAL_MATCH_FUNC | \
+                                                     G_SIGNAL_MATCH_DATA), 0)
+#endif
 
 // child is not a member of GTK_BUTTON() any more in GTK+ 2.0
-#define BUTTON_CHILD(w) GTK_BUTTON((w))->child
+#ifdef __WXGTK20__
+    #define BUTTON_CHILD(w) GTK_BIN((w))->child
+#else
+    #define BUTTON_CHILD(w) GTK_BUTTON((w))->child
+#endif
 
 // event_window has disappeared from GtkToggleButton in GTK+ 2.0
-#define TOGGLE_BUTTON_EVENT_WIN(w) GTK_TOGGLE_BUTTON((w))->event_window
+#ifdef __WXGTK20__
+    #define TOGGLE_BUTTON_EVENT_WIN(w) GTK_BUTTON((w))->event_window
+#else
+    #define TOGGLE_BUTTON_EVENT_WIN(w) GTK_TOGGLE_BUTTON((w))->event_window
+#endif
 
 // gtk_editable_{copy|cut|paste}_clipboard() had an extra argument under
 // previous GTK+ versions but no more
@@ -41,16 +69,31 @@
     #define DUMMY_CLIPBOARD_ARG  ,0
 #endif
 
-// _GtkEditable is private in GTK2
-#define GET_EDITABLE_POS(w) GTK_EDITABLE((w))->current_pos
-#define SET_EDITABLE_POS(w, pos) \
-    GTK_EDITABLE((w))->current_pos = (pos)
+// _GtkEditable is now private
+#ifdef __WXGTK20__
+    #define GET_EDITABLE_POS(w) gtk_editable_get_position(GTK_EDITABLE(w))
+    #define SET_EDITABLE_POS(w, pos) \
+        gtk_editable_set_position(GTK_EDITABLE(w), (pos))
+#else
+    #define GET_EDITABLE_POS(w) GTK_EDITABLE((w))->current_pos
+    #define SET_EDITABLE_POS(w, pos) \
+        GTK_EDITABLE((w))->current_pos = (pos)
+#endif
 
-// this GtkNotebook struct field has been renamed in GTK2
-#define NOTEBOOK_PANEL(nb)  GTK_NOTEBOOK(nb)->panel
+// this GtkNotebook struct field has been renamed
+#ifdef __WXGTK20__
+    #define NOTEBOOK_PANEL(nb)  GTK_NOTEBOOK(nb)->event_window
+#else
+    #define NOTEBOOK_PANEL(nb)  GTK_NOTEBOOK(nb)->panel
+#endif
 
-#define SCROLLBAR_CBACK_ARG
-#define GET_SCROLL_TYPE(w)   GTK_RANGE((w))->scroll_type
+#ifdef __WXGTK20__
+    #define SCROLLBAR_CBACK_ARG
+    #define GET_SCROLL_TYPE(w)   GTK_SCROLL_JUMP
+#else
+    #define SCROLLBAR_CBACK_ARG
+    #define GET_SCROLL_TYPE(w)   GTK_RANGE((w))->scroll_type
+#endif
 
 // translate a GTK+ scroll type to a wxEventType
 inline wxEventType GtkScrollTypeToWx(guint scrollType)
@@ -88,9 +131,10 @@ inline wxEventType GtkScrollWinTypeToWx(guint scrollType)
             wxEVT_SCROLLWIN_TOP - wxEVT_SCROLL_TOP;
 }
 
-// Needed for implementing e.g. combobox on wxGTK within a modal dialog.
-void wxAddGrab(wxWindow* window);
-void wxRemoveGrab(wxWindow* window);
+#ifdef __WXGTK20__
+// Escapes string so that it is valid Pango markup XML string:
+WXDLLIMPEXP_CORE wxString wxEscapeStringForPangoMarkup(const wxString& str);
+#endif
 
 // The declaration for gtk_icon_size_lookup was accidentally ifdefed out in
 // GTK+ 2.1.0 which Sun seem to have shipped with some versions of JDS

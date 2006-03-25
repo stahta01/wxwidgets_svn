@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagtiff.cpp
+// Name:        imagtiff.cpp
 // Purpose:     wxImage TIFF handler
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagtiff.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -34,11 +38,7 @@ extern "C"
 #include "wx/module.h"
 
 #ifndef TIFFLINKAGEMODE
-  #if defined(__WATCOMC__) && defined(__WXMGL__)
-    #define TIFFLINKAGEMODE cdecl
-  #else
-    #define TIFFLINKAGEMODE LINKAGEMODE
-  #endif
+  #define TIFFLINKAGEMODE LINKAGEMODE
 #endif
 
 //-----------------------------------------------------------------------------
@@ -48,39 +48,6 @@ extern "C"
 IMPLEMENT_DYNAMIC_CLASS(wxTIFFHandler,wxImageHandler)
 
 #if wxUSE_STREAMS
-
-// helper to translate our, possibly 64 bit, wxFileOffset to TIFF, always 32
-// bit, toff_t
-static toff_t wxFileOffsetToTIFF(wxFileOffset ofs)
-{
-    if ( ofs == wxInvalidOffset )
-        return (toff_t)-1;
-
-    toff_t tofs = wx_truncate_cast(toff_t, ofs);
-    wxCHECK_MSG( (wxFileOffset)tofs == ofs, (toff_t)-1,
-                    _T("TIFF library doesn't support large files") );
-
-    return tofs;
-}
-
-// another helper to convert standard seek mode to our
-static wxSeekMode wxSeekModeFromTIFF(int whence)
-{
-    switch ( whence )
-    {
-        case SEEK_SET:
-            return wxFromStart;
-
-        case SEEK_CUR:
-            return wxFromCurrent;
-
-        case SEEK_END:
-            return wxFromEnd;
-
-        default:
-            return wxFromCurrent;
-    }
-}
 
 extern "C"
 {
@@ -113,18 +80,32 @@ toff_t TIFFLINKAGEMODE
 _tiffSeekIProc(thandle_t handle, toff_t off, int whence)
 {
     wxInputStream *stream = (wxInputStream*) handle;
+    wxSeekMode mode;
+    switch (whence)
+    {
+        case SEEK_SET: mode = wxFromStart; break;
+        case SEEK_CUR: mode = wxFromCurrent; break;
+        case SEEK_END: mode = wxFromEnd; break;
+        default:       mode = wxFromCurrent; break;
+    }
 
-    return wxFileOffsetToTIFF(stream->SeekI((wxFileOffset)off,
-                                            wxSeekModeFromTIFF(whence)));
+    return (toff_t)stream->SeekI( (wxFileOffset)off, mode );
 }
 
 toff_t TIFFLINKAGEMODE
 _tiffSeekOProc(thandle_t handle, toff_t off, int whence)
 {
     wxOutputStream *stream = (wxOutputStream*) handle;
+    wxSeekMode mode;
+    switch (whence)
+    {
+        case SEEK_SET: mode = wxFromStart; break;
+        case SEEK_CUR: mode = wxFromCurrent; break;
+        case SEEK_END: mode = wxFromEnd; break;
+        default:       mode = wxFromCurrent; break;
+    }
 
-    return wxFileOffsetToTIFF(stream->SeekO((wxFileOffset)off,
-                                            wxSeekModeFromTIFF(whence)));
+    return (toff_t)stream->SeekO( (wxFileOffset)off, mode );
 }
 
 int TIFFLINKAGEMODE
@@ -449,7 +430,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
                         if ( ptr[column*24 + bp*3] > 0 )
                         {
                             // check only red as this is sufficient
-                            reverse = (uint8)(reverse | 128 >> bp);
+                            reverse = reverse | 128 >> bp;
                         }
                     }
 
@@ -495,3 +476,4 @@ bool wxTIFFHandler::DoCanRead( wxInputStream& stream )
 #endif  // wxUSE_STREAMS
 
 #endif  // wxUSE_LIBTIFF
+

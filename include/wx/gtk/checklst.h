@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class
 // Author:      Robert Roebling
 // Modified by:
@@ -10,6 +10,10 @@
 
 #ifndef __GTKCHECKLISTH__
 #define __GTKCHECKLISTH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 // ----------------------------------------------------------------------------
 // macros
@@ -23,10 +27,6 @@
 
     #define wxCHECKLBOX_STRING    _T("[ ] ")
 #endif
-
-//Use the native GTK2.0+ checklist?? You should say YYEEESS unless
-//there are like some major bugs or something :)
-#define wxUSE_NATIVEGTKCHECKLIST 1
 
 //-----------------------------------------------------------------------------
 // wxCheckListBox
@@ -52,15 +52,11 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxListBoxNameStr);
 
-    bool IsChecked(unsigned int index) const;
-    void Check(unsigned int index, bool check = true);
+    bool IsChecked( int index ) const;
+    void Check( int index, bool check = TRUE );
 
     int GetItemHeight() const;
-
-#if wxUSE_NATIVEGTKCHECKLIST
-    void DoCreateCheckList();
-#endif
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };

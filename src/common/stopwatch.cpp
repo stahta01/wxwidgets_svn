@@ -364,13 +364,6 @@ wxLongLong wxGetLocalTimeMillis()
 #endif // time functions
 }
 
-#else // !wxUSE_LONGLONG
-
-double wxGetLocalTimeMillis(void)
-{
-    return (double(clock()) / double(CLOCKS_PER_SEC)) * 1000.0;
-}
-
-#endif // wxUSE_LONGLONG/!wxUSE_LONGLONG
+#endif // wxUSE_LONGLONG
 
 

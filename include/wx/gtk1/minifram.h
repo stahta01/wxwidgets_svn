@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/minifram.h
+// Name:        minifram.h
 // Purpose:     wxMiniFrame class
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKMINIFRAMEH__
 #define __GTKMINIFRAMEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -54,7 +58,7 @@ public:
 
     virtual void SetTitle( const wxString &title );
  // implementation
-
+ 
     bool   m_isDragging;
     int    m_oldX,m_oldY;
     int    m_diffX,m_diffY;

@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xmlres.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -42,7 +46,7 @@
 #include "wx/xrc/xmlres.h"
 
 #include "wx/arrimpl.cpp"
-WX_DEFINE_OBJARRAY(wxXmlResourceDataRecords)
+WX_DEFINE_OBJARRAY(wxXmlResourceDataRecords);
 
 
 wxXmlResource *wxXmlResource::ms_instance = NULL;
@@ -411,11 +415,7 @@ bool wxXmlResource::UpdateResources()
         {
 #           if wxUSE_FILESYSTEM
             file = fsys.OpenFile(m_data[i].File);
-#           if wxUSE_DATETIME
             modif = file && file->GetModificationTime() > m_data[i].Time;
-#           else // wxUSE_DATETIME
-            modif = true;
-#           endif // wxUSE_DATETIME
             if (!file)
             {
                 wxLogError(_("Cannot open file '%s'."), m_data[i].File.c_str());
@@ -423,13 +423,9 @@ bool wxXmlResource::UpdateResources()
             }
             wxDELETE(file);
             wxUnusedVar(file);
-#           else // wxUSE_FILESYSTEM
-#           if wxUSE_DATETIME
+#           else
             modif = wxDateTime(wxFileModificationTime(m_data[i].File)) > m_data[i].Time;
-#           else // wxUSE_DATETIME
-            modif = true;
-#           endif // wxUSE_DATETIME
-#           endif // wxUSE_FILESYSTEM
+#           endif
         }
 
         if (modif)
@@ -485,13 +481,11 @@ bool wxXmlResource::UpdateResources()
                 }
 
                 ProcessPlatformProperty(m_data[i].Doc->GetRoot());
-#if wxUSE_DATETIME
 #if wxUSE_FILESYSTEM
                 m_data[i].Time = file->GetModificationTime();
-#else // wxUSE_FILESYSTEM
+#else
                 m_data[i].Time = wxDateTime(wxFileModificationTime(m_data[i].File));
-#endif // wxUSE_FILESYSTEM
-#endif // wxUSE_DATETIME
+#endif
             }
 
 #           if wxUSE_FILESYSTEM
@@ -689,7 +683,7 @@ wxObject *wxXmlResource::CreateResFromNode(wxXmlNode *node, wxObject *parent,
 
 #include "wx/listimpl.cpp"
 WX_DECLARE_LIST(wxXmlSubclassFactory, wxXmlSubclassFactoriesList);
-WX_DEFINE_LIST(wxXmlSubclassFactoriesList)
+WX_DEFINE_LIST(wxXmlSubclassFactoriesList);
 
 wxXmlSubclassFactoriesList *wxXmlResource::ms_subclassFactories = NULL;
 
@@ -803,6 +797,7 @@ void wxXmlResourceHandler::AddWindowStyles()
     XRC_ADD_STYLE(wxALWAYS_SHOW_SB);
     XRC_ADD_STYLE(wxWS_EX_BLOCK_EVENTS);
     XRC_ADD_STYLE(wxWS_EX_VALIDATE_RECURSIVELY);
+    XRC_ADD_STYLE(wxALWAYS_SHOW_SB);
 }
 
 
@@ -950,7 +945,7 @@ float wxXmlResourceHandler::GetFloat(const wxString& param, float defaultv)
     setlocale(LC_NUMERIC, prevlocale);
 #endif
 
-    return wx_truncate_cast(float, value);
+    return value;
 }
 
 
@@ -1094,17 +1089,21 @@ wxBitmap wxXmlResourceHandler::GetBitmap(const wxString& param,
     wxImage img(*(fsfile->GetStream()));
     delete fsfile;
 #else
-    wxImage img(name);
+    wxImage img(GetParamValue(wxT("bitmap")));
 #endif
 
     if (!img.Ok())
     {
         wxLogError(_("XRC resource: Cannot create bitmap from '%s'."),
-                   name.c_str());
+                   param.c_str());
         return wxNullBitmap;
     }
     if (!(size == wxDefaultSize)) img.Rescale(size.x, size.y);
+#if !defined(__WXMSW__) || wxUSE_WXDIB
     return wxBitmap(img);
+#else
+    return wxBitmap();
+#endif
 }
 
 
@@ -1287,10 +1286,10 @@ wxFont wxXmlResourceHandler::GetFont(const wxString& param)
     // font attributes:
 
     // size
-    int isize = -1;
+    int isize = wxDEFAULT;
     bool hasSize = HasParam(wxT("size"));
     if (hasSize)
-        isize = GetLong(wxT("size"), -1);
+        isize = GetLong(wxT("size"), wxDEFAULT);
 
     // style
     int istyle = wxNORMAL;
@@ -1368,38 +1367,36 @@ wxFont wxXmlResourceHandler::GetFont(const wxString& param)
     }
 
     // is this font based on a system font?
-    wxFont font = GetSystemFont(GetParamValue(wxT("sysfont")));
+    wxFont sysfont = GetSystemFont(GetParamValue(wxT("sysfont")));
 
-    if (font.Ok())
+    if (sysfont.Ok())
     {
-        if (hasSize && isize != -1)
-            font.SetPointSize(isize);
+        if (hasSize)
+            sysfont.SetPointSize(isize);
         else if (HasParam(wxT("relativesize")))
-            font.SetPointSize(int(font.GetPointSize() *
+            sysfont.SetPointSize(int(sysfont.GetPointSize() *
                                      GetFloat(wxT("relativesize"))));
 
         if (hasStyle)
-            font.SetStyle(istyle);
+            sysfont.SetStyle(istyle);
         if (hasWeight)
-            font.SetWeight(iweight);
+            sysfont.SetWeight(iweight);
         if (hasUnderlined)
-            font.SetUnderlined(underlined);
+            sysfont.SetUnderlined(underlined);
         if (hasFamily)
-            font.SetFamily(ifamily);
+            sysfont.SetFamily(ifamily);
         if (hasFacename)
-            font.SetFaceName(facename);
+            sysfont.SetFaceName(facename);
         if (hasEncoding)
-            font.SetDefaultEncoding(enc);
-    }
-    else // not based on system font
-    {
-        font = wxFont(isize == -1 ? wxNORMAL_FONT->GetPointSize() : isize,
-                      ifamily, istyle, iweight,
-                      underlined, facename, enc);
+            sysfont.SetDefaultEncoding(enc);
+
+        m_node = oldnode;
+        return sysfont;
     }
 
     m_node = oldnode;
-    return font;
+    return wxFont(isize, ifamily, istyle, iweight,
+                  underlined, facename, enc);
 }
 
 

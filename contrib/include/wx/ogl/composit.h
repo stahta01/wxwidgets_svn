@@ -12,6 +12,10 @@
 #ifndef _OGL_COMPOSIT_H_
 #define _OGL_COMPOSIT_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "composit.h"
+#endif
+
 
 class WXDLLIMPEXP_OGL wxDivisionShape;
 class WXDLLIMPEXP_OGL wxOGLConstraint;

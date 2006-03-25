@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/checkbox.h
+// Name:        wx/gtk/checkbox.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKCHECKBOXH__
 #define __GTKCHECKBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 // ----------------------------------------------------------------------------
 // wxCheckBox
@@ -43,7 +47,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
     // --------------
 
@@ -58,6 +62,11 @@ public:
 
 protected:
     virtual wxSize DoGetBestSize() const;
+
+#ifdef __WXGTK20__
+    void DoSet3StateValue(wxCheckBoxState state);
+    wxCheckBoxState DoGet3StateValue() const;
+#endif
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCheckBox)

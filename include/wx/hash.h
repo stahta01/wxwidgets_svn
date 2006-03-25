@@ -12,6 +12,10 @@
 #ifndef _WX_HASH_H__
 #define _WX_HASH_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "hash.h"
+#endif
+
 #include "wx/defs.h"
 
 #if !wxUSE_STL && WXWIN_COMPATIBILITY_2_4
@@ -393,6 +397,8 @@ public:
 
     size_t GetCount() const { return wxHashTableBase::GetCount(); }
 protected:
+    virtual void DoDeleteContents( wxHashTableBase_Node* node );
+
     // copy helper
     void DoCopy( const wxHashTable& copy );
 
@@ -400,8 +406,6 @@ protected:
     // m_curr to it and m_currBucket to its bucket
     void GetNextNode( size_t bucketStart );
 private:
-    virtual void DoDeleteContents( wxHashTableBase_Node* node );
-
     // current node
     Node* m_curr;
 
@@ -525,7 +529,7 @@ private:
         eltype *Delete(long key) { return (eltype*)DoDelete(key, key); }      \
         eltype *Delete(long lhash, long key)                                  \
             { return (eltype*)DoDelete(key, lhash); }                         \
-    private:                                                                  \
+    protected:                                                                \
         virtual void DoDeleteContents( wxHashTableBase_Node* node )           \
             { delete (eltype*)node->GetData(); }                              \
                                                                               \

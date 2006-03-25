@@ -15,6 +15,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -34,12 +38,12 @@
 #include "wx/dcclient.h"
 
 #include <glib.h>
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 #include <gdk/gdkkeysyms.h>
 #include <gdk/gdkx.h>
 
-#include "wx/gtk1/win_gtk.h"
+#include "wx/gtk/win_gtk.h"
 
 // ----------------------------------------------------------------------------
 // constants

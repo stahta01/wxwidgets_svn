@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKICONH__
 #define __GTKICONH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -28,6 +33,7 @@ class WXDLLIMPEXP_CORE wxIcon: public wxBitmap
 {
 public:
     wxIcon();
+    wxIcon( const wxIcon& icon);
     wxIcon( const char **bits, int width=-1, int height=-1 );
 
     // For compatibility with wxMSW where desired size is sometimes required to
@@ -44,6 +50,7 @@ public:
     {
     }
 
+    wxIcon& operator=(const wxIcon& icon);
     bool operator==(const wxIcon& icon) const { return m_refData == icon.m_refData; }
     bool operator!=(const wxIcon& icon) const { return !(*this == icon); }
 

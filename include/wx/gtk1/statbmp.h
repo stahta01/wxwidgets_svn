@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/statbmp.h
+// Name:        wx/gtk/statbmp.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSTATICBITMAPH__
 #define __GTKSTATICBITMAPH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/icon.h"
 
@@ -49,7 +54,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
 private:
     wxBitmap   m_bitmap;
 

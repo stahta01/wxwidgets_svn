@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -210,9 +214,8 @@ void wxTreeCtrl::DoSetItem(wxTreeViewItem* tvItem)
 {
 }
 
-unsigned int wxTreeCtrl::GetCount() const
+size_t wxTreeCtrl::GetCount() const
 {
-    // TODO
     return 0;
 }
 

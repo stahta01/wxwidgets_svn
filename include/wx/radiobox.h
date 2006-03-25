@@ -12,11 +12,15 @@
 #ifndef _WX_RADIOBOX_H_BASE_
 #define _WX_RADIOBOX_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "radioboxbase.h"
+#endif
+
 #if wxUSE_RADIOBOX
 
 #include "wx/ctrlsub.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxRadioBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxRadioBoxNameStr;
 
 // ----------------------------------------------------------------------------
 // wxRadioBoxBase is not a normal base class, but rather a mix-in because the
@@ -27,19 +31,20 @@ extern WXDLLEXPORT_DATA(const wxChar) wxRadioBoxNameStr[];
 class WXDLLEXPORT wxRadioBoxBase : public wxItemContainerImmutable
 {
 public:
-    // change/query the individual radio button state
-    virtual bool Enable(unsigned int n, bool enable = true) = 0;
-    virtual bool Show(unsigned int n, bool show = true) = 0;
-    virtual bool IsItemEnabled(unsigned int n) const = 0;
-    virtual bool IsItemShown(unsigned int n) const = 0;
+    // change the individual radio button state
+    virtual bool Enable(int n, bool enable = true) = 0;
+    virtual bool Show(int n, bool show = true) = 0;
 
-    // return number of columns/rows in this radiobox
-    unsigned int GetColumnCount() const { return m_numCols; }
-    unsigned int GetRowCount() const { return m_numRows; }
+    // layout parameters
+    virtual int GetColumnCount() const = 0;
+    virtual int GetRowCount() const = 0;
 
     // return the item above/below/to the left/right of the given one
     int GetNextItem(int item, wxDirection dir, long style) const;
 
+
+    // implement some of wxItemContainerImmutable functions
+    virtual int FindString(const wxString& s) const;
 
     // deprecated functions
     // --------------------
@@ -49,29 +54,12 @@ public:
     wxDEPRECATED( void SetNumberOfRowsOrCols(int n) );
 #endif // WXWIN_COMPATIBILITY_2_4
 
-protected:
-    wxRadioBoxBase()
-    {
-        m_majorDim = 0;
-    }
-
-    // return the number of items in major direction (which depends on whether
-    // we have wxRA_SPECIFY_COLS or wxRA_SPECIFY_ROWS style)
-    unsigned int GetMajorDim() const { return m_majorDim; }
-
-    // sets m_majorDim and also updates m_numCols/Rows
-    //
-    // the style parameter should be the style of the radiobox itself
-    void SetMajorDim(unsigned int majorDim, long style);
-
-
-private:
-    // the number of elements in major dimension (i.e. number of columns if
-    // wxRA_SPECIFY_COLS or the number of rows if wxRA_SPECIFY_ROWS) and also
-    // the number of rows/columns calculated from it
-    unsigned int m_majorDim,
-                 m_numCols,
-                 m_numRows;
+    // for compatibility only, don't use these methods in new code!
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( int Number() const );
+    wxDEPRECATED( wxString GetLabel(int n) const );
+    wxDEPRECATED( void SetLabel(int n, const wxString& label) );
+#endif // WXWIN_COMPATIBILITY_2_2
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -80,10 +68,8 @@ private:
     #include "wx/msw/radiobox.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/radiobox.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/radiobox.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/radiobox.h"
+    #include "wx/gtk/radiobox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/radiobox.h"
 #elif defined(__WXCOCOA__)

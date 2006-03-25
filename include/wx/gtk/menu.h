@@ -10,6 +10,10 @@
 #ifndef __GTKMENUH__
 #define __GTKMENUH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "menu.h"
+#endif
+
 //-----------------------------------------------------------------------------
 // wxMenuBar
 //-----------------------------------------------------------------------------
@@ -44,6 +48,9 @@ public:
     // common part of Append and Insert
     bool GtkAppend(wxMenu *menu, const wxString& title, int pos=-1);
 
+#ifndef __WXGTK20__
+    GtkAccelGroup   *m_accel;
+#endif
     GtkWidget       *m_menubar;
     long             m_style;
     wxWindow        *m_invokingWindow;
@@ -69,6 +76,11 @@ public:
 
     virtual ~wxMenu();
 
+    // implement base class virtuals
+    virtual wxMenuItem* DoAppend(wxMenuItem *item);
+    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
+    virtual wxMenuItem* DoRemove(wxMenuItem *item);
+
     // TODO: virtual void SetTitle(const wxString& title);
 
     // implementation
@@ -78,11 +90,6 @@ public:
     GtkWidget       *m_menu;  // GtkMenu
     GtkWidget       *m_owner;
     GtkAccelGroup   *m_accel;
-
-protected:
-    virtual wxMenuItem* DoAppend(wxMenuItem *item);
-    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem* DoRemove(wxMenuItem *item);
 
 private:
     // common code for all constructors:

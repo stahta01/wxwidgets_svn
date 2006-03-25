@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcmemory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,6 +30,12 @@ wxMemoryDC::wxMemoryDC() : wxWindowDC()
     m_ok = FALSE;
 
     m_cmap = gtk_widget_get_default_colormap();
+    
+#ifdef __WXGTK20__
+    m_context = gdk_pango_context_get();
+    m_layout = pango_layout_new( m_context );
+    m_fontdesc = pango_font_description_copy( pango_context_get_font_description( m_context ) );
+#endif
 }
 
 wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
@@ -34,11 +44,19 @@ wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
     m_ok = FALSE;
 
     m_cmap = gtk_widget_get_default_colormap();
-
+    
+#ifdef __WXGTK20__
+    m_context = gdk_pango_context_get();
+    m_layout = pango_layout_new( m_context );
+    m_fontdesc = pango_font_description_copy( pango_context_get_font_description( m_context ) );
+#endif
 }
 
 wxMemoryDC::~wxMemoryDC()
 {
+#ifdef __WXGTK20__
+    g_object_unref(m_context);
+#endif
 }
 
 void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
@@ -55,6 +73,10 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
         {
             m_window = m_selected.GetBitmap();
         }
+
+#ifdef __WXGTK20__
+        m_selected.PurgeOtherRepresentations(wxBitmap::Pixmap);
+#endif
 
         m_isMemDC = TRUE;
 
@@ -93,7 +115,7 @@ void wxMemoryDC::SetBrush( const wxBrush& brushOrig )
     wxWindowDC::SetBrush( brush );
 }
 
-void wxMemoryDC::SetBackground( const wxBrush& brushOrig )
+void wxMemoryDC::SetBackground( const wxBrush& brushOrig ) 
 {
     wxBrush brush(brushOrig);
 

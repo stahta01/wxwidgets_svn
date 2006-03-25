@@ -7,8 +7,13 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -28,7 +33,7 @@ class WXDLLIMPEXP_CORE wxGauge;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxGaugeNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar* wxGaugeNameStr;
 
 //-----------------------------------------------------------------------------
 // wxGaugeBox
@@ -74,8 +79,6 @@ public:
     
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    virtual wxVisualAttributes GetDefaultAttributes() const;
     
     // implementation
     // -------------
@@ -83,6 +86,11 @@ public:
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
+
+    // obsolete functions, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return true; }
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // common part of all ctors
@@ -92,6 +100,8 @@ protected:
     void DoSetGauge();
 
     virtual wxSize DoGetBestSize() const;
+
+    virtual wxVisualAttributes GetDefaultAttributes() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGauge)

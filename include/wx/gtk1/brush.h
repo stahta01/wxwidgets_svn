@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/brush.h
+// Name:        brush.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -10,6 +10,10 @@
 
 #ifndef __GTKBRUSHH__
 #define __GTKBRUSHH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -35,6 +39,11 @@ public:
     wxBrush( const wxColour &colour, int style = wxSOLID );
     wxBrush( const wxBitmap &stippleBitmap );
     ~wxBrush();
+
+    wxBrush( const wxBrush &brush )
+        : wxBrushBase()
+        { Ref(brush); }
+    wxBrush& operator = ( const wxBrush& brush ) { Ref(brush); return *this; }
 
     bool Ok() const { return m_refData != NULL; }
 

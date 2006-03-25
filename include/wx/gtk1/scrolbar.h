@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/scrolbar.h
+// Name:        scrolbar.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSCROLLBARH__
 #define __GTKSCROLLBARH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "scrolbar.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -65,7 +70,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
     // --------------
 

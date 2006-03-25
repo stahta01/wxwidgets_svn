@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "cursor.h"
+#endif
+
 #include "wx/defs.h"
 
 #include "wx/app.h"
@@ -94,10 +98,10 @@ wxCursor::wxCursor(char **bits)
 
 bool wxCursor::CreateFromXpm(const char **bits)
 {
-    wxCHECK_MSG( bits != NULL, FALSE, wxT("invalid cursor data") );
+    wxCHECK_MSG( bits != NULL, FALSE, wxT("invalid cursor data") )
     wxXPMDecoder decoder;
     wxImage img = decoder.ReadData(bits);
-    wxCHECK_MSG( img.Ok(), FALSE, wxT("invalid cursor data") );
+    wxCHECK_MSG( img.Ok(), FALSE, wxT("invalid cursor data") )    
 	CreateFromImage( img ) ;
     return TRUE;
 }

@@ -22,6 +22,9 @@
 // ----------------------------------------------------------------------------
 // Pre-compiled header stuff
 // ----------------------------------------------------------------------------
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "mediactrl.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -71,8 +74,7 @@ enum wxMediaCtrlPlayerControls
 #define wxMEDIABACKEND_MCI          wxT("wxMCIMediaBackend")
 #define wxMEDIABACKEND_QUICKTIME    wxT("wxQTMediaBackend")
 #define wxMEDIABACKEND_GSTREAMER    wxT("wxGStreamerMediaBackend")
-#define wxMEDIABACKEND_REALPLAYER   wxT("wxRealPlayerMediaBackend")
-#define wxMEDIABACKEND_WMP10        wxT("wxWMP10MediaBackend")
+
 
 // ----------------------------------------------------------------------------
 //
@@ -200,8 +202,8 @@ public:
     bool Load(const wxURI& location);
     bool Load(const wxURI& location, const wxURI& proxy);
 
-    wxFileOffset GetDownloadProgress(); // DirectShow only
-    wxFileOffset GetDownloadTotal();    // DirectShow only
+    wxFileOffset GetDownloadProgress();
+    wxFileOffset GetDownloadTotal();
 
     double GetVolume();
     bool   SetVolume(double dVolume);
@@ -349,18 +351,6 @@ typedef void (wxEvtHandler::*wxMediaEventFunction)(wxMediaEvent&);
 #   define EVT_MEDIA_LOADED(winid, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_MEDIA_LOADED, winid, wxID_ANY, wxMediaEventHandler(fn), (wxObject *) NULL ),
 #endif
 
-#if wxABI_VERSION >= 20603 /* 2.6.3+ only */
-#   define wxMEDIA_STATECHANGED_ID      13003
-#   define wxMEDIA_PLAY_ID      13004
-#   define wxMEDIA_PAUSE_ID      13005
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_MEDIA, wxEVT_MEDIA_STATECHANGED,     wxMEDIA_STATECHANGED_ID)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_MEDIA, wxEVT_MEDIA_PLAY,     wxMEDIA_PLAY_ID)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_MEDIA, wxEVT_MEDIA_PAUSE,     wxMEDIA_PAUSE_ID)
-#   define EVT_MEDIA_STATECHANGED(winid, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_MEDIA_STATECHANGED, winid, wxID_ANY, wxMediaEventHandler(fn), (wxObject *) NULL ),
-#   define EVT_MEDIA_PLAY(winid, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_MEDIA_PLAY, winid, wxID_ANY, wxMediaEventHandler(fn), (wxObject *) NULL ),
-#   define EVT_MEDIA_PAUSE(winid, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_MEDIA_PAUSE, winid, wxID_ANY, wxMediaEventHandler(fn), (wxObject *) NULL ),
-#endif
-
 // ----------------------------------------------------------------------------
 // common backend base class used by many other backends
 // ----------------------------------------------------------------------------
@@ -372,25 +362,10 @@ public:
     void QueueEvent(wxEventType evtType);
 
     // notify that the movie playback is finished
-    void QueueFinishEvent()
-    {
-#if wxABI_VERSION >= 20603 /* 2.6.3+ only */
-        QueueEvent(wxEVT_MEDIA_STATECHANGED);
-#endif
-        QueueEvent(wxEVT_MEDIA_FINISHED);
-    }
+    void QueueFinishEvent() { QueueEvent(wxEVT_MEDIA_FINISHED); }
 
     // send the stop event and return true if it hasn't been vetoed
     bool SendStopEvent();
-
-    // Queue pause event
-    void QueuePlayEvent();
-
-    // Queue pause event
-    void QueuePauseEvent();
-
-    // Queue stop event (no veto)
-    void QueueStopEvent();
 
 protected:
     // call this when the movie size has changed but not because it has just

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fontbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -53,16 +57,13 @@
 
 static void AdjustFontSize(wxFont& font, wxDC& dc, const wxSize& pixelSize)
 {
-    int currentSize = 0;
+    int currentSize = font.GetPointSize();
     int largestGood = 0;
     int smallestBad = 0;
 
     bool initialGoodFound = false;
     bool initialBadFound = false;
 
-    // NB: this assignment was separated from the variable definition
-    // in order to fix a gcc v3.3.3 compiler crash
-    currentSize = font.GetPointSize();
     while (currentSize > 0)
     {
         dc.SetFont(font);
@@ -300,6 +301,14 @@ void wxFontBase::SetNativeFontInfoUserDesc(const wxString& info)
     }
 }
 
+wxFont& wxFont::operator=(const wxFont& font)
+{
+    if ( this != &font )
+        Ref(font);
+
+    return (wxFont &)*this;
+}
+
 bool wxFontBase::operator==(const wxFont& font) const
 {
     // either it is the same font, i.e. they share the same common data or they
@@ -509,7 +518,7 @@ void wxNativeFontInfo::SetUnderlined(bool underlined_)
     underlined = underlined_;
 }
 
-void wxNativeFontInfo::SetFaceName(const wxString& facename_)
+void wxNativeFontInfo::SetFaceName(wxString facename_)
 {
     faceName = facename_;
 }

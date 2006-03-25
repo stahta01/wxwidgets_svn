@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/tglbtn.h
+// Name:        wx/gtk/tglbtn.h
 // Purpose:     Declaration of the wxToggleButton class, which implements a
 //              toggle button under wxGTK.
 // Author:      John Norris, minor changes by Axel Schlueter
@@ -26,7 +26,7 @@ class WXDLLIMPEXP_CORE wxToggleBitmapButton;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxCheckBoxNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar *wxCheckBoxNameStr;
 
 //-----------------------------------------------------------------------------
 // wxToggleBitmapButton
@@ -63,8 +63,7 @@ public:
     bool GetValue() const;
 
     // Set the label
-    virtual void SetLabel(const wxString& label) { wxControl::SetLabel(label); }
-    virtual void SetLabel(const wxBitmap& label);
+    void SetLabel(const wxBitmap& label);
     bool Enable(bool enable = TRUE);
 
     static wxVisualAttributes
@@ -125,7 +124,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+ 
     // implementation
     bool m_blockEvent;
 

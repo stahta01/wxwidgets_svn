@@ -7,6 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "winpars.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -111,7 +116,7 @@ void wxHtmlWinParser::RemoveModule(wxHtmlTagsModule *module)
     m_Modules.DeleteObject(module);
 }
 
-void wxHtmlWinParser::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlWinParser::SetFonts(wxString normal_face, wxString fixed_face,
                                const int *sizes)
 {
     static int default_sizes[7] =
@@ -192,8 +197,6 @@ void wxHtmlWinParser::InitParser(const wxString& source)
     m_LinkColor.Set(0, 0, 0xFF);
     m_ActualColor.Set(0, 0, 0);
     m_Align = wxHTML_ALIGN_LEFT;
-    m_ScriptMode = wxHTML_SCRIPT_NORMAL;
-    m_ScriptBaseline = 0;
     m_tmpLastWasSpace = false;
     m_lastWordCell = NULL;
 
@@ -302,6 +305,7 @@ wxFSFile *wxHtmlWinParser::OpenURL(wxHtmlURLType type,
 
 void wxHtmlWinParser::AddText(const wxChar* txt)
 {
+    wxHtmlCell *c;
     size_t i = 0,
            x,
            lng = wxStrlen(txt);
@@ -339,40 +343,45 @@ void wxHtmlWinParser::AddText(const wxChar* txt)
         if (x)
         {
             temp[templen-1] = wxT(' ');
-            DoAddText(temp, templen, nbsp);
+            temp[templen] = 0;
+            templen = 0;
+#if !wxUSE_UNICODE
+            if (m_EncConv)
+                m_EncConv->Convert(temp);
+#endif
+            size_t len = wxStrlen(temp);
+            for (size_t j = 0; j < len; j++)
+                if (temp[j] == nbsp)
+                    temp[j] = wxT(' ');
+            c = new wxHtmlWordCell(temp, *(GetDC()));
+            if (m_UseLink)
+                c->SetLink(m_Link);
+            m_Container->InsertCell(c);
+            ((wxHtmlWordCell*)c)->SetPreviousWord(m_lastWordCell);
+            m_lastWordCell = (wxHtmlWordCell*)c;
             m_tmpLastWasSpace = true;
         }
     }
 
     if (templen && (templen > 1 || temp[0] != wxT(' ')))
     {
-        DoAddText(temp, templen, nbsp);
+        temp[templen] = 0;
+#if !wxUSE_UNICODE
+        if (m_EncConv)
+            m_EncConv->Convert(temp);
+#endif
+        size_t len = wxStrlen(temp);
+        for (size_t j = 0; j < len; j++)
+            if (temp[j] == nbsp)
+                temp[j] = wxT(' ');
+        c = new wxHtmlWordCell(temp, *(GetDC()));
+        if (m_UseLink)
+            c->SetLink(m_Link);
+        m_Container->InsertCell(c);
+        ((wxHtmlWordCell*)c)->SetPreviousWord(m_lastWordCell);
+        m_lastWordCell = (wxHtmlWordCell*)c;
         m_tmpLastWasSpace = false;
     }
-}
-
-void wxHtmlWinParser::DoAddText(wxChar *temp, int& templen, wxChar nbsp)
-{
-    temp[templen] = 0;
-    templen = 0;
-#if !wxUSE_UNICODE
-    if (m_EncConv)
-        m_EncConv->Convert(temp);
-#endif
-    size_t len = wxStrlen(temp);
-    for (size_t j = 0; j < len; j++)
-    {
-        if (temp[j] == nbsp)
-            temp[j] = wxT(' ');
-    }
-
-    wxHtmlCell *c = new wxHtmlWordCell(temp, *(GetDC()));
-
-    ApplyStateToCell(c);
-
-    m_Container->InsertCell(c);
-    ((wxHtmlWordCell*)c)->SetPreviousWord(m_lastWordCell);
-    m_lastWordCell = (wxHtmlWordCell*)c;
 }
 
 
@@ -466,6 +475,7 @@ void wxHtmlWinParser::SetLink(const wxHtmlLinkInfo& link)
     m_UseLink = (link.GetHref() != wxEmptyString);
 }
 
+
 void wxHtmlWinParser::SetFontFace(const wxString& face)
 {
     if (GetFontFixed()) m_FontFaceFixed = face;
@@ -477,15 +487,6 @@ void wxHtmlWinParser::SetFontFace(const wxString& face)
 #endif
 }
 
-void wxHtmlWinParser::ApplyStateToCell(wxHtmlCell *cell)
-{
-    // set the link:
-    if (m_UseLink)
-        cell->SetLink(GetLink());
-
-    // apply current script mode settings:
-    cell->SetScriptMode(GetScriptMode(), GetScriptBaseline());
-}
 
 
 #if !wxUSE_UNICODE

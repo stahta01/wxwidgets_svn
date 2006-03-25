@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// File:        contrib/samples/stc/stctest.cpp
+// File:        stctest.cpp
 // Purpose:     STC test application
 // Maintainer:  Otto Wyss
 // Created:     2003-09-01
@@ -12,7 +12,7 @@
 // headers
 //----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx/wx.h".
+// For compilers that support precompilation, includes <wx/wx.h>.
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -69,8 +69,7 @@
 
 #define NONAME _("<untitled>")
 
-class AppBook;
-
+class AppFrame;
 
 //----------------------------------------------------------------------------
 //! global application name
@@ -110,7 +109,6 @@ DECLARE_APP (App);
 //! frame of the application APP_VENDOR-APP_NAME.
 class AppFrame: public wxFrame {
     friend class App;
-    friend class AppBook;
     friend class AppAbout;
 
 public:

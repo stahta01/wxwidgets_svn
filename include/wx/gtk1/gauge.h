@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/gauge.h
+// Name:        gauge.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -28,7 +33,7 @@ class WXDLLIMPEXP_CORE wxGauge;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxGaugeNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar* wxGaugeNameStr;
 
 //-----------------------------------------------------------------------------
 // wxGaugeBox
@@ -71,16 +76,21 @@ public:
     int GetValue() const;
 
     bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
-
+    
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
     // -------------
 
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
+
+    // obsolete functions, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return true; }
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // common part of all ctors

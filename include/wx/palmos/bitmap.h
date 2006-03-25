@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "bitmap.h"
+#endif
+
 #include "wx/palmos/gdiimage.h"
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
@@ -40,6 +44,9 @@ class WXDLLEXPORT wxBitmap : public wxGDIImage
 public:
     // default ctor creates an invalid bitmap, you must Create() it later
     wxBitmap() { Init(); }
+
+    // Copy constructors
+    wxBitmap(const wxBitmap& bitmap) { Init(); Ref(bitmap); }
 
     // Initialize with raw data
     wxBitmap(const char bits[], int width, int height, int depth = 1);
@@ -77,6 +84,13 @@ public:
     // we must have this, otherwise icons are silently copied into bitmaps using
     // the copy ctor but the resulting bitmap is invalid!
     wxBitmap(const wxIcon& icon) { Init(); CopyFromIcon(icon); }
+
+    wxBitmap& operator=(const wxBitmap& bitmap)
+    {
+        if ( m_refData != bitmap.m_refData )
+            Ref(bitmap);
+        return *this;
+    }
 
     wxBitmap& operator=(const wxIcon& icon)
     {

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/colour.cpp
+// Name:        colour.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,12 +7,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/colour.h"
 #include "wx/gdicmn.h"
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
@@ -92,9 +97,14 @@ void wxColourRefData::FreeColour()
 {
     if (m_colormap)
     {
+#ifdef __WXGTK20__
+        if ((m_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
+            (m_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
+#else
         GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) m_colormap;
         if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
             (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
+#endif
         {
             int idx = m_color.pixel;
             colMapAllocCounter[ idx ] = colMapAllocCounter[ idx ] - 1;
@@ -112,9 +122,14 @@ void wxColourRefData::AllocColour( GdkColormap *cmap )
 
     FreeColour();
 
+#ifdef __WXGTK20__
+    if ( (cmap->visual->type == GDK_VISUAL_GRAYSCALE) ||
+         (cmap->visual->type == GDK_VISUAL_PSEUDO_COLOR) )
+#else
     GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) cmap;
     if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
         (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
+#endif
     {
         m_hasPixel = gdk_colormap_alloc_color( cmap, &m_color, FALSE, TRUE );
         int idx = m_color.pixel;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/dc.h
+// Name:        dc.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKDCH__
 #define __GTKDCH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 //-----------------------------------------------------------------------------
 // classes
@@ -41,9 +46,7 @@ public:
     wxDC();
     ~wxDC() { }
 
-#if wxUSE_PALETTE
     void SetColourMap( const wxPalette& palette ) { SetPalette(palette); };
-#endif // wxUSE_PALETTE
 
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;

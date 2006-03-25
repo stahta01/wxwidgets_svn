@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 //              Note: this is an optional class.
 // Author:      Stefan Csomor
@@ -12,6 +12,14 @@
 
 #ifndef _WX_CHECKLST_H_
 #define _WX_CHECKLST_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "checklst.h"
+#endif
+
+#if !defined(__MWERKS__) && !defined(__UNIX__)
+typedef   unsigned int  size_t;
+#endif
 
 class WXDLLEXPORT wxCheckListBox : public wxCheckListBoxBase
 {
@@ -66,8 +74,8 @@ public:
                 const wxString& name = wxListBoxNameStr);
 
   // items may be checked
-  bool  IsChecked(unsigned int uiIndex) const;
-  void  Check(unsigned int uiIndex, bool bCheck = true);
+  bool  IsChecked(size_t uiIndex) const;
+  void  Check(size_t uiIndex, bool bCheck = TRUE);
   void OnChar(wxKeyEvent& event) ;
   void OnLeftClick(wxMouseEvent& event) ;
 
@@ -81,10 +89,10 @@ public:
 
     // override all methods which add/delete items to update m_checks array as
     // well
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
     virtual void DoSetItems(const wxArrayString& items, void **clientData);
     virtual void DoClear();
     // common part of all ctors

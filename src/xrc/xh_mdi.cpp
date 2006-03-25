@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_mdi.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -78,10 +82,7 @@ wxWindow *wxMdiXmlHandler::CreateFrame()
         wxMDIParentFrame *mdiParent = wxDynamicCast(m_parent, wxMDIParentFrame);
 
         if ( !mdiParent )
-        {
-            wxLogError(wxT("Parent of wxMDIParentFrame must be wxMDIParentFrame."));
-            return NULL;
-        }
+            wxLogError(wxT("Parent is not of type wxMDIParentFrame."));
 
         XRC_MAKE_INSTANCE(frame, wxMDIChildFrame);
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -192,26 +192,10 @@ protected:
     HANDLE m_handle;
 };
 
-// a template to make initializing Windows styructs less painful: it zeroes all
-// the struct fields and also sets cbSize member to the correct value (and so
-// can be only used with structures which have this member...)
-template <class T>
-struct WinStruct : public T
-{
-    WinStruct()
-    {
-        ::ZeroMemory(this, sizeof(T));
-
-        // explicit qualification is required here for this to be valid C++
-        this->cbSize = sizeof(T);
-    }
-};
-
-
 #if wxUSE_GUI
 
-#include "wx/gdicmn.h"
-#include "wx/colour.h"
+#include <wx/gdicmn.h>
+#include <wx/colour.h>
 
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
@@ -357,6 +341,22 @@ inline RECT wxGetClientRect(HWND hwnd)
 // ---------------------------------------------------------------------------
 // small helper classes
 // ---------------------------------------------------------------------------
+
+// a template to make initializing Windows styructs less painful: it zeroes all
+// the struct fields and also sets cbSize member to the correct value (and so
+// can be only used with structures which have this member...)
+template <class T>
+struct WinStruct : public T
+{
+    WinStruct()
+    {
+        ::ZeroMemory(this, sizeof(T));
+
+        // explicit qualification is required here for this to be valid C++
+        this->cbSize = sizeof(T);
+    }
+};
+
 
 // create an instance of this class and use it as the HDC for screen, will
 // automatically release the DC going out of scope
@@ -518,41 +518,6 @@ private:
 
     DECLARE_NO_COPY_CLASS(HDCClipper)
 };
-
-// set the given map mode for the life time of this object
-//
-// NB: SetMapMode() is not supported by CE so we also define a helper macro
-//     to avoid using it there
-#ifdef __WXWINCE__
-    #define wxCHANGE_HDC_MAP_MODE(hdc, mm)
-#else // !__WXWINCE__
-    class HDCMapModeChanger
-    {
-    public:
-        HDCMapModeChanger(HDC hdc, int mm)
-            : m_hdc(hdc)
-        {
-            m_modeOld = ::SetMapMode(hdc, mm);
-            if ( !m_modeOld )
-                wxLogLastError(_T("SelectClipRgn"));
-        }
-
-        ~HDCMapModeChanger()
-        {
-            if ( m_modeOld )
-                ::SetMapMode(m_hdc, m_modeOld);
-        }
-
-    private:
-        HDC m_hdc;
-        int m_modeOld;
-
-        DECLARE_NO_COPY_CLASS(HDCMapModeChanger)
-    };
-
-    #define wxCHANGE_HDC_MAP_MODE(hdc, mm) \
-        HDCMapModeChanger wxMAKE_UNIQUE_NAME(wxHDCMapModeChanger)(hdc, mm)
-#endif // __WXWINCE__/!__WXWINCE__
 
 // smart buffeer using GlobalAlloc/GlobalFree()
 class GlobalPtr
@@ -894,27 +859,37 @@ inline void *wxSetWindowUserData(HWND hwnd, void *data)
 
 #else // __WIN32__
 
-// note that the casts to LONG_PTR here are required even on 32-bit machines
-// for the 64-bit warning mode of later versions of MSVC (C4311/4312)
-inline WNDPROC wxGetWindowProc(HWND hwnd)
+#ifdef __VISUALC__
+    // strangely enough, VC++ 7.1 gives warnings about 32 -> 64 bit conversions
+    // in the functions below, even in spite of the explicit casts
+    #pragma warning(disable:4311)
+    #pragma warning(disable:4312)
+#endif
+
+inline void *wxGetWindowProc(HWND hwnd)
 {
-    return (WNDPROC)(LONG_PTR)::GetWindowLong(hwnd, GWL_WNDPROC);
+    return (void *)::GetWindowLong(hwnd, GWL_WNDPROC);
 }
 
 inline void *wxGetWindowUserData(HWND hwnd)
 {
-    return (void *)(LONG_PTR)::GetWindowLong(hwnd, GWL_USERDATA);
+    return (void *)::GetWindowLong(hwnd, GWL_USERDATA);
 }
 
 inline WNDPROC wxSetWindowProc(HWND hwnd, WNDPROC func)
 {
-    return (WNDPROC)(LONG_PTR)::SetWindowLong(hwnd, GWL_WNDPROC, (LONG_PTR)func);
+    return (WNDPROC)::SetWindowLong(hwnd, GWL_WNDPROC, (LONG)func);
 }
 
 inline void *wxSetWindowUserData(HWND hwnd, void *data)
 {
-    return (void *)(LONG_PTR)::SetWindowLong(hwnd, GWL_USERDATA, (LONG_PTR)data);
+    return (void *)::SetWindowLong(hwnd, GWL_USERDATA, (LONG)data);
 }
+
+#ifdef __VISUALC__
+    #pragma warning(default:4311)
+    #pragma warning(default:4312)
+#endif
 
 #endif // __WIN64__/__WIN32__
 

@@ -1,11 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/scrolbar.cpp
+// Name:        src/gtk/scrolbar.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "scrolbar.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -16,7 +21,7 @@
 
 #include "wx/utils.h"
 #include "wx/math.h"
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // idle system
@@ -118,8 +123,10 @@ static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
             g_currentUpDownEvent = wxEVT_SCROLL_LINEUP;
       }
 
+#ifndef __WXGTK20__
     // There is no slider field any more
     win->m_isScrolling = (gdk_event->window == widget->slider);
+#endif
 
     return FALSE;
 }
@@ -343,10 +350,12 @@ bool wxScrollBar::IsOwnGtkWindow( GdkWindow *window )
 {
     GtkRange *range = GTK_RANGE(m_widget);
     return ( (window == GTK_WIDGET(range)->window)
+#ifndef __WXGTK20__
                 || (window == range->trough)
                 || (window == range->slider)
                 || (window == range->step_forw)
                 || (window == range->step_back)
+#endif // GTK+ 1.x
            );
 }
 

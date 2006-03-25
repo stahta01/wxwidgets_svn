@@ -8,6 +8,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma implementation
+    #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -43,7 +48,7 @@ private:
 
 #include "wx/arrimpl.cpp"
 WX_DECLARE_OBJARRAY(XRCWidgetData,ArrayOfXRCWidgetData);
-WX_DEFINE_OBJARRAY(ArrayOfXRCWidgetData)
+WX_DEFINE_OBJARRAY(ArrayOfXRCWidgetData);
 
 class XRCWndClassData
 {
@@ -148,7 +153,7 @@ public:
     };
 };
 WX_DECLARE_OBJARRAY(XRCWndClassData,ArrayOfXRCWndClassData);
-WX_DEFINE_OBJARRAY(ArrayOfXRCWndClassData)
+WX_DEFINE_OBJARRAY(ArrayOfXRCWndClassData);
 
 
 class XmlResApp : public wxAppConsole
@@ -381,30 +386,28 @@ wxArrayString XmlResApp::PrepareTempFiles()
 // Does 'node' contain filename information at all?
 static bool NodeContainsFilename(wxXmlNode *node)
 {
-   const wxString name = node->GetName();
-
-   // Any bitmaps (bitmap2 is used for disabled toolbar buttons):
-   if ( name == _T("bitmap") || name == _T("bitmap2") )
+   // Any bitmaps:
+   if (node->GetName() == _T("bitmap"))
        return true;
 
-   if ( name == _T("icon") )
+   if (node->GetName() == _T("icon"))
        return true;
 
    // URLs in wxHtmlWindow:
-   if ( name == _T("url") )
+   if (node->GetName() == _T("url"))
        return true;
 
    // wxBitmapButton:
    wxXmlNode *parent = node->GetParent();
    if (parent != NULL &&
        parent->GetPropVal(_T("class"), _T("")) == _T("wxBitmapButton") &&
-       (name == _T("focus") ||
-        name == _T("disabled") ||
-        name == _T("selected")))
+       (node->GetName() == _T("focus") ||
+        node->GetName() == _T("disabled") ||
+        node->GetName() == _T("selected")))
        return true;
 
    // wxBitmap or wxIcon toplevel resources:
-   if ( name == _T("object") )
+   if (node->GetName() == _T("object"))
    {
        wxString klass = node->GetPropVal(_T("class"), wxEmptyString);
        if (klass == _T("wxBitmap") || klass == _T("wxIcon"))
@@ -504,9 +507,8 @@ static wxString FileToCppArray(wxString filename, int num)
     wxFFile file(filename, wxT("rb"));
     wxFileOffset offset = file.Length();
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
-
-    const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( lng == offset, wxT("Huge file not supported") );
+    wxASSERT_MSG( offset == wxFileOffset(size_t(offset)) , wxT("Huge file not supported") );
+    size_t lng = (size_t)offset;
 
     snum.Printf(_T("%i"), num);
     output.Printf(_T("static size_t xml_res_size_") + snum + _T(" = %i;\n"), lng);
@@ -631,9 +633,8 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxFFile file(filename, wxT("rb"));
     wxFileOffset offset = file.Length();
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
-
-    const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( offset == lng, wxT("Huge file not supported") );
+    wxASSERT_MSG( offset == wxFileOffset(size_t(offset)) , wxT("Huge file not supported") );
+    size_t lng = (size_t)offset;
 
     snum.Printf(_T("%i"), num);
     output = _T("    xml_res_file_") + snum + _T(" = '''\\\n");

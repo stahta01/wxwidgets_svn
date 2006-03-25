@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/dcscreen.h
+// Name:        dcscreen.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$

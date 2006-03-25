@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "email.h"
+#endif
+
 #ifndef _WX_EMAIL_H_
 #define _WX_EMAIL_H_
 

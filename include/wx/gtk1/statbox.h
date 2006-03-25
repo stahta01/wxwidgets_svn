@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/stabox.h
+// Name:        wx/gtk/stabox.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSTATICBOXH__
 #define __GTKSTATICBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 //-----------------------------------------------------------------------------
 // wxStaticBox
@@ -44,7 +49,7 @@ public:
 
 protected:
     void DoApplyWidgetStyle(GtkRcStyle *style);
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };

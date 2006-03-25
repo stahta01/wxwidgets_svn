@@ -4,12 +4,12 @@
 set -o errexit
 
 # read the config variables from the file given on the command line
-# . $1
+. $1
 
 
-host=$1
-flavor=$2
-pyver=$3
+host=$2
+flavor=$3
+pyver=$4
 
 if [ $skiposx != yes ]; then
     # test if the target machine is online

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/notebook.cpp
+// Name:        univ/notebook.cpp
 // Purpose:     wxNotebook implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univnotebook.h"
+#endif
 
 #ifdef __VMS
 #pragma message disable unscomzer
@@ -170,7 +174,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
 int wxNotebook::GetPageImage(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
@@ -209,7 +213,7 @@ wxNotebook::~wxNotebook()
 
 int wxNotebook::SetSelection(size_t nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     if ( (size_t)nPage == m_sel )
     {
@@ -654,14 +658,14 @@ bool wxNotebook::IsVertical() const
 wxDirection wxNotebook::GetTabOrientation() const
 {
     long style = GetWindowStyle();
-    if ( style & wxBK_BOTTOM )
+    if ( style & wxNB_BOTTOM )
         return wxBOTTOM;
-    else if ( style & wxBK_RIGHT )
+    else if ( style & wxNB_RIGHT )
         return wxRIGHT;
-    else if ( style & wxBK_LEFT )
+    else if ( style & wxNB_LEFT )
         return wxLEFT;
 
-    // wxBK_TOP == 0 so we don't have to test for it
+    // wxNB_TOP == 0 so we don't have to test for it
     return wxTOP;
 }
 
@@ -1427,3 +1431,4 @@ void wxStdNotebookInputHandler::HandleFocusChange(wxInputConsumer *consumer)
 }
 
 #endif // wxUSE_NOTEBOOK
+

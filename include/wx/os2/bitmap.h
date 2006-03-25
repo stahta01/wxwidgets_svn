@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#ifdef __GNUG__
+    #pragma interface "bitmap.h"
+#endif
+
 #include "wx/os2/private.h"
 #include "wx/os2/gdiimage.h"
 #include "wx/gdicmn.h"
@@ -70,11 +74,7 @@ public:
 
     // Copy constructors
     inline wxBitmap(const wxBitmap& rBitmap)
-        : wxGDIImage(rBitmap)
-    {
-        Init();
-        SetHandle(rBitmap.GetHandle());
-    }
+      { Init(); Ref(rBitmap); SetHandle(rBitmap.GetHandle()); }
 
     // Initialize with raw data
     wxBitmap( const char bits[]
@@ -115,6 +115,13 @@ public:
     // the copy ctor but the resulting bitmap is invalid!
     inline wxBitmap(const wxIcon& rIcon)
       { Init(); CopyFromIcon(rIcon); }
+
+    wxBitmap& operator=(const wxBitmap& rBitmap)
+    {
+        if ( m_refData != rBitmap.m_refData )
+            Ref(rBitmap);
+        return(*this);
+    }
 
     wxBitmap& operator=(const wxIcon& rIcon)
     {

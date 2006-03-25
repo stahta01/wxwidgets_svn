@@ -60,6 +60,14 @@ public:
     ~wxRegion();
 
     //
+    // Copying
+    //
+    inline wxRegion(const wxRegion& rSrc)
+        { Ref(rSrc); }
+    inline wxRegion& operator = (const wxRegion& rSrc)
+        { Ref(rSrc); return (*this); }
+
+    //
     // Modify region
     //
 

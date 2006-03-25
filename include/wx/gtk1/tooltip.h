@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/tooltip.h
+// Name:        tooltip.h
 // Purpose:     wxToolTip class
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKTOOLTIPH__
 #define __GTKTOOLTIPH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/string.h"

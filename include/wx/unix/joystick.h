@@ -12,6 +12,10 @@
 #ifndef __JOYSTICKH__
 #define __JOYSTICKH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "joystick.h"
+#endif
+
 #include "wx/event.h"
 #include "wx/thread.h"
 
@@ -46,7 +50,7 @@ class WXDLLEXPORT wxJoystick: public wxObject
     ////////////////////////////////////////////////////////////////////////////
 
     bool IsOk() const; // Checks that the joystick is functioning
-    static int GetNumberJoysticks() ;
+    int GetNumberJoysticks() const ;
     int GetManufacturerId() const ;
     int GetProductId() const ;
     wxString GetProductName() const ;

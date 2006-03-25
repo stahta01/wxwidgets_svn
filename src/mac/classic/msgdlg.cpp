@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "msgdlg.h"
+#endif
+
 #include "wx/app.h"
 #include "wx/msgdlg.h"
 #include "wx/intl.h"

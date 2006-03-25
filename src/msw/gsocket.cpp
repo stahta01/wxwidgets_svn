@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  * Project:     GSocket (Generic Socket)
- * Name:        src/msw/gsocket.cpp
+ * Name:        gsocket.cpp
  * Copyright:   (c) Guilhem Lavaux
  * Licence:     wxWindows Licence
  * Author:      Guillermo Rodriguez Garcia <guille@iies.es>
@@ -55,6 +55,7 @@
 
 #ifndef __GSOCKET_STANDALONE__
 #   include "wx/platform.h"
+#   include "wx/setup.h"
 #endif
 
 #if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
@@ -593,18 +594,6 @@ GSocketError GSocket::Connect(GSocketStream stream)
   ioctlsocket(m_fd, FIONBIO, (u_long FAR *) &arg);
   gs_gui_functions->Enable_Events(this);
 
-  // If the reuse flag is set, use the applicable socket reuse flag
-  if (m_reusable)
-  {
-     setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&arg, sizeof(u_long));
-  }
-
-  // If a local address has been set, then we need to bind to it before calling connect
-  if (m_local && m_local->m_addr)
-  {
-    bind(m_fd, m_local->m_addr, m_local->m_len);
-  }
-
   /* Connect it to the peer address, with a timeout (see below) */
   ret = connect(m_fd, m_peer->m_addr, m_peer->m_len);
 
@@ -737,10 +726,7 @@ int GSocket::Read(char *buffer, int size)
 
   /* If the socket is blocking, wait for data (with a timeout) */
   if (Input_Timeout() == GSOCK_TIMEDOUT)
-  {
-    m_error = GSOCK_TIMEDOUT;
     return -1;
-  }
 
   /* Read the data */
   if (m_stream)
@@ -1561,3 +1547,4 @@ GSocketError GAddress_UNIX_GetPath(GAddress *address, char *WXUNUSED(path), size
 typedef void (*wxDummy)();
 
 #endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */
+

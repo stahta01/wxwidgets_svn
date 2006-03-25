@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/clipboard.h
+// Name:        clipboard.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -10,6 +10,10 @@
 
 #ifndef __GTKCLIPBOARDH__
 #define __GTKCLIPBOARDH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #if wxUSE_CLIPBOARD
 
@@ -57,7 +61,7 @@ public:
     // primary == FALSE resets it.
     virtual void UsePrimarySelection(bool primary = TRUE)
         { m_usePrimary = primary; }
-
+    
     // implementation from now on
     bool              m_open;
     bool              m_ownsClipboard;

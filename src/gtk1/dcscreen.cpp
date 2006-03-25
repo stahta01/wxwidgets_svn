@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcscreen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -36,6 +40,12 @@ wxScreenDC::wxScreenDC()
     m_ok = FALSE;
     m_cmap = gdk_colormap_get_system();
     m_window = GDK_ROOT_PARENT();
+
+#ifdef __WXGTK20__
+    m_context = gdk_pango_context_get();
+    m_layout = pango_layout_new( m_context );
+//    m_fontdesc = pango_font_description_copy( widget->style->font_desc );
+#endif
 
     m_isScreenDC = TRUE;
 

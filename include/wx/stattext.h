@@ -18,7 +18,7 @@
 
 #include "wx/control.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxStaticTextNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxStaticTextNameStr;
 
 class WXDLLEXPORT wxStaticTextBase : public wxControl
 {
@@ -49,10 +49,8 @@ private:
     #include "wx/msw/stattext.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/stattext.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/stattext.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/stattext.h"
+    #include "wx/gtk/stattext.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/stattext.h"
 #elif defined(__WXCOCOA__)

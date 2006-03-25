@@ -12,6 +12,10 @@
 #ifndef _WX_LISTCTRL_H_
 #define _WX_LISTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "listctrl.h"
+#endif
+
 #include "wx/control.h"
 #include "wx/event.h"
 #include "wx/imaglist.h"
@@ -223,8 +227,10 @@ class WXDLLEXPORT wxListCtrl: public wxControl
 
   // Sets the item image
   bool SetItemImage(long item, int image, int selImage) ;
+#if wxABI_VERSION >= 20603
   bool SetItemColumnImage(long item, long column, int image);
-
+#endif
+    
   // Gets the item text
   wxString GetItemText(long item) const ;
 

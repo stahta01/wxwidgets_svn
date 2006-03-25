@@ -71,7 +71,6 @@ public:
     void OnChar(wxKeyEvent& event);
 
     void OnText(wxCommandEvent& event);
-    void OnTextEnter(wxCommandEvent& event);
     void OnTextURL(wxTextUrlEvent& event);
     void OnTextMaxLen(wxCommandEvent& event);
 
@@ -117,14 +116,6 @@ public:
     void DoMoveToEndOfText();
     void DoMoveToEndOfEntry();
 
-    // return true if currently text control has any selection
-    bool HasSelection() const
-    {
-        long from, to;
-        GetFocusedText()->GetSelection(&from, &to);
-        return from != to;
-    }
-
     MyTextCtrl    *m_text;
     MyTextCtrl    *m_password;
     MyTextCtrl    *m_enter;
@@ -143,10 +134,9 @@ public:
 #endif // wxUSE_LOG
 
 private:
-    // get the currently focused text control or return the default one
-    // (m_multitext) is no text ctrl has focus -- in any case, returns
-    // something non NULL
-    wxTextCtrl *GetFocusedText() const;
+    // get the currently focused text control or return the default one is no
+    // text ctrl has focus
+    wxTextCtrl *GetFocusedText(wxTextCtrl *textDef);
 };
 
 class MyFrame: public wxFrame
@@ -163,27 +153,9 @@ public:
 
 #if wxUSE_CLIPBOARD
     void OnPasteFromClipboard( wxCommandEvent& WXUNUSED(event) )
-    {
-        wxLogMessage(_T("Pasting text from clipboard."));
-        m_panel->DoPasteFromClipboard();
-    }
+        { m_panel->DoPasteFromClipboard(); }
     void OnCopyToClipboard( wxCommandEvent& WXUNUSED(event) )
-    {
-        wxLogMessage(_T("Copying text to clipboard."));
-        m_panel->DoCopyToClipboard();
-    }
-
-    void OnUpdatePasteFromClipboard(wxUpdateUIEvent& event)
-    {
-        wxClipboardLocker lockClip;
-
-        event.Enable( wxTheClipboard->IsSupported(wxDF_TEXT) );
-    }
-
-    void OnUpdateCopyToClipboard(wxUpdateUIEvent& event)
-    {
-        event.Enable( m_panel->HasSelection() );
-    }
+        { m_panel->DoCopyToClipboard(); }
 #endif // wxUSE_CLIPBOARD
 
     void OnAddTextFreeze( wxCommandEvent& WXUNUSED(event) )
@@ -434,12 +406,10 @@ bool MyApp::OnInit()
 #endif // wxUSE_TOOLTIPS
 
 #if wxUSE_CLIPBOARD
-    // notice that we use non default accelerators on purpose here to compare
-    // their behaviour with the built in handling of standard Ctrl/Cmd-C/V
     wxMenu *menuClipboard = new wxMenu;
-    menuClipboard->Append(TEXT_CLIPBOARD_COPY, _T("&Copy\tCtrl-Shift-C"),
-                          _T("Copy the selection to the clipboard"));
-    menuClipboard->Append(TEXT_CLIPBOARD_PASTE, _T("&Paste\tCtrl-Shift-V"),
+    menuClipboard->Append(TEXT_CLIPBOARD_COPY, _T("&Copy\tCtrl-C"),
+                          _T("Copy the first line to the clipboard"));
+    menuClipboard->Append(TEXT_CLIPBOARD_PASTE, _T("&Paste\tCtrl-V"),
                           _T("Paste from clipboard to the text control"));
     menu_bar->Append(menuClipboard, _T("&Clipboard"));
 #endif // wxUSE_CLIPBOARD
@@ -511,7 +481,6 @@ BEGIN_EVENT_TABLE(MyTextCtrl, wxTextCtrl)
     EVT_CHAR(MyTextCtrl::OnChar)
 
     EVT_TEXT(wxID_ANY, MyTextCtrl::OnText)
-    EVT_TEXT_ENTER(wxID_ANY, MyTextCtrl::OnTextEnter)
     EVT_TEXT_URL(wxID_ANY, MyTextCtrl::OnTextURL)
     EVT_TEXT_MAXLEN(wxID_ANY, MyTextCtrl::OnTextMaxLen)
 
@@ -552,6 +521,8 @@ void MyTextCtrl::LogKeyEvent(const wxChar *name, wxKeyEvent& event) const
             case WXK_MENU: key = _T("MENU"); break;
             case WXK_PAUSE: key = _T("PAUSE"); break;
             case WXK_CAPITAL: key = _T("CAPITAL"); break;
+            case WXK_PRIOR: key = _T("PRIOR"); break;
+            case WXK_NEXT: key = _T("NEXT"); break;
             case WXK_END: key = _T("END"); break;
             case WXK_HOME: key = _T("HOME"); break;
             case WXK_LEFT: key = _T("LEFT"); break;
@@ -620,6 +591,7 @@ void MyTextCtrl::LogKeyEvent(const wxChar *name, wxKeyEvent& event) const
             case WXK_NUMPAD_UP: key = _T("NUMPAD_UP"); break;
             case WXK_NUMPAD_RIGHT: key = _T("NUMPAD_RIGHT"); break;
             case WXK_NUMPAD_DOWN: key = _T("NUMPAD_DOWN"); break;
+            case WXK_NUMPAD_PRIOR: key = _T("NUMPAD_PRIOR"); break;
             case WXK_NUMPAD_PAGEUP: key = _T("NUMPAD_PAGEUP"); break;
             case WXK_NUMPAD_PAGEDOWN: key = _T("NUMPAD_PAGEDOWN"); break;
             case WXK_NUMPAD_END: key = _T("NUMPAD_END"); break;
@@ -770,23 +742,6 @@ void MyTextCtrl::OnText(wxCommandEvent& event)
     {
         // wxLogMessage( event.GetString() );
         wxLogMessage(_T("Text changed in some control"));
-    }
-}
-
-void MyTextCtrl::OnTextEnter(wxCommandEvent& event)
-{
-    if ( !ms_logText )
-        return;
-
-    MyTextCtrl *win = (MyTextCtrl *)event.GetEventObject();
-    const wxChar *data = (const wxChar *)(win->GetClientData());
-    if ( data )
-    {
-        wxLogMessage(_T("Enter pressed in control '%s'"), data);
-    }
-    else
-    {
-        wxLogMessage(_T("Enter pressed in some control"));
     }
 }
 
@@ -1071,12 +1026,12 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     SetSizer(topSizer);
 }
 
-wxTextCtrl *MyPanel::GetFocusedText() const
+wxTextCtrl *MyPanel::GetFocusedText(wxTextCtrl *textDef)
 {
     wxWindow *win = FindFocus();
 
     wxTextCtrl *text = win ? wxDynamicCast(win, wxTextCtrl) : NULL;
-    return text ? text : m_multitext;
+    return text ? text : textDef;
 }
 
 #if wxUSE_CLIPBOARD
@@ -1114,7 +1069,7 @@ void MyPanel::DoPasteFromClipboard()
 #if wxUSE_LOG
             *m_log << _T("Successfully retrieved data from the clipboard.\n");
 #endif // wxUSE_LOG
-            GetFocusedText()->AppendText(data.GetText());
+            *m_multitext << data.GetText() << _T("\n");
         }
         else
         {
@@ -1144,7 +1099,7 @@ void MyPanel::DoCopyToClipboard()
     // call has no effect under MSW.
     wxTheClipboard->UsePrimarySelection();
 
-    wxString text( GetFocusedText()->GetStringSelection() );
+    wxString text( m_multitext->GetLineText(0) );
 
     if (text.IsEmpty())
     {
@@ -1208,17 +1163,17 @@ void MyPanel::DoMoveToEndOfEntry()
 
 void MyPanel::DoRemoveText()
 {
-    GetFocusedText()->Remove(0, 10);
+    GetFocusedText(m_multitext)->Remove(0, 10);
 }
 
 void MyPanel::DoReplaceText()
 {
-    GetFocusedText()->Replace(3, 8, _T("ABC"));
+    GetFocusedText(m_multitext)->Replace(3, 8, _T("ABC"));
 }
 
 void MyPanel::DoSelectText()
 {
-    GetFocusedText()->SetSelection(3, 8);
+    GetFocusedText(m_multitext)->SetSelection(3, 8);
 }
 
 //----------------------------------------------------------------------
@@ -1249,9 +1204,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #if wxUSE_CLIPBOARD
     EVT_MENU(TEXT_CLIPBOARD_PASTE,    MyFrame::OnPasteFromClipboard)
     EVT_MENU(TEXT_CLIPBOARD_COPY,     MyFrame::OnCopyToClipboard)
-
-    EVT_UPDATE_UI(TEXT_CLIPBOARD_PASTE, MyFrame::OnUpdatePasteFromClipboard)
-    EVT_UPDATE_UI(TEXT_CLIPBOARD_COPY,  MyFrame::OnUpdateCopyToClipboard)
 #endif // wxUSE_CLIPBOARD
 
     EVT_MENU(TEXT_REMOVE,             MyFrame::OnRemoveText)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/button.h
+// Name:        wx/gtk/button.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKBUTTONH__
 #define __GTKBUTTONH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -25,7 +29,7 @@ class WXDLLIMPEXP_CORE wxButton;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxButtonNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar *wxButtonNameStr;
 
 //-----------------------------------------------------------------------------
 // wxButton
@@ -67,7 +71,7 @@ public:
     // Since this wxButton doesn't derive from wxButtonBase (why?) we need
     // to override this here too...
     virtual bool ShouldInheritColours() const { return false; }
-
+    
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 

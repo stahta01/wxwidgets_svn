@@ -12,7 +12,11 @@
 #ifndef __COLORDLGH_G__
 #define __COLORDLGH_G__
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "colrdlgg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/gdicmn.h"
 #include "wx/dialog.h"
 #include "wx/cmndata.h"

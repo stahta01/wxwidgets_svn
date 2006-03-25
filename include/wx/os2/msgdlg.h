@@ -13,7 +13,7 @@
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 #include "wx/dialog.h"
 
 /*

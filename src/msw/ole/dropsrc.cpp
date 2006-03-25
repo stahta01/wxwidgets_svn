@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/dropsrc.cpp
+// Name:        msw/ole/dropsrc.cpp
 // Purpose:     implementation of wxIDropSource and wxDropSource
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,16 +17,21 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "dropsrc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if defined(__BORLANDC__)
   #pragma hdrstop
 #endif
-
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
+#include "wx/window.h"
 #endif
+
+#include "wx/setup.h"
 
 #if wxUSE_OLE && wxUSE_DRAG_AND_DROP
 
@@ -52,19 +57,18 @@ class wxIDropSource : public IDropSource
 {
 public:
   wxIDropSource(wxDropSource *pDropSource);
-  virtual ~wxIDropSource() { }
+
+  DECLARE_IUNKNOWN_METHODS;
 
   // IDropSource
   STDMETHODIMP QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState);
   STDMETHODIMP GiveFeedback(DWORD dwEffect);
 
-    DECLARE_IUNKNOWN_METHODS;
-
 private:
   DWORD         m_grfInitKeyState;  // button which started the d&d operation
   wxDropSource *m_pDropSource;      // pointer to C++ class we belong to
 
-  DECLARE_NO_COPY_CLASS(wxIDropSource)
+    DECLARE_NO_COPY_CLASS(wxIDropSource)
 };
 
 // ============================================================================

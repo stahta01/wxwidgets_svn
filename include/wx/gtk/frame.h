@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFRAMEH__
 #define __GTKFRAMEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "frame.h"
+#endif
 
 //-----------------------------------------------------------------------------
 // classes
@@ -54,6 +59,8 @@ public:
     virtual ~wxFrame();
 
 #if wxUSE_STATUSBAR
+    virtual void PositionStatusBar();
+
     virtual wxStatusBar* CreateStatusBar(int number = 1,
                                          long style = wxST_SIZEGRIP|wxFULL_REPAINT_ON_RESIZE,
                                          wxWindowID id = 0,
@@ -85,10 +92,6 @@ public:
 protected:
     // common part of all ctors
     void Init();
-
-#if wxUSE_STATUSBAR
-    virtual void PositionStatusBar();
-#endif // wxUSE_STATUSBAR
 
     // override wxWindow methods to take into account tool/menu/statusbars
     virtual void DoSetClientSize(int width, int height);

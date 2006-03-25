@@ -12,9 +12,13 @@
 #ifndef __NUMDLGH_G__
 #define __NUMDLGH_G__
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "numdlgg.h"
+#endif
 
 #if wxUSE_NUMBERDLG
+
+#include "wx/defs.h"
 
 #include "wx/dialog.h"
 
@@ -77,3 +81,4 @@ wxGetNumberFromUser(const wxString& message,
 #endif // wxUSE_NUMBERDLG
 
 #endif // __NUMDLGH_G__
+

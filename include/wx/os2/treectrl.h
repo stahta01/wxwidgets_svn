@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma interface "treectrl.h"
+#endif
+
 #if wxUSE_TREECTRL
 
 #include "wx/textctrl.h"
@@ -90,7 +94,7 @@ public:
     //
     // Get the total number of items in the control
     //
-    virtual unsigned int GetCount(void) const;
+    size_t GetCount(void) const;
 
     //
     // Indent is the number of pixels the children are indented relative to
@@ -272,6 +276,14 @@ public:
     // Get the parent of this item (may return NULL if root)
     //
     wxTreeItemId GetItemParent(const wxTreeItemId& rItem) const;
+
+#if WXWIN_COMPATIBILITY_2_2
+        // deprecated:  Use GetItemParent instead.
+    wxDEPRECATED( wxTreeItemId GetParent(const wxTreeItemId& item) const);
+
+        // Expose the base class method hidden by the one above. Not deprecatable.
+    wxWindow *GetParent() const { return wxControl::GetParent(); }
+#endif  // WXWIN_COMPATIBILITY_2_2
 
         // for this enumeration function you must pass in a "cookie" parameter
         // which is opaque for the application but is necessary for the library

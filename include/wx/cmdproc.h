@@ -12,6 +12,10 @@
 #ifndef _WX_CMDPROC_H_
 #define _WX_CMDPROC_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "cmdproc.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/list.h"
@@ -87,8 +91,7 @@ public:
 #endif // wxUSE_MENUS
 
     // command list access
-    wxList& GetCommands() { return m_commands; }
-    const wxList& GetCommands() const { return m_commands; }
+    wxList& GetCommands() const { return (wxList&) m_commands; }
     wxCommand *GetCurrentCommand() const
     {
         return (wxCommand *)(m_currentCommand ? m_currentCommand->GetData() : NULL);

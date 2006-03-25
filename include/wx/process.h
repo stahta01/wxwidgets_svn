@@ -12,6 +12,10 @@
 #ifndef _WX_PROCESSH__
 #define _WX_PROCESSH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "process.h"
+#endif
+
 #include "wx/event.h"
 
 #if wxUSE_STREAMS
@@ -100,6 +104,11 @@ public:
                         wxOutputStream *inStream,
                         wxInputStream *errStream);
 #endif // wxUSE_STREAMS
+
+    // for backwards compatibility only, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( wxProcess(wxEvtHandler *parent, bool redirect) );
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     void Init(wxEvtHandler *parent, int id, int flags);

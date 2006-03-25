@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -284,11 +289,13 @@ bool wxListCtrl::SetItemImage(long item, int image, int WXUNUSED(selImage))
     return false;
 }
 
+#if wxABI_VERSION >= 20603
 // Sets the item image
 bool wxListCtrl::SetItemColumnImage(long item, long column, int image)
 {
     return false;
 }
+#endif
 
 // Gets the item text
 wxString wxListCtrl::GetItemText(long item) const
@@ -625,14 +632,6 @@ wxString wxListCtrl::OnGetItemText(long WXUNUSED(item), long WXUNUSED(col)) cons
 
 int wxListCtrl::OnGetItemImage(long WXUNUSED(item)) const
 {
-    return -1;
-}
-
-int wxListCtrl::OnGetItemColumnImage(long item, long column) const
-{
-    if (!column)
-        return OnGetItemImage(item);
-
     return -1;
 }
 

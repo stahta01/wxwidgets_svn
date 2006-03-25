@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/glcanvas.h
+// Name:        glcanvas.h
 // Purpose:     wxGLCanvas, for using OpenGL/Mesa with wxWidgets and GTK
 // Author:      Robert Roebling
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_GLCANVAS_H_
 #define _WX_GLCANVAS_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "glcanvas.h"
+#endif
 
 #include "wx/scrolwin.h"
 #include "wx/app.h"

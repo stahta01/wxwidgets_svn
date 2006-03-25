@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 20 March 2006                                                       *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 2 March 2000                                                        *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -14,16 +14,9 @@ CXX_DEFINE = /define=(__WXGTK__=1,__WXUNIVERSAL__==1)/float=ieee\
 CC_DEFINE = /define=(__WXGTK__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/ieee=denorm
 .else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2==1)/float=ieee\
-	/name=(as_is,short)/ieee=denorm/assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2==1)/float=ieee\
-	/name=(as_is,short)/ieee=denorm
-.else
 CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
-.endif
 .endif
 
 .suffixes : .cpp
@@ -35,11 +28,9 @@ CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
 
 OBJECTS = \
 	app.obj,\
-	artgtk.obj,\
 	bitmap.obj,\
 	brush.obj,\
 	clipbrd.obj,\
-	colordlg.obj,\
 	colour.obj,\
 	cursor.obj,\
 	data.obj,\
@@ -101,12 +92,10 @@ OBJECTS0= \
 	tbargtk.obj,\
 	textctrl.obj,\
 	tglbtn.obj,\
-	msgdlg.obj,\
-	treeentry_gtk.obj
+	msgdlg.obj
 
 SOURCES =\
 	app.cpp,\
-	artgtk.cpp, \
 	bitmap.cpp,\
         bmpbuttn.cpp,\
 	brush.cpp,\
@@ -115,7 +104,6 @@ SOURCES =\
 	checklst.cpp,\
 	choice.cpp,\
 	clipbrd.cpp,\
-	colordlg.cpp,\
 	colour.cpp,\
         combobox.cpp,\
 	control.cpp,\
@@ -170,8 +158,7 @@ SOURCES =\
 	utilsgtk.cpp,\
 	utilsres.cpp,\
         win_gtk.c,\
-	window.cpp,\
-	treeentry_gtk.c
+	window.cpp
    
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -179,21 +166,13 @@ all : $(SOURCES)
 	library [--.lib]libwx_gtk_univ.olb $(OBJECTS)
 	library [--.lib]libwx_gtk_univ.olb [.CXX_REPOSITORY]*.obj
 .else
-.ifdef __WXGTK2__
-	library [--.lib]libwx_gtk2.olb $(OBJECTS)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS0)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS0)
-.else
 	library [--.lib]libwx_gtk.olb $(OBJECTS)
 	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS0)
 	library [--.lib]libwx_gtk.olb $(OBJECTS0)
 .endif
-.endif
 
 app.obj : app.cpp
-artgtk.obj : artgtk.cpp
 bitmap.obj : bitmap.cpp
 bmpbuttn.obj : bmpbuttn.cpp
 brush.obj : brush.cpp
@@ -202,7 +181,6 @@ checkbox.obj : checkbox.cpp
 checklst.obj : checklst.cpp
 choice.obj : choice.cpp
 clipbrd.obj :clipbrd.cpp
-colordlg.obj : colordlg.cpp
 colour.obj : colour.cpp
 combobox.obj : combobox.cpp
 control.obj : control.cpp
@@ -258,4 +236,3 @@ utilsgtk.obj : utilsgtk.cpp
 utilsres.obj : utilsres.cpp
 win_gtk.obj : win_gtk.c
 window.obj : window.cpp
-treeentry_gtk.obj : treeentry_gtk.c

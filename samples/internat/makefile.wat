@@ -201,7 +201,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -223,7 +223,7 @@ $(OBJS) :
 
 ### Targets: ###
 
-all : .SYMBOLIC $(OBJS)\internat.exe bg cs de fr ka pl ru sv ja ja_JP.EUC-JP
+all : .SYMBOLIC $(OBJS)\internat.exe bg cs de fr ja ka pl ru sv
 
 clean : .SYMBOLIC 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -261,6 +261,10 @@ fr : .SYMBOLIC
 	if not exist $(OBJS)\fr mkdir $(OBJS)\fr
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\fr\%f copy .\fr\%f $(OBJS)\fr
 
+ja : .SYMBOLIC 
+	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
+	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
+
 ka : .SYMBOLIC 
 	if not exist $(OBJS)\ka mkdir $(OBJS)\ka
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ka\%f copy .\ka\%f $(OBJS)\ka
@@ -276,14 +280,6 @@ ru : .SYMBOLIC
 sv : .SYMBOLIC 
 	if not exist $(OBJS)\sv mkdir $(OBJS)\sv
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\sv\%f copy .\sv\%f $(OBJS)\sv
-
-ja : .SYMBOLIC 
-	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
-
-ja_JP.EUC-JP : .SYMBOLIC 
-	if not exist $(OBJS)\ja_JP.EUC-JP mkdir $(OBJS)\ja_JP.EUC-JP
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja_JP.EUC-JP\%f copy .\ja_JP.EUC-JP\%f $(OBJS)\ja_JP.EUC-JP
 
 $(OBJS)\internat_internat.obj :  .AUTODEPEND .\internat.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(INTERNAT_CXXFLAGS) $<

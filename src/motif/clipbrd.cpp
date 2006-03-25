@@ -1,13 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/clipbrd.cpp
+// Name:        clipbrd.cpp
 // Purpose:     Clipboard functionality
 // Author:      Julian Smart
 // Modified by: Mattia Barbon (added support for generic wxDataObjects)
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#pragma implementation "clipbrd.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -67,7 +72,7 @@ bool wxClipboardOpen()
     return wxTheClipboard->IsOpened();
 }
 
-bool wxIsClipboardFormatAvailable(const wxDataFormat& dataFormat)
+bool wxIsClipboardFormatAvailable(wxDataFormat dataFormat)
 {
     return wxTheClipboard->IsSupported( dataFormat );
 }
@@ -129,7 +134,7 @@ wxObject *wxGetClipboardData(wxDataFormat dataFormat, long *len)
     return NULL; // just in case...
 }
 
-wxDataFormat wxEnumClipboardFormats(const wxDataFormat& dataFormat)
+wxDataFormat wxEnumClipboardFormats(wxDataFormat dataFormat)
 {
     // Only wxDF_TEXT supported
     if (dataFormat == wxDF_TEXT)
@@ -144,7 +149,7 @@ wxDataFormat wxRegisterClipboardFormat(char *WXUNUSED(formatName))
     return wxDF_INVALID;
 }
 
-bool wxGetClipboardFormatName(const wxDataFormat& dataFormat, char *formatName,
+bool wxGetClipboardFormatName(wxDataFormat dataFormat, char *formatName,
                               int maxCount)
 {
     wxStrncpy( formatName, dataFormat.GetId().c_str(), maxCount );
@@ -168,8 +173,8 @@ struct wxDataIdToDataObject
 
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxDataObjectList)
-WX_DEFINE_LIST(wxDataIdToDataObjectList)
+WX_DEFINE_LIST(wxDataObjectList);
+WX_DEFINE_LIST(wxDataIdToDataObjectList);
 
 extern "C"
 {
@@ -191,7 +196,7 @@ wxClipboard::wxClipboard()
 
 wxClipboard::~wxClipboard()
 {
-    Clear();
+    Clear();  
 }
 
 void wxClipboard::Clear()
@@ -215,7 +220,7 @@ void wxClipboard::Clear()
 bool wxClipboard::Open()
 {
     wxCHECK_MSG( !m_open, false, "clipboard already open" );
-
+  
     m_open = true;
 
     return true;
@@ -231,15 +236,15 @@ bool wxClipboard::SetData( wxDataObject *data )
     return AddData( data );
 }
 
-wxDECLARE_SCOPED_ARRAY( wxDataFormat, wxDataFormatScopedArray )
-wxDEFINE_SCOPED_ARRAY( wxDataFormat, wxDataFormatScopedArray )
+wxDECLARE_SCOPED_ARRAY( wxDataFormat, wxDataFormatScopedArray );
+wxDEFINE_SCOPED_ARRAY( wxDataFormat, wxDataFormatScopedArray );
 
 #if wxCHECK_LESSTIF()
 void wxClipboardCallback( Widget xwidget, int* data_id,
-                          int* priv, int* WXUNUSED(reason) )
+                          int* priv, int* reason )
 #else
 void wxClipboardCallback( Widget xwidget, long* data_id,
-                          long* priv, int* WXUNUSED(reason) )
+                          long* priv, int* reason )
 #endif
 {
     Display* xdisplay = XtDisplay( xwidget );
@@ -326,7 +331,7 @@ bool wxClipboard::AddData( wxDataObject *data )
 void wxClipboard::Close()
 {
     wxCHECK_RET( m_open, "clipboard not open" );
-
+    
     m_open = false;
 }
 
@@ -415,7 +420,7 @@ bool wxClipboard::GetData( wxDataObject& data )
     size_t dfcount = data.GetFormatCount( wxDataObject::Set );
     wxDataFormatScopedArray dfarr( new wxDataFormat[dfcount] );
     data.GetAllFormats( dfarr.get(), wxDataObject::Set );
-
+    
     if( XmClipboardInquireCount( xdisplay, xwindow, &count, &max_name_length )
         == XmClipboardSuccess )
     {

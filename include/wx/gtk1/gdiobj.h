@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/gdiobj.h
+// Name:        gdiobj.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,10 +7,15 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GDIOBJH__
 #define __GDIOBJH__
 
 #include "wx/object.h"
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 class WXDLLIMPEXP_CORE wxGDIObject : public wxObject
 {

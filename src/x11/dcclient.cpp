@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 #include "wx/dcclient.h"
 #include "wx/dcmemory.h"
 #include "wx/window.h"
@@ -1170,31 +1174,31 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     WXPixmap mask = NULL;
     if (use_bitmap.GetMask()) mask = use_bitmap.GetMask()->GetBitmap();
 
-    bool setClipMask = false;
+    bool b_setClipMask = false;
 
     if (!m_currentClippingRegion.IsNull() || (useMask && mask))
     {
         // XSetClipMask() call is necessary (because of clip region and/or transparent mask)
-        setClipMask = true;
+        b_setClipMask = true;
         Pixmap new_pixmap = 0;
-
+  
         if (!m_currentClippingRegion.IsNull())
         {
             // clipping necessary => create new_pixmap
             Display *xdisplay = (Display*) m_display;
             int xscreen = DefaultScreen( xdisplay );
             Window xroot = RootWindow( xdisplay, xscreen );
-
+    
             new_pixmap = XCreatePixmap( xdisplay, xroot, ww, hh, 1 );
             GC gc = XCreateGC( xdisplay, new_pixmap, 0, NULL );
-
+    
             XSetForeground( xdisplay, gc, BlackPixel(xdisplay,xscreen) );
-        
+            
             XSetFillStyle( xdisplay, gc, FillSolid );
             XFillRectangle( xdisplay, new_pixmap, gc, 0, 0, ww, hh );
-
+    
             XSetForeground( xdisplay, gc, WhitePixel(xdisplay,xscreen) );
-
+    
             if (useMask && mask)
             {
                 // transparent mask => call XSetStipple
@@ -1202,14 +1206,14 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                 XSetTSOrigin( xdisplay, gc, 0, 0);
                 XSetStipple( xdisplay, gc, (Pixmap) mask);
             }
-
+    
             wxCoord clip_x, clip_y, clip_w, clip_h;
             m_currentClippingRegion.GetBox(clip_x, clip_y, clip_w, clip_h);
             XFillRectangle( xdisplay, new_pixmap, gc, clip_x-xx, clip_y-yy, clip_w, clip_h );
-
+    
             XFreeGC( xdisplay, gc );
         }
-
+  
         if (is_mono)
         {
             if (new_pixmap)
@@ -1226,7 +1230,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                 XSetClipMask( (Display*) m_display, (GC) m_penGC, (Pixmap) mask );
             XSetClipOrigin( (Display*) m_display, (GC) m_penGC, xx, yy );
         }
-
+  
         if (new_pixmap)
             XFreePixmap( (Display*) m_display, new_pixmap );
     }
@@ -1241,7 +1245,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
             (GC) m_penGC, 0, 0, ww, hh, xx, yy );
 
     // remove mask again if any
-    if (setClipMask)
+    if (b_setClipMask)
     {
         if (is_mono)
         {

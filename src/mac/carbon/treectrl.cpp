@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/treectrl.cpp
+// Name:        treectrl.cpp
 // Purpose:     wxTreeCtrl. See also Robert's generic wxTreeCtrl.
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "treectrl.h"
+#endif
 
 #include "wx/wxprec.h"
 
@@ -15,10 +19,8 @@
 #include "wx/treebase.h"
 #include "wx/stubs/treectrl.h"
 
-
 IMPLEMENT_DYNAMIC_CLASS(wxTreeCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxTreeItem, wxObject)
-
 
 wxTreeCtrl::wxTreeCtrl()
 {
@@ -27,37 +29,39 @@ wxTreeCtrl::wxTreeCtrl()
     m_textCtrl = NULL;
 }
 
-bool wxTreeCtrl::Create(wxWindow *parent,
-    wxWindowID id, const wxPoint& pos, const wxSize& size,
-    long style, const wxValidator& validator, const wxString& name)
+bool wxTreeCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
+            long style, const wxValidator& validator, const wxString& name)
 {
+    SetName(name);
+    SetValidator(validator);
+
     m_imageListNormal = NULL;
     m_imageListState = NULL;
     m_textCtrl = NULL;
 
-    SetName(name);
-    SetValidator(validator);
-    SetParent(parent);
-
     m_windowStyle = style;
 
-    m_windowId = (id == wxID_ANY) ? NewControlId() : id;
+    SetParent(parent);
 
-    if (parent)
-        parent->AddChild(this);
+    m_windowId = (id == -1) ? NewControlId() : id;
 
-    // TODO: create tree control
+    if (parent) parent->AddChild(this);
 
-    return false;
+    // TODO create tree control
+
+    return FALSE;
 }
 
 wxTreeCtrl::~wxTreeCtrl()
 {
-    delete m_textCtrl;
+    if (m_textCtrl)
+    {
+        delete m_textCtrl;
+    }
 }
 
 // Attributes
-unsigned int wxTreeCtrl::GetCount() const
+int wxTreeCtrl::GetCount() const
 {
     // TODO
     return 0;
@@ -77,20 +81,26 @@ void wxTreeCtrl::SetIndent(int indent)
 wxImageList *wxTreeCtrl::GetImageList(int which) const
 {
     if ( which == wxIMAGE_LIST_NORMAL )
+    {
         return m_imageListNormal;
+    }
     else if ( which == wxIMAGE_LIST_STATE )
+    {
         return m_imageListState;
-
+    }
     return NULL;
 }
 
 void wxTreeCtrl::SetImageList(wxImageList *imageList, int which)
 {
     if ( which == wxIMAGE_LIST_NORMAL )
+    {
         m_imageListNormal = imageList;
+    }
     else if ( which == wxIMAGE_LIST_STATE )
+    {
         m_imageListState = imageList;
-
+    }
     // TODO
 }
 
@@ -103,7 +113,7 @@ long wxTreeCtrl::GetNextItem(long item, int code) const
 bool wxTreeCtrl::ItemHasChildren(long item) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 long wxTreeCtrl::GetChild(long item) const
@@ -145,20 +155,20 @@ long wxTreeCtrl::GetRootItem() const
 bool wxTreeCtrl::GetItem(wxTreeItem& info) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::SetItem(wxTreeItem& info)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 int wxTreeCtrl::GetItemState(long item, long stateMask) const
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_STATE;
+    info.m_mask = wxTREE_MASK_STATE ;
     info.m_stateMask = stateMask;
     info.m_itemId = item;
 
@@ -172,7 +182,7 @@ bool wxTreeCtrl::SetItemState(long item, long state, long stateMask)
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_STATE;
+    info.m_mask = wxTREE_MASK_STATE ;
     info.m_state = state;
     info.m_stateMask = stateMask;
     info.m_itemId = item;
@@ -184,14 +194,13 @@ bool wxTreeCtrl::SetItemImage(long item, int image, int selImage)
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_IMAGE;
+    info.m_mask = wxTREE_MASK_IMAGE ;
     info.m_image = image;
     if ( selImage > -1)
     {
         info.m_selectedImage = selImage;
         info.m_mask |= wxTREE_MASK_SELECTED_IMAGE;
     }
-
     info.m_itemId = item;
 
     return SetItem(info);
@@ -201,12 +210,11 @@ wxString wxTreeCtrl::GetItemText(long item) const
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_TEXT;
+    info.m_mask = wxTREE_MASK_TEXT ;
     info.m_itemId = item;
 
     if (!GetItem(info))
-        return wxEmptyString;
-
+        return wxString("");
     return info.m_text;
 }
 
@@ -214,7 +222,7 @@ void wxTreeCtrl::SetItemText(long item, const wxString& str)
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_TEXT;
+    info.m_mask = wxTREE_MASK_TEXT ;
     info.m_itemId = item;
     info.m_text = str;
 
@@ -225,12 +233,11 @@ long wxTreeCtrl::GetItemData(long item) const
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_DATA;
+    info.m_mask = wxTREE_MASK_DATA ;
     info.m_itemId = item;
 
     if (!GetItem(info))
         return 0;
-
     return info.m_data;
 }
 
@@ -238,7 +245,7 @@ bool wxTreeCtrl::SetItemData(long item, long data)
 {
     wxTreeItem info;
 
-    info.m_mask = wxTREE_MASK_DATA;
+    info.m_mask = wxTREE_MASK_DATA ;
     info.m_itemId = item;
     info.m_data = data;
 
@@ -248,10 +255,10 @@ bool wxTreeCtrl::SetItemData(long item, long data)
 bool wxTreeCtrl::GetItemRect(long item, wxRect& rect, bool textOnly) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
-wxTextCtrl * wxTreeCtrl::GetEditControl() const
+wxTextCtrl* wxTreeCtrl::GetEditControl() const
 {
     return m_textCtrl;
 }
@@ -260,7 +267,7 @@ wxTextCtrl * wxTreeCtrl::GetEditControl() const
 bool wxTreeCtrl::DeleteItem(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::ExpandItem(long item, int action)
@@ -270,50 +277,45 @@ bool wxTreeCtrl::ExpandItem(long item, int action)
     {
     case wxTREE_EXPAND_EXPAND:
         break;
-
+        
     case wxTREE_EXPAND_COLLAPSE:
         break;
-
+        
     case wxTREE_EXPAND_COLLAPSE_RESET:
         break;
-
+        
     case wxTREE_EXPAND_TOGGLE:
         break;
-
+        
     default:
-        wxFAIL_MSG(wxT("unknown action in wxTreeCtrl::ExpandItem");
+        wxFAIL_MSG("unknown action in wxTreeCtrl::ExpandItem");
     }
-
-    // TODO: expand item
-    bool bOk = false;
-
+    
+    bool bOk = FALSE; // TODO expand item
+    
     // May not send messages, so emulate them
-    if ( bOk )
-    {
+    if ( bOk ) {
         wxTreeEvent event(wxEVT_NULL, m_windowId);
-        event.m_item.m_itemId = item;
-        event.m_item.m_mask = event.m_item.m_stateMask = 0xFFFF; // get all
+        event.m_item.m_itemId  = item;
+        event.m_item.m_mask      =
+            event.m_item.m_stateMask = 0xffff; // get all
         GetItem(event.m_item);
-
+        
         bool bIsExpanded = (event.m_item.m_state & wxTREE_STATE_EXPANDED) != 0;
-
+        
         event.m_code = action;
         event.SetEventObject(this);
-
+        
         // @@@ return values of {EXPAND|COLLAPS}ING event handler is discarded
-        event.SetEventType(
-            bIsExpanded
-            ? wxEVT_COMMAND_TREE_ITEM_EXPANDING
+        event.SetEventType(bIsExpanded ? wxEVT_COMMAND_TREE_ITEM_EXPANDING
             : wxEVT_COMMAND_TREE_ITEM_COLLAPSING);
         GetEventHandler()->ProcessEvent(event);
-
-        event.SetEventType(
-            bIsExpanded
-            ? wxEVT_COMMAND_TREE_ITEM_EXPANDED
+        
+        event.SetEventType(bIsExpanded ? wxEVT_COMMAND_TREE_ITEM_EXPANDED
             : wxEVT_COMMAND_TREE_ITEM_COLLAPSED);
         GetEventHandler()->ProcessEvent(event);
     }
-
+    
     return bOk;
 }
 
@@ -323,8 +325,8 @@ long wxTreeCtrl::InsertItem(long parent, wxTreeItem& info, long insertAfter)
     return 0;
 }
 
-long wxTreeCtrl::InsertItem(long parent, const wxString& label,
-    int image, int selImage, long insertAfter)
+long wxTreeCtrl::InsertItem(long parent, const wxString& label, int image, int selImage,
+  long insertAfter)
 {
     wxTreeItem info;
     info.m_text = label;
@@ -345,22 +347,22 @@ long wxTreeCtrl::InsertItem(long parent, const wxString& label,
 bool wxTreeCtrl::SelectItem(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::ScrollTo(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::DeleteAllItems()
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
-wxTextCtrl * wxTreeCtrl::EditLabel(long item, wxClassInfo* textControlClass)
+wxTextCtrl* wxTreeCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 {
     // TODO
     return NULL;
@@ -370,7 +372,7 @@ wxTextCtrl * wxTreeCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 bool wxTreeCtrl::EndEditLabel(bool cancel)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 long wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
@@ -382,13 +384,13 @@ long wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
 bool wxTreeCtrl::SortChildren(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::EnsureVisible(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Tree item structure
@@ -407,9 +409,10 @@ wxTreeItem::wxTreeItem()
 // Tree event
 IMPLEMENT_DYNAMIC_CLASS(wxTreeEvent, wxCommandEvent)
 
-wxTreeEvent::wxTreeEvent(wxEventType commandType, int id)
-    : wxCommandEvent(commandType, id)
+wxTreeEvent::wxTreeEvent(wxEventType commandType, int id):
+  wxCommandEvent(commandType, id)
 {
     m_code = 0;
     m_oldItem = 0;
 }
+

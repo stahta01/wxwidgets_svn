@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      David Webster
 // Modified by:

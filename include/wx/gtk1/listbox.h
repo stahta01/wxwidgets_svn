@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/listbox.h
+// Name:        listbox.h
 // Purpose:     wxListBox class declaration
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKLISTBOXH__
 #define __GTKLISTBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "listbox.h"
+#endif
 
 #include "wx/list.h"
 
@@ -32,7 +37,7 @@ public:
             const wxString& name = wxListBoxNameStr )
     {
 #if wxUSE_CHECKLISTBOX
-        m_hasCheckBoxes = false;
+        m_hasCheckBoxes = FALSE;
 #endif // wxUSE_CHECKLISTBOX
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
@@ -45,7 +50,7 @@ public:
             const wxString& name = wxListBoxNameStr )
     {
 #if wxUSE_CHECKLISTBOX
-        m_hasCheckBoxes = false;
+        m_hasCheckBoxes = FALSE;
 #endif // wxUSE_CHECKLISTBOX
         Create(parent, id, pos, size, choices, style, validator, name);
     }
@@ -68,12 +73,12 @@ public:
 
     // implement base class pure virtuals
     virtual void Clear();
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 
-    virtual unsigned int GetCount() const;
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int GetCount() const;
+    virtual wxString GetString(int n) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual int FindString(const wxString& s) const;
 
     virtual bool IsSelected(int n) const;
     virtual void DoSetSelection(int n, bool select);
@@ -81,19 +86,19 @@ public:
     virtual int GetSelections(wxArrayInt& aSelections) const;
 
     virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
     virtual void DoSetItems(const wxArrayString& items, void **clientData);
 
     virtual void DoSetFirstItem(int n);
 
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation from now on
 
     void GtkAddItem( const wxString &item, int pos=-1 );

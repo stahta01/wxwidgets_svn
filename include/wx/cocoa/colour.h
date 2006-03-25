@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/colour.h
+// Name:        colour.h
 // Purpose:     wxColour class
 // Author:      David Elliott
 // Modified by:
@@ -21,18 +21,12 @@
 class WXDLLEXPORT wxColour: public wxObject
 {
 public:
-    // constructors
-    // ------------
-
-    // default
     wxColour() { Init(); }
 
-    // from separate RGB
+    // from RGB
     wxColour( unsigned char red, unsigned char green, unsigned char blue )
     :   m_cocoaNSColor(NULL)
     {   Set(red,green,blue); }
-
-    // from packed RGB
     wxColour( unsigned long colRGB )
     :   m_cocoaNSColor(NULL)
     {   Set(colRGB); }

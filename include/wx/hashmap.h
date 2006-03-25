@@ -12,6 +12,10 @@
 #ifndef _WX_HASHMAP_H_
 #define _WX_HASHMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "hashmap.h"
+#endif
+
 #include "wx/string.h"
 
 #if (defined(HAVE_EXT_HASH_MAP) || defined(HAVE_HASH_MAP)) \
@@ -34,7 +38,7 @@
 #endif
 
 #define _WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP ) \
-    typedef WX_HASH_MAP_NAMESPACE::hash_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME
+    typedef WX_HASH_MAP_NAMESPACE::hash_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME;
 
 #else // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
@@ -344,11 +348,10 @@ protected: \
         { \
             if( m_equals( m_getKey( (*node)->m_value ), key ) ) \
                 return node; \
-            /* Tell the compiler to not do any strict-aliasing assumptions with a void cast? Can we make such a runtime guarantee? */ \
             node = (Node**)&(*node)->m_nxt; \
         } \
  \
-        return NULL; \
+        return 0; \
     } \
  \
     /* returns NULL if not found */ \

@@ -24,8 +24,6 @@
 #include "wx/longlong.h"
 #include "wx/timer.h"
 
-#if wxUSE_LONGLONG
-
 // ----------------------------------------------------------------------------
 // helpers for testing
 // ----------------------------------------------------------------------------
@@ -324,4 +322,3 @@ void LongLongTestCase::ToString()
 
 }
 
-#endif // wxUSE_LONGLONG

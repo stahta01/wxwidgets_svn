@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/fontdlgg.h
+// Name:        fontdlgg.h
 // Purpose:     wxFontDialog
 // Author:      Robert Roebling
 // Created:
@@ -10,6 +10,10 @@
 
 #ifndef __GTK_FONTDLGH__
 #define __GTK_FONTDLGH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fontdlg.h"
+#endif
 
 //-----------------------------------------------------------------------------
 // wxFontDialog

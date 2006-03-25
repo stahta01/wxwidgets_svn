@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/spinctrl.h
+// Name:        spinctrl.h
 // Purpose:     wxSpinCtrl class
 // Author:      Robert Roebling
 // Modified by:
@@ -10,6 +10,10 @@
 
 #ifndef __GTKSPINCTRLH__
 #define __GTKSPINCTRLH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -57,10 +61,10 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
     void OnChar( wxKeyEvent &event );
-
+    
     bool IsOwnGtkWindow( GdkWindow *window );
     void GtkDisableEvents();
     void GtkEnableEvents();

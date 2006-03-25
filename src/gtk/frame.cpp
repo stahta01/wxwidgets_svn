@@ -15,6 +15,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -47,6 +51,13 @@
 
 const int wxSTATUS_HEIGHT  = 25;
 const int wxPLACE_HOLDER   = 0;
+
+// ----------------------------------------------------------------------------
+// idle system
+// ----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -173,12 +184,11 @@ static void wxInsertChildInFrame( wxFrame* parent, wxWindow* child )
             wxToolBar *toolBar = (wxToolBar*) child;
             if (toolBar->GetWindowStyle() & wxTB_DOCKABLE)
             {
-                g_signal_connect (toolBar->m_widget, "child_attached",
-                                  G_CALLBACK (gtk_toolbar_attached_callback),
-                                  parent);
-                g_signal_connect (toolBar->m_widget, "child_detached",
-                                  G_CALLBACK (gtk_toolbar_detached_callback),
-                                  parent);
+                gtk_signal_connect( GTK_OBJECT(toolBar->m_widget), "child_attached",
+                    GTK_SIGNAL_FUNC(gtk_toolbar_attached_callback), (gpointer)parent );
+
+                gtk_signal_connect( GTK_OBJECT(toolBar->m_widget), "child_detached",
+                    GTK_SIGNAL_FUNC(gtk_toolbar_detached_callback), (gpointer)parent );
             }
         }
 #endif // wxUSE_TOOLBAR
@@ -483,12 +493,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
         gtk_pizza_set_size( GTK_PIZZA(m_wxwindow),
                             m_frameStatusBar->m_widget,
                             xx, yy, ww, hh );
-        if (GTK_WIDGET_DRAWABLE (m_frameStatusBar->m_widget))
-        {
-            gtk_widget_queue_draw (m_frameStatusBar->m_widget);
-            // FIXME: Do we really want to force an immediate redraw?
-            gdk_window_process_updates (m_frameStatusBar->m_widget->window, TRUE);
-        }
+        gtk_widget_draw( m_frameStatusBar->m_widget, (GdkRectangle*) NULL );
     }
 #endif // wxUSE_STATUSBAR
 
@@ -557,13 +562,11 @@ void wxFrame::DetachMenuBar()
 
         if (m_frameMenuBar->GetWindowStyle() & wxMB_DOCKABLE)
         {
-            g_signal_handlers_disconnect_by_func (m_frameMenuBar->m_widget,
-                    (gpointer) gtk_menu_attached_callback,
-                    this);
+            gtk_signal_disconnect_by_func( GTK_OBJECT(m_frameMenuBar->m_widget),
+                GTK_SIGNAL_FUNC(gtk_menu_attached_callback), (gpointer)this );
 
-            g_signal_handlers_disconnect_by_func (m_frameMenuBar->m_widget,
-                    (gpointer) gtk_menu_detached_callback,
-                    this);
+            gtk_signal_disconnect_by_func( GTK_OBJECT(m_frameMenuBar->m_widget),
+                GTK_SIGNAL_FUNC(gtk_menu_detached_callback), (gpointer)this );
         }
 
         gtk_widget_ref( m_frameMenuBar->m_widget );
@@ -592,12 +595,11 @@ void wxFrame::AttachMenuBar( wxMenuBar *menuBar )
 
         if (menuBar->GetWindowStyle() & wxMB_DOCKABLE)
         {
-            g_signal_connect (menuBar->m_widget, "child_attached",
-                              G_CALLBACK (gtk_menu_attached_callback),
-                              this);
-            g_signal_connect (menuBar->m_widget, "child_detached",
-                              G_CALLBACK (gtk_menu_detached_callback),
-                              this);
+            gtk_signal_connect( GTK_OBJECT(menuBar->m_widget), "child_attached",
+                GTK_SIGNAL_FUNC(gtk_menu_attached_callback), (gpointer)this );
+
+            gtk_signal_connect( GTK_OBJECT(menuBar->m_widget), "child_detached",
+                GTK_SIGNAL_FUNC(gtk_menu_detached_callback), (gpointer)this );
         }
 
         gtk_widget_show( m_frameMenuBar->m_widget );

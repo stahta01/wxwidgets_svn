@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/frame.h
+// Name:        wx/gtk/frame.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFRAMEH__
 #define __GTKFRAMEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "frame.h"
+#endif
 
 //-----------------------------------------------------------------------------
 // classes
@@ -60,7 +65,7 @@ public:
                                          long style = wxST_SIZEGRIP|wxFULL_REPAINT_ON_RESIZE,
                                          wxWindowID id = 0,
                                          const wxString& name = wxStatusLineNameStr);
-
+                                         
     void SetStatusBar(wxStatusBar *statbar);
 #endif // wxUSE_STATUSBAR
 
@@ -70,7 +75,7 @@ public:
                                      const wxString& name = wxToolBarNameStr);
     void SetToolBar(wxToolBar *toolbar);
 #endif // wxUSE_TOOLBAR
-
+    
     wxPoint GetClientAreaOrigin() const { return wxPoint(0, 0); }
 
     // implementation from now on

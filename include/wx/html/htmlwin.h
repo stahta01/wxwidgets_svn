@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLWIN_H_
 #define _WX_HTMLWIN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlwin.h"
+#endif
 
 #include "wx/defs.h"
 #if wxUSE_HTML
@@ -16,7 +21,6 @@
 #include "wx/window.h"
 #include "wx/scrolwin.h"
 #include "wx/config.h"
-#include "wx/stopwatch.h"
 #include "wx/html/winpars.h"
 #include "wx/html/htmlcell.h"
 #include "wx/filesys.h"
@@ -86,7 +90,7 @@ public:
     // it is NOT address/filename of HTML document. If you want to
     // specify document location, use LoadPage() istead
     // Return value : false if an error occurred, true otherwise
-    virtual bool SetPage(const wxString& source);
+    bool SetPage(const wxString& source);
 
     // Append to current page
     bool AppendToPage(const wxString& source);
@@ -124,7 +128,7 @@ public:
 #endif // wxUSE_STATUSBAR
 
     // Sets fonts to be used when displaying HTML page.
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face,
+    void SetFonts(wxString normal_face, wxString fixed_face,
                   const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system
@@ -214,8 +218,6 @@ public:
     wxString ToText();
 #endif // wxUSE_CLIPBOARD
 
-    virtual void OnInternalIdle();
-
 protected:
     void Init();
 
@@ -243,6 +245,8 @@ protected:
     void OnMouseLeave(wxMouseEvent& event);
 #endif // wxUSE_CLIPBOARD
 
+    virtual void OnInternalIdle();
+
     // Returns new filter (will be stored into m_DefaultFilter variable)
     virtual wxHtmlFilter *GetDefaultFilter() {return new wxHtmlFilterPlainText;}
 
@@ -269,13 +273,9 @@ protected:
     void StopAutoScrolling();
 #endif // wxUSE_CLIPBOARD
 
+protected:
     wxString DoSelectionToText(wxHtmlSelection *sel);
 
-private:
-    // implementation of SetPage()
-    bool DoSetPage(const wxString& source);
-
-protected:
     // This is pointer to the first cell in parsed data.  (Note: the first cell
     // is usually top one = all other cells are sub-cells of this one)
     wxHtmlContainerCell *m_Cell;
@@ -315,7 +315,7 @@ protected:
 #if wxUSE_CLIPBOARD
     // time of the last doubleclick event, used to detect tripleclicks
     // (tripleclicks are used to select whole line):
-    wxMilliClock_t m_lastDoubleClick;
+    wxLongLong m_lastDoubleClick;
 
     // helper class to automatically scroll the window if the user is selecting
     // text and the mouse leaves wxHtmlWindow:

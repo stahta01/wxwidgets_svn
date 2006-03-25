@@ -582,11 +582,11 @@ public:
     void SetStateImageList(wxImageList *imageList);
     void SetButtonsImageList(wxImageList *imageList);
 
-    %disownarg( wxImageList *imageList );
+    %apply SWIGTYPE *DISOWN { wxImageList *imageList };
     void AssignImageList(wxImageList *imageList);
     void AssignStateImageList(wxImageList *imageList);
     void AssignButtonsImageList(wxImageList *imageList);
-    %cleardisown( wxImageList *imageList );
+    %clear wxImageList *imageList;
 
 
     // adds a column

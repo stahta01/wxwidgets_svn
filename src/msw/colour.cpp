@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -80,6 +84,22 @@ void wxColour::Init()
     m_green = 0;
 }
 
+wxColour::wxColour(const wxColour& col)
+         :wxObject()
+{
+    *this = col;
+}
+
+wxColour& wxColour::operator=(const wxColour& col)
+{
+    m_red = col.m_red;
+    m_green = col.m_green;
+    m_blue = col.m_blue;
+    m_isInit = col.m_isInit;
+    m_pixel = col.m_pixel;
+    return *this;
+}
+
 void wxColour::InitFromName(const wxString& name)
 {
     if ( wxTheColourDatabase )
@@ -108,3 +128,4 @@ void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
     m_isInit = true;
     m_pixel = PALETTERGB(m_red, m_green, m_blue);
 }
+

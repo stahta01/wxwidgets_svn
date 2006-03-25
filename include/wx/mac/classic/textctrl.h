@@ -12,9 +12,13 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "textctrl.h"
+#endif
+
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxTextCtrlNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlNameStr;
 
 // Single-line text item
 class WXDLLEXPORT wxTextCtrl: public wxTextCtrlBase

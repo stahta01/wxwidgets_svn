@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/popupwin.h
+// Name:        popupwin.h
 // Purpose:
 // Author:      Robert Roebling
 // Created:
@@ -10,6 +10,10 @@
 
 #ifndef __GTKPOPUPWINH__
 #define __GTKPOPUPWINH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "popupwin.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/panel.h"

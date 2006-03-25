@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKRADIOBUTTONH__
 #define __GTKRADIOBUTTONH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 //-----------------------------------------------------------------------------
 // wxRadioButton
@@ -51,13 +56,14 @@ public:
 
     virtual bool IsRadioButton() const { return TRUE; }
 
+    GSList *m_radioButtonGroup;
+    void DoApplyWidgetStyle(GtkRcStyle *style);
     bool IsOwnGtkWindow( GdkWindow *window );
     void OnInternalIdle();
 
     bool m_blockEvent;
 
 protected:
-    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual wxSize DoGetBestSize() const;
 
 private:

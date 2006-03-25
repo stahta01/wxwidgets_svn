@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/dataobj.h
+// Name:        gtk/dataobj.h
 // Purpose:     declaration of the wxDataObject
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -9,6 +9,10 @@
 
 #ifndef _WX_GTK_DATAOBJ_H_
 #define _WX_GTK_DATAOBJ_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dataobj.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxDataObject is the same as wxDataObjectBase under wxGTK

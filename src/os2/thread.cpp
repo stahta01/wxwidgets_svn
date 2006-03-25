@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "thread.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -381,9 +385,11 @@ private:
     unsigned int                    m_nPriority;  // thread priority in "wx" units
 };
 
-void wxThreadInternal::OS2ThreadStart( void * pParam )
+void wxThreadInternal::OS2ThreadStart(
+  void * pParam
+)
 {
-    DWORD dwRet;
+    DWORD                           dwRet;
     bool bWasCancelled;
 
     wxThread *pThread = (wxThread *)pParam;

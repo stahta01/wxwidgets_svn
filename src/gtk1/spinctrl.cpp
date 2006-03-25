@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "spinctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -19,7 +23,7 @@
 
 #include "wx/textctrl.h"    // for wxEVT_COMMAND_TEXT_UPDATED
 #include "wx/math.h"
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // idle system
@@ -77,7 +81,7 @@ gtk_spinctrl_text_changed_callback( GtkWidget *WXUNUSED(widget), wxSpinCtrl *win
 
     wxCommandEvent event( wxEVT_COMMAND_TEXT_UPDATED, win->GetId() );
     event.SetEventObject( win );
-
+    
     // see above
     event.SetInt( (int)ceil(win->m_adjust->value) );
     win->GetEventHandler()->ProcessEvent( event );
@@ -116,12 +120,12 @@ bool wxSpinCtrl::Create(wxWindow *parent, wxWindowID id,
     m_adjust = (GtkAdjustment*) gtk_adjustment_new( initial, min, max, 1.0, 5.0, 0.0);
 
     m_widget = gtk_spin_button_new( m_adjust, 1, 0 );
-
+    
     gtk_spin_button_set_wrap( GTK_SPIN_BUTTON(m_widget),
                               (int)(m_windowStyle & wxSP_WRAP) );
 
     GtkEnableEvents();
-
+    
     m_parent->DoAddChild( this );
 
     PostCreation(size);
@@ -148,7 +152,7 @@ void wxSpinCtrl::GtkEnableEvents()
                         "value_changed",
                         GTK_SIGNAL_FUNC(gtk_spinctrl_callback),
                         (gpointer) this );
-
+    
     gtk_signal_connect( GTK_OBJECT(m_widget),
                         "changed",
                         GTK_SIGNAL_FUNC(gtk_spinctrl_text_changed_callback),
@@ -290,7 +294,7 @@ void wxSpinCtrl::OnChar( wxKeyEvent &event )
 bool wxSpinCtrl::IsOwnGtkWindow( GdkWindow *window )
 {
     if (GTK_SPIN_BUTTON(m_widget)->entry.text_area == window) return TRUE;
-
+    
     if (GTK_SPIN_BUTTON(m_widget)->panel == window) return TRUE;
 
     return FALSE;

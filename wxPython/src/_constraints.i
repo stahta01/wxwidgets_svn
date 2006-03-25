@@ -233,7 +233,6 @@ button label.", "");
         "is not determinable, -1.", "");
 };
 
-
 DocStr(wxLayoutConstraints,
 "**Note:** constraints are now deprecated and you should use sizers
 instead.
@@ -290,8 +289,6 @@ public:
     DocCtorStr(
         wxLayoutConstraints(),
         "", "");
-
-    ~wxLayoutConstraints();
     
     DocDeclA(
         bool, SatisfyConstraints(wxWindow *win, int *OUTPUT),

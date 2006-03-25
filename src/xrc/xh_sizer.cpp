@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_sizer.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -200,11 +204,6 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
     else if (m_class == wxT("wxGridBagSizer"))
         sizer = Handle_wxGridBagSizer();
 
-    if ( !sizer )
-    {
-        wxLogError(_T("Failed to create size of class \"%s\""), m_class.c_str());
-        return NULL;
-    }
 
     wxSize minsize = GetSize(wxT("minsize"));
     if (!(minsize == wxDefaultSize))

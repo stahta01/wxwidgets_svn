@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "timer.h"
+#endif
+
 #include "wx/timer.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)

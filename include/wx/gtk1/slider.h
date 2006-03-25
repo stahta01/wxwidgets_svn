@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk1/slider.h
+// Name:        wx/gtk/slider.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,10 @@
 
 #ifndef __GTKSLIDERH__
 #define __GTKSLIDERH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 // ----------------------------------------------------------------------------
 // wxSlider
@@ -58,7 +62,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
     bool IsOwnGtkWindow( GdkWindow *window );
     void GtkDisableEvents();

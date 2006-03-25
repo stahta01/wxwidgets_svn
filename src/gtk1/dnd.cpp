@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dnd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -22,7 +26,7 @@
 #include "wx/intl.h"
 #include "wx/utils.h"
 
-#include "wx/gtk1/private.h"
+#include "wx/gtk/private.h"
 
 #include <gdk/gdkprivate.h>
 
@@ -359,7 +363,7 @@ static gboolean target_drag_drop( GtkWidget *widget,
         GdkAtom format = drop_target->GetMatchingPair();
 
         // this does happen somehow, see bug 555111
-        wxCHECK_MSG( format, FALSE, _T("no matching GdkAtom for format?") );
+        wxCHECK_MSG( format, FALSE, _T("no matching GdkAtom for format?") )
 
 /*
         GdkDragAction action = GDK_ACTION_MOVE;
@@ -506,7 +510,7 @@ GdkAtom wxDropTarget::GetMatchingPair()
     GList *child = m_dragContext->targets;
     while (child)
     {
-        GdkAtom formatAtom = GPOINTER_TO_INT(child->data);
+        GdkAtom formatAtom = (GdkAtom) GPOINTER_TO_INT(child->data);
         wxDataFormat format( formatAtom );
 
 #ifdef __WXDEBUG__
@@ -817,14 +821,18 @@ void wxDropSource::PrepareIcon( int action, GdkDragContext *context )
     gdk_window_get_size (pixmap, &width, &height);
 
     GdkColormap *colormap = gtk_widget_get_colormap( m_widget );
+#ifndef __WXGTK20__
     gtk_widget_push_visual (gdk_colormap_get_visual (colormap));
+#endif
     gtk_widget_push_colormap (colormap);
 
     m_iconWindow = gtk_window_new (GTK_WINDOW_POPUP);
     gtk_widget_set_events (m_iconWindow, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
     gtk_widget_set_app_paintable (GTK_WIDGET (m_iconWindow), TRUE);
 
+#ifndef __WXGTK20__
     gtk_widget_pop_visual ();
+#endif
     gtk_widget_pop_colormap ();
 
     gtk_widget_set_usize (m_iconWindow, width, height);

@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dataobj.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -282,9 +286,9 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
                 AddFile(wxURI::Unescape(filename.c_str() + lenPrefix));
                 filename.Empty();
             }
-            else if ( !filename.empty() )
+            else
             {
-                wxLogDebug(_T("Unsupported URI \"%s\" in wxFileDataObject"),
+                wxLogDebug(_T("Unsupported URI '%s' in wxFileDataObject"),
                            filename.c_str());
             }
 

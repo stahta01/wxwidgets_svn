@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_SPINCTRL_H_
 #define _WX_MSW_SPINCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "spinctrl.h"
+#endif
+
 #include "wx/spinbutt.h"    // the base class
 
 #if wxUSE_SPINCTRL
@@ -102,7 +106,6 @@ protected:
     // Handle processing of special keys
     void OnChar(wxKeyEvent& event);
     void OnSetFocus(wxFocusEvent& event);
-    void OnKillFocus(wxFocusEvent& event);
 
     // the data for the "buddy" text ctrl
     WXHWND     m_hwndBuddy;

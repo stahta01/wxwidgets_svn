@@ -8,6 +8,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "settings.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -16,12 +21,6 @@
 #include "wx/cmndata.h"
 #include "wx/fontutil.h"
 #include "wx/toplevel.h"
-
-// Using gtk_list_new, which is deprecated since GTK2
-// Using gtk_object_sink, which is deprecated since GTK+-2.9.0
-#ifdef GTK_DISABLE_DEPRECATED
-#undef GTK_DISABLE_DEPRECATED
-#endif
 
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
@@ -350,23 +349,24 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
         {
             if (!gs_objects.m_fontSystem.Ok())
             {
+#ifdef __WXGTK20__
                 GtkWidget *widget = gtk_button_new();
                 GtkStyle *def = gtk_rc_get_style( widget );
                 if ( !def || !def->font_desc )
-                    def = gtk_widget_get_default_style();
+                    def = gtk_widget_get_default_style();  
                 if ( def && def->font_desc )
-                {
-                    wxNativeFontInfo info;
-                    info.description =
+                {  
+                    wxNativeFontInfo info;  
+                    info.description = 
                         pango_font_description_copy(def->font_desc);
-                    gs_objects.m_fontSystem = wxFont(info);
-                }
-                else
-                {
+                    gs_objects.m_fontSystem = wxFont(info);  
+                }  
+                else  
+                {  
                     GtkSettings *settings = gtk_settings_get_default();
                     gchar *font_name = NULL;
                     g_object_get ( settings,
-                                   "gtk-font-name",
+                                   "gtk-font-name", 
                                    &font_name,
                                    NULL);
                     if (!font_name)
@@ -374,8 +374,11 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
                     else
                         gs_objects.m_fontSystem = wxFont(wxString::FromAscii(font_name));
                     g_free (font_name);
-                }
+                }  
                 gtk_widget_destroy( widget );
+#else
+                gs_objects.m_fontSystem = wxFont( 12, wxSWISS, wxNORMAL, wxNORMAL );
+#endif
             }
             return gs_objects.m_fontSystem;
         }
@@ -387,15 +390,18 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
 
 int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 {
+#ifdef __WXGTK20__
     bool success = false;
-
+            
     guchar *data = NULL;
     GdkWindow *window = NULL;
     if(win && GTK_WIDGET_REALIZED(win->GetHandle()))
         window = win->GetHandle()->window;
+#endif
 
     switch (index)
     {
+#ifdef __WXGTK20__
         case wxSYS_BORDER_X:
         case wxSYS_BORDER_Y:
         case wxSYS_EDGE_X:
@@ -427,15 +433,15 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
                         if (!gdk_net_wm_supports(gdk_atom_intern("_NET_FRAME_EXTENTS", false)))
                             return -1;
                     }
-
+    
                     // Get the frame extents from the windowmanager.
                     // In most cases the top extent is the titlebar, so we use the bottom extent
                     // for the heights.
-
+    
                     Atom type;
                     gint format;
                     gulong nitems;
-
+                    
 #if GTK_CHECK_VERSION(2,2,0)
                     if (!gtk_check_version(2,2,0))
                     {
@@ -483,6 +489,7 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
             }
 
             return -1; // no window specified
+#endif // gtk2
 
         case wxSYS_CURSOR_X:
         case wxSYS_CURSOR_Y:
@@ -498,6 +505,7 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 #endif
                 return 16;
 
+#ifdef __WXGTK20__
         case wxSYS_DCLICK_X:
         case wxSYS_DCLICK_Y:
             gint dclick_distance;
@@ -511,7 +519,9 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
                                 "gtk-double-click-distance", &dclick_distance, NULL);
 
             return dclick_distance * 2;
+#endif // gtk2
 
+#ifdef __WXGTK20__
         case wxSYS_DRAG_X:
         case wxSYS_DRAG_Y:
             gint drag_threshold;
@@ -531,6 +541,7 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
             }
 
             return drag_threshold * 2;
+#endif
 
         // MBN: ditto for icons
         case wxSYS_ICON_X:     return 32;
@@ -555,6 +566,8 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
         case wxSYS_HSCROLL_Y:  return 15;
         case wxSYS_VSCROLL_X:  return 15;
 
+// a gtk1 implementation should be possible too if gtk2 efficiency/convenience functions aren't used
+#ifdef __WXGTK20__
         case wxSYS_CAPTION_Y:
             if (!window)
                 // No realized window specified, and no implementation for that case yet.
@@ -627,6 +640,7 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
             // ...
 
             return -1;
+#endif // gtk2
 
         case wxSYS_PENWINDOWS_PRESENT:
             // No MS Windows for Pen computing extension available in X11 based gtk+.
@@ -641,12 +655,12 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
 {
     switch (index)
     {
-        case wxSYS_CAN_ICONIZE_FRAME:
-            return FALSE;
-
+        case wxSYS_CAN_ICONIZE_FRAME: 
+            return FALSE; 
+            break;
         case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return TRUE;
-
+            return TRUE; 
+            break;
         default:
             return FALSE;
     }
