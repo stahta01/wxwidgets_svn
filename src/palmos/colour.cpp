@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 #include "wx/colour.h"
@@ -106,8 +110,5 @@ wxColour::~wxColour()
 
 void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
 {
-    m_red = r;
-    m_green = g;
-    m_blue = b;
-    m_isInit = true;
 }
+

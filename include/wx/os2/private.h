@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -20,44 +20,7 @@
 #define INCL_WINSYS
 #define INCL_SHLERRORS
 #define INCL_DOS
-#define INCL_WINATOM
-#define INCL_WIN
 #include <os2.h>
-
-#if wxONLY_WATCOM_EARLIER_THAN(1,4)
-    inline HATOMTBL APIENTRY WinQuerySystemAtomTable(VOID){return NULL;}
-    inline ULONG APIENTRY WinQueryAtomName(HATOMTBL,ATOM,PCSZ,ULONG){return 0;}
-    inline LONG APIENTRY GpiPointArc(HPS,PPOINTL){return GPI_ERROR;}
-    inline BOOL APIENTRY WinDrawPointer(HPS,LONG,LONG,HPOINTER,ULONG){return FALSE;}
-    inline HPOINTER APIENTRY WinCreatePointerIndirect(HWND,PPOINTERINFO){return NULLHANDLE;}
-    inline BOOL APIENTRY WinGetMaxPosition(HWND,PSWP){return FALSE;}
-    inline BOOL APIENTRY WinGetMinPosition(HWND,PSWP,PPOINTL){return FALSE;}
-#endif
-
-#if defined(__WATCOMC__) && defined(__WXMOTIF__)
-    #include <os2def.h>
-    #define I_NEED_OS2_H
-    #include <X11/Xmd.h>
-
-    // include this header from here for many of the GUI related code
-    #if wxUSE_GUI
-        extern "C" {
-            #include <Xm/VendorSP.h>
-        }
-    #endif
-
-    // provide Unix-like pipe()
-    #include <types.h>
-    #include <tcpustd.h>
-    #include <sys/time.h>
-    // Use ::DosCreatePipe or ::DosCreateNPipe under OS/2
-    // for more see http://posix2.sourceforge.net/guide.html
-    inline int pipe( int WXUNUSED(filedes)[2] )
-    {
-        wxFAIL_MSG(wxT("Implement first"));
-        return -1;
-    }
-#endif
 
 #if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS) && !defined(HAVE_SPBCDATA)
 
@@ -74,7 +37,6 @@
 
 #endif
 
-#include "wx/dlimpexp.h"
 #include "wx/fontenc.h"
 
 class WXDLLEXPORT wxFont;
@@ -93,42 +55,42 @@ class WXDLLEXPORT wxBitmap;
 //
 // Controls
 //
-WXDLLEXPORT_DATA(extern const wxChar) wxButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxCanvasNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxCheckBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxChoiceNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxComboBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFrameNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxGaugeNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxListBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticTextNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticBitmapNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxMultiTextNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxPanelNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxRadioBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxRadioButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxBitmapRadioButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxScrollBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxSliderNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxTextCtrlWindowNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxTextCtrlNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxVirtListBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxButtonBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxEnhDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStatusLineNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxGetTextFromUserPromptStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxMessageBoxCaptionStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFileSelectorPromptStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFileSelectorDefaultWildcardStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxCanvasNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxCheckBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxChoiceNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxComboBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxGaugeNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxListBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticTextNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBitmapNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMultiTextNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxRadioBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxRadioButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxBitmapRadioButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxScrollBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlWindowNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxVirtListBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxEnhDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxGetTextFromUserPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFileSelectorPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFileSelectorDefaultWildcardStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxInternalErrorStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxFatalErrorStr;
-WXDLLEXPORT_DATA(extern const wxChar) wxTreeCtrlNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDirDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDirDialogDefaultFolderStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxTreeCtrlNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogDefaultFolderStr;
 
 //
 // Class names
@@ -388,7 +350,7 @@ WXDLLEXPORT extern wxString wxGetWindowClass(WXHWND hWnd);
 WXDLLEXPORT extern WXWORD wxGetWindowId(WXHWND hWnd);
 
 // Convert a PM Error code to a string
-WXDLLIMPEXP_BASE extern wxString wxPMErrorToStr(ERRORID vError);
+WXDLLEXPORT extern wxString wxPMErrorToStr(ERRORID vError);
 
 // Does this window style specify any border?
 inline bool wxStyleHasBorder(long style)
@@ -423,4 +385,4 @@ WXDLLEXPORT extern COLORREF wxColourToRGB(const wxColour& rColor);
 
 #endif // __WXPM__
 
-#endif // _WX_OS2_PRIVATE_H_
+#endif // _WX_PRIVATE_H_

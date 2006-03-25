@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gdiimage.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -48,7 +52,7 @@
 #include "wx/file.h"
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxGDIImageHandlerList)
+WX_DEFINE_LIST(wxGDIImageHandlerList);
 
 // ----------------------------------------------------------------------------
 // private classes

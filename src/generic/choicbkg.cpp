@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/choicbkg.cpp
+// Name:        generic/choicbkg.cpp
 // Purpose:     generic implementation of wxChoicebook
 // Author:      Vadim Zeitlin
 // Modified by: Wlodzimierz ABX Skiba from generic/listbkg.cpp
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicebook.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -32,6 +36,17 @@
 #include "wx/settings.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// margin between the choice and the page
+#if defined(__WXWINCE__)
+const wxCoord MARGIN = 1;
+#else
+const wxCoord MARGIN = 5;
+#endif
+
+// ----------------------------------------------------------------------------
 // various wxWidgets macros
 // ----------------------------------------------------------------------------
 
@@ -42,7 +57,7 @@
 // event table
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxChoicebook, wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxChoicebook, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxChoicebookEvent, wxNotifyEvent)
 
 const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING = wxNewEventType();
@@ -50,6 +65,7 @@ const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED = wxNewEventType();
 const int wxID_CHOICEBOOKCHOICE = wxNewId();
 
 BEGIN_EVENT_TABLE(wxChoicebook, wxBookCtrlBase)
+    EVT_SIZE(wxChoicebook::OnSize)
     EVT_CHOICE(wxID_CHOICEBOOKCHOICE, wxChoicebook::OnChoiceSelected)
 END_EVENT_TABLE()
 
@@ -63,6 +79,7 @@ END_EVENT_TABLE()
 
 void wxChoicebook::Init()
 {
+    m_choice = NULL;
     m_selection = wxNOT_FOUND;
 }
 
@@ -74,9 +91,9 @@ wxChoicebook::Create(wxWindow *parent,
                      long style,
                      const wxString& name)
 {
-    if ( (style & wxBK_ALIGN_MASK) == wxBK_DEFAULT )
+    if ( (style & wxCHB_ALIGN_MASK) == wxCHB_DEFAULT )
     {
-        style |= wxBK_TOP;
+        style |= wxCHB_TOP;
     }
 
     // no border for this control, it doesn't look nice together with
@@ -88,7 +105,7 @@ wxChoicebook::Create(wxWindow *parent,
                             wxDefaultValidator, name) )
         return false;
 
-    m_bookctrl = new wxChoice
+    m_choice = new wxChoice
                  (
                     this,
                     wxID_CHOICEBOOKCHOICE,
@@ -103,10 +120,10 @@ wxChoicebook::Create(wxWindow *parent,
 // wxChoicebook geometry management
 // ----------------------------------------------------------------------------
 
-wxSize wxChoicebook::GetControllerSize() const
+wxSize wxChoicebook::GetChoiceSize() const
 {
     const wxSize sizeClient = GetClientSize(),
-                 sizeChoice = m_bookctrl->GetBestFittingSize();
+                 sizeChoice = m_choice->GetBestFittingSize();
 
     wxSize size;
     if ( IsVertical() )
@@ -123,19 +140,98 @@ wxSize wxChoicebook::GetControllerSize() const
     return size;
 }
 
+wxRect wxChoicebook::GetPageRect() const
+{
+    const wxSize sizeChoice = m_choice->GetBestFittingSize();
+
+    wxPoint pt;
+    wxRect rectPage(pt, GetClientSize());
+    switch ( GetWindowStyle() & wxCHB_ALIGN_MASK )
+    {
+        default:
+            wxFAIL_MSG( _T("unexpected wxChoicebook alignment") );
+            // fall through
+
+        case wxCHB_TOP:
+            rectPage.y = sizeChoice.y + MARGIN;
+            // fall through
+
+        case wxCHB_BOTTOM:
+            rectPage.height -= sizeChoice.y + MARGIN;
+            break;
+
+        case wxCHB_LEFT:
+            rectPage.x = sizeChoice.x + MARGIN;
+            // fall through
+
+        case wxCHB_RIGHT:
+            rectPage.width -= sizeChoice.x + MARGIN;
+            break;
+    }
+
+    return rectPage;
+}
+
+void wxChoicebook::OnSize(wxSizeEvent& event)
+{
+    event.Skip();
+
+    if ( !m_choice )
+    {
+        // we're not fully created yet
+        return;
+    }
+
+    // resize the choice control and the page area to fit inside our new size
+    const wxSize sizeClient = GetClientSize(),
+                 sizeChoice = GetChoiceSize();
+
+    wxPoint posChoice;
+    switch ( GetWindowStyle() & wxCHB_ALIGN_MASK )
+    {
+        default:
+            wxFAIL_MSG( _T("unexpected wxChoicebook alignment") );
+            // fall through
+
+        case wxCHB_TOP:
+        case wxCHB_LEFT:
+            // posChoice is already ok
+            break;
+
+        case wxCHB_BOTTOM:
+            posChoice.y = sizeClient.y - sizeChoice.y;
+            break;
+
+        case wxCHB_RIGHT:
+            posChoice.x = sizeClient.x - sizeChoice.x;
+            break;
+    }
+
+    m_choice->Move(posChoice);
+    m_choice->SetSize(sizeChoice);
+
+    // resize the currently shown page
+    if ( m_selection != wxNOT_FOUND )
+    {
+        wxWindow *page = m_pages[m_selection];
+        wxCHECK_RET( page, _T("NULL page in wxChoicebook?") );
+        page->SetSize(GetPageRect());
+    }
+}
+
 wxSize wxChoicebook::CalcSizeFromPage(const wxSize& sizePage) const
 {
-    // we need to add the size of the choice control and the border between
-    const wxSize sizeChoice = GetControllerSize();
+    // we need to add the size of the choice control and the margin
+    const wxSize sizeChoice = GetChoiceSize();
 
     wxSize size = sizePage;
     if ( IsVertical() )
     {
-        size.y += sizeChoice.y + GetInternalBorder();
+        size.y += sizeChoice.y + MARGIN;
     }
     else // left/right aligned
     {
-        size.x += sizeChoice.x + GetInternalBorder();
+        size.x += sizeChoice.x + MARGIN;
     }
 
     return size;
@@ -148,14 +244,14 @@ wxSize wxChoicebook::CalcSizeFromPage(const wxSize& sizePage) const
 
 bool wxChoicebook::SetPageText(size_t n, const wxString& strText)
 {
-    GetChoiceCtrl()->SetString(n, strText);
+    m_choice->SetString(n, strText);
 
     return true;
 }
 
 wxString wxChoicebook::GetPageText(size_t n) const
 {
-    return GetChoiceCtrl()->GetString(n);
+    return m_choice->GetString(n);
 }
 
 int wxChoicebook::GetPageImage(size_t WXUNUSED(n)) const
@@ -216,7 +312,7 @@ int wxChoicebook::SetSelection(size_t n)
 
             // change m_selection now to ignore the selection change event
             m_selection = n;
-            GetChoiceCtrl()->Select(n);
+            m_choice->Select(n);
 
             // program allows the page change
             event.SetEventType(wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED);
@@ -241,7 +337,7 @@ wxChoicebook::InsertPage(size_t n,
     if ( !wxBookCtrlBase::InsertPage(n, page, text, bSelect, imageId) )
         return false;
 
-    GetChoiceCtrl()->Insert(text, n);
+    m_choice->Insert(text, n);
 
     // if the inserted page is before the selected one, we must update the
     // index of the selected page
@@ -249,21 +345,21 @@ wxChoicebook::InsertPage(size_t n,
     {
         // one extra page added
         m_selection++;
-        GetChoiceCtrl()->Select(m_selection);
+        m_choice->Select(m_selection);
     }
 
     // some page should be selected: either this one or the first one if there
     // is still no selection
-    int selNew = wxNOT_FOUND;
+    int selNew = -1;
     if ( bSelect )
         selNew = n;
-    else if ( m_selection == wxNOT_FOUND )
+    else if ( m_selection == -1 )
         selNew = 0;
 
     if ( selNew != m_selection )
         page->Hide();
 
-    if ( selNew != wxNOT_FOUND )
+    if ( selNew != -1 )
         SetSelection(selNew);
 
     InvalidateBestSize();
@@ -277,7 +373,7 @@ wxWindow *wxChoicebook::DoRemovePage(size_t page)
 
     if ( win )
     {
-        GetChoiceCtrl()->Delete(page);
+        m_choice->Delete(page);
 
         if (m_selection >= (int)page)
         {
@@ -302,7 +398,7 @@ wxWindow *wxChoicebook::DoRemovePage(size_t page)
 
 bool wxChoicebook::DeleteAllPages()
 {
-    GetChoiceCtrl()->Clear();
+    m_choice->Clear();
     return wxBookCtrlBase::DeleteAllPages();
 }
 
@@ -326,7 +422,7 @@ void wxChoicebook::OnChoiceSelected(wxCommandEvent& eventChoice)
 
     // change wasn't allowed, return to previous state
     if (m_selection != selNew)
-        GetChoiceCtrl()->Select(m_selection);
+        m_choice->Select(m_selection);
 }
 
 #endif // wxUSE_CHOICEBOOK

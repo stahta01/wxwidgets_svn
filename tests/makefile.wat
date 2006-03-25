@@ -210,7 +210,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -245,7 +245,6 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_scopeguardtest.obj &
 	$(OBJS)\test_strings.obj &
 	$(OBJS)\test_stdstrings.obj &
-	$(OBJS)\test_tokenizer.obj &
 	$(OBJS)\test_unicode.obj &
 	$(OBJS)\test_crt.obj &
 	$(OBJS)\test_bstream.obj &
@@ -382,9 +381,6 @@ $(OBJS)\test_strings.obj :  .AUTODEPEND .\strings\strings.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_stdstrings.obj :  .AUTODEPEND .\strings\stdstrings.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_tokenizer.obj :  .AUTODEPEND .\strings\tokenizer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_unicode.obj :  .AUTODEPEND .\strings\unicode.cpp

@@ -16,13 +16,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "controlbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CONTROLS
 
 #include "wx/window.h"      // base class
 
-extern WXDLLEXPORT_DATA(const wxChar) wxControlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxControlNameStr;
 
 // ----------------------------------------------------------------------------
 // wxControl is the base class for all controls
@@ -62,8 +66,16 @@ public:
     virtual void SetLabel( const wxString &label );
     virtual bool SetFont(const wxFont& font);
 
-    // wxControl-specific processing after processing the update event
-    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event);
+    // Reserved for future use
+    virtual void ReservedControlFunc1() {}
+    virtual void ReservedControlFunc2() {}
+    virtual void ReservedControlFunc3() {}
+    virtual void ReservedControlFunc4() {}
+    virtual void ReservedControlFunc5() {}
+    virtual void ReservedControlFunc6() {}
+    virtual void ReservedControlFunc7() {}
+    virtual void ReservedControlFunc8() {}
+    virtual void ReservedControlFunc9() {}
 
 protected:
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
@@ -105,10 +117,8 @@ protected:
     #include "wx/msw/control.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/control.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/control.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/control.h"
+    #include "wx/gtk/control.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/control.h"
 #elif defined(__WXCOCOA__)

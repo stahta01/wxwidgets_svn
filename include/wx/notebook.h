@@ -12,6 +12,10 @@
 #ifndef _WX_NOTEBOOK_H_BASE_
 #define _WX_NOTEBOOK_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "notebookbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -37,7 +41,7 @@ enum
 
 typedef wxWindow wxNotebookPage;  // so far, any window can be a page
 
-extern WXDLLEXPORT_DATA(const wxChar) wxNotebookNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxNotebookNameStr;
 
 #if WXWIN_COMPATIBILITY_2_4
     #define wxNOTEBOOK_NAME wxNotebookNameStr
@@ -90,6 +94,14 @@ public:
     // On platforms that support it, get the theme page background colour, else invalid colour
     virtual wxColour GetThemeBackgroundColour() const { return wxNullColour; }
 
+
+    // Reserved for future use
+    virtual void ReservedNotebookFunc1() {}
+    virtual void ReservedNotebookFunc2() {}
+    virtual void ReservedNotebookFunc3() {}
+    virtual void ReservedNotebookFunc4() {}
+    virtual void ReservedNotebookFunc5() {}
+
 protected:
     DECLARE_NO_COPY_CLASS(wxNotebookBase)
 };
@@ -107,15 +119,8 @@ public:
     {
     }
 
-    wxNotebookEvent(const wxNotebookEvent& event)
-        : wxBookCtrlBaseEvent(event)
-    {
-    }
-
-    virtual wxEvent *Clone() const { return new wxNotebookEvent(*this); }
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxNotebookEvent)
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNotebookEvent)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()
@@ -144,10 +149,8 @@ typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
     #include  "wx/msw/notebook.h"
 #elif defined(__WXMOTIF__)
     #include  "wx/generic/notebook.h"
-#elif defined(__WXGTK20__)
-    #include  "wx/gtk/notebook.h"
 #elif defined(__WXGTK__)
-    #include  "wx/gtk1/notebook.h"
+    #include  "wx/gtk/notebook.h"
 #elif defined(__WXMAC__)
     #include  "wx/mac/notebook.h"
 #elif defined(__WXCOCOA__)

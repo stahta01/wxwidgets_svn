@@ -6,10 +6,8 @@ so a window can have a device context associated with it, and a printer also has
 In this way, the same piece of code may write to a number of different devices,
 if the device context is used as a parameter.
 
-Notice that wxDC is an abstract base class and can't be created directly,
-please use \helpref{wxPaintDC}{wxpaintdc}, \helpref{wxClientDC}{wxclientdc}, 
-\helpref{wxWindowDC}{wxwindowdc}, \helpref{wxScreenDC}{wxscreendc}, 
-\helpref{wxMemoryDC}{wxmemorydc} or \helpref{wxPrinterDC}{wxprinterdc}.
+Derived types of wxDC have documentation for specific features
+only, so refer to this section for most device context information.
 
 % VZ: we should really document them instead of this lame excuse, but I don't
 %     have time for it now, when it is done please remove this
@@ -31,6 +29,27 @@ them.
 \helpref{Overview}{dcoverview}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
+
+
+\membersection{wxDC::wxDC}\label{wxdcctor}
+
+\func{}{wxDC}{\void}
+
+Constructor.
+
+
+\membersection{wxDC::\destruct{wxDC}}\label{wxdcdtor}
+
+\func{}{\destruct{wxDC}}{\void}
+
+Destructor.
+
+
+\membersection{wxDC::BeginDrawing}\label{wxdcbegindrawing}
+
+\func{void}{BeginDrawing}{\void}
+
+This is deprecated and does nothing. Don't use.
 
 
 \membersection{wxDC::Blit}\label{wxdcblit}
@@ -540,6 +559,13 @@ wxUSE\_DC\_CACHEING preprocessor symbol for portability.
 Ends a document (only relevant when outputting to a printer).
 
 
+\membersection{wxDC::EndDrawing}\label{wxdcenddrawing}
+
+\func{void}{EndDrawing}{\void}
+
+This is deprecated and does nothing. Don't use.
+
+
 \membersection{wxDC::EndPage}\label{wxdcendpage}
 
 \func{void}{EndPage}{\void}
@@ -622,10 +648,7 @@ rectangle are returned as a tuple.}
 
 \constfunc{const wxFont\&}{GetFont}{\void}
 
-Gets the current font. Notice that even although each device context object has
-some default font after creation, this method would return a \texttt{wxNullFont} 
-initially and only after calling \helpref{wxDC::SetFont}{wxdcsetfont} a valid
-font is returned.
+Gets the current font (see \helpref{wxDC::SetFont}{wxdcsetfont}).
 
 
 \membersection{wxDC::GetLogicalFunction}\label{wxdcgetlogicalfunction}
@@ -750,8 +773,10 @@ dimension from the baseline of the font to the bottom of the
 descender, and {\it externalLeading} is any extra vertical space added
 to the font by the font designer (usually is zero).
 
-If the optional parameter {\it font} is specified and valid, then it is used
-for the text extent calculation. Otherwise the currently selected font is.
+The optional parameter {\it font} specifies an alternative
+to the currently selected font: but note that this does not
+yet work under Windows, so you need to set a font for
+the device context first.
 
 See also \helpref{wxFont}{wxfont}, \helpref{wxDC::SetFont}{wxdcsetfont}.
 
@@ -784,35 +809,6 @@ Gets the current user scale factor (set by \helpref{SetUserScale}{wxdcsetusersca
 
 \perlnote{In wxPerl this method takes no arguments and return a two element
  array {\tt ( x, y )}}
-
-
-\membersection{wxDC::GradientFillConcentric}\label{wxdcgradientfillconcentric}
-
-\func{void}{GradientFillConcentric}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}}
-
-\func{void}{GradientFillConcentric}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}, \param{const wxPoint\& }{circleCenter}}
-
-Fill the area specified by rect with a radial gradient, starting from 
-\arg{initialColour} at the centre of the circle and fading to \arg{destColour} 
-on the circle outside.
-
-\arg{circleCenter} are the relative coordinates of centre of the circle in
-the specified \arg{rect}. If not specified, the cercle is placed at the
-centre of rect.
-
-\textbf{Note: } Currently this function is very slow, don't use it for
-real-time drawing.
-
-
-\membersection{wxDC::GradientFillLinear}\label{wxdcgradientfilllinear}
-
-\func{void}{GradientFillLinear}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}, \param{wxDirection}{ nDirection = wxEAST}}
-
-Fill the area specified by \arg{rect} with a linear gradient, starting from 
-\arg{initialColour} and eventually fading to \arg{destColour}. The 
-\arg{nDirection} specifies the direction of the colour change, default is to
-use \arg{initialColour} on the left part of the rectangle and 
-\arg{destColour} on the right one.
 
 
 \membersection{wxDC::LogicalToDeviceX}\label{wxdclogicaltodevicex}

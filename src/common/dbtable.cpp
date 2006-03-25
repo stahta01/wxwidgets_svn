@@ -16,6 +16,10 @@
 // SYNOPSIS STOP
 */
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dbtable.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -413,12 +417,10 @@ void wxDbTable::setCbValueForColumn(int columnIndex)
     switch(colDefs[columnIndex].DbDataType)
     {
         case DB_DATA_TYPE_VARCHAR:
-        case DB_DATA_TYPE_MEMO:
             if (colDefs[columnIndex].Null)
                 colDefs[columnIndex].CbValue = SQL_NULL_DATA;
             else
                 colDefs[columnIndex].CbValue = SQL_NTS;
-            break;
             break;
         case DB_DATA_TYPE_INTEGER:
             if (colDefs[columnIndex].Null)
@@ -483,11 +485,6 @@ bool wxDbTable::bindParams(bool forUpdate)
         {
             case DB_DATA_TYPE_VARCHAR:
                 fSqlType = pDb->GetTypeInfVarchar().FsqlType;
-                precision = colDefs[i].SzDataObj;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                fSqlType = pDb->GetTypeInfMemo().FsqlType;
                 precision = colDefs[i].SzDataObj;
                 scale = 0;
                 break;
@@ -1421,9 +1418,6 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             case DB_DATA_TYPE_VARCHAR:
                 cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wxChar)) << wxT(")");
                 break;
-            case DB_DATA_TYPE_MEMO:
-                cout << pDb->GetTypeInfMemo().TypeName;
-                break;
             case DB_DATA_TYPE_INTEGER:
                 cout << pDb->GetTypeInfInteger().TypeName;
                 break;
@@ -1464,9 +1458,6 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         {
             case DB_DATA_TYPE_VARCHAR:
                 sqlStmt += pDb->GetTypeInfVarchar().TypeName;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                sqlStmt += pDb->GetTypeInfMemo().TypeName;
                 break;
             case DB_DATA_TYPE_INTEGER:
                 sqlStmt += pDb->GetTypeInfInteger().TypeName;
@@ -2358,11 +2349,6 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
             switch (pColInfs[index].dbDataType)
             {
                 case DB_DATA_TYPE_VARCHAR:
-                   pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferSize+(1*sizeof(wxChar))];
-                   pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wxChar));
-                   pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
-                   break;
-                case DB_DATA_TYPE_MEMO:
                    pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferSize+(1*sizeof(wxChar))];
                    pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wxChar));
                    pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;

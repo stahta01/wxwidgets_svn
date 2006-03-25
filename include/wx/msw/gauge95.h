@@ -12,9 +12,13 @@
 #ifndef _GAUGE95_H_
 #define _GAUGE95_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "gauge95.h"
+#endif
+
 #if wxUSE_GAUGE
 
-extern WXDLLEXPORT_DATA(const wxChar) wxGaugeNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxGaugeNameStr;
 
 // Group box
 class WXDLLEXPORT wxGauge95 : public wxGaugeBase
@@ -51,9 +55,8 @@ public:
     virtual bool SetForegroundColour(const wxColour& col);
     virtual bool SetBackgroundColour(const wxColour& col);
 
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
 protected:
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
     virtual wxSize DoGetBestSize() const;
 
 

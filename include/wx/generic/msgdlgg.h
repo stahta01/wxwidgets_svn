@@ -12,13 +12,17 @@
 #ifndef __MSGDLGH_G__
 #define __MSGDLGH_G__
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "msgdlgg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/dialog.h"
 
 // type is an 'or' (|) of wxOK, wxCANCEL, wxYES_NO
 // Returns wxYES/NO/OK/CANCEL
 
-extern WXDLLEXPORT_DATA(const wxChar) wxMessageBoxCaptionStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxMessageBoxCaptionStr;
 
 class WXDLLEXPORT wxGenericMessageDialog: public wxDialog, public wxMessageDialogBase
 {

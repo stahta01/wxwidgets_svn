@@ -75,8 +75,6 @@ def _deprecated(callable, msg=None):
 
 MAKE_CONST_WXSTRING(EmptyString);
 
-%include _swigtype.i
-
 %include _obj.i
 %include _gdicmn.i
 %include _streams.i

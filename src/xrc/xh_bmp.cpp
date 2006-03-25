@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_bmp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,8 +33,6 @@ wxBitmapXmlHandler::wxBitmapXmlHandler()
 
 wxObject *wxBitmapXmlHandler::DoCreateResource()
 {
-    // NB: empty parameter name means "take directly from this node's next
-    //     instead of from subnode with given name"
     return new wxBitmap(GetBitmap(wxEmptyString));
 }
 
@@ -48,8 +50,6 @@ wxIconXmlHandler::wxIconXmlHandler()
 
 wxObject *wxIconXmlHandler::DoCreateResource()
 {
-    // NB: empty parameter name means "take directly from this node's next
-    //     instead of from subnode with given name"
     return new wxIcon(GetIcon(wxEmptyString));
 }
 

@@ -14,19 +14,20 @@
          </bakefile-gen>
 
     Reasons why these formats are disabled (and so not in CVS):
-
+    
+    dmars     - In beta testing, will be added when it stabilizes.
+    dmars_smake     - ditto
+    msevc4prj - ditto
     cbuilderx - Generated projects are too bad to be included in CVS. Please
                 *do not* enable this format until FIXMEs in .bkl files related
                 to cbuilderx are addressed. In particular, the project must
                 be placed into build/msw(?) directory and store object files
                 in its subdirectory and it must copy setup.h as others do.
     cbx_unix  - Doesn't integrate well and won't be used by most Unix people.
-    dmars, dmars_smake, msevc4prj - These are generated at release time and
-                we don't want to clutter the source tree with these files.
     -->
-
-    <disable-formats>dmars,dmars_smake,msevc4prj,cbx_unix,cbuilderx</disable-formats>
-
+    
+    <disable-formats>dmars,dmars_smake,cbx_unix,cbuilderx,msevc4prj</disable-formats>
+    
 
     <!-- These wildcards match all .bkl files in wxWidgets tree: -->
     <input>
@@ -52,7 +53,7 @@
     <add-formats>
         autoconf,borland,dmars_smake,dmars,mingw,msvc,msvc6prj,msevc4prj,watcom,cbuilderx,cbx_unix
     </add-formats>
-
+    
     <del-formats files="../../samples/*.bkl">
         autoconf,msvc6prj,msevc4prj,cbuilderx,cbx_unix
     </del-formats>
@@ -79,16 +80,11 @@
     <del-formats files="../../contrib/utils/wxrc/*">msevc4prj</del-formats>
     <del-formats files="../../tests/*">msevc4prj</del-formats>
 
-    <!-- HtmlCtrl sample is Cocoa only (autoconf format) -->
-    <del-formats files="../../samples/html/htmlctrl/htmlctrl.bkl">
-        borland,dmars_smake,dmars,mingw,msvc,msvc6prj,msevc4prj,watcom,cbuilderx,cbx_unix
-    </del-formats>
-
-
+    
     <!-- Default flags (for all formats and bakefiles): -->
     <add-flags>-Iformats</add-flags>
-
-
+    
+    
     <!-- Directories where the files go: -->
     <add-flags files="wx.bkl" formats="autoconf">
         -o../../Makefile.in
@@ -135,7 +131,7 @@
         -DSRCDIR=../../src/$(INPUT_FILE_BASENAME_NOEXT)
     </add-flags>
 
-
+    
 
     <!-- Format specific settings: -->
     <add-flags formats="autoconf">
@@ -146,7 +142,7 @@
     <add-flags formats="wx24dsp">
         -DUSE_GUI=1 -DWXUNIV=0 -o../../src/wxWindows.dsp
     </add-flags>
-
+    
     <add-formats files="wx.bkl">rpmspec</add-formats>
 
 
@@ -158,7 +154,7 @@
     <del-flags files="wx.bkl">
         -DWRITE_OPTIONS_FILE=0
     </del-flags>
-
+    
     <add-flags files="wx.bkl" formats="borland">
         -DOPTIONS_FILE=config.bcc
     </add-flags>
@@ -182,7 +178,7 @@
     <add-flags files="../../*/*/*">-DWXTOPDIR=../../</add-flags>
     <add-flags files="../../*/*/*/*">-DWXTOPDIR=../../../</add-flags>
     <add-flags files="../../*/*/*/*/*">-DWXTOPDIR=../../../../</add-flags>
-
+    
     <add-flags files="../../*/*" formats="borland">
         -DOPTIONS_FILE=../build/msw/config.bcc
     </add-flags>

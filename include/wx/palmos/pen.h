@@ -12,6 +12,10 @@
 #ifndef _WX_PEN_H_
 #define _WX_PEN_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "pen.h"
+#endif
+
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
 #include "wx/colour.h"
@@ -77,7 +81,16 @@ public:
     wxPen();
     wxPen(const wxColour& col, int width = 1, int style = wxSOLID);
     wxPen(const wxBitmap& stipple, int width);
+    wxPen(const wxPen& pen) { Ref(pen); }
     virtual ~wxPen();
+
+    wxPen& operator=(const wxPen& pen)
+    {
+        if ( this != &pen )
+            Ref(pen);
+
+        return *this;
+    }
 
     bool operator==(const wxPen& pen) const
     {
@@ -119,7 +132,7 @@ public:
 
     // Internal
     bool RealizeResource();
-    bool FreeResource(bool force = false);
+    bool FreeResource(bool force = FALSE);
     WXHANDLE GetResourceHandle() const;
     bool IsFree() const;
     void Unshare();
@@ -129,3 +142,4 @@ private:
 };
 
 #endif // _WX_PEN_H_
+

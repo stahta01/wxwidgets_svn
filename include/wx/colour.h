@@ -12,18 +12,14 @@
 #ifndef _WX_COLOUR_H_BASE_
 #define _WX_COLOUR_H_BASE_
 
-#include "wx/defs.h"
-
 #if defined(__WXPALMOS__)
 #include "wx/palmos/colour.h"
 #elif defined(__WXMSW__)
 #include "wx/msw/colour.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/colour.h"
-#elif defined(__WXGTK20__)
-#include "wx/gtk/colour.h"
 #elif defined(__WXGTK__)
-#include "wx/gtk1/colour.h"
+#include "wx/gtk/colour.h"
 #elif defined(__WXMGL__)
 #include "wx/mgl/colour.h"
 #elif defined(__WXX11__)

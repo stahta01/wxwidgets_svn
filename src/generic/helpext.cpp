@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/helpext.cpp
+// Name:        helpext.cpp
 // Purpose:     an external help controller for wxWidgets
 // Author:      Karsten Ballueder
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Karsten Ballueder
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#   pragma implementation "wxexthlp.h"
+#endif
 
 #include "wx/wxprec.h"
 
@@ -18,6 +22,7 @@
 #if wxUSE_HELP && !defined(__WXWINCE__) && (!defined(__WXMAC__) || defined(__WXMAC_OSX__))
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/string.h"
     #include "wx/utils.h"
     #include "wx/list.h"
@@ -73,8 +78,7 @@ IMPLEMENT_CLASS(wxExtHelpController, wxHelpControllerBase)
    and a file mapping numerical Section numbers to relative URLS.
 */
 
-wxExtHelpController::wxExtHelpController(wxWindow* parentWindow):
-    wxHelpControllerBase(parentWindow)
+wxExtHelpController::wxExtHelpController()
 {
    m_MapList = (wxList*) NULL;
    m_NumOfEntries = 0;
@@ -125,7 +129,7 @@ wxExtHelpController::DisplayHelp(const wxString &relativeURL)
    }
 
    return true;
-#elif  defined(__OS2__)
+#elif  defined(__WXPM__)
 
    wxString url;
    url << m_MapFile << '\\' << relativeURL.BeforeFirst('#');
@@ -237,7 +241,9 @@ bool wxExtHelpController::LoadFile(const wxString& ifile)
       file = ifile;
       if(! wxIsAbsolutePath(file))
       {
-         file = wxGetCwd();
+         wxChar* f = wxGetWorkingDirectory();
+         file = f;
+         delete[] f; // wxGetWorkingDirectory returns new memory
 #ifdef __WXMAC__
          file << ifile;
 #else
@@ -345,7 +351,7 @@ wxExtHelpController::DisplayContents()
    file << m_MapFile << WXEXTHELP_SEPARATOR << contents;
    if(file.Contains(wxT('#')))
       file = file.BeforeLast(wxT('#'));
-   if(contents.length() && wxFileExists(file))
+   if(contents.Length() && wxFileExists(file))
       rc = DisplaySection(CONTENTS_ID);
 
    // if not found, open homemade toc:
@@ -463,3 +469,4 @@ void wxExtHelpController::OnQuit()
 
 
 #endif // wxUSE_HELP
+

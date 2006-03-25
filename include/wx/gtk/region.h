@@ -10,6 +10,10 @@
 #ifndef _WX_GTK_REGION_H_
 #define _WX_GTK_REGION_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/list.h"
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
@@ -80,10 +84,15 @@ public:
 
     ~wxRegion();
 
+    wxRegion( const wxRegion& region )
+        : wxGDIObject()
+        { Ref(region); }
+    wxRegion& operator = ( const wxRegion& region ) { Ref(region); return *this; }
+
     bool Ok() const { return m_refData != NULL; }
 
-    bool operator == ( const wxRegion& region ) const;
-    bool operator != ( const wxRegion& region ) const { return !(*this == region); }
+    bool operator == ( const wxRegion& region );
+    bool operator != ( const wxRegion& region ) { return !(*this == region); }
 
     void Clear();
 

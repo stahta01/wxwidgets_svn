@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "bitmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -241,6 +245,12 @@ void wxBitmapRefData::Free()
 // wxBitmap creation
 // ----------------------------------------------------------------------------
 
+// this function should be called from all wxBitmap ctors
+void wxBitmap::Init()
+{
+    // m_refData = NULL; done in the base class ctor
+}
+
 wxGDIImageRefData *wxBitmap::CreateData() const
 {
     return new wxBitmapRefData;
@@ -410,6 +420,8 @@ wxBitmap::~wxBitmap()
 
 wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 {
+    Init();
+
 #ifndef __WXMICROWIN__
     wxBitmapRefData *refData = new wxBitmapRefData;
     m_refData = refData;
@@ -476,11 +488,13 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 bool wxBitmap::CreateFromXpm(const char **data)
 {
 #if wxUSE_IMAGE && wxUSE_XPM && wxUSE_WXDIB
-    wxCHECK_MSG( data != NULL, false, wxT("invalid bitmap data") );
+    Init();
+
+    wxCHECK_MSG( data != NULL, false, wxT("invalid bitmap data") )
 
     wxXPMDecoder decoder;
     wxImage img = decoder.ReadData(data);
-    wxCHECK_MSG( img.Ok(), false, wxT("invalid bitmap data") );
+    wxCHECK_MSG( img.Ok(), false, wxT("invalid bitmap data") )
 
     *this = wxBitmap(img);
     return true;
@@ -492,21 +506,29 @@ bool wxBitmap::CreateFromXpm(const char **data)
 
 wxBitmap::wxBitmap(int w, int h, int d)
 {
+    Init();
+
     (void)Create(w, h, d);
 }
 
 wxBitmap::wxBitmap(int w, int h, const wxDC& dc)
 {
+    Init();
+
     (void)Create(w, h, dc);
 }
 
 wxBitmap::wxBitmap(void *data, long type, int width, int height, int depth)
 {
+    Init();
+
     (void)Create(data, type, width, height, depth);
 }
 
 wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
 {
+    Init();
+
     LoadFile(filename, (int)type);
 }
 
@@ -780,6 +802,8 @@ wxImage wxBitmap::ConvertToImage() const
 // wxImage to/from conversions
 // ----------------------------------------------------------------------------
 
+#if wxUSE_WXDIB
+
 bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
 {
     return CreateFromImage(image, depth, 0);
@@ -792,8 +816,6 @@ bool wxBitmap::CreateFromImage(const wxImage& image, const wxDC& dc)
 
     return CreateFromImage(image, -1, dc.GetHDC());
 }
-
-#if wxUSE_WXDIB
 
 bool wxBitmap::CreateFromImage(const wxImage& image, int depth, WXHDC hdc)
 {
@@ -808,9 +830,8 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth, WXHDC hdc)
     wxDIB dib(image);
     if ( !dib.IsOk() )
         return false;
-
-    if ( depth == -1 )
-        depth = dib.GetDepth(); // Get depth from image if none specified
+	if (depth == -1)
+		depth = dib.GetDepth();	// Get depth from image if none specified
 
     // store the bitmap parameters
     wxBitmapRefData *refData = new wxBitmapRefData;
@@ -974,22 +995,7 @@ wxImage wxBitmap::ConvertToImage() const
     return image;
 }
 
-#else // !wxUSE_WXDIB
-
-bool
-wxBitmap::CreateFromImage(const wxImage& WXUNUSED(image),
-                          int WXUNUSED(depth),
-                          WXHDC WXUNUSED(hdc))
-{
-    return false;
-}
-
-wxImage wxBitmap::ConvertToImage() const
-{
-    return wxImage();
-}
-
-#endif // wxUSE_WXDIB/!wxUSE_WXDIB
+#endif // wxUSE_WXDIB
 
 #endif // wxUSE_IMAGE
 

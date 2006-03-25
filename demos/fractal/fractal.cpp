@@ -27,6 +27,11 @@ doesn't seem to be an equivalent of under wxWidgets, and my quick
 hack doesn't fix.
 */
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__

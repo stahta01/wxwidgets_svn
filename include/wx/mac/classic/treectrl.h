@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/treectrl.h
+// Name:        treectrl.h
 // Purpose:     wxTreeCtrl class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_TREECTRL_H_
 #define _WX_TREECTRL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "treectrl.h"
+#endif
 
 #include "wx/control.h"
 #include "wx/event.h"
@@ -137,7 +141,7 @@ public:
     // accessors
     // ---------
       //
-    virtual unsigned int GetCount() const;
+    int GetCount() const;
 
       // indent
     int GetIndent() const;

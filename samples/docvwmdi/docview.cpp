@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation "docview.h"
+#endif
+
 /*
  * Purpose:  Document/view architecture demo for wxWidgets class library - MDI
  */

@@ -75,6 +75,9 @@ protected:
 
 #if defined(__WXUNIVERSAL__) || \
     defined(__WXMOTIF__)     || \
+    (defined(__WXMAC__) && !defined(__WXMAC_OSX__))  || \
+    (defined(__WXMAC__) && !USE_NATIVE_FONT_DIALOG_FOR_MACOSX)  || \
+    (defined(__WXMAC_OSX__) && ( MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_2 ) ) || \
     defined(__WXCOCOA__)     || \
     defined(__WXWINCE__)     || \
     defined(__WXGPE__)
@@ -83,10 +86,8 @@ protected:
     #define wxFontDialog wxGenericFontDialog
 #elif defined(__WXMSW__)
     #include "wx/msw/fontdlg.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/fontdlg.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/fontdlg.h"
+    #include "wx/gtk/fontdlg.h"
 #elif defined(__WXPM__)
     #include "wx/os2/fontdlg.h"
 #elif defined(__WXMAC__)
@@ -101,7 +102,7 @@ protected:
 // cancelled
 wxFont WXDLLEXPORT
 wxGetFontFromUser(wxWindow *parent = (wxWindow *)NULL,
-                  const wxFont& fontInit = wxNullFont, const wxString& caption = wxEmptyString);
+                  const wxFont& fontInit = wxNullFont);
 
 #endif // wxUSE_FONTDLG
 

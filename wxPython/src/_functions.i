@@ -73,10 +73,10 @@ wxString wxGetOsDescription();
 // int wxParseCommonDialogsFilter(const wxString& wildCard, wxArrayString& descriptions, wxArrayString& filters);
 
 #if defined(__WXMSW__) || defined(__WXMAC__)
-wxMemorySize wxGetFreeMemory();
+long wxGetFreeMemory();
 #else
 %inline %{
-    wxMemorySize wxGetFreeMemory()
+    long wxGetFreeMemory()
         { wxPyRaiseNotImplemented(); return 0; }
 %}
 #endif
@@ -200,7 +200,6 @@ int wxMessageBox(const wxString& message,
                  int x = -1, int y = -1);
 
 // WXWIN_COMPATIBILITY_2_4
-#if 0
 MustHaveApp(wxGetNumberFromUser);
 long wxGetNumberFromUser(const wxString& message,
                          const wxString& prompt,
@@ -210,7 +209,7 @@ long wxGetNumberFromUser(const wxString& message,
                          wxWindow *parent = NULL,
                          const wxPoint& pos = wxDefaultPosition);
 %pythoncode { GetNumberFromUser = wx._deprecated(GetNumberFromUser) }
-#endif
+
 
 // GDI Functions
 

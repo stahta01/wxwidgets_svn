@@ -10,6 +10,10 @@
 #ifndef __GTKDCCLIENTH__
 #define __GTKDCCLIENTH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/dc.h"
 #include "wx/window.h"
 
@@ -75,8 +79,6 @@ protected:
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
                                 wxFont *theFont = (wxFont *) NULL) const;
-    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
-    virtual void DoSetClippingRegionAsRegion( const wxRegion &region );
 
 public:
     virtual wxCoord GetCharWidth() const;
@@ -94,7 +96,9 @@ public:
     virtual void SetBackgroundMode( int mode );
     virtual void SetPalette( const wxPalette& palette );
 
+    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
     virtual void DestroyClippingRegion();
+    virtual void DoSetClippingRegionAsRegion( const wxRegion &region  );
 
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;
@@ -116,9 +120,11 @@ public:
     wxRegion      m_paintClippingRegion;
 
     // PangoContext stuff for GTK 2.0
+#ifdef __WXGTK20__
     PangoContext *m_context;
     PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
+#endif
 
     void SetUpDC();
     void Destroy();

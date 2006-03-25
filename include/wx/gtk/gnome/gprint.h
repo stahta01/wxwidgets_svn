@@ -11,6 +11,10 @@
 #ifndef __gprint_H__
 #define __gprint_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 // Include wxWindows' headers
 
 #include "wx/defs.h"
@@ -201,6 +205,9 @@ public:
     ~wxGnomePrintDC();
 
     bool Ok() const;
+
+    virtual void BeginDrawing() {}
+    virtual void EndDrawing() {}
 
     bool DoFloodFill(wxCoord x1, wxCoord y1, const wxColour &col, int style=wxFLOOD_SURFACE );
     bool DoGetPixel(wxCoord x1, wxCoord y1, wxColour *col) const;

@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "treectrl.h"
+#endif
+
 #if wxUSE_TREECTRL
 
 #include "wx/textctrl.h"
@@ -73,7 +77,7 @@ public:
     // ---------
 
         // get the total number of items in the control
-    virtual unsigned int GetCount() const;
+    size_t GetCount() const;
 
         // indent is the number of pixels the children are indented relative to
         // the parents position. SetIndent() also redraws the control

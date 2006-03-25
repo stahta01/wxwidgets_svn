@@ -89,13 +89,9 @@ extern long WXDLLIMPEXP_BASE wxGetLocalTime();
 extern long WXDLLIMPEXP_BASE wxGetUTCTime();
 
 #if wxUSE_LONGLONG
-    typedef wxLongLong wxMilliClock_t;
-#else
-    typedef double wxMilliClock_t;
-#endif // wxUSE_LONGLONG
-
 // Get number of milliseconds since local time 00:00:00 Jan 1st 1970
-extern wxMilliClock_t WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+extern wxLongLong WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+#endif // wxUSE_LONGLONG
 
 #define wxGetCurrentTime() wxGetLocalTime()
 

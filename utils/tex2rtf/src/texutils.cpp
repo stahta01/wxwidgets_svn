@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -501,29 +505,29 @@ void BibEatWhiteSpace(wxString& line)
 
 void BibEatWhiteSpace(wxSTD istream& str)
 {
-  char ch = (char)str.peek();
+    char ch = (char)str.peek();
 
-  while (!str.eof() && (ch == ' ' || ch == '\t' || ch == 13 || ch == 10 || ch == (char)EOF))
-  {
-    if (ch == 10)
-      BibLine ++;
-    str.get(ch);
-    if ((ch == (char)EOF) || str.eof()) return;
-    ch = (char)str.peek();
-  }
-
-  // Ignore end-of-line comments
-  if (ch == '%' || ch == ';' || ch == '#')
-  {
-    str.get(ch);
-    ch = (char)str.peek();
-    while (ch != 10 && ch != 13 && !str.eof())
+    while (!str.eof() && (ch == ' ' || ch == '\t' || ch == 13 || ch == 10 || ch == (char)EOF))
     {
-      str.get(ch);
-      ch = (char)str.peek();
+        if (ch == 10)
+            BibLine ++;
+        str.get(ch);
+        if ((ch == (char)EOF) || str.eof()) return;
+        ch = (char)str.peek();
     }
-    BibEatWhiteSpace(str);
-  }
+
+    // Ignore end-of-line comments
+    if (ch == '%' || ch == ';' || ch == '#')
+    {
+        str.get(ch);
+        ch = (char)str.peek();
+        while (ch != 10 && ch != 13 && !str.eof())
+        {
+            str.get(ch);
+            ch = (char)str.peek();
+        }
+        BibEatWhiteSpace(str);
+    }
 }
 
 // Read word up to { or , or space
@@ -547,18 +551,18 @@ wxString BibReadWord(wxString& line)
 
 void BibReadWord(wxSTD istream& istr, wxChar *buffer)
 {
-  int i = 0;
-  buffer[i] = 0;
-  char ch = (char)istr.peek();
-  while (!istr.eof() && ch != ' ' && ch != '{' && ch != '(' && ch != 13 && ch != 10 && ch != '\t' &&
-         ch != ',' && ch != '=')
-  {
-    istr.get(ch);
-    buffer[i] = ch;
-    i ++;
-    ch = (char)istr.peek();
-  }
-  buffer[i] = 0;
+    int i = 0;
+    buffer[i] = 0;
+    char ch = (char)istr.peek();
+    while (!istr.eof() && ch != ' ' && ch != '{' && ch != '(' && ch != 13 && ch != 10 && ch != '\t' &&
+           ch != ',' && ch != '=')
+    {
+        istr.get(ch);
+        buffer[i] = ch;
+        i ++;
+        ch = (char)istr.peek();
+    }
+    buffer[i] = 0;
 }
 
 // Read string (double-quoted or not) to end quote or EOL

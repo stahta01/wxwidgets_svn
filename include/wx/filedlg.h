@@ -16,6 +16,10 @@
 
 #if wxUSE_FILEDLG
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlg.h"
+#endif
+
 #include "wx/dialog.h"
 #include "wx/arrstr.h"
 
@@ -36,8 +40,8 @@ enum
     wxCHANGE_DIR        = 0x0040
 };
 
-extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorPromptStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorDefaultWildcardStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxFileSelectorPromptStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxFileSelectorDefaultWildcardStr;
 
 //----------------------------------------------------------------------------
 // wxFileDialogBase
@@ -109,6 +113,7 @@ public:
 protected:
     wxString      m_message;
     long          m_dialogStyle;
+    wxWindow     *m_parent;
     wxString      m_dir;
     wxString      m_path;       // Full path
     wxString      m_fileName;
@@ -168,10 +173,8 @@ wxSaveFileSelector(const wxChar *what,
 #include "wx/msw/filedlg.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/filedlg.h"
-#elif defined(__WXGTK20__)
-#include "wx/gtk/filedlg.h"
 #elif defined(__WXGTK__)
-#include "wx/gtk1/filedlg.h"
+#include "wx/gtk/filedlg.h"
 #elif defined(__WXX11__)
 #include "wx/generic/filedlgg.h"
 #elif defined(__WXMGL__)

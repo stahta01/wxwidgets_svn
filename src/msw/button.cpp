@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "button.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -34,7 +38,6 @@
     #include "wx/bmpbuttn.h"
     #include "wx/settings.h"
     #include "wx/dcscreen.h"
-    #include "wx/dcclient.h"
 #endif
 
 #include "wx/stockitem.h"

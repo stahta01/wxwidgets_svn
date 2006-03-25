@@ -12,6 +12,10 @@
 #ifndef _WX_HELPDATA_H_
 #define _WX_HELPDATA_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpdata.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HTML

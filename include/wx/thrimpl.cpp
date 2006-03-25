@@ -64,11 +64,19 @@ wxMutexError wxMutex::Unlock()
 // wxConditionInternal
 // --------------------------------------------------------------------------
 
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__EMX__)
 // Win32 and OS/2 don't have explicit support for the POSIX condition
 // variables and their events/event semaphores have quite different semantics,
 // so we reimplement the conditions from scratch using the mutexes and
 // semaphores
-#if defined(__WXMSW__) || defined(__OS2__) || defined(__EMX__)
+#if defined(__WXPM__) || defined(__EMX__)
+void InterlockedIncrement(LONG *num)
+{
+  ::DosEnterCritSec();
+  (*num)++;
+  ::DosExitCritSec();
+}
+#endif
 
 class wxConditionInternal
 {
@@ -107,10 +115,7 @@ wxConditionInternal::wxConditionInternal(wxMutex& mutex)
 wxCondError wxConditionInternal::Wait()
 {
     // increment the number of waiters
-    {
-        wxCriticalSectionLocker lock(m_csWaiters);
-        m_numWaiters++;
-    }
+    ::InterlockedIncrement(&m_numWaiters);
 
     m_mutex.Unlock();
 
@@ -128,20 +133,12 @@ wxCondError wxConditionInternal::Wait()
     wxSemaError err = m_semaphore.Wait();
     m_mutex.Lock();
 
-    if ( err == wxSEMA_NO_ERROR )
-        return wxCOND_NO_ERROR;
-    else if ( err == wxSEMA_TIMEOUT )
-        return wxCOND_TIMEOUT;
-    else
-        return wxCOND_MISC_ERROR;
+    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR : wxCOND_MISC_ERROR;
 }
 
 wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 {
-    {
-        wxCriticalSectionLocker lock(m_csWaiters);
-        m_numWaiters++;
-    }
+    ::InterlockedIncrement(&m_numWaiters);
 
     m_mutex.Unlock();
 
@@ -151,7 +148,7 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     wxSemaError err = m_semaphore.WaitTimeout(milliseconds);
 
-    if ( err == wxSEMA_TIMEOUT )
+    if ( err == wxSEMA_BUSY )
     {
         // another potential race condition exists here it is caused when a
         // 'waiting' thread timesout, and returns from WaitForSingleObject, but
@@ -177,9 +174,12 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     m_mutex.Lock();
 
-    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR
-                                  : err == wxSEMA_TIMEOUT ? wxCOND_TIMEOUT
-                                                          : wxCOND_MISC_ERROR;
+    if ( err == wxSEMA_NO_ERROR )
+        return wxCOND_NO_ERROR;
+    else if ( err == wxSEMA_TIMEOUT )
+        return wxCOND_TIMEOUT;
+    else
+        return wxCOND_MISC_ERROR;
 }
 
 wxCondError wxConditionInternal::Signal()
@@ -212,8 +212,7 @@ wxCondError wxConditionInternal::Broadcast()
 
     return wxCOND_NO_ERROR;
 }
-
-#endif // MSW or OS2
+#endif
 
 // ----------------------------------------------------------------------------
 // wxCondition

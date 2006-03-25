@@ -105,12 +105,6 @@
 %rename(SL_INVERSE)                         wxSL_INVERSE;
 %rename(Slider)                             wxSlider;
 %rename(ToggleButton)                       wxToggleButton;
-%rename(BK_DEFAULT)                         wxBK_DEFAULT;
-%rename(BK_TOP)                             wxBK_TOP;
-%rename(BK_BOTTOM)                          wxBK_BOTTOM;
-%rename(BK_LEFT)                            wxBK_LEFT;
-%rename(BK_RIGHT)                           wxBK_RIGHT;
-%rename(BK_ALIGN_MASK)                      wxBK_ALIGN_MASK;
 %rename(BookCtrlBase)                       wxBookCtrlBase;
 %rename(BookCtrlBaseEvent)                  wxBookCtrlBaseEvent;
 %rename(NB_FIXEDWIDTH)                      wxNB_FIXEDWIDTH;
@@ -142,10 +136,8 @@
 %rename(CHB_ALIGN_MASK)                     wxCHB_ALIGN_MASK;
 %rename(Choicebook)                         wxChoicebook;
 %rename(ChoicebookEvent)                    wxChoicebookEvent;
-%rename(Treebook)                           wxTreebook;
-%rename(TreebookEvent)                      wxTreebookEvent;
-%rename(Toolbook)                           wxToolbook;
-%rename(ToolbookEvent)                      wxToolbookEvent;
+%rename(BookCtrlSizer)                      wxBookCtrlSizer;
+%rename(NotebookSizer)                      wxNotebookSizer;
 %rename(TOOL_STYLE_BUTTON)                  wxTOOL_STYLE_BUTTON;
 %rename(TOOL_STYLE_SEPARATOR)               wxTOOL_STYLE_SEPARATOR;
 %rename(TOOL_STYLE_CONTROL)                 wxTOOL_STYLE_CONTROL;

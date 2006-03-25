@@ -12,6 +12,10 @@
 #ifndef _WX_DOCH__
 #define _WX_DOCH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "docview.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_DOC_VIEW_ARCHITECTURE
@@ -126,8 +130,7 @@ public:
 
     virtual bool AddView(wxView *view);
     virtual bool RemoveView(wxView *view);
-    wxList& GetViews() { return m_documentViews; }
-    const wxList& GetViews() const { return m_documentViews; }
+    wxList& GetViews() const { return (wxList&) m_documentViews; }
     wxView *GetFirstView() const;
 
     virtual void UpdateAllViews(wxView *sender = (wxView *) NULL, wxObject *hint = (wxObject *) NULL);

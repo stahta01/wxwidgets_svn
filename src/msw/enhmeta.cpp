@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "enhmeta.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -194,9 +198,7 @@ wxEnhMetaFileDC::wxEnhMetaFileDC(const wxString& filename,
                                  int width, int height,
                                  const wxString& description)
 {
-    m_width = width;
-    m_height = height;
-
+    ScreenHDC hdcRef;
     RECT rect;
     RECT *pRect;
     if ( width && height )
@@ -217,21 +219,12 @@ wxEnhMetaFileDC::wxEnhMetaFileDC(const wxString& filename,
         pRect = (LPRECT)NULL;
     }
 
-    ScreenHDC hdcRef;
     m_hDC = (WXHDC)::CreateEnhMetaFile(hdcRef, GetMetaFileName(filename),
                                        pRect, description);
     if ( !m_hDC )
     {
         wxLogLastError(_T("CreateEnhMetaFile"));
     }
-}
-
-void wxEnhMetaFileDC::DoGetSize(int *width, int *height) const
-{
-    if ( width )
-        *width = m_width;
-    if ( height )
-        *height = m_height;
 }
 
 wxEnhMetaFile *wxEnhMetaFileDC::Close()

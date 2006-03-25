@@ -7,6 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmltag.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -515,5 +520,14 @@ wxHtmlTag *wxHtmlTag::GetNextTag() const
         cur = cur->m_Parent;
     return cur->m_Next;
 }
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxHtmlTag::IsEnding() const
+{
+    return false;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif

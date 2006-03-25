@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -121,10 +126,11 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 
     EVT_LIST_CACHE_HINT(LIST_CTRL, MyListCtrl::OnCacheHint)
 
+    EVT_CHAR(MyListCtrl::OnChar)
+
 #if USE_CONTEXT_MENU
     EVT_CONTEXT_MENU(MyListCtrl::OnContextMenu)
 #endif
-    EVT_CHAR(MyListCtrl::OnChar)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -168,7 +174,7 @@ MyFrame::MyFrame(const wxChar *title)
     m_logWindow = NULL;
     m_smallVirtual = false;
 
-    if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL)
+    if ( wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL )
         SetSize(wxSize(450, 340));
 
     // Give it an icon
@@ -493,6 +499,7 @@ void MyFrame::InitWithReportItems()
     m_listCtrl->SetItem( item );
 
     m_listCtrl->SetTextColour(*wxBLUE);
+    m_listCtrl->SetBackgroundColour(*wxLIGHT_GREY);
 
     m_listCtrl->SetColumnWidth( 0, wxLIST_AUTOSIZE );
     m_listCtrl->SetColumnWidth( 1, wxLIST_AUTOSIZE );
@@ -1028,15 +1035,9 @@ wxString MyListCtrl::OnGetItemText(long item, long column) const
     }
 }
 
-int MyListCtrl::OnGetItemColumnImage(long item, long column) const
+int MyListCtrl::OnGetItemImage(long WXUNUSED(item)) const
 {
-    if (!column)
-        return 0;
-
-    if (!(item %3) && column == 1)
-        return 0;
-
-    return -1;
+    return 0;
 }
 
 wxListItemAttr *MyListCtrl::OnGetItemAttr(long item) const
@@ -1084,3 +1085,4 @@ void MyListCtrl::ShowContextMenu(const wxPoint& pos)
 
     PopupMenu(&menu, pos.x, pos.y);
 }
+

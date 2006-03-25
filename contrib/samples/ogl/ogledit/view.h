@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/view.h
+// Name:        view.h
 // Purpose:     View-related classes
 // Author:      Julian Smart
 // Modified by:
@@ -12,8 +12,12 @@
 #ifndef _OGLSAMPLE_VIEW_H_
 #define _OGLSAMPLE_VIEW_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface "view.h"
+#endif
+
 #include "doc.h"
-#include "wx/ogl/ogl.h"
+#include <wx/ogl/ogl.h>
 
 class MyCanvas: public wxShapeCanvas
 {
@@ -51,7 +55,7 @@ class DiagramView: public wxView
  public:
   wxFrame *frame;
   MyCanvas *canvas;
-
+  
   DiagramView(void) { canvas = NULL; frame = NULL; };
   ~DiagramView(void) {};
 
@@ -61,6 +65,8 @@ class DiagramView: public wxView
   bool OnClose(bool deleteWindow = true);
 
   wxShape *FindSelectedShape(void);
+
+//  void OnMenuCommand(int cmd);
 
   void OnCut(wxCommandEvent& event);
   void OnChangeBackgroundColour(wxCommandEvent& event);

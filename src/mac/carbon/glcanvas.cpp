@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "glcanvas.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if defined(__BORLANDC__)
@@ -213,8 +217,6 @@ bool wxGLCanvas::Create(wxWindow *parent, const wxGLContext *shared, wxWindowID 
                         const wxPoint& pos, const wxSize& size, long style, const wxString& name,
                         int *attribList, const wxPalette& palette)
 {
-    m_macCanvasIsShown = false ;
-    m_glContext = 0 ;
     wxWindow::Create( parent, id, pos, size, style, name );
     
     AGLPixelFormat fmt = ChoosePixelFormat(attribList);

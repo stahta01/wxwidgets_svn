@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/menu.cpp
+// Name:        menu.cpp
 // Purpose:     wxMenu, wxMenuBar, wxMenuItem
 // Author:      Julian Smart
 // Modified by:
@@ -9,9 +9,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 // ============================================================================
 // declarations
 // ============================================================================
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menu.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -114,7 +119,18 @@ void wxMenu::Break()
 // function appends a new item or submenu to the menu
 wxMenuItem* wxMenu::DoAppend(wxMenuItem *pItem)
 {
-    return DoInsert(GetMenuItemCount(), pItem);
+    if (m_menuWidget)
+    {
+        // this is a dynamic Append
+        pItem->CreateItem(m_menuWidget, GetMenuBar(), m_topLevelMenu);
+    }
+
+    if ( pItem->IsSubMenu() )
+    {
+        pItem->GetSubMenu()->m_topLevelMenu = m_topLevelMenu;
+    }
+
+    return wxMenuBase::DoAppend(pItem);
 }
 
 wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
@@ -126,22 +142,12 @@ wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
 
 wxMenuItem* wxMenu::DoInsert(size_t pos, wxMenuItem *item)
 {
-    if (m_menuWidget)
-    {
-        // this is a dynamic Append
-#ifndef XmNpositionIndex
-    wxCHECK_MSG( pos == GetMenuItemCount(), -1, wxT("insert not implemented"));
-#endif
-        item->CreateItem(m_menuWidget, GetMenuBar(), m_topLevelMenu, pos);
-    }
+    if ( wxMenuBase::DoInsert(pos, item) )
+        return item;
 
-    if ( item->IsSubMenu() )
-    {
-        item->GetSubMenu()->m_topLevelMenu = m_topLevelMenu;
-    }
+    wxFAIL_MSG(wxT("DoInsert not implemented; or error in wxMenuBase::DoInsert"));
 
-    return pos == GetMenuItemCount() ? wxMenuBase::DoAppend(item) :
-                                       wxMenuBase::DoInsert(pos, item);
+    return NULL;
 }
 
 void wxMenu::SetTitle(const wxString& label)
@@ -266,27 +272,30 @@ wxString wxMenuBar::GetLabelTop(size_t pos) const
 
 bool wxMenuBar::Append(wxMenu * menu, const wxString& title)
 {
-    return Insert(GetMenuCount(), menu, title);
-}
-
-bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
-{
-    wxCHECK_MSG( pos <= GetMenuCount(), false, wxT("invalid position") );
     wxCHECK_MSG( menu, false, wxT("invalid menu") );
     wxCHECK_MSG( !menu->GetParent() && !menu->GetButtonWidget(), false,
                  wxT("menu already appended") );
 
     if ( m_menuBarFrame )
     {
-        WXWidget w = menu->CreateMenu(this, GetMainWidget(), menu,
-                                      pos, title, true);
+        WXWidget w = menu->CreateMenu(this, GetMainWidget(), menu, title, true);
         wxCHECK_MSG( w, false, wxT("failed to create menu") );
         menu->SetButtonWidget(w);
     }
 
-    m_titles.Insert(title, pos);
+    m_titles.Add(title);
 
-    return wxMenuBarBase::Insert(pos, menu, title);
+    return wxMenuBarBase::Append(menu, title);
+}
+
+bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
+{
+    if ( !wxMenuBarBase::Insert(pos, menu, title) )
+        return false;
+
+    wxFAIL_MSG(wxT("TODO"));
+
+    return false;
 }
 
 wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
@@ -338,14 +347,12 @@ wxMenuItem *wxMenuBar::FindItem(int id, wxMenu ** itemMenu) const
     if (itemMenu)
         *itemMenu = NULL;
 
+    wxMenuItem *item = NULL;
     size_t menuCount = GetMenuCount();
     for (size_t i = 0; i < menuCount; i++)
-    {
-        wxMenuItem *item = m_menus.Item(i)->GetData()->FindItem(id, itemMenu);
-        if (item) return item;
-    }
-
-    return NULL;
+        if ((item = m_menus.Item(i)->GetData()->FindItem(id, itemMenu)))
+            return item;
+        return NULL;
 }
 
 // Create menubar
@@ -371,7 +378,7 @@ bool wxMenuBar::CreateMenuBar(wxFrame* parent)
     {
         wxMenu *menu = GetMenu(i);
         wxString title(m_titles[i]);
-        menu->SetButtonWidget(menu->CreateMenu (this, menuBarW, menu, i, title, true));
+        menu->SetButtonWidget(menu->CreateMenu (this, menuBarW, menu, title, true));
 
         if (strcmp (wxStripMenuCodes(title), "Help") == 0)
             XtVaSetValues ((Widget) menuBarW, XmNmenuHelpWidget, (Widget) menu->GetButtonWidget(), NULL);
@@ -467,12 +474,7 @@ void wxMenu::DestroyWidgetAndDetach()
 *
 */
 
-WXWidget wxMenu::CreateMenu (wxMenuBar * menuBar,
-                             WXWidget parent,
-                             wxMenu * topMenu,
-                             size_t WXUNUSED(index),
-                             const wxString& title,
-                             bool pullDown)
+WXWidget wxMenu::CreateMenu (wxMenuBar * menuBar, WXWidget parent, wxMenu * topMenu, const wxString& title, bool pullDown)
 {
     Widget menu = (Widget) 0;
     Widget buttonWidget = (Widget) 0;
@@ -515,14 +517,13 @@ WXWidget wxMenu::CreateMenu (wxMenuBar * menuBar,
 
     m_topLevelMenu = topMenu;
 
-    size_t i = 0;
     for ( wxMenuItemList::compatibility_iterator node = GetMenuItems().GetFirst();
           node;
-          node = node->GetNext(), ++i )
+          node = node->GetNext() )
     {
         wxMenuItem *item = node->GetData();
 
-        item->CreateItem(menu, menuBar, topMenu, i);
+        item->CreateItem(menu, menuBar, topMenu);
     }
 
     SetBackgroundColour(m_backgroundColour);
@@ -678,8 +679,6 @@ void wxMenu::ChangeFont(bool keepOriginalSize)
         if (item->GetSubMenu())
             item->GetSubMenu()->ChangeFont(keepOriginalSize);
     }
-#else
-    wxUnusedVar(keepOriginalSize);
 #endif
 }
 

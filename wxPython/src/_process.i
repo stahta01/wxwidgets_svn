@@ -104,9 +104,8 @@ public:
 
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    void OnTerminate(int pid, int status);
-    %MAKE_BASE_FUNC(Process, OnTerminate);
-        
+    void base_OnTerminate(int pid, int status);
+
     // call Redirect before passing the object to wxExecute() to redirect the
     // launched process stdin/stdout, then use GetInputStream() and
     // GetOutputStream() to get access to them
@@ -188,11 +187,7 @@ long wxExecute(const wxString& command,
 {
     PyObject* o;
     o = PyInt_FromLong((long) (*$1));
-#if SWIG_VERSION < 0x010328
     $result = t_output_helper($result, o);
-#else
-    $result = SWIG_Python_AppendOutput($result, o);
-#endif
 }
 
 int wxKill(long pid, wxSignal sig = wxSIGTERM, wxKillError* rc, int flags = wxKILL_NOCHILDREN);

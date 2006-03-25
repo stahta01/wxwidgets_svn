@@ -1,11 +1,14 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/busyinfo.cpp
+// Name:        busyinfo.cpp
 // Purpose:     Information window when app is busy
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// RCS-ID:      $Id$
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "busyinfo.h"
+#endif
 
 #include "wx/wxprec.h"
 
@@ -15,24 +18,10 @@
 
 #if wxUSE_BUSYINFO
 
-// for all others, include the necessary headers
-#ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/stattext.h"
-    #include "wx/panel.h"
-    #include "wx/utils.h"
-#endif
-
+#include "wx/stattext.h"
+#include "wx/panel.h"
+#include "wx/utils.h"
 #include "wx/busyinfo.h"
-
-class WXDLLEXPORT wxInfoFrame : public wxFrame
-{
-public:
-    wxInfoFrame(wxWindow *parent, const wxString& message);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxInfoFrame)
-};
 
 
 wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
@@ -126,4 +115,6 @@ wxBusyInfo::~wxBusyInfo()
     m_InfoFrame->Close();
 }
 
-#endif // wxUSE_BUSYINFO
+#endif
+  // wxUSE_BUSYINFO
+

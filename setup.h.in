@@ -3,6 +3,10 @@
 #ifndef __WX_SETUP_H__
 #define __WX_SETUP_H__
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 /* never undefine inline or const keywords for C++ compilation */
 #ifndef __cplusplus
 
@@ -148,9 +152,9 @@
 #endif
 
 
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-#define WXWIN_COMPATIBILITY_2_6 0
+#define WXWIN_COMPATIBILITY_2_4 0
 
 #define wxDIALOG_UNIT_COMPATIBILITY   0
 
@@ -329,15 +333,9 @@
 
 #define wxUSE_CHOICEBOOK 0
 
-#define wxUSE_TREEBOOK 0
-
-#define wxUSE_TOOLBOOK 0
-
 #define wxUSE_TAB_DIALOG    0
 
 #define wxUSE_GRID         0
-
-#define wxUSE_DATAVIEWCTRL   0
 
 #define wxUSE_MINIFRAME 0
 
@@ -413,8 +411,6 @@
 #define wxUSE_HTML          0
 
 #define wxUSE_GLCANVAS       0
-
-#define wxUSE_RICHTEXT       0
 
 
 #define wxUSE_CLIPBOARD     0
@@ -497,8 +493,6 @@
  * the common values automatically */
 #if (defined(__WIN95__) && !defined(__WXUNIVERSAL__)) || defined(__WXPM__)
 #define wxUSE_OWNER_DRAWN 1
-#else
-#define wxUSE_OWNER_DRAWN 0
 #endif
 
 #if defined(__WIN95__) && !defined(__WINE__) && !defined(__GNUWIN32_OLD__)
@@ -508,8 +502,6 @@
 #define wxUSE_RICHEDIT 0
 #define wxUSE_RICHEDIT2 0
 #endif
-
-#define wxUSE_INKEDIT 0
 
 #define wxUSE_UNICODE_MSLU 0
 
@@ -602,10 +594,6 @@
  * Use GNOME print for printing under GTK+ 2.0
  */
 #define wxUSE_LIBGNOMEPRINT 0
-/*
- * Use GNOME VFS for MIME types
- */
-#define wxUSE_LIBGNOMEVFS 0
 /*
  * Use the Hildon framework
  */
@@ -766,9 +754,6 @@
 /* Define if you have pthread_mutexattr_t and functions to work with it */
 #undef HAVE_PTHREAD_MUTEXATTR_T
 
-/* Define if you have pthread_mutexattr_settype() declaration */
-#undef HAVE_PTHREAD_MUTEXATTR_SETTYPE_DECL
-
 /* Define if you have PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP */
 #undef HAVE_PTHREAD_RECURSIVE_MUTEX_INITIALIZER
 
@@ -808,9 +793,6 @@
 
 /* Define if you have strptime() */
 #undef HAVE_STRPTIME
-
-/* Define if strptime() is declared in headers */
-#undef HAVE_STRPTIME_DECL
 
 /* Define if you have all functions to set thread priority */
 #undef HAVE_THREAD_PRIORITY_FUNCTIONS
@@ -879,47 +861,14 @@
 /* Define if you have BSD flock() function. */
 #undef HAVE_FLOCK
 
-/* Define if you have getaddrinfo function. */
-#undef HAVE_GETADDRINFO
-
-/* Define if you have a gethostbyname_r function taking 6 arguments. */
-#undef HAVE_FUNC_GETHOSTBYNAME_R_6
-
-/* Define if you have a gethostbyname_r function taking 5 arguments. */
-#undef HAVE_FUNC_GETHOSTBYNAME_R_5
-
-/* Define if you have a gethostbyname_r function taking 3 arguments. */
-#undef HAVE_FUNC_GETHOSTBYNAME_R_3
-
-/* Define if you only have a gethostbyname function */
-#undef HAVE_GETHOSTBYNAME
-
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
-
-/* Define if you have a getservbyname_r function taking 6 arguments. */
-#undef HAVE_FUNC_GETSERVBYNAME_R_6
-
-/* Define if you have a getservbyname_r function taking 5 arguments. */
-#undef HAVE_FUNC_GETSERVBYNAME_R_5
-
-/* Define if you have a getservbyname_r function taking 4 arguments. */
-#undef HAVE_FUNC_GETSERVBYNAME_R_4
-
-/* Define if you only have a getservbyname function */
-#undef HAVE_GETSERVBYNAME
-
-/* Define if you have the gmtime_r function.  */
-#undef HAVE_GMTIME_R
 
 /* Define if you have the inet_addr function.  */
 #undef HAVE_INET_ADDR
 
 /* Define if you have the inet_aton function.  */
 #undef HAVE_INET_ATON
-
-/* Define if you have the localtime_r function.  */
-#undef HAVE_LOCALTIME_R
 
 /* Define if you have the mktemp function.  */
 #undef HAVE_MKTEMP
@@ -932,9 +881,6 @@
 
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
-
-/* Define if you have the readdir_r function.  */
-#undef HAVE_READDIR_R
 
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
@@ -1073,8 +1019,7 @@
 #define wxUSE_XPM_IN_MSW wxUSE_XPM
 
 /* Set to 0 to disable PostScript print/preview architecture code under Windows
-  (just use Windows printing).
- */
+   (just use Windows printing). */
 #define wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW 1
 
 #endif /* __WIN32__ */
@@ -1083,6 +1028,8 @@
  *  This stuff is static, it doesn't get modified directly
  *  by configure.
 */
+
+#include "wx/chkconf.h"
 
 /*
    define some constants identifying wxWindows version in more details than

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "evtloop.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -82,6 +86,30 @@ private:
 // ----------------------------------------------------------------------------
 
 wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoopImpl);
+
+// this object sets the wxEventLoop given to the ctor as the currently active
+// one and unsets it in its dtor
+class wxEventLoopActivator
+{
+public:
+    wxEventLoopActivator(wxEventLoop **pActive,
+                         wxEventLoop *evtLoop)
+    {
+        m_pActive = pActive;
+        m_evtLoopOld = *pActive;
+        *pActive = evtLoop;
+    }
+
+    ~wxEventLoopActivator()
+    {
+        // restore the previously active event loop
+        *m_pActive = m_evtLoopOld;
+    }
+
+private:
+    wxEventLoop *m_evtLoopOld;
+    wxEventLoop **m_pActive;
+};
 
 // ============================================================================
 // wxEventLoopImpl implementation
@@ -199,6 +227,8 @@ bool wxEventLoopImpl::SendIdleMessage()
 // wxEventLoop implementation
 // ============================================================================
 
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+
 // ----------------------------------------------------------------------------
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
@@ -245,7 +275,7 @@ int wxEventLoop::Run()
     // SendIdleMessage() and Dispatch() below may throw so the code here should
     // be exception-safe, hence we must use local objects for all actions we
     // should undo
-    wxEventLoopActivator activate(this);
+    wxEventLoopActivator activate(&ms_activeLoop, this);
     wxEventLoopImplTiedPtr impl(&m_impl, new wxEventLoopImpl);
 
     CallEventLoopMethod  callOnExit(this, &wxEventLoop::OnExit);

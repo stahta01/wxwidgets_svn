@@ -12,6 +12,10 @@
 #ifndef _WX_LISTCTRL_H_
 #define _WX_LISTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listctrl.h"
+#endif
+
 #if wxUSE_LISTCTRL
 
 #include "wx/control.h"
@@ -120,7 +124,7 @@ public:
     bool GetColumn(int col, wxListItem& item) const;
 
     // Sets information about this column
-    bool SetColumn(int col, const wxListItem& item) ;
+    bool SetColumn(int col, wxListItem& item) ;
 
     // Gets the column width
     int GetColumnWidth(int col) const;
@@ -157,7 +161,9 @@ public:
 
     // Sets the item image
     bool SetItemImage(long item, int image, int selImage = -1) ;
+#if wxABI_VERSION >= 20603
     bool SetItemColumnImage(long item, long column, int image);
+#endif
 
     // Gets the item text
     wxString GetItemText(long item) const ;
@@ -197,9 +203,11 @@ public:
     void SetItemBackgroundColour( long item, const wxColour &col);
     wxColour GetItemBackgroundColour( long item ) const;
 
+#if wxABI_VERSION >= 20602
     // Font of an item.
     void SetItemFont( long item, const wxFont &f);
     wxFont GetItemFont( long item ) const;
+#endif
 
     // Gets the number of selected items in the list control
     int GetSelectedItemCount() const;
@@ -297,7 +305,7 @@ public:
 
     // Inserts an item, returning the index of the new item if successful,
     // -1 otherwise.
-    long InsertItem(const wxListItem& info);
+    long InsertItem(wxListItem& info);
 
     // Insert a string item
     long InsertItem(long index, const wxString& label);
@@ -309,7 +317,7 @@ public:
     long InsertItem(long index, const wxString& label, int imageIndex);
 
     // For list view mode (only), inserts a column.
-    long InsertColumn(long col, const wxListItem& info);
+    long InsertColumn(long col, wxListItem& info);
 
     long InsertColumn(long col,
                       const wxString& heading,
@@ -366,14 +374,6 @@ public:
     // obsolete stuff, for compatibility only -- don't use
     wxDEPRECATED( int GetItemSpacing(bool isSmall) const);
 
-    // convert our styles to Windows
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
-    // special Windows message handling
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg,
-                                    WXWPARAM wParam,
-                                    WXLPARAM lParam);
-
 protected:
     // common part of all ctors
     void Init();
@@ -381,9 +381,13 @@ protected:
     // free memory taken by all internal data
     void FreeAllInternalData();
 
-    // get the item attribute, either by quering it for virtual control, or by
-    // returning the one previously set using setter methods for a normal one
-    wxListItemAttr *DoGetItemAttr(long item) const;
+    // convert our styles to Windows
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
+
+    // special Windows message handling
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg,
+                                    WXWPARAM wParam,
+                                    WXLPARAM lParam);
 
 
     wxTextCtrl*       m_textCtrl;        // The control used for editing a label
@@ -412,13 +416,8 @@ protected:
     // return the text for the given column of the given item
     virtual wxString OnGetItemText(long item, long column) const;
 
-    // return the icon for the given item. In report view, OnGetItemImage will
-    // only be called for the first column. See OnGetItemColumnImage for 
-    // details.
+    // return the icon for the given item
     virtual int OnGetItemImage(long item) const;
-
-    // return the icon for the given item and column.
-    virtual int OnGetItemColumnImage(long item, long column) const;
 
     // return the attribute for the item (may return NULL if none)
     virtual wxListItemAttr *OnGetItemAttr(long item) const;

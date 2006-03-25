@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/dialogs.cpp
+// Name:        dialogs.cpp
 // Purpose:     Implements Studio dialogs
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+// #pragma implementation
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -17,7 +21,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #include "dialogs.h"
@@ -530,3 +534,5 @@ END_EVENT_TABLE()
 csTextBoxDialog::csTextBoxDialog()
 {
 }
+
+

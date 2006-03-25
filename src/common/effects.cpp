@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "effects.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -83,7 +87,7 @@ void wxEffects::DrawSunkenEdge(wxDC& dc, const wxRect& rect, int WXUNUSED(border
     dc.SetPen(wxNullPen);
 }
 
-bool wxEffects::TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap)
+bool wxEffects::TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap)
 {
     static bool hiColour = (wxDisplayDepth() >= 16) ;
 

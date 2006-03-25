@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -223,15 +227,6 @@ bool wxTopLevelWindowPalm::ShowFullScreen(bool show, long style)
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowPalm misc
 // ----------------------------------------------------------------------------
-
-void wxTopLevelWindowPalm::SetTitle( const wxString& WXUNUSED(title))
-{
-}
-
-wxString wxTopLevelWindowPalm::GetTitle() const
-{
-    return wxEmptyString;
-}
 
 void wxTopLevelWindowPalm::SetIcon(const wxIcon& icon)
 {

@@ -12,6 +12,10 @@
 #ifndef _WX_PROPFORM_H_
 #define _WX_PROPFORM_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "propform.h"
+#endif
+
 #include "wx/deprecated/setup.h"
 
 #if wxUSE_PROPSHEET
@@ -145,6 +149,12 @@ class WXDLLIMPEXP_DEPRECATED wxPropertyFormValidator: public wxPropertyValidator
   virtual void OnCommand( wxProperty *WXUNUSED(property), wxPropertyFormView *WXUNUSED(view),
      wxWindow *WXUNUSED(parentWindow), wxCommandEvent& WXUNUSED(event) ) {}
 private:
+// Virtual function hiding suppression
+#if WXWIN_COMPATIBILITY_2
+    virtual void OnCommand(wxWindow& win,
+                           wxCommandEvent& event)
+    { wxEvtHandler::OnCommand(win, event); }
+#endif
 };
 
 /*

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "tabg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -32,7 +36,7 @@
 #include "wx/tab.h"
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxTabLayerList)
+WX_DEFINE_LIST(wxTabLayerList);
 
 // not defined: use old, square tab implementation (fills in tabs)
 // defined: use new, rounded tab implementation (doesn't colour in tabs)

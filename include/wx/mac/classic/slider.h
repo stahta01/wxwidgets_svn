@@ -12,11 +12,15 @@
 #ifndef _WX_SLIDER_H_
 #define _WX_SLIDER_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "slider.h"
+#endif
+
 #include "wx/control.h"
 #include "wx/slider.h"
 #include "wx/stattext.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxSliderNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
 
 // Slider
 class WXDLLEXPORT wxSlider: public wxControl

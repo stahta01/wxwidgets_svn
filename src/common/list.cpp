@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/list.cpp
+// Name:        list.cpp
 // Purpose:     wxList implementation
 // Author:      Julian Smart
 // Modified by: VZ at 16/11/98: WX_DECLARE_LIST() and typesafe lists added
@@ -16,6 +16,10 @@
 // -----------------------------------------------------------------------------
 // headers
 // -----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "list.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -654,19 +658,13 @@ wxStringList::wxStringList (const wxChar *first, ...)
   {
       Add(s);
 
-      // icc gives this warning in its own va_arg() macro, argh
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-#endif
-
       s = va_arg(ap, const wxChar *);
-
-#ifdef __INTELC__
-    #pragma warning(pop)
+      //    if (s == NULL)
+#ifdef __WXMSW__
+      if ((int)(long) s == 0)
+#else
+      if ((long) s == 0)
 #endif
-
-      if ( !s )
           break;
   }
 
@@ -742,14 +740,12 @@ void wxStringList::Sort()
 
 wxNode *wxStringList::Add(const wxChar *s)
 {
-    return (wxNode *)(wxStringListBase::Node *)
-            wxStringListBase::Append(MYcopystring(s));
+    return (wxNode *)wxStringListBase::Append(MYcopystring(s));
 }
 
 wxNode *wxStringList::Prepend(const wxChar *s)
 {
-    return (wxNode *)(wxStringListBase::Node *)
-            wxStringListBase::Insert(MYcopystring(s));
+    return (wxNode *)wxStringListBase::Insert(MYcopystring(s));
 }
 
 #endif // wxLIST_COMPATIBILITY
@@ -757,11 +753,12 @@ wxNode *wxStringList::Prepend(const wxChar *s)
 #else // wxUSE_STL = 1
 
     #include "wx/listimpl.cpp"
-    WX_DEFINE_LIST(wxObjectList)
+    WX_DEFINE_LIST(wxObjectList);
 
 // with wxUSE_STL wxStringList contains wxString objects, not pointers
-void _WX_LIST_HELPER_wxStringListBase::DeleteFunction( wxString WXUNUSED(X) )
+void wxStringListBase::DeleteFunction( _WX_DELETEFUNCTIONCONST wxString WXUNUSED(X) )
 {
 }
 
 #endif // !wxUSE_STL
+

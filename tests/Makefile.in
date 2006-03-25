@@ -37,8 +37,8 @@ SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.7
-WX_VERSION = $(WX_RELEASE).0
+WX_RELEASE = 2.6
+WX_VERSION = $(WX_RELEASE).3
 LIBDIRNAME = $(top_builddir)lib
 TEST_CXXFLAGS = $(__test_PCH_INC) -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
@@ -65,7 +65,6 @@ TEST_OBJECTS =  \
 	test_scopeguardtest.o \
 	test_strings.o \
 	test_stdstrings.o \
-	test_tokenizer.o \
 	test_unicode.o \
 	test_crt.o \
 	test_bstream.o \
@@ -318,9 +317,6 @@ test_strings.o: $(srcdir)/strings/strings.cpp $(TEST_ODEP)
 
 test_stdstrings.o: $(srcdir)/strings/stdstrings.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/stdstrings.cpp
-
-test_tokenizer.o: $(srcdir)/strings/tokenizer.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/tokenizer.cpp
 
 test_unicode.o: $(srcdir)/strings/unicode.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/unicode.cpp

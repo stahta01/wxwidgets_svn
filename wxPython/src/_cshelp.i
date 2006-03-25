@@ -208,18 +208,11 @@ application using wx.HelpProvider.Set().", "");
 class wxHelpProvider 
 {
 public:
-    
-    ~wxHelpProvider();
-    
-    
-    %disownarg( wxHelpProvider *helpProvider );
-    %newobject Set;
     DocDeclStr(
         static wxHelpProvider *, Set(wxHelpProvider *helpProvider),
         "Sset the current, application-wide help provider. Returns the previous
 one.  Unlike some other classes, the help provider is not created on
 demand. This must be explicitly done by the application.", "");
-    %cleardisown( wxHelpProvider *helpProvider );
     
     DocDeclStr(
         static wxHelpProvider *, Get(),
@@ -257,7 +250,6 @@ table of help strings will fill up and when window pointers are
 reused, the wrong help string will be found.", "");
     
     
-    %pythonAppend Destroy "args[0].thisown = 0"
     %extend { void Destroy() { delete self; } }
 };
 

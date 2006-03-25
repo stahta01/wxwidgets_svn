@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cursor.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -206,18 +210,18 @@ wxCursor::wxCursor(const wxImage& image)
         imageSized = image.Scale(w, h);
     }
 
+#if wxUSE_WXDIB
     HCURSOR hcursor = wxBitmapToHCURSOR( wxBitmap(imageSized),
                                          hotSpotX, hotSpotY );
+#else
+    HCURSOR hcursor = 0;
+#endif                                         
 
-#if wxUSE_WXDIB
     if ( !hcursor )
     {
         wxLogWarning(_("Failed to create cursor."));
         return;
     }
-#else
-    HCURSOR hcursor = 0;
-#endif                                         
 
     m_refData = new wxCursorRefData(hcursor, true /* delete it later */);
 }

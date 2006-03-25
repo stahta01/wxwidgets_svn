@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -152,14 +156,12 @@ static void gtk_treectrl_count_callback (GtkWidget *widget, gpointer data) {
     gtk_container_foreach(GTK_CONTAINER(widget), gtk_treectrl_count_callback, data);
 }
 
-unsigned int wxTreeCtrl::GetCount() const
-{
-    int count = 0;
+size_t wxTreeCtrl::GetCount() const {
+  int count = 0;
 
-    if (m_anchor != NULL)
-        gtk_treectrl_count_callback(GTK_WIDGET(m_anchor), &count);
-
-    return (unsigned int)count;
+  if (m_anchor != NULL)
+    gtk_treectrl_count_callback(GTK_WIDGET(m_anchor), &count);
+  return count;
 }
 
 unsigned int wxTreeCtrl::GetIndent() const {
@@ -224,7 +226,7 @@ void wxTreeCtrl::SetItemText(const wxTreeItemId& item, const wxString& text) {
     return;
 
   GtkLabel *l = GTK_LABEL(gtk_object_get_data(GTK_OBJECT((GtkTreeItem *)item), "w_label"));
-  gtk_label_set_text(l, text);
+  gtk_label_set(l, text);
 }
 
 void wxTreeCtrl::SetItemImage(const wxTreeItemId& item, int image) {
@@ -536,14 +538,16 @@ printf("m_tree = %p\n", m_tree);
 
   gtk_widget_show(GTK_WIDGET(item));
 
-  g_signal_connect (item, "select",
-                    G_CALLBACK (gtk_treeitem_select_callback), this);
-  g_signal_connect (item, "deselect",
-                    G_CALLBACK (gtk_treeitem_select_callback), this);
-  g_signal_connect (item, "expand",
-                    G_CALLBACK (gtk_treeitem_expand_callback), this);
-  g_signal_connect (item, "collapse",
-                    G_CALLBACK (gtk_treeitem_collapse_callback), this);
+  gtk_signal_connect(GTK_OBJECT(item), "select",
+    GTK_SIGNAL_FUNC(gtk_treeitem_select_callback), (gpointer)this );
+
+  gtk_signal_connect(GTK_OBJECT(item), "deselect",
+    GTK_SIGNAL_FUNC(gtk_treeitem_select_callback), (gpointer)this );
+
+  gtk_signal_connect(GTK_OBJECT(item), "expand",
+    GTK_SIGNAL_FUNC(gtk_treeitem_expand_callback), (gpointer)this );
+  gtk_signal_connect(GTK_OBJECT(item), "collapse",
+    GTK_SIGNAL_FUNC(gtk_treeitem_collapse_callback), (gpointer)this );
 
   return item;
 }
@@ -667,7 +671,7 @@ void wxTreeCtrl::EndEditLabel(const wxTreeItemId& item, bool discardChanges) {
 #warning "Need to implement EndEditLabel"
 /*
   GtkLabel *m_label = (GtkLabel *)gtk_object_get_data(GTK_OBJECT((GtkTreeItem *)m_editItem), "w_label");
-  gtk_label_set_text(m_label, m_textCtrl->GetValue());
+  gtk_label_set(m_label, m_textCtrl->GetValue());
 
   gtk_object_remove_data(GTK_OBJECT((GtkTreeItem *)m_editItem), "w_edit");
 
@@ -716,8 +720,8 @@ long wxTreeCtrl::GetChild(long item) const {
   GtkTreeItem *next = NULL;
 
   p = findGtkTreeItem(item);
-  GList *list = gtk_container_get_children(GTK_CONTAINER(p));
-  next = GTK_TREE_ITEM(list->data);
+  GList *list = gtk_container_children(GTK_CONTAINER(p));
+  next = GTK_TREE_ITEM(list->data);;
 
   if (next != NULL)
     return (long)gtk_object_get_data(GTK_OBJECT(next), "id");
@@ -728,8 +732,8 @@ long wxTreeCtrl::GetChild(long item) const {
 long wxTreeCtrl::GetFirstVisibleItem(void) const {
   GtkTreeItem *next = NULL;
 
-  GList *list = gtk_container_get_children(GTK_CONTAINER(m_anchor));
-  next = GTK_TREE_ITEM(list->data);
+  GList *list = gtk_container_children(GTK_CONTAINER(m_anchor));
+  next = GTK_TREE_ITEM(list->data);;
 //  gtk_container_foreach(GTK_CONTAINER(m_anchor), gtk_treectrl_next_visible_callback, &next);
 
   if (next != NULL)
@@ -743,8 +747,8 @@ long wxTreeCtrl::GetNextVisibleItem(long item) const {
   GtkTreeItem *next = NULL;
 
   p = findGtkTreeItem(item);
-  GList *list = gtk_container_get_children(GTK_CONTAINER(p));
-  next = GTK_TREE_ITEM(list->data);
+  GList *list = gtk_container_children(GTK_CONTAINER(p));
+  next = GTK_TREE_ITEM(list->data);;
 //  gtk_container_foreach(GTK_CONTAINER(p), gtk_treectrl_next_visible_callback, &next);
 
   if (next != NULL)
@@ -856,14 +860,16 @@ long wxTreeCtrl::InsertItem(long parent, wxTreeItem& info, long insertAfter) {
 
   gtk_widget_show(GTK_WIDGET(item));
 
-  g_signal_connect (item, "select",
-                    G_CALLBACK (gtk_treeitem_select_callback), this);
-  g_signal_connect (item, "deselect",
-                    G_CALLBACK (gtk_treeitem_select_callback), this);
-  g_signal_connect (item, "expand",
-                    G_CALLBACK (gtk_treeitem_expand_callback), this);
-  g_signal_connect (item, "collapse",
-                    G_CALLBACK (gtk_treeitem_collapse_callback), this);
+  gtk_signal_connect(GTK_OBJECT(item), "select",
+    GTK_SIGNAL_FUNC(gtk_treeitem_select_callback), (gpointer)this );
+
+  gtk_signal_connect(GTK_OBJECT(item), "deselect",
+    GTK_SIGNAL_FUNC(gtk_treeitem_select_callback), (gpointer)this );
+
+  gtk_signal_connect(GTK_OBJECT(item), "expand",
+    GTK_SIGNAL_FUNC(gtk_treeitem_expand_callback), (gpointer)this );
+  gtk_signal_connect(GTK_OBJECT(item), "collapse",
+    GTK_SIGNAL_FUNC(gtk_treeitem_collapse_callback), (gpointer)this );
 
   return info.m_itemId;
 }

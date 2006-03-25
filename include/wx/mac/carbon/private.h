@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -209,10 +209,6 @@ template<> inline EventParamType wxMacGetEventParamType<EventRef>() { return typ
 template<> inline EventParamType wxMacGetEventParamType<Point>() { return typeQDPoint ; }
 template<> inline EventParamType wxMacGetEventParamType<Rect>() { return typeQDRectangle ; }
 template<> inline EventParamType wxMacGetEventParamType<Boolean>() { return typeBoolean ; }
-template<> inline EventParamType wxMacGetEventParamType<SInt16>() { return typeSInt16 ; }
-template<> inline EventParamType wxMacGetEventParamType<SInt32>() { return typeSInt32 ; }
-template<> inline EventParamType wxMacGetEventParamType<UInt32>() { return typeUInt32 ; }
-template<> inline EventParamType wxMacGetEventParamType<RGBColor>() { return typeRGBColor ; }
 #if TARGET_API_MAC_OSX
 template<> inline EventParamType wxMacGetEventParamType<HICommand>() { return typeHICommand ; }
 template<> inline EventParamType wxMacGetEventParamType<HIPoint>() { return typeHIPoint ; }
@@ -220,7 +216,6 @@ template<> inline EventParamType wxMacGetEventParamType<HISize>() { return typeH
 template<> inline EventParamType wxMacGetEventParamType<HIRect>() { return typeHIRect ; }
 template<> inline EventParamType wxMacGetEventParamType<void*>() { return typeVoidPtr ; }
 #endif
-template<> inline EventParamType wxMacGetEventParamType<CFDictionaryRef>() { return typeCFDictionaryRef ; }
 template<> inline EventParamType wxMacGetEventParamType<Collection>() { return typeCollection ; }
 template<> inline EventParamType wxMacGetEventParamType<CGContextRef>() { return typeCGContextRef ; }
 /*
@@ -268,6 +263,7 @@ public :
             ReleaseEvent( m_eventRef ) ;
             m_release = false ;
             m_eventRef = NULL ;
+
         }
         OSStatus err = MacCreateEvent( NULL , inClassID, inKind,inWhen,inAttributes,&m_eventRef) ;
         if ( err == noErr )
@@ -332,13 +328,9 @@ public :
     {
         return EventTimeToTicks( GetTime() ) ;
     }
-    OSStatus SetCurrentTime( )
+    OSStatus SetTime( EventTime inWhen = 0 /*now*/ )
     {
-        return ::SetEventTime( m_eventRef , GetCurrentEventTime() ) ;
-    }
-    OSStatus SetTime( EventTime when )
-    {
-        return ::SetEventTime( m_eventRef , when ) ;
+        return ::SetEventTime( m_eventRef , inWhen ? inWhen : GetCurrentEventTime() ) ;
     }
     operator EventRef () { return m_eventRef; }
 
@@ -460,7 +452,6 @@ void wxMacNativeToPoint( const Point *n , wxPoint* wx ) ;
 wxWindow *              wxFindControlFromMacControl(ControlRef inControl ) ;
 wxTopLevelWindowMac*    wxFindWinFromMacWindow( WindowRef inWindow ) ;
 wxMenu*                 wxFindMenuFromMacMenu(MenuRef inMenuRef) ;
-
 int                     wxMacCommandToId( UInt32 macCommandId ) ;
 UInt32                  wxIdToMacCommand( int wxId ) ;
 wxMenu*                 wxFindMenuFromMacCommand( const HICommand &macCommandId , wxMenuItem* &item ) ;
@@ -536,14 +527,6 @@ public :
     {
         return SetData( inPartCode , inTag , sizeof( T ) , &data ) ;
     }
-    template <typename T> OSStatus SetData( ResType inTag , const T *data )
-    {
-        return SetData( kControlEntireControl , inTag , sizeof( T ) , data ) ;
-    }
-    template <typename T> OSStatus SetData( ResType inTag , const T& data )
-    {
-        return SetData( kControlEntireControl , inTag , sizeof( T ) , &data ) ;
-    }
     template <typename T> OSStatus GetData( ControlPartCode inPartCode , ResType inTag , T *data ) const
     {
         Size dummy ;
@@ -555,18 +538,7 @@ public :
         verify_noerr( GetData<T>( inPartCode , inTag , &value ) ) ;
         return value ;
     }
-    template <typename T> OSStatus GetData( ResType inTag , T *data ) const
-    {
-        Size dummy ;
-        return GetData( kControlEntireControl , inTag , sizeof( T ) , data , &dummy ) ;
-    }
-    template <typename T> T GetData( ResType inTag ) const
-    {
-        T value ;
-        verify_noerr( GetData<T>( kControlEntireControl , inTag , &value ) ) ;
-        return value ;
-    }
-    
+
     // Flash the control for the specified amount of time
     virtual void Flash( ControlPartCode part , UInt32 ticks = 8 ) ;
 
@@ -598,7 +570,7 @@ public :
     // where is in native window relative coordinates
     virtual void SetNeedsDisplay( Rect* where = NULL ) ;
 
-    // if rect = NULL, entire view
+	// if rect = NULL, entire view
     virtual void ScrollRect( wxRect *rect , int dx , int dy ) ;
 
     // in native parent window relative coordinates
@@ -609,7 +581,7 @@ public :
 
     virtual void GetRectInWindowCoords( Rect *r ) ;
     virtual void GetBestRect( Rect *r ) ;
-    virtual void SetLabel( const wxString &title ) ;
+    virtual void SetTitle( const wxString &title ) ;
     // converts from Toplevel-Content relative to local
     static void Convert( wxPoint *pt , wxMacControl *convert , wxMacControl *to ) ;
 
@@ -826,19 +798,19 @@ private :
 
 // toplevel.cpp
 
-ControlRef wxMacFindControlUnderMouse( wxTopLevelWindowMac* toplevelWindow, const Point& location , WindowRef window , ControlPartCode *outPart ) ;
+ControlRef wxMacFindControlUnderMouse( wxTopLevelWindowMac* toplevelWindow, Point location , WindowRef window , ControlPartCode *outPart ) ;
 
-#if WORDS_BIGENDIAN
-    inline Rect* wxMacGetPictureBounds( PicHandle pict , Rect* rect ) 
-    { 
-       *rect = (**pict).picFrame ; 
-        return rect ;
-    }
+#ifdef WORDS_BIGENDIAN
+inline Rect* wxMacGetPictureBounds( PicHandle pict , Rect* rect ) 
+{ 
+    *rect = (**pict).picFrame ; 
+    return rect ;
+}
 #else
-    inline Rect* wxMacGetPictureBounds( PicHandle pict , Rect* rect ) 
-    {   
-        return QDGetPictureBounds( pict , rect ) ;
-    }
+inline Rect* wxMacGetPictureBounds( PicHandle pict , Rect* rect ) 
+{   
+    return QDGetPictureBounds( pict , rect ) ;
+}
 #endif
 
 #endif // wxUSE_GUI

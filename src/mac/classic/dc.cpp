@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "dc.h"
+#endif
+
 #include "wx/dc.h"
 #include "wx/app.h"
 #include "wx/mac/uma.h"

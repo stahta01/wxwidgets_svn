@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/dirctrlg.cpp
+// Name:        dirctrlg.cpp
 // Purpose:     wxGenericDirCtrl
 // Author:      Harm van der Heijden, Robert Roebling, Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Harm van der Heijden, Robert Roebling and Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dirctrlg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -118,9 +122,8 @@ size_t wxGetAvailableDrives(wxArrayString &paths, wxArrayString &names, wxArrayI
         name.Printf(wxT("%c:"), driveBuffer[i]);
 
 #if !defined(__WXWINCE__)
-        wxChar pname[52]; // FIXME: why 52 and not MAX_PATH or whatever?
-        if ( GetVolumeInformation(path, pname, WXSIZEOF(pname),
-                                  NULL, NULL, NULL, NULL, 0) )
+        wxChar pname[52];
+        if (GetVolumeInformation( path.c_str(), pname, 52, NULL, NULL, NULL, NULL, 0 ))
         {
             name << _T(' ') << pname;
         }
@@ -175,17 +178,7 @@ size_t wxGetAvailableDrives(wxArrayString &paths, wxArrayString &names, wxArrayI
                 // Note: If _filesys is unsupported by some compilers,
                 //       we can always replace it by DosQueryFSAttach
                 char filesysname[20];
-#ifdef __WATCOMC__
-                ULONG cbBuffer = sizeof(filesysname);
-                PFSQBUFFER2 pfsqBuffer = (PFSQBUFFER2)filesysname;
-                APIRET rc = ::DosQueryFSAttach(name.fn_str(),0,FSAIL_QUERYNAME,pfsqBuffer,&cbBuffer);
-                if (rc != NO_ERROR)
-                {
-                    filesysname[0] = '\0';
-                }
-#else
                 _filesys(name.fn_str(), filesysname, sizeof(filesysname));
-#endif
                 /* FAT, LAN, HPFS, CDFS, NFS */
                 int imageId;
                 if (path == wxT("A:\\") || path == wxT("B:\\"))
@@ -276,9 +269,7 @@ size_t wxGetAvailableDrives(wxArrayString &paths, wxArrayString &names, wxArrayI
 bool wxIsDriveAvailable(const wxString& dirName)
 {
     // FIXME_MGL - this method leads to hang up under Watcom for some reason
-#ifdef __WATCOMC__
-    wxUnusedVar(dirName);
-#else
+#ifndef __WATCOMC__
     if ( dirName.Len() == 3 && dirName[1u] == wxT(':') )
     {
         wxString dirNameLower(dirName.Lower());
@@ -851,6 +842,8 @@ void wxGenericDirCtrl::ExpandDir(wxTreeItemId parentId)
     // Now do the filenames -- but only if we're allowed to
     if ((GetWindowStyle() & wxDIRCTRL_DIR_ONLY) == 0)
     {
+        wxLogNull log;
+
         d.Open(dirName);
 
         if (d.IsOpened())
@@ -884,7 +877,7 @@ void wxGenericDirCtrl::ExpandDir(wxTreeItemId parentId)
     size_t i;
     for (i = 0; i < dirs.Count(); i++)
     {
-        eachFilename = dirs[i];
+        wxString eachFilename(dirs[i]);
         path = dirName;
         if (!wxEndsWithPathSeparator(path))
             path += wxString(wxFILE_SEP_PATH);
@@ -913,7 +906,7 @@ void wxGenericDirCtrl::ExpandDir(wxTreeItemId parentId)
     {
         for (i = 0; i < filenames.Count(); i++)
         {
-            eachFilename = filenames[i];
+            wxString eachFilename(filenames[i]);
             path = dirName;
             if (!wxEndsWithPathSeparator(path))
                 path += wxString(wxFILE_SEP_PATH);
@@ -1016,46 +1009,48 @@ bool wxGenericDirCtrl::ExpandPath(const wxString& path)
         if (id.IsOk())
             lastId = id;
     }
-    if (!lastId.IsOk())
-        return false;
-
-    wxDirItemData *data = (wxDirItemData *) m_treeCtrl->GetItemData(lastId);
-    if (data->m_isDir)
+    if (lastId.IsOk())
     {
-        m_treeCtrl->Expand(lastId);
-    }
-    if ((GetWindowStyle() & wxDIRCTRL_SELECT_FIRST) && data->m_isDir)
-    {
-        // Find the first file in this directory
-        wxTreeItemIdValue cookie;
-        wxTreeItemId childId = m_treeCtrl->GetFirstChild(lastId, cookie);
-        bool selectedChild = false;
-        while (childId.IsOk())
+        wxDirItemData *data = (wxDirItemData *) m_treeCtrl->GetItemData(lastId);
+        if (data->m_isDir)
         {
-            data = (wxDirItemData*) m_treeCtrl->GetItemData(childId);
-
-            if (data && data->m_path != wxEmptyString && !data->m_isDir)
-            {
-                m_treeCtrl->SelectItem(childId);
-                m_treeCtrl->EnsureVisible(childId);
-                selectedChild = true;
-                break;
-            }
-            childId = m_treeCtrl->GetNextChild(lastId, cookie);
+            m_treeCtrl->Expand(lastId);
         }
-        if (!selectedChild)
+        if ((GetWindowStyle() & wxDIRCTRL_SELECT_FIRST) && data->m_isDir)
+        {
+            // Find the first file in this directory
+            wxTreeItemIdValue cookie;
+            wxTreeItemId childId = m_treeCtrl->GetFirstChild(lastId, cookie);
+            bool selectedChild = false;
+            while (childId.IsOk())
+            {
+                wxDirItemData* data = (wxDirItemData*) m_treeCtrl->GetItemData(childId);
+
+                if (data && data->m_path != wxEmptyString && !data->m_isDir)
+                {
+                    m_treeCtrl->SelectItem(childId);
+                    m_treeCtrl->EnsureVisible(childId);
+                    selectedChild = true;
+                    break;
+                }
+                childId = m_treeCtrl->GetNextChild(lastId, cookie);
+            }
+            if (!selectedChild)
+            {
+                m_treeCtrl->SelectItem(lastId);
+                m_treeCtrl->EnsureVisible(lastId);
+            }
+        }
+        else
         {
             m_treeCtrl->SelectItem(lastId);
             m_treeCtrl->EnsureVisible(lastId);
         }
+
+        return true;
     }
     else
-    {
-        m_treeCtrl->SelectItem(lastId);
-        m_treeCtrl->EnsureVisible(lastId);
-    }
-
-    return true;
+        return false;
 }
 
 wxString wxGenericDirCtrl::GetPath() const

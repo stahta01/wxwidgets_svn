@@ -13,6 +13,10 @@
 #ifndef _WX_DATETIME_H
 #define _WX_DATETIME_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "datetime.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_DATETIME
@@ -51,27 +55,6 @@ class WXDLLIMPEXP_BASE wxDateSpan;
  * + 4. pluggable modules for the workdays calculations
  *   5. wxDateTimeHolidayAuthority for Easter and other christian feasts
  */
-
-/* Two wrapper functions for thread safety */
-#ifdef HAVE_LOCALTIME_R
-#define wxLocaltime_r localtime_r
-#else
-struct tm *wxLocaltime_r(const time_t*, struct tm*);
-#if wxUSE_THREADS && !defined(__WINDOWS__) && !defined(__WATCOMC__)
-     // On Windows, localtime _is_ threadsafe!
-#warning using pseudo thread-safe wrapper for localtime to emulate localtime_r
-#endif
-#endif
-
-#ifdef HAVE_GMTIME_R
-#define wxGmtime_r gmtime_r
-#else
-struct tm *wxGmtime_r(const time_t*, struct tm*);
-#if wxUSE_THREADS && !defined(__WINDOWS__) && !defined(__WATCOMC__)
-     // On Windows, gmtime _is_ threadsafe!
-#warning using pseudo thread-safe wrapper for gmtime to emulate gmtime_r
-#endif
-#endif
 
 /*
   The three (main) classes declared in this header represent:
@@ -790,10 +773,12 @@ public:
     inline wxDateTime ToTimezone(const TimeZone& tz, bool noDST = false) const;
     wxDateTime& MakeTimezone(const TimeZone& tz, bool noDST = false);
 
+#if wxABI_VERSION >= 20602
         // interpret current value as being in another timezone and transform
         // it to local one
     inline wxDateTime FromTimezone(const TimeZone& tz, bool noDST = false) const;
     wxDateTime& MakeFromTimezone(const TimeZone& tz, bool noDST = false);
+#endif // ABI >= 2.6.2
 
         // transform to/from GMT/UTC
     wxDateTime ToUTC(bool noDST = false) const { return ToTimezone(UTC, noDST); }
@@ -802,10 +787,12 @@ public:
     wxDateTime ToGMT(bool noDST = false) const { return ToUTC(noDST); }
     wxDateTime& MakeGMT(bool noDST = false) { return MakeUTC(noDST); }
 
+#if wxABI_VERSION >= 20602
     wxDateTime FromUTC(bool noDST = false) const
         { return FromTimezone(UTC, noDST); }
     wxDateTime& MakeFromUTC(bool noDST = false)
         { return MakeFromTimezone(UTC, noDST); }
+#endif // ABI >= 2.6.2
 
         // is daylight savings time in effect at this moment according to the
         // rules of the specified country?
@@ -1075,9 +1062,6 @@ public:
         time_t t = GetTimeNow();
         return localtime(&t);
     }
-
-    // get current time using thread-safe function
-    static struct tm *GetTmNow(struct tm *tmstruct);
 
 private:
     // the current country - as it's the same for all program objects (unless
@@ -1561,8 +1545,7 @@ inline bool wxDateTime::IsInStdRange() const
 /* static */
 inline wxDateTime wxDateTime::Now()
 {
-    struct tm tmstruct;
-    return wxDateTime(*GetTmNow(&tmstruct));
+    return wxDateTime(*GetTmNow());
 }
 
 /* static */
@@ -1879,11 +1862,15 @@ wxDateTime::ToTimezone(const wxDateTime::TimeZone& tz, bool noDST) const
     MODIFY_AND_RETURN( MakeTimezone(tz, noDST) );
 }
 
+#if wxABI_VERSION >= 20602
+
 inline wxDateTime
 wxDateTime::FromTimezone(const wxDateTime::TimeZone& tz, bool noDST) const
 {
     MODIFY_AND_RETURN( MakeFromTimezone(tz, noDST) );
 }
+
+#endif // ABI >= 2.6.2
 
 // ----------------------------------------------------------------------------
 // wxTimeSpan construction

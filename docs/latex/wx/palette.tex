@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        palette.tex
-%% Purpose:     wxPalette docs
-%% Author:
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{\class{wxPalette}}\label{wxpalette}
 
 A palette is a table that maps pixel values to RGB colours. It allows the colours
@@ -111,8 +100,8 @@ Returns number of entries in palette.
 
 \membersection{wxPalette::GetPixel}\label{wxpalettegetpixel}
 
-\constfunc{int}{GetPixel}{\param{unsigned char }{red}, \param{unsigned char }{green},\rtfsp
- \param{unsigned char }{blue}}
+\constfunc{int}{GetPixel}{\param{const unsigned char }{red}, \param{const unsigned char }{green},\rtfsp
+ \param{const unsigned char }{blue}}
 
 Returns a pixel value (index into the palette) for the given RGB values.
 
@@ -126,7 +115,7 @@ Returns a pixel value (index into the palette) for the given RGB values.
 
 \wxheading{Return value}
 
-The nearest palette index or {\tt wxNOT\_FOUND} for unexpected errors.
+The nearest palette index.
 
 \wxheading{See also}
 
@@ -188,3 +177,5 @@ fail the test.
 
 Inequality operator. Two palettes are not equal if they contain pointers
 to different underlying palette data. It does not compare each attribute.
+
+

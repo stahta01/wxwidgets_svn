@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        mac/dataobj2.h
+// Name:        os2/dataobj2.h
 // Purpose:     declaration of standard wxDataObjectSimple-derived classes
 // Author:      David Webster (adapted from Robert Roebling's gtk port
 // Modified by:
@@ -9,8 +9,12 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MAC_DATAOBJ2_H_
-#define _WX_MAC_DATAOBJ2_H_
+#ifndef _WX_GTK_DATAOBJ2_H_
+#define _WX_GTK_DATAOBJ2_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dataobj.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
@@ -35,19 +39,6 @@ public:
     virtual size_t GetDataSize() const ;
     virtual bool GetDataHere(void *buf) const ;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
 
 protected :
     void Init() ;
@@ -55,6 +46,14 @@ protected :
 
     void* m_pictHandle ;
     bool m_pictCreated ;
+private:
+    // Virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& rFormat) const
+    { return(wxDataObjectSimple::GetDataSize(rFormat)); }
+    bool GetDataHere(const wxDataFormat& rFormat, void* pBuf) const
+    { return(wxDataObjectSimple::GetDataHere(rFormat, pBuf)); }
+    bool SetData(const wxDataFormat& rFormat, size_t nLen, const void* pBuf)
+    { return(wxDataObjectSimple::SetData(rFormat, nLen, pBuf)); }
 };
 
 // ----------------------------------------------------------------------------
@@ -68,27 +67,20 @@ public:
     // ----------------------------------
 
     void AddFile( const wxString &filename );
-    
+
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
-protected:
-    // translates the filenames stored into a utf8 encoded char stream
-    void GetFileNames(wxCharBuffer &buf) const ;
+
+private:
+    // Virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& rFormat) const
+    { return(wxDataObjectSimple::GetDataSize(rFormat)); }
+    bool GetDataHere(const wxDataFormat& rFormat, void* pBuf) const
+    { return(wxDataObjectSimple::GetDataHere(rFormat, pBuf)); }
+    bool SetData(const wxDataFormat& rFormat, size_t nLen, const void* pBuf)
+    { return(wxDataObjectSimple::SetData(rFormat, nLen, pBuf)); }
 };
 
-#endif // _WX_MAC_DATAOBJ2_H_
+#endif // _WX_GTK_DATAOBJ2_H_
 

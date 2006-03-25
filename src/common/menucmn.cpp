@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/menucmn.cpp
+// Name:        common/menucmn.cpp
 // Purpose:     wxMenu and wxMenuBar methods common to all ports
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menubase.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -40,8 +44,8 @@
 
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxMenuList)
-WX_DEFINE_LIST(wxMenuItemList)
+WX_DEFINE_LIST(wxMenuList);
+WX_DEFINE_LIST(wxMenuItemList);
 
 // ============================================================================
 // implementation
@@ -1056,23 +1060,6 @@ wxString wxMenuBarBase::GetHelpString(int id) const
                  wxT("wxMenuBar::GetHelpString(): no such item") );
 
     return item->GetHelp();
-}
-
-void wxMenuBarBase::UpdateMenus( void )
-{
-    wxEvtHandler* source;
-    wxMenu* menu;
-    int nCount = GetMenuCount();
-    for (int n = 0; n < nCount; n++)
-    {
-        menu = GetMenu( n );
-        if (menu != NULL)
-        {
-            source = menu->GetEventHandler();
-            if (source != NULL)
-                menu->UpdateUI( source );
-        }
-    }
 }
 
 #endif // wxUSE_MENUS

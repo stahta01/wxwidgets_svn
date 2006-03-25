@@ -13,6 +13,11 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinctrlbase.h"
+    #pragma implementation "spinctrl.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -109,12 +114,11 @@ wxCONSTRUCTOR_6( wxSpinCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 #endif
 
-//pmg EVT_KILL_FOCUS
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
 
     EVT_SET_FOCUS(wxSpinCtrl::OnSetFocus)
-    EVT_KILL_FOCUS(wxSpinCtrl::OnKillFocus)
+
     EVT_SPIN(wxID_ANY, wxSpinCtrl::OnSpinChange)
 END_EVENT_TABLE()
 
@@ -260,13 +264,6 @@ void wxSpinCtrl::OnChar(wxKeyEvent& event)
     }
 
     // no, we didn't process it
-    event.Skip();
-}
-
-void wxSpinCtrl::OnKillFocus(wxFocusEvent& event)
-{
-    // ensure that the value is shown correctly
-    SetValue(GetValue()) ; 
     event.Skip();
 }
 

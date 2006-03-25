@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/helpbest.h
+// Name:        helpbest.h
 // Purpose:     Tries to load MS HTML Help, falls back to wxHTML upon failure
 // Author:      Mattia Barbon
 // Modified by:
@@ -12,7 +12,11 @@
 #ifndef _WX_HELPBEST_H_
 #define _WX_HELPBEST_H_
 
-#if wxUSE_HELP && wxUSE_MS_HTML_HELP \
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpbest.h"
+#endif
+
+#if wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__) \
     && wxUSE_WXHTML_HELP && !defined(__WXUNIVERSAL__)
 
 #include "wx/helpbase.h"
@@ -20,8 +24,8 @@
 class WXDLLIMPEXP_HTML wxBestHelpController: public wxHelpControllerBase
 {
 public:
-    wxBestHelpController(wxWindow* parentWindow = NULL)
-        : wxHelpControllerBase( parentWindow ), m_helpControllerType( wxUseNone ),
+    wxBestHelpController()
+        : m_helpControllerType( wxUseNone ),
           m_helpController( NULL )
     {
     }
@@ -98,12 +102,6 @@ public:
                                                      newFrameEachTime );
     }
 
-    /// Set the window that can optionally be used for the help window's parent.
-    virtual void SetParentWindow(wxWindow* win) { m_helpController->SetParentWindow(win); }
-
-    /// Get the window that can optionally be used for the help window's parent.
-    virtual wxWindow* GetParentWindow() const { return m_helpController->GetParentWindow(); }
-
 protected:
     // Append/change extension if necessary.
     wxString GetValidFilename(const wxString& file) const;
@@ -118,7 +116,7 @@ protected:
     DECLARE_NO_COPY_CLASS(wxBestHelpController)
 };
 
-#endif // wxUSE_HELP && wxUSE_MS_HTML_HELP && wxUSE_WXHTML_HELP
+#endif // wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__) && wxUSE_WXHTML_HELP
 
 #endif
     // _WX_HELPBEST_H_

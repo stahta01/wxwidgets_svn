@@ -17,7 +17,7 @@
 #include "wx/panel.h"
 #include "wx/cocoa/NSPanel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
 // ========================================================================
 // wxDialog
@@ -102,10 +102,6 @@ protected:
     void OnOK(wxCommandEvent& event);
     void OnApply(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
-
-    // end either modal or modeless dialog
-    void EndDialog(int rc);
-
 };
 
 #endif // _WX_COCOA_DIALOG_H_

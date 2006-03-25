@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/wince/chkconf.h
+// Name:        wx/wince/chkconf.h
 // Purpose:     WinCE-specific configuration options checks
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -19,12 +19,6 @@
     #define wxUSE_STDPATHS 0
 #endif // WCE_PLATFORM_STANDARDSDK
 
-#if _WIN32_WCE < 400
-    // not enough API and lack of ddraw.h
-    #undef wxUSE_DISPLAY
-    #define wxUSE_DISPLAY 0
-#endif
-
 // DDE doesn't exist under WinCE and wxIPC is DDE-based under MSW
 #undef wxUSE_IPC
 #define wxUSE_IPC 0
@@ -39,6 +33,10 @@
 // eVC doesn't support SEH
 #undef wxUSE_ON_FATAL_EXCEPTION
 #define wxUSE_ON_FATAL_EXCEPTION 0
+
+// media stuff not supported under CE
+#undef wxUSE_MEDIACTRL
+#define wxUSE_MEDIACTRL 0
 
 #undef wxUSE_WXHTML_HELP
 #define wxUSE_WXHTML_HELP 0

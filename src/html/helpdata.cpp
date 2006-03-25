@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpdata.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -462,17 +466,17 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
         }
         else
         {
-            int cnt2 = 0;
+            int cnt = 0;
             wxHtmlHelpDataItem *parent = m_index[i].parent;
             for (int j = i-1; j >= 0; j--)
             {
                 if (m_index[j].book == book && m_index[j].level > 0)
-                    cnt2++;
+                    cnt++;
                 if (&m_index[j] == parent)
                     break;
             }
-            wxASSERT(cnt2 > 0);
-            CacheWriteInt32(f, cnt2);
+            wxASSERT(cnt > 0);
+            CacheWriteInt32(f, cnt);
         }
     }
     return true;

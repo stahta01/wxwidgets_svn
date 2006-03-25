@@ -12,6 +12,10 @@
 #ifndef _WX_AUTOMTN_H_
 #define _WX_AUTOMTN_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "automtn.h"
+#endif
+
 #include "wx/object.h"
 #include "wx/variant.h"
 

@@ -19,7 +19,7 @@
 #include "wx/object.h"
 #include "wx/gdiobj.h"
 
-// wxPaletteBase
+// wxBrushBase
 class WXDLLEXPORT wxPaletteBase: public wxGDIObject
 {
 public:

@@ -12,6 +12,10 @@
 #ifndef _WX_DCMEMORY_H_
 #define _WX_DCMEMORY_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcmemory.h"
+#endif
+
 #include "wx/dcclient.h"
 
 class WXDLLEXPORT wxMemoryDC: public wxPaintDC
@@ -23,11 +27,8 @@ class WXDLLEXPORT wxMemoryDC: public wxPaintDC
     wxMemoryDC( wxDC *dc ); // Create compatible DC
     ~wxMemoryDC(void);
     virtual void SelectObject( const wxBitmap& bitmap );
-        wxBitmap    GetSelectedObject() { return m_selected ; }
-
-protected:
     virtual void DoGetSize( int *width, int *height ) const;
-
+        wxBitmap    GetSelectedObject() { return m_selected ; }
   private:
     wxBitmap  m_selected;
 };

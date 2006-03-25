@@ -1,23 +1,26 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/radiobox.cpp
+// Name:        radiobox.cpp
 // Purpose:     wxRadioBox
 // Author:      Stefan Csomor
 // Modified by: JS Lair (99/11/15) first implementation
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "radioboxbase.h"
+#pragma implementation "radiobox.h"
+#endif
 
 //-------------------------------------------------------------------------------------
 //         headers
 //-------------------------------------------------------------------------------------
 
-#include "wx/wxprec.h"
-
-#if wxUSE_RADIOBOX
-
+#include "wx/defs.h"
 #include "wx/arrstr.h"
+
 #include "wx/radiobox.h"
 #include "wx/radiobut.h"
 #include "wx/mac/uma.h"
@@ -39,7 +42,7 @@ void wxRadioBox::OnRadioButton( wxCommandEvent &outer )
         wxCommandEvent event(wxEVT_COMMAND_RADIOBOX_SELECTED, m_windowId);
         int i = GetSelection() ;
         event.SetInt( i );
-        event.SetString(GetString(i));
+        event.SetString( GetString( i ) );
         event.SetEventObject( this );
         ProcessCommand(event);
     }
@@ -49,6 +52,7 @@ wxRadioBox::wxRadioBox()
 {
     m_noItems = 0;
     m_noRowsOrCols = 0;
+    m_majorDim = 0 ;
     m_radioButtonCycle = NULL;
 }
 
@@ -111,11 +115,14 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 
     int i;
 
-    m_noItems = (unsigned int)n;
+    m_noItems = n;
     m_noRowsOrCols = majorDim;
     m_radioButtonCycle = NULL;
 
-    SetMajorDim(majorDim == 0 ? n : majorDim, style);
+    if (majorDim==0)
+        m_majorDim = n ;
+    else
+        m_majorDim = majorDim ;
 
     Rect bounds ;
     Str255 title ;
@@ -155,12 +162,14 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 
 bool wxRadioBox::Enable(bool enable)
 {
+    int i;
+    wxRadioButton *current;
+
     if (!wxControl::Enable(enable))
         return false;
 
-    wxRadioButton *current = m_radioButtonCycle;
-    for (unsigned int i = 0; i < m_noItems; i++)
-    {
+    current = m_radioButtonCycle;
+    for (i = 0; i < m_noItems; i++) {
         current->Enable(enable);
         current = current->NextInCycle();
     }
@@ -168,19 +177,21 @@ bool wxRadioBox::Enable(bool enable)
 }
 
 //-------------------------------------------------------------------------------------
-//         ¥ Enable(unsigned int, bool)
+//         ¥ Enable(int, bool)
 //-------------------------------------------------------------------------------------
 // Enables or disables an given button
 
-bool wxRadioBox::Enable(unsigned int item, bool enable)
+bool wxRadioBox::Enable(int item, bool enable)
 {
+    int i;
+    wxRadioButton *current;
+
     if (!IsValid(item))
         return false;
 
-    unsigned int i = 0;
-    wxRadioButton *current = m_radioButtonCycle;
-    while (i != item)
-    {
+    i = 0;
+    current = m_radioButtonCycle;
+    while (i != item) {
         i++;
         current = current->NextInCycle();
     }
@@ -202,14 +213,15 @@ wxString wxRadioBox::GetLabel() const
 //-------------------------------------------------------------------------------------
 // Returns the label for the given button
 
-wxString wxRadioBox::GetString(unsigned int item) const
+wxString wxRadioBox::GetString(int item) const
 {
+    int i;
     wxRadioButton *current;
 
     if (!IsValid(item))
         return wxEmptyString;
 
-    unsigned int i = 0;
+    i = 0;
     current = m_radioButtonCycle;
     while (i != item) {
         i++;
@@ -261,15 +273,16 @@ void wxRadioBox::SetLabel(const wxString& label)
 //-------------------------------------------------------------------------------------
 // Sets the label of a given button
 
-void wxRadioBox::SetString(unsigned int item,const wxString& label)
+void wxRadioBox::SetString(int item,const wxString& label)
 {
+    int i;
+    wxRadioButton *current;
+
     if (!IsValid(item))
         return;
-
-    unsigned int i=0;
-    wxRadioButton *current=m_radioButtonCycle;
-    while (i!=item)
-    {
+    i=0;
+    current=m_radioButtonCycle;
+    while (i!=item) {
         i++;
         current=current->NextInCycle();
     }
@@ -306,12 +319,13 @@ void wxRadioBox::SetSelection(int item)
 
 bool wxRadioBox::Show(bool show)
 {
+    int i;
     wxRadioButton *current;
 
     wxControl::Show(show);
 
     current=m_radioButtonCycle;
-    for (unsigned int i=0; i<m_noItems; i++)
+    for (i=0;i<m_noItems;i++)
     {
         current->Show(show);
         current=current->NextInCycle();
@@ -320,17 +334,19 @@ bool wxRadioBox::Show(bool show)
 }
 
 //-------------------------------------------------------------------------------------
-//         ¥ Show(unsigned int, bool)
+//         ¥ Show(int, bool)
 //-------------------------------------------------------------------------------------
 // Shows or hides the given button
 
-bool wxRadioBox::Show(unsigned int item, bool show)
+bool wxRadioBox::Show(int item, bool show)
 {
+    int i;
+    wxRadioButton *current;
+
     if (!IsValid(item))
         return false;
-
-    unsigned int i = 0;
-    wxRadioButton *current=m_radioButtonCycle;
+    i=0;
+    current=m_radioButtonCycle;
     while (i!=item) {
         i++;
         current=current->NextInCycle();
@@ -378,7 +394,7 @@ void wxRadioBox::SetFocus()
 
 void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
-    unsigned int i;
+    int i;
     wxRadioButton *current;
 
     // define the position
@@ -416,7 +432,7 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
         eachHeight[i] = (int)((3*eachHeight[i])/2);
         if (maxWidth<eachWidth[i]) maxWidth = eachWidth[i];
         if (maxHeight<eachHeight[i]) maxHeight = eachHeight[i];
-    }
+          }
 
     totHeight = GetRowCount() * (maxHeight + charHeight/2) + charHeight ;
     totWidth  = GetColumnCount() * (maxWidth + charWidth) + charWidth;
@@ -458,7 +474,7 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
     current=m_radioButtonCycle;
     for ( i = 0 ; i < m_noItems; i++)
     {
-        if (i&&((i%GetMajorDim())==0)) // not to do for the zero button!
+        if (i&&((i%m_majorDim)==0)) // not to do for the zero button!
         {
             if (m_windowStyle & wxRA_VERTICAL)
             {
@@ -497,7 +513,7 @@ wxSize wxRadioBox::DoGetBestSize() const
     maxWidth = -1;
     maxHeight = -1;
 
-    for (unsigned int i = 0 ; i < m_noItems; i++)
+    for (int i = 0 ; i < m_noItems; i++)
     {
         GetTextExtent(GetString(i), &eachWidth, &eachHeight);
         eachWidth  = (int)(eachWidth + RADIO_SIZE) ;
@@ -515,12 +531,43 @@ wxSize wxRadioBox::DoGetBestSize() const
         totHeight = totHeight + 10; //how many exactly should this be to meet the HIG?
     }
     // handle radio box title as well
-    GetTextExtent(GetLabel(), &eachWidth, NULL);
+    GetTextExtent(GetTitle(), &eachWidth, NULL);
     eachWidth  = (int)(eachWidth + RADIO_SIZE) + 3 * charWidth ;
     if (totWidth < eachWidth)
         totWidth = eachWidth;
 
     return wxSize(totWidth, totHeight);
 }
+//-------------------------------------------------------------------------------------
+//         ¥ GetNumVer
+//-------------------------------------------------------------------------------------
+// return the number of buttons in the vertical direction
 
-#endif // wxUSE_RADIOBOX
+int wxRadioBox::GetRowCount() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return m_majorDim;
+    }
+    else
+    {
+        return (m_noItems + m_majorDim - 1)/m_majorDim;
+    }
+}
+
+//-------------------------------------------------------------------------------------
+//         ¥ GetNumHor
+//-------------------------------------------------------------------------------------
+// return the number of buttons in the horizontal direction
+
+int wxRadioBox::GetColumnCount() const
+{
+    if ( m_windowStyle & wxRA_SPECIFY_ROWS )
+    {
+        return (m_noItems + m_majorDim - 1)/m_majorDim;
+    }
+    else
+    {
+        return m_majorDim;
+    }
+}

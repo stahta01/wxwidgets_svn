@@ -147,22 +147,18 @@ Get the userData item attribute.
 
 If this item is tracking a window then return it.  NULL otherwise.
 
+\membersection{wxSizerItem::IsShown}\label{wxsizeritemisshown}
+
+\constfunc{bool}{IsShown}{\void}
+
+Is this item shown?
+
 
 \membersection{wxSizerItem::IsSizer}\label{wxsizeritemissizer}
 
 \constfunc{bool}{IsSizer}{\void}
 
 Is this item a sizer?
-
-
-\membersection{wxSizerItem::IsShown}\label{wxsizeritemisshown}
-
-\constfunc{bool}{IsShown}{\void}
-
-Returns \true if this item is a window or a spacer and it is shown or if this
-item is a sizer and not all its elements are hidden. In other words, for sizer
-items, all of the child elements must be hidden for the sizer itself to be
-considered hidden.
 
 
 \membersection{wxSizerItem::IsSpacer}\label{wxsizeritemisspacer}
@@ -187,7 +183,7 @@ Set the border item attribute.
 
 \membersection{wxSizerItem::SetDimension}\label{wxsizeritemsetdimension}
 
-\func{void}{SetDimension}{\param{const wxPoint\& }{pos}, \param{const wxSize\& }{size}}
+\func{void}{SetDimension}{\param{wxPoint }{pos}, \param{wxSize }{size}}
 
 Set the position and size of the space allocated to the sizer, and
 adjust the position and size of the item to be within that space
