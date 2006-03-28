@@ -12,6 +12,10 @@
 #ifndef _WX_TEXTBUFFER_H
 #define _WX_TEXTBUFFER_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textbuf.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/arrstr.h"
 
@@ -106,7 +110,7 @@ public:
     // you're using "direct access" i.e. GetLine()
     size_t GetCurrentLine() const { return m_nCurLine; }
     void GoToLine(size_t n) { m_nCurLine = n; }
-    bool Eof() const { return m_nCurLine == m_aLines.size(); }
+    bool Eof() const { return (m_aLines.size() == 0 || m_nCurLine == m_aLines.size() - 1); }
 
     // these methods allow more "iterator-like" traversal of the list of
     // lines, i.e. you may write something like:
@@ -114,15 +118,12 @@ public:
 
     // NB: const is commented out because not all compilers understand
     //     'mutable' keyword yet (m_nCurLine should be mutable)
-    wxString& GetFirstLine() /* const */
-        { return m_aLines.empty() ? ms_eof : m_aLines[m_nCurLine = 0]; }
-    wxString& GetNextLine()  /* const */
-        { return ++m_nCurLine == m_aLines.size() ? ms_eof
-                                                 : m_aLines[m_nCurLine]; }
+    wxString& GetFirstLine() /* const */ { return m_aLines[m_nCurLine = 0]; }
+    wxString& GetNextLine()  /* const */ { return m_aLines[++m_nCurLine];   }
     wxString& GetPrevLine()  /* const */
-        { wxASSERT(m_nCurLine > 0); return m_aLines[--m_nCurLine]; }
+        { wxASSERT(m_nCurLine > 0); return m_aLines[--m_nCurLine];   }
     wxString& GetLastLine() /* const */
-        { m_nCurLine = m_aLines.size() - 1; return m_aLines.Last(); }
+        { return m_aLines[m_nCurLine = m_aLines.size() - 1]; }
 
     // get the type of the line (see also GetEOL)
     wxTextFileType GetLineType(size_t n) const { return m_aTypes[n]; }
@@ -186,8 +187,7 @@ protected:
     virtual bool OnRead(wxMBConv& conv) = 0;
     virtual bool OnWrite(wxTextFileType typeNew, wxMBConv& conv) = 0;
 
-    static wxString ms_eof;     // dummy string returned at EOF
-    wxString m_strBufferName;   // name of the buffer
+    wxString m_strBufferName;  // name of the buffer
 
 private:
     wxArrayLinesType m_aTypes;   // type of each line

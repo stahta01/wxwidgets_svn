@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/automtn.cpp
+// Name:        automtn.cpp
 // Purpose:     OLE automation utilities
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) 1998, Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "automtn.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -49,6 +53,7 @@
 
 #if wxUSE_DATETIME
 #include "wx/datetime.h"
+
 #endif // wxUSE_TIMEDATE
 
 static void ClearVariant(VARIANTARG *pvarg) ;
@@ -597,8 +602,8 @@ WXDLLEXPORT bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& ole
         oleVariant.vt = VT_DATE;
         
         long dosDateTime = date.GetAsDOS();
-        short dosDate = short((dosDateTime & 0xFFFF0000) >> 16);
-        short dosTime = short(dosDateTime & 0xFFFF);
+        short dosDate = (dosDateTime & 0xFFFF0000) >> 16;
+        short dosTime = dosDateTime & 0xFFFF;
         
         DosDateTimeToVariantTime(dosDate, dosTime, & oleVariant.date);
     }
@@ -687,7 +692,7 @@ WXDLLEXPORT bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& 
             wxDateTime date;
             date.SetFromDOS(dosDateTime);
             variant = date;
-#endif
+#endif            
             break;
         }
     case VT_I4:
@@ -932,3 +937,4 @@ void ShowException(LPOLESTR szMember, HRESULT hr, EXCEPINFO *pexcep, unsigned in
 #endif
 
 #endif // wxUSE_OLE && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__)
+

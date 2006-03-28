@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -492,17 +496,16 @@ void wxTreeCtrl::DoSetItem (
     }
 } // end of wxTreeCtrl::DoSetItem
 
-unsigned int wxTreeCtrl::GetCount () const
+size_t wxTreeCtrl::GetCount () const
 {
-    CNRINFO  vCnrInfo;
+    CNRINFO                         vCnrInfo;
 
     ::WinSendMsg( GetHWND()
                  ,CM_QUERYCNRINFO
                  ,MPFROMP(&vCnrInfo)
                  ,(MPARAM)(USHORT)sizeof(CNRINFO)
                 );
-
-    return (unsigned int)vCnrInfo.cRecords;
+    return (size_t)vCnrInfo.cRecords;
 } // end of wxTreeCtrl::GetCount
 
 unsigned int wxTreeCtrl::GetIndent () const
@@ -2124,5 +2127,14 @@ MRESULT wxTreeCtrl::OS2WindowProc (
                                       );
     return mRc;
 } // end of wxTreeCtrl::OS2WindowProc
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxTreeItemId wxTreeCtrl::GetParent(const wxTreeItemId& item) const
+{
+    return GetItemParent( item );
+}
+
+#endif  // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL

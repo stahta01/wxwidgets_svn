@@ -23,15 +23,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.4 API: set it to 1 to
+// This setting determines the compatibility with 2.2 API: set it to 1 to
 // enable it but please consider updating your code instead.
 //
 // Default is 0
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
+// This setting determines the compatibility with 2.4 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -39,7 +39,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
 // MSW-only: Set to 0 for accurate dialog units, else 1 for old behaviour when
 // default system font is used for wxWindow::GetCharWidth/Height() instead of
@@ -242,29 +242,10 @@
 // Recommended setting: 0 unless you do plan to develop MT applications
 #define wxUSE_THREADS 1
 
-// If enabled, compiles wxWidgets streams classes
-//
-// wx stream classes are used for image IO, process IO redirection, network
-// protocols implementation and much more and so disabling this results in a
-// lot of other functionality being lost.
-//
-// Default is 1
-//
-// Recommended setting: 1 as setting it to 0 disables many other things
+// If enabled (1), compiles wxWidgets streams classes
 #define wxUSE_STREAMS       1
 
-// Use standard C++ streams if 1 instead of wx streams in some places. If
-// disabled (default), wx streams are used everywhere and wxWidgets doesn't
-// depend on the standard streams library.
-//
-// Notice that enabling this does not replace wx streams with std streams
-// everywhere, in a lot of places wx streams are used no matter what.
-//
-// Default is 0
-//
-// Recommended setting: 1 if you use the standard streams anyhow and so
-//                      dependency on the standard streams library is not a
-//                      problem
+// Use standard C++ streams if 1. If 0, use wxWin streams implementation only.
 #define wxUSE_STD_IOSTREAM  0
 
 // Enable conversion to standard C++ string if 1.
@@ -574,7 +555,6 @@
 #define wxUSE_TEXTCTRL     1    // wxTextCtrl
 #define wxUSE_TOGGLEBTN    1    // requires wxButton
 #define wxUSE_TREECTRL     1    // wxTreeCtrl
-#define wxUSE_DATAVIEWCTRL 1    // wxDataViewCtrl
 
 // Use a status bar class? Depending on the value of wxUSE_NATIVE_STATUSBAR
 // below either wxStatusBar95 or a generic wxStatusBar will be used.
@@ -628,22 +608,6 @@
 //
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
-
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
 
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
@@ -884,14 +848,6 @@
 //
 // Recommended setting: 1 if you intend to use OpenGL, 0 otherwise
 #define wxUSE_GLCANVAS       0
-
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
 
 // ----------------------------------------------------------------------------
 // Data transfer

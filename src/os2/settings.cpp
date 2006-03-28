@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/settings.cpp
+// Name:        settings.cpp
 // Purpose:     wxSettings
 // Author:      David Webster
 // Modified by:
@@ -62,7 +62,7 @@ wxArrayString wxSystemSettingsModule::sm_optionValues;
 
 bool wxSystemSettingsModule::OnInit()
 {
-    return true;
+    return TRUE;
 }
 
 void wxSystemSettingsModule::OnExit()
@@ -287,9 +287,6 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index,
         // TODO case wxSYS_PENWINDOWS_PRESENT:
         // TODO case wxSYS_SHOW_SOUNDS:
         // TODO case wxSYS_SWAP_BUTTONS:
-
-        default:
-            break;
     }
     return -1;  // unsupported metric
 }
@@ -301,11 +298,8 @@ bool wxSystemSettingsNative::HasFeature( wxSystemFeature index )
         case wxSYS_CAN_ICONIZE_FRAME:
             return true;
 
-        // TODO case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        // TODO case wxSYS_TABLET_PRESENT:
-
-        default:
-            break;
+        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
+            return false;
     }
 
     return false;

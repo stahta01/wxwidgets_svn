@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:     wxComboBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "combobox.h"
+#endif
 
 #include "wx/combobox.h"
 #include "wx/button.h"
@@ -134,7 +138,7 @@ public:
 protected:
     void OnChoice( wxCommandEvent& e )
     {
-        wxString s = e.GetString();
+        wxString    s = e.GetString();
 
         m_cb->DelegateChoice( s );
         wxCommandEvent event2(wxEVT_COMMAND_COMBOBOX_SELECTED, m_cb->GetId() );
@@ -308,7 +312,7 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 
 wxString wxComboBox::GetValue() const
 {
-    wxString result;
+    wxString        result;
 
     if ( m_text == NULL )
     {
@@ -420,27 +424,27 @@ int wxComboBox::DoAppend(const wxString& item)
     return m_choice->DoAppend( item ) ;
 }
 
-int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+int wxComboBox::DoInsert(const wxString& item, int pos)
 {
     return m_choice->DoInsert( item , pos ) ;
 }
 
-void wxComboBox::DoSetItemClientData(unsigned int n, void* clientData)
+void wxComboBox::DoSetItemClientData(int n, void* clientData)
 {
     return m_choice->DoSetItemClientData( n , clientData ) ;
 }
 
-void* wxComboBox::DoGetItemClientData(unsigned int n) const
+void* wxComboBox::DoGetItemClientData(int n) const
 {
     return m_choice->DoGetItemClientData( n ) ;
 }
 
-void wxComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxComboBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
-    return m_choice->DoSetItemClientObject(n , clientData);
+    return m_choice->DoSetItemClientObject( n , clientData ) ;
 }
 
-wxClientData* wxComboBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxComboBox::DoGetItemClientObject(int n) const
 {
     return m_choice->DoGetItemClientObject( n ) ;
 }
@@ -449,15 +453,15 @@ void wxComboBox::FreeData()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int count = GetCount();
-        for ( unsigned int n = 0; n < count; n++ )
+        size_t count = GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
             SetClientObject( n, NULL );
         }
     }
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int n)
 {
     // force client object deletion
     if( HasClientObjectData() )
@@ -482,16 +486,16 @@ void wxComboBox::SetSelection(int n)
 
     if ( m_text != NULL )
     {
-        m_text->SetValue(GetString(n));
+        m_text->SetValue( GetString( n ) );
     }
 }
 
-int wxComboBox::FindString(const wxString& s, bool bCase ) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    return m_choice->FindString( s , bCase );
+    return m_choice->FindString( s );
 }
 
-wxString wxComboBox::GetString(unsigned int n) const
+wxString wxComboBox::GetString(int n) const
 {
     return m_choice->GetString( n );
 }
@@ -499,16 +503,15 @@ wxString wxComboBox::GetString(unsigned int n) const
 wxString wxComboBox::GetStringSelection() const
 {
     int sel = GetSelection ();
-
-    if (sel != wxNOT_FOUND)
-        return wxString(this->GetString((unsigned int)sel));
+    if (sel > -1)
+        return wxString(this->GetString (sel));
     else
         return wxEmptyString;
 }
 
-void wxComboBox::SetString(unsigned int n, const wxString& s)
+void wxComboBox::SetString(int n, const wxString& s)
 {
-    m_choice->SetString( n , s );
+    m_choice->SetString( n , s ) ;
 }
 
 bool wxComboBox::IsEditable() const
@@ -582,3 +585,4 @@ void wxComboBox::MacHandleControlClick( WXWidget WXUNUSED(control) , wxInt16 WXU
     event.SetString(GetStringSelection());
     ProcessCommand(event);
 }
+

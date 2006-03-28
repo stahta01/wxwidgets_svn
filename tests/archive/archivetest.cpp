@@ -268,10 +268,8 @@ size_t TestInputStream::OnSysRead(void *buffer, size_t size)
     }
 
     if (((m_eoftype & AtLast) != 0 && m_pos >= m_size) || count < size)
-        if ((m_eoftype & WithError) != 0)
-            m_lasterror = wxSTREAM_READ_ERROR;
-        else
-            m_lasterror = wxSTREAM_EOF;
+        m_lasterror = (m_eoftype & WithError) != 0 ?
+                        wxSTREAM_READ_ERROR : wxSTREAM_EOF;
 
     return count;
 }
@@ -476,7 +474,7 @@ void ArchiveTestCase<ClassFactoryT>::runTest()
     // check archive could be created
     CPPUNIT_ASSERT(out.GetLength() > 0);
 
-    TestInputStream in(out, m_id % ((m_options & PipeIn) ? 4 : 3));
+    TestInputStream in(out, (m_options & PipeIn) ? m_id % 3 : 0);
 
     TestIterator(in);
     in.Rewind();
@@ -1177,7 +1175,7 @@ int TestId::m_seed = 6219;
 string TestId::MakeId()
 {
     m_seed = (m_seed * 171) % 30269;
-    return (const char *)wxString::Format(_T("%-6d"), m_seed).mb_str();
+    return string(wxString::Format(_T("%-6d"), m_seed).mb_str());
 }
 
 

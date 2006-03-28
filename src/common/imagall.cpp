@@ -1,11 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagall.cpp
+// Name:        imagall.cpp
 // Purpose:     wxImage access all handler
 // Author:      Sylvain Bougnoux
 // RCS-ID:      $Id$
 // Copyright:   (c) Sylvain Bougnoux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+/*
+   We don't put pragma implement in this file because it is already present in
+   src/common/image.cpp
+*/
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -15,6 +20,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+#  include "wx/setup.h"
 #endif
 
 #include "wx/image.h"

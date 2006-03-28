@@ -39,6 +39,11 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
 {
     DECLARE_DYNAMIC_CLASS(wxMetafile)
 public:
+    // Copy constructor
+    wxMetafile(const wxMetafile& metafile)
+      : wxGDIObject()
+    { Ref(metafile); }
+
     wxMetafile(const wxString& file = wxEmptyString);
     ~wxMetafile(void);
 
@@ -58,8 +63,9 @@ public:
     void SetHMETAFILE(WXHMETAFILE mf) ;
 
     // Operators
-    inline bool operator == (const wxMetafile& metafile) const { return m_refData == metafile.m_refData; }
-    inline bool operator != (const wxMetafile& metafile) const { return m_refData != metafile.m_refData; }
+    inline wxMetafile& operator = (const wxMetafile& metafile) { if (*this == metafile) return (*this); Ref(metafile); return *this; }
+    inline bool operator == (const wxMetafile& metafile) { return m_refData == metafile.m_refData; }
+    inline bool operator != (const wxMetafile& metafile) { return m_refData != metafile.m_refData; }
 
 protected:
 };
@@ -79,14 +85,13 @@ class WXDLLEXPORT wxMetafileDC: public wxDC
 
   // Should be called at end of drawing
   virtual wxMetafile *Close(void);
+  virtual void DoGetSize(int *width, int *height) const ;
 
   // Implementation
   inline wxMetafile *GetMetaFile(void) const { return m_metaFile; }
   inline void SetMetaFile(wxMetafile *mf) { m_metaFile = mf; }
 
 protected:
-    virtual void DoGetSize(int *width, int *height) const;
-
   wxMetafile*   m_metaFile;
 };
 

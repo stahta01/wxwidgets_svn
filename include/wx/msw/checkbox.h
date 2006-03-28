@@ -12,6 +12,10 @@
 #ifndef _WX_CHECKBOX_H_
 #define _WX_CHECKBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "checkbox.h"
+#endif
+
 // Checkbox item (single checkbox)
 class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
 {
@@ -45,10 +49,10 @@ public:
     virtual bool MSWCommand(WXUINT param, WXWORD id);
     virtual void Command(wxCommandEvent& event);
     virtual bool SetForegroundColour(const wxColour& colour);
-    virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
 
 protected:
     virtual wxSize DoGetBestSize() const;
+    virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
 
     virtual void DoSet3StateValue(wxCheckBoxState value);
     virtual wxCheckBoxState DoGet3StateValue() const;

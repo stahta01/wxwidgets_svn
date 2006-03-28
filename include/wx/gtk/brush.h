@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/brush.h
+// Name:        brush.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -10,6 +10,10 @@
 
 #ifndef __GTKBRUSHH__
 #define __GTKBRUSHH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -36,6 +40,11 @@ public:
     wxBrush( const wxBitmap &stippleBitmap );
     ~wxBrush();
 
+    wxBrush( const wxBrush &brush )
+        : wxBrushBase()
+        { Ref(brush); }
+    wxBrush& operator = ( const wxBrush& brush ) { Ref(brush); return *this; }
+
     bool Ok() const { return m_refData != NULL; }
 
     bool operator == ( const wxBrush& brush ) const;
@@ -50,7 +59,7 @@ public:
     void SetStyle( int style );
     void SetStipple( const wxBitmap& stipple );
 
-protected:
+private:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;

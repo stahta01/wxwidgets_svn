@@ -12,6 +12,10 @@
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "cursor.h"
+#endif
+
 #include "wx/bitmap.h"
 
 // Cursor
@@ -21,6 +25,11 @@ class WXDLLEXPORT wxCursor: public wxBitmap
 
 public:
   wxCursor();
+
+  // Copy constructors
+  wxCursor(const wxCursor& cursor)
+      : wxBitmap()
+  { Ref(cursor); }
 
   wxCursor(const char bits[], int width, int height, int hotSpotX = -1, int hotSpotY = -1,
     const char maskBits[] = NULL);
@@ -37,6 +46,7 @@ public:
 	bool CreateFromXpm(const char **bits) ;
   virtual bool Ok() const ;
 
+  inline wxCursor& operator = (const wxCursor& cursor) { if (*this == cursor) return (*this); Ref(cursor); return *this; }
   inline bool operator == (const wxCursor& cursor) const { return m_refData == cursor.m_refData; }
   inline bool operator != (const wxCursor& cursor) const { return m_refData != cursor.m_refData; }
 

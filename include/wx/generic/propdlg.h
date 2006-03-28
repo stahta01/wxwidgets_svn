@@ -12,6 +12,10 @@
 #ifndef _WX_PROPDLG_H_
 #define _WX_PROPDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "propdlg.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_BOOKCTRL
@@ -48,24 +52,6 @@ class WXDLLEXPORT wxBookCtrlBase;
 // kind of book control.
 //-----------------------------------------------------------------------------
 
-// Use the platform default
-#define wxPROPSHEET_DEFAULT     0x0001
-
-// Use a notebook
-#define wxPROPSHEET_NOTEBOOK    0x0002
-
-// Use a toolbook
-#define wxPROPSHEET_TOOLBOOK    0x0004
-
-// Use a choicebook
-#define wxPROPSHEET_CHOICEBOOK  0x0008
-
-// Use a listbook
-#define wxPROPSHEET_LISTBOOK    0x0010
-
-// Shrink dialog to fit current page
-#define wxPROPSHEET_SHRINKTOFIT 0x0100
-
 class WXDLLIMPEXP_ADV wxPropertySheetDialog : public wxDialog
 {
 public:
@@ -99,17 +85,13 @@ public:
     void SetInnerSize(wxSizer* sizer) { m_innerSizer = sizer; }
     wxSizer* GetInnerSizer() const { return m_innerSizer ; }
 
-    // Set and get the book style
-    void SetSheetStyle(long sheetStyle) { m_sheetStyle = sheetStyle; }
-    long GetSheetStyle() const { return m_sheetStyle ; }
-
 /// Operations
 
     // Creates the buttons (none on PocketPC)
     virtual void CreateButtons(int flags = wxOK|wxCANCEL);
 
     // Lay out the dialog, to be called after pages have been created
-    virtual void LayoutDialog(int centreFlags = wxBOTH);
+    virtual void LayoutDialog();
 
 /// Implementation
 
@@ -123,17 +105,12 @@ public:
     // Set the focus
     void OnActivate(wxActivateEvent& event);
 
-    // Resize dialog if necessary
-    void OnIdle(wxIdleEvent& event);
-
 private:
     void Init();
 
 protected:
     wxBookCtrlBase* m_bookCtrl;
     wxSizer*        m_innerSizer; // sizer for extra space
-    long            m_sheetStyle;
-    int             m_selectedPage;
 
     DECLARE_DYNAMIC_CLASS(wxPropertySheetDialog)
     DECLARE_EVENT_TABLE()

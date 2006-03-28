@@ -12,6 +12,17 @@
 #ifndef _WX_EVENT_H__
 #define _WX_EVENT_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma interface "event.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/clntdata.h"
@@ -211,7 +222,9 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_PAGEDOWN, 305)
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_THUMBTRACK, 306)
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_THUMBRELEASE, 307)
+#if wxABI_VERSION >= 20601
     DECLARE_EVENT_TYPE(wxEVT_SCROLL_CHANGED, 308)
+#endif
 
         // Scroll events from wxWindow
     DECLARE_EVENT_TYPE(wxEVT_SCROLLWIN_TOP, 320)
@@ -504,6 +517,14 @@ private:
 };
 #endif
 
+#ifdef __VISUALC__
+    // 'this' : used in base member initializer list (for m_commandString)
+    #if _MSC_VER > 1100
+        #pragma warning(push)
+    #endif
+    #pragma warning(disable:4355)
+#endif
+
 class WXDLLIMPEXP_CORE wxCommandEvent : public wxEvent
 {
 public:
@@ -565,6 +586,10 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxCommandEvent)
 };
+
+#if defined(__VISUALC__) && (_MSC_VER > 1100)
+    #pragma warning(pop)
+#endif
 
 #if WXWIN_COMPATIBILITY_2_4
 inline void wxCommandEventStringHelper::operator=(const wxString &str)
@@ -935,22 +960,11 @@ public:
     wxKeyEvent(wxEventType keyType = wxEVT_NULL);
     wxKeyEvent(const wxKeyEvent& evt);
 
-    // can be used check if the key event has exactly the given modifiers:
-    // "GetModifiers() = wxMOD_CONTROL" is easier to write than "ControlDown()
-    // && !MetaDown() && !AltDown() && !ShiftDown()"
-    int GetModifiers() const
-    {
-        return (m_controlDown ? wxMOD_CONTROL : 0) |
-               (m_shiftDown ? wxMOD_SHIFT : 0) |
-               (m_metaDown ? wxMOD_META : 0) |
-               (m_altDown ? wxMOD_ALT : 0);
-    }
-
     // Find state of shift/control keys
     bool ControlDown() const { return m_controlDown; }
-    bool ShiftDown() const { return m_shiftDown; }
     bool MetaDown() const { return m_metaDown; }
     bool AltDown() const { return m_altDown; }
+    bool ShiftDown() const { return m_shiftDown; }
 
     // "Cmd" is a pseudo key which is Control for PC and Unix platforms but
     // Apple ("Command") key under Macs: it makes often sense to use it instead
@@ -1040,13 +1054,10 @@ public:
 
     long          m_keyCode;
 
-    // TODO: replace those with a single m_modifiers bitmask of wxMOD_XXX?
     bool          m_controlDown;
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
-
-    // FIXME: what is this for? relation to m_rawXXX?
     bool          m_scanCode;
 
 #if wxUSE_UNICODE
@@ -1088,7 +1099,7 @@ public:
 
     wxSize GetSize() const { return m_size; }
     wxRect GetRect() const { return m_rect; }
-    void SetRect(const wxRect& rect) { m_rect = rect; }
+    void SetRect(wxRect rect) { m_rect = rect; }
 
     virtual wxEvent *Clone() const { return new wxSizeEvent(*this); }
 
@@ -1128,7 +1139,7 @@ public:
     wxPoint GetPosition() const { return m_pos; }
     void SetPosition(const wxPoint& pos) { m_pos = pos; }
     wxRect GetRect() const { return m_rect; }
-    void SetRect(const wxRect& rect) { m_rect = rect; }
+    void SetRect(wxRect rect) { m_rect = rect; }
 
     virtual wxEvent *Clone() const { return new wxMoveEvent(*this); }
 
@@ -1667,9 +1678,7 @@ public:
     {
         m_checked =
         m_enabled =
-        m_shown =
         m_setEnabled =
-        m_setShown =
         m_setText =
         m_setChecked = false;
     }
@@ -1677,9 +1686,7 @@ public:
         : wxCommandEvent(event),
           m_checked(event.m_checked),
           m_enabled(event.m_enabled),
-          m_shown(event.m_shown),
           m_setEnabled(event.m_setEnabled),
-          m_setShown(event.m_setShown),
           m_setText(event.m_setText),
           m_setChecked(event.m_setChecked),
           m_text(event.m_text)
@@ -1687,16 +1694,13 @@ public:
 
     bool GetChecked() const { return m_checked; }
     bool GetEnabled() const { return m_enabled; }
-    bool GetShown() const { return m_shown; }
     wxString GetText() const { return m_text; }
     bool GetSetText() const { return m_setText; }
     bool GetSetChecked() const { return m_setChecked; }
     bool GetSetEnabled() const { return m_setEnabled; }
-    bool GetSetShown() const { return m_setShown; }
 
     void Check(bool check) { m_checked = check; m_setChecked = true; }
     void Enable(bool enable) { m_enabled = enable; m_setEnabled = true; }
-    void Show(bool show) { m_shown = show; m_setShown = true; }
     void SetText(const wxString& text) { m_text = text; m_setText = true; }
 
     // Sets the interval between updates in milliseconds.
@@ -1726,9 +1730,7 @@ public:
 protected:
     bool          m_checked;
     bool          m_enabled;
-    bool          m_shown;
     bool          m_setEnabled;
-    bool          m_setShown;
     bool          m_setText;
     bool          m_setChecked;
     wxString      m_text;
@@ -2638,111 +2640,6 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
         { return theClass::sm_eventHashTable; } \
     const wxEventTableEntry theClass::sm_eventTableEntries[] = { \
 
-#define BEGIN_EVENT_TABLE_TEMPLATE1(theClass, baseClass, T1) \
-    template<typename T1> \
-    const wxEventTable theClass<T1>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1>::sm_eventTableEntries[0] }; \
-    template<typename T1> \
-    const wxEventTable *theClass<T1>::GetEventTable() const \
-        { return &theClass<T1>::sm_eventTable; } \
-    template<typename T1> \
-    wxEventHashTable theClass<T1>::sm_eventHashTable(theClass<T1>::sm_eventTable); \
-    template<typename T1> \
-    wxEventHashTable &theClass<T1>::GetEventHashTable() const \
-        { return theClass<T1>::sm_eventHashTable; } \
-    template<typename T1> \
-    const wxEventTableEntry theClass<T1>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE2(theClass, baseClass, T1, T2) \
-    template<typename T1, typename T2> \
-    const wxEventTable theClass<T1, T2>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2> \
-    const wxEventTable *theClass<T1, T2>::GetEventTable() const \
-        { return &theClass<T1, T2>::sm_eventTable; } \
-    template<typename T1, typename T2> \
-    wxEventHashTable theClass<T1, T2>::sm_eventHashTable(theClass<T1, T2>::sm_eventTable); \
-    template<typename T1, typename T2> \
-    wxEventHashTable &theClass<T1, T2>::GetEventHashTable() const \
-        { return theClass<T1, T2>::sm_eventHashTable; } \
-    template<typename T1, typename T2> \
-    const wxEventTableEntry theClass<T1, T2>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE3(theClass, baseClass, T1, T2, T3) \
-    template<typename T1, typename T2, typename T3> \
-    const wxEventTable theClass<T1, T2, T3>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2, T3>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2, typename T3> \
-    const wxEventTable *theClass<T1, T2, T3>::GetEventTable() const \
-        { return &theClass<T1, T2, T3>::sm_eventTable; } \
-    template<typename T1, typename T2, typename T3> \
-    wxEventHashTable theClass<T1, T2, T3>::sm_eventHashTable(theClass<T1, T2, T3>::sm_eventTable); \
-    template<typename T1, typename T2, typename T3> \
-    wxEventHashTable &theClass<T1, T2, T3>::GetEventHashTable() const \
-        { return theClass<T1, T2, T3>::sm_eventHashTable; } \
-    template<typename T1, typename T2, typename T3> \
-    const wxEventTableEntry theClass<T1, T2, T3>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE4(theClass, baseClass, T1, T2, T3, T4) \
-    template<typename T1, typename T2, typename T3, typename T4> \
-    const wxEventTable theClass<T1, T2, T3, T4>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2, T3, T4>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2, typename T3, typename T4> \
-    const wxEventTable *theClass<T1, T2, T3, T4>::GetEventTable() const \
-        { return &theClass<T1, T2, T3, T4>::sm_eventTable; } \
-    template<typename T1, typename T2, typename T3, typename T4> \
-    wxEventHashTable theClass<T1, T2, T3, T4>::sm_eventHashTable(theClass<T1, T2, T3, T4>::sm_eventTable); \
-    template<typename T1, typename T2, typename T3, typename T4> \
-    wxEventHashTable &theClass<T1, T2, T3, T4>::GetEventHashTable() const \
-        { return theClass<T1, T2, T3, T4>::sm_eventHashTable; } \
-    template<typename T1, typename T2, typename T3, typename T4> \
-    const wxEventTableEntry theClass<T1, T2, T3, T4>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE5(theClass, baseClass, T1, T2, T3, T4, T5) \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5> \
-    const wxEventTable theClass<T1, T2, T3, T4, T5>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2, T3, T4, T5>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5> \
-    const wxEventTable *theClass<T1, T2, T3, T4, T5>::GetEventTable() const \
-        { return &theClass<T1, T2, T3, T4, T5>::sm_eventTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5> \
-    wxEventHashTable theClass<T1, T2, T3, T4, T5>::sm_eventHashTable(theClass<T1, T2, T3, T4, T5>::sm_eventTable); \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5> \
-    wxEventHashTable &theClass<T1, T2, T3, T4, T5>::GetEventHashTable() const \
-        { return theClass<T1, T2, T3, T4, T5>::sm_eventHashTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5> \
-    const wxEventTableEntry theClass<T1, T2, T3, T4, T5>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE7(theClass, baseClass, T1, T2, T3, T4, T5, T6, T7) \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7> \
-    const wxEventTable theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7> \
-    const wxEventTable *theClass<T1, T2, T3, T4, T5, T6, T7>::GetEventTable() const \
-        { return &theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7> \
-    wxEventHashTable theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventHashTable(theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventTable); \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7> \
-    wxEventHashTable &theClass<T1, T2, T3, T4, T5, T6, T7>::GetEventHashTable() const \
-        { return theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventHashTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7> \
-    const wxEventTableEntry theClass<T1, T2, T3, T4, T5, T6, T7>::sm_eventTableEntries[] = { \
-
-#define BEGIN_EVENT_TABLE_TEMPLATE8(theClass, baseClass, T1, T2, T3, T4, T5, T6, T7, T8) \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8> \
-    const wxEventTable theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventTable = \
-        { &baseClass::sm_eventTable, &theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventTableEntries[0] }; \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8> \
-    const wxEventTable *theClass<T1, T2, T3, T4, T5, T6, T7, T8>::GetEventTable() const \
-        { return &theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8> \
-    wxEventHashTable theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventHashTable(theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventTable); \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8> \
-    wxEventHashTable &theClass<T1, T2, T3, T4, T5, T6, T7, T8>::GetEventHashTable() const \
-        { return theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventHashTable; } \
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8> \
-    const wxEventTableEntry theClass<T1, T2, T3, T4, T5, T6, T7, T8>::sm_eventTableEntries[] = { \
-
 #define END_EVENT_TABLE() DECLARE_EVENT_TABLE_ENTRY( wxEVT_NULL, 0, 0, 0, 0 ) };
 
 /*
@@ -2886,7 +2783,12 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
 #define EVT_SCROLL_PAGEDOWN(func) wx__DECLARE_EVT0(wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler(func))
 #define EVT_SCROLL_THUMBTRACK(func) wx__DECLARE_EVT0(wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler(func))
 #define EVT_SCROLL_THUMBRELEASE(func) wx__DECLARE_EVT0(wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler(func))
+#if wxABI_VERSION >= 20601
 #define EVT_SCROLL_CHANGED(func) wx__DECLARE_EVT0(wxEVT_SCROLL_CHANGED, wxScrollEventHandler(func))
+#define wx__EVT_SCROLL_CHANGED(func) EVT_SCROLL_CHANGED(func)
+#else
+#define wx__EVT_SCROLL_CHANGED(func)
+#endif
 
 #define EVT_SCROLL(func) \
     EVT_SCROLL_TOP(func) \
@@ -2897,7 +2799,7 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
     EVT_SCROLL_PAGEDOWN(func) \
     EVT_SCROLL_THUMBTRACK(func) \
     EVT_SCROLL_THUMBRELEASE(func) \
-    EVT_SCROLL_CHANGED(func)
+    wx__EVT_SCROLL_CHANGED(func)
 
 // Scrolling from wxSlider and wxScrollBar, with an id
 #define EVT_COMMAND_SCROLL_TOP(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_TOP, winid, wxScrollEventHandler(func))
@@ -2908,7 +2810,12 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
 #define EVT_COMMAND_SCROLL_PAGEDOWN(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_PAGEDOWN, winid, wxScrollEventHandler(func))
 #define EVT_COMMAND_SCROLL_THUMBTRACK(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_THUMBTRACK, winid, wxScrollEventHandler(func))
 #define EVT_COMMAND_SCROLL_THUMBRELEASE(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_THUMBRELEASE, winid, wxScrollEventHandler(func))
+#if wxABI_VERSION >= 20601
 #define EVT_COMMAND_SCROLL_CHANGED(winid, func) wx__DECLARE_EVT1(wxEVT_SCROLL_CHANGED, winid, wxScrollEventHandler(func))
+#define wx__EVT_COMMAND_SCROLL_CHANGED(winid, func) EVT_COMMAND_SCROLL_CHANGED(winid, func)
+#else
+#define wx__EVT_COMMAND_SCROLL_CHANGED(winid, func)
+#endif
 
 #define EVT_COMMAND_SCROLL(winid, func) \
     EVT_COMMAND_SCROLL_TOP(winid, func) \
@@ -2919,12 +2826,20 @@ typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureC
     EVT_COMMAND_SCROLL_PAGEDOWN(winid, func) \
     EVT_COMMAND_SCROLL_THUMBTRACK(winid, func) \
     EVT_COMMAND_SCROLL_THUMBRELEASE(winid, func) \
-    EVT_COMMAND_SCROLL_CHANGED(winid, func)
+    wx__EVT_COMMAND_SCROLL_CHANGED(winid, func)
 
 // compatibility macros for the old name, to be deprecated in 2.8
+//
+// note that simply #defines suffice for the macro names as they're only
+// present in the source code and macros are enough to maintain source
+// backwards compatibility, but that we have to ensure that we also have
+// wxEVT_SCROLL_ENDSCROLL inside the library for binary backwards compatibility
+// and this is done in event.cpp
+#if wxABI_VERSION >= 20601
 #define wxEVT_SCROLL_ENDSCROLL wxEVT_SCROLL_CHANGED
 #define EVT_COMMAND_SCROLL_ENDSCROLL EVT_COMMAND_SCROLL_CHANGED
 #define EVT_SCROLL_ENDSCROLL EVT_SCROLL_CHANGED
+#endif
 
 // Convenience macros for commonly-used commands
 #define EVT_CHECKBOX(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_CHECKBOX_CLICKED, winid, wxCommandEventHandler(func))
@@ -3017,7 +2932,7 @@ extern WXDLLIMPEXP_BASE wxList *wxPendingEvents;
 
 // Find a window with the focus, that is also a descendant of the given window.
 // This is used to determine the window to initially send commands to.
-WXDLLIMPEXP_CORE wxWindow* wxFindFocusDescendant(wxWindow* ancestor);
+wxWindow* wxFindFocusDescendant(wxWindow* ancestor);
 
 #endif // wxUSE_GUI
 

@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "intl.h"
+#endif
+
 #if defined(__BORLAND__) && !defined(__WXDEBUG__)
     // There's a bug in Borland's compiler that breaks wxLocale with -O2,
     // so make sure that flag is not used for this file:
@@ -77,7 +81,6 @@
 #include "wx/ptr_scpd.h"
 #include "wx/app.h"
 #include "wx/apptrait.h"
-#include "wx/stdpaths.h"
 
 #if defined(__WXMAC__)
   #include  "wx/mac/private.h"  // includes mac headers
@@ -503,7 +506,7 @@ private:
     wxPluralFormsNodePtr m_plural;
 };
 
-wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator)
+wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator);
 
 void wxPluralFormsCalculator::init(wxPluralFormsToken::Number nplurals,
                                    wxPluralFormsNode* plural)
@@ -985,7 +988,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // the list of the directories to search for message catalog files
-static wxArrayString gs_searchPrefixes;
+static wxArrayString s_searchPrefixes;
 
 // ============================================================================
 // implementation
@@ -1006,20 +1009,18 @@ wxMsgCatalogFile::~wxMsgCatalogFile()
     wxDELETEA(m_pData);
 }
 
-// return the directory to search for message catalogs under the given prefix
-static
-wxString GetMsgCatalogSubdir(const wxChar *prefix, const wxChar *lang)
+// return all directories to search for given prefix
+static wxString GetAllMsgCatalogSubdirs(const wxChar *prefix,
+                                        const wxChar *lang)
 {
     wxString searchPath;
-    searchPath << prefix << wxFILE_SEP_PATH << lang;
 
-    // under Unix, the message catalogs are supposed to go into LC_MESSAGES
-    // subdirectory so look there too
-#ifdef __UNIX__
-    const wxString searchPathOrig(searchPath);
-    searchPath << wxFILE_SEP_PATH << wxT("LC_MESSAGES")
-               << wxPATH_SEP << searchPathOrig;
-#endif // __UNIX__
+    // search first in prefix/fr/LC_MESSAGES, then in prefix/fr and finally in
+    // prefix (assuming the language is 'fr')
+    searchPath << prefix << wxFILE_SEP_PATH << lang << wxFILE_SEP_PATH
+                         << wxT("LC_MESSAGES") << wxPATH_SEP
+               << prefix << wxFILE_SEP_PATH << lang << wxPATH_SEP
+               << prefix << wxPATH_SEP;
 
     return searchPath;
 }
@@ -1027,59 +1028,48 @@ wxString GetMsgCatalogSubdir(const wxChar *prefix, const wxChar *lang)
 // construct the search path for the given language
 static wxString GetFullSearchPath(const wxChar *lang)
 {
+    wxString searchPath;
+
     // first take the entries explicitly added by the program
-    wxArrayString paths;
-    paths.reserve(gs_searchPrefixes.size() + 1);
-    size_t n,
-           count = gs_searchPrefixes.size();
-    for ( n = 0; n < count; n++ )
+    size_t count = s_searchPrefixes.Count();
+    for ( size_t n = 0; n < count; n++ )
     {
-        paths.Add(GetMsgCatalogSubdir(gs_searchPrefixes[n], lang));
+        searchPath << GetAllMsgCatalogSubdirs(s_searchPrefixes[n], lang)
+                   << wxPATH_SEP;
     }
 
+    // TODO: use wxStandardPaths instead of all this mess!!
 
-#if wxUSE_STDPATHS
-    // then look in the standard location
-    const wxString stdp = wxStandardPaths::Get().
-        GetLocalizedResourcesDir(lang, wxStandardPaths::ResourceCat_Messages);
-
-    if ( paths.Index(stdp) == wxNOT_FOUND )
-        paths.Add(stdp);
-#endif // wxUSE_STDPATHS
-
-    // last look in default locations
-#ifdef __UNIX__
     // LC_PATH is a standard env var containing the search path for the .mo
     // files
+#ifndef __WXWINCE__
     const wxChar *pszLcPath = wxGetenv(wxT("LC_PATH"));
-    if ( pszLcPath )
-    {
-        const wxString lcp = GetMsgCatalogSubdir(pszLcPath, lang);
-        if ( paths.Index(lcp) == wxNOT_FOUND )
-            paths.Add(lcp);
-    }
+    if ( pszLcPath != NULL )
+        searchPath << GetAllMsgCatalogSubdirs(pszLcPath, lang);
+#endif
 
-    // also add the one from where wxWin was installed:
-    wxString wxp = wxGetInstallPrefix();
-    if ( !wxp.empty() )
-    {
-        wxp = GetMsgCatalogSubdir(wxp + _T("/share/locale"), lang);
-        if ( paths.Index(wxp) == wxNOT_FOUND )
-            paths.Add(wxp);
-    }
+#ifdef __UNIX__
+    // add some standard ones and the one in the tree where wxWin was installed:
+    searchPath
+        << GetAllMsgCatalogSubdirs(wxString(wxGetInstallPrefix()) + wxT("/share/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/share/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/lib/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/local/share/locale"), lang);
 #endif // __UNIX__
 
-
-    // finally construct the full search path
-    wxString searchPath;
-    searchPath.reserve(500);
-    count = paths.size();
-    for ( n = 0; n < count; n++ )
-    {
-        searchPath += paths[n];
-        if ( n != count - 1 )
-            searchPath += wxPATH_SEP;
-    }
+    // then take the current directory
+    // FIXME it should be the directory of the executable
+#if defined(__WXMAC__)
+    searchPath << GetAllMsgCatalogSubdirs(wxGetCwd(), lang);
+    // generic search paths could be somewhere in the system folder preferences
+#elif defined(__WXMSW__)
+    // look in the directory of the executable
+    wxString path;
+    wxSplitPath(wxGetFullModuleName(), &path, NULL, NULL);
+    searchPath << GetAllMsgCatalogSubdirs(path, lang);
+#else // !Mac, !MSW
+    searchPath << GetAllMsgCatalogSubdirs(wxT("."), lang);
+#endif // platform
 
     return searchPath;
 }
@@ -1112,9 +1102,9 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
       // also add just base locale name: for things like "fr_BE" (belgium
       // french) we should use "fr" if no belgium specific message catalogs
       // exist
-      searchPath << wxPATH_SEP
-                 << GetFullSearchPath(wxString(szDirPrefix).
-                                      Left((size_t)(sublocale - szDirPrefix)));
+      searchPath << GetFullSearchPath(wxString(szDirPrefix).
+                                      Left((size_t)(sublocale - szDirPrefix)))
+                 << wxPATH_SEP;
   }
 
   // don't give translation errors here because the wxstd catalog might
@@ -1146,16 +1136,13 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
     return false;
 
   // get the file size (assume it is less than 4Gb...)
-  wxFileOffset lenFile = fileMsg.Length();
-  if ( lenFile == wxInvalidOffset )
+  wxFileOffset nSize = fileMsg.Length();
+  if ( nSize == wxInvalidOffset )
     return false;
-
-  size_t nSize = wx_truncate_cast(size_t, lenFile);
-  wxASSERT_MSG( nSize == lenFile + size_t(0), _T("message catalog bigger than 4GB?") );
 
   // read the whole file in memory
   m_pData = new size_t8[nSize];
-  if ( fileMsg.Read(m_pData, nSize) != lenFile ) {
+  if ( fileMsg.Read(m_pData, (size_t)nSize) != nSize ) {
     wxDELETEA(m_pData);
     return false;
   }
@@ -1268,14 +1255,10 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
     if ( convertEncoding )
     {
         if ( m_charset.empty() )
-        {
             inputConv = wxConvCurrent;
-        }
         else
-        {
             inputConv =
             csConv = new wxCSConv(m_charset);
-        }
     }
     else // no need to convert the encoding
     {
@@ -1284,7 +1267,7 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
         inputConv = wxConvCurrent;
 #else // !wxUSE_UNICODE
         inputConv = NULL;
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
     }
 
     // conversion to apply to msgid strings before looking them up: we only
@@ -1338,11 +1321,11 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
         wxString msgid(data, *inputConv);
 #else // ASCII
         wxString msgid;
-        #if wxUSE_WCHAR_T
-            if ( inputConv && sourceConv )
-                msgid = wxString(inputConv->cMB2WC(data), *sourceConv);
-            else
-        #endif
+#if wxUSE_WCHAR_T
+        if ( inputConv && sourceConv )
+            msgid = wxString(inputConv->cMB2WC(data), *sourceConv);
+        else
+#endif
             msgid = data;
 #endif // wxUSE_UNICODE
 
@@ -1438,7 +1421,7 @@ const wxChar *wxMsgCatalog::GetString(const wxChar *sz, size_t n) const
 
 #include "wx/arrimpl.cpp"
 WX_DECLARE_EXPORTED_OBJARRAY(wxLanguageInfo, wxLanguageInfoArray);
-WX_DEFINE_OBJARRAY(wxLanguageInfoArray)
+WX_DEFINE_OBJARRAY(wxLanguageInfoArray);
 
 wxLanguageInfoArray *wxLocale::ms_languagesDB = NULL;
 
@@ -1614,70 +1597,13 @@ bool wxLocale::Init(int language, int flags)
     wxString locale;
 
     // Set the locale:
-#if defined(__OS2__)
-    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
-#elif defined(__UNIX__) && !defined(__WXMAC__)
-    if (language != wxLANGUAGE_DEFAULT)
+#if defined(__UNIX__) && !defined(__WXMAC__)
+    if (language == wxLANGUAGE_DEFAULT)
+        locale = wxEmptyString;
+    else
         locale = info->CanonicalName;
 
     wxMB2WXbuf retloc = wxSetlocaleTryUTF(LC_ALL, locale);
-
-    const wxString langOnly = locale.Left(2);
-    if ( !retloc )
-    {
-        // Some C libraries don't like xx_YY form and require xx only
-        retloc = wxSetlocaleTryUTF(LC_ALL, langOnly);
-    }
-
-#if wxUSE_FONTMAP
-    // some systems (e.g. FreeBSD and HP-UX) don't have xx_YY aliases but
-    // require the full xx_YY.encoding form, so try using UTF-8 because this is
-    // the only thing we can do generically
-    //
-    // TODO: add encodings applicable to each language to the lang DB and try
-    //       them all in turn here
-    if ( !retloc )
-    {
-        const wxChar **names =
-            wxFontMapperBase::GetAllEncodingNames(wxFONTENCODING_UTF8);
-        while ( *names )
-        {
-            retloc = wxSetlocale(LC_ALL, locale + _T('.') + *names++);
-            if ( retloc )
-                break;
-        }
-    }
-#endif // wxUSE_FONTMAP
-
-    if ( !retloc )
-    {
-        // Some C libraries (namely glibc) still use old ISO 639,
-        // so will translate the abbrev for them
-        wxString localeAlt;
-        if ( langOnly == wxT("he") )
-            localeAlt = wxT("iw") + locale.Mid(3);
-        else if ( langOnly == wxT("id") )
-            localeAlt = wxT("in") + locale.Mid(3);
-        else if ( langOnly == wxT("yi") )
-            localeAlt = wxT("ji") + locale.Mid(3);
-        else if ( langOnly == wxT("nb") )
-            localeAlt = wxT("no_NO");
-        else if ( langOnly == wxT("nn") )
-            localeAlt = wxT("no_NY");
-
-        if ( !localeAlt.empty() )
-        {
-            retloc = wxSetlocaleTryUTF(LC_ALL, localeAlt);
-            if ( !retloc )
-                retloc = wxSetlocaleTryUTF(LC_ALL, locale.Left(2));
-        }
-    }
-
-    if ( !retloc )
-    {
-        wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
-        return false;
-    }
 
 #ifdef __AIX__
     // at least in AIX 5.2 libc is buggy and the string returned from setlocale(LC_ALL)
@@ -1691,6 +1617,40 @@ bool wxLocale::Init(int language, int flags)
         *p = _T('\0');
 #endif // __AIX__
 
+    if ( !retloc )
+    {
+        // Some C libraries don't like xx_YY form and require xx only
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
+    }
+    if ( !retloc )
+    {
+        // Some C libraries (namely glibc) still use old ISO 639,
+        // so will translate the abbrev for them
+        wxString mid = locale.Mid(0,2);
+        if (mid == wxT("he"))
+            locale = wxT("iw") + locale.Mid(3);
+        else if (mid == wxT("id"))
+            locale = wxT("in") + locale.Mid(3);
+        else if (mid == wxT("yi"))
+            locale = wxT("ji") + locale.Mid(3);
+        else if (mid == wxT("nb"))
+            locale = wxT("no_NO");
+        else if (mid == wxT("nn"))
+            locale = wxT("no_NY");
+
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale);
+    }
+    if ( !retloc )
+    {
+        // (This time, we changed locale in previous if-branch, so try again.)
+        // Some C libraries don't like xx_YY form and require xx only
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
+    }
+    if ( !retloc )
+    {
+        wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
+        return false;
+    }
 #elif defined(__WIN32__)
 
     #if wxUSE_UNICODE && (defined(__VISUALC__) || defined(__MINGW32__))
@@ -1808,8 +1768,9 @@ bool wxLocale::Init(int language, int flags)
         wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
         return false;
     }
+#elif defined(__WXPM__)
+    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
 #else
-    wxUnusedVar(flags);
     return false;
     #define WX_NO_LOCALE_SUPPORT
 #endif
@@ -1825,16 +1786,16 @@ bool wxLocale::Init(int language, int flags)
         m_language = lang;
 
     return ret;
-#endif // !WX_NO_LOCALE_SUPPORT
+#endif
 }
 
 
 
 void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
 {
-    if ( gs_searchPrefixes.Index(prefix) == wxNOT_FOUND )
+    if ( s_searchPrefixes.Index(prefix) == wxNOT_FOUND )
     {
-        gs_searchPrefixes.Add(prefix);
+        s_searchPrefixes.Add(prefix);
     }
     //else: already have it
 }
@@ -3584,9 +3545,10 @@ void wxLocale::InitLanguagesDB()
    LNG(wxLANGUAGE_ZHUANG,                     "za"   , 0              , 0                                 , "Zhuang")
    LNG(wxLANGUAGE_ZULU,                       "zu"   , 0              , 0                                 , "Zulu")
 
-}
+};
 #undef LNG
 
 // --- --- --- generated code ends here --- --- ---
 
 #endif // wxUSE_INTL
+

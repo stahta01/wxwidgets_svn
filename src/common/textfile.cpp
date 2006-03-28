@@ -13,6 +13,10 @@
 // headers
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textfile.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef    __BORLANDC__
@@ -88,79 +92,39 @@ bool wxTextFile::OnClose()
 bool wxTextFile::OnRead(wxMBConv& conv)
 {
     // file should be opened and we must be in it's beginning
-    wxASSERT( m_file.IsOpened() &&
-                (m_file.GetKind() != wxFILE_KIND_DISK || m_file.Tell() == 0) );
+    wxASSERT( m_file.IsOpened() && m_file.Tell() == 0 );
 
-    static const size_t BUF_SIZE = 1024;
-#if wxUSE_UNICODE
-    static const size_t NUL_SIZE = 4;
-#else
-    static const size_t NUL_SIZE = 1;
-#endif
+    char *strBuf, *strPtr, *strEnd;
+    char ch, chLast = '\0';
+    char buf[1024];
+    size_t nRead;
 
-    char buf[BUF_SIZE + NUL_SIZE];
-    wxChar chLast = '\0';
-    wxString str;
+    strPtr = strBuf = new char[1024];
+    strEnd = strBuf + 1024;
 
-    for ( ;; )
+    do
     {
-        // leave space for trailing NUL
-        ssize_t nRead = m_file.Read(buf, BUF_SIZE);
-
-        if ( nRead == wxInvalidOffset )
+        nRead = m_file.Read(buf, WXSIZEOF(buf));
+        if ( nRead == (size_t)wxInvalidOffset )
         {
             // read error (error message already given in wxFile::Read)
+            delete[] strBuf;
             return false;
         }
 
-        if ( nRead == 0 )
-            break;
-
-#if wxUSE_UNICODE
-        // we have to properly NUL-terminate the string for any encoding it may
-        // use -- 4 NULs should be enough for everyone (this is why we add 4
-        // extra bytes to the buffer)
-        buf[nRead] =
-        buf[nRead + 1] =
-        buf[nRead + 2] =
-        buf[nRead + 3] = '\0';
-
-        // append to the remains of the last block, don't overwrite
-        wxString strbuf(buf, conv);
-        if ( strbuf.empty() )
+        for (size_t n = 0; n < nRead; n++)
         {
-            // conversion failed
-            return false;
-        }
-
-        str += strbuf;
-#else // ANSI
-        wxUnusedVar(conv);
-        buf[nRead] = '\0';
-        str += buf;
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
-
-
-        // the beginning of the current line, changes inside the loop
-        const wxChar *lineStart = str.begin();
-        const wxChar * const end = str.end();
-        for ( const wxChar *p = lineStart; p != end; p++ )
-        {
-            const wxChar ch = *p;
+            ch = buf[n];
             switch ( ch )
             {
                 case '\n':
-                    // could be a DOS or Unix EOL
-                    if ( chLast == '\r' )
-                    {
-                        AddLine(wxString(lineStart, p - 1), wxTextFileType_Dos);
-                    }
-                    else // bare '\n', Unix style
-                    {
-                        AddLine(wxString(lineStart, p), wxTextFileType_Unix);
-                    }
-
-                    lineStart = p + 1;
+                    // Dos/Unix line termination
+                    *strPtr = '\0';
+                    AddLine(wxString(strBuf, conv),
+                            chLast == '\r' ? wxTextFileType_Dos
+                                           : wxTextFileType_Unix);
+                    strPtr = strBuf;
+                    chLast = '\n';
                     break;
 
                 case '\r':
@@ -168,34 +132,50 @@ bool wxTextFile::OnRead(wxMBConv& conv)
                     {
                         // Mac empty line
                         AddLine(wxEmptyString, wxTextFileType_Mac);
-                        lineStart = p + 1;
                     }
-                    //else: we don't what this is yet -- could be a Mac EOL or
-                    //      start of DOS EOL so wait for next char
+                    else
+                        chLast = '\r';
                     break;
 
                 default:
                     if ( chLast == '\r' )
                     {
                         // Mac line termination
-                        AddLine(wxString(lineStart, p - 1), wxTextFileType_Mac);
-                        lineStart = p;
+                        *strPtr = '\0';
+                        AddLine(wxString(strBuf, conv), wxTextFileType_Mac);
+                        chLast = ch;
+                        strPtr = strBuf;
+                        *(strPtr++) = ch;
+                    }
+                    else
+                    {
+                        // add to the current line
+                        *(strPtr++) = ch;
+                        if ( strPtr == strEnd )
+                        {
+                            // we must allocate more memory
+                            size_t size = strEnd - strBuf;
+                            char *newBuf = new char[size + 1024];
+                            memcpy(newBuf, strBuf, size);
+                            delete[] strBuf;
+                            strBuf = newBuf;
+                            strEnd = strBuf + size + 1024;
+                            strPtr = strBuf + size;
+                        }
                     }
             }
-
-            chLast = ch;
         }
-
-        // remove the part we already processed
-        str.erase(0, lineStart - str.begin());
-    }
+    } while ( nRead == WXSIZEOF(buf) );
 
     // anything in the last line?
-    if ( !str.empty() )
+    if ( strPtr != strBuf )
     {
-        AddLine(str, wxTextFileType_None); // no line terminator
+        *strPtr = '\0';
+        AddLine(wxString(strBuf, conv),
+                wxTextFileType_None); // no line terminator
     }
 
+    delete[] strBuf;
     return true;
 }
 

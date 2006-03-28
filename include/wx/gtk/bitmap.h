@@ -11,13 +11,19 @@
 #ifndef __GTKBITMAPH__
 #define __GTKBITMAPH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/palette.h"
 #include "wx/gdiobj.h"
 
+#ifdef __WXGTK20__
 typedef struct _GdkPixbuf GdkPixbuf;
+#endif
 
 class WXDLLEXPORT wxPixelDataBase;
 
@@ -71,9 +77,11 @@ public:
     wxBitmap( const char bits[], int width, int height, int depth = 1 );
     wxBitmap( const char **bits ) { (void)CreateFromXpm(bits); }
     wxBitmap( char **bits ) { (void)CreateFromXpm((const char **)bits); }
+    wxBitmap( const wxBitmap& bmp );
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
     wxBitmap( const wxImage& image, int depth = -1 ) { (void)CreateFromImage(image, depth); }
     ~wxBitmap();
+    wxBitmap& operator = ( const wxBitmap& bmp );
     bool operator == ( const wxBitmap& bmp ) const;
     bool operator != ( const wxBitmap& bmp ) const;
     bool Ok() const;
@@ -114,13 +122,17 @@ public:
     void SetDepth( int depth );
     void SetPixmap( GdkPixmap *pixmap );
     void SetBitmap( GdkBitmap *bitmap );
+#ifdef __WXGTK20__
     void SetPixbuf(GdkPixbuf *pixbuf);
+#endif
 
     GdkPixmap *GetPixmap() const;
     GdkBitmap *GetBitmap() const;
     bool HasPixmap() const;
+#ifdef __WXGTK20__
     bool HasPixbuf() const;
     GdkPixbuf *GetPixbuf() const;
+#endif
 
     // Basically, this corresponds to Win32 StretchBlt()
     wxBitmap Rescale( int clipx, int clipy, int clipwidth, int clipheight, int width, int height );
@@ -141,6 +153,7 @@ private:
     bool CreateFromImageAsBitmap(const wxImage& image);
     bool CreateFromImageAsPixmap(const wxImage& image);
 
+#ifdef __WXGTK20__
     bool CreateFromImageAsPixbuf(const wxImage& image);
 
     enum Representation
@@ -153,6 +166,7 @@ private:
     void PurgeOtherRepresentations(Representation keep);
 
     friend class wxMemoryDC;
+#endif
     friend class wxBitmapHandler;
 
 private:

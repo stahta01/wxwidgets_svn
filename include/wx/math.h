@@ -1,10 +1,10 @@
 /**
-* Name:        wx/math.h
+* Name:        math.h
 * Purpose:     Declarations/definitions of common math functions
 * Author:      John Labenski and others
 * Modified by:
 * Created:     02/02/03
-* RCS-ID:      $Id$
+* RCS-ID:
 * Copyright:   (c) John Labenski
 * Licence:     wxWindows licence
 */
@@ -13,6 +13,10 @@
 
 #ifndef _WX_MATH_H_
 #define _WX_MATH_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "math.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -109,18 +113,5 @@ inline bool wxIsNullDouble(double x) { return wxIsSameDouble(x, 0.); }
 #else
     #define wxMulDivInt32( a , b , c ) ((wxInt32)((a)*(((wxDouble)b)/((wxDouble)c))))
 #endif
-
-#if wxUSE_APPLE_IEEE
-#ifdef __cplusplus
-    extern "C" {
-#endif
-    /* functions from common/extended.c */
-    extern wxFloat64 ConvertFromIeeeExtended(const wxInt8 *bytes);
-    extern void ConvertToIeeeExtended(wxFloat64 num, wxInt8 *bytes);
-#ifdef __cplusplus
-    }
-#endif
-#endif /* wxUSE_APPLE_IEEE */
-
 
 #endif /* _WX_MATH_H_ */

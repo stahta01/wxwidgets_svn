@@ -75,9 +75,6 @@ USE_GUI = 1
 # Build wxHTML library (USE_GUI must be 1)? [0,1]
 USE_HTML = 1
 
-# Build multimedia library (USE_GUI must be 1)? [0,1]
-USE_MEDIA = 1
-
 # Build wxXRC library (USE_GUI must be 1)? [0,1]
 USE_XRC = 1
 
@@ -88,7 +85,7 @@ USE_OPENGL = 0
 USE_ODBC = 0
 
 # Build quality assurance classes library (USE_GUI must be 1)? [0,1]
-USE_QA = 1
+USE_QA = 0
 
 # Enable exceptions in compiled code. [0,1]
 USE_EXCEPTIONS = 1

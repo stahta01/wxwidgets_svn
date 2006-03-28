@@ -12,6 +12,10 @@
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "font.h"
+#endif
+
 class wxXFont;
 
 // Font
@@ -19,7 +23,8 @@ class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) { Init(); Ref(font); }
 
     wxFont(int size,
         int family,
@@ -29,6 +34,8 @@ public:
         const wxString& face = wxEmptyString,
         wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -52,6 +59,9 @@ public:
     // bool Create(const wxNativeFontInfo& fontinfo);
 
     virtual ~wxFont();
+
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -102,6 +112,9 @@ public:
 
 protected:
     virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
+
+    // common part of all ctors
+    void Init();
 
     void Unshare();
 

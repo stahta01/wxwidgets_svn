@@ -17,7 +17,6 @@
 #if wxUSE_STDPATHS
 
 #include "wx/string.h"
-#include "wx/filefn.h"
 
 // ----------------------------------------------------------------------------
 // wxStandardPaths returns the standard locations in the file system
@@ -26,20 +25,6 @@
 class WXDLLIMPEXP_BASE wxStandardPathsBase
 {
 public:
-    // possible resources categorires
-    enum ResourceCat
-    {
-        // no special category
-        ResourceCat_None,
-
-        // message catalog resources
-        ResourceCat_Messages,
-
-        // end of enum marker
-        ResourceCat_Max
-    };
-
-
     // return the global standard paths object
     static wxStandardPathsBase& Get();
 
@@ -88,28 +73,6 @@ public:
     // prefix/lib/appname under Unix, program directory under Windows and
     // Contents/Plugins app bundle subdirectory under Mac
     virtual wxString GetPluginsDir() const = 0;
-
-    // get resources directory: resources are auxiliary files used by the
-    // application and include things like image and sound files
-    //
-    // same as GetDataDir() for all platforms except Mac where it returns
-    // Contents/Resources subdirectory of the app bundle
-    virtual wxString GetResourcesDir() const { return GetDataDir(); }
-
-    // get localized resources directory containing the resource files of the
-    // specified category for the given language
-    //
-    // in general this is just GetResourcesDir()/lang under Windows and Unix
-    // and GetResourcesDir()/lang.lproj under Mac but is something quite
-    // different under Unix for message catalog category (namely the standard
-    // prefix/share/locale/lang/LC_MESSAGES)
-    virtual wxString
-    GetLocalizedResourcesDir(const wxChar *lang,
-                             ResourceCat WXUNUSED(category)
-                                = ResourceCat_None) const
-    {
-        return GetResourcesDir() + wxFILE_SEP_PATH + lang;
-    }
 
 
     // virtual dtor for the base class

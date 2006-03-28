@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/tooltip.cpp
+// Name:        tooltip.cpp
 // Purpose:     wxToolTip implementation
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tooltip.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/setup.h"
 
 #if wxUSE_TOOLTIPS
 
@@ -68,19 +74,13 @@ void wxToolTip::Enable( bool flag )
         gtk_tooltips_disable( ss_tooltips );
 }
 
-G_BEGIN_DECLS
-void gtk_tooltips_set_delay (GtkTooltips *tooltips,
-                             guint delay);
-G_END_DECLS
-
 void wxToolTip::SetDelay( long msecs )
 {
     if (!ss_tooltips)
         return;
 
-    // FIXME: This is a deprecated function and might not even have an effect.
-    // Try to not use it, after which remove the prototype above.
     gtk_tooltips_set_delay( ss_tooltips, (int)msecs );
 }
 
 #endif
+

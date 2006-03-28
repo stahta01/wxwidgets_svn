@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "cbcustom.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,6 +34,8 @@ public:
     cbSimpleCustomizationPlugin* mpBackRef;
 
 public:
+    void OnMenuCommand( wxCommandEvent& evt );
+
     void OnCommandEvents( wxCommandEvent& evt );
 
     DECLARE_EVENT_TABLE()
@@ -43,12 +49,12 @@ public:
 
 BEGIN_EVENT_TABLE( cbContextMenuHandler, wxEvtHandler )
 
-    // FIXME:: what is the right range for these ids ? so that they
+    // FIXME:: what is the right range for these ids ? so that they 
     //         would not collide with user commands?
 
     EVT_COMMAND_RANGE( CB_CUSTOMIZE_MENU_FIRST_ITEM_ID,
-                       CB_CUSTOMIZE_MENU_FIRST_ITEM_ID + 300,
-                       wxEVT_COMMAND_MENU_SELECTED,
+                       CB_CUSTOMIZE_MENU_FIRST_ITEM_ID + 300, 
+                       wxEVT_COMMAND_MENU_SELECTED,  
                        cbContextMenuHandler::OnCommandEvents )
 
 END_EVENT_TABLE()
@@ -119,7 +125,7 @@ void cbSimpleCustomizationPlugin::OnCustomizeLayout( cbCustomizeLayoutEvent& eve
 #if 0
     pMenu->AppendSeparator();
     pMenu->Append( id, "Customize...", "Show layout customization dialog", false );
-#endif
+#endif    
     mCustMenuItemId = id;
 
     cbContextMenuHandler* pHandler = new cbContextMenuHandler();
@@ -188,8 +194,9 @@ void cbSimpleCustomizationPlugin::OnMenuItemSelected( wxCommandEvent& event )
         mpLayout->SetBarState( pBar, newState, true );
 
         if ( newState == wxCBAR_FLOATING )
-            mpLayout->RepositionFloatedBar( pBar );
+            mpLayout->RepositionFloatedBar( pBar ); 
     }
 
     // menu-item-selected event is "eaten"
 }
+

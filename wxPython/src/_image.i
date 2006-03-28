@@ -83,8 +83,8 @@ the following methods::
 To activate your handler create an instance of it and pass it to
 `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
 `SetExtension` from your constructor.
-", "");
 
+", "");
 class wxPyImageHandler: public wxImageHandler {
 public:
     %pythonAppend wxPyImageHandler() "self._SetSelf(self)"
@@ -872,14 +872,6 @@ indicates the orientation.", "");
                         byte r2, byte g2, byte b2 ),
         "Replaces the colour specified by ``(r1,g1,b1)`` by the colour
 ``(r2,g2,b2)``.", "");
-
-    DocDeclStr(
-        wxImage , ConvertToGreyscale( double lr = 0.299,
-                                      double lg = 0.587,
-                                      double lb = 0.114 ) const,
-        "Convert to greyscale image. Uses the luminance component (Y) of the
-image.  The luma value (YUV) is calculated using (R * lr) + (G * lg) + (B * lb),
-defaults to ITU-T BT.601", "");
     
 
     DocDeclStr(

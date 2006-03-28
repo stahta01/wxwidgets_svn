@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/quantize.cpp
+// Name:        quantize.cpp
 // Purpose:     wxQuantize implementation
 // Author:      Julian Smart
 // Modified by:
@@ -29,6 +29,10 @@
  */
 
 /* modified by Vaclav Slavik for use as jpeglib-independent module */
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "quantize.h"
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -73,7 +77,7 @@
 
 typedef unsigned short UINT16;
 typedef signed short INT16;
-#if !(defined(__WATCOMC__) && (defined(__WXMSW__) || defined(__WXMOTIF__)))
+#if !(defined(__WATCOMC__) && defined(__WXMSW__))
 typedef signed int INT32;
 #endif
 

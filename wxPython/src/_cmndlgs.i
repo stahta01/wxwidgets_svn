@@ -98,11 +98,6 @@ instance.", "");
 };
 
 
-wxColour wxGetColourFromUser(wxWindow *parent = (wxWindow *)NULL,
-                             const wxColour& colInit = wxNullColour,
-                             const wxString& caption = wxPyEmptyString);
-
-
 //--------------------------------------------------------------------------------
 
 
@@ -289,22 +284,23 @@ which will be used when the dialog is first displayed. After the
 dialog is shown, this is the index selected by the user.", "");
 
 
-    %extend {
-        DocStr(GetFilenames,
-               "Returns a list of filenames chosen in the dialog.  This function
+    DocStr(GetFilenames,
+        "Returns a list of filenames chosen in the dialog.  This function
 should only be used with the dialogs which have wx.MULTIPLE style, use
 GetFilename for the others.", "");
+
+    DocStr(GetPaths,
+        "Fills the array paths with the full paths of the files chosen. This
+function should only be used with the dialogs which have wx.MULTIPLE
+style, use GetPath for the others.", "");   
+    
+    %extend {
         PyObject* GetFilenames() {
             wxArrayString arr;
             self->GetFilenames(arr);
             return wxArrayString2PyList_helper(arr);
         }
 
-        DocStr(GetPaths,
-               "Fills the array paths with the full paths of the files chosen. This
-function should only be used with the dialogs which have wx.MULTIPLE
-style, use GetPath for the others.", "");   
-    
         PyObject* GetPaths() {
             wxArrayString arr;
             self->GetPaths(arr);
@@ -592,11 +588,6 @@ results with via the `wx.FontData` returned by `GetFontData`.", "");
         "Returns a reference to the internal `wx.FontData` used by the
 wx.FontDialog.", "");    
 };
-
-
-wxFont wxGetFontFromUser(wxWindow *parent = NULL,
-                         const wxFont& fontInit = wxNullFont,
-                         const wxString& caption = wxPyEmptyString);
 
 
 //---------------------------------------------------------------------------

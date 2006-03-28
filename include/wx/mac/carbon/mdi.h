@@ -14,10 +14,14 @@
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "mdi.h"
+#endif
+
 #include "wx/frame.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxFrameNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStatusLineNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
 
 class WXDLLEXPORT wxMDIClientWindow;
 class WXDLLEXPORT wxMDIChildFrame;
@@ -179,14 +183,15 @@ class WXDLLEXPORT wxMDIClientWindow: public wxWindow
   // Note: this is virtual, to allow overridden behaviour.
   virtual bool CreateClient(wxMDIParentFrame *parent, long style = wxVSCROLL | wxHSCROLL);
 
+  // Gets the size available for subwindows after menu size, toolbar size
+  // and status bar size have been subtracted. If you want to manage your own
+  // toolbar(s), don't call SetToolBar.
+  void DoGetClientSize(int *width, int *height) const;
+
   // Explicitly call default scroll behaviour
   void OnScroll(wxScrollEvent& event);
 
 protected:
-    // Gets the size available for subwindows after menu size, toolbar size
-    // and status bar size have been subtracted. If you want to manage your own
-    // toolbar(s), don't call SetToolBar.
-    void DoGetClientSize(int *width, int *height) const;
 
 DECLARE_EVENT_TABLE()
 };

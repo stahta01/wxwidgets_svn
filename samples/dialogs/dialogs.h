@@ -34,13 +34,7 @@ of MSW, MAC and OS2
     #define USE_DLL 0
 #endif
 
-#if defined(__WXWINCE__)
-    #define USE_WXWINCE 1
-#else
-    #define USE_WXWINCE 0
-#endif
-
-#if defined(__WXMSW__) && !USE_WXWINCE
+#if defined(__WXMSW__) && !defined(__WXWINCE__)
     #define USE_WXMSW 1
 #else
     #define USE_WXMSW 0
@@ -77,9 +71,10 @@ of MSW, MAC and OS2
 #define USE_DIRDLG_GENERIC \
     ((USE_WXMSW || USE_WXMAC) && USE_GENERIC_DIALOGS && wxUSE_DIRDLG)
 #define USE_FILEDLG_GENERIC \
-    ((((USE_WXMSW || USE_WXMAC || USE_WXPM) && USE_GENERIC_DIALOGS) || USE_WXWINCE) && wxUSE_FILEDLG)
+    ((USE_WXMSW || USE_WXMAC || USE_WXPM) && USE_GENERIC_DIALOGS && wxUSE_FILEDLG)
 #define USE_FONTDLG_GENERIC \
-    ((USE_WXMSW || USE_WXMACFONTDLG || USE_WXPM) && USE_GENERIC_DIALOGS && wxUSE_FONTDLG)
+    ((USE_WXMSW || USE_WXMACFONTDLG ||USE_WXPM) && USE_GENERIC_DIALOGS && wxUSE_FONTDLG)
+
 
 // Turn USE_MODAL_PRESENTATION to 0 if there is any reason for not presenting difference
 // between modal and modeless dialogs (ie. not implemented it in your port yet)
@@ -147,8 +142,7 @@ class SettingsDialog: public wxPropertySheetDialog
 {
 DECLARE_CLASS(SettingsDialog)
 public:
-    SettingsDialog(wxWindow* parent, bool useToolBook = false);
-    ~SettingsDialog();
+    SettingsDialog(wxWindow* parent);
 
     wxPanel* CreateGeneralSettingsPage(wxWindow* parent);
     wxPanel* CreateAestheticSettingsPage(wxWindow* parent);
@@ -165,8 +159,6 @@ protected:
         ID_BACKGROUND_STYLE,
         ID_FONT_SIZE
     };
-
-    wxImageList*    m_imageList;
 
 DECLARE_EVENT_TABLE()
 };
@@ -236,8 +228,6 @@ public:
 #if USE_MODAL_PRESENTATION
     void ModalDlg(wxCommandEvent& event);
     void ModelessDlg(wxCommandEvent& event);
-    void DlgCenteredScreen(wxCommandEvent& event);
-    void DlgCenteredParent(wxCommandEvent& event);
 #endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_PROGRESSDLG
@@ -263,7 +253,6 @@ public:
 #endif // USE_FONTDLG_GENERIC
 
     void OnPropertySheet(wxCommandEvent& event);
-    void OnPropertySheetToolBook(wxCommandEvent& event);
     void OnRequestUserAttention(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
 
@@ -327,16 +316,13 @@ enum
     DIALOGS_LOG_DIALOG,
     DIALOGS_MODAL,
     DIALOGS_MODELESS,
-    DIALOGS_CENTRE_SCREEN,
-    DIALOGS_CENTRE_PARENT,
     DIALOGS_MODELESS_BTN,
     DIALOGS_PROGRESS,
     DIALOGS_BUSYINFO,
     DIALOGS_FIND,
     DIALOGS_REPLACE,
     DIALOGS_REQUEST,
-    DIALOGS_PROPERTY_SHEET,
-    DIALOGS_PROPERTY_SHEET_TOOLBOOK
+    DIALOGS_PROPERTY_SHEET
 };
 
 #endif

@@ -153,7 +153,7 @@ public:
     wxListItemAttr(const wxColour& colText = wxNullColour,
                    const wxColour& colBack = wxNullColour,
                    const wxFont& font = wxNullFont);
-    ~wxListItemAttr();
+
 
     // setters
     void SetTextColour(const wxColour& colText);
@@ -169,9 +169,6 @@ public:
     wxColour GetBackgroundColour();
     wxFont GetFont();
 
-    void AssignFrom(const wxListItemAttr& source);
-
-    %pythonAppend Destroy "args[0].thisown = 0"
     %extend { void Destroy() { delete self; } }
 };
 
@@ -307,10 +304,9 @@ public:
 %constant wxEventType wxEVT_COMMAND_LIST_ITEM_FOCUSED;
 
 // WXWIN_COMPATIBILITY_2_4
-#if 0
 %constant wxEventType wxEVT_COMMAND_LIST_GET_INFO;
 %constant wxEventType wxEVT_COMMAND_LIST_SET_INFO;
-#endif
+
 
 %pythoncode {
 
@@ -320,10 +316,8 @@ EVT_LIST_BEGIN_LABEL_EDIT  = wx.PyEventBinder(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDI
 EVT_LIST_END_LABEL_EDIT    = wx.PyEventBinder(wxEVT_COMMAND_LIST_END_LABEL_EDIT   , 1)
 EVT_LIST_DELETE_ITEM       = wx.PyEventBinder(wxEVT_COMMAND_LIST_DELETE_ITEM      , 1)
 EVT_LIST_DELETE_ALL_ITEMS  = wx.PyEventBinder(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS , 1)
-#WXWIN_COMPATIBILITY_2_4
-#EVT_LIST_GET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_GET_INFO         , 1)
-#EVT_LIST_SET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_SET_INFO         , 1)
-#END WXWIN_COMPATIBILITY_2_4
+EVT_LIST_GET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_GET_INFO         , 1)
+EVT_LIST_SET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_SET_INFO         , 1)
 EVT_LIST_ITEM_SELECTED     = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_SELECTED    , 1)
 EVT_LIST_ITEM_DESELECTED   = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_DESELECTED  , 1)
 EVT_LIST_KEY_DOWN          = wx.PyEventBinder(wxEVT_COMMAND_LIST_KEY_DOWN         , 1)
@@ -339,9 +333,8 @@ EVT_LIST_COL_DRAGGING      = wx.PyEventBinder(wxEVT_COMMAND_LIST_COL_DRAGGING   
 EVT_LIST_COL_END_DRAG      = wx.PyEventBinder(wxEVT_COMMAND_LIST_COL_END_DRAG     , 1)
 EVT_LIST_ITEM_FOCUSED      = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_FOCUSED     , 1)
 
-#WXWIN_COMPATIBILITY_2_4
-#EVT_LIST_GET_INFO = wx._deprecated(EVT_LIST_GET_INFO)
-#EVT_LIST_SET_INFO = wx._deprecated(EVT_LIST_SET_INFO)
+EVT_LIST_GET_INFO = wx._deprecated(EVT_LIST_GET_INFO)
+EVT_LIST_SET_INFO = wx._deprecated(EVT_LIST_SET_INFO)
 }
 
 //---------------------------------------------------------------------------
@@ -396,8 +389,11 @@ public:
 
     // use the virtual version to avoid a confusing assert in the base class
     DEC_PYCALLBACK_INT_LONG_virtual(OnGetItemImage);
-    DEC_PYCALLBACK_INT_LONGLONG(OnGetItemColumnImage);
 
+#ifdef wxHAVE_OnGetItemColumnImage
+    DEC_PYCALLBACK_INT_LONGLONG(OnGetItemColumnImage);
+#endif
+    
     PYPRIVATE;
 };
 
@@ -406,8 +402,10 @@ IMPLEMENT_ABSTRACT_CLASS(wxPyListCtrl, wxListCtrl);
 IMP_PYCALLBACK_STRING_LONGLONG(wxPyListCtrl, wxListCtrl, OnGetItemText);
 IMP_PYCALLBACK_LISTATTR_LONG(wxPyListCtrl, wxListCtrl, OnGetItemAttr);
 IMP_PYCALLBACK_INT_LONG_virtual(wxPyListCtrl, wxListCtrl, OnGetItemImage);
-IMP_PYCALLBACK_INT_LONGLONG(wxPyListCtrl, wxListCtrl, OnGetItemColumnImage); 
 
+#ifdef wxHAVE_OnGetItemColumnImage
+IMP_PYCALLBACK_INT_LONGLONG(wxPyListCtrl, wxListCtrl, OnGetItemColumnImage); 
+#endif
 %}
 
 
@@ -483,8 +481,10 @@ public:
     // return the total area occupied by all the items (icon/small icon only)
     wxRect GetViewRect() const;
 
+#ifdef __WXMSW__
     // Gets the edit control for editing labels.
     wxTextCtrl* GetEditControl() const;
+#endif
 
     // Gets information about the item
     %pythonAppend GetItem "if val is not None: val.thisown = 1";  // %newobject doesn't work with OOR typemap
@@ -594,9 +594,11 @@ public:
     // Sets the image list
     void SetImageList(wxImageList *imageList, int which);
 
-    %disownarg( wxImageList *imageList );
+    // is there a way to tell SWIG to disown this???
+
+    %apply SWIGTYPE *DISOWN { wxImageList *imageList };
     void AssignImageList(wxImageList *imageList, int which);
-    %cleardisown( wxImageList *imageList );
+    %clear wxImageList *imageList;
 
     // are we in report mode?
     bool InReportView() const;

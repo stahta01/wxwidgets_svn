@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "helpxxxx.h"
+#endif
+
 #include "wx/stubs/helpxxxx.h"
 
 #include <string.h>

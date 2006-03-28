@@ -12,6 +12,10 @@
 #ifndef _WX_STOCKITEM_H_
 #define _WX_STOCKITEM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "stockitem.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/wxchar.h"
 #include "wx/string.h"
@@ -31,7 +35,7 @@ WXDLLEXPORT bool wxIsStockLabel(wxWindowID id, const wxString& label);
 // for wxSTOCK_OK):
 WXDLLEXPORT wxString wxGetStockLabel(wxWindowID id,
                                      bool withCodes = true,
-                                     const wxString& accelerator = wxEmptyString);
+                                     wxString accelerator = wxEmptyString);
 
 #ifdef __WXGTK20__
 // Translates stock ID to GTK+'s stock item string indentifier:

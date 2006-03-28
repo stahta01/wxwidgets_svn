@@ -93,7 +93,6 @@
     static
     void ShowAssertDialog(const wxChar *szFile,
                           int nLine,
-                          const wxChar *szFunc,
                           const wxChar *szCond,
                           const wxChar *szMsg,
                           wxAppTraits *traits = NULL);
@@ -208,6 +207,10 @@ int wxAppConsole::OnExit()
     delete wxConfigBase::Set((wxConfigBase *) NULL);
 #endif // wxUSE_CONFIG
 
+    // use Set(NULL) and not Get() to avoid creating a message output object on
+    // demand when we just want to delete it
+    delete wxMessageOutput::Set(NULL);
+
     return 0;
 }
 
@@ -319,6 +322,17 @@ wxAppConsole::HandleEvent(wxEvtHandler *handler,
 {
     // by default, simply call the handler
     (handler->*func)(event);
+}
+
+bool
+wxAppConsole::OnExceptionInMainLoop()
+{
+    throw;
+
+    // some compilers are too stupid to know that we never return after throw
+#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
+    return false;
+#endif
 }
 
 #endif // wxUSE_EXCEPTIONS
@@ -435,21 +449,12 @@ bool wxAppConsole::CheckBuildOptions(const char *optionsSignature,
 
 #ifdef __WXDEBUG__
 
-void wxAppConsole::OnAssertFailure(const wxChar *file,
-                                   int line,
-                                   const wxChar *func,
-                                   const wxChar *cond,
-                                   const wxChar *msg)
-{
-    ShowAssertDialog(file, line, func, cond, msg, GetTraits());
-}
-
 void wxAppConsole::OnAssert(const wxChar *file,
                             int line,
                             const wxChar *cond,
                             const wxChar *msg)
 {
-    OnAssertFailure(file, line, NULL, cond, msg);
+    ShowAssertDialog(file, line, cond, msg, GetTraits());
 }
 
 #endif // __WXDEBUG__
@@ -597,10 +602,19 @@ void wxTrap()
 #endif // Win/Unix
 }
 
+void wxAssert(int cond,
+              const wxChar *szFile,
+              int nLine,
+              const wxChar *szCond,
+              const wxChar *szMsg)
+{
+    if ( !cond )
+        wxOnAssert(szFile, nLine, szCond, szMsg);
+}
+
 // this function is called when an assert fails
 void wxOnAssert(const wxChar *szFile,
                 int nLine,
-                const char *szFunc,
                 const wxChar *szCond,
                 const wxChar *szMsg)
 {
@@ -619,19 +633,16 @@ void wxOnAssert(const wxChar *szFile,
 
     s_bInAssert = true;
 
-    // __FUNCTION__ is always in ASCII, convert it to wide char if needed
-    const wxString strFunc = wxString::FromAscii(szFunc);
-
     if ( !wxTheApp )
     {
         // by default, show the assert dialog box -- we can't customize this
         // behaviour
-        ShowAssertDialog(szFile, nLine, strFunc, szCond, szMsg);
+        ShowAssertDialog(szFile, nLine, szCond, szMsg);
     }
     else
     {
         // let the app process it as it wants
-        wxTheApp->OnAssertFailure(szFile, nLine, strFunc, szCond, szMsg);
+        wxTheApp->OnAssert(szFile, nLine, szCond, szMsg);
     }
 
     s_bInAssert = false;
@@ -710,11 +721,7 @@ static wxString GetAssertStackTrace()
     protected:
         virtual void OnStackFrame(const wxStackFrame& frame)
         {
-            m_stackTrace << wxString::Format
-                            (
-                              _T("[%02d] "),
-                              wx_truncate_cast(int, frame.GetLevel())
-                            );
+            m_stackTrace << wxString::Format(_T("[%02d] "), frame.GetLevel());
 
             wxString name = frame.GetName();
             if ( !name.empty() )
@@ -723,7 +730,11 @@ static wxString GetAssertStackTrace()
             }
             else
             {
-                m_stackTrace << wxString::Format(_T("%p"), frame.GetAddress());
+                m_stackTrace << wxString::Format
+                                (
+                                    _T("0x%08lx"),
+                                    (unsigned long)frame.GetAddress()
+                                );
             }
 
             if ( frame.HasSourceLocation() )
@@ -742,7 +753,7 @@ static wxString GetAssertStackTrace()
     };
 
     StackDump dump;
-    dump.Walk(2); // don't show OnAssert() call itself
+    dump.Walk(5); // don't show OnAssert() call itself
     stackTrace = dump.GetStackTrace();
 
     // don't show more than maxLines or we could get a dialog too tall to be
@@ -761,7 +772,6 @@ static wxString GetAssertStackTrace()
 static
 void ShowAssertDialog(const wxChar *szFile,
                       int nLine,
-                      const wxChar *szFunc,
                       const wxChar *szCond,
                       const wxChar *szMsg,
                       wxAppTraits *traits)
@@ -777,11 +787,6 @@ void ShowAssertDialog(const wxChar *szFile,
     // the failed assert
     msg.Printf(wxT("%s(%d): assert \"%s\" failed"), szFile, nLine, szCond);
 
-    // add the function name, if any
-    if ( szFunc && *szFunc )
-        msg << _T(" in ") << szFunc << _T("()");
-
-    // and the message itself
     if ( szMsg )
     {
         msg << _T(": ") << szMsg;

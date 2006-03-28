@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "stream.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -579,7 +583,7 @@ wxFileOffset wxStreamBuffer::Seek(wxFileOffset pos, wxSeekMode mode)
         }
         if (diff < 0 || diff > last_access)
             return wxInvalidOffset;
-        size_t int_diff = wx_truncate_cast(size_t, diff);
+        size_t int_diff = (size_t)diff;
         wxCHECK_MSG( (wxFileOffset)int_diff == diff, wxInvalidOffset, wxT("huge file not supported") );
         SetIntPosition(int_diff);
         return diff;
@@ -606,7 +610,7 @@ wxFileOffset wxStreamBuffer::Seek(wxFileOffset pos, wxSeekMode mode)
             }
             else
             {
-                size_t int_diff = wx_truncate_cast(size_t, diff);
+                size_t int_diff = (size_t)diff;
                 wxCHECK_MSG( (wxFileOffset)int_diff == diff, wxInvalidOffset, wxT("huge file not supported") );
                 SetIntPosition(int_diff);
                 return pos;
@@ -663,13 +667,7 @@ wxStreamBase::~wxStreamBase()
 size_t wxStreamBase::GetSize() const
 {
     wxFileOffset length = GetLength();
-    if ( length == wxInvalidOffset )
-        return 0;
-
-    const size_t len = wx_truncate_cast(size_t, length);
-    wxASSERT_MSG( len == length + size_t(0), _T("large files not supported") );
-
-    return len;
+    return length == wxInvalidOffset ? 0 : (size_t)length;
 }
 
 wxFileOffset wxStreamBase::OnSysSeek(wxFileOffset WXUNUSED(seek), wxSeekMode WXUNUSED(mode))
@@ -681,6 +679,20 @@ wxFileOffset wxStreamBase::OnSysTell() const
 {
     return wxInvalidOffset;
 }
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxStreamError wxStreamBase::LastError() const
+{
+    return m_lasterror;
+}
+
+size_t wxStreamBase::StreamSize() const
+{
+    return GetSize();
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 // ----------------------------------------------------------------------------
 // wxInputStream
@@ -989,7 +1001,7 @@ size_t wxCountingOutputStream::OnSysWrite(const void *WXUNUSED(buffer),
 
 wxFileOffset wxCountingOutputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
 {
-    ssize_t new_pos = wx_truncate_cast(ssize_t, pos);
+    ssize_t new_pos = (ssize_t)pos;
 
     switch ( mode )
     {

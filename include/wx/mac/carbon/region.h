@@ -12,6 +12,10 @@
 #ifndef _WX_REGION_H_
 #define _WX_REGION_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "region.h"
+#endif
+
 #include "wx/list.h"
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
@@ -53,6 +57,13 @@ public:
     }
 
     ~wxRegion();
+
+    //# Copying
+    wxRegion(const wxRegion& r)
+        : wxGDIObject()
+    { Ref(r); }
+    wxRegion& operator = (const wxRegion& r)
+    { Ref(r); return (*this); }
 
     //# Modify region
     // Clear current region

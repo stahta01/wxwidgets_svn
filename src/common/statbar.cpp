@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -32,7 +36,7 @@
 #if wxUSE_STATUSBAR
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxListString)
+WX_DEFINE_LIST(wxListString);
 
 // ============================================================================
 // wxStatusBarBase implementation

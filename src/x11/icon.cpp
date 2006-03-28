@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "icon.h"
+#endif
+
 #include "wx/icon.h"
 #include "wx/window.h"
 
@@ -32,6 +36,18 @@ wxIcon::wxIcon( char **bits, int WXUNUSED(width), int WXUNUSED(height) ) :
 
 wxIcon::wxIcon() :  wxBitmap()
 {
+}
+
+wxIcon::wxIcon( const wxIcon& icon ) : wxBitmap()
+{
+    Ref(icon);
+}
+
+wxIcon& wxIcon::operator = ( const wxIcon& icon )
+{
+    if (*this == icon) return (*this);
+    Ref(icon);
+    return *this;
 }
 
 void wxIcon::CopyFromBitmap(const wxBitmap& bmp)

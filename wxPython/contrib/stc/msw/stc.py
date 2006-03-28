@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 """
@@ -8,17 +8,17 @@ languages are built-in.
 """
 
 import _stc
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -27,15 +27,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -49,8 +43,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -1335,14 +1328,17 @@ STC_CMD_WORDRIGHTEND = _stc.STC_CMD_WORDRIGHTEND
 STC_CMD_WORDRIGHTENDEXTEND = _stc.STC_CMD_WORDRIGHTENDEXTEND
 class StyledTextCtrl(_core.Control):
     """Proxy of C++ StyledTextCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStyledTextCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=ID_ANY, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, String name=STCNameStr) -> StyledTextCtrl
         """
-        _stc.StyledTextCtrl_swiginit(self,_stc.new_StyledTextCtrl(*args, **kwargs))
+        newobj = _stc.new_StyledTextCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -5161,25 +5157,38 @@ class StyledTextCtrl(_core.Control):
         self.AppendTextRaw(text)
 
 
-StyledTextCtrl_swigregister = _stc.StyledTextCtrl_swigregister
-StyledTextCtrl_swigregister(StyledTextCtrl)
+
+class StyledTextCtrlPtr(StyledTextCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StyledTextCtrl
+_stc.StyledTextCtrl_swigregister(StyledTextCtrlPtr)
 cvar = _stc.cvar
 STCNameStr = cvar.STCNameStr
 
 def PreStyledTextCtrl(*args, **kwargs):
     """PreStyledTextCtrl() -> StyledTextCtrl"""
     val = _stc.new_PreStyledTextCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class StyledTextEvent(_core.CommandEvent):
     """Proxy of C++ StyledTextEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStyledTextEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, wxEventType commandType=0, int id=0) -> StyledTextEvent"""
-        _stc.StyledTextEvent_swiginit(self,_stc.new_StyledTextEvent(*args, **kwargs))
-    __swig_destroy__ = _stc.delete_StyledTextEvent
-    __del__ = lambda self : None;
+        newobj = _stc.new_StyledTextEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_stc.delete_StyledTextEvent):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def SetPosition(*args, **kwargs):
         """SetPosition(self, int pos)"""
         return _stc.StyledTextEvent_SetPosition(*args, **kwargs)
@@ -5352,8 +5361,17 @@ class StyledTextEvent(_core.CommandEvent):
         """GetAlt(self) -> bool"""
         return _stc.StyledTextEvent_GetAlt(*args, **kwargs)
 
-StyledTextEvent_swigregister = _stc.StyledTextEvent_swigregister
-StyledTextEvent_swigregister(StyledTextEvent)
+    def Clone(*args, **kwargs):
+        """Clone(self) -> Event"""
+        return _stc.StyledTextEvent_Clone(*args, **kwargs)
+
+
+class StyledTextEventPtr(StyledTextEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StyledTextEvent
+_stc.StyledTextEvent_swigregister(StyledTextEventPtr)
 
 wxEVT_STC_CHANGE = _stc.wxEVT_STC_CHANGE
 wxEVT_STC_STYLENEEDED = _stc.wxEVT_STC_STYLENEEDED
@@ -5406,7 +5424,6 @@ EVT_STC_ZOOM = wx.PyEventBinder( wxEVT_STC_ZOOM, 1 )
 EVT_STC_HOTSPOT_CLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_CLICK, 1 )
 EVT_STC_HOTSPOT_DCLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_DCLICK, 1 )
 EVT_STC_CALLTIP_CLICK = wx.PyEventBinder( wxEVT_STC_CALLTIP_CLICK, 1 )
-EVT_STC_AUTOCOMP_SELECTION = wx.PyEventBinder( wxEVT_STC_AUTOCOMP_SELECTION, 1 )
 
 
 

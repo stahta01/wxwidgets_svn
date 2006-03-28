@@ -16,6 +16,9 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#ifdef __GNUG__
+    #pragma implementation "tree.h"
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -30,7 +33,7 @@
     #include "wx/wx.h"
 #endif
 
-#if !defined(__WXMSW__) // || wxUSE_XPM_IN_MSW
+#if !defined(__WXMSW__) || wxUSE_XPM_IN_MSW
 /* Closed folder */
 static char * icon1_xpm[] = {
 /* width height ncolors chars_per_pixel */
@@ -94,7 +97,7 @@ static char * icon2_xpm[] = {
 // resources
 // ----------------------------------------------------------------------------
 // the application icon
-#ifndef __WXMSW__
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     #include "mondrian.xpm"
 #endif
 
@@ -186,7 +189,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     SetIcon(wxICON(mondrian));
 
     // create a menu bar
-    wxMenu *menuFile = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
+    wxMenu *menuFile = new wxMenu(wxT(""), wxMENU_TEAROFF);
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;

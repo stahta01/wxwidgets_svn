@@ -84,8 +84,7 @@ public:
 
     wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly);
 
-    bool GiveFeedback(wxDragResult effect);
-    %MAKE_BASE_FUNC(DropSource, GiveFeedback);
+    bool base_GiveFeedback(wxDragResult effect);
 };
 
 
@@ -138,8 +137,7 @@ class wxPyDropTarget // : public wxDropTarget
 public:
     %pythonAppend wxPyDropTarget
        "self._setCallbackInfo(self, DropTarget)"
-
-    %disownarg( wxDataObject *dataObject );
+    %apply SWIGTYPE *DISOWN { wxDataObject *dataObject };
 
     wxPyDropTarget(wxDataObject *dataObject = NULL);
     void _setCallbackInfo(PyObject* self, PyObject* _class);
@@ -150,19 +148,13 @@ public:
     wxDataObject *GetDataObject();
     void SetDataObject(wxDataObject *dataObject);
 
-    %cleardisown( wxDataObject *dataObject );
+    %clear wxDataObject *dataObject;
 
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
 
-    %MAKE_BASE_FUNC(DropTarget, OnEnter);
-    %MAKE_BASE_FUNC(DropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(DropTarget, OnLeave);
-    %MAKE_BASE_FUNC(DropTarget, OnDrop);
-
-    
     // may be called *only* from inside OnData() and will fill m_dataObject
     // with the data from the drop source if it returns True
     bool GetData();
@@ -220,19 +212,12 @@ public:
     wxPyTextDropTarget();
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
-    wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-    %MAKE_BASE_FUNC(TextDropTarget, OnDropText);
-    %MAKE_BASE_FUNC(TextDropTarget, OnEnter);
-    %MAKE_BASE_FUNC(TextDropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(TextDropTarget, OnLeave);
-    %MAKE_BASE_FUNC(TextDropTarget, OnDrop);
-    %MAKE_BASE_FUNC(TextDropTarget, OnData);    
+    //bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnData(wxCoord x, wxCoord y, wxDragResult def);
 };
 
 //---------------------------------------------------------------------------
@@ -289,19 +274,12 @@ public:
     wxPyFileDropTarget();
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
-    wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-    
-    %MAKE_BASE_FUNC(FileDropTarget, OnDropFiles);
-    %MAKE_BASE_FUNC(FileDropTarget, OnEnter);
-    %MAKE_BASE_FUNC(FileDropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(FileDropTarget, OnLeave);
-    %MAKE_BASE_FUNC(FileDropTarget, OnDrop);
-    %MAKE_BASE_FUNC(FileDropTarget, OnData);    
+//    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) = 0;
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnData(wxCoord x, wxCoord y, wxDragResult def);
 };
 
 

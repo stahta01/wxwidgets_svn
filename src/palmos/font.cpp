@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "font.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,6 +29,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
@@ -363,6 +368,10 @@ void wxNativeFontInfo::SetPixelSize(const wxSize& pixelSize)
 // wxFont
 // ----------------------------------------------------------------------------
 
+void wxFont::Init()
+{
+}
+
 bool wxFont::Create(const wxNativeFontInfo& info, WXHFONT hFont)
 {
     return false;
@@ -518,3 +527,4 @@ bool wxFont::IsFixedWidth() const
 {
     return false;
 }
+

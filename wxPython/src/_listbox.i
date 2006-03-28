@@ -63,7 +63,7 @@ public:
         }
     }
 
-    void InsertItems(const wxArrayString& items, unsigned int pos);
+    void InsertItems(const wxArrayString& items, int pos);
     void Set(const wxArrayString& items/*, void **clientData = NULL */);
 
     // multiple selection logic
@@ -79,15 +79,15 @@ public:
     // GetSelection which only works for listboxes with single selection)
     //virtual int GetSelections(wxArrayInt& aSelections) const;
     %extend {
-        PyObject* GetSelections() {
-            wxArrayInt lst;
-            self->GetSelections(lst);
-            PyObject *tup = PyTuple_New(lst.GetCount());
-            for(size_t i=0; i<lst.GetCount(); i++) {
-                PyTuple_SetItem(tup, i, PyInt_FromLong(lst[i]));
-            }
-            return tup;
-        }
+      PyObject* GetSelections() {
+          wxArrayInt lst;
+          self->GetSelections(lst);
+          PyObject *tup = PyTuple_New(lst.GetCount());
+          for(size_t i=0; i<lst.GetCount(); i++) {
+              PyTuple_SetItem(tup, i, PyInt_FromLong(lst[i]));
+          }
+          return tup;
+      }
     }
 
     // set the specified item at the first visible item or scroll to max
@@ -106,8 +106,6 @@ public:
     // return True if this listbox is sorted
     bool IsSorted() const;
 
-    // return the index of the item at this position or wxNOT_FOUND
-    int HitTest(const wxPoint& pt) const;
 
     %extend {
         void SetItemForegroundColour(int item, const wxColour& c) {
@@ -165,13 +163,16 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxPyListBoxNameStr);
 
-    bool  IsChecked(unsigned int index);
-    void  Check(unsigned int index, int check = true);
+    bool  IsChecked(int index);
+    void  Check(int index, int check = true);
 
 #if defined(__WXMSW__) || defined(__WXGTK__)
     int GetItemHeight();
 #endif
 
+    // return the index of the item at this position or wxNOT_FOUND
+    int HitTest(const wxPoint& pt) const;
+    %Rename(HitTestXY, int, HitTest(wxCoord x, wxCoord y) const);
 };
 
 //---------------------------------------------------------------------------

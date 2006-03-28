@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/palette.cpp
+// Name:        palette.cpp
 // Purpose:     wxPalette
 // Author:      Julian Smart
 // Modified by:
@@ -33,6 +33,10 @@ X11 colormap for a particular window, and AFAIK this is not
 recommended; only the window manager should do this...  Also, it is
 not the functionality that wxPalette::Create() aims to provide.
  */
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "palette.h"
+#endif
 
 #include "wx/palette.h"
 #include "wx/window.h"
@@ -164,13 +168,13 @@ bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *gre
     return true;
 }
 
-int wxPalette::GetPixel(unsigned char red, unsigned char green, unsigned char blue) const
+int wxPalette::GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const
 {
     if ( !m_refData )
-        return wxNOT_FOUND;
+        return FALSE;
 
     // TODO
-    return wxNOT_FOUND;
+    return FALSE;
 }
 
 bool wxPalette::GetRGB(int index, unsigned char *WXUNUSED(red), unsigned char *WXUNUSED(green), unsigned char *WXUNUSED(blue)) const
@@ -351,3 +355,4 @@ void wxPalette::PutXColormap(WXDisplay* display, WXColormap cm, bool dp)
 
     M_PALETTEDATA->m_palettes.Append(c);
 }
+

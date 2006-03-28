@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/propdlg.cpp
+// Name:        propdlg.cpp
 // Purpose:     wxPropertySheetDialog
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "propdlg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -29,22 +33,7 @@
 #endif
 
 #include "wx/bookctrl.h"
-
-#if wxUSE_NOTEBOOK
-#include "wx/notebook.h"
-#endif
-#if wxUSE_CHOICEBOOK
-#include "wx/choicebk.h"
-#endif
-#if wxUSE_TOOLBOOK
-#include "wx/toolbook.h"
-#endif
-#if wxUSE_LISTBOOK
-#include "wx/listbook.h"
-#endif
-
 #include "wx/generic/propdlg.h"
-#include "wx/sysopt.h"
 
 //-----------------------------------------------------------------------------
 // wxPropertySheetDialog
@@ -54,7 +43,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxPropertySheetDialog, wxDialog)
 
 BEGIN_EVENT_TABLE(wxPropertySheetDialog, wxDialog)
     EVT_ACTIVATE(wxPropertySheetDialog::OnActivate)
-    EVT_IDLE(wxPropertySheetDialog::OnIdle)
 END_EVENT_TABLE()
 
 bool wxPropertySheetDialog::Create(wxWindow* parent, wxWindowID id, const wxString& title,
@@ -84,21 +72,17 @@ bool wxPropertySheetDialog::Create(wxWindow* parent, wxWindowID id, const wxStri
 
 void wxPropertySheetDialog::Init()
 {
-    m_sheetStyle = wxPROPSHEET_DEFAULT;
     m_innerSizer = NULL;
     m_bookCtrl = NULL;
 }
 
 // Layout the dialog, to be called after pages have been created
-void wxPropertySheetDialog::LayoutDialog(int centreFlags)
+void wxPropertySheetDialog::LayoutDialog()
 {
 #if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
-    if (centreFlags)
-        Centre(centreFlags);
-#else
-    wxUnusedVar(centreFlags);
+    Centre(wxBOTH);
 #endif
 #if defined(__SMARTPHONE__)
     if (m_bookCtrl)
@@ -109,27 +93,19 @@ void wxPropertySheetDialog::LayoutDialog(int centreFlags)
 // Creates the buttons, if any
 void wxPropertySheetDialog::CreateButtons(int flags)
 {
-#ifdef __POCKETPC__
-    // keep system option status
-    const wxChar *optionName = wxT("wince.dialog.real-ok-cancel");
-    const int status = wxSystemOptions::GetOptionInt(optionName);
-    wxSystemOptions::SetOption(optionName,0);
-#endif
-
-    wxSizer *buttonSizer = CreateButtonSizer( flags & ButtonSizerFlags );
-    if(buttonSizer->GetChildren().GetCount() > 0 )
-    {
-        m_innerSizer->Add( buttonSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT|wxRIGHT, 2);
-        m_innerSizer->AddSpacer(2);
-    }
-    else
-    {
-        delete buttonSizer;
-    }
-
-#ifdef __POCKETPC__
-    // restore system option
-    wxSystemOptions::SetOption(optionName,status);
+#if defined(__SMARTPHONE__)
+    // TODO: create a right-click menu with all the other IDs available.
+    // Perhaps that could be embedded in CreateButtonSizer() directly.
+    SetRightMenu(wxID_CANCEL);
+    SetLeftMenu(wxID_OK);
+    wxUnusedVar(flags);
+#elif defined(__POCKETPC__)
+    // Do nothing
+    wxUnusedVar(flags);
+#else
+    wxSizer* sizer = CreateButtonSizer(flags);
+    m_innerSizer->Add( sizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT|wxRIGHT, 2);
+    m_innerSizer->AddSpacer(2);
 #endif
 }
 
@@ -138,36 +114,11 @@ wxBookCtrlBase* wxPropertySheetDialog::CreateBookCtrl()
 {
     int style = wxCLIP_CHILDREN;
 #if defined(__POCKETPC__) && wxUSE_NOTEBOOK
-    style |= wxBK_BOTTOM|wxNB_FLAT;
+    style |= wxNB_BOTTOM|wxNB_FLAT;
 #else
-    style |= wxBK_DEFAULT;
+    style |= wxBC_DEFAULT;
 #endif
-
-    wxBookCtrlBase* bookCtrl = NULL;
-    
-#if wxUSE_NOTEBOOK
-    if (GetSheetStyle() & wxPROPSHEET_NOTEBOOK)
-        bookCtrl = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
-#endif
-#if wxUSE_CHOICEBOOK
-    if (GetSheetStyle() & wxPROPSHEET_CHOICEBOOK)
-        bookCtrl = new wxChoicebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
-#endif
-#if wxUSE_TOOLBOOK
-    if (GetSheetStyle() & wxPROPSHEET_TOOLBOOK)
-        bookCtrl = new wxToolbook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
-#endif
-#if wxUSE_LISTBOOK
-    if (GetSheetStyle() & wxPROPSHEET_LISTBOOK)
-        bookCtrl = new wxListbook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
-#endif
-    if (!bookCtrl)
-        bookCtrl = new wxBookCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
-    
-    if (GetSheetStyle() & wxPROPSHEET_SHRINKTOFIT)
-        bookCtrl->SetFitToCurrentPage(true);
-    
-    return bookCtrl;
+    return new wxBookCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, style );
 }
 
 // Adds the book control to the inner sizer.
@@ -201,25 +152,4 @@ void wxPropertySheetDialog::OnActivate(wxActivateEvent& event)
         event.Skip();
 }
 
-// Resize dialog if necessary
-void wxPropertySheetDialog::OnIdle(wxIdleEvent& event)
-{
-    event.Skip();
-    
-    if ((GetSheetStyle() & wxPROPSHEET_SHRINKTOFIT) && GetBookCtrl())
-    {
-        int sel = GetBookCtrl()->GetSelection();
-        if (sel != -1 && sel != m_selectedPage)
-        {
-            GetBookCtrl()->InvalidateBestSize();
-            InvalidateBestSize();
-            SetSizeHints(-1, -1, -1, -1);
-
-            m_selectedPage = sel;
-            LayoutDialog(0);
-        }
-    }
-}
-
 #endif // wxUSE_BOOKCTRL
-

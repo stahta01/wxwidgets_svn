@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "listdb.h"
+#endif
+
 /*
     Contains dialog class for creating a data table lookup listbox
 */

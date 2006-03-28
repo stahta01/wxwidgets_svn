@@ -19,7 +19,6 @@
 
 // See also wxPy_ReinitStockObjects in helpers.cpp
 %immutable;
-%threadWrapperOff;
 
 wxFont* const wxNORMAL_FONT;
 wxFont* const wxSMALL_FONT;
@@ -70,7 +69,6 @@ const wxPalette wxNullPalette;
 const wxFont   wxNullFont;
 const wxColour wxNullColour;
 
-%threadWrapperOn;
 %mutable;
 
 

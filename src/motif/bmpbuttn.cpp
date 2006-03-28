@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpbuttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -126,13 +130,13 @@ void wxBitmapButton::SetBitmapSelected(const wxBitmap& sel)
     m_bmpSelectedOriginal = sel;
 
     DoSetBitmap();
-}
+};
 
 void wxBitmapButton::SetBitmapFocus(const wxBitmap& focus)
 {
     m_bmpFocus = focus;
     // Not used in Motif
-}
+};
 
 void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
 {
@@ -140,7 +144,7 @@ void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
     m_bmpDisabledOriginal = disabled;
 
     DoSetBitmap();
-}
+};
 
 void wxBitmapButton::DoSetBitmap()
 {

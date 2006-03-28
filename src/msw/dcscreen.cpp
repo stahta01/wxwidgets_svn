@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcscreen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,7 +29,7 @@
 
 #include "wx/dcscreen.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxDC)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
 // Create a DC representing the whole screen
 wxScreenDC::wxScreenDC()
@@ -35,5 +39,12 @@ wxScreenDC::wxScreenDC()
     // the background mode is only used for text background and is set in
     // DrawText() to OPAQUE as required, otherwise always TRANSPARENT
     ::SetBkMode( GetHdc(), TRANSPARENT );
+}
+
+void wxScreenDC::DoGetSize(int *width, int *height) const
+{
+    // skip wxWindowDC version because it doesn't work without a valid m_canvas
+    // (which we don't have)
+    wxDC::DoGetSize(width, height);
 }
 

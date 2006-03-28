@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/timer.cpp
+// Name:        timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      David Webster
 // Modified by:
@@ -9,17 +9,23 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "timer.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/window.h"
+#include "wx/os2/private.h"
+
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/event.h"
     #include "wx/app.h"
 #endif
 
-#include "wx/os2/private.h"
 #include "wx/intl.h"
 #include "wx/log.h"
 
@@ -204,3 +210,4 @@ ULONG wxTimerProc(
     wxProcessTimer(*(node->second));
     return 0;
 }
+

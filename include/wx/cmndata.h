@@ -12,6 +12,10 @@
 #ifndef _WX_CMNDATA_H_BASE_
 #define _WX_CMNDATA_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "cmndata.h"
+#endif
+
 #include "wx/window.h"
 #include "wx/font.h"
 #include "wx/encinfo.h"
@@ -54,24 +58,24 @@ private:
     DECLARE_DYNAMIC_CLASS(wxColourData)
 };
 
-class WXDLLEXPORT wxFontData : public wxObject
+class WXDLLEXPORT wxFontData: public wxObject
 {
 public:
     wxFontData();
-    virtual ~wxFontData();
+    ~wxFontData();
 
     wxFontData(const wxFontData& data)
-        : wxObject(),
-          m_fontColour(data.m_fontColour),
-          m_showHelp(data.m_showHelp),
-          m_allowSymbols(data.m_allowSymbols),
-          m_enableEffects(data.m_enableEffects),
-          m_initialFont(data.m_initialFont),
-          m_chosenFont(data.m_chosenFont),
-          m_minSize(data.m_minSize),
-          m_maxSize(data.m_maxSize),
-          m_encoding(data.m_encoding),
-          m_encodingInfo(data.m_encodingInfo)
+        : wxObject()
+        , m_fontColour(data.m_fontColour)
+        , m_showHelp(data.m_showHelp)
+        , m_allowSymbols(data.m_allowSymbols)
+        , m_enableEffects(data.m_enableEffects)
+        , m_initialFont(data.m_initialFont)
+        , m_chosenFont(data.m_chosenFont)
+        , m_minSize(data.m_minSize)
+        , m_maxSize(data.m_maxSize)
+        , m_encoding(data.m_encoding)
+        , m_encodingInfo(data.m_encodingInfo)
     {
     }
 
@@ -86,8 +90,8 @@ public:
         m_chosenFont     = data.m_chosenFont;
         m_minSize        = data.m_minSize;
         m_maxSize        = data.m_maxSize;
-        m_encoding       = data.m_encoding;
-        m_encodingInfo   = data.m_encodingInfo;
+        m_encoding     = data.m_encoding;
+        m_encodingInfo = data.m_encodingInfo;
         return *this;
     }
 
@@ -95,7 +99,7 @@ public:
     bool GetAllowSymbols() const { return m_allowSymbols; }
 
     void SetColour(const wxColour& colour) { m_fontColour = colour; }
-    const wxColour& GetColour() const { return m_fontColour; }
+    wxColour &GetColour() { return m_fontColour; }
 
     void SetShowHelp(bool flag) { m_showHelp = flag; }
     bool GetShowHelp() const { return m_showHelp; }
@@ -119,8 +123,6 @@ public:
 
     wxNativeEncodingInfo& EncodingInfo() { return m_encodingInfo; }
 
-
-    // public for backwards compatibility only: don't use directly
 public:
     wxColour        m_fontColour;
     bool            m_showHelp;

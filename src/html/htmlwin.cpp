@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlwin.h"
+#pragma implementation "htmlproc.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -135,10 +141,10 @@ private:
 //-----------------------------------------------------------------------------
 
 WX_DECLARE_OBJARRAY(wxHtmlHistoryItem, wxHtmlHistoryArray);
-WX_DEFINE_OBJARRAY(wxHtmlHistoryArray)
+WX_DEFINE_OBJARRAY(wxHtmlHistoryArray);
 
 WX_DECLARE_LIST(wxHtmlProcessor, wxHtmlProcessorList);
-WX_DEFINE_LIST(wxHtmlProcessorList)
+WX_DEFINE_LIST(wxHtmlProcessorList);
 
 //-----------------------------------------------------------------------------
 // wxHtmlWindow
@@ -235,31 +241,32 @@ void wxHtmlWindow::SetRelatedStatusBar(int bar)
 
 
 
-void wxHtmlWindow::SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes)
+void wxHtmlWindow::SetFonts(wxString normal_face, wxString fixed_face, const int *sizes)
 {
-    m_Parser->SetFonts(normal_face, fixed_face, sizes);
+    wxString op = m_OpenedPage;
 
-    // re-layout the page after changing fonts:
-    DoSetPage(*(m_Parser->GetSource()));
+    m_Parser->SetFonts(normal_face, fixed_face, sizes);
+    // fonts changed => contents invalid, so reload the page:
+    SetPage(wxT("<html><body></body></html>"));
+    if (!op.empty())
+        LoadPage(op);
 }
 
 void wxHtmlWindow::SetStandardFonts(int size,
                                     const wxString& normal_face,
                                     const wxString& fixed_face)
 {
-    m_Parser->SetStandardFonts(size, normal_face, fixed_face);
+    wxString op = m_OpenedPage;
 
-    // re-layout the page after changing fonts:
-    DoSetPage(*(m_Parser->GetSource()));
+    m_Parser->SetStandardFonts(size, normal_face, fixed_face);
+    // fonts changed => contents invalid, so reload the page:
+    SetPage(wxT("<html><body></body></html>"));
+    if (!op.empty())
+        LoadPage(op);
 }
+
 
 bool wxHtmlWindow::SetPage(const wxString& source)
-{
-    m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
-    return DoSetPage(source);
-}
-
-bool wxHtmlWindow::DoSetPage(const wxString& source)
 {
     wxString newsrc(source);
 
@@ -274,10 +281,8 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
         wxHtmlProcessorList::compatibility_iterator nodeL, nodeG;
         int prL, prG;
 
-        if ( m_Processors )
-            nodeL = m_Processors->GetFirst();
-        if ( m_GlobalProcessors )
-            nodeG = m_GlobalProcessors->GetFirst();
+        nodeL = (m_Processors) ? m_Processors->GetFirst() : wxHtmlProcessorList::compatibility_iterator();
+        nodeG = (m_GlobalProcessors) ? m_GlobalProcessors->GetFirst() : wxHtmlProcessorList::compatibility_iterator();
 
         // VS: there are two lists, global and local, both of them sorted by
         //     priority. Since we have to go through _both_ lists with
@@ -308,7 +313,7 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
     dc->SetMapMode(wxMM_TEXT);
     SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF));
     SetBackgroundImage(wxNullBitmap);
-
+    m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
     m_Parser->SetDC(dc);
     if (m_Cell)
     {
@@ -327,7 +332,7 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
 
 bool wxHtmlWindow::AppendToPage(const wxString& source)
 {
-    return DoSetPage(*(GetParser()->GetSource()) + source);
+    return SetPage(*(GetParser()->GetSource()) + source);
 }
 
 bool wxHtmlWindow::LoadPage(const wxString& location)

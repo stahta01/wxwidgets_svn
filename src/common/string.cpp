@@ -361,8 +361,8 @@ bool wxStringBase::Alloc(size_t nLen)
     if ( pData->IsEmpty() ) {
       nLen += EXTRA_ALLOC;
 
-      pData = (wxStringData *)
-                malloc(sizeof(wxStringData) + (nLen + 1)*sizeof(wxChar));
+      wxStringData* pData = (wxStringData*)
+          malloc(sizeof(wxStringData) + (nLen + 1)*sizeof(wxChar));
 
       if ( pData == NULL ) {
         // allocation failure handled by caller
@@ -1813,7 +1813,7 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
     for ( ;; )
     {
         wxStringBuffer tmp(*this, size + 1);
-        wxChar *buf = tmp;
+        wxChar* buf = tmp;
 
         if ( !buf )
         {
@@ -1836,20 +1836,14 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
         // vsnprintf() may return either -1 (traditional Unix behaviour) or the
         // total number of characters which would have been written if the
         // buffer were large enough (newer standards such as Unix98)
-        if ( len < 0 )
+        if ( len >= 0 && len <= size )
         {
-            // still not enough, as we don't know how much we need, double the
-            // current size of the buffer
-            size *= 2;
-        }
-        else if ( len > size )
-        {
-            size = len;
-        }
-        else // ok, there was enough space
-        {
+            // ok, there was enough space
             break;
         }
+
+        // still not enough, double it again
+        size *= 2;
     }
 
     // we could have overshot

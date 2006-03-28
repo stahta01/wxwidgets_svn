@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "docview.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -50,8 +54,8 @@
 #endif
 
 #if wxUSE_PRINTING_ARCHITECTURE
-  #include "wx/prntbase.h"
-  #include "wx/printdlg.h"
+    #include "wx/prntbase.h"
+    #include "wx/printdlg.h"
 #endif
 
 #include "wx/msgdlg.h"
@@ -66,14 +70,14 @@
 #include <string.h>
 
 #if wxUSE_STD_IOSTREAM
-  #include "wx/ioswrap.h"
-  #if wxUSE_IOSTREAMH
-    #include <fstream.h>
-  #else
-    #include <fstream>
-  #endif
+    #include "wx/ioswrap.h"
+    #if wxUSE_IOSTREAMH
+        #include <fstream.h>
+    #else
+        #include <fstream>
+    #endif
 #else
-  #include "wx/wfstream.h"
+    #include "wx/wfstream.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -657,18 +661,14 @@ void wxView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 
 void wxView::OnChangeFilename()
 {
-    // GetFrame can return wxWindow rather than wxTopLevelWindow due to
-    // generic MDI implementation so use SetLabel rather than SetTitle.
-    // It should cause SetTitle() for top level windows.
-    wxWindow *win = GetFrame();
-    if (!win) return;
+    if (GetFrame() && GetDocument())
+    {
+        wxString title;
 
-    wxDocument *doc = GetDocument();
-    if (!doc) return;
+        GetDocument()->GetPrintableName(title);
 
-    wxString name;
-    doc->GetPrintableName(name);
-    win->SetLabel(name);
+        GetFrame()->SetTitle(title);
+    }
 }
 
 void wxView::SetDocument(wxDocument *doc)
@@ -2231,10 +2231,10 @@ void wxFileHistory::RemoveFileFromHistory(size_t i)
         // delete the last separator too if no more files are left
         if ( m_fileHistoryN == 1 )
         {
-            wxMenuItemList::compatibility_iterator nodeLast = menu->GetMenuItems().GetLast();
-            if ( nodeLast )
+            wxMenuItemList::compatibility_iterator node = menu->GetMenuItems().GetLast();
+            if ( node )
             {
-                wxMenuItem *menuItem = nodeLast->GetData();
+                wxMenuItem *menuItem = node->GetData();
                 if ( menuItem->IsSeparator() )
                 {
                     menu->Delete(menuItem);

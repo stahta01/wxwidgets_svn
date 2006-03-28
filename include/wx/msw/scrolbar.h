@@ -12,6 +12,10 @@
 #ifndef _WX_SCROLBAR_H_
 #define _WX_SCROLBAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "scrolbar.h"
+#endif
+
 // Scrollbar item
 class WXDLLEXPORT wxScrollBar: public wxScrollBarBase
 {
@@ -56,10 +60,9 @@ public:
     // override wxControl version to not use solid background here
     virtual WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd);
 
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
 protected:
     virtual wxSize DoGetBestSize() const;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
     int m_pageSize;
     int m_viewSize;

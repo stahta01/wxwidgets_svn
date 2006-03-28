@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statbr95.cpp
+// Name:        msw/statbr95.cpp
 // Purpose:     native implementation of wxStatusBar
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbr95.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,12 +21,13 @@
 #endif
 
 #ifndef WX_PRECOMP
+  #include "wx/setup.h"
   #include "wx/frame.h"
   #include "wx/settings.h"
   #include "wx/dcclient.h"
 #endif
 
-#if wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
+#if wxUSE_STATUSBAR && defined(__WIN95__) && wxUSE_NATIVE_STATUSBAR
 
 #include "wx/intl.h"
 #include "wx/log.h"
@@ -31,8 +36,9 @@
 #include "wx/msw/private.h"
 #include <windowsx.h>
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 #if wxUSE_UXTHEME
     #include "wx/msw/uxtheme.h"
@@ -407,4 +413,5 @@ wxStatusBar95::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
     return wxStatusBarBase::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
+#endif // __WIN95__ && wxUSE_NATIVE_STATUSBAR
+

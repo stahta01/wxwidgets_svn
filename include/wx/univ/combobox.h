@@ -36,6 +36,10 @@
 #ifndef _WX_UNIV_COMBOBOX_H_
 #define _WX_UNIV_COMBOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univcombobox.h"
+#endif
+
 class WXDLLEXPORT wxComboControl;
 class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxPopupComboWindow;
@@ -66,7 +70,6 @@ class WXDLLEXPORT wxComboPopup
 {
 public:
     wxComboPopup(wxComboControl *combo) { m_combo = combo; }
-    virtual ~wxComboPopup() {}
 
     // we must have an associated control which is subclassed by the combobox
     virtual wxControl *GetControl() = 0;
@@ -163,11 +166,6 @@ public:
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif // wxUSE_TOOLTIPS
 
-    // we have our own input handler and our own actions
-    virtual bool PerformAction(const wxControlAction& action,
-                               long numArg = 0l,
-                               const wxString& strArg = wxEmptyString);
-
 protected:
     // override the base class virtuals involved into geometry calculations
     virtual wxSize DoGetBestClientSize() const;
@@ -175,6 +173,11 @@ protected:
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
+
+    // we have our own input handler and our own actions
+    virtual bool PerformAction(const wxControlAction& action,
+                               long numArg = 0l,
+                               const wxString& strArg = wxEmptyString);
 
     // event handlers
     void OnKey(wxKeyEvent& event);
@@ -293,11 +296,11 @@ public:
 
     // wxControlWithItems methods
     virtual void Clear();
-    virtual void Delete(unsigned int n);
-    virtual unsigned int GetCount() const;
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual void Delete(int n);
+    virtual int GetCount() const;
+    virtual wxString GetString(int n) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual int FindString(const wxString& s) const;
     virtual void SetSelection(int n);
     virtual int GetSelection() const;
 
@@ -305,11 +308,11 @@ public:
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, unsigned int pos);
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual int DoInsert(const wxString& item, int pos);
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
 
     // common part of all ctors
     void Init();

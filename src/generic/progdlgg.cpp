@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "progdlgg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -141,7 +145,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
 
     wxClientDC dc(this);
     dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    long widthText = 0;
+    long widthText;
     dc.GetTextExtent(message, &widthText, NULL, NULL, NULL, NULL);
 
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);

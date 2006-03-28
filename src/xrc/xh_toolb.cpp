@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_toolb.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -76,9 +80,6 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
                                kind,
                                GetText(wxT("tooltip")),
                                GetText(wxT("longhelp")));
-
-            if ( GetBool(wxT("disabled")) )
-                m_toolbar->EnableTool(GetID(), false);
         }
         return m_toolbar; // must return non-NULL
     }
@@ -118,8 +119,6 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
         long separation = GetLong(wxT("separation"), -1);
         if (separation != -1)
             toolbar->SetToolSeparation(separation);
-        if (HasParam(wxT("bg")))
-            toolbar->SetBackgroundColour(GetColour(wxT("bg")));
 
         wxXmlNode *children_node = GetParamNode(wxT("object"));
         if (!children_node)

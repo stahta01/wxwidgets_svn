@@ -552,13 +552,12 @@ class Editor(wx.ScrolledWindow):
 
 
     def AdjustScrollbars(self):
-        if self:
-            for i in range(2):
-                self.SetCharDimensions()
-                self.scroller.SetScrollbars(
-                    self.fw, self.fh,
-                    self.CalcMaxLineLen()+3, max(self.LinesInFile()+1, self.sh),
-                    self.sx, self.sy)
+        for i in range(2):
+            self.SetCharDimensions()
+            self.scroller.SetScrollbars(
+                self.fw, self.fh,
+                self.CalcMaxLineLen()+3, max(self.LinesInFile()+1, self.sh),
+                self.sx, self.sy)
 
 #------------ backspace, delete, return
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/app.cpp
+// Name:        app.cpp
 // Purpose:     wxApp
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,10 @@
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -292,9 +296,9 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     }
 #endif
 
-#if !defined(__WXMICROWIN__)
+#if defined(__WIN95__) && !defined(__WXMICROWIN__)
     InitCommonControls();
-#endif // !defined(__WXMICROWIN__)
+#endif // __WIN95__
 
 #if defined(__SMARTPHONE__) || defined(__POCKETPC__)
     SHInitExtraControls();
@@ -485,7 +489,7 @@ void wxApp::CleanUp()
 
     delete wxWinHandleHash;
     wxWinHandleHash = NULL;
-
+    
 #ifdef __WXWINCE__
     free( wxCanvasClassName );
     free( wxCanvasClassNameNR );
@@ -503,6 +507,17 @@ wxApp::wxApp()
 
 wxApp::~wxApp()
 {
+    // our cmd line arguments are allocated inside wxEntry(HINSTANCE), they
+    // don't come from main(), so we have to free them
+
+    while ( argc )
+    {
+        // m_argv elements were allocated by wxStrdup()
+        free(argv[--argc]);
+    }
+
+    // but m_argv itself -- using new[]
+    delete [] argv;
 }
 
 // ----------------------------------------------------------------------------
@@ -583,7 +598,7 @@ int wxApp::GetComCtl32Version()
 
         // we're prepared to handle the errors
         wxLogNull noLog;
-        
+
 #if wxUSE_DYNLIB_CLASS
         // do we have it?
         wxDynamicLibrary dllComCtl32(_T("comctl32.dll"), wxDL_VERBATIM);
@@ -720,7 +735,7 @@ terminate the program,\r\n\
 \"Retry\" to exit the program normally and \"Ignore\" to try to continue."),
                 _T("Unhandled exception"),
                 MB_ABORTRETRYIGNORE |
-                MB_ICONERROR|
+                MB_ICONERROR| 
                 MB_TASKMODAL
               )
            )
@@ -770,3 +785,4 @@ bool wxApp::ProcessMessage(WXMSG* pMsg)
 }
 
 #endif // WXWIN_COMPATIBILITY_2_4
+

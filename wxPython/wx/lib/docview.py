@@ -916,11 +916,11 @@ class View(wx.EvtHandler):
         Call this from your view frame's OnActivate member to tell the
         framework which view is currently active. If your windowing system
         doesn't call OnActivate, you may need to call this function from
-        any place where you know the view must be active, and
+        OnMenuCommand or any place where you know the view must be active, and
         the framework will need to get the current view.
 
         The prepackaged view frame wxDocChildFrame calls wxView.Activate from
-        its OnActivate member.
+        its OnActivate member and from its OnMenuCommand member.
         """
         if self.GetDocument() and self.GetDocumentManager():
             self.OnActivateView(activate, self, self.GetDocumentManager().GetCurrentView())
@@ -2896,7 +2896,7 @@ class DocPrintout(wx.Printout):
         """
         Not quite sure why this was overridden, but it was in wxWindows! :)
         """
-        if not wx.Printout.OnBeginDocument(self, startPage, endPage):
+        if not wx.Printout.base_OnBeginDocument(self, startPage, endPage):
             return False
         return True
 

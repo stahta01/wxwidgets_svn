@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/notebook.h
+// Name:        msw/notebook.h
 // Purpose:     MSW/GTK compatible notebook (a.k.a. property sheet)
 // Author:      Robert Roebling
 // Modified by: Vadim Zeitlin for Windows version
@@ -10,6 +10,10 @@
 
 #ifndef _NOTEBOOK_H
 #define _NOTEBOOK_H
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "notebook.h"
+#endif
 
 #if wxUSE_NOTEBOOK
 
@@ -179,20 +183,14 @@ public:
 
       return true;
   }
-
-  // return the themed brush for painting our children
-  virtual WXHBRUSH MSWGetBgBrushForChild(WXHDC hDC, WXHWND hWnd);
-
-  // draw child background
-  virtual bool MSWPrintChild(WXHDC hDC, wxWindow *win);
 #endif // wxUSE_UXTHEME
-
-  // translate wxWin styles to the Windows ones
-  virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
 protected:
   // common part of all ctors
   void Init();
+
+  // translate wxWin styles to the Windows ones
+  virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
   // remove one page from the notebook, without deleting
   virtual wxNotebookPage *DoRemovePage(size_t nPage);
@@ -211,6 +209,12 @@ protected:
 
   // creates the brush to be used for drawing the tab control background
   void UpdateBgBrush();
+
+  // return the themed brush for painting our children
+  virtual WXHBRUSH MSWGetBgBrushForChild(WXHDC hDC, WXHWND hWnd);
+
+  // draw child background
+  virtual bool MSWPrintChild(WXHDC hDC, wxWindow *win);
 
   // common part of QueryBgBitmap() and MSWPrintChild()
   //

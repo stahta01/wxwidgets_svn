@@ -12,6 +12,10 @@
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "clipbrd.h"
+#endif
+
 #if wxUSE_CLIPBOARD
 
 #include "wx/list.h"
@@ -89,7 +93,7 @@ public:
     void UsePrimarySelection( bool WXUNUSED(primary) = false ) { }
 
 private:
-    IDataObject *m_lastDataObject;
+    bool m_clearOnExit;
     bool m_isOpened;
 };
 

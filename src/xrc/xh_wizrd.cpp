@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_wizrd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -55,7 +59,8 @@ wxObject *wxWizardXmlHandler::DoCreateResource()
     }
     else
     {
-        wxWizardPage *page;
+        wxWizardPage *page = NULL;
+        wxUnusedVar(page);
 
         if (m_class == wxT("wxWizardPageSimple"))
         {
@@ -68,14 +73,13 @@ wxObject *wxWizardXmlHandler::DoCreateResource()
         }
         else /*if (m_class == wxT("wxWizardPage"))*/
         {
-            if ( !m_instance )
-            {
+            wxWizardPage *p = NULL;
+            if (m_instance)
+                p = wxStaticCast(m_instance, wxWizardPage);
+            else
                 wxLogError(wxT("wxWizardPage is abstract class, must be subclassed"));
-                return NULL;
-            }
-
-            page = wxStaticCast(m_instance, wxWizardPage);
-            page->Create(m_wizard, GetBitmap());
+            p->Create(m_wizard, GetBitmap());
+            page = p;
         }
 
         page->SetName(GetName());

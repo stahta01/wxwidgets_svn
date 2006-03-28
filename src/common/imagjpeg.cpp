@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagjpeg.cpp
+// Name:        imagjpeg.cpp
 // Purpose:     wxImage JPEG handler
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagjpeg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -29,7 +33,7 @@
 //     This causes a conflict with jmorecfg.h header from libjpeg, so we have
 //     to make sure libjpeg won't try to define boolean itself. This is done by
 //     defining HAVE_BOOLEAN.
-#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__DIGITALMARS__))
+#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__DIGITALMARS__) || (defined(__WATCOMC__) && __WATCOMC__ < 1200))
     #define HAVE_BOOLEAN
     #include "wx/msw/wrapwin.h"
 #endif
@@ -420,3 +424,9 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 #endif   // wxUSE_STREAMS
 
 #endif   // wxUSE_LIBJPEG
+
+
+
+
+
+

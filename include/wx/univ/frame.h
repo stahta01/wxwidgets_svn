@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_FRAME_H_
 #define _WX_UNIV_FRAME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univframe.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxFrame
 // ----------------------------------------------------------------------------
@@ -54,6 +58,7 @@ public:
     virtual wxToolBar* CreateToolBar(long style = -1,
                                      wxWindowID id = wxID_ANY,
                                      const wxString& name = wxToolBarNameStr);
+    virtual void PositionToolBar();
 #endif // wxUSE_TOOLBAR
 
     virtual int GetMinWidth() const;
@@ -80,11 +85,6 @@ protected:
     // override to update statusbar position when the frame size changes
     virtual void PositionStatusBar();
 #endif // wxUSE_MENUS
-
-protected:
-#if wxUSE_TOOLBAR
-    virtual void PositionToolBar();
-#endif // wxUSE_TOOLBAR
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxFrame)

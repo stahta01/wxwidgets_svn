@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFILEDLGH__
 #define __GTKFILEDLGH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlggtk.h"
+#endif
 
 #include "wx/generic/filedlgg.h"
 
@@ -51,7 +56,6 @@ public:
 //private:
     bool m_destroyed_by_delete;
 
-protected:
     // override this from wxTLW since the native
     // form doesn't have any m_wxwindow
     virtual void DoSetSize(int x, int y,

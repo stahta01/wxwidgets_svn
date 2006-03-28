@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/control.h
+// Name:        control.h
 // Purpose:     wxControl class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "control.h"
+#endif
 
 #include "wx/dynarray.h"
 
@@ -56,7 +60,9 @@ public:
     bool ProcessCommand(wxCommandEvent& event);
 
     // MSW-specific
+#ifdef __WIN95__
     virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
+#endif // Win95
 
     // For ownerdraw items
     virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *WXUNUSED(item)) { return false; };
@@ -67,9 +73,6 @@ public:
     // default handling of WM_CTLCOLORxxx: this is public so that wxWindow
     // could call it
     virtual WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd);
-
-    // default style for the control include WS_TABSTOP if it AcceptsFocus()
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 protected:
     // choose the default border for this window
@@ -113,6 +116,9 @@ protected:
                           const wxSize& size = wxDefaultSize,
                           const wxString& label = wxEmptyString,
                           WXDWORD exstyle = (WXDWORD)-1);
+
+    // default style for the control include WS_TABSTOP if it AcceptsFocus()
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
     // call this from the derived class MSWControlColor() if you want to show
     // the control greyed out (and opaque)
