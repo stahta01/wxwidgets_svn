@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_ICON_H__
 #define __WX_ICON_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "icon.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -28,6 +33,7 @@ class WXDLLEXPORT wxIcon: public wxBitmap
 {
 public:
     wxIcon() : wxBitmap() {}
+    wxIcon(const wxIcon& icon);
     wxIcon(const char **bits, int width=-1, int height=-1);
     wxIcon(char **bits, int width=-1, int height=-1);
 
@@ -42,6 +48,7 @@ public:
     {
     }
 
+    wxIcon& operator=(const wxIcon& icon);
     bool operator==(const wxIcon& icon) const { return m_refData == icon.m_refData; }
     bool operator!=(const wxIcon& icon) const { return !(*this == icon); }
 

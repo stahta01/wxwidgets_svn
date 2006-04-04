@@ -12,6 +12,10 @@
 #ifndef _WX_UXTHEME_H_
 #define _WX_UXTHEME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "uxtheme.h"
+#endif
+
 #include "wx/defs.h"
 
 #include "wx/msw/wrapwin.h"
@@ -72,7 +76,7 @@ typedef HRESULT (__stdcall *PFNWXUENABLETHEMING)(BOOL);
 // we always define this class, even if wxUSE_UXTHEME == 0, but we just make it
 // empty in this case -- this allows to use it elsewhere without any #ifdefs
 #if wxUSE_UXTHEME
-    #include "wx/dynlib.h"
+    #include "wx/dynload.h"
 
     #define wxUX_THEME_DECLARE(type, func) type func;
 #else

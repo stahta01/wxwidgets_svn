@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "font.h"
+#endif
+
 #ifdef __VMS
 #pragma message disable nosimpint
 #include "wx/vms_x_fix.h"
@@ -522,8 +526,14 @@ void wxFontRefData::SetNativeFontInfo(const wxNativeFontInfo& info)
 // wxFont
 // ----------------------------------------------------------------------------
 
+void wxFont::Init()
+{
+}
+
 wxFont::wxFont(const wxNativeFontInfo& info)
 {
+    Init();
+
 #if wxUSE_UNICODE
     Create( info.GetPointSize(),
             info.GetFamily(),

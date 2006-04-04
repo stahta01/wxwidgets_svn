@@ -12,6 +12,10 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrl.h"
+#endif
+
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {
 public:
@@ -158,12 +162,6 @@ public:
     virtual bool SetForegroundColour(const wxColour& colour);
 #endif // wxUSE_RICHEDIT
 
-#if wxUSE_INKEDIT && wxUSE_RICHEDIT
-    bool IsInkEdit() const { return m_isInkEdit != 0; }
-#else
-    bool IsInkEdit() const { return false; }
-#endif
-
     virtual void AdoptAttributesFromHWND();
 
     virtual bool AcceptsFocus() const;
@@ -196,16 +194,12 @@ public:
     // called HideNativeCaret() before
     void OnSetFocus(wxFocusEvent& event);
 
-    // intercept WM_GETDLGCODE
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
-
-    virtual bool MSWShouldPreProcessMessage(WXMSG* pMsg);
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-    virtual wxVisualAttributes GetDefaultAttributes() const;
-
 protected:
     // common part of all ctors
     void Init();
+
+    // intercept WM_GETDLGCODE
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
     // return true if this control has a user-set limit on amount of text (i.e.
     // the limit is due to a previous call to SetMaxLength() and not built in)
@@ -244,7 +238,11 @@ protected:
     // send TEXT_UPDATED event, return true if it was handled, false otherwise
     bool SendUpdateEvent();
 
+    // override some base class virtuals
+    virtual bool MSWShouldPreProcessMessage(WXMSG* pMsg);
     virtual wxSize DoGetBestSize() const;
+
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 #if wxUSE_RICHEDIT
     // we're using RICHEDIT (and not simple EDIT) control if this field is not
@@ -257,6 +255,8 @@ protected:
     // text ourselves: we want this to be exactly 1
     int m_updatesCount;
 
+    virtual wxVisualAttributes GetDefaultAttributes() const;
+
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxTextCtrl)
@@ -264,11 +264,6 @@ private:
     wxMenu* m_privateContextMenu;
 
     bool m_isNativeCaretShown;
-
-#if wxUSE_INKEDIT && wxUSE_RICHEDIT
-    int  m_isInkEdit;
-#endif
-
 };
 
 #endif

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "notebookbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -45,7 +49,7 @@ wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage) const
     // default because not all ports implement this
     wxSize sizeTotal = sizePage;
 
-    if ( HasFlag(wxBK_LEFT) || HasFlag(wxBK_RIGHT) )
+    if ( HasFlag(wxNB_LEFT) || HasFlag(wxNB_RIGHT) )
     {
         sizeTotal.x += 90;
         sizeTotal.y += 10;
@@ -60,3 +64,4 @@ wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage) const
 }
 
 #endif // wxUSE_NOTEBOOK
+

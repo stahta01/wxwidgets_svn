@@ -99,16 +99,8 @@ wxEventType wxNewEventType();
 %constant wxEventType wxEVT_NAVIGATION_KEY;
 %constant wxEventType wxEVT_KEY_DOWN;
 %constant wxEventType wxEVT_KEY_UP;
-
-%{
-#if ! wxUSE_HOTKEY
-#define wxEVT_HOTKEY -9999
-#endif
-%}
-
 %constant wxEventType wxEVT_HOTKEY;
-
-
+    
 // Set cursor event
 %constant wxEventType wxEVT_SET_CURSOR;
 
@@ -1246,17 +1238,6 @@ public:
 
 
     DocDeclStr(
-        int, GetModifiers() const,
-        "Returns a bitmask of the current modifier settings.  Can be used to
-check if the key event has exactly the given modifiers without having
-to explicitly check that the other modifiers are not down.  For
-example::
-
-    if event.GetModifers() == wx.MOD_CONTROL:
-        DoSomething()
-", "");
-
-    DocDeclStr(
         bool , ControlDown() const,
         "Returns ``True`` if the Control key was down at the time of the event.", "");
     
@@ -1963,11 +1944,7 @@ public:
     DocDeclStr(
         bool , GetEnabled() const,
         "Returns ``True`` if the UI element should be enabled.", "");
-
-    DocDeclStr(
-        bool , GetShown() const,
-        "Returns ``True`` if the UI element should be shown.", "");
-        
+    
     DocDeclStr(
         wxString , GetText() const,
         "Returns the text that should be set for the UI element.", "");
@@ -1987,11 +1964,7 @@ internal use only.", "");
         "Returns ``True`` if the application has called `Enable`. For wxWidgets
 internal use only.", "");
     
-    DocDeclStr(
-        bool , GetSetShown() const,
-        "Returns ``True`` if the application has called `Show`. For wxWidgets
-internal use only.", "");
-    
+
 
     DocDeclStr(
         void , Check(bool check),
@@ -2000,11 +1973,6 @@ internal use only.", "");
     DocDeclStr(
         void , Enable(bool enable),
         "Enable or disable the UI element.", "");
-
-    DocDeclStr(
-        void , Show(bool show),
-        "Show or hide the UI element.", "");
-    
     
     DocDeclStr(
         void , SetText(const wxString& text),

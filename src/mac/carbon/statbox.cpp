@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbox.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_STATBOX
@@ -18,33 +22,34 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBox, wxControl)
 
+/*
+ * Static box
+ */
 
-bool wxStaticBox::Create( wxWindow *parent,
-    wxWindowID id,
-    const wxString& label,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name )
+bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
+           const wxString& label,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
-    m_macIsUserPane = false;
+    m_macIsUserPane = FALSE ;
 
-    if ( !wxControl::Create( parent, id, pos, size, style, wxDefaultValidator, name ) )
+    if ( !wxControl::Create(parent, id, pos, size,
+                            style, wxDefaultValidator, name) )
         return false;
 
-    m_label = label;
+    m_label = label ;
 
-    Rect bounds = wxMacGetBoundsForControl( this, pos, size );
+    Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
 
-    m_peer = new wxMacControl( this );
-    OSStatus err = CreateGroupBoxControl(
-        MAC_WXHWND(parent->MacGetTopLevelWindowRef()), &bounds, CFSTR(""),
-        true /*primary*/, m_peer->GetControlRefAddr() );
-    verify_noerr( err );
+    m_peer = new wxMacControl(this) ;
+    verify_noerr(CreateGroupBoxControl(MAC_WXHWND(parent->MacGetTopLevelWindowRef()),&bounds, CFSTR("") ,
+        true /*primary*/ , m_peer->GetControlRefAddr() ) ) ;
 
-    MacPostControlCreate( pos, size );
+    MacPostControlCreate(pos,size) ;
 
-    return true;
+    return TRUE;
 }
 
 void wxStaticBox::GetBordersForSizer(int *borderTop, int *borderOther) const
@@ -54,11 +59,11 @@ void wxStaticBox::GetBordersForSizer(int *borderTop, int *borderOther) const
 
     if ( extraTop == -1 )
     {
-        // The minimal border used for the top.
-        // Later on, the staticbox's font height is added to this.
+        // The minimal border used for the top. Later on the staticbox'
+        // font height is added to this.
         extraTop = 0;
 
-        if ( UMAGetSystemVersion() >= 0x1030 ) // Panther
+        if ( UMAGetSystemVersion() >= 0x1030 /*Panther*/ )
         {
             // As indicated by the HIG, Panther needs an extra border of 11
             // pixels (otherwise overlapping occurs at the top). The "other"
@@ -66,6 +71,7 @@ void wxStaticBox::GetBordersForSizer(int *borderTop, int *borderOther) const
             extraTop = 11;
             other = 11;
         }
+
     }
 
     *borderTop = extraTop + GetCharHeight();

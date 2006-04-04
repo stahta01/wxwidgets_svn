@@ -12,6 +12,10 @@
 #ifndef _WX_LISTCTRL_H_BASE_
 #define _WX_LISTCTRL_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listctrlbase.h"
+#endif
+
 #include "wx/defs.h" // headers should include this before first wxUSE_XXX check
 
 #if wxUSE_LISTCTRL
@@ -22,7 +26,7 @@
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxListCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxListCtrlNameStr;
 
 // ----------------------------------------------------------------------------
 // include the wxListCtrl class declaration

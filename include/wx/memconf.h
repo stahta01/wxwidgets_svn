@@ -22,6 +22,8 @@
 #ifndef _WX_MEMCONF_H_
 #define _WX_MEMCONF_H_
 
+// no #pragma interface because no implementation file
+
 #if wxUSE_CONFIG
 
 #include "wx/fileconf.h"   // the base class

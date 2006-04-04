@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "treectrl.h"
+#endif
+
 #if wxUSE_TREECTRL
 
 #include "wx/textctrl.h"
@@ -27,6 +31,14 @@
 class  WXDLLEXPORT wxImageList;
 class  WXDLLEXPORT wxDragImage;
 struct WXDLLEXPORT wxTreeViewItem;
+
+// NB: all the following flags are for compatbility only and will be removed in the
+//     next versions
+
+// flags for deprecated InsertItem() variant (their values are the same as of
+// TVI_FIRST and TVI_LAST)
+#define wxTREE_INSERT_FIRST 0xFFFF0001
+#define wxTREE_INSERT_LAST  0xFFFF0002
 
 // hash storing attributes for our items
 WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP(wxTreeItemAttr *, wxMapTreeAttr);
@@ -65,7 +77,7 @@ public:
     // ---------
 
         // get the total number of items in the control
-    virtual unsigned int GetCount() const;
+    size_t GetCount() const;
 
         // indent is the number of pixels the children are indented relative to
         // the parents position. SetIndent() also redraws the control

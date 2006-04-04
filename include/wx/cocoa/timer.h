@@ -11,6 +11,10 @@
 #ifndef __WX_TIMER_H__
 #define __WX_TIMER_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "timer.h"
+#endif
+
 #include "wx/cocoa/ObjcRef.h"
 
 //-----------------------------------------------------------------------------
@@ -40,6 +44,7 @@ protected:
 
 private:
     WX_NSTimer m_cocoaNSTimer;
+    static const wxObjcAutoRefFromAlloc<struct objc_object *> sm_cocoaDelegate;
 
     DECLARE_ABSTRACT_CLASS(wxTimer)
 };

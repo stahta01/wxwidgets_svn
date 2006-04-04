@@ -113,7 +113,7 @@ MyFrame::MyFrame( wxWindow* parent, const wxChar *title )
     : wxFrame( parent, wxID_ANY, title, wxDefaultPosition,
           wxSize( 700, 500 ),
           wxCLIP_CHILDREN | wxMINIMIZE_BOX | wxMAXIMIZE_BOX |
-          wxRESIZE_BORDER   | wxSYSTEM_MENU  | wxCAPTION | wxCLOSE_BOX,
+          wxTHICK_FRAME   | wxSYSTEM_MENU  | wxCAPTION | wxCLOSE_BOX,
           wxT("freimas") )
 {
 
@@ -336,3 +336,4 @@ void MyFrame::OnButt2( wxCommandEvent& WXUNUSED(event) )
     }
     i++;
 }
+

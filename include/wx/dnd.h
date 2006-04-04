@@ -12,6 +12,10 @@
 #ifndef _WX_DND_H_BASE_
 #define _WX_DND_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dndbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -218,10 +222,8 @@ protected:
     #include "wx/motif/dnd.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dnd.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dnd.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dnd.h"
+    #include "wx/gtk/dnd.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dnd.h"
 #elif defined(__WXPM__)

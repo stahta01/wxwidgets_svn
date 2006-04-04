@@ -3,4 +3,6 @@ aaaaa    ICON   "cards.ico"
 #include "wx/msw/wx.rc"
 
 CardsIcon    ICON   "cards.ico"
+CardPictures BITMAP "pictures.bmp"
+CardSymbols  BITMAP "symbols.bmp"
 

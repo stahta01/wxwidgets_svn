@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gifdecod.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -142,18 +146,21 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
         image->SetMask(false);
 
 #if wxUSE_PALETTE
-    unsigned char r[256];
-    unsigned char g[256];
-    unsigned char b[256];
-
-    for (i = 0; i < 256; i++)
+    if (pal)
     {
-        r[i] = pal[3*i + 0];
-        g[i] = pal[3*i + 1];
-        b[i] = pal[3*i + 2];
-    }
+        unsigned char r[256];
+        unsigned char g[256];
+        unsigned char b[256];
 
-    image->SetPalette(wxPalette(256, r, g, b));
+        for (i = 0; i < 256; i++)
+        {
+            r[i] = pal[3*i + 0];
+            g[i] = pal[3*i + 1];
+            b[i] = pal[3*i + 2];
+        }
+
+        image->SetPalette(wxPalette(256, r, g, b));
+    }
 #endif // wxUSE_PALETTE
 
     /* copy image data */

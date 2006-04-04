@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/brush.h
+// Name:        brush.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_BRUSH_H__
 #define __WX_BRUSH_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "brush.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -33,7 +38,9 @@ public:
     wxBrush() {}
     wxBrush(const wxColour &colour, int style = wxSOLID);
     wxBrush(const wxBitmap &stippleBitmap);
+    wxBrush(const wxBrush &brush);
     ~wxBrush() {}
+    wxBrush& operator = (const wxBrush& brush);
     bool operator == (const wxBrush& brush) const;
     bool operator != (const wxBrush& brush) const;
     bool Ok() const;

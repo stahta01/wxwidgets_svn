@@ -9,6 +9,10 @@
 #ifndef _WX_SNDBASE_H
 #define _WX_SNDBASE_H
 
+#ifdef __GNUG__
+#pragma interface "sndbase.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/mmedia/defs.h"
 

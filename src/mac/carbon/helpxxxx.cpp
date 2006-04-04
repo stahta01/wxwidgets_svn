@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpxxxx.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/stubs/helpxxxx.h"

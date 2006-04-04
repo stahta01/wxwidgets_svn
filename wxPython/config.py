@@ -37,10 +37,10 @@ import distutils.command.clean
 #----------------------------------------------------------------------
 
 VER_MAJOR        = 2      # The first three must match wxWidgets
-VER_MINOR        = 7
-VER_RELEASE      = 0
-VER_SUBREL       = 0      # wxPython release num for x.y.z release of wxWidgets
-VER_FLAGS        = "pre"  # release flags, such as prerelease or RC num, etc.
+VER_MINOR        = 6
+VER_RELEASE      = 3
+VER_SUBREL       = 2      # wxPython release num for x.y.z release of wxWidgets
+VER_FLAGS        = ""     # release flags, such as prerelease or RC num, etc.
 
 DESCRIPTION      = "Cross platform GUI toolkit for Python"
 AUTHOR           = "Robin Dunn"
@@ -87,6 +87,7 @@ BUILD_DLLWIDGET = 0# Build a module that enables unknown wx widgets
                    # to be loaded from a DLL and to be used from Python.
 
                    # Internet Explorer wrapper (experimental)
+BUILD_IEWIN = 0 #(os.name == 'nt')
 BUILD_ACTIVEX = (os.name == 'nt')  # new version of IEWIN and more
 
 
@@ -155,12 +156,12 @@ WX_CONFIG = None   # Usually you shouldn't need to touch this, but you can set
 
 SYS_WX_CONFIG = None # When installing an in tree build, setup.py uses wx-config
                      # for two different purposes.  First, to determine the prefix
-                     # where files will be installed, and secondly, to initialise
-                     # build_options.py with the correct options for it.
-                     # WX_CONFIG is used for the first task.  SYS_WX_CONFIG may
-                     # be set independently, to the value that should appear in
-                     # build_options.py, if it is different to that.  The default
-                     # is to use the value of WX_CONFIG.
+		     # where files will be installed, and secondly, to initialise
+		     # build_options.py with the correct options for it.
+		     # WX_CONFIG is used for the first task.  SYS_WX_CONFIG may
+		     # be set independently, to the value that should appear in
+		     # build_options.py, if it is different to that.  The default
+		     # is to use the value of WX_CONFIG.
 
 WXPORT = 'gtk2'    # On Linux/Unix there are several ports of wxWidgets available.
                    # Setting this value lets you select which will be used for
@@ -256,7 +257,7 @@ WXPYTHON_TYPE_TABLE = '_wxPython_table'
 
 # Boolean (int) flags
 for flag in [ 'BUILD_ACTIVEX', 'BUILD_ANIMATE', 'BUILD_DLLWIDGET',
-              'BUILD_GIZMOS', 'BUILD_GLCANVAS', 
+              'BUILD_GIZMOS', 'BUILD_GLCANVAS', 'BUILD_IEWIN',
               'BUILD_OGL', 'BUILD_STC',     
              'CORE_ONLY', 'PREP_ONLY', 'USE_SWIG', 'UNICODE',
              'UNDEF_NDEBUG', 'NO_SCRIPTS', 'NO_HEADERS', 'BUILD_RENAMERS',
@@ -433,18 +434,6 @@ def run_swig(files, dir, gendir, package, USE_SWIG, force, swig_args,
 
     return sources
 
-
-def swig_version():
-    # It may come on either stdout or stderr, depending on the
-    # version, so read both.
-    i, o, e = os.popen3(SWIG + ' -version', 't')
-    stext = o.read() + e.read()
-    import re
-    match = re.search(r'[0-9]+\.[0-9]+\.[0-9]+$', stext, re.MULTILINE)
-    if not match:
-        raise 'NotFound'
-    SVER = match.group(0)
-    return SVER
 
 
 # Specializations of some distutils command classes
@@ -663,6 +652,7 @@ if CORE_ONLY:
     BUILD_STC = 0
     BUILD_GIZMOS = 0
     BUILD_DLLWIDGET = 0
+    BUILD_IEWIN = 0
     BUILD_ACTIVEX = 0
     BUILD_ANIMATE = 0
 
@@ -712,7 +702,6 @@ if os.name == 'nt':
                 ('WXUSINGDLL', '1'),
 
                 ('SWIG_TYPE_TABLE', WXPYTHON_TYPE_TABLE),
-                ('SWIG_PYTHON_OUTPUT_TUPLE', None),
                 ('WXP_USE_THREAD', '1'),
                 ]
 
@@ -724,9 +713,6 @@ if os.name == 'nt':
 
     if not FINAL or HYBRID:
         defines.append( ('__WXDEBUG__', None) )
-
-    if UNICODE:
-        defines.append( ('wxUSE_UNICODE', 1) )
 
     libdirs = [ opj(WXDIR, 'lib', 'vc_dll') ]
     if MONOLITHIC:
@@ -770,7 +756,7 @@ elif os.name == 'posix':
     WXDIR = '..'
     includes = ['include', 'src']
     defines = [('SWIG_TYPE_TABLE', WXPYTHON_TYPE_TABLE),
-               ('SWIG_PYTHON_OUTPUT_TUPLE', None),
+               ('HAVE_CONFIG_H', None),
                ('WXP_USE_THREAD', '1'),
                ]
     if UNDEF_NDEBUG:
@@ -889,22 +875,13 @@ i_files_includes = [ '-I' + opj(WXPY_SRC, 'src'),
 swig_cmd = SWIG
 swig_force = force
 swig_args = ['-c++',
-             #'-Wall',
+             '-Wall',
+             '-nodefault',
              '-python',
              '-new_repr',
              '-modern',
              '-D'+WXPLAT,
              ] + i_files_includes
-
-if USE_SWIG:
-    SVER = swig_version()
-    if int(SVER[-2:]) >= 29:
-        swig_args += [ '-fastdispatch',
-                       '-fvirtual',
-                       '-fastinit',
-                       '-fastunpack',
-                       #'-outputtuple',  Currently setting this with a -D define above
-                       ]
              
 if UNICODE:
     swig_args.append('-DwxUSE_UNICODE')
@@ -1051,6 +1028,7 @@ class BuildRenamers:
         # do a depth first iteration over what's left
         for node in topnode:
             doRename = False
+            doPtr = False
             addWX = False
             revOnly = False
     
@@ -1059,6 +1037,7 @@ class BuildRenamers:
                 lastClassName = name = self.GetAttr(node, "name")
                 lastClassSymName = sym_name = self.GetAttr(node, "sym_name")
                 doRename = True
+                doPtr = True
                 if sym_name != name:
                     name = sym_name
                     addWX = True
@@ -1116,6 +1095,8 @@ class BuildRenamers:
                 if addWX and not old.startswith('wx'):
                     old = 'wx'+old
                 pyFile.write("%s = wx.%s.%s\n" % (old, modname, new))
+                if doPtr:
+                    pyFile.write("%sPtr = wx.%s.%sPtr\n" % (old, modname, new))
                 
     
     #---------------------------------------------------------------------------

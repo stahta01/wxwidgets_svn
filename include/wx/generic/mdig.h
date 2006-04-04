@@ -12,6 +12,10 @@
 #ifndef _WX_MDIG_H_
 #define _WX_MDIG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "mdig.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -20,8 +24,8 @@
 #include "wx/panel.h"
 #include "wx/notebook.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxFrameNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxFrameNameStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxStatusLineNameStr;
 
 
 //-----------------------------------------------------------------------------

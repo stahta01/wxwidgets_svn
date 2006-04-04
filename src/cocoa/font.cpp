@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "font.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/string.h"
 #include "wx/font.h"
@@ -30,6 +34,10 @@ void wxFontRefData::Init(int size, int family, int style, int weight, bool under
 wxFontRefData::~wxFontRefData()
 {
     // TODO: delete font data
+}
+
+void wxFont::Init()
+{
 }
 
 bool wxFont::Create(const wxNativeFontInfo&)

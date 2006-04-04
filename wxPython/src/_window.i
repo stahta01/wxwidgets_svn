@@ -259,7 +259,6 @@ instead.");
     
 
 
-    %pythonAppend Destroy "args[0].thisown = 0"
     DocDeclStr(
         virtual bool , Destroy(),
         "Destroys the window safely.  Frames and dialogs are not destroyed
@@ -287,13 +286,14 @@ destructor.", "");
     // window attributes
     // -----------------
 
-    //DocDeclStr(
-    //    virtual void , SetTitle( const wxString& title),
-    //    "Sets the window's title. Applicable only to frames and dialogs.", "");
+    DocDeclStr(
+        virtual void , SetTitle( const wxString& title),
+        "Sets the window's title. Applicable only to frames and dialogs.", "");
     
-    //DocDeclStr(
-    //    virtual wxString , GetTitle() const,
-    //    "Gets the window's title. Applicable only to frames and dialogs.", "");    
+    DocDeclStr(
+        virtual wxString , GetTitle() const,
+        "Gets the window's title. Applicable only to frames and dialogs.", "");
+    
 
     DocDeclStr(
         virtual void , SetLabel(const wxString& label),
@@ -460,32 +460,14 @@ around panel items, for example.", "");
 
 
     DocStr(GetPosition,   // sets the docstring for both
-           "Get the window's position.  Notice that the position is in client
-coordinates for child windows and screen coordinates for the top level
-ones, use `GetScreenPosition` if you need screen coordinates for all
-kinds of windows.", "");
-    wxPoint GetPosition() const;
+           "Get the window's position.", "");
+    wxPoint GetPosition();
 
     DocDeclAName(
-        void, GetPosition(int *OUTPUT, int *OUTPUT) const,
+        void, GetPosition(int *OUTPUT, int *OUTPUT),
         "GetPositionTuple() -> (x,y)",
         GetPositionTuple);
 
-    
-    DocStr(GetScreenPosition,   // sets the docstring for both
-           "Get the position of the window in screen coordinantes.", "");
-    wxPoint GetScreenPosition() const;
-    DocDeclAName(
-        void, GetScreenPosition(int *OUTPUT, int *OUTPUT) const,
-        "GetScreenPositionTuple() -> (x,y)",
-        GetScreenPositionTuple);
-
-    DocDeclStr(
-        wxRect , GetScreenRect() const,
-        "Returns the size and position of the window in screen coordinantes as
-a `wx.Rect` object.", "
-:see: `GetRect`, `GetScreenPosition`");
-    
    
     DocStr(GetSize, "Get the window size.", "");
     wxSize GetSize() const;
@@ -498,7 +480,7 @@ a `wx.Rect` object.", "
 
     DocDeclStr(
         wxRect , GetRect() const,
-        "Returns the size and position of the window as a `wx.Rect` object.", "");
+        "Returns the size and position of the window as a wx.Rect object.", "");
     
 
     DocStr(GetClientSize,
@@ -578,10 +560,18 @@ cetering, and may be wx.HORIZONTAL, wx.VERTICAL or wx.BOTH. It may
 also include wx.CENTER_ON_SCREEN flag if you want to center the window
 on the entire screen and not on its parent window.  If it is a
 top-level window and has no parent then it will always be centered
-relative to the screen.", "");    
+relative to the screen.", "");
+    
     %pythoncode { Centre = Center }
 
     
+    DocDeclStr(
+        void , CenterOnScreen(int dir = wxBOTH),
+        "Center on screen (only works for top level windows)", "");
+    %pythoncode { CenterOnScreen = wx._deprecated(CenterOnScreen) }
+    %pythoncode { CentreOnScreen = CenterOnScreen }
+
+
     DocDeclStr(
         void , CenterOnParent(int dir = wxBOTH),
         "Center with respect to the the parent window", "");
@@ -1466,11 +1456,9 @@ be reset back to default.", "");
 
     
 
-    %disownarg( wxCaret *caret );
     DocDeclStr(
         void , SetCaret(wxCaret *caret),
         "Sets the caret associated with the window.", "");
-    %cleardisown( wxCaret *caret );
     
     DocDeclStr(
         wxCaret *, GetCaret() const,
@@ -1757,7 +1745,7 @@ already on top/bottom and nothing was done.", "");
         void , SetHelpText(const wxString& text),
         "Sets the help text to be used as context-sensitive help for this
 window.  Note that the text is actually stored by the current
-`wx.HelpProvider` implementation, and not in the window object itself.", "");
+wxHelpProvider implementation, and not in the window object itself.", "");
     
 
     DocDeclStr(
@@ -1770,7 +1758,7 @@ one.", "");
         wxString , GetHelpText() const,
         "Gets the help text to be used as context-sensitive help for this
 window.  Note that the text is actually stored by the current
-`wx.HelpProvider` implementation, and not in the window object itself.", "");
+wxHelpProvider implementation, and not in the window object itself.", "");
     
 
 
@@ -1781,10 +1769,7 @@ window.  Note that the text is actually stored by the current
     DocStr(SetToolTip,
            "Attach a tooltip to the window.", "");
     %Rename(SetToolTipString, void,  SetToolTip( const wxString &tip ));
-
-    %disownarg( wxToolTip *tip );
     void SetToolTip( wxToolTip *tip );
-    %cleardisown( wxToolTip *tip );
 
     DocDeclStr(
         wxToolTip* , GetToolTip() const,
@@ -1799,12 +1784,16 @@ window.  Note that the text is actually stored by the current
     // drag and drop
     // -------------
 
-    %disownarg( wxPyDropTarget *dropTarget );
+    // set/retrieve the drop target associated with this window (may be
+    // NULL; it's owned by the window and will be deleted by it)
+    %apply SWIGTYPE *DISOWN { wxPyDropTarget *dropTarget };
+    
     DocDeclStr(
         virtual void , SetDropTarget( wxPyDropTarget *dropTarget ),
         "Associates a drop target with this window.  If the window already has
 a drop target, it is deleted.", "");   
-    %cleardisown( wxPyDropTarget *dropTarget );
+
+    %clear wxPyDropTarget *dropTarget;
 
     
     DocDeclStr(
@@ -1828,7 +1817,7 @@ Only functional on Windows.", "");
     // constraints and sizers
     // ----------------------
 
-    %disownarg(wxLayoutConstraints*);
+    // set the constraints for this window or retrieve them (may be NULL)
     DocDeclStr(
         void , SetConstraints( wxLayoutConstraints *constraints ),
         "Sets the window to have the given layout constraints. If an existing
@@ -1846,19 +1835,14 @@ effect.", "");
         wxLayoutConstraints *, GetConstraints() const,
         "Returns a pointer to the window's layout constraints, or None if there
 are none.", "");
-    %cleardisown(wxLayoutConstraints*);
     
 
     DocDeclStr(
         void , SetAutoLayout( bool autoLayout ),
         "Determines whether the Layout function will be called automatically
-when the window is resized.  lease note that this only happens for the
-windows usually used to contain children, namely `wx.Panel` and
-`wx.TopLevelWindow` (and the classes deriving from them).
-
-This method is called implicitly by `SetSizer` but if you use
-`SetConstraints` you should call it manually or otherwise the window
-layout won't be correctly updated when its size changes.", "");
+when the window is resized.  It is called implicitly by SetSizer but
+if you use SetConstraints you should call it manually or otherwise the
+window layout won't be correctly updated when its size changes.", "");
     
     DocDeclStr(
         bool , GetAutoLayout() const,
@@ -1873,7 +1857,6 @@ this function gets called automatically by the default EVT_SIZE
 handler when the window is resized.", "");
     
 
-    %disownarg( wxSizer *sizer );
     DocDeclStr(
         void , SetSizer(wxSizer *sizer, bool deleteOld = true ),
         "Sets the window to have the given layout sizer. The window will then
@@ -1887,8 +1870,7 @@ non-None, and False otherwise.", "");
         void , SetSizerAndFit( wxSizer *sizer, bool deleteOld = true ),
         "The same as SetSizer, except it also sets the size hints for the
 window based on the sizer's minimum size.", "");
-    %cleardisown( wxSizer *sizer );
-
+    
 
     DocDeclStr(
         wxSizer *, GetSizer() const,

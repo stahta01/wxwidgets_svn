@@ -13,6 +13,10 @@
 #ifndef   _FILECONF_H
 #define   _FILECONF_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fileconf.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CONFIG
@@ -200,7 +204,7 @@ private:
   void CleanUp();
 
   // parse the whole file
-  void Parse(const wxTextBuffer& buffer, bool bLocal);
+  void Parse(wxTextBuffer& buffer, bool bLocal);
 
   // the same as SetPath("/")
   void SetRootPath();

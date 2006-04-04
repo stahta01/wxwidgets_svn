@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrlbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_TEXTCTRL
@@ -62,7 +66,7 @@ typedef long wxTextCoord;
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxTextCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxTextCtrlNameStr;
 
 // this is intentionally not enum to avoid warning fixes with
 // typecasting from enum type to wxTextCoord
@@ -378,6 +382,11 @@ public:
     virtual void SelectAll();
     virtual void SetEditable(bool editable) = 0;
 
+    // override streambuf method
+#if wxHAS_TEXT_WINDOW_STREAM
+    int overflow(int i);
+#endif // wxHAS_TEXT_WINDOW_STREAM
+
     // stream-like insertion operators: these are always available, whether we
     // were, or not, compiled with streambuf support
     wxTextCtrl& operator<<(const wxString& s);
@@ -393,11 +402,6 @@ public:
     virtual bool ShouldInheritColours() const { return false; }
 
 protected:
-    // override streambuf method
-#if wxHAS_TEXT_WINDOW_STREAM
-    int overflow(int i);
-#endif // wxHAS_TEXT_WINDOW_STREAM
-
     // the name of the last file loaded with LoadFile() which will be used by
     // SaveFile() by default
     wxString m_filename;
@@ -422,10 +426,8 @@ protected:
     #include "wx/msw/textctrl.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/textctrl.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/textctrl.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/textctrl.h"
+    #include "wx/gtk/textctrl.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/textctrl.h"
 #elif defined(__WXCOCOA__)

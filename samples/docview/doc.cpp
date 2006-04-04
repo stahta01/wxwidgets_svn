@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -119,7 +123,7 @@ wxInputStream& DrawingDocument::LoadObject(wxInputStream& stream)
 }
 #endif
 
-DoodleSegment::DoodleSegment(const DoodleSegment& seg):wxObject()
+DoodleSegment::DoodleSegment(DoodleSegment& seg):wxObject()
 {
     wxList::compatibility_iterator node = seg.lines.GetFirst();
     while (node)

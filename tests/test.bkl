@@ -43,7 +43,6 @@
             scopeguard/scopeguardtest.cpp
             strings/strings.cpp
             strings/stdstrings.cpp
-            strings/tokenizer.cpp
             strings/unicode.cpp
             strings/crt.cpp
             streams/bstream.cpp
@@ -56,7 +55,6 @@
             streams/tempfile.cpp
             streams/textstreamtest.cpp
             streams/zlibstream.cpp
-            textfile/textfiletest.cpp
             uris/uris.cpp
         </sources>
         <wx-lib>net</wx-lib>

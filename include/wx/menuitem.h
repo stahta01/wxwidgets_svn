@@ -163,10 +163,8 @@ private:
     #include "wx/msw/menuitem.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/menuitem.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/menuitem.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/menuitem.h"
+    #include "wx/gtk/menuitem.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menuitem.h"
 #elif defined(__WXCOCOA__)

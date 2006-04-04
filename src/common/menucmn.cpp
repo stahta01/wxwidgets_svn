@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/menucmn.cpp
+// Name:        common/menucmn.cpp
 // Purpose:     wxMenu and wxMenuBar methods common to all ports
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menubase.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -40,8 +44,8 @@
 
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxMenuList)
-WX_DEFINE_LIST(wxMenuItemList)
+WX_DEFINE_LIST(wxMenuList);
+WX_DEFINE_LIST(wxMenuItemList);
 
 // ============================================================================
 // implementation
@@ -174,9 +178,9 @@ wxAcceleratorEntry *wxGetAccelFromString(const wxString& label)
                     else if ( current == wxT("ENTER") || current == wxT("RETURN") )
                         keyCode = WXK_RETURN;
                     else if ( current == wxT("PGUP") )
-                        keyCode = WXK_PAGEUP;
+                        keyCode = WXK_PRIOR;
                     else if ( current == wxT("PGDN") )
-                        keyCode = WXK_PAGEDOWN;
+                        keyCode = WXK_NEXT;
                     else if ( current == wxT("LEFT") )
                         keyCode = WXK_LEFT;
                     else if ( current == wxT("RIGHT") )
@@ -250,11 +254,11 @@ wxAcceleratorEntry *wxGetAccelFromString(const wxString& label)
                     else if ( current == wxT("KP_DOWN") )
                         keyCode = WXK_NUMPAD_DOWN;
                     else if ( current == wxT("KP_PRIOR") )
-                        keyCode = WXK_NUMPAD_PAGEUP;
+                        keyCode = WXK_NUMPAD_PRIOR;
                     else if ( current == wxT("KP_PAGEUP") )
                         keyCode = WXK_NUMPAD_PAGEUP;
                     else if ( current == wxT("KP_NEXT;") )
-                        keyCode = WXK_NUMPAD_PAGEDOWN;
+                        keyCode = WXK_NUMPAD_NEXT;
                     else if ( current == wxT("KP_PAGEDOWN") )
                         keyCode = WXK_NUMPAD_PAGEDOWN;
                     else if ( current == wxT("KP_END") )
@@ -1056,23 +1060,6 @@ wxString wxMenuBarBase::GetHelpString(int id) const
                  wxT("wxMenuBar::GetHelpString(): no such item") );
 
     return item->GetHelp();
-}
-
-void wxMenuBarBase::UpdateMenus( void )
-{
-    wxEvtHandler* source;
-    wxMenu* menu;
-    int nCount = GetMenuCount();
-    for (int n = 0; n < nCount; n++)
-    {
-        menu = GetMenu( n );
-        if (menu != NULL)
-        {
-            source = menu->GetEventHandler();
-            if (source != NULL)
-                menu->UpdateUI( source );
-        }
-    }
 }
 
 #endif // wxUSE_MENUS

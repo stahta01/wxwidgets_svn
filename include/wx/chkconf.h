@@ -23,10 +23,6 @@
 #  include "wx/msw/chkconf.h"
 #elif defined(__WXMAC__)
 #  include "wx/mac/chkconf.h"
-#elif defined(__OS2__)
-#  include "wx/os2/chkconf.h"
-#elif defined(__WXMGL__)
-#  include "wx/mgl/chkconf.h"
 #elif defined(__WXMOTIF__)
 #  include "wx/motif/chkconf.h"
 #endif
@@ -831,17 +827,6 @@
    check consistency of the settings
  */
 
-#if wxUSE_ARCHIVE_STREAMS
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxArchive requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_ARCHIVE_STREAMS
-#           define wxUSE_ARCHIVE_STREAMS 0
-#       endif
-#   endif
-#endif /* wxUSE_ARCHIVE_STREAMS */
-
 #if wxUSE_CRASHREPORT && !wxUSE_ON_FATAL_EXCEPTION
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_CRASHREPORT requires wxUSE_ON_FATAL_EXCEPTION"
@@ -948,17 +933,6 @@
 #       define wxUSE_TEXTFILE 1
 #   endif
 #endif /* wxUSE_MIMETYPE */
-
-#if wxUSE_ODBC
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxODBC requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_ODBC
-#           define wxUSE_ODBC 0
-#       endif
-#   endif
-#endif /* wxUSE_ODBC */
 
 #if wxUSE_TEXTFILE && !wxUSE_TEXTBUFFER
 #   ifdef wxABORT_ON_CONFIG_ERROR

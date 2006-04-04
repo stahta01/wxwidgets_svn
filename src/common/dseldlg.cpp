@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dseldlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -35,7 +39,7 @@
 // implementation
 // ============================================================================
 
-const wxChar wxDirSelectorPromptStr[] = wxT("Select a directory");
+const wxChar *wxDirSelectorPromptStr = wxT("Select a directory");
 
 wxString wxDirSelector(const wxString& message,
                        const wxString& defaultPath,

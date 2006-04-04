@@ -11,6 +11,10 @@
 #ifndef __GTKPOPUPWINH__
 #define __GTKPOPUPWINH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "popupwin.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/panel.h"
 #include "wx/icon.h"
@@ -34,10 +38,9 @@ public:
     // implementation
     // --------------
 
+    virtual void DoMoveWindow(int x, int y, int width, int height);
+
     virtual void OnInternalIdle();
-    
-    // GTK time when connecting to button_press signal
-    wxUint32  m_time;
 
 
 protected:
@@ -46,8 +49,6 @@ protected:
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-
-    virtual void DoMoveWindow(int x, int y, int width, int height);
 
 private:
     DECLARE_EVENT_TABLE()

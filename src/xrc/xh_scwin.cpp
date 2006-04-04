@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_scwin.cpp
+// Name:        xh_scwin.cpp
 // Purpose:     XRC resource for wxScrolledWindow
 // Author:      Vaclav Slavik
 // Created:     2002/10/18
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2002 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_scwin.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -19,7 +23,7 @@
 
 #include "wx/xrc/xh_scwin.h"
 #include "wx/scrolwin.h"
-#include "wx/frame.h"
+#include "wx/frame.h"  // to get wxNO_3D
 
 IMPLEMENT_DYNAMIC_CLASS(wxScrolledWindowXmlHandler, wxXmlResourceHandler)
 
@@ -30,9 +34,7 @@ wxScrolledWindowXmlHandler::wxScrolledWindowXmlHandler()
     XRC_ADD_STYLE(wxVSCROLL);
 
     // wxPanel styles
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxNO_3D);
-#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTAB_TRAVERSAL);
     XRC_ADD_STYLE(wxWS_EX_VALIDATE_RECURSIVELY);
 

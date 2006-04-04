@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/view.cpp
+// Name:        view.cpp
 // Purpose:     Implements view functionality in OGLEdit
 // Author:      Julian Smart
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,10 +21,10 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/colordlg.h"
+#include <wx/colordlg.h>
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
@@ -118,6 +122,7 @@ void DiagramView::OnDraw(wxDC *dc)
 
   // This part was added to preform the print preview and printing functions
 
+  dc->BeginDrawing(); // Allows optimization of drawing code under MS Windows.
   wxDiagram *diagram_p=((DiagramDocument*)GetDocument())->GetDiagram();  // Get the current diagram
   if (diagram_p->GetShapeList())
   {
@@ -134,6 +139,7 @@ void DiagramView::OnDraw(wxDC *dc)
         current = current->GetNext();  // Procede to the next shape in the list
     }
   }
+  dc->EndDrawing(); // Allows optimization of drawing code under MS Windows.
 }
 
 void DiagramView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))

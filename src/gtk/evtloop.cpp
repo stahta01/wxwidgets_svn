@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "evtloop.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -56,6 +60,8 @@ private:
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+
 wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
@@ -66,7 +72,8 @@ int wxEventLoop::Run()
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    wxEventLoopActivator activate(this);
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
 
     m_impl = new wxEventLoopImpl;
 
@@ -75,6 +82,8 @@ int wxEventLoop::Run()
     int exitcode = m_impl->GetExitCode();
     delete m_impl;
     m_impl = NULL;
+
+    ms_activeLoop = oldLoop;
 
     return exitcode;
 }

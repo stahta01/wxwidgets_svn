@@ -1,12 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_listbk.cpp
+// Name:        xh_listbk.cpp
 // Purpose:     XRC resource for wxListbook
 // Author:      Vaclav Slavik
 // Created:     2000/03/21
-// RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_listbk.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -29,19 +32,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxListbookXmlHandler, wxXmlResourceHandler)
 wxListbookXmlHandler::wxListbookXmlHandler()
 : wxXmlResourceHandler(), m_isInside(false), m_listbook(NULL)
 {
-    XRC_ADD_STYLE(wxBK_DEFAULT);
-    XRC_ADD_STYLE(wxBK_LEFT);
-    XRC_ADD_STYLE(wxBK_RIGHT);
-    XRC_ADD_STYLE(wxBK_TOP);
-    XRC_ADD_STYLE(wxBK_BOTTOM);
-
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxLB_DEFAULT);
     XRC_ADD_STYLE(wxLB_LEFT);
     XRC_ADD_STYLE(wxLB_RIGHT);
     XRC_ADD_STYLE(wxLB_TOP);
     XRC_ADD_STYLE(wxLB_BOTTOM);
-#endif
 
     AddWindowStyles();
 }

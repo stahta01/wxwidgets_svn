@@ -14,6 +14,10 @@
 #ifndef _WX_TOPLEVEL_BASE_H_
 #define _WX_TOPLEVEL_BASE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevelbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -21,8 +25,8 @@
 #include "wx/window.h"
 #include "wx/iconbndl.h"
 
-// the default names for various classes
-extern WXDLLEXPORT_DATA(const wxChar) wxFrameNameStr[];
+// the default names for various classs
+extern WXDLLEXPORT_DATA(const wxChar*) wxFrameNameStr;
 
 class WXDLLEXPORT wxTopLevelWindowBase;
 
@@ -44,19 +48,15 @@ class WXDLLEXPORT wxTopLevelWindowBase;
 #define wxTINY_CAPTION_VERT     0x0080
 #define wxRESIZE_BORDER         0x0040
 
-#if WXWIN_COMPATIBILITY_2_6
+// deprecated versions defined for compatibility reasons
+#define wxRESIZE_BOX            wxMAXIMIZE_BOX
+#define wxTHICK_FRAME           wxRESIZE_BORDER
 
-    // deprecated versions defined for compatibility reasons
-    #define wxRESIZE_BOX            wxMAXIMIZE_BOX
-    #define wxTHICK_FRAME           wxRESIZE_BORDER
-
-    // obsolete styles, unused any more
-    #define wxDIALOG_MODAL          0
-    #define wxDIALOG_MODELESS       0
-    #define wxNO_3D                 0
-    #define wxUSER_COLOURS          0
-
-#endif // WXWIN_COMPATIBILITY_2_6
+// obsolete styles, unused any more
+#define wxDIALOG_MODAL          0
+#define wxDIALOG_MODELESS       0
+#define wxNO_3D                 0
+#define wxUSER_COLOURS          0
 
 // default style
 //
@@ -158,10 +158,13 @@ public:
     // return true if the frame is in fullscreen mode
     virtual bool IsFullScreen() const = 0;
 
-    // the title of the top level window: the text which the
-    // window shows usually at the top of the frame/dialog in dedicated bar
+    /*
+       for now we already have them in wxWindow, but this is wrong: these
+       methods really only make sense for wxTopLevelWindow!
+
     virtual void SetTitle(const wxString& title) = 0;
     virtual wxString GetTitle() const = 0;
+     */
 
     // Set the shape of the window to the given region.
     // Returns true if the platform supports this feature (and the
@@ -180,11 +183,6 @@ public:
     virtual void SetLeftMenu(int id = wxID_ANY, const wxString& label = wxEmptyString, wxMenu *subMenu = NULL) = 0;
     virtual void SetRightMenu(int id = wxID_ANY, const wxString& label = wxEmptyString, wxMenu *subMenu = NULL) = 0;
 #endif // __SMARTPHONE__
-
-    // centre the window on screen: this is just a shortcut
-    void CentreOnScreen(int dir = wxBOTH) { DoCentre(dir | wxCENTRE_ON_SCREEN); }
-    void CenterOnScreen(int dir = wxBOTH) { CentreOnScreen(dir); }
-
 
     // implementation only from now on
     // -------------------------------
@@ -208,21 +206,22 @@ public:
     // do the window-specific processing after processing the update event
     virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) ;
 
+    // Reserved for future use
+    virtual void ReservedTopLevelWindowFunc1() {}
+    virtual void ReservedTopLevelWindowFunc2() {}
+    virtual void ReservedTopLevelWindowFunc3() {}
+    virtual void ReservedTopLevelWindowFunc4() {}
+    virtual void ReservedTopLevelWindowFunc5() {}
+    virtual void ReservedTopLevelWindowFunc6() {}
+    virtual void ReservedTopLevelWindowFunc7() {}
+    virtual void ReservedTopLevelWindowFunc8() {}
+    virtual void ReservedTopLevelWindowFunc9() {}
+
 protected:
     // the frame client to screen translation should take account of the
     // toolbar which may shift the origin of the client area
     virtual void DoClientToScreen(int *x, int *y) const;
     virtual void DoScreenToClient(int *x, int *y) const;
-
-    // add support for wxCENTRE_ON_SCREEN
-    virtual void DoCentre(int dir);
-
-    // no need to do client to screen translation to get our position in screen
-    // coordinates: this is already the case
-    virtual void DoGetScreenPosition(int *x, int *y) const
-    {
-        DoGetPosition(x, y);
-    }
 
     // test whether this window makes part of the frame
     // (menubar, toolbar and statusbar are excluded from automatic layout)
@@ -262,11 +261,8 @@ protected:
 #elif defined(__WXMSW__)
     #include "wx/msw/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMSW
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowGTK
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/toplevel.h"
+    #include "wx/gtk/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowGTK
 #elif defined(__WXX11__)
     #include "wx/x11/toplevel.h"

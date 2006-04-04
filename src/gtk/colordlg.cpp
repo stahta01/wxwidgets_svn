@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colordlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -104,10 +108,12 @@ void wxColourDialog::ColourDataToDialog()
         }
     }
 
-    wxGtkString pal(gtk_color_selection_palette_to_string(colors, n_colors));
+    gchar *pal = gtk_color_selection_palette_to_string(colors, n_colors);
 
     GtkSettings *settings = gtk_widget_get_settings(GTK_WIDGET(sel));
-    g_object_set(settings, "gtk-color-palette", pal.c_str(), NULL);
+    g_object_set(settings, "gtk-color-palette", pal, NULL);
+
+    g_free(pal);
 }
 
 void wxColourDialog::DialogToColourData()

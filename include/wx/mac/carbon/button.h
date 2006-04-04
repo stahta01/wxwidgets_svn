@@ -12,10 +12,14 @@
 #ifndef _WX_BUTTON_H_
 #define _WX_BUTTON_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "button.h"
+#endif
+
 #include "wx/control.h"
 #include "wx/gdicmn.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxButtonNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonNameStr;
 
 // Pushbutton
 class WXDLLEXPORT wxButton: public wxButtonBase

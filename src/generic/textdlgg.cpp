@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/textdlgg.cpp
+// Name:        textdlgg.cpp
 // Purpose:     wxTextEntryDialog
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textdlgg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -83,7 +87,7 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
                                      long style,
                                      const wxPoint& pos)
                  : wxDialog(parent, wxID_ANY, caption, pos, wxDefaultSize,
-                            wxDEFAULT_DIALOG_STYLE),
+                            wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
                    m_value(value)
 {
     m_dialogStyle = style;
@@ -96,7 +100,7 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 #if wxUSE_STATTEXT
     // 1) text message
     topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(10,0) );
-#endif
+#endif        
 
     // 2) text ctrl
     m_textctrl = new wxTextCtrl(this, wxID_TEXT, value,
@@ -107,19 +111,25 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 #if wxUSE_VALIDATORS
     wxTextValidator validator( wxFILTER_NONE, &m_value );
     m_textctrl->SetValidator( validator );
-#endif // wxUSE_VALIDATORS
+#endif
+  // wxUSE_VALIDATORS
 
-    // 3) buttons if any
-    wxSizer *buttonSizer = CreateButtonSizer( style & ButtonSizerFlags , true, wxLARGESMALL(10,0) );
-    if(buttonSizer->GetChildren().GetCount() > 0 )
-    {
-        topsizer->Add( buttonSizer, 0, wxEXPAND | wxALL, wxLARGESMALL(10,0) );
-    }
-    else
-    {
-        topsizer->AddSpacer( wxLARGESMALL(15,0) );
-        delete buttonSizer;
-    }
+    // smart phones does not support or do not waste space for wxButtons
+#ifdef __SMARTPHONE__
+
+    SetRightMenu(wxID_CANCEL, _("Cancel"));
+
+#else // __SMARTPHONE__/!__SMARTPHONE__
+
+#if wxUSE_STATLINE
+    // 3) static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif
+
+    // 4) buttons
+    topsizer->Add( CreateButtonSizer( style ), 0, wxEXPAND | wxALL, 10 );
+
+#endif // !__SMARTPHONE__
 
     SetAutoLayout( true );
     SetSizer( topsizer );
@@ -167,7 +177,7 @@ void wxTextEntryDialog::SetTextValidator( long style )
     m_textctrl->SetValidator( validator );
 }
 
-void wxTextEntryDialog::SetTextValidator( const wxTextValidator& validator )
+void wxTextEntryDialog::SetTextValidator( wxTextValidator& validator )
 {
     m_textctrl->SetValidator( validator );
 }

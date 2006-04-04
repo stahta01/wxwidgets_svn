@@ -9,14 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "tabctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
-
-#if wxUSE_TAB_DIALOG
 
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -179,4 +181,3 @@ void wxTabCtrl::SetPadding(const wxSize& padding)
 #endif
     // __WIN95__
 
-#endif // wxUSE_TAB_DIALOG

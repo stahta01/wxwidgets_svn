@@ -12,13 +12,17 @@
 #ifndef _WX_FRAME_H_
 #define _WX_FRAME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "frame.h"
+#endif
+
 #include "wx/window.h"
 #include "wx/toolbar.h"
 #include "wx/accel.h"
 #include "wx/icon.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxFrameNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxStatusBar;

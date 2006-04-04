@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -52,7 +56,7 @@ struct WXDLLEXPORT wxPaintDCInfo
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_OBJARRAY(wxArrayDCInfo)
+WX_DEFINE_OBJARRAY(wxArrayDCInfo);
 
 // ----------------------------------------------------------------------------
 // macros
@@ -253,7 +257,7 @@ wxPaintDC::~wxPaintDC()
 
         wxCHECK_RET( info, wxT("existing DC should have a cache entry") );
 
-        if ( --info->count == 0 )
+        if ( !--info->count )
         {
             ::EndPaint(GetHwndOf(m_canvas), &g_paintStruct);
 
@@ -338,7 +342,7 @@ wxPaintDCEx::~wxPaintDCEx()
 
     wxCHECK_RET( info, wxT("existing DC should have a cache entry") );
 
-    if ( --info->count == 0 )
+    if ( !--info->count )
     {
         RestoreDC((HDC) m_hDC, saveState);
         ms_cache.RemoveAt(index);

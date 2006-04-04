@@ -31,6 +31,9 @@
 #include "glib.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
+#ifndef __WXGTK20__
+#include "gtk/gtkfeatures.h"
+#endif
 #include "gdk/gdkx.h"
 
 #ifdef HAVE_X11_XKBLIB_H
@@ -64,7 +67,7 @@ void wxBell()
 
 /* Don't synthesize KeyUp events holding down a key and producing
    KeyDown events with autorepeat. */
-#ifdef HAVE_X11_XKBLIB_H
+#if defined(HAVE_X11_XKBLIB_H) && !(defined(__WXGPE__))
 bool wxSetDetectableAutoRepeat( bool flag )
 {
     Bool result;
@@ -78,6 +81,7 @@ bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
 }
 #endif
 
+#ifdef __WXGTK20__
 // Escapes string so that it is valid Pango markup XML string:
 wxString wxEscapeStringForPangoMarkup(const wxString& str)
 {
@@ -111,6 +115,7 @@ wxString wxEscapeStringForPangoMarkup(const wxString& str)
     }
     return out;
 }
+#endif
 
 
 // ----------------------------------------------------------------------------
@@ -157,13 +162,17 @@ bool wxColourDisplay()
 
 int wxDisplayDepth()
 {
-    return gdk_drawable_get_visual( wxGetRootWindow()->window )->depth;
+    return gdk_window_get_visual( wxGetRootWindow()->window )->depth;
 }
 
 wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
 {
     static wxToolkitInfo info;
+#ifdef __WXGTK20__
     info.shortName = _T("gtk2");
+#else
+    info.shortName = _T("gtk");
+#endif
     info.name = _T("wxGTK");
 #ifdef __WXUNIVERSAL__
     info.shortName << _T("univ");

@@ -12,6 +12,10 @@
 #ifndef _WX_WXSTRCONVH__
 #define _WX_WXSTRCONVH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "strconv.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/wxchar.h"
 #include "wx/buffer.h"
@@ -28,73 +32,30 @@
 
 #if wxUSE_WCHAR_T
 
-// the error value returned by wxMBConv methods
-#define wxCONV_FAILED ((size_t)-1)
-
 // ----------------------------------------------------------------------------
 // wxMBConv (abstract base class for conversions)
 // ----------------------------------------------------------------------------
 
-// When deriving a new class from wxMBConv you must reimplement ToWChar() and
-// FromWChar() methods which are not pure virtual only for historical reasons,
-// don't let the fact that the existing classes implement MB2WC/WC2MB() instead
-// confuse you.
-//
-// And you might need to override GetMBNulLen() as well.
 class WXDLLIMPEXP_BASE wxMBConv
 {
 public:
-    // The functions doing actual conversion from/to narrow to/from wide
-    // character strings.
+    // the actual conversion takes place here
     //
-    // On success, the return value is the length (i.e. the number of
-    // characters, not bytes) of the converted string including any trailing
-    // L'\0' or (possibly multiple) '\0'(s). If the conversion fails or if
-    // there is not enough space for everything, including the trailing NUL
-    // character(s), in the output buffer, (size_t)-1 is returned.
-    //
-    // In the special case when dstLen is 0 (outputBuf may be NULL then) the
-    // return value is the length of the needed buffer but nothing happens
-    // otherwise. If srcLen is -1, the entire string, up to and including the
-    // trailing NUL(s), is converted, otherwise exactly srcLen bytes are.
-    //
-    // Typical usage:
-    //
-    //          size_t dstLen = conv.ToWChar(NULL, 0, src);
-    //          if ( dstLen != wxCONV_FAILED )
-    //              ... handle error ...
-    //          wchar_t *wbuf = new wchar_t[dstLen];
-    //          conv.ToWChar(wbuf, dstLen, src);
-    //
-    virtual size_t ToWChar(wchar_t *dst, size_t dstLen,
-                           const char *src, size_t srcLen = -1) const;
+    // note that outputSize is the size of the output buffer, not the length of input
+    // (the latter is always supposed to be NUL-terminated)
+    virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const = 0;
+    virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const = 0;
 
-    virtual size_t FromWChar(char *dst, size_t dstLen,
-                             const wchar_t *src, size_t srcLen = -1) const;
+    // MB <-> WC
+    const wxWCharBuffer cMB2WC(const char *psz) const;
+    const wxCharBuffer cWC2MB(const wchar_t *psz) const;
 
-
-    // Convenience functions for translating NUL-terminated strings: returns
-    // the buffer containing the converted string or NULL pointer if the
-    // conversion failed.
-    const wxWCharBuffer cMB2WC(const char *in) const;
-    const wxCharBuffer cWC2MB(const wchar_t *in) const;
-
-    // Convenience functions for converting strings which may contain embedded
-    // NULs and don't have to be NUL-terminated.
+    // MB <-> WC for strings with embedded null characters
     //
-    // inLen is the length of the buffer including trailing NUL if any: if the
-    // last 4 bytes of the buffer are all NULs, these functions are more
-    // efficient as they avoid copying the string, but otherwise a copy is made
-    // internally which could be quite bad for (very) long strings.
-    //
-    // outLen receives, if not NULL, the length of the converted string or 0 if
-    // the conversion failed (returning 0 and not -1 in this case makes it
-    // difficult to distinguish between failed conversion and empty input but
-    // this is done for backwards compatibility)
-    const wxWCharBuffer
-        cMB2WC(const char *in, size_t inLen, size_t *outLen) const;
-    const wxCharBuffer
-        cWC2MB(const wchar_t *in, size_t inLen, size_t *outLen) const;
+    // pszLen length of the input string
+    // pOutSize gets the final size of the converted string
+    const wxWCharBuffer cMB2WC(const char *psz, size_t pszLen, size_t* pOutSize) const;
+    const wxCharBuffer cWC2MB(const wchar_t *psz, size_t pszLen, size_t* pOutSize) const;
 
     // convenience functions for converting MB or WC to/from wxWin default
 #if wxUSE_UNICODE
@@ -108,44 +69,6 @@ public:
     const wxCharBuffer cWC2WX(const wchar_t *psz) const { return cWC2MB(psz); }
     const wxWCharBuffer cWX2WC(const char *psz) const { return cMB2WC(psz); }
 #endif // Unicode/ANSI
-
-    // this function is used in the implementation of cMB2WC() to distinguish
-    // between the following cases:
-    //
-    //      a) var width encoding with strings terminated by a single NUL
-    //         (usual multibyte encodings): return 1 in this case
-    //      b) fixed width encoding with 2 bytes/char and so terminated by
-    //         2 NULs (UTF-16/UCS-2 and variants): return 2 in this case
-    //      c) fixed width encoding with 4 bytes/char and so terminated by
-    //         4 NULs (UTF-32/UCS-4 and variants): return 4 in this case
-    //
-    // anything else is not supported currently and -1 should be returned
-    virtual size_t GetMBNulLen() const { return 1; }
-
-    // return the maximal value currently returned by GetMBNulLen() for any
-    // encoding
-    static size_t GetMaxMBNulLen() { return 4 /* for UTF-32 */; }
-
-
-    // The old conversion functions. The existing classes currently mostly
-    // implement these ones but we're in transition to using To/FromWChar()
-    // instead and any new classes should implement just the new functions.
-    // For now, however, we provide default implementation of To/FromWChar() in
-    // this base class in terms of MB2WC/WC2MB() to avoid having to rewrite all
-    // the conversions at once.
-    //
-    // On success, the return value is the length (i.e. the number of
-    // characters, not bytes) not counting the trailing NUL(s) of the converted
-    // string. On failure, (size_t)-1 is returned. In the special case when
-    // outputBuf is NULL the return value is the same one but nothing is
-    // written to the buffer.
-    //
-    // Note that outLen is the length of the output buffer, not the length of
-    // the input (which is always supposed to be terminated by one or more
-    // NULs, as appropriate for the encoding)!
-    virtual size_t MB2WC(wchar_t *out, const char *in, size_t outLen) const;
-    virtual size_t WC2MB(char *out, const wchar_t *in, size_t outLen) const;
-
 
     // virtual dtor for any base class
     virtual ~wxMBConv();
@@ -178,28 +101,15 @@ public:
     wxConvBrokenFileNames(const wxChar *charset);
     virtual ~wxConvBrokenFileNames() { delete m_conv; }
 
-    virtual size_t MB2WC(wchar_t *out, const char *in, size_t outLen) const
-    {
-        return m_conv->MB2WC(out, in, outLen);
-    }
-
-    virtual size_t WC2MB(char *out, const wchar_t *in, size_t outLen) const
-    {
-        return m_conv->WC2MB(out, in, outLen);
-    }
-
-    virtual size_t GetMBNulLen() const
-    {
-        // cast needed to call a private function
-        return m_conv->GetMBNulLen();
-    }
+    virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
+    virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
 
 private:
     // the conversion object we forward to
     wxMBConv *m_conv;
 };
 
-#endif // __UNIX__
+#endif
 
 // ----------------------------------------------------------------------------
 // wxMBConvUTF7 (for conversion using UTF7 encoding)
@@ -219,7 +129,7 @@ public:
 class WXDLLIMPEXP_BASE wxMBConvUTF8 : public wxMBConv
 {
 public:
-    enum {
+    enum { 
         MAP_INVALID_UTF8_NOT = 0,
         MAP_INVALID_UTF8_TO_PUA = 1,
         MAP_INVALID_UTF8_TO_OCTAL = 2
@@ -228,26 +138,16 @@ public:
     wxMBConvUTF8(int options = MAP_INVALID_UTF8_NOT) : m_options(options) { }
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
     virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
-
+    
 private:
     int m_options;
-};
-
-// ----------------------------------------------------------------------------
-// wxMBConvUTF16Base: for both LE and BE variants
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxMBConvUTF16Base : public wxMBConv
-{
-public:
-    virtual size_t GetMBNulLen() const { return 2; }
 };
 
 // ----------------------------------------------------------------------------
 // wxMBConvUTF16LE (for conversion using UTF16 Little Endian encoding)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMBConvUTF16LE : public wxMBConvUTF16Base
+class WXDLLIMPEXP_BASE wxMBConvUTF16LE : public wxMBConv
 {
 public:
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
@@ -258,7 +158,7 @@ public:
 // wxMBConvUTF16BE (for conversion using UTF16 Big Endian encoding)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMBConvUTF16BE : public wxMBConvUTF16Base
+class WXDLLIMPEXP_BASE wxMBConvUTF16BE : public wxMBConv
 {
 public:
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
@@ -266,20 +166,10 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// wxMBConvUTF32Base: base class for both LE and BE variants
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxMBConvUTF32Base : public wxMBConv
-{
-public:
-    virtual size_t GetMBNulLen() const { return 4; }
-};
-
-// ----------------------------------------------------------------------------
 // wxMBConvUTF32LE (for conversion using UTF32 Little Endian encoding)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMBConvUTF32LE : public wxMBConvUTF32Base
+class WXDLLIMPEXP_BASE wxMBConvUTF32LE : public wxMBConv
 {
 public:
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
@@ -290,7 +180,7 @@ public:
 // wxMBConvUTF32BE (for conversion using UTF32 Big Endian encoding)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMBConvUTF32BE : public wxMBConvUTF32Base
+class WXDLLIMPEXP_BASE wxMBConvUTF32BE : public wxMBConv
 {
 public:
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
@@ -318,7 +208,6 @@ public:
 
     virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
     virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
-    virtual size_t GetMBNulLen() const;
 
     void Clear() ;
 

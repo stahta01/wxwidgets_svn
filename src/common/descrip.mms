@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 19 January 2006                                                     *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 9 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -18,11 +18,6 @@ CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
 .else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm
-.else
 .ifdef __WXX11__
 CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)
@@ -31,7 +26,6 @@ CC_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 .else
 CXX_DEFINE =
 CC_DEFINE =
-.endif
 .endif
 .endif
 .endif
@@ -79,12 +73,10 @@ OBJECTS = \
 		dobjcmn.obj,\
 		docmdi.obj,\
 		docview.obj,\
-		dpycmn.obj,\
 		dynarray.obj,\
 		dynlib.obj,\
 		encconv.obj,\
 		event.obj,\
-		evtloopcmn.obj,\
 		extended.obj,\
 		fddlgcmn.obj,\
 		ffile.obj,\
@@ -143,7 +135,6 @@ OBJECTS1=fs_inet.obj,\
 		process.obj,\
 		protocol.obj,\
 		quantize.obj,\
-		radiocmn.obj,\
 		rendcmn.obj,\
 		sckaddr.obj,\
 		sckfile.obj,\
@@ -222,12 +213,10 @@ SOURCES = \
 		dobjcmn.cpp,\
 		docmdi.cpp,\
 		docview.cpp,\
-		dpycmn.cpp,\
 		dynarray.cpp,\
 		dynlib.cpp,\
 		encconv.cpp,\
 		event.cpp,\
-		evtloopcmn.cpp,\
 		extended.c,\
 		ffile.cpp,\
 		fddlgcmn.cpp,\
@@ -286,7 +275,6 @@ SOURCES = \
 		process.cpp,\
 		protocol.cpp,\
 		quantize.cpp,\
-		radiocmn.cpp,\
 		rendcmn.cpp,\
 		rgncmn.cpp,\
 		sckaddr.cpp,\
@@ -360,18 +348,12 @@ all : $(SOURCES)
 	library [--.lib]libwx_gtk.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk.olb $(OBJECTS2)
 .else
-.ifdef __WXGTK2__
-	library [--.lib]libwx_gtk2.olb $(OBJECTS)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
-.else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS1)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11)
-.endif
 .endif
 .endif
 .endif
@@ -409,7 +391,6 @@ dynarray.obj : dynarray.cpp
 dynlib.obj : dynlib.cpp
 encconv.obj : encconv.cpp
 event.obj : event.cpp
-evtloopcmn.obj : evtloopcmn.cpp
 extended.obj : extended.c
 ffile.obj : ffile.cpp
 fddlgcmn.obj : fddlgcmn.cpp
@@ -468,7 +449,6 @@ prntbase.obj : prntbase.cpp
 process.obj : process.cpp
 protocol.obj : protocol.cpp
 quantize.obj : quantize.cpp
-radiocmn.obj : radiocmn.cpp
 rendcmn.obj : rendcmn.cpp
 rgncmn.obj : rgncmn.cpp
 sckaddr.obj : sckaddr.cpp
@@ -525,4 +505,3 @@ xti.obj : xti.cpp
 xtistrm.obj : xtistrm.cpp
 xtixml.obj : xtixml.cpp
 uri.obj : uri.cpp
-dpycmn.obj : dpycmn.cpp

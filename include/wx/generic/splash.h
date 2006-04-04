@@ -12,6 +12,10 @@
 #ifndef _WX_SPLASH_H_
 #define _WX_SPLASH_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "splash.h"
+#endif
+
 #include "wx/bitmap.h"
 #include "wx/timer.h"
 #include "wx/frame.h"

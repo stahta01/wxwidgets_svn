@@ -144,6 +144,7 @@ PALMOS_LOWLEVEL_SRC = \
 ../../src/palmos/dcprint.cpp \
 ../../src/palmos/dcscreen.cpp \
 ../../src/palmos/dib.cpp \
+../../src/palmos/display.cpp \
 ../../src/palmos/enhmeta.cpp \
 ../../src/palmos/evtloop.cpp \
 ../../src/palmos/font.cpp \
@@ -239,7 +240,6 @@ GUI_CMN_SRC = \
 ../../src/common/dpycmn.cpp \
 ../../src/common/dseldlg.cpp \
 ../../src/common/effects.cpp \
-../../src/common/evtloopcmn.cpp \
 ../../src/common/fddlgcmn.cpp \
 ../../src/common/fldlgcmn.cpp \
 ../../src/common/fontcmn.cpp \

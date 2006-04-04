@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/gdicmn.cpp
+// Name:        gdicmn.cpp
 // Purpose:     Common GDI classes
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gdicmn.h"
+#endif
 
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
@@ -488,7 +492,6 @@ wxString wxColourDatabase::FindName(const wxColour& colour) const
 // deprecated wxColourDatabase methods
 // ----------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_6
 wxColour *wxColourDatabase::FindColour(const wxString& name)
 {
     // This function is deprecated, use Find() instead.
@@ -517,7 +520,6 @@ wxColour *wxColourDatabase::FindColour(const wxString& name)
 
     return new wxColour(s_col);
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ============================================================================
 // stock objects
@@ -952,3 +954,4 @@ wxResourceCache::~wxResourceCache ()
         node = node->GetNext ();
     }
 }
+

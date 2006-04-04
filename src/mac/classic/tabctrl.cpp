@@ -9,9 +9,11 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/defs.h"
+#ifdef __GNUG__
+#pragma implementation "tabctrl.h"
+#endif
 
-#if wxUSE_TAB_DIALOG
+#include "wx/defs.h"
 
 #include "wx/control.h"
 #include "wx/tabctrl.h"
@@ -200,4 +202,3 @@ wxTabEvent::wxTabEvent(wxEventType commandType, int id):
 {
 }
 
-#endif // wxUSE_TAB_DIALOG

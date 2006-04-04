@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statusbr.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,9 +21,10 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/settings.h"
-    #include "wx/dcclient.h"
+  #include "wx/setup.h"
+  #include "wx/frame.h"
+  #include "wx/settings.h"
+  #include "wx/dcclient.h"
 #endif
 
 #if wxUSE_NATIVE_STATUSBAR
@@ -268,3 +273,4 @@ void wxStatusBarPalm::DoMoveWindow(int x, int y, int width, int height)
 }
 
 #endif // wxUSE_NATIVE_STATUSBAR
+

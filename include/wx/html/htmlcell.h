@@ -8,8 +8,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLCELL_H_
 #define _WX_HTMLCELL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlcell.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -145,13 +150,6 @@ enum
 };
 
 
-// Superscript/subscript/normal script mode of a cell
-enum wxHtmlScriptMode
-{
-    wxHTML_SCRIPT_NORMAL,
-    wxHTML_SCRIPT_SUB,
-    wxHTML_SCRIPT_SUP
-};
 
 
 // ---------------------------------------------------------------------------
@@ -182,10 +180,6 @@ public:
 
     int GetHeight() const {return m_Height;}
     int GetDescent() const {return m_Descent;}
-
-    void SetScriptMode(wxHtmlScriptMode mode, long previousBase);
-    wxHtmlScriptMode GetScriptMode() const { return m_ScriptMode; }
-    long GetScriptBaseline() { return m_ScriptBaseline; }
 
     // Formatting cells are not visible on the screen, they only alter
     // renderer's state.
@@ -308,26 +302,21 @@ public:
         { return wxEmptyString; }
 
 protected:
-    // pointer to the next cell
     wxHtmlCell *m_Next;
-    // pointer to parent cell
+            // pointer to the next cell
     wxHtmlContainerCell *m_Parent;
-
-    // dimensions of fragment (m_Descent is used to position text & images)
+            // pointer to parent cell
     long m_Width, m_Height, m_Descent;
-    // position where the fragment is drawn:
+            // dimensions of fragment
+            // m_Descent is used to position text&images..
     long m_PosX, m_PosY;
-
-    // superscript/subscript/normal:
-    wxHtmlScriptMode m_ScriptMode;
-    long m_ScriptBaseline;
-
-    // destination address if this fragment is hypertext link, NULL otherwise
+            // position where the fragment is drawn
     wxHtmlLinkInfo *m_Link;
-    // true if this cell can be placed on pagebreak, false otherwise
+            // destination address if this fragment is hypertext link, NULL otherwise
     bool m_CanLiveOnPagebreak;
-    // unique identifier of the cell, generated from "id" property of tags
+            // true if this cell can be placed on pagebreak, false otherwise
     wxString m_id;
+            // unique identifier of the cell, generated from "id" property of tags
 
     DECLARE_ABSTRACT_CLASS(wxHtmlCell)
     DECLARE_NO_COPY_CLASS(wxHtmlCell)
@@ -349,7 +338,7 @@ protected:
 class WXDLLIMPEXP_HTML wxHtmlWordCell : public wxHtmlCell
 {
 public:
-    wxHtmlWordCell(const wxString& word, const wxDC& dc);
+    wxHtmlWordCell(const wxString& word, wxDC& dc);
     void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
               wxHtmlRenderingInfo& info);
     wxCursor GetCursor() const;
@@ -359,8 +348,8 @@ public:
     void SetPreviousWord(wxHtmlWordCell *cell);
 
 protected:
-    void SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const;
-    void Split(const wxDC& dc,
+    void SetSelectionPrivPos(wxDC& dc, wxHtmlSelection *s) const;
+    void Split(wxDC& dc,
                const wxPoint& selFrom, const wxPoint& selTo,
                unsigned& pos1, unsigned& pos2) const;
 
@@ -430,8 +419,6 @@ public:
 #if WXWIN_COMPATIBILITY_2_4
     wxDEPRECATED( wxHtmlCell* GetFirstCell() const );
 #endif
-    // returns last child cell:
-    wxHtmlCell* GetLastChild() const { return m_LastCell; }
 
     // see comment in wxHtmlCell about this method
     virtual bool IsTerminalCell() const { return false; }
@@ -445,7 +432,7 @@ public:
 
     // Removes indentation on top or bottom of the container (i.e. above or
     // below first/last terminal cell). For internal use only.
-    virtual void RemoveExtraSpacing(bool top, bool bottom);
+    void RemoveExtraSpacing(bool top, bool bottom);
 
     // Returns the maximum possible length of the container.
     // Call Layout at least once before using GetMaxTotalWidth()

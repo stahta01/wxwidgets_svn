@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "font.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,6 +29,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
@@ -561,7 +566,7 @@ void wxNativeFontInfo::SetUnderlined(bool underlined)
     lf.lfUnderline = underlined;
 }
 
-void wxNativeFontInfo::SetFaceName(const wxString& facename)
+void wxNativeFontInfo::SetFaceName(wxString facename)
 {
     wxStrncpy(lf.lfFaceName, facename, WXSIZEOF(lf.lfFaceName));
 }
@@ -759,6 +764,10 @@ wxString wxNativeFontInfo::ToString() const
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
+
+void wxFont::Init()
+{
+}
 
 bool wxFont::Create(const wxNativeFontInfo& info, WXHFONT hFont)
 {
@@ -1043,3 +1052,4 @@ bool wxFont::IsFixedWidth() const
 
     return wxFontBase::IsFixedWidth();
 }
+

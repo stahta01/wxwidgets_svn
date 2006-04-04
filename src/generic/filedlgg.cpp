@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/filedlgg.cpp
+// Name:        filedlgg.cpp
 // Purpose:     wxGenericFileDialog
 // Author:      Robert Roebling
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "filedlgg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -30,7 +34,6 @@
 #include "wx/stattext.h"
 #include "wx/debug.h"
 #include "wx/log.h"
-#include "wx/longlong.h"
 #include "wx/intl.h"
 #include "wx/msgdlg.h"
 #include "wx/sizer.h"
@@ -86,83 +89,56 @@
 // ----------------------------------------------------------------------------
 
 static
-int wxCALLBACK wxFileDataNameCompare( long data1, long data2, long sortOrder)
+int wxCALLBACK wxFileDataNameCompare( long data1, long data2, long data)
 {
-     wxFileData *fd1 = (wxFileData *)wxUIntToPtr(data1);
-     wxFileData *fd2 = (wxFileData *)wxUIntToPtr(data2);
-
-     if (fd1->GetFileName() == wxT(".."))
-         return -sortOrder;
-     if (fd2->GetFileName() == wxT(".."))
-         return sortOrder;
-     if (fd1->IsDir() && !fd2->IsDir())
-         return -sortOrder;
-     if (fd2->IsDir() && !fd1->IsDir())
-         return sortOrder;
-
-     return sortOrder*wxStrcmp( fd1->GetFileName(), fd2->GetFileName() );
+     wxFileData *fd1 = (wxFileData*)data1;
+     wxFileData *fd2 = (wxFileData*)data2;
+     if (fd1->GetFileName() == wxT("..")) return -data;
+     if (fd2->GetFileName() == wxT("..")) return data;
+     if (fd1->IsDir() && !fd2->IsDir()) return -data;
+     if (fd2->IsDir() && !fd1->IsDir()) return data;
+     return data*wxStrcmp( fd1->GetFileName(), fd2->GetFileName() );
 }
 
 static
-int wxCALLBACK wxFileDataSizeCompare(long data1, long data2, long sortOrder)
+int wxCALLBACK wxFileDataSizeCompare( long data1, long data2, long data)
 {
-     wxFileData *fd1 = (wxFileData *)wxUIntToPtr(data1);
-     wxFileData *fd2 = (wxFileData *)wxUIntToPtr(data2);
-
-     if (fd1->GetFileName() == wxT(".."))
-         return -sortOrder;
-     if (fd2->GetFileName() == wxT(".."))
-         return sortOrder;
-     if (fd1->IsDir() && !fd2->IsDir())
-         return -sortOrder;
-     if (fd2->IsDir() && !fd1->IsDir())
-         return sortOrder;
-     if (fd1->IsLink() && !fd2->IsLink())
-         return -sortOrder;
-     if (fd2->IsLink() && !fd1->IsLink())
-         return sortOrder;
-
-     return fd1->GetSize() > fd2->GetSize() ? sortOrder : -sortOrder;
+     wxFileData *fd1 = (wxFileData*)data1;
+     wxFileData *fd2 = (wxFileData*)data2;
+     if (fd1->GetFileName() == wxT("..")) return -data;
+     if (fd2->GetFileName() == wxT("..")) return data;
+     if (fd1->IsDir() && !fd2->IsDir()) return -data;
+     if (fd2->IsDir() && !fd1->IsDir()) return data;
+     if (fd1->IsLink() && !fd2->IsLink()) return -data;
+     if (fd2->IsLink() && !fd1->IsLink()) return data;
+     return data*(fd1->GetSize() - fd2->GetSize());
 }
 
 static
-int wxCALLBACK wxFileDataTypeCompare(long data1, long data2, long sortOrder)
+int wxCALLBACK wxFileDataTypeCompare( long data1, long data2, long data)
 {
-     wxFileData *fd1 = (wxFileData *)wxUIntToPtr(data1);
-     wxFileData *fd2 = (wxFileData *)wxUIntToPtr(data2);
-
-     if (fd1->GetFileName() == wxT(".."))
-         return -sortOrder;
-     if (fd2->GetFileName() == wxT(".."))
-         return sortOrder;
-     if (fd1->IsDir() && !fd2->IsDir())
-         return -sortOrder;
-     if (fd2->IsDir() && !fd1->IsDir())
-         return sortOrder;
-     if (fd1->IsLink() && !fd2->IsLink())
-         return -sortOrder;
-     if (fd2->IsLink() && !fd1->IsLink())
-         return sortOrder;
-
-     return sortOrder*wxStrcmp( fd1->GetFileType(), fd2->GetFileType() );
+     wxFileData *fd1 = (wxFileData*)data1;
+     wxFileData *fd2 = (wxFileData*)data2;
+     if (fd1->GetFileName() == wxT("..")) return -data;
+     if (fd2->GetFileName() == wxT("..")) return data;
+     if (fd1->IsDir() && !fd2->IsDir()) return -data;
+     if (fd2->IsDir() && !fd1->IsDir()) return data;
+     if (fd1->IsLink() && !fd2->IsLink()) return -data;
+     if (fd2->IsLink() && !fd1->IsLink()) return data;
+     return data*wxStrcmp( fd1->GetFileType(), fd2->GetFileType() );
 }
 
 static
-int wxCALLBACK wxFileDataTimeCompare(long data1, long data2, long sortOrder)
+int wxCALLBACK wxFileDataTimeCompare( long data1, long data2, long data)
 {
-     wxFileData *fd1 = (wxFileData *)wxUIntToPtr(data1);
-     wxFileData *fd2 = (wxFileData *)wxUIntToPtr(data2);
+     wxFileData *fd1 = (wxFileData*)data1;
+     wxFileData *fd2 = (wxFileData*)data2;
+     if (fd1->GetFileName() == wxT("..")) return -data;
+     if (fd2->GetFileName() == wxT("..")) return data;
+     if (fd1->IsDir() && !fd2->IsDir()) return -data;
+     if (fd2->IsDir() && !fd1->IsDir()) return data;
 
-     if (fd1->GetFileName() == wxT(".."))
-         return -sortOrder;
-     if (fd2->GetFileName() == wxT(".."))
-         return sortOrder;
-     if (fd1->IsDir() && !fd2->IsDir())
-         return -sortOrder;
-     if (fd2->IsDir() && !fd1->IsDir())
-         return sortOrder;
-
-     return fd1->GetDateTime().IsLaterThan(fd2->GetDateTime()) ? sortOrder : -sortOrder;
+     return fd1->GetDateTime().IsLaterThan(fd2->GetDateTime()) ? int(data) : -int(data);
 }
 
 #if defined(__WXWINCE__)
@@ -250,7 +226,7 @@ void wxFileData::ReadData()
             NULL);
 
     if (fileHandle != INVALID_HANDLE_VALUE)
-    {
+    { 
         m_size = GetFileSize(fileHandle, 0);
         CloseHandle(fileHandle);
     }
@@ -278,8 +254,7 @@ void wxFileData::ReadData()
 
     m_type |= (buff.st_mode & S_IFDIR) != 0 ? is_dir : 0;
     m_type |= (buff.st_mode & wxS_IXUSR) != 0 ? is_exe : 0;
-
-    m_size = buff.st_size;
+    m_size = (long)buff.st_size;
 
     m_dateTime = buff.st_mtime;
 #endif
@@ -297,7 +272,7 @@ void wxFileData::ReadData()
                          buff.st_mode & wxS_IWOTH ? _T('w') : _T('-'),
                          buff.st_mode & wxS_IXOTH ? _T('x') : _T('-'));
 #elif defined(__WIN32__)
-    DWORD attribs = ::GetFileAttributes(m_filePath.c_str());
+    DWORD attribs = GetFileAttributes(m_filePath.fn_str());
     if (attribs != (DWORD)-1)
     {
         m_permissions.Printf(_T("%c%c%c%c"),
@@ -353,8 +328,7 @@ wxString wxFileData::GetHint() const
     else if (IsDrive())
         s += _("<DRIVE>");
     else // plain file
-        s += wxString::Format(_("%ld bytes"),
-                              wxLongLong(m_size).ToString().c_str());
+        s += wxString::Format( _("%ld bytes"), m_size );
 
     s += wxT(' ');
 
@@ -366,7 +340,7 @@ wxString wxFileData::GetHint() const
     }
 
     return s;
-}
+};
 
 wxString wxFileData::GetEntry( fileListFieldType num ) const
 {
@@ -379,7 +353,7 @@ wxString wxFileData::GetEntry( fileListFieldType num ) const
 
         case FileList_Size:
             if (!IsDir() && !IsLink() && !IsDrive())
-                s = wxLongLong(m_size).ToString();
+                s.Printf(_T("%ld"), m_size);
             break;
 
         case FileList_Type:
@@ -427,7 +401,7 @@ void wxFileData::MakeItem( wxListItem &item )
         if ( dg.Ok() )
             item.SetTextColour(dg);
     }
-    item.m_data = wxPtrToUInt(this);
+    item.m_data = (long)this;
 }
 
 //-----------------------------------------------------------------------------
@@ -719,7 +693,7 @@ void wxFileCtrl::MakeDir()
     if (id != -1)
     {
         SortItems(m_sort_field, m_sort_foward);
-        id = FindItem( 0, wxPtrToUInt(fd) );
+        id = FindItem( 0, (long)fd );
         EnsureVisible( id );
         EditLabel( id );
     }
@@ -882,30 +856,35 @@ void wxFileCtrl::OnListColClick( wxListEvent &event )
     SortItems(m_sort_field, m_sort_foward);
 }
 
-void wxFileCtrl::SortItems(wxFileData::fileListFieldType field, bool forward)
+void wxFileCtrl::SortItems(wxFileData::fileListFieldType field, bool foward)
 {
     m_sort_field = field;
-    m_sort_foward = forward;
-    const long sort_dir = forward ? 1 : -1;
+    m_sort_foward = foward;
+    long sort_dir = foward ? 1 : -1;
 
     switch (m_sort_field)
     {
-        case wxFileData::FileList_Size :
-            wxListCtrl::SortItems(wxFileDataSizeCompare, sort_dir);
-            break;
-
-        case wxFileData::FileList_Type :
-            wxListCtrl::SortItems(wxFileDataTypeCompare, sort_dir);
-            break;
-
-        case wxFileData::FileList_Time :
-            wxListCtrl::SortItems(wxFileDataTimeCompare, sort_dir);
-            break;
-
         case wxFileData::FileList_Name :
-        default :
-            wxListCtrl::SortItems(wxFileDataNameCompare, sort_dir);
+        {
+            wxListCtrl::SortItems((wxListCtrlCompare)wxFileDataNameCompare, sort_dir);
             break;
+        }
+        case wxFileData::FileList_Size :
+        {
+             wxListCtrl::SortItems((wxListCtrlCompare)wxFileDataSizeCompare, sort_dir);
+            break;
+        }
+        case wxFileData::FileList_Type :
+        {
+             wxListCtrl::SortItems((wxListCtrlCompare)wxFileDataTypeCompare, sort_dir);
+             break;
+        }
+        case wxFileData::FileList_Time :
+        {
+             wxListCtrl::SortItems((wxListCtrlCompare)wxFileDataTimeCompare, sort_dir);
+             break;
+        }
+        default : break;
     }
 }
 
@@ -998,11 +977,7 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
         return true;
 
     if (!wxDialog::Create( parent, wxID_ANY, message, pos, wxDefaultSize,
-                           wxDEFAULT_DIALOG_STYLE
-#if !(defined(__PDA__) || defined(__SMARTPHONE__))
-                           | wxRESIZE_BORDER
-#endif
-                           ))
+                           wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER ))
     {
         return false;
     }
@@ -1095,7 +1070,7 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
         mainsizer->Add( buttonsizer, 0, wxALL | wxEXPAND, 5 );
 
     wxBoxSizer *staticsizer = new wxBoxSizer( wxHORIZONTAL );
-    if (is_pda)
+    if (!is_pda)
         staticsizer->Add( new wxStaticText( this, wxID_ANY, _("Current directory:") ), 0, wxRIGHT, 10 );
     m_static = new wxStaticText( this, wxID_ANY, m_dir );
     staticsizer->Add( m_static, 1 );
@@ -1111,18 +1086,21 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
     style2 |= wxSUNKEN_BORDER;
 #endif
 
+    wxSize list_size(500,240);
+    if (is_pda) list_size = wxSize(50,80);
+
     m_list = new wxFileCtrl( this, ID_LIST_CTRL,
                              wxEmptyString, ms_lastShowHidden,
-                             wxDefaultPosition, wxSize(540,200),
+                             wxDefaultPosition, list_size,
                              style2);
 
     if (is_pda)
     {
         // PDAs have a different screen layout
-        mainsizer->Add( m_list, 1, wxEXPAND | wxLEFT|wxRIGHT, 5 );
+        mainsizer->Add( m_list, 1, wxEXPAND|wxSHRINK | wxLEFT|wxRIGHT, 5 );
 
         wxBoxSizer *textsizer = new wxBoxSizer( wxHORIZONTAL );
-        m_text = new wxTextCtrl( this, ID_TEXT, m_fileName, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+        m_text = new wxTextCtrl( this, ID_TEXT, m_fileName, wxDefaultPosition, wxDefaultSize, wxPROCESS_ENTER );
         textsizer->Add( m_text, 1, wxCENTER | wxALL, 5 );
         mainsizer->Add( textsizer, 0, wxEXPAND );
 
@@ -1130,22 +1108,17 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
         m_choice = new wxChoice( this, ID_CHOICE );
         textsizer->Add( m_choice, 1, wxCENTER|wxALL, 5 );
 
-        wxSizer *bsizer = CreateButtonSizer( wxOK|wxCANCEL , false, 5 );
-        if(bsizer->GetChildren().GetCount() > 0 )
-        {
-            mainsizer->Add( bsizer, 0, wxEXPAND | wxALL, 5 );
-        }
-        else
-        {
-            delete bsizer;
-        }
+        buttonsizer = new wxBoxSizer( wxHORIZONTAL );
+        buttonsizer->Add( new wxButton( this, wxID_OK ), 0, wxCENTER | wxALL, 5 );
+        buttonsizer->Add( new wxButton( this, wxID_CANCEL ), 0, wxCENTER | wxALL, 5 );
+        mainsizer->Add( buttonsizer, 0, wxALIGN_RIGHT );
     }
     else
     {
         mainsizer->Add( m_list, 1, wxEXPAND | wxLEFT|wxRIGHT, 10 );
 
         wxBoxSizer *textsizer = new wxBoxSizer( wxHORIZONTAL );
-        m_text = new wxTextCtrl( this, ID_TEXT, m_fileName, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+        m_text = new wxTextCtrl( this, ID_TEXT, m_fileName, wxDefaultPosition, wxDefaultSize, wxPROCESS_ENTER );
         textsizer->Add( m_text, 1, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
         textsizer->Add( new wxButton( this, wxID_OK ), 0, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
         mainsizer->Add( textsizer, 0, wxEXPAND );
@@ -1169,10 +1142,10 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
     {
         mainsizer->Fit( this );
         mainsizer->SetSizeHints( this );
-
+    
         Centre( wxBOTH );
     }
-
+    
     m_text->SetFocus();
 
     ignoreChanges = false;
@@ -1296,7 +1269,9 @@ void wxGenericFileDialog::OnActivated( wxListEvent &event )
 
 void wxGenericFileDialog::OnTextEnter( wxCommandEvent &WXUNUSED(event) )
 {
-    HandleAction( m_text->GetValue() );
+    wxCommandEvent cevent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
+    cevent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent( cevent );
 }
 
 void wxGenericFileDialog::OnTextChange( wxCommandEvent &WXUNUSED(event) )
@@ -1353,16 +1328,9 @@ void wxGenericFileDialog::HandleAction( const wxString &fn )
         return;
 
     wxString filename( fn );
-    if (filename.empty())
-    {
-#ifdef __WXWINCE__
-        EndModal(wxID_CANCEL);
-#endif
-        return;
-    }
-    if (filename == wxT(".")) return;
-
     wxString dir = m_list->GetDir();
+    if (filename.empty()) return;
+    if (filename == wxT(".")) return;
 
     // "some/place/" means they want to chdir not try to load "place"
     bool want_dir = filename.Last() == wxFILE_SEP_PATH;
@@ -1479,7 +1447,8 @@ void wxGenericFileDialog::HandleAction( const wxString &fn )
         }
     }
 
-    EndModal(wxID_OK);
+    wxCommandEvent event;
+    wxDialog::OnOK(event);
 }
 
 void wxGenericFileDialog::OnListOk( wxCommandEvent &WXUNUSED(event) )
@@ -1625,8 +1594,9 @@ void wxGenericFileDialog::UpdateControls()
 
 #ifdef USE_GENERIC_FILEDIALOG
 
-IMPLEMENT_DYNAMIC_CLASS(wxFileDialog, wxGenericFileDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFileDialog, wxGenericFileDialog);
 
 #endif // USE_GENERIC_FILEDIALOG
 
 #endif // wxUSE_FILEDLG
+

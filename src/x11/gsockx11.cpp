@@ -1,17 +1,12 @@
 /* -------------------------------------------------------------------------
  * Project: GSocket (Generic Socket) for WX
- * Name:    src/x11/gsockx11.cpp
+ * Name:    gsockmot.c
  * Purpose: GSocket: X11 part
  * Licence: The wxWindows licence
  * CVSID:   $Id$
  * ------------------------------------------------------------------------- */
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#if defined(__BORLANDC__)
-#pragma hdrstop
-#endif
+#include "wx/setup.h"
 
 #if wxUSE_SOCKETS
 
@@ -36,7 +31,7 @@ extern "C" void wxUnregisterSocketCallback(int fd, wxSocketTableType socketType)
 static void _GSocket_X11_Input(int *fid, void* data)
 {
   GSocket *socket = (GSocket *)data;
-
+  
   socket->Detected_Read();
 }
 

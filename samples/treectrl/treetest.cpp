@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+  #pragma implementation
+  #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -931,6 +936,8 @@ void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
             case WXK_MENU: key = wxT("MENU"); break;
             case WXK_PAUSE: key = wxT("PAUSE"); break;
             case WXK_CAPITAL: key = wxT("CAPITAL"); break;
+            case WXK_PRIOR: key = wxT("PRIOR"); break;
+            case WXK_NEXT: key = wxT("NEXT"); break;
             case WXK_END: key = wxT("END"); break;
             case WXK_HOME: key = wxT("HOME"); break;
             case WXK_LEFT: key = wxT("LEFT"); break;
@@ -999,6 +1006,7 @@ void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
             case WXK_NUMPAD_UP: key = wxT("NUMPAD_UP"); break;
             case WXK_NUMPAD_RIGHT: key = wxT("NUMPAD_RIGHT"); break;
             case WXK_NUMPAD_DOWN: key = wxT("NUMPAD_DOWN"); break;
+            case WXK_NUMPAD_PRIOR: key = wxT("NUMPAD_PRIOR"); break;
             case WXK_NUMPAD_PAGEUP: key = wxT("NUMPAD_PAGEUP"); break;
             case WXK_NUMPAD_PAGEDOWN: key = wxT("NUMPAD_PAGEDOWN"); break;
             case WXK_NUMPAD_END: key = wxT("NUMPAD_END"); break;

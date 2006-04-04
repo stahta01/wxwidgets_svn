@@ -12,7 +12,11 @@
 #ifndef _WX_COLORDLG_H_
 #define _WX_COLORDLG_H_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "colordlg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/dialog.h"
 #include "wx/cmndata.h"
 
@@ -36,8 +40,9 @@ public:
 
     virtual int ShowModal();
 
-protected:
     virtual void DoGetPosition( int *x, int *y ) const;
+
+protected:
     virtual void DoGetSize(int *width, int *height) const;
     virtual void DoGetClientSize(int *width, int *height) const;
     virtual void DoSetSize(int x, int y,

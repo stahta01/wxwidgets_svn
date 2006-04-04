@@ -25,12 +25,12 @@
 class WXDLLIMPEXP_BASE classname                                            \
 {                                                                           \
 public:                                                                     \
-    classname(const chartype *str = NULL)                                   \
+    classname(const chartype *str)                                          \
         : m_str(str ? strdupfunc(str) : NULL)                               \
     {                                                                       \
     }                                                                       \
                                                                             \
-    classname(size_t len)                                                   \
+    classname(size_t len=0)                                                 \
         : m_str((chartype *)malloc((len + 1)*sizeof(chartype)))             \
     {                                                                       \
         m_str[len] = (chartype)0;                                           \
@@ -64,12 +64,6 @@ public:                                                                     \
         return p;                                                           \
     }                                                                       \
                                                                             \
-    void reset()                                                            \
-    {                                                                       \
-        free(m_str);                                                        \
-        m_str = NULL;                                                       \
-    }                                                                       \
-                                                                            \
     classname(const classname& src)                                         \
         : m_str(src.release())                                              \
     {                                                                       \
@@ -88,18 +82,6 @@ public:                                                                     \
         m_str = src.release();                                              \
                                                                             \
         return *this;                                                       \
-    }                                                                       \
-                                                                            \
-    bool extend(size_t len)                                                 \
-    {                                                                       \
-        chartype *                                                          \
-            str = (chartype *)realloc(m_str, (len + 1)*sizeof(chartype));   \
-        if ( !str )                                                         \
-            return false;                                                   \
-                                                                            \
-        m_str = str;                                                        \
-                                                                            \
-        return true;                                                        \
     }                                                                       \
                                                                             \
     chartype *data() { return m_str; }                                      \
@@ -142,13 +124,13 @@ class wxMemoryBufferData
 {
 public:
     // the initial size and also the size added by ResizeIfNeeded()
-    enum { DefBufSize = 1024 };
+    enum { BLOCK_SIZE = 1024 };
 
     friend class wxMemoryBuffer;
 
     // everyting is private as it can only be used by wxMemoryBuffer
 private:
-    wxMemoryBufferData(size_t size = wxMemoryBufferData::DefBufSize)
+    wxMemoryBufferData(size_t size = wxMemoryBufferData::BLOCK_SIZE)
         : m_data(size ? malloc(size) : NULL), m_size(size), m_len(0), m_ref(0)
     {
     }
@@ -160,13 +142,13 @@ private:
         if (newSize > m_size)
         {
             void *dataOld = m_data;
-            m_data = realloc(m_data, newSize + wxMemoryBufferData::DefBufSize);
+            m_data = realloc(m_data, newSize + wxMemoryBufferData::BLOCK_SIZE);
             if ( !m_data )
             {
                 free(dataOld);
             }
 
-            m_size = newSize + wxMemoryBufferData::DefBufSize;
+            m_size = newSize + wxMemoryBufferData::BLOCK_SIZE;
         }
     }
 
@@ -199,7 +181,7 @@ class wxMemoryBuffer
 {
 public:
     // ctor and dtor
-    wxMemoryBuffer(size_t size = wxMemoryBufferData::DefBufSize)
+    wxMemoryBuffer(size_t size = wxMemoryBufferData::BLOCK_SIZE)
     {
         m_bufdata = new wxMemoryBufferData(size);
         m_bufdata->IncRef();
@@ -269,7 +251,7 @@ public:
         m_bufdata->m_len += 1;
     }
 
-    void  AppendData(const void *data, size_t len)
+    void  AppendData(void* data, size_t len)
     {
         memcpy(GetAppendBuf(len), data, len);
         UngetAppendBuf(len);

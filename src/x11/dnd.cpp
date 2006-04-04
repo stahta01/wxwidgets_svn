@@ -1,18 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/dnd.cpp
+// Name:        dnd.cpp
 // Purpose:     wxDropTarget, wxDropSource classes
 // Author:      Julian Smart
 // Id:          $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#if defined(__BORLANDC__)
-#pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dnd.h"
 #endif
+
+#include "wx/setup.h"
 
 #if wxUSE_DRAG_AND_DROP
 
@@ -49,14 +48,14 @@ wxDropTarget::~wxDropTarget()
 bool wxTextDropTarget::OnDrop( long x, long y, const void *data, size_t WXUNUSED(size) )
 {
   OnDropText( x, y, (const char*)data );
-  return true;
+  return TRUE;
 }
 
 bool wxTextDropTarget::OnDropText( long x, long y, const char *psz )
 {
   wxLogDebug( "Got dropped text: %s.", psz );
   wxLogDebug( "At x: %d, y: %d.", (int)x, (int)y );
-  return true;
+  return TRUE;
 }
 
 size_t wxTextDropTarget::GetFormatCount() const
@@ -82,7 +81,7 @@ bool wxFileDropTarget::OnDropFiles( long x, long y, size_t nFiles, const char * 
   {
     wxLogDebug( aszFiles[i] );
   }
-  return true;
+  return TRUE;
 }
 
 bool wxFileDropTarget::OnDrop(long x, long y, const void *data, size_t size )
@@ -93,10 +92,10 @@ bool wxFileDropTarget::OnDrop(long x, long y, const void *data, size_t size )
   for (i = 0; i < size; i++)
     if (text[i] == 0) number++;
 
-  if (number == 0) return true;
-
+  if (number == 0) return TRUE;    
+    
   char **files = new char*[number];
-
+  
   text = (char*) data;
   for ( i = 0; i < number; i++)
   {
@@ -105,10 +104,10 @@ bool wxFileDropTarget::OnDrop(long x, long y, const void *data, size_t size )
     text += len+1;
   }
 
-  bool ret = OnDropFiles( x, y, 1, files );
-
+  bool ret = OnDropFiles( x, y, 1, files ); 
+  
   free( files );
-
+  
   return ret;
 }
 
@@ -141,13 +140,13 @@ wxDropSource::wxDropSource( wxWindow *win )
 wxDropSource::wxDropSource( wxDataObject &data, wxWindow *win )
 {
 #if 0
-  g_blockEventsOnDrag = true;
-
+  g_blockEventsOnDrag = TRUE;
+  
   m_window = win;
   m_widget = win->m_widget;
   if (win->m_wxwindow) m_widget = win->m_wxwindow;
   m_retValue = wxDragCancel;
-
+  
   m_data = &data;
 
   m_defaultCursor = wxCursor( wxCURSOR_NO_ENTRY );
@@ -164,7 +163,7 @@ wxDropSource::~wxDropSource(void)
 {
 //  if (m_data) delete m_data;
 }
-
+   
 wxDragResult wxDropSource::DoDragDrop( int WXUNUSED(flags) )
 {
   //  wxASSERT_MSG( m_data, "wxDragSource: no data" );
@@ -173,15 +172,15 @@ wxDragResult wxDropSource::DoDragDrop( int WXUNUSED(flags) )
 #if 0
   if (!m_data) return (wxDragResult) wxDragNone;
   if (m_data->GetDataSize() == 0) return (wxDragResult) wxDragNone;
-
+  
   RegisterWindow();
-
+  
   // TODO
-
+  
   UnregisterWindow();
-
+  
   g_blockEventsOnDrag = FALSE;
-
+  
   return m_retValue;
 #endif
 }
@@ -192,30 +191,30 @@ void wxDropSource::RegisterWindow(void)
   if (!m_data) return;
 
   wxString formats;
-
+    
   wxDataFormat df = m_data->GetPreferredFormat();
-
-    switch (df)
+  
+    switch (df) 
     {
-      case wxDF_TEXT:
+      case wxDF_TEXT: 
         formats += "text/plain";
-        break;
+	break;
       case wxDF_FILENAME:
         formats += "file:ALL";
-        break;
+	break;
       default:
         break;
     }
-
+  
   char *str = WXSTRINGCAST formats;
-
+  
   // TODO
 }
 
 void wxDropSource::UnregisterWindow(void)
 {
   if (!m_widget) return;
-
+  
   // TODO
 }
 #endif
@@ -224,7 +223,7 @@ wxPrivateDropTarget::wxPrivateDropTarget()
 {
     m_id = wxTheApp->GetAppName();
 }
-
+  
 size_t wxPrivateDropTarget::GetFormatCount() const
 {
     return 1;

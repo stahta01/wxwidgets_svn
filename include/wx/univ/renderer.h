@@ -28,6 +28,10 @@
    implementation of the latter or reimplement itself).
  */
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "renderer.h"
+#endif
+
 #include "wx/renderer.h"
 
 class WXDLLEXPORT wxDC;

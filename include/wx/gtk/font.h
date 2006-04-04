@@ -10,6 +10,10 @@
 #ifndef __GTKFONTH__
 #define __GTKFONTH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface
+#endif
+
 #include "wx/hash.h"
 
 // ----------------------------------------------------------------------------
@@ -29,11 +33,15 @@ class WXDLLIMPEXP_CORE wxFont;
 class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
-    wxFont() { }
+    // ctors and such
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) : wxFontBase() { Init(); Ref(font); }
 
     // wxGTK-specific
     wxFont(const wxString& fontname)
     {
+        Init();
+
         Create(fontname);
     }
 
@@ -47,6 +55,8 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -62,6 +72,9 @@ public:
     bool Create(const wxString& fontname);
 
     ~wxFont();
+
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -87,6 +100,10 @@ public:
 
     // implementation from now on
     void Unshare();
+
+#ifndef __WXGTK20__
+    GdkFont* GetInternalFont(float scale = 1.0) const;
+#endif
 
     // no data :-)
 

@@ -12,11 +12,17 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dialog.h"
+#endif
+
 #include "wx/panel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
-class WXDLLEXPORT wxMacToolTip;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
+
+class WXDLLEXPORT wxMacToolTip ;
 
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase

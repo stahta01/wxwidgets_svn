@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "encconv.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -469,7 +473,7 @@ wxFontEncodingArray wxEncodingConverter::GetPlatformEquivalents(wxFontEncoding e
         platform = wxPLATFORM_WINDOWS;
 #elif defined(__WXGTK__) || defined(__WXMOTIF__)
         platform = wxPLATFORM_UNIX;
-#elif defined(__WXPM__)
+#elif defined(__WXOS2__)
         platform = wxPLATFORM_OS2;
 #elif defined(__WXMAC__)
         platform = wxPLATFORM_MAC;

@@ -18,10 +18,8 @@
     #include "wx/palmos/region.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/region.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/region.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/region.h"
+    #include "wx/gtk/region.h"
 #elif defined(__WXMOTIF__) || defined(__WXX11__)
     #include "wx/x11/region.h"
 #elif defined(__WXMGL__)

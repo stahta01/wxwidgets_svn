@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -25,9 +30,6 @@
 #include "wx/datetime.h"
 #include "wx/image.h"
 #include "wx/bookctrl.h"
-#include "wx/artprov.h"
-#include "wx/imaglist.h"
-#include "wx/sysopt.h"
 
 #if wxUSE_COLOURDLG
     #include "wx/colordlg.h"
@@ -43,7 +45,7 @@
 
 #if wxUSE_PROGRESSDLG
 #if wxUSE_STOPWATCH && wxUSE_LONGLONG
-    #include "wx/datetime.h"      // wxDateTime
+    #include <wx/datetime.h>      // wxDateTime
 #endif
 
     #include "wx/progdlg.h"
@@ -155,8 +157,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #if USE_MODAL_PRESENTATION
     EVT_MENU(DIALOGS_MODAL,                         MyFrame::ModalDlg)
     EVT_MENU(DIALOGS_MODELESS,                      MyFrame::ModelessDlg)
-    EVT_MENU(DIALOGS_CENTRE_SCREEN,                 MyFrame::DlgCenteredScreen)
-    EVT_MENU(DIALOGS_CENTRE_PARENT,                 MyFrame::DlgCenteredParent)
 #endif // USE_MODAL
 
 #if wxUSE_STARTUP_TIPS
@@ -196,7 +196,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
 #if USE_SETTINGS_DIALOG
     EVT_MENU(DIALOGS_PROPERTY_SHEET,                MyFrame::OnPropertySheet)
-    EVT_MENU(DIALOGS_PROPERTY_SHEET_TOOLBOOK,       MyFrame::OnPropertySheetToolBook)
 #endif
 
     EVT_MENU(DIALOGS_REQUEST,                       MyFrame::OnRequestUserAttention)
@@ -356,20 +355,15 @@ bool MyApp::OnInit()
 #endif // wxUSE_FINDREPLDLG
 
 #if USE_MODAL_PRESENTATION
-    wxMenu *dialogs_menu = new wxMenu;
-    dialogs_menu->Append(DIALOGS_MODAL, _T("&Modal dialog\tCtrl-W"));
-    dialogs_menu->AppendCheckItem(DIALOGS_MODELESS, _T("Mode&less dialog\tCtrl-Z"));
-    dialogs_menu->AppendCheckItem(DIALOGS_CENTRE_SCREEN, _T("Centered on &screen\tShift-Ctrl-1"));
-    dialogs_menu->AppendCheckItem(DIALOGS_CENTRE_PARENT, _T("Centered on &parent\tShift-Ctrl-2"));
-    file_menu->Append(wxID_ANY, _T("&Generic dialogs"), dialogs_menu);
+    wxMenu *modal_menu = new wxMenu;
+    modal_menu->Append(DIALOGS_MODAL, _T("Mo&dal dialog\tCtrl-W"));
+    modal_menu->AppendCheckItem(DIALOGS_MODELESS, _T("Modeless &dialog\tCtrl-Z"));
+    file_menu->Append(wxID_ANY,_T("&Modal/Modeless"),modal_menu);
 #endif // USE_MODAL_PRESENTATION
 
 #if USE_SETTINGS_DIALOG
-    wxMenu *sheet_menu = new wxMenu;
-    sheet_menu->Append(DIALOGS_PROPERTY_SHEET, _T("&Standard property sheet\tShift-Ctrl-P"));
-    sheet_menu->Append(DIALOGS_PROPERTY_SHEET_TOOLBOOK, _T("&Toolbook sheet\tShift-Ctrl-T"));
-    file_menu->Append(wxID_ANY, _T("&Property sheets"), sheet_menu);
-#endif // USE_SETTINGS_DIALOG
+    file_menu->Append(DIALOGS_PROPERTY_SHEET, _T("&Property Sheet Dialog\tCtrl-P"));
+#endif
 
     file_menu->Append(DIALOGS_REQUEST, _T("&Request user attention\tCtrl-R"));
 
@@ -383,7 +377,9 @@ bool MyApp::OnInit()
     myCanvas = new MyCanvas(frame);
     myCanvas->SetBackgroundColour(*wxWHITE);
 
+#ifndef __WXWINCE__
     frame->Centre(wxBOTH);
+#endif
 
     // Show the frame
     frame->Show(true);
@@ -504,7 +500,7 @@ void MyFrame::ChooseFontGeneric(wxCommandEvent& WXUNUSED(event) )
     data.SetInitialFont(wxGetApp().m_canvasFont);
     data.SetColour(wxGetApp().m_canvasTextColour);
 
-    wxGenericFontDialog *dialog = new wxGenericFontDialog(this, data);
+    wxGenericFontDialog *dialog = new wxGenericFontDialog(this, &data);
     if (dialog->ShowModal() == wxID_OK)
     {
         wxFontData retData = dialog->GetFontData();
@@ -824,10 +820,6 @@ void MyFrame::FileOpenGeneric(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::FilesOpenGeneric(wxCommandEvent& WXUNUSED(event) )
 {
-    // On PocketPC you can disable OK-only dialogs policy using system option
-    int buttons = wxSystemOptions::GetOptionInt(wxT("wince.dialog.real-ok-cancel"));
-    wxSystemOptions::SetOption(wxT("wince.dialog.real-ok-cancel"), 1);
-
     wxString wildcards = _T("All files (*.*)|*.*|C++ files (*.cpp;*.h)|*.cpp;*.h");
     wxGenericFileDialog dialog(this, _T("Testing open multiple file dialog"),
                         wxEmptyString, wxEmptyString, wildcards,
@@ -855,9 +847,6 @@ void MyFrame::FilesOpenGeneric(wxCommandEvent& WXUNUSED(event) )
         wxMessageDialog dialog2(this, msg, _T("Selected files"));
         dialog2.ShowModal();
     }
-
-    // restore system option
-    wxSystemOptions::SetOption(wxT("wince.dialog.real-ok-cancel"), buttons);
 }
 
 void MyFrame::FileSaveGeneric(wxCommandEvent& WXUNUSED(event) )
@@ -954,25 +943,6 @@ void MyFrame::ModelessDlg(wxCommandEvent& event)
             m_dialog->Hide();
     }
 }
-
-void MyFrame::DlgCenteredScreen(wxCommandEvent& WXUNUSED(event))
-{
-    wxDialog dlg(this, wxID_ANY, _T("Dialog centered on screen"),
-                 wxDefaultPosition, wxSize(200, 100));
-    new wxButton(&dlg, wxID_OK, _T("Close"), wxPoint(10, 10));
-    dlg.CentreOnScreen();
-    dlg.ShowModal();
-}
-
-void MyFrame::DlgCenteredParent(wxCommandEvent& WXUNUSED(event))
-{
-    wxDialog dlg(this, wxID_ANY, _T("Dialog centered on parent"),
-                 wxDefaultPosition, wxSize(200, 100));
-    new wxButton(&dlg, wxID_OK, _T("Close"), wxPoint(10, 10));
-    dlg.CentreOnParent();
-    dlg.ShowModal();
-}
-
 #endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_STARTUP_TIPS
@@ -1008,12 +978,6 @@ void MyFrame::ShowTip(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 {
     SettingsDialog dialog(this);
-    dialog.ShowModal();
-}
-
-void MyFrame::OnPropertySheetToolBook(wxCommandEvent& WXUNUSED(event))
-{
-    SettingsDialog dialog(this, true);
     dialog.ShowModal();
 }
 #endif // USE_SETTINGS_DIALOG
@@ -1414,34 +1378,9 @@ IMPLEMENT_CLASS(SettingsDialog, wxPropertySheetDialog)
 BEGIN_EVENT_TABLE(SettingsDialog, wxPropertySheetDialog)
 END_EVENT_TABLE()
 
-SettingsDialog::SettingsDialog(wxWindow* win, bool useToolBook)
+SettingsDialog::SettingsDialog(wxWindow* win)
 {
     SetExtraStyle(wxDIALOG_EX_CONTEXTHELP|wxWS_EX_VALIDATE_RECURSIVELY);
-
-    int tabImage1 = -1;
-    int tabImage2 = -1;
-
-    if (useToolBook)
-    {
-        tabImage1 = 0;
-        tabImage2 = 1;
-        SetSheetStyle(wxPROPSHEET_TOOLBOOK|wxPROPSHEET_SHRINKTOFIT);
-
-        // create a dummy image list with a few icons
-        const wxSize imageSize(32, 32);
-
-        m_imageList = new wxImageList(imageSize.GetWidth(), imageSize.GetHeight());
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_WARNING, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_OTHER, imageSize));
-    }
-    else
-        m_imageList = NULL;
 
     Create(win, wxID_ANY, _("Preferences"), wxDefaultPosition, wxDefaultSize,
         wxDEFAULT_DIALOG_STYLE
@@ -1449,30 +1388,17 @@ SettingsDialog::SettingsDialog(wxWindow* win, bool useToolBook)
         |wxRESIZE_BORDER
 #endif
     );
-
-    // If using a toolbook, also follow Mac style and don't create buttons
-    if (!useToolBook)
-        CreateButtons(wxOK|wxCANCEL
-#ifndef __POCKETPC__
-                      |wxHELP
-#endif
-    );
+    CreateButtons(wxOK|wxCANCEL|wxHELP);
 
     wxBookCtrlBase* notebook = GetBookCtrl();
-    notebook->SetImageList(m_imageList);
 
     wxPanel* generalSettings = CreateGeneralSettingsPage(notebook);
     wxPanel* aestheticSettings = CreateAestheticSettingsPage(notebook);
 
-    notebook->AddPage(generalSettings, _("General"), true, tabImage1);
-    notebook->AddPage(aestheticSettings, _("Aesthetics"), false, tabImage2);
+    notebook->AddPage(generalSettings, _("General"));
+    notebook->AddPage(aestheticSettings, _("Aesthetics"));
 
     LayoutDialog();
-}
-
-SettingsDialog::~SettingsDialog()
-{
-    delete m_imageList;
 }
 
 wxPanel* SettingsDialog::CreateGeneralSettingsPage(wxWindow* parent)

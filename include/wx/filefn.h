@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/filefn.h
+// Name:        filefn.h
 // Purpose:     File- and directory-related functions
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef   _FILEFN_H_
 #define   _FILEFN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "filefn.h"
+#endif
 
 #include "wx/list.h"
 #include "wx/arrstr.h"
@@ -439,15 +443,13 @@ WXDLLIMPEXP_BASE bool wxRemoveFile(const wxString& file);
 WXDLLIMPEXP_BASE bool wxRenameFile(const wxString& file1, const wxString& file2);
 
 // Get current working directory.
-#if WXWIN_COMPATIBILITY_2_6
 // If buf is NULL, allocates space using new, else
 // copies into buf.
 // IMPORTANT NOTE getcwd is know not to work under some releases
 // of Win32s 1.3, according to MS release notes!
-wxDEPRECATED( WXDLLIMPEXP_BASE wxChar* wxGetWorkingDirectory(wxChar *buf = (wxChar *) NULL, int sz = 1000) );
+WXDLLIMPEXP_BASE wxChar* wxGetWorkingDirectory(wxChar *buf = (wxChar *) NULL, int sz = 1000);
 // new and preferred version of wxGetWorkingDirectory
 // NB: can't have the same name because of overloading ambiguity
-#endif // WXWIN_COMPATIBILITY_2_6
 WXDLLIMPEXP_BASE wxString wxGetCwd();
 
 // Set working directory
@@ -463,14 +465,15 @@ WXDLLIMPEXP_BASE bool wxRmdir(const wxString& dir, int flags = 0);
 WXDLLIMPEXP_BASE wxFileKind wxGetFileKind(int fd);
 WXDLLIMPEXP_BASE wxFileKind wxGetFileKind(FILE *fp);
 
-#if WXWIN_COMPATIBILITY_2_6
 // compatibility defines, don't use in new code
+// consider removal droping 2.4 compatibility
+// #if WXWIN_COMPATIBILITY_2_4
 wxDEPRECATED( inline bool wxPathExists(const wxChar *pszPathName) );
 inline bool wxPathExists(const wxChar *pszPathName)
 {
     return wxDirExists(pszPathName);
 }
-#endif //WXWIN_COMPATIBILITY_2_6
+// #endif //WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // separators in file names

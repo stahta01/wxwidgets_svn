@@ -27,15 +27,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.4 API: set it to 1 to
+// This setting determines the compatibility with 2.2 API: set it to 1 to
 // enable it but please consider updating your code instead.
 //
 // Default is 0
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
+// This setting determines the compatibility with 2.4 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -43,7 +43,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
 // MSW-only: Set to 0 for accurate dialog units, else 1 for old behaviour when
 // default system font is used for wxWindow::GetCharWidth/Height() instead of
@@ -559,7 +559,6 @@
 #define wxUSE_TEXTCTRL     1    // wxTextCtrl
 #define wxUSE_TOGGLEBTN    1    // requires wxButton
 #define wxUSE_TREECTRL     1    // wxTreeCtrl
-#define wxUSE_DATAVIEWCTRL 1    // wxDataViewCtrl
 
 // Use a status bar class? Depending on the value of wxUSE_NATIVE_STATUSBAR
 // below either wxStatusBar95 or a generic wxStatusBar will be used.
@@ -614,22 +613,6 @@
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
 
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
-
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
 //
@@ -678,7 +661,7 @@
 // Default is 0 because it isn't yet implemented on all platforms
 //
 // Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       1
+#define wxUSE_DISPLAY       0
 
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
@@ -869,14 +852,6 @@
 //
 // Recommended setting: 1 if you intend to use OpenGL, 0 otherwise
 #define wxUSE_GLCANVAS       0
-
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
 
 // ----------------------------------------------------------------------------
 // Data transfer
@@ -1098,12 +1073,7 @@
 // bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
 #define wxUSE_DIB_FOR_BITMAP 0
 
-// Set this to 1 to enable wxDIB class used internally for manipulating
-// wxBitmao data.
-//
-// Default is 1, set it to 0 only if you don't use wxImage neither
-//
-// Recommended setting: 1 (without it conversion to/from wxImage won't work)
+// Set this to 1 to enable wxDIB
 #define wxUSE_WXDIB 1
 
 // Set to 0 to disable PostScript print/preview architecture code under Windows
@@ -1118,14 +1088,17 @@
 //
 // Recommended setting: 1, only set it to 0 if your compiler doesn't have
 //                      or can't compile <richedit.h>
+#if defined(__WIN95__) && !defined(__WINE__) && !defined(__GNUWIN32_OLD__)
 #define wxUSE_RICHEDIT  1
 
-// Set this to 1 to use extra features of richedit v2 and later controls
-//
-// Default is 1 for compilers which support it
-//
-// Recommended setting: 1
+// TODO:  This should be ifdef'ed for any compilers that don't support
+//        RichEdit 2.0 but do have RichEdit 1.0...
 #define wxUSE_RICHEDIT2 1
+
+#else
+#define wxUSE_RICHEDIT  0
+#define wxUSE_RICHEDIT2 0
+#endif
 
 // Set this to 1 to enable support for the owner-drawn menu and listboxes. This
 // is required by wxUSE_CHECKLISTBOX.
@@ -1141,9 +1114,6 @@
 // Set to 1 to auto-adapt to MS Windows XP themes where possible
 // (notably, wxNotebook pages)
 #define wxUSE_UXTHEME_AUTO      1
-
-// Set to 1 to use InkEdit control (Tablet PC), if available
-#define wxUSE_INKEDIT  0
 
 // ----------------------------------------------------------------------------
 // Generic versions of native controls

@@ -7,6 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlpars.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/defs.h"
@@ -52,7 +57,7 @@ public:
 };
 
 WX_DECLARE_OBJARRAY(wxHtmlTextPiece, wxHtmlTextPieces);
-WX_DEFINE_OBJARRAY(wxHtmlTextPieces)
+WX_DEFINE_OBJARRAY(wxHtmlTextPieces);
 
 class wxHtmlParserState
 {
@@ -351,7 +356,7 @@ void wxHtmlParser::AddTagHandler(wxHtmlTagHandler *handler)
     handler->SetParser(this);
 }
 
-void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, const wxString& tags)
+void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
 {
     wxStringTokenizer tokenizer(tags, wxT(", "));
     wxString key;
@@ -432,26 +437,11 @@ bool wxHtmlParser::RestoreState()
     return true;
 }
 
-wxString wxHtmlParser::GetInnerSource(const wxHtmlTag& tag)
-{
-    return GetSource()->Mid(tag.GetBeginPos(),
-                            tag.GetEndPos1() - tag.GetBeginPos());
-}
-
 //-----------------------------------------------------------------------------
 // wxHtmlTagHandler
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxHtmlTagHandler,wxObject)
-
-void wxHtmlTagHandler::ParseInnerSource(const wxString& source)
-{
-    // It is safe to temporarily change the source being parsed,
-    // provided we restore the state back after parsing
-    m_Parser->SetSourceAndSaveState(source);
-    m_Parser->DoParsing();
-    m_Parser->RestoreState();
-}
 
 
 //-----------------------------------------------------------------------------

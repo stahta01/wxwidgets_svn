@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "object.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -208,6 +212,15 @@ wxClassInfo *wxClassInfo::FindClass(const wxChar *className)
     }
 }
 
+void wxClassInfo::CleanUp()
+{
+    if ( sm_classTable )
+    {
+        delete sm_classTable;
+        sm_classTable = NULL;
+    }
+}
+
 void wxClassInfo::Register()
 {
     if ( !sm_classTable )
@@ -274,6 +287,15 @@ wxObject *wxCreateDynamicObject(const wxChar *name)
 // wxObject
 // ----------------------------------------------------------------------------
 
+// Initialize ref data from another object (needed for copy constructor and
+// assignment operator)
+void wxObject::InitFrom(const wxObject& other)
+{
+    m_refData = other.m_refData;
+    if ( m_refData )
+        m_refData->m_count++;
+}
+
 void wxObject::Ref(const wxObject& clone)
 {
 #if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
@@ -301,7 +323,7 @@ void wxObject::UnRef()
     {
         wxASSERT_MSG( m_refData->m_count > 0, _T("invalid ref data count") );
 
-        if ( --m_refData->m_count == 0 )
+        if ( !--m_refData->m_count )
             delete m_refData;
         m_refData = NULL;
     }

@@ -44,7 +44,7 @@
 #define wxSL_NOTIFY_DRAG     0x0000
 
 
-extern WXDLLEXPORT_DATA(const wxChar) wxSliderNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxSliderNameStr;
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
@@ -130,10 +130,8 @@ private:
     #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/slider.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/slider.h"
+    #include "wx/gtk/slider.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/slider.h"
 #elif defined(__WXCOCOA__)

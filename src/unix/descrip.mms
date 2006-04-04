@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 13 February 2006                                                    *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 10 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -18,11 +18,6 @@ CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
 .else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2)/float=ieee/name=(as_is,short)/ieee=denorm
-.else
 .ifdef __WXX11__
 CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)
@@ -31,7 +26,6 @@ CC_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 .else
 CXX_DEFINE =
 CC_DEFINE =
-.endif
 .endif
 .endif
 .endif
@@ -46,7 +40,6 @@ CC_DEFINE =
 OBJECTS =       baseunix.obj,\
 		dialup.obj,\
 		dir.obj,\
-		displayx11.obj,\
 		dlunix.obj,\
 		fontenum.obj,\
 		fontutil.obj,\
@@ -65,7 +58,6 @@ OBJECTS =       baseunix.obj,\
 SOURCES =       baseunix.cpp,\
 		dialup.cpp,\
 		dir.cpp,\
-		displayx11.cpp,\
 		dlunix.cpp,\
 		fontenum.cpp,\
 		fontutil.cpp,\
@@ -89,12 +81,8 @@ all : $(SOURCES)
 .ifdef __WXGTK__
 	library [--.lib]libwx_gtk.olb $(OBJECTS)
 .else
-.ifdef __WXGTK2__
-	library [--.lib]libwx_gtk2.olb $(OBJECTS)
-.else
 .ifdef __WXX11__
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
-.endif
 .endif
 .endif
 .endif
@@ -117,4 +105,3 @@ sound.obj : sound.cpp
 sound_sdl.obj : sound_sdl.cpp
 stdpaths.obj : stdpaths.cpp
 taskbarx11.obj : taskbarx11.cpp
-displayx11.obj : displayx11.cpp

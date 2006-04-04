@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/stattext.cpp
+// Name:        stattext.cpp
 // Purpose:     wxStaticText
 // Author:      Stefan Csomor
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "stattext.h"
+#endif
 
 #include "wx/app.h"
 #include "wx/stattext.h"
@@ -53,33 +57,33 @@ const wxString punct = wxT(" ,.-;:!?");
 void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph, int &y)
 {
     long width, height ;
-
-    if (paragraph.length() == 0)
+  
+    if (paragraph.Length() == 0)
     {
         // empty line
         dc.GetTextExtent( wxT("H"), &width, &height );
         y += height;
-
+        
         return;
     }
 
     int x = 0 ;
 
     bool linedrawn = true;
-    while( paragraph.length() > 0 )
+    while( paragraph.Length() > 0 )
     {
         dc.GetTextExtent( paragraph , &width , &height ) ;
-
+        
         if ( width > m_width )
         {
-            for ( size_t p = paragraph.length() - 1 ; p > 0 ; --p )
+            for ( size_t p = paragraph.Length() - 1 ; p > 0 ; --p )
             {
                 if ((punct.Find(paragraph[p]) != wxNOT_FOUND) || !linedrawn)
                 {
                     int blank = (paragraph[p] == ' ') ? 0 : 1;
-
+                    
                     dc.GetTextExtent( paragraph.Left(p + blank) , &width , &height ) ;
-
+                    
                     if ( width <= m_width )
                     {
                         int pos = x ;
@@ -91,7 +95,7 @@ void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph, int &y)
                         {
                             pos += ( m_width - width ) ;
                         }
-
+                        
                         dc.DrawText( paragraph.Left(p + blank), pos , y) ;
                         y += height ;
                         paragraph = paragraph.Mid(p+1) ;
@@ -100,7 +104,7 @@ void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph, int &y)
                     }
                 }
             }
-
+            
             linedrawn = false;
         }
         else
@@ -114,7 +118,7 @@ void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph, int &y)
             {
                 pos += ( m_width - width ) ;
             }
-
+            
             dc.DrawText( paragraph, pos , y) ;
             paragraph=wxEmptyString;
             y += height ;
@@ -130,7 +134,7 @@ void wxStaticText::OnDraw( wxDC &dc )
         dc.Clear() ;
         wxRect rect(0,0,m_width,m_height) ;
         dc.SetFont(*wxSMALL_FONT) ;
-
+        
           dc.DrawRectangle(rect) ;
     */
     if ( !IsWindowHilited( (WindowRef) MacGetRootWindow() ) &&
@@ -143,14 +147,14 @@ void wxStaticText::OnDraw( wxDC &dc )
     {
         dc.SetTextForeground( GetForegroundColour() ) ;
     }
-
+    
     wxString paragraph;
     size_t i = 0 ;
     wxString text = m_label;
     int y = 0 ;
-    while (i < text.length())
+    while (i < text.Length())
     {
-
+        
         if (text[i] == 13 || text[i] == 10)
         {
             DrawParagraph(dc, paragraph,y);
@@ -162,7 +166,7 @@ void wxStaticText::OnDraw( wxDC &dc )
         }
         ++i;
     }
-    if (paragraph.length() > 0)
+    if (paragraph.Length() > 0)
         DrawParagraph(dc, paragraph,y);
 }
 
@@ -224,7 +228,7 @@ wxSize wxStaticText::DoGetBestSize() const
 
 void wxStaticText::SetLabel(const wxString& st )
 {
-    wxStaticTextBase::SetLabel( st ) ;
+    SetTitle( st ) ;
     m_label = st ;
     if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
     {
@@ -241,18 +245,18 @@ bool wxStaticText::SetFont(const wxFont& font)
 {
     bool ret = wxControl::SetFont(font);
 
-    if ( ret )
-    {
-        // adjust the size of the window to fit to the label unless autoresizing is
-        // disabled
-        if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
-        {
-            // temporary fix until layout measurement and drawing are in synch again
-            Refresh() ;
-            InvalidateBestSize();
-            SetSize( GetBestSize() );
-        }
-    }
+	if ( ret )
+	{
+	    // adjust the size of the window to fit to the label unless autoresizing is
+	    // disabled
+	    if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
+	    {
+	        // temporary fix until layout measurement and drawing are in synch again
+                Refresh() ;
+                InvalidateBestSize();
+	        SetSize( GetBestSize() );
+	    }
+	}
 
     return ret;
 }

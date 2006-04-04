@@ -16,6 +16,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "window.h"
+#endif
+
 // [at least] some version of Windows send extra mouse move messages after
 // a mouse click or a key press - to temporarily fix this problem, set the
 // define below to 1
@@ -53,9 +57,8 @@ public:
                 const wxString& name = wxPanelNameStr);
 
     // implement base class pure virtuals
-
-    virtual void SetLabel( const wxString& label);
-    virtual wxString GetLabel() const;
+    virtual void SetTitle( const wxString& title);
+    virtual wxString GetTitle() const;
 
     virtual void Raise();
     virtual void Lower();

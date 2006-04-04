@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/combobox.h
+// Name:        combobox.h
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
@@ -8,8 +8,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKCOMBOBOXH__
 #define __GTKCOMBOBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -27,7 +32,7 @@ class WXDLLIMPEXP_CORE wxComboBox;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxComboBoxNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar* wxComboBoxNameStr;
 extern WXDLLIMPEXP_BASE const wxChar* wxEmptyString;
 
 //-----------------------------------------------------------------------------
@@ -81,16 +86,19 @@ public:
            const wxString& name = wxComboBoxNameStr);
 
     void Clear();
-    void Delete(unsigned int n);
+    void Delete( int n );
 
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int FindString( const wxString &item ) const;
     int GetSelection() const;
+#if wxABI_VERSION >= 20602
     int GetCurrentSelection() const;
-    virtual wxString GetString(unsigned int n) const;
+#endif
+    wxString GetString( int n ) const;
     wxString GetStringSelection() const;
-    virtual unsigned int GetCount() const;
-    virtual void SetSelection(int n);
-    virtual void SetString(unsigned int n, const wxString &text);
+    int GetCount() const;
+    int Number() const { return GetCount(); }
+    void SetSelection( int n );
+    void SetString(int n, const wxString &text);
 
     wxString GetValue() const;
     void SetValue(const wxString& value);
@@ -151,6 +159,7 @@ public:
     void EnableEvents();
     GtkWidget* GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
+    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
@@ -158,14 +167,13 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, unsigned int pos);
+    virtual int DoInsert(const wxString& item, int pos);
 
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual void DoSetItemClientData( int n, void* clientData );
+    virtual void* DoGetItemClientData( int n ) const;
+    virtual void DoSetItemClientObject( int n, wxClientData* clientData );
+    virtual wxClientData* DoGetItemClientObject( int n ) const;
 
     virtual wxSize DoGetBestSize() const;
 

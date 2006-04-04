@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gdicmn.h
+// Name:        gdicmn.h
 // Purpose:     Common GDI classes, types and declarations
 // Author:      Julian Smart
 // Modified by:
@@ -16,12 +16,15 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gdicmn.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/list.h"
 #include "wx/string.h"
 #include "wx/fontenc.h"
 #include "wx/hashmap.h"
-#include "wx/math.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -214,10 +217,10 @@ public:
     bool operator==(const wxSize& sz) const { return x == sz.x && y == sz.y; }
     bool operator!=(const wxSize& sz) const { return x != sz.x || y != sz.y; }
 
-    wxSize operator+(const wxSize& sz) const { return wxSize(x + sz.x, y + sz.y); }
-    wxSize operator-(const wxSize& sz) const { return wxSize(x - sz.x, y - sz.y); }
-    wxSize operator/(int i) const { return wxSize(x / i, y / i); }
-    wxSize operator*(int i) const { return wxSize(x * i, y * i); }
+    wxSize operator+(const wxSize& sz) { return wxSize(x + sz.x, y + sz.y); }
+    wxSize operator-(const wxSize& sz) { return wxSize(x - sz.x, y - sz.y); }
+    wxSize operator/(const int i) { return wxSize(x / i, y / i); }
+    wxSize operator*(const int i) { return wxSize(x * i, y * i); }
 
     wxSize& operator+=(const wxSize& sz) { x += sz.x; y += sz.y; return *this; }
     wxSize& operator-=(const wxSize& sz) { x -= sz.x; y -= sz.y; return *this; }
@@ -270,13 +273,9 @@ public:
     wxRealPoint operator+(const wxRealPoint& pt) const { return wxRealPoint(x + pt.x, y + pt.y); }
     wxRealPoint operator-(const wxRealPoint& pt) const { return wxRealPoint(x - pt.x, y - pt.y); }
 
-    bool operator==(const wxRealPoint& pt) const
-    {
-        return wxIsSameDouble(x, pt.x) && wxIsSameDouble(y, pt.y);
-    }
-    bool operator!=(const wxRealPoint& pt) const { return !(*this == pt); }
+    bool operator==(const wxRealPoint& pt) const { return x == pt.x && y == pt.y; }
+    bool operator!=(const wxRealPoint& pt) const { return x != pt.x || y != pt.y; }
 };
-
 
 class WXDLLEXPORT wxPoint
 {
@@ -428,20 +427,6 @@ public:
     }
 
 
-    // centre this rectangle in the given (usually, but not necessarily,
-    // larger) one
-    wxRect CentreIn(const wxRect& r, int dir = wxBOTH) const
-    {
-        return wxRect(dir & wxHORIZONTAL ? r.x + (r.width - width)/2 : x,
-                      dir & wxVERTICAL ? r.y + (r.height - height)/2 : y,
-                      width, height);
-    }
-
-    wxRect CenterIn(const wxRect& r, int dir = wxBOTH) const
-    {
-        return CentreIn(r, dir);
-    }
-
 public:
     int x, y, width, height;
 };
@@ -503,10 +488,8 @@ public:
     // add a new colour to the database
     void AddColour(const wxString& name, const wxColour& colour);
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, use Find() instead
     wxDEPRECATED( wxColour *FindColour(const wxString& name) );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 
 #ifdef __WXPM__
@@ -606,7 +589,7 @@ extern WXDLLEXPORT_DATA(wxCursor*)    wxCROSS_CURSOR;
 
 extern WXDLLEXPORT_DATA(wxColourDatabase*)  wxTheColourDatabase;
 
-extern WXDLLEXPORT_DATA(const wxChar) wxPanelNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxPanelNameStr;
 
 extern WXDLLEXPORT_DATA(const wxSize) wxDefaultSize;
 extern WXDLLEXPORT_DATA(const wxPoint) wxDefaultPosition;

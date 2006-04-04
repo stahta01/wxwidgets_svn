@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "spinctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_SPINCTRL
@@ -15,7 +19,7 @@
 #include "wx/spinbutt.h"
 #include "wx/spinctrl.h"
 #include "wx/textctrl.h"
-#include "wx/containr.h"
+
 
 // ----------------------------------------------------------------------------
 // constants
@@ -43,15 +47,6 @@ public:
         SetSizeHints(-1,-1);
     }
 
-    bool ProcessEvent(wxEvent &event)
-    {
-        // Hand button down events to wxSpinCtrl. Doesn't work.
-        if (event.GetEventType() == wxEVT_LEFT_DOWN && m_spin->ProcessEvent( event ))
-            return TRUE;
-
-        return wxTextCtrl::ProcessEvent( event );
-    }
-
 protected:
     void OnTextChange(wxCommandEvent& event)
     {
@@ -59,15 +54,6 @@ protected:
         if ( m_spin->GetTextValue(&val) )
         {
             m_spin->GetSpinButton()->SetValue(val);
-
-            // If we're already processing a text update from m_spin,
-            // don't send it again, since we could end up recursing
-            // infinitely.
-            if (event.GetId() == m_spin->GetId())
-            {
-                event.Skip();
-                return;
-            }
 
             // Send event that the text was manually changed
             wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, m_spin->GetId());
@@ -79,6 +65,15 @@ protected:
         }
 
         event.Skip();
+    }
+
+    bool ProcessEvent(wxEvent &event)
+    {
+        // Hand button down events to wxSpinCtrl. Doesn't work.
+        if (event.GetEventType() == wxEVT_LEFT_DOWN && m_spin->ProcessEvent( event ))
+            return TRUE;
+
+        return wxTextCtrl::ProcessEvent( event );
     }
 
 private:
@@ -138,13 +133,6 @@ END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
     
-BEGIN_EVENT_TABLE(wxSpinCtrl, wxControl)
-  WX_EVENT_TABLE_CONTROL_CONTAINER(wxSpinCtrl)
-END_EVENT_TABLE()
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxSpinCtrl)
-
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -157,7 +145,6 @@ void wxSpinCtrl::Init()
 {
     m_text = NULL;
     m_btn = NULL;
-    m_container.SetContainerWindow(this);
 }
 
 bool wxSpinCtrl::Create(wxWindow *parent,
@@ -279,6 +266,13 @@ bool wxSpinCtrl::Show(bool show)
     if ( !wxControl::Show(show) )
         return FALSE;
     return TRUE;
+}
+
+void wxSpinCtrl::SetFocus()
+{
+    if ( m_text != NULL) {
+        m_text->SetFocus();
+    }
 }
 
 // ----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/utils.cpp
+// Name:        msw/utils.cpp
 // Purpose:     Various utilities
 // Author:      Julian Smart
 // Modified by:
@@ -111,13 +111,8 @@
 // ----------------------------------------------------------------------------
 
 // In the WIN.INI file
-#if (!defined(USE_NET_API) && !defined(__WXWINCE__)) || defined(__WXMICROWIN__)
 static const wxChar WX_SECTION[] = wxT("wxWindows");
-#endif
-
-#if (!defined(USE_NET_API) && !defined(__WXWINCE__))
 static const wxChar eUSERNAME[]  = wxT("UserName");
-#endif
 
 // ============================================================================
 // implementation
@@ -268,8 +263,8 @@ bool wxGetUserId(wxChar *WXUNUSED_IN_WINCE(buf),
 
     // Can't assume we have NIS (PC-NFS) or some other ID daemon
     // So we ...
-    if ( (user = wxGetenv(wxT("USER"))) == NULL &&
-         (user = wxGetenv(wxT("LOGNAME"))) == NULL )
+    if (  (user = wxGetenv(wxT("USER"))) == NULL &&
+            (user = wxGetenv(wxT("LOGNAME"))) == NULL )
     {
         // Use wxWidgets configuration data (comming soon)
         GetProfileString(WX_SECTION, eUSERID, default_id, buf, maxSize - 1);
@@ -480,8 +475,8 @@ wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
 }
 
 bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
-                    wxDiskspaceSize_t *WXUNUSED_IN_WINCE(pTotal),
-                    wxDiskspaceSize_t *WXUNUSED_IN_WINCE(pFree))
+                    wxLongLong *WXUNUSED_IN_WINCE(pTotal),
+                    wxLongLong *WXUNUSED_IN_WINCE(pFree))
 {
 #ifdef __WXWINCE__
     // TODO-CE
@@ -536,20 +531,12 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
 #endif
         if ( pTotal )
         {
-#if wxUSE_LONGLONG
-            *pTotal = wxDiskspaceSize_t(UL(bytesTotal).HighPart, UL(bytesTotal).LowPart);
-#else
-            *pTotal = wxDiskspaceSize_t(UL(bytesTotal).LowPart);
-#endif
+            *pTotal = wxLongLong(UL(bytesTotal).HighPart, UL(bytesTotal).LowPart);
         }
 
         if ( pFree )
         {
-#if wxUSE_LONGLONG
             *pFree = wxLongLong(UL(bytesFree).HighPart, UL(bytesFree).LowPart);
-#else
-            *pFree = wxDiskspaceSize_t(UL(bytesFree).LowPart);
-#endif
         }
     }
     else
@@ -577,7 +564,7 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
             return false;
         }
 
-        wxDiskspaceSize_t lBytesPerCluster = (wxDiskspaceSize_t) lSectorsPerCluster;
+        wxLongLong lBytesPerCluster = lSectorsPerCluster;
         lBytesPerCluster *= lBytesPerSector;
 
         if ( pTotal )
@@ -1567,3 +1554,4 @@ wxCreateHiddenWindow(LPCTSTR *pclassname, LPCTSTR classname, WNDPROC wndproc)
 
     return hwnd;
 }
+

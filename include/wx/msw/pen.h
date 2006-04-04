@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/pen.h
+// Name:        wx/pen.h
 // Purpose:     wxPen class
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin: fixed operator=(), ==(), !=()
@@ -11,6 +11,10 @@
 
 #ifndef _WX_PEN_H_
 #define _WX_PEN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "pen.h"
+#endif
 
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
@@ -77,7 +81,16 @@ public:
     wxPen();
     wxPen(const wxColour& col, int width = 1, int style = wxSOLID);
     wxPen(const wxBitmap& stipple, int width);
+    wxPen(const wxPen& pen) : wxGDIObject(pen) { Ref(pen); }
     virtual ~wxPen();
+
+    wxPen& operator=(const wxPen& pen)
+    {
+        if ( this != &pen )
+            Ref(pen);
+
+        return *this;
+    }
 
     bool operator==(const wxPen& pen) const
     {
@@ -129,3 +142,4 @@ private:
 };
 
 #endif // _WX_PEN_H_
+
