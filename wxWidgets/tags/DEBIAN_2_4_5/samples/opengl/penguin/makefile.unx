@@ -1,0 +1,29 @@
+#
+# File:		makefile.unx
+# Author:	Julian Smart
+# Created:	1998
+# Updated:	
+# Copyright:	(c) 1998 Julian Smart
+#
+# Makefile for penguin example (UNIX).
+
+CC = $(shell wx-config --cc)
+CXX = $(shell wx-config --cxx)
+
+Penguin: penguin.o trackball.o lw.o
+	$(CXX) -o Penguin \
+	penguin.o trackball.o lw.o \
+	`wx-config --gl-libs`
+
+penguin.o: penguin.cpp
+	$(CXX) `wx-config --cxxflags` -I../../gtk -c penguin.cpp
+
+lw.o: lw.cpp
+	$(CXX) `wx-config --cxxflags` -I../../gtk -c lw.cpp
+
+trackball.o: trackball.c
+	$(CC) `wx-config --cflags` -I../../gtk -c trackball.c
+
+clean: 
+	rm -f *.o Penguin
+

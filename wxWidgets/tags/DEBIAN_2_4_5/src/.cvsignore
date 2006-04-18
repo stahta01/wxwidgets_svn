@@ -1,0 +1,17 @@
+FreeBSD
+Linux
+linux
+linux-gnu
+Makefile.in
+*.lo
+*.la
+make.env
+makeprog.env
+makelib.env
+wxwindowsM*Data
+wxwindowsM5.mcp
+*.ncb
+*.opt
+*.plg
+build
+.DS_Store
