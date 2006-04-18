@@ -16,7 +16,7 @@
 // wxToolBar
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToolBar : public wxToolBarBase
+class wxToolBar : public wxToolBarBase
 {
 public:
     // construction/destruction
@@ -52,13 +52,13 @@ public:
 
     virtual void SetWindowStyleFlag( long style );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation from now on
     // --------------------------
 
     GtkToolbar   *m_toolbar;
+
+    GdkColor     *m_fg;
+    GdkColor     *m_bg;
 
     bool          m_blockEvent;
 

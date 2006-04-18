@@ -63,17 +63,41 @@ class WXDLLEXPORT wxTextCtrlCommandProcessor;
 #define wxACTION_TEXT_REDO          _T("redo")
 
 // ----------------------------------------------------------------------------
+// wxTextCtrl types
+// ----------------------------------------------------------------------------
+
+// wxTextPos is the position in the text
+typedef long wxTextPos;
+
+// wxTextCoord is the line or row number (which should have been unsigned but
+// is long for backwards compatibility)
+typedef long wxTextCoord;
+
+// ----------------------------------------------------------------------------
+// wxTextCtrl::HitTest return values
+// ----------------------------------------------------------------------------
+
+// the point asked is ...
+enum wxTextCtrlHitTestResult
+{
+    wxTE_HT_BEFORE = -1,    // either to the left or upper
+    wxTE_HT_ON_TEXT,        // directly on
+    wxTE_HT_BELOW,          // below [the last line]
+    wxTE_HT_BEYOND          // after [the end of line]
+};
+// ... the character returned
+
+// ----------------------------------------------------------------------------
 // wxTextCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase,
-                               public wxScrollHelper
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase, public wxScrollHelper
 {
 public:
     // creation
     // --------
 
-    wxTextCtrl() : wxScrollHelper(this) { Init(); }
+    wxTextCtrl() { Init(); }
 
     wxTextCtrl(wxWindow *parent,
                wxWindowID id,
@@ -83,7 +107,6 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxTextCtrlNameStr)
-        : wxScrollHelper(this) 
     {
         Init();
 
@@ -125,8 +148,7 @@ public:
     virtual void Replace(wxTextPos from, wxTextPos to, const wxString& value);
     virtual void Remove(wxTextPos from, wxTextPos to);
 
-    // sets/clears the dirty flag
-    virtual void MarkDirty();
+    // clears the dirty flag
     virtual void DiscardEdits();
 
     // writing text inserts it at the current position, appending always
@@ -174,8 +196,8 @@ public:
     // -----------------------
 
     // caret stuff
-    virtual void ShowCaret(bool show = true);
-    void HideCaret() { ShowCaret(false); }
+    virtual void ShowCaret(bool show = TRUE);
+    void HideCaret() { ShowCaret(FALSE); }
     void CreateCaret(); // for the current font size
 
     // helpers for cursor movement
@@ -189,10 +211,16 @@ public:
     void RemoveSelection();
     wxString GetSelectionText() const;
 
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt, long *pos) const;
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
-                                            wxTextCoord *col,
-                                            wxTextCoord *row) const;
+    // find the character at this position, return 0 if the character is
+    // really there, -1 if the point is before the beginning of the text/line
+    // and the returned character is the first one to follow it or +1 if it the
+    // position is beyond the end of line/text and the returned character is
+    // the last one
+    //
+    // NB: pt is in device coords (not adjusted for the client area origin nor
+    //     for the scrolling)
+    wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
+                                    wxTextCoord *col, wxTextCoord *row) const;
 
     // find the character at this position in the given line, return value as
     // for HitTest()
@@ -219,6 +247,10 @@ public:
     virtual void CalcUnscrolledPosition(int x, int y, int *xx, int *yy) const;
     virtual void CalcScrolledPosition(int x, int y, int *xx, int *yy) const;
 
+    // set the right colours and border
+    virtual bool IsContainerWindow() const { return TRUE; }
+    virtual wxBorder GetDefaultBorder() const { return wxBORDER_SUNKEN; }
+
     // perform an action
     virtual bool PerformAction(const wxControlAction& action,
                                long numArg = -1,
@@ -226,7 +258,7 @@ public:
 
     // override these methods to handle the caret
     virtual bool SetFont(const wxFont &font);
-    virtual bool Enable(bool enable = true);
+    virtual bool Enable(bool enable = TRUE);
 
     // more readable flag testing methods
     bool IsPassword() const { return (GetWindowStyle() & wxTE_PASSWORD) != 0; }
@@ -236,17 +268,7 @@ public:
     // only for wxStdTextCtrlInputHandler
     void RefreshSelection();
 
-    // override wxScrollHelper method to prevent (auto)scrolling beyond the end
-    // of line
-    virtual bool SendAutoScrollEvents(wxScrollWinEvent& event) const;
-
-    // idle processing
-    virtual void OnInternalIdle();
-
 protected:
-    // ensure we have correct default border
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_SUNKEN; }
-
     // override base class methods
     virtual void DoDrawBorder(wxDC& dc, const wxRect& rect);
     virtual void DoDraw(wxControlRenderer *renderer);
@@ -300,7 +322,7 @@ protected:
     wxRect GetRealTextArea() const;
 
     // refresh the text in the given (in logical coords) rect
-    void RefreshTextRect(const wxRect& rect, bool textOnly = true);
+    void RefreshTextRect(const wxRect& rect, bool textOnly = TRUE);
 
     // refresh the line wrap marks for the given range of lines (inclusive)
     void RefreshLineWrapMarks(wxTextCoord rowFirst, wxTextCoord rowLast);
@@ -335,7 +357,7 @@ protected:
                                 wxCoord *widthReal = NULL) const;
 
     // get the start and end of the selection for this line: if the line is
-    // outside the selection, both will be -1 and false will be returned
+    // outside the selection, both will be -1 and FALSE will be returned
     bool GetSelectedPartOfLine(wxTextCoord line,
                                wxTextPos *start, wxTextPos *end) const;
 
@@ -382,7 +404,7 @@ protected:
                                      wxTextCoord *colStart,
                                      wxTextCoord *colEnd,
                                      wxTextCoord *colRowStart,
-                                     bool devCoords = true) const;
+                                     bool devCoords = TRUE) const;
 
     // HitTest() version which takes the logical text coordinates and not the
     // device ones
@@ -391,7 +413,7 @@ protected:
                                            wxTextCoord *row) const;
 
     // get the line and the row in this line corresponding to the given row,
-    // return true if ok and false if row is out of range
+    // return TRUE if ok and FALSE if row is out of range
     //
     // NB: this function can only be called for controls which wrap lines
     bool GetLineAndRow(wxTextCoord row,
@@ -429,8 +451,13 @@ protected:
 
     // event handlers
     // --------------
+    void OnIdle(wxIdleEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnSize(wxSizeEvent& event);
+
+    // overrdie wxScrollHelper method to prevent (auto)scrolling beyond the end
+    // of line
+    virtual bool SendAutoScrollEvents(wxScrollWinEvent& event) const;
 
     // return the struct containing control-type dependent data
     struct wxTextSingleLineData& SData() { return *m_data.sdata; }
@@ -455,7 +482,7 @@ private:
     inline const wxArrayString& GetLines() const;
     inline size_t GetLineCount() const;
 
-    // replace a line (returns true if the number of rows in thel ine changed)
+    // replace a line (returns TRUE if the number of rows in thel ine changed)
     bool ReplaceLine(wxTextCoord line, const wxString& text);
 
     // remove a line
@@ -518,8 +545,6 @@ private:
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxTextCtrl)
-
-    friend class wxWrappedLineData;
 };
 
 // ----------------------------------------------------------------------------

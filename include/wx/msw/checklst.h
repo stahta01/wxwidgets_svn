@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -32,13 +32,6 @@ public:
                  long style = 0,
                  const wxValidator& validator = wxDefaultValidator,
                  const wxString& name = wxListBoxNameStr);
-  wxCheckListBox(wxWindow *parent, wxWindowID id,
-                 const wxPoint& pos,
-                 const wxSize& size,
-                 const wxArrayString& choices,
-                 long style = 0,
-                 const wxValidator& validator = wxDefaultValidator,
-                 const wxString& name = wxListBoxNameStr);
 
   bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
@@ -47,22 +40,15 @@ public:
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
-  bool Create(wxWindow *parent, wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
 
   // override base class virtuals
-  virtual void Delete(unsigned int n);
+  virtual void Delete(int n);
 
   virtual bool SetFont( const wxFont &font );
 
   // items may be checked
-  virtual bool IsChecked(unsigned int uiIndex) const;
-  virtual void Check(unsigned int uiIndex, bool bCheck = true);
+  virtual bool IsChecked(size_t uiIndex) const;
+  virtual void Check(size_t uiIndex, bool bCheck = TRUE);
 
   // return the index of the item at this position or wxNOT_FOUND
   int HitTest(const wxPoint& pt) const { return DoHitTestItem(pt.x, pt.y); }
@@ -71,12 +57,12 @@ public:
   // accessors
   size_t GetItemHeight() const { return m_nItemHeight; }
 
+protected:
   // we create our items ourselves and they have non-standard size,
   // so we need to override these functions
   virtual wxOwnerDrawn *CreateLboxItem(size_t n);
   virtual bool          MSWOnMeasure(WXMEASUREITEMSTRUCT *item);
 
-protected:
   // this can't be called DoHitTest() because wxWindow already has this method
   int DoHitTestItem(wxCoord x, wxCoord y) const;
 
@@ -84,13 +70,11 @@ protected:
   void OnKeyDown(wxKeyEvent& event);
   void OnLeftClick(wxMouseEvent& event);
 
-  wxSize DoGetBestSize() const;
-
 private:
   size_t    m_nItemHeight;  // height of checklistbox items (the same for all)
 
   DECLARE_EVENT_TABLE()
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckListBox)
+  DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
 
 #endif    //_CHECKLST_H

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/missing.h
+// Name:        missing.h
 // Purpose:     Declarations for parts of the Win32 SDK that are missing in
-//              the versions that come with some compilers
+//              the version that comes with some compilers
 // Created:     2002/04/23
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Mattia Barbon
@@ -11,212 +11,53 @@
 #ifndef _WX_MISSING_H_
 #define _WX_MISSING_H_
 
-/*
- * The following are required for VC++ 6.
- */
-
-// Needed by cursor.cpp
-#ifndef IDC_HAND
-    #define IDC_HAND MAKEINTRESOURCE(32649)
-#endif
-
-// Needed by strconv.cpp
-#ifndef WC_NO_BEST_FIT_CHARS
-    #define WC_NO_BEST_FIT_CHARS 0x400
-#endif
-
-#ifndef WM_CONTEXTMENU
-    #define WM_CONTEXTMENU      0x007B
-#endif
-
-// Needed by toplevel.cpp
-#ifndef WM_UPDATEUISTATE
-    #define WM_UPDATEUISTATE    0x0128
-#endif
-
-#ifndef WM_CHANGEUISTATE
-    #define WM_CHANGEUISTATE    0x0127
-#endif
-
-#ifndef WM_PRINTCLIENT
-    #define WM_PRINTCLIENT 0x318
-#endif
-
-// Needed by toplevel.cpp
-#ifndef UIS_SET
-    #define UIS_SET         1
-    #define UIS_CLEAR       2
-    #define UIS_INITIALIZE  3
-#endif
-
-#ifndef UISF_HIDEFOCUS
-    #define UISF_HIDEFOCUS  1
-#endif
-
-#ifndef UISF_HIDEACCEL
-    #define UISF_HIDEACCEL 2
-#endif
-
-#ifndef OFN_EXPLORER
-    #define OFN_EXPLORER 0x00080000
-#endif
-
-#ifndef OFN_ENABLESIZING
-    #define OFN_ENABLESIZING 0x00800000
-#endif
-
-// Needed by window.cpp
-#if wxUSE_MOUSEWHEEL
-    #ifndef WM_MOUSEWHEEL
-        #define WM_MOUSEWHEEL           0x020A
-    #endif
-    #ifndef WHEEL_DELTA
-        #define WHEEL_DELTA             120
-    #endif
-    #ifndef SPI_GETWHEELSCROLLLINES
-        #define SPI_GETWHEELSCROLLLINES 104
-    #endif
-#endif // wxUSE_MOUSEWHEEL
-
-// Needed by window.cpp
-#ifndef VK_OEM_1
-    #define VK_OEM_1        0xBA
-    #define VK_OEM_2        0xBF
-    #define VK_OEM_3        0xC0
-    #define VK_OEM_4        0xDB
-    #define VK_OEM_5        0xDC
-    #define VK_OEM_6        0xDD
-    #define VK_OEM_7        0xDE
-#endif
-
-#ifndef VK_OEM_COMMA
-    #define VK_OEM_PLUS     0xBB
-    #define VK_OEM_COMMA    0xBC
-    #define VK_OEM_MINUS    0xBD
-    #define VK_OEM_PERIOD   0xBE
-#endif
-
-#ifndef SM_TABLETPC
-    #define SM_TABLETPC 86
-#endif
-
-#ifndef INKEDIT_CLASS
-#   define INKEDIT_CLASSW  L"INKEDIT"
-#   ifdef UNICODE
-#       define INKEDIT_CLASS   INKEDIT_CLASSW
-#   else
-#       define INKEDIT_CLASS   "INKEDIT"
-#   endif
-#endif
-
-#ifndef EM_SETINKINSERTMODE
-#   define EM_SETINKINSERTMODE (WM_USER + 0x0204)
-#endif
-
-#ifndef EM_SETUSEMOUSEFORINPUT
-#define EM_SETUSEMOUSEFORINPUT (WM_USER + 0x224)
-#endif
-
-#ifndef TPM_RECURSE
-#define TPM_RECURSE 1
-#endif
-
 // ----------------------------------------------------------------------------
 // ListView common control
-// Needed by listctrl.cpp
 // ----------------------------------------------------------------------------
 
-#ifndef LVS_EX_FULLROWSELECT
-    #define LVS_EX_FULLROWSELECT 0x00000020
-#endif
-
-#ifndef LVS_EX_LABELTIP
-    #define LVS_EX_LABELTIP 0x00004000
-#endif
-
-#ifndef LVS_EX_SUBITEMIMAGES
-    #define LVS_EX_SUBITEMIMAGES 0x00000002
-#endif
-
-#ifndef HDN_GETDISPINFOW
-    #define HDN_GETDISPINFOW (HDN_FIRST-29)
-#endif
-
- /*
-  * In addition to the above, the following are required for several compilers.
-  */
-
-#if !defined(CCS_VERT)
-#define CCS_VERT                0x00000080L
-#endif
-
-#if !defined(TB_SETDISABLEDIMAGELIST)
-    #define TB_SETDISABLEDIMAGELIST (WM_USER + 54)
-#endif // !defined(TB_SETDISABLEDIMAGELIST)
-
-#ifndef CFM_BACKCOLOR
-    #define CFM_BACKCOLOR 0x04000000
-#endif
-
-#ifndef HANGUL_CHARSET
-    #define HANGUL_CHARSET 129
-#endif
-
-#ifndef CCM_SETUNICODEFORMAT
-    #define CCM_SETUNICODEFORMAT 8197
-#endif
-
-// ----------------------------------------------------------------------------
-// Tree control
-// ----------------------------------------------------------------------------
-
-#ifndef TV_FIRST
-    #define TV_FIRST                0x1100
-#endif
-
-#ifndef TVS_FULLROWSELECT
-    #define TVS_FULLROWSELECT       0x1000
-#endif
-
-#ifndef TVM_SETBKCOLOR
-    #define TVM_SETBKCOLOR          (TV_FIRST + 29)
-    #define TVM_SETTEXTCOLOR        (TV_FIRST + 30)
-#endif
-
- /*
-  * The following are required for BC++ 5.5 (none at present.)
-  */
-
- /*
-  * The following are specifically required for Digital Mars C++
-  */
-
-#ifdef __DMC__
-
-typedef struct _OSVERSIONINFOEX {
-    DWORD dwOSVersionInfoSize;
-    DWORD dwMajorVersion;
-    DWORD dwMinorVersion;
-    DWORD dwBuildNumber;
-    DWORD dwPlatformId;
-    TCHAR szCSDVersion[ 128 ];
-    WORD  wServicePackMajor;
-    WORD  wServicePackMinor;
-    WORD  wSuiteMask;
-    BYTE  wProductType;
-    BYTE  wReserved;
-} OSVERSIONINFOEX;
-
-#ifndef _TrackMouseEvent
-    #define _TrackMouseEvent TrackMouseEvent
+#ifndef LVHT_ONITEM
+    #define LVHT_ONITEM \
+                (LVHT_ONITEMICON | LVHT_ONITEMLABEL | LVHT_ONITEMSTATEICON)
 #endif
 
 #ifndef LVM_SETEXTENDEDLISTVIEWSTYLE
     #define LVM_SETEXTENDEDLISTVIEWSTYLE (0x1000 + 54)
 #endif
 
-#ifndef LVCF_IMAGE
-    #define LVCF_IMAGE             0x0010
+#ifndef LVS_EX_FULLROWSELECT
+    #define LVS_EX_FULLROWSELECT 0x00000020
+#endif
+
+#ifndef LVS_OWNERDATA
+    #define LVS_OWNERDATA 0x1000
+#endif
+
+#ifndef LVM_FIRST
+    #define LVM_FIRST 0x1000
+#endif
+
+#ifndef HDM_FIRST
+    #define HDM_FIRST 0x1200
+#endif
+
+#ifndef LVCFMT_JUSTIFYMASK
+    #define LVCFMT_JUSTIFYMASK 0x0003
+#endif
+
+#ifndef LVSICF_NOSCROLL
+    #define LVSICF_NOSCROLL 0x0002
+#endif
+
+#ifndef LVN_ODCACHEHINT
+    #define LVN_ODCACHEHINT (-113)
+#endif
+
+#ifndef ListView_GetHeader
+    #define ListView_GetHeader(w) (HWND)SendMessage((w),LVM_GETHEADER,0,0)
+#endif
+
+#ifndef LVM_GETHEADER
+    #define LVM_GETHEADER (LVM_FIRST+31)
 #endif
 
 #ifndef Header_GetItemRect
@@ -228,109 +69,127 @@ typedef struct _OSVERSIONINFOEX {
     #define HDM_GETITEMRECT (HDM_FIRST+7)
 #endif
 
-#ifndef ListView_GetHeader
-    #define ListView_GetHeader(w) (HWND)SendMessage((w),LVM_GETHEADER,0,0)
+#ifndef LVCF_IMAGE
+    #define LVCF_IMAGE             0x0010
 #endif
 
-#ifndef LVM_GETHEADER
-    #define LVM_GETHEADER (LVM_FIRST+31)
+#ifndef LVCFMT_BITMAP_ON_RIGHT
+    #define LVCFMT_BITMAP_ON_RIGHT 0x1000
 #endif
 
-#ifndef LVSICF_NOSCROLL
-    #define LVSICF_NOINVALIDATEALL  0x0001
-    #define LVSICF_NOSCROLL         0x0002
+#ifndef ListView_GetColumnWidth
+#define ListView_GetColumnWidth(hwnd, iCol) \
+    (int)SNDMSG((hwnd), LVM_GETCOLUMNWIDTH, (WPARAM)(int)(iCol), 0)
 #endif
 
-#ifndef CP_SYMBOL
-    #define CP_SYMBOL 42
+#ifndef ListView_SetColumnWidth
+#define ListView_SetColumnWidth(hwnd, iCol, cx) \
+    (BOOL)SNDMSG((hwnd), LVM_SETCOLUMNWIDTH, (WPARAM)(int)(iCol), MAKELPARAM((cx), 0))
+#endif
+
+#ifndef ListView_GetTextColor
+#define ListView_GetTextColor(hwnd)  \
+    (COLORREF)SNDMSG((hwnd), LVM_GETTEXTCOLOR, 0, 0L)
+#endif
+
+#ifndef ListView_FindItem
+#define ListView_FindItem(hwnd, iStart, plvfi) \
+    (int)SNDMSG((hwnd), LVM_FINDITEM, (WPARAM)(int)(iStart), (LPARAM)(const LV_FINDINFO FAR*)(plvfi))
+#endif
+
+#ifndef HDN_GETDISPINFOW
+#define HDN_GETDISPINFOW (HDN_FIRST-29)
 #endif
 
 // ----------------------------------------------------------------------------
-// wxDisplay
+// Toolbar define value missing 
 // ----------------------------------------------------------------------------
-
-// The windows headers with Digital Mars lack some typedefs.
-// typedef them as my_XXX and then #define to rename to XXX in case
-// a newer version of Digital Mars fixes the headers
-// (or up to date PSDK is in use with older version)
-// also we use any required definition (MONITOR_DEFAULTTONULL) to recognize
-// whether whole missing block needs to be included
-
-#ifndef MONITOR_DEFAULTTONULL
-
-    #define HMONITOR_DECLARED
-    DECLARE_HANDLE(HMONITOR);
-    typedef BOOL(CALLBACK* my_MONITORENUMPROC)(HMONITOR,HDC,LPRECT,LPARAM);
-    #define MONITORENUMPROC my_MONITORENUMPROC
-    typedef struct my_tagMONITORINFO {
-        DWORD cbSize;
-        RECT rcMonitor;
-        RECT rcWork;
-        DWORD dwFlags;
-    } my_MONITORINFO,*my_LPMONITORINFO;
-    #define MONITORINFO my_MONITORINFO
-    #define LPMONITORINFO my_LPMONITORINFO
-
-    typedef struct my_MONITORINFOEX : public my_tagMONITORINFO
-    {
-        TCHAR       szDevice[CCHDEVICENAME];
-    } my_MONITORINFOEX, *my_LPMONITORINFOEX;
-    #define MONITORINFOEX my_MONITORINFOEX
-    #define LPMONITORINFOEX my_LPMONITORINFOEX
-
-    #ifndef MONITOR_DEFAULTTONULL
-        #define MONITOR_DEFAULTTONULL 0
-    #endif // MONITOR_DEFAULTTONULL
-
-    #ifndef MONITORINFOF_PRIMARY
-        #define MONITORINFOF_PRIMARY 1
-    #endif // MONITORINFOF_PRIMARY
-
-    #ifndef DDENUM_ATTACHEDSECONDARYDEVICES
-        #define DDENUM_ATTACHEDSECONDARYDEVICES 1
-    #endif
-
-#endif // MONITOR_DEFAULTTONULL
+#if !defined(CCS_VERT)
+#define CCS_VERT                0x00000080L
+#endif
 
 // ----------------------------------------------------------------------------
-// Tree control
+// MS HTML Help
 // ----------------------------------------------------------------------------
 
-#ifndef TVIS_FOCUSED
-    #define TVIS_FOCUSED            0x0001
+// instead of including htmlhelp.h, duplicate the things from it we need here:
+
+enum
+{
+    HH_DISPLAY_TOPIC,
+    HH_DISPLAY_TOC,
+    HH_DISPLAY_INDEX,
+    HH_DISPLAY_SEARCH,
+    HH_SET_WIN_TYPE,
+    HH_GET_WIN_TYPE,
+    HH_GET_WIN_HANDLE,
+    HH_ENUM_INFO_TYPE,
+    HH_SET_INFO_TYPE,
+    HH_SYNC,
+    HH_RESERVED1,
+    HH_RESERVED2,
+    HH_RESERVED3,
+    HH_KEYWORD_LOOKUP,
+    HH_DISPLAY_TEXT_POPUP,
+    HH_HELP_CONTEXT,
+    HH_TP_HELP_CONTEXTMENU,
+    HH_TP_HELP_WM_HELP,
+    HH_CLOSE_ALL,
+    HH_ALINK_LOOKUP,
+    HH_GET_LAST_ERROR,
+    HH_ENUM_CATEGORY,
+    HH_ENUM_CATEGORY_IT,
+    HH_RESET_IT_FILTER,
+    HH_SET_INCLUSIVE_FILTER,
+    HH_SET_EXCLUSIVE_FILTER
+};
+
+struct HH_POPUP
+{
+    int       cbStruct;
+    HINSTANCE hinst;
+    UINT      idString;
+    LPCTSTR   pszText;
+    POINT     pt;
+    COLORREF  clrForeground;
+    COLORREF  clrBackground;
+    RECT      rcMargins;
+    LPCTSTR   pszFont;
+};
+
+struct HH_AKLINK
+{
+    int       cbStruct;
+    BOOL      fReserved;
+    LPCTSTR   pszKeywords;
+    LPCTSTR   pszUrl;
+    LPCTSTR   pszMsgText;
+    LPCTSTR   pszMsgTitle;
+    LPCTSTR   pszWindow;
+    BOOL      fIndexOnFail;
+};
+
+
+// ----------------------------------------------------------------------------
+// Misc stuff
+// ----------------------------------------------------------------------------
+
+#ifndef QS_ALLPOSTMESSAGE
+    #define QS_ALLPOSTMESSAGE    0x0100
 #endif
 
-#ifndef TVS_CHECKBOXES
-    #define TVS_CHECKBOXES          0x0100
+#ifdef __WXWINE__
+#define LV_ITEMA LVITEMA
+#define LV_ITEMW LVITEMW
+#define LV_DISPINFOA NMLVDISPINFOA
+#define LV_DISPINFOW NMLVDISPINFOW
+
+#if wxUSE_UNICODE
+#define LV_FINDINFO LVFINDINFOW
+#else
+#define LV_FINDINFO LVFINDINFOA
 #endif
 
-#ifndef TVITEM
-    #define TVITEM TV_ITEM
-#endif
-
-#endif
-    // DMC++
-
- /*
-  * The following are specifically required for OpenWatcom C++ (none at present)
-  */
-
-#if defined(__WATCOMC__)
-#endif
-
- /*
-  * The following are specifically required for MinGW (none at present)
-  */
-
-#if defined (__MINGW32__)
-#endif
-
- /*
-  * In addition to the declarations for VC++, the following are required for WinCE
-  */
-
-#ifdef __WXWINCE__
-    #include "wx/msw/wince/missing.h"
 #endif
 
 #endif

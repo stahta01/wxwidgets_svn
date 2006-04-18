@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        matrix.h
 // Purpose:     wxTransformMatrix class. NOT YET USED
-// Author:      Chris Breeze, Julian Smart
+//! Author:      Chris Breeze, Julian Smart
 // Modified by:  Klaas Holwerda
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart, Chris Breeze
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,10 +23,10 @@
 // Note: this is intended to be used in wxDC at some point to replace
 // the current system of scaling/translation. It is not yet used.
 
-//:definition
+//:defenition
 //  A 3x3 matrix to do 2D transformations.
-//  It can be used to map data to window coordinates,
-//  and also for manipulating your own data.
+//  It can be used to map data to window coordinates.
+//  But also for manipulating your own data.
 //  For example drawing a picture (composed of several primitives)
 //  at a certain coordinate and angle within another parent picture.
 //  At all times m_isIdentity is set if the matrix itself is an Identity matrix.
@@ -48,8 +48,8 @@ public:
     void SetValue(int col, int row, double value);
 
     void operator = (const wxTransformMatrix& mat);
-    bool operator == (const wxTransformMatrix& mat) const;
-    bool operator != (const wxTransformMatrix& mat) const;
+    bool operator == (const wxTransformMatrix& mat);
+    bool operator != (const wxTransformMatrix& mat);
 
     //multiply every element by t
     wxTransformMatrix&          operator*=(const double& t);
@@ -118,7 +118,7 @@ public:
     //!code:           | -1     0      0 |
     //!code: matrix' = |  0    -1      0 | x matrix
     //!code:           |  0     0      1 |
-    wxTransformMatrix&  Mirror(bool x=true, bool y=false);
+    wxTransformMatrix&  Mirror(bool x=TRUE, bool y=FALSE);
     // Translate by dx, dy:
     //!ex:
     //!code:           | 1  0 dx |
@@ -214,15 +214,15 @@ inline double wxTransformMatrix::TransformY(double y) const
 inline bool wxTransformMatrix::IsIdentity1(void) const
 {
     return
-    ( wxIsSameDouble(m_matrix[0][0], 1.0) &&
-      wxIsSameDouble(m_matrix[1][1], 1.0) &&
-      wxIsSameDouble(m_matrix[2][2], 1.0) &&
-      wxIsSameDouble(m_matrix[1][0], 0.0) &&
-      wxIsSameDouble(m_matrix[2][0], 0.0) &&
-      wxIsSameDouble(m_matrix[0][1], 0.0) &&
-      wxIsSameDouble(m_matrix[2][1], 0.0) &&
-      wxIsSameDouble(m_matrix[0][2], 0.0) &&
-      wxIsSameDouble(m_matrix[1][2], 0.0) );
+     (m_matrix[0][0] == 1.0 &&
+      m_matrix[1][1] == 1.0 &&
+      m_matrix[2][2] == 1.0 &&
+      m_matrix[1][0] == 0.0 &&
+      m_matrix[2][0] == 0.0 &&
+      m_matrix[0][1] == 0.0 &&
+      m_matrix[2][1] == 0.0 &&
+      m_matrix[0][2] == 0.0 &&
+      m_matrix[1][2] == 0.0) ;
 }
 
 // Calculates the determinant of a 2 x 2 matrix
@@ -231,4 +231,5 @@ inline double wxCalculateDet(double a11, double a21, double a12, double a22)
     return a11 * a22 - a12 * a21;
 }
 
-#endif // _WX_MATRIXH__
+#endif
+    // _WX_MATRIXH__

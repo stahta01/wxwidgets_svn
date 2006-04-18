@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFRAMEH__
 #define __GTKFRAMEH__
 
@@ -14,18 +15,18 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame;
-class WXDLLIMPEXP_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_CORE wxMenu;
-class WXDLLIMPEXP_CORE wxMenuBar;
-class WXDLLIMPEXP_CORE wxToolBar;
-class WXDLLIMPEXP_CORE wxStatusBar;
+class wxMDIChildFrame;
+class wxMDIClientWindow;
+class wxMenu;
+class wxMenuBar;
+class wxToolBar;
+class wxStatusBar;
 
 //-----------------------------------------------------------------------------
 // wxFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFrame : public wxFrameBase
+class wxFrame : public wxFrameBase
 {
 public:
     // construction
@@ -54,16 +55,16 @@ public:
     virtual ~wxFrame();
 
 #if wxUSE_STATUSBAR
+    virtual void PositionStatusBar();
+
     virtual wxStatusBar* CreateStatusBar(int number = 1,
-                                         long style = wxST_SIZEGRIP|wxFULL_REPAINT_ON_RESIZE,
+                                         long style = wxST_SIZEGRIP,
                                          wxWindowID id = 0,
                                          const wxString& name = wxStatusLineNameStr);
-                                         
-    void SetStatusBar(wxStatusBar *statbar);
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_TOOLBAR
-    virtual wxToolBar* CreateToolBar(long style = -1,
+    virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT,
                                      wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
     void SetToolBar(wxToolBar *toolbar);
@@ -85,10 +86,6 @@ public:
 protected:
     // common part of all ctors
     void Init();
-
-#if wxUSE_STATUSBAR
-    virtual void PositionStatusBar();
-#endif // wxUSE_STATUSBAR
 
     // override wxWindow methods to take into account tool/menu/statusbars
     virtual void DoSetClientSize(int width, int height);

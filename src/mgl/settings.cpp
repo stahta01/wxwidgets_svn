@@ -1,9 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/settings.cpp
+// Name:        settings.h
 // Author:      Vaclav Slavik, Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -28,7 +28,7 @@ static wxFont *gs_fontDefault = NULL;
 class wxSystemSettingsModule : public wxModule
 {
 public:
-    virtual bool OnInit() { return true; }
+    virtual bool OnInit() { return TRUE; }
     virtual void OnExit()
     {
         delete gs_fontDefault;
@@ -65,21 +65,18 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
         case wxSYS_DEFAULT_GUI_FONT:
         {
             if ( !gs_fontDefault )
-                gs_fontDefault = new wxFont(10, wxSWISS, wxNORMAL, wxNORMAL, false, "Arial");
+                gs_fontDefault = new wxFont(10, wxSWISS, wxNORMAL, wxNORMAL, FALSE, "Arial");
             return *gs_fontDefault;
         }
         default:
-        {
-        }
+            return wxNullFont;
     }
-
-    return wxNullFont;
 }
 
-int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(win))
+int wxSystemSettingsNative::GetMetric(wxSystemMetric index)
 {
     int val;
-
+    
     switch (index)
     {
         case wxSYS_SCREEN_X:
@@ -90,27 +87,23 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
             return val;
         case wxSYS_VSCROLL_X:
         case wxSYS_HSCROLL_Y:
-            return 15;
+            return 15; 
+            break;
         default:
-        {
-        }
+            wxCHECK_MSG(index, 0, wxT("wxSystemSettings::GetMetric not fully implemented"));
+            return 0;
     }
-
-    return -1;  // unsupported metric
 }
 
 bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
 {
     switch (index)
     {
-        case wxSYS_CAN_ICONIZE_FRAME:
-            return false;
+        case wxSYS_CAN_ICONIZE_FRAME: 
+            return FALSE; break;
         case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return false;
+            return FALSE; break;
         default:
-        {
-        }
+            return FALSE;
     }
-
-    return false;
 }

@@ -5,9 +5,13 @@ two such groups of classes: this one is based on \helpref{wxFile}{wxfile}
 whereas \helpref{wxFFileInputStream}{wxffileinputstream} is based in
 the \helpref{wxFFile}{wxffile} class.
 
-Note that \helpref{SeekI()}{wxinputstreamseeki} 
-can seek beyond the end of the stream (file) and will thus not return 
-{\it wxInvalidOffset} for that.
+Note that \helpref{wxFile}{wxfile} and \helpref{wxFFile}{wxffile} differ
+in one aspect, namely when to report that the end of the file has been
+reached. This is documented in \helpref{wxFile::Eof}{wxfileeof} and 
+\helpref{wxFFile::Eof}{wxffileeof} and the behaviour of the stream
+classes reflects this difference, i.e. wxFileInputStream will report
+wxSTREAM\_EOF after having read the last byte whereas wxFFileInputStream
+will report wxSTREAM\_EOF after trying to read {\it past} the last byte.
 
 \wxheading{Derived from}
 
@@ -26,7 +30,7 @@ can seek beyond the end of the stream (file) and will thus not return
 % ----------
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxFileInputStream::wxFileInputStream}\label{wxfileinputstreamctor}
+\membersection{wxFileInputStream::wxFileInputStream}
 
 \func{}{wxFileInputStream}{\param{const wxString\&}{ ifileName}}
 
@@ -40,15 +44,15 @@ Initializes a file stream in read-only mode using the file I/O object {\it file}
 
 Initializes a file stream in read-only mode using the specified file descriptor.
 
-\membersection{wxFileInputStream::\destruct{wxFileInputStream}}\label{wxfileinputstreamdtor}
+\membersection{wxFileInputStream::\destruct{wxFileInputStream}}
 
 \func{}{\destruct{wxFileInputStream}}{\void}
 
 Destructor.
 
-\membersection{wxFileInputStream::Ok}\label{wxfileinputstreamok}
+\membersection{wxFileInputStream::Ok}
 
 \constfunc{bool}{Ok}{\void}
 
-Returns true if the stream is initialized and ready.
+Returns TRUE if the stream is initialized and ready.
 

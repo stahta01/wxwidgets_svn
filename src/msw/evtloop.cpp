@@ -6,7 +6,7 @@
 // Created:     01.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -30,45 +30,56 @@
 #endif //WX_PRECOMP
 
 #include "wx/evtloop.h"
-
 #include "wx/tooltip.h"
-#include "wx/except.h"
-#include "wx/ptr_scpd.h"
 
 #include "wx/msw/private.h"
 
 #if wxUSE_THREADS
-    #include "wx/thread.h"
-
-    // define the list of MSG strutures
-    WX_DECLARE_LIST(MSG, wxMsgList);
-
-    #include "wx/listimpl.cpp"
-
-    WX_DEFINE_LIST(wxMsgList)
-#endif // wxUSE_THREADS
-
-// ============================================================================
-// wxEventLoop implementation
-// ============================================================================
-
-wxWindowMSW *wxEventLoop::ms_winCritical = NULL;
+    // define the array of MSG strutures
+    WX_DECLARE_OBJARRAY(MSG, wxMsgArray);
+    // VS: this is a bit dirty - it duplicates same declaration in app.cpp
+    //     (and there's no WX_DEFINE_OBJARRAY for that reason - it is already
+    //     defined in app.cpp).
+#endif
 
 // ----------------------------------------------------------------------------
-// ctor/dtor
+// wxEventLoopImpl
 // ----------------------------------------------------------------------------
 
-wxEventLoop::wxEventLoop()
+class WXDLLEXPORT wxEventLoopImpl
 {
-    m_shouldExit = false;
-    m_exitcode = 0;
-}
+public:
+    // ctor
+    wxEventLoopImpl() { SetExitCode(0); }
+
+    // process a message
+    void ProcessMessage(MSG *msg);
+
+    // generate an idle message, return TRUE if more idle time requested
+    bool SendIdleMessage();
+
+    // set/get the exit code
+    void SetExitCode(int exitcode) { m_exitcode = exitcode; }
+    int GetExitCode() const { return m_exitcode; }
+
+private:
+    // preprocess a message, return TRUE if processed (i.e. no further
+    // dispatching required)
+    bool PreProcessMessage(MSG *msg);
+
+    // the exit code of the event loop
+    int m_exitcode;
+};
+
+// ============================================================================
+// wxEventLoopImpl implementation
+// ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxEventLoop message processing
+// wxEventLoopImpl message processing
 // ----------------------------------------------------------------------------
 
-void wxEventLoop::ProcessMessage(WXMSG *msg)
+void wxEventLoopImpl::ProcessMessage(MSG *msg)
 {
     // give us the chance to preprocess the message first
     if ( !PreProcessMessage(msg) )
@@ -79,67 +90,15 @@ void wxEventLoop::ProcessMessage(WXMSG *msg)
     }
 }
 
-bool wxEventLoop::IsChildOfCriticalWindow(wxWindowMSW *win)
+bool wxEventLoopImpl::PreProcessMessage(MSG *msg)
 {
-    while ( win )
-    {
-        if ( win == ms_winCritical )
-            return true;
-
-        win = win->GetParent();
-    }
-
-    return false;
-}
-
-bool wxEventLoop::PreProcessMessage(WXMSG *msg)
-{
-    HWND hwnd = msg->hwnd;
-    wxWindow *wndThis = wxGetWindowFromHWND((WXHWND)hwnd);
-    wxWindow *wnd;
-
-    // this might happen if we're in a modeless dialog, or if a wx control has
-    // children which themselves were not created by wx (i.e. wxActiveX control children)
-    if ( !wndThis )
-    {
-        while ( hwnd && (::GetWindowLong(hwnd, GWL_STYLE) & WS_CHILD ))
-        {
-            hwnd = ::GetParent(hwnd);
-
-            // If the control has a wx parent, break and give the parent a chance
-            // to process the window message
-            wndThis = wxGetWindowFromHWND((WXHWND)hwnd);
-            if (wndThis != NULL)
-                break;
-        }
-
-        if ( !wndThis )
-        {
-            // this may happen if the event occurred in a standard modeless dialog (the
-            // only example of which I know of is the find/replace dialog) - then call
-            // IsDialogMessage() to make TAB navigation in it work
-
-            // NOTE: IsDialogMessage() just eats all the messages (i.e. returns true for
-            // them) if we call it for the control itself
-            return hwnd && ::IsDialogMessage(hwnd, msg) != 0;
-        }
-    }
-
-    if ( !AllowProcessing(wndThis) )
-    {
-        // not a child of critical window, so we eat the event but take care to
-        // stop an endless stream of WM_PAINTs which would have resulted if we
-        // didn't validate the invalidated part of the window
-        if ( msg->message == WM_PAINT )
-            ::ValidateRect(hwnd, NULL);
-
-        return true;
-    }
+    HWND hWnd = msg->hwnd;
+    wxWindow *wndThis = wxGetWindowFromHWND((WXHWND)hWnd);
 
 #if wxUSE_TOOLTIPS
     // we must relay WM_MOUSEMOVE events to the tooltip ctrl if we want it to
     // popup the tooltip bubbles
-    if ( msg->message == WM_MOUSEMOVE )
+    if ( wndThis && (msg->message == WM_MOUSEMOVE) )
     {
         wxToolTip *tt = wndThis->GetToolTip();
         if ( tt )
@@ -149,65 +108,102 @@ bool wxEventLoop::PreProcessMessage(WXMSG *msg)
     }
 #endif // wxUSE_TOOLTIPS
 
-    // allow the window to prevent certain messages from being
-    // translated/processed (this is currently used by wxTextCtrl to always
-    // grab Ctrl-C/V/X, even if they are also accelerators in some parent)
-    if ( !wndThis->MSWShouldPreProcessMessage((WXMSG *)msg) )
-    {
-        return false;
-    }
-
-    // try translations first: the accelerators override everything
+    // try translations first; find the youngest window with a translation
+    // table.
+    wxWindow *wnd;
     for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
     {
-        if ( wnd->MSWTranslateMessage((WXMSG *)msg))
-            return true;
-
-        // stop at first top level window, i.e. don't try to process the key
-        // strokes originating in a dialog using the accelerators of the parent
-        // frame - this doesn't make much sense
-        if ( wnd->IsTopLevel() )
-            break;
+        if ( wnd->MSWTranslateMessage((WXMSG *)msg) )
+            return TRUE;
     }
 
-    // now try the other hooks (kbd navigation is handled here)
+    // Anyone for a non-translation message? Try youngest descendants first.
     for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
     {
-        if (wnd != wndThis) // Skip the first since wndThis->MSWProcessMessage() was called above
-        {
-            if ( wnd->MSWProcessMessage((WXMSG *)msg) )
-                return true;
-        }
-
-        // Stop at first top level window (as per comment above).
-        // If we don't do this, pressing ESC on a modal dialog shown as child of a modal
-        // dialog with wxID_CANCEL will cause the parent dialog to be closed, for example
-        if (wnd->IsTopLevel())
-            break;
+        if ( wnd->MSWProcessMessage((WXMSG *)msg) )
+            return TRUE;
     }
 
-    // no special preprocessing for this message, dispatch it normally
-    return false;
+    return FALSE;
 }
+
+// ----------------------------------------------------------------------------
+// wxEventLoopImpl idle event processing
+// ----------------------------------------------------------------------------
+
+bool wxEventLoopImpl::SendIdleMessage()
+{
+    wxIdleEvent event;
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
+}
+
+// ============================================================================
+// wxEventLoop implementation
+// ============================================================================
+
+wxEventLoop *wxEventLoop::ms_activeLoop = NULL;
 
 // ----------------------------------------------------------------------------
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-// wxEventLoopManual customization
-// ----------------------------------------------------------------------------
-
-void wxEventLoop::OnNextIteration()
+wxEventLoop::~wxEventLoop()
 {
-#if wxUSE_THREADS
-    wxMutexGuiLeaveOrEnter();
-#endif // wxUSE_THREADS
+    wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-void wxEventLoop::WakeUp()
+bool wxEventLoop::IsRunning() const
 {
-    ::PostMessage(NULL, WM_NULL, 0, 0);
+    return m_impl != NULL;
+}
+
+int wxEventLoop::Run()
+{
+    // event loops are not recursive, you need to create another loop!
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
+
+    m_impl = new wxEventLoopImpl;
+    
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
+
+    for ( ;; )
+    {
+#if wxUSE_THREADS
+        wxMutexGuiLeaveOrEnter();
+#endif // wxUSE_THREADS
+
+        // generate and process idle events for as long as we don't have
+        // anything else to do
+        while ( !Pending() && m_impl->SendIdleMessage() )
+            ;
+
+        // a message came or no more idle processing to do, sit in Dispatch()
+        // waiting for the next message
+        if ( !Dispatch() )
+        {
+            // we got WM_QUIT
+            break;
+        }
+    }
+
+    int exitcode = m_impl->GetExitCode();
+    delete m_impl;
+    m_impl = NULL;
+
+    ms_activeLoop = oldLoop;
+
+    return exitcode;
+}
+
+void wxEventLoop::Exit(int rc)
+{
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
+
+    m_impl->SetExitCode(rc);
+
+    ::PostQuitMessage(rc);
 }
 
 // ----------------------------------------------------------------------------
@@ -222,7 +218,7 @@ bool wxEventLoop::Pending() const
 
 bool wxEventLoop::Dispatch()
 {
-    wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
+    wxCHECK_MSG( IsRunning(), FALSE, _T("can't call Dispatch() if not running") );
 
     MSG msg;
     BOOL rc = ::GetMessage(&msg, (HWND) NULL, 0, 0);
@@ -230,7 +226,7 @@ bool wxEventLoop::Dispatch()
     if ( rc == 0 )
     {
         // got WM_QUIT
-        return false;
+        return FALSE;
     }
 
     if ( rc == -1 )
@@ -239,32 +235,31 @@ bool wxEventLoop::Dispatch()
         wxLogLastError(wxT("GetMessage"));
 
         // still break from the loop
-        return false;
+        return FALSE;
     }
 
 #if wxUSE_THREADS
     wxASSERT_MSG( wxThread::IsMain(),
                   wxT("only the main thread can process Windows messages") );
 
-    static bool s_hadGuiLock = true;
-    static wxMsgList s_aSavedMessages;
+    static bool s_hadGuiLock = TRUE;
+    static wxMsgArray s_aSavedMessages;
 
     // if a secondary thread owning the mutex is doing GUI calls, save all
     // messages for later processing - we can't process them right now because
     // it will lead to recursive library calls (and we're not reentrant)
     if ( !wxGuiOwnedByMainThread() )
     {
-        s_hadGuiLock = false;
+        s_hadGuiLock = FALSE;
 
         // leave out WM_COMMAND messages: too dangerous, sometimes
         // the message will be processed twice
         if ( !wxIsWaitingForThread() || msg.message != WM_COMMAND )
         {
-            MSG* pMsg = new MSG(msg);
-            s_aSavedMessages.Append(pMsg);
+            s_aSavedMessages.Add(msg);
         }
 
-        return true;
+        return TRUE;
     }
     else
     {
@@ -275,25 +270,22 @@ bool wxEventLoop::Dispatch()
         //       messages normally - expect some things to break...
         if ( !s_hadGuiLock )
         {
-            s_hadGuiLock = true;
+            s_hadGuiLock = TRUE;
 
-            wxMsgList::compatibility_iterator node = s_aSavedMessages.GetFirst();
-            while (node)
+            size_t count = s_aSavedMessages.Count();
+            for ( size_t n = 0; n < count; n++ )
             {
-                MSG* pMsg = node->GetData();
-                s_aSavedMessages.Erase(node);
-
-                ProcessMessage(pMsg);
-                delete pMsg;
-
-                node = s_aSavedMessages.GetFirst();
+                MSG& msg = s_aSavedMessages[n];
+                m_impl->ProcessMessage(&msg);
             }
+
+            s_aSavedMessages.Empty();
         }
     }
 #endif // wxUSE_THREADS
 
-    ProcessMessage(&msg);
+    m_impl->ProcessMessage(&msg);
 
-    return true;
+    return TRUE;
 }
 

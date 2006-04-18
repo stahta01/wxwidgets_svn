@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/uuid.cpp
+// Name:        ole/uuid.cpp
 // Purpose:     implements Uuid class, see uuid.h for details
 // Author:      Vadim Zeitlin
-// Modified by:
+// Modified by: 
 // Created:     12.09.96
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -20,11 +20,13 @@
 #pragma hdrstop
 #endif
 
+#include  "wx/setup.h"
+
 #if wxUSE_OLE && ( wxUSE_DRAG_AND_DROP || (defined(__WXDEBUG__) && wxUSE_DATAOBJ) )
 
 // standard headers
 #if wxCHECK_W32API_VERSION( 1, 0 )
-    #include "wx/msw/wrapwin.h"
+    #include <windows.h>
 #endif
 #include  <rpc.h>                       // UUID related functions
 
@@ -42,8 +44,8 @@
 // copy ctor
 Uuid::Uuid(const Uuid& uuid)
 {
-  // bitwise copy Ok for UUIDs
-  m_uuid = uuid.m_uuid;
+  // bitwise copy Ok for UUIDs 
+  m_uuid = uuid.m_uuid;              
 
   // force the string to be allocated by RPC
   // (we free it later with RpcStringFree)
@@ -83,11 +85,11 @@ Uuid& Uuid::operator=(const Uuid& uuid)
 }
 
 // dtor
-Uuid::~Uuid()
-{
+Uuid::~Uuid() 
+{ 
   // this string must be allocated by RPC!
   // (otherwise you get a debug breakpoint deep inside RPC DLL)
-  if ( m_pszUuid )
+  if ( m_pszUuid ) 
 #ifdef _UNICODE
     RpcStringFree((unsigned short **)&m_pszUuid);
 #else
@@ -123,13 +125,17 @@ void Uuid::Create()
 
   // can't fail
   UuidCreate(&uuid);
-
+  
   Set(uuid);
 }
 
 // set the value
 bool Uuid::Set(const wxChar *pc)
 {
+#ifdef __WXWINE__
+    wxFAIL_MSG(_T("UUid::Set not implemented"));
+    return FALSE;
+#else
   // get UUID from string
 #ifdef _UNICODE
   if ( UuidFromString((unsigned short *)pc, &m_uuid) != RPC_S_OK)
@@ -137,7 +143,7 @@ bool Uuid::Set(const wxChar *pc)
   if ( UuidFromString((wxUChar *)pc, &m_uuid) != RPC_S_OK)
 #endif
     // failed: probably invalid string
-    return false;
+    return FALSE;
 
   // transform it back to string to normalize it
 #ifdef _UNICODE
@@ -149,7 +155,8 @@ bool Uuid::Set(const wxChar *pc)
   // update m_pszCForm
   UuidToCForm();
 
-  return true;
+  return TRUE;
+#endif
 }
 
 // stores m_uuid in m_pszCForm in a format required by

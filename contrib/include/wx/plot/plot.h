@@ -14,62 +14,48 @@
 
 #include "wx/defs.h"
 
-#include "wx/dynarray.h"
-#include "wx/event.h"
-#include "wx/pen.h"
 #include "wx/scrolwin.h"
-
-#ifdef WXMAKINGDLL_PLOT
-    #define WXDLLIMPEXP_PLOT WXEXPORT
-    #define WXDLLIMPEXP_DATA_PLOT(type) WXEXPORT type
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_PLOT WXIMPORT
-    #define WXDLLIMPEXP_DATA_PLOT(type) WXIMPORT type
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_PLOT
-    #define WXDLLIMPEXP_DATA_PLOT(type) type
-#endif
+#include "wx/event.h"
+#include "wx/dynarray.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotEvent;
-class WXDLLIMPEXP_PLOT wxPlotCurve;
-class WXDLLIMPEXP_PLOT wxPlotValues;
-class WXDLLIMPEXP_PLOT wxPlotArea;
-class WXDLLIMPEXP_PLOT wxPlotXAxisArea;
-class WXDLLIMPEXP_PLOT wxPlotYAxisArea;
-class WXDLLIMPEXP_PLOT wxPlotWindow;
-class WXDLLIMPEXP_CORE wxStaticText;
+class WXDLLEXPORT wxPlotEvent;
+class WXDLLEXPORT wxPlotCurve;
+class WXDLLEXPORT wxPlotValues;
+class WXDLLEXPORT wxPlotArea;
+class WXDLLEXPORT wxPlotXAxisArea;
+class WXDLLEXPORT wxPlotYAxisArea;
+class WXDLLEXPORT wxPlotWindow;
 
 //-----------------------------------------------------------------------------
 // consts
 //-----------------------------------------------------------------------------
 
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_SEL_CHANGING,  941)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_SEL_CHANGED, 921)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_CLICKED, 922)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_DOUBLECLICKED, 923)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_ZOOM_IN, 924)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_ZOOM_OUT, 925)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_VALUE_SEL_CREATING, 926)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_VALUE_SEL_CREATED, 927)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_VALUE_SEL_CHANGING, 928)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_VALUE_SEL_CHANGED, 929)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_AREA_SEL_CREATING, 930)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_AREA_SEL_CREATED, 931)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_AREA_SEL_CHANGING, 932)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_AREA_SEL_CHANGED, 933)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_BEGIN_X_LABEL_EDIT, 934)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_END_X_LABEL_EDIT, 935)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_BEGIN_Y_LABEL_EDIT, 936)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_END_Y_LABEL_EDIT, 937)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_BEGIN_TITLE_EDIT, 938)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_END_TITLE_EDIT, 939)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_PLOT, wxEVT_PLOT_AREA_CREATE, 940)
-END_DECLARE_EVENT_TYPES()
+extern const int wxEVT_PLOT_SEL_CHANGING;
+extern const int wxEVT_PLOT_SEL_CHANGED;
+extern const int wxEVT_PLOT_CLICKED;
+extern const int wxEVT_PLOT_DOUBLECLICKED;
+extern const int wxEVT_PLOT_ZOOM_IN;
+extern const int wxEVT_PLOT_ZOOM_OUT;
+extern const int wxEVT_PLOT_VALUE_SEL_CREATING;
+extern const int wxEVT_PLOT_VALUE_SEL_CREATED;
+extern const int wxEVT_PLOT_VALUE_SEL_CHANGING;
+extern const int wxEVT_PLOT_VALUE_SEL_CHANGED;
+extern const int wxEVT_PLOT_AREA_SEL_CREATING;
+extern const int wxEVT_PLOT_AREA_SEL_CREATED;
+extern const int wxEVT_PLOT_AREA_SEL_CHANGING;
+extern const int wxEVT_PLOT_AREA_SEL_CHANGED;
+extern const int wxEVT_PLOT_BEGIN_X_LABEL_EDIT;
+extern const int wxEVT_PLOT_END_X_LABEL_EDIT;
+extern const int wxEVT_PLOT_BEGIN_Y_LABEL_EDIT;
+extern const int wxEVT_PLOT_END_Y_LABEL_EDIT;
+extern const int wxEVT_PLOT_BEGIN_TITLE_EDIT;
+extern const int wxEVT_PLOT_END_TITLE_EDIT;
+extern const int wxEVT_PLOT_AREA_CREATE;
+
 
 #define wxPLOT_X_AXIS          0x0004
 #define wxPLOT_Y_AXIS          0x0008
@@ -84,7 +70,7 @@ END_DECLARE_EVENT_TYPES()
 // wxPlotEvent
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotEvent: public wxNotifyEvent
+class WXDLLEXPORT wxPlotEvent: public wxNotifyEvent
 {
 public:
     wxPlotEvent( wxEventType commandType = wxEVT_NULL, int id = 0 );
@@ -114,7 +100,7 @@ private:
 // wxPlotCurve
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotCurve: public wxObject
+class WXDLLEXPORT wxPlotCurve: public wxObject
 {
 public:
     wxPlotCurve( int offsetY, double startY, double endY );
@@ -126,26 +112,21 @@ public:
 
     void SetStartY( double startY )
         { m_startY = startY; }
-    double GetStartY() const
+    double GetStartY()
         { return m_startY; }
     void SetEndY( double endY )
         { m_endY = endY; }
-    double GetEndY() const
+    double GetEndY()
         { return m_endY; }
     void SetOffsetY( int offsetY )
        { m_offsetY = offsetY; }
-    int GetOffsetY() const
+    int GetOffsetY()
        { return m_offsetY; }
-
+       
     void SetPenNormal( const wxPen &pen )
        { m_penNormal = pen; }
     void SetPenSelected( const wxPen &pen )
        { m_penSelected = pen; }
-
-    const wxPen& GetPenNormal() const
-       { return m_penNormal; }
-    const wxPen& GetPenSelected() const
-       { return m_penSelected; }
 
 private:
     int     m_offsetY;
@@ -161,7 +142,7 @@ private:
 // wxPlotOnOffCurve
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotOnOff
+class WXDLLEXPORT wxPlotOnOff
 {
 public:
     wxPlotOnOff() { }
@@ -171,10 +152,9 @@ public:
     void     *m_clientData;
 };
 
-WX_DECLARE_OBJARRAY_WITH_DECL(wxPlotOnOff, wxArrayPlotOnOff,
-                              class WXDLLIMPEXP_PLOT);
+WX_DECLARE_EXPORTED_OBJARRAY(wxPlotOnOff, wxArrayPlotOnOff);
 
-class WXDLLIMPEXP_PLOT wxPlotOnOffCurve: public wxObject
+class WXDLLEXPORT wxPlotOnOffCurve: public wxObject
 {
 public:
     wxPlotOnOffCurve( int offsetY );
@@ -188,10 +168,10 @@ public:
        { m_offsetY = offsetY; }
     int GetOffsetY()
        { return m_offsetY; }
-
+       
     void Add( wxInt32 on, wxInt32 off, void *clientData = NULL );
     size_t GetCount();
-
+    
     wxInt32 GetOn( size_t index );
     wxInt32 GetOff( size_t index );
     void* GetClientData( size_t index );
@@ -204,7 +184,7 @@ private:
     int               m_offsetY;
     wxInt32           m_minX;
     wxInt32           m_maxX;
-
+    
     wxArrayPlotOnOff   m_marks;
 
     DECLARE_CLASS(wxPlotOnOffCurve)
@@ -214,7 +194,7 @@ private:
 // wxPlotArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotArea: public wxWindow
+class WXDLLEXPORT wxPlotArea: public wxWindow
 {
 public:
     wxPlotArea() {}
@@ -241,7 +221,7 @@ private:
 // wxPlotXAxisArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotXAxisArea: public wxWindow
+class WXDLLEXPORT wxPlotXAxisArea: public wxWindow
 {
 public:
     wxPlotXAxisArea() {}
@@ -261,7 +241,7 @@ private:
 // wxPlotYAxisArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotYAxisArea: public wxWindow
+class WXDLLEXPORT wxPlotYAxisArea: public wxWindow
 {
 public:
     wxPlotYAxisArea() {}
@@ -281,15 +261,11 @@ private:
 // wxPlotWindow
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotWindow: public wxScrolledWindow
+class WXDLLEXPORT wxPlotWindow: public wxScrolledWindow
 {
 public:
     wxPlotWindow() {}
-    wxPlotWindow(wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 int flags = wxPLOT_DEFAULT);
+    wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, int flags = wxPLOT_DEFAULT );
     ~wxPlotWindow();
 
     // curve accessors
@@ -301,15 +277,15 @@ public:
     size_t GetCount();
     wxPlotCurve *GetAt( size_t n );
 
-    void SetCurrentCurve( wxPlotCurve* current );
-    wxPlotCurve *GetCurrentCurve();
+    void SetCurrent( wxPlotCurve* current );
+    wxPlotCurve *GetCurrent();
 
     // mark list accessors
     // -------------------
 
     void Add( wxPlotOnOffCurve *curve );
     void Delete( wxPlotOnOffCurve* curve );
-
+    
     size_t GetOnOffCurveCount();
     wxPlotOnOffCurve *GetOnOffCurveAt( size_t n );
 
@@ -333,12 +309,12 @@ public:
     // options
     // -------
 
-    void SetScrollOnThumbRelease( bool scrollOnThumbRelease = true )
+    void SetScrollOnThumbRelease( bool scrollOnThumbRelease = TRUE )
         { m_scrollOnThumbRelease = scrollOnThumbRelease; }
     bool GetScrollOnThumbRelease()
         { return m_scrollOnThumbRelease; }
 
-    void SetEnlargeAroundWindowCentre( bool enlargeAroundWindowCentre = true )
+    void SetEnlargeAroundWindowCentre( bool enlargeAroundWindowCentre = TRUE )
         { m_enlargeAroundWindowCentre = enlargeAroundWindowCentre; }
     bool GetEnlargeAroundWindowCentre()
         { return m_enlargeAroundWindowCentre; }
@@ -365,8 +341,6 @@ public:
 
     void ResetScrollbar();
 
-    void AddChartTitle( const wxString&, wxFont = *wxNORMAL_FONT, wxColour = *wxBLACK );
-
 private:
     friend class wxPlotArea;
     friend class wxPlotXAxisArea;
@@ -377,7 +351,7 @@ private:
 
     wxList             m_curves;
     wxList             m_onOffCurves;
-
+    
     wxPlotArea        *m_area;
     wxPlotXAxisArea   *m_xaxis;
     wxPlotYAxisArea   *m_yaxis;
@@ -385,14 +359,6 @@ private:
 
     bool               m_scrollOnThumbRelease;
     bool               m_enlargeAroundWindowCentre;
-
-    wxString           m_title;
-    wxFont             m_titleFont;
-    wxColour           m_titleColour;
-    wxStaticText*      m_titleStaticText;
-    wxBoxSizer*        m_plotAndTitleSizer;
-
-    void DrawChartTitle();
 
     DECLARE_CLASS(wxPlotWindow)
     DECLARE_EVENT_TABLE()
@@ -406,51 +372,51 @@ typedef void (wxEvtHandler::*wxPlotEventFunction)(wxPlotEvent&);
 
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
 
-#define EVT_PLOT(id, fn) { wxEVT_PLOT_DOUBLECLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_SEL_CHANGING(id, fn) { wxEVT_PLOT_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_SEL_CHANGED(id, fn) { wxEVT_PLOT_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_CLICKED(id, fn) { wxEVT_PLOT_CLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_DOUBLECLICKED(id, fn) { wxEVT_PLOT_DOUBLECLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_ZOOM_IN(id, fn) { wxEVT_PLOT_ZOOM_IN, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_ZOOM_OUT(id, fn) { wxEVT_PLOT_ZOOM_OUT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_VALUE_SEL_CREATING(id, fn) { wxEVT_PLOT_VALUE_SEL_CREATING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_VALUE_SEL_CREATED(id, fn) { wxEVT_PLOT_VALUE_SEL_CREATED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_VALUE_SEL_CHANGING(id, fn) { wxEVT_PLOT_VALUE_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_VALUE_SEL_CHANGED(id, fn) { wxEVT_PLOT_VALUE_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_AREA_SEL_CREATING(id, fn) { wxEVT_PLOT_AREA_SEL_CREATING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_AREA_SEL_CREATED(id, fn) { wxEVT_PLOT_AREA_SEL_CREATED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_AREA_SEL_CHANGING(id, fn) { wxEVT_PLOT_AREA_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_AREA_SEL_CHANGED(id, fn) { wxEVT_PLOT_AREA_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_BEGIN_X_LABEL_EDIT(id, fn) { wxEVT_PLOT_BEGIN_X_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_END_X_LABEL_EDIT(id, fn) { wxEVT_PLOT_END_X_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_BEGIN_Y_LABEL_EDIT(id, fn) { wxEVT_PLOT_BEGIN_Y_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_END_Y_LABEL_EDIT(id, fn) { wxEVT_PLOT_END_Y_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_BEGIN_TITLE_EDIT(id, fn) { wxEVT_PLOT_BEGIN_TITLE_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
-#define EVT_PLOT_END_TITLE_EDIT(id, fn) { wxEVT_PLOT_END_TITLE_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT(id, fn) { wxEVT_PLOT_DOUBLECLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_SEL_CHANGING(id, fn) { wxEVT_PLOT_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_SEL_CHANGED(id, fn) { wxEVT_PLOT_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_CLICKED(id, fn) { wxEVT_PLOT_CLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_DOUBLECLICKED(id, fn) { wxEVT_PLOT_DOUBLECLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_ZOOM_IN(id, fn) { wxEVT_PLOT_ZOOM_IN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_ZOOM_OUT(id, fn) { wxEVT_PLOT_ZOOM_OUT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_VALUE_SEL_CREATING(id, fn) { wxEVT_PLOT_VALUE_SEL_CREATING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_VALUE_SEL_CREATED(id, fn) { wxEVT_PLOT_VALUE_SEL_CREATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_VALUE_SEL_CHANGING(id, fn) { wxEVT_PLOT_VALUE_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_VALUE_SEL_CHANGED(id, fn) { wxEVT_PLOT_VALUE_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_AREA_SEL_CREATING(id, fn) { wxEVT_PLOT_AREA_SEL_CREATING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_AREA_SEL_CREATED(id, fn) { wxEVT_PLOT_AREA_SEL_CREATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_AREA_SEL_CHANGING(id, fn) { wxEVT_PLOT_AREA_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_AREA_SEL_CHANGED(id, fn) { wxEVT_PLOT_AREA_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_BEGIN_X_LABEL_EDIT(id, fn) { wxEVT_PLOT_BEGIN_X_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_END_X_LABEL_EDIT(id, fn) { wxEVT_PLOT_END_X_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_BEGIN_Y_LABEL_EDIT(id, fn) { wxEVT_PLOT_BEGIN_Y_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_END_Y_LABEL_EDIT(id, fn) { wxEVT_PLOT_END_Y_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_BEGIN_TITLE_EDIT(id, fn) { wxEVT_PLOT_BEGIN_TITLE_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
+#define EVT_PLOT_END_TITLE_EDIT(id, fn) { wxEVT_PLOT_END_TITLE_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL },
 
 #else
 
-#define EVT_PLOT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_DOUBLECLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_CLICKED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_CLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_DOUBLECLICKED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_DOUBLECLICKED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_ZOOM_IN(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_ZOOM_IN, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_ZOOM_OUT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_ZOOM_OUT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_VALUE_SEL_CREATING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CREATING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_VALUE_SEL_CREATED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CREATED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_VALUE_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_VALUE_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_AREA_SEL_CREATING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CREATING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_AREA_SEL_CREATED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CREATED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_AREA_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CHANGING, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_AREA_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CHANGED, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_BEGIN_X_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_X_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_END_X_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_X_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_BEGIN_Y_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_Y_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_END_Y_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_Y_LABEL_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_BEGIN_TITLE_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_TITLE_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_PLOT_END_TITLE_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_TITLE_EDIT, id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction)  wxStaticCastEvent( wxPlotEventFunction, & fn ), (wxObject *) NULL ),
+#define EVT_PLOT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_DOUBLECLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_CLICKED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_CLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_DOUBLECLICKED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_DOUBLECLICKED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_ZOOM_IN(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_ZOOM_IN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_ZOOM_OUT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_ZOOM_OUT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_VALUE_SEL_CREATING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CREATING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_VALUE_SEL_CREATED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CREATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_VALUE_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_VALUE_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_VALUE_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_AREA_SEL_CREATING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CREATING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_AREA_SEL_CREATED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CREATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_AREA_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_AREA_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_AREA_SEL_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_BEGIN_X_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_X_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_END_X_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_X_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_BEGIN_Y_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_Y_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_END_Y_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_Y_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_BEGIN_TITLE_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_BEGIN_TITLE_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_PLOT_END_TITLE_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_PLOT_END_TITLE_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) (wxPlotEventFunction) & fn, (wxObject *) NULL ),
 
 #endif
 

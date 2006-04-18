@@ -6,7 +6,7 @@
 %% Created:
 %% RCS-ID:      $Id$
 %% Copyright:   (c) 2001 Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxIconizeEvent}}\label{wxiconizeevent}
@@ -37,14 +37,14 @@ member function that takes a wxIconizeEvent argument.
 \wxheading{See also}
 
 \helpref{Event handling overview}{eventhandlingoverview},\rtfsp
-\helpref{wxTopLevelWindow::Iconize}{wxtoplevelwindowiconize},\rtfsp
-\helpref{wxTopLevelWindow::IsIconized}{wxtoplevelwindowisiconized}
+\helpref{wxFrame::Iconize}{wxframeiconize},\rtfsp
+\helpref{wxFrame::IsIconized}{wxframeisiconized}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxIconizeEvent::wxIconizeEvent}\label{wxiconizeeventctor}
 
-\func{}{wxIconizeEvent}{\param{int }{id = 0}, \param{bool }{iconized = true}}
+\func{}{wxIconizeEvent}{\param{int }{id = 0}, \param{bool }{iconized = TRUE}}
 
 Constructor.
 
@@ -52,6 +52,6 @@ Constructor.
 
 \constfunc{bool}{Iconized}{\void}
 
-Returns {\tt true} if the frame has been iconized, {\tt false} if it has been
+Returns {\tt TRUE} if the frame has been iconized, {\tt FALSE} if it has been
 restored.
 

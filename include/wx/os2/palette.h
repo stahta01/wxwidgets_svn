@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/palette.h
+// Name:        palette.h
 // Purpose:     wxPalette class
 // Author:      David Webster
 // Modified by:
@@ -13,7 +13,6 @@
 #define _WX_PALETTE_H_
 
 #include "wx/gdiobj.h"
-#include "wx/os2/private.h"
 
 class WXDLLEXPORT wxPalette;
 
@@ -30,12 +29,13 @@ public:
 
 #define M_PALETTEDATA ((wxPaletteRefData *)m_refData)
 
-class WXDLLEXPORT wxPalette: public wxPaletteBase
+class WXDLLEXPORT wxPalette: public wxGDIObject
 {
     DECLARE_DYNAMIC_CLASS(wxPalette)
 
 public:
     wxPalette();
+    inline wxPalette(const wxPalette& rPalette) { Ref(rPalette); }
 
     wxPalette( int                  n
               ,const unsigned char* pRed
@@ -49,9 +49,9 @@ public:
                 ,const unsigned char* pGreen
                 ,const unsigned char* pBlue
                );
-    int  GetPixel( unsigned char cRed
-                  ,unsigned char cGreen
-                  ,unsigned char cBlue
+    int  GetPixel( const unsigned char cRed
+                  ,const unsigned char cGreen
+                  ,const unsigned char cBlue
                  ) const;
     bool GetRGB( int            nPixel
                 ,unsigned char* pRed
@@ -61,17 +61,20 @@ public:
 
     virtual bool Ok(void) const { return (m_refData != NULL) ; }
 
-    inline bool       operator == (const wxPalette& rPalette) const
-        { return m_refData == rPalette.m_refData; }
-    inline bool       operator != (const wxPalette& rPalette) const
-        { return m_refData != rPalette.m_refData; }
+    inline wxPalette& operator = (const wxPalette& rPalette) { if (*this == rPalette) return (*this); Ref(rPalette); return *this; }
+    inline bool       operator == (const wxPalette& rPalette) { return m_refData == rPalette.m_refData; }
+    inline bool       operator != (const wxPalette& rPalette) { return m_refData != rPalette.m_refData; }
 
-    virtual bool FreeResource(bool bForce = false);
+    virtual bool FreeResource(bool bForce = FALSE);
 
     inline WXHPALETTE GetHPALETTE(void) const { return (M_PALETTEDATA ? M_PALETTEDATA->m_hPalette : 0); }
     void              SetHPALETTE(WXHPALETTE hPalette);
     void              SetPS(HPS hPS);
 }; // end of CLASS wxPalette
 
+#define wxColorMap wxPalette
+#define wxColourMap wxPalette
+
 #endif
     // _WX_PALETTE_H_
+

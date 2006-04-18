@@ -37,10 +37,7 @@ protected:
 	CallTip ct;
 
 	int listType;			///< 0 is an autocomplete list
-	SString listSelected;	///< Receives listbox selected string
-	int maxListWidth;		/// Maximum width of list, in average character widths
-
-	bool performingStyle;	///< Prevent reentrance
+	SString userListSelected;	///< Receives listbox selected string
 
 #ifdef SCI_LEXER
 	int lexLanguage;
@@ -68,7 +65,6 @@ protected:
 	void AutoCompleteStart(int lenEntered, const char *list);
 	void AutoCompleteCancel();
 	void AutoCompleteMove(int delta);
-	int AutoCompleteGetCurrent();
 	void AutoCompleteCharacterAdded(char ch);
 	void AutoCompleteCharacterDeleted();
 	void AutoCompleteCompleted();

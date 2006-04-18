@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/timer.cpp
+// Name:        timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      David Webster
 // Modified by:
@@ -12,14 +12,16 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/window.h"
+#include "wx/os2/private.h"
+
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/event.h"
     #include "wx/app.h"
 #endif
 
-#include "wx/os2/private.h"
 #include "wx/intl.h"
 #include "wx/log.h"
 
@@ -29,46 +31,18 @@
 #include <sys/types.h>
 
 #include <sys/timeb.h>
-
-// ----------------------------------------------------------------------------
-// private globals
-// ----------------------------------------------------------------------------
-
-// define a hash containing all the timers: it is indexed by timer id and
-// contains the corresponding timer
-WX_DECLARE_HASH_MAP(unsigned long, wxTimer *, wxIntegerHash, wxIntegerEqual,
-                    wxTimerMap);
-
-// instead of using a global here, wrap it in a static function as otherwise it
-// could have been used before being initialized if a timer object were created
-// globally
-static wxTimerMap& TimerMap()
-{
-    static wxTimerMap s_timerMap;
-
-    return s_timerMap;
-}
-
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
-// timer callback used for all timers
+wxList wxTimerList(wxKEY_INTEGER);
 ULONG wxTimerProc(HWND hwnd, ULONG, int nIdTimer, ULONG);
 
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxTimer class
-// ----------------------------------------------------------------------------
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxObject)
 
 void wxTimer::Init()
 {
@@ -78,6 +52,8 @@ void wxTimer::Init()
 wxTimer::~wxTimer()
 {
     wxTimer::Stop();
+
+    wxTimerList.DeleteObject(this);
 }
 
 void wxTimer::Notify()
@@ -107,6 +83,8 @@ bool wxTimer::Start(
 
     wxCHECK_MSG( m_milli > 0L, FALSE, wxT("invalid value for timer") );
 
+    wxTimerList.DeleteObject(this);
+
     wxWindow*                       pWin = NULL;
 
     if (m_owner)
@@ -126,23 +104,10 @@ bool wxTimer::Start(
                                 );
     if (m_ulId > 0L)
     {
-        // check that SetTimer() didn't reuse an existing id: according to
-        // the MSDN this can happen and this would be catastrophic to us as
-        // we rely on ids uniquely identifying the timers because we use
-        // them as keys in the hash
-        if ( TimerMap().find(m_ulId) != TimerMap().end() )
-        {
-            wxLogError(_("Timer creation failed."));
-
-            ::WinStopTimer(m_Hab, pWin?(pWin->GetHWND()):NULL, m_ulId);
-            m_ulId = 0;
-
-            return false;
-        }
-
-        TimerMap()[m_ulId] = this;
-
-        return true;
+        wxTimerList.Append( m_ulId
+                           ,this
+                          );
+        return(TRUE);
     }
     else
     {
@@ -164,8 +129,7 @@ void wxTimer::Stop()
         }
         else
             ::WinStopTimer(m_Hab, NULLHANDLE, m_ulId);
-
-        TimerMap().erase(m_ulId);
+        wxTimerList.DeleteObject(this);
     }
     m_ulId = 0L;
 }
@@ -197,10 +161,11 @@ ULONG wxTimerProc(
 , ULONG
 )
 {
-    wxTimerMap::iterator node = TimerMap().find((ULONG)nIdTimer);
+    wxNode*                         pNode = wxTimerList.Find((ULONG)nIdTimer);
 
-    wxCHECK_MSG(node != TimerMap().end(), 0,
-                wxT("bogus timer id in wxTimerProc") );
-    wxProcessTimer(*(node->second));
+    wxCHECK_MSG(pNode, 0, wxT("bogus timer id in wxTimerProc") );
+    if (pNode)
+      wxProcessTimer(*(wxTimer *)pNode->Data());
     return 0;
 }
+

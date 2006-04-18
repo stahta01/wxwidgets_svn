@@ -6,7 +6,7 @@
 // Created:     29/07/2002
 // RCS-ID:      $Id$
 // Copyright:   (c) Hans Van Leemputten
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -31,7 +31,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/generic/mdig.h"
-#include "wx/stockitem.h"
 
 enum MDI_MENU_ID
 {
@@ -48,9 +47,7 @@ enum MDI_MENU_ID
 IMPLEMENT_DYNAMIC_CLASS(wxGenericMDIParentFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxGenericMDIParentFrame, wxFrame)
-#if wxUSE_MENUS
-    EVT_MENU (wxID_ANY, wxGenericMDIParentFrame::DoHandleMenu)
-#endif
+    EVT_MENU (-1, wxGenericMDIParentFrame::DoHandleMenu)
 END_EVENT_TABLE()
 
 wxGenericMDIParentFrame::wxGenericMDIParentFrame()
@@ -120,7 +117,7 @@ bool wxGenericMDIParentFrame::Create(wxWindow *parent,
 
   OnCreateClient();
 
-  return true;
+  return TRUE;
 }
 
 #if wxUSE_MENUS
@@ -189,12 +186,12 @@ bool wxGenericMDIParentFrame::ProcessEvent(wxEvent& event)
     // Stops the same event being processed repeatedly
     static wxEventType inEvent = wxEVT_NULL;
     if (inEvent == event.GetEventType())
-        return false;
+        return FALSE;
 
     inEvent = event.GetEventType();
 
     // Let the active child (if any) process the event first.
-    bool res = false;
+    bool res = FALSE;
     if (m_pActiveChild && event.IsKindOf(CLASSINFO(wxCommandEvent))
 #if 0
         /* This is sure to not give problems... */
@@ -255,7 +252,7 @@ void wxGenericMDIParentFrame::ActivateNext()
 {
     if (m_pClientWindow && m_pClientWindow->GetSelection() != -1)
     {
-        size_t active = m_pClientWindow->GetSelection() + 1;
+        int active = m_pClientWindow->GetSelection() + 1;
         if (active >= m_pClientWindow->GetPageCount())
             active = 0;
 
@@ -304,7 +301,7 @@ void wxGenericMDIParentFrame::AddWindowMenu(wxMenuBar *pMenuBar)
 {
     if (pMenuBar && m_pWindowMenu)
     {
-        int pos = pMenuBar->FindMenu(wxGetStockLabel(wxID_HELP,false));
+        int pos = pMenuBar->FindMenu(_("Help"));
         if (pos == wxNOT_FOUND)
         {
             pMenuBar->Append(m_pWindowMenu, _("&Window"));
@@ -341,7 +338,6 @@ void wxGenericMDIParentFrame::DoHandleMenu(wxCommandEvent &event)
                 {
 #if 1   // What's best? Delayed deleting or immediate deleting?
                     delete m_pActiveChild;
-                    m_pActiveChild = NULL;
 #else
                     ActivateNext();
 
@@ -406,18 +402,18 @@ wxGenericMDIChildFrame::~wxGenericMDIChildFrame()
 
     if (pParentFrame != NULL)
     {
-        bool bActive = false;
+        bool bActive = FALSE;
         if (pParentFrame->GetActiveChild() == this)
         {
             pParentFrame->SetActiveChild((wxGenericMDIChildFrame*) NULL);
             pParentFrame->SetChildMenuBar((wxGenericMDIChildFrame*) NULL);
-            bActive = true;
+            bActive = TRUE;
         }
 
         wxGenericMDIClientWindow *pClientWindow = pParentFrame->GetClientWindow();
 
         // Remove page if still there
-        size_t pos;
+        int pos;
         for (pos = 0; pos < pClientWindow->GetPageCount(); pos++)
         {
             if (pClientWindow->GetPage(pos) == this)
@@ -437,7 +433,7 @@ wxGenericMDIChildFrame::~wxGenericMDIChildFrame()
             }
             else
             {
-                if ((int)pClientWindow->GetPageCount() - 1 >= 0)
+                if (pClientWindow->GetPageCount() - 1 >= 0)
                     pClientWindow->SetSelection(pClientWindow->GetPageCount() - 1);
             }
         }
@@ -466,11 +462,11 @@ bool wxGenericMDIChildFrame::Create( wxGenericMDIParentFrame *parent,
 
     m_Title = title;
 
-    pClientWindow->AddPage(this, title, true);
+    pClientWindow->AddPage(this, title, TRUE);
     ApplyMDIChildFrameRect();   // Ok confirme the size change!
     pClientWindow->Refresh();
 
-    return true;
+    return TRUE;
 }
 
 #if wxUSE_MENUS
@@ -516,7 +512,7 @@ void wxGenericMDIChildFrame::SetTitle(const wxString& title)
 
         if (pClientWindow != NULL)
         {
-            size_t pos;
+            int pos;
             for (pos = 0; pos < pClientWindow->GetPageCount(); pos++)
             {
                 if (pClientWindow->GetPage(pos) == this)
@@ -544,7 +540,7 @@ void wxGenericMDIChildFrame::Activate()
 
         if (pClientWindow != NULL)
         {
-            size_t pos;
+            int pos;
             for (pos = 0; pos < pClientWindow->GetPageCount(); pos++)
             {
                 if (pClientWindow->GetPage(pos) == this)
@@ -566,12 +562,10 @@ void wxGenericMDIChildFrame::OnMenuHighlight(wxMenuEvent& event)
         // but may be the MDI frame does?
         m_pMDIParentFrame->OnMenuHighlight(event);
     }
-#else
-    wxUnusedVar(event);
 #endif // wxUSE_STATUSBAR
 }
 
-void wxGenericMDIChildFrame::OnActivate(wxActivateEvent& WXUNUSED(event))
+void wxGenericMDIChildFrame::OnActivate(wxActivateEvent& event)
 {
     // Do mothing.
 }
@@ -590,7 +584,7 @@ void wxGenericMDIChildFrame::OnSize(wxSizeEvent& WXUNUSED(event))
     {
         // do we have _exactly_ one child?
         wxWindow *child = (wxWindow *)NULL;
-        for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        for ( wxWindowList::Node *node = GetChildren().GetFirst();
               node;
               node = node->GetNext() )
         {
@@ -697,7 +691,7 @@ bool wxGenericMDIClientWindow::CreateClient( wxGenericMDIParentFrame *parent, lo
 {
     SetWindowStyleFlag(style);
 
-    bool success = wxNotebook::Create(parent, wxID_NOTEBOOK_CLIENT_AREA, wxPoint(0,0), wxSize(100, 100), 0);
+    bool success = wxNotebook::Create(parent, wxID_NOTEBOOK_CLIENT_AREA, wxPoint(0, 0), wxSize(100, 100), 0);
     if (success)
     {
         /*
@@ -708,13 +702,13 @@ bool wxGenericMDIClientWindow::CreateClient( wxGenericMDIParentFrame *parent, lo
         GetTabView()->SetTabSize(120, 18);
         GetTabView()->SetTabSelectionHeight(20);
         */
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
-int wxGenericMDIClientWindow::SetSelection(size_t nPage)
+int wxGenericMDIClientWindow::SetSelection(int nPage)
 {
     int oldSelection = wxNotebook::SetSelection(nPage);
 
@@ -747,7 +741,7 @@ void wxGenericMDIClientWindow::PageChanged(int OldSelection, int newSelection)
         wxGenericMDIChildFrame* oldChild = (wxGenericMDIChildFrame *)GetPage(OldSelection);
         if (oldChild)
         {
-            wxActivateEvent event(wxEVT_ACTIVATE, false, oldChild->GetId());
+            wxActivateEvent event(wxEVT_ACTIVATE, FALSE, oldChild->GetId());
             event.SetEventObject( oldChild );
             oldChild->GetEventHandler()->ProcessEvent(event);
         }
@@ -759,7 +753,7 @@ void wxGenericMDIClientWindow::PageChanged(int OldSelection, int newSelection)
         wxGenericMDIChildFrame* activeChild = (wxGenericMDIChildFrame *)GetPage(newSelection);
         if (activeChild)
         {
-            wxActivateEvent event(wxEVT_ACTIVATE, true, activeChild->GetId());
+            wxActivateEvent event(wxEVT_ACTIVATE, TRUE, activeChild->GetId());
             event.SetEventObject( activeChild );
             activeChild->GetEventHandler()->ProcessEvent(event);
 
@@ -783,7 +777,7 @@ void wxGenericMDIClientWindow::OnSize(wxSizeEvent& event)
 {
     wxNotebook::OnSize(event);
 
-    size_t pos;
+    int pos;
     for (pos = 0; pos < GetPageCount(); pos++)
     {
         ((wxGenericMDIChildFrame *)GetPage(pos))->ApplyMDIChildFrameRect();

@@ -6,7 +6,7 @@
 // Created:     1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_PROTO_FILE_H__
@@ -19,8 +19,8 @@
 #include "wx/protocol/protocol.h"
 #include "wx/url.h"
 
-class WXDLLIMPEXP_NET wxFileProto: public wxProtocol {
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxFileProto)
+class WXDLLEXPORT wxFileProto: public wxProtocol {
+  DECLARE_DYNAMIC_CLASS(wxFileProto)
   DECLARE_PROTOCOL(wxFileProto)
 protected:
   wxProtocolError m_error;

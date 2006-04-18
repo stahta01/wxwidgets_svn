@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/menuitem.h
+// Name:        menuitem.h
 // Purpose:     wxMenuItem class
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _MENUITEM_H
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 // an exception to the general rule that a normal header doesn't include other
 // headers - only because ownerdrw.h is not always included and I don't want
@@ -43,8 +43,8 @@ public:
     //
     wxMenuItem( wxMenu*         pParentMenu = NULL
                ,int             nId = wxID_SEPARATOR
-               ,const wxString& rStrName = wxEmptyString
-               ,const wxString& rWxHelp = wxEmptyString
+               ,const wxString& rStrName = ""
+               ,const wxString& rWxHelp = ""
                ,wxItemKind      eKind = wxITEM_NORMAL
                ,wxMenu*         pSubMenu = NULL
               );
@@ -67,8 +67,8 @@ public:
     virtual void SetText(const wxString& rStrName);
     virtual void SetCheckable(bool bCheckable);
 
-    virtual void Enable(bool bDoEnable = true);
-    virtual void Check(bool bDoCheck = true);
+    virtual void Enable(bool bDoEnable = TRUE);
+    virtual void Check(bool bDoCheck = TRUE);
     virtual bool IsChecked(void) const;
 
     //

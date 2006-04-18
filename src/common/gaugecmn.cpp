@@ -6,7 +6,7 @@
 // Created:     20.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -54,7 +54,7 @@ bool wxGaugeBase::Create(wxWindow *parent,
                          const wxString& name)
 {
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     SetName(name);
 
@@ -65,7 +65,7 @@ bool wxGaugeBase::Create(wxWindow *parent,
     SetRange(range);
     SetValue(0);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------

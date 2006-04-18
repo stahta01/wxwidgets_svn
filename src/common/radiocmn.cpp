@@ -6,7 +6,7 @@
 // Created:     03.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -33,26 +33,6 @@
 // ============================================================================
 // implementation
 // ============================================================================
-
-void wxRadioBoxBase::SetMajorDim(unsigned int majorDim, long style)
-{
-    wxCHECK_RET( majorDim != 0, _T("major radiobox dimension can't be 0") );
-
-    m_majorDim = majorDim;
-
-    int minorDim = (GetCount() + m_majorDim - 1) / m_majorDim;
-
-    if ( style & wxRA_SPECIFY_COLS )
-    {
-        m_numCols = majorDim;
-        m_numRows = minorDim;
-    }
-    else // wxRA_SPECIFY_ROWS
-    {
-        m_numCols = minorDim;
-        m_numRows = majorDim;
-    }
-}
 
 int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
 {
@@ -114,7 +94,7 @@ int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
 
         default:
             wxFAIL_MSG( _T("unexpected wxDirection value") );
-            return wxNOT_FOUND;
+            return -1;
     }
 
     // ensure that the item is in range [0..count)
@@ -150,18 +130,5 @@ int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
     return item;
 }
 
-#if WXWIN_COMPATIBILITY_2_4
-
-// these functions are deprecated and don't do anything
-int wxRadioBoxBase::GetNumberOfRowsOrCols() const
-{
-    return 1;
-}
-
-void wxRadioBoxBase::SetNumberOfRowsOrCols(int WXUNUSED(n))
-{
-}
-
-#endif // WXWIN_COMPATIBILITY_2_4
-
 #endif // wxUSE_RADIOBOX
+

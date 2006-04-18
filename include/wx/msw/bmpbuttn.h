@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/bmpbuttn.h
+// Name:        bmpbuttn.h
 // Purpose:     wxBitmapButton class
 // Author:      Julian Smart
 // Modified by:
@@ -14,13 +14,14 @@
 
 #include "wx/button.h"
 #include "wx/bitmap.h"
-#include "wx/brush.h"
 
-class WXDLLEXPORT wxBitmapButton : public wxBitmapButtonBase
+#define wxDEFAULT_BUTTON_MARGIN 4
+
+class WXDLLEXPORT wxBitmapButton: public wxBitmapButtonBase
 {
 public:
-    wxBitmapButton() { }
-
+    wxBitmapButton()
+        { m_marginX = m_marginY = wxDEFAULT_BUTTON_MARGIN; }
     wxBitmapButton(wxWindow *parent,
                    wxWindowID id,
                    const wxBitmap& bitmap,
@@ -42,32 +43,20 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxButtonNameStr);
 
+#if WXWIN_COMPATIBILITY
+    wxBitmap *GetBitmap() const { return (wxBitmap *) & m_bmp; }
+#endif
+
     // Implementation
-    virtual bool SetBackgroundColour(const wxColour& colour);
     virtual void SetDefault();
     virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
     virtual void DrawFace( WXHDC dc, int left, int top, int right, int bottom, bool sel );
     virtual void DrawButtonFocus( WXHDC dc, int left, int top, int right, int bottom, bool sel );
     virtual void DrawButtonDisable( WXHDC dc, int left, int top, int right, int bottom, bool with_marg );
 
-protected:
-    // reimplement some base class virtuals
-    virtual wxSize DoGetBestSize() const;
-    virtual void OnSetBitmap();
-
-    // invalidate m_brushDisabled when system colours change
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
-
-    // change the currently bitmap if we have a hover one
-    void OnMouseEnterOrLeave(wxMouseEvent& event);
-
-
-    // the brush we use to draw disabled buttons
-    wxBrush m_brushDisabled;
-
-
-    DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxBitmapButton)
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapButton)
 };
 
-#endif // _WX_BMPBUTTN_H_
+#endif
+    // _WX_BMPBUTTN_H_

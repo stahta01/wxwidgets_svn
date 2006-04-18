@@ -55,7 +55,7 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
         }
         else
         {
-            m_window = m_selected.GetBitmap();
+//            m_window = m_selected.GetBitmap();
         }
 
         m_isMemDC = TRUE;

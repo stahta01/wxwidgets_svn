@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKTIMERH__
 #define __GTKTIMERH__
 
@@ -14,7 +15,7 @@
 // wxTimer
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTimer : public wxTimerBase
+class wxTimer : public wxTimerBase
 {
 public:
     wxTimer() { Init(); }

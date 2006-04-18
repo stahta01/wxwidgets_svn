@@ -9,23 +9,22 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_STATTEXT
-
+#include "wx/app.h"
 #include "wx/stattext.h"
+
+#include <stdio.h>
 
 #ifdef __VMS__
 #pragma message disable nosimpint
 #endif
+#include <Xm/Frame.h>
 #include <Xm/Label.h>
+#include <Xm/LabelG.h>
+#include <Xm/PushBG.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
@@ -41,49 +40,130 @@ bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
            long style,
            const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style,
-                        wxDefaultValidator, name ) )
-        return false;
+    SetName(name);
+    if (parent) parent->AddChild(this);
 
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+
+    if ( id == -1 )
+              m_windowId = (int)NewControlId();
+    else
+            m_windowId = id;
+
+    m_windowStyle = style;
+    m_font = parent->GetFont();
+
+#if 0  // gcc 2.95 doesn't like this apparently    
+    char* label1 = (label.IsNull() ? "" : (char*) (const char*) label);
+#endif
+    
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
-    Widget borderWidget =
-        (Widget) wxCreateBorderWidget( (WXWidget)parentWidget, style );
-    wxXmString text( wxStripMenuCodes( label ) );
+    Widget borderWidget = NULL;
+    
+    // Decorate the label widget if a border style is specified.
+    if (style & wxSIMPLE_BORDER)
+    {
+        borderWidget = XtVaCreateManagedWidget
+                                   (
+                                    "simpleBorder",
+                                    xmFrameWidgetClass, parentWidget,
+                                    XmNshadowType, XmSHADOW_ETCHED_IN,
+                                    XmNshadowThickness, 1,
+                                    NULL
+                                   );
+    } else if (style & wxSUNKEN_BORDER)
+    {
+        borderWidget = XtVaCreateManagedWidget
+                                   (
+                                    "sunkenBorder",
+                                    xmFrameWidgetClass, parentWidget,
+                                    XmNshadowType, XmSHADOW_IN,
+                                    NULL
+                                   );
+    } else if (style & wxRAISED_BORDER)
+    {
+        borderWidget = XtVaCreateManagedWidget
+                                   (
+                                    "raisedBorder",
+                                    xmFrameWidgetClass, parentWidget,
+                                    XmNshadowType, XmSHADOW_OUT,
+                                    NULL
+                                   );
+    }
 
-    m_labelWidget =
-        XtVaCreateManagedWidget (wxConstCast(name.c_str(), char),
-            xmLabelWidgetClass,
-            borderWidget ? borderWidget : parentWidget,
-            wxFont::GetFontTag(), m_font.GetFontTypeC(XtDisplay(parentWidget)),
-            XmNlabelString, text(),
-            XmNalignment, ((style & wxALIGN_RIGHT)  ? XmALIGNMENT_END :
-                          ((style & wxALIGN_CENTRE) ? XmALIGNMENT_CENTER :
-                                                      XmALIGNMENT_BEGINNING)),
-            XmNrecomputeSize, ((style & wxST_NO_AUTORESIZE) ? TRUE : FALSE),
-            NULL);
+    wxString buf(wxStripMenuCodes(label));
+    wxXmString label_str(buf);
+
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay(parentWidget));
+
+    m_labelWidget = XtVaCreateManagedWidget ((char*) (const char*) name,
+                                         xmLabelWidgetClass,
+                                         borderWidget ? borderWidget : parentWidget,
+                                         XmNfontList, fontList,
+                                         XmNlabelString, label_str(),
+                                         XmNalignment,
+                     ((style & wxALIGN_RIGHT) ? XmALIGNMENT_END :
+                     ((style & wxALIGN_CENTRE) ? XmALIGNMENT_CENTER :
+                     XmALIGNMENT_BEGINNING)),
+                                         NULL);
 
     m_mainWidget = borderWidget ? borderWidget : m_labelWidget;
 
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, size.x, size.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour ();
 
-    return true;
+    return TRUE;
+}
+
+void wxStaticText::ChangeFont(bool keepOriginalSize)
+{
+    wxWindow::ChangeFont(keepOriginalSize);
+}
+
+void wxStaticText::ChangeBackgroundColour()
+{
+    wxWindow::ChangeBackgroundColour();
+}
+
+void wxStaticText::ChangeForegroundColour()
+{
+    wxWindow::ChangeForegroundColour();
 }
 
 void wxStaticText::SetLabel(const wxString& label)
 {
-    wxXmString label_str(wxStripMenuCodes(label));
+    wxString buf(wxStripMenuCodes(label));
+    wxXmString label_str(buf);
 
     // This variable means we don't need so many casts later.
     Widget widget = (Widget) m_labelWidget;
+
+    if (GetWindowStyle() & wxST_NO_AUTORESIZE)
+    {
+        XtUnmanageChild(widget);
+        Dimension width, height;
+        XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
 
         XtVaSetValues(widget,
             XmNlabelString, label_str(),
             XmNlabelType, XmSTRING,
             NULL);
+        XtVaSetValues(widget,
+            XmNwidth, width,
+            XmNheight, height,
+            NULL);        
+        XtManageChild(widget);
+    }
+    else
+    {
+        XtVaSetValues(widget,
+            XmNlabelString, label_str(),
+            XmNlabelType, XmSTRING,
+            NULL);
+    }
 }
 
-#endif // wxUSE_STATTEXT

@@ -28,7 +28,7 @@
     #include "wx/wx.h"
 #endif
 
-#ifndef __WXMSW__
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     #include "mondrian.xpm"
 #endif
 
@@ -45,11 +45,9 @@ IMPLEMENT_APP(MyApp)
 // ---------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-    EVT_MENU(wxID_EXIT, MyFrame::OnQuit)
-#if wxUSE_FILEDLG
-    EVT_MENU(wxID_OPEN, MyFrame::OnOpen)
-#endif // wxUSE_FILEDLG
+    EVT_MENU(ANITEST_ABOUT, MyFrame::OnAbout)
+    EVT_MENU(ANITEST_QUIT, MyFrame::OnQuit)
+    EVT_MENU(ANITEST_OPEN, MyFrame::OnOpen)
 
     EVT_SIZE(MyFrame::OnSize)
 END_EVENT_TABLE()
@@ -67,13 +65,13 @@ bool MyApp::OnInit()
 {
     // Create the main frame window
 
-    MyFrame* frame = new MyFrame((wxFrame *)NULL, -1, _T("Animation Demo"),
+    MyFrame* frame = new MyFrame((wxFrame *)NULL, -1, "Animation Demo",
                         wxPoint(-1, -1), wxSize(500, 400),
                         wxDEFAULT_FRAME_STYLE);
 
     // Give it an icon
 #ifdef __WXMSW__
-    frame->SetIcon(wxIcon(_T("mdi_icn")));
+    frame->SetIcon(wxIcon("mdi_icn"));
 #else
     frame->SetIcon(wxIcon( mondrian_xpm ));
 #endif
@@ -81,31 +79,27 @@ bool MyApp::OnInit()
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
 
-#if wxUSE_FILEDLG
-    file_menu->Append(wxID_OPEN, _T("&Open Animation...\tCtrl+O"), _T("Open a GIF animation"));
-#endif // wxUSE_FILEDLG
-    file_menu->Append(wxID_EXIT, _T("&Exit\tAlt+X"), _T("Quit the program"));
+    file_menu->Append(ANITEST_OPEN, "&Open Animation...\tCtrl+O", "Open a GIF animation");
+    file_menu->Append(ANITEST_QUIT, "&Exit\tAlt+X", "Quit the program");
 
     wxMenu *help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, _T("&About\tF1"));
+    help_menu->Append(ANITEST_ABOUT, "&About\tF1");
 
     wxMenuBar *menu_bar = new wxMenuBar;
 
-    menu_bar->Append(file_menu, _T("&File"));
-    menu_bar->Append(help_menu, _T("&Help"));
+    menu_bar->Append(file_menu, "&File");
+    menu_bar->Append(help_menu, "&Help");
 
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
 
-#if wxUSE_STATUSBAR
     frame->CreateStatusBar();
-#endif // wxUSE_STATUSBAR
 
-    frame->Show(true);
+    frame->Show(TRUE);
 
     SetTopWindow(frame);
 
-    return true;
+    return TRUE;
 }
 
 // ---------------------------------------------------------------------------
@@ -123,9 +117,9 @@ MyFrame::MyFrame(wxWindow *parent,
                           style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
 //    m_animation = NULL;
-    m_canvas = new MyCanvas(this, wxPoint(0, 0), wxDefaultSize);
+    m_canvas = new MyCanvas(this, wxPoint(0, 0), wxSize(-1, -1));
 #if 0
-    m_player.SetDestroyAnimation(false);
+    m_player.SetDestroyAnimation(FALSE);
     m_player.SetWindow(m_canvas);
     m_player.SetPosition(wxPoint(0, 0));
 #endif
@@ -145,15 +139,14 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    (void)wxMessageBox(_T("wxWidgets 2 Animation Demo\n")
-                       _T("Author: Julian Smart (c) 2001\n"),
-                       _T("About Animation Demo"));
+    (void)wxMessageBox("wxWindows 2 Animation Demo\n"
+                       "Author: Julian Smart (c) 2001\n",
+                       "About Animation Demo");
 }
 
-#if wxUSE_FILEDLG
-void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnOpen(wxCommandEvent& event)
 {
-    wxFileDialog dialog(this, _T("Please choose an animated GIF"),
+    wxFileDialog dialog(this, wxT("Please choose an animated GIF"),
         wxEmptyString, wxEmptyString, wxT("*.gif"), wxOPEN);
     if (dialog.ShowModal() == wxID_OK)
     {
@@ -166,11 +159,10 @@ void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
         }
         else
         {
-            wxMessageBox(_T("Sorry, this animation was not a valid animated GIF."));
+            wxMessageBox("Sorry, this animation was not a valid animated GIF.");
         }
     }
 }
-#endif // wxUSE_FILEDLG
 
 
 // ---------------------------------------------------------------------------
@@ -188,10 +180,10 @@ MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size)
                            wxNO_FULL_REPAINT_ON_RESIZE |
                            wxVSCROLL | wxHSCROLL)
 {
-    SetBackgroundColour(wxColour(_T("YELLOW")));
+    SetBackgroundColour(wxColour("YELLOW"));
 }
 
-void MyCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
+void MyCanvas::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
 #if 0
@@ -202,3 +194,4 @@ void MyCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     }
 #endif
 }
+

@@ -7,6 +7,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
 
@@ -22,19 +23,19 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGauge;
+class wxGauge;
 
 //-----------------------------------------------------------------------------
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxGaugeNameStr[];
+extern const wxChar* wxGaugeNameStr;
 
 //-----------------------------------------------------------------------------
 // wxGaugeBox
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGauge: public wxControl
+class wxGauge: public wxControl
 {
 public:
     wxGauge() { Init(); }
@@ -70,19 +71,19 @@ public:
     int GetRange() const;
     int GetValue() const;
 
-    bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
-    
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    virtual wxVisualAttributes GetDefaultAttributes() const;
-    
     // implementation
     // -------------
+
+    void ApplyWidgetStyle();
 
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
+
+    // obsolete functions, don't use
+#ifdef WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return TRUE; }
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // common part of all ctors
@@ -90,8 +91,6 @@ protected:
 
     // set the gauge value to the value of m_gaugePos
     void DoSetGauge();
-
-    virtual wxSize DoGetBestSize() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGauge)

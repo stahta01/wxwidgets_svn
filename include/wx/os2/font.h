@@ -14,6 +14,7 @@
 
 #include "wx/gdiobj.h"
 #include "wx/os2/private.h"
+#include "wx/fontutil.h"
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
@@ -25,17 +26,20 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& rFont) { Init(); Ref(rFont); }
 
     wxFont( int             nSize
            ,int             nFamily
            ,int             nStyle
            ,int             nWeight
-           ,bool            bUnderlined = false
+           ,bool            bUnderlined = FALSE
            ,const wxString& rsFace = wxEmptyString
            ,wxFontEncoding  vEncoding = wxFONTENCODING_DEFAULT
           )
     {
+        Init();
+
         (void)Create( nSize
                      ,nFamily
                      ,nStyle
@@ -51,6 +55,8 @@ public:
           )
 
     {
+        Init();
+
         (void)Create( rInfo
                      ,hFont
                     );
@@ -62,7 +68,7 @@ public:
                 ,int             nFamily
                 ,int             nStyle
                 ,int             nWeight
-                ,bool            bUnderlined = false
+                ,bool            bUnderlined = FALSE
                 ,const wxString& rsFace = wxEmptyString
                 ,wxFontEncoding  vEncoding = wxFONTENCODING_DEFAULT
                );
@@ -71,6 +77,11 @@ public:
                );
 
     virtual ~wxFont();
+
+    //
+    // Assignment
+    //
+    wxFont& operator=(const wxFont& rFont);
 
     //
     // Implement base class pure virtuals
@@ -82,7 +93,7 @@ public:
     virtual bool              GetUnderlined(void) const;
     virtual wxString          GetFaceName(void) const;
     virtual wxFontEncoding    GetEncoding(void) const;
-    virtual const wxNativeFontInfo* GetNativeFontInfo() const;
+    virtual wxNativeFontInfo* GetNativeFontInfo() const;
 
     virtual void SetPointSize(int nPointSize);
     virtual void SetFamily(int nFamily);
@@ -91,6 +102,7 @@ public:
     virtual void SetFaceName(const wxString& rsFaceName);
     virtual void SetUnderlined(bool bUnderlined);
     virtual void SetEncoding(wxFontEncoding vEncoding);
+    virtual void SetNativeFontInfo(const wxNativeFontInfo& rInfo);
 
     //
     // For internal use only!
@@ -106,13 +118,14 @@ public:
     virtual bool     IsFree(void) const;
     virtual bool     RealizeResource(void);
     virtual WXHANDLE GetResourceHandle(void);
-    virtual bool     FreeResource(bool bForce = false);
+    virtual bool     FreeResource(bool bForce = FALSE);
 
     WXHFONT GetHFONT(void) const;
-
 protected:
-    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& rInfo);
-
+    //
+    // Common part of all ctors
+    //
+    void Init(void);
     void Unshare(void);
 
 private:

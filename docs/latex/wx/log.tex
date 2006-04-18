@@ -6,7 +6,7 @@
 %% Created:     some time ago
 %% RCS-ID:      $Id$
 %% Copyright:   (c) 1997-2001 Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxLog}}\label{wxlog}
@@ -36,7 +36,7 @@ No base class
 
 \latexignore{\rtfignore{\wxheading{Function groups}}}
 
-\membersection{Static functions}\label{staticlogfunctions}
+\membersection{Static functions}
 
 The functions in this section work with and manipulate the active log target.
 The \helpref{OnLog()}{wxlogonlog} is called by the {\it wxLogXXX()} functions
@@ -54,7 +54,7 @@ situations because it may easily lead to a loss of messages.
 \helpref{Suspend}{wxlogsuspend}\\
 \helpref{Resume}{wxlogresume}
 
-\membersection{Logging functions}\label{loggingfunctions}
+\membersection{Logging functions}
 
 There are two functions which must be implemented by any derived class to
 actually process the log messages: \helpref{DoLog}{wxlogdolog} and
@@ -72,12 +72,15 @@ night in the current time zone).
 There also functions to support message buffering. Why are they needed?
 Some of wxLog implementations, most notably the standard wxLogGui class,
 buffer the messages (for example, to avoid showing the user a zillion of modal
-message boxes one after another -- which would be really annoying).
+message boxes one after another - which would be really annoying).
 \helpref{Flush()}{wxlogflush} shows them all and clears the buffer contents.
-This function doesn't do anything if the buffer is already empty.
+Although this function doesn't do anything if the buffer is already empty,
+\helpref{HasPendingMessages()}{wxloghaspendingmessages} is also provided which
+allows to explicitly verify it.
 
 \helpref{Flush}{wxlogflush}\\
-\helpref{FlushActive}{wxlogflushactive}
+\helpref{FlushActive}{wxlogflushactive}\\
+\helpref{HasPendingMessages}{wxloghaspendingmessages}
 
 \membersection{Customization}\label{wxlogcustomization}
 
@@ -172,7 +175,6 @@ Add the {\it mask} to the list of allowed masks for
 \helpref{wxLogTrace}{wxlogtrace}.
 
 \wxheading{See also}
-
 \helpref{RemoveTraceMask}{wxlogremovetracemask}
 \helpref{GetTraceMasks}{wxloggettracemasks}
 
@@ -184,17 +186,15 @@ Removes all trace masks previously set with
 \helpref{AddTraceMask}{wxlogaddtracemask}.
 
 \wxheading{See also}
-
 \helpref{RemoveTraceMask}{wxlogremovetracemask}
 
 \membersection{wxLog::GetTraceMasks}\label{wxloggettracemasks}
 
-\func{static const wxArrayString \&}{GetTraceMasks}{\void}
+\func{static const wxArrayString &}{GetTraceMasks}{\void}
 
 Returns the currently allowed list of string trace masks.
 
 \wxheading{See also}
-
 \helpref{AddTraceMask}{wxlogaddtracemask}.
 
 \membersection{wxLog::OnLog}\label{wxlogonlog}
@@ -215,9 +215,7 @@ Returns the pointer to the active log target (may be NULL).
 \func{static wxLog *}{SetActiveTarget}{\param{wxLog * }{ logtarget}}
 
 Sets the specified log target as the active one. Returns the pointer to the
-previous active log target (may be NULL).  To supress logging use a new
-instance of wxLogNull not NULL.  If the active log target is set to NULL a
-new default log target will be created when logging occurs.
+previous active log target (may be NULL).
 
 \membersection{wxLog::Suspend}\label{wxlogsuspend}
 
@@ -233,7 +231,7 @@ logging immediately without waiting for \helpref{Flush}{wxlogflush} to be
 called (the standard GUI log target only shows the log dialog when it is
 flushed, so Suspend() works as expected with it).
 
-\wxheading{See also}
+\wxheading{See also:}
 
 \helpref{Resume}{wxlogresume},\\
 \helpref{wxLogNull}{wxlogoverview}
@@ -292,13 +290,20 @@ is already empty, nothing happens.
 
 Flushes the current log target if any, does nothing if there is none.
 
-\wxheading{See also}
+See also:
 
 \helpref{Flush}{wxlogflush}
 
+\membersection{wxLog::HasPendingMessages}\label{wxloghaspendingmessages}
+
+\constfunc{bool}{HasPendingMessages}{\void}
+
+Returns true if there are any messages in the buffer (not yet shown to the
+user). (Almost) for internal use only.
+
 \membersection{wxLog::SetVerbose}\label{wxlogsetverbose}
 
-\func{static void}{SetVerbose}{\param{bool }{ verbose = true}}
+\func{static void}{SetVerbose}{\param{bool }{ verbose = TRUE}}
 
 Activates or deactivates verbose mode in which the verbose messages are
 logged as the normal ones instead of being silently dropped.
@@ -353,7 +358,7 @@ for details.
 
 \func{static bool}{IsAllowedTraceMask}{\param{const wxChar *}{mask}}
 
-Returns true if the {\it mask} is one of allowed masks for
+Returns TRUE if the {\it mask} is one of allowed masks for
 \helpref{wxLogTrace}{wxlogtrace}.
 
 See also: \helpref{AddTraceMask}{wxlogaddtracemask},
@@ -404,14 +409,14 @@ delete wxLog::SetActiveTarget(...something else or NULL...);
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogChain::wxLogChain}\label{wxlogchainctor}
+\membersection{wxLogChain::wxLogChain}\label{wxlogchainwxlogchain}
 
 \func{}{wxLogChain}{\param{wxLog *}{logger}}
 
 Sets the specified {\tt logger} (which may be {\tt NULL}) as the default log
 target but the log messages are also passed to the previous log target if any.
 
-\membersection{wxLogChain::\destruct{wxLogChain}}\label{wxlogchaindtor}
+\membersection{wxLogChain::\destruct{wxLogChain}}
 
 \func{}{\destruct{wxLogChain}}{\void}
 
@@ -428,8 +433,8 @@ NULL}).
 
 \constfunc{bool}{IsPassingMessages}{\void}
 
-Returns {\tt true} if the messages are passed to the previously active log
-target (default) or {\tt false} if \helpref{PassMessages}{wxlogchainpassmessages}
+Returns {\tt TRUE} if the messages are passed to the previously active log
+target (default) or {\tt FALSE} if \helpref{PassMessages}{wxlogchainpassmessages}
 had been called.
 
 \membersection{wxLogChain::PassMessages}\label{wxlogchainpassmessages}
@@ -437,17 +442,17 @@ had been called.
 \func{void}{PassMessages}{\param{bool }{passMessages}}
 
 By default, the log messages are passed to the previously active log target.
-Calling this function with {\tt false} parameter disables this behaviour
+Calling this function with {\tt FALSE} parameter disables this behaviour
 (presumably temporarily, as you shouldn't use wxLogChain at all otherwise) and
 it can be reenabled by calling it again with {\it passMessages} set to {\tt
-true}.
+TRUE}.
 
 \membersection{wxLogChain::SetLog}\label{wxlogchainsetlog}
 
 \func{void}{SetLog}{\param{wxLog *}{logger}}
 
 Sets another log target to use (may be {\tt NULL}). The log target specified
-in the \helpref{constructor}{wxlogchainctor} or in a previous call to
+in the \helpref{constructor}{wxlogchainwxlogchain} or in a previous call to
 this function is deleted.
 
 This doesn't change the old log target value (the one the messages are
@@ -472,7 +477,7 @@ startup and is deleted by wxWidgets during the program shut down.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogGui::wxLogGui}\label{wxlogguictor}
+\membersection{wxLogGui::wxLogGui}
 
 \func{}{wxLogGui}{\void}
 
@@ -505,7 +510,7 @@ For instance, the example of the overview:
 
   wxLogMessage("..."); // ok
 \end{verbatim}
-}%
+}
 
 would be better written as:
 
@@ -525,7 +530,7 @@ would be better written as:
       ...
   }
 \end{verbatim}
-}%
+}
 
 \wxheading{Derived from}
 
@@ -537,13 +542,13 @@ would be better written as:
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogNull::wxLogNull}\label{wxlognullctor}
+\membersection{wxLogNull::wxLogNull}
 
 \func{}{wxLogNull}{\void}
 
 Suspends logging.
 
-\membersection{wxLogNull::\destruct{wxLogNull}}\label{wxlognulldtor}
+\membersection{wxLogNull::\destruct{wxLogNull}}
 
 Resumes logging.
 
@@ -596,7 +601,7 @@ wxWidgets applications which send all the output to {\tt stderr}.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogStderr::wxLogStderr}\label{wxlogstderrctor}
+\membersection{wxLogStderr::wxLogStderr}
 
 \func{}{wxLogStderr}{\param{FILE }{*fp = NULL}}
 
@@ -627,7 +632,7 @@ the standard iostream library support ({\tt wxUSE\_STD\_IOSTREAM} must be on).
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogStream::wxLogStream}\label{wxlogstreamctor}
+\membersection{wxLogStream::wxLogStream}
 
 \func{}{wxLogStream}{\param{std::ostream }{*ostr = NULL}}
 
@@ -657,7 +662,7 @@ caller previously.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogTextCtrl::wxLogTextCtrl}\label{wxlogtextctrlctor}
+\membersection{wxLogTextCtrl::wxLogTextCtrl}
 
 \func{}{wxLogTextCtrl}{\param{wxTextCtrl }{*textctrl}}
 
@@ -688,9 +693,9 @@ them normally by showing the standard log dialog.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxLogWindow::wxLogWindow}\label{wxlogwindowctor}
+\membersection{wxLogWindow::wxLogWindow}
 
-\func{}{wxLogWindow}{\param{wxFrame }{*parent}, \param{const wxChar }{*title}, \param{bool }{show = {\tt true}}, \param{bool }{passToOld = {\tt true}}}
+\func{}{wxLogWindow}{\param{wxFrame }{*parent}, \param{const wxChar }{*title}, \param{bool }{show = {\tt TRUE}}, \param{bool }{passToOld = {\tt TRUE}}}
 
 Creates the log frame window and starts collecting the messages in it.
 
@@ -700,27 +705,27 @@ Creates the log frame window and starts collecting the messages in it.
 
 \docparam{title}{The title for the log frame}
 
-\docparam{show}{{\tt true} to show the frame initially (default), otherwise
+\docparam{show}{{\tt TRUE} to show the frame initially (default), otherwise
 \helpref{wxLogWindow::Show}{wxlogwindowshow} must be called later.}
 
-\docparam{passToOld}{{\tt true} to process the log messages normally in addition to
-logging them in the log frame (default), {\tt false} to only log them in the
+\docparam{passToOld}{{\tt TRUE} to process the log messages normally in addition to
+logging them in the log frame (default), {\tt FALSE} to only log them in the
 log frame.}
 
 \membersection{wxLogWindow::Show}\label{wxlogwindowshow}
 
-\func{void}{Show}{\param{bool }{show = {\tt true}}}
+\func{void}{Show}{\param{bool }{show = {\tt TRUE}}}
 
 Shows or hides the frame.
 
-\membersection{wxLogWindow::GetFrame}\label{wxlogwindowgetframe}
+\membersection{wxLogWindow::GetFrame}
 
 \constfunc{wxFrame *}{GetFrame}{\void}
 
 Returns the associated log frame window. This may be used to position or resize
 it but use \helpref{wxLogWindow::Show}{wxlogwindowshow} to show or hide it.
 
-\membersection{wxLogWindow::OnFrameCreate}\label{wxlogwindowonframecreate}
+\membersection{wxLogWindow::OnFrameCreate}
 
 \func{virtual void}{OnFrameCreate}{\param{wxFrame }{*frame}}
 
@@ -729,13 +734,13 @@ any extra initializations.
 
 \membersection{wxLogWindow::OnFrameClose}\label{wxlogwindowonframeclose}
 
-\func{virtual bool}{OnFrameClose}{\param{wxFrame }{*frame}}
+\func{virtual void}{OnFrameClose}{\param{wxFrame }{*frame}}
 
 Called if the user closes the window interactively, will not be
 called if it is destroyed for another reason (such as when program
 exits).
 
-Return {\tt true} from here to allow the frame to close, {\tt false} to
+Return {\tt TRUE} from here to allow the frame to close, {\tt FALSE} to
 prevent this from happening.
 
 \wxheading{See also}

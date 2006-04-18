@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        helphtml.h
-// Purpose:     Includes wx/html/helpctrl.h, for wxHtmlHelpController.
+// Purpose:     Includes wx/generic/helphtml.h
 // Author:      Julian Smart
 // Modified by:
 // Created:     2003-05-24
@@ -9,12 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __WX_HELPHTML_H_
-#define __WX_HELPHTML_H_
+#ifndef _WX_HELPHTML_H_BASE_
+#define _WX_HELPHTML_H_BASE_
 
-#if wxUSE_WXHTML_HELP
-#include "wx/html/helpctrl.h"
+#include "wx/generic/helphtml.h"
+
 #endif
-
-#endif // __WX_HELPHTML_H_
-
+    // _WX_HELPHTML_H_BASE_

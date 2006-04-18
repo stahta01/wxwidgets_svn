@@ -1,6 +1,6 @@
 """Hangman.py, a simple wxPython game, inspired by the
 old bsd game by Ken Arnold.
->From the original man page:
+From the original man page:
 
  In hangman, the computer picks a word from the on-line
  word list and you must try to guess it.  The computer
@@ -15,7 +15,8 @@ Have fun with it,
 Harm van der Heijden (H.v.d.Heijden@phys.tue.nl)"""
 
 import random,re
-import wx
+from wxPython.wx import *
+
 
 
 class WordFetcher:
@@ -114,21 +115,18 @@ class URLWordFetcher(WordFetcher):
 
 
 
-class HangmanWnd(wx.Window):
-    def __init__(self, parent, id, pos=wx.DefaultPosition, size=wx.DefaultSize):
-        wx.Window.__init__(self, parent, id, pos, size)
-        self.SetBackgroundColour(wx.NamedColour('white'))
-        if wx.Platform == '__WXGTK__':
-            self.font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
+class HangmanWnd(wxWindow):
+    def __init__(self, parent, id, pos=wxDefaultPosition, size=wxDefaultSize):
+        wxWindow.__init__(self, parent, id, pos, size)
+        self.SetBackgroundColour(wxNamedColour('white'))
+        if wxPlatform == '__WXGTK__':
+            self.font = wxFont(12, wxMODERN, wxNORMAL, wxNORMAL)
         else:
-            self.font = wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL)
+            self.font = wxFont(10, wxMODERN, wxNORMAL, wxNORMAL)
         self.SetFocus()
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
+        EVT_PAINT(self, self.OnPaint)
 
-    def OnSize(self, event):
-        self.Refresh()
-        
+
     def StartGame(self, word):
         self.word = word
         self.guess = []
@@ -167,7 +165,7 @@ class HangmanWnd(wx.Window):
 
     def Draw(self, dc = None):
         if not dc:
-            dc = wx.ClientDC(self)
+            dc = wxClientDC(self)
         dc.SetFont(self.font)
         dc.Clear()
         (x,y) = self.GetSizeTuple()
@@ -190,13 +188,13 @@ class HangmanWnd(wx.Window):
         self.DrawVictim(dc)
 
     def DrawVictim(self, dc):
-        dc.SetPen(wx.Pen(wx.NamedColour('black'), 20))
+        dc.SetPen(wxPen(wxNamedColour('black'), 20))
         dc.DrawLines([(10, 980), (10,900), (700,900), (700,940), (720,940),
                       (720,980), (900,980)])
         dc.DrawLines([(100,900), (100, 100), (300,100)])
         dc.DrawLine(100,200,200,100)
         if ( self.misses == 0 ): return
-        dc.SetPen(wx.Pen(wx.NamedColour('blue'), 10))
+        dc.SetPen(wxPen(wxNamedColour('blue'), 10))
         dc.DrawLine(300,100,300,200)
         if ( self.misses == 1 ): return
         dc.DrawEllipse(250,200,100,100)
@@ -212,7 +210,7 @@ class HangmanWnd(wx.Window):
         dc.DrawLine(300,600,250,850)
 
     def OnPaint(self, event):
-        dc = wx.PaintDC(self)
+        dc = wxPaintDC(self)
         self.Draw(dc)
 
 
@@ -241,9 +239,9 @@ class HangmanDemo(HangmanWnd):
     def Stop(self):
         self.timer.Stop()
 
-    class PlayTimer(wx.Timer):
+    class PlayTimer(wxTimer):
         def __init__(self,func):
-            wx.Timer.__init__(self)
+            wxTimer.__init__(self)
             self.func = func
             self.Start(1000)
 
@@ -252,11 +250,11 @@ class HangmanDemo(HangmanWnd):
 
 
 
-class HangmanDemoFrame(wx.Frame):
+class HangmanDemoFrame(wxFrame):
     def __init__(self, wf, parent, id, pos, size):
-        wx.Frame.__init__(self, parent, id, "Hangman demo", pos, size)
-        self.demo = HangmanDemo(wf, self, -1, wx.DefaultPosition, wx.DefaultSize)
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        wxFrame.__init__(self, parent, id, "Hangman demo", pos, size)
+        self.demo = HangmanDemo(wf, self, -1, wxDefaultPosition, wxDefaultSize)
+        EVT_CLOSE(self, self.OnCloseWindow)
 
     def OnCloseWindow(self, event):
         self.demo.timer.Stop()
@@ -264,27 +262,26 @@ class HangmanDemoFrame(wx.Frame):
 
 
 
-class AboutBox(wx.Dialog):
+class AboutBox(wxDialog):
     def __init__(self, parent,wf):
-        wx.Dialog.__init__(self, parent, -1, "About Hangman", wx.DefaultPosition, (350,450))
-        self.wnd = HangmanDemo(wf, self, -1, (1,1), (350,150))
-        self.static = wx.StaticText(self, -1, __doc__, (1,160), (350, 250))
-        self.button = wx.Button(self, 2001, "OK", (150,420), (50,-1))
-        self.Fit()
-        self.button.Bind(wx.EVT_BUTTON, self.OnOK)
+        wxDialog.__init__(self, parent, -1, "About Hangman", wxDefaultPosition, wxSize(350,450))
+        self.wnd = HangmanDemo(wf, self, -1, wxPoint(1,1), wxSize(350,150))
+        self.static = wxStaticText(self, -1, __doc__, wxPoint(1,160), wxSize(350, 250))
+        self.button = wxButton(self, 2001, "OK", wxPoint(150,420), wxSize(50,-1))
+        EVT_BUTTON(self, 2001, self.OnOK)
 
     def OnOK(self, event):
         self.wnd.Stop()
-        self.EndModal(wx.ID_OK)
+        self.EndModal(wxID_OK)
 
 
 
-class MyFrame(wx.Frame):
+class MyFrame(wxFrame):
     def __init__(self, parent, wf):
         self.wf = wf
-        wx.Frame.__init__(self, parent, -1, "hangman", wx.DefaultPosition, (400,300))
+        wxFrame.__init__(self, parent, -1, "hangman", wxDefaultPosition, wxSize(400,300))
         self.wnd = HangmanWnd(self, -1)
-        menu = wx.Menu()
+        menu = wxMenu()
         menu.Append(1001, "New")
         menu.Append(1002, "End")
         menu.AppendSeparator()
@@ -292,9 +289,9 @@ class MyFrame(wx.Frame):
         menu.Append(1004, "Demo...")
         menu.AppendSeparator()
         menu.Append(1005, "Exit")
-        menubar = wx.MenuBar()
+        menubar = wxMenuBar()
         menubar.Append(menu, "Game")
-        menu = wx.Menu()
+        menu = wxMenu()
         #menu.Append(1010, "Internal", "Use internal dictionary", True)
         menu.Append(1011, "ASCII File...")
         urls = [ 'wxPython home', 'http://wxPython.org/',
@@ -304,7 +301,7 @@ class MyFrame(wx.Frame):
                  'De Volkskrant', 'http://www.volkskrant.nl/frameless/25000006.html',
                  'Gnu GPL', 'http://www.fsf.org/copyleft/gpl.html',
                  'Bijbel: Genesis', 'http://www.coas.com/bijbel/gn1.htm']
-        urlmenu = wx.Menu()
+        urlmenu = wxMenu()
         for item in range(0,len(urls),2):
             urlmenu.Append(1020+item/2, urls[item], urls[item+1])
         urlmenu.Append(1080, 'Other...', 'Enter an URL')
@@ -313,22 +310,22 @@ class MyFrame(wx.Frame):
         menubar.Append(menu, "Dictionary")
         self.urls = urls
         self.urloffset = 1020
-        menu = wx.Menu()
+        menu = wxMenu()
         menu.Append(1090, "About...")
         menubar.Append(menu, "Help")
         self.SetMenuBar(menubar)
         self.CreateStatusBar(2)
-        self.Bind(wx.EVT_MENU, self.OnGameNew, id=1001)
-        self.Bind(wx.EVT_MENU, self.OnGameEnd, id=1002)
-        self.Bind(wx.EVT_MENU, self.OnGameReset, id=1003)
-        self.Bind(wx.EVT_MENU, self.OnGameDemo, id=1004)
-        self.Bind(wx.EVT_MENU, self.OnWindowClose, id=1005)
-        self.Bind(wx.EVT_MENU, self.OnDictFile, id=1011)
-        self.Bind(wx.EVT_MENU, self.OnDictURL, id=1020, id2=1020+len(urls)/2)
-        self.Bind(wx.EVT_MENU, self.OnDictURLSel, id=1080)
-        self.Bind(wx.EVT_MENU, self.OnDictDump, id=1013)
-        self.Bind(wx.EVT_MENU, self.OnHelpAbout, id=1090)
-        self.wnd.Bind(wx.EVT_CHAR, self.OnChar)
+        EVT_MENU(self, 1001, self.OnGameNew)
+        EVT_MENU(self, 1002, self.OnGameEnd)
+        EVT_MENU(self, 1003, self.OnGameReset)
+        EVT_MENU(self, 1004, self.OnGameDemo)
+        EVT_MENU(self, 1005, self.OnWindowClose)
+        EVT_MENU(self, 1011, self.OnDictFile)
+        EVT_MENU_RANGE(self, 1020, 1020+len(urls)/2, self.OnDictURL)
+        EVT_MENU(self, 1080, self.OnDictURLSel)
+        EVT_MENU(self, 1013, self.OnDictDump)
+        EVT_MENU(self, 1090, self.OnHelpAbout)
+        EVT_CHAR(self.wnd, self.OnChar)
         self.OnGameReset()
 
     def OnGameNew(self, event):
@@ -351,14 +348,14 @@ class MyFrame(wx.Frame):
         self.OnGameNew(None)
 
     def OnGameDemo(self, event):
-        frame = HangmanDemoFrame(self.wf, self, -1, wx.DefaultPosition, self.GetSize())
+        frame = HangmanDemoFrame(self.wf, self, -1, wxDefaultPosition, self.GetSize())
         frame.Show(True)
 
     def OnDictFile(self, event):
-        fd = wx.FileDialog(self)
+        fd = wxFileDialog(self)
         if (self.wf.filename):
             fd.SetFilename(self.wf.filename)
-        if fd.ShowModal() == wx.ID_OK:
+        if fd.ShowModal() == wxID_OK:
             file = fd.GetPath()
             self.wf = WordFetcher(file)
 
@@ -368,8 +365,8 @@ class MyFrame(wx.Frame):
         self.wf = URLWordFetcher(self.urls[item+1])
 
     def OnDictURLSel(self, event):
-        msg = wx.TextEntryDialog(self, "Enter the URL of the dictionary document", "Enter URL")
-        if msg.ShowModal() == wx.ID_OK:
+        msg = wxTextEntryDialog(self, "Enter the URL of the dictionary document", "Enter URL")
+        if msg.ShowModal() == wxID_OK:
             url = msg.GetValue()
             self.wf = URLWordFetcher(url)
     def OnDictDump(self, event):
@@ -425,11 +422,11 @@ class MyFrame(wx.Frame):
 
 
 
-class MyApp(wx.App):
+class MyApp(wxApp):
     def OnInit(self):
-        if wx.Platform == '__WXGTK__':
+        if wxPlatform == '__WXGTK__':
             defaultfile = "/usr/share/games/hangman-words"
-        elif wx.Platform == '__WXMSW__':
+        elif wxPlatform == '__WXMSW__':
             defaultfile = "c:\\windows\\hardware.txt"
         else:
             defaultfile = ""
@@ -452,9 +449,9 @@ overview = __doc__
 
 
 def runTest(frame, nb, log):
-    if wx.Platform == '__WXGTK__' or wx.Platform == '__WXMOTIF__':
+    if wxPlatform == '__WXGTK__' or wxPlatform == '__WXMOTIF__':
         defaultfile = "/usr/share/games/hangman-words"
-    elif wx.Platform == '__WXMSW__':
+    elif wxPlatform == '__WXMSW__':
         defaultfile = "c:\\windows\\hardware.txt"
     else:
         defaultfile = ""

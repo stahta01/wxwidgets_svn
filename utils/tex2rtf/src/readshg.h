@@ -46,7 +46,7 @@ struct HotSpot
                       top,
                       right,
                       bottom;
-          wxChar      szHlpTopic_Macro[65];
+          char        szHlpTopic_Macro[65];
           bool        IsVisible;
 };
 
@@ -55,10 +55,10 @@ struct HotSpot
 // HotSpots *array;
 // int n = ParseSHG("thing.shg", &array);
 
-extern int ParseSHG( const wxChar* fileName, HotSpot **hotspots);
+extern int ParseSHG( const char* fileName, HotSpot **hotspots);
 
 // Converts Windows .SHG file to HTML map file
-extern bool SHGToMap(wxChar *filename, wxChar *defaultFile);
+extern bool SHGToMap(char *filename, char *defaultFile);
 
 #endif
 

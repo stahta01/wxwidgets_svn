@@ -14,6 +14,7 @@
 #include "wx/list.h"
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
+#include "wx/list.h"
 
 class WXDLLEXPORT wxRect;
 class WXDLLEXPORT wxPoint;
@@ -36,18 +37,21 @@ public:
     wxRegion(const wxPoint& topLeft, const wxPoint& bottomRight);
     wxRegion(const wxRect& rect);
     wxRegion(const MGLRegion& region);
-    wxRegion( const wxBitmap& bmp)
-    {
-        Union(bmp);
-    }
     wxRegion( const wxBitmap& bmp,
-              const wxColour& transColour, int tolerance = 0)
+              const wxColour& transColour = wxNullColour,
+              int   tolerance = 0)
     {
         Union(bmp, transColour, tolerance);
     }
 
     wxRegion();
     ~wxRegion();
+
+    //# Copying
+    inline wxRegion(const wxRegion& r)
+        { Ref(r); }
+    inline wxRegion& operator = (const wxRegion& r)
+        { Ref(r); return (*this); }
 
     //# Modify region
     // Clear current region
@@ -100,13 +104,12 @@ public:
     wxBitmap ConvertToBitmap() const;
 
     // Use the non-transparent pixels of a wxBitmap for the region to combine
-    // with this region.  First version takes transparency from bitmap's mask,
-    // second lets the user specify the colour to be treated as transparent
+    // with this region.  If the bitmap has a mask then it will be used,
+    // otherwise the colour to be treated as transparent may be specified,
     // along with an optional tolerance value.
-    // NOTE: implemented in common/rgncmn.cpp
-    bool Union(const wxBitmap& bmp);
     bool Union(const wxBitmap& bmp,
-               const wxColour& transColour, int tolerance = 0);
+               const wxColour& transColour = wxNullColour,
+               int   tolerance = 0);
 
 
     // implementation from now on:

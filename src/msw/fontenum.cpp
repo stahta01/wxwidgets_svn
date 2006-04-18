@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/fontenum.cpp
+// Name:        msw/fontenum.cpp
 // Purpose:     wxFontEnumerator class for Windows
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin to add support for font encodings
@@ -27,16 +27,14 @@
 #if wxUSE_FONTMAP
 
 #ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
-    #include "wx/font.h"
-    #include "wx/encinfo.h"
+  #include "wx/font.h"
 #endif
-
-#include "wx/msw/private.h"
 
 #include "wx/fontutil.h"
 #include "wx/fontenum.h"
 #include "wx/fontmap.h"
+
+#include "wx/msw/private.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -77,10 +75,10 @@ private:
     // if not empty, enum only the fonts in this family
     wxString m_family;
 
-    // if true, enum only fixed fonts
+    // if TRUE, enum only fixed fonts
     bool m_fixedOnly;
 
-    // if true, we enumerate the encodings, not fonts
+    // if TRUE, we enumerate the encodings, not fonts
     bool m_enumEncodings;
 
     // the list of charsets we already found while enumerating charsets
@@ -88,8 +86,6 @@ private:
 
     // the list of facenames we already found while enumerating facenames
     wxArrayString m_facenames;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumeratorHelper)
 };
 
 // ----------------------------------------------------------------------------
@@ -113,13 +109,13 @@ wxFontEnumeratorHelper::wxFontEnumeratorHelper(wxFontEnumerator *fontEnum)
 {
     m_fontEnum = fontEnum;
     m_charset = DEFAULT_CHARSET;
-    m_fixedOnly = false;
-    m_enumEncodings = false;
+    m_fixedOnly = FALSE;
+    m_enumEncodings = FALSE;
 }
 
 void wxFontEnumeratorHelper::SetFamily(const wxString& family)
 {
-    m_enumEncodings = true;
+    m_enumEncodings = TRUE;
     m_family = family;
 }
 
@@ -135,7 +131,7 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
 #endif // wxUSE_FONTMAP
             {
                 // no such encodings at all
-                return false;
+                return FALSE;
             }
         }
 
@@ -143,11 +139,17 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
         m_facename = info.facename;
     }
 
-    return true;
+    return TRUE;
 }
 
-#if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
-    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+#if defined(__WXWINE__)
+    #define wxFONTENUMPROC FONTENUMPROCEX
+#elif (defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ))
+    #if wxUSE_NORLANDER_HEADERS
+        #define wxFONTENUMPROC int(*)(const LOGFONT *, const TEXTMETRIC *, long unsigned int, LPARAM)
+    #else
+        #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+    #endif
 #else
     #define wxFONTENUMPROC FONTENUMPROC
 #endif
@@ -157,19 +159,22 @@ void wxFontEnumeratorHelper::DoEnumerate()
 #ifndef __WXMICROWIN__
     HDC hDC = ::GetDC(NULL);
 
-#ifdef __WXWINCE__
-    ::EnumFontFamilies(hDC,
-                       m_facename.empty() ? NULL : m_facename.c_str(),
-                       (wxFONTENUMPROC)wxFontEnumeratorProc,
-                       (LPARAM)this) ;
-#else // __WIN32__
+#ifdef __WIN32__
     LOGFONT lf;
-    lf.lfCharSet = (BYTE)m_charset;
+    lf.lfCharSet = m_charset;
     wxStrncpy(lf.lfFaceName, m_facename, WXSIZEOF(lf.lfFaceName));
     lf.lfPitchAndFamily = 0;
     ::EnumFontFamiliesEx(hDC, &lf, (wxFONTENUMPROC)wxFontEnumeratorProc,
                          (LPARAM)this, 0 /* reserved */) ;
-#endif // Win32/CE
+#else // Win16
+    ::EnumFonts(hDC, (LPTSTR)NULL, (FONTENUMPROC)wxFontEnumeratorProc,
+    #ifdef STRICT
+               (LPARAM)
+    #else
+               (LPSTR)
+    #endif
+               this);
+#endif // Win32/16
 
     ::ReleaseDC(NULL, hDC);
 #endif
@@ -193,7 +198,7 @@ bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
         else
         {
             // continue enumeration
-            return true;
+            return TRUE;
         }
     }
 
@@ -204,7 +209,7 @@ bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
         if ( tm->tmPitchAndFamily & TMPF_FIXED_PITCH )
         {
             // not a fixed pitch font
-            return true;
+            return TRUE;
         }
     }
 
@@ -213,7 +218,7 @@ bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
         // check that we have the right encoding
         if ( lf->lfCharSet != m_charset )
         {
-            return true;
+            return TRUE;
         }
     }
     else // enumerating fonts in all charsets
@@ -224,7 +229,7 @@ bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
         if ( m_facenames.Index(lf->lfFaceName) != wxNOT_FOUND )
         {
             // continue enumeration
-            return true;
+            return TRUE;
         }
 
         wxConstCast(this, wxFontEnumeratorHelper)->
@@ -250,7 +255,7 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
     }
     // else: no such fonts, unknown encoding
 
-    return true;
+    return TRUE;
 }
 
 bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
@@ -259,7 +264,7 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
     fe.SetFamily(family);
     fe.DoEnumerate();
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     20.02.01
 // RCS-ID:      $Id$
-// Copyright:   (c) 2001 wxWidgets team
-// License:     wxWindows licence
+// Copyright:   (c) 2001 wxWindows team
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -35,7 +35,7 @@
 // implementation
 // ============================================================================
 
-const wxChar wxDirSelectorPromptStr[] = wxT("Select a directory");
+const wxChar *wxDirSelectorPromptStr = wxT("Select a directory");
 
 wxString wxDirSelector(const wxString& message,
                        const wxString& defaultPath,

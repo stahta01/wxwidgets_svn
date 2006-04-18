@@ -6,7 +6,7 @@
 // Created:     29.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GENERIC_CALCTRL_H
@@ -25,8 +25,11 @@ class WXDLLEXPORT wxSpinCtrl;
 // wxCalendarCtrl: a control allowing the user to pick a date interactively
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxCalendarCtrl : public wxControl
+class WXDLLEXPORT wxCalendarCtrl : public wxControl
 {
+friend class wxMonthComboBox;
+friend class wxYearSpinCtrl;
+
 public:
     // construction
     wxCalendarCtrl() { Init(); }
@@ -74,13 +77,13 @@ public:
     // should be used instead for them
 
     // corresponds to wxCAL_NO_YEAR_CHANGE bit
-    void EnableYearChange(bool enable = true);
+    void EnableYearChange(bool enable = TRUE);
 
     // corresponds to wxCAL_NO_MONTH_CHANGE bit
-    void EnableMonthChange(bool enable = true);
+    void EnableMonthChange(bool enable = TRUE);
 
     // corresponds to wxCAL_SHOW_HOLIDAYS bit
-    void EnableHolidayDisplay(bool display = true);
+    void EnableHolidayDisplay(bool display = TRUE);
 
     // customization
     // -------------
@@ -152,31 +155,12 @@ public:
     // -------------------------------
 
     // forward these functions to all subcontrols
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
-
-    virtual wxVisualAttributes GetDefaultAttributes() const
-        { return GetClassDefaultAttributes(GetWindowVariant()); }
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
-
-protected:
-    // override some base class virtuals
-    virtual wxSize DoGetBestSize() const;
-    virtual void DoGetPosition(int *x, int *y) const;
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual void DoSetSize(int x, int y, int width, int height, int sizeFlags);
-    virtual void DoMoveWindow(int x, int y, int width, int height);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
 
 private:
     // common part of all ctors
     void Init();
-
-    // startup colours and reinitialization after colour changes in system
-    void InitColours();
 
     // event handlers
     void OnPaint(wxPaintEvent& event);
@@ -185,7 +169,13 @@ private:
     void OnChar(wxKeyEvent& event);
     void OnMonthChange(wxCommandEvent& event);
     void OnYearChange(wxCommandEvent& event);
-    void OnYearTextChange(wxCommandEvent& event);
+
+    // override some base class virtuals
+    virtual wxSize DoGetBestSize() const;
+    virtual void DoGetPosition(int *x, int *y) const;
+    virtual void DoGetSize(int *width, int *height) const;
+    virtual void DoSetSize(int x, int y, int width, int height, int sizeFlags);
+    virtual void DoMoveWindow(int x, int y, int width, int height);
 
     // (re)calc m_widthCol and m_heightRow
     void RecalcGeometry();
@@ -248,10 +238,6 @@ private:
     // show the correct controls
     void ShowCurrentControls();
 
-    // create the month combo and year spin controls
-    void CreateMonthComboBox();
-    void CreateYearSpinCtrl();
-
 public:
     // get the currently shown control for month/year
     wxControl *GetMonthControl() const;
@@ -261,7 +247,7 @@ private:
     // OnPaint helper-methods
 
     // Highlight the [fromdate : todate] range using pen and brush
-    void HighlightRange(wxPaintDC* dc, const wxDateTime& fromdate, const wxDateTime& todate, const wxPen* pen, const wxBrush* brush);
+    void HighlightRange(wxPaintDC* dc, const wxDateTime& fromdate, const wxDateTime& todate, wxPen* pen, wxBrush* brush);
 
     // Get the "coordinates" for the date relative to the month currently displayed.
     // using (day, week): upper left coord is (1, 1), lower right coord is (7, 6)
@@ -270,7 +256,7 @@ private:
 
     // Set the flag for SetDate(): otherwise it would overwrite the year
     // typed in by the user
-    void SetUserChangedYear() { m_userChangedYear = true; }
+    void SetUserChangedYear() { m_userChangedYear = TRUE; }
 
     // the subcontrols
     wxStaticText *m_staticMonth;
@@ -292,9 +278,7 @@ private:
              m_colHolidayFg,
              m_colHolidayBg,
              m_colHeaderFg,
-             m_colHeaderBg,
-             m_colBackground,
-             m_colSorrounding;
+             m_colHeaderBg;
 
     // the attributes for each of the month days
     wxCalendarDateAttr *m_attrs[31];
@@ -310,13 +294,12 @@ private:
     // the week day names
     wxString m_weekdays[7];
 
-    // true if SetDate() is being called as the result of changing the year in
+    // TRUE if SetDate() is being called as the result of changing the year in
     // the year control
     bool m_userChangedYear;
 
     DECLARE_DYNAMIC_CLASS(wxCalendarCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxCalendarCtrl)
 };
 
 #endif // _WX_GENERIC_CALCTRL_H

@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 
 #include "wx/wxprec.h"
@@ -64,7 +64,7 @@ wxUint16 wxSoundFormatMSAdpcm::GetChannels() const
     return m_nchannels; 
 }
 
-void wxSoundFormatMSAdpcm::SetCoefs(wxInt16 **WXUNUSED(coefs), wxUint16 ncoefs,
+void wxSoundFormatMSAdpcm::SetCoefs(wxInt16 **coefs, wxUint16 ncoefs,
                                     wxUint16 coefs_len)
 {
     wxUint16 i;
@@ -128,7 +128,7 @@ bool wxSoundFormatMSAdpcm::operator !=(const wxSoundFormatBase& frmt2) const
     const wxSoundFormatMSAdpcm *adpcm = (const wxSoundFormatMSAdpcm *)&frmt2;
     
     if (frmt2.GetType() != wxSOUND_MSADPCM)
-        return true;
+        return TRUE;
     
     return (adpcm->m_srate != m_srate) && (adpcm->m_nchannels != m_nchannels);
 }
@@ -141,8 +141,8 @@ wxSoundStreamMSAdpcm::wxSoundStreamMSAdpcm(wxSoundStream& sndio)
 {
     // PCM converter
     m_router     = new wxSoundRouterStream(sndio);
-    m_got_header = false;
-    m_stereo = false;
+    m_got_header = FALSE;
+    m_stereo = FALSE;
 }
 
 wxSoundStreamMSAdpcm::~wxSoundStreamMSAdpcm()
@@ -150,7 +150,7 @@ wxSoundStreamMSAdpcm::~wxSoundStreamMSAdpcm()
     delete m_router;
 }
 
-wxSoundStream& wxSoundStreamMSAdpcm::Read(void *WXUNUSED(buffer), wxUint32 WXUNUSED(len))
+wxSoundStream& wxSoundStreamMSAdpcm::Read(void *buffer, wxUint32 len)
 {
     m_snderror = wxSOUND_NOCODEC;
     m_lastcount = 0;
@@ -352,7 +352,7 @@ bool wxSoundStreamMSAdpcm::SetSoundFormat(const wxSoundFormatBase& format)
 {
     if (format.GetType() != wxSOUND_MSADPCM) {
         m_snderror = wxSOUND_INVFRMT;
-        return false;
+        return FALSE;
     }
     
     wxSoundFormatPcm pcm;
@@ -366,14 +366,15 @@ bool wxSoundStreamMSAdpcm::SetSoundFormat(const wxSoundFormatBase& format)
     adpcm->GetCoefs(m_coefs, ncoefs, coefs_len);
 
     if (!ncoefs) {
-        wxLogError(wxT("Number of ADPCM coefficients must be non null"));
-        return false;
+        wxLogError(__FILE__ ":%d: Number of ADPCM coefficients"
+                   " must be non null", __LINE__);
+        return FALSE;
     }
     
     pcm.SetSampleRate(adpcm->GetSampleRate());
     pcm.SetBPS(16);
     pcm.SetChannels(adpcm->GetChannels());
-    pcm.Signed(true);
+    pcm.Signed(TRUE);
     pcm.SetOrder(wxBYTE_ORDER);
 
     m_stereo = (adpcm->GetChannels() == 2);
@@ -382,6 +383,6 @@ bool wxSoundStreamMSAdpcm::SetSoundFormat(const wxSoundFormatBase& format)
     
     m_router->SetSoundFormat(pcm);
     
-    return true;
+    return TRUE;
 }
 

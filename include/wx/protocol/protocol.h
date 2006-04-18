@@ -6,7 +6,7 @@
 // Created:     10/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PROTOCOL_PROTOCOL_H
@@ -46,7 +46,7 @@ typedef enum
 // wxProtocol: abstract base class for all protocols
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_NET wxProtocol
+class WXDLLEXPORT wxProtocol
 #if wxUSE_SOCKETS
  : public wxSocketClient
 #else
@@ -78,11 +78,11 @@ public:
     virtual void SetPassword(const wxString& WXUNUSED(passwd) ) {}
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxProtocol)
+    DECLARE_ABSTRACT_CLASS(wxProtocol)
 };
 
 #if wxUSE_SOCKETS
-wxProtocolError WXDLLIMPEXP_NET GetLine(wxSocketBase *sock, wxString& result);
+wxProtocolError WXDLLEXPORT GetLine(wxSocketBase *sock, wxString& result);
 #endif
 
 // ----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ bool wxProtocolUse##class = TRUE;
         wxProtocolUserFor##class() { wxProtocolUse##class = TRUE; } \
     } wxProtocolDoUse##class;
 
-class WXDLLIMPEXP_NET wxProtoInfo : public wxObject
+class WXDLLEXPORT wxProtoInfo : public wxObject
 {
 public:
     wxProtoInfo(const wxChar *name,
@@ -123,7 +123,6 @@ protected:
     friend class wxURL;
 
     DECLARE_DYNAMIC_CLASS(wxProtoInfo)
-    DECLARE_NO_COPY_CLASS(wxProtoInfo)
 };
 
 #endif // wxUSE_PROTOCOL

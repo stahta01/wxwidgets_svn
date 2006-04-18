@@ -7,8 +7,7 @@
 # being called with this dir as the cwd, but if we generate this file
 # with configure an explicit path should be specified -- RL.
 
-WX_LINGUAS := `ls *.po */*.po 2> /dev/null | sed -n 's/\(wxstd\)\?\.po//p'`
-WX_LINGUAS_UPDATE := `ls *.po 2> /dev/null | sed -n 's/\(wxstd\)\?\.po//p'`
+WX_LINGUAS := `ls *.po 2> /dev/null | sed -n 's/\(wxstd\)\?\.po//p'`
 
 # the programs we use (TODO: use configure to detect them)
 MSGFMT=msgfmt --verbose
@@ -17,11 +16,11 @@ XGETTEXT=xgettext
 XARGS=xargs
 
 # common xgettext args: C++ syntax, use the specified macro names as markers
-XGETTEXT_ARGS=-C -k_ -kwxPLURAL:1,2 -kwxTRANSLATE -s -j
+XGETTEXT_ARGS=-C -k_ -kwxGetTranslation -kwxTRANSLATE -s -j
 
 # implicit rules
 %.mo: %.po
-	$(MSGFMT) -c -o $@ $<
+	$(MSGFMT) -o $@ $<
 
 # a PO file must be updated from wxstd.po to include new translations
 %.po: wxstd.po
@@ -35,7 +34,7 @@ wxstd.po:
 	find ../contrib/src -name "*.cpp" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.po
 
 allpo: force-update
-	@-for t in $(WX_LINGUAS_UPDATE); do $(MAKE) $$t.po; done
+	@-for t in $(WX_LINGUAS); do $(MAKE) $$t.po; done
 
 allmo:
 	@for t in $(WX_LINGUAS); do $(MAKE) $$t.mo; done
@@ -43,7 +42,7 @@ allmo:
 force-update:
 	$(RM) wxstd.po
 
-# print out the percentage of the translated strings
+# print out the percentage of the trsnalted strings
 stats: FORCE
 	@for i in $(WX_LINGUAS); do \
 		x=`$(MSGFMT) -o /dev/null "$$i.po" 2>&1 | sed -e 's/[,\.]//g' \

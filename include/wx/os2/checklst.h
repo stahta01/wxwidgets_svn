@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 //              Note: this is an optional class.
 // Author:      David Webster
@@ -15,11 +15,13 @@
 
 #include <stddef.h>
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 class wxOwnerDrawn; // so the compiler knows, it is a class.
 
-class WXDLLEXPORT wxCheckListBox : public wxCheckListBoxBase
+class wxCheckListBoxItem; // fwd decl, define in checklst.cpp
+
+class WXDLLEXPORT wxCheckListBox : public wxListBox
 {
 public:
     //
@@ -36,28 +38,25 @@ public:
                    ,const wxValidator& rValidator = wxDefaultValidator
                    ,const wxString&    rsName = wxListBoxNameStr
                   );
-    wxCheckListBox( wxWindow*            pParent
-                   ,wxWindowID           vId
-                   ,const wxPoint&       rPos
-                   ,const wxSize&        vSize
-                   ,const wxArrayString& asChoices
-                   ,long                 lStyle = 0
-                   ,const wxValidator&   rValidator = wxDefaultValidator
-                   ,const wxString&      rsName = wxListBoxNameStr
-                  );
 
     //
     // Override base class virtuals
     //
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
+    virtual void InsertItems( int            nItems
+                             ,const wxString asItems[]
+                             ,int            nPos
+                            );
 
     virtual bool SetFont(const wxFont &rFont);
 
     //
     // Items may be checked
     //
-    bool IsChecked(unsigned int uiIndex) const;
-    void Check(unsigned int uiIndex, bool bCheck = true);
+    bool IsChecked(size_t uiIndex) const;
+    void Check( size_t uiIndex
+               ,bool   bCheck = TRUE
+              );
 
     //
     // Accessors
@@ -72,8 +71,6 @@ protected:
     virtual wxOwnerDrawn* CreateItem(size_t n);
     virtual long          OS2OnMeasure(WXMEASUREITEMSTRUCT* pItem);
 
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
-
     //
     // Pressing space or clicking the check box toggles the item
     //
@@ -81,11 +78,24 @@ protected:
     void OnLeftClick(wxMouseEvent& rEvent);
 
 private:
-    size_t m_nItemHeight;  // height of checklistbox items (the same for all)
+    size_t                          m_nItemHeight;  // height of checklistbox items (the same for all)
 
+    //
+    // Virtual function hiding suppression, do not use
+    //
+    virtual wxControl* CreateItem( const wxItemResource*  pChildResource
+                                  ,const wxItemResource*  pParentResource
+                                  ,const wxResourceTable* pTable = (const wxResourceTable *) NULL
+                                 )
+    {
+        return(wxWindowBase::CreateItem( pChildResource
+                                        ,pParentResource
+                                        ,pTable
+                                       ));
+    }
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
     DECLARE_EVENT_TABLE()
-}; // end of CLASS wxCheckListBox
+}; // end of CLASS wxCheckListBoxItem
 
 #endif
    // _WX_CHECKLST_H_

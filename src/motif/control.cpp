@@ -9,9 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/defs.h"
 
 #include "wx/control.h"
@@ -39,7 +36,11 @@ wxControl::wxControl()
     m_backgroundColour = *wxWHITE;
     m_foregroundColour = *wxBLACK;
 
-    m_inSetValue = false;
+#if WXWIN_COMPATIBILITY
+    m_callback = 0;
+#endif // WXWIN_COMPATIBILITY
+
+    m_inSetValue = FALSE;
 }
 
 bool wxControl::Create( wxWindow *parent,
@@ -59,32 +60,14 @@ bool wxControl::Create( wxWindow *parent,
     return ret;
 }
 
-bool wxControl::CreateControl(wxWindow *parent,
-                              wxWindowID id,
-                              const wxPoint& pos,
-                              const wxSize& size,
-                              long style,
-                              const wxValidator& validator,
-                              const wxString& name)
-{
-    if( !wxControlBase::CreateControl( parent, id, pos, size, style,
-                                       validator, name ) )
-        return false;
-
-    m_backgroundColour = parent->GetBackgroundColour();
-    m_foregroundColour = parent->GetForegroundColour();
-    m_font = parent->GetFont();
-
-    return true;
-}
-
 void wxControl::SetLabel(const wxString& label)
 {
     Widget widget = (Widget) GetLabelWidget() ;
     if (!widget)
         return;
 
-    wxXmString label_str(wxStripMenuCodes(label));
+    wxString buf(wxStripMenuCodes(label));
+    wxXmString label_str(buf);
 
     XtVaSetValues (widget,
         XmNlabelString, label_str(),
@@ -98,28 +81,37 @@ wxString wxControl::GetLabel() const
     if (!widget)
         return wxEmptyString;
 
-    XmString text = NULL;
+    XmString text;
+    char *s;
     XtVaGetValues (widget,
         XmNlabelString, &text,
         NULL);
 
-    return wxXmStringToString( text );
+    if (XmStringGetLtoR (text, XmSTRING_DEFAULT_CHARSET, &s))
+    {
+        wxString str(s);
+        XtFree (s);
+        XmStringFree(text);
+        return str;
+    }
+    else
+    {
+      //        XmStringFree(text);
+        return wxEmptyString;
+    }
 }
 
 bool wxControl::ProcessCommand(wxCommandEvent & event)
 {
+#if WXWIN_COMPATIBILITY
+    if ( m_callback )
+    {
+        (void)(*m_callback)(this, event);
+
+        return TRUE;
+    }
+    else
+#endif // WXWIN_COMPATIBILITY
+
     return GetEventHandler()->ProcessEvent(event);
-}
-
-wxSize wxControl::DoGetBestSize() const
-{
-    Widget w = (Widget)GetTopWidget();
-
-    // Do not return any arbitrary default value...
-    wxASSERT_MSG (w, wxT("DoGetBestSize called before creation"));
-
-    XtWidgetGeometry preferred;
-    XtQueryGeometry (w, NULL, &preferred);
-
-    return wxSize(preferred.width, preferred.height);
 }

@@ -3,7 +3,7 @@
 
 Here are some different kinds of contribution:
 
-1. Bug fixes. You can send these to the wx-dev list.
+1. Bug fixes. You can send these to the wx-devel list.
 2. New classes. New classes normally go in the contrib hierarchy:
    please see below for more details. They may be promoted to
    the main wxWidgets hierarchy if they are deemed to be 'core'.
@@ -14,7 +14,7 @@ Here are some different kinds of contribution:
 
 You may or may not wish to add your code to the main wxWidgets CVS
 archive. Whether your code is appropriate for this archive
-should first be ascertained by discussing it on wx-dev@wxwidgets.org.
+should first be ascertained by discussing it on wx-devel@wxwidgets.org.
 
 The contrib hierarchy
 ---------------------
@@ -41,7 +41,6 @@ contrib/docs/htmlhelp/yourclass/        ; Your MS HTML Help doc files go here
 contrib/docs/htb/yourclass/             ; Your wxHTML doc files go here
 contrib/docs/pdf/yourclass/             ; Your PDF doc files go here
 contrib/docs/winhelp/yourclass/         ; Your WinHelp doc files go here
-contrib/build/yourclass/                ; Your makefiles
 
 It is recommended that you produce a manual using Tex2RTF, as specified
 in Technical Note TN0003. This allows you to output all the above
@@ -54,8 +53,8 @@ but the main lib directory is recommended.
 
 Please include a readme.txt in your source directory, and conform
 as much as possible to the coding guidelines specified on the web
-site in the 'Backroom' section. Include bakefile and generated makefiles
-(see Technote #16 for details).
+site in the 'Backroom' section. Include as many makefiles as
+possible for different compilers.
 
 Your archive can be in .tgz or .zip format. For inclusion on
 the wxWidgets ftp site and CD-ROM, please send your submission to

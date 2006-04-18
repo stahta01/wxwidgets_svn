@@ -1,48 +1,30 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/gauge.cpp
+// Name:        gauge.cpp
 // Purpose:     wxGauge class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __VMS
-#include "wx/vms_x_fix.h"
-#undef XtDisplay
-#undef XtScreen
-#undef XtWindow
-#undef XtIsRealized
-#undef XtParent
-#undef XtClass
+#ifdef __VMS__
+#include <wx/vms_x_fix.h>
 #endif
 
 # include "wx/gauge.h"
-
-#ifdef __OS2__
-#include <types.h>
-#endif
 
 #ifdef __VMS__
 #pragma message disable nosimpint
 #endif
 #include <Xm/Xm.h>
-#ifdef __WXMOTIF20__
-#include <Xm/Scale.h>
-#endif // __WXMOTIF20__
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
 #include "wx/motif/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
-
-#if !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
 
 // XmGauge copyright notice:
 
@@ -71,8 +53,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
 */
 
 //// PUBLIC XMGAUGE DECLARATIONS
-typedef struct _XmGaugeClassRec*  XmGaugeWidgetClass;
-typedef struct _XmGaugeRec*       XmGaugeWidget;
+typedef struct _XmGaugeClassRec*	XmGaugeWidgetClass;
+typedef struct _XmGaugeRec*	        XmGaugeWidget;
 
 #ifdef __cplusplus
 extern "C" WidgetClass xmGaugeWidgetClass;
@@ -93,7 +75,7 @@ XmGaugeSetValue(Widget w, int value);
 int
 XmGaugeGetValue(Widget w);
 
-#endif // !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
+
 
 bool wxGauge::Create(wxWindow *parent, wxWindowID id,
                      int range,
@@ -103,14 +85,25 @@ bool wxGauge::Create(wxWindow *parent, wxWindowID id,
                      const wxValidator& validator,
                      const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
+    SetName(name);
+    SetValidator(validator);
+    m_rangeMax = range;
+    m_windowStyle = style;
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+
+    if (parent) parent->AddChild(this);
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
-    Arg args[7];
+    Arg args[4];
     int count = 4;
-    if (style & wxGA_HORIZONTAL)
+    if (style & wxHORIZONTAL)
     {
         XtSetArg (args[0], XmNorientation, XmHORIZONTAL);
         XtSetArg (args[1], XmNprocessingDirection, XmMAX_ON_RIGHT);
@@ -122,43 +115,27 @@ bool wxGauge::Create(wxWindow *parent, wxWindowID id,
     }
     XtSetArg(args[2], XmNminimum, 0);
     XtSetArg(args[3], XmNmaximum, range);
-#if wxCHECK_MOTIF_VERSION( 2, 0 ) && !wxCHECK_LESSTIF()
-    XtSetArg(args[4], XmNeditable, False); ++count;
-    XtSetArg(args[5], XmNslidingMode, XmTHERMOMETER); ++count;
-    // XtSetArg(args[6], XmNsliderVisual, XmFOREGROUND_COLOR ); ++count;
-    Widget gaugeWidget =
-        XtCreateManagedWidget("gauge", xmScaleWidgetClass,
-                              parentWidget, args, count);
-#else
-    Widget gaugeWidget =
-        XtCreateManagedWidget("gauge", xmGaugeWidgetClass,
-                              parentWidget, args, count);
-#endif
+    Widget gaugeWidget = XtCreateManagedWidget("gauge", xmGaugeWidgetClass, parentWidget, args, count);
     m_mainWidget = (WXWidget) gaugeWidget ;
 
     XtManageChild (gaugeWidget);
 
     int x = pos.x; int y = pos.y;
-    wxSize best = GetBestSize();
-    if( size.x != wxDefaultCoord ) best.x = size.x;
-    if( size.y != wxDefaultCoord ) best.y = size.y;
+    int width = size.x; int height = size.y;
+    if (width == -1)
+        width = 150;
+    if (height == -1)
+        height = 80;
 
-    ChangeFont(false);
+    m_font = parent->GetFont();
+    ChangeFont(FALSE);
 
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, x, y,
-                  best.x, best.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, x, y, width, height);
 
     ChangeBackgroundColour();
 
-    return true;
-}
-
-wxSize wxGauge::DoGetBestSize() const
-{
-    if( HasFlag(wxGA_HORIZONTAL) )
-        return wxSize( 100, 18 );
-    else
-        return wxSize( 18, 100 );
+    return TRUE;
 }
 
 void wxGauge::SetShadowWidth(int w)
@@ -168,13 +145,19 @@ void wxGauge::SetShadowWidth(int w)
     XtVaSetValues((Widget) m_mainWidget, XmNshadowThickness, w, NULL);
 }
 
+void wxGauge::SetBezelFace(int WXUNUSED(w))
+{
+}
+
 void wxGauge::SetRange(int r)
 {
+    m_rangeMax = r;
     XtVaSetValues((Widget) m_mainWidget, XmNmaximum, r, NULL);
 }
 
 void wxGauge::SetValue(int pos)
 {
+    m_gaugePos = pos;
     XtVaSetValues((Widget) m_mainWidget, XmNvalue, pos, NULL);
 }
 
@@ -185,11 +168,17 @@ int wxGauge::GetShadowWidth() const
     return (int)w;
 }
 
+int wxGauge::GetBezelFace() const
+{
+    return 0;
+}
+
 int wxGauge::GetRange() const
 {
     int r;
     XtVaGetValues((Widget) m_mainWidget, XmNmaximum, &r, NULL);
     return (int)r;
+    //    return m_rangeMax;
 }
 
 int wxGauge::GetValue() const
@@ -197,19 +186,23 @@ int wxGauge::GetValue() const
     int pos;
     XtVaGetValues((Widget) m_mainWidget, XmNvalue, &pos, NULL);
     return pos;
+    //    return m_gaugePos;
 }
 
-void wxGauge::DoMoveWindow(int x, int y, int width, int height)
+void wxGauge::ChangeFont(bool keepOriginalSize)
 {
-    wxGaugeBase::DoMoveWindow( x, y, width, height );
-#ifdef __WXMOTIF20__
-    XtVaSetValues( (Widget)m_mainWidget,
-                   XmNscaleHeight, height,
-                   NULL );
-#endif
+    wxWindow::ChangeFont(keepOriginalSize);
 }
 
-#if !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
+void wxGauge::ChangeBackgroundColour()
+{
+    wxWindow::ChangeBackgroundColour();
+}
+
+void wxGauge::ChangeForegroundColour()
+{
+    wxWindow::ChangeForegroundColour();
+}
 
 //// PRIVATE DECLARATIONS FOR XMGAUGE
 
@@ -221,9 +214,9 @@ typedef struct {
 } XmGaugeClassPart;
 
 typedef struct _XmGaugeClassRec {
-    CoreClassPart         core_class;
-    XmPrimitiveClassPart  primitive_class;
-    XmGaugeClassPart      gauge_class;
+    CoreClassPart	        core_class;
+    XmPrimitiveClassPart	primitive_class;
+    XmGaugeClassPart	        gauge_class;
 } XmGaugeClassRec;
 
 
@@ -238,16 +231,16 @@ typedef struct _XmGaugePart{
     XtCallbackList valueChangedCallback;
 
     /* private fields */
-    Boolean dragging; /* drag in progress ? */
+    Boolean dragging;		/* drag in progress ? */
     int oldx, oldy;
     GC gc;
 } XmGaugePart;
 
 
 typedef struct _XmGaugeRec {
-    CorePart         core;
-    XmPrimitivePart  primitive;
-    XmGaugePart      gauge;
+    CorePart		core;
+    XmPrimitivePart	primitive;
+    XmGaugePart	        gauge;
 } XmGaugeRec;
 
 extern XmGaugeClassRec xmGaugeClassRec;
@@ -408,7 +401,7 @@ DrawSlider(XmGaugeWidget gw, Boolean clear)
     }
     switch(THIS.orientation) {
     case XmHORIZONTAL:
-        /* size = (gw->core.width - 2 * sht) / ratio; */
+        /*	size = (gw->core.width - 2 * sht) / ratio; */
         /* A fix suggested by Dmitri Chubraev */
         size = (gw->core.width - 2 * sht) /((float)THIS.maximum-(float)THIS.minimum)*(float)THIS.value;
         switch(THIS.processingDirection) {
@@ -427,7 +420,7 @@ DrawSlider(XmGaugeWidget gw, Boolean clear)
         break;
         case XmVERTICAL:
             size = (gw->core.height - 2 * sht) /((float)THIS.maximum-(float)THIS.minimum)*(float)THIS.value;
-            /* size = (gw->core.height - 2 * sht)/ ratio; */
+            /*	size = (gw->core.height - 2 * sht)/ ratio; */
             switch(THIS.processingDirection) {
             case XmMAX_ON_RIGHT:
             case XmMAX_ON_BOTTOM:
@@ -515,7 +508,7 @@ ExposeProc(Widget w, XEvent *WXUNUSED(event), Region WXUNUSED(r))
         gw->primitive.top_shadow_GC,
         gw->primitive.bottom_shadow_GC,
         0, 0, w->core.width, w->core.height,
-        (Dimension)sht, XmSHADOW_IN);
+        sht, XmSHADOW_IN);
     DrawSlider(gw, False);
 #undef THIS
 }
@@ -555,53 +548,53 @@ resources[] = {
 
 
 XmGaugeClassRec xmGaugeClassRec = {
-    {    /* core fields */
-        (WidgetClass) &xmPrimitiveClassRec, /* superclass */
-        "XmGauge",            /* class_name */
-        sizeof(XmGaugeRec),   /* widget_size */
-        NULL,                 /* class_initialize */
-        NULL,                 /* class_part_initialize */
-        False,                /* class_inited */
-        Initialize,           /* initialize */
-        NULL,                 /* initialize_hook */
-        XtInheritRealize,     /* realize */
-        actions,              /* actions */
-        XtNumber(actions),    /* num_actions */
-        resources,            /* resources */
-        XtNumber(resources),  /* num_resources */
-        NULLQUARK,            /* xrm_class */
-        True,                 /* compress_motion */
-        True,                 /* compress_exposure */
-        True,                 /* compress_enterleave */
-        False,                /* visible_interest */
-        Destroy,              /* destroy */
-        NULL,                 /* resize */
-        ExposeProc,           /* expose */
-        SetValues,            /* set_values */
-        NULL,                 /* set_values_hook */
-        XtInheritSetValuesAlmost, /* set_values_almost */
-        NULL,                 /* get_values_hook */
-        NULL,                 /* accept_focus */
-        XtVersion,            /* version */
-        NULL,                 /* callback_private */
-        translations,         /* tm_table */
-        NULL,                 /* query_geometry */
-        NULL,                 /* display_accelerator */
-        NULL                  /* extension */
+    {				/* core fields */
+        (WidgetClass) &xmPrimitiveClassRec, /* superclass		*/
+            "XmGauge",		/* class_name		*/
+            sizeof(XmGaugeRec),	/* widget_size		*/
+            NULL,			/* class_initialize		*/
+            NULL,			/* class_part_initialize	*/
+            FALSE,			/* class_inited		*/
+            Initialize,		/* initialize		*/
+            NULL,			/* initialize_hook		*/
+            XtInheritRealize,	/* realize			*/
+            actions,		/* actions			*/
+            XtNumber(actions),	/* num_actions		*/
+            resources,		/* resources		*/
+            XtNumber(resources),	/* num_resources		*/
+            NULLQUARK,		/* xrm_class		*/
+            TRUE,			/* compress_motion		*/
+            TRUE,			/* compress_exposure	*/
+            TRUE,			/* compress_enterleave	*/
+            FALSE,			/* visible_interest		*/
+            Destroy,		/* destroy			*/
+            NULL,			/* resize			*/
+            ExposeProc,		/* expose			*/
+            SetValues,		/* set_values		*/
+            NULL,			/* set_values_hook		*/
+            XtInheritSetValuesAlmost, /* set_values_almost	*/
+            NULL,			/* get_values_hook		*/
+            NULL,			/* accept_focus		*/
+            XtVersion,		/* version			*/
+            NULL,			/* callback_private		*/
+            translations,		/* tm_table			*/
+            NULL,			/* query_geometry		*/
+            NULL,			/* display_accelerator	*/
+            NULL			/* extension		*/
     },
-    /* primitive_class fields */
+				/* primitive_class fields */
     {
-        NULL,                 /* border_highlight */
-        NULL,                 /* border_unhighlight */
-        NULL,                 /* translations */
-        NULL,                 /* arm_and_activate */
-        NULL,                 /* syn_resources */
-        0,                    /* num_syn_resources */
-        NULL                  /* extension */
-    },
-    { /* gauge fields */
-        0                     /* empty */
-    }
+            NULL,			/* border_highlight	*/
+                NULL,			/* border_unhighlight	*/
+                NULL,			/* translations		*/
+                NULL,			/* arm_and_activate	*/
+                NULL,			/* syn_resources	*/
+                0,			/* num_syn_resources	*/
+                NULL			/* extension		*/
+        },
+        { /* gauge fields */
+                0			/* empty		*/
+            }
 };
 
 WidgetClass xmGaugeWidgetClass = (WidgetClass)&xmGaugeClassRec;
@@ -612,7 +605,7 @@ WidgetClass xmGaugeWidgetClass = (WidgetClass)&xmGaugeClassRec;
 void
 GaugePick(Widget WXUNUSED(w), XEvent *WXUNUSED(e), String *WXUNUSED(args), Cardinal  *WXUNUSED(num_args))
 {
-    /* Commented out for a read-only gauge in wxWidgets */
+    /* Commented out for a read-only gauge in wxWindows */
 #if 0
     XmGaugeWidget gw = (XmGaugeWidget)w;
 #define THIS gw->gauge
@@ -678,7 +671,7 @@ GaugePick(Widget WXUNUSED(w), XEvent *WXUNUSED(e), String *WXUNUSED(args), Cardi
 void
 GaugeDrag(Widget WXUNUSED(w), XEvent *WXUNUSED(e), String *WXUNUSED(args), Cardinal  *WXUNUSED(num_args))
 {
-    /* Commented out for a read-only gauge in wxWidgets */
+    /* Commented out for a read-only gauge in wxWindows */
 #if 0
     XmGaugeWidget gw = (XmGaugeWidget)w;
 #define THIS gw->gauge
@@ -747,7 +740,7 @@ GaugeDrag(Widget WXUNUSED(w), XEvent *WXUNUSED(e), String *WXUNUSED(args), Cardi
 void
 GaugeDrop(Widget WXUNUSED(w), XEvent *WXUNUSED(e), String *WXUNUSED(args), Cardinal  *WXUNUSED(num_args))
 {
-    /* Commented out for a read-only gauge in wxWidgets */
+    /* Commented out for a read-only gauge in wxWindows */
 #if 0
     XmGaugeWidget gw = (XmGaugeWidget)w;
 #define THIS gw->gauge
@@ -782,5 +775,3 @@ XmGaugeGetValue(Widget w)
 
     return gw->gauge.value;
 }
-
-#endif // !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()

@@ -1,29 +1,29 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/doc.h
+// Name:        doc.h
 // Purpose:     Document classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _STUDIO_DOC_H_
 #define _STUDIO_DOC_H_
 
-#include "wx/docview.h"
-#include "wx/cmdproc.h"
-#include "wx/string.h"
+#include <wx/docview.h>
+#include <wx/cmdproc.h>
+#include <wx/string.h>
+#include <wx/wxexpr.h>
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
-
+#include <wx/ogl/ogl.h>
 #include "shapes.h"
 
 /*
  * A diagram document, which contains a diagram.
  */
-
+ 
 class csDiagramDocument: public wxDocument
 {
   DECLARE_DYNAMIC_CLASS(csDiagramDocument)
@@ -31,13 +31,11 @@ public:
   csDiagramDocument();
   ~csDiagramDocument();
 
-#if wxUSE_PROLOGIO
   bool OnSaveDocument(const wxString& file);
   bool OnOpenDocument(const wxString& file);
-#endif // wxUSE_PROLOGIO
-
+  
   inline wxDiagram *GetDiagram() { return &m_diagram; }
-
+  
   bool OnCloseDocument();
 
 protected:
@@ -67,7 +65,7 @@ protected:
 
  */
 
-
+  
 class csCommandState;
 class csDiagramCommand: public wxCommand
 {

@@ -92,20 +92,8 @@
  *
  */
 #ifdef __VMS
-/* vms_x_fix.h should be included before any of the X11/Motif headers */
 #include <wx/vms_x_fix.h>
-#undef XtDisplay
-#undef XtScreen
-#undef XtWindow
-#undef XtIsRealized
-#undef XtParent
-#undef XtClass
 #endif
-
-/* get XmVersion definition */
-#include <Xm/Xm.h>
-
-#if (XmVersion < 2000)
 
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
@@ -124,7 +112,6 @@
 #include <Xm/TextF.h>
 #include <Xm/List.h>
 #include <Xm/LabelP.h>
-
 #include <string.h>
 #include <ctype.h> /* define toupper */
 #include "combop.h"
@@ -3200,12 +3187,12 @@ static int FindSortedItemPos(XmComboBoxWidget w, XmString item)
  */
 static Boolean CheckComboBox(Widget w, char *pFuncName)
 {
-    char buff[256];
-    char *pWName;
-
 #if (XmVersion >= 2000)
     return False; /* temporary workaround */
 #else    
+    char buff[256];
+    char *pWName;
+
     if ( XmIsComboBox(w) ) return False;
     pWName = XrmQuarkToString(w->core.xrm_name);
     sprintf(buff, 
@@ -3569,5 +3556,3 @@ Widget XmCreateComboBox(Widget parent, String name, ArgList arglist,
 } /* XmCreateComboBox */
 
 /* Ende von ComboBox.c */
-
-#endif /* XmVersion < 2000 */

@@ -6,7 +6,7 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_INPCONS_H_
@@ -31,7 +31,7 @@ typedef wxString wxControlAction;
 #define wxACTION_NONE    _T("")           // no action to perform
 
 // ----------------------------------------------------------------------------
-// wxInputConsumer: mix-in class for handling wxControlActions (used by
+// wxInputConsumer: mix-in class for handling wxControlActions (used by 
 // wxControl and wxTopLevelWindow).
 // ----------------------------------------------------------------------------
 
@@ -39,7 +39,6 @@ class WXDLLEXPORT wxInputConsumer
 {
 public:
     wxInputConsumer() { m_inputHandler = NULL; }
-    virtual ~wxInputConsumer() {}
 
     // get the input handler
     wxInputHandler *GetInputHandler() const { return m_inputHandler; }
@@ -99,18 +98,18 @@ private:
     EVT_SET_FOCUS(classname::OnFocus) \
     EVT_KILL_FOCUS(classname::OnFocus) \
     EVT_ACTIVATE(classname::OnActivate)
-
+    
 // Forward event handlers to wxInputConsumer
 //
-// (We can't use them directly, because wxIC has virtual methods, which forces
-// the compiler to include (at least) two vtables into wxControl, one for the
-// wxWindow-wxControlBase-wxControl branch and one for the wxIC mix-in.
-// Consequently, the "this" pointer has different value when in wxControl's
-// and wxIC's method, even though the instance stays same. This doesn't matter
-// so far as member pointers aren't used, but that's not wxControl's case.
-// When we add an event table entry (= use a member pointer) pointing to
-// wxIC's OnXXX method, GCC compiles code that executes wxIC::OnXXX with the
-// version of "this" that belongs to wxControl, not wxIC! In our particular
+// (We can't use them directly, because wxIC has virtual methods, which forces 
+// the compiler to include (at least) two vtables into wxControl, one for the 
+// wxWindow-wxControlBase-wxControl branch and one for the wxIC mix-in. 
+// Consequently, the "this" pointer has different value when in wxControl's 
+// and wxIC's method, even though the instance stays same. This doesn't matter 
+// so far as member pointers aren't used, but that's not wxControl's case. 
+// When we add an event table entry (= use a member pointer) pointing to 
+// wxIC's OnXXX method, GCC compiles code that executes wxIC::OnXXX with the 
+// version of "this" that belongs to wxControl, not wxIC! In our particular 
 // case, the effect is that m_handler is NULL (probably same memory
 // area as the_other_vtable's_this->m_refObj) and input handling doesn't work.)
 #define WX_FORWARD_TO_INPUT_CONSUMER(classname) \

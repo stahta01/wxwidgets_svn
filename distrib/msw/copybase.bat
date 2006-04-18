@@ -3,7 +3,7 @@
 rem VZ: this is quick and _very_ dirty, to be replaced by a script directly
 rem     parsing the files.txt and include/wx/version.h...
 
-set VER=2.3.4
+set VER=2.4.2
 set DEST=t:\wxBase-%VER%
 
 mkdir %DEST%
@@ -12,7 +12,6 @@ mkdir %DEST%\include\wx
 mkdir %DEST%\include\wx\msw
 mkdir %DEST%\include\wx\protocol
 mkdir %DEST%\include\wx\unix
-mkdir %DEST%\locale
 mkdir %DEST%\samples
 mkdir %DEST%\samples\console
 mkdir %DEST%\src
@@ -26,7 +25,8 @@ mkdir %DEST%\lib
 chdir %WXWIN%
 
 rem Copy the files to the root directory
-
+rem
+rem "/q" is 4NT-specific, remove it if you're using DOS
 copy /q configure.in %DEST%
 copy /q configure %DEST%
 copy /q wxwin.m4 %DEST%

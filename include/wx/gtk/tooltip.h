@@ -3,7 +3,7 @@
 // Purpose:     wxToolTip class
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -18,14 +18,14 @@
 // forward declarations
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToolTip;
-class WXDLLIMPEXP_CORE wxWindow;
+class wxToolTip;
+class wxWindow;
 
 //-----------------------------------------------------------------------------
 // wxToolTip
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToolTip : public wxObject
+class wxToolTip : public wxObject
 {
 public:
     // globally change the tooltip parameters

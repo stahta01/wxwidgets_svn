@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     25.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -49,14 +49,14 @@ static int gs_blinkTime = 500;  // in milliseconds
 // timer stuff
 // ----------------------------------------------------------------------------
 
-wxCaretTimer::wxCaretTimer(wxCaret *caret)
-{
-    m_caret = caret;
+wxCaretTimer::wxCaretTimer(wxCaret *caret) 
+{ 
+    m_caret = caret; 
 }
 
-void wxCaretTimer::Notify()
-{
-    m_caret->OnTimer();
+void wxCaretTimer::Notify() 
+{ 
+    m_caret->OnTimer(); 
 }
 
 void wxCaret::OnTimer()
@@ -86,8 +86,8 @@ void wxCaretBase::SetBlinkTime(int milliseconds)
 
 void wxCaret::InitGeneric()
 {
-    m_hasFocus = true;
-    m_blinkedOut = true;
+    m_hasFocus = TRUE;
+    m_blinkedOut = TRUE;
 
     m_xOld =
     m_yOld = -1;
@@ -146,30 +146,13 @@ void wxCaret::DoMove()
     //else: will be shown at the correct location when it is shown
 }
 
-void wxCaret::DoSize()
-{
-    int countVisible = m_countVisible;
-    if (countVisible > 0)
-    {
-        m_countVisible = 0;
-        DoHide();
-    }
-    // Change bitmap size
-    m_bmpUnderCaret = wxBitmap(m_width, m_height);
-    if (countVisible > 0)
-    {
-        m_countVisible = countVisible;
-        DoShow();
-    }
-}
-
 // ----------------------------------------------------------------------------
 // handling the focus
 // ----------------------------------------------------------------------------
 
 void wxCaret::OnSetFocus()
 {
-    m_hasFocus = true;
+    m_hasFocus = TRUE;
 
     if ( IsVisible() )
         Refresh();
@@ -177,7 +160,7 @@ void wxCaret::OnSetFocus()
 
 void wxCaret::OnKillFocus()
 {
-    m_hasFocus = false;
+    m_hasFocus = FALSE;
 
     if ( IsVisible() )
     {

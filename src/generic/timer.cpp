@@ -3,7 +3,7 @@
 // Purpose:     wxTimer implementation
 // Author:      Vaclav Slavik
 // Id:          $Id$
-// Copyright:   (c) Vaclav Slavik
+// Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,8 +15,8 @@
 #endif
 
 // ----------------------------------------------------------------------------
-// NB: when using generic wxTimer implementation in your port, you *must* call
-//     wxTimer::NotifyTimers() often enough. The ideal place for this
+// NB: when using generic wxTimer implementation in your port, you *must* call 
+//     wxTimer::NotifyTimers() often enough. The ideal place for this 
 //     is in wxEventLoop::Dispatch().
 // ----------------------------------------------------------------------------
 
@@ -37,52 +37,13 @@
     // if we are unlucky and the latter combines information from two sources.
     #include "wx/mgl/private.h"
     extern "C" ulong _EVT_getTicks();
-    #define GetMillisecondsTime _EVT_getTicks
-
-    typedef ulong wxTimerTick_t;
-
-    #define wxTimerTickFmtSpec _T("lu")
-    #define wxTimerTickPrintfArg(tt) (tt)
-
-    #ifdef __DOS__
-        // Under DOS the MGL timer has a 24hr period, so consider the 12 hours
-        // before y to be 'less' and the the 12 hours after 'greater' modulo
-        // 24 hours.
-        inline bool wxTickGreaterEqual(wxTimerTick_t x, wxTimerTick_t y)
-        {
-            // _EVT_getTicks wraps at 1573040 * 55
-            const wxTimerTick_t modulus = 1573040 * 55;
-            return (2 * modulus + x - y) % modulus < modulus / 2;
-        }
-    #else
-        // If wxTimerTick_t is 32-bits then it'll wrap in around 50 days. So
-        // let the 25 days before y be 'less' and 25 days after be 'greater'.
-        inline bool wxTickGreaterEqual(wxTimerTick_t x, wxTimerTick_t y)
-        {
-            // This code assumes wxTimerTick_t is an unsigned type.
-            // Set half_modulus with top bit set and the rest zeros.
-            const wxTimerTick_t half_modulus = ~((~(wxTimerTick_t)0) >> 1);
-            return x - y < half_modulus;
-        }
-    #endif
-#else // !__WXMGL__
-    #define GetMillisecondsTime wxGetLocalTimeMillis
-
-    typedef wxLongLong wxTimerTick_t;
-
-    #if wxUSE_LONGLONG_WX
-        #define wxTimerTickFmtSpec wxLongLongFmtSpec _T("d")
-        #define wxTimerTickPrintfArg(tt) (tt.GetValue())
-    #else // using native wxLongLong
-        #define wxTimerTickFmtSpec _T("s")
-        #define wxTimerTickPrintfArg(tt) (tt.ToString().c_str())
-    #endif // wx/native long long
-
-    inline bool wxTickGreaterEqual(wxTimerTick_t x, wxTimerTick_t y)
-    {
-        return x >= y;
-    }
-#endif // __WXMGL__/!__WXMGL__
+    #define GetMillisecondsTime() _EVT_getTicks()
+#else
+//    #define GetMillisecondsTime() wxGetLocalTimeMillis().ToLong()
+    // Suppresses the debug warning in ToLong. FIXME: check
+    // that we don't drastically lose precision
+    #define GetMillisecondsTime() (unsigned long) wxGetLocalTimeMillis().GetValue()
+#endif
 
 // ----------------------------------------------------------------------------
 // helper structures and wxTimerScheduler
@@ -91,14 +52,14 @@
 class wxTimerDesc
 {
 public:
-    wxTimerDesc(wxTimer *t) :
-        timer(t), running(false), next(NULL), prev(NULL),
+    wxTimerDesc(wxTimer *t) : 
+        timer(t), running(FALSE), next(NULL), prev(NULL), 
         shotTime(0), deleteFlag(NULL) {}
 
     wxTimer         *timer;
     bool             running;
     wxTimerDesc     *next, *prev;
-    wxTimerTick_t    shotTime;
+    unsigned long    shotTime;  
     volatile bool   *deleteFlag; // see comment in ~wxTimer
 };
 
@@ -107,27 +68,26 @@ class wxTimerScheduler
 public:
     wxTimerScheduler() : m_timers(NULL) {}
 
-    void QueueTimer(wxTimerDesc *desc, wxTimerTick_t when = 0);
+    void QueueTimer(wxTimerDesc *desc, unsigned long when = 0);
     void RemoveTimer(wxTimerDesc *desc);
     void NotifyTimers();
-
+   
 private:
     wxTimerDesc *m_timers;
 };
 
-void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, wxTimerTick_t when)
+void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, unsigned long when)
 {
     if ( desc->running )
         return; // already scheduled
-
+        
     if ( when == 0 )
         when = GetMillisecondsTime() + desc->timer->GetInterval();
     desc->shotTime = when;
-    desc->running = true;
+    desc->running = TRUE;
 
-    wxLogTrace( wxT("timer"),
-                wxT("queued timer %p at tick %") wxTimerTickFmtSpec,
-               desc->timer,  wxTimerTickPrintfArg(when));
+    wxLogTrace( wxT("timer"), wxT("queued timer %p at tick %ld"), 
+               desc->timer, (long) when);
 
     if ( m_timers )
     {
@@ -148,7 +108,7 @@ void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, wxTimerTick_t when)
 
 void wxTimerScheduler::RemoveTimer(wxTimerDesc *desc)
 {
-    desc->running = false;
+    desc->running = FALSE;
     if ( desc == m_timers )
         m_timers = desc->next;
     if ( desc->prev )
@@ -164,37 +124,27 @@ void wxTimerScheduler::NotifyTimers()
     {
         bool oneShot;
         volatile bool timerDeleted;
-        wxTimerTick_t now = GetMillisecondsTime();
+        unsigned long now = GetMillisecondsTime();
+        wxTimerDesc *desc;
 
-        for ( wxTimerDesc *desc = m_timers; desc; desc = desc->next )
+        while ( m_timers && m_timers->shotTime <= now )
         {
-            if ( desc->running && wxTickGreaterEqual(now, desc->shotTime) )
+            desc = m_timers;
+            oneShot = desc->timer->IsOneShot();
+            RemoveTimer(desc);
+
+            timerDeleted = FALSE;
+            desc->deleteFlag = &timerDeleted;
+            desc->timer->Notify();
+            
+            if ( !timerDeleted )
             {
-                oneShot = desc->timer->IsOneShot();
-                RemoveTimer(desc);
+                wxLogTrace( wxT("timer"), wxT("notified timer %p sheduled for %ld"), 
+                           desc->timer, (long) desc->shotTime);
 
-                timerDeleted = false;
-                desc->deleteFlag = &timerDeleted;
-                desc->timer->Notify();
-
-                if ( !timerDeleted )
-                {
-                    wxLogTrace( wxT("timer"),
-                                wxT("notified timer %p sheduled for %")
-                                wxTimerTickFmtSpec,
-                                desc->timer,
-                                wxTimerTickPrintfArg(desc->shotTime) );
-
-                    desc->deleteFlag = NULL;
-                    if ( !oneShot )
-                        QueueTimer(desc, now + desc->timer->GetInterval());
-                }
-                else
-                {
-                    desc = m_timers;
-                    if (!desc)
-                        break;
-                }
+                desc->deleteFlag = NULL;
+                if ( !oneShot )
+                    QueueTimer(desc, now + desc->timer->GetInterval());
             }
         }
     }
@@ -205,7 +155,7 @@ void wxTimerScheduler::NotifyTimers()
 // wxTimer
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
+IMPLEMENT_ABSTRACT_CLASS(wxTimer,wxObject)
 
 wxTimerScheduler *gs_scheduler = NULL;
 
@@ -223,11 +173,11 @@ wxTimer::~wxTimer()
         Stop();
 
     // NB: this is a hack: wxTimerScheduler must have some way of knowing
-    //     that wxTimer object was deleted under its hands -- this may
+    //     that wxTimer object was deleted under its hands -- this may 
     //     happen if somebody is really nasty and deletes the timer
     //     from wxTimer::Notify()
     if ( m_desc->deleteFlag != NULL )
-        *m_desc->deleteFlag = true;
+        *m_desc->deleteFlag = TRUE;
 
     delete m_desc;
     wxLogTrace( wxT("timer"), wxT("    ...done destroying timer %p..."), this);
@@ -240,20 +190,20 @@ bool wxTimer::IsRunning() const
 
 bool wxTimer::Start(int millisecs, bool oneShot)
 {
-    wxLogTrace( wxT("timer"), wxT("started timer %p: %i ms, oneshot=%i"),
+    wxLogTrace( wxT("timer"), wxT("started timer %p: %i ms, oneshot=%i"), 
                this, millisecs, oneShot);
 
     if ( !wxTimerBase::Start(millisecs, oneShot) )
-        return false;
-
+        return FALSE;
+    
     gs_scheduler->QueueTimer(m_desc);
-    return true;
+    return TRUE;
 }
 
 void wxTimer::Stop()
 {
     if ( !m_desc->running ) return;
-
+    
     gs_scheduler->RemoveTimer(m_desc);
 }
 
@@ -271,7 +221,7 @@ class wxTimerModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxTimerModule)
 public:
     wxTimerModule() {}
-    bool OnInit() { return true; }
+    bool OnInit() { return TRUE; }
     void OnExit() { delete gs_scheduler; gs_scheduler = NULL; }
 };
 

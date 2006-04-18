@@ -6,7 +6,7 @@
 %% Created:     02.04.00
 %% RCS-ID:      $Id$
 %% Copyright:   (c) Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxWizardPage}}\label{wxwizardpage}
@@ -139,7 +139,7 @@ instead.
 \membersection{wxWizardPageSimple::wxWizardPageSimple}\label{wxwizardpagesimplewxwizardpagesimple}
 
 \func{}{wxWizardPageSimple}{\param{wxWizard* }{parent = NULL}, \param{wxWizardPage* }{prev = NULL}, \param{wxWizardPage* }{next = NULL}, 
-\param{const wxBitmap\& }{bitmap = wxNullBitmap}}
+\param{const wxBitmap& }{bitmap = wxNullBitmap}}
 
 Constructor takes the previous and next pages. They may be modified later by
 \helpref{SetPrev()}{wxwizardpagesimplesetprev} or 
@@ -164,7 +164,6 @@ Sets the next page.
 A convenience function to make the pages follow each other.
 
 Example:
-
 \begin{verbatim}
     wxRadioboxPage *page3 = new wxRadioboxPage(wizard);
     wxValidationPage *page4 = new wxValidationPage(wizard);

@@ -1,28 +1,23 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/doc.h
+// Name:        doc.h
 // Purpose:     Document classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGLSAMPLE_DOC_H_
 #define _OGLSAMPLE_DOC_H_
 
-#include "wx/docview.h"
-#include "wx/cmdproc.h"
-#include "wx/string.h"
+#include <wx/docview.h>
+#include <wx/cmdproc.h>
+#include <wx/string.h>
+#include <wx/wxexpr.h>
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
-
-#if wxUSE_PROLOGIO
-#include "wx/deprecated/wxexpr.h"
-#endif
-
-#include "wx/ogl/ogl.h"
+#include <wx/ogl/ogl.h>
 
 #if wxUSE_STD_IOSTREAM
  #include <iosfwd>
@@ -31,7 +26,7 @@
 /*
  * Override a few members for this application
  */
-
+ 
 class MyDiagram: public wxDiagram
 {
  public:
@@ -46,7 +41,7 @@ class MyDiagram: public wxDiagram
  * A few new shape classes so we have a 1:1 mapping
  * between palette symbol and unique class
  */
-
+ 
 class wxRoundedRectangleShape: public wxRectangleShape
 {
   DECLARE_DYNAMIC_CLASS(wxRoundedRectangleShape)
@@ -67,12 +62,12 @@ class wxDiamondShape: public wxPolygonShape
  * All shape event behaviour is routed through this handler, so we don't
  * have to derive from each shape class. We plug this in to each shape.
  */
-
+ 
 class MyEvtHandler: public wxShapeEvtHandler
 {
  public:
   wxString label;
-  MyEvtHandler(wxShapeEvtHandler *prev = NULL, wxShape *shape = NULL, const wxString& lab = wxEmptyString):wxShapeEvtHandler(prev, shape)
+  MyEvtHandler(wxShapeEvtHandler *prev = NULL, wxShape *shape = NULL, const wxString& lab = ""):wxShapeEvtHandler(prev, shape)
   {
     label = lab;
   }
@@ -89,14 +84,14 @@ class MyEvtHandler: public wxShapeEvtHandler
 /*
  * A diagram document, which contains a diagram.
  */
-
+ 
 class DiagramDocument: public wxDocument
 {
   DECLARE_DYNAMIC_CLASS(DiagramDocument)
  private:
  public:
   MyDiagram diagram;
-
+  
   DiagramDocument(void);
   ~DiagramDocument(void);
 
@@ -107,9 +102,9 @@ class DiagramDocument: public wxDocument
     virtual wxOutputStream& SaveObject(wxOutputStream& stream);
     virtual wxInputStream& LoadObject(wxInputStream& stream);
 #endif
-
+  
   inline wxDiagram *GetDiagram() { return &diagram; }
-
+  
   bool OnCloseDocument(void);
 };
 
@@ -138,7 +133,7 @@ class DiagramDocument: public wxDocument
  * Assume, as here, that we keep a pointer to the old shape so we reuse it
  * when we recreate.
  */
-
+ 
 class DiagramCommand: public wxCommand
 {
  protected:
@@ -159,12 +154,12 @@ class DiagramCommand: public wxCommand
   wxString shapeLabel;
  public:
   // Multi-purpose constructor for creating, deleting shapes
-  DiagramCommand(const wxString& name, int cmd, DiagramDocument *ddoc, wxClassInfo *shapeInfo = NULL,
-     double x = 0.0, double y = 0.0, bool sel = false, wxShape *theShape = NULL, wxShape *fs = NULL, wxShape *ts = NULL);
+  DiagramCommand(char *name, int cmd, DiagramDocument *ddoc, wxClassInfo *shapeInfo = NULL,
+     double x = 0.0, double y = 0.0, bool sel = FALSE, wxShape *theShape = NULL, wxShape *fs = NULL, wxShape *ts = NULL);
 
   // Property-changing command constructors
-  DiagramCommand(const wxString& name, int cmd, DiagramDocument *ddoc, wxBrush *backgroundColour, wxShape *theShape);
-  DiagramCommand(const wxString& name, int cmd, DiagramDocument *ddoc, const wxString& lab, wxShape *theShape);
+  DiagramCommand(char *name, int cmd, DiagramDocument *ddoc, wxBrush *backgroundColour, wxShape *theShape);
+  DiagramCommand(char *name, int cmd, DiagramDocument *ddoc, const wxString& lab, wxShape *theShape);
 
   ~DiagramCommand(void);
 

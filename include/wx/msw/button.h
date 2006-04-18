@@ -22,7 +22,7 @@ public:
     wxButton() { }
     wxButton(wxWindow *parent,
              wxWindowID id,
-             const wxString& label = wxEmptyString,
+             const wxString& label,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
@@ -34,7 +34,7 @@ public:
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
-                const wxString& label = wxEmptyString,
+                const wxString& label,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
@@ -47,21 +47,22 @@ public:
 
     // implementation from now on
     virtual void Command(wxCommandEvent& event);
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
     virtual bool MSWCommand(WXUINT param, WXWORD id);
 
+#ifdef __WIN32__
     // coloured buttons support
     virtual bool SetBackgroundColour(const wxColour &colour);
     virtual bool SetForegroundColour(const wxColour &colour);
 
     virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 private:
     void MakeOwnerDrawn();
+#endif // __WIN32__
 
 protected:
-    // send a notification event, return true if processed
+    // send a notification event, return TRUE if processed
     bool SendClickEvent();
 
     // default button handling
@@ -73,9 +74,10 @@ protected:
 
     // usually overridden base class virtuals
     virtual wxSize DoGetBestSize() const;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxButton)
+    DECLARE_DYNAMIC_CLASS(wxButton)
 };
 
 #endif

@@ -4,7 +4,7 @@
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998, 1999 Vadim Zeitlin, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GTK_DATAOBJ_H_
@@ -14,7 +14,7 @@
 // wxDataObject is the same as wxDataObjectBase under wxGTK
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataObject : public wxDataObjectBase
+class wxDataObject : public wxDataObjectBase
 {
 public:
     wxDataObject();

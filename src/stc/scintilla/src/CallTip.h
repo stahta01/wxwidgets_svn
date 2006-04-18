@@ -15,8 +15,8 @@ class CallTip {
 	int endHighlight;
 	char *val;
 	Font font;
-	PRectangle rectUp;
-	PRectangle rectDown;
+	int xUp;
+	int xDown;
 	int lineHeight;
 	int offsetMain;
 	// Private so CallTip objects can not be copied
@@ -52,8 +52,7 @@ public:
 
 	/// Setup the calltip and return a rectangle of the area required.
 	PRectangle CallTipStart(int pos, Point pt, const char *defn,
-		const char *faceName, int size, int codePage_, 
-		int characterSet, Window &wParent);
+		const char *faceName, int size, int codePage_, Window &wParent);
 
 	void CallTipCancel();
 

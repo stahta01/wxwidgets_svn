@@ -6,7 +6,7 @@
 // Created:     20.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_SCROLBAR_H_
@@ -15,7 +15,6 @@
 class WXDLLEXPORT wxScrollTimer;
 
 #include "wx/univ/scrarrow.h"
-#include "wx/renderer.h"
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control
@@ -84,7 +83,7 @@ public:
     virtual void SetThumbPosition(int thumbPos);
     virtual void SetScrollbar(int position, int thumbSize,
                               int range, int pageSize,
-                              bool refresh = true);
+                              bool refresh = TRUE);
 
     // wxScrollBar actions
     void ScrollToStart();
@@ -116,15 +115,15 @@ public:
     // for wxControlRenderer::DrawScrollbar() only
     const wxScrollArrows& GetArrows() const { return m_arrows; }
 
-    // idle processing
-    virtual void OnInternalIdle();
-
 protected:
     virtual wxSize DoGetBestClientSize() const;
     virtual void DoDraw(wxControlRenderer *renderer);
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
-    // forces update of thumb's visual appearence (does nothing if m_dirty=false)
+    // event handlers
+    void OnIdle(wxIdleEvent& event);
+
+    // forces update of thumb's visual appearence (does nothing if m_dirty=FALSE)
     void UpdateThumb();
 
     // SetThumbPosition() helper
@@ -188,14 +187,14 @@ public:
 
     // this method is called by wxScrollBarTimer only and may be overridden
     //
-    // return true to continue scrolling, false to stop the timer
+    // return TRUE to continue scrolling, FALSE to stop the timer
     virtual bool OnScrollTimer(wxScrollBar *scrollbar,
                                const wxControlAction& action);
 
 protected:
     // the methods which must be overridden in the derived class
 
-    // return true if the mouse button can be used to activate scrollbar, false
+    // return TRUE if the mouse button can be used to activate scrollbar, FALSE
     // if not (only left mouse button can do it under Windows, any button under
     // GTK+)
     virtual bool IsAllowedButton(int button) = 0;

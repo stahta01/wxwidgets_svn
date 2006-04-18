@@ -1,24 +1,33 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/icon.cpp
+// Name:        icon.cpp
 // Purpose:     wxIcon class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/icon.h"
+#include "wx/window.h"
+
+#ifdef __VMS__
+#pragma message disable nosimpint
+#endif
+#include <Xm/Xm.h>
+#include <X11/cursorfont.h>
+#ifdef __VMS__
+#pragma message enable nosimpint
+#endif
+
+#include "wx/motif/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap)
 
-// ============================================================================
-// Icons
-// ============================================================================
+/*
+* Icons
+*/
 
 wxIcon::wxIcon()
 {
@@ -41,6 +50,13 @@ wxIcon::wxIcon(const char **data)
     (void) Create((void*) data, wxBITMAP_TYPE_XPM_DATA, 0, 0, 0);
 }
 
+wxIcon::wxIcon(const wxString& icon_file, long flags,
+               int desiredWidth, int desiredHeight)
+               
+{
+    LoadFile(icon_file, flags, desiredWidth, desiredHeight);
+}
+
 void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 {
     wxIcon *icon = (wxIcon*)(&bmp);
@@ -51,16 +67,18 @@ wxIcon::~wxIcon()
 {
 }
 
-bool wxIcon::LoadFile(const wxString& filename, wxBitmapType type,
+bool wxIcon::LoadFile(const wxString& filename, long type,
                       int desiredWidth, int desiredHeight)
 {
     UnRef();
-
+    
+    m_refData = new wxBitmapRefData;
+    
     wxBitmapHandler *handler = FindHandler(type);
-
+    
     if ( handler )
-        return handler->LoadFile(this, filename, type,
-                                 desiredWidth, desiredHeight);
+        return handler->LoadFile(this, filename, type, desiredWidth, desiredHeight);
     else
-        return false;
+        return FALSE;
 }
+

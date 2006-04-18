@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/helpwin.cpp
+// Name:        helpwin.cpp
 // Purpose:     Help system: native implementation
 // Author:      David Webster
 // Modified by:
@@ -8,9 +8,6 @@
 // Copyright:   (c) David Webster
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
 #include "wx/defs.h"
@@ -21,7 +18,7 @@
 #if wxUSE_HELP
 #include <time.h>
 
-#include "wx/os2/private.h"
+#include <wx/os2/private.h>
 
 #include <string.h>
 
@@ -35,7 +32,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxWinHelpController, wxHelpControllerBase)
 
 wxWinHelpController::wxWinHelpController()
 {
-    m_helpFile = wxEmptyString;
+    m_helpFile = "";
 }
 
 wxWinHelpController::~wxWinHelpController()
@@ -46,82 +43,77 @@ bool wxWinHelpController::Initialize(const wxString& filename)
 {
     m_helpFile = filename;
     // TODO any other inits
-    return true;
+    return TRUE;
 }
 
 bool wxWinHelpController::LoadFile(const wxString& file)
 {
     m_helpFile = file;
     // TODO
-    return true;
+    return TRUE;
 }
 
 bool wxWinHelpController::DisplayContents()
 {
-    if (m_helpFile.empty())
-        return false;
+    if (m_helpFile == wxT("")) return FALSE;
 
     wxString str = m_helpFile;
-    size_t len = str.length();
+    size_t len = str.Length();
     if (!(str[(size_t)(len-1)] == wxT('p') && str[(size_t)(len-2)] == wxT('l') && str[(size_t)(len-3)] == wxT('h') && str[(size_t)(len-4)] == wxT('.')))
-        str += wxT(".hlp");
+      str += wxT(".hlp");
 
     if (wxTheApp->GetTopWindow())
     {
-        // TODO : display the help
-        return true;
+    // TODO : display the help
+     return TRUE;
     }
-    return false;
+	return FALSE;
 }
 
-bool wxWinHelpController::DisplaySection(int WXUNUSED(section))
+bool wxWinHelpController::DisplaySection(int section)
 {
     // Use context number
-    if (m_helpFile.empty())
-        return false;
+    if (m_helpFile == wxT("")) return FALSE;
 
     wxString str = m_helpFile;
-    size_t len = str.length();
+    size_t len = str.Length();
     if (!(str[(size_t)(len-1)] == wxT('p') && str[(size_t)(len-2)] == wxT('l') && str[(size_t)(len-3)] == wxT('h') && str[(size_t)(len-4)] == wxT('.')))
       str += wxT(".hlp");
 
     if (wxTheApp->GetTopWindow())
-    {
-        // TODO ::
-        //  WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXT, (DWORD)section);
-        return true;
-    }
-
-    return false;
+	{
+    // TODO ::
+    //  WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXT, (DWORD)section);
+      return TRUE;
+	}
+    return FALSE;
 }
 
-bool wxWinHelpController::DisplayBlock(long WXUNUSED(block))
+bool wxWinHelpController::DisplayBlock(long block)
 {
     // Use context number -- a very rough equivalent to block id!
-    if (m_helpFile.empty())
-        return false;
+    if (m_helpFile == wxT("")) return FALSE;
 
     wxString str = m_helpFile;
-    size_t len = str.length();
-    if (!(str[(size_t)(len-1)] == wxT('p') && str[(size_t)(len-2)] == wxT('l') && str[(size_t)(len-3)] == wxT('h') && str[(size_t)(len-4)] == wxT('.')))
+    size_t len = str.Length();
+    if (!(str[(size_t)(len-1)] == 'p' && str[(size_t)(len-2)] == 'l' && str[(size_t)(len-3)] == 'h' && str[(size_t)(len-4)] == '.'))
       str += wxT(".hlp");
 
     if (wxTheApp->GetTopWindow())
-    {
-        // TODO:
-        //  WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXT, (DWORD)block);
-        return true;
-    }
-    return false;
+	{
+    // TODO:
+    //  WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXT, (DWORD)block);
+      return TRUE;
+	}
+    return FALSE;
 }
 
-bool wxWinHelpController::KeywordSearch(const wxString& WXUNUSED(k),
-                                        wxHelpSearchMode WXUNUSED(mode))
+bool wxWinHelpController::KeywordSearch(const wxString& k)
 {
-    if (m_helpFile == wxEmptyString) return false;
+    if (m_helpFile == "") return FALSE;
 
     wxString str = m_helpFile;
-    size_t len = str.length();
+    size_t len = str.Length();
     if (!(str[(size_t)(len-1)] == wxT('p') && str[(size_t)(len-2)] == wxT('l') && str[(size_t)(len-3)] == wxT('h') && str[(size_t)(len-4)] == wxT('.')))
       str += wxT(".hlp");
 
@@ -129,25 +121,26 @@ bool wxWinHelpController::KeywordSearch(const wxString& WXUNUSED(k),
     {
       // TODO:
       // WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_PARTIALKEY, (DWORD)(const wxChar*) k);
-      return true;
+      return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 // Can't close the help window explicitly in WinHelp
 bool wxWinHelpController::Quit()
 {
-    if (wxTheApp->GetTopWindow())
-    {
-      // TODO:
-      // WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), 0, HELP_QUIT, 0L);
-      return true;
-    }
-
-    return false;
+  if (wxTheApp->GetTopWindow())
+  {
+    // TODO:
+    // WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), 0, HELP_QUIT, 0L);
+    return TRUE;
+  }
+  else
+    return FALSE;
 }
 
 void wxWinHelpController::OnQuit()
 {
 }
 #endif // wxUSE_HELP
+

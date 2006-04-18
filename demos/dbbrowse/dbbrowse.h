@@ -13,9 +13,9 @@
 class MainFrame: public wxFrame
 {
 public:
-    MainFrame(wxFrame *frame, wxChar *title,  const wxPoint& pos, const wxSize& size);
+    MainFrame(wxFrame *frame, char *title,  const wxPoint& pos, const wxSize& size);
     ~MainFrame(void);
-
+    
 public:
     // menu callbacks
     void OnAbout(wxCommandEvent& event);
@@ -46,6 +46,9 @@ public:
 //----------------------------------------------------------------------------------------
 // ID for the menu quit command
 //----------------------------------------------------------------------------------------
+#define QUIT                         777
+#define ABOUT                        778
+#define HELP                         779
 #define TREE_CTRL_PGM                102
 #define GRID_CTRL                    103
 #define TREE_CTRL_DB                 104

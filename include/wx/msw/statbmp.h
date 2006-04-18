@@ -16,7 +16,7 @@
 #include "wx/icon.h"
 #include "wx/bitmap.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxStaticBitmapNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBitmapNameStr;
 
 // a control showing an icon or a bitmap
 class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
@@ -32,8 +32,6 @@ public:
                    long style = 0,
                    const wxString& name = wxStaticBitmapNameStr)
     {
-        Init();
-
         Create(parent, id, label, pos, size, style, name);
     }
 
@@ -49,20 +47,27 @@ public:
 
     virtual void SetIcon(const wxIcon& icon) { SetImage(&icon); }
     virtual void SetBitmap(const wxBitmap& bitmap) { SetImage(&bitmap); }
-    virtual wxBitmap GetBitmap() const;
-    virtual wxIcon GetIcon() const;
 
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
+    // assert failure is provoked by an attempt to get an icon from bitmap or
+    // vice versa
+    wxIcon GetIcon() const
+        { wxASSERT( m_isIcon ); return *(wxIcon *)m_image; }
+    wxBitmap GetBitmap() const
+        { wxASSERT( !m_isIcon ); return *(wxBitmap *)m_image; }
+
+    // IMPLEMENTATION
+#ifdef __WIN16__
+    virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
+#endif // __WIN16__
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const;
     virtual wxSize DoGetBestSize() const;
 
-    // ctor/dtor helpers
-    void Init() { m_isIcon = true; m_image = NULL; m_currentHandle = 0; }
+    void Init() { m_isIcon = TRUE; m_image = NULL; }
     void Free();
 
-    // true if icon/bitmap is valid
+    // TRUE if icon/bitmap is valid
     bool ImageIsOk() const;
 
     void SetImage(const wxGDIImage* image);
@@ -72,12 +77,8 @@ protected:
     bool m_isIcon;
     wxGDIImage *m_image;
 
-    // handle used in last call to STM_SETIMAGE
-    WXHANDLE m_currentHandle;
-
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBitmap)
-    DECLARE_NO_COPY_CLASS(wxStaticBitmap)
 };
 
 #endif

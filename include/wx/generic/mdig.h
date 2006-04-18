@@ -20,8 +20,8 @@
 #include "wx/panel.h"
 #include "wx/notebook.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxFrameNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
 
 
 //-----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ class WXDLLEXPORT wxGenericMDIParentFrame: public wxFrame
 public:
     wxGenericMDIParentFrame();
     wxGenericMDIParentFrame(wxWindow *parent,
-                     wxWindowID winid,
+                     wxWindowID id,
                      const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
@@ -50,7 +50,7 @@ public:
 
     ~wxGenericMDIParentFrame();
     bool Create( wxWindow *parent,
-                 wxWindowID winid,
+                 wxWindowID id,
                  const wxString& title,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
@@ -75,7 +75,7 @@ public:
     virtual wxGenericMDIClientWindow *OnCreateClient();
 
     virtual void Cascade() { /* Has no effect */ }
-    virtual void Tile(wxOrientation WXUNUSED(orient) = wxHORIZONTAL) { }
+    virtual void Tile() { /* Has no effect */ }
     virtual void ArrangeIcons() { /* Has no effect */ }
     virtual void ActivateNext();
     virtual void ActivatePrevious();
@@ -114,7 +114,7 @@ class WXDLLEXPORT wxGenericMDIChildFrame: public wxPanel
 public:
     wxGenericMDIChildFrame();
     wxGenericMDIChildFrame( wxGenericMDIParentFrame *parent,
-                     wxWindowID winid,
+                     wxWindowID id,
                      const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
@@ -123,7 +123,7 @@ public:
 
     virtual ~wxGenericMDIChildFrame();
     bool Create( wxGenericMDIParentFrame *parent,
-                 wxWindowID winid,
+                 wxWindowID id,
                  const wxString& title,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
@@ -144,7 +144,7 @@ public:
     // no status bars
     virtual wxStatusBar* CreateStatusBar( int WXUNUSED(number) = 1,
                                         long WXUNUSED(style) = 1,
-                                        wxWindowID WXUNUSED(winid) = 1,
+                                        wxWindowID WXUNUSED(id) = 1,
                                         const wxString& WXUNUSED(name) = wxEmptyString)
       { return (wxStatusBar*)NULL; }
 
@@ -154,36 +154,36 @@ public:
 #endif
 
     // no size hints
-    virtual void DoSetSizeHints( int WXUNUSED(minW),
+    virtual void SetSizeHints( int WXUNUSED(minW),
                                int WXUNUSED(minH),
-                               int WXUNUSED(maxW) = wxDefaultCoord,
-                               int WXUNUSED(maxH) = wxDefaultCoord,
-                               int WXUNUSED(incW) = wxDefaultCoord,
-                               int WXUNUSED(incH) = wxDefaultCoord) {}
+                               int WXUNUSED(maxW) = -1,
+                               int WXUNUSED(maxH) = -1,
+                               int WXUNUSED(incW) = -1,
+                               int WXUNUSED(incH) = -1) {}
 
 #if wxUSE_TOOLBAR
     // no toolbar bars
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
-                                       wxWindowID WXUNUSED(winid),
+                                       wxWindowID WXUNUSED(id),
                                        const wxString& WXUNUSED(name) )
         { return (wxToolBar*)NULL; }
     virtual wxToolBar *GetToolBar() const { return (wxToolBar*)NULL; }
 #endif
 
     // no icon
-    void SetIcon( const wxIcon& WXUNUSED(icon) ) { }
-    void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
+    void SetIcon( const wxIcon &icon ) { /*m_icons = wxIconBundle( icon );*/}
+    void SetIcons( const wxIconBundle &icons ) { /*m_icons = icons;*/ }
 
     // no maximize etc
-    virtual void Maximize( bool WXUNUSED(maximize) = true) { /* Has no effect */ }
+    virtual void Maximize( bool WXUNUSED(maximize) = TRUE) { /* Has no effect */ }
     virtual void Restore() { /* Has no effect */ }
-    virtual void Iconize(bool WXUNUSED(iconize)  = true) { /* Has no effect */ }
-    virtual bool IsMaximized() const { return true; }
-    virtual bool IsIconized() const { return false; }
-    virtual bool ShowFullScreen(bool WXUNUSED(show), long WXUNUSED(style)) { return false; }
-    virtual bool IsFullScreen() const { return false; }
+    virtual void Iconize(bool WXUNUSED(iconize)  = TRUE) { /* Has no effect */ }
+    virtual bool IsMaximized() const { return TRUE; }
+    virtual bool IsIconized() const { return FALSE; }
+    virtual bool ShowFullScreen(bool WXUNUSED(show), long WXUNUSED(style)) { return FALSE; }
+    virtual bool IsFullScreen() const { return FALSE; }
 
-    virtual bool IsTopLevel() const { return false; }
+    virtual bool IsTopLevel() const { return FALSE; }
 
     void OnMenuHighlight(wxMenuEvent& event);
     void OnActivate(wxActivateEvent& event);
@@ -233,7 +233,7 @@ public:
     ~wxGenericMDIClientWindow();
     virtual bool CreateClient( wxGenericMDIParentFrame *parent, long style = wxVSCROLL | wxHSCROLL );
 
-    virtual int SetSelection(size_t nPage);
+    virtual int SetSelection(int nPage);
 
 protected:
     void PageChanged(int OldSelection, int newSelection);
@@ -252,7 +252,7 @@ private:
  */
 
 #ifndef wxUSE_GENERIC_MDI_AS_NATIVE
-#if defined(__WXUNIVERSAL__) || defined(__WXPM__) || defined(__WXCOCOA__)
+#if defined(__WXUNIVERSAL__) || defined(__WXPM__)
 #define wxUSE_GENERIC_MDI_AS_NATIVE   1
 #else
 #define wxUSE_GENERIC_MDI_AS_NATIVE   0
@@ -272,19 +272,19 @@ class WXDLLEXPORT wxMDIParentFrame: public wxGenericMDIParentFrame
 public:
     wxMDIParentFrame() {}
     wxMDIParentFrame(wxWindow *parent,
-                     wxWindowID winid,
+                     wxWindowID id,
                      const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
                      long style = wxDEFAULT_FRAME_STYLE | wxVSCROLL | wxHSCROLL,
                      const wxString& name = wxFrameNameStr)
-         :wxGenericMDIParentFrame(parent, winid, title, pos, size, style, name)
-     {
-     }
+        :wxGenericMDIParentFrame(parent, id, title, pos, size, style, name)
+    {
+    }
 
     wxMDIChildFrame * GetActiveChild() const ;
-
-
+    
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
 };
@@ -299,15 +299,16 @@ public:
     wxMDIChildFrame() {}
 
     wxMDIChildFrame( wxGenericMDIParentFrame *parent,
-                     wxWindowID winid,
+                     wxWindowID id,
                      const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
                      long style = wxDEFAULT_FRAME_STYLE,
                      const wxString& name = wxFrameNameStr )
-         :wxGenericMDIChildFrame(parent, winid, title, pos, size, style, name)
-     {
-     }
+        :wxGenericMDIChildFrame(parent, id, title, pos, size, style, name)
+    {
+    }
+
 private:
     DECLARE_DYNAMIC_CLASS(wxMDIChildFrame)
 };

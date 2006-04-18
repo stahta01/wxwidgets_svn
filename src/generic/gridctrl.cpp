@@ -15,7 +15,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -29,11 +29,9 @@
 // wxGridCellDateTimeRenderer
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DATETIME
+// Enables a grid cell to display a formated date and or time
 
-// Enables a grid cell to display a formatted date and or time
-
-wxGridCellDateTimeRenderer::wxGridCellDateTimeRenderer(const wxString& outformat, const wxString& informat)
+wxGridCellDateTimeRenderer::wxGridCellDateTimeRenderer(wxString outformat, wxString informat)
 {
     m_iformat = informat;
     m_oformat = outformat;
@@ -52,11 +50,11 @@ wxGridCellRenderer *wxGridCellDateTimeRenderer::Clone() const
     return renderer;
 }
 
-wxString wxGridCellDateTimeRenderer::GetString(const wxGrid& grid, int row, int col)
+wxString wxGridCellDateTimeRenderer::GetString(wxGrid& grid, int row, int col)
 {
     wxGridTableBase *table = grid.GetTable();
 
-    bool hasDatetime = false;
+    bool hasDatetime = FALSE;
     wxDateTime val;
     wxString text;
     if ( table->CanGetValueAs(row, col, wxGRID_VALUE_DATETIME) )
@@ -65,7 +63,7 @@ wxString wxGridCellDateTimeRenderer::GetString(const wxGrid& grid, int row, int 
 
         if (tempval){
             val = *((wxDateTime *)tempval);
-            hasDatetime = true;
+            hasDatetime = TRUE;
             delete (wxDateTime *)tempval;
         }
 
@@ -114,13 +112,10 @@ wxSize wxGridCellDateTimeRenderer::GetBestSize(wxGrid& grid,
     return DoGetBestSize(attr, dc, GetString(grid, row, col));
 }
 
-void wxGridCellDateTimeRenderer::SetParameters(const wxString& params)
-{
-    if (!params.empty())
+void wxGridCellDateTimeRenderer::SetParameters(const wxString& params){
+    if (!params.IsEmpty())
         m_oformat=params;
 }
-
-#endif // wxUSE_DATETIME
 
 // ----------------------------------------------------------------------------
 // wxGridCellChoiceNumberRenderer
@@ -131,7 +126,7 @@ void wxGridCellDateTimeRenderer::SetParameters(const wxString& params)
 
 wxGridCellEnumRenderer::wxGridCellEnumRenderer(const wxString& choices)
 {
-    if (!choices.empty())
+    if (!choices.IsEmpty())
         SetParameters(choices);
 }
 
@@ -142,7 +137,7 @@ wxGridCellRenderer *wxGridCellEnumRenderer::Clone() const
     return renderer;
 }
 
-wxString wxGridCellEnumRenderer::GetString(const wxGrid& grid, int row, int col)
+wxString wxGridCellEnumRenderer::GetString(wxGrid& grid, int row, int col)
 {
     wxGridTableBase *table = grid.GetTable();
     wxString text;
@@ -219,11 +214,11 @@ void wxGridCellEnumRenderer::SetParameters(const wxString& params)
 // "John","Fred"..."Bob" in the combo choice box
 
 wxGridCellEnumEditor::wxGridCellEnumEditor(const wxString& choices)
-                     :wxGridCellChoiceEditor()
+                    : wxGridCellChoiceEditor()
 {
     m_startint = -1;
 
-    if (!choices.empty())
+    if (!choices.IsEmpty())
         SetParameters(choices);
 }
 
@@ -248,7 +243,7 @@ void wxGridCellEnumEditor::BeginEdit(int row, int col, wxGrid* grid)
     else
     {
         wxString startValue = table->GetValue(row, col);
-        if (startValue.IsNumber() && !startValue.empty())
+        if (startValue.IsNumber() && !startValue.IsEmpty())
         {
             startValue.ToLong(&m_startint);
         }
@@ -326,7 +321,7 @@ wxGridCellAutoWrapStringRenderer::Draw(wxGrid& grid,
 wxArrayString
 wxGridCellAutoWrapStringRenderer::GetTextLines(wxGrid& grid,
                                                wxDC& dc,
-                                               const wxGridCellAttr& attr,
+                                               wxGridCellAttr& attr,
                                                const wxRect& rect,
                                                int row, int col)
 {
@@ -341,29 +336,27 @@ wxGridCellAutoWrapStringRenderer::GetTextLines(wxGrid& grid,
 
     dc.SetFont(attr.GetFont());
     wxStringTokenizer tk(data , _T(" \n\t\r"));
-    wxString thisline = wxEmptyString;
+    wxString thisline(wxT(""));
 
     while ( tk.HasMoreTokens() )
     {
         wxString tok = tk.GetNextToken();
-        //FIXME: this causes us to print an extra unnecesary
-        //       space at the end of the line. But it
-        //       is invisible , simplifies the size calculation
-        //       and ensures tokens are separated in the display
-        tok += _T(" ");
+    //FIXME: this causes us to print an extra unnecesary
+    //       space at the end of the line. But it
+    //       is invisible , simplifies the size calculation
+    //       and ensures tokens are seperated in the display
+    tok += _T(" ");
 
         dc.GetTextExtent(tok, &x, &y);
-        if ( curr_x + x > max_x)
-        {
+        if ( curr_x + x > max_x) {
             lines.Add( wxString(thisline) );
-            thisline = tok;
-            curr_x=x;
-        }
-        else
-        {
+        thisline = tok;
+        curr_x=x;
+    } else {
             thisline+= tok;
-            curr_x += x;
-        }
+        curr_x += x;
+    }
+
     }
     //Add last line
     lines.Add( wxString(thisline) );
@@ -390,7 +383,7 @@ wxGridCellAutoWrapStringRenderer::GetBestSize(wxGrid& grid,
     {
         width+=10;
         rect.SetWidth(width);
-        height = y * (wx_truncate_cast(wxCoord, GetTextLines(grid,dc,attr,rect,row,col).GetCount()));
+        height = y *( GetTextLines(grid,dc,attr,rect,row,col).GetCount());
         count--;
     // Search for a shape no taller than the golden ratio.
     } while (count && (width  < (height*1.68)) );

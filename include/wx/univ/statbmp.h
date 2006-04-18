@@ -18,7 +18,7 @@
 // wxStaticBitmap
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
+class wxStaticBitmap : public wxStaticBitmapBase
 {
 public:
     wxStaticBitmap()
@@ -31,7 +31,7 @@ public:
                    const wxSize& size = wxDefaultSize,
                    long style = 0)
     {
-        Create(parent, wxID_ANY, label, pos, size, style);
+        Create(parent, -1, label, pos, size, style);
     }
 
     wxStaticBitmap(wxWindow *parent,
@@ -59,12 +59,11 @@ public:
 
     wxIcon GetIcon() const;
 
-    virtual bool HasTransparentBackground() { return true; }
-
-protected:
+    virtual bool HasTransparentBackground() { return TRUE; }
+    
+private:
     virtual void DoDraw(wxControlRenderer *renderer);
 
-private:
     // the bitmap which we show
     wxBitmap m_bitmap;
 

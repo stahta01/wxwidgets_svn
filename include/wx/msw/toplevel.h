@@ -46,29 +46,24 @@ public:
     virtual ~wxTopLevelWindowMSW();
 
     // implement base class pure virtuals
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
-    virtual void Maximize(bool maximize = true);
+    virtual void Maximize(bool maximize = TRUE);
     virtual bool IsMaximized() const;
-    virtual void Iconize(bool iconize = true);
+    virtual void Iconize(bool iconize = TRUE);
     virtual bool IsIconized() const;
     virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons );
     virtual void Restore();
 
-#ifndef __WXWINCE__
-    virtual bool SetShape(const wxRegion& region);
-#endif // __WXWINCE__
-    virtual void RequestUserAttention(int flags = wxUSER_ATTENTION_INFO);
+    /*virtual*/ bool SetShape(const wxRegion& region);
 
-    virtual bool Show(bool show = true);
+    virtual bool Show(bool show = TRUE);
 
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
     virtual bool IsFullScreen() const { return m_fsIsShowing; }
 
-    // wxMSW only: EnableCloseButton(false) may be used to remove the "Close"
+    // wxMSW only: EnableCloseButton(FALSE) may be used to remove the "Close"
     // button from the title bar
-    bool EnableCloseButton(bool enable = true);
+    bool EnableCloseButton(bool enable = TRUE);
 
     // implementation from now on
     // --------------------------
@@ -80,38 +75,17 @@ public:
     void SetLastFocus(wxWindow *win) { m_winLastFocused = win; }
     wxWindow *GetLastFocus() const { return m_winLastFocused; }
 
-#if defined(__SMARTPHONE__) && defined(__WXWINCE__)
-    virtual void SetLeftMenu(int id = wxID_ANY, const wxString& label = wxEmptyString, wxMenu *subMenu = NULL);
-    virtual void SetRightMenu(int id = wxID_ANY, const wxString& label = wxEmptyString, wxMenu *subMenu = NULL);
-    bool HandleCommand(WXWORD id, WXWORD cmd, WXHWND control);
-    virtual bool MSWShouldPreProcessMessage(WXMSG* pMsg);
-#endif // __SMARTPHONE__ && __WXWINCE__
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    // Soft Input Panel (SIP) change notification
-    virtual bool HandleSettingChange(WXWPARAM wParam, WXLPARAM lParam);
-#endif
-
-    // translate wxWidgets flags to Windows ones
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle) const;
-
-    // choose the right parent to use with CreateWindow()
-    virtual WXHWND MSWGetParent() const;
-
-    // window proc for the frames
-    WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
-
 protected:
     // common part of all ctors
     void Init();
 
-    // create a new frame, return false if it couldn't be created
+    // create a new frame, return FALSE if it couldn't be created
     bool CreateFrame(const wxString& title,
                      const wxPoint& pos,
                      const wxSize& size);
 
     // create a new dialog using the given dialog template from resources,
-    // return false if it couldn't be created
+    // return FALSE if it couldn't be created
     bool CreateDialog(const void *dlgTemplate,
                       const wxString& title,
                       const wxPoint& pos,
@@ -119,6 +93,12 @@ protected:
 
     // common part of Iconize(), Maximize() and Restore()
     void DoShowWindow(int nShowCmd);
+
+    // translate wxWindows flags to Windows ones
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle) const;
+
+    // choose the right parent to use with CreateWindow()
+    virtual WXHWND MSWGetParent() const;
 
     // is the window currently iconized?
     bool m_iconized;
@@ -137,49 +117,11 @@ protected:
     // the last focused child: we restore focus to it on activation
     wxWindow             *m_winLastFocused;
 
-#if defined(__SMARTPHONE__) && defined(__WXWINCE__)
-    class ButtonMenu
-    {
-    public:
-        ButtonMenu();
-        ~ButtonMenu();
-
-        void SetButton(int id = wxID_ANY,
-                       const wxString& label  = wxEmptyString,
-                       wxMenu *subMenu = NULL);
-
-        bool IsAssigned() const {return m_assigned;}
-        bool IsMenu() const {return m_menu!=NULL;}
-
-        int GetId() const {return m_id;}
-        wxMenu* GetMenu() const {return m_menu;}
-        wxString GetLabel() {return m_label;}
-
-        static wxMenu *DuplicateMenu(wxMenu *menu);
-
-    protected:
-        int      m_id;
-        wxString m_label;
-        wxMenu  *m_menu;
-        bool     m_assigned;
-    };
-
-    ButtonMenu               m_LeftButton;
-    ButtonMenu               m_RightButton;
-    HWND                     m_MenuBarHWND;
-
-    void ReloadButton(ButtonMenu& button, UINT menuID);
-    void ReloadAllButtons();
-#endif // __SMARTPHONE__ && __WXWINCE__
-
-private:
-
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    void* m_activateInfo;
-#endif
-
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTopLevelWindowMSW)
 };
 
+// list of all frames and modeless dialogs
+extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
+
 #endif // _WX_MSW_TOPLEVEL_H_
+

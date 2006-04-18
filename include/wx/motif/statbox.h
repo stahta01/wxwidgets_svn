@@ -12,8 +12,12 @@
 #ifndef _WX_STATBOX_H_
 #define _WX_STATBOX_H_
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxStaticBoxNameStr;
+
 // Group box
-class WXDLLEXPORT wxStaticBox: public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
         
@@ -28,7 +32,6 @@ public:
     {
         Create(parent, id, label, pos, size, style, name);
     }
-
     ~wxStaticBox();
     
     bool Create(wxWindow *parent, wxWindowID id,
@@ -40,15 +43,17 @@ public:
     
     virtual bool ProcessCommand(wxCommandEvent& WXUNUSED(event))
     {
-        return false;
+        return FALSE;
     }
-
-    virtual WXWidget GetLabelWidget() const { return m_labelWidget; }
-
-    virtual void SetLabel(const wxString& label);
-    virtual void GetBordersForSizer(int *borderTop, int *borderOther) const;
-
-private:
+    
+    void SetLabel(const wxString& label);
+    wxString GetLabel() const;
+    
+    // Implementation
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
+    
+protected:
+    // Motif-specific
     WXWidget  m_labelWidget;
    
 private:

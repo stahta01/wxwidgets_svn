@@ -5,6 +5,7 @@
 #! Author:  Vadim Zeitlin
 #! Created: 14.07.99
 #! Version: $Id$
+#! Changelist: 2003-02-25 - Juergen Ulbts - update from wxWindows 2.5.x/HEAD branch
 #!#############################################################################
 #${
     #! include the code which parses filelist.txt file and initializes
@@ -58,7 +59,7 @@ wxUSE_GUI=0
 
 !include ..\makewat.env
 
-LIBTARGET   = $(WXDIR)\lib\wx$(TOOLKIT)$(DEBUGSUFFIX)_w.lib
+LIBTARGET   = $(WXDIR)\lib\$(LIBNAME).lib
 
 EXTRATARGETS = zlib regex
 EXTRATARGETSCLEAN = clean_zlib clean_regex
@@ -157,26 +158,26 @@ cleanall:   clean
 
 zlib:   .SYMBOLIC
     cd $(WXDIR)\src\zlib
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_zlib:   .SYMBOLIC
     cd $(WXDIR)\src\zlib
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 regex:    .SYMBOLIC
     cd $(WXDIR)\src\regex
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_regex:   .SYMBOLIC
     cd $(WXDIR)\src\regex
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 MFTYPE=watbase
 self : .SYMBOLIC $(WXDIR)\distrib\msw\tmake\filelist.txt $(WXDIR)\distrib\msw\tmake\$(MFTYPE).t
 	cd $(WXDIR)\distrib\msw\tmake
-	perl -S tmake -t $(MFTYPE) wxwin.pro -o makebase.wat
+	tmake -t $(MFTYPE) wxwin.pro -o makebase.wat
 	copy makebase.wat $(WXDIR)\src\msw

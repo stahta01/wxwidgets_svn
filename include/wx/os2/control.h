@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/control.h
+// Name:        control.h
 // Purpose:     wxControl class
 // Author:      David Webster
 // Modified by:
@@ -30,7 +30,14 @@ public:
              ,const wxString&    rsName = wxControlNameStr
             )
     {
-        Create( pParent, vId, rPos, rSize, lStyle, rValidator, rsName );
+        Create( pParent
+               ,vId
+               ,rPos
+               ,rSize
+               ,lStyle
+               ,rValidator
+               ,rsName
+              );
     }
     virtual ~wxControl();
 
@@ -42,9 +49,6 @@ public:
                 ,const wxValidator& rValidator = wxDefaultValidator
                 ,const wxString&    rsName = wxControlNameStr
                );
-
-    virtual void SetLabel(const wxString& rsLabel);
-    virtual wxString GetLabel() const { return m_label; }
 
     //
     // Simulates an event
@@ -64,7 +68,7 @@ public:
     //
     // For ownerdraw items
     //
-    virtual bool OS2OnDraw(WXDRAWITEMSTRUCT* WXUNUSED(pItem)) { return false; };
+    virtual bool OS2OnDraw(WXDRAWITEMSTRUCT* WXUNUSED(pItem)) { return FALSE; };
     virtual long OS2OnMeasure(WXMEASUREITEMSTRUCT* WXUNUSED(pItem)) { return 0L; };
 
     wxArrayLong&     GetSubcontrols() { return m_aSubControls; }
@@ -76,6 +80,25 @@ public:
                                 ,WXWPARAM wParam
                                 ,WXLPARAM lParam
                                );
+
+#if WXWIN_COMPATIBILITY
+    virtual void SetButtonColour(const wxColour& WXUNUSED(rCol)) { }
+    wxColour*    GetButtonColour(void) const { return NULL; }
+
+    inline virtual void SetLabelFont(const wxFont& rFont);
+    inline virtual void SetButtonFont(const wxFont& rFont);
+    inline wxFont&      GetLabelFont(void) const;
+    inline wxFont&      GetButtonFont(void) const;
+
+    //
+    // Adds callback
+    //
+    inline void Callback(const wxFunction function);
+    wxFunction  GetCallback(void) { return m_callback; }
+
+protected:
+    wxFunction                      m_callback;     // Callback associated with the window
+#endif // WXWIN_COMPATIBILITY
 
 public:
     //
@@ -95,7 +118,7 @@ public:
                           ,long            lStyle
                          );
     //
-    // Create the control of the given class with the given style, returns false
+    // Create the control of the given class with the given style, returns FALSE
     // if creation failed.
     //
     bool OS2CreateControl( const wxChar*   zClassname
@@ -119,13 +142,18 @@ public:
     inline void SetYComp(const int nYComp) {m_nYComp = nYComp;}
 
 private:
-    int m_nXComp;
-    int m_nYComp;
-
-    wxString m_label;
-    WXDWORD  m_dwStyle;
-
-    DECLARE_EVENT_TABLE()
+    int                             m_nXComp;
+    int                             m_nYComp;
+   DECLARE_EVENT_TABLE()
 }; // end of wxControl
 
+#if WXWIN_COMPATIBILITY
+    inline void wxControl::Callback(const wxFunction f) { m_callback = f; };
+    inline wxFont& wxControl::GetLabelFont(void) const { return GetFont(); }
+    inline wxFont& wxControl::GetButtonFont(void) const { return GetFont(); }
+    inline void wxControl::SetLabelFont(const wxFont& rFont) { SetFont(rFont); }
+    inline void wxControl::SetButtonFont(const wxFont& rFont) { SetFont(rFont); }
+#endif // WXWIN_COMPATIBILITY
+
 #endif // _WX_CONTROL_H_
+

@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _MIMETYPE_IMPL_H
@@ -14,11 +14,11 @@
 
 #include "wx/mimetype.h"
 
-#if wxUSE_MIMETYPE
+#if (wxUSE_FILE && wxUSE_TEXTFILE)
 
 class wxMimeTypeCommands;
 
-WX_DEFINE_ARRAY_PTR(wxMimeTypeCommands *, wxMimeCommandsArray);
+WX_DEFINE_ARRAY(wxMimeTypeCommands *, wxMimeCommandsArray);
 
 // this is the real wxMimeTypesManager for Unix
 class WXDLLEXPORT wxMimeTypesManagerImpl
@@ -26,10 +26,10 @@ class WXDLLEXPORT wxMimeTypesManagerImpl
 public:
     // ctor and dtor
     wxMimeTypesManagerImpl();
-    virtual ~wxMimeTypesManagerImpl();
+    ~wxMimeTypesManagerImpl();
 
     // load all data into memory - done when it is needed for the first time
-    void Initialize(int mailcapStyles = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyles = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxEmptyString);
 
     // and delete the data here
@@ -66,8 +66,15 @@ public:
         // file type
     wxString GetExtension(size_t index) { return m_aExtensions[index]; }
 
-protected:
-    void InitIfNeeded();
+private:
+    void InitIfNeeded()
+    {
+        if ( !m_initialized ) {
+            // set the flag first to prevent recursion
+            m_initialized = TRUE;
+            Initialize();
+        }
+    }
 
     wxArrayString m_aTypes,         // MIME types
                   m_aDescriptions,  // descriptions (just some text)
@@ -87,12 +94,15 @@ protected:
     wxString GetCommand(const wxString &verb, size_t nIndex) const;
 
     // read Gnome files
-    void LoadGnomeDataFromKeyFile(const wxString& filename,
-                                  const wxArrayString& dirs);
+    void LoadGnomeDataFromKeyFile(const wxString& filename);
     void LoadGnomeMimeTypesFromMimeFile(const wxString& filename);
-    void LoadGnomeMimeFilesFromDir(const wxString& dirbase,
-                                   const wxArrayString& dirs);
+    void LoadGnomeMimeFilesFromDir(const wxString& dirbase);
     void GetGnomeMimeInfo(const wxString& sExtraDir);
+
+    // write gnome files
+    bool CheckGnomeDirsExist();
+    bool WriteGnomeKeyFile(int index, bool delete_index);
+    bool WriteGnomeMimeFile(int index, bool delete_index);
 
     // read KDE
     void LoadKDELinksForMimeSubtype(const wxString& dirbase,
@@ -122,20 +132,20 @@ protected:
 
     // functions used to do associations
 
-    virtual int AddToMimeData(const wxString& strType,
+    int AddToMimeData(const wxString& strType,
                       const wxString& strIcon,
                       wxMimeTypeCommands *entry,
                       const wxArrayString& strExtensions,
                       const wxString& strDesc,
                       bool replaceExisting = TRUE);
 
-    virtual bool DoAssociation(const wxString& strType,
+    bool DoAssociation(const wxString& strType,
                        const wxString& strIcon,
                        wxMimeTypeCommands *entry,
                        const wxArrayString& strExtensions,
                        const wxString& strDesc);
 
-    virtual bool WriteMimeInfo(int nIndex, bool delete_mime );
+    bool WriteMimeInfo(int nIndex, bool delete_mime );
 
     // give it access to m_aXXX variables
     friend class WXDLLEXPORT wxFileTypeImpl;
@@ -161,7 +171,8 @@ public:
     bool GetMimeType(wxString *mimeType) const
         { *mimeType = m_manager->m_aTypes[m_index[0]]; return TRUE; }
     bool GetMimeTypes(wxArrayString& mimeTypes) const;
-    bool GetIcon(wxIconLocation *iconLoc) const;
+    bool GetIcon(wxIcon *icon, wxString *iconFile = NULL,
+                 int *iconIndex = NULL) const;
 
     bool GetDescription(wxString *desc) const
         { *desc = m_manager->m_aDescriptions[m_index[0]]; return TRUE; }
@@ -206,8 +217,9 @@ private:
     wxArrayInt              m_index; // in the wxMimeTypesManagerImpl arrays
 };
 
-#endif // wxUSE_MIMETYPE
+#endif
+  // wxUSE_FILE
 
-#endif // _MIMETYPE_IMPL_H
-
+#endif
+  //_MIMETYPE_IMPL_H
 

@@ -45,9 +45,9 @@ public:
         wxBitmapButtonBase::SetMargins(x, y);
     }
 
-    virtual bool Enable(bool enable = true);
+    virtual bool Enable(bool enable = TRUE);
 
-    virtual bool SetCurrent(bool doit = true);
+    virtual bool SetCurrent(bool doit = TRUE);
 
     virtual void Press();
     virtual void Release();
@@ -60,7 +60,7 @@ protected:
     virtual void OnSetBitmap();
 
     // set bitmap to the given one if it's ok or to m_bmpNormal and return
-    // true if the bitmap really changed
+    // TRUE if the bitmap really changed
     bool ChangeBitmap(const wxBitmap& bmp);
 
 private:

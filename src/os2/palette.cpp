@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/palette.cpp
+// Name:        palette.cpp
 // Purpose:     wxPalette
 // Author:      AUTHOR
 // Modified by:
 // Created:     ??/??/98
 // RCS-ID:      $Id$
 // Copyright:   (c) AUTHOR
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -15,6 +15,7 @@
 #ifndef WX_PRECOMP
 #include <stdio.h>
 #include "wx/defs.h"
+#include "wx/setup.h"
 #include "wx/string.h"
 #include "wx/os2/private.h"
 #include "wx/palette.h"
@@ -67,20 +68,24 @@ wxPalette::~wxPalette()
 {
 } // end of wxPalette::~wxPalette
 
-bool wxPalette::FreeResource( bool WXUNUSED(bForce) )
+bool wxPalette::FreeResource(
+  bool                              bForce
+)
 {
     if ( M_PALETTEDATA && M_PALETTEDATA->m_hPalette)
     {
         ::GpiSelectPalette(M_PALETTEDATA->m_hPS, NULLHANDLE);
         ::GpiDeletePalette((HPAL)M_PALETTEDATA->m_hPalette);
     }
-    return true;
+    return TRUE;
 } // end of wxPalette::FreeResource
 
-bool wxPalette::Create( int n,
-                        const unsigned char* pRed,
-                        const unsigned char* pGreen,
-                        const unsigned char* pBlue )
+bool wxPalette::Create(
+  int                               n
+, const unsigned char*              pRed
+, const unsigned char*              pGreen
+, const unsigned char*              pBlue
+)
 {
     PULONG                          pualTable;
 
@@ -89,7 +94,7 @@ bool wxPalette::Create( int n,
     m_refData = new wxPaletteRefData;
     pualTable = new ULONG[n];
     if (!pualTable)
-        return false;
+        return(FALSE);
 
     for (int i = 0; i < n; i ++)
     {
@@ -102,23 +107,25 @@ bool wxPalette::Create( int n,
                                                                ,pualTable
                                                               );
     delete [] pualTable;
-    return true;
+    return TRUE;
 } // end of wxPalette::Create
 
-int wxPalette::GetPixel( unsigned char cRed,
-                         unsigned char cGreen,
-                         unsigned char cBlue) const
+int wxPalette::GetPixel(
+  const unsigned char               cRed
+, const unsigned char               cGreen
+, const unsigned char               cBlue
+) const
 {
-    bool    bFound = false;
-    PULONG  pualTable = NULL;
-    ULONG   ulNumEntries;
-    ULONG   ulRGB = (PC_RESERVED * 16777216) +
-                    ((int)cRed * 65536) +
-                    ((int)cGreen * 256) +
-                    (int)cBlue;
+    bool                            bFound = FALSE;
+    PULONG                          pualTable = NULL;
+    ULONG                           ulNumEntries;
+    ULONG                           ulRGB = (PC_RESERVED * 16777216) +
+                                            ((int)cRed * 65536) +
+                                            ((int)cGreen * 256) +
+                                             (int)cBlue;
 
     if (!m_refData)
-        return wxNOT_FOUND;
+        return FALSE;
 
     //
     // Get number of entries first
@@ -146,34 +153,36 @@ int wxPalette::GetPixel( unsigned char cRed,
     //
     // Now loop through and find the matching entry
     //
-    ULONG i;
+    int                             i;
     for (i = 0; i < ulNumEntries; i++)
     {
         if (pualTable[i] == ulRGB)
         {
-            bFound = true;
+            bFound = TRUE;
             break;
         }
     }
     if (!bFound)
-        return wxNOT_FOUND;
+        return 0;
     return (i + 1);
 } // end of wxPalette::GetPixel
 
-bool wxPalette::GetRGB( int nIndex,
-                        unsigned char* pRed,
-                        unsigned char* pGreen,
-                        unsigned char* pBlue) const
+bool wxPalette::GetRGB(
+  int                               nIndex
+, unsigned char*                    pRed
+, unsigned char*                    pGreen
+, unsigned char*                    pBlue
+) const
 {
     PULONG                          pualTable = NULL;
     RGB2                            vRGB;
     ULONG                           ulNumEntries;
 
     if (!m_refData)
-        return false;
+        return FALSE;
 
     if (nIndex < 0 || nIndex > 255)
-        return false;
+        return FALSE;
     //
     // Get number of entries first
     //
@@ -202,7 +211,7 @@ bool wxPalette::GetRGB( int nIndex,
     *pBlue  = vRGB.bBlue;
     *pGreen = vRGB.bGreen;
     *pRed   = vRGB.bRed;
-    return true;
+    return TRUE;
 } // end of wxPalette::GetRGB
 
 void wxPalette::SetHPALETTE(
@@ -225,3 +234,4 @@ void wxPalette::SetPS(
     ::GpiSelectPalette(M_PALETTEDATA->m_hPS, M_PALETTEDATA->m_hPalette);
     M_PALETTEDATA->m_hPS = hPS;
 } // end of wxPalette::SetHPALETTE
+

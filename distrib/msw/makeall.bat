@@ -1,5 +1,5 @@
 Rem @echo off
-Rem This script compiles wxWidgets and some samples/demos with
+Rem This script compiles wxWindows and some samples/demos with
 Rem a range of compilers.
 Rem Note that it currently uses batch scripts local to Julian Smart's machine,
 Rem to set up the environment correctly.
@@ -19,7 +19,7 @@ Rem The following line is for a specific environment -- edit, or comment out
 Rem Not working in 4NT?
 Rem if not %@INDEX["%WXDIR%","wx2stable"] == "-1" set FATWXWIN=c:\wx2sta~1\wxwind~1
 
-echo Full wxWidgets path is %FULLWXWIN%, FAT path is %FATWXWIN%
+echo Full wxWindows path is %FULLWXWIN%, FAT path is %FATWXWIN%
 set BUILDDEST=%TEMP%\wxWinBuild
 Rem Only carry on if we haven't specified a single target
 set CARRYON=0
@@ -47,10 +47,12 @@ cd %WXDIR%\demos
 erase /S *.exe
 cd %WXDIR%\contrib\samples
 erase /S *.exe
+cd %WXDIR%\utils\dialoged\src
+erase /S *.exe
 cd %WXDIR%\utils\tex2rtf\src
 erase /S *.exe
 
-echo Starting wxWidgets build at %_TIME, %_DATE
+echo Starting wxWindows build at %_TIME, %_DATE
 
 Rem First, VC++ 6.
 
@@ -95,7 +97,7 @@ Rem Euch, this is the only way I can think of right now
 Rem to copy them to the same directory. Daft but...
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\VC6Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\VC6Release
 nmake -f makefile.vc clean FINAL=1
 
 cd %WXDIR%\demos
@@ -104,7 +106,7 @@ nmake -f makefile.vc FINAL=1
 Rem Copy all executables to VC6Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\VC6Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\VC6Release
 nmake -f makefile.vc clean FINAL=1
 
 Rem Compile OGL
@@ -122,6 +124,13 @@ nmake -f makefile.vc FINAL=1
 copy *.exe %BUILDDEST%\VC6Release
 nmake -f makefile.vc clean FINAL=1
 cd %WXDIR%\contrib\src\ogl
+nmake -f makefile.vc clean FINAL=1
+
+Rem Compile Dialog Editor
+cd %WXDIR%\utils\dialoged\src
+nmake -f makefile.vc clean FINAL=1
+nmake -f makefile.vc FINAL=1
+copy *.exe %BUILDDEST%\VC6Release
 nmake -f makefile.vc clean FINAL=1
 
 Rem Compile Tex2RTF
@@ -238,7 +247,7 @@ make -f makefile.b32 FINAL=1
 Rem Copy all executables to BC55Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\BC55Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\BC55Release
 make -f makefile.b32 clean FINAL=1
 
 cd %WXDIR%\demos
@@ -247,7 +256,7 @@ make -f makefile.b32 FINAL=1
 Rem Copy all executables to BC55Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\BC55Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\BC55Release
 make -f makefile.b32 clean FINAL=1
 
 Rem Compile OGL
@@ -265,6 +274,13 @@ make -f makefile.b32 FINAL=1
 copy *.exe %BUILDDEST%\BC55Release
 make -f makefile.b32 clean FINAL=1
 cd %WXDIR%\contrib\src\ogl
+make -f makefile.b32 clean FINAL=1
+
+Rem Compile Dialog Editor
+cd %WXDIR%\utils\dialoged\src
+make -f makefile.b32 clean FINAL=1
+make -f makefile.b32 FINAL=1
+copy *.exe %BUILDDEST%\BC55Release
 make -f makefile.b32 clean FINAL=1
 
 Rem Compile Tex2RTF
@@ -363,7 +379,7 @@ make -f makefile.g95 FINAL=1
 Rem Copy all executables to Cygwin11Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\Cygwin11Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\Cygwin11Release
 make -f makefile.g95 clean FINAL=1
 
 cd %WXDIR%\demos
@@ -372,7 +388,7 @@ make -f makefile.g95 FINAL=1
 Rem Copy all executables to Cygwin11Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\Cygwin11Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\Cygwin11Release
 make -f makefile.g95 clean FINAL=1
 
 Rem Compile OGL
@@ -390,6 +406,13 @@ make -f makefile.g95 FINAL=1
 copy *.exe %BUILDDEST%\Cygwin11Release
 make -f makefile.g95 clean FINAL=1
 cd %WXDIR%\contrib\src\ogl
+make -f makefile.g95 clean FINAL=1
+
+Rem Compile Dialog Editor
+cd %WXDIR%\utils\dialoged\src
+make -f makefile.g95 clean FINAL=1
+make -f makefile.g95 FINAL=1
+copy *.exe %BUILDDEST%\Cygwin11Release
 make -f makefile.g95 clean FINAL=1
 
 Rem Compile Tex2RTF
@@ -436,7 +459,7 @@ make -f makefile.g95 FINAL=1
 Rem Copy all executables to Ming2952Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\Ming2952Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\Ming2952Release
 make -f makefile.g95 clean FINAL=1
 
 cd %WXDIR%\demos
@@ -445,7 +468,7 @@ make -f makefile.g95 FINAL=1
 Rem Copy all executables to Ming2952Release
 erase %TEMP%\temp.zip
 zip16 -r %TEMP%\temp.zip *.exe
-unzip32 -o %TEMP%\temp.zip -d %BUILDDEST%\Ming2952Release
+unzip -o %TEMP%\temp.zip -d %BUILDDEST%\Ming2952Release
 make -f makefile.g95 clean FINAL=1
 
 Rem Compile OGL
@@ -463,6 +486,13 @@ make -f makefile.g95 FINAL=1
 copy *.exe %BUILDDEST%\Ming2952Release
 make -f makefile.g95 clean FINAL=1
 cd %WXDIR%\contrib\src\ogl
+make -f makefile.g95 clean FINAL=1
+
+Rem Compile Dialog Editor
+cd %WXDIR%\utils\dialoged\src
+make -f makefile.g95 clean FINAL=1
+make -f makefile.g95 FINAL=1
+copy *.exe %BUILDDEST%\Ming2952Release
 make -f makefile.g95 clean FINAL=1
 
 Rem Compile Tex2RTF
@@ -490,7 +520,7 @@ echo ===================
 Rem Set up the environment
 call msvc1
 
-Rem Needs full wxWidgets path for making libraries
+Rem Needs full wxWindows path for making libraries
 set WXWIN=%FULLWXWIN%
 
 echo *** VC++ Debug ***
@@ -504,7 +534,7 @@ erase /F /Y %BUILDDEST%\VC1Debug
 Rem Make one sample, just to make sure Debug mode is OK
 cd %WXDIR%\samples\minimal
 nmake -f makefile.dos clean
-Rem Needs FAT wxWidgets path for making executables
+Rem Needs FAT wxWindows path for making executables
 set WXWIN=%FATWXWIN%
 nmake -f makefile.dos
 
@@ -514,7 +544,7 @@ nmake -f makefile.dos clean
 cd %WXDIR%\src\msw
 nmake -f makefile.dos cleanall
 
-Rem Needs full wxWidgets path for making libraries
+Rem Needs full wxWindows path for making libraries
 set WXWIN=%FULLWXWIN%
 
 echo *** VC++ Release ***
@@ -529,7 +559,7 @@ Rem Make one sample, just to make sure Release mode is OK
 cd %WXDIR%\samples\minimal
 nmake -f makefile.dos clean
 nmake -f makefile.dos FINAL=1
-Rem Needs FAT wxWidgets path for making executables
+Rem Needs FAT wxWindows path for making executables
 set WXWIN=%FATWXWIN%
 nmake -f makefile.dos FINAL=1
 copy minimal.exe /S %BUILDDEST%\VC1Release
@@ -591,5 +621,5 @@ make -f makefile.bcc cleanall FINAL=1
 
 :end
 
-echo Finished wxWidgets build at %_TIME, %_DATE
+echo Finished wxWindows build at %_TIME, %_DATE
 

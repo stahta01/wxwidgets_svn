@@ -70,11 +70,7 @@ public:
 
     // Copy constructors
     inline wxBitmap(const wxBitmap& rBitmap)
-        : wxGDIImage(rBitmap)
-    {
-        Init();
-        SetHandle(rBitmap.GetHandle());
-    }
+      { Init(); Ref(rBitmap); SetHandle(rBitmap.GetHandle()); }
 
     // Initialize with raw data
     wxBitmap( const char bits[]
@@ -106,7 +102,10 @@ public:
             );
 
     // If depth is omitted, will create a bitmap compatible with the display
-    wxBitmap( int nWidth, int nHeight, int nDepth = -1 );
+    wxBitmap( int nWidth
+             ,int nHeight
+             ,int nDepth = -1
+            );
 
     wxBitmap( const wxImage& image, int depth = -1 )
                          { (void)CreateFromImage(image, depth); }
@@ -115,6 +114,13 @@ public:
     // the copy ctor but the resulting bitmap is invalid!
     inline wxBitmap(const wxIcon& rIcon)
       { Init(); CopyFromIcon(rIcon); }
+
+    wxBitmap& operator=(const wxBitmap& rBitmap)
+    {
+        if ( m_refData != rBitmap.m_refData )
+            Ref(rBitmap);
+        return(*this);
+    }
 
     wxBitmap& operator=(const wxIcon& rIcon)
     {
@@ -155,9 +161,6 @@ public:
     virtual bool LoadFile( int             nId
                           ,long            lType = wxBITMAP_TYPE_BMP_RESOURCE
                          );
-    virtual bool LoadFile( const wxString& rName
-                          ,long            lType = wxBITMAP_TYPE_XPM
-                         );
     virtual bool SaveFile( const wxString&  rName
                           ,int              lType
                           ,const wxPalette* pCmap = NULL
@@ -186,6 +189,19 @@ public:
 
     inline bool operator!=(const wxBitmap& rBitmap) const
       { return m_refData != rBitmap.m_refData; }
+
+#if WXWIN_COMPATIBILITY_2
+    void SetOk(bool bIsOk);
+#endif // WXWIN_COMPATIBILITY_2
+
+#if WXWIN_COMPATIBILITY
+    inline wxPalette* GetColourMap() const
+      { return GetPalette(); }
+
+    inline void       SetColourMap(wxPalette* pCmap)
+      { SetPalette(*pCmap); };
+
+#endif // WXWIN_COMPATIBILITY
 
     // Implementation
 public:
@@ -308,12 +324,6 @@ public:
                           ,int             nDesiredWidth
                           ,int             nDesiredHeight
                          );
-    virtual bool LoadFile( wxBitmap*       pBitmap
-                          ,const wxString& rName
-                          ,long            lFlags
-                          ,int             nDesiredWidth
-                          ,int             nDesiredHeight
-                         );
     virtual bool SaveFile( wxBitmap*        pBitmap
                           ,const wxString&  rName
                           ,int              lType
@@ -338,14 +348,14 @@ public:
                       ,int             lType
                      );
 private:
-    inline virtual bool Load( wxGDIImage*     WXUNUSED(pImage)
-                             ,const wxString& WXUNUSED(rName)
-                             ,HPS             WXUNUSED(hPs)
-                             ,long            WXUNUSED(lFlags)
-                             ,int             WXUNUSED(nDesiredWidth)
-                             ,int             WXUNUSED(nDesiredHeight)
+    inline virtual bool Load( wxGDIImage*     pImage
+                             ,const wxString& rName
+                             ,HPS             hPs
+                             ,long            lFlags
+                             ,int             nDesiredWidth
+                             ,int             nDesiredHeight
                             )
-    { return false; }
+    { return FALSE; }
     DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 }; // end of CLASS wxBitmapHandler
 

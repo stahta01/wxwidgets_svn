@@ -52,30 +52,23 @@ _tiffWriteProc(thandle_t fd, tdata_t buf, tsize_t size)
 static toff_t
 _tiffSeekProc(thandle_t fd, toff_t off, int whence)
 {
-	DWORD dwMoveMethod, dwMoveHigh;
-
-        /* we use this as a special code, so avoid accepting it */
-        if( off == 0xFFFFFFFF )
-            return 0xFFFFFFFF;
-        
+	DWORD dwMoveMethod;
 	switch(whence)
 	{
-	case SEEK_SET:
+	case 0:
 		dwMoveMethod = FILE_BEGIN;
 		break;
-	case SEEK_CUR:
+	case 1:
 		dwMoveMethod = FILE_CURRENT;
 		break;
-	case SEEK_END:
+	case 2:
 		dwMoveMethod = FILE_END;
 		break;
 	default:
 		dwMoveMethod = FILE_BEGIN;
 		break;
 	}
-        dwMoveHigh = 0;
-	return ((toff_t)SetFilePointer(fd, (LONG) off, (PLONG)&dwMoveHigh,
-                                       dwMoveMethod));
+	return ((toff_t)SetFilePointer(fd, off, NULL, dwMoveMethod));
 }
 
 static int
@@ -90,9 +83,6 @@ _tiffSizeProc(thandle_t fd)
 	return ((toff_t)GetFileSize(fd, NULL));
 }
 
-#ifdef __BORLANDC__
-#pragma argsused
-#endif
 static int
 _tiffDummyMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
 {
@@ -116,7 +106,7 @@ _tiffMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
 	toff_t size;
 	HANDLE hMapFile;
 
-	if ((size = _tiffSizeProc(fd)) == 0xFFFFFFFF)
+	if ((size = _tiffSizeProc(fd)) == (toff_t)-1)
 		return (0);
 	hMapFile = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, size, NULL);
 	if (hMapFile == NULL)
@@ -129,9 +119,6 @@ _tiffMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
 	return(1);
 }
 
-#ifdef __BORLANDC__
-#pragma argsused
-#endif
 static void
 _tiffDummyUnmapProc(thandle_t fd, tdata_t base, toff_t size)
 {
@@ -152,7 +139,7 @@ TIFF*
 TIFFFdOpen(int ifd, const char* name, const char* mode)
 {
 	TIFF* tif;
-	BOOL fSuppressMap = (mode[1] == 'u' || (mode[1]!=0 && mode[2] == 'u'));
+	BOOL fSuppressMap = (mode[1] == 'u' || mode[2] == 'u');
 
 	tif = TIFFClientOpen(name, mode,
 		 (thandle_t)ifd,
@@ -224,23 +211,14 @@ _TIFFfree(tdata_t p)
 tdata_t
 _TIFFrealloc(tdata_t p, tsize_t s)
 {
-  void* pvTmp;
-  tsize_t old=GlobalSize(p);
-  if (old>=s)
-    {
-      if ((pvTmp = GlobalAlloc(GMEM_FIXED, s)) != NULL) {
-	CopyMemory(pvTmp, p, s);
-	GlobalFree(p);
-      }
-    }
-  else
-    {
-      if ((pvTmp = GlobalAlloc(GMEM_FIXED, s)) != NULL) {
-	CopyMemory(pvTmp, p, old);
-	GlobalFree(p);
-      }
-    }
-  return ((tdata_t)pvTmp);
+	void* pvTmp;
+	if ((pvTmp = GlobalReAlloc(p, s, 0)) == NULL) {
+		if ((pvTmp = GlobalAlloc(GMEM_FIXED, s)) != NULL) {
+			CopyMemory(pvTmp, p, GlobalSize(p));
+			GlobalFree(p);
+		}
+	}
+	return ((tdata_t)pvTmp);
 }
 
 void
@@ -258,8 +236,8 @@ _TIFFmemcpy(void* d, const tdata_t s, tsize_t c)
 int
 _TIFFmemcmp(const tdata_t p1, const tdata_t p2, tsize_t c)
 {
-	register const BYTE *pb1 = (const BYTE *) p1;
-	register const BYTE *pb2 = (const BYTE *) p2;
+	register const BYTE *pb1 = p1;
+	register const BYTE *pb2 = p2;
 	register DWORD dwTmp = c;
 	register int iTmp;
 	for (iTmp = 0; dwTmp-- && !iTmp; iTmp = (int)*pb1++ - (int)*pb2++)

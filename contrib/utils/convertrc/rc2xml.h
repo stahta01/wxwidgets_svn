@@ -6,11 +6,11 @@
 #define RC2XML_H
 
 #include "wx/file.h"
-#include "wx/ffile.h"
-#include "wx/list.h"
+#include <wx/ffile.h>
+#include <wx/list.h>
 
 
-class rc2xml : public wxObject
+class rc2xml : public wxObject  
 {
 public:
     wxString m_workingpath;
@@ -22,8 +22,8 @@ public:
     ~rc2xml();
 
 protected:
-    wxString LookUpId(wxString id);
-
+	wxString LookUpId(wxString id);
+	
     void ParseResourceHeader();
     void WriteBitmap(wxString bitmapname);
     void ParseListCtrl(wxString label,wxString varname);
@@ -37,7 +37,7 @@ protected:
     wxList * m_iconlist;
     void ParseIconStatic();
     void ParseMenuItem();
-
+	
 //Functions
     bool SplitHelp(wxString msg, wxString &shorthelp, wxString &longhelp);
     bool LookUpString(wxString strid,wxString & st);
@@ -58,10 +58,10 @@ protected:
     void ParseRadioButton(wxString phrase,wxString varname);
     void ParseCheckBox(wxString phrase,wxString varname);
     void ParsePushButton(wxString phrase, wxString varname);
-    bool Separator(int ch);
+    bool Seperator(int ch);
     void ParseGroupBox(wxString phrase, wxString varname);
     bool ReadRect(int & x, int & y, int & width, int & height);
-    wxString GetToken(bool *listseparator = 0);
+    wxString GetToken(bool *listseperator = 0);
     wxString GetQuoteField();
     wxString GetStringQuote();
     void ReadChar(int &ch);
@@ -87,7 +87,7 @@ protected:
     wxList * m_resourcelist;
     wxFile m_rc;
     wxFFile m_xmlfile;
-    wxFileOffset m_filesize;
+    int m_filesize;
     bool m_done;
 
 };

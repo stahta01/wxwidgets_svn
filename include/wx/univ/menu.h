@@ -20,7 +20,7 @@
 
 // fwd declarations
 class WXDLLEXPORT wxMenuInfo;
-WX_DECLARE_EXPORTED_OBJARRAY(wxMenuInfo, wxMenuInfoArray);
+WX_DECLARE_OBJARRAY(wxMenuInfo, wxMenuInfoArray);
 
 class WXDLLEXPORT wxMenuGeometryInfo;
 class WXDLLEXPORT wxPopupMenuWindow;
@@ -50,7 +50,7 @@ public:
     // show this menu at the given position (in screen coords) and optionally
     // select its first item
     void Popup(const wxPoint& pos, const wxSize& size,
-               bool selectFirst = true);
+               bool selectFirst = TRUE);
 
     // dismiss the menu
     void Dismiss();
@@ -61,11 +61,11 @@ public:
 
     // implementation only from here
 
-    // do as if this item were clicked, return true if the resulting event was
-    // processed, false otherwise
+    // do as if this item were clicked, return TRUE if the resulting event was
+    // processed, FALSE otherwise
     bool ClickItem(wxMenuItem *item);
 
-    // process the key event, return true if done
+    // process the key event, return TRUE if done
     bool ProcessKeyDown(int key);
 
 #if wxUSE_ACCEL
@@ -75,9 +75,9 @@ public:
 
 protected:
     // implement base class virtuals
-    virtual wxMenuItem* DoAppend(wxMenuItem *item);
-    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem* DoRemove(wxMenuItem *item);
+    virtual bool DoAppend(wxMenuItem *item);
+    virtual bool DoInsert(size_t pos, wxMenuItem *item);
+    virtual wxMenuItem *DoRemove(wxMenuItem *item);
 
     // common part of DoAppend and DoInsert
     void OnItemAdded(wxMenuItem *item);
@@ -111,9 +111,6 @@ private:
     // common part of all ctors
     void Init();
 
-    // terminate the current radio group, if any
-    void EndRadioGroup();
-
     // the exact menu geometry is defined by a struct derived from this one
     // which is opaque and defined by the renderer
     wxMenuGeometryInfo *m_geometry;
@@ -125,9 +122,6 @@ private:
     // the accel table for this menu
     wxAcceleratorTable m_accelTable;
 #endif // wxUSE_ACCEL
-
-    // the position of the first item in the current radio group or -1
-    int m_startRadioGroup;
 
     // it calls out OnDismiss()
     friend class wxPopupMenuWindow;
@@ -143,7 +137,6 @@ class WXDLLEXPORT wxMenuBar : public wxMenuBarBase
 public:
     // ctors and dtor
     wxMenuBar(long WXUNUSED(style) = 0) { Init(); }
-    wxMenuBar(size_t n, wxMenu *menus[], const wxString titles[], long style = 0);
     virtual ~wxMenuBar();
 
     // implement base class virtuals
@@ -164,8 +157,8 @@ public:
     // get the next item for the givan accel letter (used by wxFrame), return
     // -1 if none
     //
-    // if unique is not NULL, filled with true if there is only one item with
-    // this accel, false if two or more
+    // if unique is not NULL, filled with TRUE if there is only one item with
+    // this accel, FALSE if two or more
     int FindNextItemForAccel(int idxStart,
                              int keycode,
                              bool *unique = NULL) const;
@@ -180,7 +173,7 @@ public:
 #endif // wxUSE_ACCEL
 
     // called by wxMenu when it is dismissed
-    void OnDismissMenu(bool dismissMenuBar = false);
+    void OnDismissMenu(bool dismissMenuBar = FALSE);
 
 protected:
     // common part of all ctors
@@ -192,7 +185,7 @@ protected:
     void OnKeyDown(wxKeyEvent& event);
     void OnKillFocus(wxFocusEvent& event);
 
-    // process the mouse move event, return true if we did, false to continue
+    // process the mouse move event, return TRUE if we did, FALSE to continue
     // processing as usual
     //
     // the coordinates are client coordinates of menubar, convert if necessary
@@ -233,7 +226,7 @@ protected:
     void DoSelectMenu(size_t pos);
 
     // popup the currently selected menu
-    void PopupCurrentMenu(bool selectFirst = true);
+    void PopupCurrentMenu(bool selectFirst = TRUE);
 
     // hide the currently selected menu
     void DismissMenu();
@@ -243,9 +236,6 @@ protected:
 
     // we don't want to have focus except while selecting from menu
     void GiveAwayFocus();
-
-    // Release the mouse capture if we have it
-    bool ReleaseMouseCapture();
 
     // the array containing extra menu info we need
     wxMenuInfoArray m_menuInfos;

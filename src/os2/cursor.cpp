@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/cursor.cpp
+// Name:        cursor.cpp
 // Purpose:     wxCursor class
 // Author:      David Webster
 // Modified by:
@@ -14,15 +14,16 @@
 
 #ifndef WX_PRECOMP
 #include <stdio.h>
+#include "wx/setup.h"
 #include "wx/list.h"
 #include "wx/utils.h"
 #include "wx/app.h"
 #include "wx/cursor.h"
 #include "wx/icon.h"
+#include "wx/resource.h"
 #endif
 
 #include "wx/os2/private.h"
-#include "wx/os2/wxrsc.h"
 #include "wx/image.h"
 
 #include "assert.h"
@@ -34,7 +35,7 @@ wxCursorRefData::wxCursorRefData(void)
   m_nWidth = 32;
   m_nHeight = 32;
   m_hCursor = 0 ;
-  m_bDestroyCursor = false;
+  m_bDestroyCursor = FALSE;
 }
 
 void wxCursorRefData::Free()
@@ -52,35 +53,39 @@ wxCursor::wxCursor(void)
 {
 }
 
-wxCursor::wxCursor(const char WXUNUSED(bits)[],
-                   int WXUNUSED(width),
-                   int WXUNUSED(height),
-                   int WXUNUSED(hotSpotX),
-                   int WXUNUSED(hotSpotY),
-                   const char WXUNUSED(maskBits)[])
+wxCursor::wxCursor(
+  const char                        WXUNUSED(bits)[]
+, int                               WXUNUSED(width)
+, int                               WXUNUSED(height)
+, int                               WXUNUSED(hotSpotX)
+, int                               WXUNUSED(hotSpotY)
+, const char                        WXUNUSED(maskBits)[]
+)
 {
 }
 
-wxCursor::wxCursor(const wxImage& rImage)
+wxCursor::wxCursor(
+  const wxImage&                    rImage
+)
 {
-    wxImage  vImage32 = rImage.Scale(32,32);
-    int      nWidth   = vImage32.GetWidth();
-    int      nHeight  = vImage32.GetHeight();
+    wxImage                         vImage32 = rImage.Scale(32,32);
+    int                             nWidth   = vImage32.GetWidth();
+    int                             nHeight  = vImage32.GetHeight();
 
     //
     // Need a bitmap handle somehow
     //
-    HBITMAP  hBitmap = wxBitmap(vImage32).GetHBITMAP();
-    int      nHotSpotX = vImage32.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X);
-    int      nHotSpotY = vImage32.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_Y);
+    HBITMAP                      hBitmap = wxBitmap(vImage32).GetHBITMAP();
+    int                          nHotSpotX = vImage32.GetOptionInt(wxCUR_HOTSPOT_X);
+    int                          nHotSpotY = vImage32.GetOptionInt(wxCUR_HOTSPOT_Y);
 
     if (nHotSpotX < 0 || nHotSpotX >= nWidth)
-        nHotSpotX = 0;
+            nHotSpotX = 0;
     if (nHotSpotY < 0 || nHotSpotY >= nHeight)
-        nHotSpotY = 0;
+            nHotSpotY = 0;
 
 
-    wxCursorRefData* pRefData = new wxCursorRefData;
+    wxCursorRefData*                pRefData = new wxCursorRefData;
 
     m_refData = pRefData;
     pRefData->m_hCursor = (WXHCURSOR) ::WinCreatePointer( HWND_DESKTOP
@@ -92,16 +97,18 @@ wxCursor::wxCursor(const wxImage& rImage)
 
 } // end of wxCursor::wxCursor
 
-wxCursor::wxCursor( const wxString& WXUNUSED(rsCursorFile),
-                    long lFlags,
-                    int WXUNUSED(nHotSpotX),
-                    int WXUNUSED(nHotSpotY) )
+wxCursor::wxCursor(
+  const wxString&                   rsCursorFile
+, long                              lFlags
+, int                               nHotSpotX
+, int                               nHotSpotY
+)
 {
-    wxCursorRefData* pRefData = new wxCursorRefData;
+    wxCursorRefData*                pRefData = new wxCursorRefData;
 
     pRefData = new wxCursorRefData;
     m_refData = pRefData;
-    pRefData->m_bDestroyCursor = false;
+    pRefData->m_bDestroyCursor = FALSE;
     if (lFlags == wxBITMAP_TYPE_CUR_RESOURCE)
     {
         pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
@@ -112,7 +119,9 @@ wxCursor::wxCursor( const wxString& WXUNUSED(rsCursorFile),
 } // end of wxCursor::wxCursor
 
 // Cursors by stock number
-wxCursor::wxCursor(int nCursorType)
+wxCursor::wxCursor(
+  int                               nCursorType
+)
 {
     wxCursorRefData*                pRefData = new wxCursorRefData;
 
@@ -126,7 +135,6 @@ wxCursor::wxCursor(int nCursorType)
                                                                   );
             break;
 
-        case wxCURSOR_WATCH:
         case wxCURSOR_WAIT:
             pRefData->m_hCursor = (WXHCURSOR) ::WinQuerySysPointer( HWND_DESKTOP
                                                                    ,(ULONG)SPTR_WAIT
@@ -212,10 +220,10 @@ wxCursor::wxCursor(int nCursorType)
             break;
 
         case wxCURSOR_NO_ENTRY:
-            pRefData->m_hCursor = (WXHCURSOR) ::WinQuerySysPointer( HWND_DESKTOP
-                                                                   ,(ULONG)SPTR_ILLEGAL
-                                                                   ,FALSE
-                                                                  );
+            pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
+                                                               ,0
+                                                               ,(ULONG)wxCURSOR_NO_ENTRY
+                                                              );
             break;
 
         case wxCURSOR_LEFT_BUTTON:
@@ -244,6 +252,13 @@ wxCursor::wxCursor(int nCursorType)
                                                                    ,(ULONG)SPTR_SIZE
                                                                    ,FALSE
                                                                   );
+            break;
+
+        case wxCURSOR_WATCH:
+            pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
+                                                               ,0
+                                                               ,(ULONG)wxCURSOR_WATCH
+                                                              );
             break;
 
         case wxCURSOR_SPRAYCAN:
@@ -296,10 +311,7 @@ wxCursor::wxCursor(int nCursorType)
                                                                   );
             break;
     }
-    //
-    // No need to destroy the stock cursors
-    //
-    ((wxCursorRefData *)m_refData)->m_bDestroyCursor = false;
+    ((wxCursorRefData *)m_refData)->m_bDestroyCursor = FALSE;
 } // end of wxCursor::wxCursor
 
 // Global cursor setting
@@ -315,3 +327,4 @@ void wxSetCursor(const wxCursor& cursor)
             (*g_globalCursor) = cursor;
     }
 }
+

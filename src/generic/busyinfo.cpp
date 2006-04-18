@@ -1,10 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/busyinfo.cpp
+// Name:        busyinfo.cpp
 // Purpose:     Information window when app is busy
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// RCS-ID:      $Id$
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -15,38 +14,24 @@
 
 #if wxUSE_BUSYINFO
 
-// for all others, include the necessary headers
-#ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/stattext.h"
-    #include "wx/panel.h"
-    #include "wx/utils.h"
-#endif
-
+#include "wx/stattext.h"
+#include "wx/panel.h"
+#include "wx/utils.h"
 #include "wx/busyinfo.h"
-
-class WXDLLEXPORT wxInfoFrame : public wxFrame
-{
-public:
-    wxInfoFrame(wxWindow *parent, const wxString& message);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxInfoFrame)
-};
 
 
 wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
-           : wxFrame(parent, wxID_ANY, wxT("Busy"),
+           : wxFrame(parent, -1, wxT("Busy"),
                      wxDefaultPosition, wxDefaultSize,
 #if defined(__WXX11__)
-                     wxRESIZE_BORDER
+                     wxTHICK_FRAME
 #else
                      wxSIMPLE_BORDER
 #endif
                      | wxFRAME_TOOL_WINDOW)
 {
     wxPanel *panel = new wxPanel( this );
-    wxStaticText *text = new wxStaticText(panel, wxID_ANY, message);
+    wxStaticText *text = new wxStaticText(panel, -1, message);
 
     panel->SetCursor(*wxHOURGLASS_CURSOR);
     text->SetCursor(*wxHOURGLASS_CURSOR);
@@ -63,7 +48,7 @@ wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
     int                             nParentWidth = parent->GetClientSize().x;
     int                             nColor;
 
-    SetBackgroundColour(wxT("WHITE"));
+    SetBackgroundColour("WHITE");
     nColor = (LONG)GetBackgroundColour().GetPixel();
 
     ::WinSetPresParam( GetHwnd()
@@ -71,7 +56,7 @@ wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
                       ,sizeof(LONG)
                       ,(PVOID)&nColor
                      );
-    panel->SetBackgroundColour(wxT("WHITE"));
+    panel->SetBackgroundColour("WHITE");
     nColor = (LONG)panel->GetBackgroundColour().GetPixel();
 
     ::WinSetPresParam( GetHwndOf(panel)
@@ -92,7 +77,7 @@ wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
                       ,nHeight
                       ,SWP_SIZE | SWP_MOVE | SWP_ACTIVATE
                      );
-    text->SetBackgroundColour(wxT("WHITE"));
+    text->SetBackgroundColour("WHITE");
     nColor = (LONG)text->GetBackgroundColour().GetPixel();
 
     ::WinSetPresParam( GetHwndOf(text)
@@ -115,15 +100,23 @@ wxInfoFrame::wxInfoFrame(wxWindow *parent, const wxString& message)
 wxBusyInfo::wxBusyInfo(const wxString& message, wxWindow *parent)
 {
     m_InfoFrame = new wxInfoFrame( parent, message);
-    m_InfoFrame->Show(true);
-    m_InfoFrame->Refresh();
+    m_InfoFrame->Show(TRUE);
+#ifdef __WXMAC__
     m_InfoFrame->Update();
+#else
+    wxYield();
+    m_InfoFrame->Refresh();
+    wxYield();
+#endif
 }
 
 wxBusyInfo::~wxBusyInfo()
 {
-    m_InfoFrame->Show(false);
+    m_InfoFrame->Show(FALSE);
     m_InfoFrame->Close();
+    wxYield();
 }
 
-#endif // wxUSE_BUSYINFO
+#endif
+  // wxUSE_BUSYINFO
+

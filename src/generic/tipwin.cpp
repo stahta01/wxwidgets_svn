@@ -6,7 +6,7 @@
 // Created:     10.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -27,9 +27,7 @@
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
 #endif // WX_PRECOMP
-#ifdef __WXGTK__
-    #include <gtk/gtk.h>
-#endif
+
 #include "wx/tipwin.h"
 
 #if wxUSE_TIPWINDOW
@@ -74,7 +72,6 @@ private:
 #endif // !wxUSE_POPUPWIN
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTipWindowView)
 };
 
 // ============================================================================
@@ -122,7 +119,7 @@ wxTipWindow::wxTipWindow(wxWindow *parent,
 #if wxUSE_POPUPWIN
            : wxPopupTransientWindow(parent)
 #else
-           : wxFrame(parent, wxID_ANY, wxEmptyString,
+           : wxFrame(parent, -1, _T(""),
                      wxDefaultPosition, wxDefaultSize,
                      wxNO_BORDER | wxFRAME_NO_TASKBAR )
 #endif
@@ -153,15 +150,11 @@ wxTipWindow::wxTipWindow(wxWindow *parent,
     y += wxSystemSettings::GetMetric(wxSYS_CURSOR_Y) / 2;
 
 #if wxUSE_POPUPWIN
-    Position(wxPoint(x, y), wxSize(0,0));
+    Position(wxPoint(x, y), wxSize(0, 0));
     Popup(m_view);
-    #ifdef __WXGTK__
-        if (!GTK_WIDGET_HAS_GRAB(m_widget))
-            gtk_grab_add( m_widget );
-    #endif
 #else
     Move(x, y);
-    Show(true);
+    Show(TRUE);
 #endif
 }
 
@@ -171,12 +164,6 @@ wxTipWindow::~wxTipWindow()
     {
         *m_windowPtr = NULL;
     }
-    #ifdef wxUSE_POPUPWIN
-        #ifdef __WXGTK__
-            if (GTK_WIDGET_HAS_GRAB(m_widget))
-                gtk_grab_remove( m_widget );
-        #endif
-    #endif
 }
 
 void wxTipWindow::OnMouseClick(wxMouseEvent& WXUNUSED(event))
@@ -225,11 +212,7 @@ void wxTipWindow::Close()
     }
 
 #if wxUSE_POPUPWIN
-    Show(false);
-    #ifdef __WXGTK__
-        if (GTK_WIDGET_HAS_GRAB(m_widget))
-            gtk_grab_remove( m_widget );
-    #endif
+    Show(FALSE);
     Destroy();
 #else
     wxFrame::Close();
@@ -241,7 +224,7 @@ void wxTipWindow::Close()
 // ----------------------------------------------------------------------------
 
 wxTipWindowView::wxTipWindowView(wxWindow *parent)
-               : wxWindow(parent, wxID_ANY,
+               : wxWindow(parent, -1,
                           wxDefaultPosition, wxDefaultSize,
                           wxNO_BORDER)
 {
@@ -268,7 +251,7 @@ void wxTipWindowView::Adjust(const wxString& text, wxCoord maxLength)
             widthMax = 0;
     m_parent->m_heightLine = 0;
 
-    bool breakLine = false;
+    bool breakLine = FALSE;
     for ( const wxChar *p = text.c_str(); ; p++ )
     {
         if ( *p == _T('\n') || *p == _T('\0') )
@@ -289,21 +272,21 @@ void wxTipWindowView::Adjust(const wxString& text, wxCoord maxLength)
             }
 
             current.clear();
-            breakLine = false;
+            breakLine = FALSE;
         }
         else if ( breakLine && (*p == _T(' ') || *p == _T('\t')) )
         {
             // word boundary - break the line here
             m_parent->m_textLines.Add(current);
             current.clear();
-            breakLine = false;
+            breakLine = FALSE;
         }
         else // line goes on
         {
             current += *p;
             dc.GetTextExtent(current, &width, &height);
             if ( width > maxLength )
-                breakLine = true;
+                breakLine = TRUE;
 
             if ( width > widthMax )
                 widthMax = width;
@@ -315,7 +298,7 @@ void wxTipWindowView::Adjust(const wxString& text, wxCoord maxLength)
 
     // take into account the border size and the margins
     width  = 2*(TEXT_MARGIN_X + 1) + widthMax;
-    height = 2*(TEXT_MARGIN_Y + 1) + wx_truncate_cast(wxCoord, m_parent->m_textLines.GetCount())*m_parent->m_heightLine;
+    height = 2*(TEXT_MARGIN_Y + 1) + m_parent->m_textLines.GetCount()*m_parent->m_heightLine;
     m_parent->SetClientSize(width, height);
     SetSize(0, 0, width, height);
 }

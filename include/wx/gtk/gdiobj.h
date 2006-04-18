@@ -7,12 +7,13 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GDIOBJH__
 #define __GDIOBJH__
 
 #include "wx/object.h"
 
-class WXDLLIMPEXP_CORE wxGDIObject : public wxObject
+class wxGDIObject : public wxObject
 {
 public:
     inline wxGDIObject() { m_visible = FALSE; };

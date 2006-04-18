@@ -13,7 +13,6 @@
 #include "wx/string.h"
 #include "wx/stream.h"
 #include "wx/datstrm.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndcodec.h"
 #include "wx/mmedia/sndfile.h"
@@ -22,7 +21,7 @@
 // WAVE codec
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundWave: public wxSoundFileStream {
+class wxSoundWave: public wxSoundFileStream {
 public:
     wxSoundWave(wxInputStream& stream, wxSoundStream& io_sound);
     wxSoundWave(wxOutputStream& stream, wxSoundStream& io_sound);

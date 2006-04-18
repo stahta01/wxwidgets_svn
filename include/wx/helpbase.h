@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_HELPBASEH__
@@ -24,31 +24,24 @@
 // Flags for SetViewer
 #define wxHELP_NETSCAPE     1
 
-// Search modes:
-enum wxHelpSearchMode
-{
-    wxHELP_SEARCH_INDEX,
-    wxHELP_SEARCH_ALL
-};
-
 // Defines the API for help controllers
 class WXDLLEXPORT wxHelpControllerBase: public wxObject
 {
 public:
-    inline wxHelpControllerBase(wxWindow* parentWindow = NULL) { m_parentWindow = parentWindow; }
+    inline wxHelpControllerBase() {}
     inline ~wxHelpControllerBase() {}
 
     // Must call this to set the filename and server name.
     // server is only required when implementing TCP/IP-based
     // help controllers.
-    virtual bool Initialize(const wxString& WXUNUSED(file), int WXUNUSED(server) ) { return false; }
-    virtual bool Initialize(const wxString& WXUNUSED(file)) { return false; }
+    virtual bool Initialize(const wxString& WXUNUSED(file), int WXUNUSED(server) ) { return FALSE; }
+    virtual bool Initialize(const wxString& WXUNUSED(file)) { return FALSE; }
 
     // Set viewer: only relevant to some kinds of controller
     virtual void SetViewer(const wxString& WXUNUSED(viewer), long WXUNUSED(flags) = 0) {}
 
     // If file is "", reloads file given  in Initialize
-    virtual bool LoadFile(const wxString& file = wxEmptyString) = 0;
+    virtual bool LoadFile(const wxString& file = wxT("")) = 0;
 
     // Displays the contents
     virtual bool DisplayContents(void) = 0;
@@ -57,22 +50,21 @@ public:
     virtual bool DisplaySection(int sectionNo) = 0;
 
     // Display the section using a context id
-    virtual bool DisplayContextPopup(int WXUNUSED(contextId)) { return false; };
+    virtual bool DisplayContextPopup(int WXUNUSED(contextId)) { return FALSE; };
 
     // Display the text in a popup, if possible
-    virtual bool DisplayTextPopup(const wxString& WXUNUSED(text), const wxPoint& WXUNUSED(pos)) { return false; }
+    virtual bool DisplayTextPopup(const wxString& WXUNUSED(text), const wxPoint& WXUNUSED(pos)) { return FALSE; }
 
     // By default, uses KeywordSection to display a topic. Implementations
     // may override this for more specific behaviour.
     virtual bool DisplaySection(const wxString& section) { return KeywordSearch(section); }
     virtual bool DisplayBlock(long blockNo) = 0;
-    virtual bool KeywordSearch(const wxString& k,
-                               wxHelpSearchMode mode = wxHELP_SEARCH_ALL) = 0;
+    virtual bool KeywordSearch(const wxString& k) = 0;
     /// Allows one to override the default settings for the help frame.
     virtual void SetFrameParameters(const wxString& WXUNUSED(title),
         const wxSize& WXUNUSED(size),
         const wxPoint& WXUNUSED(pos) = wxDefaultPosition,
-        bool WXUNUSED(newFrameEachTime) = false)
+        bool WXUNUSED(newFrameEachTime) = FALSE)
     {
         // does nothing by default
     }
@@ -87,15 +79,7 @@ public:
 
     virtual bool Quit() = 0;
     virtual void OnQuit() {}
-
-    /// Set the window that can optionally be used for the help window's parent.
-    virtual void SetParentWindow(wxWindow* win) { m_parentWindow = win; }
-
-    /// Get the window that can optionally be used for the help window's parent.
-    virtual wxWindow* GetParentWindow() const { return m_parentWindow; }
-
-protected:
-    wxWindow* m_parentWindow;
+    
 private:
     DECLARE_CLASS(wxHelpControllerBase)
 };

@@ -15,9 +15,9 @@
 // headers
 //----------------------------------------------------------------------------
 
-//! wxWidgets headers
-#include "wx/print.h"    // printing support
-#include "wx/printdlg.h" // printing dialog
+//! wxWindows headers
+#include <wx/print.h>    // printing support
+#include <wx/printdlg.h> // printing dialog
 
 
 //============================================================================
@@ -96,12 +96,9 @@ enum {
 //! global application name
 extern wxString *g_appname;
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
 //! global print data, to remember settings during the session
 extern wxPrintData *g_printData;
 extern wxPageSetupData *g_pageSetupData;
 
-#endif // wxUSE_PRINTING_ARCHITECTURE
-
 #endif // _WX_DEFSEXT_H_
+

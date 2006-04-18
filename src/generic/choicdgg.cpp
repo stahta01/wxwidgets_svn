@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/choicdgg.cpp
+// Name:        choicdgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by: 03.11.00: VZ to add wxArrayString and multiple sel functions
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,14 +32,15 @@
     #include "wx/dialog.h"
     #include "wx/button.h"
     #include "wx/listbox.h"
-    #include "wx/checklst.h"
     #include "wx/stattext.h"
     #include "wx/intl.h"
     #include "wx/sizer.h"
-    #include "wx/arrstr.h"
 #endif
 
-#include "wx/statline.h"
+#if wxUSE_STATLINE
+    #include "wx/statline.h"
+#endif
+
 #include "wx/generic/choicdgg.h"
 
 // ----------------------------------------------------------------------------
@@ -47,20 +48,6 @@
 // ----------------------------------------------------------------------------
 
 #define wxID_LISTBOX 3000
-
-// ---------------------------------------------------------------------------
-// macros
-// ---------------------------------------------------------------------------
-
-/* Macro for avoiding #ifdefs when value have to be different depending on size of
-   device we display on - take it from something like wxDesktopPolicy in the future
- */
-
-#if defined(__SMARTPHONE__)
-    #define wxLARGESMALL(large,small) small
-#else
-    #define wxLARGESMALL(large,small) large
-#endif
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -127,6 +114,28 @@ wxString wxGetSingleChoice( const wxString& message,
     return res;
 }
 
+#if WXWIN_COMPATIBILITY_2
+// Overloaded for backward compatibility
+wxString wxGetSingleChoice( const wxString& message,
+                            const wxString& caption,
+                            int n, wxChar *choices[],
+                            wxWindow *parent,
+                            int x, int y, bool centre,
+                            int width, int height )
+{
+    wxString *strings = new wxString[n];
+    int i;
+    for ( i = 0; i < n; i++)
+    {
+        strings[i] = choices[i];
+    }
+    wxString ans(wxGetSingleChoice(message, caption, n, (const wxString *)strings, parent,
+        x, y, centre, width, height));
+    delete[] strings;
+    return ans;
+}
+#endif // WXWIN_COMPATIBILITY_2
+
 int wxGetSingleChoiceIndex( const wxString& message,
                             const wxString& caption,
                             int n, const wxString *choices,
@@ -161,6 +170,25 @@ int wxGetSingleChoiceIndex( const wxString& message,
 
     return res;
 }
+
+#if WXWIN_COMPATIBILITY_2
+// Overloaded for backward compatibility
+int wxGetSingleChoiceIndex( const wxString& message,
+                            const wxString& caption,
+                            int n, wxChar *choices[],
+                            wxWindow *parent,
+                            int x, int y, bool centre,
+                            int width, int height )
+{
+    wxString *strings = new wxString[n];
+    for ( int i = 0; i < n; i++)
+        strings[i] = choices[i];
+    int ans = wxGetSingleChoiceIndex(message, caption, n, (const wxString *)strings, parent,
+        x, y, centre, width, height);
+    delete[] strings;
+    return ans;
+}
+#endif // WXWIN_COMPATIBILITY_2
 
 void *wxGetSingleChoiceData( const wxString& message,
                              const wxString& caption,
@@ -201,6 +229,30 @@ void *wxGetSingleChoiceData( const wxString& message,
     return res;
 }
 
+#if WXWIN_COMPATIBILITY_2
+// Overloaded for backward compatibility
+void *wxGetSingleChoiceData( const wxString& message,
+                             const wxString& caption,
+                             int n, wxChar *choices[],
+                             void **client_data,
+                             wxWindow *parent,
+                             int x, int y, bool centre, int width, int height )
+{
+    wxString *strings = new wxString[n];
+    int i;
+    for ( i = 0; i < n; i++)
+    {
+        strings[i] = choices[i];
+    }
+    void *data = wxGetSingleChoiceData(message, caption,
+                                       n, (const wxString *)strings,
+                                       client_data, parent,
+                                       x, y, centre, width, height);
+    delete[] strings;
+    return data;
+}
+#endif // WXWIN_COMPATIBILITY_2
+
 size_t wxGetMultipleChoices(wxArrayInt& selections,
                             const wxString& message,
                             const wxString& caption,
@@ -212,9 +264,8 @@ size_t wxGetMultipleChoices(wxArrayInt& selections,
 {
     wxMultiChoiceDialog dialog(parent, message, caption, n, choices);
 
-    // call this even if selections array is empty and this then (correctly)
-    // deselects the first item which is selected by default
-    dialog.SetSelections(selections);
+    if ( !selections.IsEmpty() )
+        dialog.SetSelections(selections);
 
     if ( dialog.ShowModal() == wxID_OK )
         selections = dialog.GetSelections();
@@ -255,82 +306,43 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
                                const wxPoint& pos,
                                long styleLbox)
 {
-#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
-    styleDlg &= ~wxBORDER_MASK;
-    styleDlg &= ~wxRESIZE_BORDER;
-    styleDlg &= ~wxCAPTION;
-#endif
-#ifdef __WXMAC__
-    if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg & (~wxCANCEL) ) )
-        return false;
-#else
-    if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg) )
-        return false;
-#endif
+    if ( !wxDialog::Create(parent, -1, caption, pos, wxDefaultSize, styleDlg) )
+        return FALSE;
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
     // 1) text message
-#ifdef __WXMAC__
-    // align text and list at least on mac
-    topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(15,0) );
-#else
-    topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(10,0) );
-#endif
-    // 2) list box
-    m_listbox = CreateList(n,choices,styleLbox);
+    topsizer->Add( CreateTextSizer( message ), 0, wxALL, 10 );
 
+    // 2) list box
+    m_listbox = new wxListBox( this, wxID_LISTBOX,
+                               wxDefaultPosition, wxDefaultSize,
+                               n, choices,
+                               styleLbox );
     if ( n > 0 )
         m_listbox->SetSelection(0);
 
-    topsizer->Add( m_listbox, 1, wxEXPAND|wxLEFT|wxRIGHT, wxLARGESMALL(15,0) );
+    topsizer->Add( m_listbox, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
 
-    // 3) buttons if any
-    wxSizer *buttonSizer = CreateButtonSizer( styleDlg & ButtonSizerFlags , true, wxLARGESMALL(10,0) );
-    if(buttonSizer->GetChildren().GetCount() > 0 )
-    {
-        topsizer->Add( buttonSizer, 0, wxEXPAND | wxALL, wxLARGESMALL(10,0) );
-    }
-    else
-    {
-        topsizer->AddSpacer( wxLARGESMALL(15,0) );
-        delete buttonSizer;
-    }
+#if wxUSE_STATLINE
+    // 3) static line
+    topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif
 
+    // 4) buttons
+    topsizer->Add( CreateButtonSizer( styleDlg & (wxOK|wxCANCEL) ), 0, wxCENTRE | wxALL, 10 );
+
+    SetAutoLayout( TRUE );
     SetSizer( topsizer );
 
-#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
-    if ( styleDlg & wxCENTRE )
-        Centre(wxBOTH);
-#endif
+    Centre( wxBOTH );
 
     m_listbox->SetFocus();
 
-    return true;
-}
-
-bool wxAnyChoiceDialog::Create(wxWindow *parent,
-                               const wxString& message,
-                               const wxString& caption,
-                               const wxArrayString& choices,
-                               long styleDlg,
-                               const wxPoint& pos,
-                               long styleLbox)
-{
-    wxCArrayString chs(choices);
-    return Create(parent, message, caption, chs.GetCount(), chs.GetStrings(),
-                  styleDlg, pos, styleLbox);
-}
-
-wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-    return new wxListBox( this, wxID_LISTBOX,
-                          wxDefaultPosition, wxDefaultSize,
-                          n, choices,
-                          styleLbox );
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -339,12 +351,7 @@ wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, lon
 
 BEGIN_EVENT_TABLE(wxSingleChoiceDialog, wxDialog)
     EVT_BUTTON(wxID_OK, wxSingleChoiceDialog::OnOK)
-#ifndef __SMARTPHONE__
     EVT_LISTBOX_DCLICK(wxID_LISTBOX, wxSingleChoiceDialog::OnListBoxDClick)
-#endif
-#ifdef __WXWINCE__
-    EVT_JOY_BUTTON_DOWN(wxSingleChoiceDialog::OnJoystickButtonDown)
-#endif
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxSingleChoiceDialog, wxDialog)
@@ -361,16 +368,39 @@ wxSingleChoiceDialog::wxSingleChoiceDialog(wxWindow *parent,
     Create(parent, message, caption, n, choices, clientData, style);
 }
 
+#if WXWIN_COMPATIBILITY_2
+
 wxSingleChoiceDialog::wxSingleChoiceDialog(wxWindow *parent,
                                            const wxString& message,
                                            const wxString& caption,
-                                           const wxArrayString& choices,
+                                           const wxStringList& choices,
                                            char **clientData,
                                            long style,
                                            const wxPoint& WXUNUSED(pos))
 {
     Create(parent, message, caption, choices, clientData, style);
 }
+
+bool wxSingleChoiceDialog::Create(wxWindow *parent,
+                                  const wxString& message,
+                                  const wxString& caption,
+                                  const wxStringList& choices,
+                                  char **clientData,
+                                  long style,
+                                  const wxPoint& pos)
+{
+    wxString *strings = new wxString[choices.Number()];
+    int i;
+    for ( i = 0; i < choices.Number(); i++)
+    {
+        strings[i] = (wxChar *)choices.Nth(i)->Data();
+    }
+    bool ans = Create(parent, message, caption, choices.Number(), strings, clientData, style, pos);
+    delete[] strings;
+    return ans;
+}
+
+#endif // WXWIN_COMPATIBILITY_2
 
 bool wxSingleChoiceDialog::Create( wxWindow *parent,
                                    const wxString& message,
@@ -384,7 +414,7 @@ bool wxSingleChoiceDialog::Create( wxWindow *parent,
     if ( !wxAnyChoiceDialog::Create(parent, message, caption,
                                     n, choices,
                                     style, pos) )
-        return false;
+        return FALSE;
 
     m_selection = n > 0 ? 0 : -1;
 
@@ -394,20 +424,7 @@ bool wxSingleChoiceDialog::Create( wxWindow *parent,
             m_listbox->SetClientData(i, clientData[i]);
     }
 
-    return true;
-}
-
-bool wxSingleChoiceDialog::Create( wxWindow *parent,
-                                   const wxString& message,
-                                   const wxString& caption,
-                                   const wxArrayString& choices,
-                                   char **clientData,
-                                   long style,
-                                   const wxPoint& pos )
-{
-    wxCArrayString chs(choices);
-    return Create( parent, message, caption, chs.GetCount(), chs.GetStrings(),
-                   clientData, style, pos );
+    return TRUE;
 }
 
 // Set the selection
@@ -419,24 +436,14 @@ void wxSingleChoiceDialog::SetSelection(int sel)
 
 void wxSingleChoiceDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
-    DoChoice();
+    m_selection = m_listbox->GetSelection();
+    m_stringSelection = m_listbox->GetStringSelection();
+    if ( m_listbox->HasClientUntypedData() )
+        SetClientData(m_listbox->GetClientData(m_selection));
+    EndModal(wxID_OK);
 }
 
-#ifndef __SMARTPHONE__
 void wxSingleChoiceDialog::OnListBoxDClick(wxCommandEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-#ifdef __WXWINCE__
-void wxSingleChoiceDialog::OnJoystickButtonDown(wxJoystickEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-void wxSingleChoiceDialog::DoChoice()
 {
     m_selection = m_listbox->GetSelection();
     m_stringSelection = m_listbox->GetStringSelection();
@@ -465,36 +472,15 @@ bool wxMultiChoiceDialog::Create( wxWindow *parent,
                                     n, choices,
                                     style, pos,
                                     wxLB_ALWAYS_SB | wxLB_EXTENDED) )
-        return false;
+        return FALSE;
 
-    return true;
-}
-
-bool wxMultiChoiceDialog::Create( wxWindow *parent,
-                                  const wxString& message,
-                                  const wxString& caption,
-                                  const wxArrayString& choices,
-                                  long style,
-                                  const wxPoint& pos )
-{
-    wxCArrayString chs(choices);
-    return Create( parent, message, caption, chs.GetCount(),
-                   chs.GetStrings(), style, pos );
+    return TRUE;
 }
 
 void wxMultiChoiceDialog::SetSelections(const wxArrayInt& selections)
 {
-    // first clear all currently selected items
-    size_t n,
-           count = m_listbox->GetCount();
-    for ( n = 0; n < count; ++n )
-    {
-        m_listbox->Deselect(n);
-    }
-
-    // now select the ones which should be selected
-    count = selections.GetCount();
-    for ( n = 0; n < count; n++ )
+    size_t count = selections.GetCount();
+    for ( size_t n = 0; n < count; n++ )
     {
         m_listbox->Select(selections[n]);
     }
@@ -510,19 +496,7 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
             m_selections.Add(n);
     }
 
-    return true;
+    return TRUE;
 }
-
-#if wxUSE_CHECKLISTBOX
-
-wxListBoxBase *wxMultiChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-    return new wxCheckListBox( this, wxID_LISTBOX,
-                               wxDefaultPosition, wxDefaultSize,
-                               n, choices,
-                               styleLbox );
-}
-
-#endif // wxUSE_CHECKLISTBOX
 
 #endif // wxUSE_CHOICEDLG

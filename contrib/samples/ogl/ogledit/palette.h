@@ -1,21 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/palette.h
+// Name:        palette.h
 // Purpose:     OGL sample palette
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGLSAMPLE_PALETTE_H_
 #define _OGLSAMPLE_PALETTE_H_
 
-#include "wx/wx.h"
-#include "wx/string.h"
-#include "wx/deprecated/setup.h"
-#include "wx/deprecated/tbarsmpl.h"
+#include <wx/wx.h>
+#include <wx/string.h>
+#if 0 // def __WXGTK__
+#include <wx/toolbar.h>
+#else
+#include <wx/tbarsmpl.h>
+#endif
 
 /*
  * Object editor tool palette
@@ -25,14 +28,11 @@
 // TODO for wxWin: wxToolBar95 cannot be moved to a non-0,0 position!
 // Needs to have a parent window...
 // So use a simple toolbar at present.
-// ABX: Simple toolbar is not available in default compilation
-//      so I use wxToolBar anyway
-// #if 0 // def __WXGTK__
-// #define TOOLPALETTECLASS    wxToolBar
-// #else
-// #define TOOLPALETTECLASS    wxToolBarSimple
-// #endif
+#if 0 // def __WXGTK__
 #define TOOLPALETTECLASS    wxToolBar
+#else
+#define TOOLPALETTECLASS    wxToolBarSimple
+#endif
 
 class EditorToolPalette: public TOOLPALETTECLASS
 {

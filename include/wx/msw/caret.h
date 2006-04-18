@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     23.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ protected:
     {
         wxCaretBase::Init();
 
-        m_hasCaret = false;
+        m_hasCaret = FALSE;
     }
 
     // override base class virtuals
@@ -55,8 +55,6 @@ protected:
 
 private:
     bool m_hasCaret;
-
-    DECLARE_NO_COPY_CLASS(wxCaret)
 };
 
 #endif // _WX_CARET_H_

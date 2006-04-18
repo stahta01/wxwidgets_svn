@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,7 @@ class MyChild: public wxMDIChildFrame
 {
 public:
     MyCanvas *canvas;
-    MyChild(wxMDIParentFrame *parent, const wxString& title);
+    MyChild(wxMDIParentFrame *parent, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
     ~MyChild();
 
     void OnActivate(wxActivateEvent& event);
@@ -79,12 +79,12 @@ public:
 // menu items ids
 enum
 {
-    MDI_QUIT = wxID_EXIT,
-    MDI_NEW_WINDOW = 101,
+    MDI_QUIT = 100,
+    MDI_NEW_WINDOW,
     MDI_REFRESH,
     MDI_CHANGE_TITLE,
     MDI_CHANGE_POSITION,
     MDI_CHANGE_SIZE,
     MDI_CHILD_QUIT,
-    MDI_ABOUT = wxID_ABOUT
+    MDI_ABOUT
 };

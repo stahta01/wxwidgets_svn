@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/dc.h
+// Name:        dc.h
 // Purpose:     wxDC class
 // Author:      Julian Smart
 // Modified by:
@@ -9,10 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MSW_DC_H_
-#define _WX_MSW_DC_H_
+#ifndef _WX_DC_H_
+#define _WX_DC_H_
 
 #include "wx/defs.h"
+#include "wx/dc.h"
 
 // ---------------------------------------------------------------------------
 // macros
@@ -40,12 +41,10 @@ public:
 };
 #endif
 
-// this is an ABC: use one of the derived classes to create a DC associated
-// with a window, screen, printer and so on
 class WXDLLEXPORT wxDC : public wxDCBase
 {
 public:
-    wxDC(WXHDC hDC) { Init(); m_hDC = hDC; }
+    wxDC();
     ~wxDC();
 
     // implement base class pure virtuals
@@ -72,6 +71,11 @@ public:
 
     virtual wxCoord GetCharHeight() const;
     virtual wxCoord GetCharWidth() const;
+    virtual void DoGetTextExtent(const wxString& string,
+                                 wxCoord *x, wxCoord *y,
+                                 wxCoord *descent = NULL,
+                                 wxCoord *externalLeading = NULL,
+                                 wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;
@@ -105,17 +109,10 @@ public:
     }
 
     WXHDC GetHDC() const { return m_hDC; }
-    void SetHDC(WXHDC dc, bool bOwnsDC = false)
+    void SetHDC(WXHDC dc, bool bOwnsDC = FALSE)
     {
         m_hDC = dc;
         m_bOwnsDC = bOwnsDC;
-
-        // we might have a pre existing clipping region, make sure that we
-        // return it if asked -- but avoid calling ::GetClipBox() right now as
-        // it could be unnecessary wasteful
-        m_clipping = true;
-        m_clipX1 =
-        m_clipX2 = 0;
     }
 
     const wxBitmap& GetSelectedBitmap() const { return m_selectedBitmap; }
@@ -134,40 +131,8 @@ public:
 #endif
 
 protected:
-    void Init()
-    {
-        m_canvas = NULL;
-        m_bOwnsDC = false;
-        m_hDC = NULL;
-
-        m_oldBitmap = NULL;
-        m_oldPen = NULL;
-        m_oldBrush = NULL;
-        m_oldFont = NULL;
-
-#if wxUSE_PALETTE
-        m_oldPalette = NULL;
-#endif // wxUSE_PALETTE
-    }
-
-    // create an uninitialized DC: this should be only used by the derived
-    // classes
-    wxDC() { Init(); }
-
-    virtual void DoGetTextExtent(const wxString& string,
-                                 wxCoord *x, wxCoord *y,
-                                 wxCoord *descent = NULL,
-                                 wxCoord *externalLeading = NULL,
-                                 wxFont *theFont = NULL) const;
-    virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
-
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE);
-
-    virtual void DoGradientFillLinear(const wxRect& rect,
-                                      const wxColour& initialColour,
-                                      const wxColour& destColour,
-                                      wxDirection nDirection = wxEAST);
 
     virtual bool DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const;
 
@@ -188,15 +153,11 @@ protected:
                                         double radius);
     virtual void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
 
-#if wxUSE_SPLINES
-    virtual void DoDrawSpline(wxList *points);
-#endif
-
     virtual void DoCrossHair(wxCoord x, wxCoord y);
 
     virtual void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y);
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                              bool useMask = false);
+                              bool useMask = FALSE);
 
     virtual void DoDrawText(const wxString& text, wxCoord x, wxCoord y);
     virtual void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
@@ -204,16 +165,20 @@ protected:
 
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
+                        int rop = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
 
     // this is gnarly - we can't even call this function DoSetClippingRegion()
     // because of virtual function hiding
     virtual void DoSetClippingRegionAsRegion(const wxRegion& region);
     virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
                                      wxCoord width, wxCoord height);
-    virtual void DoGetClippingBox(wxCoord *x, wxCoord *y,
-                                  wxCoord *w, wxCoord *h) const;
+    virtual void DoGetClippingRegion(wxCoord *x, wxCoord *y,
+                                     wxCoord *width, wxCoord *height)
+    {
+        GetClippingBox(x, y, width, height);
+    }
 
+    virtual void DoGetSize(int *width, int *height) const;
     virtual void DoGetSizeMM(int* width, int* height) const;
 
     virtual void DoDrawLines(int n, wxPoint points[],
@@ -221,9 +186,6 @@ protected:
     virtual void DoDrawPolygon(int n, wxPoint points[],
                                wxCoord xoffset, wxCoord yoffset,
                                int fillStyle = wxODDEVEN_RULE);
-    virtual void DoDrawPolyPolygon(int n, int count[], wxPoint points[],
-                                   wxCoord xoffset, wxCoord yoffset,
-                                   int fillStyle = wxODDEVEN_RULE);
 
 
 #if wxUSE_PALETTE
@@ -231,7 +193,7 @@ protected:
     // (tell windows to translate pixel from other palettes to our custom one
     // and vice versa)
     // Realize tells it to also reset the system palette to this one.
-    void DoSelectPalette(bool realize = false);
+    void DoSelectPalette(bool realize = FALSE);
 
     // Find out what palette our parent window has, then select it into the dc
     void InitializePalette();
@@ -242,17 +204,6 @@ protected:
 
     // common part of DoSetClippingRegion() and DoSetClippingRegionAsRegion()
     void SetClippingHrgn(WXHRGN hrgn);
-
-    // implementation of DoGetSize() for wxScreen/PrinterDC: this simply
-    // returns the size of the entire device this DC is associated with
-    //
-    // notice that we intentionally put it in a separate function instead of
-    // DoGetSize() itself because we want it to remain pure virtual both
-    // because each derived class should take care to define it as needed (this
-    // implementation is not at all always appropriate) and because we want
-    // wxDC to be an ABC to prevent it from being created directly
-    void GetDeviceSize(int *width, int *height) const;
-
 
     // MSW-specific member variables
     // -----------------------------
@@ -286,41 +237,19 @@ protected:
 #endif
 
     DECLARE_DYNAMIC_CLASS(wxDC)
-    DECLARE_NO_COPY_CLASS(wxDC)
 };
 
 // ----------------------------------------------------------------------------
-// wxDCTemp: a wxDC which doesn't free the given HDC (used by wxWidgets
+// wxDCTemp: a wxDC which doesn't free the given HDC (used by wxWindows
 // only/mainly)
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDCTemp : public wxDC
 {
 public:
-    wxDCTemp(WXHDC hdc) : wxDC(hdc)
-    {
-    }
-
-    virtual ~wxDCTemp()
-    {
-        // prevent base class dtor from freeing it
-        SetHDC((WXHDC)NULL);
-    }
-
-protected:
-    virtual void DoGetSize(int *w, int *h) const
-    {
-        wxFAIL_MSG( _T("no way to retrieve the size of generic DC") );
-
-        if ( w )
-            *w = 0;
-        if ( h )
-            *h = 0;
-    }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxDCTemp)
+    wxDCTemp(WXHDC hdc) { SetHDC(hdc); }
+    virtual ~wxDCTemp() { SetHDC((WXHDC)NULL); }
 };
 
-#endif // _WX_MSW_DC_H_
-
+#endif
+    // _WX_DC_H_

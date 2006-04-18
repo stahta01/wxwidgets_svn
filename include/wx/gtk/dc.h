@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/dc.h
+// Name:        dc.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef __GTKDCH__
 #define __GTKDCH__
@@ -14,13 +15,12 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDC;
+class wxDC;
 
 //-----------------------------------------------------------------------------
 // constants
 //-----------------------------------------------------------------------------
 
-#ifndef MM_TEXT
 #define MM_TEXT         0
 #define MM_ISOTROPIC    1
 #define MM_ANISOTROPIC  2
@@ -29,26 +29,26 @@ class WXDLLIMPEXP_CORE wxDC;
 #define MM_TWIPS        5
 #define MM_POINTS       6
 #define MM_METRIC       7
-#endif
 
 //-----------------------------------------------------------------------------
 // wxDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDC : public wxDCBase
+class wxDC : public wxDCBase
 {
 public:
     wxDC();
     ~wxDC() { }
 
-#if wxUSE_PALETTE
     void SetColourMap( const wxPalette& palette ) { SetPalette(palette); };
-#endif // wxUSE_PALETTE
+
+    // the first two must be overridden and called
+    virtual void DestroyClippingRegion();
 
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;
 
-    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return true; }
+    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return TRUE; }
     virtual void EndDoc() { }
     virtual void StartPage() { }
     virtual void EndPage() { }

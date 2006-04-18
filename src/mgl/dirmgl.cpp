@@ -7,7 +7,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 //              (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -105,7 +105,7 @@ wxDirData::~wxDirData()
 void wxDirData::SetFileSpec(const wxString& filespec)
 {
 #ifdef __DOS__
-    if ( filespec.empty() )
+    if ( filespec.IsEmpty() )
         m_filespec = _T("*.*");
     else
 #endif
@@ -124,10 +124,10 @@ void wxDirData::Rewind()
 bool wxDirData::Read(wxString *filename)
 {
     PM_findData data;
-    bool matches = false;
+    bool matches = FALSE;
 
     data.dwSize = sizeof(data);
-
+    
     wxString path = m_dirname;
     path += wxFILE_SEP_PATH;
     path.reserve(path.length() + 255); // speed up string concatenation
@@ -137,7 +137,7 @@ bool wxDirData::Read(wxString *filename)
         if ( m_dir )
         {
             if ( !PM_findNextFile(m_dir, &data) )
-                return false;
+                return FALSE;
         }
         else
         {
@@ -145,7 +145,7 @@ bool wxDirData::Read(wxString *filename)
             if ( m_dir == PM_FILE_INVALID )
             {
                 m_dir = NULL;
-                return false;
+                return FALSE;
             }
         }
 
@@ -173,12 +173,12 @@ bool wxDirData::Read(wxString *filename)
             continue;
         }
 
-        matches = m_flags & wxDIR_HIDDEN ? true : !(data.attrib & PM_FILE_HIDDEN);
+        matches = m_flags & wxDIR_HIDDEN ? TRUE : !(data.attrib & PM_FILE_HIDDEN);
     }
 
     *filename = data.name;
 
-    return true;
+    return TRUE;
 }
 
 
@@ -189,7 +189,7 @@ bool wxDirData::Read(wxString *filename)
 /* static */
 bool wxDir::Exists(const wxString& dir)
 {
-    return wxDirExists(dir);
+    return wxPathExists(dir);
 }
 
 // ----------------------------------------------------------------------------
@@ -207,15 +207,15 @@ bool wxDir::Open(const wxString& dirname)
 {
     delete M_DIR;
     m_data = NULL;
-
+    
     if ( !wxDir::Exists(dirname) )
     {
         wxLogError(_("Directory '%s' doesn't exist!"), dirname.c_str());
-        return false;
+        return FALSE;
     }
-
+    
     m_data = new wxDirData(dirname);
-    return true;
+    return TRUE;
 }
 
 bool wxDir::IsOpened() const
@@ -252,7 +252,7 @@ bool wxDir::GetFirst(wxString *filename,
                      const wxString& filespec,
                      int flags) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
 
     M_DIR->Rewind();
 
@@ -264,9 +264,9 @@ bool wxDir::GetFirst(wxString *filename,
 
 bool wxDir::GetNext(wxString *filename) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
 
-    wxCHECK_MSG( filename, false, _T("bad pointer in wxDir::GetNext()") );
+    wxCHECK_MSG( filename, FALSE, _T("bad pointer in wxDir::GetNext()") );
 
     return M_DIR->Read(filename);
 }

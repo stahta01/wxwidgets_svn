@@ -6,7 +6,7 @@
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -17,15 +17,16 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include "wx/deprecated/wxexpr.h"
-#endif
+#include <wx/wxexpr.h>
 
-#include "wx/ogl/ogl.h"
-
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/canvas.h>
+#include <wx/ogl/bmpshape.h>
+#include <wx/ogl/misc.h>
 
 /*
  * Bitmap object
@@ -48,13 +49,13 @@ void wxBitmapShape::OnDraw(wxDC& dc)
   if (!m_bitmap.Ok())
     return;
 
-  int x, y;
+  double x, y;
   x = WXROUND(m_xpos - m_bitmap.GetWidth() / 2.0);
   y = WXROUND(m_ypos - m_bitmap.GetHeight() / 2.0);
   dc.DrawBitmap(m_bitmap, x, y, true);
 }
 
-void wxBitmapShape::SetSize(double w, double h, bool WXUNUSED(recursive))
+void wxBitmapShape::SetSize(double w, double h, bool recursive)
 {
   if (m_bitmap.Ok())
   {
@@ -75,13 +76,13 @@ void wxBitmapShape::WriteAttributes(wxExpr *clause)
   // Can't really save the bitmap; so instantiate the bitmap
   // at a higher level in the application, from a symbol library.
   wxRectangleShape::WriteAttributes(clause);
-  clause->AddAttributeValueString(_T("filename"), m_filename);
+  clause->AddAttributeValueString("filename", m_filename);
 }
 
 void wxBitmapShape::ReadAttributes(wxExpr *clause)
 {
   wxRectangleShape::ReadAttributes(clause);
-  clause->GetAttributeValue(_T("filename"), m_filename);
+  clause->GetAttributeValue("filename", m_filename);
 }
 #endif
 

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +54,7 @@ DECLARE_EVENT_TABLE()
 extern MyFrame *GetMainFrame(void);
 
 #define DOCVIEW_CUT     1
-#define DOCVIEW_ABOUT   wxID_ABOUT
+#define DOCVIEW_ABOUT   2
 
 extern bool singleWindowMode;
 

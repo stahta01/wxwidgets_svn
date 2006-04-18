@@ -6,7 +6,7 @@
 // Created:     14.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_FFILE_H_
@@ -16,9 +16,10 @@
 
 #if wxUSE_FFILE
 
-#include  "wx/string.h"
-#include  "wx/filefn.h"
-#include  "wx/convauto.h"
+#ifndef WX_PRECOMP
+  #include  "wx/string.h"
+  #include  "wx/filefn.h"
+#endif
 
 #include <stdio.h>
 
@@ -29,7 +30,7 @@
 //     dtor which is _not_ virtual, so it shouldn't be used as a base class.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFFile
+class WXDLLEXPORT wxFFile
 {
 public:
   // ctors
@@ -37,32 +38,32 @@ public:
     // def ctor
   wxFFile() { m_fp = NULL; }
     // open specified file (may fail, use IsOpened())
-  wxFFile(const wxChar *filename, const wxChar *mode = _T("r"));
+  wxFFile(const wxChar *filename, const char *mode = "r");
     // attach to (already opened) file
-  wxFFile(FILE *lfp) { m_fp = lfp; }
+  wxFFile(FILE *fp) { m_fp = fp; }
 
   // open/close
     // open a file (existing or not - the mode controls what happens)
-  bool Open(const wxChar *filename, const wxChar *mode = _T("r"));
+  bool Open(const wxChar *filename, const char *mode = "r");
     // closes the opened file (this is a NOP if not opened)
   bool Close();
 
   // assign an existing file descriptor and get it back from wxFFile object
-  void Attach(FILE *lfp, const wxString& name = wxEmptyString)
-    { Close(); m_fp = lfp; m_name = name; }
+  void Attach(FILE *fp, const wxString& name = wxT(""))
+    { Close(); m_fp = fp; m_name = name; }
   void Detach() { m_fp = NULL; }
   FILE *fp() const { return m_fp; }
 
   // read/write (unbuffered)
     // read all data from the file into a string (useful for text files)
-  bool ReadAll(wxString *str, const wxMBConv& conv = wxConvAuto());
+  bool ReadAll(wxString *str);
     // returns number of bytes read - use Eof() and Error() to see if an error
-    // occurred or not
+    // occured or not
   size_t Read(void *pBuf, size_t nCount);
     // returns the number of bytes written
   size_t Write(const void *pBuf, size_t nCount);
     // returns true on success
-  bool Write(const wxString& s, const wxMBConv& conv = wxConvAuto())
+  bool Write(const wxString& s, wxMBConv& conv = wxConvLibc)
   {
       const wxWX2MBbuf buf = s.mb_str(conv);
       size_t size = strlen(buf);
@@ -73,26 +74,23 @@ public:
 
   // file pointer operations (return ofsInvalid on failure)
     // move ptr ofs bytes related to start/current pos/end of file
-  bool Seek(wxFileOffset ofs, wxSeekMode mode = wxFromStart);
+  bool Seek(long ofs, wxSeekMode mode = wxFromStart);
     // move ptr to ofs bytes before the end
-  bool SeekEnd(wxFileOffset ofs = 0) { return Seek(ofs, wxFromEnd); }
+  bool SeekEnd(long ofs = 0) { return Seek(ofs, wxFromEnd); }
     // get current position in the file
-  wxFileOffset Tell() const;
+  size_t Tell() const;
     // get current file length
-  wxFileOffset Length() const;
+  size_t Length() const;
 
-  // simple accessors: note that Eof() and Error() may only be called if
-  // IsOpened()!
+  // simple accessors
     // is file opened?
   bool IsOpened() const { return m_fp != NULL; }
     // is end of file reached?
   bool Eof() const { return feof(m_fp) != 0; }
-    // has an error occurred?
+    // is an error occured?
   bool Error() const { return ferror(m_fp) != 0; }
     // get the file name
   const wxString& GetName() const { return m_name; }
-    // type such as disk or pipe
-  wxFileKind GetKind() const { return wxGetFileKind(m_fp); }
 
   // dtor closes the file if opened
   ~wxFFile() { Close(); }

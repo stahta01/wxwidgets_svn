@@ -25,6 +25,11 @@
 #include "wx/geometry.h"
 #include "wx/datstrm.h"
 
+// normally this is defined in <math.h>
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 //
 // wxPoint2D
 //
@@ -48,9 +53,9 @@ bool wxRect2DDouble::Intersects( const wxRect2DDouble &rect ) const
 
     if ( left < right && top < bottom )
     {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void wxRect2DDouble::Intersect( const wxRect2DDouble &src1 , const wxRect2DDouble &src2 , wxRect2DDouble *dest )
@@ -136,15 +141,6 @@ void wxRect2DDouble::ConstrainTo( const wxRect2DDouble &rect )
         SetTop( rect.GetTop() );
 }
 
-wxRect2DDouble& wxRect2DDouble::operator=( const wxRect2DDouble &r )
-{
-    m_x = r.m_x;
-    m_y = r.m_y;
-    m_width = r.m_width;
-    m_height = r.m_height;
-    return *this;
-}
-
 // integer version
 
 // for the following calculations always remember
@@ -152,7 +148,6 @@ wxRect2DDouble& wxRect2DDouble::operator=( const wxRect2DDouble &r )
 
 // wxPoint2D
 
-#if wxUSE_STREAMS
 void wxPoint2DInt::WriteTo( wxDataOutputStream &stream ) const
 {
     stream.Write32( m_x );
@@ -164,7 +159,6 @@ void wxPoint2DInt::ReadFrom( wxDataInputStream &stream )
     m_x = stream.Read32();
     m_y = stream.Read32();
 }
-#endif // wxUSE_STREAMS
 
 wxDouble wxPoint2DInt::GetVectorAngle() const
 {
@@ -202,14 +196,14 @@ void wxPoint2DInt::SetVectorAngle( wxDouble degrees )
 
 wxDouble wxPoint2DDouble::GetVectorAngle() const
 {
-    if ( wxIsNullDouble(m_x) )
+    if ( m_x == 0 )
     {
         if ( m_y >= 0 )
             return 90;
         else
             return 270;
     }
-    if ( wxIsNullDouble(m_y) )
+    if ( m_y == 0 )
     {
         if ( m_x >= 0 )
             return 0;
@@ -243,9 +237,9 @@ bool wxRect2DInt::Intersects( const wxRect2DInt &rect ) const
 
     if ( left < right && top < bottom )
     {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void wxRect2DInt::Intersect( const wxRect2DInt &src1 , const wxRect2DInt &src2 , wxRect2DInt *dest )
@@ -340,7 +334,6 @@ wxRect2DInt& wxRect2DInt::operator=( const wxRect2DInt &r )
     return *this;
 }
 
-#if wxUSE_STREAMS
 void wxRect2DInt::WriteTo( wxDataOutputStream &stream ) const
 {
     stream.Write32( m_x );
@@ -356,6 +349,5 @@ void wxRect2DInt::ReadFrom( wxDataInputStream &stream )
     m_width = stream.Read32();
     m_height = stream.Read32();
 }
-#endif // wxUSE_STREAMS
 
 #endif // wxUSE_GEOMETRY

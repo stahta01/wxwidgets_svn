@@ -10,6 +10,10 @@ capable of creating a control from an XML node.
 
 See \helpref{XML-based resource system overview}{xrcoverview} for details.
 
+{\bf NOTE:} XRC is not yet a part of the core wxWidgets library, so
+please see the overview for how to compile and link it. Otherwise if you
+try to use it, you will get link errors.
+
 \wxheading{Derived from}
 
 \helpref{wxObject}{wxobject}
@@ -20,7 +24,7 @@ See \helpref{XML-based resource system overview}{xrcoverview} for details.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxXmlResourceHandler::wxXmlResourceHandler}\label{wxxmlresourcehandlerctor}
+\membersection{wxXmlResourceHandler::wxXmlResourceHandler}\label{wxxmlresourcehandlerwxxmlresourcehandler}
 
 \func{}{wxXmlResourceHandler}{\void}
 
@@ -49,8 +53,8 @@ Add styles common to all wxWindow-derived classes.
 
 \func{bool}{CanHandle}{\param{wxXmlNode* }{node}}
 
-Returns true if it understands this node and can create
-a resource from it, false otherwise.
+Returns TRUE if it understands this node and can create
+a resource from it, FALSE otherwise.
 
 \wxheading{Note}
 
@@ -61,7 +65,7 @@ safe to operate on {\it node} directly or to call IsOfClass.
 
 \membersection{wxXmlResourceHandler::CreateChildren}\label{wxxmlresourcehandlercreatechildren}
 
-\func{void}{CreateChildren}{\param{wxObject* }{parent}, \param{bool }{this\_hnd\_only = false}}
+\func{void}{CreateChildren}{\param{wxObject* }{parent}, \param{bool }{this\_hnd\_only = FALSE}}
 
 Creates children.
 
@@ -102,9 +106,9 @@ Gets a bitmap.
 
 \membersection{wxXmlResourceHandler::GetBool}\label{wxxmlresourcehandlergetbool}
 
-\func{bool}{GetBool}{\param{const wxString\& }{param}, \param{bool }{defaultv = false}}
+\func{bool}{GetBool}{\param{const wxString\& }{param}, \param{bool }{defaultv = FALSE}}
 
-Gets a bool flag (1, t, yes, on, true are true, everything else is false).
+Gets a bool flag (1, t, yes, on, true are TRUE, everything else is FALSE).
 
 \membersection{wxXmlResourceHandler::GetColour}\label{wxxmlresourcehandlergetcolour}
 

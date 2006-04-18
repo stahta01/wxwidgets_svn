@@ -4,7 +4,7 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -28,37 +28,23 @@ FORCE_LINK_ME(m_links)
 
 class wxHtmlAnchorCell : public wxHtmlCell
 {
-private:
-    wxString m_AnchorName;
+    private:
+        wxString m_AnchorName;
 
-public:
-    wxHtmlAnchorCell(const wxString& name) : wxHtmlCell()
-        { m_AnchorName = name; }
-    void Draw(wxDC& WXUNUSED(dc),
-              int WXUNUSED(x), int WXUNUSED(y),
-              int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-              wxHtmlRenderingInfo& WXUNUSED(info)) {}
-
-    virtual const wxHtmlCell* Find(int condition, const void* param) const
-    {
-        if ((condition == wxHTML_COND_ISANCHOR) &&
-            (m_AnchorName == (*((const wxString*)param))))
+    public:
+        wxHtmlAnchorCell(const wxString& name) : wxHtmlCell() {m_AnchorName = name;}
+        virtual const wxHtmlCell* Find(int condition, const void* param) const
         {
-            return this;
+            if ((condition == wxHTML_COND_ISANCHOR) && (m_AnchorName == (*((const wxString*)param))))
+                return this;
+            else
+                return wxHtmlCell::Find(condition, param);
         }
-        else
-        {
-            return wxHtmlCell::Find(condition, param);
-        }
-    }
-
-    DECLARE_NO_COPY_CLASS(wxHtmlAnchorCell)
 };
 
 
 
 TAG_HANDLER_BEGIN(A, "A")
-    TAG_HANDLER_CONSTR(A) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -77,7 +63,7 @@ TAG_HANDLER_BEGIN(A, "A")
             if (tag.HasParam( wxT("TARGET") )) target = tag.GetParam( wxT("TARGET") );
             m_WParser->SetActualColor(m_WParser->GetLinkColor());
             m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(m_WParser->GetLinkColor()));
-            m_WParser->SetFontUnderlined(true);
+            m_WParser->SetFontUnderlined(TRUE);
             m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
             m_WParser->SetLink(wxHtmlLinkInfo(name, target));
 
@@ -89,9 +75,9 @@ TAG_HANDLER_BEGIN(A, "A")
             m_WParser->SetActualColor(oldclr);
             m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(oldclr));
 
-            return true;
+            return TRUE;
         }
-        else return false;
+        else return FALSE;
     }
 
 TAG_HANDLER_END(A)

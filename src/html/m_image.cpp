@@ -4,7 +4,7 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik, Joel Lucsy
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -31,9 +31,8 @@
 #include "wx/gifdecod.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
-#include "wx/artprov.h"
-#include "wx/math.h"
 
+#include <math.h>
 #include <float.h>
 
 FORCE_LINK_ME(m_image)
@@ -43,14 +42,14 @@ FORCE_LINK_ME(m_image)
 
 WX_DECLARE_OBJARRAY(int, CoordArray);
 #include "wx/arrimpl.cpp" // this is a magic incantation which must be done!
-WX_DEFINE_OBJARRAY(CoordArray)
+WX_DEFINE_OBJARRAY(CoordArray);
 
 
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageMapAreaCell
-//                  0-width, 0-height cell that represents single area in
-//                  imagemap (it's GetLink is called from wxHtmlImageCell's)
-// ---------------------------------------------------------------------------
+//                  0-width, 0-height cell that represents single area in imagemap
+//                  (it's GetLink is called from wxHtmlImageCell's)
+//--------------------------------------------------------------------------------
 
 class wxHtmlImageMapAreaCell : public wxHtmlCell
 {
@@ -63,13 +62,6 @@ class wxHtmlImageMapAreaCell : public wxHtmlCell
     public:
         wxHtmlImageMapAreaCell( celltype t, wxString &coords, double pixel_scale = 1.0);
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingInfo& WXUNUSED(info)) {}
-
-
-    DECLARE_NO_COPY_CLASS(wxHtmlImageMapAreaCell)
 };
 
 
@@ -82,7 +74,7 @@ wxHtmlImageMapAreaCell::wxHtmlImageMapAreaCell( wxHtmlImageMapAreaCell::celltype
     wxString x = incoords, y;
 
     type = t;
-    while ((i = x.Find( ',' )) != wxNOT_FOUND)
+    while ((i = x.Find( ',' )) != -1)
     {
         coords.Add( (int)(pixel_scale * (double)wxAtoi( x.Left( i ).c_str())) );
         x = x.Mid( i + 1 );
@@ -242,12 +234,6 @@ class wxHtmlImageMapCell : public wxHtmlCell
     public:
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
         virtual const wxHtmlCell *Find( int cond, const void *param ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingInfo& WXUNUSED(info)) {}
-
-    DECLARE_NO_COPY_CLASS(wxHtmlImageMapCell)
 };
 
 
@@ -286,13 +272,12 @@ const wxHtmlCell *wxHtmlImageMapCell::Find( int cond, const void *param ) const
 class wxHtmlImageCell : public wxHtmlCell
 {
 public:
-    wxHtmlImageCell(wxHtmlWindowInterface *windowIface,
-                    wxFSFile *input, int w = wxDefaultCoord, int h = wxDefaultCoord,
+    wxHtmlImageCell(wxWindow *window,
+                    wxFSFile *input, int w = -1, int h = -1,
                     double scale = 1.0, int align = wxHTML_ALIGN_BOTTOM,
                     const wxString& mapname = wxEmptyString);
     ~wxHtmlImageCell();
-    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-              wxHtmlRenderingInfo& info);
+    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
     virtual wxHtmlLinkInfo *GetLink(int x = 0, int y = 0) const;
 
     void SetImage(const wxImage& img);
@@ -305,7 +290,7 @@ private:
     wxBitmap           *m_bitmap;
     int                 m_bmpW, m_bmpH;
     bool                m_showFrame:1;
-    wxHtmlWindowInterface *m_windowIface;
+    wxScrolledWindow   *m_window;
 #if wxUSE_GIF && wxUSE_TIMER
     wxGIFDecoder       *m_gifDecoder;
     wxTimer            *m_gifTimer;
@@ -314,8 +299,6 @@ private:
     double              m_scale;
     wxHtmlImageMapCell *m_imageMap;
     wxString            m_mapName;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlImageCell)
 };
 
 #if wxUSE_GIF && wxUSE_TIMER
@@ -330,35 +313,73 @@ class wxGIFTimer : public wxTimer
 
     private:
         wxHtmlImageCell *m_cell;
-
-    DECLARE_NO_COPY_CLASS(wxGIFTimer)
 };
 #endif
 
 
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageCell
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
+/* XPM */
+static const char * broken_image_xpm[] = {
+"29 31 7 1",
+"   c None",
+".  c #808080",
+"+  c #FFFFFF",
+"@  c #C0C0C0",
+"#  c #000000",
+"$  c #333366",
+"%  c #B2B2B2",
+".....................        ",
+".+++++++++++++++++++..       ",
+".+++++++++++++++++++.@.      ",
+".++@@@@@@@@@@@@@@@@@.+@.     ",
+".++@@@@@@@@@@@@@@@@@.++@.    ",
+".++@@@@@.@@@@.@@@@@@.+++@.   ",
+".++@@@@@@@@@@@@@@@@@.++++@.  ",
+".++@@@@@@@@@@@@@@@@@.+++++@. ",
+".++@@.@@@@@@@@@@.@@@######## ",
+".++@@@@@@@@@@@@@@@@@@$$$$$$#.",
+".######@@@@@@@@@@@@@@@.....#.",
+"       ###@@@@@@@@@@@@@@@++#.",
+"          #####@@@@@@@@@@++#.",
+"              #@.@@@@@@@@++#.",
+"..             ###@@@@@@@++#.",
+".+....            #@@@@@@++#.",
+".++@@@...          ####@@++#.",
+".++@@@@@@..            #####.",
+".++@@@@@@@@...               ",
+".++@@@@@@%%%%@.              ",
+".++@@@@@@%%%%@@....          ",
+".++@@@@@@%%%%@@@@@@....      ",
+".++@@@@@@%%%%@@@@@@@@@@....  ",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++++++++++++++++++++++++++#.",
+".++++++++++++++++++++++++++#.",
+"############################."};
 
-wxHtmlImageCell::wxHtmlImageCell(wxHtmlWindowInterface *windowIface,
-                                 wxFSFile *input,
+wxHtmlImageCell::wxHtmlImageCell(wxWindow *window, wxFSFile *input,
                                  int w, int h, double scale, int align,
                                  const wxString& mapname) : wxHtmlCell()
 {
-    m_windowIface = windowIface;
+    m_window = window ? wxStaticCast(window, wxScrolledWindow) : NULL;
     m_scale = scale;
-    m_showFrame = false;
+    m_showFrame = FALSE;
     m_bitmap = NULL;
     m_bmpW = w;
     m_bmpH = h;
     m_imageMap = NULL;
     m_mapName = mapname;
-    SetCanLiveOnPagebreak(false);
+    SetCanLiveOnPagebreak(FALSE);
 #if wxUSE_GIF && wxUSE_TIMER
     m_gifDecoder = NULL;
     m_gifTimer = NULL;
-    m_physX = m_physY = wxDefaultCoord;
+    m_physX = m_physY = -1;
 #endif
 
     if ( m_bmpW && m_bmpH )
@@ -369,25 +390,25 @@ wxHtmlImageCell::wxHtmlImageCell(wxHtmlWindowInterface *windowIface,
 
             if ( s )
             {
+                bool readImg = TRUE;
+
 #if wxUSE_GIF && wxUSE_TIMER
-                bool readImg = true;
-                if ( m_windowIface &&
-                     (input->GetLocation().Matches(wxT("*.gif")) ||
-                      input->GetLocation().Matches(wxT("*.GIF"))) )
+                if ( (input->GetLocation().Matches(wxT("*.gif")) ||
+                      input->GetLocation().Matches(wxT("*.GIF"))) && m_window )
                 {
-                    m_gifDecoder = new wxGIFDecoder(s, true);
+                    m_gifDecoder = new wxGIFDecoder(s, TRUE);
                     if ( m_gifDecoder->ReadGIF() == wxGIF_OK )
                     {
                         wxImage img;
                         if ( m_gifDecoder->ConvertToImage(&img) )
                             SetImage(img);
 
-                        readImg = false;
+                        readImg = FALSE;
 
                         if ( m_gifDecoder->IsAnimation() )
                         {
                             m_gifTimer = new wxGIFTimer(this);
-                            m_gifTimer->Start(m_gifDecoder->GetDelay(), true);
+                            m_gifTimer->Start(m_gifDecoder->GetDelay(), TRUE);
                         }
                         else
                         {
@@ -411,19 +432,18 @@ wxHtmlImageCell::wxHtmlImageCell(wxHtmlWindowInterface *windowIface,
         }
         else // input==NULL, use "broken image" bitmap
         {
-            if ( m_bmpW == wxDefaultCoord && m_bmpH == wxDefaultCoord )
+            if ( m_bmpW == -1 && m_bmpH == -1 )
             {
                 m_bmpW = 29;
                 m_bmpH = 31;
             }
             else
             {
-                m_showFrame = true;
-                if ( m_bmpW == wxDefaultCoord ) m_bmpW = 31;
-                if ( m_bmpH == wxDefaultCoord ) m_bmpH = 33;
+                m_showFrame = TRUE;
+                if ( m_bmpW == -1 ) m_bmpW = 31;
+                if ( m_bmpH == -1 ) m_bmpH = 33;
             }
-            m_bitmap =
-                new wxBitmap(wxArtProvider::GetBitmap(wxART_MISSING_IMAGE));
+            m_bitmap = new wxBitmap(broken_image_xpm);
         }
     }
     //else: ignore the 0-sized images used sometimes on the Web pages
@@ -448,7 +468,6 @@ wxHtmlImageCell::wxHtmlImageCell(wxHtmlWindowInterface *windowIface,
 
 void wxHtmlImageCell::SetImage(const wxImage& img)
 {
-#if !defined(__WXMSW__) || wxUSE_WXDIB
     if ( img.Ok() )
     {
         delete m_bitmap;
@@ -457,24 +476,19 @@ void wxHtmlImageCell::SetImage(const wxImage& img)
         ww = img.GetWidth();
         hh = img.GetHeight();
 
-        if ( m_bmpW == wxDefaultCoord )
+        if ( m_bmpW == -1 )
             m_bmpW = ww;
-        if ( m_bmpH == wxDefaultCoord )
+        if ( m_bmpH == -1 )
             m_bmpH = hh;
 
-        // Only scale the bitmap at the rendering stage,
-        // so we don't lose quality twice
-/*
         if ((m_bmpW != ww) || (m_bmpH != hh))
         {
             wxImage img2 = img.Scale(m_bmpW, m_bmpH);
             m_bitmap = new wxBitmap(img2);
         }
         else
-*/
             m_bitmap = new wxBitmap(img);
     }
-#endif
 }
 
 #if wxUSE_GIF && wxUSE_TIMER
@@ -482,9 +496,9 @@ void wxHtmlImageCell::AdvanceAnimation(wxTimer *timer)
 {
     wxImage img;
 
-    m_gifDecoder->GoNextFrame(true);
+    m_gifDecoder->GoNextFrame(TRUE);
 
-    if ( m_physX == wxDefaultCoord )
+    if ( m_physX == -1 )
     {
         m_physX = m_physY = 0;
         for (wxHtmlCell *cell = this; cell; cell = cell->GetParent())
@@ -494,15 +508,13 @@ void wxHtmlImageCell::AdvanceAnimation(wxTimer *timer)
         }
     }
 
-    wxWindow *win = m_windowIface->GetHTMLWindow();
-    wxPoint pos =
-        m_windowIface->HTMLCoordsToWindow(this, wxPoint(m_physX, m_physY));
-    wxRect rect(pos, wxSize(m_Width, m_Height));
+    int x, y;
+    m_window->CalcScrolledPosition(m_physX, m_physY, &x, &y);
+    wxRect rect(x, y, m_Width, m_Height);
 
-    if ( win->GetClientRect().Intersects(rect) &&
+    if ( m_window->GetClientRect().Intersects(rect) &&
          m_gifDecoder->ConvertToImage(&img) )
     {
-#if !defined(__WXMSW__) || wxUSE_WXDIB
         if ( (int)m_gifDecoder->GetWidth() != m_Width ||
              (int)m_gifDecoder->GetHeight() != m_Height ||
              m_gifDecoder->GetLeft() != 0 || m_gifDecoder->GetTop() != 0 )
@@ -510,22 +522,20 @@ void wxHtmlImageCell::AdvanceAnimation(wxTimer *timer)
             wxBitmap bmp(img);
             wxMemoryDC dc;
             dc.SelectObject(*m_bitmap);
-            dc.DrawBitmap(bmp, m_gifDecoder->GetLeft(), m_gifDecoder->GetTop(),
-                          true /* use mask */);
+            dc.DrawBitmap(bmp, m_gifDecoder->GetLeft(), m_gifDecoder->GetTop());
         }
         else
-#endif
             SetImage(img);
-        win->Refresh(img.HasMask(), &rect);
+        m_window->Refresh(img.HasMask(), &rect);
     }
 
-    timer->Start(m_gifDecoder->GetDelay(), true);
+    timer->Start(m_gifDecoder->GetDelay(), TRUE);
 }
 
 void wxHtmlImageCell::Layout(int w)
 {
     wxHtmlCell::Layout(w);
-    m_physX = m_physY = wxDefaultCoord;
+    m_physX = m_physY = -1;
 }
 
 #endif
@@ -540,9 +550,7 @@ wxHtmlImageCell::~wxHtmlImageCell()
 }
 
 
-void wxHtmlImageCell::Draw(wxDC& dc, int x, int y,
-                           int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                           wxHtmlRenderingInfo& WXUNUSED(info))
+void wxHtmlImageCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
 {
     if ( m_showFrame )
     {
@@ -553,28 +561,19 @@ void wxHtmlImageCell::Draw(wxDC& dc, int x, int y,
     }
     if ( m_bitmap )
     {
-        // We add in the scaling from the desired bitmap width
-        // and height, so we only do the scaling once.
-        double imageScaleX = 1.0;
-        double imageScaleY = 1.0;
-        if (m_bmpW != m_bitmap->GetWidth())
-            imageScaleX = (double) m_bmpW / (double) m_bitmap->GetWidth();
-        if (m_bmpH != m_bitmap->GetHeight())
-            imageScaleY = (double) m_bmpH / (double) m_bitmap->GetHeight();
-
         double us_x, us_y;
         dc.GetUserScale(&us_x, &us_y);
-        dc.SetUserScale(us_x * m_scale * imageScaleX, us_y * m_scale * imageScaleY);
+        dc.SetUserScale(us_x * m_scale, us_y * m_scale);
 
-        dc.DrawBitmap(*m_bitmap, (int) ((x + m_PosX) / (m_scale*imageScaleX)),
-                                 (int) ((y + m_PosY) / (m_scale*imageScaleY)), true);
+        dc.DrawBitmap(*m_bitmap, (int) ((x + m_PosX) / m_scale),
+                                 (int) ((y + m_PosY) / m_scale), TRUE);
         dc.SetUserScale(us_x, us_y);
     }
 }
 
 wxHtmlLinkInfo *wxHtmlImageCell::GetLink( int x, int y ) const
 {
-    if (m_mapName.empty())
+    if (m_mapName.IsEmpty())
         return wxHtmlCell::GetLink( x, y );
     if (!m_imageMap)
     {
@@ -609,7 +608,6 @@ wxHtmlLinkInfo *wxHtmlImageCell::GetLink( int x, int y ) const
 //--------------------------------------------------------------------------------
 
 TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
-    TAG_HANDLER_CONSTR(IMG) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -617,7 +615,7 @@ TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
         {
             if (tag.HasParam(wxT("SRC")))
             {
-                int w = wxDefaultCoord, h = wxDefaultCoord;
+                int w = -1, h = -1;
                 int al;
                 wxFSFile *str;
                 wxString tmp = tag.GetParam(wxT("SRC"));
@@ -648,11 +646,11 @@ TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
                     }
                 }
                 wxHtmlImageCell *cel = new wxHtmlImageCell(
-                                          m_WParser->GetWindowInterface(),
+                                          m_WParser->GetWindow(),
                                           str, w, h,
                                           m_WParser->GetPixelScale(),
                                           al, mn);
-                m_WParser->ApplyStateToCell(cel);
+                cel->SetLink(m_WParser->GetLink());
                 cel->SetId(tag.GetParam(wxT("id"))); // may be empty
                 m_WParser->GetContainer()->InsertCell(cel);
                 if (str)
@@ -699,17 +697,16 @@ TAG_HANDLER_BEGIN(IMG, "IMG,MAP,AREA")
                 }
                 if (cel != NULL && tag.HasParam(wxT("HREF")))
                 {
-                    wxString target;
-                    if (tag.HasParam(wxT("TARGET")))
-                        target = tag.GetParam(wxT("TARGET"));
-                    cel->SetLink(wxHtmlLinkInfo(tag.GetParam(wxT("HREF")), target));
+                    wxString tmp = tag.GetParam(wxT("HREF"));
+                    wxString target = wxEmptyString;
+                    if (tag.HasParam(wxT("TARGET"))) target = tag.GetParam(wxT("TARGET"));
+                    cel->SetLink( wxHtmlLinkInfo(tmp, target));
                 }
-                if (cel != NULL)
-                    m_WParser->GetContainer()->InsertCell( cel );
+                if (cel != NULL) m_WParser->GetContainer()->InsertCell( cel );
             }
         }
 
-        return false;
+        return FALSE;
     }
 
 TAG_HANDLER_END(IMG)

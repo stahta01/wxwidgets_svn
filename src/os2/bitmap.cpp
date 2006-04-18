@@ -61,13 +61,13 @@ void wxBitmapRefData::Free()
 {
     if ( m_pSelectedInto )
     {
-        wxLogLastError(wxT("GpiDeleteBitmap(hbitmap)"));
+        wxLogLastError("GpiDeleteBitmap(hbitmap)");
     }
     if (m_hBitmap)
     {
         if (!::GpiDeleteBitmap((HBITMAP)m_hBitmap))
         {
-            wxLogLastError(wxT("GpiDeleteBitmap(hbitmap)"));
+            wxLogLastError("GpiDeleteBitmap(hbitmap)");
         }
     }
     if (m_pBitmapMask)
@@ -84,7 +84,7 @@ void wxBitmapRefData::Free()
 // this function should be called from all wxBitmap ctors
 void wxBitmap::Init()
 {
-    m_bIsMono = false;
+    m_bIsMono = FALSE;
     //
     // True for all bitmaps created from bits, wxImages, Xpms
     //
@@ -100,7 +100,7 @@ bool wxBitmap::CopyFromIconOrCursor(
     if (!::WinQueryPointerInfo(hIcon, &SIconInfo))
     {
         wxLogLastError(wxT("WinQueryPointerInfo"));
-        return false;
+        return FALSE;
     }
     wxBitmapRefData*                pRefData = new wxBitmapRefData;
 
@@ -120,7 +120,7 @@ bool wxBitmap::CopyFromIconOrCursor(
     pMask->SetMaskBitmap(GetHBITMAP());
     SetMask(pMask);
 
-    return true;
+    return(TRUE);
 } // end of wxBitmap::CopyFromIconOrCursor
 
 bool wxBitmap::CopyFromCursor(
@@ -130,7 +130,7 @@ bool wxBitmap::CopyFromCursor(
     UnRef();
 
     if (!rCursor.Ok())
-        return(false);
+        return(FALSE);
     return(CopyFromIconOrCursor(rCursor));
 } // end of wxBitmap::CopyFromCursor
 
@@ -141,7 +141,7 @@ bool wxBitmap::CopyFromIcon(
     UnRef();
 
     if (!rIcon.Ok())
-        return(false);
+        return(FALSE);
 
     return CopyFromIconOrCursor(rIcon);
 } // end of wxBitmap::CopyFromIcon
@@ -182,7 +182,7 @@ wxBitmap::wxBitmap(
     hPs = ::GpiCreatePS(vHabmain, hDc, &vSize, GPIA_ASSOC | PU_PELS);
     if (hPs == 0)
     {
-        wxLogLastError(wxT("GpiCreatePS Failure"));
+        wxLogLastError("GpiCreatePS Failure");
     }
 
     if (nDepth == 1)
@@ -190,7 +190,7 @@ wxBitmap::wxBitmap(
         //
         // We assume that it is in XBM format which is not quite the same as
         // the format CreateBitmap() wants because the order of bytes in the
-        // line is reversed!
+        // line is inversed!
         //
         const size_t                nBytesPerLine = (nWidth + 7) / 8;
         const size_t                nPadding = nBytesPerLine % 2;
@@ -207,14 +207,14 @@ wxBitmap::wxBitmap(
         {
             for (nCols = 0; nCols < nBytesPerLine; nCols++)
             {
-                unsigned char ucVal = *pzSrc++;
-                unsigned char ucReversed = 0;
-                int nBits;
+                unsigned char       ucVal = *pzSrc++;
+                unsigned char       ucReversed = 0;
+                int                 nBits;
 
                 for (nBits = 0; nBits < 8; nBits++)
                 {
                     ucReversed <<= 1;
-                    ucReversed = (unsigned char)(ucReversed | (ucVal & 0x01));
+                    ucReversed |= (ucVal & 0x01);
                     ucVal >>= 1;
                 }
                 *pzDst++ = ucReversed;
@@ -238,7 +238,7 @@ wxBitmap::wxBitmap(
     vHeader.cx              = (USHORT)nWidth;
     vHeader.cy              = (USHORT)nHeight;
     vHeader.cPlanes         = 1L;
-    vHeader.cBitCount       = (USHORT)nDepth;
+    vHeader.cBitCount       = nDepth;
     vHeader.usReserved      = 0;
 
     memset(&vInfo, '\0', 16);
@@ -246,13 +246,13 @@ wxBitmap::wxBitmap(
     vInfo.cx              = (USHORT)nWidth;
     vInfo.cy              = (USHORT)nHeight;
     vInfo.cPlanes         = 1L;
-    vInfo.cBitCount       = (USHORT)nDepth;
+    vInfo.cBitCount       = nDepth;
 
     HBITMAP                         hBmp = ::GpiCreateBitmap(hPs, &vHeader, CBM_INIT, (PBYTE)pzData, &vInfo);
 
     if (!hBmp)
     {
-        wxLogLastError(wxT("CreateBitmap"));
+        wxLogLastError("CreateBitmap");
     }
     ::GpiDestroyPS(hPs);
     ::DevCloseDC(hDc);
@@ -330,7 +330,7 @@ bool wxBitmap::Create(
         HPS                         hPS   = ::GpiCreatePS(vHabmain, hDC, &vSize, PU_PELS | GPIA_ASSOC);
 
         if (nD == 1)
-            m_bIsMono = true;
+            m_bIsMono = TRUE;
         memset(&vHeader, '\0', 16);
         vHeader.cbFix     =  16;
         vHeader.cx        = nW;
@@ -365,7 +365,7 @@ bool wxBitmap::Create(
         vHeader.cx        = nW;
         vHeader.cy        = nH;
         vHeader.cPlanes   = 1;
-        vHeader.cBitCount = (USHORT)lBitCount;
+        vHeader.cBitCount = lBitCount;
 
         hBmp = ::GpiCreateBitmap( hPSScreen
                                  ,&vHeader
@@ -379,6 +379,10 @@ bool wxBitmap::Create(
     }
     SetHBITMAP((WXHBITMAP)hBmp);
 
+#if WXWIN_COMPATIBILITY_2
+    GetBitmapData()->m_bOk = hBmp != 0;
+#endif // WXWIN_COMPATIBILITY_2
+
     return Ok();
 } // end of wxBitmap::Create
 
@@ -389,53 +393,27 @@ bool wxBitmap::CreateFromXpm(
 #if wxUSE_IMAGE && wxUSE_XPM
     Init();
 
-    wxCHECK_MSG(ppData != NULL, false, wxT("invalid bitmap data"));
+    wxCHECK_MSG(ppData != NULL, FALSE, wxT("invalid bitmap data"))
 
     wxXPMDecoder                    vDecoder;
     wxImage                         vImg = vDecoder.ReadData(ppData);
 
-    wxCHECK_MSG(vImg.Ok(), false, wxT("invalid bitmap data"));
+    wxCHECK_MSG(vImg.Ok(), FALSE, wxT("invalid bitmap data"))
 
     *this = wxBitmap(vImg);
-    return true;
+    return TRUE;
 #else
-    return false;
+    return FALSE;
 #endif
 } // end of wxBitmap::CreateFromXpm
-
-bool wxBitmap::LoadFile(const wxString& filename, long type)
-{
-    UnRef();
-
-    wxBitmapHandler *handler = wxDynamicCast(FindHandler(type), wxBitmapHandler);
-
-    if ( handler )
-    {
-        m_refData = new wxBitmapRefData;
-
-        return handler->LoadFile(this, filename, type, -1, -1);
-    }
-#if wxUSE_IMAGE
-    else // no bitmap handler found
-    {
-        wxImage image;
-        if ( image.LoadFile( filename, type ) && image.Ok() )
-        {
-            *this = wxBitmap(image);
-
-            return true;
-        }
-    }
-#endif // wxUSE_IMAGE
-
-    return false;
-}
 
 bool wxBitmap::LoadFile(
   int                               nId
 , long                              lType
 )
 {
+    HPS                             hPs = NULLHANDLE;
+
     UnRef();
 
     wxBitmapHandler*                pHandler = wxDynamicCast( FindHandler(lType)
@@ -455,7 +433,7 @@ bool wxBitmap::LoadFile(
     }
     else
     {
-        return false;
+        return(FALSE);
     }
 } // end of wxBitmap::LoadFile
 
@@ -475,9 +453,10 @@ bool wxBitmap::Create(
 
     if (!pHandler)
     {
-        wxLogDebug(wxT("Failed to create bitmap: no bitmap handler for type %ld defined."), lType);
+        wxLogDebug(wxT("Failed to create bitmap: no bitmap handler for "
+                       "type %d defined."), lType);
 
-        return false;
+        return(FALSE);
     }
 
     m_refData = new wxBitmapRefData;
@@ -515,7 +494,7 @@ bool wxBitmap::SaveFile(
         wxImage                     vImage = ConvertToImage();
 
         if (!vImage.Ok())
-            return false;
+            return(FALSE);
 
         return(vImage.SaveFile( rFilename
                                ,lType
@@ -533,7 +512,7 @@ bool wxBitmap::CreateFromImage (
 , int                               nDepth
 )
 {
-    wxCHECK_MSG(rImage.Ok(), false, wxT("invalid image"));
+    wxCHECK_MSG(rImage.Ok(), FALSE, wxT("invalid image"));
     m_refData = new wxBitmapRefData();
 
     int                             nSizeLimit = 1024 * 768 * 3;
@@ -570,13 +549,13 @@ bool wxBitmap::CreateFromImage (
     //
     // Set bitmap parameters
     //
-    wxCHECK_MSG(rImage.Ok(), false, wxT("invalid image"));
+    wxCHECK_MSG(rImage.Ok(), FALSE, wxT("invalid image"));
     SetWidth(nWidth);
     SetHeight(nBmpHeight);
     if (nDepth == 1)
-        m_bIsMono = true;
+        m_bIsMono = TRUE;
     else
-        m_bIsMono = false;
+        m_bIsMono = FALSE;
     if (nDepth == -1)
         nDepth = wxDisplayDepth();
     SetDepth(nDepth);
@@ -613,7 +592,7 @@ bool wxBitmap::CreateFromImage (
     if(!pucBits)
     {
         wxFAIL_MSG(wxT("could not allocate memory for DIB"));
-        return false;
+        return FALSE;
     }
     memset(pucBits, '\0', (nBytePerLine * nHeight));
 
@@ -719,9 +698,9 @@ bool wxBitmap::CreateFromImage (
                                   ,PU_PELS | GPIA_ASSOC
                                  );
 
-        POINTL                      vPoint[4] = { {0, nOrigin},
-                                                  {nWidth, nHeight},
-                                                  {0, 0}, {nWidth, nHeight}
+        POINTL                      vPoint[4] = { 0, nOrigin,
+                                                  nWidth, nHeight,
+                                                  0, 0, nWidth, nHeight
                                                 };
 
 
@@ -820,9 +799,9 @@ bool wxBitmap::CreateFromImage (
                                       ,&vSize
                                       ,PU_PELS | GPIA_ASSOC
                                      );
-            POINTL vPoint2[4] = { {0, nOrigin},
-                                  {nWidth, nHeight},
-                                  {0, 0}, {nWidth, nHeight}
+            POINTL vPoint2[4] = { 0, nOrigin,
+                                  nWidth, nHeight,
+                                  0, 0, nWidth, nHeight
                                 };
             ::GpiBitBlt( hPSScreen
                         ,hPS
@@ -853,7 +832,7 @@ bool wxBitmap::CreateFromImage (
     ::DevCloseDC(hDCScreen);
     ::DevCloseDC(hDC);
     free(pucBits);
-    return true;
+    return TRUE;
 } // end of wxBitmap::CreateFromImage
 
 wxImage wxBitmap::ConvertToImage() const
@@ -880,11 +859,12 @@ wxImage wxBitmap::ConvertToImage() const
     BITMAPINFOHEADER2               vDIBh;
     BITMAPINFO2                     vDIBInfo;
     HPS                             hPSMem;
+    HPS                             hPS;
     HBITMAP                         hBitmap;
     HBITMAP                         hOldBitmap;
     DEVOPENSTRUC                    vDop  = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
     SIZEL                           vSizlPage = {0,0};
-    HDC                             hDCMem = NULLHANDLE;
+    HDC                             hDCMem;
 
     vImage.Create( nWidth
                   ,nHeight
@@ -1068,11 +1048,11 @@ wxImage wxBitmap::ConvertToImage() const
                              ,ucGreen
                              ,ucBlue
                             );
-        vImage.SetMask(true);
+        vImage.SetMask(TRUE);
     }
     else
     {
-        vImage.SetMask(false);
+        vImage.SetMask(FALSE);
     }
 
     //
@@ -1112,9 +1092,9 @@ wxBitmap wxBitmap::GetSubBitmap(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0, 0}, {rRect.width, rRect.height},
-                                                  {rRect.x, rRect.y},
-                                                  {rRect.x + rRect.width, rRect.y + rRect.height}
+    POINTL                          vPoint[4] = { 0, 0, rRect.width, rRect.height,
+                                                  rRect.x, rRect.y,
+                                                  rRect.x + rRect.width, rRect.y + rRect.height
                                                 };
 
     ::GpiSetBitmap(hPSSrc, (HBITMAP) GetHBITMAP());
@@ -1187,6 +1167,17 @@ void wxBitmap::SetQuality(
     GetBitmapData()->m_nQuality = nQ;
 } // end of wxBitmap::SetQuality
 
+#if WXWIN_COMPATIBILITY_2
+void wxBitmap::SetOk(
+  bool                              bOk
+)
+{
+    EnsureHasData();
+
+    GetBitmapData()->m_bOk = bOk;
+} // end of wxBitmap::SetOk
+#endif // WXWIN_COMPATIBILITY_2
+
 void wxBitmap::SetPalette(
   const wxPalette&                  rPalette
 )
@@ -1205,7 +1196,9 @@ void wxBitmap::SetMask(
     GetBitmapData()->m_pBitmapMask = pMask;
 } // end of wxBitmap::SetMask
 
-wxBitmap wxBitmap::GetBitmapForDC(wxDC& WXUNUSED(rDc)) const
+wxBitmap wxBitmap::GetBitmapForDC(
+  wxDC&                             rDc
+) const
 {
     return(*this);
 } // end of wxBitmap::GetBitmapForDC
@@ -1272,8 +1265,8 @@ bool wxMask::Create(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0 ,0}, {rBitmap.GetWidth(), rBitmap.GetHeight()},
-                                                  {0, 0}, {rBitmap.GetWidth(), rBitmap.GetHeight()}
+    POINTL                          vPoint[4] = { 0 ,0, rBitmap.GetWidth(), rBitmap.GetHeight(),
+                                                  0, 0, rBitmap.GetWidth(), rBitmap.GetHeight()
                                                 };
 
     if (m_hMaskBitmap)
@@ -1283,7 +1276,7 @@ bool wxMask::Create(
     }
     if (!rBitmap.Ok() || rBitmap.GetDepth() != 1)
     {
-        return false;
+        return(FALSE);
     }
 
     memset(&vBmih, '\0', sizeof(BITMAPINFOHEADER2));
@@ -1314,7 +1307,7 @@ bool wxMask::Create(
     ::GpiDestroyPS(hPSDst);
     ::DevCloseDC(hDCSrc);
     ::DevCloseDC(hDCDst);
-    return true;
+    return(TRUE);
 } // end of wxMask::Create
 
 // Create a mask from a bitmap and a palette index indicating
@@ -1351,7 +1344,7 @@ bool wxMask::Create(
                           ));
         }
     }
-    return false;
+    return(FALSE);
 } // end of wxMask::Create
 
 // Create a mask from a bitmap and a colour indicating
@@ -1361,7 +1354,7 @@ bool wxMask::Create(
 , const wxColour&                   rColour
 )
 {
-    bool                            bOk = true;
+    bool                            bOk = TRUE;
     COLORREF                        vMaskColour = OS2RGB( rColour.Red()
                                                          ,rColour.Green()
                                                          ,rColour.Blue()
@@ -1373,6 +1366,9 @@ bool wxMask::Create(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
+    POINTL                          vPoint[4] = { 0 ,0, rBitmap.GetWidth(), rBitmap.GetHeight(),
+                                                  0, 0, rBitmap.GetWidth(), rBitmap.GetHeight()
+                                                };
 
     if (m_hMaskBitmap)
     {
@@ -1381,7 +1377,7 @@ bool wxMask::Create(
     }
     if (!rBitmap.Ok())
     {
-        return false;
+        return(FALSE);
     }
 
     //
@@ -1422,7 +1418,7 @@ bool wxMask::Create(
                 //
                 // Doesn't make sense to continue
                 //
-                bOk = false;
+                bOk = FALSE;
                 break;
             }
 
@@ -1444,30 +1440,32 @@ bool wxMask::Create(
     ::GpiDestroyPS(hPSDst);
     ::DevCloseDC(hDCSrc);
     ::DevCloseDC(hDCDst);
-    return true;
+    return(TRUE);
 } // end of wxMask::Create
 
 // ----------------------------------------------------------------------------
 // wxBitmapHandler
 // ----------------------------------------------------------------------------
 
-bool wxBitmapHandler::Create( wxGDIImage* pImage,
-                              void*       pData,
-                              long        WXUNUSED(lFlags),
-                              int         nWidth,
-                              int         nHeight,
-                              int         nDepth)
+bool wxBitmapHandler::Create(
+  wxGDIImage*                       pImage
+, void*                             pData
+, long                              lFlags
+, int                               nWidth
+, int                               nHeight
+, int                               nDepth
+)
 {
-    wxBitmap* pBitmap = wxDynamicCast( pImage
-                                      ,wxBitmap
-                                       );
+    wxBitmap*                       pBitmap = wxDynamicCast( pImage
+                                                            ,wxBitmap
+                                                           );
 
     return(pBitmap ? Create( pBitmap
                             ,pData
                             ,nWidth
                             ,nHeight
                             ,nDepth
-                           ) : false);
+                           ) : FALSE);
 }
 
 bool wxBitmapHandler::Load(
@@ -1487,7 +1485,7 @@ bool wxBitmapHandler::Load(
                               ,lFlags
                               ,nWidth
                               ,nHeight
-                             ) : false);
+                             ) : FALSE);
 }
 
 bool wxBitmapHandler::Save(
@@ -1503,7 +1501,7 @@ bool wxBitmapHandler::Save(
     return(pBitmap ? SaveFile( pBitmap
                               ,rName
                               ,lType
-                             ) : false);
+                             ) : FALSE);
 }
 
 bool wxBitmapHandler::Create(
@@ -1515,7 +1513,7 @@ bool wxBitmapHandler::Create(
 , int                               WXUNUSED(nDepth)
 )
 {
-    return false;
+    return(FALSE);
 }
 
 bool wxBitmapHandler::LoadFile(
@@ -1526,18 +1524,7 @@ bool wxBitmapHandler::LoadFile(
 , int                               WXUNUSED(nDesiredHeight)
 )
 {
-    return false;
-}
-
-bool wxBitmapHandler::LoadFile(
-  wxBitmap*                         WXUNUSED(pBitmap)
-, const wxString&                   WXUNUSED(rName)
-, long                              WXUNUSED(lType)
-, int                               WXUNUSED(nDesiredWidth)
-, int                               WXUNUSED(nDesiredHeight)
-)
-{
-    return false;
+    return(FALSE);
 }
 
 bool wxBitmapHandler::SaveFile(
@@ -1547,7 +1534,7 @@ bool wxBitmapHandler::SaveFile(
 , const wxPalette*                  WXUNUSED(pPalette)
 )
 {
-    return false;
+    return(FALSE);
 }
 
 // ----------------------------------------------------------------------------
@@ -1584,8 +1571,8 @@ HBITMAP wxInvertMask(
     HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
     HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
     HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL                          vPoint[4] = { {0 ,0}, {nWidth, nHeight},
-                                                  {0, 0}, {nWidth, nHeight}
+    POINTL                          vPoint[4] = { 0 ,0, nWidth, nHeight,
+                                                  0, 0, nWidth, nHeight
                                                 };
 
     memset(&vBmih, '\0', 16);
@@ -1621,79 +1608,3 @@ HBITMAP wxInvertMask(
     return hBmpInvMask;
 } // end of WxWinGdi_InvertMask
 
-HBITMAP wxFlipBmp( HBITMAP hBmp, int nWidth, int nHeight )
-{
-    wxCHECK_MSG( hBmp, 0, _T("invalid bitmap in wxFlipBmp") );
-
-    //
-    // Get width/height from the bitmap if not given
-    //
-    if (!nWidth || !nHeight)
-    {
-        BITMAPINFOHEADER2 vBmhdr;
-
-        vBmhdr.cbFix  = 16;
-        ::GpiQueryBitmapInfoHeader( hBmp,
-                                    &vBmhdr );
-        nWidth        = (int)vBmhdr.cx;
-        nHeight       = (int)vBmhdr.cy;
-    }
-
-    BITMAPINFOHEADER2 vBmih;
-    SIZEL             vSize     = {0, 0};
-    DEVOPENSTRUC      vDop      = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC               hDCSrc    = ::DevOpenDC(  vHabmain,
-                                                OD_MEMORY,
-                                                "*",
-                                                5L,
-                                                (PDEVOPENDATA)&vDop,
-                                                NULLHANDLE  );
-    HDC               hDCDst    = ::DevOpenDC(  vHabmain,
-                                                OD_MEMORY,
-                                                "*",
-                                                5L,
-                                                (PDEVOPENDATA)&vDop,
-                                                NULLHANDLE  );
-    HPS               hPSSrc    = ::GpiCreatePS(  vHabmain,
-                                                  hDCSrc,
-                                                  &vSize,
-                                                  PU_PELS | GPIA_ASSOC  );
-    HPS               hPSDst    = ::GpiCreatePS(  vHabmain,
-                                                  hDCDst,
-                                                  &vSize,
-                                                  PU_PELS | GPIA_ASSOC  );
-    POINTL            vPoint[4] = { {0,      nHeight},
-                                    {nWidth, 0},
-                                    {0,      0},
-                                    {nWidth, nHeight} };
-
-    memset(&vBmih, '\0', 16);
-    vBmih.cbFix     = 16;
-    vBmih.cx        = nWidth;
-    vBmih.cy        = nHeight;
-    vBmih.cPlanes   = 1;
-    vBmih.cBitCount = 24;
-
-    HBITMAP hInvBmp = ::GpiCreateBitmap(  hPSDst,
-                                          &vBmih,
-                                          0L,
-                                          NULL,
-                                          NULL  );
-
-    ::GpiSetBitmap(hPSSrc, (HBITMAP) hBmp);
-    ::GpiSetBitmap(hPSDst, (HBITMAP) hInvBmp);
-
-    ::GpiBitBlt(  hPSDst,
-                  hPSSrc,
-                  4L,
-                  vPoint,
-                  ROP_SRCCOPY,
-                  BBO_IGNORE  );
-
-    ::GpiDestroyPS(hPSSrc);
-    ::GpiDestroyPS(hPSDst);
-    ::DevCloseDC(hDCSrc);
-    ::DevCloseDC(hDCDst);
-
-    return hInvBmp;
-} // end of wxFlipBmp

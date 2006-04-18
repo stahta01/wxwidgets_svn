@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/scrolbar.cpp
+// Name:        scrolbar.cpp
 // Purpose:     wxScrollBar
 // Author:      David Webster
 // Modified by:
@@ -13,7 +13,8 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
+#include "wx/defs.h"
+#include "wx/utils.h"
 #endif
 
 #include "wx/scrolbar.h"
@@ -22,25 +23,23 @@
 IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
 
 // Scrollbar
-bool wxScrollBar::Create(wxWindow* pParent,
-                         wxWindowID vId,
-                         const wxPoint& rPos,
-                         const wxSize& rSize,
-                         long lStyle,
-#if wxUSE_VALIDATORS
-                         const wxValidator& rValidator,
-#endif
-                         const wxString& rsName
-                        )
+bool wxScrollBar::Create (
+  wxWindow*                         pParent
+, wxWindowID                        vId
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxValidator&                rValidator
+, const wxString&                   rsName
+)
 {
-    int nX = rPos.x;
-    int nY = rPos.y;
-    int nWidth = rSize.x;
-    int nHeight = rSize.y;
+    int                             nX = rPos.x;
+    int                             nY = rPos.y;
+    int                             nWidth = rSize.x;
+    int                             nHeight = rSize.y;
 
     if (!pParent)
-        return false;
-
+        return FALSE;
     pParent->AddChild(this);
     SetName(rsName);
 #if wxUSE_VALIDATORS
@@ -49,19 +48,19 @@ bool wxScrollBar::Create(wxWindow* pParent,
     SetBackgroundColour(pParent->GetBackgroundColour()) ;
     SetForegroundColour(pParent->GetForegroundColour()) ;
 
-    if (vId == wxID_ANY)
+    if (vId == -1L)
         m_windowId = (int)NewControlId();
     else
         m_windowId = vId;
 
-    if (nWidth == wxDefaultCoord)
+    if (nWidth == -1)
     {
         if (lStyle & wxHORIZONTAL)
             nWidth = 140;
         else
             nWidth = 14;
     }
-    if (nHeight == wxDefaultCoord)
+    if (nHeight == -1)
     {
         if (lStyle & wxVERTICAL)
             nHeight = 140;
@@ -74,19 +73,19 @@ bool wxScrollBar::Create(wxWindow* pParent,
     if (GetWindowStyleFlag() & wxCLIP_SIBLINGS)
         dwStyle |= WS_CLIPSIBLINGS;
 
-    DWORD dwDirection = (lStyle & wxHORIZONTAL) ? SBS_HORZ: SBS_VERT;
+    DWORD                           dwDirection = (lStyle & wxHORIZONTAL) ? SBS_HORZ: SBS_VERT;
 
-    HWND hScrollBar = ::WinCreateWindow( (HWND)GetHwndOf(pParent)
-                                         ,WC_SCROLLBAR
-                                         ,(PSZ)NULL
-                                         ,dwDirection | dwStyle
-                                         ,0, 0, 0, 0
-                                         ,(HWND)GetHwndOf(pParent)
-                                         ,HWND_TOP
-                                         ,(HMENU)m_windowId
-                                         ,NULL
-                                         ,NULL
-                                         );
+    HWND                            hScrollBar = ::WinCreateWindow( (HWND)GetHwndOf(pParent)
+                                                                   ,WC_SCROLLBAR
+                                                                   ,(PSZ)NULL
+                                                                   ,dwDirection | dwStyle
+                                                                   ,0, 0, 0, 0
+                                                                   ,(HWND)GetHwndOf(pParent)
+                                                                   ,HWND_TOP
+                                                                   ,(HMENU)m_windowId
+                                                                   ,NULL
+                                                                   ,NULL
+                                                                  );
 
     m_nPageSize = 1;
     m_nViewSize = 1;
@@ -96,7 +95,9 @@ bool wxScrollBar::Create(wxWindow* pParent,
                  ,(MPARAM)0
                  ,MPFROM2SHORT(0,1)
                 );
-    ::WinShowWindow( hScrollBar, TRUE );
+    ::WinShowWindow( hScrollBar
+                    ,TRUE
+                   );
     SetFont(*wxSMALL_FONT);
 
     m_hWnd = hScrollBar;
@@ -110,26 +111,28 @@ bool wxScrollBar::Create(wxWindow* pParent,
             ,nWidth
             ,nHeight
            );
-    return true;
+    return TRUE;
 } // end of wxScrollBar::Create
 
 wxScrollBar::~wxScrollBar()
 {
 }
 
-bool wxScrollBar::OS2OnScroll ( int    WXUNUSED(nOrientation),
-                                WXWORD wParam,
-                                WXWORD wPos,
-                                WXHWND WXUNUSED(hControl) )
+bool wxScrollBar::OS2OnScroll (
+  int                               nOrientation
+, WXWORD                            wParam
+, WXWORD                            wPos
+, WXHWND                            hControl
+)
 {
-    int         nPosition;
-    int         nMaxPos;
-    int         nTrackPos = wPos;
-    int         nMinPos;
-    int         nScrollInc;
-    wxEventType vScrollEvent = wxEVT_NULL;
+    int                             nPosition;
+    int                             nMaxPos;
+    int                             nTrackPos = wPos;
+    int                             nMinPos;
+    int                             nScrollInc;
+    wxEventType                     vScrollEvent = wxEVT_NULL;
 
-    MRESULT     vRange;
+    MRESULT                         vRange;
 
     //
     // When we're dragging the scrollbar we can't use pos parameter because it
@@ -190,7 +193,7 @@ bool wxScrollBar::OS2OnScroll ( int    WXUNUSED(nOrientation),
 
         case SB_ENDSCROLL:
             nScrollInc   = 0;
-            vScrollEvent = wxEVT_SCROLL_CHANGED;
+            vScrollEvent = wxEVT_SCROLL_ENDSCROLL;
             break;
 
         default:
@@ -207,14 +210,14 @@ bool wxScrollBar::OS2OnScroll ( int    WXUNUSED(nOrientation),
         SetThumbPosition(nPosition);
     }
     else if ( vScrollEvent != wxEVT_SCROLL_THUMBRELEASE &&
-              vScrollEvent != wxEVT_SCROLL_CHANGED
+              vScrollEvent != wxEVT_SCROLL_ENDSCROLL
             )
     {
         //
         // Don't process the event if there is no displacement,
         // unless this is a thumb release or end scroll event.
         //
-        return false;
+        return FALSE;
     }
 
     wxScrollEvent                   vEvent( vScrollEvent
@@ -227,13 +230,15 @@ bool wxScrollBar::OS2OnScroll ( int    WXUNUSED(nOrientation),
     return GetEventHandler()->ProcessEvent(vEvent);
 } // end of wxScrollBar::OS2OnScroll
 
-void wxScrollBar::SetThumbPosition ( int nViewStart )
+void wxScrollBar::SetThumbPosition (
+  int                               nViewStart
+)
 {
     SBCDATA                        vInfo;
 
     memset(&vInfo, '\0', sizeof(SBCDATA));
     vInfo.cb       = sizeof(SBCDATA);
-    vInfo.posThumb = (SHORT)nViewStart;
+    vInfo.posThumb = nViewStart;
 
     ::WinSendMsg((HWND)GetHwnd(), WM_SETWINDOWPARAMS, (MPARAM)&vInfo, (MPARAM)NULL);
     ::WinSendMsg((HWND)GetHwnd(), SBM_SETPOS, (MPARAM)nViewStart, (MPARAM)NULL);
@@ -244,11 +249,13 @@ int wxScrollBar::GetThumbPosition() const
     return((int)(MRESULT)::WinSendMsg((HWND)GetHwnd(), SBM_QUERYPOS, (MPARAM)NULL, (MPARAM)NULL));
 } // end of wxScrollBar::GetThumbPosition
 
-void wxScrollBar::SetScrollbar ( int  nPosition,
-                                 int  nThumbSize,
-                                 int  nRange,
-                                 int  nPageSize,
-                                 bool WXUNUSED(bRefresh) )
+void wxScrollBar::SetScrollbar (
+  int                               nPosition
+, int                               nThumbSize
+, int                               nRange
+, int                               nPageSize
+, bool                              bRefresh
+)
 {
     SBCDATA                         vInfo;
     //
@@ -271,20 +278,22 @@ void wxScrollBar::SetScrollbar ( int  nPosition,
         nRange1 += (m_nPageSize - 1);
     }
     vInfo.cb = sizeof(SBCDATA);
-    vInfo.cVisible = (SHORT)m_nPageSize;
+    vInfo.cVisible = m_nPageSize;
     vInfo.posFirst = 0;
-    vInfo.posLast  = (SHORT)nRange1;
-    vInfo.posThumb = (SHORT)nPosition;
+    vInfo.posLast  = nRange1;
+    vInfo.posThumb = nPosition;
 
     ::WinSendMsg((HWND)GetHwnd(), WM_SETWINDOWPARAMS, (MPARAM)&vInfo, (MPARAM)NULL);
 } // end of wxScrollBar::SetScrollbar
 
-WXHBRUSH wxScrollBar::OnCtlColor ( WXHDC    WXUNUSED(hDC),
-                                   WXHWND   WXUNUSED(hWnd),
-                                   WXUINT   WXUNUSED(uCtlColor),
-                                   WXUINT   WXUNUSED(uMessage),
-                                   WXWPARAM WXUNUSED(wParam),
-                                   WXLPARAM WXUNUSED(lParam) )
+WXHBRUSH wxScrollBar::OnCtlColor (
+  WXHDC                             hDC
+, WXHWND                            hWnd
+, WXUINT                            uCtlColor
+, WXUINT                            uMessage
+, WXWPARAM                          wParam
+, WXLPARAM                          lParam
+)
 {
     //
     // Does nothing under OS/2
@@ -292,8 +301,11 @@ WXHBRUSH wxScrollBar::OnCtlColor ( WXHDC    WXUNUSED(hDC),
     return 0;
 } // end of wxScrollBar::OnCtlColor
 
-void wxScrollBar::Command ( wxCommandEvent& rEvent )
+void wxScrollBar::Command (
+  wxCommandEvent&                   rEvent
+)
 {
-    SetThumbPosition(rEvent.GetInt());
+    SetThumbPosition(rEvent.m_commandInt);
     ProcessCommand(rEvent);
 } // end of wxScrollBar::Command
+

@@ -7,9 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/statline.h"
 
 #if wxUSE_STATLINE
@@ -70,16 +67,11 @@ bool wxStaticLine::Create( wxWindow *parent, wxWindowID id,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    Show( TRUE );
 
     return TRUE;
-}
-
-// static
-wxVisualAttributes
-wxStaticLine::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_vseparator_new);
 }
 
 #endif

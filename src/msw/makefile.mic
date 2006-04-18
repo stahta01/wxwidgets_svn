@@ -1,7 +1,7 @@
 ##############################################################################
 # Microwindows template Makefile
 # Copyright (c) 2000 Martin Jolicoeur, Greg Haerr
-# Licence:   wxWindows Licence
+# Licence:  wxWindows Licence
 ##############################################################################
 
 TOP=$(MICROWINDOWS)
@@ -141,6 +141,7 @@ COMMONOBJS  = \
 		$(COMMDIR)/process.$(OBJSUFF) \
 		$(COMMDIR)/quantize.$(OBJSUFF) \
 		$(COMMDIR)/radiocmn.$(OBJSUFF) \
+		$(COMMDIR)/resource.$(OBJSUFF) \
 		$(COMMDIR)/sizer.$(OBJSUFF) \
 		$(COMMDIR)/statbar.$(OBJSUFF) \
 		$(COMMDIR)/strconv.$(OBJSUFF) \

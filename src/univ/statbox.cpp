@@ -6,7 +6,7 @@
 // Created:     25.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -51,15 +51,12 @@ bool wxStaticBox::Create(wxWindow *parent,
                          long style,
                          const wxString &name)
 {
-    // FIXME refresh just the right/bottom parts affected in OnSize
-    style |= wxFULL_REPAINT_ON_RESIZE;
-
     if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return false;
+        return FALSE;
 
     SetLabel(label);
 
-    return true;
+    return TRUE;
 }
 
 void wxStaticBox::DoDraw(wxControlRenderer *renderer)

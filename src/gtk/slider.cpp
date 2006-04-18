@@ -7,16 +7,22 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/slider.h"
 
 #if wxUSE_SLIDER
 
 #include "wx/utils.h"
-#include "wx/math.h"
+
+#include <math.h>
+
 #include "wx/gtk/private.h"
+
+//-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 
 //-----------------------------------------------------------------------------
 // data
@@ -24,63 +30,14 @@
 
 extern bool g_blockEventsOnDrag;
 
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
-
-// compare 2 adjustment values up to some (hardcoded) precision
-static inline bool AreSameAdjustValues(double x, double y)
-{
-    return fabs(x - y) < 0.02;
-}
-
-static inline int AdjustValueToInt(double x)
-{
-    // we want to round to the nearest integer, i.e. 0.9 is rounded to 1 and
-    // -0.9 is rounded to -1
-    return (int)(x < 0 ? x - 0.5 : x + 0.5);
-}
-
-// process a scroll event
-static void
-ProcessScrollEvent(wxSlider *win, wxEventType evtType, double dvalue)
-{
-    const int orient = win->HasFlag(wxSL_VERTICAL) ? wxVERTICAL
-                                                   : wxHORIZONTAL;
-
-    const int value = (int)(dvalue < 0 ? dvalue - 0.5 : dvalue + 0.5);
-
-    // if we have any "special" event (i.e. the value changed by a line or a
-    // page), send this specific event first
-    if ( evtType != wxEVT_NULL )
-    {
-        wxScrollEvent event( evtType, win->GetId(), value, orient );
-        event.SetEventObject( win );
-        win->GetEventHandler()->ProcessEvent( event );
-    }
-
-    // but, in any case, except if we're dragging the slider (and so the change
-    // is not definitive), send a generic "changed" event
-    if ( evtType != wxEVT_SCROLL_THUMBTRACK )
-    {
-        wxScrollEvent event(wxEVT_SCROLL_CHANGED, win->GetId(), value, orient);
-        event.SetEventObject( win );
-        win->GetEventHandler()->ProcessEvent( event );
-    }
-
-    // and also generate a command event for compatibility
-    wxCommandEvent event( wxEVT_COMMAND_SLIDER_UPDATED, win->GetId() );
-    event.SetEventObject( win );
-    event.SetInt( value );
-    win->GetEventHandler()->ProcessEvent( event );
-}
+static const float sensitivity = 0.02;
 
 //-----------------------------------------------------------------------------
 // "value_changed"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_slider_callback( GtkAdjustment *adjust,
+                                 SCROLLBAR_CBACK_ARG
                                  wxSlider *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -88,58 +45,27 @@ static void gtk_slider_callback( GtkAdjustment *adjust,
     if (!win->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    const double dvalue = adjust->value;
-    const double diff = dvalue - win->m_oldPos;
-    if ( AreSameAdjustValues(diff, 0) )
-        return;
+    float diff = adjust->value - win->m_oldPos;
+    if (fabs(diff) < sensitivity) return;
 
-    wxEventType evtType;
-    if ( win->m_isScrolling )
-        evtType = wxEVT_SCROLL_THUMBTRACK;
-    // it could seem that UP/DOWN are inversed but this is what wxMSW does
-    else if ( AreSameAdjustValues(diff, adjust->step_increment) )
-        evtType = wxEVT_SCROLL_LINEDOWN;
-    else if ( AreSameAdjustValues(diff, -adjust->step_increment) )
-        evtType = wxEVT_SCROLL_LINEUP;
-    else if ( AreSameAdjustValues(diff, adjust->page_increment) )
-        evtType = wxEVT_SCROLL_PAGEDOWN;
-    else if ( AreSameAdjustValues(diff, -adjust->page_increment) )
-        evtType = wxEVT_SCROLL_PAGEUP;
-    else if ( AreSameAdjustValues(adjust->value, adjust->lower) )
-        evtType = wxEVT_SCROLL_TOP;
-    else if ( AreSameAdjustValues(adjust->value, adjust->upper) )
-        evtType = wxEVT_SCROLL_BOTTOM;
-    else
-        evtType = wxEVT_NULL; // wxEVT_SCROLL_CHANGED will still be generated
+    win->m_oldPos = adjust->value;
 
-    ProcessScrollEvent(win, evtType, dvalue);
+    wxEventType command = GtkScrollTypeToWx(GET_SCROLL_TYPE(win->m_widget));
 
-    win->m_oldPos = dvalue;
-}
+    double dvalue = adjust->value;
+    int value = (int)(dvalue < 0 ? dvalue - 0.5 : dvalue + 0.5);
 
-static gint gtk_slider_button_press_callback( GtkWidget * /* widget */,
-                                              GdkEventButton * /* gdk_event */,
-                                              wxWindowGTK *win)
-{
-    // indicate that the thumb is being dragged with the mouse
-    win->m_isScrolling = true;
+    int orient = win->GetWindowStyleFlag() & wxSL_VERTICAL ? wxVERTICAL
+                                                           : wxHORIZONTAL;
 
-    return FALSE;
-}
+    wxScrollEvent event( command, win->GetId(), value, orient );
+    event.SetEventObject( win );
+    win->GetEventHandler()->ProcessEvent( event );
 
-static gint gtk_slider_button_release_callback( GtkWidget *scale,
-                                                GdkEventButton * /* gdk_event */,
-                                                wxSlider *win)
-{
-    // not scrolling any longer
-    win->m_isScrolling = false;
-
-    ProcessScrollEvent(win, wxEVT_SCROLL_THUMBRELEASE,
-                       GTK_RANGE(scale)->adjustment->value);
-
-    return FALSE;
-}
-
+    wxCommandEvent cevent( wxEVT_COMMAND_SLIDER_UPDATED, win->GetId() );
+    cevent.SetEventObject( win );
+    cevent.SetInt( value );
+    win->GetEventHandler()->ProcessEvent( cevent );
 }
 
 //-----------------------------------------------------------------------------
@@ -201,52 +127,49 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     m_adjust = gtk_range_get_adjustment( GTK_RANGE(m_widget) );
 
-    if (style & wxSL_INVERSE)
-        gtk_range_set_inverted( GTK_RANGE(m_widget), TRUE );
-
     GtkEnableEvents();
-    g_signal_connect (m_widget, "button_press_event",
-                      G_CALLBACK (gtk_slider_button_press_callback),
-                      this);
-    g_signal_connect (m_widget, "button_release_event",
-                      G_CALLBACK (gtk_slider_button_release_callback),
-                      this);
 
     SetRange( minValue, maxValue );
     SetValue( value );
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    SetBackgroundColour( parent->GetBackgroundColour() );
+
+    Show( TRUE );
 
     return TRUE;
 }
 
 int wxSlider::GetValue() const
 {
-    return AdjustValueToInt(m_adjust->value);
+    // we want to round to the nearest integer, i.e. 0.9 is rounded to 1 and
+    // -0.9 is rounded to -1
+    double val = m_adjust->value;
+    return (int)(val < 0 ? val - 0.5 : val + 0.5);
 }
 
 void wxSlider::SetValue( int value )
 {
-    double fpos = (double)value;
+    float fpos = (float)value;
     m_oldPos = fpos;
-    if ( AreSameAdjustValues(fpos, m_adjust->value) )
-        return;
+    if (fabs(fpos-m_adjust->value) < 0.2) return;
 
     m_adjust->value = fpos;
 
     GtkDisableEvents();
-
-    g_signal_emit_by_name (m_adjust, "value_changed");
-
+    
+    gtk_signal_emit_by_name( GTK_OBJECT(m_adjust), "value_changed" );
+    
     GtkEnableEvents();
 }
 
 void wxSlider::SetRange( int minValue, int maxValue )
 {
-    double fmin = (double)minValue;
-    double fmax = (double)maxValue;
+    float fmin = (float)minValue;
+    float fmax = (float)maxValue;
 
     if ((fabs(fmin-m_adjust->lower) < 0.2) &&
         (fabs(fmax-m_adjust->upper) < 0.2))
@@ -260,9 +183,9 @@ void wxSlider::SetRange( int minValue, int maxValue )
     m_adjust->page_increment = ceil((fmax-fmin) / 10.0);
 
     GtkDisableEvents();
-
-    g_signal_emit_by_name (m_adjust, "changed");
-
+    
+    gtk_signal_emit_by_name( GTK_OBJECT(m_adjust), "changed" );
+    
     GtkEnableEvents();
 }
 
@@ -278,16 +201,16 @@ int wxSlider::GetMax() const
 
 void wxSlider::SetPageSize( int pageSize )
 {
-    double fpage = (double)pageSize;
+    float fpage = (float)pageSize;
 
     if (fabs(fpage-m_adjust->page_increment) < 0.2) return;
 
     m_adjust->page_increment = fpage;
 
     GtkDisableEvents();
-
-    g_signal_emit_by_name (m_adjust, "changed");
-
+    
+    gtk_signal_emit_by_name( GTK_OBJECT(m_adjust), "changed" );
+    
     GtkEnableEvents();
 }
 
@@ -298,16 +221,16 @@ int wxSlider::GetPageSize() const
 
 void wxSlider::SetThumbLength( int len )
 {
-    double flen = (double)len;
+    float flen = (float)len;
 
     if (fabs(flen-m_adjust->page_size) < 0.2) return;
 
     m_adjust->page_size = flen;
 
     GtkDisableEvents();
-
-    g_signal_emit_by_name (m_adjust, "changed");
-
+    
+    gtk_signal_emit_by_name( GTK_OBJECT(m_adjust), "changed" );
+    
     GtkEnableEvents();
 }
 
@@ -328,27 +251,36 @@ int wxSlider::GetLineSize() const
 bool wxSlider::IsOwnGtkWindow( GdkWindow *window )
 {
     GtkRange *range = GTK_RANGE(m_widget);
+#ifdef __WXGTK20__
     return (range->event_window == window);
+#else
+    return ( (window == GTK_WIDGET(range)->window)
+                || (window == range->trough)
+                || (window == range->slider)
+                || (window == range->step_forw)
+                || (window == range->step_back) );
+#endif
+}
+
+void wxSlider::ApplyWidgetStyle()
+{
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
 void wxSlider::GtkDisableEvents()
 {
-    g_signal_handlers_disconnect_by_func (m_adjust,
-                                          (gpointer) gtk_slider_callback,
-                                          this);
+    gtk_signal_disconnect_by_func( GTK_OBJECT(m_adjust),
+                        GTK_SIGNAL_FUNC(gtk_slider_callback),
+                        (gpointer) this );
 }
 
 void wxSlider::GtkEnableEvents()
 {
-    g_signal_connect (m_adjust, "value_changed",
-                      G_CALLBACK (gtk_slider_callback), this);
-}
-
-// static
-wxVisualAttributes
-wxSlider::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_vscale_new);
+    gtk_signal_connect( GTK_OBJECT (m_adjust),
+                        "value_changed",
+                        GTK_SIGNAL_FUNC(gtk_slider_callback),
+                        (gpointer) this );
 }
 
 #endif

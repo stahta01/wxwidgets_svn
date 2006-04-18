@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     26.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets Team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows Team
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DND_H_BASE_
@@ -93,9 +93,9 @@ public:
     virtual wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly) = 0;
 
     // override to give feedback depending on the current operation result
-    // "effect" and return true if you did something, false to let the library
+    // "effect" and return TRUE if you did something, FALSE to let the library
     // give the default feedback
-    virtual bool GiveFeedback(wxDragResult WXUNUSED(effect)) { return false; }
+    virtual bool GiveFeedback(wxDragResult WXUNUSED(effect)) { return FALSE; }
 
 protected:
     const wxCursor& GetCursor(wxDragResult res) const
@@ -115,8 +115,6 @@ protected:
     wxCursor m_cursorCopy,
              m_cursorMove,
              m_cursorStop;
-
-    DECLARE_NO_COPY_CLASS(wxDropSourceBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -137,7 +135,7 @@ public:
     // by wxDropTarget and deleted by it automatically. If you don't give it
     // here, you can use SetDataObject() later.
     wxDropTargetBase(wxDataObject *dataObject = (wxDataObject*)NULL)
-        { m_dataObject = dataObject; m_defaultAction = wxDragNone; }
+        { m_dataObject = dataObject; }
     // dtor deletes our data object
     virtual ~wxDropTargetBase()
         { delete m_dataObject; }
@@ -173,7 +171,7 @@ public:
     virtual void OnLeave() { }
 
     // this function is called when data is dropped at position (x, y) - if it
-    // returns true, OnData() will be called immediately afterwards which will
+    // returns TRUE, OnData() will be called immediately afterwards which will
     // allow to retrieve the data dropped.
     virtual bool OnDrop(wxCoord x, wxCoord y) = 0;
 
@@ -185,26 +183,11 @@ public:
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) = 0;
 
     // may be called *only* from inside OnData() and will fill m_dataObject
-    // with the data from the drop source if it returns true
+    // with the data from the drop source if it returns TRUE
     virtual bool GetData() = 0;
-
-    // sets the default action for drag and drop:
-    // use wxDragMove or wxDragCopy to set deafult action to move or copy
-    // and use wxDragNone (default) to set default action specified by
-    // initialization of draging (see wxDropSourceBase::DoDragDrop())
-    void SetDefaultAction(wxDragResult action)
-        { m_defaultAction = action; }
-
-    // returns default action for drag and drop or
-    // wxDragNone if this not specified
-    wxDragResult GetDefaultAction()
-        { return m_defaultAction; }
 
 protected:
     wxDataObject *m_dataObject;
-    wxDragResult m_defaultAction;
-
-    DECLARE_NO_COPY_CLASS(wxDropTargetBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -218,14 +201,14 @@ protected:
     #include "wx/motif/dnd.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dnd.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dnd.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dnd.h"
+    #include "wx/gtk/dnd.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dnd.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dnd.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -242,9 +225,6 @@ public:
     virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
 
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxTextDropTarget)
 };
 
 // A drop target which accepts files (dragged from File Manager or Explorer)
@@ -258,9 +238,6 @@ public:
                              const wxArrayString& filenames) = 0;
 
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFileDropTarget)
 };
 
 #endif // wxUSE_DRAG_AND_DROP

@@ -20,7 +20,7 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRegion;
+class wxRegion;
 
 //-----------------------------------------------------------------------------
 // constants
@@ -47,7 +47,7 @@ enum wxRegionOp
 // wxRegion
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRegion : public wxGDIObject
+class wxRegion : public wxGDIObject
 {
 public:
     wxRegion() { }
@@ -70,22 +70,22 @@ public:
 
     wxRegion( size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
 
-    wxRegion( const wxBitmap& bmp)
-    {
-        Union(bmp);
-    }
     wxRegion( const wxBitmap& bmp,
-              const wxColour& transColour, int tolerance = 0)
+              const wxColour& transColour = wxNullColour,
+              int   tolerance = 0)
     {
         Union(bmp, transColour, tolerance);
     }
 
     ~wxRegion();
 
+    wxRegion( const wxRegion& region ) { Ref(region); }
+    wxRegion& operator = ( const wxRegion& region ) { Ref(region); return *this; }
+
     bool Ok() const { return m_refData != NULL; }
 
-    bool operator == ( const wxRegion& region ) const;
-    bool operator != ( const wxRegion& region ) const { return !(*this == region); }
+    bool operator == ( const wxRegion& region );
+    bool operator != ( const wxRegion& region ) { return !(*this == region); }
 
     void Clear();
 
@@ -123,13 +123,12 @@ public:
     wxBitmap ConvertToBitmap() const;
 
     // Use the non-transparent pixels of a wxBitmap for the region to combine
-    // with this region.  First version takes transparency from bitmap's mask,
-    // second lets the user specify the colour to be treated as transparent
+    // with this region.  If the bitmap has a mask then it will be used,
+    // otherwise the colour to be treated as transparent may be specified,
     // along with an optional tolerance value.
-    // NOTE: implemented in common/rgncmn.cpp
-    bool Union(const wxBitmap& bmp);
     bool Union(const wxBitmap& bmp,
-               const wxColour& transColour, int tolerance = 0);
+               const wxColour& transColour = wxNullColour,
+               int   tolerance = 0);
 
 
 public:
@@ -144,14 +143,14 @@ protected:
     void InitRect(wxCoord x, wxCoord y, wxCoord w, wxCoord h);
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxRegion)
+    DECLARE_DYNAMIC_CLASS(wxRegion);
 };
 
 // ----------------------------------------------------------------------------
 // wxRegionIterator: decomposes a region into rectangles
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRegionIterator: public wxObject
+class wxRegionIterator: public wxObject
 {
 public:
     wxRegionIterator();
@@ -179,7 +178,7 @@ private:
     wxRegion m_region;
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxRegionIterator)
+    DECLARE_DYNAMIC_CLASS(wxRegionIterator);
 };
 
 #endif

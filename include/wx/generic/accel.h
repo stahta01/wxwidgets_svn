@@ -23,12 +23,16 @@ public:
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
     virtual ~wxAcceleratorTable();
 
-#if WXWIN_COMPATIBILITY_2_4
+    wxAcceleratorTable(const wxAcceleratorTable& accel)
+        : wxObject()
+        { Ref(accel); }
+    wxAcceleratorTable& operator=(const wxAcceleratorTable& accel)
+      { if ( m_refData != accel.m_refData ) Ref(accel); return *this; }
+
     bool operator==(const wxAcceleratorTable& accel) const
-        { return m_refData == accel.m_refData; }
+        { return m_refData == accel.m_refData; } // FIXME: this is wrong (VZ)
     bool operator!=(const wxAcceleratorTable& accel) const
         { return !(*this == accel); }
-#endif
 
     bool Ok() const;
 

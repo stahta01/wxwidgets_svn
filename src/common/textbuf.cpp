@@ -3,9 +3,8 @@
 // Purpose:     implementation of wxTextBuffer class
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
-// RCS-ID:      $Id$
-// Copyright:   (c) 1998-2001 wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) 1998-2001 wxWindows team
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -40,13 +39,13 @@
 //   - Mac when compiling with CodeWarrior (__WXMAC__)
 
 const wxTextFileType wxTextBuffer::typeDefault =
-#if defined(__WINDOWS__) || defined(__DOS__) || defined(__PALMOS__)
+#if defined(__WINDOWS__) || defined(__DOS__)
   wxTextFileType_Dos;
 #elif defined(__UNIX__)
   wxTextFileType_Unix;
 #elif defined(__WXMAC__)
   wxTextFileType_Mac;
-#elif defined(__OS2__)
+#elif defined(__WXPM__)
   wxTextFileType_Os2;
 #else
   wxTextFileType_None;
@@ -60,7 +59,7 @@ const wxChar *wxTextBuffer::GetEOL(wxTextFileType type)
             wxFAIL_MSG(wxT("bad buffer type in wxTextBuffer::GetEOL."));
             // fall through nevertheless - we must return something...
 
-        case wxTextFileType_None: return wxEmptyString;
+        case wxTextFileType_None: return wxT("");
         case wxTextFileType_Unix: return wxT("\n");
         case wxTextFileType_Dos:  return wxT("\r\n");
         case wxTextFileType_Mac:  return wxT("\r");
@@ -74,7 +73,7 @@ wxString wxTextBuffer::Translate(const wxString& text, wxTextFileType type)
         return text;
 
     // nor if it is empty
-    if ( text.empty() )
+    if ( text.IsEmpty() )
         return text;
 
     wxString eol = GetEOL(type), result;
@@ -132,8 +131,6 @@ wxString wxTextBuffer::Translate(const wxString& text, wxTextFileType type)
 
 #if wxUSE_TEXTBUFFER
 
-wxString wxTextBuffer::ms_eof;
-
 // ----------------------------------------------------------------------------
 // ctors & dtor
 // ----------------------------------------------------------------------------
@@ -142,12 +139,11 @@ wxTextBuffer::wxTextBuffer(const wxString& strBufferName)
             : m_strBufferName(strBufferName)
 {
     m_nCurLine = 0;
-    m_isOpened = false;
+    m_isOpened = FALSE;
 }
 
 wxTextBuffer::~wxTextBuffer()
 {
-    // required here for Darwin
 }
 
 // ----------------------------------------------------------------------------
@@ -169,33 +165,33 @@ bool wxTextBuffer::Create(const wxString& strBufferName)
 bool wxTextBuffer::Create()
 {
     // buffer name must be either given in ctor or in Create(const wxString&)
-    wxASSERT( !m_strBufferName.empty() );
+    wxASSERT( !m_strBufferName.IsEmpty() );
 
     // if the buffer already exists do nothing
-    if ( Exists() ) return false;
-
+    if ( Exists() ) return FALSE;
+  
     if ( !OnOpen(m_strBufferName, WriteAccess) )
-        return false;
+        return FALSE;
 
     OnClose();
-    return true;
+    return TRUE;
 }
 
-bool wxTextBuffer::Open(const wxString& strBufferName, const wxMBConv& conv)
+bool wxTextBuffer::Open(const wxString& strBufferName, wxMBConv& conv)
 {
     m_strBufferName = strBufferName;
 
     return Open(conv);
 }
 
-bool wxTextBuffer::Open(const wxMBConv& conv)
+bool wxTextBuffer::Open(wxMBConv& conv)
 {
     // buffer name must be either given in ctor or in Open(const wxString&)
-    wxASSERT( !m_strBufferName.empty() );
+    wxASSERT( !m_strBufferName.IsEmpty() );
 
     // open buffer in read-only mode
     if ( !OnOpen(m_strBufferName, ReadAccess) )
-        return false;
+        return FALSE;
 
     // read buffer into memory
     m_isOpened = OnRead(conv);
@@ -250,7 +246,9 @@ wxTextFileType wxTextBuffer::GuessType() const
                                                     ? wxTextFileType_##t1   \
                                                     : wxTextFileType_##t2
 
-#if !defined(__WATCOMC__) || wxCHECK_WATCOM_VERSION(1,4)
+        // Watcom C++ doesn't seem to be able to handle the macro
+        // VS: Watcom 11 doesn't have a problem...
+#if !(defined(__WATCOMC__) && (__WATCOMC__ < 1100))
         if ( nDos > nUnix )
             return GREATER_OF(Dos, Mac);
         else if ( nDos < nUnix )
@@ -270,15 +268,18 @@ wxTextFileType wxTextBuffer::GuessType() const
 
 bool wxTextBuffer::Close()
 {
-    Clear();
-    m_isOpened = false;
+    m_aTypes.Clear();
+    m_aLines.Clear();
+    m_nCurLine = 0;
+    m_isOpened = FALSE;
 
-    return true;
+    return TRUE;
 }
 
-bool wxTextBuffer::Write(wxTextFileType typeNew, const wxMBConv& conv)
+bool wxTextBuffer::Write(wxTextFileType typeNew, wxMBConv& conv)
 {
     return OnWrite(typeNew, conv);
 }
 
 #endif // wxUSE_TEXTBUFFER
+

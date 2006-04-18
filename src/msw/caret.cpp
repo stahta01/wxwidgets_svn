@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     23.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -31,17 +31,21 @@
 
 #include "wx/caret.h"
 
-#if wxUSE_CARET
-
 #include "wx/msw/private.h"
 
 // ---------------------------------------------------------------------------
 // macros
 // ---------------------------------------------------------------------------
 
-#define CALL_CARET_API(api, args)   \
+// under Win16 the caret APIs are void but under Win32 they may return an
+// error code which we want to check - this macro does just this
+#ifdef __WIN16__
+    #define CALL_CARET_API(api, args)   api args
+#else // Win32
+    #define CALL_CARET_API(api, args)   \
         if ( !api args )                \
             wxLogLastError(_T(#api))
+#endif // Win16/32
 
 // ===========================================================================
 // implementation
@@ -83,7 +87,7 @@ bool wxCaret::MSWCreateCaret()
         CALL_CARET_API(CreateCaret, (GetWinHwnd(GetWindow()), 0,
                                      m_width, m_height));
 
-        m_hasCaret = true;
+        m_hasCaret = TRUE;
     }
 
     return m_hasCaret;
@@ -109,7 +113,7 @@ void wxCaret::OnKillFocus()
 {
     if ( m_hasCaret )
     {
-        m_hasCaret = false;
+        m_hasCaret = FALSE;
 
         CALL_CARET_API(DestroyCaret, ());
     }
@@ -178,11 +182,9 @@ void wxCaret::DoSize()
 {
     if ( m_hasCaret )
     {
-        m_hasCaret = false;
+        m_hasCaret = FALSE;
         CALL_CARET_API(DestroyCaret, ());
         MSWCreateCaret();
         OnSetFocus();
     }
 }
-
-#endif

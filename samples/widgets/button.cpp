@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Program:     wxWidgets Widgets Sample
+// Program:     wxWindows Widgets Sample
 // Name:        button.cpp
 // Purpose:     Part of the widgets sample showing wxButton
 // Author:      Vadim Zeitlin
@@ -29,7 +29,6 @@
     #include "wx/app.h"
     #include "wx/log.h"
 
-    #include "wx/bmpbuttn.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/radiobox.h"
@@ -39,7 +38,6 @@
 
 #include "wx/artprov.h"
 #include "wx/sizer.h"
-#include "wx/dcmemory.h"
 
 #include "widgets.h"
 
@@ -79,11 +77,8 @@ enum
 class ButtonWidgetsPage : public WidgetsPage
 {
 public:
-    ButtonWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
-    virtual ~ButtonWidgetsPage(){};
-
-    virtual wxControl *GetWidget() const { return m_button; }
-    virtual void RecreateWidget() { CreateButton(); }
+    ButtonWidgetsPage(wxNotebook *notebook, wxImageList *imaglist);
+    virtual ~ButtonWidgetsPage();
 
 protected:
     // event handlers
@@ -99,32 +94,18 @@ protected:
     // (re)create the wxButton
     void CreateButton();
 
-    // add m_button to m_sizerButton using current value of m_chkFit
-    void AddButtonToSizer();
-
-    // helper function: create a bitmap for wxBitmapButton
-    wxBitmap CreateBitmap(const wxString& label);
-
-
     // the controls
     // ------------
 
     // the check/radio boxes for styles
-    wxCheckBox *m_chkBitmap,
-               *m_chkImage,
+    wxCheckBox *m_chkImage,
                *m_chkFit,
                *m_chkDefault;
-
-    // more checkboxes for wxBitmapButton only
-    wxCheckBox *m_chkUseSelected,
-               *m_chkUseFocused,
-               *m_chkUseHover,
-               *m_chkUseDisabled;
 
     wxRadioBox *m_radioHAlign,
                *m_radioVAlign;
 
-    // the button itself and the sizer it is in
+    // the gauge itself and the sizer it is in
     wxButton *m_button;
     wxSizer *m_sizerButton;
 
@@ -146,8 +127,8 @@ BEGIN_EVENT_TABLE(ButtonWidgetsPage, WidgetsPage)
     EVT_BUTTON(ButtonPage_Reset, ButtonWidgetsPage::OnButtonReset)
     EVT_BUTTON(ButtonPage_ChangeLabel, ButtonWidgetsPage::OnButtonChangeLabel)
 
-    EVT_CHECKBOX(wxID_ANY, ButtonWidgetsPage::OnCheckOrRadioBox)
-    EVT_RADIOBOX(wxID_ANY, ButtonWidgetsPage::OnCheckOrRadioBox)
+    EVT_CHECKBOX(-1, ButtonWidgetsPage::OnCheckOrRadioBox)
+    EVT_RADIOBOX(-1, ButtonWidgetsPage::OnCheckOrRadioBox)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -156,21 +137,16 @@ END_EVENT_TABLE()
 
 IMPLEMENT_WIDGETS_PAGE(ButtonWidgetsPage, _T("Button"));
 
-ButtonWidgetsPage::ButtonWidgetsPage(wxBookCtrlBase *book,
-                                     wxImageList *imaglist)
-                  : WidgetsPage(book)
+ButtonWidgetsPage::ButtonWidgetsPage(wxNotebook *notebook,
+                                       wxImageList *imaglist)
+                  : WidgetsPage(notebook)
 {
     imaglist->Add(wxBitmap(button_xpm));
 
     // init everything
-    m_chkBitmap =
     m_chkImage =
     m_chkFit =
-    m_chkDefault =
-    m_chkUseSelected =
-    m_chkUseFocused =
-    m_chkUseHover =
-    m_chkUseDisabled = (wxCheckBox *)NULL;
+    m_chkDefault = (wxCheckBox *)NULL;
 
     m_radioHAlign =
     m_radioVAlign = (wxRadioBox *)NULL;
@@ -183,31 +159,20 @@ ButtonWidgetsPage::ButtonWidgetsPage(wxBookCtrlBase *book,
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
-    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
+    wxStaticBox *box = new wxStaticBox(this, -1, _T("&Set style"));
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
-    m_chkBitmap = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Bitmap button"));
     m_chkImage = CreateCheckBoxAndAddToSizer(sizerLeft, _T("With &image"));
     m_chkFit = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Fit exactly"));
     m_chkDefault = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Default"));
 
 #ifndef __WXUNIVERSAL__
-    // only wxUniv currently supports buttons with images
+    // only wxUniv currently supoprts buttons with images
     m_chkImage->Disable();
 #endif // !wxUniv
 
-    sizerLeft->AddSpacer(5);
-
-    wxSizer *sizerUseLabels =
-        new wxStaticBoxSizer(wxVERTICAL, this, _T("&Use the following labels?"));
-    m_chkUseSelected = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Pushed"));
-    m_chkUseFocused = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Focused"));
-    m_chkUseHover = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Hover"));
-    m_chkUseDisabled = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Disabled"));
-    sizerLeft->Add(sizerUseLabels, wxSizerFlags().Expand().Border());
-
-    sizerLeft->AddSpacer(15);
+    sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
 
     // should be in sync with enums Button[HV]Align!
     static const wxString halign[] =
@@ -224,10 +189,10 @@ ButtonWidgetsPage::ButtonWidgetsPage(wxBookCtrlBase *book,
         _T("bottom"),
     };
 
-    m_radioHAlign = new wxRadioBox(this, wxID_ANY, _T("&Horz alignment"),
+    m_radioHAlign = new wxRadioBox(this, -1, _T("&Horz alignment"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(halign), halign);
-    m_radioVAlign = new wxRadioBox(this, wxID_ANY, _T("&Vert alignment"),
+    m_radioVAlign = new wxRadioBox(this, -1, _T("&Vert alignment"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(valign), valign);
 
@@ -240,33 +205,41 @@ ButtonWidgetsPage::ButtonWidgetsPage(wxBookCtrlBase *book,
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, _T("&Operations"));
+    wxStaticBox *box2 = new wxStaticBox(this, -1, _T("&Operations"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxSizer *sizerRow = CreateSizerWithTextAndButton(ButtonPage_ChangeLabel,
                                                      _T("Change label"),
-                                                     wxID_ANY,
+                                                     -1,
                                                      &m_textLabel);
-    m_textLabel->SetValue(_T("&Press me!"));
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     // right pane
-    m_sizerButton = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerButton->SetMinSize(150, 0);
+    wxSizer *sizerRight = new wxBoxSizer(wxHORIZONTAL);
+    m_button = new wxButton(this, ButtonPage_Button, _T("&Press me!"));
+    sizerRight->Add(0, 0, 1, wxCENTRE);
+    sizerRight->Add(m_button, 1, wxCENTRE);
+    sizerRight->Add(0, 0, 1, wxCENTRE);
+    sizerRight->SetMinSize(150, 0);
+    m_sizerButton = sizerRight; // save it to modify it later
 
     // the 3 panes panes compose the window
     sizerTop->Add(sizerLeft, 0, wxGROW | (wxALL & ~wxLEFT), 10);
     sizerTop->Add(sizerMiddle, 1, wxGROW | wxALL, 10);
-    sizerTop->Add(m_sizerButton, 1, wxGROW | (wxALL & ~wxRIGHT), 10);
+    sizerTop->Add(sizerRight, 1, wxGROW | (wxALL & ~wxRIGHT), 10);
 
-    // do create the main control
+    // final initializations
     Reset();
-    CreateButton();
 
+    SetAutoLayout(TRUE);
     SetSizer(sizerTop);
 
     sizerTop->Fit(this);
+}
+
+ButtonWidgetsPage::~ButtonWidgetsPage()
+{
 }
 
 // ----------------------------------------------------------------------------
@@ -275,15 +248,9 @@ ButtonWidgetsPage::ButtonWidgetsPage(wxBookCtrlBase *book,
 
 void ButtonWidgetsPage::Reset()
 {
-    m_chkBitmap->SetValue(false);
-    m_chkFit->SetValue(true);
-    m_chkImage->SetValue(false);
-    m_chkDefault->SetValue(false);
-
-    m_chkUseSelected->SetValue(true);
-    m_chkUseFocused->SetValue(true);
-    m_chkUseHover->SetValue(true);
-    m_chkUseDisabled->SetValue(true);
+    m_chkFit->SetValue(TRUE);
+    m_chkImage->SetValue(FALSE);
+    m_chkDefault->SetValue(FALSE);
 
     m_radioHAlign->SetSelection(ButtonHAlign_Centre);
     m_radioVAlign->SetSelection(ButtonVAlign_Centre);
@@ -299,20 +266,17 @@ void ButtonWidgetsPage::CreateButton()
         size_t count = m_sizerButton->GetChildren().GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
-            m_sizerButton->Remove( 0 );
+            m_sizerButton->Remove(0);
         }
 
         delete m_button;
     }
-
-    if ( label.empty() )
+    else
     {
-        // creating for the first time or recreating a button after bitmap
-        // button
-        label = m_textLabel->GetValue();
+        label = _T("&Press me!");
     }
 
-    int flags = ms_defaultFlags;
+    int flags = 0;
     switch ( m_radioHAlign->GetSelection() )
     {
         case ButtonHAlign_Left:
@@ -342,7 +306,7 @@ void ButtonWidgetsPage::CreateButton()
             // fall through
 
         case ButtonVAlign_Centre:
-            // centre vertical alignment is the default (no style)
+            flags |= wxALIGN_CENTRE_VERTICAL;
             break;
 
         case ButtonVAlign_Bottom:
@@ -350,32 +314,9 @@ void ButtonWidgetsPage::CreateButton()
             break;
     }
 
-    const bool isBitmapButton = m_chkBitmap->GetValue();
-    if ( isBitmapButton )
-    {
-        wxBitmapButton *bbtn = new wxBitmapButton(this, ButtonPage_Button,
-                                                  CreateBitmap(_T("normal")));
-        if ( m_chkUseSelected->GetValue() )
-            bbtn->SetBitmapSelected(CreateBitmap(_T("pushed")));
-        if ( m_chkUseFocused->GetValue() )
-            bbtn->SetBitmapFocus(CreateBitmap(_T("focused")));
-        if ( m_chkUseHover->GetValue() )
-            bbtn->SetBitmapHover(CreateBitmap(_T("hover")));
-        if ( m_chkUseDisabled->GetValue() )
-            bbtn->SetBitmapDisabled(CreateBitmap(_T("disabled")));
-        m_button = bbtn;
-    }
-    else // normal button
-    {
-        m_button = new wxButton(this, ButtonPage_Button, label,
-                                wxDefaultPosition, wxDefaultSize,
-                                flags);
-    }
-
-    m_chkUseSelected->Enable(isBitmapButton);
-    m_chkUseFocused->Enable(isBitmapButton);
-    m_chkUseHover->Enable(isBitmapButton);
-    m_chkUseDisabled->Enable(isBitmapButton);
+    m_button = new wxButton(this, ButtonPage_Button, label,
+                            wxDefaultPosition, wxDefaultSize,
+                            flags);
 
 #ifdef __WXUNIVERSAL__
     if ( m_chkImage->GetValue() )
@@ -389,23 +330,18 @@ void ButtonWidgetsPage::CreateButton()
         m_button->SetDefault();
     }
 
-    AddButtonToSizer();
-
-    m_sizerButton->Layout();
-}
-
-void ButtonWidgetsPage::AddButtonToSizer()
-{
     if ( m_chkFit->GetValue() )
     {
-        m_sizerButton->AddStretchSpacer(1);
-        m_sizerButton->Add(m_button, wxSizerFlags(0).Centre().Border());
-        m_sizerButton->AddStretchSpacer(1);
+        m_sizerButton->Add(0, 0, 1, wxCENTRE);
+        m_sizerButton->Add(m_button, 1, wxCENTRE);
+        m_sizerButton->Add(0, 0, 1, wxCENTRE);
     }
-    else // take up the entire space
+    else
     {
-        m_sizerButton->Add(m_button, wxSizerFlags(1).Expand().Border());
+        m_sizerButton->Add(m_button, 1, wxGROW | wxALL, 5);
     }
+
+    m_sizerButton->Layout();
 }
 
 // ----------------------------------------------------------------------------
@@ -419,7 +355,7 @@ void ButtonWidgetsPage::OnButtonReset(wxCommandEvent& WXUNUSED(event))
     CreateButton();
 }
 
-void ButtonWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void ButtonWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateButton();
 }
@@ -429,29 +365,8 @@ void ButtonWidgetsPage::OnButtonChangeLabel(wxCommandEvent& WXUNUSED(event))
     m_button->SetLabel(m_textLabel->GetValue());
 }
 
-void ButtonWidgetsPage::OnButton(wxCommandEvent& WXUNUSED(event))
+void ButtonWidgetsPage::OnButton(wxCommandEvent& event)
 {
     wxLogMessage(_T("Test button clicked."));
-}
-
-// ----------------------------------------------------------------------------
-// bitmap button stuff
-// ----------------------------------------------------------------------------
-
-wxBitmap ButtonWidgetsPage::CreateBitmap(const wxString& label)
-{
-    wxBitmap bmp(180, 70); // shouldn't hardcode but it's simpler like this
-    wxMemoryDC dc;
-    dc.SelectObject(bmp);
-    dc.SetBackground(wxBrush(*wxWHITE));
-    dc.Clear();
-    dc.SetTextForeground(*wxBLUE);
-    dc.DrawLabel(wxStripMenuCodes(m_textLabel->GetValue()) + _T("\n")
-                    _T("(") + label + _T(" state)"),
-                 wxArtProvider::GetBitmap(wxART_INFORMATION),
-                 wxRect(10, 10, bmp.GetWidth() - 20, bmp.GetHeight() - 20),
-                 wxALIGN_CENTRE);
-
-    return bmp;
 }
 

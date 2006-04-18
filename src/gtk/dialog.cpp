@@ -7,14 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/dialog.h"
 #include "wx/frame.h"
 #include "wx/app.h"
 #include "wx/cursor.h"
-#include "wx/evtloop.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -23,9 +19,11 @@
 #include "wx/gtk/win_gtk.h"
 
 //-----------------------------------------------------------------------------
-// global data
+// idle system
 //-----------------------------------------------------------------------------
 
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 extern int g_openDialogs;
 
 //-----------------------------------------------------------------------------
@@ -44,9 +42,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxDialog,wxTopLevelWindow)
 void wxDialog::Init()
 {
     m_returnCode = 0;
-    m_sizeSet = false;
-    m_modalShowing = false;
-    m_themeEnabled = true;
+    m_sizeSet = FALSE;
+    m_modalShowing = FALSE;
+    m_themeEnabled = TRUE;
 }
 
 wxDialog::wxDialog( wxWindow *parent,
@@ -87,7 +85,7 @@ void wxDialog::OnCancel( wxCommandEvent &WXUNUSED(event) )
     else
     {
         SetReturnCode(wxID_CANCEL);
-        Show(false);
+        Show(FALSE);
     }
 }
 
@@ -102,7 +100,7 @@ void wxDialog::OnOK( wxCommandEvent &WXUNUSED(event) )
         else
         {
             SetReturnCode(wxID_OK);
-            Show(false);
+            Show(FALSE);
         }
     }
 }
@@ -172,6 +170,12 @@ bool wxDialog::IsModal() const
 
 void wxDialog::SetModal( bool WXUNUSED(flag) )
 {
+/*
+  if (flag)
+    m_windowStyle |= wxDIALOG_MODAL;
+  else
+    if (m_windowStyle & wxDIALOG_MODAL) m_windowStyle -= wxDIALOG_MODAL;
+*/
     wxFAIL_MSG( wxT("wxDialog:SetModal obsolete now") );
 }
 
@@ -199,17 +203,17 @@ int wxDialog::ShowModal()
     }
 
     wxBusyCursorSuspender cs; // temporarily suppress the busy cursor
+    
+    Show( TRUE );
 
-    Show( true );
+    SetFocus();
 
-    m_modalShowing = true;
+    m_modalShowing = TRUE;
 
     g_openDialogs++;
 
     gtk_grab_add( m_widget );
-
-    wxEventLoop().Run();
-
+    gtk_main();
     gtk_grab_remove( m_widget );
 
     g_openDialogs--;
@@ -227,9 +231,9 @@ void wxDialog::EndModal( int retCode )
         return;
     }
 
-    m_modalShowing = false;
+    m_modalShowing = FALSE;
 
     gtk_main_quit();
 
-    Show( false );
+    Show( FALSE );
 }

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -30,11 +30,11 @@ class DoodleSegment: public wxObject
 {
 public:
     wxList lines;
-
-    DoodleSegment(void){};
-    DoodleSegment(const DoodleSegment& seg);
+    
+    DoodleSegment(void);
+    DoodleSegment(DoodleSegment& seg);
     ~DoodleSegment(void);
-
+    
     void Draw(wxDC *dc);
 #if wxUSE_STD_IOSTREAM
     wxSTD ostream& SaveObject(wxSTD ostream& text_stream);
@@ -43,7 +43,7 @@ public:
     wxOutputStream& SaveObject(wxOutputStream& stream);
     wxInputStream& LoadObject(wxInputStream& stream);
 #endif
-
+    
 };
 
 class DrawingDocument: public wxDocument
@@ -52,10 +52,10 @@ class DrawingDocument: public wxDocument
 private:
 public:
     wxList doodleSegments;
-
-    DrawingDocument(void){};
+    
+    DrawingDocument(void);
     ~DrawingDocument(void);
-
+    
 #if wxUSE_STD_IOSTREAM
     wxSTD ostream& SaveObject(wxSTD ostream& text_stream);
     wxSTD istream& LoadObject(wxSTD istream& text_stream);
@@ -63,7 +63,7 @@ public:
     wxOutputStream& SaveObject(wxOutputStream& stream);
     wxInputStream& LoadObject(wxInputStream& stream);
 #endif
-
+    
     inline wxList& GetDoodleSegments(void) const { return (wxList&) doodleSegments; };
 };
 
@@ -79,7 +79,7 @@ protected:
 public:
     DrawingCommand(const wxString& name, int cmd, DrawingDocument *ddoc, DoodleSegment *seg);
     ~DrawingCommand(void);
-
+    
     bool Do(void);
     bool Undo(void);
 };
@@ -97,7 +97,7 @@ wxSTD istream& LoadObject(wxSTD istream& stream);
     virtual bool OnOpenDocument(const wxString& filename);
     virtual bool IsModified(void) const;
     virtual void Modify(bool mod);
-
+    
     TextEditDocument(void) {}
     ~TextEditDocument(void) {}
 };

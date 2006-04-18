@@ -31,13 +31,14 @@ BEGIN_EVENT_TABLE(csProjectTreeCtrl, wxTreeCtrl)
 END_EVENT_TABLE()
 
 // Define my frame constructor
-csProjectTreeCtrl::csProjectTreeCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos, const wxSize& size, long style):
+csProjectTreeCtrl::csProjectTreeCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
+	long style):
 
   wxTreeCtrl(parent, id, pos, size, style),
   m_imageList(16, 16)
 {
-    m_imageList.Add(wxIcon(_T("folder1")));
-    m_imageList.Add(wxIcon(_T("file1")));
+    m_imageList.Add(wxIcon("folder1"));
+    m_imageList.Add(wxIcon("file1"));
 
     SetImageList(& m_imageList);
 }
@@ -48,7 +49,7 @@ csProjectTreeCtrl::~csProjectTreeCtrl()
 }
 
 // Create the project window
-bool csApp::CreateProjectWindow(wxFrame *WXUNUSED(parent))
+bool csApp::CreateProjectWindow(wxFrame *parent)
 {
 #if 0
     // Create a layout window
@@ -57,7 +58,7 @@ bool csApp::CreateProjectWindow(wxFrame *WXUNUSED(parent))
     win->SetOrientation(wxLAYOUT_VERTICAL);
     win->SetAlignment(wxLAYOUT_LEFT);
     win->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
-    win->SetSashVisible(wxSASH_RIGHT, true);
+    win->SetSashVisible(wxSASH_RIGHT, TRUE);
     win->SetExtraBorderSize(5);
 
     m_projectSashWindow = win;
@@ -66,10 +67,10 @@ bool csApp::CreateProjectWindow(wxFrame *WXUNUSED(parent))
         wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxDOUBLE_BORDER);
 
     // For now, hide the window
-    m_projectSashWindow->Show(false);
+    m_projectSashWindow->Show(FALSE);
 #endif
 
-    return true;
+    return TRUE;
 }
 
 // Fill out the project tree control

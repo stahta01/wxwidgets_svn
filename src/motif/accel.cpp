@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      Julian Smart
 // Modified by:
@@ -9,9 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
+#include "wx/setup.h"
 #include "wx/accel.h"
 #include "wx/string.h"
 #include "wx/utils.h"
@@ -97,7 +95,7 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
     bool eventAltDown = event.AltDown();
     bool eventCtrlDown = event.ControlDown();
     bool eventShiftDown = event.ShiftDown();
-    int  eventKeyCode = event.GetKeyCode();
+    int  eventKeyCode = event.KeyCode();
 
     bool accAltDown = ((GetFlags() & wxACCEL_ALT) == wxACCEL_ALT);
     bool accCtrlDown = ((GetFlags() & wxACCEL_CTRL) == wxACCEL_CTRL);
@@ -111,3 +109,4 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
         (eventShiftDown == accShiftDown) &&
         ((eventKeyCode == accKeyCode || eventKeyCode == accKeyCode2))) ;
 }
+

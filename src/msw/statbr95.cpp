@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statbr95.cpp
+// Name:        msw/statbr95.cpp
 // Purpose:     native implementation of wxStatusBar
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     04.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // for compilers that support precompilation, includes "wx.h".
@@ -17,12 +17,13 @@
 #endif
 
 #ifndef WX_PRECOMP
+  #include "wx/setup.h"
   #include "wx/frame.h"
   #include "wx/settings.h"
   #include "wx/dcclient.h"
 #endif
 
-#if wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
+#if defined(__WIN95__) && wxUSE_NATIVE_STATUSBAR
 
 #include "wx/intl.h"
 #include "wx/log.h"
@@ -31,11 +32,8 @@
 #include "wx/msw/private.h"
 #include <windowsx.h>
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
-
-#if wxUSE_UXTHEME
-    #include "wx/msw/uxtheme.h"
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -68,7 +66,7 @@ bool wxStatusBar95::Create(wxWindow *parent,
                            long style,
                            const wxString& name)
 {
-    wxCHECK_MSG( parent, false, wxT("status bar must have a parent") );
+    wxCHECK_MSG( parent, FALSE, wxT("status bar must have a parent") );
 
     SetName(name);
     SetWindowStyleFlag(style);
@@ -76,7 +74,7 @@ bool wxStatusBar95::Create(wxWindow *parent,
 
     parent->AddChild(this);
 
-    m_windowId = id == wxID_ANY ? NewControlId() : id;
+    m_windowId = id == -1 ? NewControlId() : id;
 
     DWORD wstyle = WS_CHILD | WS_VISIBLE;
 
@@ -94,11 +92,9 @@ bool wxStatusBar95::Create(wxWindow *parent,
     }
     else
     {
-#ifndef __WXWINCE__
         // may be some versions of comctl32.dll do need it - anyhow, it won't
         // do any harm
         wstyle |= SBARS_SIZEGRIP;
-#endif
     }
 
     m_hWnd = (WXHWND)CreateStatusWindow(wstyle,
@@ -109,36 +105,19 @@ bool wxStatusBar95::Create(wxWindow *parent,
     {
         wxLogSysError(_("Failed to create a status bar."));
 
-        return false;
+        return FALSE;
     }
 
     SetFieldsCount(1);
     SubclassWin(m_hWnd);
-    InheritAttributes();
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 
-    // we must refresh the frame size when the statusbar is created, because
-    // its client area might change
-    wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-    if ( frame )
-    {
-        frame->SendSizeEvent();
-    }
-
-    return true;
+    return TRUE;
 }
 
 wxStatusBar95::~wxStatusBar95()
 {
-    // we must refresh the frame size when the statusbar is deleted but the
-    // frame is not - otherwise statusbar leaves a hole in the place it used to
-    // occupy
-    wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-    if ( frame && !frame->IsBeingDeleted() )
-    {
-        frame->SendSizeEvent();
-    }
 }
 
 void wxStatusBar95::SetFieldsCount(int nFields, const int *widths)
@@ -191,30 +170,7 @@ void wxStatusBar95::SetStatusText(const wxString& strText, int nField)
     wxCHECK_RET( (nField >= 0) && (nField < m_nFields),
                  _T("invalid statusbar field index") );
 
-    // Get field style, if any
-    int style;
-    if (m_statusStyles)
-    {
-        switch(m_statusStyles[nField])
-        {
-        case wxSB_RAISED:
-            style = SBT_POPOUT;
-            break;
-        case wxSB_FLAT:
-            style = SBT_NOBORDERS;
-            break;
-        case wxSB_NORMAL:
-        default:
-            style = 0;
-            break;
-        }
-    }
-    else
-        style = 0;
-
-    // Pass both field number and style. MSDN library doesn't mention
-    // that nField and style have to be 'ORed'
-    if ( !StatusBar_SetText(GetHwnd(), nField | style, strText) )
+    if ( !StatusBar_SetText(GetHwnd(), nField, strText) )
     {
         wxLogLastError(wxT("StatusBar_SetText"));
     }
@@ -229,7 +185,8 @@ wxString wxStatusBar95::GetStatusText(int nField) const
     int len = StatusBar_GetTextLen(GetHwnd(), nField);
     if ( len > 0 )
     {
-        StatusBar_GetText(GetHwnd(), nField, wxStringBuffer(str, len));
+        StatusBar_GetText(GetHwnd(), nField, str.GetWriteBuf(len));
+        str.UngetWriteBuf();
     }
 
     return str;
@@ -261,7 +218,7 @@ void wxStatusBar95::SetMinHeight(int height)
 
 bool wxStatusBar95::GetFieldRect(int i, wxRect& rect) const
 {
-    wxCHECK_MSG( (i >= 0) && (i < m_nFields), false,
+    wxCHECK_MSG( (i >= 0) && (i < m_nFields), FALSE,
                  _T("invalid statusbar field index") );
 
     RECT r;
@@ -270,52 +227,30 @@ bool wxStatusBar95::GetFieldRect(int i, wxRect& rect) const
         wxLogLastError(wxT("SendMessage(SB_GETRECT)"));
     }
 
-#if wxUSE_UXTHEME
-    wxUxThemeHandle theme((wxStatusBar95 *)this, L"Status"); // const_cast
-    if ( theme )
-    {
-        // by default Windows has a 2 pixel border to the right of the left
-        // divider (or it could be a bug) but it looks wrong so remove it
-        if ( i != 0 )
-        {
-            r.left -= 2;
-        }
-
-        wxUxThemeEngine::Get()->GetThemeBackgroundContentRect(theme, NULL,
-                                                              1 /* SP_PANE */, 0,
-                                                              &r, &r);
-    }
-#endif
-
     wxCopyRECTToRect(r, rect);
 
-    return true;
+    return TRUE;
 }
 
 void wxStatusBar95::DoMoveWindow(int x, int y, int width, int height)
 {
-    if ( GetParent()->IsSizeDeferred() )
-    {
-        wxWindowMSW::DoMoveWindow(x, y, width, height);
-    }
-    else
-    {
-        // parent pos/size isn't deferred so do it now but don't send
-        // WM_WINDOWPOSCHANGING since we don't want to change pos/size later
-        // we must use SWP_NOCOPYBITS here otherwise it paints incorrectly
-        // if other windows are size deferred
-        ::SetWindowPos(GetHwnd(), NULL, x, y, width, height,
-                       SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE
-#ifndef __WXWINCE__
-                       | SWP_NOCOPYBITS | SWP_NOSENDCHANGING
-#endif
-                       );
-    }
+    // the status bar wnd proc must be forwarded the WM_SIZE message whenever
+    // the stat bar position/size is changed because it normally positions the
+    // control itself along bottom or top side of the parent window - failing
+    // to do so will result in nasty visual effects
+    FORWARD_WM_SIZE(GetHwnd(), SIZE_RESTORED, x, y, SendMessage);
+
+    // but now, when the standard status bar wnd proc did all it wanted to do,
+    // move the status bar to its correct location - usually this call may be
+    // omitted because for normal status bars (positioned along the bottom
+    // edge) the position is already set correctly, but if the user wants to
+    // position them in some exotic location, this is really needed
+    wxWindow::DoMoveWindow(x, y, width, height);
 
     // adjust fields widths to the new size
     SetFieldsWidth();
 
-    // we have to trigger wxSizeEvent if there are children window in status
+    // we have to trigger wxSizeEvent if there are children window in status 
     // bar because GetFieldRect returned incorrect (not updated) values up to
     // here, which almost certainly resulted in incorrectly redrawn statusbar
     if ( m_children.GetCount() > 0 )
@@ -326,85 +261,5 @@ void wxStatusBar95::DoMoveWindow(int x, int y, int width, int height)
     }
 }
 
-void wxStatusBar95::SetStatusStyles(int n, const int styles[])
-{
-    wxStatusBarBase::SetStatusStyles(n, styles);
+#endif // __WIN95__ && wxUSE_NATIVE_STATUSBAR
 
-    if (n != m_nFields)
-        return;
-
-    for (int i = 0; i < n; i++)
-    {
-        int style;
-        switch(styles[i])
-        {
-        case wxSB_RAISED:
-            style = SBT_POPOUT;
-            break;
-        case wxSB_FLAT:
-            style = SBT_NOBORDERS;
-            break;
-        case wxSB_NORMAL:
-        default:
-            style = 0;
-            break;
-        }
-        // The SB_SETTEXT message is both used to set the field's text as well as
-        // the fields' styles. MSDN library doesn't mention
-        // that nField and style have to be 'ORed'
-        wxString text = GetStatusText(i);
-        if (!StatusBar_SetText(GetHwnd(), style | i, text))
-        {
-            wxLogLastError(wxT("StatusBar_SetText"));
-        }
-    }
-}
-
-WXLRESULT
-wxStatusBar95::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
-{
-#ifndef __WXWINCE__
-    if ( nMsg == WM_WINDOWPOSCHANGING )
-    {
-        WINDOWPOS *lpPos = (WINDOWPOS *)lParam;
-        int x, y, w, h;
-        GetPosition(&x, &y);
-        GetSize(&w, &h);
-
-        // we need real window coords and not wx client coords
-        AdjustForParentClientOrigin(x, y);
-
-        lpPos->x  = x;
-        lpPos->y  = y;
-        lpPos->cx = w;
-        lpPos->cy = h;
-
-        return 0;
-    }
-
-    if ( nMsg == WM_NCLBUTTONDOWN )
-    {
-        // if hit-test is on gripper then send message to TLW to begin
-        // resizing. It is possible to send this message to any window.
-        if ( wParam == HTBOTTOMRIGHT )
-        {
-            wxWindow *win;
-
-            for ( win = GetParent(); win; win = win->GetParent() )
-            {
-                if ( win->IsTopLevel() )
-                {
-                    SendMessage(GetHwndOf(win), WM_NCLBUTTONDOWN,
-                                wParam, lParam);
-
-                    return 0;
-                }
-            }
-        }
-    }
-#endif
-
-    return wxStatusBarBase::MSWWindowProc(nMsg, wParam, lParam);
-}
-
-#endif // wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR

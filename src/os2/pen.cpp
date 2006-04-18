@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/pen.cpp
+// Name:        pen.cpp
 // Purpose:     wxPen
 // Author:      David Webster
 // Modified by:
@@ -13,12 +13,13 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/pen.h"
-    #include "wx/log.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/pen.h"
+#include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
@@ -32,8 +33,6 @@ wxPenRefData::wxPenRefData()
     m_nWidth  = 1;
     m_nJoin   = wxJOIN_ROUND ;
     m_nCap    = wxCAP_ROUND ;
-    m_nbDash  = 0 ;
-    m_dash    = (wxDash*)NULL;
     m_hPen    = 0L;
 } // end of wxPenRefData::wxPenRefData
 
@@ -45,8 +44,6 @@ wxPenRefData::wxPenRefData(
     m_nWidth  = rData.m_nWidth;
     m_nJoin   = rData.m_nJoin;
     m_nCap    = rData.m_nCap;
-    m_nbDash  = rData.m_nbDash;
-    m_dash    = rData.m_dash;
     m_vColour = rData.m_vColour;
     m_hPen    = 0L;
 } // end of wxPenRefData::wxPenRefData
@@ -60,10 +57,14 @@ wxPenRefData::~wxPenRefData()
 //
 wxPen::wxPen()
 {
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 wxPen::~wxPen()
 {
+    if (wxThePenList)
+        wxThePenList->RemovePen(this);
 } // end of wxPen::wxPen
 
 // Should implement Create
@@ -83,6 +84,9 @@ wxPen::wxPen(
     M_PENDATA->m_hPen    = 0L;
 
     RealizeResource();
+
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 wxPen::wxPen(
@@ -100,6 +104,9 @@ wxPen::wxPen(
     M_PENDATA->m_hPen     = 0;
 
     RealizeResource();
+
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 int wx2os2PenStyle(
@@ -144,16 +151,16 @@ bool wxPen::RealizeResource()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(_T("Unable to set current color table to RGB mode. Error: %s\n"), sError.c_str());
-            return false;
+            wxLogError("Unable to set current color table to RGB mode. Error: %s\n", sError.c_str());
+            return FALSE;
         }
         if (M_PENDATA->m_nStyle == wxTRANSPARENT)
         {
-            return true;
+            return TRUE;
         }
 
-        COLORREF vPmColour = 0L;
-        USHORT   uLineType = (USHORT)wx2os2PenStyle(M_PENDATA->m_nStyle);
+        COLORREF                    vPmColour = 0L;
+        USHORT                      uLineType = wx2os2PenStyle(M_PENDATA->m_nStyle);
 
         vPmColour = M_PENDATA->m_vColour.GetPixel();
 
@@ -208,8 +215,8 @@ bool wxPen::RealizeResource()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(_T("Can't set Gpi attributes for a LINEBUNDLE. Error: %s\n"), sError.c_str());
-            return false;
+            wxLogError("Can't set Gpi attributes for a LINEBUNDLE. Error: %s\n", sError.c_str());
+            return FALSE;
         }
 
         ULONG                           flAttrMask = 0L;
@@ -293,12 +300,11 @@ bool wxPen::RealizeResource()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(_T("Can't set Gpi attributes for an AREABUNDLE. Error: %s\n"), sError.c_str());
+            wxLogError("Can't set Gpi attributes for an AREABUNDLE. Error: %s\n", sError.c_str());
         }
-
-        return (bool)bOk;
+        return bOk;
     }
-    return false;
+    return FALSE;
 } // end of wxPen::RealizeResource
 
 WXHANDLE wxPen::GetResourceHandle()
@@ -309,14 +315,16 @@ WXHANDLE wxPen::GetResourceHandle()
         return (WXHANDLE)M_PENDATA->m_hPen;
 } // end of wxPen::GetResourceHandle
 
-bool wxPen::FreeResource( bool WXUNUSED(bForce) )
+bool wxPen::FreeResource(
+  bool                              bForce
+)
 {
     if (M_PENDATA && (M_PENDATA->m_hPen != 0))
     {
         M_PENDATA->m_hPen = 0;
-        return true;
+        return TRUE;
     }
-    else return false;
+    else return FALSE;
 } // end of wxPen::FreeResource
 
 bool wxPen::IsFree() const
@@ -339,21 +347,29 @@ void wxPen::Unshare()
     }
 } // end of wxPen::Unshare
 
-void wxPen::SetColour( const wxColour& rColour )
+void wxPen::SetColour(
+  const wxColour&                   rColour
+)
 {
     Unshare();
     M_PENDATA->m_vColour = rColour;
     RealizeResource();
 } // end of wxPen::SetColour
 
-void wxPen::SetColour( unsigned char cRed, unsigned char cGreen, unsigned char cBlue)
+void wxPen::SetColour(
+  unsigned char                     cRed
+, unsigned char                     cGreen
+, unsigned char                     cBlue
+)
 {
     Unshare();
     M_PENDATA->m_vColour.Set(cRed, cGreen, cBlue);
     RealizeResource();
 } // end of wxPen::SetColour
 
-void wxPen::SetPS( HPS hPS )
+void wxPen::SetPS(
+  HPS                               hPS
+)
 {
     Unshare();
     if (M_PENDATA->m_hPen)
@@ -390,8 +406,10 @@ void wxPen::SetStipple(
     RealizeResource();
 } // end of wxPen::SetStipple
 
-void wxPen::SetDashes( int WXUNUSED(nNbDashes),
-                       const wxDash* WXUNUSED(pDash) )
+void wxPen::SetDashes(
+  int                               nNbDashes
+, const wxDash*                     pDash
+)
 {
     //
     // Does nothing under OS/2
@@ -455,3 +473,5 @@ int wx2os2PenStyle(
     }
     return nPMStyle;
 } // end of wx2os2PenStyle
+
+

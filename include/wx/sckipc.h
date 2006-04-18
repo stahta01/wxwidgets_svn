@@ -10,7 +10,7 @@
 // Copyright:   (c) Julian Smart 1993
 //              (c) Guilhem Lavaux 1997, 1998
 //              (c) 2000 Guillermo Rodriguez <guille@iies.es>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SCKIPC_H
@@ -49,10 +49,10 @@
  *
  */
 
-class WXDLLIMPEXP_NET wxTCPServer;
-class WXDLLIMPEXP_NET wxTCPClient;
+class WXDLLEXPORT wxTCPServer;
+class WXDLLEXPORT wxTCPClient;
 
-class WXDLLIMPEXP_NET wxTCPConnection: public wxConnectionBase
+class WXDLLEXPORT wxTCPConnection: public wxConnectionBase
 {
   DECLARE_DYNAMIC_CLASS(wxTCPConnection)
 
@@ -75,15 +75,11 @@ public:
   virtual bool Disconnect(void);
 
   // Callbacks to BOTH - override at will
-  // Default behaviour is to delete connection and return true
-  virtual bool OnDisconnect(void) { delete this; return true; }
+  // Default behaviour is to delete connection and return TRUE
+  virtual bool OnDisconnect(void) { delete this; return TRUE; }
 
   // To enable the compressor (NOTE: not implemented!)
   void Compress(bool on);
-
-  // unhide the Execute overload from wxConnectionBase
-  virtual bool Execute(const wxString& str)
-    { return Execute(str, -1, wxIPC_TEXT); }
 
 protected:
   wxSocketBase       *m_sock;
@@ -96,18 +92,25 @@ protected:
   friend class wxTCPClient;
   friend class wxTCPEventHandler;
 
-  DECLARE_NO_COPY_CLASS(wxTCPConnection)
+private:
+  //
+  // We're hiding an Execute method in ConnectionBase
+  //
+  virtual bool Execute(const wxString& str)
+    { return Execute(str, -1, wxIPC_TEXT); }
 };
 
-class WXDLLIMPEXP_NET wxTCPServer: public wxServerBase
+class wxTCPServer: public wxServerBase
 {
+  DECLARE_DYNAMIC_CLASS(wxTCPServer)
+
 public:
   wxTCPConnection *topLevelConnection;
 
   wxTCPServer();
   virtual ~wxTCPServer();
 
-  // Returns false on error (e.g. port number is already in use)
+  // Returns FALSE on error (e.g. port number is already in use)
   virtual bool Create(const wxString& serverName);
 
   // Callbacks to SERVER - override at will
@@ -120,13 +123,12 @@ protected:
   // the name of the file associated to the Unix domain socket, may be empty
   wxString m_filename;
 #endif // __UNIX_LIKE__
-
-  DECLARE_NO_COPY_CLASS(wxTCPServer)
-  DECLARE_DYNAMIC_CLASS(wxTCPServer)
 };
 
-class WXDLLIMPEXP_NET wxTCPClient: public wxClientBase
+class wxTCPClient: public wxClientBase
 {
+  DECLARE_DYNAMIC_CLASS(wxTCPClient)
+
 public:
   wxTCPClient();
   virtual ~wxTCPClient();
@@ -140,9 +142,6 @@ public:
 
   // Callbacks to CLIENT - override at will
   virtual wxConnectionBase *OnMakeConnection();
-
-private:
-  DECLARE_DYNAMIC_CLASS(wxTCPClient)
 };
 
 #endif // wxUSE_SOCKETS && wxUSE_IPC

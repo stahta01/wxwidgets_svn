@@ -5,18 +5,15 @@
 // Modified by:
 // Created:     05.11.00
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CMDPROC_H_
 #define _WX_CMDPROC_H_
 
-#include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/list.h"
-
-class WXDLLEXPORT wxMenu;
 
 // ----------------------------------------------------------------------------
 // wxCommand: a single command capable of performing itself
@@ -25,8 +22,8 @@ class WXDLLEXPORT wxMenu;
 class WXDLLEXPORT wxCommand : public wxObject
 {
 public:
-    wxCommand(bool canUndoIt = false, const wxString& name = wxEmptyString);
-    ~wxCommand(){}
+    wxCommand(bool canUndoIt = FALSE, const wxString& name = wxT(""));
+    ~wxCommand();
 
     // Override this to perform a command
     virtual bool Do() = 0;
@@ -57,8 +54,8 @@ public:
     virtual ~wxCommandProcessor();
 
     // Pass a command to the processor. The processor calls Do(); if
-    // successful, is appended to the command history unless storeIt is false.
-    virtual bool Submit(wxCommand *command, bool storeIt = true);
+    // successful, is appended to the command history unless storeIt is FALSE.
+    virtual bool Submit(wxCommand *command, bool storeIt = TRUE);
 
     // just store the command without executing it
     virtual void Store(wxCommand *command);
@@ -87,27 +84,13 @@ public:
 #endif // wxUSE_MENUS
 
     // command list access
-    wxList& GetCommands() { return m_commands; }
-    const wxList& GetCommands() const { return m_commands; }
+    wxList& GetCommands() const { return (wxList&) m_commands; }
     wxCommand *GetCurrentCommand() const
     {
-        return (wxCommand *)(m_currentCommand ? m_currentCommand->GetData() : NULL);
+        return (wxCommand *)(m_currentCommand ? m_currentCommand->Data() : NULL);
     }
     int GetMaxCommands() const { return m_maxNoCommands; }
     virtual void ClearCommands();
-
-    // Has the current project been changed?
-    virtual bool IsDirty() const
-    {
-        return m_currentCommand && (m_lastSavedCommand != m_currentCommand);
-    }
-
-    // Mark the current command as the one where the last save took place
-    void MarkAsSaved()
-    {
-        m_lastSavedCommand = m_currentCommand;
-    }
-
 
     // By default, the accelerators are "\tCtrl+Z" and "\tCtrl+Y"
     const wxString& GetUndoAccelerator() const { return m_undoAccelerator; }
@@ -125,8 +108,7 @@ protected:
 
     int           m_maxNoCommands;
     wxList        m_commands;
-    wxList::compatibility_iterator m_currentCommand,
-                                   m_lastSavedCommand;
+    wxNode*       m_currentCommand;
 
 #if wxUSE_MENUS
     wxMenu*       m_commandEditMenu;
@@ -137,8 +119,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCommandProcessor)
-    DECLARE_NO_COPY_CLASS(wxCommandProcessor)
 };
 
 #endif // _WX_CMDPROC_H_
-

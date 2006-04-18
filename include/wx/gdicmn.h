@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gdicmn.h
+// Name:        gdicmn.h
 // Purpose:     Common GDI classes, types and declarations
 // Author:      Julian Smart
 // Modified by:
@@ -16,27 +16,28 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#include "wx/defs.h"
+#include "wx/object.h"
 #include "wx/list.h"
+#include "wx/hash.h"
 #include "wx/string.h"
-#include "wx/fontenc.h"
-#include "wx/hashmap.h"
-#include "wx/math.h"
+#include "wx/setup.h"
+#include "wx/colour.h"
+#include "wx/font.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmap;
-class WXDLLIMPEXP_CORE wxBrush;
-class WXDLLIMPEXP_CORE wxColour;
-class WXDLLIMPEXP_CORE wxCursor;
-class WXDLLIMPEXP_CORE wxFont;
-class WXDLLIMPEXP_CORE wxIcon;
-class WXDLLIMPEXP_CORE wxPalette;
-class WXDLLIMPEXP_CORE wxPen;
-class WXDLLIMPEXP_CORE wxRegion;
-class WXDLLIMPEXP_BASE wxString;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxBrush;
+class WXDLLEXPORT wxColour;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxFont;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxPalette;
+class WXDLLEXPORT wxPen;
+class WXDLLEXPORT wxRegion;
+class WXDLLEXPORT wxString;
 
 // ---------------------------------------------------------------------------
 // constants
@@ -114,7 +115,7 @@ enum wxStockCursor
     wxCURSOR_DEFAULT, // standard X11 cursor
 #endif
 #ifdef __WXMAC__
-    wxCURSOR_COPY_ARROW , // MacOS Theme Plus arrow
+	wxCURSOR_COPY_ARROW , // MacOS Theme Plus arrow 
 #endif
 #ifdef __X__
     // Not yet implemented for Windows
@@ -179,12 +180,7 @@ enum wxStockCursor
 
 #if defined(__WXMSW__) || defined(__WXPM__)
     #define wxBITMAP(name) wxBitmap(wxT(#name), wxBITMAP_TYPE_RESOURCE)
-#elif defined(__WXGTK__)   || \
-      defined(__WXMOTIF__) || \
-      defined(__WXX11__)   || \
-      defined(__WXMAC__)   || \
-      defined(__WXMGL__)   || \
-      defined(__WXCOCOA__)
+#elif defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__) || defined(__WXMAC__) || defined(__WXMGL__)
     // Initialize from an included XPM
     #define wxBITMAP(name) wxBitmap( (const char**) name##_xpm )
 #else // other platforms
@@ -202,7 +198,9 @@ enum wxStockCursor
 class WXDLLEXPORT wxSize
 {
 public:
-    // members are public for compatibility, don't use them directly.
+    // members are public for compatibility (don't use them directly,
+    // especially that there names were chosen very unfortunately - they should
+    // have been called width and height)
     int x, y;
 
     // constructors
@@ -214,20 +212,9 @@ public:
     bool operator==(const wxSize& sz) const { return x == sz.x && y == sz.y; }
     bool operator!=(const wxSize& sz) const { return x != sz.x || y != sz.y; }
 
-    wxSize operator+(const wxSize& sz) const { return wxSize(x + sz.x, y + sz.y); }
-    wxSize operator-(const wxSize& sz) const { return wxSize(x - sz.x, y - sz.y); }
-    wxSize operator/(int i) const { return wxSize(x / i, y / i); }
-    wxSize operator*(int i) const { return wxSize(x * i, y * i); }
-
-    wxSize& operator+=(const wxSize& sz) { x += sz.x; y += sz.y; return *this; }
-    wxSize& operator-=(const wxSize& sz) { x -= sz.x; y -= sz.y; return *this; }
-    wxSize& operator/=(const int i) { x /= i; y /= i; return *this; }
-    wxSize& operator*=(const int i) { x *= i; y *= i; return *this; }
-
-    void IncTo(const wxSize& sz)
-        { if ( sz.x > x ) x = sz.x; if ( sz.y > y ) y = sz.y; }
-    void DecTo(const wxSize& sz)
-        { if ( sz.x < x ) x = sz.x; if ( sz.y < y ) y = sz.y; }
+    // FIXME are these really useful? If they're, we should have += &c as well
+    wxSize operator+(const wxSize& sz) { return wxSize(x + sz.x, y + sz.y); }
+    wxSize operator-(const wxSize& sz) { return wxSize(x - sz.x, y - sz.y); }
 
     // accessors
     void Set(int xx, int yy) { x = xx; y = yy; }
@@ -236,18 +223,6 @@ public:
 
     int GetWidth() const { return x; }
     int GetHeight() const { return y; }
-
-    bool IsFullySpecified() const { return x != wxDefaultCoord && y != wxDefaultCoord; }
-
-    // combine this size with the other one replacing the default (i.e. equal
-    // to wxDefaultCoord) components of this object with those of the other
-    void SetDefaults(const wxSize& size)
-    {
-        if ( x == wxDefaultCoord )
-            x = size.x;
-        if ( y == wxDefaultCoord )
-            y = size.y;
-    }
 
     // compatibility
     int GetX() const { return x; }
@@ -270,13 +245,9 @@ public:
     wxRealPoint operator+(const wxRealPoint& pt) const { return wxRealPoint(x + pt.x, y + pt.y); }
     wxRealPoint operator-(const wxRealPoint& pt) const { return wxRealPoint(x - pt.x, y - pt.y); }
 
-    bool operator==(const wxRealPoint& pt) const
-    {
-        return wxIsSameDouble(x, pt.x) && wxIsSameDouble(y, pt.y);
-    }
-    bool operator!=(const wxRealPoint& pt) const { return !(*this == pt); }
+    bool operator==(const wxRealPoint& pt) const { return x == pt.x && y == pt.y; }
+    bool operator!=(const wxRealPoint& pt) const { return x != pt.x || y != pt.y; }
 };
-
 
 class WXDLLEXPORT wxPoint
 {
@@ -298,13 +269,12 @@ public:
 
     wxPoint& operator+=(const wxPoint& p) { x += p.x; y += p.y; return *this; }
     wxPoint& operator-=(const wxPoint& p) { x -= p.x; y -= p.y; return *this; }
-
-    wxPoint& operator+=(const wxSize& s) { x += s.GetWidth(); y += s.GetHeight(); return *this; }
-    wxPoint& operator-=(const wxSize& s) { x -= s.GetWidth(); y -= s.GetHeight(); return *this; }
-
-    wxPoint operator+(const wxSize& s) const { return wxPoint(x + s.GetWidth(), y + s.GetHeight()); }
-    wxPoint operator-(const wxSize& s) const { return wxPoint(x - s.GetWidth(), y - s.GetHeight()); }
 };
+
+#if WXWIN_COMPATIBILITY
+    #define wxIntPoint wxPoint
+    #define wxRectangle wxRect
+#endif // WXWIN_COMPATIBILITY
 
 // ---------------------------------------------------------------------------
 // wxRect
@@ -320,12 +290,7 @@ public:
         : x(xx), y(yy), width(ww), height(hh)
         { }
     wxRect(const wxPoint& topLeft, const wxPoint& bottomRight);
-    wxRect(const wxPoint& pt, const wxSize& size)
-        : x(pt.x), y(pt.y), width(size.x), height(size.y)
-        { }
-    wxRect(const wxSize& size)
-        : x(0), y(0), width(size.x), height(size.y)
-        { }
+    wxRect(const wxPoint& pos, const wxSize& size);
 
     // default copy ctor and assignment operators ok
 
@@ -346,18 +311,6 @@ public:
 
     wxSize GetSize() const { return wxSize(width, height); }
     void SetSize( const wxSize &s ) { width = s.GetWidth(); height = s.GetHeight(); }
-
-    bool IsEmpty() const { return (width <= 0) || (height <= 0); }
-
-    wxPoint GetTopLeft() const { return GetPosition(); }
-    wxPoint GetLeftTop() const { return GetTopLeft(); }
-    void SetTopLeft(const wxPoint &p) { SetPosition(p); }
-    void SetLeftTop(const wxPoint &p) { SetTopLeft(p); }
-
-    wxPoint GetBottomRight() const { return wxPoint(GetRight(), GetBottom()); }
-    wxPoint GetRightBottom() const { return GetBottomRight(); }
-    void SetBottomRight(const wxPoint &p) { SetRight(p.x); SetBottom(p.y); }
-    void SetRightBottom(const wxPoint &p) { SetBottomRight(p); }
 
     int GetLeft()   const { return x; }
     int GetTop()    const { return y; }
@@ -399,48 +352,19 @@ public:
         return r;
     }
 
-    wxRect& Union(const wxRect& rect);
-    wxRect Union(const wxRect& rect) const
-    {
-        wxRect r = *this;
-        r.Union(rect);
-        return r;
-    }
+    wxRect operator+(const wxRect& rect) const;
+    wxRect& operator+=(const wxRect& rect);
 
     // compare rectangles
     bool operator==(const wxRect& rect) const;
     bool operator!=(const wxRect& rect) const { return !(*this == rect); }
 
-    // return true if the point is (not strcitly) inside the rect
+    // return TRUE if the point is (not strcitly) inside the rect
     bool Inside(int x, int y) const;
     bool Inside(const wxPoint& pt) const { return Inside(pt.x, pt.y); }
 
-    // return true if the rectangles have a non empty intersection
+    // return TRUE if the rectangles have a non empty intersection
     bool Intersects(const wxRect& rect) const;
-
-
-    // these are like Union() but don't ignore empty rectangles
-    wxRect operator+(const wxRect& rect) const;
-    wxRect& operator+=(const wxRect& rect)
-    {
-        *this = *this + rect;
-        return *this;
-    }
-
-
-    // centre this rectangle in the given (usually, but not necessarily,
-    // larger) one
-    wxRect CentreIn(const wxRect& r, int dir = wxBOTH) const
-    {
-        return wxRect(dir & wxHORIZONTAL ? r.x + (r.width - width)/2 : x,
-                      dir & wxVERTICAL ? r.y + (r.height - height)/2 : y,
-                      width, height);
-    }
-
-    wxRect CenterIn(const wxRect& r, int dir = wxBOTH) const
-    {
-        return CentreIn(r, dir);
-    }
 
 public:
     int x, y, width, height;
@@ -452,91 +376,90 @@ public:
 
 typedef wxInt8 wxDash;
 
-class WXDLLIMPEXP_CORE wxGDIObjListBase {
-public:
-    wxGDIObjListBase();
-    ~wxGDIObjListBase();
-
-protected:
-    wxList list;
-};
-
-class WXDLLIMPEXP_CORE wxPenList: public wxGDIObjListBase
+class WXDLLEXPORT wxPenList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxPenList)
+
 public:
+    wxPenList() { }
+    ~wxPenList();
+
+    void AddPen(wxPen *pen);
+    void RemovePen(wxPen *pen);
     wxPen *FindOrCreatePen(const wxColour& colour, int width, int style);
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( void AddPen(wxPen*) );
-    wxDEPRECATED( void RemovePen(wxPen*) );
-#endif
 };
 
-class WXDLLIMPEXP_CORE wxBrushList: public wxGDIObjListBase
+class WXDLLEXPORT wxBrushList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxBrushList)
+
 public:
-    wxBrush *FindOrCreateBrush(const wxColour& colour, int style = wxSOLID);
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( void AddBrush(wxBrush*) );
-    wxDEPRECATED( void RemoveBrush(wxBrush*) );
-#endif
+    wxBrushList() { }
+    ~wxBrushList();
+
+    void AddBrush(wxBrush *brush);
+    void RemoveBrush(wxBrush *brush);
+    wxBrush *FindOrCreateBrush(const wxColour& colour, int style);
 };
 
-class WXDLLIMPEXP_CORE wxFontList: public wxGDIObjListBase
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
+
+class WXDLLEXPORT wxFontList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxFontList)
+
 public:
+    wxFontList() { }
+    ~wxFontList();
+
+    void AddFont(wxFont *font);
+    void RemoveFont(wxFont *font);
     wxFont *FindOrCreateFont(int pointSize, int family, int style, int weight,
-                             bool underline = false,
+                             bool underline = FALSE,
                              const wxString& face = wxEmptyString,
                              wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( void AddFont(wxFont*) );
-    wxDEPRECATED( void RemoveFont(wxFont*) );
-#endif
 };
 
-WX_DECLARE_STRING_HASH_MAP( wxColour *, wxStringToColourHashMap );
-
-class WXDLLEXPORT wxColourDatabase
+class WXDLLEXPORT wxColourDatabase : public wxList
 {
+    DECLARE_CLASS(wxColourDatabase)
+
 public:
-    wxColourDatabase();
-    ~wxColourDatabase();
+    wxColourDatabase(int type);
+    ~wxColourDatabase() ;
 
-    // find colour by name or name for the given colour
-    wxColour Find(const wxString& name) const;
+    // Not const because it may add a name to the database
+    wxColour *FindColour(const wxString& colour) ;
     wxString FindName(const wxColour& colour) const;
-
-    // add a new colour to the database
-    void AddColour(const wxString& name, const wxColour& colour);
-
-#if WXWIN_COMPATIBILITY_2_6
-    // deprecated, use Find() instead
-    wxDEPRECATED( wxColour *FindColour(const wxString& name) );
-#endif // WXWIN_COMPATIBILITY_2_6
-
-
+    void Initialize();
 #ifdef __WXPM__
     // PM keeps its own type of colour table
     long*                           m_palTable;
     size_t                          m_nSize;
 #endif
+};
 
-private:
-    // load the database with the built in colour values when called for the
-    // first time, do nothing after this
-    void Initialize();
+class WXDLLEXPORT wxBitmapList : public wxList
+{
+    DECLARE_DYNAMIC_CLASS(wxBitmapList)
 
-    wxStringToColourHashMap *m_map;
+public:
+    wxBitmapList();
+    ~wxBitmapList();
+
+    void AddBitmap(wxBitmap *bitmap);
+    void RemoveBitmap(wxBitmap *bitmap);
 };
 
 class WXDLLEXPORT wxResourceCache: public wxList
 {
 public:
     wxResourceCache() { }
-#if !wxUSE_STL
     wxResourceCache(const unsigned int keyType) : wxList(keyType) { }
-#endif
     ~wxResourceCache();
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxResourceCache)
 };
 
 // ---------------------------------------------------------------------------
@@ -544,147 +467,80 @@ public:
 // ---------------------------------------------------------------------------
 
 // Lists of GDI objects
-extern WXDLLEXPORT_DATA(wxPenList*)   wxThePenList;
-extern WXDLLEXPORT_DATA(wxBrushList*)   wxTheBrushList;
-extern WXDLLEXPORT_DATA(wxFontList*)    wxTheFontList;
+WXDLLEXPORT_DATA(extern wxPenList*)   wxThePenList;
+WXDLLEXPORT_DATA(extern wxBrushList*)   wxTheBrushList;
+WXDLLEXPORT_DATA(extern wxFontList*)    wxTheFontList;
+WXDLLEXPORT_DATA(extern wxBitmapList*)  wxTheBitmapList;
 
-/* Stock objects
+// Stock objects
+WXDLLEXPORT_DATA(extern wxFont*)      wxNORMAL_FONT;
+WXDLLEXPORT_DATA(extern wxFont*)      wxSMALL_FONT;
+WXDLLEXPORT_DATA(extern wxFont*)      wxITALIC_FONT;
+WXDLLEXPORT_DATA(extern wxFont*)      wxSWISS_FONT;
 
-  wxStockGDI creates the stock GDI objects on demand.  Pointers to the
-  created objects are stored in the ms_stockObject array, which is indexed
-  by the Item enum values.  Platorm-specific fonts can be created by
-  implementing a derived class with an override for the GetFont function.
-  wxStockGDI operates as a singleton, accessed through the ms_instance
-  pointer.  By default this pointer is set to an instance of wxStockGDI.
-  A derived class must arrange to set this pointer to an instance of itself.
-*/
-class WXDLLIMPEXP_CORE wxStockGDI
-{
-public:
-    enum Item {
-        BRUSH_BLACK,
-        BRUSH_BLUE,
-        BRUSH_CYAN,
-        BRUSH_GREEN,
-        BRUSH_GREY,
-        BRUSH_LIGHTGREY,
-        BRUSH_MEDIUMGREY,
-        BRUSH_RED,
-        BRUSH_TRANSPARENT,
-        BRUSH_WHITE,
-        COLOUR_BLACK,
-        COLOUR_BLUE,
-        COLOUR_CYAN,
-        COLOUR_GREEN,
-        COLOUR_LIGHTGREY,
-        COLOUR_RED,
-        COLOUR_WHITE,
-        CURSOR_CROSS,
-        CURSOR_HOURGLASS,
-        CURSOR_STANDARD,
-        FONT_ITALIC,
-        FONT_NORMAL,
-        FONT_SMALL,
-        FONT_SWISS,
-        PEN_BLACK,
-        PEN_BLACKDASHED,
-        PEN_CYAN,
-        PEN_GREEN,
-        PEN_GREY,
-        PEN_LIGHTGREY,
-        PEN_MEDIUMGREY,
-        PEN_RED,
-        PEN_TRANSPARENT,
-        PEN_WHITE,
-        ITEMCOUNT
-    };
+WXDLLEXPORT_DATA(extern wxPen*)      wxRED_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxCYAN_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxGREEN_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxBLACK_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxWHITE_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxTRANSPARENT_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxBLACK_DASHED_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxGREY_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxMEDIUM_GREY_PEN;
+WXDLLEXPORT_DATA(extern wxPen*)      wxLIGHT_GREY_PEN;
 
-    wxStockGDI();
-    virtual ~wxStockGDI();
-    static void DeleteAll();
+WXDLLEXPORT_DATA(extern wxBrush*)    wxBLUE_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxGREEN_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxWHITE_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxBLACK_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxGREY_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxMEDIUM_GREY_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxLIGHT_GREY_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxTRANSPARENT_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxCYAN_BRUSH;
+WXDLLEXPORT_DATA(extern wxBrush*)    wxRED_BRUSH;
 
-    static wxStockGDI& instance() { return *ms_instance; }
-
-    static const wxBrush* GetBrush(Item item);
-    static const wxColour* GetColour(Item item);
-    static const wxCursor* GetCursor(Item item);
-    // Can be overridden by platform-specific derived classes
-    virtual const wxFont* GetFont(Item item);
-    static const wxPen* GetPen(Item item);
-
-protected:
-    static wxStockGDI* ms_instance;
-
-    static wxObject* ms_stockObject[ITEMCOUNT];
-
-    DECLARE_NO_COPY_CLASS(wxStockGDI)
-};
-
-#define wxITALIC_FONT  wxStockGDI::instance().GetFont(wxStockGDI::FONT_ITALIC)
-#define wxNORMAL_FONT  wxStockGDI::instance().GetFont(wxStockGDI::FONT_NORMAL)
-#define wxSMALL_FONT   wxStockGDI::instance().GetFont(wxStockGDI::FONT_SMALL)
-#define wxSWISS_FONT   wxStockGDI::instance().GetFont(wxStockGDI::FONT_SWISS)
-
-#define wxBLACK_DASHED_PEN  wxStockGDI::GetPen(wxStockGDI::PEN_BLACKDASHED)
-#define wxBLACK_PEN         wxStockGDI::GetPen(wxStockGDI::PEN_BLACK)
-#define wxCYAN_PEN          wxStockGDI::GetPen(wxStockGDI::PEN_CYAN)
-#define wxGREEN_PEN         wxStockGDI::GetPen(wxStockGDI::PEN_GREEN)
-#define wxGREY_PEN          wxStockGDI::GetPen(wxStockGDI::PEN_GREY)
-#define wxLIGHT_GREY_PEN    wxStockGDI::GetPen(wxStockGDI::PEN_LIGHTGREY)
-#define wxMEDIUM_GREY_PEN   wxStockGDI::GetPen(wxStockGDI::PEN_MEDIUMGREY)
-#define wxRED_PEN           wxStockGDI::GetPen(wxStockGDI::PEN_RED)
-#define wxTRANSPARENT_PEN   wxStockGDI::GetPen(wxStockGDI::PEN_TRANSPARENT)
-#define wxWHITE_PEN         wxStockGDI::GetPen(wxStockGDI::PEN_WHITE)
-
-#define wxBLACK_BRUSH        wxStockGDI::GetBrush(wxStockGDI::BRUSH_BLACK)
-#define wxBLUE_BRUSH         wxStockGDI::GetBrush(wxStockGDI::BRUSH_BLUE)
-#define wxCYAN_BRUSH         wxStockGDI::GetBrush(wxStockGDI::BRUSH_CYAN)
-#define wxGREEN_BRUSH        wxStockGDI::GetBrush(wxStockGDI::BRUSH_GREEN)
-#define wxGREY_BRUSH         wxStockGDI::GetBrush(wxStockGDI::BRUSH_GREY)
-#define wxLIGHT_GREY_BRUSH   wxStockGDI::GetBrush(wxStockGDI::BRUSH_LIGHTGREY)
-#define wxMEDIUM_GREY_BRUSH  wxStockGDI::GetBrush(wxStockGDI::BRUSH_MEDIUMGREY)
-#define wxRED_BRUSH          wxStockGDI::GetBrush(wxStockGDI::BRUSH_RED)
-#define wxTRANSPARENT_BRUSH  wxStockGDI::GetBrush(wxStockGDI::BRUSH_TRANSPARENT)
-#define wxWHITE_BRUSH        wxStockGDI::GetBrush(wxStockGDI::BRUSH_WHITE)
-
-#define wxBLACK       wxStockGDI::GetColour(wxStockGDI::COLOUR_BLACK)
-#define wxBLUE        wxStockGDI::GetColour(wxStockGDI::COLOUR_BLUE)
-#define wxCYAN        wxStockGDI::GetColour(wxStockGDI::COLOUR_CYAN)
-#define wxGREEN       wxStockGDI::GetColour(wxStockGDI::COLOUR_GREEN)
-#define wxLIGHT_GREY  wxStockGDI::GetColour(wxStockGDI::COLOUR_LIGHTGREY)
-#define wxRED         wxStockGDI::GetColour(wxStockGDI::COLOUR_RED)
-#define wxWHITE       wxStockGDI::GetColour(wxStockGDI::COLOUR_WHITE)
-
-#define wxCROSS_CURSOR      wxStockGDI::GetCursor(wxStockGDI::CURSOR_CROSS)
-#define wxHOURGLASS_CURSOR  wxStockGDI::GetCursor(wxStockGDI::CURSOR_HOURGLASS)
-#define wxSTANDARD_CURSOR   wxStockGDI::GetCursor(wxStockGDI::CURSOR_STANDARD)
+WXDLLEXPORT_DATA(extern wxColour*)    wxBLACK;
+WXDLLEXPORT_DATA(extern wxColour*)    wxWHITE;
+WXDLLEXPORT_DATA(extern wxColour*)    wxRED;
+WXDLLEXPORT_DATA(extern wxColour*)    wxBLUE;
+WXDLLEXPORT_DATA(extern wxColour*)    wxGREEN;
+WXDLLEXPORT_DATA(extern wxColour*)    wxCYAN;
+WXDLLEXPORT_DATA(extern wxColour*)    wxLIGHT_GREY;
 
 // 'Null' objects
-extern WXDLLEXPORT_DATA(wxBitmap)     wxNullBitmap;
-extern WXDLLEXPORT_DATA(wxIcon)       wxNullIcon;
-extern WXDLLEXPORT_DATA(wxCursor)     wxNullCursor;
-extern WXDLLEXPORT_DATA(wxPen)        wxNullPen;
-extern WXDLLEXPORT_DATA(wxBrush)      wxNullBrush;
-extern WXDLLEXPORT_DATA(wxPalette)     wxNullPalette;
-extern WXDLLEXPORT_DATA(wxFont)       wxNullFont;
-extern WXDLLEXPORT_DATA(wxColour)     wxNullColour;
+WXDLLEXPORT_DATA(extern wxBitmap)     wxNullBitmap;
+WXDLLEXPORT_DATA(extern wxIcon)       wxNullIcon;
+WXDLLEXPORT_DATA(extern wxCursor)     wxNullCursor;
+WXDLLEXPORT_DATA(extern wxPen)        wxNullPen;
+WXDLLEXPORT_DATA(extern wxBrush)      wxNullBrush;
+WXDLLEXPORT_DATA(extern wxPalette)     wxNullPalette;
+WXDLLEXPORT_DATA(extern wxFont)       wxNullFont;
+WXDLLEXPORT_DATA(extern wxColour)     wxNullColour;
 
-extern WXDLLEXPORT_DATA(wxColourDatabase*)  wxTheColourDatabase;
+// Stock cursors types
+WXDLLEXPORT_DATA(extern wxCursor*)    wxSTANDARD_CURSOR;
+WXDLLEXPORT_DATA(extern wxCursor*)    wxHOURGLASS_CURSOR;
+WXDLLEXPORT_DATA(extern wxCursor*)    wxCROSS_CURSOR;
 
-extern WXDLLEXPORT_DATA(const wxChar) wxPanelNameStr[];
+WXDLLEXPORT_DATA(extern wxColourDatabase*)  wxTheColourDatabase;
 
-extern WXDLLEXPORT_DATA(const wxSize) wxDefaultSize;
-extern WXDLLEXPORT_DATA(const wxPoint) wxDefaultPosition;
+WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
+
+WXDLLEXPORT_DATA(extern const wxSize) wxDefaultSize;
+WXDLLEXPORT_DATA(extern const wxPoint) wxDefaultPosition;
 
 // The list of objects which should be deleted
-extern WXDLLEXPORT_DATA(wxList) wxPendingDelete;
+WXDLLEXPORT_DATA(extern wxList) wxPendingDelete;
 
 // ---------------------------------------------------------------------------
 // global functions
 // ---------------------------------------------------------------------------
 
 // resource management
+extern void WXDLLEXPORT wxInitializeStockObjects();
 extern void WXDLLEXPORT wxInitializeStockLists();
+extern void WXDLLEXPORT wxDeleteStockObjects();
 extern void WXDLLEXPORT wxDeleteStockLists();
 
 // is the display colour (or monochrome)?

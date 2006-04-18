@@ -47,7 +47,7 @@ void wxDialog::Init()
     m_returnCode = 0;
     m_windowDisabler = NULL;
     m_eventLoop = NULL;
-    m_isShowingModal = false;
+    m_isShowingModal = FALSE;
 }
 
 wxDialog::~wxDialog()
@@ -83,7 +83,7 @@ void wxDialog::OnCancel(wxCommandEvent &WXUNUSED(event))
     else
     {
         SetReturnCode(wxID_CANCEL);
-        Show(false);
+        Show(FALSE);
     }
 }
 
@@ -98,7 +98,7 @@ void wxDialog::OnOK(wxCommandEvent &WXUNUSED(event))
         else
         {
             SetReturnCode(wxID_OK);
-            Show(false);
+            Show(FALSE);
         }
     }
 }
@@ -162,6 +162,11 @@ bool wxDialog::IsModal() const
     return m_isShowingModal;
 }
 
+void wxDialog::SetModal(bool WXUNUSED(flag))
+{
+    wxFAIL_MSG( wxT("wxDialog:SetModal obsolete now") );
+}
+
 int wxDialog::ShowModal()
 {
     if ( IsModal() )
@@ -181,9 +186,9 @@ int wxDialog::ShowModal()
         }
     }
 
-    Show(true);
+    Show(TRUE);
 
-    m_isShowingModal = true;
+    m_isShowingModal = TRUE;
 
     wxASSERT_MSG( !m_windowDisabler, _T("disabling windows twice?") );
 
@@ -213,9 +218,9 @@ void wxDialog::EndModal(int retCode)
         return;
     }
 
-    m_isShowingModal = false;
+    m_isShowingModal = FALSE;
     
     m_eventLoop->Exit();
 
-    Show(false);
+    Show(FALSE);
 }

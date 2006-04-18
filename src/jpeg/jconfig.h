@@ -10,38 +10,18 @@
 /* jconfig.cfg --- source file edited by configure script */
 /* see jconfig.doc for explanations */
 
-/* If using MetroWerks on Mac define __WXMAC__ if it isn't already
-   FIXME: Is this necessary any longer? */
+/* use wxWindows' configure */
 #ifdef __MWERKS__
-#if (__MWERKS__ < 0x0900) || macintosh || defined ( __MACH__ )
-#   ifndef __WXMAC__
-#       define __WWXMAC__
-#   endif
-#endif
-#endif
-
-/* use wxWidgets' configure */
-#include "wx/setup.h"
-
-/* If using Metrowerks and not using configure-generated setup */
-#if defined(__MWERKS__) && !defined(__WX_SETUP_H__)
-#if (__MWERKS__ < 0x0900) || macintosh || defined ( __MACH__ )
-
-#   define USE_MAC_MEMMGR
-
-#   ifdef __MACH__
-#       include <ansi_prefix.mach.h>
-#       include <msl_c_version.h>
-#       include <stdint.h>
-#       undef WCHAR_MAX
-#       include <machine/ansi.h>
-#   endif
-
-/* automatically includes MacHeaders */
+#if (__MWERKS__ < 0x0900) || macintosh
+    #define __WXMAC__
+		#define USE_MAC_MEMMGR
+// automatically includes MacHeaders
 #elif (__MWERKS__ >= 0x0900) && __INTEL__
     #define __WXMSW__
 #endif
 #endif
+
+#include "wx/setup.h"
 
 #define HAVE_PROTOTYPES
 #define HAVE_UNSIGNED_CHAR
@@ -49,7 +29,7 @@
 #undef void
 #undef const
 
-/* use wxWidgets' configure */
+/* use wxWindows' configure */
 /* #undef CHAR_IS_UNSIGNED */
 #ifdef __CHAR_UNSIGNED__
   #ifndef CHAR_IS_UNSIGNED
@@ -72,7 +52,7 @@
 
 #undef RIGHT_SHIFT_IS_UNSIGNED
 
-/* use wxWidgets' configure */
+/* use wxWindows' configure */
 /* #define INLINE __inline__ */
 #if defined(__VISAGECPP__) && (__IBMCPP__ >= 400 || __IBMC__ >= 400)
 #define INLINE

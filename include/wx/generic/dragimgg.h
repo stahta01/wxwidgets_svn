@@ -26,7 +26,7 @@
   void MyTreeCtrl::OnBeginDrag(wxTreeEvent& event)
   {
 #ifdef __WXMSW__
-    ::UpdateWindow((HWND) GetHWND()); // We need to implement this in wxWidgets
+    ::UpdateWindow((HWND) GetHWND()); // We need to implement this in wxWindows
 #endif
 
     CaptureMouse();
@@ -100,11 +100,26 @@ public:
         Create(cursor);
     }
 
+    // Deprecated version of the above
+    wxGenericDragImage(const wxCursor& cursor, const wxPoint& cursorHotspot)
+    {
+        Init();
+        Create(cursor, cursorHotspot);
+    }
+
     wxGenericDragImage(const wxBitmap& image, const wxCursor& cursor = wxNullCursor)
     {
         Init();
 
         Create(image, cursor);
+    }
+
+    // Deprecated version of the above
+    wxGenericDragImage(const wxBitmap& image, const wxCursor& cursor, const wxPoint& cursorHotspot)
+    {
+        Init();
+
+        Create(image, cursor, cursorHotspot);
     }
 
     wxGenericDragImage(const wxIcon& image, const wxCursor& cursor = wxNullCursor)
@@ -114,6 +129,14 @@ public:
         Create(image, cursor);
     }
 
+    // Deprecated version of the above
+    wxGenericDragImage(const wxIcon& image, const wxCursor& cursor, const wxPoint& cursorHotspot)
+    {
+        Init();
+
+        Create(image, cursor, cursorHotspot);
+    }
+
     wxGenericDragImage(const wxString& str, const wxCursor& cursor = wxNullCursor)
     {
         Init();
@@ -121,36 +144,27 @@ public:
         Create(str, cursor);
     }
 
-#if WXWIN_COMPATIBILITY_2_6
-    // don't use in new code, use versions without hot spot parameter
-    wxDEPRECATED( wxGenericDragImage(const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( wxGenericDragImage(const wxBitmap& image, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( wxGenericDragImage(const wxIcon& image, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( wxGenericDragImage(const wxString& str, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( bool Create(const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( bool Create(const wxBitmap& image, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( bool Create(const wxIcon& image, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-    wxDEPRECATED( bool Create(const wxString& str, const wxCursor& cursor, const wxPoint& cursorHotspot) );
-#endif // WXWIN_COMPATIBILITY_2_6
+    // Deprecated version of the above
+    wxGenericDragImage(const wxString& str, const wxCursor& cursor, const wxPoint& cursorHotspot)
+    {
+        Init();
 
-#if wxUSE_TREECTRL
+        Create(str, cursor, cursorHotspot);
+    }
+
     wxGenericDragImage(const wxTreeCtrl& treeCtrl, wxTreeItemId& id)
     {
         Init();
 
         Create(treeCtrl, id);
     }
-#endif
 
-#if wxUSE_LISTCTRL
     wxGenericDragImage(const wxListCtrl& listCtrl, long id)
     {
         Init();
 
         Create(listCtrl, id);
     }
-#endif
-
     ~wxGenericDragImage();
 
     // Attributes
@@ -165,29 +179,45 @@ public:
 
     // Create a drag image with a virtual image (need to override DoDrawImage, GetImageRect)
     bool Create(const wxCursor& cursor = wxNullCursor);
+    bool Create(const wxCursor& cursor, const wxPoint& WXUNUSED(cursorHotspot))
+    {
+        wxLogDebug(wxT("wxDragImage::Create: use of a cursor hotspot is now deprecated. Please omit this argument."));
+        return Create(cursor);
+    }
 
     // Create a drag image from a bitmap and optional cursor
     bool Create(const wxBitmap& image, const wxCursor& cursor = wxNullCursor);
+    bool Create(const wxBitmap& image, const wxCursor& cursor, const wxPoint& WXUNUSED(cursorHotspot))
+    {
+        wxLogDebug(wxT("wxDragImage::Create: use of a cursor hotspot is now deprecated. Please omit this argument."));
+        return Create(image, cursor);
+    }
 
     // Create a drag image from an icon and optional cursor
     bool Create(const wxIcon& image, const wxCursor& cursor = wxNullCursor);
+    bool Create(const wxIcon& image, const wxCursor& cursor, const wxPoint& WXUNUSED(cursorHotspot))
+    {
+        wxLogDebug(wxT("wxDragImage::Create: use of a cursor hotspot is now deprecated. Please omit this argument."));
+        return Create(image, cursor);
+    }
 
     // Create a drag image from a string and optional cursor
     bool Create(const wxString& str, const wxCursor& cursor = wxNullCursor);
+    bool Create(const wxString& str, const wxCursor& cursor, const wxPoint& WXUNUSED(cursorHotspot))
+    {
+        wxLogDebug(wxT("wxDragImage::Create: use of a cursor hotspot is now deprecated. Please omit this argument."));
+        return Create(str, cursor);
+    }
 
-#if wxUSE_TREECTRL
     // Create a drag image for the given tree control item
     bool Create(const wxTreeCtrl& treeCtrl, wxTreeItemId& id);
-#endif
 
-#if wxUSE_LISTCTRL
     // Create a drag image for the given list control item
     bool Create(const wxListCtrl& listCtrl, long id);
-#endif
 
     // Begin drag. hotspot is the location of the drag position relative to the upper-left
     // corner of the image.
-    bool BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen = false, wxRect* rect = (wxRect*) NULL);
+    bool BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen = FALSE, wxRect* rect = (wxRect*) NULL);
 
     // Begin drag. hotspot is the location of the drag position relative to the upper-left
     // corner of the image. This is full screen only. fullScreenRect gives the
@@ -224,7 +254,7 @@ public:
     // Instead, paint the drag image's backing bitmap to be correct, and leave the window
     // to be updated only when dragging the objects away (thus giving a smoother appearance).
     virtual bool UpdateBackingFromWindow(wxDC& windowDC, wxMemoryDC& destDC,
-                                         const wxRect& sourceRect, const wxRect& destRect) const;
+        const wxRect& sourceRect, const wxRect& destRect) const;
 
     // Erase and redraw simultaneously if possible
     virtual bool RedrawImage(const wxPoint& oldPos, const wxPoint& newPos, bool eraseOld, bool drawNew);
@@ -254,7 +284,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGenericDragImage)
-    DECLARE_NO_COPY_CLASS(wxGenericDragImage)
 };
 
 #endif

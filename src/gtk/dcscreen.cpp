@@ -7,9 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/dcscreen.h"
 #include "wx/window.h"
 
@@ -35,14 +32,7 @@ wxScreenDC::wxScreenDC()
 {
     m_ok = FALSE;
     m_cmap = gdk_colormap_get_system();
-    m_window = gdk_get_default_root_window();
-
-    m_context = gdk_pango_context_get();
-    // Note: The Sun customised version of Pango shipping with Solaris 10
-    // crashes if the language is left NULL (see bug 1374114)
-    pango_context_set_language( m_context, gtk_get_default_language() );
-    m_layout = pango_layout_new( m_context );
-//    m_fontdesc = pango_font_description_copy( widget->style->font_desc );
+    m_window = GDK_ROOT_PARENT();
 
     m_isScreenDC = TRUE;
 
@@ -64,19 +54,47 @@ wxScreenDC::~wxScreenDC()
     EndDrawingOnTop();
 }
 
-bool wxScreenDC::StartDrawingOnTop( wxWindow * )
+bool wxScreenDC::StartDrawingOnTop( wxWindow *window )
 {
-    return true;
+    if (!window) return StartDrawingOnTop();
+
+    int x = 0;
+    int y = 0;
+    window->GetPosition( &x, &y );
+    int w = 0;
+    int h = 0;
+    window->GetSize( &w, &h );
+    window->ClientToScreen( &x, &y );
+
+    wxRect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.width = 0;
+    rect.height = 0;
+
+    return StartDrawingOnTop( &rect );
 }
 
-bool wxScreenDC::StartDrawingOnTop( wxRect * )
+bool wxScreenDC::StartDrawingOnTop( wxRect *rect )
 {
-    return true;
+    int x = 0;
+    int y = 0;
+    int width = gdk_screen_width();
+    int height = gdk_screen_height();
+    if (rect)
+    {
+        x = rect->x;
+        y = rect->y;
+        width = rect->width;
+        height = rect->height;
+    }
+
+    return TRUE;
 }
 
 bool wxScreenDC::EndDrawingOnTop()
 {
-    return true;
+    return TRUE;
 }
 
 void wxScreenDC::DoGetSize(int *width, int *height) const

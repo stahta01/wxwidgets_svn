@@ -49,7 +49,7 @@ bool wxStaticBox::Create(
     wxPoint                         vPos(0,0);
     wxSize                          vSize(0,0);
 
-    if (!OS2CreateControl( wxT("STATIC")
+    if (!OS2CreateControl( "STATIC"
                           ,SS_GROUPBOX
                           ,vPos
                           ,vSize
@@ -65,20 +65,24 @@ bool wxStaticBox::Create(
     SetBackgroundColour(GetParent()->GetBackgroundColour());
 
     wxColour                        vColour;
-    vColour.Set(wxString(wxT("BLACK")));
+
+    vColour.Set(wxString("BLACK"));
+
     LONG                            lColor = (LONG)vColour.GetPixel();
+
     ::WinSetPresParam( m_hWnd
                       ,PP_FOREGROUNDCOLOR
                       ,sizeof(LONG)
                       ,(PVOID)&lColor
                      );
-
     lColor = (LONG)m_backgroundColour.GetPixel();
+
     ::WinSetPresParam( m_hWnd
                       ,PP_BACKGROUNDCOLOR
                       ,sizeof(LONG)
                       ,(PVOID)&lColor
                      );
+    SetFont(*wxSMALL_FONT);
     SetSize( rPos.x
             ,rPos.y
             ,rSize.x
@@ -93,11 +97,14 @@ wxSize wxStaticBox::DoGetBestSize() const
     int                             nCy;
     int                             wBox;
 
-    nCx = GetCharWidth();
-    nCy = GetCharHeight();
+    wxGetCharSize( GetHWND()
+                  ,&nCx
+                  ,&nCy
+                  ,(wxFont*)&GetFont()
+                 );
     GetTextExtent( wxGetWindowText(m_hWnd)
                   ,&wBox
-                  ,NULL
+                  ,&nCy
                  );
     wBox += 3 * nCx;
 

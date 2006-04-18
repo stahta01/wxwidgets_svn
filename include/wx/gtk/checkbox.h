@@ -14,7 +14,7 @@
 // wxCheckBox
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCheckBox : public wxCheckBoxBase
+class wxCheckBox : public wxCheckBoxBase
 {
 public:
     wxCheckBox();
@@ -41,12 +41,10 @@ public:
     virtual void SetLabel( const wxString& label );
     virtual bool Enable( bool enable = TRUE );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
     // implementation
     // --------------
 
+    void ApplyWidgetStyle();
     bool IsOwnGtkWindow( GdkWindow *window );
     void OnInternalIdle();
 
@@ -57,10 +55,6 @@ public:
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
-
-    void DoSet3StateValue(wxCheckBoxState state);
-    wxCheckBoxState DoGet3StateValue() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCheckBox)

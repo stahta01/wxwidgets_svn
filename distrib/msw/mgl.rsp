@@ -2,6 +2,3 @@ include/wx/mgl/*.h
 src/mgl/*.cpp
 src/mgl/*.lst
 
-include/wx/msdos/*.h
-src/msdos/*.cpp
-

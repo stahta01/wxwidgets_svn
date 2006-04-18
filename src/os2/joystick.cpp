@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/joystick.cpp
+// Name:        joystick.cpp
 // Purpose:     wxJoystick class
 // Author:      David Webster
 // Modified by:
@@ -8,11 +8,6 @@
 // Copyright:   (c) David Webster
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-//
-// For compilers that support precompilation, includes "wx.h".
-//
-#include "wx/wxprec.h"
 
 #include "wx/defs.h"
 
@@ -25,8 +20,8 @@
 
 #define NO_JOYGETPOSEX
 
-#include "wx/window.h"
-#include "wx/joystick.h"
+#include <wx/window.h>
+#include <wx/joystick.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -87,7 +82,7 @@ int wxJoystick::GetMovementThreshold() const
     return 0;
 }
 
-void wxJoystick::SetMovementThreshold(int WXUNUSED(threshold))
+void wxJoystick::SetMovementThreshold(int threshold)
 {
     // TODO
 }
@@ -98,10 +93,10 @@ void wxJoystick::SetMovementThreshold(int WXUNUSED(threshold))
 bool wxJoystick::IsOk() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;
@@ -122,7 +117,7 @@ int wxJoystick::GetProductId() const
 wxString wxJoystick::GetProductName() const
 {
     // TODO
-    return wxEmptyString;
+    return wxString("");
 }
 
 int wxJoystick::GetXMin() const
@@ -236,57 +231,58 @@ int wxJoystick::GetVMax() const
 bool wxJoystick::HasRudder() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasZ() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasU() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasV() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOV() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOV4Dir() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOVCTS() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Operations
 ////////////////////////////////////////////////////////////////////////////
 
-bool wxJoystick::SetCapture(wxWindow* WXUNUSED(win), int WXUNUSED(pollingFreq))
+bool wxJoystick::SetCapture(wxWindow* win, int pollingFreq)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::ReleaseCapture()
 {
     // TODO
-    return false;
+    return FALSE;
 }
 #endif  // wxUSE_JOYSTICK
+

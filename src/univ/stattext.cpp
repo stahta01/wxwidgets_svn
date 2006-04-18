@@ -6,7 +6,7 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -53,12 +53,12 @@ bool wxStaticText::Create(wxWindow *parent,
                           const wxString &name)
 {
     if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return false;
+        return FALSE;
         
     SetLabel(label);
     SetBestSize(size);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------

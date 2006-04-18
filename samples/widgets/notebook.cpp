@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Program:     wxWidgets Widgets Sample
+// Program:     wxWindows Widgets Sample
 // Name:        notebook.cpp
 // Purpose:     Part of the widgets sample showing wxNotebook
 // Author:      Vadim Zeitlin
@@ -24,8 +24,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_NOTEBOOK
-
 // for all others, include the necessary headers
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -46,6 +44,7 @@
 #include "wx/artprov.h"
 
 #include "widgets.h"
+#if 1
 #include "icons/notebook.xpm"
 
 // ----------------------------------------------------------------------------
@@ -79,6 +78,11 @@ enum Orient
     Orient_Max
 };
 
+// old versions of wxWindows don't define this style
+#ifndef wxNB_TOP
+    #define wxNB_TOP (0)
+#endif
+
 // ----------------------------------------------------------------------------
 // NotebookWidgetsPage
 // ----------------------------------------------------------------------------
@@ -86,11 +90,8 @@ enum Orient
 class NotebookWidgetsPage : public WidgetsPage
 {
 public:
-    NotebookWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
+    NotebookWidgetsPage(wxNotebook *notebook, wxImageList *imaglist);
     virtual ~NotebookWidgetsPage();
-
-    virtual wxControl *GetWidget() const { return m_notebook; }
-    virtual void RecreateWidget() { CreateNotebook(); }
 
 protected:
     // event handlers
@@ -135,7 +136,7 @@ protected:
 
     // is the value in range?
     bool IsValidValue(int val) const
-        { return (val >= 0) && (val < (int) m_notebook->GetPageCount()); }
+        { return (val >= 0) && (val < m_notebook->GetPageCount()); }
 
     // the controls
     // ------------
@@ -180,11 +181,11 @@ BEGIN_EVENT_TABLE(NotebookWidgetsPage, WidgetsPage)
     EVT_UPDATE_UI(NotebookPage_InsertPage, NotebookWidgetsPage::OnUpdateUIInsertButton)
     EVT_UPDATE_UI(NotebookPage_RemovePage, NotebookWidgetsPage::OnUpdateUIRemoveButton)
 
-    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, NotebookWidgetsPage::OnPageChanging)
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, NotebookWidgetsPage::OnPageChanged)
+    EVT_NOTEBOOK_PAGE_CHANGING(-1, NotebookWidgetsPage::OnPageChanging)
+    EVT_NOTEBOOK_PAGE_CHANGED(-1, NotebookWidgetsPage::OnPageChanged)
 
-    EVT_CHECKBOX(wxID_ANY, NotebookWidgetsPage::OnCheckOrRadioBox)
-    EVT_RADIOBOX(wxID_ANY, NotebookWidgetsPage::OnCheckOrRadioBox)
+    EVT_CHECKBOX(-1, NotebookWidgetsPage::OnCheckOrRadioBox)
+    EVT_RADIOBOX(-1, NotebookWidgetsPage::OnCheckOrRadioBox)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -193,9 +194,9 @@ END_EVENT_TABLE()
 
 IMPLEMENT_WIDGETS_PAGE(NotebookWidgetsPage, _T("Notebook"));
 
-NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
+NotebookWidgetsPage::NotebookWidgetsPage(wxNotebook *notebook,
                                          wxImageList *imaglist)
-                  : WidgetsPage(book)
+                  : WidgetsPage(notebook)
 {
     imaglist->Add(wxBitmap(notebook_xpm));
 
@@ -209,22 +210,25 @@ NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
-    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
+    wxStaticBox *box = new wxStaticBox(this, -1, _T("&Set style"));
 
     // must be in sync with Orient enum
-    wxArrayString orientations;
-    orientations.Add(_T("&top"));
-    orientations.Add(_T("&bottom"));
-    orientations.Add(_T("&left"));
-    orientations.Add(_T("&right"));
+    wxString orientations[] =
+    {
+        _T("&top"),
+        _T("&bottom"),
+        _T("&left"),
+        _T("&right"),
+    };
 
-    wxASSERT_MSG( orientations.GetCount() == Orient_Max,
+    wxASSERT_MSG( WXSIZEOF(orientations) == Orient_Max,
                   _T("forgot to update something") );
 
-    m_chkImages = new wxCheckBox(this, wxID_ANY, _T("Show &images"));
-    m_radioOrient = new wxRadioBox(this, wxID_ANY, _T("&Tab orientation"),
+    m_chkImages = new wxCheckBox(this, -1, _T("Show &images"));
+    m_radioOrient = new wxRadioBox(this, -1, _T("&Tab orientation"),
                                    wxDefaultPosition, wxDefaultSize,
-                                   orientations, 1, wxRA_SPECIFY_COLS);
+                                   WXSIZEOF(orientations), orientations,
+                                   1, wxRA_SPECIFY_COLS);
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
@@ -236,20 +240,20 @@ NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, _T("&Contents"));
+    wxStaticBox *box2 = new wxStaticBox(this, -1, _T("&Contents"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxTextCtrl *text;
     wxSizer *sizerRow = CreateSizerWithTextAndLabel(_T("Number of pages: "),
                                                     NotebookPage_NumPagesText,
                                                     &text);
-    text->SetEditable(false);
+    text->SetEditable(FALSE);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndLabel(_T("Current selection: "),
                                            NotebookPage_CurSelectText,
                                            &text);
-    text->SetEditable(false);
+    text->SetEditable(FALSE);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(NotebookPage_SelectPage,
@@ -292,6 +296,7 @@ NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
     Reset();
     CreateImageList();
 
+    SetAutoLayout(TRUE);
     SetSizer(sizerTop);
 
     sizerTop->Fit(this);
@@ -308,7 +313,7 @@ NotebookWidgetsPage::~NotebookWidgetsPage()
 
 void NotebookWidgetsPage::Reset()
 {
-    m_chkImages->SetValue(true);
+    m_chkImages->SetValue(TRUE);
     m_radioOrient->SetSelection(Orient_Top);
 }
 
@@ -345,31 +350,31 @@ void NotebookWidgetsPage::CreateImageList()
 
 void NotebookWidgetsPage::CreateNotebook()
 {
-    int flags = ms_defaultFlags;
+    int flags;
     switch ( m_radioOrient->GetSelection() )
     {
         default:
-            wxFAIL_MSG( _T("unknown notebook orientation") );
+            wxFAIL_MSG( _T("unknown notebok orientation") );
             // fall through
 
         case Orient_Top:
-            flags |= wxBK_TOP;
+            flags = wxNB_TOP;
             break;
 
         case Orient_Bottom:
-            flags |= wxBK_BOTTOM;
+            flags = wxNB_BOTTOM;
             break;
 
         case Orient_Left:
-            flags |= wxBK_LEFT;
+            flags = wxNB_LEFT;
             break;
 
         case Orient_Right:
-            flags |= wxBK_RIGHT;
+            flags = wxNB_RIGHT;
             break;
     }
 
-    wxNotebook *old_note = m_notebook;
+    wxNotebook *notebook = m_notebook;
 
     m_notebook = new wxNotebook(this, NotebookPage_Notebook,
                                 wxDefaultPosition, wxDefaultSize,
@@ -377,24 +382,23 @@ void NotebookWidgetsPage::CreateNotebook()
 
     CreateImageList();
 
-    if ( old_note )
+    if ( notebook )
     {
-        const int sel = old_note->GetSelection();
+        const int sel = notebook->GetSelection();
 
-        const int count = old_note->GetPageCount();
+        const int count = notebook->GetPageCount();
 
         // recreate the pages
         for ( int n = 0; n < count; n++ )
         {
             m_notebook->AddPage(CreateNewPage(),
-                                old_note->GetPageText(n),
-                                false,
-                                m_chkImages->GetValue() ?
-                                GetIconIndex() : -1);
+                                notebook->GetPageText(n),
+                                FALSE,
+                                notebook->GetPageImage(n));
         }
 
-        m_sizerNotebook->Detach( old_note );
-        delete old_note;
+        m_sizerNotebook->Remove(notebook);
+        delete notebook;
 
         // restore selection
         if ( sel != -1 )
@@ -436,7 +440,7 @@ int NotebookWidgetsPage::GetIconIndex() const
 
 wxWindow *NotebookWidgetsPage::CreateNewPage()
 {
-    return new wxTextCtrl(m_notebook, wxID_ANY, _T("I'm a notebook page"));
+    return new wxTextCtrl(m_notebook, -1, _T("I'm a notebook page"));
 }
 
 // ----------------------------------------------------------------------------
@@ -455,7 +459,7 @@ void NotebookWidgetsPage::OnButtonDeleteAll(wxCommandEvent& WXUNUSED(event))
     m_notebook->DeleteAllPages();
 }
 
-void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& event)
 {
     int pos = GetTextValue(m_textSelect);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
@@ -465,7 +469,7 @@ void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& WXUNUSED(event))
 
 void NotebookWidgetsPage::OnButtonAddPage(wxCommandEvent& WXUNUSED(event))
 {
-    m_notebook->AddPage(CreateNewPage(), _T("Added page"), false,
+    m_notebook->AddPage(CreateNewPage(), _T("Added page"), FALSE,
                         GetIconIndex());
 }
 
@@ -474,7 +478,7 @@ void NotebookWidgetsPage::OnButtonInsertPage(wxCommandEvent& WXUNUSED(event))
     int pos = GetTextValue(m_textInsert);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
 
-    m_notebook->InsertPage(pos, CreateNewPage(), _T("Inserted page"), false,
+    m_notebook->InsertPage(pos, CreateNewPage(), _T("Inserted page"), FALSE,
                            GetIconIndex());
 }
 
@@ -504,7 +508,7 @@ void NotebookWidgetsPage::OnUpdateUIRemoveButton(wxUpdateUIEvent& event)
 void NotebookWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
 {
     event.Enable( !m_chkImages->GetValue() ||
-                  m_radioOrient->GetSelection() != wxBK_TOP );
+                  m_radioOrient->GetSelection() != wxNB_TOP );
 }
 
 void NotebookWidgetsPage::OnUpdateUINumPagesText(wxUpdateUIEvent& event)
@@ -517,7 +521,7 @@ void NotebookWidgetsPage::OnUpdateUICurSelectText(wxUpdateUIEvent& event)
     event.SetText( wxString::Format(_T("%d"), m_notebook->GetSelection()) );
 }
 
-void NotebookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateNotebook();
 }
@@ -542,4 +546,4 @@ void NotebookWidgetsPage::OnPageChanged(wxNotebookEvent& event)
     event.Skip();
 }
 
-#endif // wxUSE_NOTEBOOK
+#endif

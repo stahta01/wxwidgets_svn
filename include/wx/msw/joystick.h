@@ -6,7 +6,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_JOYSTICK_H_
@@ -14,7 +14,7 @@
 
 #include "wx/event.h"
 
-class WXDLLIMPEXP_ADV wxJoystick: public wxObject
+class WXDLLEXPORT wxJoystick: public wxObject
 {
   DECLARE_DYNAMIC_CLASS(wxJoystick)
  public:

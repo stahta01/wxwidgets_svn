@@ -1,12 +1,11 @@
 /* uncompr.c -- decompress a memory buffer
- * Copyright (C) 1995-2003 Jean-loup Gailly.
+ * Copyright (C) 1995-2002 Jean-loup Gailly.
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
 /* @(#) $Id$ */
 
-#define ZLIB_INTERNAL
-#include "zlib.h"
+#include "../zlib/zlib.h"
 
 /* ===========================================================================
      Decompresses the source buffer into the destination buffer.  sourceLen is
@@ -23,11 +22,15 @@
    enough memory, Z_BUF_ERROR if there was not enough room in the output
    buffer, or Z_DATA_ERROR if the input data was corrupted.
 */
+#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
+int ZEXPORT uncompress (Bytef* dest, uLongf* destLen, const Bytef* source, uLong sourceLen)
+#else
 int ZEXPORT uncompress (dest, destLen, source, sourceLen)
     Bytef *dest;
     uLongf *destLen;
     const Bytef *source;
     uLong sourceLen;
+#endif
 {
     z_stream stream;
     int err;
@@ -50,9 +53,7 @@ int ZEXPORT uncompress (dest, destLen, source, sourceLen)
     err = inflate(&stream, Z_FINISH);
     if (err != Z_STREAM_END) {
         inflateEnd(&stream);
-        if (err == Z_NEED_DICT || (err == Z_BUF_ERROR && stream.avail_in == 0))
-            return Z_DATA_ERROR;
-        return err;
+        return err == Z_OK ? Z_BUF_ERROR : err;
     }
     *destLen = stream.total_out;
 

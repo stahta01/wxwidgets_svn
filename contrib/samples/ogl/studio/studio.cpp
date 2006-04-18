@@ -21,11 +21,13 @@
 #include "wx/mdi.h"
 #endif
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
-
+#include "wx/resource.h"
 #include "wx/config.h"
 #include "wx/laywin.h"
-#include "wx/helpwin.h"
+
+#if !wxUSE_WX_RESOURCES 
+#error "OGL studio sample requires wxUSE_WX_RESOURCES" 
+#endif // wxUSE_WX_RESOURCES 
 
 #include "studio.h"
 #include "view.h"
@@ -91,113 +93,103 @@ csApp::~csApp()
 // Initialise this in OnInit, not statically
 bool csApp::OnInit(void)
 {
-#if wxUSE_WX_RESOURCES
-    if (!wxResourceParseFile(_T("studio_resources.wxr")))
-    {
-        wxMessageBox(_T("Could not find or parse resource file: studio_resources.wxr"), _T("Studio"));
-        return false;
-    }
-#endif
+  if (!wxResourceParseFile("studio_resources.wxr"))
+  {
+    wxMessageBox("Could not find or parse resource file: studio_resources.wxr", "Studio");
+    return FALSE;
+  }
 
-#if wxUSE_MS_HTML_HELP && !defined(__WXUNIVERSAL__)
-    m_helpController = new wxWinHelpController;
-#else
-    m_helpController = new wxHtmlHelpController;
-#endif
+  m_helpController.Initialize("studio.hlp");
 
-    m_helpController->Initialize(_T("studio.hlp"));
+  ReadOptions();
 
-    ReadOptions();
+  wxOGLInitialize();
 
-    wxOGLInitialize();
+  InitSymbols();
 
-    InitSymbols();
+  //// Create a document manager
+  m_docManager = new wxDocManager;
 
-    //// Create a document manager
-    m_docManager = new wxDocManager;
+  //// Create a template relating drawing documents to their views
+  (void) new wxDocTemplate(m_docManager, "Diagram", "*.dia", "", "dia", "Diagram Doc", "Diagram View",
+          CLASSINFO(csDiagramDocument), CLASSINFO(csDiagramView));
 
-    //// Create a template relating drawing documents to their views
-    (void) new wxDocTemplate(m_docManager, _T("Diagram"), _T("*.dia"), wxEmptyString, _T("dia"), _T("Diagram Doc"), _T("Diagram View"),
-            CLASSINFO(csDiagramDocument), CLASSINFO(csDiagramView));
-
-    // Create the main frame window.
-    // Note that we use a frame style that doesn't have wxCLIP_CHILDREN in it
-    // (the default frame style contains wxCLIP_CHILDREN), otherwise the client
-    // area doesn't refresh properly when we change its position, under Windows.
+  // Create the main frame window.
+  // Note that we use a frame style that doesn't have wxCLIP_CHILDREN in it
+  // (the default frame style contains wxCLIP_CHILDREN), otherwise the client
+  // area doesn't refresh properly when we change its position, under Windows.
 
 #define wxDEFAULT_FRAME_STYLE_NO_CLIP \
-    (wxDEFAULT_FRAME_STYLE & ~wxCLIP_CHILDREN)
+  (wxSYSTEM_MENU | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxTHICK_FRAME | wxSYSTEM_MENU | wxCAPTION)
 
-    csFrame* frame = new csFrame(m_docManager, NULL, wxID_ANY, _T("OGL Studio"), m_mainFramePos, m_mainFrameSize,
-                     wxDEFAULT_FRAME_STYLE_NO_CLIP | wxHSCROLL | wxVSCROLL);
+  csFrame* frame = new csFrame(m_docManager, NULL, -1, "OGL Studio", m_mainFramePos, m_mainFrameSize,
+   wxDEFAULT_FRAME_STYLE_NO_CLIP | wxHSCROLL | wxVSCROLL);
 
-    // Give it an icon
-    frame->SetIcon(wxIcon(studio_xpm));
+  // Give it an icon
+  frame->SetIcon(wxICON(studio));
 
-    // Make a menubar
-    wxMenu *fileMenu = new wxMenu;
+  // Make a menubar
+  wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(wxID_NEW, _T("&New...\tCtrl+N"));
-    fileMenu->Append(wxID_OPEN, _T("&Open...\tCtrl+O"));
+  fileMenu->Append(wxID_NEW, "&New...\tCtrl+N");
+  fileMenu->Append(wxID_OPEN, "&Open...\tCtrl+O");
 
-    fileMenu->AppendSeparator();
+  fileMenu->AppendSeparator();
 
-    fileMenu->Append(wxID_PRINT, _T("&Print...\tCtrl+P"));
-    fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
-    fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, _T("E&xit"));
+  fileMenu->Append(wxID_PRINT, "&Print...\tCtrl+P");
+  fileMenu->Append(wxID_PRINT_SETUP, "Print &Setup...");
+  fileMenu->Append(wxID_PREVIEW, "Print Pre&view");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(wxID_EXIT, "E&xit");
 
-    // A history of files visited. Use this menu.
-    m_docManager->FileHistoryUseMenu(fileMenu);
+  // A history of files visited. Use this menu.
+  m_docManager->FileHistoryUseMenu(fileMenu);
 
-    wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(ID_CS_SETTINGS, _T("&Settings..."));
+  wxMenu *viewMenu = new wxMenu;
+  viewMenu->Append(ID_CS_SETTINGS, "&Settings...");
 
-    wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(wxID_HELP, _T("&Help Contents\tF1"));
-    helpMenu->Append(ID_CS_ABOUT, _T("&About"));
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(wxID_HELP, "&Help Contents\tF1");
+  helpMenu->Append(ID_CS_ABOUT, "&About");
 
-    wxMenuBar *menuBar = new wxMenuBar;
+  wxMenuBar *menuBar = new wxMenuBar;
 
-    menuBar->Append(fileMenu, _T("&File"));
-    menuBar->Append(viewMenu, _T("&View"));
-    menuBar->Append(helpMenu, _T("&Help"));
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(helpMenu, "&Help");
 
-    // Associate the menu bar with the frame
-    frame->SetMenuBar(menuBar);
+  // Associate the menu bar with the frame
+  frame->SetMenuBar(menuBar);
 
-    // Load the file history
-    wxConfig config(_T("OGL Studio"), _T("wxWidgets"));
-    m_docManager->FileHistoryLoad(config);
+  // Load the file history
+  wxConfig config("OGL Studio", "wxWindows");
+  m_docManager->FileHistoryLoad(config);
 
-#if wxUSE_STATUSBAR
-    frame->CreateStatusBar();
-#endif // wxUSE_STATUSBAR
+  frame->CreateStatusBar();
 
-    // The ordering of these is important for layout purposes
-    CreateDiagramToolBar(frame);
-    CreatePalette(frame);
+  // The ordering of these is important for layout purposes
+  CreateDiagramToolBar(frame);
+  CreatePalette(frame);
 
-    /*
-    CreateProjectWindow(frame);
-    FillProjectTreeCtrl();
-    */
+  /*
+  CreateProjectWindow(frame);
+  FillProjectTreeCtrl();
+  */
 
-    // Create the shape editing menu
-    m_shapeEditMenu = new ShapeEditMenu;
-    m_shapeEditMenu->Append(ID_CS_EDIT_PROPERTIES, _T("Edit properties"));
-    m_shapeEditMenu->AppendSeparator();
-    m_shapeEditMenu->Append(ID_CS_ROTATE_CLOCKWISE, _T("Rotate clockwise"));
-    m_shapeEditMenu->Append(ID_CS_ROTATE_ANTICLOCKWISE, _T("Rotate anticlockwise"));
-    m_shapeEditMenu->AppendSeparator();
-    m_shapeEditMenu->Append(ID_CS_CUT, _T("Cut"));
+  // Create the shape editing menu
+  m_shapeEditMenu = new ShapeEditMenu;
+  m_shapeEditMenu->Append(ID_CS_EDIT_PROPERTIES, "Edit properties");
+  m_shapeEditMenu->AppendSeparator();
+  m_shapeEditMenu->Append(ID_CS_ROTATE_CLOCKWISE, "Rotate clockwise");
+  m_shapeEditMenu->Append(ID_CS_ROTATE_ANTICLOCKWISE, "Rotate anticlockwise");
+  m_shapeEditMenu->AppendSeparator();
+  m_shapeEditMenu->Append(ID_CS_CUT, "Cut");
 
-    frame->Show(true);
+  frame->Show(TRUE);
 
-    SetTopWindow(frame);
+  SetTopWindow(frame);
 
-    return true;
+  return TRUE;
 }
 
 int csApp::OnExit(void)
@@ -213,9 +205,6 @@ int csApp::OnExit(void)
     delete m_shapeEditMenu;
     m_shapeEditMenu = NULL;
 
-    delete m_helpController;
-    m_helpController = NULL;
-
     wxOGLCleanUp();
 
     return 0;
@@ -225,97 +214,99 @@ int csApp::OnExit(void)
  * Centralised code for creating a document frame.
  * Called from view.cpp, when a view is created.
  */
-
+ 
 wxMDIChildFrame *csApp::CreateChildFrame(wxDocument *doc, wxView *view, wxMenu** editMenuRet)
 {
-    //// Make a child frame
-    csMDIChildFrame *subframe = new csMDIChildFrame(doc, view, ((wxDocMDIParentFrame*)GetTopWindow()), wxID_ANY, _T("Child Frame"),
-                                                    wxPoint(10, 10), wxSize(300, 300), wxDEFAULT_FRAME_STYLE);
+  //// Make a child frame
+  csMDIChildFrame *subframe = new csMDIChildFrame(doc, view, ((wxDocMDIParentFrame*)GetTopWindow()), -1, "Child Frame",
+        wxPoint(10, 10), wxSize(300, 300), wxDEFAULT_FRAME_STYLE);
 
 #ifdef __WXMSW__
-    subframe->SetIcon(wxString(_T("chart")));
+  subframe->SetIcon(wxString("chart"));
 #endif
 #ifdef __X__
-    subframe->SetIcon(wxIcon(_T("doc.xbm")));
+  subframe->SetIcon(wxIcon("doc.xbm"));
 #endif
 
-    //// Make a menubar
-    wxMenu *fileMenu = new wxMenu;
+  //// Make a menubar
+  wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(wxID_NEW, _T("&New...\tCtrl+N"));
-    fileMenu->Append(wxID_OPEN, _T("&Open...\tCtrl+O"));
-    fileMenu->Append(wxID_CLOSE, _T("&Close\tCtrl+W"));
-    fileMenu->Append(wxID_SAVE, _T("&Save\tCtrl+S"));
-    fileMenu->Append(wxID_SAVEAS, _T("Save &As...\tF12"));
+  fileMenu->Append(wxID_NEW, "&New...\tCtrl+N");
+  fileMenu->Append(wxID_OPEN, "&Open...\tCtrl+O");
+  fileMenu->Append(wxID_CLOSE, "&Close\tCtrl+W");
+  fileMenu->Append(wxID_SAVE, "&Save\tCtrl+S");
+  fileMenu->Append(wxID_SAVEAS, "Save &As...\tF12");
 
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_PRINT, _T("&Print...\tCtrl+P"));
-    fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
-    fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
+  fileMenu->AppendSeparator();
+  fileMenu->Append(wxID_PRINT, "&Print...\tCtrl+P");
+  fileMenu->Append(wxID_PRINT_SETUP, "Print &Setup...");
+  fileMenu->Append(wxID_PREVIEW, "Print Pre&view");
 
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, _T("E&xit"));
+  fileMenu->AppendSeparator();
+  fileMenu->Append(wxID_EXIT, "E&xit");
 
-    wxMenu* editMenu = new wxMenu;
-    editMenu->Append(wxID_UNDO, _T("&Undo\tCtrl+Z"));
-    editMenu->Append(wxID_REDO, _T("&Redo\tCtrl+Y"));
-    editMenu->AppendSeparator();
-    editMenu->Append(wxID_CUT, _T("Cu&t\tCtrl+X"));
-    editMenu->Append(wxID_COPY, _T("&Copy\tCtrl+C"));
-    editMenu->Append(wxID_PASTE, _T("&Paste\tCtrl+V"));
-    editMenu->Append(wxID_DUPLICATE, _T("&Duplicate\tCtrl+D"));
-    editMenu->AppendSeparator();
-    editMenu->Append(wxID_CLEAR, _T("Cle&ar\tDelete"));
-    editMenu->Append(ID_CS_SELECT_ALL, _T("Select A&ll\tCtrl+A"));
-    editMenu->AppendSeparator();
-    editMenu->Append(ID_CS_EDIT_PROPERTIES, _T("Edit P&roperties..."));
+  wxMenu *editMenu = NULL;
 
-    *editMenuRet = editMenu;
+  editMenu = new wxMenu;
+  editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z");
+  editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y");
+  editMenu->AppendSeparator();
+  editMenu->Append(wxID_CUT, "Cu&t\tCtrl+X");
+  editMenu->Append(wxID_COPY, "&Copy\tCtrl+C");
+  editMenu->Append(wxID_PASTE, "&Paste\tCtrl+V");
+  editMenu->Append(wxID_DUPLICATE, "&Duplicate\tCtrl+D");
+  editMenu->AppendSeparator();
+  editMenu->Append(wxID_CLEAR, "Cle&ar\tDelete");
+  editMenu->Append(ID_CS_SELECT_ALL, "Select A&ll\tCtrl+A");
+  editMenu->AppendSeparator();
+  editMenu->Append(ID_CS_EDIT_PROPERTIES, "Edit P&roperties...");
 
-    m_docManager->FileHistoryUseMenu(fileMenu);
-    m_docManager->FileHistoryAddFilesToMenu(fileMenu);
+  *editMenuRet = editMenu;
 
-    doc->GetCommandProcessor()->SetEditMenu(editMenu);
+  m_docManager->FileHistoryUseMenu(fileMenu);
+  m_docManager->FileHistoryAddFilesToMenu(fileMenu);
 
-    wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(ID_CS_SETTINGS, _T("&Settings..."));
+  doc->GetCommandProcessor()->SetEditMenu(editMenu);
 
-    wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(wxID_HELP, _T("&Help Contents\tF1"));
-    helpMenu->Append(ID_CS_ABOUT, _T("&About"));
+  wxMenu *viewMenu = new wxMenu;
+  viewMenu->Append(ID_CS_SETTINGS, "&Settings...");
 
-    wxMenuBar *menuBar = new wxMenuBar;
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(wxID_HELP, "&Help Contents\tF1");
+  helpMenu->Append(ID_CS_ABOUT, "&About");
 
-    menuBar->Append(fileMenu, _T("&File"));
-    menuBar->Append(editMenu, _T("&Edit"));
-    menuBar->Append(viewMenu, _T("&View"));
-    menuBar->Append(helpMenu, _T("&Help"));
+  wxMenuBar *menuBar = new wxMenuBar;
 
-    //// Associate the menu bar with the frame
-    subframe->SetMenuBar(menuBar);
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(helpMenu, "&Help");
 
-    return subframe;
+  //// Associate the menu bar with the frame
+  subframe->SetMenuBar(menuBar);
+
+  return subframe;
 }
 
 // Creates a canvas. Called by OnInit as a child of the main window
-csCanvas *csApp::CreateCanvas(wxView *view, wxMDIChildFrame *parent)
+csCanvas *csApp::CreateCanvas(wxView *view, wxFrame *parent)
 {
-    int width, height;
-    parent->GetClientSize(&width, &height);
+  int width, height;
+  parent->GetClientSize(&width, &height);
 
-    // Non-retained canvas
-    csCanvas *canvas = new csCanvas((csDiagramView*) view, parent, 1000, wxPoint(0, 0), wxSize(width, height), wxSUNKEN_BORDER);
+  // Non-retained canvas
+  csCanvas *canvas = new csCanvas((csDiagramView*) view, parent, 1000, wxPoint(0, 0), wxSize(width, height), wxSUNKEN_BORDER);
 
-    wxColour bgColour(_T("WHITE"));
-    canvas->SetBackgroundColour(bgColour);
+  wxColour bgColour("WHITE");
+  canvas->SetBackgroundColour(bgColour);
 
-    wxCursor cursor(wxCURSOR_HAND);
-    canvas->SetCursor(cursor);
+  wxCursor cursor(wxCURSOR_HAND);
+  canvas->SetCursor(cursor);
 
-    // Give it scrollbars
-    canvas->SetScrollbars(20, 20, 100, 100);
+  // Give it scrollbars
+  canvas->SetScrollbars(20, 20, 100, 100);
 
-    return canvas;
+  return canvas;
 }
 
 void csApp::InitToolBar(wxToolBar* toolBar)
@@ -333,28 +324,28 @@ void csApp::InitToolBar(wxToolBar* toolBar)
     bitmaps[8] = new wxBitmap( undo_xpm );
     bitmaps[9] = new wxBitmap( redo_xpm );
 
-    toolBar->AddTool(wxID_NEW, *bitmaps[0], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("New file"));
-    toolBar->AddTool(wxID_OPEN, *bitmaps[1], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Open file"));
-    toolBar->AddTool(wxID_SAVE, *bitmaps[2], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Save file"));
+    toolBar->AddTool(wxID_NEW, *bitmaps[0], wxNullBitmap, FALSE, -1, -1, NULL, "New file");
+    toolBar->AddTool(wxID_OPEN, *bitmaps[1], wxNullBitmap, FALSE, -1, -1, NULL, "Open file");
+    toolBar->AddTool(wxID_SAVE, *bitmaps[2], wxNullBitmap, FALSE, -1, -1, NULL, "Save file");
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_PRINT, *bitmaps[6], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Print"));
+    toolBar->AddTool(wxID_PRINT, *bitmaps[6], wxNullBitmap, FALSE, -1, -1, NULL, "Print");
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_COPY, *bitmaps[3], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Copy"));
-    toolBar->AddTool(wxID_CUT, *bitmaps[4], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Cut"));
-    toolBar->AddTool(wxID_PASTE, *bitmaps[5], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Paste"));
+    toolBar->AddTool(wxID_COPY, *bitmaps[3], wxNullBitmap, FALSE, -1, -1, NULL, "Copy");
+    toolBar->AddTool(wxID_CUT, *bitmaps[4], wxNullBitmap, FALSE, -1, -1, NULL, "Cut");
+    toolBar->AddTool(wxID_PASTE, *bitmaps[5], wxNullBitmap, FALSE, -1, -1, NULL, "Paste");
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_UNDO, *bitmaps[8], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Undo"));
-    toolBar->AddTool(wxID_REDO, *bitmaps[9], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Redo"));
+    toolBar->AddTool(wxID_UNDO, *bitmaps[8], wxNullBitmap, FALSE, -1, -1, NULL, "Undo");
+    toolBar->AddTool(wxID_REDO, *bitmaps[9], wxNullBitmap, FALSE, -1, -1, NULL, "Redo");
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_HELP, *bitmaps[7], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Help"));
+    toolBar->AddTool(wxID_HELP, *bitmaps[7], wxNullBitmap, FALSE, -1, -1, NULL, "Help");
 
     toolBar->Realize();
 
-    toolBar->EnableTool(wxID_COPY, false);
-    toolBar->EnableTool(wxID_PASTE, false);
-    toolBar->EnableTool(wxID_PRINT, false);
-    toolBar->EnableTool(wxID_UNDO, false);
-    toolBar->EnableTool(wxID_REDO, false);
+    toolBar->EnableTool(wxID_COPY, FALSE);
+    toolBar->EnableTool(wxID_PASTE, FALSE);
+    toolBar->EnableTool(wxID_PRINT, FALSE);
+    toolBar->EnableTool(wxID_UNDO, FALSE);
+    toolBar->EnableTool(wxID_REDO, FALSE);
 
     int i;
     for (i = 0; i < 10; i++)
@@ -372,13 +363,26 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
     win->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 
     m_diagramToolBarSashWindow = win;
-    m_diagramToolBarSashWindow->Show(false);
+    m_diagramToolBarSashWindow->Show(FALSE);
 
     // Create the actual toolbar
-    m_diagramToolBar = new wxToolBar(win, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER|wxTB_FLAT);
+    m_diagramToolBar = new wxToolBar(win, -1, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL|wxNO_BORDER|wxTB_FLAT);
 
     wxBitmap* bitmaps[11];
 
+#ifdef __WXMSW__
+    bitmaps[0] = new wxBitmap("alignl", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[1] = new wxBitmap("alignr", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[2] = new wxBitmap("alignt", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[3] = new wxBitmap("alignb", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[4] = new wxBitmap("horiz", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[5] = new wxBitmap("vert", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[6] = new wxBitmap("copysize", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[7] = new wxBitmap("linearrow", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[8] = new wxBitmap("newpoint", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[9] = new wxBitmap("cutpoint", wxBITMAP_TYPE_RESOURCE);
+    bitmaps[10] = new wxBitmap("straighten", wxBITMAP_TYPE_RESOURCE);
+#elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     bitmaps[0] = new wxBitmap( alignl_xpm );
     bitmaps[1] = new wxBitmap( alignr_xpm );
     bitmaps[2] = new wxBitmap( alignt_xpm );
@@ -390,19 +394,22 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
     bitmaps[8] = new wxBitmap( newpoint_xpm );
     bitmaps[9] = new wxBitmap( cutpoint_xpm );
     bitmaps[10] = new wxBitmap( straight_xpm );
+#else
+#error "Not implemented for this platform."
+#endif
 
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNL, *bitmaps[0], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align left"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNR, *bitmaps[1], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align right"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNT, *bitmaps[2], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align top"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNB, *bitmaps[3], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align bottom"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGN_HORIZ, *bitmaps[4], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align horizontally"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGN_VERT, *bitmaps[5], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Align vertically"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_COPY_SIZE, *bitmaps[6], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Copy size"));
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNL, *bitmaps[0], wxNullBitmap, FALSE, -1, -1, NULL, "Align left");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNR, *bitmaps[1], wxNullBitmap, FALSE, -1, -1, NULL, "Align right");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNT, *bitmaps[2], wxNullBitmap, FALSE, -1, -1, NULL, "Align top");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGNB, *bitmaps[3], wxNullBitmap, FALSE, -1, -1, NULL, "Align bottom");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGN_HORIZ, *bitmaps[4], wxNullBitmap, FALSE, -1, -1, NULL, "Align horizontally");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_ALIGN_VERT, *bitmaps[5], wxNullBitmap, FALSE, -1, -1, NULL, "Align vertically");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_COPY_SIZE, *bitmaps[6], wxNullBitmap, FALSE, -1, -1, NULL, "Copy size");
     m_diagramToolBar->AddSeparator();
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_LINE_ARROW, *bitmaps[7], wxNullBitmap, true, wxDefaultCoord, wxDefaultCoord, NULL, _T("Toggle arrow"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_NEW_POINT, *bitmaps[8], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("New line point"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_CUT_POINT, *bitmaps[9], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Cut line point"));
-    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_STRAIGHTEN, *bitmaps[10], wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, NULL, _T("Straighten lines"));
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_LINE_ARROW, *bitmaps[7], wxNullBitmap, TRUE, -1, -1, NULL, "Toggle arrow");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_NEW_POINT, *bitmaps[8], wxNullBitmap, FALSE, -1, -1, NULL, "New line point");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_CUT_POINT, *bitmaps[9], wxNullBitmap, FALSE, -1, -1, NULL, "Cut line point");
+    m_diagramToolBar->AddTool(DIAGRAM_TOOLBAR_STRAIGHTEN, *bitmaps[10], wxNullBitmap, FALSE, -1, -1, NULL, "Straighten lines");
 
     m_diagramToolBar->Realize();
 
@@ -415,7 +422,7 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
     wxString *pointSizes = new wxString[maxPointSize];
     for (i = 1; i <= maxPointSize; i++)
     {
-        pointSizes[i-1].Printf(_T("%d"), i);
+        pointSizes[i-1].Printf("%d", i);
     }
 
     int controlX = 260;
@@ -432,7 +439,7 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
 #endif
 
     m_pointSizeComboBox = new wxComboBox(m_diagramToolBar, ID_WINDOW_POINT_SIZE_COMBOBOX,
-        wxEmptyString, wxPoint(controlX, 1), wxSize(pointSizeW, pointSizeH), maxPointSize, pointSizes);
+        "", wxPoint(controlX, 1), wxSize(pointSizeW, pointSizeH), maxPointSize, pointSizes);
     delete[] pointSizes;
 
 #ifdef __WXGTK__
@@ -449,13 +456,13 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
     wxString *zoomStrings = new wxString[noStrings];
     for (i = 0; i < noStrings; i ++)
     {
-        zoomStrings[noStrings - i - 1].Printf(_T("%d%%"), (i*increment + minZoom));
+        zoomStrings[noStrings - i - 1].Printf("%d%%", (i*increment + minZoom));
     }
 
     controlX += pointSizeW + 10;
 
     m_zoomComboBox = new wxComboBox(m_diagramToolBar, ID_WINDOW_ZOOM_COMBOBOX,
-        wxEmptyString, wxPoint(controlX, 1), wxSize(zoomW, zoomH), noStrings, zoomStrings);
+        "", wxPoint(controlX, 1), wxSize(zoomW, zoomH), noStrings, zoomStrings);
     delete[] zoomStrings;
 
 #ifdef __WXGTK__
@@ -472,31 +479,31 @@ void csApp::CreateDiagramToolBar(wxFrame* parent)
 // Read/write configuration information
 bool csApp::ReadOptions()
 {
-    wxConfig config(_T("OGL Studio"), _T("wxWidgets"));
+    wxConfig config("OGL Studio", "wxWindows");
 
-    config.Read(_T("mainX"), & m_mainFramePos.x);
-    config.Read(_T("mainY"), & m_mainFramePos.y);
-    config.Read(_T("mainWidth"), & m_mainFrameSize.x);
-    config.Read(_T("mainHeight"), & m_mainFrameSize.y);
-    config.Read(_T("gridStyle"), & m_gridStyle);
-    config.Read(_T("gridSpacing"), & m_gridSpacing);
+    config.Read("mainX", & m_mainFramePos.x);
+    config.Read("mainY", & m_mainFramePos.y);
+    config.Read("mainWidth", & m_mainFrameSize.x);
+    config.Read("mainHeight", & m_mainFrameSize.y);
+    config.Read("gridStyle", & m_gridStyle);
+    config.Read("gridSpacing", & m_gridSpacing);
 
-    return true;
+    return TRUE;
 }
 
 bool csApp::WriteOptions()
 {
-    wxConfig config(_T("OGL Studio"), _T("wxWidgets"));
+    wxConfig config("OGL Studio", "wxWindows");
 
-    config.Write(_T("mainX"), (long) m_mainFramePos.x);
-    config.Write(_T("mainY"), (long) m_mainFramePos.y);
-    config.Write(_T("mainWidth"), (long) m_mainFrameSize.x);
-    config.Write(_T("mainHeight"), (long) m_mainFrameSize.y);
-    config.Write(_T("gridStyle"), (long) m_gridStyle);
-    config.Write(_T("gridSpacing"), (long) m_gridSpacing);
+    config.Write("mainX", (long) m_mainFramePos.x);
+    config.Write("mainY", (long) m_mainFramePos.y);
+    config.Write("mainWidth", (long) m_mainFrameSize.x);
+    config.Write("mainHeight", (long) m_mainFrameSize.y);
+    config.Write("gridStyle", (long) m_gridStyle);
+    config.Write("gridSpacing", (long) m_gridSpacing);
 
     m_docManager->FileHistorySave(config);
 
-    return true;
+    return TRUE;
 }
 

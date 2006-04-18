@@ -13,7 +13,7 @@ inkey /W4 `Press any key to continue...` %%input
 
 erase %dest\xml.zip
 cd %src
-zip32 -@ %dest\xml.zip < %src\distrib\msw\xml.rsp
+zip -@ %dest\xml.zip < %src\distrib\msw\xml.rsp
 
 cd %dest
 
@@ -23,7 +23,7 @@ goto end
 :usage
 echo DOS wxXML distribution.
 echo Usage: zipxml source destination
-echo e.g. zipxml d:\wx2\wxWidgets d:\wx2\wxWidgets\deliver
+echo e.g. zipxml d:\wx2\wxWindows d:\wx2\wxWindows\deliver
 
 :end
 

@@ -16,7 +16,7 @@
 
 // this file should never be compiled directly, just included by other code
 #ifndef _WX_USED_BY_WXEXECUTE_
-    #error "You should never directly build this file!"
+    #error "Please don't exclude this file from build!"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -65,8 +65,6 @@ private:
 
     // the size of the buffer
     size_t m_size;
-
-    DECLARE_NO_COPY_CLASS(wxStreamTempInputBuffer)
 };
 
 inline wxStreamTempInputBuffer::wxStreamTempInputBuffer()
@@ -81,17 +79,13 @@ inline void wxStreamTempInputBuffer::Init(wxPipeInputStream *stream)
     m_stream = stream;
 }
 
-inline
 void wxStreamTempInputBuffer::Update()
 {
     if ( m_stream && m_stream->CanRead() )
     {
         // realloc in blocks of 4Kb: this is the default (and minimal) buffer
         // size of the Unix pipes so it should be the optimal step
-        //
-        // NB: don't use "static int" in this inline function, some compilers
-        //     (e.g. IBM xlC) don't like it
-        enum { incSize = 4096 };
+        static const size_t incSize = 4096;
 
         void *buf = realloc(m_buffer, m_size + incSize);
         if ( !buf )
@@ -108,7 +102,6 @@ void wxStreamTempInputBuffer::Update()
     }
 }
 
-inline
 wxStreamTempInputBuffer::~wxStreamTempInputBuffer()
 {
     if ( m_buffer )

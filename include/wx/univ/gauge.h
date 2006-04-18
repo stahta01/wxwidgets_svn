@@ -9,9 +9,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_UNIV_GAUGE_H_
-#define _WX_UNIV_GAUGE_H_
-
 // ----------------------------------------------------------------------------
 // wxGauge: a progress bar
 // ----------------------------------------------------------------------------
@@ -71,5 +68,3 @@ protected:
 
     DECLARE_DYNAMIC_CLASS(wxGauge)
 };
-
-#endif // _WX_UNIV_GAUGE_H_

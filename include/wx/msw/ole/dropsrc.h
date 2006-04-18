@@ -12,7 +12,9 @@
 #ifndef   _WX_OLEDROPSRC_H
 #define   _WX_OLEDROPSRC_H
 
-#if wxUSE_DRAG_AND_DROP
+#if !wxUSE_DRAG_AND_DROP
+  #error  "You should #define wxUSE_DRAG_AND_DROP to 1 to compile this file!"
+#endif  //WX_DRAG_DROP
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -70,10 +72,6 @@ protected:
 
 private:
     wxIDropSource *m_pIDropSource;  // the pointer to COM interface
-
-    DECLARE_NO_COPY_CLASS(wxDropSource)
 };
-
-#endif  //wxUSE_DRAG_AND_DROP
 
 #endif  //_WX_OLEDROPSRC_H

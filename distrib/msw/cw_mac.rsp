@@ -25,15 +25,6 @@ src/png/*.mcp
 src/regex/*M?.xml
 src/regex/*.mcp
 
-src/xrc/*M?.xml
-src/xrc/*.mcp
-samples/xrc/*M?.xml
-samples/xrc/*.mcp
-utils/wxrc/*M?.xml
-utils/wxrc/*.mcp
-contrib/utils/convertrc/*M?.xml
-contrib/utils/convertrc/*.mcp
-
 samples/artprov/*M?.xml
 samples/artprov/*.mcp
 samples/calendar/*M?.xml
@@ -48,8 +39,6 @@ samples/controls/*M?.xml
 samples/controls/*.mcp
 samples/db/*M?.xml
 samples/db/*.mcp
-samples/debugrpt/*M?.xml
-samples/debugrpt/*.mcp
 samples/dialogs/*M?.xml
 samples/dialogs/*.mcp
 samples/dialup/*M?.xml
@@ -96,8 +85,6 @@ samples/listctrl/*M?.xml
 samples/listctrl/*.mcp
 samples/mdi/*M?.xml
 samples/mdi/*.mcp
-samples/mediaplayer/*M?.xml
-samples/mediaplayer/*.mcp
 samples/memcheck/*M?.xml
 samples/memcheck/*.mcp
 samples/menu/*M?.xml
@@ -114,6 +101,8 @@ samples/multimon/*M?.xml
 samples/multimon/*.mcp
 samples/nativdlg/*M?.xml
 samples/nativdlg/*.mcp
+samples/newgrid/*M?.xml
+samples/newgrid/*.mcp
 samples/notebook/*M?.xml
 samples/notebook/*.mcp
 samples/oleauto/*M?.xml
@@ -123,13 +112,15 @@ samples/opengl/*.mcp
 samples/ownerdrw/*M?.xml
 samples/ownerdrw/*.mcp
 samples/png/*M?.xml
-samples/popup/*M?.xml
-samples/popup/*.mcp
 samples/png/*.mcp
 samples/printing/*M?.xml
 samples/printing/*.mcp
+samples/proplist/*M?.xml
+samples/proplist/*.mcp
 samples/regtest/*M?.xml
 samples/regtest/*.mcp
+samples/resource/*M?.xml
+samples/resource/*.mcp
 samples/rotate/*M?.xml
 samples/rotate/*.mcp
 samples/sashtest/*M?.xml
@@ -158,6 +149,8 @@ samples/toolbar/*M?.xml
 samples/toolbar/*.mcp
 samples/treectrl/*M?.xml
 samples/treectrl/*.mcp
+samples/treelay/*M?.xml
+samples/treelay/*.mcp
 samples/typetest/*M?.xml
 samples/typetest/*.mcp
 samples/validate/*M?.xml
@@ -166,6 +159,11 @@ samples/widgets/*M?.xml
 samples/widgets/*.mcp
 samples/wizard/*M?.xml
 samples/wizard/*.mcp
+samples/wxtest/*M?.xml
+samples/wxtest/*.mcp
+
+utils/dialoged/src/*M?.xml
+utils/dialoged/src/*.mcp
 
 utils/helpview/src/*M?.xml
 utils/helpview/src/*.mcp
@@ -202,6 +200,12 @@ contrib/samples/ogl/ogledit/*.mcp
 contrib/samples/ogl/studio/*M?.xml
 contrib/samples/ogl/studio/*.mcp
 
+contrib/src/xrc/*M?.xml
+contrib/src/xrc/*.mcp
+
+contrib/samples/xrc/*M?.xml
+contrib/samples/xrc/*.mcp
+
 contrib/src/mmedia/*M?.xml
 contrib/src/mmedia/*.mcp
 
@@ -214,12 +218,21 @@ contrib/src/stc/*.mcp
 contrib/samples/stc/*M?.xml
 contrib/samples/stc/*.mcp
 
-contrib/src/foldbar/*M?.xml
-contrib/src/foldbar/*.mcp
-contrib/samples/foldbar/extended/*M?.xml
-contrib/samples/foldbar/extended/*.mcp
-contrib/samples/foldbar/foldpanelbar/*M?.xml
-contrib/samples/foldbar/foldpanelbar/*.mcp
+contrib/utils/wxrc/*M?.xml
+contrib/utils/wxrc/*.mcp
+
+contrib/utils/convertrc/*M?.xml
+contrib/utils/convertrc/*.mcp
+
+contrib/utils/wxrcedit/*M?.xml
+contrib/utils/wxrcedit/*.mcp
+
+contrib/src/canvas/*M?.xml
+contrib/src/canvas/*.mcp
+contrib/samples/canvas/simple/*M?.xml
+contrib/samples/canvas/simple/*.mcp
+contrib/samples/canvas/test/*M?.xml
+contrib/samples/canvas/test/*.mcp
 
 contrib/src/plot/*M?.xml
 contrib/src/plot/*.mcp
@@ -259,14 +272,4 @@ contrib/samples/fl/fl_sample3/*.mcp
 
 contrib/src/net/*M?.xml
 contrib/src/net/*.mcp
-
-contrib/src/deprecated/*M?.xml
-contrib/src/deprecated/*.mcp
-
-contrib/samples/deprecated/proplist/*M?.xml
-contrib/samples/deprecated/proplist/*.mcp
-contrib/samples/deprecated/resource/*M?.xml
-contrib/samples/deprecated/resource/*.mcp
-contrib/samples/deprecated/treelay/*M?.xml
-contrib/samples/deprecated/treelay/*.mcp
 

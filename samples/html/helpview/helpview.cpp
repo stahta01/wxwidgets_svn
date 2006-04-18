@@ -1,3 +1,4 @@
+
 /////////////////////////////////////////////////////////////////////////////
 // Name:        helpview.cpp
 // Purpose:     wxHtml help browser
@@ -13,7 +14,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
@@ -60,7 +61,7 @@ bool MyApp::OnInit()
     wxInitAllImageHandlers();
     wxFileSystem::AddHandler(new wxZipFSHandler);
 
-    SetVendorName(wxT("wxWidgets"));
+    SetVendorName(wxT("wxWindows"));
     SetAppName(wxT("wxHTMLHelp")); 
     wxConfig::Get(); // create an instance
 
@@ -69,7 +70,7 @@ bool MyApp::OnInit()
     if (argc < 2) {
         wxLogError(wxT("Usage : helpview <helpfile> [<more helpfiles>]"));
         wxLogError(wxT("  helpfile may be .hhp, .zip or .htb"));
-        return false;
+        return FALSE;
     }
 
     for (int i = 1; i < argc; i++)
@@ -81,7 +82,7 @@ bool MyApp::OnInit()
 
     help -> DisplayContents();
 
-    return true;
+    return TRUE;
 }
 
 

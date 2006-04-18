@@ -6,7 +6,7 @@
 // Created:     20/07/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -27,12 +27,11 @@
 #include "wx/protocol/file.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxFileProto, wxProtocol)
-IMPLEMENT_PROTOCOL(wxFileProto, wxT("file"), NULL, false)
+IMPLEMENT_PROTOCOL(wxFileProto, wxT("file"), NULL, FALSE)
 
 wxFileProto::wxFileProto()
-           : wxProtocol()
+  : wxProtocol()
 {
-    m_error = wxPROTO_NOERR;
 }
 
 wxFileProto::~wxFileProto()
@@ -41,18 +40,7 @@ wxFileProto::~wxFileProto()
 
 wxInputStream *wxFileProto::GetInputStream(const wxString& path)
 {
-    wxFileInputStream *retval = new wxFileInputStream(wxURI::Unescape(path));
-    if ( retval->Ok() )
-    {
-        m_error = wxPROTO_NOERR;
-
-        return retval;
-    }
-
-    m_error = wxPROTO_NOFILE;
-    delete retval;
-
-    return NULL;
+  return new wxFileInputStream(wxURL::ConvertFromURI(path));
 }
 
 #endif // wxUSE_STREAMS && wxUSE_PROTOCOL_FILE

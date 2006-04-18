@@ -205,15 +205,6 @@ private:
     wxCoord                         m_vXMouse;
     wxCoord                         m_vYMouse;
 
-    //
-    // Virtual function hiding supression
-    virtual wxToolBarToolBase *InsertTool (size_t nPos, wxToolBarToolBase* pTool)
-    {
-        return( wxToolBarBase::InsertTool( nPos
-                                          ,pTool
-                                         ));
-    }
-
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxToolBar)
 };

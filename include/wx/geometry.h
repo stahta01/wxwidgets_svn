@@ -4,7 +4,7 @@
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     08/05/99
-// RCS-ID:      $Id$
+// RCS-ID:
 // Copyright:   (c) 1999 Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,26 @@
 
 #include "wx/defs.h"
 
+#ifndef wxUSE_GEOMETRY
+    #define wxUSE_GEOMETRY 0
+#endif
+
 #if wxUSE_GEOMETRY
 
 #include "wx/utils.h"
 #include "wx/gdicmn.h"
-#include "wx/math.h"
+#include <math.h>
 
-class WXDLLIMPEXP_BASE wxDataInputStream;
-class WXDLLIMPEXP_BASE wxDataOutputStream;
+#ifdef __WXMSW__
+    #define wxMulDivInt32( a , b , c ) ::MulDiv( a , b , c )
+#elif defined( __WXMAC__ )
+    #define wxMulDivInt32( a , b , c ) ( (wxInt32) ( ( (wxInt64)(a) * (wxInt64)(b) ) / (wxInt64)(c) ) )
+#else
+    #define wxMulDivInt32( a , b , c ) ((wxInt32)((a)*(((wxDouble)b)/((wxDouble)c))))
+#endif
+
+class wxDataInputStream;
+class wxDataOutputStream;
 
 // clipping from Cohen-Sutherland
 
@@ -75,10 +87,8 @@ public :
     inline bool operator==(const wxPoint2DInt& pt) const;
     inline bool operator!=(const wxPoint2DInt& pt) const;
 
-#if wxUSE_STREAMS
     void WriteTo( wxDataOutputStream &stream ) const;
     void ReadFrom( wxDataInputStream &stream );
-#endif // wxUSE_STREAMS
 
     wxInt32 m_x;
     wxInt32 m_y;
@@ -285,9 +295,9 @@ public :
     inline wxPoint2DDouble( wxDouble x , wxDouble y );
     inline wxPoint2DDouble( const wxPoint2DDouble &pt );
     wxPoint2DDouble( const wxPoint2DInt &pt )
-        { m_x = (wxDouble) pt.m_x ; m_y = (wxDouble) pt.m_y ; }
-    wxPoint2DDouble( const wxPoint &pt )
-        { m_x = (wxDouble) pt.x ; m_y = (wxDouble) pt.y ; }
+		{ 	m_x = (wxDouble) pt.m_x ; m_y = (wxDouble) pt.m_y ; }
+	wxPoint2DDouble( const wxPoint &pt )
+		{ 	m_x = (wxDouble) pt.x ; m_y = (wxDouble) pt.y ; }
 
     // two different conversions to integers, floor and rounding
     inline void GetFloor( wxInt32 *x , wxInt32 *y ) const;
@@ -441,12 +451,12 @@ inline wxPoint2DDouble& wxPoint2DDouble::operator/=(const wxPoint2DDouble& pt)
 
 inline bool wxPoint2DDouble::operator==(const wxPoint2DDouble& pt) const
 {
-    return wxIsSameDouble(m_x, pt.m_x) && wxIsSameDouble(m_y, pt.m_y);
+    return m_x == pt.m_x && m_y == pt.m_y;
 }
 
 inline bool wxPoint2DDouble::operator!=(const wxPoint2DDouble& pt) const
 {
-    return !(*this == pt);
+    return m_x != pt.m_x || m_y != pt.m_y;
 }
 
 inline wxPoint2DDouble operator+(const wxPoint2DDouble& pt1 , const wxPoint2DDouble& pt2)
@@ -574,17 +584,17 @@ public:
                      ( ( pt.m_x > m_x + m_width ) ? wxOutRight : 0 ) +
                      ( ( pt.m_y < m_y ) ? wxOutTop : 0 )  +
                      ( ( pt.m_y > m_y + m_height ) ? wxOutBottom : 0 )); }
-    inline wxOutCode GetOutcode(const wxPoint2DDouble &pt) const
-        { return GetOutCode(pt) ; }
+	inline wxOutCode GetOutcode(const wxPoint2DDouble &pt) const
+		{ return GetOutCode(pt) ; }
     inline bool Contains( const wxPoint2DDouble &pt ) const
         { return  GetOutCode( pt ) == wxInside; }
     inline bool Contains( const wxRect2DDouble &rect ) const
         { return ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
                 ( ( m_y <= rect.m_y ) && ( rect.m_y + rect.m_height <= m_y + m_height ) ) ); }
     inline bool IsEmpty() const
-        { return m_width <= 0 || m_height <= 0; }
+        { return ( m_width <= 0 || m_height <= 0 ); }
     inline bool HaveEqualSize( const wxRect2DDouble &rect ) const
-        { return wxIsSameDouble(rect.m_width, m_width) && wxIsSameDouble(rect.m_height, m_height); }
+        { return ( rect.m_width == m_width && rect.m_height == m_height ); }
 
     inline void Inset( wxDouble x , wxDouble y )
         { m_x += x; m_y += y; m_width -= 2 * x; m_height -= 2 * y; }
@@ -618,11 +628,11 @@ public:
         { m_x *= ((wxDouble)num)/((wxDouble)denum); m_y *= ((wxDouble)num)/((wxDouble)denum);
                 m_width *= ((wxDouble)num)/((wxDouble)denum); m_height *= ((wxDouble)num)/((wxDouble)denum);}
 
+/*
     wxRect2DDouble& operator = (const wxRect2DDouble& rect);
-    inline bool operator == (const wxRect2DDouble& rect) const
-        { return wxIsSameDouble(m_x, rect.m_x) && wxIsSameDouble(m_y, rect.m_y) && HaveEqualSize(rect); }
-    inline bool operator != (const wxRect2DDouble& rect) const
-        { return !(*this == rect); }
+    bool operator == (const wxRect2DDouble& rect);
+    bool operator != (const wxRect2DDouble& rect);
+*/
 
     wxDouble  m_x;
     wxDouble  m_y;
@@ -686,8 +696,8 @@ public:
                      ( ( pt.m_x >= m_x + m_width ) ? wxOutRight : 0 ) +
                      ( ( pt.m_y < m_y ) ? wxOutTop : 0 )  +
                      ( ( pt.m_y >= m_y + m_height ) ? wxOutBottom : 0 )); }
-        inline wxOutCode GetOutcode( const wxPoint2DInt &pt ) const
-            { return GetOutCode( pt ) ; }
+		inline wxOutCode GetOutcode( const wxPoint2DInt &pt ) const
+			{ return GetOutCode( pt ) ; }
         inline bool Contains( const wxPoint2DInt &pt ) const
             { return  GetOutCode( pt ) == wxInside; }
         inline bool Contains( const wxRect2DInt &rect ) const
@@ -724,10 +734,8 @@ public:
        bool operator == (const wxRect2DInt& rect) const;
        bool operator != (const wxRect2DInt& rect) const;
 
-#if wxUSE_STREAMS
        void WriteTo( wxDataOutputStream &stream ) const;
        void ReadFrom( wxDataInputStream &stream );
-#endif // wxUSE_STREAMS
 
        wxInt32 m_x;
        wxInt32 m_y;
@@ -773,16 +781,18 @@ inline bool wxRect2DInt::operator != (const wxRect2DInt& rect) const
 class wxTransform2D
 {
 public :
-    virtual ~wxTransform2D() { }
-    virtual void                    Transform( wxPoint2DInt* pt )const  = 0;
-    virtual void                    Transform( wxRect2DInt* r ) const;
-    virtual wxPoint2DInt    Transform( const wxPoint2DInt &pt ) const;
-    virtual wxRect2DInt        Transform( const wxRect2DInt &r ) const ;
+    // virtual dtor for pure virtual base.
+    virtual ~wxTransform2D() {}
 
-    virtual void                    InverseTransform( wxPoint2DInt* pt ) const  = 0;
-    virtual void                    InverseTransform( wxRect2DInt* r ) const ;
-    virtual wxPoint2DInt    InverseTransform( const wxPoint2DInt &pt ) const ;
-    virtual wxRect2DInt        InverseTransform( const wxRect2DInt &r ) const ;
+    virtual void Transform( wxPoint2DInt* pt ) const = 0;
+    virtual void Transform( wxRect2DInt* r ) const;
+    virtual wxPoint2DInt Transform( const wxPoint2DInt &pt ) const;
+    virtual wxRect2DInt Transform( const wxRect2DInt &r ) const;
+
+    virtual void InverseTransform( wxPoint2DInt* pt ) const = 0;
+    virtual void InverseTransform( wxRect2DInt* r ) const;
+    virtual wxPoint2DInt InverseTransform( const wxPoint2DInt &pt ) const;
+    virtual wxRect2DInt InverseTransform( const wxRect2DInt &r ) const;
 };
 
 inline void    wxTransform2D::Transform( wxRect2DInt* r ) const

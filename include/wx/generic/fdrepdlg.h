@@ -5,12 +5,9 @@
 // Modified by:
 // Created:     25/05/2001
 // RCS-ID:
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-#ifndef _WX_GENERIC_FDREPDLG_H_
-#define _WX_GENERIC_FDREPDLG_H_
 
 class WXDLLEXPORT wxCheckBox;
 class WXDLLEXPORT wxRadioBox;
@@ -68,4 +65,3 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GENERIC_FDREPDLG_H_

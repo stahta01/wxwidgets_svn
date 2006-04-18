@@ -41,14 +41,18 @@ extern void  wxAssociateWinWithHandle( HWND         hWnd
 // wxCheckBox
 // ----------------------------------------------------------------------------
 
-bool wxCheckBox::OS2Command( WXUINT WXUNUSED(uParam),
-                             WXWORD WXUNUSED(wId) )
+bool wxCheckBox::OS2Command(
+  WXUINT                            WXUNUSED(uParam)
+, WXWORD                            WXUNUSED(wId)
+)
 {
-    wxCommandEvent rEvent( wxEVT_COMMAND_CHECKBOX_CLICKED, m_windowId );
+    wxCommandEvent                  rEvent( wxEVT_COMMAND_CHECKBOX_CLICKED
+                                           ,m_windowId
+                                          );
     rEvent.SetInt(GetValue());
     rEvent.SetEventObject(this);
     ProcessCommand(rEvent);
-    return true;
+    return TRUE;
 } // end of wxCheckBox::OS2Command
 
 bool wxCheckBox::Create(
@@ -102,26 +106,38 @@ void wxCheckBox::SetLabel(
   const wxString&                   rsLabel
 )
 {
-    wxString                         sLabel=::wxPMTextToLabel(rsLabel);
-    ::WinSetWindowText(GetHwnd(), (PSZ)sLabel.c_str());
+    ::WinSetWindowText(GetHwnd(), rsLabel.c_str());
 } // end of wxCheckBox::SetLabel
 
 wxSize wxCheckBox::DoGetBestSize() const
 {
-    // We should probably compute nCheckSize but it seems to be a constant
-    // independent of its label's font size and not made available by OS/2.
-    int      nCheckSize = RADIO_SIZE;
-    int      nWidthCheckbox;
-    int      nHeightCheckbox;
-    wxString sStr = wxGetWindowText(GetHWND());
+    static int                      nCheckSize = 0;
 
-    if (!sStr.empty())
+    if (!nCheckSize)
+    {
+        wxScreenDC                  vDc;
+
+        vDc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+
+        //
+        // The height of a standard button in the dialog units is 8,
+        // translate this to pixels (as one dialog unit is precisely equal to
+        // 8 character heights, it's just the char height)
+        //
+        nCheckSize = vDc.GetCharHeight();
+    }
+
+    int                             nWidthCheckbox;
+    int                             nHeightCheckbox;
+    wxString                        sStr = wxGetWindowText(GetHWND());
+
+    if (!sStr.IsEmpty())
     {
         GetTextExtent( sStr
                       ,&nWidthCheckbox
                       ,&nHeightCheckbox
                      );
-        nWidthCheckbox += nCheckSize;
+        nWidthCheckbox += nCheckSize + GetCharWidth();
 
         if (nHeightCheckbox < nCheckSize)
             nHeightCheckbox = nCheckSize;
@@ -165,14 +181,16 @@ void wxCheckBox::Command (
 // wxBitmapCheckBox
 // ----------------------------------------------------------------------------
 
-bool wxBitmapCheckBox::Create( wxWindow*          pParent,
-                               wxWindowID         vId,
-                               const wxBitmap*    WXUNUSED(pLabel),
-                               const wxPoint&     rPos,
-                               const wxSize&      rSize,
-                               long               lStyle,
-                               const wxValidator& rValidator,
-                               const wxString&    rsName)
+bool wxBitmapCheckBox::Create(
+  wxWindow*                         pParent
+, wxWindowID                        vId
+, const wxBitmap*                   pLabel
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxValidator&                rValidator
+, const wxString&                   rsName
+)
 {
     SetName(rsName);
 #if wxUSE_VALIDATORS
@@ -215,10 +233,13 @@ bool wxBitmapCheckBox::Create( wxWindow*          pParent,
            );
 
     ::WinShowWindow(hButton, TRUE);
-    return true;
+    return TRUE;
 } // end of wxBitmapCheckBox::Create
 
-void wxBitmapCheckBox::SetLabel( const wxBitmap& WXUNUSED(rBitmap) )
+void wxBitmapCheckBox::SetLabel(
+  const wxBitmap&                   rBitmap
+)
 {
     wxFAIL_MSG(wxT("not implemented"));
 }  // end of wxBitmapCheckBox::SetLabel
+

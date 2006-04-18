@@ -35,7 +35,7 @@ public:
     wxSpinCtrl() { Init(); }
 
     wxSpinCtrl(wxWindow *parent,
-               wxWindowID id = wxID_ANY,
+               wxWindowID id = -1,
                const wxString& value = wxEmptyString,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
@@ -48,7 +48,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxString& value = wxEmptyString,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -72,8 +72,8 @@ public:
     // implementation from now on
 
     // forward these functions to all subcontrols
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
 
     // get the subcontrols
     wxTextCtrl *GetText() const { return m_text; }
@@ -83,7 +83,7 @@ public:
     void SetTextValue(int val);
 
     // put the numeric value of the string in the text ctrl into val and return
-    // true or return false if the text ctrl doesn't contain a number or if the
+    // TRUE or return FALSE if the text ctrl doesn't contain a number or if the
     // number is out of range
     bool GetTextValue(int *val) const;
 
@@ -118,7 +118,7 @@ public:
     wxSpinCtrl() { Init(); }
 
     wxSpinCtrl(wxWindow *parent,
-               wxWindowID id = wxID_ANY,
+               wxWindowID id = -1,
                const wxString& value = wxEmptyString,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
@@ -130,7 +130,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxString& value = wxEmptyString,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,

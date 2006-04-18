@@ -12,24 +12,21 @@
 #ifndef _WX_GENERIC_GRIDCTRL_H_
 #define _WX_GENERIC_GRIDCTRL_H_
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #include "wx/grid.h"
 #include "wx/string.h"
-#include "wx/arrstr.h"
 #include "wx/datetime.h"
 
 #define wxGRID_VALUE_CHOICEINT    _T("choiceint")
 #define wxGRID_VALUE_DATETIME     _T("datetime")
 
-#if wxUSE_DATETIME
-
 // the default renderer for the cells containing Time and dates..
-class WXDLLIMPEXP_ADV wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
 {
 public:
-    wxGridCellDateTimeRenderer(const wxString& outformat = wxDefaultDateTimeFormat,
-                               const wxString& informat = wxDefaultDateTimeFormat);
+    wxGridCellDateTimeRenderer(wxString outformat =  _T("%c"),
+                               wxString informat =  _T("%c"));
 
     // draw the string right aligned
     virtual void Draw(wxGrid& grid,
@@ -50,7 +47,7 @@ public:
     virtual void SetParameters(const wxString& params);
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
     wxString m_iformat;
     wxString m_oformat;
@@ -58,10 +55,9 @@ protected:
     wxDateTime::TimeZone m_tz;
 };
 
-#endif // wxUSE_DATETIME
 
 // the default renderer for the cells containing Time and dates..
-class WXDLLIMPEXP_ADV wxGridCellEnumRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellEnumRenderer : public wxGridCellStringRenderer
 {
 public:
     wxGridCellEnumRenderer( const wxString& choices = wxEmptyString );
@@ -85,7 +81,7 @@ public:
     virtual void SetParameters(const wxString& params);
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
     wxArrayString m_choices;
 };
@@ -93,11 +89,11 @@ protected:
 
 #if wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_ADV wxGridCellEnumEditor : public wxGridCellChoiceEditor
+class WXDLLEXPORT wxGridCellEnumEditor : public wxGridCellChoiceEditor
 {
 public:
     wxGridCellEnumEditor( const wxString& choices = wxEmptyString );
-    virtual ~wxGridCellEnumEditor() {}
+    virtual ~wxGridCellEnumEditor() {};
 
     virtual wxGridCellEditor*  Clone() const;
 
@@ -106,13 +102,11 @@ public:
 
 private:
     long int   m_startint;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellEnumEditor)
 };
 
 #endif // wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_ADV wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
+class WXDLLEXPORT wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
 {
 public:
     wxGridCellAutoWrapStringEditor() : wxGridCellTextEditor() { }
@@ -122,11 +116,9 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellAutoWrapStringEditor; }
-
-    DECLARE_NO_COPY_CLASS(wxGridCellAutoWrapStringEditor)
 };
 
-class WXDLLIMPEXP_ADV wxGridCellAutoWrapStringRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellAutoWrapStringRenderer : public wxGridCellStringRenderer
 {
 public:
     wxGridCellAutoWrapStringRenderer() : wxGridCellStringRenderer() { }
@@ -149,13 +141,13 @@ public:
 private:
     wxArrayString GetTextLines( wxGrid& grid,
                                 wxDC& dc,
-                                const wxGridCellAttr& attr,
+                                wxGridCellAttr& attr,
                                 const wxRect& rect,
                                 int row, int col);
 
 };
 
-#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_GRID || wxUSE_NEW_GRID
 
 #endif //_WX_GENERIC_GRIDCTRL_H_
 

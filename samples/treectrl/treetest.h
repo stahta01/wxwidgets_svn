@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@
 class MyApp : public wxApp
 {
 public:
-    MyApp() { m_showImages = true; m_showButtons = false; }
+    MyApp() { m_showImages = TRUE; m_showButtons = FALSE; }
 
     bool OnInit();
 
@@ -65,7 +65,7 @@ public:
     MyTreeCtrl(wxWindow *parent, const wxWindowID id,
                const wxPoint& pos, const wxSize& size,
                long style);
-    virtual ~MyTreeCtrl(){};
+    virtual ~MyTreeCtrl();
 
     void OnBeginDrag(wxTreeEvent& event);
     void OnBeginRDrag(wxTreeEvent& event);
@@ -73,9 +73,10 @@ public:
     void OnBeginLabelEdit(wxTreeEvent& event);
     void OnEndLabelEdit(wxTreeEvent& event);
     void OnDeleteItem(wxTreeEvent& event);
-    void OnContextMenu(wxContextMenuEvent& event);
-    void OnItemMenu(wxTreeEvent& event);
+    void OnRMouseUp(wxMouseEvent& event);
     void OnGetInfo(wxTreeEvent& event);
+    void OnTreeRMouseClick(wxTreeEvent& event);
+    void OnItemRightClick(wxTreeEvent& event);
     void OnSetInfo(wxTreeEvent& event);
     void OnItemExpanded(wxTreeEvent& event);
     void OnItemExpanding(wxTreeEvent& event);
@@ -85,31 +86,24 @@ public:
     void OnSelChanging(wxTreeEvent& event);
     void OnTreeKeyDown(wxTreeEvent& event);
     void OnItemActivated(wxTreeEvent& event);
-    void OnItemRClick(wxTreeEvent& event);
-
-    void OnRMouseDown(wxMouseEvent& event);
-    void OnRMouseUp(wxMouseEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
 
-    void GetItemsRecursively(const wxTreeItemId& idParent,
-                             wxTreeItemIdValue cookie = 0);
+    void GetItemsRecursively(const wxTreeItemId& idParent, long cookie);
 
     void CreateImageList(int size = 16);
     void CreateButtonsImageList(int size = 11);
 
     void AddTestItemsToTree(size_t numChildren, size_t depth);
 
-    void DoSortChildren(const wxTreeItemId& item, bool reverse = false)
+    void DoSortChildren(const wxTreeItemId& item, bool reverse = FALSE)
         { m_reverseSort = reverse; wxTreeCtrl::SortChildren(item); }
-    void DoEnsureVisible() { if (m_lastItem.IsOk()) EnsureVisible(m_lastItem); }
+    void DoEnsureVisible() { EnsureVisible(m_lastItem); }
 
     void DoToggleIcon(const wxTreeItemId& item);
 
     void ShowMenu(wxTreeItemId id, const wxPoint& pt);
 
     int ImageSize(void) const { return m_imageSize; }
-
-    void SetLastItem(wxTreeItemId id) { m_lastItem = id; }
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2);
@@ -182,7 +176,6 @@ public:
     void OnUnselect(wxCommandEvent& event);
     void OnToggleSel(wxCommandEvent& event);
 #endif // NO_MULTIPLE_SELECTION
-    void OnSelectRoot(wxCommandEvent& event);
     void OnDelete(wxCommandEvent& event);
     void OnDeleteChildren(wxCommandEvent& event);
     void OnDeleteAll(wxCommandEvent& event);
@@ -193,8 +186,8 @@ public:
     void OnSetImageSize(wxCommandEvent& event);
     void OnCollapseAndReset(wxCommandEvent& event);
 
-    void OnSetBold(wxCommandEvent& WXUNUSED(event)) { DoSetBold(true); }
-    void OnClearBold(wxCommandEvent& WXUNUSED(event)) { DoSetBold(false); }
+    void OnSetBold(wxCommandEvent& WXUNUSED(event)) { DoSetBold(TRUE); }
+    void OnClearBold(wxCommandEvent& WXUNUSED(event)) { DoSetBold(FALSE); }
 
     void OnEnsureVisible(wxCommandEvent& event);
 
@@ -202,8 +195,8 @@ public:
     void OnCountRec(wxCommandEvent& event);
 
     void OnRename(wxCommandEvent& event);
-    void OnSort(wxCommandEvent& WXUNUSED(event)) { DoSort(); }
-    void OnSortRev(wxCommandEvent& WXUNUSED(event)) { DoSort(true); }
+    void OnSort(wxCommandEvent& event) { DoSort(); }
+    void OnSortRev(wxCommandEvent& event) { DoSort(TRUE); }
 
     void OnAddItem(wxCommandEvent& event);
     void OnInsertItem(wxCommandEvent& event);
@@ -216,13 +209,12 @@ public:
 
     void OnToggleIcon(wxCommandEvent& event);
 
-    void OnIdle(wxIdleEvent& event);
     void OnSize(wxSizeEvent& event);
 
 private:
     void TogStyle(int id, long flag);
 
-    void DoSort(bool reverse = false);
+    void DoSort(bool reverse = FALSE);
 
     void Resize();
 
@@ -230,11 +222,9 @@ private:
     void CreateTree(long style);
 
     MyTreeCtrl *m_treeCtrl;
-#if wxUSE_LOG
     wxTextCtrl *m_textCtrl;
-#endif // wxUSE_LOG
 
-    void DoSetBold(bool bold = true);
+    void DoSetBold(bool bold = TRUE);
 
     DECLARE_EVENT_TABLE()
 };
@@ -242,9 +232,9 @@ private:
 // menu and control ids
 enum
 {
-    TreeTest_Quit = wxID_EXIT,
-    TreeTest_About = wxID_ABOUT,
-    TreeTest_TogButtons = wxID_HIGHEST,
+    TreeTest_Quit,
+    TreeTest_About,
+    TreeTest_TogButtons,
     TreeTest_TogTwist,
     TreeTest_TogLines,
     TreeTest_TogEdit,
@@ -283,6 +273,5 @@ enum
     TreeTest_ToggleIcon,
     TreeTest_Select,
     TreeTest_Unselect,
-    TreeTest_SelectRoot,
     TreeTest_Ctrl = 1000
 };

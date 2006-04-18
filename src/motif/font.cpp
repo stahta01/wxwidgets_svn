@@ -17,9 +17,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/defs.h"
 
 #ifdef __VMS
@@ -38,7 +35,6 @@
 #include "wx/fontutil.h"    // for wxNativeFontInfo
 #include "wx/tokenzr.h"
 #include "wx/settings.h"
-#include "wx/motif/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
@@ -54,29 +50,22 @@ public:
     wxXFont();
     ~wxXFont();
 
-#if !wxMOTIF_NEW_FONT_HANDLING
     WXFontStructPtr     m_fontStruct;   // XFontStruct
-#endif
-#if !wxMOTIF_USE_RENDER_TABLE && !wxMOTIF_NEW_FONT_HANDLING
     WXFontList          m_fontList;     // Motif XmFontList
-#else // if wxUSE_RENDER_TABLE
-    WXRenderTable       m_renderTable;  // Motif XmRenderTable
-    WXRendition         m_rendition;    // Motif XmRendition
-#endif
     WXDisplay*          m_display;      // XDisplay
     int                 m_scale;        // Scale * 100
 };
 
 class wxFontRefData: public wxGDIRefData
 {
-    friend class wxFont;
+friend class wxFont;
 
 public:
     wxFontRefData(int size = wxDEFAULT,
                   int family = wxDEFAULT,
                   int style = wxDEFAULT,
                   int weight = wxDEFAULT,
-                  bool underlined = false,
+                  bool underlined = FALSE,
                   const wxString& faceName = wxEmptyString,
                   wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
@@ -111,7 +100,7 @@ protected:
     wxFontEncoding m_encoding;
 
     wxNativeFontInfo m_nativeFontInfo;
-
+    
     // A list of wxXFonts
     wxList        m_fonts;
 };
@@ -126,35 +115,20 @@ protected:
 
 wxXFont::wxXFont()
 {
-#if !wxMOTIF_NEW_FONT_HANDLING
     m_fontStruct = (WXFontStructPtr) 0;
-#endif
-#if !wxMOTIF_USE_RENDER_TABLE && !wxMOTIF_NEW_FONT_HANDLING
     m_fontList = (WXFontList) 0;
-#else // if wxMOTIF_USE_RENDER_TABLE
-    m_renderTable = (WXRenderTable) 0;
-    m_rendition   = (WXRendition) 0;
-#endif
     m_display = (WXDisplay*) 0;
     m_scale = 100;
 }
 
 wxXFont::~wxXFont()
 {
-#if !wxMOTIF_USE_RENDER_TABLE
-    if (m_fontList)
-        XmFontListFree ((XmFontList) m_fontList);
-    m_fontList = NULL;
-#else // if wxUSE_RENDER_TABLE
-    if (m_renderTable)
-        XmRenderTableFree ((XmRenderTable) m_renderTable);
-    m_renderTable = NULL;
-#endif
+    XmFontList fontList = (XmFontList) m_fontList;
+
+    XmFontListFree (fontList);
 
     // TODO: why does freeing the font produce a segv???
     // Note that XFreeFont wasn't called in wxWin 1.68 either.
-    // MBN: probably some interaction with fonts being still
-    //      in use in some widgets...
     // XFontStruct* fontStruct = (XFontStruct*) m_fontStruct;
     //        XFreeFont((Display*) m_display, fontStruct);
 }
@@ -199,12 +173,12 @@ void wxFontRefData::Init(int pointSize,
 
 wxFontRefData::~wxFontRefData()
 {
-    wxList::compatibility_iterator node = m_fonts.GetFirst();
+    wxNode* node = m_fonts.First();
     while (node)
     {
-        wxXFont* f = (wxXFont*) node->GetData();
+        wxXFont* f = (wxXFont*) node->Data();
         delete f;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_fonts.Clear();
 }
@@ -215,7 +189,13 @@ wxFontRefData::~wxFontRefData()
 
 wxFont::wxFont(const wxNativeFontInfo& info)
 {
+    Init();
+
     (void)Create(info.GetXFontName());
+}
+
+void wxFont::Init()
+{
 }
 
 bool wxFont::Create(int pointSize,
@@ -230,7 +210,9 @@ bool wxFont::Create(int pointSize,
     m_refData = new wxFontRefData(pointSize, family, style, weight,
                                   underlined, faceName, encoding);
 
-    return true;
+    RealizeResource();
+
+    return TRUE;
 }
 
 bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
@@ -238,7 +220,7 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
     if( !fontname )
     {
         *this = wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT);
-        return true;
+        return TRUE;
     }
 
     m_refData = new wxFontRefData();
@@ -331,9 +313,9 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
         }
         //else: unknown encoding - may be give a warning here?
         else
-            return false;
+            return FALSE;
     }
-    return true;
+    return TRUE;    
 }
 
 wxFont::~wxFont()
@@ -365,6 +347,8 @@ void wxFont::SetPointSize(int pointSize)
 
     M_FONTDATA->m_pointSize = pointSize;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
 void wxFont::SetFamily(int family)
@@ -373,6 +357,8 @@ void wxFont::SetFamily(int family)
 
     M_FONTDATA->m_family = family;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
 void wxFont::SetStyle(int style)
@@ -381,6 +367,8 @@ void wxFont::SetStyle(int style)
 
     M_FONTDATA->m_style = style;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
 void wxFont::SetWeight(int weight)
@@ -389,6 +377,8 @@ void wxFont::SetWeight(int weight)
 
     M_FONTDATA->m_weight = weight;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
 void wxFont::SetFaceName(const wxString& faceName)
@@ -397,6 +387,8 @@ void wxFont::SetFaceName(const wxString& faceName)
 
     M_FONTDATA->m_faceName = faceName;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
 void wxFont::SetUnderlined(bool underlined)
@@ -404,6 +396,8 @@ void wxFont::SetUnderlined(bool underlined)
     Unshare();
 
     M_FONTDATA->m_underlined = underlined;
+    
+    RealizeResource();
 }
 
 void wxFont::SetEncoding(wxFontEncoding encoding)
@@ -412,9 +406,11 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
 
     M_FONTDATA->m_encoding = encoding;
     M_FONTDATA->m_nativeFontInfo.GetXFontName().Clear(); // invalid now
+    
+    RealizeResource();
 }
 
-void wxFont::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+void wxFont::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
     Unshare();
 
@@ -428,7 +424,7 @@ void wxFont::DoSetNativeFontInfo(const wxNativeFontInfo& info)
 int wxFont::GetPointSize() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
-
+    
     return M_FONTDATA->m_pointSize;
 }
 
@@ -462,7 +458,7 @@ int wxFont::GetWeight() const
 
 bool wxFont::GetUnderlined() const
 {
-    wxCHECK_MSG( Ok(), false, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), FALSE, wxT("invalid font") );
 
     return M_FONTDATA->m_underlined;
 }
@@ -474,14 +470,14 @@ wxFontEncoding wxFont::GetEncoding() const
     return M_FONTDATA->m_encoding;
 }
 
-const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
+wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
     wxCHECK_MSG( Ok(), (wxNativeFontInfo *)NULL, wxT("invalid font") );
 
     if(M_FONTDATA->m_nativeFontInfo.GetXFontName().IsEmpty())
         GetInternalFont();
 
-    return &(M_FONTDATA->m_nativeFontInfo);
+    return new wxNativeFontInfo(M_FONTDATA->m_nativeFontInfo);
 }
 
 // ----------------------------------------------------------------------------
@@ -500,17 +496,16 @@ wxXFont* wxFont::GetInternalFont(double scale, WXDisplay* display) const
     int pointSize = (M_FONTDATA->m_pointSize * 10 * intScale) / 100;
 
     // search existing fonts first
-    wxList::compatibility_iterator node = M_FONTDATA->m_fonts.GetFirst();
+    wxNode* node = M_FONTDATA->m_fonts.First();
     while (node)
     {
-        wxXFont* f = (wxXFont*) node->GetData();
+        wxXFont* f = (wxXFont*) node->Data();
         if ((!display || (f->m_display == display)) && (f->m_scale == intScale))
             return f;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     // not found, create a new one
-    wxString xFontSpec;
     XFontStruct *font = (XFontStruct *)
                         wxLoadQueryNearestFont(pointSize,
                                                M_FONTDATA->m_family,
@@ -518,8 +513,7 @@ wxXFont* wxFont::GetInternalFont(double scale, WXDisplay* display) const
                                                M_FONTDATA->m_weight,
                                                M_FONTDATA->m_underlined,
                                                wxT(""),
-                                               M_FONTDATA->m_encoding,
-                                               &xFontSpec);
+                                               M_FONTDATA->m_encoding);
 
     if ( !font )
     {
@@ -529,49 +523,14 @@ wxXFont* wxFont::GetInternalFont(double scale, WXDisplay* display) const
     }
 
     wxXFont* f = new wxXFont;
-#if wxMOTIF_NEW_FONT_HANDLING
-    XFreeFont( (Display*) display, font );
-#else
     f->m_fontStruct = (WXFontStructPtr)font;
-#endif
     f->m_display = ( display ? display : wxGetDisplay() );
     f->m_scale = intScale;
-    
-#if wxMOTIF_USE_RENDER_TABLE
-    XmRendition rendition;
-    XmRenderTable renderTable;
-    Arg args[5];
-    int count = 0;
-
-#if wxMOTIF_NEW_FONT_HANDLING
-    wxChar* fontSpec = wxStrdup( xFontSpec.c_str() );
-    XtSetArg( args[count], XmNfontName, fontSpec ); ++count;
-    XtSetArg( args[count], XmNfontType, XmFONT_IS_FONTSET ); ++count;
-#else
-    XtSetArg( args[count], XmNfont, font ); ++count;
-#endif
-    XtSetArg( args[count], XmNunderlineType,
-              GetUnderlined() ? XmSINGLE_LINE : XmNO_LINE ); ++count;
-    rendition = XmRenditionCreate( XmGetXmDisplay( (Display*)f->m_display ),
-                                   (XmStringTag)"",
-                                   args, count );
-    renderTable = XmRenderTableAddRenditions( NULL, &rendition, 1,
-                                              XmMERGE_REPLACE );
-
-    f->m_renderTable = (WXRenderTable)renderTable;
-    f->m_rendition = (WXRendition)rendition;
-    wxASSERT( f->m_renderTable != NULL );
-#else // if !wxMOTIF_USE_RENDER_TABLE
     f->m_fontList = XmFontListCreate ((XFontStruct*) font, XmSTRING_DEFAULT_CHARSET);
-    wxASSERT( f->m_fontList != NULL );
-#endif
-
     M_FONTDATA->m_fonts.Append(f);
 
     return f;
 }
-
-#if !wxMOTIF_NEW_FONT_HANDLING
 
 WXFontStructPtr wxFont::GetFontStruct(double scale, WXDisplay* display) const
 {
@@ -580,10 +539,6 @@ WXFontStructPtr wxFont::GetFontStruct(double scale, WXDisplay* display) const
     return (f ? f->m_fontStruct : (WXFontStructPtr) 0);
 }
 
-#endif
-
-#if !wxMOTIF_USE_RENDER_TABLE
-
 WXFontList wxFont::GetFontList(double scale, WXDisplay* display) const
 {
     wxXFont* f = GetInternalFont(scale, display);
@@ -591,99 +546,3 @@ WXFontList wxFont::GetFontList(double scale, WXDisplay* display) const
     return (f ? f->m_fontList : (WXFontList) 0);
 }
 
-#else // if wxMOTIF_USE_RENDER_TABLE
-
-WXRenderTable wxFont::GetRenderTable(WXDisplay* display) const
-{
-    wxXFont* f = GetInternalFont(1.0, display);
-
-    return (f ? f->m_renderTable : (WXRenderTable) 0);
-}
-
-#endif // wxMOTIF_USE_RENDER_TABLE
-
-WXFontType wxFont::GetFontType(WXDisplay* display) const
-{
-#if wxMOTIF_USE_RENDER_TABLE
-    return Ok() ? GetRenderTable(display) : NULL;
-#else
-    return Ok() ? GetFontList(1.0, display) : NULL;
-#endif
-}
-
-WXFontType wxFont::GetFontTypeC(WXDisplay* display) const
-{
-#if wxMOTIF_USE_RENDER_TABLE
-    return Ok() ? GetRenderTable(display) : NULL;
-#else
-    return Ok() ? XmFontListCopy( (XmFontList)GetFontList(1.0, display) ) : NULL;
-#endif
-}
-
-/*static*/ WXString wxFont::GetFontTag()
-{
-#if wxMOTIF_USE_RENDER_TABLE
-    return (WXString)XmNrenderTable;
-#else
-    return (WXString)XmNfontList;
-#endif
-}
-
-#if wxMOTIF_NEW_FONT_HANDLING
-
-WXFontSet wxFont::GetFontSet(double scale, WXDisplay* display) const
-{
-    wxXFont* f = GetInternalFont(scale, display);
-
-    if( !f ) return (WXFontSet) 0;
-
-    Arg args[2];
-    int count = 0;
-
-    XtSetArg( args[count], XmNfont, 0 ); ++count;
-    XmRenditionRetrieve( (XmRendition) f->m_rendition, args, count );
-
-    return (WXFontSet) args[0].value;
-}
-
-void wxGetTextExtent(WXDisplay* display, const wxFont& font, double scale,
-                     const wxString& str,
-                     int* width, int* height, int* ascent, int* descent)
-{
-    XRectangle ink, logical;
-    WXFontSet fset = font.GetFontSet(scale, display);
-    
-    XmbTextExtents( (XFontSet)fset, str.c_str(), str.length(), &ink, &logical);
-
-    if( width ) *width = logical.width;
-    if( height ) *height = logical.height;
-    if( ascent ) *ascent = -logical.y;    
-    if( descent ) *descent = logical.height + logical.y;    
-}
-
-#else // if !wxMOTIF_NEW_FONT_HANDLING
-
-void wxGetTextExtent(WXDisplay* display, const wxFont& font,
-                     double scale, const wxString& str,
-                     int* width, int* height, int* ascent, int* descent)
-{
-    WXFontStructPtr pFontStruct = font.GetFontStruct(scale, display);
-
-    int direction, ascent2, descent2;
-    XCharStruct overall;
-    int slen = str.Len();
-
-    XTextExtents((XFontStruct*) pFontStruct, (char*) str.c_str(), slen,
-                 &direction, &ascent2, &descent2, &overall);
-
-    if ( width )
-        *width = (overall.width);
-    if ( height )
-        *height = (ascent2 + descent2);
-    if ( descent )
-        *descent = descent2;
-    if ( ascent )
-        *ascent = ascent2;
-}
-
-#endif // !wxMOTIF_NEW_FONT_HANDLING

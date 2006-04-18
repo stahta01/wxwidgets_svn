@@ -19,8 +19,6 @@
     #pragma hdrstop
 #endif
 
-#if HAVE_KNOWN_CDROM_INTERFACE
-
 // ---------------------------------------------------------------------------
 // MMedia headers
 // ---------------------------------------------------------------------------
@@ -54,7 +52,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxCDAudioLinux, wxCDAudio)
 wxCDAudioLinux::wxCDAudioLinux()
     : wxCDAudio(), m_fd(-1)
 {
-  OpenDevice(wxT("/dev/cdrom"));
+  OpenDevice("/dev/cdrom");
 }
 
 wxCDAudioLinux::wxCDAudioLinux(const wxString& dev_name)
@@ -77,7 +75,7 @@ void wxCDAudioLinux::OpenDevice(const wxString& dev_name)
   struct cdrom_tocentry entry, old_entry;
   struct cdrom_tochdr diskinf;
   struct cdrom_msf0 *msf = &entry.cdte_addr.msf,
-              *old_msf = &old_entry.cdte_addr.msf;
+  		    *old_msf = &old_entry.cdte_addr.msf;
   wxCDtime *the_track;
   wxCDtime tot_tm;
   wxUint8 nb_tracks, i;
@@ -215,5 +213,3 @@ wxCDAudio::CDtoc& wxCDAudioLinux::GetToc()
 {
   return *m_toc;
 }
-
-#endif

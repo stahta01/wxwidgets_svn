@@ -1,16 +1,4 @@
-#!/bin/bash
-
-# Are we using bash on win32?  If so source that file and then exit.
-if [ "$OSTYPE" = "cygwin" ]; then
-    source b.win32
-    exit
-fi
-
-# make it easy to switch versions of SWIG
-if [ "$SWIG" = "" ]; then
-  SWIG=/opt/swig/bin/swig-1.3.29
-fi
-
+#!/bin/sh
 
 function getpyver {
     if [ "$1" = "15" ]; then
@@ -38,31 +26,8 @@ python$PYVER -c "import sys;print '\n', sys.version, '\n'"
 
 
 SETUP="python$PYVER -u setup.py"
-FLAGS="USE_SWIG=1 SWIG=$SWIG" 
+FLAGS="USE_SWIG=1 IN_CVS_TREE=1" # BUILD_GLCANVAS=0"
 OTHERFLAGS=""
-PORTFLAGS=""
-UNIFLAG="UNICODE=1"
-
-
-
-if [ "$1" = "gtk1" -o "$1" = "gtk" ]; then 
-    PORTFLAGS="WXPORT=gtk"
-    UNIFLAG="UNICODE=0"
-    shift
-elif [ "$1" = "gtk2" ]; then 
-    PORTFLAGS="WXPORT=gtk2"
-    UNIFLAG="UNICODE=1"
-    shift
-fi
-
-for p in $*; do
-    if [ "$p" = "UNICODE=0" -o "$p" = "UNICODE=1" ]; then
-	UNIFLAG=""
-	break
-    fi
-done
-
-FLAGS="$FLAGS $PORTFLAGS $UNIFLAG"
 
 
 
@@ -70,16 +35,17 @@ FLAGS="$FLAGS $PORTFLAGS $UNIFLAG"
 if [ "$1" =  "c" ]; then
     shift
     CMD="$SETUP $FLAGS $OTHERFLAGS clean $*"
-    OTHERCMD="rm -f wx/*.so"
+    OTHERCMD="rm -f wxPython/*.so"
 
 # "d" --> clean extension modules only
 elif [ "$1" = "d" ]; then
     shift
-    CMD="rm -f wx/*.so"
+    CMD="rm -f wxPython/*.so"
 
 # "t" --> touch *.i files
 elif [ "$1" = "t" ]; then
     shift
+    #CMD="set CMD=touch src\*.i; touch contrib\glcanvas\*.i; touch contrib\ogl\*.i; touch contrib\stc\*.i"
     CMD='find . -name "*.i" | xargs touch'
 
 # "i" --> install
@@ -150,12 +116,10 @@ fi
 
 echo $CMD
 eval $CMD
-RC=$?
 
-if [ "$RC" = "0" -a  "$OTHERCMD" != "" ]; then
+
+if [ "$OTHERCMD" != "" ]; then
     echo $OTHERCMD
     $OTHERCMD
-    RC=$?
 fi
 
-exit $RC

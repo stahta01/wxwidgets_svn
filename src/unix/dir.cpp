@@ -6,7 +6,7 @@
 // Created:     08.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,10 +32,13 @@
 #include "wx/dir.h"
 #include "wx/filefn.h"          // for wxMatchWild
 
+#ifdef __WXGTK20__
+    #include "glib.h"
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
 #include <dirent.h>
 
 // ----------------------------------------------------------------------------
@@ -60,13 +63,21 @@ public:
     void SetFileSpec(const wxString& filespec) { m_filespec = filespec; }
     void SetFlags(int flags) { m_flags = flags; }
 
+#ifdef __WXGTK20__
+    void Rewind() { g_dir_rewind(m_dir); }
+#else
     void Rewind() { rewinddir(m_dir); }
+#endif
     bool Read(wxString *filename);
 
     const wxString& GetName() const { return m_dirname; }
 
 private:
+#ifdef __WXGTK20__
+    GDir    *m_dir;
+#else
     DIR     *m_dir;
+#endif
 
     wxString m_dirname;
     wxString m_filespec;
@@ -99,48 +110,76 @@ wxDirData::wxDirData(const wxString& dirname)
     m_dirname.Truncate(n + 1);
 
     // do open the dir
+#ifdef __WXGTK20__
+    GError *error = NULL;
+    m_dir = g_dir_open( m_dirname.fn_str(), 0, &error );
+#else
     m_dir = opendir(m_dirname.fn_str());
+#endif
 }
 
 wxDirData::~wxDirData()
 {
     if ( m_dir )
     {
+#ifdef __WXGTK20__
+        g_dir_close(m_dir);
+#else
         if ( closedir(m_dir) != 0 )
         {
             wxLogLastError(_T("closedir"));
         }
+#endif
     }
 }
 
 bool wxDirData::Read(wxString *filename)
 {
+#ifdef __WXGTK20__
+    const char *de;
+#else
     dirent *de = (dirent *)NULL;    // just to silence compiler warnings
-    bool matches = false;
+#endif
+    bool matches = FALSE;
 
     // speed up string concatenation in the loop a bit
     wxString path = m_dirname;
-    path += _T('/');
+    if (!wxIsPathSeparator(path.Last()))
+        path += _T('/');
     path.reserve(path.length() + 255);
-
+    
     wxString de_d_name;
-
+    
     while ( !matches )
     {
-        de = readdir(m_dir);
+#ifdef __WXGTK20__
+        de = g_dir_read_name( m_dir );
+        
         if ( !de )
-            return false;
-
+            return FALSE;
+            
+        de_d_name = wxConvLibc.cMB2WC( de );
+        
+        // don't return "." and ".." unless asked for
+        if ( de[0] == '.' &&
+             ((de[1] == '.' && de[2] == '\0') ||
+              (de[1] == '\0')) )
+#else
+        de = readdir(m_dir);
+        
+        if ( !de )
+            return FALSE;
 #if wxUSE_UNICODE
-        de_d_name = wxConvFileName->cMB2WC( de->d_name );
+        de_d_name = wxConvLibc.cMB2WC( de->d_name );
 #else
         de_d_name = de->d_name;
-#endif
-
+#endif            
         // don't return "." and ".." unless asked for
         if ( de->d_name[0] == '.' &&
              ((de->d_name[1] == '.' && de->d_name[2] == '\0') ||
               (de->d_name[1] == '\0')) )
+#endif
+
         {
             if ( !(m_flags & wxDIR_DOTDOT) )
                 continue;
@@ -164,7 +203,11 @@ bool wxDirData::Read(wxString *filename)
         // finally, check the name
         if ( m_filespec.empty() )
         {
-            matches = m_flags & wxDIR_HIDDEN ? true : de->d_name[0] != '.';
+#ifdef __WXGTK20__
+            matches = m_flags & wxDIR_HIDDEN ? TRUE : de[0] != '.';
+#else
+            matches = m_flags & wxDIR_HIDDEN ? TRUE : de->d_name[0] != '.';
+#endif
         }
         else
         {
@@ -176,7 +219,7 @@ bool wxDirData::Read(wxString *filename)
 
     *filename = de_d_name;
 
-    return true;
+    return TRUE;
 }
 
 #else // old VMS (TODO)
@@ -192,7 +235,7 @@ wxDirData::~wxDirData()
 
 bool wxDirData::Read(wxString * WXUNUSED(filename))
 {
-    return false;
+    return FALSE;
 }
 
 #endif // not or new VMS/old VMS
@@ -204,7 +247,7 @@ bool wxDirData::Read(wxString * WXUNUSED(filename))
 /* static */
 bool wxDir::Exists(const wxString& dir)
 {
-    return wxDirExists(dir);
+    return wxPathExists(dir);
 }
 
 // ----------------------------------------------------------------------------
@@ -231,10 +274,10 @@ bool wxDir::Open(const wxString& dirname)
         delete M_DIR;
         m_data = NULL;
 
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxDir::IsOpened() const
@@ -271,7 +314,7 @@ bool wxDir::GetFirst(wxString *filename,
                      const wxString& filespec,
                      int flags) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
 
     M_DIR->Rewind();
 
@@ -283,16 +326,16 @@ bool wxDir::GetFirst(wxString *filename,
 
 bool wxDir::GetNext(wxString *filename) const
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
 
-    wxCHECK_MSG( filename, false, _T("bad pointer in wxDir::GetNext()") );
+    wxCHECK_MSG( filename, FALSE, _T("bad pointer in wxDir::GetNext()") );
 
     return M_DIR->Read(filename);
 }
 
 bool wxDir::HasSubDirs(const wxString& spec)
 {
-    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), FALSE, _T("must wxDir::Open() first") );
 
     if ( spec.empty() )
     {
@@ -313,7 +356,7 @@ bool wxDir::HasSubDirs(const wxString& spec)
             {
                 case 2:
                     // just "." and ".."
-                    return false;
+                    return FALSE;
 
                 case 0:
                 case 1:
@@ -325,7 +368,7 @@ bool wxDir::HasSubDirs(const wxString& spec)
                     // assume we have subdirs - may turn out to be wrong if we
                     // have other hard links to this directory but it's not
                     // that bad as explained above
-                    return true;
+                    return TRUE;
             }
         }
     }

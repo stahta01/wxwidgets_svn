@@ -5,7 +5,7 @@
 //              (based on GTK & MSW implementations)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -27,11 +27,13 @@
     #include "wx/window.h"
     #include "wx/msgdlg.h"
     #include "wx/accel.h"
+    #include "wx/setup.h"
     #include "wx/dc.h"
     #include "wx/dcclient.h"
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/panel.h"
+    #include "wx/caret.h"
 #endif
 
 #if wxUSE_DRAG_AND_DROP
@@ -43,7 +45,6 @@
 #include "wx/mgl/private.h"
 #include "wx/intl.h"
 #include "wx/dcscreen.h"
-#include "wx/caret.h"
 
 #include <mgraph.hpp>
 
@@ -166,13 +167,13 @@ static ibool MGLAPI wxWindowMouseHandler(window_t *wnd, event_t *e)
     event.SetTimestamp(e->when);
     event.m_x = where.x - orig.x;
     event.m_y = where.y - orig.y;
-    event.m_shiftDown = ( e->modifiers & EVT_SHIFTKEY ) != 0;
-    event.m_controlDown = ( e->modifiers & EVT_CTRLSTATE ) != 0;
-    event.m_altDown = ( e->modifiers & EVT_LEFTALT ) != 0;
-    event.m_metaDown = ( e->modifiers & EVT_RIGHTALT ) != 0;
-    event.m_leftDown = ( e->modifiers & EVT_LEFTBUT ) != 0;
-    event.m_middleDown = ( e->modifiers & EVT_MIDDLEBUT ) != 0;
-    event.m_rightDown = ( e->modifiers & EVT_RIGHTBUT ) != 0;
+    event.m_shiftDown = e->modifiers & EVT_SHIFTKEY;
+    event.m_controlDown = e->modifiers & EVT_CTRLSTATE;
+    event.m_altDown = e->modifiers & EVT_LEFTALT;
+    event.m_metaDown = e->modifiers & EVT_RIGHTALT;
+    event.m_leftDown = e->modifiers & EVT_LEFTBUT;
+    event.m_middleDown = e->modifiers & EVT_MIDDLEBUT;
+    event.m_rightDown = e->modifiers & EVT_RIGHTBUT;
 
     switch (e->what)
     {
@@ -311,7 +312,9 @@ static long wxScanToKeyCode(event_t *event, bool translate)
             KEY (KB_padHome,        WXK_NUMPAD_HOME)
             KEY (KB_padEnd,         WXK_NUMPAD_END)
             KEY (KB_padPageUp,      WXK_NUMPAD_PAGEUP)
+          //KEY (KB_padPageUp,      WXK_NUMPAD_PRIOR)
             KEY (KB_padPageDown,    WXK_NUMPAD_PAGEDOWN)
+          //KEY (KB_padPageDown,    WXK_NUMPAD_NEXT)
             KEY (KB_1,              '1')
             KEY (KB_2,              '2')
             KEY (KB_3,              '3')
@@ -432,10 +435,10 @@ static bool wxHandleSpecialKeys(wxKeyEvent& event)
        )
     {
         wxCaptureScreenshot(event.m_altDown/*only active wnd?*/);
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
@@ -451,14 +454,14 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
     wxKeyEvent event;
     event.SetEventObject(win);
     event.SetTimestamp(e->when);
-    event.m_keyCode = wxScanToKeyCode(e, true);
+    event.m_keyCode = wxScanToKeyCode(e, TRUE);
     event.m_scanCode = 0; // not used by wx at all
     event.m_x = where.x;
     event.m_y = where.y;
-    event.m_shiftDown = ( e->modifiers & EVT_SHIFTKEY ) != 0;
-    event.m_controlDown = ( e->modifiers & EVT_CTRLSTATE ) != 0;
-    event.m_altDown = ( e->modifiers & EVT_LEFTALT ) != 0;
-    event.m_metaDown = ( e->modifiers & EVT_RIGHTALT ) != 0;
+    event.m_shiftDown = e->modifiers & EVT_SHIFTKEY;
+    event.m_controlDown = e->modifiers & EVT_CTRLSTATE;
+    event.m_altDown = e->modifiers & EVT_LEFTALT;
+    event.m_metaDown = e->modifiers & EVT_RIGHTALT;
 
     if ( e->what == EVT_KEYUP )
     {
@@ -478,7 +481,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
         // wxMSW doesn't send char events with Alt pressed
         // Only send wxEVT_CHAR event if not processed yet. Thus, ALT-x
         // will only be sent if it is not in an accelerator table:
-        event2.m_keyCode = wxScanToKeyCode(e, false);
+        event2.m_keyCode = wxScanToKeyCode(e, FALSE);
         if ( !ret && event2.m_keyCode != 0 )
         {
             event2.SetEventType(wxEVT_CHAR);
@@ -517,6 +520,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
 IMPLEMENT_ABSTRACT_CLASS(wxWindowMGL, wxWindowBase)
 
 BEGIN_EVENT_TABLE(wxWindowMGL, wxWindowBase)
+    EVT_IDLE(wxWindowMGL::OnIdle)
 END_EVENT_TABLE()
 
 // ===========================================================================
@@ -527,7 +531,7 @@ END_EVENT_TABLE()
 // constructors and such
 // ----------------------------------------------------------------------------
 
-extern wxVideoMode wxGetDefaultDisplayMode();
+extern wxDisplayModeInfo wxGetDefaultDisplayMode();
 
 void wxWindowMGL::Init()
 {
@@ -539,10 +543,15 @@ void wxWindowMGL::Init()
             wxLogFatalError(_("Cannot initialize display."));
     }
 
+    // generic:
+    InitBase();
+
     // mgl specific:
     m_wnd = NULL;
-    m_isShown = true;
-    m_frozen = false;
+    m_isShown = TRUE;
+    m_isBeingDeleted = FALSE;
+    m_isEnabled = TRUE;
+    m_frozen = FALSE;
     m_paintMGLDC = NULL;
     m_eraseBackground = -1;
 }
@@ -550,9 +559,12 @@ void wxWindowMGL::Init()
 // Destructor
 wxWindowMGL::~wxWindowMGL()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*)this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
-    m_isBeingDeleted = true;
+    m_isBeingDeleted = TRUE;
 
     if ( gs_mouseCapture == this )
         ReleaseMouse();
@@ -579,7 +591,13 @@ wxWindowMGL::~wxWindowMGL()
     if ( gs_windowUnderMouse == this )
         gs_windowUnderMouse = NULL;
 
+    // VS: destroy children first and _then_ detach *this from its parent.
+    //     If we'd do it the other way around, children wouldn't be able
+    //     find their parent frame (see above).
     DestroyChildren();
+
+    if ( m_parent )
+        m_parent->RemoveChild(this);
 
     if ( m_wnd )
         MGL_wmDestroyWindow(m_wnd);
@@ -594,7 +612,7 @@ bool wxWindowMGL::Create(wxWindow *parent,
                          const wxString& name)
 {
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return false;
+        return FALSE;
 
     if ( parent )
         parent->AddChild(this);
@@ -612,7 +630,7 @@ bool wxWindowMGL::Create(wxWindow *parent,
     long mgl_style = 0;
     window_t *wnd_parent = parent ? parent->GetHandle() : NULL;
 
-    if ( style & wxFULL_REPAINT_ON_RESIZE )
+    if ( !(style & wxNO_FULL_REPAINT_ON_RESIZE) )
     {
         mgl_style |= MGL_WM_FULL_REPAINT_ON_RESIZE;
     }
@@ -624,7 +642,7 @@ bool wxWindowMGL::Create(wxWindow *parent,
     {
         mgl_style |= MGL_WM_ALWAYS_ON_TOP;
         // it is created hidden as other top level windows
-        m_isShown = false;
+        m_isShown = FALSE;
         wnd_parent = NULL;
     }
 
@@ -635,7 +653,7 @@ bool wxWindowMGL::Create(wxWindow *parent,
 
     SetMGLwindow_t(wnd);
 
-    return true;
+    return TRUE;
 }
 
 void wxWindowMGL::SetMGLwindow_t(struct window_t *wnd)
@@ -646,7 +664,7 @@ void wxWindowMGL::SetMGLwindow_t(struct window_t *wnd)
     m_wnd = wnd;
     if ( !m_wnd ) return;
 
-    m_isShown = (bool)m_wnd->visible;
+    m_isShown = m_wnd->visible;
 
     MGL_wmSetWindowUserData(m_wnd, (void*) this);
     MGL_wmSetWindowPainter(m_wnd, wxWindowPainter);
@@ -685,13 +703,13 @@ void wxWindowMGL::SetFocus()
     {
         if ( gs_activeFrame )
         {
-            wxActivateEvent event(wxEVT_ACTIVATE, false, gs_activeFrame->GetId());
+            wxActivateEvent event(wxEVT_ACTIVATE, FALSE, gs_activeFrame->GetId());
             event.SetEventObject(gs_activeFrame);
             gs_activeFrame->GetEventHandler()->ProcessEvent(event);
         }
 
         gs_activeFrame = active;
-        wxActivateEvent event(wxEVT_ACTIVATE, true, gs_activeFrame->GetId());
+        wxActivateEvent event(wxEVT_ACTIVATE, TRUE, gs_activeFrame->GetId());
         event.SetEventObject(gs_activeFrame);
         gs_activeFrame->GetEventHandler()->ProcessEvent(event);
     }
@@ -735,7 +753,7 @@ void wxWindowMGL::KillFocus()
 // this wxWindowBase function is implemented here (in platform-specific file)
 // because it is static and so couldn't be made virtual
 // ----------------------------------------------------------------------------
-wxWindow *wxWindowBase::DoFindFocus()
+wxWindow *wxWindowBase::FindFocus()
 {
     return (wxWindow*)gs_focusedWindow;
 }
@@ -743,7 +761,7 @@ wxWindow *wxWindowBase::DoFindFocus()
 bool wxWindowMGL::Show(bool show)
 {
     if ( !wxWindowBase::Show(show) )
-        return false;
+        return FALSE;
 
     MGL_wmShowWindow(m_wnd, show);
 
@@ -766,7 +784,7 @@ bool wxWindowMGL::Show(bool show)
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 // Raise the window to the top of the Z order
@@ -808,7 +826,7 @@ bool wxWindowMGL::SetCursor(const wxCursor& cursor)
     if ( !wxWindowBase::SetCursor(cursor) )
     {
         // no change
-        return false;
+        return FALSE;
     }
 
     if ( m_cursor.Ok() )
@@ -816,7 +834,7 @@ bool wxWindowMGL::SetCursor(const wxCursor& cursor)
     else
         MGL_wmSetWindowCursor(m_wnd, *wxSTANDARD_CURSOR->GetMGLCursor());
 
-    return true;
+    return TRUE;
 }
 
 void wxWindowMGL::WarpPointer(int x, int y)
@@ -837,15 +855,46 @@ void wxWindowMGL::WarpPointer(int x, int y)
     EVT_setMousePos(x, y);
 }
 
+#if WXWIN_COMPATIBILITY
+// If nothing defined for this, try the parent.
+// E.g. we may be a button loaded from a resource, with no callback function
+// defined.
+void wxWindowMGL::OnCommand(wxWindow& win, wxCommandEvent& event)
+{
+    if ( GetEventHandler()->ProcessEvent(event)  )
+        return;
+    if ( m_parent )
+        m_parent->GetEventHandler()->OnCommand(win, event);
+}
+#endif // WXWIN_COMPATIBILITY_2
+
+#if WXWIN_COMPATIBILITY
+wxObject* wxWindowMGL::GetChild(int number) const
+{
+    // Return a pointer to the Nth object in the Panel
+    wxNode *node = GetChildren().First();
+    int n = number;
+    while (node && n--)
+        node = node->Next();
+    if ( node )
+    {
+        wxObject *obj = (wxObject *)node->Data();
+        return(obj);
+    }
+    else
+        return NULL;
+}
+#endif // WXWIN_COMPATIBILITY
+
 // Set this window to be the child of 'parent'.
 bool wxWindowMGL::Reparent(wxWindowBase *parent)
 {
     if ( !wxWindowBase::Reparent(parent) )
-        return false;
+        return FALSE;
 
     MGL_wmReparentWindow(m_wnd, parent->GetHandle());
 
-    return true;
+    return TRUE;
 }
 
 
@@ -871,7 +920,7 @@ void wxWindowMGL::SetDropTarget(wxDropTarget *pDropTarget)
 
 // old style file-manager drag&drop support: we retain the old-style
 // DragAcceptFiles in parallel with SetDropTarget.
-void wxWindowMGL::DragAcceptFiles(bool WXUNUSED(accept))
+void wxWindowMGL::DragAcceptFiles(bool accept)
 {
 #if 0 // FIXME_MGL
     HWND hWnd = GetHwnd();
@@ -932,33 +981,7 @@ void wxWindowMGL::DoGetClientSize(int *x, int *y) const
 
 void wxWindowMGL::DoMoveWindow(int x, int y, int width, int height)
 {
-    wxRect rcClient(GetClientRect());
-
-    MGL_wmSetWindowPosition(m_wnd, x, y, width, height);
-
-    // When the origin or a window stays fixed but the height or width
-    // changes, invalidate the old and new non-client areas
-    if ( !HasFlag(wxFULL_REPAINT_ON_RESIZE) &&
-         m_wnd->x == x && m_wnd->y == y &&
-         rcClient.Intersect(GetClientRect()) != wxRect(0, 0, width, height) )
-    {
-        wxRegion rgn(0, 0, width, height);
-        rgn.Subtract(rcClient);
-
-        // This should work I think, but doesn't seem to:
-        //MGL_wmInvalidateWindowRegion(m_wnd, rgn.GetMGLRegion().rgnPointer());
-
-        // Use MGL_wmInvalidateWindowRect instead:
-        for (wxRegionIterator it(rgn); it; it++)
-        {
-            rect_t rc;
-            rc.left = it.GetX();
-            rc.top = it.GetY();
-            rc.right = rc.left + it.GetW();
-            rc.bottom = rc.top + it.GetH();
-            MGL_wmInvalidateWindowRect(m_wnd, &rc);
-        }
-    }
+    MGL_wmSetWindowPosition(GetHandle(), x, y, width, height);
 }
 
 // set the size of the window: if the dimensions are positive, just use them,
@@ -1040,8 +1063,7 @@ void wxWindowMGL::DoSetSize(int x, int y, int width, int height, int sizeFlags)
     {
         DoMoveWindow(x, y, width, height);
 
-        wxSize newSize(width, height);
-        wxSizeEvent event(newSize, GetId());
+        wxSizeEvent event(wxSize(width, height), GetId());
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
     }
@@ -1080,6 +1102,48 @@ void wxWindowMGL::GetTextExtent(const wxString& string,
         theFont = &m_font;
     dc.GetTextExtent(string, x, y, descent, externalLeading, (wxFont*)theFont);
 }
+
+#if wxUSE_CARET && WXWIN_COMPATIBILITY
+// ---------------------------------------------------------------------------
+// Caret manipulation
+// ---------------------------------------------------------------------------
+
+void wxWindowMGL::CreateCaret(int w, int h)
+{
+    SetCaret(new wxCaret(this, w, h));
+}
+
+void wxWindowMGL::CreateCaret(const wxBitmap *WXUNUSED(bitmap))
+{
+    wxFAIL_MSG("not implemented");
+}
+
+void wxWindowMGL::ShowCaret(bool show)
+{
+    wxCHECK_RET( m_caret, "no caret to show" );
+
+    m_caret->Show(show);
+}
+
+void wxWindowMGL::DestroyCaret()
+{
+    SetCaret(NULL);
+}
+
+void wxWindowMGL::SetCaretPos(int x, int y)
+{
+    wxCHECK_RET( m_caret, "no caret to move" );
+
+    m_caret->Move(x, y);
+}
+
+void wxWindowMGL::GetCaretPos(int *x, int *y) const
+{
+    wxCHECK_RET( m_caret, "no caret to get position of" );
+
+    m_caret->GetPosition(x, y);
+}
+#endif // wxUSE_CARET
 
 
 // ---------------------------------------------------------------------------
@@ -1121,13 +1185,13 @@ void wxWindowMGL::Update()
 
 void wxWindowMGL::Freeze()
 {
-    m_frozen = true;
-    m_refreshAfterThaw = false;
+    m_frozen = TRUE;
+    m_refreshAfterThaw = FALSE;
 }
 
 void wxWindowMGL::Thaw()
 {
-    m_frozen = false;
+    m_frozen = FALSE;
     if ( m_refreshAfterThaw )
         Refresh();
 }
@@ -1137,7 +1201,7 @@ void wxWindowMGL::HandlePaint(MGLDevCtx *dc)
     if ( m_frozen )
     {
         // Don't paint anything if the window is frozen.
-        m_refreshAfterThaw = true;
+        m_refreshAfterThaw = TRUE;
         return;
     }
 
@@ -1211,8 +1275,7 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 // idle events processing
 // ---------------------------------------------------------------------------
 
-void wxWindowMGL::OnInternalIdle()
+void wxWindowMGL::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }

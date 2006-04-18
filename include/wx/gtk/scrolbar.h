@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSCROLLBARH__
 #define __GTKSCROLLBARH__
 
@@ -16,13 +17,13 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScrollBar;
+class wxScrollBar;
 
 //-----------------------------------------------------------------------------
 // wxScrollBar
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScrollBar: public wxScrollBarBase
+class wxScrollBar: public wxScrollBarBase
 {
 public:
     wxScrollBar()
@@ -63,19 +64,14 @@ public:
     void SetObjectLength( int objectLength );
     void SetViewLength( int viewLength );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     // --------------
 
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
 
     GtkAdjustment  *m_adjust;
     float           m_oldPos;
-
-protected:
-    virtual wxSize DoGetBestSize() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxScrollBar)

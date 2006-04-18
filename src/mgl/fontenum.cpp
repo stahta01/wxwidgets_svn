@@ -28,7 +28,6 @@
 #include "wx/utils.h"
 
 #include "wx/fontenum.h"
-#include "wx/encinfo.h"
 #include "wx/fontutil.h"
 
 #include <mgraph.h>

@@ -51,9 +51,9 @@ None
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxBusyInfo::wxBusyInfo}\label{wxbusyinfoctor}
+\membersection{wxBusyInfo::wxBusyInfo}
 
-\func{}{wxBusyInfo}{\param{const wxString\&}{ msg}, \param{wxWindow* }{parent = NULL}}
+\func{}{wxBusyInfo}{\param{const wxString\&}{ msg}, \param{wxParent }{*parent = NULL}}
 
 Constructs a busy info window as child of {\it parent} and displays {\it msg}
 in it.
@@ -61,7 +61,7 @@ in it.
 {\bf NB:} If {\it parent} is not {\tt NULL} you must ensure that it is not
 closed while the busy info is shown.
 
-\membersection{wxBusyInfo::\destruct{wxBusyInfo}}\label{wxbusyinfodtor}
+\membersection{wxBusyInfo::\destruct{wxBusyInfo}}
 
 \func{}{\destruct{wxBusyInfo}}{\void}
 

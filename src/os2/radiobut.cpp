@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/radiobut.cpp
+// Name:        radiobut.cpp
 // Purpose:     wxRadioButton
 // Author:      David Webster
 // Modified by:
@@ -17,11 +17,12 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/radiobut.h"
-    #include "wx/brush.h"
-    #include "wx/dcscreen.h"
-    #include "wx/settings.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/radiobut.h"
+#include "wx/brush.h"
+#include "wx/dcscreen.h"
+#include "wx/settings.h"
 #endif
 
 #include "wx/os2/private.h"
@@ -110,11 +111,17 @@ bool wxRadioButton::Create(
 
 wxSize wxRadioButton::DoGetBestSize() const
 {
-    // We should probably compute snRadioSize but it seems to be a constant
-    // independent of its label's font size and not made available by OS/2.
-    static int                      snRadioSize = RADIO_SIZE;
+    static int                      snRadioSize = 0;
 
-    wxString                        sStr = wxGetWindowText(GetHwnd());
+    if (!snRadioSize)
+    {
+        wxScreenDC                  vDC;
+
+        vDC.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+        snRadioSize = vDC.GetCharHeight();
+    }
+
+    wxString                        sStr = GetLabel();
     int                             nRadioWidth;
     int                             nRadioHeight;
 
@@ -124,7 +131,7 @@ wxSize wxRadioButton::DoGetBestSize() const
                       ,&nRadioWidth
                       ,&nRadioHeight
                      );
-        nRadioWidth += snRadioSize;
+        nRadioWidth += snRadioSize + GetCharWidth();
         if (nRadioHeight < snRadioSize)
             nRadioHeight = snRadioSize;
     }
@@ -146,21 +153,24 @@ bool wxRadioButton::GetValue() const
     return((::WinSendMsg((HWND) GetHWND(), BM_QUERYCHECK, (MPARAM)0L, (MPARAM)0L) != 0));
 } // end of wxRadioButton::GetValue
 
-bool wxRadioButton::OS2Command( WXUINT wParam, WXWORD WXUNUSED(wId) )
+bool wxRadioButton::OS2Command(
+  WXUINT                            wParam
+, WXWORD                            wId
+)
 {
     if (wParam != BN_CLICKED)
-        return false;
+        return FALSE;
 
     if (m_bFocusJustSet)
     {
         //
         // See above: we want to ignore this event
         //
-        m_bFocusJustSet = false;
+        m_bFocusJustSet = FALSE;
     }
     else
     {
-        bool bIsChecked = GetValue();
+        bool                        bIsChecked = GetValue();
 
         if (HasFlag(wxRB_SINGLE))
         {
@@ -172,11 +182,14 @@ bool wxRadioButton::OS2Command( WXUINT wParam, WXWORD WXUNUSED(wId) )
             if (!bIsChecked )
                 SetValue(TRUE);
         }
-        wxCommandEvent rEvent( wxEVT_COMMAND_RADIOBUTTON_SELECTED, m_windowId );
+        wxCommandEvent              rEvent( wxEVT_COMMAND_RADIOBUTTON_SELECTED
+                                           ,m_windowId
+                                          );
+
         rEvent.SetEventObject(this);
         ProcessCommand(rEvent);
     }
-    return true;
+    return TRUE;
 } // end of wxRadioButton::OS2Command
 
 void wxRadioButton::SetFocus()
@@ -188,9 +201,9 @@ void wxRadioButton::SetFocus()
     // generates BN_CLICKED which leads to showing another dialog and so on
     // without end!
     //
-    // to avoid this, we drop the pseudo BN_CLICKED events generated when the
+    // to aviod this, we drop the pseudo BN_CLICKED events generated when the
     // button gains focus
-    m_bFocusJustSet = true;
+    m_bFocusJustSet = TRUE;
 
     wxControl::SetFocus();
 }
@@ -199,8 +212,7 @@ void wxRadioButton::SetLabel(
   const wxString&                   rsLabel
 )
 {
-    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
-    ::WinSetWindowText((HWND)GetHWND(), (const char *)sLabel.c_str());
+    ::WinSetWindowText((HWND)GetHWND(), (const char *)rsLabel.c_str());
 } // end of wxRadioButton::SetLabel
 
 void wxRadioButton::SetValue(
@@ -211,9 +223,9 @@ void wxRadioButton::SetValue(
     if (bValue)
     {
         const wxWindowList&         rSiblings = GetParent()->GetChildren();
-        wxWindowList::compatibility_iterator nodeThis = rSiblings.Find(this);
+        wxWindowList::Node*         pNodeThis = rSiblings.Find(this);
 
-        wxCHECK_RET(nodeThis, _T("radio button not a child of its parent?"));
+        wxCHECK_RET(pNodeThis, _T("radio button not a child of its parent?"));
 
         //
         // If it's not the first item of the group ...
@@ -223,11 +235,11 @@ void wxRadioButton::SetValue(
             //
             // ...turn off all radio buttons before this one
             //
-            for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
-                  nodeBefore;
-                  nodeBefore = nodeBefore->GetPrevious() )
+            for ( wxWindowList::Node* pNodeBefore = pNodeThis->GetPrevious();
+                  pNodeBefore;
+                  pNodeBefore = pNodeBefore->GetPrevious() )
             {
-                wxRadioButton*      pBtn = wxDynamicCast( nodeBefore->GetData()
+                wxRadioButton*      pBtn = wxDynamicCast( pNodeBefore->GetData()
                                                          ,wxRadioButton
                                                         );
                 if (!pBtn)
@@ -253,11 +265,11 @@ void wxRadioButton::SetValue(
         //
         // ... and all after this one
         //
-        for (wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
-             nodeAfter;
-             nodeAfter = nodeAfter->GetNext())
+        for (wxWindowList::Node* pNodeAfter = pNodeThis->GetNext();
+             pNodeAfter;
+             pNodeAfter = pNodeAfter->GetNext())
         {
-            wxRadioButton*          pBtn = wxDynamicCast( nodeAfter->GetData()
+            wxRadioButton*          pBtn = wxDynamicCast( pNodeAfter->GetData()
                                                          ,wxRadioButton
                                                         );
 

@@ -17,19 +17,11 @@
 % ----------------------------------------------------------------------------
 
 % ----------------------------------------------------------------------------
-\membersection{wxHTTP::GetResponse}\label{wxhttpgetresponse}
-
-\constfunc{int}{GetResponse}{\void}
-
-Returns the HTTP response code returned by the server. Please refer to
-\urlref{RFC 2616}{http://www.faqs.org/rfcs/rfc2616.html} for the list of responses.
-
-
 \membersection{wxHTTP::GetInputStream}\label{wxhttpgetinputstream}
 
 \func{wxInputStream *}{GetInputStream}{\param{const wxString\&}{ path}}
 
-Creates a new input stream on the specified path. You can use all except the seek
+Creates a new input stream on the the specified path. You can use all except the seek
 functionality of wxStream. Seek isn't available on all streams. For example,
 http or ftp streams doesn't deal with it. Other functions like Tell and SeekI
 for this sort of stream.
@@ -48,7 +40,7 @@ this value will be 0 when the stream is finished.
 Returns the initialized stream. You will have to delete it yourself once you
 don't use it anymore. The destructor closes the network connection.
 The next time you will try to get a file the network connection will have
-to be reestablished: but you don't have to take care of this since wxHTTP reestablishes it automatically.
+to be reestablished: but you don't have to take care of this wxHTTP reestablishes it automatically.
 
 \wxheading{See also}
 
@@ -56,7 +48,7 @@ to be reestablished: but you don't have to take care of this since wxHTTP reesta
 
 % ----------------------------------------------------------------------------
 
-\membersection{wxHTTP::SetHeader}\label{wxhttpsetheader}
+\membersection{wxHTTP::SetHeader}
 
 \func{void}{SetHeader}{\param{const wxString\&}{ header}, \param{const wxString\&}{ h\_data}}
 
@@ -64,7 +56,7 @@ It sets data of a field to be sent during the next request to the HTTP server. T
 name is specified by {\it header} and the content by {\it h\_data}.
 This is a low level function and it assumes that you know what you are doing.
 
-\membersection{wxHTTP::GetHeader}\label{wxhttpgetheader}
+\membersection{wxHTTP::GetHeader}
 
 \func{wxString}{GetHeader}{\param{const wxString\&}{ header}}
 
@@ -73,6 +65,6 @@ If the field doesn't exist, it will return an empty string and not a NULL string
 
 \wxheading{Note}
 
-The header is not case-sensitive, i.e. "CONTENT-TYPE" and "content-type" 
+The header is not case-sensitive: I mean that "CONTENT-TYPE" and "content-type" 
 represent the same header.
 

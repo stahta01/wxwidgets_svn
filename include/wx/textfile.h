@@ -8,7 +8,7 @@
 // Created:     03.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTFILE_H
@@ -26,7 +26,7 @@
 // wxTextFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxTextFile : public wxTextBuffer
+class WXDLLEXPORT wxTextFile : public wxTextBuffer
 {
 public:
     // constructors
@@ -39,14 +39,11 @@ protected:
     virtual bool OnOpen(const wxString &strBufferName,
                         wxTextBufferOpenMode OpenMode);
     virtual bool OnClose();
-    virtual bool OnRead(const wxMBConv& conv);
-    virtual bool OnWrite(wxTextFileType typeNew, const wxMBConv& conv);
+    virtual bool OnRead(wxMBConv& conv);
+    virtual bool OnWrite(wxTextFileType typeNew, wxMBConv& conv);
 
 private:
-
     wxFile m_file;
-
-    DECLARE_NO_COPY_CLASS(wxTextFile)
 };
 
 #else // !wxUSE_TEXTFILE

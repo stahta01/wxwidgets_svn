@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/mdi.h
+// Name:        gtk/mdi.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef __MDIH__
 #define __MDIH__
@@ -18,26 +19,28 @@
 #include "wx/frame.h"
 #include "wx/toolbar.h"
 
+#if wxUSE_MDI_ARCHITECTURE
+
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame;
-class WXDLLIMPEXP_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_CORE wxMDIChildFrame;
+class wxMDIParentFrame;
+class wxMDIClientWindow;
+class wxMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxFrameNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+extern const wxChar* wxFrameNameStr;
+extern const wxChar* wxStatusLineNameStr;
 
 //-----------------------------------------------------------------------------
 // wxMDIParentFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame: public wxFrame
+class wxMDIParentFrame: public wxFrame
 {
 public:
     wxMDIParentFrame() { Init(); }
@@ -69,7 +72,7 @@ public:
     virtual wxMDIClientWindow *OnCreateClient();
 
     virtual void Cascade() {}
-    virtual void Tile(wxOrientation WXUNUSED(orient) = wxHORIZONTAL) {}
+    virtual void Tile() {}
     virtual void ArrangeIcons() {}
     virtual void ActivateNext();
     virtual void ActivatePrevious();
@@ -97,7 +100,7 @@ private:
 // wxMDIChildFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame: public wxFrame
+class wxMDIChildFrame: public wxFrame
 {
 public:
     wxMDIChildFrame();
@@ -139,39 +142,35 @@ public:
 #endif
 
     // no size hints
-    virtual void DoSetSizeHints( int WXUNUSED(minW),
-                                 int WXUNUSED(minH),
-                                 int WXUNUSED(maxW) = wxDefaultCoord,
-                                 int WXUNUSED(maxH) = wxDefaultCoord,
-                                 int WXUNUSED(incW) = wxDefaultCoord,
-                                 int WXUNUSED(incH) = wxDefaultCoord) {}
+    virtual void SetSizeHints( int WXUNUSED(minW),
+                               int WXUNUSED(minH),
+                               int WXUNUSED(maxW) = -1,
+                               int WXUNUSED(maxH) = -1,
+                               int WXUNUSED(incW) = -1,
+                               int WXUNUSED(incH) = -1) {}
 
 #if wxUSE_TOOLBAR
-    // no toolbar
+    // no toolbar bars
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
                                        wxWindowID WXUNUSED(id),
                                        const wxString& WXUNUSED(name) )
         { return (wxToolBar*)NULL; }
     virtual wxToolBar *GetToolBar() const { return (wxToolBar*)NULL; }
-#endif // wxUSE_TOOLBAR
+#endif
 
     // no icon
-    virtual void SetIcon(const wxIcon& icon)
-        { wxTopLevelWindowBase::SetIcon(icon); }
-    virtual void SetIcons(const wxIconBundle& icons )
-        { wxTopLevelWindowBase::SetIcons(icons); }
+    void SetIcon( const wxIcon &icon ) { m_icons = wxIconBundle( icon ); }
+    void SetIcons( const wxIconBundle &icons ) { m_icons = icons; }
 
     // no title
-    virtual void SetTitle( const wxString &title );
+    void SetTitle( const wxString &title );
+    wxString GetTitle() const { return m_title; }
 
     // no maximize etc
-    virtual void Maximize( bool WXUNUSED(maximize) = true ) { }
-    virtual bool IsMaximized() const { return true; }
-    virtual void Iconize(bool WXUNUSED(iconize) = true) { }
-    virtual bool IsIconized() const { return false; }
+    virtual void Maximize( bool WXUNUSED(maximize) ) {}
     virtual void Restore() {}
 
-    virtual bool IsTopLevel() const { return false; }
+    virtual bool IsTopLevel() const { return FALSE; }
 
     void OnActivate( wxActivateEvent& event );
     void OnMenuHighlight( wxMenuEvent& event );
@@ -199,7 +198,7 @@ private:
 // wxMDIClientWindow
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow: public wxWindow
+class wxMDIClientWindow: public wxWindow
 {
 public:
     wxMDIClientWindow();
@@ -211,4 +210,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxMDIClientWindow)
 };
 
+#endif // if USE_MDI...
+
 #endif // __MDIH__
+

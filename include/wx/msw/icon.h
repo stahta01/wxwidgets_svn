@@ -16,7 +16,23 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/msw/gdiimage.h"
+// compatible (even if incorrect) behaviour by default: derive wxIcon from
+// wxBitmap
+#ifndef wxICON_IS_BITMAP
+    #define wxICON_IS_BITMAP 1
+#endif
+
+#if wxICON_IS_BITMAP
+    #include "wx/bitmap.h"
+
+    #define wxIconRefDataBase   wxBitmapRefData
+    #define wxIconBase          wxBitmap
+#else
+    #include "wx/msw/gdiimage.h"
+
+    #define wxIconRefDataBase   wxGDIImageRefData
+    #define wxIconBase          wxGDIImage
+#endif
 
 // ---------------------------------------------------------------------------
 // icon data
@@ -24,7 +40,7 @@
 
 // notice that although wxIconRefData inherits from wxBitmapRefData, it is not
 // a valid wxBitmapRefData
-class WXDLLEXPORT wxIconRefData : public wxGDIImageRefData
+class WXDLLEXPORT wxIconRefData : public wxIconRefDataBase
 {
 public:
     wxIconRefData() { }
@@ -37,27 +53,25 @@ public:
 // Icon
 // ---------------------------------------------------------------------------
 
-class WXDLLEXPORT wxIcon : public wxGDIImage
+class WXDLLEXPORT wxIcon : public wxIconBase
 {
 public:
     // ctors
         // default
     wxIcon() { }
 
+        // copy
+    wxIcon(const wxIcon& icon) { Ref(icon); }
+
         // from raw data
     wxIcon(const char bits[], int width, int height);
-
         // from XPM data
     wxIcon(const char **data) { CreateIconFromXpm(data); }
-
     wxIcon(char **data) { CreateIconFromXpm((const char **)data); }
-
         // from resource/file
     wxIcon(const wxString& name,
            long type = wxBITMAP_TYPE_ICO_RESOURCE,
            int desiredWidth = -1, int desiredHeight = -1);
-
-    wxIcon(const wxIconLocation& loc);
 
     virtual ~wxIcon();
 
@@ -65,6 +79,8 @@ public:
                           long type = wxBITMAP_TYPE_ICO_RESOURCE,
                           int desiredWidth = -1, int desiredHeight = -1);
 
+    wxIcon& operator = (const wxIcon& icon)
+        { if ( *this != icon ) Ref(icon); return *this; }
     bool operator == (const wxIcon& icon) const
         { return m_refData == icon.m_refData; }
     bool operator != (const wxIcon& icon) const
@@ -86,8 +102,6 @@ protected:
     {
         return new wxIconRefData;
     }
-
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // create from XPM data
     void CreateIconFromXpm(const char **data);

@@ -1,19 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/view.h
+// Name:        view.h
 // Purpose:     View-related classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGLSAMPLE_VIEW_H_
 #define _OGLSAMPLE_VIEW_H_
 
 #include "doc.h"
-#include "wx/ogl/ogl.h"
+#include <wx/ogl/ogl.h>
 
 class MyCanvas: public wxShapeCanvas
 {
@@ -22,7 +22,7 @@ class MyCanvas: public wxShapeCanvas
  public:
   wxView *view;
 
-  MyCanvas(wxView *view, wxWindow *parent = NULL, wxWindowID id = wxID_ANY,
+  MyCanvas(wxView *view, wxWindow *parent = NULL, wxWindowID id = -1,
             const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
             long style = wxRETAINED);
   ~MyCanvas(void);
@@ -51,16 +51,18 @@ class DiagramView: public wxView
  public:
   wxFrame *frame;
   MyCanvas *canvas;
-
+  
   DiagramView(void) { canvas = NULL; frame = NULL; };
   ~DiagramView(void) {};
 
   bool OnCreate(wxDocument *doc, long flags);
   void OnDraw(wxDC *dc);
   void OnUpdate(wxView *sender, wxObject *hint = NULL);
-  bool OnClose(bool deleteWindow = true);
+  bool OnClose(bool deleteWindow = TRUE);
 
   wxShape *FindSelectedShape(void);
+
+//  void OnMenuCommand(int cmd);
 
   void OnCut(wxCommandEvent& event);
   void OnChangeBackgroundColour(wxCommandEvent& event);

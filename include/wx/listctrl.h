@@ -5,24 +5,16 @@
 // Modified by:
 // Created:     04.12.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LISTCTRL_H_BASE_
 #define _WX_LISTCTRL_H_BASE_
 
-#include "wx/defs.h" // headers should include this before first wxUSE_XXX check
-
 #if wxUSE_LISTCTRL
 
 #include "wx/listbase.h"
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-extern WXDLLEXPORT_DATA(const wxChar) wxListCtrlNameStr[];
 
 // ----------------------------------------------------------------------------
 // include the wxListCtrl class declaration
@@ -43,21 +35,21 @@ class WXDLLEXPORT wxListView : public wxListCtrl
 public:
     wxListView() { }
     wxListView( wxWindow *parent,
-                wxWindowID winid = wxID_ANY,
+                wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxLC_REPORT,
                 const wxValidator& validator = wxDefaultValidator,
-                const wxString &name = wxListCtrlNameStr)
+                const wxString &name = wxT("listctrl") )
     {
-        Create(parent, winid, pos, size, style, validator, name);
+        Create(parent, id, pos, size, style, validator, name);
     }
 
     // focus/selection stuff
     // ---------------------
 
     // [de]select an item
-    void Select(long n, bool on = true)
+    void Select(long n, bool on = TRUE)
     {
         SetItemState(n, on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED);
     }
@@ -81,7 +73,7 @@ public:
     long GetFirstSelected() const
         { return GetNextSelected(-1); }
 
-    // return true if the item is selected
+    // return TRUE if the item is selected
     bool IsSelected(long index)
         { return GetItemState(index, wxLIST_STATE_SELECTED) != 0; }
 
@@ -99,7 +91,7 @@ public:
     void ClearColumnImage(int col) { SetColumnImage(col, -1); }
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListView)
+    DECLARE_DYNAMIC_CLASS(wxListView)
 };
 
 #endif // wxUSE_LISTCTRL

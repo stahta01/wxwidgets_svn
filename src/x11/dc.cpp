@@ -16,6 +16,17 @@
 IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
 
 //-----------------------------------------------------------------------------
+// constants
+//-----------------------------------------------------------------------------
+
+#define mm2inches        0.0393700787402
+#define inches2mm        25.4
+#define mm2twips         56.6929133859
+#define twips2mm         0.0176388888889
+#define mm2pt            2.83464566929
+#define pt2mm            0.352777777778
+
+//-----------------------------------------------------------------------------
 // wxDC
 //-----------------------------------------------------------------------------
 
@@ -54,6 +65,11 @@ void wxDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord hei
     m_clipY1 = y;
     m_clipX2 = x + width;
     m_clipY2 = y + height;
+}
+
+void wxDC::DestroyClippingRegion()
+{
+    m_clipping = FALSE;
 }
 
 void wxDC::DoGetSizeMM( int* width, int* height ) const

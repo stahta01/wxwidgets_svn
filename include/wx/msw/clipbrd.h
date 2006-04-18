@@ -48,7 +48,7 @@ WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDataObject;
-class WXDLLEXPORT wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 
@@ -72,7 +72,7 @@ public:
     virtual bool AddData( wxDataObject *data );
 
     // ask if data in correct format is available
-    virtual bool IsSupported( const wxDataFormat& format );
+    virtual bool IsSupported( wxDataFormat format );
 
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );
@@ -86,11 +86,10 @@ public:
     virtual bool Flush();
 
     // X11 has two clipboards which get selected by this call. Empty on MSW.
-    void UsePrimarySelection( bool WXUNUSED(primary) = false ) { }
+    void UsePrimarySelection( bool WXUNUSED(primary) = FALSE ) { }
 
 private:
-    IDataObject *m_lastDataObject;
-    bool m_isOpened;
+    bool m_clearOnExit;
 };
 
 #endif // wxUSE_CLIPBOARD

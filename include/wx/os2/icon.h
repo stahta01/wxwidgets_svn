@@ -16,11 +16,23 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/bitmap.h"
-#include "wx/os2/gdiimage.h"
+// compatible (even if incorrect) behaviour by default: derive wxIcon from
+// wxBitmap
+#ifndef wxICON_IS_BITMAP
+    #define wxICON_IS_BITMAP 1
+#endif
 
-#define wxIconRefDataBase   wxGDIImageRefData
-#define wxIconBase          wxGDIImage
+#include "wx/bitmap.h"
+#if wxICON_IS_BITMAP
+
+    #define wxIconRefDataBase   wxBitmapRefData
+    #define wxIconBase          wxBitmap
+#else
+    #include "wx/os2/gdiimage.h"
+
+    #define wxIconRefDataBase   wxGDIImageRefData
+    #define wxIconBase          wxGDIImage
+#endif
 
 class WXDLLEXPORT wxIconRefData: public wxIconRefDataBase
 {
@@ -40,6 +52,9 @@ class WXDLLEXPORT wxIcon: public wxIconBase
 public:
     wxIcon();
 
+    // Copy constructors
+    inline wxIcon(const wxIcon& icon) { Ref(icon); }
+
     wxIcon( const char bits[]
            ,int        nWidth
            ,int        nHeight
@@ -51,11 +66,6 @@ public:
            ,int             nDesiredWidth = -1
            ,int             nDesiredHeight = -1
           );
-    wxIcon(const wxIconLocation& loc)
-    {
-        LoadFile(loc.GetFileName(), wxBITMAP_TYPE_ICO);
-    }
-
     ~wxIcon();
 
     bool LoadFile( const wxString& rName
@@ -64,9 +74,11 @@ public:
                   ,int             nDesiredHeight = -1
                  );
 
-    inline bool operator == (const wxIcon& rIcon) const
+    inline wxIcon& operator = (const wxIcon& rIcon)
+       { if (*this != rIcon) Ref(rIcon); return *this; }
+    inline bool operator == (const wxIcon& rIcon)
        { return m_refData == rIcon.m_refData; }
-    inline bool operator != (const wxIcon& rIcon) const
+    inline bool operator != (const wxIcon& rIcon)
        { return m_refData != rIcon.m_refData; }
 
     wxIconRefData *GetIconData() const { return (wxIconRefData *)m_refData; }

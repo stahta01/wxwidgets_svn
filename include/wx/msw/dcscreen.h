@@ -9,32 +9,29 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MSW_DCSCREEN_H_
-#define _WX_MSW_DCSCREEN_H_
+#ifndef _WX_DCSCREEN_H_
+#define _WX_DCSCREEN_H_
 
-#include "wx/dc.h"
+#include "wx/dcclient.h"
 
-class WXDLLEXPORT wxScreenDC : public wxDC
+class WXDLLEXPORT wxScreenDC : public wxWindowDC
 {
 public:
     // Create a DC representing the whole screen
     wxScreenDC();
 
-    // Compatibility with X's requirements for drawing on top of all windows:
-    // they don't do anything under MSW
-    static bool StartDrawingOnTop(wxWindow* WXUNUSED(window)) { return true; }
-    static bool StartDrawingOnTop(wxRect* WXUNUSED(rect) = NULL) { return true; }
-    static bool EndDrawingOnTop() { return true; }
+    // Compatibility with X's requirements for drawing on top of all windows
+    static bool StartDrawingOnTop(wxWindow* WXUNUSED(window)) { return TRUE; }
+    static bool StartDrawingOnTop(wxRect* WXUNUSED(rect) = NULL) { return TRUE; }
+    static bool EndDrawingOnTop() { return TRUE; }
 
 protected:
-    virtual void DoGetSize(int *w, int *h) const
-    {
-        GetDeviceSize(w, h);
-    }
+    virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxScreenDC)
+    DECLARE_DYNAMIC_CLASS(wxScreenDC)
 };
 
-#endif // _WX_MSW_DCSCREEN_H_
+#endif
+    // _WX_DCSCREEN_H_
 

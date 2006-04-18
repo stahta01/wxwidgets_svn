@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 //              Note: this is an optional class.
 // Author:      Julian Smart
@@ -15,26 +15,18 @@
 
 #include "wx/listbox.h"
 
-class WXDLLIMPEXP_CORE wxCheckListBox : public wxCheckListBoxBase
+class wxCheckListBox : public wxCheckListBoxBase
 {
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
-
+        
 public:
     // ctors
     wxCheckListBox();
     wxCheckListBox(wxWindow *parent, wxWindowID id,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
-        int nStrings = 0,
+        int nStrings = 0, 
         const wxString choices[] = NULL,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr);
-
-    wxCheckListBox(wxWindow *parent, wxWindowID id,
-        const wxPoint& pos,
-        const wxSize& size,
-        const wxArrayString& choices,
         long style = 0,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxListBoxNameStr);
@@ -46,26 +38,18 @@ public:
         long style = 0,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxListBoxNameStr);
-
-    bool Create(wxWindow *parent, wxWindowID id,
-        const wxPoint& pos,
-        const wxSize& size,
-        const wxArrayString& choices,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr);
-
+    
     // items may be checked
-    bool IsChecked(unsigned int uiIndex) const;
-    void Check(unsigned int uiIndex, bool bCheck = true);
+    bool IsChecked(size_t uiIndex) const;
+    void Check(size_t uiIndex, bool bCheck = TRUE);
 
     // override base class functions
     virtual int DoAppend(const wxString& item);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual wxString GetString(unsigned int n) const;
+    virtual int FindString(const wxString& s) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual wxString GetString(int n) const;
 
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
     virtual void DoSetItems(const wxArrayString& items, void **clientData);
 private:
     void DoToggleItem( int item, int x );

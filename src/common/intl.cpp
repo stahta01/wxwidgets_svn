@@ -1,13 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/common/intl.cpp
-// Purpose:     Internationalization and localisation for wxWidgets
+// Purpose:     Internationalization and localisation for wxWindows
 // Author:      Vadim Zeitlin
-// Modified by: Michael N. Filippov <michael@idisys.iae.nsk.su>
-//              (2003/09/30 - PluralForms support)
+// Modified by:
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,18 +16,6 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
-#if defined(__BORLAND__) && !defined(__WXDEBUG__)
-    // There's a bug in Borland's compiler that breaks wxLocale with -O2,
-    // so make sure that flag is not used for this file:
-    #pragma option -O1
-#endif
-
-#ifdef __EMX__
-// The following define is needed by Innotek's libc to
-// make the definition of struct localeconv available.
-#define __INTERNAL_DEFS
-#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -40,18 +27,14 @@
 #if wxUSE_INTL
 
 // standard headers
-
-#ifndef __WXWINCE__
 #include <locale.h>
-#endif
-
 #include <ctype.h>
 #include <stdlib.h>
 #ifdef HAVE_LANGINFO_H
   #include <langinfo.h>
 #endif
 
-// wxWidgets
+// wxWindows
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/intl.h"
@@ -61,23 +44,18 @@
     #include "wx/dynarray.h"
 #endif // WX_PRECOMP
 
-#ifdef __WIN32__
-    #include "wx/msw/private.h"
-#elif defined(__UNIX_LIKE__)
-    #include "wx/fontmap.h"         // for CharsetToEncoding()
-#endif
-
 #include "wx/file.h"
-#include "wx/filename.h"
 #include "wx/tokenzr.h"
 #include "wx/module.h"
 #include "wx/fontmap.h"
 #include "wx/encconv.h"
 #include "wx/hashmap.h"
-#include "wx/ptr_scpd.h"
-#include "wx/app.h"
-#include "wx/apptrait.h"
-#include "wx/stdpaths.h"
+
+#ifdef __WIN32__
+    #include "wx/msw/private.h"
+#elif defined(__UNIX_LIKE__)
+    #include "wx/fontmap.h"         // for CharsetToEncoding()
+#endif
 
 #if defined(__WXMAC__)
   #include  "wx/mac/private.h"  // includes mac headers
@@ -99,12 +77,13 @@ typedef wxUint32 size_t32;
 const size_t32 MSGCATALOG_MAGIC    = 0x950412de;
 const size_t32 MSGCATALOG_MAGIC_SW = 0xde120495;
 
+// extension of ".mo" files
+#define MSGCATALOG_EXTENSION  _T(".mo")
+
 // the constants describing the format of lang_LANG locale string
 static const size_t LEN_LANG = 2;
 static const size_t LEN_SUBLANG = 2;
 static const size_t LEN_FULL = LEN_LANG + 1 + LEN_SUBLANG; // 1 for '_'
-
-#define TRACE_I18N _T("i18n")
 
 // ----------------------------------------------------------------------------
 // global functions
@@ -159,713 +138,6 @@ static inline wxString ExtractNotLang(const wxString& langFull)
 
 
 // ----------------------------------------------------------------------------
-// Plural forms parser
-// ----------------------------------------------------------------------------
-
-/*
-                                Simplified Grammar
-
-Expression:
-    LogicalOrExpression '?' Expression ':' Expression
-    LogicalOrExpression
-
-LogicalOrExpression:
-    LogicalAndExpression "||" LogicalOrExpression   // to (a || b) || c
-    LogicalAndExpression
-
-LogicalAndExpression:
-    EqualityExpression "&&" LogicalAndExpression    // to (a && b) && c
-    EqualityExpression
-
-EqualityExpression:
-    RelationalExpression "==" RelationalExperession
-    RelationalExpression "!=" RelationalExperession
-    RelationalExpression
-
-RelationalExpression:
-    MultiplicativeExpression '>' MultiplicativeExpression
-    MultiplicativeExpression '<' MultiplicativeExpression
-    MultiplicativeExpression ">=" MultiplicativeExpression
-    MultiplicativeExpression "<=" MultiplicativeExpression
-    MultiplicativeExpression
-
-MultiplicativeExpression:
-    PmExpression '%' PmExpression
-    PmExpression
-
-PmExpression:
-    N
-    Number
-    '(' Expression ')'
-*/
-
-class wxPluralFormsToken
-{
-public:
-    enum Type
-    {
-        T_ERROR, T_EOF, T_NUMBER, T_N, T_PLURAL, T_NPLURALS, T_EQUAL, T_ASSIGN,
-        T_GREATER, T_GREATER_OR_EQUAL, T_LESS, T_LESS_OR_EQUAL,
-        T_REMINDER, T_NOT_EQUAL,
-        T_LOGICAL_AND, T_LOGICAL_OR, T_QUESTION, T_COLON, T_SEMICOLON,
-        T_LEFT_BRACKET, T_RIGHT_BRACKET
-    };
-    Type type() const { return m_type; }
-    void setType(Type type) { m_type = type; }
-    // for T_NUMBER only
-    typedef int Number;
-    Number number() const { return m_number; }
-    void setNumber(Number num) { m_number = num; }
-private:
-    Type m_type;
-    Number m_number;
-};
-
-
-class wxPluralFormsScanner
-{
-public:
-    wxPluralFormsScanner(const char* s);
-    const wxPluralFormsToken& token() const { return m_token; }
-    bool nextToken();  // returns false if error
-private:
-    const char* m_s;
-    wxPluralFormsToken m_token;
-};
-
-wxPluralFormsScanner::wxPluralFormsScanner(const char* s) : m_s(s)
-{
-    nextToken();
-}
-
-bool wxPluralFormsScanner::nextToken()
-{
-    wxPluralFormsToken::Type type = wxPluralFormsToken::T_ERROR;
-    while (isspace(*m_s))
-    {
-        ++m_s;
-    }
-    if (*m_s == 0)
-    {
-        type = wxPluralFormsToken::T_EOF;
-    }
-    else if (isdigit(*m_s))
-    {
-        wxPluralFormsToken::Number number = *m_s++ - '0';
-        while (isdigit(*m_s))
-        {
-            number = number * 10 + (*m_s++ - '0');
-        }
-        m_token.setNumber(number);
-        type = wxPluralFormsToken::T_NUMBER;
-    }
-    else if (isalpha(*m_s))
-    {
-        const char* begin = m_s++;
-        while (isalnum(*m_s))
-        {
-            ++m_s;
-        }
-        size_t size = m_s - begin;
-        if (size == 1 && memcmp(begin, "n", size) == 0)
-        {
-            type = wxPluralFormsToken::T_N;
-        }
-        else if (size == 6 && memcmp(begin, "plural", size) == 0)
-        {
-            type = wxPluralFormsToken::T_PLURAL;
-        }
-        else if (size == 8 && memcmp(begin, "nplurals", size) == 0)
-        {
-            type = wxPluralFormsToken::T_NPLURALS;
-        }
-    }
-    else if (*m_s == '=')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_ASSIGN;
-        }
-    }
-    else if (*m_s == '>')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_GREATER_OR_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_GREATER;
-        }
-    }
-    else if (*m_s == '<')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_LESS_OR_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_LESS;
-        }
-    }
-    else if (*m_s == '%')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_REMINDER;
-    }
-    else if (*m_s == '!' && m_s[1] == '=')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_NOT_EQUAL;
-    }
-    else if (*m_s == '&' && m_s[1] == '&')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_LOGICAL_AND;
-    }
-    else if (*m_s == '|' && m_s[1] == '|')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_LOGICAL_OR;
-    }
-    else if (*m_s == '?')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_QUESTION;
-    }
-    else if (*m_s == ':')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_COLON;
-    } else if (*m_s == ';') {
-        ++m_s;
-        type = wxPluralFormsToken::T_SEMICOLON;
-    }
-    else if (*m_s == '(')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_LEFT_BRACKET;
-    }
-    else if (*m_s == ')')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_RIGHT_BRACKET;
-    }
-    m_token.setType(type);
-    return type != wxPluralFormsToken::T_ERROR;
-}
-
-class wxPluralFormsNode;
-
-// NB: Can't use wxDEFINE_SCOPED_PTR_TYPE because wxPluralFormsNode is not
-//     fully defined yet:
-class wxPluralFormsNodePtr
-{
-public:
-    wxPluralFormsNodePtr(wxPluralFormsNode *p = NULL) : m_p(p) {}
-    ~wxPluralFormsNodePtr();
-    wxPluralFormsNode& operator*() const { return *m_p; }
-    wxPluralFormsNode* operator->() const { return m_p; }
-    wxPluralFormsNode* get() const { return m_p; }
-    wxPluralFormsNode* release();
-    void reset(wxPluralFormsNode *p);
-
-private:
-    wxPluralFormsNode *m_p;
-};
-
-class wxPluralFormsNode
-{
-public:
-    wxPluralFormsNode(const wxPluralFormsToken& token) : m_token(token) {}
-    const wxPluralFormsToken& token() const { return m_token; }
-    const wxPluralFormsNode* node(size_t i) const
-        { return m_nodes[i].get(); }
-    void setNode(size_t i, wxPluralFormsNode* n);
-    wxPluralFormsNode* releaseNode(size_t i);
-    wxPluralFormsToken::Number evaluate(wxPluralFormsToken::Number n) const;
-
-private:
-    wxPluralFormsToken m_token;
-    wxPluralFormsNodePtr m_nodes[3];
-};
-
-wxPluralFormsNodePtr::~wxPluralFormsNodePtr()
-{
-    delete m_p;
-}
-wxPluralFormsNode* wxPluralFormsNodePtr::release()
-{
-    wxPluralFormsNode *p = m_p;
-    m_p = NULL;
-    return p;
-}
-void wxPluralFormsNodePtr::reset(wxPluralFormsNode *p)
-{
-    if (p != m_p)
-    {
-        delete m_p;
-        m_p = p;
-    }
-}
-
-
-void wxPluralFormsNode::setNode(size_t i, wxPluralFormsNode* n)
-{
-    m_nodes[i].reset(n);
-}
-
-wxPluralFormsNode*  wxPluralFormsNode::releaseNode(size_t i)
-{
-    return m_nodes[i].release();
-}
-
-wxPluralFormsToken::Number
-wxPluralFormsNode::evaluate(wxPluralFormsToken::Number n) const
-{
-    switch (token().type())
-    {
-        // leaf
-        case wxPluralFormsToken::T_NUMBER:
-            return token().number();
-        case wxPluralFormsToken::T_N:
-            return n;
-        // 2 args
-        case wxPluralFormsToken::T_EQUAL:
-            return node(0)->evaluate(n) == node(1)->evaluate(n);
-        case wxPluralFormsToken::T_NOT_EQUAL:
-            return node(0)->evaluate(n) != node(1)->evaluate(n);
-        case wxPluralFormsToken::T_GREATER:
-            return node(0)->evaluate(n) > node(1)->evaluate(n);
-        case wxPluralFormsToken::T_GREATER_OR_EQUAL:
-            return node(0)->evaluate(n) >= node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LESS:
-            return node(0)->evaluate(n) < node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LESS_OR_EQUAL:
-            return node(0)->evaluate(n) <= node(1)->evaluate(n);
-        case wxPluralFormsToken::T_REMINDER:
-            {
-                wxPluralFormsToken::Number number = node(1)->evaluate(n);
-                if (number != 0)
-                {
-                    return node(0)->evaluate(n) % number;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        case wxPluralFormsToken::T_LOGICAL_AND:
-            return node(0)->evaluate(n) && node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LOGICAL_OR:
-            return node(0)->evaluate(n) || node(1)->evaluate(n);
-        // 3 args
-        case wxPluralFormsToken::T_QUESTION:
-            return node(0)->evaluate(n)
-                ? node(1)->evaluate(n)
-                : node(2)->evaluate(n);
-        default:
-            return 0;
-    }
-}
-
-
-class wxPluralFormsCalculator
-{
-public:
-    wxPluralFormsCalculator() : m_nplurals(0), m_plural(0) {}
-
-    // input: number, returns msgstr index
-    int evaluate(int n) const;
-
-    // input: text after "Plural-Forms:" (e.g. "nplurals=2; plural=(n != 1);"),
-    // if s == 0, creates default handler
-    // returns 0 if error
-    static wxPluralFormsCalculator* make(const char* s = 0);
-
-    ~wxPluralFormsCalculator() {}
-
-    void  init(wxPluralFormsToken::Number nplurals, wxPluralFormsNode* plural);
-
-private:
-    wxPluralFormsToken::Number m_nplurals;
-    wxPluralFormsNodePtr m_plural;
-};
-
-wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator)
-
-void wxPluralFormsCalculator::init(wxPluralFormsToken::Number nplurals,
-                                   wxPluralFormsNode* plural)
-{
-    m_nplurals = nplurals;
-    m_plural.reset(plural);
-}
-
-int wxPluralFormsCalculator::evaluate(int n) const
-{
-    if (m_plural.get() == 0)
-    {
-        return 0;
-    }
-    wxPluralFormsToken::Number number = m_plural->evaluate(n);
-    if (number < 0 || number > m_nplurals)
-    {
-        return 0;
-    }
-    return number;
-}
-
-
-class wxPluralFormsParser
-{
-public:
-    wxPluralFormsParser(wxPluralFormsScanner& scanner) : m_scanner(scanner) {}
-    bool parse(wxPluralFormsCalculator& rCalculator);
-
-private:
-    wxPluralFormsNode* parsePlural();
-    // stops at T_SEMICOLON, returns 0 if error
-    wxPluralFormsScanner& m_scanner;
-    const wxPluralFormsToken& token() const;
-    bool nextToken();
-
-    wxPluralFormsNode* expression();
-    wxPluralFormsNode* logicalOrExpression();
-    wxPluralFormsNode* logicalAndExpression();
-    wxPluralFormsNode* equalityExpression();
-    wxPluralFormsNode* multiplicativeExpression();
-    wxPluralFormsNode* relationalExpression();
-    wxPluralFormsNode* pmExpression();
-};
-
-bool wxPluralFormsParser::parse(wxPluralFormsCalculator& rCalculator)
-{
-    if (token().type() != wxPluralFormsToken::T_NPLURALS)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_ASSIGN)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_NUMBER)
-        return false;
-    wxPluralFormsToken::Number nplurals = token().number();
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_PLURAL)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_ASSIGN)
-        return false;
-    if (!nextToken())
-        return false;
-    wxPluralFormsNode* plural = parsePlural();
-    if (plural == 0)
-        return false;
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_EOF)
-        return false;
-    rCalculator.init(nplurals, plural);
-    return true;
-}
-
-wxPluralFormsNode* wxPluralFormsParser::parsePlural()
-{
-    wxPluralFormsNode* p = expression();
-    if (p == NULL)
-    {
-        return NULL;
-    }
-    wxPluralFormsNodePtr n(p);
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-    {
-        return NULL;
-    }
-    return n.release();
-}
-
-const wxPluralFormsToken& wxPluralFormsParser::token() const
-{
-    return m_scanner.token();
-}
-
-bool wxPluralFormsParser::nextToken()
-{
-    if (!m_scanner.nextToken())
-        return false;
-    return true;
-}
-
-wxPluralFormsNode* wxPluralFormsParser::expression()
-{
-    wxPluralFormsNode* p = logicalOrExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_QUESTION)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = expression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        qn->setNode(1, p);
-        if (token().type() != wxPluralFormsToken::T_COLON)
-        {
-            return 0;
-        }
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = expression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        qn->setNode(2, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode*wxPluralFormsParser::logicalOrExpression()
-{
-    wxPluralFormsNode* p = logicalAndExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr ln(p);
-    if (token().type() == wxPluralFormsToken::T_LOGICAL_OR)
-    {
-        wxPluralFormsNodePtr un(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = logicalOrExpression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        wxPluralFormsNodePtr rn(p);    // right
-        if (rn->token().type() == wxPluralFormsToken::T_LOGICAL_OR)
-        {
-            // see logicalAndExpression comment
-            un->setNode(0, ln.release());
-            un->setNode(1, rn->releaseNode(0));
-            rn->setNode(0, un.release());
-            return rn.release();
-        }
-
-
-        un->setNode(0, ln.release());
-        un->setNode(1, rn.release());
-        return un.release();
-    }
-    return ln.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::logicalAndExpression()
-{
-    wxPluralFormsNode* p = equalityExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr ln(p);   // left
-    if (token().type() == wxPluralFormsToken::T_LOGICAL_AND)
-    {
-        wxPluralFormsNodePtr un(new wxPluralFormsNode(token()));  // up
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = logicalAndExpression();
-        if (p == 0)
-        {
-            return NULL;
-        }
-        wxPluralFormsNodePtr rn(p);    // right
-        if (rn->token().type() == wxPluralFormsToken::T_LOGICAL_AND)
-        {
-// transform 1 && (2 && 3) -> (1 && 2) && 3
-//     u                  r
-// l       r     ->   u      3
-//       2   3      l   2
-            un->setNode(0, ln.release());
-            un->setNode(1, rn->releaseNode(0));
-            rn->setNode(0, un.release());
-            return rn.release();
-        }
-
-        un->setNode(0, ln.release());
-        un->setNode(1, rn.release());
-        return un.release();
-    }
-    return ln.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::equalityExpression()
-{
-    wxPluralFormsNode* p = relationalExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_EQUAL
-        || token().type() == wxPluralFormsToken::T_NOT_EQUAL)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = relationalExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::relationalExpression()
-{
-    wxPluralFormsNode* p = multiplicativeExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_GREATER
-            || token().type() == wxPluralFormsToken::T_LESS
-            || token().type() == wxPluralFormsToken::T_GREATER_OR_EQUAL
-            || token().type() == wxPluralFormsToken::T_LESS_OR_EQUAL)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = multiplicativeExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::multiplicativeExpression()
-{
-    wxPluralFormsNode* p = pmExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_REMINDER)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = pmExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::pmExpression()
-{
-    wxPluralFormsNodePtr n;
-    if (token().type() == wxPluralFormsToken::T_N
-        || token().type() == wxPluralFormsToken::T_NUMBER)
-    {
-        n.reset(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-    }
-    else if (token().type() == wxPluralFormsToken::T_LEFT_BRACKET) {
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        wxPluralFormsNode* p = expression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        n.reset(p);
-        if (token().type() != wxPluralFormsToken::T_RIGHT_BRACKET)
-        {
-            return NULL;
-        }
-        if (!nextToken())
-        {
-            return NULL;
-        }
-    }
-    else
-    {
-        return NULL;
-    }
-    return n.release();
-}
-
-wxPluralFormsCalculator* wxPluralFormsCalculator::make(const char* s)
-{
-    wxPluralFormsCalculatorPtr calculator(new wxPluralFormsCalculator);
-    if (s != NULL)
-    {
-        wxPluralFormsScanner scanner(s);
-        wxPluralFormsParser p(scanner);
-        if (!p.parse(*calculator))
-        {
-            return NULL;
-        }
-    }
-    return calculator.release();
-}
-
-
-
-
-// ----------------------------------------------------------------------------
 // wxMsgCatalogFile corresponds to one disk-file message catalog.
 //
 // This is a "low-level" class and is used only by wxMsgCatalog
@@ -881,17 +153,10 @@ public:
    ~wxMsgCatalogFile();
 
     // load the catalog from disk (szDirPrefix corresponds to language)
-    bool Load(const wxChar *szDirPrefix, const wxChar *szName,
-              wxPluralFormsCalculatorPtr& rPluralFormsCalculator);
+    bool Load(const wxChar *szDirPrefix, const wxChar *szName);
 
     // fills the hash with string-translation pairs
-    void FillHash(wxMessagesHash& hash,
-                  const wxString& msgIdCharset,
-                  bool convertEncoding) const;
-
-    // return the charset of the strings in this catalog or empty string if
-    // none/unknown
-    wxString GetCharset() const { return m_charset; }
+    void FillHash(wxMessagesHash& hash, bool convertEncoding) const;
 
 private:
     // this implementation is binary compatible with GNU gettext() version 0.10
@@ -918,42 +183,21 @@ private:
     // all data is stored here, NULL if no data loaded
     size_t8 *m_pData;
 
-    // amount of memory pointed to by m_pData.
-    size_t32 m_nSize;
-
     // data description
     size_t32          m_numStrings;   // number of strings in this domain
     wxMsgTableEntry  *m_pOrigTable,   // pointer to original   strings
                      *m_pTransTable;  //            translated
 
-    wxString m_charset;               // from the message catalog header
+    const char *StringAtOfs(wxMsgTableEntry *pTable, size_t32 index) const
+      { return (const char *)(m_pData + Swap(pTable[index].ofsString)); }
 
+    wxString GetCharset() const;
 
-    // swap the 2 halves of 32 bit integer if needed
-    size_t32 Swap(size_t32 ui) const
-    {
-          return m_bSwapped ? (ui << 24) | ((ui & 0xff00) << 8) |
-                              ((ui >> 8) & 0xff00) | (ui >> 24)
-                            : ui;
-    }
+    // utility functions
+      // big<->little endian
+    inline size_t32 Swap(size_t32 ui) const;
 
-    const char *StringAtOfs(wxMsgTableEntry *pTable, size_t32 n) const
-    {
-        const wxMsgTableEntry * const ent = pTable + n;
-
-        // this check could fail for a corrupt message catalog
-        size_t32 ofsString = Swap(ent->ofsString);
-        if ( ofsString + Swap(ent->nLen) > m_nSize)
-        {
-            return NULL;
-        }
-
-        return (const char *)(m_pData + ofsString);
-    }
-
-    bool m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
+    bool          m_bSwapped;   // wrong endianness?
 };
 
 
@@ -967,18 +211,14 @@ private:
 class wxMsgCatalog
 {
 public:
-    wxMsgCatalog() { m_conv = NULL; }
-    ~wxMsgCatalog();
-
     // load the catalog from disk (szDirPrefix corresponds to language)
-    bool Load(const wxChar *szDirPrefix, const wxChar *szName,
-              const wxChar *msgIdCharset = NULL, bool bConvertEncoding = false);
+    bool Load(const wxChar *szDirPrefix, const wxChar *szName, bool bConvertEncoding = FALSE);
 
     // get name of the catalog
     wxString GetName() const { return m_name; }
 
     // get the translated string: returns NULL if not found
-    const wxChar *GetString(const wxChar *sz, size_t n = size_t(-1)) const;
+    const wxChar *GetString(const wxChar *sz) const;
 
     // public variable pointing to the next element in a linked list (or NULL)
     wxMsgCatalog *m_pNext;
@@ -986,12 +226,6 @@ public:
 private:
     wxMessagesHash  m_messages; // all messages in the catalog
     wxString        m_name;     // name of the domain
-
-    // the conversion corresponding to this catalog charset if we installed it
-    // as the global one
-    wxCSConv *m_conv;
-
-    wxPluralFormsCalculatorPtr  m_pluralFormsCalculator;
 };
 
 // ----------------------------------------------------------------------------
@@ -999,7 +233,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // the list of the directories to search for message catalog files
-static wxArrayString gs_searchPrefixes;
+static wxArrayString s_searchPrefixes;
 
 // ============================================================================
 // implementation
@@ -1009,31 +243,36 @@ static wxArrayString gs_searchPrefixes;
 // wxMsgCatalogFile class
 // ----------------------------------------------------------------------------
 
+// swap the 2 halves of 32 bit integer if needed
+size_t32 wxMsgCatalogFile::Swap(size_t32 ui) const
+{
+  return m_bSwapped ? (ui << 24) | ((ui & 0xff00) << 8) |
+                      ((ui >> 8) & 0xff00) | (ui >> 24)
+                    : ui;
+}
+
 wxMsgCatalogFile::wxMsgCatalogFile()
 {
-    m_pData = NULL;
-    m_nSize = 0;
+  m_pData = NULL;
 }
 
 wxMsgCatalogFile::~wxMsgCatalogFile()
 {
-    delete [] m_pData;
+  wxDELETEA(m_pData);
 }
 
-// return the directory to search for message catalogs under the given prefix
-static
-wxString GetMsgCatalogSubdir(const wxChar *prefix, const wxChar *lang)
+// return all directories to search for given prefix
+static wxString GetAllMsgCatalogSubdirs(const wxChar *prefix,
+                                        const wxChar *lang)
 {
     wxString searchPath;
-    searchPath << prefix << wxFILE_SEP_PATH << lang;
 
-    // under Unix, the message catalogs are supposed to go into LC_MESSAGES
-    // subdirectory so look there too
-#ifdef __UNIX__
-    const wxString searchPathOrig(searchPath);
-    searchPath << wxFILE_SEP_PATH << wxT("LC_MESSAGES")
-               << wxPATH_SEP << searchPathOrig;
-#endif // __UNIX__
+    // search first in prefix/fr/LC_MESSAGES, then in prefix/fr and finally in
+    // prefix (assuming the language is 'fr')
+    searchPath << prefix << wxFILE_SEP_PATH << lang << wxFILE_SEP_PATH
+                         << wxT("LC_MESSAGES") << wxPATH_SEP
+               << prefix << wxFILE_SEP_PATH << lang << wxPATH_SEP
+               << prefix << wxPATH_SEP;
 
     return searchPath;
 }
@@ -1041,95 +280,71 @@ wxString GetMsgCatalogSubdir(const wxChar *prefix, const wxChar *lang)
 // construct the search path for the given language
 static wxString GetFullSearchPath(const wxChar *lang)
 {
+    wxString searchPath;
+
     // first take the entries explicitly added by the program
-    wxArrayString paths;
-    paths.reserve(gs_searchPrefixes.size() + 1);
-    size_t n,
-           count = gs_searchPrefixes.size();
-    for ( n = 0; n < count; n++ )
+    size_t count = s_searchPrefixes.Count();
+    for ( size_t n = 0; n < count; n++ )
     {
-        paths.Add(GetMsgCatalogSubdir(gs_searchPrefixes[n], lang));
+        searchPath << GetAllMsgCatalogSubdirs(s_searchPrefixes[n], lang)
+                   << wxPATH_SEP;
     }
 
-
-#if wxUSE_STDPATHS
-    // then look in the standard location
-    const wxString stdp = wxStandardPaths::Get().
-        GetLocalizedResourcesDir(lang, wxStandardPaths::ResourceCat_Messages);
-
-    if ( paths.Index(stdp) == wxNOT_FOUND )
-        paths.Add(stdp);
-#endif // wxUSE_STDPATHS
-
-    // last look in default locations
-#ifdef __UNIX__
     // LC_PATH is a standard env var containing the search path for the .mo
     // files
     const wxChar *pszLcPath = wxGetenv(wxT("LC_PATH"));
-    if ( pszLcPath )
-    {
-        const wxString lcp = GetMsgCatalogSubdir(pszLcPath, lang);
-        if ( paths.Index(lcp) == wxNOT_FOUND )
-            paths.Add(lcp);
-    }
+    if ( pszLcPath != NULL )
+        searchPath << GetAllMsgCatalogSubdirs(pszLcPath, lang);
 
-    // also add the one from where wxWin was installed:
-    wxString wxp = wxGetInstallPrefix();
-    if ( !wxp.empty() )
-    {
-        wxp = GetMsgCatalogSubdir(wxp + _T("/share/locale"), lang);
-        if ( paths.Index(wxp) == wxNOT_FOUND )
-            paths.Add(wxp);
-    }
+#ifdef __UNIX__
+    // add some standard ones and the one in the tree where wxWin was installed:
+    searchPath
+        << GetAllMsgCatalogSubdirs(wxString(wxGetInstallPrefix()) + wxT("/share/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/share/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/lib/locale"), lang)
+        << GetAllMsgCatalogSubdirs(wxT("/usr/local/share/locale"), lang);
 #endif // __UNIX__
 
+    // then take the current directory
+    // FIXME it should be the directory of the executable
+#ifdef __WXMAC__
+    wxChar cwd[512] ;
+    wxGetWorkingDirectory( cwd , sizeof( cwd ) ) ;
+    searchPath << GetAllMsgCatalogSubdirs(cwd, lang);
+    // generic search paths could be somewhere in the system folder preferences
+#else // !Mac
+    searchPath << GetAllMsgCatalogSubdirs(wxT("."), lang);
 
-    // finally construct the full search path
-    wxString searchPath;
-    searchPath.reserve(500);
-    count = paths.size();
-    for ( n = 0; n < count; n++ )
-    {
-        searchPath += paths[n];
-        if ( n != count - 1 )
-            searchPath += wxPATH_SEP;
-    }
+#endif // platform
 
     return searchPath;
 }
 
 // open disk file and read in it's contents
-bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
-                            wxPluralFormsCalculatorPtr& rPluralFormsCalculator)
+bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0)
 {
-  wxString searchPath;
+   /* We need to handle locales like  de_AT.iso-8859-1
+      For this we first chop off the .CHARSET specifier and ignore it.
+      FIXME: UNICODE SUPPORT: must use CHARSET specifier!
+   */
+   wxString szName = szName0;
+   if(szName.Find(wxT('.')) != -1) // contains a dot
+      szName = szName.Left(szName.Find(wxT('.')));
 
-#if wxUSE_FONTMAP
-  // first look for the catalog for this language and the current locale:
-  // notice that we don't use the system name for the locale as this would
-  // force us to install catalogs in different locations depending on the
-  // system but always use the canonical name
-  wxFontEncoding encSys = wxLocale::GetSystemEncoding();
-  if ( encSys != wxFONTENCODING_SYSTEM )
-  {
-    wxString fullname(szDirPrefix);
-    fullname << _T('.') << wxFontMapperBase::GetEncodingName(encSys);
-    searchPath << GetFullSearchPath(fullname) << wxPATH_SEP;
-  }
-#endif // wxUSE_FONTMAP
-
-
-  searchPath += GetFullSearchPath(szDirPrefix);
+  wxString searchPath = GetFullSearchPath(szDirPrefix);
   const wxChar *sublocale = wxStrchr(szDirPrefix, wxT('_'));
   if ( sublocale )
   {
       // also add just base locale name: for things like "fr_BE" (belgium
       // french) we should use "fr" if no belgium specific message catalogs
       // exist
-      searchPath << wxPATH_SEP
-                 << GetFullSearchPath(wxString(szDirPrefix).
-                                      Left((size_t)(sublocale - szDirPrefix)));
+      searchPath << GetFullSearchPath(wxString(szDirPrefix).
+                                      Left((size_t)(sublocale - szDirPrefix)))
+                 << wxPATH_SEP;
   }
+
+  wxString strFile = szName;
+  strFile += MSGCATALOG_EXTENSION;
 
   // don't give translation errors here because the wxstd catalog might
   // not yet be loaded (and it's normal)
@@ -1138,44 +353,36 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
 
   NoTransErr noTransErr;
   wxLogVerbose(_("looking for catalog '%s' in path '%s'."),
-               szName, searchPath.c_str());
-  wxLogTrace(TRACE_I18N, _T("Looking for \"%s.mo\" in \"%s\""),
-             szName, searchPath.c_str());
+               szName.c_str(), searchPath.c_str());
 
-  wxFileName fn(szName);
-  fn.SetExt(_T("mo"));
   wxString strFullName;
-  if ( !wxFindFileInPath(&strFullName, searchPath, fn.GetFullPath()) ) {
-    wxLogVerbose(_("catalog file for domain '%s' not found."), szName);
-    wxLogTrace(TRACE_I18N, _T("Catalog \"%s.mo\" not found"), szName);
-    return false;
+  if ( !wxFindFileInPath(&strFullName, searchPath, strFile) ) {
+    wxLogVerbose(_("catalog file for domain '%s' not found."), szName.c_str());
+    return FALSE;
   }
 
   // open file
-  wxLogVerbose(_("using catalog '%s' from '%s'."), szName, strFullName.c_str());
-  wxLogTrace(TRACE_I18N, _T("Using catalog \"%s\"."), strFullName.c_str());
+  wxLogVerbose(_("using catalog '%s' from '%s'."),
+             szName.c_str(), strFullName.c_str());
 
   wxFile fileMsg(strFullName);
   if ( !fileMsg.IsOpened() )
-    return false;
+    return FALSE;
 
-  // get the file size (assume it is less than 4Gb...)
-  wxFileOffset lenFile = fileMsg.Length();
-  if ( lenFile == wxInvalidOffset )
-    return false;
-
-  size_t nSize = wx_truncate_cast(size_t, lenFile);
-  wxASSERT_MSG( nSize == lenFile + size_t(0), _T("message catalog bigger than 4GB?") );
+  // get the file size
+  off_t nSize = fileMsg.Length();
+  if ( nSize == wxInvalidOffset )
+    return FALSE;
 
   // read the whole file in memory
   m_pData = new size_t8[nSize];
-  if ( fileMsg.Read(m_pData, nSize) != lenFile ) {
+  if ( fileMsg.Read(m_pData, nSize) != nSize ) {
     wxDELETEA(m_pData);
-    return false;
+    return FALSE;
   }
 
   // examine header
-  bool bValid = nSize + (size_t)0 > sizeof(wxMsgCatalogHeader);
+  bool bValid = (size_t)nSize > sizeof(wxMsgCatalogHeader);
 
   wxMsgCatalogHeader *pHeader = (wxMsgCatalogHeader *)m_pData;
   if ( bValid ) {
@@ -1191,7 +398,7 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
     wxLogWarning(_("'%s' is not a valid message catalog."), strFullName.c_str());
 
     wxDELETEA(m_pData);
-    return false;
+    return FALSE;
   }
 
   // initialize
@@ -1200,124 +407,48 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName,
                    Swap(pHeader->ofsOrigTable));
   m_pTransTable = (wxMsgTableEntry *)(m_pData +
                    Swap(pHeader->ofsTransTable));
-  m_nSize = (size_t32)nSize;
-
-  // now parse catalog's header and try to extract catalog charset and
-  // plural forms formula from it:
-
-  const char* headerData = StringAtOfs(m_pOrigTable, 0);
-  if (headerData && headerData[0] == 0)
-  {
-      // Extract the charset:
-      wxString header = wxString::FromAscii(StringAtOfs(m_pTransTable, 0));
-      int begin = header.Find(wxT("Content-Type: text/plain; charset="));
-      if (begin != wxNOT_FOUND)
-      {
-          begin += 34; //strlen("Content-Type: text/plain; charset=")
-          size_t end = header.find('\n', begin);
-          if (end != size_t(-1))
-          {
-              m_charset.assign(header, begin, end - begin);
-              if (m_charset == wxT("CHARSET"))
-              {
-                  // "CHARSET" is not valid charset, but lazy translator
-                  m_charset.Clear();
-              }
-          }
-      }
-      // else: incorrectly filled Content-Type header
-
-      // Extract plural forms:
-      begin = header.Find(wxT("Plural-Forms:"));
-      if (begin != wxNOT_FOUND)
-      {
-          begin += 13;
-          size_t end = header.find('\n', begin);
-          if (end != size_t(-1))
-          {
-              wxString pfs(header, begin, end - begin);
-              wxPluralFormsCalculator* pCalculator = wxPluralFormsCalculator
-                  ::make(pfs.ToAscii());
-              if (pCalculator != 0)
-              {
-                  rPluralFormsCalculator.reset(pCalculator);
-              }
-              else
-              {
-                   wxLogVerbose(_("Cannot parse Plural-Forms:'%s'"), pfs.c_str());
-              }
-          }
-      }
-      if (rPluralFormsCalculator.get() == NULL)
-      {
-          rPluralFormsCalculator.reset(wxPluralFormsCalculator::make());
-      }
-  }
 
   // everything is fine
-  return true;
+  return TRUE;
 }
 
-void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
-                                const wxString& msgIdCharset,
-                                bool convertEncoding) const
+void wxMsgCatalogFile::FillHash(wxMessagesHash& hash, bool convertEncoding) const
 {
-#if wxUSE_UNICODE
-    // this parameter doesn't make sense, we always must convert encoding in
-    // Unicode build
-    convertEncoding = true;
-#elif wxUSE_FONTMAP
-    if ( convertEncoding )
-    {
-        // determine if we need any conversion at all
-        wxFontEncoding encCat = wxFontMapperBase::GetEncodingFromName(m_charset);
-        if ( encCat == wxLocale::GetSystemEncoding() )
-        {
-            // no need to convert
-            convertEncoding = false;
-        }
-    }
-#endif // wxUSE_UNICODE/wxUSE_FONTMAP
+    wxString charset = GetCharset();
 
 #if wxUSE_WCHAR_T
-    // conversion to use to convert catalog strings to the GUI encoding
-    wxMBConv *inputConv,
-             *inputConvPtr = NULL; // same as inputConv but safely deleteable
-    if ( convertEncoding && !m_charset.empty() )
+    wxCSConv *csConv = NULL;
+    if ( !!charset )
+        csConv = new wxCSConv(charset);
+
+    wxMBConv& inputConv = csConv ? *((wxMBConv*)csConv) : *wxConvCurrent;
+
+    for (size_t i = 0; i < m_numStrings; i++)
     {
-        inputConvPtr =
-        inputConv = new wxCSConv(m_charset);
+        wxString key(StringAtOfs(m_pOrigTable, i), inputConv);
+
+    #if wxUSE_UNICODE
+        hash[key] = wxString(StringAtOfs(m_pTransTable, i), inputConv);
+    #else
+        if ( convertEncoding )
+            hash[key] =
+                wxString(inputConv.cMB2WC(StringAtOfs(m_pTransTable, i)),
+                         wxConvLocal);
+        else
+            hash[key] = StringAtOfs(m_pTransTable, i);
+    #endif
     }
-    else // no need or not possible to convert the encoding
-    {
-#if wxUSE_UNICODE
-        // we must somehow convert the narrow strings in the message catalog to
-        // wide strings, so use the default conversion if we have no charset
-        inputConv = wxConvCurrent;
-#else // !wxUSE_UNICODE
-        inputConv = NULL;
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
-    }
 
-    // conversion to apply to msgid strings before looking them up: we only
-    // need it if the msgids are neither in 7 bit ASCII nor in the same
-    // encoding as the catalog
-    wxCSConv *sourceConv = msgIdCharset.empty() || (msgIdCharset == m_charset)
-                            ? NULL
-                            : new wxCSConv(msgIdCharset);
-
-#elif wxUSE_FONTMAP
-    wxASSERT_MSG( msgIdCharset == NULL,
-                  _T("non-ASCII msgid languages only supported if wxUSE_WCHAR_T=1") );
-
-    wxEncodingConverter converter;
+    delete csConv;
+#else // !wxUSE_WCHAR_T
+    #if wxUSE_FONTMAP
     if ( convertEncoding )
     {
         wxFontEncoding targetEnc = wxFONTENCODING_SYSTEM;
-        wxFontEncoding enc = wxFontMapperBase::Get()->CharsetToEncoding(m_charset, false);
+        wxFontEncoding enc = wxFontMapper::Get()->CharsetToEncoding(m_charset, FALSE);
         if ( enc == wxFONTENCODING_SYSTEM )
         {
-            convertEncoding = false; // unknown encoding
+            convertEncoding = FALSE; // unknown encoding
         }
         else
         {
@@ -1327,148 +458,95 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash,
                 wxFontEncodingArray a = wxEncodingConverter::GetPlatformEquivalents(enc);
                 if (a[0] == enc)
                     // no conversion needed, locale uses native encoding
-                    convertEncoding = false;
+                    convertEncoding = FALSE;
                 if (a.GetCount() == 0)
                     // we don't know common equiv. under this platform
-                    convertEncoding = false;
+                    convertEncoding = FALSE;
                 targetEnc = a[0];
             }
         }
 
         if ( convertEncoding )
         {
+            wxEncodingConverter converter;
             converter.Init(enc, targetEnc);
-        }
-    }
-#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
-    (void)convertEncoding; // get rid of warnings about unused parameter
 
-    for (size_t32 i = 0; i < m_numStrings; i++)
-    {
-        const char *data = StringAtOfs(m_pOrigTable, i);
-
-        wxString msgid;
-#if wxUSE_UNICODE
-        msgid = wxString(data, *inputConv);
-#else // ASCII
-        #if wxUSE_WCHAR_T
-            if ( inputConv && sourceConv )
-                msgid = wxString(inputConv->cMB2WC(data), *sourceConv);
-            else
-        #endif
-                msgid = data;
-#endif // wxUSE_UNICODE
-
-        data = StringAtOfs(m_pTransTable, i);
-        size_t length = Swap(m_pTransTable[i].nLen);
-        size_t offset = 0;
-        size_t index = 0;
-        while (offset < length)
-        {
-            const char * const str = data + offset;
-
-            wxString msgstr;
-#if wxUSE_UNICODE
-            msgstr = wxString(str, *inputConv);
-#elif wxUSE_WCHAR_T
-            if ( inputConv )
-                msgstr = wxString(inputConv->cMB2WC(str), *wxConvUI);
-            else
-                msgstr = str;
-#else // !wxUSE_WCHAR_T
-        #if wxUSE_FONTMAP
-            if ( convertEncoding )
-                msgstr = wxString(converter.Convert(str));
-            else
-        #endif
-                msgstr = str;
-#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
-
-            if ( !msgstr.empty() )
+            for (size_t i = 0; i < m_numStrings; i++)
             {
-                hash[index == 0 ? msgid : msgid + wxChar(index)] = msgstr;
+                wxString key(StringAtOfs(m_pOrigTable, i));
+                hash[key] =
+                    converter.Convert(wxString(StringAtOfs(m_pTransTable, i)));
             }
-
-            // skip this string
-            offset += strlen(str) + 1;
-            ++index;
         }
     }
 
-#if wxUSE_WCHAR_T
-    delete sourceConv;
-    delete inputConvPtr;
-#endif // wxUSE_WCHAR_T
+    if ( !convertEncoding )
+    #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+    {
+        for (size_t i = 0; i < m_numStrings; i++)
+        {
+            wxString key(StringAtOfs(m_pOrigTable, i));
+            hash[key] = StringAtOfs(m_pTransTable, i);
+        }
+    }
+#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
 }
 
+wxString wxMsgCatalogFile::GetCharset() const
+{
+    // first, find encoding header:
+    const char *hdr = StringAtOfs(m_pOrigTable, 0);
+    if ( hdr == NULL || hdr[0] != 0 )
+    {
+        // not supported by this catalog, does not have correct header
+        return wxEmptyString;
+    }
+
+    wxString header = wxString::FromAscii( StringAtOfs(m_pTransTable, 0));
+    wxString charset;
+    int pos = header.Find(wxT("Content-Type: text/plain; charset="));
+    if ( pos == wxNOT_FOUND )
+    {
+        // incorrectly filled Content-Type header
+        return wxEmptyString;
+    }
+
+    size_t n = pos + 34; /*strlen("Content-Type: text/plain; charset=")*/
+    while ( header[n] != wxT('\n') )
+        charset << header[n++];
+
+    if ( charset == wxT("CHARSET") )
+    {
+        // "CHARSET" is not valid charset, but lazy translator
+        return wxEmptyString;
+    }
+
+    return charset;
+}
 
 // ----------------------------------------------------------------------------
 // wxMsgCatalog class
 // ----------------------------------------------------------------------------
 
-wxMsgCatalog::~wxMsgCatalog()
-{
-    if ( m_conv )
-    {
-        if ( wxConvUI == m_conv )
-        {
-            // we only change wxConvUI if it points to wxConvLocal so we reset
-            // it back to it too
-            wxConvUI = &wxConvLocal;
-        }
-
-        delete m_conv;
-    }
-}
-
 bool wxMsgCatalog::Load(const wxChar *szDirPrefix, const wxChar *szName,
-                        const wxChar *msgIdCharset, bool bConvertEncoding)
+                        bool bConvertEncoding)
 {
     wxMsgCatalogFile file;
 
     m_name = szName;
 
-    if ( !file.Load(szDirPrefix, szName, m_pluralFormsCalculator) )
-        return false;
-
-    file.FillHash(m_messages, msgIdCharset, bConvertEncoding);
-
-    // we should use a conversion compatible with the message catalog encoding
-    // in the GUI if we don't convert the strings to the current conversion but
-    // as the encoding is global, only change it once, otherwise we could get
-    // into trouble if we use several message catalogs with different encodings
-    //
-    // this is, of course, a hack but it at least allows the program to use
-    // message catalogs in any encodings without asking the user to change his
-    // locale
-    if ( !bConvertEncoding &&
-            !file.GetCharset().empty() &&
-                wxConvUI == &wxConvLocal )
+    if ( file.Load(szDirPrefix, szName) )
     {
-        wxConvUI =
-        m_conv = new wxCSConv(file.GetCharset());
+        file.FillHash(m_messages, bConvertEncoding);
+        return TRUE;
     }
 
-    return true;
+    return FALSE;
 }
 
-const wxChar *wxMsgCatalog::GetString(const wxChar *sz, size_t n) const
+const wxChar *wxMsgCatalog::GetString(const wxChar *sz) const
 {
-    int index = 0;
-    if (n != size_t(-1))
-    {
-        index = m_pluralFormsCalculator->evaluate(n);
-    }
-    wxMessagesHash::const_iterator i;
-    if (index != 0)
-    {
-        i = m_messages.find(wxString(sz) + wxChar(index));   // plural
-    }
-    else
-    {
-        i = m_messages.find(sz);
-    }
-
+    wxMessagesHash::const_iterator i = m_messages.find(sz);
     if ( i != m_messages.end() )
     {
         return i->second.c_str();
@@ -1483,7 +561,7 @@ const wxChar *wxMsgCatalog::GetString(const wxChar *sz, size_t n) const
 
 #include "wx/arrimpl.cpp"
 WX_DECLARE_EXPORTED_OBJARRAY(wxLanguageInfo, wxLanguageInfoArray);
-WX_DEFINE_OBJARRAY(wxLanguageInfoArray)
+WX_DEFINE_OBJARRAY(wxLanguageInfoArray);
 
 wxLanguageInfoArray *wxLocale::ms_languagesDB = NULL;
 
@@ -1503,15 +581,11 @@ wxLanguageInfoArray *wxLocale::ms_languagesDB = NULL;
 }
 
 
-void wxLocale::DoCommonInit()
+wxLocale::wxLocale()
 {
   m_pszOldLocale = NULL;
-
-  m_pOldLocale = wxSetLocale(this);
-
   m_pMsgCat = NULL;
   m_language = wxLANGUAGE_UNKNOWN;
-  m_initialized = false;
 }
 
 // NB: this function has (desired) side effect of changing current locale
@@ -1521,10 +595,6 @@ bool wxLocale::Init(const wxChar *szName,
                     bool        bLoadDefault,
                     bool        bConvertEncoding)
 {
-  wxASSERT_MSG( !m_initialized,
-                _T("you can't call wxLocale::Init more than once") );
-
-  m_initialized = true;
   m_strLocale = szName;
   m_strShort = szShort;
   m_bConvertEncoding = bConvertEncoding;
@@ -1535,38 +605,17 @@ bool wxLocale::Init(const wxChar *szName,
   {
     // the argument to setlocale()
     szLocale = szShort;
-
-    wxCHECK_MSG( szLocale, false, _T("no locale to set in wxLocale::Init()") );
   }
 
-#ifdef __WXWINCE__
-  // FIXME: I'm guessing here
-  wxChar localeName[256];
-  int ret = GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLANGUAGE, localeName,
-      256);
-  if (ret != 0)
-  {
-    m_pszOldLocale = wxStrdup(localeName);
-  }
+  m_pszOldLocale = wxSetlocale(LC_ALL, szLocale);
+  if ( m_pszOldLocale )
+    m_pszOldLocale = wxStrdup(m_pszOldLocale);
   else
-    m_pszOldLocale = NULL;
-
-  // TODO: how to find languageId
-  // SetLocaleInfo(languageId, SORT_DEFAULT, localeName);
-#else
-  wxMB2WXbuf oldLocale = wxSetlocale(LC_ALL, szLocale);
-  if ( oldLocale )
-      m_pszOldLocale = wxStrdup(oldLocale);
-  else
-      m_pszOldLocale = NULL;
-#endif
-
-  if ( m_pszOldLocale == NULL )
     wxLogError(_("locale '%s' can not be set."), szLocale);
 
   // the short name will be used to look for catalog files as well,
   // so we need something here
-  if ( m_strShort.empty() ) {
+  if ( m_strShort.IsEmpty() ) {
     // FIXME I don't know how these 2 letter abbreviations are formed,
     //       this wild guess is surely wrong
     if ( szLocale && szLocale[0] )
@@ -1577,51 +626,43 @@ bool wxLocale::Init(const wxChar *szName,
     }
   }
 
-  // load the default catalog with wxWidgets standard messages
-  m_pMsgCat = NULL;
-  bool bOk = true;
-  if ( bLoadDefault )
-  {
-    bOk = AddCatalog(wxT("wxstd"));
+  // save the old locale to be able to restore it later
+  m_pOldLocale = wxSetLocale(this);
 
-    // there may be a catalog with toolkit specific overrides, it is not
-    // an error if this does not exist
-    if ( bOk && wxTheApp )
-    {
-      wxAppTraits *traits = wxTheApp->GetTraits();
-      if (traits)
-        AddCatalog(traits->GetToolkitInfo().name.BeforeFirst(wxT('/')).MakeLower());
-    }
-  }
+  // load the default catalog with wxWindows standard messages
+  m_pMsgCat = NULL;
+  bool bOk = TRUE;
+  if ( bLoadDefault )
+    bOk = AddCatalog(wxT("wxstd"));
 
   return bOk;
 }
 
 
-#if defined(__UNIX__) && wxUSE_UNICODE && !defined(__WXMAC__)
+#if defined(__UNIX__) && wxUSE_UNICODE
 static wxWCharBuffer wxSetlocaleTryUTF(int c, const wxChar *lc)
 {
     wxMB2WXbuf l = wxSetlocale(c, lc);
     if ( !l && lc && lc[0] != 0 )
     {
-        wxString buf(lc);
+    	wxString buf(lc);
         wxString buf2;
-        buf2 = buf + wxT(".UTF-8");
-        l = wxSetlocale(c, buf2.c_str());
+    	buf2 = buf + wxT(".UTF-8");
+    	l = wxSetlocale(c, buf2.c_str());
         if ( !l )
         {
             buf2 = buf + wxT(".utf-8");
-            l = wxSetlocale(c, buf2.c_str());
+    	    l = wxSetlocale(c, buf2.c_str());
         }
         if ( !l )
         {
             buf2 = buf + wxT(".UTF8");
-            l = wxSetlocale(c, buf2.c_str());
+    	    l = wxSetlocale(c, buf2.c_str());
         }
         if ( !l )
         {
             buf2 = buf + wxT(".utf8");
-            l = wxSetlocale(c, buf2.c_str());
+    	    l = wxSetlocale(c, buf2.c_str());
         }
     }
     return l;
@@ -1642,7 +683,7 @@ bool wxLocale::Init(int language, int flags)
     // We failed to detect system language, so we will use English:
     if (lang == wxLANGUAGE_UNKNOWN)
     {
-       return false;
+       return FALSE;
     }
 
     const wxLanguageInfo *info = GetLanguageInfo(lang);
@@ -1651,7 +692,7 @@ bool wxLocale::Init(int language, int flags)
     if (info == NULL)
     {
         wxLogError(wxT("Unknown language %i."), lang);
-        return false;
+        return FALSE;
     }
 
     wxString name = info->Description;
@@ -1659,83 +700,48 @@ bool wxLocale::Init(int language, int flags)
     wxString locale;
 
     // Set the locale:
-#if defined(__OS2__)
-    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
-#elif defined(__UNIX__) && !defined(__WXMAC__)
-    if (language != wxLANGUAGE_DEFAULT)
+#if defined(__UNIX__) && !defined(__WXMAC__)
+    if (language == wxLANGUAGE_DEFAULT)
+        locale = wxEmptyString;
+    else
         locale = info->CanonicalName;
 
     wxMB2WXbuf retloc = wxSetlocaleTryUTF(LC_ALL, locale);
 
-    const wxString langOnly = locale.Left(2);
     if ( !retloc )
     {
         // Some C libraries don't like xx_YY form and require xx only
-        retloc = wxSetlocaleTryUTF(LC_ALL, langOnly);
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
     }
-
-#if wxUSE_FONTMAP
-    // some systems (e.g. FreeBSD and HP-UX) don't have xx_YY aliases but
-    // require the full xx_YY.encoding form, so try using UTF-8 because this is
-    // the only thing we can do generically
-    //
-    // TODO: add encodings applicable to each language to the lang DB and try
-    //       them all in turn here
-    if ( !retloc )
-    {
-        const wxChar **names =
-            wxFontMapperBase::GetAllEncodingNames(wxFONTENCODING_UTF8);
-        while ( *names )
-        {
-            retloc = wxSetlocale(LC_ALL, locale + _T('.') + *names++);
-            if ( retloc )
-                break;
-        }
-    }
-#endif // wxUSE_FONTMAP
-
     if ( !retloc )
     {
         // Some C libraries (namely glibc) still use old ISO 639,
         // so will translate the abbrev for them
-        wxString localeAlt;
-        if ( langOnly == wxT("he") )
-            localeAlt = wxT("iw") + locale.Mid(3);
-        else if ( langOnly == wxT("id") )
-            localeAlt = wxT("in") + locale.Mid(3);
-        else if ( langOnly == wxT("yi") )
-            localeAlt = wxT("ji") + locale.Mid(3);
-        else if ( langOnly == wxT("nb") )
-            localeAlt = wxT("no_NO");
-        else if ( langOnly == wxT("nn") )
-            localeAlt = wxT("no_NY");
+        wxString mid = locale.Mid(0,2);
+        if (mid == wxT("he"))
+            locale = wxT("iw") + locale.Mid(3);
+        else if (mid == wxT("id"))
+            locale = wxT("in") + locale.Mid(3);
+        else if (mid == wxT("yi"))
+            locale = wxT("ji") + locale.Mid(3);
+        else if (mid == wxT("nb"))
+            locale = wxT("no_NO");
+        else if (mid == wxT("nn"))
+            locale = wxT("no_NY");
 
-        if ( !localeAlt.empty() )
-        {
-            retloc = wxSetlocaleTryUTF(LC_ALL, localeAlt);
-            if ( !retloc )
-                retloc = wxSetlocaleTryUTF(LC_ALL, locale.Left(2));
-        }
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale);
     }
-
+    if ( !retloc )
+    {
+        // (This time, we changed locale in previous if-branch, so try again.)
+        // Some C libraries don't like xx_YY form and require xx only
+        retloc = wxSetlocaleTryUTF(LC_ALL, locale.Mid(0,2));
+    }
     if ( !retloc )
     {
         wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
-        return false;
+        return FALSE;
     }
-
-#ifdef __AIX__
-    // at least in AIX 5.2 libc is buggy and the string returned from setlocale(LC_ALL)
-    // can't be passed back to it because it returns 6 strings (one for each locale
-    // category), i.e. for C locale we get back "C C C C C C"
-    //
-    // this contradicts IBM own docs but this is not of much help, so just work around
-    // it in the crudest possible manner
-    wxChar *p = wxStrchr((wxChar *)retloc, _T(' '));
-    if ( p )
-        *p = _T('\0');
-#endif // __AIX__
-
 #elif defined(__WIN32__)
 
     #if wxUSE_UNICODE && (defined(__VISUALC__) || defined(__MINGW32__))
@@ -1747,10 +753,7 @@ bool wxLocale::Init(int language, int flags)
         //     #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS bellow.
         #define SETLOCALE_FAILS_ON_UNICODE_LANGS
     #endif
-
-#if !wxUSE_UNICODE
-    const
-#endif
+    
     wxMB2WXbuf retloc = wxT("C");
     if (language != wxLANGUAGE_DEFAULT)
     {
@@ -1761,17 +764,10 @@ bool wxLocale::Init(int language, int flags)
         }
         else
         {
-            int codepage
-                         #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
-                         = -1
-                         #endif
-                         ;
+            int codepage = -1;
             wxUint32 lcid = MAKELCID(MAKELANGID(info->WinLang, info->WinSublang),
                                      SORT_DEFAULT);
-            // FIXME
-#ifndef __WXWINCE__
             SetThreadLocale(lcid);
-#endif
             // NB: we must translate LCID to CRT's setlocale string ourselves,
             //     because SetThreadLocale does not modify change the
             //     interpretation of setlocale(LC_ALL, "") call:
@@ -1787,18 +783,15 @@ bool wxLocale::Init(int language, int flags)
                 if (codepage != 0)
                     locale << wxT(".") << buffer;
             }
-            if (locale.empty())
+            if (locale.IsEmpty())
             {
                 wxLogLastError(wxT("SetThreadLocale"));
                 wxLogError(wxT("Cannot set locale to language %s."), name.c_str());
-                return false;
+                return FALSE;
             }
             else
             {
-            // FIXME
-#ifndef __WXWINCE__
                 retloc = wxSetlocale(LC_ALL, locale);
-#endif
 #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
                 if (codepage == 0 && (const wxChar*)retloc == NULL)
                 {
@@ -1810,12 +803,7 @@ bool wxLocale::Init(int language, int flags)
     }
     else
     {
-            // FIXME
-#ifndef __WXWINCE__
         retloc = wxSetlocale(LC_ALL, wxEmptyString);
-#else
-        retloc = NULL;
-#endif
 #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
         if ((const wxChar*)retloc == NULL)
         {
@@ -1833,53 +821,35 @@ bool wxLocale::Init(int language, int flags)
     if ( !retloc )
     {
         wxLogError(wxT("Cannot set locale to language %s."), name.c_str());
-        return false;
+        return FALSE;
     }
-#elif defined(__WXMAC__)
-    if (lang == wxLANGUAGE_DEFAULT)
-        locale = wxEmptyString;
-    else
-        locale = info->CanonicalName;
-
-    wxMB2WXbuf retloc = wxSetlocale(LC_ALL, locale);
-
-    if ( !retloc )
-    {
-        // Some C libraries don't like xx_YY form and require xx only
-        retloc = wxSetlocale(LC_ALL, locale.Mid(0,2));
-    }
-    if ( !retloc )
-    {
-        wxLogError(wxT("Cannot set locale to '%s'."), locale.c_str());
-        return false;
-    }
+#elif defined(__WXMAC__) || defined(__WXPM__)
+    wxMB2WXbuf retloc = wxSetlocale(LC_ALL , wxEmptyString);
 #else
-    wxUnusedVar(flags);
-    return false;
+    return FALSE;
     #define WX_NO_LOCALE_SUPPORT
 #endif
 
 #ifndef WX_NO_LOCALE_SUPPORT
     wxChar *szLocale = retloc ? wxStrdup(retloc) : NULL;
-    bool ret = Init(name, canonical, szLocale,
+    bool ret = Init(name, canonical, retloc,
                     (flags & wxLOCALE_LOAD_DEFAULT) != 0,
                     (flags & wxLOCALE_CONV_ENCODING) != 0);
-    free(szLocale);
-
-    if (IsOk()) // setlocale() succeeded
+    if (szLocale)
+        free(szLocale);
+    if ( ret )
         m_language = lang;
-
     return ret;
-#endif // !WX_NO_LOCALE_SUPPORT
+#endif
 }
 
 
 
 void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
 {
-    if ( gs_searchPrefixes.Index(prefix) == wxNOT_FOUND )
+    if ( s_searchPrefixes.Index(prefix) == wxNOT_FOUND )
     {
-        gs_searchPrefixes.Add(prefix);
+        s_searchPrefixes.Add(prefix);
     }
     //else: already have it
 }
@@ -1947,7 +917,7 @@ void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
          (langFull.Len() == LEN_FULL && langFull[LEN_LANG] == wxT('_')) )
     {
         // 0. Make sure the lang is according to latest ISO 639
-        //    (this is necessary because glibc uses iw and in instead
+        //    (this is neccessary because glibc uses iw and in instead
         //    of he and id respectively).
 
         // the language itself (second part is the dialect/sublang)
@@ -2021,279 +991,279 @@ void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
         }
     }
 #elif defined(__WXMAC__)
-    const wxChar * lc = NULL ;
+    const char* lc = NULL ;
     long lang = GetScriptVariable( smSystemScript, smScriptLang) ;
     switch( GetScriptManagerVariable( smRegionCode ) ) {
       case verUS :
-        lc = wxT("en_US") ;
+        lc = "en_US" ;
         break ;
       case verFrance :
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verBritain :
-        lc = wxT("en_GB") ;
+        lc = "en_GB" ;
         break ;
       case verGermany :
-        lc = wxT("de_DE") ;
+        lc = "de_DE" ;
         break ;
       case verItaly :
-        lc = wxT("it_IT") ;
+        lc = "it_IT" ;
         break ;
       case verNetherlands :
-        lc = wxT("nl_NL") ;
+        lc = "nl_NL" ;
         break ;
       case verFlemish :
-        lc = wxT("nl_BE") ;
+        lc = "nl_BE" ;
         break ;
       case verSweden :
-        lc = wxT("sv_SE" );
+        lc = "sv_SE" ;
         break ;
       case verSpain :
-        lc = wxT("es_ES" );
+        lc = "es_ES" ;
         break ;
       case verDenmark :
-        lc = wxT("da_DK") ;
+        lc = "da_DK" ;
         break ;
       case verPortugal :
-        lc = wxT("pt_PT") ;
+        lc = "pt_PT" ;
         break ;
       case verFrCanada:
-        lc = wxT("fr_CA") ;
+        lc = "fr_CA" ;
         break ;
       case verNorway:
-        lc = wxT("nb_NO") ;
+        lc = "no_NO" ;
         break ;
       case verIsrael:
-        lc = wxT("iw_IL") ;
+        lc = "iw_IL" ;
         break ;
       case verJapan:
-        lc = wxT("ja_JP") ;
+        lc = "ja_JP" ;
         break ;
       case verAustralia:
-        lc = wxT("en_AU") ;
+        lc = "en_AU" ;
         break ;
       case verArabic:
-        lc = wxT("ar") ;
+        lc = "ar" ;
         break ;
       case verFinland:
-        lc = wxT("fi_FI") ;
+        lc = "fi_FI" ;
         break ;
       case verFrSwiss:
-        lc = wxT("fr_CH") ;
+        lc = "fr_CH" ;
         break ;
       case verGrSwiss:
-        lc = wxT("de_CH") ;
+        lc = "de_CH" ;
         break ;
       case verGreece:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verIceland:
-        lc = wxT("is_IS") ;
+        lc = "is_IS" ;
         break ;
       case verMalta:
-        lc = wxT("mt_MT") ;
+        lc = "mt_MT" ;
         break ;
       case verCyprus:
       // _CY is not part of wx, so we have to translate according to the system language
         if ( lang == langGreek ) {
-          lc = wxT("el_GR") ;
+          lc = "el_GR" ;
         }
         else if ( lang == langTurkish ) {
-          lc = wxT("tr_TR") ;
+          lc = "tr_TR" ;
         }
         break ;
       case verTurkey:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verYugoCroatian:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verIndiaHindi:
-        lc = wxT("hi_IN") ;
+        lc = "hi_IN" ;
         break ;
       case verPakistanUrdu:
-        lc = wxT("ur_PK") ;
+        lc = "ur_PK" ;
         break ;
       case verTurkishModified:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verItalianSwiss:
-        lc = wxT("it_CH") ;
+        lc = "it_CH" ;
         break ;
       case verInternational:
-        lc = wxT("en") ;
+        lc = "en" ;
         break ;
       case verRomania:
-        lc = wxT("ro_RO") ;
+        lc = "ro_RO" ;
         break ;
       case verGreecePoly:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verLithuania:
-        lc = wxT("lt_LT") ;
+        lc = "lt_LT" ;
         break ;
       case verPoland:
-        lc = wxT("pl_PL") ;
+        lc = "pl_PL" ;
         break ;
       case verMagyar :
       case verHungary:
-        lc = wxT("hu_HU") ;
+        lc = "hu_HU" ;
         break ;
       case verEstonia:
-        lc = wxT("et_EE") ;
+        lc = "et_EE" ;
         break ;
       case verLatvia:
-        lc = wxT("lv_LV") ;
+        lc = "lv_LV" ;
         break ;
       case verSami:
         // not known
         break ;
       case verFaroeIsl:
-        lc = wxT("fo_FO") ;
+        lc = "fo_FO" ;
         break ;
       case verIran:
-        lc = wxT("fa_IR") ;
+        lc = "fa_IR" ;
         break ;
       case verRussia:
-        lc = wxT("ru_RU") ;
+        lc = "ru_RU" ;
         break ;
        case verIreland:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verKorea:
-        lc = wxT("ko_KR") ;
+        lc = "ko_KR" ;
         break ;
       case verChina:
-        lc = wxT("zh_CN") ;
+        lc = "zh_CN" ;
         break ;
       case verTaiwan:
-        lc = wxT("zh_TW") ;
+        lc = "zh_TW" ;
         break ;
       case verThailand:
-        lc = wxT("th_TH") ;
+        lc = "th_TH" ;
         break ;
       case verCzech:
-        lc = wxT("cs_CZ") ;
+        lc = "cs_CZ" ;
         break ;
       case verSlovak:
-        lc = wxT("sk_SK") ;
+        lc = "sk_SK" ;
         break ;
       case verBengali:
-        lc = wxT("bn") ;
+        lc = "bn" ;
         break ;
       case verByeloRussian:
-        lc = wxT("be_BY") ;
+        lc = "be_BY" ;
         break ;
       case verUkraine:
-        lc = wxT("uk_UA") ;
+        lc = "uk_UA" ;
         break ;
       case verGreeceAlt:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verSerbian:
-        lc = wxT("sr_YU") ;
+        lc = "sr_YU" ;
         break ;
       case verSlovenian:
-        lc = wxT("sl_SI") ;
+        lc = "sl_SI" ;
         break ;
       case verMacedonian:
-        lc = wxT("mk_MK") ;
+        lc = "mk_MK" ;
         break ;
       case verCroatia:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verBrazil:
-        lc = wxT("pt_BR ") ;
+        lc = "pt_BR " ;
         break ;
       case verBulgaria:
-        lc = wxT("bg_BG") ;
+        lc = "bg_BG" ;
         break ;
       case verCatalonia:
-        lc = wxT("ca_ES") ;
+        lc = "ca_ES" ;
         break ;
       case verScottishGaelic:
-        lc = wxT("gd") ;
+        lc = "gd" ;
         break ;
       case verManxGaelic:
-        lc = wxT("gv") ;
+        lc = "gv" ;
         break ;
       case verBreton:
-        lc = wxT("br") ;
+        lc = "br" ;
         break ;
       case verNunavut:
-        lc = wxT("iu_CA") ;
+        lc = "iu_CA" ;
         break ;
       case verWelsh:
-        lc = wxT("cy") ;
+        lc = "cy" ;
         break ;
       case verIrishGaelicScript:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verEngCanada:
-        lc = wxT("en_CA") ;
+        lc = "en_CA" ;
         break ;
       case verBhutan:
-        lc = wxT("dz_BT") ;
+        lc = "dz_BT" ;
         break ;
       case verArmenian:
-        lc = wxT("hy_AM") ;
+        lc = "hy_AM" ;
         break ;
       case verGeorgian:
-        lc = wxT("ka_GE") ;
+        lc = "ka_GE" ;
         break ;
       case verSpLatinAmerica:
-        lc = wxT("es_AR") ;
+        lc = "es_AR" ;
         break ;
       case verTonga:
-        lc = wxT("to_TO" );
+        lc = "to_TO" ;
         break ;
       case verFrenchUniversal:
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verAustria:
-        lc = wxT("de_AT") ;
+        lc = "de_AT" ;
         break ;
       case verGujarati:
-        lc = wxT("gu_IN") ;
+        lc = "gu_IN" ;
         break ;
       case verPunjabi:
-        lc = wxT("pa") ;
+        lc = "pa" ;
         break ;
       case verIndiaUrdu:
-        lc = wxT("ur_IN") ;
+        lc = "ur_IN" ;
         break ;
       case verVietnam:
-        lc = wxT("vi_VN") ;
+        lc = "vi_VN" ;
         break ;
       case verFrBelgium:
-        lc = wxT("fr_BE") ;
+        lc = "fr_BE" ;
         break ;
       case verUzbek:
-        lc = wxT("uz_UZ") ;
+        lc = "uz_UZ" ;
         break ;
       case verSingapore:
-        lc = wxT("zh_SG") ;
+        lc = "zh_SG" ;
         break ;
       case verNynorsk:
-        lc = wxT("nn_NO") ;
+        lc = "nn_NO" ;
         break ;
       case verAfrikaans:
-        lc = wxT("af_ZA") ;
+        lc = "af_ZA" ;
         break ;
       case verEsperanto:
-        lc = wxT("eo") ;
+        lc = "eo" ;
         break ;
       case verMarathi:
-        lc = wxT("mr_IN") ;
+        lc = "mr_IN" ;
         break ;
       case verTibetan:
-        lc = wxT("bo") ;
+        lc = "bo" ;
         break ;
       case verNepal:
-        lc = wxT("ne_NP") ;
+        lc = "ne_NP" ;
         break ;
       case verGreenland:
-        lc = wxT("kl_GL") ;
+        lc = "kl_GL" ;
         break ;
       default :
         break ;
@@ -2341,7 +1311,7 @@ void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
 
 // this is a bit strange as under Windows we get the encoding name using its
 // numeric value and under Unix we do it the other way round, but this just
-// reflects the way different systems provide the encoding info
+// reflects the way different systems provide he encoding info
 
 /* static */
 wxString wxLocale::GetSystemEncodingName()
@@ -2352,9 +1322,6 @@ wxString wxLocale::GetSystemEncodingName()
     // FIXME: what is the error return value for GetACP()?
     UINT codepage = ::GetACP();
     encname.Printf(_T("windows-%u"), codepage);
-#elif defined(__WXMAC__)
-    // default is just empty string, this resolves to the default system
-    // encoding later
 #elif defined(__UNIX_LIKE__)
 
 #if defined(HAVE_LANGINFO_H) && defined(CODESET)
@@ -2368,9 +1335,25 @@ wxString wxLocale::GetSystemEncodingName()
 
     if ( alang )
     {
-        encname = wxString::FromAscii( alang );
+        // 7 bit ASCII encoding has several alternative names which we should
+        // recognize to avoid warnings about unrecognized encoding on each
+        // program startup
+
+        // nl_langinfo() under Solaris returns 646 by default which stands for
+        // ISO-646, i.e. 7 bit ASCII
+        //
+        // and recent glibc call it ANSI_X3.4-1968...
+        if ( strcmp(alang, "646") == 0 ||
+               strcmp(alang, "ANSI_X3.4-1968") == 0 )
+        {
+            encname = _T("US-ASCII");
+        }
+        else
+        {
+            encname = wxString::FromAscii( alang );
+        }
     }
-    else // nl_langinfo() failed
+    else
 #endif // HAVE_LANGINFO_H
     {
         // if we can't get at the character set directly, try to see if it's in
@@ -2407,15 +1390,10 @@ wxFontEncoding wxLocale::GetSystemEncoding()
 #if defined(__WIN32__) && !defined(__WXMICROWIN__)
     UINT codepage = ::GetACP();
 
-    // wxWidgets only knows about CP1250-1257, 874, 932, 936, 949, 950
+    // wxWindows only knows about CP1250-1257, 932, 936, 949, 950
     if ( codepage >= 1250 && codepage <= 1257 )
     {
         return (wxFontEncoding)(wxFONTENCODING_CP1250 + codepage - 1250);
-    }
-
-    if ( codepage == 874 )
-    {
-        return wxFONTENCODING_CP874;
     }
 
     if ( codepage == 932 )
@@ -2437,24 +1415,17 @@ wxFontEncoding wxLocale::GetSystemEncoding()
     {
         return wxFONTENCODING_CP950;
     }
-#elif defined(__WXMAC__)
-    TextEncoding encoding = 0 ;
-#if TARGET_CARBON
-    encoding = CFStringGetSystemEncoding() ;
-#else
-    UpgradeScriptInfoToTextEncoding ( smSystemScript , kTextLanguageDontCare , kTextRegionDontCare , NULL , &encoding ) ;
-#endif
-    return wxMacGetFontEncFromSystemEnc( encoding ) ;
 #elif defined(__UNIX_LIKE__) && wxUSE_FONTMAP
-    const wxString encname = GetSystemEncodingName();
+    wxString encname = GetSystemEncodingName();
     if ( !encname.empty() )
     {
-        wxFontEncoding enc = wxFontMapperBase::GetEncodingFromName(encname);
+        wxFontEncoding enc = wxFontMapper::Get()->
+            CharsetToEncoding(encname, FALSE /* not interactive */);
 
         // on some modern Linux systems (RedHat 8) the default system locale
         // is UTF8 -- but it isn't supported by wxGTK in ANSI build at all so
         // don't even try to use it in this case
-#if !wxUSE_UNICODE && (defined(__WXGTK__) || defined(__WXMOTIF__))
+#if !wxUSE_UNICODE
         if ( enc == wxFONTENCODING_UTF8 )
         {
             // the most similar supported encoding...
@@ -2462,11 +1433,13 @@ wxFontEncoding wxLocale::GetSystemEncoding()
         }
 #endif // !wxUSE_UNICODE
 
-        // GetEncodingFromName() returns wxFONTENCODING_DEFAULT for C locale
-        // (a.k.a. US-ASCII) which is arguably a bug but keep it like this for
-        // backwards compatibility and just take care to not return
-        // wxFONTENCODING_DEFAULT from here as this surely doesn't make sense
-        if ( enc != wxFONTENCODING_MAX && enc != wxFONTENCODING_DEFAULT )
+        // this should probably be considered as a bug in CharsetToEncoding():
+        // it shouldn't return wxFONTENCODING_DEFAULT at all - but it does it
+        // for US-ASCII charset
+        //
+        // we, OTOH, definitely shouldn't return it as it doesn't make sense at
+        // all (which encoding is it?)
+        if ( enc != wxFONTENCODING_DEFAULT )
         {
             return enc;
         }
@@ -2489,12 +1462,7 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
 {
     CreateLanguagesDB();
 
-    // calling GetLanguageInfo(wxLANGUAGE_DEFAULT) is a natural thing to do, so
-    // make it work
-    if ( lang == wxLANGUAGE_DEFAULT )
-        lang = GetSystemLanguage();
-
-    const size_t count = ms_languagesDB->GetCount();
+    size_t count = ms_languagesDB->GetCount();
     for ( size_t i = 0; i < count; i++ )
     {
         if ( ms_languagesDB->Item(i).Language == lang )
@@ -2506,60 +1474,9 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
     return NULL;
 }
 
-/* static */
-wxString wxLocale::GetLanguageName(int lang)
-{
-    const wxLanguageInfo *info = GetLanguageInfo(lang);
-    if ( !info )
-        return wxEmptyString;
-    else
-        return info->Description;
-}
-
-/* static */
-const wxLanguageInfo *wxLocale::FindLanguageInfo(const wxString& locale)
-{
-    CreateLanguagesDB();
-
-    const wxLanguageInfo *infoRet = NULL;
-
-    const size_t count = ms_languagesDB->GetCount();
-    for ( size_t i = 0; i < count; i++ )
-    {
-        const wxLanguageInfo *info = &ms_languagesDB->Item(i);
-
-        if ( wxStricmp(locale, info->CanonicalName) == 0 ||
-                wxStricmp(locale, info->Description) == 0 )
-        {
-            // exact match, stop searching
-            infoRet = info;
-            break;
-        }
-
-        if ( wxStricmp(locale, info->CanonicalName.BeforeFirst(_T('_'))) == 0 )
-        {
-            // a match -- but maybe we'll find an exact one later, so continue
-            // looking
-            //
-            // OTOH, maybe we had already found a language match and in this
-            // case don't overwrite it becauce the entry for the default
-            // country always appears first in ms_languagesDB
-            if ( !infoRet )
-                infoRet = info;
-        }
-    }
-
-    return infoRet;
-}
-
 wxString wxLocale::GetSysName() const
 {
-            // FIXME
-#ifndef __WXWINCE__
     return wxSetlocale(LC_ALL, NULL);
-#else
-    return wxEmptyString;
-#endif
 }
 
 // clean up
@@ -2573,13 +1490,9 @@ wxLocale::~wxLocale()
         delete pTmpCat;
     }
 
-    // restore old locale pointer
+    // restore old locale
     wxSetLocale(m_pOldLocale);
-
-    // FIXME
-#ifndef __WXWINCE__
     wxSetlocale(LC_ALL, m_pszOldLocale);
-#endif
     free((wxChar *)m_pszOldLocale);     // const_cast
 }
 
@@ -2587,16 +1500,8 @@ wxLocale::~wxLocale()
 const wxChar *wxLocale::GetString(const wxChar *szOrigString,
                                   const wxChar *szDomain) const
 {
-    return GetString(szOrigString, szOrigString, size_t(-1), szDomain);
-}
-
-const wxChar *wxLocale::GetString(const wxChar *szOrigString,
-                                  const wxChar *szOrigString2,
-                                  size_t n,
-                                  const wxChar *szDomain) const
-{
     if ( wxIsEmpty(szOrigString) )
-        return wxEmptyString;
+        return _T("");
 
     const wxChar *pszTrans = NULL;
     wxMsgCatalog *pMsgCat;
@@ -2607,14 +1512,14 @@ const wxChar *wxLocale::GetString(const wxChar *szOrigString,
 
         // does the catalog exist?
         if ( pMsgCat != NULL )
-            pszTrans = pMsgCat->GetString(szOrigString, n);
+            pszTrans = pMsgCat->GetString(szOrigString);
     }
     else
     {
         // search in all domains
         for ( pMsgCat = m_pMsgCat; pMsgCat != NULL; pMsgCat = pMsgCat->m_pNext )
         {
-            pszTrans = pMsgCat->GetString(szOrigString, n);
+            pszTrans = pMsgCat->GetString(szOrigString);
             if ( pszTrans != NULL )   // take the first found
                 break;
         }
@@ -2627,75 +1532,26 @@ const wxChar *wxLocale::GetString(const wxChar *szOrigString,
         {
             NoTransErr noTransErr;
 
-            wxLogTrace(TRACE_I18N,
-                       _T("string \"%s\"[%ld] not found in %slocale '%s'."),
-                       szOrigString, (long)n,
-                       szDomain ? wxString::Format(_T("domain '%s' "), szDomain).c_str()
-                                : _T(""),
-                       m_strLocale.c_str());
+            if ( szDomain != NULL )
+            {
+                wxLogTrace(_T("i18n"),
+                           _T("string '%s' not found in domain '%s' for locale '%s'."),
+                           szOrigString, szDomain, m_strLocale.c_str());
+            }
+            else
+            {
+                wxLogTrace(_T("i18n"),
+                           _T("string '%s' not found in locale '%s'."),
+                           szOrigString, m_strLocale.c_str());
+            }
         }
 #endif // __WXDEBUG__
 
-        if (n == size_t(-1))
-            return szOrigString;
-        else
-            return n == 1 ? szOrigString : szOrigString2;
+        return szOrigString;
     }
 
     return pszTrans;
 }
-
-wxString wxLocale::GetHeaderValue( const wxChar* szHeader,
-                                   const wxChar* szDomain ) const
-{
-    if ( wxIsEmpty(szHeader) )
-        return wxEmptyString;
-
-    wxChar const * pszTrans = NULL;
-    wxMsgCatalog *pMsgCat;
-
-    if ( szDomain != NULL )
-    {
-        pMsgCat = FindCatalog(szDomain);
-
-        // does the catalog exist?
-        if ( pMsgCat == NULL )
-            return wxEmptyString;
-
-        pszTrans = pMsgCat->GetString(wxEmptyString, (size_t)-1);
-    }
-    else
-    {
-        // search in all domains
-        for ( pMsgCat = m_pMsgCat; pMsgCat != NULL; pMsgCat = pMsgCat->m_pNext )
-        {
-            pszTrans = pMsgCat->GetString(wxEmptyString, (size_t)-1);
-            if ( pszTrans != NULL )   // take the first found
-                break;
-        }
-    }
-
-    if ( wxIsEmpty(pszTrans) )
-      return wxEmptyString;
-
-    wxChar const * pszFound = wxStrstr(pszTrans, szHeader);
-    if ( pszFound == NULL )
-      return wxEmptyString;
-
-    pszFound += wxStrlen(szHeader) + 2 /* ': ' */;
-
-    // Every header is separated by \n
-
-    wxChar const * pszEndLine = wxStrchr(pszFound, wxT('\n'));
-    if ( pszEndLine == NULL ) pszEndLine = pszFound + wxStrlen(pszFound);
-
-
-    // wxString( wxChar*, length);
-    wxString retVal( pszFound, pszEndLine - pszFound );
-
-    return retVal;
-}
-
 
 // find catalog by name in a linked list, return NULL if !found
 wxMsgCatalog *wxLocale::FindCatalog(const wxChar *szDomain) const
@@ -2720,46 +1576,26 @@ bool wxLocale::IsLoaded(const wxChar *szDomain) const
 // add a catalog to our linked list
 bool wxLocale::AddCatalog(const wxChar *szDomain)
 {
-    return AddCatalog(szDomain, wxLANGUAGE_ENGLISH, NULL);
-}
-
-// add a catalog to our linked list
-bool wxLocale::AddCatalog(const wxChar *szDomain,
-                          wxLanguage    msgIdLanguage,
-                          const wxChar *msgIdCharset)
-
-{
   wxMsgCatalog *pMsgCat = new wxMsgCatalog;
 
-  if ( pMsgCat->Load(m_strShort, szDomain, msgIdCharset, m_bConvertEncoding) ) {
+  if ( pMsgCat->Load(m_strShort, szDomain, m_bConvertEncoding) ) {
     // add it to the head of the list so that in GetString it will
     // be searched before the catalogs added earlier
     pMsgCat->m_pNext = m_pMsgCat;
     m_pMsgCat = pMsgCat;
 
-    return true;
+    return TRUE;
   }
   else {
     // don't add it because it couldn't be loaded anyway
     delete pMsgCat;
+    
+    // it's OK to not load English catalog, the texts are embedded in
+    // the program:
+    if (m_strShort.Mid(0, 2) == wxT("en"))
+        return TRUE;
 
-    // It is OK to not load catalog if the msgid language and m_language match,
-    // in which case we can directly display the texts embedded in program's
-    // source code:
-    if (m_language == msgIdLanguage)
-        return true;
-
-    // If there's no exact match, we may still get partial match where the
-    // (basic) language is same, but the country differs. For example, it's
-    // permitted to use en_US strings from sources even if m_language is en_GB:
-    const wxLanguageInfo *msgIdLangInfo = GetLanguageInfo(msgIdLanguage);
-    if ( msgIdLangInfo &&
-         msgIdLangInfo->CanonicalName.Mid(0, 2) == m_strShort.Mid(0, 2) )
-    {
-        return true;
-    }
-
-    return false;
+    return FALSE;
   }
 }
 
@@ -2767,10 +1603,12 @@ bool wxLocale::AddCatalog(const wxChar *szDomain,
 // accessors for locale-dependent data
 // ----------------------------------------------------------------------------
 
+#if 0
+
 #ifdef __WXMSW__
 
 /* static */
-wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory WXUNUSED(cat))
+wxString wxLocale::GetInfo(wxLocaleInfo index)
 {
     wxString str;
     wxChar buffer[256];
@@ -2778,31 +1616,29 @@ wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory WXUNUSED(cat))
     buffer[0] = wxT('\0');
     switch (index)
     {
-        case wxLOCALE_DECIMAL_POINT:
+        case wxSYS_DECIMAL_SEPARATOR:
             count = ::GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, buffer, 256);
             if (!count)
-                str << wxT(".");
+                str << ".";
             else
                 str << buffer;
             break;
-#if 0
         case wxSYS_LIST_SEPARATOR:
             count = ::GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, buffer, 256);
             if (!count)
-                str << wxT(",");
+                str << ",";
             else
                 str << buffer;
             break;
         case wxSYS_LEADING_ZERO: // 0 means no leading zero, 1 means leading zero
             count = ::GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_ILZERO, buffer, 256);
             if (!count)
-                str << wxT("0");
+                str << "0";
             else
                 str << buffer;
             break;
-#endif
         default:
-            wxFAIL_MSG(wxT("Unknown System String !"));
+            wxFAIL_MSG("Unknown System String !");
     }
     return str;
 }
@@ -2810,41 +1646,14 @@ wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory WXUNUSED(cat))
 #else // !__WXMSW__
 
 /* static */
-wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory cat)
+wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory)
 {
-    struct lconv *locale_info = localeconv();
-    switch (cat)
-    {
-        case wxLOCALE_CAT_NUMBER:
-            switch (index)
-            {
-                case wxLOCALE_THOUSANDS_SEP:
-                    return wxString(locale_info->thousands_sep,
-                                    *wxConvCurrent);
-                case wxLOCALE_DECIMAL_POINT:
-                    return wxString(locale_info->decimal_point,
-                                    *wxConvCurrent);
-                default:
-                    return wxEmptyString;
-            }
-        case wxLOCALE_CAT_MONEY:
-            switch (index)
-            {
-                case wxLOCALE_THOUSANDS_SEP:
-                    return wxString(locale_info->mon_thousands_sep,
-                                    *wxConvCurrent);
-                case wxLOCALE_DECIMAL_POINT:
-                    return wxString(locale_info->mon_decimal_point,
-                                    *wxConvCurrent);
-                default:
-                    return wxEmptyString;
-            }
-        default:
-            return wxEmptyString;
-    }
+    return wxEmptyString;
 }
 
 #endif // __WXMSW__/!__WXMSW__
+
+#endif // 0
 
 // ----------------------------------------------------------------------------
 // global functions and variables
@@ -2879,7 +1688,7 @@ class wxLocaleModule: public wxModule
     DECLARE_DYNAMIC_CLASS(wxLocaleModule)
     public:
         wxLocaleModule() {}
-        bool OnInit() { return true; }
+        bool OnInit() { return TRUE; }
         void OnExit() { wxLocale::DestroyLanguagesDB(); }
 };
 
@@ -3441,7 +2250,7 @@ void wxLocale::InitLanguagesDB()
    LNG(wxLANGUAGE_BURMESE,                    "my"   , 0              , 0                                 , "Burmese")
    LNG(wxLANGUAGE_CAMBODIAN,                  "km"   , 0              , 0                                 , "Cambodian")
    LNG(wxLANGUAGE_CATALAN,                    "ca_ES", LANG_CATALAN   , SUBLANG_DEFAULT                   , "Catalan")
-   LNG(wxLANGUAGE_CHINESE,                    "zh_TW", LANG_CHINESE   , SUBLANG_DEFAULT                   , "Chinese")
+   LNG(wxLANGUAGE_CHINESE,                    "zh_CN", LANG_CHINESE   , SUBLANG_DEFAULT                   , "Chinese")
    LNG(wxLANGUAGE_CHINESE_SIMPLIFIED,         "zh_CN", LANG_CHINESE   , SUBLANG_CHINESE_SIMPLIFIED        , "Chinese (Simplified)")
    LNG(wxLANGUAGE_CHINESE_TRADITIONAL,        "zh_TW", LANG_CHINESE   , SUBLANG_CHINESE_TRADITIONAL       , "Chinese (Traditional)")
    LNG(wxLANGUAGE_CHINESE_HONGKONG,           "zh_HK", LANG_CHINESE   , SUBLANG_CHINESE_HONGKONG          , "Chinese (Hongkong)")
@@ -3629,9 +2438,10 @@ void wxLocale::InitLanguagesDB()
    LNG(wxLANGUAGE_ZHUANG,                     "za"   , 0              , 0                                 , "Zhuang")
    LNG(wxLANGUAGE_ZULU,                       "zu"   , 0              , 0                                 , "Zulu")
 
-}
+};
 #undef LNG
 
 // --- --- --- generated code ends here --- --- ---
 
 #endif // wxUSE_INTL
+

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// File:        contrib/samples/stc/stctest.cpp
+// File:        stctest.cpp
 // Purpose:     STC test application
 // Maintainer:  Otto Wyss
 // Created:     2003-09-01
@@ -12,27 +12,27 @@
 // headers
 //----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+// For compilers that support precompilation, includes <wx/wx.h>.
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all 'standard' wxWidgets headers)
+// need because it includes almost all 'standard' wxWindows headers)
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+    #include <wx/wx.h>
 #endif
 
-//! wxWidgets headers
-#include "wx/config.h"   // configuration support
-#include "wx/filedlg.h"  // file dialog support
-#include "wx/filename.h" // filename support
-#include "wx/notebook.h" // notebook support
-#include "wx/settings.h" // system settings
-#include "wx/string.h"   // strings support
-#include "wx/image.h"    // images support
+//! wxWindows headers
+#include <wx/config.h>   // configuration support
+#include <wx/filedlg.h>  // file dialog support
+#include <wx/filename.h> // filename support
+#include <wx/notebook.h> // notebook support
+#include <wx/settings.h> // system settings
+#include <wx/string.h>   // strings support
+#include <wx/image.h>    // images support
 
 //! application headers
 #include "defsext.h"     // Additional definitions
@@ -57,14 +57,14 @@
 #define APP_DESCR _("See http://wxguide.sourceforge.net/")
 
 #define APP_MAINT _T("Otto Wyss")
-#define APP_VENDOR _T("wxWidgets")
+#define APP_VENDOR _T("wxWindows")
 #define APP_COPYRIGTH _T("(C) 2003 Otto Wyss")
-#define APP_LICENCE _T("wxWidgets")
+#define APP_LICENCE _T("wxWindows")
 
 #define APP_VERSION _T("0.1.alpha")
 #define APP_BUILD __DATE__
 
-#define APP_WEBSITE _T("http://www.wxWidgets.org")
+#define APP_WEBSITE _T("http://www.wxWindows.org")
 #define APP_MAIL _T("mailto://???")
 
 #define NONAME _("<untitled>")
@@ -76,13 +76,9 @@ class AppBook;
 //! global application name
 wxString *g_appname = NULL;
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
 //! global print data, to remember settings during the session
 wxPrintData *g_printData = (wxPrintData*) NULL;
 wxPageSetupData *g_pageSetupData = (wxPageSetupData*) NULL;
-
-#endif // wxUSE_PRINTING_ARCHITECTURE
 
 
 //----------------------------------------------------------------------------
@@ -103,7 +99,7 @@ private:
 
 };
 
-// created dynamically by wxWidgets
+// created dynamically by wxWindows
 DECLARE_APP (App);
 
 //----------------------------------------------------------------------------
@@ -204,11 +200,9 @@ bool App::OnInit () {
     g_appname->Append (_T("-"));
     g_appname->Append (APP_NAME);
 
-#if wxUSE_PRINTING_ARCHITECTURE
     // initialize print data and setup
     g_printData = new wxPrintData;
     g_pageSetupData = new wxPageSetupDialogData;
-#endif // wxUSE_PRINTING_ARCHITECTURE
 
     // create application frame
     m_frame = new AppFrame (*g_appname);
@@ -226,11 +220,9 @@ int App::OnExit () {
     // delete global appname
     delete g_appname;
 
-#if wxUSE_PRINTING_ARCHITECTURE
     // delete global print data and setup
     if (g_printData) delete g_printData;
     if (g_pageSetupData) delete g_pageSetupData;
-#endif // wxUSE_PRINTING_ARCHITECTURE
 
     return 0;
 }
@@ -297,7 +289,7 @@ BEGIN_EVENT_TABLE (AppFrame, wxFrame)
 END_EVENT_TABLE ()
 
 AppFrame::AppFrame (const wxString &title)
-        : wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
+        : wxFrame ((wxFrame *)NULL, -1, title, wxDefaultPosition, wxDefaultSize,
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE) {
 
     // intitialize important variables
@@ -309,14 +301,14 @@ AppFrame::AppFrame (const wxString &title)
     SetBackgroundColour (_T("WHITE"));
 
     // about box shown for 1 seconds
-    AppAbout dlg(this, 1000);
+    AppAbout (this, 1000);
 
     // create menu
     m_menuBar = new wxMenuBar;
     CreateMenu ();
 
     // open first page
-    m_edit = new Edit (this, wxID_ANY);
+    m_edit = new Edit (this, -1);
     m_edit->SetFocus();
 
     FileOpen (_T("stctest.cpp"));
@@ -337,7 +329,7 @@ void AppFrame::OnClose (wxCloseEvent &event) {
 }
 
 void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
-    AppAbout dlg(this);
+    AppAbout (this);
 }
 
 void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
@@ -347,14 +339,12 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
 // file event handlers
 void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event)) {
     if (!m_edit) return;
-#if wxUSE_FILEDLG
     wxString fname;
-    wxFileDialog dlg (this, _T("Open file"), wxEmptyString, wxEmptyString, _T("Any file (*)|*"),
+    wxFileDialog dlg (this, _T("Open file"), _T(""), _T(""), _T("Any file (*)|*"),
                       wxOPEN | wxFILE_MUST_EXIST | wxCHANGE_DIR);
     if (dlg.ShowModal() != wxID_OK) return;
     fname = dlg.GetPath ();
     FileOpen (fname);
-#endif // wxUSE_FILEDLG
 }
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) {
@@ -369,13 +359,11 @@ void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) {
 
 void AppFrame::OnFileSaveAs (wxCommandEvent &WXUNUSED(event)) {
     if (!m_edit) return;
-#if wxUSE_FILEDLG
     wxString filename = wxEmptyString;
-    wxFileDialog dlg (this, _T("Save file"), wxEmptyString, wxEmptyString, _T("Any file (*)|*"), wxSAVE|wxOVERWRITE_PROMPT);
+    wxFileDialog dlg (this, _T("Save file"), _T(""), _T(""), _T("Any file (*)|*"), wxSAVE|wxOVERWRITE_PROMPT);
     if (dlg.ShowModal() != wxID_OK) return;
     filename = dlg.GetPath();
     m_edit->SaveFile (filename);
-#endif // wxUSE_FILEDLG
 }
 
 void AppFrame::OnFileClose (wxCommandEvent &WXUNUSED(event)) {
@@ -399,22 +387,19 @@ void AppFrame::OnFileClose (wxCommandEvent &WXUNUSED(event)) {
 // properties event handlers
 void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
     if (!m_edit) return;
-    EditProperties dlg(m_edit, 0);
+    EditProperties (m_edit, 0);
 }
 
 // print event handlers
 void AppFrame::OnPrintSetup (wxCommandEvent &WXUNUSED(event)) {
-#if wxUSE_PRINTING_ARCHITECTURE
     (*g_pageSetupData) = * g_printData;
     wxPageSetupDialog pageSetupDialog(this, g_pageSetupData);
     pageSetupDialog.ShowModal();
     (*g_printData) = pageSetupDialog.GetPageSetupData().GetPrintData();
     (*g_pageSetupData) = pageSetupDialog.GetPageSetupData();
-#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 void AppFrame::OnPrintPreview (wxCommandEvent &WXUNUSED(event)) {
-#if wxUSE_PRINTING_ARCHITECTURE
     wxPrintDialogData printDialogData( *g_printData);
     wxPrintPreview *preview =
         new wxPrintPreview (new EditPrint (m_edit),
@@ -433,11 +418,9 @@ void AppFrame::OnPrintPreview (wxCommandEvent &WXUNUSED(event)) {
     frame->Centre(wxBOTH);
     frame->Initialize();
     frame->Show(true);
-#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 void AppFrame::OnPrint (wxCommandEvent &WXUNUSED(event)) {
-#if wxUSE_PRINTING_ARCHITECTURE
     wxPrintDialogData printDialogData( *g_printData);
     wxPrinter printer (&printDialogData);
     EditPrint printout (m_edit);
@@ -450,7 +433,6 @@ void AppFrame::OnPrint (wxCommandEvent &WXUNUSED(event)) {
         }
     }
     (*g_printData) = printer.GetPrintDialogData().GetPrintData();
-#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 // edit events
@@ -459,8 +441,8 @@ void AppFrame::OnEdit (wxCommandEvent &event) {
 }
 
 // private functions
-void AppFrame::CreateMenu ()
-{
+void AppFrame::CreateMenu () {
+
     // File menu
     wxMenu *menuFile = new wxMenu;
     menuFile->Append (wxID_OPEN, _("&Open ..\tCtrl+O"));
@@ -570,10 +552,10 @@ void AppFrame::CreateMenu ()
     m_menuBar->Append (menuWindow, _("&Window"));
     m_menuBar->Append (menuHelp, _("&Help"));
     SetMenuBar (m_menuBar);
+
 }
 
-void AppFrame::FileOpen (wxString fname)
-{
+void AppFrame::FileOpen (wxString fname) {
     wxFileName w(fname); w.Normalize(); fname = w.GetFullPath();
     m_edit->LoadFile (fname);
 }
@@ -604,7 +586,7 @@ END_EVENT_TABLE ()
 AppAbout::AppAbout (wxWindow *parent,
                     int milliseconds,
                     long style)
-        : wxDialog (parent, wxID_ANY, wxEmptyString,
+        : wxDialog (parent, -1, wxEmptyString,
                     wxDefaultPosition, wxDefaultSize,
                     style | wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
 
@@ -620,27 +602,27 @@ AppAbout::AppAbout (wxWindow *parent,
 
     // about info
     wxGridSizer *aboutinfo = new wxGridSizer (2, 0, 2);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, _("Written by: ")),
+    aboutinfo->Add (new wxStaticText(this, -1, _("Written by: ")),
                     0, wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, APP_MAINT),
+    aboutinfo->Add (new wxStaticText(this, -1, APP_MAINT),
                     1, wxEXPAND | wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, _("Version: ")),
+    aboutinfo->Add (new wxStaticText(this, -1, _("Version: ")),
                     0, wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, APP_VERSION),
+    aboutinfo->Add (new wxStaticText(this, -1, APP_VERSION),
                     1, wxEXPAND | wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, _("Licence type: ")),
+    aboutinfo->Add (new wxStaticText(this, -1, _("Licence type: ")),
                     0, wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, APP_LICENCE),
+    aboutinfo->Add (new wxStaticText(this, -1, APP_LICENCE),
                     1, wxEXPAND | wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, _("Copyright: ")),
+    aboutinfo->Add (new wxStaticText(this, -1, _("Copyright: ")),
                     0, wxALIGN_LEFT);
-    aboutinfo->Add (new wxStaticText(this, wxID_ANY, APP_COPYRIGTH),
+    aboutinfo->Add (new wxStaticText(this, -1, APP_COPYRIGTH),
                     1, wxEXPAND | wxALIGN_LEFT);
 
     // about icontitle//info
     wxBoxSizer *aboutpane = new wxBoxSizer (wxHORIZONTAL);
     wxBitmap bitmap = wxBitmap(wxICON (mondrian));
-    aboutpane->Add (new wxStaticBitmap (this, wxID_ANY, bitmap),
+    aboutpane->Add (new wxStaticBitmap (this, -1, bitmap),
                     0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 20);
     aboutpane->Add (aboutinfo, 1, wxEXPAND);
     aboutpane->Add (60, 0);
@@ -648,12 +630,12 @@ AppAbout::AppAbout (wxWindow *parent,
     // about complete
     wxBoxSizer *totalpane = new wxBoxSizer (wxVERTICAL);
     totalpane->Add (0, 20);
-    wxStaticText *appname = new wxStaticText(this, wxID_ANY, *g_appname);
+    wxStaticText *appname = new wxStaticText(this, -1, *g_appname);
     appname->SetFont (wxFont (24, wxDEFAULT, wxNORMAL, wxBOLD));
     totalpane->Add (appname, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 40);
     totalpane->Add (0, 10);
     totalpane->Add (aboutpane, 0, wxEXPAND | wxALL, 4);
-    totalpane->Add (new wxStaticText(this, wxID_ANY, APP_DESCR),
+    totalpane->Add (new wxStaticText(this, -1, APP_DESCR),
                     0, wxALIGN_CENTER | wxALL, 10);
     wxButton *okButton = new wxButton (this, wxID_OK, _("OK"));
     okButton->SetDefault();
@@ -679,3 +661,4 @@ void AppAbout::OnTimerEvent (wxTimerEvent &WXUNUSED(event)) {
     m_timer = NULL;
     EndModal (wxID_OK);
 }
+

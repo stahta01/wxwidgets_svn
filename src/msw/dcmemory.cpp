@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,11 @@ wxMemoryDC::wxMemoryDC(wxDC *dc)
 {
     wxCHECK_RET( dc, _T("NULL dc in wxMemoryDC ctor") );
 
+    dc->BeginDrawing();
+
     CreateCompatible(dc);
+
+    dc->EndDrawing();
 
     Init();
 }
@@ -81,7 +85,7 @@ bool wxMemoryDC::CreateCompatible(wxDC *dc)
     m_hDC = (WXHDC)::CreateCompatibleDC(dc ? GetHdcOf(*dc) : NULL);
 
     // as we created the DC, we must delete it in the dtor
-    m_bOwnsDC = true;
+    m_bOwnsDC = TRUE;
 
     m_ok = m_hDC != 0;
 
@@ -96,26 +100,22 @@ void wxMemoryDC::SelectObject(const wxBitmap& bitmap)
         ::SelectObject(GetHdc(), (HBITMAP) m_oldBitmap);
         if ( m_selectedBitmap.Ok() )
         {
-#ifdef __WXDEBUG__
             m_selectedBitmap.SetSelectedInto(NULL);
-#endif
             m_selectedBitmap = wxNullBitmap;
         }
     }
 
     // check for whether the bitmap is already selected into a device context
-    wxASSERT_MSG( !bitmap.GetSelectedInto() ||
-                  (bitmap.GetSelectedInto() == this),
-                  wxT("Bitmap is selected in another wxMemoryDC, delete the first wxMemoryDC or use SelectObject(NULL)") );
+    wxCHECK_RET( !bitmap.GetSelectedInto() ||
+                 (bitmap.GetSelectedInto() == this),
+                 wxT("Bitmap is selected in another wxMemoryDC, delete the first wxMemoryDC or use SelectObject(NULL)") );
 
     m_selectedBitmap = bitmap;
     WXHBITMAP hBmp = m_selectedBitmap.GetHBITMAP();
     if ( !hBmp )
         return;
 
-#ifdef __WXDEBUG__
     m_selectedBitmap.SetSelectedInto(this);
-#endif
     hBmp = (WXHBITMAP)::SelectObject(GetHdc(), (HBITMAP)hBmp);
 
     if ( !hBmp )

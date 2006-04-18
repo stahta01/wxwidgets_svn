@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/oleutils.cpp
+// Name:        ole/oleutils.cpp
 // Purpose:     implementation of OLE helper functions
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     19.02.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -24,27 +24,17 @@
 #pragma hdrstop
 #endif
 
+#include  "wx/setup.h"
 #include  "wx/log.h"
 
 #if wxUSE_OLE
 
 #ifndef __CYGWIN10__
 
-#include "wx/msw/private.h"
-
-#ifdef __WXWINCE__
-    #include <winreg.h>
-    #include <ole2.h>
-
-    #define GUID_DEFINED
-    #define UUID_DEFINED
-#endif
+#include <windows.h>
 
 // OLE
-#ifndef __WXWINCE__
 #include  "wx/msw/ole/uuid.h"
-#endif
-
 #include  "wx/msw/ole/oleutils.h"
 
 #if defined(__VISUALC__) && (__VISUALC__ > 1000)
@@ -55,92 +45,15 @@
 // Implementation
 // ============================================================================
 
-// return true if the iid is in the array
+// return TRUE if the iid is in the array
 bool IsIidFromList(REFIID riid, const IID *aIids[], size_t nCount)
 {
   for ( size_t i = 0; i < nCount; i++ ) {
     if ( riid == *aIids[i] )
-      return true;
+      return TRUE;
   }
 
-  return false;
-}
-
-WXDLLEXPORT BSTR wxConvertStringToOle(const wxString& str)
-{
-/*
-    unsigned int len = strlen((const char*) str);
-    unsigned short* s = new unsigned short[len*2+2];
-    unsigned int i;
-    memset(s, 0, len*2+2);
-    for (i=0; i < len; i++)
-        s[i*2] = str[i];
-*/
-    wxBasicString bstr(str.mb_str());
-    return bstr.Get();
-}
-
-WXDLLEXPORT wxString wxConvertStringFromOle(BSTR bStr)
-{
-#if wxUSE_UNICODE
-    wxString str(bStr);
-#else
-    int len = SysStringLen(bStr) + 1;
-    char    *buf = new char[len];
-    (void)wcstombs( buf, bStr, len);
-    wxString str(buf);
-    delete[] buf;
-#endif
-    return str;
-}
-
-// ----------------------------------------------------------------------------
-// wxBasicString
-// ----------------------------------------------------------------------------
-
-// ctor takes an ANSI string and transforms it to Unicode
-wxBasicString::wxBasicString(const char *sz)
-{
-    Init(sz);
-}
-
-// ctor takes an ANSI or Unicode string and transforms it to Unicode
-wxBasicString::wxBasicString(const wxString& str)
-{
-#if wxUSE_UNICODE
-    m_wzBuf = new OLECHAR[str.length() + 1];
-    memcpy(m_wzBuf, str.c_str(), str.length()*2);
-    m_wzBuf[str.length()] = L'\0';
-#else
-    Init(str.c_str());
-#endif
-}
-
-// Takes an ANSI string and transforms it to Unicode
-void wxBasicString::Init(const char *sz)
-{
-    // get the size of required buffer
-    UINT lenAnsi = strlen(sz);
-#ifdef __MWERKS__
-    UINT lenWide = lenAnsi * 2 ;
-#else
-    UINT lenWide = mbstowcs(NULL, sz, lenAnsi);
-#endif
-
-    if ( lenWide > 0 ) {
-        m_wzBuf = new OLECHAR[lenWide + 1];
-        mbstowcs(m_wzBuf, sz, lenAnsi);
-        m_wzBuf[lenWide] = L'\0';
-    }
-    else {
-        m_wzBuf = NULL;
-    }
-}
-
-// dtor frees memory
-wxBasicString::~wxBasicString()
-{
-  delete [] m_wzBuf;
+  return FALSE;
 }
 
 #if wxUSE_DATAOBJ
@@ -252,13 +165,9 @@ static wxString GetIidName(REFIID riid)
     }
   }
 
-#ifndef __WXWINCE__
   // unknown IID, just transform to string
   Uuid uuid(riid);
   return wxString((const wxChar *)uuid);
-#else
-  return wxEmptyString;
-#endif
 }
 
 void wxLogQueryInterface(const wxChar *szInterface, REFIID riid)
@@ -295,7 +204,7 @@ void wxLogRelease(const char *szInterface, ULONG cRef)
   wxLogTrace("After %s::Release: m_cRef = %d", szInterface, cRef - 1);
 }
 
-#endif  // __WXDEBUG__
+#endif  //WXDEBUG
 
 #endif
   // wxUSE_DRAG_AND_DROP
@@ -305,3 +214,4 @@ void wxLogRelease(const char *szInterface, ULONG cRef)
 
 #endif
   // wxUSE_OLE
+

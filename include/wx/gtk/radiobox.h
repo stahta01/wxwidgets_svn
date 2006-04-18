@@ -7,8 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_RADIOBOX_H_
-#define _WX_GTK_RADIOBOX_H_
+
+#ifndef __GTKRADIOBOXH__
+#define __GTKRADIOBOXH__
 
 #include "wx/bitmap.h"
 
@@ -16,11 +17,9 @@
 // wxRadioBox
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRadioBox : public wxControl,
-                                    public wxRadioBoxBase
+class wxRadioBox: public wxControl
 {
 public:
-    // ctors and dtor
     wxRadioBox() { Init(); }
     wxRadioBox(wxWindow *parent,
                wxWindowID id,
@@ -39,22 +38,7 @@ public:
         Create( parent, id, title, pos, size, n, choices, majorDim, style, val, name );
     }
 
-    wxRadioBox(wxWindow *parent,
-               wxWindowID id,
-               const wxString& title,
-               const wxPoint& pos,
-               const wxSize& size,
-               const wxArrayString& choices,
-               int majorDim = 1,
-               long style = wxRA_HORIZONTAL,
-               const wxValidator& val = wxDefaultValidator,
-               const wxString& name = wxRadioBoxNameStr)
-    {
-        Init();
-
-        Create( parent, id, title, pos, size, choices, majorDim, style, val, name );
-    }
-
+    virtual ~wxRadioBox();
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxString& title,
@@ -66,46 +50,37 @@ public:
                 long style = wxRA_HORIZONTAL,
                 const wxValidator& val = wxDefaultValidator,
                 const wxString& name = wxRadioBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                int majorDim = 0,
-                long style = wxRA_HORIZONTAL,
-                const wxValidator& val = wxDefaultValidator,
-                const wxString& name = wxRadioBoxNameStr);
 
-    virtual ~wxRadioBox();
+    int FindString( const wxString& s) const;
+    void SetSelection( int n );
+    int GetSelection() const;
 
+    wxString GetString( int n ) const;
+    void SetString( int n, const wxString& label );
 
-    // implement wxItemContainerImmutable methods
-    virtual unsigned int GetCount() const;
+    void Show( int item, bool show );
+    void Enable( int item, bool enable );
 
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& s);
+    virtual wxString GetStringSelection() const;
+    virtual bool SetStringSelection( const wxString& s );
 
-    virtual void SetSelection(int n);
-    virtual int GetSelection() const;
+    int GetCount() const;
+    int GetNumberOfRowsOrCols() const;
+    void SetNumberOfRowsOrCols( int n );
 
+    // for compatibility only, don't use these methods in new code!
+#if WXWIN_COMPATIBILITY_2_2
+    int Number() const { return GetCount(); }
+    wxString GetLabel(int n) const { return GetString(n); }
+    void SetLabel( int item, const wxString& label )
+        { SetString(item, label); }
+#endif // WXWIN_COMPATIBILITY_2_2
 
-    // implement wxRadioBoxBase methods
-    virtual bool Show(unsigned int n, bool show = true);
-    virtual bool Enable(unsigned int n, bool enable = true);
-
-    virtual bool IsItemEnabled(unsigned int n) const;
-    virtual bool IsItemShown(unsigned int n) const;
-
-
-    // override some base class methods to operate on radiobox itself too
-    virtual bool Show( bool show = true );
-    virtual bool Enable( bool enable = true );
-
+    // we have to override those to avoid virtual function name hiding
+    virtual wxString GetLabel() const { return wxControl::GetLabel(); }
     virtual void SetLabel( const wxString& label );
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
+    virtual bool Show( bool show = TRUE );
+    virtual bool Enable( bool enable = TRUE );
 
     // implementation
     // --------------
@@ -114,22 +89,21 @@ public:
     void GtkDisableEvents();
     void GtkEnableEvents();
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
 #if wxUSE_TOOLTIPS
     void ApplyToolTip( GtkTooltips *tips, const wxChar *tip );
 #endif // wxUSE_TOOLTIPS
+    wxSize LayoutItems();
 
+    virtual void DoSetSize( int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO );
     virtual void OnInternalIdle();
 
     bool             m_hasFocus,
                      m_lostFocus;
+    int              m_majorDim;
     wxList           m_boxes;
 
 protected:
-    void DoApplyWidgetStyle(GtkRcStyle *style);
-
-    virtual bool GTKWidgetNeedsMnemonic() const;
-    virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
-
     // common part of all ctors
     void Init();
 
@@ -137,4 +111,4 @@ private:
     DECLARE_DYNAMIC_CLASS(wxRadioBox)
 };
 
-#endif // _WX_GTK_RADIOBOX_H_
+#endif // __GTKRADIOBOXH__

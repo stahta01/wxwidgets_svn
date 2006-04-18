@@ -4,7 +4,7 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -30,16 +30,6 @@
 #include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
 
-#ifdef __WXWINCE__
-    #include "wx/msw/wince/missing.h"       // for bsearch()
-#endif
-
-// DLL options compatibility check:
-#include "wx/app.h"
-WX_CHECK_BUILD_OPTIONS("wxHTML")
-
-const wxChar *wxTRACE_HTML_DEBUG = _T("htmldebug");
-
 //-----------------------------------------------------------------------------
 // wxHtmlParser helpers
 //-----------------------------------------------------------------------------
@@ -52,7 +42,7 @@ public:
 };
 
 WX_DECLARE_OBJARRAY(wxHtmlTextPiece, wxHtmlTextPieces);
-WX_DEFINE_OBJARRAY(wxHtmlTextPieces)
+WX_DEFINE_OBJARRAY(wxHtmlTextPieces);
 
 class wxHtmlParserState
 {
@@ -87,18 +77,11 @@ wxHtmlParser::~wxHtmlParser()
 {
     while (RestoreState()) {}
     DestroyDOMTree();
-
-    if (m_HandlersStack)
-    {
-        wxList& tmp = *m_HandlersStack;
-        wxList::iterator it, en;
-        for( it = tmp.begin(), en = tmp.end(); it != en; ++it )
-            delete (wxHashTable*)*it;
-        tmp.clear();
-    }
+    
     delete m_HandlersStack;
     m_HandlersHash.Clear();
-    WX_CLEAR_LIST(wxList, m_HandlersList);
+    m_HandlersList.DeleteContents(TRUE);
+    m_HandlersList.Clear();
     delete m_entitiesParser;
 }
 
@@ -114,7 +97,7 @@ wxObject* wxHtmlParser::Parse(const wxString& source)
 void wxHtmlParser::InitParser(const wxString& source)
 {
     SetSource(source);
-    m_stopParsing = false;
+    m_stopParsing = FALSE;
 }
 
 void wxHtmlParser::DoneParser()
@@ -199,7 +182,7 @@ void wxHtmlParser::CreateDOMSubTree(wxHtmlTag *cur,
 
             // add another tag to the tree:
             else if (i < end_pos-1 && m_Source.GetChar(i+1) != wxT('/'))
-            {
+	        {
                 wxHtmlTag *chd;
                 if (cur)
                     chd = new wxHtmlTag(cur, m_Source,
@@ -232,7 +215,7 @@ void wxHtmlParser::CreateDOMSubTree(wxHtmlTag *cur,
                 }
                 else
                     i = chd->GetBeginPos();
-
+                
                 textBeginning = i;
             }
 
@@ -304,10 +287,14 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
         }
         else if (m_CurTag)
         {
-            if (m_CurTag->HasEnding())
-                begin_pos = m_CurTag->GetEndPos2();
-            else
-                begin_pos = m_CurTag->GetBeginPos();
+            // Add tag:
+            if (m_CurTag)
+            {
+                if (m_CurTag->HasEnding())
+                    begin_pos = m_CurTag->GetEndPos2();
+                else
+                    begin_pos = m_CurTag->GetBeginPos();
+            }
             wxHtmlTag *t = m_CurTag;
             m_CurTag = m_CurTag->GetNextTag();
             AddTag(*t);
@@ -321,7 +308,7 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
 void wxHtmlParser::AddTag(const wxHtmlTag& tag)
 {
     wxHtmlTagHandler *h;
-    bool inner = false;
+    bool inner = FALSE;
 
     h = (wxHtmlTagHandler*) m_HandlersHash.Get(tag.GetName());
     if (h)
@@ -351,7 +338,7 @@ void wxHtmlParser::AddTagHandler(wxHtmlTagHandler *handler)
     handler->SetParser(this);
 }
 
-void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, const wxString& tags)
+void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
 {
     wxStringTokenizer tokenizer(tags, wxT(", "));
     wxString key;
@@ -359,9 +346,10 @@ void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, const wxString& tag
     if (m_HandlersStack == NULL)
     {
         m_HandlersStack = new wxList;
+        m_HandlersStack->DeleteContents(TRUE);
     }
 
-    m_HandlersStack->Insert((wxObject*)new wxHashTable(m_HandlersHash));
+    m_HandlersStack->Insert(new wxHashTable(m_HandlersHash));
 
     while (tokenizer.HasMoreTokens())
     {
@@ -373,22 +361,16 @@ void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, const wxString& tag
 
 void wxHtmlParser::PopTagHandler()
 {
-    wxList::compatibility_iterator first;
+    wxNode *first;
 
-    if ( !m_HandlersStack ||
-#if wxUSE_STL
-         !(first = m_HandlersStack->GetFirst())
-#else // !wxUSE_STL
-         ((first = m_HandlersStack->GetFirst()) == NULL)
-#endif // wxUSE_STL/!wxUSE_STL
-        )
+    if (m_HandlersStack == NULL ||
+        (first = m_HandlersStack->GetFirst()) == NULL)
     {
         wxLogWarning(_("Warning: attempt to remove HTML tag handler from empty stack."));
         return;
     }
     m_HandlersHash = *((wxHashTable*) first->GetData());
-    delete (wxHashTable*) first->GetData();
-    m_HandlersStack->Erase(first);
+    m_HandlersStack->DeleteNode(first);
 }
 
 void wxHtmlParser::SetSourceAndSaveState(const wxString& src)
@@ -415,7 +397,7 @@ void wxHtmlParser::SetSourceAndSaveState(const wxString& src)
 
 bool wxHtmlParser::RestoreState()
 {
-    if (!m_SavedStates) return false;
+    if (!m_SavedStates) return FALSE;
 
     DestroyDOMTree();
 
@@ -429,13 +411,7 @@ bool wxHtmlParser::RestoreState()
     m_Source = s->m_source;
 
     delete s;
-    return true;
-}
-
-wxString wxHtmlParser::GetInnerSource(const wxHtmlTag& tag)
-{
-    return GetSource()->Mid(tag.GetBeginPos(),
-                            tag.GetEndPos1() - tag.GetBeginPos());
+    return TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -443,15 +419,6 @@ wxString wxHtmlParser::GetInnerSource(const wxHtmlTag& tag)
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxHtmlTagHandler,wxObject)
-
-void wxHtmlTagHandler::ParseInnerSource(const wxString& source)
-{
-    // It is safe to temporarily change the source being parsed,
-    // provided we restore the state back after parsing
-    m_Parser->SetSourceAndSaveState(source);
-    m_Parser->DoParsing();
-    m_Parser->RestoreState();
-}
 
 
 //-----------------------------------------------------------------------------
@@ -497,7 +464,7 @@ wxString wxHtmlEntitiesParser::Parse(const wxString& input)
     const wxChar *c, *last;
     const wxChar *in_str = input.c_str();
     wxString output;
-
+    
     output.reserve(input.length());
 
     for (c = in_str, last = in_str; *c != wxT('\0'); c++)
@@ -506,13 +473,12 @@ wxString wxHtmlEntitiesParser::Parse(const wxString& input)
         {
             if (c - last > 0)
                 output.append(last, c - last);
-            if ( *++c == wxT('\0') )
-                break;
-
+            if (++c == wxT('\0')) break;
+        
             wxString entity;
             const wxChar *ent_s = c;
             wxChar entity_char;
-
+        
             for (; (*c >= wxT('a') && *c <= wxT('z')) ||
                    (*c >= wxT('A') && *c <= wxT('Z')) ||
                    (*c >= wxT('0') && *c <= wxT('9')) ||
@@ -526,9 +492,7 @@ wxString wxHtmlEntitiesParser::Parse(const wxString& input)
             else
             {
                 output.append(ent_s-1, c-ent_s+2);
-                wxLogTrace(wxTRACE_HTML_DEBUG,
-                           wxT("Unrecognized HTML entity: '%s'"),
-                           entity.c_str());
+                wxLogDebug(wxT("Unrecognized HTML entity: '%s'"), entity.c_str());
             }
         }
     }
@@ -849,24 +813,11 @@ wxChar wxHtmlEntitiesParser::GetEntityChar(const wxString& entity)
             while (substitutions[substitutions_cnt].code != 0)
                 substitutions_cnt++;
 
-        wxHtmlEntityInfo *info = NULL;
-#ifdef __WXWINCE__
-        // bsearch crashes under WinCE for some reason
-        size_t i;
-        for (i = 0; i < substitutions_cnt; i++)
-        {
-            if (entity == substitutions[i].name)
-            {
-                info = & substitutions[i];
-                break;
-            }
-        }
-#else
+        wxHtmlEntityInfo *info;
         info = (wxHtmlEntityInfo*) bsearch(entity.c_str(), substitutions,
                                            substitutions_cnt,
                                            sizeof(wxHtmlEntityInfo),
                                            wxHtmlEntityCompare);
-#endif
         if (info)
             code = info->code;
     }
@@ -877,11 +828,10 @@ wxChar wxHtmlEntitiesParser::GetEntityChar(const wxString& entity)
         return GetCharForCode(code);
 }
 
-wxFSFile *wxHtmlParser::OpenURL(wxHtmlURLType WXUNUSED(type),
+wxFSFile *wxHtmlParser::OpenURL(wxHtmlURLType WXUNUSED(type), 
                                 const wxString& url) const
 {
-    return m_FS ? m_FS->OpenFile(url) : NULL;
-
+    return GetFS()->OpenFile(url);
 }
 
 
@@ -892,14 +842,9 @@ wxFSFile *wxHtmlParser::OpenURL(wxHtmlURLType WXUNUSED(type),
 class wxMetaTagParser : public wxHtmlParser
 {
 public:
-    wxMetaTagParser() { }
-
     wxObject* GetProduct() { return NULL; }
-
 protected:
     virtual void AddText(const wxChar* WXUNUSED(txt)) {}
-
-    DECLARE_NO_COPY_CLASS(wxMetaTagParser)
 };
 
 class wxMetaTagHandler : public wxHtmlTagHandler
@@ -911,8 +856,6 @@ public:
 
 private:
     wxString *m_retval;
-
-    DECLARE_NO_COPY_CLASS(wxMetaTagHandler)
 };
 
 bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
@@ -920,11 +863,11 @@ bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
     if (tag.GetName() == _T("BODY"))
     {
         m_Parser->StopParsing();
-        return false;
+        return FALSE;
     }
 
     if (tag.HasParam(_T("HTTP-EQUIV")) &&
-        tag.GetParam(_T("HTTP-EQUIV")).IsSameAs(_T("Content-Type"), false) &&
+        tag.GetParam(_T("HTTP-EQUIV")).IsSameAs(_T("Content-Type"), FALSE) &&
         tag.HasParam(_T("CONTENT")))
     {
         wxString content = tag.GetParam(_T("CONTENT")).Lower();
@@ -934,7 +877,7 @@ bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
             m_Parser->StopParsing();
         }
     }
-    return false;
+    return FALSE;
 }
 
 
@@ -942,14 +885,11 @@ bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
 wxString wxHtmlParser::ExtractCharsetInformation(const wxString& markup)
 {
     wxString charset;
-    wxMetaTagParser *parser = new wxMetaTagParser();
-    if(parser)
-    {
-        parser->AddTagHandler(new wxMetaTagHandler(&charset));
-        parser->Parse(markup);
-        delete parser;
-    }
+    wxMetaTagParser parser;
+    parser.AddTagHandler(new wxMetaTagHandler(&charset));
+    parser.Parse(markup);
     return charset;
 }
+
 
 #endif

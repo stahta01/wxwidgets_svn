@@ -96,20 +96,17 @@ void MarkerHandleSet::RemoveHandle(int handle) {
 	}
 }
 
-bool MarkerHandleSet::RemoveNumber(int markerNum) {
-	bool performedDeletion = false;
+void MarkerHandleSet::RemoveNumber(int markerNum) {
 	MarkerHandleNumber **pmhn = &root;
 	while (*pmhn) {
 		MarkerHandleNumber *mhn = *pmhn;
 		if (mhn->number == markerNum) {
 			*pmhn = mhn->next;
 			delete mhn;
-			performedDeletion = true;
 		} else {
 			pmhn = &((*pmhn)->next);
 		}
 	}
-	return performedDeletion;
 }
 
 void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
@@ -254,14 +251,13 @@ void LineVector::Remove(int pos) {
 		linesData[i] = linesData[i + 1];
 	}
 	if (levels) {
-		// Move up following lines but merge header flag from this line
-		// to line before to avoid a temporary disappearence causing expansion.
-		int firstHeader = levels[pos] & SC_FOLDLEVELHEADERFLAG;
-		for (int j = pos; j < lines; j++) {
+		// Level information merges back onto previous line
+		int posAbove = pos - 1;
+		if (posAbove < 0)
+			posAbove = 0;
+		for (int j = posAbove; j < lines; j++) {
 			levels[j] = levels[j + 1];
 		}
-		if (pos > 0)
-			levels[pos-1] |= firstHeader;
 	}
 	lines--;
 }
@@ -310,18 +306,13 @@ void LineVector::MergeMarkers(int pos) {
 	}
 }
 
-void LineVector::DeleteMark(int line, int markerNum, bool all) {
+void LineVector::DeleteMark(int line, int markerNum) {
 	if (linesData[line].handleSet) {
 		if (markerNum == -1) {
 			delete linesData[line].handleSet;
 			linesData[line].handleSet = 0;
 		} else {
-			bool performedDeletion = 
-				linesData[line].handleSet->RemoveNumber(markerNum);
-			while (all && performedDeletion) {
-				performedDeletion = 
-					linesData[line].handleSet->RemoveNumber(markerNum);
-			}
+			linesData[line].handleSet->RemoveNumber(markerNum);
 			if (linesData[line].handleSet->Length() == 0) {
 				delete linesData[line].handleSet;
 				linesData[line].handleSet = 0;
@@ -451,9 +442,6 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
-	if (currentAction < savePoint) {
-		savePoint = -1;
-	}
 	if (currentAction >= 1) {
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
@@ -465,7 +453,7 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 			} else if (currentAction == savePoint) {
 				currentAction++;
 			} else if ((at == insertAction) &&
-			           (position != (actPrevious.position + actPrevious.lenData))) {
+			           (position != (actPrevious.position + actPrevious.lenData*2))) {
 				// Insertions must be immediately after to coalesce
 				currentAction++;
 			} else if (!actions[currentAction].mayCoalesce) {
@@ -473,7 +461,7 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 				currentAction++;
 			} else if (at == removeAction) {
 				if ((lengthData == 1) || (lengthData == 2)){
-					if ((position + lengthData) == actPrevious.position) {
+					if ((position + lengthData * 2) == actPrevious.position) {
 						; // Backspace -> OK
 					} else if (position == actPrevious.position) {
 						; // Delete -> OK
@@ -639,11 +627,21 @@ void CellBuffer::RoomFor(int insertionLength) {
 	//Platform::DebugPrintf("need room %d %d\n", gaplen, insertionLength);
 	if (gaplen <= insertionLength) {
 		//Platform::DebugPrintf("need room %d %d\n", gaplen, insertionLength);
+		GapTo(length);
 		if (growSize * 6 < size)
 			growSize *= 2;
 		int newSize = size + insertionLength + growSize;
-		Allocate(newSize);
+		//Platform::DebugPrintf("moved gap %d\n", newSize);
+		char *newBody = new char[newSize];
+		memcpy(newBody, body, size);
+		delete []body;
+		body = newBody;
+		gaplen += newSize - size;
+		part2body = body + gaplen;
+		size = newSize;
+		//Platform::DebugPrintf("end need room %d %d - size=%d length=%d\n", gaplen, insertionLength,size,length);
 	}
+
 }
 
 // To make it easier to write code that uses ByteAt, a position outside the range of the buffer
@@ -725,12 +723,19 @@ const char *CellBuffer::InsertString(int position, char *s, int insertLength) {
 			for (int i = 0; i < insertLength / 2; i++) {
 				data[i] = s[i * 2];
 			}
-			uh.AppendAction(insertAction, position / 2, data, insertLength / 2);
+			uh.AppendAction(insertAction, position, data, insertLength / 2);
 		}
 
 		BasicInsertString(position, s, insertLength);
 	}
 	return data;
+}
+
+void CellBuffer::InsertCharStyle(int position, char ch, char style) {
+	char s[2];
+	s[0] = ch;
+	s[1] = style;
+	InsertString(position*2, s, 2);
 }
 
 bool CellBuffer::SetStyleAt(int position, char style, char mask) {
@@ -762,7 +767,6 @@ bool CellBuffer::SetStyleFor(int position, int lengthStyle, char style, char mas
 
 const char *CellBuffer::DeleteChars(int position, int deleteLength) {
 	// InsertString and DeleteChars are the bottleneck though which all changes occur
-	PLATFORM_ASSERT(deleteLength > 0);
 	char *data = 0;
 	if (!readOnly) {
 		if (collectingUndo) {
@@ -771,7 +775,7 @@ const char *CellBuffer::DeleteChars(int position, int deleteLength) {
 			for (int i = 0; i < deleteLength / 2; i++) {
 				data[i] = ByteAt(position + i * 2);
 			}
-			uh.AppendAction(removeAction, position / 2, data, deleteLength / 2);
+			uh.AppendAction(removeAction, position, data, deleteLength / 2);
 		}
 
 		BasicDeleteChars(position, deleteLength);
@@ -785,19 +789,6 @@ int CellBuffer::ByteLength() {
 
 int CellBuffer::Length() {
 	return ByteLength() / 2;
-}
-
-void CellBuffer::Allocate(int newSize) {
-	if (newSize > length) {
-		GapTo(length);
-		char *newBody = new char[newSize];
-		memcpy(newBody, body, length);
-		delete []body;
-		body = newBody;
-		gaplen += newSize - size;
-		part2body = body + gaplen;
-		size = newSize;
-	}
 }
 
 int CellBuffer::Lines() {
@@ -839,7 +830,7 @@ int CellBuffer::AddMark(int line, int markerNum) {
 
 void CellBuffer::DeleteMark(int line, int markerNum) {
 	if ((line >= 0) && (line < lv.lines)) {
-		lv.DeleteMark(line, markerNum, false);
+		lv.DeleteMark(line, markerNum);
 	}
 }
 
@@ -855,7 +846,7 @@ int CellBuffer::GetMark(int line) {
 
 void CellBuffer::DeleteAllMarks(int markerNum) {
 	for (int line = 0; line < lv.lines; line++) {
-		lv.DeleteMark(line, markerNum, true);
+		lv.DeleteMark(line, markerNum);
 	}
 }
 
@@ -869,7 +860,6 @@ void CellBuffer::BasicInsertString(int position, char *s, int insertLength) {
 	//Platform::DebugPrintf("Inserting at %d for %d\n", position, insertLength);
 	if (insertLength == 0)
 		return ;
-	PLATFORM_ASSERT(insertLength > 0);
 	RoomFor(insertLength);
 	GapTo(position);
 
@@ -1024,7 +1014,7 @@ void CellBuffer::DeleteUndoHistory() {
 }
 
 bool CellBuffer::CanUndo() {
-	return uh.CanUndo();
+	return (!readOnly) && (uh.CanUndo());
 }
 
 int CellBuffer::StartUndo() {
@@ -1038,21 +1028,21 @@ const Action &CellBuffer::GetUndoStep() const {
 void CellBuffer::PerformUndoStep() {
 	const Action &actionStep = uh.GetUndoStep();
 	if (actionStep.at == insertAction) {
-		BasicDeleteChars(actionStep.position*2, actionStep.lenData*2);
+		BasicDeleteChars(actionStep.position, actionStep.lenData*2);
 	} else if (actionStep.at == removeAction) {
 		char *styledData = new char[actionStep.lenData * 2];
 		for (int i = 0; i < actionStep.lenData; i++) {
 			styledData[i*2] = actionStep.data[i];
 			styledData[i*2 + 1] = 0;
 		}
-		BasicInsertString(actionStep.position*2, styledData, actionStep.lenData*2);
+		BasicInsertString(actionStep.position, styledData, actionStep.lenData*2);
 		delete []styledData;
 	}
 	uh.CompletedUndoStep();
 }
 
 bool CellBuffer::CanRedo() {
-	return uh.CanRedo();
+	return (!readOnly) && (uh.CanRedo());
 }
 
 int CellBuffer::StartRedo() {
@@ -1071,10 +1061,10 @@ void CellBuffer::PerformRedoStep() {
 			styledData[i*2] = actionStep.data[i];
 			styledData[i*2 + 1] = 0;
 		}
-		BasicInsertString(actionStep.position*2, styledData, actionStep.lenData*2);
+		BasicInsertString(actionStep.position, styledData, actionStep.lenData*2);
 		delete []styledData;
 	} else if (actionStep.at == removeAction) {
-		BasicDeleteChars(actionStep.position*2, actionStep.lenData*2);
+		BasicDeleteChars(actionStep.position, actionStep.lenData*2);
 	}
 	uh.CompletedRedoStep();
 }

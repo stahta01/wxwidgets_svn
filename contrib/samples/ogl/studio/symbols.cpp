@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/symbols.cpp
+// Name:        symbols.cpp
 // Purpose:     Implements the Studio symbol database
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -17,10 +17,10 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/wxexpr.h>
 
 #include "studio.h"
 #include "doc.h"
@@ -69,41 +69,41 @@ void csSymbolDatabase::AddSymbol(csSymbol* symbol)
 
 void csSymbolDatabase::ClearSymbols()
 {
-    wxObjectList::compatibility_iterator node = m_symbols.GetFirst();
+    wxNode* node = m_symbols.First();
     while (node)
     {
-        csSymbol* symbol = (csSymbol*) node->GetData();
+        csSymbol* symbol = (csSymbol*) node->Data();
         delete symbol;
 
-        node = node->GetNext();
+        node = node->Next();
     }
     m_symbols.Clear();
 }
 
 csSymbol* csSymbolDatabase::FindSymbol(const wxString& name) const
 {
-    wxObjectList::compatibility_iterator node = m_symbols.GetFirst();
+    wxNode* node = m_symbols.First();
     while (node)
     {
-        csSymbol* symbol = (csSymbol*) node->GetData();
+        csSymbol* symbol = (csSymbol*) node->Data();
         if (symbol->GetName() == name)
             return symbol;
 
-        node = node->GetNext();
+        node = node->Next();
     }
     return NULL;
 }
 
 csSymbol* csSymbolDatabase::FindSymbol(int toolId) const
 {
-    wxObjectList::compatibility_iterator node = m_symbols.GetFirst();
+    wxNode* node = m_symbols.First();
     while (node)
     {
-        csSymbol* symbol = (csSymbol*) node->GetData();
+        csSymbol* symbol = (csSymbol*) node->Data();
         if (symbol->GetToolId() == toolId)
             return symbol;
 
-        node = node->GetNext();
+        node = node->Next();
     }
     return NULL;
 }
@@ -115,51 +115,51 @@ void csApp::InitSymbols()
 
     wxShape* shape = new csCircleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Circle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Circle", shape));
 
     shape = new csCircleShadowShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Circle shadow"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Circle shadow", shape));
 
     shape = new csThinRectangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Thin Rectangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Thin Rectangle", shape));
 
     shape = new csWideRectangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Wide Rectangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Wide Rectangle", shape));
 
     shape = new csSemiCircleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("SemiCircle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("SemiCircle", shape));
 
     shape = new csTriangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Triangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Triangle", shape));
 
     shape = new csOctagonShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Octagon"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Octagon", shape));
 
     shape = new csGroupShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Group"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Group", shape));
 }
 
 wxBitmap* csSymbolDatabase::CreateToolBitmap(csSymbol* symbol, const wxSize& toolSize)
@@ -184,7 +184,7 @@ wxBitmap* csSymbolDatabase::CreateToolBitmap(csSymbol* symbol, const wxSize& too
     memDC.SelectObject(wxNullBitmap);
 #endif
 
-#if 1
+#if 1       
     wxMemoryDC memDC;
 
     double height, width, maxSize;
@@ -207,7 +207,7 @@ wxBitmap* csSymbolDatabase::CreateToolBitmap(csSymbol* symbol, const wxSize& too
     memDC.SetBackground(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE), wxSOLID));
     memDC.Clear();
 
-    symbol->GetShape()->Show(true);
+    symbol->GetShape()->Show(TRUE);
     symbol->GetShape()->Move(memDC, centreX, centreY);
 
     memDC.SelectObject(wxNullBitmap);
@@ -215,3 +215,4 @@ wxBitmap* csSymbolDatabase::CreateToolBitmap(csSymbol* symbol, const wxSize& too
 
     return newBitmap;
 }
+

@@ -1,5 +1,5 @@
-                      wxWidgets naming conventions
-                      ============================
+wxWidgets naming conventions
+============================
 
 Being a cross platform development library, it is naturally desirable
 (at least to me ;) for wxWidgets to be exploited in a fully cross

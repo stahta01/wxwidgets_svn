@@ -10,13 +10,13 @@ string to tokenize and also the delimiters which separate tokens in the string
 
 Then \helpref{GetNextToken}{wxstringtokenizergetnexttoken} may be called
 repeatedly until it \helpref{HasMoreTokens}{wxstringtokenizerhasmoretokens} 
-returns \false.
+returns FALSE.
 
 For example:
 
 \begin{verbatim}
 
-wxStringTokenizer tkz(wxT("first:second:third:fourth"), wxT(":"));
+wxStringTokenizer tkz("first:second:third:fourth", ":");
 while ( tkz.HasMoreTokens() )
 {
     wxString token = tkz.GetNextToken();
@@ -43,39 +43,28 @@ same as {\tt wxTOKEN\_STRTOK} if the delimiter string contains only
 whitespaces, same as {\tt wxTOKEN\_RET\_EMPTY} otherwise}
 \twocolitem{{\tt wxTOKEN\_RET\_EMPTY}}{In this mode, the empty tokens in the
 middle of the string will be returned, i.e. {\tt "a::b:"} will be tokenized in
-three tokens `a', `' and `b'. Notice that all trailing delimiters are ignored
-in this mode, not just the last one, i.e. a string \texttt{"a::b::"} would
-still result in the same set of tokens.}
-\twocolitem{{\tt wxTOKEN\_RET\_EMPTY\_ALL}}{In this mode, empty trailing tokens
-(including the one after the last delimiter character) will be returned as
-well. The string \texttt{"a::b:"} will be tokenized in four tokens: the already
-mentioned ones and another empty one as the last one and a string 
-\texttt{"a::b::"} will have five tokens.}
+three tokens `a', `' and `b'.}
+\twocolitem{{\tt wxTOKEN\_RET\_EMPTY\_ALL}}{In this mode, empty trailing token
+(after the last delimiter character) will be returned as well. The string as
+above will contain four tokens: the already mentioned ones and another empty
+one as the last one.}
 \twocolitem{{\tt wxTOKEN\_RET\_DELIMS}}{In this mode, the delimiter character
 after the end of the current token (there may be none if this is the last
 token) is returned appended to the token. Otherwise, it is the same mode as 
-\texttt{wxTOKEN\_RET\_EMPTY}. Notice that there is no mode like this one but
-behaving like \texttt{wxTOKEN\_RET\_EMPTY\_ALL} instead of 
-\texttt{wxTOKEN\_RET\_EMPTY}, use \texttt{wxTOKEN\_RET\_EMPTY\_ALL} and 
-\helpref{GetLastDelimiter()}{wxstringtokenizergetlastdelimiter} to emulate it.}
+{\tt wxTOKEN\_RET\_EMPTY}.}
 \twocolitem{{\tt wxTOKEN\_STRTOK}}{In this mode the class behaves exactly like
-the standard {\tt strtok()} function: the empty tokens are never returned.}
+the standard {\tt strtok()} function. The empty tokens are never returned.}
 \end{twocollist}
 
 \wxheading{Derived from}
 
 \helpref{wxObject}{wxobject}
 
-\wxheading{See also}
-
-\helpref{wxStringTokenize}{wxstringtokenize}
-
 \wxheading{Include files}
 
 <wx/tokenzr.h>
 
 \latexignore{\rtfignore{\wxheading{Members}}}
-
 
 \membersection{wxStringTokenizer::wxStringTokenizer}\label{wxstringtokenizerwxstringtokenizer}
 
@@ -90,41 +79,23 @@ methods.
 Constructor. Pass the string to tokenize, a string containing delimiters
 and the mode specifying how the string should be tokenized.
 
-
 \membersection{wxStringTokenizer::CountTokens}\label{wxstringtokenizercounttokens}
 
 \constfunc{int}{CountTokens}{\void}
 
-Returns the number of tokens remaining in the input string. The number of
-tokens returned by this function is decremented each time 
-\helpref{GetNextToken}{wxstringtokenizergetnexttoken} is called and when it
-reaches $0$ \helpref{HasMoreTokens}{wxstringtokenizerhasmoretokens} returns
-\false.
-
+Returns the number of tokens in the input string.
 
 \membersection{wxStringTokenizer::HasMoreTokens}\label{wxstringtokenizerhasmoretokens}
 
 \constfunc{bool}{HasMoreTokens}{\void}
 
-Returns \true if the tokenizer has further tokens, \false if none are left.
-
-
-\membersection{wxStringTokenizer::GetLastDelimiter}\label{wxstringtokenizergetlastdelimiter}
-
-\func{wxChar}{GetLastDelimiter}{\void}
-
-Returns the delimiter which ended scan for the last token returned by 
-\helpref{GetNextToken()}{wxstringtokenizergetnexttoken} or \texttt{NUL} if
-there had been no calls to this function yet or if it returned the trailing
-empty token in \texttt{wxTOKEN\_RET\_EMPTY\_ALL} mode.
-
+Returns TRUE if the tokenizer has further tokens, FALSE if none are left.
 
 \membersection{wxStringTokenizer::GetNextToken}\label{wxstringtokenizergetnexttoken}
 
-\constfunc{wxString}{GetNextToken}{\void}
+\func{wxString}{GetNextToken}{\void}
 
 Returns the next token or empty string if the end of string was reached.
-
 
 \membersection{wxStringTokenizer::GetPosition}\label{wxstringtokenizergetposition}
 
@@ -134,13 +105,11 @@ Returns the current position (i.e. one index after the last returned
 token or 0 if GetNextToken() has never been called) in the original
 string.
 
-
 \membersection{wxStringTokenizer::GetString}\label{wxstringtokenizergetstring}
 
 \constfunc{wxString}{GetString}{\void}
 
 Returns the part of the starting string without all token already extracted.
-
 
 \membersection{wxStringTokenizer::SetString}\label{wxstringtokenizersetstring}
 

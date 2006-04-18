@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        typetest.h
-// Purpose:     Types wxWidgets sample
+// Purpose:     Types wxWindows sample
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
@@ -21,6 +21,10 @@ public:
     bool OnInit();
     int OnExit() { delete m_mimeDatabase; return wxApp::OnExit(); }
 
+#if wxUSE_TIMEDATE
+    void DoDateDemo(wxCommandEvent& event);
+#endif // wxUSE_TIMEDATE
+    void DoTimeDemo(wxCommandEvent& event);
     void DoVariantDemo(wxCommandEvent& event);
     void DoByteOrderDemo(wxCommandEvent& event);
     void DoStreamDemo(wxCommandEvent& event);
@@ -66,9 +70,9 @@ enum
 {
     TYPES_QUIT = wxID_EXIT,
     TYPES_TEXT = 101,
-    TYPES_ABOUT = wxID_ABOUT,
+    TYPES_ABOUT,
 
-    TYPES_DATE = 102,
+    TYPES_DATE,
     TYPES_TIME,
     TYPES_VARIANT,
     TYPES_BYTEORDER,

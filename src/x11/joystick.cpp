@@ -87,7 +87,7 @@ bool wxJoystick::IsOk() const
     return FALSE;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;

@@ -67,16 +67,9 @@ copy *.* \wxmsw_dist\wxMSW\include\wx\msw
 rem del \wxmsw_dist\wxMSW\include\wx\msw\setup.h
 del \wxmsw_dist\wxMSW\include\wx\msw\Makefile.am
 del \wxmsw_dist\wxMSW\include\wx\msw\Makefile.in
-md \wxmsw_dist\wxMSW\include\wx\msw\gnuwin32
-cd gnuwin32
-copy *.h \wxmsw_dist\wxMSW\include\wx\msw\gnuwin32
-cd ..
 md \wxmsw_dist\wxMSW\include\wx\msw\ole
 cd ole
 copy *.h \wxmsw_dist\wxMSW\include\wx\msw\ole
-cd ..
-cd ctl3d
-copy *.h \wxmsw_dist\wxMSW\include\wx\msw\ctl3d
 cd ..
 cd ..
 
@@ -200,6 +193,40 @@ copy lw.cpp \wxmsw_dist\wxMSW\utils\glcanvas\samples\penguin
 copy penguin.lwo \wxmsw_dist\wxMSW\utils\glcanvas\samples\penguin
 copy mondrian.ico \wxmsw_dist\wxMSW\utils\glcanvas\samples\penguin
 cd ..\..\..
+
+echo DialogEd..
+
+cd dialoged\src
+md \wxmsw_dist\wxMSW\utils\dialoged
+md \wxmsw_dist\wxMSW\utils\dialoged\src
+copy Makefile.* \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dialoged.def \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dialoged.rc \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dialoged.ico \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dialoged.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dlghndlr.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy edlist.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy edtree.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy reseditr.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy reswrite.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy symbtabl.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy winprop.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy winstyle.cpp \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dialoged.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy dlghndlr.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy edlist.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy edtree.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy reseditr.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy symbtabl.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy winprop.h \wxmsw_dist\wxMSW\utils\dialoged\src
+copy winstyle.h \wxmsw_dist\wxMSW\utils\dialoged\src
+
+cd bitmaps
+md \wxmsw_dist\wxMSW\utils\dialoged\src\bitmaps
+copy *.bmp \wxmsw_dist\wxMSW\utils\dialoged\src\bitmaps
+copy *.ico \wxmsw_dist\wxMSW\utils\dialoged\src\bitmaps
+cd ..\..\..
+
 
 cd ..
 
@@ -582,20 +609,6 @@ copy *.def \wxmsw_dist\wxMSW\samples\scroll
 copy *.rc \wxmsw_dist\wxMSW\samples\scroll
 copy *.ico \wxmsw_dist\wxMSW\samples\scroll
 copy *.h \wxmsw_dist\wxMSW\samples\scroll
-cd ..
-
-echo Splash sample..
-
-cd splash
-md \wxmsw_dist\wxMSW\samples\splash
-copy Makefile.* \wxmsw_dist\wxMSW\samples\splash
-copy *.cpp \wxmsw_dist\wxMSW\samples\splash
-copy *.h \wxmsw_dist\wxMSW\samples\splash
-copy *.def \wxmsw_dist\wxMSW\samples\splash
-copy *.rc \wxmsw_dist\wxMSW\samples\splash
-copy *.ico \wxmsw_dist\wxMSW\samples\splash
-copy *.png \wxmsw_dist\wxMSW\samples\splash
-copy *.mpg \wxmsw_dist\wxMSW\samples\splash
 cd ..
 
 echo Splitter sample..

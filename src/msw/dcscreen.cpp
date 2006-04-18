@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +25,7 @@
 
 #include "wx/dcscreen.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxDC)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
 // Create a DC representing the whole screen
 wxScreenDC::wxScreenDC()
@@ -35,5 +35,12 @@ wxScreenDC::wxScreenDC()
     // the background mode is only used for text background and is set in
     // DrawText() to OPAQUE as required, otherwise always TRANSPARENT
     ::SetBkMode( GetHdc(), TRANSPARENT );
+}
+
+void wxScreenDC::DoGetSize(int *width, int *height) const
+{
+    // skip wxWindowDC version because it doesn't work without a valid m_canvas
+    // (which we don't have)
+    wxDC::DoGetSize(width, height);
 }
 

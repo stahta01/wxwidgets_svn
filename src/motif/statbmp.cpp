@@ -9,9 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/defs.h"
 
 #include "wx/statbmp.h"
@@ -22,6 +19,7 @@
 #include <Xm/Xm.h>
 #include <Xm/Label.h>
 #include <Xm/LabelG.h>
+#include <Xm/RowColumn.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
@@ -41,17 +39,24 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
            long style,
            const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, wxDefaultValidator,
-                        name ) )
-        return false;
-
     m_messageBitmap = bitmap;
     m_messageBitmapOriginal = bitmap;
+    SetName(name);
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    if (parent) parent->AddChild(this);
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
+
+    m_windowStyle = style;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
     m_mainWidget = (WXWidget) XtVaCreateManagedWidget ("staticBitmap",
-#if wxUSE_GADGETS
+#if USE_GADGETS
                     xmLabelGadgetClass, parentWidget,
 #else
                     xmLabelWidgetClass, parentWidget,
@@ -63,18 +68,20 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
 
     DoSetBitmap();
 
-    ChangeFont(false);
+    m_font = parent->GetFont();
+    ChangeFont(FALSE);
+
+    SetCanAddEventHandler(TRUE);
 
     wxSize actualSize(size);
     // work around the cases where the bitmap is a wxNull(Icon/Bitmap)
     if (actualSize.x == -1)
-        actualSize.x = bitmap.Ok() ? bitmap.GetWidth() : 1;
+        actualSize.x = bitmap.GetWidth() ? bitmap.GetWidth() : 1;
     if (actualSize.y == -1)
-        actualSize.y = bitmap.Ok() ? bitmap.GetHeight() : 1;
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, actualSize.x, actualSize.y);
+        actualSize.y = bitmap.GetHeight() ? bitmap.GetHeight() : 1;
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, actualSize.x, actualSize.y);
 
-    return true;
+    return TRUE;
 }
 
 wxStaticBitmap::~wxStaticBitmap()
@@ -85,7 +92,9 @@ wxStaticBitmap::~wxStaticBitmap()
 void wxStaticBitmap::DoSetBitmap()
 {
     Widget widget = (Widget) m_mainWidget;
-    int w2, h2;
+    int x, y, w1, h1, w2, h2;
+
+    GetPosition(&x, &y);
 
     if (m_messageBitmapOriginal.Ok())
     {
@@ -108,20 +117,19 @@ void wxStaticBitmap::DoSetBitmap()
             wxBitmap newBitmap = wxCreateMaskedBitmap(m_messageBitmapOriginal, col);
             m_messageBitmap = newBitmap;
 
-            pixmap = (Pixmap) m_messageBitmap.GetDrawable();
+            pixmap = (Pixmap) m_messageBitmap.GetPixmap();
         }
         else
-        {
-            m_bitmapCache.SetBitmap( m_messageBitmap );
-            pixmap = (Pixmap)m_bitmapCache.GetLabelPixmap(widget);
-        }
+            pixmap = (Pixmap) m_messageBitmap.GetLabelPixmap(widget);
 
         XtVaSetValues (widget,
             XmNlabelPixmap, pixmap,
             XmNlabelType, XmPIXMAP,
             NULL);
+        GetSize(&w1, &h1);
 
-        SetSize(w2, h2);
+        if (! (w1 == w2) && (h1 == h2))
+            SetSize(x, y, w2, h2);
     }
     else
     {
@@ -142,18 +150,21 @@ void wxStaticBitmap::SetBitmap(const wxBitmap& bitmap)
     DoSetBitmap();
 }
 
+void wxStaticBitmap::ChangeFont(bool keepOriginalSize)
+{
+    wxWindow::ChangeFont(keepOriginalSize);
+}
+
 void wxStaticBitmap::ChangeBackgroundColour()
 {
     wxWindow::ChangeBackgroundColour();
 
     // must recalculate the background colour
-    m_bitmapCache.SetColoursChanged();
     DoSetBitmap();
 }
 
 void wxStaticBitmap::ChangeForegroundColour()
 {
-    m_bitmapCache.SetColoursChanged();
     wxWindow::ChangeForegroundColour();
 }
 

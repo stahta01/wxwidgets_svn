@@ -7,19 +7,12 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/dataobj.h"
-
-#if wxUSE_DATAOBJ
-
 #include "wx/app.h"
 #include "wx/debug.h"
 #include "wx/mstream.h"
 #include "wx/image.h"
 #include "wx/log.h"
-#include "wx/uri.h"
 
 #include <gdk/gdk.h>
 
@@ -28,7 +21,6 @@
 //-------------------------------------------------------------------------
 
 GdkAtom  g_textAtom        = 0;
-GdkAtom  g_altTextAtom     = 0;
 GdkAtom  g_pngAtom         = 0;
 GdkAtom  g_fileAtom        = 0;
 
@@ -77,18 +69,14 @@ wxDataFormat::wxDataFormat( NativeFormat format )
 void wxDataFormat::SetType( wxDataFormatId type )
 {
     PrepareFormats();
+    
+    if (type == wxDF_UNICODETEXT)
+       type = wxDF_TEXT;
 
     m_type = type;
-
-#if wxUSE_UNICODE
-    if (m_type == wxDF_UNICODETEXT)
+    
+    if (m_type == wxDF_TEXT)
         m_format = g_textAtom;
-    else if (m_type == wxDF_TEXT)
-        m_format = g_altTextAtom;
-#else
-    if (m_type == wxDF_TEXT || m_type == wxDF_UNICODETEXT)
-        m_format = g_textAtom;
-#endif
     else
     if (m_type == wxDF_BITMAP)
         m_format = g_pngAtom;
@@ -108,9 +96,7 @@ wxDataFormatId wxDataFormat::GetType() const
 
 wxString wxDataFormat::GetId() const
 {
-    gchar* atom_name = gdk_atom_name( m_format );
-    wxString ret = wxString::FromAscii( atom_name );
-    g_free(atom_name);
+    wxString ret = wxString::FromAscii( gdk_atom_name( m_format ) );
     return ret;
 }
 
@@ -120,13 +106,6 @@ void wxDataFormat::SetId( NativeFormat format )
     m_format = format;
 
     if (m_format == g_textAtom)
-#if wxUSE_UNICODE
-        m_type = wxDF_UNICODETEXT;
-#else
-        m_type = wxDF_TEXT;
-#endif
-    else
-    if (m_format == g_altTextAtom)
         m_type = wxDF_TEXT;
     else
     if (m_format == g_pngAtom)
@@ -143,7 +122,7 @@ void wxDataFormat::SetId( const wxChar *id )
     PrepareFormats();
     m_type = wxDF_PRIVATE;
     wxString tmp( id );
-    m_format = gdk_atom_intern( (const char*) tmp.ToAscii(), FALSE );
+    m_format = gdk_atom_intern( (const char*) tmp.ToAscii(), FALSE ); 
 }
 
 void wxDataFormat::PrepareFormats()
@@ -158,7 +137,6 @@ void wxDataFormat::PrepareFormats()
     if (!g_textAtom)
 #if wxUSE_UNICODE
         g_textAtom = gdk_atom_intern( "UTF8_STRING", FALSE );
-        g_altTextAtom = gdk_atom_intern( "STRING", FALSE );
 #else
         g_textAtom = gdk_atom_intern( "STRING" /* "text/plain" */, FALSE );
 #endif
@@ -184,17 +162,17 @@ wxDataObject::~wxDataObject()
 bool wxDataObject::IsSupportedFormat(const wxDataFormat& format, Direction dir) const
 {
     size_t nFormatCount = GetFormatCount(dir);
-    if ( nFormatCount == 1 )
+    if ( nFormatCount == 1 ) 
     {
         return format == GetPreferredFormat();
     }
-    else
+    else 
     {
         wxDataFormat *formats = new wxDataFormat[nFormatCount];
         GetAllFormats(formats,dir);
 
         size_t n;
-        for ( n = 0; n < nFormatCount; n++ )
+        for ( n = 0; n < nFormatCount; n++ ) 
         {
             if ( formats[n] == format )
                 break;
@@ -206,18 +184,6 @@ bool wxDataObject::IsSupportedFormat(const wxDataFormat& format, Direction dir) 
         return n < nFormatCount;
     }
 }
-
-// ----------------------------------------------------------------------------
-// wxTextDataObject
-// ----------------------------------------------------------------------------
-
-#if defined(__WXGTK20__) && wxUSE_UNICODE
-void wxTextDataObject::GetAllFormats(wxDataFormat *formats, wxDataObjectBase::Direction dir) const
-{
-    *formats++ = GetPreferredFormat();
-    *formats = g_altTextAtom;
-}
-#endif
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject
@@ -255,10 +221,28 @@ size_t wxFileDataObject::GetDataSize() const
 
 bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
 {
+    // VZ: old format
+#if 0
+    // filenames are stores as a string with #0 as deliminators
+    const char *filenames = (const char*) buf;
+    size_t pos = 0;
+    for(;;)
+    {
+        if (filenames[0] == 0)
+            break;
+        if (pos >= size)
+            break;
+        wxString file( filenames );  // this returns the first file
+        AddFile( file );
+        pos += file.Len()+1;
+        filenames += file.Len()+1;
+    }
+#else // 1
     m_filenames.Empty();
 
-    // we get data in the text/uri-list format, i.e. as a sequence of URIs
-    // (filenames prefixed by "file:") delimited by "\r\n"
+    // the text/uri-list format is a sequence of URIs (filenames prefixed by
+    // "file:" as far as I see) delimited by "\r\n" of total length size
+    // (I wonder what happens if the file has '\n' in its filename??)
     wxString filename;
     for ( const char *p = (const char *)buf; ; p++ )
     {
@@ -279,12 +263,12 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
                     lenPrefix += 2;
                 }
 
-                AddFile(wxURI::Unescape(filename.c_str() + lenPrefix));
+                AddFile(filename.c_str() + lenPrefix);
                 filename.Empty();
             }
-            else if ( !filename.empty() )
+            else
             {
-                wxLogDebug(_T("Unsupported URI \"%s\" in wxFileDataObject"),
+                wxLogDebug(_T("Unsupported URI '%s' in wxFileDataObject"),
                            filename.c_str());
             }
 
@@ -299,6 +283,7 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
             filename += *p;
         }
     }
+#endif // 0/1
 
     return TRUE;
 }
@@ -397,4 +382,4 @@ void wxBitmapDataObject::DoConvertToPng()
     image.SaveFile(mstream, wxBITMAP_TYPE_PNG);
 }
 
-#endif // wxUSE_DATAOBJ
+

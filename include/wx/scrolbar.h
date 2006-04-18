@@ -12,13 +12,11 @@
 #ifndef _WX_SCROLBAR_H_BASE_
 #define _WX_SCROLBAR_H_BASE_
 
-#include "wx/defs.h"
-
 #if wxUSE_SCROLLBAR
 
 #include "wx/control.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxScrollBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxScrollBarNameStr;
 
 // ----------------------------------------------------------------------------
 // wxScrollBar: a scroll bar control
@@ -27,8 +25,6 @@ extern WXDLLEXPORT_DATA(const wxChar) wxScrollBarNameStr[];
 class WXDLLEXPORT wxScrollBarBase : public wxControl
 {
 public:
-    wxScrollBarBase() { }
-
     // scrollbar construction
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -50,10 +46,7 @@ public:
     virtual void SetThumbPosition(int viewStart) = 0;
     virtual void SetScrollbar(int position, int thumbSize,
                               int range, int pageSize,
-                              bool refresh = true) = 0;
-
-private:
-    DECLARE_NO_COPY_CLASS(wxScrollBarBase)
+                              bool refresh = TRUE) = 0;
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -62,16 +55,14 @@ private:
     #include "wx/msw/scrolbar.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/scrolbar.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/scrolbar.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/scrolbar.h"
+    #include "wx/gtk/scrolbar.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/scrolbar.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/scrolbar.h"
 #elif defined(__WXPM__)
     #include "wx/os2/scrolbar.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/scrolbar.h"
 #endif
 
 #endif // wxUSE_SCROLLBAR

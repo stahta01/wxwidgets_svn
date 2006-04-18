@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
-//              wxWidgets itself, it may contain identifiers which don't start
+//              wxWindows itself, it may contain identifiers which don't start
 //              with "wx".
 // Author:      Julian Smart
 // Modified by:
@@ -11,70 +11,29 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_OS2_PRIVATE_H_
-#define _WX_OS2_PRIVATE_H_
+#ifndef _WX_PRIVATE_H_
+#define _WX_PRIVATE_H_
 
 #define INCL_BASE
 #define INCL_PM
 #define INCL_GPI
 #define INCL_WINSYS
 #define INCL_SHLERRORS
-#define INCL_DOS
-#define INCL_WINATOM
-#define INCL_WIN
 #include <os2.h>
+#if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS)
+/* struct missing in "os2emx.h" */
+ typedef struct _SPBCDATA {
+   ULONG     cbSize;       /*  Size of control block. */
+   ULONG     ulTextLimit;  /*  Entryfield text limit. */
+   LONG      lLowerLimit;  /*  Spin lower limit (numeric only). */
+   LONG      lUpperLimit;  /*  Spin upper limit (numeric only). */
+   ULONG     idMasterSpb;  /*  ID of the servant's master spinbutton. */
+   PVOID     pHWXCtlData;  /*  Handwriting control data structure flag. */
+ } SPBCDATA;
 
-#if wxONLY_WATCOM_EARLIER_THAN(1,4)
-    inline HATOMTBL APIENTRY WinQuerySystemAtomTable(VOID){return NULL;}
-    inline ULONG APIENTRY WinQueryAtomName(HATOMTBL,ATOM,PCSZ,ULONG){return 0;}
-    inline LONG APIENTRY GpiPointArc(HPS,PPOINTL){return GPI_ERROR;}
-    inline BOOL APIENTRY WinDrawPointer(HPS,LONG,LONG,HPOINTER,ULONG){return FALSE;}
-    inline HPOINTER APIENTRY WinCreatePointerIndirect(HWND,PPOINTERINFO){return NULLHANDLE;}
-    inline BOOL APIENTRY WinGetMaxPosition(HWND,PSWP){return FALSE;}
-    inline BOOL APIENTRY WinGetMinPosition(HWND,PSWP,PPOINTL){return FALSE;}
+ typedef SPBCDATA *PSPBCDATA;
 #endif
 
-#if defined(__WATCOMC__) && defined(__WXMOTIF__)
-    #include <os2def.h>
-    #define I_NEED_OS2_H
-    #include <X11/Xmd.h>
-
-    // include this header from here for many of the GUI related code
-    #if wxUSE_GUI
-        extern "C" {
-            #include <Xm/VendorSP.h>
-        }
-    #endif
-
-    // provide Unix-like pipe()
-    #include <types.h>
-    #include <tcpustd.h>
-    #include <sys/time.h>
-    // Use ::DosCreatePipe or ::DosCreateNPipe under OS/2
-    // for more see http://posix2.sourceforge.net/guide.html
-    inline int pipe( int WXUNUSED(filedes)[2] )
-    {
-        wxFAIL_MSG(wxT("Implement first"));
-        return -1;
-    }
-#endif
-
-#if defined (__EMX__) && !defined(USE_OS2_TOOLKIT_HEADERS) && !defined(HAVE_SPBCDATA)
-
-    typedef struct _SPBCDATA {
-        ULONG     cbSize;       /*  Size of control block. */
-        ULONG     ulTextLimit;  /*  Entryfield text limit. */
-        LONG      lLowerLimit;  /*  Spin lower limit (numeric only). */
-        LONG      lUpperLimit;  /*  Spin upper limit (numeric only). */
-        ULONG     idMasterSpb;  /*  ID of the servant's master spinbutton. */
-        PVOID     pHWXCtlData;  /*  Handwriting control data structure flag. */
-    } SPBCDATA;
-
-    typedef SPBCDATA *PSPBCDATA;
-
-#endif
-
-#include "wx/dlimpexp.h"
 #include "wx/fontenc.h"
 
 class WXDLLEXPORT wxFont;
@@ -86,6 +45,19 @@ class WXDLLEXPORT wxBitmap;
 // private constants
 // ---------------------------------------------------------------------------
 
+// Conversion
+static const double METRIC_CONVERSION_CONSTANT = 0.0393700787;
+
+// Scaling factors for various unit conversions
+static const double mm2inches = (METRIC_CONVERSION_CONSTANT);
+static const double inches2mm = (1/METRIC_CONVERSION_CONSTANT);
+
+static const double mm2twips = (METRIC_CONVERSION_CONSTANT*1440);
+static const double twips2mm = (1/(METRIC_CONVERSION_CONSTANT*1440));
+
+static const double mm2pt = (METRIC_CONVERSION_CONSTANT*72);
+static const double pt2mm = (1/(METRIC_CONVERSION_CONSTANT*72));
+
 //
 // Constant strings for control names and classes
 //
@@ -93,42 +65,42 @@ class WXDLLEXPORT wxBitmap;
 //
 // Controls
 //
-WXDLLEXPORT_DATA(extern const wxChar) wxButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxCanvasNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxCheckBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxChoiceNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxComboBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFrameNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxGaugeNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxListBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticTextNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticBitmapNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxMultiTextNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxPanelNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxRadioBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxRadioButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxBitmapRadioButtonNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxScrollBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxSliderNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxTextCtrlWindowNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxTextCtrlNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxVirtListBoxNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxButtonBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxEnhDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxStatusLineNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxGetTextFromUserPromptStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxMessageBoxCaptionStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFileSelectorPromptStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxFileSelectorDefaultWildcardStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxCanvasNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxCheckBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxChoiceNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxComboBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxGaugeNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxListBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticTextNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBitmapNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMultiTextNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxRadioBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxRadioButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxBitmapRadioButtonNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxScrollBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlWindowNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxVirtListBoxNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxEnhDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxGetTextFromUserPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFileSelectorPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxFileSelectorDefaultWildcardStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxInternalErrorStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxFatalErrorStr;
-WXDLLEXPORT_DATA(extern const wxChar) wxTreeCtrlNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDirDialogNameStr[];
-WXDLLEXPORT_DATA(extern const wxChar) wxDirDialogDefaultFolderStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxTreeCtrlNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogDefaultFolderStr;
 
 //
 // Class names
@@ -169,6 +141,16 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 typedef MRESULT (APIENTRY * WndProcCast) (HWND, ULONG, MPARAM, MPARAM);
 #define CASTWNDPROC (WndProcCast)
 
+#if wxUSE_ITSY_BITSY
+    #define IBS_HORZCAPTION    0x4000L
+    #define IBS_VERTCAPTION    0x8000L
+
+    UINT    APIENTRY ibGetCaptionSize( HWND hWnd  ) ;
+    UINT    APIENTRY ibSetCaptionSize( HWND hWnd, UINT nSize ) ;
+    MRESULT APIENTRY ibDefWindowProc( HWND hWnd, ULONG ulMsg, MPARAM wParam, MPARAM lParam ) ;
+    VOID    APIENTRY ibAdjustWindowRect( HWND hWnd, LPRECT lprc ) ;
+#endif // wxUSE_ITSY_BITSY
+
 /*
  * Decide what window classes we're going to use
  * for this combination of CTl3D/FAFA settings
@@ -178,11 +160,11 @@ typedef MRESULT (APIENTRY * WndProcCast) (HWND, ULONG, MPARAM, MPARAM);
 #define STATIC_FLAGS     (SS_TEXT|DT_LEFT|SS_LEFT|WS_VISIBLE)
 #define CHECK_CLASS      _T("BUTTON")
 #define CHECK_FLAGS      (BS_AUTOCHECKBOX|WS_TABSTOP)
-#define CHECK_IS_FAFA    FALSE
+#define CHECK_IS_FAFA   FALSE
 #define RADIO_CLASS      _T("BUTTON" )
 #define RADIO_FLAGS      (BS_AUTORADIOBUTTON|WS_VISIBLE)
 #define RADIO_SIZE       20
-#define RADIO_IS_FAFA    FALSE
+#define RADIO_IS_FAFA   FALSE
 #define PURE_WINDOWS
 /*  PM has no group box button style
 #define GROUP_CLASS      "BUTTON"
@@ -225,34 +207,6 @@ extern LONG APIENTRY wxSubclassedGenericControlProc(WXHWND hWnd, WXDWORD message
     #define ENDSESSION_LOGOFF    0x80000000
 #endif
 
-#ifndef PMERR_INVALID_PARM
-    #define PMERR_INVALID_PARM 0x1303
-#endif
-
-#ifndef PMERR_INVALID_PARAMETERS
-    #define PMERR_INVALID_PARAMETERS 0x1208
-#endif
-
-#ifndef BOOKERR_INVALID_PARAMETERS
-    #define BOOKERR_INVALID_PARAMETERS -1
-#endif
-
-#ifndef DLGC_ENTRYFIELD
-    #define DLGC_ENTRYFIELD  0x0001
-#endif
-
-#ifndef DLGC_BUTTON
-    #define DLGC_BUTTON      0x0002
-#endif
-
-#ifndef DLGC_MLE
-    #define DLGC_MLE         0x0400
-#endif
-
-#ifndef DP_NORMAL
-    #define DP_NORMAL 0
-#endif
-
 // ---------------------------------------------------------------------------
 // debug messages -- OS/2 has no native debug output system
 // ---------------------------------------------------------------------------
@@ -290,34 +244,35 @@ extern LONG APIENTRY wxSubclassedGenericControlProc(WXHWND hWnd, WXDWORD message
 #define GetHfont()              ((HFONT)GetHFONT())
 #define GetHfontOf(font)        ((HFONT)(font).GetHFONT())
 
-// OS/2 convention of the mask is opposed to the wxWidgets one, so we need
+// OS/2 convention of the mask is opposed to the wxWindows one, so we need
 // to invert the mask each time we pass one/get one to/from Windows
 extern HBITMAP wxInvertMask(HBITMAP hbmpMask, int w = 0, int h = 0);
-extern HBITMAP wxFlipBmp(HBITMAP hbmp, int w = 0, int h = 0);
 
 // ---------------------------------------------------------------------------
 // global data
 // ---------------------------------------------------------------------------
 
-#ifdef __WXPM__
 // The MakeProcInstance version of the function wxSubclassedGenericControlProc
 WXDLLEXPORT_DATA(extern int) wxGenericControlSubClassProc;
 WXDLLEXPORT_DATA(extern wxChar*) wxBuffer;
+
+#ifdef __WXPM__
+
 WXDLLEXPORT_DATA(extern HINSTANCE) wxhInstance;
-#endif
 
 // ---------------------------------------------------------------------------
 // global functions
 // ---------------------------------------------------------------------------
 
-#ifdef __WXPM__
 extern "C"
 {
 WXDLLEXPORT HINSTANCE wxGetInstance();
 }
 
-WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
-#endif
+WXDLLEXPORT void wxDrawBorder( HPS     hPS
+                              ,RECTL&  rRect
+                              ,WXDWORD dwStyle
+                             );
 
 #include "wx/thread.h"
 static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
@@ -333,12 +288,7 @@ static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
 }
 #define WinSendMsg MySendMsg
 
-#ifdef __WXPM__
-
-WXDLLEXPORT void wxDrawBorder( HPS     hPS
-                              ,RECTL&  rRect
-                              ,WXDWORD dwStyle
-                             );
+WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
 
 WXDLLEXPORT wxWindow* wxFindWinFromHandle(WXHWND hWnd);
 
@@ -366,7 +316,7 @@ WXDLLEXPORT wxFont wxCreateFontFromLogFont( LOGFONT*      pLogFont
                                            ,PFONTMETRICS  pFM
                                            ,PFACENAMEDESC pFace
                                           );
-WXDLLEXPORT int    wxGpiStrcmp(wxChar* s0, wxChar* s1);
+WXDLLEXPORT int    wxGpiStrcmp(char* s0, char* s1);
 
 WXDLLEXPORT void wxSliderEvent(WXHWND control, WXWORD wParam, WXWORD pos);
 WXDLLEXPORT void wxScrollBarEvent(WXHWND hbar, WXWORD wParam, WXWORD pos);
@@ -388,7 +338,7 @@ WXDLLEXPORT extern wxString wxGetWindowClass(WXHWND hWnd);
 WXDLLEXPORT extern WXWORD wxGetWindowId(WXHWND hWnd);
 
 // Convert a PM Error code to a string
-WXDLLIMPEXP_BASE extern wxString wxPMErrorToStr(ERRORID vError);
+WXDLLEXPORT extern wxString wxPMErrorToStr(ERRORID vError);
 
 // Does this window style specify any border?
 inline bool wxStyleHasBorder(long style)
@@ -417,10 +367,7 @@ WXDLLEXPORT extern wxBitmap wxDisableBitmap( const wxBitmap& rBmp
                                             ,long            lColor
                                            );
 
-#include "wx/colour.h"
-
-WXDLLEXPORT extern COLORREF wxColourToRGB(const wxColour& rColor);
-
 #endif // __WXPM__
 
-#endif // _WX_OS2_PRIVATE_H_
+#endif // _WX_PRIVATE_H_
+

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/scrolbar.cpp
+// Name:        univ/scrolbar.cpp
 // Purpose:     wxScrollBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     20.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -79,6 +79,7 @@ private:
 IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
 
 BEGIN_EVENT_TABLE(wxScrollBar, wxScrollBarBase)
+    EVT_IDLE(wxScrollBar::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -129,7 +130,7 @@ void wxScrollBar::Init()
         m_elementsState[n] = 0;
     }
 
-    m_dirty = false;
+    m_dirty = FALSE;
 }
 
 bool wxScrollBar::Create(wxWindow *parent,
@@ -143,8 +144,8 @@ bool wxScrollBar::Create(wxWindow *parent,
     // the scrollbars never have the border
     style &= ~wxBORDER_MASK;
 
-    if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
+    if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
+        return FALSE;
 
     SetBestSize(size);
 
@@ -153,7 +154,7 @@ bool wxScrollBar::Create(wxWindow *parent,
 
     CreateInputHandler(wxINP_HANDLER_SCROLLBAR);
 
-    return true;
+    return TRUE;
 }
 
 wxScrollBar::~wxScrollBar()
@@ -169,7 +170,7 @@ bool wxScrollBar::IsStandalone() const
     wxWindow *parent = GetParent();
     if ( !parent )
     {
-        return true;
+        return TRUE;
     }
 
     return (parent->GetScrollbar(wxHORIZONTAL) != this) &&
@@ -218,7 +219,7 @@ void wxScrollBar::DoSetThumb(int pos)
     m_elementsState[Element_Thumb] |= wxCONTROL_DIRTY;
     m_elementsState[m_thumbPos > m_thumbPosOld
                         ? Element_Bar_1 : Element_Bar_2] |= wxCONTROL_DIRTY;
-    m_dirty = true;
+    m_dirty = TRUE;
 }
 
 int wxScrollBar::GetThumbPosition() const
@@ -252,7 +253,7 @@ void wxScrollBar::SetScrollbar(int position, int thumbSize,
                                int range, int pageSize,
                                bool refresh)
 {
-    // we only refresh everything when the range changes, thumb position
+    // we only refresh everythign when the range changes, thumb position
     // changes are handled in OnIdle
     bool needsRefresh = (range != m_range) ||
                         (thumbSize != m_thumbSize) ||
@@ -317,10 +318,10 @@ wxScrollArrows::Arrow wxScrollBar::HitTest(const wxPoint& pt) const
 // drawing
 // ----------------------------------------------------------------------------
 
-void wxScrollBar::OnInternalIdle()
+void wxScrollBar::OnIdle(wxIdleEvent& event)
 {
     UpdateThumb();
-    wxControl::OnInternalIdle();
+    event.Skip();
 }
 
 void wxScrollBar::UpdateThumb()
@@ -372,7 +373,7 @@ void wxScrollBar::UpdateThumb()
                     }
 
 #ifdef WXDEBUG_SCROLLBAR
-        static bool s_refreshDebug = false;
+        static bool s_refreshDebug = FALSE;
         if ( s_refreshDebug )
         {
             wxClientDC dc(this);
@@ -388,14 +389,14 @@ void wxScrollBar::UpdateThumb()
         }
 #endif // WXDEBUG_SCROLLBAR
 
-                    Refresh(false, &rect);
+                    Refresh(FALSE, &rect);
                 }
 
                 m_elementsState[n] &= ~wxCONTROL_DIRTY;
             }
         }
 
-        m_dirty = false;
+        m_dirty = FALSE;
     }
 }
 
@@ -404,7 +405,7 @@ void wxScrollBar::DoDraw(wxControlRenderer *renderer)
     renderer->DrawScrollbar(this, m_thumbPosOld);
 
     // clear all dirty flags
-    m_dirty = false;
+    m_dirty = FALSE;
     m_thumbPosOld = -1;
 }
 
@@ -452,7 +453,7 @@ void wxScrollBar::SetState(Element which, int flags)
     {
         m_elementsState[which] = flags | wxCONTROL_DIRTY;
 
-        m_dirty = true;
+        m_dirty = TRUE;
     }
 }
 
@@ -477,7 +478,7 @@ bool wxScrollBar::PerformAction(const wxControlAction& action,
 {
     int thumbOld = m_thumbPos;
 
-    bool notify = false; // send an event about the change?
+    bool notify = FALSE; // send an event about the change?
 
     wxEventType scrollType;
 
@@ -532,7 +533,7 @@ bool wxScrollBar::PerformAction(const wxControlAction& action,
     else if ( action == wxACTION_SCROLL_THUMB_RELEASE )
     {
         // always notify about this
-        notify = true;
+        notify = TRUE;
         scrollType = wxEVT_SCROLLWIN_THUMBRELEASE;
     }
     else
@@ -550,21 +551,15 @@ bool wxScrollBar::PerformAction(const wxControlAction& action,
             // NB: we assume that scrollbar events are sequentially numbered
             //     but this should be ok as other code relies on this as well
             scrollType += wxEVT_SCROLL_TOP - wxEVT_SCROLLWIN_TOP;
-            wxScrollEvent event(scrollType, this->GetId(), m_thumbPos,
-                                IsVertical() ? wxVERTICAL : wxHORIZONTAL);
-            event.SetEventObject(this);
-            GetParent()->GetEventHandler()->ProcessEvent(event);
         }
-        else // part of the window
-        {
-            wxScrollWinEvent event(scrollType, m_thumbPos,
-                                   IsVertical() ? wxVERTICAL : wxHORIZONTAL);
-            event.SetEventObject(this);
-            GetParent()->GetEventHandler()->ProcessEvent(event);
-        }
+
+        wxScrollWinEvent event(scrollType, m_thumbPos,
+                               IsVertical() ? wxVERTICAL : wxHORIZONTAL);
+        event.SetEventObject(this);
+        GetParent()->GetEventHandler()->ProcessEvent(event);
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxScrollBar::ScrollToStart()
@@ -580,13 +575,13 @@ void wxScrollBar::ScrollToEnd()
 bool wxScrollBar::ScrollLines(int nLines)
 {
     DoSetThumb(m_thumbPos + nLines);
-    return true;
+    return TRUE;
 }
 
 bool wxScrollBar::ScrollPages(int nPages)
 {
     DoSetThumb(m_thumbPos + nPages*m_pageSize);
-    return true;
+    return TRUE;
 }
 
 // ============================================================================
@@ -656,12 +651,12 @@ bool wxStdScrollBarInputHandler::OnScrollTimer(wxScrollBar *scrollbar,
     int oldThumbPos = scrollbar->GetThumbPosition();
     scrollbar->PerformAction(action);
     if ( scrollbar->GetThumbPosition() != oldThumbPos )
-        return true;
+        return TRUE;
 
     // we scrolled till the end
     m_timerScroll->Stop();
 
-    return false;
+    return FALSE;
 }
 
 void wxStdScrollBarInputHandler::StopScrolling(wxScrollBar *control)
@@ -682,7 +677,7 @@ void wxStdScrollBarInputHandler::StopScrolling(wxScrollBar *control)
     }
 
     // unpress the arrow and highlight the current element
-    Press(control, false);
+    Press(control, FALSE);
 }
 
 wxCoord
@@ -717,15 +712,17 @@ bool wxStdScrollBarInputHandler::HandleKey(wxInputConsumer *consumer,
             case WXK_LEFT:      action = wxACTION_SCROLL_LINE_UP;   break;
             case WXK_HOME:      action = wxACTION_SCROLL_START;     break;
             case WXK_END:       action = wxACTION_SCROLL_END;       break;
-            case WXK_PAGEUP:    action = wxACTION_SCROLL_PAGE_UP;   break;
-            case WXK_PAGEDOWN:  action = wxACTION_SCROLL_PAGE_DOWN; break;
+            case WXK_PAGEUP:
+            case WXK_PRIOR:     action = wxACTION_SCROLL_PAGE_UP;   break;
+            case WXK_PAGEDOWN:
+            case WXK_NEXT:      action = wxACTION_SCROLL_PAGE_DOWN; break;
         }
 
-        if ( !action.IsEmpty() )
+        if ( !!action )
         {
             consumer->PerformAction(action);
 
-            return true;
+            return TRUE;
         }
     }
 
@@ -758,7 +755,7 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
                 m_winCapture->CaptureMouse();
 
                 // generate the command
-                bool hasAction = true;
+                bool hasAction = TRUE;
                 wxControlAction action;
                 switch ( ht )
                 {
@@ -788,18 +785,18 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
                         // fall through: there is no immediate action
 
                     default:
-                        hasAction = false;
+                        hasAction = FALSE;
                 }
 
                 // remove highlighting
-                Highlight(scrollbar, false);
+                Highlight(scrollbar, FALSE);
                 m_htLast = ht;
 
                 // and press the arrow or highlight thumb now instead
                 if ( m_htLast == wxHT_SCROLLBAR_THUMB )
-                    Highlight(scrollbar, true);
+                    Highlight(scrollbar, TRUE);
                 else
-                    Press(scrollbar, true);
+                    Press(scrollbar, TRUE);
 
                 // start dragging
                 if ( hasAction )
@@ -827,7 +824,7 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
                 }
 
                 m_htLast = ht;
-                Highlight(scrollbar, true);
+                Highlight(scrollbar, TRUE);
             }
             else
             {
@@ -849,22 +846,22 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
 
     if ( m_winCapture )
     {
-        if ( (m_htLast == wxHT_SCROLLBAR_THUMB) && event.Dragging() )
+        if ( (m_htLast == wxHT_SCROLLBAR_THUMB) && event.Moving() )
         {
             // make the thumb follow the mouse by keeping the same offset
             // between the mouse position and the top/left of the thumb
             HandleThumbMove(scrollbar, event);
 
-            return true;
+            return TRUE;
         }
 
         // no other changes are possible while the mouse is captured
-        return false;
+        return FALSE;
     }
 
     bool isArrow = scrollbar->GetArrows().HandleMouseMove(event);
 
-    if ( event.Dragging() )
+    if ( event.Moving() )
     {
         wxHitTest ht = m_renderer->HitTestScrollbar
                                    (
@@ -874,35 +871,35 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
         if ( ht == m_htLast )
         {
             // nothing changed
-            return false;
+            return FALSE;
         }
 
 #ifdef DEBUG_MOUSE
         wxLogDebug("Scrollbar::OnMouseMove: ht = %d", ht);
 #endif // DEBUG_MOUSE
 
-        Highlight(scrollbar, false);
+        Highlight(scrollbar, FALSE);
         m_htLast = ht;
 
         if ( !isArrow )
-            Highlight(scrollbar, true);
+            Highlight(scrollbar, TRUE);
         //else: already done by wxScrollArrows::HandleMouseMove
     }
     else if ( event.Leaving() )
     {
         if ( !isArrow )
-            Highlight(scrollbar, false);
+            Highlight(scrollbar, FALSE);
 
         m_htLast = wxHT_NOWHERE;
     }
     else // event.Entering()
     {
         // we don't process this event
-        return false;
+        return FALSE;
     }
 
     // we did something
-    return true;
+    return TRUE;
 }
 
 #endif // wxUSE_SCROLLBAR
@@ -913,7 +910,7 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
 
 wxScrollTimer::wxScrollTimer()
 {
-    m_skipNext = false;
+    m_skipNext = FALSE;
 }
 
 void wxScrollTimer::StartAutoScroll()
@@ -928,7 +925,7 @@ void wxScrollTimer::StartAutoScroll()
     // there is an initial delay before the scrollbar starts scrolling -
     // implement it by ignoring the first timer expiration and only start
     // scrolling from the second one
-    m_skipNext = true;
+    m_skipNext = TRUE;
     Start(200); // FIXME: hardcoded delay
 }
 
@@ -940,7 +937,7 @@ void wxScrollTimer::Notify()
         Stop();
         Start(50); // FIXME: hardcoded delay
 
-        m_skipNext = false;
+        m_skipNext = FALSE;
     }
     else
     {
@@ -949,3 +946,4 @@ void wxScrollTimer::Notify()
         (void)DoNotify();
     }
 }
+

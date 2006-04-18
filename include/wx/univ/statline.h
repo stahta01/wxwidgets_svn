@@ -22,14 +22,14 @@ public:
                  wxCoord length,
                  long style = wxLI_HORIZONTAL)
     {
-        Create(parent, wxID_ANY, pos,
-               style & wxLI_VERTICAL ? wxSize(wxDefaultCoord, length)
-                                     : wxSize(length, wxDefaultCoord),
+        Create(parent, -1, pos,
+               style & wxLI_VERTICAL ? wxSize(-1, length)
+                                     : wxSize(length, -1),
                style);
     }
 
     wxStaticLine(wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
+                 wxWindowID id,
                  const wxPoint &pos = wxDefaultPosition,
                  const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,
@@ -39,7 +39,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id,
                 const wxPoint &pos = wxDefaultPosition,
                 const wxSize &size = wxDefaultSize,
                 long style = wxLI_HORIZONTAL,

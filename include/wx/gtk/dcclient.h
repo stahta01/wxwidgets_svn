@@ -17,15 +17,15 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowDC;
-class WXDLLIMPEXP_CORE wxPaintDC;
-class WXDLLIMPEXP_CORE wxClientDC;
+class wxWindowDC;
+class wxPaintDC;
+class wxClientDC;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowDC : public wxDC
+class wxWindowDC : public wxDC
 {
 public:
     wxWindowDC();
@@ -33,8 +33,8 @@ public:
 
     virtual ~wxWindowDC();
 
-    virtual bool CanDrawBitmap() const { return true; }
-    virtual bool CanGetTextExtent() const { return true; }
+    virtual bool CanDrawBitmap() const { return TRUE; }
+    virtual bool CanGetTextExtent() const { return TRUE; }
 
 protected:
     virtual void DoGetSize(int *width, int *height) const;
@@ -61,11 +61,11 @@ protected:
 
     virtual void DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y );
     virtual void DoDrawBitmap( const wxBitmap &bitmap, wxCoord x, wxCoord y,
-                               bool useMask = false );
+                               bool useMask = FALSE );
 
     virtual bool DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                          wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                         int logical_func = wxCOPY, bool useMask = false, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1 );
+                         int logical_func = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1 );
 
     virtual void DoDrawText( const wxString &text, wxCoord x, wxCoord y );
     virtual void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
@@ -75,8 +75,6 @@ protected:
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
                                 wxFont *theFont = (wxFont *) NULL) const;
-    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
-    virtual void DoSetClippingRegionAsRegion( const wxRegion &region );
 
 public:
     virtual wxCoord GetCharWidth() const;
@@ -94,7 +92,9 @@ public:
     virtual void SetBackgroundMode( int mode );
     virtual void SetPalette( const wxPalette& palette );
 
+    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
     virtual void DestroyClippingRegion();
+    virtual void DoSetClippingRegionAsRegion( const wxRegion &region  );
 
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;
@@ -114,15 +114,16 @@ public:
     wxWindow     *m_owner;
     wxRegion      m_currentClippingRegion;
     wxRegion      m_paintClippingRegion;
-
+    
     // PangoContext stuff for GTK 2.0
+#ifdef __WXGTK20__
     PangoContext *m_context;
-    PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
+#endif
 
     void SetUpDC();
     void Destroy();
-    virtual void ComputeScaleAndOrigin();
+    void ComputeScaleAndOrigin();
 
     GdkWindow *GetWindow() { return m_window; }
 
@@ -134,7 +135,7 @@ private:
 // wxClientDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxClientDC : public wxWindowDC
+class wxClientDC : public wxWindowDC
 {
 public:
     wxClientDC() { }
@@ -151,7 +152,7 @@ private:
 // wxPaintDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPaintDC : public wxClientDC
+class wxPaintDC : public wxClientDC
 {
 public:
     wxPaintDC() { }

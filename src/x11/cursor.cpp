@@ -121,18 +121,34 @@ wxCursor::wxCursor(const char bits[], int width, int  height,
                    int hotSpotX, int hotSpotY,
                    const char maskBits[], wxColour *fg, wxColour *bg)
 {
-   wxFAIL_MSG( wxT("wxCursor creation from bits not yet implemented") );
+   wxFAIL_MSG( "wxCursor creation from bits not yet implemented" );
+}
+
+
+wxCursor::wxCursor( const wxCursor &cursor )
+{
+    Ref( cursor );
 }
 
 #if wxUSE_IMAGE
 wxCursor::wxCursor( const wxImage & image )
 {
-   wxFAIL_MSG( wxT("wxCursor creation from wxImage not yet implemented") );
+   wxFAIL_MSG( "wxCursor creation from wxImage not yet implemented" );
 }
 #endif
 
 wxCursor::~wxCursor()
 {
+}
+
+wxCursor& wxCursor::operator = ( const wxCursor& cursor )
+{
+    if (*this == cursor)
+        return (*this);
+
+    Ref( cursor );
+
+    return *this;
 }
 
 bool wxCursor::operator == ( const wxCursor& cursor ) const
@@ -183,10 +199,10 @@ void wxEndBusyCursor()
     gs_savedCursor = wxNullCursor;
 
     if (wxTheApp)
-        wxTheApp->ProcessIdle();
+        wxTheApp->SendIdleEvents();
 }
 
-void wxBeginBusyCursor( const wxCursor *WXUNUSED(cursor) )
+void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )
 {
     if (gs_busyCount++ > 0)
         return;
@@ -199,7 +215,7 @@ void wxBeginBusyCursor( const wxCursor *WXUNUSED(cursor) )
     wxSetCursor( wxCursor(wxCURSOR_WATCH) );
 
     if (wxTheApp)
-        wxTheApp->ProcessIdle();
+        wxTheApp->SendIdleEvents();
 }
 
 bool wxIsBusy()

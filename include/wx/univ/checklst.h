@@ -33,7 +33,7 @@ public:
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
                    int nStrings = 0,
-                   const wxString choices[] = NULL,
+                   const wxString *choices = NULL,
                    long style = 0,
                    const wxValidator& validator = wxDefaultValidator,
                    const wxString& name = wxListBoxNameStr)
@@ -42,36 +42,20 @@ public:
 
         Create(parent, id, pos, size, nStrings, choices, style, validator, name);
     }
-    wxCheckListBox(wxWindow *parent,
-                   wxWindowID id,
-                   const wxPoint& pos,
-                   const wxSize& size,
-                   const wxArrayString& choices,
-                   long style = 0,
-                   const wxValidator& validator = wxDefaultValidator,
-                   const wxString& name = wxListBoxNameStr);
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int nStrings = 0,
-                const wxString choices[] = (const wxString *) NULL,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
+                const wxString *choices = NULL,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
 
     // implement check list box methods
-    virtual bool IsChecked(unsigned int item) const;
-    virtual void Check(unsigned int item, bool check = true);
+    virtual bool IsChecked(size_t item) const;
+    virtual void Check(size_t item, bool check = TRUE);
 
     // and input handling
     virtual bool PerformAction(const wxControlAction& action,
@@ -80,11 +64,11 @@ public:
 
     // override all methods which add/delete items to update m_checks array as
     // well
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
     virtual void DoSetItems(const wxArrayString& items, void **clientData);
     virtual void DoClear();
 
@@ -122,3 +106,4 @@ public:
 };
 
 #endif // _WX_UNIV_CHECKLST_H_
+

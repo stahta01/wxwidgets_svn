@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSTATICBOXH__
 #define __GTKSTATICBOXH__
 
@@ -14,7 +15,7 @@
 // wxStaticBox
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticBox : public wxStaticBoxBase
+class wxStaticBox : public wxStaticBoxBase
 {
 public:
     wxStaticBox();
@@ -35,19 +36,12 @@ public:
 
     virtual void SetLabel( const wxString &label );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
     // implementation
+
+    virtual void ApplyWidgetStyle();
 
     virtual bool IsTransparentForMouse() const { return TRUE; }
 
-protected:
-    virtual bool GTKWidgetNeedsMnemonic() const;
-    virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
-
-    void DoApplyWidgetStyle(GtkRcStyle *style);
-    
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };

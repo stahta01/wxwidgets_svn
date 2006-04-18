@@ -6,7 +6,7 @@
 // Created:     13.05.02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Dave Webster <dwebster@bhmi.com>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -24,15 +24,18 @@
 #ifndef WX_PRECOMP
 #endif //WX_PRECOMP
 
-#if wxUSE_POPUPWIN
 #include "wx/popupwin.h"
+
+IMPLEMENT_DYNAMIC_CLASS(wxPopupWindow, wxWindow)
 
 // ============================================================================
 // implementation
 // ============================================================================
 
-bool wxPopupWindow::Create( wxWindow* pParent,
-                            int nFlags )
+bool wxPopupWindow::Create(
+  wxWindow*                         pParent
+, int                               nFlags
+)
 {
     return wxPopupWindowBase::Create(pParent) &&
                     wxWindow::Create( pParent
@@ -43,8 +46,10 @@ bool wxPopupWindow::Create( wxWindow* pParent,
                                     );
 } // end of wxPopupWindow::Create
 
-void wxPopupWindow::DoGetPosition( int* pnX,
-                                   int* pnY ) const
+void wxPopupWindow::DoGetPosition(
+  int*                              pnX
+, int*                              pnY
+) const
 {
     //
     // The position of a "top level" window such as this should be in
@@ -63,13 +68,16 @@ WXHWND wxPopupWindow::OS2GetParent() const
     return (WXHWND)HWND_DESKTOP;
 } // end of wxPopupWindow::OS2GetParent
 
-WXDWORD wxPopupWindow::OS2GetStyle( long lFlags,
-                                    WXDWORD* dwExstyle ) const
+WXDWORD wxPopupWindow::OS2GetStyle(
+  long                              lFlags
+, WXDWORD*                          dwExstyle
+) const
 {
-    WXDWORD dwStyle = wxWindow::OS2GetStyle( lFlags & wxBORDER_MASK
-                                             ,dwExstyle
-                                           );
+    WXDWORD                         dwStyle = wxWindow::OS2GetStyle( lFlags & wxBORDER_MASK
+                                                                    ,dwExstyle
+                                                                   );
 
     return dwStyle;
 } // end of wxPopupWindow::OS2GetStyle
-#endif
+
+

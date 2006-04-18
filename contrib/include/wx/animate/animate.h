@@ -17,21 +17,13 @@
 #include <wx/gdicmn.h>
 #include <wx/list.h>
 #include <wx/timer.h>
-#include <wx/bitmap.h>
-#include <wx/colour.h>
 #include <wx/control.h>
 
+//#define ANIMDLLEXPORT WXDLLEXPORT
+#define ANIMDLLEXPORT
 
-#ifdef WXMAKINGDLL_ANIMATE
-    #define WXDLLIMPEXP_ANIMATE WXEXPORT
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_ANIMATE WXIMPORT
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_ANIMATE
-#endif
-
-class WXDLLIMPEXP_ANIMATE wxAnimationBase;
-class WXDLLIMPEXP_ANIMATE wxAnimationPlayer;
+class ANIMDLLEXPORT wxAnimationBase;
+class ANIMDLLEXPORT wxAnimationPlayer;
 class WXDLLEXPORT wxImage;
 
 enum wxAnimationDisposal
@@ -40,116 +32,82 @@ enum wxAnimationDisposal
     wxANIM_DONOTREMOVE = 0,
     wxANIM_TOBACKGROUND = 1,
     wxANIM_TOPREVIOUS = 2
-};
+} ;
 
-class WXDLLIMPEXP_ANIMATE wxAnimationTimer: public wxTimer
+class ANIMDLLEXPORT wxAnimationTimer: public wxTimer
 {
 public:
-    wxAnimationTimer()
-    { m_player = (wxAnimationPlayer*) NULL; }
+    wxAnimationTimer() { m_player = (wxAnimationPlayer*) NULL; }
 
     virtual void Notify();
-
-    void SetPlayer(wxAnimationPlayer* player)
-    { m_player = player; }
+    void SetPlayer(wxAnimationPlayer* player) { m_player = player; }
 
 protected:
     wxAnimationPlayer*  m_player;
 };
 
 /* wxAnimationPlayer
- * Create an object of this class, and either pass an wxXXXAnimation object in
- * the constructor, or call SetAnimation. Then call Play().  The wxAnimation
- * object is only destroyed in the destructor if destroyAnimation is TRUE in
- * the constructor.
+ * Create an object of this class, and either pass an wxXXXAnimation object in the constructor,
+ * or call SetAnimation. Then call Play().
+ * The wxAnimation object is only destroyed in the destructor if destroyAnimation is TRUE
+ * in the constructor.
  */
 
-class WXDLLIMPEXP_ANIMATE wxAnimationPlayer : public wxObject
+class ANIMDLLEXPORT wxAnimationPlayer : public wxObject
 {
     DECLARE_CLASS(wxAnimationPlayer)
 
 public:
-    wxAnimationPlayer(wxAnimationBase *animation = (wxAnimationBase *) NULL, bool destroyAnimation = false);
+    wxAnimationPlayer(wxAnimationBase *animation = (wxAnimationBase *) NULL, bool destroyAnimation = FALSE);
     ~wxAnimationPlayer();
-
 //// Accessors
 
-    void SetAnimation(wxAnimationBase* animation, bool destroyAnimation = false);
-    wxAnimationBase* GetAnimation() const
-    { return m_animation; }
+    void SetAnimation(wxAnimationBase* animation, bool destroyAnimation = FALSE);
+    wxAnimationBase* GetAnimation() const { return m_animation; }
 
-    void SetDestroyAnimation(bool destroyAnimation)
-    { m_destroyAnimation = destroyAnimation; }
+    void SetDestroyAnimation(bool destroyAnimation) { m_destroyAnimation = destroyAnimation; };
+    bool GetDestroyAnimation() const { return m_destroyAnimation; }
 
-    bool GetDestroyAnimation() const
-    { return m_destroyAnimation; }
+    void SetCurrentFrame(int currentFrame) { m_currentFrame = currentFrame; };
+    int GetCurrentFrame() const { return m_currentFrame; }
 
-    void SetCurrentFrame(int currentFrame)
-    { m_currentFrame = currentFrame; }
+    void SetWindow(wxWindow* window) { m_window = window; };
+    wxWindow* GetWindow() const { return m_window; }
 
-    int GetCurrentFrame() const
-    { return m_currentFrame; }
+    void SetPosition(const wxPoint& pos) { m_position = pos; };
+    wxPoint GetPosition() const { return m_position; }
 
-    void SetWindow(wxWindow* window)
-    { m_window = window; }
+    void SetLooped(bool looped) { m_looped = looped; };
+    bool GetLooped() const { return m_looped; }
 
-    wxWindow* GetWindow() const
-    { return m_window; }
+    bool HasAnimation() const { return (m_animation != (wxAnimationBase*) NULL); }
 
-    void SetPosition(const wxPoint& pos)
-    { m_position = pos; }
-
-    wxPoint GetPosition() const
-    { return m_position; }
-
-    void SetLooped(bool looped)
-    { m_looped = looped; }
-
-    bool GetLooped() const
-    { return m_looped; }
-
-    bool HasAnimation() const
-    { return (m_animation != (wxAnimationBase*) NULL); }
-
-    bool IsPlaying() const
-    { return m_isPlaying; }
+    bool IsPlaying() const { return m_isPlaying; }
 
     // Specify whether the GIF's background colour is to be shown,
     // or whether the window background should show through (the default)
-    void UseBackgroundColour(bool useBackground)
-    { m_useBackgroundColour = useBackground; }
-
-    bool UsingBackgroundColour() const
-    { return m_useBackgroundColour; }
+    void UseBackgroundColour(bool useBackground) { m_useBackgroundColour = useBackground; }
+    bool UsingBackgroundColour() const { return m_useBackgroundColour; }
 
     // Set and use a user-specified background colour (valid for transparent
     // animations only)
-    void SetCustomBackgroundColour(const wxColour& col, bool useCustomBackgroundColour = true)
-    {
-        m_customBackgroundColour = col;
-        m_useCustomBackgroundColour = useCustomBackgroundColour;
-    }
+    void SetCustomBackgroundColour(const wxColour& col, bool useCustomBackgroundColour = TRUE)
+    { m_customBackgroundColour = col; m_useCustomBackgroundColour = useCustomBackgroundColour; }
 
-    bool UsingCustomBackgroundColour() const
-    { return m_useCustomBackgroundColour; }
-
-    const wxColour& GetCustomBackgroundColour() const
-    { return m_customBackgroundColour; }
+    bool UsingCustomBackgroundColour() const { return m_useCustomBackgroundColour; }
+    const wxColour& GetCustomBackgroundColour() const { return m_customBackgroundColour; }
 
     // Another refinement - suppose we're drawing the animation in a separate
     // control or window. We may wish to use the background of the parent
     // window as the background of our animation. This allows us to specify
     // whether to grab from the parent or from this window.
-    void UseParentBackground(bool useParent)
-    { m_useParentBackground = useParent; }
-
-    bool UsingParentBackground() const
-    { return m_useParentBackground; }
+    void UseParentBackground(bool useParent) { m_useParentBackground = useParent; }
+    bool UsingParentBackground() const { return m_useParentBackground; }
 
 //// Operations
 
     // Play
-    virtual bool Play(wxWindow& window, const wxPoint& pos = wxPoint(0, 0), bool looped = true);
+    virtual bool Play(wxWindow& window, const wxPoint& pos = wxPoint(0, 0), bool looped = TRUE);
 
     // Build animation (list of wxImages). If not called before Play
     // is called, Play will call this automatically.
@@ -171,8 +129,8 @@ public:
     virtual int GetDelay(int i) const; // Delay for this frame
 
     virtual wxSize GetLogicalScreenSize() const;
-    virtual bool GetBackgroundColour(wxColour& col) const;
-    virtual bool GetTransparentColour(wxColour& col) const;
+    virtual bool GetBackgroundColour(wxColour& col) const ;
+    virtual bool GetTransparentColour(wxColour& col) const ;
 
 //// Implementation
 
@@ -189,8 +147,7 @@ public:
     // it if drawing transparently
     void SaveBackground(const wxRect& rect);
 
-    wxBitmap& GetBackingStore()
-    { return m_backingStore; }
+    wxBitmap& GetBackingStore() { return m_backingStore; }
 
 //// Data members
 protected:
@@ -213,15 +170,14 @@ protected:
 
 /* wxAnimationBase
  * Base class for animations.
- * A wxXXXAnimation only stores the animation, providing accessors to
- * wxAnimationPlayer.  Currently an animation is read-only, but we could
- * extend the API for adding frames programmatically, and perhaps have a
- * wxMemoryAnimation class that stores its frames in memory, and is able to
- * save all files with suitable filenames. You could then use e.g. Ulead GIF
- * Animator to load the image files into a GIF animation.
+ * A wxXXXAnimation only stores the animation, providing accessors to wxAnimationPlayer.
+ * Currently an animation is read-only, but we could extend the API for adding frames
+ * programmatically, and perhaps have a wxMemoryAnimation class that stores its frames
+ * in memory, and is able to save all files with suitable filenames. You could then use
+ * e.g. Ulead GIF Animator to load the image files into a GIF animation.
  */
 
-class WXDLLIMPEXP_ANIMATE wxAnimationBase : public wxObject
+class ANIMDLLEXPORT wxAnimationBase : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxAnimationBase)
 
@@ -246,23 +202,22 @@ public:
 
 //// Operations
 
-    virtual bool LoadFile(const wxString& WXUNUSED(filename))
-    { return false; }
+    virtual bool LoadFile(const wxString& filename) { return FALSE; }
 };
 
 /* wxGIFAnimation
  * This will be moved to a separate file in due course.
  */
 
-class WXDLLIMPEXP_ANIMATE wxGIFDecoder;
+class ANIMDLLEXPORT wxGIFDecoder;
 
-class WXDLLIMPEXP_ANIMATE wxGIFAnimation : public wxAnimationBase
+class ANIMDLLEXPORT wxGIFAnimation : public wxAnimationBase
 {
     DECLARE_CLASS(wxGIFAnimation)
 
 public:
-    wxGIFAnimation();
-    ~wxGIFAnimation();
+    wxGIFAnimation() ;
+    ~wxGIFAnimation() ;
 
 //// Accessors
 
@@ -272,9 +227,9 @@ public:
     virtual wxRect GetFrameRect(int i) const; // Position and size of frame
     virtual int GetDelay(int i) const; // Delay for this frame
 
-    virtual wxSize GetLogicalScreenSize() const;
-    virtual bool GetBackgroundColour(wxColour& col) const;
-    virtual bool GetTransparentColour(wxColour& col) const;
+    virtual wxSize GetLogicalScreenSize() const ;
+    virtual bool GetBackgroundColour(wxColour& col) const ;
+    virtual bool GetTransparentColour(wxColour& col) const ;
 
     virtual bool IsValid() const;
 
@@ -283,6 +238,7 @@ public:
     virtual bool LoadFile(const wxString& filename);
 
 protected:
+
     wxGIFDecoder*   m_decoder;
 };
 
@@ -296,10 +252,10 @@ protected:
 // Resize to animation size if this is set
 #define wxAN_FIT_ANIMATION       0x0010
 
-class WXDLLIMPEXP_ANIMATE wxAnimationCtrlBase: public wxControl
+class ANIMDLLEXPORT wxAnimationCtrlBase: public wxControl
 {
 public:
-    wxAnimationCtrlBase() {}
+    wxAnimationCtrlBase() { }
     wxAnimationCtrlBase(wxWindow *parent, wxWindowID id,
             const wxString& filename = wxEmptyString,
             const wxPoint& pos = wxDefaultPosition,
@@ -313,33 +269,22 @@ public:
     bool Create(wxWindow *parent, wxWindowID id,
             const wxString& filename = wxEmptyString,
             const wxPoint& pos = wxDefaultPosition,
-            const wxSize& size = wxDefaultSize,
-            long style = wxAN_FIT_ANIMATION | wxNO_BORDER,
+            const wxSize& size = wxDefaultSize, long style = wxAN_FIT_ANIMATION|wxNO_BORDER,
             const wxString& name = wxT("animationControl"));
 
     //// Operations
     virtual bool LoadFile(const wxString& filename = wxEmptyString);
-    virtual bool Play(bool looped = true);
-    virtual void Stop()
-    { m_animationPlayer.Stop(); }
-
+    virtual bool Play(bool looped = TRUE) ;
+    virtual void Stop() { m_animationPlayer.Stop(); }
     virtual void FitToAnimation();
 
     //// Accessors
-    virtual bool IsPlaying() const
-    { return m_animationPlayer.IsPlaying(); }
+    virtual bool IsPlaying() const { return m_animationPlayer.IsPlaying(); }
+    virtual wxAnimationPlayer& GetPlayer() { return m_animationPlayer; }
+    virtual wxAnimationBase* GetAnimation() { return m_animation; }
 
-    virtual wxAnimationPlayer& GetPlayer()
-    { return m_animationPlayer; }
-
-    virtual wxAnimationBase* GetAnimation()
-    { return m_animation; }
-
-    const wxString& GetFilename() const
-    { return m_filename; }
-
-    void SetFilename(const wxString& filename)
-    { m_filename = filename; }
+    const wxString& GetFilename() const { return m_filename; }
+    void SetFilename(const wxString& filename) { m_filename = filename; }
 
     //// Event handlers
     void OnPaint(wxPaintEvent& event);
@@ -364,26 +309,24 @@ private:
  * Provides a GIF animation class when required.
  */
 
-class WXDLLIMPEXP_ANIMATE wxGIFAnimationCtrl: public wxAnimationCtrlBase
+class ANIMDLLEXPORT wxGIFAnimationCtrl: public wxAnimationCtrlBase
 {
 public:
-    wxGIFAnimationCtrl() {}
-    wxGIFAnimationCtrl(wxWindow *parent,
-            wxWindowID id,
+    wxGIFAnimationCtrl() { }
+    wxGIFAnimationCtrl(wxWindow *parent, wxWindowID id,
             const wxString& filename = wxEmptyString,
             const wxPoint& pos = wxDefaultPosition,
-            const wxSize& size = wxDefaultSize,
-            long style = wxAN_FIT_ANIMATION | wxNO_BORDER,
+            const wxSize& size = wxDefaultSize, long style = wxAN_FIT_ANIMATION|wxNO_BORDER,
             const wxString& name = wxT("animationControl"))
     {
         Create(parent, id, filename, pos, size, style, name);
     }
 
 protected:
-    virtual wxAnimationBase* DoCreateAnimation(const wxString& filename);
-
+    virtual wxAnimationBase* DoCreateAnimation(const wxString& filename) ;
 private:
     DECLARE_DYNAMIC_CLASS(wxGIFAnimationCtrl)
 };
 
 #endif // _WX_ANIMATEH__
+

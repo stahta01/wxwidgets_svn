@@ -43,8 +43,8 @@ public:
         m_rules       = rules;
         m_shape       = shape;
     };
-
-    // A more convenient ctor for the built-in samples
+    
+    // A more convenient ctor for the built-in samples    
     LifePattern(wxString      name,
                 wxString      description,
                 int           width,
@@ -53,13 +53,8 @@ public:
     {
         m_name        = name;
         m_description = description;
-        m_rules       = wxEmptyString;
-        // TODO: add the positions later, since the formatting command
-        // causes a crash due to conversion objects not being available
-        // during initialisation.
-#ifndef __WXMAC__
+        m_rules       = _("");
         m_shape.Add( wxString::Format(_T("%i %i"), -width/2, -height/2) );
-#endif
         for(int j = 0; j < height; j++)
         {
             wxString tmp;
@@ -89,7 +84,7 @@ struct LifeCell
 {
     wxInt32 i;
     wxInt32 j;
-};
+};       
 
 // A private class that contains data about a block of cells
 class LifeCellBox;
@@ -107,7 +102,7 @@ public:
     inline wxString GetRules() const       { return m_rules; };
     inline wxString GetDescription() const { return m_description; };
     bool IsAlive(wxInt32 x, wxInt32 y);
-    void SetCell(wxInt32 x, wxInt32 y, bool alive = true);
+    void SetCell(wxInt32 x, wxInt32 y, bool alive = TRUE);
     void SetPattern(const LifePattern &pattern);
 
     // game control
@@ -124,7 +119,7 @@ public:
     // The following functions find cells within a given viewport; either
     // all alive cells, or only those cells which have changed since last
     // generation. You first call BeginFind() to specify the viewport,
-    // then keep calling FindMore() until it returns true.
+    // then keep calling FindMore() until it returns TRUE.
     //
     // BeginFind:
     //  Specify the viewport and whether to look for alive cells or for
@@ -136,7 +131,7 @@ public:
     //  Fills an array with cells that match the specification given with
     //  BeginFind(). The array itself belongs to the Life object and must
     //  not be modified or freed by the caller. If this function returns
-    //  false, then the operation is not complete: just process all cells
+    //  FALSE, then the operation is not complete: just process all cells
     //  and call FillMore() again.
     //
     void BeginFind(wxInt32 x0, wxInt32 y0,
@@ -147,7 +142,7 @@ public:
 private:
     // cellbox-related
     LifeCellBox *CreateBox(wxInt32 x, wxInt32 y, wxUint32 hv);
-    LifeCellBox *LinkBox(wxInt32 x, wxInt32 y, bool create = true);
+    LifeCellBox *LinkBox(wxInt32 x, wxInt32 y, bool create = TRUE);
     void KillBox(LifeCellBox *c);
 
     // helper for BeginFind & FindMore

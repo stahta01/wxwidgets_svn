@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_DND_H_
 #define _WX_DND_H_
 
@@ -148,7 +149,7 @@ public:
     void SetData( wxDataObject &data  );
     wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly);
     
-    virtual bool GiveFeedback( wxDragResult WXUNUSED(effect), bool WXUNUSED(bScrolling) ) { return true; };
+    virtual bool GiveFeedback( wxDragResult WXUNUSED(effect), bool WXUNUSED(bScrolling) ) { return TRUE; };
     
     // implementation
 #if 0

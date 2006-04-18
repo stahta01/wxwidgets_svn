@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/paletteg.h
+// Name:        palette.h
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
-// RCS-ID:      $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Id:
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -21,13 +21,13 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPalette;
+class wxPalette;
 
 //-----------------------------------------------------------------------------
 // wxPalette
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPalette: public wxPaletteBase
+class wxPalette: public wxGDIObject
 {
   DECLARE_DYNAMIC_CLASS(wxPalette)
 
@@ -35,16 +35,21 @@ class WXDLLIMPEXP_CORE wxPalette: public wxPaletteBase
 
     wxPalette();
     wxPalette( int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue );
+    wxPalette( const wxPalette& palette );
     ~wxPalette();
-    bool operator == ( const wxPalette& palette ) const;
-    bool operator != ( const wxPalette& palette ) const;
-    virtual bool Ok() const;
+    wxPalette& operator = ( const wxPalette& palette );
+    bool operator == ( const wxPalette& palette );
+    bool operator != ( const wxPalette& palette );
+    bool Ok() const;
 
     bool Create( int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
-    int GetPixel( unsigned char red, unsigned char green, unsigned char blue ) const;
+    int GetPixel( const unsigned char red, const unsigned char green, const unsigned char blue ) const;
     bool GetRGB( int pixel, unsigned char *red, unsigned char *green, unsigned char *blue ) const;
 
     // no data
 };
+
+#define wxColorMap wxPalette
+#define wxColourMap wxPalette
 
 #endif // __WX_PALETTEG_H__

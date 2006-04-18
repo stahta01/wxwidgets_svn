@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/settings.cpp
+// Name:        settings.cpp
 // Purpose:     wxSettings
 // Author:      David Webster
 // Modified by:
@@ -62,7 +62,7 @@ wxArrayString wxSystemSettingsModule::sm_optionValues;
 
 bool wxSystemSettingsModule::OnInit()
 {
-    return true;
+    return TRUE;
 }
 
 void wxSystemSettingsModule::OnExit()
@@ -78,126 +78,138 @@ wxColour wxSystemSettingsNative::GetColour(
 {
     COLORREF                        vRef;
     wxColour                        vCol;
-    LONG                            vSysClr;
     switch (nIndex)
     {
         //
         // PM actually has values for these
         //
         case wxSYS_COLOUR_WINDOW:
-            vSysClr = SYSCLR_WINDOW;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_WINDOW
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_WINDOWFRAME:
-            vSysClr = SYSCLR_WINDOWFRAME;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_WINDOWFRAME
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_MENUTEXT:
-            vSysClr = SYSCLR_MENUTEXT;
-            break;
-
-        case wxSYS_COLOUR_MENUHILIGHT:
-            vSysClr = SYSCLR_MENUHILITE;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_MENUTEXT
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_BTNFACE:
-            vSysClr = SYSCLR_BUTTONMIDDLE;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_BUTTONDEFAULT
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_BTNSHADOW:
-            vSysClr = SYSCLR_BUTTONDARK;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_BUTTONMIDDLE
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_BTNHIGHLIGHT:
-            vSysClr = SYSCLR_BUTTONLIGHT;
-            break;
-
-        case wxSYS_COLOUR_BACKGROUND:
-            vSysClr = SYSCLR_BACKGROUND;
-            break;
-
-        case wxSYS_COLOUR_APPWORKSPACE:
-            vSysClr = SYSCLR_APPWORKSPACE;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_BUTTONLIGHT
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
         case wxSYS_COLOUR_MENUBAR:
-        case wxSYS_COLOUR_MENU:
-            vSysClr = SYSCLR_MENU;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_MENU
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
 
-        case wxSYS_COLOUR_INACTIVECAPTION:
-            vSysClr = SYSCLR_INACTIVETITLE;
-            break;
-
-        case wxSYS_COLOUR_INACTIVEBORDER:
-            vSysClr = SYSCLR_INACTIVEBORDER;
-            break;
-
+        //
+        // We'll have to just give values to these
+        //
         case wxSYS_COLOUR_LISTBOX:
-            vSysClr = SYSCLR_ENTRYFIELD;
-            break;
-
         case wxSYS_COLOUR_CAPTIONTEXT:
-            vSysClr = SYSCLR_TITLETEXT;
-            break;
-
-        case wxSYS_COLOUR_INACTIVECAPTIONTEXT:
-            vSysClr = SYSCLR_INACTIVETITLETEXT;
+            return(*wxWHITE);
             break;
 
         case wxSYS_COLOUR_WINDOWTEXT:
+        case wxSYS_COLOUR_INACTIVECAPTIONTEXT:
         case wxSYS_COLOUR_BTNTEXT:
-            vSysClr = SYSCLR_WINDOWTEXT;
+        case wxSYS_COLOUR_INFOTEXT:
+            vCol = (*wxBLACK);
             break;
 
-        case wxSYS_COLOUR_INFOTEXT:
-            vSysClr = SYSCLR_HELPTEXT;
-            break;
+        //
+        // We should customize these to look like other ports
+        //
 
         case wxSYS_COLOUR_ACTIVECAPTION:
-            vSysClr = SYSCLR_ACTIVETITLE;
-            break;
-
         case wxSYS_COLOUR_ACTIVEBORDER:
-            vSysClr = SYSCLR_ACTIVEBORDER;
-            break;
-
         case wxSYS_COLOUR_HIGHLIGHT:
-            vSysClr = SYSCLR_HILITEBACKGROUND;
+            vCol = (*wxBLUE);
             break;
 
         case wxSYS_COLOUR_SCROLLBAR:
-            vSysClr = SYSCLR_SCROLLBAR;
-            break;
-
+        case wxSYS_COLOUR_BACKGROUND:
+        case wxSYS_COLOUR_INACTIVECAPTION:
+        case wxSYS_COLOUR_MENU:
+        case wxSYS_COLOUR_INACTIVEBORDER:
+        case wxSYS_COLOUR_APPWORKSPACE:
         case wxSYS_COLOUR_HIGHLIGHTTEXT:
-            vSysClr = SYSCLR_HILITEFOREGROUND;
-            break;
-
-        case wxSYS_COLOUR_INFOBK:
-            vSysClr = SYSCLR_HELPBACKGROUND;
-            break;
-
-        // Don't know what these should be, so leave them grey (normally)
         case wxSYS_COLOUR_GRAYTEXT:
         case wxSYS_COLOUR_3DDKSHADOW:
         case wxSYS_COLOUR_3DLIGHT:
-        case wxSYS_COLOUR_HOTLIGHT:
-        case wxSYS_COLOUR_GRADIENTACTIVECAPTION:
-        case wxSYS_COLOUR_GRADIENTINACTIVECAPTION:
-            vSysClr = SYSCLR_BUTTONMIDDLE;
+        case wxSYS_COLOUR_INFOBK:
+            vCol = (*wxLIGHT_GREY);
             break;
 
         default:
-            vSysClr = SYSCLR_WINDOW;
+            vRef = (ULONG)::WinQuerySysColor( HWND_DESKTOP
+                                             ,SYSCLR_WINDOW
+                                             ,0L
+                                            );
+            vCol.Set( GetRValue(vRef)
+                     ,GetGValue(vRef)
+                     ,GetBValue(vRef)
+                    );
             break;
     }
-    vRef = (ULONG)::WinQuerySysColor(   HWND_DESKTOP,
-                                        vSysClr,
-                                        0L  );
-    vCol.Set(   GetRValue(vRef),
-                GetGValue(vRef),
-                GetBValue(vRef)  );
     return(vCol);
 } // end of wxSystemSettingsNative::GetColour
 
@@ -237,76 +249,141 @@ wxFont wxSystemSettingsNative::GetFont(
 }
 
 // Get a system metric, e.g. scrollbar size
-int wxSystemSettingsNative::GetMetric( wxSystemMetric index,
-                                       wxWindow*      WXUNUSED(win) )
+int wxSystemSettingsNative::GetMetric(
+  wxSystemMetric                    index
+)
 {
     switch ( index)
     {
-        // TODO case wxSYS_MOUSE_BUTTONS:
-        // TODO case wxSYS_BORDER_X:
-        // TODO case wxSYS_BORDER_Y:
-        // TODO case wxSYS_CURSOR_X:
-        // TODO case wxSYS_CURSOR_Y:
-        // TODO case wxSYS_DCLICK_X:
-        // TODO case wxSYS_DCLICK_Y:
-        // TODO case wxSYS_DRAG_X:
-        // TODO case wxSYS_DRAG_Y:
-        // TODO case wxSYS_EDGE_X:
-        // TODO case wxSYS_EDGE_Y:
-        // TODO case wxSYS_HSCROLL_ARROW_X:
-        // TODO case wxSYS_HSCROLL_ARROW_Y:
-        // TODO case wxSYS_HTHUMB_X:
-        // TODO case wxSYS_ICON_X:
-        // TODO case wxSYS_ICON_Y:
-        // TODO case wxSYS_ICONSPACING_X:
-        // TODO case wxSYS_ICONSPACING_Y:
-        // TODO case wxSYS_WINDOWMIN_X:
-        // TODO case wxSYS_WINDOWMIN_Y:
-
+        case wxSYS_MOUSE_BUTTONS:
+            // TODO
+            return 0;
+        case wxSYS_BORDER_X:
+            // TODO
+            return 0;
+        case wxSYS_BORDER_Y:
+            // TODO
+            return 0;
+        case wxSYS_CURSOR_X:
+            // TODO
+            return 0;
+        case wxSYS_CURSOR_Y:
+            // TODO
+            return 0;
+        case wxSYS_DCLICK_X:
+            // TODO
+            return 0;
+        case wxSYS_DCLICK_Y:
+            // TODO
+            return 0;
+        case wxSYS_DRAG_X:
+            // TODO
+            return 0;
+        case wxSYS_DRAG_Y:
+            // TODO
+            return 0;
+        case wxSYS_EDGE_X:
+            // TODO
+            return 0;
+        case wxSYS_EDGE_Y:
+            // TODO
+            return 0;
+        case wxSYS_HSCROLL_ARROW_X:
+            // TODO
+            return 0;
+        case wxSYS_HSCROLL_ARROW_Y:
+            // TODO
+            return 0;
+        case wxSYS_HTHUMB_X:
+            // TODO
+            return 0;
+        case wxSYS_ICON_X:
+            // TODO
+            return 0;
+        case wxSYS_ICON_Y:
+            // TODO
+            return 0;
+        case wxSYS_ICONSPACING_X:
+            // TODO
+            return 0;
+        case wxSYS_ICONSPACING_Y:
+            // TODO
+            return 0;
+        case wxSYS_WINDOWMIN_X:
+            // TODO
+            return 0;
+        case wxSYS_WINDOWMIN_Y:
+            // TODO
+            return 0;
         case wxSYS_SCREEN_X:
             return ::WinQuerySysValue(HWND_DESKTOP,SV_CXSCREEN);
         case wxSYS_SCREEN_Y:
             return ::WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN);
-
-        // TODO case wxSYS_FRAMESIZE_X:
-        // TODO case wxSYS_FRAMESIZE_Y:
-        // TODO case wxSYS_SMALLICON_X:
-        // TODO case wxSYS_SMALLICON_Y:
-
+        case wxSYS_FRAMESIZE_X:
+            // TODO
+            return 0;
+        case wxSYS_FRAMESIZE_Y:
+            // TODO
+            return 0;
+        case wxSYS_SMALLICON_X:
+            // TODO
+            return 0;
+        case wxSYS_SMALLICON_Y:
+            // TODO
+            return 0;
         case wxSYS_HSCROLL_Y:
-            return ::WinQuerySysValue(HWND_DESKTOP,SV_CYHSCROLL);
+            // TODO
+            return 0;
         case wxSYS_VSCROLL_X:
-            return ::WinQuerySysValue(HWND_DESKTOP,SV_CXVSCROLL);
-
-        // TODO case wxSYS_VSCROLL_ARROW_X:
-        // TODO case wxSYS_VSCROLL_ARROW_Y:
-        // TODO case wxSYS_VTHUMB_Y:
-        // TODO case wxSYS_CAPTION_Y:
-        // TODO case wxSYS_MENU_Y:
-        // TODO case wxSYS_NETWORK_PRESENT:
-        // TODO case wxSYS_PENWINDOWS_PRESENT:
-        // TODO case wxSYS_SHOW_SOUNDS:
-        // TODO case wxSYS_SWAP_BUTTONS:
-
+            // TODO
+            return 0;
+        case wxSYS_VSCROLL_ARROW_X:
+            // TODO
+            return 0;
+        case wxSYS_VSCROLL_ARROW_Y:
+            // TODO
+            return 0;
+        case wxSYS_VTHUMB_Y:
+            // TODO
+            return 0;
+        case wxSYS_CAPTION_Y:
+            // TODO
+            return 0;
+        case wxSYS_MENU_Y:
+            // TODO
+            return 0;
+        case wxSYS_NETWORK_PRESENT:
+            // TODO
+            return 0;
+        case wxSYS_PENWINDOWS_PRESENT:
+            // TODO
+            return 0;
+        case wxSYS_SHOW_SOUNDS:
+            // TODO
+            return 0;
+        case wxSYS_SWAP_BUTTONS:
+            // TODO
+            return 0;
         default:
-            break;
+            return 0;
     }
-    return -1;  // unsupported metric
+    return 0;
 }
 
-bool wxSystemSettingsNative::HasFeature( wxSystemFeature index )
+bool wxSystemSettingsNative::HasFeature(
+  wxSystemFeature                   index
+)
 {
     switch (index)
     {
         case wxSYS_CAN_ICONIZE_FRAME:
-            return true;
+            return TRUE;
 
-        // TODO case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        // TODO case wxSYS_TABLET_PRESENT:
+        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
+            return FALSE;
 
         default:
-            break;
+            return FALSE;
     }
-
-    return false;
+    return FALSE;
 }

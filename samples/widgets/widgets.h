@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Program:     wxWidgets Widgets Sample
+// Program:     wxWindows Widgets Sample
 // Name:        widgets.h
 // Purpose:     Common stuff for all widgets project files
 // Author:      Vadim Zeitlin
@@ -13,7 +13,7 @@
 #define _WX_SAMPLE_WIDGETS_H_
 
 class WXDLLEXPORT wxCheckBox;
-class WXDLLEXPORT wxBookCtrlBase;
+class WXDLLEXPORT wxNotebook;
 class WXDLLEXPORT wxSizer;
 class WXDLLEXPORT wxTextCtrl;
 
@@ -24,34 +24,14 @@ class WidgetsPageInfo;
 // all source files use wxImageList
 #include "wx/imaglist.h"
 
-#if wxUSE_LOG && !defined(__SMARTPHONE__)
-    #define USE_LOG 1
-#else
-    #define USE_LOG 0
-#endif
-
 // ----------------------------------------------------------------------------
-// WidgetsPage: a book page demonstrating some widget
+// WidgetsPage: a notebook page demonstrating some widget
 // ----------------------------------------------------------------------------
 
 class WidgetsPage : public wxPanel
 {
 public:
-    WidgetsPage(wxBookCtrlBase *book);
-
-    // return the control shown by this page
-    virtual wxControl *GetWidget() const = 0;
-
-    // some pages show 2 controls, in this case override this one as well
-    virtual wxControl *GetWidget2() const { return NULL; }
-
-    // recreate the control shown by this page
-    //
-    // this is currently used only to take into account the border flags
-    virtual void RecreateWidget() = 0;
-
-    // the default flags for the widget, currently only contains border flags
-    static int ms_defaultFlags;
+    WidgetsPage(wxNotebook *notebook);
 
 protected:
     // several helper functions for page creation
@@ -60,24 +40,24 @@ protected:
     // (pointer to which will be saved in the provided variable if not NULL)
     // with the specified id
     wxSizer *CreateSizerWithText(wxControl *control,
-                                 wxWindowID id = wxID_ANY,
+                                 wxWindowID id = -1,
                                  wxTextCtrl **ppText = NULL);
 
     // create a sizer containing a label and a text ctrl
     wxSizer *CreateSizerWithTextAndLabel(const wxString& label,
-                                         wxWindowID id = wxID_ANY,
+                                         wxWindowID id = -1,
                                          wxTextCtrl **ppText = NULL);
 
     // create a sizer containing a button and a text ctrl
     wxSizer *CreateSizerWithTextAndButton(wxWindowID idBtn,
                                           const wxString& labelBtn,
-                                          wxWindowID id = wxID_ANY,
+                                          wxWindowID id = -1,
                                           wxTextCtrl **ppText = NULL);
 
     // create a checkbox and add it to the sizer
     wxCheckBox *CreateCheckBoxAndAddToSizer(wxSizer *sizer,
                                             const wxString& label,
-                                            wxWindowID id = wxID_ANY);
+                                            wxWindowID id = -1);
 
 public:
     // the head of the linked list containinginfo about all pages
@@ -91,7 +71,7 @@ public:
 class WidgetsPageInfo
 {
 public:
-    typedef WidgetsPage *(*Constructor)(wxBookCtrlBase *book,
+    typedef WidgetsPage *(*Constructor)(wxNotebook *notebook,
                                         wxImageList *imaglist);
 
     // our ctor
@@ -101,8 +81,6 @@ public:
     const wxString& GetLabel() const { return m_label; }
     Constructor GetCtor() const { return m_ctor; }
     WidgetsPageInfo *GetNext() const { return m_next; }
-
-    void SetNext(WidgetsPageInfo *next) { m_next = next; }
 
 private:
     // the label of the page
@@ -125,9 +103,9 @@ private:
 
 // and this one must be inserted somewhere in the source file
 #define IMPLEMENT_WIDGETS_PAGE(classname, label)                            \
-    WidgetsPage *wxCtorFor##classname(wxBookCtrlBase *book,                 \
+    WidgetsPage *wxCtorFor##classname(wxNotebook *notebook,                 \
                                       wxImageList *imaglist)                \
-        { return new classname(book, imaglist); }                           \
+        { return new classname(notebook, imaglist); }                       \
     WidgetsPageInfo classname::                                             \
         ms_info##classname(wxCtorFor##classname, label)
 

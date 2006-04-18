@@ -88,11 +88,10 @@ public:
 		}
 	};
 
-	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
-
 private:
 	int refCount;
 	CellBuffer cb;
+	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 	charClassification charClass[256];
 	char stylingMask;
 	int endStyled;
@@ -116,7 +115,6 @@ public:
 	int dbcsCodePage;
 	int tabInChars;
 	int indentInChars;
-	int actualIndentInChars;
 	bool useTabs;
 	bool tabIndents;
 	bool backspaceUnindents;
@@ -134,7 +132,6 @@ public:
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 
 	// Gateways to modifying document
-	void ModifiedAt(int pos);
 	bool DeleteChars(int pos, int len);
 	bool InsertStyledString(int position, char *s, int insertLength);
 	int Undo();
@@ -157,7 +154,6 @@ public:
 	int GetColumn(int position);
 	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
-	static char *TransformLineEnds(int *pLenOut, const char *s, size_t len, int eolMode);
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
 	bool IsReadOnly() { return cb.IsReadOnly(); }
@@ -176,7 +172,6 @@ public:
 	char StyleAt(int position) { return cb.StyleAt(position); }
 	int GetMark(int line) { return cb.GetMark(line); }
 	int AddMark(int line, int markerNum);
-	void AddMarkSet(int line, int valueSet);
 	void DeleteMark(int line, int markerNum);
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
@@ -195,9 +190,7 @@ public:
 	void Indent(bool forwards);
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);
 	int NextWordStart(int pos, int delta);
-	int NextWordEnd(int pos, int delta);
 	int Length() { return cb.Length(); }
-	void Allocate(int newSize) { cb.Allocate(newSize*2); }
 	long FindText(int minPos, int maxPos, const char *s,
 		bool caseSensitive, bool word, bool wordStart, bool regExp, bool posix, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
@@ -206,8 +199,7 @@ public:
 
 	void ChangeCase(Range r, bool makeUpperCase);
 
-	void SetDefaultCharClasses(bool includeWordClass);
-	void SetCharClasses(const unsigned char *chars, charClassification newCharClass);
+	void SetWordChars(unsigned char *chars);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
 	bool SetStyleFor(int length, char style);
@@ -215,7 +207,6 @@ public:
 	int GetEndStyled() { return endStyled; }
 	bool EnsureStyledTo(int pos);
 	int GetStyleClock() { return styleClock; }
-	void IncrementStyleClock();
 
 	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
 	int GetLineState(int line) { return cb.GetLineState(line); }
@@ -229,24 +220,22 @@ public:
 	bool IsWordPartSeparator(char ch);
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
-	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
-	bool IsWhiteLine(int line);
+	int ExtendStyleRange(int pos, int delta);
 	int ParaUp(int pos);
 	int ParaDown(int pos);
-	int IndentSize() { return actualIndentInChars; }
-	int BraceMatch(int position, int maxReStyle);
 
 private:
-	void CheckReadOnly();
-
 	charClassification WordCharClass(unsigned char ch);
 	bool IsWordStartAt(int pos);
 	bool IsWordEndAt(int pos);
 	bool IsWordAt(int start, int end);
+	void ModifiedAt(int pos);
 
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
+
+	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
 /**
@@ -266,19 +255,19 @@ public:
 	int foldLevelPrev;
 
 	DocModification(int modificationType_, int position_=0, int length_=0,
-		int linesAdded_=0, const char *text_=0, int line_=0) :
+		int linesAdded_=0, const char *text_=0) :
 		modificationType(modificationType_),
 		position(position_),
 		length(length_),
 		linesAdded(linesAdded_),
 		text(text_),
-		line(line_),
+		line(0),
 		foldLevelNow(0),
 		foldLevelPrev(0) {}
 
-	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
+    DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
 		modificationType(modificationType_),
-		position(act.position),
+		position(act.position / 2),
 		length(act.lenData),
 		linesAdded(linesAdded_),
 		text(act.data),

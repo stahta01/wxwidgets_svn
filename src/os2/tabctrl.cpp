@@ -12,8 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TAB_DIALOG
-
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
@@ -61,6 +59,8 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
 
     SetParent(parent);
 
+    DWORD msflags = 0;
+
     if (width <= 0)
         width = 100;
     if (height <= 0)
@@ -71,6 +71,8 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
         y = 0;
 
     m_windowId = (id < 0 ? NewControlId() : id);
+
+    long tabStyle = 0;
 
     // Create the toolbar control.
     HWND hWndTabCtrl = 0;
@@ -89,9 +91,7 @@ wxTabCtrl::~wxTabCtrl()
     UnsubclassWin();
 }
 
-bool wxTabCtrl::OS2OnNotify(int      idCtrl,
-                            WXLPARAM WXUNUSED(lParam),
-                            WXLPARAM *WXUNUSED(result) )
+bool wxTabCtrl::OS2OnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 {
     wxTabEvent event(wxEVT_NULL, m_windowId);
     wxEventType eventType = wxEVT_NULL;
@@ -146,14 +146,14 @@ void wxTabCtrl::OnSysColourChanged(wxSysColourChangedEvent& event)
 bool wxTabCtrl::DeleteAllItems()
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Delete an item
-bool wxTabCtrl::DeleteItem(int WXUNUSED(item))
+bool wxTabCtrl::DeleteItem(int item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Get the selection
@@ -184,11 +184,10 @@ int wxTabCtrl::GetItemCount() const
 }
 
 // Get the rect corresponding to the tab
-bool wxTabCtrl::GetItemRect(int     WXUNUSED(item),
-                            wxRect& WXUNUSED(wxrect)) const
+bool wxTabCtrl::GetItemRect(int item, wxRect& wxrect) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Get the number of rows
@@ -199,85 +198,82 @@ int wxTabCtrl::GetRowCount() const
 }
 
 // Get the item text
-wxString wxTabCtrl::GetItemText(int WXUNUSED(item)) const
+wxString wxTabCtrl::GetItemText(int item) const
 {
     // TODO
-    return wxEmptyString;
+    return wxString("");
 }
 
 // Get the item image
-int wxTabCtrl::GetItemImage(int WXUNUSED(item)) const
+int wxTabCtrl::GetItemImage(int item) const
 {
     // TODO
     return 0;
 }
 
 // Get the item data
-void* wxTabCtrl::GetItemData(int WXUNUSED(item)) const
+void* wxTabCtrl::GetItemData(int item) const
 {
     // TODO
     return NULL;
 }
 
 // Hit test
-int wxTabCtrl::HitTest(const wxPoint& WXUNUSED(pt), long& WXUNUSED(flags))
+int wxTabCtrl::HitTest(const wxPoint& pt, long& flags)
 {
     // TODO
     return 0;
 }
 
 // Insert an item
-bool wxTabCtrl::InsertItem(int WXUNUSED(item),
-                           const wxString& WXUNUSED(text),
-                           int WXUNUSED(imageId),
-                           void* WXUNUSED(data))
+bool wxTabCtrl::InsertItem(int item, const wxString& text, int imageId, void* data)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Set the selection
-int wxTabCtrl::SetSelection(int WXUNUSED(item))
+int wxTabCtrl::SetSelection(int item)
 {
     // TODO
     return 0;
 }
 
 // Set the image list
-void wxTabCtrl::SetImageList(wxImageList* WXUNUSED(imageList))
+void wxTabCtrl::SetImageList(wxImageList* imageList)
 {
     // TODO
 }
 
 // Set the text for an item
-bool wxTabCtrl::SetItemText(int WXUNUSED(item), const wxString& WXUNUSED(text))
+bool wxTabCtrl::SetItemText(int item, const wxString& text)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Set the image for an item
-bool wxTabCtrl::SetItemImage(int WXUNUSED(item), int WXUNUSED(image))
+bool wxTabCtrl::SetItemImage(int item, int image)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Set the data for an item
-bool wxTabCtrl::SetItemData(int WXUNUSED(item), void* WXUNUSED(data))
+bool wxTabCtrl::SetItemData(int item, void* data)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Set the size for a fixed-width tab control
-void wxTabCtrl::SetItemSize(const wxSize& WXUNUSED(size))
+void wxTabCtrl::SetItemSize(const wxSize& size)
 {
     // TODO
 }
 
 // Set the padding between tabs
-void wxTabCtrl::SetPadding(const wxSize& WXUNUSED(padding))
+void wxTabCtrl::SetPadding(const wxSize& padding)
 {
     // TODO
 }
@@ -352,9 +348,9 @@ void wxMapBitmap(HBITMAP hBitmap, int width, int height)
 // Tab event
 IMPLEMENT_DYNAMIC_CLASS(wxTabEvent, wxCommandEvent)
 
-wxTabEvent::wxTabEvent(wxEventType commandType, int id)
-           :wxCommandEvent(commandType, id)
+wxTabEvent::wxTabEvent(wxEventType commandType, int id):
+  wxCommandEvent(commandType, id)
 {
 }
 
-#endif // wxUSE_TAB_DIALOG
+

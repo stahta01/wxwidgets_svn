@@ -7,7 +7,7 @@
 // Created:     20.09.99 (extracted from src/common/log.cpp)
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -23,6 +23,10 @@
 
 #ifdef __BORLANDC__
   #pragma hdrstop
+#endif
+
+#if !wxUSE_GUI
+    #error "This file can't be compiled without GUI!"
 #endif
 
 #ifndef WX_PRECOMP
@@ -64,12 +68,6 @@
 #else // !wxUSE_LOG_DIALOG
     #include "wx/msgdlg.h"
 #endif // wxUSE_LOG_DIALOG/!wxUSE_LOG_DIALOG
-
-#if defined(__MWERKS__) && wxUSE_UNICODE
-    #include <wtime.h>
-#endif
-
-#include "wx/datetime.h"
 
 // the suffix we add to the button to show that the dialog can be expanded
 #define EXPAND_SUFFIX _T(" >>")
@@ -123,37 +121,32 @@ private:
     wxArrayLong m_times;
 
     // the "toggle" button and its state
-#ifndef __SMARTPHONE__
     wxButton *m_btnDetails;
-#endif
     bool      m_showingDetails;
 
     // the controls which are not shown initially (but only when details
     // button is pressed)
     wxListCtrl *m_listctrl;
-#ifndef __SMARTPHONE__
 #if wxUSE_STATLINE
     wxStaticLine *m_statline;
 #endif // wxUSE_STATLINE
 #if wxUSE_FILE
     wxButton *m_btnSave;
 #endif // wxUSE_FILE
-#endif // __SMARTPHONE__
 
     // the translated "Details" string
     static wxString ms_details;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogDialog)
 };
 
 BEGIN_EVENT_TABLE(wxLogDialog, wxDialog)
-    EVT_BUTTON(wxID_OK, wxLogDialog::OnOk)
+    EVT_BUTTON(wxID_CANCEL, wxLogDialog::OnOk)
     EVT_BUTTON(wxID_MORE,   wxLogDialog::OnDetails)
 #if wxUSE_FILE
     EVT_BUTTON(wxID_SAVE,   wxLogDialog::OnSave)
 #endif // wxUSE_FILE
-    EVT_LIST_ITEM_SELECTED(wxID_ANY, wxLogDialog::OnListSelect)
+    EVT_LIST_ITEM_SELECTED(-1, wxLogDialog::OnListSelect)
 END_EVENT_TABLE()
 
 #endif // wxUSE_LOG_DIALOG
@@ -165,10 +158,10 @@ END_EVENT_TABLE()
 #if wxUSE_FILE && wxUSE_FILEDLG
 
 // pass an uninitialized file object, the function will ask the user for the
-// filename and try to open it, returns true on success (file was opened),
-// false if file couldn't be opened/created and -1 if the file selection
+// filename and try to open it, returns TRUE on success (file was opened),
+// FALSE if file couldn't be opened/created and -1 if the file selection
 // dialog was cancelled
-static int OpenLogFile(wxFile& file, wxString *filename = NULL, wxWindow *parent = NULL);
+static int OpenLogFile(wxFile& file, wxString *filename = NULL);
 
 #endif // wxUSE_FILE
 
@@ -200,11 +193,7 @@ void wxVLogStatus(wxFrame *pFrame, const wxChar *szFormat, va_list argptr)
 
     wxASSERT( gs_pFrame == NULL ); // should be reset!
     gs_pFrame = pFrame;
-#ifdef __WXWINCE__
-    wxLog::OnLog(wxLOG_Status, msg, 0);
-#else
     wxLog::OnLog(wxLOG_Status, msg, time(NULL));
-#endif
     gs_pFrame = (wxFrame *) NULL;
   }
 }
@@ -221,8 +210,6 @@ void wxLogStatus(wxFrame *pFrame, const wxChar *szFormat, ...)
 // wxLogGui implementation (FIXME MT-unsafe)
 // ----------------------------------------------------------------------------
 
-#if wxUSE_LOGGUI
-
 wxLogGui::wxLogGui()
 {
     Clear();
@@ -232,7 +219,7 @@ void wxLogGui::Clear()
 {
     m_bErrors =
     m_bWarnings =
-    m_bHasMessages = false;
+    m_bHasMessages = FALSE;
 
     m_aMessages.Empty();
     m_aSeverity.Empty();
@@ -245,11 +232,11 @@ void wxLogGui::Flush()
         return;
 
     // do it right now to block any new calls to Flush() while we're here
-    m_bHasMessages = false;
+    m_bHasMessages = FALSE;
 
     wxString appName = wxTheApp->GetAppName();
-    if ( !appName.empty() )
-        appName[0u] = (wxChar)wxToupper(appName[0u]);
+    if ( !!appName )
+        appName[0u] = wxToupper(appName[0u]);
 
     long style;
     wxString titleFormat;
@@ -314,7 +301,7 @@ void wxLogGui::Flush()
 
     // this catches both cases of 1 message with wxUSE_LOG_DIALOG and any
     // situation without it
-    if ( !str.empty() )
+    if ( !!str )
     {
         wxMessageBox(str, title, wxOK | style);
 
@@ -337,7 +324,7 @@ void wxLogGui::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
                 m_aMessages.Add(szString);
                 m_aSeverity.Add(wxLOG_Message);
                 m_aTimes.Add((long)t);
-                m_bHasMessages = true;
+                m_bHasMessages = TRUE;
             }
             break;
 
@@ -401,31 +388,27 @@ void wxLogGui::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
                 m_aSeverity.Empty();
                 m_aTimes.Empty();
 #endif // wxUSE_LOG_DIALOG
-                m_bErrors = true;
+                m_bErrors = TRUE;
             }
             // fall through
 
         case wxLOG_Warning:
             if ( !m_bErrors ) {
                 // for the warning we don't discard the info messages
-                m_bWarnings = true;
+                m_bWarnings = TRUE;
             }
 
             m_aMessages.Add(szString);
             m_aSeverity.Add((int)level);
             m_aTimes.Add((long)t);
-            m_bHasMessages = true;
+            m_bHasMessages = TRUE;
             break;
     }
 }
 
-#endif   // wxUSE_LOGGUI
-
 // ----------------------------------------------------------------------------
 // wxLogWindow and wxLogFrame implementation
 // ----------------------------------------------------------------------------
-
-#if wxUSE_LOGWINDOW
 
 // log frame class
 // ---------------
@@ -433,7 +416,7 @@ class wxLogFrame : public wxFrame
 {
 public:
     // ctor & dtor
-    wxLogFrame(wxWindow *pParent, wxLogWindow *log, const wxChar *szTitle);
+    wxLogFrame(wxFrame *pParent, wxLogWindow *log, const wxChar *szTitle);
     virtual ~wxLogFrame();
 
     // menu callbacks
@@ -443,6 +426,8 @@ public:
     void OnSave (wxCommandEvent& event);
 #endif // wxUSE_FILE
     void OnClear(wxCommandEvent& event);
+
+    void OnIdle(wxIdleEvent&);
 
     // accessors
     wxTextCtrl *TextCtrl() const { return m_pTextCtrl; }
@@ -463,7 +448,6 @@ private:
     wxLogWindow *m_log;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogFrame)
 };
 
 BEGIN_EVENT_TABLE(wxLogFrame, wxFrame)
@@ -477,12 +461,12 @@ BEGIN_EVENT_TABLE(wxLogFrame, wxFrame)
     EVT_CLOSE(wxLogFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
-wxLogFrame::wxLogFrame(wxWindow *pParent, wxLogWindow *log, const wxChar *szTitle)
-          : wxFrame(pParent, wxID_ANY, szTitle)
+wxLogFrame::wxLogFrame(wxFrame *pParent, wxLogWindow *log, const wxChar *szTitle)
+          : wxFrame(pParent, -1, szTitle)
 {
     m_log = log;
 
-    m_pTextCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
+    m_pTextCtrl = new wxTextCtrl(this, -1, wxEmptyString, wxDefaultPosition,
             wxDefaultSize,
             wxTE_MULTILINE  |
             wxHSCROLL       |
@@ -521,7 +505,7 @@ void wxLogFrame::DoClose()
     {
         // instead of closing just hide the window to be able to Show() it
         // later
-        Show(false);
+        Show(FALSE);
     }
 }
 
@@ -541,7 +525,7 @@ void wxLogFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 #if wxUSE_FILEDLG
     wxString filename;
     wxFile file;
-    int rc = OpenLogFile(file, &filename, this);
+    int rc = OpenLogFile(file, &filename);
     if ( rc == -1 )
     {
         // cancelled
@@ -584,7 +568,7 @@ wxLogFrame::~wxLogFrame()
 // wxLogWindow
 // -----------
 
-wxLogWindow::wxLogWindow(wxWindow *pParent,
+wxLogWindow::wxLogWindow(wxFrame *pParent,
                          const wxChar *szTitle,
                          bool bShow,
                          bool bDoPass)
@@ -594,7 +578,7 @@ wxLogWindow::wxLogWindow(wxWindow *pParent,
     m_pLogFrame = new wxLogFrame(pParent, this, szTitle);
 
     if ( bShow )
-        m_pLogFrame->Show();
+        m_pLogFrame->Show(TRUE);
 }
 
 void wxLogWindow::Show(bool bShow)
@@ -632,6 +616,8 @@ void wxLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
                 wxLog::DoLog(level, szString, t);
         }
     }
+
+    m_bHasMessages = TRUE;
 }
 
 void wxLogWindow::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
@@ -641,7 +627,7 @@ void wxLogWindow::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 
     // remove selection (WriteText is in fact ReplaceSelection)
 #ifdef __WXMSW__
-    wxTextPos nLen = pText->GetLastPosition();
+    long nLen = pText->GetLastPosition();
     pText->SetSelection(nLen, nLen);
 #endif // Windows
 
@@ -666,7 +652,7 @@ void wxLogWindow::OnFrameCreate(wxFrame * WXUNUSED(frame))
 bool wxLogWindow::OnFrameClose(wxFrame * WXUNUSED(frame))
 {
     // allow to close
-    return true;
+    return TRUE;
 }
 
 void wxLogWindow::OnFrameDelete(wxFrame * WXUNUSED(frame))
@@ -680,19 +666,13 @@ wxLogWindow::~wxLogWindow()
     delete m_pLogFrame;
 }
 
-#endif // wxUSE_LOGWINDOW
-
 // ----------------------------------------------------------------------------
 // wxLogDialog
 // ----------------------------------------------------------------------------
 
 #if wxUSE_LOG_DIALOG
 
-#ifndef __SMARTPHONE__
 static const size_t MARGIN = 10;
-#else
-static const size_t MARGIN = 0;
-#endif
 
 wxString wxLogDialog::ms_details;
 
@@ -702,19 +682,16 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
                          const wxArrayLong& times,
                          const wxString& caption,
                          long style)
-           : wxDialog(parent, wxID_ANY, caption,
+           : wxDialog(parent, -1, caption,
                       wxDefaultPosition, wxDefaultSize,
                       wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-    if ( ms_details.empty() )
+    if ( ms_details.IsEmpty() )
     {
         // ensure that we won't loop here if wxGetTranslation()
         // happens to pop up a Log message while translating this :-)
         ms_details = wxTRANSLATE("&Details");
         ms_details = wxGetTranslation(ms_details);
-#ifdef __SMARTPHONE__
-        ms_details = wxStripMenuCodes(ms_details);
-#endif
     }
 
     size_t count = messages.GetCount();
@@ -725,16 +702,19 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
     for ( size_t n = 0; n < count; n++ )
     {
         wxString msg = messages[n];
-        msg.Replace(wxT("\n"), wxT(" "));
-        m_messages.Add(msg);
-        m_severity.Add(severity[n]);
-        m_times.Add(times[n]);
+        do
+        {
+            m_messages.Add(msg.BeforeFirst(_T('\n')));
+            msg = msg.AfterFirst(_T('\n'));
+
+            m_severity.Add(severity[n]);
+            m_times.Add(times[n]);
+        }
+        while ( !!msg );
     }
 
-    m_showingDetails = false; // not initially
+    m_showingDetails = FALSE; // not initially
     m_listctrl = (wxListCtrl *)NULL;
-
-#ifndef __SMARTPHONE__
 
 #if wxUSE_STATLINE
     m_statline = (wxStaticLine *)NULL;
@@ -744,48 +724,41 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
     m_btnSave = (wxButton *)NULL;
 #endif // wxUSE_FILE
 
-#endif // __SMARTPHONE__
-
-    bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-
     // create the controls which are always shown and layout them: we use
     // sizers even though our window is not resizeable to calculate the size of
     // the dialog properly
     wxBoxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
-#ifndef __SMARTPHONE__
-    wxBoxSizer *sizerButtons = new wxBoxSizer(isPda ? wxHORIZONTAL : wxVERTICAL);
-#endif
-    wxBoxSizer *sizerAll = new wxBoxSizer(isPda ? wxVERTICAL : wxHORIZONTAL);
+    wxBoxSizer *sizerButtons = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *sizerAll = new wxBoxSizer(wxHORIZONTAL);
 
-#ifdef __SMARTPHONE__
-    SetLeftMenu(wxID_OK);
-    SetRightMenu(wxID_MORE, ms_details + EXPAND_SUFFIX);
-#else
-    wxButton *btnOk = new wxButton(this, wxID_OK);
-    sizerButtons->Add(btnOk, 0, isPda ? wxCENTRE : wxCENTRE|wxBOTTOM, MARGIN/2);
+    // this "Ok" button has wxID_CANCEL id - not very logical, but this allows
+    // to close the log dialog with <Esc> which wouldn't work otherwise (as it
+    // translates into click on cancel button)
+    wxButton *btnOk = new wxButton(this, wxID_CANCEL, _("OK"));
+    sizerButtons->Add(btnOk, 0, wxCENTRE | wxBOTTOM, MARGIN/2);
     m_btnDetails = new wxButton(this, wxID_MORE, ms_details + EXPAND_SUFFIX);
-    sizerButtons->Add(m_btnDetails, 0, isPda ? wxCENTRE|wxLEFT : wxCENTRE | wxTOP, MARGIN/2 - 1);
-#endif
+    sizerButtons->Add(m_btnDetails, 0, wxCENTRE | wxTOP, MARGIN/2 - 1);
 
+#ifndef __WIN16__
     wxBitmap bitmap;
     switch ( style & wxICON_MASK )
     {
         case wxICON_ERROR:
-            bitmap = wxArtProvider::GetBitmap(wxART_ERROR, wxART_MESSAGE_BOX);
+            bitmap = wxArtProvider::GetIcon(wxART_ERROR, wxART_MESSAGE_BOX);
 #ifdef __WXPM__
             bitmap.SetId(wxICON_SMALL_ERROR);
 #endif
             break;
 
         case wxICON_INFORMATION:
-            bitmap = wxArtProvider::GetBitmap(wxART_INFORMATION, wxART_MESSAGE_BOX);
+            bitmap = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_MESSAGE_BOX);
 #ifdef __WXPM__
             bitmap.SetId(wxICON_SMALL_INFO);
 #endif
             break;
 
         case wxICON_WARNING:
-            bitmap = wxArtProvider::GetBitmap(wxART_WARNING, wxART_MESSAGE_BOX);
+            bitmap = wxArtProvider::GetIcon(wxART_WARNING, wxART_MESSAGE_BOX);
 #ifdef __WXPM__
             bitmap.SetId(wxICON_SMALL_WARNING);
 #endif
@@ -794,20 +767,17 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
         default:
             wxFAIL_MSG(_T("incorrect log style"));
     }
-
-    if (!isPda)
-        sizerAll->Add(new wxStaticBitmap(this, wxID_ANY, bitmap), 0,
-                  wxALIGN_CENTRE_VERTICAL);
+    sizerAll->Add(new wxStaticBitmap(this, -1, bitmap), 0);
+#endif // !Win16
 
     const wxString& message = messages.Last();
     sizerAll->Add(CreateTextSizer(message), 1,
                   wxALIGN_CENTRE_VERTICAL | wxLEFT | wxRIGHT, MARGIN);
-#ifndef __SMARTPHONE__
-    sizerAll->Add(sizerButtons, 0, isPda ? wxCENTRE|wxTOP|wxBOTTOM : (wxALIGN_RIGHT | wxLEFT), MARGIN);
-#endif
+    sizerAll->Add(sizerButtons, 0, wxALIGN_RIGHT | wxLEFT, MARGIN);
 
     sizerTop->Add(sizerAll, 0, wxALL | wxEXPAND, MARGIN);
 
+    SetAutoLayout(TRUE);
     SetSizer(sizerTop);
 
     // see comments in OnDetails()
@@ -824,46 +794,39 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
     m_maxHeight = size.y;
     SetSizeHints(size.x, size.y, m_maxWidth, m_maxHeight);
 
-#ifndef __SMARTPHONE__
     btnOk->SetFocus();
-#endif
+
+    // this can't happen any more as we don't use this dialog in this case
+#if 0
+    if ( count == 1 )
+    {
+        // no details... it's easier to disable a button than to change the
+        // dialog layout depending on whether we have details or not
+        m_btnDetails->Disable();
+    }
+#endif // 0
 
     Centre();
-
-    if (isPda)
-    {
-        // Move up the screen so that when we expand the dialog,
-        // there's enough space.
-        Move(wxPoint(GetPosition().x, GetPosition().y / 2));
-    }
 }
 
 void wxLogDialog::CreateDetailsControls()
 {
-#ifndef __SMARTPHONE__
     // create the save button and separator line if possible
 #if wxUSE_FILE
-    m_btnSave = new wxButton(this, wxID_SAVE);
+    m_btnSave = new wxButton(this, wxID_SAVE, _("&Save..."));
 #endif // wxUSE_FILE
 
 #if wxUSE_STATLINE
-    m_statline = new wxStaticLine(this, wxID_ANY);
+    m_statline = new wxStaticLine(this, -1);
 #endif // wxUSE_STATLINE
 
-#endif // __SMARTPHONE__
-
     // create the list ctrl now
-    m_listctrl = new wxListCtrl(this, wxID_ANY,
+    m_listctrl = new wxListCtrl(this, -1,
                                 wxDefaultPosition, wxDefaultSize,
                                 wxSUNKEN_BORDER |
                                 wxLC_REPORT |
                                 wxLC_NO_HEADER |
                                 wxLC_SINGLE_SEL);
-#ifdef __WXWINCE__
-    // This maks a big aesthetic difference on WinCE but I
-    // don't want to risk problems on other platforms
-    m_listctrl->Hide();
-#endif
 
     // no need to translate these strings as they're not shown to the
     // user anyhow (we use wxLC_NO_HEADER style)
@@ -882,8 +845,9 @@ void wxLogDialog::CreateDetailsControls()
         wxART_INFORMATION
     };
 
-    bool loadedIcons = true;
+    bool loadedIcons = TRUE;
 
+#ifndef __WIN16__
     for ( size_t icon = 0; icon < WXSIZEOF(icons); icon++ )
     {
         wxBitmap bmp = wxArtProvider::GetBitmap(icons[icon], wxART_MESSAGE_BOX,
@@ -893,7 +857,7 @@ void wxLogDialog::CreateDetailsControls()
         // Degrade gracefully.
         if ( !bmp.Ok() )
         {
-            loadedIcons = false;
+            loadedIcons = FALSE;
 
             break;
         }
@@ -902,6 +866,7 @@ void wxLogDialog::CreateDetailsControls()
     }
 
     m_listctrl->SetImageList(imageList, wxIMAGE_LIST_SMALL);
+#endif // !Win16
 
     // and fill it
     wxString fmt = wxLog::GetTimestamp();
@@ -916,6 +881,7 @@ void wxLogDialog::CreateDetailsControls()
     {
         int image;
 
+#ifndef __WIN16__
         if ( loadedIcons )
         {
             switch ( m_severity[n] )
@@ -933,6 +899,7 @@ void wxLogDialog::CreateDetailsControls()
             }
         }
         else // failed to load images
+#endif // !Win16
         {
             image = -1;
         }
@@ -959,7 +926,7 @@ void wxLogDialog::CreateDetailsControls()
     heightMax *= 9;
     heightMax /= 10;
 
-    m_listctrl->SetSize(wxDefaultCoord, wxMin(height, heightMax));
+    m_listctrl->SetSize(-1, wxMin(height, heightMax));
 }
 
 void wxLogDialog::OnListSelect(wxListEvent& event)
@@ -981,7 +948,7 @@ void wxLogDialog::OnSave(wxCommandEvent& WXUNUSED(event))
 {
 #if wxUSE_FILEDLG
     wxFile file;
-    int rc = OpenLogFile(file, NULL, this);
+    int rc = OpenLogFile(file);
     if ( rc == -1 )
     {
         // cancelled
@@ -1025,43 +992,29 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
 
     if ( m_showingDetails )
     {
-#ifdef __SMARTPHONE__
-        SetRightMenu(wxID_MORE, ms_details + EXPAND_SUFFIX);
-#else
         m_btnDetails->SetLabel(ms_details + EXPAND_SUFFIX);
-#endif
 
-        sizer->Detach( m_listctrl );
-
-#ifndef __SMARTPHONE__
+        sizer->Remove(m_listctrl);
 
 #if wxUSE_STATLINE
-        sizer->Detach( m_statline );
+        sizer->Remove(m_statline);
 #endif // wxUSE_STATLINE
 
 #if wxUSE_FILE
-        sizer->Detach( m_btnSave );
+        sizer->Remove(m_btnSave);
 #endif // wxUSE_FILE
-
-#endif // __SMARTPHONE__
     }
     else // show details now
     {
-#ifdef __SMARTPHONE__
-        SetRightMenu(wxID_MORE, wxString(_T("<< ")) + ms_details);
-#else
         m_btnDetails->SetLabel(wxString(_T("<< ")) + ms_details);
-#endif
 
         if ( !m_listctrl )
         {
             CreateDetailsControls();
         }
 
-#if wxUSE_STATLINE && !defined(__SMARTPHONE__)
-        bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-        if (!isPda)
-            sizer->Add(m_statline, 0, wxEXPAND | (wxALL & ~wxTOP), MARGIN);
+#if wxUSE_STATLINE
+        sizer->Add(m_statline, 0, wxEXPAND | (wxALL & ~wxTOP), MARGIN);
 #endif // wxUSE_STATLINE
 
         sizer->Add(m_listctrl, 1, wxEXPAND | (wxALL & ~wxTOP), MARGIN);
@@ -1075,7 +1028,7 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
         sizer->SetItemMinSize(m_listctrl, 100, 3*GetCharHeight());
 #endif // 0
 
-#if wxUSE_FILE && !defined(__SMARTPHONE__)
+#if wxUSE_FILE
         sizer->Add(m_btnSave, 0, wxALIGN_RIGHT | (wxALL & ~wxTOP), MARGIN);
 #endif // wxUSE_FILE
     }
@@ -1108,19 +1061,14 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
 
     SetSizeHints(size.x, size.y, m_maxWidth, m_maxHeight);
 
-#ifdef __WXWINCE__
-    if (m_showingDetails)
-        m_listctrl->Show();
-#endif
-
     // don't change the width when expanding/collapsing
-    SetSize(wxDefaultCoord, size.y);
+    SetSize(-1, size.y);
 
 #ifdef __WXGTK__
-    // VS: this is necessary in order to force frame redraw under
+    // VS: this is neccessary in order to force frame redraw under
     // WindowMaker or fvwm2 (and probably other broken WMs).
     // Otherwise, detailed list wouldn't be displayed.
-    Show();
+    Show(TRUE);
 #endif // wxGTK
 }
 
@@ -1137,14 +1085,14 @@ wxLogDialog::~wxLogDialog()
 #if wxUSE_FILE && wxUSE_FILEDLG
 
 // pass an uninitialized file object, the function will ask the user for the
-// filename and try to open it, returns true on success (file was opened),
-// false if file couldn't be opened/created and -1 if the file selection
+// filename and try to open it, returns TRUE on success (file was opened),
+// FALSE if file couldn't be opened/created and -1 if the file selection
 // dialog was cancelled
-static int OpenLogFile(wxFile& file, wxString *pFilename, wxWindow *parent)
+static int OpenLogFile(wxFile& file, wxString *pFilename)
 {
     // get the file name
     // -----------------
-    wxString filename = wxSaveFileSelector(wxT("log"), wxT("txt"), wxT("log.txt"), parent);
+    wxString filename = wxSaveFileSelector(wxT("log"), wxT("txt"), wxT("log.txt"));
     if ( !filename ) {
         // cancelled
         return -1;
@@ -1152,20 +1100,20 @@ static int OpenLogFile(wxFile& file, wxString *pFilename, wxWindow *parent)
 
     // open file
     // ---------
-    bool bOk wxDUMMY_INITIALIZE(false);
+    bool bOk = FALSE;
     if ( wxFile::Exists(filename) ) {
-        bool bAppend = false;
+        bool bAppend = FALSE;
         wxString strMsg;
         strMsg.Printf(_("Append log to file '%s' (choosing [No] will overwrite it)?"),
                       filename.c_str());
         switch ( wxMessageBox(strMsg, _("Question"),
                               wxICON_QUESTION | wxYES_NO | wxCANCEL) ) {
             case wxYES:
-                bAppend = true;
+                bAppend = TRUE;
                 break;
 
             case wxNO:
-                bAppend = false;
+                bAppend = FALSE;
                 break;
 
             case wxCANCEL:
@@ -1179,7 +1127,7 @@ static int OpenLogFile(wxFile& file, wxString *pFilename, wxWindow *parent)
             bOk = file.Open(filename, wxFile::write_append);
         }
         else {
-            bOk = file.Create(filename, true /* overwrite */);
+            bOk = file.Create(filename, TRUE /* overwrite */);
         }
     }
     else {
@@ -1196,7 +1144,7 @@ static int OpenLogFile(wxFile& file, wxString *pFilename, wxWindow *parent)
 
 #endif // !(wxUSE_LOGGUI || wxUSE_LOGWINDOW)
 
-#if wxUSE_LOG && wxUSE_TEXTCTRL
+#if wxUSE_TEXTCTRL
 
 // ----------------------------------------------------------------------------
 // wxLogTextCtrl implementation
@@ -1212,9 +1160,17 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     wxString msg;
     TimeStamp(&msg);
 
+#if defined(__WXMAC__)
+    // VZ: this is a bug in wxMac, it *must* accept '\n' as new line, the
+    //     translation must be done in wxTextCtrl, not here! (FIXME)
+    msg << szString << wxT('\r');
+#else
     msg << szString << wxT('\n');
+#endif
+
     m_pTextCtrl->AppendText(msg);
 }
 
-#endif // wxUSE_LOG && wxUSE_TEXTCTRL
+#endif // wxUSE_TEXTCTRL
 
+// vi:sts=4:sw=4:et

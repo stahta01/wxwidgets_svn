@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 
 #include "wx/wxprec.h"
@@ -80,7 +80,7 @@ bool wxSoundFormatUlaw::operator !=(const wxSoundFormatBase& frmt2) const
     wxSoundFormatUlaw *ulaw = (wxSoundFormatUlaw *)&frmt2;
     
     if (frmt2.GetType() != wxSOUND_ULAW)
-        return true;
+        return TRUE;
     
     return (ulaw->m_srate != m_srate);
 }
@@ -158,7 +158,7 @@ bool wxSoundStreamUlaw::SetSoundFormat(const wxSoundFormatBase& format)
 {
     if (format.GetType() != wxSOUND_ULAW) {
         m_snderror = wxSOUND_INVFRMT;
-        return false;
+        return FALSE;
     }
     
     // As the codec only support 16 bits, Mono we must use a wxSoundRouter
@@ -175,10 +175,10 @@ bool wxSoundStreamUlaw::SetSoundFormat(const wxSoundFormatBase& format)
     pcm.SetSampleRate(ulaw->GetSampleRate());
     pcm.SetBPS(16);
     pcm.SetChannels(ulaw->GetChannels());
-    pcm.Signed(true);
+    pcm.Signed(TRUE);
     pcm.SetOrder(wxBYTE_ORDER);
     
     m_router->SetSoundFormat(pcm);
     
-    return true;
+    return TRUE;
 }

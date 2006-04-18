@@ -12,23 +12,20 @@
 PROGRAM = embedded
 OBJECTS = $(PROGRAM).o
 
-WX_CFG = wx-config
-PYVER = 2.4
-
-EXTRAINC=-I../../include -I/usr/include/python$(PYVER)
-EXTRALIB=-L/usr/lib/python$(PYVER)/config -lpython$(PYVER)
-CXX = $(shell $(WX_CFG) --cxx)
+EXTRAINC=-I../../src -I/usr/include/python2.2
+EXTRALIB=-L/usr/lib/python2.2/config -lpython2.2
+CXX = $(shell wx-config --cxx)
 
 
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-	$(CXX) -c -g `$(WX_CFG) --cxxflags` $(EXTRAINC) -o $@ $<
+	$(CXX) -c `wx-config --cxxflags` $(EXTRAINC) -o $@ $<
 
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -g -o $(PROGRAM) $(OBJECTS) `$(WX_CFG) --libs` $(EXTRALIB)
+	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --libs` $(EXTRALIB)
 
 clean:
 	rm -f *.o $(PROGRAM)

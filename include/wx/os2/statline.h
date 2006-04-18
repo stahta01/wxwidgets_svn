@@ -22,7 +22,7 @@ public:
     // constructors and pseudo-constructors
     wxStaticLine() { }
     wxStaticLine( wxWindow*       pParent
-                 ,wxWindowID      vId = wxID_ANY
+                 ,wxWindowID      vId
                  ,const wxPoint&  rPos = wxDefaultPosition
                  ,const wxSize&   rSize = wxDefaultSize
                  ,long            lStyle = wxLI_HORIZONTAL
@@ -33,7 +33,7 @@ public:
     }
 
     bool Create(  wxWindow*       pParent
-                 ,wxWindowID      vId = wxID_ANY
+                 ,wxWindowID      vId
                  ,const wxPoint&  rPos = wxDefaultPosition
                  ,const wxSize&   rSize = wxDefaultSize
                  ,long            lStyle = wxLI_HORIZONTAL

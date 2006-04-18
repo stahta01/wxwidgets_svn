@@ -11,7 +11,6 @@
 
 #include "wx/defs.h"
 #include "wx/string.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndpcm.h"
 
@@ -19,7 +18,7 @@
 // ESD output class
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundStreamESD : public wxSoundStream {
+class wxSoundStreamESD : public wxSoundStream {
 public:
     wxSoundStreamESD(const wxString& hostname = wxT("localhost"));
     ~wxSoundStreamESD();

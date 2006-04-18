@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        radiobox.tex
-%% Purpose:     wxRadioBox documentation
-%% Author:      wxWidgets Team
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets Team
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{\class{wxRadioBox}}\label{wxradiobox}
 
 A radio box item is used to select one of number of mutually exclusive
@@ -17,7 +6,6 @@ labelled buttons.
 
 \wxheading{Derived from}
 
-\helpref{wxControlWithItems}{wxcontrolwithitems}\\
 \helpref{wxControl}{wxcontrol}\\
 \helpref{wxWindow}{wxwindow}\\
 \helpref{wxEvtHandler}{wxevthandler}\\
@@ -35,8 +23,6 @@ labelled buttons.
 maximum number of rows.}
 \twocolitem{\windowstyle{wxRA\_SPECIFY\_COLS}}{The major dimension parameter refers to the
 maximum number of columns.}
-\twocolitem{\windowstyle{wxRA\_USE\_CHECKBOX}}{Use of the checkbox controls instead of radio
-buttons (currently supported only on PalmOS)}
 \end{twocollist}
 
 See also \helpref{window styles overview}{windowstyles}.
@@ -56,8 +42,7 @@ when a radiobutton is clicked.}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxRadioBox::wxRadioBox}\label{wxradioboxctor}
+\membersection{wxRadioBox::wxRadioBox}\label{wxradioboxconstr}
 
 \func{}{wxRadioBox}{\void}
 
@@ -66,13 +51,6 @@ Default constructor.
 \func{}{wxRadioBox}{\param{wxWindow* }{parent}, \param{wxWindowID }{id}, \param{const wxString\& }{label},\rtfsp
 \param{const wxPoint\& }{point = wxDefaultPosition}, \param{const wxSize\& }{size = wxDefaultSize},\rtfsp
 \param{int}{ n = 0}, \param{const wxString}{ choices[] = NULL},\rtfsp
-\param{int}{ majorDimension = 0}, \param{long}{ style = wxRA\_SPECIFY\_COLS},\rtfsp
-\param{const wxValidator\& }{validator = wxDefaultValidator},\rtfsp
-\param{const wxString\& }{name = ``radioBox"}}
-
-\func{}{wxRadioBox}{\param{wxWindow* }{parent}, \param{wxWindowID }{id}, \param{const wxString\& }{label},\rtfsp
-\param{const wxPoint\& }{point}, \param{const wxSize\& }{size},\rtfsp
-\param{const wxArrayString\&}{ choices},\rtfsp
 \param{int}{ majorDimension = 0}, \param{long}{ style = wxRA\_SPECIFY\_COLS},\rtfsp
 \param{const wxValidator\& }{validator = wxDefaultValidator},\rtfsp
 \param{const wxString\& }{name = ``radioBox"}}
@@ -115,13 +93,11 @@ a list of strings.}
 \perlnote{In wxPerl there is just an array reference in place of {\tt n}
 and {\tt choices}.}
 
-
-\membersection{wxRadioBox::\destruct{wxRadioBox}}\label{wxradioboxdtor}
+\membersection{wxRadioBox::\destruct{wxRadioBox}}
 
 \func{}{\destruct{wxRadioBox}}{\void}
 
 Destructor, destroying the radiobox item.
-
 
 \membersection{wxRadioBox::Create}\label{wxradioboxcreate}
 
@@ -132,30 +108,22 @@ Destructor, destroying the radiobox item.
 \param{const wxValidator\& }{validator = wxDefaultValidator},\rtfsp
 \param{const wxString\& }{name = ``radioBox"}}
 
-\func{bool}{Create}{\param{wxWindow* }{parent}, \param{wxWindowID }{id}, \param{const wxString\& }{label},\rtfsp
-\param{const wxPoint\& }{point}, \param{const wxSize\& }{size},\rtfsp
-\param{const wxArrayString\&}{ choices},\rtfsp
-\param{int}{ majorDimension = 0}, \param{long}{ style = wxRA\_SPECIFY\_COLS},\rtfsp
-\param{const wxValidator\& }{validator = wxDefaultValidator},\rtfsp
-\param{const wxString\& }{name = ``radioBox"}}
-
-Creates the radiobox for two-step construction. See \helpref{wxRadioBox::wxRadioBox}{wxradioboxctor}\rtfsp
+Creates the radiobox for two-step construction. See \helpref{wxRadioBox::wxRadioBox}{wxradioboxconstr}\rtfsp
 for further details.
-
 
 \membersection{wxRadioBox::Enable}\label{wxradioboxenable}
 
-\func{virtual bool}{Enable}{\param{bool}{ enable = {\tt true}}}
+\func{void}{Enable}{\param{bool}{ enable = {\tt TRUE}}}
 
 Enables or disables the entire radiobox.
 
-\func{virtual bool}{Enable}{\param{unsigned int}{ n}, \param{bool}{ enable = {\tt true}}}
+\func{void}{Enable}{\param{int}{ n}, \param{bool}{ enable = {\tt TRUE}}}
 
 Enables or disables an individual button in the radiobox.
 
 \wxheading{Parameters}
 
-\docparam{enable}{true to enable, false to disable.}
+\docparam{enable}{TRUE to enable, FALSE to disable.}
 
 \docparam{n}{The zero-based button to enable or disable.}
 
@@ -167,11 +135,6 @@ implements the following methods:\par
 individual button in the radiobox.}
 \end{twocollist}}
 }
-
-\wxheading{See also}
-
-\helpref{wxWindow::Enable}{wxwindowenable}
-
 
 
 \membersection{wxRadioBox::FindString}\label{wxradioboxfindstring}
@@ -185,19 +148,21 @@ Finds a button matching the given string, returning the position if found, or
 
 \docparam{string}{The string to find.}
 
+\membersection{wxRadioBox::GetCount}\label{wxradioboxgetcount}
 
-\membersection{wxRadioBox::GetColumnCount}\label{wxradioboxgetcolumncount}
+\constfunc{int}{GetCount}{\void}
 
-\constfunc{unsigned int}{GetColumnCount}{\void}
-
-Returns the number of columns in the radiobox.
-
+Returns the number of items in the radiobox.
 
 \membersection{wxRadioBox::GetLabel}\label{wxradioboxgetlabel}
 
 \constfunc{wxString}{GetLabel}{\void}
 
 Returns the radiobox label.
+
+\constfunc{wxString}{GetLabel}{\param{int }{n}}
+
+Returns the label for the given button.
 
 \wxheading{Parameters}
 
@@ -216,19 +181,11 @@ implements the following methods:\par
 }
 
 
-\membersection{wxRadioBox::GetRowCount}\label{wxradioboxgetrowcount}
-
-\constfunc{unsigned int}{GetRowCount}{\void}
-
-Returns the number of rows in the radiobox.
-
-
 \membersection{wxRadioBox::GetSelection}\label{wxradioboxgetselection}
 
 \constfunc{int}{GetSelection}{\void}
 
 Returns the zero-based position of the selected button.
-
 
 \membersection{wxRadioBox::GetStringSelection}\label{wxradioboxgetstringselection}
 
@@ -236,50 +193,17 @@ Returns the zero-based position of the selected button.
 
 Returns the selected string.
 
+\membersection{wxRadioBox::Number}\label{wxradioboxnumber}
 
-\membersection{wxRadioBox::GetString}\label{wxradioboxgetstring}
+\constfunc{int}{Number}{\void}
 
-\constfunc{wxString}{GetString}{\param{unsigned int}{ n}}
+{\bf Obsolescence note:} This method is obsolete and was replaced with 
+\helpref{GetCount}{wxradioboxgetcount}, please use the new method in the new
+code. This method is only available if wxWidgets was compiled with 
+{\tt WXWIN\_COMPATIBILITY\_2\_2} defined and will disappear completely in
+future versions.
 
-Returns the label for the button at the given position.
-
-\wxheading{Parameters}
-
-\docparam{n}{The zero-based button position.}
-
-
-\membersection{wxRadioBox::IsItemEnabled}\label{wxradioboxisitemenabled}
-
-\constfunc{bool}{IsItemEnabled}{\param{unsigned int}{ n}}
-
-Returns \true if the item is enabled or \false if it was disabled using
-\helpref{Enable(n, false)}{wxradioboxenable}.
-
-{\bf Platform note:} Currently only implemented in wxMSW, wxGTK and wxUniversal
-and always returns \true in the other ports.
-
-\wxheading{Parameters}
-
-\docparam{n}{The zero-based button position.}
-
-
-\membersection{wxRadioBox::IsItemShown}\label{wxradioboxisitemshown}
-
-\constfunc{bool}{IsItemShown}{\param{unsigned int}{ n}}
-
-Returns \true if the item is currently shown or \false if it was hidden using
-\helpref{Show(n, false)}{wxradioboxshow}.
-
-Note that this function returns \true for an item which hadn't been hidden even
-if the entire radiobox is not currently shown.
-
-{\bf Platform note:} Currently only implemented in wxMSW, wxGTK and wxUniversal
-and always returns \true in the other ports.
-
-\wxheading{Parameters}
-
-\docparam{n}{The zero-based button position.}
-
+Returns the number of buttons in the radiobox.
 
 \membersection{wxRadioBox::SetLabel}\label{wxradioboxsetlabel}
 
@@ -287,6 +211,9 @@ and always returns \true in the other ports.
 
 Sets the radiobox label.
 
+\func{void}{SetLabel}{\param{int }{n}, \param{const wxString\&}{ label}}
+
+Sets a label for a radio button.
 
 \wxheading{Parameters}
 
@@ -302,7 +229,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-
 \membersection{wxRadioBox::SetSelection}\label{wxradioboxsetselection}
 
 \func{void}{SetSelection}{\param{int}{ n}}
@@ -313,7 +239,6 @@ a wxEVT\_COMMAND\_RADIOBOX\_SELECTED event to get emitted.
 \wxheading{Parameters}
 
 \docparam{n}{The zero-based button position.}
-
 
 \membersection{wxRadioBox::SetStringSelection}\label{wxradioboxsetstringselection}
 
@@ -326,31 +251,21 @@ a wxEVT\_COMMAND\_RADIOBOX\_SELECTED event to get emitted.
 
 \docparam{string}{The label of the button to select.}
 
-
 \membersection{wxRadioBox::Show}\label{wxradioboxshow}
 
-\func{virtual bool}{Show}{\param{const bool}{ show = {\tt true}}}
+\func{void}{Show}{\param{const bool}{ show}}
 
 Shows or hides the entire radiobox.
 
-\func{virtual bool}{Show}{\param{unsigned int}{ item}, \param{const bool}{ show = {\tt true}}}
+\func{void}{Show}{\param{int }{item}, \param{const bool}{ show}}
 
 Shows or hides individual buttons.
 
 \wxheading{Parameters}
 
-\docparam{show}{true to show, false to hide.}
+\docparam{show}{TRUE to show, FALSE to hide.}
 
 \docparam{item}{The zero-based position of the button to show or hide.}
-
-\wxheading{Return value}
-
-{\tt true} if the box or item has been shown or hidden or {\tt false} if nothing was
-done because it already was in the requested state.
-
-\wxheading{See also}
-
-\helpref{wxWindow::Show}{wxwindowshow}
 
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
@@ -359,3 +274,15 @@ implements the following methods:\par
 \twocolitem{{\bf ShowItem(n, flag)}}{Shows or hides individual buttons.}
 \end{twocollist}}
 }
+
+\membersection{wxRadioBox::GetString}\label{wxradioboxgetstring}
+
+\constfunc{wxString}{GetString}{\param{int}{ n}}
+
+Returns the label for the button at the given position.
+
+\wxheading{Parameters}
+
+\docparam{n}{The zero-based button position.}
+
+

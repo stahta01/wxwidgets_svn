@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     16.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@
 
 // CreateDialog
 
-#if defined(CreateDialog)
+#ifdef CreateDialog
     #undef CreateDialog
 
     inline HWND CreateDialog(HINSTANCE hInstance,
@@ -39,64 +39,6 @@
             return CreateDialogW(hInstance, pTemplate, hwndParent, pDlgProc);
         #else
             return CreateDialogA(hInstance, pTemplate, hwndParent, pDlgProc);
-        #endif
-    }
-#endif
-
-// CreateFont
-
-#ifdef CreateFont
-    #undef CreateFont
-
-    inline HFONT CreateFont(int height,
-                            int width,
-                            int escapement,
-                            int orientation,
-                            int weight,
-                            DWORD italic,
-                            DWORD underline,
-                            DWORD strikeout,
-                            DWORD charset,
-                            DWORD outprecision,
-                            DWORD clipprecision,
-                            DWORD quality,
-                            DWORD family,
-                            LPCTSTR facename)
-    {
-        #ifdef _UNICODE
-            return CreateFontW(height, width, escapement, orientation,
-                               weight, italic, underline, strikeout, charset,
-                               outprecision, clipprecision, quality,
-                               family, facename);
-        #else
-            return CreateFontA(height, width, escapement, orientation,
-                               weight, italic, underline, strikeout, charset,
-                               outprecision, clipprecision, quality,
-                               family, facename);
-        #endif
-    }
-#endif // CreateFont
-
-// CreateWindow
-
-#if defined(CreateWindow)
-    #undef CreateWindow
-
-    inline HWND CreateWindow(LPCTSTR lpClassName,
-                             LPCTSTR lpWndClass,
-                             DWORD dwStyle,
-                             int x, int y, int w, int h,
-                             HWND hWndParent,
-                             HMENU hMenu,
-                             HINSTANCE hInstance,
-                             LPVOID lpParam)
-    {
-        #ifdef _UNICODE
-            return CreateWindowW(lpClassName, lpWndClass, dwStyle, x, y, w, h,
-                                 hWndParent, hMenu, hInstance, lpParam);
-        #else
-            return CreateWindowA(lpClassName, lpWndClass, dwStyle, x, y, w, h,
-                                 hWndParent, hMenu, hInstance, lpParam);
         #endif
     }
 #endif
@@ -336,7 +278,6 @@
 #endif // LoadBitmap
 
 // LoadLibrary
-
 #ifdef LoadLibrary
     #undef LoadLibrary
     #ifdef _UNICODE
@@ -372,13 +313,9 @@
 
 #ifdef IsMaximized
     #undef IsMaximized
-    inline BOOL IsMaximized(HWND WXUNUSED_IN_WINCE(hwnd))
+    inline BOOL IsMaximized(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        return FALSE;
-#else
         return IsZoomed(hwnd);
-#endif
     }
 #endif
 
@@ -386,33 +323,9 @@
 
 #ifdef GetFirstChild
     #undef GetFirstChild
-    inline HWND GetFirstChild(HWND WXUNUSED_IN_WINCE(hwnd))
+    inline HWND GetFirstChild(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        return 0;
-#else
         return GetTopWindow(hwnd);
-#endif
-    }
-#endif
-
-// GetFirstSibling
-
-#ifdef GetFirstSibling
-    #undef GetFirstSibling
-    inline HWND GetFirstSibling(HWND hwnd)
-    {
-        return GetWindow(hwnd,GW_HWNDFIRST);
-    }
-#endif
-
-// GetLastSibling
-
-#ifdef GetLastSibling
-    #undef GetLastSibling
-    inline HWND GetLastSibling(HWND hwnd)
-    {
-        return GetWindow(hwnd,GW_HWNDLAST);
     }
 #endif
 
@@ -467,16 +380,6 @@
 #ifdef Yield
     #undef Yield
 #endif
-
-
-#if defined(__WXWINCE__) && defined(DrawIcon) //#ifdef DrawIcon
-    #undef DrawIcon
-    inline BOOL DrawIcon(HDC hdc, int x, int y, HICON hicon)
-    {
-        return DrawIconEx(hdc,x,y,hicon,0,0,0,NULL, DI_NORMAL) ;
-    }
-#endif
-
 
 // GetWindowProc
 //ifdef GetWindowProc

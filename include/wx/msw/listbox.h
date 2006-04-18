@@ -24,11 +24,11 @@
   // define the array of list box items
   #include  "wx/dynarray.h"
 
-  WX_DEFINE_EXPORTED_ARRAY_PTR(wxOwnerDrawn *, wxListBoxItemsArray);
+  WX_DEFINE_EXPORTED_ARRAY(wxOwnerDrawn *, wxListBoxItemsArray);
 #endif // wxUSE_OWNER_DRAWN
 
 // forward decl for GetSelections()
-class WXDLLIMPEXP_BASE wxArrayInt;
+class wxArrayInt;
 
 // ----------------------------------------------------------------------------
 // List box control
@@ -49,16 +49,6 @@ public:
     {
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-    wxListBox(wxWindow *parent, wxWindowID id,
-            const wxPoint& pos,
-            const wxSize& size,
-            const wxArrayString& choices,
-            long style = 0,
-            const wxValidator& validator = wxDefaultValidator,
-            const wxString& name = wxListBoxNameStr)
-    {
-        Create(parent, id, pos, size, choices, style, validator, name);
-    }
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
@@ -67,28 +57,33 @@ public:
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
-    bool Create(wxWindow *parent, wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
 
     virtual ~wxListBox();
 
     // implement base class pure virtuals
     virtual void Clear();
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 
-    virtual unsigned int GetCount() const;
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int GetCount() const;
+    virtual wxString GetString(int n) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual int FindString(const wxString& s) const;
 
     virtual bool IsSelected(int n) const;
+    virtual void SetSelection(int n, bool select = TRUE);
     virtual int GetSelection() const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
+
+    virtual int DoAppend(const wxString& item);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
+    virtual void DoSetItems(const wxArrayString& items, void **clientData);
+
+    virtual void DoSetFirstItem(int n);
+
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
 
     // wxCheckListBox support
 #if wxUSE_OWNER_DRAWN
@@ -112,42 +107,14 @@ public:
 
     // Windows callbacks
     bool MSWCommand(WXUINT param, WXWORD id);
-    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-    // under XP when using "transition effect for menus and tooltips" if we
-    // return true for WM_PRINTCLIENT here then it causes noticable slowdown
-    virtual bool MSWShouldPropagatePrintChild()
-    {
-        return false;
-    }
-
-    virtual wxVisualAttributes GetDefaultAttributes() const
-    {
-        return GetClassDefaultAttributes(GetWindowVariant());
-    }
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL)
-    {
-        return GetCompositeControlsDefaultAttributes(variant);
-    }
+    virtual void SetupColours();
 
 protected:
-    virtual void DoSetSelection(int n, bool select);
-    virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
-    virtual void DoSetItems(const wxArrayString& items, void **clientData);
-    virtual void DoSetFirstItem(int n);
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
-    virtual int DoListHitTest(const wxPoint& point) const;
-
     // free memory (common part of Clear() and dtor)
     void Free();
 
-    unsigned int m_noItems;
+    int m_noItems;
     int m_selected;
 
     virtual wxSize DoGetBestSize() const;
@@ -158,7 +125,7 @@ protected:
 #endif
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListBox)
+    DECLARE_DYNAMIC_CLASS(wxListBox)
 };
 
 #endif // wxUSE_LISTBOX

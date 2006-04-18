@@ -9,9 +9,6 @@
 // Licence:
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_QUANTIZE_H_
-#define _WX_QUANTIZE_H_
-
 /*
  * From jquant2.c
  *
@@ -19,6 +16,9 @@
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  */
+
+#ifndef _WX_QUANTIZE_H_
+#define _WX_QUANTIZE_H_
 
 class WXDLLEXPORT wxImage;
 
@@ -61,7 +61,7 @@ DECLARE_DYNAMIC_CLASS(wxQuantize)
 //// Helpers
 
     // Converts input bitmap(s) into 8bit representation with custom palette
-
+    
     // in_rows and out_rows are arrays [0..h-1] of pointer to rows
     // (in_rows contains w * 3 bytes per row, out_rows w bytes per row)
     // fills out_rows with indexes into palette (which is also stored into palette variable)

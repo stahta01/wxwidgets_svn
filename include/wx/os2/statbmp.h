@@ -47,7 +47,7 @@ class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
 
     // assert failure is provoked by an attempt to get an icon from bitmap or
     // vice versa
-    wxIcon GetIcon() const
+    const wxIcon& GetIcon() const
       { wxASSERT( m_bIsIcon ); return *(wxIcon *)m_pImage; }
     wxBitmap GetBitmap() const
       { wxASSERT( !m_bIsIcon ); return *(wxBitmap *)m_pImage; }

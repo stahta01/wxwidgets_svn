@@ -2,8 +2,8 @@
 // Name:        clipbrd.h
 // Purpose:     Clipboard functionality.
 //              Note: this functionality is under review, and
-//              is derived from wxWidgets 1.xx code. Please contact
-//              the wxWidgets developers for further information.
+//              is derived from wxWindows 1.xx code. Please contact
+//              the wxWindows developers for further information.
 // Author:      David Webster
 // Modified by:
 // Created:     10/13/99
@@ -51,7 +51,7 @@ WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDataObject;
-class WXDLLEXPORT wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 
@@ -75,7 +75,7 @@ public:
     virtual bool AddData( wxDataObject *data );
 
     // ask if data in correct format is available
-    virtual bool IsSupported( const wxDataFormat& format );
+    virtual bool IsSupported( wxDataFormat format );
 
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );

@@ -37,6 +37,9 @@ MRESULT EXPENTRY wxGaugeWndProc(
     wxGauge*                        pGauge = (wxGauge *)::WinQueryWindowULong( hWnd
                                                                               ,QWL_USER
                                                                              );
+    wxWindowOS2*                    pWindow = NULL;
+    MRESULT                         rc = (MRESULT)0;
+    bool                            bProcessed = FALSE;
     HPS                             hPS;
     RECTL                           vRect;
     RECTL                           vRect2;
@@ -154,8 +157,8 @@ bool wxGauge::Create(
 #endif
     if (pParent)
         pParent->AddChild(this);
-    m_backgroundColour.Set(wxString(wxT("LIGHT GREY")));
-    m_foregroundColour.Set(wxString(wxT("NAVY")));
+    m_backgroundColour.Set(wxString("LIGHT GREY"));
+    m_foregroundColour.Set(wxString("NAVY"));
 
     m_nRangeMax   = nRange;
     m_nGaugePos   = 0;
@@ -214,8 +217,6 @@ bool wxGauge::Create(
             ,nWidth
             ,nHeight
            );
-    m_nWidth  = nWidth;     // Save for GetBestSize
-    m_nHeight = nHeight;
     ::WinShowWindow((HWND)GetHWND(), TRUE);
     delete pTextFont;
     return TRUE;
@@ -306,7 +307,4 @@ void wxGauge::SetValue(
     ::WinInvalidateRect(GetHwnd(), &vRect, FALSE);
 } // end of wxGauge::SetValue
 
-wxSize wxGauge::DoGetBestSize() const
-{
-    return wxSize(m_nWidth,m_nHeight);
-}
+

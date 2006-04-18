@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKDCMEMORYH__
 #define __GTKDCMEMORYH__
 
@@ -17,19 +18,20 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMemoryDC;
+class wxMemoryDC;
 
 //-----------------------------------------------------------------------------
 // wxMemoryDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMemoryDC : public wxWindowDC
+class wxMemoryDC : public wxWindowDC
 {
 public:
     wxMemoryDC();
     wxMemoryDC( wxDC *dc ); // Create compatible DC
     ~wxMemoryDC();
     virtual void SelectObject( const wxBitmap& bitmap );
+    void DoGetSize( int *width, int *height ) const;
 
     // these get reimplemented for mono-bitmaps to behave
     // more like their Win32 couterparts. They now interpret
@@ -37,16 +39,13 @@ public:
     // and everything else as drawing 1.
     virtual void SetPen( const wxPen &pen );
     virtual void SetBrush( const wxBrush &brush );
-    virtual void SetBackground( const wxBrush &brush );
     virtual void SetTextForeground( const wxColour &col );
     virtual void SetTextBackground( const wxColour &col );
 
     // implementation
     wxBitmap  m_selected;
 
-protected:
-    void DoGetSize( int *width, int *height ) const;
-
+private:
     DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 

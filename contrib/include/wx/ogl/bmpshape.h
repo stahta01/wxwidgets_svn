@@ -6,14 +6,15 @@
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGL_BITMAP_H_
 #define _OGL_BITMAP_H_
 
+#include <wx/ogl/basic.h>
 
-class WXDLLIMPEXP_OGL wxBitmapShape: public wxRectangleShape
+class wxBitmapShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxBitmapShape)
  public:
@@ -31,7 +32,7 @@ class WXDLLIMPEXP_OGL wxBitmapShape: public wxRectangleShape
   // Does the copying for this object
   void Copy(wxShape& copy);
 
-  void SetSize(double w, double h, bool recursive = true);
+  void SetSize(double w, double h, bool recursive = TRUE);
   inline wxBitmap& GetBitmap() const { return (wxBitmap&) m_bitmap; }
   void SetBitmap(const wxBitmap& bm);
   inline void SetFilename(const wxString& f) { m_filename = f; };

@@ -10,11 +10,11 @@
 #ifndef _WX_XPMDECOD_H_
 #define _WX_XPMDECOD_H_
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 
-class WXDLLIMPEXP_CORE wxImage;
-class WXDLLIMPEXP_BASE wxInputStream;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxInputStream;
 
 // --------------------------------------------------------------------------
 // wxXPMDecoder class

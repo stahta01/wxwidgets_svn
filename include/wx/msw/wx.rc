@@ -16,12 +16,6 @@
 #include <windows.h>
 #endif
 
-#if defined(_WIN32_WCE)
-    #include "wx/msw/wince/wince.rc"
-#endif
-
-#include "wx/msw/rcdefs.h"
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // This is the MDI Window menu
@@ -55,7 +49,6 @@ WXCURSOR_PLEFT          CURSOR  DISCARDABLE     "wx/msw/pntleft.cur"
 WXCURSOR_PRIGHT         CURSOR  DISCARDABLE     "wx/msw/pntright.cur"
 WXCURSOR_BLANK          CURSOR  DISCARDABLE     "wx/msw/blank.cur"
 WXCURSOR_RIGHT_ARROW    CURSOR  DISCARDABLE     "wx/msw/rightarr.cur"
-WXCURSOR_CROSS          CURSOR  DISCARDABLE     "wx/msw/cross.cur"
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -82,27 +75,11 @@ wxICON_SMALL_REMOVEABLE         ICON "wx/msw/removble.ico"
 // Bitmaps
 //
 
+wxDISABLE_BUTTON_BITMAP         BITMAP  "wx/msw/disable.bmp"
+
 // For wxContextHelpButton
 csquery                 BITMAP "wx/msw/csquery.bmp"
 
 // For obtaining the RGB values of standard colours
 wxBITMAP_STD_COLOURS    BITMAP "wx/msw/colours.bmp"
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Manifest file for Windows XP
-//
-
-#if !defined(wxUSE_NO_MANIFEST) || (wxUSE_NO_MANIFEST == 0)
-#if !defined(WX_MSC_FULL_VER) || WX_MSC_FULL_VER < 140040130
-
-#if defined(WX_CPU_AMD64)
-1 24 "wx/msw/amd64.manifest"
-#elif defined(WX_CPU_IA64)
-1 24 "wx/msw/ia64.manifest"
-#elif defined(WX_CPU_X86)
-1 24 "wx/msw/wx.manifest"
-#endif
-
-#endif // !defined(WX_MSC_FULL_VER) || WX_MSC_FULL_VER < 140040130
-#endif // !defined(wxUSE_NO_MANIFEST) || (wxUSE_NO_MANIFEST == 0)

@@ -59,8 +59,8 @@ class WXDLLEXPORT wxImageList;
     which item. Each image in an image list can contain a mask, and can be made out
     of either a bitmap, two bitmaps or an icon. See ImagList.h for more details.
 
-    Notifications are passed via the wxWidgets 2.0 event system, or using virtual
-    functions in wxWidgets 1.66.
+    Notifications are passed via the wxWindows 2.0 event system, or using virtual
+    functions in wxWindows 1.66.
 
     See the sample wxListCtrl app for API usage.
 
@@ -86,12 +86,12 @@ public:
     wxListCtrl() { Init(); }
 
     wxListCtrl(wxWindow *parent,
-               wxWindowID id = wxID_ANY,
+               wxWindowID id = -1,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                long style = wxLC_ICON,
                const wxValidator& validator = wxDefaultValidator,
-               const wxString& name = wxListCtrlNameStr)
+               const wxString& name = _T("wxListCtrl"))
     {
         Init();
 
@@ -101,12 +101,12 @@ public:
     virtual ~wxListCtrl();
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxLC_ICON,
                 const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListCtrlNameStr);
+                const wxString& name = _T("wxListCtrl"));
 
 
     // Attributes
@@ -120,7 +120,7 @@ public:
     bool GetColumn(int col, wxListItem& item) const;
 
     // Sets information about this column
-    bool SetColumn(int col, const wxListItem& item) ;
+    bool SetColumn(int col, wxListItem& item) ;
 
     // Gets the column width
     int GetColumnWidth(int col) const;
@@ -133,9 +133,6 @@ public:
     // or the total number of items in the list control (icon
     // or small icon view)
     int GetCountPerPage() const;
-
-    // return the total area occupied by all the items (icon/small icon only)
-    wxRect GetViewRect() const;
 
     // Gets the edit control for editing labels.
     wxTextCtrl* GetEditControl() const;
@@ -156,8 +153,7 @@ public:
     bool SetItemState(long item, long state, long stateMask) ;
 
     // Sets the item image
-    bool SetItemImage(long item, int image, int selImage = -1) ;
-    bool SetItemColumnImage(long item, long column, int image);
+    bool SetItemImage(long item, int image, int selImage) ;
 
     // Gets the item text
     wxString GetItemText(long item) const ;
@@ -166,7 +162,7 @@ public:
     void SetItemText(long item, const wxString& str) ;
 
     // Gets the item data
-    wxUIntPtr GetItemData(long item) const ;
+    long GetItemData(long item) const ;
 
     // Sets the item data
     bool SetItemData(long item, long data) ;
@@ -186,8 +182,10 @@ public:
     // Gets the number of columns in the list control
     int GetColumnCount() const { return m_colCount; }
 
-    // get the horizontal and vertical components of the item spacing
-    wxSize GetItemSpacing() const;
+    // Retrieves the spacing between icons in pixels.
+    // If small is TRUE, gets the spacing for the small icon
+    // view, otherwise the large icon view.
+    int GetItemSpacing(bool isSmall) const;
 
     // Foreground colour of an item.
     void SetItemTextColour( long item, const wxColour& col);
@@ -196,10 +194,6 @@ public:
     // Background colour of an item.
     void SetItemBackgroundColour( long item, const wxColour &col);
     wxColour GetItemBackgroundColour( long item ) const;
-
-    // Font of an item.
-    void SetItemFont( long item, const wxFont &f);
-    wxFont GetItemFont( long item ) const;
 
     // Gets the number of selected items in the list control
     int GetSelectedItemCount() const;
@@ -215,7 +209,7 @@ public:
     long GetTopItem() const ;
 
     // Add or remove a single window style
-    void SetSingleStyle(long style, bool add = true) ;
+    void SetSingleStyle(long style, bool add = TRUE) ;
 
     // Set the whole window style
     void SetWindowStyleFlag(long style) ;
@@ -239,11 +233,8 @@ public:
     void SetImageList(wxImageList *imageList, int which) ;
     void AssignImageList(wxImageList *imageList, int which) ;
 
-    // are we in report mode?
-    bool InReportView() const { return HasFlag(wxLC_REPORT); }
-
-    // are we in virtual report mode?
-    bool IsVirtual() const { return HasFlag(wxLC_VIRTUAL); }
+    // returns true if it is a virtual list control
+    bool IsVirtual() const { return (GetWindowStyle() & wxLC_VIRTUAL) != 0; }
 
     // refresh items selectively (only useful for virtual list controls)
     void RefreshItem(long item);
@@ -281,11 +272,11 @@ public:
 
     // Find an item whose label matches this string, starting from the item after 'start'
     // or the beginning if 'start' is -1.
-    long FindItem(long start, const wxString& str, bool partial = false);
+    long FindItem(long start, const wxString& str, bool partial = FALSE);
 
     // Find an item whose data matches this data, starting from the item after 'start'
     // or the beginning if 'start' is -1.
-    long FindItem(long start, wxUIntPtr data);
+    long FindItem(long start, long data);
 
     // Find an item nearest this position in the specified direction, starting from
     // the item after 'start' or the beginning if 'start' is -1.
@@ -297,7 +288,7 @@ public:
 
     // Inserts an item, returning the index of the new item if successful,
     // -1 otherwise.
-    long InsertItem(const wxListItem& info);
+    long InsertItem(wxListItem& info);
 
     // Insert a string item
     long InsertItem(long index, const wxString& label);
@@ -309,7 +300,7 @@ public:
     long InsertItem(long index, const wxString& label, int imageIndex);
 
     // For list view mode (only), inserts a column.
-    long InsertColumn(long col, const wxListItem& info);
+    long InsertColumn(long col, wxListItem& info);
 
     long InsertColumn(long col,
                       const wxString& heading,
@@ -346,35 +337,16 @@ public:
     // bring the control in sync with current m_windowStyle value
     void UpdateStyle();
 
+    // Implementation: converts wxWindows style to MSW style.
+    // Can be a single style flag or a bit list.
+    // oldStyle is 'normalised' so that it doesn't contain
+    // conflicting styles.
+    long ConvertToMSWStyle(long& oldStyle, long style) const;
+
     // Event handlers
     ////////////////////////////////////////////////////////////////////////////
     // Necessary for drawing hrules and vrules, if specified
     void OnPaint(wxPaintEvent& event);
-
-
-    virtual bool ShouldInheritColours() const { return false; }
-
-    virtual wxVisualAttributes GetDefaultAttributes() const
-    {
-        return GetClassDefaultAttributes(GetWindowVariant());
-    }
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-
-#if WXWIN_COMPATIBILITY_2_6
-    // obsolete stuff, for compatibility only -- don't use
-    wxDEPRECATED( int GetItemSpacing(bool isSmall) const);
-#endif // WXWIN_COMPATIBILITY_2_6
-
-    // convert our styles to Windows
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
-    // special Windows message handling
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg,
-                                    WXWPARAM wParam,
-                                    WXLPARAM lParam);
 
 protected:
     // common part of all ctors
@@ -382,11 +354,6 @@ protected:
 
     // free memory taken by all internal data
     void FreeAllInternalData();
-
-    // get the item attribute, either by quering it for virtual control, or by
-    // returning the one previously set using setter methods for a normal one
-    wxListItemAttr *DoGetItemAttr(long item) const;
-
 
     wxTextCtrl*       m_textCtrl;        // The control used for editing a label
     wxImageList *     m_imageListNormal; // The image list for normal icons
@@ -396,16 +363,14 @@ protected:
                       m_ownsImageListSmall,
                       m_ownsImageListState;
 
+    long              m_baseStyle;  // Basic Windows style flags, for recreation purposes
     int               m_colCount;   // Windows doesn't have GetColumnCount so must
                                     // keep track of inserted/deleted columns
-    long              m_count;      // Keep track of item count to save calls to
-                                    // ListView_GetItemCount
-    bool              m_ignoreChangeMessages;
 
-    // true if we have any internal data (user data & attributes)
+    // TRUE if we have any internal data (user data & attributes)
     bool m_AnyInternalData;
 
-    // true if we have any items with custom attributes
+    // TRUE if we have any items with custom attributes
     bool m_hasAnyAttr;
 
     // these functions are only used for virtual list view controls, i.e. the
@@ -414,26 +379,23 @@ protected:
     // return the text for the given column of the given item
     virtual wxString OnGetItemText(long item, long column) const;
 
-    // return the icon for the given item. In report view, OnGetItemImage will
-    // only be called for the first column. See OnGetItemColumnImage for
-    // details.
+    // return the icon for the given item
     virtual int OnGetItemImage(long item) const;
-
-    // return the icon for the given item and column.
-    virtual int OnGetItemColumnImage(long item, long column) const;
 
     // return the attribute for the item (may return NULL if none)
     virtual wxListItemAttr *OnGetItemAttr(long item) const;
 
 private:
+    bool DoCreateControl(int x, int y, int w, int h);
+
     // process NM_CUSTOMDRAW notification message
     WXLPARAM OnCustomDraw(WXLPARAM lParam);
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxListCtrl)
 };
 
 #endif // wxUSE_LISTCTRL
 
 #endif // _WX_LISTCTRL_H_
+

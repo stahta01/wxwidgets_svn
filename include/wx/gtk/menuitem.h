@@ -4,7 +4,7 @@
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GTKMENUITEMH__
@@ -16,7 +16,7 @@
 // wxMenuItem
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMenuItem : public wxMenuItemBase
+class wxMenuItem : public wxMenuItemBase
 {
 public:
     wxMenuItem(wxMenu *parentMenu = (wxMenu *)NULL,

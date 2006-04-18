@@ -19,36 +19,33 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxButton;
+class wxButton;
 
 //-----------------------------------------------------------------------------
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxButtonNameStr[];
+extern const wxChar *wxButtonNameStr;
 
 //-----------------------------------------------------------------------------
 // wxButton
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxButton: public wxButtonBase
+class wxButton: public wxControl
 {
 public:
     wxButton();
-    wxButton(wxWindow *parent, wxWindowID id,
-           const wxString& label = wxEmptyString,
+    wxButton(wxWindow *parent, wxWindowID id, const wxString& label,
            const wxPoint& pos = wxDefaultPosition,
            const wxSize& size = wxDefaultSize, long style = 0,
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxButtonNameStr)
     {
-        Create(parent, id, label, pos, size, style, validator, name);
+      Create(parent, id, label, pos, size, style, validator, name);
     }
-
     virtual ~wxButton();
 
-    bool Create(wxWindow *parent, wxWindowID id,
-           const wxString& label = wxEmptyString,
+    bool Create(wxWindow *parent, wxWindowID id, const wxString& label,
            const wxPoint& pos = wxDefaultPosition,
            const wxSize& size = wxDefaultSize, long style = 0,
            const wxValidator& validator = wxDefaultValidator,
@@ -58,24 +55,16 @@ public:
     virtual void SetLabel( const wxString &label );
     virtual bool Enable( bool enable = TRUE );
 
+    static wxSize GetDefaultSize();
+
     // implementation
     // --------------
 
+    void ApplyWidgetStyle();
     bool IsOwnGtkWindow( GdkWindow *window );
-
-    // Since this wxButton doesn't derive from wxButtonBase (why?) we need
-    // to override this here too...
-    virtual bool ShouldInheritColours() const { return false; }
-    
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    // helper to allow access to protected member from GTK callback
-    void MoveWindow(int x, int y, int width, int height) { DoMoveWindow(x, y, width, height); }
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxButton)

@@ -6,11 +6,8 @@
 // Created:     01.21.00
 // RCS-ID:      $Id$
 // Copyright:   Adopted from msw port --(c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #define INCL_DOS
 #define INCL_GPI
@@ -26,12 +23,11 @@
 
 #include "wx/log.h"
 #include "wx/file.h"
-#include "wx/iconloc.h"
 #include "wx/intl.h"
 #include "wx/dynarray.h"
 #include "wx/confbase.h"
 
-#if wxUSE_MIMETYPE
+#if wxUSE_FILE
 
 #include "wx/os2/mimetype.h"
 
@@ -65,7 +61,7 @@ class WXDLLEXPORT wxIcon;
 // location, uses it, so it isn't likely to change
 static const wxChar *MIME_DATABASE_KEY = wxT("MIME\\Database\\Content Type\\");
 
-wxString wxFileTypeImpl::GetCommand(const wxChar *WXUNUSED(verb)) const
+wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
 {
 // TODO: OS/2 doesn't have a registry but uses Prf
 /*
@@ -97,7 +93,7 @@ wxString wxFileTypeImpl::GetCommand(const wxChar *WXUNUSED(verb)) const
             // NB: we don't make any attempt to verify that the string is valid,
             //     i.e. doesn't contain %2, or second %1 or .... But we do make
             //     sure that we return a string with _exactly_ one '%s'!
-            bool foundFilename = false;
+            bool foundFilename = FALSE;
             size_t len = command.Len();
             for ( size_t n = 0; (n < len) && !foundFilename; n++ ) {
                 if ( command[n] == wxT('%') &&
@@ -107,7 +103,7 @@ wxString wxFileTypeImpl::GetCommand(const wxChar *WXUNUSED(verb)) const
                     // replace it with '%s'
                     command[n + 1] = wxT('s');
 
-                    foundFilename = true;
+                    foundFilename = TRUE;
                 }
             }
 
@@ -168,7 +164,7 @@ wxFileTypeImpl::GetOpenCommand(wxString *openCmd,
 
     *openCmd = wxFileType::ExpandCommand(cmd, params);
 
-    return !openCmd->empty();
+    return !openCmd->IsEmpty();
 }
 
 bool
@@ -186,7 +182,7 @@ wxFileTypeImpl::GetPrintCommand(wxString *printCmd,
 
     *printCmd = wxFileType::ExpandCommand(cmd, params);
 
-    return !printCmd->empty();
+    return !printCmd->IsEmpty();
 }
 
 // TODO this function is half implemented
@@ -195,19 +191,19 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
     if ( m_info ) {
         extensions = m_info->GetExtensions();
 
-        return true;
+        return TRUE;
     }
-    else if ( m_ext.empty() ) {
+    else if ( m_ext.IsEmpty() ) {
         // the only way to get the list of extensions from the file type is to
         // scan through all extensions in the registry - too slow...
-        return false;
+        return FALSE;
     }
     else {
         extensions.Empty();
         extensions.Add(m_ext);
 
         // it's a lie too, we don't return _all_ extensions...
-        return true;
+        return TRUE;
     }
 }
 
@@ -217,7 +213,7 @@ bool wxFileTypeImpl::GetMimeType(wxString *mimeType) const
         // we already have it
         *mimeType = m_info->GetMimeType();
 
-        return true;
+        return TRUE;
     }
 
     // suppress possible error messages
@@ -226,13 +222,13 @@ bool wxFileTypeImpl::GetMimeType(wxString *mimeType) const
 /*
     wxRegKey key(wxRegKey::HKCR, wxT(".") + m_ext);
     if ( key.Open() && key.QueryValue(wxT("Content Type"), *mimeType) ) {
-        return true;
+        return TRUE;
     }
     else {
-        return false;
+        return FALSE;
     }
 */
-    return false;
+  return FALSE;
 }
 
 bool wxFileTypeImpl::GetMimeTypes(wxArrayString& mimeTypes) const
@@ -243,17 +239,18 @@ bool wxFileTypeImpl::GetMimeTypes(wxArrayString& mimeTypes) const
     {
         mimeTypes.Clear();
         mimeTypes.Add(s);
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
-bool wxFileTypeImpl::GetIcon(wxIconLocation *WXUNUSED(iconLoc)) const
+bool wxFileTypeImpl::GetIcon(wxIcon *icon, wxString* psCommand, int* pnIndex) const
 {
+#if wxUSE_GUI
     if ( m_info ) {
         // we don't have icons in the fallback resources
-        return false;
+        return FALSE;
     }
 
     wxString strIconKey;
@@ -268,7 +265,7 @@ bool wxFileTypeImpl::GetIcon(wxIconLocation *WXUNUSED(iconLoc)) const
     if ( key.Open() ) {
         wxString strIcon;
         // it's the default value of the key
-        if ( key.QueryValue(wxEmptyString, strIcon) ) {
+        if ( key.QueryValue(wxT(""), strIcon) ) {
             // the format is the following: <full path to file>, <icon index>
             // NB: icon index may be negative as well as positive and the full
             //     path may contain the environment variables inside '%'
@@ -277,25 +274,33 @@ bool wxFileTypeImpl::GetIcon(wxIconLocation *WXUNUSED(iconLoc)) const
 
             // index may be omitted, in which case BeforeLast(',') is empty and
             // AfterLast(',') is the whole string
-            if ( strFullPath.empty() ) {
+            if ( strFullPath.IsEmpty() ) {
                 strFullPath = strIndex;
                 strIndex = wxT("0");
             }
 
-            if ( iconLoc )
-            {
-                iconLoc->SetFileName(wxExpandEnvVars(strFullPath));
+            wxString strExpPath = wxExpandEnvVars(strFullPath);
+            int nIndex = wxAtoi(strIndex);
 
-                iconLoc->SetIndex(wxAtoi(strIndex));
+            HICON hIcon = ExtractIcon(GetModuleHandle(NULL), strExpPath, nIndex);
+            switch ( (int)hIcon ) {
+                case 0: // means no icons were found
+                case 1: // means no such file or it wasn't a DLL/EXE/OCX/ICO/...
+                    wxLogDebug(wxT("incorrect registry entry '%s': no such icon."),
+                               key.GetName().c_str());
+                    break;
+
+                default:
+                    icon->SetHICON((WXHICON)hIcon);
+                    return TRUE;
             }
-
-            return true;
         }
     }
 
     // no such file type or no value or incorrect icon entry
 */
-    return false;
+#endif // wxUSE_GUI
+    return FALSE;
 }
 
 bool wxFileTypeImpl::GetDescription(wxString *desc) const
@@ -304,7 +309,7 @@ bool wxFileTypeImpl::GetDescription(wxString *desc) const
         // we already have it
         *desc = m_info->GetDescription();
 
-        return true;
+        return TRUE;
     }
 
     // suppress possible error messages
@@ -316,11 +321,11 @@ bool wxFileTypeImpl::GetDescription(wxString *desc) const
     if ( key.Open() ) {
         // it's the default value of the key
         if ( key.QueryValue(wxT(""), *desc) ) {
-            return true;
+            return TRUE;
         }
     }
 */
-    return false;
+    return FALSE;
 }
 
 // extension -> file type
@@ -337,7 +342,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
     // suppress possible error messages
     wxLogNull nolog;
 
-    bool knownExtension = false;
+    bool knownExtension = FALSE;
 
     wxString strFileType;
 // TODO:
@@ -356,7 +361,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
             // this extension doesn't have a filetype, but it's known to the
             // system and may be has some other useful keys (open command or
             // content-type), so still return a file type object for it
-            knownExtension = true;
+            knownExtension = TRUE;
         }
     }
 */
@@ -425,7 +430,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
     return NULL;
 }
 
-size_t wxMimeTypesManagerImpl::EnumAllFileTypes(wxArrayString& WXUNUSED(mimetypes))
+size_t wxMimeTypesManagerImpl::EnumAllFileTypes(wxArrayString& mimetypes)
 {
     // enumerate all keys under MIME_DATABASE_KEY
 // TODO:
@@ -447,4 +452,4 @@ size_t wxMimeTypesManagerImpl::EnumAllFileTypes(wxArrayString& WXUNUSED(mimetype
   return 0;
 }
 
-#endif //wxUSE_MIMETYPE
+#endif //wxUSE_FILE

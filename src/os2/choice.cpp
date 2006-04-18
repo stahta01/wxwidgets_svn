@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      David Webster
 // Modified by:
@@ -12,8 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_CHOICE
-
 #ifndef WX_PRECOMP
     #include "wx/choice.h"
     #include "wx/utils.h"
@@ -24,23 +22,6 @@
 #include "wx/os2/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
-
-bool wxChoice::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, const wxArrayString&              asChoices
-, long                              lStyle
-, const wxValidator&                rValidator
-, const wxString&                   rsName
-)
-{
-    wxCArrayString chs(asChoices);
-
-    return Create(pParent, vId, rPos, rSize, chs.GetCount(), chs.GetStrings(),
-                  lStyle, rValidator, rsName);
-}
 
 bool wxChoice::Create(
   wxWindow*                         pParent
@@ -64,7 +45,7 @@ bool wxChoice::Create(
                        ,rValidator
                        ,rsName
                       ))
-        return false;
+        return FALSE;
     lSstyle = CBS_DROPDOWNLIST |
               WS_TABSTOP       |
               WS_VISIBLE;
@@ -81,31 +62,31 @@ bool wxChoice::Create(
     if (!OS2CreateControl( wxT("COMBOBOX")
                           ,lSstyle
                          ))
-        return false;
+        return FALSE;
 
     //
     // A choice/combobox normally has a white background (or other, depending
     // on global settings) rather than inheriting the parent's background colour.
     //
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-
-    // initialize the controls contents
     for (int i = 0; i < n; i++)
     {
         Append(asChoices[i]);
     }
+    wxFont*                          pTextFont = new wxFont( 10
+                                                            ,wxMODERN
+                                                            ,wxNORMAL
+                                                            ,wxNORMAL
+                                                           );
+    SetFont(*pTextFont);
     SetSize( rPos.x
             ,rPos.y
             ,rSize.x
             ,rSize.y
            );
-    return true;
+    delete pTextFont;
+    return TRUE;
 } // end of wxChoice::Create
-
-wxChoice::~wxChoice()
-{
-    Free();
-}
 
 // ----------------------------------------------------------------------------
 // adding/deleting items to/from the list
@@ -116,7 +97,7 @@ int wxChoice::DoAppend(
 )
 {
     int                             nIndex;
-    LONG                            nIndexType = 0;
+    SHORT                           nIndexType = 0;
 
     if (m_windowStyle & wxLB_SORT)
         nIndexType = LIT_SORTASCENDING;
@@ -130,38 +111,11 @@ int wxChoice::DoAppend(
     return nIndex;
 } // end of wxChoice::DoAppend
 
-int wxChoice::DoInsert( const wxString& rsItem, unsigned int pos )
+void wxChoice::Delete(
+  int                               n
+)
 {
-    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
-
-    if (pos == GetCount())
-        return DoAppend(rsItem);
-
-    int  nIndex;
-    LONG nIndexType = 0;
-
-    if (m_windowStyle & wxLB_SORT)
-        nIndexType = LIT_SORTASCENDING;
-    else
-        nIndexType = pos;
-    nIndex = (int)::WinSendMsg( GetHwnd()
-                               ,LM_INSERTITEM
-                               ,(MPARAM)nIndexType
-                               ,(MPARAM)rsItem.c_str()
-                              );
-    return nIndex;
-} // end of wxChoice::DoInsert
-
-void wxChoice::Delete(unsigned int n)
-{
-    wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
-
-    if ( HasClientObjectData() )
-    {
-        delete GetClientObject(n);
-    }
-
+    wxCHECK_RET( n < GetCount(), wxT("invalid item index in wxChoice::Delete") );
     ::WinSendMsg(GetHwnd(), LM_DELETEITEM, (MPARAM)n, (MPARAM)0);
 } // end of wxChoice::Delete
 
@@ -176,17 +130,6 @@ void wxChoice::Clear()
 // ----------------------------------------------------------------------------
 
 int wxChoice::GetSelection() const
-{
-    // if m_lastAcceptedSelection is set, it means that the dropdown is
-    // currently shown and that we want to use the last "permanent" selection
-    // instead of whatever is under the mouse pointer currently
-    //
-    // otherwise, get the selection from the control
-    return m_lastAcceptedSelection == wxID_NONE ? GetCurrentSelection()
-                                                : m_lastAcceptedSelection;
-}
-
-int wxChoice::GetCurrentSelection() const
 {
     return((int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYSELECTION, (MPARAM)LIT_FIRST, (MPARAM)0)));
 } // end of wxChoice::GetSelection
@@ -206,15 +149,43 @@ void wxChoice::SetSelection(
 // string list functions
 // ----------------------------------------------------------------------------
 
-unsigned int wxChoice::GetCount() const
+int wxChoice::GetCount() const
 {
-    return((unsigned int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)));
+    return((int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)));
 } // end of wxChoice::GetCount
 
-void wxChoice::SetString(unsigned int n, const wxString& rsStr)
+int wxChoice::FindString(
+  const wxString&                   rsStr
+) const
 {
-    LONG  nIndexType = 0;
-    void* pData;
+    int                             nPos;
+    int                             nTextLength;
+    PSZ                             zStr;
+    int                             nItemCount;
+
+    nItemCount = (int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0));
+    for (nPos = 0; nPos < nItemCount; nPos++)
+    {
+        nTextLength = (int)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXTLENGTH, (MPARAM)nPos, (MPARAM)0));
+        zStr = new char[nTextLength + 1];
+        ::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXT, MPFROM2SHORT((SHORT)nPos, (SHORT)nTextLength), (MPARAM)zStr);
+        if (rsStr == (char*)zStr)
+        {
+            delete [] zStr;
+            break;
+        }
+        delete [] zStr;
+    }
+    return nPos;
+} // end of wxChoice::FindString
+
+void wxChoice::SetString(
+  int                               n
+, const wxString&                   rsStr
+)
+{
+    SHORT                           nIndexType = 0;
+    void*                           pData;
 
     if ( m_clientDataItemsType != wxClientData_None )
     {
@@ -239,20 +210,24 @@ void wxChoice::SetString(unsigned int n, const wxString& rsStr)
 
     if (pData)
     {
-        DoSetItemClientData(n, pData);
+        DoSetItemClientData( n
+                            ,pData
+                           );
     }
 } // end of wxChoice::SetString
 
-wxString wxChoice::GetString(unsigned int n) const
+wxString wxChoice::GetString(
+  int                               n
+) const
 {
-    int      nLen = 0;
-    wxString sStr = wxEmptyString;
-    wxChar*  zBuf;
+    size_t                          nLen = 0;
+    wxString                        sStr = "";
+    char*                           zBuf;
 
     nLen = (size_t)LONGFROMMR(::WinSendMsg(GetHwnd(), LM_QUERYITEMTEXTLENGTH, (MPARAM)n, (MPARAM)0));
     if (nLen != LIT_ERROR && nLen > 0)
     {
-        zBuf = new wxChar[nLen + 1];
+        zBuf = new char[nLen + 1];
         ::WinSendMsg( GetHwnd()
                      ,LM_QUERYITEMTEXT
                      ,MPFROM2SHORT((SHORT)n, (SHORT)nLen)
@@ -268,23 +243,35 @@ wxString wxChoice::GetString(unsigned int n) const
 // client data
 // ----------------------------------------------------------------------------
 
-void wxChoice::DoSetItemClientData(unsigned int n, void* pClientData)
+void wxChoice::DoSetItemClientData(
+  int                               n
+, void*                             pClientData
+)
 {
     ::WinSendMsg(GetHwnd(), LM_SETITEMHANDLE, (MPARAM)n, MPFROMP(pClientData));
 } // end of wxChoice::DoSetItemClientData
 
-void* wxChoice::DoGetItemClientData(unsigned int n) const
+void* wxChoice::DoGetItemClientData( int n ) const
 {
-    MRESULT rc = ::WinSendMsg(GetHwnd(), LM_QUERYITEMHANDLE, (MPARAM)n, (MPARAM)0);
-    return((void*)rc);
-} // end of wxChoice::DoGetItemClientData
+    MRESULT                         rc = 0L;
 
-void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* pClientData)
+    rc = ::WinSendMsg(GetHwnd(), LM_QUERYITEMHANDLE, (MPARAM)n, (MPARAM)0);
+    return((void*)rc);
+} // end of wxChoice::DoSetItemClientData
+
+void wxChoice::DoSetItemClientObject(
+  int                               n
+, wxClientData*                     pClientData
+)
 {
-    DoSetItemClientData(n, pClientData);
+    DoSetItemClientData( n
+                        ,pClientData
+                       );
 } // end of wxChoice::DoSetItemClientObject
 
-wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxChoice::DoGetItemClientObject(
+  int                               n
+) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 } // end of wxChoice::DoGetItemClientObject
@@ -293,23 +280,25 @@ wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
 // wxOS2 specific helpers
 // ----------------------------------------------------------------------------
 
-void wxChoice::DoSetSize(int nX,
-                         int nY,
-                         int nWidth,
-                         int WXUNUSED(nHeight),
-                         int nSizeFlags)
+void wxChoice::DoSetSize(
+  int                               nX
+, int                               nY
+, int                               nWidth
+, int                               nHeight
+, int                               nSizeFlags
+)
 {
     //
     // Ignore height parameter because height doesn't mean 'initially
     // displayed' height, it refers to the drop-down menu as well. The
-    // wxWidgets interpretation is different; also, getting the size returns
+    // wxWindows interpretation is different; also, getting the size returns
     // the _displayed_ size (NOT the drop down menu size) so
     // setting-getting-setting size would not work.
     //
     wxControl::DoSetSize( nX
                          ,nY
                          ,nWidth
-                         ,wxDefaultCoord
+                         ,-1
                          ,nSizeFlags
                         );
 } // end of wxChoice::DoSetSize
@@ -319,18 +308,20 @@ wxSize wxChoice::DoGetBestSize() const
     //
     // Find the widest string
     //
-    int    nLineWidth;
-    int    nChoiceWidth = 0;
-    int    nCx;
-    int    nCy;
-    wxFont vFont = (wxFont)GetFont();
+    int                             nLineWidth;
+    int                             nChoiceWidth = 0;
+    int                             nItems = GetCount();
+    int                             nCx;
+    int                             nCy;
 
-    const unsigned int nItems = GetCount();
-
-    for (unsigned int i = 0; i < nItems; i++)
+    for (int i = 0; i < nItems; i++)
     {
-        wxString sStr(GetString(i));
-        GetTextExtent( sStr, &nLineWidth, NULL );
+        wxString                    sStr(GetString(i));
+
+        GetTextExtent( sStr
+                      ,&nLineWidth
+                      ,NULL
+                     );
         if (nLineWidth > nChoiceWidth)
             nChoiceWidth = nLineWidth;
     }
@@ -345,16 +336,22 @@ wxSize wxChoice::DoGetBestSize() const
     //
     // The combobox should be larger than the widest string
     //
-    wxGetCharSize( GetHWND(), &nCx, &nCy, &vFont );
+    wxGetCharSize( GetHWND()
+                  ,&nCx
+                  ,&nCy
+                  ,(wxFont*)&GetFont()
+                 );
     nChoiceWidth += 5 * nCx;
 
     //
     // Choice drop-down list depends on number of items (limited to 10)
     //
-    size_t nStrings = nItems == 0 ? 10 : wxMin(10, nItems) + 1;
-    int    nChoiceHeight = EDIT_HEIGHT_FROM_CHAR_HEIGHT(nCy) * nStrings;
+    size_t                          nStrings = nItems == 0 ? 10 : wxMin(10, nItems) + 1;
+    int                             nChoiceHeight = EDIT_HEIGHT_FROM_CHAR_HEIGHT(nCy) * nStrings;
 
-    return wxSize(nChoiceWidth, nChoiceHeight);
+    return wxSize( nChoiceWidth
+                  ,nChoiceHeight
+                 );
 } // end of wxChoice::DoGetBestSize
 
 MRESULT wxChoice::OS2WindowProc(
@@ -379,7 +376,7 @@ bool wxChoice::OS2Command(
         //
         // "selection changed" is the only event we're after
         //
-        return false;
+        return FALSE;
     }
     int                             n = GetSelection();
 
@@ -391,27 +388,25 @@ bool wxChoice::OS2Command(
 
         vEvent.SetInt(n);
         vEvent.SetEventObject(this);
-        vEvent.SetString(GetStringSelection());
+        vEvent.SetString((char*)GetStringSelection().c_str());
         if (HasClientObjectData())
             vEvent.SetClientObject(GetClientObject(n));
         else if (HasClientUntypedData())
             vEvent.SetClientData(GetClientData(n));
         ProcessCommand(vEvent);
     }
-    return true;
+    return TRUE;
 } // end of wxChoice::OS2Command
 
 void wxChoice::Free()
 {
     if (HasClientObjectData())
     {
-        const unsigned int nCount = GetCount();
+        size_t                      nCount = GetCount();
 
-        for (unsigned int n = 0; n < nCount; n++)
+        for (size_t n = 0; n < nCount; n++)
         {
             delete GetClientObject(n);
         }
     }
-} // end of wxChoice::Free
-
-#endif // wxUSE_CHOICE
+} // end of wxhoice::Free

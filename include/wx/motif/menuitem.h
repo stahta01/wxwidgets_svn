@@ -6,7 +6,7 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MOTIF_MENUITEM_H
@@ -20,7 +20,7 @@ class WXDLLEXPORT wxMenuBar;
 // wxMenuItem: an item in the menu, optionally implements owner-drawn behaviour
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMenuItem : public wxMenuItemBase
+class wxMenuItem : public wxMenuItemBase
 {
 public:
     // ctor & dtor
@@ -34,8 +34,8 @@ public:
     
     // accessors (some more are inherited from wxOwnerDrawn or are below)
     virtual void SetText(const wxString& label);
-    virtual void Enable(bool enable = true);
-    virtual void Check(bool check = true);
+    virtual void Enable(bool enable = TRUE);
+    virtual void Check(bool check = TRUE);
     // included SetBitmap and GetBitmap as copied from the GTK include file
     // I'm not sure if this works but it silences the linker in the
     // menu sample.
@@ -43,9 +43,10 @@ public:
     virtual void SetBitmap(const wxBitmap& bitmap) { m_bitmap = bitmap; }
     virtual const wxBitmap& GetBitmap() const { return m_bitmap; }
     
+    void DeleteSubMenu();
+    
     // implementation from now on
-    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu,
-                     size_t index);
+    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu);
     void DestroyItem(bool full);
     
     WXWidget GetButtonWidget() const { return m_buttonWidget; }

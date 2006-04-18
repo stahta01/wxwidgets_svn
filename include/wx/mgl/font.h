@@ -30,10 +30,13 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) { Init(); Ref(font); }
 
     wxFont(const wxNativeFontInfo& info)
     {
+        Init();
+
         (void)Create(info);  
     }
 
@@ -45,6 +48,8 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -60,6 +65,9 @@ public:
 
     ~wxFont() {}
 
+    // assignment
+    wxFont& operator=(const wxFont& font);
+
     // implement base class pure virtuals
     virtual int GetPointSize() const;
     virtual int GetFamily() const;
@@ -69,7 +77,6 @@ public:
     virtual bool GetUnderlined() const;
     virtual wxFontEncoding GetEncoding() const;
     virtual bool IsFixedWidth() const;
-    virtual const wxNativeFontInfo *GetNativeFontInfo() const;
 
     virtual void SetPointSize(int pointSize);
     virtual void SetFamily(int family);
@@ -82,6 +89,9 @@ public:
     struct font_t *GetMGLfont_t(float scale, bool antialiased);
 
 protected:
+    // common part of all ctors
+    void Init() {}
+
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;

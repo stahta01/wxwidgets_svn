@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dragimag.cpp
+// Name:        dragimag.cpp
 // Purpose:     wxDragImage
 // Author:      Julian Smart
 // Modified by:
@@ -26,8 +26,11 @@
 
 #if wxUSE_DRAGIMAGE
 
+#if defined(__WIN95__)
+
 #ifndef WX_PRECOMP
 #include <stdio.h>
+#include "wx/setup.h"
 #include "wx/window.h"
 #include "wx/dcclient.h"
 #include "wx/dcscreen.h"
@@ -44,12 +47,9 @@
 #include "wx/msw/dragimag.h"
 #include "wx/msw/private.h"
 
-#ifdef __WXWINCE__  // for SM_CXCURSOR and SM_CYCURSOR
-#include "wx/msw/wince/missing.h"
-#endif // __WXWINCE__
-
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#include <commctrl.h>
+#endif
 
 // Wine doesn't have this yet
 #ifndef ListView_CreateDragImage
@@ -95,7 +95,7 @@ void wxDragImage::Init()
     m_hCursorImageList = 0;
 #endif
     m_window = (wxWindow*) NULL;
-    m_fullScreen = false;
+    m_fullScreen = FALSE;
 }
 
 // Attributes
@@ -112,10 +112,7 @@ bool wxDragImage::Create(const wxBitmap& image, const wxCursor& cursor)
         ImageList_Destroy(GetHimageList());
     m_hImageList = 0;
 
-#ifdef __WXWINCE__
-    UINT flags = ILC_COLOR;
-#else
-    UINT flags wxDUMMY_INITIALIZE(0) ;
+    UINT flags = 0 ;
     if (image.GetDepth() <= 4)
         flags = ILC_COLOR4;
     else if (image.GetDepth() <= 8)
@@ -126,7 +123,6 @@ bool wxDragImage::Create(const wxBitmap& image, const wxCursor& cursor)
         flags = ILC_COLOR24;
     else
         flags = ILC_COLOR32;
-#endif
 
     bool mask = (image.GetMask() != 0);
 
@@ -169,10 +165,7 @@ bool wxDragImage::Create(const wxIcon& image, const wxCursor& cursor)
         ImageList_Destroy(GetHimageList());
     m_hImageList = 0;
 
-#ifdef __WXWINCE__
-    UINT flags = ILC_COLOR;
-#else
-    UINT flags wxDUMMY_INITIALIZE(0) ;
+    UINT flags = 0 ;
     if (image.GetDepth() <= 4)
         flags = ILC_COLOR4;
     else if (image.GetDepth() <= 8)
@@ -183,8 +176,7 @@ bool wxDragImage::Create(const wxIcon& image, const wxCursor& cursor)
         flags = ILC_COLOR24;
     else
         flags = ILC_COLOR32;
-#endif
-    bool mask = true;
+    bool mask = TRUE;
     if ( mask )
         flags |= ILC_MASK;
 
@@ -208,7 +200,7 @@ bool wxDragImage::Create(const wxString& str, const wxCursor& cursor)
 {
     wxFont font(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
-    long w = 0, h = 0;
+    long w, h;
     wxScreenDC dc;
     dc.SetFont(font);
     dc.GetTextExtent(str, & w, & h);
@@ -235,29 +227,21 @@ bool wxDragImage::Create(const wxString& str, const wxCursor& cursor)
 
     dc2.SelectObject(wxNullBitmap);
 
-#if wxUSE_WXDIB
     // Make the bitmap masked
     wxImage image = bitmap.ConvertToImage();
     image.SetMaskColour(255, 255, 255);
     return Create(wxBitmap(image), cursor);
-#else
-    return false;
-#endif
 }
 
-#if wxUSE_TREECTRL
 // Create a drag image for the given tree control item
 bool wxDragImage::Create(const wxTreeCtrl& treeCtrl, wxTreeItemId& id)
 {
     if ( m_hImageList )
         ImageList_Destroy(GetHimageList());
-    m_hImageList = (WXHIMAGELIST)
-        TreeView_CreateDragImage(GetHwndOf(&treeCtrl), (HTREEITEM) id.m_pItem);
-    return m_hImageList != 0;
+    m_hImageList = (WXHIMAGELIST) TreeView_CreateDragImage((HWND) treeCtrl.GetHWND(), (HTREEITEM) (WXHTREEITEM) id);
+    return TRUE;
 }
-#endif
 
-#if wxUSE_LISTCTRL
 // Create a drag image for the given list control item
 bool wxDragImage::Create(const wxListCtrl& listCtrl, long id)
 {
@@ -266,9 +250,8 @@ bool wxDragImage::Create(const wxListCtrl& listCtrl, long id)
     POINT pt;
     pt.x = 0; pt.y = 0;
     m_hImageList = (WXHIMAGELIST) ListView_CreateDragImage((HWND) listCtrl.GetHWND(), id, & pt);
-    return true;
+    return TRUE;
 }
-#endif
 
 // Begin drag
 bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen, wxRect* rect)
@@ -286,25 +269,20 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullS
     {
         wxFAIL_MSG( _T("BeginDrag failed.") );
 
-        return false;
+        return FALSE;
     }
 
     if (m_cursor.Ok())
     {
 #if wxUSE_SIMPLER_DRAGIMAGE
-        m_oldCursor = window->GetCursor();
-        window->SetCursor(m_cursor);
+	    m_oldCursor = window->GetCursor();
+	    window->SetCursor(m_cursor);
 #else
         if (!m_hCursorImageList)
-        {
-#ifndef SM_CXCURSOR
-			// Smartphone may not have these metric symbol
-			int cxCursor = 16;
-            int cyCursor = 16;
-#else
-            int cxCursor = ::GetSystemMetrics(SM_CXCURSOR);
-            int cyCursor = ::GetSystemMetrics(SM_CYCURSOR);
-#endif
+        {           
+            int cxCursor = GetSystemMetrics(SM_CXCURSOR); 
+            int cyCursor = GetSystemMetrics(SM_CYCURSOR); 
+ 
             m_hCursorImageList = (WXHIMAGELIST) ImageList_Create(cxCursor, cyCursor, ILC_MASK, 1, 1);
         }
 
@@ -348,7 +326,7 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullS
 
     ::SetCapture(GetHwndOf(window));
 
-    return true;
+    return TRUE;
 }
 
 // Begin drag. hotspot is the location of the drag position relative to the upper-left
@@ -360,7 +338,7 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, wxWindow* 
 
     int x = fullScreenRect->GetPosition().x;
     int y = fullScreenRect->GetPosition().y;
-
+    
     wxSize sz = fullScreenRect->GetSize();
 
     if (fullScreenRect->GetParent() && !fullScreenRect->IsKindOf(CLASSINFO(wxFrame)))
@@ -369,7 +347,7 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, wxWindow* 
     rect.x = x; rect.y = y;
     rect.width = sz.x; rect.height = sz.y;
 
-    return BeginDrag(hotspot, window, true, & rect);
+    return BeginDrag(hotspot, window, TRUE, & rect);
 }
 
 // End drag
@@ -386,14 +364,14 @@ bool wxDragImage::EndDrag()
 
 #if wxUSE_SIMPLER_DRAGIMAGE
     if (m_cursor.Ok() && m_oldCursor.Ok())
-        m_window->SetCursor(m_oldCursor);
+	    m_window->SetCursor(m_oldCursor);
 #else
     ::ShowCursor(TRUE);
 #endif
 
     m_window = (wxWindow*) NULL;
 
-    return true;
+    return TRUE;
 }
 
 // Move the image: call from OnMouseMove. Pt is in window client coordinates if window
@@ -457,5 +435,8 @@ bool wxDragImage::Hide()
 
     return ret;
 }
+
+#endif
+    // __WIN95__
 
 #endif // wxUSE_DRAGIMAGE

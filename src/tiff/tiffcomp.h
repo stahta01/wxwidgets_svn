@@ -4,28 +4,28 @@
  * Copyright (c) 1990-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and
+ * Permission to use, copy, modify, distribute, and sell this software and 
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- *
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
- *
+ * 
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
+ * 
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
  * OF THIS SOFTWARE.
  */
 
 #ifndef _COMPAT_
-#define _COMPAT_
+#define	_COMPAT_
 /*
  * This file contains a hodgepodge of definitions and
  * declarations that are needed to provide compatibility
@@ -51,14 +51,18 @@
 #define __acornriscos
 #endif
 
-#if (defined(__MWERKS__) && !defined(__MACH__)) || defined(THINK_C)
+#if defined(__MWERKS__) || defined(THINK_C)
 #include <unix.h>
 #include <math.h>
 #endif
 
+#if defined (__SC__) && !defined (__DMC__)
+    #define __SYMANTEC__
+#endif
+
 #include <stdio.h>
 
-#if defined(__PPCC__) || ( defined(__SC__) && !defined(__DMC__) ) || defined(__MRC__)
+#if defined(__PPCC__) || defined(__SYMANTEC__) || defined(__MRC__)
 #include <types.h>
 #elif !defined(__MWERKS__) && !defined(THINK_C) && !defined(__acornriscos) && !defined(applec)
 #include <sys/types.h>
@@ -79,15 +83,15 @@
  * additional includes are also done to pull in the
  * appropriate definitions we're looking for.
  */
-#if defined(__MWERKS__) || defined(THINK_C) || defined(__PPCC__) || ( defined(__SC__) && !defined(__DMC__) ) || defined(__MRC__)
+#if defined(__MWERKS__) || defined(THINK_C) || defined(__PPCC__) || defined(__SYMANTEC__) || defined(__MRC__)
 #include <stdlib.h>
 #define	BSDTYPES
 #define	HAVE_UNISTD_H	0
-#elif (defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows) || defined(_WIN32)) && !defined(unix)
-#define	BSDTYPES
+#elif defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows)
+#define BSDTYPES
+#elif defined(__DJGPP__)
+#define BSDTYPES
 #elif defined(OS2_16) || defined(OS2_32)
-#define	BSDTYPES
-#elif defined(__MSDOS__)
 #define	BSDTYPES
 #elif defined(__acornriscos)
 #include <stdlib.h>
@@ -121,17 +125,11 @@
  * then define BSDTYPES in your Makefile.
  */
 #if defined(BSDTYPES)
-# ifndef _BSDTYPES_DEFINED
-#  ifndef __u_char_defined
 typedef	unsigned char u_char;
 typedef	unsigned short u_short;
 typedef	unsigned int u_int;
 typedef	unsigned long u_long;
-#   define __u_char_defined
-#  endif /* __u_char_defined */
-#  define _BSDTYPES_DEFINED
-# endif /* _BSDTYPES_DEFINED */
-#endif /* BSDTYPES */
+#endif
 
 /*
  * dblparam_t is the type that a double precision
@@ -139,7 +137,7 @@ typedef	unsigned long u_long;
  * stack (when coerced by the compiler).
  */
 /* Note: on MacPowerPC "extended" is undefined. So only use it for 68K-Macs */
-#if ( defined(__SC__) && !defined(__DMC__) ) || defined(THINK_C)
+#if defined(__SYMANTEC__) || defined(THINK_C)
 typedef extended dblparam_t;
 #else
 typedef double dblparam_t;
@@ -218,8 +216,5 @@ extern int creat(const char *path, int mode);
 #define HOST_BIGENDIAN	0
 #endif
 
-#ifndef LINKAGEMODE
-    #define LINKAGEMODE
-#endif
 
 #endif /* _COMPAT_ */

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,14 +16,12 @@ public:
     bool OnInit();
 
     // Joystick max values
-    int     m_minX;
-    int     m_minY;
     int     m_maxX;
     int     m_maxY;
 
-#if wxUSE_SOUND
-    wxSound  m_fire;
-#endif // wxUSE_SOUND
+#if wxUSE_WAVE
+    wxWave  m_fire;
+#endif // wxUSE_WAVE
 };
 
 DECLARE_APP(MyApp)
@@ -35,7 +33,6 @@ public:
     ~MyCanvas();
     void OnJoystickEvent(wxJoystickEvent& event);
 
-    wxJoystick* m_stick;
     DECLARE_EVENT_TABLE()
 };
 
@@ -45,7 +42,7 @@ public:
     MyCanvas *canvas;
     MyFrame(wxFrame *parent, const wxString& title,
         const wxPoint& pos, const wxSize& size, const long style);
-    ~MyFrame(){};
+    ~MyFrame();
     void OnActivate(wxActivateEvent& event);
     void OnQuit(wxCommandEvent& event);
 

@@ -6,15 +6,17 @@
 // Created:     12.04.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
+
+// these classes are for private use only for now, they're not documented
 
 #ifndef _WX_BUFFER_H
 #define _WX_BUFFER_H
 
 #include "wx/wxchar.h"
 
-#include <stdlib.h>             // malloc() and free()
+#include <string.h> // strdup
 
 // ----------------------------------------------------------------------------
 // Special classes for (wide) character strings: they use malloc/free instead
@@ -22,10 +24,10 @@
 // ----------------------------------------------------------------------------
 
 #define DEFINE_BUFFER(classname, chartype, strdupfunc)                      \
-class WXDLLIMPEXP_BASE classname                                            \
+class classname                                                             \
 {                                                                           \
 public:                                                                     \
-    classname(const chartype *str = NULL)                                   \
+    classname(const chartype *str)                                          \
         : m_str(str ? strdupfunc(str) : NULL)                               \
     {                                                                       \
     }                                                                       \
@@ -64,12 +66,6 @@ public:                                                                     \
         return p;                                                           \
     }                                                                       \
                                                                             \
-    void reset()                                                            \
-    {                                                                       \
-        free(m_str);                                                        \
-        m_str = NULL;                                                       \
-    }                                                                       \
-                                                                            \
     classname(const classname& src)                                         \
         : m_str(src.release())                                              \
     {                                                                       \
@@ -90,18 +86,6 @@ public:                                                                     \
         return *this;                                                       \
     }                                                                       \
                                                                             \
-    bool extend(size_t len)                                                 \
-    {                                                                       \
-        chartype *                                                          \
-            str = (chartype *)realloc(m_str, (len + 1)*sizeof(chartype));   \
-        if ( !str )                                                         \
-            return false;                                                   \
-                                                                            \
-        m_str = str;                                                        \
-                                                                            \
-        return true;                                                        \
-    }                                                                       \
-                                                                            \
     chartype *data() { return m_str; }                                      \
     const chartype *data() const { return m_str; }                          \
     operator const chartype *() const { return m_str; }                     \
@@ -111,26 +95,30 @@ private:                                                                    \
     chartype *m_str;                                                        \
 }
 
-DEFINE_BUFFER(wxCharBuffer, char, wxStrdupA);
+DEFINE_BUFFER(wxCharBuffer, char, strdup);
 
 #if wxUSE_WCHAR_T
 
-DEFINE_BUFFER(wxWCharBuffer, wchar_t, wxStrdupW);
+inline wchar_t *wxWcsdupReplacement(const wchar_t *wcs)
+{
+    const size_t siz = (wxWcslen(wcs) + 1)*sizeof(wchar_t);
+    wchar_t *wcsCopy = (wchar_t *)malloc(siz);
+    memcpy(wcsCopy, wcs, siz);
+    return wcsCopy;
+}
+
+DEFINE_BUFFER(wxWCharBuffer, wchar_t, wxWcsdupReplacement);
 
 #endif // wxUSE_WCHAR_T
 
 #undef DEFINE_BUFFER
 
 #if wxUSE_UNICODE
-    typedef wxWCharBuffer wxWxCharBuffer;
-
     #define wxMB2WXbuf wxWCharBuffer
     #define wxWX2MBbuf wxCharBuffer
     #define wxWC2WXbuf wxChar*
     #define wxWX2WCbuf wxChar*
 #else // ANSI
-    typedef wxCharBuffer wxWxCharBuffer;
-
     #define wxMB2WXbuf wxChar*
     #define wxWX2MBbuf wxChar*
     #define wxWC2WXbuf wxCharBuffer
@@ -146,13 +134,13 @@ class wxMemoryBufferData
 {
 public:
     // the initial size and also the size added by ResizeIfNeeded()
-    enum { DefBufSize = 1024 };
+    enum { BLOCK_SIZE = 1024 };
 
     friend class wxMemoryBuffer;
 
     // everyting is private as it can only be used by wxMemoryBuffer
 private:
-    wxMemoryBufferData(size_t size = wxMemoryBufferData::DefBufSize)
+    wxMemoryBufferData(size_t size = wxMemoryBufferData::BLOCK_SIZE)
         : m_data(size ? malloc(size) : NULL), m_size(size), m_len(0), m_ref(0)
     {
     }
@@ -164,13 +152,13 @@ private:
         if (newSize > m_size)
         {
             void *dataOld = m_data;
-            m_data = realloc(m_data, newSize + wxMemoryBufferData::DefBufSize);
+            m_data = realloc(m_data, newSize + wxMemoryBufferData::BLOCK_SIZE);
             if ( !m_data )
             {
                 free(dataOld);
             }
 
-            m_size = newSize + wxMemoryBufferData::DefBufSize;
+            m_size = newSize + wxMemoryBufferData::BLOCK_SIZE;
         }
     }
 
@@ -194,8 +182,6 @@ private:
 
     // the reference count
     size_t m_ref;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryBufferData)
 };
 
 
@@ -203,7 +189,7 @@ class wxMemoryBuffer
 {
 public:
     // ctor and dtor
-    wxMemoryBuffer(size_t size = wxMemoryBufferData::DefBufSize)
+    wxMemoryBuffer(size_t size = wxMemoryBufferData::BLOCK_SIZE)
     {
         m_bufdata = new wxMemoryBufferData(size);
         m_bufdata->IncRef();
@@ -273,7 +259,7 @@ public:
         m_bufdata->m_len += 1;
     }
 
-    void  AppendData(const void *data, size_t len)
+    void  AppendData(void* data, size_t len)
     {
         memcpy(GetAppendBuf(len), data, len);
         UngetAppendBuf(len);

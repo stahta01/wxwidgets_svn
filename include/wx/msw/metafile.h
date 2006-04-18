@@ -12,6 +12,10 @@
 #ifndef _WX_METAFIILE_H_
 #define _WX_METAFIILE_H_
 
+#include "wx/setup.h"
+
+#if wxUSE_METAFILE
+
 #include "wx/dc.h"
 #include "wx/gdiobj.h"
 
@@ -44,6 +48,7 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
 {
 public:
     wxMetafile(const wxString& file = wxEmptyString);
+    wxMetafile(const wxMetafile& metafile) { Ref(metafile); }
     virtual ~wxMetafile();
 
     // After this is called, the metafile cannot be used for anything
@@ -68,6 +73,8 @@ public:
     void SetWindowsMappingMode(int mm);
 
     // Operators
+    wxMetafile& operator=(const wxMetafile& metafile)
+        { if (*this != metafile) Ref(metafile); return *this; }
     bool operator==(const wxMetafile& metafile) const
         { return m_refData == metafile.m_refData; }
     bool operator!=(const wxMetafile& metafile) const
@@ -95,7 +102,7 @@ public:
     virtual void SetMapMode(int mode);
     virtual void GetTextExtent(const wxString& string, long *x, long *y,
             long *descent = NULL, long *externalLeading = NULL,
-            wxFont *theFont = NULL, bool use16bit = false) const;
+            wxFont *theFont = NULL, bool use16bit = FALSE) const;
 
     // Implementation
     wxMetafile *GetMetaFile() const { return m_metaFile; }
@@ -104,8 +111,6 @@ public:
     void SetWindowsMappingMode(int mm) { m_windowsMappingMode = mm; }
 
 protected:
-    virtual void DoGetSize(int *width, int *height) const;
-
     int           m_windowsMappingMode;
     wxMetafile*   m_metaFile;
 
@@ -124,7 +129,7 @@ private:
 bool WXDLLEXPORT wxMakeMetafilePlaceable(const wxString& filename, float scale = 1.0);
 
 // Optional origin and extent
-bool WXDLLEXPORT wxMakeMetaFilePlaceable(const wxString& filename, int x1, int y1, int x2, int y2, float scale = 1.0, bool useOriginAndExtent = true);
+bool WXDLLEXPORT wxMakeMetaFilePlaceable(const wxString& filename, int x1, int y1, int x2, int y2, float scale = 1.0, bool useOriginAndExtent = TRUE);
 
 // ----------------------------------------------------------------------------
 // wxMetafileDataObject is a specialization of wxDataObject for metafile data
@@ -159,6 +164,7 @@ protected:
 
 #endif // wxUSE_DRAG_AND_DROP
 
+#endif // wxUSE_METAFILE
 #endif
     // _WX_METAFIILE_H_
 

@@ -8,9 +8,9 @@
 //              - restruction of Variable declaration
 //              - to prevent Warnings under MingGW32
 // Modified by: 19990909 : mj
-//              - mNoVertScroll true = no / false = Original Code
+//              - mNoVertScroll TRUE = no / FALSE = Original Code
 //                the Original Code Paints a Vertical Scroll in wxPagedWindow
-//                which is not needed in this Version. Use true for this.
+//                which is not needed in this Version. Use TRUE for this.
 // Created:     07/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
@@ -64,7 +64,7 @@ public:
 
 public:
 
- // public properties (invoke ReclaclLayout(true) to apply changes)
+ // public properties (invoke ReclaclLayout(TRUE) to apply changes)
 
  int    mVertGap;         // default: 3
  int    mHorizGap;        // default: 5
@@ -79,13 +79,13 @@ public:
  wxPen  mDarkPen;         // default: RGB(128,128,128)
  wxPen  mBlackPen;        // default: RGB(  0,  0,  0)
 
- size_t mActiveTab;
+ int    mActiveTab;
  int    mTitleHeight;
  int    mLayoutType;
 
  // notifications (can be handled by derivatives)
 
- virtual void OnTabAdded( twTabInfo* WXUNUSED(pInfo) ) {}
+ virtual void OnTabAdded( twTabInfo* pInfo ) {}
 
  virtual void SizeTabs(int x,int y, int width, int height, bool repant);
 
@@ -98,7 +98,7 @@ public:
 
  virtual void AddTab( wxWindow*    pContent,           // contained window
                       wxString     tabText,            // tab label
-                      wxString     imageFileName = _T(""), // if "", only text label is displayed
+                      wxString     imageFileName = "", // if "", only text label is displayed
                       wxBitmapType imageType     = wxBITMAP_TYPE_BMP );
 
  // NOTE:: if this AddTab(..) overload is called, the
@@ -108,7 +108,7 @@ public:
 
  virtual void AddTab( wxWindow* pContent,
                       wxString  tabText,
-                      wxBitmap* pImage );
+                      wxBitmap* pImage = NULL );
 
  virtual void RemoveTab( int tabNo );
 
@@ -131,7 +131,7 @@ public:
 
  // should be invoked to redisplay window with changed properties
 
- virtual void RecalcLayout( bool andRepaint = true );
+ virtual void RecalcLayout( bool andRepaint = TRUE );
 
  // event handlers
 
@@ -176,7 +176,7 @@ public:
  int          mTitleRowStart;
  int          mResizeNailGap;
  int          mTitleRowLen;               // actual title row length
- int          mNoVertScroll;              // No Vertical Scroll  true/false
+ int          mNoVertScroll;              // No Vertical Scroll  TRUE/FALSE
 
  void DrawPaperBar( twTabInfo& tab, int x, int y,
                                     wxBrush& brush, wxPen& pen, wxDC& dc );
@@ -196,7 +196,7 @@ public:
 
 public:
  wxPagedWindow();
- ~wxPagedWindow(){};
+ ~wxPagedWindow();
 
  // NOTE:: use public methods of the base class
  //        to add "pages" to this window
@@ -218,7 +218,7 @@ public:
 
  virtual int HitTest( const wxPoint& pos );
 
- virtual void RecalcLayout( bool andRepaint = true );
+ virtual void RecalcLayout( bool andRepaint = TRUE );
 
  // event handlers
 
@@ -239,7 +239,7 @@ class twTabInfo : public wxObject
  DECLARE_DYNAMIC_CLASS( twTabInfo )
 public:
  twTabInfo();
- ~twTabInfo(){};
+ ~twTabInfo();
 
  int ImgWidth();
  int ImgHeight();

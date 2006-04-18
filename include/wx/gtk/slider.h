@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 // wxSlider
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSlider : public wxSliderBase
+class wxSlider : public wxSliderBase
 {
 public:
     wxSlider() { }
@@ -56,11 +56,9 @@ public:
     virtual void SetThumbLength(int lenPixels);
     virtual int GetThumbLength() const;
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
     void GtkDisableEvents();
     void GtkEnableEvents();
 

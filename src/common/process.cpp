@@ -6,7 +6,7 @@
 // Created:     24/06/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -138,10 +138,10 @@ bool wxProcess::IsErrorAvailable() const
 // ----------------------------------------------------------------------------
 
 /* static */
-wxKillError wxProcess::Kill(int pid, wxSignal sig, int flags)
+wxKillError wxProcess::Kill(int pid, wxSignal sig)
 {
     wxKillError rc;
-    (void)wxKill(pid, sig, &rc, flags);
+    (void)wxKill(pid, sig, &rc);
 
     return rc;
 }
@@ -153,7 +153,7 @@ bool wxProcess::Exists(int pid)
     {
         case wxKILL_OK:
         case wxKILL_ACCESS_DENIED:
-            return true;
+            return TRUE;
 
         default:
         case wxKILL_ERROR:
@@ -162,7 +162,7 @@ bool wxProcess::Exists(int pid)
             // fall through
 
         case wxKILL_NO_PROCESS:
-            return false;
+            return FALSE;
     }
 }
 

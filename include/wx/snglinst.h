@@ -19,7 +19,7 @@
 // wxSingleInstanceChecker
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxSingleInstanceChecker
+class WXDLLEXPORT wxSingleInstanceChecker
 {
 public:
     // default ctor, use Create() after it
@@ -40,7 +40,7 @@ public:
     // path is optional and is ignored under Win32 and used as the directory to
     // create the lock file in under Unix (default is wxGetHomeDir())
     //
-    // returns false if initialization failed, it doesn't mean that another
+    // returns FALSE if initialization failed, it doesn't mean that another
     // instance is running - use IsAnotherRunning() to check it
     bool Create(const wxString& name, const wxString& path = wxEmptyString);
 
@@ -55,9 +55,7 @@ private:
     void Init() { m_impl = NULL; }
 
     // the implementation details (platform specific)
-    class WXDLLIMPEXP_BASE wxSingleInstanceCheckerImpl *m_impl;
-
-    DECLARE_NO_COPY_CLASS(wxSingleInstanceChecker)
+    class WXDLLEXPORT wxSingleInstanceCheckerImpl *m_impl;
 };
 
 #endif // wxUSE_SNGLINST_CHECKER

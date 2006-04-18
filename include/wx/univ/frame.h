@@ -40,7 +40,7 @@ public:
                 const wxString& name = wxFrameNameStr);
 
     virtual wxPoint GetClientAreaOrigin() const;
-    virtual bool Enable(bool enable = true);
+    virtual bool Enable(bool enable = TRUE);
 
 #if wxUSE_STATUSBAR
     virtual wxStatusBar* CreateStatusBar(int number = 1,
@@ -51,9 +51,10 @@ public:
 
 #if wxUSE_TOOLBAR
     // create main toolbar bycalling OnCreateToolBar()
-    virtual wxToolBar* CreateToolBar(long style = -1,
-                                     wxWindowID id = wxID_ANY,
+    virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER|wxTB_HORIZONTAL,
+                                     wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
+    virtual void PositionToolBar();
 #endif // wxUSE_TOOLBAR
 
     virtual int GetMinWidth() const;
@@ -64,7 +65,6 @@ public:
 
 protected:
     void OnSize(wxSizeEvent& event);
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
 
     virtual void DoGetClientSize(int *width, int *height) const;
     virtual void DoSetClientSize(int width, int height);
@@ -80,11 +80,6 @@ protected:
     // override to update statusbar position when the frame size changes
     virtual void PositionStatusBar();
 #endif // wxUSE_MENUS
-
-protected:
-#if wxUSE_TOOLBAR
-    virtual void PositionToolBar();
-#endif // wxUSE_TOOLBAR
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxFrame)

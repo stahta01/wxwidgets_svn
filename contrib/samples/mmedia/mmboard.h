@@ -46,7 +46,7 @@ public:
   // ----------------------------
 
   virtual bool OnInit();
-
+  
   wxUint8 TestMultimediaCaps();
 };
 

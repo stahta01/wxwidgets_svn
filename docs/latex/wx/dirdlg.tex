@@ -18,8 +18,7 @@ This class represents the directory chooser dialog.
 
 \twocolwidtha{5cm}
 \begin{twocollist}
-\twocolitem{\windowstyle{wxDD\_DEFAULT\_STYLE}}{Equivalent to a combination of wxDEFAULT\_DIALOG\_STYLE, wxDD\_NEW\_DIR\_BUTTON and wxRESIZE\_BORDER (the last one is not used under wxWinCE).}
-\twocolitem{\windowstyle{wxDD\_NEW\_DIR\_BUTTON}}{Add "Create new
+\twocolitem{\indexit{wxDD\_NEW\_DIR\_BUTTON}}{Add "Create new
 directory" button and allow directory names to be editable.  On
 Windows the new directory button is only available with recent
 versions of the common dialogs.}
@@ -33,10 +32,10 @@ See also \helpref{Generic window styles}{windowstyles}.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxDirDialog::wxDirDialog}\label{wxdirdialogctor}
+\membersection{wxDirDialog::wxDirDialog}\label{wxdirdialogconstr}
 
 \func{}{wxDirDialog}{\param{wxWindow* }{parent}, \param{const wxString\& }{message = "Choose a directory"},\rtfsp
-\param{const wxString\& }{defaultPath = ""}, \param{long }{style = wxDD\_DEFAULT\_STYLE},\rtfsp
+\param{const wxString\& }{defaultPath = ""}, \param{long }{style = 0},\rtfsp
 \param{const wxPoint\& }{pos = wxDefaultPosition},\rtfsp
 \param{const wxSize\& }{size = wxDefaultSize},\rtfsp
 \param{const wxString\& }{name = "wxDirCtrl"}}
@@ -52,7 +51,7 @@ the dialog.
 
 \docparam{defaultPath}{The default path, or the empty string.}
 
-\docparam{style}{The dialog style. See \helpref{wxDirDialog}{wxdirdialog}}
+\docparam{style}{A dialog style, currently unused.}
 
 \docparam{pos}{Dialog position. Ignored under Windows.}
 
@@ -60,7 +59,7 @@ the dialog.
 
 \docparam{name}{The dialog name, not used.}
 
-\membersection{wxDirDialog::\destruct{wxDirDialog}}\label{wxdirdialogdtor}
+\membersection{wxDirDialog::\destruct{wxDirDialog}}
 
 \func{}{\destruct{wxDirDialog}}{\void}
 

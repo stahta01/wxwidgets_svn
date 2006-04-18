@@ -1,10 +1,6 @@
 \section{\class{wxStaticBitmap}}\label{wxstaticbitmap}
 
-A static bitmap control displays a bitmap. It is meant for display of the
-small icons in the dialog boxes and is not meant to be a general purpose image
-display control. In particular, under Windows 9x the size of bitmap is limited
-to $64*64$ pixels and thus you should use your own control if you want to
-display larger images portably.
+A static bitmap control displays a bitmap.
 
 \wxheading{Derived from}
 
@@ -33,7 +29,6 @@ The bitmap to be displayed should have a small number of colours, such as 16, to
 palette problems.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
-
 
 \membersection{wxStaticBitmap::wxStaticBitmap}\label{wxstaticbitmapconstr}
 
@@ -67,7 +62,6 @@ Constructor, creating and showing a text control.
 
 \helpref{wxStaticBitmap::Create}{wxstaticbitmapcreate}
 
-
 \membersection{wxStaticBitmap::Create}\label{wxstaticbitmapcreate}
 
 \func{bool}{Create}{\param{wxWindow* }{parent}, \param{wxWindowID}{ id},\rtfsp
@@ -76,32 +70,15 @@ Constructor, creating and showing a text control.
 
 Creation function, for two-step construction. For details see \helpref{wxStaticBitmap::wxStaticBitmap}{wxstaticbitmapconstr}.
 
-
 \membersection{wxStaticBitmap::GetBitmap}\label{wxstaticbitmapgetbitmap}
 
-\constfunc{wxBitmap}{GetBitmap}{\void}
+\constfunc{wxBitmap\&}{GetBitmap}{\void}
 
-Returns the bitmap currently used in the control. Notice that this method can
-be called even if \helpref{SetIcon}{wxstaticbitmapseticon} had been used.
+Returns a reference to the label bitmap.
 
 \wxheading{See also}
 
 \helpref{wxStaticBitmap::SetBitmap}{wxstaticbitmapsetbitmap}
-
-
-\membersection{wxStaticIcon::GetIcon}\label{wxstaticbitmapgeticon}
-
-\constfunc{wxIcon}{GetIcon}{\void}
-
-Returns the icon currently used in the control. Notice that this method can
-only be called if \helpref{SetIcon}{wxstaticbitmapseticon} had been used: an icon
-can't be retrieved from the control if a bitmap had been set (using 
-\helpref{SetBitmap}{wxstaticbitmapsetbitmap}).
-
-\wxheading{See also}
-
-\helpref{wxStaticIcon::SetIcon}{wxstaticbitmapseticon}
-
 
 \membersection{wxStaticBitmap::SetBitmap}\label{wxstaticbitmapsetbitmap}
 
@@ -116,19 +93,4 @@ Sets the bitmap label.
 \wxheading{See also}
 
 \helpref{wxStaticBitmap::GetBitmap}{wxstaticbitmapgetbitmap}
-
-
-\membersection{wxStaticIcon::SetIcon}\label{wxstaticbitmapseticon}
-
-\func{virtual void}{SetIcon}{\param{const wxIcon\& }{ label}}
-
-Sets the label to the given icon.
-
-\wxheading{Parameters}
-
-\docparam{label}{The new icon.}
-
-\wxheading{See also}
-
-\helpref{wxStaticIcon::GetIcon}{wxstaticbitmapgeticon}
 

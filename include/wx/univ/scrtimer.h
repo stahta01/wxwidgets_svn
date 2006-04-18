@@ -9,9 +9,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_UNIV_SCRTIMER_H
-#define _WX_UNIV_SCRTIMER_H
-
 // NB: this class is implemented in scrolbar.cpp
 
 #include "wx/timer.h"
@@ -35,11 +32,10 @@ public:
 
 protected:
     // to implement in derived classes: perform the scroll action and return
-    // true to continue scrolling or false to stop
+    // TRUE to continue scrolling or FALSE to stop
     virtual bool DoNotify() = 0;
 
     // should we skip the next timer event?
     bool m_skipNext;
 };
 
-#endif // _WX_UNIV_SCRTIMER_H

@@ -7,8 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_STATBOX
 
@@ -56,12 +55,15 @@ bool wxStaticBox::Create( wxWindow *parent,
         return FALSE;
     }
 
-    m_widget = GTKCreateFrame(label);
     wxControl::SetLabel(label);
+
+    m_widget = gtk_frame_new(m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    InheritAttributes();
 
     // need to set non default alignment?
     gfloat xalign;
@@ -72,39 +74,26 @@ bool wxStaticBox::Create( wxWindow *parent,
     else // wxALIGN_LEFT
         xalign = 0.0;
 
-    if ( style & (wxALIGN_RIGHT | wxALIGN_CENTER) ) // left alignment is default
-        gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.5);
+    if ( xalign )
+        gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.0);
+
+    Show( TRUE );
 
     return TRUE;
 }
 
-void wxStaticBox::SetLabel( const wxString& label )
+void wxStaticBox::SetLabel( const wxString &label )
 {
-    wxCHECK_RET( m_widget != NULL, wxT("invalid staticbox") );
+    wxControl::SetLabel( label );
 
-    GTKSetLabelForFrame(GTK_FRAME(m_widget), label);
+    gtk_frame_set_label( GTK_FRAME( m_widget ),
+                         m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 }
 
-void wxStaticBox::DoApplyWidgetStyle(GtkRcStyle *style)
+void wxStaticBox::ApplyWidgetStyle()
 {
-    GTKFrameApplyWidgetStyle(GTK_FRAME(m_widget), style);
-}
-
-bool wxStaticBox::GTKWidgetNeedsMnemonic() const
-{
-    return true;
-}
-
-void wxStaticBox::GTKWidgetDoSetMnemonic(GtkWidget* w)
-{
-    GTKFrameSetMnemonicWidget(GTK_FRAME(m_widget), w);
-}
-
-// static
-wxVisualAttributes
-wxStaticBox::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_frame_new);
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
 #endif // wxUSE_STATBOX

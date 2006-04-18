@@ -6,7 +6,7 @@
 // Created:     11.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_RADIOBOX_H_
@@ -17,7 +17,7 @@ class WXDLLEXPORT wxRadioButton;
 #include "wx/statbox.h"
 #include "wx/dynarray.h"
 
-WX_DEFINE_EXPORTED_ARRAY_PTR(wxRadioButton *, wxArrayRadioButtons);
+WX_DEFINE_ARRAY(wxRadioButton *, wxArrayRadioButtons);
 
 // ----------------------------------------------------------------------------
 // wxRadioBox: a box full of radio buttons
@@ -46,16 +46,6 @@ public:
         (void)Create(parent, id, title, pos, size, n, choices,
                      majorDim, style, val, name);
     }
-    wxRadioBox(wxWindow *parent,
-               wxWindowID id,
-               const wxString& title,
-               const wxPoint& pos,
-               const wxSize& size,
-               const wxArrayString& choices,
-               int majorDim = 0,
-               long style = wxRA_SPECIFY_COLS,
-               const wxValidator& val = wxDefaultValidator,
-               const wxString& name = wxRadioBoxNameStr);
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -67,16 +57,6 @@ public:
                 long style = wxRA_SPECIFY_COLS,
                 const wxValidator& val = wxDefaultValidator,
                 const wxString& name = wxRadioBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                int majorDim = 0,
-                long style = wxRA_SPECIFY_COLS,
-                const wxValidator& val = wxDefaultValidator,
-                const wxString& name = wxRadioBoxNameStr);
 
     virtual ~wxRadioBox();
 
@@ -84,27 +64,21 @@ public:
     virtual void SetSelection(int n);
     virtual int GetSelection() const;
 
-    virtual unsigned int GetCount() const
-        { return (unsigned int)m_buttons.GetCount(); }
+    virtual int GetCount() const { return m_buttons.GetCount(); }
+    virtual int GetColumnCount() const { return m_numCols; }
+    virtual int GetRowCount() const { return m_numRows; }
 
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& label);
+    virtual wxString GetString(int n) const;
+    virtual void SetString(int n, const wxString& label);
 
-    virtual bool Enable(unsigned int n, bool enable = true);
-    virtual bool Show(unsigned int n, bool show = true);
-
-    virtual bool IsItemEnabled(unsigned int n) const;
-    virtual bool IsItemShown(unsigned int n) const;
+    virtual void Enable(int n, bool enable = TRUE);
+    virtual void Show(int n, bool show = TRUE);
 
     // we also override the wxControl methods to avoid virtual function hiding
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
     virtual wxString GetLabel() const;
     virtual void SetLabel(const wxString& label);
-
-    // we inherit a version always returning false from wxStaticBox, override
-    // it to behave normally
-    virtual bool AcceptsFocus() const { return wxControl::AcceptsFocus(); }
 
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
@@ -131,11 +105,26 @@ protected:
     // common part of all ctors
     void Init();
 
+    // check that the index is valid
+    bool IsValid(int n) const { return n >= 0 && n < GetCount(); }
+
+    // sets m_majorDim and calculate m_numCols and m_numRows
+    void SetMajorDim(int majorDim);
+
     // calculate the max size of all buttons
     wxSize GetMaxButtonSize() const;
 
     // the currently selected radio button or -1
     int m_selection;
+
+    // the parameters defining the button layout: majorDim meaning depends on
+    // the style and is the (max) number of columns if it includes
+    // wxRA_SPECIFY_COLS and is the (max) number of rows if it includes
+    // wxRA_SPECIFY_ROWS - the number of rows and columns is calculated from
+    // it
+    int m_majorDim,
+        m_numCols,
+        m_numRows;
 
     // all radio buttons
     wxArrayRadioButtons m_buttons;

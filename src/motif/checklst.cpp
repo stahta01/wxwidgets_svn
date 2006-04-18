@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/checklst.cpp
+// Name:        checklst.cpp
 // Purpose:     implementation of wxCheckListBox class
 // Author:      Julian Smart
 // Modified by:
@@ -13,15 +13,9 @@
 // headers & declarations
 // ============================================================================
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#if wxUSE_CHECKLISTBOX
-
 #include "wx/defs.h"
 
 #include "wx/checklst.h"
-#include "wx/arrstr.h"
 
 // ============================================================================
 // implementation
@@ -56,7 +50,7 @@ static void CopyStringsAddingPrefix(const wxArrayString& orig,
     copy.Clear();
 
     for(size_t i = 0; i < orig.GetCount(); ++i )
-        copy.Add( Prefix(false) + orig[i] );
+        copy.Add( Prefix(FALSE) + orig[i] );
 }
 
 // def ctor: use Create() to really create the control
@@ -76,17 +70,6 @@ wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
            style, val, name);
 }
 
-wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
-                               const wxPoint& pos, const wxSize& size,
-                               const wxArrayString& choices,
-                               long style, const wxValidator& val,
-                               const wxString& name)
-                               : wxCheckListBoxBase()
-{
-    Create(parent, id, pos, size, choices,
-           style, val, name);
-}
-
 bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
                             const wxPoint& pos,
                             const wxSize& size,
@@ -99,31 +82,17 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
     bool retVal = wxListBox::Create(parent, id, pos, size, n, choices,
                                     style, validator, name);
     return retVal;
-}
-
-bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
-                            const wxPoint& pos,
-                            const wxSize& size,
-                            const wxArrayString& choices,
-                            long style,
-                            const wxValidator& validator,
-                            const wxString& name)
-{
-    // wxListBox::Create calls set, which adds the prefixes
-    bool retVal = wxListBox::Create(parent, id, pos, size, choices,
-                                    style, validator, name);
-    return retVal;
-}
+}   
 
 // check items
 // -----------
 
-bool wxCheckListBox::IsChecked(unsigned int uiIndex) const
+bool wxCheckListBox::IsChecked(size_t uiIndex) const
 {
     return ::IsChecked(wxListBox::GetString(uiIndex));
 }
 
-void wxCheckListBox::Check(unsigned int uiIndex, bool bCheck)
+void wxCheckListBox::Check(size_t uiIndex, bool bCheck)
 {
     wxString label = wxListBox::GetString(uiIndex);
     if(::IsChecked(label) == bCheck) return;
@@ -144,10 +113,10 @@ void wxCheckListBox::DoToggleItem( int n, int x )
             event.SetClientObject( GetClientObject(n) );
         else if( HasClientUntypedData() )
             event.SetClientData( GetClientData(n) );
-        event.SetInt(n);
-        event.SetExtraLong(true);
+        event.m_commandInt = n;
+        event.m_extraLong = TRUE;
         event.SetEventObject(this);
-        event.SetString(GetString(n));
+        event.SetString( GetString( n ) );
 
         GetEventHandler()->ProcessEvent(event);
     }
@@ -155,13 +124,13 @@ void wxCheckListBox::DoToggleItem( int n, int x )
 
 int wxCheckListBox::DoAppend(const wxString& item)
 {
-    return wxListBox::DoAppend( Prefix(false) + item );
+    return wxListBox::DoAppend( Prefix(FALSE) + item );
 }
 
-int wxCheckListBox::FindString(const wxString& s, bool bCase) const
+int wxCheckListBox::FindString(const wxString& s) const
 {
-    int n1 = wxListBox::FindString(Prefix(false) + s, bCase);
-    int n2 = wxListBox::FindString(Prefix(true) + s, bCase);
+    int n1 = wxListBox::FindString(Prefix(FALSE) + s);
+    int n2 = wxListBox::FindString(Prefix(TRUE) + s);
     int min = wxMin(n1, n2), max = wxMax(n1, n2);
 
     // why this works:
@@ -172,17 +141,17 @@ int wxCheckListBox::FindString(const wxString& s, bool bCase) const
     return min;
 }
 
-void wxCheckListBox::SetString(unsigned int n, const wxString& s)
+void wxCheckListBox::SetString(int n, const wxString& s)
 {
-    wxListBox::SetString(n, Prefix(IsChecked(n)) + s);
+    wxListBox::SetString( n, Prefix(IsChecked(n)) + s );
 }
 
-wxString wxCheckListBox::GetString(unsigned int n) const
+wxString wxCheckListBox::GetString(int n) const
 {
     return wxListBox::GetString(n).substr(4);
 }
 
-void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxCheckListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
     wxArrayString copy;
     CopyStringsAddingPrefix(items, copy);
@@ -195,5 +164,3 @@ void wxCheckListBox::DoSetItems(const wxArrayString& items, void **clientData)
     CopyStringsAddingPrefix(items, copy);
     wxListBox::DoSetItems(copy, clientData);
 }
-
-#endif // wxUSE_CHECKLISTBOX

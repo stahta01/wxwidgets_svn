@@ -1,19 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/view.h
+// Name:        view.h
 // Purpose:     View-related classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _STUDIO_VIEW_H_
 #define _STUDIO_VIEW_H_
 
 #include "doc.h"
-#include "wx/ogl/ogl.h"
+#include <wx/ogl/ogl.h>
 
 class csDiagramView;
 class csCanvas: public wxShapeCanvas
@@ -21,7 +21,7 @@ class csCanvas: public wxShapeCanvas
 DECLARE_CLASS(csCanvas)
  public:
 
-  csCanvas(csDiagramView *view, wxWindow *parent = NULL, wxWindowID id = wxID_ANY,
+  csCanvas(csDiagramView *view, wxWindow *parent = NULL, wxWindowID id = -1,
             const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
             long style = wxRETAINED);
   ~csCanvas(void);
@@ -61,7 +61,7 @@ class csDiagramView: public wxView
   bool OnCreate(wxDocument *doc, long flags);
   void OnDraw(wxDC *dc);
   void OnUpdate(wxView *sender, wxObject *hint = NULL);
-  bool OnClose(bool deleteWindow = true);
+  bool OnClose(bool deleteWindow = TRUE);
   void OnSelectAll(wxCommandEvent& event);
 
   wxShape *FindFirstSelectedShape(void);
@@ -91,7 +91,7 @@ class csDiagramView: public wxView
   void DoCmd(wxList& shapes, wxList& oldShapes, int cmd, const wxString& op);
 
   // Select or deselect all
-  void SelectAll(bool select = true);
+  void SelectAll(bool select = TRUE);
 
 // Event handlers
   void OnCut(wxCommandEvent& event);
@@ -128,7 +128,7 @@ class csDiagramView: public wxView
 DECLARE_EVENT_TABLE()
 
 public:
-  wxMDIChildFrame*      frame;
+  wxFrame*      frame;
   csCanvas*     canvas;
   wxList        m_selections;
 };

@@ -91,6 +91,7 @@ GENERICOBJS= #$ ExpandGlue("WXGENERICOBJS", "\$(OUTPUTDIR)\\", " &\n\t\$(OUTPUTD
 NONESSENTIALOBJS= #$ ExpandGlue("WXNONESSENTIALOBJS", "\$(OUTPUTDIR)\\", " &\n\t\$(OUTPUTDIR)\\")
 
 COMMONOBJS = &
+	$(OUTPUTDIR)\y_tab.obj &
 	#$ ExpandGlue("WXCOMMONOBJS", "\$(OUTPUTDIR)\\", " &\n\t\$(OUTPUTDIR)\\")
 
 MSWOBJS = #$ ExpandGlue("WXMSWOBJS", "\$(OUTPUTDIR)\\", " &\n\t\$(OUTPUTDIR)\\")
@@ -184,6 +185,14 @@ cleanall:   clean
     }
 #$}
 
+$(OUTPUTDIR)\y_tab.obj:     $(COMMDIR)\y_tab.c $(COMMDIR)\lex_yy.c
+  *$(CC) $(CFLAGS) -DUSE_DEFINE $(COMMDIR)\y_tab.c
+
+$(COMMDIR)\y_tab.c:     $(COMMDIR)\dosyacc.c
+        copy $(COMMDIR)\dosyacc.c $(COMMDIR)\y_tab.c
+
+$(COMMDIR)\lex_yy.c:    $(COMMDIR)\doslex.c
+    copy $(COMMDIR)\doslex.c $(COMMDIR)\lex_yy.c
 
 ########################################################
 # Generic objects (not always compiled, depending on
@@ -219,52 +228,52 @@ cleanall:   clean
 
 png:   .SYMBOLIC
     cd $(WXDIR)\src\png
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_png:   .SYMBOLIC
     cd $(WXDIR)\src\png
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 zlib:   .SYMBOLIC
     cd $(WXDIR)\src\zlib
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_zlib:   .SYMBOLIC
     cd $(WXDIR)\src\zlib
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 jpeg:    .SYMBOLIC
     cd $(WXDIR)\src\jpeg
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_jpeg:   .SYMBOLIC
     cd $(WXDIR)\src\jpeg
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 tiff:    .SYMBOLIC
     cd $(WXDIR)\src\tiff
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_tiff:   .SYMBOLIC
     cd $(WXDIR)\src\tiff
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 regex:    .SYMBOLIC
     cd $(WXDIR)\src\regex
-    wmake -f makefile.wat all
+    wmake $(__MAKEOPTS__) -f makefile.wat all
     cd $(WXDIR)\src\msw
 
 clean_regex:   .SYMBOLIC
     cd $(WXDIR)\src\regex
-    wmake -f makefile.wat clean
+    wmake $(__MAKEOPTS__) -f makefile.wat clean
     cd $(WXDIR)\src\msw
 
 MFTYPE=wat

@@ -23,10 +23,10 @@ class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 
 public:
     // constructors and pseudo-constructors
-    wxStaticLine() { m_statbox = NULL; }
+    wxStaticLine() { }
 
     wxStaticLine( wxWindow *parent,
-                  wxWindowID id = wxID_ANY,
+                  wxWindowID id,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
@@ -35,10 +35,8 @@ public:
         Create(parent, id, pos, size, style, name);
     }
 
-    virtual ~wxStaticLine();
-
     bool Create( wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
+                 wxWindowID id,
                  const wxPoint &pos = wxDefaultPosition,
                  const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,

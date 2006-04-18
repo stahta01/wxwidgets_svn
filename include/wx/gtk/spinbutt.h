@@ -15,7 +15,7 @@
 // wxSpinButton
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSpinButton : public wxSpinButtonBase
+class wxSpinButton : public wxSpinButtonBase
 {
 public:
     wxSpinButton() { }
@@ -42,13 +42,11 @@ public:
     virtual int GetMin() const;
     virtual int GetMax() const;
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     void OnSize( wxSizeEvent &event );
 
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
 
     GtkAdjustment  *m_adjust;
     float           m_oldPos;

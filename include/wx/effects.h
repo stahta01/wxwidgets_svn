@@ -7,7 +7,7 @@
 // Created:     25/4/2000
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_EFFECTS_H_
@@ -57,7 +57,7 @@ public:
     void DrawSunkenEdge(wxDC& dc, const wxRect& rect, int borderSize = 1);
 
     // Tile a bitmap
-    bool TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap);
+    bool TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap);
 
 protected:
     wxColour    m_highlightColour;  // Usually white

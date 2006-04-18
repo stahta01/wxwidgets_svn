@@ -12,42 +12,32 @@
 #ifndef _WX_STATBMP_H_BASE_
 #define _WX_STATBMP_H_BASE_
 
-#include "wx/defs.h"
-
 #if wxUSE_STATBMP
 
 #include "wx/control.h"
 #include "wx/bitmap.h"
-#include "wx/icon.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxStaticBitmapNameStr[];
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxBitmap;
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBitmapNameStr;
 
 // a control showing an icon or a bitmap
 class WXDLLEXPORT wxStaticBitmapBase : public wxControl
 {
-public:
-    wxStaticBitmapBase() { }
+ public:
     virtual ~wxStaticBitmapBase();
-
+    
     // our interface
     virtual void SetIcon(const wxIcon& icon) = 0;
     virtual void SetBitmap(const wxBitmap& bitmap) = 0;
     virtual wxBitmap GetBitmap() const = 0;
-    virtual wxIcon GetIcon() const /* = 0 -- should be pure virtual */
-    {
-        // stub it out here for now as not all ports implement it (but they
-        // should)
-        return wxIcon();
-    }
 
     // overriden base class virtuals
-    virtual bool AcceptsFocus() const { return false; }
-    virtual bool HasTransparentBackground() { return true; }
+    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
-    virtual wxSize DoGetBestSize() const;
-
-    DECLARE_NO_COPY_CLASS(wxStaticBitmapBase)
+    virtual wxSize DoGetBestClientSize() const;
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -56,16 +46,14 @@ protected:
     #include "wx/msw/statbmp.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/statbmp.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/statbmp.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/statbmp.h"
+    #include "wx/gtk/statbmp.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/statbmp.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/statbmp.h"
 #elif defined(__WXPM__)
     #include "wx/os2/statbmp.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/statbmp.h"
 #endif
 
 #endif // wxUSE_STATBMP

@@ -17,10 +17,9 @@
 
 #ifndef WX_PRECOMP
 #  include "wx/defs.h"
-#  include "wx/palette.h"
 #endif
 
-#if wxUSE_IMAGE && wxUSE_PCX
+#if wxUSE_IMAGE && wxUSE_STREAMS && wxUSE_PCX
 
 #include "wx/imagpcx.h"
 #include "wx/wfstream.h"
@@ -31,14 +30,6 @@
 #include "wx/hash.h"
 #include "wx/list.h"
 #include "wx/object.h"
-
-//-----------------------------------------------------------------------------
-// wxPCXHandler
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxPCXHandler,wxImageHandler)
-
-#if wxUSE_STREAMS
 
 //-----------------------------------------------------------------------------
 // RLE encoding and decoding
@@ -104,7 +95,7 @@ void RLEdecode(unsigned char *p, unsigned int size, wxInputStream& s)
         // If ((data & 0xC0) != 0xC0), then the value read is a data
         // byte. Else, it is a counter (cont = val & 0x3F) and the
         // next byte is the data byte.
-
+		  //
         if ((data & 0xC0) != 0xC0)
         {
             *(p++) = (unsigned char)data;
@@ -314,7 +305,7 @@ int SavePCX(wxImage *image, wxOutputStream& stream)
     unsigned char *src;             // pointer into wxImage data
     unsigned int width, height;     // size of the image
     unsigned int bytesperline;      // bytes per line (each plane)
-    unsigned char nplanes = 3;      // number of planes
+    int nplanes = 3;                // number of planes
     int format = wxPCX_24BIT;       // image format (8 bit, 24 bit)
     wxImageHistogram histogram;     // image histogram
     unsigned long key;              // key in the hashtable
@@ -412,9 +403,9 @@ int SavePCX(wxImage *image, wxOutputStream& stream)
         memset(pal, 0, sizeof(pal));
 
         unsigned long index;
-
+        
         for (wxImageHistogram::iterator entry = histogram.begin();
-             entry != histogram.end(); ++entry )
+             entry != histogram.end(); entry++ )
         {
             key = entry->first;
             index = entry->second.index;
@@ -434,6 +425,8 @@ int SavePCX(wxImage *image, wxOutputStream& stream)
 // wxPCXHandler
 //-----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxPCXHandler,wxImageHandler)
+
 bool wxPCXHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose, int WXUNUSED(index) )
 {
     int error;
@@ -443,7 +436,7 @@ bool wxPCXHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
         if (verbose)
             wxLogError(_("PCX: this is not a PCX file."));
 
-        return false;
+        return FALSE;
     }
 
     image->Destroy();
@@ -461,10 +454,10 @@ bool wxPCXHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
             }
         }
         image->Destroy();
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxPCXHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbose )
@@ -491,13 +484,11 @@ bool wxPCXHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char c = stream.GetC();
     if ( !stream )
-        return false;
+        return FALSE;
 
     // not very safe, but this is all we can get from PCX header :-(
     return c == 10;
 }
 
-#endif // wxUSE_STREAMS
-
-#endif // wxUSE_IMAGE && wxUSE_PCX
+#endif // wxUSE_STREAMS && wxUSE_PCX
 

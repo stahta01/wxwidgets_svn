@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/mdi.cpp
+// Name:        mdi.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,13 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/mdi.h"
-#include "wx/notebook.h"
 
-#if wxUSE_MDI
+#if wxUSE_MDI_ARCHITECTURE
 
 #include "wx/dialog.h"
 #include "wx/menu.h"
@@ -32,6 +28,13 @@
 const int wxMENU_HEIGHT = 27;
 
 //-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
+
+//-----------------------------------------------------------------------------
 // globals
 //-----------------------------------------------------------------------------
 
@@ -41,7 +44,6 @@ extern wxList wxPendingDelete;
 // "switch_page"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void
 gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
                               GtkNotebookPage *page,
@@ -56,7 +58,7 @@ gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
     wxMDIChildFrame *child = parent->GetActiveChild();
     if (child)
     {
-        wxActivateEvent event1( wxEVT_ACTIVATE, false, child->GetId() );
+        wxActivateEvent event1( wxEVT_ACTIVATE, FALSE, child->GetId() );
         event1.SetEventObject( child);
         child->GetEventHandler()->ProcessEvent( event1 );
     }
@@ -69,29 +71,24 @@ gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
 
     child = (wxMDIChildFrame*) NULL;
 
-    wxWindowList::compatibility_iterator node = client_window->GetChildren().GetFirst();
-    while ( node )
+    wxNode *node = client_window->GetChildren().First();
+    while (node)
     {
-        wxMDIChildFrame *child_frame = wxDynamicCast( node->GetData(), wxMDIChildFrame );
-
-        // child_frame can be NULL when this is called from dtor, probably
-        // because g_signal_connect (m_widget, "switch_page", (see below)
-        // isn't deleted early enough
-        if ( child_frame && child_frame->m_page == page )
+        wxMDIChildFrame *child_frame = (wxMDIChildFrame *)node->Data();
+        if (child_frame->m_page == page)
         {
             child = child_frame;
             break;
         }
-        node = node->GetNext();
+        node = node->Next();
     }
 
     if (!child)
          return;
 
-    wxActivateEvent event2( wxEVT_ACTIVATE, true, child->GetId() );
+    wxActivateEvent event2( wxEVT_ACTIVATE, TRUE, child->GetId() );
     event2.SetEventObject( child);
     child->GetEventHandler()->ProcessEvent( event2 );
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +99,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxMDIParentFrame,wxFrame)
 
 void wxMDIParentFrame::Init()
 {
-    m_justInserted = false;
+    m_justInserted = FALSE;
     m_clientWindow = (wxMDIClientWindow *) NULL;
 }
 
@@ -122,7 +119,7 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
 
     OnCreateClient();
 
-    return true;
+    return TRUE;
 }
 
 void wxMDIParentFrame::GtkOnSize( int x, int y, int width, int height )
@@ -155,37 +152,22 @@ void wxMDIParentFrame::OnInternalIdle()
     if (m_justInserted)
     {
         GtkNotebook *notebook = GTK_NOTEBOOK(m_clientWindow->m_widget);
-        gtk_notebook_set_current_page( notebook, g_list_length( notebook->children ) - 1 );
+        gtk_notebook_set_page( notebook, g_list_length( notebook->children ) - 1 );
 
-        /* need to set the menubar of the child */
-        wxMDIChildFrame *active_child_frame = GetActiveChild();
-        if (active_child_frame != NULL)
-        {
-            wxMenuBar *menu_bar = active_child_frame->m_menuBar;
-            if (menu_bar)
-            {
-                menu_bar->m_width = m_width;
-                menu_bar->m_height = wxMENU_HEIGHT;
-                gtk_pizza_set_size( GTK_PIZZA(m_mainWidget),
-                                    menu_bar->m_widget,
-                                    0, 0, m_width, wxMENU_HEIGHT );
-                menu_bar->SetInvokingWindow(active_child_frame);
-            }
-        }
-        m_justInserted = false;
+        m_justInserted = FALSE;
         return;
     }
 
     wxFrame::OnInternalIdle();
 
     wxMDIChildFrame *active_child_frame = GetActiveChild();
-    bool visible_child_menu = false;
+    bool visible_child_menu = FALSE;
 
-    wxWindowList::compatibility_iterator node = m_clientWindow->GetChildren().GetFirst();
+    wxNode *node = m_clientWindow->GetChildren().First();
     while (node)
     {
-        wxMDIChildFrame *child_frame = wxDynamicCast( node->GetData(), wxMDIChildFrame );
-
+        wxObject *child = node->Data();
+        wxMDIChildFrame *child_frame = wxDynamicCast(child, wxMDIChildFrame);
         if ( child_frame )
         {
             wxMenuBar *menu_bar = child_frame->m_menuBar;
@@ -193,7 +175,7 @@ void wxMDIParentFrame::OnInternalIdle()
             {
                 if (child_frame == active_child_frame)
                 {
-                    if (menu_bar->Show(true))
+                    if (menu_bar->Show(TRUE))
                     {
                         menu_bar->m_width = m_width;
                         menu_bar->m_height = wxMENU_HEIGHT;
@@ -202,11 +184,11 @@ void wxMDIParentFrame::OnInternalIdle()
                                             0, 0, m_width, wxMENU_HEIGHT );
                         menu_bar->SetInvokingWindow( child_frame );
                     }
-                    visible_child_menu = true;
+                    visible_child_menu = TRUE;
                 }
                 else
                 {
-                    if (menu_bar->Show(false))
+                    if (menu_bar->Show(FALSE))
                     {
                         menu_bar->UnsetInvokingWindow( child_frame );
                     }
@@ -214,7 +196,7 @@ void wxMDIParentFrame::OnInternalIdle()
             }
         }
 
-        node = node->GetNext();
+        node = node->Next();
     }
 
     /* show/hide parent menu bar as required */
@@ -223,12 +205,12 @@ void wxMDIParentFrame::OnInternalIdle()
     {
         if (visible_child_menu)
         {
-            m_frameMenuBar->Show( false );
+            m_frameMenuBar->Show( FALSE );
             m_frameMenuBar->UnsetInvokingWindow( this );
         }
         else
         {
-            m_frameMenuBar->Show( true );
+            m_frameMenuBar->Show( TRUE );
             m_frameMenuBar->SetInvokingWindow( this );
 
             m_frameMenuBar->m_width = m_width;
@@ -258,16 +240,13 @@ wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
     GtkNotebookPage* page = (GtkNotebookPage*) (g_list_nth(notebook->children,i)->data);
     if (!page) return (wxMDIChildFrame*) NULL;
 
-    wxWindowList::compatibility_iterator node = m_clientWindow->GetChildren().GetFirst();
+    wxNode *node = m_clientWindow->GetChildren().First();
     while (node)
     {
-        wxMDIChildFrame *child_frame = wxDynamicCast( node->GetData(), wxMDIChildFrame );
-
-        wxASSERT_MSG( child_frame, _T("child is not a wxMDIChildFrame") );
-
+        wxMDIChildFrame *child_frame = (wxMDIChildFrame *)node->Data();
         if (child_frame->m_page == page)
             return child_frame;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     return (wxMDIChildFrame*) NULL;
@@ -388,7 +367,7 @@ void wxMDIChildFrame::Activate()
     wxMDIParentFrame* parent = (wxMDIParentFrame*) GetParent();
     GtkNotebook* notebook = GTK_NOTEBOOK(parent->m_widget);
     gint pageno = gtk_notebook_page_num( notebook, m_widget );
-    gtk_notebook_set_current_page( notebook, pageno );
+    gtk_notebook_set_page( notebook, pageno );
 }
 
 void wxMDIChildFrame::OnActivate( wxActivateEvent& WXUNUSED(event) )
@@ -424,7 +403,6 @@ void wxMDIChildFrame::SetTitle( const wxString &title )
 // "size_allocate"
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static void gtk_page_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation* alloc, wxWindow *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
@@ -440,7 +418,6 @@ static void gtk_page_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation* 
 
     win->SetSize( alloc->x, alloc->y, alloc->width, alloc->height );
 }
-}
 
 //-----------------------------------------------------------------------------
 // InsertChild callback for wxMDIClientWindow
@@ -448,14 +425,14 @@ static void gtk_page_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation* 
 
 static void wxInsertChildInMDI( wxMDIClientWindow* parent, wxMDIChildFrame* child )
 {
-    wxString s = child->GetTitle();
+    wxString s = child->m_title;
     if (s.IsNull()) s = _("MDI child");
 
     GtkWidget *label_widget = gtk_label_new( s.mbc_str() );
     gtk_misc_set_alignment( GTK_MISC(label_widget), 0.0, 0.5 );
 
-    g_signal_connect (child->m_widget, "size_allocate",
-                      G_CALLBACK (gtk_page_size_callback), child);
+    gtk_signal_connect( GTK_OBJECT(child->m_widget), "size_allocate",
+      GTK_SIGNAL_FUNC(gtk_page_size_callback), (gpointer)child );
 
     GtkNotebook *notebook = GTK_NOTEBOOK(parent->m_widget);
 
@@ -464,7 +441,7 @@ static void wxInsertChildInMDI( wxMDIClientWindow* parent, wxMDIChildFrame* chil
     child->m_page = (GtkNotebookPage*) (g_list_last(notebook->children)->data);
 
     wxMDIParentFrame *parent_frame = (wxMDIParentFrame*) parent->GetParent();
-    parent_frame->m_justInserted = true;
+    parent_frame->m_justInserted = TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -484,26 +461,25 @@ wxMDIClientWindow::wxMDIClientWindow( wxMDIParentFrame *parent, long style )
 
 wxMDIClientWindow::~wxMDIClientWindow()
 {
-
 }
 
 bool wxMDIClientWindow::CreateClient( wxMDIParentFrame *parent, long style )
 {
-    m_needParent = true;
+    m_needParent = TRUE;
 
     m_insertCallback = (wxInsertChildFunction)wxInsertChildInMDI;
 
     if (!PreCreation( parent, wxDefaultPosition, wxDefaultSize ) ||
-        !CreateBase( parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("wxMDIClientWindow") ))
+        !CreateBase( parent, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("wxMDIClientWindow") ))
     {
         wxFAIL_MSG( wxT("wxMDIClientWindow creation failed") );
-        return false;
+        return FALSE;
     }
 
     m_widget = gtk_notebook_new();
 
-    g_signal_connect (m_widget, "switch_page",
-                      G_CALLBACK (gtk_mdi_page_change_callback), parent);
+    gtk_signal_connect( GTK_OBJECT(m_widget), "switch_page",
+      GTK_SIGNAL_FUNC(gtk_mdi_page_change_callback), (gpointer)parent );
 
     gtk_notebook_set_scrollable( GTK_NOTEBOOK(m_widget), 1 );
 
@@ -511,9 +487,9 @@ bool wxMDIClientWindow::CreateClient( wxMDIParentFrame *parent, long style )
 
     PostCreation();
 
-    Show( true );
+    Show( TRUE );
 
-    return true;
+    return TRUE;
 }
 
 #endif

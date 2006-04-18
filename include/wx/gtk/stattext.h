@@ -7,6 +7,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSTATICTEXTH__
 #define __GTKSTATICTEXTH__
 
@@ -19,7 +20,7 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticText;
+class wxStaticText;
 
 //-----------------------------------------------------------------------------
 // global data
@@ -29,7 +30,7 @@ class WXDLLIMPEXP_CORE wxStaticText;
 // wxStaticText
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticText : public wxControl
+class wxStaticText : public wxControl
 {
 public:
     wxStaticText();
@@ -53,25 +54,13 @@ public:
     void SetLabel( const wxString &label );
 
     bool SetFont( const wxFont &font );
-    bool SetForegroundColour( const wxColour& colour );
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
     
-    // see wx/stattext.h
-    void Wrap(int width);
-
     // implementation
     // --------------
+    
+    void ApplyWidgetStyle();
 
 protected:
-    virtual bool GTKWidgetNeedsMnemonic() const;
-    virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
-
-    virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO);
-                           
     virtual wxSize DoGetBestSize() const;
 
     DECLARE_DYNAMIC_CLASS(wxStaticText)

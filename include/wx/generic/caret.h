@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     25.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 #include "wx/timer.h"
 
-class WXDLLIMPEXP_CORE wxCaret;
+class wxCaret;
 
 class WXDLLEXPORT wxCaretTimer : public wxTimer
 {
@@ -26,7 +26,7 @@ private:
     wxCaret *m_caret;
 };
 
-class WXDLLIMPEXP_CORE wxCaret : public wxCaretBase
+class wxCaret : public wxCaretBase
 {
 public:
     // ctors
@@ -55,7 +55,6 @@ protected:
     virtual void DoShow();
     virtual void DoHide();
     virtual void DoMove();
-    virtual void DoSize();
 
     // blink the caret once
     void Blink();
@@ -65,7 +64,7 @@ protected:
 
     // draw the caret on the given DC
     void DoDraw(wxDC *dc);
-
+    
 private:
     // GTK specific initialization
     void InitGeneric();
@@ -77,8 +76,8 @@ private:
                   m_yOld;
 
     wxCaretTimer  m_timer;
-    bool          m_blinkedOut,     // true => caret hidden right now
-                  m_hasFocus;       // true => our window has focus
+    bool          m_blinkedOut,     // TRUE => caret hidden right now
+                  m_hasFocus;       // TRUE => our window has focus
 };
 
 #endif // _WX_CARET_H_

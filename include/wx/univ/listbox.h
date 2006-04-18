@@ -13,8 +13,6 @@
 #define _WX_UNIV_LISTBOX_H_
 
 #include "wx/scrolwin.h"    // for wxScrollHelper
-#include "wx/dynarray.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control
@@ -52,7 +50,7 @@ class WXDLLEXPORT wxListBox : public wxListBoxBase, public wxScrollHelper
 {
 public:
     // ctors and such
-    wxListBox() : wxScrollHelper(this) { Init(); }
+    wxListBox() { Init(); }
     wxListBox(wxWindow *parent,
               wxWindowID id,
               const wxPoint& pos = wxDefaultPosition,
@@ -61,20 +59,11 @@ public:
               long style = 0,
               const wxValidator& validator = wxDefaultValidator,
               const wxString& name = wxListBoxNameStr )
-        : wxScrollHelper(this)
     {
         Init();
 
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-    wxListBox(wxWindow *parent,
-              wxWindowID id,
-              const wxPoint& pos,
-              const wxSize& size,
-              const wxArrayString& choices,
-              long style = 0,
-              const wxValidator& validator = wxDefaultValidator,
-              const wxString& name = wxListBoxNameStr );
 
     virtual ~wxListBox();
 
@@ -86,45 +75,34 @@ public:
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
 
     // implement the listbox interface defined by wxListBoxBase
     virtual void Clear();
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 
-    virtual unsigned int GetCount() const
-        { return (unsigned int)m_strings->GetCount(); }
-    virtual wxString GetString(unsigned int n) const
-        { return m_strings->Item(n); }
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const
-        { return m_strings->Index(s, bCase); }
+    virtual int GetCount() const { return (int)m_strings.GetCount(); }
+    virtual wxString GetString(int n) const { return m_strings[n]; }
+    virtual void SetString(int n, const wxString& s);
+    virtual int FindString(const wxString& s) const
+        { return m_strings.Index(s); }
 
     virtual bool IsSelected(int n) const
         { return m_selections.Index(n) != wxNOT_FOUND; }
+    virtual void SetSelection(int n, bool select = TRUE);
     virtual int GetSelection() const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
 
 protected:
-    virtual void DoSetSelection(int n, bool select);
-    virtual int DoAppendOnly(const wxString& item);
     virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
     virtual void DoSetItems(const wxArrayString& items, void **clientData);
 
     virtual void DoSetFirstItem(int n);
 
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
 
 public:
     // override some more base class methods
@@ -147,10 +125,10 @@ public:
     void Activate(int item = -1);
 
     // select or unselect the specified or current (if -1) item
-    void DoSelect(int item = -1, bool sel = true);
+    void DoSelect(int item = -1, bool sel = TRUE);
 
     // more readable wrapper
-    void DoUnselect(int item) { DoSelect(item, false); }
+    void DoUnselect(int item) { DoSelect(item, FALSE); }
 
     // select an item and send a notification about it
     void SelectAndNotify(int item);
@@ -159,10 +137,10 @@ public:
     virtual void EnsureVisible(int n);
 
     // find the first item [strictly] after the current one which starts with
-    // the given string and make it the current one, return true if the current
+    // the given string and make it the current one, return TRUE if the current
     // item changed
-    bool FindItem(const wxString& prefix, bool strictlyAfter = false);
-    bool FindNextItem(const wxString& prefix) { return FindItem(prefix, true); }
+    bool FindItem(const wxString& prefix, bool strictlyAfter = FALSE);
+    bool FindNextItem(const wxString& prefix) { return FindItem(prefix, TRUE); }
 
     // extend the selection to span the range from the anchor (see below) to
     // the specified or current item
@@ -183,8 +161,8 @@ public:
                                long numArg = 0l,
                                const wxString& strArg = wxEmptyString);
 
-    // idle processing
-    virtual void OnInternalIdle();
+    // let wxColourScheme choose the right colours for us
+    virtual bool IsContainerWindow() const { return TRUE; }
 
 protected:
     // geometry
@@ -200,6 +178,7 @@ protected:
     void Init();
 
     // event handlers
+    void OnIdle(wxIdleEvent& event);
     void OnSize(wxSizeEvent& event);
 
     // common part of Clear() and DoSetItems(): clears everything
@@ -239,7 +218,7 @@ protected:
 
     // the array containing all items (it is sorted if the listbox has
     // wxLB_SORT style)
-    wxArrayString* m_strings;
+    wxArrayString m_strings;
 
     // this array contains the indices of the selected items (for the single
     // selection listboxes only the first element of it is used and contains
@@ -300,11 +279,11 @@ class WXDLLEXPORT wxStdListboxInputHandler : public wxStdInputHandler
 {
 public:
     // if pressing the mouse button in a multiselection listbox should toggle
-    // the item under mouse immediately, then specify true as the second
+    // the item under mouse immediately, then specify TRUE as the second
     // parameter (this is the standard behaviour, under GTK the item is toggled
     // only when the mouse is released in the multi selection listbox)
     wxStdListboxInputHandler(wxInputHandler *inphand,
-                             bool toggleOnPressAlways = true);
+                             bool toggleOnPressAlways = TRUE);
 
     // base class methods
     virtual bool HandleKey(wxInputConsumer *consumer,
@@ -322,7 +301,7 @@ protected:
 
     // parts of HitTest(): first finds the pseudo (because not in range) index
     // of the item and the second one adjusts it if necessary - that is if the
-    // third one returns false
+    // third one returns FALSE
     int HitTestUnsafe(const wxListBox *listbox, const wxMouseEvent& event);
     int FixItemIndex(const wxListBox *listbox, int item);
     bool IsValidIndex(const wxListBox *listbox, int item);

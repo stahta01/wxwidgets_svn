@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/icon.cpp
+// Name:        icon.cpp
 // Purpose:     wxIcon class
 // Author:      David Webster
 // Modified by:
@@ -51,31 +51,35 @@ void wxIconRefData::Free()
 // ----------------------------------------------------------------------------
 
 wxIcon::wxIcon()
-       :m_bIsXpm(false)
+: m_bIsXpm(FALSE)
 {
 }
 
-wxIcon::wxIcon( const char WXUNUSED(bits)[],
-                int        WXUNUSED(nWidth),
-                int        WXUNUSED(nHeight) )
-       :m_bIsXpm(false)
+wxIcon::wxIcon(
+  const char                        WXUNUSED(bits)[]
+, int                               WXUNUSED(nWidth)
+, int                               WXUNUSED(nHeight)
+)
+: m_bIsXpm(FALSE)
 {
 }
 
-wxIcon::wxIcon( const wxString& rIconFile,
-                long            lFlags,
-                int             nDesiredWidth,
-                int             nDesiredHeight )
-       :m_bIsXpm(false)
+wxIcon::wxIcon(
+  const wxString&                   rIconFile
+, long                              lFlags
+, int                               nDesiredWidth
+, int                               nDesiredHeight
+)
+: m_bIsXpm(FALSE)
 {
     //
     // A very poor hack, but we have to have separate icon files from windows
     // So we have a modified name where replace the last three characters
     // with os2.  Also need the extension.
     //
-    wxString sOs2Name = rIconFile.Mid(0, rIconFile.length() - 3);
+    wxString                         sOs2Name = rIconFile.Mid(0, rIconFile.Length() - 3);
 
-    sOs2Name += wxT("Os2.ico");
+    sOs2Name += "Os2.ico";
     LoadFile( sOs2Name
              ,lFlags
              ,nDesiredWidth
@@ -96,12 +100,14 @@ void wxIcon::CreateIconFromXpm(
     CopyFromBitmap(vBmp);
     if (GetHICON())
     {
-        m_bIsXpm = true;
+        m_bIsXpm = TRUE;
         m_vXpmSrc = vBmp;
     }
 } // end of wxIcon::CreateIconFromXpm
 
-void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
+void wxIcon::CopyFromBitmap(
+  const wxBitmap&                   rBmp
+)
 {
     wxMask*                         pMask = rBmp.GetMask();
     HBITMAP                         hBmp = NULLHANDLE;
@@ -122,20 +128,21 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
                           );
     }
 
-    BITMAPINFOHEADER2 vHeader;
-    SIZEL             vSize = {0, 0};
-    DEVOPENSTRUC      vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC               hDCSrc = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
-    HDC               hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
-    HPS               hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
-    HPS               hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL            vPoint[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()},
-                                    {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
-                                  };
-    POINTL            vPointMask[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight() * 2},
-                                        {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
-                                    };
-    POINTERINFO       vIconInfo;
+    BITMAPINFOHEADER2               vHeader;
+    SIZEL                           vSize = {0, 0};
+    DEVOPENSTRUC                    vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
+    HDC                             hDCSrc = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
+    HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
+    HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
+    HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
+    POINTL                          vPoint[4] = { 0, 0, rBmp.GetWidth(), rBmp.GetHeight(),
+                                                  0, 0, rBmp.GetWidth(), rBmp.GetHeight()
+                                                };
+    POINTL                          vPointMask[4] = { 0, 0, rBmp.GetWidth(), rBmp.GetHeight() * 2,
+                                                      0, 0, rBmp.GetWidth(), rBmp.GetHeight()
+                                                    };
+
+    POINTERINFO                     vIconInfo;
 
     memset(&vIconInfo, '\0', sizeof(POINTERINFO));
     vIconInfo.fPointer = FALSE;  // we want an icon, not a pointer
@@ -229,7 +236,9 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
 
     vIconInfo.hbmPointer = hBmpMask;
 
-    HICON hIcon = ::WinCreatePointerIndirect( HWND_DESKTOP, &vIconInfo);
+    HICON                           hIcon = ::WinCreatePointerIndirect( HWND_DESKTOP
+                                                                       ,&vIconInfo
+                                                                      );
 
     if (!hIcon)
     {
@@ -260,10 +269,12 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
     ::DevCloseDC(hDCDst);
 } // end of wxIcon::CopyFromBitmap
 
-bool wxIcon::LoadFile( const wxString& rFilename,
-                       long lType,
-                       int nDesiredWidth,
-                       int nDesiredHeight )
+bool wxIcon::LoadFile(
+  const wxString&                   rFilename
+, long                              lType
+, int                               nDesiredWidth
+, int                               nDesiredHeight
+)
 {
     HPS                             hPs = NULLHANDLE;
 
@@ -280,5 +291,6 @@ bool wxIcon::LoadFile( const wxString& rFilename,
                               ,nDesiredHeight
                              ));
     else
-        return false;
+        return(FALSE);
 }
+

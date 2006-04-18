@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/font.cpp
+// Name:        font.cpp
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
@@ -69,8 +69,6 @@ private:
 
     wxMGLFontLibrary *m_library;
     bool              m_valid;
-
-    wxNativeFontInfo  m_info;
 
     friend class wxFont;
 };
@@ -214,7 +212,7 @@ int wxFont::GetPointSize() const
 
 wxString wxFont::GetFaceName() const
 {
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), wxT(""), wxT("invalid font") );
 
     return M_FONTDATA->m_faceName;
 }
@@ -262,14 +260,6 @@ bool wxFont::IsFixedWidth() const
     return (bool)(M_FONTDATA->m_library->GetFamily()->GetInfo()->isFixed);
 }
 
-const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
-{
-    wxCHECK_MSG( Ok(), NULL, wxT("invalid font") );
-
-    M_FONTDATA->m_info.InitFromFont(*this);
-
-    return &(M_FONTDATA->m_info);
-}
 
 // ----------------------------------------------------------------------------
 // change font attributes

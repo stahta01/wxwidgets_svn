@@ -28,28 +28,56 @@
 
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
-
-#include "wx/msw/missing.h"
-
 // Set this to 1 to be _absolutely_ sure that repainting will work for all
 // comctl32.dll versions
 #define wxUSE_COMCTL32_SAFELY 0
+
+// Mingw32 is a bit mental even though this is done in winundef
+#ifdef GetFirstChild
+    #undef GetFirstChild
+#endif
+
+#ifdef GetNextSibling
+    #undef GetNextSibling
+#endif
+
+#if defined(__WIN95__)
 
 #include "wx/app.h"
 #include "wx/log.h"
 #include "wx/dynarray.h"
 #include "wx/imaglist.h"
 #include "wx/settings.h"
-#include "wx/treectrl.h"
+#include "wx/msw/treectrl.h"
 #include "wx/msw/dragimag.h"
 
-// macros to hide the cast ugliness
-// --------------------------------
+#include <commctrl.h>
 
-// get HTREEITEM from wxTreeItemId
-#define HITEM(item)     ((HTREEITEM)(((item).m_pItem)))
+// Bug in headers, sometimes
+#ifndef TVIS_FOCUSED
+    #define TVIS_FOCUSED            0x0001
+#endif
+
+#ifndef TV_FIRST
+    #define TV_FIRST                0x1100
+#endif
+
+#ifndef TVS_CHECKBOXES
+    #define TVS_CHECKBOXES          0x0100
+#endif
+
+#ifndef TVS_FULLROWSELECT
+    #define TVS_FULLROWSELECT       0x1000
+#endif
+
+// old headers might miss these messages (comctl32.dll 4.71+ only)
+#ifndef TVM_SETBKCOLOR
+    #define TVM_SETBKCOLOR          (TV_FIRST + 29)
+    #define TVM_SETTEXTCOLOR        (TV_FIRST + 30)
+#endif
+
+// a macro to hide the ugliness of nested casts
+#define HITEM(item)     (HTREEITEM)(WXHTREEITEM)(item)
 
 // the native control doesn't support multiple selections under MSW and we
 // have 2 ways to emulate them: either using TVS_CHECKBOXES style and let
@@ -92,7 +120,7 @@ static bool IsItemSelected(HWND hwndTV, HTREEITEM hItem)
     return (tvi.state & TVIS_SELECTED) != 0;
 }
 
-static bool SelectItem(HWND hwndTV, HTREEITEM hItem, bool select = true)
+static void SelectItem(HWND hwndTV, HTREEITEM hItem, bool select = TRUE)
 {
     TV_ITEM tvi;
     tvi.mask = TVIF_STATE | TVIF_HANDLE;
@@ -103,15 +131,12 @@ static bool SelectItem(HWND hwndTV, HTREEITEM hItem, bool select = true)
     if ( TreeView_SetItem(hwndTV, &tvi) == -1 )
     {
         wxLogLastError(wxT("TreeView_SetItem"));
-        return false;
     }
-
-    return true;
 }
 
 static inline void UnselectItem(HWND hwndTV, HTREEITEM htItem)
 {
-    SelectItem(hwndTV, htItem, false);
+    SelectItem(hwndTV, htItem, FALSE);
 }
 
 static inline void ToggleItemSelection(HWND hwndTV, HTREEITEM htItem)
@@ -124,10 +149,10 @@ static inline void ToggleItemSelection(HWND hwndTV, HTREEITEM htItem)
 static void SelectRange(HWND hwndTV,
                         HTREEITEM htFirst,
                         HTREEITEM htLast,
-                        bool unselectOthers = true)
+                        bool unselectOthers = TRUE)
 {
     // find the first (or last) item and select it
-    bool cont = true;
+    bool cont = TRUE;
     HTREEITEM htItem = (HTREEITEM)TreeView_GetRoot(hwndTV);
     while ( htItem && cont )
     {
@@ -138,7 +163,7 @@ static void SelectRange(HWND hwndTV,
                 SelectItem(hwndTV, htItem);
             }
 
-            cont = false;
+            cont = FALSE;
         }
         else
         {
@@ -287,8 +312,6 @@ public:
 
 private:
     wxTreeItemData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxVirtualNode)
 };
 
 #ifdef __VISUALC__
@@ -298,11 +321,11 @@ private:
 // a macro to get the virtual root, returns NULL if none
 #define GET_VIRTUAL_ROOT() ((wxVirtualNode *)m_pVirtualRoot)
 
-// returns true if the item is the virtual root
+// returns TRUE if the item is the virtual root
 #define IS_VIRTUAL_ROOT(item) (HITEM(item) == TVI_ROOT)
 
 // a class which encapsulates the tree traversal logic: it vists all (unless
-// OnVisit() returns false) items under the given one
+// OnVisit() returns FALSE) items under the given one
 class wxTreeTraversal
 {
 public:
@@ -311,18 +334,13 @@ public:
         m_tree = tree;
     }
 
-    // give it a virtual dtor: not really needed as the class is never used
-    // polymorphically and not even allocated on heap at all, but this is safer
-    // (in case it ever is) and silences the compiler warnings for now
-    virtual ~wxTreeTraversal() { }
-
     // do traverse the tree: visit all items (recursively by default) under the
-    // given one; return true if all items were traversed or false if the
-    // traversal was aborted because OnVisit returned false
-    bool DoTraverse(const wxTreeItemId& root, bool recursively = true);
+    // given one; return TRUE if all items were traversed or FALSE if the
+    // traversal was aborted because OnVisit returned FALSE
+    bool DoTraverse(const wxTreeItemId& root, bool recursively = TRUE);
 
     // override this function to do whatever is needed for each item, return
-    // false to stop traversing
+    // FALSE to stop traversing
     virtual bool OnVisit(const wxTreeItemId& item) = 0;
 
 protected:
@@ -332,8 +350,6 @@ private:
     bool Traverse(const wxTreeItemId& root, bool recursively);
 
     const wxTreeCtrl *m_tree;
-
-    DECLARE_NO_COPY_CLASS(wxTreeTraversal)
 };
 
 // internal class for getting the selected items
@@ -346,8 +362,7 @@ public:
         {
             m_selections.Empty();
 
-            if (tree->GetCount() > 0)
-                DoTraverse(tree->GetRootItem());
+            DoTraverse(tree->GetRootItem());
         }
 
     virtual bool OnVisit(const wxTreeItemId& item)
@@ -355,7 +370,7 @@ public:
         // can't visit a virtual node.
         if ( (GetTree()->GetRootItem() == item) && (GetTree()->GetWindowStyle() & wxTR_HIDE_ROOT))
         {
-            return true;
+            return TRUE;
         }
 
 #if wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
@@ -367,15 +382,13 @@ public:
             m_selections.Add(item);
         }
 
-        return true;
+        return TRUE;
     }
 
     size_t GetCount() const { return m_selections.GetCount(); }
 
 private:
     wxArrayTreeItemIds& m_selections;
-
-    DECLARE_NO_COPY_CLASS(TraverseSelections)
 };
 
 // internal class for counting tree items
@@ -396,15 +409,13 @@ public:
     {
         m_count++;
 
-        return true;
+        return TRUE;
     }
 
     size_t GetCount() const { return m_count; }
 
 private:
     size_t m_count;
-
-    DECLARE_NO_COPY_CLASS(TraverseCounter)
 };
 
 // ----------------------------------------------------------------------------
@@ -466,77 +477,13 @@ private:
 
     // the real client data
     wxTreeItemData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxTreeItemIndirectData)
 };
 
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxTreeCtrlStyle )
-
-wxBEGIN_FLAGS( wxTreeCtrlStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxBORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxFULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxTR_EDIT_LABELS)
-    wxFLAGS_MEMBER(wxTR_NO_BUTTONS)
-    wxFLAGS_MEMBER(wxTR_HAS_BUTTONS)
-    wxFLAGS_MEMBER(wxTR_TWIST_BUTTONS)
-    wxFLAGS_MEMBER(wxTR_NO_LINES)
-    wxFLAGS_MEMBER(wxTR_FULL_ROW_HIGHLIGHT)
-    wxFLAGS_MEMBER(wxTR_LINES_AT_ROOT)
-    wxFLAGS_MEMBER(wxTR_HIDE_ROOT)
-    wxFLAGS_MEMBER(wxTR_ROW_LINES)
-    wxFLAGS_MEMBER(wxTR_HAS_VARIABLE_ROW_HEIGHT)
-    wxFLAGS_MEMBER(wxTR_SINGLE)
-    wxFLAGS_MEMBER(wxTR_MULTIPLE)
-    wxFLAGS_MEMBER(wxTR_EXTENDED)
-    wxFLAGS_MEMBER(wxTR_DEFAULT_STYLE)
-
-wxEND_FLAGS( wxTreeCtrlStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxTreeCtrl, wxControl,"wx/treectrl.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxTreeCtrl)
-    wxEVENT_PROPERTY( TextUpdated , wxEVT_COMMAND_TEXT_UPDATED , wxCommandEvent )
-    wxEVENT_RANGE_PROPERTY( TreeEvent , wxEVT_COMMAND_TREE_BEGIN_DRAG , wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK , wxTreeEvent )
-    wxPROPERTY_FLAGS( WindowStyle , wxTreeCtrlStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxTreeCtrl)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_5( wxTreeCtrl , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle )
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxTreeCtrl, wxControl)
-#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -581,28 +528,28 @@ static /* const */ wxEventType gs_expandEvents[IDX_WHAT_MAX][IDX_HOW_MAX];
 bool wxTreeTraversal::DoTraverse(const wxTreeItemId& root, bool recursively)
 {
     if ( !OnVisit(root) )
-        return false;
+        return FALSE;
 
     return Traverse(root, recursively);
 }
 
 bool wxTreeTraversal::Traverse(const wxTreeItemId& root, bool recursively)
 {
-    wxTreeItemIdValue cookie;
+    long cookie;
     wxTreeItemId child = m_tree->GetFirstChild(root, cookie);
     while ( child.IsOk() )
     {
         // depth first traversal
-        if ( recursively && !Traverse(child, true) )
-            return false;
+        if ( recursively && !Traverse(child, TRUE) )
+            return FALSE;
 
         if ( !OnVisit(child) )
-            return false;
+            return FALSE;
 
         child = m_tree->GetNextChild(root, cookie);
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -611,9 +558,13 @@ bool wxTreeTraversal::Traverse(const wxTreeItemId& root, bool recursively)
 
 void wxTreeCtrl::Init()
 {
+    m_imageListNormal = NULL;
+    m_imageListState = NULL;
+    m_ownsImageListNormal = m_ownsImageListState = FALSE;
     m_textCtrl = NULL;
-    m_hasAnyAttr = false;
+    m_hasAnyAttr = FALSE;
     m_dragImage = NULL;
+    m_htSelStart = 0;
     m_pVirtualRoot = NULL;
 
     // initialize the global array of events now as it can't be done statically
@@ -638,7 +589,7 @@ bool wxTreeCtrl::Create(wxWindow *parent,
         style |= wxBORDER_SUNKEN;
 
     if ( !CreateControl(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     DWORD exStyle = 0;
     DWORD wstyle = MSWGetStyle(m_windowStyle, & exStyle);
@@ -657,7 +608,7 @@ bool wxTreeCtrl::Create(wxWindow *parent,
 
     if ( m_windowStyle & wxTR_FULL_ROW_HIGHLIGHT )
     {
-        if ( wxApp::GetComCtl32Version() >= 471 )
+        if ( wxTheApp->GetComCtl32Version() >= 471 )
             wstyle |= TVS_FULLROWSELECT;
     }
 
@@ -675,14 +626,9 @@ bool wxTreeCtrl::Create(wxWindow *parent,
         wstyle |= TVS_CHECKBOXES;
 #endif // wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
 
-#if !defined(__WXWINCE__) && defined(TVS_INFOTIP)
-    // Need so that TVN_GETINFOTIP messages will be sent
-    wstyle |= TVS_INFOTIP;
-#endif
-
     // Create the tree control.
-    if ( !MSWCreateControl(WC_TREEVIEW, wstyle, pos, size) )
-        return false;
+    if ( !MSWCreateControl(WC_TREEVIEW, wstyle) )
+        return FALSE;
 
 #if wxUSE_COMCTL32_SAFELY
     wxWindow::SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
@@ -714,9 +660,9 @@ bool wxTreeCtrl::Create(wxWindow *parent,
         HDC hdcMem = CreateCompatibleDC(NULL);
 
         // create a mono bitmap of the standard size
-        int x = ::GetSystemMetrics(SM_CXMENUCHECK);
-        int y = ::GetSystemMetrics(SM_CYMENUCHECK);
-        wxImageList imagelistCheckboxes(x, y, false, 2);
+        int x = GetSystemMetrics(SM_CXMENUCHECK);
+        int y = GetSystemMetrics(SM_CYMENUCHECK);
+        wxImageList imagelistCheckboxes(x, y, FALSE, 2);
         HBITMAP hbmpCheck = CreateBitmap(x, y,   // bitmap size
                                          1,      // # of color planes
                                          1,      // # bits needed for one pixel
@@ -753,9 +699,9 @@ bool wxTreeCtrl::Create(wxWindow *parent,
     }
 #endif // 0
 
-    wxSetCCUnicodeFormat(GetHwnd());
+    SetSize(pos.x, pos.y, size.x, size.y);
 
-    return true;
+    return TRUE;
 }
 
 wxTreeCtrl::~wxTreeCtrl()
@@ -763,10 +709,13 @@ wxTreeCtrl::~wxTreeCtrl()
     // delete any attributes
     if ( m_hasAnyAttr )
     {
-        WX_CLEAR_HASH_MAP(wxMapTreeAttr, m_attrs);
+        for ( wxNode *node = m_attrs.Next(); node; node = m_attrs.Next() )
+        {
+            delete (wxTreeItemAttr *)node->Data();
+        }
 
         // prevent TVN_DELETEITEM handler from deleting the attributes again!
-        m_hasAnyAttr = false;
+        m_hasAnyAttr = FALSE;
     }
 
     DeleteTextCtrl();
@@ -774,39 +723,30 @@ wxTreeCtrl::~wxTreeCtrl()
     // delete user data to prevent memory leaks
     // also deletes hidden root node storage.
     DeleteAllItems();
+
+    if (m_ownsImageListNormal) delete m_imageListNormal;
+    if (m_ownsImageListState) delete m_imageListState;
 }
 
 // ----------------------------------------------------------------------------
 // accessors
 // ----------------------------------------------------------------------------
 
-/* static */ wxVisualAttributes
-wxTreeCtrl::GetClassDefaultAttributes(wxWindowVariant variant)
-{
-    wxVisualAttributes attrs = GetCompositeControlsDefaultAttributes(variant);
-
-    // common controls have their own default font
-    attrs.font = wxGetCCDefaultFont();
-
-    return attrs;
-}
-
-
 // simple wrappers which add error checking in debug mode
 
 bool wxTreeCtrl::DoGetItem(wxTreeViewItem* tvItem) const
 {
-    wxCHECK_MSG( tvItem->hItem != TVI_ROOT, false,
+    wxCHECK_MSG( tvItem->hItem != TVI_ROOT, FALSE,
                  _T("can't retrieve virtual root item") );
 
     if ( !TreeView_GetItem(GetHwnd(), tvItem) )
     {
         wxLogLastError(wxT("TreeView_GetItem"));
 
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxTreeCtrl::DoSetItem(wxTreeViewItem* tvItem)
@@ -817,9 +757,9 @@ void wxTreeCtrl::DoSetItem(wxTreeViewItem* tvItem)
     }
 }
 
-unsigned int wxTreeCtrl::GetCount() const
+size_t wxTreeCtrl::GetCount() const
 {
-    return (unsigned int)TreeView_GetCount(GetHwnd());
+    return (size_t)TreeView_GetCount(GetHwnd());
 }
 
 unsigned int wxTreeCtrl::GetIndent() const
@@ -832,12 +772,22 @@ void wxTreeCtrl::SetIndent(unsigned int indent)
     TreeView_SetIndent(GetHwnd(), indent);
 }
 
+wxImageList *wxTreeCtrl::GetImageList() const
+{
+    return m_imageListNormal;
+}
+
+wxImageList *wxTreeCtrl::GetStateImageList() const
+{
+    return m_imageListNormal;
+}
+
 void wxTreeCtrl::SetAnyImageList(wxImageList *imageList, int which)
 {
     // no error return
-    (void) TreeView_SetImageList(GetHwnd(),
-                                 imageList ? imageList->GetHIMAGELIST() : 0,
-                                 which);
+    TreeView_SetImageList(GetHwnd(),
+                          imageList ? imageList->GetHIMAGELIST() : 0,
+                          which);
 }
 
 void wxTreeCtrl::SetImageList(wxImageList *imageList)
@@ -846,22 +796,33 @@ void wxTreeCtrl::SetImageList(wxImageList *imageList)
         delete m_imageListNormal;
 
     SetAnyImageList(m_imageListNormal = imageList, TVSIL_NORMAL);
-    m_ownsImageListNormal = false;
+    m_ownsImageListNormal = FALSE;
 }
 
 void wxTreeCtrl::SetStateImageList(wxImageList *imageList)
 {
     if (m_ownsImageListState) delete m_imageListState;
     SetAnyImageList(m_imageListState = imageList, TVSIL_STATE);
-    m_ownsImageListState = false;
+    m_ownsImageListState = FALSE;
+}
+
+void wxTreeCtrl::AssignImageList(wxImageList *imageList)
+{
+    SetImageList(imageList);
+    m_ownsImageListNormal = TRUE;
+}
+
+void wxTreeCtrl::AssignStateImageList(wxImageList *imageList)
+{
+    SetStateImageList(imageList);
+    m_ownsImageListState = TRUE;
 }
 
 size_t wxTreeCtrl::GetChildrenCount(const wxTreeItemId& item,
                                     bool recursively) const
 {
-    wxCHECK_MSG( item.IsOk(), 0u, wxT("invalid tree item") );
-
     TraverseCounter counter(this, item, recursively);
+
     return counter.GetCount() - 1;
 }
 
@@ -873,24 +834,24 @@ bool wxTreeCtrl::SetBackgroundColour(const wxColour &colour)
 {
 #if !wxUSE_COMCTL32_SAFELY
     if ( !wxWindowBase::SetBackgroundColour(colour) )
-        return false;
+        return FALSE;
 
-    ::SendMessage(GetHwnd(), TVM_SETBKCOLOR, 0, colour.GetPixel());
+    SendMessage(GetHwnd(), TVM_SETBKCOLOR, 0, colour.GetPixel());
 #endif
 
-    return true;
+    return TRUE;
 }
 
 bool wxTreeCtrl::SetForegroundColour(const wxColour &colour)
 {
 #if !wxUSE_COMCTL32_SAFELY
     if ( !wxWindowBase::SetForegroundColour(colour) )
-        return false;
+        return FALSE;
 
-    ::SendMessage(GetHwnd(), TVM_SETTEXTCOLOR, 0, colour.GetPixel());
+    SendMessage(GetHwnd(), TVM_SETTEXTCOLOR, 0, colour.GetPixel());
 #endif
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -899,8 +860,6 @@ bool wxTreeCtrl::SetForegroundColour(const wxColour &colour)
 
 wxString wxTreeCtrl::GetItemText(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxEmptyString, wxT("invalid tree item") );
-
     wxChar buf[512];  // the size is arbitrary...
 
     wxTreeViewItem tvItem(item, TVIF_TEXT);
@@ -917,8 +876,6 @@ wxString wxTreeCtrl::GetItemText(const wxTreeItemId& item) const
 
 void wxTreeCtrl::SetItemText(const wxTreeItemId& item, const wxString& text)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     if ( IS_VIRTUAL_ROOT(item) )
         return;
 
@@ -934,7 +891,7 @@ void wxTreeCtrl::SetItemText(const wxTreeItemId& item, const wxString& text)
     HWND hwndEdit = TreeView_GetEditControl(GetHwnd());
     if ( hwndEdit )
     {
-        if ( item == m_idEdited )
+        if ( item == GetSelection() )
         {
             ::SetWindowText(hwndEdit, text);
         }
@@ -994,8 +951,6 @@ void wxTreeCtrl::DoSetItemImages(const wxTreeItemId& item,
 int wxTreeCtrl::GetItemImage(const wxTreeItemId& item,
                              wxTreeItemIcon which) const
 {
-    wxCHECK_MSG( item.IsOk(), -1, wxT("invalid tree item") );
-
     if ( (HITEM(item) == TVI_ROOT) && (m_windowStyle & wxTR_HIDE_ROOT) )
     {
         // TODO: Maybe a hidden root can still provide images?
@@ -1035,37 +990,21 @@ int wxTreeCtrl::GetItemImage(const wxTreeItemId& item,
 void wxTreeCtrl::SetItemImage(const wxTreeItemId& item, int image,
                               wxTreeItemIcon which)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     if ( IS_VIRTUAL_ROOT(item) )
     {
         // TODO: Maybe a hidden root can still store images?
         return;
     }
 
-    int imageNormal,
-        imageSel;
-
+    int imageNormal, imageSel;
     switch ( which )
     {
         default:
             wxFAIL_MSG( wxT("unknown tree item image type") );
-            // fall through
 
         case wxTreeItemIcon_Normal:
-            {
-                const int imageNormalOld = GetItemImage(item);
-                const int imageSelOld =
-                    GetItemImage(item, wxTreeItemIcon_Selected);
-
-                // always set the normal image
-                imageNormal = image;
-
-                // if the selected and normal images were the same, they should
-                // be the same after the update, otherwise leave the selected
-                // image as it was
-                imageSel = imageNormalOld == imageSelOld ? image : imageSelOld;
-            }
+            imageNormal = image;
+            imageSel = GetItemSelectedImage(item);
             break;
 
         case wxTreeItemIcon_Selected:
@@ -1081,7 +1020,7 @@ void wxTreeCtrl::SetItemImage(const wxTreeItemId& item, int image,
                 // the wxTreeItemIndirectData GetItemXXXImage() will use it to
                 // get the images
                 imageNormal = GetItemImage(item);
-                imageSel = GetItemImage(item, wxTreeItemIcon_Selected);
+                imageSel = GetItemSelectedImage(item);
 
                 // if it doesn't have it yet, add it
                 wxTreeItemIndirectData *data = new
@@ -1109,8 +1048,6 @@ void wxTreeCtrl::SetItemImage(const wxTreeItemId& item, int image,
 
 wxTreeItemData *wxTreeCtrl::GetItemData(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), NULL, wxT("invalid tree item") );
-
     wxTreeViewItem tvItem(item, TVIF_PARAM);
 
     // Hidden root may have data.
@@ -1136,8 +1073,6 @@ wxTreeItemData *wxTreeCtrl::GetItemData(const wxTreeItemId& item) const
 
 void wxTreeCtrl::SetItemData(const wxTreeItemId& item, wxTreeItemData *data)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     if ( IS_VIRTUAL_ROOT(item) )
     {
         GET_VIRTUAL_ROOT()->SetData(data);
@@ -1187,7 +1122,7 @@ bool wxTreeCtrl::HasIndirectData(const wxTreeItemId& item) const
     wxTreeViewItem tvItem(item, TVIF_PARAM);
     if ( !DoGetItem(&tvItem) )
     {
-        return false;
+        return FALSE;
     }
 
     wxTreeItemData *data = (wxTreeItemData *)tvItem.lParam;
@@ -1197,8 +1132,6 @@ bool wxTreeCtrl::HasIndirectData(const wxTreeItemId& item) const
 
 void wxTreeCtrl::SetItemHasChildren(const wxTreeItemId& item, bool has)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     if ( IS_VIRTUAL_ROOT(item) )
         return;
 
@@ -1209,8 +1142,6 @@ void wxTreeCtrl::SetItemHasChildren(const wxTreeItemId& item, bool has)
 
 void wxTreeCtrl::SetItemBold(const wxTreeItemId& item, bool bold)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     if ( IS_VIRTUAL_ROOT(item) )
         return;
 
@@ -1243,45 +1174,51 @@ void wxTreeCtrl::RefreshItem(const wxTreeItemId& item)
 
 wxColour wxTreeCtrl::GetItemTextColour(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxNullColour, wxT("invalid tree item") );
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
+    {
+        return wxNullColour;
+    }
 
-    wxMapTreeAttr::const_iterator it = m_attrs.find(item.m_pItem);
-    return it == m_attrs.end() ? wxNullColour : it->second->GetTextColour();
+    return attr->GetTextColour();
 }
 
 wxColour wxTreeCtrl::GetItemBackgroundColour(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxNullColour, wxT("invalid tree item") );
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
+    {
+        return wxNullColour;
+    }
 
-    wxMapTreeAttr::const_iterator it = m_attrs.find(item.m_pItem);
-    return it == m_attrs.end() ? wxNullColour : it->second->GetBackgroundColour();
+    return attr->GetBackgroundColour();
 }
 
 wxFont wxTreeCtrl::GetItemFont(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxNullFont, wxT("invalid tree item") );
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
+    {
+        return wxNullFont;
+    }
 
-    wxMapTreeAttr::const_iterator it = m_attrs.find(item.m_pItem);
-    return it == m_attrs.end() ? wxNullFont : it->second->GetFont();
+    return attr->GetFont();
 }
 
 void wxTreeCtrl::SetItemTextColour(const wxTreeItemId& item,
                                    const wxColour& col)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
+    m_hasAnyAttr = TRUE;
 
-    wxTreeItemAttr *attr;
-    wxMapTreeAttr::iterator it = m_attrs.find(item.m_pItem);
-    if ( it == m_attrs.end() )
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
     {
-        m_hasAnyAttr = true;
-
-        m_attrs[item.m_pItem] =
         attr = new wxTreeItemAttr;
-    }
-    else
-    {
-        attr = it->second;
+        m_attrs.Put(id, (wxObject *)attr);
     }
 
     attr->SetTextColour(col);
@@ -1292,20 +1229,14 @@ void wxTreeCtrl::SetItemTextColour(const wxTreeItemId& item,
 void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
                                          const wxColour& col)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
+    m_hasAnyAttr = TRUE;
 
-    wxTreeItemAttr *attr;
-    wxMapTreeAttr::iterator it = m_attrs.find(item.m_pItem);
-    if ( it == m_attrs.end() )
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
     {
-        m_hasAnyAttr = true;
-
-        m_attrs[item.m_pItem] =
         attr = new wxTreeItemAttr;
-    }
-    else // already in the hash
-    {
-        attr = it->second;
+        m_attrs.Put(id, (wxObject *)attr);
     }
 
     attr->SetBackgroundColour(col);
@@ -1315,20 +1246,14 @@ void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
 
 void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
+    m_hasAnyAttr = TRUE;
 
-    wxTreeItemAttr *attr;
-    wxMapTreeAttr::iterator it = m_attrs.find(item.m_pItem);
-    if ( it == m_attrs.end() )
+    long id = (long)(WXHTREEITEM)item;
+    wxTreeItemAttr *attr = (wxTreeItemAttr *)m_attrs.Get(id);
+    if ( !attr )
     {
-        m_hasAnyAttr = true;
-
-        m_attrs[item.m_pItem] =
         attr = new wxTreeItemAttr;
-    }
-    else // already in the hash
-    {
-        attr = it->second;
+        m_attrs.Put(id, (wxObject *)attr);
     }
 
     attr->SetFont(font);
@@ -1342,12 +1267,10 @@ void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
 
 bool wxTreeCtrl::IsVisible(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
-
     if ( item == wxTreeItemId(TVI_ROOT) )
     {
         // virtual (hidden) root is never visible
-        return false;
+        return FALSE;
     }
 
     // Bug in Gnu-Win32 headers, so don't use the macro TreeView_GetItemRect
@@ -1355,26 +1278,14 @@ bool wxTreeCtrl::IsVisible(const wxTreeItemId& item) const
 
     // this ugliness comes directly from MSDN - it *is* the correct way to pass
     // the HTREEITEM with TVM_GETITEMRECT
-    *(HTREEITEM *)&rect = HITEM(item);
+    *(WXHTREEITEM *)&rect = (WXHTREEITEM)item;
 
-    // true means to get rect for just the text, not the whole line
-    if ( !::SendMessage(GetHwnd(), TVM_GETITEMRECT, true, (LPARAM)&rect) )
-    {
-        // if TVM_GETITEMRECT returned false, then the item is definitely not
-        // visible (because its parent is not expanded)
-        return false;
-    }
-
-    // however if it returned true, the item might still be outside the
-    // currently visible part of the tree, test for it (notice that partly
-    // visible means visible here)
-    return rect.bottom > 0 && rect.top < GetClientSize().y;
+    // FALSE means get item rect for the whole item, not only text
+    return SendMessage(GetHwnd(), TVM_GETITEMRECT, FALSE, (LPARAM)&rect) != 0;
 }
 
 bool wxTreeCtrl::ItemHasChildren(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
-
     wxTreeViewItem tvItem(item, TVIF_CHILDREN);
     DoGetItem(&tvItem);
 
@@ -1383,7 +1294,8 @@ bool wxTreeCtrl::ItemHasChildren(const wxTreeItemId& item) const
 
 bool wxTreeCtrl::IsExpanded(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
+    // probably not a good idea to put it here
+    //wxASSERT( ItemHasChildren(item) );
 
     wxTreeViewItem tvItem(item, TVIF_STATE, TVIS_EXPANDED);
     DoGetItem(&tvItem);
@@ -1393,8 +1305,6 @@ bool wxTreeCtrl::IsExpanded(const wxTreeItemId& item) const
 
 bool wxTreeCtrl::IsSelected(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
-
     wxTreeViewItem tvItem(item, TVIF_STATE, TVIS_SELECTED);
     DoGetItem(&tvItem);
 
@@ -1403,8 +1313,6 @@ bool wxTreeCtrl::IsSelected(const wxTreeItemId& item) const
 
 bool wxTreeCtrl::IsBold(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
-
     wxTreeViewItem tvItem(item, TVIF_STATE, TVIS_BOLD);
     DoGetItem(&tvItem);
 
@@ -1421,21 +1329,19 @@ wxTreeItemId wxTreeCtrl::GetRootItem() const
     if ( GET_VIRTUAL_ROOT() )
         return TVI_ROOT;
 
-    return wxTreeItemId(TreeView_GetRoot(GetHwnd()));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetRoot(GetHwnd()));
 }
 
 wxTreeItemId wxTreeCtrl::GetSelection() const
 {
-    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), wxTreeItemId(),
+    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), (long)(WXHTREEITEM)0,
                  wxT("this only works with single selection controls") );
 
-    return wxTreeItemId(TreeView_GetSelection(GetHwnd()));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetSelection(GetHwnd()));
 }
 
 wxTreeItemId wxTreeCtrl::GetItemParent(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
     HTREEITEM hItem;
 
     if ( IS_VIRTUAL_ROOT(item) )
@@ -1453,72 +1359,32 @@ wxTreeItemId wxTreeCtrl::GetItemParent(const wxTreeItemId& item) const
         }
     }
 
-    return wxTreeItemId(hItem);
+    return wxTreeItemId((WXHTREEITEM)hItem);
 }
 
 wxTreeItemId wxTreeCtrl::GetFirstChild(const wxTreeItemId& item,
-                                       wxTreeItemIdValue& cookie) const
+                                       long& _cookie) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
     // remember the last child returned in 'cookie'
-    cookie = TreeView_GetChild(GetHwnd(), HITEM(item));
+    _cookie = (long)TreeView_GetChild(GetHwnd(), HITEM(item));
 
-    return wxTreeItemId(cookie);
+    return wxTreeItemId((WXHTREEITEM)_cookie);
 }
 
 wxTreeItemId wxTreeCtrl::GetNextChild(const wxTreeItemId& WXUNUSED(item),
-                                      wxTreeItemIdValue& cookie) const
+                                      long& _cookie) const
 {
-    wxTreeItemId fromCookie(cookie);
+    wxTreeItemId l = wxTreeItemId((WXHTREEITEM)TreeView_GetNextSibling(GetHwnd(),
+                                   HITEM(_cookie)));
+    _cookie = (long)l;
 
-    HTREEITEM hitem = HITEM(fromCookie);
-
-    hitem = TreeView_GetNextSibling(GetHwnd(), hitem);
-
-    wxTreeItemId item(hitem);
-
-    cookie = item.m_pItem;
-
-    return item;
+    return l;
 }
-
-#if WXWIN_COMPATIBILITY_2_4
-
-wxTreeItemId wxTreeCtrl::GetFirstChild(const wxTreeItemId& item,
-                                       long& cookie) const
-{
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
-    cookie = (long)TreeView_GetChild(GetHwnd(), HITEM(item));
-
-    return wxTreeItemId((void *)cookie);
-}
-
-wxTreeItemId wxTreeCtrl::GetNextChild(const wxTreeItemId& WXUNUSED(item),
-                                      long& cookie) const
-{
-    wxTreeItemId fromCookie((void *)cookie);
-
-    HTREEITEM hitem = HITEM(fromCookie);
-
-    hitem = TreeView_GetNextSibling(GetHwnd(), hitem);
-
-    wxTreeItemId item(hitem);
-
-    cookie = (long)item.m_pItem;
-
-    return item;
-}
-
-#endif // WXWIN_COMPATIBILITY_2_4
 
 wxTreeItemId wxTreeCtrl::GetLastChild(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
     // can this be done more efficiently?
-    wxTreeItemIdValue cookie;
+    long cookie;
 
     wxTreeItemId childLast,
     child = GetFirstChild(item, cookie);
@@ -1533,35 +1399,31 @@ wxTreeItemId wxTreeCtrl::GetLastChild(const wxTreeItemId& item) const
 
 wxTreeItemId wxTreeCtrl::GetNextSibling(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-    return wxTreeItemId(TreeView_GetNextSibling(GetHwnd(), HITEM(item)));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetNextSibling(GetHwnd(), HITEM(item)));
 }
 
 wxTreeItemId wxTreeCtrl::GetPrevSibling(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-    return wxTreeItemId(TreeView_GetPrevSibling(GetHwnd(), HITEM(item)));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetPrevSibling(GetHwnd(), HITEM(item)));
 }
 
 wxTreeItemId wxTreeCtrl::GetFirstVisibleItem() const
 {
-    return wxTreeItemId(TreeView_GetFirstVisible(GetHwnd()));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetFirstVisible(GetHwnd()));
 }
 
 wxTreeItemId wxTreeCtrl::GetNextVisible(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
     wxASSERT_MSG( IsVisible(item), wxT("The item you call GetNextVisible() for must be visible itself!"));
 
-    return wxTreeItemId(TreeView_GetNextVisible(GetHwnd(), HITEM(item)));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetNextVisible(GetHwnd(), HITEM(item)));
 }
 
 wxTreeItemId wxTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
     wxASSERT_MSG( IsVisible(item), wxT("The item you call GetPrevVisible() for must be visible itself!"));
 
-    return wxTreeItemId(TreeView_GetPrevVisible(GetHwnd(), HITEM(item)));
+    return wxTreeItemId((WXHTREEITEM) TreeView_GetPrevVisible(GetHwnd(), HITEM(item)));
 }
 
 // ----------------------------------------------------------------------------
@@ -1570,8 +1432,6 @@ wxTreeItemId wxTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
 
 bool wxTreeCtrl::IsItemChecked(const wxTreeItemId& item) const
 {
-    wxCHECK_MSG( item.IsOk(), false, wxT("invalid tree item") );
-
     // receive the desired information.
     wxTreeViewItem tvItem(item, TVIF_STATE, TVIS_STATEIMAGEMASK);
     DoGetItem(&tvItem);
@@ -1582,8 +1442,6 @@ bool wxTreeCtrl::IsItemChecked(const wxTreeItemId& item) const
 
 void wxTreeCtrl::SetItemCheck(const wxTreeItemId& item, bool check)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     // receive the desired information.
     wxTreeViewItem tvItem(item, TVIF_STATE, TVIS_STATEIMAGEMASK);
 
@@ -1606,11 +1464,11 @@ size_t wxTreeCtrl::GetSelections(wxArrayTreeItemIds& selections) const
 // Usual operations
 // ----------------------------------------------------------------------------
 
-wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
-                                       const wxTreeItemId& hInsertAfter,
-                                       const wxString& text,
-                                       int image, int selectedImage,
-                                       wxTreeItemData *data)
+wxTreeItemId wxTreeCtrl::DoInsertItem(const wxTreeItemId& parent,
+                                      wxTreeItemId hInsertAfter,
+                                      const wxString& text,
+                                      int image, int selectedImage,
+                                      wxTreeItemData *data)
 {
     wxCHECK_MSG( parent.IsOk() || !TreeView_GetRoot(GetHwnd()),
                  wxTreeItemId(),
@@ -1628,7 +1486,7 @@ wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
     }
 
     UINT mask = 0;
-    if ( !text.empty() )
+    if ( !text.IsEmpty() )
     {
         mask |= TVIF_TEXT;
         tvIns.item.pszText = (wxChar *)text.c_str();  // cast is ok
@@ -1674,31 +1532,21 @@ wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
     if ( data != NULL )
     {
         // associate the application tree item with Win32 tree item handle
-        data->SetId(id);
+        data->SetId((WXHTREEITEM)id);
     }
 
-    return wxTreeItemId(id);
+    return wxTreeItemId((WXHTREEITEM)id);
 }
 
 // for compatibility only
-#if WXWIN_COMPATIBILITY_2_4
-
-void wxTreeCtrl::SetImageList(wxImageList *imageList, int)
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    const wxString& text,
+                                    int image, int selImage,
+                                    long insertAfter)
 {
-    SetImageList(imageList);
+    return DoInsertItem(parent, (WXHTREEITEM)insertAfter, text,
+                        image, selImage, NULL);
 }
-
-int wxTreeCtrl::GetItemSelectedImage(const wxTreeItemId& item) const
-{
-    return GetItemImage(item, wxTreeItemIcon_Selected);
-}
-
-void wxTreeCtrl::SetItemSelectedImage(const wxTreeItemId& item, int image)
-{
-    SetItemImage(item, image, wxTreeItemIcon_Selected);
-}
-
-#endif // WXWIN_COMPATIBILITY_2_4
 
 wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
                                  int image, int selectedImage,
@@ -1713,40 +1561,59 @@ wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
         return TVI_ROOT;
     }
 
-    return DoInsertAfter(wxTreeItemId(), wxTreeItemId(),
-                           text, image, selectedImage, data);
+    return DoInsertItem(wxTreeItemId((long)(WXHTREEITEM) 0), (long)(WXHTREEITEM) 0,
+                        text, image, selectedImage, data);
 }
 
-wxTreeItemId wxTreeCtrl::DoInsertItem(const wxTreeItemId& parent,
-                                      size_t index,
-                                      const wxString& text,
-                                      int image, int selectedImage,
-                                      wxTreeItemData *data)
+wxTreeItemId wxTreeCtrl::PrependItem(const wxTreeItemId& parent,
+                                     const wxString& text,
+                                     int image, int selectedImage,
+                                     wxTreeItemData *data)
 {
-    wxTreeItemId idPrev;
-    if ( index == (size_t)-1 )
+    return DoInsertItem(parent, (WXHTREEITEM) TVI_FIRST,
+                        text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    const wxTreeItemId& idPrevious,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    return DoInsertItem(parent, idPrevious, text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::InsertItem(const wxTreeItemId& parent,
+                                    size_t index,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    // find the item from index
+    long cookie;
+    wxTreeItemId idPrev, idCur = GetFirstChild(parent, cookie);
+    while ( index != 0 && idCur.IsOk() )
     {
-        // special value: append to the end
-        idPrev = TVI_LAST;
-    }
-    else // find the item from index
-    {
-        wxTreeItemIdValue cookie;
-        wxTreeItemId idCur = GetFirstChild(parent, cookie);
-        while ( index != 0 && idCur.IsOk() )
-        {
-            index--;
+        index--;
 
-            idPrev = idCur;
-            idCur = GetNextChild(parent, cookie);
-        }
-
-        // assert, not check: if the index is invalid, we will append the item
-        // to the end
-        wxASSERT_MSG( index == 0, _T("bad index in wxTreeCtrl::InsertItem") );
+        idPrev = idCur;
+        idCur = GetNextChild(parent, cookie);
     }
 
-    return DoInsertAfter(parent, idPrev, text, image, selectedImage, data);
+    // assert, not check: if the index is invalid, we will append the item
+    // to the end
+    wxASSERT_MSG( index == 0, _T("bad index in wxTreeCtrl::InsertItem") );
+
+    return DoInsertItem(parent, idPrev, text, image, selectedImage, data);
+}
+
+wxTreeItemId wxTreeCtrl::AppendItem(const wxTreeItemId& parent,
+                                    const wxString& text,
+                                    int image, int selectedImage,
+                                    wxTreeItemData *data)
+{
+    return DoInsertItem(parent, (WXHTREEITEM) TVI_LAST,
+                        text, image, selectedImage, data);
 }
 
 void wxTreeCtrl::Delete(const wxTreeItemId& item)
@@ -1760,13 +1627,13 @@ void wxTreeCtrl::Delete(const wxTreeItemId& item)
 // delete all children (but don't delete the item itself)
 void wxTreeCtrl::DeleteChildren(const wxTreeItemId& item)
 {
-    wxTreeItemIdValue cookie;
+    long cookie;
 
-    wxArrayTreeItemIds children;
+    wxArrayLong children;
     wxTreeItemId child = GetFirstChild(item, cookie);
     while ( child.IsOk() )
     {
-        children.Add(child);
+        children.Add((long)(WXHTREEITEM)child);
 
         child = GetNextChild(item, cookie);
     }
@@ -1774,7 +1641,7 @@ void wxTreeCtrl::DeleteChildren(const wxTreeItemId& item)
     size_t nCount = children.Count();
     for ( size_t n = 0; n < nCount; n++ )
     {
-        if ( !TreeView_DeleteItem(GetHwnd(), HITEM(children[n])) )
+        if ( !TreeView_DeleteItem(GetHwnd(), (HTREEITEM)children[n]) )
         {
             wxLogLastError(wxT("TreeView_DeleteItem"));
         }
@@ -1791,7 +1658,6 @@ void wxTreeCtrl::DeleteAllItems()
     }
 
     // and all the real items
-
     if ( !TreeView_DeleteAllItems(GetHwnd()) )
     {
         wxLogLastError(wxT("TreeView_DeleteAllItems"));
@@ -1808,7 +1674,7 @@ void wxTreeCtrl::DoExpand(const wxTreeItemId& item, int flag)
 
     // A hidden root can be neither expanded nor collapsed.
     wxCHECK_RET( !(m_windowStyle & wxTR_HIDE_ROOT) || (HITEM(item) != TVI_ROOT),
-                 wxT("Can't expand/collapse hidden root node!") );
+                 wxT("Can't expand/collapse hidden root node!") )
 
     // TreeView_Expand doesn't send TVN_ITEMEXPAND(ING) messages, so we must
     // emulate them. This behaviour has changed slightly with comctl32.dll
@@ -1859,14 +1725,10 @@ void wxTreeCtrl::Toggle(const wxTreeItemId& item)
     DoExpand(item, TVE_TOGGLE);
 }
 
-#if WXWIN_COMPATIBILITY_2_4
-
 void wxTreeCtrl::ExpandItem(const wxTreeItemId& item, int action)
 {
     DoExpand(item, action);
 }
-
-#endif
 
 void wxTreeCtrl::Unselect()
 {
@@ -1874,7 +1736,7 @@ void wxTreeCtrl::Unselect()
                   wxT("doesn't make sense, may be you want UnselectAll()?") );
 
     // just remove the selection
-    SelectItem(wxTreeItemId());
+    SelectItem(wxTreeItemId((long) (WXHTREEITEM) 0));
 }
 
 void wxTreeCtrl::UnselectAll()
@@ -1886,13 +1748,11 @@ void wxTreeCtrl::UnselectAll()
         for ( size_t n = 0; n < count; n++ )
         {
 #if wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-            SetItemCheck(HITEM(selections[n]), false);
+            SetItemCheck(selections[n], FALSE);
 #else // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
             ::UnselectItem(GetHwnd(), HITEM(selections[n]));
 #endif // wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE/!wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
         }
-
-        m_htSelStart.Unset();
     }
     else
     {
@@ -1901,22 +1761,19 @@ void wxTreeCtrl::UnselectAll()
     }
 }
 
-void wxTreeCtrl::SelectItem(const wxTreeItemId& item, bool select)
+void wxTreeCtrl::SelectItem(const wxTreeItemId& item)
 {
     if ( m_windowStyle & wxTR_MULTIPLE )
     {
 #if wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
         // selecting the item means checking it
-        SetItemCheck(item, select);
+        SetItemCheck(item);
 #else // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-        ::SelectItem(GetHwnd(), HITEM(item), select);
+        ::SelectItem(GetHwnd(), HITEM(item));
 #endif // wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE/!wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
     }
     else
     {
-        wxASSERT_MSG( select,
-                      _T("SelectItem(false) works only for multiselect") );
-
         // inspite of the docs (MSDN Jan 99 edition), we don't seem to receive
         // the notification from the control (i.e. TVN_SELCHANG{ED|ING}), so
         // send them ourselves
@@ -1932,7 +1789,7 @@ void wxTreeCtrl::SelectItem(const wxTreeItemId& item, bool select)
             {
                 wxLogLastError(wxT("TreeView_SelectItem"));
             }
-            else // ok
+            else
             {
                 event.SetEventType(wxEVT_COMMAND_TREE_SEL_CHANGED);
                 (void)GetEventHandler()->ProcessEvent(event);
@@ -1977,8 +1834,6 @@ void wxTreeCtrl::DeleteTextCtrl()
         m_textCtrl->SetHWND(0);
         delete m_textCtrl;
         m_textCtrl = NULL;
-
-        m_idEdited.Unset();
     }
 }
 
@@ -1989,12 +1844,11 @@ wxTextCtrl* wxTreeCtrl::EditLabel(const wxTreeItemId& item,
 
     DeleteTextCtrl();
 
-    m_idEdited = item;
     m_textCtrl = (wxTextCtrl *)textControlClass->CreateObject();
     HWND hWnd = (HWND) TreeView_EditLabel(GetHwnd(), HITEM(item));
 
     // this is not an error - the TVN_BEGINLABELEDIT handler might have
-    // returned false
+    // returned FALSE
     if ( !hWnd )
     {
         delete m_textCtrl;
@@ -2007,20 +1861,20 @@ wxTextCtrl* wxTreeCtrl::EditLabel(const wxTreeItemId& item,
 }
 
 // End label editing, optionally cancelling the edit
-void wxTreeCtrl::DoEndEditLabel(bool discardChanges)
+void wxTreeCtrl::EndEditLabel(const wxTreeItemId& WXUNUSED(item), bool discardChanges)
 {
     TreeView_EndEditLabelNow(GetHwnd(), discardChanges);
 
     DeleteTextCtrl();
 }
 
-wxTreeItemId wxTreeCtrl::DoTreeHitTest(const wxPoint& point, int& flags)
+wxTreeItemId wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
 {
     TV_HITTESTINFO hitTestInfo;
     hitTestInfo.pt.x = (int)point.x;
     hitTestInfo.pt.y = (int)point.y;
 
-    (void) TreeView_HitTest(GetHwnd(), &hitTestInfo);
+    TreeView_HitTest(GetHwnd(), &hitTestInfo);
 
     flags = 0;
 
@@ -2042,7 +1896,7 @@ wxTreeItemId wxTreeCtrl::DoTreeHitTest(const wxPoint& point, int& flags)
 
     #undef TRANSLATE_FLAG
 
-    return wxTreeItemId(hitTestInfo.hItem);
+    return wxTreeItemId((WXHTREEITEM) hitTestInfo.hItem);
 }
 
 bool wxTreeCtrl::GetBoundingRect(const wxTreeItemId& item,
@@ -2054,7 +1908,7 @@ bool wxTreeCtrl::GetBoundingRect(const wxTreeItemId& item,
     // Virtual root items have no bounding rectangle
     if ( IS_VIRTUAL_ROOT(item) )
     {
-        return false;
+        return FALSE;
     }
 
     if ( TreeView_GetItemRect(GetHwnd(), HITEM(item),
@@ -2062,12 +1916,12 @@ bool wxTreeCtrl::GetBoundingRect(const wxTreeItemId& item,
     {
         rect = wxRect(wxPoint(rc.left, rc.top), wxPoint(rc.right, rc.bottom));
 
-        return true;
+        return TRUE;
     }
     else
     {
         // couldn't retrieve rect: for example, item isn't visible
-        return false;
+        return FALSE;
     }
 }
 
@@ -2108,10 +1962,14 @@ int CALLBACK wxTreeSortHelper::Compare(LPARAM pItem1,
                                 GetIdFromData(tree, pItem2));
 }
 
+int wxTreeCtrl::OnCompareItems(const wxTreeItemId& item1,
+                               const wxTreeItemId& item2)
+{
+    return wxStrcmp(GetItemText(item1), GetItemText(item2));
+}
+
 void wxTreeCtrl::SortChildren(const wxTreeItemId& item)
 {
-    wxCHECK_RET( item.IsOk(), wxT("invalid tree item") );
-
     // rely on the fact that TreeView_SortChildren does the same thing as our
     // default behaviour, i.e. sorts items alphabetically and so call it
     // directly if we're not in derived class (much more efficient!)
@@ -2150,80 +2008,38 @@ bool wxTreeCtrl::MSWCommand(WXUINT cmd, WXWORD id)
     else
     {
         // nothing done
-        return false;
+        return FALSE;
     }
 
     // command processed
-    return true;
+    return TRUE;
 }
 
 // we hook into WndProc to process WM_MOUSEMOVE/WM_BUTTONUP messages - as we
 // only do it during dragging, minimize wxWin overhead (this is important for
 // WM_MOUSEMOVE as they're a lot of them) by catching Windows messages directly
 // instead of passing by wxWin events
-WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
+long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 {
-    bool processed = false;
-    WXLRESULT rc = 0;
-    bool isMultiple = HasFlag(wxTR_MULTIPLE);
+    bool processed = FALSE;
+    long rc = 0;
+    bool isMultiple = (GetWindowStyle() & wxTR_MULTIPLE) != 0;
 
-    // This message is sent after a right-click, or when the "menu" key is pressed
-    if ( nMsg == WM_CONTEXTMENU )
+    if ( (nMsg >= WM_MOUSEFIRST) && (nMsg <= WM_MOUSELAST) )
     {
-        int x = GET_X_LPARAM(lParam),
-            y = GET_Y_LPARAM(lParam);
-        // Convert the screen point to a client point
-        wxPoint MenuPoint = ScreenToClient(wxPoint(x, y));
-
-        wxTreeEvent event( wxEVT_COMMAND_TREE_ITEM_MENU, GetId() );
-
-        // can't use GetSelection() here as it would assert in multiselect mode
-        event.m_item = wxTreeItemId(TreeView_GetSelection(GetHwnd()));
-        event.SetEventObject( this );
-
-        // Get the bounding rectangle for the item, including the non-text areas
-        wxRect ItemRect;
-        GetBoundingRect(event.m_item, ItemRect, false);
-        // If the point is inside the bounding rectangle, use it as the click position.
-        // This should be the case for WM_CONTEXTMENU as the result of a right-click
-        if (ItemRect.Inside(MenuPoint))
-        {
-            event.m_pointDrag = MenuPoint;
-        }
-        // Use the Explorer standard of putting the menu at the left edge of the text,
-        // in the vertical middle of the text. Should be the case for the "menu" key
-        else
-        {
-            // Use the bounding rectangle of only the text part
-            GetBoundingRect(event.m_item, ItemRect, true);
-            event.m_pointDrag = wxPoint(ItemRect.GetX(), ItemRect.GetY() + ItemRect.GetHeight() / 2);
-        }
-
-        if ( GetEventHandler()->ProcessEvent(event) )
-            processed = true;
-        //else: continue with generating wxEVT_CONTEXT_MENU in base class code
-    }
-    else if ( (nMsg >= WM_MOUSEFIRST) && (nMsg <= WM_MOUSELAST) )
-    {
-        // we only process mouse messages here and these parameters have the
-        // same meaning for all of them
+        // we only process mouse messages here and these parameters have the same
+        // meaning for all of them
         int x = GET_X_LPARAM(lParam),
             y = GET_Y_LPARAM(lParam);
         HTREEITEM htItem = GetItemFromPoint(GetHwnd(), x, y);
 
-        TV_HITTESTINFO tvht;
-        tvht.pt.x = x;
-        tvht.pt.y = y;
-
-        (void) TreeView_HitTest(GetHwnd(), &tvht);
-
         switch ( nMsg )
         {
             case WM_RBUTTONDOWN:
-                // if the item we are about to right click on is not already
-                // selected or if we click outside of any item, remove the
-                // entire previous selection
-                if ( !htItem || !::IsItemSelected(GetHwnd(), htItem) )
+                // if the item we are about to right click on
+                // is not already select, remove the entire
+                // previous selection
+                if (!::IsItemSelected(GetHwnd(), htItem))
                 {
                     UnselectAll();
                 }
@@ -2236,24 +2052,21 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
 
 #if !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
             case WM_LBUTTONDOWN:
-                if ( htItem && isMultiple && (tvht.flags & TVHT_ONITEM) != 0 )
+                if ( htItem && isMultiple )
                 {
-                    m_htClickedItem = (WXHTREEITEM) htItem;
-                    m_ptClick = wxPoint(x, y);
-
                     if ( wParam & MK_CONTROL )
                     {
                         SetFocus();
 
                         // toggle selected state
-                        ::ToggleItemSelection(GetHwnd(), htItem);
+                        ToggleItemSelection(GetHwnd(), htItem);
 
                         ::SetFocus(GetHwnd(), htItem);
 
                         // reset on any click without Shift
-                        m_htSelStart.Unset();
+                        m_htSelStart = 0;
 
-                        processed = true;
+                        processed = TRUE;
                     }
                     else if ( wParam & MK_SHIFT )
                     {
@@ -2263,100 +2076,45 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                         if ( !m_htSelStart )
                         {
                             // take the focused item
-                            m_htSelStart = TreeView_GetSelection(GetHwnd());
+                            m_htSelStart = (WXHTREEITEM)
+                                TreeView_GetSelection(GetHwnd());
                         }
 
-                        if ( m_htSelStart )
-                            SelectRange(GetHwnd(), HITEM(m_htSelStart), htItem,
+                        SelectRange(GetHwnd(), HITEM(m_htSelStart), htItem,
                                     !(wParam & MK_CONTROL));
-                        else
-                            ::SelectItem(GetHwnd(), htItem);
 
                         ::SetFocus(GetHwnd(), htItem);
 
-                        processed = true;
+                        processed = TRUE;
                     }
                     else // normal click
                     {
                         // avoid doing anything if we click on the only
                         // currently selected item
-
-                        SetFocus();
-
                         wxArrayTreeItemIds selections;
                         size_t count = GetSelections(selections);
                         if ( count == 0 ||
-                             count > 1 ||
-                             HITEM(selections[0]) != htItem )
+                                count > 1 ||
+                                    HITEM(selections[0]) != htItem )
                         {
-                            // clear the previously selected items, if the
-                            // user clicked outside of the present selection.
-                            // otherwise, perform the deselection on mouse-up.
-                            // this allows multiple drag and drop to work.
+                            // clear the previously selected items
+                        UnselectAll();
 
-                            if (!IsItemSelected(GetHwnd(), htItem))
-                            {
-                                UnselectAll();
-
-                                // prevent the click from starting in-place editing
-                                // which should only happen if we click on the
-                                // already selected item (and nothing else is
-                                // selected)
-
-                                TreeView_SelectItem(GetHwnd(), 0);
-                                ::SelectItem(GetHwnd(), htItem);
-                            }
-                            ::SetFocus(GetHwnd(), htItem);
-                            processed = true;
+                        // prevent the click from starting in-place editing
+                            // which should only happen if we click on the
+                            // already selected item (and nothing else is
+                            // selected)
+                        TreeView_SelectItem(GetHwnd(), 0);
                         }
 
                         // reset on any click without Shift
-                        m_htSelStart.Unset();
+                        m_htSelStart = 0;
                     }
                 }
                 break;
 #endif // wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
 
             case WM_MOUSEMOVE:
-#ifndef __WXWINCE__
-                if ( m_htClickedItem )
-                {
-                    int cx = abs(m_ptClick.x - x);
-                    int cy = abs(m_ptClick.y - y);
-
-                    if ( cx > GetSystemMetrics( SM_CXDRAG ) || cy > GetSystemMetrics( SM_CYDRAG ) )
-                    {
-                        HWND pWnd = ::GetParent( GetHwnd() );
-                        if ( pWnd )
-                        {
-                            NM_TREEVIEW tv;
-
-                            tv.hdr.hwndFrom = GetHwnd();
-                            tv.hdr.idFrom = ::GetWindowLong( GetHwnd(), GWL_ID );
-                            tv.hdr.code = TVN_BEGINDRAG;
-
-                            tv.itemNew.hItem = HITEM(m_htClickedItem);
-
-                            TVITEM tviAux;
-                            ZeroMemory(&tviAux, sizeof(tviAux));
-                            tviAux.hItem = HITEM(m_htClickedItem);
-                            tviAux.mask = TVIF_STATE | TVIF_PARAM;
-                            tviAux.stateMask = 0xffffffff;
-                            TreeView_GetItem( GetHwnd(), &tviAux );
-
-                            tv.itemNew.state = tviAux.state;
-                            tv.itemNew.lParam = tviAux.lParam;
-
-                            tv.ptDrag.x = x;
-                            tv.ptDrag.y = y;
-
-                            ::SendMessage( pWnd, WM_NOTIFY, tv.hdr.idFrom, (LPARAM)&tv );
-                        }
-                        m_htClickedItem.Unset();
-                    }
-                }
-#endif // __WXWINCE__
-
                 if ( m_dragImage )
                 {
                     m_dragImage->Move(wxPoint(x, y));
@@ -2372,27 +2130,6 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                 break;
 
             case WM_LBUTTONUP:
-
-                // facilitates multiple drag-and-drop
-                if (htItem && isMultiple)
-                {
-                    wxArrayTreeItemIds selections;
-                    size_t count = GetSelections(selections);
-
-                    if (count > 1 &&
-                        !(wParam & MK_CONTROL) &&
-                        !(wParam & MK_SHIFT))
-                    {
-                        UnselectAll();
-                        TreeView_SelectItem(GetHwnd(), htItem);
-                        ::SelectItem(GetHwnd(), htItem);
-                        ::SetFocus(GetHwnd(), htItem);
-                    }
-                    m_htClickedItem.Unset();
-                }
-
-                // fall through
-
             case WM_RBUTTONUP:
                 if ( m_dragImage )
                 {
@@ -2403,7 +2140,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                     // generate the drag end event
                     wxTreeEvent event(wxEVT_COMMAND_TREE_END_DRAG, m_windowId);
 
-                    event.m_item = htItem;
+                    event.m_item = (WXHTREEITEM)htItem;
                     event.m_pointDrag = wxPoint(x, y);
                     event.SetEventObject(this);
 
@@ -2427,7 +2164,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
         RECT rect;
         for ( size_t n = 0; n < count; n++ )
         {
-            // TreeView_GetItemRect() will return false if item is not visible,
+            // TreeView_GetItemRect() will return FALSE if item is not visible,
             // which may happen perfectly well
             if ( TreeView_GetItemRect(GetHwnd(), HITEM(selections[n]),
                                       &rect, TRUE) )
@@ -2441,145 +2178,71 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
         bool bCtrl = wxIsCtrlDown(),
              bShift = wxIsShiftDown();
 
+        // we handle.arrows and space, but not page up/down and home/end: the
+        // latter should be easy, but not the former
+
         HTREEITEM htSel = (HTREEITEM)TreeView_GetSelection(GetHwnd());
-        switch ( wParam )
+        if ( !m_htSelStart )
         {
-            case VK_SPACE:
-                if ( bCtrl )
-                {
-                    ::ToggleItemSelection(GetHwnd(), htSel);
-                }
-                else
-                {
-                    UnselectAll();
-
-                    ::SelectItem(GetHwnd(), htSel);
-                }
-
-                processed = true;
-                break;
-
-            case VK_UP:
-            case VK_DOWN:
-                if ( !bCtrl && !bShift )
-                {
-                    // no modifiers, just clear selection and then let the default
-                    // processing to take place
-                    UnselectAll();
-                }
-                else if ( htSel )
-                {
-                    (void)wxControl::MSWWindowProc(nMsg, wParam, lParam);
-
-                    HTREEITEM htNext = (HTREEITEM)
-                        TreeView_GetNextItem
-                        (
-                            GetHwnd(),
-                            htSel,
-                            wParam == VK_UP ? TVGN_PREVIOUSVISIBLE
-                                            : TVGN_NEXTVISIBLE
-                        );
-
-                    if ( !htNext )
-                    {
-                        // at the top/bottom
-                        htNext = htSel;
-                    }
-
-                    if ( bShift )
-                    {
-                        if ( !m_htSelStart )
-                            m_htSelStart = htSel;
-
-                        SelectRange(GetHwnd(), HITEM(m_htSelStart), htNext);
-                    }
-                    else // bCtrl
-                    {
-                        // without changing selection
-                        ::SetFocus(GetHwnd(), htNext);
-                    }
-
-                    processed = true;
-                }
-                break;
-
-            case VK_HOME:
-            case VK_END:
-            case VK_PRIOR:
-            case VK_NEXT:
-                // TODO: handle Shift/Ctrl with these keys
-                if ( !bCtrl && !bShift )
-                {
-                    UnselectAll();
-
-                    m_htSelStart.Unset();
-                }
+            m_htSelStart = (WXHTREEITEM)htSel;
         }
-    }
-#endif // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-    else if ( nMsg == WM_COMMAND )
-    {
-        // if we receive a EN_KILLFOCUS command from the in-place edit control
-        // used for label editing, make sure to end editing
-        WORD id, cmd;
-        WXHWND hwnd;
-        UnpackCommand(wParam, lParam, &id, &hwnd, &cmd);
 
-        if ( cmd == EN_KILLFOCUS )
+        if ( wParam == VK_SPACE )
         {
-            if ( m_textCtrl && m_textCtrl->GetHandle() == hwnd )
+            if ( bCtrl )
             {
-                DoEndEditLabel();
+                ToggleItemSelection(GetHwnd(), htSel);
+            }
+            else
+            {
+                UnselectAll();
 
-                processed = true;
+                ::SelectItem(GetHwnd(), htSel);
+            }
+
+            processed = TRUE;
+        }
+        else if ( wParam == VK_UP || wParam == VK_DOWN )
+        {
+            if ( !bCtrl && !bShift )
+            {
+                // no modifiers, just clear selection and then let the default
+                // processing to take place
+                UnselectAll();
+            }
+            else if ( htSel )
+            {
+                (void)wxControl::MSWWindowProc(nMsg, wParam, lParam);
+
+                HTREEITEM htNext = (HTREEITEM)(wParam == VK_UP
+                                    ? TreeView_GetPrevVisible(GetHwnd(), htSel)
+                                    : TreeView_GetNextVisible(GetHwnd(), htSel));
+
+                if ( !htNext )
+                {
+                    // at the top/bottom
+                    htNext = htSel;
+                }
+
+                if ( bShift )
+                {
+                    SelectRange(GetHwnd(), HITEM(m_htSelStart), htNext);
+                }
+                else // bCtrl
+                {
+                    // without changing selection
+                    ::SetFocus(GetHwnd(), htNext);
+                }
+
+                processed = TRUE;
             }
         }
     }
-
+#endif // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
     if ( !processed )
         rc = wxControl::MSWWindowProc(nMsg, wParam, lParam);
 
     return rc;
-}
-
-WXLRESULT
-wxTreeCtrl::MSWDefWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
-{
-    // default WM_RBUTTONDOWN handler enters modal loop inside DefWindowProc()
-    // waiting for WM_RBUTTONUP and then sends the resulting WM_CONTEXTMENU to
-    // the parent window, not us, which completely breaks everything so simply
-    // don't let it see this message at all
-    if ( nMsg == WM_RBUTTONDOWN )
-        return 0;
-
-    // but because of the above we don't get NM_RCLICK which is normally
-    // generated by tree window proc when the modal loop mentioned above ends
-    // because the mouse is released -- synthesize it ourselves instead
-    if ( nMsg == WM_RBUTTONUP )
-    {
-        NMHDR hdr;
-        hdr.hwndFrom = GetHwnd();
-        hdr.idFrom = GetId();
-        hdr.code = NM_RCLICK;
-
-        WXLPARAM rc;
-        MSWOnNotify(GetId(), (LPARAM)&hdr, &rc);
-
-        // continue as usual
-    }
-
-    if ( nMsg == WM_CHAR )
-    {
-        // also don't let the control process Space and Return keys because it
-        // doesn't do anything useful with them anyhow but always beeps
-        // annoyingly when it receives them and there is no way to turn it off
-        // simply if you just process TREEITEM_ACTIVATED event to which Space
-        // and Enter presses are mapped in your code
-        if ( wParam == VK_SPACE || wParam == VK_RETURN )
-            return 0;
-    }
-
-    return wxControl::MSWDefWindowProc(nMsg, wParam, lParam);
 }
 
 // process WM_NOTIFY Windows message
@@ -2603,7 +2266,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
                 NM_TREEVIEW *tv = (NM_TREEVIEW *)lParam;
 
-                event.m_item = tv->itemNew.hItem;
+                event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
                 event.m_pointDrag = wxPoint(tv->ptDrag.x, tv->ptDrag.y);
 
                 // don't allow dragging by default: the user code must
@@ -2618,13 +2281,9 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 eventType = wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT;
                 TV_DISPINFO *info = (TV_DISPINFO *)lParam;
 
-                // although the user event handler may still veto it, it is
-                // important to set it now so that calls to SetItemText() from
-                // the event handler would change the text controls contents
-                m_idEdited =
-                event.m_item = info->item.hItem;
+                event.m_item = (WXHTREEITEM) info->item.hItem;
                 event.m_label = info->item.pszText;
-                event.m_editCancelled = false;
+                event.m_editCancelled = FALSE;
             }
             break;
 
@@ -2633,16 +2292,12 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 eventType = wxEVT_COMMAND_TREE_DELETE_ITEM;
                 NM_TREEVIEW *tv = (NM_TREEVIEW *)lParam;
 
-                event.m_item = tv->itemOld.hItem;
+                event.m_item = (WXHTREEITEM)tv->itemOld.hItem;
 
                 if ( m_hasAnyAttr )
                 {
-                    wxMapTreeAttr::iterator it = m_attrs.find(tv->itemOld.hItem);
-                    if ( it != m_attrs.end() )
-                    {
-                        delete it->second;
-                        m_attrs.erase(it);
-                    }
+                    delete (wxTreeItemAttr *)m_attrs.
+                                Delete((long)tv->itemOld.hItem);
                 }
             }
             break;
@@ -2652,37 +2307,18 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 eventType = wxEVT_COMMAND_TREE_END_LABEL_EDIT;
                 TV_DISPINFO *info = (TV_DISPINFO *)lParam;
 
-                event.m_item = info->item.hItem;
+                event.m_item = (WXHTREEITEM)info->item.hItem;
                 event.m_label = info->item.pszText;
-                event.m_editCancelled = info->item.pszText == NULL;
+                if (info->item.pszText == NULL)
+                {
+                    event.m_editCancelled = TRUE;
+                }
+                 else
+                {
+                    event.m_editCancelled = FALSE;
+                }
                 break;
             }
-
-#ifndef __WXWINCE__
-        // These *must* not be removed or TVN_GETINFOTIP will
-        // not be processed each time the mouse is moved
-        // and the tooltip will only ever update once.
-        case TTN_NEEDTEXTA:
-        case TTN_NEEDTEXTW:
-            {
-                *result = 0;
-
-                break;
-            }
-
-#ifdef TVN_GETINFOTIP
-        case TVN_GETINFOTIP:
-            {
-                eventType = wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP;
-                NMTVGETINFOTIP *info = (NMTVGETINFOTIP*)lParam;
-
-                // Which item are we trying to get a tooltip for?
-                event.m_item = info->hItem;
-
-                break;
-            }
-#endif
-#endif
 
         case TVN_GETDISPINFO:
             eventType = wxEVT_COMMAND_TREE_GET_INFO;
@@ -2696,7 +2332,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
                 TV_DISPINFO *info = (TV_DISPINFO *)lParam;
 
-                event.m_item = info->item.hItem;
+                event.m_item = (WXHTREEITEM) info->item.hItem;
                 break;
             }
 
@@ -2726,7 +2362,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
                 eventType = gs_expandEvents[what][how];
 
-                event.m_item = tv->itemNew.hItem;
+                event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
             }
             break;
 
@@ -2738,12 +2374,12 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // fabricate the lParam and wParam parameters sufficiently
                 // similar to the ones from a "real" WM_KEYDOWN so that
                 // CreateKeyEvent() works correctly
-                const bool isAltDown = ::GetKeyState(VK_MENU) < 0;
-                WXLPARAM lParam = (isAltDown ? KF_ALTDOWN : 0) << 16;
+                WXLPARAM lParam =
+                    (::GetKeyState(VK_MENU) & 0x100 ? KF_ALTDOWN : 0) << 16;
 
                 WXWPARAM wParam = info->wVKey;
 
-                int keyCode = wxCharCodeMSWToWX(wParam);
+                int keyCode = wxCharCodeMSWToWX(info->wVKey);
                 if ( !keyCode )
                 {
                     // wxCharCodeMSWToWX() returns 0 to indicate that this is a
@@ -2757,7 +2393,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                                                 wParam);
 
                 // a separate event for Space/Return
-                if ( !wxIsCtrlDown() && !wxIsShiftDown() && !isAltDown &&
+                if ( !wxIsCtrlDown() && !wxIsShiftDown() &&
                      ((info->wVKey == VK_SPACE) || (info->wVKey == VK_RETURN)) )
                 {
                     wxTreeEvent event2(wxEVT_COMMAND_TREE_ITEM_ACTIVATED,
@@ -2793,21 +2429,19 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     hdr->code == TVN_SELCHANGEDW)
                 {
                     NM_TREEVIEWW* tv = (NM_TREEVIEWW *)lParam;
-                    event.m_item = tv->itemNew.hItem;
-                    event.m_itemOld = tv->itemOld.hItem;
+                    event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
+                    event.m_itemOld = (WXHTREEITEM) tv->itemOld.hItem;
                 }
                 else
                 {
                     NM_TREEVIEWA* tv = (NM_TREEVIEWA *)lParam;
-                    event.m_item = tv->itemNew.hItem;
-                    event.m_itemOld = tv->itemOld.hItem;
+                    event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
+                    event.m_itemOld = (WXHTREEITEM) tv->itemOld.hItem;
                 }
             }
             break;
 
-            // instead of explicitly checking for _WIN32_IE, check if the
-            // required symbols are available in the headers
-#if defined(CDDS_PREPAINT) && !wxUSE_COMCTL32_SAFELY
+#if defined(_WIN32_IE) && _WIN32_IE >= 0x300 && !wxUSE_COMCTL32_SAFELY && !( defined(__GNUWIN32__) && !wxCHECK_W32API_VERSION( 1, 0 ) )
         case NM_CUSTOMDRAW:
             {
                 LPNMTVCUSTOMDRAW lptvcd = (LPNMTVCUSTOMDRAW)lParam;
@@ -2823,54 +2457,70 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
                     case CDDS_ITEMPREPAINT:
                         {
-                            wxMapTreeAttr::iterator
-                                it = m_attrs.find((void *)nmcd.dwItemSpec);
+                            wxTreeItemAttr *attr =
+                                (wxTreeItemAttr *)m_attrs.Get(nmcd.dwItemSpec);
 
-                            if ( it == m_attrs.end() )
+                            if ( !attr )
                             {
                                 // nothing to do for this item
                                 *result = CDRF_DODEFAULT;
                                 break;
                             }
 
-                            wxTreeItemAttr * const attr = it->second;
+                            HFONT hFont;
+                            if ( attr->HasFont() )
+                            {
+                                hFont = GetHfontOf(attr->GetFont());
+                            }
+                            else
+                            {
+                                hFont = 0;
+                            }
 
-                            // selection colours should override ours,
-                            // otherwise it is too confusing ot the user
-                            if ( !(nmcd.uItemState & CDIS_SELECTED) )
+                            wxColour colText;
+                            if ( attr->HasTextColour() )
+                            {
+                                colText = attr->GetTextColour();
+                            }
+                            else
+                            {
+                                colText = GetForegroundColour();
+                            }
+
+                            // selection colours should override ours
+                            if ( nmcd.uItemState & CDIS_SELECTED )
+                            {
+                                lptvcd->clrTextBk =
+                                    ::GetSysColor(COLOR_HIGHLIGHT);
+                                lptvcd->clrText =
+                                    ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+                            }
+                            else // !selected
                             {
                                 wxColour colBack;
                                 if ( attr->HasBackgroundColour() )
                                 {
                                     colBack = attr->GetBackgroundColour();
-                                    lptvcd->clrTextBk = wxColourToRGB(colBack);
                                 }
-                            }
-
-                            // but we still want to keep the special foreground
-                            // colour when we don't have focus (we can't keep
-                            // it when we do, it would usually be unreadable on
-                            // the almost inverted bg colour...)
-                            if ( !(nmcd.uItemState & CDIS_SELECTED) ||
-                                    FindFocus() != this )
-                            {
-                                wxColour colText;
-                                if ( attr->HasTextColour() )
+                                else
                                 {
-                                    colText = attr->GetTextColour();
-                                    lptvcd->clrText = wxColourToRGB(colText);
+                                    colBack = GetBackgroundColour();
                                 }
+
+                                lptvcd->clrText = wxColourToRGB(colText);
+                                lptvcd->clrTextBk = wxColourToRGB(colBack);
                             }
 
-                            if ( attr->HasFont() )
+                            // note that if we wanted to set colours for
+                            // individual columns (subitems), we would have
+                            // returned CDRF_NOTIFYSUBITEMREDRAW from here
+                            if ( hFont )
                             {
-                                HFONT hFont = GetHfontOf(attr->GetFont());
-
                                 ::SelectObject(nmcd.hdc, hFont);
 
                                 *result = CDRF_NEWFONT;
                             }
-                            else // no specific font
+                            else
                             {
                                 *result = CDRF_DODEFAULT;
                             }
@@ -2883,25 +2533,8 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             }
 
             // we always process it
-            return true;
-#endif // have owner drawn support in headers
-
-        case NM_CLICK:
-            {
-                DWORD pos = GetMessagePos();
-                POINT point;
-                point.x = LOWORD(pos);
-                point.y = HIWORD(pos);
-                ::MapWindowPoints(HWND_DESKTOP, GetHwnd(), &point, 1);
-                int flags = 0;
-                wxTreeItemId item = HitTest(wxPoint(point.x, point.y), flags);
-                if (flags & wxTREE_HITTEST_ONITEMSTATEICON)
-                {
-                    event.m_item = item;
-                    eventType = wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK;
-                }
-                break;
-            }
+            return TRUE;
+#endif // _WIN32_IE >= 0x300
 
         case NM_DBLCLK:
         case NM_RCLICK:
@@ -2913,7 +2546,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 {
                     if ( tvhti.flags & TVHT_ONITEM )
                     {
-                        event.m_item = tvhti.hItem;
+                        event.m_item = (WXHTREEITEM) tvhti.hItem;
                         eventType = (int)hdr->code == NM_DBLCLK
                                     ? wxEVT_COMMAND_TREE_ITEM_ACTIVATED
                                     : wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK;
@@ -2944,7 +2577,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             // the return code of this event handler as the return value for
             // NM_DBLCLK - otherwise, double clicking the item to toggle its
             // expanded status would never work
-            *result = false;
+            *result = FALSE;
             break;
 
         case TVN_BEGINDRAG:
@@ -2956,14 +2589,14 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 wxASSERT_MSG( !m_dragImage, _T("starting to drag once again?") );
 
                 m_dragImage = new wxDragImage(*this, event.m_item);
-                m_dragImage->BeginDrag(wxPoint(0,0), this);
+                m_dragImage->BeginDrag(wxPoint(0, 0), this);
                 m_dragImage->Show();
             }
             break;
 
         case TVN_DELETEITEM:
             {
-                // NB: we might process this message using wxWidgets event
+                // NB: we might process this message using wxWindows event
                 //     tables, but due to overhead of wxWin event system we
                 //     prefer to do it here ourself (otherwise deleting a tree
                 //     with many items is just too slow)
@@ -2982,16 +2615,15 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     delete data; // may be NULL, ok
                 }
 
-                processed = true; // Make sure we don't get called twice
+                processed = TRUE; // Make sure we don't get called twice
             }
             break;
 
         case TVN_BEGINLABELEDIT:
-            // return true to cancel label editing
+            // return TRUE to cancel label editing
             *result = !event.IsAllowed();
-
             // set ES_WANTRETURN ( like we do in BeginLabelEdit )
-            if ( event.IsAllowed() )
+            if(event.IsAllowed())
             {
                 HWND hText = TreeView_GetEditControl(GetHwnd());
                 if(hText != NULL)
@@ -3016,42 +2648,24 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                                                | wxTE_PROCESS_ENTER);
                 }
             }
-            else // we had set m_idEdited before
-            {
-                m_idEdited.Unset();
-            }
             break;
 
         case TVN_ENDLABELEDIT:
-            // return true to set the label to the new string: note that we
+            // return TRUE to set the label to the new string: note that we
             // also must pretend that we did process the message or it is going
-            // to be passed to DefWindowProc() which will happily return false
+            // to be passed to DefWindowProc() which will happily return FALSE
             // cancelling the label change
             *result = event.IsAllowed();
-            processed = true;
+            processed = TRUE;
 
             // ensure that we don't have the text ctrl which is going to be
             // deleted any more
             DeleteTextCtrl();
             break;
 
-#ifndef __WXWINCE__
-#ifdef TVN_GETINFOTIP
-         case TVN_GETINFOTIP:
-            {
-                // If the user permitted a tooltip change, change it
-                if (event.IsAllowed())
-                {
-                    SetToolTip(event.m_label);
-                }
-            }
-            break;
-#endif
-#endif
-
         case TVN_SELCHANGING:
         case TVN_ITEMEXPANDING:
-            // return true to prevent the action from happening
+            // return TRUE to prevent the action from happening
             *result = !event.IsAllowed();
             break;
 
@@ -3061,7 +2675,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             // comctl32.dll or our code?
             {
                 NM_TREEVIEW* tv = (NM_TREEVIEW *)lParam;
-                wxTreeItemId id(tv->itemNew.hItem);
+                wxTreeItemId id = (WXHTREEITEM)tv->itemNew.hItem;
 
                 int image = GetItemImage(id, wxTreeItemIcon_Expanded);
                 if ( image != -1 )
@@ -3108,47 +2722,6 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     return processed;
 }
 
-// ----------------------------------------------------------------------------
-// State control.
-// ----------------------------------------------------------------------------
-
-// why do they define INDEXTOSTATEIMAGEMASK but not the inverse?
-#define STATEIMAGEMASKTOINDEX(state) (((state) & TVIS_STATEIMAGEMASK) >> 12)
-
-void wxTreeCtrl::SetState(const wxTreeItemId& node, int state)
-{
-    TV_ITEM tvi;
-    tvi.hItem = (HTREEITEM)node.m_pItem;
-    tvi.mask = TVIF_STATE;
-    tvi.stateMask = TVIS_STATEIMAGEMASK;
-
-    // Select the specified state, or -1 == cycle to the next one.
-    if ( state == -1 )
-    {
-        TreeView_GetItem(GetHwnd(), &tvi);
-
-        state = STATEIMAGEMASKTOINDEX(tvi.state) + 1;
-        if ( state == m_imageListState->GetImageCount() )
-            state = 1;
-    }
-
-    wxCHECK_RET( state < m_imageListState->GetImageCount(),
-                 _T("wxTreeCtrl::SetState(): item index out of bounds") );
-
-    tvi.state = INDEXTOSTATEIMAGEMASK(state);
-
-    TreeView_SetItem(GetHwnd(), &tvi);
-}
-
-int wxTreeCtrl::GetState(const wxTreeItemId& node)
-{
-    TV_ITEM tvi;
-    tvi.hItem = (HTREEITEM)node.m_pItem;
-    tvi.mask = TVIF_STATE;
-    tvi.stateMask = TVIS_STATEIMAGEMASK;
-    TreeView_GetItem(GetHwnd(), &tvi);
-
-    return STATEIMAGEMASKTOINDEX(tvi.state);
-}
+#endif // __WIN95__
 
 #endif // wxUSE_TREECTRL

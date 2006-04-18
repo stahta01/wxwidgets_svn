@@ -5,7 +5,7 @@
 // Created:     19.10.99 (extracted from gtk/dataobj.h)
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998, 1999 Vadim Zeitlin, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GTK_DATAOBJ2_H_
@@ -15,7 +15,7 @@
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapDataObject : public wxBitmapDataObjectBase
+class wxBitmapDataObject : public wxBitmapDataObjectBase
 {
 public:
     // ctors
@@ -34,19 +34,6 @@ public:
     virtual size_t GetDataSize() const { return m_pngSize; }
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
 
 protected:
     void Init() { m_pngData = (void *)NULL; m_pngSize = 0; }
@@ -57,13 +44,22 @@ protected:
     void       *m_pngData;
 
     void DoConvertToPng();
+
+private:
+    // virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 };
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject is a specialization of wxDataObject for file names
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDataObject : public wxFileDataObjectBase
+class wxFileDataObject : public wxFileDataObjectBase
 {
 public:
     // implement base class pure virtuals
@@ -74,19 +70,15 @@ public:
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
+
+private:
+    // virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 };
 
 #endif // _WX_GTK_DATAOBJ2_H_

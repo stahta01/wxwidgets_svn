@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/pen.h
+// Name:        pen.h
 // Purpose:     wxPen class
 // Author:      David Webster
 // Modified by:
@@ -33,8 +33,6 @@ protected:
     int                             m_nJoin;
     int                             m_nCap;
     wxBitmap                        m_vStipple;
-    int                             m_nbDash;
-    wxDash *                        m_dash;
     wxColour                        m_vColour;
     WXHPEN                          m_hPen;// in OS/2 GPI this will be the PS the pen is associated with
 };
@@ -48,18 +46,18 @@ class WXDLLEXPORT wxPen : public wxGDIObject
 public:
     wxPen();
     wxPen( const wxColour& rColour
-          ,int             nWidth = 1
-          ,int             nStyle = wxSOLID
+          ,int             nWidth
+          ,int             nStyle
          );
     wxPen( const wxBitmap& rStipple
           ,int             nWidth
          );
+    inline wxPen(const wxPen& rPen) { Ref(rPen); }
     ~wxPen();
 
-    inline bool   operator == (const wxPen& rPen) const
-        { return m_refData == rPen.m_refData; }
-    inline bool   operator != (const wxPen& rPen) const
-        { return m_refData != rPen.m_refData; }
+    inline wxPen& operator =  (const wxPen& rPen) { if (*this == rPen) return (*this); Ref(rPen); return *this; }
+    inline bool   operator == (const wxPen& rPen) { return m_refData == rPen.m_refData; }
+    inline bool   operator != (const wxPen& rPen) { return m_refData != rPen.m_refData; }
 
     virtual bool Ok(void) const { return (m_refData != NULL); }
 
@@ -67,7 +65,10 @@ public:
     // Override in order to recreate the pen
     //
     void SetColour(const wxColour& rColour);
-    void SetColour(unsigned char cRed, unsigned char cGreen, unsigned char cBlue);
+    void SetColour( unsigned char cRed
+                   ,unsigned char cGreen
+                   ,unsigned char cBlue
+                  );
 
     void SetWidth(int nWidth);
     void SetStyle(int nStyle);
@@ -85,13 +86,6 @@ public:
     inline int       GetJoin(void) const { return (M_PENDATA ? M_PENDATA->m_nJoin : 0); };
     inline int       GetCap(void) const { return (M_PENDATA ? M_PENDATA->m_nCap : 0); };
     inline int       GetPS(void) const { return (M_PENDATA ? M_PENDATA->m_hPen : 0); };
-    inline int       GetDashes(wxDash **ptr) const
-    {
-        *ptr = (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*) NULL);
-        return (M_PENDATA ? M_PENDATA->m_nbDash : 0);
-    }
-    inline wxDash*   GetDash() const { return (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*)NULL); };
-    inline int       GetDashCount() const { return (M_PENDATA ? M_PENDATA->m_nbDash : 0); };
 
     inline wxBitmap* GetStipple(void) const { return (M_PENDATA ? (& M_PENDATA->m_vStipple) : (wxBitmap*) NULL); };
 
@@ -103,7 +97,7 @@ public:
     // Useful helper: create the brush resource
     //
     bool     RealizeResource(void);
-    bool     FreeResource(bool bForce = false);
+    bool     FreeResource(bool bForce = FALSE);
     WXHANDLE GetResourceHandle(void);
     bool     IsFree(void) const;
     void     Unshare(void);

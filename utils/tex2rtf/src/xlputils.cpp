@@ -2,8 +2,7 @@
 // Name:        xlputils.cpp
 // Purpose:     Converts Latex to obsolete XLP format
 // Author:      Julian Smart
-// Modified by: Wlodzimiez ABX Skiba 2003/2004 Unicode support
-//              Ron Lee
+// Modified by:
 // Created:     7.9.93
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
@@ -18,25 +17,21 @@
 #endif
 
 #ifndef WX_PRECOMP
+#include "wx/wx.h"
 #endif
 
 #include "tex2any.h"
 #include "tex2rtf.h"
 #include <ctype.h>
 
-#if !WXWIN_COMPATIBILITY_2_4
-static inline wxChar* copystring(const wxChar* s)
-    { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
-#endif
-
 long currentBlockId = -1;
 static TexChunk *descriptionItemArg = NULL;
 static int indentLevel = 0;
 static int noColumns = 0;
 static int currentTab = 0;
-static bool tableVerticalLineLeft = false;
-static bool tableVerticalLineRight = false;
-static bool inTable = false;
+static bool tableVerticalLineLeft = FALSE;
+static bool tableVerticalLineRight = FALSE;
+static bool inTable = FALSE;
 static int citeCount = 1;
 wxList hyperLinks(wxKEY_INTEGER);
 wxList hyperLabels(wxKEY_STRING);
@@ -50,7 +45,7 @@ void PadToTab(int tabPos)
 {
   int currentCol = GetCurrentColumn();
   for (int i = currentCol; i < tabPos; i++)
-    TexOutput(_T(" "), true);
+    TexOutput(" ", TRUE);
 }
 
 static long xlpBlockId = 0;
@@ -62,7 +57,7 @@ long NewBlockId(void)
 // Called on start/end of macro examination
 void XLPOnMacro(int macroId, int no_args, bool start)
 {
-  wxChar buf[100];
+  char buf[100];
   switch (macroId)
   {
   case ltCHAPTER:
@@ -82,17 +77,17 @@ void XLPOnMacro(int macroId, int no_args, bool start)
       long id1 = NewBlockId();
       currentBlockId = NewBlockId();
 
-      startedSections = true;
-      wxFprintf(Contents, _T("\\hy-%d{%ld}{"), hyBLOCK_SMALL_HEADING, id1);
-      wxFprintf(Chapters, _T("\n\\hy-%d{%ld}{"), hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
-      wxFprintf(Index, _T("%ld %ld\n"), id1, currentBlockId);
+      startedSections = TRUE;
+      fprintf(Contents, "\\hy-%d{%ld}{", hyBLOCK_SMALL_HEADING, id1);
+      fprintf(Chapters, "\n\\hy-%d{%ld}{", hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
+      fprintf(Index, "%ld %ld\n", id1, currentBlockId);
 
       OutputCurrentSection(); // Repeat section header
 
-      wxFprintf(Contents, _T("}\n\n"));
-      wxFprintf(Chapters, _T("}\n\n"));
+      fprintf(Contents, "}\n\n");
+      fprintf(Chapters, "}\n\n");
       SetCurrentOutput(Chapters);
-      wxChar *topicName = FindTopicName(GetNextChunk());
+      char *topicName = FindTopicName(GetNextChunk());
       hyperLabels.Append(topicName, (wxObject *)currentBlockId);
     }
     break;
@@ -109,29 +104,29 @@ void XLPOnMacro(int macroId, int no_args, bool start)
 
       if (macroId != ltSECTIONSTAR)
         sectionNo ++;
-
+        
       SetCurrentOutputs(Chapters, Sections);
       long id1 = NewBlockId();
       currentBlockId = NewBlockId();
 
-      startedSections = true;
+      startedSections = TRUE;
 
       if (DocumentStyle == LATEX_ARTICLE)
-        wxFprintf(Contents, _T("\\hy-%d{%ld}{"), hyBLOCK_LARGE_HEADING, id1);
+        fprintf(Contents, "\\hy-%d{%ld}{", hyBLOCK_LARGE_HEADING, id1);
       else
-        wxFprintf(Chapters, _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id1);
-      wxFprintf(Sections, _T("\n\\hy-%d{%ld}{"), hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
-      wxFprintf(Index, _T("%ld %ld\n"), id1, currentBlockId);
+        fprintf(Chapters, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id1);
+      fprintf(Sections, "\n\\hy-%d{%ld}{", hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
+      fprintf(Index, "%ld %ld\n", id1, currentBlockId);
 
       OutputCurrentSection(); // Repeat section header
 
       if (DocumentStyle == LATEX_ARTICLE)
-        wxFprintf(Contents, _T("}\n\n"));
+        fprintf(Contents, "}\n\n");
       else
-        wxFprintf(Chapters, _T("}\n\n"));
-      wxFprintf(Sections, _T("}\n\n"));
+        fprintf(Chapters, "}\n\n");
+      fprintf(Sections, "}\n\n");
       SetCurrentOutput(Sections);
-      wxChar *topicName = FindTopicName(GetNextChunk());
+      char *topicName = FindTopicName(GetNextChunk());
       hyperLabels.Append(topicName, (wxObject *)currentBlockId);
     }
     break;
@@ -151,16 +146,16 @@ void XLPOnMacro(int macroId, int no_args, bool start)
       SetCurrentOutputs(Sections, Subsections);
       long id1 = NewBlockId();
       currentBlockId = NewBlockId();
-      wxFprintf(Sections, _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id1);
-      wxFprintf(Subsections, _T("\n\\hy-%d{%ld}{"), hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
-      wxFprintf(Index, _T("%ld %ld\n"), id1, currentBlockId);
+      fprintf(Sections, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id1);
+      fprintf(Subsections, "\n\\hy-%d{%ld}{", hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
+      fprintf(Index, "%ld %ld\n", id1, currentBlockId);
 
       OutputCurrentSection(); // Repeat section header
 
-      wxFprintf(Sections, _T("}\n\n"));
-      wxFprintf(Subsections, _T("}\n\n"));
+      fprintf(Sections, "}\n\n");
+      fprintf(Subsections, "}\n\n");
       SetCurrentOutput(Subsections);
-      wxChar *topicName = FindTopicName(GetNextChunk());
+      char *topicName = FindTopicName(GetNextChunk());
       hyperLabels.Append(topicName, (wxObject *)currentBlockId);
     }
     break;
@@ -176,16 +171,16 @@ void XLPOnMacro(int macroId, int no_args, bool start)
       SetCurrentOutputs(Subsections, Subsubsections);
       long id1 = NewBlockId();
       currentBlockId = NewBlockId();
-      wxFprintf(Subsections, _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id1);
-      wxFprintf(Subsubsections, _T("\n\\hy-%d{%ld}{"), hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
-      wxFprintf(Index, _T("%ld %ld\n"), id1, currentBlockId);
+      fprintf(Subsections, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id1);
+      fprintf(Subsubsections, "\n\\hy-%d{%ld}{", hyBLOCK_LARGE_VISIBLE_SECTION, currentBlockId);
+      fprintf(Index, "%ld %ld\n", id1, currentBlockId);
 
       OutputCurrentSection(); // Repeat section header
 
-      wxFprintf(Subsections, _T("}\n\n"));
-      wxFprintf(Subsubsections, _T("}\n\n"));
+      fprintf(Subsections, "}\n\n");
+      fprintf(Subsubsections, "}\n\n");
       SetCurrentOutput(Subsubsections);
-      wxChar *topicName = FindTopicName(GetNextChunk());
+      char *topicName = FindTopicName(GetNextChunk());
       hyperLabels.Append(topicName, (wxObject *)currentBlockId);
     }
     break;
@@ -198,27 +193,27 @@ void XLPOnMacro(int macroId, int no_args, bool start)
     if (start)
     {
       long id = NewBlockId();
-      wxFprintf(Subsections, _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id);
+      fprintf(Subsections, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id);
     }
     else
-      wxFprintf(Subsections, _T("}"));
+      fprintf(Subsections, "}");
     break;
   }
   case ltVOID:
 //    if (start)
-//      TexOutput(_T("void"), true);
+//      TexOutput("void", TRUE);
     break;
   case ltBACKSLASHCHAR:
     if (start)
-      TexOutput(_T("\n"), true);
+      TexOutput("\n", TRUE);
     break;
   case ltPAR:
   {
     if (start)
     {
       if (ParSkip > 0)
-        TexOutput(_T("\n"), true);
-      TexOutput(_T("\n"), true);
+        TexOutput("\n", TRUE);
+      TexOutput("\n", TRUE);
     }
     break;
   }
@@ -234,12 +229,12 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start)
     {
-      wxChar buf[100];
+      char buf[100];
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id);
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id);
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltTEXTIT:
@@ -248,12 +243,12 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start)
     {
-      wxChar buf[100];
+      char buf[100];
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_ITALIC, id);
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_ITALIC, id);
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltTTFAMILY:
@@ -263,60 +258,60 @@ void XLPOnMacro(int macroId, int no_args, bool start)
     if (start)
     {
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_TELETYPE, id);
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_TELETYPE, id);
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltSMALL:
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_SMALL_TEXT, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_SMALL_TEXT, NewBlockId());
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltTINY:
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_SMALL_TEXT, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_SMALL_TEXT, NewBlockId());
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltNORMALSIZE:
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_NORMAL, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_NORMAL, NewBlockId());
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltlarge:
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_SMALL_HEADING, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_SMALL_HEADING, NewBlockId());
       TexOutput(buf);
     }
-    else TexOutput(_T("}\n"));
+    else TexOutput("}\n");
     break;
   }
   case ltLARGE:
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_LARGE_HEADING, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_LARGE_HEADING, NewBlockId());
       TexOutput(buf);
     }
-    else TexOutput(_T("}\n"));
+    else TexOutput("}\n");
     break;
   }
   case ltITEMIZE:
@@ -329,7 +324,7 @@ void XLPOnMacro(int macroId, int no_args, bool start)
 //      tabCount ++;
 
 //      if (indentLevel > 0)
-//        TexOutput(_T("\\par\\par\n"));
+//        TexOutput("\\par\\par\n");
       indentLevel ++;
       int listType;
       if (macroId == ltENUMERATE)
@@ -345,38 +340,38 @@ void XLPOnMacro(int macroId, int no_args, bool start)
     {
       indentLevel --;
 
-      if (itemizeStack.GetFirst())
+      if (itemizeStack.First())
       {
-        ItemizeStruc *struc = (ItemizeStruc *)itemizeStack.GetFirst()->GetData();
+        ItemizeStruc *struc = (ItemizeStruc *)itemizeStack.First()->Data();
         delete struc;
-        delete itemizeStack.GetFirst();
+        delete itemizeStack.First();
       }
     }
     break;
   }
   case ltITEM:
   {
-    wxNode *node = itemizeStack.GetFirst();
+    wxNode *node = itemizeStack.First();
     if (node)
     {
-      ItemizeStruc *struc = (ItemizeStruc *)node->GetData();
+      ItemizeStruc *struc = (ItemizeStruc *)node->Data();
       if (!start)
       {
         struc->currentItem += 1;
-        wxChar indentBuf[30];
+        char indentBuf[30];
 
         switch (struc->listType)
         {
           case LATEX_ENUMERATE:
           {
-            wxSnprintf(indentBuf, sizeof(indentBuf), _T("\\hy-%d{%ld}{%d.} "),
+            sprintf(indentBuf, "\\hy-%d{%ld}{%d.} ",
               hyBLOCK_BOLD, NewBlockId(), struc->currentItem);
             TexOutput(indentBuf);
             break;
           }
           case LATEX_ITEMIZE:
           {
-            wxSnprintf(indentBuf, sizeof(indentBuf), _T("\\hy-%d{%ld}{o} "),
+            sprintf(indentBuf, "\\hy-%d{%ld}{o} ",
               hyBLOCK_BOLD, NewBlockId());
             TexOutput(indentBuf);
             break;
@@ -386,16 +381,16 @@ void XLPOnMacro(int macroId, int no_args, bool start)
           {
             if (descriptionItemArg)
             {
-              wxSnprintf(indentBuf, sizeof(indentBuf), _T("\\hy-%d{%ld}{"),
+              sprintf(indentBuf, "\\hy-%d{%ld}{",
                  hyBLOCK_BOLD, NewBlockId());
               TexOutput(indentBuf);
               TraverseChildrenFromChunk(descriptionItemArg);
-              TexOutput(_T("} "));
+              TexOutput("} ");
               descriptionItemArg = NULL;
             }
             break;
           }
-        }
+	}
       }
     }
     break;
@@ -404,18 +399,18 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start && DocumentTitle && DocumentAuthor)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_LARGE_HEADING, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_LARGE_HEADING, NewBlockId());
       TexOutput(buf);
       TraverseChildrenFromChunk(DocumentTitle);
-      TexOutput(_T("}\n\n"));
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_SMALL_HEADING, NewBlockId());
+      TexOutput("}\n\n");
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_SMALL_HEADING, NewBlockId());
       TexOutput(buf);
       TraverseChildrenFromChunk(DocumentAuthor);
-      TexOutput(_T("}\n\n"));
+      TexOutput("}\n\n");
       if (DocumentDate)
       {
         TraverseChildrenFromChunk(DocumentDate);
-        TexOutput(_T("\n"));
+        TexOutput("\n");
       }
     }
     break;
@@ -424,21 +419,21 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start)
     {
-      FILE *fd = wxFopen(ContentsName, _T("r"));
+      FILE *fd = fopen(ContentsName, "r");
       if (fd)
       {
         int ch = getc(fd);
         while (ch != EOF)
         {
-          wxPutc(ch, Chapters);
+          putc(ch, Chapters);
           ch = getc(fd);
         }
         fclose(fd);
       }
       else
       {
-        TexOutput(_T("RUN TEX2RTF AGAIN FOR CONTENTS PAGE\n"));
-        OnInform(_T("Run Tex2RTF again to include contents page."));
+        TexOutput("RUN TEX2RTF AGAIN FOR CONTENTS PAGE\n");
+        OnInform("Run Tex2RTF again to include contents page.");
       }
     }
     break;
@@ -446,32 +441,32 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   case ltHARDY:
   {
     if (start)
-      TexOutput(_T("HARDY"), true);
+      TexOutput("HARDY", TRUE);
     break;
   }
   case ltWXCLIPS:
   {
     if (start)
-      TexOutput(_T("wxCLIPS"), true);
+      TexOutput("wxCLIPS", TRUE);
     break;
   }
   case ltVERBATIM:
   {
     if (start)
     {
-      wxChar buf[100];
+      char buf[100];
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_TELETYPE, id);
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_TELETYPE, id);
       TexOutput(buf);
     }
-    else TexOutput(_T("}"));
+    else TexOutput("}");
     break;
   }
   case ltHRULE:
   {
     if (start)
     {
-      TexOutput(_T("\n------------------------------------------------------------------"), true);
+      TexOutput("\n------------------------------------------------------------------", TRUE);
     }
     break;
   }
@@ -479,7 +474,7 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start)
     {
-      TexOutput(_T("--------------------------------------------------------------------------------"), true);
+      TexOutput("--------------------------------------------------------------------------------", TRUE);
     }
     break;
   }
@@ -498,17 +493,17 @@ void XLPOnMacro(int macroId, int no_args, bool start)
   {
     if (start)
     {
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_TELETYPE, NewBlockId());
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_TELETYPE, NewBlockId());
       TexOutput(buf);
     }
     else
-      TexOutput(_T("}"));
+      TexOutput("}");
     break;
   }
   case ltNUMBEREDBIBITEM:
   {
     if (!start)
-      TexOutput(_T("\n\n"), true);
+      TexOutput("\n\n", TRUE);
     break;
   }
   case ltCAPTION:
@@ -518,17 +513,17 @@ void XLPOnMacro(int macroId, int no_args, bool start)
     {
       figureNo ++;
 
-      wxChar figBuf[40];
+      char figBuf[40];
       if (DocumentStyle != LATEX_ARTICLE)
-        wxSnprintf(figBuf, sizeof(figBuf), _T("Figure %d.%d: "), chapterNo, figureNo);
+        sprintf(figBuf, "Figure %d.%d: ", chapterNo, figureNo);
       else
-        wxSnprintf(figBuf, sizeof(figBuf), _T("Figure %d: "), figureNo);
+        sprintf(figBuf, "Figure %d: ", figureNo);
 
       TexOutput(figBuf);
     }
     else
     {
-      wxChar *topicName = FindTopicName(GetNextChunk());
+      char *topicName = FindTopicName(GetNextChunk());
 
       AddTexRef(topicName, NULL, NULL,
            ((DocumentStyle != LATEX_ARTICLE) ? chapterNo : figureNo),
@@ -546,7 +541,7 @@ void XLPOnMacro(int macroId, int no_args, bool start)
 
 bool XLPOnArgument(int macroId, int arg_no, bool start)
 {
-  wxChar buf[300];
+  char buf[300];
   switch (macroId)
   {
   case ltCHAPTER:
@@ -565,51 +560,52 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
   {
     if (!start && (arg_no == 1))
       currentSection = GetArgChunk();
-    return false;
+    return FALSE;
+    break;
   }
   case ltFUNC:
   {
     if (!start && (arg_no == 1))
-      TexOutput(_T(" "), true);
+      TexOutput(" ", TRUE);
     if (start && (arg_no == 3))
-      TexOutput(_T("("), true);
+      TexOutput("(", TRUE);
     if (!start && (arg_no == 3))
-     TexOutput(_T(")"), true);
+     TexOutput(")", TRUE);
     break;
   }
   case ltPFUNC:
   {
     if (!start && (arg_no == 1))
-      TexOutput(_T(" "), true);
+      TexOutput(" ", TRUE);
 
     if (start && (arg_no == 2))
-      TexOutput(_T("(*"), true);
+      TexOutput("(*", TRUE);
     if (!start && (arg_no == 2))
-      TexOutput(_T(")"), true);
+      TexOutput(")", TRUE);
 
     if (start && (arg_no == 3))
-      TexOutput(_T("("), true);
+      TexOutput("(", TRUE);
     if (!start && (arg_no == 3))
-      TexOutput(_T(")"), true);
+      TexOutput(")", TRUE);
     break;
   }
   case ltCLIPSFUNC:
   {
     if (!start && (arg_no == 1))
-      TexOutput(_T(" "), true);
+      TexOutput(" ", TRUE);
     if (start && (arg_no == 2))
     {
-      TexOutput(_T("("), true);
+      TexOutput("(", TRUE);
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_BOLD, id);
+      sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_BOLD, id);
       TexOutput(buf);
     }
     if (!start && (arg_no == 2))
     {
-      TexOutput(_T("}"));
+      TexOutput("}");
     }
     if (!start && (arg_no == 3))
-     TexOutput(_T(")"), true);
+     TexOutput(")", TRUE);
     break;
   }
   case ltPARAM:
@@ -617,12 +613,12 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
     if (start && (arg_no == 2))
     {
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T(" \\hy-%d{%ld}{"), hyBLOCK_BOLD, id);
+      sprintf(buf, " \\hy-%d{%ld}{", hyBLOCK_BOLD, id);
       TexOutput(buf);
     }
     if (!start && (arg_no == 2))
     {
-      TexOutput(_T("}"));
+      TexOutput("}");
     }
     break;
   }
@@ -631,32 +627,33 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
     if (start && (arg_no == 2))
     {
       long id = NewBlockId();
-      wxSnprintf(buf, sizeof(buf), _T(" \\hy-%d{%ld}{"), hyBLOCK_BOLD, id);
+      sprintf(buf, " \\hy-%d{%ld}{", hyBLOCK_BOLD, id);
       TexOutput(buf);
     }
     if (!start && (arg_no == 2))
     {
-      TexOutput(_T("}"));
+      TexOutput("}");
     }
     break;
   }
   case ltMEMBER:
   {
     if (!start && (arg_no == 1))
-      TexOutput(_T(" "), true);
+      TexOutput(" ", TRUE);
     break;
   }
   case ltLABEL:
   {
-    return false;
+    return FALSE;
+    break;
   }
   case ltREF:
   {
     if (start)
     {
-      wxChar *sec = NULL;
-
-      wxChar *refName = GetArgData();
+      char *sec = NULL;
+      
+      char *refName = GetArgData();
       if (refName)
       {
         TexRef *texRef = FindReference(refName);
@@ -669,7 +666,7 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
       {
         TexOutput(sec);
       }
-      return false;
+      return FALSE;
     }
     break;
   }
@@ -682,20 +679,20 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
       if (start)
       {
         currentBlockId = NewBlockId();
-        wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{"), hyBLOCK_RED_ITALIC, currentBlockId);
+        sprintf(buf, "\\hy-%d{%ld}{", hyBLOCK_RED_ITALIC, currentBlockId);
         TexOutput(buf);
       }
-      else TexOutput(_T("}"));
+      else TexOutput("}");
     }
     if (arg_no == 2)
     {
       if (start)
       {
-        wxChar *label = GetArgData();
+        char *label = GetArgData();
         hyperLinks.Append(currentBlockId, (wxObject *)copystring(label));
       }
-
-      return false;
+      
+      return FALSE;
     }
     break;
   }
@@ -703,15 +700,15 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
   {
     if (arg_no == 1)
     {
-      return true;
+      return TRUE;
     }
     else if (arg_no == 2)
     {
       if (start)
-        TexOutput(_T(" ("));
+        TexOutput(" (");
       else
-        TexOutput(_T(")"));
-      return true;
+        TexOutput(")");
+      return TRUE;
     }
     break;
   }
@@ -720,7 +717,7 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
     if (start && IsArgOptional())
     {
       descriptionItemArg = GetArgChunk();
-      return false;
+      return FALSE;
     }
     break;
   }
@@ -731,21 +728,21 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
     {
       if (start)
       {
-        inTable = true;
-        tableVerticalLineLeft = false;
-        tableVerticalLineRight = false;
+        inTable = TRUE;
+        tableVerticalLineLeft = FALSE;
+        tableVerticalLineRight = FALSE;
 
-        wxChar *alignString = copystring(GetArgData());
+        char *alignString = copystring(GetArgData());
 
         // Count the number of columns
         noColumns = 0;
-        int len = wxStrlen(alignString);
+        int len = strlen(alignString);
         if (len > 0)
         {
           if (alignString[0] == '|')
-            tableVerticalLineLeft = true;
+            tableVerticalLineLeft = TRUE;
           if (alignString[len-1] == '|')
-            tableVerticalLineRight = true;
+            tableVerticalLineRight = TRUE;
         }
 
         for (int i = 0; i < len; i++)
@@ -754,26 +751,26 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
 
 /*
       // Experimental
-      TexOutput(_T("\\brdrt\\brdrs"));
+      TexOutput("\\brdrt\\brdrs");
       if (tableVerticalLineLeft)
-        TexOutput(_T("\\brdrl\\brdrs"));
+        TexOutput("\\brdrl\\brdrs");
       if (tableVerticalLineRight)
-        TexOutput(_T("\\brdrr\\brdrs"));
+        TexOutput("\\brdrr\\brdrs");
 */
 
         // Calculate a rough size for each column
 //        int tabPos = 80/noColumns;
         currentTab = 0;
 
-        return false;
+        return FALSE;
       }
     }
     else if (arg_no == 2 && !start)
     {
-      inTable = false;
+      inTable = FALSE;
     }
     else if (arg_no == 2 && start)
-      return true;
+      return TRUE;
     break;
   }
   case ltMARGINPAR:
@@ -784,33 +781,34 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
   {
     if (start)
     {
-      TexOutput(_T("----------------------------------------------------------------------\n"), true);
-      return true;
+      TexOutput("----------------------------------------------------------------------\n", TRUE);
+      return TRUE;
     }
     else
-      TexOutput(_T("\n----------------------------------------------------------------------\n"), true);
+      TexOutput("\n----------------------------------------------------------------------\n", TRUE);
     break;
   }
   case ltBIBITEM:
   {
-    wxChar buf[100];
+    char buf[100];
     if (arg_no == 1 && start)
     {
-      wxChar *citeKey = GetArgData();
+      char *citeKey = GetArgData();
       TexRef *ref = (TexRef *)TexReferences.Get(citeKey);
       if (ref)
       {
         if (ref->sectionNumber) delete[] ref->sectionNumber;
-        wxSnprintf(buf, sizeof(buf), _T("[%d]"), citeCount);
+        sprintf(buf, "[%d]", citeCount);
         ref->sectionNumber = copystring(buf);
       }
 
-      wxSnprintf(buf, sizeof(buf), _T("\\hy-%d{%ld}{[%d]} "), hyBLOCK_BOLD, NewBlockId(), citeCount);
+      sprintf(buf, "\\hy-%d{%ld}{[%d]} ", hyBLOCK_BOLD, NewBlockId(), citeCount);
       TexOutput(buf);
       citeCount ++;
-      return false;
+      return FALSE;
     }
-    return true;
+    return TRUE;
+    break;
   }
   case ltTHEBIBLIOGRAPHY:
   {
@@ -823,27 +821,28 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
       SetCurrentOutputs(Contents, Chapters);
       long id1 = NewBlockId();
       long id2 = NewBlockId();
-      wxFprintf(Contents, _T("\\hy-%d{%ld}{%s}\n"), hyBLOCK_SMALL_HEADING, id1, ReferencesNameString);
-      wxFprintf(Chapters, _T("\\hy-%d{%ld}{%s}\n\n\n"), hyBLOCK_LARGE_VISIBLE_SECTION, id2, ReferencesNameString);
-      wxFprintf(Index, _T("%ld %ld\n"), id1, id2);
+      fprintf(Contents, "\\hy-%d{%ld}{%s}\n", hyBLOCK_SMALL_HEADING, id1, ReferencesNameString);
+      fprintf(Chapters, "\\hy-%d{%ld}{%s}\n\n\n", hyBLOCK_LARGE_VISIBLE_SECTION, id2, ReferencesNameString);
+      fprintf(Index, "%ld %ld\n", id1, id2);
 
       SetCurrentOutput(Chapters);
-      return false;
+      return FALSE;
     }
     if (!start && (arg_no == 2))
     {
     }
-    return true;
+    return TRUE;
+    break;
   }
   case ltTWOCOLITEM:
   case ltTWOCOLITEMRULED:
   {
     if (start && (arg_no == 2))
-      TexOutput(_T("\n    "));
+      TexOutput("\n    ");
 
     if (!start && (arg_no == 2))
-      TexOutput(_T("\n"));
-    return true;
+      TexOutput("\n");
+    return TRUE;
   }
   /*
    * Accents
@@ -853,329 +852,337 @@ bool XLPOnArgument(int macroId, int arg_no, bool start)
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T('e'):
-           TexOutput(_T("e"));
+          case 'e':
+           TexOutput("e");
            break;
-          case _T('i'):
-           TexOutput(_T("i"));
+          case 'i':
+           TexOutput("i");
            break;
-          case _T('o'):
-           TexOutput(_T("o"));
+          case 'o':
+           TexOutput("o");
            break;
-          case _T('u'):
-           TexOutput(_T("u"));
+          case 'u':
+           TexOutput("u");
            break;
-          case _T('A'):
-           TexOutput(_T("a"));
+          case 'A':
+           TexOutput("a");
            break;
-          case _T('E'):
-           TexOutput(_T("E"));
+          case 'E':
+           TexOutput("E");
            break;
-          case _T('I'):
-           TexOutput(_T("I"));
+          case 'I':
+           TexOutput("I");
            break;
-          case _T('O'):
-           TexOutput(_T("O"));
+          case 'O':
+           TexOutput("O");
            break;
-          case _T('U'):
-           TexOutput(_T("U"));
+          case 'U':
+           TexOutput("U");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_ACUTE:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T('e'):
-           TexOutput(_T("e"));
+          case 'e':
+           TexOutput("e");
            break;
-          case _T('i'):
-           TexOutput(_T("i"));
+          case 'i':
+           TexOutput("i");
            break;
-          case _T('o'):
-           TexOutput(_T("o"));
+          case 'o':
+           TexOutput("o");
            break;
-          case _T('u'):
-           TexOutput(_T("u"));
+          case 'u':
+           TexOutput("u");
            break;
-          case _T('y'):
-           TexOutput(_T("y"));
+          case 'y':
+           TexOutput("y");
            break;
-          case _T('A'):
-           TexOutput(_T("A"));
+          case 'A':
+           TexOutput("A");
            break;
-          case _T('E'):
-           TexOutput(_T("E"));
+          case 'E':
+           TexOutput("E");
            break;
-          case _T('I'):
-           TexOutput(_T("I"));
+          case 'I':
+           TexOutput("I");
            break;
-          case _T('O'):
-           TexOutput(_T("O"));
+          case 'O':
+           TexOutput("O");
            break;
-          case _T('U'):
-           TexOutput(_T("U"));
+          case 'U':
+           TexOutput("U");
            break;
-          case _T('Y'):
-           TexOutput(_T("Y"));
+          case 'Y':
+           TexOutput("Y");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_CARET:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T('e'):
-           TexOutput(_T("e"));
+          case 'e':
+           TexOutput("e");
            break;
-          case _T('i'):
-           TexOutput(_T("i"));
+          case 'i':
+           TexOutput("i");
            break;
-          case _T('o'):
-           TexOutput(_T("o"));
+          case 'o':
+           TexOutput("o");
            break;
-          case _T('u'):
-           TexOutput(_T("u"));
+          case 'u':
+           TexOutput("u");
            break;
-          case _T('A'):
-           TexOutput(_T("A"));
+          case 'A':
+           TexOutput("A");
            break;
-          case _T('E'):
-           TexOutput(_T("E"));
+          case 'E':
+           TexOutput("E");
            break;
-          case _T('I'):
-           TexOutput(_T("I"));
+          case 'I':
+           TexOutput("I");
            break;
-          case _T('O'):
-           TexOutput(_T("O"));
+          case 'O':
+           TexOutput("O");
            break;
-          case _T('U'):
-           TexOutput(_T("U"));
+          case 'U':
+           TexOutput("U");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_TILDE:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T(' '):
-           TexOutput(_T("~"));
+          case ' ':
+           TexOutput("~");
            break;
-          case _T('n'):
-           TexOutput(_T("n"));
+          case 'n':
+           TexOutput("n");
            break;
-          case _T('o'):
-           TexOutput(_T("o"));
+          case 'o':
+           TexOutput("o");
            break;
-          case _T('A'):
-           TexOutput(_T("A"));
+          case 'A':
+           TexOutput("A");
            break;
-          case _T('N'):
-           TexOutput(_T("N"));
+          case 'N':
+           TexOutput("N");
            break;
-          case _T('O'):
-           TexOutput(_T("O"));
+          case 'O':
+           TexOutput("O");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_UMLAUT:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T('e'):
-           TexOutput(_T("e"));
+          case 'e':
+           TexOutput("e");
            break;
-          case _T('i'):
-           TexOutput(_T("i"));
+          case 'i':
+           TexOutput("i");
            break;
-          case _T('o'):
-           TexOutput(_T("o"));
+          case 'o':
+           TexOutput("o");
            break;
-          case _T('u'):
-           TexOutput(_T("u"));
+          case 'u':
+           TexOutput("u");
            break;
-          case _T('y'):
-           TexOutput(_T("y"));
+          case 'y':
+           TexOutput("y");
            break;
-          case _T('A'):
-           TexOutput(_T("A"));
+          case 'A':
+           TexOutput("A");
            break;
-          case _T('E'):
-           TexOutput(_T("E"));
+          case 'E':
+           TexOutput("E");
            break;
-          case _T('I'):
-           TexOutput(_T("I"));
+          case 'I':
+           TexOutput("I");
            break;
-          case _T('O'):
-           TexOutput(_T("O"));
+          case 'O':
+           TexOutput("O");
            break;
-          case _T('U'):
-           TexOutput(_T("U"));
+          case 'U':
+           TexOutput("U");
            break;
-          case _T('Y'):
-           TexOutput(_T("Y"));
+          case 'Y':
+           TexOutput("Y");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_DOT:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('a'):
-           TexOutput(_T("a"));
+          case 'a':
+           TexOutput("a");
            break;
-          case _T('A'):
-           TexOutput(_T("A"));
+          case 'A':
+           TexOutput("A");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   case ltACCENT_CADILLA:
   {
     if (start)
     {
-      wxChar *val = GetArgData();
+      char *val = GetArgData();
       if (val)
       {
         switch (val[0])
         {
-          case _T('c'):
-           TexOutput(_T("c"));
+          case 'c':
+           TexOutput("c");
            break;
-          case _T('C'):
-           TexOutput(_T("C"));
+          case 'C':
+           TexOutput("C");
            break;
           default:
            break;
         }
       }
     }
-    return false;
+    return FALSE;
+    break;
   }
   default:
   {
     return DefaultOnArgument(macroId, arg_no, start);
+    break;
   }
   }
-  return true;
+  return TRUE;
 }
 
 bool XLPGo(void)
 {
   xlpBlockId = 0;
 
-  if (!InputFile.empty() && !OutputFile.empty())
+  if (InputFile && OutputFile)
   {
-    Contents = wxFopen(TmpContentsName, _T("w"));
-    Chapters = wxFopen(_T("chapters.xlp"), _T("w"));
-    Sections = wxFopen(_T("sections.xlp"), _T("w"));
-    Subsections = wxFopen(_T("subsections.xlp"), _T("w"));
-    Subsubsections = wxFopen(_T("subsubsections.xlp"), _T("w"));
-    Index = wxFopen(_T("index.xlp"), _T("w"));
+    Contents = fopen(TmpContentsName, "w");
+    Chapters = fopen("chapters.xlp", "w");
+    Sections = fopen("sections.xlp", "w");
+    Subsections = fopen("subsections.xlp", "w");
+    Subsubsections = fopen("subsubsections.xlp", "w");
+    Index = fopen("index.xlp", "w");
 
     // Insert invisible section marker at beginning
-    wxFprintf(Chapters, _T("\\hy-%d{%ld}{%s}\n"),
-                hyBLOCK_INVISIBLE_SECTION, NewBlockId(), _T("\n"));
+    fprintf(Chapters, "\\hy-%d{%ld}{%s}\n",
+                hyBLOCK_INVISIBLE_SECTION, NewBlockId(), "\n");
 
-    wxFprintf(Contents, _T("\\hy-%d{%ld}{%s}\n\n"),
+    fprintf(Contents, "\\hy-%d{%ld}{%s}\n\n",
 //                hyBLOCK_LARGE_HEADING, NewBlockId(), "\n\n%s\n\n", ContentsNameString);
                 hyBLOCK_LARGE_HEADING, NewBlockId(), ContentsNameString);
 
     SetCurrentOutput(Chapters);
 
-    wxFprintf(Index, _T("\n\\hyindex{\n\"%s\"\n"),
-             contentsString ? contentsString : _T("WXHELPCONTENTS"));
+    fprintf(Index, "\n\\hyindex{\n\"%s\"\n",
+             contentsString ? contentsString : "WXHELPCONTENTS");
     TraverseDocument();
 
-    wxNode *node = hyperLinks.GetFirst();
+    wxNode *node = hyperLinks.First();
     while (node)
     {
       long from = node->GetKeyInteger();
-      wxChar *label = (wxChar *)node->GetData();
+      char *label = (char *)node->Data();
       wxNode *otherNode = hyperLabels.Find(label);
       if (otherNode)
       {
-        long to = (long)otherNode->GetData();
-        wxFprintf(Index, _T("%ld %ld\n"), from, to);
+        long to = (long)otherNode->Data();
+        fprintf(Index, "%ld %ld\n", from, to);
       }
-      node = node->GetNext();
+      node = node->Next();
     }
 
-    wxFprintf(Index, _T("}\n"));
+    fprintf(Index, "}\n");
 
     fclose(Contents); Contents = NULL;
     fclose(Chapters); Chapters = NULL;
@@ -1192,20 +1199,21 @@ bool XLPGo(void)
       wxRemoveFile(TmpContentsName);
     }
 
-    wxConcatFiles(_T("chapters.xlp"), _T("sections.xlp"), _T("tmp2.xlp"));
-    wxConcatFiles(_T("tmp2.xlp"), _T("subsections.xlp"), _T("tmp1.xlp"));
-    wxConcatFiles(_T("tmp1.xlp"), _T("subsubsections.xlp"), _T("tmp2.xlp"));
-    wxConcatFiles(_T("tmp2.xlp"), _T("index.xlp"), OutputFile);
+    wxConcatFiles("chapters.xlp", "sections.xlp", "tmp2.xlp");
+    wxConcatFiles("tmp2.xlp", "subsections.xlp", "tmp1.xlp");
+    wxConcatFiles("tmp1.xlp", "subsubsections.xlp", "tmp2.xlp");
+    wxConcatFiles("tmp2.xlp", "index.xlp", OutputFile);
 
-    wxRemoveFile(_T("tmp1.xlp"));
-    wxRemoveFile(_T("tmp2.xlp"));
+    wxRemoveFile("tmp1.xlp");
+    wxRemoveFile("tmp2.xlp");
 
-    wxRemoveFile(_T("chapters.xlp"));
-    wxRemoveFile(_T("sections.xlp"));
-    wxRemoveFile(_T("subsections.xlp"));
-    wxRemoveFile(_T("subsubsections.xlp"));
-    wxRemoveFile(_T("index.xlp"));
-    return true;
+    wxRemoveFile("chapters.xlp");
+    wxRemoveFile("sections.xlp");
+    wxRemoveFile("subsections.xlp");
+    wxRemoveFile("subsubsections.xlp");
+    wxRemoveFile("index.xlp");
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
+

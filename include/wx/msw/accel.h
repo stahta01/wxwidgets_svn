@@ -20,7 +20,10 @@ class WXDLLEXPORT wxAcceleratorTable : public wxObject
 {
 public:
     // default ctor
-    wxAcceleratorTable() { }
+    wxAcceleratorTable();
+
+    // copy ctor
+    wxAcceleratorTable(const wxAcceleratorTable& accel) { Ref(accel); }
 
     // load from .rc resource (Windows specific)
     wxAcceleratorTable(const wxString& resource);
@@ -28,7 +31,11 @@ public:
     // initialize from array
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
 
-    bool operator==(const wxAcceleratorTable& accel) const;
+    virtual ~wxAcceleratorTable();
+
+    wxAcceleratorTable& operator = (const wxAcceleratorTable& accel) { if ( *this != accel ) Ref(accel); return *this; }
+    bool operator==(const wxAcceleratorTable& accel) const
+        { return m_refData == accel.m_refData; } // FIXME: this is wrong (VZ)
     bool operator!=(const wxAcceleratorTable& accel) const
         { return !(*this == accel); }
 
@@ -36,7 +43,7 @@ public:
     void SetHACCEL(WXHACCEL hAccel);
     WXHACCEL GetHACCEL() const;
 
-    // translate the accelerator, return true if done
+    // translate the accelerator, return TRUE if done
     bool Translate(wxWindow *window, WXMSG *msg) const;
 
 private:

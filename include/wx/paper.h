@@ -6,7 +6,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PAPERH__
@@ -16,11 +16,10 @@
 #include "wx/event.h"
 #include "wx/cmndata.h"
 #include "wx/intl.h"
-#include "wx/hashmap.h"
 
 /*
  * Paper type: see defs.h for wxPaperSize enum.
- * A wxPrintPaperType can have an id and a name, or just a name and wxPAPER_NONE,
+ * A wxPrintePaperType can have an id and a name, or just a name and wxPAPER_NONE,
  * so you can add further paper types without needing new ids.
  */
 
@@ -66,15 +65,10 @@ private:
     DECLARE_DYNAMIC_CLASS(wxPrintPaperType)
 };
 
-WX_DECLARE_STRING_HASH_MAP(wxPrintPaperType*, wxStringToPrintPaperTypeHashMap);
-
-class WXDLLEXPORT wxPrintPaperTypeList;
-
-class WXDLLEXPORT wxPrintPaperDatabase
+class WXDLLEXPORT wxPrintPaperDatabase: public wxList
 {
 public:
     wxPrintPaperDatabase();
-    ~wxPrintPaperDatabase();
 
     void CreateDatabase();
     void ClearDatabase();
@@ -106,16 +100,11 @@ public:
     // Get the paper size
     wxPaperSize GetSize(const wxSize& size);
 
-    //
-    wxPrintPaperType* Item(size_t index) const;
-    size_t GetCount() const;
 private:
-    wxStringToPrintPaperTypeHashMap* m_map;
-    wxPrintPaperTypeList* m_list;
-    // DECLARE_DYNAMIC_CLASS(wxPrintPaperDatabase)
+    DECLARE_DYNAMIC_CLASS(wxPrintPaperDatabase)
 };
 
-extern WXDLLEXPORT_DATA(wxPrintPaperDatabase*) wxThePrintPaperDatabase;
+WXDLLEXPORT_DATA(extern wxPrintPaperDatabase*) wxThePrintPaperDatabase;
 
 
 #endif

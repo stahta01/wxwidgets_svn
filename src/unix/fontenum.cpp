@@ -17,9 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
+#include "wx/defs.h"
 #include "wx/dynarray.h"
 #include "wx/string.h"
 #include "wx/regex.h"
@@ -28,7 +26,6 @@
 #include "wx/fontmap.h"
 #include "wx/fontenum.h"
 #include "wx/fontutil.h"
-#include "wx/encinfo.h"
 
 // ----------------------------------------------------------------------------
 // Pango
@@ -41,68 +38,114 @@
 #ifdef __WXGTK20__
 #include "gtk/gtk.h"
 extern GtkWidget *wxGetRootWindow();
-#endif // __WXGTK20__
+#endif
 
-extern "C" int wxCMPFUNC_CONV
-wxCompareFamilies (const void *a, const void *b)
+static int
+cmp_families (const void *a, const void *b)
 {
-  const char *a_name = pango_font_family_get_name (*(PangoFontFamily **)a);
-  const char *b_name = pango_font_family_get_name (*(PangoFontFamily **)b);
-
-  return g_utf8_collate (a_name, b_name);
+    const char *a_name = pango_font_family_get_name (*(PangoFontFamily **)a);
+    const char *b_name = pango_font_family_get_name (*(PangoFontFamily **)b);
+  
+    return g_utf8_collate (a_name, b_name);
 }
 
-// I admit I don't yet understand encodings with Pango
+static PangoLanguage *font_test_language;
+
+static gboolean font_is_latin( PangoContext *context, PangoFontDescription *desc )
+{
+    PangoFont *font = pango_context_load_font( context, desc );
+    if (!font) return FALSE;
+    
+    font_test_language = pango_language_from_string( "eng" );
+    
+    PangoCoverage *coverage =pango_font_get_coverage( font, font_test_language );
+    if (!coverage) return FALSE;
+    
+    if ((pango_coverage_get(coverage, 'i') == PANGO_COVERAGE_EXACT) &&
+        (pango_coverage_get(coverage, 'W') == PANGO_COVERAGE_EXACT))
+    {
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
 bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
                                           bool fixedWidthOnly)
 {
-#if defined(__WXGTK20__) || !defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
-    if ( fixedWidthOnly
-#if defined(__WXGTK24__)
-        && (gtk_check_version(2,4,0) != NULL)
-#endif
-       )
-{
-        OnFacename( wxT("monospace") );
-    }
-    else
-#endif // __WXGTK20__ || !HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE
-    {
-        PangoFontFamily **families = NULL;
-        gint n_families = 0;
-        pango_context_list_families (
+    PangoContext *context =
 #ifdef __WXGTK20__
-            gtk_widget_get_pango_context( wxGetRootWindow() ),
+            gtk_widget_get_pango_context( wxGetRootWindow() );
 #else
-            wxTheApp->GetPangoContext(),
+            wxTheApp->GetPangoContext();
 #endif
-            &families, &n_families );
-        qsort (families, n_families, sizeof (PangoFontFamily *), wxCompareFamilies);
+    PangoFontFamily **families = NULL;
+    gint n_families = 0;
+    pango_context_list_families( context,  &families, &n_families );
+    qsort (families, n_families, sizeof (PangoFontFamily *), cmp_families);
 
-        for (int i=0; i<n_families; i++)
+    for (int i=0; i<n_families; i++)
+    {
+        const gchar *name = pango_font_family_get_name( families[i] );
+            
+        if (fixedWidthOnly)
         {
-#if defined(__WXGTK24__) || defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
-            if (!fixedWidthOnly || (
-#ifdef __WXGTK24__
-                !gtk_check_version(2,4,0) &&
-#endif
-                pango_font_family_is_monospace(families[i])
-                                   ) )
-#endif
+            if (
+                 (strstr( name, "mono") == NULL) &&
+                 (strstr( name, "Mono") == NULL) &&
+                 (strstr( name, "MONO") == NULL) &&
+                 (strstr( name, "fixed") == NULL) &&
+                 (strstr( name, "Fixed") == NULL) &&
+                 (strstr( name, "FIXED") == NULL) &&
+                 (strstr( name, "terminal") == NULL) &&
+                 (strstr( name, "Terminal") == NULL) &&
+                 (strstr( name, "TERMINAL") == NULL) &&
+                 (strstr( name, "cour") == NULL) &&
+                 (strstr( name, "Cour") == NULL) &&
+                 (strstr( name, "COUR") == NULL) 
+               )
             {
-                const gchar *name = pango_font_family_get_name(families[i]);
-                OnFacename(wxString(name, wxConvUTF8));
+                continue;
             }
+        
+            PangoFontDescription *desc = pango_font_description_new();
+            pango_font_description_set_family( desc, name );
+            pango_font_description_set_size( desc, 12 * PANGO_SCALE );
+                
+            if (!font_is_latin( context, desc))
+            {
+                pango_font_description_free( desc );
+                continue;
+            }
+                
+            PangoLayout *layout = pango_layout_new(context);
+            pango_layout_set_font_description(layout, desc);
+                
+            pango_layout_set_text(layout, "i", 1 );
+            int i_width = 0;
+            pango_layout_get_size(layout, &i_width, NULL);
+                
+            pango_layout_set_text(layout, "W", 1 );
+            int W_width = 0;
+            pango_layout_get_size(layout, &W_width, NULL);
+               
+            g_object_unref( G_OBJECT( layout ) );
+            pango_font_description_free( desc );
+               
+            if (W_width != i_width) continue;
+            if (i_width == 0) continue;
         }
-        g_free(families);
+        
+        wxString tmp( name, wxConvUTF8 );
+        OnFacename( tmp );
     }
-
-    return true;
-}
+    
+    return TRUE;
+    }
 
 bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 {
-    return false;
+    return FALSE;
 }
 
 
@@ -205,7 +248,7 @@ static bool ProcessFamiliesFromFontList(wxFontEnumerator *This,
             if ( !This->OnFacename(fam) )
             {
                 // stop enumerating
-                return false;
+                return FALSE;
             }
 
             families.Add(fam);
@@ -213,7 +256,7 @@ static bool ProcessFamiliesFromFontList(wxFontEnumerator *This,
         //else: already seen
     }
 
-    return true;
+    return TRUE;
 }
 #endif
   // wxUSE_NANOX
@@ -226,14 +269,14 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
                                           bool fixedWidthOnly)
 {
 #if wxUSE_NANOX
-    return false;
+    return FALSE;
 #else
     int nFonts;
     char **fonts;
 
     if ( fixedWidthOnly )
     {
-        bool cont = true;
+        bool cont = TRUE;
         fonts = CreateFontList(wxT('m'), encoding, &nFonts);
         if ( fonts )
         {
@@ -244,13 +287,13 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
 
         if ( !cont )
         {
-            return true;
+            return TRUE;
         }
 
         fonts = CreateFontList(wxT('c'), encoding, &nFonts);
         if ( !fonts )
         {
-            return true;
+            return TRUE;
         }
     }
     else
@@ -264,14 +307,14 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
             wxASSERT_MSG(encoding != wxFONTENCODING_SYSTEM,
                          wxT("No fonts at all on this system?"));
 
-            return false;
+            return FALSE;
         }
     }
 
     (void)ProcessFamiliesFromFontList(this, fonts, nFonts);
 
     XFreeFontNames(fonts);
-    return true;
+    return TRUE;
 #endif
     // wxUSE_NANOX
 }
@@ -279,11 +322,11 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
 bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 {
 #if wxUSE_NANOX
-    return false;
+    return FALSE;
 #else
     wxString pattern;
     pattern.Printf(wxT("-*-%s-*-*-*-*-*-*-*-*-*-*-*-*"),
-                   family.empty() ? wxT("*") : family.c_str());
+                   family.IsEmpty() ? wxT("*") : family.c_str());
 
     // get the list of all fonts
     int nFonts;
@@ -293,7 +336,7 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
     if ( !fonts )
     {
         // unknown family?
-        return false;
+        return FALSE;
     }
 
     // extract the list of (unique) encodings
@@ -313,7 +356,7 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
         dash = strchr(familyFont, '-');
         *dash = '\0'; // !NULL because Matches() above succeeded
 
-        if ( !family.empty() && (family != familyFont) )
+        if ( !family.IsEmpty() && (family != familyFont) )
         {
             // family doesn't match
             continue;
@@ -344,9 +387,10 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 
     XFreeFontNames(fonts);
 
-    return true;
+    return TRUE;
 #endif
     // wxUSE_NANOX
 }
 
-#endif // !wxUSE_PANGO
+#endif
+   // __WXGTK20__

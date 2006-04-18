@@ -91,7 +91,7 @@ void MyCanvas::OnEraseBackground(wxEraseEvent& event)
     {
         wxSize sz = GetClientSize();
         wxRect rect(0, 0, sz.x, sz.y);
-
+        
         if (event.GetDC())
         {
             wxGetApp().TileBitmap(rect, *(event.GetDC()), wxGetApp().GetBackgroundBitmap());
@@ -143,7 +143,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
         {
             m_currentlyHighlighted->Draw(dc);
         }
-        m_draggedShape->SetShow(true);
+        m_draggedShape->SetShow(TRUE);
         m_draggedShape->Draw(dc);
 
         m_currentlyHighlighted = (DragShape*) NULL;
@@ -169,7 +169,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
                 delete m_dragImage;
 
             // Erase the dragged shape from the canvas
-            m_draggedShape->SetShow(false);
+            m_draggedShape->SetShow(FALSE);
             wxClientDC dc(this);
             EraseShape(m_draggedShape, dc);
             DrawShapes(dc);
@@ -188,7 +188,15 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
                 }
                 case SHAPE_DRAG_ICON:
                 {
-                    m_dragImage = new wxDragImage(wxICON(dragicon), wxCursor(wxCURSOR_HAND));
+                    // Can anyone explain why this test is necessary,
+                    // to prevent a gcc error?
+#if defined(__WXMOTIF__) || defined(__WXX11__)
+                    wxIcon icon(dragicon_xpm);
+#else
+                    wxIcon icon(wxICON(dragicon));
+#endif
+                    
+                    m_dragImage = new wxDragImage(icon, wxCursor(wxCURSOR_HAND));
                     break;
                 }
             }
@@ -197,19 +205,19 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 
             // The offset between the top-left of the shape image and the current shape position
             wxPoint beginDragHotSpot = m_dragStartPos - m_draggedShape->GetPosition();
-
+            
             // Now we do this inside the implementation: always assume
             // coordinates relative to the capture window (client coordinates)
 
             //if (fullScreen)
             //    beginDragHotSpot -= ClientToScreen(wxPoint(0, 0));
-
+            
             if (!m_dragImage->BeginDrag(beginDragHotSpot, this, fullScreen))
             {
                 delete m_dragImage;
                 m_dragImage = (wxDragImage*) NULL;
                 m_dragMode = TEST_DRAG_NONE;
-
+                
             } else
             {
                 m_dragImage->Move(event.GetPosition());
@@ -221,17 +229,17 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
             // We're currently dragging. See if we're over another shape.
             DragShape* onShape = FindShape(event.GetPosition());
 
-            bool mustUnhighlightOld = false;
-            bool mustHighlightNew = false;
+            bool mustUnhighlightOld = FALSE;
+            bool mustHighlightNew = FALSE;
 
             if (m_currentlyHighlighted)
             {
                 if ((onShape == (DragShape*) NULL) || (m_currentlyHighlighted != onShape))
-                    mustUnhighlightOld = true;
+                    mustUnhighlightOld = TRUE;
             }
 
             if (onShape && (onShape != m_currentlyHighlighted) && onShape->IsShown())
-                mustHighlightNew = true;
+                mustHighlightNew = TRUE;
 
             if (mustUnhighlightOld || mustHighlightNew)
                 m_dragImage->Hide();
@@ -262,13 +270,13 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 
 void MyCanvas::DrawShapes(wxDC& dc)
 {
-    wxList::compatibility_iterator node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         if (shape->IsShown())
           shape->Draw(dc);
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
@@ -279,7 +287,7 @@ void MyCanvas::EraseShape(DragShape* shape, wxDC& dc)
 
     wxRect rect2(shape->GetRect());
     dc.SetClippingRegion(rect2.x, rect2.y, rect2.width, rect2.height);
-
+        
     wxGetApp().TileBitmap(rect, dc, wxGetApp().GetBackgroundBitmap());
 
     dc.DestroyClippingRegion();
@@ -287,25 +295,25 @@ void MyCanvas::EraseShape(DragShape* shape, wxDC& dc)
 
 void MyCanvas::ClearShapes()
 {
-    wxList::compatibility_iterator node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         delete shape;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_displayList.Clear();
 }
 
 DragShape* MyCanvas::FindShape(const wxPoint& pt) const
 {
-    wxList::compatibility_iterator node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         if (shape->HitTest(pt))
             return shape;
-        node = node->GetNext();
+        node = node->Next();
     }
     return (DragShape*) NULL;
 }
@@ -319,40 +327,37 @@ BEGIN_EVENT_TABLE(MyFrame,wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
-: wxFrame( (wxFrame *)NULL, wxID_ANY, _T("wxDragImage sample"),
-          wxPoint(20,20), wxSize(470,360) )
+       : wxFrame( (wxFrame *)NULL, -1, _T("wxDragImage sample"),
+                  wxPoint(20,20), wxSize(470,360) )
 {
-    wxMenu *file_menu = new wxMenu();
-    file_menu->Append( wxID_ABOUT, _T("&About..."));
-    file_menu->AppendCheckItem( TEST_USE_SCREEN, _T("&Use whole screen for dragging"), _T("Use whole screen"));
-    file_menu->Append( wxID_EXIT, _T("E&xit"));
+  wxMenu *file_menu = new wxMenu();
+  file_menu->Append( wxID_ABOUT, _T("&About..."));
+  file_menu->Append( TEST_USE_SCREEN, _T("&Use whole screen for dragging"), _T("Use whole screen"), TRUE);
+  file_menu->Append( wxID_EXIT, _T("E&xit"));
 
-    wxMenuBar *menu_bar = new wxMenuBar();
-    menu_bar->Append(file_menu, _T("&File"));
+  wxMenuBar *menu_bar = new wxMenuBar();
+  menu_bar->Append(file_menu, _T("&File"));
 
-    SetIcon(wxICON(mondrian));
-    SetMenuBar( menu_bar );
+  SetMenuBar( menu_bar );
 
-#if wxUSE_STATUSBAR
-    CreateStatusBar(2);
-    int widths[] = { -1, 100 };
-    SetStatusWidths( 2, widths );
-#endif // wxUSE_STATUSBAR
+  CreateStatusBar(2);
+  int widths[] = { -1, 100 };
+  SetStatusWidths( 2, widths );
 
-    m_canvas = new MyCanvas( this, wxID_ANY, wxPoint(0,0), wxSize(10,10) );
+  m_canvas = new MyCanvas( this, -1, wxPoint(0,0), wxSize(10,10) );
 }
 
 void MyFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
 {
-    Close( true );
+  Close( TRUE );
 }
 
 void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 {
     (void)wxMessageBox( _T("wxDragImage demo\n")
-        _T("Julian Smart (c) 2000"),
-        _T("About wxDragImage Demo"),
-        wxICON_INFORMATION | wxOK );
+                        _T("Julian Smart (c) 2000"),
+                        _T("About wxDragImage Demo"), 
+                        wxICON_INFORMATION | wxOK );
 }
 
 //-----------------------------------------------------------------------------
@@ -366,7 +371,7 @@ END_EVENT_TABLE()
 MyApp::MyApp()
 {
     // Drag across whole screen
-    m_useScreen = false;
+    m_useScreen = FALSE;
 }
 
 bool MyApp::OnInit()
@@ -425,9 +430,9 @@ bool MyApp::OnInit()
     m_background = bitmap;
 #endif
 
-    frame->Show( true );
+    frame->Show( TRUE );
 
-    return true;
+    return TRUE;
 }
 
 int MyApp::OnExit()
@@ -439,17 +444,17 @@ bool MyApp::TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap)
 {
     int w = bitmap.GetWidth();
     int h = bitmap.GetHeight();
-
+    
     int i, j;
     for (i = rect.x; i < rect.x + rect.width; i += w)
     {
         for (j = rect.y; j < rect.y + rect.height; j+= h)
             dc.DrawBitmap(bitmap, i, j);
     }
-    return true;
+    return TRUE;
 }
 
-void MyApp::OnUseScreen(wxCommandEvent& WXUNUSED(event))
+void MyApp::OnUseScreen(wxCommandEvent& event)
 {
     m_useScreen = !m_useScreen;
 }
@@ -462,7 +467,11 @@ DragShape::DragShape(const wxBitmap& bitmap)
     m_pos.x = 0;
     m_pos.y = 0;
     m_dragMethod = SHAPE_DRAG_BITMAP;
-    m_show = true;
+    m_show = TRUE;
+}
+
+DragShape::~DragShape()
+{
 }
 
 bool DragShape::HitTest(const wxPoint& pt) const
@@ -477,13 +486,13 @@ bool DragShape::Draw(wxDC& dc, int op)
     {
         wxMemoryDC memDC;
         memDC.SelectObject(m_bitmap);
-
+    
         dc.Blit(m_pos.x, m_pos.y, m_bitmap.GetWidth(), m_bitmap.GetHeight(),
-            & memDC, 0, 0, op, true);
+            & memDC, 0, 0, op, TRUE);
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 

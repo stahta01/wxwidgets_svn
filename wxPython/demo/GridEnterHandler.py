@@ -1,12 +1,11 @@
-
-import  wx
-import  wx.grid as  gridlib
+from wxPython.wx import *
+from wxPython.grid import *
 
 #---------------------------------------------------------------------------
 
-class NewEnterHandlingGrid(gridlib.Grid):
+class NewEnterHandlingGrid(wxGrid):
     def __init__(self, parent, log):
-        gridlib.Grid.__init__(self, parent, -1)
+        wxGrid.__init__(self, parent, -1)
         self.log = log
 
         self.CreateGrid(20, 6)
@@ -16,11 +15,11 @@ class NewEnterHandlingGrid(gridlib.Grid):
         self.SetColSize(0, 150)
         self.SetColSize(5, 150)
 
-        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        EVT_KEY_DOWN(self, self.OnKeyDown)
 
 
     def OnKeyDown(self, evt):
-        if evt.KeyCode() != wx.WXK_RETURN:
+        if evt.KeyCode() != WXK_RETURN:
             evt.Skip()
             return
 
@@ -30,10 +29,8 @@ class NewEnterHandlingGrid(gridlib.Grid):
 
         self.DisableCellEditControl()
         success = self.MoveCursorRight(evt.ShiftDown())
-
         if not success:
             newRow = self.GetGridCursorRow() + 1
-
             if newRow < self.GetTable().GetNumberRows():
                 self.SetGridCursor(newRow, 0)
                 self.MakeCellVisible(newRow, 0)
@@ -45,9 +42,9 @@ class NewEnterHandlingGrid(gridlib.Grid):
 
 #---------------------------------------------------------------------------
 
-class TestFrame(wx.Frame):
+class TestFrame(wxFrame):
     def __init__(self, parent, log):
-        wx.Frame.__init__(self, parent, -1, "Simple Grid Demo", size=(640,480))
+        wxFrame.__init__(self, parent, -1, "Simple Grid Demo", size=(640,480))
         grid = NewEnterHandlingGrid(self, log)
 
 
@@ -56,7 +53,7 @@ class TestFrame(wx.Frame):
 
 if __name__ == '__main__':
     import sys
-    app = wx.PySimpleApp()
+    app = wxPySimpleApp()
     frame = TestFrame(None, sys.stdout)
     frame.Show(True)
     app.MainLoop()

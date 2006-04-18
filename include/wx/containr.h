@@ -61,12 +61,9 @@ public:
     void HandleOnFocus(wxFocusEvent& event);
     void HandleOnWindowDestroy(wxWindowBase *child);
 
-    // should be called from SetFocus(), returns false if we did nothing with
+    // should be called from SetFocus(), returns FALSE if we did nothing with
     // the focus and the default processing should take place
     bool DoSetFocus();
-
-    // can our child get the focus?
-    bool AcceptsFocus() const;
 
     // called from OnChildFocus() handler, i.e. when one of our (grand)
     // children gets the focus
@@ -88,13 +85,10 @@ protected:
     // a temporary override of m_winDefault, use the latter if NULL
     wxWindow *m_winTmpDefault;
 
-    // a guard against infinite recursion
-    bool m_inSetFocus;
-
     DECLARE_NO_COPY_CLASS(wxControlContainer)
 };
 
-// this function is for wxWidgets internal use only
+// this function is for wxWindows internal use only
 extern bool wxSetFocusToChild(wxWindow *win, wxWindow **child);
 
 // ----------------------------------------------------------------------------
@@ -109,12 +103,10 @@ public: \
     void OnFocus(wxFocusEvent& event); \
     virtual void OnChildFocus(wxChildFocusEvent& event); \
     virtual void SetFocus(); \
-    virtual void SetFocusIgnoringChildren(); \
     virtual void RemoveChild(wxWindowBase *child); \
     virtual wxWindow *GetDefaultItem() const; \
     virtual wxWindow *SetDefaultItem(wxWindow *child); \
     virtual void SetTmpDefaultItem(wxWindow *win); \
-    virtual bool AcceptsFocus() const; \
 \
 protected: \
     wxControlContainer m_container
@@ -160,11 +152,6 @@ void classname::SetFocus() \
         wxWindow::SetFocus(); \
 } \
  \
-void classname::SetFocusIgnoringChildren() \
-{ \
-        wxWindow::SetFocus(); \
-} \
- \
 void classname::OnChildFocus(wxChildFocusEvent& event) \
 { \
     m_container.SetLastFocus(event.GetWindow()); \
@@ -173,10 +160,6 @@ void classname::OnChildFocus(wxChildFocusEvent& event) \
 void classname::OnFocus(wxFocusEvent& event) \
 { \
     m_container.HandleOnFocus(event); \
-} \
-bool classname::AcceptsFocus() const \
-{ \
-    return m_container.AcceptsFocus(); \
 }
 
 

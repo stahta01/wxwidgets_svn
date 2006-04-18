@@ -25,14 +25,16 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
 
 #define BUTTON_HEIGHT_FACTOR (EDIT_CONTROL_FACTOR * 1.1)
 
-bool wxBitmapButton::Create( wxWindow*          pParent,
-                             wxWindowID         vId,
-                             const wxBitmap&    rBitmap,
-                             const wxPoint&     rPos,
-                             const wxSize&      rSize,
-                             long               lStyle,
-                             const wxValidator& rValidator,
-                             const wxString&    rsName )
+bool wxBitmapButton::Create(
+  wxWindow*                         pParent
+, wxWindowID                        vId
+, const wxBitmap&                   rBitmap
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxValidator&                rValidator
+, const wxString&                   rsName
+)
 {
     m_bmpNormal = rBitmap;
     SetName(rsName);
@@ -75,7 +77,7 @@ bool wxBitmapButton::Create( wxWindow*          pParent,
 
     m_hWnd = (WXHWND)::WinCreateWindow( GetHwndOf(pParent)
                                        ,WC_BUTTON
-                                       ,(PSZ)wxEmptyString
+                                       ,wxT("")
                                        ,ulOS2Style
                                        ,0, 0, 0, 0
                                        ,GetHwndOf(pParent)
@@ -95,10 +97,12 @@ bool wxBitmapButton::Create( wxWindow*          pParent,
             ,nWidth
             ,nHeight
            );
-    return true;
+    return TRUE;
 } // end of wxBitmapButton::Create
 
-bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
+bool wxBitmapButton::OS2OnDraw(
+  WXDRAWITEMSTRUCT*                 pItem
+)
 {
     PUSERBUTTON                     pUser     = (PUSERBUTTON)pItem;
     bool                            bAutoDraw = (GetWindowStyleFlag() & wxBU_AUTODRAW) != 0;
@@ -107,6 +111,7 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
         return FALSE;
 
     wxBitmap*                       pBitmap;
+    RECTL                           vRect;
     bool                            bIsSelected = pUser->fsState & BDS_HILITED;
     wxClientDC                      vDc(this);
 
@@ -127,6 +132,7 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
     // Centre the bitmap in the control area
     //
     int                             nX         = 0;
+    int                             nY         = 0;
     int                             nX1        = 0;
     int                             nY1        = 0;
     int                             nWidth     = vDc.m_vRclPaint.xRight - vDc.m_vRclPaint.xLeft;
@@ -155,7 +161,11 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
     //
     // Draw the bitmap
     //
-    vDc.DrawBitmap( *pBitmap, nX1, nY1, true );
+    vDc.DrawBitmap( *pBitmap
+                   ,nX1
+                   ,nY1
+                   ,TRUE
+                  );
 
     //
     // Draw focus / disabled state, if auto-drawing
@@ -170,18 +180,20 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
     {
         DrawButtonFocus(vDc);
     }
-    return true;
+    return TRUE;
 } // end of wxBitmapButton::OS2OnDraw
 
-void wxBitmapButton::DrawFace (wxClientDC& rDC, bool bSel)
+void wxBitmapButton::DrawFace (
+  wxClientDC&                       rDC
+, bool                              bSel
+)
 {
     //
     // Set up drawing colors
     //
-    wxPen vHiLitePen(*wxWHITE, 2, wxSOLID); // White
-    wxColour gray85(85, 85, 85);
-    wxPen vDarkShadowPen(gray85, 2, wxSOLID);
-    wxColour vFaceColor(204, 204, 204); // Light Grey
+    wxPen                           vHiLitePen(wxColour(255, 255, 255), 2, wxSOLID); // White
+    wxPen                           vDarkShadowPen(wxColour(85, 85, 85), 2, wxSOLID);
+    wxColour                        vFaceColor(wxColour(204, 204, 204)); // Light Grey
 
     //
     // Draw the main button face
@@ -221,7 +233,7 @@ void wxBitmapButton::DrawButtonFocus (
   wxClientDC&                       rDC
 )
 {
-    wxPen vBlackPen(*wxBLACK, 2, wxSOLID);
+    wxPen                           vBlackPen(wxColour(0, 0, 0), 2, wxSOLID);
 
     //
     // Draw a thick black line around the outside of the button
@@ -249,10 +261,12 @@ void wxBitmapButton::DrawButtonFocus (
                 );
 } // end of wxBitmapButton::DrawButtonFocus
 
-void wxBitmapButton::DrawButtonDisable( wxClientDC& rDC,
-                                        wxBitmap& rBmp )
+void wxBitmapButton::DrawButtonDisable(
+  wxClientDC&                       rDC
+, wxBitmap&                         rBmp
+)
 {
-    wxPen vGreyPen(wxT("GREY"), 2, wxSOLID);
+    wxPen                           vGreyPen(wxColour(128, 128, 128), 2, wxSOLID);
 
     //
     // Draw a thick black line around the outside of the button
@@ -287,3 +301,4 @@ void wxBitmapButton::SetDefault()
 }
 
 #endif // ndef for wxUSE_BMPBUTTON
+

@@ -2,13 +2,13 @@
 // Name:        wx/longlong.cpp
 // Purpose:     implementation of wxLongLongNative
 // Author:      Jeffrey C. Ollie <jeff@ollie.clive.ia.us>, Vadim Zeitlin
-// Remarks:     this class is not public in wxWidgets 2.0! It is intentionally
+// Remarks:     this class is not public in wxWindows 2.0! It is intentionally
 //              not documented and is for private use only.
 // Modified by:
 // Created:     10.02.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -23,11 +23,6 @@
 
 #if wxUSE_LONGLONG
 #include "wx/longlong.h"
-#include "wx/math.h"       // for fabs()
-
-#if wxUSE_STREAMS
-#include "wx/txtstrm.h"
-#endif
 
 #if defined(__MWERKS__) && defined(__WXMSW__)
 #include <string.h>     // for memset()
@@ -35,7 +30,7 @@
 #include <memory.h>     // for memset()
 #endif
 
-#include "wx/ioswrap.h"
+#include <math.h>       // for fabs()
 
 // ============================================================================
 // implementation
@@ -51,14 +46,14 @@ void *wxLongLongNative::asArray() const
 {
     static unsigned char temp[8];
 
-    temp[0] = wx_truncate_cast(unsigned char, ((m_ll >> 56) & 0xFF));
-    temp[1] = wx_truncate_cast(unsigned char, ((m_ll >> 48) & 0xFF));
-    temp[2] = wx_truncate_cast(unsigned char, ((m_ll >> 40) & 0xFF));
-    temp[3] = wx_truncate_cast(unsigned char, ((m_ll >> 32) & 0xFF));
-    temp[4] = wx_truncate_cast(unsigned char, ((m_ll >> 24) & 0xFF));
-    temp[5] = wx_truncate_cast(unsigned char, ((m_ll >> 16) & 0xFF));
-    temp[6] = wx_truncate_cast(unsigned char, ((m_ll >> 8)  & 0xFF));
-    temp[7] = wx_truncate_cast(unsigned char, ((m_ll >> 0)  & 0xFF));
+    temp[0] = (m_ll >> 56) & 0xFF;
+    temp[1] = (m_ll >> 48) & 0xFF;
+    temp[2] = (m_ll >> 40) & 0xFF;
+    temp[3] = (m_ll >> 32) & 0xFF;
+    temp[4] = (m_ll >> 24) & 0xFF;
+    temp[5] = (m_ll >> 16) & 0xFF;
+    temp[6] = (m_ll >> 8)  & 0xFF;
+    temp[7] = (m_ll >> 0)  & 0xFF;
 
     return temp;
 }
@@ -67,71 +62,17 @@ void *wxULongLongNative::asArray() const
 {
     static unsigned char temp[8];
 
-    temp[0] = wx_truncate_cast(unsigned char, ((m_ll >> 56) & 0xFF));
-    temp[1] = wx_truncate_cast(unsigned char, ((m_ll >> 48) & 0xFF));
-    temp[2] = wx_truncate_cast(unsigned char, ((m_ll >> 40) & 0xFF));
-    temp[3] = wx_truncate_cast(unsigned char, ((m_ll >> 32) & 0xFF));
-    temp[4] = wx_truncate_cast(unsigned char, ((m_ll >> 24) & 0xFF));
-    temp[5] = wx_truncate_cast(unsigned char, ((m_ll >> 16) & 0xFF));
-    temp[6] = wx_truncate_cast(unsigned char, ((m_ll >> 8)  & 0xFF));
-    temp[7] = wx_truncate_cast(unsigned char, ((m_ll >> 0)  & 0xFF));
+    temp[0] = (m_ll >> 56) & 0xFF;
+    temp[1] = (m_ll >> 48) & 0xFF;
+    temp[2] = (m_ll >> 40) & 0xFF;
+    temp[3] = (m_ll >> 32) & 0xFF;
+    temp[4] = (m_ll >> 24) & 0xFF;
+    temp[5] = (m_ll >> 16) & 0xFF;
+    temp[6] = (m_ll >> 8)  & 0xFF;
+    temp[7] = (m_ll >> 0)  & 0xFF;
 
     return temp;
 }
-
-#if wxUSE_LONGLONG_WX
-wxLongLongNative::wxLongLongNative(wxLongLongWx ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ll.GetLo();
-}
-
-wxLongLongNative& wxLongLongNative::operator=(wxLongLongWx ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ll.GetLo();
-    return *this;
-}
-
-wxLongLongNative& wxLongLongNative::operator=(const class wxULongLongWx &ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ll.GetLo();
-    return *this;
-}
-
-wxULongLongNative::wxULongLongNative(const class wxULongLongWx &ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ((unsigned long) ll.GetLo());
-}
-
-wxULongLongNative& wxULongLongNative::operator=(wxLongLongWx ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ((unsigned long) ll.GetLo());
-    return *this;
-}
-
-wxULongLongNative& wxULongLongNative::operator=(const class wxULongLongWx &ll)
-{
-    // assign first to avoid precision loss!
-    m_ll = ll.GetHi();
-    m_ll <<= 32;
-    m_ll |= ((unsigned long) ll.GetLo());
-    return *this;
-}
-#endif
 
 #endif // wxUSE_LONGLONG_NATIVE
 
@@ -140,14 +81,6 @@ wxULongLongNative& wxULongLongNative::operator=(const class wxULongLongWx &ll)
 // ============================================================================
 
 #if wxUSE_LONGLONG_WX
-
-// Set value from unsigned wxULongLongWx
-wxLongLongWx &wxLongLongWx::operator=(const class wxULongLongWx &ll)
-{
-    m_hi = (unsigned long) ll.GetHi();
-    m_lo = ll.GetLo();
-    return *this;
-}
 
 // assignment
 wxLongLongWx& wxLongLongWx::Assign(double d)
@@ -175,19 +108,6 @@ wxLongLongWx& wxLongLongWx::Assign(double d)
         Negate();
 
     return *this;
-}
-
-double wxLongLongWx::ToDouble() const
-{
-    double d = m_hi;
-    d *= 1.0 + (double)ULONG_MAX;
-    d += m_lo;
-
-#ifdef wxLONGLONG_TEST_MODE
-    wxASSERT( d == m_ll );
-#endif // wxLONGLONG_TEST_MODE
-
-    return d;
 }
 
 wxLongLongWx wxLongLongWx::operator<<(int shift) const
@@ -502,14 +422,10 @@ wxLongLongWx wxLongLongWx::operator-(const wxLongLongWx& ll) const
     return res;
 }
 
-wxLongLongWx wxULongLongWx::operator-(const wxULongLongWx& ll) const
+wxULongLongWx wxULongLongWx::operator-(const wxULongLongWx& ll) const
 {
-    wxASSERT(m_hi <= LONG_MAX );
-    wxASSERT(ll.m_hi <= LONG_MAX );
-
-    wxLongLongWx res( (long)m_hi , m_lo );
-    wxLongLongWx op( (long)ll.m_hi , ll.m_lo );
-    res -= op;
+    wxULongLongWx res(*this);
+    res -= ll;
 
     return res;
 }
@@ -588,41 +504,41 @@ wxULongLongWx& wxULongLongWx::operator--()
 bool wxLongLongWx::operator<(const wxLongLongWx& ll) const
 {
     if ( m_hi < ll.m_hi )
-        return true;
+        return TRUE;
     else if ( m_hi == ll.m_hi )
         return m_lo < ll.m_lo;
     else
-        return false;
+        return FALSE;
 }
 
 bool wxULongLongWx::operator<(const wxULongLongWx& ll) const
 {
     if ( m_hi < ll.m_hi )
-        return true;
+        return TRUE;
     else if ( m_hi == ll.m_hi )
         return m_lo < ll.m_lo;
     else
-        return false;
+        return FALSE;
 }
 
 bool wxLongLongWx::operator>(const wxLongLongWx& ll) const
 {
     if ( m_hi > ll.m_hi )
-        return true;
+        return TRUE;
     else if ( m_hi == ll.m_hi )
         return m_lo > ll.m_lo;
     else
-        return false;
+        return FALSE;
 }
 
 bool wxULongLongWx::operator>(const wxULongLongWx& ll) const
 {
     if ( m_hi > ll.m_hi )
-        return true;
+        return TRUE;
     else if ( m_hi == ll.m_hi )
         return m_lo > ll.m_lo;
     else
-        return false;
+        return FALSE;
 }
 
 // bitwise operators
@@ -809,7 +725,7 @@ wxULongLongWx& wxULongLongWx::operator*=(const wxULongLongWx& ll)
     m_hi = m_lo = 0;
 
 #ifdef wxLONGLONG_TEST_MODE
-    wxULongLong_t llOld = m_ll;
+    unsigned wxLongLong_t llOld = m_ll;
     m_ll = 0;
 #endif // wxLONGLONG_TEST_MODE
 
@@ -835,11 +751,9 @@ wxULongLongWx& wxULongLongWx::operator*=(const wxULongLongWx& ll)
 
 // division
 
-#define IS_MSB_SET(ll)  ((ll.GetHi()) & (1 << (8*sizeof(long) - 1)))
-
 void wxLongLongWx::Divide(const wxLongLongWx& divisorIn,
                           wxLongLongWx& quotient,
-                          wxLongLongWx& remainderIO) const
+                          wxLongLongWx& remainder) const
 {
     if ((divisorIn.m_lo == 0) && (divisorIn.m_hi == 0))
     {
@@ -863,7 +777,8 @@ void wxLongLongWx::Divide(const wxLongLongWx& divisorIn,
     //     all responsibility for using this code.
 
     // init everything
-    wxULongLongWx dividend, divisor, remainder;
+    wxLongLongWx dividend = *this,
+                 divisor = divisorIn;
 
     quotient = 0l;
     remainder = 0l;
@@ -876,21 +791,17 @@ void wxLongLongWx::Divide(const wxLongLongWx& divisorIn,
     //      dividend = quotient*divisor + remainder
     //
     // with 0 <= abs(remainder) < abs(divisor)
-    bool negRemainder = GetHi() < 0;
-    bool negQuotient = false;   // assume positive
-    if ( GetHi() < 0 )
+    bool negRemainder = dividend.m_hi < 0;
+    bool negQuotient = FALSE;   // assume positive
+    if ( dividend.m_hi < 0 )
     {
         negQuotient = !negQuotient;
-        dividend = -*this;
-    } else {
-        dividend = *this;
+        dividend = -dividend;
     }
-    if ( divisorIn.GetHi() < 0 )
+    if ( divisor.m_hi < 0 )
     {
         negQuotient = !negQuotient;
-        divisor = -divisorIn;
-    } else {
-        divisor = divisorIn;
+        divisor = -divisor;
     }
 
     // check for some particular cases
@@ -904,9 +815,11 @@ void wxLongLongWx::Divide(const wxLongLongWx& divisorIn,
     }
     else
     {
-        // here: dividend > divisor and both are positive: do unsigned division
+        // here: dividend > divisor and both are positibe: do unsigned division
         size_t nBits = 64u;
         wxLongLongWx d;
+
+        #define IS_MSB_SET(ll)  ((ll.m_hi) & (1 << (8*sizeof(long) - 1)))
 
         while ( remainder < divisor )
         {
@@ -947,12 +860,10 @@ void wxLongLongWx::Divide(const wxLongLongWx& divisorIn,
         }
     }
 
-    remainderIO = remainder;
-
     // adjust signs
     if ( negRemainder )
     {
-        remainderIO = -remainderIO;
+        remainder = -remainder;
     }
 
     if ( negQuotient )
@@ -1007,6 +918,8 @@ void wxULongLongWx::Divide(const wxULongLongWx& divisorIn,
         // here: dividend > divisor
         size_t nBits = 64u;
         wxULongLongWx d;
+
+        #define IS_MSB_SET(ll)  ((ll.m_hi) & (1 << (8*sizeof(long) - 1)))
 
         while ( remainder < divisor )
         {
@@ -1145,206 +1058,80 @@ void *wxULongLongWx::asArray(void) const
 
 #endif // wxUSE_LONGLONG_WX
 
-#define LL_TO_STRING(name)                                           \
-    wxString name::ToString() const                                  \
-    {                                                                \
-        /* TODO: this is awfully inefficient, anything better? */    \
-        wxString result;                                             \
-                                                                     \
-        name ll = *this;                                             \
-                                                                     \
-        bool neg = ll < 0;                                           \
-        if ( neg )                                                   \
-        {                                                            \
-            while ( ll != 0 )                                        \
-            {                                                        \
-                long digit = (ll % 10).ToLong();                     \
-                result.Prepend((wxChar)(_T('0') - digit));           \
-                ll /= 10;                                            \
-            }                                                        \
-        }                                                            \
-        else                                                         \
-        {                                                            \
-            while ( ll != 0 )                                        \
-            {                                                        \
-                long digit = (ll % 10).ToLong();                     \
-                result.Prepend((wxChar)(_T('0') + digit));           \
-                ll /= 10;                                            \
-            }                                                        \
-        }                                                            \
-                                                                     \
-        if ( result.empty() )                                        \
-            result = _T('0');                                        \
-        else if ( neg )                                              \
-            result.Prepend(_T('-'));                                 \
-                                                                     \
-        return result;                                               \
-    }
-
-#define ULL_TO_STRING(name)                                          \
-    wxString name::ToString() const                                  \
-    {                                                                \
-        /* TODO: this is awfully inefficient, anything better? */    \
-        wxString result;                                             \
-                                                                     \
-        name ll = *this;                                             \
-                                                                     \
-        while ( ll != 0 )                                            \
-        {                                                            \
-            result.Prepend((wxChar)(_T('0') + (ll % 10).ToULong())); \
-            ll /= 10;                                                \
-        }                                                            \
-                                                                     \
-        if ( result.empty() )                                        \
-            result = _T('0');                                        \
-                                                                     \
-        return result;                                               \
-    }
-
+wxString
 #if wxUSE_LONGLONG_NATIVE
-    LL_TO_STRING(wxLongLongNative)
-    ULL_TO_STRING(wxULongLongNative)
+wxLongLongNative::ToString() const
+#else
+wxLongLongWx::ToString() const
 #endif
+{
+    // TODO: this is awfully inefficient, anything better?
+    wxString result;
 
-#if wxUSE_LONGLONG_WX
-    LL_TO_STRING(wxLongLongWx)
-    ULL_TO_STRING(wxULongLongWx)
+    wxLongLong ll = *this;
+
+    bool neg;
+    if ( ll < 0L )
+    {
+        ll.Negate();
+        neg = TRUE;
+    }
+    else
+    {
+        neg = FALSE;
+    }
+
+    while ( ll != 0L )
+    {
+        result.Prepend((wxChar)(_T('0') + (ll % 10L).ToLong()));
+        ll /= 10;
+    }
+
+    if ( result.empty() )
+        result = _T('0');
+    else if ( neg )
+        result.Prepend(_T('-'));
+
+    return result;
+}
+
+wxString
+#if wxUSE_LONGLONG_NATIVE
+wxULongLongNative::ToString() const
+#else
+wxULongLongWx::ToString() const
 #endif
+{
+    // TODO: this is awfully inefficient, anything better?
+    wxString result;
+
+    wxULongLong ll = *this;
+
+    while ( ll != 0 )
+    {
+        result.Prepend((wxChar)(_T('0') + (ll % 10).ToULong()));
+        ll /= 10;
+    }
+
+    if ( result.empty() )
+        result = _T('0');
+
+    return result;
+}
 
 #if wxUSE_STD_IOSTREAM
 
 // input/output
-WXDLLIMPEXP_BASE
 wxSTD ostream& operator<< (wxSTD ostream& o, const wxLongLong& ll)
 {
     return o << ll.ToString();
 }
 
-WXDLLIMPEXP_BASE
 wxSTD ostream& operator<< (wxSTD ostream& o, const wxULongLong& ll)
 {
     return o << ll.ToString();
 }
 
 #endif // wxUSE_STD_IOSTREAM
-
-WXDLLIMPEXP_BASE wxString& operator<< (wxString& s, const wxLongLong& ll)
-{
-    return s << ll.ToString();
-}
-
-WXDLLIMPEXP_BASE wxString& operator<< (wxString& s, const wxULongLong& ll)
-{
-    return s << ll.ToString();
-}
-
-#if wxUSE_STREAMS
-
-WXDLLIMPEXP_BASE wxTextOutputStream& operator<< (wxTextOutputStream& o, const wxULongLong& ll)
-{
-    return o << ll.ToString();
-}
-
-WXDLLIMPEXP_BASE wxTextOutputStream& operator<< (wxTextOutputStream& o, const wxLongLong& ll)
-{
-    return o << ll.ToString();
-}
-
-#define READ_STRING_CHAR(s, idx, len) ((wxChar) ((idx!=len) ? s[idx++] : 0))
-
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &o, wxULongLong &ll)
-{
-    wxString s = o.ReadWord();
-
-    ll = wxULongLong(0l, 0l);
-    size_t length = s.Length();
-    size_t idx = 0;
-
-    wxChar ch = READ_STRING_CHAR(s, idx, length);
-
-    // Skip WS
-    while (ch==wxT(' ') || ch==wxT('\t'))
-        ch = READ_STRING_CHAR(s, idx, length);
-
-    // Read number
-    wxULongLong multiplier(0l, 10l);
-    while (ch>=wxT('0') && ch<=wxT('9')) {
-        long lValue = (unsigned) (ch - wxT('0'));
-        ll = ll * multiplier + wxULongLong(0l, lValue);
-        ch = READ_STRING_CHAR(s, idx, length);
-    }
-
-    return o;
-}
-
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &o, wxLongLong &ll)
-{
-    wxString s = o.ReadWord();
-
-    ll = wxLongLong(0l, 0l);
-    size_t length = s.Length();
-    size_t idx = 0;
-
-    wxChar ch = READ_STRING_CHAR(s, idx, length);
-
-    // Skip WS
-    while (ch==wxT(' ') || ch==wxT('\t'))
-        ch = READ_STRING_CHAR(s, idx, length);
-
-    // Ask for sign
-    int iSign = 1;
-    if (ch==wxT('-') || ch==wxT('+')) {
-        iSign = ((ch==wxT('-')) ? -1 : 1);
-        ch = READ_STRING_CHAR(s, idx, length);
-    }
-
-    // Read number
-    wxLongLong multiplier(0l, 10l);
-    while (ch>=wxT('0') && ch<=wxT('9')) {
-        long lValue = (unsigned) (ch - wxT('0'));
-        ll = ll * multiplier + wxLongLong(0l, lValue);
-        ch = READ_STRING_CHAR(s, idx, length);
-    }
-
-#if wxUSE_LONGLONG_NATIVE
-    ll = ll * wxLongLong((wxLongLong_t) iSign);
-#else
-    ll = ll * wxLongLong((long) iSign);
-#endif
-
-    return o;
-}
-
-#if wxUSE_LONGLONG_NATIVE
-
-WXDLLIMPEXP_BASE class wxTextOutputStream &operator<<(class wxTextOutputStream &o, wxULongLong_t value)
-{
-    return o << wxULongLong(value).ToString();
-}
-
-WXDLLIMPEXP_BASE class wxTextOutputStream &operator<<(class wxTextOutputStream &o, wxLongLong_t value)
-{
-    return o << wxLongLong(value).ToString();
-}
-
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &o, wxULongLong_t &value)
-{
-    wxULongLong ll;
-    o >> ll;
-    value = ll.GetValue();
-    return o;
-}
-
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &o, wxLongLong_t &value)
-{
-    wxLongLong ll;
-    o >> ll;
-    value = ll.GetValue();
-    return o;
-}
-
-#endif // wxUSE_LONGLONG_NATIVE
-
-#endif // wxUSE_STREAMS
 
 #endif // wxUSE_LONGLONG

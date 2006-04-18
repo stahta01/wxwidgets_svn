@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/dropsrc.cpp
+// Name:        msw/ole/dropsrc.cpp
 // Purpose:     implementation of wxIDropSource and wxDropSource
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     10.05.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -23,21 +23,26 @@
 #if defined(__BORLANDC__)
   #pragma hdrstop
 #endif
-
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
+#include "wx/window.h"
 #endif
+
+#include "wx/setup.h"
 
 #if wxUSE_OLE && wxUSE_DRAG_AND_DROP
 
 #include "wx/log.h"
 #include "wx/dnd.h"
 
-#include "wx/msw/private.h"
+#include <windows.h>
 
-// for some compilers, the entire ole2.h must be included, not only oleauto.h
-#if wxUSE_NORLANDER_HEADERS || defined(__WATCOMC__) || defined(__WXWINCE__)
+#if wxUSE_NORLANDER_HEADERS
     #include <ole2.h>
+#endif
+
+#ifndef __WIN32__
+    #include <ole2.h>
+    #include <olestd.h>
 #endif
 
 #include <oleauto.h>
@@ -52,19 +57,16 @@ class wxIDropSource : public IDropSource
 {
 public:
   wxIDropSource(wxDropSource *pDropSource);
-  virtual ~wxIDropSource() { }
+
+  DECLARE_IUNKNOWN_METHODS;
 
   // IDropSource
   STDMETHODIMP QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState);
   STDMETHODIMP GiveFeedback(DWORD dwEffect);
 
-    DECLARE_IUNKNOWN_METHODS;
-
 private:
   DWORD         m_grfInitKeyState;  // button which started the d&d operation
   wxDropSource *m_pDropSource;      // pointer to C++ class we belong to
-
-  DECLARE_NO_COPY_CLASS(wxIDropSource)
 };
 
 // ============================================================================
@@ -237,11 +239,11 @@ bool wxDropSource::GiveFeedback(wxDragResult effect)
     {
         ::SetCursor((HCURSOR)cursor.GetHCURSOR());
 
-        return true;
+        return TRUE;
     }
     else
     {
-        return false;
+        return FALSE;
     }
 }
 

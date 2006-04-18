@@ -6,7 +6,7 @@
 // Created:     31.01.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,8 +32,14 @@
 #include "wx/tooltip.h"
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
+
+#ifndef _WIN32_IE
+    // minimal set of features by default
+    #define _WIN32_IE 0x0200
+#endif
 
 // VZ: normally, the trick with subclassing the tooltip control and processing
 //     TTM_WINDOWFROMPOINT should work but, somehow, it doesn't. I leave the
@@ -141,13 +147,13 @@ LRESULT APIENTRY wxToolTipWndProc(HWND hwndTT,
     {
         LPPOINT ppt = (LPPOINT)lParam;
 
-        // the window on which event occurred
+        // the window on which event occured
         HWND hwnd = ::WindowFromPoint(*ppt);
 
         OutputDebugString("TTM_WINDOWFROMPOINT: ");
         OutputDebugString(wxString::Format("0x%08x => ", hwnd));
 
-        // return a HWND corresponding to a wxWindow because only wxWidgets are
+        // return a HWND corresponding to a wxWindow because only wxWindows are
         // associated with tooltips using TTM_ADDTOOL
         wxWindow *win = wxGetWindowFromHWND((WXHWND)hwnd);
 
@@ -217,7 +223,8 @@ WXHWND wxToolTip::GetToolTipCtrl()
 
 #if wxUSE_TTM_WINDOWFROMPOINT
            // subclass the newly created control
-           gs_wndprocToolTip = wxSetWindowProc(hwnd, wxToolTipWndProc);
+           gs_wndprocToolTip = (WNDPROC)::GetWindowLong(hwnd, GWL_WNDPROC);
+           ::SetWindowLong(hwnd, GWL_WNDPROC, (long)wxToolTipWndProc);
 #endif // wxUSE_TTM_WINDOWFROMPOINT
        }
     }
@@ -244,9 +251,8 @@ wxToolTip::wxToolTip(const wxString &tip)
 
 wxToolTip::~wxToolTip()
 {
-    // the tooltip has to be removed before deleting. Otherwise, if it is visible
-	// while being deleted, there will be a delay before it goes away.
-	Remove();
+    // there is no need to Remove() this tool - it will be done automatically
+    // anyhow
 }
 
 // ----------------------------------------------------------------------------
@@ -289,10 +295,10 @@ void wxToolTip::Add(WXHWND hWnd)
 
         if ( index != wxNOT_FOUND )
         {
-#ifdef TTM_SETMAXTIPWIDTH
-            if ( wxApp::GetComCtl32Version() >= 470 )
+#if _WIN32_IE >= 0x0300
+            if ( wxTheApp->GetComCtl32Version() >= 470 )
             {
-                // use TTM_SETMAXTIPWIDTH to make tooltip multiline using the
+                // use TTM_SETMAXWIDTH to make tooltip multiline using the
                 // extent of its first line as max value
                 HFONT hfont = (HFONT)SendTooltipMessage(GetToolTipCtrl(),
                                                         WM_GETFONT,
@@ -318,27 +324,19 @@ void wxToolTip::Add(WXHWND hWnd)
                 }
 
                 SIZE sz;
-                if ( !::GetTextExtentPoint32(hdc, m_text, index, &sz) )
+                if ( !GetTextExtentPoint(hdc, m_text, index, &sz) )
                 {
-                    wxLogLastError(wxT("GetTextExtentPoint32"));
+                    wxLogLastError(wxT("GetTextExtentPoint"));
                 }
 
                 SendTooltipMessage(GetToolTipCtrl(), TTM_SETMAXTIPWIDTH,
                                    0, (void *)sz.cx);
             }
-            else
 #endif // comctl32.dll >= 4.70
-            {
-                // replace the '\n's with spaces because otherwise they appear as
-                // unprintable characters in the tooltip string
-                m_text.Replace(_T("\n"), _T(" "));
-                ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
-                if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, 0, &ti) )
-                {
-                    wxLogDebug(_T("Failed to create the tooltip '%s'"), m_text.c_str());
-                }
-            }
+            // replace the '\n's with spaces because otherwise they appear as
+            // unprintable characters in the tooltip string
+            m_text.Replace(_T("\n"), _T(" "));
         }
     }
 }
@@ -359,7 +357,7 @@ void wxToolTip::SetWindow(wxWindow *win)
     wxControl *control = wxDynamicCast(m_window, wxControl);
     if ( control )
     {
-        const wxArrayLong& subcontrols = control->GetSubcontrols();
+        const wxArrayLong subcontrols = control->GetSubcontrols();
         size_t count = subcontrols.GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
@@ -369,7 +367,7 @@ void wxToolTip::SetWindow(wxWindow *win)
             {
                 // may be it's a child of parent of the control, in fact?
                 // (radiobuttons are subcontrols, i.e. children of the radiobox
-                // for wxWidgets but are its siblings at Windows level)
+                // for wxWindows but are its siblings at Windows level)
                 hwnd = GetDlgItem(GetHwndOf(m_window->GetParent()), id);
             }
 

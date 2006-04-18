@@ -1,33 +1,36 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/cspalette.h
+// Name:        cspalette.h
 // Purpose:     OGL sample palette
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _STUDIO_CSPALETTE_H_
 #define _STUDIO_CSPALETTE_H_
 
-#include "wx/wx.h"
-#include "wx/string.h"
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/wx.h>
+#include <wx/string.h>
+#include <wx/tbarsmpl.h>
 
 /*
  * Object editor tool palette
  *
  */
 
-#define TOOLPALETTECLASS    wxToolBar
+// TODO for wxWin: wxToolBar95 cannot be moved to a non-0,0 position!
+// Needs to have a parent window...
+// So use a simple toolbar at present.
+#define TOOLPALETTECLASS    wxToolBarSimple
 
 class csEditorToolPalette: public TOOLPALETTECLASS
 {
 public:
 
-  csEditorToolPalette(wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
+  csEditorToolPalette(wxWindow *parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
     const wxSize& size = wxDefaultSize,
     long style = wxTB_VERTICAL);
 

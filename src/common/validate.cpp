@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -32,9 +32,9 @@ const wxValidator wxDefaultValidator;
 
     IMPLEMENT_DYNAMIC_CLASS(wxValidator, wxEvtHandler)
 
-// VZ: personally, I think true would be more appropriate - these bells are
+// VZ: personally, I think TRUE would be more appropriate - these bells are
 //     _annoying_
-bool wxValidator::ms_isSilent = false;
+bool wxValidator::ms_isSilent = FALSE;
 
 wxValidator::wxValidator()
 {

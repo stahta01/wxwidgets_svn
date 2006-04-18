@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart, Robert Roebling
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/gdicmn.h"
@@ -28,7 +28,7 @@ public:
         m_color.blue = 0;
         m_color.pixel = 0;
         m_colormap = (WXColormap *) NULL;
-        m_hasPixel = false;
+        m_hasPixel = FALSE;
     }
     wxColourRefData(const wxColourRefData& data):
         wxObjectRefData()
@@ -37,7 +37,7 @@ public:
         m_colormap = data.m_colormap;
         m_hasPixel = data.m_hasPixel;
     }
-
+    
     ~wxColourRefData()
     {
         FreeColour();
@@ -52,7 +52,7 @@ public:
                 m_color.blue == data.m_color.blue &&
                 m_color.pixel == data.m_color.pixel);
     }
-
+    
     void FreeColour();
     void AllocColour( WXColormap cmap );
 
@@ -66,8 +66,8 @@ public:
     static unsigned short colMapAllocCounter[ 256 ];
 };
 
-unsigned short wxColourRefData::colMapAllocCounter[ 256 ] =
-{
+unsigned short wxColourRefData::colMapAllocCounter[ 256 ] = 
+{  
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -87,14 +87,13 @@ void wxColourRefData::FreeColour()
 {
     if (!m_colormap)
         return;
-#if !wxUSE_NANOX
-    if ( wxTheApp &&
-         (wxTheApp->m_visualInfo->m_visualType == GrayScale ||
-          wxTheApp->m_visualInfo->m_visualType == PseudoColor) )
+#if !wxUSE_NANOX        
+    if ((wxTheApp->m_visualType == GrayScale) ||
+        (wxTheApp->m_visualType == PseudoColor))
     {
         int idx = m_color.pixel;
         colMapAllocCounter[ idx ] = colMapAllocCounter[ idx ] - 1;
-
+        
         if (colMapAllocCounter[ idx ] == 0)
         {
             unsigned long pixel = m_color.pixel;
@@ -112,8 +111,8 @@ void wxColourRefData::AllocColour( WXColormap cmap )
     FreeColour();
 
 #if !wxUSE_NANOX
-    if ((wxTheApp->m_visualInfo->m_visualType == GrayScale) ||
-        (wxTheApp->m_visualInfo->m_visualType == PseudoColor))
+    if ((wxTheApp->m_visualType == GrayScale) ||
+        (wxTheApp->m_visualType == PseudoColor))
     {
         m_hasPixel = XAllocColor( wxGlobalDisplay(), (Colormap) cmap, &m_color );
         int idx = m_color.pixel;
@@ -124,7 +123,7 @@ void wxColourRefData::AllocColour( WXColormap cmap )
     {
         m_hasPixel = XAllocColor( wxGlobalDisplay(), (Colormap) cmap, &m_color );
     }
-
+    
     m_colormap = cmap;
 }
 
@@ -143,7 +142,7 @@ wxColour::wxColour( unsigned char red, unsigned char green, unsigned char blue )
     M_COLDATA->m_color.red = ((unsigned short)red) ;
     M_COLDATA->m_color.green = ((unsigned short)green) ;
     M_COLDATA->m_color.blue = ((unsigned short)blue) ;
-#else
+#else    
     M_COLDATA->m_color.red = ((unsigned short)red) << SHIFT;
     M_COLDATA->m_color.green = ((unsigned short)green) << SHIFT;
     M_COLDATA->m_color.blue = ((unsigned short)blue) << SHIFT;
@@ -151,46 +150,35 @@ wxColour::wxColour( unsigned char red, unsigned char green, unsigned char blue )
     M_COLDATA->m_color.pixel = 0;
 }
 
-/* static */
-wxColour wxColour::CreateByName(const wxString& name)
-{
-    wxColour col;
-
-    Display *dpy = wxGlobalDisplay();
-    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
-    XColor xcol;
-    if ( XParseColor( dpy, (Colormap)colormap, name.mb_str(), &xcol ) )
-    {
-        wxColourRefData *refData = new wxColourRefData;
-        refData->m_colormap = colormap;
-        refData->m_color = xcol;
-        col.m_refData = refData;
-    }
-
-    return col;
-}
-
 void wxColour::InitFromName( const wxString &colourName )
 {
-    // check the cache first
-    wxColour col;
-    if ( wxTheColourDatabase )
+    wxNode *node = (wxNode *) NULL;
+    if ( (wxTheColourDatabase) && (node = wxTheColourDatabase->Find(colourName)) )
     {
-        col = wxTheColourDatabase->Find(colourName);
-    }
-
-    if ( !col.Ok() )
-    {
-        col = CreateByName(colourName);
-    }
-
-    if ( col.Ok() )
-    {
-        *this = col;
+        wxColour *col = (wxColour*)node->Data();
+        UnRef();
+        if (col) Ref( *col );
     }
     else
     {
-        wxFAIL_MSG( wxT("wxColour: couldn't find colour") );
+        m_refData = new wxColourRefData();
+        
+        M_COLDATA->m_colormap = wxTheApp->GetMainColormap( wxGlobalDisplay() );
+        
+        if (!XParseColor( wxGlobalDisplay(), (Colormap) M_COLDATA->m_colormap, colourName.mb_str(), &M_COLDATA->m_color ))
+        {
+            // VZ: asserts are good in general but this one is triggered by
+            //     calling wxColourDatabase::FindColour() with an
+            //     unrecognized colour name and this can't be avoided from the
+            //     user code, so don't give it here
+            //
+            //     a better solution would be to changed code in FindColour()
+
+            //wxFAIL_MSG( wxT("wxColour: couldn't find colour") );
+
+            delete m_refData;
+            m_refData = (wxObjectRefData *) NULL;
+        }
     }
 }
 
@@ -200,17 +188,17 @@ wxColour::~wxColour()
 
 bool wxColour::operator == ( const wxColour& col ) const
 {
-    if (m_refData == col.m_refData) return true;
+    if (m_refData == col.m_refData) return TRUE;
 
-    if (!m_refData || !col.m_refData) return false;
+    if (!m_refData || !col.m_refData) return FALSE;
 
     XColor *own = &(((wxColourRefData*)m_refData)->m_color);
     XColor *other = &(((wxColourRefData*)col.m_refData)->m_color);
+    if (own->red != other->red) return FALSE;
+    if (own->blue != other->blue) return FALSE;
+    if (own->green != other->green) return FALSE;
 
-    return (own->red == other->red)
-        && (own->green == other->green)
-        && (own->blue == other->blue) ;
-
+    return TRUE;
 }
 
 wxObjectRefData *wxColour::CreateRefData() const
@@ -226,7 +214,8 @@ wxObjectRefData *wxColour::CloneRefData(const wxObjectRefData *data) const
 void wxColour::Set( unsigned char red, unsigned char green, unsigned char blue )
 {
     AllocExclusive();
-
+    
+    m_refData = new wxColourRefData();
 #if wxUSE_NANOX
     M_COLDATA->m_color.red = ((unsigned short)red) ;
     M_COLDATA->m_color.green = ((unsigned short)green) ;

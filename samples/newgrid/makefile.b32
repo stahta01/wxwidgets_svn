@@ -1,0 +1,18 @@
+#
+# File:		makefile.b32
+# Author:	Michael Bedward
+# Created:	1999
+# Updated:	
+# Copyright:
+# Licence:  wxWindows Licence
+#
+# Makefile : Builds sample for 32-bit BC++
+
+WXDIR = $(WXWIN)
+
+TARGET=griddemo
+
+OBJECTS = griddemo.obj
+
+!include $(WXDIR)\src\makeprog.b32
+

@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/statline.h
+// Name:        statline.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef __GTKSTATICLINEH__
 #define __GTKSTATICLINEH__
@@ -14,36 +15,36 @@
 
 #if wxUSE_STATLINE
 
-// ----------------------------------------------------------------------------
-// wxStaticLine
-// ----------------------------------------------------------------------------
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
 
-class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class wxStaticLine;
+
+//-----------------------------------------------------------------------------
+// wxStaticLine
+//-----------------------------------------------------------------------------
+
+class wxStaticLine : public wxStaticLineBase
 {
+    DECLARE_DYNAMIC_CLASS(wxStaticLine)
+
 public:
     wxStaticLine();
-    wxStaticLine(wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
-                 const wxPoint &pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = wxLI_HORIZONTAL,
-                 const wxString &name = wxStaticTextNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxLI_HORIZONTAL,
-                const wxString &name = wxStaticTextNameStr);
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxStaticLine)
+    wxStaticLine( wxWindow *parent, wxWindowID id,
+            const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize, 
+            long style = wxLI_HORIZONTAL, const wxString &name = wxStaticTextNameStr );
+    bool Create(  wxWindow *parent, wxWindowID id,
+            const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize, 
+            long style = wxLI_HORIZONTAL, const wxString &name = wxStaticTextNameStr );
 };
 
-#endif // wxUSE_STATLINE
-
-#endif // __GTKSTATICLINEH__
-
+#endif 
+  // wxUSE_STATLINE
+  
+#endif 
+  // __GTKSTATICLINEH__

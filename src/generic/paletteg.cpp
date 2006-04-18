@@ -3,9 +3,9 @@
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
-// RCS-ID:      $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
-// Licence:     wxWindows licence
+// Id:
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -66,16 +66,29 @@ wxPalette::wxPalette(int n, const unsigned char *red, const unsigned char *green
     Create(n, red, green, blue);
 }
 
+wxPalette::wxPalette(const wxPalette& palette)
+    : wxGDIObject()
+{
+    Ref(palette);
+}
+
 wxPalette::~wxPalette()
 {
 }
 
-bool wxPalette::operator == (const wxPalette& palette) const
+wxPalette& wxPalette::operator = (const wxPalette& palette)
+{
+    if (*this == palette) return (*this);
+    Ref(palette);
+    return *this;
+}
+
+bool wxPalette::operator == (const wxPalette& palette)
 {
     return m_refData == palette.m_refData;
 }
 
-bool wxPalette::operator != (const wxPalette& palette) const
+bool wxPalette::operator != (const wxPalette& palette)
 {
     return m_refData != palette.m_refData;
 }
@@ -104,14 +117,14 @@ bool wxPalette::Create(int n,
         e->blue = blue[i];
     }
 
-    return true;
+    return TRUE;
 }
 
-int wxPalette::GetPixel( unsigned char red,
-                         unsigned char green,
-                         unsigned char blue ) const
+int wxPalette::GetPixel( const unsigned char red,
+                         const unsigned char green,
+                         const unsigned char blue ) const
 {
-    if (!m_refData) return wxNOT_FOUND;
+    if (!m_refData) return FALSE;
 
     int closest = 0;
     double d,distance = 1000.0; // max. dist is 256
@@ -134,14 +147,16 @@ bool wxPalette::GetRGB(int pixel,
                        unsigned char *green,
                        unsigned char *blue) const
 {
-    if (!m_refData) return false;
-    if (pixel >= M_PALETTEDATA->m_count) return false;
+    if (!m_refData) return FALSE;
+    if (pixel >= M_PALETTEDATA->m_count) return FALSE;
 
     wxPaletteEntry& p = M_PALETTEDATA->m_entries[pixel];
     if (red) *red = p.red;
     if (green) *green = p.green;
     if (blue) *blue = p.blue;
-    return true;
+    return TRUE;
 }
 
 #endif // wxUSE_PALETTE
+
+

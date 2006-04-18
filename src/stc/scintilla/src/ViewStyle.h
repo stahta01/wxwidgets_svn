@@ -68,7 +68,6 @@ public:
 	bool hotspotBackgroundSet;
 	ColourPair hotspotBackground;
 	bool hotspotUnderline;
-	bool hotspotSingleLine;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
 	enum { margins=3 };
 	int leftMarginWidth;	///< Spacing margin on left of text
@@ -89,7 +88,6 @@ public:
 	int edgeState;
 	int caretWidth;
 	bool someStylesProtected;
-	bool extraFontFlag;
 
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);

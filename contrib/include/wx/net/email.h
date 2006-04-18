@@ -19,7 +19,7 @@
  * Miscellaneous email functions
  */
 
-class WXDLLIMPEXP_NETUTILS wxEmail
+class wxEmail
 {
 public:
 //// Ctor/dtor
@@ -28,9 +28,9 @@ public:
 //// Operations
 
     // Send a message.
-    // Specify profile, or leave it to wxWidgets to find the current user name
+    // Specify profile, or leave it to wxWindows to find the current user name
     static bool Send(wxMailMessage& message, const wxString& profileName = wxEmptyString,
-        const wxString& sendMail = wxT("/usr/sbin/sendmail -t"));
+        const wxString& sendMail = wxT("/usr/lib/sendmail -t"));
     
 protected:
 };

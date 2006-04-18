@@ -91,14 +91,10 @@ public:
         { return IsVert() ? wxVERTICAL : wxHORIZONTAL; }
 
     // do we have labels?
-    bool HasLabels() const
-        { return ((GetWindowStyle() & wxSL_LABELS) != 0) &&
-                 ((GetWindowStyle() & (wxSL_TOP|wxSL_BOTTOM|wxSL_LEFT|wxSL_RIGHT)) != 0); }
+    bool HasLabels() const { return (GetWindowStyle() & wxSL_LABELS) != 0; }
 
     // do we have ticks?
-    bool HasTicks() const
-        { return ((GetWindowStyle() & wxSL_TICKS) != 0) &&
-                 ((GetWindowStyle() & (wxSL_TOP|wxSL_BOTTOM|wxSL_LEFT|wxSL_RIGHT|wxSL_BOTH)) != 0); }
+    bool HasTicks() const { return (GetWindowStyle() & wxSL_TICKS) != 0; }
 
     // implement wxControlWithThumb interface
     virtual wxWindow *GetWindow() { return this; }
@@ -110,7 +106,7 @@ public:
 
     virtual void SetShaftPartState(wxScrollThumb::Shaft shaftPart,
                                    int flag,
-                                   bool set = true);
+                                   bool set = TRUE);
 
     virtual void OnThumbDragStart(int pos);
     virtual void OnThumbDrag(int pos);
@@ -120,10 +116,6 @@ public:
 
     // for wxStdSliderButtonInputHandler
     wxScrollThumb& GetThumb() { return m_thumb; }
-
-    virtual bool PerformAction(const wxControlAction& action,
-                               long numArg = 0,
-                               const wxString& strArg = wxEmptyString);
 
 protected:
     enum
@@ -136,6 +128,10 @@ protected:
     virtual void DoDraw(wxControlRenderer *renderer);
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
+    virtual bool PerformAction(const wxControlAction& action,
+                               long numArg = 0,
+                               const wxString& strArg = wxEmptyString);
+
     // event handlers
     void OnSize(wxSizeEvent& event);
 
@@ -145,7 +141,7 @@ protected:
     // normalize the value to fit in the range
     int NormalizeValue(int value) const;
 
-    // change the value by the given increment, return true if really changed
+    // change the value by the given increment, return TRUE if really changed
     bool ChangeValueBy(int inc);
 
     // change the value to the given one

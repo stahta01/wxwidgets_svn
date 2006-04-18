@@ -13,7 +13,6 @@
 #define _WX_UNIV_STATUSBR_H_
 
 #include "wx/univ/inpcons.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // wxStatusBar: a window near the bottom of the frame used for status info
@@ -26,7 +25,7 @@ public:
     wxStatusBarUniv() { Init(); }
 
     wxStatusBarUniv(wxWindow *parent,
-                    wxWindowID id = wxID_ANY,
+                    wxWindowID id = -1,
                     long style = 0,
                     const wxString& name = wxPanelNameStr)
     {
@@ -36,7 +35,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
 
@@ -58,16 +57,16 @@ public:
     virtual int GetBorderX() const;
     virtual int GetBorderY() const;
 
-    // wxInputConsumer pure virtual
-    virtual wxWindow *GetInputWindow() const
-        { return wx_const_cast(wxStatusBar*, this); }
-
 protected:
     // recalculate the field widths
     void OnSize(wxSizeEvent& event);
 
     // draw the statusbar
     virtual void DoDraw(wxControlRenderer *renderer);
+
+    // wxInputConsumer pure virtual
+    virtual wxWindow *GetInputWindow() const
+        { return wxConstCast(this, wxStatusBar); }
 
     // tell them about our preferred height
     virtual wxSize DoGetBestSize() const;

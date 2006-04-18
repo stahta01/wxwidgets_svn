@@ -12,7 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/dcclient.h"
 #include "wx/window.h"
 #include "wx/os2/private.h"
 
@@ -24,7 +23,7 @@
 #include <stdio.h>
 
 // ---------------------------------------------------------------------------
-// macros
+// macors
 // ---------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
@@ -65,13 +64,15 @@ static wxGDIImage* ConvertImage(
 //  wxStaticBitmap
 // ---------------------------------------------------------------------------
 
-bool wxStaticBitmap::Create( wxWindow*         pParent,
-                             wxWindowID        nId,
-                             const wxGDIImage& rBitmap,
-                             const wxPoint&    rPos,
-                             const wxSize&     WXUNUSED(rSize),
-                             long              lStyle,
-                             const wxString&   rName )
+bool wxStaticBitmap::Create(
+  wxWindow*                         pParent
+, wxWindowID                        nId
+, const wxGDIImage&                 rBitmap
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxString&                   rName
+)
 {
     ERRORID                         vError;
     wxString                        sError;
@@ -91,6 +92,8 @@ bool wxStaticBitmap::Create( wxWindow*         pParent,
 
     int                             nX= rPos.x;
     int                             nY = rPos.y;
+    int                             nWidth = rSize.x;
+    int                             nHeight = rSize.y;
     char                            zId[16];
 
     m_windowStyle = lStyle;
@@ -103,7 +106,7 @@ bool wxStaticBitmap::Create( wxWindow*         pParent,
     int                             nWinstyle = SS_ICON;
 
     m_hWnd = (WXHWND)::WinCreateWindow( pParent->GetHWND()
-                                       ,(PSZ)wxCanvasClassName
+                                       ,wxCanvasClassName
                                        ,zId
                                        ,nWinstyle | WS_VISIBLE
                                        ,0,0,0,0
@@ -117,20 +120,17 @@ bool wxStaticBitmap::Create( wxWindow*         pParent,
     {
         vError = ::WinGetLastError(wxGetInstance());
         sError = wxPMErrorToStr(vError);
-        return false;
+        return FALSE;
     }
     wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static bitmap") );
     m_pImage = ConvertImage(rBitmap);
-    ::WinSendMsg(   m_hWnd,
-                    SM_SETHANDLE,
-                    MPFROMHWND(rBitmap.GetHandle()),
-                    (MPARAM)0);
+    m_pImage->SetHandle((WXHWND)::WinSendMsg(m_hWnd, SM_QUERYHANDLE, (MPARAM)0, (MPARAM)0));
 
     // Subclass again for purposes of dialog editing mode
     SubclassWin(m_hWnd);
     SetSize(nX, nY, m_pImage->GetWidth(), m_pImage->GetHeight());
 
-    return true;
+    return(TRUE);
 } // end of wxStaticBitmap::Create
 
 bool wxStaticBitmap::ImageIsOk() const
@@ -159,6 +159,7 @@ void wxStaticBitmap::OnPaint (
 )
 {
     wxPaintDC                       vDc(this);
+    int                             i;
     wxBitmap*                       pBitmap;
 
     if (m_pImage->IsKindOf(CLASSINFO(wxIcon)))
@@ -196,15 +197,13 @@ void wxStaticBitmap::SetImage(
 
     GetPosition(&nX, &nY);
     GetSize(&nWidth, &nHeight);
-    // Convert to OS/2 coordinate system
-    nY = wxWindow::GetOS2ParentHeight(GetParent()) - nY - nHeight;
 
     RECTL                           vRect;
 
     vRect.xLeft   = nX;
-    vRect.yTop    = nY + nHeight;
+    vRect.yTop    = nY;
     vRect.xRight  = nX + nWidth;
-    vRect.yBottom = nY;
+    vRect.yBottom = nY + nHeight;
 
     ::WinInvalidateRect(GetHwndOf(GetParent()), &vRect, TRUE);
 }

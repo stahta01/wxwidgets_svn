@@ -14,13 +14,7 @@
 
 #if wxUSE_CLIPBOARD
 
-class WXDLLIMPEXP_CORE wxDataObject;
-struct wxDataIdToDataObject;
-
 #include "wx/list.h"
-
-WX_DECLARE_LIST(wxDataObject, wxDataObjectList);
-WX_DECLARE_LIST(wxDataIdToDataObject, wxDataIdToDataObjectList);
 
 bool WXDLLEXPORT wxOpenClipboard();
 bool WXDLLEXPORT wxClipboardOpen();
@@ -37,7 +31,7 @@ bool WXDLLEXPORT wxGetClipboardFormatName(wxDataFormat dataFormat, char *formatN
 // wxClipboard
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxClipboard : public wxClipboardBase
+class wxClipboard : public wxClipboardBase
 {
 public:
     wxClipboard();
@@ -67,15 +61,15 @@ public:
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear();
     
-    virtual void UsePrimarySelection(bool primary = true)
+    virtual void UsePrimarySelection(bool primary = TRUE)
     { m_usePrimary = primary; }
     
     // implementation from now on
+    
     bool              m_open;
-    wxDataObjectList  m_data;
+    wxList            m_data;
     bool              m_usePrimary;
-    wxDataIdToDataObjectList m_idToObject;
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 };

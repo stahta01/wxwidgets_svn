@@ -6,7 +6,7 @@
 // Created:     08/09/2000
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Julian Smart, Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CSHELPH__
@@ -17,11 +17,7 @@
 #if wxUSE_HELP
 
 #include "wx/help.h"
-
-#include "wx/hashmap.h"
-#if wxUSE_BMPBUTTON
 #include "wx/bmpbuttn.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // classes used to implement context help UI
@@ -37,7 +33,7 @@
 class WXDLLEXPORT wxContextHelp : public wxObject
 {
 public:
-    wxContextHelp(wxWindow* win = NULL, bool beginHelp = true);
+    wxContextHelp(wxWindow* win = NULL, bool beginHelp = TRUE);
     virtual ~wxContextHelp();
 
     bool BeginContextHelp(wxWindow* win);
@@ -50,13 +46,12 @@ public:
 
 protected:
     bool    m_inHelp;
-    bool    m_status; // true if the user left-clicked
+    bool    m_status; // TRUE if the user left-clicked
 
 private:
     DECLARE_DYNAMIC_CLASS(wxContextHelp)
 };
 
-#if wxUSE_BMPBUTTON
 /*
  * wxContextHelpButton
  * You can add this to your dialogs (especially on non-Windows platforms)
@@ -75,11 +70,9 @@ public:
     void OnContextHelp(wxCommandEvent& event);
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxContextHelpButton)
+    DECLARE_CLASS(wxContextHelpButton)
     DECLARE_EVENT_TABLE()
 };
-
-#endif
 
 // ----------------------------------------------------------------------------
 // classes used to implement context help support
@@ -113,7 +106,7 @@ public:
     virtual wxString GetHelp(const wxWindowBase *window) = 0;
 
     // do show help for the given window (uses GetHelp() internally if
-    // applicable), return true if it was done or false if no help available
+    // applicable), return TRUE if it was done or FALSE if no help available
     // for this window
     virtual bool ShowHelp(wxWindowBase *window) = 0;
 
@@ -137,9 +130,6 @@ private:
     static wxHelpProvider *ms_helpProvider;
 };
 
-WX_DECLARE_EXPORTED_HASH_MAP( wxUIntPtr, wxString, wxIntegerHash,
-                              wxIntegerEqual, wxSimpleHelpProviderHashMap );
-
 // wxSimpleHelpProvider is an implementation of wxHelpProvider which supports
 // only plain text help strings and shows the string associated with the
 // control (if any) in a tooltip
@@ -156,8 +146,8 @@ public:
 protected:
     // we use 2 hashes for storing the help strings associated with windows
     // and the ids
-    wxSimpleHelpProviderHashMap m_hashWindows,
-                                m_hashIds;
+    wxStringHashTable m_hashWindows,
+                     m_hashIds;
 };
 
 // wxHelpControllerHelpProvider is an implementation of wxHelpProvider which supports
@@ -180,8 +170,6 @@ public:
 
 protected:
     wxHelpControllerBase*   m_helpController;
-
-    DECLARE_NO_COPY_CLASS(wxHelpControllerHelpProvider)
 };
 
 // Convenience function for turning context id into wxString

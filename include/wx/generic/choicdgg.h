@@ -5,7 +5,7 @@
 // Modified by: 03.11.00: VZ to add wxArrayString and multiple sel functions
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@
 #include "wx/dynarray.h"
 #include "wx/dialog.h"
 
-class WXDLLEXPORT wxListBoxBase;
+class WXDLLEXPORT wxListBox;
 
 // ----------------------------------------------------------------------------
 // some (ugly...) constants
@@ -24,13 +24,8 @@ class WXDLLEXPORT wxListBoxBase;
 #define wxCHOICE_HEIGHT 150
 #define wxCHOICE_WIDTH 200
 
-#ifdef __WXWINCE__
-#define wxCHOICEDLG_STYLE \
-    (wxDEFAULT_DIALOG_STYLE | wxOK | wxCANCEL | wxCENTRE)
-#else
 #define wxCHOICEDLG_STYLE \
     (wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxOK | wxCANCEL | wxCENTRE)
-#endif
 
 // ----------------------------------------------------------------------------
 // wxAnyChoiceDialog: a base class for dialogs containing a listbox
@@ -52,17 +47,6 @@ public:
         (void)Create(parent, message, caption, n, choices,
                      styleDlg, pos, styleLbox);
     }
-    wxAnyChoiceDialog(wxWindow *parent,
-                      const wxString& message,
-                      const wxString& caption,
-                      const wxArrayString& choices,
-                      long styleDlg = wxCHOICEDLG_STYLE,
-                      const wxPoint& pos = wxDefaultPosition,
-                      long styleLbox = wxLB_ALWAYS_SB)
-    {
-        (void)Create(parent, message, caption, choices,
-                     styleDlg, pos, styleLbox);
-    }
 
     bool Create(wxWindow *parent,
                 const wxString& message,
@@ -71,22 +55,9 @@ public:
                 long styleDlg = wxCHOICEDLG_STYLE,
                 const wxPoint& pos = wxDefaultPosition,
                 long styleLbox = wxLB_ALWAYS_SB);
-    bool Create(wxWindow *parent,
-                const wxString& message,
-                const wxString& caption,
-                const wxArrayString& choices,
-                long styleDlg = wxCHOICEDLG_STYLE,
-                const wxPoint& pos = wxDefaultPosition,
-                long styleLbox = wxLB_ALWAYS_SB);
 
 protected:
-    wxListBoxBase *m_listbox;
-
-    virtual wxListBoxBase *CreateList(int n,
-                                      const wxString *choices,
-                                      long styleLbox);
-
-    DECLARE_NO_COPY_CLASS(wxAnyChoiceDialog)
+    wxListBox  *m_listbox;
 };
 
 // ----------------------------------------------------------------------------
@@ -109,26 +80,12 @@ public:
                          char **clientData = (char **)NULL,
                          long style = wxCHOICEDLG_STYLE,
                          const wxPoint& pos = wxDefaultPosition);
-    wxSingleChoiceDialog(wxWindow *parent,
-                         const wxString& message,
-                         const wxString& caption,
-                         const wxArrayString& choices,
-                         char **clientData = (char **)NULL,
-                         long style = wxCHOICEDLG_STYLE,
-                         const wxPoint& pos = wxDefaultPosition);
 
     bool Create(wxWindow *parent,
                 const wxString& message,
                 const wxString& caption,
                 int n,
                 const wxString *choices,
-                char **clientData = (char **)NULL,
-                long style = wxCHOICEDLG_STYLE,
-                const wxPoint& pos = wxDefaultPosition);
-    bool Create(wxWindow *parent,
-                const wxString& message,
-                const wxString& caption,
-                const wxArrayString& choices,
                 char **clientData = (char **)NULL,
                 long style = wxCHOICEDLG_STYLE,
                 const wxPoint& pos = wxDefaultPosition);
@@ -142,21 +99,33 @@ public:
 
     // implementation from now on
     void OnOK(wxCommandEvent& event);
-#ifndef __SMARTPHONE__
     void OnListBoxDClick(wxCommandEvent& event);
-#endif
-#ifdef __WXWINCE__
-    void OnJoystickButtonDown(wxJoystickEvent& event);
-#endif
+
+    // old, deprecated methods
+#if WXWIN_COMPATIBILITY_2
+    wxSingleChoiceDialog(wxWindow *parent,
+                         const wxString& message,
+                         const wxString& caption,
+                         const wxStringList& choices,
+                         char **clientData = (char **)NULL,
+                         long style = wxCHOICEDLG_STYLE,
+                         const wxPoint& pos = wxDefaultPosition);
+
+    bool Create(wxWindow *parent,
+                const wxString& message,
+                const wxString& caption,
+                const wxStringList& choices,
+                char **clientData = (char **)NULL,
+                long style = wxCHOICEDLG_STYLE,
+                const wxPoint& pos = wxDefaultPosition);
+#endif // WXWIN_COMPATIBILITY_2
 
 protected:
     int         m_selection;
     wxString    m_stringSelection;
 
-    void DoChoice();
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSingleChoiceDialog)
+    DECLARE_DYNAMIC_CLASS(wxSingleChoiceDialog)
     DECLARE_EVENT_TABLE()
 };
 
@@ -179,27 +148,12 @@ public:
     {
         (void)Create(parent, message, caption, n, choices, style, pos);
     }
-    wxMultiChoiceDialog(wxWindow *parent,
-                        const wxString& message,
-                        const wxString& caption,
-                        const wxArrayString& choices,
-                        long style = wxCHOICEDLG_STYLE,
-                        const wxPoint& pos = wxDefaultPosition)
-    {
-        (void)Create(parent, message, caption, choices, style, pos);
-    }
 
     bool Create(wxWindow *parent,
                 const wxString& message,
                 const wxString& caption,
                 int n,
                 const wxString *choices,
-                long style = wxCHOICEDLG_STYLE,
-                const wxPoint& pos = wxDefaultPosition);
-    bool Create(wxWindow *parent,
-                const wxString& message,
-                const wxString& caption,
-                const wxArrayString& choices,
                 long style = wxCHOICEDLG_STYLE,
                 const wxPoint& pos = wxDefaultPosition);
 
@@ -210,16 +164,10 @@ public:
     virtual bool TransferDataFromWindow();
 
 protected:
-#if wxUSE_CHECKLISTBOX
-    virtual wxListBoxBase *CreateList(int n,
-                                      const wxString *choices,
-                                      long styleLbox);
-#endif // wxUSE_CHECKLISTBOX
-
     wxArrayInt m_selections;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMultiChoiceDialog)
+    DECLARE_DYNAMIC_CLASS(wxMultiChoiceDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -231,9 +179,9 @@ WXDLLEXPORT wxString wxGetSingleChoice(const wxString& message,
                                        const wxString& caption,
                                        const wxArrayString& choices,
                                        wxWindow *parent = (wxWindow *) NULL,
-                                       int x = wxDefaultCoord,
-                                       int y = wxDefaultCoord,
-                                       bool centre = true,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
                                        int width = wxCHOICE_WIDTH,
                                        int height = wxCHOICE_HEIGHT);
 
@@ -241,9 +189,9 @@ WXDLLEXPORT wxString wxGetSingleChoice(const wxString& message,
                                        const wxString& caption,
                                        int n, const wxString *choices,
                                        wxWindow *parent = (wxWindow *) NULL,
-                                       int x = wxDefaultCoord,
-                                       int y = wxDefaultCoord,
-                                       bool centre = true,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
                                        int width = wxCHOICE_WIDTH,
                                        int height = wxCHOICE_HEIGHT);
 
@@ -253,9 +201,9 @@ WXDLLEXPORT int wxGetSingleChoiceIndex(const wxString& message,
                                        const wxString& caption,
                                        const wxArrayString& choices,
                                        wxWindow *parent = (wxWindow *) NULL,
-                                       int x = wxDefaultCoord,
-                                       int y = wxDefaultCoord,
-                                       bool centre = true,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
                                        int width = wxCHOICE_WIDTH,
                                        int height = wxCHOICE_HEIGHT);
 
@@ -263,9 +211,9 @@ WXDLLEXPORT int wxGetSingleChoiceIndex(const wxString& message,
                                        const wxString& caption,
                                        int n, const wxString *choices,
                                        wxWindow *parent = (wxWindow *) NULL,
-                                       int x = wxDefaultCoord,
-                                       int y = wxDefaultCoord,
-                                       bool centre = true,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
                                        int width = wxCHOICE_WIDTH,
                                        int height = wxCHOICE_HEIGHT);
 
@@ -275,9 +223,8 @@ WXDLLEXPORT void* wxGetSingleChoiceData(const wxString& message,
                                         const wxArrayString& choices,
                                         void **client_data,
                                         wxWindow *parent = (wxWindow *) NULL,
-                                        int x = wxDefaultCoord,
-                                        int y = wxDefaultCoord,
-                                        bool centre = true,
+                                        int x = -1, int y = -1,
+                                        bool centre = TRUE,
                                         int width = wxCHOICE_WIDTH,
                                         int height = wxCHOICE_HEIGHT);
 
@@ -286,9 +233,8 @@ WXDLLEXPORT void* wxGetSingleChoiceData(const wxString& message,
                                         int n, const wxString *choices,
                                         void **client_data,
                                         wxWindow *parent = (wxWindow *) NULL,
-                                        int x = wxDefaultCoord,
-                                        int y = wxDefaultCoord,
-                                        bool centre = true,
+                                        int x = -1, int y = -1,
+                                        bool centre = TRUE,
                                         int width = wxCHOICE_WIDTH,
                                         int height = wxCHOICE_HEIGHT);
 
@@ -300,9 +246,9 @@ WXDLLEXPORT size_t wxGetMultipleChoices(wxArrayInt& selections,
                                         const wxString& caption,
                                         int n, const wxString *choices,
                                         wxWindow *parent = (wxWindow *) NULL,
-                                        int x = wxDefaultCoord,
-                                        int y = wxDefaultCoord,
-                                        bool centre = true,
+                                        int x = -1,
+                                        int y = -1,
+                                        bool centre = TRUE,
                                         int width = wxCHOICE_WIDTH,
                                         int height = wxCHOICE_HEIGHT);
 
@@ -311,10 +257,51 @@ WXDLLEXPORT size_t wxGetMultipleChoices(wxArrayInt& selections,
                                         const wxString& caption,
                                         const wxArrayString& choices,
                                         wxWindow *parent = (wxWindow *) NULL,
-                                        int x = wxDefaultCoord,
-                                        int y = wxDefaultCoord,
-                                        bool centre = true,
+                                        int x = -1,
+                                        int y = -1,
+                                        bool centre = TRUE,
                                         int width = wxCHOICE_WIDTH,
                                         int height = wxCHOICE_HEIGHT);
 
+// ----------------------------------------------------------------------------
+// these methods are for backwards compatibility only, not documented and
+// deprecated
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2
+
+WXDLLEXPORT wxString wxGetSingleChoice(const wxString& message,
+                                       const wxString& caption,
+                                       int n, wxChar *choices[],
+                                       wxWindow *parent = (wxWindow *) NULL,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
+                                       int width = wxCHOICE_WIDTH,
+                                       int height = wxCHOICE_HEIGHT);
+
+WXDLLEXPORT int wxGetSingleChoiceIndex(const wxString& message,
+                                       const wxString& caption,
+                                       int n, wxChar *choices[],
+                                       wxWindow *parent = (wxWindow *) NULL,
+                                       int x = -1,
+                                       int y = -1,
+                                       bool centre = TRUE,
+                                       int width = wxCHOICE_WIDTH,
+                                       int height = wxCHOICE_HEIGHT);
+
+WXDLLEXPORT void* wxGetSingleChoiceData(const wxString& message,
+                                        const wxString& caption,
+                                        int n, wxChar **choices,
+                                        void **client_data,
+                                        wxWindow *parent = (wxWindow *) NULL,
+                                        int x = -1, int y = -1,
+                                        bool centre = TRUE,
+                                        int width = wxCHOICE_WIDTH,
+                                        int height = wxCHOICE_HEIGHT);
+
+
+#endif // WXWIN_COMPATIBILITY_2
+
 #endif // __CHOICEDLGH_G__
+

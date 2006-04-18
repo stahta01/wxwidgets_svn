@@ -18,13 +18,16 @@
 
 #include "wx/module.h"
 #include "wx/hash.h"
-#include "wx/intl.h"
-#include "wx/log.h"
 #include "wx/listimpl.cpp"
 
-#define TRACE_MODULE _T("module")
-
-WX_DEFINE_LIST(wxModuleList)
+#ifdef __SALFORDC__
+void wxwxModuleListNode::DeleteData()
+{
+    delete (_WX_LIST_ITEM_TYPE_wxModuleList *)GetData();
+}
+#else
+WX_DEFINE_LIST(wxModuleList);
+#endif
 
 IMPLEMENT_CLASS(wxModule, wxObject)
 
@@ -38,26 +41,23 @@ void wxModule::RegisterModule(wxModule* module)
 void wxModule::UnregisterModule(wxModule* module)
 {
     m_modules.DeleteObject(module);
-    delete module;
 }
 
 // Collect up all module-derived classes, create an instance of each,
 // and register them.
 void wxModule::RegisterModules()
 {
-    wxHashTable::compatibility_iterator node;
+    wxNode *node;
     wxClassInfo* classInfo;
 
     wxClassInfo::sm_classTable->BeginFind();
     node = wxClassInfo::sm_classTable->Next();
     while (node)
     {
-        classInfo = (wxClassInfo *)node->GetData();
+        classInfo = (wxClassInfo *)node->Data();
         if ( classInfo->IsKindOf(CLASSINFO(wxModule)) &&
-            (classInfo != (& (wxModule::ms_classInfo))) )
+            (classInfo != (& (wxModule::sm_classwxModule))) )
         {
-            wxLogTrace(TRACE_MODULE, wxT("Registering module %s"),
-                       classInfo->GetClassName());
             wxModule* module = (wxModule *)classInfo->CreateObject();
             RegisterModule(module);
         }
@@ -68,40 +68,35 @@ void wxModule::RegisterModules()
 bool wxModule::InitializeModules()
 {
     // Initialize user-defined modules
-    wxModuleList::compatibility_iterator node;
+    wxModuleList::Node *node;
     for ( node = m_modules.GetFirst(); node; node = node->GetNext() )
     {
-        wxModule *module = node->GetData();
-        if ( !module->Init() )
+        if ( !node->GetData()->Init() )
         {
-            wxLogError(_("Module \"%s\" initialization failed"),
-                       module->GetClassInfo()->GetClassName());
-
             // clean up already initialized modules - process in reverse order
-            wxModuleList::compatibility_iterator n;
+            wxModuleList::Node *n;
             for ( n = node->GetPrevious(); n; n = n->GetPrevious() )
             {
                 n->GetData()->OnExit();
             }
 
-            return false;
+            return FALSE;
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxModule::CleanUpModules()
 {
     // Cleanup user-defined modules
-    wxModuleList::compatibility_iterator node;
+    wxModuleList::Node *node;
     for ( node = m_modules.GetFirst(); node; node = node->GetNext() )
     {
-        wxLogTrace(TRACE_MODULE, wxT("Cleanup module %s"),
-                   node->GetData()->GetClassInfo()->GetClassName());
         node->GetData()->Exit();
     }
 
-    WX_CLEAR_LIST(wxModuleList, m_modules);
+    m_modules.DeleteContents(TRUE);
+    m_modules.Clear();
 }
 

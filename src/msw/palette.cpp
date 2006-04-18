@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/palette.cpp
+// Name:        palette.cpp
 // Purpose:     wxPalette
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -33,7 +33,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxPalette, wxGDIObject)
 
 wxPaletteRefData::wxPaletteRefData(void)
 {
-    m_hPalette = 0;
+  m_hPalette = 0;
 }
 
 wxPaletteRefData::~wxPaletteRefData(void)
@@ -53,7 +53,7 @@ wxPalette::wxPalette(int n, const unsigned char *red, const unsigned char *green
 
 wxPalette::~wxPalette(void)
 {
-//    FreeResource(true);
+//    FreeResource(TRUE);
 }
 
 bool wxPalette::FreeResource(bool WXUNUSED(force))
@@ -62,77 +62,76 @@ bool wxPalette::FreeResource(bool WXUNUSED(force))
     {
       DeleteObject((HPALETTE)M_PALETTEDATA->m_hPalette);
     }
-    return true;
+    return TRUE;
 }
 
 bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue)
 {
-    UnRef();
+  UnRef();
 
-#if defined(__WXMICROWIN__)
+#if defined(__WXWINE__) || defined(__WXMICROWIN__)
 
-    return false;
+  return (FALSE);
 
 #else
 
-    m_refData = new wxPaletteRefData;
+  m_refData = new wxPaletteRefData;
 
-    NPLOGPALETTE npPal = (NPLOGPALETTE)LocalAlloc(LMEM_FIXED, sizeof(LOGPALETTE) +
-                          (WORD)n * sizeof(PALETTEENTRY));
-    if (!npPal)
-        return false;
+  NPLOGPALETTE npPal = (NPLOGPALETTE)LocalAlloc(LMEM_FIXED, sizeof(LOGPALETTE) +
+                        (WORD)n * sizeof(PALETTEENTRY));
+  if (!npPal)
+    return(FALSE);
 
-    npPal->palVersion = 0x300;
-    npPal->palNumEntries = (WORD)n;
+  npPal->palVersion = 0x300;
+  npPal->palNumEntries = n;
 
-    int i;
-    for (i = 0; i < n; i ++)
-    {
-        npPal->palPalEntry[i].peRed = red[i];
-        npPal->palPalEntry[i].peGreen = green[i];
-        npPal->palPalEntry[i].peBlue = blue[i];
-        npPal->palPalEntry[i].peFlags = 0;
-    }
-    M_PALETTEDATA->m_hPalette = (WXHPALETTE) CreatePalette((LPLOGPALETTE)npPal);
-    LocalFree((HANDLE)npPal);
-    return true;
+  int i;
+  for (i = 0; i < n; i ++)
+  {
+    npPal->palPalEntry[i].peRed = red[i];
+    npPal->palPalEntry[i].peGreen = green[i];
+    npPal->palPalEntry[i].peBlue = blue[i];
+    npPal->palPalEntry[i].peFlags = 0;
+  }
+  M_PALETTEDATA->m_hPalette = (WXHPALETTE) CreatePalette((LPLOGPALETTE)npPal);
+  LocalFree((HANDLE)npPal);
+  return TRUE;
 
 #endif
 }
 
-int wxPalette::GetPixel(unsigned char red, unsigned char green, unsigned char blue) const
+int wxPalette::GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const
 {
 #ifdef __WXMICROWIN__
-    return wxNOT_FOUND;
+  return FALSE;
 #else
-    if ( !m_refData )
-        return wxNOT_FOUND;
+  if ( !m_refData )
+    return FALSE;
 
-    return ::GetNearestPaletteIndex((HPALETTE) M_PALETTEDATA->m_hPalette, PALETTERGB(red, green, blue));
+  return ::GetNearestPaletteIndex((HPALETTE) M_PALETTEDATA->m_hPalette, PALETTERGB(red, green, blue));
 #endif
 }
 
 bool wxPalette::GetRGB(int index, unsigned char *red, unsigned char *green, unsigned char *blue) const
 {
 #ifdef __WXMICROWIN__
-    return false;
+  return FALSE;
 #else
-    if ( !m_refData )
-        return false;
+  if ( !m_refData )
+    return FALSE;
 
-    if (index < 0 || index > 255)
-        return false;
+  if (index < 0 || index > 255)
+         return FALSE;
 
-    PALETTEENTRY entry;
-    if (::GetPaletteEntries((HPALETTE) M_PALETTEDATA->m_hPalette, index, 1, &entry))
-    {
-        *red = entry.peRed;
-        *green = entry.peGreen;
-        *blue = entry.peBlue;
-        return true;
-    }
-    else
-        return false;
+  PALETTEENTRY entry;
+  if (::GetPaletteEntries((HPALETTE) M_PALETTEDATA->m_hPalette, index, 1, &entry))
+  {
+         *red = entry.peRed;
+         *green = entry.peGreen;
+         *blue = entry.peBlue;
+         return TRUE;
+  } else
+         return FALSE;
 #endif
 }
 
@@ -145,3 +144,4 @@ void wxPalette::SetHPALETTE(WXHPALETTE pal)
 }
 
 #endif // wxUSE_PALETTE
+

@@ -9,7 +9,7 @@ class TestWindow : public wxWindow
 {
 public:
     TestWindow(wxWindow *parent, long style)
-        : wxWindow(parent, wxID_ANY)
+        : wxWindow(parent, -1)
     {
         SetBackgroundColour(wxColour("white"));
     }

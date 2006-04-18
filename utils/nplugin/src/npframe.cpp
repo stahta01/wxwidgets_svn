@@ -93,7 +93,7 @@ void wxPluginFrame::GetClientSize(int *x, int *y) const
 }
 
 // Set the client size (i.e. leave the calculation of borders etc.
-// to wxWidgets)
+// to wxWindows)
 void wxPluginFrame::SetClientSize(const int width, const int height)
 {
     if ( !m_hWnd )

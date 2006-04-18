@@ -9,12 +9,9 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/timer.h"
 #include "wx/app.h"
-#include "wx/hashmap.h"
+#include "wx/list.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -26,16 +23,14 @@
 
 #include "wx/motif/private.h"
 
-IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxObject)
 
-WX_DECLARE_VOIDPTR_HASH_MAP(wxTimer*, wxTimerHashMap);
-
-static wxTimerHashMap s_timers;
+static wxList wxTimerList(wxKEY_INTEGER);
 
 void wxTimerCallback (wxTimer * timer)
 {
   // Check to see if it's still on
-  if (s_timers.find(timer) == s_timers.end())
+  if (!wxTimerList.Find((long)timer))
     return;
 
   if (timer->m_id == 0)
@@ -60,8 +55,8 @@ void wxTimer::Init()
 
 wxTimer::~wxTimer()
 {
-    Stop();
-    s_timers.erase(this);
+    wxTimer::Stop();
+    wxTimerList.DeleteObject(this);
 }
 
 bool wxTimer::Start(int milliseconds, bool mode)
@@ -70,14 +65,14 @@ bool wxTimer::Start(int milliseconds, bool mode)
 
     (void)wxTimerBase::Start(milliseconds, mode);
 
-    if (s_timers.find(this) == s_timers.end())
-        s_timers[this] = this;
+    if (!wxTimerList.Find((long)this))
+        wxTimerList.Append((long)this, this);
 
     m_id = XtAppAddTimeOut((XtAppContext) wxTheApp->GetAppContext(),
                             m_milli,
                             (XtTimerCallbackProc) wxTimerCallback,
                             (XtPointer) this);
-    return true;
+    return TRUE;
 }
 
 void wxTimer::Stop()

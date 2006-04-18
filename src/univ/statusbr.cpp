@@ -6,7 +6,7 @@
 // Created:     14.10.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -64,7 +64,7 @@ bool wxStatusBarUniv::Create(wxWindow *parent,
                            wxDefaultPosition, wxDefaultSize,
                            style, name) )
     {
-        return false;
+        return FALSE;
     }
 
     SetFieldsCount(1);
@@ -73,7 +73,7 @@ bool wxStatusBarUniv::Create(wxWindow *parent,
 
     SetSize(DoGetBestSize());
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
     dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
     // do draw the fields
-    int flags = IsEnabled() ? 0 : (int)wxCONTROL_DISABLED;
+    int flags = IsEnabled() ? 0 : wxCONTROL_DISABLED;
     for ( int n = 0; n < m_nFields; n++ )
     {
         rect.width = m_widthsAbs[n];
@@ -136,12 +136,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
                 flags |= wxCONTROL_ISDEFAULT;
             }
 
-            int style;
-            if (m_statusStyles)
-                style = m_statusStyles[n];
-            else
-                style = wxSB_NORMAL;
-            m_renderer->DrawStatusField(dc, rect, m_statusText[n], flags, style);
+            m_renderer->DrawStatusField(dc, rect, m_statusText[n], flags);
         }
 
         rect.x += rect.width + borderBetweenFields;
@@ -179,7 +174,7 @@ void wxStatusBarUniv::SetStatusText(const wxString& text, int number)
 
 wxString wxStatusBarUniv::GetStatusText(int number) const
 {
-    wxCHECK_MSG( number >= 0 && number < m_nFields, wxEmptyString,
+    wxCHECK_MSG( number >= 0 && number < m_nFields, _T(""),
                  _T("invalid status bar field index") );
 
     return m_statusText[number];
@@ -250,7 +245,7 @@ void wxStatusBarUniv::OnSize(wxSizeEvent& event)
 
 bool wxStatusBarUniv::GetFieldRect(int n, wxRect& rect) const
 {
-    wxCHECK_MSG( n >= 0 && n < m_nFields, false,
+    wxCHECK_MSG( n >= 0 && n < m_nFields, FALSE,
                  _T("invalid field index in GetFieldRect()") );
 
     // this is a fix for a bug exhibited by the statbar sample: if
@@ -261,7 +256,7 @@ bool wxStatusBarUniv::GetFieldRect(int n, wxRect& rect) const
 
     rect = DoGetFieldRect(n);
 
-    return true;
+    return TRUE;
 }
 
 wxRect wxStatusBarUniv::DoGetFieldRect(int n) const

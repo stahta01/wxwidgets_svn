@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dataobj.cpp
+// Name:        os2/dataobj.cpp
 // Purpose:     implementation of wx[I]DataObject class
 // Author:      David Webster
 // Modified by:
 // Created:     10/21/99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -21,206 +21,190 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/defs.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
+#include "wx/intl.h"
 #endif
+#include "wx/defs.h"
 
-#if wxUSE_DATAOBJ
-
+#include "wx/log.h"
 #include "wx/dataobj.h"
 #include "wx/mstream.h"
 #include "wx/image.h"
 
-#include "wx/os2/private.h"
+#define INCL_DOS
+#include <os2.h>
 
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
 
+#ifdef __WXDEBUG__
+    static const wxChar *GetTymedName(DWORD tymed);
+#endif // Debug
+
 // ----------------------------------------------------------------------------
 // wxDataFormat
 // ----------------------------------------------------------------------------
 
-wxString wxDataFormat::GetId() const
+wxDataFormat::wxDataFormat()
 {
-    wxChar                          zBuf[256];
-    wxString                        sRet;
+    m_vType = wxDF_INVALID;
+    m_vFormat = 0;
+}
 
-    ::WinQueryAtomName( ::WinQuerySystemAtomTable()
-                       ,m_uFormat
-                       ,(PSZ)zBuf
-                       ,256
-                      );
-    sRet = zBuf;
-    return sRet;
-} // end of wxDataFormat::GetId()
+wxDataFormat::wxDataFormat(
+  wxDataFormatId                    vType
+)
+{
+    PrepareFormats();
+    SetType(vType);
+}
 
-void wxDataFormat::SetId (
+wxDataFormat::wxDataFormat(
   const wxChar*                     zId
 )
 {
-    m_uFormat = ::WinAddAtom( ::WinQuerySystemAtomTable()
-                             ,(PSZ)zId
-                            );
-} // end of wxDataFormat::SetId
+    PrepareFormats();
+    SetId(zId);
+}
 
-class CIDataObject
-{
-public:
-    CIDataObject(wxDataObject* pDataObject);
-    ~CIDataObject();
-
-    //
-    // Operations on the DRAGITEM struct
-    //
-    bool GetData( const wxDataFormat& rFormat
-                 ,char*               pzBuffer
-                 ,ULONG               ulLen
-                );
-    void GetDataHere( const wxDataFormat& rFormat
-                     ,char*               pzBuffer
-                     ,ULONG               ulLen
-                    );
-    void QueryGetData(const wxDataFormat& rFormat);
-    void SetData( const wxDataFormat& rFormat
-                 ,char*               pzBuffer
-                );
-private:
-    wxDataObject*                   m_pDataObject;      // pointer to C++ class we belong to
-    DRAGITEM                        m_vDragItem;
-}; // end of CLASS CIDataObject
-
-bool CIDataObject::GetData ( const wxDataFormat& rFormat,
-                             char* pzBuffer,
-                             ULONG ulLen )
-{
-    QueryGetData(rFormat);
-    if (rFormat.GetType() == wxDF_INVALID)
-        return false;
-
-    ULONG                           ulSize = m_pDataObject->GetDataSize(rFormat);
-
-    if (ulSize == 0)
-    {
-        //
-        // It probably means that the method is just not implemented
-        //
-        return false;
-    }
-    if (rFormat.GetType() == wxDF_PRIVATE)
-    {
-        //
-        // For custom formats, put the size with the data - alloc the
-        // space for it
-        //
-        ulSize += sizeof(ULONG);
-    }
-
-    if (ulSize > ulLen) // not enough room to copy
-        return false;
-
-    //
-    // Copy the data
-    //
-    GetDataHere( rFormat
-                ,pzBuffer
-                ,ulSize
-               );
-    return true;
-} // end of CIDataObject::GetData
-
-void CIDataObject::GetDataHere(
-  const wxDataFormat&               rFormat
-, char*                             pzBuffer
-, ULONG                             WXUNUSED(ulLen)
+wxDataFormat::wxDataFormat(
+  const wxString&                   rId
 )
 {
-    m_pDataObject->GetDataHere( rFormat
-                               ,(void*)pzBuffer
-                              );
-} // end of CIDataObject::GetDataHere
+    PrepareFormats();
+    SetId(rId);
+}
 
-void CIDataObject::QueryGetData (
-  const wxDataFormat&               rFormat
+wxDataFormat::wxDataFormat(
+  NativeFormat                      vFormat
 )
 {
-    m_pDataObject->IsSupportedFormat(rFormat);
-} // end of CIDataObject::QueryGetData
+    PrepareFormats();
+    SetId(vFormat);
+}
 
-void CIDataObject::SetData (
-  const wxDataFormat&               rFormat
-, char*                             pzBuffer
+void wxDataFormat::SetType(
+  wxDataFormatId                    vType
 )
 {
-    ULONG                           ulSize = 0;
+    m_vType = vType;
 
-    switch (rFormat.GetType())
+    if (m_vType == wxDF_TEXT)
+        m_vFormat = 0;
+    else
+    if (m_vType == wxDF_BITMAP)
+        m_vFormat = 0;
+    else
+    if (m_vType == wxDF_FILENAME)
+        m_vFormat = 0;
+    else
     {
-        case wxDF_TEXT:
-        case wxDF_OEMTEXT:
-        case wxDF_FILENAME:
-        case wxDF_HTML:
-            ulSize = strlen((const char *)pzBuffer);
-            break;
-
-#if wxUSE_UNICODE
-        case wxDF_UNICODETEXT:
-             ulSize = ::wcslen((const wchar_t *)pzBuffer);
-             break;
-#endif
-
-        case wxDF_BITMAP:
-        case wxDF_METAFILE:
-        case wxDF_ENHMETAFILE:
-        case wxDF_TIFF:
-        case wxDF_DIB:
-            ulSize = 0; // pass via a handle
-            break;
-
-
-        case wxDF_SYLK:
-        case wxDF_DIF:
-        case wxDF_PALETTE:
-        case wxDF_PENDATA:
-        case wxDF_RIFF:
-        case wxDF_WAVE:
-        case wxDF_LOCALE:
-            //PUNT
-            break;
-
-        case wxDF_PRIVATE:
-            size_t*                 p = (size_t *)pzBuffer;
-
-            ulSize = *p++;
-            pzBuffer = (char*)p;
-            break;
+       wxFAIL_MSG( wxT("invalid dataformat") );
     }
-    m_pDataObject->SetData( rFormat
-                           ,ulSize
-                           ,(void*)pzBuffer
-                          );
-} // end of CIDataObject::SetData
+}
+
+wxDataFormatId wxDataFormat::GetType() const
+{
+    return m_vType;
+}
+
+wxString wxDataFormat::GetId() const
+{
+    wxString                        sRet("");  // TODO: gdk_atom_name( m_format ) );
+    return sRet;
+}
+
+void wxDataFormat::SetId(
+  NativeFormat                      vFormat
+)
+{
+    m_vFormat = vFormat;
+// TODO:
+/*
+    if (m_format == g_textAtom)
+        m_type = wxDF_TEXT;
+    else
+    if (m_format == g_pngAtom)
+        m_type = wxDF_BITMAP;
+    else
+    if (m_format == g_fileAtom)
+        m_type = wxDF_FILENAME;
+    else
+        m_type = wxDF_PRIVATE;
+*/
+}
+
+void wxDataFormat::SetId(
+  const wxChar*                     zId
+)
+{
+    wxString                        tmp(zId);
+
+    m_vType = wxDF_PRIVATE;
+    m_vFormat = 0;// TODO: get the format gdk_atom_intern( wxMBSTRINGCAST tmp.mbc_str(), FALSE );
+}
+
+void wxDataFormat::PrepareFormats()
+{
+// TODO:
+/*
+    if (!g_textAtom)
+        g_textAtom = gdk_atom_intern( "STRING", FALSE );
+    if (!g_pngAtom)
+        g_pngAtom = gdk_atom_intern( "image/png", FALSE );
+    if (!g_fileAtom)
+        g_fileAtom = gdk_atom_intern( "file:ALL", FALSE );
+*/
+}
 
 //-------------------------------------------------------------------------
 // wxDataObject
 //-------------------------------------------------------------------------
 
-wxDataObject::wxDataObject ()
+wxDataObject::wxDataObject()
 {
-    m_pDataObject = new DRAGITEM;
-} // end of wxDataObject::wxDataObject
+}
 
-wxDataObject::~wxDataObject ()
+bool wxDataObject::IsSupportedFormat(
+  const wxDataFormat&               rFormat
+, Direction                         vDir
+) const
 {
-    delete m_pDataObject;
-} // end of wxDataObject::~wxDataObject
+    size_t                          nFormatCount = GetFormatCount(vDir);
+
+    if (nFormatCount == 1)
+    {
+        return rFormat == GetPreferredFormat();
+    }
+    else
+    {
+        wxDataFormat*               pFormats = new wxDataFormat[nFormatCount];
+        GetAllFormats( pFormats
+                      ,vDir
+                     );
+
+        size_t                      n;
+
+        for (n = 0; n < nFormatCount; n++)
+        {
+            if (pFormats[n] == rFormat)
+                break;
+        }
+
+        delete [] pFormats;
+
+        // found?
+        return n < nFormatCount;
+    }
+}
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject
 // ----------------------------------------------------------------------------
 
-bool wxFileDataObject::GetDataHere( void* pBuf ) const
+bool wxFileDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
     wxString                        sFilenames;
 
@@ -231,7 +215,7 @@ bool wxFileDataObject::GetDataHere( void* pBuf ) const
     }
 
     memcpy(pBuf, sFilenames.mbc_str(), sFilenames.Len() + 1);
-    return true;
+    return TRUE;
 }
 
 size_t wxFileDataObject::GetDataSize() const
@@ -247,16 +231,18 @@ size_t wxFileDataObject::GetDataSize() const
     return nRes + 1;
 }
 
-bool wxFileDataObject::SetData( size_t WXUNUSED(nSize),
-                                const void* pBuf )
+bool wxFileDataObject::SetData(
+  size_t                            WXUNUSED(nSize)
+, const void*                       pBuf
+)
 {
     /* TODO */
 
-    wxString sFile((const wxChar *)pBuf);  /* char, not wxChar */
+    wxString                        sFile( (const char *)pBuf);  /* char, not wxChar */
 
     AddFile(sFile);
 
-    return true;
+    return TRUE;
 }
 
 void wxFileDataObject::AddFile(
@@ -290,25 +276,32 @@ wxBitmapDataObject::~wxBitmapDataObject()
     Clear();
 }
 
-void wxBitmapDataObject::SetBitmap( const wxBitmap& rBitmap )
+void wxBitmapDataObject::SetBitmap(
+  const wxBitmap&                   rBitmap
+)
 {
     ClearAll();
     wxBitmapDataObjectBase::SetBitmap(rBitmap);
     DoConvertToPng();
 }
 
-bool wxBitmapDataObject::GetDataHere( void* pBuf ) const
+bool wxBitmapDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
     if (!m_pngSize)
     {
         wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
-        return false;
+        return FALSE;
     }
     memcpy(pBuf, m_pngData, m_pngSize);
-    return true;
+    return TRUE;
 }
 
-bool wxBitmapDataObject::SetData( size_t nSize, const void* pBuf)
+bool wxBitmapDataObject::SetData(
+  size_t                            nSize
+, const void*                       pBuf
+)
 {
     Clear();
     m_pngSize = nSize;
@@ -323,7 +316,7 @@ bool wxBitmapDataObject::SetData( size_t nSize, const void* pBuf)
 
     if (!vHandler.LoadFile(&vImage, vMstream))
     {
-        return false;
+        return FALSE;
     }
 
     m_bitmap = wxBitmap(vImage);
@@ -353,4 +346,3 @@ void wxBitmapDataObject::DoConvertToPng()
 #endif
 }
 
-#endif // wxUSE_DATAOBJ

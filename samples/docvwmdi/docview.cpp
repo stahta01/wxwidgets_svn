@@ -5,12 +5,12 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 /*
- * Purpose:  Document/view architecture demo for wxWidgets class library - MDI
+ * Purpose:  Document/view architecture demo for wxWindows class library - MDI
  */
 
 
@@ -95,19 +95,14 @@ bool MyApp::OnInit(void)
     menu_bar->Append(edit_menu, _T("&Edit"));
   menu_bar->Append(help_menu, _T("&Help"));
 
-#ifdef __WXMAC__
-  wxMenuBar::MacSetCommonMenuBar(menu_bar);
-#endif //def __WXMAC__
   //// Associate the menu bar with the frame
   frame->SetMenuBar(menu_bar);
 
   frame->Centre(wxBOTH);
-#ifndef __WXMAC__
-  frame->Show(true);
-#endif //ndef __WXMAC__
+  frame->Show(TRUE);
 
   SetTopWindow(frame);
-  return true;
+  return TRUE;
 }
 
 int MyApp::OnExit(void)
@@ -125,7 +120,7 @@ wxMDIChildFrame *MyApp::CreateChildFrame(wxDocument *doc, wxView *view, bool isC
 {
   //// Make a child frame
   wxDocMDIChildFrame *subframe =
-      new wxDocMDIChildFrame(doc, view, GetMainFrame(), wxID_ANY, _T("Child Frame"),
+      new wxDocMDIChildFrame(doc, view, GetMainFrame(), -1, _T("Child Frame"),
                              wxPoint(10, 10), wxSize(300, 300),
                              wxDEFAULT_FRAME_STYLE |
                              wxNO_FULL_REPAINT_ON_RESIZE);
@@ -197,7 +192,7 @@ END_EVENT_TABLE()
 
 MyFrame::MyFrame(wxDocManager *manager, wxFrame *frame, const wxString& title,
     const wxPoint& pos, const wxSize& size, long type):
-  wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, type, _T("myFrame"))
+  wxDocMDIParentFrame(manager, frame, -1, title, pos, size, type, _T("myFrame"))
 {
   editMenu = (wxMenu *) NULL;
 }

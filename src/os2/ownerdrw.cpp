@@ -6,7 +6,7 @@
 // Created:     10/12/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -20,11 +20,11 @@
   #include "wx/dcmemory.h"
   #include "wx/menu.h"
   #include "wx/utils.h"
+  #include "wx/settings.h"
 #endif
 
 #if wxUSE_OWNER_DRAWN
 
-#include "wx/settings.h"
 #include "wx/ownerdrw.h"
 #include "wx/menuitem.h"
 
@@ -37,9 +37,11 @@
 // ctor
 // ----
 //
-wxOwnerDrawn::wxOwnerDrawn( const wxString& rsStr,
-                            bool            bCheckable,
-                            bool            WXUNUSED(bMenuItem) )
+wxOwnerDrawn::wxOwnerDrawn(
+  const wxString&                   rsStr
+, bool                              bCheckable
+, bool                              bMenuItem
+)
 : m_strName(rsStr)
 {
     m_bCheckable   = bCheckable;
@@ -50,8 +52,6 @@ wxOwnerDrawn::wxOwnerDrawn( const wxString& rsStr,
         m_font = *wxNORMAL_FONT;
 } // end of wxOwnerDrawn::wxOwnerDrawn
 
-wxOwnerDrawn::~wxOwnerDrawn() { }
-
 size_t wxOwnerDrawn::ms_nDefaultMarginWidth = 15;
 
 size_t wxOwnerDrawn::ms_nLastMarginWidth = ms_nDefaultMarginWidth;
@@ -61,17 +61,20 @@ size_t wxOwnerDrawn::ms_nLastMarginWidth = ms_nDefaultMarginWidth;
 // -------
 //
 
-bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
-                                  size_t* pHeight )
+bool wxOwnerDrawn::OnMeasureItem(
+  size_t*                           pWidth
+, size_t*                           pHeight
+)
 {
-    wxMemoryDC vDC;
+    wxMemoryDC                      vDC;
 
-    wxString  sStr = wxStripMenuCodes(m_strName);
+
+    wxString                        sStr = wxStripMenuCodes(m_strName);
 
     //
     // If we have a valid accel string, then pad out
-    // the menu string so that the menu and accel string are not
-    // placed on top of each other.
+    // the menu string so the menu and accel string are not
+    // placed ontop of eachother.
     if (!m_strAccel.empty() )
     {
         sStr.Pad(sStr.Length()%8);
@@ -82,10 +85,10 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
                       ,(long *)pWidth
                       ,(long *)pHeight
                      );
-    if (!m_strAccel.empty())
+    if (!m_strAccel.IsEmpty())
     {
         //
-        // Measure the accelerator string, and add its width to
+        // Measure the accelerator string, and add it's width to
         // the total item width, plus 16 (Accelerators are right justified,
         // with the right edge of the text rectangle 16 pixels left of
         // the right edge of the menu)
@@ -101,10 +104,10 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
     }
 
     //
-    // Add space at the end of the menu for the submenu expansion arrow.
-    // This will also allow offsetting the accel string from the right edge
+    // Add space at the end of the menu for the submenu expansion arrow
+    // this will also allow offsetting the accel string from the right edge
     //
-    *pWidth = (size_t)(*pWidth + GetDefaultMarginWidth() * 1.5);
+    *pWidth += GetDefaultMarginWidth() * 1.5;
 
     //
     // JACS: items still look too tightly packed, so adding 5 pixels.
@@ -159,20 +162,22 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
     if (*pHeight < m_nMinHeight)
         *pHeight = m_nMinHeight;
     m_nHeight = *pHeight;                // remember height for use in OnDrawItem
-    return true;
+    return TRUE;
 } // end of wxOwnerDrawn::OnMeasureItem
 
 // draw the item
-bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
-                               const wxRect& rRect,
-                               wxODAction eAction,
-                               wxODStatus eStatus )
+bool wxOwnerDrawn::OnDrawItem(
+  wxDC&                             rDC
+, const wxRect&                     rRect
+, wxODAction                        eAction
+, wxODStatus                        eStatus
+)
 {
     //
     // We do nothing on focus change
     //
     if (eAction == wxODFocusChanged )
-        return true;
+        return TRUE;
 
     //
     // Select the font and draw the text
@@ -201,11 +206,11 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     }
 
     //
-    // Based on the status of the menu item, pick the right colors
+    // Base on the status of the menu item pick the right colors
     //
     if (eStatus & wxODSelected)
     {
-        wxColour                        vCol2(wxT("WHITE"));
+        wxColour                        vCol2("WHITE");
         vColBack.Set( (unsigned char)0
                      ,(unsigned char)0
                      ,(unsigned char)160
@@ -237,7 +242,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
         // Fall back to default colors if none explicitly specified
         //
         vRef = ::WinQuerySysColor( HWND_DESKTOP
-                                  ,SYSCLR_MENU  // we are using gray for all our window backgrounds in wxWidgets
+                                  ,SYSCLR_MENU  // we are using gray for all our window backgrounds in wxWindows
                                   ,0L
                                  );
         vColBack.Set( GetRValue(vRef)
@@ -282,24 +287,24 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     //
     // Unfortunately, unlike Win32, PM has no owner drawn specific text
     // drawing methods like ::DrawState that can cleanly handle accel
-    // mnemonics and deal, automatically, with various states, so we have
+    // pneumonics and deal, automatically, with various states, so we have
     // to handle them ourselves. Notice Win32 can't handle \t in ownerdrawn
-    // strings either.  We cannot handle mnemonics either.  We display
-    // them, though, in the hope we can figure them out some day.
+    // strings either.  We cannot handle mneumonics either.  We display
+    // it, though, in hopes we can figure it out some day.
     //
 
     //
-    // Display main text and accel text separately to align better
+    // Display main text and accel text separately to allign better
     //
-    wxString sTgt = wxT("\t");
-    wxString sFullString = m_strName; // need to save the original text
-    wxString sAccel;
-    int      nIndex;
-    size_t   nWidth;
-    size_t   nCharWidth;
-    size_t   nHeight;
-    bool     bFoundMnemonic = false;
-    bool     bFoundAccel = false;
+    wxString                        sTgt = "\t";
+    wxString                        sFullString = m_strName; // need to save the original text
+    wxString                        sAccel;
+    size_t                          nIndex;
+    size_t                          nWidth;
+    size_t                          nCharWidth;
+    size_t                          nHeight;
+    bool                            bFoundMneumonic = FALSE;
+    bool                            bFoundAccel = FALSE;
 
     //
     // Deal with the tab, extracting the Accel text
@@ -307,32 +312,32 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
-        bFoundAccel = true;
+        bFoundAccel = TRUE;
         sAccel = sFullString.Mid(nIndex + 1);
         sFullString.Remove(nIndex);
     }
 
     //
-    // Deal with the mnemonic character
+    // Deal with the mneumonic character
     //
-    sTgt = wxT("~");
+    sTgt = "~";
     nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
-        wxString sTmp = sFullString;
+        wxString                    sTmp = sFullString;
 
-        bFoundMnemonic = true;
+        bFoundMneumonic = TRUE;
         sTmp.Remove(nIndex);
         rDC.GetTextExtent( sTmp
                           ,(long *)&nWidth
                           ,(long *)&nHeight
                          );
-        sTmp = sFullString[(size_t)(nIndex + 1)];
+        sTmp = sFullString[nIndex + 1];
         rDC.GetTextExtent( sTmp
                           ,(long *)&nCharWidth
                           ,(long *)&nHeight
                          );
-        sFullString.Replace(sTgt.c_str(), wxEmptyString, true);
+        sFullString.Replace(sTgt.c_str(), "", TRUE);
     }
 
     //
@@ -344,10 +349,10 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
                       ,sFullString.length()
                       ,(PCH)sFullString.c_str()
                      );
-    if (bFoundMnemonic)
+    if (bFoundMneumonic)
     {
         //
-        // Underline the mnemonic -- still won't work, but at least it "looks" right
+        // Underline the mneumonic -- still won't work, but at least it "looks" right
         //
         wxPen                       vPen;
         POINTL                      vPntEnd = {nX + nWidth + nCharWidth - 3, rRect.y + 2}; //CharWidth is bit wide
@@ -415,7 +420,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
         //
         // For uncheckable item we use only the 'checked' bitmap
         //
-        wxBitmap vBmp(GetBitmap(IsCheckable() ? ((eStatus & wxODChecked) != 0) : TRUE));
+        wxBitmap                    vBmp(GetBitmap(IsCheckable() ? ((eStatus & wxODChecked) != 0) : TRUE));
 
         if (vBmp.Ok())
         {
@@ -450,11 +455,16 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
                      ,0
                      ,0
                      ,wxCOPY
-                     ,true
+                     ,TRUE
                     );
 
             if (eStatus & wxODSelected)
             {
+                RECT                vRectBmp = { rRect.x
+                                                ,rRect.y
+                                                ,rRect.x + GetMarginWidth() - 1
+                                                ,rRect.y + m_nHeight - 1
+                                               };
                 POINTL              vPnt1 = {rRect.x + 1, rRect.y + 3}; // Leave a little background border
                 POINTL              vPnt2 = {rRect.x + GetMarginWidth(), rRect.y + m_nHeight - 3};
 
@@ -478,7 +488,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
             vBmp.SetSelectedInto(NULL);
         }
     }
-    return true;
+    return TRUE;
 } // end of wxOwnerDrawn::OnDrawItem
 
 #endif //wxUSE_OWNER_DRAWN

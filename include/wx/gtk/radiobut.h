@@ -7,6 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKRADIOBUTTONH__
 #define __GTKRADIOBUTTONH__
 
@@ -14,7 +15,7 @@
 // wxRadioButton
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRadioButton: public wxControl
+class wxRadioButton: public wxControl
 {
 public:
     wxRadioButton() { }
@@ -44,20 +45,18 @@ public:
     virtual bool GetValue() const;
     virtual bool Enable( bool enable = TRUE );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
     // implementation
 
     virtual bool IsRadioButton() const { return TRUE; }
 
+    GSList *m_radioButtonGroup;
+    void ApplyWidgetStyle();
     bool IsOwnGtkWindow( GdkWindow *window );
     void OnInternalIdle();
 
     bool m_blockEvent;
 
 protected:
-    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual wxSize DoGetBestSize() const;
 
 private:

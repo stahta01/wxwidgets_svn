@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/colour.h
+// Name:        colour.h
 // Purpose:     wxColour class
 // Author:      Julian Smart, Robert Roebling
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_COLOUR_H_
@@ -22,30 +22,24 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDC;
-class WXDLLIMPEXP_CORE wxPaintDC;
-class WXDLLIMPEXP_CORE wxBitmap;
-class WXDLLIMPEXP_CORE wxWindow;
+class wxDC;
+class wxPaintDC;
+class wxBitmap;
+class wxWindow;
 
-class WXDLLIMPEXP_CORE wxColour;
+class wxColour;
 
 //-----------------------------------------------------------------------------
 // wxColour
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxColour: public wxGDIObject
+class wxColour: public wxGDIObject
 {
 public:
-    // constructors
-    // ------------
-
-    // default
     wxColour() { }
-
-    // from separate RGB
+  
+    // Construct from RGB
     wxColour( unsigned char red, unsigned char green, unsigned char blue );
-
-    // from packed RGB
     wxColour( unsigned long colRGB ) { Set(colRGB); }
 
     // Implicit conversion from the colour name
@@ -55,13 +49,13 @@ public:
     wxColour( const wxChar *colourName ) { InitFromName( wxString(colourName) ); }
 #endif
 
-    // Get colour from name or wxNullColour
-    static wxColour CreateByName(const wxString& name);
+    wxColour( const wxColour& col ) { Ref(col); }
+    wxColour& operator = ( const wxColour& col ) { Ref(col); return *this; }
 
     ~wxColour();
 
     bool Ok() const { return m_refData != NULL; }
-
+  
     bool operator == ( const wxColour& col ) const;
     bool operator != ( const wxColour& col ) const { return !(*this == col); }
 
@@ -80,18 +74,18 @@ public:
     unsigned char Blue() const;
 
     // Implementation part
-
+    
     void CalcPixel( WXColormap cmap );
     unsigned long GetPixel() const;
     WXColor *GetColor() const;
-
-    void InitFromName(const wxString& colourName);
 
 protected:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
-
+    
+    // Helper functions
+    void InitFromName(const wxString& colourName);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxColour)
@@ -100,3 +94,4 @@ private:
 #endif
 
 // _WX_COLOUR_H_
+

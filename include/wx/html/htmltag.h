@@ -4,8 +4,9 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef _WX_HTMLTAG_H_
 #define _WX_HTMLTAG_H_
@@ -15,10 +16,9 @@
 #if wxUSE_HTML
 
 #include "wx/object.h"
-#include "wx/arrstr.h"
 
-class WXDLLIMPEXP_CORE wxColour;
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
+class WXDLLEXPORT wxColour;
+class WXDLLEXPORT wxHtmlEntitiesParser;
 
 //-----------------------------------------------------------------------------
 // wxHtmlTagsCache
@@ -27,7 +27,7 @@ class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
 
 struct wxHtmlCacheItem;
 
-class WXDLLIMPEXP_HTML wxHtmlTagsCache : public wxObject
+class WXDLLEXPORT wxHtmlTagsCache : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlTagsCache)
 
@@ -43,8 +43,6 @@ public:
 
     // Finds parameters for tag starting at at and fills the variables
     void QueryTag(int at, int* end1, int* end2);
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTagsCache)
 };
 
 
@@ -54,7 +52,7 @@ public:
 //                  by wxHtmlParser.
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlTag : public wxObject
+class WXDLLEXPORT wxHtmlTag : public wxObject
 {
     DECLARE_CLASS(wxHtmlTag)
 
@@ -82,17 +80,17 @@ public:
     // Returns tag's name in uppercase.
     inline wxString GetName() const {return m_Name;}
 
-    // Returns true if the tag has given parameter. Parameter
+    // Returns TRUE if the tag has given parameter. Parameter
     // should always be in uppercase.
-    // Example : <IMG SRC="test.jpg"> HasParam("SRC") returns true
+    // Example : <IMG SRC="test.jpg"> HasParam("SRC") returns TRUE
     bool HasParam(const wxString& par) const;
 
     // Returns value of the param. Value is in uppercase unless it is
     // enclosed with "
     // Example : <P align=right> GetParam("ALIGN") returns (RIGHT)
     //           <P IMG SRC="WhaT.jpg"> GetParam("SRC") returns (WhaT.jpg)
-    //                           (or ("WhaT.jpg") if with_commas == true)
-    wxString GetParam(const wxString& par, bool with_commas = false) const;
+    //                           (or ("WhaT.jpg") if with_commas == TRUE)
+    wxString GetParam(const wxString& par, bool with_commas = FALSE) const;
 
     // Convenience functions:
     bool GetParamAsColour(const wxString& par, wxColour *clr) const;
@@ -100,7 +98,7 @@ public:
 
     // Scans param like scanf() functions family does.
     // Example : ScanParam("COLOR", "\"#%X\"", &clr);
-    // This is always with with_commas=false
+    // This is always with with_commas=FALSE
     // Returns number of scanned values
     // (like sscanf() does)
     // NOTE: unlike scanf family, this function only accepts
@@ -110,7 +108,13 @@ public:
     // Returns string containing all params.
     wxString GetAllParams() const;
 
-    // return true if this there is matching ending tag
+#if WXWIN_COMPATIBILITY_2_2
+    // return TRUE if this is ending tag (</something>) or FALSE
+    // if it isn't (<something>)
+    inline bool IsEnding() const {return FALSE;}
+#endif
+
+    // return TRUE if this there is matching ending tag
     inline bool HasEnding() const {return m_End1 >= 0;}
 
     // returns beginning position of _internal_ block of text
@@ -134,8 +138,6 @@ private:
     wxHtmlTag *m_Prev;
     wxHtmlTag *m_FirstChild, *m_LastChild;
     wxHtmlTag *m_Parent;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTag)
 };
 
 

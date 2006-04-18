@@ -17,7 +17,6 @@
 
 #ifndef WX_PRECOMP
 #  include "wx/defs.h"
-#  include "wx/palette.h"
 #endif
 
 #if wxUSE_STREAMS && wxUSE_GIF
@@ -112,7 +111,7 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
     image->Create(GetWidth(), GetHeight());
 
     if (!image->Ok())
-        return false;
+        return FALSE;
 
     pal = GetPalette();
     src = GetData();
@@ -139,21 +138,24 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
         image->SetMaskColour(255, 0, 255);
     }
     else
-        image->SetMask(false);
+        image->SetMask(FALSE);
 
 #if wxUSE_PALETTE
-    unsigned char r[256];
-    unsigned char g[256];
-    unsigned char b[256];
-
-    for (i = 0; i < 256; i++)
+    if (pal)
     {
-        r[i] = pal[3*i + 0];
-        g[i] = pal[3*i + 1];
-        b[i] = pal[3*i + 2];
-    }
+        unsigned char r[256];
+        unsigned char g[256];
+        unsigned char b[256];
 
-    image->SetPalette(wxPalette(256, r, g, b));
+        for (i = 0; i < 256; i++)
+        {
+            r[i] = pal[3*i + 0];
+            g[i] = pal[3*i + 1];
+            b[i] = pal[3*i + 2];
+        }
+
+        image->SetPalette(wxPalette(256, r, g, b));
+    }
 #endif // wxUSE_PALETTE
 
     /* copy image data */
@@ -164,7 +166,7 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
         *(dst++) = pal[3 * (*src) + 2];
     }
 
-    return true;
+    return TRUE;
 }
 
 
@@ -201,27 +203,27 @@ bool wxGIFDecoder::IsAnimation() const          { return (m_nimages > 1); }
 bool wxGIFDecoder::GoFirstFrame()
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     m_image = 1;
     m_pimage = m_pfirst;
-    return true;
+    return TRUE;
 }
 
 bool wxGIFDecoder::GoLastFrame()
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     m_image = m_nimages;
     m_pimage = m_plast;
-    return true;
+    return TRUE;
 }
 
 bool wxGIFDecoder::GoNextFrame(bool cyclic)
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((m_image < m_nimages) || (cyclic))
     {
@@ -234,16 +236,16 @@ bool wxGIFDecoder::GoNextFrame(bool cyclic)
             m_pimage = m_pfirst;
         }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 bool wxGIFDecoder::GoPrevFrame(bool cyclic)
 {
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((m_image > 1) || (cyclic))
     {
@@ -256,32 +258,30 @@ bool wxGIFDecoder::GoPrevFrame(bool cyclic)
             m_pimage = m_plast;
         }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 bool wxGIFDecoder::GoFrame(int which)
 {
+    int i;
+
     if (!IsAnimation())
-        return false;
+        return FALSE;
 
     if ((which >= 1) && (which <= m_nimages))
     {
-        m_image = 1;
         m_pimage = m_pfirst;
 
-        while (m_image < which)
-        {
-            m_image++;
+        for (i = 0; i < which; i++)
             m_pimage = m_pimage->next;
-        }
 
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 
@@ -467,25 +467,6 @@ int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
         /* make new entry in alphabet (only if NOT just cleared) */
         if (lastcode != -1)
         {
-            // Normally, after the alphabet is full and can't grow any
-            // further (ab_free == 4096), encoder should (must?) emit CLEAR
-            // to reset it. This checks whether we really got it, otherwise
-            // the GIF is damaged.
-            if (ab_free > ab_max)
-            {
-                delete[] ab_prefix;
-                delete[] ab_tail;
-                delete[] stack;
-                return wxGIF_INVFORMAT;
-            }
-
-            // This assert seems unnecessary since the condition above
-            // eliminates the only case in which it went false. But I really
-            // don't like being forced to ask "Who in .text could have
-            // written there?!" And I wouldn't have been forced to ask if
-            // this line had already been here.
-            wxASSERT(ab_free < allocSize);
-
             ab_prefix[ab_free] = lastcode;
             ab_tail[ab_free]   = code;
             ab_free++;
@@ -521,7 +502,7 @@ int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
                     /* loop until a valid y coordinate has been
                     found, Or if the maximum number of passes has
                     been reached, exit the loop, and stop image
-                    decoding (At this point the image is successfully
+                    decoding (At this point the image is succesfully
                     decoded).
                     If we don't loop, but merely set y to some other
                     value, that new value might still be invalid depending
@@ -626,16 +607,16 @@ as an End of Information itself)
 
 
 // CanRead:
-//  Returns true if the file looks like a valid GIF, false otherwise.
+//  Returns TRUE if the file looks like a valid GIF, FALSE otherwise.
 //
 bool wxGIFDecoder::CanRead()
 {
     unsigned char buf[3];
 
     if ( !m_f->Read(buf, WXSIZEOF(buf)) )
-        return false;
+        return FALSE;
 
-    m_f->SeekI(-(wxFileOffset)WXSIZEOF(buf), wxFromCurrent);
+    m_f->SeekI(-(off_t)WXSIZEOF(buf), wxFromCurrent);
 
     return memcmp(buf, "GIF", WXSIZEOF(buf)) == 0;
 }
@@ -677,7 +658,7 @@ int wxGIFDecoder::ReadGIF()
 
     if (memcmp(buf + 3, "89a", 3) < 0)
     {
-        m_anim = false;
+        m_anim = FALSE;
     }
 
     /* read logical screen descriptor block (LSDB) */
@@ -690,11 +671,6 @@ int wxGIFDecoder::ReadGIF()
 
     m_screenw = buf[0] + 256 * buf[1];
     m_screenh = buf[2] + 256 * buf[3];
-
-    if ((m_screenw == 0) || (m_screenh == 0))
-    {
-        return wxGIF_INVFORMAT;
-    }
 
     /* load global color map if available */
     if ((buf[4] & 0x80) == 0x80)
@@ -720,9 +696,9 @@ int wxGIFDecoder::ReadGIF()
     pprev = NULL;
     pimg  = NULL;
 
-    bool done = false;
+    bool done = FALSE;
 
-    while (!done)
+    while(!done)
     {
         type = (unsigned char)m_f->GetC();
 
@@ -746,7 +722,7 @@ int wxGIFDecoder::ReadGIF()
         /* end of data? */
         if (type == 0x3B)
         {
-            done = true;
+            done = TRUE;
         }
         else
         /* extension block? */
@@ -771,7 +747,7 @@ int wxGIFDecoder::ReadGIF()
                     transparent = buf[4];
 
                 /* read disposal method */
-                disposal = ((buf[1] & 0x1C) >> 2) - 1;
+                disposal = (buf[1] & 0x1C) - 1;
             }
             else
             /* other extension, skip */
@@ -781,7 +757,7 @@ int wxGIFDecoder::ReadGIF()
                     m_f->SeekI(i, wxFromCurrent);
                     if (m_f->Eof())
                     {
-                        done = true;
+                        done = TRUE;
                         break;
                     }
                 }
@@ -818,7 +794,7 @@ int wxGIFDecoder::ReadGIF()
             pimg->w = buf[4] + 256 * buf[5];
             pimg->h = buf[6] + 256 * buf[7];
 
-            if ((pimg->w == 0) || (pimg->w > m_screenw) || (pimg->h == 0) || (pimg->h > m_screenh))
+            if (pimg->w == 0 || pimg->h == 0)
             {
                 Destroy();
                 return wxGIF_INVFORMAT;
@@ -864,11 +840,6 @@ int wxGIFDecoder::ReadGIF()
 
             /* get initial code size from first byte in raster data */
             bits = (unsigned char)m_f->GetC();
-            if (bits == 0)
-            {
-                Destroy();
-                return wxGIF_INVFORMAT;
-            }
 
             /* decode image */
             int result = dgif(pimg, interl, bits);
@@ -881,11 +852,11 @@ int wxGIFDecoder::ReadGIF()
 
             /* if this is not an animated GIF, exit after first image */
             if (!m_anim)
-                done = true;
+                done = TRUE;
         }
     }
 
-    if (m_nimages <= 0)
+    if (m_nimages == 0)
     {
         Destroy();
         return wxGIF_INVFORMAT;
@@ -930,8 +901,8 @@ int wxGIFDecoder::ReadGIF()
             if ((buf[8] & 0x80) == 0x80)
             {
                 ncolors = 2 << (buf[8] & 0x07);
-                wxFileOffset pos = m_f->TellI();
-                wxFileOffset numBytes = 3 * ncolors;
+                off_t pos = m_f->TellI();
+                off_t numBytes = 3 * ncolors;
                 m_f->SeekI(numBytes, wxFromCurrent);
                 if (m_f->TellI() != (pos + numBytes))
                 {

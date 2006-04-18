@@ -1,17 +1,12 @@
-#
-# Note: this module is not a demo per se, but is used by many of 
-# the demo modules for various purposes.
-#
 
-import wx
+from wxPython.wx import *
 
 #---------------------------------------------------------------------------
 
 
-class ColoredPanel(wx.Window):
+class ColoredPanel(wxWindow):
     def __init__(self, parent, color):
-        wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
+        wxWindow.__init__(self, parent, -1, style = wxSIMPLE_BORDER) #wxRAISED_BORDER)
         self.SetBackgroundColour(color)
 
 #---------------------------------------------------------------------------
-

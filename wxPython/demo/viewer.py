@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
     Run wxPython in a second thread.
 
@@ -57,8 +56,7 @@ class viewer_thread:
     def start(self):
         """ start the GUI thread
         """
-        import  time
-        import  thread
+        import thread,time
         thread.start_new_thread(self.run, ())
 
     def run(self):
@@ -70,10 +68,9 @@ class viewer_thread:
             the import would occur in the main thread and
             wxPython wouldn't run correctly in the second thread.
         """
-        import  viewer_basics
-
+        from viewer_basics import *
         try:
-            self.app = viewer_basics.SecondThreadApp(0)
+            self.app = SecondThreadApp(0)
             self.app.MainLoop()
         except TypeError:
             self.app = None
@@ -83,8 +80,7 @@ class viewer_thread:
             send an event to the catcher window in the
             other thread and tell it to create a cone window.
         """
-        import  viewer_basics
-
+        import viewer_basics
         if self.app:
             evt = viewer_basics.AddCone()
             viewer_basics.wxPostEvent(self.app.catcher, evt)

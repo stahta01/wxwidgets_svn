@@ -4,7 +4,7 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@
 // wxTextCtrl
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTextCtrl: public wxTextCtrlBase
+class wxTextCtrl: public wxTextCtrlBase
 {
 public:
     wxTextCtrl() { Init(); }
@@ -27,8 +27,6 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString &name = wxTextCtrlNameStr);
-
-    ~wxTextCtrl();
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -63,8 +61,7 @@ public:
     virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
 
-    // sets/clears the dirty flag
-    virtual void MarkDirty();
+    // clears the dirty flag
     virtual void DiscardEdits();
 
     virtual void SetMaxLength(unsigned long len);
@@ -86,14 +83,6 @@ public:
 
     virtual void ShowPosition(long pos);
 
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt, long *pos) const;
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
-                                            wxTextCoord *col,
-                                            wxTextCoord *row) const
-    {
-        return wxTextCtrlBase::HitTest(pt, col, row);
-    }
-
     // Clipboard operations
     virtual void Copy();
     virtual void Cut();
@@ -110,12 +99,12 @@ public:
     virtual void SetInsertionPoint(long pos);
     virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
-    virtual wxTextPos GetLastPosition() const;
+    virtual long GetLastPosition() const;
 
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
 
-    virtual bool Enable( bool enable = true );
+    virtual bool Enable( bool enable = TRUE );
 
     // Implementation from now on
     void OnDropFiles( wxDropFilesEvent &event );
@@ -139,17 +128,21 @@ public:
 
     GtkWidget* GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
     void CalculateScrollbar();
     void OnInternalIdle();
+    void UpdateFontIfNeeded();
 
-    void SetUpdateFont(bool WXUNUSED(update)) { }
-
-    void SetModified() { m_modified = true; }
+    void SetModified() { m_modified = TRUE; }
 
     // GTK+ textctrl is so dumb that you need to freeze/thaw it manually to
     // avoid horrible flicker/scrolling back and forth
     virtual void Freeze();
     virtual void Thaw();
+
+    // textctrl specific scrolling
+    virtual bool ScrollLines(int lines);
+    virtual bool ScrollPages(int pages);
 
     // implementation only from now on
 
@@ -164,22 +157,18 @@ public:
     // should we ignore the changed signal? always resets the flag
     bool IgnoreTextUpdate();
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
 protected:
     virtual wxSize DoGetBestSize() const;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     // common part of all ctors
     void Init();
 
-    // Widgets that use the style->base colour for the BG colour should
-    // override this and return true.
-    virtual bool UseGTKStyleBase() const { return true; }
+    // get the vertical adjustment, if any, NULL otherwise
+    GtkAdjustment *GetVAdj() const;
 
-    // has the control been frozen by Freeze()?
-    bool IsFrozen() const { return m_frozenness > 0; }
+    // scroll the control by the given number of pixels, return true if the
+    // scroll position changed
+    bool DoScroll(GtkAdjustment *adj, int diff);
 
 private:
     // change the font for everything in this control
@@ -190,22 +179,11 @@ private:
 
     bool        m_modified:1;
     bool        m_vScrollbarVisible:1;
+    bool        m_updateFont:1;
     bool        m_ignoreNextUpdate:1;
 
-    // Our text buffer. Convenient, and holds the buffer while using
-    // a dummy one when m_frozenness > 0
-    GtkTextBuffer *m_buffer;
-
-    // number of calls to Freeze() minus number of calls to Thaw()
-    unsigned int m_frozenness;
-
-    // For wxTE_AUTO_URL
-    void OnUrlMouseEvent(wxMouseEvent&);
-    GdkCursor *m_gdkHandCursor;
-    GdkCursor *m_gdkXTermCursor;
-
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxTextCtrl)
+    DECLARE_DYNAMIC_CLASS(wxTextCtrl);
 };
 
 #endif // __GTKTEXTCTRLH__

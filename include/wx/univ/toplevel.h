@@ -118,6 +118,8 @@ public:
     // implement base class pure virtuals
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
     virtual wxPoint GetClientAreaOrigin() const;
+    virtual void DoGetClientSize(int *width, int *height) const;
+    virtual void DoSetClientSize(int width, int height);
     virtual void SetIcon(const wxIcon& icon) { SetIcons( wxIconBundle( icon ) ); }
     virtual void SetIcons(const wxIconBundle& icons);
 
@@ -137,14 +139,13 @@ public:
     virtual int GetMinWidth() const;
     virtual int GetMinHeight() const;
 
-    virtual wxWindow *GetInputWindow() const { return wx_const_cast(wxTopLevelWindow*, this); }
-
+    virtual bool ProvidesBackground() const { return TRUE; }
+    
 protected:
-    virtual void DoGetClientSize(int *width, int *height) const;
-    virtual void DoSetClientSize(int width, int height);
-
     // handle titlebar button click event
     virtual void ClickTitleBarButton(long button);
+
+    virtual wxWindow *GetInputWindow() const { return (wxWindow*)this; }
 
     // return wxTOPLEVEL_xxx combination based on current state of the frame
     long GetDecorationsStyle() const;
@@ -153,12 +154,12 @@ protected:
     void Init();
 
     void RefreshTitleBar();
-    void OnNcPaint(wxNcPaintEvent& event);
+    void OnNcPaint(wxPaintEvent& event);
     void OnSystemMenu(wxCommandEvent& event);
 
-    // true if wxTLW should render decorations (aka titlebar) itself
+    // TRUE if wxTLW should render decorations (aka titlebar) itself
     static int ms_drawDecorations;
-    // true if wxTLW can be iconized
+    // TRUE if wxTLW can be iconized
     static int ms_canIconize;
     // true for currently active frame
     bool m_isActive:1;

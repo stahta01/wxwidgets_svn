@@ -40,7 +40,7 @@
 
 WX_DECLARE_LIST(wxAcceleratorEntry, wxAccelList);
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxAccelList)
+WX_DEFINE_LIST(wxAccelList);
 
 // ----------------------------------------------------------------------------
 // wxAccelRefData: the data used by wxAcceleratorTable
@@ -51,17 +51,14 @@ class wxAccelRefData : public wxObjectRefData
 public:
     wxAccelRefData()
     {
+        m_accels.DeleteContents(TRUE);
     }
 
     wxAccelRefData(const wxAccelRefData& data)
         : wxObjectRefData()
     {
+        m_accels.DeleteContents(TRUE);
         m_accels = data.m_accels;
-    }
-
-    virtual ~wxAccelRefData()
-    {
-        WX_CLEAR_LIST(wxAccelList, m_accels);
     }
 
     wxAccelList m_accels;
@@ -94,8 +91,8 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
         const wxAcceleratorEntry& entry = entries[i];
 
         int keycode = entry.GetKeyCode();
-        if ( isascii(keycode) )
-            keycode = toupper(keycode);
+        if ( wxIslower(keycode) )
+            keycode = wxToupper(keycode);
 
         M_ACCELDATA->m_accels.Append(new wxAcceleratorEntry(entry.GetFlags(),
                                                             keycode,
@@ -132,19 +129,14 @@ void wxAcceleratorTable::Remove(const wxAcceleratorEntry& entry)
 {
     AllocExclusive();
 
-    wxAccelList::compatibility_iterator node = M_ACCELDATA->m_accels.GetFirst();
+    wxAccelList::Node *node = M_ACCELDATA->m_accels.GetFirst();
     while ( node )
     {
         const wxAcceleratorEntry *entryCur = node->GetData();
 
-        // given entry contains only the information of the accelerator key
-        // because it was set that way in wxGetAccelFromString()
-        // so do not perform full ( *entryCur == entry ) comparison
-        if ((entryCur->GetKeyCode() == entry.GetKeyCode()) &&
-            (entryCur->GetFlags() == entry.GetFlags()))
+        if ( *entryCur == entry )
         {
-            delete node->GetData();
-            M_ACCELDATA->m_accels.Erase(node);
+            M_ACCELDATA->m_accels.DeleteNode(node);
 
             return;
         }
@@ -168,7 +160,7 @@ wxAcceleratorTable::GetEntry(const wxKeyEvent& event) const
         return NULL;
     }
 
-    wxAccelList::compatibility_iterator node = M_ACCELDATA->m_accels.GetFirst();
+    wxAccelList::Node *node = M_ACCELDATA->m_accels.GetFirst();
     while ( node )
     {
         const wxAcceleratorEntry *entry = node->GetData();

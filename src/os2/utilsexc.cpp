@@ -1,21 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utilsexec.cpp
+// Name:        utilsexec.cpp
 // Purpose:     Various utilities
 // Author:      David Webster
 // Modified by:
 // Created:     10/17/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/intl.h"
+#include "wx/setup.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/intl.h"
 #endif
 
 #include "wx/log.h"
@@ -26,11 +27,9 @@
 
 #define PURE_32
 #ifndef __EMX__
-    #include <upm.h>
-    #ifndef __WATCOMC__
-        #include <netcons.h>
-        #include <netbios.h>
-    #endif
+#include <upm.h>
+#include <netcons.h>
+#include <netbios.h>
 #endif
 
 #include <ctype.h>
@@ -65,17 +64,19 @@ public:
         DosExit(EXIT_PROCESS, 0);
     }
 
-    HWND         hWnd;          // window to send wxWM_PROC_TERMINATED to [not used]
-    RESULTCODES  vResultCodes;
-    wxProcess*   pHandler;
-    ULONG        ulExitCode;    // the exit code of the process
-    bool         bState;        // set to false when the process finishes
+    HWND                            hWnd;          // window to send wxWM_PROC_TERMINATED to [not used]
+    RESULTCODES                     vResultCodes;
+    wxProcess*                      pHandler;
+    ULONG                           ulExitCode;    // the exit code of the process
+    bool                            bState;        // set to FALSE when the process finishes
 };
 
-static ULONG wxExecuteThread(wxExecuteData* pData)
+static ULONG wxExecuteThread(
+  wxExecuteData*                    pData
+)
 {
-    ULONG ulRc;
-    PID   vPidChild;
+    ULONG                           ulRc;
+    PID                             vPidChild;
 
 //     cout << "Executing thread: " << endl;
 
@@ -87,7 +88,7 @@ static ULONG wxExecuteThread(wxExecuteData* pData)
                          );
     if (ulRc != NO_ERROR)
     {
-        wxLogLastError(wxT("DosWaitChild"));
+        wxLogLastError("DosWaitChild");
     }
     delete pData;
     return 0;
@@ -95,10 +96,12 @@ static ULONG wxExecuteThread(wxExecuteData* pData)
 
 // window procedure of a hidden window which is created just to receive
 // the notification message when a process exits
-MRESULT APIENTRY wxExecuteWindowCbk( HWND   hWnd,
-                                     ULONG  ulMessage,
-                                     MPARAM WXUNUSED(wParam),
-                                     MPARAM lParam)
+MRESULT APIENTRY wxExecuteWindowCbk(
+  HWND                              hWnd
+, ULONG                             ulMessage
+, MPARAM                            wParam
+, MPARAM                            lParam
+)
 {
     if (ulMessage == wxWM_PROC_TERMINATED)
     {
@@ -127,11 +130,13 @@ MRESULT APIENTRY wxExecuteWindowCbk( HWND   hWnd,
     return 0;
 }
 
-long wxExecute( const wxString& rCommand,
-                int flags,
-                wxProcess* pHandler)
+long wxExecute(
+  const wxString&                   rCommand
+, int                               flags
+, wxProcess*                        pHandler
+)
 {
-    if (rCommand.empty())
+    if (rCommand.IsEmpty())
     {
 //         cout << "empty command in wxExecute." << endl;
         return 0;
@@ -143,7 +148,9 @@ long wxExecute( const wxString& rCommand,
     ULONG                           ulExecFlag;
     PSZ                             zArgs = NULL;
     PSZ                             zEnvs = NULL;
+    ULONG                           ulWindowId;
     APIRET                          rc;
+    PFNWP                           pOldProc;
     TID                             vTID;
 
     if (flags & wxEXEC_SYNC)
@@ -190,7 +197,7 @@ long wxExecute( const wxString& rCommand,
                           );
     if (rc != NO_ERROR)
     {
-        wxLogLastError(wxT("CreateThread in wxExecute"));
+        wxLogLastError("CreateThread in wxExecute");
         delete pData;
 
         // the process still started up successfully...
@@ -226,10 +233,7 @@ long wxExecute(
 
     while (*ppArgv != NULL)
     {
-        wxString                    sArg((wxChar*)(*ppArgv++));
-
-
-        sCommand << sArg.c_str() << ' ';
+        sCommand << *ppArgv++ << ' ';
     }
     sCommand.RemoveLast();
     return wxExecute( sCommand
@@ -238,7 +242,32 @@ long wxExecute(
                     );
 }
 
-bool wxGetFullHostName( wxChar* zBuf, int nMaxSize)
+bool wxGetFullHostName(
+  wxChar*                           zBuf
+, int                               nMaxSize
+)
 {
-    return wxGetHostName( zBuf, nMaxSize );
+#if wxUSE_NET_API
+    char                            zServer[256];
+    char                            zComputer[256];
+    unsigned long                   ulLevel = 0;
+    unsigned char*                  zBuffer = NULL;
+    unsigned long                   ulBuffer = 256;
+    unsigned long*                  pulTotalAvail = NULL;
+
+    NetBios32GetInfo( (const unsigned char*)zServer
+                     ,(const unsigned char*)zComputer
+                     ,ulLevel
+                     ,zBuffer
+                     ,ulBuffer
+                     ,pulTotalAvail
+                    );
+    strncpy(zBuf, zComputer, nMaxSize);
+    zBuf[nMaxSize] = _T('\0');
+#else
+    strcpy(zBuf, "noname");
+#endif
+    return *zBuf ? TRUE : FALSE;
+    return TRUE;
 }
+

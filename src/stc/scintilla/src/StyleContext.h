@@ -2,7 +2,7 @@
 /** @file StyleContext.cxx
  ** Lexer infrastructure.
  **/
-// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
 // This file is in the public domain.
 
 // All languages handled so far can treat all characters >= 0x80 as one class
@@ -45,7 +45,7 @@ public:
 		currentPos(startPos),
 		atLineStart(true),
 		atLineEnd(false),
-		state(initStyle & chMask), // Mask off all bits which aren't in the chMask.
+		state(initStyle),
 		chPrev(0),
 		ch(0),
 		chNext(0) {
@@ -104,7 +104,7 @@ public:
 		return currentPos - styler.GetStartSegment();
 	}
 	int GetRelative(int n) {
-		return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n));
+		return styler.SafeGetCharAt(currentPos+n);
 	}
 	bool Match(char ch0) {
 		return ch == ch0;
@@ -134,8 +134,7 @@ public:
 			return false;
 		s++;
 		for (int n=2; *s; n++) {
-			if (*s !=
-				tolower(static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n))))
+			if (*s != tolower((styler.SafeGetCharAt(currentPos+n))))
 				return false;
 			s++;
 		}
@@ -156,14 +155,4 @@ inline bool IsASpaceOrTab(unsigned int ch) {
 
 inline bool IsADigit(unsigned int ch) {
 	return (ch >= '0') && (ch <= '9');
-}
-
-inline bool IsADigit(unsigned int ch, unsigned int base) {
-	if (base <= 10) {
-		return (ch >= '0') && (ch < '0' + base);
-	} else {
-		return ((ch >= '0') && (ch <= '9')) ||
-		       ((ch >= 'A') && (ch < 'A' + base - 10)) ||
-		       ((ch >= 'a') && (ch < 'a' + base - 10));
-	}
 }

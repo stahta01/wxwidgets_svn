@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,24 +16,28 @@
 // classes
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDC;
-class WXDLLIMPEXP_CORE wxPaintDC;
-class WXDLLIMPEXP_CORE wxWindow;
+class wxDC;
+class wxPaintDC;
+class wxWindow;
 
-class WXDLLIMPEXP_CORE wxFont;
+class wxFont;
 
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFont : public wxFontBase
+class wxFont : public wxFontBase
 {
 public:
-    wxFont() { }
+    // ctors and such
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) : wxFontBase() { Init(); Ref(font); }
 
     // wxGTK-specific
     wxFont(const wxString& fontname)
     {
+        Init();
+
         Create(fontname);
     }
 
@@ -43,10 +47,12 @@ public:
            int family,
            int style,
            int weight,
-           bool underlined = false,
+           bool underlined = FALSE,
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -54,7 +60,7 @@ public:
                 int family,
                 int style,
                 int weight,
-                bool underlined = false,
+                bool underlined = FALSE,
                 const wxString& face = wxEmptyString,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
@@ -62,6 +68,9 @@ public:
     bool Create(const wxString& fontname);
 
     ~wxFont();
+
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -71,7 +80,7 @@ public:
     virtual wxString GetFaceName() const;
     virtual bool GetUnderlined() const;
     virtual wxFontEncoding GetEncoding() const;
-    virtual const wxNativeFontInfo *GetNativeFontInfo() const;
+    virtual wxNativeFontInfo *GetNativeFontInfo() const;
     virtual bool IsFixedWidth() const;
 
     virtual void SetPointSize( int pointSize );
@@ -81,18 +90,19 @@ public:
     virtual void SetFaceName( const wxString& faceName );
     virtual void SetUnderlined( bool underlined );
     virtual void SetEncoding(wxFontEncoding encoding);
+    virtual void SetNativeFontInfo( const wxNativeFontInfo& info );
 
-    virtual void SetNoAntiAliasing( bool no = true );
-    virtual bool GetNoAntiAliasing() const ;
-
+    virtual void SetNoAntiAliasing( bool no = TRUE );
+    virtual bool GetNoAntiAliasing();
+    
     // implementation from now on
     void Unshare();
+
+    GdkFont* GetInternalFont(float scale = 1.0) const;
 
     // no data :-)
 
 protected:
-    virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
-
     // common part of all ctors
     void Init();
 

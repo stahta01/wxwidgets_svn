@@ -27,6 +27,7 @@
 extern void  wxAssociateWinWithHandle( HWND         hWnd
                                       ,wxWindowOS2* pWin
                                      );
+static WXFARPROC fnWndProcSpinCtrl = (WXFARPROC)NULL;
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
@@ -117,7 +118,7 @@ bool wxSpinButton::Create(
 
     ::WinQueryWindowPos(m_hWnd, &vSwp);
     SetXComp(vSwp.x);
-    SetYComp(vSwp.y-5); // compensate for the associated TextControl border
+    SetYComp(vSwp.y);
     wxFont*                          pTextFont = new wxFont( 10
                                                             ,wxMODERN
                                                             ,wxNORMAL
@@ -126,12 +127,11 @@ bool wxSpinButton::Create(
     SetFont(*pTextFont);
     //
     // For OS/2 we want to hide the text portion so we can substitute an
-    // independent text ctrl in its place.
-    // Therefore we must override any user given width with our best guess.
+    // independent text ctrl in its place.  10 device units does this
     //
-    SetSize( nX - GetXComp()
-            ,nY - GetYComp()
-            ,nWidth
+    SetSize( nX
+            ,nY
+            ,10L
             ,nHeight
            );
     wxAssociateWinWithHandle( m_hWnd
@@ -160,11 +160,10 @@ wxSize wxSpinButton::DoGetBestSize() const
 {
     //
     // OS/2 PM does not really have system metrics so we'll just set  it to
-    // 26x20 which is the size of the buttons and the borders.
+    // 24x20 which is the size of the buttons and the borders.
     // Also we have no horizontal spin buttons.
     //
-    wxSize best(26,20);
-    return best;
+    return (wxSize(24,20));
 } // end of wxSpinButton::DoGetBestSize
 
 // ----------------------------------------------------------------------------
@@ -187,25 +186,31 @@ int wxSpinButton::GetValue() const
     return ((int)lVal);
 } // end of wxSpinButton::GetValue
 
-bool wxSpinButton::OS2OnScroll( int    WXUNUSED(nOrientation),
-                                WXWORD WXUNUSED(wParam),
-                                WXWORD wPos,
-                                WXHWND hControl )
+bool wxSpinButton::OS2OnScroll(
+  int                               nOrientation
+, WXWORD                            wParam
+, WXWORD                            wPos
+, WXHWND                            hControl
+)
 {
-    wxCHECK_MSG(hControl, false, wxT("scrolling what?") );
+    wxCHECK_MSG(hControl, FALSE, wxT("scrolling what?") )
 
-    wxSpinEvent vEvent( wxEVT_SCROLL_THUMBTRACK, m_windowId );
-    int nVal = (int)wPos;    // cast is important for negative values!
+    wxSpinEvent                     vEvent( wxEVT_SCROLL_THUMBTRACK
+                                           ,m_windowId
+                                          );
+    int                             nVal = (int)wPos;    // cast is important for negative values!
 
     vEvent.SetPosition(nVal);
     vEvent.SetEventObject(this);
     return(GetEventHandler()->ProcessEvent(vEvent));
 } // end of wxSpinButton::OS2OnScroll
 
-bool wxSpinButton::OS2Command( WXUINT WXUNUSED(uCmd),
-                               WXWORD WXUNUSED(wId) )
+bool wxSpinButton::OS2Command(
+  WXUINT                            uCmd
+, WXWORD                            wId
+)
 {
-    return false;
+    return FALSE;
 } // end of wxSpinButton::OS2Command
 
 void wxSpinButton::SetRange(

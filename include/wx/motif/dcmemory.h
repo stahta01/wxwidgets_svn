@@ -14,7 +14,7 @@
 
 #include "wx/dcclient.h"
 
-class WXDLLIMPEXP_CORE wxMemoryDC : public wxWindowDC
+class wxMemoryDC : public wxWindowDC
 {
     DECLARE_DYNAMIC_CLASS(wxMemoryDC)
         

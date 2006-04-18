@@ -10,16 +10,13 @@
 #ifndef _WX_IMAGJPEG_H_
 #define _WX_IMAGJPEG_H_
 
-#include "wx/defs.h"
+#include "wx/image.h"
 
 //-----------------------------------------------------------------------------
 // wxJPEGHandler
 //-----------------------------------------------------------------------------
 
 #if wxUSE_LIBJPEG
-
-#include "wx/image.h"
-
 class WXDLLEXPORT wxJPEGHandler: public wxImageHandler
 {
 public:
@@ -32,17 +29,18 @@ public:
     }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
-protected:
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
     virtual bool DoCanRead( wxInputStream& stream );
 #endif
 
 private:
     DECLARE_DYNAMIC_CLASS(wxJPEGHandler)
 };
+#endif
 
-#endif // wxUSE_LIBJPEG
 
-#endif // _WX_IMAGJPEG_H_
+
+#endif
+  // _WX_IMAGJPEG_H_
 

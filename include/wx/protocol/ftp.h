@@ -3,11 +3,11 @@
 // Purpose:     FTP protocol
 // Author:      Vadim Zeitlin
 // Modified by: Mark Johnson, wxWindows@mj10777.de 
-//              20000917 : RmDir, GetLastResult, GetList
+//              20000917 : RmDir, GetLastResult, GetList 
 // Created:     07/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_FTP_H__
@@ -21,7 +21,7 @@
 #include "wx/protocol/protocol.h"
 #include "wx/url.h"
 
-class WXDLLIMPEXP_NET wxFTP : public wxProtocol
+class WXDLLEXPORT wxFTP : public wxProtocol
 {
 public:
     enum TransferMode
@@ -38,7 +38,7 @@ public:
     void SetUser(const wxString& user) { m_user = user; }
     void SetPassword(const wxString& passwd) { m_passwd = passwd; }
 
-    bool Connect(wxSockAddress& addr, bool wait = true);
+    bool Connect(wxSockAddress& addr, bool wait = TRUE);
     bool Connect(const wxString& host);
 
     // disconnect
@@ -47,8 +47,6 @@ public:
     // Parameters set up
 
     // set transfer mode now
-    void SetPassive(bool pasv) { m_bPassive = pasv; };
-    void SetDefaultTimeout(wxUint32 Value);
     bool SetBinary() { return SetTransferMode(BINARY); }
     bool SetAscii() { return SetTransferMode(ASCII); }
     bool SetTransferMode(TransferMode mode);
@@ -102,7 +100,7 @@ public:
     bool GetFilesList(wxArrayString& files,
                       const wxString& wildcard = wxEmptyString)
     {
-        return GetList(files, wildcard, false);
+        return GetList(files, wildcard, FALSE);
     }
 
     // get a directory list in server dependent format - this can be shown
@@ -110,40 +108,33 @@ public:
     bool GetDirList(wxArrayString& files,
                     const wxString& wildcard = wxEmptyString)
     {
-        return GetList(files, wildcard, true);
+        return GetList(files, wildcard, TRUE);
     }
 
     // equivalent to either GetFilesList() (default) or GetDirList()
     bool GetList(wxArrayString& files,
                  const wxString& wildcard = wxEmptyString,
-                 bool details = false);
+                 bool details = FALSE);
+
+#if WXWIN_COMPATIBILITY_2
+    // deprecated
+    wxList *GetList(const wxString& wildcard, bool details = FALSE);
+#endif // WXWIN_COMPATIBILITY_2
 
 protected:
     // this executes a simple ftp command with the given argument and returns
-    // true if it its return code starts with '2'
+    // TRUE if it its return code starts with '2'
     bool DoSimpleCommand(const wxChar *command,
                          const wxString& arg = wxEmptyString);
 
     // get the server reply, return the first character of the reply code,
-    // '1'..'5' for normal FTP replies, 0 (*not* '0') if an error occurred
+    // '1'..'5' for normal FTP replies, 0 (*not* '0') if an error occured
     char GetResult();
 
     // check that the result is equal to expected value
     bool CheckResult(char ch) { return GetResult() == ch; }
 
-    // return the socket to be used, Passive/Active versions are used only by
-    // GetPort()
-    wxSocketBase *GetPort();
-    wxSocketBase *GetPassivePort();
-    wxSocketBase *GetActivePort();
-
-    // helper for GetPort()
-    wxString GetPortCmdArgument(const wxIPV4address& Local, const wxIPV4address& New);
-
-    // accept connection from server in active mode, returns the same socket as
-    // passed in in passive mode
-    wxSocketBase *AcceptIfActive(wxSocketBase *sock);
-
+    wxSocketClient *GetPort();
 
     wxString m_user,
              m_passwd;
@@ -161,15 +152,7 @@ protected:
     friend class wxInputFTPStream;
     friend class wxOutputFTPStream;
 
-    bool            m_bPassive;
-    wxUint32        m_uiDefaultTimeout;
-
-    // following is true when  a read or write times out, we then assume
-    // the connection is dead and abort. we avoid additional delays this way
-    bool            m_bEncounteredError;
-
-
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxFTP)
+    DECLARE_DYNAMIC_CLASS(wxFTP)
     DECLARE_PROTOCOL(wxFTP)
 };
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      David Webster
 // Modified by:
@@ -14,6 +14,7 @@
 
 #ifndef WX_PRECOMP
 #include <stdio.h>
+#include "wx/setup.h"
 #include "wx/window.h"
 #include "wx/app.h"
 #include "wx/frame.h"
@@ -134,19 +135,20 @@ wxAcceleratorTable::wxAcceleratorTable(
             uVirt |= AF_VIRTUALKEY;
         }
 
-        bool bIsVirtual;
-        USHORT uKey = (USHORT)wxCharCodeWXToOS2( vaEntries[i].GetKeyCode(),
-                                                 &bIsVirtual);
+        bool                        bIsVirtual;
+        USHORT                      uKey = wxCharCodeWXToOS2( vaEntries[i].GetKeyCode()
+                                                             ,&bIsVirtual
+                                                            );
         if (bIsVirtual)
             uVirt = AF_CHAR | AF_VIRTUALKEY;
 
-        USHORT uCmd = (USHORT)vaEntries[i].GetCommand();
+        USHORT                      uCmd = vaEntries[i].GetCommand();
 
         pArr->aaccel[i].fs  = uVirt;
         pArr->aaccel[i].key = uKey;
         pArr->aaccel[i].cmd = uCmd;
     }
-    pArr->codepage = (USHORT)::WinQueryCp(wxTheApp->m_hMq);
+    pArr->codepage = ::WinQueryCp(wxTheApp->m_hMq);
     pArr->cAccel = (USHORT)n;
     M_ACCELDATA->m_hAccel = ::WinCreateAccelTable( vHabmain
                                                   ,pArr
@@ -156,7 +158,7 @@ wxAcceleratorTable::wxAcceleratorTable(
         //
         // If we have accelerators the top window is the frame
         //
-        wxFrame* pFrame = (wxFrame*)wxTheApp->GetTopWindow();
+        wxFrame*                    pFrame = (wxFrame*)wxTheApp->GetTopWindow();
 
         ::WinSetAccelTable( vHabmain
                            ,M_ACCELDATA->m_hAccel
@@ -201,45 +203,10 @@ bool wxAcceleratorTable::Translate(
                              ,GetHaccel()
                              ,pMsg
                             );
+    if (rc)
+    {
+        int x = 1;
+    }
     return (Ok() && rc);
 } // end of wxAcceleratorTable::Translate
 
-// ---------------------------------------------------------------------------
-// function for translating labels
-// ---------------------------------------------------------------------------
-
-wxString wxPMTextToLabel( const wxString& rsTitle )
-{
-    wxString      sTitle;
-    const wxChar* zPc;
-
-    if (rsTitle.empty())
-        return(sTitle);
-
-    for (zPc = rsTitle.c_str(); *zPc != wxT('\0'); zPc++)
-    {
-        if (*zPc == wxT('&'))
-        {
-            if (*(zPc + 1) == wxT('&'))
-            {
-                zPc++;
-                sTitle << wxT('&');
-            }
-            else
-                sTitle << wxT('~');
-        }
-        else
-        {
-            if ( *zPc == wxT('~'))
-            {
-                //
-                // Tildes must be doubled to prevent them from being
-                // interpreted as accelerator character prefix by PM ???
-                //
-                sTitle << *zPc;
-            }
-            sTitle << *zPc;
-        }
-    }
-    return(sTitle);
-} // end of wxPMTextToLabel

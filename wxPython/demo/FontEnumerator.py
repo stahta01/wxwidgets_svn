@@ -1,41 +1,39 @@
 
-import  wx
+from wxPython.wx import *
 
 #----------------------------------------------------------------------
 
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
 
-        e = wx.FontEnumerator()
+        e = wxFontEnumerator()
         e.EnumerateFacenames()
         list = e.GetFacenames()
 
         list.sort()
 
-        s1 = wx.StaticText(self, -1, "Face names:")
+        s1 = wxStaticText(self, -1, "Face names:")
+        self.lb1 = wxListBox(self, -1, wxDefaultPosition, (200, 250),
+                             list, wxLB_SINGLE)
+        EVT_LISTBOX(self, self.lb1.GetId(), self.OnSelect)
 
-        self.lb1 = wx.ListBox(self, -1, wx.DefaultPosition, (200, 250),
-                             list, wx.LB_SINGLE)
+        self.txt = wxStaticText(self, -1, "Sample text...", (285, 50))
 
-        self.Bind(wx.EVT_LISTBOX, self.OnSelect, id=self.lb1.GetId())
+        row = wxBoxSizer(wxHORIZONTAL)
+        row.Add(s1, 0, wxALL, 5)
+        row.Add(self.lb1, 0, wxALL, 5)
+        row.Add(self.txt, 0, wxALL|wxADJUST_MINSIZE, 5)
 
-        self.txt = wx.StaticText(self, -1, "Sample text...", (285, 50))
-
-        row = wx.BoxSizer(wx.HORIZONTAL)
-        row.Add(s1, 0, wx.ALL, 5)
-        row.Add(self.lb1, 0, wx.ALL, 5)
-        row.Add(self.txt, 0, wx.ALL|wx.ADJUST_MINSIZE, 5)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(row, 0, wx.ALL, 30)
+        sizer = wxBoxSizer(wxVERTICAL)
+        sizer.Add(row, 0, wxALL, 30)
         self.SetSizer(sizer)
         self.Layout()
 
         self.lb1.SetSelection(0)
         self.OnSelect(None)
-        wx.FutureCall(300, self.SetTextSize)
+        wxFutureCall(300, self.SetTextSize)
 
 
     def SetTextSize(self):
@@ -43,16 +41,23 @@ class TestPanel(wx.Panel):
 
 
     def OnSelect(self, evt):
+        #print "OnSelect: "
         face = self.lb1.GetStringSelection()
-        font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, face)
+        #print '\t '+face
+        font = wxFont(28, wxDEFAULT, wxNORMAL, wxNORMAL, False, face)
+        #print "\t got font"
         self.txt.SetLabel(face)
+        #print "\t set label"
         self.txt.SetFont(font)
-        if wx.Platform == "__WXMAC__": self.Refresh()
+        #print "\t set font"
+        #self.txt.SetSize(self.txt.GetBestSize())
+        #print "\t set size"
+
 
 ##         st = font.GetNativeFontInfo().ToString()
-##         ni2 = wx.NativeFontInfo()
+##         ni2 = wxNativeFontInfo()
 ##         ni2.FromString(st)
-##         font2 = wx.FontFromNativeInfo(ni2)
+##         font2 = wxFontFromNativeInfo(ni2)
 
 #----------------------------------------------------------------------
 
@@ -61,6 +66,11 @@ def runTest(frame, nb, log):
     return win
 
 #----------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -76,5 +86,5 @@ the given encoding.
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/ctrlcmn.cpp
+// Name:        ctrlcmn.cpp
 // Purpose:     wxControl common interface
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     26.07.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -29,7 +29,6 @@
 #ifndef WX_PRECOMP
     #include "wx/control.h"
     #include "wx/log.h"
-    #include "wx/radiobut.h"
 #endif
 
 #if wxUSE_STATBMP
@@ -51,7 +50,7 @@ bool wxControlBase::Create(wxWindow *parent,
                            const wxPoint &pos,
                            const wxSize &size,
                            long style,
-                           const wxValidator& wxVALIDATOR_PARAM(validator),
+                           const wxValidator& validator,
                            const wxString &name)
 {
     bool ret = wxWindow::Create(parent, id, pos, size, style, name);
@@ -75,14 +74,35 @@ bool wxControlBase::CreateControl(wxWindowBase *parent,
     // even if it's possible to create controls without parents in some port,
     // it should surely be discouraged because it doesn't work at all under
     // Windows
-    wxCHECK_MSG( parent, false, wxT("all controls must have parents") );
+    wxCHECK_MSG( parent, FALSE, wxT("all controls must have parents") );
 
     if ( !CreateBase(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     parent->AddChild(this);
 
-    return true;
+    return TRUE;
+}
+
+// inherit colour and font settings from the parent window
+void wxControlBase::InheritAttributes()
+{
+    // it definitely doesn't make sense to inherit the background colour as the
+    // controls typically have their own standard one and probably not the
+    // foreground neither?
+#if 0
+    SetBackgroundColour(GetParent()->GetBackgroundColour());
+    SetForegroundColour(GetParent()->GetForegroundColour());
+#endif // 0
+
+#ifdef __WXPM__
+    //
+    // All OS/2 ctrls use the small font
+    //
+    SetFont(*wxSMALL_FONT);
+#else
+    SetFont(GetParent()->GetFont());
+#endif
 }
 
 void wxControlBase::Command(wxCommandEvent& event)
@@ -112,45 +132,6 @@ void wxControlBase::InitCommandEvent(wxCommandEvent& event) const
     }
 }
 
-
-void wxControlBase::SetLabel( const wxString &label )
-{
-    InvalidateBestSize();
-    wxWindow::SetLabel(label);
-}
-
-bool wxControlBase::SetFont(const wxFont& font)
-{
-    InvalidateBestSize();
-    return wxWindow::SetFont(font);
-}
-
-// wxControl-specific processing after processing the update event
-void wxControlBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
-{
-    // call inherited
-    wxWindowBase::DoUpdateWindowUI(event);
-
-    // update label
-    if ( event.GetSetText() )
-    {
-        if ( event.GetText() != GetLabel() )
-            SetLabel(event.GetText());
-    }
-
-    // Unfortunately we don't yet have common base class for
-    // wxRadioButton, so we handle updates of radiobuttons here.
-    // TODO: If once wxRadioButtonBase will exist, move this code there.
-#if wxUSE_RADIOBTN
-    if ( event.GetSetChecked() )
-    {
-        wxRadioButton *radiobtn = wxDynamicCastThis(wxRadioButton);
-        if ( radiobtn )
-            radiobtn->SetValue(event.GetChecked());
-    }
-#endif // wxUSE_RADIOBTN
-}
-
 // ----------------------------------------------------------------------------
 // wxStaticBitmap
 // ----------------------------------------------------------------------------
@@ -162,19 +143,17 @@ wxStaticBitmapBase::~wxStaticBitmapBase()
     // this destructor is required for Darwin
 }
 
-wxSize wxStaticBitmapBase::DoGetBestSize() const
+wxSize wxStaticBitmapBase::DoGetBestClientSize() const
 {
-    wxSize best;
     wxBitmap bmp = GetBitmap();
     if ( bmp.Ok() )
-        best = wxSize(bmp.GetWidth(), bmp.GetHeight());
-    else
-        // this is completely arbitrary
-        best = wxSize(16, 16);
-    CacheBestSize(best);
-    return best;
+        return wxSize(bmp.GetWidth(), bmp.GetHeight());
+
+    // this is completely arbitrary
+    return wxSize(16, 16);
 }
 
 #endif // wxUSE_STATBMP
 
 #endif // wxUSE_CONTROLS
+

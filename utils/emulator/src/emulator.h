@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     2002-03-10
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@ class wxEmulatorInfo: public wxObject
 public:
 
     wxEmulatorInfo() { Init(); }
-    wxEmulatorInfo(const wxEmulatorInfo& info) : wxObject() { Init(); Copy(info); }
+    wxEmulatorInfo(const wxEmulatorInfo& info) { Init(); Copy(info); }
 
     void operator= (const wxEmulatorInfo& info) { Copy(info); }
     void Copy(const wxEmulatorInfo& info);
@@ -127,7 +127,7 @@ public:
     void OnCloseWindow(wxCloseEvent& event);
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 

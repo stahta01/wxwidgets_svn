@@ -6,7 +6,7 @@
 // Created:     06/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -99,17 +99,17 @@ END_EVENT_TABLE()
 
 cbPaneDrawPlugin::cbPaneDrawPlugin(void)
 
-    : mResizeStarted          ( false ),
+    : mResizeStarted          ( FALSE ),
 
-      mResizeCursorOn         ( false ),
+      mResizeCursorOn         ( FALSE ),
       mpDraggedBar              ( NULL  ),
       mpResizedRow            ( NULL  ),
 
-      mRowHandleHitted        ( false ),
-      mIsUpperHandle          ( false ),
-      mBarHandleHitted        ( false ),
-      mIsLeftHandle           ( false ),
-      mBarContentHitted       ( false ),
+      mRowHandleHitted        ( FALSE ),
+      mIsUpperHandle          ( FALSE ),
+      mBarHandleHitted        ( FALSE ),
+      mIsLeftHandle           ( FALSE ),
+      mBarContentHitted       ( FALSE ),
 
       mpClntDc ( NULL ),
       mpPane   ( NULL )
@@ -121,17 +121,17 @@ cbPaneDrawPlugin::cbPaneDrawPlugin( wxFrameLayout* pPanel, int paneMask )
     
       // bar-row resizing state varaibles
 
-      mResizeStarted          ( false ),
+      mResizeStarted          ( FALSE ),
 
-      mResizeCursorOn         ( false ),
+      mResizeCursorOn         ( FALSE ),
       mpDraggedBar              ( NULL ),
       mpResizedRow            ( NULL ),
 
-      mRowHandleHitted        ( false ),
-      mIsUpperHandle          ( false ),
-      mBarHandleHitted        ( false ),
-      mIsLeftHandle           ( false ),
-      mBarContentHitted       ( false ),
+      mRowHandleHitted        ( FALSE ),
+      mIsUpperHandle          ( FALSE ),
+      mBarHandleHitted        ( FALSE ),
+      mIsLeftHandle           ( FALSE ),
+      mBarContentHitted       ( FALSE ),
 
       mpClntDc ( NULL ),
       mpPane   ( NULL )
@@ -250,9 +250,9 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
 
         bool prevWasRowHandle = mRowHandleHitted;
 
-        mBarContentHitted = false;
-        mBarHandleHitted  = false;
-        mRowHandleHitted  = false;
+        mBarContentHitted = FALSE;
+        mBarHandleHitted  = FALSE;
+        mRowHandleHitted  = FALSE;
 
         int testResult =  
             event.mpPane->HitTestPaneItems( event.mPos,        // in pane's coordiantes
@@ -271,9 +271,9 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
                     mpLayout->ReleaseEventsFromPane( event.mpPane );
                     mpLayout->ReleaseEventsFromPlugin( this );
     
-                    mResizeCursorOn = false;
+                    mResizeCursorOn = FALSE;
 
-                    mBarContentHitted = true;
+                    mBarContentHitted = TRUE;
 
                     // In Windows, at least, the frame needs to have a null cursor
                     // else child windows (such as text windows) inherit the cursor
@@ -290,7 +290,7 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
                 return;
             }
 
-            wxCursor* pCurs;
+            wxCursor* pCurs = NULL;
 
             if ( testResult == CB_UPPER_ROW_HANDLE_HITTED ||
                  testResult == CB_LOWER_ROW_HANDLE_HITTED)
@@ -301,7 +301,7 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
                 else
                     pCurs = mpLayout->mpHorizCursor;
 
-                mRowHandleHitted = true;
+                mRowHandleHitted = TRUE;
                 mIsUpperHandle    = ( testResult == CB_UPPER_ROW_HANDLE_HITTED );
             }
             else
@@ -314,7 +314,7 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
                 else
                     pCurs = mpLayout->mpVertCursor;
 
-                mBarHandleHitted = true;
+                mBarHandleHitted = TRUE;
                 mIsLeftHandle    = ( testResult == CB_LEFT_BAR_HANDLE_HITTED );
             }
 
@@ -322,17 +322,17 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
 
             if ( !mResizeCursorOn || prevWasRowHandle != mRowHandleHitted )
             {
-                mpLayout->GetParentFrame().SetCursor( *pCurs );
-
                 if ( !mResizeCursorOn )
                 {
                     // caputre if not captured yet
                     mpLayout->CaptureEventsForPane( event.mpPane );
                     mpLayout->CaptureEventsForPlugin( this );
                 }
+
+                mpLayout->GetParentFrame().SetCursor( *pCurs );
             }
 
-            mResizeCursorOn = true;
+            mResizeCursorOn = TRUE;
 
             // handled is being dragged now, thus event is "eaten" by this plugin
 
@@ -354,7 +354,7 @@ void cbPaneDrawPlugin::OnMouseMove( cbMotionEvent& event )
             mpLayout->GetParentFrame().SetCursor( *mpLayout->mpNormalCursor );
 #endif
 
-            mResizeCursorOn = false;
+            mResizeCursorOn = FALSE;
         }
 
         event.Skip(); // pass event to the next plugin
@@ -402,14 +402,14 @@ void cbPaneDrawPlugin::OnLButtonDown( cbLeftDownEvent& event )
 
     if ( mResizeCursorOn )
     {
-        mResizeStarted = true;
+        mResizeStarted = TRUE;
         mDragOrigin    = event.mPos;
         
         // setup constraints for the dragging handle
 
         int from, till;
         mHandleOfs        = 0;
-        mHandleIsVertical = false;
+        mHandleIsVertical = FALSE;
 
         if ( mRowHandleHitted )
 
@@ -420,7 +420,7 @@ void cbPaneDrawPlugin::OnLButtonDown( cbLeftDownEvent& event )
          
         if ( mRowHandleHitted )
         {
-            mHandleIsVertical = ( event.mpPane->IsHorizontal() ) ? false : true;
+            mHandleIsVertical = ( event.mpPane->IsHorizontal() ) ? FALSE : TRUE;
 
             mHandleDragArea.x      = 0;
             mHandleDragArea.width  = event.mpPane->mPaneWidth;
@@ -443,7 +443,7 @@ void cbPaneDrawPlugin::OnLButtonDown( cbLeftDownEvent& event )
 //            cbRowInfo& rowInfo     = *mpDraggedBar->mpRow;
             wxRect& bounds         = mpDraggedBar->mBounds;
 
-            mHandleIsVertical = ( event.mpPane->IsHorizontal() ) ? true : false;
+            mHandleIsVertical = ( event.mpPane->IsHorizontal() ) ? TRUE : FALSE;
 
             mHandleDragArea.x      = from;
             mHandleDragArea.width  = till - from;
@@ -501,8 +501,8 @@ void cbPaneDrawPlugin::OnLButtonUp( cbLeftUpEvent& event )
     {
         DrawDraggedHandle( event.mPos, *event.mpPane );
 
-        mResizeStarted  = false;
-        mResizeCursorOn = false;
+        mResizeStarted  = FALSE;
+        mResizeCursorOn = FALSE;
 
         mpLayout->ReleaseEventsFromPane( event.mpPane );
         mpLayout->ReleaseEventsFromPlugin( this );
@@ -600,11 +600,11 @@ void cbPaneDrawPlugin::OnSizeBarWindow( cbSizeBarWndEvent& event )
 
         if ( !bar.mpBarWnd->IsShown() )
 
-            bar.mpBarWnd->Show( true );
+            bar.mpBarWnd->Show( TRUE );
     }
     else
         // hide bar if not visible
-        bar.mpBarWnd->Show( false );
+        bar.mpBarWnd->Show( FALSE );
 
     event.Skip(); // pass event to the next plugin in the chain
 }
@@ -1272,7 +1272,7 @@ void cbPaneDrawPlugin::OnStartDrawInArea( cbStartDrawInAreaEvent& event )
                                  event.mArea.width, event.mArea.height );
 }
 
-void cbPaneDrawPlugin::OnFinishDrawInArea( cbFinishDrawInAreaEvent& WXUNUSED(event) )
+void cbPaneDrawPlugin::OnFinishDrawInArea( cbFinishDrawInAreaEvent& event )
 {
     // DBG::
     wxASSERT( mpClntDc );

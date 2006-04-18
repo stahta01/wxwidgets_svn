@@ -9,7 +9,7 @@
 
 
 #if defined(_WIN32_WCE)
-    /* eVC cause warnings in its own headers: stdlib.h and winnt.h */
+    // eVC cause warnings in its own headers: stdlib.h and winnt.h
     #pragma warning (disable:4115)
     #pragma warning (disable:4214)
 #endif
@@ -28,7 +28,7 @@
 
 #if wxUSE_APPLE_IEEE
 
-#include "wx/math.h"
+#include <math.h>
 
 /* Copyright (C) 1989-1991 Ken Turkowski. <turk@computer.org>
  *
@@ -105,7 +105,7 @@
  * and a 64-bit mantissa, with no hidden bit.
  ****************************************************************/
 
-wxFloat64 ConvertFromIeeeExtended(const wxInt8 *bytes)
+wxFloat64 ConvertFromIeeeExtended(wxInt8* bytes)
 {
     wxFloat64 f;
     wxInt32 expon;

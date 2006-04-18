@@ -17,19 +17,19 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDialog;
+class wxDialog;
 
 //-----------------------------------------------------------------------------
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxDialogNameStr[];
+extern const wxChar *wxDialogNameStr;
 
 //-----------------------------------------------------------------------------
 // wxDialog
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDialog: public wxDialogBase
+class wxDialog: public wxDialogBase
 {
 public:
     wxDialog() { Init(); }

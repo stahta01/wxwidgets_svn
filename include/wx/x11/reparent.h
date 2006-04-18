@@ -18,8 +18,8 @@
  * This class helps to reparent a specific window
  */
 
-class WXDLLIMPEXP_CORE wxAdoptedWindow;
-class WXDLLIMPEXP_CORE wxReparenter: public wxObject
+class wxAdoptedWindow;
+class wxReparenter: public wxObject
 {
 public:
     wxReparenter() {}
@@ -52,7 +52,7 @@ protected:
  * toolkit. It has no parent until reparented.
  */
 
-class WXDLLIMPEXP_CORE wxAdoptedWindow: public wxWindow
+class wxAdoptedWindow: public wxWindow
 {
   public:
     wxAdoptedWindow();

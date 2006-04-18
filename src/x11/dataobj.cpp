@@ -9,8 +9,6 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_DATAOBJ
-
 #include "wx/dataobj.h"
 #include "wx/mstream.h"
 #include "wx/app.h"
@@ -376,6 +374,4 @@ void wxBitmapDataObject::DoConvertToPng()
     handler.SaveFile( &image, mstream );
 #endif
 }
-
-#endif // wxUSE_DATAOBJ
 

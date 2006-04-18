@@ -20,7 +20,7 @@ is to use a wxMetafileDC.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxMetafile::wxMetafile}\label{wxmetafilector}
+\membersection{wxMetafile::wxMetafile}
 
 \func{}{wxMetafile}{\param{const wxString\& }{filename = ""}}
 
@@ -28,7 +28,7 @@ Constructor. If a filename is given, the Windows disk metafile is
 read in. Check whether this was performed successfully by
 using the \helpref{wxMetafile::Ok}{wxmetafileok} member.
 
-\membersection{wxMetafile::\destruct{wxMetafile}}\label{wxmetafiledtor}
+\membersection{wxMetafile::\destruct{wxMetafile}}
 
 \func{}{\destruct{wxMetafile}}{\void}
 
@@ -38,16 +38,16 @@ Destructor.
 
 \func{bool}{Ok}{\void}
 
-Returns true if the metafile is valid.
+Returns TRUE if the metafile is valid.
 
 \membersection{wxMetafile::Play}\label{wxmetafileplay}
 
 \func{bool}{Play}{\param{wxDC *}{dc}}
 
 Plays the metafile into the given device context, returning
-true if successful.
+TRUE if successful.
 
-\membersection{wxMetafile::SetClipboard}\label{wxmetafilesetclipboard}
+\membersection{wxMetafile::SetClipboard}
 
 \func{bool}{SetClipboard}{\param{int}{ width = 0}, \param{int}{ height = 0}}
 
@@ -64,7 +64,7 @@ to keep track of the maximum extent of drawing commands.
   wxMetafileDC dc;
   if (dc.Ok())
   {
-    Draw(dc, false);
+    Draw(dc, FALSE);
     wxMetafile *mf = dc.Close();
     if (mf)
     {
@@ -108,14 +108,14 @@ closing your disk-based metafile device context.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxMetafileDC::wxMetafileDC}\label{wxmetafiledcctor}
+\membersection{wxMetafileDC::wxMetafileDC}
 
 \func{}{wxMetafileDC}{\param{const wxString\& }{filename = ""}}
 
 Constructor. If no filename is passed, the metafile is created
 in memory.
 
-\membersection{wxMetafileDC::\destruct{wxMetafileDC}}\label{wxmetafiledcdtor}
+\membersection{wxMetafileDC::\destruct{wxMetafileDC}}
 
 \func{}{\destruct{wxMetafileDC}}{\void}
 

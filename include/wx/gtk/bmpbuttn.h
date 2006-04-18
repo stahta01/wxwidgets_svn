@@ -15,7 +15,7 @@
 // wxBitmapButton
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapButton: public wxBitmapButtonBase
+class wxBitmapButton: public wxBitmapButtonBase
 {
 public:
     wxBitmapButton() { Init(); }
@@ -44,6 +44,7 @@ public:
                 const wxString& name = wxButtonNameStr);
 
     void SetLabel( const wxString &label );
+    wxString GetLabel() const;
     virtual void SetLabel( const wxBitmap& bitmap ) { SetBitmapLabel(bitmap); }
 
     virtual void SetDefault();
@@ -56,14 +57,13 @@ public:
     void NotFocus();
     void StartSelect();
     void EndSelect();
+    void ApplyWidgetStyle();
 
     bool         m_hasFocus:1;
     bool         m_isSelected:1;
 
 protected:
     virtual void OnSetBitmap();
-    virtual wxSize DoGetBestSize() const;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     void Init();
 

@@ -1,12 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/list.cpp
+// Name:        list.cpp
 // Purpose:     wxList implementation
 // Author:      Julian Smart
 // Modified by: VZ at 16/11/98: WX_DECLARE_LIST() and typesafe lists added
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 ////////////////////////////////////////////////////////////////////////////////
 
 // =============================================================================
@@ -31,9 +31,8 @@
 #ifndef WX_PRECOMP
     #include "wx/defs.h"
     #include "wx/list.h"
+    #include "wx/utils.h"   // for copystring() (beurk...)
 #endif
-
-#if !wxUSE_STL
 
 // =============================================================================
 // implementation
@@ -42,6 +41,7 @@
 // -----------------------------------------------------------------------------
 // wxListKey
 // -----------------------------------------------------------------------------
+
 wxListKey wxDefaultListKey;
 
 bool wxListKey::operator==(wxListKeyValue value) const
@@ -143,7 +143,7 @@ void wxListBase::Init(wxKeyType keyType)
   m_nodeFirst =
   m_nodeLast = (wxNodeBase *) NULL;
   m_count = 0;
-  m_destroy = false;
+  m_destroy = FALSE;
   m_keyType = keyType;
 }
 
@@ -341,7 +341,7 @@ wxNodeBase *wxListBase::Find(const wxListKey& key) const
     return (wxNodeBase *)NULL;
 }
 
-wxNodeBase *wxListBase::Find(const void *object) const
+wxNodeBase *wxListBase::Find(void *object) const
 {
     for ( wxNodeBase *current = GetFirst(); current; current = current->GetNext() )
     {
@@ -404,11 +404,11 @@ wxNodeBase *wxListBase::DetachNode(wxNodeBase *node)
 bool wxListBase::DeleteNode(wxNodeBase *node)
 {
     if ( !DetachNode(node) )
-        return false;
+        return FALSE;
 
     DoDeleteNode(node);
 
-    return true;
+    return TRUE;
 }
 
 bool wxListBase::DeleteObject(void *object)
@@ -418,12 +418,12 @@ bool wxListBase::DeleteObject(void *object)
         if ( current->GetData() == object )
         {
             DeleteNode(current);
-            return true;
+            return TRUE;
         }
     }
 
     // not found
-    return false;
+    return FALSE;
 }
 
 void wxListBase::Clear()
@@ -509,59 +509,23 @@ void wxListBase::Sort(const wxSortCompareFunction compfunc)
 
     // go through the list and put the pointers into the array
     wxNodeBase *node;
-    for ( node = GetFirst(); node; node = node->GetNext() )
+    for ( node = GetFirst(); node; node = node->Next() )
     {
-        *objPtr++ = node->GetData();
+        *objPtr++ = node->Data();
     }
 
     // sort the array
-    qsort((void *)objArray,num,sizeof(wxObject *),
-#ifdef __WXWINCE__
-        (int (__cdecl *)(const void *,const void *))
-#endif
-        compfunc);
+    qsort((void *)objArray,num,sizeof(wxObject *),compfunc);
 
     // put the sorted pointers back into the list
     objPtr = objArray;
-    for ( node = GetFirst(); node; node = node->GetNext() )
+    for ( node = GetFirst(); node; node = node->Next() )
     {
         node->SetData(*objPtr++);
     }
 
     // free the array
     delete[] objArray;
-}
-
-void wxListBase::Reverse()
-{
-    wxNodeBase* node = m_nodeFirst;
-    wxNodeBase* tmp;
-
-    while (node)
-    {
-        // swap prev and next pointers
-        tmp = node->m_next;
-        node->m_next = node->m_previous;
-        node->m_previous = tmp;
-
-        // this is the node that was next before swapping
-        node = tmp;
-    }
-
-    // swap first and last node
-    tmp = m_nodeFirst; m_nodeFirst = m_nodeLast; m_nodeLast = tmp;
-}
-
-void wxListBase::DeleteNodes(wxNodeBase* first, wxNodeBase* last)
-{
-    wxNodeBase* node = first;
-
-    while (node != last)
-    {
-        wxNodeBase* next = node->GetNext();
-        DeleteNode(node);
-        node = next;
-    }
 }
 
 // ============================================================================
@@ -576,25 +540,14 @@ void wxListBase::DeleteNodes(wxNodeBase* first, wxNodeBase* last)
 
 IMPLEMENT_DYNAMIC_CLASS(wxList, wxObject)
 
-wxList::wxList( int key_type )
-    : wxObjectList( (wxKeyType)key_type )
-{
-}
-
 void wxObjectListNode::DeleteData()
 {
     delete (wxObject *)GetData();
 }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // wxStringList
-// ----------------------------------------------------------------------------
-
-static inline wxChar* MYcopystring(const wxChar* s)
-{
-    wxChar* copy = new wxChar[wxStrlen(s) + 1];
-    return wxStrcpy(copy, s);
-}
+// -----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxStringList, wxObject)
 
@@ -614,12 +567,12 @@ bool wxStringList::Delete(const wxChar *s)
         if ( wxStrcmp(current->GetData(), s) == 0 )
         {
             DeleteNode(current);
-            return true;
+            return TRUE;
         }
     }
 
     // not found
-    return false;
+    return FALSE;
 }
 
 void wxStringList::DoCopy(const wxStringList& other)
@@ -633,16 +586,11 @@ void wxStringList::DoCopy(const wxStringList& other)
     }
 }
 
-wxStringList::wxStringList()
-{
-    DeleteContents(true);
-}
-
 // Variable argument list, terminated by a zero
 // Makes new storage for the strings
 wxStringList::wxStringList (const wxChar *first, ...)
 {
-  DeleteContents(true);
+  DeleteContents(TRUE);
   if ( !first )
     return;
 
@@ -654,26 +602,20 @@ wxStringList::wxStringList (const wxChar *first, ...)
   {
       Add(s);
 
-      // icc gives this warning in its own va_arg() macro, argh
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-#endif
-
       s = va_arg(ap, const wxChar *);
-
-#ifdef __INTELC__
-    #pragma warning(pop)
+      //    if (s == NULL)
+#ifdef __WXMSW__
+      if ((int)(long) s == 0)
+#else
+      if ((long) s == 0)
 #endif
-
-      if ( !s )
           break;
   }
 
   va_end(ap);
 }
 
-// Only makes new strings if arg is true
+// Only makes new strings if arg is TRUE
 wxChar **wxStringList::ListToArray(bool new_copies) const
 {
     wxChar **string_array = new wxChar *[GetCount()];
@@ -682,7 +624,7 @@ wxChar **wxStringList::ListToArray(bool new_copies) const
     {
         wxChar *s = node->GetData();
         if ( new_copies )
-            string_array[i] = MYcopystring(s);
+            string_array[i] = copystring(s);
         else
             string_array[i] = s;
         node = node->GetNext();
@@ -698,18 +640,13 @@ bool wxStringList::Member(const wxChar *s) const
     {
         const wxChar *s1 = node->GetData();
         if (s == s1 || wxStrcmp (s, s1) == 0)
-            return true;
+            return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
-#ifdef __WXWINCE__
-extern "C" int __cdecl
-#else
 extern "C" int LINKAGEMODE
-#endif
-
 wx_comparestrings(const void *arg1, const void *arg2)
 {
   wxChar **s1 = (wxChar **) arg1;
@@ -740,28 +677,5 @@ void wxStringList::Sort()
     delete [] array;
 }
 
-wxNode *wxStringList::Add(const wxChar *s)
-{
-    return (wxNode *)(wxStringListBase::Node *)
-            wxStringListBase::Append(MYcopystring(s));
-}
-
-wxNode *wxStringList::Prepend(const wxChar *s)
-{
-    return (wxNode *)(wxStringListBase::Node *)
-            wxStringListBase::Insert(MYcopystring(s));
-}
-
 #endif // wxLIST_COMPATIBILITY
 
-#else // wxUSE_STL = 1
-
-    #include "wx/listimpl.cpp"
-    WX_DEFINE_LIST(wxObjectList)
-
-// with wxUSE_STL wxStringList contains wxString objects, not pointers
-void _WX_LIST_HELPER_wxStringListBase::DeleteFunction( wxString WXUNUSED(X) )
-{
-}
-
-#endif // !wxUSE_STL

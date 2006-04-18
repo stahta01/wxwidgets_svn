@@ -7,9 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/dcmemory.h"
 
 #include <gdk/gdk.h>
@@ -26,13 +23,6 @@ wxMemoryDC::wxMemoryDC() : wxWindowDC()
     m_ok = FALSE;
 
     m_cmap = gtk_widget_get_default_colormap();
-
-    m_context = gdk_pango_context_get();
-    // Note: The Sun customised version of Pango shipping with Solaris 10
-    // crashes if the language is left NULL (see bug 1374114)
-    pango_context_set_language( m_context, gtk_get_default_language() );
-    m_layout = pango_layout_new( m_context );
-    m_fontdesc = pango_font_description_copy( pango_context_get_font_description( m_context ) );
 }
 
 wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
@@ -41,16 +31,10 @@ wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
     m_ok = FALSE;
 
     m_cmap = gtk_widget_get_default_colormap();
-
-    m_context = gdk_pango_context_get();
-    pango_context_set_language( m_context, gtk_get_default_language() );
-    m_layout = pango_layout_new( m_context );
-    m_fontdesc = pango_font_description_copy( pango_context_get_font_description( m_context ) );
 }
 
 wxMemoryDC::~wxMemoryDC()
 {
-    g_object_unref(m_context);
 }
 
 void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
@@ -68,8 +52,6 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
             m_window = m_selected.GetBitmap();
         }
 
-        m_selected.PurgeOtherRepresentations(wxBitmap::Pixmap);
-
         m_isMemDC = TRUE;
 
         SetUpDC();
@@ -81,51 +63,44 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
     }
 }
 
-void wxMemoryDC::SetPen( const wxPen& penOrig )
+void wxMemoryDC::SetPen( const wxPen &pen )
 {
-    wxPen pen( penOrig );
-    if ( m_selected.Ok() &&
-            m_selected.GetBitmap() &&
-                (pen != *wxTRANSPARENT_PEN) )
+    if (m_selected.Ok() && m_selected.GetBitmap() && (*wxTRANSPARENT_PEN != pen))
     {
-        pen.SetColour( pen.GetColour() == *wxWHITE ? *wxBLACK : *wxWHITE );
+        if (*wxWHITE_PEN == pen)
+            wxWindowDC::SetPen( *wxBLACK_PEN );
+        else
+            wxWindowDC::SetPen( *wxWHITE_PEN );
     }
-
-    wxWindowDC::SetPen( pen );
+    else
+    {
+        wxWindowDC::SetPen( pen );
+    }
 }
 
-void wxMemoryDC::SetBrush( const wxBrush& brushOrig )
+void wxMemoryDC::SetBrush( const wxBrush &brush )
 {
-    wxBrush brush( brushOrig );
-    if ( m_selected.Ok() &&
-            m_selected.GetBitmap() &&
-                (brush != *wxTRANSPARENT_BRUSH) )
+    if (m_selected.Ok() && m_selected.GetBitmap() && (*wxTRANSPARENT_BRUSH != brush))
     {
-        brush.SetColour( brush.GetColour() == *wxWHITE ? *wxBLACK : *wxWHITE);
+        if (*wxWHITE_BRUSH == brush)
+            wxWindowDC::SetBrush( *wxBLACK_BRUSH );
+        else
+            wxWindowDC::SetBrush( *wxWHITE_BRUSH );
     }
-
-    wxWindowDC::SetBrush( brush );
+    else
+    {
+        wxWindowDC::SetBrush( brush );
+    }
 }
 
-void wxMemoryDC::SetBackground( const wxBrush& brushOrig )
+void wxMemoryDC::SetTextForeground( const wxColour &col )
 {
-    wxBrush brush(brushOrig);
-
-    if ( m_selected.Ok() &&
-            m_selected.GetBitmap() &&
-                (brush != *wxTRANSPARENT_BRUSH) )
+    if (m_selected.Ok() && m_selected.GetBitmap())
     {
-        brush.SetColour( brush.GetColour() == *wxWHITE ? *wxBLACK : *wxWHITE );
-    }
-
-    wxWindowDC::SetBackground( brush );
-}
-
-void wxMemoryDC::SetTextForeground( const wxColour& col )
-{
-    if ( m_selected.Ok() && m_selected.GetBitmap() )
-    {
-        wxWindowDC::SetTextForeground( col == *wxWHITE ? *wxBLACK : *wxWHITE);
+        if (col == *wxWHITE)
+            wxWindowDC::SetTextForeground( *wxBLACK );
+        else
+            wxWindowDC::SetTextForeground( *wxWHITE );
     }
     else
     {
@@ -137,7 +112,10 @@ void wxMemoryDC::SetTextBackground( const wxColour &col )
 {
     if (m_selected.Ok() && m_selected.GetBitmap())
     {
-        wxWindowDC::SetTextBackground( col == *wxWHITE ? *wxBLACK : *wxWHITE );
+        if (col == *wxWHITE)
+            wxWindowDC::SetTextBackground( *wxBLACK );
+        else
+            wxWindowDC::SetTextBackground( *wxWHITE );
     }
     else
     {

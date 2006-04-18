@@ -7,9 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/utils.h"
 #include "wx/string.h"
 #include "wx/list.h"
@@ -25,11 +22,11 @@ bool wxWriteResource(const wxString& section, const wxString& entry, const wxStr
 {
     wxString filename( file );
     if (filename.IsEmpty()) filename = wxT(".wxWindows");
-
+    
     wxFileConfig conf( wxTheApp->GetAppName(), wxTheApp->GetVendorName(), filename );
-
+    
     conf.SetPath( section );
-
+    
     return conf.Write( entry, value );
 }
 

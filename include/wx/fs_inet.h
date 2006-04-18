@@ -3,7 +3,7 @@
 // Purpose:     HTTP and FTP file system
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FS_INET_H_
@@ -13,17 +13,25 @@
 
 #if wxUSE_FILESYSTEM && wxUSE_FS_INET && wxUSE_STREAMS && wxUSE_SOCKETS
 
+#ifndef WXPRECOMP
+    #include "wx/hash.h"
+#endif
+
 #include "wx/filesys.h"
 
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxInternetFSHandler
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_NET wxInternetFSHandler : public wxFileSystemHandler
+class WXDLLEXPORT wxInternetFSHandler : public wxFileSystemHandler
 {
+    private:
+        wxHashTable m_Cache;
+
     public:
         virtual bool CanOpen(const wxString& location);
         virtual wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location);
+        ~wxInternetFSHandler();
 };
 
 #endif

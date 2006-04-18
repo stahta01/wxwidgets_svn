@@ -105,6 +105,7 @@ GENERICOBJS= #$ ExpandList("WXGENERICOBJS");
 
 # we can't have all objects in one list because the library becomes too big
 COMMONOBJS1 = \
+		$(COMMDIR)\y_tab.obj \
 		#$ ExpandList("WXCOMMONOBJS1");
 
 COMMONOBJS2 = \
@@ -206,6 +207,17 @@ $(CPPFLAGS) /YcWX/WXPREC.H /c /Tp $*.$(SRCSUFF)
         }
     }
 #$}
+
+$(COMMDIR)/y_tab.obj:     $*.c $(COMMDIR)/lex_yy.c
+        cl @<<
+$(CPPFLAGS2) -DUSE_DEFINE -DYY_USE_PROTOS /Fo$@ /I ..\common /c $*.c
+<<
+
+$(COMMDIR)/y_tab.c:     $(COMMDIR)/dosyacc.c
+        copy $(COMMDIR)\dosyacc.c $(COMMDIR)\y_tab.c
+
+$(COMMDIR)/lex_yy.c:    $(COMMDIR)/doslex.c
+    copy $(COMMDIR)\doslex.c $(COMMDIR)\lex_yy.c
 
 $(OBJECTS):	$(WXDIR)/include/wx/setup.h
 

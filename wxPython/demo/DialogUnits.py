@@ -10,53 +10,53 @@
 # Copyright:    (c) 1998 by Total Control Software
 # Licence:      wxWindows license
 #----------------------------------------------------------------------------
-#
 
-import  wx
+
+## import all of the wxPython GUI package
+from wxPython.wx import *
+
 
 #---------------------------------------------------------------------------
 
-# Create a new frame class, derived from the wxPython Frame.
-class MyFrame(wx.Frame):
+## Create a new frame class, derived from the wxPython Frame.
+class MyFrame(wxFrame):
 
     def __init__(self, parent, id, title):
         # First, call the base class' __init__ method to create the frame
-        wx.Frame.__init__(self, parent, id, title, (100, 100), (160, 100))
+        wxFrame.__init__(self, parent, id, title,
+                         wxPoint(100, 100), wxSize(160, 100))
 
         # Associate some events with methods of this class
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_MOVE, self.OnMove)
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        EVT_SIZE(self, self.OnSize)
+        EVT_MOVE(self, self.OnMove)
+        EVT_CLOSE(self, self.OnCloseWindow)
 
         # Add a panel and some controls to display the size and position
-        panel = wx.Panel(self, -1)
+        panel = wxPanel(self, -1)
+        wxStaticText(panel, -1, "Size:",
+                     wxDLG_PNT(panel, wxPoint(4, 4)),  wxDefaultSize)
+        wxStaticText(panel, -1, "Pos:",
+                     wxDLG_PNT(panel, wxPoint(4, 16)), wxDefaultSize)
+        self.sizeCtrl = wxTextCtrl(panel, -1, "",
+                                   wxDLG_PNT(panel, wxPoint(24, 4)),
+                                   wxDLG_SZE(panel, wxSize(36, -1)),
+                                   wxTE_READONLY)
 
-        wx.StaticText(panel, -1, "Size:", 
-            wx.DLG_PNT(panel, (4, 4)),  wx.DefaultSize
-            )
+        self.posCtrl = wxTextCtrl(panel, -1, "",
+                                  wxDLG_PNT(panel, wxPoint(24, 16)),
+                                  wxDLG_SZE(panel, wxSize(36, -1)),
+                                  wxTE_READONLY)
 
-        wx.StaticText(panel, -1, "Pos:", 
-            wx.DLG_PNT(panel, (4, 16)), wx.DefaultSize
-            )
+        #print wxDLG_PNT(panel, wxPoint(24, 4)), wxDLG_SZE(panel, wxSize(36, -1))
+        #print wxDLG_PNT(panel, wxPoint(24, 16)),wxDLG_SZE(panel, wxSize(36, -1))
 
-        self.sizeCtrl = wx.TextCtrl(panel, -1, "", 
-                            wx.DLG_PNT(panel, (24, 4)),
-                            wx.DLG_SZE(panel, (36, -1)),
-                            wx.TE_READONLY)
-
-        self.posCtrl = wx.TextCtrl(panel, -1, "", 
-                            wx.DLG_PNT(panel, (24, 16)),
-                            wx.DLG_SZE(panel, (36, -1)),
-                            wx.TE_READONLY)
-
-        #print wx.DLG_PNT(panel, (24, 4)), wx.DLG_SZE(panel, (36, -1))
-        #print wx.DLG_PNT(panel, (24, 16)),wx.DLG_SZE(panel, (36, -1))
 
     # This method is called automatically when the CLOSE event is
     # sent to this window
     def OnCloseWindow(self, event):
         # tell the window to kill itself
         self.Destroy()
+
 
     # This method is called by the System when the window is resized,
     # because of the association above.
@@ -81,7 +81,7 @@ class MyFrame(wx.Frame):
 
 if __name__ == "__main__":
     # Every wxWindows application must have a class derived from wxApp
-    class MyApp(wx.App):
+    class MyApp(wxApp):
 
         # wxWindows calls this method to initialize the application
         def OnInit(self):

@@ -36,7 +36,7 @@
 #endif
 
 // Send a message.
-// Specify profile, or leave it to wxWidgets to find the current user name
+// Specify profile, or leave it to wxWindows to find the current user name
 
 #ifdef __WXMSW__
 bool wxEmail::Send(wxMailMessage& message, const wxString& profileName, const wxString& WXUNUSED(sendMail))
@@ -57,31 +57,29 @@ bool wxEmail::Send(wxMailMessage& message, const wxString& profileName, const wx
     return session.Send(message);
 }
 #elif defined(__UNIX__)
-bool
-wxEmail::Send(wxMailMessage& message,
-              const wxString& profileName,
-              const wxString& sendMail)
+bool wxEmail::Send(wxMailMessage& message, const wxString& profileName, const wxString& sendMail)
 {
-    wxASSERT_MSG( !message.m_to.IsEmpty(), _T("no recipients to send mail to") ) ;
-
+    wxASSERT (message.m_to.GetCount() > 0) ;
 
     // The 'from' field is optionally supplied by the app; it's not needed
     // by MAPI, and on Unix, will be guessed if not supplied.
     wxString from = message.m_from;
-    if ( from.empty() )
+    if (from.IsEmpty())
     {
         from = wxGetEmailAddress();
     }
 
+    wxASSERT (!from.IsEmpty());
+
     wxString msg;
     msg << wxT("To: ");
 
-    const size_t rcptCount = message.m_to.GetCount();
-    for (size_t rcpt = 0; rcpt < rcptCount; rcpt++)
+    size_t i;
+    for (i = 0; i < message.m_to.GetCount(); i++)
     {
-        if ( rcpt )
+        msg << message.m_to[i];
+        if (i < message.m_to.GetCount())
             msg << wxT(", ");
-        msg << message.m_to[rcpt];
     }
 
     msg << wxT("\nFrom: ") << from << wxT("\nSubject: ") << message.m_subject;

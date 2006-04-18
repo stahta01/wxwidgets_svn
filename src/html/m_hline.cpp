@@ -4,10 +4,11 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
+
 
 #include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
@@ -37,22 +38,17 @@ class wxHtmlLineCell : public wxHtmlCell
 {
     public:
         wxHtmlLineCell(int size, bool shading) : wxHtmlCell() {m_Height = size; m_HasShading = shading;}
-        void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                  wxHtmlRenderingInfo& info);
+        void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
         void Layout(int w)
             { m_Width = w; wxHtmlCell::Layout(w); }
 
     private:
         // Should we draw 3-D shading or not
       bool m_HasShading;
-
-      DECLARE_NO_COPY_CLASS(wxHtmlLineCell)
 };
 
 
-void wxHtmlLineCell::Draw(wxDC& dc, int x, int y,
-                          int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                          wxHtmlRenderingInfo& WXUNUSED(info))
+void wxHtmlLineCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
 {
     wxBrush mybrush(wxT("GREY"), (m_HasShading) ? wxTRANSPARENT : wxSOLID);
     wxPen mypen(wxT("GREY"), 1, wxSOLID);
@@ -70,7 +66,6 @@ void wxHtmlLineCell::Draw(wxDC& dc, int x, int y,
 
 
 TAG_HANDLER_BEGIN(HR, "HR")
-    TAG_HANDLER_CONSTR(HR) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -93,7 +88,7 @@ TAG_HANDLER_BEGIN(HR, "HR")
         m_WParser->CloseContainer();
         m_WParser->OpenContainer();
 
-        return false;
+        return FALSE;
     }
 
 TAG_HANDLER_END(HR)

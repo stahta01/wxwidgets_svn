@@ -86,8 +86,6 @@ private:
 class WXDLLEXPORT wxControlWithThumb
 {
 public:
-    virtual ~wxControlWithThumb() {}
-
     // simple accessors
     // ----------------
 
@@ -116,7 +114,7 @@ public:
     // responsible for refreshing the control
     virtual void SetShaftPartState(wxScrollThumb::Shaft shaftPart,
                                    int flag,
-                                   bool set = true) = 0;
+                                   bool set = TRUE) = 0;
 
     // called when the user starts dragging the thumb
     virtual void OnThumbDragStart(int pos) = 0;
@@ -132,7 +130,7 @@ public:
     virtual void OnPageScrollStart() = 0;
 
     // called while the user keeps the mouse pressed above/below the thumb,
-    // return true to continue scrollign and false to stop it (e.g. because the
+    // return TRUE to continue scrollign and FALSE to stop it (e.g. because the
     // scrollbar has reached the top/bottom)
     virtual bool OnPageScroll(int pageInc) = 0;
 };

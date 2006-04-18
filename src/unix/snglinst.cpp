@@ -7,7 +7,7 @@
 // Created:     09.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -31,9 +31,9 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
+    #include "wx/file.h"
 #endif //WX_PRECOMP
 
-#include "wx/file.h"
 #include "wx/utils.h"           // wxGetHomeDir()
 
 #include "wx/snglinst.h"
@@ -85,9 +85,9 @@ static int wxLockFile(int fd, LockOperation lock)
     fl.l_type = lock == LOCK ? F_WRLCK : F_UNLCK;
 
     // lock the entire file
+    fl.l_whence =
     fl.l_start =
-    fl.l_len =
-    fl.l_whence = 0;
+    fl.l_len = 0;
 
     // is this needed?
     fl.l_pid = getpid();
@@ -176,17 +176,6 @@ LockResult wxSingleInstanceCheckerImpl::CreateLockFile()
 
             fsync(m_fdLock);
 
-            // change file's permission so that only this user can access it:
-            if ( chmod(m_nameLock.fn_str(), S_IRUSR | S_IWUSR) != 0 )
-            {
-                wxLogSysError(_("Failed to set permissions on lock file '%s'"),
-                              m_nameLock.c_str());
-
-                Unlock();
-                
-                return LOCK_ERROR;
-            }
-
             return LOCK_CREATED;
         }
         else // failure: see what exactly happened
@@ -233,26 +222,6 @@ bool wxSingleInstanceCheckerImpl::Create(const wxString& name)
             return FALSE;
     }
 
-    // Check if the file is owned by current user and has 0600 permissions.
-    // If it doesn't, it's a fake file, possibly meant as a DoS attack, and
-    // so we refuse to touch it:
-    wxStructStat stats;
-    if ( wxStat(name, &stats) != 0 )
-    {
-        wxLogSysError(_("Failed to inspect the lock file '%s'"), name.c_str());
-        return false;
-    }
-    if ( stats.st_uid != getuid() )
-    {
-        wxLogError(_("Lock file '%s' has incorrect owner."), name.c_str());
-        return false;
-    }
-    if ( stats.st_mode != (S_IFREG | S_IRUSR | S_IWUSR) )
-    {
-        wxLogError(_("Lock file '%s' has incorrect permissions."), name.c_str());
-        return false;
-    }
-
     // try to open the file for reading and get the PID of the process
     // which has it
     wxFile file(name, wxFile::read);
@@ -273,7 +242,7 @@ bool wxSingleInstanceCheckerImpl::Create(const wxString& name)
     }
 
     char buf[256];
-    ssize_t count = file.Read(buf, WXSIZEOF(buf));
+    off_t count = file.Read(buf, WXSIZEOF(buf));
     if ( count == wxInvalidOffset )
     {
         wxLogError(_("Failed to read PID from lock file."));

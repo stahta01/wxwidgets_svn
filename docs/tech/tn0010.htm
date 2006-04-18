@@ -63,13 +63,13 @@ The <B>Preprocessor definitions</B> field should contain the following symbols f
 
 <PRE>
 WIN32,_DEBUG,_WINDOWS,__WINDOWS__,__WXMSW__,__WXDEBUG__,WXDEBUG=1,
-__WIN32__,WINVER=0x0400,STRICT
+__WIN95__,__WIN32__,WINVER=0x0400,STRICT
 </PRE>
 <P>
 and these for Release:<P>
 
 <PRE>
-NDEBUG,WIN32,_WINDOWS,__WINDOWS__,__WXMSW__,__WIN32__,
+NDEBUG,WIN32,_WINDOWS,__WINDOWS__,__WXMSW__,__WIN95__,__WIN32__,
 WINVER=0x0400,STRICT</PRE>
 <P>
 The <B>Additional include directories</B> field should contain the following:<P>
@@ -95,7 +95,7 @@ The <B>Object/library modules</B> field should contain:
 <PRE>
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib
 ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib
-winmm.lib wxmsw25d.lib wxbase25d.lib wxpngd.lib wxzlibd.lib wxjpegd.lib wxtiffd.lib
+winmm.lib wxmswd.lib pngd.lib zlibd.lib jpegd.lib tiffd.lib
 </PRE>
 
 for the Debug configuration and
@@ -103,7 +103,7 @@ for the Debug configuration and
 <PRE>
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib
 ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib rpcrt4.lib wsock32.lib
-winmm.lib wxmsw25.lib wxbase25.lib wxpng.lib wxzlib.lib wxjpeg.lib wxtiff.lib
+winmm.lib wxmsw.lib png.lib zlib.lib jpeg.lib tiff.lib
 </PRE>
 
 for the Release configuration.<P>
@@ -160,7 +160,7 @@ and executable to be created in the project directory and not a subdirectory.<P>
 <DT><B>C/C++: Preprocessor</B><DD>
 The <B>Preprocessor definitions</B> field should contain the following symbols:<P>
 <PRE>
-WIN32,_DEBUG,_WINDOWS,wx_msw,DEBUG=1,WINVER=0x0400,STRICT
+WIN32,_DEBUG,_WINDOWS,wx_msw,DEBUG=1,WIN95=1,WINVER=0x0400,STRICT
 </PRE>
 <P>
 The <B>Additional include directories</B> field should contain the following:<P>

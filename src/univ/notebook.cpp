@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/notebook.cpp
+// Name:        univ/notebook.cpp
 // Purpose:     wxNotebook implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -36,12 +36,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#if 0
-// due to unsigned type nPage is always >= 0
-#define IS_VALID_PAGE(nPage) (((nPage) >= 0) && ((size_t(nPage)) < GetPageCount()))
-#else
-#define IS_VALID_PAGE(nPage) (((size_t)nPage) < GetPageCount())
-#endif
+#define IS_VALID_PAGE(nPage) (((nPage) >= 0) && ((nPage) < GetPageCount()))
 
 // ----------------------------------------------------------------------------
 // constants
@@ -60,7 +55,7 @@ class wxNotebookSpinBtn : public wxSpinButton
 {
 public:
     wxNotebookSpinBtn(wxNotebook *nb)
-        : wxSpinButton(nb, wxID_ANY,
+        : wxSpinButton(nb, -1,
                        wxDefaultPosition, wxDefaultSize,
                        nb->IsVertical() ? wxSP_VERTICAL : wxSP_HORIZONTAL)
     {
@@ -80,7 +75,7 @@ private:
 };
 
 BEGIN_EVENT_TABLE(wxNotebookSpinBtn, wxSpinButton)
-    EVT_SPIN(wxID_ANY, wxNotebookSpinBtn::OnSpin)
+    EVT_SPIN(-1, wxNotebookSpinBtn::OnSpin)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -119,7 +114,7 @@ bool wxNotebook::Create(wxWindow *parent,
 {
     if ( !wxControl::Create(parent, id, pos, size, style,
                             wxDefaultValidator, name) )
-        return false;
+        return FALSE;
 
     m_sizePad = GetRenderer()->GetTabPadding();
 
@@ -127,23 +122,23 @@ bool wxNotebook::Create(wxWindow *parent,
 
     CreateInputHandler(wxINP_HANDLER_NOTEBOOK);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
 // wxNotebook page titles and images
 // ----------------------------------------------------------------------------
 
-wxString wxNotebook::GetPageText(size_t nPage) const
+wxString wxNotebook::GetPageText(int nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxEmptyString, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), _T(""), _T("invalid notebook page") );
 
     return m_titles[nPage];
 }
 
-bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
+bool wxNotebook::SetPageText(int nPage, const wxString& strText)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, _T("invalid notebook page") );
 
     if ( strText != m_titles[nPage] )
     {
@@ -161,21 +156,21 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
         }
     }
 
-    return true;
+    return TRUE;
 }
 
-int wxNotebook::GetPageImage(size_t nPage) const
+int wxNotebook::GetPageImage(int nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
 
-bool wxNotebook::SetPageImage(size_t nPage, int nImage)
+bool wxNotebook::SetPageImage(int nPage, int nImage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, _T("invalid notebook page") );
 
-    wxCHECK_MSG( m_imageList && nImage < m_imageList->GetImageCount(), false,
+    wxCHECK_MSG( m_imageList && nImage < m_imageList->GetImageCount(), FALSE,
                  _T("invalid image index in SetPageImage()") );
 
     if ( nImage != m_images[nPage] )
@@ -192,7 +187,7 @@ bool wxNotebook::SetPageImage(size_t nPage, int nImage)
             RefreshTab(nPage);
     }
 
-    return true;
+    return TRUE;
 }
 
 wxNotebook::~wxNotebook()
@@ -203,24 +198,13 @@ wxNotebook::~wxNotebook()
 // wxNotebook page switching
 // ----------------------------------------------------------------------------
 
-int wxNotebook::SetSelection(size_t nPage)
+int wxNotebook::SetSelection(int nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     if ( (size_t)nPage == m_sel )
     {
         // don't do anything if there is nothing to do
-        return m_sel;
-    }
-
-    // event handling
-    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
-    event.SetSelection(nPage);
-    event.SetOldSelection(m_sel);
-    event.SetEventObject(this);
-    if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
-    {
-        // program doesn't allow the page change
         return m_sel;
     }
 
@@ -234,7 +218,7 @@ int wxNotebook::SetSelection(size_t nPage)
 
     if ( selOld != INVALID_PAGE )
     {
-        RefreshTab(selOld, true /* this tab was selected */);
+        RefreshTab(selOld, TRUE /* this tab was selected */);
 
         m_pages[selOld]->Hide();
     }
@@ -267,25 +251,47 @@ int wxNotebook::SetSelection(size_t nPage)
         m_pages[m_sel]->Show();
     }
 
-    // event handling
+    return selOld;
+}
+
+void wxNotebook::ChangePage(int nPage)
+{
+    wxCHECK_RET( IS_VALID_PAGE(nPage), _T("invalid notebook page") );
+
+    if ( (size_t)nPage == m_sel )
+    {
+        // nothing to do
+        return;
+    }
+
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
+    event.SetSelection(nPage);
+    event.SetOldSelection(m_sel);
+    event.SetEventObject(this);
+    if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
+    {
+        // program doesn't allow the page change
+        return;
+    }
+
+    SetSelection(nPage);
+
     event.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
     GetEventHandler()->ProcessEvent(event);
-
-    return selOld;
 }
 
 // ----------------------------------------------------------------------------
 // wxNotebook pages adding/deleting
 // ----------------------------------------------------------------------------
 
-bool wxNotebook::InsertPage(size_t nPage,
+bool wxNotebook::InsertPage(int nPage,
                             wxNotebookPage *pPage,
                             const wxString& strText,
                             bool bSelect,
                             int imageId)
 {
-    size_t nPages = GetPageCount();
-    wxCHECK_MSG( nPage == nPages || IS_VALID_PAGE(nPage), false,
+    int nPages = GetPageCount();
+    wxCHECK_MSG( nPage == nPages || IS_VALID_PAGE(nPage), FALSE,
                  _T("invalid notebook page in InsertPage()") );
 
     // modify the data
@@ -317,7 +323,7 @@ bool wxNotebook::InsertPage(size_t nPage,
     if ( nPages == 0 )
     {
         // always select the first tab to have at least some selection
-        bSelect = true;
+        bSelect = TRUE;
 
         Relayout();
         Refresh();
@@ -336,13 +342,13 @@ bool wxNotebook::InsertPage(size_t nPage,
         pPage->Hide();
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxNotebook::DeleteAllPages()
 {
     if ( !wxNotebookBase::DeleteAllPages() )
-        return false;
+        return FALSE;
 
     // clear the other arrays as well
     m_titles.Clear();
@@ -358,10 +364,10 @@ bool wxNotebook::DeleteAllPages()
 
     Relayout();
 
-    return true;
+    return TRUE;
 }
 
-wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
+wxNotebookPage *wxNotebook::DoRemovePage(int nPage)
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), NULL, _T("invalid notebook page") );
 
@@ -382,7 +388,7 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
         UpdateSpinBtn();
     }
 
-    size_t count = GetPageCount();
+    int count = GetPageCount();
     if ( count )
     {
         if ( m_sel == (size_t)nPage )
@@ -462,10 +468,10 @@ void wxNotebook::DoDrawTab(wxDC& dc, const wxRect& rect, size_t n)
         wxMemoryDC dc;
         dc.SelectObject(bmp);
         dc.SetBackground(wxBrush(GetBackgroundColour(), wxSOLID));
-        m_imageList->Draw(image, dc, 0, 0, wxIMAGELIST_DRAW_NORMAL, true);
+        m_imageList->Draw(image, dc, 0, 0, wxIMAGELIST_DRAW_NORMAL, TRUE);
         dc.SelectObject(wxNullBitmap);
 #else
-        bmp = m_imageList->GetBitmap(image);
+        bmp = *m_imageList->GetBitmap(image);
 #endif
     }
 
@@ -575,11 +581,8 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
 // wxNotebook geometry
 // ----------------------------------------------------------------------------
 
-int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
+int wxNotebook::HitTest(const wxPoint& pt) const
 {
-    if ( flags )
-        *flags = wxNB_HITTEST_NOWHERE;
-
     // first check that it is in this window at all
     if ( !GetClientRect().Inside(pt) )
     {
@@ -620,15 +623,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
         GetTabSize(n, &rectTabs.width, &rectTabs.height);
 
         if ( rectTabs.Inside(pt) )
-        {
-            if ( flags )
-            {
-                // TODO: be more precise
-                *flags = wxNB_HITTEST_ONITEM;
-            }
-
             return n;
-        }
 
         // move the rectTabs to the next tab
         if ( IsVertical() )
@@ -650,14 +645,14 @@ bool wxNotebook::IsVertical() const
 wxDirection wxNotebook::GetTabOrientation() const
 {
     long style = GetWindowStyle();
-    if ( style & wxBK_BOTTOM )
+    if ( style & wxNB_BOTTOM )
         return wxBOTTOM;
-    else if ( style & wxBK_RIGHT )
+    else if ( style & wxNB_RIGHT )
         return wxRIGHT;
-    else if ( style & wxBK_LEFT )
+    else if ( style & wxNB_LEFT )
         return wxLEFT;
 
-    // wxBK_TOP == 0 so we don't have to test for it
+    // wxNB_TOP == 0 so we don't have to test for it
     return wxTOP;
 }
 
@@ -737,16 +732,8 @@ wxRect wxNotebook::GetTabsPart() const
     const wxSize indent = GetRenderer()->GetTabIndent();
     if ( IsVertical() )
     {
+        rect.x += indent.y;
         rect.y += indent.x;
-        if ( dir == wxLEFT )
-        {
-            rect.x += indent.y;
-            rect.width -= indent.y;
-        }
-        else // wxRIGHT
-        {
-            rect.width -= indent.y;
-        }
     }
     else // horz
     {
@@ -833,7 +820,7 @@ void wxNotebook::ResizeTab(int page)
     wxSize sizeTab = CalcTabSize(page);
 
     // we only need full relayout if the page size changes
-    bool needsRelayout = false;
+    bool needsRelayout = FALSE;
 
     if ( IsVertical() )
     {
@@ -845,7 +832,7 @@ void wxNotebook::ResizeTab(int page)
 
     if ( sizeTab.y > m_heightTab )
     {
-        needsRelayout = true;
+        needsRelayout = TRUE;
 
         m_heightTab = sizeTab.y;
     }
@@ -971,7 +958,7 @@ void wxNotebook::SetPageSize(const wxSize& size)
     SetClientSize(GetSizeForPage(size));
 }
 
-wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
+wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage)
 {
     return AdjustSize(GetSizeForPage(sizePage));
 }
@@ -1071,7 +1058,7 @@ void wxNotebook::UpdateSpinBtn()
     {
         // this case is special, get rid of it immediately: everything is
         // visible and we don't need any spin buttons
-        allTabsShown = true;
+        allTabsShown = TRUE;
 
         // have to reset them manually as we don't call CalcLastVisibleTab()
         m_firstVisible =
@@ -1127,7 +1114,7 @@ void wxNotebook::UpdateSpinBtn()
     }
     else // all tabs are visible, we don't need spin button
     {
-        if ( m_spinbtn && m_spinbtn -> IsShown() )
+        if ( m_spinbtn )
         {
             m_spinbtn->Hide();
         }
@@ -1245,7 +1232,7 @@ void wxNotebook::ScrollLastTo(int page)
 wxSize wxNotebook::DoGetBestClientSize() const
 {
     // calculate the max page size
-    wxSize size;
+    wxSize size(0, 0);
 
     size_t count = GetPageCount();
     if ( count )
@@ -1285,9 +1272,9 @@ void wxNotebook::DoSetSize(int x, int y,
     wxSize old_client_size = GetClientSize();
 
     wxControl::DoSetSize(x, y, width, height, sizeFlags);
-
+    
     wxSize new_client_size = GetClientSize();
-
+    
     if (old_client_size != new_client_size)
         Relayout();
 }
@@ -1301,15 +1288,15 @@ bool wxNotebook::PerformAction(const wxControlAction& action,
                                const wxString& strArg)
 {
     if ( action == wxACTION_NOTEBOOK_NEXT )
-        SetSelection(GetNextPage(true));
+        ChangePage(GetNextPage(TRUE));
     else if ( action == wxACTION_NOTEBOOK_PREV )
-        SetSelection(GetNextPage(false));
+        ChangePage(GetNextPage(FALSE));
     else if ( action == wxACTION_NOTEBOOK_GOTO )
-        SetSelection((int)numArg);
+        ChangePage((int)numArg);
     else
         return wxControl::PerformAction(action, numArg, strArg);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1365,7 +1352,7 @@ bool wxStdNotebookInputHandler::HandleKey(wxInputConsumer *consumer,
                 break;
         }
 
-        if ( !action.IsEmpty() )
+        if ( !!action )
         {
             return consumer->PerformAction(action, page);
         }
@@ -1385,7 +1372,7 @@ bool wxStdNotebookInputHandler::HandleMouse(wxInputConsumer *consumer,
         {
             consumer->PerformAction(wxACTION_NOTEBOOK_GOTO, page);
 
-            return false;
+            return FALSE;
         }
     }
 
@@ -1398,13 +1385,12 @@ bool wxStdNotebookInputHandler::HandleMouseMove(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool
-wxStdNotebookInputHandler::HandleFocus(wxInputConsumer *consumer,
-                                       const wxFocusEvent& WXUNUSED(event))
+bool wxStdNotebookInputHandler::HandleFocus(wxInputConsumer *consumer,
+                                            const wxFocusEvent& event)
 {
     HandleFocusChange(consumer);
 
-    return false;
+    return FALSE;
 }
 
 bool wxStdNotebookInputHandler::HandleActivation(wxInputConsumer *consumer,
@@ -1413,7 +1399,7 @@ bool wxStdNotebookInputHandler::HandleActivation(wxInputConsumer *consumer,
     // we react to the focus change in the same way as to the [de]activation
     HandleFocusChange(consumer);
 
-    return false;
+    return FALSE;
 }
 
 void wxStdNotebookInputHandler::HandleFocusChange(wxInputConsumer *consumer)
@@ -1423,3 +1409,4 @@ void wxStdNotebookInputHandler::HandleFocusChange(wxInputConsumer *consumer)
 }
 
 #endif // wxUSE_NOTEBOOK
+

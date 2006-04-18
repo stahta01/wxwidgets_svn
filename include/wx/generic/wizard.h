@@ -1,16 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/wizard.h
+// Name:        generic/wizard.h
 // Purpose:     declaration of generic wxWizard class
 // Author:      Vadim Zeitlin
-// Modified by: Robert Vazan (sizers)
+// Modified by:
 // Created:     28.09.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifndef _WX_GENERIC_WIZARD_H_
-#define _WX_GENERIC_WIZARD_H_
 
 // ----------------------------------------------------------------------------
 // wxWizard
@@ -18,31 +15,27 @@
 
 class WXDLLEXPORT wxButton;
 class WXDLLEXPORT wxStaticBitmap;
-class WXDLLIMPEXP_ADV wxWizardEvent;
-class WXDLLEXPORT wxBoxSizer;
-class WXDLLIMPEXP_ADV wxWizardSizer;
+class WXDLLEXPORT wxWizardEvent;
 
-class WXDLLIMPEXP_ADV wxWizard : public wxWizardBase
+class WXDLLEXPORT wxWizard : public wxWizardBase
 {
 public:
     // ctor
     wxWizard() { Init(); }
     wxWizard(wxWindow *parent,
-             int id = wxID_ANY,
+             int id = -1,
              const wxString& title = wxEmptyString,
              const wxBitmap& bitmap = wxNullBitmap,
-             const wxPoint& pos = wxDefaultPosition,
-             long style = wxDEFAULT_DIALOG_STYLE)
+             const wxPoint& pos = wxDefaultPosition)
     {
         Init();
-        Create(parent, id, title, bitmap, pos, style);
+        Create(parent, id, title, bitmap, pos);
     }
     bool Create(wxWindow *parent,
-             int id = wxID_ANY,
+             int id = -1,
              const wxString& title = wxEmptyString,
              const wxBitmap& bitmap = wxNullBitmap,
-             const wxPoint& pos = wxDefaultPosition,
-             long style = wxDEFAULT_DIALOG_STYLE);
+             const wxPoint& pos = wxDefaultPosition);
     void Init();
 
     // implement base class pure virtuals
@@ -51,8 +44,6 @@ public:
     virtual void SetPageSize(const wxSize& size);
     virtual wxSize GetPageSize() const;
     virtual void FitToPage(const wxWizardPage *firstPage);
-    virtual wxSizer *GetPageAreaSizer() const;
-    virtual void SetBorder(int border);
 
     // implementation only from now on
     // -------------------------------
@@ -61,16 +52,13 @@ public:
     bool IsRunning() const { return m_page != NULL; }
 
     // show the prev/next page, but call TransferDataFromWindow on the current
-    // page first and return false without changing the page if
-    // TransferDataFromWindow() returns false - otherwise, returns true
-    bool ShowPage(wxWizardPage *page, bool goingForward = true);
+    // page first and return FALSE without changing the page if
+    // TransferDataFromWindow() returns FALSE - otherwise, returns TRUE
+    bool ShowPage(wxWizardPage *page, bool goingForward = TRUE);
 
     // do fill the dialog with controls
     // this is app-overridable to, for example, set help and tooltip text
     virtual void DoCreateControls();
-
-protected:
-    void FinishLayout();
 
 private:
     // was the dialog really created?
@@ -83,18 +71,16 @@ private:
 
     void OnWizEvent(wxWizardEvent& event);
 
-    void AddBitmapRow(wxBoxSizer *mainColumn);
-    void AddStaticLine(wxBoxSizer *mainColumn);
-    void AddBackNextPair(wxBoxSizer *buttonRow);
-    void AddButtonRow(wxBoxSizer *mainColumn);
-
-    wxSize GetManualPageSize() const;
-
     // the page size requested by user
     wxSize m_sizePage;
 
     // the dialog position from the ctor
     wxPoint m_posWizard;
+
+    // wizard dimensions
+    int          m_x, m_y;      // the origin for the pages
+    int          m_width,       // the size of the page itself
+                 m_height;      // (total width is m_width + m_x)
 
     // wizard state
     wxWizardPage *m_page;       // the current page or NULL
@@ -105,28 +91,7 @@ private:
                 *m_btnNext;     // the "Next>" or "Finish" button
     wxStaticBitmap *m_statbmp;  // the control for the bitmap
 
-    // Whether user called SetBorder()
-    bool m_calledSetBorder;
-    // Border around page area sizer requested using SetBorder()
-    int m_border;
-
-    // Whether RunWizard() was called
-    bool m_started;
-
-    // Whether was modal (modeless has to be destroyed on finish or cancel)
-    bool m_wasModal;
-
-    // Page area sizer will be inserted here with padding
-    wxBoxSizer *m_sizerBmpAndPage;
-
-    // Actual position and size of pages
-    wxWizardSizer *m_sizerPage;
-
-    friend class wxWizardSizer;
-
     DECLARE_DYNAMIC_CLASS(wxWizard)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxWizard)
 };
 
-#endif // _WX_GENERIC_WIZARD_H_

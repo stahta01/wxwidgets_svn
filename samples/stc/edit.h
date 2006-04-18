@@ -20,10 +20,10 @@
 // headers
 //----------------------------------------------------------------------------
 
-//! wxWidgets headers
+//! wxWindows headers
 
-//! wxWidgets/contrib headers
-#include "wx/stc/stc.h"  // styled text control
+//! wxWindows/contrib headers
+#include <wx/stc/stc.h>  // styled text control
 
 //! application headers
 #include "prefs.h"       // preferences
@@ -45,7 +45,7 @@ class Edit: public wxStyledTextCtrl {
 
 public:
     //! constructor
-    Edit (wxWindow *parent, wxWindowID id = wxID_ANY,
+    Edit (wxWindow *parent, wxWindowID id = -1,
           const wxPoint &pos = wxDefaultPosition,
           const wxSize &size = wxDefaultSize,
           long style = wxSUNKEN_BORDER|wxVSCROLL
@@ -139,8 +139,6 @@ private:
 
 };
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
 //----------------------------------------------------------------------------
 //! EditPrint
 class EditPrint: public wxPrintout {
@@ -167,6 +165,5 @@ private:
     bool PrintScaling (wxDC *dc);
 };
 
-#endif // wxUSE_PRINTING_ARCHITECTURE
-
 #endif // _EDIT_H_
+

@@ -6,7 +6,7 @@
 // Created:     ??/10/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
-// Licence:     wxWindows license
+// Licence:       wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -25,7 +25,7 @@
 #include "wx/fl/dyntbar.h"
 #include "wx/fl/newbmpbtn.h"
 
-IMPLEMENT_DYNAMIC_CLASS( wxDynamicToolBar, wxObject )
+IMPLEMENT_DYNAMIC_CLASS( wxDynamicToolBar, wxToolBarBase )
 
 BEGIN_EVENT_TABLE( wxDynamicToolBar, wxToolBarBase )
 
@@ -36,12 +36,12 @@ BEGIN_EVENT_TABLE( wxDynamicToolBar, wxToolBarBase )
 END_EVENT_TABLE()
 
 /***** Implementation for class wxToolLayoutItem *****/
-
+        
 IMPLEMENT_DYNAMIC_CLASS(wxToolLayoutItem, wxObject)
 
 
 /***** Implementation for class wxDynToolInfo *****/
-
+        
 IMPLEMENT_DYNAMIC_CLASS(wxDynToolInfo, wxToolLayoutItem)
 
 /***** Implementation for class wxDynamicToolBar *****/
@@ -54,7 +54,7 @@ wxDynamicToolBar::wxDynamicToolBar()
 {
 }
 
-wxDynamicToolBar::wxDynamicToolBar(wxWindow *parent, const wxWindowID id,
+wxDynamicToolBar::wxDynamicToolBar(wxWindow *parent, const wxWindowID id, 
                                    const wxPoint& pos, const wxSize& size,
                                    const long style, const int orientation,
                                    const int RowsOrColumns, const wxString& name )
@@ -68,27 +68,27 @@ wxDynamicToolBar::wxDynamicToolBar(wxWindow *parent, const wxWindowID id,
     SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_3DFACE) );
 }
 
-bool wxDynamicToolBar::Create(wxWindow *parent, const wxWindowID id,
-                              const wxPoint& pos,
+bool wxDynamicToolBar::Create(wxWindow *parent, const wxWindowID id, 
+                              const wxPoint& pos, 
                               const wxSize& size,
-                              const long style,
-                              const int WXUNUSED(orientation), const int WXUNUSED(RowsOrColumns),
+                              const long style, 
+                              const int orientation, const int RowsOrColumns, 
                               const wxString& name)
 {
     // cut&pasted from wxtbatsmpl.h
 
     if ( ! wxWindow::Create(parent, id, pos, size, style, name) )
-        return false;
+        return FALSE;
 
     SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_3DFACE ));
 
-    return true;
+    return TRUE;
 }
 
 bool wxDynamicToolBar::Realize(void)
 {
     // FOR NOW:: nothing
-    return true;
+    return TRUE;
 }
 
 wxDynamicToolBar::~wxDynamicToolBar(void)
@@ -103,16 +103,16 @@ wxDynamicToolBar::~wxDynamicToolBar(void)
     }
 }
 
-void wxDynamicToolBar::AddTool( int toolIndex,
-                                wxWindow* pToolWindow,
-                                const wxSize& WXUNUSED(size)
+void wxDynamicToolBar::AddTool( int toolIndex, 
+                                wxWindow* pToolWindow, 
+                                const wxSize& size
                               )
 {
     wxDynToolInfo* pInfo = new wxDynToolInfo();
 
     pInfo->mpToolWnd    = pToolWindow;
     pInfo->mIndex       = toolIndex;
-    pInfo->mIsSeparator    = false;
+    pInfo->mIsSeparator    = FALSE;
 
     int x,y;
     pToolWindow->GetSize( &x, &y );
@@ -124,18 +124,18 @@ void wxDynamicToolBar::AddTool( int toolIndex,
     mTools.Add( pInfo );
 }
 
-void wxDynamicToolBar::AddTool( int toolIndex,
+void wxDynamicToolBar::AddTool( int toolIndex, 
                                 const wxString& imageFileName,
-                                wxBitmapType imageFileType,
+                                wxBitmapType imageFileType, 
                                 const wxString& labelText, bool alignTextRight,
                                 bool isFlat )
 {
     wxNewBitmapButton* pBtn =
 
       new wxNewBitmapButton( imageFileName, imageFileType,
-                             labelText,
-                             ( alignTextRight )
-                             ? NB_ALIGN_TEXT_RIGHT
+                             labelText, 
+                             ( alignTextRight ) 
+                             ? NB_ALIGN_TEXT_RIGHT 
                              : NB_ALIGN_TEXT_BOTTOM,
                              isFlat
                            );
@@ -143,7 +143,7 @@ void wxDynamicToolBar::AddTool( int toolIndex,
     pBtn->Create( this, toolIndex );
 
     pBtn->Reshape();
-
+    
     AddTool( toolIndex, pBtn );
 }
 void wxDynamicToolBar::AddTool( int toolIndex, wxBitmap labelBmp,
@@ -153,9 +153,9 @@ void wxDynamicToolBar::AddTool( int toolIndex, wxBitmap labelBmp,
     wxNewBitmapButton* pBtn =
 
       new wxNewBitmapButton( labelBmp,
-                             labelText,
-                             ( alignTextRight )
-                             ? NB_ALIGN_TEXT_RIGHT
+                             labelText, 
+                             ( alignTextRight ) 
+                             ? NB_ALIGN_TEXT_RIGHT 
                              : NB_ALIGN_TEXT_BOTTOM,
                              isFlat
                            );
@@ -163,17 +163,17 @@ void wxDynamicToolBar::AddTool( int toolIndex, wxBitmap labelBmp,
     pBtn->Create( this, toolIndex );
 
     pBtn->Reshape();
-
+    
     AddTool( toolIndex, pBtn );
 }
 
 
-wxToolBarToolBase*
-      wxDynamicToolBar::AddTool(const int toolIndex, const wxBitmap& bitmap,
-                                const wxBitmap& WXUNUSED(pushedBitmap),
-                                const bool WXUNUSED(toggle), const long WXUNUSED(xPos),
-                                const long WXUNUSED(yPos), wxObject *WXUNUSED(clientData),
-                                const wxString& helpString1, const wxString& WXUNUSED(helpString2))
+wxToolBarToolBase* 
+      wxDynamicToolBar::AddTool(const int toolIndex, const wxBitmap& bitmap, 
+                                const wxBitmap& pushedBitmap,
+                                const bool toggle, const long xPos, 
+                                const long yPos, wxObject *clientData,
+                                const wxString& helpString1, const wxString& helpString2)
 {
     wxNewBitmapButton* pBmpBtn = new wxNewBitmapButton( bitmap );
 
@@ -183,8 +183,6 @@ wxToolBarToolBase*
 
 #if wxUSE_TOOLTIPS
     pBmpBtn->SetToolTip( helpString1 );
-#else
-    wxUnusedVar( helpString1 );
 #endif  // wxUSE_TOOLTIPS
 
     AddTool( toolIndex, pBmpBtn );
@@ -210,7 +208,7 @@ void wxDynamicToolBar::RemveTool( int toolIndex )
     size_t i;
     for( i = 0; i != mTools.Count(); ++i )
     {
-        if ( mTools[i]->mIndex == toolIndex )
+        if ( mTools[i]->mIndex == toolIndex ) 
         {
             if ( mTools[i]->mpToolWnd )
             {
@@ -236,7 +234,7 @@ void wxDynamicToolBar::AddSeparator( wxWindow* pSepartorWnd )
 
     pInfo->mpToolWnd    = pSepartorWnd;
     pInfo->mIndex       = -1;
-    pInfo->mIsSeparator = true;
+    pInfo->mIsSeparator = TRUE;
 
     // Do we draw a separator or is a other object?
     if ( pSepartorWnd )
@@ -267,12 +265,12 @@ void wxDynamicToolBar::AddSeparator( wxWindow* pSepartorWnd )
     mTools.Add( pInfo );
 }
 
-void wxDynamicToolBar::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
+void wxDynamicToolBar::OnEraseBackground( wxEraseEvent& event )
 {
     // FOR NOW:: nothing
 }
 
-void wxDynamicToolBar::OnSize( wxSizeEvent& WXUNUSED(event) )
+void wxDynamicToolBar::OnSize( wxSizeEvent& event )
 {
     //SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_3DFACE ) );
 
@@ -308,7 +306,7 @@ void wxDynamicToolBar::DrawSeparator( wxDynToolInfo& info, wxDC& dc )
     }
 }
 
-void wxDynamicToolBar::OnPaint( wxPaintEvent& WXUNUSED(event) )
+void wxDynamicToolBar::OnPaint( wxPaintEvent& event )
 {
     // draw separators if any
     wxPaintDC dc(this);
@@ -316,7 +314,7 @@ void wxDynamicToolBar::OnPaint( wxPaintEvent& WXUNUSED(event) )
     size_t i;
     for( i = 0; i != mTools.Count(); ++i )
     {
-        if ( mTools[i]->mIsSeparator )
+        if ( mTools[i]->mIsSeparator ) 
         {
             // check if separator doesn't have it's own window
             // if so, then draw it using built-in drawing method
@@ -331,8 +329,8 @@ void wxDynamicToolBar::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
 void wxDynamicToolBar::SizeToolWindows()
 {
-    bool bStateCheckDone = false;
-    bool bHorzSeparator  = false;
+    bool bStateCheckDone = FALSE;
+    bool bHorzSeparator  = FALSE;
     int maxWidth         = 0;
     int maxHeight        = 0;
 
@@ -341,9 +339,9 @@ void wxDynamicToolBar::SizeToolWindows()
     {
         wxDynToolInfo& info = *mTools[i];
 
-        if ( !info.mIsSeparator )
+        if ( !info.mIsSeparator ) 
         {
-            // center real rectangle within the rectangle
+            // center real rectangle within the rectangle 
             // provided by the layout manager
 
             int x = info.mRect.x;
@@ -352,36 +350,36 @@ void wxDynamicToolBar::SizeToolWindows()
             // FOR NOW FOR NOW:: quick & dirty fix
             if ( info.mpToolWnd->IsKindOf( CLASSINFO( wxChoice ) ) )
             {
-                info.mpToolWnd->SetSize( x, y,
-                                         info.mRealSize.x - 3,
+                info.mpToolWnd->SetSize( x, y, 
+                                         info.mRealSize.x - 3, 
                                          info.mRealSize.y);
             }
             else
             {
-                info.mpToolWnd->SetSize( x, y,
-                                         info.mRealSize.x,
+                info.mpToolWnd->SetSize( x, y, 
+                                         info.mRealSize.x, 
                                          info.mRealSize.y );
             }
         }
         else
         {
-            // We performer this code here, so we only execute it when we have
+            // We performer this code here, so we only execute it when we have 
             // separators and we do it only once (all to do with performance...)
             if (!bStateCheckDone)
             {
-                bStateCheckDone = true;
-
+                bStateCheckDone = TRUE;
+                
                 size_t j;
-                wxDynToolInfo *pInfo;
+                wxDynToolInfo *pInfo = NULL;
                 wxDynToolInfo *pPrevInfo = NULL;
                 int nVertSeparators = 0;
 
                 for( j = 0; j != mTools.Count(); ++j )
                 {
                     pInfo = mTools[j];
-
+                    
                     // Count all Vert Separators.
-                    if ( pInfo->mIsSeparator )
+                    if ( pInfo->mIsSeparator ) 
                         nVertSeparators++;
 
                     // Check if the new row starts with a Separator.
@@ -389,8 +387,8 @@ void wxDynamicToolBar::SizeToolWindows()
                          // pPrevInfo->mRect.x >= pInfo->mRect.x &&
                          pPrevInfo->mRect.y < pInfo->mRect.y)
                     {
-                        // If the Separator is shown on the next row and it's
-                        // the only object on the row it would mean that the
+                        // If the Separator is shown on the next row and it's 
+                        // the only object on the row it would mean that the 
                         // Separator should be shown as Horizontal one.
                         if (j+1 != mTools.Count())
                         {
@@ -408,10 +406,10 @@ void wxDynamicToolBar::SizeToolWindows()
                     maxWidth = wxMax(pInfo->mRect.width, maxWidth);
                     maxHeight = wxMax(pInfo->mRect.height, maxHeight);
                 }
-
+                
                 bHorzSeparator = nVertSeparators == 0;
             }
-
+            
             // Check if we should draw Horz or Vert...
             if ( !bHorzSeparator )
             {
@@ -424,12 +422,12 @@ void wxDynamicToolBar::SizeToolWindows()
                 info.mRect.height = mSepartorSize;
             }
 
-            // Do we need to set a new size to a separator object?
+            // Do we need to set a new size to a seperator object?
             if ( info.mpToolWnd )
             {
                 info.mpToolWnd->SetSize( info.mRect.x,
-                                         info.mRect.y,
-                                         info.mRect.width,
+                                         info.mRect.y, 
+                                         info.mRect.width, 
                                          info.mRect.height);
             }
 
@@ -450,8 +448,8 @@ bool wxDynamicToolBar::Layout()
     for( i = 0; i != mTools.Count(); ++i )
     {
         pInfo = mTools[i];
-
-        if ( pInfo->mIsSeparator )
+        
+        if ( pInfo->mIsSeparator ) 
         {
             pInfo->mRect.width  = mSepartorSize;
             pInfo->mRect.height = mSepartorSize;
@@ -462,7 +460,7 @@ bool wxDynamicToolBar::Layout()
     GetPreferredDim( wndDim, result );
 
     SizeToolWindows();
-    return true;
+    return TRUE;
 }
 
 void wxDynamicToolBar::GetPreferredDim( const wxSize& givenDim, wxSize& prefDim )
@@ -490,7 +488,7 @@ void wxDynamicToolBar::SetLayout( LayoutManagerBase* pLayout )
     Layout();
 }
 
-void wxDynamicToolBar::EnableTool(int toolIndex, bool enable )
+void wxDynamicToolBar::EnableTool(const int toolIndex, const bool enable )
 {
     wxDynToolInfo* pInfo = GetToolInfo( toolIndex );
 
@@ -505,11 +503,11 @@ void wxDynamicToolBar::EnableTool(int toolIndex, bool enable )
 
 /***** Implementation for class BagLayout *****/
 
-void BagLayout::Layout(  const wxSize&       parentDim,
+void BagLayout::Layout(  const wxSize&       parentDim, 
                          wxSize&             resultingDim,
                          wxLayoutItemArrayT& items,
                          int                 horizGap,
-                         int                 vertGap
+                         int                 vertGap  
                       )
 {
     int maxWidth = 0;
@@ -541,7 +539,7 @@ void BagLayout::Layout(  const wxSize&       parentDim,
 
             if ( curX + r.width > parentDim.x )
             {
-                if ( itemsInRow > 0 )
+                if ( itemsInRow > 0 ) 
                     break;
             }
             r.x = curX;
@@ -567,47 +565,39 @@ void BagLayout::Layout(  const wxSize&       parentDim,
 
 //////// stuff from 2.1.15 ///////////
 
-wxToolBarToolBase* wxDynamicToolBar::FindToolForPosition( wxCoord WXUNUSED(x), wxCoord WXUNUSED(y) ) const
+wxToolBarToolBase* wxDynamicToolBar::FindToolForPosition( wxCoord x, wxCoord y ) const
 {
     return NULL;
 }
 
-bool wxDynamicToolBar::DoInsertTool( size_t WXUNUSED(pos), wxToolBarToolBase* WXUNUSED(tool) )
+bool wxDynamicToolBar::DoInsertTool( size_t pos, wxToolBarToolBase* tool )
 {
-    return true;
+    return TRUE;
 }
 
-bool wxDynamicToolBar::DoDeleteTool( size_t WXUNUSED(pos), wxToolBarToolBase* WXUNUSED(tool) )
+bool wxDynamicToolBar::DoDeleteTool( size_t pos, wxToolBarToolBase* tool )
 {
-    return true;
+    return TRUE;
 }
 
-void wxDynamicToolBar::DoEnableTool( wxToolBarToolBase* WXUNUSED(tool), bool WXUNUSED(enable) )
-{
-}
-
-void wxDynamicToolBar::DoToggleTool( wxToolBarToolBase* WXUNUSED(tool), bool WXUNUSED(toggle) )
+void wxDynamicToolBar::DoEnableTool( wxToolBarToolBase* tool, bool enable )
 {
 }
 
-void wxDynamicToolBar::DoSetToggle( wxToolBarToolBase* WXUNUSED(tool), bool WXUNUSED(toggle) )
+void wxDynamicToolBar::DoToggleTool( wxToolBarToolBase* tool, bool toggle )
 {
 }
 
-wxToolBarToolBase* wxDynamicToolBar::CreateTool( int WXUNUSED(id),
-                                                 const wxString& WXUNUSED(label),
-                                                 const wxBitmap& WXUNUSED(bmpNormal),
-                                                 const wxBitmap& WXUNUSED(bmpDisabled),
-                                                 wxItemKind WXUNUSED(kind),
-                                                 wxObject *WXUNUSED(clientData),
-                                                 const wxString& WXUNUSED(shortHelp),
-                                                 const wxString& WXUNUSED(longHelp)
-                                                )
+void wxDynamicToolBar::DoSetToggle( wxToolBarToolBase* tool, bool toggle )
+{
+}
+
+wxToolBarToolBase* wxDynamicToolBar::CreateTool( int id, const wxString& label, const wxBitmap& bmpNormal, const wxBitmap& bmpDisabled, wxItemKind kind, wxObject *clientData, const wxString& shortHelp, const wxString& longHelp)
 {
     return NULL;
 }
 
-wxToolBarToolBase* wxDynamicToolBar::CreateTool( wxControl* WXUNUSED(control) )
+wxToolBarToolBase* wxDynamicToolBar::CreateTool( wxControl* control )
 {
     return NULL;
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagall.cpp
+// Name:        imagall.cpp
 // Purpose:     wxImage access all handler
 // Author:      Sylvain Bougnoux
 // RCS-ID:      $Id$
@@ -15,6 +15,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+#  include "wx/setup.h"
 #endif
 
 #include "wx/image.h"
@@ -49,13 +50,13 @@ void wxInitAllImageHandlers()
 #if wxUSE_IFF
   wxImage::AddHandler( new wxIFFHandler );
 #endif
+#if wxUSE_XPM && (defined(__WXGTK__) || defined(__WXMOTIF__))
+  wxImage::AddHandler( new wxXPMHandler );
+#endif
 #if wxUSE_ICO_CUR
   wxImage::AddHandler( new wxICOHandler );
   wxImage::AddHandler( new wxCURHandler );
   wxImage::AddHandler( new wxANIHandler );
-#endif
-#if wxUSE_XPM
-  wxImage::AddHandler( new wxXPMHandler );
 #endif
 }
 

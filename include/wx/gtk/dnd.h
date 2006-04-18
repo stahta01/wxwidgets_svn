@@ -4,8 +4,9 @@
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef __GTKDNDH__
 #define __GTKDNDH__
@@ -23,13 +24,13 @@
 // classes
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindow;
+class wxWindow;
 
-class WXDLLIMPEXP_CORE wxDropTarget;
-class WXDLLIMPEXP_CORE wxTextDropTarget;
-class WXDLLIMPEXP_CORE wxFileDropTarget;
+class wxDropTarget;
+class wxTextDropTarget;
+class wxFileDropTarget;
 
-class WXDLLIMPEXP_CORE wxDropSource;
+class wxDropSource;
 
 // ----------------------------------------------------------------------------
 // macros
@@ -45,7 +46,7 @@ class WXDLLIMPEXP_CORE wxDropSource;
 // wxDropTarget
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDropTarget: public wxDropTargetBase
+class wxDropTarget: public wxDropTargetBase
 {
 public:
     wxDropTarget(wxDataObject *dataObject = (wxDataObject*) NULL );
@@ -78,7 +79,7 @@ public:
 // wxDropSource
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDropSource: public wxDropSourceBase
+class wxDropSource: public wxDropSourceBase
 {
 public:
     // constructor. set data later with SetData()

@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        tdocview.tex
-%% Purpose:     Document/view overview
-%% Author:      wxWidgets Team
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets Team
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{Document/view overview}\label{docviewoverview}
 
 Classes: \helpref{wxDocument}{wxdocument}, \helpref{wxView}{wxview}, \helpref{wxDocTemplate}{wxdoctemplate},\rtfsp
@@ -46,7 +35,8 @@ document child frames surrounded by an overall frame), SDI (a separate, unconstr
 for each document), or single-window (one document open at a time, as in Windows Write).
 \item Use the appropriate wxDocParentFrame and wxDocChildFrame classes. Construct an instance
 of wxDocParentFrame in your wxApp::OnInit, and a wxDocChildFrame (if not single-window) when
-you initialize a view. Create menus using standard menu ids (such as wxID\_OPEN, wxID\_PRINT).
+you initialize a view. Create menus using standard menu ids (such as wxID\_OPEN, wxID\_PRINT),
+routing non-application-specific identifiers to the base frame's OnMenuCommand.
 \item Construct a single wxDocManager instance at the beginning of your wxApp::OnInit, and then
 as many wxDocTemplate instances as necessary to define relationships between documents and
 views. For a simple application, there will be just one wxDocTemplate.
@@ -136,7 +126,8 @@ See the example application in {\tt samples/docview}.
 
 To use the abstract wxView class, you need to derive a new class and override
 at least the member functions OnCreate, OnDraw, OnUpdate and OnClose. You will probably
-want to respond to menu commands from the frame containing the view.
+want to override OnMenuCommand to respond to menu commands from the frame containing the
+view.
 
 Use the macros DECLARE\_DYNAMIC\_CLASS and IMPLEMENT\_DYNAMIC\_CLASS in order
 to allow the framework to create view objects on demand. When you create
@@ -173,14 +164,16 @@ the user clicks on the Open menu item, the file selector is displayed
 with a list of possible file filters -- one for each wxDocTemplate. Selecting
 the filter selects the wxDocTemplate, and when
 a file is selected, that template will be used for creating a document
-and view.
+and view. Under non-Windows platforms, the user will be prompted for
+a list of templates before the file selector is shown, since most file selectors
+do not allow a choice of file filters.
 
 For the case where an application has one document type and one view type,
 a single document template is constructed, and dialogs will be appropriately
 simplified.
 
 wxDocTemplate is part of the document/view framework supported by wxWidgets,
-and cooperates with the \helpref{wxView}{wxview}, \helpref{wxDocument}{wxdocument}
+and cooperates with the \helpref{wxView}{wxview}, \helpref{wxDocument}{wxdocument} 
 and \helpref{wxDocManager}{wxdocmanager} classes.
 
 See the example application in {\tt samples/docview}.
@@ -192,7 +185,8 @@ If you do not wish to use the wxWidgets method of creating document
 objects dynamically, you must override wxDocTemplate::CreateDocument
 and wxDocTemplate::CreateView to return instances of the appropriate class.
 
-{\it NOTE}: the document template has nothing to do with the C++ template construct.
+{\it NOTE}: the document template has nothing to do with the C++ template construct. C++
+templates are not used anywhere in wxWidgets.
 
 \subsection{wxDocManager overview}\label{wxdocmanageroverview}
 
@@ -204,7 +198,7 @@ The wxDocManager class is part of the document/view framework supported by wxWid
 and cooperates with the \helpref{wxView}{wxview}, \helpref{wxDocument}{wxdocument}\rtfsp
 and \helpref{wxDocTemplate}{wxdoctemplate} classes.
 
-A wxDocManager instance coordinates documents, views and document templates. It keeps a list of document
+A wxDocManager instance coordinates documents, views and document templates. It keeps a list of document 
 and template instances, and much functionality is routed through this object, such
 as providing selection and file dialogs. The application can use this class `as is' or
 derive a class and override some members to extend or change the functionality.
@@ -265,17 +259,9 @@ Although wxFileHistory is used by wxDocManager, it can be used independently. Yo
 to derive from it to allow different behaviour, such as popping up a scrolling
 list of files.
 
-By calling \helpref{wxFileHistory::UseMenu()}{wxfilehistoryusemenu} you can
-associate a file menu with the file history. The menu will then be used for
-appending filenames that are added to the history. Please notice that currently
-if the history already contained filenames when UseMenu() is called (e.g. when
-initializing a second MDI child frame), the menu is not automatically
-initialized with the existing filenames in the history and so you need to call
-\helpref{AddFilesToMenu()}{wxfilehistoryaddfilestomenu} after UseMenu()
-explicitly in order to initialize the menu with the existing list of MRU files.
-(otherwise an assertion failure is raised in debug builds).
-The filenames are appended using menu identifiers in the range
-\texttt{wxID\_FILE1} to \texttt{wxID\_FILE9}.
+By calling wxFileHistory::FileHistoryUseMenu you can associate a file menu with
+the file history, that will be used for appending the filenames. They are
+appended using menu identifiers in the range wxID\_FILE1 to wxID\_FILE9.
 
 In order to respond to a file load command from one of these identifiers,
 you need to handle them using an event handler, for example:
@@ -295,7 +281,7 @@ void wxDocParentFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 void wxDocParentFrame::OnMRUFile(wxCommandEvent& event)
 {
       wxString f(m_docManager->GetHistoryFile(event.GetId() - wxID_FILE1));
-      if (!f.empty())
+      if (f != "")
         (void)m_docManager->CreateDocument(f, wxDOC_SILENT);
 }
 \end{verbatim}
@@ -305,7 +291,9 @@ void wxDocParentFrame::OnMRUFile(wxCommandEvent& event)
 
 To allow communication between the application's menus and the
 document/view framework, several command identifiers are predefined for you
-to use in menus.
+to use in menus. The framework recognizes them and processes them if you
+forward commands from wxFrame::OnMenuCommand (or perhaps from toolbars and
+other user interface constructs).
 
 \begin{itemize}\itemsep=0pt
 \item wxID\_OPEN (5000)
@@ -322,3 +310,5 @@ to use in menus.
 \item wxID\_PRINT\_SETUP (5011)
 \item wxID\_PREVIEW (5012)
 \end{itemize}
+
+

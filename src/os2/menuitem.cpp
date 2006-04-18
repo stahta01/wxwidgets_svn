@@ -50,6 +50,48 @@
     #define OWNER_DRAWN_ONLY( code )
 #endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
 
+// ----------------------------------------------------------------------------
+// static function for translating menu labels
+// ----------------------------------------------------------------------------
+
+static wxString TextToLabel(
+  const wxString&                   rsTitle
+)
+{
+    wxString                        sTitle;
+    const wxChar*                   zPc;
+
+    if (rsTitle.IsEmpty())
+        return(sTitle);
+
+    for (zPc = rsTitle.c_str(); *zPc != wxT('\0'); zPc++)
+    {
+        if (*zPc == wxT('&'))
+        {
+            if (*(zPc + 1) == wxT('&'))
+            {
+                zPc++;
+                sTitle << wxT('&');
+            }
+            else
+                sTitle << wxT('~');
+        }
+        else
+        {
+            if ( *zPc == wxT('~'))
+            {
+                //
+                // Tildes must be doubled to prevent them from being
+                // interpreted as accelerator character prefix by PM ???
+                //
+                sTitle << *zPc;
+            }
+            sTitle << *zPc;
+        }
+    }
+    return(sTitle);
+} // end of TextToLabel
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -77,13 +119,13 @@ wxMenuItem::wxMenuItem(
 )
 : wxMenuItemBase( pParentMenu
                  ,nId
-                 ,wxPMTextToLabel(rsText)
+                 ,TextToLabel(rsText)
                  ,rsHelp
                  ,eKind
                  ,pSubMenu
                 )
 #if wxUSE_OWNER_DRAWN
-,  wxOwnerDrawn( wxPMTextToLabel(rsText)
+,  wxOwnerDrawn( TextToLabel(rsText)
                 ,eKind == wxITEM_CHECK
                )
 #endif // owner drawn
@@ -105,13 +147,13 @@ wxMenuItem::wxMenuItem(
 )
 : wxMenuItemBase( pParentMenu
                  ,nId
-                 ,wxPMTextToLabel(rsText)
+                 ,TextToLabel(rsText)
                  ,rsHelp
                  ,bIsCheckable ? wxITEM_CHECK : wxITEM_NORMAL
                  ,pSubMenu
                 )
 #if wxUSE_OWNER_DRAWN
-,  wxOwnerDrawn( wxPMTextToLabel(rsText)
+,  wxOwnerDrawn( TextToLabel(rsText)
                 ,bIsCheckable
                )
 #endif // owner drawn
@@ -171,13 +213,13 @@ int wxMenuItem::GetRealId() const
 // --------------
 bool wxMenuItem::IsChecked() const
 {
-    USHORT uFlag = SHORT1FROMMR(::WinSendMsg( GetHMenuOf(m_parentMenu)
-                                             ,MM_QUERYITEMATTR
-                                             ,MPFROM2SHORT(GetId(), TRUE)
-                                             ,MPFROMSHORT(MIA_CHECKED)
-                                            ));
+    USHORT                          uFlag = SHORT1FROMMR(::WinSendMsg( GetHMenuOf(m_parentMenu)
+                                                                      ,MM_QUERYITEMATTR
+                                                                      ,MPFROM2SHORT(GetId(), TRUE)
+                                                                      ,MPFROMSHORT(MIA_CHECKED)
+                                                                     ));
 
-    return (uFlag & MIA_CHECKED) == MIA_CHECKED ;
+    return (uFlag & MIA_CHECKED);
 } // end of wxMenuItem::IsChecked
 
 wxString wxMenuItemBase::GetLabelFromText(
@@ -186,13 +228,13 @@ wxString wxMenuItemBase::GetLabelFromText(
 {
     wxString                        sLabel;
 
-    for (const wxChar* zPc = rsText.c_str(); *zPc; zPc++)
+    for (const char* zPc = rsText.c_str(); *zPc; zPc++)
     {
         if (*zPc == wxT('~') || *zPc == wxT('&'))
         {
             //
             // '~' is the escape character for OS/2PM and '&' is the one for
-            // wxWidgets - skip both of them
+            // wxWindows - skip both of them
             //
             continue;
         }
@@ -207,7 +249,7 @@ wxString wxMenuItemBase::GetLabelFromText(
 //
 void wxMenuItem::SetAsRadioGroupStart()
 {
-    m_bIsRadioGroupStart = true;
+    m_bIsRadioGroupStart = TRUE;
 } // end of wxMenuItem::SetAsRadioGroupStart
 
 void wxMenuItem::SetRadioGroupStart(
@@ -256,7 +298,7 @@ void wxMenuItem::Enable(
                                 );
     if (!bOk)
     {
-        wxLogLastError(wxT("EnableMenuItem"));
+        wxLogLastError("EnableMenuItem");
     }
     wxMenuItemBase::Enable(bEnable);
 } // end of wxMenuItem::Enable
@@ -317,9 +359,9 @@ void wxMenuItem::Check(
         //
         // Also uncheck all the other items in this radio group
         //
-        wxMenuItemList::compatibility_iterator node = rItems.Item(nStart);
+        wxMenuItemList::Node*       pNode = rItems.Item(nStart);
 
-        for (int n = nStart; n <= nEnd && node; n++)
+        for (int n = nStart; n <= nEnd && pNode; n++)
         {
             if (n == nPos)
             {
@@ -331,14 +373,14 @@ void wxMenuItem::Check(
             }
             if (n != nPos)
             {
-                node->GetData()->m_isChecked = FALSE;
+                pNode->GetData()->m_isChecked = FALSE;
                 ::WinSendMsg( hMenu
                              ,MM_SETITEMATTR
                              ,MPFROM2SHORT(n, TRUE)
                              ,MPFROM2SHORT(MIA_CHECKED, FALSE)
                             );
             }
-            node = node->GetNext();
+            pNode = pNode->GetNext();
         }
     }
     else // check item
@@ -358,18 +400,20 @@ void wxMenuItem::Check(
     }
     if (!bOk)
     {
-        wxLogLastError(wxT("CheckMenuItem"));
+        wxLogLastError("CheckMenuItem");
     }
     wxMenuItemBase::Check(bCheck);
 } // end of wxMenuItem::Check
 
-void wxMenuItem::SetText( const wxString& rText )
+void wxMenuItem::SetText(
+  const wxString&                   rText
+)
 {
     //
     // Don't do anything if label didn't change
     //
 
-    wxString                        sText = wxPMTextToLabel(rText);
+    wxString                        sText = TextToLabel(rText);
     if (m_text == sText)
         return;
 
@@ -387,9 +431,9 @@ void wxMenuItem::SetText( const wxString& rText )
     m_parentMenu->UpdateAccel(this);
 #endif // wxUSE_ACCEL
 
-    USHORT   uId = (USHORT)GetRealId();
-    MENUITEM vItem;
-    USHORT   uFlagsOld;
+    USHORT                          uId = GetRealId();
+    MENUITEM                        vItem;
+    USHORT                          uFlagsOld;
 
     if (!::WinSendMsg( hMenu
                       ,MM_QUERYITEM
@@ -397,7 +441,7 @@ void wxMenuItem::SetText( const wxString& rText )
                       ,(MPARAM)&vItem
                      ))
     {
-        wxLogLastError(wxT("GetMenuState"));
+        wxLogLastError("GetMenuState");
     }
     else
     {
@@ -477,3 +521,4 @@ wxMenuItem* wxMenuItemBase::New(
                           ,pSubMenu
                          );
 } // end of wxMenuItemBase::New
+

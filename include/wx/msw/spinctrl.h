@@ -14,12 +14,10 @@
 
 #include "wx/spinbutt.h"    // the base class
 
-#if wxUSE_SPINCTRL
-
 #include "wx/dynarray.h"
 
 class WXDLLEXPORT wxSpinCtrl;
-WX_DEFINE_EXPORTED_ARRAY_PTR(wxSpinCtrl *, wxArraySpins);
+WX_DEFINE_EXPORTED_ARRAY(wxSpinCtrl *, wxArraySpins);
 
 // ----------------------------------------------------------------------------
 // Under Win32, wxSpinCtrl is a wxSpinButton with a buddy (as MSDN docs call
@@ -33,7 +31,7 @@ public:
     wxSpinCtrl() { }
 
     wxSpinCtrl(wxWindow *parent,
-               wxWindowID id = wxID_ANY,
+               wxWindowID id = -1,
                const wxString& value = wxEmptyString,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
@@ -45,7 +43,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxString& value = wxEmptyString,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -70,8 +68,8 @@ public:
     virtual bool SetFont(const wxFont &font);
     virtual void SetFocus();
 
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
 
     // wxSpinButton doesn't accept focus, but we do
     virtual bool AcceptsFocus() const { return wxWindow::AcceptsFocus(); }
@@ -92,9 +90,6 @@ protected:
     virtual void DoMoveWindow(int x, int y, int width, int height);
     virtual wxSize DoGetBestSize() const;
     virtual void DoGetSize(int *width, int *height) const;
-#if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip( wxToolTip *tip );
-#endif // wxUSE_TOOLTIPS
 
     // the handler for wxSpinButton events
     void OnSpinChange(wxSpinEvent& event);
@@ -102,7 +97,6 @@ protected:
     // Handle processing of special keys
     void OnChar(wxKeyEvent& event);
     void OnSetFocus(wxFocusEvent& event);
-    void OnKillFocus(wxFocusEvent& event);
 
     // the data for the "buddy" text ctrl
     WXHWND     m_hwndBuddy;
@@ -115,10 +109,7 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS(wxSpinCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSpinCtrl)
 };
-
-#endif // wxUSE_SPINCTRL
 
 #endif // _WX_MSW_SPINCTRL_H_
 
