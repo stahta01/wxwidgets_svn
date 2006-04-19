@@ -77,7 +77,6 @@ public:
     virtual ~CheckBoxWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_checkbox; }
-    virtual void RecreateWidget() { CreateCheckbox(); }
 
 protected:
     // event handlers
@@ -244,7 +243,7 @@ void CheckBoxWidgetsPage::CreateCheckbox()
 
     delete m_checkbox;
 
-    int flags = ms_defaultFlags;
+    int flags = 0;
     if ( m_chkRight->IsChecked() )
         flags |= wxALIGN_RIGHT;
 

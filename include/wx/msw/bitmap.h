@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "bitmap.h"
+#endif
+
 #include "wx/msw/gdiimage.h"
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
@@ -39,7 +43,10 @@ class WXDLLEXPORT wxBitmap : public wxGDIImage
 {
 public:
     // default ctor creates an invalid bitmap, you must Create() it later
-    wxBitmap() { }
+    wxBitmap() { Init(); }
+
+    // Copy constructors
+    wxBitmap(const wxBitmap& bitmap) : wxGDIImage(bitmap) { Init(); Ref(bitmap); }
 
     // Initialize with raw data
     wxBitmap(const char bits[], int width, int height, int depth = 1);
@@ -64,7 +71,7 @@ public:
     // Create a bitmap compatible with the given DC
     wxBitmap(int width, int height, const wxDC& dc);
 
-#if wxUSE_IMAGE
+#if wxUSE_IMAGE && wxUSE_WXDIB
     // Convert from wxImage
     wxBitmap(const wxImage& image, int depth = -1)
         { (void)CreateFromImage(image, depth); }
@@ -76,7 +83,14 @@ public:
 
     // we must have this, otherwise icons are silently copied into bitmaps using
     // the copy ctor but the resulting bitmap is invalid!
-    wxBitmap(const wxIcon& icon) { CopyFromIcon(icon); }
+    wxBitmap(const wxIcon& icon) { Init(); CopyFromIcon(icon); }
+
+    wxBitmap& operator=(const wxBitmap& bitmap)
+    {
+        if ( m_refData != bitmap.m_refData )
+            Ref(bitmap);
+        return *this;
+    }
 
     wxBitmap& operator=(const wxIcon& icon)
     {
@@ -94,7 +108,7 @@ public:
 
     virtual ~wxBitmap();
 
-#if wxUSE_IMAGE
+#if wxUSE_IMAGE && wxUSE_WXDIB
     wxImage ConvertToImage() const;
 #endif // wxUSE_IMAGE
 
@@ -162,6 +176,9 @@ public:
 #endif // __WXDEBUG__
 
 protected:
+    // common part of all ctors
+    void Init();
+
     virtual wxGDIImageRefData *CreateData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
@@ -171,7 +188,7 @@ protected:
     // creates an uninitialized bitmap, called from Create()s above
     bool DoCreate(int w, int h, int depth, WXHDC hdc);
 
-#if wxUSE_IMAGE
+#if wxUSE_IMAGE && wxUSE_WXDIB
     // creates the bitmap from wxImage, supposed to be called from ctor
     bool CreateFromImage(const wxImage& image, int depth);
 
@@ -183,9 +200,10 @@ protected:
 #endif // wxUSE_IMAGE
 
 private:
+#ifdef __WIN32__
     // common part of CopyFromIcon/CopyFromCursor for Win32
     bool CopyFromIconOrCursor(const wxGDIImage& icon);
-
+#endif // __WIN32__
 
     DECLARE_DYNAMIC_CLASS(wxBitmap)
 };

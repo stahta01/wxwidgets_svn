@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dirdlg.cpp
+// Name:        dirdlg.cpp
 // Purpose:     wxDirDialog
 // Author:      David Webster
 // Modified by:
@@ -9,14 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "dirdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/dirdlg.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/dirdlg.h"
 #endif
 
 #include "wx/os2/private.h"
@@ -45,3 +50,4 @@ int wxDirDialog::ShowModal()
     // TODO
     return wxID_CANCEL;
 }
+

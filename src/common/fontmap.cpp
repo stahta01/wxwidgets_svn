@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fontmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -445,9 +449,9 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
 
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
                 // remember this in the config
-                wxFontMapperPathChanger path2(this,
-                                              FONTMAPPER_FONT_FROM_ENCODING_PATH);
-                if ( path2.IsOk() )
+                wxFontMapperPathChanger path(this,
+                                             FONTMAPPER_FONT_FROM_ENCODING_PATH);
+                if ( path.IsOk() )
                 {
                     GetConfig()->Write(configEntry, info->ToString());
                 }
@@ -464,9 +468,9 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
             //
             // remember it to avoid asking the same question again later
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
-            wxFontMapperPathChanger path2(this,
-                                          FONTMAPPER_FONT_FROM_ENCODING_PATH);
-            if ( path2.IsOk() )
+            wxFontMapperPathChanger path(this,
+                                         FONTMAPPER_FONT_FROM_ENCODING_PATH);
+            if ( path.IsOk() )
             {
                 GetConfig()->Write
                              (
@@ -494,6 +498,12 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
     wxCHECK_MSG( encodingAlt, false,
                     _T("wxFontEncoding::GetAltForEncoding(): NULL pointer") );
 
+#ifdef __WXGTK20__
+    // in GTK+ 2 we can always use UTF-8 for everything so just do it,
+    // especially as no other font encodings are currently supported
+    *encodingAlt = wxFONTENCODING_UTF8;
+    return true;
+#else // !wxGTK2
     wxNativeEncodingInfo info;
     if ( !GetAltForEncoding(encoding, &info, facename, interactive) )
         return false;
@@ -501,6 +511,7 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
     *encodingAlt = info.encoding;
 
     return true;
+#endif // wxGTK2/!wxGTK2
 }
 
 bool wxFontMapper::IsEncodingAvailable(wxFontEncoding encoding,

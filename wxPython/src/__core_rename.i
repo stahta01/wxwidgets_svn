@@ -56,8 +56,6 @@
 %rename(RB_USE_CHECKBOX)                    wxRB_USE_CHECKBOX;
 %rename(ST_SIZEGRIP)                        wxST_SIZEGRIP;
 %rename(ST_NO_AUTORESIZE)                   wxST_NO_AUTORESIZE;
-%rename(ST_DOTS_MIDDLE)                     wxST_DOTS_MIDDLE;
-%rename(ST_DOTS_END)                        wxST_DOTS_END;
 %rename(FLOOD_SURFACE)                      wxFLOOD_SURFACE;
 %rename(FLOOD_BORDER)                       wxFLOOD_BORDER;
 %rename(ODDEVEN_RULE)                       wxODDEVEN_RULE;
@@ -480,12 +478,8 @@
 %rename(MOD_NONE)                           wxMOD_NONE;
 %rename(MOD_ALT)                            wxMOD_ALT;
 %rename(MOD_CONTROL)                        wxMOD_CONTROL;
-%rename(MOD_ALTGR)                          wxMOD_ALTGR;
 %rename(MOD_SHIFT)                          wxMOD_SHIFT;
-%rename(MOD_META)                           wxMOD_META;
 %rename(MOD_WIN)                            wxMOD_WIN;
-%rename(MOD_CMD)                            wxMOD_CMD;
-%rename(MOD_ALL)                            wxMOD_ALL;
 %rename(UPDATE_UI_NONE)                     wxUPDATE_UI_NONE;
 %rename(UPDATE_UI_RECURSE)                  wxUPDATE_UI_RECURSE;
 %rename(UPDATE_UI_FROMIDLE)                 wxUPDATE_UI_FROMIDLE;
@@ -665,7 +659,6 @@
 %rename(SetDefaultPyEncoding)               wxSetDefaultPyEncoding;
 %rename(GetDefaultPyEncoding)               wxGetDefaultPyEncoding;
 %rename(EventLoop)                          wxEventLoop;
-%rename(EventLoopActivator)                 wxEventLoopActivator;
 %rename(AcceleratorEntry)                   wxAcceleratorEntry;
 %rename(AcceleratorTable)                   wxAcceleratorTable;
 %rename(NullAcceleratorTable)               wxNullAcceleratorTable;

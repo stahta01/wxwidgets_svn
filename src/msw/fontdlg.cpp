@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fontdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,6 +31,7 @@
 #if wxUSE_FONTDLG
 
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/utils.h"
     #include "wx/dialog.h"
 #endif

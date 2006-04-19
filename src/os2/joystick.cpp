@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/joystick.cpp
+// Name:        joystick.cpp
 // Purpose:     wxJoystick class
 // Author:      David Webster
 // Modified by:
@@ -14,6 +14,8 @@
 //
 #include "wx/wxprec.h"
 
+#include "wx/defs.h"
+
 #if wxUSE_JOYSTICK
 
 #include "wx/string.h"
@@ -23,8 +25,8 @@
 
 #define NO_JOYGETPOSEX
 
-#include "wx/window.h"
-#include "wx/joystick.h"
+#include <wx/window.h>
+#include <wx/joystick.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -99,7 +101,7 @@ bool wxJoystick::IsOk() const
     return false;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;
@@ -120,7 +122,7 @@ int wxJoystick::GetProductId() const
 wxString wxJoystick::GetProductName() const
 {
     // TODO
-    return wxEmptyString;
+    return wxString("");
 }
 
 int wxJoystick::GetXMin() const

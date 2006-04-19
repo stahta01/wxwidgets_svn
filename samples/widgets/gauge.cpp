@@ -75,7 +75,6 @@ public:
     virtual ~GaugeWidgetsPage();
 
     virtual wxControl *GetWidget() const { return m_gauge; }
-    virtual void RecreateWidget() { CreateGauge(); }
 
 protected:
     // event handlers
@@ -260,7 +259,7 @@ void GaugeWidgetsPage::Reset()
 
 void GaugeWidgetsPage::CreateGauge()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
 
     if ( m_chkVert->GetValue() )
         flags |= wxGA_VERTICAL;

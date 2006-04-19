@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/htmprint.cpp
+// Name:        htmprint.cpp
 // Purpose:     html printing classes
 // Author:      Vaclav Slavik
 // Created:     25/09/99
@@ -8,20 +8,27 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+#include "wx/defs.h"
 
-#if wxUSE_HTML && wxUSE_PRINTING_ARCHITECTURE && wxUSE_STREAMS
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/dc.h"
 #endif
+
+#if wxUSE_HTML && wxUSE_PRINTING_ARCHITECTURE && wxUSE_STREAMS
 
 #include "wx/dc.h"
 #include "wx/print.h"
@@ -43,7 +50,7 @@ wxHtmlDCRenderer::wxHtmlDCRenderer() : wxObject()
     m_DC = NULL;
     m_Width = m_Height = 0;
     m_Cells = NULL;
-    m_Parser = new wxHtmlWinParser();
+    m_Parser = new wxHtmlWinParser(NULL);
     m_FS = new wxFileSystem();
     m_Parser->SetFS(m_FS);
 }
@@ -87,7 +94,7 @@ void wxHtmlDCRenderer::SetHtmlText(const wxString& html, const wxString& basepat
 }
 
 
-void wxHtmlDCRenderer::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlDCRenderer::SetFonts(wxString normal_face, wxString fixed_face,
                                 const int *sizes)
 {
     m_Parser->SetFonts(normal_face, fixed_face, sizes);
@@ -450,7 +457,7 @@ void wxHtmlPrintout::SetMargins(float top, float bottom, float left, float right
 
 
 
-void wxHtmlPrintout::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlPrintout::SetFonts(wxString normal_face, wxString fixed_face,
                               const int *sizes)
 {
     m_Renderer->SetFonts(normal_face, fixed_face, sizes);
@@ -626,7 +633,7 @@ void wxHtmlEasyPrinting::SetFooter(const wxString& footer, int pg)
 }
 
 
-void wxHtmlEasyPrinting::SetFonts(const wxString& normal_face, const wxString& fixed_face,
+void wxHtmlEasyPrinting::SetFonts(wxString normal_face, wxString fixed_face,
                                   const int *sizes)
 {
     m_fontMode = FontMode_Explicit;

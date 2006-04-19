@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/statusbr.cpp
+// Name:        generic/statusbr.cpp
 // Purpose:     wxStatusBarGeneric class implementation
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statusbr.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -19,6 +23,7 @@
 #if wxUSE_STATUSBAR
 
 #ifndef WX_PRECOMP
+#include "wx/setup.h"
 #include "wx/frame.h"
 #include "wx/settings.h"
 #include "wx/dcclient.h"
@@ -232,7 +237,7 @@ void wxStatusBarGeneric::DrawFieldText(wxDC& dc, int i)
 
     wxString text(GetStatusText(i));
 
-    long x = 0, y = 0;
+    long x, y;
 
     dc.GetTextExtent(text, &x, &y);
 
@@ -350,7 +355,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#if defined(__WIN95__) || defined(__WXMAC__)
     wxColour mediumShadowColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 

@@ -132,7 +132,7 @@ public:
 };
 
 #define WX_DECLARE_VECTORBASE(obj, cls)\
-protected:\
+private:\
     virtual void Free(void *o)\
     {\
         delete (obj *) o;\

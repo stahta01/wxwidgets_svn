@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/ogledit/palette.h
+// Name:        palette.h
 // Purpose:     OGL sample palette
 // Author:      Julian Smart
 // Modified by:
@@ -12,10 +12,14 @@
 #ifndef _OGLSAMPLE_PALETTE_H_
 #define _OGLSAMPLE_PALETTE_H_
 
-#include "wx/wx.h"
-#include "wx/string.h"
-#include "wx/deprecated/setup.h"
-#include "wx/deprecated/tbarsmpl.h"
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface
+#endif
+
+#include <wx/wx.h>
+#include <wx/string.h>
+#include <wx/deprecated/setup.h>
+#include <wx/deprecated/tbarsmpl.h>
 
 /*
  * Object editor tool palette

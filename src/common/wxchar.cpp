@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/wxchar.cpp
+// Name:        wxchar.cpp
 // Purpose:     wxChar implementation
 // Author:      Ove Kåven
 // Modified by: Ron Lee
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "wxchar.h"
+#endif
+
 // ===========================================================================
 // headers, declarations, constants
 // ===========================================================================
@@ -17,7 +21,7 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #define _ISOC9X_SOURCE 1 // to get vsscanf()
@@ -28,23 +32,24 @@
 #include <string.h>
 
 #ifndef __WXWINCE__
-    #include <time.h>
-    #include <locale.h>
+#include <time.h>
+#include <locale.h>
 #else
-    #include "wx/msw/wince/time.h"
+#include "wx/msw/wince/time.h"
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/wxchar.h"
-    #include "wx/string.h"
-    #include "wx/hash.h"
+  #include "wx/defs.h"
+  #include "wx/wxchar.h"
+  #include "wx/string.h"
+  #include "wx/hash.h"
 #endif
 
 #if defined(__WIN32__) && defined(wxNEED_WX_CTYPE_H)
   #include <windef.h>
-    #include <winbase.h>
-    #include <winnls.h>
-    #include <winnt.h>
+  #include <winbase.h>
+  #include <winnls.h>
+  #include <winnt.h>
 #endif
 
 #if defined(__MWERKS__) && __MSL__ >= 0x6000
@@ -77,12 +82,6 @@ size_t WXDLLEXPORT wxMB2WC(wchar_t *buf, const char *psz, size_t n)
 #endif
   }
 
-  // note that we rely on common (and required by Unix98 but unfortunately not
-  // C99) extension which allows to call mbs(r)towcs() with NULL output pointer
-  // to just get the size of the needed buffer -- this is needed as otherwise
-  // we have no idea about how much space we need and if the CRT doesn't
-  // support it (the only currently known example being Metrowerks, see
-  // wx/wxchar.h) we don't use its mbstowcs() at all
 #ifdef HAVE_WCSRTOMBS
   return mbsrtowcs((wchar_t *) NULL, &psz, 0, &mbstate);
 #else
@@ -1095,7 +1094,7 @@ WXDLLEXPORT size_t wxMbstowcs (wchar_t * out, const char * in, size_t outlen)
     return in - origin;
 }
 
-WXDLLEXPORT size_t wxWcstombs (char * out, const wchar_t * in, size_t outlen)
+WXDLLEXPORT size_t	wxWcstombs (char * out, const wchar_t * in, size_t outlen)
 {
     if (!out)
     {
@@ -1452,8 +1451,8 @@ double   WXDLLEXPORT wxAtof(const wxChar *psz)
     wxString str(psz);
     if (str.ToDouble(& d))
         return d;
-
-    return 0.0;
+    else
+        return 0.0;
 #else
     return atof(wxConvLibc.cWX2MB(psz));
 #endif

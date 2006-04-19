@@ -179,8 +179,7 @@ static void ConvertArgsToUnicode(int argc, char **argv)
     gs_initData.argv = new wchar_t *[argc + 1];
     for ( int i = 0; i < argc; i++ )
     {
-        wxWCharBuffer buf(wxConvLocal.cMB2WX(argv[i]));
-        gs_initData.argv[i] = buf ? wxStrdup(buf) : NULL;
+        gs_initData.argv[i] = wxStrdup(wxConvLocal.cMB2WX(argv[i]));
     }
 
     gs_initData.argc = argc;
@@ -357,16 +356,15 @@ static void DoCommonPostCleanup()
 {
     wxModule::CleanUpModules();
 
+    wxClassInfo::CleanUp();
+
     // we can't do this in wxApp itself because it doesn't know if argv had
     // been allocated
 #if wxUSE_UNICODE
     FreeConvertedArgs();
 #endif // wxUSE_UNICODE
 
-    // use Set(NULL) and not Get() to avoid creating a message output object on
-    // demand when we just want to delete it
-    delete wxMessageOutput::Set(NULL);
-
+    // Note: check for memory leaks is now done via wxDebugContextDumpDelayCounter
 #if wxUSE_LOG
     // and now delete the last logger as well
     delete wxLog::SetActiveTarget(NULL);
@@ -476,7 +474,7 @@ void wxUninitialize()
 {
     wxCRIT_SECT_LOCKER(lockInit, gs_initData.csInit);
 
-    if ( --gs_initData.nInitCount == 0 )
+    if ( !--gs_initData.nInitCount )
     {
         wxEntryCleanup();
     }

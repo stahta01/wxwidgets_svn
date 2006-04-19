@@ -207,6 +207,17 @@ wxChar *wxGetUserHome(const wxString& user)
         return _T("");
 }
 
+#if WXWIN_COMPATIBILITY_2_2
+void wxFatalError(const wxString &msg, const wxString &title)
+{
+    wxFprintf( stderr, _("Error ") );
+    if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+    if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+    wxFprintf( stderr, wxT(".\n") );
+    exit(3); // the same exit code as for abort()
+}
+#endif // WXWIN_COMPATIBILITY_2_2
+
 // returns %UserName%, $USER or just "user"
 //
 bool wxGetUserId(wxChar *buf, int n)
@@ -487,3 +498,4 @@ wxString wxGetOsDescription()
     wxString osname(_T("DOS"));
     return osname;
 }
+

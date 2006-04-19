@@ -20,10 +20,9 @@
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxDirDialogNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxDirDialogDefaultFolderStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxDirSelectorPromptStr[];
-
+extern WXDLLEXPORT_DATA(const wxChar*) wxDirDialogNameStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxDirDialogDefaultFolderStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxDirSelectorPromptStr;
 
 #ifdef __WXWINCE__
     #define wxDD_DEFAULT_STYLE \
@@ -83,11 +82,6 @@ public:
 #elif defined(__WXMAC__)
 
     #include "wx/mac/dirdlg.h"
-
-// Native Cocoa
-#elif defined(__WXCOCOA__)
-
-    #include "wx/cocoa/dirdlg.h"
 
 // Other ports use generic implementation
 #elif defined(__WXMOTIF__) || \

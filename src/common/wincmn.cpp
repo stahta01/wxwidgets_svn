@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/window.cpp
+// Name:        common/window.cpp
 // Purpose:     common (to all ports) wxWindow functions
 // Author:      Julian Smart, Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "windowbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,6 +33,7 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/frame.h"
+    #include "wx/defs.h"
     #include "wx/window.h"
     #include "wx/control.h"
     #include "wx/checkbox.h"
@@ -73,21 +78,12 @@
     #include "wx/caret.h"
 #endif // wxUSE_CARET
 
-#if wxUSE_SYSTEM_OPTIONS
-    #include "wx/sysopt.h"
+#if wxUSE_DISPLAY
+    #include "wx/display.h"
 #endif
 
-// For reporting compile- and runtime version of GTK+ in the ctrl+alt+mclick dialog.
-// The gtk includes don't pull any other headers in, at least not on my system - MR
-#ifdef __WXGTK__
-    #ifdef __WXGTK20__
-        #include <gtk/gtkversion.h>
-    #else
-        #include <gtk/gtkfeatures.h>
-    #endif
-    extern const unsigned int gtk_major_version;
-    extern const unsigned int gtk_minor_version;
-    extern const unsigned int gtk_micro_version;
+#if wxUSE_SYSTEM_OPTIONS
+    #include "wx/sysopt.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -220,6 +216,11 @@ wxWindowBase::wxWindowBase()
 
     // VZ: this one shouldn't exist...
     m_isBeingDeleted = false;
+
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    m_windowReserved = NULL;
+#endif
 }
 
 // common part of window creation process
@@ -392,20 +393,150 @@ bool wxWindowBase::DestroyChildren()
 // ----------------------------------------------------------------------------
 
 // centre the window with respect to its parent in either (or both) directions
-void wxWindowBase::DoCentre(int dir)
+void wxWindowBase::Centre(int direction)
 {
-    wxCHECK_RET( !(dir & wxCENTRE_ON_SCREEN) && GetParent(),
-                 _T("this method only implements centering child windows") );
+    // the position/size of the parent window or of the entire screen
+    wxPoint posParent;
+    int widthParent, heightParent;
 
-    SetSize(GetRect().CentreIn(GetParent()->GetClientSize(), dir));
+    wxWindow *parent = NULL;
+    wxTopLevelWindow *winTop = NULL;
+
+    if ( !(direction & wxCENTRE_ON_SCREEN) )
+    {
+        // find the parent to centre this window on: it should be the
+        // immediate parent for the controls but the top level parent for the
+        // top level windows (like dialogs)
+        parent = GetParent();
+        if ( IsTopLevel() )
+        {
+            while ( parent && !parent->IsTopLevel() )
+            {
+                parent = parent->GetParent();
+            }
+        }
+
+        // there is no wxTopLevelWindow under wxMotif yet
+#ifndef __WXMOTIF__
+        // we shouldn't center the dialog on the iconized window: under
+        // Windows, for example, this places it completely off the screen
+        if ( parent )
+        {
+            winTop = wxDynamicCast(parent, wxTopLevelWindow);
+            if ( winTop && winTop->IsIconized() )
+            {
+                winTop = NULL;
+                parent = NULL;
+            }
+        }
+#endif // __WXMOTIF__
+
+        // did we find the parent?
+        if ( !parent )
+        {
+            // no other choice
+            direction |= wxCENTRE_ON_SCREEN;
+        }
+    }
+
+    if ( direction & wxCENTRE_ON_SCREEN )
+    {
+        //RN:  If we are using wxDisplay we get
+        //the dimensions of the monitor the window is on,
+        //otherwise we get the dimensions of the primary monitor
+        //FIXME:  wxDisplay::GetFromWindow only implemented on MSW
+#if wxUSE_DISPLAY && defined(__WXMSW__)
+        int nDisplay = wxDisplay::GetFromWindow((wxWindow*)this);
+        if(nDisplay != wxNOT_FOUND)
+        {
+            wxDisplay windowDisplay(nDisplay);
+            wxRect displayRect = windowDisplay.GetGeometry();
+            widthParent = displayRect.width;
+            heightParent = displayRect.height;
+        }
+        else
+#endif
+        // centre with respect to the whole screen
+        wxDisplaySize(&widthParent, &heightParent);
+    }
+    else
+    {
+        if ( IsTopLevel() )
+        {
+            if(winTop)
+                winTop->GetRectForTopLevelChildren(&posParent.x, &posParent.y, &widthParent, &heightParent);
+            else
+            {
+                // centre on the parent
+                parent->GetSize(&widthParent, &heightParent);
+
+                // adjust to the parents position
+                posParent = parent->GetPosition();
+            }
+        }
+        else
+        {
+            // centre inside the parents client rectangle
+            parent->GetClientSize(&widthParent, &heightParent);
+        }
+    }
+
+    int width, height;
+    GetSize(&width, &height);
+
+    int xNew = wxDefaultCoord,
+        yNew = wxDefaultCoord;
+
+    if ( direction & wxHORIZONTAL )
+        xNew = (widthParent - width)/2;
+
+    if ( direction & wxVERTICAL )
+        yNew = (heightParent - height)/2;
+
+    xNew += posParent.x;
+    yNew += posParent.y;
+
+    // FIXME:  This needs to get the client display rect of the display
+    // the window is (via wxDisplay::GetFromWindow).
+
+    // Base size of the visible dimensions of the display
+    // to take into account the taskbar. And the Mac menu bar at top.
+    wxRect clientrect = wxGetClientDisplayRect();
+
+    // NB: in wxMSW, negative position may not necessarily mean "out of screen",
+    //     but it may mean that the window is placed on other than the main
+    //     display. Therefore we only make sure centered window is on the main display
+    //     if the parent is at least partially present here.
+    if (posParent.x + widthParent >= 0)  // if parent is (partially) on the main display
+    {
+        if (xNew < clientrect.GetLeft())
+            xNew = clientrect.GetLeft();
+        else if (xNew + width > clientrect.GetRight())
+            xNew = clientrect.GetRight() - width;
+    }
+    if (posParent.y + heightParent >= 0)  // if parent is (partially) on the main display
+    {
+        if (yNew + height > clientrect.GetBottom())
+            yNew = clientrect.GetBottom() - height;
+
+        // Make certain that the title bar is initially visible
+        // always, even if this would push the bottom of the
+        // dialog off the visible area of the display
+        if (yNew < clientrect.GetTop())
+            yNew = clientrect.GetTop();
+    }
+
+    // move the window to this position (keeping the old size but using
+    // SetSize() and not Move() to allow xNew and/or yNew to be wxDefaultCoord)
+    SetSize(xNew, yNew, width, height, wxSIZE_ALLOW_MINUS_ONE);
 }
 
 // fits the window around the children
 void wxWindowBase::Fit()
 {
-    if ( !GetChildren().empty() )
+    if ( GetChildren().GetCount() > 0 )
     {
-        SetClientSize(GetBestSize());
+        SetSize(GetBestSize());
     }
     //else: do nothing if we have no children
 }
@@ -456,7 +587,7 @@ wxSize wxWindowBase::DoGetBestSize() const
 
     if ( m_windowSizer )
     {
-        best = GetWindowSizeForVirtualSize(m_windowSizer->GetMinSize());
+        best = m_windowSizer->GetMinSize();
     }
 #if wxUSE_CONSTRAINTS
     else if ( m_constraints )
@@ -698,29 +829,17 @@ void wxWindowBase::DoSetVirtualSize( int x, int y )
 
 wxSize wxWindowBase::DoGetVirtualSize() const
 {
-    // we should use the entire client area so if it is greater than our
-    // virtual size, expand it to fit (otherwise if the window is big enough we
-    // wouldn't be using parts of it)
+    if ( m_virtualSize.IsFullySpecified() )
+        return m_virtualSize;
+
     wxSize size = GetClientSize();
-    if ( m_virtualSize.x > size.x )
+    if ( m_virtualSize.x != wxDefaultCoord )
         size.x = m_virtualSize.x;
 
-    if ( m_virtualSize.y >= size.y )
+    if ( m_virtualSize.y != wxDefaultCoord )
         size.y = m_virtualSize.y;
 
     return size;
-}
-
-void wxWindowBase::DoGetScreenPosition(int *x, int *y) const
-{
-    // screen position is the same as (0, 0) in client coords for non TLWs (and
-    // TLWs override this method)
-    if ( x )
-        *x = 0;
-    if ( y )
-        *y = 0;
-
-    ClientToScreen(x, y);
 }
 
 // ----------------------------------------------------------------------------
@@ -1713,7 +1832,7 @@ bool wxWindowBase::Layout()
     // If there is a sizer, use it instead of the constraints
     if ( GetSizer() )
     {
-        int w = 0, h = 0;
+        int w, h;
         GetVirtualSize(&w, &h);
         GetSizer()->SetDimension( 0, 0, w, h );
     }
@@ -2002,13 +2121,44 @@ void wxWindowBase::UpdateWindowUI(long flags)
 }
 
 // do the window-specific processing after processing the update event
+// TODO: take specific knowledge out of this function and
+// put in each control's base class. Unfortunately we don't
+// yet have base implementation files for wxCheckBox and wxRadioButton.
 void wxWindowBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
 {
     if ( event.GetSetEnabled() )
         Enable(event.GetEnabled());
 
-    if ( event.GetSetShown() )
-        Show(event.GetShown());
+#if wxUSE_CONTROLS
+    if ( event.GetSetText() )
+    {
+        wxControl *control = wxDynamicCastThis(wxControl);
+        if ( control )
+        {
+            if ( event.GetText() != control->GetLabel() )
+                control->SetLabel(event.GetText());
+        }
+    }
+#endif // wxUSE_CONTROLS
+
+    if ( event.GetSetChecked() )
+    {
+#if wxUSE_CHECKBOX
+        wxCheckBox *checkbox = wxDynamicCastThis(wxCheckBox);
+        if ( checkbox )
+        {
+            checkbox->SetValue(event.GetChecked());
+        }
+#endif // wxUSE_CHECKBOX
+
+#if wxUSE_RADIOBTN
+        wxRadioButton *radiobtn = wxDynamicCastThis(wxRadioButton);
+        if ( radiobtn )
+        {
+            radiobtn->SetValue(event.GetChecked());
+        }
+#endif // wxUSE_RADIOBTN
+    }
 }
 
 #if 0
@@ -2094,82 +2244,12 @@ void wxWindowBase::OnInitDialog( wxInitDialogEvent &WXUNUSED(event) )
     UpdateWindowUI(wxUPDATE_UI_RECURSE);
 }
 
-// methods for drawing the sizers in a visible way
-#ifdef __WXDEBUG__
-
-static void DrawSizers(wxWindowBase *win);
-
-static void DrawBorder(wxWindowBase *win, const wxRect& rect, bool fill = false)
-{
-    wxClientDC dc((wxWindow *)win);
-    dc.SetPen(*wxRED_PEN);
-    dc.SetBrush(fill ? wxBrush(*wxRED, wxCROSSDIAG_HATCH): *wxTRANSPARENT_BRUSH);
-    dc.DrawRectangle(rect.Deflate(1, 1));
-}
-
-static void DrawSizer(wxWindowBase *win, wxSizer *sizer)
-{
-    const wxSizerItemList& items = sizer->GetChildren();
-    for ( wxSizerItemList::const_iterator i = items.begin(),
-                                        end = items.end();
-          i != end;
-          ++i )
-    {
-        wxSizerItem *item = *i;
-        if ( item->IsSizer() )
-        {
-            DrawBorder(win, item->GetRect().Deflate(2));
-            DrawSizer(win, item->GetSizer());
-        }
-        else if ( item->IsSpacer() )
-        {
-            DrawBorder(win, item->GetRect().Deflate(2), true);
-        }
-        else if ( item->IsWindow() )
-        {
-            DrawSizers(item->GetWindow());
-        }
-    }
-}
-
-static void DrawSizers(wxWindowBase *win)
-{
-    wxSizer *sizer = win->GetSizer();
-    if ( sizer )
-    {
-        DrawBorder(win, win->GetClientSize());
-        DrawSizer(win, sizer);
-    }
-    else // no sizer, still recurse into the children
-    {
-        const wxWindowList& children = win->GetChildren();
-        for ( wxWindowList::const_iterator i = children.begin(),
-                                         end = children.end();
-              i != end;
-              ++i )
-        {
-            DrawSizers(*i);
-        }
-    }
-}
-
-#endif // __WXDEBUG__
-
-// process special middle clicks
+// process Ctrl-Alt-mclick
 void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 {
+#if wxUSE_MSGDLG
     if ( event.ControlDown() && event.AltDown() )
     {
-#ifdef __WXDEBUG__
-        // Ctrl-Alt-Shift-mclick makes the sizers visible in debug builds
-        if ( event.ShiftDown() )
-        {
-            DrawSizers(this);
-            return;
-        }
-#endif // __WXDEBUG__
-
-#if wxUSE_MSGDLG
         // don't translate these strings
         wxString port;
 
@@ -2208,7 +2288,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 
         wxMessageBox(wxString::Format(
                                       _T(
-                                        "       wxWidgets Library (%s port)\nVersion %d.%d.%d%s%s, compiled at %s %s%s\n   Copyright (c) 1995-2006 wxWidgets team"
+                                        "       wxWidgets Library (%s port)\nVersion %u.%u.%u%s%s, compiled at %s %s\n   Copyright (c) 1995-2006 wxWidgets team"
                                         ),
                                       port.c_str(),
                                       wxMAJOR_VERSION,
@@ -2225,12 +2305,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
                                       wxEmptyString,
 #endif
                                       __TDATE__,
-                                      __TTIME__,
-#ifdef __WXGTK__
-                                      wxString::Format(_T("\nagainst GTK+ %d.%d.%d. Runtime GTK+ version: %d.%d.%d"), GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION, gtk_major_version, gtk_minor_version, gtk_micro_version).c_str()
-#else
-                                      ""
-#endif
+                                      __TTIME__
                                      ),
                      _T("wxWidgets information"),
                      wxICON_INFORMATION | wxOK,
@@ -2280,7 +2355,7 @@ wxAccessible* wxWindowBase::CreateAccessible()
 #if wxUSE_STL
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxWindowList)
+WX_DEFINE_LIST(wxWindowList);
 
 #else
 
@@ -2435,7 +2510,7 @@ bool wxWindowBase::TryValidator(wxEvent& wxVALIDATOR_PARAM(event))
 
 bool wxWindowBase::TryParent(wxEvent& event)
 {
-    // carry on up the parent-child hierarchy if the propagation count hasn't
+    // carry on up the parent-child hierarchy if the propgation count hasn't
     // reached zero yet
     if ( event.ShouldPropagate() )
     {

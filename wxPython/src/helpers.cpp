@@ -30,8 +30,8 @@
 #include <gdk/gdkprivate.h>
 #include <wx/gtk/win_gtk.h>
 #define GetXWindow(wxwin) (wxwin)->m_wxwindow ? \
-                          GDK_WINDOW_XWINDOW(GTK_PIZZA((wxwin)->m_wxwindow)->bin_window) : \
-                          GDK_WINDOW_XWINDOW((wxwin)->m_widget->window)
+                              GDK_WINDOW_XWINDOW(GTK_PIZZA((wxwin)->m_wxwindow)->bin_window) : \
+                              GDK_WINDOW_XWINDOW((wxwin)->m_widget->window)
 #include <locale.h>
 #endif
 
@@ -175,18 +175,6 @@ int wxPyApp::OnExit() {
     wxApp::OnExit();  // in this case always call the base class version
     return rval;
 }
-
-
-
-void wxPyApp::ExitMainLoop() {
-    bool found;
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if ((found = wxPyCBH_findCallback(m_myInst, "ExitMainLoop")))
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("()"));
-    wxPyEndBlockThreads(blocked);
-    if (! found)
-        wxApp::ExitMainLoop();
-}  
 
 
 #ifdef __WXDEBUG__
@@ -457,6 +445,10 @@ void wxPyApp::_BootstrapApp()
 
 //        wxSystemOptions::SetOption(wxT("mac.textcontrol-use-mlte"), 1);
         
+        // The stock objects were all NULL when they were loaded into
+        // SWIG generated proxies, so re-init those now...
+        wxPy_ReinitStockObjects(3);
+
         wxPyEndBlockThreads(blocked);
         haveInitialized = true;
     }
@@ -476,7 +468,6 @@ void wxPyApp::_BootstrapApp()
         PyObject* method = m_myInst.GetLastFound();
         PyObject* argTuple = PyTuple_New(0);
         retval = PyEval_CallObject(method, argTuple);
-        m_myInst.clearRecursionGuard(method);
         Py_DECREF(argTuple);
         Py_DECREF(method);
         if (retval == NULL)
@@ -583,6 +574,9 @@ void __wxPyPreStart(PyObject* moduleDict)
 
     // Ensure that the build options in the DLL (or whatever) match this build
     wxApp::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "wxPython");
+
+    // Init the stock objects to a non-NULL value so SWIG doesn't create them as None
+    wxPy_ReinitStockObjects(1);
 
     wxInitAllImageHandlers();
 }
@@ -698,7 +692,7 @@ PyObject* __wxPySetDictionary(PyObject* /* self */, PyObject* args)
     _AddInfoString("wx-assertions-off");
 #endif
     _AddInfoString(wxPy_SWIG_VERSION);    
-    
+
 #undef _AddInfoString
 
     PyObject* PlatInfoTuple = PyList_AsTuple(PlatInfo);
@@ -709,6 +703,163 @@ PyObject* __wxPySetDictionary(PyObject* /* self */, PyObject* args)
 }
 
 
+
+//---------------------------------------------------------------------------
+
+// The stock objects are no longer created when the wx._core_ module is
+// imported, but only after the app object has been created.  The
+// wxPy_ReinitStockObjects function will be called 3 times to pass the stock
+// objects though various stages of evolution:
+//
+//   pass 1: Set all the pointers to a non-NULL value so the Python proxy
+//           object will be created (otherwise SWIG will just use None.)
+//
+//   pass 2: After the module has been imported and the python proxys have
+//           been created, then set the __class__ to be _wxPyUnbornObject so
+//           it will catch any access to the object and will raise an exception.
+//
+//   pass 3: Finally, from BootstrapApp patch things up so the stock objects
+//           can be used.
+
+
+PyObject* __wxPyFixStockObjects(PyObject* /* self */, PyObject* args)
+{
+    wxPy_ReinitStockObjects(2);
+    RETURN_NONE();
+}
+
+
+static void rsoPass2(const char* name)
+{
+    static PyObject* unbornObjectClass = NULL;
+    PyObject* obj;
+
+    if (unbornObjectClass == NULL) {
+        unbornObjectClass = PyDict_GetItemString(wxPython_dict, "_wxPyUnbornObject");
+        Py_INCREF(unbornObjectClass);
+    }
+
+    // Find the object instance
+    obj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(name));
+    wxCHECK_RET(obj != NULL, wxT("Unable to find stock object"));
+    wxCHECK_RET(wxPySwigInstance_Check(obj), wxT("Not a swig instance"));
+
+    // Change its class
+    PyObject_SetAttrString(obj, "__class__",  unbornObjectClass);
+
+}
+
+static void rsoPass3(const char* name, const char* classname, void* ptr)
+{
+    PyObject* obj;
+    PyObject* classobj;
+    PyObject* ptrobj;
+
+    // Find the object instance
+    obj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(name));
+    wxCHECK_RET(obj != NULL, wxT("Unable to find stock object"));
+    wxCHECK_RET(wxPySwigInstance_Check(obj), wxT("Not a swig instance"));
+
+    // Find the class object and put it back in the instance
+    classobj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(classname));
+    wxCHECK_RET(classobj != NULL, wxT("Unable to find stock class object"));
+    PyObject_SetAttrString(obj, "__class__",  classobj);
+
+    // Rebuild the .this swigified pointer with the new value of the C++ pointer
+    ptrobj = wxPyMakeSwigPtr(ptr, wxString(classname, *wxConvCurrent));
+    PyObject_SetAttrString(obj, "this", ptrobj);
+    Py_DECREF(ptrobj);
+}
+
+
+
+void wxPy_ReinitStockObjects(int pass)
+{
+
+    // If there is already an App object then wxPython is probably embedded in
+    // a wx C++ application, so there is no need to do all this.
+    static bool embedded = false;
+    if ((pass == 1 || pass == 2) && wxTheApp) {
+        embedded = true;
+        return;
+    }
+    if (pass == 3 && embedded)
+        return;
+
+
+#define REINITOBJ(name, classname) \
+    if (pass == 1) { name = (classname*)0xC0C0C0C0; } \
+    else if (pass == 2) { rsoPass2(#name); } \
+    else if (pass == 3) { rsoPass3(#name, #classname, (void*)name); }
+
+
+#define REINITOBJ2(name, classname) \
+    if (pass == 1) { } \
+    else if (pass == 2) { rsoPass2(#name); } \
+    else if (pass == 3) { rsoPass3(#name, #classname, (void*)&name); }
+
+
+    REINITOBJ(wxNORMAL_FONT, wxFont);
+    REINITOBJ(wxSMALL_FONT, wxFont);
+    REINITOBJ(wxITALIC_FONT, wxFont);
+    REINITOBJ(wxSWISS_FONT, wxFont);
+
+    REINITOBJ(wxRED_PEN, wxPen);
+    REINITOBJ(wxCYAN_PEN, wxPen);
+    REINITOBJ(wxGREEN_PEN, wxPen);
+    REINITOBJ(wxBLACK_PEN, wxPen);
+    REINITOBJ(wxWHITE_PEN, wxPen);
+    REINITOBJ(wxTRANSPARENT_PEN, wxPen);
+    REINITOBJ(wxBLACK_DASHED_PEN, wxPen);
+    REINITOBJ(wxGREY_PEN, wxPen);
+    REINITOBJ(wxMEDIUM_GREY_PEN, wxPen);
+    REINITOBJ(wxLIGHT_GREY_PEN, wxPen);
+
+    REINITOBJ(wxBLUE_BRUSH, wxBrush);
+    REINITOBJ(wxGREEN_BRUSH, wxBrush);
+    REINITOBJ(wxWHITE_BRUSH, wxBrush);
+    REINITOBJ(wxBLACK_BRUSH, wxBrush);
+    REINITOBJ(wxTRANSPARENT_BRUSH, wxBrush);
+    REINITOBJ(wxCYAN_BRUSH, wxBrush);
+    REINITOBJ(wxRED_BRUSH, wxBrush);
+    REINITOBJ(wxGREY_BRUSH, wxBrush);
+    REINITOBJ(wxMEDIUM_GREY_BRUSH, wxBrush);
+    REINITOBJ(wxLIGHT_GREY_BRUSH, wxBrush);
+
+    REINITOBJ(wxBLACK, wxColour);
+    REINITOBJ(wxWHITE, wxColour);
+    REINITOBJ(wxRED, wxColour);
+    REINITOBJ(wxBLUE, wxColour);
+    REINITOBJ(wxGREEN, wxColour);
+    REINITOBJ(wxCYAN, wxColour);
+    REINITOBJ(wxLIGHT_GREY, wxColour);
+
+    REINITOBJ(wxSTANDARD_CURSOR, wxCursor);
+    REINITOBJ(wxHOURGLASS_CURSOR, wxCursor);
+    REINITOBJ(wxCROSS_CURSOR, wxCursor);
+
+    REINITOBJ2(wxNullBitmap, wxBitmap);
+    REINITOBJ2(wxNullIcon, wxIcon);
+    REINITOBJ2(wxNullCursor, wxCursor);
+    REINITOBJ2(wxNullPen, wxPen);
+    REINITOBJ2(wxNullBrush, wxBrush);
+    REINITOBJ2(wxNullPalette, wxPalette);
+    REINITOBJ2(wxNullFont, wxFont);
+    REINITOBJ2(wxNullColour, wxColour);
+
+    REINITOBJ(wxTheFontList, wxFontList);
+    REINITOBJ(wxThePenList, wxPenList);
+    REINITOBJ(wxTheBrushList, wxBrushList);
+    REINITOBJ(wxTheColourDatabase, wxColourDatabase);
+
+
+    REINITOBJ2(wxDefaultValidator, wxValidator);
+    REINITOBJ2(wxNullImage, wxImage);
+    REINITOBJ2(wxNullAcceleratorTable, wxAcceleratorTable);
+
+#undef REINITOBJ
+#undef REINITOBJ2
+}
 
 //---------------------------------------------------------------------------
 
@@ -1566,81 +1717,45 @@ PyObject* PyFindClassWithAttr(PyObject *klass, PyObject *name)
 
 
 static
-PyObject* PyMethod_GetDefiningClass(PyObject* method, PyObject* nameo)
+PyObject* PyMethod_GetDefiningClass(PyObject* method, const char* name)
 {
     PyObject* mgc = PyMethod_GET_CLASS(method);
 
 #if PYTHON_API_VERSION <= 1010    // prior to Python 2.2, the easy way
     return mgc;
 #else                             // 2.2 and after, the hard way...
-    return PyFindClassWithAttr(mgc, nameo);
+
+    PyObject* nameo = PyString_FromString(name);
+    PyObject* klass = PyFindClassWithAttr(mgc, nameo);
+    Py_DECREF(nameo);
+    return klass;
 #endif
 }
 
 
 
-// To avoid recursion when an overridden virtual method wants to call the base
-// class version, temporarily set an attribute in the instance with the same
-// name as the method.  Then the PyObject_GetAttr in the next findCallback
-// will return this attribute and the PyMethod_Check will fail.
-
-void wxPyCallbackHelper::setRecursionGuard(PyObject* method) const
-{
-    PyFunctionObject* func = (PyFunctionObject*)PyMethod_Function(method);
-    PyObject_SetAttr(m_self, func->func_name, Py_None);
-}
-
-void wxPyCallbackHelper::clearRecursionGuard(PyObject* method) const
-{
-    PyFunctionObject* func = (PyFunctionObject*)PyMethod_Function(method);
-    if (PyObject_HasAttr(m_self, func->func_name)) {
-        PyObject_DelAttr(m_self, func->func_name);
-    }
-}
-
-// bool wxPyCallbackHelper::hasRecursionGuard(PyObject* method) const
-// {
-//     PyFunctionObject* func = (PyFunctionObject*)PyMethod_Function(method);
-//     if (PyObject_HasAttr(m_self, func->func_name)) {
-//         PyObject* attr = PyObject_GetAttr(m_self, func->func_name);
-//         bool retval = (attr == Py_None);
-//         Py_DECREF(attr);
-//         return retval;
-//     }
-//     return false;
-// }
-
-
-bool wxPyCallbackHelper::findCallback(const char* name, bool setGuard) const {
+bool wxPyCallbackHelper::findCallback(const char* name) const {
     wxPyCallbackHelper* self = (wxPyCallbackHelper*)this; // cast away const
-    PyObject *method, *klass;
-    PyObject* nameo = PyString_FromString(name);
     self->m_lastFound = NULL;
 
     // If the object (m_self) has an attibute of the given name...
-    if (m_self && PyObject_HasAttr(m_self, nameo)) {
-        method = PyObject_GetAttr(m_self, nameo);
+    if (m_self && PyObject_HasAttrString(m_self, (char*)name)) {
+        PyObject *method, *klass;
+        method = PyObject_GetAttrString(m_self, (char*)name);
 
         // ...and if that attribute is a method, and if that method's class is
-        // not from the registered class or a base class...
+        // not from a base class...
         if (PyMethod_Check(method) &&
-            (klass = PyMethod_GetDefiningClass(method, nameo)) != NULL &&
-            (klass != m_class) &&
-            PyObject_IsSubclass(klass, m_class)) {
+            (klass = PyMethod_GetDefiningClass(method, (char*)name)) != NULL &&
+            ((klass == m_class) || PyObject_IsSubclass(klass, m_class))) {
 
-            // ...then we'll save a pointer to the method so callCallback can
-            // call it.  But first, set a recursion guard in case the
-            // overridden method wants to call the base class version.
-            if (setGuard)
-                setRecursionGuard(method);
+            // ...then we'll save a pointer to the method so callCallback can call it.
             self->m_lastFound = method;
         }
         else {
             Py_DECREF(method);
         }
     }
-    
-    Py_DECREF(nameo);
     return m_lastFound != NULL;
 }
 
@@ -1669,8 +1784,6 @@ PyObject* wxPyCallbackHelper::callCallbackObj(PyObject* argTuple) const {
     PyObject* method = m_lastFound;
 
     result = PyEval_CallObject(method, argTuple);
-    clearRecursionGuard(method);
-    
     Py_DECREF(argTuple);
     Py_DECREF(method);
     if (!result) {
@@ -1684,8 +1797,8 @@ void wxPyCBH_setCallbackInfo(wxPyCallbackHelper& cbh, PyObject* self, PyObject* 
     cbh.setSelf(self, klass, incref);
 }
 
-bool wxPyCBH_findCallback(const wxPyCallbackHelper& cbh, const char* name, bool setGuard) {
-    return cbh.findCallback(name, setGuard);
+bool wxPyCBH_findCallback(const wxPyCallbackHelper& cbh, const char* name) {
+    return cbh.findCallback(name);
 }
 
 int  wxPyCBH_callCallback(const wxPyCallbackHelper& cbh, PyObject* argTuple) {

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/bmpmotif.cpp
+// Name:        bitmap.cpp
 // Purpose:     wxBitmap
 // Author:      Julian Smart, originally in bitmap.cpp
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpmotif.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,6 +21,7 @@
 #define XtDisplay XTDISPLAY
 #endif
 
+#include "wx/defs.h"
 #include "wx/motif/bmpmotif.h"
 
 #ifdef __VMS__

@@ -90,7 +90,6 @@ public:
     virtual ~NotebookWidgetsPage();
 
     virtual wxControl *GetWidget() const { return m_notebook; }
-    virtual void RecreateWidget() { CreateNotebook(); }
 
 protected:
     // event handlers
@@ -212,19 +211,22 @@ NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
     wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
 
     // must be in sync with Orient enum
-    wxArrayString orientations;
-    orientations.Add(_T("&top"));
-    orientations.Add(_T("&bottom"));
-    orientations.Add(_T("&left"));
-    orientations.Add(_T("&right"));
+    wxString orientations[] =
+    {
+        _T("&top"),
+        _T("&bottom"),
+        _T("&left"),
+        _T("&right"),
+    };
 
-    wxASSERT_MSG( orientations.GetCount() == Orient_Max,
+    wxASSERT_MSG( WXSIZEOF(orientations) == Orient_Max,
                   _T("forgot to update something") );
 
     m_chkImages = new wxCheckBox(this, wxID_ANY, _T("Show &images"));
     m_radioOrient = new wxRadioBox(this, wxID_ANY, _T("&Tab orientation"),
                                    wxDefaultPosition, wxDefaultSize,
-                                   orientations, 1, wxRA_SPECIFY_COLS);
+                                   WXSIZEOF(orientations), orientations,
+                                   1, wxRA_SPECIFY_COLS);
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
@@ -345,7 +347,7 @@ void NotebookWidgetsPage::CreateImageList()
 
 void NotebookWidgetsPage::CreateNotebook()
 {
-    int flags = ms_defaultFlags;
+    int flags;
     switch ( m_radioOrient->GetSelection() )
     {
         default:
@@ -353,19 +355,19 @@ void NotebookWidgetsPage::CreateNotebook()
             // fall through
 
         case Orient_Top:
-            flags |= wxBK_TOP;
+            flags = wxNB_TOP;
             break;
 
         case Orient_Bottom:
-            flags |= wxBK_BOTTOM;
+            flags = wxNB_BOTTOM;
             break;
 
         case Orient_Left:
-            flags |= wxBK_LEFT;
+            flags = wxNB_LEFT;
             break;
 
         case Orient_Right:
-            flags |= wxBK_RIGHT;
+            flags = wxNB_RIGHT;
             break;
     }
 
@@ -504,7 +506,7 @@ void NotebookWidgetsPage::OnUpdateUIRemoveButton(wxUpdateUIEvent& event)
 void NotebookWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
 {
     event.Enable( !m_chkImages->GetValue() ||
-                  m_radioOrient->GetSelection() != wxBK_TOP );
+                  m_radioOrient->GetSelection() != wxNB_TOP );
 }
 
 void NotebookWidgetsPage::OnUpdateUINumPagesText(wxUpdateUIEvent& event)

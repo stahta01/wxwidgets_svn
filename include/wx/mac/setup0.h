@@ -28,15 +28,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.4 API: set it to 1 to
+// This setting determines the compatibility with 2.2 API: set it to 1 to
 // enable it but please consider updating your code instead.
 //
 // Default is 0
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
+// This setting determines the compatibility with 2.4 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -44,7 +44,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
 // MSW-only: Set to 0 for accurate dialog units, else 1 for old behaviour when
 // default system font is used for wxWindow::GetCharWidth/Height() instead of
@@ -247,29 +247,10 @@
 // Recommended setting: 0 unless you do plan to develop MT applications
 #define wxUSE_THREADS 1
 
-// If enabled, compiles wxWidgets streams classes
-//
-// wx stream classes are used for image IO, process IO redirection, network
-// protocols implementation and much more and so disabling this results in a
-// lot of other functionality being lost.
-//
-// Default is 1
-//
-// Recommended setting: 1 as setting it to 0 disables many other things
+// If enabled (1), compiles wxWidgets streams classes
 #define wxUSE_STREAMS       1
 
-// Use standard C++ streams if 1 instead of wx streams in some places. If
-// disabled (default), wx streams are used everywhere and wxWidgets doesn't
-// depend on the standard streams library.
-//
-// Notice that enabling this does not replace wx streams with std streams
-// everywhere, in a lot of places wx streams are used no matter what.
-//
-// Default is 0
-//
-// Recommended setting: 1 if you use the standard streams anyhow and so
-//                      dependency on the standard streams library is not a
-//                      problem
+// Use standard C++ streams if 1. If 0, use wxWin streams implementation only.
 #define wxUSE_STD_IOSTREAM  0
 
 // Enable conversion to standard C++ string if 1.
@@ -562,7 +543,6 @@
 #define wxUSE_CHECKLISTBOX 1    // wxCheckListBox (requires wxUSE_OWNER_DRAWN)
 #define wxUSE_CHOICE       1    // wxChoice
 #define wxUSE_COMBOBOX     1    // wxComboBox
-#define wxUSE_DATAVIEWCTRL 1    // wxDataViewCtrl
 #define wxUSE_DATEPICKCTRL 1    // wxDatePickerCtrl
 #define wxUSE_GAUGE        1    // wxGauge
 #define wxUSE_LISTBOX      1    // wxListBox
@@ -634,22 +614,6 @@
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
 
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
-
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
 //
@@ -693,13 +657,12 @@
 #define wxUSE_CARET         1
 
 // Use wxDisplay class: it allows enumerating all displays on a system and
-// their geometries as well as finding the display on which the given point or
-// window lies.
+// working with them.
 //
-// Default is 1.
+// Default is 0 because it isn't yet implemented on all platforms
 //
 // Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       1
+#define wxUSE_DISPLAY       0
 
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
@@ -890,14 +853,6 @@
 //
 // Recommended setting: 1 if you intend to use OpenGL, 0 otherwise
 #define wxUSE_GLCANVAS       0
-
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
 
 // ----------------------------------------------------------------------------
 // Data transfer

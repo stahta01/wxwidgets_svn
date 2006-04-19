@@ -1,19 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/checkbox.cpp
+// Name:        checkbox.cpp
 // Purpose:     wxCheckBox
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "checkbox.h"
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/checkbox.h"
 
@@ -34,7 +34,7 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 
     Rect bounds ;
     Str255 title ;
-
+    
     MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
 
     SInt16 maxValue = 1 /* kControlCheckboxCheckedValue */;
@@ -43,12 +43,12 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
         maxValue = 2 /* kControlCheckboxMixedValue */;
     }
 
-    m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , maxValue,
+    m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , maxValue, 
           kControlCheckBoxProc , (long) this ) ;
-
+    
     MacPostControlCreate() ;
 
-    return true;
+  return TRUE;
 }
 
 void wxCheckBox::SetValue(bool val)
@@ -92,7 +92,7 @@ void wxCheckBox::DoSet3StateValue(wxCheckBoxState val)
     MacRedrawControl() ;
 }
 
-void wxCheckBox::MacHandleControlClick( WXWidget WXUNUSED(control), wxInt16 WXUNUSED(controlpart) , bool WXUNUSED(mouseStillDown) )
+void wxCheckBox::MacHandleControlClick( WXWidget WXUNUSED(control), wxInt16 WXUNUSED(controlpart) , bool WXUNUSED(mouseStillDown) ) 
 {
     wxCommandEvent event(wxEVT_COMMAND_CHECKBOX_CLICKED, m_windowId );
     wxCheckBoxState state = Get3StateValue();
@@ -147,7 +147,7 @@ bool wxBitmapCheckBox::Create(wxWindow *parent, wxWindowID id,
 
     // TODO: Create the bitmap checkbox
 
-    return false;
+    return FALSE;
 }
 
 void wxBitmapCheckBox::SetLabel(const wxBitmap *bitmap)
@@ -171,5 +171,7 @@ bool wxBitmapCheckBox::GetValue() const
 {
     // TODO
     wxFAIL_MSG(wxT("wxBitmapCheckBox::GetValue() not yet implemented"));
-    return false;
+    return FALSE;
 }
+
+

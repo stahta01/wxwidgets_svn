@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        function.tex
-%% Purpose:     Functions and macros
-%% Author:      wxWidgets Team
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets Team
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \chapter{Functions}\label{functions}
 \setheader{{\it CHAPTER \thechapter}}{}{}{}{}{{\it CHAPTER \thechapter}}%
 \setfooter{\thepage}{}{}{}{}{\thepage}
@@ -32,12 +21,16 @@ the corresponding topic.
 \helpref{IMPLEMENT\_CLASS}{implementclass}\\
 \helpref{IMPLEMENT\_DYNAMIC\_CLASS2}{implementdynamicclass2}\\
 \helpref{IMPLEMENT\_DYNAMIC\_CLASS}{implementdynamicclass}\\
-\helpref{wxASSERT}{wxassert}\\
+\helpref{wxCONCAT}{wxconcat}\\
+\helpref{WXDEBUG\_NEW}{debugnew}\\
+\helpref{WXTRACELEVEL}{tracelevel}\\
+\helpref{WXTRACE}{trace}\\
 \helpref{wxASSERT\_MIN\_BITSIZE}{wxassertminbitsize}\\
 \helpref{wxASSERT\_MSG}{wxassertmsg}\\
+\helpref{wxASSERT}{wxassert}\\
+\helpref{wxBITMAP}{wxbitmapmacro}\\
 \helpref{wxBeginBusyCursor}{wxbeginbusycursor}\\
 \helpref{wxBell}{wxbell}\\
-\helpref{wxBITMAP}{wxbitmapmacro}\\
 \helpref{wxCHANGE\_UMASK}{wxchangeumask}\\
 \helpref{wxCHECK}{wxcheck}\\
 \helpref{wxCHECK2\_MSG}{wxcheck2msg}\\
@@ -54,7 +47,6 @@ the corresponding topic.
 \helpref{wxColourDisplay}{wxcolourdisplay}\\
 \helpref{wxCOMPILE\_TIME\_ASSERT}{wxcompiletimeassert}\\
 \helpref{wxCOMPILE\_TIME\_ASSERT2}{wxcompiletimeassert2}\\
-\helpref{wxCONCAT}{wxconcat}\\
 \helpref{wxConcatFiles}{wxconcatfiles}\\
 \helpref{wxConstCast}{wxconstcast}\\
 \helpref{wxCopyFile}{wxcopyfile}\\
@@ -68,8 +60,6 @@ the corresponding topic.
 \helpref{wxDDEInitialize}{wxddeinitialize}\\
 \helpref{wxDROP\_ICON}{wxdropicon}\\
 \helpref{wxDebugMsg}{wxdebugmsg}\\
-\helpref{WXDEBUG\_NEW}{debugnew}\\
-\helpref{wxDirExists}{functionwxdirexists}\\
 \helpref{wxDirSelector}{wxdirselector}\\
 \helpref{wxDisplayDepth}{wxdisplaydepth}\\
 \helpref{wxDisplaySize}{wxdisplaysize}\\
@@ -204,8 +194,8 @@ the corresponding topic.
 \helpref{wxON\_BLOCK\_EXIT\_OBJ}{wxonblockexitobj}\\
 \helpref{wxOpenClipboard}{wxopenclipboard}\\
 \helpref{wxParseCommonDialogsFilter}{wxparsecommondialogsfilter}\\
+\helpref{wxDirExists}{functionwxdirexists}\\
 \helpref{wxPathOnly}{wxpathonly}\\
-\helpref{wxPLURAL}{wxplural}\\
 \helpref{wxPostDelete}{wxpostdelete}\\
 \helpref{wxPostEvent}{wxpostevent}\\
 \helpref{wxRegisterClipboardFormat}{wxregisterclipboardformat}\\
@@ -240,17 +230,13 @@ the corresponding topic.
 \helpref{wxStricmp}{wxstricmp}\\
 \helpref{wxStringEq}{wxstringeq}\\
 \helpref{wxStringMatch}{wxstringmatch}\\
-\helpref{wxStringTokenize}{wxstringtokenize}\\
 \helpref{wxStripMenuCodes}{wxstripmenucodes}\\
 \helpref{wxStrlen}{wxstrlen}\\
-\helpref{wxSUPPRESS\_GCC\_PRIVATE\_DTOR\_WARNING}{wxsuppressgccprivatedtorwarning}\\
 \helpref{wxSysErrorCode}{wxsyserrorcode}\\
 \helpref{wxSysErrorMsg}{wxsyserrormsg}\\
 \helpref{wxT}{wxt}\\
-\helpref{wxTrace}{wxtrace}\\
-\helpref{WXTRACE}{trace}\\
 \helpref{wxTraceLevel}{wxtracelevel}\\
-\helpref{WXTRACELEVEL}{tracelevel}\\
+\helpref{wxTrace}{wxtrace}\\
 \helpref{wxTransferFileToStream}{wxtransferfiletostream}\\
 \helpref{wxTransferStreamToFile}{wxtransferstreamtofile}\\
 \helpref{wxTrap}{wxtrap}\\
@@ -269,8 +255,8 @@ the corresponding topic.
 \helpref{wx\_static\_cast}{wxstaticcastraw}\\
 \helpref{wx\_truncate\_cast}{wxtruncatecast}\\
 \helpref{\_}{underscore}\\
+\helpref{wxPLURAL}{wxplural}\\
 \helpref{\_T}{underscoret}
-\helpref{\_\_WXFUNCTION\_\_}{wxfunction}
 
 
 
@@ -1136,7 +1122,7 @@ Returns a string containing the current (or working) directory.
 
 \func{wxString}{wxGetWorkingDirectory}{\param{char *}{buf=NULL}, \param{int }{sz=1000}}
 
-{\bf NB:} This function is deprecated: use \helpref{wxGetCwd}{wxgetcwd} instead.
+{\bf NB:} This function is obsolete: use \helpref{wxGetCwd}{wxgetcwd} instead.
 
 Copies the current working directory into the buffer if supplied, or
 copies the working directory into new storage (which you {\emph must} delete
@@ -1215,13 +1201,9 @@ Removes \arg{file}, returning true if successful.
 
 \membersection{::wxRenameFile}\label{wxrenamefile}
 
-\func{bool}{wxRenameFile}{\param{const wxString\& }{file1}, \param{const wxString\& }{file2}, \param{bool overwrite = true}}
+\func{bool}{wxRenameFile}{\param{const wxString\& }{file1}, \param{const wxString\& }{file2}}
 
 Renames \arg{file1} to \arg{file2}, returning true if successful.
-
-If \arg{overwrite} parameter is true (default), the destination file is
-overwritten if it exists, but if \arg{overwrite} is false, the functions fails
-in this case.
 
 
 \membersection{::wxRmdir}\label{wxrmdir}
@@ -1532,24 +1514,24 @@ as wxGetTranslation.
 
 The second form is used when retrieving translation of string that has
 different singular and plural form in English or different plural forms in some
-other language. It takes two extra arguments: as above, \arg{str}
+other language. It takes two extra arguments: as above, \arg{str} 
 parameter must contain the singular form of the string to be converted and
 is used as the key for the search in the catalog. The \arg{strPlural} parameter
 is the plural form (in English). The parameter \arg{n} is used to determine the
 plural form.  If no message catalog is found \arg{str} is returned if `n == 1',
 otherwise \arg{strPlural}.
 
-See \urlref{GNU gettext manual}{http://www.gnu.org/manual/gettext/html\_chapter/gettext\_10.html\#SEC150}
+See \urlref{GNU gettext manual}{http://www.gnu.org/manual/gettext/html\_chapter/gettext\_10.html\#SEC150} 
 for additional information on plural forms handling. For a shorter alternative
 see the \helpref{wxPLURAL()}{wxplural} macro.
 
 Both versions call \helpref{wxLocale::GetString}{wxlocalegetstring}.
 
 Note that this function is not suitable for literal strings in Unicode
-builds, since the literal strings must be enclosed into
+builds, since the literal strings must be enclosed into 
 \helpref{\_T()}{underscoret} or \helpref{wxT}{wxt} macro which makes them
 unrecognised by \texttt{xgettext}, and so they are not extracted to the message
-catalog. Instead, use the \helpref{\_()}{underscore} and
+catalog. Instead, use the \helpref{\_()}{underscore} and 
 \helpref{wxPLURAL}{wxplural} macro for all literal strings.
 
 
@@ -1583,19 +1565,6 @@ This function complements the standard C function {\it strcmp()} which performs
 case-sensitive comparison.
 
 
-\membersection{::wxStringEq}\label{wxstringeq}
-
-\func{bool}{wxStringEq}{\param{const wxString\& }{s1}, \param{const wxString\& }{s2}}
-
-{\bf NB:} This function is obsolete, use \helpref{wxString}{wxstring} instead.
-
-A macro defined as:
-
-\begin{verbatim}
-#define wxStringEq(s1, s2) (s1 && s2 && (strcmp(s1, s2) == 0))
-\end{verbatim}
-
-
 \membersection{::wxStringMatch}\label{wxstringmatch}
 
 \func{bool}{wxStringMatch}{\param{const wxString\& }{s1}, \param{const wxString\& }{s2},\\
@@ -1608,19 +1577,17 @@ ignoring case if {\it exact} is false. If {\it subString} is \false,
 no substring matching is done.
 
 
-\membersection{::wxStringTokenize}\label{wxstringtokenize}
+\membersection{::wxStringEq}\label{wxstringeq}
 
-\func{wxArrayString}{wxStringTokenize}{\param{const wxString\& }{str},\\
-  \param{const wxString\& }{delims = wxDEFAULT\_DELIMITERS},\\
-  \param{wxStringTokenizerMode }{mode = wxTOKEN\_DEFAULT}}
+\func{bool}{wxStringEq}{\param{const wxString\& }{s1}, \param{const wxString\& }{s2}}
 
-This is a convenience function wrapping
-\helpref{wxStringTokenizer}{wxstringtokenizer} which simply returns all tokens
-found in the given \arg{str} in an array.
+{\bf NB:} This function is obsolete, use \helpref{wxString}{wxstring} instead.
 
-Please see
-\helpref{wxStringTokenizer::wxStringTokenizer}{wxstringtokenizerwxstringtokenizer}
-for the description of the other parameters.
+A macro defined as:
+
+\begin{verbatim}
+#define wxStringEq(s1, s2) (s1 && s2 && (strcmp(s1, s2) == 0))
+\end{verbatim}
 
 
 \membersection{::wxStrlen}\label{wxstrlen}
@@ -1862,9 +1829,7 @@ If path is empty, the current directory will be used. If filename is empty,
 no default filename will be supplied. The wildcard determines what files
 are displayed in the file selector, and file extension supplies a type
 extension for the required filename. Flags may be a combination of wxOPEN,
-wxSAVE, wxOVERWRITE\_PROMPT or wxFILE\_MUST\_EXIST. Note that wxMULTIPLE
-can only be used with \helpref{wxFileDialog}{wxfiledialog} and not here as this
-function only returns a single file name.
+wxSAVE, wxOVERWRITE\_PROMPT, wxFILE\_MUST\_EXIST, wxMULTIPLE or 0.
 
 Both the Unix and Windows versions implement a wildcard filter. Typing a
 filename containing wildcards (*, ?) in the filename text item, and
@@ -1912,7 +1877,7 @@ See also \helpref{wxIsBusy}{wxisbusy}, \helpref{wxBusyCursor}{wxbusycursor}.
 
 \membersection{::wxGetColourFromUser}\label{wxgetcolourfromuser}
 
-\func{wxColour}{wxGetColourFromUser}{\param{wxWindow *}{parent}, \param{const wxColour\& }{colInit}, \param{const wxString\& }{caption = wxEmptyString}}
+\func{wxColour}{wxGetColourFromUser}{\param{wxWindow *}{parent}, \param{const wxColour\& }{colInit}}
 
 Shows the colour selection dialog and returns the colour selected by user or
 invalid colour (use \helpref{wxColour::Ok}{wxcolourok} to test whether a colour
@@ -1924,8 +1889,6 @@ is valid) if the dialog was cancelled.
 
 \docparam{colInit}{If given, this will be the colour initially selected in the dialog.}
 
-\docparam{caption}{If given, this will be used for the dialog caption.}
-
 \wxheading{Include files}
 
 <wx/colordlg.h>
@@ -1933,7 +1896,7 @@ is valid) if the dialog was cancelled.
 
 \membersection{::wxGetFontFromUser}\label{wxgetfontfromuser}
 
-\func{wxFont}{wxGetFontFromUser}{\param{wxWindow *}{parent}, \param{const wxFont\& }{fontInit}, \param{const wxString\& }{caption = wxEmptyString}}
+\func{wxFont}{wxGetFontFromUser}{\param{wxWindow *}{parent}, \param{const wxFont\& }{fontInit}}
 
 Shows the font selection dialog and returns the font selected by user or
 invalid font (use \helpref{wxFont::Ok}{wxfontok} to test whether a font
@@ -1944,8 +1907,6 @@ is valid) if the dialog was cancelled.
 \docparam{parent}{The parent window for the font selection dialog}
 
 \docparam{fontInit}{If given, this will be the font initially selected in the dialog.}
-
-\docparam{caption}{If given, this will be used for the dialog caption.}
 
 \wxheading{Include files}
 
@@ -2829,7 +2790,7 @@ details.
 \func{}{wxON\_BLOCK\_EXIT\_OBJ1}{\param{}{obj}, \param{}{method}, \param{}{p1}}
 \func{}{wxON\_BLOCK\_EXIT\_OBJ2}{\param{}{obj}, \param{}{method}, \param{}{p1}, \param{}{p2}}
 
-This family of macros is similar to \helpref{wxON\_BLOCK\_EXIT}{wxonblockexit}
+This family of macros is similar to \helpref{wxON\_BLOCK\_EXIT}{wxonblockexit} 
 but calls a method of the given object instead of a free function.
 
 \wxheading{Include files}
@@ -2959,8 +2920,7 @@ and current pointer position in screen coordinates.
 
 \func{wxWindow *}{wxGetActiveWindow}{\void}
 
-Gets the currently active window (implemented for MSW and GTK only currently,
-always returns \NULL in the other ports).
+Gets the currently active window (Windows only).
 
 \wxheading{Include files}
 
@@ -3058,7 +3018,7 @@ public:
     void        SetLeftDown(bool down);
     void        SetMiddleDown(bool down);
     void        SetRightDown(bool down);
-
+    
     void        SetControlDown(bool down);
     void        SetShiftDown(bool down);
     void        SetAltDown(bool down);
@@ -3104,7 +3064,7 @@ See also \helpref{wxWriteResource}{wxwriteresource}, \helpref{wxConfigBase}{wxco
 
 \membersection{::wxGetStockLabel}\label{wxgetstocklabel}
 
-\func{wxString}{wxGetStockLabel}{\param{wxWindowID }{id}, \param{bool }{withCodes = true}, \param{const wxString\& }{accelerator = wxEmptyString}}
+\func{wxString}{wxGetStockLabel}{\param{wxWindowID }{id}, \param{bool }{withCodes = true}, \param{wxString }{accelerator = wxEmptyString}}
 
 Returns label that should be used for given {\it id} element.
 
@@ -3138,18 +3098,15 @@ frame or dialog containing it, or {\tt NULL}.
 
 \membersection{::wxLaunchDefaultBrowser}\label{wxlaunchdefaultbrowser}
 
-\func{bool}{wxLaunchDefaultBrowser}{\param{const wxString\& }{url}, \param{int }{flags = $0$}}
+\func{bool}{wxLaunchDefaultBrowser}{\param{const wxString\& }{sUrl}}
 
-Open the \arg{url} in user's default browser. If \arg{flags} parameter contains
-\texttt{wxBROWSER\_NEW\_WINDOW} flag, a new window is opened for the URL
-(currently this is only supported under Windows).
+Launches the user's default browser and tells it to open the location at {\tt sUrl}.
 
-Returns \true if the application was successfully launched.
+Returns true if the application was successfully launched.
 
 \wxheading{Include files}
 
 <wx/utils.h>
-
 
 \membersection{::wxLoadUserResource}\label{wxloaduserresource}
 
@@ -3240,36 +3197,6 @@ as a keyboard shortkey in Windows and Motif) and $\backslash$t (tab in Windows).
 <wx/utils.h>
 
 
-\membersection{wxSUPPRESS\_GCC\_PRIVATE\_DTOR\_WARNING}\label{wxsuppressgccprivatedtorwarning}
-
-\func{}{wxSUPPRESS\_GCC\_PRIVATE\_DTOR\_WARNING}{\param{}{name}}
-
-GNU C++ compiler gives a warning for any class whose destructor is private
-unless it has a friend. This warning may sometimes be useful but it doesn't
-make sense for reference counted class which always delete themselves (hence
-destructor should be private) but don't necessarily have any friends, so this
-macro is provided to disable the warning in such case. The \arg{name} parameter
-should be the name of the class but is only used to construct a unique friend
-class name internally. Example of using the macro:
-
-\begin{verbatim}
-    class RefCounted
-    {
-    public:
-        RefCounted() { m_nRef = 1; }
-        void IncRef() { m_nRef++ ; }
-        void DecRef() { if ( !--m_nRef ) delete this; }
-
-    private:
-        ~RefCounted() { }
-
-        wxSUPPRESS_GCC_PRIVATE_DTOR(RefCounted)
-    };
-\end{verbatim}
-
-Notice that there should be no semicolon after this macro.
-
-
 \membersection{wxULL}\label{wxull}
 
 \func{wxLongLong\_t}{wxULL}{\param{}{number}}
@@ -3335,15 +3262,6 @@ See also \helpref{wxGetResource}{wxgetresource}, \helpref{wxConfigBase}{wxconfig
 \wxheading{Include files}
 
 <wx/utils.h>
-
-
-\membersection{\_\_WXFUNCTION\_\_}\label{wxfunction}
-
-\func{}{\_\_WXFUNCTION\_\_}{\void}
-
-This macro expands to the name of the current function if the compiler supports
-any of \texttt{\_\_FUNCTION\_\_}, \texttt{\_\_func\_\_} or equivalent variables
-or macros or to \NULL if none of them is available.
 
 
 
@@ -3505,7 +3423,7 @@ dynamically. The same as DECLARE\_ABSTRACT\_CLASS.
 Used inside a class declaration to make the class known to wxWidgets RTTI
 system and also declare that the objects of this class should be dynamically
 creatable from run-time type information. Notice that this implies that the
-class should have a default constructor, if this is not the case consider using
+class should have a default constructor, if this is not the case consider using 
 \helpref{DECLARE\_CLASS}{declareclass}.
 
 Example:
@@ -4327,7 +4245,7 @@ compilation error messages if the condition they check fail.
 
 \membersection{::wxOnAssert}\label{wxonassert}
 
-\func{void}{wxOnAssert}{\param{const char *}{fileName}, \param{int}{ lineNumber}, \param{const char *}{func}, \param{const char *}{cond}, \param{const char *}{msg = NULL}}
+\func{void}{wxOnAssert}{\param{const char *}{fileName}, \param{int}{ lineNumber}, \param{const char *}{cond}, \param{const char *}{msg = NULL}}
 
 This function is called whenever one of debugging macros fails (i.e. condition
 is false in an assertion). It is only defined in the debug mode, in release
@@ -4336,7 +4254,7 @@ builds the \helpref{wxCHECK}{wxcheck} failures don't result in anything.
 To override the default behaviour in the debug builds which is to show the user
 a dialog asking whether he wants to abort the program, continue or continue
 ignoring any subsequent assert failures, you may override
-\helpref{wxApp::OnAssertFailure}{wxapponassertfailure} which is called by this function if
+\helpref{wxApp::OnAssert}{wxapponassert} which is called by this function if
 the global application object exists.
 
 
@@ -4585,3 +4503,4 @@ Removes the variable {\it var} from the environment.
 function.
 
 Returns \true on success.
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/scrolbar.cpp
+// Name:        msw/scrolbar.cpp
 // Purpose:     wxScrollBar
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "scrolbar.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -146,11 +150,13 @@ bool wxScrollBar::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
     }
 #endif
 
+#if defined(__WIN95__)
     // A page size greater than one has the effect of reducing the effective
     // range, therefore the range has already been boosted artificially - so
     // reduce it again.
     if ( m_pageSize > 1 )
         maxPos -= (m_pageSize - 1);
+#endif // __WIN95__
 
     wxEventType scrollEvent = wxEVT_NULL;
 
@@ -235,6 +241,7 @@ bool wxScrollBar::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
 
 void wxScrollBar::SetThumbPosition(int viewStart)
 {
+#if defined(__WIN95__)
     SCROLLINFO info;
     info.cbSize = sizeof(SCROLLINFO);
     info.nPage = 0;
@@ -243,6 +250,9 @@ void wxScrollBar::SetThumbPosition(int viewStart)
     info.fMask = SIF_POS ;
 
     ::SetScrollInfo((HWND) GetHWND(), SB_CTL, &info, TRUE);
+#else
+    ::SetScrollPos((HWND) GetHWND(), SB_CTL, viewStart, TRUE);
+#endif
 }
 
 int wxScrollBar::GetThumbPosition(void) const
@@ -263,31 +273,36 @@ int wxScrollBar::GetThumbPosition(void) const
 void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageSize,
     bool refresh)
 {
-    m_viewSize = pageSize;
-    m_pageSize = thumbSize;
-    m_objectSize = range;
+  m_viewSize = pageSize;
+  m_pageSize = thumbSize;
+  m_objectSize = range;
 
-    // The range (number of scroll steps) is the
-    // object length minus the page size.
-    int range1 = wxMax((m_objectSize - m_pageSize), 0) ;
+  // The range (number of scroll steps) is the
+  // object length minus the page size.
+  int range1 = wxMax((m_objectSize - m_pageSize), 0) ;
 
-    // Try to adjust the range to cope with page size > 1
-    // (see comment for SetPageLength)
-    if ( m_pageSize > 1 )
-    {
-        range1 += (m_pageSize - 1);
-    }
+#if defined(__WIN95__)
+  // Try to adjust the range to cope with page size > 1
+  // (see comment for SetPageLength)
+  if ( m_pageSize > 1 )
+  {
+    range1 += (m_pageSize - 1);
+  }
 
-    SCROLLINFO info;
-    info.cbSize = sizeof(SCROLLINFO);
-    info.nPage = m_pageSize;
-    info.nMin = 0;
-    info.nMax = range1;
-    info.nPos = position;
+  SCROLLINFO info;
+  info.cbSize = sizeof(SCROLLINFO);
+  info.nPage = m_pageSize;
+  info.nMin = 0;
+  info.nMax = range1;
+  info.nPos = position;
 
-    info.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
+  info.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
 
-    ::SetScrollInfo((HWND) GetHWND(), SB_CTL, &info, refresh);
+  ::SetScrollInfo((HWND) GetHWND(), SB_CTL, &info, refresh);
+#else
+  ::SetScrollPos((HWND)m_hWnd, SB_CTL, position, refresh);
+  ::SetScrollRange((HWND)m_hWnd, SB_CTL, 0, range1, refresh);
+#endif
 }
 
 void wxScrollBar::Command(wxCommandEvent& event)

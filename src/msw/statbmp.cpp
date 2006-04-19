@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbmp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -196,34 +200,6 @@ bool wxStaticBitmap::ImageIsOk() const
     return m_image && m_image->Ok();
 }
 
-wxIcon wxStaticBitmap::GetIcon() const
-{
-    wxCHECK_MSG( m_image, wxIcon(), _T("no image in wxStaticBitmap") );
-
-    // we can't ask for an icon if all we have is a bitmap
-    wxCHECK_MSG( m_isIcon, wxIcon(), _T("no icon in this wxStaticBitmap") );
-
-    return *(wxIcon *)m_image;
-}
-
-wxBitmap wxStaticBitmap::GetBitmap() const
-{
-    if ( m_isIcon )
-    {
-        // don't fail because we might have replaced the bitmap with icon
-        // ourselves internally in ConvertImage() to keep the transparency but
-        // the user code doesn't know about it so it still can use GetBitmap()
-        // to retrieve the bitmap
-        return wxBitmap(GetIcon());
-    }
-    else // we have a bitmap
-    {
-        wxCHECK_MSG( m_image, wxBitmap(), _T("no image in wxStaticBitmap") );
-
-        return *(wxBitmap *)m_image;
-    }
-}
-
 void wxStaticBitmap::Free()
 {
     delete m_image;
@@ -269,16 +245,8 @@ void wxStaticBitmap::SetImageNoCopy( wxGDIImage* image)
     LONG style = ::GetWindowLong( (HWND)GetHWND(), GWL_STYLE ) ;
     ::SetWindowLong( (HWND)GetHWND(), GWL_STYLE, ( style & ~( SS_BITMAP|SS_ICON ) ) |
                      ( m_isIcon ? SS_ICON : SS_BITMAP ) );
-    HGDIOBJ oldHandle = (HGDIOBJ)::SendMessage(GetHwnd(), STM_SETIMAGE,
+    ::SendMessage(GetHwnd(), STM_SETIMAGE,
                   m_isIcon ? IMAGE_ICON : IMAGE_BITMAP, (LPARAM)handle);
-    // detect if this is still the handle we passed before or
-    // if the static-control made a copy of the bitmap!
-    if (m_currentHandle != 0 && oldHandle != (HGDIOBJ) m_currentHandle)
-    {
-        // the static control made a copy and we are responsible for deleting it
-        DeleteObject((HGDIOBJ) oldHandle);      
-    }
-    m_currentHandle = (WXHANDLE)handle;                  	
 #endif // Win32
 
     if ( ImageIsOk() )

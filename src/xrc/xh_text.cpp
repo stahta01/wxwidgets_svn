@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_text.cpp
+// Name:        xh_text.cpp
 // Purpose:     XRC resource for wxTextCtrl
 // Author:      Aleksandras Gluchovas
 // Created:     2000/03/21
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2000 Aleksandras Gluchovas
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_text.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -40,10 +44,7 @@ wxTextCtrlXmlHandler::wxTextCtrlXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxTE_CENTRE);
     XRC_ADD_STYLE(wxTE_RIGHT);
     XRC_ADD_STYLE(wxTE_DONTWRAP);
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTE_LINEWRAP);
-#endif // WXWIN_COMPATIBILITY_2_6
-    XRC_ADD_STYLE(wxTE_CHARWRAP);
     XRC_ADD_STYLE(wxTE_WORDWRAP);
     AddWindowStyles();
 }

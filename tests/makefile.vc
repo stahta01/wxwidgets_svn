@@ -12,7 +12,7 @@
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = \
 	vc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)$(DIR_SUFFIX_CPU)
 LIBDIRNAME = .\..\lib\vc$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
@@ -42,14 +42,12 @@ TEST_OBJECTS =  \
 	$(OBJS)\test_hashes.obj \
 	$(OBJS)\test_lists.obj \
 	$(OBJS)\test_longlongtest.obj \
-	$(OBJS)\test_convautotest.obj \
 	$(OBJS)\test_mbconvtest.obj \
 	$(OBJS)\test_regextest.obj \
 	$(OBJS)\test_wxregextest.obj \
 	$(OBJS)\test_scopeguardtest.obj \
 	$(OBJS)\test_strings.obj \
 	$(OBJS)\test_stdstrings.obj \
-	$(OBJS)\test_tokenizer.obj \
 	$(OBJS)\test_unicode.obj \
 	$(OBJS)\test_crt.obj \
 	$(OBJS)\test_bstream.obj \
@@ -62,7 +60,6 @@ TEST_OBJECTS =  \
 	$(OBJS)\test_tempfile.obj \
 	$(OBJS)\test_textstreamtest.obj \
 	$(OBJS)\test_zlibstream.obj \
-	$(OBJS)\test_textfiletest.obj \
 	$(OBJS)\test_uris.obj
 TEST_GUI_CXXFLAGS = /M$(__RUNTIME_LIBS_23)$(__DEBUGRUNTIME) /DWIN32 \
 	$(__DEBUGINFO) /Fd$(OBJS)\test_gui.pdb $(____DEBUGRUNTIME) \
@@ -414,9 +411,6 @@ $(OBJS)\test_lists.obj: .\lists\lists.cpp
 $(OBJS)\test_longlongtest.obj: .\longlong\longlongtest.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
-$(OBJS)\test_convautotest.obj: .\mbconv\convautotest.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
-
 $(OBJS)\test_mbconvtest.obj: .\mbconv\mbconvtest.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
@@ -433,9 +427,6 @@ $(OBJS)\test_strings.obj: .\strings\strings.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_stdstrings.obj: .\strings\stdstrings.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_tokenizer.obj: .\strings\tokenizer.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_unicode.obj: .\strings\unicode.cpp
@@ -472,9 +463,6 @@ $(OBJS)\test_textstreamtest.obj: .\streams\textstreamtest.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_zlibstream.obj: .\streams\zlibstream.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_textfiletest.obj: .\textfile\textfiletest.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_uris.obj: .\uris\uris.cpp

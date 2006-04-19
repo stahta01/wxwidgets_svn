@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/toplvcmn.cpp
+// Name:        common/toplvcmn.cpp
 // Purpose:     common (for all platforms) wxTopLevelWindow functions
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevelbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -28,8 +32,6 @@
     #include "wx/dcclient.h"
     #include "wx/app.h"
 #endif // WX_PRECOMP
-
-#include "wx/display.h"
 
 // ----------------------------------------------------------------------------
 // event table
@@ -62,11 +64,13 @@ wxTopLevelWindowBase::~wxTopLevelWindowBase()
     if ( wxTheApp && wxTheApp->GetTopWindow() == this )
         wxTheApp->SetTopWindow(NULL);
 
+    bool shouldExit = IsLastBeforeExit();
+
     wxTopLevelWindows.DeleteObject(this);
 
-    if ( IsLastBeforeExit() )
+    if ( shouldExit )
     {
-        // no other (important) windows left, quit the app
+        // then do it
         wxTheApp->ExitMainLoop();
     }
 }
@@ -94,43 +98,11 @@ bool wxTopLevelWindowBase::Destroy()
 
 bool wxTopLevelWindowBase::IsLastBeforeExit() const
 {
-    // first of all, automatically exiting the app on last window close can be
-    // completely disabled at wxTheApp level
-    if ( !wxTheApp || !wxTheApp->GetExitOnFrameDelete() )
-        return false;
-
-    wxWindowList::const_iterator i;
-    const wxWindowList::const_iterator end = wxTopLevelWindows.end();
-
-    // then decide whether we should exit at all
-    for ( i = wxTopLevelWindows.begin(); i != end; ++i )
-    {
-        wxTopLevelWindow * const win = wx_static_cast(wxTopLevelWindow *, *i);
-        if ( win->ShouldPreventAppExit() )
-        {
-            // there remains at least one important TLW, don't exit
-            return false;
-        }
-    }
-
-    // if yes, close all the other windows: this could still fail
-    for ( i = wxTopLevelWindows.begin(); i != end; ++i )
-    {
-        // don't close twice the windows which are already marked for deletion
-        wxTopLevelWindow * const win = wx_static_cast(wxTopLevelWindow *, *i);
-        if ( !wxPendingDelete.Member(win) && !win->Close() )
-        {
-            // one of the windows refused to close, don't exit
-            //
-            // NB: of course, by now some other windows could have been already
-            //     closed but there is really nothing we can do about it as we
-            //     have no way just to ask the window if it can close without
-            //     forcing it to do it
-            return false;
-        }
-    }
-
-    return true;
+    // we exit the application if there are no more top level windows left
+    // normally but wxApp can prevent this from happening
+    return wxTopLevelWindows.GetCount() == 1 &&
+            wxTopLevelWindows.GetFirst()->GetData() == (wxWindow *)this &&
+            wxTheApp && wxTheApp->GetExitOnFrameDelete();
 }
 
 // ----------------------------------------------------------------------------
@@ -181,78 +153,6 @@ wxSize wxTopLevelWindowBase::GetDefaultSize()
     }
 
     return size;
-}
-
-void wxTopLevelWindowBase::DoCentre(int dir)
-{
-    // we need the display rect anyhow so store it first
-    int nDisplay = wxDisplay::GetFromWindow(this);
-    wxDisplay dpy(nDisplay == wxNOT_FOUND ? 0 : nDisplay);
-    const wxRect rectDisplay(dpy.GetClientArea());
-
-    // what should we centre this window on?
-    wxRect rectParent;
-    if ( !(dir & wxCENTRE_ON_SCREEN) && GetParent() )
-    {
-        // centre on parent window: notice that we need screen coordinates for
-        // positioning this TLW
-        rectParent = GetParent()->GetScreenRect();
-
-        // if the parent is entirely off screen (happens at least with MDI
-        // parent frame under Mac but could happen elsewhere too if the frame
-        // was hidden/moved away for some reason), don't use it as otherwise
-        // this window wouldn't be visible at all
-        if ( !rectDisplay.Inside(rectParent.GetTopLeft()) &&
-                !rectParent.Inside(rectParent.GetBottomRight()) )
-        {
-            // this is enough to make IsEmpty() test below pass
-            rectParent.width = 0;
-        }
-    }
-
-    if ( rectParent.IsEmpty() )
-    {
-        // we were explicitely asked to centre this window on the entire screen
-        // or if we have no parent anyhow and so can't centre on it
-        rectParent = rectDisplay;
-    }
-
-    // centering maximized window on screen is no-op
-    if((rectParent == rectDisplay) && IsMaximized())
-        return;
-
-    // the new window rect candidate
-    wxRect rect = GetRect().CentreIn(rectParent, dir);
-
-    // we don't want to place the window off screen if Centre() is called as
-    // this is (almost?) never wanted and it would be very difficult to prevent
-    // it from happening from the user code if we didn't check for it here
-    if ( rectDisplay.Inside(rect.GetTopLeft()) )
-    {
-        if ( !rectDisplay.Inside(rect.GetBottomRight()) )
-        {
-            // check if we can move the window so that the bottom right corner
-            // is visible without hiding the top left one
-            int dx = rectDisplay.GetRight() - rect.GetRight();
-            int dy = rectDisplay.GetBottom() - rect.GetBottom();
-            rect.Offset(dx, dy);
-        }
-        //else: the window top left and bottom right corner are both visible,
-        //      although the window might still be not entirely on screen (with
-        //      2 staggered displays for example) we wouldn't be able to
-        //      improve the layout much in such case, so just leave it as is
-    }
-    else // make top left corner visible
-    {
-        if ( rect.x < rectDisplay.x )
-            rect.x = rectDisplay.x;
-
-        if ( rect.y < rectDisplay.y )
-            rect.y = rectDisplay.y;
-    }
-
-    // -1 could be valid coordinate here if there are several displays
-    SetSize(rect, wxSIZE_ALLOW_MINUS_ONE);
 }
 
 // ----------------------------------------------------------------------------
@@ -361,12 +261,9 @@ bool wxTopLevelWindowBase::SendIconizeEvent(bool iconized)
 // do the window-specific processing after processing the update event
 void wxTopLevelWindowBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
 {
-    // call inherited, but skip the wxControl's version, and call directly the
-    // wxWindow's one instead, because the only reason why we are overriding this
-    // function is that we want to use SetTitle() instead of wxControl::SetLabel()
-    wxWindowBase::DoUpdateWindowUI(event);
+    if ( event.GetSetEnabled() )
+        Enable(event.GetEnabled());
 
-    // update title
     if ( event.GetSetText() )
     {
         if ( event.GetText() != GetTitle() )
@@ -379,3 +276,4 @@ void wxTopLevelWindowBase::RequestUserAttention(int WXUNUSED(flags))
     // it's probably better than do nothing, isn't it?
     Raise();
 }
+

@@ -14,7 +14,7 @@
 
 #include "wx/dialog.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxFileSelectorPromptStr[];
+WXDLLEXPORT_DATA(extern const char*) wxFileSelectorPromptStr;
 
 class WXDLLEXPORT wxDirDialog: public wxDialog
 {

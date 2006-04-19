@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/textctrl.h
+// Name:        textctrl.h
 // Purpose:     wxTextCtrlBase class - the interface of wxTextCtrl
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -15,6 +15,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrlbase.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -62,7 +66,7 @@ typedef long wxTextCoord;
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxTextCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxTextCtrlNameStr;
 
 // this is intentionally not enum to avoid warning fixes with
 // typecasting from enum type to wxTextCoord
@@ -116,10 +120,8 @@ const wxTextCoord wxInvalidTextCoord    = -2;
 #define wxTE_WORDWRAP       0x0001  // wrap only at words boundaries
 #define wxTE_BESTWRAP       0x0000  // this is the default
 
-#if WXWIN_COMPATIBILITY_2_6
-    // obsolete synonym
-    #define wxTE_LINEWRAP       wxTE_CHARWRAP
-#endif // WXWIN_COMPATIBILITY_2_6
+// obsolete synonym
+#define wxTE_LINEWRAP       wxTE_CHARWRAP
 
 // force using RichEdit version 2.0 or 3.0 instead of 1.0 (default) for
 // wxTE_RICH controls - can be used together with or instead of wxTE_RICH
@@ -380,6 +382,11 @@ public:
     virtual void SelectAll();
     virtual void SetEditable(bool editable) = 0;
 
+    // override streambuf method
+#if wxHAS_TEXT_WINDOW_STREAM
+    int overflow(int i);
+#endif // wxHAS_TEXT_WINDOW_STREAM
+
     // stream-like insertion operators: these are always available, whether we
     // were, or not, compiled with streambuf support
     wxTextCtrl& operator<<(const wxString& s);
@@ -395,11 +402,6 @@ public:
     virtual bool ShouldInheritColours() const { return false; }
 
 protected:
-    // override streambuf method
-#if wxHAS_TEXT_WINDOW_STREAM
-    int overflow(int i);
-#endif // wxHAS_TEXT_WINDOW_STREAM
-
     // the name of the last file loaded with LoadFile() which will be used by
     // SaveFile() by default
     wxString m_filename;
@@ -424,10 +426,8 @@ protected:
     #include "wx/msw/textctrl.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/textctrl.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/textctrl.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/textctrl.h"
+    #include "wx/gtk/textctrl.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/textctrl.h"
 #elif defined(__WXCOCOA__)

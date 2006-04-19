@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "notebook.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -34,15 +38,15 @@
 // event table
 // ----------------------------------------------------------------------------
 
-#include "wx/listimpl.cpp"
+#include <wx/listimpl.cpp>
 
-WX_DEFINE_LIST( wxNotebookPageInfoList )
+WX_DEFINE_LIST( wxNotebookPageInfoList ) ;
 
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
 
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
+    EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
 
     EVT_SIZE(wxNotebook::OnSize)
 
@@ -81,9 +85,9 @@ wxBEGIN_FLAGS( wxNotebookStyle )
     wxFLAGS_MEMBER(wxHSCROLL)
 
     wxFLAGS_MEMBER(wxNB_FIXEDWIDTH)
-    wxFLAGS_MEMBER(wxBK_LEFT)
-    wxFLAGS_MEMBER(wxBK_RIGHT)
-    wxFLAGS_MEMBER(wxBK_BOTTOM)
+    wxFLAGS_MEMBER(wxNB_LEFT)
+    wxFLAGS_MEMBER(wxNB_RIGHT)
+    wxFLAGS_MEMBER(wxNB_BOTTOM)
 
 wxEND_FLAGS( wxNotebookStyle )
 

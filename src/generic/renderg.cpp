@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/renderg.cpp
+// Name:        generic/renderg.cpp
 // Purpose:     generic implementation of wxRendererNative (for any platform)
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -78,11 +78,6 @@ public:
                                const wxRect& rect,
                                int flags = 0);
 
-    virtual void DrawCheckButton(wxWindow *win,
-                                 wxDC& dc,
-                                 const wxRect& rect,
-                                 int flags = 0);
-                                 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
     virtual wxRendererVersion GetVersion() const
@@ -400,22 +395,6 @@ wxRendererGeneric::DrawDropArrow(wxWindow *win,
     dc.DrawPolygon(WXSIZEOF(pt), pt, rect.x, rect.y);
 }
 
-void 
-wxRendererGeneric::DrawCheckButton(wxWindow *WXUNUSED(win),
-                                   wxDC& dc,
-                                   const wxRect& rect,
-                                   int flags)
-{
-    dc.SetPen(*(flags & wxCONTROL_DISABLED ? wxGREY_PEN : wxBLACK_PEN));
-    dc.SetBrush( *wxTRANSPARENT_BRUSH );
-    dc.DrawRectangle(rect);
-
-    if ( flags & wxCONTROL_CHECKED )
-    {
-        dc.DrawCheckMark(rect.Deflate(2, 2));
-    }
-}
-
 // ----------------------------------------------------------------------------
 // A module to allow cleanup of generic renderer.
 // ----------------------------------------------------------------------------
@@ -430,3 +409,4 @@ public:
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxGenericRendererModule, wxModule)
+

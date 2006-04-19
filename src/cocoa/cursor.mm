@@ -9,6 +9,10 @@
 // Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "cursor.h"
+#endif
+
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
     #include "wx/icon.h"
@@ -424,7 +428,7 @@ void wxSetCursor(const wxCursor& cursor)
 static int wxBusyCursorCount = 0;
 
 // Set the cursor to the busy cursor for all windows
-void wxBeginBusyCursor(const wxCursor *cursor)
+void wxBeginBusyCursor(wxCursor *cursor)
 {
   wxBusyCursorCount ++;
   if (wxBusyCursorCount == 1)

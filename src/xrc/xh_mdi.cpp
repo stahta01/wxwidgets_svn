@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_mdi.cpp
+// Name:        xh_mdi.cpp
 // Purpose:     XRC resource for dialogs
 // Author:      David M. Falkinder & Vaclav Slavik
 // Created:     14/02/2005
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2005 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_mdi.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -31,14 +35,10 @@ wxMdiXmlHandler::wxMdiXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxCAPTION);
     XRC_ADD_STYLE(wxDEFAULT_DIALOG_STYLE);
     XRC_ADD_STYLE(wxDEFAULT_FRAME_STYLE);
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTHICK_FRAME);
-#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxSYSTEM_MENU);
     XRC_ADD_STYLE(wxRESIZE_BORDER);
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxRESIZE_BOX);
-#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxCLOSE_BOX);
 
     XRC_ADD_STYLE(wxFRAME_NO_TASKBAR);
@@ -49,9 +49,7 @@ wxMdiXmlHandler::wxMdiXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxMINIMIZE_BOX);
     XRC_ADD_STYLE(wxSTAY_ON_TOP);
 
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxNO_3D);
-#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTAB_TRAVERSAL);
     XRC_ADD_STYLE(wxWS_EX_VALIDATE_RECURSIVELY);
     XRC_ADD_STYLE(wxFRAME_EX_METAL);
@@ -84,10 +82,7 @@ wxWindow *wxMdiXmlHandler::CreateFrame()
         wxMDIParentFrame *mdiParent = wxDynamicCast(m_parent, wxMDIParentFrame);
 
         if ( !mdiParent )
-        {
-            wxLogError(wxT("Parent of wxMDIParentFrame must be wxMDIParentFrame."));
-            return NULL;
-        }
+            wxLogError(wxT("Parent is not of type wxMDIParentFrame."));
 
         XRC_MAKE_INSTANCE(frame, wxMDIChildFrame);
 

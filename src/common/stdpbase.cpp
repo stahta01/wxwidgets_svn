@@ -73,11 +73,6 @@ wxString wxStandardPathsBase::GetUserLocalDataDir() const
     return GetUserDataDir();
 }
 
-wxString wxStandardPathsBase::GetDocumentsDir() const
-{
-    return wxFileName::GetHomeDir();
-}
-
 /* static */
 wxString wxStandardPathsBase::AppendAppName(const wxString& dir)
 {

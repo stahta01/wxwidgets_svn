@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/prntbase.cpp
+// Name:        prntbase.cpp
 // Purpose:     Printing framework base class implementation
 // Author:      Julian Smart
 // Modified by:
@@ -9,29 +9,36 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "prntbase.h"
+  #pragma implementation "printdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/dc.h"
-    #include "wx/app.h"
-    #include "wx/msgdlg.h"
-    #include "wx/layout.h"
-    #include "wx/choice.h"
-    #include "wx/button.h"
-    #include "wx/settings.h"
-    #include "wx/dcmemory.h"
-    #include "wx/stattext.h"
-    #include "wx/intl.h"
-    #include "wx/textdlg.h"
-    #include "wx/sizer.h"
+#include "wx/utils.h"
+#include "wx/dc.h"
+#include "wx/app.h"
+#include "wx/msgdlg.h"
+#include "wx/layout.h"
+#include "wx/choice.h"
+#include "wx/button.h"
+#include "wx/settings.h"
+#include "wx/dcmemory.h"
+#include "wx/stattext.h"
+#include "wx/intl.h"
+#include "wx/textdlg.h"
+#include "wx/sizer.h"
 #endif // !WX_PRECOMP
 
 #include "wx/prntbase.h"
@@ -96,7 +103,7 @@ wxPrinterBase *wxNativePrintFactory::CreatePrinter( wxPrintDialogData *data )
 #else
     return new wxPostScriptPrinter( data );
 #endif
-}
+};
 
 wxPrintPreviewBase *wxNativePrintFactory::CreatePrintPreview( wxPrintout *preview,
     wxPrintout *printout, wxPrintDialogData *data )
@@ -652,9 +659,9 @@ void wxPreviewCanvas::OnChar(wxKeyEvent &event)
 
     switch(event.GetKeyCode())
     {
-        case WXK_PAGEDOWN:
+        case WXK_NEXT:
             controlBar->OnNext(); break;
-        case WXK_PAGEUP:
+        case WXK_PRIOR:
             controlBar->OnPrevious(); break;
         case WXK_HOME:
             controlBar->OnFirst(); break;
@@ -1134,17 +1141,17 @@ bool wxPrintPreviewBase::SetCurrentPage(int pageNum)
 }
 
 int wxPrintPreviewBase::GetCurrentPage() const
-    { return m_currentPage; }
+    { return m_currentPage; };
 void wxPrintPreviewBase::SetPrintout(wxPrintout *printout)
-    { m_previewPrintout = printout; }
+    { m_previewPrintout = printout; };
 wxPrintout *wxPrintPreviewBase::GetPrintout() const
-    { return m_previewPrintout; }
+    { return m_previewPrintout; };
 wxPrintout *wxPrintPreviewBase::GetPrintoutForPrinting() const
-    { return m_printPrintout; }
+    { return m_printPrintout; };
 void wxPrintPreviewBase::SetFrame(wxFrame *frame)
-    { m_previewFrame = frame; }
+    { m_previewFrame = frame; };
 void wxPrintPreviewBase::SetCanvas(wxPreviewCanvas *canvas)
-    { m_previewCanvas = canvas; }
+    { m_previewCanvas = canvas; };
 wxFrame *wxPrintPreviewBase::GetFrame() const
     { return m_previewFrame; }
 wxPreviewCanvas *wxPrintPreviewBase::GetCanvas() const
@@ -1510,5 +1517,6 @@ void wxPrintPreview::DetermineScaling()
 {
     m_pimpl->DetermineScaling();
 }
+
 
 #endif // wxUSE_PRINTING_ARCHITECTURE

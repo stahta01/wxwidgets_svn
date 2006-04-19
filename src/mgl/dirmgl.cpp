@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/dir.cpp
+// Name:        mgl/dir.cpp
 // Purpose:     wxDir implementation for MGL
 // Author:      Vaclav Slavik, Vadim Zeitlin
 // Modified by:
@@ -10,13 +10,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -24,6 +17,19 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#include "wx/defs.h"
 
 #ifndef __UNIX__
 
@@ -270,3 +276,4 @@ bool wxDir::GetNext(wxString *filename) const
 }
 
 #endif // !__UNIX__
+

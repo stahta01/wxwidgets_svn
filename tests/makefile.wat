@@ -210,7 +210,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -239,14 +239,12 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_hashes.obj &
 	$(OBJS)\test_lists.obj &
 	$(OBJS)\test_longlongtest.obj &
-	$(OBJS)\test_convautotest.obj &
 	$(OBJS)\test_mbconvtest.obj &
 	$(OBJS)\test_regextest.obj &
 	$(OBJS)\test_wxregextest.obj &
 	$(OBJS)\test_scopeguardtest.obj &
 	$(OBJS)\test_strings.obj &
 	$(OBJS)\test_stdstrings.obj &
-	$(OBJS)\test_tokenizer.obj &
 	$(OBJS)\test_unicode.obj &
 	$(OBJS)\test_crt.obj &
 	$(OBJS)\test_bstream.obj &
@@ -259,7 +257,6 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_tempfile.obj &
 	$(OBJS)\test_textstreamtest.obj &
 	$(OBJS)\test_zlibstream.obj &
-	$(OBJS)\test_textfiletest.obj &
 	$(OBJS)\test_uris.obj
 TEST_GUI_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
@@ -368,9 +365,6 @@ $(OBJS)\test_lists.obj :  .AUTODEPEND .\lists\lists.cpp
 $(OBJS)\test_longlongtest.obj :  .AUTODEPEND .\longlong\longlongtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_convautotest.obj :  .AUTODEPEND .\mbconv\convautotest.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_mbconvtest.obj :  .AUTODEPEND .\mbconv\mbconvtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
@@ -387,9 +381,6 @@ $(OBJS)\test_strings.obj :  .AUTODEPEND .\strings\strings.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_stdstrings.obj :  .AUTODEPEND .\strings\stdstrings.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_tokenizer.obj :  .AUTODEPEND .\strings\tokenizer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_unicode.obj :  .AUTODEPEND .\strings\unicode.cpp
@@ -426,9 +417,6 @@ $(OBJS)\test_textstreamtest.obj :  .AUTODEPEND .\streams\textstreamtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_zlibstream.obj :  .AUTODEPEND .\streams\zlibstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_textfiletest.obj :  .AUTODEPEND .\textfile\textfiletest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_uris.obj :  .AUTODEPEND .\uris\uris.cpp

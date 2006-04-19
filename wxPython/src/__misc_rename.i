@@ -89,7 +89,6 @@
 %rename(SYS_SWAP_BUTTONS)                   wxSYS_SWAP_BUTTONS;
 %rename(SYS_CAN_DRAW_FRAME_DECORATIONS)     wxSYS_CAN_DRAW_FRAME_DECORATIONS;
 %rename(SYS_CAN_ICONIZE_FRAME)              wxSYS_CAN_ICONIZE_FRAME;
-%rename(SYS_TABLET_PRESENT)                 wxSYS_TABLET_PRESENT;
 %rename(SYS_SCREEN_NONE)                    wxSYS_SCREEN_NONE;
 %rename(SYS_SCREEN_TINY)                    wxSYS_SCREEN_TINY;
 %rename(SYS_SCREEN_PDA)                     wxSYS_SCREEN_PDA;
@@ -139,6 +138,7 @@
 %rename(GetSingleChoice)                    wxGetSingleChoice;
 %rename(GetSingleChoiceIndex)               wxGetSingleChoiceIndex;
 %rename(MessageBox)                         wxMessageBox;
+%rename(GetNumberFromUser)                  wxGetNumberFromUser;
 %rename(ColourDisplay)                      wxColourDisplay;
 %rename(DisplayDepth)                       wxDisplayDepth;
 %rename(GetDisplayDepth)                    wxGetDisplayDepth;

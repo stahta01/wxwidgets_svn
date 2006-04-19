@@ -27,7 +27,7 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 	-DUNICODE="$(UNICODE)" -DMSLU="$(MSLU)" -DBUILD="$(BUILD)" \
 	-DDEBUG_INFO="$(DEBUG_INFO)" -DDEBUG_FLAG="$(DEBUG_FLAG)" \
 	-DMONOLITHIC="$(MONOLITHIC)" -DUSE_GUI="$(USE_GUI)" \
-	-DUSE_HTML="$(USE_HTML)" -DUSE_MEDIA="$(USE_MEDIA)" -DUSE_XRC="$(USE_XRC)" \
+	-DUSE_HTML="$(USE_HTML)" -DUSE_XRC="$(USE_XRC)" \
 	-DUSE_OPENGL="$(USE_OPENGL)" -DUSE_ODBC="$(USE_ODBC)" -DUSE_QA="$(USE_QA)" \
 	-DUSE_EXCEPTIONS="$(USE_EXCEPTIONS)" -DUSE_RTTI="$(USE_RTTI)" \
 	-DUSE_THREADS="$(USE_THREADS)" -DOFFICIAL_BUILD="$(OFFICIAL_BUILD)" \
@@ -35,8 +35,7 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 	-DWX_LIB_FLAVOUR="$(WX_LIB_FLAVOUR)" -DCFG="$(CFG)" \
 	-DCPPUNIT_CFLAGS="$(CPPUNIT_CFLAGS)" -DCPPUNIT_LIBS="$(CPPUNIT_LIBS)" \
 	-DRUNTIME_LIBS="$(RUNTIME_LIBS)"
-WX_RELEASE_NODOT = 27
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
+WX_RELEASE_NODOT = 26
 OBJS = \
 	bcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = ..\..\lib\bcc_$(LIBTYPE_SUFFIX)$(CFG)
@@ -206,7 +205,6 @@ MONODLL_OBJECTS =  \
 	$(OBJS)\monodll_clntdata.obj \
 	$(OBJS)\monodll_cmdline.obj \
 	$(OBJS)\monodll_config.obj \
-	$(OBJS)\monodll_convauto.obj \
 	$(OBJS)\monodll_datetime.obj \
 	$(OBJS)\monodll_datstrm.obj \
 	$(OBJS)\monodll_dircmn.obj \
@@ -315,7 +313,6 @@ MONOLIB_OBJECTS =  \
 	$(OBJS)\monolib_clntdata.obj \
 	$(OBJS)\monolib_cmdline.obj \
 	$(OBJS)\monolib_config.obj \
-	$(OBJS)\monolib_convauto.obj \
 	$(OBJS)\monolib_datetime.obj \
 	$(OBJS)\monolib_datstrm.obj \
 	$(OBJS)\monolib_dircmn.obj \
@@ -425,7 +422,6 @@ BASEDLL_OBJECTS =  \
 	$(OBJS)\basedll_clntdata.obj \
 	$(OBJS)\basedll_cmdline.obj \
 	$(OBJS)\basedll_config.obj \
-	$(OBJS)\basedll_convauto.obj \
 	$(OBJS)\basedll_datetime.obj \
 	$(OBJS)\basedll_datstrm.obj \
 	$(OBJS)\basedll_dircmn.obj \
@@ -520,7 +516,6 @@ BASELIB_OBJECTS =  \
 	$(OBJS)\baselib_clntdata.obj \
 	$(OBJS)\baselib_cmdline.obj \
 	$(OBJS)\baselib_config.obj \
-	$(OBJS)\baselib_convauto.obj \
 	$(OBJS)\baselib_datetime.obj \
 	$(OBJS)\baselib_datstrm.obj \
 	$(OBJS)\baselib_dircmn.obj \
@@ -703,8 +698,7 @@ MEDIADLL_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
 MEDIADLL_OBJECTS =  \
 	$(OBJS)\mediadll_dummy.obj \
 	$(OBJS)\mediadll_mediactrlcmn.obj \
-	$(OBJS)\mediadll_mediactrl_am.obj \
-	$(OBJS)\mediadll_mediactrl_wmp10.obj \
+	$(OBJS)\mediadll_mediactrl.obj \
 	$(OBJS)\mediadll_activex.obj
 MEDIALIB_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
 	$(__OPTIMIZEFLAG) $(__THREADSFLAG) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
@@ -716,8 +710,7 @@ MEDIALIB_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
 MEDIALIB_OBJECTS =  \
 	$(OBJS)\medialib_dummy.obj \
 	$(OBJS)\medialib_mediactrlcmn.obj \
-	$(OBJS)\medialib_mediactrl_am.obj \
-	$(OBJS)\medialib_mediactrl_wmp10.obj \
+	$(OBJS)\medialib_mediactrl.obj \
 	$(OBJS)\medialib_activex.obj
 ODBCDLL_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
 	$(__OPTIMIZEFLAG) $(__THREADSFLAG) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
@@ -776,9 +769,7 @@ HTMLDLL_OBJECTS =  \
 	$(OBJS)\htmldll_helpbest.obj \
 	$(OBJS)\htmldll_helpctrl.obj \
 	$(OBJS)\htmldll_helpdata.obj \
-	$(OBJS)\htmldll_helpdlg.obj \
 	$(OBJS)\htmldll_helpfrm.obj \
-	$(OBJS)\htmldll_helpwnd.obj \
 	$(OBJS)\htmldll_htmlcell.obj \
 	$(OBJS)\htmldll_htmlfilt.obj \
 	$(OBJS)\htmldll_htmlpars.obj \
@@ -809,9 +800,7 @@ HTMLLIB_OBJECTS =  \
 	$(OBJS)\htmllib_helpbest.obj \
 	$(OBJS)\htmllib_helpctrl.obj \
 	$(OBJS)\htmllib_helpdata.obj \
-	$(OBJS)\htmllib_helpdlg.obj \
 	$(OBJS)\htmllib_helpfrm.obj \
-	$(OBJS)\htmllib_helpwnd.obj \
 	$(OBJS)\htmllib_htmlcell.obj \
 	$(OBJS)\htmllib_htmlfilt.obj \
 	$(OBJS)\htmllib_htmlpars.obj \
@@ -901,7 +890,6 @@ XRCDLL_OBJECTS =  \
 	$(OBJS)\xrcdll_xh_mdi.obj \
 	$(OBJS)\xrcdll_xh_gauge.obj \
 	$(OBJS)\xrcdll_xh_gdctl.obj \
-	$(OBJS)\xrcdll_xh_grid.obj \
 	$(OBJS)\xrcdll_xh_html.obj \
 	$(OBJS)\xrcdll_xh_listb.obj \
 	$(OBJS)\xrcdll_xh_listbk.obj \
@@ -926,7 +914,6 @@ XRCDLL_OBJECTS =  \
 	$(OBJS)\xrcdll_xh_tglbtn.obj \
 	$(OBJS)\xrcdll_xh_toolb.obj \
 	$(OBJS)\xrcdll_xh_tree.obj \
-	$(OBJS)\xrcdll_xh_treebk.obj \
 	$(OBJS)\xrcdll_xh_unkwn.obj \
 	$(OBJS)\xrcdll_xh_wizrd.obj \
 	$(OBJS)\xrcdll_xmlres.obj \
@@ -955,7 +942,6 @@ XRCLIB_OBJECTS =  \
 	$(OBJS)\xrclib_xh_mdi.obj \
 	$(OBJS)\xrclib_xh_gauge.obj \
 	$(OBJS)\xrclib_xh_gdctl.obj \
-	$(OBJS)\xrclib_xh_grid.obj \
 	$(OBJS)\xrclib_xh_html.obj \
 	$(OBJS)\xrclib_xh_listb.obj \
 	$(OBJS)\xrclib_xh_listbk.obj \
@@ -980,7 +966,6 @@ XRCLIB_OBJECTS =  \
 	$(OBJS)\xrclib_xh_tglbtn.obj \
 	$(OBJS)\xrclib_xh_toolb.obj \
 	$(OBJS)\xrclib_xh_tree.obj \
-	$(OBJS)\xrclib_xh_treebk.obj \
 	$(OBJS)\xrclib_xh_unkwn.obj \
 	$(OBJS)\xrclib_xh_wizrd.obj \
 	$(OBJS)\xrclib_xmlres.obj \
@@ -1060,22 +1045,19 @@ EXTRALIBS_FOR_BASE =
 !endif
 !if "$(MONOLITHIC)" == "1" && "$(SHARED)" == "1"
 __monodll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
 !endif
 !if "$(USE_GUI)" == "1"
 ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  \
 	$(____CORE_SRC_FILENAMES_OBJECTS) \
 	$(____ADVANCED_SRC_FILENAMES_OBJECTS) \
 	$(OBJS)\monodll_mediactrlcmn.obj \
-	$(OBJS)\monodll_mediactrl_am.obj \
-	$(OBJS)\monodll_mediactrl_wmp10.obj \
+	$(OBJS)\monodll_mediactrl.obj \
 	$(OBJS)\monodll_activex.obj \
 	$(OBJS)\monodll_helpbest.obj \
 	$(OBJS)\monodll_helpctrl.obj \
 	$(OBJS)\monodll_helpdata.obj \
-	$(OBJS)\monodll_helpdlg.obj \
 	$(OBJS)\monodll_helpfrm.obj \
-	$(OBJS)\monodll_helpwnd.obj \
 	$(OBJS)\monodll_htmlcell.obj \
 	$(OBJS)\monodll_htmlfilt.obj \
 	$(OBJS)\monodll_htmlpars.obj \
@@ -1114,7 +1096,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_xh_mdi.obj \
 	$(OBJS)\monodll_xh_gauge.obj \
 	$(OBJS)\monodll_xh_gdctl.obj \
-	$(OBJS)\monodll_xh_grid.obj \
 	$(OBJS)\monodll_xh_html.obj \
 	$(OBJS)\monodll_xh_listb.obj \
 	$(OBJS)\monodll_xh_listbk.obj \
@@ -1139,7 +1120,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_xh_tglbtn.obj \
 	$(OBJS)\monodll_xh_toolb.obj \
 	$(OBJS)\monodll_xh_tree.obj \
-	$(OBJS)\monodll_xh_treebk.obj \
 	$(OBJS)\monodll_xh_unkwn.obj \
 	$(OBJS)\monodll_xh_wizrd.obj \
 	$(OBJS)\monodll_xmlres.obj \
@@ -1267,7 +1247,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_dpycmn.obj \
 	$(OBJS)\monodll_dseldlg.obj \
 	$(OBJS)\monodll_effects.obj \
-	$(OBJS)\monodll_evtloopcmn.obj \
 	$(OBJS)\monodll_fddlgcmn.obj \
 	$(OBJS)\monodll_fldlgcmn.obj \
 	$(OBJS)\monodll_fontcmn.obj \
@@ -1337,9 +1316,7 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_splitter.obj \
 	$(OBJS)\monodll_textdlgg.obj \
 	$(OBJS)\monodll_tipwin.obj \
-	$(OBJS)\monodll_toolbkg.obj \
 	$(OBJS)\monodll_treectlg.obj \
-	$(OBJS)\monodll_treebkg.obj \
 	$(OBJS)\monodll_vlbox.obj \
 	$(OBJS)\monodll_vscroll.obj
 !endif
@@ -1466,7 +1443,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_dpycmn.obj \
 	$(OBJS)\monodll_dseldlg.obj \
 	$(OBJS)\monodll_effects.obj \
-	$(OBJS)\monodll_evtloopcmn.obj \
 	$(OBJS)\monodll_fddlgcmn.obj \
 	$(OBJS)\monodll_fldlgcmn.obj \
 	$(OBJS)\monodll_fontcmn.obj \
@@ -1536,18 +1512,13 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_splitter.obj \
 	$(OBJS)\monodll_textdlgg.obj \
 	$(OBJS)\monodll_tipwin.obj \
-	$(OBJS)\monodll_toolbkg.obj \
 	$(OBJS)\monodll_treectlg.obj \
-	$(OBJS)\monodll_treebkg.obj \
 	$(OBJS)\monodll_vlbox.obj \
 	$(OBJS)\monodll_vscroll.obj
 !endif
 !if "$(WXUNIV)" == "0"
 ____ADVANCED_SRC_FILENAMES_OBJECTS =  \
-	$(OBJS)\monodll_datavcmn.obj \
-	$(OBJS)\monodll_buttonbar.obj \
 	$(OBJS)\monodll_calctrl.obj \
-	$(OBJS)\monodll_datavgen.obj \
 	$(OBJS)\monodll_datectlg.obj \
 	$(OBJS)\monodll_grid.obj \
 	$(OBJS)\monodll_gridctrl.obj \
@@ -1559,11 +1530,6 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_splash.obj \
 	$(OBJS)\monodll_tipdlg.obj \
 	$(OBJS)\monodll_wizard.obj \
-	$(OBJS)\monodll_richtextctrl.obj \
-	$(OBJS)\monodll_richtextbuffer.obj \
-	$(OBJS)\monodll_richtextstyles.obj \
-	$(OBJS)\monodll_richtextxml.obj \
-	$(OBJS)\monodll_richtexthtml.obj \
 	$(OBJS)\monodll_taskbarcmn.obj \
 	$(OBJS)\monodll_sound.obj \
 	$(OBJS)\monodll_taskbar.obj \
@@ -1572,10 +1538,7 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =  \
 !endif
 !if "$(WXUNIV)" == "1"
 ____ADVANCED_SRC_FILENAMES_OBJECTS =  \
-	$(OBJS)\monodll_datavcmn.obj \
-	$(OBJS)\monodll_buttonbar.obj \
 	$(OBJS)\monodll_calctrl.obj \
-	$(OBJS)\monodll_datavgen.obj \
 	$(OBJS)\monodll_datectlg.obj \
 	$(OBJS)\monodll_grid.obj \
 	$(OBJS)\monodll_gridctrl.obj \
@@ -1587,11 +1550,6 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_splash.obj \
 	$(OBJS)\monodll_tipdlg.obj \
 	$(OBJS)\monodll_wizard.obj \
-	$(OBJS)\monodll_richtextctrl.obj \
-	$(OBJS)\monodll_richtextbuffer.obj \
-	$(OBJS)\monodll_richtextstyles.obj \
-	$(OBJS)\monodll_richtextxml.obj \
-	$(OBJS)\monodll_richtexthtml.obj \
 	$(OBJS)\monodll_taskbarcmn.obj \
 	$(OBJS)\monodll_sound.obj \
 	$(OBJS)\monodll_taskbar.obj \
@@ -1606,15 +1564,12 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  \
 	$(____CORE_SRC_FILENAMES_1_OBJECTS) \
 	$(____ADVANCED_SRC_FILENAMES_1_OBJECTS) \
 	$(OBJS)\monolib_mediactrlcmn.obj \
-	$(OBJS)\monolib_mediactrl_am.obj \
-	$(OBJS)\monolib_mediactrl_wmp10.obj \
+	$(OBJS)\monolib_mediactrl.obj \
 	$(OBJS)\monolib_activex.obj \
 	$(OBJS)\monolib_helpbest.obj \
 	$(OBJS)\monolib_helpctrl.obj \
 	$(OBJS)\monolib_helpdata.obj \
-	$(OBJS)\monolib_helpdlg.obj \
 	$(OBJS)\monolib_helpfrm.obj \
-	$(OBJS)\monolib_helpwnd.obj \
 	$(OBJS)\monolib_htmlcell.obj \
 	$(OBJS)\monolib_htmlfilt.obj \
 	$(OBJS)\monolib_htmlpars.obj \
@@ -1653,7 +1608,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_xh_mdi.obj \
 	$(OBJS)\monolib_xh_gauge.obj \
 	$(OBJS)\monolib_xh_gdctl.obj \
-	$(OBJS)\monolib_xh_grid.obj \
 	$(OBJS)\monolib_xh_html.obj \
 	$(OBJS)\monolib_xh_listb.obj \
 	$(OBJS)\monolib_xh_listbk.obj \
@@ -1678,7 +1632,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_xh_tglbtn.obj \
 	$(OBJS)\monolib_xh_toolb.obj \
 	$(OBJS)\monolib_xh_tree.obj \
-	$(OBJS)\monolib_xh_treebk.obj \
 	$(OBJS)\monolib_xh_unkwn.obj \
 	$(OBJS)\monolib_xh_wizrd.obj \
 	$(OBJS)\monolib_xmlres.obj \
@@ -1806,7 +1759,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_dpycmn.obj \
 	$(OBJS)\monolib_dseldlg.obj \
 	$(OBJS)\monolib_effects.obj \
-	$(OBJS)\monolib_evtloopcmn.obj \
 	$(OBJS)\monolib_fddlgcmn.obj \
 	$(OBJS)\monolib_fldlgcmn.obj \
 	$(OBJS)\monolib_fontcmn.obj \
@@ -1876,9 +1828,7 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_splitter.obj \
 	$(OBJS)\monolib_textdlgg.obj \
 	$(OBJS)\monolib_tipwin.obj \
-	$(OBJS)\monolib_toolbkg.obj \
 	$(OBJS)\monolib_treectlg.obj \
-	$(OBJS)\monolib_treebkg.obj \
 	$(OBJS)\monolib_vlbox.obj \
 	$(OBJS)\monolib_vscroll.obj
 !endif
@@ -2005,7 +1955,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_dpycmn.obj \
 	$(OBJS)\monolib_dseldlg.obj \
 	$(OBJS)\monolib_effects.obj \
-	$(OBJS)\monolib_evtloopcmn.obj \
 	$(OBJS)\monolib_fddlgcmn.obj \
 	$(OBJS)\monolib_fldlgcmn.obj \
 	$(OBJS)\monolib_fontcmn.obj \
@@ -2075,18 +2024,13 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_splitter.obj \
 	$(OBJS)\monolib_textdlgg.obj \
 	$(OBJS)\monolib_tipwin.obj \
-	$(OBJS)\monolib_toolbkg.obj \
 	$(OBJS)\monolib_treectlg.obj \
-	$(OBJS)\monolib_treebkg.obj \
 	$(OBJS)\monolib_vlbox.obj \
 	$(OBJS)\monolib_vscroll.obj
 !endif
 !if "$(WXUNIV)" == "0"
 ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
-	$(OBJS)\monolib_datavcmn.obj \
-	$(OBJS)\monolib_buttonbar.obj \
 	$(OBJS)\monolib_calctrl.obj \
-	$(OBJS)\monolib_datavgen.obj \
 	$(OBJS)\monolib_datectlg.obj \
 	$(OBJS)\monolib_grid.obj \
 	$(OBJS)\monolib_gridctrl.obj \
@@ -2098,11 +2042,6 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_splash.obj \
 	$(OBJS)\monolib_tipdlg.obj \
 	$(OBJS)\monolib_wizard.obj \
-	$(OBJS)\monolib_richtextctrl.obj \
-	$(OBJS)\monolib_richtextbuffer.obj \
-	$(OBJS)\monolib_richtextstyles.obj \
-	$(OBJS)\monolib_richtextxml.obj \
-	$(OBJS)\monolib_richtexthtml.obj \
 	$(OBJS)\monolib_taskbarcmn.obj \
 	$(OBJS)\monolib_sound.obj \
 	$(OBJS)\monolib_taskbar.obj \
@@ -2111,10 +2050,7 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
 !endif
 !if "$(WXUNIV)" == "1"
 ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
-	$(OBJS)\monolib_datavcmn.obj \
-	$(OBJS)\monolib_buttonbar.obj \
 	$(OBJS)\monolib_calctrl.obj \
-	$(OBJS)\monolib_datavgen.obj \
 	$(OBJS)\monolib_datectlg.obj \
 	$(OBJS)\monolib_grid.obj \
 	$(OBJS)\monolib_gridctrl.obj \
@@ -2126,11 +2062,6 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_splash.obj \
 	$(OBJS)\monolib_tipdlg.obj \
 	$(OBJS)\monolib_wizard.obj \
-	$(OBJS)\monolib_richtextctrl.obj \
-	$(OBJS)\monolib_richtextbuffer.obj \
-	$(OBJS)\monolib_richtextstyles.obj \
-	$(OBJS)\monolib_richtextxml.obj \
-	$(OBJS)\monolib_richtexthtml.obj \
 	$(OBJS)\monolib_taskbarcmn.obj \
 	$(OBJS)\monolib_sound.obj \
 	$(OBJS)\monolib_taskbar.obj \
@@ -2138,7 +2069,7 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
 __basedll___depname = \
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0"
 __baselib___depname = \
@@ -2146,7 +2077,7 @@ __baselib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
 __netdll___depname = \
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0"
 __netlib___depname = \
@@ -2154,7 +2085,7 @@ __netlib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
 __coredll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll
 !endif
 !if "$(USE_GUI)" == "1" && "$(WXUNIV)" == "0"
 ____CORE_SRC_FILENAMES_2_OBJECTS =  \
@@ -2278,7 +2209,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_dpycmn.obj \
 	$(OBJS)\coredll_dseldlg.obj \
 	$(OBJS)\coredll_effects.obj \
-	$(OBJS)\coredll_evtloopcmn.obj \
 	$(OBJS)\coredll_fddlgcmn.obj \
 	$(OBJS)\coredll_fldlgcmn.obj \
 	$(OBJS)\coredll_fontcmn.obj \
@@ -2348,9 +2278,7 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_splitter.obj \
 	$(OBJS)\coredll_textdlgg.obj \
 	$(OBJS)\coredll_tipwin.obj \
-	$(OBJS)\coredll_toolbkg.obj \
 	$(OBJS)\coredll_treectlg.obj \
-	$(OBJS)\coredll_treebkg.obj \
 	$(OBJS)\coredll_vlbox.obj \
 	$(OBJS)\coredll_vscroll.obj
 !endif
@@ -2477,7 +2405,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_dpycmn.obj \
 	$(OBJS)\coredll_dseldlg.obj \
 	$(OBJS)\coredll_effects.obj \
-	$(OBJS)\coredll_evtloopcmn.obj \
 	$(OBJS)\coredll_fddlgcmn.obj \
 	$(OBJS)\coredll_fldlgcmn.obj \
 	$(OBJS)\coredll_fontcmn.obj \
@@ -2547,9 +2474,7 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_splitter.obj \
 	$(OBJS)\coredll_textdlgg.obj \
 	$(OBJS)\coredll_tipwin.obj \
-	$(OBJS)\coredll_toolbkg.obj \
 	$(OBJS)\coredll_treectlg.obj \
-	$(OBJS)\coredll_treebkg.obj \
 	$(OBJS)\coredll_vlbox.obj \
 	$(OBJS)\coredll_vscroll.obj
 !endif
@@ -2679,7 +2604,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_dpycmn.obj \
 	$(OBJS)\corelib_dseldlg.obj \
 	$(OBJS)\corelib_effects.obj \
-	$(OBJS)\corelib_evtloopcmn.obj \
 	$(OBJS)\corelib_fddlgcmn.obj \
 	$(OBJS)\corelib_fldlgcmn.obj \
 	$(OBJS)\corelib_fontcmn.obj \
@@ -2749,9 +2673,7 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_splitter.obj \
 	$(OBJS)\corelib_textdlgg.obj \
 	$(OBJS)\corelib_tipwin.obj \
-	$(OBJS)\corelib_toolbkg.obj \
 	$(OBJS)\corelib_treectlg.obj \
-	$(OBJS)\corelib_treebkg.obj \
 	$(OBJS)\corelib_vlbox.obj \
 	$(OBJS)\corelib_vscroll.obj
 !endif
@@ -2878,7 +2800,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_dpycmn.obj \
 	$(OBJS)\corelib_dseldlg.obj \
 	$(OBJS)\corelib_effects.obj \
-	$(OBJS)\corelib_evtloopcmn.obj \
 	$(OBJS)\corelib_fddlgcmn.obj \
 	$(OBJS)\corelib_fldlgcmn.obj \
 	$(OBJS)\corelib_fontcmn.obj \
@@ -2948,22 +2869,17 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_splitter.obj \
 	$(OBJS)\corelib_textdlgg.obj \
 	$(OBJS)\corelib_tipwin.obj \
-	$(OBJS)\corelib_toolbkg.obj \
 	$(OBJS)\corelib_treectlg.obj \
-	$(OBJS)\corelib_treebkg.obj \
 	$(OBJS)\corelib_vlbox.obj \
 	$(OBJS)\corelib_vscroll.obj
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
 __advdll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll
 !endif
 !if "$(WXUNIV)" == "0"
 ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  \
-	$(OBJS)\advdll_datavcmn.obj \
-	$(OBJS)\advdll_buttonbar.obj \
 	$(OBJS)\advdll_calctrl.obj \
-	$(OBJS)\advdll_datavgen.obj \
 	$(OBJS)\advdll_datectlg.obj \
 	$(OBJS)\advdll_grid.obj \
 	$(OBJS)\advdll_gridctrl.obj \
@@ -2975,11 +2891,6 @@ ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\advdll_splash.obj \
 	$(OBJS)\advdll_tipdlg.obj \
 	$(OBJS)\advdll_wizard.obj \
-	$(OBJS)\advdll_richtextctrl.obj \
-	$(OBJS)\advdll_richtextbuffer.obj \
-	$(OBJS)\advdll_richtextstyles.obj \
-	$(OBJS)\advdll_richtextxml.obj \
-	$(OBJS)\advdll_richtexthtml.obj \
 	$(OBJS)\advdll_taskbarcmn.obj \
 	$(OBJS)\advdll_sound.obj \
 	$(OBJS)\advdll_taskbar.obj \
@@ -2988,10 +2899,7 @@ ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  \
 !endif
 !if "$(WXUNIV)" == "1"
 ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  \
-	$(OBJS)\advdll_datavcmn.obj \
-	$(OBJS)\advdll_buttonbar.obj \
 	$(OBJS)\advdll_calctrl.obj \
-	$(OBJS)\advdll_datavgen.obj \
 	$(OBJS)\advdll_datectlg.obj \
 	$(OBJS)\advdll_grid.obj \
 	$(OBJS)\advdll_gridctrl.obj \
@@ -3003,11 +2911,6 @@ ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\advdll_splash.obj \
 	$(OBJS)\advdll_tipdlg.obj \
 	$(OBJS)\advdll_wizard.obj \
-	$(OBJS)\advdll_richtextctrl.obj \
-	$(OBJS)\advdll_richtextbuffer.obj \
-	$(OBJS)\advdll_richtextstyles.obj \
-	$(OBJS)\advdll_richtextxml.obj \
-	$(OBJS)\advdll_richtexthtml.obj \
 	$(OBJS)\advdll_taskbarcmn.obj \
 	$(OBJS)\advdll_sound.obj \
 	$(OBJS)\advdll_taskbar.obj \
@@ -3019,10 +2922,7 @@ __advlib___depname = \
 !endif
 !if "$(WXUNIV)" == "0"
 ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  \
-	$(OBJS)\advlib_datavcmn.obj \
-	$(OBJS)\advlib_buttonbar.obj \
 	$(OBJS)\advlib_calctrl.obj \
-	$(OBJS)\advlib_datavgen.obj \
 	$(OBJS)\advlib_datectlg.obj \
 	$(OBJS)\advlib_grid.obj \
 	$(OBJS)\advlib_gridctrl.obj \
@@ -3034,11 +2934,6 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\advlib_splash.obj \
 	$(OBJS)\advlib_tipdlg.obj \
 	$(OBJS)\advlib_wizard.obj \
-	$(OBJS)\advlib_richtextctrl.obj \
-	$(OBJS)\advlib_richtextbuffer.obj \
-	$(OBJS)\advlib_richtextstyles.obj \
-	$(OBJS)\advlib_richtextxml.obj \
-	$(OBJS)\advlib_richtexthtml.obj \
 	$(OBJS)\advlib_taskbarcmn.obj \
 	$(OBJS)\advlib_sound.obj \
 	$(OBJS)\advlib_taskbar.obj \
@@ -3047,10 +2942,7 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  \
 !endif
 !if "$(WXUNIV)" == "1"
 ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  \
-	$(OBJS)\advlib_datavcmn.obj \
-	$(OBJS)\advlib_buttonbar.obj \
 	$(OBJS)\advlib_calctrl.obj \
-	$(OBJS)\advlib_datavgen.obj \
 	$(OBJS)\advlib_datectlg.obj \
 	$(OBJS)\advlib_grid.obj \
 	$(OBJS)\advlib_gridctrl.obj \
@@ -3062,27 +2954,22 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\advlib_splash.obj \
 	$(OBJS)\advlib_tipdlg.obj \
 	$(OBJS)\advlib_wizard.obj \
-	$(OBJS)\advlib_richtextctrl.obj \
-	$(OBJS)\advlib_richtextbuffer.obj \
-	$(OBJS)\advlib_richtextstyles.obj \
-	$(OBJS)\advlib_richtextxml.obj \
-	$(OBJS)\advlib_richtexthtml.obj \
 	$(OBJS)\advlib_taskbarcmn.obj \
 	$(OBJS)\advlib_sound.obj \
 	$(OBJS)\advlib_taskbar.obj \
 	$(OBJS)\advlib_joystick.obj
 !endif
-!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_MEDIA)" == "1"
+!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
 __mediadll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll
 !endif
-!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1" && "$(USE_MEDIA)" == "1"
+!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1"
 __medialib___depname = \
 	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_ODBC)" == "1"
 __odbcdll___depname = \
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_ODBC)" == "1"
 __odbclib___depname = \
@@ -3090,7 +2977,7 @@ __odbclib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_ODBC)" == "1"
 __dbgriddll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1" && "$(USE_ODBC)" == "1"
 __dbgridlib___depname = \
@@ -3098,7 +2985,7 @@ __dbgridlib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_HTML)" == "1"
 __htmldll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1" && "$(USE_HTML)" == "1"
 __htmllib___depname = \
@@ -3106,7 +2993,7 @@ __htmllib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_QA)" == "1"
 __qadll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1" && "$(USE_QA)" == "1"
 __qalib___depname = \
@@ -3114,7 +3001,7 @@ __qalib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
 __xmldll___depname = \
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0"
 __xmllib___depname = \
@@ -3122,7 +3009,7 @@ __xmllib___depname = \
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_XRC)" == "1"
 __xrcdll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_XRC)" == "1"
 __xrclib___depname = \
@@ -3130,7 +3017,7 @@ __xrclib___depname = \
 !endif
 !if "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_OPENGL)" == "1"
 __gldll___depname = \
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll
 !endif
 !if "$(MONOLITHIC)" == "0"
 __WXLIBGLDEP_CORE_p = \
@@ -3276,108 +3163,108 @@ clean:
 	-if exist $(LIBDIRNAME)\wxjpeg$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxjpeg$(WXDEBUGFLAG).lib
 	-if exist $(LIBDIRNAME)\wxtiff$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxtiff$(WXDEBUGFLAG).lib
 	-if exist $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).tds
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilc
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ild
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilf
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ils
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).tds del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).tds
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilc del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilc
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ild del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ild
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilf del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ilf
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ils del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).ils
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib
 	@echo cd ..\..\samples >$(OBJS)\samples.bat
@@ -3430,7 +3317,7 @@ $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib: $(WXEXPAT_OBJECTS)
 |
 
 !if "$(MONOLITHIC)" == "1" && "$(SHARED)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll: $(OBJS)\monodll_dummy.obj  $(MONODLL_OBJECTS)  $(OBJS)\monodll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll: $(OBJS)\monodll_dummy.obj  $(MONODLL_OBJECTS)  $(OBJS)\monodll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(MONODLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib      import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\monodll_version.res
 |
@@ -3446,7 +3333,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll: $(OBJS)\basedll_dummy.obj  $(BASEDLL_OBJECTS)  $(OBJS)\basedll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG).dll: $(OBJS)\basedll_dummy.obj  $(BASEDLL_OBJECTS)  $(OBJS)\basedll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(BASEDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\basedll_version.res
 |
@@ -3462,7 +3349,7 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll: $(OBJS)\netdll_dummy.obj  $(NETDLL_OBJECTS)  $(OBJS)\netdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG).dll: $(OBJS)\netdll_dummy.obj  $(NETDLL_OBJECTS)  $(OBJS)\netdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(NETDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\netdll_version.res
 |
@@ -3478,7 +3365,7 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll: $(OBJS)\coredll_dummy.obj  $(COREDLL_OBJECTS)  $(OBJS)\coredll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG).dll: $(OBJS)\coredll_dummy.obj  $(COREDLL_OBJECTS)  $(OBJS)\coredll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(COREDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\coredll_version.res
 |
@@ -3494,9 +3381,9 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll: $(OBJS)\advdll_dummy.obj  $(ADVDLL_OBJECTS)  $(OBJS)\advdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__htmldll___depname) $(__xmldll___depname) $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG).dll: $(OBJS)\advdll_dummy.obj  $(ADVDLL_OBJECTS)  $(OBJS)\advdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
-	c0d32.obj $(ADVDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\advdll_version.res
+	c0d32.obj $(ADVDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\advdll_version.res
 |
 	implib -f $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv $@
 !endif
@@ -3509,15 +3396,15 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 |
 !endif
 
-!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_MEDIA)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll: $(OBJS)\mediadll_dummy.obj  $(MEDIADLL_OBJECTS)  $(OBJS)\mediadll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname)
+!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1"
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG).dll: $(OBJS)\mediadll_dummy.obj  $(MEDIADLL_OBJECTS)  $(OBJS)\mediadll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(MEDIADLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\mediadll_version.res
 |
 	implib -f $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media $@
 !endif
 
-!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1" && "$(USE_MEDIA)" == "1"
+!if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "0" && "$(USE_GUI)" == "1"
 $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib: $(OBJS)\medialib_dummy.obj  $(MEDIALIB_OBJECTS)
 	if exist $@ del $@
 	tlib /a /p4096 $@ @&&|
@@ -3526,7 +3413,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_ODBC)" == "1"
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll: $(OBJS)\odbcdll_dummy.obj  $(ODBCDLL_OBJECTS)  $(OBJS)\odbcdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG).dll: $(OBJS)\odbcdll_dummy.obj  $(ODBCDLL_OBJECTS)  $(OBJS)\odbcdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(ODBCDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\odbcdll_version.res
 |
@@ -3542,7 +3429,7 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_ODBC)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll: $(OBJS)\dbgriddll_dummy.obj  $(DBGRIDDLL_OBJECTS)  $(OBJS)\dbgriddll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__advdll___depname) $(__odbcdll___depname) $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG).dll: $(OBJS)\dbgriddll_dummy.obj  $(DBGRIDDLL_OBJECTS)  $(OBJS)\dbgriddll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__advdll___depname) $(__odbcdll___depname) $(__coredll___depname) $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(DBGRIDDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\dbgriddll_version.res
 |
@@ -3558,7 +3445,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_HTML)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll: $(OBJS)\htmldll_dummy.obj  $(HTMLDLL_OBJECTS)  $(OBJS)\htmldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG).dll: $(OBJS)\htmldll_dummy.obj  $(HTMLDLL_OBJECTS)  $(OBJS)\htmldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(HTMLDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\htmldll_version.res
 |
@@ -3574,7 +3461,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_QA)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll: $(OBJS)\qadll_dummy.obj  $(QADLL_OBJECTS)  $(OBJS)\qadll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname) $(__xmldll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG).dll: $(OBJS)\qadll_dummy.obj  $(QADLL_OBJECTS)  $(OBJS)\qadll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__coredll___depname) $(__basedll___depname) $(__xmldll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(QADLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\qadll_version.res
 |
@@ -3590,7 +3477,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1"
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll: $(OBJS)\xmldll_dummy.obj  $(XMLDLL_OBJECTS)  $(OBJS)\xmldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG).dll: $(OBJS)\xmldll_dummy.obj  $(XMLDLL_OBJECTS)  $(OBJS)\xmldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(XMLDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\xmldll_version.res
 |
@@ -3606,7 +3493,7 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !if "$(MONOLITHIC)" == "0" && "$(SHARED)" == "1" && "$(USE_XRC)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll: $(OBJS)\xrcdll_dummy.obj  $(XRCDLL_OBJECTS)  $(OBJS)\xrcdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__htmldll___depname) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG).dll: $(OBJS)\xrcdll_dummy.obj  $(XRCDLL_OBJECTS)  $(OBJS)\xrcdll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__htmldll___depname) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(XRCDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\xrcdll_version.res
 |
@@ -3622,7 +3509,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !if "$(SHARED)" == "1" && "$(USE_GUI)" == "1" && "$(USE_OPENGL)" == "1"
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll: $(OBJS)\gldll_dummy.obj  $(GLDLL_OBJECTS)  $(OBJS)\gldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname) $(__coredll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG).dll: $(OBJS)\gldll_dummy.obj  $(GLDLL_OBJECTS)  $(OBJS)\gldll_version.res $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__basedll___depname) $(__coredll___depname)
 	ilink32 -Tpd -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) @&&|
 	c0d32.obj $(GLDLL_OBJECTS),$@,, $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  $(__WXLIBGLDEP_CORE_p) $(__WXLIBGLDEP_BASE_p) $(__WXLIB_MONO_p)  import32.lib cw32$(__THREADSFLAG_10)$(__RUNTIME_LIBS_4).lib,, $(OBJS)\gldll_version.res
 |
@@ -3666,8 +3553,8 @@ $(SETUPHDIR)\wx\msw\rcdefs.h: $(SETUPHDIR)\wx\msw ..\..\include\wx\msw\genrcdefs
 
 build_cfg_file: $(SETUPHDIR)
 	@echo WXVER_MAJOR=2 >$(BUILD_CFG_FILE)
-	@echo WXVER_MINOR=7 >>$(BUILD_CFG_FILE)
-	@echo WXVER_RELEASE=0 >>$(BUILD_CFG_FILE)
+	@echo WXVER_MINOR=6 >>$(BUILD_CFG_FILE)
+	@echo WXVER_RELEASE=3 >>$(BUILD_CFG_FILE)
 	@echo BUILD=$(BUILD) >>$(BUILD_CFG_FILE)
 	@echo MONOLITHIC=$(MONOLITHIC) >>$(BUILD_CFG_FILE)
 	@echo SHARED=$(SHARED) >>$(BUILD_CFG_FILE)
@@ -3684,7 +3571,6 @@ build_cfg_file: $(SETUPHDIR)
 	@echo USE_THREADS=$(USE_THREADS) >>$(BUILD_CFG_FILE)
 	@echo USE_GUI=$(USE_GUI) >>$(BUILD_CFG_FILE)
 	@echo USE_HTML=$(USE_HTML) >>$(BUILD_CFG_FILE)
-	@echo USE_MEDIA=$(USE_MEDIA) >>$(BUILD_CFG_FILE)
 	@echo USE_ODBC=$(USE_ODBC) >>$(BUILD_CFG_FILE)
 	@echo USE_OPENGL=$(USE_OPENGL) >>$(BUILD_CFG_FILE)
 	@echo USE_QA=$(USE_QA) >>$(BUILD_CFG_FILE)
@@ -4051,7 +3937,7 @@ $(OBJS)\monodll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) -H $**
 
 $(OBJS)\monodll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG) $**
 
 $(OBJS)\monodll_appbase.obj: ..\..\src\common\appbase.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
@@ -4066,9 +3952,6 @@ $(OBJS)\monodll_cmdline.obj: ..\..\src\common\cmdline.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_config.obj: ..\..\src\common\config.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
-$(OBJS)\monodll_convauto.obj: ..\..\src\common\convauto.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_datetime.obj: ..\..\src\common\datetime.cpp
@@ -4464,10 +4347,7 @@ $(OBJS)\monodll_datectrl.obj: ..\..\src\msw\datectrl.cpp
 $(OBJS)\monodll_mediactrlcmn.obj: ..\..\src\common\mediactrlcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
-$(OBJS)\monodll_mediactrl_am.obj: ..\..\src\msw\mediactrl_am.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
-$(OBJS)\monodll_mediactrl_wmp10.obj: ..\..\src\msw\mediactrl_wmp10.cpp
+$(OBJS)\monodll_mediactrl.obj: ..\..\src\msw\mediactrl.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_activex.obj: ..\..\src\msw\ole\activex.cpp
@@ -4482,13 +4362,7 @@ $(OBJS)\monodll_helpctrl.obj: ..\..\src\html\helpctrl.cpp
 $(OBJS)\monodll_helpdata.obj: ..\..\src\html\helpdata.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
-$(OBJS)\monodll_helpdlg.obj: ..\..\src\html\helpdlg.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
 $(OBJS)\monodll_helpfrm.obj: ..\..\src\html\helpfrm.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
-$(OBJS)\monodll_helpwnd.obj: ..\..\src\html\helpwnd.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_htmlcell.obj: ..\..\src\html\htmlcell.cpp
@@ -4605,9 +4479,6 @@ $(OBJS)\monodll_xh_gauge.obj: ..\..\src\xrc\xh_gauge.cpp
 $(OBJS)\monodll_xh_gdctl.obj: ..\..\src\xrc\xh_gdctl.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
-$(OBJS)\monodll_xh_grid.obj: ..\..\src\xrc\xh_grid.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
 $(OBJS)\monodll_xh_html.obj: ..\..\src\xrc\xh_html.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
@@ -4678,9 +4549,6 @@ $(OBJS)\monodll_xh_toolb.obj: ..\..\src\xrc\xh_toolb.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_xh_tree.obj: ..\..\src\xrc\xh_tree.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-
-$(OBJS)\monodll_xh_treebk.obj: ..\..\src\xrc\xh_treebk.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 
 $(OBJS)\monodll_xh_unkwn.obj: ..\..\src\xrc\xh_unkwn.cpp
@@ -5317,11 +5185,6 @@ $(OBJS)\monodll_effects.obj: ..\..\src\common\effects.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_evtloopcmn.obj: ..\..\src\common\evtloopcmn.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monodll_fddlgcmn.obj: ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 !endif
@@ -5667,17 +5530,7 @@ $(OBJS)\monodll_tipwin.obj: ..\..\src\generic\tipwin.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_toolbkg.obj: ..\..\src\generic\toolbkg.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monodll_treectlg.obj: ..\..\src\generic\treectlg.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_treebkg.obj: ..\..\src\generic\treebkg.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 !endif
 
@@ -5692,22 +5545,7 @@ $(OBJS)\monodll_vscroll.obj: ..\..\src\generic\vscroll.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_datavcmn.obj: ..\..\src\common\datavcmn.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_buttonbar.obj: ..\..\src\generic\buttonbar.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monodll_calctrl.obj: ..\..\src\generic\calctrl.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_datavgen.obj: ..\..\src\generic\datavgen.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 !endif
 
@@ -5767,31 +5605,6 @@ $(OBJS)\monodll_wizard.obj: ..\..\src\generic\wizard.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_richtextctrl.obj: ..\..\src\richtext\richtextctrl.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_richtextbuffer.obj: ..\..\src\richtext\richtextbuffer.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_richtextstyles.obj: ..\..\src\richtext\richtextstyles.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_richtextxml.obj: ..\..\src\richtext\richtextxml.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monodll_richtexthtml.obj: ..\..\src\richtext\richtexthtml.cpp
-	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monodll_taskbarcmn.obj: ..\..\src\common\taskbarcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONODLL_CXXFLAGS) $**
 !endif
@@ -5827,9 +5640,6 @@ $(OBJS)\monolib_cmdline.obj: ..\..\src\common\cmdline.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_config.obj: ..\..\src\common\config.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
-$(OBJS)\monolib_convauto.obj: ..\..\src\common\convauto.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_datetime.obj: ..\..\src\common\datetime.cpp
@@ -6225,10 +6035,7 @@ $(OBJS)\monolib_datectrl.obj: ..\..\src\msw\datectrl.cpp
 $(OBJS)\monolib_mediactrlcmn.obj: ..\..\src\common\mediactrlcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
-$(OBJS)\monolib_mediactrl_am.obj: ..\..\src\msw\mediactrl_am.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
-$(OBJS)\monolib_mediactrl_wmp10.obj: ..\..\src\msw\mediactrl_wmp10.cpp
+$(OBJS)\monolib_mediactrl.obj: ..\..\src\msw\mediactrl.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_activex.obj: ..\..\src\msw\ole\activex.cpp
@@ -6243,13 +6050,7 @@ $(OBJS)\monolib_helpctrl.obj: ..\..\src\html\helpctrl.cpp
 $(OBJS)\monolib_helpdata.obj: ..\..\src\html\helpdata.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
-$(OBJS)\monolib_helpdlg.obj: ..\..\src\html\helpdlg.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
 $(OBJS)\monolib_helpfrm.obj: ..\..\src\html\helpfrm.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
-$(OBJS)\monolib_helpwnd.obj: ..\..\src\html\helpwnd.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_htmlcell.obj: ..\..\src\html\htmlcell.cpp
@@ -6366,9 +6167,6 @@ $(OBJS)\monolib_xh_gauge.obj: ..\..\src\xrc\xh_gauge.cpp
 $(OBJS)\monolib_xh_gdctl.obj: ..\..\src\xrc\xh_gdctl.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
-$(OBJS)\monolib_xh_grid.obj: ..\..\src\xrc\xh_grid.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
 $(OBJS)\monolib_xh_html.obj: ..\..\src\xrc\xh_html.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
@@ -6439,9 +6237,6 @@ $(OBJS)\monolib_xh_toolb.obj: ..\..\src\xrc\xh_toolb.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_xh_tree.obj: ..\..\src\xrc\xh_tree.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-
-$(OBJS)\monolib_xh_treebk.obj: ..\..\src\xrc\xh_treebk.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 
 $(OBJS)\monolib_xh_unkwn.obj: ..\..\src\xrc\xh_unkwn.cpp
@@ -7078,11 +6873,6 @@ $(OBJS)\monolib_effects.obj: ..\..\src\common\effects.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_evtloopcmn.obj: ..\..\src\common\evtloopcmn.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monolib_fddlgcmn.obj: ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 !endif
@@ -7428,17 +7218,7 @@ $(OBJS)\monolib_tipwin.obj: ..\..\src\generic\tipwin.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_toolbkg.obj: ..\..\src\generic\toolbkg.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monolib_treectlg.obj: ..\..\src\generic\treectlg.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_treebkg.obj: ..\..\src\generic\treebkg.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 !endif
 
@@ -7453,22 +7233,7 @@ $(OBJS)\monolib_vscroll.obj: ..\..\src\generic\vscroll.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_datavcmn.obj: ..\..\src\common\datavcmn.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_buttonbar.obj: ..\..\src\generic\buttonbar.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monolib_calctrl.obj: ..\..\src\generic\calctrl.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_datavgen.obj: ..\..\src\generic\datavgen.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 !endif
 
@@ -7528,31 +7293,6 @@ $(OBJS)\monolib_wizard.obj: ..\..\src\generic\wizard.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_richtextctrl.obj: ..\..\src\richtext\richtextctrl.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_richtextbuffer.obj: ..\..\src\richtext\richtextbuffer.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_richtextstyles.obj: ..\..\src\richtext\richtextstyles.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_richtextxml.obj: ..\..\src\richtext\richtextxml.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\monolib_richtexthtml.obj: ..\..\src\richtext\richtexthtml.cpp
-	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\monolib_taskbarcmn.obj: ..\..\src\common\taskbarcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MONOLIB_CXXFLAGS) $**
 !endif
@@ -7576,7 +7316,7 @@ $(OBJS)\basedll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(BASEDLL_CXXFLAGS) -H $**
 
 $(OBJS)\basedll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_bcc$(VENDORTAG) $**
 
 $(OBJS)\basedll_appbase.obj: ..\..\src\common\appbase.cpp
 	$(CXX) -q -c -P -o$@ $(BASEDLL_CXXFLAGS) $**
@@ -7591,9 +7331,6 @@ $(OBJS)\basedll_cmdline.obj: ..\..\src\common\cmdline.cpp
 	$(CXX) -q -c -P -o$@ $(BASEDLL_CXXFLAGS) $**
 
 $(OBJS)\basedll_config.obj: ..\..\src\common\config.cpp
-	$(CXX) -q -c -P -o$@ $(BASEDLL_CXXFLAGS) $**
-
-$(OBJS)\basedll_convauto.obj: ..\..\src\common\convauto.cpp
 	$(CXX) -q -c -P -o$@ $(BASEDLL_CXXFLAGS) $**
 
 $(OBJS)\basedll_datetime.obj: ..\..\src\common\datetime.cpp
@@ -7830,9 +7567,6 @@ $(OBJS)\baselib_cmdline.obj: ..\..\src\common\cmdline.cpp
 $(OBJS)\baselib_config.obj: ..\..\src\common\config.cpp
 	$(CXX) -q -c -P -o$@ $(BASELIB_CXXFLAGS) $**
 
-$(OBJS)\baselib_convauto.obj: ..\..\src\common\convauto.cpp
-	$(CXX) -q -c -P -o$@ $(BASELIB_CXXFLAGS) $**
-
 $(OBJS)\baselib_datetime.obj: ..\..\src\common\datetime.cpp
 	$(CXX) -q -c -P -o$@ $(BASELIB_CXXFLAGS) $**
 
@@ -8053,7 +7787,7 @@ $(OBJS)\netdll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(NETDLL_CXXFLAGS) -H $**
 
 $(OBJS)\netdll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_bcc$(VENDORTAG) $**
 
 $(OBJS)\netdll_fs_inet.obj: ..\..\src\common\fs_inet.cpp
 	$(CXX) -q -c -P -o$@ $(NETDLL_CXXFLAGS) $**
@@ -8134,7 +7868,7 @@ $(OBJS)\coredll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) -H $**
 
 $(OBJS)\coredll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_bcc$(VENDORTAG) $**
 
 $(OBJS)\coredll_event.obj: ..\..\src\common\event.cpp
 	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
@@ -8908,11 +8642,6 @@ $(OBJS)\coredll_effects.obj: ..\..\src\common\effects.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\coredll_evtloopcmn.obj: ..\..\src\common\evtloopcmn.cpp
-	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\coredll_fddlgcmn.obj: ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
 !endif
@@ -9258,17 +8987,7 @@ $(OBJS)\coredll_tipwin.obj: ..\..\src\generic\tipwin.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\coredll_toolbkg.obj: ..\..\src\generic\toolbkg.cpp
-	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\coredll_treectlg.obj: ..\..\src\generic\treectlg.cpp
-	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\coredll_treebkg.obj: ..\..\src\generic\treebkg.cpp
 	$(CXX) -q -c -P -o$@ $(COREDLL_CXXFLAGS) $**
 !endif
 
@@ -10057,11 +9776,6 @@ $(OBJS)\corelib_effects.obj: ..\..\src\common\effects.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\corelib_evtloopcmn.obj: ..\..\src\common\evtloopcmn.cpp
-	$(CXX) -q -c -P -o$@ $(CORELIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\corelib_fddlgcmn.obj: ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -q -c -P -o$@ $(CORELIB_CXXFLAGS) $**
 !endif
@@ -10407,17 +10121,7 @@ $(OBJS)\corelib_tipwin.obj: ..\..\src\generic\tipwin.cpp
 !endif
 
 !if "$(USE_GUI)" == "1"
-$(OBJS)\corelib_toolbkg.obj: ..\..\src\generic\toolbkg.cpp
-	$(CXX) -q -c -P -o$@ $(CORELIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
 $(OBJS)\corelib_treectlg.obj: ..\..\src\generic\treectlg.cpp
-	$(CXX) -q -c -P -o$@ $(CORELIB_CXXFLAGS) $**
-!endif
-
-!if "$(USE_GUI)" == "1"
-$(OBJS)\corelib_treebkg.obj: ..\..\src\generic\treebkg.cpp
 	$(CXX) -q -c -P -o$@ $(CORELIB_CXXFLAGS) $**
 !endif
 
@@ -10435,21 +10139,12 @@ $(OBJS)\advdll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) -H $**
 
 $(OBJS)\advdll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_bcc$(VENDORTAG) $**
 
 $(OBJS)\advdll_datectrl.obj: ..\..\src\msw\datectrl.cpp
 	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
 
-$(OBJS)\advdll_datavcmn.obj: ..\..\src\common\datavcmn.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_buttonbar.obj: ..\..\src\generic\buttonbar.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
 $(OBJS)\advdll_calctrl.obj: ..\..\src\generic\calctrl.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_datavgen.obj: ..\..\src\generic\datavgen.cpp
 	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
 
 $(OBJS)\advdll_datectlg.obj: ..\..\src\generic\datectlg.cpp
@@ -10485,21 +10180,6 @@ $(OBJS)\advdll_tipdlg.obj: ..\..\src\generic\tipdlg.cpp
 $(OBJS)\advdll_wizard.obj: ..\..\src\generic\wizard.cpp
 	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
 
-$(OBJS)\advdll_richtextctrl.obj: ..\..\src\richtext\richtextctrl.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_richtextbuffer.obj: ..\..\src\richtext\richtextbuffer.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_richtextstyles.obj: ..\..\src\richtext\richtextstyles.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_richtextxml.obj: ..\..\src\richtext\richtextxml.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
-$(OBJS)\advdll_richtexthtml.obj: ..\..\src\richtext\richtexthtml.cpp
-	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
-
 $(OBJS)\advdll_taskbarcmn.obj: ..\..\src\common\taskbarcmn.cpp
 	$(CXX) -q -c -P -o$@ $(ADVDLL_CXXFLAGS) $**
 
@@ -10518,16 +10198,7 @@ $(OBJS)\advlib_dummy.obj: ..\..\src\msw\dummy.cpp
 $(OBJS)\advlib_datectrl.obj: ..\..\src\msw\datectrl.cpp
 	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
 
-$(OBJS)\advlib_datavcmn.obj: ..\..\src\common\datavcmn.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_buttonbar.obj: ..\..\src\generic\buttonbar.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
 $(OBJS)\advlib_calctrl.obj: ..\..\src\generic\calctrl.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_datavgen.obj: ..\..\src\generic\datavgen.cpp
 	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
 
 $(OBJS)\advlib_datectlg.obj: ..\..\src\generic\datectlg.cpp
@@ -10563,21 +10234,6 @@ $(OBJS)\advlib_tipdlg.obj: ..\..\src\generic\tipdlg.cpp
 $(OBJS)\advlib_wizard.obj: ..\..\src\generic\wizard.cpp
 	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
 
-$(OBJS)\advlib_richtextctrl.obj: ..\..\src\richtext\richtextctrl.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_richtextbuffer.obj: ..\..\src\richtext\richtextbuffer.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_richtextstyles.obj: ..\..\src\richtext\richtextstyles.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_richtextxml.obj: ..\..\src\richtext\richtextxml.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
-$(OBJS)\advlib_richtexthtml.obj: ..\..\src\richtext\richtexthtml.cpp
-	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
-
 $(OBJS)\advlib_taskbarcmn.obj: ..\..\src\common\taskbarcmn.cpp
 	$(CXX) -q -c -P -o$@ $(ADVLIB_CXXFLAGS) $**
 
@@ -10594,15 +10250,12 @@ $(OBJS)\mediadll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(MEDIADLL_CXXFLAGS) -H $**
 
 $(OBJS)\mediadll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_bcc$(VENDORTAG) $**
 
 $(OBJS)\mediadll_mediactrlcmn.obj: ..\..\src\common\mediactrlcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MEDIADLL_CXXFLAGS) $**
 
-$(OBJS)\mediadll_mediactrl_am.obj: ..\..\src\msw\mediactrl_am.cpp
-	$(CXX) -q -c -P -o$@ $(MEDIADLL_CXXFLAGS) $**
-
-$(OBJS)\mediadll_mediactrl_wmp10.obj: ..\..\src\msw\mediactrl_wmp10.cpp
+$(OBJS)\mediadll_mediactrl.obj: ..\..\src\msw\mediactrl.cpp
 	$(CXX) -q -c -P -o$@ $(MEDIADLL_CXXFLAGS) $**
 
 $(OBJS)\mediadll_activex.obj: ..\..\src\msw\ole\activex.cpp
@@ -10614,10 +10267,7 @@ $(OBJS)\medialib_dummy.obj: ..\..\src\msw\dummy.cpp
 $(OBJS)\medialib_mediactrlcmn.obj: ..\..\src\common\mediactrlcmn.cpp
 	$(CXX) -q -c -P -o$@ $(MEDIALIB_CXXFLAGS) $**
 
-$(OBJS)\medialib_mediactrl_am.obj: ..\..\src\msw\mediactrl_am.cpp
-	$(CXX) -q -c -P -o$@ $(MEDIALIB_CXXFLAGS) $**
-
-$(OBJS)\medialib_mediactrl_wmp10.obj: ..\..\src\msw\mediactrl_wmp10.cpp
+$(OBJS)\medialib_mediactrl.obj: ..\..\src\msw\mediactrl.cpp
 	$(CXX) -q -c -P -o$@ $(MEDIALIB_CXXFLAGS) $**
 
 $(OBJS)\medialib_activex.obj: ..\..\src\msw\ole\activex.cpp
@@ -10627,7 +10277,7 @@ $(OBJS)\odbcdll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(ODBCDLL_CXXFLAGS) -H $**
 
 $(OBJS)\odbcdll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_bcc$(VENDORTAG) $**
 
 $(OBJS)\odbcdll_db.obj: ..\..\src\common\db.cpp
 	$(CXX) -q -c -P -o$@ $(ODBCDLL_CXXFLAGS) $**
@@ -10648,7 +10298,7 @@ $(OBJS)\dbgriddll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(DBGRIDDLL_CXXFLAGS) -H $**
 
 $(OBJS)\dbgriddll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_bcc$(VENDORTAG) $**
 
 $(OBJS)\dbgriddll_dbgrid.obj: ..\..\src\common\dbgrid.cpp
 	$(CXX) -q -c -P -o$@ $(DBGRIDDLL_CXXFLAGS) $**
@@ -10663,7 +10313,7 @@ $(OBJS)\htmldll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) -H $**
 
 $(OBJS)\htmldll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_bcc$(VENDORTAG) $**
 
 $(OBJS)\htmldll_helpbest.obj: ..\..\src\msw\helpbest.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) $**
@@ -10674,13 +10324,7 @@ $(OBJS)\htmldll_helpctrl.obj: ..\..\src\html\helpctrl.cpp
 $(OBJS)\htmldll_helpdata.obj: ..\..\src\html\helpdata.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) $**
 
-$(OBJS)\htmldll_helpdlg.obj: ..\..\src\html\helpdlg.cpp
-	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) $**
-
 $(OBJS)\htmldll_helpfrm.obj: ..\..\src\html\helpfrm.cpp
-	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) $**
-
-$(OBJS)\htmldll_helpwnd.obj: ..\..\src\html\helpwnd.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLDLL_CXXFLAGS) $**
 
 $(OBJS)\htmldll_htmlcell.obj: ..\..\src\html\htmlcell.cpp
@@ -10749,13 +10393,7 @@ $(OBJS)\htmllib_helpctrl.obj: ..\..\src\html\helpctrl.cpp
 $(OBJS)\htmllib_helpdata.obj: ..\..\src\html\helpdata.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLLIB_CXXFLAGS) $**
 
-$(OBJS)\htmllib_helpdlg.obj: ..\..\src\html\helpdlg.cpp
-	$(CXX) -q -c -P -o$@ $(HTMLLIB_CXXFLAGS) $**
-
 $(OBJS)\htmllib_helpfrm.obj: ..\..\src\html\helpfrm.cpp
-	$(CXX) -q -c -P -o$@ $(HTMLLIB_CXXFLAGS) $**
-
-$(OBJS)\htmllib_helpwnd.obj: ..\..\src\html\helpwnd.cpp
 	$(CXX) -q -c -P -o$@ $(HTMLLIB_CXXFLAGS) $**
 
 $(OBJS)\htmllib_htmlcell.obj: ..\..\src\html\htmlcell.cpp
@@ -10816,7 +10454,7 @@ $(OBJS)\qadll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(QADLL_CXXFLAGS) -H $**
 
 $(OBJS)\qadll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_bcc$(VENDORTAG) $**
 
 $(OBJS)\qadll_debugrpt.obj: ..\..\src\common\debugrpt.cpp
 	$(CXX) -q -c -P -o$@ $(QADLL_CXXFLAGS) $**
@@ -10837,7 +10475,7 @@ $(OBJS)\xmldll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(XMLDLL_CXXFLAGS) -H $**
 
 $(OBJS)\xmldll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_bcc$(VENDORTAG) $**
 
 $(OBJS)\xmldll_xml.obj: ..\..\src\xml\xml.cpp
 	$(CXX) -q -c -P -o$@ $(XMLDLL_CXXFLAGS) $**
@@ -10858,7 +10496,7 @@ $(OBJS)\xrcdll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) -H $**
 
 $(OBJS)\xrcdll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_bcc$(VENDORTAG) $**
 
 $(OBJS)\xrcdll_xh_bmpbt.obj: ..\..\src\xrc\xh_bmpbt.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
@@ -10903,9 +10541,6 @@ $(OBJS)\xrcdll_xh_gauge.obj: ..\..\src\xrc\xh_gauge.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
 
 $(OBJS)\xrcdll_xh_gdctl.obj: ..\..\src\xrc\xh_gdctl.cpp
-	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
-
-$(OBJS)\xrcdll_xh_grid.obj: ..\..\src\xrc\xh_grid.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
 
 $(OBJS)\xrcdll_xh_html.obj: ..\..\src\xrc\xh_html.cpp
@@ -10980,9 +10615,6 @@ $(OBJS)\xrcdll_xh_toolb.obj: ..\..\src\xrc\xh_toolb.cpp
 $(OBJS)\xrcdll_xh_tree.obj: ..\..\src\xrc\xh_tree.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
 
-$(OBJS)\xrcdll_xh_treebk.obj: ..\..\src\xrc\xh_treebk.cpp
-	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
-
 $(OBJS)\xrcdll_xh_unkwn.obj: ..\..\src\xrc\xh_unkwn.cpp
 	$(CXX) -q -c -P -o$@ $(XRCDLL_CXXFLAGS) $**
 
@@ -11041,9 +10673,6 @@ $(OBJS)\xrclib_xh_gauge.obj: ..\..\src\xrc\xh_gauge.cpp
 	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
 
 $(OBJS)\xrclib_xh_gdctl.obj: ..\..\src\xrc\xh_gdctl.cpp
-	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
-
-$(OBJS)\xrclib_xh_grid.obj: ..\..\src\xrc\xh_grid.cpp
 	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
 
 $(OBJS)\xrclib_xh_html.obj: ..\..\src\xrc\xh_html.cpp
@@ -11118,9 +10747,6 @@ $(OBJS)\xrclib_xh_toolb.obj: ..\..\src\xrc\xh_toolb.cpp
 $(OBJS)\xrclib_xh_tree.obj: ..\..\src\xrc\xh_tree.cpp
 	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
 
-$(OBJS)\xrclib_xh_treebk.obj: ..\..\src\xrc\xh_treebk.cpp
-	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
-
 $(OBJS)\xrclib_xh_unkwn.obj: ..\..\src\xrc\xh_unkwn.cpp
 	$(CXX) -q -c -P -o$@ $(XRCLIB_CXXFLAGS) $**
 
@@ -11137,7 +10763,7 @@ $(OBJS)\gldll_dummy.obj: ..\..\src\msw\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(GLDLL_CXXFLAGS) -H $**
 
 $(OBJS)\gldll_version.res: ..\..\src\msw\version.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG) $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include   -d__WXMSW__ $(__WXUNIV_DEFINE_p_49) $(__DEBUG_DEFINE_p_49) $(__EXCEPTIONS_DEFINE_p_49) $(__RTTI_DEFINE_p_49) $(__THREAD_DEFINE_p_49) $(__UNICODE_DEFINE_p_50) $(__MSLU_DEFINE_p_49) -i$(SETUPHDIR) -i..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_bcc$(VENDORTAG) $**
 
 $(OBJS)\gldll_glcanvas.obj: ..\..\src\msw\glcanvas.cpp
 	$(CXX) -q -c -P -o$@ $(GLDLL_CXXFLAGS) $**

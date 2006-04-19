@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_links.cpp
+// Name:        m_links.cpp
 // Purpose:     wxHtml module for links & anchors
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,13 +7,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
 #endif

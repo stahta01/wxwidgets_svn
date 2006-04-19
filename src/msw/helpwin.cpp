@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/helpwin.cpp
+// Name:        helpwin.cpp
 // Purpose:     Help system: WinHelp implementation
 // Author:      Julian Smart
 // Modified by:
@@ -9,17 +9,22 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif
 
 #if wxUSE_HELP
-
-#ifndef WX_PRECOMP
-#endif
 
 #include "wx/filefn.h"
 #include "wx/msw/helpwin.h"
@@ -32,11 +37,9 @@
 
 #include <string.h>
 
-static HWND GetSuitableHWND(wxWinHelpController* controller)
+static HWND GetSuitableHWND()
 {
-    if (controller->GetParentWindow())
-        return (HWND) controller->GetParentWindow()->GetHWND();
-    else if (wxTheApp->GetTopWindow())
+    if (wxTheApp->GetTopWindow())
         return (HWND) wxTheApp->GetTopWindow()->GetHWND();
     else
         return GetDesktopWindow();
@@ -52,37 +55,41 @@ bool wxWinHelpController::Initialize(const wxString& filename)
 
 bool wxWinHelpController::LoadFile(const wxString& file)
 {
-    if (!file.empty())
+    if (!file.IsEmpty())
         m_helpFile = file;
     return true;
 }
 
 bool wxWinHelpController::DisplayContents(void)
 {
-    if (m_helpFile.empty()) return false;
+    if (m_helpFile.IsEmpty()) return false;
 
     wxString str = GetValidFilename(m_helpFile);
 
-    return (WinHelp(GetSuitableHWND(this), (const wxChar*) str, HELP_FINDER, 0L) != 0);
+#if defined(__WIN95__)
+    return (WinHelp(GetSuitableHWND(), (const wxChar*) str, HELP_FINDER, 0L) != 0);
+#else
+    return (WinHelp(GetSuitableHWND(), (const wxChar*) str, HELP_CONTENTS, 0L) != 0);
+#endif
 }
 
 bool wxWinHelpController::DisplaySection(int section)
 {
     // Use context number
-    if (m_helpFile.empty()) return false;
+    if (m_helpFile.IsEmpty()) return false;
 
     wxString str = GetValidFilename(m_helpFile);
 
-    return (WinHelp(GetSuitableHWND(this), (const wxChar*) str, HELP_CONTEXT, (DWORD)section) != 0);
+    return (WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXT, (DWORD)section) != 0);
 }
 
 bool wxWinHelpController::DisplayContextPopup(int contextId)
 {
-    if (m_helpFile.empty()) return false;
+    if (m_helpFile.IsEmpty()) return false;
 
     wxString str = GetValidFilename(m_helpFile);
 
-    return (WinHelp(GetSuitableHWND(this), (const wxChar*) str, HELP_CONTEXTPOPUP, (DWORD) contextId) != 0);
+    return (WinHelp((HWND) wxTheApp->GetTopWindow()->GetHWND(), (const wxChar*) str, HELP_CONTEXTPOPUP, (DWORD) contextId) != 0);
 }
 
 bool wxWinHelpController::DisplayBlock(long block)
@@ -94,17 +101,17 @@ bool wxWinHelpController::DisplayBlock(long block)
 bool wxWinHelpController::KeywordSearch(const wxString& k,
                                         wxHelpSearchMode WXUNUSED(mode))
 {
-    if (m_helpFile.empty()) return false;
+    if (m_helpFile.IsEmpty()) return false;
 
     wxString str = GetValidFilename(m_helpFile);
 
-    return (WinHelp(GetSuitableHWND(this), (const wxChar*) str, HELP_PARTIALKEY, (DWORD)(const wxChar*) k) != 0);
+    return (WinHelp(GetSuitableHWND(), (const wxChar*) str, HELP_PARTIALKEY, (DWORD)(const wxChar*) k) != 0);
 }
 
 // Can't close the help window explicitly in WinHelp
 bool wxWinHelpController::Quit(void)
 {
-    return (WinHelp(GetSuitableHWND(this), 0, HELP_QUIT, 0L) != 0);
+    return (WinHelp(GetSuitableHWND(), 0, HELP_QUIT, 0L) != 0);
 }
 
 // Append extension if necessary.
@@ -114,7 +121,7 @@ wxString wxWinHelpController::GetValidFilename(const wxString& file) const
     wxSplitPath(file, & path, & name, & ext);
 
     wxString fullName;
-    if (path.empty())
+    if (path.IsEmpty())
         fullName = name + wxT(".hlp");
     else if (path.Last() == wxT('\\'))
         fullName = path + name + wxT(".hlp");

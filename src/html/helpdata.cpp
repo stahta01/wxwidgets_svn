@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/helpdata.cpp
+// Name:        helpdata.cpp
 // Purpose:     wxHtmlHelpData
 // Notes:       Based on htmlhelp.cpp, implementing a monolithic
 //              HTML Help controller class,  by Vaclav Slavik
@@ -9,12 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpdata.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
@@ -292,7 +298,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
     HP_TagHandler *handler = new HP_TagHandler(book);
     parser.AddTagHandler(handler);
 
-    f = ( contentsfile.empty() ? (wxFSFile*) NULL : fsys.OpenFile(contentsfile) );
+    f = ( contentsfile.IsEmpty() ? (wxFSFile*) NULL : fsys.OpenFile(contentsfile) );
     if (f)
     {
         buf.clear();
@@ -306,7 +312,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
         wxLogError(_("Cannot open contents file: %s"), contentsfile.c_str());
     }
 
-    f = ( indexfile.empty() ? (wxFSFile*) NULL : fsys.OpenFile(indexfile) );
+    f = ( indexfile.IsEmpty() ? (wxFSFile*) NULL : fsys.OpenFile(indexfile) );
     if (f)
     {
         buf.clear();
@@ -315,7 +321,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
         handler->Reset(m_index);
         parser.Parse(buf);
     }
-    else if (!indexfile.empty())
+    else if (!indexfile.IsEmpty())
     {
         wxLogError(_("Cannot open index file: %s"), indexfile.c_str());
     }
@@ -460,17 +466,17 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
         }
         else
         {
-            int cnt2 = 0;
+            int cnt = 0;
             wxHtmlHelpDataItem *parent = m_index[i].parent;
             for (int j = i-1; j >= 0; j--)
             {
                 if (m_index[j].book == book && m_index[j].level > 0)
-                    cnt2++;
+                    cnt++;
                 if (&m_index[j] == parent)
                     break;
             }
-            wxASSERT(cnt2 > 0);
-            CacheWriteInt32(f, cnt2);
+            wxASSERT(cnt > 0);
+            CacheWriteInt32(f, cnt);
         }
     }
     return true;
@@ -486,7 +492,7 @@ void wxHtmlHelpData::SetTempDir(const wxString& path)
         if (wxIsAbsolutePath(path)) m_tempPath = path;
         else m_tempPath = wxGetCwd() + _T("/") + path;
 
-        if (m_tempPath[m_tempPath.length() - 1] != _T('/'))
+        if (m_tempPath[m_tempPath.Length() - 1] != _T('/'))
             m_tempPath << _T('/');
     }
 }
@@ -516,7 +522,7 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     int IndexOld = m_index.size(),
         ContentsOld = m_contents.size();
 
-    if (!path.empty())
+    if (!path.IsEmpty())
         fsys.ChangePathTo(path, true);
 
     size_t booksCnt = m_bookRecords.GetCount();
@@ -641,7 +647,7 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
 #endif
             s = fsys.FindFirst(book + wxT("#zip:*.hhp"), wxFILE);
 
-        while (!s.empty())
+        while (!s.IsEmpty())
         {
             if (AddBook(s)) rt = true;
             s = fsys.FindNext();
@@ -987,7 +993,7 @@ bool wxHtmlSearchEngine::Scan(const wxFSFile& file)
     wxASSERT_MSG(!m_Keyword.empty(), wxT("wxHtmlSearchEngine::LookFor must be called before scanning!"));
 
     int i, j;
-    int wrd = m_Keyword.length();
+    int wrd = m_Keyword.Length();
     bool found = false;
     wxHtmlFilterHTML filter;
     wxString tmp = filter.ReadFile(file);

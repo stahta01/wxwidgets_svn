@@ -17,12 +17,18 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printpalm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 // Don't use the Windows printer if we're in wxUniv mode and using
 // the PostScript architecture

@@ -1188,7 +1188,7 @@ void wxDialUpManagerMSW::DisableAutoCheckOnlineStatus()
 {
     wxCHECK_RET( IsOk(), wxT("using uninitialized wxDialUpManager") );
 
-    if ( --m_autoCheckLevel != 0 )
+    if ( --m_autoCheckLevel )
     {
         // still checking
         return;

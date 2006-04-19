@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/string.cpp
+// Name:        string.cpp
 // Purpose:     wxString class
 // Author:      Vadim Zeitlin, Ryan Norton
 // Modified by:
@@ -25,13 +25,14 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/thread.h"
+  #include "wx/defs.h"
+  #include "wx/string.h"
+  #include "wx/intl.h"
+  #include "wx/thread.h"
 #endif
 
 #include <ctype.h>
@@ -39,7 +40,7 @@
 #include <stdlib.h>
 
 #ifdef __SALFORDC__
-    #include <clib.h>
+  #include <clib.h>
 #endif
 
 // allocating extra space for each string consumes more memory but speeds up
@@ -360,8 +361,8 @@ bool wxStringBase::Alloc(size_t nLen)
     if ( pData->IsEmpty() ) {
       nLen += EXTRA_ALLOC;
 
-      pData = (wxStringData *)
-                malloc(sizeof(wxStringData) + (nLen + 1)*sizeof(wxChar));
+      wxStringData* pData = (wxStringData*)
+          malloc(sizeof(wxStringData) + (nLen + 1)*sizeof(wxChar));
 
       if ( pData == NULL ) {
         // allocation failure handled by caller
@@ -1005,58 +1006,114 @@ int STRINGCLASS::compare(size_t nStart, size_t nLen,
 #if wxUSE_UNICODE
 
 // from multibyte string
-wxString::wxString(const char *psz, const wxMBConv& conv, size_t nLength)
+wxString::wxString(const char *psz, wxMBConv& conv, size_t nLength)
 {
-    // anything to do?
-    if ( psz && nLength != 0 )
+    // if nLength != npos, then we have to make a NULL-terminated copy
+    // of first nLength bytes of psz first because the input buffer to MB2WC
+    // must always be NULL-terminated:
+    wxCharBuffer inBuf((const char *)NULL);
+    if (nLength != npos)
     {
-        if ( nLength == npos )
-        {
-            nLength = wxNO_LEN;
-        }
+        wxASSERT( psz != NULL );
+        wxCharBuffer tmp(nLength);
+        memcpy(tmp.data(), psz, nLength);
+        tmp.data()[nLength] = '\0';
+        inBuf = tmp;
+        psz = inBuf.data();
+    }
 
-        size_t nLenWide;
-        wxWCharBuffer wbuf = conv.cMB2WC(psz, nLength, &nLenWide);
+    // first get the size of the buffer we need
+    size_t nLen;
+    if ( psz )
+    {
+        // calculate the needed size ourselves or use the provided one
+        if (nLength == npos)
+            nLen = strlen(psz);
+        else
+            nLen = nLength;
+    }
+    else
+    {
+        // nothing to convert
+        nLen = 0;
+    }
 
-        if ( nLenWide )
-            assign(wbuf, nLenWide);
+
+    // anything to do?
+    if ( (nLen != 0) && (nLen != (size_t)-1) )
+    {
+        //Convert string
+        size_t nRealSize;
+        wxWCharBuffer theBuffer = conv.cMB2WC(psz, nLen, &nRealSize);
+
+        //Copy
+        if (nRealSize)
+            assign( theBuffer.data() , nRealSize - 1 );
     }
 }
 
 //Convert wxString in Unicode mode to a multi-byte string
-const wxCharBuffer wxString::mb_str(const wxMBConv& conv) const
+const wxCharBuffer wxString::mb_str(wxMBConv& conv) const
 {
-    return conv.cWC2MB(c_str(), length() + 1 /* size, not length */, NULL);
+    size_t dwOutSize;
+    return conv.cWC2MB(c_str(), length(), &dwOutSize);
 }
 
 #else // ANSI
 
 #if wxUSE_WCHAR_T
-
 // from wide string
-wxString::wxString(const wchar_t *pwz, const wxMBConv& conv, size_t nLength)
+wxString::wxString(const wchar_t *pwz, wxMBConv& conv, size_t nLength)
 {
-    // anything to do?
-    if ( pwz && nLength != 0 )
+    // if nLength != npos, then we have to make a NULL-terminated copy
+    // of first nLength chars of psz first because the input buffer to WC2MB
+    // must always be NULL-terminated:
+    wxWCharBuffer inBuf((const wchar_t *)NULL);
+    if (nLength != npos)
     {
-        if ( nLength == npos )
-        {
-            nLength = wxNO_LEN;
-        }
+        wxASSERT( pwz != NULL );
+        wxWCharBuffer tmp(nLength);
+        memcpy(tmp.data(), pwz, nLength * sizeof(wchar_t));
+        tmp.data()[nLength] = '\0';
+        inBuf = tmp;
+        pwz = inBuf.data();
+    }
 
-        size_t nLenMB;
-        wxCharBuffer buf = conv.cWC2MB(pwz, nLength, &nLenMB);
+    // first get the size of the buffer we need
+    size_t nLen;
+    if ( pwz )
+    {
+        // calculate the needed size ourselves or use the provided one
+        if (nLength == npos)
+            nLen = wxWcslen(pwz);
+        else
+            nLen = nLength;
+    }
+    else
+    {
+        // nothing to convert
+        nLen = 0;
+    }
 
-        if ( nLenMB )
-            assign(buf, nLenMB);
+    // anything to do?
+    if ( (nLen != 0) && (nLen != (size_t)-1) )
+    {
+        //Convert string
+        size_t nRealSize;
+        wxCharBuffer theBuffer = conv.cWC2MB(pwz, nLen, &nRealSize);
+
+        //Copy
+        if (nRealSize)
+            assign( theBuffer.data() , nRealSize - 1 );
     }
 }
 
 //Converts this string to a wide character string if unicode
 //mode is not enabled and wxUSE_WCHAR_T is enabled
-const wxWCharBuffer wxString::wc_str(const wxMBConv& conv) const
+const wxWCharBuffer wxString::wc_str(wxMBConv& conv) const
 {
-    return conv.cMB2WC(c_str(), length() + 1 /* size, not length */, NULL);
+    size_t dwOutSize;
+    return conv.cMB2WC(c_str(), length(), &dwOutSize);
 }
 
 #endif // wxUSE_WCHAR_T
@@ -1756,7 +1813,7 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
     for ( ;; )
     {
         wxStringBuffer tmp(*this, size + 1);
-        wxChar *buf = tmp;
+        wxChar* buf = tmp;
 
         if ( !buf )
         {
@@ -1779,20 +1836,14 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
         // vsnprintf() may return either -1 (traditional Unix behaviour) or the
         // total number of characters which would have been written if the
         // buffer were large enough (newer standards such as Unix98)
-        if ( len < 0 )
+        if ( len >= 0 && len <= size )
         {
-            // still not enough, as we don't know how much we need, double the
-            // current size of the buffer
-            size *= 2;
-        }
-        else if ( len > size )
-        {
-            size = len;
-        }
-        else // ok, there was enough space
-        {
+            // ok, there was enough space
             break;
         }
+
+        // still not enough, double it again
+        size *= 2;
     }
 
     // we could have overshot

@@ -1,7 +1,7 @@
-Installing wxWidgets 2.6.2
+Installing wxWidgets 2.6.3
 -----------------------------------------------------------
 
-This is wxWidgets 2.6.2 for Microsoft Windows 9x/ME, Windows NT,
+This is wxWidgets 2.6.3 for Microsoft Windows 9x/ME, Windows NT,
 Windows 2000, Windows XP and Windows CE.
 
 These installation notes can be found in docs/msw/install.txt
@@ -261,13 +261,10 @@ If you receive this error add bufferoverflowu.lib to link, e.g.:
 
 See http://support.microsoft.com/?id=894573 for more information.
 
-Borland C++ compilation
+Borland C++ 5.0/5.5 compilation
 ----------------------------------------------------------------
 
-The minimum version required is 5.5, which can be downloaded for free from:
-http://www.borland.com/products/downloads/download_cbuilder.html#
-
-Compiling using the makefiles:
+Compiling using the makefiles (updated 24 Sept 02):
 
 1. Change directory to build\msw. Type 'make -f makefile.bcc' to
    make the wxWidgets core library. Ignore the compiler warnings.
@@ -290,11 +287,11 @@ recompile wxWidgets. The same applies if compiling using the IDE.
 Note (3): If you wish debug messages to be sent to the console in
 debug mode, edit makefile.bcc and change /aa to /Tpe in link commands.
 
-Cmpilation succeeds with CBuilderX personal edition and CBuilder6, but 
-you may have to copy make.exe from the 5.5 download to the new bin directory.
-Compiling using the IDE files for Borland C++ 5.0 and using CBuilder IDE 
-(v1-v6): not supported 
+Compiling using the IDE files for Borland C++ 5.0: not supported - please
+use version 2.4.1 (using the make utility in commandline mode works fine_
 
+Compiling using CBuilder (v1-v6): not supported - please
+use version 2.4.1 (using the make utility in commandline mode works fine_
 
 ** REMEMBER **
 
@@ -342,7 +339,7 @@ Metrowerks CodeWarrior compilation
 ----------------------------------------------------------------
 
 1. CodeWarrior Pro 7 project files in XML format are already
-   included in wxMSW-2.6.2.zip and the setup version.
+   included in wxMSW-2.6.3.zip and the setup version.
 
 2. Review the file include\wx\msw\setup.h (or include\wx\msw\setup0.h if
    you are working from the CVS version) to make sure the settings reflect
@@ -443,6 +440,9 @@ Here are the steps required using the provided makefiles:
 
 - If you are using gcc-2.95, edit build\msw\config.gcc and set the GCC_VERSION
   variable to "2.95".
+
+- If you are compiling with GCC 3.x using makefiles and with wxUSE_STL == 1
+  you need to manually add -DNO_GCC_PRAGMA to CXXFLAGS in config.gcc.
 
 - Use the makefile.gcc files for compiling wxWidgets and samples,
   e.g. to compile a debugging version of wxWidgets:

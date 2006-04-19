@@ -13,6 +13,10 @@
 #ifndef _WX_XTIH__
 #define _WX_XTIH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xti.h"
+#endif
+
 // We want to support properties, event sources and events sinks through
 // explicit declarations, using templates and specialization to make the
 // effort as painless as possible.
@@ -689,7 +693,7 @@ private :
     wxString m_name ;
 } ;
 
-#include "wx/dynarray.h"
+#include <wx/dynarray.h>
 
 WX_DECLARE_OBJARRAY_WITH_DECL(wxxVariant, wxxVariantArray, class WXDLLIMPEXP_BASE);
 
@@ -1661,7 +1665,6 @@ public:
     const wxChar       *GetIncludeName() const { return m_unitName ; }
     const wxClassInfo **GetParents() const { return m_parents; }
     int                 GetSize() const { return m_objectSize; }
-    bool                IsDynamic() const { return (NULL != m_objectConstructor); }
 
     wxObjectConstructorFn      GetConstructor() const { return m_objectConstructor; }
     static const wxClassInfo  *GetFirst() { return sm_first; }
@@ -2077,4 +2080,4 @@ template<typename collection_t> void wxArrayCollectionToVariantArray( const coll
 }
 
 
-#endif // _WX_XTIH__
+#endif

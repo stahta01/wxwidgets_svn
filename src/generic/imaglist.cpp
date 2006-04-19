@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/imaglist.cpp
+// Name:        generic/imaglist.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $id$
@@ -7,14 +7,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imaglist.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#if wxUSE_IMAGLIST
+
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_IMAGLIST
+#include "wx/defs.h"
 
 #ifndef __WXPALMOS__
 
@@ -84,7 +90,7 @@ int wxGenericImageList::Add( const wxBitmap &bitmap )
         m_width = bitmap.GetWidth();
         m_height = bitmap.GetHeight();
     }
-
+    
     return m_images.GetCount()-1;
 }
 

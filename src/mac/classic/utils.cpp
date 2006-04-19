@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,8 +9,12 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+// Note: this is done in utilscmn.cpp now.
+// #pragma implementation "utils.h"
+#endif
 
+#include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
 #include "wx/apptrait.h"
@@ -339,7 +343,7 @@ extern wxCursor    gMacCurrentCursor ;
 wxCursor        gMacStoredActiveCursor ;
 
 // Set the cursor to the busy cursor for all windows
-void wxBeginBusyCursor(const wxCursor *cursor)
+void wxBeginBusyCursor(wxCursor *cursor)
 {
     if (gs_wxBusyCursorCount++ == 0)
     {
@@ -372,7 +376,7 @@ bool wxIsBusy()
 
 #if wxUSE_BASE
 
-wxString wxMacFindFolderNoSeparator( short        vol,
+wxString wxMacFindFolder( short        vol,
               OSType       folderType,
               Boolean      createFolder)
 {
@@ -385,17 +389,10 @@ wxString wxMacFindFolderNoSeparator( short        vol,
         FSSpec file ;
         if ( FSMakeFSSpec( vRefNum , dirID , "\p" , &file ) == noErr )
         {
-            strDir = wxMacFSSpec2MacFilename( &file );
+            strDir = wxMacFSSpec2MacFilename( &file ) + wxFILE_SEP_PATH ;
         }
     }
     return strDir ;
-}
-
-wxString wxMacFindFolder( short        vol,
-              OSType       folderType,
-              Boolean      createFolder)
-{
-    return wxMacFindFolderNoSeparator(vol, folderType, createFolder) + wxFILE_SEP_PATH;
 }
 
 #endif // wxUSE_BASE
@@ -536,7 +533,7 @@ wxChar *wxGetUserHome (const wxString& user)
     return NULL;
 }
 
-bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspaceSize_t *pFree)
+bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
 {
     if ( path.empty() )
         return false;
@@ -560,10 +557,10 @@ bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspace
     OSErr err = XGetVolumeInfoNoName( volumeName , 0 , &pb ) ;
     if ( err == noErr ) {
       if ( pTotal ) {
-        (*pTotal) = wxDiskspaceSize_t( pb.ioVTotalBytes ) ;
+        (*pTotal) = wxLongLong( pb.ioVTotalBytes ) ;
       }
       if ( pFree ) {
-        (*pFree) = wxDiskspaceSize_t( pb.ioVFreeBytes ) ;
+        (*pFree) = wxLongLong( pb.ioVFreeBytes ) ;
       }
     }
 
@@ -1407,3 +1404,4 @@ extern bool WXDLLEXPORT wxIsDebuggerRunning()
 #endif // defined(__WXMAC__) && !defined(__DARWIN__) && (__MWERKS__ >= 0x2400)
 
 #endif // wxUSE_GUI
+

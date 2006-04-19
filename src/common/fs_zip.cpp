@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fs_zip.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__

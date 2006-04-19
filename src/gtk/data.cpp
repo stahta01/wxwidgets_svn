@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/data.cpp
+// Name:        gtk/data.cpp
 // Purpose:     Various global GTK-specific data
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -10,6 +10,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/window.h"
 #include "wx/dc.h"
@@ -20,15 +21,15 @@
 wxCursor g_globalCursor;
 
 /* Don't allow event propagation during drag */
-bool g_blockEventsOnDrag = false;
+bool g_blockEventsOnDrag = FALSE;
 
 /* Don't allow mouse event propagation during scroll */
-bool g_blockEventsOnScroll = false;
+bool g_blockEventsOnScroll = FALSE;
 
 /* Don't allow window closing if there are open dialogs */
 int g_openDialogs = 0;
 
-/* true when the message queue is empty. this gets set to
-   false by all event callbacks before anything else is done */
-bool g_isIdle = false;
+/* TRUE when the message queue is empty. this gets set to
+   FALSE by all event callbacks before anything else is done */
+bool g_isIdle = FALSE;
 

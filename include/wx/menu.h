@@ -12,6 +12,10 @@
 #ifndef _WX_MENU_H_BASE_
 #define _WX_MENU_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "menubase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_MENUS
@@ -87,11 +91,12 @@ public:
     }
 
     // append a submenu
-    wxMenuItem* AppendSubMenu(wxMenu *submenu,
-                              const wxString& text,
-                              const wxString& help = wxEmptyString)
+    wxMenuItem* Append(int itemid,
+                       const wxString& text,
+                       wxMenu *submenu,
+                       const wxString& help = wxEmptyString)
     {
-        return DoAppend(wxMenuItem::New((wxMenu *)this, wxID_ANY, text, help,
+        return DoAppend(wxMenuItem::New((wxMenu *)this, itemid, text, help,
                                         wxITEM_NORMAL, submenu));
     }
 
@@ -308,16 +313,6 @@ public:
         Append(itemid, text, help, isCheckable ? wxITEM_CHECK : wxITEM_NORMAL);
     }
 
-    // use more readable and not requiring unused itemid AppendSubMenu() instead
-    wxMenuItem* Append(int itemid,
-                       const wxString& text,
-                       wxMenu *submenu,
-                       const wxString& help = wxEmptyString)
-    {
-        return DoAppend(wxMenuItem::New((wxMenu *)this, itemid, text, help,
-                                        wxITEM_NORMAL, submenu));
-    }
-
     void Insert(size_t pos,
                 int itemid,
                 const wxString& text,
@@ -485,9 +480,6 @@ public:
     // don't want menu bars to accept the focus by tabbing to them
     virtual bool AcceptsFocusFromKeyboard() const { return false; }
 
-    // update all menu item states in all menus
-    virtual void UpdateMenus();
-
 protected:
     // the list of all our menus
     wxMenuList m_menus;
@@ -513,10 +505,8 @@ protected:
     #include "wx/msw/menu.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/menu.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/menu.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/menu.h"
+    #include "wx/gtk/menu.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menu.h"
 #elif defined(__WXCOCOA__)

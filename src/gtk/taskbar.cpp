@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "taskbarpriv.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -33,17 +37,17 @@ wxTaskBarIconAreaBase::wxTaskBarIconAreaBase()
     {
         m_widget = GTK_WIDGET(egg_tray_icon_new("systray icon"));
         gtk_window_set_resizable(GTK_WINDOW(m_widget), false);
-
+        
         wxLogTrace(_T("systray"), _T("using freedesktop.org systray spec"));
     }
-
+    
     wxTopLevelWindow::Create(
             NULL, wxID_ANY, _T("systray icon"),
             wxDefaultPosition, wxDefaultSize,
             wxDEFAULT_FRAME_STYLE | wxFRAME_NO_TASKBAR | wxSIMPLE_BORDER |
             wxFRAME_SHAPED,
             wxEmptyString /*eggtray doesn't like setting wmclass*/);
-
+            
     m_invokingWindow = NULL;
 }
 
@@ -54,16 +58,16 @@ bool wxTaskBarIconAreaBase::IsProtocolSupported()
     {
         Display *display = GDK_DISPLAY();
         Screen *screen = DefaultScreenOfDisplay(display);
-
+    
         wxString name;
         name.Printf(_T("_NET_SYSTEM_TRAY_S%d"), XScreenNumberOfScreen(screen));
         Atom atom = XInternAtom(display, name.ToAscii(), False);
-
+        
         Window manager = XGetSelectionOwner(display, atom);
-
+        
         s_supported = (manager != None);
     }
-
+    
     return (bool)s_supported;
 }
 
@@ -98,9 +102,10 @@ bool wxTaskBarIconAreaBase::DoPopupMenu( wxMenu *menu, int x, int y )
 
     bool is_waiting = true;
 
-    gulong handler = g_signal_connect (menu->m_menu, "hide",
-                                       G_CALLBACK (gtk_pop_hide_callback),
-                                       &is_waiting);
+    gulong handler = gtk_signal_connect( GTK_OBJECT(menu->m_menu),
+                                         "hide",
+                                         GTK_SIGNAL_FUNC(gtk_pop_hide_callback),
+                                         (gpointer)&is_waiting );
 
     wxPoint pos;
     gpointer userdata;
@@ -133,7 +138,7 @@ bool wxTaskBarIconAreaBase::DoPopupMenu( wxMenu *menu, int x, int y )
         gtk_main_iteration();
     }
 
-    g_signal_handler_disconnect (menu->m_menu, handler);
+    gtk_signal_disconnect(GTK_OBJECT(menu->m_menu), handler);
 
     return true;
 }

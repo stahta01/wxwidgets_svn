@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "cursor.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -14,10 +18,15 @@
 #include "wx/utils.h"
 #include "wx/app.h"
 
-#include "wx/gtk/private.h" //for idle stuff
-
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+
+//-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 
 //-----------------------------------------------------------------------------
 // wxCursor
@@ -40,7 +49,7 @@ wxCursorRefData::wxCursorRefData()
 
 wxCursorRefData::~wxCursorRefData()
 {
-    if (m_cursor) gdk_cursor_unref( m_cursor );
+    if (m_cursor) gdk_cursor_destroy( m_cursor );
 }
 
 //-----------------------------------------------------------------------------
@@ -61,20 +70,6 @@ wxCursor::wxCursor( int cursorId )
     GdkCursorType gdk_cur = GDK_LEFT_PTR;
     switch (cursorId)
     {
-        case wxCURSOR_BLANK:
-            {
-                static const gchar bits[] = { 0 };
-                static /* const -- not in GTK1 */ GdkColor color = { 0, 0, 0, 0 };
-
-                GdkPixmap *pixmap = gdk_bitmap_create_from_data(NULL, bits, 1, 1);
-                M_CURSORDATA->m_cursor = gdk_cursor_new_from_pixmap(pixmap,
-                                                                    pixmap,
-                                                                    &color,
-                                                                    &color,
-                                                                    0, 0);
-            }
-            return;
-
         case wxCURSOR_ARROW:            // fall through to default
         case wxCURSOR_DEFAULT:          gdk_cur = GDK_LEFT_PTR; break;
         case wxCURSOR_RIGHT_ARROW:      gdk_cur = GDK_RIGHT_PTR; break;
@@ -109,7 +104,6 @@ wxCursor::wxCursor( int cursorId )
         case wxCURSOR_BASED_ARROW_UP:   gdk_cur = GDK_BASED_ARROW_UP; break;
         case wxCURSOR_BASED_ARROW_DOWN: gdk_cur = GDK_BASED_ARROW_DOWN; break;
 */
-
         default:
             wxFAIL_MSG(wxT("unsupported cursor type"));
             // will use the standard one
@@ -123,7 +117,7 @@ extern GtkWidget *wxGetRootWindow();
 
 wxCursor::wxCursor(const char bits[], int width, int  height,
                    int hotSpotX, int hotSpotY,
-                   const char maskBits[], const wxColour *fg, const wxColour *bg)
+                   const char maskBits[], wxColour *fg, wxColour *bg)
 {
     if (!maskBits)
         maskBits = bits;
@@ -144,8 +138,15 @@ wxCursor::wxCursor(const char bits[], int width, int  height,
                  data, mask, fg->GetColor(), bg->GetColor(),
                  hotSpotX, hotSpotY );
 
-    g_object_unref (G_OBJECT (data));
-    g_object_unref (G_OBJECT (mask));
+    gdk_bitmap_unref( data );
+    gdk_bitmap_unref( mask );
+}
+
+
+wxCursor::wxCursor( const wxCursor &cursor )
+    : wxObject()
+{
+    Ref( cursor );
 }
 
 #if wxUSE_IMAGE
@@ -296,8 +297,8 @@ wxCursor::wxCursor( const wxImage & image )
                                 hotSpotX, hotSpotY
                              );
 
-    g_object_unref (G_OBJECT (data));
-    g_object_unref (G_OBJECT (mask));
+    gdk_bitmap_unref( data );
+    gdk_bitmap_unref( mask );
     delete [] bits;
     delete [] maskBits;
 }
@@ -306,6 +307,16 @@ wxCursor::wxCursor( const wxImage & image )
 
 wxCursor::~wxCursor()
 {
+}
+
+wxCursor& wxCursor::operator = ( const wxCursor& cursor )
+{
+    if (*this == cursor)
+        return (*this);
+
+    Ref( cursor );
+
+    return *this;
 }
 
 bool wxCursor::operator == ( const wxCursor& cursor ) const
@@ -359,7 +370,7 @@ void wxEndBusyCursor()
         wxTheApp->ProcessIdle();
 }
 
-void wxBeginBusyCursor( const wxCursor *WXUNUSED(cursor) )
+void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )
 {
     if (gs_busyCount++ > 0)
         return;

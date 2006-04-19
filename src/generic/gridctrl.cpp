@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gridctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -31,9 +35,9 @@
 
 #if wxUSE_DATETIME
 
-// Enables a grid cell to display a formatted date and or time
+// Enables a grid cell to display a formated date and or time
 
-wxGridCellDateTimeRenderer::wxGridCellDateTimeRenderer(const wxString& outformat, const wxString& informat)
+wxGridCellDateTimeRenderer::wxGridCellDateTimeRenderer(wxString outformat, wxString informat)
 {
     m_iformat = informat;
     m_oformat = outformat;
@@ -52,7 +56,7 @@ wxGridCellRenderer *wxGridCellDateTimeRenderer::Clone() const
     return renderer;
 }
 
-wxString wxGridCellDateTimeRenderer::GetString(const wxGrid& grid, int row, int col)
+wxString wxGridCellDateTimeRenderer::GetString(wxGrid& grid, int row, int col)
 {
     wxGridTableBase *table = grid.GetTable();
 
@@ -142,7 +146,7 @@ wxGridCellRenderer *wxGridCellEnumRenderer::Clone() const
     return renderer;
 }
 
-wxString wxGridCellEnumRenderer::GetString(const wxGrid& grid, int row, int col)
+wxString wxGridCellEnumRenderer::GetString(wxGrid& grid, int row, int col)
 {
     wxGridTableBase *table = grid.GetTable();
     wxString text;
@@ -326,7 +330,7 @@ wxGridCellAutoWrapStringRenderer::Draw(wxGrid& grid,
 wxArrayString
 wxGridCellAutoWrapStringRenderer::GetTextLines(wxGrid& grid,
                                                wxDC& dc,
-                                               const wxGridCellAttr& attr,
+                                               wxGridCellAttr& attr,
                                                const wxRect& rect,
                                                int row, int col)
 {

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/joystick.cpp
+// Name:        joystick.cpp
 // Purpose:     wxJoystick class
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,11 +9,15 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "joystick.h"
+#endif
 
-#if wxUSE_JOYSTICK
+#include "wx/setup.h"
 
 #include "wx/joystick.h"
+
+#if wxUSE_JOYSTICK
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -85,10 +89,10 @@ void wxJoystick::SetMovementThreshold(int threshold)
 bool wxJoystick::IsOk() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;
@@ -109,7 +113,7 @@ int wxJoystick::GetProductId() const
 wxString wxJoystick::GetProductName() const
 {
     // TODO
-    return wxEmptyString;
+    return wxString(wxT(""));
 }
 
 int wxJoystick::GetXMin() const
@@ -223,43 +227,43 @@ int wxJoystick::GetVMax() const
 bool wxJoystick::HasRudder() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasZ() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasU() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasV() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOV() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOV4Dir() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::HasPOVCTS() const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Operations
@@ -268,14 +272,15 @@ bool wxJoystick::HasPOVCTS() const
 bool wxJoystick::SetCapture(wxWindow* win, int pollingFreq)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxJoystick::ReleaseCapture()
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 #endif
     // wxUSE_JOYSTICK
+

@@ -68,10 +68,6 @@ static const wxChar *TRACE_MASK = _T("stdpaths");
     #define CSIDL_PROGRAM_FILES   0x0026
 #endif
 
-#ifndef CSIDL_PERSONAL
-    #define CSIDL_PERSONAL        0x0005
-#endif
-
 #ifndef SHGFP_TYPE_CURRENT
     #define SHGFP_TYPE_CURRENT 0
 #endif
@@ -79,6 +75,7 @@ static const wxChar *TRACE_MASK = _T("stdpaths");
 #ifndef SHGFP_TYPE_DEFAULT
     #define SHGFP_TYPE_DEFAULT 1
 #endif
+
 // ----------------------------------------------------------------------------
 // module globals
 // ----------------------------------------------------------------------------
@@ -245,31 +242,6 @@ wxString wxStandardPaths::DoGetDirectory(int csidl)
     return dir;
 }
 
-/* static */
-wxString wxStandardPaths::GetAppDir()
-{
-    wxFileName fn(wxGetFullModuleName());
-
-    // allow running the apps directly from build directory in debug builds
-#ifdef __WXDEBUG__
-    wxString lastdir;
-    if ( fn.GetDirCount() )
-    {
-        lastdir = fn.GetDirs().Last();
-        lastdir.MakeLower();
-        if ( lastdir.Matches(_T("debug*")) || lastdir.Matches(_T("vc_msw*")) )
-            fn.RemoveLastDir();
-    }
-#endif // __WXDEBUG__
-
-    return fn.GetPath();
-}
-
-wxString wxStandardPaths::GetDocumentsDir() const
-{
-    return DoGetDirectory(CSIDL_PERSONAL);
-}
-
 // ----------------------------------------------------------------------------
 // public functions
 // ----------------------------------------------------------------------------
@@ -288,7 +260,7 @@ wxString wxStandardPaths::GetDataDir() const
 {
     // under Windows each program is usually installed in its own directory and
     // so its datafiles are in the same directory as its main executable
-    return GetAppDir();
+    return wxFileName(wxGetFullModuleName()).GetPath();
 }
 
 wxString wxStandardPaths::GetUserDataDir() const
@@ -303,10 +275,9 @@ wxString wxStandardPaths::GetUserLocalDataDir() const
 
 wxString wxStandardPaths::GetPluginsDir() const
 {
-    // there is no standard location for plugins, suppose they're in the same
-    // directory as the .exe
-    return GetAppDir();
+    return wxFileName(wxGetFullModuleName()).GetPath();
 }
+
 
 // ============================================================================
 // wxStandardPathsWin16 implementation

@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "cursor.h"
+#endif
+
 #include "wx/cursor.h"
 #include "wx/gdicmn.h"
 #include "wx/icon.h"
@@ -124,6 +128,12 @@ wxCursor::wxCursor(const char bits[], int width, int  height,
    wxFAIL_MSG( wxT("wxCursor creation from bits not yet implemented") );
 }
 
+
+wxCursor::wxCursor( const wxCursor &cursor )
+{
+    Ref( cursor );
+}
+
 #if wxUSE_IMAGE
 wxCursor::wxCursor( const wxImage & image )
 {
@@ -133,6 +143,16 @@ wxCursor::wxCursor( const wxImage & image )
 
 wxCursor::~wxCursor()
 {
+}
+
+wxCursor& wxCursor::operator = ( const wxCursor& cursor )
+{
+    if (*this == cursor)
+        return (*this);
+
+    Ref( cursor );
+
+    return *this;
 }
 
 bool wxCursor::operator == ( const wxCursor& cursor ) const
@@ -186,7 +206,7 @@ void wxEndBusyCursor()
         wxTheApp->ProcessIdle();
 }
 
-void wxBeginBusyCursor( const wxCursor *WXUNUSED(cursor) )
+void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )
 {
     if (gs_busyCount++ > 0)
         return;

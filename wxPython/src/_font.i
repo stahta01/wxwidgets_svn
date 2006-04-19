@@ -383,6 +383,14 @@ public:
     static wxFontEncoding GetEncodingFromName(const wxString& name);
 
 
+    // set the config object to use (may be NULL to use default)
+    void SetConfig(wxConfigBase *config);
+    %pythoncode {
+        SetConfig = wx._deprecated(SetConfig,
+            "Set a config object for the whole app instead, with `wx.Config.Set`.")
+    }
+
+
     // set the root config path to use (should be an absolute path)
     void SetConfigPath(const wxString& prefix);
 
@@ -842,27 +850,19 @@ public:
     //wxArrayString* GetFacenames();
     %extend {
         PyObject* GetEncodings() {
-            PyObject* ret;
             wxArrayString* arr = self->GetEncodings();
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();            
             if (arr)
-                ret = wxArrayString2PyList_helper(*arr);
+                return wxArrayString2PyList_helper(*arr);
             else
-                ret = PyList_New(0);
-            wxPyEndBlockThreads(blocked);
-            return ret;
+                return PyList_New(0);
         }
 
         PyObject* GetFacenames() {
-            PyObject* ret;
             wxArrayString* arr = self->GetFacenames();
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();            
             if (arr)
-                ret = wxArrayString2PyList_helper(*arr);
+                return wxArrayString2PyList_helper(*arr);
             else
-                ret =  PyList_New(0);
-            wxPyEndBlockThreads(blocked);
-            return ret;
+                return PyList_New(0);
         }
     }
 };

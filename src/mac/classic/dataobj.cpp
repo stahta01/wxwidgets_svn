@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/dataobj.cpp
+// Name:        mac/dataobj.cpp
 // Purpose:     implementation of wxDataObject class
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,12 +9,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -23,9 +17,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
+#ifdef __GNUG__
+  #pragma implementation "dataobj.h"
 #endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/intl.h"
+#endif
+#include "wx/defs.h"
 
 #include "wx/log.h"
 #include "wx/dataobj.h"
@@ -168,7 +170,9 @@ bool wxDataObject::IsSupportedFormat(
 // wxFileDataObject
 // ----------------------------------------------------------------------------
 
-bool wxFileDataObject::GetDataHere( void* pBuf ) const
+bool wxFileDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
     wxString                        sFilenames;
 
@@ -179,7 +183,7 @@ bool wxFileDataObject::GetDataHere( void* pBuf ) const
     }
 
     memcpy(pBuf, sFilenames.mbc_str(), sFilenames.Len() + 1);
-    return true;
+    return TRUE;
 }
 
 size_t wxFileDataObject::GetDataSize() const
@@ -204,7 +208,7 @@ bool wxFileDataObject::SetData(
 
     AddFile(wxString::FromAscii((char*)pBuf));
 
-    return true;
+    return TRUE;
 }
 
 void wxFileDataObject::AddFile(
@@ -252,13 +256,13 @@ void wxBitmapDataObject::SetBitmap(
     }
 }
 
-void wxBitmapDataObject::Init()
-{
+void wxBitmapDataObject::Init() 
+{ 
     m_pictHandle = NULL ;
     m_pictCreated = false ;
-}
+} 
 
-void wxBitmapDataObject::Clear()
+void wxBitmapDataObject::Clear() 
 {
     if ( m_pictCreated && m_pictHandle )
     {
@@ -267,15 +271,17 @@ void wxBitmapDataObject::Clear()
     m_pictHandle = NULL ;
 }
 
-bool wxBitmapDataObject::GetDataHere( void* pBuf ) const
+bool wxBitmapDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
     if (!m_pictHandle)
     {
         wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
-        return false;
+        return FALSE;
     }
     memcpy(pBuf, *(Handle)m_pictHandle, GetHandleSize((Handle)m_pictHandle));
-    return true;
+    return TRUE;
 }
 
 size_t wxBitmapDataObject::GetDataSize() const
@@ -294,7 +300,7 @@ bool wxBitmapDataObject::SetData(
     m_pictHandle = picHandle ;
     m_pictCreated = false ;
     Rect frame = (**picHandle).picFrame ;
-
+    
     m_bitmap.SetPict( picHandle ) ;
     m_bitmap.SetWidth( frame.right - frame.left ) ;
     m_bitmap.SetHeight( frame.bottom - frame.top ) ;

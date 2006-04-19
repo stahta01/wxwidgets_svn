@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/gdiobj.cpp
+// Name:        gdiobj.cpp
 // Purpose:     wxGDIObject class
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gdiobj.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,6 +22,7 @@
 
 #ifndef WX_PRECOMP
 #include <stdio.h>
+#include "wx/setup.h"
 #include "wx/list.h"
 #include "wx/utils.h"
 #include "wx/app.h"
@@ -27,8 +32,6 @@
 #include "wx/msw/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxGDIObject, wxObject)
-
-#define M_GDIDATA wx_static_cast(wxGDIRefData*, m_refData)
 
 /*
 void wxGDIObject::IncrementResourceUsage(void)
@@ -59,3 +62,4 @@ void wxGDIObject::DecrementResourceUsage(void)
 };
 
 */
+

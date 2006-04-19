@@ -12,7 +12,11 @@
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
 
-WXDLLEXPORT_DATA(extern const wxChar) wxControlNameStr[];
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "control.h"
+#endif
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxControlNameStr;
 
 // General item class
 class WXDLLEXPORT wxControl : public wxControlBase

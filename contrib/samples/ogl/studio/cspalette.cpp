@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/cspalette.cpp
+// Name:        cspalette.cpp
 // Purpose:     OGLEdit palette
 // Author:      Julian Smart
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,10 +21,10 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/laywin.h"
+#include <wx/laywin.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -32,7 +36,7 @@
 #include "cspalette.h"
 #include "symbols.h"
 
-#ifndef __WXMSW__
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
 #include "bitmaps/arrow.xpm"
 #include "bitmaps/texttool.xpm"
 #endif
@@ -118,7 +122,7 @@ bool csApp::CreatePalette(wxFrame *parent)
     wxBitmap PaletteArrow(_T("arrowtool"));
     wxBitmap TextTool(_T("texttool"));
     wxSize toolBitmapSize(32, 32);
-#else // !__WXMSW__
+#elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     wxBitmap PaletteArrow(arrow_xpm);
     wxBitmap TextTool(texttool_xpm);
     wxSize toolBitmapSize(22, 22);
@@ -141,7 +145,7 @@ bool csApp::CreatePalette(wxFrame *parent)
 
   symbols[noSymbols] =  _T("Thin Rectangle");
   noSymbols ++;
-
+ 
   symbols[noSymbols] =  _T("Triangle");
   noSymbols ++;
 
@@ -200,3 +204,4 @@ bool csApp::CreatePalette(wxFrame *parent)
 
   return true;
 }
+

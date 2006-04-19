@@ -13,6 +13,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "artprov.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -38,7 +42,7 @@
 
 #include "wx/listimpl.cpp"
 WX_DECLARE_LIST(wxArtProvider, wxArtProvidersList);
-WX_DEFINE_LIST(wxArtProvidersList)
+WX_DEFINE_LIST(wxArtProvidersList);
 
 // ----------------------------------------------------------------------------
 // Cache class - stores already requested bitmaps

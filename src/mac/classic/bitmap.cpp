@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/bitmap.cpp
+// Name:        bitmap.cpp
 // Purpose:     wxBitmap
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,11 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "bitmap.h"
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/bitmap.h"
 #include "wx/icon.h"
@@ -357,7 +357,7 @@ wxBitmapRefData::wxBitmapRefData()
     : m_width(0)
     , m_height(0)
     , m_depth(0)
-    , m_ok(false)
+    , m_ok(FALSE)
     , m_numColors(0)
     , m_quality(0)
 {
@@ -512,12 +512,12 @@ wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
 
 bool wxBitmap::CreateFromXpm(const char **bits)
 {
-    wxCHECK_MSG( bits != NULL, false, wxT("invalid bitmap data") );
+    wxCHECK_MSG( bits != NULL, FALSE, wxT("invalid bitmap data") )
     wxXPMDecoder decoder;
     wxImage img = decoder.ReadData(bits);
-    wxCHECK_MSG( img.Ok(), false, wxT("invalid bitmap data") );
+    wxCHECK_MSG( img.Ok(), FALSE, wxT("invalid bitmap data") )
     *this = wxBitmap(img);
-    return true;
+    return TRUE;
 }
 
 wxBitmap::wxBitmap(const char **bits)
@@ -714,7 +714,7 @@ bool wxBitmap::Create(void *data, wxBitmapType type, int width, int height, int 
     if ( handler == NULL ) {
         wxLogWarning(wxT("no bitmap handler for type %d defined."), type);
 
-        return false;
+        return FALSE;
     }
 
     return handler->Create(this, data, type, width, height, depth);
@@ -722,8 +722,8 @@ bool wxBitmap::Create(void *data, wxBitmapType type, int width, int height, int 
 
 wxBitmap::wxBitmap(const wxImage& image, int depth)
 {
-    wxCHECK_RET( image.Ok(), wxT("invalid image") );
-    wxCHECK_RET( depth == -1, wxT("invalid bitmap depth") );
+    wxCHECK_RET( image.Ok(), wxT("invalid image") )
+    wxCHECK_RET( depth == -1, wxT("invalid bitmap depth") )
 
     m_refData = new wxBitmapRefData();
 
@@ -1166,7 +1166,7 @@ bool wxMask::Create(const wxBitmap& bitmap)
    UnlockPixels( GetGWorldPixMap( (GWorldPtr) m_maskBitmap) );
    UnlockPixels( GetGWorldPixMap( (GWorldPtr) bitmap.GetHBITMAP()) );
 
-   return false;
+   return FALSE;
 }
 
 // Create a mask from a bitmap and a palette index indicating
@@ -1175,7 +1175,7 @@ bool wxMask::Create(const wxBitmap& bitmap, int paletteIndex)
 {
     // TODO
     wxCHECK_MSG( 0, false, wxT("wxMask::Create not yet implemented"));
-    return false;
+    return FALSE;
 }
 
 // Create a mask from a bitmap and a colour indicating
@@ -1230,7 +1230,7 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
     UnlockPixels( GetGWorldPixMap(  (GWorldPtr) bitmap.GetHBITMAP() ) ) ;
     SetGWorld( origPort , origDevice ) ;
 
-    return true;
+    return TRUE;
 }
 
 bool wxMask::PointMasked(int x, int y)
@@ -1264,18 +1264,18 @@ wxBitmapHandler::~wxBitmapHandler()
 
 bool wxBitmapHandler::Create(wxBitmap *bitmap, void *data, long type, int width, int height, int depth)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxBitmapHandler::LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
         int desiredWidth, int desiredHeight)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxBitmapHandler::SaveFile(const wxBitmap *bitmap, const wxString& name, int type, const wxPalette *palette)
 {
-    return false;
+    return FALSE;
 }
 
 /*
@@ -1321,9 +1321,9 @@ bool  wxPICTResourceHandler::LoadFile(wxBitmap *bitmap, const wxString& name, lo
         M_BITMAPHANDLERDATA->m_numColors = theInfo.uniqueColors ;
 //      M_BITMAPHANDLERDATA->m_bitmapPalette;
 //      M_BITMAPHANDLERDATA->m_quality;
-        return true ;
+        return TRUE ;
     }
-    return false ;
+    return FALSE ;
 }
 
 void wxBitmap::InitStandardHandlers()

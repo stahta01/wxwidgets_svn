@@ -12,9 +12,13 @@
 #ifndef _WX_STATBOX_H_
 #define _WX_STATBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "statbox.h"
+#endif
+
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxStaticBoxNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBoxNameStr;
 
 // Group box
 class WXDLLEXPORT wxStaticBox: public wxControl

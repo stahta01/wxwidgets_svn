@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -955,7 +959,7 @@ bool Go(void)
     frame->SetTitle(buf);
   }
 
-  wxLongLong localTime = wxGetLocalTimeMillis();
+  wxStartTimer();
 #endif
 
   // Find extension-less filename
@@ -1057,8 +1061,8 @@ bool Go(void)
 
     wxString buf;
 #ifndef NO_GUI
-    wxLongLong elapsed = wxGetLocalTimeMillis() - localTime;
-    buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(elapsed.GetLo()/1000.0));
+    long tim = wxGetElapsedTime();
+    buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(tim/1000.0));
     OnInform((wxChar *)buf.c_str());
 
     if (errorCount)

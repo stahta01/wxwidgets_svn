@@ -1,19 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/scrolbar.cpp
+// Name:        scrolbar.cpp
 // Purpose:     wxScrollBar
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "scrolbar.h"
 #endif
+
+#include "wx/defs.h"
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
@@ -38,7 +38,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
            const wxString& name)
 {
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     Rect bounds ;
     Str255 title ;
@@ -46,7 +46,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
     MacPreControlCreate( parent , id ,  wxEmptyString , pos , size ,style, validator , name , &bounds , title ) ;
 
     m_macControl = (WXWidget) ::NewControl(MAC_WXHWND(parent->MacGetRootWindow()) ,
-                                &bounds , title , false , 0 , 0 , 100,
+                                &bounds , title , false , 0 , 0 , 100, 
                                 kControlScrollBarLiveProc , (long) this) ;
 
     wxASSERT_MSG( (ControlHandle) m_macControl != NULL , wxT("No valid mac control") ) ;
@@ -55,7 +55,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 
     MacPostControlCreate() ;
 
-    return true;
+    return TRUE;
 }
 
 wxScrollBar::~wxScrollBar()
@@ -103,22 +103,22 @@ void wxScrollBar::Command(wxCommandEvent& event)
     ProcessCommand(event);
 }
 
-void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown )
+void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) 
 {
     if ( (ControlHandle) m_macControl == NULL )
         return ;
-
+    
     int position = GetControl32BitValue( (ControlHandle) m_macControl) ;
     int minPos = GetControl32BitMinimum( (ControlHandle) m_macControl) ;
     int maxPos = GetControl32BitMaximum( (ControlHandle) m_macControl) ;
-
+    
     wxEventType scrollEvent = wxEVT_NULL;
     int nScrollInc = 0;
-
+    
     // all events have already been reported during mouse down, except for THUMBRELEASE
     if ( !mouseStillDown && controlpart !=kControlIndicatorPart )
         return ;
-
+    
     switch( controlpart )
     {
     case kControlUpButtonPart :
@@ -148,16 +148,16 @@ void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart 
         wxFAIL_MSG(wxT("illegal scrollbar selector"));
         break ;
     }
-
+    
     int new_pos = position + nScrollInc;
-
+    
     if (new_pos < minPos)
         new_pos = minPos;
     if (new_pos > maxPos)
         new_pos = maxPos;
     if ( nScrollInc )
         SetThumbPosition(new_pos);
-
+    
     wxScrollEvent event(scrollEvent, m_windowId);
     if ( m_windowStyle & wxHORIZONTAL )
     {
@@ -178,3 +178,4 @@ void wxScrollBar::MacHandleControlClick( WXWidget control , wxInt16 controlpart 
     else
         GetEventHandler()->ProcessEvent(event);
 }
+

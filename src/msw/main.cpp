@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,7 +31,6 @@
 #include "wx/event.h"
 #include "wx/app.h"
 #include "wx/cmdline.h"
-#include "wx/scopeguard.h"
 
 #include "wx/msw/private.h"
 
@@ -332,20 +335,6 @@ static bool wxIsUnicodeAvailable()
 // Windows-specific wxEntry
 // ----------------------------------------------------------------------------
 
-// helper function used to clean up in wxEntry() just below
-//
-// notice that argv elements are supposed to be allocated using malloc() while
-// argv array itself is allocated with new
-static void wxFreeArgs(int argc, wxChar **argv)
-{
-    for ( int i = 0; i < argc; i++ )
-    {
-        free(argv[i]);
-    }
-
-    delete [] argv;
-}
-
 WXDLLEXPORT int wxEntry(HINSTANCE hInstance,
                         HINSTANCE WXUNUSED(hPrevInstance),
                         wxCmdLineArgType WXUNUSED(pCmdLine),
@@ -394,10 +383,57 @@ WXDLLEXPORT int wxEntry(HINSTANCE hInstance,
     // argv[] must be NULL-terminated
     argv[argc] = NULL;
 
-    wxON_BLOCK_EXIT2(wxFreeArgs, argc, argv);
-
     return wxEntry(argc, argv);
 }
+
+// May wish not to have a DllMain or WinMain, e.g. if we're programming
+// a Netscape plugin or if we're writing a console application
+#if !defined(NOMAIN)
+
+extern "C"
+{
+
+// ----------------------------------------------------------------------------
+// WinMain
+// ----------------------------------------------------------------------------
+
+// Note that WinMain is also defined in dummy.obj, which is linked to
+// an application that is using the DLL version of wxWidgets.
+
+#if defined(_WINDLL)
+
+// DLL entry point
+
+BOOL WINAPI
+DllMain(HINSTANCE hModule, DWORD fdwReason, LPVOID WXUNUSED(lpReserved))
+{
+    // Only call wxEntry if the application itself is part of the DLL.
+    // If only the wxWidgets library is in the DLL, then the
+    // initialisation will be called when the application implicitly
+    // calls WinMain.
+#ifndef WXMAKINGDLL
+    switch (fdwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+            return wxEntry(hModule);
+
+        case DLL_PROCESS_DETACH:
+            wxEntryCleanup();
+            break;
+    }
+#else
+    (void)hModule;
+    (void)fdwReason;
+#endif // !WXMAKINGDLL
+
+    return TRUE;
+}
+
+#endif // _WINDLL
+
+} // extern "C"
+
+#endif // !NOMAIN
 
 #endif // wxUSE_GUI && __WXMSW__
 

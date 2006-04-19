@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrl.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -134,7 +138,7 @@ wxBEGIN_FLAGS( wxTextCtrlStyle )
     wxFLAGS_MEMBER(wxTE_CENTRE)
     wxFLAGS_MEMBER(wxTE_RIGHT)
     wxFLAGS_MEMBER(wxTE_DONTWRAP)
-    wxFLAGS_MEMBER(wxTE_CHARWRAP)
+    wxFLAGS_MEMBER(wxTE_LINEWRAP)
     wxFLAGS_MEMBER(wxTE_WORDWRAP)
 
 wxEND_FLAGS( wxTextCtrlStyle )

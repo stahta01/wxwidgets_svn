@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/wizard.h
+// Name:        generic/wizard.h
 // Purpose:     declaration of generic wxWizard class
 // Author:      Vadim Zeitlin
 // Modified by: Robert Vazan (sizers)
@@ -15,6 +15,10 @@
 // ----------------------------------------------------------------------------
 // wxWizard
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "wizardg.h"
+#endif
 
 class WXDLLEXPORT wxButton;
 class WXDLLEXPORT wxStaticBitmap;
@@ -69,9 +73,6 @@ public:
     // this is app-overridable to, for example, set help and tooltip text
     virtual void DoCreateControls();
 
-protected:
-    void FinishLayout();
-
 private:
     // was the dialog really created?
     bool WasCreated() const { return m_btnPrev != NULL; }
@@ -88,6 +89,12 @@ private:
     void AddBackNextPair(wxBoxSizer *buttonRow);
     void AddButtonRow(wxBoxSizer *mainColumn);
 
+#if wxABI_VERSION >= 20602
+protected:
+#endif
+    void FinishLayout();
+
+private:
     wxSize GetManualPageSize() const;
 
     // the page size requested by user
@@ -112,9 +119,6 @@ private:
 
     // Whether RunWizard() was called
     bool m_started;
-
-    // Whether was modal (modeless has to be destroyed on finish or cancel)
-    bool m_wasModal;
 
     // Page area sizer will be inserted here with padding
     wxBoxSizer *m_sizerBmpAndPage;

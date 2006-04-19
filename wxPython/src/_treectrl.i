@@ -46,13 +46,10 @@ enum {
     wxTR_DEFAULT_STYLE,
 
     wxTR_TWIST_BUTTONS,
+    wxTR_MAC_BUTTONS,
+    wxTR_AQUA_BUTTONS,
 };
 
-%pythoncode {
-    %# obsolete
-    TR_MAC_BUTTONS = 0
-    wxTR_AQUA_BUTTONS = 0
-}
 
 enum wxTreeItemIcon
 {
@@ -124,15 +121,13 @@ public:
 class wxPyTreeItemData {
 public:
     wxPyTreeItemData(PyObject* obj = NULL);
-    ~wxPyTreeItemData();
-    
+
     PyObject* GetData();
     void      SetData(PyObject* obj);
 
     const wxTreeItemId& GetId();
     void                SetId(const wxTreeItemId& id);
 
-    %pythonAppend Destroy "args[0].thisown = 0"
     %extend { void Destroy() { delete self; } }
 };
 
@@ -149,8 +144,7 @@ public:
     wxTreeItemAttr(const wxColour& colText = wxNullColour,
                    const wxColour& colBack = wxNullColour,
                    const wxFont& font = wxNullFont);
-    ~wxTreeItemAttr();
-    
+
     // setters
     void SetTextColour(const wxColour& colText);
     void SetBackgroundColour(const wxColour& colBack);
@@ -165,7 +159,6 @@ public:
     wxColour GetBackgroundColour();
     wxFont GetFont();
 
-    %pythonAppend Destroy "args[0].thisown = 0"
     %extend { void Destroy() { delete self; } }
 };
 
@@ -349,7 +342,7 @@ public:
 
     
     // get the total number of items in the control
-    unsigned int GetCount() const;
+    size_t GetCount() const;
 
     // indent is the number of pixels the children are indented relative to
     // the parents position. SetIndent() also redraws the control
@@ -379,10 +372,10 @@ public:
     void SetImageList(wxImageList *imageList);
     void SetStateImageList(wxImageList *imageList);
 
-    %disownarg( wxImageList *imageList );
+    %apply SWIGTYPE *DISOWN { wxImageList *imageList };
     void AssignImageList(wxImageList *imageList);
     void AssignStateImageList(wxImageList *imageList);
-    %cleardisown( wxImageList *imageList );
+    %clear wxImageList *imageList;
     
 
     // retrieve items label
@@ -437,12 +430,10 @@ public:
 
     %extend {
         // associate a wxPyTreeItemData with the tree item
-        %disownarg( wxPyTreeItemData* data );
         void SetItemData(const wxTreeItemId& item, wxPyTreeItemData* data) {
             data->SetId(item); // set the id
             self->SetItemData(item, data);
         }
-        %cleardisown( wxPyTreeItemData* data );
 
         // associate a Python object with the tree item
         void SetItemPyData(const wxTreeItemId& item, PyObject* obj) {
@@ -591,7 +582,6 @@ public:
     wxTreeItemId GetPrevVisible(const wxTreeItemId& item) const;
 
     
-    %disownarg( wxPyTreeItemData* data );
     
     // add the root node to the tree
     wxTreeItemId AddRoot(const wxString& text,
@@ -626,8 +616,7 @@ public:
                             wxPyTreeItemData *data = NULL);
 
 
-    %cleardisown( wxPyTreeItemData* data );
-    
+
     // delete this item and associated data if any
     void Delete(const wxTreeItemId& item);
 

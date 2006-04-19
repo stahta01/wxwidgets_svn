@@ -112,7 +112,7 @@ class  wxTreeListHeaderWindow : public wxWindow
 {
 protected:
     wxTreeListMainWindow *m_owner;
-    const wxCursor       *m_currentCursor;
+    wxCursor             *m_currentCursor;
     wxCursor             *m_resizeCursor;
     bool                 m_isDragging;
 
@@ -1216,6 +1216,7 @@ void wxTreeListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
     dc.SetBackground(wxBrush(GetBackgroundColour()));
     dc.Clear();
     
+    dc.BeginDrawing();
     dc.SetFont( GetFont() );
     dc.SetBackgroundMode(wxTRANSPARENT);
 
@@ -1306,6 +1307,7 @@ void wxTreeListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
     }
 
     // Finish up by drawing the buffer to the real dc
+    dc.EndDrawing();
     dc.SelectObject(wxNullBitmap);
     real_dc.DrawBitmap(buffer, 0, 0, false);
 }

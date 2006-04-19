@@ -34,6 +34,7 @@
 #include "wx/vlbox.h"
 #include "wx/dcbuffer.h"
 #include "wx/selstore.h"
+#include "wx/bitmap.h"
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -57,12 +58,16 @@ IMPLEMENT_ABSTRACT_CLASS(wxVListBox, wxVScrolledWindow)
 // wxVListBox creation
 // ----------------------------------------------------------------------------
 
+// due to ABI compatibility reasons, we need to declare double-buffer
+// outside the class
+static wxBitmap* gs_doubleBuffer = NULL;
+
+
 void wxVListBox::Init()
 {
     m_current =
     m_anchor = wxNOT_FOUND;
     m_selStore = NULL;
-    m_doubleBuffer = NULL;
 }
 
 bool wxVListBox::Create(wxWindow *parent,
@@ -92,8 +97,10 @@ bool wxVListBox::Create(wxWindow *parent,
 
 wxVListBox::~wxVListBox()
 {
-    delete m_doubleBuffer;    
     delete m_selStore;
+
+    delete gs_doubleBuffer;
+    gs_doubleBuffer = NULL;
 }
 
 void wxVListBox::SetItemCount(size_t count)
@@ -358,15 +365,15 @@ void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
     // If size is larger, recalculate double buffer bitmap
     wxSize clientSize = GetClientSize();
 
-    if ( !m_doubleBuffer ||
-         clientSize.x > m_doubleBuffer->GetWidth() ||
-         clientSize.y > m_doubleBuffer->GetHeight() )
+    if ( !gs_doubleBuffer ||
+         clientSize.x > gs_doubleBuffer->GetWidth() ||
+         clientSize.y > gs_doubleBuffer->GetHeight() )
     {
-        delete m_doubleBuffer;
-        m_doubleBuffer = new wxBitmap(clientSize.x+25,clientSize.y+25);
+        delete gs_doubleBuffer;
+        gs_doubleBuffer = new wxBitmap(clientSize.x+25,clientSize.y+25);
     }
 
-    wxBufferedPaintDC dc(this,*m_doubleBuffer);
+    wxBufferedPaintDC dc(this,*gs_doubleBuffer);
 
     // the update rectangle
     wxRect rectUpdate = GetUpdateClientRect();
@@ -538,11 +545,13 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
             break;
 
         case WXK_PAGEDOWN:
+        case WXK_NEXT:
             PageDown();
             current = GetFirstVisibleLine();
             break;
 
         case WXK_PAGEUP:
+        case WXK_PRIOR:
             if ( m_current == (int)GetFirstVisibleLine() )
             {
                 PageUp();

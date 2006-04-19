@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/icon.cpp
+// Name:        msw/icon.cpp
 // Purpose:     wxIcon class
 // Author:      Julian Smart
 // Modified by: 20.11.99 (VZ): don't derive from wxBitmap any more
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "icon.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -151,3 +155,4 @@ bool wxIcon::LoadFile(const wxString& filename,
 
     return handler->Load(this, filename, type, desiredWidth, desiredHeight);
 }
+

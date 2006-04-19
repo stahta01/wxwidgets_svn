@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef    __GNUG__
+    #pragma implementation "mimetypebase.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -81,17 +85,7 @@ wxFileTypeInfo::wxFileTypeInfo(const wxChar *mimeType,
 
     for ( ;; )
     {
-        // icc gives this warning in its own va_arg() macro, argh
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-#endif
-
         const wxChar *ext = va_arg(argptr, const wxChar *);
-
-#ifdef __INTELC__
-    #pragma warning(pop)
-#endif
         if ( !ext )
         {
             // NULL terminates the list
@@ -120,7 +114,7 @@ wxFileTypeInfo::wxFileTypeInfo(const wxArrayString& sArray)
 }
 
 #include "wx/arrimpl.cpp"
-WX_DEFINE_OBJARRAY(wxArrayFileTypeInfo)
+WX_DEFINE_OBJARRAY(wxArrayFileTypeInfo);
 
 // ============================================================================
 // implementation of the wrapper classes
@@ -453,34 +447,6 @@ bool wxFileType::SetDefaultIcon(const wxString& cmd, int index)
 #endif
 }
 
-//----------------------------------------------------------------------------
-// wxMimeTypesManagerFactory
-//----------------------------------------------------------------------------
-
-wxMimeTypesManagerFactory *wxMimeTypesManagerFactory::m_factory = NULL;
-
-/* static */ 
-void wxMimeTypesManagerFactory::SetFactory( wxMimeTypesManagerFactory *factory )
-{
-    if (wxMimeTypesManagerFactory::m_factory)
-        delete wxMimeTypesManagerFactory::m_factory;
-
-    wxMimeTypesManagerFactory::m_factory = factory;
-}
-
-/* static */ 
-wxMimeTypesManagerFactory *wxMimeTypesManagerFactory::GetFactory()
-{
-    if (!wxMimeTypesManagerFactory::m_factory)
-        wxMimeTypesManagerFactory::m_factory = new wxMimeTypesManagerFactory;
-
-    return wxMimeTypesManagerFactory::m_factory;
-}
-
-wxMimeTypesManagerImpl *wxMimeTypesManagerFactory::CreateMimeTypesManagerImpl()
-{
-    return new wxMimeTypesManagerImpl;
-}
 
 // ----------------------------------------------------------------------------
 // wxMimeTypesManager
@@ -489,7 +455,7 @@ wxMimeTypesManagerImpl *wxMimeTypesManagerFactory::CreateMimeTypesManagerImpl()
 void wxMimeTypesManager::EnsureImpl()
 {
     if ( !m_impl )
-        m_impl = wxMimeTypesManagerFactory::GetFactory()->CreateMimeTypesManagerImpl();
+        m_impl = new wxMimeTypesManagerImpl;
 }
 
 bool wxMimeTypesManager::IsOfType(const wxString& mimeType,

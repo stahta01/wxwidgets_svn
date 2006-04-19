@@ -442,7 +442,7 @@ class XML_Tree(wxTreeCtrl):
         EVT_TREE_ITEM_COLLAPSED(self, self.GetId(), self.OnItemExpandedCollapsed)
 
         self.selection = None
-        self.selectionChanging = False
+	self.selectionChanging = False
         self.needUpdate = False
         self.pendingHighLight = None
         self.ctrl = self.shift = False
@@ -654,7 +654,7 @@ class XML_Tree(wxTreeCtrl):
         # Top-level sizer? return window's sizer
         if xxx.isSizer and isinstance(parentWin, wxWindow):
             return parentWin.GetSizer()
-        elif xxx.__class__ in [xxxMenu, xxxMenuItem, xxxSeparator]:  return None
+        elif xxx.__class__ in [xxxStatusBar, xxxMenu, xxxMenuItem, xxxSeparator]:  return None
         elif xxx.__class__ in [xxxToolBar, xxxMenuBar]:
             # If it's the main toolbar or menubar, we can't really select it
             if xxx.parent.__class__ == xxxFrame:  return None
@@ -671,20 +671,23 @@ class XML_Tree(wxTreeCtrl):
             # First window is controld
             return parentWin.GetChildren()[self.ItemIndex(item)+1]
         # Otherwise get parent's object and it's child
-        child = parentWin.GetChildren()[self.WindowIndex(item)]
+        child = parentWin.GetChildren()[self.ItemIndex(item)]
         # Return window or sizer for sizer items
         if child.GetClassName() == 'wxSizerItem':
             if child.IsWindow(): child = child.GetWindow()
             elif child.IsSizer():
                 child = child.GetSizer()
+                # Test for notebook sizers (deprecated)
+                if isinstance(child, wxNotebookSizer):
+                    child = child.GetNotebook()        
         return child
 
     def OnSelChanged(self, evt):
         if self.selectionChanging: return
-        self.selectionChanging = True
+	self.selectionChanging = True
         self.UnselectAll()
         self.SelectItem(evt.GetItem())
-        self.selectionChanging = False
+	self.selectionChanging = False
 
     def ChangeSelection(self, item):
         # Apply changes
@@ -738,9 +741,7 @@ class XML_Tree(wxTreeCtrl):
             return
         # Get window/sizer object
         obj = self.FindNodeObject(item)
-        if not obj:
-            if g.testWin.highLight: g.testWin.highLight.Remove()
-            return
+        if not obj: return
         pos = self.FindNodePos(item, obj)
         size = obj.GetSize()
         # Highlight
@@ -980,17 +981,6 @@ class XML_Tree(wxTreeCtrl):
 
     def OnCloseTestWin(self, evt):
         self.CloseTestWindow()
-
-    # Return index in parent, for real window children
-    def WindowIndex(self, item):
-        n = 0                           # index of sibling
-        prev = self.GetPrevSibling(item)
-        while prev.IsOk():
-            # MenuBar is not a child
-            if not isinstance(self.GetPyData(prev), xxxMenuBar):
-                n += 1
-            prev = self.GetPrevSibling(prev)
-        return n
 
     # Return item index in parent
     def ItemIndex(self, item):

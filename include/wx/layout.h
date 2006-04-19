@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/layout.h
-// Purpose:     OBSOLETE layout constraint classes, use sizers instead
+// Name:        layout.h
+// Purpose:     Layout classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     29/01/98
@@ -9,12 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_LAYOUT_H_
-#define _WX_LAYOUT_H_
+#ifndef _WX_LAYOUTH__
+#define _WX_LAYOUTH__
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "layout.h"
+#endif
 
 #include "wx/object.h"
 
@@ -25,8 +29,6 @@
 #ifdef Below
     #undef Below
 #endif
-
-#if wxUSE_CONSTRAINTS
 
 // ----------------------------------------------------------------------------
 // forward declrations
@@ -186,6 +188,5 @@ public:
     DECLARE_DYNAMIC_CLASS(wxLayoutConstraints)
 };
 
-#endif // wxUSE_CONSTRAINTS
-
-#endif // _WX_LAYOUT_H_
+#endif
+    // _WX_LAYOUTH__

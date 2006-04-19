@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLPARS_H_
 #define _WX_HTMLPARS_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlpars.h"
+#endif
 
 #include "wx/defs.h"
 #if wxUSE_HTML
@@ -99,7 +104,7 @@ public:
     // handler can handle only 'myitems' (e.g. it's GetSupportedTags returns "MYITEMS")
     // you can call PushTagHandler(handler, "IT") when you find <myitems>
     // and call PopTagHandler() when you find </myitems>
-    void PushTagHandler(wxHtmlTagHandler *handler, const wxString& tags);
+    void PushTagHandler(wxHtmlTagHandler *handler, wxString tags);
 
     // Restores state before last call to PushTagHandler
     void PopTagHandler();
@@ -115,10 +120,6 @@ public:
     // Restores parser's state from stack or returns false if the stack is
     // empty
     virtual bool RestoreState();
-
-    // Returns HTML source inside the element (i.e. between the starting
-    // and ending tag)
-    wxString GetInnerSource(const wxHtmlTag& tag);
 
     // Parses HTML string 'markup' and extracts charset info from <meta> tag
     // if present. Returns empty string if the tag is missing.
@@ -227,12 +228,6 @@ protected:
     // m_Parser must be set.
     void ParseInner(const wxHtmlTag& tag)
         { m_Parser->DoParsing(tag.GetBeginPos(), tag.GetEndPos1()); }
-
-    // Parses given source as if it was tag's inner code (see
-    // wxHtmlParser::GetInnerSource).  Unlike ParseInner(), this method lets
-    // you specify the source code to parse. This is useful when you need to
-    // modify the inner text before parsing.
-    void ParseInnerSource(const wxString& source);
 
     wxHtmlParser *m_Parser;
 

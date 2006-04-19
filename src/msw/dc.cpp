@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -131,13 +135,10 @@ static bool AlphaBlt(HDC hdcDst,
                      const wxBitmap& bmpSrc);
 
 #ifdef wxHAVE_RAW_BITMAP
-
-// our (limited) AlphaBlend() replacement for Windows versions not providing it
+// our (limited) AlphaBlend() replacement
 static void
-wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h,
-             int srcX, int srcY, const wxBitmap& bmp);
-
-#endif // wxHAVE_RAW_BITMAP
+wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h, int srcX, int srcY, const wxBitmap& bmp);
+#endif
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -195,37 +196,6 @@ private:
 
     DECLARE_NO_COPY_CLASS(StretchBltModeChanger)
 };
-
-// support for dynamic loading of msimg32.dll which we use for some functions
-class wxMSImg32DLL
-{
-public:
-    // return the symbol with the given name if the DLL not loaded or symbol
-    // not present
-    static void *GetSymbol(const wxChar *name)
-    {
-        wxLogNull noLog;
-
-        if ( !ms_triedToLoad )
-        {
-            ms_triedToLoad = true;
-            ms_dll.Load(_T("msimg32"));
-        }
-
-        return ms_dll.IsLoaded() ? ms_dll.GetSymbol(name) : NULL;
-    }
-
-private:
-    static wxDynamicLibrary ms_dll;
-    static bool ms_triedToLoad;
-};
-
-wxDynamicLibrary wxMSImg32DLL::ms_dll;
-bool wxMSImg32DLL::ms_triedToLoad = false;
-
-// helper macro for getting the symbols from msimg32.dll: it supposes that a
-// type "name_t" is defined and casts the returned symbol to it automatically
-#define wxMSIMG32_SYMBOL(name) (name ## _t)wxMSImg32DLL::GetSymbol(_T(#name))
 
 // ===========================================================================
 // implementation
@@ -288,6 +258,23 @@ wxColourChanger::~wxColourChanger()
 // ---------------------------------------------------------------------------
 // wxDC
 // ---------------------------------------------------------------------------
+
+// Default constructor
+wxDC::wxDC()
+{
+    m_canvas = NULL;
+
+    m_oldBitmap = 0;
+    m_oldPen = 0;
+    m_oldBrush = 0;
+    m_oldFont = 0;
+#if wxUSE_PALETTE
+    m_oldPalette = 0;
+#endif // wxUSE_PALETTE
+
+    m_bOwnsDC = false;
+    m_hDC = 0;
+}
 
 wxDC::~wxDC()
 {
@@ -483,7 +470,7 @@ void wxDC::DestroyClippingRegion()
 
     if (m_clipping && m_hDC)
     {
-#if 1
+#ifdef __WXWINCE__
         // On a PocketPC device (not necessarily emulator), resetting
         // the clip region as per the old method causes bad display
         // problems. In fact setting a null region is probably OK
@@ -498,7 +485,7 @@ void wxDC::DestroyClippingRegion()
         HRGN rgn = CreateRectRgn(0, 0, 32000, 32000);
         ::SelectClipRgn(GetHdc(), rgn);
         ::DeleteObject(rgn);
-#endif        
+#endif
     }
 
     wxDCBase::DestroyClippingRegion();
@@ -724,13 +711,12 @@ void wxDC::DoDrawArc(wxCoord x1, wxCoord y1,
 void wxDC::DoDrawCheckMark(wxCoord x1, wxCoord y1,
                            wxCoord width, wxCoord height)
 {
-    // cases when we don't have DrawFrameControl()
-#if defined(__SYMANTEC__) || defined(__WXMICROWIN__)
-    return wxDCBase::DoDrawCheckMark(x1, y1, width, height);
-#else // normal case
+    WXMICROWIN_CHECK_HDC
+
     wxCoord x2 = x1 + width,
             y2 = y1 + height;
 
+#if defined(__WIN32__) && !defined(__SYMANTEC__) && !defined(__WXMICROWIN__)
     RECT rect;
     rect.left   = x1;
     rect.top    = y1;
@@ -742,10 +728,25 @@ void wxDC::DoDrawCheckMark(wxCoord x1, wxCoord y1,
 #else
     DrawFrameControl(GetHdc(), &rect, DFC_MENU, DFCS_MENUCHECK);
 #endif
+#else // Symantec-MicroWin
+    // draw a cross
+    HPEN blackPen = ::CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    HPEN whiteBrush = (HPEN)::GetStockObject(WHITE_BRUSH);
+    HPEN hPenOld = (HPEN)::SelectObject(GetHdc(), blackPen);
+    HPEN hBrushOld = (HPEN)::SelectObject(GetHdc(), whiteBrush);
+    ::SetROP2(GetHdc(), R2_COPYPEN);
+    Rectangle(GetHdc(), x1, y1, x2, y2);
+    MoveToEx(GetHdc(), x1, y1, NULL);
+    LineTo(GetHdc(), x2, y2);
+    MoveToEx(GetHdc(), x2, y1, NULL);
+    LineTo(GetHdc(), x1, y2);
+    ::SelectObject(GetHdc(), hPenOld);
+    ::SelectObject(GetHdc(), hBrushOld);
+    ::DeleteObject(blackPen);
+#endif // Win32/Symantec-MicroWin
 
     CalcBoundingBox(x1, y1);
     CalcBoundingBox(x2, y2);
-#endif // Microwin/Normal
 }
 
 void wxDC::DoDrawPoint(wxCoord x, wxCoord y)
@@ -1739,39 +1740,10 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
     }
 
     SIZE sizeRect;
-    const size_t len = string.length();
-    if ( !::GetTextExtentPoint32(GetHdc(), string, len, &sizeRect) )
-    {
-        wxLogLastError(_T("GetTextExtentPoint32()"));
-    }
-
-    // the result computed by GetTextExtentPoint32() may be too small as it
-    // accounts for under/overhang of the first/last character while we want
-    // just the bounding rect for this string so adjust the width as needed
-    if ( len > 0 )
-    {
-        ABC width;
-        const wxChar chFirst = *string.begin();
-        if ( ::GetCharABCWidths(GetHdc(), chFirst, chFirst, &width) )
-        {
-            if ( width.abcA < 0 )
-                sizeRect.cx -= width.abcA;
-
-            if ( len > 1 )
-            {
-                const wxChar chLast = *string.rbegin();
-                ::GetCharABCWidths(GetHdc(), chLast, chLast, &width);
-            }
-            //else: we already have the width of the last character
-
-            if ( width.abcC < 0 )
-                sizeRect.cx -= width.abcC;
-        }
-        //else: GetCharABCWidths() failed, not a TrueType font?
-    }
-
     TEXTMETRIC tm;
-    ::GetTextMetrics(GetHdc(), &tm);
+
+    ::GetTextExtentPoint32(GetHdc(), string, string.length(), &sizeRect);
+    GetTextMetrics(GetHdc(), &tm);
 
     if (x)
         *x = sizeRect.cx;
@@ -1798,7 +1770,7 @@ bool wxDC::DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) con
     static int maxWidth = -1;
     int fit = 0;
     SIZE sz = {0,0};
-    int stlen = text.length();
+    int stlen = text.Length();
 
     if (maxLenText == -1)
     {
@@ -2323,14 +2295,12 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     return success;
 }
 
-void wxDC::GetDeviceSize(int *width, int *height) const
+void wxDC::DoGetSize(int *w, int *h) const
 {
     WXMICROWIN_CHECK_HDC
 
-    if ( width )
-        *width = ::GetDeviceCaps(GetHdc(), HORZRES);
-    if ( height )
-        *height = ::GetDeviceCaps(GetHdc(), VERTRES);
+    if ( w ) *w = ::GetDeviceCaps(GetHdc(), HORZRES);
+    if ( h ) *h = ::GetDeviceCaps(GetHdc(), VERTRES);
 }
 
 void wxDC::DoGetSizeMM(int *w, int *h) const
@@ -2538,7 +2508,32 @@ static bool AlphaBlt(HDC hdcDst,
                                         HDC,int,int,int,int,
                                         BLENDFUNCTION);
 
-    static AlphaBlend_t pfnAlphaBlend = wxMSIMG32_SYMBOL(AlphaBlend);
+    // bitmaps can be drawn only from GUI thread so there is no need to
+    // protect this static variable from multiple threads
+    static bool s_triedToLoad = false;
+    static AlphaBlend_t pfnAlphaBlend = NULL;
+    if ( !s_triedToLoad )
+    {
+        s_triedToLoad = true;
+
+        // don't give errors about the DLL being unavailable, we're
+        // prepared to handle this
+        wxLogNull nolog;
+
+        wxDynamicLibrary dll(_T("msimg32.dll"));
+        if ( dll.IsLoaded() )
+        {
+            pfnAlphaBlend = (AlphaBlend_t)dll.GetSymbol(_T("AlphaBlend"));
+            if ( pfnAlphaBlend )
+            {
+                // we must keep the DLL loaded if we want to be able to
+                // call AlphaBlend() so just never unload it at all, not a
+                // big deal
+                dll.Detach();
+            }
+        }
+    }
+
     if ( pfnAlphaBlend )
     {
         BLENDFUNCTION bf;
@@ -2557,8 +2552,6 @@ static bool AlphaBlt(HDC hdcDst,
 
         wxLogLastError(_T("AlphaBlend"));
     }
-#else
-    wxUnusedVar(hdcSrc);
 #endif // defined(AC_SRC_OVER)
 
     // AlphaBlend() unavailable of failed: use our own (probably much slower)
@@ -2580,9 +2573,7 @@ static bool AlphaBlt(HDC hdcDst,
 #ifdef wxHAVE_RAW_BITMAP
 
 static void
-wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
-             int w, int h,
-             int srcX, int srcY, const wxBitmap& bmpSrc)
+wxAlphaBlend(HDC hdcDst, int xDst, int yDst, int w, int h, int srcX, int srcY, const wxBitmap& bmpSrc)
 {
     // get the destination DC pixels
     wxBitmap bmpDst(w, h, 32 /* force creating RGBA DIB */);
@@ -2639,66 +2630,3 @@ wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
 }
 
 #endif // #ifdef wxHAVE_RAW_BITMAP
-
-void wxDC::DoGradientFillLinear (const wxRect& rect,
-                                 const wxColour& initialColour,
-                                 const wxColour& destColour,
-                                 wxDirection nDirection)
-{
-    // use native function if we have compile-time support it and can load it
-    // during run-time (linking to it statically would make the program
-    // unusable on earlier Windows versions)
-#if defined(GRADIENT_FILL_RECT_H) && wxUSE_DYNLIB_CLASS
-    typedef BOOL
-        (WINAPI *GradientFill_t)(HDC, PTRIVERTEX, ULONG, PVOID, ULONG, ULONG);
-    static GradientFill_t pfnGradientFill = wxMSIMG32_SYMBOL(GradientFill);
-
-    if ( pfnGradientFill )
-    {
-        GRADIENT_RECT grect;
-        grect.UpperLeft = 0;
-        grect.LowerRight = 1;
-
-        // invert colours direction if not filling from left-to-right or
-        // top-to-bottom
-        int firstVertex = nDirection == wxNORTH || nDirection == wxWEST ? 1 : 0;
-
-        // one vertex for upper left and one for upper-right
-        TRIVERTEX vertices[2];
-
-        vertices[0].x = rect.GetLeft();
-        vertices[0].y = rect.GetTop();
-        vertices[1].x = rect.GetRight();
-        vertices[1].y = rect.GetBottom();
-
-        vertices[firstVertex].Red = (COLOR16)(initialColour.Red() << 8);
-        vertices[firstVertex].Green = (COLOR16)(initialColour.Green() << 8);
-        vertices[firstVertex].Blue = (COLOR16)(initialColour.Blue() << 8);
-        vertices[firstVertex].Alpha = 0;
-        vertices[1 - firstVertex].Red = (COLOR16)(destColour.Red() << 8);
-        vertices[1 - firstVertex].Green = (COLOR16)(destColour.Green() << 8);
-        vertices[1 - firstVertex].Blue = (COLOR16)(destColour.Blue() << 8);
-        vertices[1 - firstVertex].Alpha = 0;
-
-        if ( (*pfnGradientFill)
-             (
-                GetHdc(),
-                vertices,
-                WXSIZEOF(vertices),
-                &grect,
-                1,
-                nDirection == wxWEST || nDirection == wxEAST
-                    ? GRADIENT_FILL_RECT_H
-                    : GRADIENT_FILL_RECT_V
-             ) )
-        {
-            // skip call of the base class version below
-            return;
-        }
-
-        wxLogLastError(_T("GradientFill"));
-    }
-#endif // wxUSE_DYNLIB_CLASS
-
-    wxDCBase::DoGradientFillLinear(rect, initialColour, destColour, nDirection);
-}

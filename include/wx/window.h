@@ -12,6 +12,10 @@
 #ifndef _WX_WINDOW_H_BASE_
 #define _WX_WINDOW_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "windowbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers which we must include here
 // ----------------------------------------------------------------------------
@@ -168,11 +172,19 @@ public:
     // window attributes
     // -----------------
 
+        // NB: in future versions of wxWidgets Set/GetTitle() will only work
+        //     with the top level windows (such as dialogs and frames) and
+        //     Set/GetLabel() only with the other ones (i.e. all controls).
+
+        // the title (or label, see below) of the window: the text which the
+        // window shows
+    virtual void SetTitle( const wxString& WXUNUSED(title) ) {}
+    virtual wxString GetTitle() const { return wxEmptyString; }
+
         // label is just the same as the title (but for, e.g., buttons it
-        // makes more sense to speak about labels), title access
-        // is available from wxTLW classes only (frames, dialogs)
-    virtual void SetLabel(const wxString& label) = 0;
-    virtual wxString GetLabel() const = 0;
+        // makes more sense to speak about labels)
+    virtual void SetLabel(const wxString& label) { SetTitle(label); }
+    virtual wxString GetLabel() const { return GetTitle(); }
 
         // the window name is used for ressource setting in X, it is not the
         // same as the window title/label
@@ -222,8 +234,6 @@ public:
     void Move(const wxPoint& pt, int flags = wxSIZE_USE_EXISTING)
         { Move(pt.x, pt.y, flags); }
 
-    void SetPosition(const wxPoint& pt) { Move(pt); }
-
         // Z-order
     virtual void Raise() = 0;
     virtual void Lower() = 0;
@@ -238,30 +248,18 @@ public:
     void SetClientSize(const wxRect& rect)
         { SetClientSize( rect.width, rect.height ); }
 
-        // get the window position (pointers may be NULL): notice that it is in
-        // client coordinates for child windows and screen coordinates for the
-        // top level ones, use GetScreenPosition() if you need screen
-        // coordinates for all kinds of windows
+        // get the window position and/or size (pointers may be NULL)
     void GetPosition( int *x, int *y ) const { DoGetPosition(x, y); }
     wxPoint GetPosition() const
     {
-        int x, y;
-        DoGetPosition(&x, &y);
+        int w, h;
+        DoGetPosition(&w, &h);
 
-        return wxPoint(x, y);
+        return wxPoint(w, h);
     }
 
-        // get the window position in screen coordinates
-    void GetScreenPosition(int *x, int *y) const { DoGetScreenPosition(x, y); }
-    wxPoint GetScreenPosition() const
-    {
-        int x, y;
-        DoGetScreenPosition(&x, &y);
+    void SetPosition( const wxPoint& pt ) { Move( pt ) ; }
 
-        return wxPoint(x, y);
-    }
-
-        // get the window size (pointers may be NULL)
     void GetSize( int *w, int *h ) const { DoGetSize(w, h); }
     wxSize GetSize() const
     {
@@ -270,32 +268,22 @@ public:
         return wxSize(w, h);
     }
 
+    wxRect GetRect() const
+    {
+        int x, y, w, h;
+        GetPosition(& x, & y);
+        GetSize(& w, & h);
+
+        return wxRect(x, y, w, h);
+    }
+
     void GetClientSize( int *w, int *h ) const { DoGetClientSize(w, h); }
     wxSize GetClientSize() const
     {
         int w, h;
-        DoGetClientSize(&w, &h);
+        DoGetClientSize(& w, & h);
 
         return wxSize(w, h);
-    }
-
-        // get the position and size at once
-    wxRect GetRect() const
-    {
-        int x, y, w, h;
-        GetPosition(&x, &y);
-        GetSize(&w, &h);
-
-        return wxRect(x, y, w, h);
-    }
-
-    wxRect GetScreenRect() const
-    {
-        int x, y, w, h;
-        GetScreenPosition(&x, &y);
-        GetSize(&w, &h);
-
-        return wxRect(x, y, w, h);
     }
 
         // get the origin of the client area of the window relative to the
@@ -356,11 +344,15 @@ public:
         // the generic centre function - centers the window on parent by`
         // default or on screen if it doesn't have parent or
         // wxCENTER_ON_SCREEN flag is given
-    void Centre(int dir = wxBOTH) { DoCentre(dir); }
-    void Center(int dir = wxBOTH) { DoCentre(dir); }
+    void Centre( int direction = wxBOTH );
+    void Center( int direction = wxBOTH ) { Centre(direction); }
+
+        // centre on screen (only works for top level windows)
+    void CentreOnScreen(int dir = wxBOTH) { Centre(dir | wxCENTER_ON_SCREEN); }
+    void CenterOnScreen(int dir = wxBOTH) { CentreOnScreen(dir); }
 
         // centre with respect to the the parent window
-    void CentreOnParent(int dir = wxBOTH) { DoCentre(dir); }
+    void CentreOnParent(int dir = wxBOTH) { Centre(dir | wxCENTER_FRAME); }
     void CenterOnParent(int dir = wxBOTH) { CentreOnParent(dir); }
 
         // set window size to wrap around its children
@@ -976,7 +968,7 @@ public:
     void DeleteRelatedConstraints();
     void ResetConstraints();
 
-        // these methods may be overridden for special layout algorithms
+        // these methods may be overriden for special layout algorithms
     virtual void SetConstraintSizes(bool recurse = true);
     virtual bool LayoutPhase1(int *noChanges);
     virtual bool LayoutPhase2(int *noChanges);
@@ -1080,6 +1072,19 @@ public:
     // this just provides a simple way to customize InheritAttributes()
     // behaviour in the most common case
     virtual bool ShouldInheritColours() const { return false; }
+
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedWindowFunc1() {}
+    virtual void ReservedWindowFunc2() {}
+    virtual void ReservedWindowFunc3() {}
+    virtual void ReservedWindowFunc4() {}
+    virtual void ReservedWindowFunc5() {}
+    virtual void ReservedWindowFunc6() {}
+    virtual void ReservedWindowFunc7() {}
+    virtual void ReservedWindowFunc8() {}
+    virtual void ReservedWindowFunc9() {}
+#endif
 
 protected:
     // event handling specific to wxWindow
@@ -1271,23 +1276,14 @@ protected:
     virtual void DoReleaseMouse() = 0;
 
     // retrieve the position/size of the window
-    virtual void DoGetPosition(int *x, int *y) const = 0;
-    virtual void DoGetScreenPosition(int *x, int *y) const;
-    virtual void DoGetSize(int *width, int *height) const = 0;
-    virtual void DoGetClientSize(int *width, int *height) const = 0;
+    virtual void DoGetPosition( int *x, int *y ) const = 0;
+    virtual void DoGetSize( int *width, int *height ) const = 0;
+    virtual void DoGetClientSize( int *width, int *height ) const = 0;
 
     // get the size which best suits the window: for a control, it would be
     // the minimal size which doesn't truncate the control, for a panel - the
     // same size as it would have after a call to Fit()
     virtual wxSize DoGetBestSize() const;
-
-    // called from DoGetBestSize() to convert best virtual size (returned by
-    // the window sizer) to the best size for the window itself; this is
-    // overridden at wxScrolledWindow level to clump down virtual size to real
-    virtual wxSize GetWindowSizeForVirtualSize(const wxSize& size) const
-    {
-        return size;
-    }
 
     // this is the virtual function to be overriden in any derived class which
     // wants to change how SetSize() or Move() works - it is called by all
@@ -1305,11 +1301,6 @@ protected:
     // arrange themselves inside the given rectangle
     virtual void DoMoveWindow(int x, int y, int width, int height) = 0;
 
-    // centre the window in the specified direction on parent, note that
-    // wxCENTRE_ON_SCREEN shouldn't be specified here, it only makes sense for
-    // TLWs
-    virtual void DoCentre(int dir);
-
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif // wxUSE_TOOLTIPS
@@ -1326,6 +1317,11 @@ protected:
 
     // implements the window variants
     virtual void DoSetWindowVariant( wxWindowVariant variant ) ;
+
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    void* m_windowReserved;
+#endif
 
 private:
     // contains the last id generated by NewControlId
@@ -1360,20 +1356,13 @@ private:
     #include "wx/msw/window.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/window.h"
-#elif defined(__WXGTK20__)
-    #ifdef __WXUNIVERSAL__
-        #define wxWindowNative wxWindowGTK
-    #else // !wxUniv
-        #define wxWindowGTK wxWindow
-    #endif // wxUniv
-    #include "wx/gtk/window.h"
 #elif defined(__WXGTK__)
     #ifdef __WXUNIVERSAL__
         #define wxWindowNative wxWindowGTK
     #else // !wxUniv
         #define wxWindowGTK wxWindow
     #endif // wxUniv
-    #include "wx/gtk1/window.h"
+    #include "wx/gtk/window.h"
 #elif defined(__WXX11__)
     #ifdef __WXUNIVERSAL__
         #define wxWindowNative wxWindowX11
@@ -1448,11 +1437,8 @@ extern WXDLLEXPORT wxWindow *wxGetActiveWindow();
 // get the (first) top level parent window
 WXDLLEXPORT wxWindow* wxGetTopLevelParent(wxWindow *win);
 
-#if WXWIN_COMPATIBILITY_2_6
-    // deprecated (doesn't start with 'wx' prefix), use wxWindow::NewControlId()
-    wxDEPRECATED( int NewControlId() );
-    inline int NewControlId() { return wxWindowBase::NewControlId(); }
-#endif // WXWIN_COMPATIBILITY_2_6
+// deprecated (doesn't start with 'wx' prefix), use wxWindow::NewControlId()
+inline int NewControlId() { return wxWindowBase::NewControlId(); }
 
 #if wxUSE_ACCESSIBILITY
 // ----------------------------------------------------------------------------
@@ -1550,4 +1536,6 @@ public:
 #endif // wxUSE_ACCESSIBILITY
 
 
-#endif // _WX_WINDOW_H_BASE_
+#endif
+    // _WX_WINDOW_H_BASE_
+

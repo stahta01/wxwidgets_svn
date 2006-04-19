@@ -9,6 +9,10 @@
 // Licence:
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "propeditor.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -81,7 +85,7 @@ void ctPropertyEditor::CreateControls(wxWindow* parent)
     // TODO: find sash pos from last time
     int sashPos = 100;
 
-    m_splitterWindow = new wxSplitterWindow(parent, ctID_PROPERTY_EDITOR_SPLITTER, wxDefaultPosition, wxSize(500, 400), wxSP_3DSASH/*|wxCLIP_CHILDREN*/ |wxBORDER_NONE|wxNO_FULL_REPAINT_ON_RESIZE);
+    m_splitterWindow = new wxSplitterWindow(parent, ctID_PROPERTY_EDITOR_SPLITTER, wxDefaultPosition, wxSize(500, 400), wxSP_3DSASH|wxSP_FULLSASH/*|wxCLIP_CHILDREN*/ |wxBORDER_NONE|wxNO_FULL_REPAINT_ON_RESIZE);
     m_splitterWindow->SetMinimumPaneSize(10);
 
     m_propertyDescriptionWindow = new wxHtmlWindow(m_splitterWindow, ctID_ATTRIBUTE_EDITOR_DESCRIPTION, wxDefaultPosition, wxSize(200, 60), wxSUNKEN_BORDER);

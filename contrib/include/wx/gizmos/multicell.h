@@ -15,6 +15,10 @@
 #ifndef __WX_MULTICELL_H__
 #define __WX_MULTICELL_H__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "multicell.h"
+#endif
+
 #include "wx/gizmos/gizmos.h"
 
 // ----------------------------------------------------------------------------
@@ -113,7 +117,7 @@ private:
     int m_maxWeights;
     wxSize m_defaultCellSize;
     wxWindow *m_win; // usually used for debugging
-    const wxPen *m_pen;
+    wxPen *m_pen;
 
     void DrawGridLines(wxDC& dc);
     void Initialize(wxSize size);

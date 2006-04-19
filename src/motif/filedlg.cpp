@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/filedlg.cpp
+// Name:        filedlg.cpp
 // Purpose:     wxFileDialog
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "filedlgmot.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,6 +22,7 @@
 #define XtWindow XTWINDOW
 #endif
 
+#include "wx/defs.h"
 #include "wx/utils.h"
 #include "wx/filedlg.h"
 #include "wx/intl.h"

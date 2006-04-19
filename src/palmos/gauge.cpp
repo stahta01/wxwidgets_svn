@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gauge.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GAUGE
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
 #endif
+
+#if wxUSE_GAUGE
 
 #include "wx/gauge.h"
 #include "wx/palmos/private.h"
@@ -89,6 +94,7 @@ wxBEGIN_FLAGS( wxGaugeStyle )
 
     wxFLAGS_MEMBER(wxGA_HORIZONTAL)
     wxFLAGS_MEMBER(wxGA_VERTICAL)
+    wxFLAGS_MEMBER(wxGA_PROGRESSBAR)
     wxFLAGS_MEMBER(wxGA_SMOOTH)
 
 wxEND_FLAGS( wxGaugeStyle )
@@ -168,3 +174,4 @@ bool wxGauge::SetBackgroundColour(const wxColour& col)
 }
 
 #endif // wxUSE_GAUGE
+

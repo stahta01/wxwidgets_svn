@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/menu.cpp
+// Name:        menu.cpp
 // Purpose:     wxMenu, wxMenuBar, wxMenuItem
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin
@@ -16,6 +16,10 @@
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menu.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -120,9 +124,9 @@ UINT GetMenuState(HMENU hMenu, UINT id, UINT flags)
 // implementation
 // ============================================================================
 
-#include "wx/listimpl.cpp"
+#include <wx/listimpl.cpp>
 
-WX_DEFINE_LIST( wxMenuInfoList )
+WX_DEFINE_LIST( wxMenuInfoList ) ;
 
 #if wxUSE_EXTENDED_RTTI
 
@@ -708,7 +712,7 @@ void wxMenu::SetTitle(const wxString& label)
             info.cbSize = sizeof(info);
             info.fMask = MIIM_TYPE;
             info.fType = MFT_STRING;
-            info.cch = m_title.length();
+            info.cch = m_title.Length();
             info.dwTypeData = (LPTSTR) m_title.c_str();
             if ( !SetMenuItemInfo(hMenu, 0, TRUE, & info) )
             {
@@ -1018,7 +1022,7 @@ void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
     info.cbSize = sizeof(info);
     info.fMask = MIIM_TYPE;
     info.fType = MFT_STRING;
-    info.cch = label.length();
+    info.cch = label.Length();
     info.dwTypeData = (LPTSTR) label.c_str();
     if ( !SetMenuItemInfo(GetHmenu(), id, TRUE, & info) )
     {
@@ -1103,7 +1107,6 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
 #else
         (GetHmenu() != 0);
 #endif
-
     int mswpos = (!isAttached || (pos == m_menus.GetCount()))
         ?   -1 // append the menu
         :   MSWPositionForWxMenu(GetMenu(pos),pos);
@@ -1135,7 +1138,6 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
             wxLogLastError(wxT("TB_INSERTBUTTON"));
             return false;
         }
-        wxUnusedVar(mswpos);
 #else
         if ( !::InsertMenu(GetHmenu(), mswpos,
                            MF_BYPOSITION | MF_POPUP | MF_STRING,
@@ -1257,6 +1259,7 @@ wxMenu *wxMenuBar::Remove(size_t pos)
         if (IsAttached())
             Refresh();
     }
+
 
     m_titles.RemoveAt(pos);
 

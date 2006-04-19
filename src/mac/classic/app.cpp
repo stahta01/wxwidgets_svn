@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/app.cpp
+// Name:        app.cpp
 // Purpose:     wxApp
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,11 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "app.h"
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/window.h"
 #include "wx/frame.h"
@@ -76,10 +76,10 @@ extern size_t g_numberOfThreads;
 
 // statics for implementation
 
-static bool s_inYield = false;
+static bool s_inYield = FALSE;
 
 #if TARGET_CARBON
-static bool s_inReceiveEvent = false ;
+static bool s_inReceiveEvent = FALSE ;
 static EventTime sleepTime = kEventDurationNoWait ;
 #else
 static long sleepTime = 0 ;
@@ -233,7 +233,7 @@ short wxApp::MacHandleAEQuit(const WXEVENTREF WXUNUSED(event) , WXEVENTREF WXUNU
     {
         wxCommandEvent exitEvent(wxEVT_COMMAND_MENU_SELECTED, s_macExitMenuItemId);
         if (!win->ProcessEvent(exitEvent))
-            win->Close(true) ;
+            win->Close(TRUE ) ;
     }
     else
     {
@@ -277,7 +277,7 @@ void wxApp::MacPrintFile(const wxString & fileName )
                 if (printout)
                 {
                     wxPrinter printer;
-                    printer.Print(view->GetFrame(), printout, true);
+                    printer.Print(view->GetFrame(), printout, TRUE);
                     delete printout;
                 }
             }
@@ -332,13 +332,13 @@ static pascal OSStatus
 MenuEventHandler( EventHandlerCallRef handler , EventRef event , void *data )
 {
     wxMenuBar* mbar = wxMenuBar::MacGetInstalledMenuBar();
-
+    
     if ( mbar )
     {
         wxFrame* win = mbar->GetFrame();
         if ( win )
         {
-
+            
             // VZ: we could find the menu from its handle here by examining all
             //     the menus in the menu bar recursively but knowing that neither
             //     wxMSW nor wxGTK do it why bother...
@@ -352,7 +352,7 @@ MenuEventHandler( EventHandlerCallRef handler , EventRef event , void *data )
                               &menuRef);
  #endif // 0
 
-            wxEventType type=0;
+            wxEventType type=0;        
             MenuCommand cmd=0;
             switch (GetEventKind(event))
             {
@@ -633,7 +633,7 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
         UMAShowArrowCursor() ;
         ParamText("\pFatal Error", message, (ConstStr255Param)"\p", (ConstStr255Param)"\p");
         itemHit = Alert(128, nil);
-        return false ;
+      return FALSE ;
   }
 
 #ifndef __DARWIN__
@@ -739,7 +739,7 @@ bool wxApp::OnInitGui()
 #endif
     }
 
-    return true ;
+    return TRUE ;
 }
 
 void wxApp::CleanUp()
@@ -1073,18 +1073,18 @@ pascal OSStatus wxMacApplicationEventHandler( EventHandlerCallRef handler , Even
 
 wxApp::wxApp()
 {
-    m_printMode = wxPRINT_WINDOWS;
-    m_auto3D = true;
+  m_printMode = wxPRINT_WINDOWS;
+  m_auto3D = TRUE;
 
-    m_macCurrentEvent = NULL ;
+  m_macCurrentEvent = NULL ;
 #if TARGET_CARBON
-    m_macCurrentEventHandlerCallRef = NULL ;
+  m_macCurrentEventHandlerCallRef = NULL ;
 #endif
 }
 
 int wxApp::MainLoop()
 {
-    m_keepGoing = true;
+    m_keepGoing = TRUE;
 
     while (m_keepGoing)
     {
@@ -1096,7 +1096,7 @@ int wxApp::MainLoop()
 
 void wxApp::ExitMainLoop()
 {
-    m_keepGoing = false;
+      m_keepGoing = FALSE;
 }
 
 // Is a message/event pending?
@@ -1106,7 +1106,7 @@ bool wxApp::Pending()
     // without the receive event (with pull param = false ) nothing is ever reported
     EventRef theEvent;
     ReceiveNextEvent (0, NULL, kEventDurationNoWait, false, &theEvent);
-    return GetNumEventsInQueue( GetMainEventQueue() ) > 0 ;
+    return GetNumEventsInQueue( GetMainEventQueue() ) > 0 ; 
 #else
     EventRecord event ;
 
@@ -1149,7 +1149,7 @@ void wxApp::Exit()
 void wxApp::OnEndSession(wxCloseEvent& WXUNUSED(event))
 {
     if (GetTopWindow())
-        GetTopWindow()->Close(true);
+        GetTopWindow()->Close(TRUE);
 }
 
 // Default behaviour: close the application with prompts. The
@@ -1159,7 +1159,7 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
     if (GetTopWindow())
     {
         if (!GetTopWindow()->Close(!event.CanVeto()))
-            event.Veto(true);
+            event.Veto(TRUE);
     }
 }
 
@@ -1180,10 +1180,10 @@ bool wxApp::Yield(bool onlyIfNeeded)
             wxFAIL_MSG( wxT("wxYield called recursively" ) );
         }
 
-        return false;
+        return FALSE;
     }
 
-    s_inYield = true;
+    s_inYield = TRUE;
 
 #if wxUSE_THREADS
     YieldToAnyThread() ;
@@ -1234,9 +1234,9 @@ bool wxApp::Yield(bool onlyIfNeeded)
 #endif
 
     wxMacProcessNotifierAndPendingEvents() ;
-    s_inYield = false;
+    s_inYield = FALSE;
 
-    return true;
+    return TRUE;
 }
 
 // platform specifics
@@ -1385,7 +1385,7 @@ void wxApp::MacDoOneEvent()
 
 /*virtual*/ void wxApp::MacHandleUnhandledEvent( WXEVENTREF evr )
 {
-    // Override to process unhandled events as you please
+    // Override to process unhandled events as you please    
 }
 
 void wxApp::MacHandleOneEvent( WXEVENTREF evr )
@@ -1512,7 +1512,7 @@ void wxApp::MacHandleHighLevelEvent( WXEVENTREF evr )
 {
     // we must avoid reentrancy problems when processing high level events eg printing
     bool former = s_inYield ;
-    s_inYield = true ;
+    s_inYield = TRUE ;
     EventRecord* ev = (EventRecord*) evr ;
     ::AEProcessAppleEvent( ev ) ;
     s_inYield = former ;
@@ -1853,7 +1853,7 @@ bool wxGetKeyState(wxKeyCode key) //virtual key code if < 10.2.x, else see below
     wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key !=
         WXK_MBUTTON, wxT("can't use wxGetKeyState() for mouse buttons"));
 
-    KeyMap keymap;
+    KeyMap keymap; 
     GetKeys(keymap);
     return !!(BitTst(keymap, (sizeof(KeyMap)*8) - key));
 }
@@ -1977,7 +1977,7 @@ bool wxApp::MacSendKeyDownEvent( wxWindow* focus , long keymessage , long modifi
     }
     if (!handled)
     {
-        event.Skip( false ) ;
+        event.Skip( FALSE ) ;
         event.SetEventType( wxEVT_CHAR ) ;
         // raw value again
         event.m_keyCode = realkeyval ;
@@ -2206,7 +2206,7 @@ void wxApp::MacHandleOSEvent( WXEVENTREF evr )
                     bool controlDown = ev->modifiers & controlKey ; // for simulating right mouse
 
                     event.m_leftDown = isDown && !controlDown;
-                    event.m_middleDown = false;
+                    event.m_middleDown = FALSE;
                     event.m_rightDown = isDown && controlDown;
                     event.m_shiftDown = ev->modifiers & shiftKey;
                     event.m_controlDown = ev->modifiers & controlKey;
@@ -2307,7 +2307,7 @@ void wxApp::MacHandleMouseMovedEvent(wxInt32 x , wxInt32 y ,wxUint32 modifiers ,
 
         event.m_leftDown = isDown && !controlDown;
 
-        event.m_middleDown = false;
+        event.m_middleDown = FALSE;
         event.m_rightDown = isDown && controlDown;
 
         event.m_shiftDown = modifiers & shiftKey;

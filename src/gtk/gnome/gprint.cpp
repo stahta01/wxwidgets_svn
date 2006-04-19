@@ -8,6 +8,10 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -780,13 +784,8 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     gs_lgp->gnome_print_job_close( job );
     if (m_native_preview)
     {
-        const wxCharBuffer title(wxGTK_CONV_SYS(_("Print preview")));
-        GtkWidget *preview = gs_lgp->gnome_print_job_preview_new
-                                     (
-                                        job,
-                                        (const guchar *)title.data()
-                                     );
-        gtk_widget_show(preview);
+        wxString title( _("Print preview") );
+        gtk_widget_show( gs_lgp->gnome_print_job_preview_new( job, (const guchar*)(const char*)wxGTK_CONV(title) ));
     }
     else
     {

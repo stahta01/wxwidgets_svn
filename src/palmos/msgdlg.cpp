@@ -9,15 +9,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "msgdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/defs.h"
     #include "wx/utils.h"
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
@@ -148,3 +153,4 @@ int wxMessageDialog::ShowModal()
 
     return wxResult;
 }
+

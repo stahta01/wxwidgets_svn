@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_TBAR95_H_
 #define _WX_MSW_TBAR95_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbar95.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 #include "wx/dynarray.h"
@@ -70,11 +74,6 @@ public:
 
     static WXHBITMAP MapBitmap(WXHBITMAP bitmap, int width, int height);
 
-    // override WndProc mainly to process WM_SIZE
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
-
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
 protected:
     // common part of all ctors
     void Init();
@@ -103,8 +102,12 @@ protected:
                                           const wxString& longHelp);
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
+    // override WndProc mainly to process WM_SIZE
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+
     // return the appropriate size and flags for the toolbar control
     virtual wxSize DoGetBestSize() const;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
     // handlers for various events
     bool HandleSize(WXWPARAM wParam, WXLPARAM lParam);

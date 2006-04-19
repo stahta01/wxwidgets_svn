@@ -12,6 +12,10 @@
 #ifndef _WX_CHECKBOX_H_
 #define _WX_CHECKBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "checkbox.h"
+#endif
+
 // Checkbox item (single checkbox)
 class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
 {
@@ -34,12 +38,11 @@ public:
     virtual void SetValue(bool);
     virtual bool GetValue() const;
 
-    virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
-    virtual void Command(wxCommandEvent& event);
-
-protected:
     void DoSet3StateValue(wxCheckBoxState val);
     virtual wxCheckBoxState DoGet3StateValue() const;
+
+    virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
+    virtual void Command(wxCommandEvent& event);
 
     DECLARE_DYNAMIC_CLASS(wxCheckBox)
 };

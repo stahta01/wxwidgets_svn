@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagjpeg.cpp
+// Name:        imagjpeg.cpp
 // Purpose:     wxImage JPEG handler
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagjpeg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,23 +18,22 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_IMAGE && wxUSE_LIBJPEG
+#include "wx/defs.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-#endif
+#if wxUSE_IMAGE && wxUSE_LIBJPEG
 
 #include "wx/imagjpeg.h"
 #include "wx/bitmap.h"
 #include "wx/debug.h"
+#include "wx/log.h"
+#include "wx/app.h"
 
 // NB: Some compilers define boolean type in Windows headers
 //     (e.g. Watcom C++, but not Open Watcom).
 //     This causes a conflict with jmorecfg.h header from libjpeg, so we have
 //     to make sure libjpeg won't try to define boolean itself. This is done by
 //     defining HAVE_BOOLEAN.
-#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__DIGITALMARS__))
+#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__DIGITALMARS__) || (defined(__WATCOMC__) && __WATCOMC__ < 1200))
     #define HAVE_BOOLEAN
     #include "wx/msw/wrapwin.h"
 #endif
@@ -433,3 +436,9 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 #endif   // wxUSE_STREAMS
 
 #endif   // wxUSE_LIBJPEG
+
+
+
+
+
+

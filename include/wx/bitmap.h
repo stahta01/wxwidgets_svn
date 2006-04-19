@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "bitmapbase.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/string.h"
@@ -79,6 +83,9 @@ private:
 class WXDLLEXPORT wxBitmapBase : public wxGDIObject
 {
 public:
+    wxBitmapBase() : wxGDIObject() {}
+    virtual ~wxBitmapBase() {}
+
     /*
     Derived class must implement these:
 
@@ -87,8 +94,10 @@ public:
     wxBitmap(const char bits[], int width, int height, int depth = 1);
     wxBitmap(const char **bits);
     wxBitmap(char **bits);
+    wxBitmap(const wxBitmap& bmp);
     wxBitmap(const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM);
     wxBitmap(const wxImage& image, int depth = -1);
+    wxBitmap& operator = (const wxBitmap& bmp);
     bool operator == (const wxBitmap& bmp) const;
     bool operator != (const wxBitmap& bmp) const;
 
@@ -162,10 +171,8 @@ protected:
 #include "wx/msw/bitmap.h"
 #elif defined(__WXMOTIF__)
 #include "wx/x11/bitmap.h"
-#elif defined(__WXGTK20__)
-#include "wx/gtk/bitmap.h"
 #elif defined(__WXGTK__)
-#include "wx/gtk1/bitmap.h"
+#include "wx/gtk/bitmap.h"
 #elif defined(__WXX11__)
 #include "wx/x11/bitmap.h"
 #elif defined(__WXMGL__)

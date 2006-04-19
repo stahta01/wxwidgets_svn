@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/spinbutt.cpp
+// Name:        spinbutt.cpp
 // Purpose:     wxSpinCtrl
 // Author:      Robert
 // Modified by: Mark Newsam (Based on GTK file)
@@ -8,17 +8,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "spinctlg.h"
 #endif
 
-#if wxUSE_SPINCTRL
+#include "wx/defs.h"
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
 #endif //WX_PRECOMP
+
+#if wxUSE_SPINCTRL
 
 #include "wx/spinbutt.h"
 #include "wx/spinctrl.h"
@@ -62,7 +62,7 @@ protected:
     {
         // Hand button down events to wxSpinCtrl. Doesn't work.
         if (event.GetEventType() == wxEVT_LEFT_DOWN && m_spin->ProcessEvent( event ))
-            return true;
+            return TRUE;
 
         return wxTextCtrl::ProcessEvent( event );
     }
@@ -120,7 +120,7 @@ BEGIN_EVENT_TABLE(wxSpinCtrlButton, wxSpinButton)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
-
+    
 // ============================================================================
 // implementation
 // ============================================================================
@@ -149,7 +149,7 @@ bool wxSpinCtrl::Create(wxWindow *parent,
     if ( !wxControl::Create(parent, id, wxDefaultPosition, wxDefaultSize, style,
                             wxDefaultValidator, name) )
     {
-        return false;
+        return FALSE;
     }
 
     // the string value overrides the numeric one (for backwards compatibility
@@ -175,7 +175,7 @@ bool wxSpinCtrl::Create(wxWindow *parent,
     }
     DoSetSize(pos.x , pos.y , csize.x, csize.y);
 
-    return true;
+    return TRUE;
 }
 
 wxSpinCtrl::~wxSpinCtrl()
@@ -220,15 +220,15 @@ void wxSpinCtrl::DoMoveWindow(int x, int y, int width, int height)
 bool wxSpinCtrl::Enable(bool enable)
 {
     if ( !wxControl::Enable(enable) )
-        return false;
-    return true;
+        return FALSE;
+    return TRUE;
 }
 
 bool wxSpinCtrl::Show(bool show)
 {
     if ( !wxControl::Show(show) )
-        return false;
-    return true;
+        return FALSE;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -241,18 +241,18 @@ bool wxSpinCtrl::GetTextValue(int *val) const
     if ( !m_text->GetValue().ToLong(&l) )
     {
         // not a number at all
-        return false;
+        return FALSE;
     }
 
     if ( l < GetMin() || l > GetMax() )
     {
         // out of range
-        return false;
+        return FALSE;
     }
 
     *val = l;
 
-    return true;
+    return TRUE;
 }
 
 int wxSpinCtrl::GetValue() const
@@ -325,9 +325,9 @@ void wxSpinCtrl::SetSelection(long from, long to)
     // be selected
     if ( (from == -1) && (to == -1) )
     {
-        from = 0;
+        from = 0;     
     }
     m_text->SetSelection(from, to);
-}
+}     
 
 #endif // wxUSE_SPINCTRL

@@ -12,12 +12,16 @@
 #ifndef _WX_TOOLBAR_H_
 #define _WX_TOOLBAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "toolbar.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 #include "wx/tbarbase.h"
 #include "wx/dynarray.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxToolBar: public wxToolBarBase
 {
@@ -50,6 +54,8 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
     virtual bool Show(bool show = true);
     virtual bool IsShown() const;
+    virtual void DoGetSize(int *width, int *height) const;
+    virtual wxSize DoGetBestSize() const ;
     virtual bool Realize();
 
     virtual void SetToolBitmapSize(const wxSize& size);
@@ -73,8 +79,7 @@ protected:
     // common part of all ctors
     void Init();
 
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual wxSize DoGetBestSize() const;
+    // implement base class pure virtuals
     virtual bool DoInsertTool(size_t pos, wxToolBarToolBase *tool);
     virtual bool DoDeleteTool(size_t pos, wxToolBarToolBase *tool);
 

@@ -264,27 +264,14 @@ public:
 
 #if wxUSE_CHECKLISTBOX
         static const wxChar *aszChoices[] =
-        {
-            _T("Zeroth"),
-            _T("First"),
-            _T("Second"),
-            _T("Third"),
-            _T("Fourth"),
-            _T("Fifth"),
-            _T("Sixth"),
-            _T("Seventh"),
-            _T("Eighth"),
-            _T("Nineth")
-        };
+            { _T("Zeroth"), _T("First"), _T("Second"), _T("Third"), _T("Fourth"), _T("Fifth"), _T("Sixth"), _T("Seventh"), _T("Eighth"), _T("Nineth") };
+        wxString *astrChoices = new wxString[WXSIZEOF(aszChoices)];
+        unsigned int ui;
+        for ( ui = 0; ui < WXSIZEOF(aszChoices); ui++ )
+            astrChoices[ui] = aszChoices[ui];
 
-        m_checklistbox = new wxCheckListBox
-                             (
-                                this,
-                                wxID_ANY,
-                                wxDefaultPosition,
-                                wxSize(100,100),
-                                wxArrayString(WXSIZEOF(aszChoices), aszChoices)
-                             );
+        m_checklistbox = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxSize(100,100),
+            WXSIZEOF(aszChoices), astrChoices);
 
         mainSizer->Add(
             m_checklistbox,

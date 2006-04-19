@@ -1,19 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_layout.cpp
+// Name:        m_layout.cpp
 // Purpose:     wxHtml module for basic paragraphs/layout handling
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
 
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
+
+#if wxUSE_HTML && wxUSE_STREAMS
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_HTML && wxUSE_STREAMS
 
 #ifndef WXPRECOMP
 #endif
@@ -287,19 +292,21 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
 
     TAG_HANDLER_PROC(tag)
     {
-        wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
-        if (winIface)
+        if (m_WParser->GetWindow())
         {
-            wxString title = m_WParser->GetSource()->Mid(
-                                    tag.GetBeginPos(),
-                                    tag.GetEndPos1()-tag.GetBeginPos());
+            wxHtmlWindow *wfr = (wxHtmlWindow*)(m_WParser->GetWindow());
+            if (wfr)
+            {
+                wxString title = m_WParser->GetSource()->Mid(
+                                        tag.GetBeginPos(),
+                                        tag.GetEndPos1()-tag.GetBeginPos());
 #if !wxUSE_UNICODE && wxUSE_WCHAR_T
-            wxCSConv conv(m_WParser->GetInputEncoding());
-            title = wxString(title.wc_str(conv), wxConvLocal);
+                wxCSConv conv(m_WParser->GetInputEncoding());
+                title = wxString(title.wc_str(conv), wxConvLocal);
 #endif
-            title = m_WParser->GetEntitiesParser()->Parse(title);
-
-            winIface->SetHTMLWindowTitle(title);
+                title = m_WParser->GetEntitiesParser()->Parse(title);
+                wfr->OnSetTitle(title);
+            }
         }
         return true;
     }
@@ -325,11 +332,6 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
         if (tag.GetParamAsColour(wxT("LINK"), &clr))
             m_WParser->SetLinkColor(clr);
 
-        wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
-        // the rest of this function requires a window:
-        if ( !winIface )
-            return false;
-
         if (tag.HasParam(wxT("BACKGROUND")))
         {
             wxFSFile *fileBgImage = m_WParser->OpenURL
@@ -345,8 +347,8 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
 #if !defined(__WXMSW__) || wxUSE_WXDIB
                     wxImage image(*is);
                     if ( image.Ok() )
-                        winIface->SetHTMLBackgroundImage(image);
-#endif
+                        m_WParser->GetWindow()->SetBackgroundImage(image);
+#endif                    
                 }
             }
         }
@@ -355,7 +357,8 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
         {
             m_WParser->GetContainer()->InsertCell(
                 new wxHtmlColourCell(clr, wxHTML_CLR_BACKGROUND));
-            winIface->SetHTMLBackgroundColour(clr);
+            if (m_WParser->GetWindow() != NULL)
+                m_WParser->GetWindow()->SetBackgroundColour(clr);
         }
 
         return false;
@@ -394,42 +397,6 @@ TAG_HANDLER_END(BLOCKQUOTE)
 
 
 
-TAG_HANDLER_BEGIN(SUBSUP, "SUB,SUP")
-
-    TAG_HANDLER_PROC(tag)
-    {
-        bool issub = (tag.GetName() == wxT("SUB"));
-        wxHtmlScriptMode oldmode = m_WParser->GetScriptMode();
-        int oldbase = m_WParser->GetScriptBaseline();
-        int oldsize = m_WParser->GetFontSize();
-
-        wxHtmlContainerCell *cont = m_WParser->GetContainer();
-        wxHtmlCell *c = cont->GetLastChild();
-
-        m_WParser->SetScriptMode(issub ? wxHTML_SCRIPT_SUB : wxHTML_SCRIPT_SUP);
-        m_WParser->SetScriptBaseline(oldbase + c->GetScriptBaseline());
-
-        // select smaller font
-        m_WParser->SetFontSize(m_WParser->GetFontSize()-2);
-        cont->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        ParseInner(tag);
-
-        // restore font size
-        m_WParser->SetFontSize(oldsize);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        // restore base and alignment
-        m_WParser->SetScriptBaseline(oldbase);
-        m_WParser->SetScriptMode(oldmode);
-
-        return true;
-    }
-
-TAG_HANDLER_END(SUBSUP)
-
-
 // Tag handler for tags that we have to ignore, otherwise non-text data
 // would show up as text:
 TAG_HANDLER_BEGIN(DoNothing, "SCRIPT")
@@ -443,8 +410,6 @@ TAG_HANDLER_END(DoNothing)
 
 
 
-
-
 TAGS_MODULE_BEGIN(Layout)
 
     TAGS_MODULE_ADD(P)
@@ -454,7 +419,6 @@ TAGS_MODULE_BEGIN(Layout)
     TAGS_MODULE_ADD(TITLE)
     TAGS_MODULE_ADD(BODY)
     TAGS_MODULE_ADD(BLOCKQUOTE)
-    TAGS_MODULE_ADD(SUBSUP)
     TAGS_MODULE_ADD(DoNothing)
 
 TAGS_MODULE_END(Layout)

@@ -1,7 +1,10 @@
-wxWidgets 2.6.2 for MGL installation
+wxWidgets 2.6.3 for MGL installation
 ------------------------------------
 
 IMPORTANT NOTE:
+
+  wxMGL is currently in need of some work to bring it up to the
+  standard of some of the other wxWidgets ports.
 
   If you experience problems installing, please re-read these
   instructions and other related files (todo.txt, bugs.txt and
@@ -204,8 +207,8 @@ OpenSourced by SciTech, check out http://www.openwatcom.org).
        !include $(WXDIR)\src\mgl\makeprog.wat
 
 
-Compilation notes for MGL with DJGPP
-------------------------------------
+Compilation notes for MGL with gcc
+----------------------------------
 
 The mvis library doesn't compile with current versions of gcc. However wxMGL
 does not use this part of MGL, so it can be taken out of the compile, e.g.:

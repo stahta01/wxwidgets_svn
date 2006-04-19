@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcpsg.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -21,6 +25,8 @@
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #if wxUSE_POSTSCRIPT
+
+#include "wx/setup.h"
 
 #include "wx/dcmemory.h"
 #include "wx/utils.h"
@@ -403,10 +409,9 @@ void wxPostScriptDC::DoDrawArc (wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, 
         alpha1 = 0.0;
         alpha2 = 360.0;
     }
-    else if ( wxIsNullDouble(radius) )
+    else if (radius == 0.0)
     {
-        alpha1 =
-        alpha2 = 0.0;
+        alpha1 = alpha2 = 0.0;
     }
     else
     {
@@ -459,16 +464,12 @@ void wxPostScriptDC::DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,d
 {
     wxCHECK_RET( m_ok, wxT("invalid postscript dc") );
 
-    if ( sa >= 360 || sa <= -360 )
-        sa -= int(sa/360)*360;
-    if ( ea >= 360 || ea <=- 360 )
-        ea -= int(ea/360)*360;
-    if ( sa < 0 )
-        sa += 360;
-    if ( ea < 0 )
-        ea += 360;
+    if (sa>=360 || sa<=-360) sa=sa-int(sa/360)*360;
+    if (ea>=360 || ea<=-360) ea=ea-int(ea/360)*360;
+    if (sa<0) sa+=360;
+    if (ea<0) ea+=360;
 
-    if ( wxIsSameDouble(sa, ea) )
+    if (sa==ea)
     {
         DrawEllipse(x,y,w,h);
         return;
@@ -1056,7 +1057,7 @@ void wxPostScriptDC::SetPen( const wxPen& pen )
         default:              psdash = "[] 0";         break;
     }
 
-    if ( psdash && (oldStyle != m_pen.GetStyle()) )
+    if (psdash && (oldStyle != m_pen.GetStyle()) )
     {
         PsPrint( psdash );
         PsPrint( " setdash\n" );
@@ -1087,6 +1088,7 @@ void wxPostScriptDC::SetPen( const wxPen& pen )
         double bluePS = (double)(blue) / 255.0;
         double greenPS = (double)(green) / 255.0;
 
+        char buffer[100];
         sprintf( buffer,
             "%.8f %.8f %.8f setrgbcolor\n",
             redPS, greenPS, bluePS );
@@ -1263,7 +1265,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
 
 void wxPostScriptDC::DoDrawRotatedText( const wxString& text, wxCoord x, wxCoord y, double angle )
 {
-    if ( wxIsNullDouble(angle) )
+    if (angle == 0.0)
     {
         DoDrawText(text, x, y);
         return;
@@ -1363,6 +1365,7 @@ void wxPostScriptDC::DoDrawRotatedText( const wxString& text, wxCoord x, wxCoord
     {
         wxCoord uy = (wxCoord)(y + size - m_underlinePosition);
         wxCoord w, h;
+        char buffer[100];
         GetTextExtent(text, &w, &h);
 
         sprintf( buffer,
@@ -1996,6 +1999,10 @@ void wxPostScriptDC::DoGetTextExtent(const wxString& string,
 
         if ( !afmName.empty() )
             afmFile = wxFopen(afmName, wxT("r"));
+
+        if ( !afmFile )
+        {
+        }
 
         if ( !afmFile )
         {

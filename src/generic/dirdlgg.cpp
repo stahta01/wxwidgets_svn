@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/dirdlg.cpp
+// Name:        dirdlg.cpp
 // Purpose:     wxDirDialog
 // Author:      Harm van der Heijden, Robert Roebling & Julian Smart
 // Modified by:
@@ -9,12 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dirdlgg.h"
+#endif
+
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_DIRDLG
 
@@ -91,7 +98,7 @@ wxGenericDirDialog::wxGenericDirDialog(wxWindow* parent, const wxString& title,
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
-    // smartphones does not support or do not waste space for wxButtons
+    // smart phones does not support or do not waste space for wxButtons
 #if defined(__SMARTPHONE__)
 
     wxMenu *dirMenu = new wxMenu;
@@ -105,6 +112,8 @@ wxGenericDirDialog::wxGenericDirDialog(wxWindow* parent, const wxString& title,
     dirMenu->AppendCheckItem(ID_SHOW_HIDDEN, _("Show hidden directories"));
     dirMenu->AppendSeparator();
     dirMenu->Append(wxID_CANCEL, _("Cancel"));
+
+    SetRightMenu(wxID_ANY, _("Options"), dirMenu);
 
 #else
 
@@ -171,22 +180,17 @@ wxGenericDirDialog::wxGenericDirDialog(wxWindow* parent, const wxString& title,
     m_input = new wxTextCtrl( this, ID_TEXTCTRL, m_path, wxDefaultPosition );
     topsizer->Add( m_input, 0, wxTOP|wxLEFT|wxRIGHT | wxEXPAND, wxLARGESMALL(10,0) );
 
-    // 3) buttons if any
-    wxSizer *buttonSizer = CreateButtonSizer( wxOK|wxCANCEL , true, wxLARGESMALL(10,0) );
-    if(buttonSizer->GetChildren().GetCount() > 0 )
-    {
-        topsizer->Add( buttonSizer, 0, wxEXPAND | wxALL, wxLARGESMALL(10,0) );
-    }
-    else
-    {
-        topsizer->AddSpacer( wxLARGESMALL(10,0) );
-        delete buttonSizer;
-    }
+#ifndef __SMARTPHONE__
 
-#ifdef __SMARTPHONE__
-    // overwrite menu achieved with earlier CreateButtonSizer() call
-    SetRightMenu(wxID_ANY, _("Options"), dirMenu);
+#if wxUSE_STATLINE
+    // 3) Static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
 #endif
+
+    // 4) Buttons
+    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxEXPAND | wxALL, 10 );
+
+#endif // !__SMARTPHONE__
 
     m_input->SetFocus();
 
@@ -273,7 +277,7 @@ void wxGenericDirDialog::OnTreeSelected( wxTreeEvent &event )
 
     if (data)
        m_input->SetValue( data->m_path );
-}
+};
 
 void wxGenericDirDialog::OnTreeKeyDown( wxTreeEvent &WXUNUSED(event) )
 {
@@ -283,7 +287,7 @@ void wxGenericDirDialog::OnTreeKeyDown( wxTreeEvent &WXUNUSED(event) )
     wxDirItemData *data = (wxDirItemData*)m_dirCtrl->GetTreeCtrl()->GetItemData(m_dirCtrl->GetTreeCtrl()->GetSelection());
     if (data)
         m_input->SetValue( data->m_path );
-}
+};
 
 void wxGenericDirDialog::OnShowHidden( wxCommandEvent& event )
 {

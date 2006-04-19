@@ -1,12 +1,6 @@
 
 import  wx
-
-hadImportError = False
-try:
-    import  wx.lib.plot
-except ImportError:
-    hadImportError = True
-    
+import  wx.lib.plot
 
 ################################################################\
 # Where's the code???                                           |
@@ -38,27 +32,13 @@ class TestPanel(wx.Panel):
 
 
 def runTest(frame, nb, log):
-    if not hadImportError:
-        win = TestPanel(nb, log)
-    else:
-        from Main import MessagePanel
-        win = MessagePanel(nb, """\
-This demo requires the Numeric or numarray module,
-which could not be imported.  It probably is not installed
-(it's not part of the standard Python distribution). See the
-Python site (http://www.python.org) for information on
-downloading source or binaries.""",
-                           'Sorry', wx.ICON_WARNING)
-    
+    win = TestPanel(nb, log)
     return win
 
 
 #----------------------------------------------------------------------
 
-if hadImportError:
-    overview = ""
-else:
-    overview = """\
+overview = """\
 <html><body>
 <center><h2>PyPlot</h2></center>
 

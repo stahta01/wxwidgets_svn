@@ -1,20 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/font.cpp
+// Name:        font.cpp
 // Purpose:     wxFont class
 // Author:      AUTHOR
 // Modified by:
 // Created:     ??/??/98
 // RCS-ID:      $Id$
 // Copyright:   (c) AUTHOR
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
+#ifdef __GNUG__
+#pragma implementation "font.h"
 #endif
 
+#include "wx/defs.h"
+#include "wx/string.h"
 #include "wx/font.h"
 #include "wx/gdicmn.h"
 #include "wx/encinfo.h"
@@ -23,12 +23,12 @@ IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
 void wxFontRefData::Init(int size, int family, int style, int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
 {
-    m_family = family;
-    m_style = style;
-    m_weight = weight;
-    m_underlined = underlined;
-    m_faceName = faceName;
-    m_encoding = encoding;
+	m_family = family;
+	m_style = style;
+	m_weight = weight;
+	m_underlined = underlined;
+	m_faceName = faceName;
+	m_encoding = encoding;
 }
 
 wxFontRefData::~wxFontRefData()
@@ -36,9 +36,13 @@ wxFontRefData::~wxFontRefData()
     // TODO: delete font data
 }
 
+void wxFont::Init()
+{
+}
+
 bool wxFont::Create(const wxNativeFontInfo&)
 {
-    return false;
+    return FALSE;
 }
 
 void wxFont::SetEncoding(wxFontEncoding)
@@ -57,7 +61,7 @@ int wxFont::GetPointSize() const
 
 bool wxFont::GetUnderlined() const
 {
-    return false;
+    return FALSE;
 }
 
 int wxFont::GetStyle() const
@@ -96,32 +100,34 @@ bool wxFont::Create(int pointSize, int family, int style, int weight, bool under
 
     RealizeResource();
 
-    return true;
+    return TRUE;
 }
 
 wxFont::~wxFont()
 {
+    if (wxTheFontList)
+        wxTheFontList->DeleteObject(this);
 }
 
 bool wxFont::RealizeResource()
 {
     // TODO: create the font (if there is a native font object)
-    return false;
+    return FALSE;
 }
 
 void wxFont::Unshare()
 {
-    // Don't change shared data
-    if (!m_refData)
+	// Don't change shared data
+	if (!m_refData)
     {
-        m_refData = new wxFontRefData();
-    }
+		m_refData = new wxFontRefData();
+	}
     else
     {
-        wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
-        UnRef();
-        m_refData = ref;
-    }
+		wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
+		UnRef();
+		m_refData = ref;
+	}
 }
 
 void wxFont::SetPointSize(int pointSize)
@@ -183,7 +189,7 @@ wxString wxFont::GetFaceName() const
 {
     wxString str;
     if (M_FONTDATA)
-        str = M_FONTDATA->m_faceName ;
+	    str = M_FONTDATA->m_faceName ;
     return str;
 }
 

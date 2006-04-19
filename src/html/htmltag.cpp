@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/htmltag.cpp
+// Name:        htmltag.cpp
 // Purpose:     wxHtmlTag class (represents single tag)
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,13 +7,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmltag.h"
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
 #endif
@@ -60,7 +66,7 @@ bool wxIsCDATAElement(const wxChar *tag)
 wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
 {
     const wxChar *src = source.c_str();
-    int lng = source.length();
+    int lng = source.Length();
     wxChar tagBuffer[256];
 
     m_Cache = NULL;
@@ -514,5 +520,14 @@ wxHtmlTag *wxHtmlTag::GetNextTag() const
         cur = cur->m_Parent;
     return cur->m_Next;
 }
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxHtmlTag::IsEnding() const
+{
+    return false;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif

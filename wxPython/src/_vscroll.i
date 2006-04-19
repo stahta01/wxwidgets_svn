@@ -208,16 +208,7 @@ public:
     // is kept for backwards compatibility
     size_t GetLastVisibleLine() const;
 
-    // find the index of the line we need to show at the top of the window such
-    // that the last (fully or partially) visible line is the given one
-    size_t FindFirstFromBottom(size_t lineLast, bool fullyVisible = false);
-
-    // get the total height of the lines between lineMin (inclusive) and
-    // lineMax (exclusive)
-    wxCoord GetLinesHeight(size_t lineMin, size_t lineMax) const;
 };
-
-
 
 //---------------------------------------------------------------------------
 // wxVListBox
@@ -458,8 +449,8 @@ public:
     // change the background colour of the selected cells
     void SetSelectionBackground(const wxColour& col);
 
-    virtual void OnDrawSeparator(wxDC& dc, wxRect& rect, size_t n) const;
-    virtual void OnDrawBackground(wxDC& dc, const wxRect& rect, size_t n) const;
+    void base_OnDrawSeparator(wxDC& dc, wxRect& rect, size_t n) const;
+    void base_OnDrawBackground(wxDC& dc, const wxRect& rect, size_t n) const;
 };
 
 
@@ -514,11 +505,6 @@ public:
 //     // globally using SetSelectionBackground()
 //     virtual wxColour GetSelectedTextBgColour(const wxColour& colBg) const;
 
-    
-    // This method may be overriden to handle clicking on a link in
-    // the listbox. By default, clicking links is ignored.
-    virtual void OnLinkClicked(size_t n,
-                               const wxHtmlLinkInfo& link);        
 
     PYPRIVATE;
 };
@@ -531,21 +517,6 @@ IMP_PYCALLBACK_STRING_SIZET     (wxPyHtmlListBox, wxHtmlListBox, OnGetItemMarkup
 IMP_PYCALLBACK__DCRECTSIZET2_const   (wxPyHtmlListBox, wxHtmlListBox, OnDrawSeparator);
 IMP_PYCALLBACK__DCRECTSIZET_const    (wxPyHtmlListBox, wxHtmlListBox, OnDrawBackground);
 
-
-void wxPyHtmlListBox::OnLinkClicked(size_t n,
-                                    const wxHtmlLinkInfo& link) {
-    bool found;
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if ((found = wxPyCBH_findCallback(m_myInst, "OnLinkClicked"))) {
-        PyObject* obj = wxPyConstructObject((void*)&link, wxT("wxHtmlLinkInfo"), 0);
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("(iO)", n, obj));
-        Py_DECREF(obj);
-    }
-    wxPyEndBlockThreads(blocked);
-    if (! found)
-        wxPyHtmlListBox::OnLinkClicked(n, link);
-}
- 
 %}
 
 
@@ -589,8 +560,6 @@ public:
     // retrieve the file system used by the wxHtmlWinParser: if you use
     // relative paths in your HTML, you should use its ChangePathTo() method
     wxFileSystem& GetFileSystem();
-
-    void OnLinkClicked(size_t n, const wxHtmlLinkInfo& link);        
 };
 
 

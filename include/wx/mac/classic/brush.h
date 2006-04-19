@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/brush.h
+// Name:        brush.h
 // Purpose:     wxBrush class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "brush.h"
+#endif
 
 #include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
@@ -35,6 +39,9 @@ public:
     wxBrush(short macThemeBrush ) ;
     wxBrush(const wxColour& col, int style = wxSOLID);
     wxBrush(const wxBitmap& stipple);
+    wxBrush(const wxBrush& brush)
+        : wxBrushBase()
+        { Ref(brush); }
     ~wxBrush();
 
     virtual void SetColour(const wxColour& col)  ;
@@ -44,9 +51,11 @@ public:
     virtual void SetMacTheme(short macThemeBrush) ;
     virtual void SetMacThemeBackground(unsigned long macThemeBackground ,  WXRECTPTR extent) ;
 
-    bool operator == (const wxBrush& brush) const
+    wxBrush& operator = (const wxBrush& brush)
+    { if (*this == brush) return (*this); Ref(brush); return *this; }
+    bool operator == (const wxBrush& brush)
     { return m_refData == brush.m_refData; }
-    bool operator != (const wxBrush& brush) const
+    bool operator != (const wxBrush& brush)
     { return m_refData != brush.m_refData; }
 
     wxMacBrushKind MacGetBrushKind()  const ;

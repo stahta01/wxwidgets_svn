@@ -66,17 +66,17 @@ private:
 
 #endif // wxUSE_STOPWATCH
 
-#if wxUSE_LONGLONG && WXWIN_COMPATIBILITY_2_6
+#if wxUSE_LONGLONG
 
-    // Starts a global timer
-    // -- DEPRECATED: use wxStopWatch instead
-    wxDEPRECATED( void WXDLLIMPEXP_BASE wxStartTimer() );
+// Starts a global timer
+// -- DEPRECATED: use wxStopWatch instead
+void WXDLLIMPEXP_BASE wxStartTimer();
 
-    // Gets elapsed milliseconds since last wxStartTimer or wxGetElapsedTime
-    // -- DEPRECATED: use wxStopWatch instead
-    wxDEPRECATED( long WXDLLIMPEXP_BASE wxGetElapsedTime(bool resetTimer = true) );
+// Gets elapsed milliseconds since last wxStartTimer or wxGetElapsedTime
+// -- DEPRECATED: use wxStopWatch instead
+long WXDLLIMPEXP_BASE wxGetElapsedTime(bool resetTimer = true);
 
-#endif // wxUSE_LONGLONG && WXWIN_COMPATIBILITY_2_6
+#endif // wxUSE_LONGLONG
 
 // ----------------------------------------------------------------------------
 // global time functions
@@ -89,14 +89,11 @@ extern long WXDLLIMPEXP_BASE wxGetLocalTime();
 extern long WXDLLIMPEXP_BASE wxGetUTCTime();
 
 #if wxUSE_LONGLONG
-    typedef wxLongLong wxMilliClock_t;
-#else
-    typedef double wxMilliClock_t;
-#endif // wxUSE_LONGLONG
-
 // Get number of milliseconds since local time 00:00:00 Jan 1st 1970
-extern wxMilliClock_t WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+extern wxLongLong WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+#endif // wxUSE_LONGLONG
 
 #define wxGetCurrentTime() wxGetLocalTime()
 
 #endif // _WX_STOPWATCH_H_
+

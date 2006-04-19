@@ -79,7 +79,6 @@ public:
     ListboxWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
 
     virtual wxControl *GetWidget() const { return m_lbox; }
-    virtual void RecreateWidget() { CreateLbox(); }
 
 protected:
     // event handlers
@@ -335,7 +334,7 @@ void ListboxWidgetsPage::Reset()
 
 void ListboxWidgetsPage::CreateLbox()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
     switch ( m_radioSelMode->GetSelection() )
     {
         default:

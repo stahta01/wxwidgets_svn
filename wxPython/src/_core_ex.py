@@ -266,7 +266,7 @@ class __DocFilter:
         obj = self._globals.get(name, None)
         if type(obj) not in [type, types.ClassType, types.FunctionType, types.BuiltinFunctionType]:
             return False
-        if name.startswith('_') or name.startswith('EVT') or name.endswith('_swigregister')  or name.endswith('Ptr') :
+        if name.startswith('_') or name.endswith('Ptr') or name.startswith('EVT'):
             return False
         return True
 
@@ -279,6 +279,11 @@ from _gdi import *
 from _windows import *
 from _controls import *
 from _misc import *
+
+
+# Fixup the stock objects since they can't be used yet.  (They will be
+# restored in wx.PyApp.OnInit.)
+_core_._wxPyFixStockObjects()
 
 #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------

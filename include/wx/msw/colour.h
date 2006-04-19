@@ -12,6 +12,10 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "colour.h"
+#endif
+
 #include "wx/object.h"
 
 // ----------------------------------------------------------------------------
@@ -37,6 +41,11 @@ public:
     // implicit conversion from the colour name
     wxColour(const wxString &colourName) { InitFromName(colourName); }
     wxColour(const wxChar *colourName) { InitFromName(colourName); }
+
+
+    // copy ctors and assignment operators
+    wxColour(const wxColour& col);
+    wxColour& operator=( const wxColour& col);
 
     // dtor
     ~wxColour();

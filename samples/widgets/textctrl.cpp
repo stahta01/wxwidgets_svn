@@ -136,7 +136,6 @@ public:
     virtual ~TextWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_text; }
-    virtual void RecreateWidget() { CreateText(); }
 
 protected:
     // create an info text contorl
@@ -600,7 +599,7 @@ void TextWidgetsPage::Reset()
 
 void TextWidgetsPage::CreateText()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
     switch ( m_radioTextLines->GetSelection() )
     {
         default:
@@ -634,7 +633,7 @@ void TextWidgetsPage::CreateText()
             break;
 
         case WrapStyle_Char:
-            flags |= wxTE_CHARWRAP;
+            flags |= wxTE_LINEWRAP;
             break;
 
         case WrapStyle_Best:

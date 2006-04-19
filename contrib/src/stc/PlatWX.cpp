@@ -1342,20 +1342,11 @@ int Platform::DBCSCharMaxLength() {
 //----------------------------------------------------------------------
 
 ElapsedTime::ElapsedTime() {
-    wxLongLong localTime = wxGetLocalTimeMillis();
-    littleBit = localTime.GetLo();
-    bigBit = localTime.GetHi();
+    wxStartTimer();
 }
 
 double ElapsedTime::Duration(bool reset) {
-    wxLongLong prevTime(bigBit, littleBit);
-    wxLongLong localTime = wxGetLocalTimeMillis();
-    if(reset) {
-        littleBit = localTime.GetLo();
-        bigBit = localTime.GetHi();
-    }
-    wxLongLong duration = localTime - prevTime;
-    double result = duration.ToDouble();
+    double result = wxGetElapsedTime(reset);
     result /= 1000.0;
     return result;
 }

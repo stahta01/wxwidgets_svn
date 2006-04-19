@@ -24,14 +24,12 @@
 
 %{
     static PyObject* __EnumerationHelper(bool flag, wxString& str, long index) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
         PyObject* ret = PyTuple_New(3);
         if (ret) {
             PyTuple_SET_ITEM(ret, 0, PyInt_FromLong(flag));
 	    PyTuple_SET_ITEM(ret, 1, wx2PyString(str));
             PyTuple_SET_ITEM(ret, 2, PyInt_FromLong(index));
         }
-        wxPyEndBlockThreads(blocked);
         return ret;
     }
 %}
@@ -87,12 +85,12 @@ public:
     };
 
 
-    %disownarg( wxConfigBase *config );
+    %apply SWIGTYPE *DISOWN { wxConfigBase *config };
     DocDeclStr(
         static wxConfigBase *, Set(wxConfigBase *config),
         "Sets the global config object (the one returned by Get) and returns a
 reference to the previous global config object.", "");
-    %cleardisown( wxConfigBase *config );
+    %clear wxConfigBase *config;
 
     DocDeclStr(
         static wxConfigBase *, Get(bool createOnDemand = true),

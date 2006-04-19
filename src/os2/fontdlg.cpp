@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/fontdlg.cpp
+// Name:        fontdlg.cpp
 // Purpose:     wxFontDialog class. NOTE: you can use the generic class
 //              if you wish, instead of implementing this.
 // Author:      David Webster
@@ -14,10 +14,11 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/math.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/math.h"
 #endif
 
 #include "wx/fontdlg.h"
@@ -97,3 +98,4 @@ int wxFontDialog::ShowModal()
     }
     return wxID_CANCEL;
 } // end of wxFontDialg::ShowModal
+

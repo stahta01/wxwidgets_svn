@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "framebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -523,16 +527,16 @@ void wxFrameBase::SetToolBar(wxToolBar *toolbar)
 // update all menus
 void wxFrameBase::DoMenuUpdates(wxMenu* menu)
 {
+    wxEvtHandler* source = GetEventHandler();
+    wxMenuBar* bar = GetMenuBar();
+
     if (menu)
-    {
-        wxEvtHandler* source = GetEventHandler();
         menu->UpdateUI(source);
-    }
-    else
+    else if ( bar != NULL )
     {
-        wxMenuBar* bar = GetMenuBar();
-        if (bar != NULL)
-            bar->UpdateMenus();
+        int nCount = bar->GetMenuCount();
+        for (int n = 0; n < nCount; n++)
+            bar->GetMenu(n)->UpdateUI(source);
     }
 }
 
@@ -568,3 +572,12 @@ void wxFrameBase::SetMenuBar(wxMenuBar *menubar)
 }
 
 #endif // wxUSE_MENUS
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxFrameBase::Command(int winid)
+{
+    return ProcessCommand(winid);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2

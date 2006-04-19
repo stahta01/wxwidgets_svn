@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "colordlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,6 +29,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/intl.h"
 #endif
 

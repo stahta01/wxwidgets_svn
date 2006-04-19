@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/metafile.cpp
+// Name:        metafile.cpp
 // Purpose:     wxMetaFile, wxMetaFileDC etc. These classes are optional.
 // Author:      David Webster
 // Modified by:
@@ -11,6 +11,10 @@
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+#include "wx/setup.h"
+#endif
 
 #if wxUSE_METAFILE
 
@@ -58,7 +62,7 @@ wxMetafile::wxMetafile(const wxString& file)
 
     M_METAFILEDATA->m_windowsMappingMode = wxMM_ANISOTROPIC;
     M_METAFILEDATA->m_metafile = 0;
-    if (!file.empty())
+    if (!file.IsNull() && (file.Cmp(wxT("")) == 0))
         M_METAFILEDATA->m_metafile = (WXHANDLE)0; // TODO: GetMetaFile(file);
 }
 
@@ -93,8 +97,12 @@ bool wxMetafile::Play(wxDC *dc)
     if (!m_refData)
         return FALSE;
 
+    dc->BeginDrawing();
+
  //   if (dc->GetHDC() && M_METAFILEDATA->m_metafile)
  //       PlayMetaFile((HDC) dc->GetHDC(), (HMETAFILE) M_METAFILEDATA->m_metafile);
+
+    dc->EndDrawing();
 
     return true;
 }
@@ -136,7 +144,7 @@ wxMetafileDC::wxMetafileDC(const wxString& file)
 
   // TODO
 /*
-  if (!file.empty())
+  if (!file.IsNull() && (file != wxT("")))
     m_hDC = (WXHDC) CreateMetaFile(file);
   else
     m_hDC = (WXHDC) CreateMetaFile(NULL);
@@ -162,7 +170,7 @@ wxMetafileDC::wxMetafileDC( const wxString& file,
     m_minY = 10000;
     m_maxX = -10000;
     m_maxY = -10000;
-    if (!file.empty() && wxFileExists(file))
+    if (file != wxT("") && wxFileExists(file))
         wxRemoveFile(file);
 
 //  m_hDC = (WXHDC) CreateMetaFile(file);

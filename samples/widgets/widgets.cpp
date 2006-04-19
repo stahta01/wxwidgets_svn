@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Program:     wxWidgets Widgets Sample
-// Name:        samples/widgets/widgets.cpp
+// Name:        widgets.cpp
 // Purpose:     Sample showing most of the simple wxWidgets widgets
 // Author:      Vadim Zeitlin
 // Created:     27.03.01
@@ -58,27 +58,13 @@ enum
 {
     Widgets_ClearLog = 100,
     Widgets_Quit,
-
-    Widgets_BookCtrl,
-
 #if wxUSE_TOOLTIPS
     Widgets_SetTooltip,
 #endif // wxUSE_TOOLTIPS
     Widgets_SetFgColour,
     Widgets_SetBgColour,
     Widgets_SetFont,
-    Widgets_Enable,
-
-    Widgets_BorderNone,
-    Widgets_BorderStatic,
-    Widgets_BorderSimple,
-    Widgets_BorderRaised,
-    Widgets_BorderSunken,
-    Widgets_BorderDouble,
-    Widgets_BorderDefault,
-
-    Widgets_GoToPage,
-    Widgets_GoToPageLast = Widgets_GoToPage + 100
+    Widgets_Enable
 };
 
 // ----------------------------------------------------------------------------
@@ -114,9 +100,6 @@ protected:
     void OnExit(wxCommandEvent& event);
 
 #if wxUSE_MENUS
-    void OnPageChanged(wxBookCtrlEvent& event);
-    void OnGoToPage(wxCommandEvent& event);
-
 #if wxUSE_TOOLTIPS
     void OnSetTooltip(wxCommandEvent& event);
 #endif // wxUSE_TOOLTIPS
@@ -124,7 +107,6 @@ protected:
     void OnSetBgCol(wxCommandEvent& event);
     void OnSetFont(wxCommandEvent& event);
     void OnEnable(wxCommandEvent& event);
-    void OnSetBorder(wxCommandEvent& event);
 #endif // wxUSE_MENUS
 
     // initialize the book: add all pages to it
@@ -241,21 +223,12 @@ BEGIN_EVENT_TABLE(WidgetsFrame, wxFrame)
     EVT_MENU(Widgets_SetTooltip, WidgetsFrame::OnSetTooltip)
 #endif // wxUSE_TOOLTIPS
 
-#if wxUSE_MENUS
-    EVT_BOOKCTRL_PAGE_CHANGED(Widgets_BookCtrl, WidgetsFrame::OnPageChanged)
-    EVT_MENU_RANGE(Widgets_GoToPage, Widgets_GoToPageLast,
-                   WidgetsFrame::OnGoToPage)
-
     EVT_MENU(Widgets_SetFgColour, WidgetsFrame::OnSetFgCol)
     EVT_MENU(Widgets_SetBgColour, WidgetsFrame::OnSetBgCol)
     EVT_MENU(Widgets_SetFont,     WidgetsFrame::OnSetFont)
     EVT_MENU(Widgets_Enable,      WidgetsFrame::OnEnable)
 
-    EVT_MENU_RANGE(Widgets_BorderNone, Widgets_BorderDefault,
-                   WidgetsFrame::OnSetBorder)
-
     EVT_MENU(wxID_EXIT, WidgetsFrame::OnExit)
-#endif // wxUSE_MENUS
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -332,17 +305,6 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
     menuWidget->Append(Widgets_SetBgColour, _T("Set &background...\tCtrl-B"));
     menuWidget->Append(Widgets_SetFont,     _T("Set f&ont...\tCtrl-O"));
     menuWidget->AppendCheckItem(Widgets_Enable,  _T("&Enable/disable\tCtrl-E"));
-
-    wxMenu *menuBorders = new wxMenu;
-    menuBorders->AppendRadioItem(Widgets_BorderDefault, _T("De&fault\tCtrl-Shift-9"));
-    menuBorders->AppendRadioItem(Widgets_BorderNone,   _T("&None\tCtrl-Shift-0"));
-    menuBorders->AppendRadioItem(Widgets_BorderSimple, _T("&Simple\tCtrl-Shift-1"));
-    menuBorders->AppendRadioItem(Widgets_BorderDouble, _T("&Double\tCtrl-Shift-2"));
-    menuBorders->AppendRadioItem(Widgets_BorderStatic, _T("Stati&c\tCtrl-Shift-3"));
-    menuBorders->AppendRadioItem(Widgets_BorderRaised, _T("&Raised\tCtrl-Shift-4"));
-    menuBorders->AppendRadioItem(Widgets_BorderSunken, _T("S&unken\tCtrl-Shift-5"));
-    menuWidget->AppendSubMenu(menuBorders, _T("Set &border"));
-
     menuWidget->AppendSeparator();
     menuWidget->Append(wxID_EXIT, _T("&Quit\tCtrl-Q"));
     mbar->Append(menuWidget, _T("&Widget"));
@@ -360,13 +322,13 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
     // we have 2 panes: book with pages demonstrating the controls in the
     // upper one and the log window with some buttons in the lower
 
-    int style = wxNO_FULL_REPAINT_ON_RESIZE|wxCLIP_CHILDREN|wxBK_DEFAULT;
+    int style = wxNO_FULL_REPAINT_ON_RESIZE|wxCLIP_CHILDREN|wxBC_DEFAULT;
     // Uncomment to suppress page theme (draw in solid colour)
     //style |= wxNB_NOPAGETHEME;
 
-    m_book = new wxBookCtrl(m_panel, Widgets_BookCtrl, wxDefaultPosition,
+    m_book = new wxBookCtrl(m_panel, wxID_ANY, wxDefaultPosition,
 #ifdef __WXMOTIF__
-        wxSize(500, wxDefaultCoord), // under Motif, height is a function of the width...
+        wxSize(500, -1), // under Motif, height is a function of the width...
 #else
         wxDefaultSize,
 #endif
@@ -430,30 +392,18 @@ void WidgetsFrame::InitBook()
     ArrayWidgetsPage pages;
     wxArrayString labels;
 
-    wxMenu *menuPages = new wxMenu;
-    unsigned nPage = 0;
-
     // we need to first create all pages and only then add them to the book
     // as we need the image list first
-    //
-    // we also construct the pages menu during this first iteration
-    for ( WidgetsPageInfo *info = WidgetsPage::ms_widgetPages;
-          info;
-          info = info->GetNext(), nPage++ )
+    WidgetsPageInfo *info = WidgetsPage::ms_widgetPages;
+    while ( info )
     {
         WidgetsPage *page = (*info->GetCtor())(m_book, m_imaglist);
         pages.Add(page);
 
         labels.Add(info->GetLabel());
-        menuPages->AppendRadioItem
-                   (
-                    Widgets_GoToPage + nPage,
-                    wxString::Format("%s\tF%u",
-                                     info->GetLabel().c_str(), nPage + 1)
-                   );
-    }
 
-    GetMenuBar()->Append(menuPages, _T("&Page"));
+        info = info->GetNext();
+    }
 
     m_book->SetImageList(m_imaglist);
 
@@ -467,6 +417,11 @@ void WidgetsFrame::InitBook()
                         false, // don't select
                         n // image id
                        );
+
+/*
+        wxColour colour = m_book->MSWGetBgColourForChild(pages[n]);
+        pages[n]->SetBackgroundColour(colour);
+*/
     }
 }
 
@@ -495,17 +450,6 @@ void WidgetsFrame::OnButtonClearLog(wxCommandEvent& WXUNUSED(event))
 #endif // USE_LOG
 
 #if wxUSE_MENUS
-
-void WidgetsFrame::OnPageChanged(wxBookCtrlEvent& event)
-{
-    GetMenuBar()->Check(Widgets_GoToPage + event.GetSelection(), true);
-    event.Skip();
-}
-
-void WidgetsFrame::OnGoToPage(wxCommandEvent& event)
-{
-    m_book->SetSelection(event.GetId() - Widgets_GoToPage);
-}
 
 #if wxUSE_TOOLTIPS
 
@@ -633,37 +577,13 @@ void WidgetsFrame::OnEnable(wxCommandEvent& event)
     page->GetWidget()->Enable(event.IsChecked());
 }
 
-void WidgetsFrame::OnSetBorder(wxCommandEvent& event)
-{
-    int border;
-    switch ( event.GetId() )
-    {
-        case Widgets_BorderNone:   border = wxBORDER_NONE;   break;
-        case Widgets_BorderStatic: border = wxBORDER_STATIC; break;
-        case Widgets_BorderSimple: border = wxBORDER_SIMPLE; break;
-        case Widgets_BorderRaised: border = wxBORDER_RAISED; break;
-        case Widgets_BorderSunken: border = wxBORDER_SUNKEN; break;
-        case Widgets_BorderDouble: border = wxBORDER_DOUBLE; break;
-
-        default:
-            wxFAIL_MSG( _T("unknown border style") );
-            // fall through
-
-        case Widgets_BorderDefault: border = wxBORDER_DEFAULT; break;
-    }
-
-    WidgetsPage::ms_defaultFlags &= ~wxBORDER_MASK;
-    WidgetsPage::ms_defaultFlags |= border;
-
-    WidgetsPage *page = wxStaticCast(m_book->GetCurrentPage(), WidgetsPage);
-    page->RecreateWidget();
-}
-
 #endif // wxUSE_MENUS
 
 // ----------------------------------------------------------------------------
 // WidgetsPageInfo
 // ----------------------------------------------------------------------------
+
+WidgetsPageInfo *WidgetsPage::ms_widgetPages = NULL;
 
 WidgetsPageInfo::WidgetsPageInfo(Constructor ctor, const wxChar *label)
                : m_label(label)
@@ -672,11 +592,12 @@ WidgetsPageInfo::WidgetsPageInfo(Constructor ctor, const wxChar *label)
 
     m_next = NULL;
 
-    // dummy sorting: add and immediately sort in the list according to label
-    if ( WidgetsPage::ms_widgetPages )
+    // dummy sorting: add and immediately sort on list according to label
+
+    if(WidgetsPage::ms_widgetPages)
     {
         WidgetsPageInfo *node_prev = WidgetsPage::ms_widgetPages;
-        if ( wxStrcmp(label, node_prev->GetLabel().c_str()) < 0 )
+        if(wxStrcmp(label,node_prev->GetLabel().c_str())<0)
         {
             // add as first
             m_next = node_prev;
@@ -688,10 +609,10 @@ WidgetsPageInfo::WidgetsPageInfo(Constructor ctor, const wxChar *label)
             do
             {
                 node_next = node_prev->GetNext();
-                if ( node_next )
+                if(node_next)
                 {
                     // add if between two
-                    if ( wxStrcmp(label, node_next->GetLabel().c_str()) < 0 )
+                    if(wxStrcmp(label,node_next->GetLabel().c_str())<0)
                     {
                         node_prev->SetNext(this);
                         m_next = node_next;
@@ -706,23 +627,22 @@ WidgetsPageInfo::WidgetsPageInfo(Constructor ctor, const wxChar *label)
                     m_next = node_next;
                 }
                 node_prev = node_next;
-            }
-            while ( node_next );
+            }while(node_next);
         }
     }
     else
     {
         // add when first
+
         WidgetsPage::ms_widgetPages = this;
+
     }
+
 }
 
 // ----------------------------------------------------------------------------
 // WidgetsPage
 // ----------------------------------------------------------------------------
-
-int WidgetsPage::ms_defaultFlags = wxBORDER_DEFAULT;
-WidgetsPageInfo *WidgetsPage::ms_widgetPages = NULL;
 
 WidgetsPage::WidgetsPage(wxBookCtrlBase *book)
            : wxPanel(book, wxID_ANY,
@@ -778,3 +698,4 @@ wxCheckBox *WidgetsPage::CreateCheckBoxAndAddToSizer(wxSizer *sizer,
 
     return checkbox;
 }
+

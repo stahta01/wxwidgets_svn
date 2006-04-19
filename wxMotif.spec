@@ -1,5 +1,5 @@
 %define pref /usr
-%define ver  2.6.2
+%define ver  2.6.3
 %define ver2 2.6
 %define rel  1
 
@@ -124,7 +124,6 @@ wx/clntdata.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
-wx/convauto.h
 wx/containr.h
 wx/datetime.h
 wx/datstrm.h
@@ -163,7 +162,6 @@ wx/ipc.h
 wx/ipcbase.h
 wx/isql.h
 wx/isqlext.h
-wx/link.h
 wx/list.h
 wx/listimpl.cpp
 wx/log.h
@@ -221,7 +219,6 @@ wx/unix/apptrait.h
 wx/unix/execute.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
-wx/unix/private.h
 wx/unix/stackwalk.h
 wx/unix/stdpaths.h
 wx/fs_inet.h

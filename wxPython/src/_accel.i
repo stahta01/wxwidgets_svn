@@ -123,6 +123,7 @@ items or or of 3-tuples (flags, keyCode, cmdID)
 
  
 %immutable;
+// See also wxPy_ReinitStockObjects in helpers.cpp
 const wxAcceleratorTable wxNullAcceleratorTable;
 %mutable;
 

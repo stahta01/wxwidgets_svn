@@ -124,9 +124,6 @@ WXDLLEXPORT wxString wxUnix2MacFilename( const wxChar *s);
 #  endif
 
 // utils.h
-WXDLLEXPORT wxString wxMacFindFolderNoSeparator(short vRefNum,
-                                                OSType folderType,
-                                                Boolean createFolder);
 WXDLLEXPORT wxString wxMacFindFolder(short vRefNum,
                                      OSType folderType,
                                      Boolean createFolder);

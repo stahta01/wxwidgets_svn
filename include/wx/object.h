@@ -13,6 +13,10 @@
 #ifndef _WX_OBJECTH__
 #define _WX_OBJECTH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "object.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -33,6 +37,15 @@ class WXDLLIMPEXP_BASE wxObject;
 // ----------------------------------------------------------------------------
 // conditional compilation
 // ----------------------------------------------------------------------------
+
+// this shouldn't be needed any longer as <wx/msw/private.h> does it but it
+// doesn't hurt neither
+#ifdef GetClassName
+#undef GetClassName
+#endif
+#ifdef GetClassInfo
+#undef GetClassInfo
+#endif
 
 class WXDLLIMPEXP_BASE wxClassInfo;
 class WXDLLIMPEXP_BASE wxHashTable;
@@ -65,8 +78,7 @@ public:
 
     ~wxClassInfo();
 
-    wxObject *CreateObject() const { return m_objectConstructor ? (*m_objectConstructor)() : 0; }
-    bool IsDynamic() const { return (NULL != m_objectConstructor); }
+    wxObject *CreateObject() { return m_objectConstructor ? (*m_objectConstructor)() : 0; }
 
     const wxChar       *GetClassName() const { return m_className; }
     const wxChar       *GetBaseClassName1() const
@@ -99,6 +111,7 @@ public:
     // Cleans up hash table used for fast searching.
     wxDEPRECATED( static void CleanUpClasses() );
 #endif
+    static void     CleanUp();
 
 public:
     const wxChar            *m_className;
@@ -381,24 +394,6 @@ inline void* wxCheckCast(void *ptr)
 #endif // __WXDEBUG__ && wxUSE_MEMORY_TRACING
 
 // ----------------------------------------------------------------------------
-// wxObjectRefData: ref counted data meant to be stored in wxObject
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxObjectRefData
-{
-    friend class WXDLLIMPEXP_BASE wxObject;
-
-public:
-    wxObjectRefData() : m_count(1) { }
-    virtual ~wxObjectRefData() { }
-
-    int GetRefCount() const { return m_count; }
-
-private:
-    int m_count;
-};
-
-// ----------------------------------------------------------------------------
 // wxObject: the root class of wxWidgets object hierarchy
 // ----------------------------------------------------------------------------
 
@@ -406,22 +401,24 @@ class WXDLLIMPEXP_BASE wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxObject)
 
+private:
+    void InitFrom(const wxObject& other);
+
 public:
     wxObject() { m_refData = NULL; }
     virtual ~wxObject() { UnRef(); }
 
     wxObject(const wxObject& other)
     {
-         m_refData = other.m_refData;
-         if (m_refData)
-             m_refData->m_count++;
+        InitFrom(other);
     }
 
     wxObject& operator=(const wxObject& other)
     {
         if ( this != &other )
         {
-            Ref(other);
+            UnRef();
+            InitFrom(other);
         }
         return *this;
     }
@@ -471,6 +468,20 @@ public:
     // destroy a reference
     void UnRef();
 
+
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedObjectFunc1() {}
+    virtual void ReservedObjectFunc2() {}
+    virtual void ReservedObjectFunc3() {}
+    virtual void ReservedObjectFunc4() {}
+    virtual void ReservedObjectFunc5() {}
+    virtual void ReservedObjectFunc6() {}
+    virtual void ReservedObjectFunc7() {}
+    virtual void ReservedObjectFunc8() {}
+    virtual void ReservedObjectFunc9() {}
+#endif
+
 protected:
     // ensure that our data is not shared with anybody else: if we have no
     // data, it is created using CreateRefData() below, if we have shared data
@@ -488,6 +499,25 @@ protected:
 
     wxObjectRefData *m_refData;
 };
+
+// ----------------------------------------------------------------------------
+// wxObjectRefData: ref counted data meant to be stored in wxObject
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxObjectRefData
+{
+    friend class WXDLLIMPEXP_BASE wxObject;
+
+public:
+    wxObjectRefData() : m_count(1) { }
+    virtual ~wxObjectRefData() { }
+
+    int GetRefCount() const { return m_count; }
+
+private:
+    int m_count;
+};
+
 
 inline wxObject *wxCheckDynamicCast(wxObject *obj, wxClassInfo *classInfo)
 {
@@ -557,4 +587,5 @@ private :
     #include "wx/msw/msvcrt.h"
 #endif
 
-#endif // _WX_OBJECTH__
+#endif  // _WX_OBJECTH__
+

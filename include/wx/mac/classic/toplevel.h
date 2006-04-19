@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/toplevel.h
+// Name:        wx/mac/toplevel.h
 // Purpose:     wxTopLevelWindowMac is the Mac implementation of wxTLW
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_MSW_TOPLEVEL_H_
 #define _WX_MSW_TOPLEVEL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
 
 #if wxUSE_SYSTEM_OPTIONS
     #define wxMAC_WINDOW_PLAIN_TRANSITION _T("mac.window-plain-transition")
@@ -50,9 +54,9 @@ public:
     virtual ~wxTopLevelWindowMac();
 
     // implement base class pure virtuals
-    virtual void Maximize(bool maximize = true);
+    virtual void Maximize(bool maximize = TRUE);
     virtual bool IsMaximized() const;
-    virtual void Iconize(bool iconize = true);
+    virtual void Iconize(bool iconize = TRUE);
     virtual bool IsIconized() const;
     virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
@@ -61,8 +65,8 @@ public:
     virtual bool SetShape(const wxRegion& region);
 
     virtual bool ShowFullScreen(bool WXUNUSED(show), long WXUNUSED(style) = wxFULLSCREEN_ALL)
-    { return false; }
-    virtual bool IsFullScreen() const { return false; }
+    { return FALSE; }
+    virtual bool IsFullScreen() const { return FALSE; }
 
     // implementation from now on
     // --------------------------
@@ -87,18 +91,15 @@ public:
     virtual void MacKeyDown( WXEVENTREF ev ) ;
 #endif
     virtual void MacFireMouseEvent( wxUint16 kind , wxInt32 x , wxInt32 y ,wxUint32 modifiers , long timestamp ) ;
-
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
-
     virtual void Raise();
     virtual void Lower();
-    virtual bool Show( bool show = true );
+    virtual void SetTitle( const wxString& title);
+    virtual bool Show( bool show = TRUE );
     virtual void DoMoveWindow(int x, int y, int width, int height);
     void MacInvalidate( const WXRECTPTR rect, bool eraseBackground ) ;
     short MacGetWindowBackgroundTheme() const { return m_macWindowBackgroundTheme ; }
-    static bool MacEnableCompositing( bool useCompositing );
-    bool MacUsesCompositing() { return m_macUsesCompositing; }
+    static bool MacEnableCompositing( bool useCompositing ); 
+    bool MacUsesCompositing() { return m_macUsesCompositing; } 
 
 #if TARGET_CARBON
     WXEVENTHANDLERREF    MacGetEventHandler() { return m_macEventHandler ; }
@@ -141,3 +142,4 @@ void wxRemoveMacWindowAssociation(wxTopLevelWindowMac *win) ;
 
 
 #endif // _WX_MSW_TOPLEVEL_H_
+

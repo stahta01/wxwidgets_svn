@@ -85,7 +85,7 @@
     #define TEST_WCHAR
     #define TEST_ZIP
 #else // #if TEST_ALL
-    #define TEST_STDPATHS
+    #define TEST_DIR
 #endif
 
 // some tests are interactive, define this to run them
@@ -897,8 +897,8 @@ static void TestFileNameCwd()
 
 #ifdef TEST_FILETIME
 
-#include "wx/filename.h"
-#include "wx/datetime.h"
+#include <wx/filename.h>
+#include <wx/datetime.h>
 
 static void TestFileGetTimes()
 {
@@ -1554,7 +1554,7 @@ static void TestRegExInteractive()
 
 #ifdef TEST_ODBC
 
-#include "wx/db.h"
+#include <wx/db.h>
 
 static void TestDbOpen()
 {
@@ -2113,9 +2113,9 @@ static void TestScopeGuard()
     wxON_BLOCK_EXIT2(function2, 3.14, 'p');
 
     Object obj;
-    wxON_BLOCK_EXIT_OBJ0(obj, Object::method0);
-    wxON_BLOCK_EXIT_OBJ1(obj, Object::method1, 7);
-    wxON_BLOCK_EXIT_OBJ2(obj, Object::method2, 2.71, 'e');
+    wxON_BLOCK_EXIT_OBJ0(obj, &Object::method0);
+    wxON_BLOCK_EXIT_OBJ1(obj, &Object::method1, 7);
+    wxON_BLOCK_EXIT_OBJ2(obj, &Object::method2, 2.71, 'e');
 
     wxScopeGuard dismissed = wxMakeGuard(function0);
     dismissed.Dismiss();
@@ -2684,17 +2684,7 @@ static void TestStandardPaths()
     wxPrintf(_T("Data dir (sys local):\t%s\n"), stdp.GetLocalDataDir().c_str());
     wxPrintf(_T("Data dir (user):\t%s\n"), stdp.GetUserDataDir().c_str());
     wxPrintf(_T("Data dir (user local):\t%s\n"), stdp.GetUserLocalDataDir().c_str());
-    wxPrintf(_T("Documents dir:\t\t%s\n"), stdp.GetDocumentsDir().c_str());
     wxPrintf(_T("Plugins dir:\t\t%s\n"), stdp.GetPluginsDir().c_str());
-    wxPrintf(_T("Resources dir:\t\t%s\n"), stdp.GetResourcesDir().c_str());
-    wxPrintf(_T("Localized res. dir:\t%s\n"),
-             stdp.GetLocalizedResourcesDir(_T("fr")).c_str());
-    wxPrintf(_T("Message catalogs dir:\t%s\n"),
-             stdp.GetLocalizedResourcesDir
-                  (
-                    _T("fr"),
-                    wxStandardPaths::ResourceCat_Messages
-                  ).c_str());
 }
 
 #endif // TEST_STDPATHS

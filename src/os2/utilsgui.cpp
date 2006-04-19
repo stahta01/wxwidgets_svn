@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utilsgui.cpp
+// Name:        os2/utilsgui.cpp
 // Purpose:     Various utility functions only available in GUI
 // Author:      David Webster
 // Modified by:
@@ -25,6 +25,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/cursor.h"
@@ -68,7 +69,7 @@ bool wxWriteResource(
     HAB                             hab = 0;
     HINI                            hIni = 0;
 
-    if (!rFile.empty())
+    if (rFile != "")
     {
         hIni = ::PrfOpenProfile(hab, (PSZ)WXSTRINGCAST rFile);
         if (hIni != 0L)
@@ -152,7 +153,7 @@ bool wxGetResource(
     wxChar                          zDefunkt[] = _T("$$default");
     char                            zBuf[1000];
 
-    if (!rFile.empty())
+    if (rFile != "")
     {
         hIni = ::PrfOpenProfile(hab, (PSZ)WXSTRINGCAST rFile);
         if (hIni != 0L)
@@ -289,7 +290,9 @@ HCURSOR gs_wxBusyCursorOld = 0;  // old cursor
 static int gs_wxBusyCursorCount = 0;
 
 // Set the cursor to the busy cursor for all windows
-void wxBeginBusyCursor(const wxCursor* pCursor)
+void wxBeginBusyCursor(
+  wxCursor*                         pCursor
+)
 {
     if ( gs_wxBusyCursorCount++ == 0 )
     {
@@ -481,7 +484,7 @@ void wxGUIAppTraits::TerminateGui(unsigned long ulHab)
 
 wxToolkitInfo & wxGUIAppTraits::GetToolkitInfo()
 {
-    static wxToolkitInfo vInfo;
+    static wxToolkitInfo	    vInfo;
     ULONG                           ulSysInfo[QSV_MAX] = {0};
     APIRET                          ulrc;
 
@@ -509,40 +512,44 @@ wxToolkitInfo & wxGUIAppTraits::GetToolkitInfo()
 // window information functions
 // ---------------------------------------------------------------------------
 
-wxString WXDLLEXPORT wxGetWindowText( WXHWND hWnd )
+wxString WXDLLEXPORT wxGetWindowText(
+  WXHWND                            hWnd
+)
 {
-    wxString vStr;
+    wxString                        vStr;
 
     if ( hWnd )
     {
-        long lLen = ::WinQueryWindowTextLength((HWND)hWnd) + 1;
-        ::WinQueryWindowText((HWND)hWnd, lLen, (PSZ)(wxChar*)wxStringBuffer(vStr, lLen));
+	long                lLen = ::WinQueryWindowTextLength((HWND)hWnd) + 1;
+	::WinQueryWindowText((HWND)hWnd, lLen, (PSZ)(wxChar*)wxStringBuffer(vStr, lLen));
     }
 
     return vStr;
 }
 
-wxString WXDLLEXPORT wxGetWindowClass( WXHWND hWnd )
+wxString WXDLLEXPORT wxGetWindowClass(
+  WXHWND                            hWnd
+)
 {
-    wxString vStr;
+    wxString                        vStr;
     if ( hWnd )
     {
-        int nLen = 256; // some starting value
+        int                         nLen = 256; // some starting value
 
-    for ( ;; )
-    {
-        int                     nCount = ::WinQueryClassName((HWND)hWnd, nLen, (PSZ)(wxChar*)wxStringBuffer(vStr, nLen));
+	for ( ;; )
+	{
+	    int                     nCount = ::WinQueryClassName((HWND)hWnd, nLen, (PSZ)(wxChar*)wxStringBuffer(vStr, nLen));
 
-        if (nCount == nLen )
-        {
-            // the class name might have been truncated, retry with larger
-            // buffer
-            nLen *= 2;
-        }
-        else
-        {
-            break;
-        }
+	    if (nCount == nLen )
+	    {
+		// the class name might have been truncated, retry with larger
+		// buffer
+		nLen *= 2;
+	    }
+	    else
+	    {
+		break;
+	    }
         }
     }
     return vStr;

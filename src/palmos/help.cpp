@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -16,10 +20,11 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_HELP
-
 #ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif
+
+#if wxUSE_HELP
 
 #include "wx/filefn.h"
 

@@ -13,6 +13,7 @@
 #define _WX_SETUP_H_
 
 /* --- start common options --- */
+
 // ----------------------------------------------------------------------------
 // global settings
 // ----------------------------------------------------------------------------
@@ -27,15 +28,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.4 API: set it to 1 to
+// This setting determines the compatibility with 2.2 API: set it to 1 to
 // enable it but please consider updating your code instead.
 //
 // Default is 0
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
+// This setting determines the compatibility with 2.4 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -43,7 +44,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
 // MSW-only: Set to 0 for accurate dialog units, else 1 for old behaviour when
 // default system font is used for wxWindow::GetCharWidth/Height() instead of
@@ -129,7 +130,7 @@
 // Default is 1 if supported by the compiler.
 //
 // Recommended setting: 1, set to 0 if your programs never crash
-#define wxUSE_STACKWALKER 1
+#define wxUSE_STACKWALKER 0
 
 // Set this to 1 to compile in wxDebugReport class which allows you to create
 // and optionally upload to your web site a debug report consisting of back
@@ -148,10 +149,6 @@
 // Set wxUSE_UNICODE to 1 to compile wxWidgets in Unicode mode: wxChar will be
 // defined as wchar_t, wxString will use Unicode internally. If you set this
 // to 1, you must use wxT() macro for all literal strings in the program.
-//
-// Unicode is currently only fully supported under Windows NT/2000/XP
-// (Windows 9x doesn't support it and the programs compiled in Unicode mode
-// will not run under 9x -- but see wxUSE_UNICODE_MSLU below).
 //
 // Default is 0
 //
@@ -246,32 +243,13 @@
 // Recommended setting: 0 unless you do plan to develop MT applications
 #define wxUSE_THREADS 1
 
-// If enabled, compiles wxWidgets streams classes
-//
-// wx stream classes are used for image IO, process IO redirection, network
-// protocols implementation and much more and so disabling this results in a
-// lot of other functionality being lost.
-//
-// Default is 1
-//
-// Recommended setting: 1 as setting it to 0 disables many other things
+// If enabled (1), compiles wxWidgets streams classes
 #define wxUSE_STREAMS       1
 
-// Use standard C++ streams if 1 instead of wx streams in some places. If
-// disabled (default), wx streams are used everywhere and wxWidgets doesn't
-// depend on the standard streams library.
-//
-// Notice that enabling this does not replace wx streams with std streams
-// everywhere, in a lot of places wx streams are used no matter what.
-//
-// Default is 0
-//
-// Recommended setting: 1 if you use the standard streams anyhow and so
-//                      dependency on the standard streams library is not a
-//                      problem
+// Use standard C++ streams if 1. If 0, use wxWin streams implementation only.
 #define wxUSE_STD_IOSTREAM  0
 
-// Enable conversion to standard C++ string if 1.
+// Enable conversion to  standard C++ string if 1.
 #define wxUSE_STD_STRING  0
 
 // ----------------------------------------------------------------------------
@@ -488,7 +466,7 @@
 //
 // Default is 1.
 //
-// Recommended setting: 1 
+// Recommended setting: 1
 #define wxUSE_MEDIACTRL     1
 
 // Use GStreamer for Unix (req a lot of dependancies)
@@ -561,7 +539,6 @@
 #define wxUSE_CHECKLISTBOX 1    // wxCheckListBox (requires wxUSE_OWNER_DRAWN)
 #define wxUSE_CHOICE       1    // wxChoice
 #define wxUSE_COMBOBOX     1    // wxComboBox
-#define wxUSE_DATAVIEWCTRL 1    // wxDataViewCtrl
 #define wxUSE_DATEPICKCTRL 1    // wxDatePickerCtrl
 #define wxUSE_GAUGE        1    // wxGauge
 #define wxUSE_LISTBOX      1    // wxListBox
@@ -633,22 +610,6 @@
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
 
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
-
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
 //
@@ -692,13 +653,12 @@
 #define wxUSE_CARET         1
 
 // Use wxDisplay class: it allows enumerating all displays on a system and
-// their geometries as well as finding the display on which the given point or
-// window lies.
+// working with them.
 //
-// Default is 1.
+// Default is 0 because it isn't yet implemented on all platforms
 //
 // Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       1
+#define wxUSE_DISPLAY       0
 
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
@@ -775,7 +735,7 @@
 #define wxUSE_COLOURDLG     1
 
 // wxDirDlg class for getting a directory name from user
-#define wxUSE_DIRDLG 1
+#define wxUSE_DIRDLG 0
 
 // TODO: setting to choose the generic or native one
 
@@ -784,7 +744,7 @@
 // Default is 1
 //
 // Recommended setting: 1 (used in many places in the library itself)
-#define wxUSE_FILEDLG       1
+#define wxUSE_FILEDLG       0
 
 // Use find/replace dialogs.
 //
@@ -860,15 +820,15 @@
 #define wxUSE_MDI 1
 
 // Set to 0 to disable document/view architecture
-#define wxUSE_DOC_VIEW_ARCHITECTURE 1
+#define wxUSE_DOC_VIEW_ARCHITECTURE 0
 
 // Set to 0 to disable MDI document/view architecture
 //
 // Requires wxUSE_MDI && wxUSE_DOC_VIEW_ARCHITECTURE
-#define wxUSE_MDI_ARCHITECTURE    1
+#define wxUSE_MDI_ARCHITECTURE    0
 
 // Set to 0 to disable print/preview architecture code
-#define wxUSE_PRINTING_ARCHITECTURE  1
+#define wxUSE_PRINTING_ARCHITECTURE  0
 
 // wxHTML sublibrary allows to display HTML in wxWindow programs and much,
 // much more.
@@ -890,14 +850,6 @@
 // Recommended setting: 1 if you intend to use OpenGL, 0 otherwise
 #define wxUSE_GLCANVAS       0
 
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
-
 // ----------------------------------------------------------------------------
 // Data transfer
 // ----------------------------------------------------------------------------
@@ -907,7 +859,7 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_CLIPBOARD     1
+#define wxUSE_CLIPBOARD     0
 
 // Use wxDataObject and related classes. Needed for clipboard and OLE drag and
 // drop
@@ -915,7 +867,7 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_DATAOBJ       1
+#define wxUSE_DATAOBJ       0
 
 // Use wxDropTarget and wxDropSource classes for drag and drop (this is
 // different from "built in" drag and drop in wxTreeCtrl which is always
@@ -924,7 +876,7 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_DRAG_AND_DROP 1
+#define wxUSE_DRAG_AND_DROP 0
 
 // Use wxAccessible for enhanced and customisable accessibility.
 // Depends on wxUSE_OLE.
@@ -953,11 +905,9 @@
                                 // 0 for no interprocess comms
 #define wxUSE_HELP        1
                                 // 0 for no help facility
-#define wxUSE_MS_HTML_HELP 1
-                                // 0 for no MS HTML Help
 
 // Use wxHTML-based help controller?
-#define wxUSE_WXHTML_HELP 1
+#define wxUSE_WXHTML_HELP 0
 
 #define wxUSE_RESOURCES   0
                                 // 0 for no wxGetResource/wxWriteResource
@@ -994,7 +944,7 @@
 // that use the connection) should support forward only scrolling of cursors,
 // or both forward and backward support for backward scrolling cursors is
 // dependent on the data source as well as the ODBC driver being used.
-#define wxODBC_FWD_ONLY_CURSORS	 1
+#define wxODBC_FWD_ONLY_CURSORS 1
 
 // Default is 0.  Set to 1 to use the deprecated classes, enum types, function,
 // member variables.  With a setting of 1, full backward compatibility with the

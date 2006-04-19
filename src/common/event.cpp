@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/event.cpp
+// Name:        event.cpp
 // Purpose:     Event classes
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma implementation "event.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,6 +36,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/app.h"
     #include "wx/list.h"
 
@@ -234,6 +246,14 @@ DEFINE_EVENT_TYPE(wxEVT_SCROLL_PAGEDOWN)
 DEFINE_EVENT_TYPE(wxEVT_SCROLL_THUMBTRACK)
 DEFINE_EVENT_TYPE(wxEVT_SCROLL_THUMBRELEASE)
 DEFINE_EVENT_TYPE(wxEVT_SCROLL_CHANGED)
+
+// see comments in wx/event.h, near wxEVT_SCROLL_ENDSCROLL declaration
+#if wxCHECK_VERSION(2, 7, 0)
+    #error "Remove the lines below, not needed any more"
+#endif
+#undef wxEVT_SCROLL_ENDSCROLL
+extern WXDLLIMPEXP_CORE const wxEventType wxEVT_SCROLL_ENDSCROLL;
+const wxEventType wxEVT_SCROLL_ENDSCROLL = wxEVT_SCROLL_CHANGED;
 
 // Scroll events from wxWindow
 DEFINE_EVENT_TYPE(wxEVT_SCROLLWIN_TOP)
@@ -736,12 +756,10 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
 #endif
 }
 
-#if WXWIN_COMPATIBILITY_2_6
 long wxKeyEvent::KeyCode() const
 {
     return m_keyCode;
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindowCreateEvent::wxWindowCreateEvent(wxWindow *win)
 {
@@ -1024,8 +1042,6 @@ wxEvtHandler::~wxEvtHandler()
         delete m_dynamicEvents;
     };
 
-    if (m_pendingEvents)
-        m_pendingEvents->DeleteContents(true);
     delete m_pendingEvents;
 
 #if wxUSE_THREADS
@@ -1069,7 +1085,7 @@ void wxEvtHandler::ClearEventLocker()
     delete m_eventsLocker;
     m_eventsLocker = NULL;
 #endif
-}
+};
 
 #endif // wxUSE_THREADS
 
@@ -1104,7 +1120,7 @@ void wxEvtHandler::AddPendingEvent(wxEvent& event)
 
     wxLEAVE_CRIT_SECT(*wxPendingEventsLocker);
 
-    // 3) Inform the system that new pending events are somewhere,
+    // 3) Inform the system that new pending events are somwehere,
     //    and that these should be processed in idle time.
     wxWakeUpIdle();
 }
@@ -1129,9 +1145,6 @@ void wxEvtHandler::ProcessPendingEvents()
     {
         wxEvent *event = (wxEvent *)node->GetData();
 
-        // It's importan we remove event from list before processing it.
-        // Else a nested event loop, for example from a modal dialog, might
-        // process the same event again.
         m_pendingEvents->Erase(node);
 
         wxLEAVE_CRIT_SECT( Lock() );
@@ -1141,7 +1154,7 @@ void wxEvtHandler::ProcessPendingEvents()
 
         wxENTER_CRIT_SECT( Lock() );
 
-        if ( --n == 0 )
+        if ( !--n )
             break;
     }
 
@@ -1346,10 +1359,6 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
         wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
-        // get next node before (maybe) calling the event handler as it could
-        // call Disconnect() invalidating the current node
-        node = node->GetNext();
-
         if ((event.GetEventType() == entry->m_eventType) && (entry->m_fn != 0))
         {
             wxEvtHandler *handler =
@@ -1364,10 +1373,12 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
                 return true;
             }
         }
+
+        node = node->GetNext();
     }
 
     return false;
-}
+};
 
 void wxEvtHandler::DoSetClientObject( wxClientData *data )
 {

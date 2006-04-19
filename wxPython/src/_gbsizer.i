@@ -73,8 +73,7 @@ class wxGBPosition
 {
 public:
     wxGBPosition(int row=0, int col=0);
-    ~wxGBPosition();
-    
+
     int GetRow() const;
     int GetCol() const;
     void SetRow(int row);
@@ -164,8 +163,6 @@ public:
         "Construct a new wxGBSpan, optionally setting the rowspan and
 colspan. The default is (1,1). (Meaning that the item occupies one
 cell in each direction.", "");
-
-    ~wxGBSpan();
 
     int GetRowspan() const;
     int GetColspan() const;
@@ -263,9 +260,6 @@ item can be used in a Sizer.
 You will probably never need to create a wx.GBSizerItem directly as they
 are created automatically when the sizer's Add method is called.", "");
 
-    ~wxGBSizerItem();
-
-    
     %extend {
         DocStr(wxGBSizerItem( wxWindow *window, const wxGBPosition& pos,const wxGBSpan& span,int flag,int border,PyObject* userData=NULL ),
                "Construct a `wx.GBSizerItem` for a window.", "");
@@ -289,7 +283,6 @@ are created automatically when the sizer's Add method is called.", "");
 
         DocStr(wxGBSizerItem( wxSizer *sizer,const wxGBPosition& pos,const wxGBSpan& span,int flag,int border,PyObject* userData=NULL ),
                "Construct a `wx.GBSizerItem` for a sizer", "");
-        %disownarg( wxSizer *sizer );
         %RenameCtor(GBSizerItemSizer, wxGBSizerItem( wxSizer *sizer,
                                                      const wxGBPosition& pos,
                                                      const wxGBSpan& span,
@@ -305,7 +298,6 @@ are created automatically when the sizer's Add method is called.", "");
                 }
                 return new wxGBSizerItem(sizer, pos, span, flag, border, data);
             }
-        %cleardisown( wxSizer *sizer );
 
              
         DocStr(wxGBSizerItem( int width,int height,const wxGBPosition& pos,const wxGBSpan& span,int flag,int border,PyObject* userData=NULL),
@@ -442,8 +434,6 @@ position, False if something was already there.
             wxPySizerItemInfo info = wxPySizerItemTypeHelper(item, true, false);
             if ( userData && (info.window || info.sizer || info.gotSize) )
                 data = new wxPyUserData(userData);
-            if ( info.sizer )
-                PyObject_SetAttrString(item,"thisown",Py_False);
             wxPyEndBlockThreads(blocked);
             
             // Now call the real Add method if a valid item type was found
@@ -457,8 +447,7 @@ position, False if something was already there.
             return NULL;
         }
     }
-
-    %disownarg( wxGBSizerItem *item );
+    
     DocDeclAStrName(
         wxGBSizerItem* , Add( wxGBSizerItem *item ),
         "Add(self, GBSizerItem item) -> wx.GBSizerItem",
@@ -466,7 +455,6 @@ position, False if something was already there.
 the item was successfully placed at its given cell position, False if
 something was already there.", "",
         AddItem);
-    %cleardisown( wxGBSizerItem *item );
 
     DocDeclStr(
         wxSize , GetCellSize(int row, int col) const,

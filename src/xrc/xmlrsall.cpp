@@ -8,6 +8,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+// -- Already done in xmlres.cpp
+//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+//#pragma implementation "xmlres.h"
+//#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -86,9 +91,6 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_CHOICEBOOK
     AddHandler(new wxChoicebookXmlHandler);
 #endif
-#if wxUSE_TREEBOOK
-    AddHandler(new wxTreebookXmlHandler);
-#endif
     AddHandler(new wxTextCtrlXmlHandler);
 #if wxUSE_LISTBOX
     AddHandler(new wxListBoxXmlHandler);
@@ -117,9 +119,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_MDI
     AddHandler(new wxMdiXmlHandler);
-#endif
-#if wxUSE_GRID
-    AddHandler( new wxGridXmlHandler);
 #endif
 }
 

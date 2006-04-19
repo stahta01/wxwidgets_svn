@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/combobox.cpp
+// Name:        univ/combobox.cpp
 // Purpose:     wxComboControl and wxComboBox implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univcombobox.h"
+#endif
 
 #include "wx/wxprec.h"
 
@@ -127,11 +131,6 @@ public:
     virtual void SetSelection(int n) { DoSetSelection(n, true); }
     void SetSelection(int n, bool select) { DoSetSelection(n, select); }
 
-    // used to process wxUniv actions
-    bool PerformAction(const wxControlAction& action,
-                       long numArg,
-                       const wxString& strArg);
-
 protected:
     // we shouldn't return height too big from here
     virtual wxSize DoGetBestClientSize() const;
@@ -144,6 +143,11 @@ protected:
 
     // called whenever the user selects or activates a listbox item
     void OnSelect(wxCommandEvent& event);
+
+    // used to process wxUniv actions
+    bool PerformAction(const wxControlAction& action,
+                       long numArg,
+                       const wxString& strArg);
 
 private:
     // has the mouse been released on this control?
@@ -506,6 +510,8 @@ void wxComboTextCtrl::OnKey(wxKeyEvent& event)
         case WXK_ESCAPE:
         case WXK_PAGEDOWN:
         case WXK_PAGEUP:
+        case WXK_PRIOR:
+        case WXK_NEXT:
             (void)m_combo->ProcessEvent(event);
             return;
     }
@@ -538,7 +544,7 @@ bool wxComboListBox::SetSelection(const wxString& value)
     // always matches), but we want to show the first one in such case
     if ( value.empty() )
     {
-        if ( GetCount() > 0 )
+        if ( GetCount() )
         {
             wxListBox::SetSelection(0);
         }
@@ -794,43 +800,43 @@ void wxComboBox::Clear()
     GetText()->SetValue(wxEmptyString);
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int n)
 {
-    wxCHECK_RET( IsValid(n), _T("invalid index in wxComboBox::Delete") );
+    wxCHECK_RET( (n >= 0) && (n < GetCount()), _T("invalid index in wxComboBox::Delete") );
 
-    if (GetSelection() == (int)n)
+    if (GetSelection() == n)
         GetText()->SetValue(wxEmptyString);
 
     GetLBox()->Delete(n);
 }
 
-unsigned int wxComboBox::GetCount() const
+int wxComboBox::GetCount() const
 {
     return GetLBox()->GetCount();
 }
 
-wxString wxComboBox::GetString(unsigned int n) const
+wxString wxComboBox::GetString(int n) const
 {
-    wxCHECK_MSG( IsValid(n), wxEmptyString, _T("invalid index in wxComboBox::GetString") );
+    wxCHECK_MSG( (n >= 0) && (n < GetCount()), wxEmptyString, _T("invalid index in wxComboBox::GetString") );
 
     return GetLBox()->GetString(n);
 }
 
-void wxComboBox::SetString(unsigned int n, const wxString& s)
+void wxComboBox::SetString(int n, const wxString& s)
 {
-    wxCHECK_RET( IsValid(n), _T("invalid index in wxComboBox::SetString") );
+    wxCHECK_RET( (n >= 0) && (n < GetCount()), _T("invalid index in wxComboBox::SetString") );
 
     GetLBox()->SetString(n, s);
 }
 
-int wxComboBox::FindString(const wxString& s, bool bCase) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    return GetLBox()->FindString(s, bCase);
+    return GetLBox()->FindString(s);
 }
 
 void wxComboBox::SetSelection(int n)
 {
-    wxCHECK_RET( IsValid(n), _T("invalid index in wxComboBox::Select") );
+    wxCHECK_RET( (n >= 0) && (n < GetCount()), _T("invalid index in wxComboBox::Select") );
 
     GetLBox()->SetSelection(n);
     GetText()->SetValue(GetLBox()->GetString(n));
@@ -854,10 +860,10 @@ int wxComboBox::DoAppend(const wxString& item)
     return GetLBox()->Append(item);
 }
 
-int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+int wxComboBox::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     if (pos == GetCount())
         return DoAppend(item);
@@ -866,22 +872,22 @@ int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
     return pos;
 }
 
-void wxComboBox::DoSetItemClientData(unsigned int n, void* clientData)
+void wxComboBox::DoSetItemClientData(int n, void* clientData)
 {
     GetLBox()->SetClientData(n, clientData);
 }
 
-void *wxComboBox::DoGetItemClientData(unsigned int n) const
+void *wxComboBox::DoGetItemClientData(int n) const
 {
     return GetLBox()->GetClientData(n);
 }
 
-void wxComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxComboBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
     GetLBox()->SetClientObject(n, clientData);
 }
 
-wxClientData* wxComboBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxComboBox::DoGetItemClientObject(int n) const
 {
     return GetLBox()->GetClientObject(n);
 }

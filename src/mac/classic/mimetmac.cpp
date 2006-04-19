@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/mimetype.cpp
+// Name:        mac/mimetype.cpp
 // Purpose:     classes and functions to manage MIME types
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,11 +9,19 @@
 // Licence:     wxWindows licence (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef    __GNUG__
+#pragma implementation "mimetype.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
   #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #ifndef WX_PRECOMP

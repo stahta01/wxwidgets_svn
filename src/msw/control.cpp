@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/control.cpp
+// Name:        msw/control.cpp
 // Purpose:     wxControl class
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "control.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -36,19 +40,16 @@
 
 #include "wx/control.h"
 
-#if wxUSE_LISTCTRL
-    #include "wx/listctrl.h"
-#endif // wxUSE_LISTCTRL
-
-#if wxUSE_TREECTRL
-    #include "wx/treectrl.h"
-#endif // wxUSE_TREECTRL
+#if wxUSE_NOTEBOOK
+    #include "wx/notebook.h"
+#endif // wxUSE_NOTEBOOK
 
 #include "wx/msw/private.h"
 #include "wx/msw/uxtheme.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -169,33 +170,8 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
 
     // set up fonts and colours
     InheritAttributes();
-    if ( !m_hasFont )
-    {
-#if wxUSE_LISTCTRL || wxUSE_TREECTRL
-        // if we set a font for {list,tree}ctrls and the font size is changed in
-        // the display properties then the font size for these controls doesn't
-        // automatically adjust when they receive WM_SETTINGCHANGE
-        if ( wxDynamicCastThis(wxListCtrl) || wxDynamicCastThis(wxTreeCtrl) )
-        {
-            // not sure if we need to explicitly set the font here for Win95/NT4
-            // but we definitely can't do it for any newer version
-            // see wxGetCCDefaultFont() in src/msw/settings.cpp for explanation
-            // of why this test works
-
-            // TODO: test Win95/NT4 to see if this is needed or breaks the
-            // font resizing as it does on newer versions
-            wxFont font = GetDefaultAttributes().font;
-            if ( font == wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT) )
-            {
-                SetFont(font);
-            }
-        }
-        else
-#endif // wxUSE_LISTCTRL || wxUSE_TREECTRL
-        {
-            SetFont(GetDefaultAttributes().font);
-        }
-    }
+    if (!m_hasFont)
+        SetFont(GetDefaultAttributes().font);
 
     // set the size now if no initial size specified
     SetInitialBestSize(size);
@@ -306,6 +282,7 @@ bool wxControl::ProcessCommand(wxCommandEvent& event)
     return GetEventHandler()->ProcessEvent(event);
 }
 
+#ifdef __WIN95__
 bool wxControl::MSWOnNotify(int idCtrl,
                             WXLPARAM lParam,
                             WXLPARAM* result)
@@ -353,6 +330,7 @@ bool wxControl::MSWOnNotify(int idCtrl,
 
     return GetEventHandler()->ProcessEvent(event);
 }
+#endif // Win95
 
 WXHBRUSH wxControl::DoMSWControlColor(WXHDC pDC, wxColour colBg, WXHWND hWnd)
 {

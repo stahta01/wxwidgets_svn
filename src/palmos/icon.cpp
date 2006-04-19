@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "icon.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,6 +29,7 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
@@ -89,3 +94,4 @@ bool wxIcon::LoadFile(const wxString& filename,
 {
     return false;
 }
+

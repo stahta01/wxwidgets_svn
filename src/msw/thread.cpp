@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -737,6 +741,12 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
                 //     the system might dead lock then
                 if ( wxThread::IsMain() )
                 {
+                    // it looks that sometimes WAIT_OBJECT_0 + 1 is
+                    // returned but there are no messages in the thread
+                    // queue -- prevent DoMessageFromThreadWait() from
+                    // blocking inside ::GetMessage() forever in this case
+                    ::PostMessage(NULL, WM_NULL, 0, 0);
+
                     wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits()
                                                    : NULL;
 
@@ -919,7 +929,7 @@ bool wxThread::SetConcurrency(size_t WXUNUSED_IN_WINCE(level))
             dwProcMask |= bit;
 
             // another process added
-            if ( --level == 0 )
+            if ( !--level )
             {
                 // and that's enough
                 break;

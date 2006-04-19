@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/htmlwin.cpp
+// Name:        htmlwin.cpp
 // Purpose:     wxHtmlWindow class for parsing & displaying HTML (implementation)
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,13 +7,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlwin.h"
+#pragma implementation "htmlproc.h"
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
     #include "wx/log.h"
@@ -134,134 +141,21 @@ private:
 //-----------------------------------------------------------------------------
 
 WX_DECLARE_OBJARRAY(wxHtmlHistoryItem, wxHtmlHistoryArray);
-WX_DEFINE_OBJARRAY(wxHtmlHistoryArray)
+WX_DEFINE_OBJARRAY(wxHtmlHistoryArray);
 
 WX_DECLARE_LIST(wxHtmlProcessor, wxHtmlProcessorList);
-WX_DEFINE_LIST(wxHtmlProcessorList)
-
-//-----------------------------------------------------------------------------
-// wxHtmlWindowMouseHelper
-//-----------------------------------------------------------------------------
-
-wxHtmlWindowMouseHelper::wxHtmlWindowMouseHelper(wxHtmlWindowInterface *iface)
-    : m_tmpMouseMoved(false),
-      m_tmpLastLink(NULL),
-      m_tmpLastCell(NULL),
-      m_interface(iface)
-{
-}
-
-void wxHtmlWindowMouseHelper::HandleMouseMoved()
-{
-    m_tmpMouseMoved = true;
-}
-
-bool wxHtmlWindowMouseHelper::HandleMouseClick(wxHtmlCell *rootCell,
-                                               const wxPoint& pos,
-                                               const wxMouseEvent& event)
-{
-    if (!rootCell)
-        return false;
-
-    wxHtmlCell *cell = rootCell->FindCellByPos(pos.x, pos.y);
-    // this check is needed because FindCellByPos returns terminal cell and
-    // containers may have empty borders -- in this case NULL will be
-    // returned
-    if (!cell)
-        return false;
-
-    // adjust the coordinates to be relative to this cell:
-    wxPoint relpos = pos - cell->GetAbsPos(rootCell);
-
-    return OnCellClicked(cell, relpos.x, relpos.y, event);
-}
-
-void wxHtmlWindowMouseHelper::HandleIdle(wxHtmlCell *rootCell,
-                                         const wxPoint& pos)
-{
-    wxHtmlCell *cell = rootCell ? rootCell->FindCellByPos(pos.x, pos.y) : NULL;
-
-    if (cell != m_tmpLastCell)
-    {
-        wxHtmlLinkInfo *lnk = NULL;
-        if (cell)
-        {
-            // adjust the coordinates to be relative to this cell:
-            wxPoint relpos = pos - cell->GetAbsPos(rootCell);
-            lnk = cell->GetLink(relpos.x, relpos.y);
-        }
-
-        wxCursor cur;
-        if (cell)
-            cur = cell->GetMouseCursor(m_interface);
-        else
-            cur = m_interface->GetHTMLCursor(
-                        wxHtmlWindowInterface::HTMLCursor_Default);
-
-        m_interface->GetHTMLWindow()->SetCursor(cur);
-
-        if (lnk != m_tmpLastLink)
-        {
-            if (lnk)
-                m_interface->SetHTMLStatusText(lnk->GetHref());
-            else
-                m_interface->SetHTMLStatusText(wxEmptyString);
-
-            m_tmpLastLink = lnk;
-        }
-
-        m_tmpLastCell = cell;
-    }
-    else // mouse moved but stayed in the same cell
-    {
-        if ( cell )
-        {
-            OnCellMouseHover(cell, pos.x, pos.y);
-        }
-    }
-
-    m_tmpMouseMoved = false;
-}
-
-bool wxHtmlWindowMouseHelper::OnCellClicked(wxHtmlCell *cell,
-                                            wxCoord x, wxCoord y,
-                                            const wxMouseEvent& event)
-{
-    wxCHECK_MSG( cell, false, _T("can't be called with NULL cell") );
-
-    return cell->ProcessMouseClick(m_interface, wxPoint(x, y), event);
-}
-
-void wxHtmlWindowMouseHelper::OnCellMouseHover(wxHtmlCell * WXUNUSED(cell),
-                                               wxCoord WXUNUSED(x),
-                                               wxCoord WXUNUSED(y))
-{
-    // do nothing here
-}
+WX_DEFINE_LIST(wxHtmlProcessorList);
 
 //-----------------------------------------------------------------------------
 // wxHtmlWindow
 //-----------------------------------------------------------------------------
 
-wxList wxHtmlWindow::m_Filters;
-wxHtmlFilter *wxHtmlWindow::m_DefaultFilter = NULL;
-wxHtmlProcessorList *wxHtmlWindow::m_GlobalProcessors = NULL;
-wxCursor *wxHtmlWindow::ms_cursorLink = NULL;
-wxCursor *wxHtmlWindow::ms_cursorText = NULL;
-
-void wxHtmlWindow::CleanUpStatics()
-{
-    wxDELETE(m_DefaultFilter);
-    WX_CLEAR_LIST(wxList, m_Filters);
-    if (m_GlobalProcessors)
-        WX_CLEAR_LIST(wxHtmlProcessorList, *m_GlobalProcessors);
-    wxDELETE(m_GlobalProcessors);
-    wxDELETE(ms_cursorLink);
-    wxDELETE(ms_cursorText);
-}
 
 void wxHtmlWindow::Init()
 {
+    m_tmpMouseMoved = false;
+    m_tmpLastLink = NULL;
+    m_tmpLastCell = NULL;
     m_tmpCanDrawLocks = 0;
     m_FS = new wxFileSystem();
 #if wxUSE_STATUSBAR
@@ -347,31 +241,32 @@ void wxHtmlWindow::SetRelatedStatusBar(int bar)
 
 
 
-void wxHtmlWindow::SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes)
+void wxHtmlWindow::SetFonts(wxString normal_face, wxString fixed_face, const int *sizes)
 {
-    m_Parser->SetFonts(normal_face, fixed_face, sizes);
+    wxString op = m_OpenedPage;
 
-    // re-layout the page after changing fonts:
-    DoSetPage(*(m_Parser->GetSource()));
+    m_Parser->SetFonts(normal_face, fixed_face, sizes);
+    // fonts changed => contents invalid, so reload the page:
+    SetPage(wxT("<html><body></body></html>"));
+    if (!op.empty())
+        LoadPage(op);
 }
 
 void wxHtmlWindow::SetStandardFonts(int size,
                                     const wxString& normal_face,
                                     const wxString& fixed_face)
 {
-    m_Parser->SetStandardFonts(size, normal_face, fixed_face);
+    wxString op = m_OpenedPage;
 
-    // re-layout the page after changing fonts:
-    DoSetPage(*(m_Parser->GetSource()));
+    m_Parser->SetStandardFonts(size, normal_face, fixed_face);
+    // fonts changed => contents invalid, so reload the page:
+    SetPage(wxT("<html><body></body></html>"));
+    if (!op.empty())
+        LoadPage(op);
 }
+
 
 bool wxHtmlWindow::SetPage(const wxString& source)
-{
-    m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
-    return DoSetPage(source);
-}
-
-bool wxHtmlWindow::DoSetPage(const wxString& source)
 {
     wxString newsrc(source);
 
@@ -386,10 +281,8 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
         wxHtmlProcessorList::compatibility_iterator nodeL, nodeG;
         int prL, prG;
 
-        if ( m_Processors )
-            nodeL = m_Processors->GetFirst();
-        if ( m_GlobalProcessors )
-            nodeG = m_GlobalProcessors->GetFirst();
+        nodeL = (m_Processors) ? m_Processors->GetFirst() : wxHtmlProcessorList::compatibility_iterator();
+        nodeG = (m_GlobalProcessors) ? m_GlobalProcessors->GetFirst() : wxHtmlProcessorList::compatibility_iterator();
 
         // VS: there are two lists, global and local, both of them sorted by
         //     priority. Since we have to go through _both_ lists with
@@ -420,7 +313,7 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
     dc->SetMapMode(wxMM_TEXT);
     SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF));
     SetBackgroundImage(wxNullBitmap);
-
+    m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
     m_Parser->SetDC(dc);
     if (m_Cell)
     {
@@ -439,7 +332,7 @@ bool wxHtmlWindow::DoSetPage(const wxString& source)
 
 bool wxHtmlWindow::AppendToPage(const wxString& source)
 {
-    return DoSetPage(*(GetParser()->GetSource()) + source);
+    return SetPage(*(GetParser()->GetSource()) + source);
 }
 
 bool wxHtmlWindow::LoadPage(const wxString& location)
@@ -833,6 +726,21 @@ void wxHtmlWindow::AddProcessor(wxHtmlProcessor *processor)
 
 
 
+wxList wxHtmlWindow::m_Filters;
+wxHtmlFilter *wxHtmlWindow::m_DefaultFilter = NULL;
+wxHtmlProcessorList *wxHtmlWindow::m_GlobalProcessors = NULL;
+
+void wxHtmlWindow::CleanUpStatics()
+{
+    wxDELETE(m_DefaultFilter);
+    WX_CLEAR_LIST(wxList, m_Filters);
+    if (m_GlobalProcessors)
+        WX_CLEAR_LIST(wxHtmlProcessorList, *m_GlobalProcessors);
+    wxDELETE(m_GlobalProcessors);
+}
+
+
+
 void wxHtmlWindow::AddFilter(wxHtmlFilter *filter)
 {
     m_Filters.Append(filter);
@@ -931,6 +839,21 @@ void wxHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     const wxMouseEvent *e = link.GetEvent();
     if (e == NULL || e->LeftUp())
         LoadPage(link.GetHref());
+}
+
+void wxHtmlWindow::OnCellClicked(wxHtmlCell *cell,
+                                 wxCoord x, wxCoord y,
+                                 const wxMouseEvent& event)
+{
+    wxCHECK_RET( cell, _T("can't be called with NULL cell") );
+
+    cell->OnMouseClick(this, x, y, event);
+}
+
+void wxHtmlWindow::OnCellMouseHover(wxHtmlCell * WXUNUSED(cell),
+                                    wxCoord WXUNUSED(x), wxCoord WXUNUSED(y))
+{
+    // do nothing here
 }
 
 void wxHtmlWindow::OnEraseBackground(wxEraseEvent& event)
@@ -1076,7 +999,7 @@ void wxHtmlWindow::OnSize(wxSizeEvent& event)
 
 void wxHtmlWindow::OnMouseMove(wxMouseEvent& WXUNUSED(event))
 {
-    wxHtmlWindowMouseHelper::HandleMouseMoved();
+    m_tmpMouseMoved = true;
 }
 
 void wxHtmlWindow::OnMouseDown(wxMouseEvent& event)
@@ -1130,9 +1053,17 @@ void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
 #endif // wxUSE_CLIPBOARD
 
     SetFocus();
+    if ( m_Cell )
+    {
+        wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
+        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
 
-    wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
-    wxHtmlWindowMouseHelper::HandleMouseClick(m_Cell, pos, event);
+        // check is needed because FindCellByPos returns terminal cell and
+        // containers may have empty borders -- in this case NULL will be
+        // returned
+        if ( cell )
+            OnCellClicked(cell, pos.x, pos.y, event);
+    }
 }
 
 
@@ -1141,7 +1072,7 @@ void wxHtmlWindow::OnInternalIdle()
 {
     wxWindow::OnInternalIdle();
 
-    if (m_Cell != NULL && DidMouseMove())
+    if (m_tmpMouseMoved && (m_Cell != NULL))
     {
 #ifdef DEBUG_HTML_SELECTION
         Refresh();
@@ -1258,14 +1189,44 @@ void wxHtmlWindow::OnInternalIdle()
         }
 
         // handle cursor and status bar text changes:
+        if ( cell != m_tmpLastCell )
+        {
+            wxHtmlLinkInfo *lnk = cell ? cell->GetLink(x, y) : NULL;
+            wxCursor cur;
+            if (cell)
+                cur = cell->GetCursor();
+            else
+                cur = *wxSTANDARD_CURSOR;
+            SetCursor(cur);
 
-        // NB: because we're passing in 'cell' and not 'm_Cell' (so that the
-        //     leaf cell lookup isn't done twice), we need to adjust the
-        //     position for the new root:
-        wxPoint posInCell(x, y);
-        if (cell)
-            posInCell -= cell->GetAbsPos();
-        wxHtmlWindowMouseHelper::HandleIdle(cell, posInCell);
+            if (lnk != m_tmpLastLink)
+            {
+#if wxUSE_STATUSBAR
+                if (lnk == NULL)
+                {
+                    if (m_RelatedStatusBar != -1)
+                        m_RelatedFrame->SetStatusText(wxEmptyString,
+                                                      m_RelatedStatusBar);
+                }
+                else
+                {
+                    if (m_RelatedStatusBar != -1)
+                        m_RelatedFrame->SetStatusText(lnk->GetHref(),
+                                                      m_RelatedStatusBar);
+                }
+#endif // wxUSE_STATUSBAR
+                m_tmpLastLink = lnk;
+            }
+
+            m_tmpLastCell = cell;
+        }
+        else // mouse moved but stayed in the same cell
+        {
+            if ( cell )
+                OnCellMouseHover(cell, x, y);
+        }
+
+        m_tmpMouseMoved = false;
     }
 }
 
@@ -1504,91 +1465,9 @@ BEGIN_EVENT_TABLE(wxHtmlWindow, wxScrolledWindow)
 #endif // wxUSE_CLIPBOARD
 END_EVENT_TABLE()
 
-//-----------------------------------------------------------------------------
-// wxHtmlWindowInterface implementation in wxHtmlWindow
-//-----------------------------------------------------------------------------
-
-void wxHtmlWindow::SetHTMLWindowTitle(const wxString& title)
-{
-    OnSetTitle(title);
-}
-
-void wxHtmlWindow::OnHTMLLinkClicked(const wxHtmlLinkInfo& link)
-{
-    OnLinkClicked(link);
-}
-
-wxHtmlOpeningStatus wxHtmlWindow::OnHTMLOpeningURL(wxHtmlURLType type,
-                                                   const wxString& url,
-                                                   wxString *redirect) const
-{
-    return OnOpeningURL(type, url, redirect);
-}
-
-wxPoint wxHtmlWindow::HTMLCoordsToWindow(wxHtmlCell *WXUNUSED(cell),
-                                         const wxPoint& pos) const
-{
-    return CalcScrolledPosition(pos);
-}
-
-wxWindow* wxHtmlWindow::GetHTMLWindow()
-{
-    return this;
-}
-
-wxColour wxHtmlWindow::GetHTMLBackgroundColour() const
-{
-    return GetBackgroundColour();
-}
-
-void wxHtmlWindow::SetHTMLBackgroundColour(const wxColour& clr)
-{
-    SetBackgroundColour(clr);
-}
-
-void wxHtmlWindow::SetHTMLBackgroundImage(const wxBitmap& bmpBg)
-{
-    SetBackgroundImage(bmpBg);
-}
-
-void wxHtmlWindow::SetHTMLStatusText(const wxString& text)
-{
-#if wxUSE_STATUSBAR
-    if (m_RelatedStatusBar != -1)
-        m_RelatedFrame->SetStatusText(text, m_RelatedStatusBar);
-#endif // wxUSE_STATUSBAR
-}
-
-/*static*/
-wxCursor wxHtmlWindow::GetDefaultHTMLCursor(HTMLCursor type)
-{
-    switch (type)
-    {
-        case HTMLCursor_Link:
-            if ( !ms_cursorLink )
-                ms_cursorLink = new wxCursor(wxCURSOR_HAND);
-            return *ms_cursorLink;
-
-        case HTMLCursor_Text:
-            if ( !ms_cursorText )
-                ms_cursorText = new wxCursor(wxCURSOR_IBEAM);
-            return *ms_cursorText;
-
-        case HTMLCursor_Default:
-        default:
-            return *wxSTANDARD_CURSOR;
-    }
-}
-
-wxCursor wxHtmlWindow::GetHTMLCursor(HTMLCursor type) const
-{
-    return GetDefaultHTMLCursor(type);
-}
 
 
-//-----------------------------------------------------------------------------
-// wxHtmlWinModule
-//-----------------------------------------------------------------------------
+
 
 // A module to allow initialization/cleanup
 // without calling these functions from app.cpp or from

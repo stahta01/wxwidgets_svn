@@ -12,6 +12,10 @@
 #ifndef _WX_VSCROLL_H_
 #define _WX_VSCROLL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "vscroll.h"
+#endif
+
 #include "wx/panel.h"           // base class
 
 // ----------------------------------------------------------------------------
@@ -135,8 +139,6 @@ public:
     // is kept for backwards compatibility
     size_t GetLastVisibleLine() const { return GetVisibleEnd() - 1; }
 
-    // layout the children (including the sizer if needed)
-    virtual bool Layout();
 
 protected:
     // this function must be overridden in the derived class and it should

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface remhelp.h
+#endif
+
 #ifndef _WX_REMHELP_H_
 #define _WX_REMHELP_H_
 

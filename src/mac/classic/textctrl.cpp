@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/textctrl.cpp
+// Name:        textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,11 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "textctrl.h"
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_TEXTCTRL
 
@@ -1196,7 +1196,7 @@ void wxTextCtrl::Replace(long from, long to, const wxString& str)
         ::SetControlData((ControlHandle)  m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
         TESetSelect( from , to  , ((TEHandle) m_macTE) ) ;
         TEDelete( ((TEHandle) m_macTE) ) ;
-        TEInsert( value , value.length() , ((TEHandle) m_macTE) ) ;
+        TEInsert( value , value.Length() , ((TEHandle) m_macTE) ) ;
     }
     else
     {
@@ -1452,7 +1452,7 @@ int wxTextCtrl::GetNumberOfLines() const
         wxString content = GetValue() ;
 
         int count = 1;
-        for (size_t i = 0; i < content.length() ; i++)
+        for (size_t i = 0; i < content.Length() ; i++)
         {
             if (content[i] == '\r') count++;
         }
@@ -1503,13 +1503,13 @@ int wxTextCtrl::GetLineLength(long lineNo) const
 
     // Find line first
     int count = 0;
-    for (size_t i = 0; i < content.length() ; i++)
+    for (size_t i = 0; i < content.Length() ; i++)
     {
         if (count == lineNo)
         {
             // Count chars in line then
             count = 0;
-            for (size_t j = i; j < content.length(); j++)
+            for (size_t j = i; j < content.Length(); j++)
             {
                 count++;
                 if (content[j] == '\n') return count;
@@ -1529,14 +1529,14 @@ wxString wxTextCtrl::GetLineText(long lineNo) const
 
     // Find line first
     int count = 0;
-    for (size_t i = 0; i < content.length() ; i++)
+    for (size_t i = 0; i < content.Length() ; i++)
     {
         if (count == lineNo)
         {
             // Add chars in line then
             wxString tmp;
 
-            for (size_t j = i; j < content.length(); j++)
+            for (size_t j = i; j < content.Length(); j++)
             {
                 if (content[j] == '\n')
                     return tmp;
@@ -1583,8 +1583,8 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
     }
 
     if ( !IsEditable() && key != WXK_LEFT && key != WXK_RIGHT && key != WXK_DOWN && key != WXK_UP && key != WXK_TAB &&
-        !( key == WXK_RETURN && ( (m_windowStyle & wxTE_PROCESS_ENTER) || (m_windowStyle & wxTE_MULTILINE) ) )
-/*        && key != WXK_PAGEUP && key != WXK_PAGEDOWN && key != WXK_HOME && key != WXK_END */
+        !( key == WXK_RETURN && ( (m_windowStyle & wxPROCESS_ENTER) || (m_windowStyle & wxTE_MULTILINE) ) )
+/*        && key != WXK_PRIOR && key != WXK_NEXT && key != WXK_HOME && key != WXK_END */
         )
     {
         // eat it
@@ -1609,7 +1609,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
     switch ( key )
     {
         case WXK_RETURN:
-            if (m_windowStyle & wxTE_PROCESS_ENTER)
+            if (m_windowStyle & wxPROCESS_ENTER)
             {
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 event.SetEventObject( this );
