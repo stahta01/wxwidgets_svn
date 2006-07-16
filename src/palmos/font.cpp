@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "font.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,12 +28,12 @@
     #pragma hdrstop
 #endif
 
-#include "wx/font.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
+    #include "wx/font.h"
     #include "wx/log.h"
     #include "wx/encinfo.h"
 #endif // WX_PRECOMP
@@ -252,7 +256,7 @@ public:
             m_weight = weight;
     }
 
-    bool SetFaceName(const wxString& faceName)
+    void SetFaceName(const wxString& faceName)
     {
         if ( m_nativeFontInfoOk )
             m_nativeFontInfo.SetFaceName(faceName);
@@ -364,6 +368,10 @@ void wxNativeFontInfo::SetPixelSize(const wxSize& pixelSize)
 // wxFont
 // ----------------------------------------------------------------------------
 
+void wxFont::Init()
+{
+}
+
 bool wxFont::Create(const wxNativeFontInfo& info, WXHFONT hFont)
 {
     return false;
@@ -445,9 +453,8 @@ void wxFont::SetWeight(int weight)
 {
 }
 
-bool wxFont::SetFaceName(const wxString& faceName)
+void wxFont::SetFaceName(const wxString& faceName)
 {
-    return true;
 }
 
 void wxFont::SetUnderlined(bool underlined)
@@ -520,3 +527,4 @@ bool wxFont::IsFixedWidth() const
 {
     return false;
 }
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/ipcbase.cpp
+// Name:        ipcbase.cpp
 // Purpose:     IPC base classes
 // Author:      Julian Smart
 // Modified by:
@@ -9,14 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "ipcbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif
 
 #include "wx/ipcbase.h"
@@ -46,7 +51,7 @@ wxConnectionBase::wxConnectionBase()
 {
 }
 
-wxConnectionBase::wxConnectionBase(const wxConnectionBase& copy)
+wxConnectionBase::wxConnectionBase(wxConnectionBase& copy)
     : wxObject(),
       m_connected(copy.m_connected),
       m_buffer(copy.m_buffer),
@@ -86,3 +91,4 @@ wxChar *wxConnectionBase::GetBufferAtLeast( size_t bytes )
       return NULL;
   }
 }
+

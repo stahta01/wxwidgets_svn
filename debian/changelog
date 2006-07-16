@@ -1,8 +1,8 @@
-wxwidgets2.7 (2.7.0.0-0rpd) unstable; urgency=low
+wxwidgets2.6 (2.6.3.3-1rpd) unstable; urgency=low
 
-  * First test build with wx 2.7 tree.
+  * wxPython 2.6.3.3 release
 
- -- Robin Dunn <robin@alldunn.com>  Thu,  1 Jun 2006 14:23:16 -0700
+ -- Robin Dunn <robin@alldunn.com>  Sat, 15 Jul 2006 15:23:50 -0700
 
 wxwidgets2.6 (2.6.3.2-3rpd) unstable; urgency=low
 

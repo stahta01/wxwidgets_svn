@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univcheckbox.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,10 +29,9 @@
 
 #if wxUSE_CHECKBOX
 
-#include "wx/checkbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
+    #include "wx/checkbox.h"
     #include "wx/validate.h"
 
     #include "wx/button.h" // for wxACTION_BUTTON_XXX

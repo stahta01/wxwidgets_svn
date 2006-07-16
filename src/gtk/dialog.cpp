@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,17 +7,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/dialog.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/frame.h"
-    #include "wx/cursor.h"
-#endif // WX_PRECOMP
-
+#include "wx/frame.h"
+#include "wx/app.h"
+#include "wx/cursor.h"
 #include "wx/evtloop.h"
 
 #include <gdk/gdk.h>
@@ -206,16 +206,17 @@ int wxDialog::ShowModal()
 
     Show( true );
 
+    SetFocus();
+
     m_modalShowing = true;
 
     g_openDialogs++;
 
-    // NOTE: gtk_window_set_modal internally calls gtk_grab_add() !
-    gtk_window_set_modal(GTK_WINDOW(m_widget), TRUE);
+    gtk_grab_add( m_widget );
 
     wxEventLoop().Run();
 
-    gtk_window_set_modal(GTK_WINDOW(m_widget), FALSE);
+    gtk_grab_remove( m_widget );
 
     g_openDialogs--;
 

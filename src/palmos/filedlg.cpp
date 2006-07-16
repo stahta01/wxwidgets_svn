@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "filedlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,11 +30,10 @@
 
 #if wxUSE_FILEDLG && !defined(__SMARTPHONE__)
 
-#include "wx/filedlg.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/msgdlg.h"
+    #include "wx/filedlg.h"
     #include "wx/filefn.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -76,10 +79,8 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
                            const wxString& defaultFileName,
                            const wxString& wildCard,
                            long style,
-                           const wxPoint& pos,
-                           const wxSize& sz,
-                           const wxString& name)
-             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos, sz, name)
+                           const wxPoint& pos)
+             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos)
 
 {
 }
@@ -102,3 +103,4 @@ int wxFileDialog::ShowModal()
 }
 
 #endif // wxUSE_FILEDLG
+

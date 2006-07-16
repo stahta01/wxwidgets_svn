@@ -14,6 +14,10 @@
 #ifndef _WX_WXCHAR_H_
 #define _WX_WXCHAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "wxchar.h"
+#endif
+
 /* defs.h indirectly includes this file, so don't include it here */
 #include "wx/platform.h"
 #include "wx/dlimpexp.h"
@@ -145,17 +149,9 @@
     #define wxHAVE_TCHAR_SUPPORT
 #endif /* compilers with (good) TCHAR support */
 
-#if defined(__MWERKS__)
-    /* Metrowerks only has wide char support for OS X >= 10.3 */
-    #if !defined(__DARWIN__) || \
-         (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
-        #define wxHAVE_MWERKS_UNICODE
-    #endif
-
-    #ifdef wxHAVE_MWERKS_UNICODE
-        #define HAVE_WPRINTF
-    #endif
-#endif /* __MWERKS__ */
+#ifdef __MWERKS__
+    #define HAVE_WPRINTF
+#endif
 
 #ifdef wxHAVE_TCHAR_SUPPORT
     /* get TCHAR definition if we've got it */
@@ -232,8 +228,7 @@
     #if !wxUSE_UNICODE
         #define _T(x) x
     #else /* Unicode */
-        /* use wxCONCAT_HELPER so that x could be expanded if it's a macro */
-        #define _T(x) wxCONCAT_HELPER(L, x)
+        #define _T(x) L ## x
     #endif /* ASCII/Unicode */
 #endif /* !defined(_T) */
 
@@ -242,20 +237,20 @@
 /* and _() in wxWidgets sources */
 #define wxT(x)       _T(x)
 
-/* a helper macro allowing to make another macro Unicode-friendly, see below */
-#define wxAPPLY_T(x) _T(x)
-
 /* Unicode-friendly __FILE__, __DATE__ and __TIME__ analogs */
 #ifndef __TFILE__
-    #define __TFILE__ wxAPPLY_T(__FILE__)
+    #define __XFILE__(x) wxT(x)
+    #define __TFILE__ __XFILE__(__FILE__)
 #endif
 
 #ifndef __TDATE__
-    #define __TDATE__ wxAPPLY_T(__DATE__)
+    #define __XDATE__(x) wxT(x)
+    #define __TDATE__ __XDATE__(__DATE__)
 #endif
 
 #ifndef __TTIME__
-    #define __TTIME__ wxAPPLY_T(__TIME__)
+    #define __XTIME__(x) wxT(x)
+    #define __TTIME__ __XTIME__(__TIME__)
 #endif
 
 /*
@@ -369,14 +364,8 @@
     /* special case: not all TCHAR-aware compilers have those */
     #if defined(__VISUALC__) || \
             (defined(__BORLANDC__) && __BORLANDC__ >= 0x540)
-        /*
-           we can only use the system _vsntprintf() if we don't require the
-           Unix98 positional parameters support as it doesn't have it
-         */
-        #if !wxUSE_PRINTF_POS_PARAMS
-            #define wxVsnprintf_    _vsntprintf
-            #define wxSnprintf_     _sntprintf
-        #endif
+        #define wxVsnprintf_    _vsntprintf
+        #define wxSnprintf_     _sntprintf
     #endif
 
     /* special case: these functions are missing under Win9x with Unicows so we */
@@ -415,6 +404,7 @@
     #define wxMbstowcs mbstowcs
     #define wxWcstombs wcstombs
 #else /* !TCHAR-aware compilers */
+
     /*
         There are 2 unrelated problems with these functions under Mac:
             a) Metrowerks MSL CRT implements them strictly in C99 sense and
@@ -446,19 +436,9 @@
         #define wxWcstombs wcstombs
     #endif
 
-    /* 
-       The system C library on Mac OS X 10.2 and below does not support
-       unicode: in other words all wide-character functions such as towupper et
-       al. do simply not exist so we need to provide our own in that context,
-       except for the wchar_t definition/typedef itself.
-       
-       We need to do this for both project builder and CodeWarrior as
-       the latter uses the system C library in Mach builds for wide character
-       support, which as mentioned does not exist on 10.2 and below.
-    */
-    #if wxUSE_UNICODE && \
-        defined(__DARWIN__) && \
-            ( MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_2 )
+    /* No UNICODE in the c library except wchar_t typedef on mac OSX 10.2 and less - roll our own */
+    #if !defined(__MWERKS__) && wxUSE_UNICODE && defined(__DARWIN__) && ( MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_2 )
+
         /* we need everything! */
         #define wxNEED_WX_STRING_H
         #define wxNEED_WX_CTYPE_H
@@ -873,34 +853,32 @@ WXDLLIMPEXP_BASE bool wxOKlibc(); /* for internal use */
    We define function with a trailing underscore here because the real one is a
    wrapper around it as explained below
  */
-#if !defined( wxVsnprintf_ ) && !wxUSE_PRINTF_POS_PARAMS
+#ifndef wxVsnprintf_
     #if wxUSE_UNICODE
-        #ifdef wxHAVE_MWERKS_UNICODE
+        #if defined(__MWERKS__)
             #define HAVE_WCSRTOMBS 1
             #define HAVE_VSWPRINTF 1
-        #endif /* Metrowerks with Unicode support */
+        #endif
         #if defined(__WATCOMC__)
             #define wxVsnprintf_    _vsnwprintf
             #define wxSnprintf_     _snwprintf
-        #endif /* Watcom */
+        #endif
         #if defined(HAVE__VSNWPRINTF)
             #define wxVsnprintf_    _vsnwprintf
         /* MinGW?MSVCRT has the wrong vswprintf */
-        /* Mac OS X has a somehow buggy vswprintf */
+		/* Mac OS X has a somehow buggy vswprintf */
         #elif defined(HAVE_VSWPRINTF) && !defined(__MINGW32__) && !defined(__DARWIN__)
             #define wxVsnprintf_    vswprintf
         #endif
     #else /* ASCII */
         /* all versions of CodeWarrior supported by wxWidgets apparently have */
         /* both snprintf() and vsnprintf() */
-        #if defined(HAVE_SNPRINTF) \
-            || defined(__MWERKS__) || defined(__WATCOMC__)
+        #if defined(HAVE_SNPRINTF) || defined(__MWERKS__) || defined(__WATCOMC__)
             #ifndef HAVE_BROKEN_SNPRINTF_DECL
                 #define wxSnprintf_     snprintf
             #endif
         #endif
-        #if defined(HAVE_VSNPRINTF) \
-            || defined(__MWERKS__) || defined(__WATCOMC__)
+        #if defined(HAVE_VSNPRINTF) || defined(__MWERKS__) || defined(__WATCOMC__)
             #if defined __cplusplus && defined HAVE_BROKEN_VSNPRINTF_DECL
                 #define wxVsnprintf_    wx_fixed_vsnprintf
             #else
@@ -908,28 +886,7 @@ WXDLLIMPEXP_BASE bool wxOKlibc(); /* for internal use */
             #endif
         #endif
     #endif
-#endif /* wxVsnprintf_ not defined yet && !wxUSE_PRINTF_POS_PARAMS */
-
-#if !defined( wxVsnprintf_ ) && wxUSE_PRINTF_POS_PARAMS
-    /*
-        The systems where vsnprintf() supports positionals should define
-        the HAVE_UNIX98_PRINTF symbol.
-
-        On systems which don't (e.g. Windows) we are forced to use
-        our wxVsnprintf() implementation.
-    */
-    #if defined(HAVE_UNIX98_PRINTF)
-        #if wxUSE_UNICODE
-            #define wxVsnprintf_        vswprintf
-        #else /* ASCII */
-            #if defined __cplusplus && defined HAVE_BROKEN_VSNPRINTF_DECL
-                #define wxVsnprintf_    wx_fixed_vsnprintf
-            #else
-                #define wxVsnprintf_    vsnprintf
-            #endif
-        #endif
-    #endif
-#endif  // !defined( wxVsnprintf_ ) && wxUSE_PRINTF_POS_PARAMS
+#endif /* wxVsnprintf_ not defined yet */
 
 #ifndef wxSnprintf_
     /* no [v]snprintf(), cook our own */
@@ -1286,13 +1243,13 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
             return szRet;
         }
 
-    #else /* !wxUSE_UNICODE */
+    #else //!wxUSE_UNICODE
     #   define wxTmemchr memchr
     #   define wxTmemcmp memcmp
     #   define wxTmemcpy memcpy
     #   define wxTmemmove memmove
     #   define wxTmemset memset
-    #endif /* wxUSE_UNICODE/!wxUSE_UNICODE */
+    #endif
 
 #endif /*__cplusplus*/
 

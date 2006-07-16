@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gdiimage.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,10 +31,11 @@
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
 #endif // WX_PRECOMP
 
+#include "wx/app.h"
+
+#include "wx/bitmap.h"
 #include "wx/palmos/gdiimage.h"
 
 #if wxUSE_WXDIB
@@ -40,7 +45,7 @@
 #include "wx/file.h"
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxGDIImageHandlerList)
+WX_DEFINE_LIST(wxGDIImageHandlerList);
 
 // ----------------------------------------------------------------------------
 // auxiliary functions
@@ -110,3 +115,5 @@ void wxGDIImage::CleanUpHandlers()
 void wxGDIImage::InitStandardHandlers()
 {
 }
+
+

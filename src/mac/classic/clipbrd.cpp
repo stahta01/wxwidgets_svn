@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/clipbrd.cpp
+// Name:        clipbrd.cpp
 // Purpose:     Clipboard functionality
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,20 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#include "wx/clipbrd.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/frame.h"
-    #include "wx/bitmap.h"
+#ifdef __GNUG__
+#pragma implementation "clipbrd.h"
 #endif
 
+#include "wx/app.h"
+#include "wx/frame.h"
+#include "wx/bitmap.h"
+#include "wx/utils.h"
 #include "wx/metafile.h"
+#include "wx/clipbrd.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 #ifndef __DARWIN__
 #include <Scrap.h>
@@ -190,12 +188,12 @@ void wxClipboard::Clear()
 
 bool wxClipboard::Flush()
 {
-    return false;
+    return FALSE;
 }
 
 bool wxClipboard::Open()
 {
-    wxCHECK_MSG( !m_open, false, wxT("clipboard already open") );
+    wxCHECK_MSG( !m_open, FALSE, wxT("clipboard already open") );
     m_open = true ;
     return true ;
 }
@@ -207,9 +205,9 @@ bool wxClipboard::IsOpened() const
 
 bool wxClipboard::SetData( wxDataObject *data )
 {
-    wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
+    wxCHECK_MSG( m_open, FALSE, wxT("clipboard not open") );
 
-    wxCHECK_MSG( data, false, wxT("data is invalid") );
+    wxCHECK_MSG( data, FALSE, wxT("data is invalid") );
 
     Clear();
     // as we can only store one wxDataObject, this is the same in this
@@ -219,9 +217,9 @@ bool wxClipboard::SetData( wxDataObject *data )
 
 bool wxClipboard::AddData( wxDataObject *data )
 {
-    wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
+    wxCHECK_MSG( m_open, FALSE, wxT("clipboard not open") );
 
-    wxCHECK_MSG( data, false, wxT("data is invalid") );
+    wxCHECK_MSG( data, FALSE, wxT("data is invalid") );
 
     /* we can only store one wxDataObject */
     Clear();
@@ -246,7 +244,7 @@ bool wxClipboard::AddData( wxDataObject *data )
         size_t sz = data->GetDataSize( array[i] ) ;
         void* buf = malloc( sz + 1 ) ;
         if ( buf )
-        {
+        {        
             data->GetDataHere( array[i] , buf ) ;
             OSType mactype = 0 ;
             switch ( array[i].GetType() )
@@ -287,15 +285,15 @@ void wxClipboard::Close()
     wxCHECK_RET( m_open, wxT("clipboard not open") );
 
     m_open = false ;
-
-    // Get rid of cached object.  If this is not done copying from another application will
-    // only work once
+    
+ 	// Get rid of cached object.  If this is not done copying from another application will
+ 	// only work once
     if (m_data)
     {
         delete m_data;
         m_data = (wxDataObject*) NULL;
-    }
-
+    }    
+	    
 }
 
 bool wxClipboard::IsSupported( const wxDataFormat &dataFormat )
@@ -318,11 +316,11 @@ bool wxClipboard::IsSupported( const wxDataFormat &dataFormat )
         {
             if (( err = GetScrapFlavorSize( scrapRef, dataFormat.GetFormatId(), &byteCount )) == noErr)
             {
-                return true ;
+                return TRUE ;
             }
         }
     }
-    return false;
+    return FALSE;
 
 #else
     long offset ;
@@ -338,7 +336,7 @@ bool wxClipboard::IsSupported( const wxDataFormat &dataFormat )
 
 bool wxClipboard::GetData( wxDataObject& data )
 {
-    wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
+    wxCHECK_MSG( m_open, FALSE, wxT("clipboard not open") );
 
     size_t formatcount = data.GetFormatCount() + 1 ;
     wxDataFormat *array = new wxDataFormat[ formatcount  ];

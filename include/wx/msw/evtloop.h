@@ -12,20 +12,21 @@
 #ifndef _WX_MSW_EVTLOOP_H_
 #define _WX_MSW_EVTLOOP_H_
 
-#include "wx/window.h"
-
 // ----------------------------------------------------------------------------
 // wxEventLoop
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxEventLoop : public wxEventLoopManual
+class WXDLLEXPORT wxEventLoop : public wxEventLoopBase
 {
 public:
     wxEventLoop();
 
     // implement base class pure virtuals
+    virtual int Run();
+    virtual void Exit(int rc = 0);
     virtual bool Pending() const;
     virtual bool Dispatch();
+    virtual bool IsRunning() const;
 
     // MSW-specific methods
     // --------------------
@@ -53,10 +54,6 @@ public:
     }
 
 protected:
-    // override/implement base class virtuals
-    virtual void WakeUp();
-    virtual void OnNextIteration();
-
     // check if the given window is a child of ms_winCritical (which must be
     // non NULL)
     static bool IsChildOfCriticalWindow(wxWindowMSW *win);
@@ -64,6 +61,13 @@ protected:
 
     // critical window or NULL
     static wxWindowMSW *ms_winCritical;
+
+    // the loop exit code
+    int m_exitcode;
+
+    // should we exit the loop?
+    bool m_shouldExit;
 };
 
 #endif // _WX_MSW_EVTLOOP_H_
+

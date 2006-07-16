@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/filedlg.h
+// Name:        filedlg.h
 // Purpose:     wxFileDialog base header
 // Author:      Robert Roebling
 // Modified by:
@@ -16,6 +16,10 @@
 
 #if wxUSE_FILEDLG
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlg.h"
+#endif
+
 #include "wx/dialog.h"
 #include "wx/arrstr.h"
 
@@ -25,34 +29,19 @@
 
 enum
 {
-    wxFD_OPEN              = 0x0001,
-    wxFD_SAVE              = 0x0002,
-    wxFD_OVERWRITE_PROMPT  = 0x0004,
-    wxFD_FILE_MUST_EXIST   = 0x0010,
-    wxFD_MULTIPLE          = 0x0020,
-    wxFD_CHANGE_DIR        = 0x0040
-};
-
-#if WXWIN_COMPATIBILITY_2_6
-enum
-{
-    wxOPEN              = wxFD_OPEN,
-    wxSAVE              = wxFD_SAVE,
-    wxOVERWRITE_PROMPT  = wxFD_OVERWRITE_PROMPT,
+    wxOPEN              = 0x0001,
+    wxSAVE              = 0x0002,
+    wxOVERWRITE_PROMPT  = 0x0004,
 #if WXWIN_COMPATIBILITY_2_4
     wxHIDE_READONLY     = 0x0008,
 #endif
-    wxFILE_MUST_EXIST   = wxFD_FILE_MUST_EXIST,
-    wxMULTIPLE          = wxFD_MULTIPLE,
-    wxCHANGE_DIR        = wxFD_CHANGE_DIR
+    wxFILE_MUST_EXIST   = 0x0010,
+    wxMULTIPLE          = 0x0020,
+    wxCHANGE_DIR        = 0x0040
 };
-#endif
 
-#define wxFD_DEFAULT_STYLE      wxFD_OPEN
-
-extern WXDLLEXPORT_DATA(const wxChar) wxFileDialogNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorPromptStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorDefaultWildcardStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxFileSelectorPromptStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxFileSelectorDefaultWildcardStr;
 
 //----------------------------------------------------------------------------
 // wxFileDialogBase
@@ -68,13 +57,11 @@ public:
                      const wxString& defaultDir = wxEmptyString,
                      const wxString& defaultFile = wxEmptyString,
                      const wxString& wildCard = wxFileSelectorDefaultWildcardStr,
-                     long style = wxFD_DEFAULT_STYLE,
-                     const wxPoint& pos = wxDefaultPosition,
-                     const wxSize& sz = wxDefaultSize,
-                     const wxString& name = wxFileDialogNameStr)
+                     long style = 0,
+                     const wxPoint& pos = wxDefaultPosition) : wxDialog()
     {
         Init();
-        Create(parent, message, defaultDir, defaultFile, wildCard, style, pos, sz, name);
+        Create(parent, message, defaultDir, defaultFile, wildCard, style, pos);
     }
 
     bool Create(wxWindow *parent,
@@ -82,16 +69,15 @@ public:
                 const wxString& defaultDir = wxEmptyString,
                 const wxString& defaultFile = wxEmptyString,
                 const wxString& wildCard = wxFileSelectorDefaultWildcardStr,
-                long style = wxFD_DEFAULT_STYLE,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& sz = wxDefaultSize,
-                const wxString& name = wxFileDialogNameStr);
+                long style = 0,
+                const wxPoint& pos = wxDefaultPosition);
 
     virtual void SetMessage(const wxString& message) { m_message = message; }
     virtual void SetPath(const wxString& path) { m_path = path; }
     virtual void SetDirectory(const wxString& dir) { m_dir = dir; }
     virtual void SetFilename(const wxString& name) { m_fileName = name; }
     virtual void SetWildcard(const wxString& wildCard) { m_wildCard = wildCard; }
+    virtual void SetStyle(long style) { m_dialogStyle = style; }
     virtual void SetFilterIndex(int filterIndex) { m_filterIndex = filterIndex; }
 
     virtual wxString GetMessage() const { return m_message; }
@@ -101,6 +87,7 @@ public:
     virtual wxString GetFilename() const { return m_fileName; }
     virtual void GetFilenames(wxArrayString& files) const { files.Empty(); files.Add(m_fileName); }
     virtual wxString GetWildcard() const { return m_wildCard; }
+    virtual long GetStyle() const { return m_dialogStyle; }
     virtual int GetFilterIndex() const { return m_filterIndex; }
 
     // Utility functions
@@ -125,6 +112,8 @@ public:
 
 protected:
     wxString      m_message;
+    long          m_dialogStyle;
+    wxWindow     *m_parent;
     wxString      m_dir;
     wxString      m_path;       // Full path
     wxString      m_fileName;
@@ -179,19 +168,17 @@ wxSaveFileSelector(const wxChar *what,
 
 
 #if defined (__WXUNIVERSAL__)
-#define wxUSE_GENERIC_FILEDIALOG
 #include "wx/generic/filedlgg.h"
 #elif defined(__WXMSW__)
 #include "wx/msw/filedlg.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/filedlg.h"
-#elif defined(__WXGTK24__)
-#include "wx/gtk/filedlg.h"     // GTK+ > 2.4 has native version
-#elif defined(__WXGTK20__)
-#define wxUSE_GENERIC_FILEDIALOG
-#include "wx/generic/filedlgg.h"
 #elif defined(__WXGTK__)
-#include "wx/gtk1/filedlg.h"
+#include "wx/gtk/filedlg.h"
+#elif defined(__WXX11__)
+#include "wx/generic/filedlgg.h"
+#elif defined(__WXMGL__)
+#include "wx/generic/filedlgg.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/filedlg.h"
 #elif defined(__WXCOCOA__)

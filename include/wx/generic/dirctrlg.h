@@ -15,6 +15,10 @@
 #ifndef _WX_DIRCTRL_H_
 #define _WX_DIRCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dirctrlg.h"
+#endif
+
 #if wxUSE_DIRDLG || wxUSE_FILEDLG
     #include "wx/imaglist.h"
 #endif
@@ -116,8 +120,6 @@ public:
 
     // Try to expand as much of the given path as possible.
     virtual bool ExpandPath(const wxString& path);
-    // collapse the path
-    virtual bool CollapsePath(const wxString& path);
 
     // Accessors
 

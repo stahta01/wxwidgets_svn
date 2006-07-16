@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/listbox.cpp
+// Name:        listbox.cpp
 // Purpose:     wxListBox
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,21 +9,19 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#if wxUSE_LISTBOX
-
-#include "wx/listbox.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/button.h"
-    #include "wx/settings.h"
-    #include "wx/toplevel.h"
+#ifdef __GNUG__
+#pragma implementation "listbox.h"
 #endif
+
+#include "wx/app.h"
+#include "wx/listbox.h"
+#include "wx/button.h"
+#include "wx/settings.h"
+#include "wx/toplevel.h"
+#include "wx/dynarray.h"
+#include "wx/log.h"
+
+#include "wx/utils.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
@@ -76,7 +74,7 @@ static pascal void wxMacListDefinition( short message, Boolean isSelected, Rect 
     list = (wxListBox*) GetControlReference( (ControlHandle) GetListRefCon(listHandle) );
     if ( list == NULL )
         return ;
-
+    
     GrafPtr savePort;
     GrafPtr grafPtr;
     RgnHandle savedClipRegion;
@@ -85,29 +83,29 @@ static pascal void wxMacListDefinition( short message, Boolean isSelected, Rect 
     SetPort((**listHandle).port);
     grafPtr = (**listHandle).port ;
     // typecast our refCon
-
+    
     //  Calculate the cell rect.
-
+    
     switch( message ) {
     case lInitMsg:
         break;
-
+        
     case lCloseMsg:
         break;
-
+        
     case lDrawMsg:
         {
             const wxString linetext = list->m_stringArray[cell.v] ;
-
+            
             //  Save the current clip region, and set the clip region to the area we are about
             //  to draw.
-
+            
             savedClipRegion = NewRgn();
             GetClip( savedClipRegion );
-
+            
             ClipRect( drawRect );
             EraseRect( drawRect );
-
+            
             const wxFont& font = list->GetFont();
             if ( font.Ok() )
             {
@@ -121,50 +119,50 @@ static pascal void wxMacListDefinition( short message, Boolean isSelected, Rect 
                 ::TextSize( 9  );
                 ::TextFace( 0 ) ;
             }
-
+            
 #if TARGET_CARBON
-            {
-                Rect frame = { drawRect->top, drawRect->left + 4,
-                               drawRect->top + kwxMacListItemHeight, drawRect->right + 10000 } ;
-                CFMutableStringRef mString = CFStringCreateMutableCopy( NULL , 0 , wxMacCFStringHolder(linetext , list->GetFont().GetEncoding()) ) ;
-                ::TruncateThemeText( mString , kThemeCurrentPortFont, kThemeStateActive, drawRect->right - drawRect->left , truncEnd , NULL ) ;
-                ::DrawThemeTextBox( mString,
-                                    kThemeCurrentPortFont,
-                                    kThemeStateActive,
-                                    false,
-                                    &frame,
-                                    teJustLeft,
-                                    nil );
-                                    CFRelease( mString ) ;
-            }
+			{
+				Rect frame = { drawRect->top, drawRect->left + 4,
+				    drawRect->top + kwxMacListItemHeight, drawRect->right + 10000 } ;
+				CFMutableStringRef mString = CFStringCreateMutableCopy( NULL , 0 , wxMacCFStringHolder(linetext , list->GetFont().GetEncoding()) ) ;
+				::TruncateThemeText( mString , kThemeCurrentPortFont, kThemeStateActive, drawRect->right - drawRect->left , truncEnd , NULL ) ;
+				::DrawThemeTextBox( mString,
+				    kThemeCurrentPortFont,
+				    kThemeStateActive,
+				    false,
+				    &frame,
+				    teJustLeft,
+				    nil );
+				CFRelease( mString ) ;
+			}
 #else
-            {
-                wxCharBuffer text = linetext.mb_str( wxConvLocal) ;
+            {	
+            	wxCharBuffer text = linetext.mb_str( wxConvLocal) ;
                 MoveTo(drawRect->left + 4 , drawRect->top + 10 );
                 DrawText(text, 0 , strlen(text) );
             }
-#endif
+#endif            
             //  If the cell is hilited, do the hilite now. Paint the cell contents with the
             //  appropriate QuickDraw transform mode.
-
+            
             if( isSelected ) {
                 savedPenMode = GetPortPenMode( (CGrafPtr) grafPtr );
                 SetPortPenMode( (CGrafPtr)grafPtr, hilitetransfermode );
                 PaintRect( drawRect );
                 SetPortPenMode( (CGrafPtr)grafPtr, savedPenMode );
             }
-
+            
             //  Restore the saved clip region.
-
+            
             SetClip( savedClipRegion );
             DisposeRgn( savedClipRegion );
         }
         break;
     case lHiliteMsg:
-
+        
         //  Hilite or unhilite the cell. Paint the cell contents with the
         //  appropriate QuickDraw transform mode.
-
+        
         GetPort( &grafPtr );
         savedPenMode = GetPortPenMode( (CGrafPtr)grafPtr );
         SetPortPenMode( (CGrafPtr)grafPtr, hilitetransfermode );
@@ -226,9 +224,9 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 
     Rect bounds ;
     Str255 title ;
-
+    
     MacPreControlCreate( parent , id ,  wxEmptyString , pos , size ,style, validator , name , &bounds , title ) ;
-
+    
     ListDefSpec listDef;
     listDef.defType = kListDefUserProcType;
     if ( macListDefUPP == NULL )
@@ -236,7 +234,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
         macListDefUPP = NewListDefUPP( wxMacListDefinition );
     }
     listDef.u.userProc = macListDefUPP ;
-
+    
     Str255 fontName ;
     SInt16 fontSize ;
     Style fontStyle ;
@@ -246,7 +244,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
     GetFontName( kFontIDMonaco , fontName ) ;
     fontSize = 9 ;
     fontStyle = normal ;
-#endif
+#endif 
     SetFont( wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal( fontName ) ) ) ;
 #if TARGET_CARBON
     Size asize;
@@ -266,7 +264,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
     long    result ;
     wxStAppResource resload ;
     m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false ,
-                  (style & wxLB_HSCROLL) ? kwxMacListWithVerticalAndHorizontalScrollbar : kwxMacListWithVerticalScrollbar ,
+                  (style & wxLB_HSCROLL) ? kwxMacListWithVerticalAndHorizontalScrollbar : kwxMacListWithVerticalScrollbar , 
                   0 , 0, kControlListBoxProc , (long) this ) ;
     ::GetControlData( (ControlHandle) m_macControl , kControlNoPart , kControlListBoxListHandleTag ,
                sizeof( ListHandle ) , (char*) &m_macList  , &result ) ;
@@ -310,7 +308,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 
     LSetDrawingMode( true , (ListHandle)m_macList ) ;
 
-    return true;
+    return TRUE;
 }
 
 wxListBox::~wxListBox()
@@ -345,7 +343,7 @@ void wxListBox::FreeData()
 #endif // wxUSE_OWNER_DRAWN
     if ( HasClientObjectData() )
     {
-        for ( unsigned int n = 0; n < m_noItems; n++ )
+        for ( size_t n = 0; n < (size_t)m_noItems; n++ )
         {
             delete GetClientObject(n);
         }
@@ -378,32 +376,32 @@ void wxListBox::DoSetFirstItem(int N)
     MacScrollTo( N ) ;
 }
 
-void wxListBox::Delete(unsigned int n)
+void wxListBox::Delete(int N)
 {
-    wxCHECK_RET( IsValid(n),
+    wxCHECK_RET( N >= 0 && N < m_noItems,
                  wxT("invalid index in wxListBox::Delete") );
 
 #if wxUSE_OWNER_DRAWN
-    delete m_aItems[n];
-    m_aItems.RemoveAt(n);
+    delete m_aItems[N];
+    m_aItems.RemoveAt(N);
 #else // !wxUSE_OWNER_DRAWN
     if ( HasClientObjectData() )
     {
-        delete GetClientObject(n);
+        delete GetClientObject(N);
     }
 #endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
-    m_stringArray.RemoveAt(n) ;
-    m_dataArray.RemoveAt(n) ;
-    m_noItems--;
+    m_stringArray.RemoveAt( N ) ;
+    m_dataArray.RemoveAt( N ) ;
+    m_noItems --;
 
-    MacDelete(n) ;
+    MacDelete( N ) ;
 }
 
 int wxListBox::DoAppend(const wxString& item)
 {
     InvalidateBestSize();
 
-    unsigned int index = m_noItems ;
+    int index = m_noItems ;
     m_stringArray.Add( item ) ;
     m_dataArray.Add( NULL );
     m_noItems ++;
@@ -418,7 +416,7 @@ void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
     MacSetRedraw( false ) ;
     Clear() ;
     int n = choices.GetCount();
-
+    
     for( int i = 0 ; i < n ; ++i )
     {
         if ( clientData )
@@ -433,19 +431,19 @@ void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
         else
             Append( choices[i] ) ;
     }
-
+    
 #if wxUSE_OWNER_DRAWN
     if ( m_windowStyle & wxLB_OWNERDRAW ) {
         // first delete old items
-        unsigned int ui = m_aItems.Count();
+        size_t ui = m_aItems.Count();
         while ( ui-- != 0 ) {
             delete m_aItems[ui];
             m_aItems[ui] = NULL;
         }
         m_aItems.Empty();
-
+        
         // then create new ones
-        for ( ui = 0; ui < m_noItems; ui++ ) {
+        for ( ui = 0; ui < (size_t)m_noItems; ui++ ) {
             wxOwnerDrawn *pNewItem = CreateItem(ui);
             pNewItem->SetName(choices[ui]);
             m_aItems.Add(pNewItem);
@@ -460,50 +458,50 @@ bool wxListBox::HasMultipleSelection() const
     return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
 }
 
-int wxListBox::FindString(const wxString& s, bool bCase) const
+int wxListBox::FindString(const wxString& s) const
 {
+    
     if ( s.Right(1) == wxT("*") )
     {
-        wxString search = s.Left( s.length() - 1 ) ;
-        int len = search.length() ;
+        wxString search = s.Left( s.Length() - 1 ) ;
+        int len = search.Length() ;
         Str255 s1 , s2 ;
         wxMacStringToPascal( search , s2 ) ;
-
-        for ( unsigned int i = 0 ; i < m_noItems ; ++ i )
+        
+        for ( int i = 0 ; i < m_noItems ; ++ i )
         {
-            wxMacStringToPascal( m_stringArray[i].Left( len ) , s1 ) ;
+        	wxMacStringToPascal( m_stringArray[i].Left( len ) , s1 ) ;
 
-            if ( EqualString( s1 , s2 , bCase , false ) )
-                return (int)i ;
+            if ( EqualString( s1 , s2 , false , false ) )
+                return i ;
         }
-        if ( s.Left(1) == wxT("*") && s.length() > 1 )
+        if ( s.Left(1) == wxT("*") && s.Length() > 1 )
         {
             wxString st = s ;
             st.MakeLower() ;
-            for ( unsigned int i = 0 ; i < m_noItems ; ++i )
+            for ( int i = 0 ; i < m_noItems ; ++i )
             {
-                if (GetString(i).Lower().Matches(st))
-                    return (int)i ;
+                if ( GetString(i).Lower().Matches(st) )
+                    return i ;
             }
         }
-
+        
     }
     else
     {
         Str255 s1 , s2 ;
-
+        
         wxMacStringToPascal( s , s2 ) ;
-
-        for ( unsigned int i = 0 ; i < m_noItems ; ++ i )
+        
+        for ( int i = 0 ; i < m_noItems ; ++ i )
         {
-            wxMacStringToPascal( m_stringArray[i] , s1 ) ;
+        	wxMacStringToPascal( m_stringArray[i] , s1 ) ;
 
-            if ( EqualString( s1 , s2 , bCase , false ) )
-                return (int)i ;
+            if ( EqualString( s1 , s2 , false , false ) )
+                return i ;
         }
     }
-
-    return wxNOT_FOUND;
+    return -1;
 }
 
 void wxListBox::Clear()
@@ -517,7 +515,7 @@ void wxListBox::Clear()
 
 void wxListBox::DoSetSelection(int N, bool select)
 {
-    wxCHECK_RET( IsValid(N),
+    wxCHECK_RET( N >= 0 && N < m_noItems,
         wxT("invalid index in wxListBox::SetSelection") );
     MacSetSelection( N , select ) ;
     GetSelections( m_selectionPreImage ) ;
@@ -525,30 +523,30 @@ void wxListBox::DoSetSelection(int N, bool select)
 
 bool wxListBox::IsSelected(int N) const
 {
-    wxCHECK_MSG( IsValid(N), false,
+    wxCHECK_MSG( N >= 0 && N < m_noItems, FALSE,
         wxT("invalid index in wxListBox::Selected") );
-
+    
     return MacIsSelected( N ) ;
 }
 
-void *wxListBox::DoGetItemClientData(unsigned int n) const
+void *wxListBox::DoGetItemClientData(int N) const
 {
-    wxCHECK_MSG( IsValid(n), NULL,
+    wxCHECK_MSG( N >= 0 && N < m_noItems, NULL,
         wxT("invalid index in wxListBox::GetClientData"));
-
-    return (void *)m_dataArray[n];
+    
+    return (void *)m_dataArray[N];
 }
 
-wxClientData *wxListBox::DoGetItemClientObject(unsigned int n) const
+wxClientData *wxListBox::DoGetItemClientObject(int N) const
 {
-    return (wxClientData *) DoGetItemClientData( n ) ;
+    return (wxClientData *) DoGetItemClientData( N ) ;
 }
 
-void wxListBox::DoSetItemClientData(unsigned int n, void *Client_data)
+void wxListBox::DoSetItemClientData(int N, void *Client_data)
 {
-    wxCHECK_RET( IsValid(n),
+    wxCHECK_RET( N >= 0 && N < m_noItems,
         wxT("invalid index in wxListBox::SetClientData") );
-
+    
 #if wxUSE_OWNER_DRAWN
     if ( m_windowStyle & wxLB_OWNERDRAW )
     {
@@ -557,11 +555,11 @@ void wxListBox::DoSetItemClientData(unsigned int n, void *Client_data)
         wxFAIL_MSG(wxT("Can't use client data with owner-drawn listboxes"));
     }
 #endif // wxUSE_OWNER_DRAWN
-    wxASSERT_MSG( m_dataArray.GetCount() >= (unsigned int) n , wxT("invalid client_data array") ) ;
-
-    if ( m_dataArray.GetCount() > (size_t) n )
+    wxASSERT_MSG( m_dataArray.GetCount() >= (size_t) N , wxT("invalid client_data array") ) ;
+    
+    if ( m_dataArray.GetCount() > (size_t) N )
     {
-        m_dataArray[n] = (char*) Client_data ;
+        m_dataArray[N] = (char*) Client_data ;
     }
     else
     {
@@ -569,7 +567,7 @@ void wxListBox::DoSetItemClientData(unsigned int n, void *Client_data)
     }
 }
 
-void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxListBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
     DoSetItemClientData(n, clientData);
 }
@@ -587,34 +585,34 @@ int wxListBox::GetSelection() const
 }
 
 // Find string for position
-wxString wxListBox::GetString(unsigned int n) const
+wxString wxListBox::GetString(int N) const
 {
-    return m_stringArray[n]  ;
+	return m_stringArray[N]  ;
 }
 
-void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
-    wxCHECK_RET( IsValidInsert(pos),
+    wxCHECK_RET( pos >= 0 && pos <= m_noItems,
         wxT("invalid index in wxListBox::InsertItems") );
-
+    
     InvalidateBestSize();
 
-    unsigned int nItems = items.GetCount();
-
-    for ( unsigned int i = 0 ; i < nItems ; i++ )
+    int nItems = items.GetCount();
+    
+    for ( int i = 0 ; i < nItems ; i++ )
     {
         m_stringArray.Insert( items[i] , pos + i ) ;
         m_dataArray.Insert( NULL , pos + i ) ;
         MacInsert( pos + i , items[i] ) ;
     }
-
+    
     m_noItems += nItems;
 }
 
-void wxListBox::SetString(unsigned int n, const wxString& s)
+void wxListBox::SetString(int N, const wxString& s)
 {
-    m_stringArray[n] = s;
-    MacSet(n, s);
+    m_stringArray[N] = s ;
+    MacSet( N , s ) ;
 }
 
 wxSize wxListBox::DoGetBestSize() const
@@ -622,10 +620,10 @@ wxSize wxListBox::DoGetBestSize() const
     int lbWidth = 100;  // some defaults
     int lbHeight = 110;
     int wLine;
-
+    
     {
-        wxMacPortStateHelper st( UMAGetWindowPort( (WindowRef) MacGetRootWindow() ) ) ;
-
+        wxMacPortStateHelper st( UMAGetWindowPort( (WindowRef) MacGetRootWindow() ) ) ; 
+        
         if ( m_font.Ok() )
         {
             ::TextFont( m_font.GetMacFontNum() ) ;
@@ -638,9 +636,9 @@ wxSize wxListBox::DoGetBestSize() const
             ::TextSize( 9  );
             ::TextFace( 0 ) ;
         }
-
+        
         // Find the widest line
-        for(unsigned int i = 0; i < GetCount(); i++) {
+        for(int i = 0; i < GetCount(); i++) {
             wxString str(GetString(i));
         #if wxUSE_UNICODE
             Point bounds={0,0} ;
@@ -653,19 +651,19 @@ wxSize wxListBox::DoGetBestSize() const
                 &baseline );
             wLine = bounds.h ;
         #else
-            wLine = ::TextWidth( str.c_str() , 0 , str.length() ) ;
+            wLine = ::TextWidth( str.c_str() , 0 , str.Length() ) ;
         #endif
             lbWidth = wxMax(lbWidth, wLine);
         }
-
+        
         // Add room for the scrollbar
         lbWidth += wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
-
+        
         // And just a bit more
         int cy = 12 ;
         int cx = ::TextWidth( "X" , 0 , 1 ) ;
         lbWidth += cx ;
-
+        
         // don't make the listbox too tall (limit height to around 10 items) but don't
         // make it too small neither
         lbHeight = (cy+4) * wxMin(wxMax(GetCount(), 3), 10);
@@ -673,7 +671,7 @@ wxSize wxListBox::DoGetBestSize() const
     return wxSize(lbWidth, lbHeight);
 }
 
-unsigned int wxListBox::GetCount() const
+int wxListBox::GetCount() const
 {
     return m_noItems;
 }
@@ -695,10 +693,10 @@ void wxListBox::Refresh(bool eraseBack, const wxRect *rect)
 class wxListBoxItem : public wxOwnerDrawn
 {
 public:
-    wxListBoxItem(const wxString& str = wxEmptyString);
+    wxListBoxItem(const wxString& str = "");
 };
 
-wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, false)
+wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, FALSE)
 {
     // no bitmaps/checkmarks
     SetMarginWidth(0);
@@ -727,8 +725,8 @@ list = (wxListBox*)refCon;
   ::TextFont( kFontIDMonaco ) ;
   ::TextSize( 9  );
   ::TextFace( 0 ) ;
-  DrawText(text, 0 , text.length());
-
+  DrawText(text, 0 , text.Length());
+  
     }
 */
 void wxListBox::MacDelete( int N )
@@ -771,7 +769,7 @@ void wxListBox::MacSetSelection( int n , bool select )
             LSetSelect( false , cell , (ListHandle)m_macList ) ;
         }
     }
-
+    
     cell.v = n ;
     LSetSelect( select , cell , (ListHandle)m_macList ) ;
     LAutoScroll( (ListHandle)m_macList ) ;
@@ -802,12 +800,12 @@ int wxListBox::MacGetSelection() const
 int wxListBox::MacGetSelections( wxArrayInt& aSelections ) const
 {
     int no_sel = 0 ;
-
+    
     aSelections.Empty();
-
+    
     Cell cell = { 0 , 0 } ;
     cell.v = 0 ;
-
+    
     while ( LGetSelect( true , &cell ,(ListHandle) m_macList ) )
     {
         aSelections.Add( cell.v ) ;
@@ -835,7 +833,7 @@ void wxListBox::MacScrollTo( int n )
 void wxListBox::OnSize( wxSizeEvent &event)
 {
     Point pt;
-
+    
 #if TARGET_CARBON
     GetListCellSize((ListHandle)m_macList, &pt);
 #else
@@ -849,7 +847,7 @@ void wxListBox::MacHandleControlClick( WXWidget control , wxInt16 controlpart , 
 {
     Boolean wasDoubleClick = false ;
     long    result ;
-
+    
     ::GetControlData( (ControlHandle) m_macControl , kControlNoPart , kControlListBoxDoubleClickTag , sizeof( wasDoubleClick ) , (char*) &wasDoubleClick  , &result ) ;
     if ( !wasDoubleClick )
     {
@@ -864,6 +862,7 @@ void wxListBox::MacHandleControlClick( WXWidget control , wxInt16 controlpart , 
 void wxListBox::MacSetRedraw( bool doDraw )
 {
     LSetDrawingMode( doDraw , (ListHandle)m_macList ) ;
+    
 }
 
 void wxListBox::MacDoClick()
@@ -871,7 +870,7 @@ void wxListBox::MacDoClick()
     wxArrayInt aSelections;
     int n ;
     size_t count = GetSelections(aSelections);
-
+    
     if ( count == m_selectionPreImage.GetCount() )
     {
         bool hasChanged = false ;
@@ -888,12 +887,12 @@ void wxListBox::MacDoClick()
             return ;
         }
     }
-
+    
     m_selectionPreImage = aSelections;
-
+    
     wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
     event.SetEventObject( this );
-
+    
     if ( count > 0 )
     {
         n = aSelections[0];
@@ -901,15 +900,15 @@ void wxListBox::MacDoClick()
             event.SetClientObject( GetClientObject(n) );
         else if ( HasClientUntypedData() )
             event.SetClientData( GetClientData(n) );
-        event.SetString(GetString(n));
+        event.SetString( GetString(n) );
     }
     else
     {
         n = -1;
     }
-
+    
     event.SetInt(n);
-
+    
     GetEventHandler()->ProcessEvent(event);
 }
 
@@ -927,7 +926,7 @@ void wxListBox::OnChar(wxKeyEvent& event)
         wxWindow* parent = GetParent() ;
         while( parent  && !parent->IsTopLevel() && parent->GetDefaultItem() == NULL )
             parent = parent->GetParent() ;
-
+        
         if ( parent && parent->GetDefaultItem() )
         {
             wxButton *def = wxDynamicCast(parent->GetDefaultItem(),
@@ -945,14 +944,14 @@ void wxListBox::OnChar(wxKeyEvent& event)
     /* generate wxID_CANCEL if command-. or <esc> has been pressed (typically in dialogs) */
     else if (event.GetKeyCode() == WXK_ESCAPE || (event.GetKeyCode() == '.' && event.MetaDown() ) )
     {
-        // FIXME: look in ancestors, not just parent.
+    	// FIXME: look in ancestors, not just parent.
         wxWindow* win = GetParent()->FindWindow( wxID_CANCEL ) ;
         if (win)
         {
-            wxCommandEvent new_event(wxEVT_COMMAND_BUTTON_CLICKED,wxID_CANCEL);
-            new_event.SetEventObject( win );
-            win->GetEventHandler()->ProcessEvent( new_event );
-        }
+        	wxCommandEvent new_event(wxEVT_COMMAND_BUTTON_CLICKED,wxID_CANCEL);
+        	new_event.SetEventObject( win );
+        	win->GetEventHandler()->ProcessEvent( new_event );
+      	}
     }
     else if ( event.GetKeyCode() == WXK_TAB )
     {
@@ -969,10 +968,10 @@ void wxListBox::OnChar(wxKeyEvent& event)
     {
         // perform the default key handling first
         wxControl::OnKeyDown( event ) ;
-
+        
         wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
         event.SetEventObject( this );
-
+        
         wxArrayInt aSelections;
         int n, count = GetSelections(aSelections);
         if ( count > 0 )
@@ -982,15 +981,15 @@ void wxListBox::OnChar(wxKeyEvent& event)
                 event.SetClientObject( GetClientObject(n) );
             else if ( HasClientUntypedData() )
                 event.SetClientData( GetClientData(n) );
-            event.SetString(GetString(n));
+            event.SetString( GetString(n) );
         }
         else
         {
             n = -1;
         }
-
+        
         event.SetInt(n);
-
+        
         GetEventHandler()->ProcessEvent(event);
     }
     else
@@ -1009,19 +1008,18 @@ void wxListBox::OnChar(wxKeyEvent& event)
                 SetSelection(line) ;
                 wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
                 event.SetEventObject( this );
-
+                
                 if ( HasClientObjectData() )
                     event.SetClientObject( GetClientObject( line ) );
                 else if ( HasClientUntypedData() )
                     event.SetClientData( GetClientData(line) );
-                event.SetString(GetString(line));
-
+                event.SetString( GetString(line) );
+                
                 event.SetInt(line);
-
+                
                 GetEventHandler()->ProcessEvent(event);
             }
         }
     }
 }
 
-#endif // wxUSE_LISTBOX

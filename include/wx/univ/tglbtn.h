@@ -12,9 +12,12 @@
 #ifndef _WX_UNIV_TGLBTN_H_
 #define _WX_UNIV_TGLBTN_H_
 
-#include "wx/button.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univtglbtn.h"
+#endif
 
-extern WXDLLEXPORT_DATA(const wxChar) wxCheckBoxNameStr[];
+#include "wx/button.h"
+#include "wx/checkbox.h"
 
 // ----------------------------------------------------------------------------
 // wxToggleButton: a push button
@@ -24,7 +27,6 @@ class WXDLLIMPEXP_CORE wxToggleButton: public wxButton
 {
 public:
     wxToggleButton();
-
     wxToggleButton(wxWindow *parent,
              wxWindowID id,
              const wxBitmap& bitmap,
@@ -34,7 +36,7 @@ public:
              long style = 0,
              const wxValidator& validator = wxDefaultValidator,
              const wxString& name = wxCheckBoxNameStr);
-
+    
     wxToggleButton(wxWindow *parent,
              wxWindowID id,
              const wxString& label = wxEmptyString,
@@ -50,7 +52,6 @@ public:
 
     // wxToggleButton actions
     virtual void Toggle();
-    virtual void Click();
 
     // Get/set the value
     void SetValue(bool state);
@@ -61,7 +62,6 @@ protected:
     bool m_value;
 
 private:
-    // common part of all ctors
     void Init();
 
     DECLARE_DYNAMIC_CLASS(wxToggleButton)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// File:      src/mac/classic/region.cpp
+// File:      region.cpp
 // Purpose:   Region class
 // Author:    Stefan Csomor
 // Created:   Fri Oct 24 10:46:34 MET 1997
@@ -8,14 +8,12 @@
 // Licence:   wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#include "wx/region.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
+#ifdef __GNUG__
+#pragma implementation "region.h"
 #endif
 
+#include "wx/region.h"
+#include "wx/gdicmn.h"
 #include "wx/mac/uma.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxRegion, wxGDIObject)
@@ -107,11 +105,11 @@ void wxRegion::Clear()
 bool wxRegion::Combine(long x, long y, long width, long height, wxRegionOp op)
 {
     // Don't change shared data
-    if (!m_refData)
+    if (!m_refData) 
     {
         m_refData = new wxRegionRefData();
-    }
-    else if (m_refData->GetRefCount() > 1)
+    } 
+    else if (m_refData->GetRefCount() > 1) 
     {
         wxRegionRefData* ref = (wxRegionRefData*)m_refData;
         UnRef();
@@ -119,7 +117,7 @@ bool wxRegion::Combine(long x, long y, long width, long height, wxRegionOp op)
     }
     RgnHandle rgn = NewRgn() ;
         SetRectRgn( rgn , x , y, x+width,y + height ) ;
-
+        
     switch (op)
     {
         case wxRGN_AND:
@@ -142,20 +140,20 @@ bool wxRegion::Combine(long x, long y, long width, long height, wxRegionOp op)
 
         DisposeRgn( rgn ) ;
 
-    return true;
+    return TRUE;
 }
 
 //! Union /e region with this.
 bool wxRegion::Combine(const wxRegion& region, wxRegionOp op)
 {
     if (region.Empty())
-        return false;
+        return FALSE;
 
     // Don't change shared data
     if (!m_refData) {
         m_refData = new wxRegionRefData();
-    }
-    else if (m_refData->GetRefCount() > 1)
+    } 
+    else    if (m_refData->GetRefCount() > 1) 
     {
         wxRegionRefData* ref = (wxRegionRefData*)m_refData;
         UnRef();
@@ -182,7 +180,7 @@ bool wxRegion::Combine(const wxRegion& region, wxRegionOp op)
             break ;
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxRegion::Combine(const wxRect& rect, wxRegionOp op)
@@ -197,7 +195,7 @@ bool wxRegion::Combine(const wxRect& rect, wxRegionOp op)
 // Outer bounds of region
 void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const
 {
-    if (m_refData)
+    if (m_refData) 
     {
         Rect box ;
         GetRegionBounds( M_REGION , &box ) ;
@@ -205,8 +203,8 @@ void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const
         y = box.top ;
         w = box.right - box.left ;
         h = box.bottom - box.top ;
-    }
-    else
+    } 
+    else 
     {
         x = y = w = h = 0;
     }
@@ -255,7 +253,7 @@ wxRegionContain wxRegion::Contains(const wxPoint& pt) const
     Point p = { pt.y , pt.x } ;
     if (PtInRgn( p , M_REGION ) )
         return wxInRegion;
-
+        
     return wxOutRegion;
 }
 
@@ -434,3 +432,4 @@ long wxRegionIterator::GetH() const
         return m_rects[m_current].height;
     return 0;
 }
+

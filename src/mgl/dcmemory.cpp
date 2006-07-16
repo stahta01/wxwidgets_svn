@@ -1,12 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/dcmemory.cpp
+// Name:        dcmemory.cpp
 // Purpose:
 // Author:      Robert Roebling, Vaclav Slavik
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998 Robert Roebling,
+// Copyright:   (c) 1998 Robert Roebling, 
 //                  2001 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcmemory.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -26,12 +30,12 @@ IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC,wxWindowDC)
 
 wxMemoryDC::wxMemoryDC() : wxDC()
 {
-    m_isMemDC = true;
+    m_isMemDC = TRUE;
 }
 
 wxMemoryDC::wxMemoryDC(wxDC *WXUNUSED(dc)) : wxDC()
 {
-    m_isMemDC = true;
+    m_isMemDC = TRUE;
 }
 
 wxMemoryDC::~wxMemoryDC()

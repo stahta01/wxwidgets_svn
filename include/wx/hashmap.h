@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/hashmap.h
+// Name:        hashmap.h
 // Purpose:     wxHashMap class
 // Author:      Mattia Barbon
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_HASHMAP_H_
 #define _WX_HASHMAP_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "hashmap.h"
+#endif
 
 #include "wx/string.h"
 
@@ -34,7 +38,7 @@
 #endif
 
 #define _WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP ) \
-    typedef WX_HASH_MAP_NAMESPACE::hash_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME
+    typedef WX_HASH_MAP_NAMESPACE::hash_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME;
 
 #else // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
@@ -202,7 +206,6 @@ public: \
     { \
     public: \
         const_iterator() : Iterator() {} \
-        const_iterator(iterator i) : Iterator(i) {} \
         const_iterator( Node* node, const Self* ht ) \
             : Iterator( node, (Self*)ht ) {} \
         const_iterator& operator++() { PlusPlus();return *this; } \
@@ -345,11 +348,10 @@ protected: \
         { \
             if( m_equals( m_getKey( (*node)->m_value ), key ) ) \
                 return node; \
-            /* Tell the compiler to not do any strict-aliasing assumptions with a void cast? Can we make such a runtime guarantee? */ \
             node = (Node**)&(*node)->m_nxt; \
         } \
  \
-        return NULL; \
+        return 0; \
     } \
  \
     /* returns NULL if not found */ \
@@ -641,10 +643,7 @@ public: \
  \
     /* count() == 0 | 1 */ \
     size_type count( const const_key_type& key ) \
-    { \
-        /* explicit cast needed to suppress CodeWarrior warnings */ \
-        return (size_type)(GetNode( key ) ? 1 : 0); \
-    } \
+        { return GetNode( key ) ? 1 : 0; } \
 }
 
 #endif // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
@@ -708,3 +707,4 @@ WX_DECLARE_HASH_MAP_WITH_DECL( long, long, wxIntegerHash, wxIntegerEqual,
 
 
 #endif // _WX_HASHMAP_H_
+

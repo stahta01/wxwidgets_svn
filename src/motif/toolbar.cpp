@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/toolbar.cpp
+// Name:        motif/toolbar.cpp
 // Purpose:     wxToolBar
 // Author:      Julian Smart
 // Modified by: 13.12.99 by VZ during toolbar classes reorganization
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toolbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,14 +28,11 @@
 #define XtDisplay XTDISPLAY
 #endif
 
+#include "wx/settings.h"
+#include "wx/app.h"
+#include "wx/timer.h"
 #include "wx/toolbar.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/frame.h"
-    #include "wx/timer.h"
-    #include "wx/settings.h"
-#endif
+#include "wx/frame.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -420,7 +421,7 @@ bool wxToolBar::Realize()
                             (Pixmap)tmp.GetDrawable() :
                             tool->GetInsensPixmap();
                 }
-
+                
                 if (tool->CanBeToggled())
                 {
                     // Toggle button
@@ -495,7 +496,7 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
     return true;
 }
 
-bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
+bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
 {
     tool->Detach();
 
@@ -519,7 +520,7 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
                 offset = isVertical ? size.y : size.x;
                 offset += packing;
                 break;
-            }
+            }       
             case wxTOOL_STYLE_SEPARATOR:
                 offset = isVertical ? 0 : separatorSize;
                 break;
@@ -545,14 +546,14 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
             {
             case wxTOOL_STYLE_CONTROL:
             {
-                wxPoint location = t->GetControl()->GetPosition();
+                wxPoint pos = t->GetControl()->GetPosition();
 
                 if( isVertical )
-                    location.y -= offset;
+                    pos.y -= offset;
                 else
-                    location.x -= offset;
+                    pos.x -= offset;
 
-                t->GetControl()->Move( location );
+                t->GetControl()->Move( pos );
                 break;
             }
             case wxTOOL_STYLE_SEPARATOR:
@@ -566,9 +567,9 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
                                NULL );
 
                 if( isVertical )
-                    y = (Dimension)(y - offset);
+                    y -= offset;
                 else
-                    x = (Dimension)(x - offset);
+                    x -= offset;
 
                 XtVaSetValues( t->GetButtonWidget(),
                                XmNx, x,
@@ -624,12 +625,12 @@ void wxToolBar::DoSetSize(int x, int y, int width, int height, int sizeFlags)
     }
 
     wxToolBarBase::DoSetSize(x, y, width, height, sizeFlags);
-
+  
     // We must refresh the frame size when the toolbar changes size
     // otherwise the toolbar can be shown incorrectly
     if ( old_width != width || old_height != height )
     {
-        // But before we send the size event check it
+        // But before we send the size event check it 
         // we have a frame that is not being deleted.
         wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
         if ( frame && !frame->IsBeingDeleted() )
@@ -757,7 +758,7 @@ void wxToolBarTimer::Notify()
 
         // Move the tooltip more or less above the button
         int yOffset = 20; // TODO: What should be really?
-        y = (Position)(y - yOffset);
+        y -= yOffset;
         if (y < yOffset) y = 0;
 
         /************************************************************/
@@ -789,3 +790,4 @@ void wxToolBarTimer::Notify()
         /************************************************************/
         XtPopup (help_popup, XtGrabNone);
 }
+

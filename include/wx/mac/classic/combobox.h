@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/combobox.h
+// Name:        combobox.h
 // Purpose:     wxComboBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -12,9 +12,13 @@
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
+
 #include "wx/choice.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxComboBoxNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxComboBoxNameStr;
 
 // Combobox item
 class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
@@ -78,15 +82,15 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
            const wxString& name = wxComboBoxNameStr);
 
     // List functions
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
     virtual void Clear();
 
     virtual int GetSelection() const ;
     virtual void SetSelection(int n);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
-    virtual wxString GetString(unsigned int n) const ;
+    virtual int FindString(const wxString& s) const;
+    virtual wxString GetString(int n) const ;
     virtual wxString GetStringSelection() const ;
-    virtual void SetString(unsigned int n, const wxString& s);
+    virtual void SetString(int n, const wxString& s) ;
 
     // Text field functions
     virtual wxString GetValue() const ;
@@ -104,7 +108,7 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
     virtual void Remove(long from, long to);
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
-    virtual unsigned int GetCount() const { return m_choice->GetCount() ; }
+    virtual int GetCount() const { return m_choice->GetCount() ; }
 
     virtual bool IsEditable() const ;
 
@@ -124,12 +128,12 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
 
 protected:
     virtual int DoAppend(const wxString& item) ;
-    virtual int DoInsert(const wxString& item, unsigned int pos) ;
+    virtual int DoInsert(const wxString& item, int pos) ;
 
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const ;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const ;
+    virtual void DoSetItemClientData(int n, void* clientData) ;
+    virtual void* DoGetItemClientData(int n) const ;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData) ;
+    virtual wxClientData* DoGetItemClientObject(int n) const ;
 
     void FreeData();
 

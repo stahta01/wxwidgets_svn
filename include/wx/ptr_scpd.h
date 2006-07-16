@@ -45,7 +45,7 @@
     #define wxPOST_NO_WARNING_SCOPE(name)
 #else
     #define wxPRE_NO_WARNING_SCOPE(name)  do
-    #define wxPOST_NO_WARNING_SCOPE(name) while ( wxFalse )
+    #define wxPOST_NO_WARNING_SCOPE(name) while ( 0 )
 #endif
 
 #define wxCHECKED_DELETE(ptr)                                                 \
@@ -197,7 +197,7 @@ void name::reset(T * p){                \
 // ----------------------------------------------------------------------------
 
 #define wxDEFINE_TIED_SCOPED_PTR_TYPE(T)                                      \
-    wxDEFINE_SCOPED_PTR_TYPE(T)                                               \
+    wxDEFINE_SCOPED_PTR_TYPE(T);                                              \
     class T ## TiedPtr : public T ## Ptr                                      \
     {                                                                         \
     public:                                                                   \
@@ -216,7 +216,7 @@ void name::reset(T * p){                \
     private:                                                                  \
         T **m_pp;                                                             \
         T *m_pOld;                                                            \
-    };
+    }
 
 #endif // __WX_SCOPED_POINTER__
 

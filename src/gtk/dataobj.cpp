@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/dataobj.cpp
+// Name:        dataobj.cpp
 // Purpose:     wxDataObject class
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,20 +7,22 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dataobj.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_DATAOBJ
-
 #include "wx/dataobj.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/image.h"
-#endif
+#if wxUSE_DATAOBJ
 
+#include "wx/app.h"
+#include "wx/debug.h"
 #include "wx/mstream.h"
+#include "wx/image.h"
+#include "wx/log.h"
 #include "wx/uri.h"
 
 #include <gdk/gdk.h>
@@ -236,9 +238,9 @@ bool wxFileDataObject::GetDataHere(void *buf) const
         filenames += wxT("\r\n");
     }
 
-    memcpy( buf, filenames.mbc_str(), filenames.length() + 1 );
+    memcpy( buf, filenames.mbc_str(), filenames.Len() + 1 );
 
-    return true;
+    return TRUE;
 }
 
 size_t wxFileDataObject::GetDataSize() const
@@ -248,7 +250,7 @@ size_t wxFileDataObject::GetDataSize() const
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
         // This is junk in UTF-8
-        res += m_filenames[i].length();
+        res += m_filenames[i].Len();
         res += 5 + 2; // "file:" (5) + "\r\n" (2)
     }
 
@@ -284,9 +286,9 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
                 AddFile(wxURI::Unescape(filename.c_str() + lenPrefix));
                 filename.Empty();
             }
-            else if ( !filename.empty() )
+            else
             {
-                wxLogDebug(_T("Unsupported URI \"%s\" in wxFileDataObject"),
+                wxLogDebug(_T("Unsupported URI '%s' in wxFileDataObject"),
                            filename.c_str());
             }
 
@@ -302,7 +304,7 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxFileDataObject::AddFile( const wxString &filename )
@@ -347,12 +349,12 @@ bool wxBitmapDataObject::GetDataHere(void *buf) const
     {
         wxFAIL_MSG( wxT("attempt to copy empty bitmap failed") );
 
-        return false;
+        return FALSE;
     }
 
     memcpy(buf, m_pngData, m_pngSize);
 
-    return true;
+    return TRUE;
 }
 
 bool wxBitmapDataObject::SetData(size_t size, const void *buf)
@@ -360,7 +362,7 @@ bool wxBitmapDataObject::SetData(size_t size, const void *buf)
     Clear();
 
     wxCHECK_MSG( wxImage::FindHandler(wxBITMAP_TYPE_PNG) != NULL,
-                 false, wxT("You must call wxImage::AddHandler(new wxPNGHandler); to be able to use clipboard with bitmaps!") );
+                 FALSE, wxT("You must call wxImage::AddHandler(new wxPNGHandler); to be able to use clipboard with bitmaps!") );
 
     m_pngSize = size;
     m_pngData = malloc(m_pngSize);
@@ -371,7 +373,7 @@ bool wxBitmapDataObject::SetData(size_t size, const void *buf)
     wxImage image;
     if ( !image.LoadFile( mstream, wxBITMAP_TYPE_PNG ) )
     {
-        return false;
+        return FALSE;
     }
 
     m_bitmap = wxBitmap(image);

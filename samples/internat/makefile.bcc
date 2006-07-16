@@ -21,7 +21,7 @@ BCCDIR = $(MAKEDIR)\..
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = \
 	bcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\lib\bcc_$(LIBTYPE_SUFFIX)$(CFG)
@@ -199,7 +199,7 @@ $(OBJS):
 
 ### Targets: ###
 
-all: $(OBJS)\internat.exe bg cs de fr ka pl ru sv ja ja_JP.EUC-JP
+all: $(OBJS)\internat.exe bg cs de fr ja ka pl ru sv
 
 clean: 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -214,7 +214,7 @@ clean:
 
 $(OBJS)\internat.exe: $(INTERNAT_OBJECTS)  $(OBJS)\internat_internat.res
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) -aa @&&|
-	c0w32.obj $(INTERNAT_OBJECTS),$@,, $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG_5)$(__RUNTIME_LIBS_8).lib,, $(OBJS)\internat_internat.res
+	c0w32.obj $(INTERNAT_OBJECTS),$@,, $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  import32.lib cw32$(__THREADSFLAG_5)$(__RUNTIME_LIBS_8).lib,, $(OBJS)\internat_internat.res
 |
 
 bg: 
@@ -233,6 +233,10 @@ fr:
 	if not exist $(OBJS)\fr mkdir $(OBJS)\fr
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\fr\%f copy .\fr\%f $(OBJS)\fr
 
+ja: 
+	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
+	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
+
 ka: 
 	if not exist $(OBJS)\ka mkdir $(OBJS)\ka
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ka\%f copy .\ka\%f $(OBJS)\ka
@@ -248,14 +252,6 @@ ru:
 sv: 
 	if not exist $(OBJS)\sv mkdir $(OBJS)\sv
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\sv\%f copy .\sv\%f $(OBJS)\sv
-
-ja: 
-	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
-
-ja_JP.EUC-JP: 
-	if not exist $(OBJS)\ja_JP.EUC-JP mkdir $(OBJS)\ja_JP.EUC-JP
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja_JP.EUC-JP\%f copy .\ja_JP.EUC-JP\%f $(OBJS)\ja_JP.EUC-JP
 
 $(OBJS)\internat_internat.obj: .\internat.cpp
 	$(CXX) -q -c -P -o$@ $(INTERNAT_CXXFLAGS) $**

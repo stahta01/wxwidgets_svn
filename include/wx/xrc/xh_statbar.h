@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_statbar.h
+// Name:        xh_statbar.h
 // Purpose:     XML resource handler for wxStatusBar
 // Author:      Brian Ravnsgaard Riis
 // Created:     2004/01/21
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_STATBAR_H_
 #define _WX_XH_STATBAR_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_statbar.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 
@@ -23,3 +27,4 @@ DECLARE_DYNAMIC_CLASS(wxStatusBarXmlHandler)
 };
 
 #endif // _WX_XH_STATBAR_H_
+

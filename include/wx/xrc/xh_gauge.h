@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_gauge.h
+// Name:        xh_gauge.h
 // Purpose:     XML resource handler for wxGauge
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_GAUGE_H_
 #define _WX_XH_GAUGE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_gauge.h"
+#endif
 
 #include "wx/defs.h"
 

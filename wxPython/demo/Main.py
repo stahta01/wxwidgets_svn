@@ -36,8 +36,8 @@ import images
 
 # For debugging
 ##wx.Trap();
-##print "wx.VERSION_STRING = %s (%s)" % (wx.VERSION_STRING, wx.USE_UNICODE and 'unicode' or 'ansi')
-##print "pid:", os.getpid()
+##print "wx.VERSION_STRING = ", wx.VERSION_STRING
+##print os.getpid();
 ##raw_input("Press Enter...")
 
 
@@ -47,19 +47,19 @@ import images
 _treeList = [
     # new stuff
     ('Recent Additions/Updates', [
+        'FoldPanelBar',
+        'GIFAnimationCtrl',
+        'HyperLinkCtrl',
+        'MultiSplitterWindow',
+        'Throbber',
+        'GetMouseState',
+        'FloatCanvas',
         'AnalogClock',
-        'AUI',
         'CheckListCtrlMixin',
-        'Pickers',
-        'PseudoDC',
-        'RichTextCtrl',
-        'Treebook',
-        'Toolbook',
         ]),
 
     # managed windows == things with a (optional) caption you can close
     ('Frames and Dialogs', [
-        'AUI',
         'Dialog',
         'Frame',
         'MDIWindows',
@@ -96,6 +96,7 @@ _treeList = [
         'CheckBox',
         'CheckListBox',
         'Choice',
+        'Choicebook',
         'ComboBox',
         'Gauge',
         'Grid',
@@ -104,7 +105,9 @@ _treeList = [
         'ListCtrl',
         'ListCtrl_virtual',
         'ListCtrl_edit',
+        'Listbook',
         'Menu',
+        'Notebook',
         'PopupMenu',
         'PopupWindow',
         'RadioBox',
@@ -125,14 +128,6 @@ _treeList = [
         'ToolBar',
         'TreeCtrl',
         'Validator',
-        ]),
-    
-    ('"Book" Controls', [
-        'Choicebook',
-        'Listbook',
-        'Notebook',
-        'Toolbook',
-        'Treebook',
         ]),
 
     ('Custom Controls', [
@@ -175,11 +170,9 @@ _treeList = [
         'MaskedNumCtrl',
         'MediaCtrl',
         'MultiSplitterWindow',
-        'Pickers',
         'PyCrust',
         'PyPlot',
         'PyShell',
-        'RichTextCtrl',
         'ScrolledPanel',
         'SplitTree',
         'StyledTextCtrl_1',
@@ -249,7 +242,6 @@ _treeList = [
         'MouseGestures',
         'OGL',
         'PrintFramework',
-        'PseudoDC',
         'ShapedWindow',
         'Sound',
         'StandardPaths',
@@ -466,7 +458,7 @@ try:
                                   'fore:#000000,back:#FFFFFF,face:Courier New,size:9')
             else:
                 self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 
-                                  'fore:#000000,back:#FFFFFF,face:Courier,size:9')
+                                  'fore:#000000,back:#FFFFFF,face:Courier,size:12')
     
             # Clear styles and revert to default.
             self.StyleClearAll()
@@ -1179,6 +1171,22 @@ class wxPythonDemo(wx.Frame):
             menu.AppendMenu(wx.NewId(), item[0], submenu)
         self.mainmenu.Append(menu, '&Demo')
 
+        # Make a Demo Code menu
+        #TODO: Add new menu items
+        #       Like the option-enabled entries to select the
+        #       active module
+        #TODO: should we bother?
+
+        #menu = wx.Menu()
+        #saveID = wx.NewId()
+        #restoreID = wx.NewId()
+       # 
+        #menu.Append(saveID, '&Save\tCtrl-S', 'Save edited demo')
+        #menu.Append(restoreID, '&Delete Modified\tCtrl-R', 'Delete modified copy')
+        #self.Bind(wx.EVT_MENU, self.codePage.OnSave, id=saveID)
+        #self.Bind(wx.EVT_MENU, self.codePage.OnRestore, id=restoreID)
+        #self.mainmenu.Append(menu, 'Demo &Code')
+       # 
 
         # Make a Help menu
         menu = wx.Menu()

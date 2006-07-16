@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/printps.cpp
+// Name:        printps.cpp
 // Purpose:     Postscript print/preview framework
 // Author:      Julian Smart
 // Modified by:
@@ -9,13 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -23,6 +16,19 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printps.h"
+#endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE && wxUSE_POSTSCRIPT && (!defined(__WXMSW__) || wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
 
@@ -34,10 +40,10 @@
     #include "wx/intl.h"
     #include "wx/progdlg.h"
     #include "wx/log.h"
-    #include "wx/dcprint.h"
 #endif
 
 #include "wx/generic/printps.h"
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
 #include "wx/generic/prntdlgg.h"
 #include "wx/generic/progdlgg.h"

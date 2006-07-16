@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gauge95.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,17 +28,18 @@
     #pragma hdrstop
 #endif
 
+#ifndef WX_PRECOMP
+    #include "wx/defs.h"
+#endif
+
 #if wxUSE_GAUGE
 
 #include "wx/gauge.h"
-
-#ifndef WX_PRECOMP
-#endif
-
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -94,9 +99,7 @@ wxBEGIN_FLAGS( wxGaugeStyle )
 
     wxFLAGS_MEMBER(wxGA_HORIZONTAL)
     wxFLAGS_MEMBER(wxGA_VERTICAL)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxGA_PROGRESSBAR)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxGA_SMOOTH)
 
 wxEND_FLAGS( wxGaugeStyle )
@@ -218,3 +221,4 @@ bool wxGauge95::SetBackgroundColour(const wxColour& col)
 }
 
 #endif // wxUSE_GAUGE
+

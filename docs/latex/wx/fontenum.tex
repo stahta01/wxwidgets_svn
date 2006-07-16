@@ -48,8 +48,6 @@ None
 \helpref{wxFont}{wxfont}, 
 \helpref{wxFontMapper}{wxfontmapper}
 
-
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxFontEnumerator::EnumerateFacenames}\label{wxfontenumeratorenumeratefacenames}
@@ -60,11 +58,10 @@ None
 
 Call \helpref{OnFacename}{wxfontenumeratoronfacename} for each font which
 supports given encoding (only if it is not wxFONTENCODING\_SYSTEM) and is of
-fixed width (if \arg{fixedWidthOnly} is true).
+fixed width (if {\it fixedWidthOnly} is true).
 
 Calling this function with default arguments will result in enumerating all
 fonts available on the system.
-
 
 \membersection{wxFontEnumerator::EnumerateEncodings}\label{wxfontenumeratorenumerateencodings}
 
@@ -77,26 +74,21 @@ least some font if {\it font} is not specified.
 
 \membersection{wxFontEnumerator::GetEncodings}\label{wxfontenumeratorgetencodings}
 
-\func{static wxArrayString}{GetEncodings}{\param{const wxString\&}{ facename = ""}}
+\func{wxArrayString*}{GetEncodings}{\void}
 
 Return array of strings containing all encodings found by 
-\helpref{EnumerateEncodings}{wxfontenumeratorenumerateencodings}.
-
+\helpref{EnumerateEncodings}{wxfontenumeratorenumerateencodings}. This is convenience function. It is 
+based on default implementation of \helpref{OnFontEncoding}{wxfontenumeratoronfontencoding} so don't expect
+it to work if you overwrite that method.
 
 \membersection{wxFontEnumerator::GetFacenames}\label{wxfontenumeratorgetfacenames}
 
-\func{static wxArrayString}{GetFacenames}{\param{wxFontEncoding }{encoding = wxFONTENCODING\_SYSTEM}, \param{bool }{fixedWidthOnly = false}}
+\func{wxArrayString*}{GetFacenames}{\void}
 
 Return array of strings containing all facenames found by 
-\helpref{EnumerateFacenames}{wxfontenumeratorenumeratefacenames}.
-
-
-\membersection{wxFontEnumerator::IsValidFacename}\label{wxfontenumeratorisvalidfacename}
-
-\func{static bool}{IsValidFacename}{\param{const wxString \&}{ facename}}
-
-Returns \true if the given string is valid face name, i.e. it's the face name of an installed
-font and it can safely be used with \helpref{wxFont::SetFaceName}{wxfontsetfacename}.
+\helpref{EnumerateFacenames}{wxfontenumeratorenumeratefacenames}. This is convenience function. It is 
+based on default implementation of \helpref{OnFacename}{wxfontenumeratoronfacename} so don't expect
+it to work if you overwrite that method.
 
 
 \membersection{wxFontEnumerator::OnFacename}\label{wxfontenumeratoronfacename}
@@ -106,10 +98,12 @@ font and it can safely be used with \helpref{wxFont::SetFaceName}{wxfontsetfacen
 Called by \helpref{EnumerateFacenames}{wxfontenumeratorenumeratefacenames} for
 each match. Return true to continue enumeration or false to stop it.
 
-
 \membersection{wxFontEnumerator::OnFontEncoding}\label{wxfontenumeratoronfontencoding}
 
-\func{virtual bool}{OnFontEncoding}{\param{const wxString\& }{font}, \param{const wxString\& }{encoding}}
+\func{virtual bool}{OnFontEncoding}{
+ \param{const wxString\& }{font},
+ \param{const wxString\& }{encoding}
+}
 
 Called by \helpref{EnumerateEncodings}{wxfontenumeratorenumerateencodings} for
 each match. Return true to continue enumeration or false to stop it.

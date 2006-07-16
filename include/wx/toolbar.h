@@ -49,10 +49,7 @@ enum
 
     // show the text and the icons alongside, not vertically stacked (Win32/GTK)
     wxTB_HORZ_LAYOUT = 0x0800,
-    wxTB_HORZ_TEXT   = wxTB_HORZ_LAYOUT | wxTB_TEXT,
-
-    // don't show the toolbar short help tooltips
-    wxTB_NO_TOOLTIPS = 0x1000
+    wxTB_HORZ_TEXT   = wxTB_HORZ_LAYOUT | wxTB_TEXT
 };
 
 #if wxUSE_TOOLBAR
@@ -66,12 +63,12 @@ enum
        #include "wx/msw/tbar95.h"
     #elif defined(__WXWINCE__)
        #include "wx/msw/wince/tbarwce.h"
+    #elif defined(__WXMSW__)
+       #include "wx/msw/tbarmsw.h"
     #elif defined(__WXMOTIF__)
        #include "wx/motif/toolbar.h"
-    #elif defined(__WXGTK20__)
-        #include "wx/gtk/tbargtk.h"
     #elif defined(__WXGTK__)
-        #include "wx/gtk1/tbargtk.h"
+        #include "wx/gtk/tbargtk.h"
     #elif defined(__WXMAC__)
        #include "wx/mac/toolbar.h"
     #elif defined(__WXCOCOA__)

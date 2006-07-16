@@ -11,15 +11,14 @@
 
 #if wxUSE_STL
 
-#undef  WX_DEFINE_LIST
-#define WX_DEFINE_LIST(name)                                                  \
-    void _WX_LIST_HELPER_##name::DeleteFunction( _WX_LIST_ITEM_TYPE_##name X )\
-    {                                                                         \
-        delete X;                                                             \
-    }                                                                         \
-    name::BaseListType name::EmptyList;
+    #undef  WX_DEFINE_LIST
+    #define WX_DEFINE_LIST(name)                                        \
+        void name::DeleteFunction( _WX_DELETEFUNCTIONCONST _WX_LIST_ITEM_TYPE_##name X )  \
+        {                                                               \
+            delete X;                                                   \
+        }
 
-#else // !wxUSE_STL
+#else // if !wxUSE_STL
 
     #define _DEFINE_LIST(T, name)         \
         void wx##name##Node::DeleteData() \
@@ -35,5 +34,5 @@
     // don't pollute preprocessor's name space
     //#undef  _DEFINE_LIST
 
-#endif // wxUSE_STL/!wxUSE_STL
+#endif
 

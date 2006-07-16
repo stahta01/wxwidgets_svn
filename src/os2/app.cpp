@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/app.cpp
+// Name:        app.cpp
 // Purpose:     wxApp
 // Author:      David Webster
 // Modified by:
@@ -9,14 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "app.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/app.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
     #include "wx/frame.h"
+    #include "wx/app.h"
     #include "wx/utils.h"
     #include "wx/gdicmn.h"
     #include "wx/pen.h"
@@ -28,13 +30,14 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
+    #include "wx/dynarray.h"
     #include "wx/wxchar.h"
-    #include "wx/log.h"
+    #include "wx/icon.h"
+    #include "wx/stdpaths.h"
+    #include "wx/filename.h"
 #endif
 
-#include "wx/stdpaths.h"
-#include "wx/filename.h"
-
+#include "wx/log.h"
 #include "wx/module.h"
 
 #include "wx/os2/private.h"
@@ -82,7 +85,8 @@ extern "C" int _System bsdselect(int,
 // global variables
 // ---------------------------------------------------------------------------
 
-WXDLLEXPORT_DATA(wxChar*) wxBuffer;
+extern wxChar*                      wxBuffer;
+extern wxList WXDLLEXPORT           wxPendingDelete;
 extern wxCursor*                    g_globalCursor;
 
 HAB                                 vHabmain = NULLHANDLE;
@@ -122,7 +126,7 @@ struct GsocketCallbackInfo{
 
 void wxApp::HandleSockets()
 {
-    bool pendingEvent = false;
+    bool pendingEvent = FALSE;
 
     // Check whether it's time for Gsocket operation
     if (m_maxSocketHandles > 0 && m_maxSocketNr > 0)
@@ -151,7 +155,7 @@ void wxApp::HandleSockets()
                     if (r < m_maxSocketHandles)
                     {
                         CallbackInfo[r].proc(CallbackInfo[r].gsock);
-                        pendingEvent = true;
+                        pendingEvent = TRUE;
                     }
                 }
                 if (FD_ISSET(i, &writefds))
@@ -164,7 +168,7 @@ void wxApp::HandleSockets()
                     if (r < m_maxSocketHandles)
                     {
                         CallbackInfo[r].proc(CallbackInfo[r].gsock);
-                        pendingEvent = true;
+                        pendingEvent = TRUE;
                     }
                 }
             }
@@ -228,7 +232,7 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
         // TODO: at least give some error message here...
         wxAppBase::CleanUp();
 
-        return false;
+        return FALSE;
     }
 
     wxBuffer = new wxChar[1500]; // FIXME; why?
@@ -252,7 +256,7 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 
     RegisterWindowClasses(vHabmain);
 
-    return true;
+    return TRUE;
 } // end of wxApp::Initialize
 
 const char*                         CANTREGISTERCLASS = " Can't register Class ";
@@ -260,10 +264,12 @@ const char*                         CANTREGISTERCLASS = " Can't register Class "
 // RegisterWindowClasses
 // ---------------------------------------------------------------------------
 
-bool wxApp::RegisterWindowClasses( HAB vHab )
+bool wxApp::RegisterWindowClasses(
+  HAB                               vHab
+)
 {
-    ERRORID vError = 0L;
-    wxString sError;
+    ERRORID                         vError = 0L;
+    wxString                        sError;
 
     if (!::WinRegisterClass( vHab
                             ,(PSZ)wxFrameClassName
@@ -275,7 +281,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -288,7 +294,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -301,7 +307,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -314,7 +320,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -327,7 +333,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -340,7 +346,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -353,7 +359,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
 
     if (!::WinRegisterClass( vHab
@@ -366,7 +372,7 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
     if (!::WinRegisterClass( vHab
                             ,(PSZ)wxCanvasClassNameNR
@@ -378,9 +384,9 @@ bool wxApp::RegisterWindowClasses( HAB vHab )
         vError = ::WinGetLastError(vHab);
         sError = wxPMErrorToStr(vError);
         wxLogLastError(sError.c_str());
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 } // end of wxApp::RegisterWindowClasses
 
 //
@@ -395,7 +401,7 @@ void wxApp::CleanUp()
     // PM-SPECIFIC CLEANUP
     //
 
-    // wxSetKeyboardHook(false);
+    // wxSetKeyboardHook(FALSE);
 
     if (wxSTD_FRAME_ICON)
         ::WinFreeFileIcon(wxSTD_FRAME_ICON);
@@ -428,11 +434,11 @@ void wxApp::CleanUp()
 
 bool wxApp::OnInitGui()
 {
-    ERRORID vError;
-    wxString sError;
+    ERRORID                         vError;
+    wxString                        sError;
 
     if (!wxAppBase::OnInitGui())
-        return false;
+        return FALSE;
 
     m_hMq = ::WinCreateMsgQueue(vHabmain, 0);
     if (!m_hMq)
@@ -440,10 +446,10 @@ bool wxApp::OnInitGui()
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
         wxLogDebug(sError);
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 } // end of wxApp::OnInitGui
 
 wxApp::wxApp()
@@ -473,10 +479,13 @@ wxApp::~wxApp()
 #endif
 } // end of wxApp::~wxApp
 
-bool gbInOnIdle = false;
+bool                                gbInOnIdle = FALSE;
 
-void wxApp::OnIdle( wxIdleEvent& rEvent )
+void wxApp::OnIdle(
+  wxIdleEvent&                      rEvent
+)
 {
+
     //
     // Avoid recursion (via ProcessEvent default case)
     //
@@ -497,26 +506,28 @@ void wxApp::OnIdle( wxIdleEvent& rEvent )
         wxDC::ClearCache();
 #endif // wxUSE_DC_CACHEING
 
-    gbInOnIdle = false;
+    gbInOnIdle = FALSE;
 } // end of wxApp::OnIdle
 
 void wxApp::OnEndSession(
   wxCloseEvent&                     WXUNUSED(rEvent))
 {
     if (GetTopWindow())
-        GetTopWindow()->Close(true);
+        GetTopWindow()->Close(TRUE);
 } // end of wxApp::OnEndSession
 
 //
 // Default behaviour: close the application with prompts. The
 // user can veto the close, and therefore the end session.
 //
-void wxApp::OnQueryEndSession( wxCloseEvent& rEvent )
+void wxApp::OnQueryEndSession(
+  wxCloseEvent&                     rEvent
+)
 {
     if (GetTopWindow())
     {
         if (!GetTopWindow()->Close(!rEvent.CanVeto()))
-            rEvent.Veto(true);
+            rEvent.Veto(TRUE);
     }
 } // end of wxApp::OnQueryEndSession
 
@@ -525,7 +536,7 @@ void wxApp::OnQueryEndSession( wxCloseEvent& rEvent )
 //
 bool wxApp::Yield(bool onlyIfNeeded)
 {
-    static bool s_inYield = false;
+    static bool s_inYield = FALSE;
 
     if ( s_inYield )
     {
@@ -534,11 +545,11 @@ bool wxApp::Yield(bool onlyIfNeeded)
             wxFAIL_MSG( _T("wxYield() called recursively") );
         }
 
-        return false;
+        return FALSE;
     }
 
-    HAB vHab = 0;
-    QMSG vMsg;
+    HAB                             vHab = 0;
+    QMSG                            vMsg;
 
     //
     // Disable log flushing from here because a call to wxYield() shouldn't
@@ -546,7 +557,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
     //
     wxLog::Suspend();
 
-    s_inYield = true;
+    s_inYield = TRUE;
 
     //
     // We want to go back to the main message loop
@@ -571,8 +582,8 @@ bool wxApp::Yield(bool onlyIfNeeded)
     // Let the logs be flashed again
     //
     wxLog::Resume();
-    s_inYield = false;
-    return true;
+    s_inYield = FALSE;
+    return TRUE;
 } // end of wxYield
 
 int wxApp::AddSocketHandler(int handle, int mask,

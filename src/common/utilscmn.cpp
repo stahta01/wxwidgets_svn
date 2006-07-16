@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/utilscmn.cpp
+// Name:        utilscmn.cpp
 // Purpose:     Miscellaneous utility functions and classes
 // Author:      Julian Smart
 // Modified by:
@@ -16,6 +16,17 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma implementation "utils.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -62,7 +73,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !wxONLY_WATCOM_EARLIER_THAN(1,4)
+#if !defined(__WATCOMC__)
     #if !(defined(_MSC_VER) && (_MSC_VER > 800))
         #include <errno.h>
     #endif
@@ -72,6 +83,7 @@
     #include "wx/colordlg.h"
     #include "wx/fontdlg.h"
     #include "wx/notebook.h"
+    #include "wx/frame.h"
     #include "wx/statusbr.h"
 #endif // wxUSE_GUI
 
@@ -104,6 +116,11 @@
 // ----------------------------------------------------------------------------
 // common data
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+    const wxChar *wxInternalErrorStr = wxT("wxWidgets Internal Error");
+    const wxChar *wxFatalErrorStr = wxT("wxWidgets Fatal Error");
+#endif // WXWIN_COMPATIBILITY_2_2
 
 // ============================================================================
 // implementation
@@ -301,195 +318,6 @@ int wxGetOsVersion(int *verMaj, int *verMin)
     if ( verMin )
         *verMin = info.versionMinor;
     return info.os;
-}
-
-/*
- * Class to make it easier to specify platform-dependent values
- */
-
-wxArrayInt*  wxPlatform::sm_customPlatforms = NULL;
-
-void wxPlatform::Copy(const wxPlatform& platform)
-{
-    m_longValue = platform.m_longValue;
-    m_doubleValue = platform.m_doubleValue;
-    m_stringValue = platform.m_stringValue;
-}
-
-wxPlatform wxPlatform::If(int platform, long value)
-{
-    if (Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform wxPlatform::IfNot(int platform, long value)
-{
-    if (!Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform& wxPlatform::ElseIf(int platform, long value)
-{
-    if (Is(platform))
-        m_longValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::ElseIfNot(int platform, long value)
-{
-    if (!Is(platform))
-        m_longValue = value;
-    return *this;
-}
-
-wxPlatform wxPlatform::If(int platform, double value)
-{
-    if (Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform wxPlatform::IfNot(int platform, double value)
-{
-    if (!Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform& wxPlatform::ElseIf(int platform, double value)
-{
-    if (Is(platform))
-        m_doubleValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::ElseIfNot(int platform, double value)
-{
-    if (!Is(platform))
-        m_doubleValue = value;
-    return *this;
-}
-
-wxPlatform wxPlatform::If(int platform, const wxString& value)
-{
-    if (Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform wxPlatform::IfNot(int platform, const wxString& value)
-{
-    if (!Is(platform))
-        return wxPlatform(value);
-    else
-        return wxPlatform();
-}
-
-wxPlatform& wxPlatform::ElseIf(int platform, const wxString& value)
-{
-    if (Is(platform))
-        m_stringValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::ElseIfNot(int platform, const wxString& value)
-{
-    if (!Is(platform))
-        m_stringValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::Else(long value)
-{
-    m_longValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::Else(double value)
-{
-    m_doubleValue = value;
-    return *this;
-}
-
-wxPlatform& wxPlatform::Else(const wxString& value)
-{
-    m_stringValue = value;
-    return *this;
-}
-
-void wxPlatform::AddPlatform(int platform)
-{
-    if (!sm_customPlatforms)
-        sm_customPlatforms = new wxArrayInt;
-    sm_customPlatforms->Add(platform);
-}
-
-void wxPlatform::ClearPlatforms()
-{
-    delete sm_customPlatforms;
-    sm_customPlatforms = NULL;
-}
-
-/// Function for testing current platform
-
-bool wxPlatform::Is(int platform)
-{
-#ifdef __WXMSW__
-    if (platform == wxMSW)
-        return true;
-#endif
-#ifdef __WXWINCE__
-    if (platform == wxWinCE)
-        return true;
-#endif
-#if defined(__WXWINCE__) && defined(__POCKETPC__)
-    if (platform == wxWinPocketPC)
-        return true;
-#endif
-#if defined(__WXWINCE__) && defined(__SMARTPHONE__)
-    if (platform == wxWinSmartPhone)
-        return true;
-#endif
-#ifdef __WXGTK__
-    if (platform == wxGTK)
-        return true;
-#endif
-#ifdef __WXMAC__
-    if (platform == wxMac)
-        return true;
-#endif
-#ifdef __WXX11__
-    if (platform == wxX11)
-        return true;
-#endif
-#ifdef __UNIX__
-    if (platform == wxUnix)
-        return true;
-#endif
-#ifdef __WXMGL__
-    if (platform == wxMGL)
-        return true;
-#endif
-#ifdef __WXOS2__
-    if (platform == wxOS2)
-        return true;
-#endif
-#ifdef __WXCOCOA__
-    if (platform == wxCocoa)
-        return true;
-#endif
-
-    if (sm_customPlatforms && sm_customPlatforms->Index(platform) != wxNOT_FOUND)
-        return true;
-
-    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -712,77 +540,14 @@ long wxExecute(const wxString& command,
 // Launch default browser
 // ----------------------------------------------------------------------------
 
-bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
+bool wxLaunchDefaultBrowser(const wxString& urlOrig)
 {
-    wxUnusedVar(flags);
-
     // set the scheme of url to http if it does not have one
     wxString url(urlOrig);
     if ( !wxURI(url).HasScheme() )
         url.Prepend(wxT("http://"));
 
 #if defined(__WXMSW__)
-
-#if wxUSE_IPC
-    if ( flags & wxBROWSER_NEW_WINDOW )
-    {
-        // ShellExecuteEx() opens the URL in an existing window by default so
-        // we can't use it if we need a new window
-        wxRegKey key(wxRegKey::HKCR, url.BeforeFirst(':') + _T("\\shell\\open"));
-        if ( key.Exists() )
-        {
-            wxRegKey keyDDE(key, wxT("DDEExec"));
-            if ( keyDDE.Exists() )
-            {
-                const wxString ddeTopic = wxRegKey(keyDDE, wxT("topic"));
-
-                // we only know the syntax of WWW_OpenURL DDE request for IE,
-                // optimistically assume that all other browsers are compatible
-                // with it
-                wxString ddeCmd;
-                bool ok = ddeTopic == wxT("WWW_OpenURL");
-                if ( ok )
-                {
-                    ddeCmd = keyDDE.QueryDefaultValue();
-                    ok = !ddeCmd.empty();
-                }
-
-                if ( ok )
-                {
-                    // for WWW_OpenURL, the index of the window to open the URL
-                    // in is -1 (meaning "current") by default, replace it with
-                    // 0 which means "new" (see KB article 160957)
-                    ok = ddeCmd.Replace(wxT("-1"), wxT("0"),
-                                        false /* only first occurence */) == 1;
-                }
-
-                if ( ok )
-                {
-                    // and also replace the parameters: the topic should
-                    // contain a placeholder for the URL
-                    ok = ddeCmd.Replace(wxT("%1"), url, false) == 1;
-                }
-
-                if ( ok )
-                {
-                    // try to send it the DDE request now but ignore the errors
-                    wxLogNull noLog;
-
-                    const wxString ddeServer = wxRegKey(keyDDE, wxT("application"));
-                    if ( wxExecuteDDE(ddeServer, ddeTopic, ddeCmd) )
-                        return true;
-
-                    // this is not necessarily an error: maybe browser is
-                    // simply not running, but no matter, in any case we're
-                    // going to launch it using ShellExecuteEx() below now and
-                    // we shouldn't try to open a new window if we open a new
-                    // browser anyhow
-                }
-            }
-        }
-    }
-#endif // wxUSE_IPC
-
     WinStruct<SHELLEXECUTEINFO> sei;
     sei.lpFile = url.c_str();
     sei.lpVerb = _T("open");
@@ -819,7 +584,7 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
         {
             ConstStr255Param hint = 0;
             startSel = 0;
-            endSel = url.length();
+            endSel = url.Length();
             err = ICLaunchURL(inst, hint, url.fn_str(), endSel, &startSel, &endSel);
             if (err != noErr)
                 wxLogDebug(wxT("ICLaunchURL error %d"), (int) err);
@@ -914,18 +679,15 @@ wxRegisterId (long id)
     wxCurrentId = id + 1;
 }
 
+#if wxUSE_MENUS
+
 // ----------------------------------------------------------------------------
 // Menu accelerators related functions
 // ----------------------------------------------------------------------------
 
 wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
 {
-#if wxUSE_MENUS
     wxString s = wxMenuItem::GetLabelFromText(in);
-#else
-    wxString str(in);
-    wxString s = wxStripMenuCodes(str);
-#endif // wxUSE_MENUS
     if ( out )
     {
         // go smash their buffer if it's not big enough - I love char * params
@@ -978,6 +740,8 @@ wxString wxStripMenuCodes(const wxString& in)
     return out;
 }
 
+#endif // wxUSE_MENUS
+
 // ----------------------------------------------------------------------------
 // Window search functions
 // ----------------------------------------------------------------------------
@@ -1012,12 +776,12 @@ int
 wxFindMenuItemId (wxFrame * frame, const wxString& menuString, const wxString& itemString)
 {
 #if wxUSE_MENUS
-    wxMenuBar *menuBar = frame->GetMenuBar ();
-    if ( menuBar )
-        return menuBar->FindMenuItem (menuString, itemString);
+  wxMenuBar *menuBar = frame->GetMenuBar ();
+  if ( menuBar )
+      return menuBar->FindMenuItem (menuString, itemString);
 #endif // wxUSE_MENUS
 
-    return wxNOT_FOUND;
+  return wxNOT_FOUND;
 }
 
 // Try to find the deepest child that contains 'pt'.
@@ -1059,7 +823,7 @@ wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
 
     wxPoint pos = win->GetPosition();
     wxSize sz = win->GetSize();
-    if ( !win->IsTopLevel() && win->GetParent() )
+    if (win->GetParent())
     {
         pos = win->GetParent()->ClientToScreen(pos);
     }
@@ -1067,8 +831,8 @@ wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
     wxRect rect(pos, sz);
     if (rect.Inside(pt))
         return win;
-
-    return NULL;
+    else
+        return NULL;
 }
 
 wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt)
@@ -1183,7 +947,7 @@ wxString wxGetPasswordFromUser(const wxString& message,
 
 #if wxUSE_COLOURDLG
 
-wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit, const wxString& caption)
+wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit)
 {
     wxColourData data;
     data.SetChooseFull(true);
@@ -1194,8 +958,6 @@ wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit, const wx
 
     wxColour colRet;
     wxColourDialog dialog(parent, &data);
-    if (!caption.empty())
-        dialog.SetTitle(caption);
     if ( dialog.ShowModal() == wxID_OK )
     {
         colRet = dialog.GetColourData().GetColour();
@@ -1209,7 +971,7 @@ wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit, const wx
 
 #if wxUSE_FONTDLG
 
-wxFont wxGetFontFromUser(wxWindow *parent, const wxFont& fontInit, const wxString& caption)
+wxFont wxGetFontFromUser(wxWindow *parent, const wxFont& fontInit)
 {
     wxFontData data;
     if ( fontInit.Ok() )
@@ -1219,8 +981,6 @@ wxFont wxGetFontFromUser(wxWindow *parent, const wxFont& fontInit, const wxStrin
 
     wxFont fontRet;
     wxFontDialog dialog(parent, data);
-    if (!caption.empty())
-        dialog.SetTitle(caption);
     if ( dialog.ShowModal() == wxID_OK )
     {
         fontRet = dialog.GetFontData().GetChosenFont();

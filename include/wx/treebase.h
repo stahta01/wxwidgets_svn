@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/treebase.h
+// Name:        treebase.h
 // Purpose:     wxTreeCtrl base classes and types
 // Author:      Julian Smart et al
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_TREEBASE_H_
 #define _WX_TREEBASE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "treebase.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -24,8 +28,6 @@
 #include "wx/event.h"
 #include "wx/dynarray.h"
 
-#if WXWIN_COMPATIBILITY_2_6
-
 // flags for deprecated `Expand(int action)', will be removed in next versions
 enum
 {
@@ -34,8 +36,6 @@ enum
     wxTREE_EXPAND_COLLAPSE_RESET,
     wxTREE_EXPAND_TOGGLE
 };
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ----------------------------------------------------------------------------
 // wxTreeItemId identifies an element of the tree. In this implementation, it's
@@ -127,19 +127,11 @@ protected:
 
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxTreeItemIdValue, wxArrayTreeItemIdsBase);
 
-// this is a wrapper around the array class defined above which allow to wok
-// with vaue of natural wxTreeItemId type instead of using wxTreeItemIdValue
-// and does it without any loss of efficiency
 class WXDLLEXPORT wxArrayTreeItemIds : public wxArrayTreeItemIdsBase
 {
 public:
     void Add(const wxTreeItemId& id)
         { wxArrayTreeItemIdsBase::Add(id.m_pItem); }
-    void Insert(const wxTreeItemId& id, size_t pos)
-        { wxArrayTreeItemIdsBase::Insert(id.m_pItem, pos); }
-    wxTreeItemId Item(size_t i) const
-        { return wxTreeItemId(wxArrayTreeItemIdsBase::Item(i)); }
-    wxTreeItemId operator[](size_t i) const { return Item(i); }
 };
 
 // ----------------------------------------------------------------------------
@@ -183,11 +175,9 @@ enum wxTreeItemIcon
 #define wxTR_DEFAULT_STYLE           (wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT)
 #endif
 
-#if WXWIN_COMPATIBILITY_2_6
 // deprecated, don't use
 #define wxTR_MAC_BUTTONS             0
 #define wxTR_AQUA_BUTTONS            0
-#endif // WXWIN_COMPATIBILITY_2_6
 
 
 // values for the `flags' parameter of wxTreeCtrl::HitTest() which determine
@@ -222,7 +212,7 @@ static const int wxTREE_HITTEST_ONITEM  = wxTREE_HITTEST_ONITEMICON |
                                           wxTREE_HITTEST_ONITEMLABEL;
 
 // tree ctrl default name
-extern WXDLLEXPORT_DATA(const wxChar) wxTreeCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxTreeCtrlNameStr;
 
 // ----------------------------------------------------------------------------
 // wxTreeItemAttr: a structure containing the visual attributes of an item
@@ -265,16 +255,11 @@ private:
 //     descriptions below
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT  wxTreeCtrlBase;
-
 class WXDLLEXPORT wxTreeEvent : public wxNotifyEvent
 {
 public:
-    wxTreeEvent(wxEventType commandType,
-                wxTreeCtrlBase *tree,
-                const wxTreeItemId &item = wxTreeItemId());
     wxTreeEvent(wxEventType commandType = wxEVT_NULL, int id = 0);
-    wxTreeEvent(const wxTreeEvent& event);
+    wxTreeEvent(const wxTreeEvent & event);
 
     virtual wxEvent *Clone() const { return new wxTreeEvent(*this); }
 
@@ -310,6 +295,11 @@ public:
         // Set the tooltip for the item (for EVT\_TREE\_ITEM\_GETTOOLTIP events)
     void SetToolTip(const wxString& toolTip) { m_label = toolTip; }
     wxString GetToolTip() { return m_label; }
+
+#if WXWIN_COMPATIBILITY_2_2
+    // for compatibility only, don't use
+    wxDEPRECATED( int GetCode() const);
+#endif // WXWIN_COMPATIBILITY_2_2
 
 private:
     // not all of the members are used (or initialized) for all events
@@ -424,3 +414,4 @@ END_DECLARE_EVENT_TYPES()
 #endif // wxUSE_TREECTRL
 
 #endif // _WX_TREEBASE_H_
+

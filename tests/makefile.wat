@@ -83,18 +83,6 @@ __WXLIB_CORE_p =
 __WXLIB_CORE_p = &
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
 !endif
-__LIB_TIFF_p =
-!ifeq USE_GUI 1
-__LIB_TIFF_p = wxtiff$(WXDEBUGFLAG).lib
-!endif
-__LIB_JPEG_p =
-!ifeq USE_GUI 1
-__LIB_JPEG_p = wxjpeg$(WXDEBUGFLAG).lib
-!endif
-__LIB_PNG_p =
-!ifeq USE_GUI 1
-__LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
-!endif
 __DEBUGINFO =
 !ifeq BUILD debug
 !ifeq DEBUG_INFO default
@@ -174,6 +162,18 @@ __WXLIB_MONO_p =
 __WXLIB_MONO_p = &
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 !endif
+__LIB_TIFF_p =
+!ifeq USE_GUI 1
+__LIB_TIFF_p = wxtiff$(WXDEBUGFLAG).lib
+!endif
+__LIB_JPEG_p =
+!ifeq USE_GUI 1
+__LIB_JPEG_p = wxjpeg$(WXDEBUGFLAG).lib
+!endif
+__LIB_PNG_p =
+!ifeq USE_GUI 1
+__LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
+!endif
 __WXUNIV_DEFINE_p =
 !ifeq WXUNIV 1
 __WXUNIV_DEFINE_p = -d__WXUNIVERSAL__
@@ -210,7 +210,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -239,17 +239,14 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_hashes.obj &
 	$(OBJS)\test_lists.obj &
 	$(OBJS)\test_longlongtest.obj &
-	$(OBJS)\test_convautotest.obj &
 	$(OBJS)\test_mbconvtest.obj &
 	$(OBJS)\test_regextest.obj &
 	$(OBJS)\test_wxregextest.obj &
 	$(OBJS)\test_scopeguardtest.obj &
 	$(OBJS)\test_strings.obj &
 	$(OBJS)\test_stdstrings.obj &
-	$(OBJS)\test_tokenizer.obj &
 	$(OBJS)\test_unicode.obj &
 	$(OBJS)\test_crt.obj &
-	$(OBJS)\test_vsnprintf.obj &
 	$(OBJS)\test_bstream.obj &
 	$(OBJS)\test_datastreamtest.obj &
 	$(OBJS)\test_ffilestream.obj &
@@ -260,7 +257,6 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_tempfile.obj &
 	$(OBJS)\test_textstreamtest.obj &
 	$(OBJS)\test_zlibstream.obj &
-	$(OBJS)\test_textfiletest.obj &
 	$(OBJS)\test_uris.obj
 TEST_GUI_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
@@ -301,7 +297,7 @@ $(OBJS)\test.exe :  $(TEST_OBJECTS)
 	@%append $(OBJS)\test.lbc option caseexact
 	@%append $(OBJS)\test.lbc $(LDFLAGS) $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) system nt ref 'main_' $(CPPUNIT_LIBS)
 	@for %i in ($(TEST_OBJECTS)) do @%append $(OBJS)\test.lbc file %i
-	@for %i in ( $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\test.lbc library %i
+	@for %i in ( $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\test.lbc library %i
 	@%append $(OBJS)\test.lbc
 	@for %i in () do @%append $(OBJS)\test.lbc option stack=%i
 	wlink @$(OBJS)\test.lbc
@@ -314,7 +310,7 @@ $(OBJS)\test_gui.exe :  $(TEST_GUI_OBJECTS) $(OBJS)\test_gui_sample.res
 	@%append $(OBJS)\test_gui.lbc option caseexact
 	@%append $(OBJS)\test_gui.lbc $(LDFLAGS) $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) $(CPPUNIT_LIBS) system nt ref 'main_'
 	@for %i in ($(TEST_GUI_OBJECTS)) do @%append $(OBJS)\test_gui.lbc file %i
-	@for %i in ( $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\test_gui.lbc library %i
+	@for %i in ( $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ) do @%append $(OBJS)\test_gui.lbc library %i
 	@%append $(OBJS)\test_gui.lbc option resource=$(OBJS)\test_gui_sample.res
 	@for %i in () do @%append $(OBJS)\test_gui.lbc option stack=%i
 	wlink @$(OBJS)\test_gui.lbc
@@ -369,9 +365,6 @@ $(OBJS)\test_lists.obj :  .AUTODEPEND .\lists\lists.cpp
 $(OBJS)\test_longlongtest.obj :  .AUTODEPEND .\longlong\longlongtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_convautotest.obj :  .AUTODEPEND .\mbconv\convautotest.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_mbconvtest.obj :  .AUTODEPEND .\mbconv\mbconvtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
@@ -390,16 +383,10 @@ $(OBJS)\test_strings.obj :  .AUTODEPEND .\strings\strings.cpp
 $(OBJS)\test_stdstrings.obj :  .AUTODEPEND .\strings\stdstrings.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_tokenizer.obj :  .AUTODEPEND .\strings\tokenizer.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_unicode.obj :  .AUTODEPEND .\strings\unicode.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_crt.obj :  .AUTODEPEND .\strings\crt.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_vsnprintf.obj :  .AUTODEPEND .\strings\vsnprintf.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_bstream.obj :  .AUTODEPEND .\streams\bstream.cpp
@@ -430,9 +417,6 @@ $(OBJS)\test_textstreamtest.obj :  .AUTODEPEND .\streams\textstreamtest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_zlibstream.obj :  .AUTODEPEND .\streams\zlibstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_textfiletest.obj :  .AUTODEPEND .\textfile\textfiletest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_uris.obj :  .AUTODEPEND .\uris\uris.cpp

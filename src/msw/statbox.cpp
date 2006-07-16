@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statbox.cpp
+// Name:        msw/statbox.cpp
 // Purpose:     wxStaticBox
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,16 +30,16 @@
 
 #if wxUSE_STATBOX
 
-#include "wx/statbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/dcclient.h"
-    #include "wx/dcmemory.h"
-    #include "wx/image.h"
 #endif
 
+#include "wx/statbox.h"
 #include "wx/notebook.h"
+#include "wx/sysopt.h"
+#include "wx/image.h"
+#include "wx/dcmemory.h"
 #include "wx/sysopt.h"
 
 #include "wx/msw/uxtheme.h"
@@ -447,3 +451,4 @@ void wxStaticBox::OnPaint(wxPaintEvent& WXUNUSED(event))
 #endif // !__WXWINCE__
 
 #endif // wxUSE_STATBOX
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/wince/tbarwce.cpp
+// Name:        msw/wince/tbarwce.cpp
 // Purpose:     wxToolBar for Windows CE
 // Author:      Julian Smart
 // Modified by:
@@ -17,11 +17,26 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tbarwce.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+    #include "wx/frame.h"
+    #include "wx/log.h"
+    #include "wx/intl.h"
+    #include "wx/dynarray.h"
+    #include "wx/settings.h"
+    #include "wx/bitmap.h"
+    #include "wx/dcmemory.h"
+    #include "wx/control.h"
 #endif
 
 // Use the WinCE-specific toolbar only if we're either compiling
@@ -30,23 +45,9 @@
 
 #include "wx/toolbar.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/frame.h"
-    #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/settings.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/control.h"
-#endif
-
 #if !defined(__GNUWIN32__) && !defined(__SALFORDC__)
     #include "malloc.h"
 #endif
-
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
 
 #include "wx/msw/private.h"
 #include <windows.h>
@@ -54,6 +55,7 @@
 #include <tchar.h>
 #include <ole2.h>
 #include <shellapi.h>
+#include <commctrl.h>
 #if defined(WINCE_WITHOUT_COMMANDBAR)
   #include <aygshell.h>
 #endif
@@ -122,7 +124,7 @@ public:
     // a control in the toolbar
     void SetSeparatorsCount(size_t count) { m_nSepCount = count; }
     size_t GetSeparatorsCount() const { return m_nSepCount; }
-
+    
     void SetBitmapIndex(int idx) { m_bitmapIndex = idx; }
     int GetBitmapIndex() const { return m_bitmapIndex; }
 
@@ -165,8 +167,8 @@ wxToolBarToolBase *wxToolMenuBar::CreateTool(wxControl *control)
 void wxToolMenuBar::Init()
 {
     wxToolBar::Init();
-
-    m_nButtons = 0;
+    
+    m_nButtons = 0;    
     m_menuBar = NULL;
 }
 
@@ -399,7 +401,7 @@ bool wxToolMenuBar::Realize()
                 break;
 
             case wxTOOL_STYLE_BUTTON:
-
+            
                 if ( HasFlag(wxTB_TEXT) )
                 {
                     const wxString& label = tool->GetLabel();
@@ -600,10 +602,10 @@ bool wxToolBar::Create(wxWindow *parent,
     // satisfy other parts of wxWidgets.
 
     parent->AddChild(this);
-
+    
     SetWindowStyle(style);
     SetName(name);
-
+    
     return true;
 }
 
@@ -648,4 +650,7 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(tog
 #endif
     // !__SMARTPHONE__
 
-#endif // wxUSE_TOOLBAR
+
+
+#endif // wxUSE_TOOLBAR && Win95
+

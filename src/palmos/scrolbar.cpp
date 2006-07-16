@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "scrolbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,14 +22,13 @@
 
 #if wxUSE_SCROLLBAR
 
-#include "wx/scrolbar.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
-    #include "wx/settings.h"
 #endif
 
+#include "wx/scrolbar.h"
 #include "wx/palmos/private.h"
+#include "wx/settings.h"
 
 #if wxUSE_EXTENDED_RTTI
 WX_DEFINE_FLAGS( wxScrollBarStyle )

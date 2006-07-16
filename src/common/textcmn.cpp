@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/textcmn.cpp
+// Name:        common/textcmn.cpp
 // Purpose:     implementation of platform-independent functions of wxTextCtrl
 // Author:      Julian Smart
 // Modified by:
@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrlbase.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -20,17 +24,12 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/event.h"
-#endif // WX_PRECOMP
-
 #if wxUSE_TEXTCTRL
-
-#include "wx/textctrl.h"
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
+    #include "wx/textctrl.h"
 #endif // WX_PRECOMP
 
 #include "wx/ffile.h"
@@ -53,8 +52,6 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_UPDATED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_ENTER)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_URL)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_MAXLEN)
-
-IMPLEMENT_ABSTRACT_CLASS(wxTextCtrlBase, wxControl)
 
 // ----------------------------------------------------------------------------
 // style functions - not implemented here
@@ -478,12 +475,9 @@ wxString wxTextCtrlBase::GetRange(long from, long to) const
 // do the window-specific processing after processing the update event
 void wxTextCtrlBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
 {
-    // call inherited, but skip the wxControl's version, and call directly the
-    // wxWindow's one instead, because the only reason why we are overriding this
-    // function is that we want to use SetValue() instead of wxControl::SetLabel()
-    wxWindowBase::DoUpdateWindowUI(event);
+    if ( event.GetSetEnabled() )
+        Enable(event.GetEnabled());
 
-    // update text
     if ( event.GetSetText() )
     {
         if ( event.GetText() != GetValue() )
@@ -524,6 +518,7 @@ wxTextCtrlBase::HitTest(const wxPoint& WXUNUSED(pt),
 
 // define this one even if !wxUSE_TEXTCTRL because it is also used by other
 // controls (wxComboBox and wxSpinCtrl)
+#include "wx/event.h"
 
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_UPDATED)
 

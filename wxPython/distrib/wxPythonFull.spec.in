@@ -205,7 +205,7 @@ cd bld
 	--with-gtk=2 \
 %endif
 	--prefix=%{wxpref} \
-	--disable-monolithic \
+	--enable-monolithic \
 	--disable-rpath \
 	--with-opengl \
 	--with-gnomeprint \
@@ -418,7 +418,7 @@ rm %{wxpref}/bin/wx-config
 %{pref}/lib*/python%{pyver}/site-packages/wxaddons/*
 %dir %{wxpref}
 %dir %{wxpref}/lib
-%{wxpref}/lib/libwx_*
+%{wxpref}/lib/libwx_gtk*
 %dir %{wxpref}/bin
 %{wxpref}/bin/wxrc*
 %{wxpref}/share

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/mimetype.cpp
+// Name:        mac/mimetype.cpp
 // Purpose:     classes and functions to manage MIME types
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,28 +9,36 @@
 // Licence:     wxWindows licence (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef    __GNUG__
+#pragma implementation "mimetype.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
-#include "wx/mac/mimetype.h"
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
+#endif
 
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #if wxUSE_GUI
-        #include "wx/icon.h"
-    #endif
+  #include "wx/string.h"
+  #if wxUSE_GUI
+    #include "wx/icon.h"
+  #endif
 #endif //WX_PRECOMP
 
 
+#include "wx/log.h"
 #include "wx/file.h"
+#include "wx/intl.h"
+#include "wx/dynarray.h"
 #include "wx/confbase.h"
+
+#include "wx/mac/mimetype.h"
 
 // other standard headers
 #include <ctype.h>
@@ -61,7 +69,7 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
 
 bool wxFileTypeImpl::GetMimeType(wxString *mimeType) const
 {
-    if ( !m_strFileType.empty() )
+    if ( m_strFileType.Length() > 0 )
     {
         *mimeType = m_strFileType ;
         return true ;
@@ -217,3 +225,4 @@ wxMimeTypesManagerImpl::Unassociate(wxFileType *ft)
 {
     return false;
 }
+

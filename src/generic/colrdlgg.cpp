@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/colrdlgg.cpp
+// Name:        generic/colrdlgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colrdlgg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -28,11 +32,14 @@
     #include "wx/layout.h"
     #include "wx/dcclient.h"
     #include "wx/sizer.h"
-    #include "wx/slider.h"
 #endif
 
 #if wxUSE_STATLINE
     #include "wx/statline.h"
+#endif
+
+#if wxUSE_SLIDER
+    #include "wx/slider.h"
 #endif
 
 #include "wx/generic/colrdlgg.h"
@@ -117,17 +124,17 @@ static const wxChar *wxColourDialogNames[] =
 
 wxGenericColourDialog::wxGenericColourDialog()
 {
-    dialogParent = NULL;
-    whichKind = 1;
-    colourSelection = -1;
+  dialogParent = NULL;
+  whichKind = 1;
+  colourSelection = -1;
 }
 
 wxGenericColourDialog::wxGenericColourDialog(wxWindow *parent,
                                              wxColourData *data)
 {
-    whichKind = 1;
-    colourSelection = -1;
-    Create(parent, data);
+  whichKind = 1;
+  colourSelection = -1;
+  Create(parent, data);
 }
 
 wxGenericColourDialog::~wxGenericColourDialog()
@@ -136,7 +143,7 @@ wxGenericColourDialog::~wxGenericColourDialog()
 
 void wxGenericColourDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 {
-    EndModal(wxID_CANCEL);
+  EndModal(wxID_CANCEL);
 }
 
 bool wxGenericColourDialog::Create(wxWindow *parent, wxColourData *data)
@@ -159,7 +166,7 @@ bool wxGenericColourDialog::Create(wxWindow *parent, wxColourData *data)
 
 int wxGenericColourDialog::ShowModal()
 {
-    return wxDialog::ShowModal();
+  return wxDialog::ShowModal();
 }
 
 
@@ -219,36 +226,36 @@ void wxGenericColourDialog::OnPaint(wxPaintEvent& event)
 
 void wxGenericColourDialog::CalculateMeasurements()
 {
-    smallRectangleSize.x = 18;
-    smallRectangleSize.y = 14;
-    customRectangleSize.x = 40;
-    customRectangleSize.y = 40;
+  smallRectangleSize.x = 18;
+  smallRectangleSize.y = 14;
+  customRectangleSize.x = 40;
+  customRectangleSize.y = 40;
 
-    gridSpacing = 6;
-    sectionSpacing = 15;
+  gridSpacing = 6;
+  sectionSpacing = 15;
 
-    standardColoursRect.x = 10;
+  standardColoursRect.x = 10;
 #ifdef __WXPM__
-    standardColoursRect.y = 15 + 20; /* OS/2 needs to account for dialog titlebar */
+  standardColoursRect.y = 15 + 20; /* OS/2 needs to account for dialog titlebar */
 #else
-    standardColoursRect.y = 15;
+  standardColoursRect.y = 15;
 #endif
-    standardColoursRect.width = (8*smallRectangleSize.x) + (7*gridSpacing);
-    standardColoursRect.height = (6*smallRectangleSize.y) + (5*gridSpacing);
+  standardColoursRect.width = (8*smallRectangleSize.x) + (7*gridSpacing);
+  standardColoursRect.height = (6*smallRectangleSize.y) + (5*gridSpacing);
 
-    customColoursRect.x = standardColoursRect.x;
-    customColoursRect.y = standardColoursRect.y + standardColoursRect.height  + 20;
-    customColoursRect.width = (8*smallRectangleSize.x) + (7*gridSpacing);
-    customColoursRect.height = (2*smallRectangleSize.y) + (1*gridSpacing);
+  customColoursRect.x = standardColoursRect.x;
+  customColoursRect.y = standardColoursRect.y + standardColoursRect.height  + 20;
+  customColoursRect.width = (8*smallRectangleSize.x) + (7*gridSpacing);
+  customColoursRect.height = (2*smallRectangleSize.y) + (1*gridSpacing);
 
-    singleCustomColourRect.x = customColoursRect.width + customColoursRect.x + sectionSpacing;
-    singleCustomColourRect.y = 80;
-    singleCustomColourRect.width = customRectangleSize.x;
-    singleCustomColourRect.height = customRectangleSize.y;
+  singleCustomColourRect.x = customColoursRect.width + customColoursRect.x + sectionSpacing;
+  singleCustomColourRect.y = 80;
+  singleCustomColourRect.width = customRectangleSize.x;
+  singleCustomColourRect.height = customRectangleSize.y;
 
-    okButtonX = 10;
-    customButtonX = singleCustomColourRect.x ;
-    buttonY = customColoursRect.y + customColoursRect.height + 10;
+  okButtonX = 10;
+  customButtonX = singleCustomColourRect.x ;
+  buttonY = customColoursRect.y + customColoursRect.height + 10;
 }
 
 void wxGenericColourDialog::CreateWidgets()
@@ -364,28 +371,33 @@ void wxGenericColourDialog::InitializeColours(void)
 
 void wxGenericColourDialog::PaintBasicColours(wxDC& dc)
 {
-    int i;
-    for (i = 0; i < 6; i++)
+  dc.BeginDrawing();
+
+  int i;
+  for (i = 0; i < 6; i++)
+  {
+    int j;
+    for (j = 0; j < 8; j++)
     {
-        int j;
-        for (j = 0; j < 8; j++)
-        {
-            int ptr = i*8 + j;
+      int ptr = i*8 + j;
 
-            int x = (j*(smallRectangleSize.x+gridSpacing) + standardColoursRect.x);
-            int y = (i*(smallRectangleSize.y+gridSpacing) + standardColoursRect.y);
+      int x = (j*(smallRectangleSize.x+gridSpacing) + standardColoursRect.x);
+      int y = (i*(smallRectangleSize.y+gridSpacing) + standardColoursRect.y);
 
-            dc.SetPen(*wxBLACK_PEN);
-            wxBrush brush(standardColours[ptr], wxSOLID);
-            dc.SetBrush(brush);
+      dc.SetPen(*wxBLACK_PEN);
+      wxBrush brush(standardColours[ptr], wxSOLID);
+      dc.SetBrush(brush);
 
-            dc.DrawRectangle( x, y, smallRectangleSize.x, smallRectangleSize.y);
-        }
+      dc.DrawRectangle( x, y, smallRectangleSize.x, smallRectangleSize.y);
     }
+  }
+  dc.EndDrawing();
 }
 
 void wxGenericColourDialog::PaintCustomColours(wxDC& dc)
 {
+  dc.BeginDrawing();
+
   int i;
   for (i = 0; i < 2; i++)
   {
@@ -405,12 +417,15 @@ void wxGenericColourDialog::PaintCustomColours(wxDC& dc)
       dc.DrawRectangle( x, y, smallRectangleSize.x, smallRectangleSize.y);
     }
   }
+  dc.EndDrawing();
 }
 
 void wxGenericColourDialog::PaintHighlight(wxDC& dc, bool draw)
 {
   if ( colourSelection < 0 )
       return;
+
+  dc.BeginDrawing();
 
   // Number of pixels bigger than the standard rectangle size
   // for drawing a highlight
@@ -451,20 +466,26 @@ void wxGenericColourDialog::PaintHighlight(wxDC& dc, bool draw)
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.DrawRectangle( x, y, (smallRectangleSize.x + (2*deltaX)), (smallRectangleSize.y + (2*deltaY)));
   }
+
+  dc.EndDrawing();
 }
 
 void wxGenericColourDialog::PaintCustomColour(wxDC& dc)
 {
-    dc.SetPen(*wxBLACK_PEN);
+  dc.BeginDrawing();
 
-    wxBrush *brush = new wxBrush(colourData.m_dataColour, wxSOLID);
-    dc.SetBrush(*brush);
+  dc.SetPen(*wxBLACK_PEN);
 
-    dc.DrawRectangle( singleCustomColourRect.x, singleCustomColourRect.y,
-                      customRectangleSize.x, customRectangleSize.y);
+  wxBrush *brush = new wxBrush(colourData.m_dataColour, wxSOLID);
+  dc.SetBrush(*brush);
 
-    dc.SetBrush(wxNullBrush);
-    delete brush;
+  dc.DrawRectangle( singleCustomColourRect.x, singleCustomColourRect.y,
+                    customRectangleSize.x, customRectangleSize.y);
+
+  dc.SetBrush(wxNullBrush);
+  delete brush;
+
+  dc.EndDrawing();
 }
 
 void wxGenericColourDialog::OnBasicColourClick(int which)

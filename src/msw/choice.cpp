@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin to derive from wxChoiceBase
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choice.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,9 +30,8 @@
 
 #if wxUSE_CHOICE && !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
 
-#include "wx/choice.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/choice.h"
     #include "wx/utils.h"
     #include "wx/log.h"
     #include "wx/brush.h"
@@ -237,10 +240,10 @@ int wxChoice::DoAppend(const wxString& item)
     return n;
 }
 
-int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+int wxChoice::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos, (LPARAM)item.c_str());
     if ( n == CB_ERR )
@@ -257,9 +260,9 @@ int wxChoice::DoInsert(const wxString& item, unsigned int pos)
     return n;
 }
 
-void wxChoice::Delete(unsigned int n)
+void wxChoice::Delete(int n)
 {
-    wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
+    wxCHECK_RET( n < GetCount(), wxT("invalid item index in wxChoice::Delete") );
 
     if ( HasClientObjectData() )
     {
@@ -290,8 +293,8 @@ void wxChoice::Free()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int count = GetCount();
-        for ( unsigned int n = 0; n < count; n++ )
+        size_t count = GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
             delete GetClientObject(n);
         }
@@ -327,21 +330,21 @@ void wxChoice::SetSelection(int n)
 // string list functions
 // ----------------------------------------------------------------------------
 
-unsigned int wxChoice::GetCount() const
+int wxChoice::GetCount() const
 {
-    return (unsigned int)SendMessage(GetHwnd(), CB_GETCOUNT, 0, 0);
+    return (int)SendMessage(GetHwnd(), CB_GETCOUNT, 0, 0);
 }
 
-int wxChoice::FindString(const wxString& s, bool bCase) const
+int wxChoice::FindString(const wxString& s) const
 {
 #if defined(__WATCOMC__) && defined(__WIN386__)
     // For some reason, Watcom in WIN386 mode crashes in the CB_FINDSTRINGEXACT message.
     // wxChoice::Do it the long way instead.
-    unsigned int count = GetCount();
-    for ( unsigned int i = 0; i < count; i++ )
+    int count = GetCount();
+    for ( int i = 0; i < count; i++ )
     {
         // as CB_FINDSTRINGEXACT is case insensitive, be case insensitive too
-        if (GetString(i).IsSameAs(s, bCase))
+        if ( GetString(i).IsSameAs(s, false) )
             return i;
     }
 
@@ -351,33 +354,29 @@ int wxChoice::FindString(const wxString& s, bool bCase) const
    //passed to SendMessage, so we have to do it ourselves in that case
    if ( s.empty() )
    {
-       unsigned int count = GetCount();
-       for ( unsigned int i = 0; i < count; i++ )
-       {
-         if (GetString(i).empty())
-             return i;
-       }
+     int count = GetCount();
+     for ( int i = 0; i < count; i++ )
+     {
+       if ( GetString(i).empty() )
+           return i;
+     }
 
-       return wxNOT_FOUND;
-   }
-   else if (bCase)
-   {
-       // back to base class search for not native search type
-       return wxItemContainerImmutable::FindString( s, bCase );
+     return wxNOT_FOUND;
    }
    else
    {
-       int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
-                                  (WPARAM)-1, (LPARAM)s.c_str());
+     int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
+                                (WPARAM)-1, (LPARAM)s.c_str());
 
-       return pos == LB_ERR ? wxNOT_FOUND : pos;
+     return pos == LB_ERR ? wxNOT_FOUND : pos;
    }
 #endif // Watcom/!Watcom
 }
 
-void wxChoice::SetString(unsigned int n, const wxString& s)
+void wxChoice::SetString(int n, const wxString& s)
 {
-    wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::SetString") );
+    wxCHECK_RET( n >= 0 && n < GetCount(),
+                 wxT("invalid item index in wxChoice::SetString") );
 
     // we have to delete and add back the string as there is no way to change a
     // string in place
@@ -405,7 +404,7 @@ void wxChoice::SetString(unsigned int n, const wxString& s)
     InvalidateBestSize();
 }
 
-wxString wxChoice::GetString(unsigned int n) const
+wxString wxChoice::GetString(int n) const
 {
     int len = (int)::SendMessage(GetHwnd(), CB_GETLBTEXTLEN, n, 0);
 
@@ -431,7 +430,7 @@ wxString wxChoice::GetString(unsigned int n) const
 // client data
 // ----------------------------------------------------------------------------
 
-void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
+void wxChoice::DoSetItemClientData( int n, void* clientData )
 {
     if ( ::SendMessage(GetHwnd(), CB_SETITEMDATA,
                        n, (LPARAM)clientData) == CB_ERR )
@@ -440,7 +439,7 @@ void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
     }
 }
 
-void* wxChoice::DoGetItemClientData(unsigned int n) const
+void* wxChoice::DoGetItemClientData( int n ) const
 {
     LPARAM rc = SendMessage(GetHwnd(), CB_GETITEMDATA, n, 0);
     if ( rc == CB_ERR )
@@ -454,12 +453,12 @@ void* wxChoice::DoGetItemClientData(unsigned int n) const
     return (void *)rc;
 }
 
-void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxChoice::DoSetItemClientObject( int n, wxClientData* clientData )
 {
     DoSetItemClientData(n, clientData);
 }
 
-wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxChoice::DoGetItemClientObject( int n ) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }
@@ -562,7 +561,7 @@ void wxChoice::DoSetSize(int x, int y,
     {
         // don't make the drop down list too tall, arbitrarily limit it to 40
         // items max and also don't leave it empty
-        unsigned int nItems = GetCount();
+        size_t nItems = GetCount();
         if ( !nItems )
             nItems = 9;
         else if ( nItems > 24 )
@@ -621,8 +620,8 @@ wxSize wxChoice::DoGetBestSize() const
 {
     // find the widest string
     int wChoice = 0;
-    const unsigned int nItems = GetCount();
-    for ( unsigned int i = 0; i < nItems; i++ )
+    const size_t nItems = GetCount();
+    for ( size_t i = 0; i < nItems; i++ )
     {
         int wLine;
         GetTextExtent(GetString(i), &wLine, NULL);
@@ -749,7 +748,10 @@ bool wxChoice::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
                 if ( n > -1 )
                 {
                     event.SetString(GetStringSelection());
-                    InitCommandEventWithItems(event, n);
+                    if ( HasClientObjectData() )
+                        event.SetClientObject( GetClientObject(n) );
+                    else if ( HasClientUntypedData() )
+                        event.SetClientData( GetClientData(n) );
                 }
 
                 ProcessCommand(event);
@@ -778,3 +780,4 @@ WXHBRUSH wxChoice::MSWControlColor(WXHDC hDC, WXHWND hWnd)
 }
 
 #endif // wxUSE_CHOICE && !(__SMARTPHONE__ && __WXWINCE__)
+

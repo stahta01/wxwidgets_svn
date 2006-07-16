@@ -8,6 +8,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma implementation
+    #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -27,9 +32,7 @@
 #include "wx/filename.h"
 #include "wx/wfstream.h"
 #include "wx/utils.h"
-#include "wx/hashset.h"
 
-WX_DECLARE_HASH_SET(wxString, wxStringHash, wxStringEqual, StringSet);
 
 class XRCWidgetData
 {
@@ -45,14 +48,13 @@ private:
 
 #include "wx/arrimpl.cpp"
 WX_DECLARE_OBJARRAY(XRCWidgetData,ArrayOfXRCWidgetData);
-WX_DEFINE_OBJARRAY(ArrayOfXRCWidgetData)
+WX_DEFINE_OBJARRAY(ArrayOfXRCWidgetData);
 
 class XRCWndClassData
 {
 private:
     wxString m_className;
     wxString m_parentClassName;
-    StringSet m_ancestorClassNames;
     ArrayOfXRCWidgetData m_wdata;
 
     void BrowseXmlNode(wxXmlNode* node)
@@ -76,31 +78,9 @@ private:
     }
 
 public:
-    XRCWndClassData(const wxString& className,
-                    const wxString& parentClassName,
-                    const wxXmlNode* node) :
+    XRCWndClassData(const wxString& className,const wxString& parentClassName, const wxXmlNode* node) :
         m_className(className) , m_parentClassName(parentClassName)
     {
-        if ( className == _T("wxMenu") )
-        {
-            m_ancestorClassNames.insert(_T("wxMenu"));
-            m_ancestorClassNames.insert(_T("wxMenuBar"));
-        }
-        else if ( className == _T("wxMDIChildFrame") )
-        {
-            m_ancestorClassNames.insert(_T("wxMDIParentFrame"));
-        }
-        else if( className == _T("wxMenuBar") ||
-                    className == _T("wxStatusBar") ||
-                        className == _T("wxToolBar") )
-        {
-            m_ancestorClassNames.insert(_T("wxFrame"));
-        }
-        else
-        {
-            m_ancestorClassNames.insert(_T("wxWindow"));
-        }
-
         BrowseXmlNode(node->GetChildren());
     }
 
@@ -138,8 +118,8 @@ public:
                 _T(" ") + w.GetClass() + _T("* ") + w.GetName()
                 + _T(";\n"));
         }
-        file.Write(_T("\nprivate:\n void InitWidgetsFromXRC(wxWindow *parent){\n")
-                   _T("  wxXmlResource::Get()->LoadObject(this,parent,_T(\"")
+        file.Write(_T("\nprivate:\n void InitWidgetsFromXRC(){\n")
+                   _T("  wxXmlResource::Get()->LoadObject(this,NULL,_T(\"")
                    +  m_className
                    +  _T("\"), _T(\"")
                    +  m_parentClassName
@@ -155,46 +135,25 @@ public:
                         + w.GetName()
                         + _T("\",")
                         + w.GetClass()
-                        + _T(");\n"));
+                        + _T(");\n")
+                );
         }
         file.Write(_T(" }\n"));
 
-        file.Write( _T("public:\n"));
-
-        if ( m_ancestorClassNames.size() == 1 )
-        {
-            file.Write
-                 (
-                    m_className +
-                    _T("(") +
-                        *m_ancestorClassNames.begin() +
-                        _T(" *parent=NULL){\n") +
-                    _T("  InitWidgetsFromXRC((wxWindow *)parent);\n")
-                    _T(" }\n")
-                    _T("};\n")
-                 );
-        }
-        else
-        {
-            file.Write(m_className + _T("(){\n") +
-                       _T("  InitWidgetsFromXRC(NULL);\n")
-                       _T(" }\n")
-                       _T("};\n"));
-
-            for ( StringSet::const_iterator it = m_ancestorClassNames.begin();
-                  it != m_ancestorClassNames.end();
-                  ++it )
-            {
-                file.Write(m_className + _T("(") + *it + _T(" *parent){\n") +
-                            _T("  InitWidgetsFromXRC((wxWindow *)parent);\n")
-                            _T(" }\n")
-                            _T("};\n"));
-            }
-        }
-    }
+        file.Write(
+            _T("public:\n")
+            + m_className
+            + _T("::")
+            + m_className
+            + _T("(){\n")
+            + _T("  InitWidgetsFromXRC();\n")
+              _T(" }\n")
+              _T("};\n")
+        );
+    };
 };
 WX_DECLARE_OBJARRAY(XRCWndClassData,ArrayOfXRCWndClassData);
-WX_DEFINE_OBJARRAY(ArrayOfXRCWndClassData)
+WX_DEFINE_OBJARRAY(ArrayOfXRCWndClassData);
 
 
 class XmlResApp : public wxAppConsole
@@ -427,30 +386,28 @@ wxArrayString XmlResApp::PrepareTempFiles()
 // Does 'node' contain filename information at all?
 static bool NodeContainsFilename(wxXmlNode *node)
 {
-   const wxString name = node->GetName();
-
-   // Any bitmaps (bitmap2 is used for disabled toolbar buttons):
-   if ( name == _T("bitmap") || name == _T("bitmap2") )
+   // Any bitmaps:
+   if (node->GetName() == _T("bitmap"))
        return true;
 
-   if ( name == _T("icon") )
+   if (node->GetName() == _T("icon"))
        return true;
 
    // URLs in wxHtmlWindow:
-   if ( name == _T("url") )
+   if (node->GetName() == _T("url"))
        return true;
 
    // wxBitmapButton:
    wxXmlNode *parent = node->GetParent();
    if (parent != NULL &&
        parent->GetPropVal(_T("class"), _T("")) == _T("wxBitmapButton") &&
-       (name == _T("focus") ||
-        name == _T("disabled") ||
-        name == _T("selected")))
+       (node->GetName() == _T("focus") ||
+        node->GetName() == _T("disabled") ||
+        node->GetName() == _T("selected")))
        return true;
 
    // wxBitmap or wxIcon toplevel resources:
-   if ( name == _T("object") )
+   if (node->GetName() == _T("object"))
    {
        wxString klass = node->GetPropVal(_T("class"), wxEmptyString);
        if (klass == _T("wxBitmap") || klass == _T("wxIcon"))
@@ -550,9 +507,8 @@ static wxString FileToCppArray(wxString filename, int num)
     wxFFile file(filename, wxT("rb"));
     wxFileOffset offset = file.Length();
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
-
-    const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( lng == offset, wxT("Huge file not supported") );
+    wxASSERT_MSG( offset == wxFileOffset(size_t(offset)) , wxT("Huge file not supported") );
+    size_t lng = (size_t)offset;
 
     snum.Printf(_T("%i"), num);
     output.Printf(_T("static size_t xml_res_size_") + snum + _T(" = %i;\n"), lng);
@@ -677,9 +633,8 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxFFile file(filename, wxT("rb"));
     wxFileOffset offset = file.Length();
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
-
-    const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( offset == lng, wxT("Huge file not supported") );
+    wxASSERT_MSG( offset == wxFileOffset(size_t(offset)) , wxT("Huge file not supported") );
+    size_t lng = (size_t)offset;
 
     snum.Printf(_T("%i"), num);
     output = _T("    xml_res_file_") + snum + _T(" = '''\\\n");

@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        treectrl.tex
-%% Purpose:     wxTreeCtrl documentation
-%% Author:      wxWidgets Team
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets Team
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{\class{wxTreeCtrl}}\label{wxtreectrl}
 
 A tree control presents information as a hierarchy, with items that may be expanded
@@ -42,7 +31,7 @@ to show + and - buttons to the left of parent items.}
 to hide vertical level connectors.}
 \twocolitem{\windowstyle{wxTR\_FULL\_ROW\_HIGHLIGHT}}{Use this style to have the background
 colour and the selection highlight extend over the entire horizontal
-row of the tree control window. (This flag is ignored under Windows unless you
+row of the tree control window. (This flag is ignored under Windows unless you 
 specify wxTR\_NO\_LINES as well.) }
 \twocolitem{\windowstyle{wxTR\_LINES\_AT\_ROOT}}{Use this style
 to show lines between root nodes.
@@ -115,8 +104,9 @@ wxTreeCtrl class uses the standard common treeview control under Win32
 implemented in the system library {\tt comctl32.dll}. Some versions of this
 library are known to have bugs with handling the tree control colours: the
 usual symptom is that the expanded items leave black (or otherwise incorrectly
-coloured) background behind them, especially for the controls using non-default background colour. The recommended solution is to upgrade the {\tt comctl32.dll}
-to a newer version: see
+coloured) background behind them, especially for the controls using non
+default background colour. The recommended solution is to upgrade the {\tt comctl32.dll}
+to a newer version: see 
 \urlref{http://www.microsoft.com/downloads/release.asp?ReleaseID=11916}{http://www.microsoft.com/downloads/release.asp?ReleaseID=11916}.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
@@ -268,7 +258,7 @@ This function may cause a subsequent call to GetNextChild to fail.
 
 \func{void}{DeleteAllItems}{\void}
 
-Deletes all items in the control. Note that this may not generate
+Deletes all the items in the control. Note that this may not generate 
 {\tt EVT\_TREE\_DELETE\_ITEM} events under some Windows versions although
 normally such event is generated for each removed item.
 
@@ -278,7 +268,7 @@ normally such event is generated for each removed item.
 \func{void}{DeleteChildren}{\param{const wxTreeItemId\& }{item}}
 
 Deletes all children of the given item (but not the item itself). Note that
-this will {\bf not} generate any events unlike
+this will {\bf not} generate any events unlike 
 \helpref{Delete}{wxtreectrldelete} method.
 
 If you have called \helpref{wxTreeCtrl::SetItemHasChildren}{wxtreectrlsetitemhaschildren}, you
@@ -331,20 +321,6 @@ Scrolls and/or expands items to ensure that the given item is visible.
 Expands the given item.
 
 
-\membersection{wxTreeCtrl::ExpandAll}\label{wxtreectrlexpandall}
-
-\func{void}{Expand}{\void}
-
-Expands all items in the tree.
-
-
-\membersection{wxTreeCtrl::ExpandAllChildren}\label{wxtreectrlexpandallchildren}
-
-\func{void}{ExpandAllChildren}{\param{const wxTreeItemId\&}{ item}}
-
-Expands the given item and all its children recursively.
-
-
 \membersection{wxTreeCtrl::GetBoundingRect}\label{wxtreectrlgetitemrect}
 
 \constfunc{bool}{GetBoundingRect}{\param{const wxTreeItemId\&}{ item}, \param{wxRect\& }{rect}, \param{bool }{textOnly = {\tt false}}}
@@ -354,18 +330,14 @@ only the rectangle around the item's label will be returned, otherwise the
 item's image is also taken into account.
 
 The return value is {\tt true} if the rectangle was successfully retrieved or {\tt false}
-if it was not (in this case {\it rect} is not changed) -- for example, if the
+if it was not (in this case {\it rect} is not changed) - for example, if the
 item is currently invisible.
-
-Notice that the rectangle coordinates are logical, not physical ones. So, for
-example, the x coordinate may be negative if the tree has a horizontal
-scrollbar and its position is not $0$.
 
 \pythonnote{The wxPython version of this method requires only the
 {\tt item} and {\tt textOnly} parameters.  The return value is either a
 {\tt wxRect} object or {\tt None}.}
 
-\perlnote{In wxPerl this method only takes the parameters {\tt item} and
+\perlnote{In wxPerl this method only takes the parameters {\tt item} and 
   {\tt textOnly}, and returns a Wx::Rect ( or undef ).}
 
 
@@ -380,7 +352,7 @@ This function is only available in the generic version.
 
 \membersection{wxTreeCtrl::GetChildrenCount}\label{wxtreectrlgetchildrencount}
 
-\constfunc{unsigned int}{GetChildrenCount}{\param{const wxTreeItemId\&}{ item}, \param{bool}{ recursively = {\tt true}}}
+\constfunc{size\_t}{GetChildrenCount}{\param{const wxTreeItemId\&}{ item}, \param{bool}{ recursively = {\tt true}}}
 
 Returns the number of items in the branch. If {\it recursively} is {\tt true}, returns the total number
 of descendants, otherwise only one level of children is counted.
@@ -388,7 +360,7 @@ of descendants, otherwise only one level of children is counted.
 
 \membersection{wxTreeCtrl::GetCount}\label{wxtreectrlgetcount}
 
-\constfunc{unsigned int}{GetCount}{\void}
+\constfunc{int}{GetCount}{\void}
 
 Returns the number of items in the control.
 
@@ -589,6 +561,19 @@ Returns the next visible item.
 Returns the item's parent.
 
 
+\membersection{wxTreeCtrl::GetParent}\label{wxtreectrlgetparent}
+
+\constfunc{wxTreeItemId}{GetParent}{\param{const wxTreeItemId\&}{ item}}
+
+{\bf NOTE:} This function is deprecated and will only work if {\tt WXWIN\_COMPATIBILITY\_2\_2}
+is defined.  Use \helpref{wxTreeCtrl::GetItemParent}{wxtreectrlgetitemparent} instead.
+
+Returns the item's parent.
+
+\pythonnote{This method is named {\tt GetItemParent} to avoid a name
+clash with wxWindow::GetParent.}
+
+
 \membersection{wxTreeCtrl::GetPrevSibling}\label{wxtreectrlgetprevsibling}
 
 \constfunc{wxTreeItemId}{GetPrevSibling}{\param{const wxTreeItemId\&}{ item}}
@@ -607,18 +592,6 @@ Returns an invalid tree item if there are no further children.
 \constfunc{wxTreeItemId}{GetPrevVisible}{\param{const wxTreeItemId\&}{ item}}
 
 Returns the previous visible item.
-
-
-\membersection{wxTreeCtrl::GetQuickBestSize}\label{wxtreectrlgetquickbestsize}
-
-\constfunc{bool}{GetQuickBestSize}{\void}
-
-Returns true if the control will use a quick calculation for the best size,
-looking only at the first and last items. The default is false.
-
-\wxheading{See also}
-
-\helpref{wxTreeCtrl::SetQuickBestSize}{wxtreectrlsetquickbestsize}
 
 
 \membersection{wxTreeCtrl::GetRootItem}\label{wxtreectrlgetrootitem}
@@ -648,7 +621,7 @@ this style.
 
 \membersection{wxTreeCtrl::GetSelections}\label{wxtreectrlgetselections}
 
-\constfunc{unsigned int}{GetSelections}{\param{wxArrayTreeItemIds\& }{selection}}
+\constfunc{size\_t}{GetSelections}{\param{wxArrayTreeItemIds\& }{selection}}
 
 Fills the array of tree items passed in with the currently selected items. This
 function can be called only if the control has the wxTR\_MULTIPLE style.
@@ -671,7 +644,7 @@ Returns the state image list (from which application-defined state images are ta
 
 \membersection{wxTreeCtrl::HitTest}\label{wxtreectrlhittest}
 
-\constfunc{wxTreeItemId}{HitTest}{\param{const wxPoint\& }{point}, \param{int\& }{flags}}
+\func{wxTreeItemId}{HitTest}{\param{const wxPoint\& }{point}, \param{int\& }{flags}}
 
 Calculates which (if any) item is under the given point, returning the tree item
 id at this point plus extra information {\it flags}. {\it flags} is a bitlist of the following:
@@ -793,7 +766,7 @@ Scrolls the specified item into view.
 
 \membersection{wxTreeCtrl::SelectItem}\label{wxtreectrlselectitem}
 
-\func{void}{SelectItem}{\param{const wxTreeItemId\&}{ item}, \param{bool }{select = \true}}
+\func{bool}{SelectItem}{\param{const wxTreeItemId\&}{ item}, \param{bool }{select = \true}}
 
 Selects the given item. In multiple selection controls, can be also used to
 deselect a currently selected item if the value of \arg{select} is false.
@@ -935,19 +908,6 @@ Sets the item label.
 Sets the colour of the item's text.
 
 
-\membersection{wxTreeCtrl::SetQuickBestSize}\label{wxtreectrlsetquickbestsize}
-
-\func{void}{SetQuickBestSize}{\param{bool}{ quickBestSize}}
-
-If true is passed, specifies that the control will use a quick calculation for the best size,
-looking only at the first and last items. Otherwise, it will look at all items.
-The default is false.
-
-\wxheading{See also}
-
-\helpref{wxTreeCtrl::GetQuickBestSize}{wxtreectrlgetquickbestsize}
-
-
 \membersection{wxTreeCtrl::SetStateImageList}\label{wxtreectrlsetstateimagelist}
 
 \func{void}{SetStateImageList}{\param{wxImageList*}{ imageList}}
@@ -1017,4 +977,5 @@ all items if it does have this style.
 \func{void}{UnselectItem}{\param{const wxTreeItemId\& }{item}}
 
 Unselects the given item. This works in multiselection controls only.
+
 

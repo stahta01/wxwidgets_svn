@@ -9,6 +9,7 @@
 // License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -17,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrlce.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,18 +29,18 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TEXTCTRL && defined(__SMARTPHONE__) && defined(__WXWINCE__)
-
-#include "wx/textctrl.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/textctrl.h"
 #endif
-
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
 
 #include "wx/spinbutt.h"
 #include "wx/textfile.h"
+
+#include <commctrl.h>
+#include "wx/msw/missing.h"
+#include "wx/msw/winundef.h"
+
+#if wxUSE_TEXTCTRL && defined(__SMARTPHONE__) && defined(__WXWINCE__)
 
 #define GetBuddyHwnd()      (HWND)(m_hwndBuddy)
 

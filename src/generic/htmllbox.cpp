@@ -39,13 +39,6 @@
 #include "wx/html/forcelnk.h"
 FORCE_WXHTML_MODULES()
 
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// small border always added to the cells:
-static const wxCoord CELL_BORDER = 2;
-
 // ============================================================================
 // private classes
 // ============================================================================
@@ -158,7 +151,7 @@ private:
 class wxHtmlListBoxStyle : public wxDefaultHtmlRenderingStyle
 {
 public:
-    wxHtmlListBoxStyle(const wxHtmlListBox& hlbox) : m_hlbox(hlbox) { }
+    wxHtmlListBoxStyle(wxHtmlListBox& hlbox) : m_hlbox(hlbox) { }
 
     virtual wxColour GetSelectedTextColour(const wxColour& colFg)
     {
@@ -176,14 +169,13 @@ private:
     DECLARE_NO_COPY_CLASS(wxHtmlListBoxStyle)
 };
 
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxHtmlListBox, wxVListBox)
     EVT_SIZE(wxHtmlListBox::OnSize)
-    EVT_MOTION(wxHtmlListBox::OnMouseMove)
-    EVT_LEFT_DOWN(wxHtmlListBox::OnLeftDown)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -196,26 +188,6 @@ IMPLEMENT_ABSTRACT_CLASS(wxHtmlListBox, wxVListBox)
 // ----------------------------------------------------------------------------
 // wxHtmlListBox creation
 // ----------------------------------------------------------------------------
-
-wxHtmlListBox::wxHtmlListBox()
-    : wxHtmlWindowMouseHelper(this)
-{
-    Init();
-}
-
-// normal constructor which calls Create() internally
-wxHtmlListBox::wxHtmlListBox(wxWindow *parent,
-                             wxWindowID id,
-                             const wxPoint& pos,
-                             const wxSize& size,
-                             long style,
-                             const wxString& name)
-    : wxHtmlWindowMouseHelper(this)
-{
-    Init();
-
-    (void)Create(parent, id, pos, size, style, name);
-}
 
 void wxHtmlListBox::Init()
 {
@@ -287,7 +259,7 @@ void wxHtmlListBox::CacheItem(size_t n) const
         {
             wxHtmlListBox *self = wxConstCast(this, wxHtmlListBox);
 
-            self->m_htmlParser = new wxHtmlWinParser(self);
+            self->m_htmlParser = new wxHtmlWinParser;
             m_htmlParser->SetDC(new wxClientDC(self));
             m_htmlParser->SetFS(&self->m_filesystem);
 
@@ -298,10 +270,6 @@ void wxHtmlListBox::CacheItem(size_t n) const
         wxHtmlContainerCell *cell = (wxHtmlContainerCell *)m_htmlParser->
                 Parse(OnGetItemMarkup(n));
         wxCHECK_RET( cell, _T("wxHtmlParser::Parse() returned NULL?") );
-
-        // set the cell's ID to item's index so that CellCoordsToPhysical()
-        // can quickly find the item:
-        cell->SetId(wxString::Format(_T("%lu"), (unsigned long)n));
 
         cell->Layout(GetClientSize().x - 2*GetMargins().x);
 
@@ -373,9 +341,7 @@ void wxHtmlListBox::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
     // note that we can't stop drawing exactly at the window boundary as then
     // even the visible cells part could be not drawn, so always draw the
     // entire cell
-    cell->Draw(dc,
-               rect.x + CELL_BORDER, rect.y + CELL_BORDER,
-               0, INT_MAX, htmlRendInfo);
+    cell->Draw(dc, rect.x+2, rect.y+2, 0, INT_MAX, htmlRendInfo);
 }
 
 wxCoord wxHtmlListBox::OnMeasureItem(size_t n) const
@@ -388,157 +354,5 @@ wxCoord wxHtmlListBox::OnMeasureItem(size_t n) const
     return cell->GetHeight() + cell->GetDescent() + 4;
 }
 
-// ----------------------------------------------------------------------------
-// wxHtmlListBox implementation of wxHtmlListBoxWinInterface
-// ----------------------------------------------------------------------------
-
-void wxHtmlListBox::SetHTMLWindowTitle(const wxString& WXUNUSED(title))
-{
-    // nothing to do
-}
-
-void wxHtmlListBox::OnHTMLLinkClicked(const wxHtmlLinkInfo& link)
-{
-    OnLinkClicked(GetItemForCell(link.GetHtmlCell()), link);
-}
-
-wxHtmlOpeningStatus
-wxHtmlListBox::OnHTMLOpeningURL(wxHtmlURLType WXUNUSED(type),
-                                const wxString& WXUNUSED(url),
-                                wxString *WXUNUSED(redirect)) const
-{
-    return wxHTML_OPEN;
-}
-
-wxPoint wxHtmlListBox::HTMLCoordsToWindow(wxHtmlCell *cell,
-                                          const wxPoint& pos) const
-{
-    return CellCoordsToPhysical(pos, cell);
-}
-
-wxWindow* wxHtmlListBox::GetHTMLWindow() { return this; }
-
-wxColour wxHtmlListBox::GetHTMLBackgroundColour() const
-{
-    return GetBackgroundColour();
-}
-
-void wxHtmlListBox::SetHTMLBackgroundColour(const wxColour& WXUNUSED(clr))
-{
-    // nothing to do
-}
-
-void wxHtmlListBox::SetHTMLBackgroundImage(const wxBitmap& WXUNUSED(bmpBg))
-{
-    // nothing to do
-}
-
-void wxHtmlListBox::SetHTMLStatusText(const wxString& WXUNUSED(text))
-{
-    // nothing to do
-}
-
-wxCursor wxHtmlListBox::GetHTMLCursor(HTMLCursor type) const
-{
-    // we don't want to show text selection cursor in listboxes
-    if (type == HTMLCursor_Text)
-        return wxHtmlWindow::GetDefaultHTMLCursor(HTMLCursor_Default);
-
-    // in all other cases, use the same cursor as wxHtmlWindow:
-    return wxHtmlWindow::GetDefaultHTMLCursor(type);
-}
-
-// ----------------------------------------------------------------------------
-// wxHtmlListBox handling of HTML links
-// ----------------------------------------------------------------------------
-
-wxPoint wxHtmlListBox::GetRootCellCoords(size_t n) const
-{
-    wxPoint pos(CELL_BORDER, CELL_BORDER);
-    pos += GetMargins();
-    pos.y += GetLinesHeight(GetFirstVisibleLine(), n);
-    return pos;
-}
-
-bool wxHtmlListBox::PhysicalCoordsToCell(wxPoint& pos, wxHtmlCell*& cell) const
-{
-    int n = HitTest(pos);
-    if ( n == wxNOT_FOUND )
-        return false;
-
-    // convert mouse coordinates to coords relative to item's wxHtmlCell:
-    pos -= GetRootCellCoords(n);
-
-    CacheItem(n);
-    cell = m_cache->Get(n);
-
-    return true;
-}
-
-size_t wxHtmlListBox::GetItemForCell(const wxHtmlCell *cell) const
-{
-    wxCHECK_MSG( cell, 0, _T("no cell") );
-
-    cell = cell->GetRootCell();
-
-    wxCHECK_MSG( cell, 0, _T("no root cell") );
-
-    // the cell's ID contains item index, see CacheItem():
-    unsigned long n;
-    if ( !cell->GetId().ToULong(&n) )
-    {
-        wxFAIL_MSG( _T("unexpected root cell's ID") );
-        return 0;
-    }
-
-    return n;
-}
-
-wxPoint
-wxHtmlListBox::CellCoordsToPhysical(const wxPoint& pos, wxHtmlCell *cell) const
-{
-    return pos + GetRootCellCoords(GetItemForCell(cell));
-}
-
-void wxHtmlListBox::OnInternalIdle()
-{
-    wxVListBox::OnInternalIdle();
-
-    if ( wxHtmlWindowMouseHelper::DidMouseMove() )
-    {
-        wxPoint pos = ScreenToClient(wxGetMousePosition());
-        wxHtmlCell *cell;
-
-        if ( !PhysicalCoordsToCell(pos, cell) )
-            return;
-
-        wxHtmlWindowMouseHelper::HandleIdle(cell, pos);
-    }
-}
-
-void wxHtmlListBox::OnMouseMove(wxMouseEvent& event)
-{
-    wxHtmlWindowMouseHelper::HandleMouseMoved();
-    event.Skip();
-}
-
-void wxHtmlListBox::OnLeftDown(wxMouseEvent& event)
-{
-    wxPoint pos = event.GetPosition();
-    wxHtmlCell *cell;
-
-    if ( !PhysicalCoordsToCell(pos, cell) )
-    {
-        event.Skip();
-        return;
-    }
-
-    if ( !wxHtmlWindowMouseHelper::HandleMouseClick(cell, pos, event) )
-    {
-        // no link was clicked, so let the listbox code handle the click (e.g.
-        // by selecting another item in the list):
-        event.Skip();
-    }
-}
-
 #endif // wxUSE_HTML
+

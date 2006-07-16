@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/log.cpp
+// Name:        log.cpp
 // Purpose:     Assorted wxLogXXX functions, and wxLog (sink for logs)
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "log.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -28,19 +32,19 @@
 
 // wxWidgets
 #ifndef WX_PRECOMP
-    #include "wx/log.h"
     #include "wx/app.h"
     #include "wx/arrstr.h"
     #include "wx/intl.h"
     #include "wx/string.h"
-    #include "wx/utils.h"
 #endif //WX_PRECOMP
 
 #include "wx/apptrait.h"
 #include "wx/file.h"
+#include "wx/log.h"
 #include "wx/msgout.h"
 #include "wx/textfile.h"
 #include "wx/thread.h"
+#include "wx/utils.h"
 #include "wx/wxchar.h"
 
 // other standard headers
@@ -96,6 +100,12 @@ static wxCriticalSection gs_csLogBuf;
 
 #endif // wxUSE_THREADS
 
+// return true if we have a non NULL non disabled log target
+static inline bool IsLoggingEnabled()
+{
+    return wxLog::IsEnabled() && (wxLog::GetActiveTarget() != NULL);
+}
+
 // ----------------------------------------------------------------------------
 // implementation of Log functions
 //
@@ -104,7 +114,7 @@ static wxCriticalSection gs_csLogBuf;
 // ----------------------------------------------------------------------------
 
 // wrapper for wxVsnprintf(s_szBuf) which always NULL-terminates it
-static inline void PrintfInLogBuf(const wxChar *szFormat, va_list argptr)
+static inline void PrintfInLogBug(const wxChar *szFormat, va_list argptr)
 {
     if ( wxVsnprintf(s_szBuf, s_szBufSize, szFormat, argptr) < 0 )
     {
@@ -117,10 +127,10 @@ static inline void PrintfInLogBuf(const wxChar *szFormat, va_list argptr)
 // generic log function
 void wxVLogGeneric(wxLogLevel level, const wxChar *szFormat, va_list argptr)
 {
-    if ( wxLog::IsEnabled() ) {
+    if ( IsLoggingEnabled() ) {
         wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
-        PrintfInLogBuf(szFormat, argptr);
+        PrintfInLogBug(szFormat, argptr);
 
         wxLog::OnLog(level, s_szBuf, time(NULL));
     }
@@ -137,10 +147,10 @@ void wxLogGeneric(wxLogLevel level, const wxChar *szFormat, ...)
 #define IMPLEMENT_LOG_FUNCTION(level)                               \
   void wxVLog##level(const wxChar *szFormat, va_list argptr)        \
   {                                                                 \
-    if ( wxLog::IsEnabled() ) {                                     \
+    if ( IsLoggingEnabled() ) {                                     \
       wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);                      \
                                                                     \
-      PrintfInLogBuf(szFormat, argptr);                             \
+      PrintfInLogBug(szFormat, argptr);                             \
                                                                     \
       wxLog::OnLog(wxLOG_##level, s_szBuf, time(NULL));             \
     }                                                               \
@@ -166,7 +176,6 @@ void wxSafeShowMessage(const wxString& title, const wxString& text)
     ::MessageBox(NULL, text, title, MB_OK | MB_ICONSTOP);
 #else
     wxFprintf(stderr, _T("%s: %s\n"), title.c_str(), text.c_str());
-    fflush(stderr);
 #endif
 }
 
@@ -199,7 +208,7 @@ void wxLogFatalError(const wxChar *szFormat, ...)
 // same as info, but only if 'verbose' mode is on
 void wxVLogVerbose(const wxChar *szFormat, va_list argptr)
 {
-    if ( wxLog::IsEnabled() ) {
+    if ( IsLoggingEnabled() ) {
         if ( wxLog::GetActiveTarget() != NULL && wxLog::GetVerbose() ) {
             wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
@@ -223,7 +232,7 @@ void wxLogVerbose(const wxChar *szFormat, ...)
 #define IMPLEMENT_LOG_DEBUG_FUNCTION(level)                         \
   void wxVLog##level(const wxChar *szFormat, va_list argptr)        \
   {                                                                 \
-    if ( wxLog::IsEnabled() ) {                                     \
+    if ( IsLoggingEnabled() ) {                                     \
       wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);                      \
                                                                     \
       wxVsnprintf(s_szBuf, s_szBufSize, szFormat, argptr);    \
@@ -241,7 +250,7 @@ void wxLogVerbose(const wxChar *szFormat, ...)
 
   void wxVLogTrace(const wxChar *mask, const wxChar *szFormat, va_list argptr)
   {
-    if ( wxLog::IsEnabled() && wxLog::IsAllowedTraceMask(mask) ) {
+    if ( IsLoggingEnabled() && wxLog::IsAllowedTraceMask(mask) ) {
       wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
       wxChar *p = s_szBuf;
@@ -277,7 +286,7 @@ void wxLogVerbose(const wxChar *szFormat, ...)
     // we check that all of mask bits are set in the current mask, so
     // that wxLogTrace(wxTraceRefCount | wxTraceOle) will only do something
     // if both bits are set.
-    if ( wxLog::IsEnabled() && ((wxLog::GetTraceMask() & mask) == mask) ) {
+    if ( IsLoggingEnabled() && ((wxLog::GetTraceMask() & mask) == mask) ) {
       wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
       wxVsnprintf(s_szBuf, s_szBufSize, szFormat, argptr);
@@ -317,7 +326,7 @@ void wxLogSysErrorHelper(long lErrCode)
 
 void WXDLLEXPORT wxVLogSysError(const wxChar *szFormat, va_list argptr)
 {
-    if ( wxLog::IsEnabled() ) {
+    if ( IsLoggingEnabled() ) {
         wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
         wxVsnprintf(s_szBuf, s_szBufSize, szFormat, argptr);
@@ -336,7 +345,7 @@ void WXDLLEXPORT wxLogSysError(const wxChar *szFormat, ...)
 
 void WXDLLEXPORT wxVLogSysError(long lErrCode, const wxChar *szFormat, va_list argptr)
 {
-    if ( wxLog::IsEnabled() ) {
+    if ( IsLoggingEnabled() ) {
         wxCRIT_SECT_LOCKER(locker, gs_csLogBuf);
 
         wxVsnprintf(s_szBuf, s_szBufSize, szFormat, argptr);
@@ -828,3 +837,4 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
 }
 
 #endif // wxUSE_LOG
+

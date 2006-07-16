@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      Julian Smart
 // Modified by:
@@ -9,16 +9,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "accel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/setup.h"
 #include "wx/accel.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/utils.h"
-#endif
-
+#include "wx/string.h"
+#include "wx/utils.h"
 #include <ctype.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
@@ -115,3 +116,4 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
         (eventShiftDown == accShiftDown) &&
         ((eventKeyCode == accKeyCode || eventKeyCode == accKeyCode2))) ;
 }
+

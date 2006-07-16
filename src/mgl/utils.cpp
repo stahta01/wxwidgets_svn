@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/utils.cpp
+// Name:        utils.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -15,14 +15,11 @@
 #endif
 
 #include "wx/utils.h"
+#include "wx/string.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
+#include "wx/intl.h"
 #include "wx/apptrait.h"
+#include "wx/log.h"
 #include "wx/process.h"
 
 #include <stdarg.h>
@@ -45,16 +42,6 @@
 void wxBell()
 {
     // FIXME_MGL
-}
-
-bool wxGetKeyState(wxKeyCode key)
-{
-    wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key !=
-        WXK_MBUTTON, wxT("can't use wxGetKeyState() for mouse buttons"));
-
-    // TODO
-
-    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -187,7 +174,6 @@ wxMouseState wxGetMouseState()
 
     return ms;
 }
-
 
 #ifdef __UNIX__
 

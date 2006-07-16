@@ -2,7 +2,7 @@
 // Name:        src/msw/listctrl.cpp
 // Purpose:     wxListCtrl
 // Author:      Julian Smart
-// Modified by: Agron Selimaj
+// Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,19 +29,19 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_LISTCTRL
+#if wxUSE_LISTCTRL && defined(__WIN95__)
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/settings.h"
-    #include "wx/dcclient.h"
-    #include "wx/textctrl.h"
 #endif
 
+#include "wx/textctrl.h"
 #include "wx/imaglist.h"
 #include "wx/listctrl.h"
+#include "wx/dcclient.h"
 
 #include "wx/msw/private.h"
 
@@ -78,9 +83,7 @@ static void wxConvertFromMSWListItem(HWND hwndListCtrl,
                                      /* const */ LV_ITEM& lvItem);
 
 // convert our wxListItem to LV_COLUMN
-static void wxConvertToMSWListCol(HWND hwndList,
-                                  int col,
-                                  const wxListItem& item,
+static void wxConvertToMSWListCol(int col, const wxListItem& item,
                                   LV_COLUMN& lvCol);
 
 // ----------------------------------------------------------------------------
@@ -121,7 +124,7 @@ public:
     }
 
     // init with conversion
-    void Init(const LV_ITEM_OTHER& item)
+    void Init(LV_ITEM_OTHER& item)
     {
         // avoid unnecessary dynamic memory allocation, jjust make m_pItem
         // point to our own m_item
@@ -214,7 +217,7 @@ public:
 // Get the internal data structure
 static wxListItemInternalData *wxGetInternalData(HWND hwnd, long itemId);
 static wxListItemInternalData *wxGetInternalData(const wxListCtrl *ctl, long itemId);
-static wxListItemAttr *wxGetInternalDataAttr(const wxListCtrl *ctl, long itemId);
+static wxListItemAttr *wxGetInternalDataAttr(wxListCtrl *ctl, long itemId);
 static void wxDeleteInternalData(wxListCtrl* ctl, long itemId);
 
 
@@ -363,10 +366,6 @@ bool wxListCtrl::Create(wxWindow *parent,
     // explicitly say that we want to use Unicode because otherwise we get ANSI
     // versions of _some_ messages (notably LVN_GETDISPINFOA) in MSLU build
     wxSetCCUnicodeFormat(GetHwnd());
-
-    // We must set the default text colour to the system/theme color, otherwise
-    // GetTextColour will always return black
-    SetTextColour(GetDefaultAttributes().colFg);
 
     // for comctl32.dll v 4.70+ we want to have some non default extended
     // styles because it's prettier (and also because wxGTK does it like this)
@@ -665,10 +664,10 @@ bool wxListCtrl::GetColumn(int col, wxListItem& item) const
 }
 
 // Sets information about this column
-bool wxListCtrl::SetColumn(int col, const wxListItem& item)
+bool wxListCtrl::SetColumn(int col, wxListItem& item)
 {
     LV_COLUMN lvCol;
-    wxConvertToMSWListCol(GetHwnd(), col, item, lvCol);
+    wxConvertToMSWListCol(col, item, lvCol);
 
     return ListView_SetColumn(GetHwnd(), col, &lvCol) != 0;
 }
@@ -761,10 +760,6 @@ bool wxListCtrl::GetItem(wxListItem& info) const
 // Sets information about the item
 bool wxListCtrl::SetItem(wxListItem& info)
 {
-    const long id = info.GetId();
-    wxCHECK_MSG( id >= 0 && id < GetItemCount(), false,
-                 _T("invalid item index in SetItem") );
-
     LV_ITEM item;
     wxConvertToMSWListItem(this, info, item);
 
@@ -777,7 +772,7 @@ bool wxListCtrl::SetItem(wxListItem& info)
     {
         // get internal item data
         // perhaps a cache here ?
-        wxListItemInternalData *data = wxGetInternalData(this, id);
+        wxListItemInternalData *data = wxGetInternalData(this, info.m_itemId);
 
         if (! data)
         {
@@ -794,15 +789,12 @@ bool wxListCtrl::SetItem(wxListItem& info)
             data->lParam = info.m_data;
 
         // attributes
-        if ( info.HasAttributes() )
+        if (info.HasAttributes())
         {
-            const wxListItemAttr& attrNew = *info.GetAttributes();
-
-            // don't overwrite the already set attributes if we have them
-            if ( data->attr )
-                data->attr->AssignFrom(attrNew);
+            if (data->attr)
+                *data->attr = *info.GetAttributes();
             else
-                data->attr = new wxListItemAttr(attrNew);
+                data->attr = new wxListItemAttr(*info.GetAttributes());
         };
     };
 
@@ -926,6 +918,7 @@ bool wxListCtrl::SetItemImage(long item, int image, int WXUNUSED(selImage))
     return SetItemColumnImage(item, 0, image);
 }
 
+#if wxABI_VERSION >= 20603
 // Sets the item image
 bool wxListCtrl::SetItemColumnImage(long item, long column, int image)
 {
@@ -938,6 +931,7 @@ bool wxListCtrl::SetItemColumnImage(long item, long column, int image)
 
     return SetItem(info);
 }
+#endif
 
 // Gets the item text
 wxString wxListCtrl::GetItemText(long item) const
@@ -1011,24 +1005,6 @@ wxRect wxListCtrl::GetViewRect() const
 // Gets the item rectangle
 bool wxListCtrl::GetItemRect(long item, wxRect& rect, int code) const
 {
-    return GetSubItemRect( item, wxLIST_GETSUBITEMRECT_WHOLEITEM, rect, code) ;
-}
-
-/*!
- * Retrieve coordinates and size of a specified subitem of a listview control.
- * This function only works if the listview control is in the report mode.
- *
- * @param item : Item number
- * @param subItem : Subitem or column number, use -1 for the whole row including
- *                  all columns or subitems
- * @param rect : A pointer to an allocated wxRect object
- * @param code : Specify the part of the subitem coordinates you need. Choices are
- *               wxLIST_RECT_BOUNDS, wxLIST_RECT_ICON, wxLIST_RECT_LABEL
- *
- * @return bool  : True if successful.
- */
-bool wxListCtrl::GetSubItemRect(long item, long subItem, wxRect& rect, int code) const
-{
     RECT rectWin;
 
     int codeWin;
@@ -1040,24 +1016,12 @@ bool wxListCtrl::GetSubItemRect(long item, long subItem, wxRect& rect, int code)
         codeWin = LVIR_LABEL;
     else
     {
-        wxFAIL_MSG( _T("incorrect code in GetItemRect() / GetSubItemRect()") );
+        wxFAIL_MSG( _T("incorrect code in GetItemRect()") );
+
         codeWin = LVIR_BOUNDS;
     }
 
-    bool success;
-    if( subItem == wxLIST_GETSUBITEMRECT_WHOLEITEM)
-    {
-      success = ListView_GetItemRect(GetHwnd(), (int) item, &rectWin, codeWin) != 0;
-    }
-    else if( subItem >= 0)
-    {
-      success = ListView_GetSubItemRect( GetHwnd(), (int) item, (int) subItem, codeWin, &rectWin) != 0;
-    }
-    else
-    {
-      wxFAIL_MSG( _T("incorrect subItem number in GetSubItemRect()") );
-      return false;
-    }
+    bool success = ListView_GetItemRect(GetHwnd(), (int) item, &rectWin, codeWin) != 0;
 
     rect.x = rectWin.left;
     rect.y = rectWin.top;
@@ -1066,9 +1030,6 @@ bool wxListCtrl::GetSubItemRect(long item, long subItem, wxRect& rect, int code)
 
     return success;
 }
-
-
-
 
 // Gets the item position
 bool wxListCtrl::GetItemPosition(long item, wxPoint& pos) const
@@ -1100,14 +1061,10 @@ wxSize wxListCtrl::GetItemSpacing() const
     return wxSize(LOWORD(spacing), HIWORD(spacing));
 }
 
-#if WXWIN_COMPATIBILITY_2_6
-
 int wxListCtrl::GetItemSpacing(bool isSmall) const
 {
     return ListView_GetItemSpacing(GetHwnd(), (BOOL) isSmall);
 }
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 void wxListCtrl::SetItemTextColour( long item, const wxColour &col )
 {
@@ -1511,25 +1468,13 @@ long wxListCtrl::FindItem(long start, const wxPoint& pt, int direction)
 
 // Determines which item (if any) is at the specified point,
 // giving details in 'flags' (see wxLIST_HITTEST_... flags above)
-long
-wxListCtrl::HitTest(const wxPoint& point, int& flags, long *ptrSubItem) const
+long wxListCtrl::HitTest(const wxPoint& point, int& flags)
 {
     LV_HITTESTINFO hitTestInfo;
     hitTestInfo.pt.x = (int) point.x;
     hitTestInfo.pt.y = (int) point.y;
 
-    long item;
-#ifdef LVM_SUBITEMHITTEST
-    if ( ptrSubItem && wxApp::GetComCtl32Version() >= 470 )
-    {
-        item = ListView_SubItemHitTest(GetHwnd(), &hitTestInfo);
-        *ptrSubItem = hitTestInfo.iSubItem;
-    }
-    else
-#endif // LVM_SUBITEMHITTEST
-    {
-        item = ListView_HitTest(GetHwnd(), &hitTestInfo);
-    }
+    ListView_HitTest(GetHwnd(), & hitTestInfo);
 
     flags = 0;
 
@@ -1564,13 +1509,12 @@ wxListCtrl::HitTest(const wxPoint& point, int& flags, long *ptrSubItem) const
             flags |= wxLIST_HITTEST_ONITEMSTATEICON;
     }
 
-    return item;
+    return (long) hitTestInfo.iItem;
 }
-
 
 // Inserts an item, returning the index of the new item if successful,
 // -1 otherwise.
-long wxListCtrl::InsertItem(const wxListItem& info)
+long wxListCtrl::InsertItem(wxListItem& info)
 {
     wxASSERT_MSG( !IsVirtual(), _T("can't be used with virtual controls") );
 
@@ -1643,10 +1587,10 @@ long wxListCtrl::InsertItem(long index, const wxString& label, int imageIndex)
 }
 
 // For list view mode (only), inserts a column.
-long wxListCtrl::InsertColumn(long col, const wxListItem& item)
+long wxListCtrl::InsertColumn(long col, wxListItem& item)
 {
     LV_COLUMN lvCol;
-    wxConvertToMSWListCol(GetHwnd(), col, item, lvCol);
+    wxConvertToMSWListCol(col, item, lvCol);
 
     if ( !(lvCol.mask & LVCF_WIDTH) )
     {
@@ -1736,7 +1680,7 @@ int CALLBACK wxInternalDataCompareFunc(LPARAM lParam1, LPARAM lParam2,  LPARAM l
 
     return internalData->user_fn(d1, d2, internalData->data);
 
-}
+};
 
 bool wxListCtrl::SortItems(wxListCtrlCompare fn, long data)
 {
@@ -2216,7 +2160,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             case NM_CUSTOMDRAW:
                 *result = OnCustomDraw(lParam);
 
-                return *result != CDRF_DODEFAULT;
+                return true;
 #endif // _WIN32_IE >= 0x300
 
             case LVN_ODCACHEHINT:
@@ -2330,7 +2274,10 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 #ifdef NM_CUSTOMDRAW
                     if ( lvi.mask & LVIF_IMAGE )
                     {
-                        lvi.iImage = OnGetItemColumnImage(item, lvi.iSubItem);
+                        if ( lvi.iSubItem == 0 )
+                            lvi.iImage = OnGetItemImage(item);
+                        else
+                            lvi.iImage = -1;
                     }
 #endif // NM_CUSTOMDRAW
 
@@ -2407,238 +2354,13 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     return processed;
 }
 
-// ----------------------------------------------------------------------------
-// custom draw stuff
-// ----------------------------------------------------------------------------
-
 // see comment at the end of wxListCtrl::GetColumn()
 #ifdef NM_CUSTOMDRAW // _WIN32_IE >= 0x0300
 
-static RECT GetCustomDrawnItemRect(const NMCUSTOMDRAW& nmcd)
-{
-    RECT rc;
-    ListView_GetItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, &rc, LVIR_BOUNDS);
-
-    RECT rcIcon;
-    ListView_GetItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, &rcIcon, LVIR_ICON);
-
-    // exclude the icon part, neither the selection background nor focus rect
-    // should cover it
-    rc.left = rcIcon.right;
-
-    return rc;
-}
-
-static void HandleSubItemPrepaint(LPNMLVCUSTOMDRAW pLVCD, HFONT hfont)
-{
-    NMCUSTOMDRAW& nmcd = pLVCD->nmcd;
-
-    HDC hdc = nmcd.hdc;
-    HWND hwndList = nmcd.hdr.hwndFrom;
-    const DWORD item = nmcd.dwItemSpec;
-
-
-    // the font must be valid, otherwise we wouldn't be painting the item at all
-    SelectInHDC selFont(hdc, hfont);
-
-    // get the rectangle to paint
-    RECT rc;
-    ListView_GetSubItemRect(hwndList, item, pLVCD->iSubItem, LVIR_BOUNDS, &rc);
-    if ( !pLVCD->iSubItem )
-    {
-        // broken ListView_GetSubItemRect() returns the entire item rect for
-        // 0th subitem while we really need just the part for this column
-        RECT rc2;
-        ListView_GetSubItemRect(hwndList, item, 1, LVIR_BOUNDS, &rc2);
-
-        rc.right = rc2.left;
-        rc.left += 4;
-    }
-    else // not first subitem
-    {
-        rc.left += 6;
-    }
-
-    // get the image and text to draw
-    wxChar text[512];
-    LV_ITEM it;
-    wxZeroMemory(it);
-    it.mask = LVIF_TEXT | LVIF_IMAGE;
-    it.iItem = item;
-    it.iSubItem = pLVCD->iSubItem;
-    it.pszText = text;
-    it.cchTextMax = WXSIZEOF(text);
-    ListView_GetItem(hwndList, &it);
-
-    HIMAGELIST himl = ListView_GetImageList(hwndList, LVSIL_SMALL);
-    if ( himl && ImageList_GetImageCount(himl) )
-    {
-        if ( it.iImage != -1 )
-        {
-            ImageList_Draw(himl, it.iImage, hdc, rc.left, rc.top,
-                           nmcd.uItemState & CDIS_SELECTED ? ILD_SELECTED
-                                                           : ILD_TRANSPARENT);
-        }
-
-        // notice that even if this item doesn't have any image, the list
-        // control still leaves space for the image in the first column if the
-        // image list is not empty (presumably so that items with and without
-        // images align?)
-        if ( it.iImage != -1 || it.iSubItem == 0 )
-        {
-            int wImage, hImage;
-            ImageList_GetIconSize(himl, &wImage, &hImage);
-
-            rc.left += wImage + 2;
-        }
-    }
-
-    ::SetBkMode(hdc, TRANSPARENT);
-
-    // TODO: support for centred/right aligned columns
-    ::DrawText(hdc, text, -1, &rc,
-#ifndef __WXWINCE__
-               DT_WORD_ELLIPSIS |
-#endif // __WXWINCE__
-               DT_NOPREFIX | DT_SINGLELINE | DT_VCENTER);
-}
-
-static void HandleItemPostpaint(NMCUSTOMDRAW nmcd)
-{
-    if ( nmcd.uItemState & CDIS_FOCUS )
-    {
-        RECT rc = GetCustomDrawnItemRect(nmcd);
-
-        // don't use the provided HDC, it's in some strange state by now
-        ::DrawFocusRect(WindowHDC(nmcd.hdr.hwndFrom), &rc);
-    }
-}
-
-// pLVCD->clrText and clrTextBk should contain the colours to use
-static void HandleItemPaint(LPNMLVCUSTOMDRAW pLVCD, HFONT hfont)
-{
-    NMCUSTOMDRAW& nmcd = pLVCD->nmcd; // just a shortcut
-
-    const HWND hwndList = nmcd.hdr.hwndFrom;
-    const int item = nmcd.dwItemSpec;
-
-    // unfortunately we can't trust CDIS_SELECTED, it is often set even when
-    // the item is not at all selected for some reason (comctl32 6), but we
-    // also can't always trust ListView_GetItem() as it could return the old
-    // item status if we're called just after the (de)selection, so remember
-    // the last item to gain selection and also check for it here
-    for ( int i = -1;; )
-    {
-        i = ListView_GetNextItem(hwndList, i, LVNI_SELECTED);
-        if ( i == -1 )
-        {
-            nmcd.uItemState &= ~CDIS_SELECTED;
-            break;
-        }
-
-        if ( i == item )
-        {
-            nmcd.uItemState |= CDIS_SELECTED;
-            break;
-        }
-    }
-
-    // same thing for CDIS_FOCUS (except simpler as there is only one of them)
-    if ( ::GetFocus() == hwndList &&
-            ListView_GetNextItem(hwndList, (WPARAM)-1, LVNI_FOCUSED) == item )
-    {
-        nmcd.uItemState |= CDIS_FOCUS;
-    }
-    else
-    {
-        nmcd.uItemState &= ~CDIS_FOCUS;
-    }
-
-    if ( nmcd.uItemState & CDIS_SELECTED )
-    {
-        int syscolFg, syscolBg;
-        if ( ::GetFocus() == hwndList )
-        {
-            syscolFg = COLOR_HIGHLIGHTTEXT;
-            syscolBg = COLOR_HIGHLIGHT;
-        }
-        else // selected but unfocused
-        {
-            syscolFg = COLOR_WINDOWTEXT;
-            syscolBg = COLOR_BTNFACE;
-
-            // don't grey out the icon in this case neither
-            nmcd.uItemState &= ~CDIS_SELECTED;
-        }
-
-        pLVCD->clrText = ::GetSysColor(syscolFg);
-        pLVCD->clrTextBk = ::GetSysColor(syscolBg);
-    }
-    //else: not selected, use normal colours from pLVCD
-
-    HDC hdc = nmcd.hdc;
-    RECT rc = GetCustomDrawnItemRect(nmcd);
-
-    ::SetTextColor(hdc, pLVCD->clrText);
-    ::FillRect(hdc, &rc, AutoHBRUSH(pLVCD->clrTextBk));
-
-    // we could use CDRF_NOTIFYSUBITEMDRAW here but it results in weird repaint
-    // problems so just draw everything except the focus rect from here instead
-    const int colCount = Header_GetItemCount(ListView_GetHeader(hwndList));
-    for ( int col = 0; col < colCount; col++ )
-    {
-        pLVCD->iSubItem = col;
-        HandleSubItemPrepaint(pLVCD, hfont);
-    }
-
-    HandleItemPostpaint(nmcd);
-}
-
-static WXLPARAM HandleItemPrepaint(wxListCtrl *listctrl,
-                                   LPNMLVCUSTOMDRAW pLVCD,
-                                   wxListItemAttr *attr)
-{
-    if ( !attr )
-    {
-        // nothing to do for this item
-        return CDRF_DODEFAULT;
-    }
-
-
-    // set the colours to use for text drawing
-    pLVCD->clrText = attr->HasTextColour()
-                     ? wxColourToRGB(attr->GetTextColour())
-                     : wxColourToRGB(listctrl->GetTextColour());
-    pLVCD->clrTextBk = attr->HasBackgroundColour()
-                       ? wxColourToRGB(attr->GetBackgroundColour())
-                       : wxColourToRGB(listctrl->GetBackgroundColour());
-
-    // select the font if non default one is specified
-    if ( attr->HasFont() )
-    {
-        wxFont font = attr->GetFont();
-        if ( font.GetEncoding() != wxFONTENCODING_SYSTEM )
-        {
-            // the standard control ignores the font encoding/charset, at least
-            // with recent comctl32.dll versions (5 and 6, it uses to work with
-            // 4.something) so we have to draw the item entirely ourselves in
-            // this case
-            HandleItemPaint(pLVCD, GetHfontOf(font));
-            return CDRF_SKIPDEFAULT;
-        }
-
-        ::SelectObject(pLVCD->nmcd.hdc, GetHfontOf(font));
-
-        return CDRF_NEWFONT;
-    }
-
-    return CDRF_DODEFAULT;
-}
-
 WXLPARAM wxListCtrl::OnCustomDraw(WXLPARAM lParam)
 {
-    LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)lParam;
-    NMCUSTOMDRAW& nmcd = pLVCD->nmcd;
+    LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
+    NMCUSTOMDRAW& nmcd = lplvcd->nmcd;
     switch ( nmcd.dwDrawStage )
     {
         case CDDS_PREPAINT:
@@ -2647,22 +2369,78 @@ WXLPARAM wxListCtrl::OnCustomDraw(WXLPARAM lParam)
             //
             // for virtual controls, always suppose that we have attributes as
             // there is no way to check for this
-            if ( IsVirtual() || m_hasAnyAttr )
-                return CDRF_NOTIFYITEMDRAW;
-            break;
+            return IsVirtual() || m_hasAnyAttr ? CDRF_NOTIFYITEMDRAW
+                                               : CDRF_DODEFAULT;
 
         case CDDS_ITEMPREPAINT:
-            const int item = nmcd.dwItemSpec;
+            {
+                size_t item = (size_t)nmcd.dwItemSpec;
+                if ( item >= (size_t)GetItemCount() )
+                {
+                    // we get this message with item == 0 for an empty control,
+                    // we must ignore it as calling OnGetItemAttr() would be
+                    // wrong
+                    return CDRF_DODEFAULT;
+                }
 
-            // we get this message with item == 0 for an empty control, we
-            // must ignore it as calling OnGetItemAttr() would be wrong
-            if ( item < 0 || item >= GetItemCount() )
-                break;
+                wxListItemAttr *attr =
+                    IsVirtual() ? OnGetItemAttr(item)
+                                : wxGetInternalDataAttr(this, item);
 
-            return HandleItemPrepaint(this, pLVCD, DoGetItemAttr(item));
+                if ( !attr )
+                {
+                    // nothing to do for this item
+                    return CDRF_DODEFAULT;
+                }
+
+                HFONT hFont;
+                wxColour colText, colBack;
+                if ( attr->HasFont() )
+                {
+                    wxFont font = attr->GetFont();
+                    hFont = (HFONT)font.GetResourceHandle();
+                }
+                else
+                {
+                    hFont = 0;
+                }
+
+                if ( attr->HasTextColour() )
+                {
+                    colText = attr->GetTextColour();
+                }
+                else
+                {
+                    colText = GetTextColour();
+                }
+
+                if ( attr->HasBackgroundColour() )
+                {
+                    colBack = attr->GetBackgroundColour();
+                }
+                else
+                {
+                    colBack = GetBackgroundColour();
+                }
+
+                lplvcd->clrText = wxColourToRGB(colText);
+                lplvcd->clrTextBk = wxColourToRGB(colBack);
+
+                // note that if we wanted to set colours for
+                // individual columns (subitems), we would have
+                // returned CDRF_NOTIFYSUBITEMREDRAW from here
+                if ( hFont )
+                {
+                    ::SelectObject(nmcd.hdc, hFont);
+
+                    return CDRF_NEWFONT;
+                }
+            }
+            // fall through to return CDRF_DODEFAULT
+
+        default:
+            return CDRF_DODEFAULT;
     }
-
-    return CDRF_DODEFAULT;
 }
 
 #endif // NM_CUSTOMDRAW supported
@@ -2670,21 +2448,18 @@ WXLPARAM wxListCtrl::OnCustomDraw(WXLPARAM lParam)
 // Necessary for drawing hrules and vrules, if specified
 void wxListCtrl::OnPaint(wxPaintEvent& event)
 {
-    bool drawHRules = HasFlag(wxLC_HRULES);
-    bool drawVRules = HasFlag(wxLC_VRULES);
-
-    if (!InReportView() || !drawHRules && !drawVRules)
-    {
-        event.Skip();
-        return;
-    }
-
     wxPaintDC dc(this);
 
     wxControl::OnPaint(event);
 
     // Reset the device origin since it may have been set
     dc.SetDeviceOrigin(0, 0);
+
+    bool drawHRules = HasFlag(wxLC_HRULES);
+    bool drawVRules = HasFlag(wxLC_VRULES);
+
+    if (!InReportView() || !drawHRules && !drawVRules)
+        return;
 
     wxPen pen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
     dc.SetPen(pen);
@@ -2724,23 +2499,13 @@ void wxListCtrl::OnPaint(wxPaintEvent& event)
 
         if (GetItemRect(i, itemRect))
         {
-            // this is a fix for bug 673394: erase the pixels which we would
-            // otherwise leave on the screen
-            static const int gap = 2;
-            dc.SetPen(*wxTRANSPARENT_PEN);
-            dc.SetBrush(wxBrush(GetBackgroundColour()));
-            dc.DrawRectangle(0, firstItemRect.GetY() - gap,
-                             clientSize.GetWidth(), gap);
-
-            dc.SetPen(pen);
-            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            int col;
             int x = itemRect.GetX();
-            for (int col = 0; col < GetColumnCount(); col++)
+            for (col = 0; col < GetColumnCount(); col++)
             {
                 int colWidth = GetColumnWidth(col);
                 x += colWidth ;
-                dc.DrawLine(x-1, firstItemRect.GetY() - gap,
-                            x-1, itemRect.GetBottom());
+                dc.DrawLine(x-1, firstItemRect.GetY() - 2, x-1, itemRect.GetBottom());
             }
         }
     }
@@ -2749,25 +2514,14 @@ void wxListCtrl::OnPaint(wxPaintEvent& event)
 WXLRESULT
 wxListCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 {
-    switch ( nMsg )
-    {
 #ifdef WM_PRINT
-        case WM_PRINT:
-            // we should bypass our own WM_PRINT handling as we don't handle
-            // PRF_CHILDREN flag, so leave it to the native control itself
-            return MSWDefWindowProc(nMsg, wParam, lParam);
-#endif // WM_PRINT
-
-        case WM_CONTEXTMENU:
-            // because this message is propagated upwards the child-parent
-            // chain, we get it for the right clicks on the header window but
-            // this is confusing in wx as right clicking there already
-            // generates a separate wxEVT_COMMAND_LIST_COL_RIGHT_CLICK event
-            // so just ignore them
-            if ( (HWND)wParam == ListView_GetHeader(GetHwnd()) )
-                return 0;
-            //else: break
+    if ( nMsg == WM_PRINT )
+    {
+        // we should bypass our own WM_PRINT handling as we don't handle
+        // PRF_CHILDREN flag, so leave it to the native control itself
+        return MSWDefWindowProc(nMsg, wParam, lParam);
     }
+#endif // WM_PRINT
 
     return wxControl::MSWWindowProc(nMsg, wParam, lParam);
 }
@@ -2789,15 +2543,7 @@ int wxListCtrl::OnGetItemImage(long WXUNUSED(item)) const
 {
     wxCHECK_MSG(!GetImageList(wxIMAGE_LIST_SMALL),
                 -1,
-                wxT("List control has an image list, OnGetItemImage or OnGetItemColumnImage should be overridden."));
-    return -1;
-}
-
-int wxListCtrl::OnGetItemColumnImage(long item, long column) const
-{
-    if (!column)
-        return OnGetItemImage(item);
-
+                wxT("List control has an image list, OnGetItemImage should be overridden."));
     return -1;
 }
 
@@ -2808,12 +2554,6 @@ wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_DEBUG(item)) cons
 
     // no attributes by default
     return NULL;
-}
-
-wxListItemAttr *wxListCtrl::DoGetItemAttr(long item) const
-{
-    return IsVirtual() ? OnGetItemAttr(item)
-                       : wxGetInternalDataAttr(this, item);
 }
 
 void wxListCtrl::SetItemCount(long count)
@@ -2872,21 +2612,20 @@ static wxListItemInternalData *wxGetInternalData(HWND hwnd, long itemId)
         return NULL;
 
     return (wxListItemInternalData *) it.lParam;
-}
+};
 
 static
 wxListItemInternalData *wxGetInternalData(const wxListCtrl *ctl, long itemId)
 {
     return wxGetInternalData(GetHwndOf(ctl), itemId);
-}
+};
 
-static
-wxListItemAttr *wxGetInternalDataAttr(const wxListCtrl *ctl, long itemId)
+static wxListItemAttr *wxGetInternalDataAttr(wxListCtrl *ctl, long itemId)
 {
     wxListItemInternalData *data = wxGetInternalData(ctl, itemId);
 
     return data ? data->attr : NULL;
-}
+};
 
 static void wxDeleteInternalData(wxListCtrl* ctl, long itemId)
 {
@@ -3054,7 +2793,7 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl,
             // pszText is not const, hence the cast
             lvItem.pszText = (wxChar *)info.m_text.c_str();
             if ( lvItem.pszText )
-                lvItem.cchTextMax = info.m_text.length();
+                lvItem.cchTextMax = info.m_text.Length();
             else
                 lvItem.cchTextMax = 0;
         }
@@ -3063,9 +2802,7 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl,
         lvItem.mask |= LVIF_IMAGE;
 }
 
-static void wxConvertToMSWListCol(HWND hwndList,
-                                  int col,
-                                  const wxListItem& item,
+static void wxConvertToMSWListCol(int WXUNUSED(col), const wxListItem& item,
                                   LV_COLUMN& lvCol)
 {
     wxZeroMemory(lvCol);
@@ -3103,11 +2840,11 @@ static void wxConvertToMSWListCol(HWND hwndList,
 #ifdef NM_CUSTOMDRAW // _WIN32_IE >= 0x0300
     if ( item.m_mask & wxLIST_MASK_IMAGE )
     {
-        if ( wxApp::GetComCtl32Version() >= 470 )
+        if ( wxTheApp->GetComCtl32Version() >= 470 )
         {
-            lvCol.mask |= LVCF_IMAGE;
+            lvCol.mask |= LVCF_IMAGE | LVCF_FMT;
 
-            // we use LVCFMT_BITMAP_ON_RIGHT because the images on the right
+            // we use LVCFMT_BITMAP_ON_RIGHT because thei mages on the right
             // seem to be generally nicer than on the left and the generic
             // version only draws them on the right (we don't have a flag to
             // specify the image location anyhow)
@@ -3115,24 +2852,7 @@ static void wxConvertToMSWListCol(HWND hwndList,
             // we don't use LVCFMT_COL_HAS_IMAGES because it doesn't seem to
             // make any difference in my tests -- but maybe we should?
             if ( item.m_image != -1 )
-            {
-                // as we're going to overwrite the format field, get its
-                // current value first -- unless we want to overwrite it anyhow
-                if ( !(lvCol.mask & LVCF_FMT) )
-                {
-                    LV_COLUMN lvColOld;
-                    wxZeroMemory(lvColOld);
-                    lvColOld.mask = LVCF_FMT;
-                    if ( ListView_GetColumn(hwndList, col, &lvColOld) )
-                    {
-                        lvCol.fmt = lvColOld.fmt;
-                    }
-
-                    lvCol.mask |= LVCF_FMT;
-                }
-
                 lvCol.fmt |= LVCFMT_BITMAP_ON_RIGHT | LVCFMT_IMAGE;
-            }
 
             lvCol.iImage = item.m_image;
         }

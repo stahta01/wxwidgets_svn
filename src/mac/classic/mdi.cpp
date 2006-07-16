@@ -1,23 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/mdi.cpp
+// Name:        mdi.cpp
 // Purpose:     MDI classes
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "mdi.h"
+#endif
 
 #include "wx/mdi.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/menu.h"
-    #include "wx/settings.h"
-#endif
+#include "wx/menu.h"
+#include "wx/settings.h"
+#include "wx/log.h"
 
 #include "wx/mac/private.h"
 #include "wx/mac/uma.h"
@@ -59,20 +58,20 @@ wxMDIParentFrame::wxMDIParentFrame()
     m_clientWindow = NULL;
     m_currentChild = NULL;
     m_windowMenu = (wxMenu*) NULL;
-    m_parentFrameActive = true;
+    m_parentFrameActive = TRUE;
 }
 
 bool wxMDIParentFrame::Create(wxWindow *parent,
-                              wxWindowID id,
-                              const wxString& title,
-                              const wxPoint& pos,
-                              const wxSize& size,
-                              long style,
-                              const wxString& name)
+           wxWindowID id,
+           const wxString& title,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
     m_clientWindow = NULL;
     m_currentChild = NULL;
-
+    
     // this style can be used to prevent a window from having the standard MDI
     // "Window" menu
     if ( style & wxFRAME_NO_WINDOW_MENU )
@@ -83,7 +82,7 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
     else // normal case: we have the window menu, so construct it
     {
         m_windowMenu = new wxMenu;
-
+        
         m_windowMenu->Append(IDM_WINDOWCASCADE, wxT("&Cascade"));
         m_windowMenu->Append(IDM_WINDOWTILEHOR, wxT("Tile &Horizontally"));
         m_windowMenu->Append(IDM_WINDOWTILEVERT, wxT("Tile &Vertically"));
@@ -91,13 +90,13 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
         m_windowMenu->Append(IDM_WINDOWICONS, wxT("&Arrange Icons"));
         m_windowMenu->Append(IDM_WINDOWNEXT, wxT("&Next"));
     }
-
+    
     wxFrame::Create( parent , id , title , pos , size , style , name ) ;
-    m_parentFrameActive = true;
-
+    m_parentFrameActive = TRUE;
+    
     OnCreateClient();
-
-    return true;
+    
+    return TRUE;
 }
 
 wxMDIParentFrame::~wxMDIParentFrame()
@@ -109,15 +108,15 @@ wxMDIParentFrame::~wxMDIParentFrame()
 #endif
 #if wxUSE_STATUSBAR
     m_frameStatusBar = NULL;
-#endif
+#endif    
     m_clientWindow = NULL ;
-
+    
     if (m_windowMenu)
     {
         delete m_windowMenu;
         m_windowMenu = (wxMenu*) NULL;
     }
-
+    
     if ( m_clientWindow )
     {
         delete m_clientWindow;
@@ -200,7 +199,7 @@ wxMDIClientWindow *wxMDIParentFrame::OnCreateClient()
 void wxMDIParentFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
     // TODO
-
+    
     // Propagate the event to the non-top-level children
     wxFrame::OnSysColourChanged(event);
 }
@@ -250,21 +249,21 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
                              const wxString& name)
 {
     SetName(name);
-
-    if ( id != wxID_ANY )
+    
+    if ( id > -1 )
         m_windowId = id;
     else
         m_windowId = (int)NewControlId();
-
+    
     if (parent) parent->AddChild(this);
-
+    
     MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
-
+    
     m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
     SetThemeWindowBackground( (WindowRef) m_macWindow , m_macWindowBackgroundTheme , false ) ;
-
+    
     wxModelessWindows.Append(this);
-    return false;
+    return FALSE;
 }
 
 wxMDIChildFrame::~wxMDIChildFrame()
@@ -280,7 +279,7 @@ wxMDIChildFrame::~wxMDIChildFrame()
 #endif
 #if wxUSE_STATUSBAR
     m_frameStatusBar = NULL;
-#endif
+#endif    
 }
 
 void wxMDIChildFrame::SetMenuBar(wxMenuBar *menu_bar)
@@ -304,7 +303,7 @@ void wxMDIChildFrame::MacActivate(long timestamp, bool activating)
         }
         else if((mdiparent->m_currentChild==this) || !s_macDeactivateWindow)
             mdiparent->wxFrame::MacActivate(timestamp,activating);
-
+        
         if(mdiparent->m_currentChild && mdiparent->m_currentChild!=this)
             mdiparent->m_currentChild->wxFrame::MacActivate(timestamp,false);
         mdiparent->m_currentChild = this;
@@ -367,17 +366,17 @@ wxMDIClientWindow::~wxMDIClientWindow()
 
 bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
 {
-
+    
     m_windowId = (int)NewControlId();
-
+    
     if ( parent )
     {
         parent->AddChild(this);
     }
     m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
-
+    
     wxModelessWindows.Append(this);
-    return true;
+    return TRUE;
 }
 
 // Get size *available for subwindows* i.e. excluding menu bar.
@@ -390,3 +389,4 @@ void wxMDIClientWindow::DoGetClientSize(int *x, int *y) const
 void wxMDIClientWindow::OnScroll(wxScrollEvent& event)
 {
 }
+

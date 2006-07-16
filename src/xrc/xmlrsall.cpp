@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xmlrsall.cpp
+// Name:        xmlrsall.cpp
 // Purpose:     wxXmlResource::InitAllHandlers
 // Author:      Vaclav Slavik
 // Created:     2000/03/05
@@ -7,6 +7,11 @@
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+// -- Already done in xmlres.cpp
+//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+//#pragma implementation "xmlres.h"
+//#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -77,9 +82,6 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_COMBOBOX
     AddHandler(new wxComboBoxXmlHandler);
 #endif
-#if wxUSE_ODCOMBOBOX
-    AddHandler(new wxOwnerDrawnComboBoxXmlHandler);
-#endif
 #if wxUSE_NOTEBOOK
     AddHandler(new wxNotebookXmlHandler);
 #endif
@@ -88,9 +90,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_CHOICEBOOK
     AddHandler(new wxChoicebookXmlHandler);
-#endif
-#if wxUSE_TREEBOOK
-    AddHandler(new wxTreebookXmlHandler);
 #endif
     AddHandler(new wxTextCtrlXmlHandler);
 #if wxUSE_LISTBOX
@@ -118,26 +117,8 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_DATEPICKCTRL
     AddHandler(new wxDateCtrlXmlHandler);
 #endif
-#if wxUSE_COLOURPICKERCTRL
-    AddHandler(new wxColourPickerCtrlXmlHandler);
-#endif
-#if wxUSE_FILEPICKERCTRL
-    AddHandler(new wxFilePickerCtrlXmlHandler);
-#endif
-#if wxUSE_DIRPICKERCTRL
-    AddHandler(new wxDirPickerCtrlXmlHandler);
-#endif
-#if wxUSE_FONTPICKERCTRL
-    AddHandler(new wxFontPickerCtrlXmlHandler);
-#endif
 #if wxUSE_MDI
     AddHandler(new wxMdiXmlHandler);
-#endif
-#if wxUSE_GRID
-    AddHandler( new wxGridXmlHandler);
-#endif
-#if wxUSE_HYPERLINKCTRL
-    AddHandler( new wxHyperlinkCtrlXmlHandler);
 #endif
 }
 

@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/treectrl.cpp
+// Name:        treectrl.cpp
 // Purpose:     wxTreeCtrl. See also Robert's generic wxTreeCtrl.
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "treectrl.h"
+#endif
 
 #include "wx/stubs/textctrl.h"
 #include "wx/treebase.h"
@@ -37,13 +41,13 @@ bool wxTreeCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, con
 
     SetParent(parent);
 
-    m_windowId = (id == wxID_ANY) ? NewControlId() : id;
+    m_windowId = (id == -1) ? NewControlId() : id;
 
     if (parent) parent->AddChild(this);
 
     // TODO create tree control
 
-    return false;
+    return FALSE;
 }
 
 wxTreeCtrl::~wxTreeCtrl()
@@ -55,7 +59,7 @@ wxTreeCtrl::~wxTreeCtrl()
 }
 
 // Attributes
-unsigned int wxTreeCtrl::GetCount() const
+int wxTreeCtrl::GetCount() const
 {
     // TODO
     return 0;
@@ -107,7 +111,7 @@ long wxTreeCtrl::GetNextItem(long item, int code) const
 bool wxTreeCtrl::ItemHasChildren(long item) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 long wxTreeCtrl::GetChild(long item) const
@@ -149,13 +153,13 @@ long wxTreeCtrl::GetRootItem() const
 bool wxTreeCtrl::GetItem(wxTreeItem& info) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::SetItem(wxTreeItem& info)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 int wxTreeCtrl::GetItemState(long item, long stateMask) const
@@ -208,7 +212,7 @@ wxString wxTreeCtrl::GetItemText(long item) const
     info.m_itemId = item;
 
     if (!GetItem(info))
-        return wxEmptyString;
+        return wxString("");
     return info.m_text;
 }
 
@@ -249,7 +253,7 @@ bool wxTreeCtrl::SetItemData(long item, long data)
 bool wxTreeCtrl::GetItemRect(long item, wxRect& rect, bool textOnly) const
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 wxTextCtrl* wxTreeCtrl::GetEditControl() const
@@ -261,7 +265,7 @@ wxTextCtrl* wxTreeCtrl::GetEditControl() const
 bool wxTreeCtrl::DeleteItem(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::ExpandItem(long item, int action)
@@ -271,22 +275,22 @@ bool wxTreeCtrl::ExpandItem(long item, int action)
     {
     case wxTREE_EXPAND_EXPAND:
         break;
-
+        
     case wxTREE_EXPAND_COLLAPSE:
         break;
-
+        
     case wxTREE_EXPAND_COLLAPSE_RESET:
         break;
-
+        
     case wxTREE_EXPAND_TOGGLE:
         break;
-
+        
     default:
         wxFAIL_MSG("unknown action in wxTreeCtrl::ExpandItem");
     }
-
-    bool bOk = false; // TODO expand item
-
+    
+    bool bOk = FALSE; // TODO expand item
+    
     // May not send messages, so emulate them
     if ( bOk ) {
         wxTreeEvent event(wxEVT_NULL, m_windowId);
@@ -294,22 +298,22 @@ bool wxTreeCtrl::ExpandItem(long item, int action)
         event.m_item.m_mask      =
             event.m_item.m_stateMask = 0xffff; // get all
         GetItem(event.m_item);
-
+        
         bool bIsExpanded = (event.m_item.m_state & wxTREE_STATE_EXPANDED) != 0;
-
+        
         event.m_code = action;
         event.SetEventObject(this);
-
+        
         // @@@ return values of {EXPAND|COLLAPS}ING event handler is discarded
         event.SetEventType(bIsExpanded ? wxEVT_COMMAND_TREE_ITEM_EXPANDING
             : wxEVT_COMMAND_TREE_ITEM_COLLAPSING);
         GetEventHandler()->ProcessEvent(event);
-
+        
         event.SetEventType(bIsExpanded ? wxEVT_COMMAND_TREE_ITEM_EXPANDED
             : wxEVT_COMMAND_TREE_ITEM_COLLAPSED);
         GetEventHandler()->ProcessEvent(event);
     }
-
+    
     return bOk;
 }
 
@@ -341,19 +345,19 @@ long wxTreeCtrl::InsertItem(long parent, const wxString& label, int image, int s
 bool wxTreeCtrl::SelectItem(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::ScrollTo(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::DeleteAllItems()
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 wxTextCtrl* wxTreeCtrl::EditLabel(long item, wxClassInfo* textControlClass)
@@ -366,7 +370,7 @@ wxTextCtrl* wxTreeCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 bool wxTreeCtrl::EndEditLabel(bool cancel)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 long wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
@@ -378,13 +382,13 @@ long wxTreeCtrl::HitTest(const wxPoint& point, int& flags)
 bool wxTreeCtrl::SortChildren(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 bool wxTreeCtrl::EnsureVisible(long item)
 {
     // TODO
-    return false;
+    return FALSE;
 }
 
 // Tree item structure
@@ -409,3 +413,4 @@ wxTreeEvent::wxTreeEvent(wxEventType commandType, int id):
     m_code = 0;
     m_oldItem = 0;
 }
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/settings.cpp
+// Name:        settings.cpp
 // Purpose:     wxSettings
 // Author:      David Webster
 // Modified by:
@@ -13,15 +13,16 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/pen.h"
-    #include "wx/brush.h"
-    #include "wx/gdicmn.h"
-    #include "wx/window.h"
-    #include "wx/settings.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/pen.h"
+#include "wx/brush.h"
+#include "wx/gdicmn.h"
 #endif
 
 #include "wx/module.h"
+#include "wx/settings.h"
+#include "wx/window.h"
 #include "wx/os2/private.h"
 
 // the module which is used to clean up wxSystemSettings data (this is a
@@ -61,7 +62,7 @@ wxArrayString wxSystemSettingsModule::sm_optionValues;
 
 bool wxSystemSettingsModule::OnInit()
 {
-    return true;
+    return TRUE;
 }
 
 void wxSystemSettingsModule::OnExit()
@@ -286,9 +287,6 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index,
         // TODO case wxSYS_PENWINDOWS_PRESENT:
         // TODO case wxSYS_SHOW_SOUNDS:
         // TODO case wxSYS_SWAP_BUTTONS:
-
-        default:
-            break;
     }
     return -1;  // unsupported metric
 }
@@ -300,11 +298,8 @@ bool wxSystemSettingsNative::HasFeature( wxSystemFeature index )
         case wxSYS_CAN_ICONIZE_FRAME:
             return true;
 
-        // TODO case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        // TODO case wxSYS_TABLET_PRESENT:
-
-        default:
-            break;
+        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
+            return false;
     }
 
     return false;

@@ -10,7 +10,7 @@ selections).
 List box elements are numbered from zero. Their number is limited in
 some platforms (e.g. ca. 2000 on GTK).
 
-A listbox callback gets an event wxEVT\_COMMAND\_LISTBOX\_SELECTED for single clicks, and
+A listbox callback gets an event wxEVT\_COMMAND\_LISTBOX\_SELECT for single clicks, and
 wxEVT\_COMMAND\_LISTBOX\_DOUBLE\_CLICKED for double clicks.
 
 \wxheading{Derived from}
@@ -71,7 +71,7 @@ Default constructor.
 
 \func{}{wxListBox}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
 \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ size = wxDefaultSize},\rtfsp
-\param{int}{ n = 0}, \param{const wxString }{choices[] = NULL},\rtfsp
+\param{int}{ n}, \param{const wxString }{choices[] = NULL},\rtfsp
 \param{long}{ style = 0}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``listBox"}}
 
 \func{}{wxListBox}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
@@ -180,9 +180,9 @@ selected items as a list.}
 
 \membersection{wxListBox::InsertItems}\label{wxlistboxinsertitems}
 
-\func{void}{InsertItems}{\param{int}{ nItems}, \param{const wxString}{ *items}, \param{unsigned int}{ pos}}
+\func{void}{InsertItems}{\param{int}{ nItems}, \param{const wxString}{ *items}, \param{int}{ pos}}
 
-\func{void}{InsertItems}{\param{const wxArrayString\&}{ nItems}, \param{unsigned int}{ pos}}
+\func{void}{InsertItems}{\param{const wxArrayString\&}{ nItems}, \param{int}{ pos}}
 
 Insert the given number of strings before the specified position.
 
@@ -200,25 +200,6 @@ parameter for wxPython, which is a list of strings.}
 
 \perlnote{In wxPerl there is just an array reference in place of {\tt nItems}
 and {\tt items}.}
-
-\membersection{wxListBox::HitTest}\label{wxlistboxhittest}
-
-\constfunc{int}{HitTest}{\param{const wxPoint&}{ point}}
-
-Returns the item located at \arg{point}, or \texttt{wxNOT\_FOUND} if there
-is no item located at \arg{point}.
-
-\newsince{2.7.0}. It is currently implemented for wxMSW, wxMac and wxGTK2
-ports.
-
-\wxheading{Parameters}
-
-\docparam{point}{Point of item (in client coordinates) to obtain}
-
-\wxheading{Return value}
-
-Item located at \arg{point}, or \texttt{wxNOT\_FOUND} if unimplemented
-or the item does not exist.
 
 \membersection{wxListBox::IsSelected}\label{wxlistboxisselected}
 

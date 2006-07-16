@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/timer.cpp
+// Name:        timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      David Webster
 // Modified by:
@@ -9,21 +9,27 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "timer.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/timer.h"
+#include "wx/window.h"
+#include "wx/os2/private.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/list.h"
-    #include "wx/window.h"
     #include "wx/event.h"
     #include "wx/app.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
 #endif
 
-#include "wx/os2/private.h"
+#include "wx/intl.h"
+#include "wx/log.h"
+
+#include "wx/timer.h"
 
 #include <time.h>
 #include <sys/types.h>
@@ -96,13 +102,18 @@ void wxTimer::Notify()
     (void)m_owner->ProcessEvent(vEvent);
 } // end of wxTimer::Notify
 
-bool wxTimer::Start( int nMilliseconds, bool bOneShot )
+bool wxTimer::Start(
+  int                               nMilliseconds
+, bool                              bOneShot
+)
 {
-    (void)wxTimerBase::Start( nMilliseconds, bOneShot );
+    (void)wxTimerBase::Start( nMilliseconds
+                             ,bOneShot
+                            );
 
-    wxCHECK_MSG( m_milli > 0L, false, wxT("invalid value for timer") );
+    wxCHECK_MSG( m_milli > 0L, FALSE, wxT("invalid value for timer") );
 
-    wxWindow* pWin = NULL;
+    wxWindow*                       pWin = NULL;
 
     if (m_owner)
     {
@@ -143,7 +154,7 @@ bool wxTimer::Start( int nMilliseconds, bool bOneShot )
     {
         wxLogSysError(_("Couldn't create a timer"));
 
-        return false;
+        return(FALSE);
     }
 }
 
@@ -199,3 +210,4 @@ ULONG wxTimerProc(
     wxProcessTimer(*(node->second));
     return 0;
 }
+

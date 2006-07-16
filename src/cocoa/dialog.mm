@@ -10,12 +10,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/app.h"
+    #include "wx/dialog.h"
     #include "wx/settings.h"
 #endif //WX_PRECOMP
 
@@ -34,10 +32,10 @@ static wxWindowList wxModalDialogs;
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
 
 BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
-    EVT_BUTTON(wxID_OK, wxDialog::OnOK)
-    EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
-    EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
-    EVT_CLOSE(wxDialog::OnCloseWindow)
+  EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+  EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+  EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+  EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
 WX_IMPLEMENT_COCOA_OWNER(wxDialog,NSPanel,NSWindow,NSWindow)
@@ -177,14 +175,6 @@ void wxDialog::EndModal(int retCode)
     Show(false);
 }
 
-void wxDialog::EndDialog(int retCode)
-{
-    if(IsModal())
-        EndModal(retCode);
-    else
-        Show(false);
-}
-
 void wxDialog::OnCloseWindow(wxCloseEvent& event)
 {
     // We'll send a Cancel message by default,
@@ -226,7 +216,7 @@ void wxDialog::OnOK(wxCommandEvent& event)
 {
     if ( Validate() && TransferDataFromWindow() )
     {
-        EndDialog(wxID_OK);
+        EndModal(wxID_OK);
     }
 }
 
@@ -240,5 +230,6 @@ void wxDialog::OnApply(wxCommandEvent& event)
 void wxDialog::OnCancel(wxCommandEvent& event)
 {
     wxLogTrace(wxTRACE_COCOA,wxT("Cancelled!"));
-    EndDialog(wxID_CANCEL);
+    EndModal(wxID_CANCEL);
 }
+

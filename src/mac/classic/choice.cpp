@@ -1,24 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/choice.cpp
+// Name:        choice.cpp
 // Purpose:     wxChoice
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "choice.h"
+#endif
+
+#include "wx/defs.h"
 
 #if wxUSE_CHOICE
 
 #include "wx/choice.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/menu.h"
-#endif
-
+#include "wx/menu.h"
 #include "wx/mac/uma.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
@@ -29,7 +29,7 @@ wxChoice::~wxChoice()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int i, max = GetCount();
+        size_t i, max = GetCount();
 
         for ( i = 0; i < max; ++i )
             delete GetClientObject(i);
@@ -100,10 +100,10 @@ int wxChoice::DoAppend(const wxString& item)
     return index ;
 }
 
-int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+int wxChoice::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     if (pos == GetCount())
         return DoAppend(item);
@@ -116,9 +116,9 @@ int wxChoice::DoInsert(const wxString& item, unsigned int pos)
     return pos ;
 }
 
-void wxChoice::Delete(unsigned int n)
+void wxChoice::Delete(int n)
 {
-    wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
+    wxCHECK_RET( n < GetCount(), wxT("invalid item index in wxChoice::Delete") );
     if ( HasClientObjectData() )
     {
         delete GetClientObject(n);
@@ -132,7 +132,7 @@ void wxChoice::Delete(unsigned int n)
 void wxChoice::Clear()
 {
     FreeData();
-    for ( unsigned int i = 0 ; i < GetCount() ; i++ )
+    for ( int i = 0 ; i < GetCount() ; i++ )
     {
         ::DeleteMenuItem( MAC_WXHMENU(m_macPopUpMenuHandle) , 1 ) ;
     }
@@ -145,8 +145,8 @@ void wxChoice::FreeData()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int count = GetCount();
-        for ( unsigned int n = 0; n < count; n++ )
+        size_t count = GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
             delete GetClientObject(n);
         }
@@ -170,12 +170,22 @@ void wxChoice::SetSelection(int n)
 // string list functions
 // ----------------------------------------------------------------------------
 
-unsigned int wxChoice::GetCount() const
+int wxChoice::GetCount() const
 {
     return m_strings.GetCount() ;
 }
 
-void wxChoice::SetString(unsigned int n, const wxString& s)
+int wxChoice::FindString(const wxString& s) const
+{
+    for( int i = 0 ; i < GetCount() ; i++ )
+    {
+        if ( GetString( i ).IsSameAs(s, false) )
+            return i ;
+    }
+    return wxNOT_FOUND ;
+}
+
+void wxChoice::SetString(int n, const wxString& s)
 {
     wxFAIL_MSG(wxT("wxChoice::SetString() not yet implemented"));
 #if 0 // should do this, but no Insert() so far
@@ -184,9 +194,9 @@ void wxChoice::SetString(unsigned int n, const wxString& s)
 #endif
 }
 
-wxString wxChoice::GetString(unsigned int n) const
+wxString wxChoice::GetString(int n) const
 {
-    wxCHECK_MSG( IsValid(n), wxEmptyString,
+    wxCHECK_MSG( n >= 0 && (size_t)n < m_strings.GetCount(), _T(""),
                     _T("wxChoice::GetString(): invalid index") );
 
     return m_strings[n] ;
@@ -195,27 +205,27 @@ wxString wxChoice::GetString(unsigned int n) const
 // ----------------------------------------------------------------------------
 // client data
 // ----------------------------------------------------------------------------
-void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
+void wxChoice::DoSetItemClientData( int n, void* clientData )
 {
-    wxCHECK_RET( n >= 0 && (unsigned int)n < m_datas.GetCount(),
+    wxCHECK_RET( n >= 0 && (size_t)n < m_datas.GetCount(),
                  wxT("invalid index in wxChoice::SetClientData") );
 
     m_datas[n] = (char*) clientData ;
 }
 
-void *wxChoice::DoGetItemClientData(unsigned int n) const
+void *wxChoice::DoGetItemClientData(int n) const
 {
-    wxCHECK_MSG( n >= 0 && (unsigned int)n < m_datas.GetCount(), NULL,
+    wxCHECK_MSG( n >= 0 && (size_t)n < m_datas.GetCount(), NULL,
                  wxT("invalid index in wxChoice::GetClientData") );
     return (void *)m_datas[n];
 }
 
-void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxChoice::DoSetItemClientObject( int n, wxClientData* clientData )
 {
     DoSetItemClientData(n, clientData);
 }
 
-wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxChoice::DoGetItemClientObject( int n ) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }
@@ -263,7 +273,7 @@ wxSize wxChoice::DoGetBestSize() const
             ::TextFace( 0 ) ;
         }
         // Find the widest line
-        for(unsigned int i = 0; i < GetCount(); i++) {
+        for(int i = 0; i < GetCount(); i++) {
             wxString str(GetString(i));
         #if wxUSE_UNICODE
             Point bounds={0,0} ;
@@ -276,7 +286,7 @@ wxSize wxChoice::DoGetBestSize() const
                 &baseline );
             wLine = bounds.h ;
         #else
-            wLine = ::TextWidth( str.c_str() , 0 , str.length() ) ;
+            wLine = ::TextWidth( str.c_str() , 0 , str.Length() ) ;
         #endif
             lbWidth = wxMax(lbWidth, wLine);
         }

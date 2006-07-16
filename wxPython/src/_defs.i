@@ -12,53 +12,23 @@
 
 
 //---------------------------------------------------------------------------
-
 // Globally turn on the autodoc feature
+
 %feature("autodoc", "1");  // 0 == no param types, 1 == show param types
 
 // Turn on kwargs by default
 %feature("kwargs", "1");
 
-// Don't generate separate wrappers for each default args combination
-%feature("compactdefaultargs");
-
-#if SWIG_VERSION < 0x010328
-// Don't generate default ctors or dtors if the C++ doesn't have them
-%feature("nodefault");
-#else
-// This is the SWIG 1.3.28 way to do the above...
-%feature("nodefaultctor");
-%feature("nodefaultdtor");
-#endif
-
-// For all items that don't have a %rename already, give them a %rename that
-// removes the leading 'wx' (except for wxEVT_* items.)
-%rename("%(wxpy)s") "";
-
-// For now, just supress the warning about using Python keywords as parameter
-// names.  Will need to come back later and correct these rather than just
-// hide them...
-#pragma SWIG nowarn=314
-
 //---------------------------------------------------------------------------
+// Tell SWIG to wrap all the wrappers with our thread protection by default
 
-// Tell SWIG to wrap all the wrappers with our thread protection
-%define %threadWrapperOn
 %exception {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
     $action
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) SWIG_fail;
 }
-%enddef
 
-// This one will turn off the generation of the thread wrapper code
-%define %threadWrapperOff
-%exception 
-%enddef
-
-// Turn it on by default
-%threadWrapperOn
 
 // This one can be used to add a check for an existing wxApp before the real
 // work is done.  An exception is raised if there isn't one.
@@ -102,22 +72,9 @@ typedef unsigned long   wxUIntPtr;
 
 #define %pythonAppend   %feature("pythonappend")
 #define %pythonPrepend  %feature("pythonprepend")
-#define %noautodoc      %feature("noautodoc")
-
-#if SWIG_VERSION >= 0x010327
-#undef %kwargs
-#define %kwargs         %feature("kwargs", "1")
-#define %nokwargs       %feature("kwargs", "0")
-#else
 #define %kwargs         %feature("kwargs")
-#define %nokwargs       %feature("nokwargs")
-#endif
-
-#define %disownarg(typespec)   %typemap(in) typespec = SWIGTYPE* DISOWN
-#define %cleardisown(typespec) %typemap(in) typespec
-    
-#define %ref   %feature("ref")
-#define %unref %feature("unref")
+#define %nokwargs       %feature("kwargs", "0")
+#define %noautodoc      %feature("noautodoc")
 
 
 #ifndef %pythoncode
@@ -396,23 +353,6 @@ typedef unsigned long   wxUIntPtr;
     %enddef
 #endif
 
-
-//---------------------------------------------------------------------------
-// Generates a base_On* method that just wraps a call to the On*, and mark it
-// deprecated.  We need this because there is no longer any need for a
-// base_On* method to be able to call the C++ base class method, since our
-// virtualization code can now sense when an attempt is being made to call
-// the base class version from the derived class override.
-        
-%define %MAKE_BASE_FUNC(Class, Method)
-    %pythoncode {
-        def base_##Method(*args, **kw):
-            return Class.Method(*args, **kw)
-        base_##Method = wx._deprecated(base_##Method,
-                                       "Please use Class.Method instead.")
-    }
-%enddef    
-    
 //---------------------------------------------------------------------------
 // Forward declarations and %renames for some classes, so the autodoc strings
 // will be able to use the right types even when the real class declaration is
@@ -490,8 +430,6 @@ enum {
     wxCLIP_CHILDREN,
     wxCLIP_SIBLINGS,
 
-    wxWINDOW_STYLE_MASK,
-    
     wxALWAYS_SHOW_SB,
     
     wxRETAINED,
@@ -527,9 +465,7 @@ enum {
     wxRB_USE_CHECKBOX,
     wxST_SIZEGRIP,
     wxST_NO_AUTORESIZE,
-    wxST_DOTS_MIDDLE,
-    wxST_DOTS_END,
-    
+
     wxFLOOD_SURFACE,
     wxFLOOD_BORDER,
     wxODDEVEN_RULE,
@@ -681,6 +617,14 @@ enum {
    
     wxID_HIGHEST,
 
+    wxOPEN,
+    wxSAVE,
+    wxHIDE_READONLY,
+    wxOVERWRITE_PROMPT,
+    wxFILE_MUST_EXIST,
+    wxMULTIPLE,
+    wxCHANGE_DIR,
+
     wxACCEL_ALT,
     wxACCEL_CTRL,
     wxACCEL_SHIFT,
@@ -694,6 +638,9 @@ enum {
     wxPD_REMAINING_TIME,
     wxPD_SMOOTH,
     wxPD_CAN_SKIP,
+
+    wxDD_NEW_DIR_BUTTON,
+    wxDD_DEFAULT_STYLE,
 
     wxMENU_TEAROFF,
     wxMB_DOCKABLE,
@@ -1190,18 +1137,27 @@ enum wxHitTest
 };
 
 
-
-enum wxKeyModifier
+%{
+#if ! wxUSE_HOTKEY
+enum wxHotkeyModifier
 {
-    wxMOD_NONE,
-    wxMOD_ALT,
-    wxMOD_CONTROL,
-    wxMOD_ALTGR,
-    wxMOD_SHIFT,
-    wxMOD_META,
-    wxMOD_WIN,
-    wxMOD_CMD,
-    wxMOD_ALL       
+    wxMOD_NONE = 0,
+    wxMOD_ALT = 1,
+    wxMOD_CONTROL = 2,
+    wxMOD_SHIFT = 4,
+    wxMOD_WIN = 8
+};
+#define wxEVT_HOTKEY 9999
+#endif
+%}
+
+enum wxHotkeyModifier
+{
+    wxMOD_NONE = 0,
+    wxMOD_ALT = 1,
+    wxMOD_CONTROL = 2,
+    wxMOD_SHIFT = 4,
+    wxMOD_WIN = 8
 };
 
 

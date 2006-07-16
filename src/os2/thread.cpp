@@ -6,8 +6,13 @@
 // Created:     04/22/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Neis (2003)
+//
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+    #pragma implementation "thread.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -18,19 +23,15 @@
 
 #if wxUSE_THREADS
 
-#include "wx/thread.h"
+#include <stdio.h>
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-#endif //WX_PRECOMP
-
+#include "wx/app.h"
 #include "wx/apptrait.h"
 #include "wx/module.h"
+#include "wx/intl.h"
 #include "wx/utils.h"
-
-#include <stdio.h>
+#include "wx/log.h"
+#include "wx/thread.h"
 
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSPROCESS
@@ -384,9 +385,11 @@ private:
     unsigned int                    m_nPriority;  // thread priority in "wx" units
 };
 
-void wxThreadInternal::OS2ThreadStart( void * pParam )
+void wxThreadInternal::OS2ThreadStart(
+  void * pParam
+)
 {
-    DWORD dwRet;
+    DWORD                           dwRet;
     bool bWasCancelled;
 
     wxThread *pThread = (wxThread *)pParam;

@@ -35,10 +35,17 @@ public:
     wxRegionGeneric();
     ~wxRegionGeneric();
 
+    //# Copying
+    wxRegionGeneric(const wxRegionGeneric& r)
+    :   wxGDIObject()
+    {   Ref(r); }
+    wxRegionGeneric& operator= (const wxRegionGeneric& r)
+    {   Ref(r); return (*this); }
+
     bool Ok() const { return m_refData != NULL; }
 
-    bool operator == ( const wxRegionGeneric& region ) const;
-    bool operator != ( const wxRegionGeneric& region ) const { return !(*this == region); }
+    bool operator == ( const wxRegionGeneric& region );
+    bool operator != ( const wxRegionGeneric& region ) { return !(*this == region); }
 
     //# Modify region
     // Clear current region
@@ -89,19 +96,6 @@ public:
     wxRegionContain Contains(long x, long y, long w, long h) const;
     // Does the region contain the rectangle rect?
     wxRegionContain Contains(const wxRect& rect) const;
-
-    // Use the non-transparent pixels of a wxBitmap for the region to combine
-    // with this region.  First version takes transparency from bitmap's mask,
-    // second lets the user specify the colour to be treated as transparent
-    // along with an optional tolerance value.
-    // NOTE: implemented in common/rgncmn.cpp
-    bool Union(const wxBitmap& bmp);
-    bool Union(const wxBitmap& bmp,
-               const wxColour& transColour, int tolerance = 0);
-
-    // Convert the region to a B&W bitmap with the white pixels being inside
-    // the region.
-    wxBitmap ConvertToBitmap() const;
 
 protected:
     virtual wxObjectRefData *CreateRefData() const;

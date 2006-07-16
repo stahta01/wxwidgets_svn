@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_sizer.h
+// Name:        xh_sizer.h
 // Purpose:     XML resource handler for wxBoxSizer
 // Author:      Vaclav Slavik
 // Created:     2000/04/24
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_SIZER_H_
 #define _WX_XH_SIZER_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_sizer.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 #include "wx/sizer.h"

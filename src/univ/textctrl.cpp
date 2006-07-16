@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/textctrl.cpp
+// Name:        univ/textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -117,6 +117,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtextctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -125,15 +129,15 @@
 
 #if wxUSE_TEXTCTRL
 
-#include "wx/textctrl.h"
+#include <ctype.h>
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
+
     #include "wx/dcclient.h"
     #include "wx/validate.h"
+    #include "wx/textctrl.h"
 #endif
-
-#include <ctype.h>
 
 #include "wx/clipbrd.h"
 
@@ -606,13 +610,13 @@ private:
 // implementation
 // ============================================================================
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
 
     EVT_SIZE(wxTextCtrl::OnSize)
 END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 
 // ----------------------------------------------------------------------------
 // creation
@@ -634,6 +638,9 @@ void wxTextCtrl::Init()
 
     m_heightLine =
     m_widthAvg = -1;
+
+    // init wxScrollHelper
+    SetWindow(this);
 
     // init the undo manager
     m_cmdProcessor = new wxTextCtrlCommandProcessor(this);
@@ -2683,7 +2690,7 @@ size_t wxTextCtrl::GetPartOfWrappedLine(const wxChar* text,
                 //else: we can just see it
 
                 // wrap at any character or only at words boundaries?
-                if ( !(GetWindowStyle() & wxTE_CHARWRAP) )
+                if ( !(GetWindowStyle() & wxTE_LINEWRAP) )
                 {
                     // find the (last) not word char before this word
                     wxTextCoord colWordStart;
@@ -4259,7 +4266,7 @@ void wxTextCtrl::CreateCaret()
         // FIXME use renderer
         caret = new wxCaret(this, 1, GetLineHeight());
 #ifndef __WXMSW__
-        wxCaret::SetBlinkTime(0);
+        caret->SetBlinkTime(0);
 #endif // __WXMSW__
     }
     else
@@ -4685,7 +4692,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
         int keycode = event.GetKeyCode();
 #if wxUSE_UNICODE
         wxChar unicode = event.GetUnicodeKey();
-#endif
+#endif        
         if ( keycode == WXK_RETURN )
         {
             if ( IsSingleLine() || (GetWindowStyle() & wxTE_PROCESS_ENTER) )
@@ -4714,7 +4721,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
 
             return;
         }
-#endif
+#endif        
     }
 #ifdef __WXDEBUG__
     // Ctrl-R refreshes the control in debug mode
@@ -4814,12 +4821,14 @@ bool wxStdTextCtrlInputHandler::HandleKey(wxInputConsumer *consumer,
             break;
 
         case WXK_PAGEDOWN:
+        case WXK_NEXT:
             // we don't map Ctrl-PgUp/Dn to anything special - what should it
             // to? for now, it's the same as without control
             action << wxACTION_TEXT_PAGE_DOWN;
             break;
 
         case WXK_PAGEUP:
+        case WXK_PRIOR:
             action << wxACTION_TEXT_PAGE_UP;
             break;
 

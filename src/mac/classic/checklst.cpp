@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/checklst.cpp
+// Name:        checklst.cpp
 // Purpose:     implementation of wxCheckListBox class
 // Author:      Stefan Csomor
-// Modified by:
+// Modified by: 
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
@@ -13,15 +13,16 @@
 // headers & declarations
 // ============================================================================
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "checklst.h"
+#endif
+
+#include "wx/defs.h"
 
 #if wxUSE_CHECKLISTBOX
 
 #include "wx/checklst.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/arrstr.h"
-#endif
+#include "wx/arrstr.h"
 
 #include "wx/mac/uma.h"
 #include <Appearance.h>
@@ -72,7 +73,7 @@ static pascal void wxMacCheckListDefinition( short message, Boolean isSelected, 
     list = (wxCheckListBox*) GetControlReference( (ControlHandle) GetListRefCon(listHandle) );
     if ( list == NULL )
         return ;
-
+    
     GrafPtr savePort;
     GrafPtr grafPtr;
     RgnHandle savedClipRegion;
@@ -81,9 +82,9 @@ static pascal void wxMacCheckListDefinition( short message, Boolean isSelected, 
     SetPort((**listHandle).port);
     grafPtr = (**listHandle).port ;
     // typecast our refCon
-
+    
     //  Calculate the cell rect.
-
+    
     switch( message ) {
         case lInitMsg:
             break;
@@ -98,13 +99,13 @@ static pascal void wxMacCheckListDefinition( short message, Boolean isSelected, 
 
             //  Save the current clip region, and set the clip region to the area we are about
             //  to draw.
-
+            
             savedClipRegion = NewRgn();
             GetClip( savedClipRegion );
 
             ClipRect( drawRect );
             EraseRect( drawRect );
-
+            
             const wxFont& font = list->GetFont();
             if ( font.Ok() )
             {
@@ -112,45 +113,45 @@ static pascal void wxMacCheckListDefinition( short message, Boolean isSelected, 
                 ::TextSize( font.GetMacFontSize())  ;
                 ::TextFace( font.GetMacFontStyle() ) ;
             }
-
+                       
             ThemeButtonDrawInfo info ;
             info.state = kThemeStateActive ;
             info.value = checked ? kThemeButtonOn : kThemeButtonOff ;
             info.adornment = kThemeAdornmentNone ;
             Rect checkRect = *drawRect ;
-
-
+                        
+            
             checkRect.left +=0 ;
             checkRect.top +=0 ;
             checkRect.right = checkRect.left + list->m_checkBoxWidth ;
             checkRect.bottom = checkRect.top + list->m_checkBoxHeight ;
             DrawThemeButton(&checkRect,kThemeCheckBox,
                 &info,NULL,NULL, NULL,0);
-
+            
             MoveTo(drawRect->left + 2 + list->m_checkBoxWidth+2, drawRect->top + list->m_TextBaseLineOffset );
-
-            DrawText(text, 0 , text.length());
+            
+            DrawText(text, 0 , text.Length());
             //  If the cell is hilited, do the hilite now. Paint the cell contents with the
             //  appropriate QuickDraw transform mode.
-
+            
             if( isSelected ) {
                 savedPenMode = GetPortPenMode( (CGrafPtr) grafPtr );
                 SetPortPenMode( (CGrafPtr) grafPtr, hilitetransfermode );
                 PaintRect( drawRect );
                 SetPortPenMode( (CGrafPtr) grafPtr, savedPenMode );
             }
-
+            
             //  Restore the saved clip region.
-
+            
             SetClip( savedClipRegion );
             DisposeRgn( savedClipRegion );
         }
         break;
         case lHiliteMsg:
-
+            
             //  Hilite or unhilite the cell. Paint the cell contents with the
             //  appropriate QuickDraw transform mode.
-
+            
             GetPort( &grafPtr );
             savedPenMode = GetPortPenMode( (CGrafPtr) grafPtr );
             SetPortPenMode( (CGrafPtr) grafPtr, hilitetransfermode );
@@ -160,7 +161,7 @@ static pascal void wxMacCheckListDefinition( short message, Boolean isSelected, 
         default :
           break ;
     }
-    SetPort(savePort);
+    SetPort(savePort);  
 }
 
 extern "C" void MacDrawStringCell(Rect *cellRect, Cell lCell, ListHandle theList, long refCon) ;
@@ -206,13 +207,13 @@ bool wxCheckListBox::Create(wxWindow *parent,
 
     m_noItems = 0 ; // this will be increased by our append command
     m_selected = 0;
-
+    
     m_checkBoxWidth = 12;
     m_checkBoxHeight= 10;
-
+    
     long h = m_checkBoxHeight ;
 #if TARGET_CARBON
-    GetThemeMetric(kThemeMetricCheckBoxWidth,(long *)&m_checkBoxWidth);
+    GetThemeMetric(kThemeMetricCheckBoxWidth,(long *)&m_checkBoxWidth);    
     GetThemeMetric(kThemeMetricCheckBoxHeight,&h);
 #endif
 
@@ -220,26 +221,26 @@ bool wxCheckListBox::Create(wxWindow *parent,
 
     FontInfo finfo;
     FetchFontInfo(font.GetMacFontNum(),font.GetMacFontSize(),font.GetMacFontStyle(),&finfo);
-
+    
     m_TextBaseLineOffset= finfo.leading+finfo.ascent;
     m_checkBoxHeight= finfo.leading+finfo.ascent+finfo.descent;
-
+    
     if (m_checkBoxHeight<h)
     {
         m_TextBaseLineOffset+= (h-m_checkBoxHeight)/2;
         m_checkBoxHeight= h;
     }
-
+        
     Rect bounds ;
     Str255 title ;
-
+    
     MacPreControlCreate( parent , id ,  wxEmptyString , pos , size ,style, validator , name , &bounds , title ) ;
 
     ListDefSpec listDef;
     listDef.defType = kListDefUserProcType;
     if ( macCheckListDefUPP == NULL )
     {
-      macCheckListDefUPP = NewListDefUPP( wxMacCheckListDefinition );
+      macCheckListDefUPP = NewListDefUPP( wxMacCheckListDefinition ); 
     }
         listDef.u.userProc = macCheckListDefUPP ;
 
@@ -262,7 +263,7 @@ bool wxCheckListBox::Create(wxWindow *parent,
 
     wxStAppResource resload ;
     m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false ,
-                  kwxMacListWithVerticalScrollbar , 0 , 0,
+                  kwxMacListWithVerticalScrollbar , 0 , 0, 
                   kControlListBoxProc , (long) this ) ;
     ::GetControlData( (ControlHandle) m_macControl , kControlNoPart , kControlListBoxListHandleTag ,
                sizeof( ListHandle ) , (char*) &m_macList  , &result ) ;
@@ -276,7 +277,7 @@ bool wxCheckListBox::Create(wxWindow *parent,
       (**ldef).function = (void(*)()) listDef.u.userProc;
       (**(ListHandle)m_macList).listDefProc = (Handle) ldef ;
     }
-
+        
     Point pt = (**(ListHandle)m_macList).cellSize ;
     pt.v = 14 ;
     LCellSize( pt , (ListHandle)m_macList ) ;
@@ -296,34 +297,34 @@ bool wxCheckListBox::Create(wxWindow *parent,
         options = (OptionBits) lOnlyOne ;
     }
     SetListSelectionFlags((ListHandle)m_macList, options);
-
+    
     MacPostControlCreate() ;
-
+    
     for ( int i = 0 ; i < n ; i++ )
     {
         Append( choices[i] ) ;
     }
-
+    
     LSetDrawingMode( true , (ListHandle) m_macList ) ;
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
 // wxCheckListBox functions
 // ----------------------------------------------------------------------------
 
-bool wxCheckListBox::IsChecked(unsigned int item) const
+bool wxCheckListBox::IsChecked(size_t item) const
 {
-    wxCHECK_MSG( IsValid(item), false,
+    wxCHECK_MSG( item < m_checks.GetCount(), FALSE,
                  _T("invalid index in wxCheckListBox::IsChecked") );
 
     return m_checks[item] != 0;
 }
 
-void wxCheckListBox::Check(unsigned int item, bool check)
+void wxCheckListBox::Check(size_t item, bool check)
 {
-    wxCHECK_RET( IsValid(item),
+    wxCHECK_RET( item < m_checks.GetCount(),
                  _T("invalid index in wxCheckListBox::Check") );
 
     // intermediate var is needed to avoid compiler warning with VC++
@@ -340,9 +341,9 @@ void wxCheckListBox::Check(unsigned int item, bool check)
 // methods forwarded to wxListBox
 // ----------------------------------------------------------------------------
 
-void wxCheckListBox::Delete(unsigned int n)
+void wxCheckListBox::Delete(int n)
 {
-    wxCHECK_RET( IsValid(n), _T("invalid index in wxListBox::Delete") );
+    wxCHECK_RET( n < GetCount(), _T("invalid index in wxListBox::Delete") );
 
     wxListBox::Delete(n);
 
@@ -355,20 +356,20 @@ int wxCheckListBox::DoAppend(const wxString& item)
     int pos = wxListBox::DoAppend(item);
 
     // the item is initially unchecked
-    m_checks.Insert(false, pos);
+    m_checks.Insert(FALSE, pos);
     LSetDrawingMode( true , (ListHandle) m_macList ) ;
 
     return pos;
 }
 
-void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxCheckListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
     wxListBox::DoInsertItems(items, pos);
 
-    unsigned int count = items.GetCount();
-    for ( unsigned int n = 0; n < count; n++ )
+    size_t count = items.GetCount();
+    for ( size_t n = 0; n < count; n++ )
     {
-        m_checks.Insert(false, pos + n);
+        m_checks.Insert(FALSE, pos + n);
     }
 }
 
@@ -377,10 +378,10 @@ void wxCheckListBox::DoSetItems(const wxArrayString& items, void **clientData)
     // call it first as it does DoClear()
     wxListBox::DoSetItems(items, clientData);
 
-    unsigned int count = items.GetCount();
-    for ( unsigned int n = 0; n < count; n++ )
+    size_t count = items.GetCount();
+    for ( size_t n = 0; n < count; n++ )
     {
-        m_checks.Add(false);
+        m_checks.Add(FALSE);
     }
 }
 
@@ -394,7 +395,7 @@ BEGIN_EVENT_TABLE(wxCheckListBox, wxListBox)
   EVT_LEFT_DOWN(wxCheckListBox::OnLeftClick)
 END_EVENT_TABLE()
 
-// this will only work as soon as
+// this will only work as soon as 
 
 void wxCheckListBox::OnChar(wxKeyEvent& event)
 {
@@ -432,8 +433,8 @@ void wxCheckListBox::OnLeftClick(wxMouseEvent& event)
         topcell = (**(ListHandle)m_macList).visible.top ;
 #endif
         size_t nItem = ((size_t)event.GetY()) / lineheight + topcell ;
-
-        if ( nItem < m_noItems )
+        
+        if ( nItem < (size_t)m_noItems )
         {
             Check(nItem, !IsChecked(nItem) ) ;
             wxCommandEvent event(wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, GetId());

@@ -12,6 +12,10 @@
 #ifndef _WX_HELPCHM_H_
 #define _WX_HELPCHM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpchm.h"
+#endif
+
 #if wxUSE_MS_HTML_HELP
 
 #include "wx/helpbase.h"
@@ -19,7 +23,8 @@
 class WXDLLEXPORT wxCHMHelpController : public wxHelpControllerBase
 {
 public:
-    wxCHMHelpController(wxWindow* parentWindow = NULL): wxHelpControllerBase(parentWindow) { }
+    wxCHMHelpController() { }
+    virtual ~wxCHMHelpController();
 
     // Must call this to set the filename
     virtual bool Initialize(const wxString& file);
@@ -38,11 +43,6 @@ public:
     virtual bool Quit();
 
     wxString GetHelpFile() const { return m_helpFile; }
-
-    // helper of DisplayTextPopup(), also used in wxSimpleHelpProvider::ShowHelp
-    static bool ShowContextHelpPopup(const wxString& text,
-                                     const wxPoint& pos,
-                                     wxWindow *window);
 
 protected:
     // Append extension if necessary.

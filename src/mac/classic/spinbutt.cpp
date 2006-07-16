@@ -1,19 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/spinbutt.cpp
+// Name:        spinbutt.cpp
 // Purpose:     wxSpinButton
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "spinbutt.h"
+#pragma implementation "spinbuttbase.h"
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_SPINBTN
 

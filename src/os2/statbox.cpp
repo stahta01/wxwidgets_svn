@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/statbox.cpp
+// Name:        statbox.cpp
 // Purpose:     wxStaticBox
 // Author:      David Webster
 // Modified by:
@@ -12,25 +12,27 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/statbox.h"
+#include "wx/window.h"
+#include "wx/os2/private.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/dcclient.h"
-    #include "wx/window.h"
+#include "wx/app.h"
+#include "wx/dcclient.h"
 #endif
 
-#include "wx/os2/private.h"
+#include "wx/statbox.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBox, wxControl)
 
-bool wxStaticBox::Create( wxWindow*       pParent,
-                          wxWindowID      vId,
-                          const wxString& rsLabel,
-                          const wxPoint&  rPos,
-                          const wxSize&   rSize,
-                          long            lStyle,
-                          const wxString& rsName )
+bool wxStaticBox::Create(
+  wxWindow*                         pParent
+, wxWindowID                        vId
+, const wxString&                   rsLabel
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxString&                   rsName
+)
 {
     if(!CreateControl( pParent
                       ,vId
@@ -41,11 +43,11 @@ bool wxStaticBox::Create( wxWindow*       pParent,
                       ,rsName
                      ))
     {
-        return false;
+        return FALSE;
     }
 
-    wxPoint  vPos(0,0);
-    wxSize   vSize(0,0);
+    wxPoint                         vPos(0,0);
+    wxSize                          vSize(0,0);
 
     if (!OS2CreateControl( wxT("STATIC")
                           ,SS_GROUPBOX
@@ -54,7 +56,7 @@ bool wxStaticBox::Create( wxWindow*       pParent,
                           ,rsLabel
                          ))
     {
-        return false;
+        return FALSE;
     }
 
     //
@@ -62,7 +64,9 @@ bool wxStaticBox::Create( wxWindow*       pParent,
     //
     SetBackgroundColour(GetParent()->GetBackgroundColour());
 
-    LONG lColor = (LONG)wxBLACK->GetPixel();
+    wxColour                        vColour;
+    vColour.Set(wxString(wxT("BLACK")));
+    LONG                            lColor = (LONG)vColour.GetPixel();
     ::WinSetPresParam( m_hWnd
                       ,PP_FOREGROUNDCOLOR
                       ,sizeof(LONG)
@@ -80,7 +84,7 @@ bool wxStaticBox::Create( wxWindow*       pParent,
             ,rSize.x
             ,rSize.y
            );
-    return true;
+    return TRUE;
 } // end of wxStaticBox::Create
 
 wxSize wxStaticBox::DoGetBestSize() const
@@ -104,9 +108,13 @@ wxSize wxStaticBox::DoGetBestSize() const
                  );
 } // end of wxStaticBox::DoGetBestSize
 
-MRESULT wxStaticBox::OS2WindowProc( WXUINT    nMsg,
-                                    WXWPARAM  wParam,
-                                    WXLPARAM  lParam )
+MRESULT wxStaticBox::OS2WindowProc(
+  WXUINT                            nMsg
+, WXWPARAM                          wParam
+, WXLPARAM                          lParam
+)
 {
     return wxControl::OS2WindowProc(nMsg, wParam, lParam);
 } // end of wxStaticBox::OS2WindowProc
+
+

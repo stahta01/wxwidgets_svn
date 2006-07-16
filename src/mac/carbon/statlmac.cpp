@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/statlmac.cpp
+// Name:        generic/statline.cpp
 // Purpose:     a generic wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -16,20 +16,21 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statline.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#if wxUSE_STATLINE
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATLINE
-
 #include "wx/statline.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/statbox.h"
-#endif
+#include "wx/statbox.h"
 
 #include "wx/mac/uma.h"
 
@@ -50,19 +51,19 @@ bool wxStaticLine::Create( wxWindow *parent,
                            long style,
                            const wxString &name)
 {
-    m_macIsUserPane = false ;
-
+    m_macIsUserPane = FALSE ;
+    
     if ( !wxStaticLineBase::Create(parent, id, pos, size,
                                    style, wxDefaultValidator, name) )
         return false;
 
     Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
     m_peer = new wxMacControl(this) ;
-    verify_noerr(CreateSeparatorControl(MAC_WXHWND(parent->MacGetTopLevelWindowRef()),&bounds, m_peer->GetControlRefAddr() ) ) ;
+    verify_noerr(CreateSeparatorControl(MAC_WXHWND(parent->MacGetTopLevelWindowRef()),&bounds, m_peer->GetControlRefAddr() ) ) ;  
 
     MacPostControlCreate(pos,size) ;
 
-    return true;
+    return TRUE;
 }
 
 #endif //wxUSE_STATLINE

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_listbk.h
+// Name:        xh_listbk.h
 // Purpose:     XML resource handler for wxListbook
 // Author:      Vaclav Slavik
 // Copyright:   (c) 2000 Vaclav Slavik
@@ -8,6 +8,10 @@
 
 #ifndef _WX_XH_LISTBK_H_
 #define _WX_XH_LISTBK_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_listbk.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

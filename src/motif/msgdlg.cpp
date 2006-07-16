@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "msgdlg.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -20,10 +24,12 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/defs.h"
+
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
 #pragma message disable nosimpint
-#include "wx/vms_x_fix.h"
+#include <wx/vms_x_fix.h>
 #endif
 #include <X11/Xlib.h>
 
@@ -33,15 +39,11 @@
 #pragma message enable nosimpint
 #endif
 
+#include "wx/app.h"
+#include "wx/intl.h"
 #include "wx/msgdlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-#endif
-
 #include "wx/motif/private.h"
+#include "wx/settings.h"
 
 // ----------------------------------------------------------------------------
 // macros
@@ -269,3 +271,4 @@ int wxMessageDialog::ShowModal()
 
     return m_result;
 }
+

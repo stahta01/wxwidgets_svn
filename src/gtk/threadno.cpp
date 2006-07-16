@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/thread.cpp
+// Name:        thread.cpp
 // Purpose:     Solaris thread support
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -9,17 +9,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/thread.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
-
 #include "wx/wx.h"
 #include "wx/module.h"
+#include "wx/log.h"
 
 wxMutex::wxMutex()
 {

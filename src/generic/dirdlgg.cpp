@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/dirdlg.cpp
+// Name:        dirdlg.cpp
 // Purpose:     wxDirDialog
 // Author:      Harm van der Heijden, Robert Roebling & Julian Smart
 // Modified by:
@@ -9,12 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dirdlgg.h"
+#endif
+
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_DIRDLG
 
@@ -26,13 +33,13 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/msgdlg.h"
-    #include "wx/bmpbuttn.h"
 #endif
 
 #include "wx/statline.h"
 #include "wx/dirctrl.h"
 #include "wx/generic/dirdlgg.h"
 #include "wx/artprov.h"
+#include "wx/bmpbuttn.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -78,22 +85,10 @@ END_EVENT_TABLE()
 wxGenericDirDialog::wxGenericDirDialog(wxWindow* parent, const wxString& title,
                                        const wxString& defaultPath, long style,
                                        const wxPoint& pos, const wxSize& sz,
-                                       const wxString& name)
-{
-    Create(parent, title, defaultPath, style, pos, sz, name);
-}
-
-bool wxGenericDirDialog::Create(wxWindow* parent,
-                                const wxString& title,
-                                const wxString& defaultPath, long style,
-                                const wxPoint& pos,
-                                const wxSize& sz,
-                                const wxString& name)
+                                       const wxString& name):
+                wxDialog(parent, ID_DIRCTRL, title, pos, sz, style, name)
 {
     wxBusyCursor cursor;
-
-    if (!wxDirDialogBase::Create(parent, title, defaultPath, style, pos, sz, name))
-        return false;
 
     m_path = defaultPath;
     if (m_path == wxT("~"))
@@ -103,13 +98,13 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
-    // smartphones does not support or do not waste space for wxButtons
+    // smart phones does not support or do not waste space for wxButtons
 #if defined(__SMARTPHONE__)
 
     wxMenu *dirMenu = new wxMenu;
     dirMenu->Append(ID_GO_HOME, _("Home"));
 
-    if (!HasFlag(wxDD_DIR_MUST_EXIST))
+    if (style & wxDD_NEW_DIR_BUTTON)
     {
         dirMenu->Append(ID_NEW, _("New directory"));
     }
@@ -117,6 +112,8 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
     dirMenu->AppendCheckItem(ID_SHOW_HIDDEN, _("Show hidden directories"));
     dirMenu->AppendSeparator();
     dirMenu->Append(wxID_CANCEL, _("Cancel"));
+
+    SetRightMenu(wxID_ANY, _("Options"), dirMenu);
 
 #else
 
@@ -133,7 +130,7 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
 
     // I'm not convinced we need a New button, and we tend to get annoying
     // accidental-editing with label editing enabled.
-    if (!HasFlag(wxDD_DIR_MUST_EXIST))
+    if (style & wxDD_NEW_DIR_BUTTON)
     {
         wxBitmapButton* newButton =
             new wxBitmapButton(this, ID_NEW,
@@ -158,7 +155,7 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
     long dirStyle = wxDIRCTRL_DIR_ONLY | wxDEFAULT_CONTROL_BORDER;
 
 #ifdef __WXMSW__
-    if (!HasFlag(wxDD_DIR_MUST_EXIST))
+    if (style & wxDD_NEW_DIR_BUTTON)
     {
         // Only under Windows do we need the wxTR_EDIT_LABEL tree control style
         // before we can call EditLabel (required for "New directory")
@@ -183,43 +180,29 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
     m_input = new wxTextCtrl( this, ID_TEXTCTRL, m_path, wxDefaultPosition );
     topsizer->Add( m_input, 0, wxTOP|wxLEFT|wxRIGHT | wxEXPAND, wxLARGESMALL(10,0) );
 
-    // 3) buttons if any
-    wxSizer *buttonSizer = CreateButtonSizer( wxOK|wxCANCEL , true, wxLARGESMALL(10,0) );
-    if(buttonSizer->GetChildren().GetCount() > 0 )
-    {
-        topsizer->Add( buttonSizer, 0, wxEXPAND | wxALL, wxLARGESMALL(10,0) );
-    }
-    else
-    {
-        topsizer->AddSpacer( wxLARGESMALL(10,0) );
-        delete buttonSizer;
-    }
+#ifndef __SMARTPHONE__
 
-#ifdef __SMARTPHONE__
-    // overwrite menu achieved with earlier CreateButtonSizer() call
-    SetRightMenu(wxID_ANY, _("Options"), dirMenu);
+#if wxUSE_STATLINE
+    // 3) Static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
 #endif
+
+    // 4) Buttons
+    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxEXPAND | wxALL, 10 );
+
+#endif // !__SMARTPHONE__
 
     m_input->SetFocus();
 
     SetAutoLayout( true );
     SetSizer( topsizer );
 
+#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
     Centre( wxBOTH );
-
-    return true;
-}
-
-void wxGenericDirDialog::EndModal(int retCode)
-{
-    // before proceeding, change the current working directory if user asked so
-    if (retCode == wxID_OK && HasFlag(wxDD_CHANGE_DIR))
-        wxSetWorkingDirectory(m_path);
-
-    wxDialog::EndModal(retCode);
+#endif
 }
 
 void wxGenericDirDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
@@ -230,15 +213,12 @@ void wxGenericDirDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 void wxGenericDirDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
     m_path = m_input->GetValue();
-
     // Does the path exist? (User may have typed anything in m_input)
-    if (wxDirExists(m_path))
-    {
+    if (wxDirExists(m_path)) {
         // OK, path exists, we're done.
         EndModal(wxID_OK);
         return;
     }
-
     // Interact with user, find out if the dir is a typo or to be created
     wxString msg;
     msg.Printf(_("The directory '%s' does not exist\nCreate it now?"),
@@ -246,18 +226,15 @@ void wxGenericDirDialog::OnOK(wxCommandEvent& WXUNUSED(event))
     wxMessageDialog dialog(this, msg, _("Directory does not exist"),
                            wxYES_NO | wxICON_WARNING);
 
-    if ( dialog.ShowModal() == wxID_YES )
-    {
+    if ( dialog.ShowModal() == wxID_YES ) {
         // Okay, let's make it
         wxLogNull log;
-        if (wxMkdir(m_path))
-        {
+        if (wxMkdir(m_path)) {
             // The new dir was created okay.
             EndModal(wxID_OK);
             return;
         }
-        else
-        {
+        else {
             // Trouble...
             msg.Printf(_("Failed to create directory '%s'\n(Do you have the required permissions?)"),
                        m_path.c_str());
@@ -300,7 +277,7 @@ void wxGenericDirDialog::OnTreeSelected( wxTreeEvent &event )
 
     if (data)
        m_input->SetValue( data->m_path );
-}
+};
 
 void wxGenericDirDialog::OnTreeKeyDown( wxTreeEvent &WXUNUSED(event) )
 {
@@ -310,7 +287,7 @@ void wxGenericDirDialog::OnTreeKeyDown( wxTreeEvent &WXUNUSED(event) )
     wxDirItemData *data = (wxDirItemData*)m_dirCtrl->GetTreeCtrl()->GetItemData(m_dirCtrl->GetTreeCtrl()->GetSelection());
     if (data)
         m_input->SetValue( data->m_path );
-}
+};
 
 void wxGenericDirDialog::OnShowHidden( wxCommandEvent& event )
 {

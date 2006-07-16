@@ -23,12 +23,10 @@ __all__ = [
     'tools',
 
     # other modules
-    'aui',
     'calendar',
     'grid',
     'html',
     'media',
-    'richtext',
     'webkit',
     'wizard',
     'xrc',

@@ -14,6 +14,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univdialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -21,12 +25,13 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/dialog.h"
     #include "wx/utils.h"
     #include "wx/app.h"
 #endif
+
+#include "wx/settings.h"
 
 #include "wx/evtloop.h"
 
@@ -66,7 +71,13 @@ bool wxDialog::Create(wxWindow *parent,
     // all dialogs should have tab traversal enabled
     style |= wxTAB_TRAVERSAL;
 
-    return wxTopLevelWindow::Create(parent, id, title, pos, size, style, name);
+    if (!wxTopLevelWindow::Create(parent, id, title, pos, size, style, name))
+        return false;
+
+    if ( !m_hasFont )
+        SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+
+    return true;
 }
 
 void wxDialog::OnApply(wxCommandEvent &WXUNUSED(event))
@@ -215,7 +226,7 @@ void wxDialog::EndModal(int retCode)
     }
 
     m_isShowingModal = false;
-
+    
     m_eventLoop->Exit();
 
     Show(false);

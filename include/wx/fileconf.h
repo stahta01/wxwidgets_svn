@@ -13,6 +13,10 @@
 #ifndef   _FILECONF_H
 #define   _FILECONF_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fileconf.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CONFIG
@@ -122,11 +126,11 @@ public:
                const wxString& localFilename = wxEmptyString,
                const wxString& globalFilename = wxEmptyString,
                long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
-               const wxMBConv& conv = wxConvAuto());
+               wxMBConv& conv = wxConvUTF8);
 
 #if wxUSE_STREAMS
     // ctor that takes an input stream.
-  wxFileConfig(wxInputStream &inStream, const wxMBConv& conv = wxConvAuto());
+  wxFileConfig(wxInputStream &inStream, wxMBConv& conv = wxConvUTF8);
 #endif // wxUSE_STREAMS
 
     // dtor will save unsaved data
@@ -169,7 +173,7 @@ public:
   // save the entire config file text to the given stream, note that the text
   // won't be saved again in dtor when Flush() is called if you use this method
   // as it won't be "changed" any more
-  virtual bool Save(wxOutputStream& os, const wxMBConv& conv = wxConvAuto());
+  virtual bool Save(wxOutputStream& os, wxMBConv& conv = wxConvUTF8);
 #endif // wxUSE_STREAMS
 
 public:
@@ -200,7 +204,7 @@ private:
   void CleanUp();
 
   // parse the whole file
-  void Parse(const wxTextBuffer& buffer, bool bLocal);
+  void Parse(wxTextBuffer& buffer, bool bLocal);
 
   // the same as SetPath("/")
   void SetRootPath();
@@ -227,7 +231,7 @@ private:
   wxFileConfigGroup *m_pRootGroup,      // the top (unnamed) group
                     *m_pCurrentGroup;   // the current group
 
-  wxMBConv    *m_conv;
+  wxMBConv   &m_conv;
 
 #ifdef __UNIX__
   int m_umask;                          // the umask to use for file creation

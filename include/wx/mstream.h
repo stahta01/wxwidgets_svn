@@ -27,16 +27,15 @@ public:
     wxMemoryInputStream(const wxMemoryOutputStream& stream);
     virtual ~wxMemoryInputStream();
     virtual wxFileOffset GetLength() const { return m_length; }
+    virtual bool Eof() const;
     virtual bool IsSeekable() const { return true; }
 
     char Peek();
 
     wxStreamBuffer *GetInputStreamBuffer() const { return m_i_streambuf; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, compatibility only
-    wxDEPRECATED( wxStreamBuffer *InputStreamBuffer() const );
-#endif // WXWIN_COMPATIBILITY_2_6
+    wxStreamBuffer *InputStreamBuffer() const { return m_i_streambuf; }
 
 protected:
     wxStreamBuffer *m_i_streambuf;
@@ -64,10 +63,8 @@ public:
 
     wxStreamBuffer *GetOutputStreamBuffer() const { return m_o_streambuf; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, compatibility only
-    wxDEPRECATED( wxStreamBuffer *OutputStreamBuffer() const );
-#endif // WXWIN_COMPATIBILITY_2_6
+    wxStreamBuffer *OutputStreamBuffer() const { return m_o_streambuf; }
 
 protected:
     wxStreamBuffer *m_o_streambuf;
@@ -80,13 +77,9 @@ protected:
     DECLARE_NO_COPY_CLASS(wxMemoryOutputStream)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
-    inline wxStreamBuffer *wxMemoryInputStream::InputStreamBuffer() const { return m_i_streambuf; }
-    inline wxStreamBuffer *wxMemoryOutputStream::OutputStreamBuffer() const { return m_o_streambuf; }
-#endif // WXWIN_COMPATIBILITY_2_6
-
 #endif
   // wxUSE_STREAMS
 
 #endif
   // _WX_WXMMSTREAM_H__
+

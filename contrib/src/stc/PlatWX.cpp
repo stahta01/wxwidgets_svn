@@ -47,21 +47,14 @@ wxColour wxColourFromCA(const ColourAllocated& ca) {
 Palette::Palette() {
     used = 0;
     allowRealization = false;
-    size = 100;
-    entries = new ColourPair[size];
 }
 
 Palette::~Palette() {
     Release();
-    delete [] entries;
-    entries = 0;
 }
 
 void Palette::Release() {
     used = 0;
-    delete [] entries;
-    size = 100;
-    entries = new ColourPair[size];
 }
 
 // This method either adds a colour to the list of wanted colours (want==true)
@@ -74,20 +67,11 @@ void Palette::WantFind(ColourPair &cp, bool want) {
                 return;
         }
 
-        if (used >= size) {
-            int sizeNew = size * 2;
-            ColourPair *entriesNew = new ColourPair[sizeNew];
-            for (int j=0; j<size; j++) {
-                entriesNew[j] = entries[j];
-            }
-            delete []entries;
-            entries = entriesNew;
-            size = sizeNew;
+        if (used < numEntries) {
+            entries[used].desired = cp.desired;
+            entries[used].allocated.Set(cp.desired.AsLong());
+            used++;
         }
-
-        entries[used].desired = cp.desired;
-        entries[used].allocated.Set(cp.desired.AsLong());
-        used++;
     } else {
         for (int i=0; i < used; i++) {
             if (entries[i].desired == cp.desired) {
@@ -178,8 +162,6 @@ public:
     virtual void FillRectangle(PRectangle rc, ColourAllocated back);
     virtual void FillRectangle(PRectangle rc, Surface &surfacePattern);
     virtual void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-    virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-                                ColourAllocated outline, int alphaOutline, int flags);
     virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
     virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
@@ -332,14 +314,6 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
     PenColour(fore);
     BrushColour(back);
     hdc->DrawRoundedRectangle(wxRectFromPRectangle(rc), 4);
-}
-
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize,
-                                 ColourAllocated fill, int alphaFill,
-                                 ColourAllocated outline, int alphaOutline, int flags) {
-// ** TODO
-
-    RectangleDraw(rc, outline, fill);
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
@@ -569,11 +543,13 @@ void Window::Show(bool show) {
 
 void Window::InvalidateAll() {
     GETWIN(id)->Refresh(false);
+    wxWakeUpIdle();
 }
 
 void Window::InvalidateRectangle(PRectangle rc) {
     wxRect r = wxRectFromPRectangle(rc);
     GETWIN(id)->Refresh(false, &r);
+    wxWakeUpIdle();
 }
 
 void Window::SetFont(Font &font) {
@@ -1366,20 +1342,11 @@ int Platform::DBCSCharMaxLength() {
 //----------------------------------------------------------------------
 
 ElapsedTime::ElapsedTime() {
-    wxLongLong localTime = wxGetLocalTimeMillis();
-    littleBit = localTime.GetLo();
-    bigBit = localTime.GetHi();
+    wxStartTimer();
 }
 
 double ElapsedTime::Duration(bool reset) {
-    wxLongLong prevTime(bigBit, littleBit);
-    wxLongLong localTime = wxGetLocalTimeMillis();
-    if(reset) {
-        littleBit = localTime.GetLo();
-        bigBit = localTime.GetHi();
-    }
-    wxLongLong duration = localTime - prevTime;
-    double result = duration.ToDouble();
+    double result = wxGetElapsedTime(reset);
     result /= 1000.0;
     return result;
 }

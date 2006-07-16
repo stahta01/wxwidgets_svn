@@ -17,6 +17,12 @@
 // headers
 // ----------------------------------------------------------------------------
 
+/* this is done in platform-specific files
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
+*/
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,9 +35,9 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/filefn.h"
-    #include "wx/arrstr.h"
 #endif //WX_PRECOMP
 
+#include "wx/arrstr.h"
 #include "wx/dir.h"
 
 // ============================================================================
@@ -236,3 +242,4 @@ size_t wxDir::GetAllFiles(const wxString& dirname,
 
     return nFiles;
 }
+

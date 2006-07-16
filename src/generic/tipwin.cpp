@@ -17,26 +17,29 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx/wx.h".
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tipwin.h"
+#endif
+
+// For compilers that support precompilatixon, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_TIPWINDOW
-
-#include "wx/tipwin.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
-    #include "wx/timer.h"
-    #include "wx/settings.h"
 #endif // WX_PRECOMP
-
 #ifdef __WXGTK__
     #include <gtk/gtk.h>
 #endif
+#include "wx/tipwin.h"
+
+#if wxUSE_TIPWINDOW
+
+#include "wx/timer.h"
+#include "wx/settings.h"
 
 // ----------------------------------------------------------------------------
 // constants

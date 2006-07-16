@@ -79,7 +79,7 @@ EXTRALIBS_FOR_BASE =
 __stcdll___depname =
 !ifeq SHARED 1
 __stcdll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
 !endif
 __DEBUGINFO_2 =
 !ifeq BUILD debug
@@ -214,8 +214,7 @@ __UNICODE_DEFINE_p = -d_UNICODE
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = ..\..\src\stc\..\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -236,7 +235,6 @@ STCDLL_OBJECTS =  &
 	$(OBJS)\stcdll_AutoComplete.obj &
 	$(OBJS)\stcdll_CallTip.obj &
 	$(OBJS)\stcdll_CellBuffer.obj &
-	$(OBJS)\stcdll_CharClassify.obj &
 	$(OBJS)\stcdll_ContractionState.obj &
 	$(OBJS)\stcdll_Document.obj &
 	$(OBJS)\stcdll_DocumentAccessor.obj &
@@ -271,7 +269,6 @@ STCDLL_OBJECTS =  &
 	$(OBJS)\stcdll_LexGui4Cli.obj &
 	$(OBJS)\stcdll_LexHTML.obj &
 	$(OBJS)\stcdll_LexHaskell.obj &
-	$(OBJS)\stcdll_LexInno.obj &
 	$(OBJS)\stcdll_LexKix.obj &
 	$(OBJS)\stcdll_LexLisp.obj &
 	$(OBJS)\stcdll_LexLout.obj &
@@ -282,7 +279,6 @@ STCDLL_OBJECTS =  &
 	$(OBJS)\stcdll_LexMatlab.obj &
 	$(OBJS)\stcdll_LexMetapost.obj &
 	$(OBJS)\stcdll_LexNsis.obj &
-	$(OBJS)\stcdll_LexOpal.obj &
 	$(OBJS)\stcdll_LexOthers.obj &
 	$(OBJS)\stcdll_LexPB.obj &
 	$(OBJS)\stcdll_LexPOV.obj &
@@ -297,8 +293,6 @@ STCDLL_OBJECTS =  &
 	$(OBJS)\stcdll_LexTADS3.obj &
 	$(OBJS)\stcdll_LexScriptol.obj &
 	$(OBJS)\stcdll_LexSpecman.obj &
-	$(OBJS)\stcdll_LexSpice.obj &
-	$(OBJS)\stcdll_LexTCL.obj &
 	$(OBJS)\stcdll_LexTeX.obj &
 	$(OBJS)\stcdll_LexVB.obj &
 	$(OBJS)\stcdll_LexVHDL.obj &
@@ -329,7 +323,6 @@ STCLIB_OBJECTS =  &
 	$(OBJS)\stclib_AutoComplete.obj &
 	$(OBJS)\stclib_CallTip.obj &
 	$(OBJS)\stclib_CellBuffer.obj &
-	$(OBJS)\stclib_CharClassify.obj &
 	$(OBJS)\stclib_ContractionState.obj &
 	$(OBJS)\stclib_Document.obj &
 	$(OBJS)\stclib_DocumentAccessor.obj &
@@ -364,7 +357,6 @@ STCLIB_OBJECTS =  &
 	$(OBJS)\stclib_LexGui4Cli.obj &
 	$(OBJS)\stclib_LexHTML.obj &
 	$(OBJS)\stclib_LexHaskell.obj &
-	$(OBJS)\stclib_LexInno.obj &
 	$(OBJS)\stclib_LexKix.obj &
 	$(OBJS)\stclib_LexLisp.obj &
 	$(OBJS)\stclib_LexLout.obj &
@@ -375,7 +367,6 @@ STCLIB_OBJECTS =  &
 	$(OBJS)\stclib_LexMatlab.obj &
 	$(OBJS)\stclib_LexMetapost.obj &
 	$(OBJS)\stclib_LexNsis.obj &
-	$(OBJS)\stclib_LexOpal.obj &
 	$(OBJS)\stclib_LexOthers.obj &
 	$(OBJS)\stclib_LexPB.obj &
 	$(OBJS)\stclib_LexPOV.obj &
@@ -390,8 +381,6 @@ STCLIB_OBJECTS =  &
 	$(OBJS)\stclib_LexTADS3.obj &
 	$(OBJS)\stclib_LexScriptol.obj &
 	$(OBJS)\stclib_LexSpecman.obj &
-	$(OBJS)\stclib_LexSpice.obj &
-	$(OBJS)\stclib_LexTCL.obj &
 	$(OBJS)\stclib_LexTeX.obj &
 	$(OBJS)\stclib_LexVB.obj &
 	$(OBJS)\stclib_LexVHDL.obj &
@@ -423,19 +412,19 @@ clean : .SYMBOLIC
 	-if exist $(OBJS)\*.lbc del $(OBJS)\*.lbc
 	-if exist $(OBJS)\*.ilk del $(OBJS)\*.ilk
 	-if exist $(OBJS)\*.pch del $(OBJS)\*.pch
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib
 
 !ifeq SHARED 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll :  $(STCDLL_OBJECTS) $(OBJS)\stcdll_version.res
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll :  $(STCDLL_OBJECTS) $(OBJS)\stcdll_version.res
 	@%create $(OBJS)\stcdll.lbc
 	@%append $(OBJS)\stcdll.lbc option quiet
 	@%append $(OBJS)\stcdll.lbc name $^@
 	@%append $(OBJS)\stcdll.lbc option caseexact
 	@%append $(OBJS)\stcdll.lbc $(LDFLAGS) $(__DEBUGINFO_2)  libpath $(LIBDIRNAME)
 	@for %i in ($(STCDLL_OBJECTS)) do @%append $(OBJS)\stcdll.lbc file %i
-	@for %i in ( $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p) ) do @%append $(OBJS)\stcdll.lbc library %i
+	@for %i in ( $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p) ) do @%append $(OBJS)\stcdll.lbc library %i
 	@%append $(OBJS)\stcdll.lbc option resource=$(OBJS)\stcdll_version.res
 	@%append $(OBJS)\stcdll.lbc system nt_dll
 	wlink @$(OBJS)\stcdll.lbc
@@ -450,7 +439,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 $(OBJS)\stcdll_version.res :  .AUTODEPEND ../../src/stc\..\..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@   -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  -i=$(SETUPHDIR) -i=..\..\src\stc\..\..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG) $<
+	wrc -q -ad -bt=nt -r -fo=$^@   -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  -i=$(SETUPHDIR) -i=..\..\src\stc\..\..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG) $<
 
 $(OBJS)\stcdll_PlatWX.obj :  .AUTODEPEND ../../src/stc\PlatWX.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
@@ -468,9 +457,6 @@ $(OBJS)\stcdll_CallTip.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CallTip.cx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_CellBuffer.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CellBuffer.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_CharClassify.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CharClassify.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_ContractionState.obj :  .AUTODEPEND ../../src/stc\scintilla\src\ContractionState.cxx
@@ -575,9 +561,6 @@ $(OBJS)\stcdll_LexHTML.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexHTML.cx
 $(OBJS)\stcdll_LexHaskell.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexHaskell.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
-$(OBJS)\stcdll_LexInno.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexInno.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
 $(OBJS)\stcdll_LexKix.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexKix.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
@@ -606,9 +589,6 @@ $(OBJS)\stcdll_LexMetapost.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexMet
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_LexNsis.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexNsis.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_LexOpal.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexOpal.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_LexOthers.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexOthers.cxx
@@ -651,12 +631,6 @@ $(OBJS)\stcdll_LexScriptol.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexScr
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_LexSpecman.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexSpecman.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_LexSpice.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexSpice.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_LexTCL.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexTCL.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
 
 $(OBJS)\stcdll_LexTeX.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexTeX.cxx
@@ -720,9 +694,6 @@ $(OBJS)\stclib_CallTip.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CallTip.cx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_CellBuffer.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CellBuffer.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_CharClassify.obj :  .AUTODEPEND ../../src/stc\scintilla\src\CharClassify.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_ContractionState.obj :  .AUTODEPEND ../../src/stc\scintilla\src\ContractionState.cxx
@@ -827,9 +798,6 @@ $(OBJS)\stclib_LexHTML.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexHTML.cx
 $(OBJS)\stclib_LexHaskell.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexHaskell.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
-$(OBJS)\stclib_LexInno.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexInno.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
 $(OBJS)\stclib_LexKix.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexKix.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
@@ -858,9 +826,6 @@ $(OBJS)\stclib_LexMetapost.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexMet
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_LexNsis.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexNsis.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_LexOpal.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexOpal.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_LexOthers.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexOthers.cxx
@@ -903,12 +868,6 @@ $(OBJS)\stclib_LexScriptol.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexScr
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_LexSpecman.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexSpecman.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_LexSpice.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexSpice.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_LexTCL.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexTCL.cxx
 	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
 
 $(OBJS)\stclib_LexTeX.obj :  .AUTODEPEND ../../src/stc\scintilla\src\LexTeX.cxx

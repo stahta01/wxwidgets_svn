@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/bitmap.mm
+// Name:        src/cocoa/bitmap.cpp
 // Purpose:     wxBitmap
 // Author:      David Elliott
 // Modified by:
@@ -10,18 +10,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/bitmap.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/utils.h"
     #include "wx/palette.h"
     #include "wx/icon.h"
     #include "wx/colour.h"
-    #include "wx/image.h"
 #endif //WX_PRECOMP
-
+#include "wx/bitmap.h"
+#include "wx/image.h"
 #include "wx/xpmdecod.h"
 #include "wx/rawbmp.h"
 
@@ -418,11 +415,11 @@ bool wxBitmap::CreateFromXpm(const char **xpm)
 #if wxUSE_IMAGE && wxUSE_XPM
     UnRef();
 
-    wxCHECK_MSG( xpm, false, wxT("invalid XPM data") );
+    wxCHECK_MSG( xpm, false, wxT("invalid XPM data") )
 
     wxXPMDecoder decoder;
     wxImage img = decoder.ReadData(xpm);
-    wxCHECK_MSG( img.Ok(), false, wxT("invalid XPM data") );
+    wxCHECK_MSG( img.Ok(), false, wxT("invalid XPM data") )
 
     *this = wxBitmap(img);
     return true;
@@ -669,3 +666,4 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
     m_cocoaNSBitmapImageRep = [maskRep retain];
     return true;
 }
+

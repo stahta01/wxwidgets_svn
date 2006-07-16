@@ -1,18 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/dcmemory.cpp
+// Name:        dcmemory.cpp
 // Purpose:     wxMemoryDC class
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "dcmemory.h"
+#endif
 
 #include "wx/dcmemory.h"
-
 #include "wx/mac/private.h"
 
 //-----------------------------------------------------------------------------
@@ -22,23 +23,23 @@
 IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC,wxPaintDC)
 
 wxMemoryDC::wxMemoryDC(void)
-          : m_selected()
+: m_selected()
 {
-    m_ok = true;
+    m_ok = TRUE;
     SetBackground(*wxWHITE_BRUSH);
     SetBrush(*wxWHITE_BRUSH);
     SetPen(*wxBLACK_PEN);
-    m_ok = false;
+    m_ok = FALSE;
 };
 
 wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
-          : m_selected()
+: m_selected()
 {
-    m_ok = true;
+    m_ok = TRUE;
     SetBackground(*wxWHITE_BRUSH);
     SetBrush(*wxWHITE_BRUSH);
     SetPen(*wxBLACK_PEN);
-    m_ok = false;
+    m_ok = FALSE;
 };
 
 wxMemoryDC::~wxMemoryDC()
@@ -69,16 +70,16 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
             }
             SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , 0 , 0 , m_selected.GetWidth() , m_selected.GetHeight() ) ;
             CopyRgn( (RgnHandle) m_macBoundaryClipRgn ,(RgnHandle)  m_macCurrentClipRgn ) ;
-            m_ok = true ;
+            m_ok = TRUE ;
         }
         else
         {
-            m_ok = false;
+            m_ok = FALSE;
         }
     }
     else
     {
-        m_ok = false;
+        m_ok = FALSE;
     }
 }
 
@@ -95,3 +96,5 @@ void wxMemoryDC::DoGetSize( int *width, int *height ) const
         if (height) (*height) = 0;
     }
 }
+
+

@@ -61,15 +61,15 @@ enum {
     wxTE_WORDWRAP,
     wxTE_BESTWRAP,
 
+    // obsolete synonym
+    wxTE_LINEWRAP,
+
     // force using RichEdit version 2.0 or 3.0 instead of 1.0 (default) for
     // wxTE_RICH controls - can be used together with or instead of wxTE_RICH
     wxTE_RICH2,
 
     wxTE_CAPITALIZE,
 };
-
-%pythoncode { TE_LINEWRAP = TE_CHARWRAP }
-
 
 
 enum wxTextAttrAlignment
@@ -128,16 +128,6 @@ public:
     // operations
     void Init();
 
-    // merges the attributes of the base and the overlay objects and returns
-    // the result; the parameter attributes take precedence
-    //
-    // WARNING: the order of arguments is the opposite of Combine()
-    static wxTextAttr Merge(const wxTextAttr& base, const wxTextAttr& overlay);
-    
-//     // merges the attributes of this object and overlay
-//     void Merge(const wxTextAttr& overlay);
-
-    
     // setters
     void SetTextColour(const wxColour& colText);
     void SetBackgroundColour(const wxColour& colBack);
@@ -249,8 +239,7 @@ public:
     // sets/clears the dirty flag
     virtual void MarkDirty();
     virtual void DiscardEdits();
-    void SetModified(bool modified);
-    
+
     // set the max number of characters which may be entered in a single line
     // text control
     virtual void SetMaxLength(unsigned long len);

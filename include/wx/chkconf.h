@@ -23,10 +23,6 @@
 #  include "wx/msw/chkconf.h"
 #elif defined(__WXMAC__)
 #  include "wx/mac/chkconf.h"
-#elif defined(__OS2__)
-#  include "wx/os2/chkconf.h"
-#elif defined(__WXMGL__)
-#  include "wx/mgl/chkconf.h"
 #elif defined(__WXMOTIF__)
 #  include "wx/motif/chkconf.h"
 #endif
@@ -71,8 +67,6 @@
 
 /*
    tests for non GUI features
-
-   please keep the options in alphabetical order!
  */
 
 #ifndef wxUSE_CRASHREPORT
@@ -153,14 +147,6 @@
 #       define wxUSE_ON_FATAL_EXCEPTION 0
 #   endif
 #endif /* !defined(wxUSE_ON_FATAL_EXCEPTION) */
-
-#ifndef wxUSE_PRINTF_POS_PARAMS
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_PRINTF_POS_PARAMS must be defined."
-#   else
-#       define wxUSE_PRINTF_POS_PARAMS 0
-#   endif
-#endif /* !defined(wxUSE_PRINTF_POS_PARAMS) */
 
 #ifndef wxUSE_PROTOCOL
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -286,8 +272,6 @@
 
 /*
    all these tests are for GUI only
-
-   please keep the options in alphabetical order!
  */
 #if wxUSE_GUI
 
@@ -392,14 +376,6 @@
 #   endif
 #endif /* !defined(wxUSE_COLOURDLG) */
 
-#ifndef wxUSE_COLOURPICKERCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_COLOURPICKERCTRL must be defined."
-#   else
-#       define wxUSE_COLOURPICKERCTRL 0
-#   endif
-#endif /* !defined(wxUSE_COLOURPICKERCTRL) */
-
 #ifndef wxUSE_COMBOBOX
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_COMBOBOX must be defined."
@@ -407,14 +383,6 @@
 #       define wxUSE_COMBOBOX 0
 #   endif
 #endif /* !defined(wxUSE_COMBOBOX) */
-
-#ifndef wxUSE_COMBOCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_COMBOCTRL must be defined."
-#   else
-#       define wxUSE_COMBOCTRL 0
-#   endif
-#endif /* !defined(wxUSE_COMBOCTRL) */
 
 #ifndef wxUSE_DATAOBJ
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -424,14 +392,6 @@
 #   endif
 #endif /* !defined(wxUSE_DATAOBJ) */
 
-#ifndef wxUSE_DATAVIEWCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_DATAVIEWCTRL must be defined."
-#   else
-#       define wxUSE_DATAVIEWCTRL 0
-#   endif
-#endif /* !defined(wxUSE_DATAVIEWCTRL) */
-
 #ifndef wxUSE_DATEPICKCTRL
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_DATEPICKCTRL must be defined."
@@ -439,14 +399,6 @@
 #       define wxUSE_DATEPICKCTRL 0
 #   endif
 #endif /* !defined(wxUSE_DATEPICKCTRL) */
-
-#ifndef wxUSE_DIRPICKERCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_DIRPICKERCTRL must be defined."
-#   else
-#       define wxUSE_DIRPICKERCTRL 0
-#   endif
-#endif /* !defined(wxUSE_DIRPICKERCTRL) */
 
 #ifndef wxUSE_DISPLAY
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -472,14 +424,6 @@
 #   endif
 #endif /* !defined(wxUSE_FILEDLG) */
 
-#ifndef wxUSE_FILEPICKERCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_FILEPICKERCTRL must be defined."
-#   else
-#       define wxUSE_FILEPICKERCTRL 0
-#   endif
-#endif /* !defined(wxUSE_FILEPICKERCTRL) */
-
 #ifndef wxUSE_FONTDLG
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_FONTDLG must be defined."
@@ -495,14 +439,6 @@
 #       define wxUSE_FONTMAP 0
 #   endif
 #endif /* !defined(wxUSE_FONTMAP) */
-
-#ifndef wxUSE_FONTPICKERCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_FONTPICKERCTRL must be defined."
-#   else
-#       define wxUSE_FONTPICKERCTRL 0
-#   endif
-#endif /* !defined(wxUSE_FONTPICKERCTRL) */
 
 #ifndef wxUSE_GAUGE
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -528,14 +464,6 @@
 #   endif
 #endif /* !defined(wxUSE_HELP) */
 
-#ifndef wxUSE_HYPERLINKCTRL
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_HYPERLINKCTRL must be defined."
-#   else
-#       define wxUSE_HYPERLINKCTRL 0
-#   endif
-#endif /* !defined(wxUSE_HYPERLINKCTRL) */
-
 #ifndef wxUSE_HTML
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_HTML must be defined."
@@ -543,6 +471,14 @@
 #       define wxUSE_HTML 0
 #   endif
 #endif /* !defined(wxUSE_HTML) */
+
+#ifndef wxUSE_XRC
+#   ifdef wxABORT_ON_CONFIG_ERROR
+#       error "wxUSE_XRC must be defined."
+#   else
+#       define wxUSE_XRC 0
+#   endif
+#endif /* !defined(wxUSE_XRC) */
 
 #ifndef wxUSE_LIBMSPACK
 #   ifndef __UNIX__
@@ -676,14 +612,6 @@
 #       define wxUSE_NOTEBOOK 0
 #   endif
 #endif /* !defined(wxUSE_NOTEBOOK) */
-
-#ifndef wxUSE_ODCOMBOBOX
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_ODCOMBOBOX must be defined."
-#   else
-#       define wxUSE_ODCOMBOBOX 0
-#   endif
-#endif /* !defined(wxUSE_ODCOMBOBOX) */
 
 #ifndef wxUSE_PALETTE
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -893,41 +821,11 @@
 #   endif
 #endif /* !defined(wxUSE_WXHTML_HELP) */
 
-#ifndef wxUSE_XRC
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_XRC must be defined."
-#   else
-#       define wxUSE_XRC 0
-#   endif
-#endif /* !defined(wxUSE_XRC) */
-
 #endif /* wxUSE_GUI */
 
 /*
    check consistency of the settings
  */
-
-#if WXWIN_COMPATIBILITY_2_4
-#   if !WXWIN_COMPATIBILITY_2_6
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "2.4.X compatibility requires 2.6.X compatibility"
-#       else
-#           undef WXWIN_COMPATIBILITY_2_6
-#           define WXWIN_COMPATIBILITY_2_6 1
-#       endif
-#   endif
-#endif /* WXWIN_COMPATIBILITY_2_4 */
-
-#if wxUSE_ARCHIVE_STREAMS
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxArchive requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_ARCHIVE_STREAMS
-#           define wxUSE_ARCHIVE_STREAMS 0
-#       endif
-#   endif
-#endif /* wxUSE_ARCHIVE_STREAMS */
 
 #if wxUSE_CRASHREPORT && !wxUSE_ON_FATAL_EXCEPTION
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -1035,17 +933,6 @@
 #       define wxUSE_TEXTFILE 1
 #   endif
 #endif /* wxUSE_MIMETYPE */
-
-#if wxUSE_ODBC
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxODBC requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_ODBC
-#           define wxUSE_ODBC 0
-#       endif
-#   endif
-#endif /* wxUSE_ODBC */
 
 #if wxUSE_TEXTFILE && !wxUSE_TEXTBUFFER
 #   ifdef wxABORT_ON_CONFIG_ERROR

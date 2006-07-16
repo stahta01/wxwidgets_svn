@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/framecmn.cpp
+// Name:        common/framecmn.cpp
 // Purpose:     common (for all platforms) wxFrame functions
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "framebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -23,15 +27,19 @@
     #pragma hdrstop
 #endif
 
-#include "wx/frame.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/frame.h"
     #include "wx/menu.h"
     #include "wx/menuitem.h"
     #include "wx/dcclient.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
 #endif // WX_PRECOMP
+
+#if wxUSE_TOOLBAR
+    #include "wx/toolbar.h"
+#endif
+#if wxUSE_STATUSBAR
+    #include "wx/statusbr.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // event table
@@ -458,7 +466,7 @@ wxToolBar* wxFrameBase::CreateToolBar(long style,
                                       wxWindowID id,
                                       const wxString& name)
 {
-    // the main toolbar can't be recreated (unless it was explicitly deleted
+    // the main toolbar can't be recreated (unless it was explicitly deeleted
     // before)
     wxCHECK_MSG( !m_frameToolBar, (wxToolBar *)NULL,
                  wxT("recreating toolbar in wxFrame") );
@@ -519,16 +527,16 @@ void wxFrameBase::SetToolBar(wxToolBar *toolbar)
 // update all menus
 void wxFrameBase::DoMenuUpdates(wxMenu* menu)
 {
+    wxEvtHandler* source = GetEventHandler();
+    wxMenuBar* bar = GetMenuBar();
+
     if (menu)
-    {
-        wxEvtHandler* source = GetEventHandler();
         menu->UpdateUI(source);
-    }
-    else
+    else if ( bar != NULL )
     {
-        wxMenuBar* bar = GetMenuBar();
-        if (bar != NULL)
-            bar->UpdateMenus();
+        int nCount = bar->GetMenuCount();
+        for (int n = 0; n < nCount; n++)
+            bar->GetMenu(n)->UpdateUI(source);
     }
 }
 
@@ -564,3 +572,12 @@ void wxFrameBase::SetMenuBar(wxMenuBar *menubar)
 }
 
 #endif // wxUSE_MENUS
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxFrameBase::Command(int winid)
+{
+    return ProcessCommand(winid);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2

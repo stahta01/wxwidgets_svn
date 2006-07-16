@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/popupcmn.cpp
+// Name:        common/popupcmn.cpp
 // Purpose:     implementation of wxPopupTransientWindow
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "popupwinbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,9 +33,10 @@
 #include "wx/popupwin.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/combobox.h"        // wxComboCtrl
+    #include "wx/combobox.h"        // wxComboControl
     #include "wx/app.h"             // wxPostEvent
     #include "wx/log.h"
+    #include "wx/app.h"
 #endif //WX_PRECOMP
 
 #ifdef __WXUNIVERSAL__
@@ -187,7 +192,7 @@ wxPopupTransientWindow::~wxPopupTransientWindow()
 {
     if (m_handlerPopup && m_handlerPopup->GetNextHandler())
         PopHandlers();
-
+        
     wxASSERT(!m_handlerFocus || !m_handlerFocus->GetNextHandler());
     wxASSERT(!m_handlerPopup || !m_handlerPopup->GetNextHandler());
 
@@ -206,7 +211,7 @@ void wxPopupTransientWindow::PopHandlers()
             m_handlerPopup = NULL;
         }
         if (m_child->HasCapture())
-        {
+        {       
             m_child->ReleaseMouse();
         }
         m_child = NULL;
@@ -289,11 +294,11 @@ bool wxPopupTransientWindow::Show( bool show )
 
 #ifdef __WXMSW__
     if (!show && m_child && m_child->HasCapture())
-    {
+    {       
         m_child->ReleaseMouse();
     }
 #endif
-
+    
     bool ret = wxPopupWindow::Show( show );
 
 #ifdef __WXGTK__
@@ -386,10 +391,10 @@ void wxPopupTransientWindow::OnIdle(wxIdleEvent& event)
             {
                 m_child->CaptureMouse();
             }
-        }
+        }                
     }
 }
-#endif // __WXMSW__
+#endif
 
 
 #if wxUSE_COMBOBOX && defined(__WXUNIVERSAL__)
@@ -402,13 +407,13 @@ BEGIN_EVENT_TABLE(wxPopupComboWindow, wxPopupTransientWindow)
     EVT_KEY_DOWN(wxPopupComboWindow::OnKeyDown)
 END_EVENT_TABLE()
 
-wxPopupComboWindow::wxPopupComboWindow(wxComboCtrl *parent)
+wxPopupComboWindow::wxPopupComboWindow(wxComboControl *parent)
                   : wxPopupTransientWindow(parent)
 {
     m_combo = parent;
 }
 
-bool wxPopupComboWindow::Create(wxComboCtrl *parent)
+bool wxPopupComboWindow::Create(wxComboControl *parent)
 {
     m_combo = parent;
 
@@ -436,7 +441,7 @@ void wxPopupComboWindow::PositionNearCombo()
 
 void wxPopupComboWindow::OnDismiss()
 {
-    m_combo->OnPopupDismiss();
+    m_combo->OnDismiss();
 }
 
 void wxPopupComboWindow::OnKeyDown(wxKeyEvent& event)
@@ -461,11 +466,8 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
 
     wxPoint pos = event.GetPosition();
 
-    // in non-Univ ports the system manages scrollbars for us
-#if defined(__WXUNIVERSAL__) && wxUSE_SCROLLBAR
     // scrollbar on which the click occurred
     wxWindow *sbar = NULL;
-#endif // __WXUNIVERSAL__ && wxUSE_SCROLLBAR
 
     wxWindow *win = (wxWindow *)event.GetEventObject();
 
@@ -485,20 +487,20 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
                 // dismissing a tooltip shouldn't waste a click, i.e. you
                 // should be able to dismiss it and press the button with the
                 // same click, so repost this event to the window beneath us
-                wxWindow *winUnder = wxFindWindowAtPoint(event2.GetPosition());
-                if ( winUnder )
+                wxWindow *win = wxFindWindowAtPoint(event2.GetPosition());
+                if ( win )
                 {
                     // translate the event coords to the ones of the window
                     // which is going to get the event
-                    winUnder->ScreenToClient(&event2.m_x, &event2.m_y);
+                    win->ScreenToClient(&event2.m_x, &event2.m_y);
 
-                    event2.SetEventObject(winUnder);
-                    wxPostEvent(winUnder, event2);
+                    event2.SetEventObject(win);
+                    wxPostEvent(win, event2);
                 }
             }
             break;
 
-#if defined(__WXUNIVERSAL__) && wxUSE_SCROLLBAR
+#ifdef __WXUNIVERSAL__
         case wxHT_WINDOW_HORZ_SCROLLBAR:
             sbar = win->GetScrollbar(wxHORIZONTAL);
             break;
@@ -506,7 +508,7 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
         case wxHT_WINDOW_VERT_SCROLLBAR:
             sbar = win->GetScrollbar(wxVERTICAL);
             break;
-#endif // __WXUNIVERSAL__ && wxUSE_SCROLLBAR
+#endif
 
         default:
             // forgot to update the switch after adding a new hit test code?
@@ -523,7 +525,6 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
             break;
     }
 
-#if defined(__WXUNIVERSAL__) && wxUSE_SCROLLBAR
     if ( sbar )
     {
         // translate the event coordinates to the scrollbar ones
@@ -536,7 +537,6 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
 
         (void)sbar->GetEventHandler()->ProcessEvent(event2);
     }
-#endif // __WXUNIVERSAL__ && wxUSE_SCROLLBAR
 }
 
 // ----------------------------------------------------------------------------
@@ -569,3 +569,4 @@ void wxPopupFocusHandler::OnKeyDown(wxKeyEvent& event)
 }
 
 #endif // wxUSE_POPUPWIN
+

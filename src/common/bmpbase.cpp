@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/bmpbase.cpp
+// Name:        bitmap.cpp
 // Purpose:     wxBitmapBase
 // Author:      VaclavSlavik
 // Created:     2001/04/11
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2001, Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bitmapbase.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -21,16 +25,13 @@
     defined(__WXMOTIF__) || \
     defined(__WXX11__)
 
+#include "wx/setup.h"
+#include "wx/utils.h"
+#include "wx/palette.h"
 #include "wx/bitmap.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/utils.h"
-    #include "wx/palette.h"
-    #include "wx/icon.h"
-    #include "wx/image.h"
-#endif // WX_PRECOMP
-
+#include "wx/icon.h"
+#include "wx/log.h"
+#include "wx/image.h"
 #include "wx/module.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxBitmapBase, wxGDIObject)
@@ -80,7 +81,7 @@ wxBitmapHandler *wxBitmapBase::FindHandler(const wxString& extension, wxBitmapTy
     {
         wxBitmapHandler *handler = (wxBitmapHandler *)node->GetData();
         if ( handler->GetExtension() == extension &&
-                    (bitmapType == wxBITMAP_TYPE_ANY || handler->GetType() == bitmapType) )
+                    (bitmapType == -1 || handler->GetType() == bitmapType) )
             return handler;
         node = node->GetNext();
     }

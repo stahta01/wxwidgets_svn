@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////
-// File:        src/msw/taskbar.cpp
+// File:        taskbar.cpp
 // Purpose:     Implements wxTaskBarIcon class for manipulating icons on
 //              the Windows task bar.
 // Author:      Julian Smart
@@ -10,19 +10,26 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "taskbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/frame.h"
-    #include "wx/utils.h"
-    #include "wx/menu.h"
+#include "wx/defs.h"
+#include "wx/window.h"
+#include "wx/frame.h"
+#include "wx/utils.h"
+#include "wx/menu.h"
 #endif
+
+#if defined(__WIN95__)
 
 #include "wx/msw/private.h"
 #include "wx/msw/winundef.h"
@@ -147,7 +154,7 @@ bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
     m_icon = icon;
     m_strTooltip = tooltip;
 
-    NotifyIconData notifyData(GetHwndOf(m_win));
+    NotifyIconData notifyData((HWND)m_win->GetHWND());
 
     if (icon.Ok())
     {
@@ -178,7 +185,7 @@ bool wxTaskBarIcon::RemoveIcon()
 
     m_iconAdded = false;
 
-    NotifyIconData notifyData(GetHwndOf(m_win));
+    NotifyIconData notifyData((HWND)m_win->GetHWND());
 
     return Shell_NotifyIcon(NIM_DELETE, &notifyData) != 0;
 }
@@ -203,14 +210,13 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
 
     menu->UpdateUI();
 
-    // the SetForegroundWindow() and PostMessage() calls are needed to work
-    // around Win32 bug with the popup menus shown for the notifications as
-    // documented at http://support.microsoft.com/kb/q135788/
-    ::SetForegroundWindow(GetHwndOf(m_win));
+    // Work around a WIN32 bug
+    ::SetForegroundWindow((HWND)m_win->GetHWND());
 
     bool rval = m_win->PopupMenu(menu, 0, 0);
 
-    ::PostMessage(GetHwndOf(m_win), WM_NULL, 0, 0L);
+    // Work around a WIN32 bug
+    ::PostMessage((HWND)m_win->GetHWND(), WM_NULL, 0, 0L);
 
     m_win->PopEventHandler(false);
 
@@ -323,3 +329,5 @@ long wxTaskBarIcon::WindowProc(unsigned int msg,
 
     return 0;
 }
+
+#endif // __WIN95__

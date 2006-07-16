@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "clipbrd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CLIPBOARD
+#ifndef WX_PRECOMP
+    #include "wx/setup.h"
+#endif
 
-#include "wx/clipbrd.h"
+#if wxUSE_CLIPBOARD
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -36,12 +42,14 @@
     #include "wx/bitmap.h"
     #include "wx/utils.h"
     #include "wx/intl.h"
-    #include "wx/log.h"
 #endif
 
 #if wxUSE_METAFILE
     #include "wx/metafile.h"
 #endif
+
+#include "wx/log.h"
+#include "wx/clipbrd.h"
 
 #include <string.h>
 
@@ -199,3 +207,4 @@ bool wxClipboard::GetData( wxDataObject& data )
 }
 
 #endif // wxUSE_CLIPBOARD
+

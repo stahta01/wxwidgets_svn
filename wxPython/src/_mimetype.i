@@ -81,7 +81,7 @@ public:
 
     // get the array of all extensions
     const wxArrayString& GetExtensions() const;
-    size_t GetExtensionsCount() const;
+    int GetExtensionsCount() const;
 
     // get the icon info
     const wxString& GetIconFile() const;
@@ -295,6 +295,7 @@ public:
 
 //---------------------------------------------------------------------------
 
+// See also wxPy_ReinitStockObjects in helpers.cpp
 wxMimeTypesManager* const wxTheMimeTypesManager;
 
 

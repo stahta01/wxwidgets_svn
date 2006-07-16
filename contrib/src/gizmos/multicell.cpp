@@ -11,6 +11,10 @@
 
 // This was inspired by the gbsizer class written by Alex Andruschak
 
+#ifdef __GNUG__
+    #pragma implementation "multicell.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -198,7 +202,7 @@ bool wxMultiCellSizer::EnableGridLines(wxWindow *win)
     return true;
 }
 //---------------------------------------------------------------------------
-bool wxMultiCellSizer::SetGridPen(const wxPen *pen)
+bool wxMultiCellSizer::SetGridPen(wxPen *pen)
 {
     m_pen = pen;
     return true;

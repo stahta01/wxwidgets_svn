@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/sashwin.cpp
+// Name:        sashwin.cpp
 // Purpose:     wxSashWindow implementation. A sash window has an optional
 //              sash on each edge, allowing it to be dragged. An event
 //              is generated when the sash is released.
@@ -11,28 +11,31 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sashwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_SASH
-
-#include "wx/sashwin.h"
 
 #ifndef WX_PRECOMP
     #include "wx/dialog.h"
     #include "wx/frame.h"
     #include "wx/settings.h"
-    #include "wx/dcclient.h"
-    #include "wx/dcscreen.h"
-    #include "wx/math.h"
 #endif
+
+#include "wx/math.h"
 
 #include <stdlib.h>
 
+#include "wx/dcscreen.h"
+#include "wx/sashwin.h"
 #include "wx/laywin.h"
 
 DEFINE_EVENT_TYPE(wxEVT_SASH_DRAGGED)
@@ -46,7 +49,7 @@ BEGIN_EVENT_TABLE(wxSashWindow, wxWindow)
     EVT_MOUSE_EVENTS(wxSashWindow::OnMouseEvent)
 #if defined( __WXMSW__ ) || defined( __WXMAC__)
     EVT_SET_CURSOR(wxSashWindow::OnSetCursor)
-#endif // __WXMSW__ || __WXMAC__
+#endif // wxMSW
 
 END_EVENT_TABLE()
 
@@ -277,11 +280,11 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
 
         dragRect = wxRect(x, y, newWidth, newHeight);
 
-        wxSashEvent eventSash(GetId(), edge);
-        eventSash.SetEventObject(this);
-        eventSash.SetDragStatus(status);
-        eventSash.SetDragRect(dragRect);
-        GetEventHandler()->ProcessEvent(eventSash);
+        wxSashEvent event(GetId(), edge);
+        event.SetEventObject(this);
+        event.SetDragStatus(status);
+        event.SetDragRect(dragRect);
+        GetEventHandler()->ProcessEvent(event);
     }
     else if ( event.LeftUp() )
     {
@@ -703,6 +706,6 @@ void wxSashWindow::OnSetCursor(wxSetCursorEvent& event)
     //else: do nothing, in particular, don't call Skip()
 }
 
-#endif // __WXMSW__ || __WXMAC__
+#endif // wxMSW
 
 #endif // wxUSE_SASH

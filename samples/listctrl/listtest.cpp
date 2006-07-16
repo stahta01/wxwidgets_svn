@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -121,12 +126,11 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
 
     EVT_LIST_CACHE_HINT(LIST_CTRL, MyListCtrl::OnCacheHint)
 
+    EVT_CHAR(MyListCtrl::OnChar)
+
 #if USE_CONTEXT_MENU
     EVT_CONTEXT_MENU(MyListCtrl::OnContextMenu)
 #endif
-    EVT_CHAR(MyListCtrl::OnChar)
-
-    EVT_RIGHT_DOWN(MyListCtrl::OnRightClick)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -170,7 +174,7 @@ MyFrame::MyFrame(const wxChar *title)
     m_logWindow = NULL;
     m_smallVirtual = false;
 
-    if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL)
+    if ( wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL )
         SetSize(wxSize(450, 340));
 
     // Give it an icon
@@ -495,6 +499,7 @@ void MyFrame::InitWithReportItems()
     m_listCtrl->SetItem( item );
 
     m_listCtrl->SetTextColour(*wxBLUE);
+    m_listCtrl->SetBackgroundColour(*wxLIGHT_GREY);
 
     m_listCtrl->SetColumnWidth( 0, wxLIST_AUTOSIZE );
     m_listCtrl->SetColumnWidth( 1, wxLIST_AUTOSIZE );
@@ -1011,36 +1016,6 @@ void MyListCtrl::OnChar(wxKeyEvent& event)
     }
 }
 
-void MyListCtrl::OnRightClick(wxMouseEvent& event)
-{
-    if ( !event.ControlDown() )
-    {
-        event.Skip();
-        return;
-    }
-
-    int flags;
-    long subitem;
-    long item = HitTest(event.GetPosition(), flags, &subitem);
-
-    wxString where;
-    switch ( flags )
-    {
-        case wxLIST_HITTEST_ABOVE: where = _T("above"); break;
-        case wxLIST_HITTEST_BELOW: where = _T("below"); break;
-        case wxLIST_HITTEST_NOWHERE: where = _T("nowhere near"); break;
-        case wxLIST_HITTEST_ONITEMICON: where = _T("on icon of"); break;
-        case wxLIST_HITTEST_ONITEMLABEL: where = _T("on label of"); break;
-        case wxLIST_HITTEST_ONITEMRIGHT: where = _T("right on"); break;
-        case wxLIST_HITTEST_TOLEFT: where = _T("to the left of"); break;
-        case wxLIST_HITTEST_TORIGHT: where = _T("to the right of"); break;
-        default: where = _T("not clear exactly where on"); break;
-    }
-
-    wxLogMessage(_T("Right double click %s item %ld, subitem %ld"),
-                 where.c_str(), item, subitem);
-}
-
 void MyListCtrl::LogEvent(const wxListEvent& event, const wxChar *eventName)
 {
     wxLogMessage(_T("Item %ld: %s (item text = %s, data = %ld)"),
@@ -1060,15 +1035,9 @@ wxString MyListCtrl::OnGetItemText(long item, long column) const
     }
 }
 
-int MyListCtrl::OnGetItemColumnImage(long item, long column) const
+int MyListCtrl::OnGetItemImage(long WXUNUSED(item)) const
 {
-    if (!column)
-        return 0;
-
-    if (!(item %3) && column == 1)
-        return 0;
-
-    return -1;
+    return 0;
 }
 
 wxListItemAttr *MyListCtrl::OnGetItemAttr(long item) const
@@ -1116,3 +1085,4 @@ void MyListCtrl::ShowContextMenu(const wxPoint& pos)
 
     PopupMenu(&menu, pos.x, pos.y);
 }
+

@@ -19,6 +19,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "ftp.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -641,8 +645,8 @@ wxSocketBase *wxFTP::AcceptIfActive(wxSocketBase *sock)
     return sock;
 }
 
-wxString wxFTP::GetPortCmdArgument(const wxIPV4address& addrLocal,
-                                   const wxIPV4address& addrNew)
+wxString wxFTP::GetPortCmdArgument(wxIPV4address addrLocal,
+                                   wxIPV4address addrNew)
 {
     // Just fills in the return value with the local IP
     // address of the current socket.  Also it fill in the
@@ -861,7 +865,7 @@ bool wxFTP::FileExists(const wxString& fileName)
     if ( GetList(fileList, fileName, false) )
     {
         // Some ftp-servers (Ipswitch WS_FTP Server 1.0.5 does this)
-        // displays this behaviour when queried on a nonexistent file:
+        // displays this behaviour when queried on a non-existing file:
         // NLST this_file_does_not_exist
         // 150 Opening ASCII data connection for directory listing
         // (no data transferred)

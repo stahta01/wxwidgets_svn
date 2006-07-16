@@ -1,21 +1,21 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/bmpbuttn.mm
+// Name:        cocoa/bmpbuttn.mm
 // Purpose:     wxBitmapButton
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
 
 #if wxUSE_BMPBUTTON
 
-#include "wx/bmpbuttn.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
+    #include "wx/bmpbuttn.h"
     #include "wx/log.h"
 #endif
 

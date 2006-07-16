@@ -250,18 +250,10 @@ public:
     void SetStyle(wxFontStyle style);
     void SetWeight(wxFontWeight weight);
     void SetUnderlined(bool underlined);
-    bool SetFaceName(wxString facename);
+    void SetFaceName(wxString facename);
     void SetFamily(wxFontFamily family);
     void SetEncoding(wxFontEncoding encoding);
 
-// TODO:     
-//     // sets the first facename in the given array which is found
-//     // to be valid. If no valid facename is given, sets the
-//     // first valid facename returned by wxFontEnumerator::GetFacenames().
-//     // Does not return a bool since it cannot fail.
-//     void SetFaceName(const wxArrayString &facenames);
-
-    
     // it is important to be able to serialize wxNativeFontInfo objects to be
     // able to store them (in config file, for example)
     bool FromString(const wxString& s);
@@ -389,6 +381,14 @@ public:
     //
     // returns wxFONTENCODING_MAX if the name is not a supported encoding
     static wxFontEncoding GetEncodingFromName(const wxString& name);
+
+
+    // set the config object to use (may be NULL to use default)
+    void SetConfig(wxConfigBase *config);
+    %pythoncode {
+        SetConfig = wx._deprecated(SetConfig,
+            "Set a config object for the whole app instead, with `wx.Config.Set`.")
+    }
 
 
     // set the root config path to use (should be an absolute path)
@@ -742,7 +742,7 @@ size is found using a binary search.", "");
         "Sets the font weight.", "");
     
     DocDeclStr(
-        virtual bool , SetFaceName( const wxString& faceName ),
+        virtual void , SetFaceName( const wxString& faceName ),
         "Sets the facename for the font.  The facename, which should be a valid
 font installed on the end-user's system.
 
@@ -766,13 +766,13 @@ then for a font belonging to the same family.", "");
     
 
     DocDeclStrName(
-        bool , SetNativeFontInfo(const wxString& info),
+        void , SetNativeFontInfo(const wxString& info),
         "Set the font's attributes from string representation of a
 `wx.NativeFontInfo` object.", "",
         SetNativeFontInfoFromString);
     
     DocDeclStr(
-        bool , SetNativeFontInfoUserDesc(const wxString& info),
+        void , SetNativeFontInfoUserDesc(const wxString& info),
         "Set the font's attributes from a string formerly returned from
 `GetNativeFontInfoDesc`.", "");
     
@@ -846,31 +846,25 @@ public:
 
     bool EnumerateEncodings(const wxString& facename = wxPyEmptyString);
 
+    //wxArrayString* GetEncodings();
+    //wxArrayString* GetFacenames();
     %extend {
-        static PyObject* GetEncodings() {
-            PyObject* ret;
-            wxArrayString arr = wxFontEnumerator::GetEncodings();
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();            
-            ret = wxArrayString2PyList_helper(arr);
-            wxPyEndBlockThreads(blocked);
-            return ret;
+        PyObject* GetEncodings() {
+            wxArrayString* arr = self->GetEncodings();
+            if (arr)
+                return wxArrayString2PyList_helper(*arr);
+            else
+                return PyList_New(0);
         }
 
-        static PyObject* GetFacenames() {
-            PyObject* ret;
-            wxArrayString arr = wxFontEnumerator::GetFacenames();
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();            
-            ret = wxArrayString2PyList_helper(arr);
-            wxPyEndBlockThreads(blocked);
-            return ret;
+        PyObject* GetFacenames() {
+            wxArrayString* arr = self->GetFacenames();
+            if (arr)
+                return wxArrayString2PyList_helper(*arr);
+            else
+                return PyList_New(0);
         }
     }
-
-    DocDeclStr(
-        static bool , IsValidFacename(const wxString &str),
-        "Convenience function that returns true if the given face name exist in
-the user's system", "");
-    
 };
 
 

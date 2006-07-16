@@ -1,23 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/checklst.mm
+// Name:        cocoa/checklst.mm
 // Purpose:     wxCheckListBox
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/18
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
 
 #if wxUSE_CHECKLISTBOX
 
-#include "wx/checklst.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/app.h"
+    #include "wx/checklst.h"
 #endif //WX_PRECOMP
 
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
@@ -59,13 +58,13 @@ wxCheckListBox::~wxCheckListBox()
 {
 }
 
-bool wxCheckListBox::IsChecked(unsigned int item) const
+bool wxCheckListBox::IsChecked(size_t item) const
 {
     return false;
 }
 
 
-void wxCheckListBox::Check(unsigned int item, bool check)
+void wxCheckListBox::Check(size_t item, bool check)
 {
 }
 

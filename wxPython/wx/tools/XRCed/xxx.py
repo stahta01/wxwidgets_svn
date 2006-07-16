@@ -40,7 +40,7 @@ class xxxParam(xxxNode):
         # Use convertion from unicode to current encoding
         self.textNode = text
     # Value returns string
-    if wx.USE_UNICODE:   # no conversion is needed
+    if wxUSE_UNICODE:   # no conversion is needed
         def value(self):
             return self.textNode.data
         def update(self, value):
@@ -56,7 +56,7 @@ class xxxParam(xxxNode):
                 self.textNode.data = unicode(value, g.currentEncoding)
             except UnicodeDecodeError:
                 self.textNode.data = unicode(value)
-                #wx.LogMessage("Unicode error: set encoding in file\nglobals.py to something appropriate")
+                #wxLogMessage("Unicode error: set encoding in file\nglobals.py to something appropriate")
 
 # Integer parameter
 class xxxParamInt(xxxParam):
@@ -90,7 +90,7 @@ class xxxParamContent(xxxNode):
                     text = n.childNodes[0] # first child must be text node
                     assert text.nodeType == minidom.Node.TEXT_NODE
                 l.append(text)
-                data.append(text.data)
+                data.append(str(text.data))
             else:                       # remove other
                 node.removeChild(n)
                 n.unlink()
@@ -285,7 +285,7 @@ class xxxObject:
                     else:
                         self.element.appendChild(elem)
                 else:
-                    wx.LogWarning('Required parameter %s of %s missing' %
+                    wxLogWarning('Required parameter %s of %s missing' %
                                  (param, self.className))
     # Returns real tree object
     def treeObject(self):
@@ -338,7 +338,7 @@ def DoFindResource(parent, name, classname, recursive):
 def FindResource(name, classname='', recursive=True):
     found = DoFindResource(g.tree.mainNode, name, classname, recursive)
     if found:  return found
-    wx.LogError('XRC resource "%s" not found!' % name)
+    wxLogError('XRC resource "%s" not found!' % name)
                 
 
 ################################################################################
@@ -649,8 +649,6 @@ class xxxButton(xxxObject):
 class xxxBitmapButton(xxxObject):
     allParams = ['bitmap', 'selected', 'focus', 'disabled', 'default',
                  'pos', 'size', 'style']
-    paramDict = {'selected': ParamBitmap, 'focus': ParamBitmap, 'disabled': ParamBitmap,
-                 'default': ParamBool}
     required = ['bitmap']
     winStyles = ['wxBU_AUTODRAW', 'wxBU_LEFT', 'wxBU_RIGHT',
                  'wxBU_TOP', 'wxBU_BOTTOM', 'wxBU_EXACTFIT']
@@ -980,16 +978,16 @@ xxxDict = {
     }
 
 # Create IDs for all parameters of all classes
-paramIDs = {'fg': wx.NewId(), 'bg': wx.NewId(), 'exstyle': wx.NewId(), 'font': wx.NewId(),
-            'enabled': wx.NewId(), 'focused': wx.NewId(), 'hidden': wx.NewId(),
-            'tooltip': wx.NewId(), 'encoding': wx.NewId(),
-            'cellpos': wx.NewId(), 'cellspan': wx.NewId()
+paramIDs = {'fg': wxNewId(), 'bg': wxNewId(), 'exstyle': wxNewId(), 'font': wxNewId(),
+            'enabled': wxNewId(), 'focused': wxNewId(), 'hidden': wxNewId(),
+            'tooltip': wxNewId(), 'encoding': wxNewId(),
+            'cellpos': wxNewId(), 'cellspan': wxNewId()
             }
 for cl in xxxDict.values():
     if cl.allParams:
         for param in cl.allParams + cl.paramDict.keys():
             if not paramIDs.has_key(param):
-                paramIDs[param] = wx.NewId()
+                paramIDs[param] = wxNewId()
 
 ################################################################################
 # Helper functions

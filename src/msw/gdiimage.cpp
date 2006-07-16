@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/gdiimage.cpp
+// Name:        msw/gdiimage.cpp
 // Purpose:     wxGDIImage implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gdiimage.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,12 +31,13 @@
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
 
+#include "wx/app.h"
+
+#include "wx/bitmap.h"
 #include "wx/msw/gdiimage.h"
 
 #if wxUSE_WXDIB
@@ -47,7 +52,7 @@
 #include "wx/file.h"
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxGDIImageHandlerList)
+WX_DEFINE_LIST(wxGDIImageHandlerList);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -602,3 +607,4 @@ wxSize wxGetHiconSize(HICON WXUNUSED_IN_WINCE(hicon))
 }
 
 #endif // __WXMICROWIN__
+

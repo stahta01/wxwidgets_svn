@@ -29,13 +29,12 @@
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/timer.h"
 #endif  //WX_PRECOMP
 
 #include "wx/apptrait.h"
 #include "wx/dynload.h"
 #include "wx/confbase.h"
-#include "wx/power.h"
+#include "wx/timer.h"
 
 #include <MemoryMgr.h>
 #include <DLServer.h>
@@ -108,7 +107,7 @@ wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
     return NULL;
 }
 
-bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspaceSize_t *pFree)
+bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
 {
     return false;
 }
@@ -147,10 +146,6 @@ bool wxShutdown(wxShutdownFlags wFlags)
 {
     return false;
 }
-
-// ----------------------------------------------------------------------------
-// power management
-// ----------------------------------------------------------------------------
 
 wxPowerType wxGetPowerType()
 {
@@ -275,3 +270,4 @@ extern long wxCharsetToCodepage(const wxChar *name)
 }
 
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+

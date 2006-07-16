@@ -2,7 +2,7 @@
 // Name:        wx/generic/grid.h
 // Purpose:     wxGrid and related classes
 // Author:      Michael Bedward (based on code by Julian Smart, Robin Dunn)
-// Modified by: Santiago Palacios
+// Modified by:
 // Created:     1/08/1999
 // RCS-ID:      $Id$
 // Copyright:   (c) Michael Bedward
@@ -11,6 +11,10 @@
 
 #ifndef __WXGRID_H__
 #define __WXGRID_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "grid.h"
+#endif
 
 #include "wx/hashmap.h"
 #include "wx/panel.h"
@@ -178,13 +182,13 @@ public:
 
 protected:
     // set the text colours before drawing
-    void SetTextColoursAndFont(const wxGrid& grid,
-                               const wxGridCellAttr& attr,
+    void SetTextColoursAndFont(wxGrid& grid,
+                               wxGridCellAttr& attr,
                                wxDC& dc,
                                bool isSelected);
 
     // calc the string extent for given string/font
-    wxSize DoGetBestSize(const wxGridCellAttr& attr,
+    wxSize DoGetBestSize(wxGridCellAttr& attr,
                          wxDC& dc,
                          const wxString& text);
 };
@@ -210,7 +214,7 @@ public:
         { return new wxGridCellNumberRenderer; }
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 };
 
 class WXDLLIMPEXP_ADV wxGridCellFloatRenderer : public wxGridCellStringRenderer
@@ -243,7 +247,7 @@ public:
     virtual wxGridCellRenderer *Clone() const;
 
 protected:
-    wxString GetString(const wxGrid& grid, int row, int col);
+    wxString GetString(wxGrid& grid, int row, int col);
 
 private:
     // formatting parameters
@@ -1123,7 +1127,6 @@ public:
 
     void DoEndDragResizeRow();
     void DoEndDragResizeCol();
-    void DoEndDragMoveCol();
 
     wxGridTableBase * GetTable() const { return m_table; }
     bool SetTable( wxGridTableBase *table, bool takeOwnership = false,
@@ -1174,7 +1177,7 @@ public:
     //
     void StringToLines( const wxString& value, wxArrayString& lines );
 
-    void GetTextBoxSize( const wxDC& dc,
+    void GetTextBoxSize( wxDC& dc,
                          const wxArrayString& lines,
                          long *width, long *height );
 
@@ -1227,7 +1230,7 @@ public:
     //
     void XYToCell( int x, int y, wxGridCellCoords& );
     int  YToRow( int y );
-    int  XToCol( int x, bool clipToMinMax = false );
+    int  XToCol( int x );
 
     int  YToEdgeOfRow( int y );
     int  XToEdgeOfCol( int x );
@@ -1307,9 +1310,6 @@ public:
     void     EnableDragColSize( bool enable = true );
     void     DisableDragColSize() { EnableDragColSize( false ); }
     bool     CanDragColSize() { return m_canDragColSize; }
-    void     EnableDragColMove( bool enable = true );
-    void     DisableDragColMove() { EnableDragColMove( false ); }
-    bool     CanDragColMove() { return m_canDragColMove; }
     void     EnableDragGridSize(bool enable = true);
     void     DisableDragGridSize() { EnableDragGridSize(false); }
     bool     CanDragGridSize() { return m_canDragGridSize; }
@@ -1364,33 +1364,6 @@ public:
     void     SetDefaultColSize( int width, bool resizeExistingCols = false );
 
     void     SetColSize( int col, int width );
-
-    //Column positions
-    int GetColAt( int colPos ) const
-    {
-        if ( m_colAt.IsEmpty() )
-            return colPos;
-        else
-            return m_colAt[colPos];
-    }
-
-    void SetColPos( int colID, int newPos );
-
-    int GetColPos( int colID ) const
-    {
-        if ( m_colAt.IsEmpty() )
-            return colID;
-        else
-        {
-            for ( int i = 0; i < m_numCols; i++ )
-            {
-                if ( m_colAt[i] == colID )
-                    return i;
-            }
-        }
-
-        return -1;
-    }
 
     // automatically size the column or row to fit to its contents, if
     // setAsMin is true, this optimal width will also be set as minimal width
@@ -1900,8 +1873,7 @@ protected:
         WXGRID_CURSOR_RESIZE_ROW,
         WXGRID_CURSOR_RESIZE_COL,
         WXGRID_CURSOR_SELECT_ROW,
-        WXGRID_CURSOR_SELECT_COL,
-        WXGRID_CURSOR_MOVE_COL
+        WXGRID_CURSOR_SELECT_COL
     };
 
     // this method not only sets m_cursorMode but also sets the correct cursor
@@ -1917,13 +1889,8 @@ protected:
     wxWindow *m_winCapture;     // the window which captured the mouse
     CursorMode m_cursorMode;
 
-    //Column positions
-    wxArrayInt m_colAt;
-    int m_moveToCol;
-
     bool    m_canDragRowSize;
     bool    m_canDragColSize;
-    bool    m_canDragColMove;
     bool    m_canDragGridSize;
     bool    m_canDragCell;
     int     m_dragLastPos;
@@ -2017,14 +1984,6 @@ public:
     bool        MetaDown() { return m_meta; }
     bool        ShiftDown() { return m_shift; }
     bool        AltDown() { return m_alt; }
-    bool        CmdDown()
-    {
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-        return MetaDown();
-#else
-        return ControlDown();
-#endif
-    }
 
 protected:
     int         m_row;
@@ -2059,14 +2018,6 @@ public:
     bool        MetaDown() { return m_meta; }
     bool        ShiftDown() { return m_shift; }
     bool        AltDown() { return m_alt; }
-    bool        CmdDown()
-    {
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-        return MetaDown();
-#else
-        return ControlDown();
-#endif
-    }
 
 protected:
     int         m_rowOrCol;
@@ -2114,14 +2065,6 @@ public:
     bool        MetaDown()     { return m_meta; }
     bool        ShiftDown()    { return m_shift; }
     bool        AltDown()      { return m_alt; }
-    bool        CmdDown()
-    {
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-        return MetaDown();
-#else
-        return ControlDown();
-#endif
-    }
 
 protected:
     wxGridCellCoords  m_topLeft;

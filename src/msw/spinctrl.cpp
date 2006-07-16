@@ -13,6 +13,11 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinctrlbase.h"
+    #pragma implementation "spinctrl.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -109,12 +114,11 @@ wxCONSTRUCTOR_6( wxSpinCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 #endif
 
-//pmg EVT_KILL_FOCUS
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
 
     EVT_SET_FOCUS(wxSpinCtrl::OnSetFocus)
-    EVT_KILL_FOCUS(wxSpinCtrl::OnKillFocus)
+
     EVT_SPIN(wxID_ANY, wxSpinCtrl::OnSpinChange)
 END_EVENT_TABLE()
 
@@ -260,13 +264,6 @@ void wxSpinCtrl::OnChar(wxKeyEvent& event)
     }
 
     // no, we didn't process it
-    event.Skip();
-}
-
-void wxSpinCtrl::OnKillFocus(wxFocusEvent& event)
-{
-    // ensure that the value is shown correctly
-    SetValue(GetValue()) ; 
     event.Skip();
 }
 
@@ -431,34 +428,16 @@ void wxSpinCtrl::SetValue(const wxString& text)
     }
 }
 
-void  wxSpinCtrl::SetValue(int val)
-{
-    wxSpinButton::SetValue(val);
-
-    // normally setting the value of the spin button is enough as it updates
-    // its buddy control automatically ...
-    if ( wxGetWindowText(m_hwndBuddy).empty() )
-    {
-        // ... but sometimes it doesn't, notably when the value is 0 and the
-        // text control is currently empty, the spin button seems to be happy
-        // to leave it like this, while we really want to always show the
-        // current value in the control, so do it manually
-        ::SetWindowText(GetBuddyHwnd(), wxString::Format(_T("%ld"), val));
-    }
-}
-
 int wxSpinCtrl::GetValue() const
 {
     wxString val = wxGetWindowText(m_hwndBuddy);
 
     long n;
-    if ( (wxSscanf(val, wxT("%ld"), &n) != 1) )
+    if ( (wxSscanf(val, wxT("%lu"), &n) != 1) )
         n = INT_MIN;
 
-    if ( n < m_min )
-        n = m_min;
-    if ( n > m_max )
-        n = m_max;
+    if (n < m_min) n = m_min;
+    if (n > m_max) n = m_max;
 
     return n;
 }

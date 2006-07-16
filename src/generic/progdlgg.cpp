@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/progdlgg.cpp
+// Name:        progdlgg.h
 // Purpose:     wxProgressDialog class
 // Author:      Karsten Ballüder
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "progdlgg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -37,10 +41,10 @@
     #include "wx/intl.h"
     #include "wx/dcclient.h"
     #include "wx/timer.h"
-    #include "wx/settings.h"
 #endif
 
 #include "wx/generic/progdlgg.h"
+#include "wx/settings.h"
 
 // ---------------------------------------------------------------------------
 // macros

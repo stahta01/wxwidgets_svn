@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/button.cpp
+// Name:        button.cpp
 // Purpose:     wxButton
 // Author:      David Webster
 // Modified by:
@@ -12,10 +12,9 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/button.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/button.h"
     #include "wx/brush.h"
     #include "wx/panel.h"
     #include "wx/bmpbuttn.h"
@@ -90,7 +89,7 @@ bool wxButton::Create( wxWindow*          pParent,
                                       );
     if (m_hWnd == 0)
     {
-        return false;
+        return FALSE;
     }
 
     //

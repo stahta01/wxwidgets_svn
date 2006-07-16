@@ -17,11 +17,19 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "metafile.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+    #include "wx/setup.h"
 #endif
 
 #ifndef WX_PRECOMP
@@ -186,3 +194,4 @@ bool wxMetafileDataObject::SetData(size_t WXUNUSED(len), const void *buf)
 #endif // wxUSE_DRAG_AND_DROP
 
 #endif // wxUSE_METAFILE
+

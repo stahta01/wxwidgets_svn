@@ -10,6 +10,10 @@
 #ifndef _WX_GTK_TBARGTK_H_
 #define _WX_GTK_TBARGTK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbargtk.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 // ----------------------------------------------------------------------------
@@ -25,7 +29,7 @@ public:
                wxWindowID id,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
-               long style = wxTB_HORIZONTAL,
+               long style = 0,
                const wxString& name = wxToolBarNameStr )
     {
         Init();

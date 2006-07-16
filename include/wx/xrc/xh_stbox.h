@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_stbox.h
+// Name:        xh_stbox.h
 // Purpose:     XML resource handler for wxStaticBox
 // Author:      Brian Gavin
 // Created:     2000/09/00
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_STBOX_H_
 #define _WX_XH_STBOX_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_stbox.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

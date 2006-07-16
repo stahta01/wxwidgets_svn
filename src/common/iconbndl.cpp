@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/iconbndl.cpp
+// Name:        iconbndl.cpp
 // Purpose:     wxIconBundle
 // Author:      Mattia Barbon
 // Created:     23.03.2002
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "iconbndl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,17 +19,19 @@
     #pragma hdrstop
 #endif
 
-#include "wx/iconbndl.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/icon.h"
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/bitmap.h"
+#endif
+
+#if wxUSE_IMAGE && !defined(_WX_IMAGE_H_)
     #include "wx/image.h"
 #endif
 
+#include "wx/iconbndl.h"
 #include "wx/arrimpl.cpp"
 
 WX_DEFINE_OBJARRAY(wxIconArray)

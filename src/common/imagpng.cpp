@@ -11,6 +11,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagpng.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -19,19 +23,20 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_IMAGE && wxUSE_LIBPNG
 
 #include "wx/imagpng.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
-#endif
-
+#include "wx/bitmap.h"
+#include "wx/debug.h"
+#include "wx/log.h"
+#include "wx/app.h"
 #include "png.h"
 #include "wx/filefn.h"
 #include "wx/wfstream.h"
@@ -104,7 +109,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxPNGHandler,wxImageHandler)
 #if wxUSE_STREAMS
 
 #ifndef PNGLINKAGEMODE
-    #if defined(__WATCOMC__) && ( defined(__WXMSW__) || defined(__WXMGL__) )
+    #if defined(__WATCOMC__) && ( defined(__WXMSW__) || __WATCOMC__ > 1230 )
         // we need an explicit cdecl for Watcom, at least according to
         //
         // http://sf.net/tracker/index.php?func=detail&aid=651492&group_id=9863&atid=109863
@@ -507,15 +512,13 @@ wxPNGHandler::LoadFile(wxImage *image,
                        bool verbose,
                        int WXUNUSED(index))
 {
-    // VZ: as this function uses setjmp() the only fool-proof error handling
+    // VZ: as this function uses setjmp() the only fool proof error handling
     //     method is to use goto (setjmp is not really C++ dtors friendly...)
 
     unsigned char **lines = NULL;
+    png_uint_32 height = 0;
     png_infop info_ptr = (png_infop) NULL;
     wxPNGInfoStruct wxinfo;
-
-    png_uint_32 i, width, height = 0;
-    int bit_depth, color_type, interlace_type;
 
     wxinfo.verbose = verbose;
     wxinfo.stream.in = &stream;
@@ -542,6 +545,9 @@ wxPNGHandler::LoadFile(wxImage *image,
 
     if (setjmp(wxinfo.jmpbuf))
         goto error;
+
+    png_uint_32 i, width;
+    int bit_depth, color_type, interlace_type;
 
     png_read_info( png_ptr, info_ptr );
     png_get_IHDR( png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, (int*) NULL, (int*) NULL );

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/frame.cpp
+// Name:        univ/frame.cpp
 // Purpose:     wxFrame class for wxUniversal
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univframe.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,9 @@
     #pragma hdrstop
 #endif
 
-#include "wx/frame.h"
-
-#ifndef WX_PRECOMP
     #include "wx/menu.h"
+#ifndef WX_PRECOMP
+    #include "wx/frame.h"
     #include "wx/statusbr.h"
     #include "wx/settings.h"
     #include "wx/toolbar.h"
@@ -49,12 +52,12 @@ IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
 // ----------------------------------------------------------------------------
 
 bool wxFrame::Create(wxWindow *parent,
-                     wxWindowID id,
-                     const wxString& title,
-                     const wxPoint& pos,
-                     const wxSize& size,
-                     long style,
-                     const wxString& name)
+                wxWindowID id,
+                const wxString& title,
+                const wxPoint& pos,
+                const wxSize& size,
+                long style,
+                const wxString& name)
 {
     if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
         return false;

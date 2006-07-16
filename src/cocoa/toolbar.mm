@@ -6,7 +6,7 @@
 // Created:     2003/08/17
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -21,10 +21,8 @@
 #include "wx/wxprec.h"
 
 #if wxUSE_TOOLBAR_NATIVE
-
-#include "wx/toolbar.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/toolbar.h"
     #include "wx/frame.h"
     #include "wx/log.h"
 #endif // WX_PRECOMP
@@ -221,11 +219,6 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
 {
     Realize();
     return true;
-}
-
-bool wxToolBar::Cocoa_acceptsFirstMouse(bool &acceptsFirstMouse, WX_NSEvent theEvent)
-{
-    acceptsFirstMouse = true; return true;
 }
 
 bool wxToolBar::Cocoa_drawRect(const NSRect &rect)

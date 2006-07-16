@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 29 May 2006                                                         *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 9 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -18,11 +18,6 @@ CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
 .else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm
-.else
 .ifdef __WXX11__
 CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)
@@ -31,7 +26,6 @@ CC_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 .else
 CXX_DEFINE =
 CC_DEFINE =
-.endif
 .endif
 .endif
 .endif
@@ -64,8 +58,6 @@ OBJECTS = \
 		cmndata.obj,\
 		config.obj,\
 		containr.obj,\
-		convauto.obj,\
-		colourcmn.obj,\
 		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
@@ -81,12 +73,10 @@ OBJECTS = \
 		dobjcmn.obj,\
 		docmdi.obj,\
 		docview.obj,\
-		dpycmn.obj,\
 		dynarray.obj,\
 		dynlib.obj,\
 		encconv.obj,\
 		event.obj,\
-		evtloopcmn.obj,\
 		extended.obj,\
 		fddlgcmn.obj,\
 		ffile.obj,\
@@ -98,14 +88,12 @@ OBJECTS = \
 		fldlgcmn.obj,\
 		fmapbase.obj,\
 		fontcmn.obj,\
-		fontenumcmn.obj,\
 		fontmap.obj,\
 		framecmn.obj
 
 OBJECTS1=fs_inet.obj,\
 		fs_zip.obj,\
 		ftp.obj,\
-		gaugecmn.obj,\
 		gdicmn.obj,\
 		gifdecod.obj,\
 		hash.obj,\
@@ -147,7 +135,6 @@ OBJECTS1=fs_inet.obj,\
 		process.obj,\
 		protocol.obj,\
 		quantize.obj,\
-		radiocmn.obj,\
 		rendcmn.obj,\
 		sckaddr.obj,\
 		sckfile.obj,\
@@ -163,9 +150,8 @@ OBJECTS1=fs_inet.obj,\
 		strconv.obj,\
 		stream.obj,\
 		string.obj,\
-		sysopt.obj
-
-OBJECTS2=tbarbase.obj,\
+		sysopt.obj,\
+		tbarbase.obj,\
 		textbuf.obj,\
 		textcmn.obj,\
 		textfile.obj,\
@@ -174,8 +160,9 @@ OBJECTS2=tbarbase.obj,\
 		toplvcmn.obj,\
 		treebase.obj,\
 		txtstrm.obj,\
-		url.obj,\
-		utilscmn.obj,\
+		url.obj
+
+OBJECTS2=utilscmn.obj,\
 		rgncmn.obj,\
 		uri.obj,\
 		valgen.obj,\
@@ -189,13 +176,12 @@ OBJECTS2=tbarbase.obj,\
 		zipstrm.obj,\
 		zstream.obj
 
-OBJECTS_MOTIF=radiocmn.obj
+OBJECTS_MOTIF=gaugecmn.obj,radiocmn.obj
 
 OBJECTS_X11=accesscmn.obj,dndcmn.obj,dpycmn.obj,dseldlg.obj,\
-	dynload.obj,effects.obj,fddlgcmn.obj,fs_mem.obj,\
+	dynload.obj,effects.obj,fddlgcmn.obj,fs_mem.obj,gaugecmn.obj,\
 	gbsizer.obj,geometry.obj,matrix.obj,radiocmn.obj,\
-	regex.obj,taskbarcmn.obj,xti.obj,xtistrm.obj,xtixml.obj,\
-	combocmn.obj
+	regex.obj,taskbarcmn.obj,xti.obj,xtistrm.obj,xtixml.obj
 
 SOURCES = \
 		appbase.cpp,\
@@ -212,8 +198,6 @@ SOURCES = \
 		cmndata.cpp,\
 		config.cpp,\
 		containr.cpp,\
-		convauto.cpp,\
-		colourcmn.cpp,\
 		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
@@ -229,12 +213,10 @@ SOURCES = \
 		dobjcmn.cpp,\
 		docmdi.cpp,\
 		docview.cpp,\
-		dpycmn.cpp,\
 		dynarray.cpp,\
 		dynlib.cpp,\
 		encconv.cpp,\
 		event.cpp,\
-		evtloopcmn.cpp,\
 		extended.c,\
 		ffile.cpp,\
 		fddlgcmn.cpp,\
@@ -246,7 +228,6 @@ SOURCES = \
 		fldlgcmn.cpp,\
 		fmapbase.cpp,\
 		fontcmn.cpp,\
-		fontenumcmn.cpp,\
 		fontmap.cpp,\
 		framecmn.cpp,\
 		fs_inet.cpp,\
@@ -294,7 +275,6 @@ SOURCES = \
 		process.cpp,\
 		protocol.cpp,\
 		quantize.cpp,\
-		radiocmn.cpp,\
 		rendcmn.cpp,\
 		rgncmn.cpp,\
 		sckaddr.cpp,\
@@ -368,18 +348,12 @@ all : $(SOURCES)
 	library [--.lib]libwx_gtk.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk.olb $(OBJECTS2)
 .else
-.ifdef __WXGTK2__
-	library [--.lib]libwx_gtk2.olb $(OBJECTS)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
-.else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS1)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11)
-.endif
 .endif
 .endif
 .endif
@@ -398,8 +372,6 @@ cmdproc.obj : cmdproc.cpp
 cmndata.obj : cmndata.cpp
 config.obj : config.cpp
 containr.obj : containr.cpp
-convauto.obj : convauto.cpp
-colourcmn.obj : colourcmn.cpp
 cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
@@ -419,7 +391,6 @@ dynarray.obj : dynarray.cpp
 dynlib.obj : dynlib.cpp
 encconv.obj : encconv.cpp
 event.obj : event.cpp
-evtloopcmn.obj : evtloopcmn.cpp
 extended.obj : extended.c
 ffile.obj : ffile.cpp
 fddlgcmn.obj : fddlgcmn.cpp
@@ -431,7 +402,6 @@ filesys.obj : filesys.cpp
 fldlgcmn.obj : fldlgcmn.cpp
 fmapbase.obj : fmapbase.cpp
 fontcmn.obj : fontcmn.cpp
-fontenumcmn.obj : fontenumcmn.cpp
 fontmap.obj : fontmap.cpp
 framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
@@ -479,7 +449,6 @@ prntbase.obj : prntbase.cpp
 process.obj : process.cpp
 protocol.obj : protocol.cpp
 quantize.obj : quantize.cpp
-radiocmn.obj : radiocmn.cpp
 rendcmn.obj : rendcmn.cpp
 rgncmn.obj : rgncmn.cpp
 sckaddr.obj : sckaddr.cpp
@@ -536,5 +505,3 @@ xti.obj : xti.cpp
 xtistrm.obj : xtistrm.cpp
 xtixml.obj : xtixml.cpp
 uri.obj : uri.cpp
-dpycmn.obj : dpycmn.cpp
-combocmn.obj : combocmn.cpp

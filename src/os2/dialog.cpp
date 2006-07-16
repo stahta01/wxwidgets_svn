@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:     wxDialog class
 // Author:      David Webster
 // Modified by:
@@ -12,18 +12,18 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/frame.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
+#include "wx/dialog.h"
+#include "wx/utils.h"
+#include "wx/frame.h"
+#include "wx/app.h"
+#include "wx/settings.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
+#include "wx/log.h"
 #include "wx/evtloop.h"
 #include "wx/ptr_scpd.h"
 
@@ -83,7 +83,7 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 void wxDialog::Init()
 {
     m_pOldFocus = (wxWindow *)NULL;
-    m_isShown = false;
+    m_isShown = FALSE;
     m_pWindowDisabler = (wxWindowDisabler *)NULL;
     m_modalData = NULL;
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
@@ -130,8 +130,6 @@ bool wxDialog::Create( wxWindow*       pParent,
     return true;
 } // end of wxDialog::Create
 
-#if WXWIN_COMPATIBILITY_2_6
-
 // deprecated ctor
 wxDialog::wxDialog(wxWindow *parent,
                    const wxString& title,
@@ -148,12 +146,12 @@ wxDialog::wxDialog(wxWindow *parent,
     Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h), style, name);
 }
 
-void wxDialog::SetModal(bool WXUNUSED(bFlag))
+void wxDialog::SetModal(
+  bool                              WXUNUSED(bFlag)
+)
 {
     // nothing to do, obsolete method
 } // end of wxDialog::SetModal
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxDialog::~wxDialog()
 {
@@ -201,14 +199,11 @@ void wxDialog::OnCharHook(
 // showing the dialogs
 // ----------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_6
-
 bool wxDialog::IsModalShowing() const
 {
     return IsModal();
 } // end of wxDialog::IsModalShowing
 
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -232,7 +227,9 @@ wxWindow *wxDialog::FindSuitableParent() const
     return parent;
 }
 
-bool wxDialog::Show( bool bShow )
+bool wxDialog::Show(
+  bool                              bShow
+)
 {
     if ( bShow == IsShown() )
         return false;
@@ -264,14 +261,13 @@ bool wxDialog::Show( bool bShow )
 
     wxDialogBase::Show(bShow);
 
-    wxString title = GetTitle();
-    if (!title.empty())
-        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)title.c_str());
+    if (GetTitle().c_str())
+        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)GetTitle().c_str());
 
     if ( bShow )
     {
         // dialogs don't get WM_SIZE message after creation unlike most (all?)
-        // other windows and so could start their life not laid out correctly
+        // other windows and so could start their life non laid out correctly
         // if we didn't call Layout() from here
         //
         // NB: normally we should call it just the first time but doing it
@@ -326,7 +322,7 @@ int wxDialog::ShowModal()
         extern bool                     gbInOnIdle;
         bool                            bWasInOnIdle = gbInOnIdle;
 
-        gbInOnIdle = false;
+        gbInOnIdle = FALSE;
 
         // enter and run the modal loop
         {
@@ -436,10 +432,14 @@ void wxDialog::OnSysColourChanged( wxSysColourChangedEvent& WXUNUSED(rEvent) )
     Refresh();
 } // end of wxDialog::OnSysColourChanged
 
-MRESULT wxDialog::OS2WindowProc( WXUINT uMessage, WXWPARAM wParam, WXLPARAM lParam )
+MRESULT wxDialog::OS2WindowProc(
+  WXUINT                            uMessage
+, WXWPARAM                          wParam
+, WXLPARAM                          lParam
+)
 {
-    MRESULT  rc = 0;
-    bool     bProcessed = false;
+    MRESULT                         rc = 0;
+    bool                            bProcessed = FALSE;
 
     switch (uMessage)
     {

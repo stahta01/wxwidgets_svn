@@ -23,13 +23,10 @@
 
 DocStr(wxSizerItem,
 "The wx.SizerItem class is used to track the position, size and other
-attributes of each item managed by a `wx.Sizer`. It is not usually
-necessary to use this class because the sizer elements can also be
-identified by their positions or window or sizer references but
-sometimes it may be more convenient to use wx.SizerItem directly.
-Also, custom classes derived from `wx.PySizer` will probably need to
-use the collection of wx.SizerItems held by wx.Sizer when calculating
-layout.
+attributes of each item managed by a `wx.Sizer`. In normal usage user
+code should never need to deal directly with a wx.SizerItem, but
+custom classes derived from `wx.PySizer` will probably need to use the
+collection of wx.SizerItems held by wx.Sizer when calculating layout.
 
 :see: `wx.Sizer`, `wx.GBSizerItem`", "");
 
@@ -46,8 +43,6 @@ methods are called.
 
 :see: `wx.SizerItemSpacer`, `wx.SizerItemWindow`, `wx.SizerItemSizer`", "");
 
-    
-    ~wxSizerItem();
 
 
     %extend {
@@ -91,7 +86,6 @@ methods are called.
                          int border, PyObject* userData=NULL ),
             "Constructs a `wx.SizerItem` for tracking a subsizer", "");
 
-        %disownarg( wxSizer *sizer );
         %RenameCtor(SizerItemSizer,  wxSizerItem( wxSizer *sizer, int proportion, int flag,
                                                   int border, PyObject* userData=NULL ))
         {
@@ -103,7 +97,6 @@ methods are called.
             }
             return new wxSizerItem(sizer, proportion, flag, border, data);
         }
-        %cleardisown( wxSizer *sizer );
     }
 
 
@@ -221,11 +214,9 @@ added, if needed.", "");
         wxSizer *, GetSizer(),
         "Get the subsizer (if any) that is managed by this sizer item.", "");
 
-    %disownarg( wxSizer *sizer );
     DocDeclStr(
         void , SetSizer( wxSizer *sizer ),
         "Set the subsizer to be managed by this sizer item.", "");
-    %cleardisown( wxSizer *sizer );
 
 
     DocDeclStr(
@@ -360,8 +351,8 @@ DocStr(wxSizer,
 "wx.Sizer is the abstract base class used for laying out subwindows in
 a window.  You cannot use wx.Sizer directly; instead, you will have to
 use one of the sizer classes derived from it such as `wx.BoxSizer`,
-`wx.StaticBoxSizer`, `wx.GridSizer`, `wx.FlexGridSizer` and
-`wx.GridBagSizer`.
+`wx.StaticBoxSizer`, `wx.NotebookSizer`, `wx.GridSizer`,  `wx.FlexGridSizer`
+and `wx.GridBagSizer`.
 
 The concept implemented by sizers in wxWidgets is closely related to
 layout tools in other GUI toolkits, such as Java's AWT, the GTK
@@ -404,8 +395,7 @@ method to determine where the drawing operations should take place.
 class wxSizer : public wxObject {
 public:
     // wxSizer();      ****  abstract, can't instantiate
-
-    ~wxSizer();
+    // ~wxSizer();
 
     %extend {
         void _setOORInfo(PyObject* _self) {
@@ -522,8 +512,6 @@ public:
             wxPySizerItemInfo info = wxPySizerItemTypeHelper(item, true, false);
             if ( userData && (info.window || info.sizer || info.gotSize) )
                 data = new wxPyUserData(userData);
-            if ( info.sizer )
-                PyObject_SetAttrString(item,"thisown",Py_False);
             wxPyEndBlockThreads(blocked);
 
             // Now call the real Add method if a valid item type was found
@@ -555,8 +543,6 @@ the item at index *before*.  See `Add` for a description of the parameters.", ""
             wxPySizerItemInfo info = wxPySizerItemTypeHelper(item, true, false);
             if ( userData && (info.window || info.sizer || info.gotSize) )
                 data = new wxPyUserData(userData);
-            if ( info.sizer )
-                PyObject_SetAttrString(item,"thisown",Py_False);
             wxPyEndBlockThreads(blocked);
 
             // Now call the real Insert method if a valid item type was found
@@ -589,8 +575,6 @@ this sizer.  See `Add` for a description of the parameters.", "");
             wxPySizerItemInfo info = wxPySizerItemTypeHelper(item, true, false);
             if ( userData && (info.window || info.sizer || info.gotSize) )
                 data = new wxPyUserData(userData);
-            if ( info.sizer )
-                PyObject_SetAttrString(item,"thisown",Py_False);
             wxPyEndBlockThreads(blocked);
 
             // Now call the real Prepend method if a valid item type was found
@@ -709,9 +693,6 @@ the item to be found.", "");
             return self._SetItemMinSize(item, args[0])
     }
 
-
-    %disownarg( wxSizerItem *item ); 
-
     DocDeclAStrName(
         wxSizerItem* , Add( wxSizerItem *item ),
         "AddItem(self, SizerItem item)",
@@ -730,7 +711,6 @@ the item to be found.", "");
         "Prepends a `wx.SizerItem` to the sizer.", "",
         PrependItem);
 
-    %cleardisown( wxSizerItem *item );
 
 
     %pythoncode {
@@ -942,7 +922,7 @@ subsizer.  Returns True if the item was found.", "");
 
         DocAStr(IsShown,
                 "IsShown(self, item)",
-                "Determines if the item is currently shown. To make a sizer
+                "Determines if the item is currently shown. sizer.  To make a sizer
 item disappear or reappear, use Show followed by `Layout`.  The *item*
 parameter can be either a window, a sizer, or the zero-based index of
 the item.", "");
@@ -974,6 +954,10 @@ the item.", "");
         void , ShowItems(bool show),
         "Recursively call `wx.SizerItem.Show` on all sizer items.", "");
 
+    // TODO:
+    //          void Show(bool show);
+    //          bool IsShown();
+    
 };
 
 
@@ -1168,11 +1152,11 @@ define extra space between all children.", "");
 
     DocDeclStr(
         int , GetCols(),
-        "Returns the number of columns in the sizer.", "");
+        "Returns the number of columns in the sizer, as specified in the constructor.", "");
 
     DocDeclStr(
         int , GetRows(),
-        "Returns the number of rows in the sizer.", "");
+        "Returns the number of rows in the sizer, as specified in the constructor.", "");
 
     DocDeclStr(
         int , GetVGap(),

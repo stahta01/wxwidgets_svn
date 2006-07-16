@@ -1,9 +1,8 @@
-*Carbon?Debug*
-*Carbon?Release*
+build
+minimalM5.mcp
+minimalM*Data
 *Classic?Debug*
 *Classic?Release*
-build
+*Carbon?Debug*
+*Carbon?Release*
 minimal
-minimalM*Data
-minimalM5.mcp
-vc_mswhdll

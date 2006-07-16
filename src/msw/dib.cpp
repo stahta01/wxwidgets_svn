@@ -30,16 +30,15 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_WXDIB
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/bitmap.h"
-    #include "wx/image.h"
 #endif //WX_PRECOMP
 
+#if wxUSE_WXDIB
+
+#include "wx/bitmap.h"
+#include "wx/intl.h"
 #include "wx/file.h"
 
 #include <stdio.h>
@@ -49,6 +48,7 @@
     #include <memory.h>
 #endif
 
+#include "wx/image.h"
 #include "wx/msw/dib.h"
 
 #ifdef __WXWINCE__
@@ -800,3 +800,4 @@ wxImage wxDIB::ConvertToImage() const
 #endif // wxUSE_IMAGE
 
 #endif // wxUSE_WXDIB
+

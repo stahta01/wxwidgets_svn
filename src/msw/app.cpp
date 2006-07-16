@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/app.cpp
+// Name:        app.cpp
 // Purpose:     wxApp
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,7 +29,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
     #include "wx/frame.h"
     #include "wx/app.h"
     #include "wx/utils.h"
@@ -39,7 +42,9 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
+    #include "wx/dynarray.h"
     #include "wx/wxchar.h"
+    #include "wx/icon.h"
     #include "wx/log.h"
 #endif
 
@@ -47,7 +52,6 @@
 #include "wx/filename.h"
 #include "wx/module.h"
 #include "wx/dynlib.h"
-#include "wx/evtloop.h"
 
 #include "wx/msw/private.h"
 #include "wx/msw/ole/oleutils.h"
@@ -108,6 +112,8 @@
 // ---------------------------------------------------------------------------
 // global variables
 // ---------------------------------------------------------------------------
+
+extern wxList WXDLLEXPORT wxPendingDelete;
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
 extern void wxSetKeyboardHook(bool doIt);
@@ -216,14 +222,7 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
 {
     // we should return false only if the app should exit, i.e. only if
     // Dispatch() determines that the main event loop should terminate
-    wxEventLoop *evtLoop = wxEventLoop::GetActive();
-    if ( !evtLoop || !evtLoop->Pending() )
-    {
-        // no events means no quit event
-        return true;
-    }
-
-    return evtLoop->Dispatch();
+    return !wxTheApp || wxTheApp->Dispatch();
 }
 
 wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
@@ -297,9 +296,9 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     }
 #endif
 
-#if !defined(__WXMICROWIN__)
+#if defined(__WIN95__) && !defined(__WXMICROWIN__)
     InitCommonControls();
-#endif // !defined(__WXMICROWIN__)
+#endif // __WIN95__
 
 #if defined(__SMARTPHONE__) || defined(__POCKETPC__)
     SHInitExtraControls();
@@ -310,7 +309,7 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     // fails to find a device.
     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX);
 #endif
-
+    
     wxOleInitialize();
 
     RegisterWindowClasses();
@@ -490,7 +489,7 @@ void wxApp::CleanUp()
 
     delete wxWinHandleHash;
     wxWinHandleHash = NULL;
-
+    
 #ifdef __WXWINCE__
     free( wxCanvasClassName );
     free( wxCanvasClassNameNR );
@@ -508,6 +507,17 @@ wxApp::wxApp()
 
 wxApp::~wxApp()
 {
+    // our cmd line arguments are allocated inside wxEntry(HINSTANCE), they
+    // don't come from main(), so we have to free them
+
+    while ( argc )
+    {
+        // m_argv elements were allocated by wxStrdup()
+        free(argv[--argc]);
+    }
+
+    // but m_argv itself -- using new[]
+    delete [] argv;
 }
 
 // ----------------------------------------------------------------------------
@@ -647,7 +657,7 @@ int wxApp::GetComCtl32Version()
                 }
             }
         }
-#endif
+#endif        
     }
 
     return s_verComCtl32;
@@ -725,7 +735,7 @@ terminate the program,\r\n\
 \"Retry\" to exit the program normally and \"Ignore\" to try to continue."),
                 _T("Unhandled exception"),
                 MB_ABORTRETRYIGNORE |
-                MB_ICONERROR|
+                MB_ICONERROR| 
                 MB_TASKMODAL
               )
            )
@@ -753,6 +763,8 @@ terminate the program,\r\n\
 
 #if WXWIN_COMPATIBILITY_2_4
 
+#include "wx/evtloop.h"
+
 void wxApp::DoMessage(WXMSG *pMsg)
 {
     wxEventLoop *evtLoop = wxEventLoop::GetActive();
@@ -773,3 +785,4 @@ bool wxApp::ProcessMessage(WXMSG* pMsg)
 }
 
 #endif // WXWIN_COMPATIBILITY_2_4
+

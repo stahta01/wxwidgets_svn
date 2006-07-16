@@ -17,16 +17,18 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "checklst.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_CHECKLISTBOX && wxUSE_OWNER_DRAWN
-
-#include "wx/checklst.h"
+#if wxUSE_OWNER_DRAWN
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -43,6 +45,7 @@
 #endif
 
 #include "wx/ownerdrw.h"
+#include "wx/checklst.h"
 
 #include "wx/palmos/wrapwin.h"
 
@@ -149,14 +152,14 @@ private:
 };
 
 wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox *pParent, size_t nIndex)
-                  : wxOwnerDrawn(wxEmptyString, true)   // checkable
+                  : wxOwnerDrawn(wxEmptyString, TRUE)   // checkable
 {
 }
 
 bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
                                     wxODAction act, wxODStatus stat)
 {
-    return false;
+    return FALSE;
 }
 
 // change the state of the item and redraw it
@@ -230,7 +233,7 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
 // misc overloaded methods
 // -----------------------
 
-void wxCheckListBox::Delete(unsigned int n)
+void wxCheckListBox::Delete(int N)
 {
 }
 
@@ -259,12 +262,12 @@ bool wxCheckListBox::MSWOnMeasure(WXMEASUREITEMSTRUCT *item)
 // check items
 // -----------
 
-bool wxCheckListBox::IsChecked(unsigned int uiIndex) const
+bool wxCheckListBox::IsChecked(size_t uiIndex) const
 {
     return false;
 }
 
-void wxCheckListBox::Check(unsigned int uiIndex, bool bCheck)
+void wxCheckListBox::Check(size_t uiIndex, bool bCheck)
 {
 }
 
@@ -284,4 +287,5 @@ int wxCheckListBox::DoHitTestItem(wxCoord x, wxCoord y) const
     return wxNOT_FOUND;
 }
 
-#endif // wxUSE_CHECKLISTBOX && wxUSE_OWNER_DRAWN
+#endif
+

@@ -50,11 +50,10 @@ demo item so you can learn how to use the classes yourself.</p>
         if "gtk2" in wx.PlatformInfo:
             html.SetStandardFonts()
         py_version = sys.version.split()[0]
-        txt = self.text % (wx.VERSION_STRING,
-                           ", ".join(wx.PlatformInfo[1:]),
-                           py_version
-                           )
-        html.SetPage(txt)
+        html.SetPage(self.text % (wx.VERSION_STRING,
+                                  ", ".join(wx.PlatformInfo[1:]),
+                                  py_version
+                                  ))
         btn = html.FindWindowById(wx.ID_OK)
         ir = html.GetInternalRepresentation()
         html.SetSize( (ir.GetWidth()+25, ir.GetHeight()+25) )

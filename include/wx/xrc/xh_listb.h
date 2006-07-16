@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_listb.h
+// Name:        xh_listb.h
 // Purpose:     XML resource handler for wxListbox
 // Author:      Bob Mitchell & Vaclav Slavik
 // Created:     2000/07/29
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_LISTB_H_
 #define _WX_XH_LISTB_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_listb.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

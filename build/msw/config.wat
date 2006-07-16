@@ -68,17 +68,8 @@ USE_GUI = 1
 # Build wxHTML library (USE_GUI must be 1)? [0,1]
 USE_HTML = 1
 
-# Build multimedia library (USE_GUI must be 1)? [0,1]
-USE_MEDIA = 1
-
 # Build wxXRC library (USE_GUI must be 1)? [0,1]
 USE_XRC = 1
-
-# Build wxAUI library (USE_GUI must be 1)? [0,1]
-USE_AUI = 1
-
-# Build wxRichTextCtrl library (USE_GUI must be 1)? [0,1]
-USE_RICHTEXT = 1
 
 # Build OpenGL canvas library (USE_GUI must be 1)? [0,1]
 USE_OPENGL = 0

@@ -52,6 +52,9 @@ MAKE_CONST_WXSTRING(StaticPictureNameStr);
     
 MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 
+
+%include _gizmos_rename.i
+
 //---------------------------------------------------------------------------
 
 enum {
@@ -458,8 +461,6 @@ public:
                          bool shown = true,
 			 wxTreeListColumnAlign alignment = wxTL_ALIGN_LEFT);
 
-    ~wxTreeListColumnInfo();
-    
     bool GetShown() const;
     wxTreeListColumnAlign GetAlignment() const;
     wxString GetText() const;
@@ -581,11 +582,11 @@ public:
     void SetStateImageList(wxImageList *imageList);
     void SetButtonsImageList(wxImageList *imageList);
 
-    %disownarg( wxImageList *imageList );
+    %apply SWIGTYPE *DISOWN { wxImageList *imageList };
     void AssignImageList(wxImageList *imageList);
     void AssignStateImageList(wxImageList *imageList);
     void AssignButtonsImageList(wxImageList *imageList);
-    %cleardisown( wxImageList *imageList );
+    %clear wxImageList *imageList;
 
 
     // adds a column
@@ -670,12 +671,10 @@ public:
             return data;
         }
 
-        %disownarg( wxPyTreeItemData* data );
         void SetItemData(const wxTreeItemId& item, wxPyTreeItemData* data) {
             data->SetId(item); // set the id
             self->SetItemData(item, data);
         }
-        %cleardisown(wxPyTreeItemData* data );
 
         // [Get|Set]ItemPyData are short-cuts.  Also made somewhat crash-proof by
         // automatically creating data classes.
@@ -848,8 +847,6 @@ public:
     wxTreeItemId GetNext(const wxTreeItemId& item) const;
 
 
-    %disownarg( wxPyTreeItemData* data );
-    
     // add the root node to the tree
     wxTreeItemId AddRoot(const wxString& text,
                          int image = -1, int selectedImage = -1,
@@ -882,8 +879,6 @@ public:
                             int image = -1, int selectedImage = -1,
                             wxPyTreeItemData *data = NULL);
 
-    %cleardisown(wxPyTreeItemData* data );
-    
     // delete this item and associated data if any
     void Delete(const wxTreeItemId& item);
 

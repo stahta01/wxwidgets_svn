@@ -60,6 +60,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "filename.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -68,16 +72,15 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/file.h"
-    #include "wx/utils.h"
+#include "wx/intl.h"
+#include "wx/log.h"
+#include "wx/file.h"
 #endif
 
 #include "wx/filename.h"
 #include "wx/tokenzr.h"
 #include "wx/config.h"          // for wxExpandEnvVars
+#include "wx/utils.h"
 #include "wx/file.h"
 #include "wx/dynlib.h"
 
@@ -519,7 +522,7 @@ bool wxFileName::FileExists( const wxString &file )
 
 bool wxFileName::DirExists() const
 {
-    return wxFileName::DirExists( GetPath() );
+    return wxFileName::DirExists( GetFullPath() );
 }
 
 bool wxFileName::DirExists( const wxString &dir )
@@ -562,7 +565,7 @@ wxString wxFileName::GetCwd(const wxString& volume)
 
 bool wxFileName::SetCwd()
 {
-    return wxFileName::SetCwd( GetPath() );
+    return wxFileName::SetCwd( GetFullPath() );
 }
 
 bool wxFileName::SetCwd( const wxString &cwd )
@@ -799,7 +802,7 @@ wxFileName::CreateTempFileName(const wxString& prefix, wxFile *fileTemp)
 
 bool wxFileName::Mkdir( int perm, int flags )
 {
-    return wxFileName::Mkdir(GetPath(), perm, flags);
+    return wxFileName::Mkdir( GetFullPath(), perm, flags );
 }
 
 bool wxFileName::Mkdir( const wxString& dir, int perm, int flags )
@@ -850,7 +853,7 @@ bool wxFileName::Mkdir( const wxString& dir, int perm, int flags )
 
 bool wxFileName::Rmdir()
 {
-    return wxFileName::Rmdir( GetPath() );
+    return wxFileName::Rmdir( GetFullPath() );
 }
 
 bool wxFileName::Rmdir( const wxString &dir )
@@ -2048,6 +2051,7 @@ public :
   OSType m_creator ;
 }  ;
 
+#include "wx/dynarray.h"
 WX_DECLARE_OBJARRAY(MacDefaultExtensionRecord, MacDefaultExtensionArray) ;
 
 bool gMacDefaultExtensionsInited = false ;

@@ -24,6 +24,10 @@ class WXDLLEXPORT wxIcon: public wxGDIObject
 public:
     wxIcon();
 
+    // Copy constructors
+    wxIcon(const wxIcon& icon)
+    {   Ref(icon); }
+
     wxIcon(const char **data) { CreateFromXpm(data); }
     wxIcon(char **data) { CreateFromXpm((const char**)data); }
     wxIcon(const char bits[], int width , int height );
@@ -40,6 +44,8 @@ public:
     bool LoadFile(const wxString& name, wxBitmapType flags = wxBITMAP_TYPE_ICON_RESOURCE )
     {   return LoadFile( name , flags , -1 , -1 ) ; }
 
+    wxIcon& operator=(const wxIcon& icon)
+    {   if (this != &icon) Ref(icon); return *this; }
     bool operator==(const wxIcon& icon) const
     {   return m_refData == icon.m_refData; }
     bool operator!=(const wxIcon& icon) const { return !(*this == icon); }

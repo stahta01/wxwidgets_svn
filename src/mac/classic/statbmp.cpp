@@ -1,25 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/statbmp.cpp
+// Name:        statbmp.cpp
 // Purpose:     wxStaticBitmap
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+  #pragma implementation "statbmp.h"
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/statbmp.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dcclient.h"
-#endif
+#include "wx/dcclient.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
 
@@ -52,7 +49,7 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     m_foregroundColour = parent->GetForegroundColour() ;
 
     m_bitmap = bitmap;
-    if ( id == wxID_ANY )
+    if ( id == -1 )
           m_windowId = (int)NewControlId();
     else
         m_windowId = id;
@@ -61,7 +58,7 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
 
     bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
     SetBestSize( size ) ;
-
+    
     return ret;
 }
 
@@ -73,15 +70,16 @@ void wxStaticBitmap::SetBitmap(const wxBitmap& bitmap)
     Refresh() ;
 }
 
-void wxStaticBitmap::OnPaint( wxPaintEvent& WXUNUSED(event) )
+void wxStaticBitmap::OnPaint( wxPaintEvent& WXUNUSED(event) ) 
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
 
-    dc.DrawBitmap( m_bitmap , 0 , 0 , true ) ;
+    dc.DrawBitmap( m_bitmap , 0 , 0 , TRUE ) ;
 }
 
 wxSize wxStaticBitmap::DoGetBestSize() const
 {
     return wxWindow::DoGetBestSize() ;
 }
+

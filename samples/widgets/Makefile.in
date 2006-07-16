@@ -29,10 +29,7 @@ TOOLKIT_LOWERCASE = @TOOLKIT_LOWERCASE@
 TOOLKIT_VERSION = @TOOLKIT_VERSION@
 TOOLCHAIN_FULLNAME = @TOOLCHAIN_FULLNAME@
 EXTRALIBS = @EXTRALIBS@
-EXTRALIBS_XML = @EXTRALIBS_XML@
-EXTRALIBS_HTML = @EXTRALIBS_HTML@
 EXTRALIBS_GUI = @EXTRALIBS_GUI@
-EXTRALIBS_SDL = @EXTRALIBS_SDL@
 HOST_SUFFIX = @HOST_SUFFIX@
 SAMPLES_RPATH_FLAG = @SAMPLES_RPATH_FLAG@
 SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
@@ -40,8 +37,8 @@ SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.7
-WX_VERSION = $(WX_RELEASE).0
+WX_RELEASE = 2.6
+WX_VERSION = $(WX_RELEASE).3
 LIBDIRNAME = $(top_builddir)lib
 WIDGETS_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
@@ -51,21 +48,14 @@ WIDGETS_OBJECTS =  \
 	widgets_button.o \
 	widgets_checkbox.o \
 	widgets_combobox.o \
-	widgets_datepick.o \
 	widgets_gauge.o \
-	widgets_hyperlnk.o \
 	widgets_listbox.o \
 	widgets_notebook.o \
-	widgets_clrpicker.o \
-	widgets_fontpicker.o \
-	widgets_filepicker.o \
-	widgets_dirpicker.o \
 	widgets_radiobox.o \
 	widgets_slider.o \
 	widgets_spinbtn.o \
 	widgets_static.o \
 	widgets_textctrl.o \
-	widgets_toggle.o \
 	widgets_widgets.o \
 	$(__widgets___win32rc)
 
@@ -73,7 +63,6 @@ WIDGETS_OBJECTS =  \
 
 @COND_DEPS_TRACKING_0@CXXC = $(CXX)
 @COND_DEPS_TRACKING_1@CXXC = $(top_builddir)./bk-deps $(CXX)
-@COND_USE_PLUGINS_0@PLUGIN_ADV_EXTRALIBS = $(EXTRALIBS_SDL)
 @COND_USE_GUI_0@PORTNAME = base
 @COND_USE_GUI_1@PORTNAME = $(TOOLKIT_LOWERCASE)$(TOOLKIT_VERSION)
 @COND_TOOLKIT_MAC@WXBASEPORT = _carbon
@@ -117,22 +106,13 @@ COND_PLATFORM_OS2_1___widgets___os2_emxbindcmd = $(NM) widgets$(EXEEXT) | if \
 @COND_TOOLKIT_COCOA@	widgets.app/Contents/PkgInfo
 @COND_TOOLKIT_MAC@____widgets_BUNDLE_TGT_REF_DEP = \
 @COND_TOOLKIT_MAC@	widgets.app/Contents/PkgInfo
-COND_MONOLITHIC_0___WXLIB_XML_p = \
-	-lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_MONOLITHIC_0@__WXLIB_XML_p = $(COND_MONOLITHIC_0___WXLIB_XML_p)
-COND_MONOLITHIC_0___WXLIB_ADV_p = \
-	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_MONOLITHIC_0@__WXLIB_ADV_p = $(COND_MONOLITHIC_0___WXLIB_ADV_p)
-COND_MONOLITHIC_0___WXLIB_HTML_p = \
-	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_MONOLITHIC_0@__WXLIB_HTML_p = $(COND_MONOLITHIC_0___WXLIB_HTML_p)
 COND_MONOLITHIC_0___WXLIB_CORE_p = \
 	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_0@__WXLIB_CORE_p = $(COND_MONOLITHIC_0___WXLIB_CORE_p)
 COND_MONOLITHIC_0___WXLIB_BASE_p = \
 	-lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_0@__WXLIB_BASE_p = $(COND_MONOLITHIC_0___WXLIB_BASE_p)
-@COND_PLATFORM_WIN32_1@__widgets___win32rc = widgets_sample_rc.o
+@COND_PLATFORM_WIN32_1@__widgets___win32rc = widgets_widgets_rc.o
 COND_MONOLITHIC_1___WXLIB_MONO_p = \
 	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_1@__WXLIB_MONO_p = $(COND_MONOLITHIC_1___WXLIB_MONO_p)
@@ -181,7 +161,7 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 widgets$(EXEEXT): $(WIDGETS_OBJECTS) $(__widgets___win32rc)
-	$(CXX) -o $@ $(WIDGETS_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(__WXLIB_XML_p) $(EXTRALIBS_XML) $(__WXLIB_ADV_p) $(PLUGIN_ADV_EXTRALIBS) $(__WXLIB_HTML_p) $(EXTRALIBS_HTML) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+	$(CXX) -o $@ $(WIDGETS_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI)
 	$(__widgets___mac_rezcmd)
 	$(__widgets___mac_setfilecmd)
 	$(__widgets___os2_emxbindcmd)
@@ -218,32 +198,14 @@ widgets_checkbox.o: $(srcdir)/checkbox.cpp
 widgets_combobox.o: $(srcdir)/combobox.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/combobox.cpp
 
-widgets_datepick.o: $(srcdir)/datepick.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/datepick.cpp
-
 widgets_gauge.o: $(srcdir)/gauge.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/gauge.cpp
-
-widgets_hyperlnk.o: $(srcdir)/hyperlnk.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/hyperlnk.cpp
 
 widgets_listbox.o: $(srcdir)/listbox.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/listbox.cpp
 
 widgets_notebook.o: $(srcdir)/notebook.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/notebook.cpp
-
-widgets_clrpicker.o: $(srcdir)/clrpicker.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/clrpicker.cpp
-
-widgets_fontpicker.o: $(srcdir)/fontpicker.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/fontpicker.cpp
-
-widgets_filepicker.o: $(srcdir)/filepicker.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/filepicker.cpp
-
-widgets_dirpicker.o: $(srcdir)/dirpicker.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/dirpicker.cpp
 
 widgets_radiobox.o: $(srcdir)/radiobox.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/radiobox.cpp
@@ -260,13 +222,10 @@ widgets_static.o: $(srcdir)/static.cpp
 widgets_textctrl.o: $(srcdir)/textctrl.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/textctrl.cpp
 
-widgets_toggle.o: $(srcdir)/toggle.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/toggle.cpp
-
 widgets_widgets.o: $(srcdir)/widgets.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/widgets.cpp
 
-widgets_sample_rc.o: $(srcdir)/../sample.rc
+widgets_widgets_rc.o: $(srcdir)/widgets.rc
 	$(WINDRES) -i$< -o$@   --define __WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p_2)  $(__EXCEPTIONS_DEFINE_p_2) $(__RTTI_DEFINE_p_2) $(__THREAD_DEFINE_p_2)   --include-dir $(srcdir) $(__DLLFLAG_p_2) --include-dir $(srcdir)/../../samples $(__RCDEFDIR_p_1) --include-dir $(top_srcdir)/include
 
 

@@ -6,16 +6,15 @@
 // Created:     2003/08/02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
 #ifndef WX_PRECOMP
     #include "wx/pen.h"
-    #include "wx/bitmap.h"
-    #include "wx/colour.h"
 #endif //WX_PRECOMP
+#include "wx/bitmap.h"
+#include "wx/colour.h"
 
 #import <AppKit/NSColor.h>
 
@@ -324,27 +323,27 @@ void wxPen::SetStipple(const wxBitmap& Stipple)
 
 wxColour& wxPen::GetColour() const
 {
-    return (M_PENDATA ? M_PENDATA->m_colour : wxNullColour);
+    return (M_PENDATA ? M_PENDATA->m_colour : wxNullColour); 
 }
 
 int wxPen::GetWidth() const
 {
-    return (M_PENDATA ? M_PENDATA->m_width : 0);
+    return (M_PENDATA ? M_PENDATA->m_width : 0); 
 }
 
 int wxPen::GetStyle() const
 {
-    return (M_PENDATA ? M_PENDATA->m_style : 0);
+    return (M_PENDATA ? M_PENDATA->m_style : 0); 
 }
 
 int wxPen::GetJoin() const
 {
-    return (M_PENDATA ? M_PENDATA->m_join : 0);
+    return (M_PENDATA ? M_PENDATA->m_join : 0); 
 }
 
 int wxPen::GetCap() const
 {
-    return (M_PENDATA ? M_PENDATA->m_cap : 0);
+    return (M_PENDATA ? M_PENDATA->m_cap : 0); 
 }
 
 int wxPen::GetDashes(wxDash **ptr) const
@@ -354,7 +353,7 @@ int wxPen::GetDashes(wxDash **ptr) const
 
 wxBitmap *wxPen::GetStipple() const
 {
-    return (M_PENDATA ? (& M_PENDATA->m_stipple) : (wxBitmap*) NULL);
+    return (M_PENDATA ? (& M_PENDATA->m_stipple) : (wxBitmap*) NULL); 
 }
 
 WX_NSColor wxPen::GetNSColor()
@@ -370,3 +369,4 @@ int wxPen::GetCocoaLineDash(const float **pattern)
         *pattern = NULL;
     return 0;
 }
+

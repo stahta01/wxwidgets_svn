@@ -18,11 +18,15 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "logg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
@@ -37,6 +41,7 @@
     #include "wx/textctrl.h"
     #include "wx/sizer.h"
     #include "wx/statbmp.h"
+    #include "wx/button.h"
     #include "wx/settings.h"
 #endif // WX_PRECOMP
 
@@ -48,18 +53,20 @@
 #include "wx/artprov.h"
 
 #ifdef  __WXMSW__
-    // for OutputDebugString()
-    #include  "wx/msw/private.h"
+  // for OutputDebugString()
+  #include  "wx/msw/private.h"
 #endif // Windows
 
 #ifdef  __WXPM__
-    #include <time.h>
+  #include <time.h>
 #endif
 
 #if wxUSE_LOG_DIALOG
     #include "wx/listctrl.h"
     #include "wx/imaglist.h"
     #include "wx/image.h"
+#else // !wxUSE_LOG_DIALOG
+    #include "wx/msgdlg.h"
 #endif // wxUSE_LOG_DIALOG/!wxUSE_LOG_DIALOG
 
 #if defined(__MWERKS__) && wxUSE_UNICODE
@@ -1214,3 +1221,4 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 }
 
 #endif // wxUSE_LOG && wxUSE_TEXTCTRL
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/mimetype.cpp
+// Name:        msw/mimetype.cpp
 // Purpose:     classes and functions to manage MIME types
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,36 +9,40 @@
 // Licence:     wxWindows licence (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mimetype.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #if wxUSE_MIMETYPE
 
-#include "wx/msw/mimetype.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
     #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
     #if wxUSE_GUI
         #include "wx/icon.h"
         #include "wx/msgdlg.h"
     #endif
 #endif //WX_PRECOMP
 
+#include "wx/log.h"
 #include "wx/file.h"
 #include "wx/iconloc.h"
+#include "wx/intl.h"
+#include "wx/dynarray.h"
 #include "wx/confbase.h"
 
 #ifdef __WXMSW__
     #include "wx/msw/registry.h"
     #include "wx/msw/private.h"
 #endif // OS
+
+#include "wx/msw/mimetype.h"
 
 // other standard headers
 #include <ctype.h>
@@ -509,7 +513,7 @@ wxFileType *wxMimeTypesManagerImpl::Associate(const wxFileTypeInfo& ftInfo)
                  _T("Associate() needs extension") );
 
     bool ok;
-    size_t iExtCount = 0;
+    int iExtCount = 0 ;
     wxString filetype;
     wxString extWithDot;
 

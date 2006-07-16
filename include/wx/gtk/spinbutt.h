@@ -11,6 +11,10 @@
 #ifndef _WX_GTK_SPINBUTT_H_
 #define _WX_GTK_SPINBUTT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 //-----------------------------------------------------------------------------
 // wxSpinButton
 //-----------------------------------------------------------------------------
@@ -18,7 +22,7 @@
 class WXDLLIMPEXP_CORE wxSpinButton : public wxSpinButtonBase
 {
 public:
-    wxSpinButton();
+    wxSpinButton() { }
     wxSpinButton(wxWindow *parent,
                  wxWindowID id = -1,
                  const wxPoint& pos = wxDefaultPosition,
@@ -50,7 +54,8 @@ public:
 
     bool IsOwnGtkWindow( GdkWindow *window );
 
-    int m_pos;
+    GtkAdjustment  *m_adjust;
+    float           m_oldPos;
 
 protected:
     virtual wxSize DoGetBestSize() const;

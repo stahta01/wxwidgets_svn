@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/frame.cpp
+// Name:        frame.cpp
 // Purpose:     wxFrame
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,24 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "frame.h"
+#endif
 
 #include "wx/frame.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/dcclient.h"
-    #include "wx/menu.h"
-    #include "wx/dialog.h"
-    #include "wx/settings.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
-    #include "wx/menuitem.h"
-#endif // WX_PRECOMP
+#include "wx/statusbr.h"
+#include "wx/toolbar.h"
+#include "wx/menuitem.h"
+#include "wx/menu.h"
+#include "wx/dcclient.h"
+#include "wx/dialog.h"
+#include "wx/settings.h"
+#include "wx/app.h"
 
 #include "wx/mac/uma.h"
 
 extern wxWindowList wxModelessWindows;
+extern wxList wxPendingDelete;
 
 BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
   EVT_ACTIVATE(wxFrame::OnActivate)
@@ -38,7 +38,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
 
-#define WX_MAC_STATUSBAR_HEIGHT 15
+#define WX_MAC_STATUSBAR_HEIGHT 15 
 // ----------------------------------------------------------------------------
 // creation/destruction
 // ----------------------------------------------------------------------------
@@ -46,15 +46,15 @@ IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
 void wxFrame::Init()
 {
     m_frameMenuBar = NULL;
-
+    
 #if wxUSE_TOOLBAR
     m_frameToolBar = NULL ;
 #endif
     m_frameStatusBar = NULL;
     m_winLastFocused = NULL ;
-
-    m_iconized = false;
-
+    
+    m_iconized = FALSE;
+    
 #if wxUSE_TOOLTIPS
     m_hwndToolTip = 0;
 #endif
@@ -94,23 +94,23 @@ bool wxFrame::Create(wxWindow *parent,
            const wxString& name)
 {
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
-
+    
     if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return false;
-
+        return FALSE;
+    
     MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
 
     m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
     SetThemeWindowBackground( (WindowRef) m_macWindow , m_macWindowBackgroundTheme , false ) ;
 
     wxModelessWindows.Append(this);
-
-    return true;
+    
+    return TRUE;
 }
 
 wxFrame::~wxFrame()
 {
-    m_isBeingDeleted = true;
+    m_isBeingDeleted = TRUE;
     DeleteAllBars();
 }
 
@@ -118,18 +118,18 @@ wxFrame::~wxFrame()
 bool wxFrame::Enable(bool enable)
 {
     if ( !wxWindow::Enable(enable) )
-        return false;
+        return FALSE;
 
     if ( m_frameMenuBar && m_frameMenuBar == wxMenuBar::MacGetInstalledMenuBar() )
     {
-        int iMaxMenu = m_frameMenuBar->GetMenuCount();
+         int iMaxMenu = m_frameMenuBar->GetMenuCount(); 
         for ( int i = 0 ; i < iMaxMenu ; ++ i )
         {
             m_frameMenuBar->EnableTop( i , enable ) ;
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 wxStatusBar *wxFrame::OnCreateStatusBar(int number, long style, wxWindowID id,
@@ -152,7 +152,7 @@ void wxFrame::PositionStatusBar()
         GetClientSize(&w, &h);
         int sw, sh;
         m_frameStatusBar->GetSize(&sw, &sh);
-
+        
         // Since we wish the status bar to be directly under the client area,
         // we use the adjusted sizes without using wxSIZE_NO_ADJUSTMENTS.
         m_frameStatusBar->SetSize(0, h, w, sh);
@@ -253,7 +253,7 @@ void wxFrame::AttachMenuBar( wxMenuBar *menuBar )
 void wxFrame::DoGetClientSize(int *x, int *y) const
 {
     wxWindow::DoGetClientSize( x , y ) ;
-
+    
 #if wxUSE_STATUSBAR
     if ( GetStatusBar() && y )
     {
@@ -262,11 +262,11 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
         *y -= statusY;
     }
 #endif // wxUSE_STATUSBAR
-
+    
     wxPoint pt(GetClientAreaOrigin());
     if ( y )
         *y -= pt.y;
-    if ( x )
+    if ( x ) 
         *x -= pt.x;
 }
 
@@ -274,10 +274,10 @@ void wxFrame::DoSetClientSize(int clientwidth, int clientheight)
 {
     int currentclientwidth , currentclientheight ;
     int currentwidth , currentheight ;
-
+    
     GetClientSize( &currentclientwidth , &currentclientheight ) ;
     GetSize( &currentwidth , &currentheight ) ;
-
+    
     // find the current client size
 
   // Find the difference between the entire window (title bar and all)

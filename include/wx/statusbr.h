@@ -12,11 +12,14 @@
 #ifndef _WX_STATUSBR_H_BASE_
 #define _WX_STATUSBR_H_BASE_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "statbar.h"
+#endif
+
+#include "wx/window.h"
 
 #if wxUSE_STATUSBAR
 
-#include "wx/window.h"
 #include "wx/list.h"
 #include "wx/dynarray.h"
 

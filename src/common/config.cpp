@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/config.cpp
+// Name:        config.cpp
 // Purpose:     implementation of wxConfigBase class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -13,11 +13,14 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "confbase.h"
+#endif
 
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef    __BORLANDC__
+  #pragma hdrstop
 #endif  //__BORLANDC__
 
 #ifndef wxUSE_CONFIG_NATIVE
@@ -25,19 +28,18 @@
 #endif
 
 #include "wx/config.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/arrstr.h"
-    #include "wx/math.h"
-#endif //WX_PRECOMP
+#include "wx/intl.h"
+#include "wx/log.h"
+#include "wx/arrstr.h"
 
 #if wxUSE_CONFIG && ((wxUSE_FILE && wxUSE_TEXTFILE) || wxUSE_CONFIG_NATIVE)
 
+#include "wx/app.h"
 #include "wx/file.h"
+#include "wx/textfile.h"
+#include "wx/utils.h"
+#include "wx/utils.h"
+#include "wx/math.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -274,21 +276,6 @@ wxConfigPathChanger::wxConfigPathChanger(const wxConfigBase *pContainer,
   }
 }
 
-void wxConfigPathChanger::UpdateIfDeleted()
-{
-    // we don't have to do anything at all if we didn't change the path
-    if ( !m_bChanged )
-        return;
-
-    // find the deepest still existing parent path of the original path
-    while ( !m_pContainer->HasGroup(m_strOldPath) )
-    {
-        m_strOldPath = m_strOldPath.BeforeLast(wxCONFIG_PATH_SEPARATOR);
-        if ( m_strOldPath.empty() )
-            m_strOldPath = wxCONFIG_PATH_SEPARATOR;
-    }
-}
-
 wxConfigPathChanger::~wxConfigPathChanger()
 {
   // only restore path if it was changed
@@ -323,10 +310,10 @@ enum Bracket
 wxString wxExpandEnvVars(const wxString& str)
 {
   wxString strResult;
-  strResult.Alloc(str.length());
+  strResult.Alloc(str.Len());
 
   size_t m;
-  for ( size_t n = 0; n < str.length(); n++ ) {
+  for ( size_t n = 0; n < str.Len(); n++ ) {
     switch ( str[n] ) {
 #ifdef  __WXMSW__
       case wxT('%'):
@@ -339,7 +326,7 @@ wxString wxExpandEnvVars(const wxString& str)
               bracket = Bracket_Windows;
             else
           #endif  //WINDOWS
-          if ( n == str.length() - 1 ) {
+          if ( n == str.Len() - 1 ) {
             bracket = Bracket_None;
           }
           else {
@@ -361,7 +348,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           m = n + 1;
 
-          while ( m < str.length() && (wxIsalnum(str[m]) || str[m] == wxT('_')) )
+          while ( m < str.Len() && (wxIsalnum(str[m]) || str[m] == wxT('_')) )
             m++;
 
           wxString strVarName(str.c_str() + n + 1, m - n - 1);
@@ -386,7 +373,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           // check the closing bracket
           if ( bracket != Bracket_None ) {
-            if ( m == str.length() || str[m] != (wxChar)bracket ) {
+            if ( m == str.Len() || str[m] != (wxChar)bracket ) {
               // under MSW it's common to have '%' characters in the registry
               // and it's annoying to have warnings about them each time, so
               // ignroe them silently if they are not used for env vars
@@ -412,7 +399,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
       case '\\':
         // backslash can be used to suppress special meaning of % and $
-        if ( n != str.length() - 1 &&
+        if ( n != str.Len() - 1 &&
                 (str[n + 1] == wxT('%') || str[n + 1] == wxT('$')) ) {
           strResult += str[++n];
 
@@ -465,3 +452,5 @@ void wxSplitPath(wxArrayString& aParts, const wxChar *sz)
     pc++;
   }
 }
+
+

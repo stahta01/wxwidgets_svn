@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_combo.h
+// Name:        xh_combo.h
 // Purpose:     XML resource handler for wxComboBox
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_COMBO_H_
 #define _WX_XH_COMBO_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_combo.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

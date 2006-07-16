@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKSCROLLBARH__
 #define __GTKSCROLLBARH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "scrolbar.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -25,7 +30,8 @@ class WXDLLIMPEXP_CORE wxScrollBar;
 class WXDLLIMPEXP_CORE wxScrollBar: public wxScrollBarBase
 {
 public:
-    wxScrollBar();
+    wxScrollBar()
+       { m_adjust = (GtkAdjustment *) NULL; m_oldPos = 0.0; }
     inline wxScrollBar( wxWindow *parent, wxWindowID id,
            const wxPoint& pos = wxDefaultPosition,
            const wxSize& size = wxDefaultSize,
@@ -48,11 +54,19 @@ public:
     int GetRange() const;
     virtual void SetThumbPosition( int viewStart );
     virtual void SetScrollbar( int position, int thumbSize, int range, int pageSize,
-      bool refresh = true );
+      bool refresh = TRUE );
 
-    void SetThumbSize(int thumbSize);
+    // Backward compatibility
+    // ----------------------
+
+    int GetValue(void) const;
+    void SetValue( int viewStart );
+    void GetValues( int *viewStart, int *viewLength, int *objectLength, int *pageLength) const;
+    int GetViewLength() const;
+    int GetObjectLength() const;
     void SetPageSize( int pageLength );
-    void SetRange(int range);
+    void SetObjectLength( int objectLength );
+    void SetViewLength( int viewLength );
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
@@ -61,6 +75,12 @@ public:
     // --------------
 
     bool IsOwnGtkWindow( GdkWindow *window );
+
+    GtkAdjustment  *m_adjust;
+    float           m_oldPos;
+
+protected:
+    virtual wxSize DoGetBestSize() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxScrollBar)

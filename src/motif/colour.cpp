@@ -1,26 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 //// TODO: make wxColour a ref-counted object,
 //// so pixel values get shared.
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/gdicmn.h"
 #include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/gdicmn.h"
-#endif
+#include "wx/app.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -45,6 +46,11 @@ void wxColour::Init()
     m_pixel = -1;
 }
 
+wxColour::wxColour()
+{
+    Init();
+}
+
 wxColour::wxColour(const wxColour& col)
 {
     *this = col;
@@ -60,11 +66,47 @@ wxColour& wxColour::operator =(const wxColour& col)
     return *this;
 }
 
+void wxColour::InitFromName(const wxString& name)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(name);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
+}
+
+/* static */
+wxColour wxColour::CreateByName(const wxString& name)
+{
+    wxColour col;
+
+    Display *dpy = wxGlobalDisplay();
+    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
+    XColor xcol;
+    if ( XParseColor( dpy, (Colormap)colormap, name.mb_str(), &xcol ) )
+    {
+        col.m_red = xcol.red & 0xff;
+        col.m_green = xcol.green & 0xff;
+        col.m_blue = xcol.blue & 0xff;
+        col.m_isInit = true;
+        col.m_pixel = -1;
+    }
+
+    return col;
+}
+
 wxColour::~wxColour()
 {
 }
 
-void wxColour::InitWith(unsigned char r, unsigned char g, unsigned char b)
+void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
 {
     m_red = r;
     m_green = g;
@@ -88,11 +130,11 @@ int wxColour::AllocColour(WXDisplay* display, bool realloc)
 
     XColor color;
     color.red = (unsigned short) Red ();
-    color.red |= (unsigned short)(color.red << 8);
+    color.red |= color.red << 8;
     color.green = (unsigned short) Green ();
-    color.green |= (unsigned short)(color.green << 8);
+    color.green |= color.green << 8;
     color.blue = (unsigned short) Blue ();
-    color.blue |= (unsigned short)(color.blue << 8);
+    color.blue |= color.blue << 8;
 
     color.flags = DoRed | DoGreen | DoBlue;
 

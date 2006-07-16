@@ -6,16 +6,13 @@
 // Created:     2003/04/01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/dc.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
-    #include "wx/math.h" //math constants
+    #include "wx/dc.h"
 #endif //WX_PRECOMP
 
 #include "wx/cocoa/autorelease.h"
@@ -31,6 +28,7 @@
 #import <AppKit/NSTypesetter.h>
 #import <AppKit/NSImage.h>
 
+#include "wx/math.h" //math constants
 #include "wx/listimpl.cpp"
 WX_DEFINE_LIST(wxCocoaDCStack);
 
@@ -376,8 +374,8 @@ void wxDC::DoDrawIcon( const wxIcon &WXUNUSED(icon), int WXUNUSED(x), int WXUNUS
 {
 };
 
-void wxDC::DoDrawPoint( int x, int y )
-{
+void wxDC::DoDrawPoint( int x, int y ) 
+{ 
 };
 
 void wxDC::DoDrawPolygon( int, wxPoint *, int, int, int)
@@ -426,7 +424,7 @@ bool wxDC::DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const
 void wxDC::DoDrawArc(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCoord xc, wxCoord yc)
 {
 }
-
+    
 void wxDC::SetPen(const wxPen& pen)
 {
     m_pen = pen;
@@ -507,7 +505,7 @@ void wxDC::DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask)
         fromRect: NSMakeRect(0.0,0.0,bmp.GetWidth(),bmp.GetHeight())
         operation: NSCompositeSourceOver
         fraction: 1.0];
-
+        
     [nsimage release];
     [context restoreGraphicsState];
 }
@@ -598,7 +596,7 @@ void wxDC::SetLogicalFunction(int)
 
 void wxDC::SetMapMode( int mode )
 {
-  switch (mode)
+  switch (mode) 
   {
     case wxMM_TWIPS:
       break;
@@ -662,7 +660,7 @@ void wxDC::ComputeScaleAndOrigin(void)
   m_scaleX = m_logicalScaleX * m_userScaleX;
   m_scaleY = m_logicalScaleY * m_userScaleY;
 
-  // CMB: if scale has changed call SetPen to recalulate the line width
+  // CMB: if scale has changed call SetPen to recalulate the line width 
   if (m_scaleX != origScaleX || m_scaleY != origScaleY)
   {
     // this is a bit artificial, but we need to force wxDC to think
@@ -673,3 +671,4 @@ void wxDC::ComputeScaleAndOrigin(void)
     SetPen(* pen);
   }
 };
+

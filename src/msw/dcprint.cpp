@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,26 +28,25 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
-#include "wx/dcprint.h"
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/window.h"
     #include "wx/dcmemory.h"
-    #include "wx/math.h"
 #endif
+
+#if wxUSE_PRINTING_ARCHITECTURE
 
 #include "wx/msw/private.h"
 
 #if wxUSE_WXDIB
-    #include "wx/msw/dib.h"
+#include "wx/msw/dib.h"
 #endif
 
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
 #include "wx/msw/printdlg.h"
+#include "wx/math.h"
 
 #include "wx/msw/wrapcdlg.h"
 #ifndef __WIN32__
@@ -181,8 +184,10 @@ bool wxPrinterDC::StartDoc(const wxString& message)
     else
         docinfo.lpszOutput = (const wxChar *) filename;
 
+#if defined(__WIN95__)
     docinfo.lpszDatatype = NULL;
     docinfo.fwType = 0;
+#endif
 
     if (!m_hDC)
         return false;

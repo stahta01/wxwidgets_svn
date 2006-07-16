@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/frame.cpp
+// Name:        msw/frame.cpp
 // Purpose:     wxFrame
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/frame.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/frame.h"
     #include "wx/app.h"
     #include "wx/menu.h"
     #include "wx/utils.h"
@@ -35,16 +38,13 @@
     #include "wx/dcclient.h"
     #include "wx/mdi.h"
     #include "wx/panel.h"
-    #include "wx/log.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
-    #include "wx/menuitem.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#ifdef __WXWINCE__
+#include <commctrl.h>
+#endif
 
 #if defined(__POCKETPC__) || defined(__SMARTPHONE__)
     #include <ole2.h>
@@ -52,7 +52,17 @@
     #include "wx/msw/winundef.h"
 #endif
 
-#include "wx/generic/statusbr.h"
+#if wxUSE_STATUSBAR
+    #include "wx/statusbr.h"
+    #include "wx/generic/statusbr.h"
+#endif // wxUSE_STATUSBAR
+
+#if wxUSE_TOOLBAR
+    #include "wx/toolbar.h"
+#endif // wxUSE_TOOLBAR
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #ifdef __WXUNIVERSAL__
     #include "wx/univ/theme.h"
@@ -109,14 +119,10 @@ wxBEGIN_FLAGS( wxFrameStyle )
     // frame styles
     wxFLAGS_MEMBER(wxSTAY_ON_TOP)
     wxFLAGS_MEMBER(wxCAPTION)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxTHICK_FRAME)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxSYSTEM_MENU)
     wxFLAGS_MEMBER(wxRESIZE_BORDER)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxRESIZE_BOX)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxCLOSE_BOX)
     wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
     wxFLAGS_MEMBER(wxMINIMIZE_BOX)
@@ -177,6 +183,14 @@ void wxFrame::Init()
     m_hwndToolTip = 0;
 #endif
 
+#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
+    SHACTIVATEINFO* info = new SHACTIVATEINFO;
+    memset(info, 0, sizeof(SHACTIVATEINFO));
+    info->cbSize = sizeof(SHACTIVATEINFO);
+
+    m_activateInfo = (void*) info;
+#endif
+
     m_wasMinimized = false;
 }
 
@@ -213,6 +227,12 @@ wxFrame::~wxFrame()
 {
     m_isBeingDeleted = true;
     DeleteAllBars();
+
+#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
+    SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
+    delete info;
+    m_activateInfo = NULL;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -681,8 +701,10 @@ void wxFrame::IconizeChildFrames(bool bIconize)
         // them appear in the taskbar because they are, by virtue of this
         // style, not managed by the taskbar - instead leave Windows take care
         // of them
+#ifdef __WIN95__
         if ( win->GetWindowStyle() & wxFRAME_TOOL_WINDOW )
             continue;
+#endif // Win95
 
         // the child MDI frames are a special case and should not be touched by
         // the parent frame - instead, they are managed by the user
@@ -724,7 +746,7 @@ WXHICON wxFrame::GetDefaultIcon() const
 // preprocessing
 // ---------------------------------------------------------------------------
 
-bool wxFrame::MSWDoTranslateMessage(wxFrame *frame, WXMSG *pMsg)
+bool wxFrame::MSWTranslateMessage(WXMSG* pMsg)
 {
     if ( wxWindow::MSWTranslateMessage(pMsg) )
         return true;
@@ -732,14 +754,14 @@ bool wxFrame::MSWDoTranslateMessage(wxFrame *frame, WXMSG *pMsg)
 #if wxUSE_MENUS && wxUSE_ACCEL && !defined(__WXUNIVERSAL__)
     // try the menu bar accels
     wxMenuBar *menuBar = GetMenuBar();
-    if ( menuBar )
-    {
-        const wxAcceleratorTable& acceleratorTable = menuBar->GetAccelTable();
-        return acceleratorTable.Translate(frame, pMsg);
-    }
-#endif // wxUSE_MENUS && wxUSE_ACCEL
+    if ( !menuBar )
+        return false;
 
+    const wxAcceleratorTable& acceleratorTable = menuBar->GetAccelTable();
+    return acceleratorTable.Translate(this, pMsg);
+#else
     return false;
+#endif // wxUSE_MENUS && wxUSE_ACCEL
 }
 
 // ---------------------------------------------------------------------------
@@ -949,6 +971,39 @@ WXLRESULT wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
 
     switch ( message )
     {
+#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
+        case WM_ACTIVATE:
+        {
+            SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
+            if (info)
+                SHHandleWMActivate(GetHwnd(), wParam, lParam, info, FALSE);
+
+            // This implicitly sends a wxEVT_ACTIVATE_APP event
+            if (wxTheApp)
+                wxTheApp->SetActive(wParam != 0, FindFocus());
+            break;
+        }
+        case WM_SETTINGCHANGE:
+        {
+            SHACTIVATEINFO* info = (SHACTIVATEINFO*) m_activateInfo;
+            if (info)
+                SHHandleWMSettingChange(GetHwnd(), wParam, lParam, info);
+            processed = true;
+            break;
+        }
+        case WM_HIBERNATE:
+        {
+            wxActivateEvent event(wxEVT_HIBERNATE, true, wxID_ANY);
+            event.SetEventObject(wxTheApp);
+
+            if (wxTheApp)
+            {
+                processed = wxTheApp->ProcessEvent(event);
+            }
+            break;
+        }
+#endif
+
         case WM_CLOSE:
             // if we can't close, tell the system that we processed the
             // message - otherwise it would close us

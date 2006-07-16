@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dynarray.cpp
+// Name:        dynarray.cpp
 // Purpose:     implementation of wxBaseArray class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -13,17 +13,18 @@
 // headers
 // ============================================================================
 
-// For compilers that support precompilation, includes "wx.h".
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dynarray.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/intl.h"
-#endif //WX_PRECOMP
+#include "wx/dynarray.h"
+#include "wx/intl.h"
 
 #include <stdlib.h>
 #include <string.h> // for memmove
@@ -413,22 +414,12 @@ void name::insert(iterator it, const_iterator first, const_iterator last)   \
         _WX_DEFINE_BASEARRAY_COMMON(T, name)                                \
         _WX_DEFINE_BASEARRAY_NOCOMMON(T, name)
 
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-    #pragma warning(disable: 1572)
-#endif
-
 _WX_DEFINE_BASEARRAY(const void *, wxBaseArrayPtrVoid)
 _WX_DEFINE_BASEARRAY(short,        wxBaseArrayShort)
 _WX_DEFINE_BASEARRAY(int,          wxBaseArrayInt)
 _WX_DEFINE_BASEARRAY(long,         wxBaseArrayLong)
 _WX_DEFINE_BASEARRAY(size_t,       wxBaseArraySizeT)
 _WX_DEFINE_BASEARRAY(double,       wxBaseArrayDouble)
-
-#ifdef __INTELC__
-    #pragma warning(pop)
-#endif
 
 #if wxUSE_STL
 #include "wx/arrstr.h"
@@ -437,7 +428,7 @@ _WX_DEFINE_BASEARRAY(double,       wxBaseArrayDouble)
 #include <functional>
 #include "wx/afterstd.h"
 
-_WX_DEFINE_BASEARRAY(wxString, wxBaseArrayStringBase)
+_WX_DEFINE_BASEARRAY(wxString, wxBaseArrayStringBase);
 
 // some compilers (Sun CC being the only known example) distinguish between
 // extern "C" functions and the functions with C++ linkage and ptr_fun and

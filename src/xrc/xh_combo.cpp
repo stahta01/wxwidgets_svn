@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_combo.cpp
+// Name:        xh_combo.cpp
 // Purpose:     XRC resource for wxRadioBox
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2000 Bob Mitchell and Verant Interactive
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_combo.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,17 +22,13 @@
 #if wxUSE_XRC && wxUSE_COMBOBOX
 
 #include "wx/xrc/xh_combo.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/combobox.h"
-#endif
+#include "wx/combobox.h"
+#include "wx/intl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxComboBoxXmlHandler, wxXmlResourceHandler)
 
 wxComboBoxXmlHandler::wxComboBoxXmlHandler()
-                     :wxXmlResourceHandler()
-                     ,m_insideBox(false)
+: wxXmlResourceHandler() , m_insideBox(false)
 {
     XRC_ADD_STYLE(wxCB_SIMPLE);
     XRC_ADD_STYLE(wxCB_SORT);

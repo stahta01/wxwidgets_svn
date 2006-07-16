@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/access.cpp
+// Name:        msw/ole/access.cpp
 // Purpose:     implementation of wxIAccessible and wxAccessible
 // Author:      Julian Smart
 // Modified by:
@@ -17,21 +17,26 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "access.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if defined(__BORLANDC__)
   #pragma hdrstop
 #endif
+#ifndef WX_PRECOMP
+#include "wx/window.h"
+#endif
+
+#include "wx/setup.h"
 
 #if wxUSE_OLE && wxUSE_ACCESSIBILITY
 
+#include "wx/log.h"
 #include "wx/access.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/log.h"
-#endif
 
 #include "wx/msw/wrapwin.h"
 
@@ -961,7 +966,7 @@ STDMETHODIMP wxIAccessible::get_accDescription ( VARIANT varID, BSTR* pszDescrip
     }
     else
     {
-        if (description.empty())
+        if (description.IsEmpty())
         {
             * pszDescription = NULL;
             return S_FALSE;
@@ -1018,7 +1023,7 @@ STDMETHODIMP wxIAccessible::get_accHelp ( VARIANT varID, BSTR* pszHelp)
     }
     else
     {
-        if (helpString.empty())
+        if (helpString.IsEmpty())
         {
             * pszHelp = NULL;
             return S_FALSE;
@@ -1123,7 +1128,7 @@ STDMETHODIMP wxIAccessible::get_accKeyboardShortcut ( VARIANT varID, BSTR* pszKe
     }
     else
     {
-        if (keyboardShortcut.empty())
+        if (keyboardShortcut.IsEmpty())
         {
             * pszKeyboardShortcut = NULL;
             return S_FALSE;
@@ -1991,4 +1996,4 @@ wxAccSelectionFlags wxConvertFromWindowsSelFlag(int sel)
 }
 
 
-#endif  // wxUSE_OLE && wxUSE_ACCESSIBILITY
+#endif  //USE_ACCESSIBILITY

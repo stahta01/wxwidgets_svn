@@ -38,6 +38,7 @@ languages are built-in."
 MAKE_CONST_WXSTRING(STCNameStr);
 
 
+%include _stc_rename.i
 %include _stc_docstrings.i
 
 enum wxFontEncoding;  // forward declare
@@ -78,7 +79,6 @@ EVT_STC_ZOOM = wx.PyEventBinder( wxEVT_STC_ZOOM, 1 )
 EVT_STC_HOTSPOT_CLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_CLICK, 1 )
 EVT_STC_HOTSPOT_DCLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_DCLICK, 1 )
 EVT_STC_CALLTIP_CLICK = wx.PyEventBinder( wxEVT_STC_CALLTIP_CLICK, 1 )
-EVT_STC_AUTOCOMP_SELECTION = wx.PyEventBinder( wxEVT_STC_AUTOCOMP_SELECTION, 1 )
 }
 
 //---------------------------------------------------------------------------

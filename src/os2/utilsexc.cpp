@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utilsexec.cpp
+// Name:        utilsexec.cpp
 // Purpose:     Various utilities
 // Author:      David Webster
 // Modified by:
@@ -13,11 +13,13 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
+#include "wx/setup.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/intl.h"
 #endif
+
+#include "wx/log.h"
 
 #include "wx/process.h"
 
@@ -237,7 +239,29 @@ long wxExecute(
                     );
 }
 
-bool wxGetFullHostName( wxChar* zBuf, int nMaxSize)
+bool wxGetFullHostName( wxChar* zBuf,
+                        int nMaxSize)
 {
-    return wxGetHostName( zBuf, nMaxSize );
+#if wxUSE_NET_API
+    char                            zServer[256];
+    char                            zComputer[256];
+    unsigned long                   ulLevel = 0;
+    unsigned char*                  zBuffer = NULL;
+    unsigned long                   ulBuffer = 256;
+    unsigned long*                  pulTotalAvail = NULL;
+
+    NetBios32GetInfo( (const unsigned char*)zServer
+                     ,(const unsigned char*)zComputer
+                     ,ulLevel
+                     ,zBuffer
+                     ,ulBuffer
+                     ,pulTotalAvail
+                    );
+    strncpy(zBuf, zComputer, nMaxSize);
+    zBuf[nMaxSize] = _T('\0');
+#else
+    wxUnusedVar(nMaxSize);
+    strcpy((char*)zBuf, "noname");
+#endif
+    return *zBuf ? true : false;
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/helpbase.cpp
+// Name:        helpbase.cpp
 // Purpose:     Help system base classes
 // Author:      Julian Smart
 // Modified by:
@@ -9,17 +9,22 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif
 
 #if wxUSE_HELP
-
-#ifndef WX_PRECOMP
-#endif
 
 #include "wx/helpbase.h"
 

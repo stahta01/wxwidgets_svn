@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/gauge.cpp
+// Name:        gauge.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,12 +7,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gauge.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_GAUGE
-
 #include "wx/gauge.h"
+
+#if wxUSE_GAUGE
 
 #include <gtk/gtk.h>
 
@@ -31,13 +35,13 @@ bool wxGauge::Create( wxWindow *parent,
                       const wxValidator& validator,
                       const wxString& name )
 {
-    m_needParent = true;
+    m_needParent = TRUE;
 
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxGauge creation failed") );
-        return false;
+        return FALSE;
     }
 
     m_rangeMax = range;
@@ -53,8 +57,8 @@ bool wxGauge::Create( wxWindow *parent,
 
     PostCreation(size);
     SetBestSize(size);
-
-    return true;
+    
+    return TRUE;
 }
 
 void wxGauge::DoSetGauge()
@@ -62,8 +66,8 @@ void wxGauge::DoSetGauge()
     wxASSERT_MSG( 0 <= m_gaugePos && m_gaugePos <= m_rangeMax,
                   _T("invalid gauge position in DoSetGauge()") );
 
-    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (m_widget),
-                                   m_rangeMax ? ((double)m_gaugePos)/m_rangeMax : 0.0);
+    gtk_progress_bar_update( GTK_PROGRESS_BAR(m_widget),
+                             m_rangeMax ? ((float)m_gaugePos)/m_rangeMax : 0.);
 }
 
 wxSize wxGauge::DoGetBestSize() const
@@ -123,3 +127,4 @@ wxGauge::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 }
 
 #endif // wxUSE_GAUGE
+

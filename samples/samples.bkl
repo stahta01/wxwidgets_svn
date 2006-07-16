@@ -15,7 +15,6 @@
     <subproject id="caret" template="sub"/>
     <subproject id="checklst" template="sub"/>
     <subproject id="config" template="sub"/>
-    <subproject id="combo" template="sub"/>
     <subproject id="console" template="sub"/>
     <subproject id="controls" template="sub"/>
     <subproject id="db" template="sub"/>
@@ -64,6 +63,7 @@
     <subproject id="propsize" template="sub"/>
     <subproject id="regtest" template="sub"/>
     <subproject id="render" template="sub"/>
+    <subproject id="richedit" template="sub"/>
     <subproject id="rotate" template="sub"/>
     <subproject id="sashtest" template="sub"/>
     <subproject id="scroll" template="sub"/>
@@ -84,7 +84,7 @@
     <subproject id="vscroll" template="sub"/>
     <subproject id="widgets" template="sub"/>
     <subproject id="wizard" template="sub"/>
-    <!-- Put samples most likely to fail at the end -->
+    <!-- Put samples most likely to fail at the end -->    
     <subproject id="mfc" template="sub"/>
 
 </makefile>

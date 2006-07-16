@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "checkbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,9 +30,8 @@
 
 #if wxUSE_CHECKBOX
 
-#include "wx/checkbox.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/checkbox.h"
     #include "wx/brush.h"
     #include "wx/dcscreen.h"
     #include "wx/settings.h"

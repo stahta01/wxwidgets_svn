@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/statusbr.cpp
+// Name:        univ/statusbr.cpp
 // Purpose:     wxStatusBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univstatusbr.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,13 +29,13 @@
 
 #if wxUSE_STATUSBAR
 
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcclient.h"
-    #include "wx/toplevel.h"
 #endif
+
+#include "wx/statusbr.h"
+#include "wx/toplevel.h"
 
 #include "wx/univ/renderer.h"
 
@@ -327,3 +331,4 @@ int wxStatusBarUniv::GetBorderY() const
 }
 
 #endif // wxUSE_STATUSBAR
+

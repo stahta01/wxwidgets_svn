@@ -11,14 +11,11 @@
 #include "wx/wxprec.h"
 
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
+#include "wx/string.h"
 
 #include "wx/apptrait.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 #include "wx/process.h"
 
@@ -34,6 +31,9 @@
 #include "glib.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
+#ifndef __WXGTK20__
+#include "gtk/gtkfeatures.h"
+#endif
 #include "gdk/gdkx.h"
 
 #ifdef HAVE_X11_XKBLIB_H
@@ -67,20 +67,21 @@ void wxBell()
 
 /* Don't synthesize KeyUp events holding down a key and producing
    KeyDown events with autorepeat. */
-#ifdef HAVE_X11_XKBLIB_H
+#if defined(HAVE_X11_XKBLIB_H) && !(defined(__WXGPE__))
 bool wxSetDetectableAutoRepeat( bool flag )
 {
     Bool result;
     XkbSetDetectableAutoRepeat( GDK_DISPLAY(), flag, &result );
-    return result;       /* true if keyboard hardware supports this mode */
+    return result;       /* TRUE if keyboard hardware supports this mode */
 }
 #else
 bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
 {
-    return false;
+    return FALSE;
 }
 #endif
 
+#ifdef __WXGTK20__
 // Escapes string so that it is valid Pango markup XML string:
 wxString wxEscapeStringForPangoMarkup(const wxString& str)
 {
@@ -114,6 +115,7 @@ wxString wxEscapeStringForPangoMarkup(const wxString& str)
     }
     return out;
 }
+#endif
 
 
 // ----------------------------------------------------------------------------
@@ -155,18 +157,22 @@ void wxGetMousePosition( int* x, int* y )
 
 bool wxColourDisplay()
 {
-    return true;
+    return TRUE;
 }
 
 int wxDisplayDepth()
 {
-    return gdk_drawable_get_visual( wxGetRootWindow()->window )->depth;
+    return gdk_window_get_visual( wxGetRootWindow()->window )->depth;
 }
 
 wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
 {
     static wxToolkitInfo info;
+#ifdef __WXGTK20__
     info.shortName = _T("gtk2");
+#else
+    info.shortName = _T("gtk");
+#endif
     info.name = _T("wxGTK");
 #ifdef __WXUNIVERSAL__
     info.shortName << _T("univ");
@@ -183,34 +189,6 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
     return wxGenericFindWindowAtPoint(pt);
 }
 
-#if !wxUSE_UNICODE
-
-wxCharBuffer wxConvertToGTK(const wxString& s, wxFontEncoding enc)
-{
-    if ( enc == wxFONTENCODING_UTF8 )
-    {
-        // no need for conversion at all
-        return wxCharBuffer(s);
-    }
-
-    wxWCharBuffer wbuf;
-    if ( enc == wxFONTENCODING_SYSTEM || enc == wxFONTENCODING_DEFAULT )
-    {
-        wbuf = wxConvUI->cMB2WC(s);
-    }
-    else // another encoding, use generic conversion class
-    {
-        wbuf = wxCSConv(enc).cMB2WC(s);
-    }
-
-    wxCharBuffer buf;
-    if ( wbuf )
-        buf = wxConvUTF8.cWC2MB(wbuf);
-
-    return buf;
-}
-
-#endif // !wxUSE_UNICODE
 
 // ----------------------------------------------------------------------------
 // subprocess routines
@@ -259,3 +237,4 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 
     return tag;
 }
+

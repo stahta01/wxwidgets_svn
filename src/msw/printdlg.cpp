@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/printdlg.cpp
+// Name:        printdlg.cpp
 // Purpose:     wxPrintDialog, wxPageSetupDialog
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,12 +34,12 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
-    #include "wx/dcprint.h"
-    #include "wx/cmndata.h"
 #endif
 
+#include "wx/cmndata.h"
 #include "wx/printdlg.h"
 #include "wx/msw/printdlg.h"
+#include "wx/dcprint.h"
 #include "wx/paper.h"
 
 #include <stdlib.h>
@@ -95,19 +99,19 @@ static HGLOBAL wxCreateDevNames(const wxString& driverName, const wxString& prin
     else
     {
         hDev = GlobalAlloc(GPTR, 4*sizeof(WORD)+
-                           ( driverName.length() + 1 +
-            printerName.length() + 1 +
-                             portName.length()+1 ) * sizeof(wxChar) );
+                           ( driverName.Length() + 1 +
+            printerName.Length() + 1 +
+                             portName.Length()+1 ) * sizeof(wxChar) );
         LPDEVNAMES lpDev = (LPDEVNAMES)GlobalLock(hDev);
         lpDev->wDriverOffset = sizeof(WORD) * 4 / sizeof(wxChar);
         wxStrcpy((wxChar*)lpDev + lpDev->wDriverOffset, driverName);
 
         lpDev->wDeviceOffset = (WORD)( lpDev->wDriverOffset +
-                                       driverName.length() + 1 );
+                                       driverName.Length() + 1 );
         wxStrcpy((wxChar*)lpDev + lpDev->wDeviceOffset, printerName);
 
         lpDev->wOutputOffset = (WORD)( lpDev->wDeviceOffset +
-                                       printerName.length() + 1 );
+                                       printerName.Length() + 1 );
         wxStrcpy((wxChar*)lpDev + lpDev->wOutputOffset, portName);
 
         lpDev->wDefault = 0;

@@ -161,7 +161,7 @@ class wxpTagHandler(wx.html.HtmlWinTagHandler):
         self.ParseInner(tag)
 
         # create the object
-        parent = self.GetParser().GetWindowInterface().GetHTMLWindow()
+        parent = self.GetParser().GetWindow()
         if parent:
             obj = apply(self.ctx.classObj,
                         (parent,),

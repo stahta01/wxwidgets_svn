@@ -11,6 +11,10 @@
 #ifndef __IMAGELISTH_G__
 #define __IMAGELISTH_G__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "imaglist.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/list.h"
 #include "wx/icon.h"
@@ -68,7 +72,6 @@ public:
     wxBitmap GetBitmap(int index) const;
     wxIcon GetIcon(int index) const;
     bool Replace( int index, const wxBitmap &bitmap );
-    bool Replace( int index, const wxBitmap &bitmap, const wxBitmap& mask );
     bool Remove( int index );
     bool RemoveAll();
 

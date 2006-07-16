@@ -12,6 +12,10 @@
 #ifndef _OGL_DRAWN_H_
 #define _OGL_DRAWN_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "drawn.h"
+#endif
+
 
 #define oglMETAFLAGS_OUTLINE         1
 #define oglMETAFLAGS_ATTACHMENTS     2
@@ -57,11 +61,11 @@ class WXDLLIMPEXP_OGL wxPseudoMetaFile: public wxObject
 
   inline void SetSize(double w, double h) { m_width = w; m_height = h; }
 
-  inline void SetFillBrush(const wxBrush* brush) { m_fillBrush = brush; }
-  inline wxBrush* GetFillBrush() const { return wx_const_cast(wxBrush*, m_fillBrush); }
+  inline void SetFillBrush(wxBrush* brush) { m_fillBrush = brush; }
+  inline wxBrush* GetFillBrush() const { return m_fillBrush; }
 
-  inline void SetOutlinePen(const wxPen* pen) { m_outlinePen = pen; }
-  inline wxPen* GetOutlinePen() const { return wx_const_cast(wxPen*, m_outlinePen); }
+  inline void SetOutlinePen(wxPen* pen) { m_outlinePen = pen; }
+  inline wxPen* GetOutlinePen() const { return m_outlinePen; }
 
   inline void SetOutlineOp(int op) { m_outlineOp = op; }
   inline int GetOutlineOp() const { return m_outlineOp; }
@@ -96,8 +100,8 @@ public:
   virtual void SetClippingRect(const wxRect& rect);
   virtual void DestroyClippingRect();
 
-  virtual void SetPen(const wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
-  virtual void SetBrush(const wxBrush* brush, bool isFill = false);  // pens/brushes etc.
+  virtual void SetPen(wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
+  virtual void SetBrush(wxBrush* brush, bool isFill = false);  // pens/brushes etc.
   virtual void SetFont(wxFont* font);
   virtual void SetTextColour(const wxColour& colour);
   virtual void SetBackgroundColour(const wxColour& colour);
@@ -113,8 +117,8 @@ public:
 
   // Pen/brush specifying outline/fill colours
   // to override operations.
-  const wxPen*      m_outlinePen;
-  const wxBrush*    m_fillBrush;
+  wxPen*            m_outlinePen;
+  wxBrush*          m_fillBrush;
   wxList            m_outlineColours; // List of the GDI operations that comprise the outline
   wxList            m_fillColours; // List of the GDI operations that fill the shape
   double             m_currentRotation;
@@ -184,8 +188,8 @@ class WXDLLIMPEXP_OGL wxDrawnShape: public wxRectangleShape
   virtual void SetClippingRect(const wxRect& rect);
   virtual void DestroyClippingRect();
 
-  virtual void SetDrawnPen(const wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
-  virtual void SetDrawnBrush(const wxBrush* brush, bool isFill = false);  // pens/brushes etc.
+  virtual void SetDrawnPen(wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
+  virtual void SetDrawnBrush(wxBrush* brush, bool isFill = false);  // pens/brushes etc.
   virtual void SetDrawnFont(wxFont* font);
   virtual void SetDrawnTextColour(const wxColour& colour);
   virtual void SetDrawnBackgroundColour(const wxColour& colour);
@@ -219,3 +223,4 @@ private:
 
 #endif
     // _DRAWN_H_
+

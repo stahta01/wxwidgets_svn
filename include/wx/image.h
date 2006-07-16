@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/image.h
+// Name:        image.h
 // Purpose:     wxImage class
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -10,10 +10,11 @@
 #ifndef _WX_IMAGE_H_
 #define _WX_IMAGE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "image.h"
+#endif
+
 #include "wx/defs.h"
-
-#if wxUSE_IMAGE
-
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/gdicmn.h"
@@ -22,6 +23,8 @@
 #if wxUSE_STREAMS
 #  include "wx/stream.h"
 #endif
+
+#if wxUSE_IMAGE
 
 // on some systems (Unixware 7.x) index is defined as a macro in the headers
 // which breaks the compilation below
@@ -154,6 +157,7 @@ public:
 class WXDLLEXPORT wxImage: public wxObject
 {
 public:
+#if wxABI_VERSION >= 20602
     // red, green and blue are 8 bit unsigned integers in the range of 0..255
     // We use the identifier RGBValue instead of RGB, since RGB is #defined
     class RGBValue
@@ -161,7 +165,7 @@ public:
     public:
       RGBValue(unsigned char r=0, unsigned char g=0, unsigned char b=0)
         : red(r), green(g), blue(b) {}
-        unsigned char red;
+        unsigned char red;  
         unsigned char green;
         unsigned char blue;
     };
@@ -172,10 +176,11 @@ public:
     public:
         HSVValue(double h=0.0, double s=0.0, double v=0.0)
             : hue(h), saturation(s), value(v) {}
-        double hue;
+        double hue;  
         double saturation;
         double value;
     };
+#endif // wxABI_VERSION >= 2.6.2
 
     wxImage(){}
     wxImage( int width, int height, bool clear = true );
@@ -190,6 +195,9 @@ public:
     wxImage( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY, int index = -1 );
     wxImage( wxInputStream& stream, const wxString& mimetype, int index = -1 );
 #endif // wxUSE_STREAMS
+
+    wxImage( const wxImage& image );
+    wxImage( const wxImage* image );
 
     bool Create( int width, int height, bool clear = true );
     bool Create( int width, int height, unsigned char* data, bool static_data = false );
@@ -238,10 +246,6 @@ public:
     // replace one colour with another
     void Replace( unsigned char r1, unsigned char g1, unsigned char b1,
                   unsigned char r2, unsigned char g2, unsigned char b2 );
-
-    // Convert to greyscale image. Uses the luminance component (Y) of the image.
-    // The luma value (YUV) is calculated using (R * lr) + (G * lg) + (B * lb), defaults to ITU-T BT.601
-    wxImage ConvertToGreyscale( double lr = 0.299, double lg = 0.587, double lb = 0.114 ) const;
 
     // convert to monochrome image (<r,g,b> will be replaced by white,
     // everything else by black)
@@ -358,9 +362,18 @@ public:
     // Returned value: # of entries in the histogram
     unsigned long ComputeHistogram( wxImageHistogram &h ) const;
 
+#if wxABI_VERSION >= 20602
     // Rotates the hue of each pixel of the image. angle is a double in the range
     // -1.0..1.0 where -1.0 is -360 degrees and 1.0 is 360 degrees
     void RotateHue(double angle);
+#endif // wxABI_VERSION >= 2.6.2
+
+    wxImage& operator = (const wxImage& image)
+    {
+        if ( (*this) != image )
+            Ref(image);
+        return *this;
+    }
 
     bool operator == (const wxImage& image) const
         { return m_refData == image.m_refData; }
@@ -381,8 +394,10 @@ public:
     static void CleanUpHandlers();
     static void InitStandardHandlers();
 
+#if wxABI_VERSION >= 20602
     static HSVValue RGBtoHSV(const RGBValue& rgb);
     static RGBValue HSVtoRGB(const HSVValue& hsv);
+#endif // wxABI_VERSION >= 2.6.2
 
 
 protected:
@@ -393,9 +408,6 @@ protected:
     //
     // note that index must be multiplied by 3 when using it with RGB array
     long XYToIndex(int x, int y) const;
-
-    virtual wxObjectRefData* CreateRefData() const;
-    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
 
 private:
     friend class WXDLLEXPORT wxImageHandler;
@@ -426,3 +438,4 @@ extern WXDLLEXPORT_DATA(wxImage)    wxNullImage;
 
 #endif
   // _WX_IMAGE_H_
+

@@ -17,14 +17,16 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "bitmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#include "wx/bitmap.h"
 
 #ifndef WX_PRECOMP
     #include <stdio.h>
@@ -34,15 +36,17 @@
     #include "wx/app.h"
     #include "wx/palette.h"
     #include "wx/dcmemory.h"
+    #include "wx/bitmap.h"
     #include "wx/icon.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
 #endif
+
+#include "wx/log.h"
 
 #if wxUSE_WXDIB
 #include "wx/palmos/dib.h"
 #endif
 
+#include "wx/image.h"
 #include "wx/xpmdecod.h"
 
 #ifdef wxHAVE_RAW_BITMAP

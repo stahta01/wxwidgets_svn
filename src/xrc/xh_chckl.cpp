@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_chckl.cpp
+// Name:        xh_chckl.cpp
 // Purpose:     XRC resource for wxCheckList
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_chckl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,15 +19,14 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_CHECKLISTBOX
+#if wxUSE_XRC
+
+#if wxUSE_CHECKLISTBOX
 
 #include "wx/xrc/xh_chckl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/checklst.h"
-#endif
+#include "wx/checklst.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBoxXmlHandler, wxXmlResourceHandler)
 
@@ -38,7 +41,7 @@ wxCheckListBoxXmlHandler::wxCheckListBoxXmlHandler()
     XRC_ADD_STYLE(wxLB_ALWAYS_SB);
     XRC_ADD_STYLE(wxLB_NEEDED_SB);
     XRC_ADD_STYLE(wxLB_SORT);
-
+    
     AddWindowStyles();
 }
 
@@ -128,4 +131,6 @@ bool wxCheckListBoxXmlHandler::CanHandle(wxXmlNode *node)
            (m_insideBox && node->GetName() == wxT("item")));
 }
 
-#endif // wxUSE_XRC && wxUSE_CHECKLISTBOX
+#endif // wxUSE_CHECKLISTBOX
+
+#endif // wxUSE_XRC

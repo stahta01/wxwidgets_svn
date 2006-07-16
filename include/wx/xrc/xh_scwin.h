@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_scwin.h
+// Name:        xh_scwin.h
 // Purpose:     XML resource handler for wxScrolledWindow
 // Author:      Vaclav Slavik
 // Created:     2002/10/18
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_SCWIN_H_
 #define _WX_XH_SCWIN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_scwin.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 #include "wx/defs.h"

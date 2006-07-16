@@ -1,13 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/menu.cpp
+// Name:        menu.cpp
 // Purpose:     wxMenu, wxMenuBar, wxMenuItem
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "menu.h"
+#pragma implementation "menuitem.h"
+#endif
 
 // ============================================================================
 // headers & declarations
@@ -16,18 +21,13 @@
 // wxWidgets headers
 // -----------------
 
-#include "wx/wxprec.h"
-
+#include "wx/app.h"
 #include "wx/menu.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/window.h"
-    #include "wx/frame.h"
-    #include "wx/menuitem.h"
-#endif
+#include "wx/menuitem.h"
+#include "wx/window.h"
+#include "wx/log.h"
+#include "wx/utils.h"
+#include "wx/frame.h"
 
 #include "wx/mac/uma.h"
 
@@ -63,7 +63,7 @@ short wxMenu::s_macNextMenuId = 2 ;
 
 void wxMenu::Init()
 {
-    m_doBreak = false;
+    m_doBreak = FALSE;
     m_startRadioGroup = -1;
 
     // create the menu
@@ -76,7 +76,7 @@ void wxMenu::Init()
     }
 
     // if we have a title, insert it in the beginning of the menu
-    if ( !m_title.empty() )
+    if ( !!m_title )
     {
         Append(idMenuTitle, m_title) ;
         AppendSeparator() ;
@@ -166,7 +166,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
     {
         GetMenuBar()->Refresh();
     }
-    return true ;
+    return TRUE ;
 }
 
 void wxMenu::EndRadioGroup()
@@ -179,7 +179,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
 {
     wxCHECK_MSG( item, NULL, _T("NULL item in wxMenu::DoAppend") );
 
-    bool check = false;
+    bool check = FALSE;
 
     if ( item->GetKind() == wxITEM_RADIO )
     {
@@ -195,7 +195,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
             item->SetRadioGroupEnd(m_startRadioGroup);
 
             // ensure that we have a checked item in the radio group
-            check = true;
+            check = TRUE;
         }
         else // extend the current radio group
         {
@@ -226,7 +226,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
     if ( check )
     {
         // check the item initially
-        item->Check(true);
+        item->Check(TRUE);
     }
 
     return item;
@@ -275,7 +275,7 @@ void wxMenu::SetTitle(const wxString& label)
 }
 bool wxMenu::ProcessCommand(wxCommandEvent & event)
 {
-    bool processed = false;
+    bool processed = FALSE;
 
     // Try the menu's event handler
     if ( !processed && GetEventHandler())
@@ -671,7 +671,7 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
 {
     wxMenu *menuOld = wxMenuBarBase::Replace(pos, menu, title);
     if ( !menuOld )
-        return NULL;
+        return FALSE;
     m_titles[pos] = title;
 
     if ( IsAttached() )
@@ -703,7 +703,7 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
 bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
 {
     if ( !wxMenuBarBase::Insert(pos, menu, title) )
-        return false;
+        return FALSE;
 
     m_titles.Insert(title, pos);
 
@@ -726,7 +726,7 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
         Refresh();
     }
 
-    return true;
+    return TRUE;
 }
 
 wxMenu *wxMenuBar::Remove(size_t pos)
@@ -753,10 +753,10 @@ wxMenu *wxMenuBar::Remove(size_t pos)
 bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
 {
     WXHMENU submenu = menu ? menu->GetHMenu() : 0;
-    wxCHECK_MSG( submenu, false, wxT("can't append invalid menu to menubar") );
+    wxCHECK_MSG( submenu, FALSE, wxT("can't append invalid menu to menubar") );
 
     if ( !wxMenuBarBase::Append(menu, title) )
-        return false;
+        return FALSE;
 
     m_titles.Add(title);
 
@@ -777,7 +777,7 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     if (m_invokingWindow)
         wxMenubarSetInvokingWindow( menu, m_invokingWindow );
 
-    return true;
+    return TRUE;
 }
 
 static void wxMenubarUnsetInvokingWindow( wxMenu *menu )
@@ -875,3 +875,5 @@ wxMenuItem *wxMenuBar::FindItem(int id, wxMenu **itemMenu) const
 
     return item;
 }
+
+

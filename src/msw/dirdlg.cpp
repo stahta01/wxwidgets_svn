@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dirdlg.cpp
+// Name:        dirdlg.cpp
 // Purpose:     wxDirDialog
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dirdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,14 +30,12 @@
 
 #if wxUSE_DIRDLG
 
-#if wxUSE_OLE && !defined(__GNUWIN32_OLD__) && (!defined(__WXWINCE__) || \
-    (defined(__HANDHELDPC__) && (_WIN32_WCE >= 500)))
-
-#include "wx/dirdlg.h"
+#if wxUSE_OLE && !defined(__GNUWIN32_OLD__) && (!defined(__WXWINCE__) || (defined(__HANDHELDPC__) && (_WIN32_WCE >= 500)))
 
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/dialog.h"
+    #include "wx/dirdlg.h"
     #include "wx/log.h"
     #include "wx/app.h"     // for GetComCtl32Version()
 #endif
@@ -91,7 +93,7 @@ wxDirDialog::wxDirDialog(wxWindow *parent,
     m_message = message;
     m_parent = parent;
 
-    SetWindowStyle(style);
+    SetStyle(style);
     SetPath(defaultPath);
 }
 
@@ -149,7 +151,7 @@ int wxDirDialog::ShowModal()
     // is also the only way to have a resizable dialog
     //
     // "new" style is only available in the version 5.0+ of comctl32.dll
-    const bool needNewDir = !HasFlag(wxDD_DIR_MUST_EXIST);
+    const bool needNewDir = HasFlag(wxDD_NEW_DIR_BUTTON);
     if ( (needNewDir || HasFlag(wxRESIZE_BORDER)) && (verComCtl32 >= 500) )
     {
         if (needNewDir)
@@ -182,10 +184,6 @@ int wxDirDialog::ShowModal()
     }
 
     m_path = pidl.GetPath();
-
-    // change current working directory if asked so
-    if (HasFlag(wxDD_CHANGE_DIR))
-        wxSetWorkingDirectory(m_path);
 
     return m_path.empty() ? wxID_CANCEL : wxID_OK;
 }
@@ -249,3 +247,4 @@ BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 #endif // compiler/platform on which the code here compiles
 
 #endif // wxUSE_DIRDLG
+

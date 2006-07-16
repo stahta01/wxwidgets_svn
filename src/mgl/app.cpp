@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/app.cpp
+// Name:        app.cpp
 // Author:      Vaclav Slavik
 //              based on GTK and MSW implementations
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,7 +18,6 @@
     #pragma hdrstop
 #endif
 
-#include "wx/app.h"
 
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
@@ -24,6 +27,7 @@
     #include "wx/intl.h"
 #endif
 
+#include "wx/app.h"
 #include "wx/evtloop.h"
 #include "wx/module.h"
 #include "wx/fontutil.h"
@@ -329,3 +333,4 @@ void wxApp::CleanUp()
 
     wxModule::RegisterModule(new wxMGLFinalCleanup);
 }
+

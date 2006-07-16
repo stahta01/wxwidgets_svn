@@ -15,9 +15,6 @@
 
 #if wxUSE_DEBUGREPORT && wxUSE_XML
 
-#include "wx/string.h"
-#include "wx/arrstr.h"
-
 class WXDLLIMPEXP_XML wxXmlNode;
 
 // ----------------------------------------------------------------------------
@@ -230,6 +227,7 @@ public:
 
 #endif // wxUSE_GUI
 
-#endif // wxUSE_DEBUGREPORT && wxUSE_XML
+#endif // wxUSE_DEBUGREPORT
 
 #endif // _WX_DEBUGRPT_H_
+

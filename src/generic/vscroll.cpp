@@ -17,15 +17,15 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "vscroll.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
 #pragma hdrstop
-#endif
-
-#ifndef WX_PRECOMP
-    #include "wx/sizer.h"
 #endif
 
 #include "wx/vscroll.h"
@@ -160,13 +160,6 @@ size_t wxVScrolledWindow::FindFirstFromBottom(size_t lineLast, bool full)
     return lineFirst;
 }
 
-void wxVScrolledWindow::RemoveScrollbar()
-{
-    m_lineFirst = 0;
-    m_nVisible = m_lineMax;
-    SetScrollbar(wxVERTICAL, 0, 0, 0);
-}
-
 void wxVScrolledWindow::UpdateScrollbar()
 {
     // see how many lines can we fit on screen
@@ -180,25 +173,6 @@ void wxVScrolledWindow::UpdateScrollbar()
             break;
 
         h += OnGetLineHeight(line);
-    }
-
-    // if we still have remaining space below, maybe we can fit everything?
-    if ( h < hWindow )
-    {
-        wxCoord hAll = h;
-        for ( size_t lineFirst = m_lineFirst; lineFirst > 0; lineFirst-- )
-        {
-            hAll += OnGetLineHeight(m_lineFirst - 1);
-            if ( hAll > hWindow )
-                break;
-        }
-
-        if ( hAll < hWindow )
-        {
-            // we don't need scrollbar at all
-            RemoveScrollbar();
-            return;
-        }
     }
 
     m_nVisible = line - m_lineFirst;
@@ -229,15 +203,8 @@ void wxVScrolledWindow::SetLineCount(size_t count)
     m_heightTotal = EstimateTotalHeight();
 
     // recalculate the scrollbars parameters
-    if ( count )
-    {
-        m_lineFirst = 1;    // make sure it is != 0
-        ScrollToLine(0);
-    }
-    else // no items
-    {
-        RemoveScrollbar();
-    }
+    m_lineFirst = 1;    // make sure it is != 0
+    ScrollToLine(0);
 }
 
 void wxVScrolledWindow::RefreshLine(size_t line)
@@ -298,27 +265,6 @@ void wxVScrolledWindow::RefreshAll()
     UpdateScrollbar();
 
     Refresh();
-}
-
-bool wxVScrolledWindow::Layout()
-{
-    if ( GetSizer() )
-    {
-        // adjust the sizer dimensions/position taking into account the
-        // virtual size and scrolled position of the window.
-
-        int w, h;
-        GetVirtualSize(&w, &h);
-
-        // x is always 0 so no variable needed
-        int y = -GetLinesHeight(0, GetFirstVisibleLine());
-
-        GetSizer()->SetDimension(0, y, w, h);
-        return true;
-    }
-
-    // fall back to default for LayoutConstraints
-    return wxPanel::Layout();
 }
 
 int wxVScrolledWindow::HitTest(wxCoord WXUNUSED(x), wxCoord y) const
@@ -509,5 +455,4 @@ void wxVScrolledWindow::OnMouseWheel(wxMouseEvent& event)
         ScrollPages( units_to_scroll );
 }
 
-#endif // wxUSE_MOUSEWHEEL
-
+#endif

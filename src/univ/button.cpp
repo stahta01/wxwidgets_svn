@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univbutton.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -78,7 +82,9 @@ bool wxButton::Create(wxWindow *parent,
         label = wxGetStockLabel(id);
 
     long ctrl_style = style & ~wxBU_ALIGN_MASK;
-    ctrl_style = ctrl_style & ~wxALIGN_MASK;
+
+    wxASSERT_MSG( (ctrl_style & wxALIGN_MASK) == 0,
+                  _T("Some style conflicts with align flags") );
 
     if((style & wxBU_RIGHT) == wxBU_RIGHT)
         ctrl_style |= wxALIGN_RIGHT;

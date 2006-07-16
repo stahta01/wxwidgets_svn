@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrl.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -26,9 +30,8 @@
 
 #if wxUSE_TEXTCTRL
 
-#include "wx/textctrl.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/textctrl.h"
     #include "wx/settings.h"
     #include "wx/brush.h"
     #include "wx/utils.h"
@@ -135,7 +138,7 @@ wxBEGIN_FLAGS( wxTextCtrlStyle )
     wxFLAGS_MEMBER(wxTE_CENTRE)
     wxFLAGS_MEMBER(wxTE_RIGHT)
     wxFLAGS_MEMBER(wxTE_DONTWRAP)
-    wxFLAGS_MEMBER(wxTE_CHARWRAP)
+    wxFLAGS_MEMBER(wxTE_LINEWRAP)
     wxFLAGS_MEMBER(wxTE_WORDWRAP)
 
 wxEND_FLAGS( wxTextCtrlStyle )
@@ -156,11 +159,11 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_6( wxTextCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , Value , wxPoint , Position , wxSize , Size , long , WindowStyle)
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 #endif
 
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
     EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
 

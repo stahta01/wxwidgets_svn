@@ -89,6 +89,7 @@ public:
 
 
 %immutable;
+// See also wxPy_ReinitStockObjects in helpers.cpp
 const wxValidator wxDefaultValidator;
 %mutable;
 

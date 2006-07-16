@@ -53,7 +53,7 @@
 // control ids
 enum
 {
-    TextPage_Reset = wxID_HIGHEST,
+    TextPage_Reset = 100,
 
     TextPage_Set,
     TextPage_Add,
@@ -132,14 +132,10 @@ class TextWidgetsPage : public WidgetsPage
 {
 public:
     // ctor(s) and dtor
-    TextWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    TextWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~TextWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_text; }
-    virtual void RecreateWidget() { CreateText(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // create an info text contorl
@@ -332,25 +328,17 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXX11__)
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#elif defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
-
-IMPLEMENT_WIDGETS_PAGE(TextWidgetsPage, _T("Text"),
-                       FAMILY_CTRLS | EDITABLE_CTRLS
-                       );
+IMPLEMENT_WIDGETS_PAGE(TextWidgetsPage, _T("Text"));
 
 // ----------------------------------------------------------------------------
 // TextWidgetsPage creation
 // ----------------------------------------------------------------------------
 
-TextWidgetsPage::TextWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist)
-               : WidgetsPage(book, imaglist, text_xpm)
+TextWidgetsPage::TextWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist)
+               : WidgetsPage(book)
 {
+    imaglist->Add(wxBitmap(text_xpm));
+
     // init everything
 #ifdef __WXMSW__
     m_radioKind =
@@ -377,10 +365,7 @@ TextWidgetsPage::TextWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist)
     m_posLast =
     m_selFrom =
     m_selTo = -2; // not -1 which means "no selection"
-}
 
-void TextWidgetsPage::CreateContent()
-{
     // left pane
     static const wxString modes[] =
     {
@@ -614,7 +599,7 @@ void TextWidgetsPage::Reset()
 
 void TextWidgetsPage::CreateText()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
     switch ( m_radioTextLines->GetSelection() )
     {
         default:
@@ -648,7 +633,7 @@ void TextWidgetsPage::CreateText()
             break;
 
         case WrapStyle_Char:
-            flags |= wxTE_CHARWRAP;
+            flags |= wxTE_LINEWRAP;
             break;
 
         case WrapStyle_Best:

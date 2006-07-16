@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_bmpbt.h
+// Name:        xh_bmpbt.h
 // Purpose:     XML resource handler for bitmap buttons
 // Author:      Brian Gavin
 // Created:     2000/03/05
@@ -11,11 +11,14 @@
 #ifndef _WX_XH_BMPBT_H_
 #define _WX_XH_BMPBT_H_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_bmpbt.h"
+#endif
+
+#include "wx/xrc/xmlres.h"
 
 #if wxUSE_XRC
 
-#include "wx/xrc/xmlres.h"
 
 class WXDLLIMPEXP_XRC wxBitmapButtonXmlHandler : public wxXmlResourceHandler
 {

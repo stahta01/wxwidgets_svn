@@ -211,7 +211,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -250,14 +250,14 @@ $(OBJS)\test.exe :  $(TEST_OBJECTS) $(OBJS)\test_test.res
 	@%append $(OBJS)\test.lbc option caseexact
 	@%append $(OBJS)\test.lbc $(LDFLAGS) $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) system nt_win ref '_WinMain@16'
 	@for %i in ($(TEST_OBJECTS)) do @%append $(OBJS)\test.lbc file %i
-	@for %i in ( $(__WXLIB_HTML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\test.lbc library %i
+	@for %i in ( $(__WXLIB_HTML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ) do @%append $(OBJS)\test.lbc library %i
 	@%append $(OBJS)\test.lbc option resource=$(OBJS)\test_test.res
 	@for %i in () do @%append $(OBJS)\test.lbc option stack=%i
 	wlink @$(OBJS)\test.lbc
 
 data : .SYMBOLIC 
 	if not exist $(OBJS) mkdir $(OBJS)
-	for %f in (f.html fft.html imagemap.htm imagemap.png pic.png pic2.bmp tables.htm test.htm listtest.htm i18n.gif 8859_2.htm cp1250.htm regres.htm foo.png subsup.html) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
+	for %f in (f.html fft.html imagemap.htm imagemap.png pic.png pic2.bmp tables.htm test.htm listtest.htm i18n.gif 8859_2.htm cp1250.htm regres.htm) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
 
 $(OBJS)\test_test.obj :  .AUTODEPEND .\test.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<

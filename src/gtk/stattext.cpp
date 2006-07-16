@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "stattext.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -61,10 +65,13 @@ bool wxStaticText::Create(wxWindow *parent,
         return FALSE;
     }
 
-    const wxString labelGTK = GTKConvertMnemonics(label);
-    m_label = label;
-    m_widget = gtk_label_new_with_mnemonic(wxGTK_CONV(labelGTK));
-
+    // notice that we call the base class version which will just remove the
+    // '&' characters from the string, but not set the label's text to it
+    // because the label is not yet created and because SetLabel() has a side
+    // effect of changing the control size which might not be desirable
+    wxControl::SetLabel(label);
+    m_widget = gtk_label_new( wxGTK_CONV( m_label ) );
+    
     GtkJustification justify;
     if ( style & wxALIGN_CENTER )
       justify = GTK_JUSTIFY_CENTER;
@@ -78,23 +85,28 @@ bool wxStaticText::Create(wxWindow *parent,
     static const float labelAlignments[] = { 0.0, 1.0, 0.5 };
     gtk_misc_set_alignment(GTK_MISC(m_widget), labelAlignments[justify], 0.0);
 
-    gtk_label_set_line_wrap( GTK_LABEL(m_widget), TRUE );
+        gtk_label_set_line_wrap( GTK_LABEL(m_widget), TRUE );
 
     m_parent->DoAddChild( this );
 
     PostCreation(size);
-
+    
     // the bug below only happens with GTK 2
+#ifdef __WXGTK20__
     if ( justify != GTK_JUSTIFY_LEFT )
     {
         // if we let GTK call wxgtk_window_size_request_callback the label
         // always shrinks to its minimal size for some reason and so no
         // alignment except the default left doesn't work (in fact it does,
         // but you don't see it)
-        g_signal_handlers_disconnect_by_func (m_widget,
-                                              (gpointer) wxgtk_window_size_request_callback,
-                                              this);
+        gtk_signal_disconnect_by_func
+        (
+            GTK_OBJECT(m_widget),
+            GTK_SIGNAL_FUNC(wxgtk_window_size_request_callback),
+            (gpointer) this
+        );
     }
+#endif // __WXGTK20__
 
     return TRUE;
 }
@@ -102,20 +114,44 @@ bool wxStaticText::Create(wxWindow *parent,
 wxString wxStaticText::GetLabel() const
 {
     GtkLabel *label = GTK_LABEL(m_widget);
+
+#ifdef __WXGTK20__
     wxString str = wxGTK_CONV_BACK( gtk_label_get_text( label ) );
+#else
+    wxString str = wxString( label->label );
+#endif
 
     return wxString(str);
 }
 
 void wxStaticText::SetLabel( const wxString &label )
 {
-    wxCHECK_RET( m_widget != NULL, wxT("invalid static text") );
+    wxControl::SetLabel(label);
 
-    GTKSetLabelForLabel(GTK_LABEL(m_widget), label);
+#ifdef __WXGTK20__
+    // Build the colorized version of the label (markup only allowed
+    // under GTK2):
+    if (m_foregroundColour.Ok())
+    {
+        // If the color has been set, create a markup string to pass to
+        // the label setter
+        wxString colorlabel;
+        colorlabel.Printf(_T("<span foreground=\"#%02x%02x%02x\">%s</span>"),
+                          m_foregroundColour.Red(), m_foregroundColour.Green(),
+                          m_foregroundColour.Blue(),
+                          wxEscapeStringForPangoMarkup(label).c_str());
+        gtk_label_set_markup( GTK_LABEL(m_widget), wxGTK_CONV( colorlabel ) );
+    }
+    else
+#endif
+        gtk_label_set( GTK_LABEL(m_widget), wxGTK_CONV( m_label ) );
 
     // adjust the label size to the new label unless disabled
-    if ( !HasFlag(wxST_NO_AUTORESIZE) )
+    if (!HasFlag(wxST_NO_AUTORESIZE))
+    {
+        InvalidateBestSize();
         SetSize( GetBestSize() );
+    }
 }
 
 bool wxStaticText::SetFont( const wxFont &font )
@@ -143,9 +179,15 @@ wxSize wxStaticText::DoGetBestSize() const
     // Do not return any arbitrary default value...
     wxASSERT_MSG( m_widget, wxT("wxStaticText::DoGetBestSize called before creation") );
 
+#ifndef __WXGTK20__
+    // This resets the internal GTK1 size calculation, which
+    // otherwise would be cashed (incorrectly)
+    gtk_label_set_pattern( GTK_LABEL(m_widget), NULL );
+#endif
+
     // GetBestSize is supposed to return unwrapped size
     gtk_label_set_line_wrap( GTK_LABEL(m_widget), FALSE );
-
+    
     GtkRequisition req;
     req.width = -1;
     req.height = -1;
@@ -153,9 +195,8 @@ wxSize wxStaticText::DoGetBestSize() const
         (m_widget, &req );
 
     gtk_label_set_line_wrap( GTK_LABEL(m_widget), TRUE );
-
-    // Adding 1 to width to workaround GTK sometimes wrapping the text needlessly
-    return wxSize (req.width+1, req.height);
+    
+    return wxSize (req.width, req.height);
 }
 
 bool wxStaticText::SetForegroundColour(const wxColour& colour)
@@ -165,16 +206,6 @@ bool wxStaticText::SetForegroundColour(const wxColour& colour)
     // Then, to force the color change, we set the label with the current label
     SetLabel(GetLabel());
     return true;
-}
-
-bool wxStaticText::GTKWidgetNeedsMnemonic() const
-{
-    return true;
-}
-
-void wxStaticText::GTKWidgetDoSetMnemonic(GtkWidget* w)
-{
-    gtk_label_set_mnemonic_widget(GTK_LABEL(m_widget), w);
 }
 
 // static

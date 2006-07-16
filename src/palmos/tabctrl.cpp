@@ -9,23 +9,25 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "tabctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_TAB_DIALOG
-
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
-    #include "wx/app.h"
+#include "wx/wx.h"
 #endif
 
 #if defined(__WIN95__)
 
 #include "wx/tabctrl.h"
+#include "wx/app.h"
 #include "wx/palmos/imaglist.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabCtrl, wxControl)
@@ -179,4 +181,3 @@ void wxTabCtrl::SetPadding(const wxSize& padding)
 #endif
     // __WIN95__
 
-#endif // wxUSE_TAB_DIALOG

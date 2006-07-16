@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/vlbox.cpp
+// Name:        generic/vlbox.cpp
 // Purpose:     implementation of wxVListBox
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -26,16 +26,15 @@
 
 #if wxUSE_LISTBOX
 
-#include "wx/vlbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcclient.h"
-    #include "wx/listbox.h"
 #endif //WX_PRECOMP
 
+#include "wx/vlbox.h"
 #include "wx/dcbuffer.h"
 #include "wx/selstore.h"
+#include "wx/bitmap.h"
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -59,12 +58,16 @@ IMPLEMENT_ABSTRACT_CLASS(wxVListBox, wxVScrolledWindow)
 // wxVListBox creation
 // ----------------------------------------------------------------------------
 
+// due to ABI compatibility reasons, we need to declare double-buffer
+// outside the class
+static wxBitmap* gs_doubleBuffer = NULL;
+
+
 void wxVListBox::Init()
 {
     m_current =
     m_anchor = wxNOT_FOUND;
     m_selStore = NULL;
-    m_doubleBuffer = NULL;
 }
 
 bool wxVListBox::Create(wxWindow *parent,
@@ -94,8 +97,10 @@ bool wxVListBox::Create(wxWindow *parent,
 
 wxVListBox::~wxVListBox()
 {
-    delete m_doubleBuffer;
     delete m_selStore;
+
+    delete gs_doubleBuffer;
+    gs_doubleBuffer = NULL;
 }
 
 void wxVListBox::SetItemCount(size_t count)
@@ -233,7 +238,7 @@ bool wxVListBox::DoSetCurrent(int current)
             // it is, indeed, only partly visible, so scroll it into view to
             // make it entirely visible
             while ( (size_t)m_current == GetLastVisibleLine() &&
-                    ScrollToLine(GetVisibleBegin()+1) ) ;
+                    ScrollToLine(GetVisibleBegin()+1) );
 
             // but in any case refresh it as even if it was only partly visible
             // before we need to redraw it entirely as its background changed
@@ -360,15 +365,15 @@ void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
     // If size is larger, recalculate double buffer bitmap
     wxSize clientSize = GetClientSize();
 
-    if ( !m_doubleBuffer ||
-         clientSize.x > m_doubleBuffer->GetWidth() ||
-         clientSize.y > m_doubleBuffer->GetHeight() )
+    if ( !gs_doubleBuffer ||
+         clientSize.x > gs_doubleBuffer->GetWidth() ||
+         clientSize.y > gs_doubleBuffer->GetHeight() )
     {
-        delete m_doubleBuffer;
-        m_doubleBuffer = new wxBitmap(clientSize.x+25,clientSize.y+25);
+        delete gs_doubleBuffer;
+        gs_doubleBuffer = new wxBitmap(clientSize.x+25,clientSize.y+25);
     }
 
-    wxBufferedPaintDC dc(this,*m_doubleBuffer);
+    wxBufferedPaintDC dc(this,*gs_doubleBuffer);
 
     // the update rectangle
     wxRect rectUpdate = GetUpdateClientRect();
@@ -382,8 +387,8 @@ void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
     rectLine.width = clientSize.x;
 
     // iterate over all visible lines
-    const size_t lineMax = GetVisibleEnd();
-    for ( size_t line = GetFirstVisibleLine(); line < lineMax; line++ )
+    const size_t lineMax = GetLastVisibleLine();
+    for ( size_t line = GetFirstVisibleLine(); line <= lineMax; line++ )
     {
         const wxCoord hLine = OnGetLineHeight(line);
 
@@ -540,11 +545,13 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
             break;
 
         case WXK_PAGEDOWN:
+        case WXK_NEXT:
             PageDown();
             current = GetFirstVisibleLine();
             break;
 
         case WXK_PAGEUP:
+        case WXK_PRIOR:
             if ( m_current == (int)GetFirstVisibleLine() )
             {
                 PageUp();
@@ -638,7 +645,7 @@ void wxVListBox::OnLeftDClick(wxMouseEvent& eventMouse)
         {
             OnLeftDown(eventMouse);
         }
-
+    
     }
 }
 
@@ -646,6 +653,8 @@ void wxVListBox::OnLeftDClick(wxMouseEvent& eventMouse)
 // ----------------------------------------------------------------------------
 // use the same default attributes as wxListBox
 // ----------------------------------------------------------------------------
+
+#include "wx/listbox.h"
 
 //static
 wxVisualAttributes

@@ -11,6 +11,10 @@
 #ifndef _WX_HTMPRINT_H_
 #define _WX_HTMPRINT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmprint.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HTML & wxUSE_PRINTING_ARCHITECTURE
@@ -53,7 +57,7 @@ public:
     void SetHtmlText(const wxString& html, const wxString& basepath = wxEmptyString, bool isdir = true);
 
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = NULL);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system
     // default size; use either specified or default font
@@ -77,8 +81,9 @@ public:
     // set the same pagebreak twice.
     //
     // CAUTION! Render() changes DC's user scale and does NOT restore it!
-    int Render(int x, int y, wxArrayInt& known_pagebreaks, int from = 0,
-               int dont_render = FALSE, int to = INT_MAX);
+    int Render(int x, int y, int from = 0, int dont_render = FALSE,
+               int maxHeight = INT_MAX,
+               int *known_pagebreaks = NULL, int number_of_pages = 0);
 
     // returns total height of the html document
     // (compare Render's return value with this)
@@ -142,7 +147,7 @@ public:
             // You can set different header/footer for odd and even pages
 
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = NULL);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
 
     // Sets font sizes to be relative to the given size or the system
     // default size; use either specified or default font
@@ -180,8 +185,7 @@ private:
 
 private:
     int m_NumPages;
-    //int m_PageBreaks[wxHTML_PRINT_MAX_PAGES];
-    wxArrayInt m_PageBreaks;
+    int m_PageBreaks[wxHTML_PRINT_MAX_PAGES];
 
     wxString m_Document, m_BasePath;
     bool m_BasePathIsDir;
@@ -242,7 +246,7 @@ public:
             // pg is one of wxPAGE_ODD, wxPAGE_EVEN and wx_PAGE_ALL constants.
             // You can set different header/footer for odd and even pages
 
-    void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = 0);
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = 0);
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used)
 
     // Sets font sizes to be relative to the given size or the system

@@ -1,21 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
+#ifdef __GNUG__
+#pragma implementation "colour.h"
 #endif
+
+#include "wx/gdicmn.h"
+#include "wx/colour.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
@@ -75,11 +74,27 @@ wxColour& wxColour::operator =(const wxColour& col)
     return *this;
 }
 
+void wxColour::InitFromName(const wxString& name)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(name);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
+}
+
 wxColour::~wxColour ()
 {
 }
 
-void wxColour::InitWith (unsigned char r, unsigned char g, unsigned char b)
+void wxColour::Set (unsigned char r, unsigned char g, unsigned char b)
 {
     m_red = r;
     m_green = g;

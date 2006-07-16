@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dde.cpp
+// Name:        msw/dde.cpp
 // Purpose:     DDE classes
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dde.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,12 +33,12 @@
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/app.h"
-    #include "wx/hashmap.h"
 #endif
 
 #include "wx/module.h"
 #include "wx/dde.h"
 #include "wx/intl.h"
+#include "wx/hashmap.h"
 
 #include "wx/msw/private.h"
 
@@ -104,9 +108,9 @@ static wxAtomMap wxAtomTable;
 
 #include "wx/listimpl.cpp"
 
-WX_DEFINE_LIST(wxDDEClientList)
-WX_DEFINE_LIST(wxDDEServerList)
-WX_DEFINE_LIST(wxDDEConnectionList)
+WX_DEFINE_LIST(wxDDEClientList);
+WX_DEFINE_LIST(wxDDEServerList);
+WX_DEFINE_LIST(wxDDEConnectionList);
 
 static wxDDEClientList wxDDEClientObjects;
 static wxDDEServerList wxDDEServerObjects;
@@ -300,7 +304,7 @@ bool wxDDEServer::Create(const wxString& server)
 
 wxDDEServer::~wxDDEServer()
 {
-    if ( !m_serviceName.empty() )
+    if ( !m_serviceName.IsEmpty() )
     {
         HSZ hsz = DDEAtomFromString(m_serviceName);
 
@@ -558,7 +562,7 @@ bool wxDDEConnection::Execute(const wxChar *data, int size, wxIPCFormat WXUNUSED
                                     GetHConv(),
                                     NULL,
 // If the transaction specified by the wType parameter does not pass data or is XTYP_EXECUTE,
-// wFmt should be zero.
+// wFmt should be zero. 
                                     0,
                                     XTYP_EXECUTE,
                                     DDE_TIMEOUT,

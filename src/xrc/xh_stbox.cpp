@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_stbox.cpp
+// Name:        xh_stbox.cpp
 // Purpose:     XRC resource for wxStaticBox
 // Author:      Brian Gavin
 // Created:     2000/09/09
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_stbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,18 +19,15 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_STATBOX
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_stbox.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/statbox.h"
-#endif
+#include "wx/statbox.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBoxXmlHandler, wxXmlResourceHandler)
 
 wxStaticBoxXmlHandler::wxStaticBoxXmlHandler()
-                      :wxXmlResourceHandler()
+: wxXmlResourceHandler()
 {
     AddWindowStyles();
 }
@@ -52,4 +53,4 @@ bool wxStaticBoxXmlHandler::CanHandle(wxXmlNode *node)
     return IsOfClass(node, wxT("wxStaticBox"));
 }
 
-#endif // wxUSE_XRC && wxUSE_STATBOX
+#endif // wxUSE_XRC

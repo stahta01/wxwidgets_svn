@@ -1,26 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
+#include "wx/gdicmn.h"
 #include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
-#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
@@ -53,11 +54,27 @@ wxColour& wxColour::operator =(const wxColour& col)
     return *this;
 }
 
+void wxColour::InitFromName(const wxString& name)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(name);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
+}
+
 wxColour::~wxColour()
 {
 }
 
-void wxColour::InitWith(unsigned char r, unsigned char g, unsigned char b)
+void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
 {
     m_red = r;
     m_green = g;

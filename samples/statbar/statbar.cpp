@@ -452,7 +452,7 @@ void MyFrame::OnSetStatusFields(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnUpdateStatusBarToggle(wxUpdateUIEvent& event)
 {
-    event.Check(GetStatusBar() != NULL);
+    event.Check(GetStatusBar() != 0);
 }
 
 void MyFrame::OnStatusBarToggle(wxCommandEvent& WXUNUSED(event))
@@ -461,12 +461,17 @@ void MyFrame::OnStatusBarToggle(wxCommandEvent& WXUNUSED(event))
     if ( statbarOld )
     {
         statbarOld->Hide();
-        SetStatusBar(NULL);
+        SetStatusBar(0);
     }
     else
     {
         DoCreateStatusBar(m_statbarKind);
     }
+#ifdef __WXMSW__
+    // The following is a kludge suggested by Vadim Zeitlin (one of the wxWidgets
+    // authors) while we look for a proper fix..
+//    SendSizeEvent();
+#endif
 }
 
 void MyFrame::OnRecreateStatusBar(wxCommandEvent& WXUNUSED(event))

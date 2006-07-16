@@ -12,6 +12,10 @@
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "cursor.h"
+#endif
+
 #include "wx/object.h"
 #include "wx/gdicmn.h"
 
@@ -24,7 +28,10 @@ class WXDLLEXPORT wxCursor: public wxObject
         
 public:
     wxCursor();
-
+    
+    // Copy constructors
+    wxCursor(const wxCursor& cursor) { Ref(cursor); }
+    
     wxCursor(const char bits[], int width, int height,
              int hotSpotX = -1, int hotSpotY = -1,
              const char maskBits[] = NULL);
@@ -41,6 +48,8 @@ public:
     
     virtual bool Ok() const;
     
+    wxCursor& operator = (const wxCursor& cursor)
+        { if (*this == cursor) return (*this); Ref(cursor); return *this; }
     bool operator == (const wxCursor& cursor) const
         { return m_refData == cursor.m_refData; }
     bool operator != (const wxCursor& cursor) const

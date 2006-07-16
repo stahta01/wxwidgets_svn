@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/classic/glcanvas.h
+// Name:        glcanvas.h
 // Purpose:     wxGLCanvas, for using OpenGL with wxWidgets under Macintosh
 // Author:      Stefan Csomor
 // Modified by:
@@ -12,7 +12,11 @@
 #ifndef _WX_GLCANVAS_H_
 #define _WX_GLCANVAS_H_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#  pragma interface "glcanvas.h"
+#endif
+
+#include "wx/setup.h"
 
 #if wxUSE_GLCANVAS
 
@@ -57,7 +61,7 @@ class WXDLLEXPORT wxGLCanvas;     /* forward reference */
 class WXDLLEXPORT wxGLContext: public wxObject
 {
 public:
-   wxGLContext(AGLPixelFormat fmt, wxGLCanvas *win,
+   wxGLContext(AGLPixelFormat fmt, wxGLCanvas *win, 
                const wxPalette& WXUNUSED(palette),
                const wxGLContext *other        /* for sharing display lists */
     );
@@ -82,16 +86,16 @@ class WXDLLEXPORT wxGLCanvas: public wxWindow
 {
    DECLARE_CLASS(wxGLCanvas)
  public:
-   wxGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
+   wxGLCanvas(wxWindow *parent, wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0,
         const wxString& name = wxT("GLCanvas") , int *attribList = 0, const wxPalette& palette = wxNullPalette);
    wxGLCanvas( wxWindow *parent, const wxGLContext *shared,
-        wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("GLCanvas"),
+        wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("GLCanvas"), 
           int *attribList = (int*) NULL, const wxPalette& palette = wxNullPalette );
 
-   wxGLCanvas( wxWindow *parent, const wxGLCanvas *shared, wxWindowID id = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0,
+   wxGLCanvas( wxWindow *parent, const wxGLCanvas *shared, wxWindowID id = -1,
+        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, 
         const wxString& name = wxT("GLCanvas"), int *attribList = 0, const wxPalette& palette = wxNullPalette );
 
    ~wxGLCanvas();
@@ -105,24 +109,24 @@ class WXDLLEXPORT wxGLCanvas: public wxWindow
    void SwapBuffers();
    void UpdateContext();
    void SetViewport();
-   virtual bool Show(bool show = true) ;
-
+   virtual bool Show(bool show = TRUE) ;
+   
    // Unlike some other platforms, this must get called if you override it.
    // It sets the viewport correctly and update the context.
    // You shouldn't call glViewport yourself either (use SetViewport if you must reset it.)
    void OnSize(wxSizeEvent& event);
+   
+     virtual void MacSuperChangedPosition() ;
+     virtual void MacTopLevelWindowChangedPosition() ;
+     virtual void MacSuperShown( bool show ) ;
 
-   virtual void MacSuperChangedPosition() ;
-   virtual void MacTopLevelWindowChangedPosition() ;
-   virtual void MacSuperShown( bool show ) ;
-
-   void MacUpdateView() ;
+     void MacUpdateView() ;
 
    inline wxGLContext* GetContext() const { return m_glContext; }
 
 protected:
     wxGLContext*   m_glContext;
-    bool m_macCanvasIsShown ;
+	bool m_macCanvasIsShown ;
 DECLARE_EVENT_TABLE()
 };
 

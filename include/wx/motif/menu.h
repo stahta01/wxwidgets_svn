@@ -12,6 +12,10 @@
 #ifndef _WX_MOTIF_MENU_H_
 #define _WX_MOTIF_MENU_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "menu.h"
+#endif
+
 #include "wx/colour.h"
 #include "wx/font.h"
 #include "wx/arrstr.h"
@@ -62,7 +66,7 @@ public:
     void HidePopup();
     
     WXWidget CreateMenu(wxMenuBar *menuBar, WXWidget parent, wxMenu *topMenu,
-        size_t index, const wxString& title = wxEmptyString,
+        const wxString& title = wxEmptyString,
         bool isPulldown = false);
     
     // For popups, need to destroy, then recreate menu for a different (or

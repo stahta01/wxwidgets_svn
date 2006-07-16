@@ -1,25 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/printdlg.cpp
+// Name:        printdlg.cpp
 // Purpose:     wxPrintDialog, wxPageSetupDialog
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#include "wx/printdlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/dcprint.h"
-    #include "wx/msgdlg.h"
+#ifdef __GNUG__
+#pragma implementation "printdlg.h"
 #endif
 
+#include "wx/object.h"
+#include "wx/printdlg.h"
+#include "wx/dcprint.h"
+#include "wx/msgdlg.h"
 #include "wx/mac/private/print.h"
 
 // Use generic page setup dialog: use your own native one if one exists.
@@ -31,7 +28,7 @@ wxPrintDialog::wxPrintDialog()
 {
     m_dialogParent = NULL;
     m_printerDC = NULL;
-    m_destroyDC = true;
+    m_destroyDC = TRUE;
 }
 
 wxPrintDialog::wxPrintDialog(wxWindow *p, wxPrintDialogData* data)
@@ -44,7 +41,7 @@ wxPrintDialog::wxPrintDialog(wxWindow *p, wxPrintData* data)
     wxPrintDialogData data2;
     if ( data )
         data2 = *data;
-
+    
     Create(p, &data2);
 }
 
@@ -52,12 +49,12 @@ bool wxPrintDialog::Create(wxWindow *p, wxPrintDialogData* data)
 {
     m_dialogParent = p;
     m_printerDC = NULL;
-    m_destroyDC = true;
-
+    m_destroyDC = TRUE;
+    
     if ( data )
         m_printDialogData = *data;
-
-    return true;
+    
+    return TRUE;
 }
 
 wxPrintDialog::~wxPrintDialog()
@@ -74,7 +71,7 @@ int wxPrintDialog::ShowModal()
     int result = m_printDialogData.GetPrintData().m_nativePrintData->ShowPrintDialog() ;
     if ( result == wxID_OK )
         m_printDialogData.ConvertFromNative() ;
-
+    
     return result ;
 }
 
@@ -102,11 +99,11 @@ wxDialog()
 bool wxPageSetupDialog::Create(wxWindow *p, wxPageSetupData *data)
 {
     m_dialogParent = p;
-
+    
     if (data)
         m_pageSetupData = (*data);
-
-    return true;
+    
+    return TRUE;
 }
 
 wxPageSetupDialog::~wxPageSetupDialog()
@@ -119,6 +116,7 @@ int wxPageSetupDialog::ShowModal()
     int result = m_pageSetupData.GetPrintData().m_nativePrintData->ShowPageSetupDialog() ;
     if (result == wxID_OK )
         m_pageSetupData.ConvertFromNative() ;
-
+        
     return result ;
 }
+

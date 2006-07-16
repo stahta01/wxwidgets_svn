@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dragimag.cpp
+// Name:        dragimag.cpp
 // Purpose:     wxDragImage
 // Author:      Julian Smart
 // Modified by:
@@ -17,29 +17,36 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dragimag.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_DRAGIMAGE
 
+#if defined(__WIN95__)
+
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/window.h"
-    #include "wx/dcclient.h"
-    #include "wx/dcscreen.h"
-    #include "wx/dcmemory.h"
-    #include "wx/settings.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/frame.h"
-    #include "wx/image.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/window.h"
+#include "wx/dcclient.h"
+#include "wx/dcscreen.h"
+#include "wx/dcmemory.h"
+#include "wx/settings.h"
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/log.h"
+#include "wx/intl.h"
+#include "wx/frame.h"
+#include "wx/image.h"
 
 #include "wx/msw/dragimag.h"
 #include "wx/msw/private.h"
@@ -48,8 +55,9 @@
 #include "wx/msw/wince/missing.h"
 #endif // __WXWINCE__
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#include <commctrl.h>
+#endif
 
 // Wine doesn't have this yet
 #ifndef ListView_CreateDragImage
@@ -298,8 +306,8 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullS
         if (!m_hCursorImageList)
         {
 #ifndef SM_CXCURSOR
-            // Smartphone may not have these metric symbol
-            int cxCursor = 16;
+			// Smartphone may not have these metric symbol
+			int cxCursor = 16;
             int cyCursor = 16;
 #else
             int cxCursor = ::GetSystemMetrics(SM_CXCURSOR);
@@ -457,5 +465,8 @@ bool wxDragImage::Hide()
 
     return ret;
 }
+
+#endif
+    // __WIN95__
 
 #endif // wxUSE_DRAGIMAGE

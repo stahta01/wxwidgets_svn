@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      Julian Smart
 // Modified by:
@@ -24,15 +24,12 @@
 #define XtDisplay XTDISPLAY
 #endif
 
+#include "wx/setup.h"
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/dcmemory.h"
-    #include "wx/bitmap.h"
-#endif
-
 #include "wx/apptrait.h"
+#include "wx/app.h"
+#include "wx/dcmemory.h"
+#include "wx/bitmap.h"
 #include "wx/evtloop.h"
 
 #include <string.h>
@@ -183,7 +180,7 @@ static char * GetIniFile (char *dest, const char *filename)
     {
         strcpy(dest, filename);
     }
-    else if ((home = wxGetUserHome()) != NULL)
+    else if ((home = wxGetUserHome("")) != NULL)
     {
         strcpy(dest, home);
         if (dest[strlen(dest) - 1] != '/')
@@ -317,7 +314,7 @@ bool wxGetResource(const wxString& section, const wxString& entry, char **value,
 
     XrmDatabase database;
 
-    if (!file.empty())
+    if (file != "")
     {
         char buffer[500];
 
@@ -457,7 +454,7 @@ void wxXMergeDatabases (wxApp * theApp, Display * display)
         environment = GetIniFile (filename, NULL);
         len = strlen (environment);
         wxString hostname = wxGetHostName();
-        if ( !hostname.empty() )
+        if ( !!hostname )
             strncat(environment, hostname, 1024 - len);
     }
     homeDB = XrmGetFileDatabase (environment);
@@ -532,7 +529,7 @@ void wxGetMousePosition( int* x, int* y )
     *x = xev.x_root;
     *y = xev.y_root;
 #endif
-}
+};
 
 // Return true if we have a colour display
 bool wxColourDisplay()
@@ -670,9 +667,9 @@ void wxHSVToXColor(wxHSV *hsv,XColor *rgb)
     case 4: r = t, g = p, b = v; break;
     case 5: r = v, g = p, b = q; break;
     }
-    rgb->red = (unsigned short)(r << 8);
-    rgb->green = (unsigned short)(g << 8);
-    rgb->blue = (unsigned short)(b << 8);
+    rgb->red = r << 8;
+    rgb->green = g << 8;
+    rgb->blue = b << 8;
 }
 
 void wxXColorToHSV(wxHSV *hsv,XColor *rgb)
@@ -814,7 +811,6 @@ char wxFindMnemonic (const char *s)
 char* wxFindAccelerator( const char *s )
 {
 #if 1
-    wxUnusedVar(s);
     // VZ: this function returns incorrect keysym which completely breaks kbd
     //     handling
     return NULL;
@@ -882,7 +878,6 @@ char* wxFindAccelerator( const char *s )
 XmString wxFindAcceleratorText (const char *s)
 {
 #if 1
-    wxUnusedVar(s);
     // VZ: this function returns incorrect keysym which completely breaks kbd
     //     handling
     return NULL;
@@ -913,7 +908,7 @@ void wxDoChangeForegroundColour(WXWidget widget, wxColour& foregroundColour)
         NULL);
 }
 
-void wxDoChangeBackgroundColour(WXWidget widget, const wxColour& backgroundColour, bool changeArmColour)
+void wxDoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, bool changeArmColour)
 {
     wxComputeColours (XtDisplay((Widget) widget), & backgroundColour,
         (wxColour*) NULL);
@@ -931,7 +926,7 @@ void wxDoChangeBackgroundColour(WXWidget widget, const wxColour& backgroundColou
         NULL);
 }
 
-extern void wxDoChangeFont(WXWidget widget, const wxFont& font)
+extern void wxDoChangeFont(WXWidget widget, wxFont& font)
 {
     // Lesstif 0.87 hangs here, but 0.93 does not; MBN: sometimes it does
 #if !wxCHECK_LESSTIF() // || wxCHECK_LESSTIF_VERSION( 0, 93 )
@@ -939,9 +934,6 @@ extern void wxDoChangeFont(WXWidget widget, const wxFont& font)
     XtVaSetValues( w,
                    wxFont::GetFontTag(), font.GetFontTypeC( XtDisplay(w) ),
                    NULL );
-#else
-    wxUnusedVar(widget);
-    wxUnusedVar(font);
 #endif
 
 }
@@ -975,7 +967,7 @@ XmString wxStringToXmString( const char* str )
 
 // Creates a bitmap with transparent areas drawn in
 // the given colour.
-wxBitmap wxCreateMaskedBitmap(const wxBitmap& bitmap, const wxColour& colour)
+wxBitmap wxCreateMaskedBitmap(const wxBitmap& bitmap, wxColour& colour)
 {
     wxBitmap newBitmap(bitmap.GetWidth(),
                        bitmap.GetHeight(),

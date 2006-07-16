@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "imaglist.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,23 +28,28 @@
     #pragma hdrstop
 #endif
 
+#if defined(__WIN95__)
+
 #ifndef WX_PRECOMP
     #include "wx/window.h"
     #include "wx/icon.h"
     #include "wx/dc.h"
     #include "wx/string.h"
     #include "wx/dcmemory.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
+
     #include <stdio.h>
 #endif
+
+#include "wx/log.h"
+#include "wx/intl.h"
+#include "wx/image.h"
 
 #include "wx/msw/imaglist.h"
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -321,7 +330,7 @@ wxBitmap wxImageList::GetBitmap(int index) const
     bitmap = wxBitmap(image);
 #else
     wxBitmap bitmap;
-#endif
+#endif    
     return bitmap;
 }
 
@@ -333,14 +342,14 @@ wxIcon wxImageList::GetIcon(int index) const
     {
         wxIcon icon;
         icon.SetHICON((WXHICON)hIcon);
-
+        
         int iconW, iconH;
         GetSize(index, iconW, iconH);
         icon.SetSize(iconW, iconH);
-
+        
         return icon;
     }
-    else
+    else               
         return wxNullIcon;
 }
 
@@ -389,3 +398,6 @@ static HBITMAP GetMaskForImage(const wxBitmap& bitmap, const wxBitmap& mask)
 
     return hbmpMaskInv;
 }
+
+#endif // Win95
+

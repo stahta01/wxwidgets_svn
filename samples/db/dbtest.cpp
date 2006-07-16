@@ -21,6 +21,10 @@
  *  SYNOPSIS END
  */
 
+#ifdef __GNUG__
+#pragma implementation "dbtest.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef    __BORLANDC__
@@ -1712,7 +1716,7 @@ bool CeditorDlg::Initialize()
 
 void CeditorDlg::OnSelectPict()
 {
-    wxFileDialog dlg(this, wxT("Choose an image file less than 60K"), wxEmptyString, wxEmptyString, wxT("JPEG files (*.jpg)|*.jpg|GIF files (*.gif)|*.gif|BMP files (*.bmp)|*.bmp|All Files (*.*)|*.*"), wxFD_OPEN);
+    wxFileDialog dlg(this, wxT("Choose an image file less than 60K"), wxEmptyString, wxEmptyString, wxT("JPEG files (*.jpg)|*.jpg|GIF files (*.gif)|*.gif|BMP files (*.bmp)|*.bmp|All Files (*.*)|*.*"), wxOPEN);
 
     if (dlg.ShowModal() == wxID_OK)
     {
@@ -2919,7 +2923,7 @@ m_pImage(NULL)
 
         if(m_pImage->Ok())
         {
-            m_pBmp = new wxBitmap(*m_pImage);
+            m_pBmp = new wxBitmap(m_pImage);
             m_pDisplayBmp = new wxStaticBitmap(this, IMAGE_DIALOG_STATIC_BMP, *m_pBmp, wxPoint(5,5), wxDefaultSize);
 
             SetSize(m_pBmp->GetWidth() + 10, m_pBmp->GetHeight() + 30);

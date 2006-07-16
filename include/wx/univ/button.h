@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_BUTTON_H_
 #define _WX_UNIV_BUTTON_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univbutton.h"
+#endif
+
 class WXDLLEXPORT wxInputHandler;
 
 #include "wx/bitmap.h"
@@ -100,17 +104,16 @@ public:
     virtual void Release();
     virtual void Click();
 
+protected:
     virtual bool PerformAction(const wxControlAction& action,
                                long numArg = -1,
                                const wxString& strArg = wxEmptyString);
-
-    virtual bool CanBeHighlighted() const { return true; }
-
-protected:
     virtual wxSize DoGetBestClientSize() const;
     
     virtual bool DoDrawBackground(wxDC& dc);
     virtual void DoDraw(wxControlRenderer *renderer);
+
+    virtual bool CanBeHighlighted() const { return true; }
 
     // common part of all ctors
     void Init();

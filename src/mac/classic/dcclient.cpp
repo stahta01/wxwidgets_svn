@@ -1,26 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/dcclient.cpp
+// Name:        dcclient.cpp
 // Purpose:     wxClientDC class
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#include "wx/dcclient.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/dcmemory.h"
-    #include "wx/toplevel.h"
-    #include "wx/math.h"
-    #include "wx/region.h"
+#ifdef __GNUG__
+#pragma implementation "dcclient.h"
 #endif
 
+#include "wx/dcclient.h"
+#include "wx/dcmemory.h"
+#include "wx/region.h"
+#include "wx/window.h"
+#include "wx/toplevel.h"
+#include "wx/math.h"
 #include "wx/mac/private.h"
 
 //-----------------------------------------------------------------------------
@@ -43,17 +41,17 @@ IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 
 #include "wx/mac/uma.h"
 
-wxWindowDC::wxWindowDC()
+wxWindowDC::wxWindowDC() 
 {
     m_window = NULL ;
 }
 
-wxWindowDC::wxWindowDC(wxWindow *window)
+wxWindowDC::wxWindowDC(wxWindow *window) 
 {
     m_window = window ;
     wxTopLevelWindowMac* rootwindow = window->MacGetTopLevelWindow() ;
     WindowRef windowref = (WindowRef) rootwindow->MacGetWindowRef() ;
-
+    
     int x , y ;
     x = y = 0 ;
     window->MacWindowToRootWindow( &x , &y ) ;
@@ -63,7 +61,7 @@ wxWindowDC::wxWindowDC(wxWindow *window)
     OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
     m_macPort = UMAGetWindowPort( windowref ) ;
-    m_ok = true ;
+    m_ok = TRUE ;
     SetBackground(window->MacGetBackgroundBrush());
 }
 
@@ -109,7 +107,7 @@ wxClientDC::wxClientDC(wxWindow *window)
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn ,(RgnHandle)  m_macCurrentClipRgn ) ;
     m_macPort = UMAGetWindowPort( windowref ) ;
 
-    m_ok = true ;
+    m_ok = TRUE ;
     SetBackground(window->MacGetBackgroundBrush());
     SetFont( window->GetFont() ) ;
 }
@@ -156,7 +154,7 @@ wxPaintDC::wxPaintDC(wxWindow *window)
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
     m_macPort = UMAGetWindowPort( windowref ) ;
 
-    m_ok = true ;
+    m_ok = TRUE ;
     SetBackground(window->MacGetBackgroundBrush());
     SetFont( window->GetFont() ) ;
 }
@@ -171,3 +169,5 @@ void wxPaintDC::DoGetSize(int *width, int *height) const
 
     m_window->GetClientSize( width, height );
 }
+
+

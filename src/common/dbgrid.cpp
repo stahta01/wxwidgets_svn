@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dbgrid.cpp
+// Name:        dbgrid.cpp
 // Purpose:     Displays a wxDbTable in a wxGrid.
 // Author:      Roger Gammans, Paul Gammans
 // Modified by:
@@ -11,24 +11,30 @@
 // Branched From : dbgrid.cpp,v 1.18 2000/12/19 13:00:58
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dbgrid.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_ODBC && wxUSE_GRID
+
+#if wxUSE_ODBC
+#if wxUSE_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
     #include "wx/dc.h"
-    #include "wx/app.h"
 #endif // WX_PRECOMP
 
 #include "wx/generic/gridctrl.h"
 #include "wx/dbgrid.h"
 
 // DLL options compatibility check:
+#include "wx/app.h"
 WX_CHECK_BUILD_OPTIONS("wxDbGrid")
 
 
@@ -272,7 +278,7 @@ wxString wxDbGridTableBase::GetTypeName(int WXUNUSED(row), int col)
                 case SQL_C_CHAR:
 #ifdef SQL_C_WCHAR
                 case SQL_C_WCHAR:
-#endif
+#endif                 
                     return wxGRID_VALUE_STRING;
                 case SQL_C_SHORT:
                 case SQL_C_SSHORT:
@@ -721,6 +727,8 @@ bool wxDbGridTableBase::Writeback() const
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_EXPORTED_OBJARRAY(keyarray)
+WX_DEFINE_EXPORTED_OBJARRAY(keyarray);
 
-#endif  // wxUSE_GRID && wxUSE_ODBC
+#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_ODBC
+

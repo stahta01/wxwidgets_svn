@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/data.cpp
+// Name:        mac/data.cpp
 // Purpose:     Various global Mac-specific data
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,8 +9,4 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/event.h"
-#endif
+#include "wx/event.h"

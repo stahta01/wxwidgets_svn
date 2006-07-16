@@ -89,14 +89,10 @@ enum
 class SliderWidgetsPage : public WidgetsPage
 {
 public:
-    SliderWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    SliderWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~SliderWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_slider; }
-    virtual void RecreateWidget() { CreateSlider(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // event handlers
@@ -201,18 +197,14 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
+IMPLEMENT_WIDGETS_PAGE(SliderWidgetsPage, _T("Slider"));
 
-IMPLEMENT_WIDGETS_PAGE(SliderWidgetsPage, _T("Slider"), FAMILY_CTRLS );
-
-SliderWidgetsPage::SliderWidgetsPage(WidgetsBookCtrl *book,
+SliderWidgetsPage::SliderWidgetsPage(wxBookCtrlBase *book,
                                      wxImageList *imaglist)
-                  : WidgetsPage(book, imaglist, slider_xpm)
+                  : WidgetsPage(book)
 {
+    imaglist->Add(wxBitmap(slider_xpm));
+
     // init everything
     m_min = 0;
     m_max = 100;
@@ -226,10 +218,7 @@ SliderWidgetsPage::SliderWidgetsPage(WidgetsBookCtrl *book,
 
     m_slider = (wxSlider *)NULL;
     m_sizerSlider = (wxSizer *)NULL;
-}
 
-void SliderWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
@@ -344,7 +333,7 @@ void SliderWidgetsPage::Reset()
 
 void SliderWidgetsPage::CreateSlider()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
 
     if ( m_chkInverse->GetValue() )
     {
@@ -573,11 +562,11 @@ void SliderWidgetsPage::OnUpdateUIRadioSides(wxUpdateUIEvent& event)
 
 void SliderWidgetsPage::OnUpdateUIBothSides(wxUpdateUIEvent& event)
 {
-#if defined(__WXMSW__) || defined(__WXUNIVERSAL__)
+#if defined(__WIN95__) || defined(__WXUNIVERSAL__)
     event.Enable( m_chkTicks->GetValue() );
 #else
     event.Enable( false );
-#endif // defined(__WXMSW__) || defined(__WXUNIVERSAL__)
+#endif // defined(__WIN95__) || defined(__WXUNIVERSAL__)
 }
 
 void SliderWidgetsPage::OnSlider(wxScrollEvent& event)
@@ -617,7 +606,7 @@ void SliderWidgetsPage::OnSlider(wxScrollEvent& event)
 
     static int s_numSliderEvents = 0;
 
-    wxLogMessage(wxT("Slider event #%d: %s (pos = %d, int value = %d)"),
+    wxLogMessage(wxT("Slider event #%d: %s (pos = %d, int value = %ld)"),
                  s_numSliderEvents++,
                  eventNames[index],
                  event.GetPosition(),

@@ -76,8 +76,6 @@ public:
     void OnContextMenu(wxContextMenuEvent& event);
 #endif
 
-    void OnRightClick(wxMouseEvent& event);
-
 private:
     void ShowContextMenu(const wxPoint& pos);
     wxLog *m_logOld;
@@ -87,7 +85,7 @@ private:
     void LogColEvent(const wxListEvent& event, const wxChar *eventName);
 
     virtual wxString OnGetItemText(long item, long column) const;
-    virtual int OnGetItemColumnImage(long item, long column) const;
+    virtual int OnGetItemImage(long item) const;
     virtual wxListItemAttr *OnGetItemAttr(long item) const;
 
     wxListItemAttr m_attr;
@@ -161,9 +159,7 @@ private:
     // and return false if it is
     bool CheckNonVirtual() const;
 
-
     wxLog *m_logOld;
-
     bool m_smallVirtual;
 
     DECLARE_NO_COPY_CLASS(MyFrame)
@@ -206,3 +202,4 @@ enum
 
     LIST_CTRL                   = 1000
 };
+

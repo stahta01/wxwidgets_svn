@@ -40,13 +40,10 @@ public:
     // -------------------------------
 
     // should be called in responde to WM_MOUSEMOVE
-    static void RelayEvent(WXMSG *msg);
+    void RelayEvent(WXMSG *msg);
 
     // add a window to the tooltip control
     void Add(WXHWND hwnd);
-
-    // remove any tooltip from the window
-    static void Remove(WXHWND hwnd);
 
 private:
     // the one and only one tooltip control we use - never access it directly

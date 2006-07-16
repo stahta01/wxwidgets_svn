@@ -184,7 +184,7 @@ if [ -z "${skipcopy}" ]; then
     rm -f wxPython/samples/embedded/embedded.o
 
     # ports that are not supported yet
-    #cleanup cocoa    # wxMac needs some cocoa headers
+    cleanup cocoa
     cleanup mgl
     cleanup motif
     cleanup os2

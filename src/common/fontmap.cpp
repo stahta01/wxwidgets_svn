@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/fontmap.cpp
+// Name:        common/fontmap.cpp
 // Purpose:     wxFontMapper class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fontmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,14 +30,10 @@
 
 #if wxUSE_FONTMAP
 
-#include "wx/fontmap.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/msgdlg.h"
-    #include "wx/choicdlg.h"
 #endif // PCH
 
 #if wxUSE_CONFIG
@@ -45,9 +45,12 @@
   #include  "wx/msw/winundef.h"
 #endif
 
+#include "wx/fontmap.h"
 #include "wx/fmappriv.h"
 #include "wx/fontutil.h"
+#include "wx/msgdlg.h"
 #include "wx/fontdlg.h"
+#include "wx/choicdlg.h"
 #include "wx/encinfo.h"
 
 #include "wx/encconv.h"
@@ -160,17 +163,17 @@ wxFontMapper::~wxFontMapper()
 {
 }
 
+bool wxFontMapper::IsWxFontMapper()
+{   return true; }
+
 /* static */
 wxFontMapper *wxFontMapper::Get()
 {
     wxFontMapperBase *fontmapper = wxFontMapperBase::Get();
-    wxASSERT_MSG( !fontmapper->IsDummy(),
-                 wxT("GUI code requested a wxFontMapper but we only have a wxFontMapperBase.") );
-
+    wxASSERT_MSG(fontmapper->IsWxFontMapper(), wxT("GUI code requested a wxFontMapper but we only have a wxFontMapperBase."));
     // Now return it anyway because there's a chance the GUI code might just
-    // only want to call wxFontMapperBase functions and it's better than
-    // crashing by returning NULL
-    return (wxFontMapper *)fontmapper;
+    // only want to call wxFontMapperBase functions.
+    return (wxFontMapper*)fontmapper;
 }
 
 wxFontEncoding
@@ -446,9 +449,9 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
 
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
                 // remember this in the config
-                wxFontMapperPathChanger path2(this,
-                                              FONTMAPPER_FONT_FROM_ENCODING_PATH);
-                if ( path2.IsOk() )
+                wxFontMapperPathChanger path(this,
+                                             FONTMAPPER_FONT_FROM_ENCODING_PATH);
+                if ( path.IsOk() )
                 {
                     GetConfig()->Write(configEntry, info->ToString());
                 }
@@ -465,9 +468,9 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
             //
             // remember it to avoid asking the same question again later
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
-            wxFontMapperPathChanger path2(this,
-                                          FONTMAPPER_FONT_FROM_ENCODING_PATH);
-            if ( path2.IsOk() )
+            wxFontMapperPathChanger path(this,
+                                         FONTMAPPER_FONT_FROM_ENCODING_PATH);
+            if ( path.IsOk() )
             {
                 GetConfig()->Write
                              (
@@ -495,6 +498,12 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
     wxCHECK_MSG( encodingAlt, false,
                     _T("wxFontEncoding::GetAltForEncoding(): NULL pointer") );
 
+#ifdef __WXGTK20__
+    // in GTK+ 2 we can always use UTF-8 for everything so just do it,
+    // especially as no other font encodings are currently supported
+    *encodingAlt = wxFONTENCODING_UTF8;
+    return true;
+#else // !wxGTK2
     wxNativeEncodingInfo info;
     if ( !GetAltForEncoding(encoding, &info, facename, interactive) )
         return false;
@@ -502,6 +511,7 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
     *encodingAlt = info.encoding;
 
     return true;
+#endif // wxGTK2/!wxGTK2
 }
 
 bool wxFontMapper::IsEncodingAvailable(wxFontEncoding encoding,

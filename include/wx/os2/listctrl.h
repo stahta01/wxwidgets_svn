@@ -12,6 +12,10 @@
 #ifndef _WX_LISTCTRL_H_
 #define _WX_LISTCTRL_H_
 
+#ifdef __GNUG__
+    #pragma interface "listctrl.h"
+#endif
+
 #if wxUSE_LISTCTRL
 
 #include "wx/control.h"
@@ -133,11 +137,13 @@ public:
                       ,int  nImage
                       ,int  lSelImage
                      );
+#if wxABI_VERSION >= 20603
     bool SetItemColumnImage( long lItem
                             ,long lColumn
                             ,int  nImage
                            );
-
+#endif
+    
     //
     // Item text
     //
@@ -507,16 +513,9 @@ protected:
                                   ) const;
 
     //
-    // Return the icon for the given item. In report view, OnGetItemImage will
-    // only be called for the first column. See OnGetItemColumnImage for 
-    // details.
+    // Return the icon for the given item
     //
     virtual int OnGetItemImage(long lItem) const;
-
-    //
-    // Return the icon for the given item and column
-    //
-    virtual int OnGetItemColumnImage(long lItem, long lColumn) const;
 
     //
     // Return the attribute for the item (may return NULL if none)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/notebook.cpp
+// Name:        univ/notebook.cpp
 // Purpose:     wxNotebook implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,14 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univnotebook.h"
+#endif
+
+#ifdef __VMS
+#pragma message disable unscomzer
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,14 +33,10 @@
 
 #if wxUSE_NOTEBOOK
 
-#include "wx/notebook.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dcmemory.h"
-#endif
-
 #include "wx/imaglist.h"
+#include "wx/notebook.h"
 #include "wx/spinbutt.h"
+#include "wx/dcmemory.h"
 
 #include "wx/univ/renderer.h"
 
@@ -121,9 +125,6 @@ bool wxNotebook::Create(wxWindow *parent,
                         long style,
                         const wxString& name)
 {
-    if ( (style & wxBK_ALIGN_MASK) == wxBK_DEFAULT )
-        style |= wxBK_TOP;
-
     if ( !wxControl::Create(parent, id, pos, size, style,
                             wxDefaultValidator, name) )
         return false;
@@ -173,7 +174,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
 int wxNotebook::GetPageImage(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
@@ -212,7 +213,7 @@ wxNotebook::~wxNotebook()
 
 int wxNotebook::SetSelection(size_t nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     if ( (size_t)nPage == m_sel )
     {
@@ -585,7 +586,7 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
 int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
 {
     if ( flags )
-        *flags = wxBK_HITTEST_NOWHERE;
+        *flags = wxNB_HITTEST_NOWHERE;
 
     // first check that it is in this window at all
     if ( !GetClientRect().Inside(pt) )
@@ -631,7 +632,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
             if ( flags )
             {
                 // TODO: be more precise
-                *flags = wxBK_HITTEST_ONITEM;
+                *flags = wxNB_HITTEST_ONITEM;
             }
 
             return n;
@@ -657,14 +658,14 @@ bool wxNotebook::IsVertical() const
 wxDirection wxNotebook::GetTabOrientation() const
 {
     long style = GetWindowStyle();
-    if ( style & wxBK_BOTTOM )
+    if ( style & wxNB_BOTTOM )
         return wxBOTTOM;
-    else if ( style & wxBK_RIGHT )
+    else if ( style & wxNB_RIGHT )
         return wxRIGHT;
-    else if ( style & wxBK_LEFT )
+    else if ( style & wxNB_LEFT )
         return wxLEFT;
 
-    // wxBK_TOP == 0 so we don't have to test for it
+    // wxNB_TOP == 0 so we don't have to test for it
     return wxTOP;
 }
 
@@ -1430,3 +1431,4 @@ void wxStdNotebookInputHandler::HandleFocusChange(wxInputConsumer *consumer)
 }
 
 #endif // wxUSE_NOTEBOOK
+

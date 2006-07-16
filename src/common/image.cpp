@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/image.cpp
+// Name:        image.cpp
 // Purpose:     wxImage
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "image.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,26 +18,25 @@
     #pragma hdrstop
 #endif
 
+#include "wx/defs.h"
+
 #if wxUSE_IMAGE
 
 #include "wx/image.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/hash.h"
-    #include "wx/utils.h"
-    #include "wx/bitmap.h"
-    #include "wx/math.h"
-#endif
-
+#include "wx/bitmap.h"
+#include "wx/debug.h"
+#include "wx/log.h"
+#include "wx/app.h"
 #include "wx/filefn.h"
 #include "wx/wfstream.h"
 #include "wx/intl.h"
 #include "wx/module.h"
+#include "wx/hash.h"
+#include "wx/utils.h"
+#include "wx/math.h"
 
 #if wxUSE_XPM
-    #include "wx/xpmdecod.h"
+#include "wx/xpmdecod.h"
 #endif
 
 // For memcpy
@@ -108,7 +111,7 @@ wxImage wxNullImage;
 
 //-----------------------------------------------------------------------------
 
-#define M_IMGDATA wx_static_cast(wxImageRefData*, m_refData)
+#define M_IMGDATA ((wxImageRefData *)m_refData)
 
 IMPLEMENT_DYNAMIC_CLASS(wxImage, wxObject)
 
@@ -148,6 +151,17 @@ wxImage::wxImage( wxInputStream& stream, const wxString& mimetype, int index )
     LoadFile( stream, mimetype, index );
 }
 #endif // wxUSE_STREAMS
+
+wxImage::wxImage( const wxImage& image )
+    : wxObject()
+{
+    Ref(image);
+}
+
+wxImage::wxImage( const wxImage* image )
+{
+    if (image) Ref(*image);
+}
 
 wxImage::wxImage( const char** xpmData )
 {
@@ -235,48 +249,35 @@ void wxImage::Destroy()
     UnRef();
 }
 
-wxObjectRefData* wxImage::CreateRefData() const
-{
-    return new wxImageRefData;
-}
-
-wxObjectRefData* wxImage::CloneRefData(const wxObjectRefData* that) const
-{
-    const wxImageRefData* refData = wx_static_cast(const wxImageRefData*, that);
-    wxCHECK_MSG(refData->m_ok, NULL, wxT("invalid image") );
-
-    wxImageRefData* refData_new = new wxImageRefData;
-    refData_new->m_width = refData->m_width;
-    refData_new->m_height = refData->m_height;
-    refData_new->m_maskRed = refData->m_maskRed;
-    refData_new->m_maskGreen = refData->m_maskGreen;
-    refData_new->m_maskBlue = refData->m_maskBlue;
-    refData_new->m_hasMask = refData->m_hasMask;
-    refData_new->m_ok = true;
-    unsigned size = unsigned(refData->m_width) * unsigned(refData->m_height);
-    if (refData->m_alpha != NULL)
-    {
-        refData_new->m_alpha = (unsigned char*)malloc(size);
-        memcpy(refData_new->m_alpha, refData->m_alpha, size);
-    }
-    size *= 3;
-    refData_new->m_data = (unsigned char*)malloc(size);
-    memcpy(refData_new->m_data, refData->m_data, size);
-#if wxUSE_PALETTE
-    refData_new->m_palette = refData->m_palette;
-#endif
-    refData_new->m_optionNames = refData->m_optionNames;
-    refData_new->m_optionValues = refData->m_optionValues;
-    return refData_new;
-}
-
 wxImage wxImage::Copy() const
 {
     wxImage image;
 
     wxCHECK_MSG( Ok(), image, wxT("invalid image") );
 
-    image.m_refData = CloneRefData(m_refData);
+    image.Create( M_IMGDATA->m_width, M_IMGDATA->m_height, false );
+
+    unsigned char *data = image.GetData();
+
+    wxCHECK_MSG( data, image, wxT("unable to create image") );
+
+    image.SetMaskColour( M_IMGDATA->m_maskRed, M_IMGDATA->m_maskGreen, M_IMGDATA->m_maskBlue );
+    image.SetMask( M_IMGDATA->m_hasMask );
+
+    memcpy( data, GetData(), M_IMGDATA->m_width*M_IMGDATA->m_height*3 );
+
+    wxImageRefData *imgData = (wxImageRefData *)image.m_refData;
+    
+    // also copy the alpha channel
+    if (HasAlpha())
+    {
+        image.SetAlpha();
+        unsigned char* alpha = image.GetAlpha();
+        memcpy( alpha, GetAlpha(), M_IMGDATA->m_width*M_IMGDATA->m_height );
+    }
+
+    imgData->m_optionNames = M_IMGDATA->m_optionNames;
+    imgData->m_optionValues = M_IMGDATA->m_optionValues;
 
     return image;
 }
@@ -284,7 +285,7 @@ wxImage wxImage::Copy() const
 wxImage wxImage::ShrinkBy( int xFactor , int yFactor ) const
 {
     if( xFactor == 1 && yFactor == 1 )
-        return *this;
+        return Copy() ;
 
     wxImage image;
 
@@ -391,7 +392,7 @@ wxImage wxImage::ShrinkBy( int xFactor , int yFactor ) const
         }
     }
 
-    // In case this is a cursor, make sure the hotspot is scaled accordingly:
+    // In case this is a cursor, make sure the hotspot is scalled accordingly:
     if ( HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_X) )
         image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X,
                 (GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X))/xFactor);
@@ -477,7 +478,7 @@ wxImage wxImage::Scale( int width, int height ) const
         y += y_delta;
     }
 
-    // In case this is a cursor, make sure the hotspot is scaled accordingly:
+    // In case this is a cursor, make sure the hotspot is scalled accordingly:
     if ( HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_X) )
         image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X,
                 (GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X)*width)/old_width);
@@ -562,15 +563,8 @@ wxImage wxImage::Mirror( bool horizontally ) const
     image.Create( M_IMGDATA->m_width, M_IMGDATA->m_height, false );
 
     unsigned char *data = image.GetData();
-    unsigned char *alpha = NULL;
 
     wxCHECK_MSG( data, image, wxT("unable to create image") );
-
-    if (M_IMGDATA->m_alpha != NULL) {
-        image.SetAlpha();
-        alpha = image.GetAlpha();
-        wxCHECK_MSG( alpha, image, wxT("unable to create alpha channel") );
-    }
 
     if (M_IMGDATA->m_hasMask)
         image.SetMaskColour( M_IMGDATA->m_maskRed, M_IMGDATA->m_maskGreen, M_IMGDATA->m_maskBlue );
@@ -594,25 +588,6 @@ wxImage wxImage::Mirror( bool horizontally ) const
                 target_data -= 3;
             }
         }
-
-        if (alpha != NULL)
-        {
-            // src_alpha starts at the first pixel and increases by 1 after each step
-            // (a step here is the copy of the alpha value of one pixel)
-            const unsigned char *src_alpha = M_IMGDATA->m_alpha;
-            // dest_alpha starts just beyond the first line, decreases before each step,
-            // and after each line is finished, increases by 2 widths (skipping the line
-            // just copied and the line that will be copied next)
-            unsigned char *dest_alpha = alpha + width;
-
-            for (long jj = 0; jj < height; ++jj)
-            {
-                for (long i = 0; i < width; ++i) {
-                    *(--dest_alpha) = *(src_alpha++); // copy one pixel
-                }
-                dest_alpha += 2 * width; // advance beyond the end of the next line
-            }
-        }
     }
     else
     {
@@ -621,23 +596,6 @@ wxImage wxImage::Mirror( bool horizontally ) const
             target_data = data + 3*width*(height-1-i);
             memcpy( target_data, source_data, (size_t)3*width );
             source_data += 3*width;
-        }
-
-        if (alpha != NULL)
-        {
-            // src_alpha starts at the first pixel and increases by 1 width after each step
-            // (a step here is the copy of the alpha channel of an entire line)
-            const unsigned char *src_alpha = M_IMGDATA->m_alpha;
-            // dest_alpha starts just beyond the last line (beyond the whole image)
-            // and decreases by 1 width before each step
-            unsigned char *dest_alpha = alpha + width * height;
-
-            for (long jj = 0; jj < height; ++jj)
-            {
-                dest_alpha -= width;
-                memcpy( dest_alpha, src_alpha, (size_t)width );
-                src_alpha += width;
-            }
         }
     }
 
@@ -650,47 +608,32 @@ wxImage wxImage::GetSubImage( const wxRect &rect ) const
 
     wxCHECK_MSG( Ok(), image, wxT("invalid image") );
 
-    wxCHECK_MSG( (rect.GetLeft()>=0) && (rect.GetTop()>=0) &&
-                 (rect.GetRight()<=GetWidth()) && (rect.GetBottom()<=GetHeight()),
+    wxCHECK_MSG( (rect.GetLeft()>=0) && (rect.GetTop()>=0) && (rect.GetRight()<=GetWidth()) && (rect.GetBottom()<=GetHeight()),
                  image, wxT("invalid subimage size") );
 
-    const int subwidth = rect.GetWidth();
-    const int subheight = rect.GetHeight();
+    int subwidth=rect.GetWidth();
+    const int subheight=rect.GetHeight();
 
     image.Create( subwidth, subheight, false );
 
-    const unsigned char *src_data = GetData();
-    const unsigned char *src_alpha = M_IMGDATA->m_alpha;
-    unsigned char *subdata = image.GetData();
-    unsigned char *subalpha = NULL;
+    unsigned char *subdata = image.GetData(), *data=GetData();
 
     wxCHECK_MSG( subdata, image, wxT("unable to create image") );
-
-    if (src_alpha != NULL) {
-        image.SetAlpha();
-        subalpha = image.GetAlpha();
-        wxCHECK_MSG( subalpha, image, wxT("unable to create alpha channel"));
-    }
 
     if (M_IMGDATA->m_hasMask)
         image.SetMaskColour( M_IMGDATA->m_maskRed, M_IMGDATA->m_maskGreen, M_IMGDATA->m_maskBlue );
 
-    const int width = GetWidth();
-    const int pixsoff = rect.GetLeft() + width * rect.GetTop();
+    const int subleft=3*rect.GetLeft();
+    const int width=3*GetWidth();
+    subwidth*=3;
 
-    src_data += 3 * pixsoff;
-    src_alpha += pixsoff; // won't be used if was NULL, so this is ok
+    data+=rect.GetTop()*width+subleft;
 
     for (long j = 0; j < subheight; ++j)
     {
-        memcpy( subdata, src_data, 3 * subwidth );
-        subdata += 3 * subwidth;
-        src_data += 3 * width;
-        if (subalpha != NULL) {
-            memcpy( subalpha, src_alpha, subwidth );
-            subalpha += subwidth;
-            src_alpha += width;
-        }
+        memcpy( subdata, data, subwidth);
+        subdata+=subwidth;
+        data+=width;
     }
 
     return image;
@@ -720,10 +663,6 @@ wxImage wxImage::Size( const wxSize& size, const wxPoint& pos,
 
     wxRect subRect(pos.x, pos.y, width, height);
     wxRect finalRect(0, 0, size.GetWidth(), size.GetHeight());
-    if (pos.x < 0)
-        finalRect.width -= pos.x;
-    if (pos.y < 0)
-        finalRect.height -= pos.y;
 
     subRect.Intersect(finalRect);
 
@@ -742,8 +681,6 @@ void wxImage::Paste( const wxImage &image, int x, int y )
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
     wxCHECK_RET( image.Ok(), wxT("invalid image") );
-
-    AllocExclusive();
 
     int xx = 0;
     int yy = 0;
@@ -826,8 +763,6 @@ void wxImage::Replace( unsigned char r1, unsigned char g1, unsigned char b1,
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
 
-    AllocExclusive();
-
     unsigned char *data = GetData();
 
     const int w = GetWidth();
@@ -844,56 +779,6 @@ void wxImage::Replace( unsigned char r1, unsigned char g1, unsigned char b1,
             }
             data += 3;
         }
-}
-
-wxImage wxImage::ConvertToGreyscale( double lr, double lg, double lb ) const
-{
-    wxImage image;
-
-    wxCHECK_MSG( Ok(), image, wxT("invalid image") );
-
-    image.Create(M_IMGDATA->m_width, M_IMGDATA->m_height, false);
-
-    unsigned char *dest = image.GetData();
-
-    wxCHECK_MSG( dest, image, wxT("unable to create image") );
-
-    unsigned char *src = M_IMGDATA->m_data;
-    bool hasMask = M_IMGDATA->m_hasMask;
-    unsigned char maskRed = M_IMGDATA->m_maskRed;
-    unsigned char maskGreen = M_IMGDATA->m_maskGreen;
-    unsigned char maskBlue = M_IMGDATA->m_maskBlue;
-
-    if ( hasMask )
-        image.SetMaskColour(maskRed, maskGreen, maskBlue);
-
-    const long size = M_IMGDATA->m_width * M_IMGDATA->m_height;
-    for ( long i = 0; i < size; i++, src += 3, dest += 3 )
-    {
-        // don't modify the mask
-        if ( hasMask && src[0] == maskRed && src[1] == maskGreen && src[2] == maskBlue )
-        {
-            memcpy(dest, src, 3);
-        }
-        else
-        {
-            // calculate the luma
-            double luma = (src[0] * lr + src[1] * lg + src[2] * lb) + 0.5;
-            dest[0] = dest[1] = dest[2] = wx_static_cast(unsigned char, luma);
-        }
-    }
-
-    // copy the alpha channel, if any
-    if (HasAlpha())
-    {
-        const size_t alphaSize = GetWidth() * GetHeight();
-        unsigned char *alpha = (unsigned char*)malloc(alphaSize);
-        memcpy(alpha, GetAlpha(), alphaSize);
-        image.InitAlpha();
-        image.SetAlpha(alpha);
-    }
-
-    return image;
 }
 
 wxImage wxImage::ConvertToMono( unsigned char r, unsigned char g, unsigned char b ) const
@@ -964,8 +849,6 @@ void wxImage::SetRGB( int x, int y, unsigned char r, unsigned char g, unsigned c
     long pos = XYToIndex(x, y);
     wxCHECK_RET( pos != -1, wxT("invalid image coordinates") );
 
-    AllocExclusive();
-
     pos *= 3;
 
     M_IMGDATA->m_data[ pos   ] = r;
@@ -976,8 +859,6 @@ void wxImage::SetRGB( int x, int y, unsigned char r, unsigned char g, unsigned c
 void wxImage::SetRGB( const wxRect& rect_, unsigned char r, unsigned char g, unsigned char b )
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    AllocExclusive();
 
     wxRect rect(rect_);
     wxRect imageRect(0, 0, GetWidth(), GetHeight());
@@ -1117,8 +998,6 @@ void wxImage::SetAlpha(int x, int y, unsigned char alpha)
     long pos = XYToIndex(x, y);
     wxCHECK_RET( pos != -1, wxT("invalid image coordinates") );
 
-    AllocExclusive();
-
     M_IMGDATA->m_alpha[pos] = alpha;
 }
 
@@ -1160,8 +1039,6 @@ wxImage::ConvertColourToAlpha(unsigned char r, unsigned char g, unsigned char b)
 void wxImage::SetAlpha( unsigned char *alpha, bool static_data )
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    AllocExclusive();
 
     if ( !alpha )
     {
@@ -1224,8 +1101,6 @@ void wxImage::SetMaskColour( unsigned char r, unsigned char g, unsigned char b )
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
 
-    AllocExclusive();
-
     M_IMGDATA->m_maskRed = r;
     M_IMGDATA->m_maskGreen = g;
     M_IMGDATA->m_maskBlue = b;
@@ -1274,8 +1149,6 @@ unsigned char wxImage::GetMaskBlue() const
 void wxImage::SetMask( bool mask )
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    AllocExclusive();
 
     M_IMGDATA->m_hasMask = mask;
 }
@@ -1336,8 +1209,6 @@ bool wxImage::SetMaskFromImage(const wxImage& mask,
         return false ;
     }
 
-    AllocExclusive();
-
     unsigned char *imgdata = GetData();
     unsigned char *maskdata = mask.GetData();
 
@@ -1376,8 +1247,6 @@ bool wxImage::ConvertAlphaToMask(unsigned char threshold)
         wxLogError( _("No unused colour in image being masked.") );
         return false;
     }
-
-    AllocExclusive();
 
     SetMask(true);
     SetMaskColour(mr, mg, mb);
@@ -1432,8 +1301,6 @@ void wxImage::SetPalette(const wxPalette& palette)
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
 
-    AllocExclusive();
-
     M_IMGDATA->m_palette = palette;
 }
 
@@ -1446,8 +1313,6 @@ void wxImage::SetPalette(const wxPalette& palette)
 void wxImage::SetOption(const wxString& name, const wxString& value)
 {
     wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    AllocExclusive();
 
     int idx = M_IMGDATA->m_optionNames.Index(name, false);
     if (idx == wxNOT_FOUND)
@@ -1496,9 +1361,7 @@ bool wxImage::HasOption(const wxString& name) const
 // image I/O
 // ----------------------------------------------------------------------------
 
-bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        long WXUNUSED_UNLESS_STREAMS(type),
-                        int WXUNUSED_UNLESS_STREAMS(index) )
+bool wxImage::LoadFile( const wxString& filename, long type, int index )
 {
 #if wxUSE_STREAMS
     if (wxFileExists(filename))
@@ -1518,9 +1381,7 @@ bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
 #endif // wxUSE_STREAMS
 }
 
-bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        const wxString& WXUNUSED_UNLESS_STREAMS(mimetype),
-                        int WXUNUSED_UNLESS_STREAMS(index) )
+bool wxImage::LoadFile( const wxString& filename, const wxString& mimetype, int index )
 {
 #if wxUSE_STREAMS
     if (wxFileExists(filename))
@@ -1558,8 +1419,7 @@ bool wxImage::SaveFile( const wxString& filename ) const
     return false;
 }
 
-bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        int WXUNUSED_UNLESS_STREAMS(type) ) const
+bool wxImage::SaveFile( const wxString& filename, int type ) const
 {
 #if wxUSE_STREAMS
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
@@ -1578,8 +1438,7 @@ bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
     return false;
 }
 
-bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        const wxString& WXUNUSED_UNLESS_STREAMS(mimetype) ) const
+bool wxImage::SaveFile( const wxString& filename, const wxString& mimetype ) const
 {
 #if wxUSE_STREAMS
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
@@ -1598,23 +1457,22 @@ bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
     return false;
 }
 
-bool wxImage::CanRead( const wxString& WXUNUSED_UNLESS_STREAMS(name) )
+bool wxImage::CanRead( const wxString &name )
 {
 #if wxUSE_STREAMS
-    wxFileInputStream stream(name);
-    return CanRead(stream);
+  wxFileInputStream stream(name);
+  return CanRead(stream);
 #else
-    return false;
+  return false;
 #endif
 }
 
-int wxImage::GetImageCount( const wxString& WXUNUSED_UNLESS_STREAMS(name),
-                            long WXUNUSED_UNLESS_STREAMS(type) )
+int wxImage::GetImageCount( const wxString &name, long type )
 {
 #if wxUSE_STREAMS
-    wxFileInputStream stream(name);
-    if (stream.Ok())
-        return GetImageCount(stream, type);
+  wxFileInputStream stream(name);
+  if (stream.Ok())
+      return GetImageCount(stream, type);
 #endif
 
   return 0;
@@ -1917,36 +1775,29 @@ wxString wxImage::GetImageExtWildcard()
 
 wxImage::HSVValue wxImage::RGBtoHSV(const RGBValue& rgb)
 {
+    double hue, saturation, value;
+
     const double red = rgb.red / 255.0,
                  green = rgb.green / 255.0,
                  blue = rgb.blue / 255.0;
 
-    // find the min and max intensity (and remember which one was it for the
-    // latter)
     double minimumRGB = red;
-    if ( green < minimumRGB )
+    if (green < minimumRGB)
         minimumRGB = green;
-    if ( blue < minimumRGB )
+
+    if (blue < minimumRGB)
         minimumRGB = blue;
 
-    enum { RED, GREEN, BLUE } chMax = RED;
     double maximumRGB = red;
-    if ( green > maximumRGB )
-    {
-        chMax = GREEN;
+    if (green > maximumRGB)
         maximumRGB = green;
-    }
-    if ( blue > maximumRGB )
-    {
-        chMax = BLUE;
+
+    if (blue > maximumRGB)
         maximumRGB = blue;
-    }
 
-    const double value = maximumRGB;
+    value = maximumRGB;
 
-    double hue = 0.0, saturation;
-    const double deltaRGB = maximumRGB - minimumRGB;
-    if ( wxIsNullDouble(deltaRGB) )
+    if (maximumRGB == minimumRGB)
     {
         // Gray has no color
         hue = 0.0;
@@ -1954,31 +1805,21 @@ wxImage::HSVValue wxImage::RGBtoHSV(const RGBValue& rgb)
     }
     else
     {
-        switch ( chMax )
-        {
-            case RED:
-                hue = (green - blue) / deltaRGB;
-                break;
-
-            case GREEN:
-                hue = 2.0 + (blue - red) / deltaRGB;
-                break;
-
-            case BLUE:
-                hue = 4.0 + (red - green) / deltaRGB;
-                break;
-
-            default:
-                wxFAIL_MSG(wxT("hue not specified"));
-                break;
-        }
-
-        hue /= 6.0;
-
-        if ( hue < 0.0 )
-            hue += 1.0;
+        double deltaRGB = maximumRGB - minimumRGB;
 
         saturation = deltaRGB / maximumRGB;
+
+        if ( red == maximumRGB )
+            hue = (green - blue) / deltaRGB;
+        else if (green == maximumRGB)
+            hue = 2.0 + (blue - red) / deltaRGB;
+        else
+            hue = 4.0 + (red - green) / deltaRGB;
+
+        hue = hue / 6.0;
+
+        if (hue < 0.0)
+            hue = hue + 1.0;
     }
 
     return HSVValue(hue, saturation, value);
@@ -1988,14 +1829,13 @@ wxImage::RGBValue wxImage::HSVtoRGB(const HSVValue& hsv)
 {
     double red, green, blue;
 
-    if ( wxIsNullDouble(hsv.saturation) )
+    if ( hsv.saturation == 0.0 )
     {
-        // Grey
-        red = hsv.value;
+        red = hsv.value; //Grey
         green = hsv.value;
-        blue = hsv.value;
+        blue = hsv.value; 
     }
-    else // not grey
+    else
     {
         double hue = hsv.hue * 6.0;      // sector 0 to 5
         int i = (int)floor(hue);
@@ -2053,8 +1893,6 @@ wxImage::RGBValue wxImage::HSVtoRGB(const HSVValue& hsv)
  */
 void wxImage::RotateHue(double angle)
 {
-    AllocExclusive();
-
     unsigned char *srcBytePtr;
     unsigned char *dstBytePtr;
     unsigned long count;
@@ -2063,7 +1901,7 @@ void wxImage::RotateHue(double angle)
 
     wxASSERT (angle >= -1.0 && angle <= 1.0);
     count = M_IMGDATA->m_width * M_IMGDATA->m_height;
-    if ( count > 0 && !wxIsNullDouble(angle) )
+    if (count > 0 && angle != 0.0)
     {
         srcBytePtr = M_IMGDATA->m_data;
         dstBytePtr = srcBytePtr;
@@ -2347,20 +2185,20 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
     wxRealPoint p3 = rotated_point (GetWidth(), 0, cos_angle, sin_angle, p0);
     wxRealPoint p4 = rotated_point (GetWidth(), GetHeight(), cos_angle, sin_angle, p0);
 
-    int x1a = (int) floor (wxMin (wxMin(p1.x, p2.x), wxMin(p3.x, p4.x)));
-    int y1a = (int) floor (wxMin (wxMin(p1.y, p2.y), wxMin(p3.y, p4.y)));
-    int x2a = (int) ceil (wxMax (wxMax(p1.x, p2.x), wxMax(p3.x, p4.x)));
-    int y2a = (int) ceil (wxMax (wxMax(p1.y, p2.y), wxMax(p3.y, p4.y)));
+    int x1 = (int) floor (wxMin (wxMin(p1.x, p2.x), wxMin(p3.x, p4.x)));
+    int y1 = (int) floor (wxMin (wxMin(p1.y, p2.y), wxMin(p3.y, p4.y)));
+    int x2 = (int) ceil (wxMax (wxMax(p1.x, p2.x), wxMax(p3.x, p4.x)));
+    int y2 = (int) ceil (wxMax (wxMax(p1.y, p2.y), wxMax(p3.y, p4.y)));
 
     // Create rotated image
-    wxImage rotated (x2a - x1a + 1, y2a - y1a + 1, false);
+    wxImage rotated (x2 - x1 + 1, y2 - y1 + 1, false);
     // With alpha channel
     if (has_alpha)
         rotated.SetAlpha();
 
     if (offset_after_rotation != NULL)
     {
-        *offset_after_rotation = wxPoint (x1a, y1a);
+        *offset_after_rotation = wxPoint (x1, y1);
     }
 
     // GRG: The rotated (destination) image is always accessed
@@ -2402,7 +2240,7 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
         {
             for (x = 0; x < rotated.GetWidth(); x++)
             {
-                wxRealPoint src = rotated_point (x + x1a, y + y1a, cos_angle, -sin_angle, p0);
+                wxRealPoint src = rotated_point (x + x1, y + y1, cos_angle, -sin_angle, p0);
 
                 if (-0.25 < src.x && src.x < GetWidth() - 0.75 &&
                     -0.25 < src.y && src.y < GetHeight() - 0.75)
@@ -2410,6 +2248,8 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                     // interpolate using the 4 enclosing grid-points.  Those
                     // points can be obtained using floor and ceiling of the
                     // exact coordinates of the point
+                        // C.M. 2000-02-17:  when the point is near the border, special care is required.
+
                     int x1, y1, x2, y2;
 
                     if (0 < src.x && src.x < GetWidth() - 1)
@@ -2459,7 +2299,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y1] + x1);
+                        {
+                            unsigned char *p = alpha[y1] + x1;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d2 < gs_Epsilon)
                     {
@@ -2469,7 +2312,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y1] + x2);
+                        {
+                            unsigned char *p = alpha[y1] + x2;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d3 < gs_Epsilon)
                     {
@@ -2479,7 +2325,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y2] + x2);
+                        {
+                            unsigned char *p = alpha[y2] + x2;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else if (d4 < gs_Epsilon)
                     {
@@ -2489,7 +2338,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                         *(dst++) = *p;
 
                         if (has_alpha)
-                            *(alpha_dst++) = *(alpha[y2] + x1);
+                        {
+                            unsigned char *p = alpha[y2] + x1;
+                            *(alpha_dst++) = *p;
+                        }
                     }
                     else
                     {
@@ -2518,10 +2370,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
 
                         if (has_alpha)
                         {
-                            v1 = alpha[y1] + (x1);
-                            v2 = alpha[y1] + (x2);
-                            v3 = alpha[y2] + (x2);
-                            v4 = alpha[y2] + (x1);
+                            unsigned char *v1 = alpha[y1] + (x1);
+                            unsigned char *v2 = alpha[y1] + (x2);
+                            unsigned char *v3 = alpha[y2] + (x2);
+                            unsigned char *v4 = alpha[y2] + (x1);
 
                             *(alpha_dst++) = (unsigned char)
                                 ( (w1 * *v1 + w2 * *v2 +
@@ -2548,7 +2400,7 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
         {
             for (x = 0; x < rotated.GetWidth(); x++)
             {
-                wxRealPoint src = rotated_point (x + x1a, y + y1a, cos_angle, -sin_angle, p0);
+                wxRealPoint src = rotated_point (x + x1, y + y1, cos_angle, -sin_angle, p0);
 
                 const int xs = wxCint (src.x);      // wxCint rounds to the
                 const int ys = wxCint (src.y);      // closest integer
@@ -2562,7 +2414,10 @@ wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool i
                     *(dst++) = *p;
 
                     if (has_alpha)
-                        *(alpha_dst++) = *(alpha[ys] + (xs));
+                    {
+                        unsigned char *p = alpha[ys] + (xs);
+                        *(alpha_dst++) = *p;
+                    }
                 }
                 else
                 {

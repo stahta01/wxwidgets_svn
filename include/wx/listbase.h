@@ -12,6 +12,10 @@
 #ifndef _WX_LISTBASE_H_BASE_
 #define _WX_LISTBASE_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+//    #pragma interface "listctrlbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_LISTCTRL
@@ -104,9 +108,6 @@ typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortDat
 
 #define wxLIST_HITTEST_ONITEM (wxLIST_HITTEST_ONITEMICON | wxLIST_HITTEST_ONITEMLABEL | wxLIST_HITTEST_ONITEMSTATEICON)
 
-// GetSubItemRect constants
-#define wxLIST_GETSUBITEMRECT_WHOLEITEM -1l
-
 // Flags for GetNextItem (MSW only except wxLIST_NEXT_ALL)
 enum
 {
@@ -163,9 +164,6 @@ enum
 // wxListItemAttr: a structure containing the visual attributes of an item
 // ----------------------------------------------------------------------------
 
-// TODO: this should be renamed to wxItemAttr or something general like this
-//       and used as base class for wxTextAttr which duplicates this class
-//       entirely currently
 class WXDLLEXPORT wxListItemAttr
 {
 public:
@@ -174,12 +172,7 @@ public:
     wxListItemAttr(const wxColour& colText,
                    const wxColour& colBack,
                    const wxFont& font)
-        : m_colText(colText), m_colBack(colBack), m_font(font)
-    {
-    }
-
-    // default copy ctor, assignment operator and dtor are ok
-
+        : m_colText(colText), m_colBack(colBack), m_font(font) { }
 
     // setters
     void SetTextColour(const wxColour& colText) { m_colText = colText; }
@@ -194,19 +187,6 @@ public:
     const wxColour& GetTextColour() const { return m_colText; }
     const wxColour& GetBackgroundColour() const { return m_colBack; }
     const wxFont& GetFont() const { return m_font; }
-
-
-    // this is almost like assignment operator except it doesn't overwrite the
-    // fields unset in the source attribute
-    void AssignFrom(const wxListItemAttr& source)
-    {
-        if ( source.HasTextColour() )
-            SetTextColour(source.GetTextColour());
-        if ( source.HasBackgroundColour() )
-            SetBackgroundColour(source.GetBackgroundColour());
-        if ( source.HasFont() )
-            SetFont(source.GetFont());
-    }
 
 private:
     wxColour m_colText,
@@ -237,7 +217,7 @@ public:
           m_attr(NULL)
     {
         // copy list item attributes
-        if ( item.HasAttributes() )
+        if( item.HasAttributes() )
             m_attr = new wxListItemAttr(*item.GetAttributes());
     }
     virtual ~wxListItem() { delete m_attr; }
@@ -404,6 +384,15 @@ public:
     // was label editing canceled? (for wxEVT_COMMAND_LIST_END_LABEL_EDIT only)
     bool IsEditCancelled() const { return m_editCancelled; }
     void SetEditCanceled(bool editCancelled) { m_editCancelled = editCancelled; }
+
+#if WXWIN_COMPATIBILITY_2_2
+    // these methods don't do anything at all
+    long GetOldIndex() const { return 0; }
+    long GetOldItem() const { return 0; }
+
+    // this one is superseded by GetKeyCode()
+    int GetCode() const { return GetKeyCode(); }
+#endif // WXWIN_COMPATIBILITY_2_2
 
     virtual wxEvent *Clone() const { return new wxListEvent(*this); }
 

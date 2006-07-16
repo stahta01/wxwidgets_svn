@@ -52,53 +52,11 @@ MustHaveApp(wxEndBusyCursor);
 void wxEndBusyCursor();
 
 long wxGetElapsedTime(bool resetTimer = true);
-%pythoncode { GetElapsedTime = wx._deprecated(GetElapsedTime) }
-    
+
 bool wxIsBusy();
 wxString wxNow();
 bool wxShell(const wxString& command = wxPyEmptyString);
 void wxStartTimer();
-
-
-
-enum
-{
-    wxUNKNOWN_PLATFORM,
-    wxCURSES,                 /*  Text-only CURSES */
-    wxXVIEW_X,                /*  Sun's XView OpenLOOK toolkit */
-    wxMOTIF_X,                /*  OSF Motif 1.x.x */
-    wxCOSE_X,                 /*  OSF Common Desktop Environment */
-    wxNEXTSTEP,               /*  NeXTStep */
-    wxMAC,                    /*  Apple Mac OS 8/9/X with Mac paths */
-    wxMAC_DARWIN,             /*  Apple Mac OS X with Unix paths */
-    wxBEOS,                   /*  BeOS */
-    wxGTK,                    /*  GTK on X */
-    wxGTK_WIN32,              /*  GTK on Win32 */
-    wxGTK_OS2,                /*  GTK on OS/2 */
-    wxGTK_BEOS,               /*  GTK on BeOS */
-    wxGEOS,                   /*  GEOS */
-    wxOS2_PM,                 /*  OS/2 Workplace */
-    wxWINDOWS,                /*  Windows or WfW */
-    wxMICROWINDOWS,           /*  MicroWindows */
-    wxPENWINDOWS,             /*  Windows for Pen Computing */
-    wxWINDOWS_NT,             /*  Windows NT */
-    wxWIN32S,                 /*  Windows 32S API */
-    wxWIN95,                  /*  Windows 95 */
-    wxWIN386,                 /*  Watcom 32-bit supervisor modus */
-    wxWINDOWS_CE,             /*  Windows CE (generic) */
-    wxWINDOWS_POCKETPC,       /*  Windows CE PocketPC */
-    wxWINDOWS_SMARTPHONE,     /*  Windows CE Smartphone */
-    wxMGL_UNIX,               /*  MGL with direct hardware access */
-    wxMGL_X,                  /*  MGL on X */
-    wxMGL_WIN32,              /*  MGL on Win32 */
-    wxMGL_OS2,                /*  MGL on OS/2 */
-    wxMGL_DOS,                /*  MGL on MS-DOS */
-    wxWINDOWS_OS2,            /*  Native OS/2 PM */
-    wxUNIX,                   /*  wxBase under Unix */
-    wxX11,                    /*  Plain X11 and Universal widgets */
-    wxPALMOS,                 /*  PalmOS */
-    wxDOS                     /*  wxBase under MS-DOS */
-};
 
 DocDeclA(
     int, wxGetOsVersion(int *OUTPUT, int *OUTPUT),
@@ -115,10 +73,10 @@ wxString wxGetOsDescription();
 // int wxParseCommonDialogsFilter(const wxString& wildCard, wxArrayString& descriptions, wxArrayString& filters);
 
 #if defined(__WXMSW__) || defined(__WXMAC__)
-wxMemorySize wxGetFreeMemory();
+long wxGetFreeMemory();
 #else
 %inline %{
-    wxMemorySize wxGetFreeMemory()
+    long wxGetFreeMemory()
         { wxPyRaiseNotImplemented(); return 0; }
 %}
 #endif
@@ -249,6 +207,7 @@ long wxGetNumberFromUser(const wxString& message,
                          long min = 0, long max = 100,
                          wxWindow *parent = NULL,
                          const wxPoint& pos = wxDefaultPosition);
+
 
 // GDI Functions
 
@@ -463,6 +422,41 @@ MustHaveApp(wxThread);
 #endif
     }
 %}
+
+//---------------------------------------------------------------------------
+
+// enum wxPowerType
+// {
+//     wxPOWER_SOCKET,
+//     wxPOWER_BATTERY,
+//     wxPOWER_UNKNOWN
+// };
+
+// DocDeclStr(
+//     wxPowerType , wxGetPowerType(),
+//     "Returns the type of power source as one of wx.POWER_SOCKET,
+// wx.POWER_BATTERY or wx.POWER_UNKNOWN.  wx.POWER_UNKNOWN is also the
+// default on platforms where this feature is not implemented.", "");
+
+
+// enum wxBatteryState
+// {
+//     wxBATTERY_NORMAL_STATE,    // system is fully usable
+//     wxBATTERY_LOW_STATE,       // start to worry
+//     wxBATTERY_CRITICAL_STATE,  // save quickly
+//     wxBATTERY_SHUTDOWN_STATE,  // too late
+//     wxBATTERY_UNKNOWN_STATE
+// };
+
+// DocDeclStr(
+//     wxBatteryState , wxGetBatteryState(),
+//     "Returns battery state as one of wx.BATTERY_NORMAL_STATE,
+// wx.BATTERY_LOW_STATE}, wx.BATTERY_CRITICAL_STATE,
+// wx.BATTERY_SHUTDOWN_STATE or wx.BATTERY_UNKNOWN_STATE.
+// wx.BATTERY_UNKNOWN_STATE is also the default on platforms where this
+// feature is not implemented.", "");
+
+
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

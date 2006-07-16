@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/archive.cpp
+// Name:        archive.cpp
 // Purpose:     Streams for archive formats
 // Author:      Mike Wetherell
 // RCS-ID:      $Id$
@@ -7,26 +7,33 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "archive.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_STREAMS && wxUSE_ARCHIVE_STREAMS
 
-#ifndef WX_PRECOMP
-#endif
-
 #include "wx/archive.h"
-#include "wx/link.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxArchiveEntry, wxObject)
 IMPLEMENT_ABSTRACT_CLASS(wxArchiveClassFactory, wxObject)
 
 #if wxUSE_ZIPSTREAM
-wxFORCE_LINK_MODULE(zipstrm)
+//FORCE_LINK(zipstrm)
+extern int _wx_link_dummy_func_zipstrm();
+static int _wx_link_dummy_var_zipstrm =
+               _wx_link_dummy_func_zipstrm ();
 #endif
 
 

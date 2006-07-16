@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toolbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,27 +28,27 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TOOLBAR && wxUSE_TOOLBAR_NATIVE
-
-#include "wx/toolbar.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
     #include "wx/frame.h"
     #include "wx/log.h"
     #include "wx/intl.h"
+    #include "wx/dynarray.h"
     #include "wx/settings.h"
     #include "wx/bitmap.h"
     #include "wx/dcmemory.h"
     #include "wx/control.h"
-    #include "wx/app.h"         // for GetComCtl32Version
 #endif
 
+#if wxUSE_TOOLBAR && wxUSE_TOOLBAR_NATIVE
+
+#include "wx/toolbar.h"
 #include "wx/sysopt.h"
 
 #include "wx/palmos/private.h"
 
 #include "wx/palmos/wrapcctl.h"
+
+#include "wx/app.h"         // for GetComCtl32Version
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -268,3 +272,4 @@ void wxToolBar::OnMouseEvent(wxMouseEvent& event)
 }
 
 #endif // wxUSE_TOOLBAR
+

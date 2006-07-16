@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/timer.cpp
+// Name:        msw/timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin (use hash map instead of list, global rewrite)
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "timer.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,17 +22,18 @@
 
 #if wxUSE_TIMER
 
-#include "wx/timer.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
     #include "wx/window.h"
+    #include "wx/list.h"
     #include "wx/event.h"
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/hashmap.h"
 #endif
+
+#include "wx/hashmap.h"
+
+#include "wx/timer.h"
 
 #include "wx/msw/private.h"
 
@@ -161,3 +166,4 @@ wxTimerProc(HWND WXUNUSED(hwnd),
 }
 
 #endif // wxUSE_TIMER
+

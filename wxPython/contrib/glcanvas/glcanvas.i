@@ -35,6 +35,9 @@
 MAKE_CONST_WXSTRING2(GLCanvasNameStr, wxT("GLCanvas"));
 MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 
+
+%include _glcanvas_rename.i
+
 //---------------------------------------------------------------------------
 
 class wxPalette;

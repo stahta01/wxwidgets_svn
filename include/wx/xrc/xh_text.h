@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_text.h
+// Name:        xh_text.h
 // Purpose:     XML resource handler for wxTextCtrl
 // Author:      Aleksandras Gluchovas
 // Created:     2000/03/21
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_TEXT_H_
 #define _WX_XH_TEXT_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_text.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

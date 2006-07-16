@@ -11,6 +11,10 @@
 #ifndef __GTKDIALOGH__
 #define __GTKDIALOGH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/defs.h"
 
 //-----------------------------------------------------------------------------
@@ -23,7 +27,7 @@ class WXDLLIMPEXP_CORE wxDialog;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxDialogNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar *wxDialogNameStr;
 
 //-----------------------------------------------------------------------------
 // wxDialog

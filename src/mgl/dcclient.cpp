@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/dcclient.cpp
+// Name:        dcclient.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcclient.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,9 +18,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dcclient.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/dcclient.h"
     #include "wx/window.h"
 #endif
 
@@ -40,7 +43,7 @@ wxWindowDC::wxWindowDC(wxWindow *win) : m_wnd(win)
     else
     {
         m_inPaintHandler = FALSE;
-
+        
         dc = new MGLDevCtx(MGL_wmBeginPaint(win->GetHandle()));
 
         MGLRegion clip;

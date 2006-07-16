@@ -15,7 +15,6 @@
 %{
 #include "wx/wxPython/wxPython_int.h"
 #include "wx/wxPython/pyclasses.h"
-#include "wx/wxPython/twoitem.h"
 %}
 
 
@@ -26,8 +25,10 @@
 %include my_typemaps.i
 
 %include _core_api.i
+%include __core_rename.i
 
 %native(_wxPySetDictionary)   __wxPySetDictionary;
+%native(_wxPyFixStockObjects) __wxPyFixStockObjects;
 
 
 %pythoncode {
@@ -73,8 +74,6 @@ def _deprecated(callable, msg=None):
 %include _defs.i
 
 MAKE_CONST_WXSTRING(EmptyString);
-
-%include _swigtype.i
 
 %include _obj.i
 %include _gdicmn.i

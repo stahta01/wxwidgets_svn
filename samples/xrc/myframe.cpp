@@ -8,6 +8,14 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// GCC implementation
+//-----------------------------------------------------------------------------
+
+#ifdef __GNUG__
+    #pragma implementation "myframe.h"
+#endif
+
+//-----------------------------------------------------------------------------
 // Standard wxWidgets headers
 //-----------------------------------------------------------------------------
 
@@ -23,8 +31,6 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-
-#include "wx/sysopt.h"
 
 //-----------------------------------------------------------------------------
 // Header of this .cpp file
@@ -117,7 +123,6 @@ MyFrame::MyFrame(wxWindow* parent)
     // NOTE: For toolbars you currently should do it exactly like this.
     // With toolbars, you currently can't create one, and set it later. It
     // needs to be all in one step.
-    wxSystemOptions::SetOption ( wxT("msw.remap"), 0 );
     SetToolBar(wxXmlResource::Get()->LoadToolBar(this, wxT("main_toolbar")));
 
 #if wxUSE_STATUSBAR

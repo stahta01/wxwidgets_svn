@@ -37,17 +37,14 @@
             hashes/hashes.cpp
             lists/lists.cpp
             longlong/longlongtest.cpp
-            mbconv/convautotest.cpp
             mbconv/mbconvtest.cpp
             regex/regextest.cpp
             regex/wxregextest.cpp
             scopeguard/scopeguardtest.cpp
             strings/strings.cpp
             strings/stdstrings.cpp
-            strings/tokenizer.cpp
             strings/unicode.cpp
             strings/crt.cpp
-            strings/vsnprintf.cpp
             streams/bstream.cpp
             streams/datastreamtest.cpp
             streams/ffilestream.cpp
@@ -58,7 +55,6 @@
             streams/tempfile.cpp
             streams/textstreamtest.cpp
             streams/zlibstream.cpp
-            textfile/textfiletest.cpp
             uris/uris.cpp
         </sources>
         <wx-lib>net</wx-lib>

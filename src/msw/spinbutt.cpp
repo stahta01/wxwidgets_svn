@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/spinbutt.cpp
+// Name:        msw/spinbutt.cpp
 // Purpose:     wxSpinButton
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinbutt.h"
+    #pragma implementation "spinbutbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,7 +30,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
+#include "wx/app.h"
 #endif
 
 #if wxUSE_SPINBTN
@@ -96,7 +101,7 @@ wxEND_FLAGS( wxSpinButtonStyle )
 IMPLEMENT_DYNAMIC_CLASS_XTI(wxSpinButton, wxControl,"wx/spinbut.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxSpinButton)
-    wxEVENT_RANGE_PROPERTY( Spin , wxEVT_SCROLL_TOP , wxEVT_SCROLL_CHANGED , wxSpinEvent )
+    wxEVENT_RANGE_PROPERTY( Spin , wxEVT_SCROLL_TOP , wxEVT_SCROLL_ENDSCROLL , wxSpinEvent )
 
     wxPROPERTY( Value , int , SetValue, GetValue, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
     wxPROPERTY( Min , int , SetMin, GetMin, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
@@ -221,7 +226,7 @@ int wxSpinButton::GetValue() const
 {
     int n;
 #ifdef UDM_GETPOS32
-    if ( wxApp::GetComCtl32Version() >= 580 )
+    if ( wxTheApp->GetComCtl32Version() >= 580 )
     {
         // use the full 32 bit range if available
         n = ::SendMessage(GetHwnd(), UDM_GETPOS32, 0, 0);
@@ -244,7 +249,7 @@ void wxSpinButton::SetValue(int val)
     // wxSpinButtonBase::SetValue(val); -- no, it is pure virtual
 
 #ifdef UDM_SETPOS32
-    if ( wxApp::GetComCtl32Version() >= 580 )
+    if ( wxTheApp->GetComCtl32Version() >= 580 )
     {
         // use the full 32 bit range if available
         ::SendMessage(GetHwnd(), UDM_SETPOS32, 0, val);
@@ -277,7 +282,7 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
 bool wxSpinButton::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
                                WXWORD pos, WXHWND control)
 {
-    wxCHECK_MSG( control, false, wxT("scrolling what?") );
+    wxCHECK_MSG( control, false, wxT("scrolling what?") )
 
     if ( wParam != SB_THUMBPOSITION )
     {

@@ -12,6 +12,10 @@
 #ifndef _WX_ACCEL_H_
 #define _WX_ACCEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "accel.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // the accel table has all accelerators for a given window or menu
 // ----------------------------------------------------------------------------
@@ -22,6 +26,9 @@ public:
     // default ctor
     wxAcceleratorTable();
 
+    // copy ctor
+    wxAcceleratorTable(const wxAcceleratorTable& accel) { Ref(accel); }
+
     // load from .rc resource (Windows specific)
     wxAcceleratorTable(const wxString& resource);
 
@@ -29,6 +36,8 @@ public:
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
 
     virtual ~wxAcceleratorTable();
+
+    wxAcceleratorTable& operator = (const wxAcceleratorTable& accel) { if ( *this != accel ) Ref(accel); return *this; }
 
 #if WXWIN_COMPATIBILITY_2_4
     bool operator==(const wxAcceleratorTable& accel) const

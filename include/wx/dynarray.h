@@ -12,6 +12,11 @@
 #ifndef   _DYNARRAY_H
 #define   _DYNARRAY_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && \
+    !(defined(__MINGW32__) && __GNUC__ == 3 && __GNUC_MINOR__ == 2)
+#pragma interface "dynarray.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_STL
@@ -226,8 +231,7 @@ protected:                                                          \
   void pop_back() { RemoveAt(size() - 1); }                         \
   void push_back(const value_type& v) { Add(v); }                   \
   void reserve(size_type n) { if(n > m_nSize) Realloc(n); }         \
-  void resize(size_type n, value_type v = value_type())             \
-    { SetCount(n, v); }                                             \
+  void resize(size_type n, value_type v = value_type());            \
                                                                     \
   iterator begin() { return m_pItems; }                             \
   iterator end() { return m_pItems + m_nCount; }                    \
@@ -401,8 +405,8 @@ public:                                                               \
       { reverse_iterator tmp = *this; --m_ptr; return tmp; }          \
     itor& operator--() { ++m_ptr; return *this; }                     \
     const itor operator--(int) { itor tmp = *this; ++m_ptr; return tmp; }\
-    bool operator ==(const itor& it) const { return m_ptr == it.m_ptr; }\
-    bool operator !=(const itor& it) const { return m_ptr != it.m_ptr; }\
+    bool operator ==(const itor& it) { return m_ptr == it.m_ptr; }    \
+    bool operator !=(const itor& it) { return m_ptr != it.m_ptr; }    \
   };                                                                  \
                                                                       \
   class const_reverse_iterator                                        \
@@ -434,8 +438,8 @@ public:                                                               \
       { itor tmp = *this; --m_ptr; return tmp; }                      \
     itor& operator--() { ++m_ptr; return *this; }                     \
     const itor operator--(int) { itor tmp = *this; ++m_ptr; return tmp; }\
-    bool operator ==(const itor& it) const { return m_ptr == it.m_ptr; }\
-    bool operator !=(const itor& it) const { return m_ptr != it.m_ptr; }\
+    bool operator ==(const itor& it) { return m_ptr == it.m_ptr; }    \
+    bool operator !=(const itor& it) { return m_ptr != it.m_ptr; }    \
   };                                                                  \
                                                                       \
   name(size_type n, const_reference v) { assign(n, v); }              \
@@ -473,8 +477,7 @@ public:                                                               \
   reverse_iterator rend() { return reverse_iterator(begin() - 1); }   \
   const_reverse_iterator rend() const;                                \
   void reserve(size_type n) { base::reserve(n); };                    \
-  void resize(size_type n, value_type v = value_type())               \
-    { base::resize(n, v); }                                           \
+  void resize(size_type n, value_type v = value_type());              \
 }
 
 #define _WX_PTROP pointer operator->() const { return m_ptr; }
@@ -969,10 +972,10 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 // append all element of one array to another one
 #define WX_APPEND_ARRAY(array, other)                                         \
     {                                                                         \
-        size_t wxAAcnt = (other).size();                                      \
-        for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
+        size_t count = (other).size();                                        \
+        for ( size_t n = 0; n < count; n++ )                                  \
         {                                                                     \
-            (array).push_back((other)[wxAAn]);                                \
+            (array).push_back((other)[n]);                                    \
         }                                                                     \
     }
 
@@ -984,10 +987,10 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 //     count on it)!
 #define WX_CLEAR_ARRAY(array)                                                 \
     {                                                                         \
-        size_t wxAAcnt = (array).size();                                      \
-        for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
+        size_t count = (array).size();                                        \
+        for ( size_t n = 0; n < count; n++ )                                  \
         {                                                                     \
-            delete (array)[wxAAn];                                            \
+            delete (array)[n];                                                \
         }                                                                     \
                                                                               \
         (array).clear();                                                      \

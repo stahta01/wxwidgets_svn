@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/artprov.cpp
+// Name:        artprov.cpp
 // Purpose:     wxArtProvider class
 // Author:      Vaclav Slavik
 // Modified by:
@@ -13,6 +13,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "artprov.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -21,14 +25,16 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
     #include "wx/log.h"
-    #include "wx/hashmap.h"
-    #include "wx/image.h"
+    #include "wx/list.h"
 #endif
 
 #include "wx/artprov.h"
+#include "wx/hashmap.h"
 #include "wx/module.h"
+#if wxUSE_IMAGE
+#include "wx/image.h"
+#endif
 
 // ===========================================================================
 // implementation
@@ -36,7 +42,7 @@
 
 #include "wx/listimpl.cpp"
 WX_DECLARE_LIST(wxArtProvider, wxArtProvidersList);
-WX_DEFINE_LIST(wxArtProvidersList)
+WX_DEFINE_LIST(wxArtProvidersList);
 
 // ----------------------------------------------------------------------------
 // Cache class - stores already requested bitmaps
@@ -238,7 +244,7 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     else if (client == wxART_BUTTON)
         return wxSize(16, 15);
     else // wxART_OTHER or perhaps a user's client, no specified size
-        return wxDefaultSize;
+        return wxDefaultSize;      
 #endif // GTK+ 2/else
 }
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/choiccmn.cpp
+// Name:        common/choiccmn.cpp
 // Purpose:     common (to all ports) wxChoice functions
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,12 +30,9 @@
 
 #if wxUSE_CHOICE
 
-#include "wx/choice.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/choice.h"
 #endif
-
-const wxChar wxChoiceNameStr[] = wxT("choice");
 
 // ============================================================================
 // implementation
@@ -53,3 +54,4 @@ void wxChoiceBase::Command(wxCommandEvent& event)
 }
 
 #endif // wxUSE_CHOICE
+

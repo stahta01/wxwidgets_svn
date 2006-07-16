@@ -12,9 +12,14 @@
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "mdi.h"
+#endif
+
 #include "wx/frame.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxFrameNameStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxStatusLineNameStr;
 
 class WXDLLEXPORT wxMDIClientWindow;
 class WXDLLEXPORT wxMDIChildFrame;
@@ -182,7 +187,6 @@ protected:
     virtual void DoSetClientSize(int width, int height);
     virtual void InternalSetMenuBar();
     virtual bool IsMDIChild() const { return true; }
-    virtual void DetachMenuBar();
 
     virtual WXHICON GetDefaultIcon() const;
 
@@ -192,6 +196,7 @@ protected:
 private:
     bool m_needsInitialShow; // Show must be called in idle time after Creation
     bool m_needsResize; // flag which tells us to artificially resize the frame
+    virtual void DetachMenuBar() ;
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxMDIChildFrame)
@@ -219,11 +224,10 @@ public:
     // Explicitly call default scroll behaviour
     void OnScroll(wxScrollEvent& event);
 
-protected:
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-
+protected:
     void Init() { m_scrollX = m_scrollY = 0; }
 
     int m_scrollX, m_scrollY;

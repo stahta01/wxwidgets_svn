@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/statusbr.cpp
+// Name:        generic/statusbr.cpp
 // Purpose:     wxStatusBarGeneric class implementation
 // Author:      Julian Smart
 // Modified by:
@@ -9,27 +9,32 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statusbr.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_STATUSBAR
 
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/settings.h"
-    #include "wx/dcclient.h"
+#include "wx/setup.h"
+#include "wx/frame.h"
+#include "wx/settings.h"
+#include "wx/dcclient.h"
 #endif
 
 #ifdef __WXGTK20__
 #include "wx/gtk/private.h"
 #include "wx/gtk/win_gtk.h"
 #endif
+
+#include "wx/statusbr.h"
 
 // we only have to do it here when we use wxStatusBarGeneric in addition to the
 // standard wxStatusBar class, if wxStatusBarGeneric is the same as
@@ -350,7 +355,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#if defined(__WIN95__) || defined(__WXMAC__)
     wxColour mediumShadowColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 
@@ -358,13 +363,17 @@ void wxStatusBarGeneric::InitColours()
     m_hilightPen = wxPen(hilightColour, 1, wxSOLID);
 #elif defined(__WXPM__)
     m_mediumShadowPen = wxPen(wxColour(127, 127, 127), 1, wxSOLID);
-    m_hilightPen = *wxWHITE_PEN;
+    m_hilightPen = wxPen(_T("WHITE"), 1, wxSOLID);
 
-    SetBackgroundColour(*wxLIGHT_GREY);
-    SetForegroundColour(*wxBLACK);
+    wxColour                        vColour;
+
+    vColour.Set(wxString(_T("LIGHT GREY")));
+    SetBackgroundColour(vColour);
+    vColour.Set(wxString(_T("BLACK")));
+    SetForegroundColour(vColour);
 #else
-    m_mediumShadowPen = *wxGREY_PEN;
-    m_hilightPen = *wxWHITE_PEN;
+    m_mediumShadowPen = wxPen("GREY", 1, wxSOLID);
+    m_hilightPen = wxPen("WHITE", 1, wxSOLID);
 #endif
 }
 

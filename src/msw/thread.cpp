@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -21,24 +25,20 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_THREADS
-
-#include "wx/thread.h"
-
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/app.h"
 #endif
 
+#if wxUSE_THREADS
+
 #include "wx/apptrait.h"
-#include "wx/scopeguard.h"
 
 #include "wx/msw/private.h"
 #include "wx/msw/missing.h"
-#include "wx/msw/seh.h"
 
-#include "wx/except.h"
 #include "wx/module.h"
+#include "wx/thread.h"
 
 // must have this symbol defined to get _beginthread/_endthread declarations
 #ifndef _MT
@@ -431,15 +431,8 @@ public:
     HANDLE GetHandle() const { return m_hThread; }
     DWORD  GetId() const { return m_tid; }
 
-    // the thread function forwarding to DoThreadStart
+    // thread function
     static THREAD_RETVAL THREAD_CALLCONV WinThreadStart(void *thread);
-
-    // really start the thread (if it's not already dead)
-    static THREAD_RETVAL DoThreadStart(wxThread *thread);
-
-    // call OnExit() on the thread
-    static void DoThreadOnExit(wxThread *thread);
-
 
     void KeepAlive()
     {
@@ -482,77 +475,45 @@ private:
     wxThreadInternal& m_thrImpl;
 };
 
-/* static */
-void wxThreadInternal::DoThreadOnExit(wxThread *thread)
+
+THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
 {
-    wxTRY
+    THREAD_RETVAL rc;
+
+    wxThread * const thread = (wxThread *)param;
+
+    // first of all, check whether we hadn't been cancelled already and don't
+    // start the user code at all then
+    const bool hasExited = thread->m_internal->GetState() == STATE_EXITED;
+
+    if ( hasExited )
     {
-        thread->OnExit();
+        rc = (THREAD_RETVAL)-1;
     }
-    wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
-}
-
-/* static */
-THREAD_RETVAL wxThreadInternal::DoThreadStart(wxThread *thread)
-{
-    wxON_BLOCK_EXIT1(DoThreadOnExit, thread);
-
-    THREAD_RETVAL rc = (THREAD_RETVAL)-1;
-
-    wxTRY
+    else // do run thread
     {
         // store the thread object in the TLS
         if ( !::TlsSetValue(gs_tlsThisThread, thread) )
         {
             wxLogSysError(_("Can not start thread: error writing TLS."));
 
-            return (THREAD_RETVAL)-1;
+            return (DWORD)-1;
         }
 
         rc = (THREAD_RETVAL)thread->Entry();
     }
-    wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
 
-    return rc;
-}
-
-/* static */
-THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
-{
-    THREAD_RETVAL rc = (THREAD_RETVAL)-1;
-
-    wxThread * const thread = (wxThread *)param;
-
-    // each thread has its own SEH translator so install our own a.s.a.p.
-    DisableAutomaticSETranslator();
-
-    // first of all, check whether we hadn't been cancelled already and don't
-    // start the user code at all then
-    const bool hasExited = thread->m_internal->GetState() == STATE_EXITED;
-
-    // run the thread function itself inside a SEH try/except block
-    wxSEH_TRY
-    {
-        if ( hasExited )
-            DoThreadOnExit(thread);
-        else
-            rc = DoThreadStart(thread);
-    }
-    wxSEH_HANDLE((THREAD_RETVAL)-1)
-
+    thread->OnExit();
 
     // save IsDetached because thread object can be deleted by joinable
     // threads after state is changed to STATE_EXITED.
-    const bool isDetached = thread->IsDetached();
+    bool isDetached = thread->IsDetached();
+
     if ( !hasExited )
     {
         // enter m_critsect before changing the thread state
-        //
-        // NB: can't use wxCriticalSectionLocker here as we use SEH and it's
-        //     incompatible with C++ object dtors
-        thread->m_critsect.Enter();
+        wxCriticalSectionLocker lock(thread->m_critsect);
         thread->m_internal->SetState(STATE_EXITED);
-        thread->m_critsect.Leave();
     }
 
     // the thread may delete itself now if it wants, we don't need it any more
@@ -780,6 +741,12 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
                 //     the system might dead lock then
                 if ( wxThread::IsMain() )
                 {
+                    // it looks that sometimes WAIT_OBJECT_0 + 1 is
+                    // returned but there are no messages in the thread
+                    // queue -- prevent DoMessageFromThreadWait() from
+                    // blocking inside ::GetMessage() forever in this case
+                    ::PostMessage(NULL, WM_NULL, 0, 0);
+
                     wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits()
                                                    : NULL;
 
@@ -1382,3 +1349,4 @@ bool WXDLLIMPEXP_BASE wxIsWaitingForThread()
 #include "wx/thrimpl.cpp"
 
 #endif // wxUSE_THREADS
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:     wxComboBox class
 // Author:      Julian Smart
 // Modified by:
@@ -9,16 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/setup.h"
 
 #if wxUSE_COMBOBOX
 
 #include "wx/combobox.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/arrstr.h"
-#endif
+#include "wx/arrstr.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -117,9 +120,7 @@ wxComboBox::~wxComboBox()
         m_clientDataDict.DestroyData();
 }
 
-void wxComboBox::DoSetSize(int x, int y,
-                           int width, int WXUNUSED(height),
-                           int sizeFlags)
+void wxComboBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
     // Necessary so it doesn't call wxChoice::SetSize
     wxWindow::DoSetSize(x, y, width, DoGetBestSize().y, sizeFlags);
@@ -147,7 +148,7 @@ void wxComboBox::SetValue(const wxString& value)
     m_inSetValue = false;
 }
 
-void wxComboBox::SetString(unsigned int WXUNUSED(n), const wxString& WXUNUSED(s))
+void wxComboBox::SetString(int n, const wxString& s)
 {
     wxFAIL_MSG( wxT("wxComboBox::SetString only implemented for Motif 2.0") );
 }
@@ -162,10 +163,10 @@ int wxComboBox::DoAppend(const wxString& item)
     return GetCount() - 1;
 }
 
-int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+int wxComboBox::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     if (pos == GetCount())
         return DoAppend(item);
@@ -179,7 +180,7 @@ int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
     return pos;
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int n)
 {
     XmComboBoxDeletePos((Widget) m_mainWidget, n+1);
     wxStringList::Node *node = m_stringList.Item(n);
@@ -216,7 +217,7 @@ int wxComboBox::GetSelection (void) const
         return sel - 1;
 }
 
-wxString wxComboBox::GetString(unsigned int n) const
+wxString wxComboBox::GetString(int n) const
 {
     wxStringList::Node *node = m_stringList.Item(n);
     if (node)
@@ -225,10 +226,8 @@ wxString wxComboBox::GetString(unsigned int n) const
         return wxEmptyString;
 }
 
-int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    // FIXME: back to base class for not supported value of bCase
-
     int *pos_list = NULL;
     int count = 0;
     wxXmString text( s );
@@ -242,7 +241,7 @@ int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
         return pos;
     }
 
-    return wxNOT_FOUND;
+    return -1;
 }
 
 // Clipboard operations

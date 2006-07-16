@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/scrthumb.cpp
+// Name:        univ/scrthumb.cpp
 // Purpose:     wxScrollThumb and related classes
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univscrthumb.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,9 +29,9 @@
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
+    #include "wx/renderer.h"
 #endif // WX_PRECOMP
 
-#include "wx/renderer.h"
 #include "wx/univ/scrtimer.h"
 #include "wx/univ/scrthumb.h"
 
@@ -59,9 +63,7 @@ struct WXDLLEXPORT wxScrollThumbCaptureData
             m_window->ReleaseMouse();
         }
 
-#if wxUSE_TIMER
         delete m_timerScroll;
-#endif // wxUSE_TIMER
     }
 
     // the thumb part being held pressed
@@ -84,8 +86,6 @@ struct WXDLLEXPORT wxScrollThumbCaptureData
 // ----------------------------------------------------------------------------
 // wxScrollTimer: the timer used when the arrow is kept pressed
 // ----------------------------------------------------------------------------
-
-#if wxUSE_TIMER
 
 class wxScrollThumbTimer : public wxScrollTimer
 {
@@ -123,8 +123,6 @@ protected:
     wxControlWithThumb *m_control;
     int m_inc;
 };
-
-#endif // wxUSE_TIMER
 
 // ============================================================================
 // implementation
@@ -198,7 +196,6 @@ bool wxScrollThumb::HandleMouse(const wxMouseEvent& event) const
             // generate an additional event if we start dragging the thumb
             m_control->OnThumbDragStart(GetThumbPos(event));
         }
-#if wxUSE_TIMER
         else // not the thumb
         {
             // start timer for auto scrolling when the user presses the mouse
@@ -206,7 +203,6 @@ bool wxScrollThumb::HandleMouse(const wxMouseEvent& event) const
             m_captureData->m_timerScroll =
                 new wxScrollThumbTimer(m_control, shaftPart);
         }
-#endif // wxUSE_TIMER
     }
     // release mouse if the *same* button went up
     else if ( HasCapture() && (btn == m_captureData->m_btnCapture) )

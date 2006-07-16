@@ -49,9 +49,8 @@ HOST_SUFFIX = @HOST_SUFFIX@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.7
-WX_RELEASE_NODOT = 27
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
+WX_RELEASE = 2.6
+WX_RELEASE_NODOT = 26
 LIBDIRNAME = $(top_builddir)lib
 STCDLL_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
@@ -66,7 +65,6 @@ STCDLL_OBJECTS =  \
 	stcdll_AutoComplete.o \
 	stcdll_CallTip.o \
 	stcdll_CellBuffer.o \
-	stcdll_CharClassify.o \
 	stcdll_ContractionState.o \
 	stcdll_Document.o \
 	stcdll_DocumentAccessor.o \
@@ -101,7 +99,6 @@ STCDLL_OBJECTS =  \
 	stcdll_LexGui4Cli.o \
 	stcdll_LexHTML.o \
 	stcdll_LexHaskell.o \
-	stcdll_LexInno.o \
 	stcdll_LexKix.o \
 	stcdll_LexLisp.o \
 	stcdll_LexLout.o \
@@ -112,7 +109,6 @@ STCDLL_OBJECTS =  \
 	stcdll_LexMatlab.o \
 	stcdll_LexMetapost.o \
 	stcdll_LexNsis.o \
-	stcdll_LexOpal.o \
 	stcdll_LexOthers.o \
 	stcdll_LexPB.o \
 	stcdll_LexPOV.o \
@@ -127,8 +123,6 @@ STCDLL_OBJECTS =  \
 	stcdll_LexTADS3.o \
 	stcdll_LexScriptol.o \
 	stcdll_LexSpecman.o \
-	stcdll_LexSpice.o \
-	stcdll_LexTCL.o \
 	stcdll_LexTeX.o \
 	stcdll_LexVB.o \
 	stcdll_LexVHDL.o \
@@ -156,7 +150,6 @@ STCLIB_OBJECTS =  \
 	stclib_AutoComplete.o \
 	stclib_CallTip.o \
 	stclib_CellBuffer.o \
-	stclib_CharClassify.o \
 	stclib_ContractionState.o \
 	stclib_Document.o \
 	stclib_DocumentAccessor.o \
@@ -191,7 +184,6 @@ STCLIB_OBJECTS =  \
 	stclib_LexGui4Cli.o \
 	stclib_LexHTML.o \
 	stclib_LexHaskell.o \
-	stclib_LexInno.o \
 	stclib_LexKix.o \
 	stclib_LexLisp.o \
 	stclib_LexLout.o \
@@ -202,7 +194,6 @@ STCLIB_OBJECTS =  \
 	stclib_LexMatlab.o \
 	stclib_LexMetapost.o \
 	stclib_LexNsis.o \
-	stclib_LexOpal.o \
 	stclib_LexOthers.o \
 	stclib_LexPB.o \
 	stclib_LexPOV.o \
@@ -217,8 +208,6 @@ STCLIB_OBJECTS =  \
 	stclib_LexTADS3.o \
 	stclib_LexScriptol.o \
 	stclib_LexSpecman.o \
-	stclib_LexSpice.o \
-	stclib_LexTCL.o \
 	stclib_LexTeX.o \
 	stclib_LexVB.o \
 	stclib_LexVHDL.o \
@@ -240,7 +229,7 @@ STCLIB_OBJECTS =  \
 @COND_DEPS_TRACKING_0@CXXC = $(CXX)
 @COND_DEPS_TRACKING_1@CXXC = $(top_builddir)./bk-deps $(CXX)
 @COND_PLATFORM_MACOSX_1@WXMACVERSION_CMD = \
-@COND_PLATFORM_MACOSX_1@	-compatibility_version 1.0 -current_version 1.0
+@COND_PLATFORM_MACOSX_1@	-compatibility_version 3.0 -current_version 3.1
 @COND_USE_GUI_0@PORTNAME = base
 @COND_USE_GUI_1@PORTNAME = $(TOOLKIT_LOWERCASE)$(TOOLKIT_VERSION)
 @COND_TOOLKIT_MAC@WXBASEPORT = _carbon
@@ -253,7 +242,7 @@ STCLIB_OBJECTS =  \
 @COND_WXUNIV_1@WXUNIVNAME = univ
 @COND_PLATFORM_WIN32_0@WXDLLNAMEPREFIXGUI = wx_$(PORTNAME)$(WXUNIVNAME)
 @COND_PLATFORM_WIN32_1@WXDLLNAMEPREFIXGUI = \
-@COND_PLATFORM_WIN32_1@	wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)
+@COND_PLATFORM_WIN32_1@	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)
 @COND_PLATFORM_WIN32_0@WXDLLVERSIONTAG = -$(WX_RELEASE)
 @COND_PLATFORM_WIN32_1@WXDLLVERSIONTAG = 
 @COND_MONOLITHIC_0@EXTRALIBS_FOR_BASE = $(EXTRALIBS)
@@ -284,9 +273,9 @@ COND_WINDOWS_IMPLIB_1___stcdll___importlib = \
 @COND_USE_SOVERSION_0@__stcdll___targetsuf2 = .$(SO_SUFFIX)
 @COND_PLATFORM_MACOSX_0_USE_SOVERCYGWIN_0_USE_SOVERSION_1@__stcdll___targetsuf3 \
 @COND_PLATFORM_MACOSX_0_USE_SOVERCYGWIN_0_USE_SOVERSION_1@	= \
-@COND_PLATFORM_MACOSX_0_USE_SOVERCYGWIN_0_USE_SOVERSION_1@	.$(SO_SUFFIX).0.0.0
+@COND_PLATFORM_MACOSX_0_USE_SOVERCYGWIN_0_USE_SOVERSION_1@	.$(SO_SUFFIX).0.3.1
 @COND_PLATFORM_MACOSX_1_USE_SOVERSION_1@__stcdll___targetsuf3 \
-@COND_PLATFORM_MACOSX_1_USE_SOVERSION_1@	= .0.0.0.$(SO_SUFFIX)
+@COND_PLATFORM_MACOSX_1_USE_SOVERSION_1@	= .0.3.1.$(SO_SUFFIX)
 @COND_USE_SOVERCYGWIN_1_USE_SOVERSION_1@__stcdll___targetsuf3 \
 @COND_USE_SOVERCYGWIN_1_USE_SOVERSION_1@	= -0.$(SO_SUFFIX)
 @COND_USE_SOVERSION_0@__stcdll___targetsuf3 = .$(SO_SUFFIX)
@@ -385,7 +374,7 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 @COND_SHARED_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(__stcdll___targetsuf3): $(STCDLL_OBJECTS) $(__stcdll___win32rc)
-@COND_SHARED_1@	$(SHARED_LD_CXX) $@ $(STCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__stcdll___macinstnamecmd) $(__stcdll___importlib) $(__stcdll___soname_flags) $(WXMACVERSION_CMD)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)
+@COND_SHARED_1@	$(SHARED_LD_CXX) $@ $(STCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__stcdll___macinstnamecmd) $(__stcdll___importlib) $(__stcdll___soname_flags) $(WXMACVERSION_CMD)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)
 @COND_SHARED_1@	
 @COND_SHARED_1@	$(__stcdll___so_symlinks_cmd)
 
@@ -424,9 +413,6 @@ stcdll_CallTip.o: $(srcdir)/scintilla/src/CallTip.cxx
 
 stcdll_CellBuffer.o: $(srcdir)/scintilla/src/CellBuffer.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/CellBuffer.cxx
-
-stcdll_CharClassify.o: $(srcdir)/scintilla/src/CharClassify.cxx
-	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/CharClassify.cxx
 
 stcdll_ContractionState.o: $(srcdir)/scintilla/src/ContractionState.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/ContractionState.cxx
@@ -530,9 +516,6 @@ stcdll_LexHTML.o: $(srcdir)/scintilla/src/LexHTML.cxx
 stcdll_LexHaskell.o: $(srcdir)/scintilla/src/LexHaskell.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexHaskell.cxx
 
-stcdll_LexInno.o: $(srcdir)/scintilla/src/LexInno.cxx
-	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexInno.cxx
-
 stcdll_LexKix.o: $(srcdir)/scintilla/src/LexKix.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexKix.cxx
 
@@ -562,9 +545,6 @@ stcdll_LexMetapost.o: $(srcdir)/scintilla/src/LexMetapost.cxx
 
 stcdll_LexNsis.o: $(srcdir)/scintilla/src/LexNsis.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexNsis.cxx
-
-stcdll_LexOpal.o: $(srcdir)/scintilla/src/LexOpal.cxx
-	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexOpal.cxx
 
 stcdll_LexOthers.o: $(srcdir)/scintilla/src/LexOthers.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexOthers.cxx
@@ -607,12 +587,6 @@ stcdll_LexScriptol.o: $(srcdir)/scintilla/src/LexScriptol.cxx
 
 stcdll_LexSpecman.o: $(srcdir)/scintilla/src/LexSpecman.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexSpecman.cxx
-
-stcdll_LexSpice.o: $(srcdir)/scintilla/src/LexSpice.cxx
-	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexSpice.cxx
-
-stcdll_LexTCL.o: $(srcdir)/scintilla/src/LexTCL.cxx
-	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexTCL.cxx
 
 stcdll_LexTeX.o: $(srcdir)/scintilla/src/LexTeX.cxx
 	$(CXXC) -c -o $@ $(STCDLL_CXXFLAGS) $(srcdir)/scintilla/src/LexTeX.cxx
@@ -676,9 +650,6 @@ stclib_CallTip.o: $(srcdir)/scintilla/src/CallTip.cxx
 
 stclib_CellBuffer.o: $(srcdir)/scintilla/src/CellBuffer.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/CellBuffer.cxx
-
-stclib_CharClassify.o: $(srcdir)/scintilla/src/CharClassify.cxx
-	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/CharClassify.cxx
 
 stclib_ContractionState.o: $(srcdir)/scintilla/src/ContractionState.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/ContractionState.cxx
@@ -782,9 +753,6 @@ stclib_LexHTML.o: $(srcdir)/scintilla/src/LexHTML.cxx
 stclib_LexHaskell.o: $(srcdir)/scintilla/src/LexHaskell.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexHaskell.cxx
 
-stclib_LexInno.o: $(srcdir)/scintilla/src/LexInno.cxx
-	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexInno.cxx
-
 stclib_LexKix.o: $(srcdir)/scintilla/src/LexKix.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexKix.cxx
 
@@ -814,9 +782,6 @@ stclib_LexMetapost.o: $(srcdir)/scintilla/src/LexMetapost.cxx
 
 stclib_LexNsis.o: $(srcdir)/scintilla/src/LexNsis.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexNsis.cxx
-
-stclib_LexOpal.o: $(srcdir)/scintilla/src/LexOpal.cxx
-	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexOpal.cxx
 
 stclib_LexOthers.o: $(srcdir)/scintilla/src/LexOthers.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexOthers.cxx
@@ -859,12 +824,6 @@ stclib_LexScriptol.o: $(srcdir)/scintilla/src/LexScriptol.cxx
 
 stclib_LexSpecman.o: $(srcdir)/scintilla/src/LexSpecman.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexSpecman.cxx
-
-stclib_LexSpice.o: $(srcdir)/scintilla/src/LexSpice.cxx
-	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexSpice.cxx
-
-stclib_LexTCL.o: $(srcdir)/scintilla/src/LexTCL.cxx
-	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexTCL.cxx
 
 stclib_LexTeX.o: $(srcdir)/scintilla/src/LexTeX.cxx
 	$(CXXC) -c -o $@ $(STCLIB_CXXFLAGS) $(srcdir)/scintilla/src/LexTeX.cxx

@@ -7,6 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -56,8 +60,9 @@ bool wxStaticBox::Create( wxWindow *parent,
         return FALSE;
     }
 
-    m_widget = GTKCreateFrame(label);
     wxControl::SetLabel(label);
+
+    m_widget = gtk_frame_new(m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 
     m_parent->DoAddChild( this );
 
@@ -72,32 +77,26 @@ bool wxStaticBox::Create( wxWindow *parent,
     else // wxALIGN_LEFT
         xalign = 0.0;
 
-    if ( style & (wxALIGN_RIGHT | wxALIGN_CENTER) ) // left alignment is default
+    if ( xalign )
         gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.5);
 
     return TRUE;
 }
 
-void wxStaticBox::SetLabel( const wxString& label )
+void wxStaticBox::SetLabel( const wxString &label )
 {
-    wxCHECK_RET( m_widget != NULL, wxT("invalid staticbox") );
+    wxControl::SetLabel( label );
 
-    GTKSetLabelForFrame(GTK_FRAME(m_widget), label);
+    gtk_frame_set_label( GTK_FRAME( m_widget ),
+                         m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 }
 
 void wxStaticBox::DoApplyWidgetStyle(GtkRcStyle *style)
 {
-    GTKFrameApplyWidgetStyle(GTK_FRAME(m_widget), style);
-}
-
-bool wxStaticBox::GTKWidgetNeedsMnemonic() const
-{
-    return true;
-}
-
-void wxStaticBox::GTKWidgetDoSetMnemonic(GtkWidget* w)
-{
-    GTKFrameSetMnemonicWidget(GTK_FRAME(m_widget), w);
+    gtk_widget_modify_style(m_widget, style);
+#ifdef __WXGTK20__
+    gtk_widget_modify_style(GTK_FRAME(m_widget)->label_widget, style);
+#endif
 }
 
 // static
@@ -105,15 +104,6 @@ wxVisualAttributes
 wxStaticBox::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 {
     return GetDefaultAttributesFromGTKWidget(gtk_frame_new);
-}
-
-
-void wxStaticBox::GetBordersForSizer(int *borderTop, int *borderOther) const
-{
-    const int BORDER = 5; // FIXME: hardcoded value
-
-    *borderTop = GetLabel().empty() ? 2*BORDER : GetCharHeight();
-    *borderOther = BORDER;
 }
 
 #endif // wxUSE_STATBOX

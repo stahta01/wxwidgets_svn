@@ -23,15 +23,14 @@
     #pragma hdrstop
 #endif
 
+#ifndef WX_PRECOMP
+#endif
+
 #if wxUSE_DATEPICKCTRL
 
 #include "wx/datectrl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/app.h"
-#endif
-
+#include "wx/app.h"
+#include "wx/intl.h"
 #include "wx/dynlib.h"
 
 #define _WX_DEFINE_DATE_EVENTS_
@@ -134,3 +133,4 @@ bool wxDatePickerCtrl::SendClickEvent()
 }
 
 #endif // wxUSE_DATEPICKCTRL
+

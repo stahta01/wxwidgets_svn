@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/topluniv.cpp
+// Name:        topluniv.cpp
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
@@ -14,23 +14,28 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtoplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#include "wx/toplevel.h"
+#include "wx/defs.h"
 
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
     #include "wx/settings.h"
-    #include "wx/bitmap.h"
-    #include "wx/image.h"
 #endif
 
+#include "wx/toplevel.h"
 #include "wx/univ/renderer.h"
+#include "wx/bitmap.h"
+#include "wx/image.h"
 #include "wx/cshelp.h"
 #include "wx/evtloop.h"
 
@@ -75,8 +80,8 @@ bool wxTopLevelWindow::Create(wxWindow *parent,
 
     if ( ms_drawDecorations == -1 )
     {
-        ms_drawDecorations =
-            !wxSystemSettings::HasFeature(wxSYS_CAN_DRAW_FRAME_DECORATIONS)
+        ms_drawDecorations = 
+            !wxSystemSettings::HasFeature(wxSYS_CAN_DRAW_FRAME_DECORATIONS) 
             || wxGetEnv(wxT("WXDECOR"), NULL);
         // FIXME -- wxUniv should provide a way to force non-native decorations!
         //          $WXDECOR is just a hack in absence of better wxUniv solution
@@ -95,7 +100,7 @@ bool wxTopLevelWindow::Create(wxWindow *parent,
         exstyleOrig = GetExtraStyle();
         style &= ~(wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX |
                    wxSYSTEM_MENU | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW |
-                   wxRESIZE_BORDER);
+                   wxTHICK_FRAME);
         style |= wxSIMPLE_BORDER;
         SetExtraStyle(exstyleOrig &
                       ~(wxFRAME_EX_CONTEXTHELP | wxDIALOG_EX_CONTEXTHELP));
@@ -160,7 +165,7 @@ long wxTopLevelWindow::GetDecorationsStyle() const
     }
     if ( (m_windowStyle & (wxSIMPLE_BORDER | wxNO_BORDER)) == 0 )
         style |= wxTOPLEVEL_BORDER;
-    if ( m_windowStyle & (wxRESIZE_BORDER | wxRESIZE_BORDER) )
+    if ( m_windowStyle & (wxRESIZE_BORDER | wxTHICK_FRAME) )
         style |= wxTOPLEVEL_RESIZEABLE;
 
     if ( IsMaximized() )
@@ -240,7 +245,12 @@ void wxTopLevelWindow::OnNcPaint(wxNcPaintEvent& event)
     else
     {
         // get the window rect
-        wxRect rect(GetSize());
+        wxRect rect;
+        wxSize size = GetSize();
+        rect.x =
+        rect.y = 0;
+        rect.width = size.x;
+        rect.height = size.y;
 
         wxWindowDC dc(this);
         m_renderer->DrawFrameTitleBar(dc, rect,
@@ -305,14 +315,12 @@ void wxTopLevelWindow::SetIcons(const wxIconBundle& icons)
                 m_titlebarIcon = wxNullIcon;
             else if ( bmp1.GetWidth() == size.x && bmp1.GetHeight() == size.y )
                 m_titlebarIcon = icon;
-#if wxUSE_IMAGE
             else
             {
                 wxImage img = bmp1.ConvertToImage();
                 img.Rescale(size.x, size.y);
                 m_titlebarIcon.CopyFromBitmap(wxBitmap(img));
             }
-#endif // wxUSE_IMAGE
         }
     }
 }
@@ -346,10 +354,14 @@ static bool wxGetResizingCursor(long hitTestResult, wxCursor& cursor)
                 break;
             default:
                 return false;
+                #if 0
+                // not rachable due to earlier return
+                break;
+                #endif
         }
         return true;
     }
-
+    
     return false;
 }
 
@@ -373,7 +385,7 @@ class wxInteractiveMoveHandler : public wxEvtHandler
 {
 public:
     wxInteractiveMoveHandler(wxInteractiveMoveData& data) : m_data(data) {}
-
+    
 private:
     DECLARE_EVENT_TABLE()
     void OnMouseMove(wxMouseEvent& event);
@@ -392,7 +404,7 @@ BEGIN_EVENT_TABLE(wxInteractiveMoveHandler, wxEvtHandler)
 END_EVENT_TABLE()
 
 
-static inline LINKAGEMODE
+static inline LINKAGEMODE 
 void wxApplyResize(wxInteractiveMoveData& data, const wxPoint& diff)
 {
     if ( data.m_flags & wxINTERACTIVE_RESIZE_W )
@@ -413,7 +425,7 @@ void wxApplyResize(wxInteractiveMoveData& data, const wxPoint& diff)
     {
         data.m_rect.height += diff.y;
     }
-
+    
     if ( data.m_minSize.x != wxDefaultCoord && data.m_rect.width < data.m_minSize.x )
     {
         if ( data.m_flags & wxINTERACTIVE_RESIZE_W )
@@ -473,7 +485,7 @@ void wxInteractiveMoveHandler::OnMouseDown(wxMouseEvent& WXUNUSED(event))
 void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
 {
     wxPoint diff(wxDefaultCoord,wxDefaultCoord);
-
+    
     switch ( event.GetKeyCode() )
     {
         case WXK_UP:    diff = wxPoint(0, -16); break;
@@ -488,7 +500,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
             m_data.m_evtLoop->Exit();
             return;
     }
-
+    
     if ( diff.x != wxDefaultCoord )
     {
         if ( m_data.m_flags & wxINTERACTIVE_WAIT_FOR_INPUT )
@@ -502,14 +514,14 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
 
             if ( m_data.m_flags & wxINTERACTIVE_MOVE )
             {
-                m_data.m_pos = m_data.m_window->GetPosition() +
+                m_data.m_pos = m_data.m_window->GetPosition() + 
                                wxPoint(m_data.m_window->GetSize().x/2, 8);
             }
         }
 
         wxPoint warp;
         bool changeCur = false;
-
+        
         if ( m_data.m_flags & wxINTERACTIVE_MOVE )
         {
             m_data.m_rect.Offset(diff);
@@ -518,7 +530,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
         }
         else /* wxINTERACTIVE_RESIZE */
         {
-            if ( !(m_data.m_flags &
+            if ( !(m_data.m_flags & 
                   (wxINTERACTIVE_RESIZE_N | wxINTERACTIVE_RESIZE_S)) )
             {
                 if ( diff.y < 0 )
@@ -535,7 +547,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
                     changeCur = true;
                 }
             }
-            if ( !(m_data.m_flags &
+            if ( !(m_data.m_flags & 
                   (wxINTERACTIVE_RESIZE_W | wxINTERACTIVE_RESIZE_E)) )
             {
                 if ( diff.x < 0 )
@@ -600,17 +612,17 @@ void wxTopLevelWindow::InteractiveMove(int flags)
     wxASSERT_MSG( !((flags & wxINTERACTIVE_MOVE) && (flags & wxINTERACTIVE_RESIZE)),
                   wxT("can't move and resize window at the same time") );
 
-    wxASSERT_MSG( !(flags & wxINTERACTIVE_RESIZE) ||
-                  (flags & wxINTERACTIVE_WAIT_FOR_INPUT) ||
+    wxASSERT_MSG( !(flags & wxINTERACTIVE_RESIZE) || 
+                  (flags & wxINTERACTIVE_WAIT_FOR_INPUT) || 
                   (flags & wxINTERACTIVE_RESIZE_DIR),
                   wxT("direction of resizing not specified") );
 
     wxInteractiveMoveData data;
     wxEventLoop loop;
-
+    
     SetFocus();
 
-#ifndef __WXGTK__
+#ifndef __WXGTK__    
     if ( flags & wxINTERACTIVE_WAIT_FOR_INPUT )
     {
         wxCursor sizingCursor(wxCURSOR_SIZING);
@@ -746,7 +758,7 @@ bool wxTopLevelWindow::PerformAction(const wxControlAction& action,
 void wxTopLevelWindow::OnSystemMenu(wxCommandEvent& event)
 {
     bool ret = true;
-
+    
     switch (event.GetId())
     {
         case wxID_CLOSE_FRAME:
@@ -775,7 +787,7 @@ void wxTopLevelWindow::OnSystemMenu(wxCommandEvent& event)
         default:
             ret = false;
     }
-
+    
     if ( !ret )
         event.Skip();
 }

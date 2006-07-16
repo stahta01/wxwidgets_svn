@@ -28,15 +28,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.4 API: set it to 1 to
+// This setting determines the compatibility with 2.2 API: set it to 1 to
 // enable it but please consider updating your code instead.
 //
 // Default is 0
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 0
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
+// This setting determines the compatibility with 2.4 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -44,7 +44,15 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
+
+// This setting controls the inclusion of reserved virtual functions
+// that were introduced just prior to the 2.6 freeze but have been
+// removed again for 2.7+
+//
+// Default is 1, typically you should not change it unless you know
+// exactly why you don't want them included.
+#define WX_USE_RESERVED_VIRTUALS 1
 
 // MSW-only: Set to 0 for accurate dialog units, else 1 for old behaviour when
 // default system font is used for wxWindow::GetCharWidth/Height() instead of
@@ -247,48 +255,14 @@
 // Recommended setting: 0 unless you do plan to develop MT applications
 #define wxUSE_THREADS 1
 
-// If enabled, compiles wxWidgets streams classes
-//
-// wx stream classes are used for image IO, process IO redirection, network
-// protocols implementation and much more and so disabling this results in a
-// lot of other functionality being lost.
-//
-// Default is 1
-//
-// Recommended setting: 1 as setting it to 0 disables many other things
+// If enabled (1), compiles wxWidgets streams classes
 #define wxUSE_STREAMS       1
 
-// Use standard C++ streams if 1 instead of wx streams in some places. If
-// disabled (default), wx streams are used everywhere and wxWidgets doesn't
-// depend on the standard streams library.
-//
-// Notice that enabling this does not replace wx streams with std streams
-// everywhere, in a lot of places wx streams are used no matter what.
-//
-// Default is 0
-//
-// Recommended setting: 1 if you use the standard streams anyhow and so
-//                      dependency on the standard streams library is not a
-//                      problem
+// Use standard C++ streams if 1. If 0, use wxWin streams implementation only.
 #define wxUSE_STD_IOSTREAM  0
 
 // Enable conversion to standard C++ string if 1.
 #define wxUSE_STD_STRING  0
-
-// Support for positional parameters (e.g. %1$d, %2$s ...) in wxVsnprintf.
-// Note that if the system's implementation does not support positional
-// parameters, setting this to 1 forces the use of the wxWidgets implementation
-// of wxVsnprintf. The standard vsnprintf() supports positional parameters on
-// many Unix systems but usually doesn't under Windows.
-//
-// Positional parameters are very useful when translating a program since using
-// them in formatting strings allow translators to correctly reorder the
-// translated sentences.
-//
-// Default is 1
-//
-// Recommended setting: 1 if you want to support multiple languages
-#define wxUSE_PRINTF_POS_PARAMS      1
 
 // ----------------------------------------------------------------------------
 // non GUI features selection
@@ -533,13 +507,6 @@
 #  define wxUSE_XML       0
 #endif
 
-// Use wxWidget's AUI docking system
-//
-// Default is 1
-//
-// Recommended setting: 1
-#define wxUSE_AUI       1
-
 // ----------------------------------------------------------------------------
 // Individual GUI controls
 // ----------------------------------------------------------------------------
@@ -577,36 +544,30 @@
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_BUTTON        1   // wxButton
-#define wxUSE_BMPBUTTON     1   // wxBitmapButton
-#define wxUSE_CALENDARCTRL  1   // wxCalendarCtrl
-#define wxUSE_CHECKBOX      1   // wxCheckBox
-#define wxUSE_CHECKLISTBOX  1   // wxCheckListBox (requires wxUSE_OWNER_DRAWN)
-#define wxUSE_CHOICE        1   // wxChoice
-#define wxUSE_COLOURPICKERCTRL 1    // wxColourPickerCtrl
-#define wxUSE_COMBOBOX      1   // wxComboBox
-#define wxUSE_DATAVIEWCTRL  1   // wxDataViewCtrl
-#define wxUSE_DATEPICKCTRL  1   // wxDatePickerCtrl
-#define wxUSE_DIRPICKERCTRL 1   // wxDirPickerCtrl
-#define wxUSE_FILEPICKERCTRL 1  // wxFilePickerCtrl
-#define wxUSE_FONTPICKERCTRL 1  // wxFontPickerCtrl
-#define wxUSE_GAUGE         1   // wxGauge
-#define wxUSE_HYPERLINKCTRL 1   // wxHyperlinkCtrl
-#define wxUSE_LISTBOX       1   // wxListBox
-#define wxUSE_LISTCTRL      1   // wxListCtrl
-#define wxUSE_RADIOBOX      1   // wxRadioBox
-#define wxUSE_RADIOBTN      1   // wxRadioButton
-#define wxUSE_SCROLLBAR     1   // wxScrollBar
-#define wxUSE_SLIDER        1   // wxSlider
-#define wxUSE_SPINBTN       1   // wxSpinButton
-#define wxUSE_SPINCTRL      1   // wxSpinCtrl
-#define wxUSE_STATBOX       1   // wxStaticBox
-#define wxUSE_STATLINE      1   // wxStaticLine
-#define wxUSE_STATTEXT      1   // wxStaticText
-#define wxUSE_STATBMP       1   // wxStaticBitmap
-#define wxUSE_TEXTCTRL      1   // wxTextCtrl
-#define wxUSE_TOGGLEBTN     1   // requires wxButton
-#define wxUSE_TREECTRL      1   // wxTreeCtrl
+#define wxUSE_BUTTON       1    // wxButton
+#define wxUSE_BMPBUTTON    1    // wxBitmapButton
+#define wxUSE_CALENDARCTRL 1    // wxCalendarCtrl
+#define wxUSE_CHECKBOX     1    // wxCheckBox
+#define wxUSE_CHECKLISTBOX 1    // wxCheckListBox (requires wxUSE_OWNER_DRAWN)
+#define wxUSE_CHOICE       1    // wxChoice
+#define wxUSE_COMBOBOX     1    // wxComboBox
+#define wxUSE_DATEPICKCTRL 1    // wxDatePickerCtrl
+#define wxUSE_GAUGE        1    // wxGauge
+#define wxUSE_LISTBOX      1    // wxListBox
+#define wxUSE_LISTCTRL     1    // wxListCtrl
+#define wxUSE_RADIOBOX     1    // wxRadioBox
+#define wxUSE_RADIOBTN     1    // wxRadioButton
+#define wxUSE_SCROLLBAR    1    // wxScrollBar
+#define wxUSE_SLIDER       1    // wxSlider
+#define wxUSE_SPINBTN      1    // wxSpinButton
+#define wxUSE_SPINCTRL     1    // wxSpinCtrl
+#define wxUSE_STATBOX      1    // wxStaticBox
+#define wxUSE_STATLINE     1    // wxStaticLine
+#define wxUSE_STATTEXT     1    // wxStaticText
+#define wxUSE_STATBMP      1    // wxStaticBitmap
+#define wxUSE_TEXTCTRL     1    // wxTextCtrl
+#define wxUSE_TOGGLEBTN    1    // requires wxButton
+#define wxUSE_TREECTRL     1    // wxTreeCtrl
 
 // Use a status bar class? Depending on the value of wxUSE_NATIVE_STATUSBAR
 // below either wxStatusBar95 or a generic wxStatusBar will be used.
@@ -661,22 +622,6 @@
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
 
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
-
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
 //
@@ -701,23 +646,6 @@
 // Recommended setting: 1 (it doesn't cost almost anything)
 #define wxUSE_MINIFRAME 1
 
-// wxComboCtrl and related classes: combobox with custom popup window and
-// not necessarily a listbox.
-//
-// Default is 1.
-//
-// Recommended setting: 1 but can be safely set to 0 except for wxUniv where it
-//                      it used by wxComboBox
-#define wxUSE_COMBOCTRL 1
-
-// wxOwnerDrawnComboBox is a custom combobox allowing to paint the combobox
-// items.
-//
-// Default is 1.
-//
-// Recommended setting: 1 but can be safely set to 0
-#define wxUSE_ODCOMBOBOX 1
-
 // ----------------------------------------------------------------------------
 // Miscellaneous GUI stuff
 // ----------------------------------------------------------------------------
@@ -737,13 +665,12 @@
 #define wxUSE_CARET         1
 
 // Use wxDisplay class: it allows enumerating all displays on a system and
-// their geometries as well as finding the display on which the given point or
-// window lies.
+// working with them.
 //
-// Default is 1.
+// Default is 0 because it isn't yet implemented on all platforms
 //
 // Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       1
+#define wxUSE_DISPLAY       0
 
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
@@ -935,14 +862,6 @@
 // Recommended setting: 1 if you intend to use OpenGL, 0 otherwise
 #define wxUSE_GLCANVAS       0
 
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
-
 // ----------------------------------------------------------------------------
 // Data transfer
 // ----------------------------------------------------------------------------
@@ -998,6 +917,8 @@
                                 // 0 for no interprocess comms
 #define wxUSE_HELP        1
                                 // 0 for no help facility
+#define wxUSE_MS_HTML_HELP 1
+                                // 0 for no MS HTML Help
 
 // Use wxHTML-based help controller?
 #define wxUSE_WXHTML_HELP 1

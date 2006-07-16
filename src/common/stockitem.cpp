@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/stockitem.cpp
+// Name:        common/stockitem.cpp
 // Purpose:     Stock buttons, menu and toolbar items labels
 // Author:      Vaclav Slavik
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "stockitem.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,11 +29,8 @@
 #endif
 
 #include "wx/stockitem.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/utils.h" // for wxStripMenuCodes()
-#endif
+#include "wx/intl.h"
+#include "wx/utils.h" // for wxStripMenuCodes()
 
 bool wxIsStockID(wxWindowID id)
 {
@@ -92,7 +93,7 @@ bool wxIsStockID(wxWindowID id)
     }
 }
 
-wxString wxGetStockLabel(wxWindowID id, bool withCodes, const wxString& accelerator)
+wxString wxGetStockLabel(wxWindowID id, bool withCodes, wxString accelerator)
 {
     wxString stockLabel;
 

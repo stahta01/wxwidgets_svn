@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKDCMEMORYH__
 #define __GTKDCMEMORYH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 #include "wx/dcclient.h"
@@ -30,6 +35,7 @@ public:
     wxMemoryDC( wxDC *dc ); // Create compatible DC
     ~wxMemoryDC();
     virtual void SelectObject( const wxBitmap& bitmap );
+    void DoGetSize( int *width, int *height ) const;
 
     // these get reimplemented for mono-bitmaps to behave
     // more like their Win32 couterparts. They now interpret
@@ -44,9 +50,7 @@ public:
     // implementation
     wxBitmap  m_selected;
 
-protected:
-    void DoGetSize( int *width, int *height ) const;
-
+private:
     DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 

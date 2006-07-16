@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/docview.h
+// Name:        docview.h
 // Purpose:     Doc/View classes
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_DOCH__
 #define _WX_DOCH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "docview.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -126,8 +130,7 @@ public:
 
     virtual bool AddView(wxView *view);
     virtual bool RemoveView(wxView *view);
-    wxList& GetViews() { return m_documentViews; }
-    const wxList& GetViews() const { return m_documentViews; }
+    wxList& GetViews() const { return (wxList&) m_documentViews; }
     wxView *GetFirstView() const;
 
     virtual void UpdateAllViews(wxView *sender = (wxView *) NULL, wxObject *hint = (wxObject *) NULL);
@@ -424,10 +427,8 @@ public:
     // Get the current document manager
     static wxDocManager* GetDocumentManager() { return sm_docManager; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetHistoryFilesCount() instead
     wxDEPRECATED( size_t GetNoHistoryFiles() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     long              m_flags;
@@ -445,12 +446,10 @@ protected:
     DECLARE_NO_COPY_CLASS(wxDocManager)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
 inline size_t wxDocManager::GetNoHistoryFiles() const
 {
     return GetHistoryFilesCount();
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ----------------------------------------------------------------------------
 // A default child frame
@@ -584,10 +583,8 @@ public:
 
     const wxList& GetMenus() const { return m_fileMenus; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetCount() instead
     wxDEPRECATED( size_t GetNoHistoryFiles() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     // Last n files
@@ -607,12 +604,10 @@ private:
     DECLARE_NO_COPY_CLASS(wxFileHistory)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
 inline size_t wxFileHistory::GetNoHistoryFiles() const
 {
     return m_fileHistoryN;
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 #if wxUSE_STD_IOSTREAM
 // For compatibility with existing file formats:

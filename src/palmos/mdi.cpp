@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "mdi.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,28 +28,33 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_MDI
-
-#include "wx/mdi.h"
+#if wxUSE_MDI && !defined(__WXUNIVERSAL__)
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/frame.h"
     #include "wx/menu.h"
     #include "wx/app.h"
     #include "wx/utils.h"
     #include "wx/dialog.h"
-    #include "wx/statusbr.h"
+    #if wxUSE_STATUSBAR
+        #include "wx/statusbr.h"
+    #endif
     #include "wx/settings.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/toolbar.h"
 #endif
 
+#include "wx/mdi.h"
 #include "wx/palmos/private.h"
 
 #if wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
     #include "wx/palmos/statbr95.h"
 #endif
+
+#if wxUSE_TOOLBAR
+    #include "wx/toolbar.h"
+#endif // wxUSE_TOOLBAR
 
 #include <string.h>
 
@@ -401,4 +410,5 @@ static void UnpackMDIActivate(WXWPARAM wParam, WXLPARAM lParam,
 {
 }
 
-#endif // wxUSE_MDI
+#endif // wxUSE_MDI && !defined(__WXUNIVERSAL__)
+

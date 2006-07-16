@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,13 +28,11 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dcclient.h"
+#include "wx/string.h"
+#include "wx/log.h"
+#include "wx/window.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/log.h"
-    #include "wx/window.h"
-#endif
+#include "wx/dcclient.h"
 
 // ----------------------------------------------------------------------------
 // array/list types
@@ -158,3 +160,4 @@ wxPaintDCEx::wxPaintDCEx(wxWindow *canvas, WXHDC dc) : saveState(0)
 wxPaintDCEx::~wxPaintDCEx()
 {
 }
+

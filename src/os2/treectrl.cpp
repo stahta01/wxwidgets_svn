@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/treectrl.cpp
+// Name:        src/msw/treectrl.cpp
 // Purpose:     wxTreeCtrl
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin to be less MSW-specific on 10.10.98
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,18 +30,14 @@
 
 #if wxUSE_TREECTRL
 
-#include "wx/treectrl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-#endif
-
 #include "wx/os2/private.h"
 
+#include "wx/app.h"
+#include "wx/log.h"
+#include "wx/dynarray.h"
 #include "wx/imaglist.h"
+#include "wx/settings.h"
+#include "wx/os2/treectrl.h"
 
 // a macro to hide the ugliness of nested casts
 #define HITEM(item)     (HTREEITEM)(WXHTREEITEM)(item)
@@ -496,17 +496,16 @@ void wxTreeCtrl::DoSetItem (
     }
 } // end of wxTreeCtrl::DoSetItem
 
-unsigned int wxTreeCtrl::GetCount () const
+size_t wxTreeCtrl::GetCount () const
 {
-    CNRINFO  vCnrInfo;
+    CNRINFO                         vCnrInfo;
 
     ::WinSendMsg( GetHWND()
                  ,CM_QUERYCNRINFO
                  ,MPFROMP(&vCnrInfo)
                  ,(MPARAM)(USHORT)sizeof(CNRINFO)
                 );
-
-    return (unsigned int)vCnrInfo.cRecords;
+    return (size_t)vCnrInfo.cRecords;
 } // end of wxTreeCtrl::GetCount
 
 unsigned int wxTreeCtrl::GetIndent () const
@@ -2128,5 +2127,14 @@ MRESULT wxTreeCtrl::OS2WindowProc (
                                       );
     return mRc;
 } // end of wxTreeCtrl::OS2WindowProc
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxTreeItemId wxTreeCtrl::GetParent(const wxTreeItemId& item) const
+{
+    return GetItemParent( item );
+}
+
+#endif  // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL

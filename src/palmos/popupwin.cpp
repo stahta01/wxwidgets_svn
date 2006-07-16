@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "popup.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_POPUPWIN
-
 #ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif //WX_PRECOMP
+
+#if wxUSE_POPUPWIN
 
 #include "wx/popupwin.h"
 
@@ -64,3 +69,4 @@ bool wxPopupWindow::Show(bool show)
 }
 
 #endif // #if wxUSE_POPUPWIN
+

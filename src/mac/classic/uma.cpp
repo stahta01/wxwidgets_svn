@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/uma.cpp
+// Name:        uma.cpp
 // Purpose:     UMA support
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,11 +9,7 @@
 // Licence:     The wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+#include "wx/defs.h"
 
 #if wxUSE_GUI
 
@@ -367,11 +363,11 @@ void UMASetMenuItemShortcut( MenuRef menu , MenuItemIndex item , wxAcceleratorEn
                     macKey = kClearCharCode ;
                     glyph = kMenuClearGlyph ;
                     break ;
-                case WXK_PAGEUP :
+                case WXK_PRIOR : // PAGE UP
                     macKey = kPageUpCharCode ;
                     glyph = kMenuPageUpGlyph ;
                     break ;
-                case WXK_PAGEDOWN :
+                case WXK_NEXT :
                     macKey = kPageDownCharCode ;
                     glyph = kMenuPageDownGlyph ;
                     break ;

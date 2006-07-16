@@ -12,15 +12,19 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dialog.h"
+#endif
+
 #include "wx/panel.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxDialogNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxDialogNameStr;
 
 class WXDLLEXPORT wxDialogModalData;
 
 #if wxUSE_TOOLBAR && (defined(__SMARTPHONE__) || defined(__POCKETPC__))
 class WXDLLEXPORT wxToolBar;
-extern WXDLLEXPORT_DATA(const wxChar) wxToolBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxToolBarNameStr;
 #endif
 
 // Dialog boxes
@@ -108,7 +112,9 @@ public:
     // Windows callbacks
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
-#if WXWIN_COMPATIBILITY_2_6
+    // obsolete methods
+    // ----------------
+
     // use the other ctor
     wxDEPRECATED( wxDialog(wxWindow *parent,
              const wxString& title, bool modal,
@@ -121,10 +127,6 @@ public:
 
     // use IsModal()
     wxDEPRECATED( bool IsModalShowing() const );
-#endif // WXWIN_COMPATIBILITY_2_6
-
-    // handle Escape here
-    virtual bool MSWProcessMessage(WXMSG* pMsg);
 
 protected:
     // find the window to use as parent for this dialog if none has been
@@ -143,6 +145,9 @@ protected:
     //
     // return true if button was "clicked" or false if we don't have it
     bool EmulateButtonClickIfPresent(int id);
+
+    // handle Escape here
+    virtual bool MSWProcessMessage(WXMSG* pMsg);
 
 private:
     wxWindow*   m_oldFocus;

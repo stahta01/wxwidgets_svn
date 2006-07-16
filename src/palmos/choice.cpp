@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choice.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,9 +29,8 @@
 
 #if wxUSE_CHOICE
 
-#include "wx/choice.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/choice.h"
     #include "wx/utils.h"
     #include "wx/log.h"
     #include "wx/brush.h"
@@ -155,12 +158,12 @@ int wxChoice::DoAppend(const wxString& item)
     return 0;
 }
 
-int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+int wxChoice::DoInsert(const wxString& item, int pos)
 {
     return 0;
 }
 
-void wxChoice::Delete(unsigned int n)
+void wxChoice::Delete(int n)
 {
 }
 
@@ -189,38 +192,45 @@ void wxChoice::SetSelection(int n)
 // string list functions
 // ----------------------------------------------------------------------------
 
-unsigned int wxChoice::GetCount() const
+int wxChoice::GetCount() const
 {
     return 0;
 }
 
-void wxChoice::SetString(unsigned int n, const wxString& s)
+int wxChoice::FindString(const wxString& s) const
+{
+    return 0;
+}
+
+void wxChoice::SetString(int n, const wxString& s)
 {
 }
 
-wxString wxChoice::GetString(unsigned int n) const
+wxString wxChoice::GetString(int n) const
 {
-    return wxEmptyString;
+    wxString str;
+
+    return str;
 }
 
 // ----------------------------------------------------------------------------
 // client data
 // ----------------------------------------------------------------------------
 
-void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
+void wxChoice::DoSetItemClientData( int n, void* clientData )
 {
 }
 
-void* wxChoice::DoGetItemClientData(unsigned int n) const
+void* wxChoice::DoGetItemClientData( int n ) const
 {
     return (void *)NULL;
 }
 
-void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData )
+void wxChoice::DoSetItemClientObject( int n, wxClientData* clientData )
 {
 }
 
-wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxChoice::DoGetItemClientObject( int n ) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/sckfile.cpp
+// Name:        sckfile.cpp
 // Purpose:     File protocol
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -8,18 +8,22 @@
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sckfile.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_STREAMS && wxUSE_PROTOCOL_FILE
-
-#ifndef WX_PRECOMP
-#endif
 
 #include <stdio.h>
 #include "wx/wfstream.h"
@@ -55,3 +59,4 @@ wxInputStream *wxFileProto::GetInputStream(const wxString& path)
 }
 
 #endif // wxUSE_STREAMS && wxUSE_PROTOCOL_FILE
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/filedlg.cpp
+// Name:        filedlg.cpp
 // Purpose:     wxFileDialog
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,26 +9,21 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "filedlg.h"
 #endif
 
+#include "wx/defs.h"
+#include "wx/app.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
 #include "wx/filedlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-#endif
-
+#include "wx/intl.h"
 #include "wx/tokenzr.h"
 #include "wx/filename.h"
 
 #ifndef __DARWIN__
-    #include "PLStringFuncs.h"
+  #include "PLStringFuncs.h"
 #endif
 
 IMPLEMENT_CLASS(wxFileDialog, wxFileDialogBase)
@@ -98,7 +93,7 @@ NavEventProc(
     else if ( inSelector == kNavCBStart )
     {
 #if TARGET_CARBON
-        if (data && !(data->defaultLocation).empty())
+        if (data && !(data->defaultLocation).IsEmpty())
         {
             // Set default location for the modern Navigation APIs
             // Apple Technical Q&A 1151
@@ -169,7 +164,7 @@ void MakeUserDataRec(OpenUserDataRec    *myData , const wxString& filter )
         int filterIndex = 0;
         bool isName = true ;
         wxString current ;
-        for( unsigned int i = 0; i < filter2.length() ; i++ )
+        for( unsigned int i = 0; i < filter2.Len() ; i++ )
         {
             if( filter2.GetChar(i) == wxT('|') )
             {
@@ -192,7 +187,7 @@ void MakeUserDataRec(OpenUserDataRec    *myData , const wxString& filter )
         // an explanatory text, in that case the first part is name and extension at the same time
 
         wxASSERT_MSG( filterIndex == 0 || !isName , wxT("incorrect format of format string") ) ;
-        if ( current.empty() )
+        if ( current.IsEmpty() )
             myData->extensions.Add( myData->name[filterIndex] ) ;
         else
             myData->extensions.Add( current.MakeUpper() ) ;
@@ -209,21 +204,21 @@ void MakeUserDataRec(OpenUserDataRec    *myData , const wxString& filter )
             wxString extension = myData->extensions[i];
 
             if (extension.GetChar(0) == '*')
-                extension = extension.Mid(1);  // Remove leading *
+                extension = extension.Mid(1);	// Remove leading *
 
             if (extension.GetChar(0) == '.')
             {
-                extension = extension.Mid(1);  // Remove leading .
+                extension = extension.Mid(1);	// Remove leading .
             }
-
+       
             if (wxFileName::MacFindDefaultTypeAndCreator( extension, &fileType, &creator ))
             {
                 myData->filtermactypes.Add( (OSType)fileType );
             }
             else
             {
-                myData->filtermactypes.Add( '****' ) ;   // We'll fail safe if it's not recognized
-            }
+                myData->filtermactypes.Add( '****' ) ;		// We'll fail safe if it's not recognized
+        	}
         }
     }
 }
@@ -251,7 +246,7 @@ static Boolean CheckFile( const wxString &filename , OSType type , OpenUserDataR
                 if ( extension.GetChar(0) == '*' )
                     extension = extension.Mid(1) ;
 
-                if ( file.length() >= extension.length() && extension == file.Right(extension.length() ) )
+                if ( file.Len() >= extension.Len() && extension == file.Right(extension.Len() ) )
                     return true ;
             }
         }
@@ -292,8 +287,8 @@ static pascal Boolean CrossPlatformFileFilter(CInfoPBPtr myCInfoPBPtr, void *dat
 
 wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         const wxString& defaultDir, const wxString& defaultFileName, const wxString& wildCard,
-        long style, const wxPoint& pos, const wxSize& sz, const wxString& name)
-             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos, sz, name)
+        long style, const wxPoint& pos)
+             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos)
 {
     wxASSERT_MSG( NavServicesAvailable() , wxT("Navigation Services are not running") ) ;
 }
@@ -320,7 +315,7 @@ pascal Boolean CrossPlatformFilterCallback (
                 wxString file = wxMacMakeStringFromPascal( spec.name ) ;
                 display = CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
             }
-#if TARGET_CARBON
+ #if TARGET_CARBON
             else if ( theItem->descriptorType == typeFSRef )
             {
                 FSRef fsref ;
@@ -328,16 +323,16 @@ pascal Boolean CrossPlatformFilterCallback (
 
 
 
-                CFURLRef fullURLRef;
+            	CFURLRef fullURLRef;
                 fullURLRef = ::CFURLCreateFromFSRef(NULL, &fsref);
 #ifdef __UNIX__
-                CFURLPathStyle pathstyle = kCFURLPOSIXPathStyle;
+            	CFURLPathStyle pathstyle = kCFURLPOSIXPathStyle;
 #else
-                CFURLPathStyle pathstyle = kCFURLHFSPathStyle;
+            	CFURLPathStyle pathstyle = kCFURLHFSPathStyle;
 #endif
-                CFStringRef cfString = CFURLCopyFileSystemPath(fullURLRef, pathstyle);
-                ::CFRelease( fullURLRef ) ;
-                wxString file = wxMacCFStringHolder(cfString).AsString(wxFont::GetDefaultEncoding());
+            	CFStringRef cfString = CFURLCopyFileSystemPath(fullURLRef, pathstyle);
+            	::CFRelease( fullURLRef ) ;
+            	wxString file = wxMacCFStringHolder(cfString).AsString(wxFont::GetDefaultEncoding());
 
                 display = CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
             }
@@ -372,7 +367,7 @@ int wxFileDialog::ShowModal()
     OpenUserDataRec myData;
     myData.defaultLocation = m_dir;
 
-    if (HasFlag(wxFD_SAVE))
+    if (m_dialogStyle & wxSAVE)
     {
         dialogCreateOptions.optionFlags |= kNavNoTypePopup;
         dialogCreateOptions.optionFlags |= kNavDontAutoTranslate;
@@ -445,7 +440,7 @@ int wxFileDialog::ShowModal()
                 break;
 
             CFURLRef fullURLRef;
-            if (HasFlag(wxFD_SAVE))
+            if (m_dialogStyle & wxSAVE)
             {
                 CFURLRef parentURLRef = ::CFURLCreateFromFSRef(NULL, &theFSRef);
 
@@ -562,7 +557,7 @@ int wxFileDialog::ShowModal()
             wxMacStringToPascal( myData.name[i] , (StringPtr)(*mNavOptions.popupExtension)[i].menuItemName ) ;
         }
     }
-    if ( HasFlag(wxFD_SAVE) )
+    if ( m_dialogStyle & wxSAVE )
     {
         myData.saveMode = true ;
 
@@ -584,7 +579,7 @@ int wxFileDialog::ShowModal()
         myData.saveMode = false ;
 
         mNavFilterUPP = NewNavObjectFilterUPP( CrossPlatformFilterCallback ) ;
-        if ( m_windowStyle & wxFD_MULTIPLE )
+        if ( m_dialogStyle & wxMULTIPLE )
             mNavOptions.dialogOptionFlags |= kNavAllowMultipleFiles ;
         else
             mNavOptions.dialogOptionFlags &= ~kNavAllowMultipleFiles ;
@@ -624,7 +619,7 @@ int wxFileDialog::ShowModal()
             OSErr err = ::AEGetNthDesc( &mNavReply.selection , i , typeFSS, &keyWord , &specDesc);
             if ( err != noErr )
             {
-                m_path = wxEmptyString ;
+                m_path = wxT("") ;
                 return wxID_CANCEL ;
             }
             outFileSpec = **(FSSpec**) specDesc.dataHandle;
@@ -647,3 +642,4 @@ int wxFileDialog::ShowModal()
     return wxID_CANCEL;
 #endif // TARGET_CARBON
 }
+

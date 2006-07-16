@@ -1,30 +1,38 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/imaglist.cpp
+// Name:        generic/imaglist.cpp
 // Purpose:
 // Author:      Robert Roebling
-// RCS_ID:      $Id$
+// Id:          $id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imaglist.h"
 #endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
 
 #if wxUSE_IMAGLIST
 
-#include "wx/imaglist.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dc.h"
-    #include "wx/icon.h"
-    #include "wx/image.h"
+#ifdef __BORLANDC__
+#pragma hdrstop
 #endif
 
-IMPLEMENT_DYNAMIC_CLASS(wxImageList, wxObject)
+#include "wx/defs.h"
 
+#include "wx/imaglist.h"
+
+#include "wx/icon.h"
+#include "wx/image.h"
+#include "wx/dc.h"
+
+//-----------------------------------------------------------------------------
+//  wxImageList
+//-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxImageList, wxObject)
 
 wxImageList::wxImageList( int width, int height, bool mask, int initialCount )
 {
@@ -68,58 +76,41 @@ int wxImageList::Add( const wxIcon &bitmap )
         m_width = bitmap.GetWidth();
         m_height = bitmap.GetHeight();
     }
-
-    return m_images.GetCount() - 1;
+    
+    return m_images.GetCount()-1;
 }
 
 int wxImageList::Add( const wxBitmap &bitmap )
 {
-    wxASSERT_MSG( (bitmap.GetWidth() >= m_width && bitmap.GetHeight() == m_height)
+    wxASSERT_MSG( (bitmap.GetWidth() == m_width && bitmap.GetHeight() == m_height)
                   || (m_width == 0 && m_height == 0),
                   _T("invalid bitmap size in wxImageList: this might work ")
                   _T("on this platform but definitely won't under Windows.") );
 
-    // Mimic behavior of Windows ImageList_Add that automatically breaks up the added
-    // bitmap into sub-images of the correct size
-    if (m_width > 0 && bitmap.GetWidth() > m_width && bitmap.GetHeight() >= m_height)
-    {
-        int numImages = bitmap.GetWidth() / m_width;
-        for (int subIndex = 0; subIndex < numImages; subIndex++)
-        {
-            wxRect rect(m_width * subIndex, 0, m_width, m_height);
-            wxBitmap tmpBmp = bitmap.GetSubBitmap(rect);
-            m_images.Append( new wxBitmap(tmpBmp) );
-        }
-    }
-    else
-    {
-        m_images.Append( new wxBitmap(bitmap) );
-    }
+    m_images.Append( new wxBitmap(bitmap) );
 
     if (m_width == 0 && m_height == 0)
     {
         m_width = bitmap.GetWidth();
         m_height = bitmap.GetHeight();
     }
-
-    return m_images.GetCount() - 1;
+    
+    return m_images.GetCount()-1;
 }
 
 int wxImageList::Add( const wxBitmap& bitmap, const wxBitmap& mask )
 {
-    wxBitmap bmp( bitmap );
+    wxBitmap bmp(bitmap);
     if (mask.Ok())
-        bmp.SetMask( new wxMask( mask ) );
-
-    return Add( bmp );
+        bmp.SetMask(new wxMask(mask));
+    return Add(bmp);
 }
 
 int wxImageList::Add( const wxBitmap& bitmap, const wxColour& maskColour )
 {
     wxImage img = bitmap.ConvertToImage();
-    img.SetMaskColour( maskColour.Red(), maskColour.Green(), maskColour.Blue() );
-
-    return Add( wxBitmap( img ) );
+    img.SetMaskColour(maskColour.Red(), maskColour.Green(), maskColour.Blue());
+    return Add(wxBitmap(img));
 }
 
 // Get the bitmap
@@ -133,9 +124,9 @@ wxBitmap wxImageList::GetBitmap(int index) const
     if ( obj == NULL )
         return wxNullBitmap ;
     else if ( obj->IsKindOf(CLASSINFO(wxIcon)) )
-        return wxBitmap( *(wx_static_cast(wxIcon*, obj)) ) ;
-    else
-        return *(wx_static_cast(wxBitmap*, obj)) ;
+        return wxBitmap( *(wx_static_cast(wxIcon*,obj)) ) ;
+    else 
+        return *(wx_static_cast(wxBitmap*,obj)) ;
 }
 
 // Get the icon
@@ -148,13 +139,13 @@ wxIcon wxImageList::GetIcon(int index) const
     wxObject* obj = (wxObject*) node->GetData();
     if ( obj == NULL )
         return wxNullIcon ;
-    else if ( obj->IsKindOf(CLASSINFO(wxBitmap)) )
+    else if( obj->IsKindOf(CLASSINFO(wxBitmap)) )
     {
         wxFAIL_MSG( wxT("cannot convert from bitmap to icon") ) ;
         return wxNullIcon ;
     }
-    else
-        return *(wx_static_cast(wxIcon*, obj)) ;
+    else 
+        return *(wx_static_cast(wxIcon*,obj)) ;
 }
 
 bool wxImageList::Replace( int index, const wxBitmap &bitmap )
@@ -163,12 +154,11 @@ bool wxImageList::Replace( int index, const wxBitmap &bitmap )
 
     wxCHECK_MSG( node, false, wxT("wrong index in image list") );
 
-    wxBitmap* newBitmap = new wxBitmap( bitmap );
+    wxBitmap* newBitmap = new wxBitmap(bitmap) ;
 
     if (index == (int) m_images.GetCount() - 1)
     {
         delete node->GetData();
-
         m_images.Erase( node );
         m_images.Append( newBitmap );
     }
@@ -176,7 +166,6 @@ bool wxImageList::Replace( int index, const wxBitmap &bitmap )
     {
         wxList::compatibility_iterator next = node->GetNext();
         delete node->GetData();
-
         m_images.Erase( node );
         m_images.Insert( next, newBitmap );
     }
@@ -190,7 +179,7 @@ bool wxImageList::Replace( int index, const wxIcon &bitmap )
 
     wxCHECK_MSG( node, false, wxT("wrong index in image list") );
 
-    wxIcon* newBitmap = new wxIcon( bitmap );
+    wxIcon* newBitmap = new wxIcon(bitmap) ;
 
     if (index == (int) m_images.GetCount() - 1)
     {
@@ -205,34 +194,6 @@ bool wxImageList::Replace( int index, const wxIcon &bitmap )
         m_images.Erase( node );
         m_images.Insert( next, newBitmap );
     }
-
-    return true;
-}
-
-bool wxImageList::Replace( int index, const wxBitmap &bitmap, const wxBitmap &mask )
-{
-    wxList::compatibility_iterator node = m_images.Item( index );
-
-    wxCHECK_MSG( node, false, wxT("wrong index in image list") );
-
-    wxBitmap* newBitmap = new wxBitmap(bitmap);
-
-    if (index == (int) m_images.GetCount() - 1)
-    {
-        delete node->GetData();
-        m_images.Erase( node );
-        m_images.Append( newBitmap );
-    }
-    else
-    {
-        wxList::compatibility_iterator next = node->GetNext();
-        delete node->GetData();
-        m_images.Erase( node );
-        m_images.Insert( next, newBitmap );
-    }
-
-    if (mask.Ok())
-        newBitmap->SetMask(new wxMask(mask));
 
     return true;
 }
@@ -267,7 +228,7 @@ bool wxImageList::GetSize( int index, int &width, int &height ) const
     wxCHECK_MSG( node, false, wxT("wrong index in image list") );
 
     wxObject *obj = (wxObject*)node->GetData();
-    if (obj->IsKindOf(CLASSINFO(wxIcon)))
+    if( obj->IsKindOf(CLASSINFO(wxIcon)))
     {
         wxIcon *bm = wx_static_cast( wxIcon* , obj ) ;
         width = bm->GetWidth();
@@ -279,23 +240,21 @@ bool wxImageList::GetSize( int index, int &width, int &height ) const
         width = bm->GetWidth();
         height = bm->GetHeight();
     }
-
     return true;
 }
 
-bool wxImageList::Draw(
-    int index, wxDC &dc, int x, int y,
-    int flags, bool WXUNUSED(solidBackground) )
+bool wxImageList::Draw( int index, wxDC &dc, int x, int y,
+                        int flags, bool WXUNUSED(solidBackground) )
 {
     wxList::compatibility_iterator node = m_images.Item( index );
 
     wxCHECK_MSG( node, false, wxT("wrong index in image list") );
 
     wxObject *obj = (wxObject*)node->GetData();
-    if (obj->IsKindOf(CLASSINFO(wxIcon)))
+    if( obj->IsKindOf(CLASSINFO(wxIcon)))
     {
         wxIcon *bm = wx_static_cast( wxIcon* , obj ) ;
-        dc.DrawIcon( *bm , x, y );
+        dc.DrawIcon( *bm , x, y);
     }
     else
     {
@@ -307,3 +266,4 @@ bool wxImageList::Draw(
 }
 
 #endif // wxUSE_IMAGLIST
+

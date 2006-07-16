@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/helpbest.cpp
+// Name:        helpbest.cpp
 // Purpose:     Tries to load MS HTML Help, falls back to wxHTML upon failure
 // Author:      Mattia Barbon
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "helpbest.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,12 +21,13 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/log.h"
+#include "wx/defs.h"
 #endif
 
 #include "wx/filefn.h"
+#include "wx/log.h"
 
-#if wxUSE_HELP && wxUSE_MS_HTML_HELP \
+#if wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__) \
     && wxUSE_WXHTML_HELP && !defined(__WXUNIVERSAL__)
 
 #include "wx/msw/helpchm.h"
@@ -34,7 +39,7 @@ IMPLEMENT_DYNAMIC_CLASS( wxBestHelpController, wxHelpControllerBase )
 bool wxBestHelpController::Initialize( const wxString& filename )
 {
     // try wxCHMHelpController
-    wxCHMHelpController* chm = new wxCHMHelpController(m_parentWindow);
+    wxCHMHelpController* chm = new wxCHMHelpController;
 
     m_helpControllerType = wxUseChmHelp;
     // do not warn upon failure
@@ -43,7 +48,6 @@ bool wxBestHelpController::Initialize( const wxString& filename )
     if( chm->Initialize( GetValidFilename( filename ) ) )
     {
         m_helpController = chm;
-        m_parentWindow = NULL;
         return true;
     }
 
@@ -51,14 +55,12 @@ bool wxBestHelpController::Initialize( const wxString& filename )
     delete chm;
 
     // try wxHtmlHelpController
-    wxHtmlHelpController *
-        html = new wxHtmlHelpController(m_style, m_parentWindow);
+    wxHtmlHelpController* html = new wxHtmlHelpController;
 
     m_helpControllerType = wxUseHtmlHelp;
     if( html->Initialize( GetValidFilename( filename ) ) )
     {
         m_helpController = html;
-        m_parentWindow = NULL;
         return true;
     }
 
@@ -100,4 +102,4 @@ wxString wxBestHelpController::GetValidFilename( const wxString& filename ) cons
 }
 
 #endif
-    // wxUSE_HELP && wxUSE_MS_HTML_HELP && wxUSE_WXHTML_HELP
+    // wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__) && wxUSE_WXHTML_HELP

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/textctrl.cpp
+// Name:        textctrl.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,22 +7,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "textctrl.h"
+#endif
 
 #include "wx/textctrl.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/utils.h"
-    #include "wx/panel.h"
-    #include "wx/dcclient.h"
-    #include "wx/settings.h"
-#endif
-
+#include "wx/utils.h"
+#include "wx/intl.h"
+#include "wx/log.h"
+#include "wx/settings.h"
+#include "wx/panel.h"
 #include "wx/clipbrd.h"
 #include "wx/tokenzr.h"
+#include "wx/dcclient.h"
 
 #include "wx/univ/inphand.h"
 #include "wx/univ/renderer.h"
@@ -56,7 +54,7 @@ wxSourceUndoStep::wxSourceUndoStep( wxSourceUndo type, int y1, int y2, wxTextCtr
         for (int i = m_y1; i < m_y2+2; i++)
         {
             if (i >= (int)m_owner->m_lines.GetCount())
-                m_lines.Add( wxEmptyString );
+                m_lines.Add( wxT("") );
             else
                 m_lines.Add( m_owner->m_lines[i].m_text );
         }
@@ -131,9 +129,9 @@ WX_DEFINE_OBJARRAY(wxSourceLineArray);
 //  wxTextCtrl
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl,wxControl)
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_PAINT(wxTextCtrl::OnPaint)
     EVT_ERASE_BACKGROUND(wxTextCtrl::OnEraseBackground)
     EVT_CHAR(wxTextCtrl::OnChar)
@@ -291,7 +289,7 @@ void wxTextCtrl::SetValue(const wxString& value)
 
     if (value.empty())
     {
-        m_lines.Add( new wxSourceLine( wxEmptyString ) );
+        m_lines.Add( new wxSourceLine( wxT("") ) );
     }
     else
     {
@@ -356,7 +354,7 @@ int wxTextCtrl::GetLineLength(long lineNo) const
 wxString wxTextCtrl::GetLineText(long lineNo) const
 {
     if (lineNo >= (long)m_lines.GetCount())
-        return wxEmptyString;
+        return wxT("");
 
     return m_lines[lineNo].m_text;
 }
@@ -399,7 +397,7 @@ void wxTextCtrl::Clear()
     ClearSelection();
 
     m_lines.Clear();
-    m_lines.Add( new wxSourceLine( wxEmptyString ) );
+    m_lines.Add( new wxSourceLine( wxT("") ) );
 
     SetScrollbars( m_charWidth, m_lineHeight, 0, 0, 0, 0 );
     Refresh();
@@ -1742,7 +1740,7 @@ void wxTextCtrl::OnMouse( wxMouseEvent &event )
 #if 0  // there is no middle button on iPAQs
     if (event.MiddleDown())
     {
-        Paste( true );
+        Paste( TRUE );
         return;
     }
 #endif
@@ -1798,15 +1796,15 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
     {
         switch (event.GetKeyCode())
         {
-            case '4': event.m_keyCode = WXK_LEFT;     break;
-            case '8': event.m_keyCode = WXK_UP;       break;
-            case '6': event.m_keyCode = WXK_RIGHT;    break;
-            case '2': event.m_keyCode = WXK_DOWN;     break;
-            case '9': event.m_keyCode = WXK_PAGEUP;   break;
-            case '3': event.m_keyCode = WXK_PAGEDOWN; break;
-            case '7': event.m_keyCode = WXK_HOME;     break;
-            case '1': event.m_keyCode = WXK_END;      break;
-            case '0': event.m_keyCode = WXK_INSERT;   break;
+            case '4': event.m_keyCode = WXK_LEFT;   break;
+            case '8': event.m_keyCode = WXK_UP;     break;
+            case '6': event.m_keyCode = WXK_RIGHT;  break;
+            case '2': event.m_keyCode = WXK_DOWN;   break;
+            case '9': event.m_keyCode = WXK_PRIOR;  break;
+            case '3': event.m_keyCode = WXK_NEXT;   break;
+            case '7': event.m_keyCode = WXK_HOME;   break;
+            case '1': event.m_keyCode = WXK_END;    break;
+            case '0': event.m_keyCode = WXK_INSERT; break;
         }
     }
 
@@ -1874,7 +1872,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
             m_ignoreInput = true;
             return;
         }
-        case WXK_PAGEUP:
+        case WXK_PRIOR:
         {
             if (m_ignoreInput) return;
             MoveCursor( m_cursorX, wxMax( 0, m_cursorY-size_y ), event.ShiftDown() );
@@ -1893,7 +1891,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
         }
         case WXK_RETURN:
         {
-            if (m_windowStyle & wxTE_PROCESS_ENTER)
+            if (m_windowStyle & wxPROCESS_ENTER)
             {
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 event.SetEventObject(this);
@@ -2413,3 +2411,4 @@ bool wxTextCtrl::ScrollPages(int pages)
 
     return false;
 }
+

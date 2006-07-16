@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/cmndata.cpp
+// Name:        cmndata.cpp
 // Purpose:     Common GDI data
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cmndata.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,17 +28,16 @@
     #pragma hdrstop
 #endif
 
-#include "wx/cmndata.h"
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
     #include "wx/string.h"
     #include "wx/utils.h"
     #include "wx/app.h"
-    #include "wx/log.h"
-    #include "wx/gdicmn.h"
 #endif
 
+#include "wx/gdicmn.h"
+#include "wx/cmndata.h"
+#include "wx/log.h"
 #include "wx/prntbase.h"
 #include "wx/printdlg.h"
 

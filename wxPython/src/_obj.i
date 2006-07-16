@@ -30,7 +30,6 @@ public:
             return self->GetClassInfo()->GetClassName();
         }
 
-        %pythonAppend Destroy "args[0].thisown = 0"
         DocStr(Destroy,
                "Deletes the C++ object this Python object is a proxy for.", "");
         void Destroy() {

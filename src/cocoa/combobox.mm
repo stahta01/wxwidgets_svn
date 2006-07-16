@@ -1,18 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/combobox.mm
+// Name:        cocoa/combobox.mm
 // Purpose:     wxComboBox
-// Author:      Ryan Norton
+// Author:     	Ryan Norton
 // Modified by:
 // Created:     2005/02/16
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
+
+// #include "wx/wxprec.h"
 
 //
 // Impl notes:
 // There is no custom data source because doing so unnecessarily sacrifices
-// some native autocompletion behavior (we would have to make our own -
+// some native autocompletion behavior (we would have to make our own - 
 // the SimpleComboBox sample does so in the developer folder that
 // comes with OSX).  One reason you might want this would be to have
 // only one array or be able to display numbers returned by an NSNumber
@@ -26,9 +28,9 @@
 // doWxEvent is really hackish... but since there's only one event...
 //
 // Ideas for future improvement - other notes:
-// Combox w/o wxCB_DROPDOWN doesn't seem to be implementable
-//wxCB_READONLY  Same as wxCB_DROPDOWN but only the strings specified as the combobox choices can be selected, it is impossible to select (even from a program) a string which is not in the choices list.
-//wxCB_SORT      is possible with data source
+// Combox w/o wxCB_DROPDOWN doesn't seem to be implementable 	
+//wxCB_READONLY 	Same as wxCB_DROPDOWN but only the strings specified as the combobox choices can be selected, it is impossible to select (even from a program) a string which is not in the choices list.
+//wxCB_SORT 	is possible with data source
 //
 // setIntercellSpacing:/setItemHeight: to autoadjust to number of inserted items?
 //
@@ -53,7 +55,7 @@
     NSString *lowercasePrefix = [prefix lowercaseString];
     NSEnumerator *stringEnum = [genres objectEnumerator];
     while ((string = [stringEnum nextObject])) {
-        if ([[string lowercaseString] hasPrefix: lowercasePrefix]) return string;
+	if ([[string lowercaseString] hasPrefix: lowercasePrefix]) return string;
     }
     return nil;
 }
@@ -66,6 +68,17 @@
 }
 */
 
+/////////////////////////////////////////////////////////////////////////////
+// Name:        cocoa/NSComboBox.mm
+// Purpose:     wxCocoaNSComboBox
+// Author:      Ryan Norton
+// Modified by:
+// Created:     2005/02/16
+// RCS-ID:      $Id: 
+// Copyright:   (c) 2003 David Elliott
+// Licence:     wxWidgets licence
+/////////////////////////////////////////////////////////////////////////////
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -75,18 +88,14 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/wxprec.h"
-
 #if wxUSE_COMBOBOX
-
-#include "wx/combobox.h"
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
 #endif // WX_PRECOMP
 
 #include "wx/cocoa/ObjcPose.h"
+#include "wx/combobox.h"
 
 #import <AppKit/NSComboBox.h>
 #import <Foundation/NSNotification.h>
@@ -102,7 +111,7 @@ void wxCocoaNSComboBox::AssociateNSComboBox(WX_NSComboBox cocoaNSComboBox)
     if(cocoaNSComboBox)
     {
         sm_cocoaHash.insert(wxCocoaNSComboBoxHash::value_type(cocoaNSComboBox,this));
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:(id)cocoaNSComboBox selector:@selector(comboBoxSelectionDidChange:) name:@"NSComboBoxSelectionDidChangeNotification" object:cocoaNSComboBox];
         [[NSNotificationCenter defaultCenter] addObserver:(id)cocoaNSComboBox selector:@selector(comboBoxSelectionDidChange:) name:@"NSComboBoxSelectionIsChangingNotification" object:cocoaNSComboBox];
         [[NSNotificationCenter defaultCenter] addObserver:(id)cocoaNSComboBox selector:@selector(comboBoxSelectionDidChange:) name:@"NSComboBoxWillDismissNotification" object:cocoaNSComboBox];
@@ -161,6 +170,10 @@ void wxCocoaNSComboBox::DisassociateNSComboBox(WX_NSComboBox cocoaNSComboBox)
 
 @end // implementation wxPoserNSComboBox
 
+#include "wx/app.h"
+#include "wx/combobox.h"
+#include "wx/log.h"
+
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
 
@@ -198,7 +211,7 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID winid,
     wxAutoNSAutoreleasePool pool;
     if(!CreateControl(parent,winid,pos,size,style,validator,name))
         return false;
-
+        
     m_cocoaNSView = NULL;
     SetNSComboBox([[wxPoserNSComboBox alloc] initWithFrame:MakeDefaultNSRect(size)]);
     [m_cocoaNSView release];
@@ -210,9 +223,9 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID winid,
 
     for(int i = 0; i < n; ++i)
         wxComboBox::DoAppend(choices[i]);
-
+        
     [GetNSComboBox() setCompletes:true]; //autocomplete :)
-
+    
     return true;
 }
 
@@ -254,41 +267,34 @@ void wxComboBox::Clear()
     m_Datas.Clear();
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int nIndex)
 {
-    [GetNSComboBox() removeItemAtIndex:n];
-    m_Datas.RemoveAt(n);
+    [GetNSComboBox() removeItemAtIndex:nIndex];
+    m_Datas.RemoveAt(nIndex);
 }
 
-unsigned int wxComboBox::GetCount() const
+int wxComboBox::GetCount() const
 {
-    return (unsigned int)[GetNSComboBox() numberOfItems];
+    return [GetNSComboBox() numberOfItems];
 }
 
-wxString wxComboBox::GetString(unsigned int nIndex) const
-{
-    return wxStringWithNSString([GetNSComboBox() itemObjectValueAtIndex:nIndex]);
-}
+wxString wxComboBox::GetString(int nIndex) const
+{	return wxStringWithNSString([GetNSComboBox() itemObjectValueAtIndex:nIndex]);	}
 
-void wxComboBox::SetString(unsigned int nIndex, const wxString& szString)
-{
+void wxComboBox::SetString(int nIndex, const wxString& szString)
+{	
     wxAutoNSAutoreleasePool pool;
     //FIXME:  There appears to be no "set item data" method - maybe
     //an assignment would work?
     [GetNSComboBox() removeItemAtIndex:nIndex];
-    [GetNSComboBox() insertItemWithObjectValue:wxNSStringWithWxString(szString) atIndex:nIndex];
+    [GetNSComboBox() insertItemWithObjectValue:wxNSStringWithWxString(szString) atIndex:nIndex];    
 }
 
-int wxComboBox::FindString(const wxString& szItem, bool bCase) const
-{
-    // FIXME: use wxItemContainerImmutable::FindString for bCase parameter
-    return [GetNSComboBox() indexOfItemWithObjectValue:wxNSStringWithWxString(szItem)];
-}
+int wxComboBox::FindString(const wxString& szItem) const
+{	return [GetNSComboBox() indexOfItemWithObjectValue:wxNSStringWithWxString(szItem)];	}
 
 int wxComboBox::GetSelection() const
-{
-    return [GetNSComboBox() indexOfSelectedItem];
-}
+{	return [GetNSComboBox() indexOfSelectedItem];	}
 
 int wxComboBox::DoAppend(const wxString& szItem)
 {
@@ -298,30 +304,30 @@ int wxComboBox::DoAppend(const wxString& szItem)
     return [GetNSComboBox() numberOfItems];
 }
 
-int wxComboBox::DoInsert(const wxString& szItem, unsigned int nIndex)
+int wxComboBox::DoInsert(const wxString& szItem, int nIndex)
 {
     m_Datas.Insert(NULL, nIndex);
     wxAutoNSAutoreleasePool pool;
     [GetNSComboBox() insertItemWithObjectValue:wxNSStringWithWxString(szItem) atIndex:nIndex];
-    return (int)nIndex;
+    return nIndex;
 }
 
-void wxComboBox::DoSetItemClientData(unsigned int nIndex, void* pData)
+void wxComboBox::DoSetItemClientData(int nIndex, void* pData)
 {
     m_Datas[nIndex] = pData;
 }
 
-void* wxComboBox::DoGetItemClientData(unsigned int nIndex) const
+void* wxComboBox::DoGetItemClientData(int nIndex) const
 {
     return m_Datas[nIndex];
 }
 
-void wxComboBox::DoSetItemClientObject(unsigned int nIndex, wxClientData* pClientData)
+void wxComboBox::DoSetItemClientObject(int nIndex, wxClientData* pClientData)
 {
     m_Datas[nIndex] = (void*) pClientData;
 }
 
-wxClientData* wxComboBox::DoGetItemClientObject(unsigned int nIndex) const
+wxClientData* wxComboBox::DoGetItemClientObject(int nIndex) const
 {
     return (wxClientData*) m_Datas[nIndex];
 }

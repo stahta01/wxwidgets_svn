@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/valgen.cpp
+// Name:        valgen.cpp
 // Purpose:     wxGenericValidator class
 // Author:      Kevin Smith
 // Modified by:
@@ -9,41 +9,51 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "valgen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_VALIDATORS
 
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/utils.h"
-    #include "wx/intl.h"
-    #include "wx/choice.h"
-    #include "wx/combobox.h"
-    #include "wx/radiobox.h"
-    #include "wx/radiobut.h"
-    #include "wx/checkbox.h"
-    #include "wx/scrolbar.h"
-    #include "wx/gauge.h"
-    #include "wx/stattext.h"
-    #include "wx/textctrl.h"
-    #include "wx/button.h"
-    #include "wx/listbox.h"
-    #include "wx/slider.h"
-    #include "wx/checklst.h"
+  #include "wx/utils.h"
+  #include "wx/intl.h"
+  #include "wx/dynarray.h"
+  #include "wx/choice.h"
+  #include "wx/combobox.h"
+  #include "wx/radiobox.h"
+  #include "wx/radiobut.h"
+  #include "wx/checkbox.h"
+  #include "wx/scrolbar.h"
+  #include "wx/gauge.h"
+  #include "wx/stattext.h"
+  #include "wx/textctrl.h"
+  #include "wx/button.h"
+  #include "wx/listbox.h"
+  #include "wx/slider.h"
 #endif
 
 #include "wx/spinctrl.h"
 
 #if wxUSE_SPINBTN
-    #include "wx/spinbutt.h"
+  #include "wx/spinbutt.h"
+#endif
+#if wxUSE_CHECKLISTBOX
+  #include "wx/checklst.h"
 #endif
 #if wxUSE_TOGGLEBTN
-    #include "wx/tglbtn.h"
+  #include "wx/tglbtn.h"
 #endif
 
 #include "wx/valgen.h"
@@ -125,11 +135,11 @@ bool wxGenericValidator::TransferToWindow(void)
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxToggleButton)) )
     {
         wxToggleButton * pControl = (wxToggleButton *) m_validatorWindow;
-        if (m_pBool)
-        {
-            pControl->SetValue(*m_pBool);
-            return true;
-        }
+	if (m_pBool)
+	{
+	    pControl->SetValue(*m_pBool);
+	    return true;
+	}
     } else
 #endif
 
@@ -369,12 +379,12 @@ bool wxGenericValidator::TransferFromWindow(void)
 #if wxUSE_TOGGLEBTN
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxToggleButton)) )
     {
-        wxToggleButton *pControl = (wxToggleButton *) m_validatorWindow;
-        if (m_pBool)
-        {
-            *m_pBool = pControl->GetValue() ;
-            return true;
-        }
+	wxToggleButton *pControl = (wxToggleButton *) m_validatorWindow;
+	if (m_pBool)
+	{
+	    *m_pBool = pControl->GetValue() ;
+	    return true;
+	}
     } else
 #endif
 
@@ -561,7 +571,7 @@ bool wxGenericValidator::TransferFromWindow(void)
                    count = pControl->GetCount();
             for ( i = 0; i < count; i++ )
             {
-                if (pControl->IsSelected(i))
+                if (pControl->Selected(i))
                     m_pArrayInt->Add(i);
             }
 
@@ -589,3 +599,4 @@ void wxGenericValidator::Initialize()
 
 #endif
   // wxUSE_VALIDATORS
+

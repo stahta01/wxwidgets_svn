@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/renderg.cpp
+// Name:        generic/renderg.cpp
 // Purpose:     generic implementation of wxRendererNative (for any platform)
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -24,18 +24,18 @@
     #pragma hdrstop
 #endif
 
-#include "wx/renderer.h"
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
-    #include "wx/dc.h"
-    #include "wx/settings.h"
-    #include "wx/gdicmn.h"
 #endif //WX_PRECOMP
 
+#include "wx/gdicmn.h"
+#include "wx/dc.h"
+
+#include "wx/settings.h"
 #include "wx/splitter.h"
 #include "wx/dcmirror.h"
 #include "wx/module.h"
+#include "wx/renderer.h"
 
 // ----------------------------------------------------------------------------
 // wxRendererGeneric: our wxRendererNative implementation
@@ -77,21 +77,6 @@ public:
                                wxDC& dc,
                                const wxRect& rect,
                                int flags = 0);
-
-    virtual void DrawCheckBox(wxWindow *win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0);
-
-    virtual void DrawPushButton(wxWindow *win,
-                                wxDC& dc,
-                                const wxRect& rect,
-                                int flags = 0);
-
-    virtual void DrawItemSelectionRect(wxWindow *win,
-                                       wxDC& dc,
-                                       const wxRect& rect,
-                                       int flags = 0);
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
@@ -230,10 +215,9 @@ wxRendererGeneric::DrawTreeItemButton(wxWindow * WXUNUSED(win),
                                       const wxRect& rect,
                                       int flags)
 {
-    // store settings
-    wxDCPenChanger penChanger(dc, *wxGREY_PEN);
-    wxDCBrushChanger brushChanger(dc, *wxWHITE_BRUSH);
-
+    // white background
+    dc.SetPen(*wxGREY_PEN);
+    dc.SetBrush(*wxWHITE_BRUSH);
     dc.DrawRectangle(rect);
 
     // black lines
@@ -371,11 +355,20 @@ void
 wxRendererGeneric::DrawComboBoxDropButton(wxWindow *win,
                                           wxDC& dc,
                                           const wxRect& rect,
-                                          int flags)
+                                          int WXUNUSED(flags))
 {
-    DrawPushButton(win,dc,rect,flags);
-    DrawDropArrow(win,dc,rect,flags);
+    // Creating a generic button background that would actually be
+    // useful is rather difficult to accomplish. Best compromise
+    // is to use window's background colour to achieve transparent'
+    // ish appearance that should look decent in combo box style
+    // controls.
+    wxColour col = win->GetBackgroundColour();
+    dc.SetBrush(wxBrush(col));
+    dc.SetPen(wxPen(col));
+    dc.DrawRectangle(rect);
+    DrawDropArrow(win,dc,rect);
 }
+
 
 void
 wxRendererGeneric::DrawDropArrow(wxWindow *win,
@@ -402,68 +395,6 @@ wxRendererGeneric::DrawDropArrow(wxWindow *win,
     dc.DrawPolygon(WXSIZEOF(pt), pt, rect.x, rect.y);
 }
 
-void
-wxRendererGeneric::DrawCheckBox(wxWindow *WXUNUSED(win),
-                                wxDC& dc,
-                                const wxRect& rect,
-                                int flags)
-{
-    dc.SetPen(*(flags & wxCONTROL_DISABLED ? wxGREY_PEN : wxBLACK_PEN));
-    dc.SetBrush( *wxTRANSPARENT_BRUSH );
-    dc.DrawRectangle(rect);
-
-    if ( flags & wxCONTROL_CHECKED )
-    {
-        dc.DrawCheckMark(rect.Deflate(2, 2));
-    }
-}
-
-void
-wxRendererGeneric::DrawPushButton(wxWindow *win,
-                                  wxDC& dc,
-                                  const wxRect& rect,
-                                  int flags)
-{
-    // Don't try anything too fancy. It'll just turn out looking
-    // out-of-place on most platforms.
-    wxColour bgCol = flags & wxCONTROL_DISABLED ?
-                        wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE) :
-                        win->GetBackgroundColour();
-    dc.SetBrush(wxBrush(bgCol));
-    dc.SetPen(wxPen(bgCol));
-    dc.DrawRectangle(rect);
-}
-
-void
-wxRendererGeneric::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
-                                         wxDC& dc,
-                                         const wxRect& rect,
-                                         int flags)
-{
-    wxBrush brush;
-    if ( flags & wxCONTROL_SELECTED )
-    {
-        if ( flags & wxCONTROL_FOCUSED )
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
-        }
-        else // !focused
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
-        }
-    }
-    else // !selected
-    {
-        brush = *wxTRANSPARENT_BRUSH;
-    }
-
-    dc.SetBrush(brush);
-    dc.SetPen(flags & wxCONTROL_CURRENT ? *wxBLACK_PEN : *wxTRANSPARENT_PEN);
-
-    dc.DrawRectangle( rect );
-}
-
-
 // ----------------------------------------------------------------------------
 // A module to allow cleanup of generic renderer.
 // ----------------------------------------------------------------------------
@@ -478,3 +409,4 @@ public:
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxGenericRendererModule, wxModule)
+

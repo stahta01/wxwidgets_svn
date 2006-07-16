@@ -12,12 +12,17 @@
 #ifndef __WXSIZER_H__
 #define __WXSIZER_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "sizer.h"
+#endif
+
 #include "wx/defs.h"
 
 #include "wx/button.h"
 #include "wx/window.h"
 #include "wx/frame.h"
 #include "wx/dialog.h"
+#include "wx/bookctrl.h"
 
 //---------------------------------------------------------------------------
 // classes
@@ -54,19 +59,14 @@ public:
 
     wxSizerFlags& Align(int alignment) // combination of wxAlignment values
     {
-        m_flags &= ~wxALIGN_MASK;
+        m_flags &= wxALL;
         m_flags |= alignment;
 
         return *this;
     }
 
-    wxSizerFlags& Expand()
-    {
-        m_flags |= wxEXPAND;
-        return *this;
-    }
-
     // some shortcuts for Align()
+    wxSizerFlags& Expand() { return Align(wxEXPAND); }
     wxSizerFlags& Centre() { return Align(wxCENTRE); }
     wxSizerFlags& Center() { return Centre(); }
     wxSizerFlags& Left() { return Align(wxALIGN_LEFT); }
@@ -86,14 +86,7 @@ public:
     wxSizerFlags& Border(int direction = wxALL)
     {
         // FIXME: default border size shouldn't be hardcoded
-#ifdef __SMARTPHONE__
-        // no borders by default on limited size screen
-        wxUnusedVar(direction);
-
-        return *this;
-#else
         return Border(direction, 5);
-#endif
     }
 
 
@@ -195,7 +188,7 @@ public:
 
     virtual wxSize GetSize() const;
     virtual wxSize CalcMin();
-    virtual void SetDimension( const wxPoint& pos, const wxSize& size );
+    virtual void SetDimension( wxPoint pos, wxSize size );
 
     wxSize GetMinSize() const
         { return m_minSize; }
@@ -229,11 +222,9 @@ public:
     bool IsSizer() const { return m_kind == Item_Sizer; }
     bool IsSpacer() const { return m_kind == Item_Spacer; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // Deprecated in 2.6, use {G,S}etProportion instead.
     wxDEPRECATED( void SetOption( int option ) );
     wxDEPRECATED( int GetOption() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
     void SetProportion( int proportion )
         { m_proportion = proportion; }
@@ -254,14 +245,13 @@ public:
         { return m_kind == Item_Sizer ? m_sizer : NULL; }
     wxSize GetSpacer() const;
 
-    // this function behaves obviously for the windows and spacers but for the
-    // sizers it returns true if any sizer element is shown and only returns
-    // false if all of them are hidden
-    bool IsShown() const;
     void Show(bool show);
+    bool IsShown() const;
 
+#if wxABI_VERSION > 20602
     void SetUserData(wxObject* userData)
         { delete m_userData; m_userData = userData; }
+#endif
     wxObject* GetUserData() const
         { return m_userData; }
     wxPoint GetPosition() const
@@ -281,8 +271,6 @@ protected:
     // common part of ctors taking wxSizerFlags
     void Init(const wxSizerFlags& flags);
 
-
-    // discriminated union: depending on m_kind one of the fields is valid
     enum
     {
         Item_None,
@@ -329,7 +317,7 @@ WX_DECLARE_EXPORTED_LIST( wxSizerItem, wxSizerItemList );
 class WXDLLEXPORT wxSizer: public wxObject, public wxClientDataContainer
 {
 public:
-    wxSizer() { }
+    wxSizer();
     ~wxSizer();
 
     // methods for adding elements to the sizer: there are Add/Insert/Prepend
@@ -411,12 +399,9 @@ public:
     inline wxSizerItem* PrependStretchSpacer(int prop = 1);
 
 
-#if WXWIN_COMPATIBILITY_2_6
     // Deprecated in 2.6 since historically it does not delete the window,
     // use Detach instead.
     wxDEPRECATED( virtual bool Remove( wxWindow *window ) );
-#endif // WXWIN_COMPATIBILITY_2_6
-
     virtual bool Remove( wxSizer *sizer );
     virtual bool Remove( int index );
 
@@ -429,24 +414,24 @@ public:
 
     void SetMinSize( int width, int height )
         { DoSetMinSize( width, height ); }
-    void SetMinSize( const wxSize& size )
+    void SetMinSize( wxSize size )
         { DoSetMinSize( size.x, size.y ); }
 
     // Searches recursively
     bool SetItemMinSize( wxWindow *window, int width, int height )
         { return DoSetItemMinSize( window, width, height ); }
-    bool SetItemMinSize( wxWindow *window, const wxSize& size )
+    bool SetItemMinSize( wxWindow *window, wxSize size )
         { return DoSetItemMinSize( window, size.x, size.y ); }
 
     // Searches recursively
     bool SetItemMinSize( wxSizer *sizer, int width, int height )
         { return DoSetItemMinSize( sizer, width, height ); }
-    bool SetItemMinSize( wxSizer *sizer, const wxSize& size )
+    bool SetItemMinSize( wxSizer *sizer, wxSize size )
         { return DoSetItemMinSize( sizer, size.x, size.y ); }
 
     bool SetItemMinSize( size_t index, int width, int height )
         { return DoSetItemMinSize( index, width, height ); }
-    bool SetItemMinSize( size_t index, const wxSize& size )
+    bool SetItemMinSize( size_t index, wxSize size )
         { return DoSetItemMinSize( index, size.x, size.y ); }
 
     wxSize GetSize() const
@@ -496,13 +481,18 @@ public:
     // Recursively call wxWindow::Show () on all sizer items.
     virtual void ShowItems (bool show);
 
-    void Show(bool show) { ShowItems(show); }
+    void Show(bool show)
+    {   m_isShown = show;
+        ShowItems(show);
+    }
+    bool IsShown() const { return m_isShown; }
 
 protected:
     wxSize              m_size;
     wxSize              m_minSize;
     wxPoint             m_position;
     wxSizerItemList     m_children;
+    bool                m_isShown;
 
     wxSize GetMaxWindowSize( wxWindow *window ) const;
     wxSize GetMinWindowSize( wxWindow *window );
@@ -685,7 +675,6 @@ class WXDLLEXPORT wxStaticBoxSizer: public wxBoxSizer
 public:
     wxStaticBoxSizer(wxStaticBox *box, int orient);
     wxStaticBoxSizer(int orient, wxWindow *win, const wxString& label = wxEmptyString);
-    virtual ~wxStaticBoxSizer();
 
     void RecalcSizes();
     wxSize CalcMin();
@@ -695,10 +684,6 @@ public:
 
     // override to hide/show the static box as well
     virtual void ShowItems (bool show);
-
-    virtual bool Detach( wxWindow *window );
-    virtual bool Detach( wxSizer *sizer ) { return wxBoxSizer::Detach(sizer); }
-    virtual bool Detach( int index ) { return wxBoxSizer::Detach(index); }
 
 protected:
     wxStaticBox   *m_staticBox;
@@ -775,9 +760,7 @@ class WXDLLEXPORT wxBookCtrlBase;
 class WXDLLEXPORT wxBookCtrlSizer : public wxSizer
 {
 public:
-#if WXWIN_COMPATIBILITY_2_6
     wxDEPRECATED( wxBookCtrlSizer(wxBookCtrlBase *bookctrl) );
-#endif // WXWIN_COMPATIBILITY_2_6
 
     wxBookCtrlBase *GetControl() const { return m_bookctrl; }
 
@@ -806,9 +789,7 @@ class WXDLLEXPORT wxNotebook;
 class WXDLLEXPORT wxNotebookSizer : public wxBookCtrlSizer
 {
 public:
-#if WXWIN_COMPATIBILITY_2_6
     wxDEPRECATED( wxNotebookSizer(wxNotebook *nb) );
-#endif // WXWIN_COMPATIBILITY_2_6
 
     wxNotebook *GetNotebook() const { return (wxNotebook *)m_bookctrl; }
 

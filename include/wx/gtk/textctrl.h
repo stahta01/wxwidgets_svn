@@ -11,6 +11,10 @@
 #ifndef __GTKTEXTCTRLH__
 #define __GTKTEXTCTRLH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrl.h"
+#endif
+
 //-----------------------------------------------------------------------------
 // wxTextCtrl
 //-----------------------------------------------------------------------------
@@ -86,6 +90,7 @@ public:
 
     virtual void ShowPosition(long pos);
 
+#ifdef __WXGTK20__
     virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt, long *pos) const;
     virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
                                             wxTextCoord *col,
@@ -93,6 +98,7 @@ public:
     {
         return wxTextCtrlBase::HitTest(pt, col, row);
     }
+#endif // __WXGTK20__
 
     // Clipboard operations
     virtual void Copy();
@@ -139,15 +145,27 @@ public:
 
     GtkWidget* GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
+    void DoApplyWidgetStyle(GtkRcStyle *style);
     void CalculateScrollbar();
     void OnInternalIdle();
 
+#ifdef __WXGTK20__
     void SetUpdateFont(bool WXUNUSED(update)) { }
+#else // !__WXGTK20__
+    void SetUpdateFont(bool update) { m_updateFont = update; }
+    void UpdateFontIfNeeded();
+#endif // __WXGTK20__/!__WXGTK20__
+
+    void SetModified() { m_modified = true; }
 
     // GTK+ textctrl is so dumb that you need to freeze/thaw it manually to
     // avoid horrible flicker/scrolling back and forth
     virtual void Freeze();
     virtual void Thaw();
+
+    // textctrl specific scrolling
+    virtual bool ScrollLines(int lines);
+    virtual bool ScrollPages(int pages);
 
     // implementation only from now on
 
@@ -157,46 +175,51 @@ public:
     virtual void OnParentEnable( bool enable ) ;
 
     // tell the control to ignore next text changed signal
-    void IgnoreNextTextUpdate() { m_ignoreNextUpdate = true; }
+    void IgnoreNextTextUpdate();
 
     // should we ignore the changed signal? always resets the flag
     bool IgnoreTextUpdate();
-
-    // call this to indicate that the control is about to be changed
-    // programmatically and so m_modified flag shouldn't be set
-    void DontMarkDirtyOnNextChange() { m_dontMarkDirty = true; }
-
-    // should we mark the control as dirty? always resets the flag
-    bool MarkDirtyOnChange();
-
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     // common part of all ctors
     void Init();
+
+    // get the vertical adjustment, if any, NULL otherwise
+    GtkAdjustment *GetVAdj() const;
+
+    // scroll the control by the given number of pixels, return true if the
+    // scroll position changed
+    bool DoScroll(GtkAdjustment *adj, int diff);
 
     // Widgets that use the style->base colour for the BG colour should
     // override this and return true.
     virtual bool UseGTKStyleBase() const { return true; }
 
+#ifdef __WXGTK20__
     // has the control been frozen by Freeze()?
     bool IsFrozen() const { return m_frozenness > 0; }
+#endif
 
 private:
     // change the font for everything in this control
     void ChangeFontGlobally();
 
     GtkWidget  *m_text;
+    GtkWidget  *m_vScrollbar;
 
     bool        m_modified:1;
+    bool        m_vScrollbarVisible:1;
+#ifndef __WXGTK20__
+    bool        m_updateFont:1;
+#endif // !__WXGTK20__
     bool        m_ignoreNextUpdate:1;
-    bool        m_dontMarkDirty:1;
 
+#ifdef __WXGTK20__
     // Our text buffer. Convenient, and holds the buffer while using
     // a dummy one when m_frozenness > 0
     GtkTextBuffer *m_buffer;
@@ -208,6 +231,7 @@ private:
     void OnUrlMouseEvent(wxMouseEvent&);
     GdkCursor *m_gdkHandCursor;
     GdkCursor *m_gdkXTermCursor;
+#endif
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxTextCtrl)

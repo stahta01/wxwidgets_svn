@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/textctrl.cpp
+// Name:        msw/textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      Julian Smart
 // Modified by:
@@ -12,6 +12,10 @@
 // ============================================================================
 // declarations
 // ============================================================================
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrl.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -39,7 +43,6 @@
 #endif
 
 #include "wx/module.h"
-#include "wx/sysopt.h"
 
 #if wxUSE_CLIPBOARD
     #include "wx/clipbrd.h"
@@ -60,10 +63,6 @@
 #endif
 
 #if wxUSE_RICHEDIT
-
-#if wxUSE_INKEDIT
-#include "wx/dynlib.h"
-#endif
 
 // old mingw32 has richedit stuff directly in windows.h and doesn't have
 // richedit.h at all
@@ -99,29 +98,14 @@ public:
     // load the richedit DLL for the specified version of rich edit
     static bool Load(Version version);
 
-#if wxUSE_INKEDIT
-    // load the InkEdit library
-    static bool LoadInkEdit();
-#endif
-
 private:
     // the handles to richedit 1.0 and 2.0 (or 3.0) DLLs
     static HINSTANCE ms_hRichEdit[Version_Max];
-
-#if wxUSE_INKEDIT
-    static wxDynamicLibrary ms_inkEditLib;
-    static bool             ms_inkEditLibLoadAttemped;
-#endif
 
     DECLARE_DYNAMIC_CLASS(wxRichEditModule)
 };
 
 HINSTANCE wxRichEditModule::ms_hRichEdit[Version_Max] = { NULL, NULL, NULL };
-
-#if wxUSE_INKEDIT
-wxDynamicLibrary wxRichEditModule::ms_inkEditLib;
-bool             wxRichEditModule::ms_inkEditLibLoadAttemped = false;
-#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxRichEditModule, wxModule)
 
@@ -206,7 +190,7 @@ wxBEGIN_FLAGS( wxTextCtrlStyle )
     wxFLAGS_MEMBER(wxTE_CENTRE)
     wxFLAGS_MEMBER(wxTE_RIGHT)
     wxFLAGS_MEMBER(wxTE_DONTWRAP)
-    wxFLAGS_MEMBER(wxTE_CHARWRAP)
+    wxFLAGS_MEMBER(wxTE_LINEWRAP)
     wxFLAGS_MEMBER(wxTE_WORDWRAP)
 
 wxEND_FLAGS( wxTextCtrlStyle )
@@ -227,11 +211,11 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_6( wxTextCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , Value , wxPoint , Position , wxSize , Size , long , WindowStyle)
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 #endif
 
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
     EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
 
@@ -258,48 +242,9 @@ BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
     EVT_SET_FOCUS(wxTextCtrl::OnSetFocus)
 END_EVENT_TABLE()
 
-// ----------------------------------------------------------------------------
-// function prototypes
-// ----------------------------------------------------------------------------
-
-LRESULT APIENTRY _EXPORT wxTextCtrlWndProc(HWND hWnd,
-                                           UINT message,
-                                           WPARAM wParam,
-                                           LPARAM lParam);
-
-// ---------------------------------------------------------------------------
-// global vars
-// ---------------------------------------------------------------------------
-
-// the pointer to standard text control wnd proc
-static WNDPROC gs_wndprocEdit = (WNDPROC)NULL;
-
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// wnd proc for subclassed edit control
-// ----------------------------------------------------------------------------
-
-LRESULT APIENTRY _EXPORT wxTextCtrlWndProc(HWND hWnd,
-                                           UINT message,
-                                           WPARAM wParam,
-                                           LPARAM lParam)
-{
-    wxWindow *win = wxFindWinFromHandle((WXHWND)hWnd);
-
-    switch ( message )
-    {
-        case WM_CUT:
-        case WM_COPY:
-        case WM_PASTE:
-            if( win->HandleClipboardEvent( message ) )
-                return 0;
-            break;
-    }
-    return ::CallWindowProc(CASTWNDPROC gs_wndprocEdit, hWnd, message, wParam, lParam);
-}
 
 // ----------------------------------------------------------------------------
 // creation
@@ -310,10 +255,6 @@ void wxTextCtrl::Init()
 #if wxUSE_RICHEDIT
     m_verRichEdit = 0;
 #endif // wxUSE_RICHEDIT
-
-#if wxUSE_INKEDIT && wxUSE_RICHEDIT
-    m_isInkEdit = 0;
-#endif
 
     m_privateContextMenu = NULL;
     m_updatesCount = -1;
@@ -384,76 +325,49 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
         m_verRichEdit = m_windowStyle & wxTE_RICH2 ? 2 : 1;
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
-#if wxUSE_INKEDIT
-        // First test if we can load an ink edit control. Normally, all edit
-        // controls will be made ink edit controls if a tablet environment is
-        // found (or if msw.inkedit != 0 and the InkEd.dll is present).
-        // However, an application can veto ink edit controls by either specifying
-        // msw.inkedit = 0 or by removing wxTE_RICH[2] from the style.
-        //
-        if ((wxSystemSettings::HasFeature(wxSYS_TABLET_PRESENT) || wxSystemOptions::GetOptionInt(wxT("msw.inkedit")) != 0) &&
-            !(wxSystemOptions::HasOption(wxT("msw.inkedit")) && wxSystemOptions::GetOptionInt(wxT("msw.inkedit")) == 0))
+        if ( m_verRichEdit == 2 )
         {
-            if (wxRichEditModule::LoadInkEdit())
+            if ( wxRichEditModule::Load(wxRichEditModule::Version_41) )
             {
-                windowClass = INKEDIT_CLASS;
-
-#if wxUSE_INKEDIT && wxUSE_RICHEDIT
-                m_isInkEdit = 1;
-#endif
-
-                // Fake rich text version for other calls
-                m_verRichEdit = 2;
+                // yes, class name for version 4.1 really is 5.0
+                windowClass = _T("RICHEDIT50W");
+            }
+            else if ( wxRichEditModule::Load(wxRichEditModule::Version_2or3) )
+            {
+                windowClass = _T("RichEdit20")
+#if wxUSE_UNICODE
+                              _T("W");
+#else // ANSI
+                              _T("A");
+#endif // Unicode/ANSI
+            }
+            else // failed to load msftedit.dll and riched20.dll
+            {
+                m_verRichEdit = 1;
             }
         }
-#endif
 
-        if (!IsInkEdit())
+        if ( m_verRichEdit == 1 )
         {
-            if ( m_verRichEdit == 2 )
+            if ( wxRichEditModule::Load(wxRichEditModule::Version_1) )
             {
-                if ( wxRichEditModule::Load(wxRichEditModule::Version_41) )
-                {
-                    // yes, class name for version 4.1 really is 5.0
-                    windowClass = _T("RICHEDIT50W");
-                }
-                else if ( wxRichEditModule::Load(wxRichEditModule::Version_2or3) )
-                {
-                    windowClass = _T("RichEdit20")
-#if wxUSE_UNICODE
-                                _T("W");
-#else // ANSI
-                                _T("A");
-#endif // Unicode/ANSI
-                }
-                else // failed to load msftedit.dll and riched20.dll
-                {
-                    m_verRichEdit = 1;
-                }
+                windowClass = _T("RICHEDIT");
             }
-
-            if ( m_verRichEdit == 1 )
+            else // failed to load any richedit control DLL
             {
-                if ( wxRichEditModule::Load(wxRichEditModule::Version_1) )
+                // only give the error msg once if the DLL can't be loaded
+                static bool s_errorGiven = false; // MT ok as only used by GUI
+
+                if ( !s_errorGiven )
                 {
-                    windowClass = _T("RICHEDIT");
+                    wxLogError(_("Impossible to create a rich edit control, using simple text control instead. Please reinstall riched32.dll"));
+
+                    s_errorGiven = true;
                 }
-                else // failed to load any richedit control DLL
-                {
-                    // only give the error msg once if the DLL can't be loaded
-                    static bool s_errorGiven = false; // MT ok as only used by GUI
 
-                    if ( !s_errorGiven )
-                    {
-                        wxLogError(_("Impossible to create a rich edit control, using simple text control instead. Please reinstall riched32.dll"));
-
-                        s_errorGiven = true;
-                    }
-
-                    m_verRichEdit = 0;
-                }
+                m_verRichEdit = 0;
             }
-        } // !useInkEdit
+        }
     }
 #endif // wxUSE_RICHEDIT
 
@@ -472,25 +386,13 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
         return false;
 
 #if wxUSE_RICHEDIT
-    if (IsRich())
+    if ( IsRich() )
     {
-#if wxUSE_INKEDIT
-        if (IsInkEdit())
-        {
-            // Pass IEM_InsertText (0) as wParam, in order to have the ink always
-            // converted to text.
-            ::SendMessage(GetHwnd(), EM_SETINKINSERTMODE, 0, 0);
-
-            // Make sure the mouse can be used for input
-            ::SendMessage(GetHwnd(), EM_SETUSEMOUSEFORINPUT, 1, 0);
-        }
-#endif
-
         // enable the events we're interested in: we want to get EN_CHANGE as
         // for the normal controls
         LPARAM mask = ENM_CHANGE;
 
-        if (GetRichVersion() == 1 && !IsInkEdit())
+        if ( GetRichVersion() == 1 )
         {
             // we also need EN_MSGFILTER for richedit 1.0 for the reasons
             // explained in its handler
@@ -517,9 +419,6 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
         ::SendMessage(GetHwnd(), EM_SETEVENTMASK, 0, mask);
     }
 #endif // wxUSE_RICHEDIT
-
-    gs_wndprocEdit = wxSetWindowProc((HWND)GetHwnd(),
-                                     wxTextCtrlWndProc);
 
     return true;
 }
@@ -791,24 +690,20 @@ void wxTextCtrl::SetValue(const wxString& value)
     {
         DoWriteText(value, false /* not selection only */);
 
-        // mark the control as being not dirty - we changed its text, not the
-        // user
-        DiscardEdits();
-
         // for compatibility, don't move the cursor when doing SetValue()
         SetInsertionPoint(0);
     }
     else // same text
     {
-        // still reset the modified flag even if the value didn't really change
-        // because now it comes from the program and not the user (and do it
-        // before generating the event so that the event handler could get the
-        // expected value from IsModified())
-        DiscardEdits();
-
         // still send an event for consistency
         SendUpdateEvent();
     }
+
+    // we should reset the modified flag even if the value didn't really change
+
+    // mark the control as being not dirty - we changed its text, not the
+    // user
+    DiscardEdits();
 }
 
 #if wxUSE_RICHEDIT && (!wxUSE_UNICODE || wxUSE_UNICODE_MSLU)
@@ -1846,15 +1741,16 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
     switch ( event.GetKeyCode() )
     {
         case WXK_RETURN:
+            if ( !HasFlag(wxTE_MULTILINE) )
             {
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 InitCommandEvent(event);
                 event.SetString(GetValue());
                 if ( GetEventHandler()->ProcessEvent(event) )
-                if ( !HasFlag(wxTE_MULTILINE) )
                     return;
-                //else: multiline controls need Enter for themselves
             }
+            //else: multiline controls need Enter for themselves
+
             break;
 
         case WXK_TAB:
@@ -2768,10 +2664,6 @@ void wxRichEditModule::OnExit()
             ms_hRichEdit[i] = NULL;
         }
     }
-#if wxUSE_INKEDIT
-    if (ms_inkEditLib.IsLoaded())
-        ms_inkEditLib.Unload();
-#endif
 }
 
 /* static */
@@ -2810,23 +2702,6 @@ bool wxRichEditModule::Load(Version version)
 
     return true;
 }
-
-#if wxUSE_INKEDIT
-// load the InkEdit library
-bool wxRichEditModule::LoadInkEdit()
-{
-    static wxDynamicLibrary ms_inkEditLib;
-    static bool             ms_inkEditLibLoadAttemped;
-    if (ms_inkEditLibLoadAttemped)
-        ms_inkEditLib.IsLoaded();
-
-    ms_inkEditLibLoadAttemped = true;
-
-    wxLogNull logNull;
-    return ms_inkEditLib.Load(wxT("inked"));
-}
-#endif
-
 
 #endif // wxUSE_RICHEDIT
 

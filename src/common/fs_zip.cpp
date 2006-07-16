@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fs_zip.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -108,36 +114,25 @@ wxFSFile* wxZipFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& l
     s = new wxZipFSInputStream(leftFile);
     if (s && s->IsOk())
     {
-#if wxUSE_DATETIME
-       wxDateTime dtMod;
-#endif // wxUSE_DATETIME
-
        bool found = false;
        while (!found)
        {
            wxZipEntry *ent = s->GetNextEntry();
            if (!ent)
                break;
-
            if (ent->GetInternalName() == right)
-           {
                found = true;
-               dtMod = ent->GetDateTime();
-           }
-
            delete ent;
        }
        if (found)
-       {
            return new wxFSFile(s,
                             left + wxT("#zip:") + right,
                             GetMimeTypeFromExt(location),
                             GetAnchor(location)
 #if wxUSE_DATETIME
-                            , dtMod
+                            , wxDateTime(wxFileModificationTime(left))
 #endif // wxUSE_DATETIME
                             );
-       }
     }
 
     delete s;

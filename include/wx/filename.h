@@ -12,6 +12,10 @@
 #ifndef   _WX_FILENAME_H_
 #define   _WX_FILENAME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "filename.h"
+#endif
+
 /*
     TODO:
 
@@ -443,7 +447,7 @@ public:
         { return GetPath(withSep ? wxPATH_GET_SEPARATOR : 0, format); }
 #endif
     wxString GetPathWithSep(wxPathFormat format = wxPATH_NATIVE ) const
-        { return GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR, format); }
+        { return GetPath(wxPATH_GET_SEPARATOR, format); }
 
 private:
     // check whether this dir is valid for Append/Prepend/InsertDir()

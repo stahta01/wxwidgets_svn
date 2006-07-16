@@ -53,7 +53,13 @@ public:
     wxBitmap GetBitmap(int index) const;
     wxIcon GetIcon(int index) const;
       
+#ifdef __WXMSW__
     bool Replace(int index, const wxBitmap& bitmap, const wxBitmap& mask = wxNullBitmap);
+#else
+//      %Rename(ReplaceIcon,bool, Replace(int index, const wxIcon& icon));
+//      int Add(const wxBitmap& bitmap);
+    bool Replace(int index, const wxBitmap& bitmap);
+#endif
 
     bool Draw(int index, wxDC& dc, int x, int x, int flags = wxIMAGELIST_DRAW_NORMAL,
               const bool solidBackground = false);
@@ -64,7 +70,7 @@ public:
 
     DocDeclA(
         void, GetSize(int index, int& OUTPUT, int& OUTPUT),
-        "GetSize(index) -> (width,height)");
+        "GetSize() -> (width,height)");
         
 };
 

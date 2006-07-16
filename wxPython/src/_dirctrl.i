@@ -86,8 +86,7 @@ public:
     
     // Try to expand as much of the given path as possible.
     virtual bool ExpandPath(const wxString& path);
-    // collapse the path
-    virtual bool CollapsePath(const wxString& path);
+
 
     virtual inline wxString GetDefaultPath() const;
     virtual void SetDefaultPath(const wxString& path);

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/menuitem.cpp
+// Name:        menuitem.cpp
 // Purpose:     wxMenuItem implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menuitem.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,18 +30,19 @@
 
 #if wxUSE_MENUS
 
-#include "wx/menuitem.h"
-
 #ifndef WX_PRECOMP
     #include "wx/font.h"
     #include "wx/bitmap.h"
     #include "wx/settings.h"
+    #include "wx/font.h"
     #include "wx/window.h"
     #include "wx/accel.h"
-    #include "wx/string.h"
-    #include "wx/log.h"
     #include "wx/menu.h"
+    #include "wx/string.h"
 #endif
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #if wxUSE_ACCEL
     #include "wx/accel.h"
@@ -77,7 +82,7 @@ UINT GetMenuState(HMENU hMenu, UINT id, UINT flags) ;
 bool wxMenuItemStreamingCallback( const wxObject *object, wxWriter * , wxPersister * , wxxVariantArray & )
 {
     const wxMenuItem * mitem = dynamic_cast<const wxMenuItem*>(object) ;
-    if ( mitem->GetMenu() && !mitem->GetMenu()->GetTitle().empty() )
+    if ( mitem->GetMenu() && !mitem->GetMenu()->GetTitle().IsEmpty() )
     {
         // we don't stream out the first two items for menus with a title, they will be reconstructed
         if ( mitem->GetMenu()->FindItemByPosition(0) == mitem || mitem->GetMenu()->FindItemByPosition(1) == mitem )
@@ -398,7 +403,7 @@ void wxMenuItem::SetText(const wxString& text)
         info.cbSize = sizeof(info);
         info.fMask = MIIM_TYPE;
         info.fType = MFT_STRING;
-        info.cch = text.length();
+        info.cch = text.Length();
         info.dwTypeData = (LPTSTR) data ;
         if ( !::SetMenuItemInfo(hMenu, id, FALSE, & info) )
         {

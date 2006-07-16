@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_TOOLBAR_H_
 #define _WX_UNIV_TOOLBAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univtoolbar.h"
+#endif
+
 #include "wx/button.h"      // for wxStdButtonInputHandler
 
 class WXDLLEXPORT wxToolBarTool;
@@ -59,8 +63,6 @@ public:
 
     virtual bool Realize();
 
-    virtual void SetWindowStyleFlag( long style );
-
     virtual wxToolBarToolBase *FindToolForPosition(wxCoord x, wxCoord y) const;
 
     virtual void SetToolShortHelp(int id, const wxString& helpString);
@@ -68,10 +70,7 @@ public:
     virtual void SetMargins(int x, int y);
     void SetMargins(const wxSize& size)
         { SetMargins((int) size.x, (int) size.y); }
-
-    virtual bool PerformAction(const wxControlAction& action,
-                               long numArg = -1,
-                               const wxString& strArg = wxEmptyString);
+    
 protected:
     // common part of all ctors
     void Init();
@@ -94,6 +93,10 @@ protected:
                                           const wxString& longHelp);
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
+    // implement wxUniversal methods
+    virtual bool PerformAction(const wxControlAction& action,
+                               long numArg = -1,
+                               const wxString& strArg = wxEmptyString);
     virtual wxSize DoGetBestClientSize() const;
     virtual void DoSetSize(int x, int y,
                            int width, int height,

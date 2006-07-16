@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/bitmap.cpp
+// Name:        bitmap.cpp
 // Purpose:     wxBitmap
 // Author:      David Webster
 // Modified by:
@@ -9,10 +9,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "bitmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
-
-#include "wx/bitmap.h"
 
 #ifndef WX_PRECOMP
     #include <stdio.h>
@@ -22,13 +24,15 @@
     #include "wx/app.h"
     #include "wx/palette.h"
     #include "wx/dcmemory.h"
+    #include "wx/bitmap.h"
     #include "wx/icon.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/os2/private.h"
+#include "wx/log.h"
 
+//#include "wx/msw/dib.h"
+#include "wx/image.h"
 #include "wx/xpmdecod.h"
 
 // ----------------------------------------------------------------------------
@@ -90,7 +94,9 @@ void wxBitmap::Init()
     //
 } // end of wxBitmap::Init
 
-bool wxBitmap::CopyFromIconOrCursor(const wxGDIImage& rIcon)
+bool wxBitmap::CopyFromIconOrCursor(
+  const wxGDIImage&                 rIcon
+)
 {
     HPOINTER                        hIcon = (HPOINTER)rIcon.GetHandle();
     POINTERINFO                     SIconInfo;
@@ -387,12 +393,12 @@ bool wxBitmap::CreateFromXpm(
 #if wxUSE_IMAGE && wxUSE_XPM
     Init();
 
-    wxCHECK_MSG(ppData != NULL, false, wxT("invalid bitmap data"));
+    wxCHECK_MSG(ppData != NULL, false, wxT("invalid bitmap data"))
 
     wxXPMDecoder                    vDecoder;
     wxImage                         vImg = vDecoder.ReadData(ppData);
 
-    wxCHECK_MSG(vImg.Ok(), false, wxT("invalid bitmap data"));
+    wxCHECK_MSG(vImg.Ok(), false, wxT("invalid bitmap data"))
 
     *this = wxBitmap(vImg);
     return true;

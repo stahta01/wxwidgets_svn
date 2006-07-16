@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "radiobox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,19 +30,19 @@
 
 #if wxUSE_RADIOBOX
 
-#include "wx/radiobox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/bitmap.h"
     #include "wx/brush.h"
+    #include "wx/radiobox.h"
     #include "wx/settings.h"
     #include "wx/log.h"
-    #include "wx/radiobut.h"
 #endif
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
+
+#include "wx/radiobut.h"
 
 // TODO: wxCONSTRUCTOR
 #if 0 // wxUSE_EXTENDED_RTTI
@@ -112,9 +116,31 @@ void wxRadioBox::Init()
     m_size = wxSize(0,0);
 }
 
-unsigned int wxRadioBox::GetCount() const
+int wxRadioBox::GetCount() const
 {
     return m_radios.GetCount();
+}
+
+int wxRadioBox::GetColumnCount() const
+{
+    return 0;
+}
+
+int wxRadioBox::GetRowCount() const
+{
+    return 0;
+}
+
+// returns the number of rows
+int wxRadioBox::GetNumVer() const
+{
+    return 0;
+}
+
+// returns the number of columns
+int wxRadioBox::GetNumHor() const
+{
+    return 0;
 }
 
 bool wxRadioBox::Create(wxWindow *parent,
@@ -130,10 +156,8 @@ bool wxRadioBox::Create(wxWindow *parent,
                         const wxString& name)
 {
     // initialize members
-    SetMajorDim(majorDim == 0 ? n : majorDim, style);
-
-    if ( GetMajorDim() == 0 || n == 0 )
-        return false;
+    m_majorDim = majorDim == 0 ? n : wxMin(majorDim, n);
+    if(m_majorDim==0 || n==0) return false;
 
     // subtype of the native palmOS radio: checkbox or push button?
     const bool use_checkbox = style & wxRA_USE_CHECKBOX;
@@ -142,13 +166,12 @@ bool wxRadioBox::Create(wxWindow *parent,
     // get default size and position for the initial placement
     m_size = size;
     m_pos = pos;
-    int minor = n / GetMajorDim();
-    if(n % GetMajorDim() > 0)
-        minor++;
+    int minor = n / m_majorDim;
+    if(n % m_majorDim > 0) minor++;
     if(m_size.x==wxDefaultCoord)
-        m_size.x=36*(use_cols?GetMajorDim():minor);
+        m_size.x=36*(use_cols?m_majorDim:minor);
     if(m_size.y==wxDefaultCoord)
-        m_size.y=12*(use_cols?minor:GetMajorDim());
+        m_size.y=12*(use_cols?minor:m_majorDim);
     if(m_pos.x==wxDefaultCoord)
         m_pos.x=0;
     if(m_pos.y==wxDefaultCoord)
@@ -160,17 +183,17 @@ bool wxRadioBox::Create(wxWindow *parent,
         return false;
 
     int i = 0;
-    for ( unsigned int j = 0; j < minor; j++ )
+    for ( int j = 0; j < minor; j++ )
     {
-        for ( unsigned int k = 0; k < GetMajorDim(); k++ )
+        for ( int k = 0; k < m_majorDim; k++ )
         {
             if(i<n)
             {
                 wxPoint start, end;
-                start.x = (use_cols ? (k*m_size.x)/GetMajorDim() : (j*m_size.x)/minor);
-                start.y = (use_cols ? (j*m_size.y)/minor : (k*m_size.y)/GetMajorDim());
-                end.x = (use_cols ? ((k+1)*m_size.x)/GetMajorDim() : ((j+1)*m_size.x)/minor);
-                end.y = (use_cols ? ((j+1)*m_size.y)/minor : ((k+1)*m_size.y)/GetMajorDim());
+                start.x = (use_cols ? (k*m_size.x)/m_majorDim : (j*m_size.x)/minor);
+                start.y = (use_cols ? (j*m_size.y)/minor : (k*m_size.y)/m_majorDim);
+                end.x = (use_cols ? ((k+1)*m_size.x)/m_majorDim : ((j+1)*m_size.x)/minor);
+                end.y = (use_cols ? ((j+1)*m_size.y)/minor : ((k+1)*m_size.y)/m_majorDim);
                 wxRadioButton* rb = new wxRadioButton();
                 rb->SetGroup( id );
                 rb->Create(
@@ -238,23 +261,22 @@ void wxRadioBox::DoMoveWindow(int x, int y, int width, int height)
 
     const bool use_cols = HasFlag(wxRA_SPECIFY_COLS);
 
-    const unsigned int n = GetCount();
-    unsigned int minor = n / GetMajorDim();
-    if(n % GetMajorDim() > 0)
-        minor++;
+    const int n = GetCount();
+    int minor = n / m_majorDim;
+    if(n % m_majorDim > 0) minor++;
 
-    unsigned int i = 0;
-    for ( unsigned int j = 0; j < minor; j++ )
+    int i = 0;
+    for ( int j = 0; j < minor; j++ )
     {
-        for ( unsigned int k = 0; k < GetMajorDim(); k++ )
+        for ( int k = 0; k < m_majorDim; k++ )
         {
             if(i<n)
             {
                 wxPoint start, end;
-                start.x = (use_cols ? (k*m_size.x)/GetMajorDim() : (j*m_size.x)/minor);
-                start.y = (use_cols ? (j*m_size.y)/minor : (k*m_size.y)/GetMajorDim());
-                end.x = (use_cols ? ((k+1)*m_size.x)/GetMajorDim() : ((j+1)*m_size.x)/minor);
-                end.y = (use_cols ? ((j+1)*m_size.y)/minor : ((k+1)*m_size.y)/GetMajorDim());
+                start.x = (use_cols ? (k*m_size.x)/m_majorDim : (j*m_size.x)/minor);
+                start.y = (use_cols ? (j*m_size.y)/minor : (k*m_size.y)/m_majorDim);
+                end.x = (use_cols ? ((k+1)*m_size.x)/m_majorDim : ((j+1)*m_size.x)/minor);
+                end.y = (use_cols ? ((j+1)*m_size.y)/minor : ((k+1)*m_size.y)/m_majorDim);
                 wxRadioButton* rb = GetRadioButton(i);
                 if(rb)
                 {
@@ -275,7 +297,7 @@ wxPoint wxRadioBox::GetClientAreaOrigin() const
     return GetPosition();
 }
 
-void wxRadioBox::SetString(unsigned int item, const wxString& label)
+void wxRadioBox::SetString(int item, const wxString& label)
 {
     wxRadioButton *btn = GetRadioButton(item);
     if(btn)
@@ -293,7 +315,7 @@ int wxRadioBox::GetSelection() const
 }
 
 // Find string for position
-wxString wxRadioBox::GetString(unsigned int item) const
+wxString wxRadioBox::GetString(int item) const
 {
     wxRadioButton *btn = GetRadioButton(item);
     if(btn)
@@ -327,13 +349,13 @@ void wxRadioBox::SetFocus()
 // Enable all subcontrols
 bool wxRadioBox::Enable(bool enable)
 {
-    for(unsigned int i=0; i<GetCount(); i++)
+    for(int i=0; i<GetCount(); i++)
         Enable(i, enable);
     return true;
 }
 
 // Enable a specific button
-bool wxRadioBox::Enable(unsigned int item, bool enable)
+bool wxRadioBox::Enable(int item, bool enable)
 {
     wxRadioButton *btn = GetRadioButton(item);
     if(btn)
@@ -343,13 +365,13 @@ bool wxRadioBox::Enable(unsigned int item, bool enable)
 
 bool wxRadioBox::Show(bool show)
 {
-    for(unsigned int i=0; i<GetCount(); i++)
+    for(int i=0; i<GetCount(); i++)
         Show(i, show);
     return true;
 }
 
 // Show a specific button
-bool wxRadioBox::Show(unsigned int item, bool show)
+bool wxRadioBox::Show(int item, bool show)
 {
     wxRadioButton *btn = GetRadioButton(item);
     if(btn)

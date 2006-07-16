@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/mimetype.cpp
+// Name:        common/mimetype.cpp
 // Purpose:     classes and functions to manage MIME types
 // Author:      David Webster
 // Modified by:
@@ -12,28 +12,28 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_MIMETYPE
-
-#include "wx/os2/mimetype.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #if wxUSE_GUI
-        #include "wx/icon.h"
-    #endif
-#endif //WX_PRECOMP
-
 #define INCL_DOS
 #define INCL_GPI
 #define INCL_WIN
 #include <os2.h>
 
+#ifndef WX_PRECOMP
+  #include "wx/string.h"
+  #if wxUSE_GUI
+    #include "wx/icon.h"
+  #endif
+#endif //WX_PRECOMP
+
+#include "wx/log.h"
 #include "wx/file.h"
 #include "wx/iconloc.h"
+#include "wx/intl.h"
+#include "wx/dynarray.h"
 #include "wx/confbase.h"
+
+#if wxUSE_MIMETYPE
+
+#include "wx/os2/mimetype.h"
 
 // other standard headers
 #include <ctype.h>

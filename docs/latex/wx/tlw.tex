@@ -11,7 +11,7 @@
 
 \section{\class{wxTopLevelWindow}}\label{wxtoplevelwindow}
 
-wxTopLevelWindow is a common base class for \helpref{wxDialog}{wxdialog} and
+wxTopLevelWindow is a common base class for \helpref{wxDialog}{wxdialog} and 
 \helpref{wxFrame}{wxframe}. It is an abstract base class meaning that you never
 work with objects of this class directly, but all of its methods are also
 applicable for the two classes above.
@@ -28,16 +28,6 @@ applicable for the two classes above.
 
 
 \latexignore{\rtfignore{\wxheading{Members}}}
-
-\membersection{wxTopLevelWindow::CanSetTranslucency}\label{wxtoplevelwindowcansettranslucency}
-
-\func{virtual bool}{CanSetTranslucency}{\void}
-
-Returns \true if the platform supports making the window translucent.
-
-\wxheading{See also}
-
-\helpref{wxTopLevelWindow::SetTranslucency}{wxtoplevelwindowsettranslucency}
 
 
 \membersection{wxTopLevelWindow::GetIcon}\label{wxtoplevelwindowgeticon}
@@ -57,7 +47,7 @@ been previously set by \helpref{SetIcon}{wxtoplevelwindowseticon}.
 \constfunc{const wxIconBundle\&}{GetIcons}{\void}
 
 Returns all icons associated with the window, there will be none of them if
-neither \helpref{SetIcon}{wxtoplevelwindowseticon} nor
+neither \helpref{SetIcon}{wxtoplevelwindowseticon} nor 
 \helpref{SetIcons}{wxtoplevelwindowseticons} had been called before.
 
 Use \helpref{GetIcon}{wxtoplevelwindowgeticon} to get the main icon of the
@@ -74,18 +64,7 @@ window.
 
 Gets a string containing the window title.
 
-\wxheading{See also}
-
-\helpref{wxTopLevelWindow::SetTitle}{wxtoplevelwindowsettitle}
-
-
-\membersection{wxTopLevelWindow::HandleSettingChange}\label{wxtoplevelwindowhandlesettingchange}
-
-\func{virtual bool}{HandleSettingChange}{\param{WXWPARAM}{ wParam}, \param{WXLPARAM}{ lParam}}
-
-Unique to the wxWinCE port. Responds to showing/hiding SIP (soft input panel) area and resize
-window accordingly. Override this if you want to avoid resizing or do additional
-operations.
+See \helpref{wxTopLevelWindow::SetTitle}{wxtoplevelwindowsettitle}.
 
 
 \membersection{wxTopLevelWindow::IsActive}\label{wxtoplevelwindowisactive}
@@ -94,14 +73,6 @@ operations.
 
 Returns \true if this window is currently active, i.e. if the user is currently
 working with it.
-
-
-\membersection{wxTopLevelWindow::IsAlwaysMaximized}\label{wxtoplevelwindowisalwaysmaximized}
-
-\constfunc{virtual bool}{IsAlwaysMaximized}{\void}
-
-Returns \true if this window is expected to be always maximized, either due to platform policy
-or due to local policy regarding particular class.
 
 
 \membersection{wxTopLevelWindow::Iconize}\label{wxtoplevelwindowiconize}
@@ -262,7 +233,7 @@ If the platform supports it, sets the shape of the window to that
 depicted by {\it region}.  The system will not display or
 respond to any mouse event for the pixels that lie outside of the
 region.  To reset the window to the normal rectangular shape simply
-call {\it SetShape} again with an empty region.  Returns true if the
+call {\it SetShape} again with an empty region.  Returns TRUE if the
 operation is successful.
 
 
@@ -279,33 +250,6 @@ Sets the window title.
 \wxheading{See also}
 
 \helpref{wxTopLevelWindow::GetTitle}{wxtoplevelwindowgettitle}
-
-
-\membersection{wxTopLevelWindow::SetTranslucency}\label{wxtoplevelwindowsettranslucency}
-
-\func{virtual bool}{SetTranslucency}{\param{int }{ alpha}}
-
-If the platform supports it will set the window to be translucent
-
-\wxheading{Parameters}
-
-\docparam{alpha}{Determines how opaque or transparent the window will
-  be.  A value of 0 sets the window to be fully transparent, and a
-  value of 255 sets the window to be fully opaque.}
-
-Returns \true if the translucency was successfully changed.
-
-
-
-\membersection{wxTopLevelWindow::ShouldPreventAppExit}\label{wxtoplevelwindowshouldpreventappexit}
-
-\constfunc{virtual bool}{ShouldPreventAppExit}{\void}
-
-This virtual function is not meant to be called directly but can be overridden
-to return \false (it returns \true by default) to allow the application to
-close even if this, presumably not very important, window is still opened.
-By default, the application stays alive as long as there are any open top level
-windows.
 
 
 \membersection{wxTopLevelWindow::ShowFullScreen}\label{wxtoplevelwindowshowfullscreen}
@@ -334,3 +278,4 @@ Note that showing a window full screen also actually
 \wxheading{See also}
 
 \helpref{wxTopLevelWindow::IsFullScreen}{wxtoplevelwindowisfullscreen}
+

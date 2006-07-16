@@ -287,7 +287,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
                 AC_TRY_COMPILE([],
                     [
                         #ifndef __INTEL_COMPILER
-                        This is not ICC
+                        #error Not ICC
                         #endif
                     ],
                     bakefile_cv_prog_icc=yes,
@@ -329,7 +329,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
                [
                    #if (__GNUC__ < 3) || \
                        ((__GNUC__ == 3) && (__GNUC_MINOR__ < 1))
-                       This is old gcc
+                       #error old gcc
                    #endif
                ],
                [
@@ -674,16 +674,16 @@ AC_DEFUN([AC_BAKEFILE_PRECOMP_HEADERS],
             AC_TRY_COMPILE([],
                 [
                     #if !defined(__GNUC__) || !defined(__GNUC_MINOR__)
-                        There is no PCH support
+                        #error "no pch support"
                     #endif
                     #if (__GNUC__ < 3)
-                        There is no PCH support
+                        #error "no pch support"
                     #endif
                     #if (__GNUC__ == 3) && \
                        ((!defined(__APPLE_CC__) && (__GNUC_MINOR__ < 4)) || \
                        ( defined(__APPLE_CC__) && (__GNUC_MINOR__ < 3))) || \
                        ( defined(__INTEL_COMPILER) )
-                        There is no PCH support
+                        #error "no pch support"
                     #endif
                 ],
                 [
@@ -695,7 +695,7 @@ AC_DEFUN([AC_BAKEFILE_PRECOMP_HEADERS],
                         [
                             #if !defined(__INTEL_COMPILER) || \
                                 (__INTEL_COMPILER < 800)
-                                There is no PCH support
+                                #error "no pch support"
                             #endif
                         ],
                         [

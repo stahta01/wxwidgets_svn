@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statline.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,15 +28,12 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATLINE
-
 #include "wx/statline.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
+#if wxUSE_STATLINE
 
 #include "wx/palmos/private.h"
+#include "wx/log.h"
 
 #ifndef SS_SUNKEN
     #define SS_SUNKEN 0x00001000L
@@ -122,3 +123,4 @@ WXDWORD wxStaticLine::MSWGetStyle(long style, WXDWORD *exstyle) const
 }
 
 #endif // wxUSE_STATLINE
+

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cursor.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,19 +28,18 @@
     #pragma hdrstop
 #endif
 
-#include "wx/cursor.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/bitmap.h"
     #include "wx/icon.h"
+    #include "wx/cursor.h"
     #include "wx/settings.h"
     #include "wx/intl.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/module.h"
+#include "wx/image.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -111,7 +114,7 @@ wxCursor::~wxCursor()
 
 bool wxCursor::operator==(const wxCursor& cursor) const
 {
-    return false;
+    return FALSE;
 }
 
 wxGDIImageRefData *wxCursor::CreateData() const
@@ -131,3 +134,5 @@ const wxCursor *wxGetGlobalCursor()
 void wxSetCursor(const wxCursor& cursor)
 {
 }
+
+

@@ -73,8 +73,7 @@ that the handler name is equal to the control's name plus 'XmlHandler', for exam
 wxTextCtrlXmlHandler, wxHtmlWindowXmlHandler. The XML resource compiler
 (wxxrc) can create include file that contains initialization code for
 all controls used within the resource. Note that this handler should be
-allocated on the heap, since it will be delete by 
-\helpref{ClearHandlers}{wxxmlresourceclearhandlers} later.
+located on heap instead of stack, since it will get destroyed on shutdown.
 
 
 \membersection{wxXmlResource::AttachUnknownControl}\label{wxxmlresourceattachunknowncontrol}
@@ -89,8 +88,7 @@ Unknown controls are used in conjunction with <object class="unknown">.
 
 \func{void}{ClearHandlers}{\void}
 
-Removes all handlers and deletes them (this means that any handlers added using 
-\helpref{AddHandler}{wxxmlresourceaddhandler} must be allocated on the heap).
+Removes all handlers.
 
 
 \membersection{wxXmlResource::CompareVersion}\label{wxxmlresourcecompareversion}
@@ -124,14 +122,12 @@ Returns version information (a.b.c.d = d+ 256*c + 256\textasciicircum2*b + 256\t
 
 \membersection{wxXmlResource::GetXRCID}\label{wxxmlresourcegetxmlid}
 
-\func{int}{GetXRCID}{\param{const wxChar* }{str\_id}, \param{int }{value\_if\_not\_found = -2}}
+\func{int}{GetXRCID}{\param{const wxChar* }{str\_id}}
 
 Returns a numeric ID that is equivalent to the string ID used in an XML
-resource. If an unknown \arg{str\_id} is requested (i.e. other than wxID\_XXX
-or integer), a new record is created which associates the given string with
-a number. If \arg{value\_if\_not\_found} is \texttt{wxID\_NONE}, the number is obtained via
-\helpref{wxNewId()}{wxnewid}. Otherwise \arg{value\_if\_not\_found} is used.
-Macro {\tt XRCID(name)} is provided for convenient use in event tables.
+resource. To be used in event tables.
+The macro {\tt XRCID(name)} is provided for convenience.
+
 
 \membersection{wxXmlResource::InitAllHandlers}\label{wxxmlresourceinitallhandlers}
 

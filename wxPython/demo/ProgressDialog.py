@@ -43,11 +43,10 @@ class TestPanel(wx.Panel):
             wx.MilliSleep(250)
 
             if count >= max / 2:
-                (keepGoing, skip) = dlg.Update(count, "Half-time!")
+                keepGoing = dlg.Update(count, "Half-time!")
             else:
-                (keepGoing, skip) = dlg.Update(count)
+                keepGoing = dlg.Update(count)
 
-                
         dlg.Destroy()
 
 #---------------------------------------------------------------------------

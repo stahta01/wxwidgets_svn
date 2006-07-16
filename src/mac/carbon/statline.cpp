@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/statline.cpp
-// Purpose:     wxStaticLine class
+// Name:        generic/statline.cpp
+// Purpose:     a generic wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
 // Version:     $Id$
@@ -8,6 +8,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statline.h"
+#endif
+
+// For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -15,30 +28,34 @@
 #endif
 
 #include "wx/statline.h"
+#include "wx/statbox.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/statbox.h"
-#endif
+// ============================================================================
+// implementation
+// ============================================================================
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticLine, wxControl)
 
+// ----------------------------------------------------------------------------
+// wxStaticLine
+// ----------------------------------------------------------------------------
 
 bool wxStaticLine::Create( wxWindow *parent,
-    wxWindowID id,
-    const wxPoint &pos,
-    const wxSize &size,
-    long style,
-    const wxString &name )
+                           wxWindowID id,
+                           const wxPoint &pos,
+                           const wxSize &size,
+                           long style,
+                           const wxString &name)
 {
-    if ( !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ) )
-        return false;
+    if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
+        return FALSE;
 
-    // this is ugly but it's better than nothing:
-    // use a thin static box to emulate static line
+    // ok, this is ugly but it's better than nothing: use a thin static box to
+    // emulate static line
 
-    wxSize sizeReal = AdjustSize( size );
+    wxSize sizeReal = AdjustSize(size);
 
-//    m_statbox = new wxStaticBox( parent, id, wxT(""), pos, sizeReal, style, name );
+//    m_statbox = new wxStaticBox(parent, id, wxT(""), pos, sizeReal, style, name);
 
-    return true;
+    return TRUE;
 }

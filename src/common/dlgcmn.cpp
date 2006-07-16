@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dlgcmn.cpp
+// Name:        common/dlgcmn.cpp
 // Purpose:     common (to all ports) wxDialog functions
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dialogbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,20 +28,17 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
     #include "wx/button.h"
+    #include "wx/dialog.h"
     #include "wx/dcclient.h"
     #include "wx/intl.h"
     #include "wx/settings.h"
     #include "wx/stattext.h"
     #include "wx/sizer.h"
+    #include "wx/button.h"
     #include "wx/containr.h"
 #endif
-
-#include "wx/statline.h"
-#include "wx/sysopt.h"
 
 #if wxUSE_STATTEXT
 
@@ -111,8 +112,7 @@ void wxDialogBase::Init()
 {
     m_returnCode = 0;
     m_affirmativeId = wxID_OK;
-    m_escapeId = wxID_ANY;
-
+    
     // the dialogs have this flag on by default to prevent the events from the
     // dialog controls from reaching the parent frame which is usually
     // undesirable and can lead to unexpected and hard to find bugs
@@ -278,12 +278,11 @@ Wrap(int width)
 
 #endif // wxUSE_STATTEXT
 
-wxSizer *wxDialogBase::CreateButtonSizer( long flags, bool separated, wxCoord distance )
+#if wxUSE_BUTTON
+
+wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 {
 #ifdef __SMARTPHONE__
-    wxUnusedVar(separated);
-    wxUnusedVar(distance);
-
     wxDialog* dialog = (wxDialog*) this;
     if (flags & wxOK){
         dialog->SetLeftMenu(wxID_OK);
@@ -302,64 +301,14 @@ wxSizer *wxDialogBase::CreateButtonSizer( long flags, bool separated, wxCoord di
     }
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     return sizer;
-
-#else // !__SMARTPHONE__
-
-#ifdef __POCKETPC__
-    // PocketPC guidelines recommend for Ok/Cancel dialogs to use
-    // OK button located inside caption bar and implement Cancel functionality
-    // through Undo outside dialog. As native behaviour this will be default
-    // here but can be easily replaced with real wxButtons
-    // with "wince.dialog.real-ok-cancel" option set to 1
-    if ( ((flags & ~(wxCANCEL|wxNO_DEFAULT))== wxOK) &&
-         (wxSystemOptions::GetOptionInt(wxT("wince.dialog.real-ok-cancel"))==0)
-       )
-    {
-        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-        return sizer;
-    }
-#endif // __POCKETPC__
-
-#if wxUSE_BUTTON
-
-    wxSizer* buttonSizer = CreateStdDialogButtonSizer( flags );
-
-    // Mac Human Interface Guidelines recommend not to use static lines as grouping elements
-#if wxUSE_STATLINE && !defined(__WXMAC__)
-    if(!separated)
-        return buttonSizer;
-
-    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxBOTTOM, distance );
-    topsizer->Add( buttonSizer, 0, wxEXPAND );
-    return topsizer;
-
-#else // !wxUSE_STATLINE
-
-    wxUnusedVar(separated);
-    wxUnusedVar(distance);
-    return buttonSizer;
-
-#endif // wxUSE_STATLINE/!wxUSE_STATLINE
-
-#else // !wxUSE_BUTTON
-
-    wxUnusedVar(separated);
-    wxUnusedVar(distance);
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    return sizer;
-
-#endif // wxUSE_BUTTON/!wxUSE_BUTTON
-
-#endif // __SMARTPHONE__/!__SMARTPHONE__
+#else
+    return CreateStdDialogButtonSizer( flags );
+#endif
 }
-
-#if wxUSE_BUTTON
 
 wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
 {
     wxStdDialogButtonSizer *sizer = new wxStdDialogButtonSizer();
-
     wxButton *ok = NULL;
     wxButton *yes = NULL;
     wxButton *no = NULL;
@@ -420,5 +369,6 @@ wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
 
     return sizer;
 }
+
 
 #endif // wxUSE_BUTTON

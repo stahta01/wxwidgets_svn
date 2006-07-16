@@ -6,17 +6,15 @@
 // Created:     2003/07/03
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/brush.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
-    #include "wx/colour.h"
+    #include "wx/brush.h"
 #endif //WX_PRECOMP
+#include "wx/colour.h"
 
 #import <AppKit/NSColor.h>
 
@@ -217,3 +215,4 @@ WX_NSColor wxBrush::GetNSColor()
         return [NSColor clearColor];
     return M_BRUSHDATA->GetNSColor();
 }
+

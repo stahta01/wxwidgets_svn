@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtglbtn.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -61,7 +65,6 @@ wxToggleButton::~wxToggleButton()
 
 void wxToggleButton::Init()
 {
-    m_isPressed = false;
     m_value = false;
 }
 
@@ -81,14 +84,8 @@ void wxToggleButton::Toggle()
     }
 }
 
-void wxToggleButton::Click()
-{
-    wxCommandEvent event(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, GetId());
-    InitCommandEvent(event);
-    event.SetInt(GetValue());
-    Command(event);
-}
-
+// void SetValue(bool state)
+// Set the value of the toggle button.
 void wxToggleButton::SetValue(bool state)
 {
     m_value = state;

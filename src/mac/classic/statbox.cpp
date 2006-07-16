@@ -1,19 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/statbox.cpp
+// Name:        statbox.cpp
 // Purpose:     wxStaticBox
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "statbox.h"
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/statbox.h"
 #include "wx/mac/uma.h"
@@ -27,7 +27,7 @@ END_EVENT_TABLE()
 /*
  * Static box
  */
-
+ 
 bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
            const wxString& label,
            const wxPoint& pos,
@@ -41,13 +41,13 @@ bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
 
     Rect bounds ;
     Str255 title ;
-
+    
     MacPreControlCreate( parent , id ,  label , pos , size ,style, wxDefaultValidator , name , &bounds , title ) ;
-
-    m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1,
+    
+    m_macControl = (WXWidget) ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1, 
         kControlGroupBoxTextTitleProc , (long) this ) ;
-
+    
     MacPostControlCreate() ;
-
-    return true;
+    
+    return TRUE;
 }

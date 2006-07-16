@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/scrolbar.cpp
+// Name:        univ/scrolbar.cpp
 // Purpose:     wxScrollBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univscrolbar.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,13 +29,12 @@
 
 #if wxUSE_SCROLLBAR
 
-#include "wx/scrolbar.h"
-
 #ifndef WX_PRECOMP
     #include "wx/timer.h"
+
     #include "wx/dcclient.h"
+    #include "wx/scrolbar.h"
     #include "wx/validate.h"
-    #include "wx/log.h"
 #endif
 
 #include "wx/univ/scrtimer.h"
@@ -39,6 +42,7 @@
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
 #include "wx/univ/theme.h"
+#include "wx/log.h"
 
 #define WXDEBUG_SCROLLBAR
 
@@ -717,8 +721,10 @@ bool wxStdScrollBarInputHandler::HandleKey(wxInputConsumer *consumer,
             case WXK_LEFT:      action = wxACTION_SCROLL_LINE_UP;   break;
             case WXK_HOME:      action = wxACTION_SCROLL_START;     break;
             case WXK_END:       action = wxACTION_SCROLL_END;       break;
-            case WXK_PAGEUP:    action = wxACTION_SCROLL_PAGE_UP;   break;
-            case WXK_PAGEDOWN:  action = wxACTION_SCROLL_PAGE_DOWN; break;
+            case WXK_PAGEUP:
+            case WXK_PRIOR:     action = wxACTION_SCROLL_PAGE_UP;   break;
+            case WXK_PAGEDOWN:
+            case WXK_NEXT:      action = wxACTION_SCROLL_PAGE_DOWN; break;
         }
 
         if ( !action.IsEmpty() )
@@ -907,8 +913,6 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
 
 #endif // wxUSE_SCROLLBAR
 
-#if wxUSE_TIMER
-
 // ----------------------------------------------------------------------------
 // wxScrollTimer
 // ----------------------------------------------------------------------------
@@ -952,4 +956,3 @@ void wxScrollTimer::Notify()
     }
 }
 
-#endif // wxUSE_TIMER

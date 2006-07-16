@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_fonts.cpp
+// Name:        m_fonts.cpp
 // Purpose:     wxHtml module for fonts & colors of fonts
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,13 +7,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
 #endif
@@ -67,8 +72,13 @@ TAG_HANDLER_BEGIN(FONT, "FONT" )
         if (tag.HasParam(wxT("FACE")))
         {
             if (m_Faces.GetCount() == 0)
-                m_Faces = wxFontEnumerator::GetFacenames();
-
+            {
+                wxFontEnumerator enu;
+                enu.EnumerateFacenames();
+                const wxArrayString *faces = enu.GetFacenames();
+                if ( faces )
+                    m_Faces = *faces;
+            }
             wxStringTokenizer tk(tag.GetParam(wxT("FACE")), wxT(","));
             int index;
 

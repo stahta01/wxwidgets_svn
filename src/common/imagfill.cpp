@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagfill.cpp
+// Name:        imagfill.cpp
 // Purpose:     FloodFill for wxImage
 // Author:      Julian Smart
 // RCS-ID:      $Id$
@@ -15,14 +15,17 @@
     #pragma hdrstop
 #endif
 
+#include "wx/defs.h"
+
 #if wxUSE_IMAGE && !defined(__WXMSW__)
 // we have no use for this code in wxMSW...
+
+#include "wx/image.h"
 
 #ifndef WX_PRECOMP
     #include "wx/brush.h"
     #include "wx/dc.h"
     #include "wx/dcmemory.h"
-    #include "wx/image.h"
 #endif
 
 // DoFloodFill

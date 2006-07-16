@@ -11,6 +11,10 @@
 #ifndef __GTKSPINCTRLH__
 #define __GTKSPINCTRLH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_SPINCTRL
@@ -24,7 +28,7 @@
 class WXDLLIMPEXP_CORE wxSpinCtrl : public wxControl
 {
 public:
-    wxSpinCtrl();
+    wxSpinCtrl() {}
     wxSpinCtrl(wxWindow *parent,
                wxWindowID id = -1,
                const wxString& value = wxEmptyString,
@@ -65,7 +69,8 @@ public:
     void GtkDisableEvents();
     void GtkEnableEvents();
 
-    int m_pos;
+    GtkAdjustment  *m_adjust;
+    float           m_oldPos;
 
 protected:
     virtual wxSize DoGetBestSize() const;

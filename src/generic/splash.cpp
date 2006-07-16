@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/splash.cpp
+// Name:        splash.cpp
 // Purpose:     wxSplashScreen class
 // Author:      Julian Smart
 // Modified by:
@@ -9,11 +9,15 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "splash.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_SPLASH
@@ -22,12 +26,13 @@
     #include <gtk/gtk.h>
 #endif
 
+#ifndef WX_PRECOMP
+#include "wx/dcmemory.h"
+#include "wx/dcclient.h"
+#endif
+
 #include "wx/splash.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
-#endif
 
 /*
  * wxSplashScreen
@@ -35,7 +40,7 @@
 
 #define wxSPLASH_TIMER_ID 9999
 
-IMPLEMENT_DYNAMIC_CLASS(wxSplashScreen, wxFrame)
+IMPLEMENT_DYNAMIC_CLASS(wxSplashScreen, wxFrame);
 
 BEGIN_EVENT_TABLE(wxSplashScreen, wxFrame)
     EVT_TIMER(wxSPLASH_TIMER_ID, wxSplashScreen::OnNotify)

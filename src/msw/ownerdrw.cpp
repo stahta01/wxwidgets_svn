@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ownerdrw.cpp
+// Name:        msw/ownerdrw.cpp
 // Purpose:     implementation of wxOwnerDrawn class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,26 +9,31 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+#include "wx/msw/private.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/msw/private.h"
-    #include "wx/font.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/menu.h"
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-    #include "wx/menuitem.h"
+  #include "wx/window.h"
+  #include "wx/msw/private.h"
+  #include "wx/font.h"
+  #include "wx/bitmap.h"
+  #include "wx/dcmemory.h"
+  #include "wx/menu.h"
+  #include "wx/utils.h"
 #endif
 
+#include "wx/settings.h"
 #include "wx/ownerdrw.h"
+#include "wx/menuitem.h"
 #include "wx/fontutil.h"
 #include "wx/module.h"
 
@@ -92,6 +97,12 @@ bool wxMSWSystemMenuFontModule::ms_showCues = true;
 IMPLEMENT_DYNAMIC_CLASS(wxMSWSystemMenuFontModule, wxModule)
 
 
+// temporary hack to implement wxOwnerDrawn::IsMenuItem() without breaking
+// backwards compatibility
+#if wxCHECK_VERSION(2, 7, 0)
+    #pragma warning "TODO: remove gs_menuItems hack"
+#endif
+
 // VC++ 6 gives a warning here:
 //
 //      return type for 'OwnerDrawnSet_wxImplementation_HashTable::iterator::
@@ -114,6 +125,8 @@ WX_DECLARE_HASH_SET(wxOwnerDrawn*, wxPointerHash, wxPointerEqual, OwnerDrawnSet)
     #pragma warning(pop)
 #endif
 
+static OwnerDrawnSet gs_menuItems;
+
 // ============================================================================
 // implementation of wxOwnerDrawn class
 // ============================================================================
@@ -125,7 +138,7 @@ wxOwnerDrawn::wxOwnerDrawn(const wxString& str,
                            bool bMenuItem)
             : m_strName(str)
 {
-    if ( ms_nDefaultMarginWidth == 0 )
+    if (ms_nDefaultMarginWidth == 0)
     {
        ms_nDefaultMarginWidth = ::GetSystemMetrics(SM_CXMENUCHECK) +
                                 wxSystemSettings::GetMetric(wxSYS_EDGE_X);
@@ -134,19 +147,32 @@ wxOwnerDrawn::wxOwnerDrawn(const wxString& str,
 
     m_bCheckable   = bCheckable;
     m_bOwnerDrawn  = false;
-    m_isMenuItem   = bMenuItem;
     m_nHeight      = 0;
     m_nMarginWidth = ms_nLastMarginWidth;
     m_nMinHeight   = wxMSWSystemMenuFontModule::ms_systemMenuHeight;
+
+    m_bmpDisabled = wxNullBitmap;
+
+    // TODO: we can't add new m_isMenuItem field in 2.6, so we use this hack
+    //       with the map, but do add m_isMenuItem in 2.7
+    if ( bMenuItem )
+    {
+        gs_menuItems.insert(this);
+    }
 }
 
 wxOwnerDrawn::~wxOwnerDrawn()
 {
+    // TODO: remove this in 2.7
+    gs_menuItems.erase(this);
 }
 
 bool wxOwnerDrawn::IsMenuItem() const
 {
-    return m_isMenuItem;
+    // TODO: in 2.7, replace this with simple "return m_isMenuItem"
+
+    // some versions of mingw have problems without const_cast when wxUSE_STL=1
+    return gs_menuItems.count(wx_const_cast(wxOwnerDrawn *, this)) == 1;
 }
 
 
@@ -191,7 +217,7 @@ bool wxOwnerDrawn::OnMeasureItem(size_t *pwidth, size_t *pheight)
         // placed on top of each other.
         if ( !m_strAccel.empty() )
         {
-            str.Pad(str.length()%8);
+            str.Pad(str.Length()%8);
             str += m_strAccel;
         }
 
@@ -352,7 +378,7 @@ bool wxOwnerDrawn::OnDrawItem(wxDC& dc,
         xText += 3; // separate text from the highlight rectangle
 
         SIZE sizeRect;
-        ::GetTextExtentPoint32(hdc, strMenuText.c_str(), strMenuText.length(), &sizeRect);
+        ::GetTextExtentPoint32(hdc, strMenuText.c_str(), strMenuText.Length(), &sizeRect);
         ::DrawState(hdc, NULL, NULL,
                     (LPARAM)strMenuText.c_str(), strMenuText.length(),
                     xText, rc.y + (int) ((rc.GetHeight()-sizeRect.cy)/2.0), // centre text vertically
@@ -464,3 +490,4 @@ bool wxOwnerDrawn::OnDrawItem(wxDC& dc,
 
 
 #endif // wxUSE_OWNER_DRAWN
+

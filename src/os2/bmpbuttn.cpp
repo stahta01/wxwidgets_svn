@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/bmpbuttn.cpp
+// Name:        bmpbuttn.cpp
 // Purpose:     wxBitmapButton
 // Author:      David Webster
 // Modified by:
@@ -14,9 +14,8 @@
 
 #if wxUSE_BMPBUTTON
 
-#include "wx/bmpbuttn.h"
-
 #ifndef WX_PRECOMP
+#include "wx/bmpbuttn.h"
 #endif
 
 #include "wx/os2/private.h"
@@ -53,20 +52,20 @@ bool wxBitmapButton::Create( wxWindow*          pParent,
         m_marginY = wxDEFAULT_BUTTON_MARGIN;
     }
 
-    int nX      = rPos.x;
-    int nY      = rPos.y;
-    int nWidth  = rSize.x;
-    int nHeight = rSize.y;
+    int                             nX      = rPos.x;
+    int                             nY      = rPos.y;
+    int                             nWidth  = rSize.x;
+    int                             nHeight = rSize.y;
 
-    if (vId == wxID_ANY)
+    if (vId == -1)
         m_windowId = NewControlId();
     else
         m_windowId = vId;
 
-    if (nWidth == wxDefaultCoord && rBitmap.Ok())
+    if (nWidth == -1 && rBitmap.Ok())
         nWidth = rBitmap.GetWidth() + 4 * m_marginX;
 
-    if (nHeight == wxDefaultCoord && rBitmap.Ok())
+    if (nHeight == -1 && rBitmap.Ok())
         nHeight = rBitmap.GetHeight() + 4 * m_marginY;
 
     ULONG                           ulOS2Style = WS_VISIBLE | WS_TABSTOP | BS_USERBUTTON;
@@ -101,15 +100,15 @@ bool wxBitmapButton::Create( wxWindow*          pParent,
 
 bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
 {
-    PUSERBUTTON  pUser     = (PUSERBUTTON)pItem;
-    bool         bAutoDraw = (GetWindowStyleFlag() & wxBU_AUTODRAW) != 0;
+    PUSERBUTTON                     pUser     = (PUSERBUTTON)pItem;
+    bool                            bAutoDraw = (GetWindowStyleFlag() & wxBU_AUTODRAW) != 0;
 
     if (!pUser)
-        return false;
+        return FALSE;
 
-    wxBitmap*  pBitmap;
-    bool       bIsSelected = pUser->fsState & BDS_HILITED;
-    wxClientDC vDc(this);
+    wxBitmap*                       pBitmap;
+    bool                            bIsSelected = pUser->fsState & BDS_HILITED;
+    wxClientDC                      vDc(this);
 
     if (bIsSelected && m_bmpSelected.Ok())
         pBitmap = &m_bmpSelected;
@@ -121,7 +120,7 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
         pBitmap = &m_bmpNormal;
 
     if (!pBitmap->Ok() )
-        return false;
+        return FALSE;
 
 
     //

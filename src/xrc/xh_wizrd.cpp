@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_wizrd.cpp
+// Name:        xh_wizrd.cpp
 // Purpose:     XRC resource for wxWizard
 // Author:      Vaclav Slavik
 // Created:     2003/03/01
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_wizrd.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,11 +22,7 @@
 #if wxUSE_XRC && wxUSE_WIZARDDLG
 
 #include "wx/xrc/xh_wizrd.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
-
+#include "wx/log.h"
 #include "wx/wizard.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxWizardXmlHandler, wxXmlResourceHandler)
@@ -59,7 +59,8 @@ wxObject *wxWizardXmlHandler::DoCreateResource()
     }
     else
     {
-        wxWizardPage *page;
+        wxWizardPage *page = NULL;
+        wxUnusedVar(page);
 
         if (m_class == wxT("wxWizardPageSimple"))
         {
@@ -72,14 +73,13 @@ wxObject *wxWizardXmlHandler::DoCreateResource()
         }
         else /*if (m_class == wxT("wxWizardPage"))*/
         {
-            if ( !m_instance )
-            {
+            wxWizardPage *p = NULL;
+            if (m_instance)
+                p = wxStaticCast(m_instance, wxWizardPage);
+            else
                 wxLogError(wxT("wxWizardPage is abstract class, must be subclassed"));
-                return NULL;
-            }
-
-            page = wxStaticCast(m_instance, wxWizardPage);
-            page->Create(m_wizard, GetBitmap());
+            p->Create(m_wizard, GetBitmap());
+            page = p;
         }
 
         page->SetName(GetName());

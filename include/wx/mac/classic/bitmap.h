@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "bitmap.h"
+#endif
+
 #include "wx/palette.h"
 
 // Bitmap
@@ -133,6 +137,11 @@ class WXDLLEXPORT wxBitmap: public wxBitmapBase
 public:
   wxBitmap(); // Platform-specific
 
+  // Copy constructors
+  wxBitmap(const wxBitmap& bitmap)
+      : wxBitmapBase()
+  { Ref(bitmap); }
+
   // Initialize with raw data.
   wxBitmap(const char bits[], int width, int height, int depth = 1);
 
@@ -189,6 +198,7 @@ public:
 
   int GetBitmapType() const;
   
+  inline wxBitmap& operator = (const wxBitmap& bitmap) { if (*this == bitmap) return (*this); Ref(bitmap); return *this; }
   inline bool operator == (const wxBitmap& bitmap) const { return m_refData == bitmap.m_refData; }
   inline bool operator != (const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
 

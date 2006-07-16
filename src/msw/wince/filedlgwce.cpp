@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "filedlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,12 +33,11 @@
 
 #if wxUSE_FILEDLG && defined(__SMARTPHONE__) && defined(__WXWINCE__)
 
-#include "wx/filedlg.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/msgdlg.h"
     #include "wx/dialog.h"
+    #include "wx/filedlg.h"
     #include "wx/filefn.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -68,14 +71,12 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
                            const wxString& defaultFileName,
                            const wxString& wildCard,
                            long style,
-                           const wxPoint& WXUNUSED(pos),
-                           const wxSize& WXUNUSED(sz),
-                           const wxString& WXUNUSED(name))
+                           const wxPoint& WXUNUSED(pos))
 {
     m_message = message;
-    m_windowStyle = style;
-    if ( ( m_windowStyle & wxFD_MULTIPLE ) && ( m_windowStyle & wxFD_SAVE ) )
-        m_windowStyle &= ~wxFD_MULTIPLE;
+    m_dialogStyle = style;
+    if ( ( m_dialogStyle & wxMULTIPLE ) && ( m_dialogStyle & wxSAVE ) )
+        m_dialogStyle &= ~wxMULTIPLE;
     m_parent = parent;
     m_path = wxEmptyString;
     m_fileName = defaultFileName;
@@ -117,12 +118,16 @@ int wxFileDialog::ShowModal()
         parentWindow = wxTheApp->GetTopWindow();
 
     wxString str = wxGetTextFromUser(m_message, _("File"), m_fileName, parentWindow);
-    if (str.empty())
+    if (str)
+    {
+        m_fileName = str;
+        m_fileNames.Add(str);
+        return wxID_OK;
+    }
+    else
+    {
         return wxID_CANCEL;
-
-    m_fileName = str;
-    m_fileNames.Add(str);
-    return wxID_OK;
+    }
 }
 
 void wxFileDialog::GetFilenames(wxArrayString& files) const

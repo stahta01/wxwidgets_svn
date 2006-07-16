@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcmemory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,12 +28,12 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dcmemory.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/log.h"
 #endif
+
+#include "wx/dcmemory.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -88,3 +92,4 @@ static void wxDrawRectangle(wxDC& dc, wxCoord x, wxCoord y, wxCoord width, wxCoo
 void wxMemoryDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 {
 }
+

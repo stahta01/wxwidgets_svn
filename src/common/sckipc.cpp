@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/sckipc.cpp
+// Name:        sckipc.cpp
 // Purpose:     Interprocess communication implementation (wxSocket version)
 // Author:      Julian Smart
 // Modified by: Guilhem Lavaux (big rewrite) May 1997, 1998
@@ -22,28 +22,31 @@
 // headers
 // --------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sckipc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/log.h"
 #endif
 
 #if wxUSE_SOCKETS && wxUSE_IPC && wxUSE_STREAMS
-
-#include "wx/sckipc.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/event.h"
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 
 #include "wx/socket.h"
+#include "wx/sckipc.h"
 #include "wx/module.h"
+#include "wx/event.h"
 
 // --------------------------------------------------------------------------
 // macros and constants
@@ -164,14 +167,14 @@ wxConnectionBase *wxTCPClient::MakeConnection (const wxString& host,
                                                const wxString& serverName,
                                                const wxString& topic)
 {
-  wxSockAddress *addr = GetAddressFromName(serverName, host);
-  if ( !addr )
-      return NULL;
-
   wxSocketClient *client = new wxSocketClient(SCKIPC_FLAGS);
   wxSocketStream *stream = new wxSocketStream(*client);
   wxDataInputStream *data_is = new wxDataInputStream(*stream);
   wxDataOutputStream *data_os = new wxDataOutputStream(*stream);
+
+  wxSockAddress *addr = GetAddressFromName(serverName, host);
+  if ( !addr )
+      return NULL;
 
   bool ok = client->Connect(*addr);
   delete addr;
@@ -753,4 +756,4 @@ IMPLEMENT_DYNAMIC_CLASS(wxTCPEventHandlerModule, wxModule)
 
 
 #endif
-   // wxUSE_SOCKETS && wxUSE_IPC && wxUSE_STREAMS
+    // wxUSE_SOCKETS && wxUSE_IPC

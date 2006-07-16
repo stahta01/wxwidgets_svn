@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_choic.cpp
+// Name:        xh_choic.cpp
 // Purpose:     XRC resource for wxChoice
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_choic.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,14 +19,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_CHOICE
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_choic.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/choice.h"
-#endif
+#include "wx/choice.h"
+#include "wx/intl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxChoiceXmlHandler, wxXmlResourceHandler)
 
@@ -95,4 +96,4 @@ bool wxChoiceXmlHandler::CanHandle(wxXmlNode *node)
            (m_insideBox && node->GetName() == wxT("item")));
 }
 
-#endif // wxUSE_XRC && wxUSE_CHOICE
+#endif // wxUSE_XRC

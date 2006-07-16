@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      src/msw/region.cpp
+// Name:      msw/region.cpp
 // Purpose:   wxRegion implementation using Win32 API
 // Author:    Vadim Zeitlin
 // Modified by:
@@ -17,18 +17,19 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "region.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include "wx/region.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
-#endif
+#include "wx/gdicmn.h"
 
 #include "wx/msw/private.h"
 
@@ -494,3 +495,4 @@ wxCoord wxRegionIterator::GetH() const
 
     return m_rects[m_current].height;
 }
+

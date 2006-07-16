@@ -197,7 +197,7 @@ false if an error occurred, true otherwise
 
 \membersection{wxHtmlWindow::OnCellClicked}\label{wxhtmlwindowoncellclicked}
 
-\func{virtual bool}{OnCellClicked}{\param{wxHtmlCell }{*cell}, \param{wxCoord }{x}, \param{wxCoord }{y}, \param{const wxMouseEvent\& }{event}}
+\func{virtual void}{OnCellClicked}{\param{wxHtmlCell }{*cell}, \param{wxCoord }{x}, \param{wxCoord }{y}, \param{const wxMouseEvent\& }{event}}
 
 This method is called when a mouse button is clicked inside wxHtmlWindow.
 The default behaviour is to call 
@@ -212,10 +212,6 @@ hypertext link.
 \docparam{x, y}{The logical coordinates of the click point}
 
 \docparam{event}{The mouse event containing other information about the click}
-
-\wxheading{Return value}
-
-\true if a link was clicked, \false otherwise.
 
 \membersection{wxHtmlWindow::OnCellMouseHover}\label{wxhtmlwindowoncellmousehover}
 
@@ -358,7 +354,7 @@ This function sets the space between border of window and HTML contents. See ima
 
 \membersection{wxHtmlWindow::SetFonts}\label{wxhtmlwindowsetfonts}
 
-\func{void}{SetFonts}{\param{const wxString\& }{normal\_face}, \param{const wxString\& }{fixed\_face}, \param{const int }{*sizes = NULL}}
+\func{void}{SetFonts}{\param{wxString }{normal\_face}, \param{wxString }{fixed\_face}, \param{const int }{*sizes = NULL}}
 
 This function sets font sizes and faces.
 

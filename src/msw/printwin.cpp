@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/printwin.cpp
+// Name:        printwin.cpp
 // Purpose:     wxWindowsPrinter framework
 // Author:      Julian Smart
 // Modified by:
@@ -17,12 +17,18 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 // Don't use the Windows printer if we're in wxUniv mode and using
 // the PostScript architecture
@@ -36,12 +42,12 @@
     #include "wx/app.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/dcprint.h"
 #endif
 
 #include "wx/msw/printwin.h"
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
+#include "wx/log.h"
 #include "wx/msw/private.h"
 
 #include <stdlib.h>
@@ -352,27 +358,28 @@ bool wxWindowsPrintPreview::Print(bool interactive)
 
 void wxWindowsPrintPreview::DetermineScaling()
 {
-    ScreenHDC dc;
+    HDC dc = ::GetDC(NULL);
     int screenWidth = ::GetDeviceCaps(dc, HORZSIZE);
-    int screenXRes = ::GetDeviceCaps(dc, HORZRES);
+    int screenYRes = ::GetDeviceCaps(dc, VERTRES);
     int logPPIScreenX = ::GetDeviceCaps(dc, LOGPIXELSX);
     int logPPIScreenY = ::GetDeviceCaps(dc, LOGPIXELSY);
     m_previewPrintout->SetPPIScreen(logPPIScreenX, logPPIScreenY);
 
+    ::ReleaseDC(NULL, dc);
 
     // Get a device context for the currently selected printer
     wxPrinterDC printerDC(m_printDialogData.GetPrintData());
 
     int printerWidth = 150;
+    int printerHeight wxDUMMY_INITIALIZE(250);
     int printerXRes = 1500;
     int printerYRes = 2500;
 
-    if ( printerDC.Ok() )
+    dc = GetHdcOf(printerDC);
+    if ( dc )
     {
-        HDC dc = GetHdcOf(printerDC);
-
         printerWidth = ::GetDeviceCaps(dc, HORZSIZE);
-        int printerHeight = ::GetDeviceCaps(dc, VERTSIZE);
+        printerHeight = ::GetDeviceCaps(dc, VERTSIZE);
         printerXRes = ::GetDeviceCaps(dc, HORZRES);
         printerYRes = ::GetDeviceCaps(dc, VERTRES);
 
@@ -382,29 +389,18 @@ void wxWindowsPrintPreview::DetermineScaling()
         m_previewPrintout->SetPPIPrinter(logPPIPrinterX, logPPIPrinterY);
         m_previewPrintout->SetPageSizeMM(printerWidth, printerHeight);
 
-        if ( logPPIPrinterX == 0 ||
-                logPPIPrinterY == 0 ||
-                    printerWidth == 0 ||
-                        printerHeight == 0 )
-        {
+        if (logPPIPrinterX == 0 || logPPIPrinterY == 0 || printerWidth == 0 || printerHeight == 0)
             m_isOk = false;
-        }
     }
     else
-    {
         m_isOk = false;
-    }
 
     m_pageWidth = printerXRes;
     m_pageHeight = printerYRes;
 
     // At 100%, the page should look about page-size on the screen.
-    //
-    // TODO: the scale could be different in vertical and horizontal directions
-    float screenDPI = (float)screenXRes / screenWidth;
-    float printerDPI = (float)printerXRes / printerWidth;
-
-    m_previewScale = screenDPI / printerDPI;
+    m_previewScale = (float)((float)screenWidth/(float)printerWidth);
+    m_previewScale = m_previewScale * (float)((float)screenYRes/(float)printerYRes);
 }
 
 /****************************************************************************

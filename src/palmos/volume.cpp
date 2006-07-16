@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fsvolume.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,16 +29,15 @@
 
 #if wxUSE_FSVOLUME
 
-#include "wx/volume.h"
-
 #ifndef WX_PRECOMP
     #if wxUSE_GUI
         #include "wx/icon.h"
     #endif
     #include "wx/intl.h"
-    #include "wx/arrstr.h"
-    #include "wx/hashmap.h"
 #endif // WX_PRECOMP
+
+#include "wx/arrstr.h"
+#include "wx/volume.h"
 
 #include <VFSMgr.h>
 #include <PalmTypesCompatibility.h>
@@ -233,3 +236,4 @@ wxIcon wxFSVolume::GetIcon(wxFSIconType type) const
 #endif // wxUSE_GUI
 
 #endif // wxUSE_FSVOLUME
+

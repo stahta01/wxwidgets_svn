@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_wizrd.h
+// Name:        xh_wizrd.h
 // Purpose:     XML resource handler for wxWizard
 // Author:      Vaclav Slavik
 // Created:     2003/03/02
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XH_WIZRD_H_
 #define _WX_XH_WIZRDL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_wizrd.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 

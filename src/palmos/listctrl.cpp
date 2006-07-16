@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -31,12 +36,12 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/settings.h"
-    #include "wx/dcclient.h"
-    #include "wx/textctrl.h"
 #endif
 
+#include "wx/textctrl.h"
 #include "wx/imaglist.h"
 #include "wx/listctrl.h"
+#include "wx/dcclient.h"
 
 // ----------------------------------------------------------------------------
 // events
@@ -284,11 +289,13 @@ bool wxListCtrl::SetItemImage(long item, int image, int WXUNUSED(selImage))
     return false;
 }
 
+#if wxABI_VERSION >= 20603
 // Sets the item image
 bool wxListCtrl::SetItemColumnImage(long item, long column, int image)
 {
     return false;
 }
+#endif
 
 // Gets the item text
 wxString wxListCtrl::GetItemText(long item) const
@@ -628,14 +635,6 @@ int wxListCtrl::OnGetItemImage(long WXUNUSED(item)) const
     return -1;
 }
 
-int wxListCtrl::OnGetItemColumnImage(long item, long column) const
-{
-    if (!column)
-        return OnGetItemImage(item);
-
-    return -1;
-}
-
 wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_DEBUG(item)) const
 {
     // no attributes by default
@@ -678,3 +677,4 @@ static void wxDeleteInternalData(wxListCtrl* ctl, long itemId)
 }
 
 #endif // wxUSE_LISTCTRL
+

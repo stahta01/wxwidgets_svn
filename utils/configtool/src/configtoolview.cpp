@@ -9,6 +9,10 @@
 // Licence:
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "configtoolview.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -913,7 +917,7 @@ void ctConfigToolView::OnSaveSetupFile(wxCommandEvent& WXUNUSED(event))
     wxFileDialog dialog(wxTheApp->GetTopWindow(),
         _("Save Setup File As"),
         path, filename ,
-        wildcard, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+        wildcard, wxSAVE|wxOVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK)
     {
@@ -946,7 +950,7 @@ void ctConfigToolView::OnSaveConfigureCommand(wxCommandEvent& WXUNUSED(event))
     wxFileDialog dialog(wxTheApp->GetTopWindow(),
         _("Save Configure Command File As"),
         path, filename ,
-        wildcard, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+        wildcard, wxSAVE|wxOVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK)
     {

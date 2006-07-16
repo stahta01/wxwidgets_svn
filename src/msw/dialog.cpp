@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/dialog.h"
     #include "wx/utils.h"
     #include "wx/frame.h"
     #include "wx/app.h"
@@ -34,10 +37,10 @@
     #include "wx/settings.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/toolbar.h"
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/log.h"
 #include "wx/evtloop.h"
 #include "wx/ptr_scpd.h"
 
@@ -46,6 +49,10 @@
 #if defined(__SMARTPHONE__) && defined(__WXWINCE__)
     #include "wx/msw/wince/resources.h"
 #endif // __SMARTPHONE__ && __WXWINCE__
+
+#if wxUSE_TOOLBAR && defined(__POCKETPC__)
+#include "wx/toolbar.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -80,14 +87,10 @@ wxBEGIN_FLAGS( wxDialogStyle )
     wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
     wxFLAGS_MEMBER(wxSTAY_ON_TOP)
     wxFLAGS_MEMBER(wxCAPTION)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxTHICK_FRAME)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxSYSTEM_MENU)
     wxFLAGS_MEMBER(wxRESIZE_BORDER)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxRESIZE_BOX)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxCLOSE_BOX)
     wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
     wxFLAGS_MEMBER(wxMINIMIZE_BOX)
@@ -144,7 +147,7 @@ private:
     wxModalEventLoop m_evtLoop;
 };
 
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData)
+wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 // ============================================================================
 // implementation
@@ -197,8 +200,6 @@ bool wxDialog::Create(wxWindow *parent,
     return true;
 }
 
-#if WXWIN_COMPATIBILITY_2_6
-
 // deprecated ctor
 wxDialog::wxDialog(wxWindow *parent,
                    const wxString& title,
@@ -220,8 +221,6 @@ void wxDialog::SetModal(bool WXUNUSED(flag))
     // nothing to do, obsolete method
 }
 
-#endif // WXWIN_COMPATIBILITY_2_6
-
 wxDialog::~wxDialog()
 {
     m_isBeingDeleted = true;
@@ -234,14 +233,10 @@ wxDialog::~wxDialog()
 // showing the dialogs
 // ----------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_6
-
 bool wxDialog::IsModalShowing() const
 {
     return IsModal();
 }
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -613,3 +608,4 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
 
     return rc;
 }
+

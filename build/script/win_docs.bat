@@ -9,7 +9,7 @@ echo Building wxWidgets docs... > c:\temp.log
 
 set WXWIN=c:\wx\wxWidgets
 set DAILY=c:\daily
-set PATH=%PATH%;C:\wx\wxw26b\utils\tex2rtf\src\vc_based;C:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
+set PATH=%PATH%;C:\wx\wxWidg~1.3\utils\tex2rtf\src\vc_based;C:\wx\GnuWin32\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
 set PATH=%PATH%;C:\Program Files\gs\gs8.51\lib;C:\Program Files\gs\gs8.51\bin
 echo %PATH% >> c:\temp.log
 
@@ -31,9 +31,6 @@ nmake -f makedocs.vc cleandocs
 nmake -f makedocs.vc alldocs
 
 del %DAILY%\in\*.p*
-mkdir %WXWIN%\docs\pdf
-mkdir %WXWIN%\docs\htmlhelp
-mkdir %WXWIN%\docs\htb
 echo starting word >>  c:\temp.log
 start /WAIT winword /mwx_ps
 
@@ -70,7 +67,7 @@ zip %DAILY%\wx-docs-extra-pdf.ZIP *.pdf -x wx.pdf
 
 
 echo setting S
-echo yes > net use s: /delete
+rem echo yes > net use s: /delete
 net use s: \\biolpc22\bake 
 
 copy %DAILY%\*.ZIP s:\bkl-cronjob\archives\win

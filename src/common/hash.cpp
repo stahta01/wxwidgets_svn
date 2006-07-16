@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/hash.cpp
+// Name:        hash.cpp
 // Purpose:     wxHashTable implementation
 // Author:      Julian Smart
 // Modified by: VZ at 25.02.00: type safe hashes with WX_DECLARE_HASH()
@@ -17,17 +17,22 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "hash.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
-    #include "wx/hash.h"
+#include "wx/list.h"
 #endif
+
+#include "wx/hash.h"
 
 #if wxUSE_OLD_HASH_TABLE
 
@@ -1035,7 +1040,7 @@ void wxHashTable::DoCopy( const wxHashTable& WXUNUSED(table) )
 {
     Create( m_keyType, m_size );
 
-    wxFAIL;
+    wxASSERT( false );
 }
 
 void wxHashTable::DoDeleteContents( wxHashTableBase_Node* node )

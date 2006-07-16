@@ -12,7 +12,7 @@
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = \
 	vc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)$(DIR_SUFFIX_CPU)
 LIBDIRNAME = .\..\..\..\lib\vc$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
@@ -35,7 +35,7 @@ PENGUIN_CXXFLAGS = /M$(__RUNTIME_LIBS_8)$(__DEBUGRUNTIME_3) /DWIN32 \
 	$(CPPFLAGS) $(CXXFLAGS)
 PENGUIN_OBJECTS =  \
 	$(OBJS)\penguin_penguin.obj \
-	$(OBJS)\penguin_dxfrenderer.obj \
+	$(OBJS)\penguin_lw.obj \
 	$(OBJS)\penguin_trackball.obj \
 	$(OBJS)\penguin_penguin.res
 
@@ -302,18 +302,18 @@ clean:
 !if "$(USE_OPENGL)" == "1"
 $(OBJS)\penguin.exe: $(PENGUIN_OBJECTS) $(OBJS)\penguin_penguin.res
 	link /NOLOGO /OUT:$@ $(LDFLAGS) $(__DEBUGINFO_1)  $(LINK_TARGET_CPU) /LIBPATH:$(LIBDIRNAME) /SUBSYSTEM:WINDOWS @<<
-	$(PENGUIN_OBJECTS)  wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib opengl32.lib glu32.lib $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib
+	$(PENGUIN_OBJECTS)  wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib opengl32.lib glu32.lib $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib
 <<
 !endif
 
 data: 
 	if not exist $(OBJS) mkdir $(OBJS)
-	for %f in (penguin.dxf.gz) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
+	for %f in (penguin.lwo) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
 
 $(OBJS)\penguin_penguin.obj: .\penguin.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(PENGUIN_CXXFLAGS) $**
 
-$(OBJS)\penguin_dxfrenderer.obj: .\dxfrenderer.cpp
+$(OBJS)\penguin_lw.obj: .\lw.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(PENGUIN_CXXFLAGS) $**
 
 $(OBJS)\penguin_trackball.obj: .\trackball.c

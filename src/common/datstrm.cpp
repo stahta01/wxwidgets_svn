@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/datstrm.cpp
+// Name:        datstrm.cpp
 // Purpose:     Data stream classes
 // Author:      Guilhem Lavaux
 // Modified by: Mickael Gilabert
@@ -8,6 +8,10 @@
 // Copyright:   (c) Guilhem Lavaux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "datstrm.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -20,17 +24,13 @@
 
 #include "wx/datstrm.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/math.h"
-#endif //WX_PRECOMP
-
 // ---------------------------------------------------------------------------
 // wxDataInputStream
 // ---------------------------------------------------------------------------
 
 #if wxUSE_UNICODE
-wxDataInputStream::wxDataInputStream(wxInputStream& s, const wxMBConv& conv)
-  : m_input(&s), m_be_order(false), m_conv(conv.Clone())
+wxDataInputStream::wxDataInputStream(wxInputStream& s, wxMBConv& conv)
+  : m_input(&s), m_be_order(false), m_conv(conv)
 #else
 wxDataInputStream::wxDataInputStream(wxInputStream& s)
   : m_input(&s), m_be_order(false)
@@ -38,21 +38,17 @@ wxDataInputStream::wxDataInputStream(wxInputStream& s)
 {
 }
 
-wxDataInputStream::~wxDataInputStream()
-{
-#if wxUSE_UNICODE
-    delete m_conv;
-#endif // wxUSE_UNICODE
-}
-
-#if wxHAS_INT64
 wxUint64 wxDataInputStream::Read64()
 {
-  wxUint64 tmp;
-  Read64(&tmp, 1);
-  return tmp;
+  wxUint64 i64;
+
+  m_input->Read(&i64, 8);
+
+  if (m_be_order)
+    return wxUINT64_SWAP_ON_LE(i64);
+  else
+    return wxUINT64_SWAP_ON_BE(i64);
 }
-#endif // wxHAS_INT64
 
 wxUint32 wxDataInputStream::Read32()
 {
@@ -86,13 +82,16 @@ wxUint8 wxDataInputStream::Read8()
   return (wxUint8)buf;
 }
 
+// Must be at global scope for VC++ 5
+extern "C" double ConvertFromIeeeExtended(const unsigned char *bytes);
+
 double wxDataInputStream::ReadDouble()
 {
 #if wxUSE_APPLE_IEEE
   char buf[10];
 
   m_input->Read(buf, 10);
-  return ConvertFromIeeeExtended((const wxInt8 *)buf);
+  return ConvertFromIeeeExtended((unsigned char *)buf);
 #else
   return 0.0;
 #endif
@@ -110,7 +109,7 @@ wxString wxDataInputStream::ReadString()
     wxCharBuffer tmp(len + 1);
     m_input->Read(tmp.data(), len);
     tmp.data()[len] = '\0';
-    wxString ret(m_conv->cMB2WX(tmp.data()));
+    wxString ret(m_conv.cMB2WX(tmp.data()));
 #else
     wxString ret;
     m_input->Read( wxStringBuffer(ret, len), len);
@@ -121,195 +120,27 @@ wxString wxDataInputStream::ReadString()
     return wxEmptyString;
 }
 
-#if wxUSE_LONGLONG
-
-template <class T>
-static
-void DoReadLL(T *buffer, size_t size, wxInputStream *input, bool be_order)
-{
-    typedef T DataType;
-    unsigned char *pchBuffer = new unsigned char[size * 8];
-    // TODO: Check for overflow when size is of type uint and is > than 512m
-    input->Read(pchBuffer, size * 8);
-    size_t idx_base = 0;
-    if ( be_order )
-    {
-        for ( size_t uiIndex = 0; uiIndex != size; ++uiIndex )
-        {
-            buffer[uiIndex] = 0l;
-            for ( unsigned ui = 0; ui != 8; ++ui )
-            {
-                buffer[uiIndex] = buffer[uiIndex] * 256l +
-                            DataType((unsigned long) pchBuffer[idx_base + ui]);
-            }
-
-            idx_base += 8;
-        }
-    }
-    else // little endian
-    {
-        for ( size_t uiIndex=0; uiIndex!=size; ++uiIndex )
-        {
-            buffer[uiIndex] = 0l;
-            for ( unsigned ui=0; ui!=8; ++ui )
-                buffer[uiIndex] = buffer[uiIndex] * 256l +
-                    DataType((unsigned long) pchBuffer[idx_base + 7 - ui]);
-            idx_base += 8;
-        }
-    }
-    delete[] pchBuffer;
-}
-
-template <class T>
-static void DoWriteLL(const T *buffer, size_t size, wxOutputStream *output, bool be_order)
-{
-    typedef T DataType;
-    unsigned char *pchBuffer = new unsigned char[size * 8];
-    size_t idx_base = 0;
-    if ( be_order )
-    {
-        for ( size_t uiIndex = 0; uiIndex != size; ++uiIndex )
-        {
-            DataType i64 = buffer[uiIndex];
-            for ( unsigned ui = 0; ui != 8; ++ui )
-            {
-                pchBuffer[idx_base + 7 - ui] =
-                    (unsigned char) (i64.GetLo() & 255l);
-                i64 >>= 8l;
-            }
-
-            idx_base += 8;
-        }
-    }
-    else // little endian
-    {
-        for ( size_t uiIndex=0; uiIndex != size; ++uiIndex )
-        {
-            DataType i64 = buffer[uiIndex];
-            for (unsigned ui=0; ui!=8; ++ui)
-            {
-                pchBuffer[idx_base + ui] =
-                    (unsigned char) (i64.GetLo() & 255l);
-                i64 >>= 8l;
-            }
-
-            idx_base += 8;
-        }
-    }
-
-    // TODO: Check for overflow when size is of type uint and is > than 512m
-    output->Write(pchBuffer, size * 8);
-    delete[] pchBuffer;
-}
-
-#endif // wxUSE_LONGLONG
-
-#ifdef wxLongLong_t
-
-template <class T>
-static
-void DoReadI64(T *buffer, size_t size, wxInputStream *input, bool be_order)
-{
-    typedef T DataType;
-    unsigned char *pchBuffer = (unsigned char*) buffer;
-    // TODO: Check for overflow when size is of type uint and is > than 512m
-    input->Read(pchBuffer, size * 8);
-    if ( be_order )
-    {
-        for ( wxUint32 i = 0; i < size; i++ )
-        {
-            DataType v = wxUINT64_SWAP_ON_LE(*buffer);
-            *(buffer++) = v;
-        }
-    }
-    else // little endian
-    {
-        for ( wxUint32 i=0; i<size; i++ )
-        {
-            DataType v = wxUINT64_SWAP_ON_BE(*buffer);
-            *(buffer++) = v;
-        }
-    }
-}
-
-template <class T>
-static
-void DoWriteI64(const T *buffer, size_t size, wxOutputStream *output, bool be_order)
-{
-  typedef T DataType;
-  if ( be_order )
-  {
-    for ( size_t i = 0; i < size; i++ )
-    {
-      DataType i64 = wxUINT64_SWAP_ON_LE(*buffer);
-      buffer++;
-      output->Write(&i64, 8);
-    }
-  }
-  else // little endian
-  {
-    for ( size_t i=0; i < size; i++ )
-    {
-      DataType i64 = wxUINT64_SWAP_ON_BE(*buffer);
-      buffer++;
-      output->Write(&i64, 8);
-    }
-  }
-}
-
-#endif // wxLongLong_t
-
-
-#if wxHAS_INT64
 void wxDataInputStream::Read64(wxUint64 *buffer, size_t size)
 {
-#ifndef wxLongLong_t
-    DoReadLL(buffer, size, m_input, m_be_order);
-#else
-    DoReadI64(buffer, size, m_input, m_be_order);
-#endif
-}
+  m_input->Read(buffer, size * 8);
 
-void wxDataInputStream::Read64(wxInt64 *buffer, size_t size)
-{
-#ifndef wxLongLong_t
-    DoReadLL(buffer, size, m_input, m_be_order);
-#else
-    DoReadI64(buffer, size, m_input, m_be_order);
-#endif
+  if (m_be_order)
+  {
+    for (wxUint32 i=0; i<size; i++)
+    {
+      wxUint64 v = wxUINT64_SWAP_ON_LE(*buffer);
+      *(buffer++) = v;
+    }
+  }
+  else
+  {
+    for (wxUint32 i=0; i<size; i++)
+    {
+      wxUint64 v = wxUINT64_SWAP_ON_BE(*buffer);
+      *(buffer++) = v;
+    }
+  }
 }
-#endif // wxHAS_INT64
-
-#if defined(wxLongLong_t) && wxUSE_LONGLONG
-void wxDataInputStream::Read64(wxULongLong *buffer, size_t size)
-{
-    DoReadLL(buffer, size, m_input, m_be_order);
-}
-
-void wxDataInputStream::Read64(wxLongLong *buffer, size_t size)
-{
-    DoReadLL(buffer, size, m_input, m_be_order);
-}
-#endif // wxLongLong_t
-
-#if wxUSE_LONGLONG
-void wxDataInputStream::ReadLL(wxULongLong *buffer, size_t size)
-{
-    DoReadLL(buffer, size, m_input, m_be_order);
-}
-
-void wxDataInputStream::ReadLL(wxLongLong *buffer, size_t size)
-{
-    DoReadLL(buffer, size, m_input, m_be_order);
-}
-
-wxLongLong wxDataInputStream::ReadLL(void)
-{
-    wxLongLong ll;
-    DoReadLL(&ll, (size_t)1, m_input, m_be_order);
-    return ll;
-}
-#endif // wxUSE_LONGLONG
 
 void wxDataInputStream::Read32(wxUint32 *buffer, size_t size)
 {
@@ -410,33 +241,11 @@ wxDataInputStream& wxDataInputStream::operator>>(wxUint32& i)
   return *this;
 }
 
-#if wxHAS_INT64
 wxDataInputStream& wxDataInputStream::operator>>(wxUint64& i)
 {
   i = Read64();
   return *this;
 }
-
-wxDataInputStream& wxDataInputStream::operator>>(wxInt64& i)
-{
-  i = Read64();
-  return *this;
-}
-#endif // wxHAS_INT64
-
-#if defined(wxLongLong_t) && wxUSE_LONGLONG
-wxDataInputStream& wxDataInputStream::operator>>(wxULongLong& i)
-{
-  i = ReadLL();
-  return *this;
-}
-
-wxDataInputStream& wxDataInputStream::operator>>(wxLongLong& i)
-{
-  i = ReadLL();
-  return *this;
-}
-#endif // wxLongLong_t
 
 wxDataInputStream& wxDataInputStream::operator>>(double& i)
 {
@@ -455,8 +264,8 @@ wxDataInputStream& wxDataInputStream::operator>>(float& f)
 // ---------------------------------------------------------------------------
 
 #if wxUSE_UNICODE
-wxDataOutputStream::wxDataOutputStream(wxOutputStream& s, const wxMBConv& conv)
-  : m_output(&s), m_be_order(false), m_conv(conv.Clone())
+wxDataOutputStream::wxDataOutputStream(wxOutputStream& s, wxMBConv& conv)
+  : m_output(&s), m_be_order(false), m_conv(conv)
 #else
 wxDataOutputStream::wxDataOutputStream(wxOutputStream& s)
   : m_output(&s), m_be_order(false)
@@ -464,24 +273,16 @@ wxDataOutputStream::wxDataOutputStream(wxOutputStream& s)
 {
 }
 
-wxDataOutputStream::~wxDataOutputStream()
-{
-#if wxUSE_UNICODE
-    delete m_conv;
-#endif // wxUSE_UNICODE
-}
-
-#if wxHAS_INT64
 void wxDataOutputStream::Write64(wxUint64 i)
 {
-  Write64(&i, 1);
-}
+  wxUint64 i64;
 
-void wxDataOutputStream::Write64(wxInt64 i)
-{
-  Write64(&i, 1);
+  if (m_be_order)
+    i64 = wxUINT64_SWAP_ON_LE(i);
+  else
+    i64 = wxUINT64_SWAP_ON_BE(i);
+  m_output->Write(&i64, 8);
 }
-#endif // wxHAS_INT64
 
 void wxDataOutputStream::Write32(wxUint32 i)
 {
@@ -514,7 +315,7 @@ void wxDataOutputStream::Write8(wxUint8 i)
 void wxDataOutputStream::WriteString(const wxString& string)
 {
 #if wxUSE_UNICODE
-  const wxWX2MBbuf buf = string.mb_str(*m_conv);
+  const wxWX2MBbuf buf = string.mb_str(m_conv);
 #else
   const wxWX2MBbuf buf = string.mb_str();
 #endif
@@ -524,12 +325,15 @@ void wxDataOutputStream::WriteString(const wxString& string)
       m_output->Write(buf, len);
 }
 
+// Must be at global scope for VC++ 5
+extern "C" void ConvertToIeeeExtended(double num, unsigned char *bytes);
+
 void wxDataOutputStream::WriteDouble(double d)
 {
   char buf[10];
 
 #if wxUSE_APPLE_IEEE
-  ConvertToIeeeExtended(d, (wxInt8 *)buf);
+  ConvertToIeeeExtended(d, (unsigned char *)buf);
 #else
 #if !defined(__VMS__) && !defined(__GNUG__)
 # pragma warning "wxDataOutputStream::WriteDouble() not using IeeeExtended - will not work!"
@@ -539,59 +343,27 @@ void wxDataOutputStream::WriteDouble(double d)
   m_output->Write(buf, 10);
 }
 
-#if wxHAS_INT64
 void wxDataOutputStream::Write64(const wxUint64 *buffer, size_t size)
 {
-#ifndef wxLongLong_t
-    DoWriteLL(buffer, size, m_output, m_be_order);
-#else
-    DoWriteI64(buffer, size, m_output, m_be_order);
-#endif
+  if (m_be_order)
+  {
+    for (wxUint32 i=0; i<size ;i++)
+    {
+      wxUint64 i64 = wxUINT64_SWAP_ON_LE(*buffer);
+      buffer++;
+      m_output->Write(&i64, 8);
+    }
+  }
+  else
+  {
+    for (wxUint32 i=0; i<size ;i++)
+    {
+      wxUint64 i64 = wxUINT64_SWAP_ON_BE(*buffer);
+      buffer++;
+      m_output->Write(&i64, 8);
+    }
+  }
 }
-
-void wxDataOutputStream::Write64(const wxInt64 *buffer, size_t size)
-{
-#ifndef wxLongLong_t
-    DoWriteLL(buffer, size, m_output, m_be_order);
-#else
-    DoWriteI64(buffer, size, m_output, m_be_order);
-#endif
-}
-#endif // wxHAS_INT64
-
-#if defined(wxLongLong_t) && wxUSE_LONGLONG
-void wxDataOutputStream::Write64(const wxULongLong *buffer, size_t size)
-{
-    DoWriteLL(buffer, size, m_output, m_be_order);
-}
-
-void wxDataOutputStream::Write64(const wxLongLong *buffer, size_t size)
-{
-    DoWriteLL(buffer, size, m_output, m_be_order);
-}
-#endif // wxLongLong_t
-
-#if wxUSE_LONGLONG
-void wxDataOutputStream::WriteLL(const wxULongLong *buffer, size_t size)
-{
-    DoWriteLL(buffer, size, m_output, m_be_order);
-}
-
-void wxDataOutputStream::WriteLL(const wxLongLong *buffer, size_t size)
-{
-    DoWriteLL(buffer, size, m_output, m_be_order);
-}
-
-void wxDataOutputStream::WriteLL(const wxLongLong &ll)
-{
-    WriteLL(&ll, 1);
-}
-
-void wxDataOutputStream::WriteLL(const wxULongLong &ll)
-{
-    WriteLL(&ll, 1);
-}
-#endif // wxUSE_LONGLONG
 
 void wxDataOutputStream::Write32(const wxUint32 *buffer, size_t size)
 {
@@ -699,33 +471,11 @@ wxDataOutputStream& wxDataOutputStream::operator<<(wxUint32 i)
   return *this;
 }
 
-#if wxHAS_INT64
 wxDataOutputStream& wxDataOutputStream::operator<<(wxUint64 i)
 {
   Write64(i);
   return *this;
 }
-
-wxDataOutputStream& wxDataOutputStream::operator<<(wxInt64 i)
-{
-  Write64(i);
-  return *this;
-}
-#endif // wxHAS_INT64
-
-#if defined(wxLongLong_t) && wxUSE_LONGLONG
-wxDataOutputStream& wxDataOutputStream::operator<<(const wxULongLong &i)
-{
-  WriteLL(i);
-  return *this;
-}
-
-wxDataOutputStream& wxDataOutputStream::operator<<(const wxLongLong &i)
-{
-  WriteLL(i);
-  return *this;
-}
-#endif // wxLongLong_t
 
 wxDataOutputStream& wxDataOutputStream::operator<<(double f)
 {
@@ -741,3 +491,4 @@ wxDataOutputStream& wxDataOutputStream::operator<<(float f)
 
 #endif
   // wxUSE_STREAMS
+

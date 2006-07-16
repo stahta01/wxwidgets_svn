@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/variant.cpp
+// Name:        variant.cpp
 // Purpose:     wxVariant class, container for any type
 // Author:      Julian Smart
 // Modified by:
@@ -9,21 +9,15 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "variant.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
-#endif
-
-#include "wx/variant.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/math.h"
-    #if wxUSE_STREAMS
-        #include "wx/stream.h"
-    #endif
 #endif
 
 #if wxUSE_STD_IOSTREAM
@@ -40,11 +34,14 @@ using namespace std ;
 #endif
 
 #if wxUSE_STREAMS
-    #include "wx/txtstrm.h"
+#include "wx/stream.h"
+#include "wx/txtstrm.h"
 #endif
 
 #include "wx/string.h"
 #include "wx/tokenzr.h"
+
+#include "wx/variant.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxVariantData, wxObject)
 
@@ -62,7 +59,7 @@ public:
     wxVariantDataList(const wxList& list);
     ~wxVariantDataList();
 
-    wxList& GetValue() { return m_value; }
+    wxList& GetValue() const { return (wxList&) m_value; }
     void SetValue(const wxList& value) ;
 
     virtual void Copy(wxVariantData& data);
@@ -461,7 +458,7 @@ bool wxVariantDataReal::Eq(wxVariantData& data) const
 
     wxVariantDataReal& otherData = (wxVariantDataReal&) data;
 
-    return wxIsSameDouble(otherData.m_value, m_value);
+    return (otherData.m_value == m_value);
 }
 
 #if wxUSE_STD_IOSTREAM
@@ -803,7 +800,7 @@ bool wxVariantDataString::Read(wxInputStream& str)
 {
     wxTextInputStream s(str);
 
-    m_value = s.ReadLine();
+    m_value = s.ReadString();
     return true;
 }
 #endif // wxUSE_STREAMS
@@ -881,7 +878,7 @@ bool wxVariantDataVoidPtr::Write(wxSTD ostream& str) const
 
 bool wxVariantDataVoidPtr::Write(wxString& str) const
 {
-    str.Printf(wxT("%p"), m_value);
+    str.Printf(wxT("%ld"), (long) m_value);
     return true;
 }
 
@@ -985,7 +982,7 @@ bool wxVariantDataWxObjectPtr::Write(wxSTD ostream& str) const
 
 bool wxVariantDataWxObjectPtr::Write(wxString& str) const
 {
-    str.Printf(wxT("%s(%p)"), GetType().c_str(), wx_static_cast(void*, m_value));
+    str.Printf(wxT("%s(%ld)"), GetType().c_str(), (long) m_value);
     return true;
 }
 
@@ -1398,8 +1395,8 @@ bool wxVariant::operator== (double value) const
     double thisValue;
     if (!Convert(&thisValue))
         return false;
-
-    return wxIsSameDouble(value, thisValue);
+    else
+        return (value == thisValue);
 }
 
 bool wxVariant::operator!= (double value) const
@@ -1736,14 +1733,14 @@ wxVariant wxVariant::operator[] (size_t idx) const
     if (GetType() == wxT("list"))
     {
         wxVariantDataList* data = (wxVariantDataList*) m_data;
-        wxASSERT_MSG( (idx < data->GetValue().GetCount()), wxT("Invalid index for array") );
+        wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
         return * (wxVariant*) (data->GetValue().Item(idx)->GetData());
     }
 #if WXWIN_COMPATIBILITY_2_4
     else if (GetType() == wxT("stringlist"))
     {
         wxVariantDataStringList* data = (wxVariantDataStringList*) m_data;
-        wxASSERT_MSG( (idx < data->GetValue().GetCount()), wxT("Invalid index for array") );
+        wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
 
         wxString str( (const wxChar*) (data->GetValue().Item(idx)->GetData()) );
         wxVariant variant( str );
@@ -1761,13 +1758,13 @@ wxVariant& wxVariant::operator[] (size_t idx)
     wxASSERT_MSG( (GetType() == wxT("list")), wxT("Invalid type for array operator") );
 
     wxVariantDataList* data = (wxVariantDataList*) m_data;
-    wxASSERT_MSG( (idx < data->GetValue().GetCount()), wxT("Invalid index for array") );
+    wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
 
     return * (wxVariant*) (data->GetValue().Item(idx)->GetData());
 }
 
 // Return the number of elements in a list
-size_t wxVariant::GetCount() const
+int wxVariant::GetCount() const
 {
 #if WXWIN_COMPATIBILITY_2_4
     wxASSERT_MSG( (GetType() == wxT("list") || GetType() == wxT("stringlist")), wxT("Invalid type for GetCount()") );
@@ -1941,7 +1938,7 @@ wxStringList& wxVariant::GetStringList() const
 void wxVariant::NullList()
 {
     SetData(new wxVariantDataList());
-}
+};
 
 // Append to list
 void wxVariant::Append(const wxVariant& value)
@@ -1976,11 +1973,11 @@ bool wxVariant::Member(const wxVariant& value) const
 }
 
 // Deletes the nth element of the list
-bool wxVariant::Delete(size_t item)
+bool wxVariant::Delete(int item)
 {
     wxList& list = GetList();
 
-    wxASSERT_MSG( (item < list.GetCount()), wxT("Invalid index to Delete") );
+    wxASSERT_MSG( (item < (int) list.GetCount()), wxT("Invalid index to Delete") );
     wxList::compatibility_iterator node = list.Item(item);
     wxVariant* variant = (wxVariant*) node->GetData();
     delete variant;
@@ -2111,3 +2108,4 @@ bool wxVariant::Convert(wxDateTime* value) const
                 (value->ParseDateTime(val) || value->ParseDate(val));
 }
 #endif // wxUSE_DATETIME
+

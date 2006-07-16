@@ -12,6 +12,10 @@
 #ifndef _WX_GAUGE_H_BASE_
 #define _WX_GAUGE_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gaugebase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_GAUGE
@@ -28,13 +32,11 @@
 // Win32 only, is default (and only) on some other platforms
 #define wxGA_SMOOTH          0x0020
 
-#if WXWIN_COMPATIBILITY_2_6
-    // obsolete style
-    #define wxGA_PROGRESSBAR     0
-#endif // WXWIN_COMPATIBILITY_2_6
+// obsolete style
+#define wxGA_PROGRESSBAR     0
 
 
-extern WXDLLEXPORT_DATA(const wxChar) wxGaugeNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxGaugeNameStr;
 
 // ----------------------------------------------------------------------------
 // wxGauge: a progress bar
@@ -90,14 +92,16 @@ protected:
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/gauge.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/gauge95.h"
-    #define wxGauge wxGauge95
+    #ifdef __WIN95__
+        #include "wx/msw/gauge95.h"
+        #define wxGauge wxGauge95
+    #else // !__WIN95__
+        // Gauge no longer supported on 16-bit Windows
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/gauge.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/gauge.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/gauge.h"
+    #include "wx/gtk/gauge.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/gauge.h"
 #elif defined(__WXCOCOA__)

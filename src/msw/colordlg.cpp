@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "colordlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,21 +28,21 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_COLOURDLG && !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
-
-#include "wx/colordlg.h"
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
+    #include "wx/defs.h"
     #include "wx/colour.h"
     #include "wx/gdicmn.h"
     #include "wx/utils.h"
     #include "wx/dialog.h"
-    #include "wx/cmndata.h"
-    #include "wx/math.h"
 #endif
 
+#if wxUSE_COLOURDLG && !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
+
 #include "wx/msw/private.h"
+#include "wx/colordlg.h"
+#include "wx/cmndata.h"
+#include "wx/math.h"
 #include "wx/msw/wrapcdlg.h"
 
 #include <stdlib.h>

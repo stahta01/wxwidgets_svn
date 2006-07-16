@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_SLIDER_H_
 #define _WX_UNIV_SLIDER_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univslider.h"
+#endif
+
 #include "wx/univ/scrthumb.h"
 
 // ----------------------------------------------------------------------------
@@ -121,10 +125,6 @@ public:
     // for wxStdSliderButtonInputHandler
     wxScrollThumb& GetThumb() { return m_thumb; }
 
-    virtual bool PerformAction(const wxControlAction& action,
-                               long numArg = 0,
-                               const wxString& strArg = wxEmptyString);
-
 protected:
     enum
     {
@@ -135,6 +135,10 @@ protected:
     virtual wxSize DoGetBestClientSize() const;
     virtual void DoDraw(wxControlRenderer *renderer);
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
+
+    virtual bool PerformAction(const wxControlAction& action,
+                               long numArg = 0,
+                               const wxString& strArg = wxEmptyString);
 
     // event handlers
     void OnSize(wxSizeEvent& event);

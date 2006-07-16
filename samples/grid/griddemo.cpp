@@ -2,7 +2,7 @@
 // Name:        griddemo.cpp
 // Purpose:     Grid control wxWidgets sample
 // Author:      Michael Bedward
-// Modified by: Santiago Palacios
+// Modified by:
 // RCS-ID:      $Id$
 // Copyright:   (c) Michael Bedward, Julian Smart, Vadim Zeitlin
 // Licence:     wxWindows license
@@ -15,6 +15,11 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma implementation
+    #pragma interface
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -68,7 +73,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_TOGGLEEDIT, GridFrame::ToggleEditing )
     EVT_MENU( ID_TOGGLEROWSIZING, GridFrame::ToggleRowSizing )
     EVT_MENU( ID_TOGGLECOLSIZING, GridFrame::ToggleColSizing )
-    EVT_MENU( ID_TOGGLECOLMOVING, GridFrame::ToggleColMoving )
     EVT_MENU( ID_TOGGLEGRIDSIZING, GridFrame::ToggleGridSizing )
     EVT_MENU( ID_TOGGLEGRIDDRAGCELL, GridFrame::ToggleGridDragCell )
     EVT_MENU( ID_TOGGLEGRIDLINES, GridFrame::ToggleGridLines )
@@ -110,7 +114,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_SELECT_ROW, GridFrame::SelectRow)
     EVT_MENU( ID_SELECT_ALL, GridFrame::SelectAll)
     EVT_MENU( ID_SELECT_UNSELECT, GridFrame::OnAddToSelectToggle)
-    EVT_MENU( ID_SHOW_SELECTION, GridFrame::OnShowSelection)
 
     EVT_MENU( ID_SET_HIGHLIGHT_WIDTH, GridFrame::OnSetHighlightWidth)
     EVT_MENU( ID_SET_RO_HIGHLIGHT_WIDTH, GridFrame::OnSetROHighlightWidth)
@@ -147,7 +150,6 @@ GridFrame::GridFrame()
     viewMenu->Append( ID_TOGGLEEDIT,  _T("&Editable"), wxEmptyString, wxITEM_CHECK );
     viewMenu->Append( ID_TOGGLEROWSIZING, _T("Ro&w drag-resize"), wxEmptyString, wxITEM_CHECK );
     viewMenu->Append( ID_TOGGLECOLSIZING, _T("C&ol drag-resize"), wxEmptyString, wxITEM_CHECK );
-    viewMenu->Append( ID_TOGGLECOLMOVING, _T("Col drag-&move"), wxEmptyString, wxITEM_CHECK );
     viewMenu->Append( ID_TOGGLEGRIDSIZING, _T("&Grid drag-resize"), wxEmptyString, wxITEM_CHECK );
     viewMenu->Append( ID_TOGGLEGRIDDRAGCELL, _T("&Grid drag-cell"), wxEmptyString, wxITEM_CHECK );
     viewMenu->Append( ID_TOGGLEGRIDLINES, _T("&Grid Lines"), wxEmptyString, wxITEM_CHECK );
@@ -194,14 +196,10 @@ GridFrame::GridFrame()
     selectMenu->Append( ID_SELECT_UNSELECT, _T("Add new cells to the selection"),
                         _T("When off, old selection is deselected before ")
                         _T("selecting the new cells"), wxITEM_CHECK );
-    selectMenu->Append( ID_SHOW_SELECTION,
-                        _T("&Show current selection\tCtrl-Alt-S"));
-    selectMenu->AppendSeparator();
     selectMenu->Append( ID_SELECT_ALL, _T("Select all"));
     selectMenu->Append( ID_SELECT_ROW, _T("Select row 2"));
     selectMenu->Append( ID_SELECT_COL, _T("Select col 2"));
     selectMenu->Append( ID_SELECT_CELL, _T("Select cell (3, 1)"));
-    selectMenu->AppendSeparator();
     selectMenu->Append( ID_DESELECT_ALL, _T("Deselect all"));
     selectMenu->Append( ID_DESELECT_ROW, _T("Deselect row 2"));
     selectMenu->Append( ID_DESELECT_COL, _T("Deselect col 2"));
@@ -378,7 +376,6 @@ void GridFrame::SetDefaults()
     GetMenuBar()->Check( ID_TOGGLEEDIT, true );
     GetMenuBar()->Check( ID_TOGGLEROWSIZING, true );
     GetMenuBar()->Check( ID_TOGGLECOLSIZING, true );
-    GetMenuBar()->Check( ID_TOGGLECOLMOVING, false );
     GetMenuBar()->Check( ID_TOGGLEGRIDSIZING, true );
     GetMenuBar()->Check( ID_TOGGLEGRIDDRAGCELL, false );
     GetMenuBar()->Check( ID_TOGGLEGRIDLINES, true );
@@ -430,12 +427,6 @@ void GridFrame::ToggleColSizing( wxCommandEvent& WXUNUSED(ev) )
 {
     grid->EnableDragColSize(
         GetMenuBar()->IsChecked( ID_TOGGLECOLSIZING ) );
-}
-
-void GridFrame::ToggleColMoving( wxCommandEvent& WXUNUSED(ev) )
-{
-    grid->EnableDragColMove(
-        GetMenuBar()->IsChecked( ID_TOGGLECOLMOVING ) );
 }
 
 void GridFrame::ToggleGridSizing( wxCommandEvent& WXUNUSED(ev) )
@@ -847,82 +838,6 @@ void GridFrame::OnColSize( wxGridSizeEvent& ev )
 }
 
 
-void GridFrame::OnShowSelection(wxCommandEvent& WXUNUSED(event))
-{
-    // max number of elements to dump -- otherwise it can take too much time
-    static const size_t countMax = 100;
-
-    bool rows = false;
-
-    switch ( grid->GetSelectionMode() )
-    {
-        case wxGrid::wxGridSelectCells:
-            {
-                const wxGridCellCoordsArray cells(grid->GetSelectedCells());
-                size_t count = cells.size();
-                wxLogMessage(_T("%lu cells selected:"), (unsigned long)count);
-                if ( count > countMax )
-                {
-                    wxLogMessage(_T("[too many selected cells, ")
-                                 _T("showing only the first %lu]"),
-                                 (unsigned long)countMax);
-                    count = countMax;
-                }
-
-                for ( size_t n = 0; n < count; n++ )
-                {
-                    const wxGridCellCoords& c = cells[n];
-                    wxLogMessage(_T("  selected cell %lu: (%d, %d)"),
-                                 (unsigned long)n, c.GetCol(), c.GetRow());
-                }
-            }
-            break;
-
-        case wxGrid::wxGridSelectRows:
-            rows = true;
-            // fall through
-
-        case wxGrid::wxGridSelectColumns:
-            {
-                const wxChar *plural, *single;
-                if ( rows )
-                {
-                    plural = _T("rows");
-                    single = _T("row");
-                }
-                else // columns
-                {
-                    plural = _T("columns");
-                    single = _T("column");
-                }
-
-                const wxArrayInt sels(rows ? grid->GetSelectedRows()
-                                           : grid->GetSelectedCols());
-                size_t count = sels.size();
-                wxLogMessage(_T("%lu %s selected:"),
-                             (unsigned long)count, plural);
-                if ( count > countMax )
-                {
-                    wxLogMessage(_T("[too many selected %s, ")
-                                 _T("showing only the first %lu]"),
-                                 plural, (unsigned long)countMax);
-                    count = countMax;
-                }
-
-                for ( size_t n = 0; n < count; n++ )
-                {
-                    wxLogMessage(_T("  selected %s %lu: %d"),
-                                 single, (unsigned long)n, sels[n]);
-                }
-            }
-            break;
-
-        default:
-            wxFAIL_MSG( _T("unknown wxGrid selection mode") );
-            break;
-    }
-}
-
 void GridFrame::OnSelectCell( wxGridEvent& ev )
 {
     logBuf = wxEmptyString;
@@ -936,11 +851,6 @@ void GridFrame::OnSelectCell( wxGridEvent& ev )
            << _T(", ShiftDown: ")<< (ev.ShiftDown() ? 'T':'F')
            << _T(", AltDown: ")<< (ev.AltDown() ? 'T':'F')
            << _T(", MetaDown: ")<< (ev.MetaDown() ? 'T':'F') << _T(" )");
-
-    //Indicate whether this column was moved
-    if ( ((wxGrid *)ev.GetEventObject())->GetColPos( ev.GetCol() ) != ev.GetCol() )
-        logBuf << _T(" *** Column moved, current position: ") << ((wxGrid *)ev.GetEventObject())->GetColPos( ev.GetCol() );
-
     wxLogMessage( wxT("%s"), logBuf.c_str() );
 
     // you must call Skip() if you want the default processing

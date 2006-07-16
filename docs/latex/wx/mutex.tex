@@ -119,6 +119,7 @@ One of:
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
 \twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
+\twocolitem{{\bf wxMUTEX\_BUSY}}{The mutex is already locked by another thread.}
 \end{twocollist}
 
 \membersection{wxMutex::TryLock}\label{wxmutextrylock}
@@ -134,6 +135,7 @@ One of:
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
+\twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
 \twocolitem{{\bf wxMUTEX\_BUSY}}{The mutex is already locked by another thread.}
 \end{twocollist}
 
@@ -150,6 +152,8 @@ One of:
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
-\twocolitem{{\bf wxMUTEX\_UNLOCKED}}{The calling thread doesn't own the mutex.}
+\twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
+\twocolitem{{\bf wxMUTEX\_BUSY}}{The mutex is already locked by another thread.}
+\twocolitem{{\bf wxMUTEX\_UNLOCKED}}{The calling thread tries to unlock an unlocked mutex.}
 \end{twocollist}
 

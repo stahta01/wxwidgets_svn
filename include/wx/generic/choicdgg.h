@@ -12,10 +12,14 @@
 #ifndef __CHOICEDLGH_G__
 #define __CHOICEDLGH_G__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "choicdgg.h"
+#endif
+
 #include "wx/dynarray.h"
 #include "wx/dialog.h"
 
-class WXDLLEXPORT wxListBoxBase;
+class WXDLLEXPORT wxListBox;
 
 // ----------------------------------------------------------------------------
 // some (ugly...) constants
@@ -80,11 +84,7 @@ public:
                 long styleLbox = wxLB_ALWAYS_SB);
 
 protected:
-    wxListBoxBase *m_listbox;
-
-    virtual wxListBoxBase *CreateList(int n,
-                                      const wxString *choices,
-                                      long styleLbox);
+    wxListBox  *m_listbox;
 
     DECLARE_NO_COPY_CLASS(wxAnyChoiceDialog)
 };
@@ -142,18 +142,11 @@ public:
 
     // implementation from now on
     void OnOK(wxCommandEvent& event);
-#ifndef __SMARTPHONE__
     void OnListBoxDClick(wxCommandEvent& event);
-#endif
-#ifdef __WXWINCE__
-    void OnJoystickButtonDown(wxJoystickEvent& event);
-#endif
 
 protected:
     int         m_selection;
     wxString    m_stringSelection;
-
-    void DoChoice();
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxSingleChoiceDialog)
@@ -210,12 +203,6 @@ public:
     virtual bool TransferDataFromWindow();
 
 protected:
-#if wxUSE_CHECKLISTBOX
-    virtual wxListBoxBase *CreateList(int n,
-                                      const wxString *choices,
-                                      long styleLbox);
-#endif // wxUSE_CHECKLISTBOX
-
     wxArrayInt m_selections;
 
 private:
@@ -318,3 +305,4 @@ WXDLLEXPORT size_t wxGetMultipleChoices(wxArrayInt& selections,
                                         int height = wxCHOICE_HEIGHT);
 
 #endif // __CHOICEDLGH_G__
+

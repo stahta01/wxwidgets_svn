@@ -201,7 +201,7 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 27
+WX_RELEASE_NODOT = 26
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -223,7 +223,7 @@ $(OBJS) :
 
 ### Targets: ###
 
-all : .SYMBOLIC $(OBJS)\internat.exe bg cs de fr ka pl ru sv ja ja_JP.EUC-JP
+all : .SYMBOLIC $(OBJS)\internat.exe bg cs de fr ja ka pl ru sv
 
 clean : .SYMBOLIC 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -240,7 +240,7 @@ $(OBJS)\internat.exe :  $(INTERNAT_OBJECTS) $(OBJS)\internat_internat.res
 	@%append $(OBJS)\internat.lbc option caseexact
 	@%append $(OBJS)\internat.lbc $(LDFLAGS) $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) system nt_win ref '_WinMain@16'
 	@for %i in ($(INTERNAT_OBJECTS)) do @%append $(OBJS)\internat.lbc file %i
-	@for %i in ( $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\internat.lbc library %i
+	@for %i in ( $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ) do @%append $(OBJS)\internat.lbc library %i
 	@%append $(OBJS)\internat.lbc option resource=$(OBJS)\internat_internat.res
 	@for %i in () do @%append $(OBJS)\internat.lbc option stack=%i
 	wlink @$(OBJS)\internat.lbc
@@ -261,6 +261,10 @@ fr : .SYMBOLIC
 	if not exist $(OBJS)\fr mkdir $(OBJS)\fr
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\fr\%f copy .\fr\%f $(OBJS)\fr
 
+ja : .SYMBOLIC 
+	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
+	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
+
 ka : .SYMBOLIC 
 	if not exist $(OBJS)\ka mkdir $(OBJS)\ka
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ka\%f copy .\ka\%f $(OBJS)\ka
@@ -276,14 +280,6 @@ ru : .SYMBOLIC
 sv : .SYMBOLIC 
 	if not exist $(OBJS)\sv mkdir $(OBJS)\sv
 	for %f in (internat.po internat.mo) do if not exist $(OBJS)\sv\%f copy .\sv\%f $(OBJS)\sv
-
-ja : .SYMBOLIC 
-	if not exist $(OBJS)\ja mkdir $(OBJS)\ja
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja\%f copy .\ja\%f $(OBJS)\ja
-
-ja_JP.EUC-JP : .SYMBOLIC 
-	if not exist $(OBJS)\ja_JP.EUC-JP mkdir $(OBJS)\ja_JP.EUC-JP
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\ja_JP.EUC-JP\%f copy .\ja_JP.EUC-JP\%f $(OBJS)\ja_JP.EUC-JP
 
 $(OBJS)\internat_internat.obj :  .AUTODEPEND .\internat.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(INTERNAT_CXXFLAGS) $<

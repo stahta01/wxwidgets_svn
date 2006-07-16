@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// File:        contrib/samples/stc/edit.cpp
+// File:        edit.cpp
 // Purpose:     STC test module
 // Maintainer:  Wyo
 // Created:     2003-09-01
@@ -17,7 +17,7 @@
 // headers
 //----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx/wx.h".
+// For compilers that support precompilation, includes <wx/wx.h>.
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -508,7 +508,7 @@ bool Edit::LoadFile ()
     // get filname
     if (!m_filename) {
         wxFileDialog dlg (this, _T("Open file"), wxEmptyString, wxEmptyString,
-                          _T("Any file (*)|*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+                          _T("Any file (*)|*"), wxOPEN | wxFILE_MUST_EXIST | wxCHANGE_DIR);
         if (dlg.ShowModal() != wxID_OK) return false;
         m_filename = dlg.GetPath();
     }
@@ -557,7 +557,7 @@ bool Edit::SaveFile ()
     // get filname
     if (!m_filename) {
         wxFileDialog dlg (this, _T("Save file"), wxEmptyString, wxEmptyString, _T("Any file (*)|*"),
-                          wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                          wxSAVE | wxOVERWRITE_PROMPT);
         if (dlg.ShowModal() != wxID_OK) return false;
         m_filename = dlg.GetPath();
     }

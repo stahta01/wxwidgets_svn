@@ -1,28 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/cursor.cpp
+// Name:        cursor.cpp
 // Purpose:     wxCursor class
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#ifdef __GNUG__
+#pragma implementation "cursor.h"
 #endif
 
+#include "wx/defs.h"
+
+#include "wx/app.h"
 #include "wx/cursor.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/icon.h"
-    #include "wx/image.h"
-#endif // WX_PRECOMP
-
+#include "wx/icon.h"
+#include "wx/image.h"
 #include "wx/xpmdecod.h"
 
 #include "wx/mac/private.h"
@@ -49,7 +45,7 @@ wxCursor    gMacCurrentCursor ;
 
 wxCursorRefData::wxCursorRefData()
 {
-    m_width = 16;
+    m_width = 16; 
     m_height = 16;
     m_hCursor = NULL ;
     m_disposeHandle = false ;
@@ -67,7 +63,7 @@ wxCursorRefData::~wxCursorRefData()
     else if ( m_disposeHandle )
     {
         ::DisposeHandle( (Handle ) m_hCursor ) ;
-    }
+    } 
     else if ( m_releaseHandle )
     {
         // we don't release the resource since it may already
@@ -90,24 +86,24 @@ wxCursor::wxCursor( const wxImage &image )
     CreateFromImage( image ) ;
 }
 
-wxCursor::wxCursor(const char **bits)
+wxCursor::wxCursor(const char **bits) 
 {
     (void) CreateFromXpm(bits);
 }
 
-wxCursor::wxCursor(char **bits)
+wxCursor::wxCursor(char **bits) 
 {
     (void) CreateFromXpm((const char **)bits);
 }
 
 bool wxCursor::CreateFromXpm(const char **bits)
 {
-    wxCHECK_MSG( bits != NULL, false, wxT("invalid cursor data") );
+    wxCHECK_MSG( bits != NULL, FALSE, wxT("invalid cursor data") )
     wxXPMDecoder decoder;
     wxImage img = decoder.ReadData(bits);
-    wxCHECK_MSG( img.Ok(), false, wxT("invalid cursor data") );
-    CreateFromImage( img ) ;
-    return true;
+    wxCHECK_MSG( img.Ok(), FALSE, wxT("invalid cursor data") )    
+	CreateFromImage( img ) ;
+    return TRUE;
 }
 
 short GetCTabIndex( CTabHandle colors , RGBColor *col )
@@ -128,18 +124,18 @@ short GetCTabIndex( CTabHandle colors , RGBColor *col )
     return retval ;
 }
 
-void wxCursor::CreateFromImage(const wxImage & image)
+void wxCursor::CreateFromImage(const wxImage & image) 
 {
     m_refData = new wxCursorRefData;
 
     int w = 16;
     int h = 16;
-
+ 
     int hotSpotX = image.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_X);
     int hotSpotY = image.GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_Y);
     int image_w = image.GetWidth();
     int image_h = image.GetHeight();
-
+    
     wxASSERT_MSG( hotSpotX >= 0 && hotSpotX < image_w &&
                   hotSpotY >= 0 && hotSpotY < image_h,
                   _T("invalid cursor hot spot coordinates") );
@@ -157,15 +153,15 @@ void wxCursor::CreateFromImage(const wxImage & image)
     }
     else if ((w != image_w) || (h != image_h))
     {
-        hotSpotX = int(hotSpotX * double(w) / double(image_w));
-        hotSpotY = int(hotSpotY * double(h) / double(image_h));
+        hotSpotX = int(hotSpotX * double(w) / double(image_w)); 
+        hotSpotY = int(hotSpotY * double(h) / double(image_h)); 
 
         image16 = image.Scale(w, h);
     }
 
     unsigned char * rgbBits = image16.GetData();
     bool bHasMask = image16.HasMask() ;
-
+            
 #if 0
     // monochrome implementation
     M_CURSORDATA->m_hCursor = NewHandle( sizeof( Cursor ) ) ;
@@ -174,7 +170,7 @@ void wxCursor::CreateFromImage(const wxImage & image)
     CursPtr cp = *(CursHandle)M_CURSORDATA->m_hCursor ;
     memset( cp->data , 0 , sizeof( Bits16 ) ) ;
     memset( cp->mask , 0 , sizeof( Bits16 ) ) ;
-
+    
     unsigned char mr = image16.GetMaskRed() ;
     unsigned char mg = image16.GetMaskGreen() ;
     unsigned char mb = image16.GetMaskBlue() ;
@@ -182,7 +178,7 @@ void wxCursor::CreateFromImage(const wxImage & image)
     {
         short rowbits = 0 ;
         short maskbits = 0 ;
-
+        
         for ( int x = 0 ; x < w ; ++x )
         {
             long pos = (y * w + x) * 3;
@@ -229,36 +225,36 @@ void wxCursor::CreateFromImage(const wxImage & image)
     }
     HLock( (Handle) ch) ;
     (**ch).crsrType = 0x8001 ; // color cursors
-    (**ch).crsrMap = pm ;
+    (**ch).crsrMap = pm ; 
     short bytesPerRow = bytesPerPixel * extent ;
 
-    (**pm).baseAddr = 0;
+    (**pm).baseAddr = 0; 
     (**pm).rowBytes = bytesPerRow | 0x8000;
-    (**pm).bounds = bounds;
-    (**pm).pmVersion = 0;
-    (**pm).packType = 0;
-    (**pm).packSize = 0;
+    (**pm).bounds = bounds;        
+    (**pm).pmVersion = 0;           
+    (**pm).packType = 0;            
+    (**pm).packSize = 0;            
     (**pm).hRes = 0x00480000; /* 72 DPI default res */
     (**pm).vRes = 0x00480000; /* 72 DPI default res */
     (**pm).pixelSize = depth;
     (**pm).pixelType = 0;
-    (**pm).cmpCount = 1;
+    (**pm).cmpCount = 1; 
     (**pm).cmpSize = depth;
     (**pm).pmTable = newColors;
 
-    (**ch).crsrData = NewHandleClear( extent * bytesPerRow ) ;
+    (**ch).crsrData = NewHandleClear( extent * bytesPerRow ) ;  
     (**ch).crsrXData = NULL ;
     (**ch).crsrXValid = 0;
     (**ch).crsrXHandle = NULL;
 
     (**ch).crsrHotSpot.h = hotSpotX ;
     (**ch).crsrHotSpot.v = hotSpotY ;
-    (**ch).crsrXTable = NULL ;
+    (**ch).crsrXTable = NULL ; 
     (**ch).crsrID = GetCTSeed() ;
-
+    
     memset( (**ch).crsr1Data  , 0 , sizeof( Bits16 ) ) ;
     memset( (**ch).crsrMask , 0 , sizeof( Bits16 ) ) ;
-
+    
     unsigned char mr = image16.GetMaskRed() ;
     unsigned char mg = image16.GetMaskGreen() ;
     unsigned char mb = image16.GetMaskBlue() ;
@@ -266,7 +262,7 @@ void wxCursor::CreateFromImage(const wxImage & image)
     {
         short rowbits = 0 ;
         short maskbits = 0 ;
-
+        
         for ( int x = 0 ; x < w ; ++x )
         {
             long pos = (y * w + x) * 3;
@@ -275,7 +271,7 @@ void wxCursor::CreateFromImage(const wxImage & image)
             unsigned char g = rgbBits[pos+1] ;
             unsigned char b = rgbBits[pos+2] ;
             RGBColor col = { 0xFFFF ,0xFFFF, 0xFFFF } ;
-
+            
             if ( bHasMask && r==mr && g==mg && b==mb )
             {
                 // masked area, does not appear anywhere
@@ -287,10 +283,10 @@ void wxCursor::CreateFromImage(const wxImage & image)
                     rowbits |= ( 1 << (15-x) ) ;
                 }
                 maskbits |= ( 1 << (15-x) ) ;
-
+                
                 col = *((RGBColor*) wxColor( r , g , b ).GetPixel()) ;
             }
-            *((*(**ch).crsrData) + y * bytesPerRow + x) =
+            *((*(**ch).crsrData) + y * bytesPerRow + x) = 
                 GetCTabIndex( newColors , &col) ;
         }
         (**ch).crsr1Data[y] = rowbits ;
@@ -300,7 +296,7 @@ void wxCursor::CreateFromImage(const wxImage & image)
     {
         memcpy( (**ch).crsrMask , (**ch).crsr1Data , sizeof( Bits16) ) ;
     }
-
+    
     HUnlock((Handle) ch) ;
     M_CURSORDATA->m_hCursor = ch ;
     M_CURSORDATA->m_isColorCursor = true ;
@@ -313,8 +309,8 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
     if ( flags == wxBITMAP_TYPE_MACCURSOR_RESOURCE )
     {
         Str255 theName ;
-        wxMacStringToPascal( cursor_file , theName ) ;
-
+		wxMacStringToPascal( cursor_file , theName ) ;
+        
         wxStAppResource resload ;
         Handle resHandle = ::GetNamedResource( 'crsr' , theName ) ;
         if ( resHandle )
@@ -328,7 +324,7 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
                 M_CURSORDATA->m_isColorCursor = true ;
         }
         else
-        {
+        {       
             Handle resHandle = ::GetNamedResource( 'CURS' , theName ) ;
             if ( resHandle )
             {
@@ -360,7 +356,7 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
 wxCursor::wxCursor(int cursor_type)
 {
     m_refData = new wxCursorRefData;
-
+    
     switch (cursor_type)
     {
     case wxCURSOR_COPY_ARROW:
@@ -493,7 +489,7 @@ wxCursor::wxCursor(int cursor_type)
         M_CURSORDATA->m_releaseHandle = true ;
 }
 
-void wxCursor::MacInstall() const
+void wxCursor::MacInstall() const 
 {
     gMacCurrentCursor = *this ;
     if ( m_refData && M_CURSORDATA->m_themeCursor != -1 )
@@ -522,3 +518,5 @@ void wxSetCursor(const wxCursor& cursor)
 {
     cursor.MacInstall() ;
 }
+
+

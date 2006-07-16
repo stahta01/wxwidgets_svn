@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gaugebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,11 +31,9 @@
 #ifndef WX_PRECOMP
 #endif //WX_PRECOMP
 
-#if wxUSE_GAUGE
-
 #include "wx/gauge.h"
 
-const wxChar wxGaugeNameStr[] = wxT("gauge");
+#if wxUSE_GAUGE
 
 // ============================================================================
 // implementation

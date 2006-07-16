@@ -9,6 +9,19 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fontutil.h"
+#endif
+
+// For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -19,24 +32,32 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-#endif
+#endif //WX_PRECOMP
 
 #include "wx/fontutil.h"
 #include "wx/fontmap.h"
 #include "wx/encinfo.h"
+
 #include "wx/tokenzr.h"
 
+// ============================================================================
+// implementation
+// ============================================================================
 
-// convert to/from the string representation:
-// format is facename[;charset]
-//
-bool wxNativeEncodingInfo::FromString( const wxString& s )
+// ----------------------------------------------------------------------------
+// wxNativeEncodingInfo
+// ----------------------------------------------------------------------------
+
+// convert to/from the string representation: format is
+//      facename[;charset]
+
+bool wxNativeEncodingInfo::FromString(const wxString& s)
 {
-    wxStringTokenizer tokenizer(s, wxT(";"));
+    wxStringTokenizer tokenizer(s, _T(";"));
 
     facename = tokenizer.GetNextToken();
     if ( !facename )
-        return false;
+        return FALSE;
 
     wxString tmp = tokenizer.GetNextToken();
     if ( !tmp )
@@ -47,19 +68,23 @@ bool wxNativeEncodingInfo::FromString( const wxString& s )
     }
     else
     {
-        if ( wxSscanf( tmp, wxT("%u"), &charset ) != 1 )
+        if ( wxSscanf(tmp, _T("%u"), &charset) != 1 )
+        {
             // should be a number!
-            return false;
+            return FALSE;
+        }
     }
 
-    return true;
+    return TRUE;
 }
 
 wxString wxNativeEncodingInfo::ToString() const
 {
     wxString s(facename);
     if ( charset != 0 )
-        s << wxT(';') << charset;
+    {
+        s << _T(';') << charset;
+    }
 
     return s;
 }
@@ -68,20 +93,25 @@ wxString wxNativeEncodingInfo::ToString() const
 // helper functions
 // ----------------------------------------------------------------------------
 
-bool wxGetNativeFontEncoding( wxFontEncoding encoding, wxNativeEncodingInfo *info )
+bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                             wxNativeEncodingInfo *info)
 {
-    wxCHECK_MSG( info, false, wxT("bad pointer in wxGetNativeFontEncoding") );
+    wxCHECK_MSG( info, FALSE, _T("bad pointer in wxGetNativeFontEncoding") );
 
     if ( encoding == wxFONTENCODING_DEFAULT )
+    {
         encoding = wxFont::GetDefaultEncoding();
+    }
 
-    info->encoding = encoding;
+    info->encoding = encoding ;
 
-    return true;
+    return TRUE;
 }
 
-bool wxTestFontEncoding( const wxNativeEncodingInfo& info )
+bool wxTestFontEncoding(const wxNativeEncodingInfo& info)
 {
-    // basically we should be able to support every encoding via the OS
-    return true;
+	// basically we should be able to support every encoding via the OS
+    return true ;
 }
+
+

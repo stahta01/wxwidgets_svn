@@ -1,19 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_list.cpp
+// Name:        m_list.cpp
 // Purpose:     wxHtml module for lists
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
 
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
 
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
     #include "wx/brush.h"

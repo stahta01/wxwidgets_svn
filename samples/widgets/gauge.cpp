@@ -52,7 +52,7 @@
 // control ids
 enum
 {
-    GaugePage_Reset = wxID_HIGHEST,
+    GaugePage_Reset = 100,
     GaugePage_Progress,
     GaugePage_Clear,
     GaugePage_SetValue,
@@ -71,14 +71,10 @@ enum
 class GaugeWidgetsPage : public WidgetsPage
 {
 public:
-    GaugeWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    GaugeWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~GaugeWidgetsPage();
 
     virtual wxControl *GetWidget() const { return m_gauge; }
-    virtual void RecreateWidget() { CreateGauge(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // event handlers
@@ -160,18 +156,14 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
+IMPLEMENT_WIDGETS_PAGE(GaugeWidgetsPage, _T("Gauge"));
 
-IMPLEMENT_WIDGETS_PAGE(GaugeWidgetsPage, _T("Gauge"), FAMILY_CTRLS );
-
-GaugeWidgetsPage::GaugeWidgetsPage(WidgetsBookCtrl *book,
+GaugeWidgetsPage::GaugeWidgetsPage(wxBookCtrlBase *book,
                                    wxImageList *imaglist)
-                 :WidgetsPage(book, imaglist, gauge_xpm)
+                 :WidgetsPage(book)
 {
+    imaglist->Add(wxBitmap(gauge_xpm));
+
     // init everything
     m_range = 100;
 
@@ -182,10 +174,7 @@ GaugeWidgetsPage::GaugeWidgetsPage(WidgetsBookCtrl *book,
 
     m_gauge = (wxGauge *)NULL;
     m_sizerGauge = (wxSizer *)NULL;
-}
 
-void GaugeWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
@@ -270,7 +259,7 @@ void GaugeWidgetsPage::Reset()
 
 void GaugeWidgetsPage::CreateGauge()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
 
     if ( m_chkVert->GetValue() )
         flags |= wxGA_VERTICAL;

@@ -341,10 +341,6 @@ SOURCE=.\common\clntdata.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\clrpickercmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\cmdline.cpp
 # End Source File
 # Begin Source File
@@ -357,23 +353,11 @@ SOURCE=.\common\cmndata.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\colourcmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\combocmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\config.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\common\containr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\convauto.cpp
 # End Source File
 # Begin Source File
 
@@ -390,10 +374,6 @@ SOURCE=.\common\ctrlsub.cpp
 # Begin Source File
 
 SOURCE=.\common\datacmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\datavcmn.cpp
 # End Source File
 # Begin Source File
 
@@ -457,11 +437,6 @@ SOURCE=.\common\dseldlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dummy.cpp
-# ADD CPP /Yc"wx/wxprec.h"
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\dynarray.cpp
 # End Source File
 # Begin Source File
@@ -483,10 +458,6 @@ SOURCE=.\common\encconv.cpp
 # Begin Source File
 
 SOURCE=.\common\event.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\evtloopcmn.cpp
 # End Source File
 # Begin Source File
 
@@ -519,10 +490,6 @@ SOURCE=.\common\filename.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\filepickercmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\filesys.cpp
 # End Source File
 # Begin Source File
@@ -539,15 +506,7 @@ SOURCE=.\common\fontcmn.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\fontenumcmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\fontmap.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\fontpickercmn.cpp
 # End Source File
 # Begin Source File
 
@@ -735,15 +694,7 @@ SOURCE=.\common\paper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\pickerbase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\popupcmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\powercmn.cpp
 # End Source File
 # Begin Source File
 
@@ -955,10 +906,6 @@ SOURCE=.\generic\busyinfo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\buttonbar.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\calctrl.cpp
 # End Source File
 # Begin Source File
@@ -968,18 +915,6 @@ SOURCE=.\generic\choicbkg.cpp
 # Begin Source File
 
 SOURCE=.\generic\choicdgg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\clrpickerg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\combog.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\datavgen.cpp
 # End Source File
 # Begin Source File
 
@@ -1003,14 +938,6 @@ SOURCE=.\generic\dragimgg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\filepickerg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\fontpickerg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\grid.cpp
 # End Source File
 # Begin Source File
@@ -1031,10 +958,6 @@ SOURCE=.\generic\htmllbox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\hyperlink.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\laywin.cpp
 # End Source File
 # Begin Source File
@@ -1048,10 +971,6 @@ SOURCE=.\generic\logg.cpp
 # Begin Source File
 
 SOURCE=.\generic\numdlgg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\odcombo.cpp
 # End Source File
 # Begin Source File
 
@@ -1119,14 +1038,6 @@ SOURCE=.\generic\tipwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\toolbkg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\treebkg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
@@ -1155,15 +1066,7 @@ SOURCE=.\html\helpdata.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\html\helpdlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\html\helpfrm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\html\helpwnd.cpp
 # End Source File
 # Begin Source File
 
@@ -1295,10 +1198,6 @@ SOURCE=.\msw\colour.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\combo.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\combobox.cpp
 # End Source File
 # Begin Source File
@@ -1380,6 +1279,11 @@ SOURCE=.\msw\dlmsw.cpp
 # Begin Source File
 
 SOURCE=.\msw\dragimag.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\dummy.cpp
+# ADD CPP /Yc"wx/wxprec.h"
 # End Source File
 # Begin Source File
 
@@ -1487,11 +1391,7 @@ SOURCE=.\msw\mdi.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\mediactrl_am.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\mediactrl_wmp10.cpp
+SOURCE=.\msw\mediactrl.cpp
 # End Source File
 # Begin Source File
 
@@ -1576,10 +1476,6 @@ SOURCE=.\msw\pen.cpp
 # Begin Source File
 
 SOURCE=.\msw\popupwin.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\power.cpp
 # End Source File
 # Begin Source File
 
@@ -1743,38 +1639,6 @@ SOURCE=.\msw\window.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\aui\dockart.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\aui\floatpane.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\aui\framemanager.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextbuffer.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextctrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtexthtml.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextstyles.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\richtext\richtextxml.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xml\xml.cpp
 # End Source File
 # Begin Source File
@@ -1811,10 +1675,6 @@ SOURCE=.\xrc\xh_choicbk.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xrc\xh_clrpicker.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xrc\xh_combo.cpp
 # End Source File
 # Begin Source File
@@ -1823,19 +1683,7 @@ SOURCE=.\xrc\xh_datectrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xrc\xh_dirpicker.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xrc\xh_dlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_filepicker.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_fontpicker.cpp
 # End Source File
 # Begin Source File
 
@@ -1851,15 +1699,7 @@ SOURCE=.\xrc\xh_gdctl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xrc\xh_grid.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xrc\xh_html.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_hyperlink.cpp
 # End Source File
 # Begin Source File
 
@@ -1884,10 +1724,6 @@ SOURCE=.\xrc\xh_menu.cpp
 # Begin Source File
 
 SOURCE=.\xrc\xh_notbk.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_odcombo.cpp
 # End Source File
 # Begin Source File
 
@@ -1960,10 +1796,6 @@ SOURCE=.\xrc\xh_toolb.cpp
 # Begin Source File
 
 SOURCE=.\xrc\xh_tree.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\xrc\xh_treebk.cpp
 # End Source File
 # Begin Source File
 
@@ -2123,22 +1955,6 @@ SOURCE=..\include\wx\artprov.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\aui\aui.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\aui\dockart.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\aui\floatpane.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\aui\framemanager.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\beforestd.h
 # End Source File
 # Begin Source File
@@ -2215,10 +2031,6 @@ SOURCE=..\include\wx\clntdata.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\clrpicker.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\cmdline.h
 # End Source File
 # Begin Source File
@@ -2236,10 +2048,6 @@ SOURCE=..\include\wx\colordlg.h
 # Begin Source File
 
 SOURCE=..\include\wx\colour.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\combo.h
 # End Source File
 # Begin Source File
 
@@ -2263,10 +2071,6 @@ SOURCE=..\include\wx\control.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\convauto.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\cshelp.h
 # End Source File
 # Begin Source File
@@ -2280,14 +2084,6 @@ SOURCE=..\include\wx\cursor.h
 # Begin Source File
 
 SOURCE=..\include\wx\dataobj.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\dataview.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\dataview.h
 # End Source File
 # Begin Source File
 
@@ -2395,10 +2191,6 @@ SOURCE=..\include\wx\display.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\display_impl.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\dlimpexp.h
 # End Source File
 # Begin Source File
@@ -2487,10 +2279,6 @@ SOURCE=..\include\wx\filename.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\filepicker.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\filesys.h
 # End Source File
 # Begin Source File
@@ -2516,10 +2304,6 @@ SOURCE=..\include\wx\fontenum.h
 # Begin Source File
 
 SOURCE=..\include\wx\fontmap.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\fontpicker.h
 # End Source File
 # Begin Source File
 
@@ -2608,10 +2392,6 @@ SOURCE=..\include\wx\helpwin.h
 # Begin Source File
 
 SOURCE=..\include\wx\htmllbox.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\hyperlink.h
 # End Source File
 # Begin Source File
 
@@ -2712,10 +2492,6 @@ SOURCE=..\include\wx\layout.h
 # Begin Source File
 
 SOURCE=..\include\wx\laywin.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\link.h
 # End Source File
 # Begin Source File
 
@@ -2823,10 +2599,6 @@ SOURCE=..\include\wx\object.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\odcombo.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\ownerdrw.h
 # End Source File
 # Begin Source File
@@ -2847,19 +2619,11 @@ SOURCE=..\include\wx\pen.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\pickerbase.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\platform.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\popupwin.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\power.h
 # End Source File
 # Begin Source File
 
@@ -2940,22 +2704,6 @@ SOURCE=..\include\wx\region.h
 # Begin Source File
 
 SOURCE=..\include\wx\renderer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextbuffer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextctrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextstyles.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\richtext\richtextxml.h
 # End Source File
 # Begin Source File
 
@@ -3159,10 +2907,6 @@ SOURCE=..\include\wx\toolbar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\toolbook.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\tooltip.h
 # End Source File
 # Begin Source File
@@ -3172,10 +2916,6 @@ SOURCE=..\include\wx\toplevel.h
 # Begin Source File
 
 SOURCE=..\include\wx\treebase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\treebook.h
 # End Source File
 # Begin Source File
 
@@ -3263,10 +3003,6 @@ SOURCE=..\include\wx\wizard.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\wupdlock.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\wx.h
 # End Source File
 # Begin Source File
@@ -3331,10 +3067,6 @@ SOURCE=..\include\wx\xrc\xh_choicbk.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\xrc\xh_clrpicker.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\xrc\xh_combo.h
 # End Source File
 # Begin Source File
@@ -3343,19 +3075,7 @@ SOURCE=..\include\wx\xrc\xh_datectrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\xrc\xh_dirpicker.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\xrc\xh_dlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_filepicker.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_fontpicker.h
 # End Source File
 # Begin Source File
 
@@ -3371,15 +3091,7 @@ SOURCE=..\include\wx\xrc\xh_gdctl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\xrc\xh_grid.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\xrc\xh_html.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_hyperlink.h
 # End Source File
 # Begin Source File
 
@@ -3404,10 +3116,6 @@ SOURCE=..\include\wx\xrc\xh_menu.h
 # Begin Source File
 
 SOURCE=..\include\wx\xrc\xh_notbk.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_odcombo.h
 # End Source File
 # Begin Source File
 
@@ -3480,10 +3188,6 @@ SOURCE=..\include\wx\xrc\xh_toolb.h
 # Begin Source File
 
 SOURCE=..\include\wx\xrc\xh_tree.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_treebk.h
 # End Source File
 # Begin Source File
 
@@ -3584,10 +3288,6 @@ SOURCE=..\include\wx\msw\colordlg.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\colour.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\combo.h
 # End Source File
 # Begin Source File
 
@@ -3692,6 +3392,10 @@ SOURCE=..\include\wx\msw\gccpriv.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\gdiimage.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\msw\gdiobj.h
 # End Source File
 # Begin Source File
 
@@ -3883,10 +3587,6 @@ SOURCE=..\include\wx\msw\scrolbar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msw\seh.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\msw\setup0.h
 # End Source File
 # Begin Source File
@@ -3944,6 +3644,10 @@ SOURCE=..\include\wx\msw\taskbar.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\tbar95.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\msw\tbarmsw.h
 # End Source File
 # Begin Source File
 
@@ -4007,14 +3711,6 @@ SOURCE=..\include\wx\generic\accel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\generic\busyinfo.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\buttonbar.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\generic\calctrl.h
 # End Source File
 # Begin Source File
@@ -4023,23 +3719,7 @@ SOURCE=..\include\wx\generic\choicdgg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\generic\clrpickerg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\clrpickerg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\generic\colrdlgg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\combo.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\dataview.h
 # End Source File
 # Begin Source File
 
@@ -4063,23 +3743,7 @@ SOURCE=..\include\wx\generic\filedlgg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\generic\filepickerg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\filepickerg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\generic\fontdlgg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\fontpickerg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\fontpickerg.h
 # End Source File
 # Begin Source File
 
@@ -4195,15 +3859,7 @@ SOURCE=..\include\wx\html\helpdata.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\html\helpdlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\html\helpfrm.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\html\helpwnd.h
 # End Source File
 # Begin Source File
 

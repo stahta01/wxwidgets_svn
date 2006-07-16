@@ -18,10 +18,6 @@
     #include <CFString.h>
 #endif
 
-#include "wx/fontenc.h"
-
-class WXDLLIMPEXP_BASE wxString;
-
 void wxMacConvertNewlines13To10( char * data ) ;
 void wxMacConvertNewlines10To13( char * data ) ;
 void wxMacConvertNewlines13To10( wxString *data ) ;
@@ -88,21 +84,4 @@ private:
     DECLARE_NO_COPY_CLASS( wxMacCFStringHolder )
 } ;
 
-// corresponding class for holding UniChars (native unicode characters)
-
-class wxMacUniCharBuffer
-{
-public :
-    wxMacUniCharBuffer( const wxString &str ) ;
-    
-    ~wxMacUniCharBuffer() ;
-        
-    UniChar* GetBuffer() ;
-       
-    UniCharCount GetChars() ;
-    
-private :
-    UniChar* m_ubuf ;
-    UniCharCount m_chars ;
-};
 #endif //__WXCFSTRINGHOLDER_H__

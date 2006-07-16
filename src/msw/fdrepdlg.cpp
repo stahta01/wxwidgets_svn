@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "mswfdrepdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -38,8 +42,8 @@
 // functions prototypes
 // ----------------------------------------------------------------------------
 
-LRESULT CALLBACK wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
-                                         WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
+                                       WPARAM wParam, LPARAM lParam);
 
 UINT_PTR CALLBACK wxFindReplaceDialogHookProc(HWND hwnd,
                                               UINT uiMsg,
@@ -216,7 +220,7 @@ wxFindReplaceDialogImpl::~wxFindReplaceDialogImpl()
 // Window Proc for handling RegisterWindowMessage(FINDMSGSTRING)
 // ----------------------------------------------------------------------------
 
-LRESULT CALLBACK wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
+LRESULT APIENTRY wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
                                          WPARAM wParam, LPARAM lParam)
 {
 #if wxUSE_UNICODE_MSLU

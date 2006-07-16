@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "drawn.h"
+#pragma implementation "drawnp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,11 +22,11 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #if wxUSE_PROLOGIO
-#include "wx/deprecated/wxexpr.h"
+#include <wx/deprecated/wxexpr.h>
 #endif
 
 #include "wx/ogl/ogl.h"
@@ -361,12 +366,12 @@ void wxDrawnShape::DestroyClippingRect()
     m_metafiles[m_currentAngle].DestroyClippingRect();
 }
 
-void wxDrawnShape::SetDrawnPen(const wxPen* pen, bool isOutline)
+void wxDrawnShape::SetDrawnPen(wxPen* pen, bool isOutline)
 {
     m_metafiles[m_currentAngle].SetPen(pen, isOutline);
 }
 
-void wxDrawnShape::SetDrawnBrush(const wxBrush* brush, bool isFill)
+void wxDrawnShape::SetDrawnBrush(wxBrush* brush, bool isFill)
 {
     m_metafiles[m_currentAngle].SetBrush(brush, isFill);
 }
@@ -2417,9 +2422,9 @@ void wxPseudoMetaFile::DestroyClippingRect()
     m_ops.Append(theOp);
 }
 
-void wxPseudoMetaFile::SetPen(const wxPen* pen, bool isOutline)
+void wxPseudoMetaFile::SetPen(wxPen* pen, bool isOutline)
 {
-    m_gdiObjects.Append(wx_const_cast(wxPen*, pen));
+    m_gdiObjects.Append(pen);
     int n = m_gdiObjects.GetCount();
 
     wxOpSetGDI* theOp = new wxOpSetGDI(DRAWOP_SET_PEN, this, n - 1);
@@ -2432,9 +2437,9 @@ void wxPseudoMetaFile::SetPen(const wxPen* pen, bool isOutline)
     }
 }
 
-void wxPseudoMetaFile::SetBrush(const wxBrush* brush, bool isFill)
+void wxPseudoMetaFile::SetBrush(wxBrush* brush, bool isFill)
 {
-    m_gdiObjects.Append(wx_const_cast(wxBrush*, brush));
+    m_gdiObjects.Append(brush);
     int n = m_gdiObjects.GetCount();
 
     wxOpSetGDI* theOp = new wxOpSetGDI(DRAWOP_SET_BRUSH, this, n - 1);

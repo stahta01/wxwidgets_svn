@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/fontdlg.cpp
+// Name:        fontdlg.cpp
 // Purpose:     wxFontDialog class. NOTE: you can use the generic class
 //              if you wish, instead of implementing this.
 // Author:      David Webster
@@ -13,22 +13,22 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/fontdlg.h"
-
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/math.h"
-    #include "wx/cmndata.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/math.h"
 #endif
 
+#include "wx/fontdlg.h"
 #include "wx/fontutil.h"
 
 #define INCL_PM
 #include <os2.h>
 
 #include "wx/os2/private.h"
+#include "wx/cmndata.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -37,10 +37,10 @@ IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
 
 int wxFontDialog::ShowModal()
 {
-    FONTDLG      vFontDlg;
-    char         zCurrentFont[FACESIZE];
-    HWND         hWndFontDlg;
-    FACENAMEDESC vFn;
+    FONTDLG                         vFontDlg;
+    char                            zCurrentFont[FACESIZE];
+    HWND                            hWndFontDlg;
+    FACENAMEDESC                    vFn;
 
     memset(&vFontDlg, '\0', sizeof(FONTDLG));
     zCurrentFont[0] = '\0';
@@ -98,3 +98,4 @@ int wxFontDialog::ShowModal()
     }
     return wxID_CANCEL;
 } // end of wxFontDialg::ShowModal
+

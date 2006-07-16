@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/url.cpp
+// Name:        url.cpp
 // Purpose:     URL parser
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -9,24 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "url.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_URL
 
-#include "wx/url.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-#endif
-
+#include "wx/string.h"
+#include "wx/list.h"
+#include "wx/utils.h"
 #include "wx/module.h"
+#include "wx/url.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -334,7 +334,7 @@ void wxURL::SetDefaultProxy(const wxString& url_proxy)
             return;
 
         wxString hostname = tmp_str(0, pos),
-        port = tmp_str(pos+1, tmp_str.length()-pos);
+        port = tmp_str(pos+1, tmp_str.Length()-pos);
         wxIPV4address addr;
 
         if (!addr.Hostname(hostname))
@@ -377,7 +377,7 @@ void wxURL::SetProxy(const wxString& url_proxy)
             return;
 
         hostname = tmp_str(0, pos);
-        port = tmp_str(pos+1, tmp_str.length()-pos);
+        port = tmp_str(pos+1, tmp_str.Length()-pos);
 
         addr.Hostname(hostname);
         addr.Service(port);

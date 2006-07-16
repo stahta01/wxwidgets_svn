@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/dialog.h
+// Name:        dialog.h
 // Purpose:     wxDialog class
 // Author:      David Webster
 // Modified by:
@@ -14,7 +14,7 @@
 
 #include "wx/panel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
 class WXDLLEXPORT wxDialogModalData;
 
@@ -90,7 +90,8 @@ public:
                                   ,WXWPARAM wParam
                                   ,WXLPARAM lParam
                                  );
-#if WXWIN_COMPATIBILITY_2_6
+    // obsolete methods
+    // ----------------
 
     // Constructor with a modal flag, but no window id - the old convention
     wxDEPRECATED( wxDialog( wxWindow*       pParent
@@ -109,8 +110,6 @@ public:
 
     // use IsModal()
     wxDEPRECATED( bool IsModalShowing() const );
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     //
@@ -148,3 +147,4 @@ private:
 }; // end of CLASS wxDialog
 
 #endif // _WX_DIALOG_H_
+

@@ -18,7 +18,6 @@
 #include "wx/unix/execute.h"
 #include "wx/stdpaths.h"
 #include "wx/apptrait.h"
-#include "wx/thread.h"
 #include "wx/process.h"
 
 // Use polling instead of Mach ports, which doesn't work on Intel

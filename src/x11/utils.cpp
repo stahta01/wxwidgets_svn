@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      Julian Smart
 // Modified by:
@@ -9,13 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#if defined(__BORLANDC__)
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -24,16 +17,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include "wx/setup.h"
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/window.h" // for wxTopLevelWindows
-    #include "wx/cursor.h"
-    #include "wx/msgdlg.h"
-#endif
-
+#include "wx/app.h"
 #include "wx/apptrait.h"
+#include "wx/msgdlg.h"
+#include "wx/cursor.h"
+#include "wx/window.h" // for wxTopLevelWindows
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -83,60 +73,18 @@ void wxFlushEvents()
 
 bool wxCheckForInterrupt(wxWindow *wnd)
 {
-    wxFAIL_MSG(wxT("wxCheckForInterrupt not yet implemented."));
-    return false;
+    wxASSERT_MSG(FALSE, wxT("wxCheckForInterrupt not yet implemented."));
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
 // wxExecute stuff
 // ----------------------------------------------------------------------------
 
-WX_DECLARE_HASH_MAP( int, wxEndProcessData*, wxIntegerHash, wxIntegerEqual, wxProcMap );
-
-static wxProcMap *gs_procmap;
-
 int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
-    if (!gs_procmap) gs_procmap = new wxProcMap();
-    (*gs_procmap)[fd] = proc_data;
-    return 1;
-}
-
-void wxCheckForFinishedChildren()
-{
-    wxProcMap::iterator it;
-    if (!gs_procmap) return;
-    if (gs_procmap->size() == 0) {
-      // Map empty, delete it.
-      delete gs_procmap;
-      gs_procmap = NULL;
-    }
-    for (it = gs_procmap->begin();it != gs_procmap->end(); ++it)
-    {
-        wxEndProcessData *proc_data = it->second;
-        int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
-        int status = 0;
-        // has the process really terminated?
-        int rc = waitpid(pid, &status, WNOHANG);
-        if (rc == 0)
-            continue;       // no, it didn't exit yet, continue waiting
-
-        // set exit code to -1 if something bad happened
-        proc_data->exitcode = rc != -1 && WIFEXITED(status) ?
-                   WEXITSTATUS(status) : -1;
-
-        // child exited, end waiting
-        close(it->first);
-
-        // don't call us again!
-        gs_procmap->erase(it->first);
-
-        wxHandleProcessTermination(proc_data);
-
-        // Iterator is invalid. Handle any further children in subsequent
-        // calls.
-        break;
-    }
+    // TODO
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -188,7 +136,7 @@ void wxGetMousePosition( int* x, int* y )
 #endif
 };
 
-// Return true if we have a colour display
+// Return TRUE if we have a colour display
 bool wxColourDisplay()
 {
     return wxDisplayDepth() > 1;
@@ -250,11 +198,11 @@ bool wxSetDisplay(const wxString& display_name)
 {
     gs_displayName = display_name;
 
-    if ( display_name.empty() )
+    if ( display_name.IsEmpty() )
     {
         gs_currentDisplay = NULL;
 
-        return true;
+        return TRUE;
     }
     else
     {
@@ -263,10 +211,10 @@ bool wxSetDisplay(const wxString& display_name)
         if (display)
         {
             gs_currentDisplay = (WXDisplay*) display;
-            return true;
+            return TRUE;
         }
         else
-            return false;
+            return FALSE;
     }
 }
 
@@ -403,20 +351,20 @@ wxString wxGetXEventName(XEvent& event)
     return str;
 #else
     int type = event.xany.type;
-    static char* event_name[] = {
-        "", "unknown(-)",                                         // 0-1
-        "KeyPress", "KeyRelease", "ButtonPress", "ButtonRelease", // 2-5
-        "MotionNotify", "EnterNotify", "LeaveNotify", "FocusIn",  // 6-9
-        "FocusOut", "KeymapNotify", "Expose", "GraphicsExpose",   // 10-13
-        "NoExpose", "VisibilityNotify", "CreateNotify",           // 14-16
-        "DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",// 17-20
-        "ReparentNotify", "ConfigureNotify", "ConfigureRequest",  // 21-23
-        "GravityNotify", "ResizeRequest", "CirculateNotify",      // 24-26
-        "CirculateRequest", "PropertyNotify", "SelectionClear",   // 27-29
-        "SelectionRequest", "SelectionNotify", "ColormapNotify",  // 30-32
-        "ClientMessage", "MappingNotify",                         // 33-34
-        "unknown(+)"};                                            // 35
-        type = wxMin(35, type); type = wxMax(1, type);
+	    static char* event_name[] = {
+		"", "unknown(-)",                                         // 0-1
+		"KeyPress", "KeyRelease", "ButtonPress", "ButtonRelease", // 2-5
+		"MotionNotify", "EnterNotify", "LeaveNotify", "FocusIn",  // 6-9
+		"FocusOut", "KeymapNotify", "Expose", "GraphicsExpose",   // 10-13
+		"NoExpose", "VisibilityNotify", "CreateNotify",           // 14-16
+		"DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",// 17-20
+		"ReparentNotify", "ConfigureNotify", "ConfigureRequest",  // 21-23
+		"GravityNotify", "ResizeRequest", "CirculateNotify",      // 24-26
+		"CirculateRequest", "PropertyNotify", "SelectionClear",   // 27-29
+		"SelectionRequest", "SelectionNotify", "ColormapNotify",  // 30-32
+		"ClientMessage", "MappingNotify",                         // 33-34
+		"unknown(+)"};                                            // 35
+	    type = wxMin(35, type); type = wxMax(1, type);
         return wxString::FromAscii(event_name[type]);
 #endif
 }

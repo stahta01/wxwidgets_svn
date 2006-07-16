@@ -27,7 +27,6 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
-#include "CharClassify.h"
 #include "XPM.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
@@ -48,6 +47,7 @@
 #include "Document.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
+
 
 //----------------------------------------------------------------------
 

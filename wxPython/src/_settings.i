@@ -129,8 +129,7 @@ enum wxSystemMetric
 enum wxSystemFeature
 {
     wxSYS_CAN_DRAW_FRAME_DECORATIONS = 1,
-    wxSYS_CAN_ICONIZE_FRAME,
-    wxSYS_TABLET_PRESENT 
+    wxSYS_CAN_ICONIZE_FRAME
 };
 
 

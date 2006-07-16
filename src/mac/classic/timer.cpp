@@ -1,22 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/classic/timer.cpp
+// Name:        timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#ifdef __GNUG__
+#pragma implementation "timer.h"
+#endif
 
 #include "wx/timer.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-#endif
 
 IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
 
@@ -26,6 +23,8 @@ IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
 #ifndef __DARWIN__
 #include <Timer.h>
 #endif
+
+#include "wx/dynarray.h"
 
 typedef struct MacTimerInfo
 {
@@ -43,7 +42,7 @@ static pascal void MacTimerProc( TMTask * t )
 }
 
 // we need this array to track timers that are being deleted within the Notify procedure
-// adding the timer before the Notify call and checking after whether it still is in there
+// adding the timer before the Notify call and checking after whether it still is in there 
 // as the destructor would have removed it from the array
 
 wxArrayPtrVoid gTimersInProcess ;
@@ -52,26 +51,27 @@ static void wxProcessTimer( unsigned long event , void *data )
 {
     if ( !data )
         return ;
-
+        
     wxTimer* timer = (wxTimer*) data ;
-
+    
     if ( timer->IsOneShot() )
         timer->Stop() ;
-
+        
     gTimersInProcess.Add( timer ) ;
-
+     
     timer->Notify();
 
     int index = gTimersInProcess.Index( timer ) ;
-
+    
     if ( index != wxNOT_FOUND )
     {
         gTimersInProcess.RemoveAt( index ) ;
-
+        
         if ( !timer->IsOneShot() && timer->m_info->m_task.tmAddr )
         {
             PrimeTime( (QElemPtr)  &timer->m_info->m_task , timer->GetInterval() ) ;
         }
+    
     }
 }
 
@@ -86,7 +86,7 @@ void wxTimer::Init()
     m_info->m_timer = this ;
 }
 
-bool wxTimer::IsRunning() const
+bool wxTimer::IsRunning() const 
 {
     // as the qType may already indicate it is elapsed, but it
     // was not handled internally yet
@@ -102,15 +102,15 @@ wxTimer::~wxTimer()
     }
     int index = gTimersInProcess.Index( this ) ;
     if ( index != wxNOT_FOUND )
-        gTimersInProcess.RemoveAt( index ) ;
+        gTimersInProcess.RemoveAt( index ) ;  
 }
 
 bool wxTimer::Start(int milliseconds,bool mode)
 {
     (void)wxTimerBase::Start(milliseconds, mode);
 
-    wxCHECK_MSG( m_milli > 0, false, wxT("invalid value for timer timeout") );
-    wxCHECK_MSG( m_info->m_task.tmAddr == NULL , false, wxT("attempting to restart a timer") );
+    wxCHECK_MSG( m_milli > 0, FALSE, wxT("invalid value for timer timeout") );
+    wxCHECK_MSG( m_info->m_task.tmAddr == NULL , FALSE, wxT("attempting to restart a timer") );
 
 #if defined(UNIVERSAL_INTERFACES_VERSION) && (UNIVERSAL_INTERFACES_VERSION >= 0x0340)
     m_info->m_task.tmAddr = NewTimerUPP( MacTimerProc ) ;
@@ -123,7 +123,7 @@ bool wxTimer::Start(int milliseconds,bool mode)
     m_info->m_timer = this ;
     InsXTime((QElemPtr) &m_info->m_task ) ;
     PrimeTime( (QElemPtr) &m_info->m_task , m_milli ) ;
-    return true;
+    return TRUE;
 }
 
 void wxTimer::Stop()
@@ -136,3 +136,6 @@ void wxTimer::Stop()
     }
     wxMacRemoveAllNotifiersForData( wxMacGetNotifierTable() , this ) ;
 }
+
+
+

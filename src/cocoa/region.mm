@@ -1,24 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/region.mm
+// Name:        cocoa/region.mm
 // Purpose:     wxRegion class
 // Author:      David Elliott
-// Modified by:
+// Modified by: 
 // Created:     2004/04/12
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
-
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/region.h"
 
@@ -44,3 +33,4 @@ wxRegion::wxRegion(const NSRect *rects, int count)
         Union(NSRectToWxRect(rects[i]));
     }
 }
+

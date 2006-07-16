@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -196,7 +200,7 @@ bool wxDirData::Read(wxString *filename)
 #ifdef __WIN32__
         DWORD err = ::GetLastError();
 
-        if ( err != ERROR_FILE_NOT_FOUND && err != ERROR_NO_MORE_FILES )
+        if ( err != ERROR_FILE_NOT_FOUND )
         {
             wxLogSysError(err, _("Can not enumerate files in directory '%s'"),
                           m_dirname.c_str());

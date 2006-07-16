@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------
 # Name:        wx.lib.splitter
 # Purpose:     A class similar to wx.SplitterWindow but that allows more
-#              than a single split
+#              a single split
 #
 # Author:      Robin Dunn
 #
@@ -208,16 +208,6 @@ class MultiSplitterWindow(wx.PyPanel):
         assert idx < len(self._sashes)
         return self._sashes[idx]
 
-
-    def SetSashPosition(self, idx, pos):
-        """
-        Set the psition of the idx'th sash, measured from the left/top
-        of the window preceding the sash.
-        """
-        assert idx < len(self._sashes)
-        self._sashes[idx] = pos
-        self._SizeWindows()
-        
 
     def SizeWindows(self):
         """

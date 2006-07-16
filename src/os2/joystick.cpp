@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/joystick.cpp
+// Name:        joystick.cpp
 // Purpose:     wxJoystick class
 // Author:      David Webster
 // Modified by:
@@ -9,23 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+//
 // For compilers that support precompilation, includes "wx.h".
+//
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
 
 #if wxUSE_JOYSTICK
 
-#include "wx/joystick.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/window.h"
-#endif
-
+#include "wx/string.h"
 #define INCL_PM
 #define INCL_DOS
 #include "wx/os2/private.h"
 
 #define NO_JOYGETPOSEX
+
+#include <wx/window.h>
+#include <wx/joystick.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -100,7 +101,7 @@ bool wxJoystick::IsOk() const
     return false;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;
@@ -121,7 +122,7 @@ int wxJoystick::GetProductId() const
 wxString wxJoystick::GetProductName() const
 {
     // TODO
-    return wxEmptyString;
+    return wxString("");
 }
 
 int wxJoystick::GetXMin() const
@@ -288,5 +289,4 @@ bool wxJoystick::ReleaseCapture()
     // TODO
     return false;
 }
-
 #endif  // wxUSE_JOYSTICK

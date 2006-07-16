@@ -40,7 +40,7 @@ HOST_SUFFIX = @HOST_SUFFIX@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.7
+WX_RELEASE = 2.6
 LIBDIRNAME = $(top_builddir)lib
 HHP2CACHED_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
@@ -150,7 +150,7 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 hhp2cached$(EXEEXT): $(HHP2CACHED_OBJECTS) $(__hhp2cached___win32rc)
-	$(CXX) -o $@ $(HHP2CACHED_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI)  $(__WXLIB_HTML_p) $(EXTRALIBS_HTML) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+	$(CXX) -o $@ $(HHP2CACHED_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI)  $(__WXLIB_HTML_p) $(EXTRALIBS_HTML) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI)
 	$(__hhp2cached___mac_rezcmd)
 	$(__hhp2cached___mac_setfilecmd)
 	$(__hhp2cached___os2_emxbindcmd)

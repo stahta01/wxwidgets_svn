@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,11 +28,8 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/event.h"
-    #include "wx/app.h"
-#endif //WX_PRECOMP
-
+#include "wx/event.h"
+#include "wx/app.h"
 #include "wx/cmdline.h"
 
 #if wxUSE_GUI

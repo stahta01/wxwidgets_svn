@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_menu.cpp
+// Name:        xh_menu.cpp
 // Purpose:     XRC resource for menus and menubars
 // Author:      Vaclav Slavik
 // Created:     2000/03/05
@@ -7,6 +7,10 @@
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_menu.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,11 +22,8 @@
 #if wxUSE_XRC
 
 #include "wx/xrc/xh_menu.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/menu.h"
-#endif
+#include "wx/menu.h"
+#include "wx/frame.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMenuXmlHandler, wxXmlResourceHandler)
 
@@ -36,9 +37,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
 {
     if (m_class == wxT("wxMenu"))
     {
-        wxMenu *menu = m_instance ? wxStaticCast(m_instance, wxMenu)
-                                  : new wxMenu(GetStyle());
-
+        wxMenu *menu = new wxMenu(GetStyle());
         wxString title = GetText(wxT("label"));
         wxString help = GetText(wxT("help"));
 
@@ -49,9 +48,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
 
         wxMenuBar *p_bar = wxDynamicCast(m_parent, wxMenuBar);
         if (p_bar)
-        {
             p_bar->Append(menu, title);
-        }
         else
         {
             wxMenu *p_menu = wxDynamicCast(m_parent, wxMenu);
@@ -80,7 +77,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
             wxString label = GetText(wxT("label"));
             wxString accel = GetText(wxT("accel"), false);
             wxString fullLabel = label;
-            if (!accel.empty())
+            if (!accel.IsEmpty())
                 fullLabel << wxT("\t") << accel;
 
             wxItemKind kind = wxITEM_NORMAL;

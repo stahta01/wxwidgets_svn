@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/menuitem.cpp
+// Name:        menuitem.cpp
 // Purpose:     wxMenuItem implementation
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,19 +9,34 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// headers & declarations
+// ============================================================================
+
 #include "wx/wxprec.h"
 
+#include "wx/app.h"
+#include "wx/menu.h"
 #include "wx/menuitem.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/menu.h"
-#endif // WX_PRECOMP
-
 #include "wx/mac/uma.h"
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// dynamic classes implementation
+// ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxObject)
 
+// ----------------------------------------------------------------------------
+// wxMenuItem
+// ----------------------------------------------------------------------------
+
+//
+// ctor & dtor
+// -----------
 
 wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
                        int id,
@@ -35,8 +50,10 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
 
     // In other languages there is no difference in naming the Exit/Quit menu item between MacOS and Windows guidelines
     // therefore these item must not be translated
-    if ( wxStripMenuCodes(m_text).Upper() == wxT("EXIT") )
-        m_text = wxT("Quit\tCtrl+Q") ;
+    if ( wxStripMenuCodes(m_text).Upper() ==  wxT("EXIT") )
+    {
+        m_text =wxT("Quit\tCtrl+Q") ;
+    }
 
     m_radioGroup.start = -1;
     m_isRadioGroupStart = false;
@@ -62,7 +79,7 @@ void wxMenuItem::UpdateItemBitmap()
 
     MenuHandle mhandle = MAC_WXHMENU(m_parentMenu->GetHMenu()) ;
     MenuItemIndex index = m_parentMenu->MacGetIndexFromItem( this ) ;
-    if ( mhandle == NULL || index == 0)
+    if( mhandle == NULL || index == 0)
         return ;
 
     if ( m_bitmap.Ok() )
@@ -86,9 +103,6 @@ void wxMenuItem::UpdateItemStatus()
     if ( !m_parentMenu )
         return ;
 
-    if ( IsSeparator() )
-        return ;
-
 #if TARGET_CARBON
     if ( UMAGetSystemVersion() >= 0x1000 && GetId() == wxApp::s_macPreferencesMenuItemId)
     {
@@ -97,7 +111,6 @@ void wxMenuItem::UpdateItemStatus()
         else
             EnableMenuCommand( NULL , kHICommandPreferences ) ;
     }
-
     if ( UMAGetSystemVersion() >= 0x1000 && GetId() == wxApp::s_macExitMenuItemId)
     {
         if ( !IsEnabled() )
@@ -106,11 +119,10 @@ void wxMenuItem::UpdateItemStatus()
             EnableMenuCommand( NULL , kHICommandQuit ) ;
     }
 #endif
-
     {
         MenuHandle mhandle = MAC_WXHMENU(m_parentMenu->GetHMenu()) ;
         MenuItemIndex index = m_parentMenu->MacGetIndexFromItem( this ) ;
-        if ( mhandle == NULL || index == 0)
+        if( mhandle == NULL || index == 0)
             return ;
 
         UMAEnableMenuItem( mhandle , index , m_isEnabled ) ;
@@ -119,7 +131,7 @@ void wxMenuItem::UpdateItemStatus()
         else
             ::SetItemMark( mhandle , index , 0 ) ; // no mark
 
-        UMASetMenuItemText( mhandle , index , wxStripMenuCodes(m_text) , wxFont::GetDefaultEncoding() ) ;
+        UMASetMenuItemText( mhandle , index , m_text , wxFont::GetDefaultEncoding() ) ;
         wxAcceleratorEntry *entry = wxGetAccelFromString( m_text ) ;
         UMASetMenuItemShortcut( mhandle , index , entry ) ;
         delete entry ;
@@ -133,14 +145,15 @@ void wxMenuItem::UpdateItemText()
 
     MenuHandle mhandle = MAC_WXHMENU(m_parentMenu->GetHMenu()) ;
     MenuItemIndex index = m_parentMenu->MacGetIndexFromItem( this ) ;
-    if (mhandle == NULL || index == 0)
+    if( mhandle == NULL || index == 0)
         return ;
 
-    UMASetMenuItemText( mhandle , index , wxStripMenuCodes(m_text) , wxFont::GetDefaultEncoding() ) ;
+    UMASetMenuItemText( mhandle , index , m_text , wxFont::GetDefaultEncoding() ) ;
     wxAcceleratorEntry *entry = wxGetAccelFromString( m_text ) ;
     UMASetMenuItemShortcut( mhandle , index , entry ) ;
     delete entry ;
 }
+
 
 void wxMenuItem::Enable(bool bDoEnable)
 {
@@ -161,7 +174,6 @@ void wxMenuItem::Enable(bool bDoEnable)
         UpdateItemStatus() ;
     }
 }
-
 void wxMenuItem::UncheckRadio()
 {
     if ( m_isChecked )
@@ -173,7 +185,7 @@ void wxMenuItem::UncheckRadio()
 
 void wxMenuItem::Check(bool bDoCheck)
 {
-    wxCHECK_RET( IsCheckable() && !IsSeparator(), wxT("only checkable items may be checked") );
+    wxCHECK_RET( IsCheckable(), wxT("only checkable items may be checked") );
 
     if ( m_isChecked != bDoCheck )
     {
@@ -191,7 +203,8 @@ void wxMenuItem::Check(bool bDoCheck)
                              _T("menuitem not found in the menu items list?") );
 
                 // get the radio group range
-                int start, end;
+                int start,
+                    end;
 
                 if ( m_isRadioGroupStart )
                 {
@@ -211,8 +224,9 @@ void wxMenuItem::Check(bool bDoCheck)
                 for ( int n = start; n <= end && node; n++ )
                 {
                     if ( n != pos )
+                    {
                         ((wxMenuItem*)node->GetData())->UncheckRadio();
-
+                    }
                     node = node->GetNext();
                 }
             }
@@ -247,7 +261,7 @@ void wxMenuItem::SetAsRadioGroupStart()
 void wxMenuItem::SetRadioGroupStart(int start)
 {
     wxASSERT_MSG( !m_isRadioGroupStart,
-                  wxT("should only be called for the next radio items") );
+                  _T("should only be called for the next radio items") );
 
     m_radioGroup.start = start;
 }
@@ -255,7 +269,7 @@ void wxMenuItem::SetRadioGroupStart(int start)
 void wxMenuItem::SetRadioGroupEnd(int end)
 {
     wxASSERT_MSG( m_isRadioGroupStart,
-                  wxT("should only be called for the first radio item") );
+                  _T("should only be called for the first radio item") );
 
     m_radioGroup.end = end;
 }

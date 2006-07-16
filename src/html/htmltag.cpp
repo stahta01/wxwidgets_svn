@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/htmltag.cpp
+// Name:        htmltag.cpp
 // Purpose:     wxHtmlTag class (represents single tag)
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,21 +7,26 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmltag.h"
+#endif
+
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
+#include "wx/defs.h"
 #if wxUSE_HTML
 
-#include "wx/html/htmltag.h"
-
-#ifndef WXPRECOMP
-    #include "wx/colour.h"
+#ifdef __BORLANDC__
+#pragma hdrstop
 #endif
 
+#ifndef WXPRECOMP
+#endif
+
+#include "wx/html/htmltag.h"
 #include "wx/html/htmlpars.h"
+#include "wx/colour.h"
 #include <stdio.h> // for vsscanf
 #include <stdarg.h>
 
@@ -61,7 +66,7 @@ bool wxIsCDATAElement(const wxChar *tag)
 wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
 {
     const wxChar *src = source.c_str();
-    int lng = source.length();
+    int lng = source.Length();
     wxChar tagBuffer[256];
 
     m_Cache = NULL;
@@ -411,13 +416,20 @@ int wxHtmlTag::ScanParam(const wxString& par,
 
 bool wxHtmlTag::GetParamAsColour(const wxString& par, wxColour *clr) const
 {
-    wxASSERT(clr);
     wxString str = GetParam(par);
 
-    if (clr->Set(str))
+    if (str.empty()) return false;
+    if (str.GetChar(0) == wxT('#'))
+    {
+        unsigned long tmp;
+        if (ScanParam(par, wxT("#%lX"), &tmp) != 1)
+            return false;
+        *clr = wxColour((unsigned char)((tmp & 0xFF0000) >> 16),
+                        (unsigned char)((tmp & 0x00FF00) >> 8),
+                        (unsigned char)(tmp & 0x0000FF));
         return true;
-
-    if (!str.empty())
+    }
+    else
     {
         // Handle colours defined in HTML 4.0:
         #define HTML_COLOUR(name,r,g,b)                 \
@@ -508,5 +520,14 @@ wxHtmlTag *wxHtmlTag::GetNextTag() const
         cur = cur->m_Parent;
     return cur->m_Next;
 }
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxHtmlTag::IsEnding() const
+{
+    return false;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif

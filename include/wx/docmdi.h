@@ -12,6 +12,10 @@
 #ifndef _WX_DOCMDI_H_
 #define _WX_DOCMDI_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "docmdi.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_MDI_ARCHITECTURE

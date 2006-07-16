@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_listb.cpp
+// Name:        xh_listb.cpp
 // Purpose:     XRC resource for wxListBox
 // Author:      Bob Mitchell & Vaclav Slavik
 // Created:     2000/07/29
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_listb.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,14 +19,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_LISTBOX
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_listb.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/listbox.h"
-#endif
+#include "wx/listbox.h"
+#include "wx/intl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxListBoxXmlHandler, wxXmlResourceHandler)
 
@@ -101,4 +102,4 @@ bool wxListBoxXmlHandler::CanHandle(wxXmlNode *node)
            (m_insideBox && node->GetName() == wxT("item")));
 }
 
-#endif // wxUSE_XRC && wxUSE_LISTBOX
+#endif // wxUSE_XRC

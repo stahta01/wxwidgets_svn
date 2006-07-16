@@ -89,13 +89,12 @@ def MakeActiveXClass(CoClass, eventClass=None, eventObj=None):
 
 
 # These functions will be used as methods in the new class
-def axw__init__(self, parent, ID=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
-    
+def axw__init__(self, parent, ID, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
+
     # init base classes
     pywin.mfc.activex.Control.__init__(self)
     wx.Window.__init__( self, parent, -1, pos, size, style|wx.NO_FULL_REPAINT_ON_RESIZE)
-    self.this.own(False)  # this should be set in wx.Window.__init__ when it calls _setOORInfo, but...
-        
+
     win32ui.EnableControlContainer()
     self._eventObj = self._eventObj  # move from class to instance
 
@@ -113,6 +112,7 @@ def axw__init__(self, parent, ID=-1, pos=wx.DefaultPosition, size=wx.DefaultSize
 
     # hook some wx events
     self.Bind(wx.EVT_SIZE, self.axw_OnSize)
+
 
 def axw__getattr__(self, attr):
     try:
@@ -135,7 +135,7 @@ def axw_OEB(self, event):
 
 
 def axw_Cleanup(self):
-    #del self._wnd
+    del self._wnd
     self.close()
     pass
 

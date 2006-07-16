@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/dc.h
+// Name:        dc.h
 // Purpose:     wxDC class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_DC_H_BASE_
 #define _WX_DC_H_BASE_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dcbase.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers which we must include here
@@ -93,6 +97,8 @@ protected:
 // global variables
 // ---------------------------------------------------------------------------
 
+extern WXDLLEXPORT_DATA(int) wxPageNumber;
+
 // ---------------------------------------------------------------------------
 // wxDC is the device context - object on which any drawing is done
 // ---------------------------------------------------------------------------
@@ -134,10 +140,8 @@ public:
 
     ~wxDCBase() { }
 
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( virtual void BeginDrawing() );
-    wxDEPRECATED( virtual void EndDrawing() );
-#endif // WXWIN_COMPATIBILITY_2_6
+    virtual void BeginDrawing() { }
+    virtual void EndDrawing() { }
 
     // graphic primitives
     // ------------------
@@ -155,27 +159,6 @@ public:
     bool FloodFill(const wxPoint& pt, const wxColour& col,
                    int style = wxFLOOD_SURFACE)
         { return DoFloodFill(pt.x, pt.y, col, style); }
-
-    // fill the area specified by rect with a radial gradient, starting from
-    // initialColour in the centre of the cercle and fading to destColour.
-    void GradientFillConcentric(const wxRect& rect,
-                                const wxColour& initialColour,
-                                const wxColour& destColour)
-        { GradientFillConcentric(rect, initialColour, destColour,
-                                 wxPoint(rect.GetWidth() / 2,
-                                         rect.GetHeight() / 2)); }
-
-    void GradientFillConcentric(const wxRect& rect,
-                                const wxColour& initialColour,
-                                const wxColour& destColour,
-                                const wxPoint& circleCenter);
-
-    // fill the area specified by rect with a linear gradient
-    void GradientFillLinear(const wxRect& rect,
-                            const wxColour& initialColour,
-                            const wxColour& destColour,
-                            wxDirection nDirection = wxEAST)
-        { DoGradientFillLinear(rect, initialColour, destColour, nDirection); }
 
     bool GetPixel(wxCoord x, wxCoord y, wxColour *col) const
         { return DoGetPixel(x, y, col); }
@@ -648,15 +631,23 @@ public:
         if (h) *h = hh;
     }
 
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedDCFunc1() {}
+    virtual void ReservedDCFunc2() {}
+    virtual void ReservedDCFunc3() {}
+    virtual void ReservedDCFunc4() {}
+    virtual void ReservedDCFunc5() {}
+    virtual void ReservedDCFunc6() {}
+    virtual void ReservedDCFunc7() {}
+    virtual void ReservedDCFunc8() {}
+    virtual void ReservedDCFunc9() {}
+#endif
+
 protected:
     // the pure virtual functions which should be implemented by wxDC
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE) = 0;
-
-    virtual void DoGradientFillLinear(const wxRect& rect,
-                                      const wxColour& initialColour,
-                                      const wxColour& destColour,
-                                      wxDirection nDirection = wxEAST);
 
     virtual bool DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const = 0;
 
@@ -819,10 +810,8 @@ private:
     #include "wx/msw/dc.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/dc.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dc.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dc.h"
+    #include "wx/gtk/dc.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dc.h"
 #elif defined(__WXMGL__)
@@ -867,60 +856,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// helper class: you can use it to temporarily change the DC pen and
-// restore it automatically when the object goes out of scope
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCPenChanger
-{
-public:
-    wxDCPenChanger(wxDC& dc, const wxPen& pen) : m_dc(dc), m_penOld(dc.GetPen())
-    {
-        m_dc.SetPen(pen);
-    }
-
-    ~wxDCPenChanger()
-    {
-        if ( m_penOld.Ok() )
-            m_dc.SetPen(m_penOld);
-    }
-
-private:
-    wxDC& m_dc;
-
-    wxPen m_penOld;
-
-    DECLARE_NO_COPY_CLASS(wxDCPenChanger)
-};
-
-// ----------------------------------------------------------------------------
-// helper class: you can use it to temporarily change the DC brush and
-// restore it automatically when the object goes out of scope
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCBrushChanger
-{
-public:
-    wxDCBrushChanger(wxDC& dc, const wxBrush& brush) : m_dc(dc), m_brushOld(dc.GetBrush())
-    {
-        m_dc.SetBrush(brush);
-    }
-
-    ~wxDCBrushChanger()
-    {
-        if ( m_brushOld.Ok() )
-            m_dc.SetBrush(m_brushOld);
-    }
-
-private:
-    wxDC& m_dc;
-
-    wxBrush m_brushOld;
-
-    DECLARE_NO_COPY_CLASS(wxDCBrushChanger)
-};
-
-// ----------------------------------------------------------------------------
 // another small helper class: sets the clipping region in its ctor and
 // destroys it in the dtor
 // ----------------------------------------------------------------------------
@@ -928,8 +863,6 @@ private:
 class WXDLLEXPORT wxDCClipper
 {
 public:
-    wxDCClipper(wxDC& dc, const wxRegion& r) : m_dc(dc)
-        { dc.SetClippingRegion(r); }
     wxDCClipper(wxDC& dc, const wxRect& r) : m_dc(dc)
         { dc.SetClippingRegion(r.x, r.y, r.width, r.height); }
     wxDCClipper(wxDC& dc, wxCoord x, wxCoord y, wxCoord w, wxCoord h) : m_dc(dc)

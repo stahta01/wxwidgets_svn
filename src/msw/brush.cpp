@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "brush.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -24,12 +28,11 @@
     #pragma hdrstop
 #endif
 
-#include "wx/brush.h"
-
 #ifndef WX_PRECOMP
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
+    #include "wx/brush.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
@@ -244,6 +247,16 @@ wxBrush::~wxBrush()
 // wxBrush house keeping stuff
 // ----------------------------------------------------------------------------
 
+wxBrush& wxBrush::operator=(const wxBrush& brush)
+{
+    if ( this != &brush )
+    {
+        Ref(brush);
+    }
+
+    return *this;
+}
+
 bool wxBrush::operator==(const wxBrush& brush) const
 {
     const wxBrushRefData *brushData = (wxBrushRefData *)brush.m_refData;
@@ -325,3 +338,5 @@ void wxBrush::SetStipple(const wxBitmap& stipple)
 
     M_BRUSHDATA->SetStipple(stipple);
 }
+
+

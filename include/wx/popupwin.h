@@ -12,6 +12,10 @@
 #ifndef _WX_POPUPWIN_H_BASE_
 #define _WX_POPUPWIN_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "popupwinbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_POPUPWIN
@@ -56,10 +60,8 @@ public:
     #include "wx/msw/popupwin.h"
 #elif defined(__WXPM__)
     #include "wx/os2/popupwin.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/popupwin.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/popupwin.h"
+    #include "wx/gtk/popupwin.h"
 #elif defined(__WXX11__)
     #include "wx/x11/popupwin.h"
 #elif defined(__WXMOTIF__)
@@ -156,15 +158,15 @@ protected:
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxComboBox;
-class WXDLLEXPORT wxComboCtrl;
+class WXDLLEXPORT wxComboControl;
 
 class WXDLLEXPORT wxPopupComboWindow : public wxPopupTransientWindow
 {
 public:
     wxPopupComboWindow() { m_combo = NULL; }
-    wxPopupComboWindow(wxComboCtrl *parent);
+    wxPopupComboWindow(wxComboControl *parent);
 
-    bool Create(wxComboCtrl *parent);
+    bool Create(wxComboControl *parent);
 
     // position the window correctly relatively to the combo
     void PositionNearCombo();
@@ -177,7 +179,7 @@ protected:
     void OnKeyDown(wxKeyEvent& event);
 
     // the parent combobox
-    wxComboCtrl *m_combo;
+    wxComboControl *m_combo;
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxPopupComboWindow)

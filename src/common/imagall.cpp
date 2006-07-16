@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagall.cpp
+// Name:        imagall.cpp
 // Purpose:     wxImage access all handler
 // Author:      Sylvain Bougnoux
 // RCS-ID:      $Id$
@@ -7,18 +7,25 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+/*
+   We don't put pragma implement in this file because it is already present in
+   src/common/image.cpp
+*/
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#if wxUSE_IMAGE
 
 #ifndef WX_PRECOMP
-    #include "wx/image.h"
+#  include "wx/setup.h"
 #endif
+
+#include "wx/image.h"
+
+#if wxUSE_IMAGE
 
 //-----------------------------------------------------------------------------
 // This function allows dynamic access to all image handlers compile within

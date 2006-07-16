@@ -30,6 +30,8 @@
 %pythoncode { wx = _core }
 %pythoncode { __docfilter__ = wx.__DocFilter(globals()) }
 
+%include _calendar_rename.i
+
 //---------------------------------------------------------------------------
 
 enum {

@@ -8,6 +8,10 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -19,17 +23,14 @@
 
 #if wxUSE_LIBGNOMEPRINT
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/dcmemory.h"
-    #include "wx/icon.h"
-    #include "wx/math.h"
-#endif
-
+#include "wx/math.h"
 #include "wx/fontutil.h"
 #include "wx/gtk/private.h"
 #include "wx/module.h"
 #include "wx/dynlib.h"
+#include "wx/dcmemory.h"
+#include "wx/log.h"
+#include "wx/icon.h"
 
 #include <libgnomeprint/gnome-print.h>
 #include <libgnomeprint/gnome-print-pango.h>
@@ -280,7 +281,7 @@ wxGnomePrintNativeData::wxGnomePrintNativeData()
 
 wxGnomePrintNativeData::~wxGnomePrintNativeData()
 {
-    g_object_unref (m_config);
+    g_object_unref (G_OBJECT (m_config));
 }
 
 bool wxGnomePrintNativeData::TransferTo( wxPrintData &data )
@@ -707,7 +708,7 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     if (!dc)
     {
         gs_lgp->gnome_print_job_close( job );
-        g_object_unref (job);
+        g_object_unref (G_OBJECT (job));
         sm_lastError = wxPRINTER_ERROR;
         return false;
     }
@@ -738,7 +739,7 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     if (maxPage == 0)
     {
         gs_lgp->gnome_print_job_close( job );
-        g_object_unref (job);
+        g_object_unref (G_OBJECT (job));
         sm_lastError = wxPRINTER_ERROR;
         return false;
     }
@@ -783,20 +784,15 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     gs_lgp->gnome_print_job_close( job );
     if (m_native_preview)
     {
-        const wxCharBuffer title(wxGTK_CONV_SYS(_("Print preview")));
-        GtkWidget *preview = gs_lgp->gnome_print_job_preview_new
-                                     (
-                                        job,
-                                        (const guchar *)title.data()
-                                     );
-        gtk_widget_show(preview);
+        wxString title( _("Print preview") );
+        gtk_widget_show( gs_lgp->gnome_print_job_preview_new( job, (const guchar*)(const char*)wxGTK_CONV(title) ));
     }
     else
     {
         gs_lgp->gnome_print_job_print( job );
     }
 
-    g_object_unref (job);
+    g_object_unref (G_OBJECT (job));
     delete dc;
 
     return (sm_lastError == wxPRINTER_NO_ERROR);
@@ -1163,7 +1159,7 @@ void wxGnomePrintDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width,
     }
 }
 
-void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
+void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y, 
                                         wxCoord width, wxCoord height)
 {
     double r = 4 * (sqrt (2) - 1) / 3;
@@ -1173,22 +1169,22 @@ void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
             halfHR = r * halfH;
     wxCoord halfWI = (wxCoord) halfW,
             halfHI = (wxCoord) halfH;
-
+            
     gs_lgp->gnome_print_newpath( m_gpc );
-
+    
     // Approximate an ellipse using four cubic splines, clockwise from 0 deg */
     gs_lgp->gnome_print_moveto( m_gpc,
-                XLOG2DEV(x + width),
+                XLOG2DEV(x + width), 
                 YLOG2DEV(y + halfHI) );
     gs_lgp->gnome_print_curveto( m_gpc,
                 XLOG2DEV(x + width),
                 YLOG2DEV(y + (wxCoord) rint (halfH + halfHR)),
-                XLOG2DEV(x + (wxCoord) rint(halfW + halfWR)),
+                XLOG2DEV(x + (wxCoord) rint(halfW + halfWR)), 
                 YLOG2DEV(y + height),
-                XLOG2DEV(x + halfWI),
+                XLOG2DEV(x + halfWI), 
                 YLOG2DEV(y + height) );
     gs_lgp->gnome_print_curveto( m_gpc,
-                XLOG2DEV(x + (wxCoord) rint(halfW - halfWR)),
+                XLOG2DEV(x + (wxCoord) rint(halfW - halfWR)), 
                 YLOG2DEV(y + height),
                 XLOG2DEV(x),
                 YLOG2DEV(y + (wxCoord) rint (halfH + halfHR)),
@@ -1205,7 +1201,7 @@ void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
                 XLOG2DEV(x + width),
                 YLOG2DEV(y + (wxCoord) rint(halfH - halfHR)),
                 XLOG2DEV(x + width), YLOG2DEV(y + halfHI) );
-
+                
     gs_lgp->gnome_print_closepath(m_gpc);
 }
 
@@ -1537,7 +1533,7 @@ void wxGnomePrintDC::SetPen( const wxPen& pen )
         case wxSHORT_DASH:    gs_lgp->gnome_print_setdash( m_gpc, 2, short_dashed, 0 ); break;
         case wxLONG_DASH:     gs_lgp->gnome_print_setdash( m_gpc, 2, wxCoord_dashed, 0 ); break;
         case wxDOT_DASH:      gs_lgp->gnome_print_setdash( m_gpc, 4, dotted_dashed, 0 );  break;
-        case wxUSER_DASH:
+        case wxUSER_DASH: 
         {
             // It may be noted that libgnomeprint between at least
             // versions 2.8.0 and 2.12.1 makes a copy of the dashes
