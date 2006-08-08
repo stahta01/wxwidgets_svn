@@ -170,9 +170,10 @@ public:
     // Tests
     // Does the region contain the point (x,y)?
     //
-    inline wxRegionContain Contains( wxCoord lX, wxCoord lY ) const{
-        return Contains( wxPoint( lX, lY ) );
-    }
+    wxRegionContain Contains( wxCoord lX
+                             ,wxCoord lY
+                            ) const;
+
     //
     // Convert the region to a B&W bitmap with the black pixels being inside
     // the region.
@@ -205,10 +206,7 @@ public:
     //
     // Does the region contain the rectangle rect?
     //
-    inline wxRegionContain Contains(const wxRect& rRect) const{
-         return Contains( rRect.x, rRect.y,
-                          rRect.GetWidth(), rRect.GetHeight());
-    }
+    wxRegionContain Contains(const wxRect& rRect) const;
 
     //
     // Internal

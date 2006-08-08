@@ -108,12 +108,12 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
     switch (index)
     {
         case wxSYS_CAN_ICONIZE_FRAME:
-        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        case wxSYS_TABLET_PRESENT:
             return false;
-
+        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
+            return false;
         default:
-            wxFAIL_MSG( _T("unknown feature") );
+        {
+        }
     }
 
     return false;

@@ -396,7 +396,7 @@ void wxWindowBase::Fit()
 {
     if ( !GetChildren().empty() )
     {
-        SetSize(GetBestSize());
+        SetClientSize(GetBestSize());
     }
     //else: do nothing if we have no children
 }

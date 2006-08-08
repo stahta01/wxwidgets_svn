@@ -29,7 +29,6 @@ INCOMPATIBLE CHANGES SINCE 2.6.x
 - wxStaticBoxSizer now deletes the associated wxStaticBox when it is deleted.
 - Windows calling CaptureMouse() are now required to handle
   the wxEVT_MOUSE_CAPTURE_LOST event.
-- SetDefaultItem() method was moved from wxPanel to wxTopLevelWindow
 
 
 Deprecated methods since 2.6.x and their replacements
@@ -94,7 +93,6 @@ All:
 
 All (GUI):
 
-- New AUI (Advanced User Interface) library for docking windows and much more
 - Added wxComboCtrl and wxOwnerDrawnComboBox (Jaakko Salli).
 - Added wxTreebook (uses a wxTreeCtrl to control pages).
 - Added wxColour/Dir/File/Font/PickerCtrls (Francesco Montorsi).
