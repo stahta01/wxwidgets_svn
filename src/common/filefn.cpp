@@ -34,8 +34,6 @@
 #include "wx/filename.h"
 #include "wx/dir.h"
 
-#include "wx/tokenzr.h"
-
 // there are just too many of those...
 #ifdef __VISUALC__
     #pragma warning(disable:4706)   // assignment within conditional expression
@@ -146,21 +144,23 @@ WXDLLEXPORT int wxOpen( const wxChar *pathname, int flags, mode_t mode )
 // wxPathList
 // ----------------------------------------------------------------------------
 
-void wxPathList::Add (const wxString& path)
-{
-    // add only the path part of the given string (not the filename, in case it's present)
-    wxFileName fn(path + wxFileName::GetPathSeparator());
-    fn.Normalize();     // add only normalized paths
+// IMPLEMENT_DYNAMIC_CLASS(wxPathList, wxStringList)
 
-    wxString toadd = fn.GetPath();
-    if (Index(toadd) == wxNOT_FOUND)
-        wxArrayString::Add(toadd);      // do not add duplicates
+static inline wxChar* MYcopystring(const wxString& s)
+{
+    wxChar* copy = new wxChar[s.length() + 1];
+    return wxStrcpy(copy, s.c_str());
 }
 
-void wxPathList::Add(const wxArrayString &arr)
+static inline wxChar* MYcopystring(const wxChar* s)
 {
-    for (size_t j=0; j < arr.GetCount(); j++)
-        Add(arr[j]);
+    wxChar* copy = new wxChar[wxStrlen(s) + 1];
+    return wxStrcpy(copy, s);
+}
+
+void wxPathList::Add (const wxString& path)
+{
+    wxStringList::Add (WXSTRINGCAST path);
 }
 
 // Add paths e.g. from the PATH environment variable
@@ -168,24 +168,43 @@ void wxPathList::AddEnvList (const wxString& WXUNUSED_IN_WINCE(envVariable))
 {
     // No environment variables on WinCE
 #ifndef __WXWINCE__
-
-    // The space has been removed from the tokenizers, otherwise a
-    // path such as "C:\Program Files" would be split into 2 paths:
-    // "C:\Program" and "Files"; this is true for both Windows and Unix.
-
     static const wxChar PATH_TOKS[] =
 #if defined(__WINDOWS__) || defined(__OS2__)
+        /*
+        The space has been removed from the tokenizers, otherwise a
+        path such as "C:\Program Files" would be split into 2 paths:
+        "C:\Program" and "Files"
+        */
+//        wxT(" ;"); // Don't separate with colon in DOS (used for drive)
         wxT(";"); // Don't separate with colon in DOS (used for drive)
 #else
-        wxT(":;");
+        wxT(" :;");
 #endif
 
-    wxString val;
-    if ( wxGetEnv(envVariable, &val) )
+    wxString val ;
+    if (wxGetEnv (WXSTRINGCAST envVariable, &val))
     {
-        // split into an array of string the value of the env var
-        wxArrayString arr = wxStringTokenize(val, PATH_TOKS);
-        WX_APPEND_ARRAY(*this, arr);
+        wxChar *s = MYcopystring (val);
+        wxChar *save_ptr, *token = wxStrtok (s, PATH_TOKS, &save_ptr);
+
+        if (token)
+        {
+            Add(token);
+            while (token)
+            {
+                if ( (token = wxStrtok ((wxChar *) NULL, PATH_TOKS, &save_ptr))
+                    != NULL )
+                {
+                    Add(token);
+                }
+            }
+        }
+
+        // suppress warning about unused variable save_ptr when wxStrtok() is a
+        // macro which throws away its third argument
+        save_ptr = token;
+
+        delete [] s;
     }
 #endif // !__WXWINCE__
 }
@@ -198,42 +217,60 @@ void wxPathList::EnsureFileAccessible (const wxString& path)
     wxString path_only(wxPathOnly(path));
     if ( !path_only.empty() )
     {
-        if ( Index(path_only) == wxNOT_FOUND )
+        if ( !Member(path_only) )
             Add(path_only);
     }
 }
 
-// deprecated !
-bool wxPathList::Member (const wxString& path) const
+bool wxPathList::Member (const wxString& path)
 {
-    return Index(path) != wxNOT_FOUND;
+  for (wxStringList::compatibility_iterator node = GetFirst(); node; node = node->GetNext())
+  {
+      wxString path2( node->GetData() );
+      if (
+#if defined(__WINDOWS__) || defined(__OS2__) || defined(__VMS__) || defined(__WXMAC__)
+      // Case INDEPENDENT
+          path.CompareTo (path2, wxString::ignoreCase) == 0
+#else
+      // Case sensitive File System
+          path.CompareTo (path2) == 0
+#endif
+        )
+        return true;
+  }
+  return false;
 }
 
-wxString wxPathList::FindValidPath (const wxString& file) const
+wxString wxPathList::FindValidPath (const wxString& file)
 {
-    wxFileName fn(file);
-    wxString strend;
+  wxExpandPath(wxFileFunctionsBuffer, file);
 
-    fn.Normalize();
-    if (fn.IsAbsolute())
-        strend = fn.GetFullName();
-    else
-        strend = fn.GetFullPath();
+  wxChar buf[_MAXPATHLEN];
+  wxStrcpy(buf, wxFileFunctionsBuffer);
 
-    for (size_t i=0; i<GetCount(); i++)
+  wxChar *filename = wxIsAbsolutePath (buf) ? wxFileNameFromPath (buf) : (wxChar *)buf;
+
+  for (wxStringList::compatibility_iterator node = GetFirst(); node; node = node->GetNext())
     {
-        wxString strstart = Item(i);
-        if (!strstart.IsEmpty() && strstart.Last() != wxFileName::GetPathSeparator())
-            strstart += wxFileName::GetPathSeparator();
+      const wxString path(node->GetData());
+      wxStrcpy (wxFileFunctionsBuffer, path);
+      wxChar ch = wxFileFunctionsBuffer[wxStrlen(wxFileFunctionsBuffer)-1];
+      if (ch != wxT('\\') && ch != wxT('/'))
+        wxStrcat (wxFileFunctionsBuffer, wxT("/"));
+      wxStrcat (wxFileFunctionsBuffer, filename);
+#ifdef __WINDOWS__
+      wxUnix2DosFilename (wxFileFunctionsBuffer);
+#endif
+      if (wxFileExists (wxFileFunctionsBuffer))
+      {
+        return wxString(wxFileFunctionsBuffer);        // Found!
+      }
+    }                                // for()
 
-        if (wxFileExists(strstart + strend))
-            return strstart + strend;        // Found!
-    }
-
-    return wxEmptyString;                    // Not found
+  return wxEmptyString;                    // Not found
 }
 
-wxString wxPathList::FindAbsoluteValidPath (const wxString& file) const
+wxString wxPathList::FindAbsoluteValidPath (const wxString& file)
 {
     wxString f = FindValidPath(file);
     if ( f.empty() || wxIsAbsolutePath(f) )
@@ -249,23 +286,6 @@ wxString wxPathList::FindAbsoluteValidPath (const wxString& file) const
 
     return buf;
 }
-
-// ----------------------------------------------------------------------------
-// miscellaneous global functions (TOFIX!)
-// ----------------------------------------------------------------------------
-
-static inline wxChar* MYcopystring(const wxString& s)
-{
-    wxChar* copy = new wxChar[s.length() + 1];
-    return wxStrcpy(copy, s.c_str());
-}
-
-static inline wxChar* MYcopystring(const wxChar* s)
-{
-    wxChar* copy = new wxChar[wxStrlen(s) + 1];
-    return wxStrcpy(copy, s);
-}
-
 
 bool
 wxFileExists (const wxString& filename)
@@ -863,15 +883,15 @@ wxString wxMacFSRefToPath( const FSRef *fsRef , CFStringRef additionalPathCompon
     CFRelease( fullURLRef ) ;
     CFMutableStringRef cfMutableString = CFStringCreateMutableCopy(NULL, 0, cfString);
     CFRelease( cfString );
-    CFStringNormalize(cfMutableString,kCFStringNormalizationFormC);
-    return wxMacCFStringHolder(cfMutableString).AsString();
+    CFStringNormalize(cfMutableString,kCFStringNormalizationFormC);    
+    return wxMacCFStringHolder(cfMutableString).AsString(wxLocale::GetSystemEncoding());
 }
 
 OSStatus wxMacPathToFSRef( const wxString&path , FSRef *fsRef )
 {
     OSStatus err = noErr ;
-    CFMutableStringRef cfMutableString = CFStringCreateMutableCopy(NULL, 0, wxMacCFStringHolder(path));
-    CFStringNormalize(cfMutableString,kCFStringNormalizationFormD);
+    CFMutableStringRef cfMutableString = CFStringCreateMutableCopy(NULL, 0, wxMacCFStringHolder(path ,wxLocale::GetSystemEncoding() ) ) ;
+    CFStringNormalize(cfMutableString,kCFStringNormalizationFormD);    
     CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cfMutableString , kDefaultPathStyle, false);
     CFRelease( cfMutableString );
     if ( NULL != url )
@@ -894,7 +914,7 @@ wxString wxMacHFSUniStrToString( ConstHFSUniStr255Param uniname )
                                                       uniname->length );
     CFMutableStringRef cfMutableString = CFStringCreateMutableCopy(NULL, 0, cfname);
     CFRelease( cfname );
-    CFStringNormalize(cfMutableString,kCFStringNormalizationFormC);
+    CFStringNormalize(cfMutableString,kCFStringNormalizationFormC);    
     return wxMacCFStringHolder(cfMutableString).AsString() ;
 }
 
@@ -1391,7 +1411,7 @@ wxChar *wxDoGetCwd(wxChar *buf, int sz)
 
     #ifdef HAVE_WGETCWD
         #if wxUSE_UNICODE_MSLU
-            if ( wxGetOsVersion() != wxOS_WINDOWS_9X )
+            if ( wxGetOsVersion() != wxWIN95 )
         #else
             char *cbuf = NULL; // never really used because needsANSI will always be false
         #endif
@@ -1625,8 +1645,6 @@ void WXDLLEXPORT wxSplitPath(const wxChar *pszFileName,
     wxFileName::SplitPath(pszFileName, pstrPath, pstrName, pstrExt);
 }
 
-#if wxUSE_DATETIME
-
 time_t WXDLLEXPORT wxFileModificationTime(const wxString& filename)
 {
     wxDateTime mtime;
@@ -1635,8 +1653,6 @@ time_t WXDLLEXPORT wxFileModificationTime(const wxString& filename)
 
     return mtime.GetTicks();
 }
-
-#endif // wxUSE_DATETIME
 
 
 // Parses the filterStr, returning the number of filters.

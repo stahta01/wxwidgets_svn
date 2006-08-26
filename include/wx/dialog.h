@@ -32,6 +32,7 @@ extern WXDLLEXPORT_DATA(const wxChar) wxDialogNameStr[];
 class WXDLLEXPORT wxDialogBase : public wxTopLevelWindow
 {
 public:
+
     enum
     {
         // all flags allowed in wxDialogBase::CreateButtonSizer()
@@ -41,27 +42,19 @@ public:
     wxDialogBase() { Init(); }
     virtual ~wxDialogBase() { }
 
-    // define public wxDialog methods to be implemented by the derived classes
-    virtual int ShowModal() = 0;
-    virtual void EndModal(int retCode) = 0;
-    virtual bool IsModal() const = 0;
-
+    void Init();
 
     // Modal dialogs have a return code - usually the id of the last
     // pressed button
     void SetReturnCode(int returnCode) { m_returnCode = returnCode; }
     int GetReturnCode() const { return m_returnCode; }
 
-    // Set the identifier for the affirmative button: this button will close
-    // the dialog after validating data and calling TransferDataFromWindow()
-    void SetAffirmativeId(int affirmativeId);
+    // The identifier for the affirmative button
+    void SetAffirmativeId(int affirmativeId) { m_affirmativeId = affirmativeId; }
     int GetAffirmativeId() const { return m_affirmativeId; }
 
-    // Set identifier for Esc key translation: the button with this id will
-    // close the dialog without doing anything else; special value wxID_NONE
-    // means to not handle Esc at all while wxID_ANY means to map Esc to
-    // wxID_CANCEL if present and GetAffirmativeId() otherwise
-    void SetEscapeId(int escapeId);
+    // Identifier for Esc key translation
+    void SetEscapeId(int escapeId) { m_escapeId = escapeId; }
     int GetEscapeId() const { return m_escapeId; }
 
 #if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
@@ -79,28 +72,6 @@ public:
 #endif // wxUSE_BUTTON
 
 protected:
-    // emulate click of a button with the given id if it's present in the dialog
-    //
-    // return true if button was "clicked" or false if we don't have it
-    bool EmulateButtonClickIfPresent(int id);
-
-    // this function is used by OnCharHook() to decide whether the given key
-    // should close the dialog
-    //
-    // for most platforms the default implementation (which just checks for
-    // Esc) is sufficient, but Mac port also adds Cmd-. here and other ports
-    // could do something different if needed
-    virtual bool IsEscapeKey(const wxKeyEvent& event);
-
-    // end either modal or modeless dialog, for the modal dialog rc is used as
-    // the dialog return code
-    void EndDialog(int rc);
-
-    // call Validate() and TransferDataFromWindow() and close dialog with
-    // wxID_OK return code
-    void AcceptAndClose();
-
-
     // The return code from modal dialog
     int m_returnCode;
 
@@ -109,23 +80,6 @@ protected:
 
     // The identifier for cancel button (usually wxID_CANCEL)
     int m_escapeId;
-
-private:
-    // common part of all ctors
-    void Init();
-
-    // handle Esc key presses
-    void OnCharHook(wxKeyEvent& event);
-
-    // handle closing the dialog window
-    void OnCloseWindow(wxCloseEvent& event);
-
-    // handle the standard buttons
-    void OnButton(wxCommandEvent& event);
-
-    // update the background colour
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
-
 
     DECLARE_NO_COPY_CLASS(wxDialogBase)
     DECLARE_EVENT_TABLE()

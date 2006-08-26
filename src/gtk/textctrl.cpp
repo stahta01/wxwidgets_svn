@@ -31,6 +31,12 @@
 #include "wx/gtk/private.h"
 #include <gdk/gdkkeysyms.h>
 
+//-----------------------------------------------------------------------------
+// data
+//-----------------------------------------------------------------------------
+
+extern wxWindowGTK *g_delayedFocus;
+
 // ----------------------------------------------------------------------------
 // helpers
 // ----------------------------------------------------------------------------
@@ -781,7 +787,7 @@ wxString wxTextCtrl::GetValue() const
     wxCHECK_MSG( m_text != NULL, wxEmptyString, wxT("invalid text ctrl") );
 
     wxString tmp;
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter start;
         gtk_text_buffer_get_start_iter( m_buffer, &start );
@@ -806,24 +812,6 @@ wxString wxTextCtrl::GetValue() const
     return tmp;
 }
 
-wxFontEncoding wxTextCtrl::GetTextEncoding() const
-{
-    // GTK+ uses UTF-8 internally, we need to convert to it but from which
-    // encoding?
-
-    // first check the default text style (we intentionally don't check the
-    // style for the current position as it doesn't make sense for SetValue())
-    const wxTextAttr& style = GetDefaultStyle();
-    wxFontEncoding enc = style.HasFont() ? style.GetFont().GetEncoding()
-                                         : wxFONTENCODING_SYSTEM;
-
-    // fall back to the controls font if no style
-    if ( enc == wxFONTENCODING_SYSTEM && m_hasFont )
-        enc = GetFont().GetEncoding();
-
-    return enc;
-}
-
 void wxTextCtrl::SetValue( const wxString &value )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
@@ -835,14 +823,12 @@ void wxTextCtrl::SetValue( const wxString &value )
     m_modified = false;
     DontMarkDirtyOnNextChange();
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
-        const wxCharBuffer buffer(wxGTK_CONV_ENC(value, GetTextEncoding()));
+        const wxCharBuffer buffer(wxGTK_CONV(value));
         if ( !buffer )
         {
-            // see comment in WriteText() as to why we must warn the user about
-            // this
-            wxLogWarning(_("Failed to set text in the text control."));
+            // what else can we do? at least don't crash...
             return;
         }
 
@@ -874,31 +860,17 @@ void wxTextCtrl::WriteText( const wxString &text )
     if ( text.empty() )
         return;
 
-    // check if we have a specific style for the current position
-    wxFontEncoding enc = wxFONTENCODING_SYSTEM;
-    wxTextAttr style;
-    if ( GetStyle(GetInsertionPoint(), style) && style.HasFont() )
-    {
-        enc = style.GetFont().GetEncoding();
-    }
-
-    if ( enc == wxFONTENCODING_SYSTEM )
-        enc = GetTextEncoding();
-
-    const wxCharBuffer buffer(wxGTK_CONV_ENC(text, enc));
+    const wxCharBuffer buffer(wxGTK_CONV(text));
     if ( !buffer )
     {
-        // we must log an error here as losing the text like this can be a
-        // serious problem (e.g. imagine the document edited by user being
-        // empty instead of containing the correct text)
-        wxLogWarning(_("Failed to insert text in the control."));
+        // what else can we do? at least don't crash...
         return;
     }
 
     // we're changing the text programmatically
     DontMarkDirtyOnNextChange();
 
-    if ( IsMultiLine() )
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         // First remove the selection if there is one
         // TODO:  Is there an easier GTK specific way to do this?
@@ -941,7 +913,7 @@ void wxTextCtrl::AppendText( const wxString &text )
 
 wxString wxTextCtrl::GetLineText( long lineNo ) const
 {
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter line;
         gtk_text_buffer_get_iter_at_line(m_buffer,&line,lineNo);
@@ -968,7 +940,7 @@ void wxTextCtrl::OnDropFiles( wxDropFilesEvent &WXUNUSED(event) )
 
 bool wxTextCtrl::PositionToXY(long pos, long *x, long *y ) const
 {
-    if ( IsMultiLine() )
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         GtkTextIter iter;
 
@@ -1003,8 +975,7 @@ bool wxTextCtrl::PositionToXY(long pos, long *x, long *y ) const
 
 long wxTextCtrl::XYToPosition(long x, long y ) const
 {
-    if ( IsSingleLine() )
-        return 0;
+    if (!(m_windowStyle & wxTE_MULTILINE)) return 0;
 
     GtkTextIter iter;
     if (y >= gtk_text_buffer_get_line_count (m_buffer))
@@ -1019,7 +990,7 @@ long wxTextCtrl::XYToPosition(long x, long y ) const
 
 int wxTextCtrl::GetLineLength(long lineNo) const
 {
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         int last_line = gtk_text_buffer_get_line_count( m_buffer ) - 1;
         if (lineNo > last_line)
@@ -1039,7 +1010,7 @@ int wxTextCtrl::GetLineLength(long lineNo) const
 
 int wxTextCtrl::GetNumberOfLines() const
 {
-    if ( IsMultiLine() )
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         GtkTextIter iter;
         gtk_text_buffer_get_iter_at_offset( m_buffer, &iter, 0 );
@@ -1099,7 +1070,7 @@ void wxTextCtrl::SetInsertionPointEnd()
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter end;
         gtk_text_buffer_get_end_iter( m_buffer, &end );
@@ -1115,7 +1086,7 @@ void wxTextCtrl::SetEditable( bool editable )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         gtk_text_view_set_editable( GTK_TEXT_VIEW(m_text), editable );
     }
@@ -1133,7 +1104,7 @@ bool wxTextCtrl::Enable( bool enable )
         return false;
     }
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         SetEditable( enable );
     }
@@ -1241,7 +1212,7 @@ void wxTextCtrl::SetSelection( long from, long to )
         to = GetValue().length();
     }
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter fromi, toi;
         gtk_text_buffer_get_iter_at_offset( m_buffer, &fromi, from );
@@ -1258,7 +1229,7 @@ void wxTextCtrl::SetSelection( long from, long to )
 
 void wxTextCtrl::ShowPosition( long pos )
 {
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter iter;
         gtk_text_buffer_get_start_iter( m_buffer, &iter );
@@ -1298,7 +1269,7 @@ long wxTextCtrl::GetInsertionPoint() const
 {
     wxCHECK_MSG( m_text != NULL, 0, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         // There is no direct accessor for the cursor, but
         // internally, the cursor is the "mark" called
@@ -1322,7 +1293,7 @@ wxTextPos wxTextCtrl::GetLastPosition() const
 
     int pos = 0;
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter end;
         gtk_text_buffer_get_end_iter( m_buffer, &end );
@@ -1341,7 +1312,7 @@ void wxTextCtrl::Remove( long from, long to )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         GtkTextIter fromi, toi;
         gtk_text_buffer_get_iter_at_offset( m_buffer, &fromi, from );
@@ -1370,7 +1341,7 @@ void wxTextCtrl::Cut()
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
         g_signal_emit_by_name (m_text, "cut-clipboard");
     else
         gtk_editable_cut_clipboard(GTK_EDITABLE(m_text));
@@ -1380,7 +1351,7 @@ void wxTextCtrl::Copy()
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
         g_signal_emit_by_name (m_text, "copy-clipboard");
     else
         gtk_editable_copy_clipboard(GTK_EDITABLE(m_text));
@@ -1390,7 +1361,7 @@ void wxTextCtrl::Paste()
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
         g_signal_emit_by_name (m_text, "paste-clipboard");
     else
         gtk_editable_paste_clipboard(GTK_EDITABLE(m_text));
@@ -1433,7 +1404,7 @@ void wxTextCtrl::GetSelection(long* fromOut, long* toOut) const
     gint to = -1;
     bool haveSelection = false;
 
-     if ( IsMultiLine() )
+     if (m_windowStyle & wxTE_MULTILINE)
      {
          GtkTextIter ifrom, ito;
          if ( gtk_text_buffer_get_selection_bounds(m_buffer, &ifrom, &ito) )
@@ -1474,7 +1445,7 @@ bool wxTextCtrl::IsEditable() const
 {
     wxCHECK_MSG( m_text != NULL, false, wxT("invalid text ctrl") );
 
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
         return gtk_text_view_get_editable(GTK_TEXT_VIEW(m_text));
     }
@@ -1498,37 +1469,31 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ( key_event.GetKeyCode() == WXK_RETURN )
+    if ((key_event.GetKeyCode() == WXK_RETURN) && (m_windowStyle & wxTE_PROCESS_ENTER))
     {
-        if ( HasFlag(wxTE_PROCESS_ENTER) )
+        wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
+        event.SetEventObject(this);
+        event.SetString(GetValue());
+        if (GetEventHandler()->ProcessEvent(event)) return;
+    }
+
+    if ((key_event.GetKeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
+    {
+        // This will invoke the dialog default action, such
+        // as the clicking the default button.
+
+        wxWindow *top_frame = m_parent;
+        while (top_frame->GetParent() && !(top_frame->IsTopLevel()))
+            top_frame = top_frame->GetParent();
+
+        if (top_frame && GTK_IS_WINDOW(top_frame->m_widget))
         {
-            wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
-            event.SetEventObject(this);
-            event.SetString(GetValue());
-            if ( GetEventHandler()->ProcessEvent(event) )
-                return;
-        }
+            GtkWindow *window = GTK_WINDOW(top_frame->m_widget);
 
-        // FIXME: this is not the right place to do it, wxDialog::OnCharHook()
-        //        probably is
-        if ( IsSingleLine() )
-        {
-            // This will invoke the dialog default action, such
-            // as the clicking the default button.
-
-            wxWindow *top_frame = m_parent;
-            while (top_frame->GetParent() && !(top_frame->IsTopLevel()))
-                top_frame = top_frame->GetParent();
-
-            if (top_frame && GTK_IS_WINDOW(top_frame->m_widget))
+            if (window->default_widget)
             {
-                GtkWindow *window = GTK_WINDOW(top_frame->m_widget);
-
-                if (window->default_widget)
-                {
-                    gtk_widget_activate (window->default_widget);
-                    return;
-                }
+                gtk_widget_activate (window->default_widget);
+                return;
             }
         }
     }
@@ -1541,16 +1506,15 @@ GtkWidget* wxTextCtrl::GetConnectWidget()
     return GTK_WIDGET(m_text);
 }
 
-GdkWindow *wxTextCtrl::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxTextCtrl::IsOwnGtkWindow( GdkWindow *window )
 {
-    if ( IsMultiLine() )
+    if (m_windowStyle & wxTE_MULTILINE)
     {
-        return gtk_text_view_get_window(GTK_TEXT_VIEW(m_text),
-                                        GTK_TEXT_WINDOW_TEXT );
+        return window == gtk_text_view_get_window( GTK_TEXT_VIEW( m_text ), GTK_TEXT_WINDOW_TEXT );  // pure guesswork
     }
     else
     {
-        return GTK_ENTRY(m_text)->text_area;
+        return (window == GTK_ENTRY(m_text)->text_area);
     }
 }
 
@@ -1565,7 +1529,7 @@ bool wxTextCtrl::SetFont( const wxFont &font )
         return false;
     }
 
-    if ( IsMultiLine() )
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         SetUpdateFont(true);
 
@@ -1583,7 +1547,7 @@ void wxTextCtrl::ChangeFontGlobally()
     // possible!
     //
     // TODO: it can be implemented much more efficiently for GTK2
-    wxASSERT_MSG( IsMultiLine(),
+    wxASSERT_MSG( (m_windowStyle & wxTE_MULTILINE),
                   _T("shouldn't be called for single line controls") );
 
     wxString value = GetValue();
@@ -1625,7 +1589,7 @@ bool wxTextCtrl::SetBackgroundColour( const wxColour &colour )
 
 bool wxTextCtrl::SetStyle( long start, long end, const wxTextAttr& style )
 {
-    if ( IsMultiLine() )
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         if ( style.IsDefault() )
         {
@@ -1712,6 +1676,21 @@ void wxTextCtrl::OnUpdateRedo(wxUpdateUIEvent& event)
     event.Enable( CanRedo() );
 }
 
+void wxTextCtrl::OnInternalIdle()
+{
+    if (g_delayedFocus == this)
+    {
+        if (GTK_WIDGET_REALIZED(m_widget))
+        {
+            gtk_widget_grab_focus( m_widget );
+            g_delayedFocus = NULL;
+        }
+    }
+
+    if (wxUpdateUIEvent::CanUpdate(this))
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+}
+
 wxSize wxTextCtrl::DoGetBestSize() const
 {
     // FIXME should be different for multi-line controls...
@@ -1773,7 +1752,7 @@ void wxTextCtrl::Thaw()
 void wxTextCtrl::OnUrlMouseEvent(wxMouseEvent& event)
 {
     event.Skip();
-    if( !HasFlag(wxTE_AUTO_URL) )
+    if(!(m_windowStyle & wxTE_AUTO_URL))
         return;
 
     gint x, y;

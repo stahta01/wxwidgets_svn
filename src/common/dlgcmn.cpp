@@ -98,17 +98,14 @@ private:
 // wxDialogBase
 // ----------------------------------------------------------------------------
 
+// FIXME - temporary hack in absence of wxTopLevelWindow, should be always used
+#ifdef wxTopLevelWindowNative
 BEGIN_EVENT_TABLE(wxDialogBase, wxTopLevelWindow)
-    EVT_BUTTON(wxID_ANY, wxDialogBase::OnButton)
-
-    EVT_CLOSE(wxDialogBase::OnCloseWindow)
-
-    EVT_CHAR_HOOK(wxDialogBase::OnCharHook)
-
     WX_EVENT_TABLE_CONTROL_CONTAINER(wxDialogBase)
 END_EVENT_TABLE()
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase, wxTopLevelWindow)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase)
+#endif
 
 void wxDialogBase::Init()
 {
@@ -121,7 +118,9 @@ void wxDialogBase::Init()
     // undesirable and can lead to unexpected and hard to find bugs
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
 
+#ifdef wxTopLevelWindowNative // FIXME - temporary hack, should be always used!
     m_container.SetContainerWindow(this);
+#endif
 }
 
 #if wxUSE_STATTEXT
@@ -423,153 +422,3 @@ wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
 }
 
 #endif // wxUSE_BUTTON
-
-// ----------------------------------------------------------------------------
-// standard buttons handling
-// ----------------------------------------------------------------------------
-
-void wxDialogBase::EndDialog(int rc)
-{
-    if ( IsModal() )
-        EndModal(rc);
-    else
-        Hide();
-}
-
-void wxDialogBase::AcceptAndClose()
-{
-    if ( Validate() && TransferDataFromWindow() )
-    {
-        EndDialog(m_affirmativeId);
-    }
-}
-
-void wxDialogBase::SetAffirmativeId(int affirmativeId)
-{
-    m_affirmativeId = affirmativeId;
-}
-
-void wxDialogBase::SetEscapeId(int escapeId)
-{
-    m_escapeId = escapeId;
-}
-
-bool wxDialogBase::EmulateButtonClickIfPresent(int id)
-{
-#if wxUSE_BUTTON
-    wxButton *btn = wxDynamicCast(FindWindow(id), wxButton);
-
-    if ( !btn || !btn->IsEnabled() || !btn->IsShown() )
-        return false;
-
-    wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, id);
-    event.SetEventObject(btn);
-    btn->GetEventHandler()->ProcessEvent(event);
-
-    return true;
-#else // !wxUSE_BUTTON
-    wxUnusedVar(id);
-    return false;
-#endif // wxUSE_BUTTON/!wxUSE_BUTTON
-}
-
-bool wxDialogBase::IsEscapeKey(const wxKeyEvent& event)
-{
-    // for most platforms, Esc key is used to close the dialogs
-    return event.GetKeyCode() == WXK_ESCAPE &&
-                event.GetModifiers() == wxMOD_NONE;
-}
-
-void wxDialogBase::OnCharHook(wxKeyEvent& event)
-{
-    if ( event.GetKeyCode() == WXK_ESCAPE )
-    {
-        int idCancel = GetEscapeId();
-        switch ( idCancel )
-        {
-            case wxID_NONE:
-                // don't handle Esc specially at all
-                break;
-
-            case wxID_ANY:
-                // this value is special: it means translate Esc to wxID_CANCEL
-                // but if there is no such button, then fall back to wxID_OK
-                if ( EmulateButtonClickIfPresent(wxID_CANCEL) )
-                    return;
-                idCancel = GetAffirmativeId();
-                // fall through
-
-            default:
-                // translate Esc to button press for the button with given id
-                if ( EmulateButtonClickIfPresent(idCancel) )
-                    return;
-        }
-    }
-
-    event.Skip();
-}
-
-void wxDialogBase::OnButton(wxCommandEvent& event)
-{
-    const int id = event.GetId();
-    if ( id == GetAffirmativeId() )
-    {
-        AcceptAndClose();
-    }
-    else if ( id == wxID_APPLY )
-    {
-        if ( Validate() )
-            TransferDataFromWindow();
-
-        // TODO: disable the Apply button until things change again
-    }
-    else if ( id == GetEscapeId() ||
-                (id == wxID_CANCEL && GetEscapeId() == wxID_ANY) )
-    {
-        EndDialog(wxID_CANCEL);
-    }
-    else // not a standard button
-    {
-        event.Skip();
-    }
-}
-
-// ----------------------------------------------------------------------------
-// other event handlers
-// ----------------------------------------------------------------------------
-
-void wxDialogBase::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
-{
-    // We'll send a Cancel message by default, which may close the dialog.
-    // Check for looping if the Cancel event handler calls Close().
-
-    // Note that if a cancel button and handler aren't present in the dialog,
-    // nothing will happen when you close the dialog via the window manager, or
-    // via Close(). We wouldn't want to destroy the dialog by default, since
-    // the dialog may have been created on the stack. However, this does mean
-    // that calling dialog->Close() won't delete the dialog unless the handler
-    // for wxID_CANCEL does so. So use Destroy() if you want to be sure to
-    // destroy the dialog. The default OnCancel (above) simply ends a modal
-    // dialog, and hides a modeless dialog.
-
-    // VZ: this is horrible and MT-unsafe. Can't we reuse some of these global
-    //     lists here? don't dare to change it now, but should be done later!
-    static wxList closing;
-
-    if ( closing.Member(this) )
-        return;
-
-    closing.Append(this);
-
-    wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
-    cancelEvent.SetEventObject( this );
-    GetEventHandler()->ProcessEvent(cancelEvent); // This may close the dialog
-
-    closing.DeleteObject(this);
-}
-
-void wxDialogBase::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event))
-{
-  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
-  Refresh();
-}

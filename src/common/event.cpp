@@ -30,7 +30,6 @@
     #include "wx/list.h"
     #include "wx/app.h"
     #include "wx/utils.h"
-    #include "wx/stopwatch.h"
 
     #if wxUSE_GUI
         #include "wx/control.h"
@@ -41,6 +40,10 @@
 #endif
 
 #include "wx/module.h"
+
+#if wxUSE_GUI && wxUSE_STOPWATCH
+    #include "wx/stopwatch.h"
+#endif // wxUSE_GUI && wxUSE_STOPWATCH
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -87,7 +90,6 @@
     IMPLEMENT_DYNAMIC_CLASS(wxHelpEvent, wxCommandEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxContextMenuEvent, wxCommandEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxMouseCaptureChangedEvent, wxEvent)
-    IMPLEMENT_DYNAMIC_CLASS(wxMouseCaptureLostEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxClipboardTextEvent, wxCommandEvent)
 #endif // wxUSE_GUI
 
@@ -261,7 +263,6 @@ DEFINE_EVENT_TYPE(wxEVT_SHOW)
 DEFINE_EVENT_TYPE(wxEVT_ICONIZE)
 DEFINE_EVENT_TYPE(wxEVT_MAXIMIZE)
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_CAPTURE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_CAPTURE_LOST)
 DEFINE_EVENT_TYPE(wxEVT_PAINT)
 DEFINE_EVENT_TYPE(wxEVT_ERASE_BACKGROUND)
 DEFINE_EVENT_TYPE(wxEVT_NC_PAINT)

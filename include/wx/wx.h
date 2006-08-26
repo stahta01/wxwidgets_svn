@@ -28,7 +28,6 @@
 #include "wx/stream.h"
 #include "wx/memory.h"
 #include "wx/math.h"
-#include "wx/stopwatch.h"
 
 #if wxUSE_GUI
 
@@ -62,7 +61,6 @@
 #include "wx/settings.h"
 #include "wx/msgdlg.h"
 #include "wx/cmndata.h"
-#include "wx/dataobj.h"
 
 #include "wx/control.h"
 #include "wx/ctrlsub.h"

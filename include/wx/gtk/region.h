@@ -24,6 +24,13 @@ class WXDLLIMPEXP_CORE wxRegion;
 // constants
 //-----------------------------------------------------------------------------
 
+enum wxRegionContain
+{
+    wxOutRegion = 0,
+    wxPartRegion = 1,
+    wxInRegion = 2
+};
+
 // So far, for internal use only
 enum wxRegionOp
 {

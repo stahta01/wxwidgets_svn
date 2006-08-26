@@ -249,20 +249,16 @@ void wxSpinCtrl::OnChar( wxKeyEvent &event )
     event.Skip();
 }
 
-GdkWindow *wxSpinCtrl::GTKGetWindow(wxArrayGdkWindows& windows) const
+bool wxSpinCtrl::IsOwnGtkWindow( GdkWindow *window )
 {
     GtkSpinButton* spinbutton = GTK_SPIN_BUTTON(m_widget);
-
-    windows.push_back(spinbutton->entry.text_area);
-    windows.push_back(spinbutton->panel);
-
-    return NULL;
+    return window == spinbutton->entry.text_area || window == spinbutton->panel;
 }
 
 wxSize wxSpinCtrl::DoGetBestSize() const
 {
     wxSize ret( wxControl::DoGetBestSize() );
-    wxSize best(95, ret.y); // FIXME: 95?
+    wxSize best(95, ret.y);
     CacheBestSize(best);
     return best;
 }

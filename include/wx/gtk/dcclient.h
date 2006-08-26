@@ -11,9 +11,15 @@
 #define __GTKDCCLIENTH__
 
 #include "wx/dc.h"
-#include "wx/region.h"
+#include "wx/window.h"
 
-class WXDLLIMPEXP_CORE wxWindow;
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxWindowDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxClientDC;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC
@@ -114,7 +120,6 @@ public:
     PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
 
-protected:
     void SetUpDC();
     void Destroy();
     virtual void ComputeScaleAndOrigin();

@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 18 August 2006                                                      *
+# Date : 29 May 2006                                                         *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -142,7 +142,6 @@ OBJECTS1=fs_inet.obj,\
 		nbkbase.obj,\
 		object.obj,\
 		paper.obj,\
-		platinfo.obj,\
 		popupcmn.obj,\
 		prntbase.obj,\
 		process.obj,\
@@ -290,7 +289,6 @@ SOURCES = \
 		nbkbase.cpp,\
 		object.cpp,\
 		paper.cpp,\
-		platinfo.cpp,\
 		popupcmn.cpp,\
 		prntbase.cpp,\
 		process.cpp,\
@@ -476,7 +474,6 @@ mstream.obj : mstream.cpp
 nbkbase.obj : nbkbase.cpp
 object.obj : object.cpp
 paper.obj : paper.cpp
-platinfo.obj : platinfo.cpp
 popupcmn.obj : popupcmn.cpp
 prntbase.obj : prntbase.cpp
 process.obj : process.cpp

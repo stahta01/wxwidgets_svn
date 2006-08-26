@@ -366,24 +366,4 @@ wxControl::GetDefaultAttributesFromGTKWidget(wxGtkWidgetNewFromAdj_t widget_new,
     return attr;
 }
 
-// ----------------------------------------------------------------------------
-// idle handling
-// ----------------------------------------------------------------------------
-
-void wxControl::OnInternalIdle()
-{
-    if ( GtkShowFromOnIdle() )
-        return;
-
-    if ( GTK_WIDGET_REALIZED(m_widget) )
-    {
-        GTKUpdateCursor();
-
-        GTKSetDelayedFocusIfNeeded();
-    }
-
-    if ( wxUpdateUIEvent::CanUpdate(this) )
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
-}
-
 #endif // wxUSE_CONTROLS

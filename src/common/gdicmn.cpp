@@ -17,7 +17,6 @@
 #endif
 
 #include "wx/gdicmn.h"
-#include "wx/gdiobj.h"
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
@@ -31,10 +30,6 @@
     #include "wx/colour.h"
     #include "wx/font.h"
 #endif
-
-
-IMPLEMENT_DYNAMIC_CLASS(wxGDIObject, wxObject)
-
 
 WXDLLIMPEXP_DATA_CORE(wxBrushList*) wxTheBrushList;
 WXDLLIMPEXP_DATA_CORE(wxFontList*)  wxTheFontList;
@@ -189,11 +184,6 @@ bool wxRect::Inside(int cx, int cy) const
           && ((cy - y) < height)
           && ((cx - x) < width)
           );
-}
-
-bool wxRect::Inside(const wxRect& rect) const
-{
-    return Inside(rect.GetTopLeft()) && Inside(rect.GetBottomRight());
 }
 
 wxRect& wxRect::Intersect(const wxRect& rect)

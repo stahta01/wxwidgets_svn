@@ -136,7 +136,9 @@ protected:
 
 private:
     // to be called from CreateFromImage only!
-    bool CreateFromImageAsPixmap(const wxImage& image, int depth);
+    bool CreateFromImageAsBitmap(const wxImage& image);
+    bool CreateFromImageAsPixmap(const wxImage& image);
+
     bool CreateFromImageAsPixbuf(const wxImage& image);
 
     enum Representation

@@ -39,19 +39,6 @@
 // For memcpy
 #include <string.h>
 
-// make the code compile with either wxFile*Stream or wxFFile*Stream:
-#define HAS_FILE_STREAMS (wxUSE_STREAMS && (wxUSE_FILE || wxUSE_FFILE))
-
-#if HAS_FILE_STREAMS
-    #if wxUSE_FILE
-        typedef wxFileInputStream wxImageFileInputStream;
-        typedef wxFileOutputStream wxImageFileOutputStream;
-    #elif wxUSE_FFILE
-        typedef wxFFileInputStream wxImageFileInputStream;
-        typedef wxFFileOutputStream wxImageFileOutputStream;
-    #endif // wxUSE_FILE/wxUSE_FFILE
-#endif // HAS_FILE_STREAMS
-
 //-----------------------------------------------------------------------------
 // wxImage
 //-----------------------------------------------------------------------------
@@ -1513,10 +1500,10 @@ bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
                         long WXUNUSED_UNLESS_STREAMS(type),
                         int WXUNUSED_UNLESS_STREAMS(index) )
 {
-#if HAS_FILE_STREAMS
+#if wxUSE_STREAMS
     if (wxFileExists(filename))
     {
-        wxImageFileInputStream stream(filename);
+        wxFileInputStream stream(filename);
         wxBufferedInputStream bstream( stream );
         return LoadFile(bstream, type, index);
     }
@@ -1526,19 +1513,19 @@ bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
 
         return false;
     }
-#else // !HAS_FILE_STREAMS
+#else // !wxUSE_STREAMS
     return false;
-#endif // HAS_FILE_STREAMS
+#endif // wxUSE_STREAMS
 }
 
 bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
                         const wxString& WXUNUSED_UNLESS_STREAMS(mimetype),
                         int WXUNUSED_UNLESS_STREAMS(index) )
 {
-#if HAS_FILE_STREAMS
+#if wxUSE_STREAMS
     if (wxFileExists(filename))
     {
-        wxImageFileInputStream stream(filename);
+        wxFileInputStream stream(filename);
         wxBufferedInputStream bstream( stream );
         return LoadFile(bstream, mimetype, index);
     }
@@ -1548,9 +1535,9 @@ bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
 
         return false;
     }
-#else // !HAS_FILE_STREAMS
+#else // !wxUSE_STREAMS
     return false;
-#endif // HAS_FILE_STREAMS
+#endif // wxUSE_STREAMS
 }
 
 
@@ -1574,19 +1561,19 @@ bool wxImage::SaveFile( const wxString& filename ) const
 bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
                         int WXUNUSED_UNLESS_STREAMS(type) ) const
 {
-#if HAS_FILE_STREAMS
+#if wxUSE_STREAMS
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
 
     ((wxImage*)this)->SetOption(wxIMAGE_OPTION_FILENAME, filename);
 
-    wxImageFileOutputStream stream(filename);
+    wxFileOutputStream stream(filename);
 
     if ( stream.IsOk() )
     {
         wxBufferedOutputStream bstream( stream );
         return SaveFile(bstream, type);
     }
-#endif // HAS_FILE_STREAMS
+#endif // wxUSE_STREAMS
 
     return false;
 }
@@ -1594,27 +1581,27 @@ bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
 bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
                         const wxString& WXUNUSED_UNLESS_STREAMS(mimetype) ) const
 {
-#if HAS_FILE_STREAMS
+#if wxUSE_STREAMS
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
 
     ((wxImage*)this)->SetOption(wxIMAGE_OPTION_FILENAME, filename);
 
-    wxImageFileOutputStream stream(filename);
+    wxFileOutputStream stream(filename);
 
     if ( stream.IsOk() )
     {
         wxBufferedOutputStream bstream( stream );
         return SaveFile(bstream, mimetype);
     }
-#endif // HAS_FILE_STREAMS
+#endif // wxUSE_STREAMS
 
     return false;
 }
 
 bool wxImage::CanRead( const wxString& WXUNUSED_UNLESS_STREAMS(name) )
 {
-#if HAS_FILE_STREAMS
-    wxImageFileInputStream stream(name);
+#if wxUSE_STREAMS
+    wxFileInputStream stream(name);
     return CanRead(stream);
 #else
     return false;
@@ -1624,8 +1611,8 @@ bool wxImage::CanRead( const wxString& WXUNUSED_UNLESS_STREAMS(name) )
 int wxImage::GetImageCount( const wxString& WXUNUSED_UNLESS_STREAMS(name),
                             long WXUNUSED_UNLESS_STREAMS(type) )
 {
-#if HAS_FILE_STREAMS
-    wxImageFileInputStream stream(name);
+#if wxUSE_STREAMS
+    wxFileInputStream stream(name);
     if (stream.Ok())
         return GetImageCount(stream, type);
 #endif
@@ -1673,7 +1660,7 @@ int wxImage::GetImageCount( wxInputStream &stream, long type )
 
     if ( !handler )
     {
-        wxLogWarning(_("No image handler for type %ld defined."), type);
+        wxLogWarning(_("No image handler for type %d defined."), type);
         return false;
     }
 
@@ -1683,7 +1670,7 @@ int wxImage::GetImageCount( wxInputStream &stream, long type )
     }
     else
     {
-        wxLogError(_("Image file is not of type %ld."), type);
+        wxLogError(_("Image file is not of type %d."), type);
         return 0;
     }
 }
@@ -1716,14 +1703,14 @@ bool wxImage::LoadFile( wxInputStream& stream, long type, int index )
 
     if (handler == 0)
     {
-        wxLogWarning( _("No image handler for type %ld defined."), type );
+        wxLogWarning( _("No image handler for type %d defined."), type );
 
         return false;
     }
 
     if (stream.IsSeekable() && !handler->CanRead(stream))
     {
-        wxLogError(_("Image file is not of type %ld."), type);
+        wxLogError(_("Image file is not of type %d."), type);
         return false;
     }
     else
@@ -2127,7 +2114,7 @@ bool wxImageHandler::CanRead( const wxString& name )
 {
     if (wxFileExists(name))
     {
-        wxImageFileInputStream stream(name);
+        wxFileInputStream stream(name);
         return CanRead(stream);
     }
 

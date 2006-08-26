@@ -29,10 +29,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#   include <sys/select.h>
-#endif
-
 #include "wx/unix/private.h"
 
 enum {

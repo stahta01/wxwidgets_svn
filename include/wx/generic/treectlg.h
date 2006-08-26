@@ -208,7 +208,6 @@ public:
 
     virtual void Freeze();
     virtual void Thaw();
-    virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
     virtual bool SetFont( const wxFont &font );
     virtual void SetWindowStyle(const long styles);
@@ -341,8 +340,6 @@ protected:
     bool TagNextChildren(wxGenericTreeItem *crt_item, wxGenericTreeItem *last_item, bool select);
     void UnselectAllChildren( wxGenericTreeItem *item );
     void ChildrenClosing(wxGenericTreeItem* item);
-
-    void DoDirtyProcessing();
 
 private:
     DECLARE_EVENT_TABLE()

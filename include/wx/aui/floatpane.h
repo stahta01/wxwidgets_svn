@@ -22,7 +22,7 @@
 
 #include "wx/frame.h"
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__ ) ||  defined( __WXGTK__ )
+#if defined( __WXMSW__ ) || defined( __WXMAC__ )
 #include "wx/minifram.h"
 #define wxFloatingPaneBaseClass wxMiniFrame
 #else
@@ -45,7 +45,7 @@ private:
     void OnMoveEvent(wxMoveEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnMoveStart();
-    void OnMoving(const wxRect& window_rect, wxDirection dir);
+    void OnMoving(const wxRect& window_rect);
     void OnMoveFinished();
     void OnActivate(wxActivateEvent& event);
     static bool isMouseDown();
@@ -53,10 +53,7 @@ private:
     wxWindow* m_pane_window;    // pane window being managed
     bool m_moving;
     wxRect m_last_rect;
-    wxRect m_last2_rect;
-    wxRect m_last3_rect;
     wxSize m_last_size;
-    wxDirection m_lastDirection;
 
     wxFrameManager* m_owner_mgr;
     wxFrameManager m_mgr;

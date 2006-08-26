@@ -64,135 +64,6 @@ DEFINE_EVENT_TYPE(wxEVT_AUI_RENDER)
 
 IMPLEMENT_DYNAMIC_CLASS(wxFrameManagerEvent, wxEvent)
 
-class wxPseudoTransparentFrame : public wxFrame
-{
-public:
-    wxPseudoTransparentFrame(wxWindow* parent = NULL,
-                wxWindowID id = wxID_ANY,
-                const wxString& title = wxEmptyString,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxDEFAULT_FRAME_STYLE,
-                const wxString &name = wxT("frame"))
-                    : wxFrame(parent, id, title, pos, size, style | wxFRAME_SHAPED, name)
-    {
-        SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-        m_Amount=0;
-        m_MaxWidth=0;
-        m_MaxHeight=0;
-        m_lastWidth=0;
-        m_lastHeight=0;
-#ifdef __WXGTK__
-        m_CanSetShape = false; // have to wait for window create event on GTK
-#else
-        m_CanSetShape = true;
-#endif
-        m_Region = wxRegion(0, 0, 0, 0);
-        SetTransparent(0);
-    }
-
-    virtual bool SetTransparent(wxByte alpha)
-    {
-        if (m_CanSetShape)
-        {
-            int w=100; // some defaults
-            int h=100;
-            GetClientSize(&w, &h);
-
-            m_MaxWidth = w;
-            m_MaxHeight = h;
-            m_Amount = alpha;
-            m_Region.Clear();
-//            m_Region.Union(0, 0, 1, m_MaxWidth);
-            if (m_Amount)
-            {
-                for (int y=0; y<m_MaxHeight; y++)
-                {
-                    // Reverse the order of the bottom 4 bits
-                    int j=((y&8)?1:0)|((y&4)?2:0)|((y&2)?4:0)|((y&1)?8:0);
-                    if ((j*16+8)<m_Amount)
-                        m_Region.Union(0, y, m_MaxWidth, 1);
-                }
-            }
-            SetShape(m_Region);
-            Refresh();
-        }
-        return true;
-    }
-
-    void OnPaint(wxPaintEvent& WXUNUSED(event))
-    {
-        wxPaintDC dc(this);
-
-        if (m_Region.IsEmpty())
-            return;
-
-#ifdef __WXMAC__
-        dc.SetBrush(wxColour(128, 192, 255));
-#else
-        dc.SetBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_ACTIVECAPTION));
-#endif
-        dc.SetPen(*wxTRANSPARENT_PEN);
-
-        wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
-
-        while (upd)
-        {
-            wxRect rect(upd.GetRect());
-            dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height);
-
-            upd++;
-        }
-    }
-
-#ifdef __WXGTK__
-    void OnWindowCreate(wxWindowCreateEvent& WXUNUSED(event)) {m_CanSetShape=true; SetTransparent(0);}
-#endif
-
-    void OnSize(wxSizeEvent& event)
-    {
-        // We sometimes get surplus size events
-        if ((event.GetSize().GetWidth() == m_lastWidth) &&
-            (event.GetSize().GetHeight() == m_lastHeight))
-        {
-            event.Skip();
-            return;
-        }
-        m_lastWidth = event.GetSize().GetWidth();
-        m_lastHeight = event.GetSize().GetHeight();
-
-        SetTransparent(m_Amount);
-        m_Region.Intersect(0, 0, event.GetSize().GetWidth(),
-                           event.GetSize().GetHeight());
-        SetShape(m_Region);
-        Refresh();
-        event.Skip();
-    }
-
-private:
-    wxByte m_Amount;
-    int m_MaxWidth;
-    int m_MaxHeight;
-    bool m_CanSetShape;
-    int m_lastWidth,m_lastHeight;
-
-    wxRegion m_Region;
-
-    DECLARE_DYNAMIC_CLASS(wxPseudoTransparentFrame)
-    DECLARE_EVENT_TABLE()
-};
-
-
-IMPLEMENT_DYNAMIC_CLASS( wxPseudoTransparentFrame, wxFrame )
-
-BEGIN_EVENT_TABLE(wxPseudoTransparentFrame, wxFrame)
-    EVT_PAINT(wxPseudoTransparentFrame::OnPaint)
-    EVT_SIZE(wxPseudoTransparentFrame::OnSize)
-#ifdef __WXGTK__
-    EVT_WINDOW_CREATE(wxPseudoTransparentFrame::OnWindowCreate)
-#endif
-END_EVENT_TABLE()
-
 
 // -- static utility functions --
 
@@ -397,16 +268,16 @@ static wxPaneInfo* FindPaneInDock(const wxDockInfo& dock, wxWindow* window)
 }
 
 // RemovePaneFromDocks() removes a pane window from all docks
-// with a possible exception specified by parameter "ex_cept"
+// with a possible exception specified by parameter "except"
 static void RemovePaneFromDocks(wxDockInfoArray& docks,
                                 wxPaneInfo& pane,
-                                wxDockInfo* ex_cept  = NULL  )
+                                wxDockInfo* except = NULL)
 {
     int i, dock_count;
     for (i = 0, dock_count = docks.GetCount(); i < dock_count; ++i)
     {
         wxDockInfo& d = docks.Item(i);
-        if (&d == ex_cept)
+        if (&d == except)
             continue;
         wxPaneInfo* pi = FindPaneInDock(d, pane.window);
         if (pi)
@@ -625,22 +496,23 @@ void wxFrameManager::SetManagedWindow(wxWindow* frame)
 #endif
 
     // Make a window to use for a transparent hint
-#if defined(__WXMSW__) || defined(__WXGTK__)
-    m_hint_wnd = new wxFrame(m_frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(1,1),
+#if defined(__WXMSW__)
+    m_hint_wnd = new wxFrame(m_frame, -1, wxEmptyString, wxDefaultPosition, wxSize(1,1),
                              wxFRAME_TOOL_WINDOW |
                              wxFRAME_FLOAT_ON_PARENT |
                              wxFRAME_NO_TASKBAR |
                              wxNO_BORDER);
 
     m_hint_wnd->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_ACTIVECAPTION));
-
+            
 #elif defined(__WXMAC__)
     // Using a miniframe with float and tool styles keeps the parent
     // frame activated and highlighted as such...
-    m_hint_wnd = new wxMiniFrame(m_frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(1,1),
+    m_hint_wnd = new wxMiniFrame(m_frame, -1, wxEmptyString, wxDefaultPosition, wxSize(1,1),
                                  wxFRAME_FLOAT_ON_PARENT
-                                 | wxFRAME_TOOL_WINDOW );
-
+                                 | wxFRAME_TOOL_WINDOW
+                                 | wxCAPTION );
+    
     // Can't set the bg colour of a Frame in wxMac
     wxPanel* p = new wxPanel(m_hint_wnd);
 
@@ -651,30 +523,11 @@ void wxFrameManager::SetManagedWindow(wxWindow* frame)
     p->SetBackgroundColour(*wxBLUE);
 #endif
 
-    m_hint_fademax=50;
-
-    if (m_hint_wnd
-        // CanSetTransparent is only present in the 2.7.0 ABI. To allow this file to be easily used
-        // in a backported environment, conditionally compile this in.
-#if wxCHECK_VERSION(2,7,0)
-       && !m_hint_wnd->CanSetTransparent()
-#endif
-        )
+    if (m_hint_wnd && !m_hint_wnd->CanSetTransparent())
     {
-
         m_hint_wnd->Close();
-        m_hint_wnd->Destroy();
         m_hint_wnd = NULL;
-
-        // If we can convert it to a PseudoTransparent window, do so
-        m_hint_wnd = new wxPseudoTransparentFrame (m_frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(1,1),
-                                                wxFRAME_TOOL_WINDOW |
-                                                wxFRAME_FLOAT_ON_PARENT |
-                                                wxFRAME_NO_TASKBAR |
-                                                wxNO_BORDER);
-
-        m_hint_fademax = 128;
-    }
+    }    
 }
 
 
@@ -822,11 +675,11 @@ bool wxFrameManager::AddPane(wxWindow* window,
 {
     if (!AddPane(window, pane_info))
         return false;
-
+    
     wxPaneInfo& pane = GetPane(window);
-
+    
     DoDrop(m_docks, m_panes, pane, drop_pos, wxPoint(0,0));
-
+    
     return true;
 }
 
@@ -903,9 +756,7 @@ bool wxFrameManager::DetachPane(wxWindow* window)
 
                 // reduce flicker
                 p.window->SetSize(1,1);
-
-                if (p.frame->IsShown())
-                    p.frame->Show(false);
+                p.frame->Show(false);
 
                 // reparent to m_frame and destroy the pane
                 p.window->Reparent(m_frame);
@@ -913,7 +764,7 @@ bool wxFrameManager::DetachPane(wxWindow* window)
                 p.frame->Destroy();
                 p.frame = NULL;
             }
-
+            
             // make sure there are no references to this pane in our uiparts,
             // just in case the caller doesn't call Update() immediately after
             // the DetachPane() call.  This prevets obscure crashes which would
@@ -930,7 +781,7 @@ bool wxFrameManager::DetachPane(wxWindow* window)
                     continue;
                 }
             }
-
+            
             m_panes.RemoveAt(i);
             return true;
         }
@@ -957,112 +808,6 @@ static wxString EscapeDelimiters(const wxString& s)
     return result;
 }
 
-wxString wxFrameManager::SavePaneInfo(wxPaneInfo& pane)
-{
-    wxString result = wxT("name=");
-    result += EscapeDelimiters(pane.name);
-    result += wxT(";");
-
-    result += wxT("caption=");
-    result += EscapeDelimiters(pane.caption);
-    result += wxT(";");
-
-    result += wxString::Format(wxT("state=%u;"), pane.state);
-    result += wxString::Format(wxT("dir=%d;"), pane.dock_direction);
-    result += wxString::Format(wxT("layer=%d;"), pane.dock_layer);
-    result += wxString::Format(wxT("row=%d;"), pane.dock_row);
-    result += wxString::Format(wxT("pos=%d;"), pane.dock_pos);
-    result += wxString::Format(wxT("prop=%d;"), pane.dock_proportion);
-    result += wxString::Format(wxT("bestw=%d;"), pane.best_size.x);
-    result += wxString::Format(wxT("besth=%d;"), pane.best_size.y);
-    result += wxString::Format(wxT("minw=%d;"), pane.min_size.x);
-    result += wxString::Format(wxT("minh=%d;"), pane.min_size.y);
-    result += wxString::Format(wxT("maxw=%d;"), pane.max_size.x);
-    result += wxString::Format(wxT("maxh=%d;"), pane.max_size.y);
-    result += wxString::Format(wxT("floatx=%d;"), pane.floating_pos.x);
-    result += wxString::Format(wxT("floaty=%d;"), pane.floating_pos.y);
-    result += wxString::Format(wxT("floatw=%d;"), pane.floating_size.x);
-    result += wxString::Format(wxT("floath=%d"), pane.floating_size.y);
-
-    return result;
-}
-
-// Load a "pane" with the pane infor settings in pane_part
-void wxFrameManager::LoadPaneInfo(wxString pane_part, wxPaneInfo &pane)
-{
-    // replace escaped characters so we can
-    // split up the string easily
-    pane_part.Replace(wxT("\\|"), wxT("\a"));
-    pane_part.Replace(wxT("\\;"), wxT("\b"));
-
-    while(1)
-    {
-        wxString val_part = pane_part.BeforeFirst(wxT(';'));
-        pane_part = pane_part.AfterFirst(wxT(';'));
-        wxString val_name = val_part.BeforeFirst(wxT('='));
-        wxString value = val_part.AfterFirst(wxT('='));
-        val_name.MakeLower();
-        val_name.Trim(true);
-        val_name.Trim(false);
-        value.Trim(true);
-        value.Trim(false);
-
-        if (val_name.empty())
-            break;
-
-        if (val_name == wxT("name"))
-            pane.name = value;
-        else if (val_name == wxT("caption"))
-            pane.caption = value;
-        else if (val_name == wxT("state"))
-            pane.state = (unsigned int)wxAtoi(value.c_str());
-        else if (val_name == wxT("dir"))
-            pane.dock_direction = wxAtoi(value.c_str());
-        else if (val_name == wxT("layer"))
-            pane.dock_layer = wxAtoi(value.c_str());
-        else if (val_name == wxT("row"))
-            pane.dock_row = wxAtoi(value.c_str());
-        else if (val_name == wxT("pos"))
-            pane.dock_pos = wxAtoi(value.c_str());
-        else if (val_name == wxT("prop"))
-            pane.dock_proportion = wxAtoi(value.c_str());
-        else if (val_name == wxT("bestw"))
-            pane.best_size.x = wxAtoi(value.c_str());
-        else if (val_name == wxT("besth"))
-            pane.best_size.y = wxAtoi(value.c_str());
-        else if (val_name == wxT("minw"))
-            pane.min_size.x = wxAtoi(value.c_str());
-        else if (val_name == wxT("minh"))
-            pane.min_size.y = wxAtoi(value.c_str());
-        else if (val_name == wxT("maxw"))
-            pane.max_size.x = wxAtoi(value.c_str());
-        else if (val_name == wxT("maxh"))
-            pane.max_size.y = wxAtoi(value.c_str());
-        else if (val_name == wxT("floatx"))
-            pane.floating_pos.x = wxAtoi(value.c_str());
-        else if (val_name == wxT("floaty"))
-            pane.floating_pos.y = wxAtoi(value.c_str());
-        else if (val_name == wxT("floatw"))
-            pane.floating_size.x = wxAtoi(value.c_str());
-        else if (val_name == wxT("floath"))
-            pane.floating_size.y = wxAtoi(value.c_str());
-        else {
-            wxFAIL_MSG(wxT("Bad Perspective String"));
-        }
-    }
-
-    // replace escaped characters so we can
-    // split up the string easily
-    pane.name.Replace(wxT("\a"), wxT("|"));
-    pane.name.Replace(wxT("\b"), wxT(";"));
-    pane.caption.Replace(wxT("\a"), wxT("|"));
-    pane.caption.Replace(wxT("\b"), wxT(";"));
-    pane_part.Replace(wxT("\a"), wxT("|"));
-    pane_part.Replace(wxT("\b"), wxT(";"));
-
-    return;
-}
-
 
 // SavePerspective() saves all pane information as a single string.
 // This string may later be fed into LoadPerspective() to restore
@@ -1079,7 +824,32 @@ wxString wxFrameManager::SavePerspective()
     for (pane_i = 0; pane_i < pane_count; ++pane_i)
     {
         wxPaneInfo& pane = m_panes.Item(pane_i);
-        result += SavePaneInfo(pane)+wxT("|");
+
+        result += wxT("name=");
+        result += EscapeDelimiters(pane.name);
+        result += wxT(";");
+
+        result += wxT("caption=");
+        result += EscapeDelimiters(pane.caption);
+        result += wxT(";");
+
+        result += wxString::Format(wxT("state=%u;"), pane.state);
+        result += wxString::Format(wxT("dir=%d;"), pane.dock_direction);
+        result += wxString::Format(wxT("layer=%d;"), pane.dock_layer);
+        result += wxString::Format(wxT("row=%d;"), pane.dock_row);
+        result += wxString::Format(wxT("pos=%d;"), pane.dock_pos);
+        result += wxString::Format(wxT("prop=%d;"), pane.dock_proportion);
+        result += wxString::Format(wxT("bestw=%d;"), pane.best_size.x);
+        result += wxString::Format(wxT("besth=%d;"), pane.best_size.y);
+        result += wxString::Format(wxT("minw=%d;"), pane.min_size.x);
+        result += wxString::Format(wxT("minh=%d;"), pane.min_size.y);
+        result += wxString::Format(wxT("maxw=%d;"), pane.max_size.x);
+        result += wxString::Format(wxT("maxh=%d;"), pane.max_size.y);
+        result += wxString::Format(wxT("floatx=%d;"), pane.floating_pos.x);
+        result += wxString::Format(wxT("floaty=%d;"), pane.floating_pos.y);
+        result += wxString::Format(wxT("floatw=%d;"), pane.floating_size.x);
+        result += wxString::Format(wxT("floath=%d"), pane.floating_size.y);
+        result += wxT("|");
     }
 
     int dock_i, dock_count = m_docks.GetCount();
@@ -1111,6 +881,7 @@ bool wxFrameManager::LoadPerspective(const wxString& layout, bool update)
     if (part != wxT("layout1"))
         return false;
 
+
     // mark all panes currently managed as docked and hidden
     int pane_i, pane_count = m_panes.GetCount();
     for (pane_i = 0; pane_i < pane_count; ++pane_i)
@@ -1136,6 +907,7 @@ bool wxFrameManager::LoadPerspective(const wxString& layout, bool update)
         if (pane_part.empty())
             break;
 
+
         if (pane_part.Left(9) == wxT("dock_size"))
         {
             wxString val_name = pane_part.BeforeFirst(wxT('='));
@@ -1159,12 +931,68 @@ bool wxFrameManager::LoadPerspective(const wxString& layout, bool update)
             continue;
         }
 
-        // Undo our escaping as LoadPaneInfo needs to take an unescaped
-        // name so it can be called by external callers
-        pane_part.Replace(wxT("\a"), wxT("|"));
-        pane_part.Replace(wxT("\b"), wxT(";"));
+        while (1)
+        {
+            wxString val_part = pane_part.BeforeFirst(wxT(';'));
+            pane_part = pane_part.AfterFirst(wxT(';'));
+            wxString val_name = val_part.BeforeFirst(wxT('='));
+            wxString value = val_part.AfterFirst(wxT('='));
+            val_name.MakeLower();
+            val_name.Trim(true);
+            val_name.Trim(false);
+            value.Trim(true);
+            value.Trim(false);
 
-        LoadPaneInfo(pane_part, pane);
+            if (val_name.empty())
+                break;
+
+            if (val_name == wxT("name"))
+                pane.name = value;
+            else if (val_name == wxT("caption"))
+                pane.caption = value;
+            else if (val_name == wxT("state"))
+                pane.state = (unsigned int)wxAtoi(value.c_str());
+            else if (val_name == wxT("dir"))
+                pane.dock_direction = wxAtoi(value.c_str());
+            else if (val_name == wxT("layer"))
+                pane.dock_layer = wxAtoi(value.c_str());
+            else if (val_name == wxT("row"))
+                pane.dock_row = wxAtoi(value.c_str());
+            else if (val_name == wxT("pos"))
+                pane.dock_pos = wxAtoi(value.c_str());
+            else if (val_name == wxT("prop"))
+                pane.dock_proportion = wxAtoi(value.c_str());
+            else if (val_name == wxT("bestw"))
+                pane.best_size.x = wxAtoi(value.c_str());
+            else if (val_name == wxT("besth"))
+                pane.best_size.y = wxAtoi(value.c_str());
+            else if (val_name == wxT("minw"))
+                pane.min_size.x = wxAtoi(value.c_str());
+            else if (val_name == wxT("minh"))
+                pane.min_size.y = wxAtoi(value.c_str());
+            else if (val_name == wxT("maxw"))
+                pane.max_size.x = wxAtoi(value.c_str());
+            else if (val_name == wxT("maxh"))
+                pane.max_size.y = wxAtoi(value.c_str());
+            else if (val_name == wxT("floatx"))
+                pane.floating_pos.x = wxAtoi(value.c_str());
+            else if (val_name == wxT("floaty"))
+                pane.floating_pos.y = wxAtoi(value.c_str());
+            else if (val_name == wxT("floatw"))
+                pane.floating_size.x = wxAtoi(value.c_str());
+            else if (val_name == wxT("floath"))
+                pane.floating_size.y = wxAtoi(value.c_str());
+            else {
+                wxFAIL_MSG(wxT("Bad Perspective String"));
+            }
+        }
+
+        // replace escaped characters so we can
+        // split up the string easily
+        pane.name.Replace(wxT("\a"), wxT("|"));
+        pane.name.Replace(wxT("\b"), wxT(";"));
+        pane.caption.Replace(wxT("\a"), wxT("|"));
+        pane.caption.Replace(wxT("\b"), wxT(";"));
 
         wxPaneInfo& p = GetPane(pane.name);
         if (!p.IsOk())
@@ -1174,8 +1002,10 @@ bool wxFrameManager::LoadPerspective(const wxString& layout, bool update)
             return false;
         }
 
-        p.SafeSet(pane);
-
+        pane.window = p.window;
+        pane.frame = p.frame;
+        pane.buttons = p.buttons;
+        p = pane;
     }
 
     if (update)
@@ -1183,6 +1013,7 @@ bool wxFrameManager::LoadPerspective(const wxString& layout, bool update)
 
     return true;
 }
+
 
 void wxFrameManager::GetPanePositionsAndSizes(wxDockInfo& dock,
                                               wxArrayInt& positions,
@@ -1974,9 +1805,7 @@ void wxFrameManager::Update()
 
             // reduce flicker
             p.window->SetSize(1,1);
-
-            if (p.frame->IsShown())
-                p.frame->Show(false);
+            p.frame->Show(false);
 
             // reparent to m_frame and destroy the pane
             p.window->Reparent(m_frame);
@@ -2006,20 +1835,20 @@ void wxFrameManager::Update()
                                                   this,
                                                   p);
 
-#if wxCHECK_VERSION(2,7,0)
                 // on MSW and Mac, if the owner desires transparent dragging, and
                 // the dragging is happening right now, then the floating
                 // window should have this style by default
                 if (m_action == actionDragFloatingPane &&
                     (m_flags & wxAUI_MGR_TRANSPARENT_DRAG))
                         frame->SetTransparent(150);
-#endif
 
                 frame->SetPaneWindow(p);
                 p.frame = frame;
 
-                if (p.IsShown() && !frame->IsShown())
+                if (p.IsShown())
+                {
                     frame->Show();
+                }
             }
              else
             {
@@ -2033,14 +1862,12 @@ void wxFrameManager::Update()
                     //p.frame->Move(p.floating_pos.x, p.floating_pos.y);
                 }
 
-                if (p.frame->IsShown() != p.IsShown())
-                    p.frame->Show(p.IsShown());
+                 p.frame->Show(p.IsShown());
             }
         }
          else
         {
-            if (p.window->IsShown() != p.IsShown())
-                p.window->Show(p.IsShown());
+            p.window->Show(p.IsShown());
         }
 
         // if "active panes" are no longer allowed, clear
@@ -2634,42 +2461,27 @@ bool wxFrameManager::DoDrop(wxDockInfoArray& docks,
 
 void wxFrameManager::OnHintFadeTimer(wxTimerEvent& WXUNUSED(event))
 {
-    if (!m_hint_wnd || m_hint_fadeamt >= m_hint_fademax)
+    if (!m_hint_wnd || m_hint_fadeamt >= 50)
     {
         m_hint_fadetimer.Stop();
         return;
     }
 
-    m_hint_fadeamt += 4;
-#if wxCHECK_VERSION(2,7,0)
+    m_hint_fadeamt += 5;
     m_hint_wnd->SetTransparent(m_hint_fadeamt);
-#else
-    if (m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame)))
-        ((wxPseudoTransparentFrame *)m_hint_wnd)->SetTransparent(m_hint_fadeamt);
-#endif
 }
 
 void wxFrameManager::ShowHint(const wxRect& rect)
 {
-    if ((m_flags & wxAUI_MGR_TRANSPARENT_HINT) != 0
-        && m_hint_wnd
-        // Finally, don't use a venetian blind effect if it's been specifically disabled
-        && !((m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame))) &&
-             (m_flags & wxAUI_MGR_DISABLE_VENETIAN_BLINDS))
-       )
+    if ((m_flags & wxAUI_MGR_TRANSPARENT_HINT) != 0 && m_hint_wnd)
     {
         if (m_last_hint == rect)
             return;
         m_last_hint = rect;
 
-        m_hint_fadeamt = m_hint_fademax;
-        if ((m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
-            && !((m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame))) &&
-                 (m_flags & wxAUI_MGR_DISABLE_VENETIAN_BLINDS_FADE))
-            )
-            m_hint_fadeamt = 0;
-
-        m_hint_wnd->SetSize(rect);
+        int initial_fade = 50;
+        if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
+            initial_fade = 0;
 
         if (! m_hint_wnd->IsShown())
             m_hint_wnd->Show();
@@ -2679,18 +2491,15 @@ void wxFrameManager::ShowHint(const wxRect& rect)
         if (m_action == actionDragFloatingPane && m_action_window)
             m_action_window->SetFocus();
 
-#if wxCHECK_VERSION(2,7,0)
-        m_hint_wnd->SetTransparent(m_hint_fadeamt);
-#else
-        if (m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame)))
-            ((wxPseudoTransparentFrame *)m_hint_wnd)->SetTransparent(m_hint_fadeamt);
-#endif
+        m_hint_wnd->SetTransparent(initial_fade);
+        m_hint_wnd->SetSize(rect);
         m_hint_wnd->Raise();
+        
 
-
-        if (m_hint_fadeamt != m_hint_fademax) //  Only fade if we need to
+        if (m_flags & wxAUI_MGR_TRANSPARENT_HINT_FADE)
         {
             // start fade in timer
+            m_hint_fadeamt = 0;
             m_hint_fadetimer.SetOwner(this, 101);
             m_hint_fadetimer.Start(5);
         }
@@ -2698,7 +2507,7 @@ void wxFrameManager::ShowHint(const wxRect& rect)
 
     else  // Not using a transparent hint window...
     {
-
+        
         if (m_last_hint != rect)
         {
             // remove the last hint rectangle
@@ -2731,11 +2540,6 @@ void wxFrameManager::ShowHint(const wxRect& rect)
             }
         }
 
-        // As we can only hide the hint by redrawing the managed window, we
-        // need to clip the region to the managed window too or we get
-        // nasty redrawn problems.
-        clip.Intersect(m_frame->GetRect());
-
         screendc.SetClippingRegion(clip);
 
         wxBitmap stipple = wxPaneCreateStippleBitmap();
@@ -2755,14 +2559,7 @@ void wxFrameManager::HideHint()
     // hides a transparent window hint, if there is one
     if (m_hint_wnd)
     {
-        if (m_hint_wnd->IsShown())
-            m_hint_wnd->Show(false);
-#if wxCHECK_VERSION(2,7,0)
         m_hint_wnd->SetTransparent(0);
-#else
-        if (m_hint_wnd->IsKindOf(CLASSINFO(wxPseudoTransparentFrame)))
-        ((wxPseudoTransparentFrame *)m_hint_wnd)->SetTransparent(0);
-#endif
         m_hint_fadetimer.Stop();
         m_last_hint = wxRect();
         return;
@@ -2868,54 +2665,17 @@ void wxFrameManager::OnFloatingPaneMoveStart(wxWindow* wnd)
     wxPaneInfo& pane = GetPane(wnd);
     wxASSERT_MSG(pane.IsOk(), wxT("Pane window not found"));
 
-#if wxCHECK_VERSION(2,7,0)
     if (m_flags & wxAUI_MGR_TRANSPARENT_DRAG)
         pane.frame->SetTransparent(150);
-#endif
 }
 
-void wxFrameManager::OnFloatingPaneMoving(wxWindow* wnd, wxDirection dir)
+void wxFrameManager::OnFloatingPaneMoving(wxWindow* wnd)
 {
     // try to find the pane
     wxPaneInfo& pane = GetPane(wnd);
     wxASSERT_MSG(pane.IsOk(), wxT("Pane window not found"));
 
     wxPoint pt = ::wxGetMousePosition();
-
-#if 0
-    // Adapt pt to direction
-    if (dir == wxNORTH)
-    {
-        // move to pane's upper border
-        wxPoint pos( 0,0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.y = pos.y;
-        // and some more pixels for the title bar
-        pt.y -= 5;
-    } else
-    if (dir == wxWEST)
-    {
-        // move to pane's left border
-        wxPoint pos( 0,0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.x = pos.x;
-    } else
-    if (dir == wxEAST)
-    {
-        // move to pane's right border
-        wxPoint pos( wnd->GetSize().x, 0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.x = pos.x;
-    } else
-    if (dir == wxSOUTH)
-    {
-        // move to pane's bottom border
-        wxPoint pos( 0, wnd->GetSize().y );
-        pos = wnd->ClientToScreen( pos );
-        pt.y = pos.y;
-    }
-#endif
-
     wxPoint client_pt = m_frame->ScreenToClient(pt);
 
     // calculate the offset from the upper left-hand corner
@@ -2975,48 +2735,13 @@ void wxFrameManager::OnFloatingPaneMoving(wxWindow* wnd, wxDirection dir)
     m_frame->Update();
 }
 
-void wxFrameManager::OnFloatingPaneMoved(wxWindow* wnd, wxDirection dir)
+void wxFrameManager::OnFloatingPaneMoved(wxWindow* wnd)
 {
     // try to find the pane
     wxPaneInfo& pane = GetPane(wnd);
     wxASSERT_MSG(pane.IsOk(), wxT("Pane window not found"));
 
     wxPoint pt = ::wxGetMousePosition();
-
-#if 0
-    // Adapt pt to direction
-    if (dir == wxNORTH)
-    {
-        // move to pane's upper border
-        wxPoint pos( 0,0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.y = pos.y;
-        // and some more pixels for the title bar
-        pt.y -= 10;
-    } else
-    if (dir == wxWEST)
-    {
-        // move to pane's left border
-        wxPoint pos( 0,0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.x = pos.x;
-    } else
-    if (dir == wxEAST)
-    {
-        // move to pane's right border
-        wxPoint pos( wnd->GetSize().x, 0 );
-        pos = wnd->ClientToScreen( pos );
-        pt.x = pos.x;
-    } else
-    if (dir == wxSOUTH)
-    {
-        // move to pane's bottom border
-        wxPoint pos( 0, wnd->GetSize().y );
-        pos = wnd->ClientToScreen( pos );
-        pt.y = pos.y;
-    }
-#endif
-
     wxPoint client_pt = m_frame->ScreenToClient(pt);
 
     // calculate the offset from the upper left-hand corner
@@ -3032,17 +2757,15 @@ void wxFrameManager::OnFloatingPaneMoved(wxWindow* wnd, wxDirection dir)
         // do the drop calculation
         DoDrop(m_docks, m_panes, pane, client_pt, action_offset);
     }
-
+    
     // if the pane is still floating, update it's floating
     // position (that we store)
     if (pane.IsFloating())
     {
         pane.floating_pos = pane.frame->GetPosition();
 
-#if wxCHECK_VERSION(2,7,0)
         if (m_flags & wxAUI_MGR_TRANSPARENT_DRAG)
             pane.frame->SetTransparent(255);
-#endif
     }
 
     Update();
@@ -3082,8 +2805,7 @@ void wxFrameManager::OnFloatingPaneClosed(wxWindow* wnd, wxCloseEvent& evt)
     {
         // reparent the pane window back to us and
         // prepare the frame window for destruction
-        if (pane.window->IsShown())
-            pane.window->Show(false);
+        pane.window->Show(false);
         pane.window->Reparent(m_frame);
         pane.frame = NULL;
         pane.Hide();
@@ -3111,7 +2833,7 @@ void wxFrameManager::OnFloatingPaneActivated(wxWindow* wnd)
 void wxFrameManager::OnRender(wxFrameManagerEvent& evt)
 {
     wxDC* dc = evt.GetDC();
-
+    
 #ifdef __WXMAC__
     dc->Clear() ;
 #endif
@@ -3217,14 +2939,13 @@ void wxFrameManager::OnEraseBackground(wxEraseEvent& event)
 #endif
 }
 
-void wxFrameManager::OnSize(wxSizeEvent& event)
+void wxFrameManager::OnSize(wxSizeEvent& WXUNUSED(event))
 {
     if (m_frame)
     {
         DoFrameLayout();
         Repaint();
     }
-    event.Skip();
 }
 
 
@@ -3799,7 +3520,7 @@ void wxFrameManager::OnChildFocus(wxChildFocusEvent& event)
             m_frame->Refresh();
         }
     }
-
+    
     event.Skip();
 }
 

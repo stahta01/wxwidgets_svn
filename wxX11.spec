@@ -1,6 +1,6 @@
 %define pref /usr
-%define ver  2.7.0
-%define ver2 2.7
+%define ver  2.6.2
+%define ver2 2.6
 %define rel  1
 
 # Configurable settings (use --with(out) unicode on rpmbuild cmd line):
@@ -203,7 +203,6 @@ wx/msgout.h
 wx/mstream.h
 wx/object.h
 wx/platform.h
-wx/platinfo.h
 wx/power.h
 wx/process.h
 wx/ptr_scpd.h

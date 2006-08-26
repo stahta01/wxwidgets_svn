@@ -26,7 +26,6 @@
 #include "wx/module.h"
 #include "wx/mimetype.h"
 #include "wx/filename.h"
-#include "wx/tokenzr.h"
 
 
 //--------------------------------------------------------------------------------
@@ -448,57 +447,13 @@ wxString wxFileSystem::FindNext()
     else return m_FindFileHandler -> FindNext();
 }
 
-bool wxFileSystem::FindFileInPath(wxString *pStr,
-                                  const wxChar *path,
-                                  const wxChar *basename)
-{
-    // we assume that it's not empty
-    wxCHECK_MSG( !wxIsEmpty(basename), false,
-                _T("empty file name in wxFileSystem::FindFileInPath"));
 
-    // skip path separator in the beginning of the file name if present
-    if ( wxIsPathSeparator(*basename) )
-       basename++;
-
-    wxStringTokenizer tokenizer(path, wxPATH_SEP);
-    while ( tokenizer.HasMoreTokens() )
-    {
-        wxString strFile = tokenizer.GetNextToken();
-        if ( !wxEndsWithPathSeparator(strFile) )
-            strFile += wxFILE_SEP_PATH;
-        strFile += basename;
-
-        wxFSFile *file = OpenFile(strFile);
-        if ( file )
-        {
-            delete file;
-            *pStr = strFile;
-            return true;
-        }
-    }
-
-    return false;
-}
 
 void wxFileSystem::AddHandler(wxFileSystemHandler *handler)
 {
-    // prepend the handler to the beginning of the list because handlers added
-    // last should have the highest priority to allow overriding them
-    m_Handlers.Insert((size_t)0, handler);
+    m_Handlers.Append(handler);
 }
 
-bool wxFileSystem::HasHandlerForPath(const wxString &location)
-{
-    for ( wxList::compatibility_iterator node = m_Handlers.GetFirst();
-           node; node = node->GetNext() )
-    {
-        wxFileSystemHandler *h = (wxFileSystemHandler*) node->GetData();
-        if (h->CanOpen(location))
-            return true;
-    }
-
-    return false;
-}
 
 void wxFileSystem::CleanUpHandlers()
 {

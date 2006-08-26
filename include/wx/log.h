@@ -139,7 +139,15 @@ public:
 
     // static sink function - see DoLog() for function to overload in the
     // derived classes
-    static void OnLog(wxLogLevel level, const wxChar *szString, time_t t);
+    static void OnLog(wxLogLevel level, const wxChar *szString, time_t t)
+    {
+        if ( IsEnabled() && ms_logLevel >= level )
+        {
+            wxLog *pLogger = GetActiveTarget();
+            if ( pLogger )
+                pLogger->DoLog(level, szString, t);
+        }
+    }
 
     // message buffering
 
@@ -186,14 +194,6 @@ public:
     // should GetActiveTarget() try to create a new log object if the
     // current is NULL?
     static void DontCreateOnDemand();
-
-    // log the count of repeating messages instead of logging the messages
-    // multiple times
-    static void SetRepetitionCounting(bool bRepetCounting = true)
-    { ms_bRepetCounting = bRepetCounting; }
-
-    // gets duplicate counting status
-    static bool GetRepetitionCounting() { return ms_bRepetCounting; }
 
     // trace mask (see wxTraceXXX constants for details)
     static void SetTraceMask(wxTraceMask ulMask) { ms_ulTraceMask = ulMask; }
@@ -242,7 +242,7 @@ public:
     static void TimeStamp(wxString *str);
 
     // make dtor virtual for all derived classes
-    virtual ~wxLog();
+    virtual ~wxLog() { }
 
 
     // this method exists for backwards compatibility only, don't use
@@ -259,22 +259,9 @@ protected:
     // you override DoLog() you might not need it at all
     virtual void DoLogString(const wxChar *szString, time_t t);
 
-    // log a line containing the number of times the previous message was
-    // repeated
-    // returns: the number
-    static unsigned DoLogNumberOfRepeats();
-
 private:
     // static variables
     // ----------------
-
-    // traditional behaviour or counting repetitions
-    static bool        ms_bRepetCounting;
-    static wxString    ms_prevString;   // previous message that was logged
-    // how many times the previous message was logged
-    static unsigned    ms_prevCounter;
-    static time_t      ms_prevTimeStamp;// timestamp of the previous message
-    static wxLogLevel  ms_prevLevel;    // level of the previous message
 
     static wxLog      *ms_pLogger;      // currently active log sink
     static bool        ms_doLog;        // false => all logging disabled
@@ -515,7 +502,6 @@ public:
 #define wxTRACE_OleCalls wxEmptyString // OLE interface calls
 
 #endif // wxUSE_LOG/!wxUSE_LOG
-
 #define DECLARE_LOG_FUNCTION2(level, argclass, arg)                         \
     DECLARE_LOG_FUNCTION2_EXP(level, argclass, arg, WXDLLIMPEXP_BASE)
 
@@ -551,7 +537,7 @@ DECLARE_LOG_FUNCTION(SysError);
 DECLARE_LOG_FUNCTION2(SysError, long, lErrCode);
 
 // debug functions do nothing in release mode
-#if wxUSE_LOG && wxUSE_LOG_DEBUG
+#if wxUSE_LOG_DEBUG
     DECLARE_LOG_FUNCTION(Debug);
 
     // there is no more unconditional LogTrace: it is not different from
@@ -566,7 +552,7 @@ DECLARE_LOG_FUNCTION2(SysError, long, lErrCode);
     // wxLog::GetActive()->GetTraceMask() -- it's deprecated in favour of
     // string identifiers
     DECLARE_LOG_FUNCTION2(Trace, wxTraceMask, mask);
-#else   //!debug || !wxUSE_LOG
+#else   //!debug
     // these functions do nothing in release builds
 
     // note that leaving out "fmt" in the vararg functions provokes a warning

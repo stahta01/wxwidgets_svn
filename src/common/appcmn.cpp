@@ -366,13 +366,10 @@ void wxAppBase::DeletePendingObjects()
     {
         wxObject *obj = node->GetData();
 
-        // remove it from the list first so that if we get back here somehow
-        // during the object deletion (e.g. wxYield called from its dtor) we
-        // wouldn't try to delete it the second time
-        if ( wxPendingDelete.Member(obj) )
-            wxPendingDelete.Erase(node);
-
         delete obj;
+
+        if (wxPendingDelete.Member(obj))
+            wxPendingDelete.Erase(node);
 
         // Deleting one object may have deleted other pending
         // objects, so start from beginning of list again.

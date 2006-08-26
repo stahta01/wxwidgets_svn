@@ -421,6 +421,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
 
       powerpc-apple-macos* | \
       *-*-freebsd* | *-*-openbsd* | *-*-netbsd* | *-*-k*bsd*-gnu | \
+      *-*-mirbsd* | \
       *-*-sunos4* | \
       *-*-osf* | \
       *-*-dgux5* | \
@@ -430,8 +431,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
       ;;
 
       *)
-        dnl wxWidgets specific: allow unknown unix systems
-        dnl AC_MSG_ERROR(unknown system type $BAKEFILE_HOST.)
+        AC_MSG_ERROR(unknown system type $BAKEFILE_HOST.)
     esac
 
     if test "x$PIC_FLAG" != "x" ; then

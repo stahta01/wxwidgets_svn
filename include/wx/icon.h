@@ -15,20 +15,19 @@
 #include "wx/iconloc.h"
 
 #if defined(__WXPALMOS__)
-  #include "wx/generic/icon.h"
+  #include "wx/palmos/icon.h"
 #elif defined(__WXMSW__)
   #include "wx/msw/icon.h"
 #elif defined(__WXMOTIF__)
   #include "wx/motif/icon.h"
 #elif defined(__WXGTK20__)
-  #include "wx/generic/icon.h"
+  #include "wx/gtk/icon.h"
 #elif defined(__WXGTK__)
-  #include "wx/generic/icon.h"
+  #include "wx/gtk1/icon.h"
 #elif defined(__WXX11__)
-  #include "wx/generic/icon.h"
+  #include "wx/x11/icon.h"
 #elif defined(__WXMGL__)
-  #define wxICON_DEFAULT_BITMAP_TYPE wxBITMAP_TYPE_ICO_RESOURCE
-  #include "wx/generic/icon.h"
+  #include "wx/mgl/icon.h"
 #elif defined(__WXMAC__)
   #include "wx/mac/icon.h"
 #elif defined(__WXCOCOA__)

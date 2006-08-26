@@ -409,7 +409,6 @@ protected:
     void OnCopy(wxCommandEvent& event);
     void OnMouseEnter(wxMouseEvent& event);
     void OnMouseLeave(wxMouseEvent& event);
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
 #endif // wxUSE_CLIPBOARD
 
     // Returns new filter (will be stored into m_DefaultFilter variable)
@@ -487,6 +486,8 @@ protected:
     // borders (free space between text and window borders)
     // defaults to 10 pixels.
     int m_Borders;
+
+    int m_Style;
 
     // current text selection or NULL
     wxHtmlSelection *m_selection;

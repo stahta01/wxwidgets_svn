@@ -44,16 +44,10 @@ enum wxFrameManagerOption
     wxAUI_MGR_TRANSPARENT_DRAG      = 1 << 2,
     wxAUI_MGR_TRANSPARENT_HINT      = 1 << 3,
     wxAUI_MGR_TRANSPARENT_HINT_FADE = 1 << 4,
-    // The venetian blind effect is ONLY used when the wxAUI_MGR_TRANSPARENT_HINT has been used, but
-    // at runtime we determine we cannot use transparency (because, for instance, the OS does not support it).
-    // setting this flag drops back in such circumstances (only) to the behaviour without wxAUI_MGR_TRANSPARENT_HINT
-    wxAUI_MGR_DISABLE_VENETIAN_BLINDS = 1 << 5,
-    wxAUI_MGR_DISABLE_VENETIAN_BLINDS_FADE = 1 << 6,
 
     wxAUI_MGR_DEFAULT = wxAUI_MGR_ALLOW_FLOATING |
                         wxAUI_MGR_TRANSPARENT_HINT |
-                        wxAUI_MGR_TRANSPARENT_HINT_FADE |
-                        wxAUI_MGR_DISABLE_VENETIAN_BLINDS_FADE
+                        wxAUI_MGR_TRANSPARENT_HINT_FADE
 };
 
 enum wxPaneDockArtSetting
@@ -113,8 +107,8 @@ WX_DECLARE_USER_EXPORTED_OBJARRAY(wxDockInfo, wxDockInfoArray, WXDLLIMPEXP_AUI);
 WX_DECLARE_USER_EXPORTED_OBJARRAY(wxDockUIPart, wxDockUIPartArray, WXDLLIMPEXP_AUI);
 WX_DECLARE_USER_EXPORTED_OBJARRAY(wxPaneButton, wxPaneButtonArray, WXDLLIMPEXP_AUI);
 WX_DECLARE_USER_EXPORTED_OBJARRAY(wxPaneInfo, wxPaneInfoArray, WXDLLIMPEXP_AUI);
-WX_DEFINE_USER_EXPORTED_ARRAY_PTR(wxPaneInfo*, wxPaneInfoPtrArray, class WXDLLIMPEXP_AUI);
-WX_DEFINE_USER_EXPORTED_ARRAY_PTR(wxDockInfo*, wxDockInfoPtrArray, class WXDLLIMPEXP_AUI);
+WX_DEFINE_ARRAY_PTR(wxPaneInfo*, wxPaneInfoPtrArray);
+WX_DEFINE_ARRAY_PTR(wxDockInfo*, wxDockInfoPtrArray);
 #endif // SWIG
 
 extern WXDLLIMPEXP_AUI wxDockInfo wxNullDockInfo;
@@ -191,20 +185,7 @@ public:
         return *this;
     }
 #endif // SWIG
-
-    // Write the safe parts of a newly loaded PaneInfo structure "source" into "this"
-    // used on loading perspectives etc.
-    void SafeSet(wxPaneInfo source)
-    {
-        // note source is not passed by reference so we can overwrite, to keep the
-        // unsafe bits of "dest"
-        source.window = window;
-        source.frame = frame;
-        source.buttons = buttons;
-        // now assign
-        *this = source;
-    }
-
+    
     bool IsOk() const { return (window != NULL) ? true : false; }
     bool IsFixed() const { return !HasFlag(optionResizable); }
     bool IsResizable() const { return HasFlag(optionResizable); }
@@ -428,9 +409,6 @@ public:
 
     bool DetachPane(wxWindow* window);
 
-    wxString SavePaneInfo(wxPaneInfo& pane);
-    void LoadPaneInfo(wxString pane_part, wxPaneInfo &pane);
-
     wxString SavePerspective();
 
     bool LoadPerspective(const wxString& perspective,
@@ -492,8 +470,8 @@ protected:
     wxDockUIPart* GetPanePart(wxWindow* pane);
     int GetDockPixelOffset(wxPaneInfo& test);
     void OnFloatingPaneMoveStart(wxWindow* window);
-    void OnFloatingPaneMoving(wxWindow* window, wxDirection dir );
-    void OnFloatingPaneMoved(wxWindow* window, wxDirection dir);
+    void OnFloatingPaneMoving(wxWindow* window);
+    void OnFloatingPaneMoved(wxWindow* window);
     void OnFloatingPaneActivated(wxWindow* window);
     void OnFloatingPaneClosed(wxWindow* window, wxCloseEvent& evt);
     void OnFloatingPaneResized(wxWindow* window, const wxSize& size);
@@ -561,8 +539,7 @@ protected:
 
     wxFrame* m_hint_wnd;         // transparent hint window, if supported by platform
     wxTimer m_hint_fadetimer;    // transparent fade timer
-    wxByte m_hint_fadeamt;       // transparent fade amount
-    wxByte m_hint_fademax;       // maximum value of hint fade
+    int m_hint_fadeamt;          // transparent fade amount
 
 #ifndef SWIG
     DECLARE_EVENT_TABLE()

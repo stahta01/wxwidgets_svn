@@ -27,11 +27,6 @@ INCOMPATIBLE CHANGES SINCE 2.6.x
 - wxFontEnumerator::GetFacenames() and GetEncodings() now return arrays and
   not pointers to arrays.
 - wxStaticBoxSizer now deletes the associated wxStaticBox when it is deleted.
-- Windows calling CaptureMouse() are now required to handle
-  the wxEVT_MOUSE_CAPTURE_LOST event.
-- SetDefaultItem() method was moved from wxPanel to wxTopLevelWindow
-- wxDialog::OnOK/OnCancel() don't exist any more, use SetAffirmative/EscapeId()
-- wxPathList doesn't derive from (deprecated) wxStringList any more
 
 
 Deprecated methods since 2.6.x and their replacements
@@ -39,35 +34,6 @@ Deprecated methods since 2.6.x and their replacements
 
 - wxGetWorkingDirectory() deprecated in favour of wxGetCwd().
 - wxDC::BeginDrawing() and wxDC::EndDrawing() deprecated, just don't use them.
-
-
-Major changes in 2.7 release
-----------------------------
-
-- New AUI library supporting docking windows and much more
-
-
-2.7.1
------
-
-All:
-
-- Added wxDir::FindFirst() (Francesco Montorsi)
-- Added wxPlatformInfo class (Francesco Montorsi)
-
-All (GUI):
-
-- Added wxID_PAGE_SETUP standard id
-
-wxMac:
-
-- Add parameter to the --enable-universal_binary configure option for the path
-  to the SDK.
-
-wxGTK:
-
-- Automatically use stock items for the menu items with standard ids
-- Setting cursor now works for all controls
 
 
 2.7.0
@@ -120,12 +86,9 @@ All:
 - Make wx-config compatible with Bourne shells.
 - Fixed wxDb::Open(wxDbConnectInf) when using connection string (Hellwolf Misty)
 - Fixed crash in wxDb::Open() in Unicode build (Massimiliano Marretta)
-- Fixed wxTimeSpan::Format() for negative time spans
-- Optionally count repeating wxLog messages instead of logging all (Lauri Nurmi)
 
 All (GUI):
 
-- New AUI (Advanced User Interface) library for docking windows and much more
 - Added wxComboCtrl and wxOwnerDrawnComboBox (Jaakko Salli).
 - Added wxTreebook (uses a wxTreeCtrl to control pages).
 - Added wxColour/Dir/File/Font/PickerCtrls (Francesco Montorsi).
@@ -200,10 +163,6 @@ All (GUI):
 - wxNB_HITTEST_* flags renamed to wxBK_HITTEST_* to serve all book controls.
 - Added wxTopLevelWindow::SetTransparent and CanSetTransparent, with
   implementations (so far) for wxMSW and wxMac.
-- Allow customizing individual grid lines appearance (Søren Lassen)
-- Fixed middle click events generation in generic wxTreeCtrl (Olly Betts)
-- Added wxEVT_MOUSE_CAPTURE_LOST event that must be handled by all windows
-  that CaptureMouse() is called on.
 
 wxMSW:
 
@@ -283,8 +242,6 @@ wxGTK:
 - Support underlined fonts in wxTextCtrl.
 - Support all border styles; wxListBox honours the borders now.
 - wxWindow and wxScrolledWindow now generate line, page and thumb-release scroll events.
-- Added file preview support in file dialogs.
-- Implemented SetLineSize and GetLineSize for wxSlider.
 
 wxMac:
 

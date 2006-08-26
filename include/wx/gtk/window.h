@@ -7,16 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_WINDOW_H_
-#define _WX_GTK_WINDOW_H_
-
-#include "wx/dynarray.h"
+#ifndef __GTKWINDOWH__
+#define __GTKWINDOWH__
 
 // helper structure that holds class that holds GtkIMContext object and
 // some additional data needed for key events processing
 struct wxGtkIMData;
-
-WX_DEFINE_EXPORTED_ARRAY_PTR(GdkWindow *, wxArrayGdkWindows);
 
 //-----------------------------------------------------------------------------
 // callback definition for inserting a window (internal)
@@ -113,6 +109,9 @@ public:
     virtual void AddChild( wxWindowBase *child );
     virtual void RemoveChild( wxWindowBase *child );
 
+    virtual void SetLayoutDirection(wxLayoutDirection dir);
+    virtual wxLayoutDirection GetLayoutDirection() const;
+
     // currently wxGTK2-only
     void SetDoubleBuffered(bool on);
 
@@ -121,8 +120,9 @@ public:
 
     virtual WXWidget GetHandle() const { return m_widget; }
 
-    // many important things are done here, this function must be called
-    // regularly
+    // I don't want users to override what's done in idle so everything that
+    // has to be done in idle time in order for wxGTK to work is done in
+    // OnInternalIdle
     virtual void OnInternalIdle();
 
     // Internal represention of Update()
@@ -159,12 +159,8 @@ public:
     // widget where (most of) the input goes. even tooltips have
     // to be applied to all subwidgets.
     virtual GtkWidget* GetConnectWidget();
+    virtual bool IsOwnGtkWindow( GdkWindow *window );
     void ConnectWidget( GtkWidget *widget );
-
-    // Called from several event handlers, if it returns true or false, the
-    // same value should be immediately returned by the handler without doing
-    // anything else. If it returns -1, the handler should continue as usual
-    int GTKCallbackCommonPrologue(struct _GdkEventAny *event) const;
 
 protected:
     // Override GTKWidgetNeedsMnemonic and return true if your
@@ -173,24 +169,6 @@ protected:
     // setting of the widget inside GTKWidgetDoSetMnemonic
     virtual bool GTKWidgetNeedsMnemonic() const;
     virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
-
-    // Get the GdkWindows making part of this window: usually there will be
-    // only one of them in which case it should be returned directly by this
-    // function. If there is more than one GdkWindow (can be the case for
-    // composite widgets), return NULL and fill in the provided array
-    //
-    // This is not pure virtual for backwards compatibility but almost
-    // certainly must be overridden in any wxControl-derived class!
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
-
-    // Check if the given window makes part of this widget
-    bool GTKIsOwnWindow(GdkWindow *window) const;
-
-    // Set the focus to this window if its setting was delayed because the
-    // widget hadn't been realized when SetFocus() was called
-    //
-    // Return true if focus was set to us, false if nothing was done
-    bool GTKSetDelayedFocusIfNeeded();
 
 public:
     // Returns the default context which usually is anti-aliased
@@ -204,15 +182,6 @@ public:
     // the layouting functions have to be called later on
     // (i.e. in idle time, implemented in OnInternalIdle() ).
     void GtkUpdateSize() { m_sizeSet = false; }
-    
-    
-    // Called when a window should delay showing itself
-    // until idle time. This partly mimmicks defered
-    // sizing under MSW.
-    void GtkShowOnIdle() { m_showOnIdle = true; }
-    
-    // This is called from the various OnInternalIdle methods
-    bool GtkShowFromOnIdle();
 
     // fix up the mouse event coords, used by wxListBox only so far
     virtual void FixUpMouseEvent(GtkWidget * WXUNUSED(widget),
@@ -245,36 +214,11 @@ public:
 
     wxGtkIMData         *m_imData;
 
-
-    // indices for the arrays below
-    enum ScrollDir { ScrollDir_Horz, ScrollDir_Vert, ScrollDir_Max };
-
     // horizontal/vertical scroll bar
-    GtkRange* m_scrollBar[ScrollDir_Max];
-
+    GtkRange* m_scrollBar[2];
     // horizontal/vertical scroll position
-    double m_scrollPos[ScrollDir_Max];
-
-    // if true, don't notify about adjustment change (without resetting the
-    // flag, so this has to be done manually)
-    bool m_blockValueChanged[ScrollDir_Max];
-
-    // return the scroll direction index corresponding to the given orientation
-    // (which is wxVERTICAL or wxHORIZONTAL)
-    static ScrollDir ScrollDirFromOrient(int orient)
-    {
-        return orient == wxVERTICAL ? ScrollDir_Vert : ScrollDir_Horz;
-    }
-
-    // return the orientation for the given scrolling direction
-    static int OrientFromScrollDir(ScrollDir dir)
-    {
-        return dir == ScrollDir_Horz ? wxHORIZONTAL : wxVERTICAL;
-    }
-
-    // find the direction of the given scrollbar (must be one of ours)
-    ScrollDir ScrollDirFromRange(GtkRange *range) const;
-
+    double m_scrollPos[2];
+    bool m_blockValueChanged[2];
 
     // extra (wxGTK-specific) flags
     bool                 m_needParent:1;        // ! wxFrame, wxDialog, wxNotebookPage ?
@@ -294,8 +238,6 @@ public:
                                                 // background style until OnIdle
     bool                 m_mouseButtonDown:1;
     bool                 m_blockScrollEvent:1;
-    
-    bool                 m_showOnIdle:1;        // postpone showing the window until idle
 
     // C++ has no virtual methods in the constrcutor of any class but we need
     // different methods of inserting a child window into a wxFrame,
@@ -351,27 +293,11 @@ protected:
     // sets the border of a given GtkScrolledWindow from a wx style
     static void GtkScrolledWindowSetBorder(GtkWidget* w, int style);
 
-    // set the current cursor for all GdkWindows making part of this widget
-    // (see GTKGetWindow)
-    //
-    // should be called from OnInternalIdle() if it's overridden
-    void GTKUpdateCursor();
-
 private:
-    enum ScrollUnit { ScrollUnit_Line, ScrollUnit_Page, ScrollUnit_Max };
-
-    // common part of ScrollLines() and ScrollPages() and could be used, in the
-    // future, for horizontal scrolling as well
-    //
-    // return true if we scrolled, false otherwise (on error or simply if we
-    // are already at the end)
-    bool DoScrollByUnits(ScrollDir dir, ScrollUnit unit, int units);
-
-
     DECLARE_DYNAMIC_CLASS(wxWindowGTK)
     DECLARE_NO_COPY_CLASS(wxWindowGTK)
 };
 
 extern WXDLLIMPEXP_CORE wxWindow *wxFindFocusedChild(wxWindowGTK *win);
 
-#endif // _WX_GTK_WINDOW_H_
+#endif // __GTKWINDOWH__

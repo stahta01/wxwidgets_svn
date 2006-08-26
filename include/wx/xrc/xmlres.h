@@ -24,7 +24,6 @@
 #include "wx/bitmap.h"
 #include "wx/icon.h"
 #include "wx/artprov.h"
-#include "wx/colour.h"
 
 #include "wx/xml/xml.h"
 
@@ -104,25 +103,21 @@ public:
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
     //              translatable strings will be translated via _()
-    //              using the given domain if specified
     //        wxXRC_NO_SUBCLASSING
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
     //        wxXRC_NO_RELOADING
     //              don't check the modification time of the XRC files and
     //              reload them if they have changed on disk
-    wxXmlResource(int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain=wxEmptyString);
+    wxXmlResource(int flags = wxXRC_USE_LOCALE);
 
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
     //              translatable strings will be translated via _()
-    //              using the given domain if specified
     //        wxXRC_NO_SUBCLASSING
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
-    wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain=wxEmptyString);
+    wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE);
 
     // Destructor.
     ~wxXmlResource();
@@ -246,10 +241,6 @@ public:
     // Set flags after construction.
     void SetFlags(int flags) { m_flags = flags; }
 
-    // Get/Set the domain to be passed to the translation functions, defaults to NULL.
-    wxChar* GetDomain() const { return m_domain; }
-    void SetDomain(const wxChar* domain);
-    
 protected:
     // Scans the resources list for unloaded files and loads them. Also reloads
     // files that have been modified since last loading.
@@ -289,9 +280,6 @@ private:
     wxFileSystem& GetCurFileSystem() { return m_curFileSystem; }
 #endif
 
-    // domain to pass to translation functions, if any.
-    wxChar* m_domain;
-    
     friend class wxXmlResourceHandler;
     friend class wxXmlResourceModule;
 

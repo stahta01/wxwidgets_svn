@@ -24,12 +24,12 @@
     #include "wx/dcmemory.h"
     #include "wx/timer.h"
     #include "wx/settings.h"
-    #include "wx/dataobj.h"
 #endif
 
 #include "wx/html/htmlwin.h"
 #include "wx/html/htmlproc.h"
 #include "wx/clipbrd.h"
+#include "wx/dataobj.h"
 
 #include "wx/arrimpl.cpp"
 #include "wx/listimpl.cpp"
@@ -277,6 +277,7 @@ void wxHtmlWindow::Init()
     m_HistoryOn = true;
     m_History = new wxHtmlHistoryArray;
     m_Processors = NULL;
+    m_Style = 0;
     SetBorders(10);
     m_selection = NULL;
     m_makingSelection = false;
@@ -298,6 +299,7 @@ bool wxHtmlWindow::Create(wxWindow *parent, wxWindowID id,
                                   name))
         return false;
 
+    m_Style = style;
     SetPage(wxT("<html><body></body></html>"));
     return true;
 }
@@ -636,14 +638,14 @@ void wxHtmlWindow::CreateLayout()
 
     if (!m_Cell) return;
 
-    if ( HasFlag(wxHW_SCROLLBAR_NEVER) )
+    if (m_Style & wxHW_SCROLLBAR_NEVER)
     {
         SetScrollbars(1, 1, 0, 0); // always off
         GetClientSize(&ClientWidth, &ClientHeight);
         m_Cell->Layout(ClientWidth);
     }
-    else // !wxHW_SCROLLBAR_NEVER
-    {
+
+    else {
         GetClientSize(&ClientWidth, &ClientHeight);
         m_Cell->Layout(ClientWidth);
         if (ClientHeight < m_Cell->GetHeight() + GetCharHeight())
@@ -840,7 +842,7 @@ void wxHtmlWindow::AddFilter(wxHtmlFilter *filter)
 bool wxHtmlWindow::IsSelectionEnabled() const
 {
 #if wxUSE_CLIPBOARD
-    return !HasFlag(wxHW_NO_SELECTION);
+    return !(m_Style & wxHW_NO_SELECTION);
 #else
     return false;
 #endif
@@ -1133,19 +1135,6 @@ void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
     wxHtmlWindowMouseHelper::HandleMouseClick(m_Cell, pos, event);
 }
 
-#if wxUSE_CLIPBOARD
-void wxHtmlWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& WXUNUSED(event))
-{
-    if ( !m_makingSelection )
-        return;
-
-    // discard the selecting operation
-    m_makingSelection = false;
-    wxDELETE(m_selection);
-    m_tmpSelFromCell = NULL;
-    Refresh();
-}
-#endif // wxUSE_CLIPBOARD
 
 
 void wxHtmlWindow::OnInternalIdle()
@@ -1510,7 +1499,6 @@ BEGIN_EVENT_TABLE(wxHtmlWindow, wxScrolledWindow)
     EVT_LEFT_DCLICK(wxHtmlWindow::OnDoubleClick)
     EVT_ENTER_WINDOW(wxHtmlWindow::OnMouseEnter)
     EVT_LEAVE_WINDOW(wxHtmlWindow::OnMouseLeave)
-    EVT_MOUSE_CAPTURE_LOST(wxHtmlWindow::OnMouseCaptureLost)
     EVT_KEY_UP(wxHtmlWindow::OnKeyUp)
     EVT_MENU(wxID_COPY, wxHtmlWindow::OnCopy)
 #endif // wxUSE_CLIPBOARD

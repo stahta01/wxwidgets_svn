@@ -39,19 +39,13 @@
 
 #include <pwd.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#   include <sys/select.h>
-#endif
-
-#define HAS_PIPE_INPUT_STREAM (wxUSE_STREAMS && wxUSE_FILE)
-
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
 
 // define this to let wxexec.cpp know that we know what we're doing
 #define _WX_USED_BY_WXEXECUTE_
 #include "../common/execcmn.cpp"
 
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
 #if wxUSE_BASE
 
@@ -413,7 +407,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
 // wxStream classes to support IO redirection in wxExecute
 // ----------------------------------------------------------------------------
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
 
 bool wxPipeInputStream::CanRead() const
 {
@@ -453,7 +447,7 @@ bool wxPipeInputStream::CanRead() const
     }
 }
 
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
 // ----------------------------------------------------------------------------
 // wxExecute: the real worker function
@@ -637,16 +631,16 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
         // prepare for IO redirection
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
         // the input buffer bufOut is connected to stdout, this is why it is
         // called bufOut and not bufIn
         wxStreamTempInputBuffer bufOut,
                                 bufErr;
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
         if ( process && process->IsRedirected() )
         {
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
             wxOutputStream *inStream =
                 new wxFileOutputStream(pipeIn.Detach(wxPipe::Write));
 
@@ -663,7 +657,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
             execData.bufOut = &bufOut;
             execData.bufErr = &bufErr;
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
         }
 
         if ( pipeIn.IsOk() )
@@ -745,35 +739,6 @@ char *wxGetUserHome( const wxString &user )
 // ----------------------------------------------------------------------------
 // network and user id routines
 // ----------------------------------------------------------------------------
-
-// private utility function which returns output of the given command, removing
-// the trailing newline
-static wxString wxGetCommandOutput(const wxString &cmd)
-{
-    FILE *f = popen(cmd.ToAscii(), "r");
-    if ( !f )
-    {
-        wxLogSysError(_T("Executing \"%s\" failed"), cmd.c_str());
-        return wxEmptyString;
-    }
-
-    wxString s;
-    char buf[256];
-    while ( !feof(f) )
-    {
-        if ( !fgets(buf, sizeof(buf), f) )
-            break;
-
-        s += wxString::FromAscii(buf);
-    }
-
-    pclose(f);
-
-    if ( !s.empty() && s.Last() == _T('\n') )
-        s.RemoveLast();
-
-    return s;
-}
 
 // retrieve either the hostname or FQDN depending on platform (caller must
 // check whether it's one or the other, this is why this function is for
@@ -891,54 +856,25 @@ bool wxGetUserName(wxChar *buf, int sz)
     return false;
 }
 
-bool wxIsPlatform64Bit()
-{
-    wxString machine = wxGetCommandOutput(wxT("uname -m"));
-
-    // NOTE: these tests are not 100% reliable!
-    return machine.Contains(wxT("AMD64")) ||
-           machine.Contains(wxT("IA64")) ||
-           machine.Contains(wxT("x64")) ||
-           machine.Contains(wxT("X64")) ||
-           machine.Contains(wxT("alpha")) ||
-           machine.Contains(wxT("hppa64")) ||
-           machine.Contains(wxT("ppc64"));
-}
-
-// these functions are in mac/utils.cpp for wxMac
+// this function is in mac/utils.cpp for wxMac
 #ifndef __WXMAC__
-
-wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
-{
-    // get OS version
-    int major, minor;
-    wxString release = wxGetCommandOutput(wxT("uname -r"));
-    if ( !release.empty() && wxSscanf(release, wxT("%d.%d"), &major, &minor) != 2 )
-    {
-        // unrecognized uname string format
-        major =
-        minor = -1;
-    }
-
-    if ( verMaj )
-        *verMaj = major;
-    if ( verMin )
-        *verMin = minor;
-
-    // try to understand which OS are we running
-    wxString kernel = wxGetCommandOutput(wxT("uname -s"));
-    if ( kernel.empty() )
-        kernel = wxGetCommandOutput(wxT("uname -o"));
-
-    if ( kernel.empty() )
-        return wxOS_UNKNOWN;
-
-    return wxPlatformInfo::GetOperatingSystemId(kernel);
-}
 
 wxString wxGetOsDescription()
 {
-    return wxGetCommandOutput(wxT("uname -s -r -m"));
+    FILE *f = popen("uname -s -r -m", "r");
+    if (f)
+    {
+        char buf[256];
+        size_t c = fread(buf, 1, sizeof(buf) - 1, f);
+        pclose(f);
+        // Trim newline from output.
+        if (c && buf[c - 1] == '\n')
+            --c;
+        buf[c] = '\0';
+        return wxString::FromAscii( buf );
+    }
+    wxFAIL_MSG( _T("uname failed") );
+    return wxEmptyString;
 }
 
 #endif // !__WXMAC__
@@ -1236,7 +1172,7 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
         {
             bool idle = true;
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
             if ( execData.bufOut )
             {
                 execData.bufOut->Update();
@@ -1248,7 +1184,7 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
                 execData.bufErr->Update();
                 idle = false;
             }
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
             // don't consume 100% of the CPU while we're sitting in this
             // loop

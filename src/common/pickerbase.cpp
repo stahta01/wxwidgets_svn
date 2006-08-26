@@ -45,7 +45,7 @@ BEGIN_EVENT_TABLE(wxPickerBase, wxControl)
     EVT_SIZE(wxPickerBase::OnSize)
     WX_EVENT_TABLE_CONTROL_CONTAINER(wxPickerBase)
 END_EVENT_TABLE()
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxPickerBase, wxControl)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxPickerBase)
 
 
 // ----------------------------------------------------------------------------
@@ -75,9 +75,8 @@ bool wxPickerBase::CreateBase(wxWindow *parent,
         // NOTE: the style of this class (wxPickerBase) and the style of the
         //       attached text control are different: GetTextCtrlStyle() extracts
         //       the styles related to the textctrl from the styles passed here
-        m_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
-                                wxDefaultPosition, wxDefaultSize,
-                                GetTextCtrlStyle(style));
+        m_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                                wxDefaultSize, GetTextCtrlStyle(style));
         if (!m_text)
         {
             wxFAIL_MSG( wxT("wxPickerBase's textctrl creation failed") );
@@ -105,7 +104,6 @@ bool wxPickerBase::CreateBase(wxWindow *parent,
                 wxWindowDestroyEventHandler(wxPickerBase::OnTextCtrlDelete),
                 NULL, this);
 
-        // the text control's proportion values defaults to 2
         m_sizer->Add(m_text, 2, GetDefaultTextCtrlFlag(), 5);
     }
 
@@ -114,9 +112,8 @@ bool wxPickerBase::CreateBase(wxWindow *parent,
 
 void wxPickerBase::PostCreation()
 {
-    // the picker's proportion value defaults to 1 when there's no text control
-    // associated with it - in that case it defaults to 0
-    m_sizer->Add(m_picker, HasTextCtrl() ? 0 : 1, GetDefaultPickerCtrlFlag(), 5);
+    // the picker's proportion value is fixed
+    m_sizer->Add(m_picker, 1, GetDefaultPickerCtrlFlag(), 5);
 
     SetSizer(m_sizer);
     m_sizer->SetSizeHints(this);

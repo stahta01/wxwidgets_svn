@@ -248,9 +248,10 @@ void wxScrollBar::SetRange(int range)
     SetScrollbar(GetThumbPosition(), GetThumbSize(), range, GetPageSize());
 }
 
-GdkWindow *wxScrollBar::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxScrollBar::IsOwnGtkWindow( GdkWindow *window )
 {
-    return GTK_WIDGET(GTK_RANGE(m_widget))->window;
+    GtkRange *range = GTK_RANGE(m_widget);
+    return ( (window == GTK_WIDGET(range)->window) );
 }
 
 // static

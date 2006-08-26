@@ -1021,12 +1021,6 @@ void wxGenericTreeCtrl::SetItemBold(const wxTreeItemId& item, bool bold)
     if ( pItem->IsBold() != bold )
     {
         pItem->SetBold(bold);
-
-        // recalculate the item size as bold and non bold fonts have different
-        // widths
-        wxClientDC dc(this);
-        CalculateSize(pItem, dc);
-
         RefreshLine(pItem);
     }
 }
@@ -1968,7 +1962,7 @@ void wxGenericTreeCtrl::ScrollTo(const wxTreeItemId &item)
 #if defined( __WXMSW__ ) || defined(__WXMAC__)
         Update();
 #else
-        DoDirtyProcessing();
+        wxYieldIfNeeded();
 #endif
     wxGenericTreeItem *gitem = (wxGenericTreeItem*) item.m_pItem;
 
@@ -2912,7 +2906,7 @@ wxTextCtrl *wxGenericTreeCtrl::EditLabel(const wxTreeItemId& item,
 #if defined( __WXMSW__ ) || defined(__WXMAC__)
         Update();
 #else
-        DoDirtyProcessing();
+        wxYieldIfNeeded();
 #endif
 
     // TODO: use textCtrlClass here to create the control of correct class
@@ -3022,12 +3016,11 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
     }
 #endif
 
-    // we process left mouse up event (enables in-place edit), middle/right down
+    // we process left mouse up event (enables in-place edit), right down
     // (pass to the user code), left dbl click (activate item) and
     // dragging/moving events for items drag-and-drop
     if ( !(event.LeftDown() ||
            event.LeftUp() ||
-           event.MiddleDown() ||
            event.RightDown() ||
            event.LeftDClick() ||
            event.Dragging() ||
@@ -3178,12 +3171,6 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
             nevent2.m_pointDrag = CalcScrolledPosition(pt);
             GetEventHandler()->ProcessEvent(nevent2);
         }
-        else if ( event.MiddleDown() )
-        {
-            wxTreeEvent nevent(wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK,  this, item);
-            nevent.m_pointDrag = CalcScrolledPosition(pt);
-            event.Skip(!GetEventHandler()->ProcessEvent(nevent));
-        }
         else if ( event.LeftUp() )
         {
             // this facilitates multiple-item drag-and-drop
@@ -3223,7 +3210,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
                 m_lastOnSame = false;
             }
         }
-        else // !RightDown() && !MiddleDown() && !LeftUp() ==> LeftDown() || LeftDClick()
+        else // !RightDown() && !LeftUp() ==> LeftDown() || LeftDClick()
         {
             if ( event.LeftDown() )
             {
@@ -3306,10 +3293,17 @@ void wxGenericTreeCtrl::OnInternalIdle()
             SelectItem(GetRootItem());
     }
 
-    // after all changes have been done to the tree control,
-    // actually redraw the tree when everything is over
-    if (m_dirty)
-        DoDirtyProcessing();
+    /* after all changes have been done to the tree control,
+     * we actually redraw the tree when everything is over */
+
+    if (!m_dirty) return;
+    if (m_freezeCount) return;
+
+    m_dirty = false;
+
+    CalculatePositions();
+    Refresh();
+    AdjustMyScrollbars();
 }
 
 void wxGenericTreeCtrl::CalculateSize( wxGenericTreeItem *item, wxDC &dc )
@@ -3412,16 +3406,10 @@ void wxGenericTreeCtrl::CalculatePositions()
     CalculateLevel( m_anchor, dc, 0, y ); // start recursion
 }
 
-void wxGenericTreeCtrl::Refresh(bool eraseBackground, const wxRect *rect)
-{
-    if ( !m_freezeCount )
-        wxTreeCtrlBase::Refresh(eraseBackground, rect);
-}
-
 void wxGenericTreeCtrl::RefreshSubtree(wxGenericTreeItem *item)
 {
-    if (m_dirty || m_freezeCount)
-        return;
+    if (m_dirty) return;
+    if (m_freezeCount) return;
 
     wxSize client = GetClientSize();
 
@@ -3437,8 +3425,8 @@ void wxGenericTreeCtrl::RefreshSubtree(wxGenericTreeItem *item)
 
 void wxGenericTreeCtrl::RefreshLine( wxGenericTreeItem *item )
 {
-    if (m_dirty || m_freezeCount)
-        return;
+    if (m_dirty) return;
+    if (m_freezeCount) return;
 
     wxRect rect;
     CalcScrolledPosition(0, item->GetY(), NULL, &rect.y);
@@ -3450,8 +3438,7 @@ void wxGenericTreeCtrl::RefreshLine( wxGenericTreeItem *item )
 
 void wxGenericTreeCtrl::RefreshSelected()
 {
-    if (m_freezeCount)
-        return;
+    if (m_freezeCount) return;
 
     // TODO: this is awfully inefficient, we should keep the list of all
     //       selected items internally, should be much faster
@@ -3461,8 +3448,7 @@ void wxGenericTreeCtrl::RefreshSelected()
 
 void wxGenericTreeCtrl::RefreshSelectedUnder(wxGenericTreeItem *item)
 {
-    if (m_freezeCount)
-        return;
+    if (m_freezeCount) return;
 
     if ( item->IsSelected() )
         RefreshLine(item);
@@ -3499,6 +3485,8 @@ bool wxGenericTreeCtrl::SetBackgroundColour(const wxColour& colour)
     if ( !wxWindow::SetBackgroundColour(colour) )
         return false;
 
+    if (m_freezeCount) return true;
+
     Refresh();
 
     return true;
@@ -3508,6 +3496,8 @@ bool wxGenericTreeCtrl::SetForegroundColour(const wxColour& colour)
 {
     if ( !wxWindow::SetForegroundColour(colour) )
         return false;
+
+    if (m_freezeCount) return true;
 
     Refresh();
 
@@ -3559,17 +3549,5 @@ void wxGenericTreeCtrl::SetItemSelectedImage(const wxTreeItemId& item, int image
 }
 
 #endif // WXWIN_COMPATIBILITY_2_4
-
-void wxGenericTreeCtrl::DoDirtyProcessing()
-{
-    if (m_freezeCount)
-        return;
-
-    m_dirty = false;
-
-    CalculatePositions();
-    Refresh();
-    AdjustMyScrollbars();
-}
 
 #endif // wxUSE_TREECTRL

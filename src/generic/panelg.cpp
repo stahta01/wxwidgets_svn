@@ -97,7 +97,7 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxPanel, wxWindow)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxPanel)
 
 // ----------------------------------------------------------------------------
 // wxPanel creation

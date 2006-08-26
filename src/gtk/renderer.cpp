@@ -28,6 +28,7 @@
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
+    #include "wx/dc.h"
     #include "wx/dcclient.h"
     #include "wx/settings.h"
 #endif
@@ -204,7 +205,7 @@ wxRendererGTK::DrawHeaderButton(wxWindow *win,
         NULL,
         button,
         "button",
-        dc.LogicalToDeviceX(rect.x), rect.y, rect.width, rect.height
+        dc.XLOG2DEV(rect.x), rect.y, rect.width, rect.height
     );
 }
 
@@ -519,6 +520,10 @@ wxRendererGTK::DrawItemSelectionRect(wxWindow *win,
                                      const wxRect& rect,
                                      int flags )
 {
+    // for reason why we do this, see DrawDropArrow
+    wxWindowDC& wdc = (wxWindowDC&)dc;
+    wxASSERT ( wdc.IsKindOf(CLASSINFO(wxWindowDC)) );
+
     GtkStateType state;
     if (flags & wxCONTROL_SELECTED)
     {

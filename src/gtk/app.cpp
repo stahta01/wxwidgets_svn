@@ -70,9 +70,6 @@
     #include <sys/types.h>
     #include <sys/time.h>
     #include <unistd.h>
-    #ifdef HAVE_SYS_SELECT_H
-        #include <sys/select.h>
-    #endif
 #endif // HAVE_POLL/!HAVE_POLL
 
 #include "wx/unix/private.h"
@@ -619,15 +616,11 @@ void wxApp::CleanUp()
 
 #ifdef __WXDEBUG__
 
-void wxApp::OnAssertFailure(const wxChar *file,
-                            int line,
-                            const wxChar* func,
-                            const wxChar* cond,
-                            const wxChar *msg)
+void wxApp::OnAssert(const wxChar *file, int line, const wxChar* cond, const wxChar *msg)
 {
     m_isInAssert = true;
 
-    wxAppBase::OnAssertFailure(file, line, func, cond, msg);
+    wxAppBase::OnAssert(file, line, cond, msg);
 
     m_isInAssert = false;
 }

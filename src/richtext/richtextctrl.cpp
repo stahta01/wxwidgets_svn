@@ -21,11 +21,8 @@
 #include "wx/richtext/richtextctrl.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/wx.h"
     #include "wx/settings.h"
-    #include "wx/menu.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/stopwatch.h"
 #endif
 
 #include "wx/textfile.h"
@@ -158,7 +155,7 @@ bool wxRichTextCtrl::Create( wxWindow* parent, wxWindowID id, const wxString& va
     RecreateBuffer(size);
 
     SetCursor(wxCursor(wxCURSOR_IBEAM));
-
+    
     if (!value.IsEmpty())
         SetValue(value);
 
@@ -1648,7 +1645,7 @@ wxRichTextCtrl::HitTest(const wxPoint& pt,
 {
     wxClientDC dc((wxRichTextCtrl*) this);
     ((wxRichTextCtrl*)this)->PrepareDC(dc);
-
+    
     // Buffer uses logical position (relative to start of buffer)
     // so convert
     wxPoint pt2 = GetLogicalPoint(pt);
@@ -2225,7 +2222,7 @@ const wxTextAttrEx& wxRichTextCtrl::GetDefaultStyleEx() const
 
 const wxTextAttr& wxRichTextCtrl::GetDefaultStyle() const
 {
-    return GetBuffer().GetDefaultStyle();
+    return GetBuffer().GetDefaultStyle();    
 }
 
 bool wxRichTextCtrl::GetStyle(long position, wxTextAttr& style) const

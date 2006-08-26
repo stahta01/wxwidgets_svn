@@ -13,7 +13,6 @@
 #define _WX_APPTRAIT_H_
 
 #include "wx/string.h"
-#include "wx/platinfo.h"
 
 class WXDLLIMPEXP_BASE wxObject;
 class WXDLLEXPORT wxAppTraits;
@@ -26,6 +25,24 @@ class WXDLLEXPORT wxRendererNative;
 class WXDLLIMPEXP_BASE wxString;
 
 class GSocketGUIFunctionsTable;
+
+// ----------------------------------------------------------------------------
+// toolkit information
+// ----------------------------------------------------------------------------
+
+// Information about the toolkit that the app is running under (e.g. wxMSW):
+struct WXDLLIMPEXP_BASE wxToolkitInfo
+{
+    // Short name of the toolkit (e.g. "msw" or "mswuniv"); empty for console:
+    wxString shortName;
+    // Descriptive name of the toolkit, human readable (e.g. "wxMSW" or
+    // "wxMSW/Universal"); "wxBase" for console apps:
+    wxString name;
+    // Version of the underlying toolkit or of the OS for console apps:
+    int versionMajor, versionMinor;
+    // OS mnenomics, e.g. wxGTK or wxMSW:
+    int os;
+};
 
 
 // ----------------------------------------------------------------------------
@@ -110,13 +127,15 @@ public:
     virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable() = 0;
 #endif
 
-    // return information about the (native) toolkit currently used;
-    // returns wxPORT_BASE for console applications and one of the remaining
-    // wxPORT_* values for GUI applications.
-    virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const = 0;
 
-    // return true if the port is using wxUniversal for the GUI, false if not
-    virtual bool IsUsingUniversalWidgets() const = 0;
+    // return information about what toolkit is running; we need for two things
+    // that are both contained in wxBase:
+    //  - wxGetOsVersion() behaves differently in GUI and non-GUI builds under
+    //    Unix: in the former case it returns the information about the toolkit
+    //    and in the latter -- about the OS, so we need to virtualize it
+    //  - wxDynamicLibrary::CanonicalizePluginName() must embed toolkit
+    //    signature in DLL name
+    virtual wxToolkitInfo& GetToolkitInfo() = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -173,19 +192,6 @@ public:
 
     virtual void ScheduleForDestroy(wxObject *object);
     virtual void RemoveFromPendingDelete(wxObject *object);
-
-    // the GetToolkitVersion for console application is always the same
-    virtual wxPortId GetToolkitVersion(int *verMaj, int *verMin) const
-    {
-        // no toolkits (wxBase is for console applications without GUI support)
-        // NB: zero means "no toolkit", -1 means "not initialized yet"
-        //     so we must use zero here!
-        if (verMaj) *verMaj = 0;
-        if (verMin) *verMin = 0;
-        return wxPORT_BASE;
-    }
-
-    virtual bool IsUsingUniversalWidgets() const { return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -216,15 +222,6 @@ public:
 
     virtual void ScheduleForDestroy(wxObject *object);
     virtual void RemoveFromPendingDelete(wxObject *object);
-
-    virtual bool IsUsingUniversalWidgets() const
-    {
-    #ifdef __WXUNIVERSAL__
-        return true;
-    #else
-        return false;
-    #endif
-    }
 };
 
 #endif // wxUSE_GUI
@@ -244,16 +241,17 @@ public:
     #include "wx/mac/apptrait.h"
 #elif defined(__WXPM__)
     #include "wx/os2/apptrait.h"
-#elif defined(__DOS__)
-    #include "wx/msdos/apptrait.h"
 #else
+    // at least, we need an implementation of GetToolkitInfo !
     #if wxUSE_GUI
         class wxGUIAppTraits : public wxGUIAppTraitsBase
         {
+            virtual wxToolkitInfo& GetToolkitInfo();
         };
     #endif // wxUSE_GUI
     class wxConsoleAppTraits: public wxConsoleAppTraitsBase
     {
+        virtual wxToolkitInfo& GetToolkitInfo();
     };
 #endif // platform
 

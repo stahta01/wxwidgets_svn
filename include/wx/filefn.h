@@ -545,12 +545,8 @@ WXDLLIMPEXP_BASE bool wxFindFileInPath(wxString *pStr, const wxChar *pszPath, co
 // On non-Windows platform, probably just return the empty string.
 WXDLLIMPEXP_BASE wxString wxGetOSDirectory();
 
-#if wxUSE_DATETIME
-
 // Get file modification time
 WXDLLIMPEXP_BASE time_t wxFileModificationTime(const wxString& filename);
-
-#endif // wxUSE_DATETIME
 
 // Parses the wildCard, returning the number of filters.
 // Returns 0 if none or if there's a problem,
@@ -599,32 +595,29 @@ private:
 
 
 // Path searching
-class WXDLLIMPEXP_BASE wxPathList : public wxArrayString
+class WXDLLIMPEXP_BASE wxPathList : public wxStringList
 {
 public:
-    wxPathList() {}
-    wxPathList(const wxArrayString &arr)
-        { Add(arr); }
+    // avoid GCC warning about virtual functions w/o virtual dtor
+    virtual ~wxPathList() {}
 
     // Adds all paths in environment variable
     void AddEnvList(const wxString& envVariable);
 
-    // Adds given path to this list
     void Add(const wxString& path);
-    void Add(const wxArrayString &paths);
-
     // Find the first full path for which the file exists
-    wxString FindValidPath(const wxString& filename) const;
-
+    wxString FindValidPath(const wxString& filename);
     // Find the first full path for which the file exists; ensure it's an
     // absolute path that gets returned.
-    wxString FindAbsoluteValidPath(const wxString& filename) const;
-
+    wxString FindAbsoluteValidPath(const wxString& filename);
     // Given full path and filename, add path to list
     void EnsureFileAccessible(const wxString& path);
-
     // Returns true if the path is in the list
-    wxDEPRECATED( bool Member(const wxString& path) const );
+    bool Member(const wxString& path);
+
+private:
+    // DECLARE_DYNAMIC_CLASS(wxPathList)
 };
 
-#endif // _WX_FILEFN_H_
+#endif
+  // _WX_FILEFN_H_

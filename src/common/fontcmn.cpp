@@ -671,10 +671,7 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 
     wxString face;
     unsigned long size;
-    bool weightfound = false, pointsizefound = false;
-#if wxUSE_FONTMAP
-    bool encodingfound = false;
-#endif
+    bool weightfound = false, pointsizefound = false, encodingfound = false;
 
     while ( tokenizer.HasMoreTokens() )
     {

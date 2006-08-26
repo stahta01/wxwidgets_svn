@@ -1668,7 +1668,7 @@ wxMBConv_iconv::wxMBConv_iconv(const wxChar *name)
 #if wxUSE_FONTMAP
         const wxChar **names = wxFontMapperBase::GetAllEncodingNames(WC_ENC);
 #else // !wxUSE_FONTMAP
-        static const wxChar *names_static[] =
+        static const wxChar *names[] =
         {
 #if SIZEOF_WCHAR_T == 4
             _T("UCS-4"),
@@ -1677,7 +1677,6 @@ wxMBConv_iconv::wxMBConv_iconv(const wxChar *name)
 #endif
             NULL
         };
-        const wxChar **names = names_static;
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
 
         for ( ; *names && ms_wcCharsetName.empty(); ++names )
@@ -2229,11 +2228,11 @@ private:
             int verMaj, verMin;
             switch ( wxGetOsVersion(&verMaj, &verMin) )
             {
-                case wxOS_WINDOWS_9X:
+                case wxWIN95:
                     s_isWin98Or2k = verMaj >= 4 && verMin >= 10;
                     break;
 
-                case wxOS_WINDOWS_NT:
+                case wxWINDOWS_NT:
                     s_isWin98Or2k = verMaj >= 5;
                     break;
 
@@ -2910,15 +2909,11 @@ public :
     {
         Init( kTextEncodingUnicodeDefault , kUnicodeNoSubset , kUnicodeUTF8Format ) ;
         m_uni = NULL;
-        m_uniBack = NULL ;
     }
      
     ~wxMBConv_macUTF8D()
     {
-        if (m_uni!=NULL)
-            DisposeUnicodeToTextInfo(&m_uni);
-        if (m_uniBack!=NULL)
-            DisposeUnicodeToTextInfo(&m_uniBack);
+        DisposeUnicodeToTextInfo(&m_uni);
     }
     
     size_t WC2MB(char *buf, const wchar_t *psz, size_t n) const
@@ -2984,68 +2979,6 @@ public :
         return res ;
     }
     
-    size_t MB2WC(wchar_t *buf, const char *psz, size_t n) const
-    {
-        CreateIfNeeded() ;
-        OSStatus status = noErr ;
-        ByteCount byteOutLen ;
-        ByteCount byteInLen = strlen(psz) + 1;
-        wchar_t *tbuf = NULL ;
-        UniChar* ubuf = NULL ;
-        size_t res = 0 ;
-        
-        if (buf == NULL)
-        {
-            // Apple specs say at least 32
-            n = wxMax( 32, byteInLen ) ;
-            tbuf = (wchar_t*) malloc( n * SIZEOF_WCHAR_T ) ;
-        }
-        
-        ByteCount byteBufferLen = n * sizeof( UniChar ) ;
-        
-#if SIZEOF_WCHAR_T == 4
-        ubuf = (UniChar*) malloc( byteBufferLen + 2 ) ;
-#else
-        ubuf = (UniChar*) (buf ? buf : tbuf) ;
-#endif
-        
-        ByteCount dcubuflen = byteBufferLen * 2 + 2 ;
-        ByteCount dcubufread , dcubufwritten ;
-        UniChar *dcubuf = (UniChar*) malloc( dcubuflen ) ; 
-
-        status = TECConvertText(
-                                m_MB2WC_converter, (ConstTextPtr) psz, byteInLen, &byteInLen,
-                                (TextPtr) dcubuf, dcubuflen, &byteOutLen);
-        // we have to terminate here, because n might be larger for the trailing zero, and if UniChar
-        // is not properly terminated we get random characters at the end
-        dcubuf[byteOutLen / sizeof( UniChar ) ] = 0 ;
-        
-        // now from the decomposed UniChar to properly composed uniChar
-        ConvertFromUnicodeToText( m_uniBack , byteOutLen , dcubuf , 
-                                  kUnicodeDefaultDirectionMask, 0, NULL, NULL, NULL, dcubuflen  , &dcubufread , &dcubufwritten , ubuf ) ;
-
-        free( dcubuf );
-        byteOutLen = dcubufwritten ;
-        ubuf[byteOutLen / sizeof( UniChar ) ] = 0 ;
-        
-        
-#if SIZEOF_WCHAR_T == 4
-        wxMBConvUTF16 converter ;
-        res = converter.MB2WC( (buf ? buf : tbuf), (const char*)ubuf, n ) ;
-        free( ubuf ) ;
-#else
-        res = byteOutLen / sizeof( UniChar ) ;
-#endif
-        
-        if ( buf == NULL )
-            free(tbuf) ;
-        
-        if ( buf  && res < n)
-            buf[res] = 0;
-        
-        return res ;
-    }
-
     virtual void CreateIfNeeded() const
     {
         wxMBConv_mac::CreateIfNeeded() ;
@@ -3059,19 +2992,10 @@ public :
             
             OSStatus err = CreateUnicodeToTextInfo(&m_map, &m_uni); 
             wxASSERT_MSG( err == noErr , _(" Couldn't create the UnicodeConverter")) ;
-            
-            m_map.unicodeEncoding = CreateTextEncoding(kTextEncodingUnicodeDefault,
-                                                       kUnicodeNoSubset, kTextEncodingDefaultFormat);
-            m_map.otherEncoding = CreateTextEncoding(kTextEncodingUnicodeDefault,
-                                                     kUnicodeCanonicalCompVariant, kTextEncodingDefaultFormat);
-            m_map.mappingVersion = kUnicodeUseLatestMapping;
-            err = CreateUnicodeToTextInfo(&m_map, &m_uniBack); 
-            wxASSERT_MSG( err == noErr , _(" Couldn't create the UnicodeConverter")) ;
         }
     }
 protected :
     mutable UnicodeToTextInfo   m_uni;
-    mutable UnicodeToTextInfo   m_uniBack;
     mutable UnicodeMapping      m_map;
 }; 
 #endif // defined(__WXMAC__) && defined(TARGET_CARBON)
@@ -3306,9 +3230,7 @@ wxMBConv *wxCSConv::DoCreate() const
 #endif // !wxUSE_FONTMAP
     {
         wxString name(m_name);
-#if wxUSE_FONTMAP
         wxFontEncoding encoding(m_encoding);
-#endif
 
         if ( !name.empty() )
         {
@@ -3339,26 +3261,20 @@ wxMBConv *wxCSConv::DoCreate() const
             }
 
             const wxChar** names = wxFontMapperBase::GetAllEncodingNames(encoding);
-            // CS : in case this does not return valid names (eg for MacRoman) encoding
-            // got a 'failure' entry in the cache all the same, although it just has to 
-            // be created using a different method, so only store failed iconv creation
-            // attempts (or perhaps we shoulnd't do this at all ?)
-            if ( names[0] != NULL )
-            {
-                for ( ; *names; ++names )
-                {
-                    wxMBConv_iconv *conv = new wxMBConv_iconv(*names);
-                    if ( conv->IsOk() )
-                    {
-                        gs_nameCache[encoding] = *names;
-                        return conv;
-                    }
 
-                    delete conv;
+            for ( ; *names; ++names )
+            {
+                wxMBConv_iconv *conv = new wxMBConv_iconv(*names);
+                if ( conv->IsOk() )
+                {
+                    gs_nameCache[encoding] = *names;
+                    return conv;
                 }
 
-                gs_nameCache[encoding] = _T(""); // cache the failure
+                delete conv;
             }
+
+            gs_nameCache[encoding] = _T(""); // cache the failure
         }
 #endif // wxUSE_FONTMAP
     }
@@ -3483,7 +3399,7 @@ wxMBConv *wxCSConv::DoCreate() const
 #if wxUSE_FONTMAP
                          wxFontMapperBase::GetEncodingDescription(m_encoding).c_str()
 #else // !wxUSE_FONTMAP
-                         wxString::Format(_("encoding %i"), m_encoding).c_str()
+                         wxString::Format(_("encoding %s"), m_encoding).c_str()
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
               );
 

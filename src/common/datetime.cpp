@@ -69,7 +69,6 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/stopwatch.h"           // for wxGetLocalTimeMillis()
 #endif // WX_PRECOMP
 
 #include "wx/thread.h"
@@ -87,6 +86,7 @@
 #endif
 
 #include "wx/datetime.h"
+#include "wx/stopwatch.h"           // for wxGetLocalTimeMillis()
 
 const long wxDateTime::TIME_T_FACTOR = 1000l;
 
@@ -4234,13 +4234,10 @@ wxString wxTimeSpan::Format(const wxChar *format) const
         if ( ch == _T('%') )
         {
             // the start of the format specification of the printf() below
-            wxString fmtPrefix(_T('%'));
+            wxString fmtPrefix = _T('%');
 
             // the number
             long n;
-
-            // the number of digits for the format string, 0 if unused
-            unsigned digits = 0;
 
             ch = *++pch;    // get the format spec char
             switch ( ch )
@@ -4276,13 +4273,6 @@ wxString wxTimeSpan::Format(const wxChar *format) const
                     n = GetHours();
                     if ( partBiggest < Part_Hour )
                     {
-                        if ( n < 0 )
-                        {
-                            // the sign has already been taken into account
-                            // when outputting the biggest part
-                            n = -n;
-                        }
-
                         n %= HOURS_PER_DAY;
                     }
                     else
@@ -4290,31 +4280,25 @@ wxString wxTimeSpan::Format(const wxChar *format) const
                         partBiggest = Part_Hour;
                     }
 
-                    digits = 2;
+                    fmtPrefix += _T("02");
                     break;
 
                 case _T('l'):
                     n = GetMilliseconds().ToLong();
                     if ( partBiggest < Part_MSec )
                     {
-                        if ( n < 0 )
-                            n = -n;
-
                         n %= 1000;
                     }
                     //else: no need to reset partBiggest to Part_MSec, it is
                     //      the least significant one anyhow
 
-                    digits = 3;
+                    fmtPrefix += _T("03");
                     break;
 
                 case _T('M'):
                     n = GetMinutes();
                     if ( partBiggest < Part_Min )
                     {
-                        if ( n < 0 )
-                            n = -n;
-
                         n %= MIN_PER_HOUR;
                     }
                     else
@@ -4322,16 +4306,13 @@ wxString wxTimeSpan::Format(const wxChar *format) const
                         partBiggest = Part_Min;
                     }
 
-                    digits = 2;
+                    fmtPrefix += _T("02");
                     break;
 
                 case _T('S'):
                     n = GetSeconds().ToLong();
                     if ( partBiggest < Part_Sec )
                     {
-                        if ( n < 0 )
-                            n = -n;
-
                         n %= SEC_PER_MIN;
                     }
                     else
@@ -4339,17 +4320,8 @@ wxString wxTimeSpan::Format(const wxChar *format) const
                         partBiggest = Part_Sec;
                     }
 
-                    digits = 2;
+                    fmtPrefix += _T("02");
                     break;
-            }
-
-            if ( digits )
-            {
-                // negative numbers need one extra position for '-' display
-                if ( n < 0 )
-                    digits++;
-
-                fmtPrefix << _T("0") << digits;
             }
 
             str += wxString::Format(fmtPrefix + _T("ld"), n);

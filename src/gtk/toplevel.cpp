@@ -237,10 +237,10 @@ static void gtk_frame_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation*
     if ((win->m_width != alloc->width) || (win->m_height != alloc->height))
     {
 /*
-        wxPrintf( wxT("gtk_frame_size_callback from ") );
+        wxPrintf( "OnSize from " );
         if (win->GetClassInfo() && win->GetClassInfo()->GetClassName())
            wxPrintf( win->GetClassInfo()->GetClassName() );
-        wxPrintf( wxT(" %d %d %d %d\n"), (int)alloc->x,
+        wxPrintf( " %d %d %d %d\n", (int)alloc->x,
                                 (int)alloc->y,
                                 (int)alloc->width,
                                 (int)alloc->height );
@@ -435,6 +435,9 @@ static void wxInsertChildInTopLevelWindow( wxTopLevelWindowGTK* parent, wxWindow
                          child->m_width,
                          child->m_height );
     }
+
+    // resize on OnInternalIdle
+    parent->GtkUpdateSize();
 }
 
 // ----------------------------------------------------------------------------
@@ -625,19 +628,10 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
                       G_CALLBACK (gtk_frame_focus_out_callback), this);
 
     // decorations
-    if ((style & wxSIMPLE_BORDER) || (style & wxNO_BORDER))
+    if ((m_miniEdge > 0) || (style & wxSIMPLE_BORDER) || (style & wxNO_BORDER))
     {
         m_gdkDecor = 0;
         m_gdkFunc = 0;
-    }
-    else
-    if (m_miniEdge > 0)
-    {
-        m_gdkDecor = 0;
-        m_gdkFunc = 0;
-        
-        if ((style & wxRESIZE_BORDER) != 0)
-           m_gdkFunc |= GDK_FUNC_RESIZE;
     }
     else
     {
@@ -801,9 +795,6 @@ bool wxTopLevelWindowGTK::Show( bool show )
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid frame") );
 
-    if (show == IsShown())
-        return true;
-
     if (show && !m_sizeSet)
     {
         /* by calling GtkOnSize here, we don't have to call
@@ -814,11 +805,8 @@ bool wxTopLevelWindowGTK::Show( bool show )
         GtkOnSize( m_x, m_y, m_width, m_height );
     }
 
-    // This seems no longer to be needed and the call
-    // itself is deprecated.
-    //
-    //if (show)
-    //    gtk_widget_set_uposition( m_widget, m_x, m_y );
+    if (show)
+        gtk_widget_set_uposition( m_widget, m_x, m_y );
 
     return wxWindow::Show( show );
 }
@@ -1311,72 +1299,4 @@ void wxTopLevelWindowGTK::SetWindowStyleFlag( long style )
         gtk_window_set_skip_taskbar_hint(GTK_WINDOW(m_widget), m_windowStyle & wxFRAME_NO_TASKBAR);
     }
 #endif // GTK+ 2.2
-}
-
-#include <X11/Xlib.h>
-
-/* Get the X Window between child and the root window.
-   This should usually be the WM managed XID */
-static Window wxGetTopmostWindowX11(Display *dpy, Window child)
-{
-    Window root, parent;
-    Window* children;
-    unsigned int nchildren;
-
-    XQueryTree(dpy, child, &root, &parent, &children, &nchildren);
-    XFree(children);
-
-    while (parent != root) {
-        child = parent;
-        XQueryTree(dpy, child, &root, &parent, &children, &nchildren);
-        XFree(children);
-    }
-
-    return child;
-}
-
-bool wxTopLevelWindowGTK::SetTransparent(wxByte alpha)
-{
-    if (!m_widget || !m_widget->window)
-        return false;
-
-    Display* dpy = GDK_WINDOW_XDISPLAY (m_widget->window);
-    // We need to get the X Window that has the root window as the immediate parent
-    // and m_widget->window as a child. This should be the X Window that the WM manages and
-    // from which the opacity property is checked from.
-    Window win = wxGetTopmostWindowX11(dpy, GDK_WINDOW_XID (m_widget->window));
-
-    unsigned int opacity = alpha * 0x1010101;
-
-    // Using pure Xlib to not have a GTK version check mess due to gtk2.0 not having GdkDisplay
-    if (alpha == 0xff)
-        XDeleteProperty(dpy, win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False));
-    else
-        XChangeProperty(dpy, win, XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False),
-                        XA_CARDINAL, 32, PropModeReplace,
-                        (unsigned char *) &opacity, 1L);
-    XSync(dpy, False);
-    return true;
-}
-
-bool wxTopLevelWindowGTK::CanSetTransparent()
-{
-#if GTK_CHECK_VERSION(2,10,0)
-    if (!gtk_check_version(2,10,0))
-    {
-        if (gtk_widget_is_composited (m_widget))
-            return true;
-    }
-    else
-#endif // In case of lower versions than gtk+-2.10.0 we could look for _NET_WM_CM_Sn ourselves
-    {
-        return false;
-    }
-
-#if 0 // Don't be optimistic here for the sake of wxAUI
-    int opcode, event, error;
-    // Check for the existence of a RGBA visual instead?
-    return XQueryExtension(gdk_x11_get_default_xdisplay (),
-                           "Composite", &opcode, &event, &error);
-#endif
 }

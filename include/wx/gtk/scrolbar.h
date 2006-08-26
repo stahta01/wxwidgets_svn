@@ -7,8 +7,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_SCROLLBAR_H_
-#define _WX_GTK_SCROLLBAR_H_
+#ifndef __GTKSCROLLBARH__
+#define __GTKSCROLLBARH__
 
 #include "wx/defs.h"
 
@@ -57,11 +57,14 @@ public:
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
     
-protected:
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
+    // implementation
+    // --------------
+
+    bool IsOwnGtkWindow( GdkWindow *window );
 
 private:
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
 };
 
-#endif // _WX_GTK_SCROLLBAR_H_
+#endif
+    // __GTKSCROLLBARH__

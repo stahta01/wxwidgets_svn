@@ -213,10 +213,6 @@ public:
         return wxNOT_FOUND;
     }
 
-
-    // we do have multiple pages
-    virtual bool HasMultiplePages() const { return true; }
-
 protected:
     // Should we accept NULL page pointers in Add/InsertPage()?
     //

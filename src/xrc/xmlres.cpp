@@ -65,39 +65,22 @@ wxXmlResource *wxXmlResource::ms_instance = NULL;
     return old;
 }
 
-wxXmlResource::wxXmlResource(int flags, const wxString& domain)
+wxXmlResource::wxXmlResource(int flags)
 {
     m_flags = flags;
     m_version = -1;
-    m_domain = NULL;
-    if (! domain.empty() )
-        SetDomain(domain);
 }
 
-wxXmlResource::wxXmlResource(const wxString& filemask, int flags, const wxString& domain)
+wxXmlResource::wxXmlResource(const wxString& filemask, int flags)
 {
     m_flags = flags;
     m_version = -1;
-    m_domain = NULL;
-    if (! domain.empty() )
-        SetDomain(domain);
     Load(filemask);
 }
 
 wxXmlResource::~wxXmlResource()
 {
-    if (m_domain)
-        free(m_domain);
     ClearHandlers();
-}
-
-void wxXmlResource::SetDomain(const wxChar* domain)
-{
-    if (m_domain)
-        free(m_domain);
-    m_domain = NULL;
-    if (domain && wxStrlen(domain))
-        m_domain = wxStrdup(domain);
 }
 
 
@@ -933,7 +916,7 @@ wxString wxXmlResourceHandler::GetText(const wxString& param, bool translate)
         if (translate && parNode &&
             parNode->GetPropVal(wxT("translate"), wxEmptyString) != wxT("0"))
         {
-            return wxGetTranslation(str2, m_resource->GetDomain());
+            return wxGetTranslation(str2);
         }
         else
         {
@@ -1624,7 +1607,6 @@ static void AddStdXRCID_Records()
     stdID(wxID_HELP);
     stdID(wxID_PRINT);
     stdID(wxID_PRINT_SETUP);
-    stdID(wxID_PAGE_SETUP);
     stdID(wxID_PREVIEW);
     stdID(wxID_ABOUT);
     stdID(wxID_HELP_CONTENTS);

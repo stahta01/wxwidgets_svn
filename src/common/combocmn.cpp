@@ -191,7 +191,7 @@ void wxComboFrameEventHandler::OnIdle( wxIdleEvent& event )
 {
     wxWindow* winFocused = ::wxWindow::FindFocus();
 
-    wxWindow* popup = m_combo->GetPopupControl()->GetControl();
+    wxWindow* popup = m_combo->GetPopupControl();
     wxWindow* winpopup = m_combo->GetPopupWindow();
 
     if (
@@ -427,7 +427,8 @@ void wxComboPopup::Dismiss()
 // ----------------------------------------------------------------------------
 
 //
-// This is pushed to the event handler queue of the child textctrl.
+// This is pushed to the event handler queue of either combo box
+// or its textctrl (latter if not readonly combo).
 //
 class wxComboBoxExtraInputHandler : public wxEvtHandler
 {
@@ -458,16 +459,56 @@ END_EVENT_TABLE()
 
 void wxComboBoxExtraInputHandler::OnKey(wxKeyEvent& event)
 {
-    // Let the wxComboCtrl event handler have a go first.
-    wxComboCtrlBase* combo = m_combo;
-    wxObject* prevObj = event.GetEventObject();
+    int keycode = event.GetKeyCode();
 
-    event.SetId(combo->GetId());
-    event.SetEventObject(combo);
-    combo->GetEventHandler()->ProcessEvent(event);
+    if ( keycode == WXK_TAB && !m_combo->IsPopupShown() )
+    {
+        wxNavigationKeyEvent evt;
+        evt.SetFlags(wxNavigationKeyEvent::FromTab|
+                     (!event.ShiftDown()?wxNavigationKeyEvent::IsForward:
+                                         wxNavigationKeyEvent::IsBackward));
+        evt.SetEventObject(m_combo);
+        m_combo->GetParent()->GetEventHandler()->AddPendingEvent(evt);
+        return;
+    }
 
-    event.SetId(((wxWindow*)prevObj)->GetId());
-    event.SetEventObject(prevObj);
+    if ( m_combo->IsPopupShown() )
+    {
+        // pass it to the popped up control
+        m_combo->GetPopupControl()->GetControl()->AddPendingEvent(event);
+    }
+    else // no popup
+    {
+        int comboStyle = m_combo->GetWindowStyle();
+        wxComboPopup* popupInterface = m_combo->GetPopupControl();
+
+        if ( !popupInterface )
+        {
+            event.Skip();
+            return;
+        }
+
+        if ( (comboStyle & wxCB_READONLY) ||
+             ( keycode != WXK_RIGHT && keycode != WXK_LEFT )
+            )
+        {
+            // Alternate keys: UP and DOWN show the popup instead of cycling
+            if ( (comboStyle & wxCC_ALT_KEYS) )
+            {
+                if ( keycode == WXK_UP || keycode == WXK_DOWN )
+                {
+                    m_combo->OnButtonClick();
+                    return;
+                }
+                else
+                    event.Skip();
+            }
+            else
+                popupInterface->OnComboKeyEvent(event);
+        }
+        else
+            event.Skip();
+    }
 }
 
 void wxComboBoxExtraInputHandler::OnFocus(wxFocusEvent& event)
@@ -482,15 +523,17 @@ void wxComboBoxExtraInputHandler::OnFocus(wxFocusEvent& event)
             m_combo->SetSelection(-1,-1);
     }
 
-    // Send focus indication to parent.
-    // NB: This is needed for cases where the textctrl gets focus
-    //     instead of its parent. While this may trigger multiple
-    //     wxEVT_SET_FOCUSes (since m_text->SetFocus is called
-    //     from combo's focus event handler), they should be quite
-    //     harmless.
-    wxFocusEvent evt2(wxEVT_SET_FOCUS,m_combo->GetId());
-    evt2.SetEventObject(m_combo);
-    m_combo->GetEventHandler()->ProcessEvent(evt2);
+    if ( event.GetId() != m_combo->GetId() )
+    {
+        // Add textctrl set focus events as combo set focus events
+        // NOTE: Simply changing the event and skipping didn't seem
+        // to do the trick.
+        wxFocusEvent evt2(wxEVT_SET_FOCUS,m_combo->GetId());
+        evt2.SetEventObject(m_combo);
+        m_combo->GetEventHandler()->ProcessEvent(evt2);
+    }
+    else
+        event.Skip();
 
     event.Skip();
 }
@@ -602,7 +645,6 @@ BEGIN_EVENT_TABLE(wxComboCtrlBase, wxControl)
     EVT_SET_FOCUS(wxComboCtrlBase::OnFocusEvent)
     EVT_KILL_FOCUS(wxComboCtrlBase::OnFocusEvent)
     //EVT_BUTTON(wxID_ANY,wxComboCtrlBase::OnButtonClickEvent)
-    EVT_KEY_DOWN(wxComboCtrlBase::OnKeyEvent)
     EVT_TEXT_ENTER(wxID_ANY,wxComboCtrlBase::OnTextCtrlEvent)
     EVT_SYS_COLOUR_CHANGED(wxComboCtrlBase::OnSysColourChanged)
 END_EVENT_TABLE()
@@ -622,6 +664,7 @@ void wxComboCtrlBase::Init()
     m_text = (wxTextCtrl*) NULL;
     m_popupInterface = (wxComboPopup*) NULL;
 
+    m_extraEvtHandler = (wxEvtHandler*) NULL;
     m_popupExtraHandler = (wxEvtHandler*) NULL;
     m_textEvtHandler = (wxEvtHandler*) NULL;
 
@@ -687,13 +730,17 @@ bool wxComboCtrlBase::Create(wxWindow *parent,
     return true;
 }
 
-void wxComboCtrlBase::InstallInputHandlers()
+void wxComboCtrlBase::InstallInputHandlers( bool alsoTextCtrl )
 {
-    if ( m_text )
+    if ( m_text && alsoTextCtrl )
     {
         m_textEvtHandler = new wxComboBoxExtraInputHandler(this);
         m_text->PushEventHandler(m_textEvtHandler);
     }
+
+    wxComboBoxExtraInputHandler* inputHandler = new wxComboBoxExtraInputHandler(this);
+    PushEventHandler(inputHandler);
+    m_extraEvtHandler = inputHandler;
 }
 
 void
@@ -739,10 +786,13 @@ wxComboCtrlBase::~wxComboCtrlBase()
 
     DestroyPopup();
 
+    RemoveEventHandler(m_extraEvtHandler);
+
     if ( m_text )
         m_text->RemoveEventHandler(m_textEvtHandler);
 
     delete m_textEvtHandler;
+    delete m_extraEvtHandler;
 }
 
 
@@ -1342,15 +1392,6 @@ bool wxComboCtrlBase::PreprocessMouseEvent( wxMouseEvent& event,
     wxLongLong t = ::wxGetLocalTimeMillis();
     int evtType = event.GetEventType();
 
-#if !USE_TRANSIENT_POPUP
-    if ( m_isPopupShown &&
-         ( evtType == wxEVT_LEFT_DOWN || evtType == wxEVT_RIGHT_DOWN ) )
-    {
-        HidePopup();
-        return true;
-    }
-#endif
-
     //
     // Generate our own double-clicks
     // (to allow on-focus dc-event on double-clicks instead of triple-clicks)
@@ -1447,68 +1488,23 @@ void wxComboCtrlBase::HandleNormalMouseEvent( wxMouseEvent& event )
         event.Skip();
 }
 
-void wxComboCtrlBase::OnKeyEvent(wxKeyEvent& event)
+void wxComboCtrlBase::OnFocusEvent( wxFocusEvent& )
 {
-    if ( IsPopupShown() )
+    // First click is the first part of double-click
+    // Some platforms don't generate down-less mouse up-event
+    // (Windows does, GTK+2 doesn't), so that's why we have
+    // to do this.
+    m_timeLastMouseUp = ::wxGetLocalTimeMillis();
+
+    if ( m_text )
     {
-        // pass it to the popped up control
-        GetPopupControl()->GetControl()->AddPendingEvent(event);
+        m_text->SetFocus();
     }
-    else // no popup
-    {
-        int keycode = event.GetKeyCode();
-
-        if ( keycode == WXK_TAB )
-        {
-            wxNavigationKeyEvent evt;
-            evt.SetFlags(wxNavigationKeyEvent::FromTab|
-                         (!event.ShiftDown() ? wxNavigationKeyEvent::IsForward
-                                             : wxNavigationKeyEvent::IsBackward));
-            evt.SetEventObject(this);
-            GetParent()->GetEventHandler()->AddPendingEvent(evt);
-            return;
-        }
-
-        if ( IsKeyPopupToggle(event) )
-        {
-            OnButtonClick();
-            return;
-        }
-
-        int comboStyle = GetWindowStyle();
-        wxComboPopup* popupInterface = GetPopupControl();
-
-        if ( !popupInterface )
-        {
-            event.Skip();
-            return;
-        }
-
-        if ( (comboStyle & wxCB_READONLY) ||
-             (keycode != WXK_RIGHT && keycode != WXK_LEFT) )
-        {
-            popupInterface->OnComboKeyEvent(event);
-        }
-        else
-            event.Skip();
-    }
-}
-
-void wxComboCtrlBase::OnFocusEvent( wxFocusEvent& event )
-{
-    if ( event.GetEventType() == wxEVT_SET_FOCUS )
-    {
-        // First click is the first part of double-click
-        // Some platforms don't generate down-less mouse up-event
-        // (Windows does, GTK+2 doesn't), so that's why we have
-        // to do this.
-        m_timeLastMouseUp = ::wxGetLocalTimeMillis();
-
-        if ( m_text && m_text != ::wxWindow::FindFocus() )
-            m_text->SetFocus();
-    }
-
-    Refresh();
+    else
+        // no need to check for m_widthCustomPaint - that
+        // area never gets special handling when selected
+        // (in writable mode, that is)
+        Refresh();
 }
 
 void wxComboCtrlBase::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event))
@@ -1550,12 +1546,12 @@ void wxComboCtrlBase::CreatePopup()
 // Destroy popup window and the child control
 void wxComboCtrlBase::DestroyPopup()
 {
-    HidePopup();
-
     if ( m_popup )
         m_popup->RemoveEventHandler(m_popupExtraHandler);
 
     delete m_popupExtraHandler;
+
+    HidePopup();
 
     delete m_popupInterface;
 

@@ -30,9 +30,6 @@ class WXDLLIMPEXP_BASE wxArrayInt;
 // wxLongLong
 #include "wx/longlong.h"
 
-// need for wxOperatingSystemId
-#include "wx/platinfo.h"
-
 #ifdef __WATCOMC__
     #include <direct.h>
 #elif defined(__X__)
@@ -96,14 +93,8 @@ WXDLLIMPEXP_BASE void wxBell();
 WXDLLIMPEXP_BASE wxString wxGetOsDescription();
 
 // Get OS version
-WXDLLIMPEXP_BASE wxOperatingSystemId wxGetOsVersion(int *majorVsn = (int *) NULL,
-                                                    int *minorVsn = (int *) NULL);
-
-// Get platform endianness
-WXDLLIMPEXP_BASE bool wxIsPlatformLittleEndian();
-
-// Get platform architecture
-WXDLLIMPEXP_BASE bool wxIsPlatform64Bit();
+WXDLLIMPEXP_BASE int wxGetOsVersion(int *majorVsn = (int *) NULL,
+                               int *minorVsn = (int *) NULL);
 
 // Return a string with the current date/time
 WXDLLIMPEXP_BASE wxString wxNow();
@@ -541,29 +532,8 @@ WXDLLIMPEXP_BASE bool wxGetDiskSpace(const wxString& path,
 // Menu accelerators related things
 // ----------------------------------------------------------------------------
 
-// flags for wxStripMenuCodes
-enum
-{
-    // strip '&' characters
-    wxStrip_Mnemonics = 1,
-
-    // strip everything after '\t'
-    wxStrip_Accel = 2,
-
-    // strip everything (this is the default)
-    wxStrip_All = wxStrip_Mnemonics | wxStrip_Accel
-};
-
-// strip mnemonics and/or accelerators from the label
-WXDLLEXPORT wxString
-wxStripMenuCodes(const wxString& str, int flags = wxStrip_All);
-
-// obsolete and deprecated version, do not use
-#if WXWIN_COMPATIBILITY_2_6
-wxDEPRECATED(
-    WXDLLEXPORT wxChar* wxStripMenuCodes(const wxChar *in, wxChar *out = NULL)
-);
-#endif
+WXDLLEXPORT wxChar* wxStripMenuCodes(const wxChar *in, wxChar *out = (wxChar *) NULL);
+WXDLLEXPORT wxString wxStripMenuCodes(const wxString& str);
 
 #if wxUSE_ACCEL
 class WXDLLEXPORT wxAcceleratorEntry;

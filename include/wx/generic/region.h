@@ -18,6 +18,12 @@
 class WXDLLEXPORT wxRect;
 class WXDLLEXPORT wxPoint;
 
+enum wxRegionContain
+{   wxOutRegion = 0
+,   wxPartRegion = 1
+,   wxInRegion = 2
+};
+
 class WXDLLEXPORT wxRegionGeneric : public wxGDIObject
 {
 //    DECLARE_DYNAMIC_CLASS(wxRegionGeneric);

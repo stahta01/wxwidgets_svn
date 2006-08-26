@@ -60,15 +60,11 @@ BEGIN_EVENT_TABLE(wxTreebook, wxBookCtrlBase)
     EVT_TREE_SEL_CHANGED   (wxID_TREEBOOKTREEVIEW, wxTreebook::OnTreeSelectionChange)
     EVT_TREE_ITEM_EXPANDED (wxID_TREEBOOKTREEVIEW, wxTreebook::OnTreeNodeExpandedCollapsed)
     EVT_TREE_ITEM_COLLAPSED(wxID_TREEBOOKTREEVIEW, wxTreebook::OnTreeNodeExpandedCollapsed)
-
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxTreebook)
 END_EVENT_TABLE()
 
 // ============================================================================
 // wxTreebook implementation
 // ============================================================================
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxTreebook, wxControl)
 
 // ----------------------------------------------------------------------------
 // wxTreebook creation
@@ -76,8 +72,6 @@ WX_DELEGATE_TO_CONTROL_CONTAINER(wxTreebook, wxControl)
 
 void wxTreebook::Init()
 {
-    m_container.SetContainerWindow(this);
-
     m_selection =
     m_actualSelection = wxNOT_FOUND;
 }
@@ -95,7 +89,6 @@ wxTreebook::Create(wxWindow *parent,
     {
         style |= wxBK_LEFT;
     }
-    style |= wxTAB_TRAVERSAL;
 
     // no border for this control, it doesn't look nice together with the tree
     style &= ~wxBORDER_MASK;
@@ -651,8 +644,7 @@ int wxTreebook::DoSetSelection(size_t pagePos)
     else // page change vetoed
     {
         // tree selection might have already had changed
-        if ( oldSel != wxNOT_FOUND )
-            tree->SelectItem(DoInternalGetPage(oldSel));
+        tree->SelectItem(DoInternalGetPage(oldSel));
     }
 
     return oldSel;

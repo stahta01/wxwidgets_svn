@@ -307,7 +307,7 @@ bool wxVScrolledWindow::Layout()
         // adjust the sizer dimensions/position taking into account the
         // virtual size and scrolled position of the window.
 
-        int w = 0, h = 0;
+        int w, h;
         GetVirtualSize(&w, &h);
 
         // x is always 0 so no variable needed

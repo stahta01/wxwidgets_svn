@@ -58,8 +58,12 @@ enum
     // In wxOwnerDrawnComboBox, for instance, it cycles item.
     wxCC_SPECIAL_DCLICK             = 0x0100,
 
+    // Use keyboard behaviour alternate to platform default:
+    // Up an down keys will show popup instead of cycling value.
+    wxCC_ALT_KEYS                   = 0x0200,
+
     // Dropbutton acts like standard push button.
-    wxCC_STD_BUTTON                 = 0x0200
+    wxCC_STD_BUTTON                 = 0x0400
 };
 
 
@@ -297,14 +301,6 @@ public:
     // Utilies needed by the popups or native implementations
     //
 
-    // Returns true if given key combination should toggle the popup.
-    // NB: This is a separate from other keyboard handling because:
-    //     1) Replaceability.
-    //     2) Centralized code (otherwise it'd be split up between
-    //        wxComboCtrl key handler and wxVListBoxComboPopup's
-    //        key handler).
-    virtual bool IsKeyPopupToggle(const wxKeyEvent& event) const = 0;
-
     // Draws focus background (on combo control) in a way typical on platform.
     // Unless you plan to paint your own focus indicator, you should always call this
     // in your wxComboPopup::PaintComboControl implementation.
@@ -359,7 +355,7 @@ protected:
     void CreateTextCtrl( int extraStyle, const wxValidator& validator );
 
     // Installs standard input handler to combo (and optionally to the textctrl)
-    void InstallInputHandlers();
+    void InstallInputHandlers( bool alsoTextCtrl = true );
 
     // Draws dropbutton. Using wxRenderer or bitmaps, as appropriate.
     void DrawButton( wxDC& dc, const wxRect& rect, bool paintBg = true );
@@ -410,7 +406,6 @@ protected:
     void OnFocusEvent(wxFocusEvent& event);
     void OnTextCtrlEvent(wxCommandEvent& event);
     void OnSysColourChanged(wxSysColourChangedEvent& event);
-    void OnKeyEvent(wxKeyEvent& event);
 
     // Set customization flags (directs how wxComboCtrlBase helpers behave)
     void Customize( wxUint32 flags ) { m_iFlags |= flags; }
@@ -441,7 +436,10 @@ protected:
     // popup interface
     wxComboPopup*           m_popupInterface;
 
-    // this is input etc. handler for the text control
+    // this is for this control itself
+    wxEvtHandler*           m_extraEvtHandler;
+
+    // this is for text
     wxEvtHandler*           m_textEvtHandler;
 
     // this is for the top level window

@@ -33,7 +33,11 @@
     #include "wx/txtstrm.h"
 #endif
 
-#include <string.h>            // for memset()
+#if defined(__MWERKS__) && defined(__WXMSW__)
+    #include <string.h>     // for memset()
+#else
+    #include <memory.h>     // for memset()
+#endif
 
 #include "wx/ioswrap.h"
 
@@ -180,19 +184,6 @@ wxLongLongWx& wxLongLongWx::Assign(double d)
 double wxLongLongWx::ToDouble() const
 {
     double d = m_hi;
-    d *= 1.0 + (double)ULONG_MAX;
-    d += m_lo;
-
-#ifdef wxLONGLONG_TEST_MODE
-    wxASSERT( d == m_ll );
-#endif // wxLONGLONG_TEST_MODE
-
-    return d;
-}
-
-double wxULongLongWx::ToDouble() const
-{
-    unsigned double d = m_hi;
     d *= 1.0 + (double)ULONG_MAX;
     d += m_lo;
 

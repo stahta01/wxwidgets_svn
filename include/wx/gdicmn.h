@@ -229,9 +229,6 @@ public:
     void DecTo(const wxSize& sz)
         { if ( sz.x < x ) x = sz.x; if ( sz.y < y ) y = sz.y; }
 
-    void Scale(float xscale, float yscale)
-        { x = (int)(x*xscale); y = (int)(y*yscale); }
-
     // accessors
     void Set(int xx, int yy) { x = xx; y = yy; }
     void SetWidth(int w) { x = w; }
@@ -417,8 +414,6 @@ public:
     // return true if the point is (not strcitly) inside the rect
     bool Inside(int x, int y) const;
     bool Inside(const wxPoint& pt) const { return Inside(pt.x, pt.y); }
-    // return true if the rectangle is (not strcitly) inside the rect
-    bool Inside(const wxRect& rect) const;
 
     // return true if the rectangles have a non empty intersection
     bool Intersects(const wxRect& rect) const;

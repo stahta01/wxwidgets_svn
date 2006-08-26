@@ -242,7 +242,7 @@ bool wxVListBoxComboPopup::HandleKey( int keycode, bool saturate, wxChar unicode
     }
     else if (unicode>0)
     {
-        keychar = unicode;
+        keychar = unicode; 
     }
 
     if ( keycode == WXK_DOWN || keycode == WXK_RIGHT )
@@ -265,7 +265,7 @@ bool wxVListBoxComboPopup::HandleKey( int keycode, bool saturate, wxChar unicode
         value-=10;
         StopPartialCompletion();
     }
-    else if ( comboStyle & wxCB_READONLY )
+    else if ( comboStyle && wxCB_READONLY )
     {
         // Try partial completion
 
@@ -279,12 +279,12 @@ bool wxVListBoxComboPopup::HandleKey( int keycode, bool saturate, wxChar unicode
 
         // now search through the values to see if this is found
         int found = -1;
-        unsigned int length=m_partialCompletionString.length();
+        unsigned int length=m_partialCompletionString.Length();
         int i;
         for (i=0; i<itemCount; i++)
         {
             wxString item=GetString(i);
-            if (( item.length() >= length) && (!  m_partialCompletionString.CmpNoCase(item.Left(length))))
+            if (( item.Length() >=length) && (!  m_partialCompletionString.CmpNoCase(item.Left(length))))
             {
                 found=i;
                 break;
@@ -410,30 +410,23 @@ void wxVListBoxComboPopup::OnLeftClick(wxMouseEvent& WXUNUSED(event))
 
 void wxVListBoxComboPopup::OnKey(wxKeyEvent& event)
 {
-    // Hide popup if certain key or key combination was pressed
-    if ( m_combo->IsKeyPopupToggle(event) )
+    // Select item if ENTER is pressed
+    if ( event.GetKeyCode() == WXK_RETURN || event.GetKeyCode() == WXK_NUMPAD_ENTER )
+    {
+        DismissWithEvent();
+    }
+    // Hide popup if ESC is pressed
+    else if ( event.GetKeyCode() == WXK_ESCAPE )
     {
         StopPartialCompletion();
         Dismiss();
-    }
-    else if ( event.AltDown() )
-    {
-        // On both wxGTK and wxMSW, pressing Alt down seems to
-        // completely freeze things in popup (ie. arrow keys and
-        // enter won't work).
-        return;
-    }
-    // Select item if ENTER is pressed
-    else if ( event.GetKeyCode() == WXK_RETURN || event.GetKeyCode() == WXK_NUMPAD_ENTER )
-    {
-        DismissWithEvent();
     }
     else
     {
         int comboStyle = m_combo->GetWindowStyle();
         int keycode = event.GetKeyCode();
         // Process partial completion key codes here, but not the arrow keys as the base class will do that for us
-        if ((comboStyle & wxCB_READONLY) &&
+        if ((comboStyle && wxCB_READONLY) &&
             (keycode >= WXK_SPACE) && (keycode <=255) && (keycode != WXK_DELETE) && wxIsprint(keycode))
         {
             OnComboKeyEvent(event);
@@ -1048,15 +1041,12 @@ wxCoord wxOwnerDrawnComboBox::OnMeasureItemWidth( size_t WXUNUSED(item) ) const
 void wxOwnerDrawnComboBox::OnDrawBackground(wxDC& dc, const wxRect& rect, int item, int flags) const
 {
     // we need to render selected and current items differently
-    if ( GetVListBoxComboPopup()->IsCurrent((size_t)item) ||
-         (flags & wxODCB_PAINTING_CONTROL) )
+    if ( GetVListBoxComboPopup()->IsCurrent((size_t)item) )
     {
-        int focusFlag = wxCONTROL_SELECTED;
-
-        if ( (flags & wxODCB_PAINTING_CONTROL) != wxODCB_PAINTING_CONTROL )
-            focusFlag |= wxCONTROL_ISSUBMENU;
-
-        DrawFocusBackground(dc, rect, focusFlag );
+        DrawFocusBackground(dc,
+                            rect,
+                            (flags&wxODCB_PAINTING_CONTROL?0:wxCONTROL_ISSUBMENU) |
+                            wxCONTROL_SELECTED);
     }
     //else: do nothing for the normal items
 }

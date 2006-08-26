@@ -138,7 +138,9 @@ public:
     bool SetBackgroundColour(const wxColour& colour);
 
     GtkWidget* GetConnectWidget();
+    bool IsOwnGtkWindow( GdkWindow *window );
     void CalculateScrollbar();
+    void OnInternalIdle();
 
     void SetUpdateFont(bool WXUNUSED(update)) { }
 
@@ -173,8 +175,7 @@ public:
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
+    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     // common part of all ctors
     void Init();
@@ -189,13 +190,6 @@ protected:
 private:
     // change the font for everything in this control
     void ChangeFontGlobally();
-
-    // get the encoding which is used in this control: this looks at our font
-    // and default style but not the current style (i.e. the style for the
-    // current position); returns wxFONTENCODING_SYSTEM if we have no specific
-    // encoding
-    wxFontEncoding GetTextEncoding() const;
-
 
     GtkWidget  *m_text;
 

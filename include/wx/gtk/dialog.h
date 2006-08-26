@@ -47,6 +47,15 @@ public:
             const wxString &name = wxDialogNameStr );
     ~wxDialog() {}
 
+    void OnApply( wxCommandEvent &event );
+    void OnCancel( wxCommandEvent &event );
+    void OnOK( wxCommandEvent &event );
+    void OnPaint( wxPaintEvent& event );
+    void OnCloseWindow( wxCloseEvent& event );
+    /*
+       void OnCharHook( wxKeyEvent& event );
+     */
+
     virtual bool Show( bool show = TRUE );
     virtual int ShowModal();
     virtual void EndModal( int retCode );
@@ -58,10 +67,12 @@ public:
 
     bool       m_modalShowing;
 
-private:
+protected:
     // common part of all ctors
     void Init();
 
+private:
+    DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxDialog)
 };
 

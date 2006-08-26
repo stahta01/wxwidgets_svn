@@ -42,6 +42,7 @@
 
 extern bool           g_blockEventsOnDrag;
 extern bool           g_blockEventsOnScroll;
+extern wxCursor       g_globalCursor;
 
 
 
@@ -1076,9 +1077,9 @@ GtkWidget *wxListBox::GetConnectWidget()
     return GTK_WIDGET(m_treeview);
 }
 
-GdkWindow *wxListBox::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxListBox::IsOwnGtkWindow( GdkWindow *window )
 {
-    return gtk_tree_view_get_bin_window(m_treeview);
+    return (window == gtk_tree_view_get_bin_window(m_treeview));
 }
 
 void wxListBox::DoApplyWidgetStyle(GtkRcStyle *style)
@@ -1095,6 +1096,26 @@ void wxListBox::DoApplyWidgetStyle(GtkRcStyle *style)
     }
 
     gtk_widget_modify_style( GTK_WIDGET(m_treeview), style );
+}
+
+void wxListBox::OnInternalIdle()
+{
+    //RN: Is this needed anymore?
+    wxCursor cursor = m_cursor;
+    if (g_globalCursor.Ok()) cursor = g_globalCursor;
+
+    if (GTK_WIDGET(m_treeview)->window && cursor.Ok())
+    {
+        /* I now set the cursor the anew in every OnInternalIdle call
+           as setting the cursor in a parent window also effects the
+           windows above so that checking for the current cursor is
+           not possible. */
+        GdkWindow *window = gtk_tree_view_get_bin_window(m_treeview);
+        gdk_window_set_cursor( window, cursor.GetCursor() );
+    }
+
+    if (wxUpdateUIEvent::CanUpdate(this))
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 }
 
 wxSize wxListBox::DoGetBestSize() const

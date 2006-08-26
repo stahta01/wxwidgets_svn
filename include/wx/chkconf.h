@@ -29,8 +29,6 @@
 #  include "wx/mgl/chkconf.h"
 #elif defined(__WXMOTIF__)
 #  include "wx/motif/chkconf.h"
-#elif defined(__WXX11__)
-#  include "wx/x11/chkconf.h"
 #endif
 
 /*
@@ -1283,6 +1281,13 @@
 #   endif
 #endif /* wxGTK && !wxUniv */
 
+/* wxMGL-specific dependencies */
+#ifdef __WXMGL__
+#   if !wxUSE_PALETTE
+#       error "wxMGL requires wxUSE_PALETTE=1"
+#   endif
+#endif /* wxMGL */
+
 /* Hopefully we can emulate these dialogs in due course */
 #if defined(__SMARTPHONE__) && defined(__WXWINCE__)
 #   ifdef wxUSE_COLOURDLG
@@ -1621,6 +1626,15 @@
 #        else
 #            undef wxUSE_TOOLBAR_NATIVE
 #            define wxUSE_TOOLBAR_NATIVE 0
+#        endif
+#   endif
+
+#   if wxUSE_TOOLBAR_SIMPLE
+#        ifdef wxABORT_ON_CONFIG_ERROR
+#            error "wxUSE_TOOLBAR is set to 0 but wxUSE_TOOLBAR_SIMPLE is set to 1"
+#        else
+#            undef wxUSE_TOOLBAR_SIMPLE
+#            define wxUSE_TOOLBAR_SIMPLE 0
 #        endif
 #   endif
 #endif

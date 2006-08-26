@@ -77,13 +77,12 @@ public:
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
+    virtual bool IsOwnGtkWindow( GdkWindow *window );
+
 protected:
     wxList m_clientList;    // contains the client data for the items
 
-    virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
-
+    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual int DoAppend(const wxString& item);
     virtual int DoInsert(const wxString& item, unsigned int pos);
 
@@ -91,6 +90,8 @@ protected:
     virtual void* DoGetItemClientData(unsigned int n) const;
     virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
     virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+
+    virtual wxSize DoGetBestSize() const;
 
 private:
     // common part of Create() and DoAppend()

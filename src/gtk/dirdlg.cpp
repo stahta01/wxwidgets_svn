@@ -167,7 +167,7 @@ wxDirDialog::wxDirDialog(wxWindow* parent, const wxString& title,
 void wxDirDialog::OnFakeOk( wxCommandEvent &event )
 {
     if (!gtk_check_version(2,4,0))
-        EndDialog(wxID_OK);
+        wxDialog::OnOK( event );
     else
         wxGenericDirDialog::OnOK( event );
 }

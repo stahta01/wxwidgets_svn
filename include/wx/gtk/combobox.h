@@ -152,6 +152,7 @@ public:
     void DisableEvents();
     void EnableEvents();
     GtkWidget* GetConnectWidget();
+    bool IsOwnGtkWindow( GdkWindow *window );
 
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
@@ -160,8 +161,7 @@ public:
 
 protected:
     // From wxWindowGTK:
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
+    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     // From wxItemContainer:
     virtual int DoAppend(const wxString& item);

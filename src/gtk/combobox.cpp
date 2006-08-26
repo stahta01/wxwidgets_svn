@@ -1325,23 +1325,21 @@ GtkWidget* wxComboBox::GetConnectWidget()
     return GTK_WIDGET( entry );
 }
 
-GdkWindow *wxComboBox::GTKGetWindow(wxArrayGdkWindows& windows) const
+bool wxComboBox::IsOwnGtkWindow( GdkWindow *window )
 {
+    GtkEntry *entry = NULL;
 #ifdef __WXGTK24__
     if (!gtk_check_version(2,4,0))
     {
-        wxUnusedVar(windows);
-
-        return GTK_ENTRY(GTK_BIN(m_widget)->child)->text_area;
+        entry = GTK_ENTRY( GTK_BIN(m_widget)->child );
+        return (window == entry->text_area);
     }
     else
-#endif // GTK+ 2.4
+#endif
     {
-        windows.push_back(GTK_ENTRY(GTK_COMBO(m_widget)->entry)->text_area);
-        windows.push_back(GTK_COMBO(m_widget)->button->window);
-
-        // indicate that we return multiple windows in the windows array
-        return NULL;
+        entry = GTK_ENTRY( GTK_COMBO(m_widget)->entry );
+        return ( (window == entry->text_area) ||
+                 (window == GTK_COMBO(m_widget)->button->window ) );
     }
 }
 

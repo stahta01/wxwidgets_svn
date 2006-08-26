@@ -75,11 +75,13 @@ public:
     wxBitmap  m_bitmap;
 
     void OnSetBitmap();
+    bool IsOwnGtkWindow(GdkWindow *window);
+
+    virtual void OnInternalIdle();
 
 protected:
+    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxToggleBitmapButton)
@@ -129,10 +131,13 @@ public:
     // implementation
     bool m_blockEvent;
 
+    bool IsOwnGtkWindow(GdkWindow *window);
+
+    virtual void OnInternalIdle();
+
 protected:
+    void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxToggleButton)

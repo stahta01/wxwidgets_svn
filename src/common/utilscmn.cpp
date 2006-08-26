@@ -287,19 +287,21 @@ wxString wxGetDataDir()
     return dir;
 }
 
-bool wxIsPlatformLittleEndian()
+int wxGetOsVersion(int *verMaj, int *verMin)
 {
-    // Are we little or big endian? This method is from Harbison & Steele.
-    union
-    {
-        long l;
-        char c[sizeof(long)];
-    } u;
-    u.l = 1;
+    // we want this function to work even if there is no wxApp
+    wxConsoleAppTraits traitsConsole;
+    wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
+    if ( ! traits )
+        traits = &traitsConsole;
 
-    return u.c[0] == 1;
+    wxToolkitInfo& info = traits->GetToolkitInfo();
+    if ( verMaj )
+        *verMaj = info.versionMajor;
+    if ( verMin )
+        *verMin = info.versionMinor;
+    return info.os;
 }
-
 
 /*
  * Class to make it easier to specify platform-dependent values
@@ -440,18 +442,13 @@ void wxPlatform::ClearPlatforms()
 bool wxPlatform::Is(int platform)
 {
 #ifdef __WXMSW__
-    if (platform == wxOS_WINDOWS)
+    if (platform == wxMSW)
         return true;
 #endif
 #ifdef __WXWINCE__
-    if (platform == wxOS_WINDOWS_CE)
+    if (platform == wxWinCE)
         return true;
 #endif
-
-#if 0
-
-// FIXME: wxWinPocketPC and wxWinSmartPhone are unknown symbols
-
 #if defined(__WXWINCE__) && defined(__POCKETPC__)
     if (platform == wxWinPocketPC)
         return true;
@@ -460,35 +457,32 @@ bool wxPlatform::Is(int platform)
     if (platform == wxWinSmartPhone)
         return true;
 #endif
-
-#endif
-
 #ifdef __WXGTK__
-    if (platform == wxPORT_GTK)
+    if (platform == wxGTK)
         return true;
 #endif
 #ifdef __WXMAC__
-    if (platform == wxPORT_MAC)
+    if (platform == wxMac)
         return true;
 #endif
 #ifdef __WXX11__
-    if (platform == wxPORT_X11)
+    if (platform == wxX11)
         return true;
 #endif
 #ifdef __UNIX__
-    if (platform == wxOS_UNIX)
+    if (platform == wxUnix)
         return true;
 #endif
 #ifdef __WXMGL__
-    if (platform == wxPORT_MGL)
+    if (platform == wxMGL)
         return true;
 #endif
 #ifdef __WXOS2__
-    if (platform == wxPORT_OS2)
+    if (platform == wxOS2)
         return true;
 #endif
 #ifdef __WXCOCOA__
-    if (platform == wxPORT_MAC)
+    if (platform == wxCocoa)
         return true;
 #endif
 
@@ -947,10 +941,8 @@ wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
     return out;
 }
 
-wxString wxStripMenuCodes(const wxString& in, int flags)
+wxString wxStripMenuCodes(const wxString& in)
 {
-    wxASSERT_MSG( flags, _T("this is useless to call without any flags") );
-
     wxString out;
 
     size_t len = in.length();
@@ -959,7 +951,7 @@ wxString wxStripMenuCodes(const wxString& in, int flags)
     for ( size_t n = 0; n < len; n++ )
     {
         wxChar ch = in[n];
-        if ( (flags & wxStrip_Mnemonics) && ch == _T('&') )
+        if ( ch == _T('&') )
         {
             // skip it, it is used to introduce the accel char (or to quote
             // itself in which case it should still be skipped): note that it
@@ -974,7 +966,7 @@ wxString wxStripMenuCodes(const wxString& in, int flags)
                 ch = in[n];
             }
         }
-        else if ( (flags & wxStrip_Accel) && ch == _T('\t') )
+        else if ( ch == _T('\t') )
         {
             // everything after TAB is accel string, exit the loop
             break;

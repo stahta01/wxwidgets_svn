@@ -294,13 +294,13 @@ class wxDynamicLibraryDetailsCreator
 public:
     // create a new wxDynamicLibraryDetails from the given data
     static wxDynamicLibraryDetails *
-    New(void *start, void *end, const wxString& path)
+    New(unsigned long start, unsigned long end, const wxString& path)
     {
         wxDynamicLibraryDetails *details = new wxDynamicLibraryDetails;
         details->m_path = path;
         details->m_name = path.AfterLast(_T('/'));
-        details->m_address = start;
-        details->m_length = (char *)end - (char *)start;
+        details->m_address = wxUIntToPtr(start);
+        details->m_length = end - start;
 
         // try to extract the library version from its name
         const size_t posExt = path.rfind(_T(".so"));
@@ -339,17 +339,16 @@ wxDynamicLibraryDetailsArray wxDynamicLibrary::ListLoaded()
     {
         // details of the module currently being parsed
         wxString pathCur;
-        void *startCur = NULL,
-             *endCur = NULL;
+        unsigned long startCur = 0,
+                      endCur = 0;
 
         char path[1024];
         char buf[1024];
         while ( fgets(buf, WXSIZEOF(buf), file.fp()) )
         {
-            // format is: "start-end perm offset maj:min inode path", see proc(5)
-            void *start,
-                 *end;
-            switch ( sscanf(buf, "%p-%p %*4s %*p %*02x:%*02x %*d %1024s\n",
+            // format is: start-end perm something? maj:min inode path
+            unsigned long start, end;
+            switch ( sscanf(buf, "%08lx-%08lx %*4s %*08x %*02d:%*02d %*d %1024s\n",
                             &start, &end, path) )
             {
                 case 2:
@@ -369,9 +368,6 @@ wxDynamicLibraryDetailsArray wxDynamicLibrary::ListLoaded()
                     continue;
             }
 
-            wxASSERT_MSG( start >= endCur,
-                          _T("overlapping regions in /proc/self/maps?") );
-
             wxString pathNew = wxString::FromAscii(path);
             if ( pathCur.empty() )
             {
@@ -380,9 +376,10 @@ wxDynamicLibraryDetailsArray wxDynamicLibrary::ListLoaded()
                 startCur = start;
                 endCur = end;
             }
-            else if ( pathCur == pathNew && endCur == end )
+            else if ( pathCur == pathNew )
             {
-                // continuation of the same module in the address space
+                // continuation of the same module
+                wxASSERT_MSG( start == endCur, _T("hole in /proc/self/maps?") );
                 endCur = end;
             }
             else // end of the current module

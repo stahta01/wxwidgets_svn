@@ -163,6 +163,21 @@ int wxDisplayDepth()
     return gdk_drawable_get_visual( wxGetRootWindow()->window )->depth;
 }
 
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+{
+    static wxToolkitInfo info;
+    info.shortName = _T("gtk2");
+    info.name = _T("wxGTK");
+#ifdef __WXUNIVERSAL__
+    info.shortName << _T("univ");
+    info.name << _T("/wxUniversal");
+#endif
+    info.versionMajor = gtk_major_version;
+    info.versionMinor = gtk_minor_version;
+    info.os = wxGTK;
+    return info;
+}
+
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 {
     return wxGenericFindWindowAtPoint(pt);
@@ -172,48 +187,25 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 
 wxCharBuffer wxConvertToGTK(const wxString& s, wxFontEncoding enc)
 {
-    wxCharBuffer buf;
     if ( enc == wxFONTENCODING_UTF8 )
     {
-        // no need for conversion at all, but do check that we have a valid
-        // UTF-8 string because passing invalid UTF-8 to GTK+ is going to
-        // result in a GTK+ error message and, especially, loss of data which
-        // was supposed to be shown in the GUI
-        if ( wxConvUTF8.ToWChar(NULL, 0, s, s.length()) == wxCONV_FAILED )
-        {
-            // warn the programmer that something is probably wrong in his code
-            //
-            // NB: don't include the string in output because chances are that
-            //     this invalid UTF-8 string could result in more errors itself
-            //     if the application shows logs in the GUI and so we get into
-            //     an infinite loop
-            wxLogDebug(_T("Invalid UTF-8 string in wxConvertToGTK()"));
-
-            // but still try to show at least something on the screen
-            wxMBConvUTF8 utf8permissive(wxMBConvUTF8::MAP_INVALID_UTF8_TO_OCTAL);
-            wxWCharBuffer wbuf(utf8permissive.cMB2WC(s));
-            buf = wxConvUTF8.cWC2MB(wbuf);
-        }
-        else // valid UTF-8 string, no need to convert
-        {
-            buf = wxCharBuffer(s);
-        }
+        // no need for conversion at all
+        return wxCharBuffer(s);
     }
-    else // !UTF-8
+
+    wxWCharBuffer wbuf;
+    if ( enc == wxFONTENCODING_SYSTEM || enc == wxFONTENCODING_DEFAULT )
     {
-        wxWCharBuffer wbuf;
-        if ( enc == wxFONTENCODING_SYSTEM || enc == wxFONTENCODING_DEFAULT )
-        {
-            wbuf = wxConvUI->cMB2WC(s);
-        }
-        else // another encoding, use generic conversion class
-        {
-            wbuf = wxCSConv(enc).cMB2WC(s);
-        }
-
-        if ( wbuf )
-            buf = wxConvUTF8.cWC2MB(wbuf);
+        wbuf = wxConvUI->cMB2WC(s);
     }
+    else // another encoding, use generic conversion class
+    {
+        wbuf = wxCSConv(enc).cMB2WC(s);
+    }
+
+    wxCharBuffer buf;
+    if ( wbuf )
+        buf = wxConvUTF8.cWC2MB(wbuf);
 
     return buf;
 }
@@ -266,20 +258,4 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
                             (gpointer)proc_data);
 
     return tag;
-}
-
-
-
-// ----------------------------------------------------------------------------
-// wxPlatformInfo-related
-// ----------------------------------------------------------------------------
-
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
-{
-    if ( verMaj )
-        *verMaj = gtk_major_version;
-    if ( verMin )
-        *verMin = gtk_minor_version;
-
-    return wxPORT_GTK;
 }

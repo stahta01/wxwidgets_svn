@@ -28,7 +28,6 @@ AC_ARG_WITH(cppunit-exec-prefix,[  --with-cppunit-exec-prefix=PFX  Exec prefix w
   AC_MSG_CHECKING(for Cppunit - version >= $cppunit_version_min)
   no_cppunit=""
   if test "$CPPUNIT_CONFIG" = "no" ; then
-    AC_MSG_RESULT(no)
     no_cppunit=yes
   else
     CPPUNIT_CFLAGS=`$CPPUNIT_CONFIG --cflags`

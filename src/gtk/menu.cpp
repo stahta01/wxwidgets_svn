@@ -23,7 +23,6 @@
     #include "wx/accel.h"
 #endif // wxUSE_ACCEL
 
-#include "wx/stockitem.h"
 #include "wx/gtk/private.h"
 
 #include <gdk/gdkkeysyms.h>
@@ -258,6 +257,53 @@ void wxMenuBar::SetInvokingWindow( wxWindow *win )
         wxMenubarSetInvokingWindow( menu, win );
         node = node->GetNext();
     }
+}
+
+void wxMenuBar::SetLayoutDirection(wxLayoutDirection dir)
+{
+    wxLayoutDirection actualDir;
+    if (dir == wxLayout_Default)
+    {
+        const wxWindow *const frame = GetFrame();
+        if (frame)
+        {
+            // inherit layout from frame.
+            actualDir = frame->GetLayoutDirection();
+        }
+        else
+        {
+            // this menubar doesn't have a frame,
+            // so, do nothing.
+            return;
+        }
+    }
+    const GtkTextDirection gtkTextDir = actualDir == wxLayout_RightToLeft ? GTK_TEXT_DIR_RTL : GTK_TEXT_DIR_LTR;
+
+    gtk_widget_set_direction(GTK_WIDGET(m_menubar), gtkTextDir);
+
+    // loop on all menus and properly set their layout direction.
+    wxMenuList::compatibility_iterator node = m_menus.GetFirst();
+    while (node)
+    {
+        wxMenu *const menu = node->GetData();
+        menu->SetLayoutDirection(actualDir);
+        node = node->GetNext();
+    }
+}
+
+wxLayoutDirection wxMenuBar::GetLayoutDirection() const
+{
+    if (gtk_widget_get_direction(GTK_WIDGET(m_menubar)) == GTK_TEXT_DIR_LTR)
+        return wxLayout_LeftToRight;
+    else
+        return wxLayout_RightToLeft;
+}
+
+void wxMenuBar::Attach(wxFrame *frame)
+{
+    wxMenuBarBase::Attach(frame);
+
+    SetLayoutDirection(wxLayout_Default);
 }
 
 void wxMenuBar::UnsetInvokingWindow( wxWindow *win )
@@ -936,6 +982,22 @@ wxMenu::~wxMenu()
    }
 }
 
+void wxMenu::SetLayoutDirection(const wxLayoutDirection dir)
+{
+    wxASSERT_MSG(dir != wxLayout_Default, wxT("invalid argument value: dir == wxLayout_Default")); 
+    const GtkTextDirection gtkTextDir = dir == wxLayout_RightToLeft ? GTK_TEXT_DIR_RTL : GTK_TEXT_DIR_LTR;
+
+    gtk_widget_set_direction(GTK_WIDGET(m_owner), gtkTextDir);
+}
+
+wxLayoutDirection wxMenu::GetLayoutDirection() const
+{
+    if (gtk_widget_get_direction(GTK_WIDGET(m_owner)) == GTK_TEXT_DIR_LTR)
+        return wxLayout_LeftToRight;
+    else
+        return wxLayout_RightToLeft;
+}
+
 bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
 {
     GtkWidget *menuItem;
@@ -946,56 +1008,37 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     {
         menuItem = gtk_separator_menu_item_new();
     }
-    else if ( mitem->GetBitmap().Ok() ||
-                (mitem->GetKind() == wxITEM_NORMAL &&
-                    wxIsStockID(mitem->GetId())) )
+    else if (mitem->GetBitmap().Ok())
     {
         text = mitem->GetText();
-        wxBitmap bitmap(mitem->GetBitmap());
+        const wxBitmap *bitmap = &mitem->GetBitmap();
 
         menuItem = gtk_image_menu_item_new_with_mnemonic( wxGTK_CONV_SYS( text ) );
 
         GtkWidget *image;
-        if ( !bitmap.Ok() )
+        if (bitmap->HasPixbuf())
         {
-            // use stock bitmap for this item if available on the assumption
-            // that it never hurts to follow GTK+ conventions more closely
-            const char *stock = wxGetStockGtkID(mitem->GetId());
-            image = stock ? gtk_image_new_from_stock(stock, GTK_ICON_SIZE_MENU)
-                          : NULL;
+            image = gtk_image_new_from_pixbuf(bitmap->GetPixbuf());
         }
-        else // we have a custom bitmap
+        else
         {
-            wxASSERT_MSG( mitem->GetKind() == wxITEM_NORMAL,
-                            _T("only normal menu items can have bitmaps") );
-
-            if ( bitmap.HasPixbuf() )
-            {
-                image = gtk_image_new_from_pixbuf(bitmap.GetPixbuf());
-            }
-            else
-            {
-                GdkPixmap *gdk_pixmap = bitmap.GetPixmap();
-                GdkBitmap *gdk_bitmap = bitmap.GetMask() ?
-                                            bitmap.GetMask()->GetBitmap() :
-                                            (GdkBitmap*) NULL;
-                image = gtk_image_new_from_pixmap( gdk_pixmap, gdk_bitmap );
-            }
+            GdkPixmap *gdk_pixmap = bitmap->GetPixmap();
+            GdkBitmap *gdk_bitmap = bitmap->GetMask() ?
+                                        bitmap->GetMask()->GetBitmap() :
+                                        (GdkBitmap*) NULL;
+            image = gtk_image_new_from_pixmap( gdk_pixmap, gdk_bitmap );
         }
 
-        if ( image )
-        {
-            gtk_widget_show(image);
+        gtk_widget_show(image);
 
-            gtk_image_menu_item_set_image( GTK_IMAGE_MENU_ITEM(menuItem), image );
-        }
+        gtk_image_menu_item_set_image( GTK_IMAGE_MENU_ITEM(menuItem), image );
 
         m_prevRadio = NULL;
     }
     else // a normal item
     {
         // text has "_" instead of "&" after mitem->SetText() so don't use it
-        text = mitem->GetText() ;
+        text =  mitem->GetText() ;
 
         switch ( mitem->GetKind() )
         {
@@ -1145,6 +1188,14 @@ int wxMenu::FindMenuIdByMenuItem( GtkWidget *menuItem ) const
     }
 
     return wxNOT_FOUND;
+}
+
+void wxMenu::Attach(wxMenuBarBase *menubar)
+{
+    wxMenuBase::Attach(menubar);
+    // inherit layout direction from menubar.
+    SetLayoutDirection(menubar->GetLayoutDirection());
+    return;
 }
 
 // ----------------------------------------------------------------------------

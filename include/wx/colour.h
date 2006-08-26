@@ -20,11 +20,11 @@
 // this macro avoids to repeat these lines across all colour.h files, since
 // Set() is a virtual function and thus cannot be called by wxColourBase
 // constructors
-#define DEFINE_STD_WXCOLOUR_CONSTRUCTORS                                                              \
-    wxColour( unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha = 255 ) \
-        { Set(red, green, blue, alpha); }                                                             \
-    wxColour( unsigned long colRGB ) { Set(colRGB); }                                                 \
-    wxColour(const wxString &colourName) { Set(colourName); }                                         \
+#define DEFINE_STD_WXCOLOUR_CONSTRUCTORS                                        \
+    wxColour( unsigned char red, unsigned char green, unsigned char blue )      \
+        { Set(red, green, blue); }                                              \
+    wxColour( unsigned long colRGB ) { Set(colRGB); }                           \
+    wxColour(const wxString &colourName) { Set(colourName); }                   \
     wxColour(const wxChar *colourName) { Set(colourName); }
 
 
@@ -36,8 +36,6 @@
 
 class WXDLLEXPORT wxColour;
 
-const unsigned char wxALPHA_TRANSPARENT = 0;
-const unsigned char wxALPHA_OPAQUE = 0xff;
 
 //-----------------------------------------------------------------------------
 // wxColourBase: this class has no data members, just some functions to avoid
@@ -49,13 +47,6 @@ class WXDLLEXPORT wxColourBase : public wxGDIObject
 protected:
 
     virtual void InitWith(unsigned char red, unsigned char green, unsigned char blue) = 0;
-
-    // this will be overridden in alpha supporting classes
-    virtual void InitWith(unsigned char red, unsigned char green, unsigned char blue, unsigned char WXUNUSED(alpha)) 
-    {
-        InitWith( red, green, blue ) ;
-    }
-
     virtual bool FromString(const wxChar *);
 
 public:
@@ -66,8 +57,8 @@ public:
     // Set() functions
     // ---------------
 
-    void Set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha = wxALPHA_OPAQUE)
-        { InitWith(red,green,blue, alpha); }
+    void Set(unsigned char red, unsigned char green, unsigned char blue)
+        { InitWith(red,green,blue); }
 
     // implemented in colourcmn.cpp
     bool Set(const wxChar *str)
@@ -95,8 +86,6 @@ public:
     virtual unsigned char Red() const = 0;
     virtual unsigned char Green() const = 0;
     virtual unsigned char Blue() const = 0;
-    virtual unsigned char Alpha() const
-        { return wxALPHA_OPAQUE ; }
 
     // implemented in colourcmn.cpp
     virtual wxString GetAsString(long flags = wxC2S_NAME | wxC2S_CSS_SYNTAX) const;
@@ -115,7 +104,7 @@ public:
 
 
 #if defined(__WXPALMOS__)
-#include "wx/generic/colour.h"
+#include "wx/palmos/colour.h"
 #elif defined(__WXMSW__)
 #include "wx/msw/colour.h"
 #elif defined(__WXMOTIF__)
@@ -125,7 +114,7 @@ public:
 #elif defined(__WXGTK__)
 #include "wx/gtk1/colour.h"
 #elif defined(__WXMGL__)
-#include "wx/generic/colour.h"
+#include "wx/mgl/colour.h"
 #elif defined(__WXX11__)
 #include "wx/x11/colour.h"
 #elif defined(__WXMAC__)

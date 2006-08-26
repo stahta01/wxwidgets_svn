@@ -1192,30 +1192,27 @@ bool wxGridCellFloatEditor::IsAcceptedKey(wxKeyEvent& event)
 {
     if ( wxGridCellEditor::IsAcceptedKey(event) )
     {
-        const int keycode = event.GetKeyCode();
-        if ( isascii(keycode) )
-        {
-            char tmpbuf[2];
-            tmpbuf[0] = (char) keycode;
-            tmpbuf[1] = '\0';
-            wxString strbuf(tmpbuf, *wxConvCurrent);
+        int keycode = event.GetKeyCode();
+        printf("%d\n", keycode);
+        // accept digits, 'e' as in '1e+6', also '-', '+', and '.'
+        char tmpbuf[2];
+        tmpbuf[0] = (char) keycode;
+        tmpbuf[1] = '\0';
+        wxString strbuf(tmpbuf, *wxConvCurrent);
 
 #if wxUSE_INTL
-            const wxString decimalPoint =
-                wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER);
+        bool is_decimal_point =
+            ( strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT,
+                                          wxLOCALE_CAT_NUMBER) );
 #else
-            const wxString decimalPoint(_T('.'));
+        bool is_decimal_point = ( strbuf == _T(".") );
 #endif
 
-            // accept digits, 'e' as in '1e+6', also '-', '+', and '.'
-            if ( wxIsdigit(keycode) ||
-                    tolower(keycode) == 'e' ||
-                        keycode == decimalPoint ||
-                            keycode == '+' ||
-                                keycode == '-' )
-            {
-                return true;
-            }
+        if ( (keycode < 128) &&
+             (wxIsdigit(keycode) || tolower(keycode) == 'e' ||
+              is_decimal_point || keycode == '+' || keycode == '-') )
+        {
+            return true;
         }
     }
 
@@ -7536,21 +7533,6 @@ void wxGrid::DrawCellHighlight( wxDC& dc, const wxGridCellAttr *attr )
 #endif
 }
 
-wxPen wxGrid::GetDefaultGridLinePen()
-{
-    return wxPen(GetGridLineColour(), 1, wxSOLID);
-}
-
-wxPen wxGrid::GetRowGridLinePen(int WXUNUSED(row))
-{
-    return GetDefaultGridLinePen();
-}
-
-wxPen wxGrid::GetColGridLinePen(int WXUNUSED(col))
-{
-    return GetDefaultGridLinePen();
-}
-
 void wxGrid::DrawCellBorder( wxDC& dc, const wxGridCellCoords& coords )
 {
     int row = coords.GetRow();
@@ -7558,16 +7540,15 @@ void wxGrid::DrawCellBorder( wxDC& dc, const wxGridCellCoords& coords )
     if ( GetColWidth(col) <= 0 || GetRowHeight(row) <= 0 )
         return;
 
+    dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
 
     wxRect rect = CellToRect( row, col );
 
     // right hand border
-    dc.SetPen( GetColGridLinePen(col) );
     dc.DrawLine( rect.x + rect.width, rect.y,
                  rect.x + rect.width, rect.y + rect.height + 1 );
 
     // bottom border
-    dc.SetPen( GetRowGridLinePen(row) );
     dc.DrawLine( rect.x, rect.y + rect.height,
                  rect.x + rect.width, rect.y + rect.height);
 }
@@ -7712,6 +7693,7 @@ void wxGrid::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
 
     dc.SetClippingRegion( clippedcells );
 
+    dc.SetPen( wxPen(GetGridLineColour(), 1, wxSOLID) );
 
     // horizontal grid lines
     //
@@ -7727,7 +7709,6 @@ void wxGrid::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
 
         if ( bot >= top )
         {
-            dc.SetPen( GetRowGridLinePen(i) );
             dc.DrawLine( left, bot, right, bot );
         }
     }
@@ -7747,7 +7728,6 @@ void wxGrid::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
 
         if ( colRight >= left )
         {
-            dc.SetPen( GetColGridLinePen(i) );
             dc.DrawLine( colRight, top, colRight, bottom );
         }
     }

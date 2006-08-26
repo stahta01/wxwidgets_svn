@@ -78,12 +78,6 @@
 #   if !defined __WXDEBUG__ && __VISUALC__ <= 1100
 #       pragma warning(disable:4702)    /* unreachable code */
 #   endif
-    /* The VC++ 5.0 warning 'C4003: not enough actual parameters for macro'
-     * is incompatible with the wxWidgets headers since it is given when
-     * parameters are empty but not missing. */
-#   if __VISUALC__ <= 1100
-#       pragma warning(disable:4003)    /* not enough actual parameters for macro */
-#   endif
 
     /*
        VC++ 8 gives a warning when using standard functions such as sprintf,
@@ -669,6 +663,68 @@ typedef int wxWindowID;
 #    endif
 #  endif
 #endif
+
+/*  ---------------------------------------------------------------------------- */
+/*  OS mnemonics -- Identify the running OS (useful for Windows) */
+/*  ---------------------------------------------------------------------------- */
+
+/*  Not all platforms are currently available or supported */
+enum
+{
+    wxUNKNOWN_PLATFORM,
+    wxCURSES,                 /*  Text-only CURSES */
+    wxXVIEW_X,                /*  Sun's XView OpenLOOK toolkit */
+    wxMOTIF_X,                /*  OSF Motif 1.x.x */
+    wxCOSE_X,                 /*  OSF Common Desktop Environment */
+    wxNEXTSTEP,               /*  NeXTStep */
+    wxMAC,                    /*  Apple Mac OS 8/9/X with Mac paths */
+    wxMAC_DARWIN,             /*  Apple Mac OS X with Unix paths */
+    wxBEOS,                   /*  BeOS */
+    wxGTK,                    /*  GTK on X */
+    wxGTK_WIN32,              /*  GTK on Win32 */
+    wxGTK_OS2,                /*  GTK on OS/2 */
+    wxGTK_BEOS,               /*  GTK on BeOS */
+    wxGEOS,                   /*  GEOS */
+    wxOS2_PM,                 /*  OS/2 Workplace */
+    wxWINDOWS,                /*  Windows or WfW */
+    wxMICROWINDOWS,           /*  MicroWindows */
+    wxPENWINDOWS,             /*  Windows for Pen Computing */
+    wxWINDOWS_NT,             /*  Windows NT */
+    wxWIN32S,                 /*  Windows 32S API */
+    wxWIN95,                  /*  Windows 95 */
+    wxWIN386,                 /*  Watcom 32-bit supervisor modus */
+    wxWINDOWS_CE,             /*  Windows CE (generic) */
+    wxWINDOWS_POCKETPC,       /*  Windows CE PocketPC */
+    wxWINDOWS_SMARTPHONE,     /*  Windows CE Smartphone */
+    wxMGL_UNIX,               /*  MGL with direct hardware access */
+    wxMGL_X,                  /*  MGL on X */
+    wxMGL_WIN32,              /*  MGL on Win32 */
+    wxMGL_OS2,                /*  MGL on OS/2 */
+    wxMGL_DOS,                /*  MGL on MS-DOS */
+    wxWINDOWS_OS2,            /*  Native OS/2 PM */
+    wxUNIX,                   /*  wxBase under Unix */
+    wxX11,                    /*  Plain X11 and Universal widgets */
+    wxPALMOS,                 /*  PalmOS */
+    wxDOS                     /*  wxBase under MS-DOS */
+};
+
+/* Friendlier platform names */
+enum
+{
+    wxMotif = wxMOTIF_X,
+    wxMac = wxMAC,
+    wxMSW = wxWINDOWS,
+    wxWinCE = wxWINDOWS_CE,
+    wxWinPocketPC = wxWINDOWS_POCKETPC,
+    wxWinSmartPhone = wxWINDOWS_SMARTPHONE,
+    wxWin95= wxWIN95,
+    wxUnix = wxUNIX,                   /*  wxBase under Unix */
+    wxPalmOS = wxPALMOS,               /*  PalmOS */
+    wxOS2 = wxOS2_PM,
+
+    wxMGL = 100,
+    wxCocoa
+};
 
 /*  ---------------------------------------------------------------------------- */
 /*  standard wxWidgets types */
@@ -1457,17 +1513,14 @@ enum wxBorder
 /*  this window should always process UI update events */
 #define wxWS_EX_PROCESS_UI_UPDATES      0x00000020
 
+/*  Use this style to add a context-sensitive help to the window (currently for */
+/*  Win32 only and it doesn't work if wxMINIMIZE_BOX or wxMAXIMIZE_BOX are used) */
+#define wxFRAME_EX_CONTEXTHELP  0x00000004
+#define wxDIALOG_EX_CONTEXTHELP 0x00000004
+
 /*  Draw the window in a metal theme on Mac */
 #define wxFRAME_EX_METAL                0x00000040
 #define wxDIALOG_EX_METAL               0x00000040
-
-/*  Use this style to add a context-sensitive help to the window (currently for */
-/*  Win32 only and it doesn't work if wxMINIMIZE_BOX or wxMAXIMIZE_BOX are used) */
-#define wxWS_EX_CONTEXTHELP             0x00000080
-
-/* synonyms for wxWS_EX_CONTEXTHELP for compatibility */
-#define wxFRAME_EX_CONTEXTHELP          wxWS_EX_CONTEXTHELP
-#define wxDIALOG_EX_CONTEXTHELP         wxWS_EX_CONTEXTHELP
 
 /*  Create a window which is attachable to another top level window */
 #define wxFRAME_DRAWER          0x0020
@@ -1746,17 +1799,14 @@ enum
     wxID_HELP,
     wxID_PRINT,
     wxID_PRINT_SETUP,
-    wxID_PAGE_SETUP,
     wxID_PREVIEW,
     wxID_ABOUT,
     wxID_HELP_CONTENTS,
-    wxID_HELP_INDEX,
-    wxID_HELP_SEARCH,
     wxID_HELP_COMMANDS,
     wxID_HELP_PROCEDURES,
     wxID_HELP_CONTEXT,
     wxID_CLOSE_ALL,
-    wxID_PREFERENCES,
+    wxID_PREFERENCES ,
 
     wxID_CUT = 5030,
     wxID_COPY,

@@ -21,6 +21,8 @@
 //-----------------------------------------------------------------------------
 
 extern bool           g_blockEventsOnDrag;
+extern wxCursor       g_globalCursor;
+extern wxWindowGTK   *g_delayedFocus;
 
 //-----------------------------------------------------------------------------
 // "clicked"
@@ -165,10 +167,38 @@ void wxRadioButton::DoApplyWidgetStyle(GtkRcStyle *style)
     gtk_widget_modify_style(GTK_BIN(m_widget)->child, style);
 }
 
-GdkWindow *
-wxRadioButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxRadioButton::IsOwnGtkWindow( GdkWindow *window )
 {
-    return GTK_BUTTON(m_widget)->event_window;
+    return window == GTK_BUTTON(m_widget)->event_window;
+}
+
+void wxRadioButton::OnInternalIdle()
+{
+    wxCursor cursor = m_cursor;
+    if (g_globalCursor.Ok()) cursor = g_globalCursor;
+
+    GdkWindow *win = GTK_BUTTON(m_widget)->event_window;
+    if ( win && cursor.Ok())
+    {
+        /* I now set the cursor the anew in every OnInternalIdle call
+       as setting the cursor in a parent window also effects the
+       windows above so that checking for the current cursor is
+       not possible. */
+
+       gdk_window_set_cursor( win, cursor.GetCursor() );
+    }
+
+    if (g_delayedFocus == this)
+    {
+        if (GTK_WIDGET_REALIZED(m_widget))
+        {
+            gtk_widget_grab_focus( m_widget );
+            g_delayedFocus = NULL;
+        }
+    }
+
+    if (wxUpdateUIEvent::CanUpdate(this))
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 }
 
 wxSize wxRadioButton::DoGetBestSize() const

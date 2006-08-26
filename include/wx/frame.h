@@ -168,11 +168,9 @@ public:
         { return false; }
 #endif // no wxTopLevelWindowNative
 
-#if wxUSE_MENUS || wxUSE_TOOLBAR
     // show help text (typically in the statusbar); show is false
     // if you are hiding the help, true otherwise
     virtual void DoGiveHelp(const wxString& text, bool show);
-#endif
 
 protected:
     // the frame main menu/status/tool bars
@@ -198,12 +196,12 @@ protected:
     virtual void AttachMenuBar(wxMenuBar *menubar);
 
     wxMenuBar *m_frameMenuBar;
-#endif // wxUSE_MENUS
 
-#if wxUSE_STATUSBAR && (wxUSE_MENUS || wxUSE_TOOLBAR)
+#if wxUSE_STATUSBAR
     // the saved status bar text overwritten by DoGiveHelp()
     wxString m_oldStatusText;
-#endif
+#endif // wxUSE_STATUSBAR
+#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
     // override to update status bar position (or anything else) when

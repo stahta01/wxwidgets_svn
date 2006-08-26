@@ -13,11 +13,6 @@
 #if wxUSE_BUTTON
 
 #include "wx/button.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/toplevel.h"
-#endif
-
 #include "wx/stockitem.h"
 
 #include "wx/gtk/private.h"
@@ -170,10 +165,10 @@ bool wxButton::Create(  wxWindow *parent, wxWindowID id, const wxString &label,
 
 void wxButton::SetDefault()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-    wxCHECK_RET( tlw, _T("button without top level window?") );
+    wxWindow *parent = GetParent();
+    wxCHECK_RET( parent, _T("button without parent?") );
 
-    tlw->SetDefaultItem(this);
+    parent->SetDefaultItem(this);
 
     GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
     gtk_widget_grab_default( m_widget );
@@ -257,7 +252,7 @@ bool wxButton::Enable( bool enable )
     return true;
 }
 
-GdkWindow *wxButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxButton::IsOwnGtkWindow( GdkWindow *window )
 {
     return GTK_BUTTON(m_widget)->event_window;
 }

@@ -97,7 +97,7 @@ wxObject *wxOwnerDrawnComboBoxXmlHandler::DoCreateResource()
         // add to the list
         wxString str = GetNodeContent(m_node);
         if (m_resource->GetFlags() & wxXRC_USE_LOCALE)
-            str = wxGetTranslation(str, m_resource->GetDomain());
+            str = wxGetTranslation(str);
         strList.Add(str);
 
         return NULL;
@@ -106,23 +106,14 @@ wxObject *wxOwnerDrawnComboBoxXmlHandler::DoCreateResource()
 
 bool wxOwnerDrawnComboBoxXmlHandler::CanHandle(wxXmlNode *node)
 {
-#if wxCHECK_VERSION(2,7,0)
-
-    return (IsOfClass(node, wxT("wxOwnerDrawnComboBox")) ||
-           (m_insideBox && node->GetName() == wxT("item")));
-
-#else
-
-//  Avoid GCC bug - this fails on certain GCC 3.3 and 3.4 builds for an unknown reason
-//  it is believed to be related to the fact IsOfClass is inline, and node->GetPropVal
-//  gets passed an invalid "this" pointer. On 2.7, the function is out of line, so the
-//  above should work fine. This code is left in here so this file can easily be used
-//  in a version backported to 2.6. All we are doing here is expanding the macro
+//  Avoid GCC bug - this fails on certain GCC 3.x builds for an unknown reason
+//  return (IsOfClass(node, wxT("wxOwnerDrawnComboBox")) ||
+//         (m_insideBox && node->GetName() == wxT("item")));
 
     bool fOurClass = node->GetPropVal(wxT("class"), wxEmptyString) == wxT("wxOwnerDrawnComboBox");
     return (fOurClass ||
           (m_insideBox && node->GetName() == wxT("item")));
-#endif
+
 }
 
 #endif // wxUSE_XRC && wxUSE_ODCOMBOBOX

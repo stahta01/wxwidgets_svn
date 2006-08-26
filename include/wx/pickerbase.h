@@ -41,14 +41,12 @@ public:
 
     // if present, intercepts wxPB_USE_TEXTCTRL style and creates the text control
     // The 3rd argument is the initial wxString to display in the text control
-    bool CreateBase(wxWindow *parent,
-                    wxWindowID id,
-                    const wxString& text = wxEmptyString,
-                    const wxPoint& pos = wxDefaultPosition,
-                    const wxSize& size = wxDefaultSize,
-                    long style = 0,
-                    const wxValidator& validator = wxDefaultValidator,
-                    const wxString& name = wxButtonNameStr);
+    bool CreateBase(wxWindow *parent, wxWindowID id,
+        const wxString& text = wxEmptyString,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = 0,
+        const wxValidator& validator = wxDefaultValidator,
+        const wxString& name = wxButtonNameStr);
 
 
 public:     // public API
@@ -59,17 +57,12 @@ public:     // public API
     int GetInternalMargin() const
         { return GetTextCtrlItem()->GetBorder(); }
 
-    // proportion of the text control
+    // proportion of the text control respect the picker
+    // (which has a fixed proportion value of 1)
     void SetTextCtrlProportion(int prop)
         { GetTextCtrlItem()->SetProportion(prop); m_sizer->Layout(); }
     int GetTextCtrlProportion() const
         { return GetTextCtrlItem()->GetProportion(); }
-
-    // proportion of the picker control
-    void SetPickerCtrlProportion(int prop)
-        { GetPickerCtrlItem()->SetProportion(prop); m_sizer->Layout(); }
-    int GetPickerCtrlProportion() const
-        { return GetPickerCtrlItem()->GetProportion(); }
 
     bool IsTextCtrlGrowable() const
         { return (GetTextCtrlItem()->GetFlag() & wxGROW) != 0; }

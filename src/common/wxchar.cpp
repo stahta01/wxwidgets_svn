@@ -186,7 +186,7 @@ bool WXDLLEXPORT wxOKlibc()
 #define wxMAX_SVNPRINTF_ARGUMENTS         64
 #define wxMAX_SVNPRINTF_FLAGBUFFER_LEN    32
 
-// the conversion specifiers accepted by wxVsnprintf_
+// the conversion specifiers accepted by wxMyPosVsnprintf_
 enum wxPrintfArgType {
     wxPAT_INVALID = -1,
 
@@ -213,7 +213,7 @@ enum wxPrintfArgType {
     wxPAT_NLONGINT      // %ln
 };
 
-// an argument passed to wxVsnprintf_
+// an argument passed to wxMyPosVsnprintf_
 typedef union {
     int pad_int;                        //  %d, %i, %o, %u, %x, %X
     long int pad_longint;               // %ld, etc
@@ -240,7 +240,7 @@ typedef union {
 
 
 // Contains parsed data relative to a conversion specifier given to
-// wxVsnprintf_ and parsed from the format string
+// wxMyPosVsnprintf_ and parsed from the format string
 // NOTE: in C++ there is almost no difference between struct & classes thus
 //       there is no performance gain by using a struct here...
 class wxPrintfConvSpec
@@ -274,16 +274,13 @@ public:
 
     // a little buffer where formatting flags like #+\.hlqLZ are stored by Parse()
     // for use in Process()
-    // NB: this buffer can be safely a char buffer instead of a wchar_t buffer
-    //     since it's used only for numeric conversion specifier and always
-    //     with sprintf().
     char szFlags[wxMAX_SVNPRINTF_FLAGBUFFER_LEN];
 
 
 public:
 
     // we don't declare this as a constructor otherwise it would be called
-    // automatically and we don't want this: to be optimized, wxVsnprintf_
+    // automatically and we don't want this: to be optimized, wxMyPosVsnprintf_
     // calls this function only on really-used instances of this class.
     void Init();
 
@@ -313,10 +310,7 @@ void wxPrintfConvSpec::Init()
     adj_left = false;
     argpos = argend = NULL;
     type = wxPAT_INVALID;
-
-    // this character will never be removed from szFlags array and
-    // is important when calling sprintf() in wxPrintfConvSpec::Process() !
-    szFlags[0] = '%';
+    szFlags[0] = wxT('%');
 }
 
 bool wxPrintfConvSpec::Parse(const wxChar *format)
@@ -335,7 +329,7 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
 #define CHECK_PREC \
         if (in_prec && !prec_dot) \
         { \
-            szFlags[flagofs++] = (char)'.'; \
+            szFlags[flagofs++] = '.'; \
             prec_dot = true; \
         }
 
@@ -355,13 +349,13 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
             case wxT('+'):
             case wxT('\''):
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('-'):
                 CHECK_PREC
                 adj_left = true;
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('.'):
@@ -376,26 +370,26 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
             case wxT('h'):
                 ilen = -1;
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('l'):
                 ilen = 1;
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('q'):
             case wxT('L'):
                 ilen = 2;
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('Z'):
                 ilen = 3;
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('*'):
@@ -416,7 +410,7 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
 
                 // save the * in our formatting buffer...
                 // will be replaced later by Process()
-                szFlags[flagofs++] = (char)ch;
+                szFlags[flagofs++] = ch;
                 break;
 
             case wxT('1'): case wxT('2'): case wxT('3'):
@@ -428,7 +422,7 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
                     while ( (*argend >= wxT('0')) &&
                             (*argend <= wxT('9')) )
                     {
-                        szFlags[flagofs++] = (char)(*argend);
+                        szFlags[flagofs++] = *argend;
                         len = len*10 + (*argend - wxT('0'));
                         argend++;
                     }
@@ -470,8 +464,8 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
             case wxT('x'):
             case wxT('X'):
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
-                szFlags[flagofs] = (char)'\0';
+                szFlags[flagofs++] = ch;
+                szFlags[flagofs] = '\0';
                 if (ilen == 0)
                     type = wxPAT_INT;
                 else if (ilen == -1)
@@ -498,8 +492,8 @@ bool wxPrintfConvSpec::Parse(const wxChar *format)
             case wxT('g'):
             case wxT('G'):
                 CHECK_PREC
-                szFlags[flagofs++] = (char)ch;
-                szFlags[flagofs] = (char)'\0';
+                szFlags[flagofs++] = ch;
+                szFlags[flagofs] = '\0';
                 if (ilen == 2)
                     type = wxPAT_LONGDOUBLE;
                 else
@@ -658,10 +652,10 @@ bool wxPrintfConvSpec::LoadArg(wxPrintfArg *p, va_list &argptr)
             break;
 
         case wxPAT_CHAR:
-            p->pad_char = (char)va_arg(argptr, int);  // char is promoted to int when passed through '...'
+            p->pad_char = va_arg(argptr, int);  // char is promoted to int when passed through '...'
             break;
         case wxPAT_WCHAR:
-            p->pad_wchar = (wchar_t)va_arg(argptr, int);  // char is promoted to int when passed through '...'
+            p->pad_wchar = va_arg(argptr, int);  // char is promoted to int when passed through '...'
             break;
 
         case wxPAT_PCHAR:
@@ -859,7 +853,7 @@ int wxPrintfConvSpec::Process(wxChar *buf, size_t lenMax, wxPrintfArg *p)
             break;
 
         case wxPAT_NSHORTINT:
-            *p->pad_nshortint = (short int)lenCur;
+            *p->pad_nshortint = lenCur;
             break;
 
         case wxPAT_NLONGINT:

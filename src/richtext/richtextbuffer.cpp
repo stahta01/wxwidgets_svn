@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/richtext/richtextbuffer.cpp
+// Name:        richtext/richtextbuffer.cpp
 // Purpose:     Buffer for wxRichTextCtrl
 // Author:      Julian Smart
 // Modified by:
@@ -13,7 +13,7 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #if wxUSE_RICHTEXT
@@ -21,14 +21,12 @@
 #include "wx/richtext/richtextbuffer.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/dc.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/dataobj.h"
+  #include "wx/wx.h"
 #endif
 
 #include "wx/filename.h"
 #include "wx/clipbrd.h"
+#include "wx/dataobj.h"
 #include "wx/wfstream.h"
 #include "wx/module.h"
 #include "wx/mstream.h"
@@ -908,7 +906,7 @@ wxRichTextRange wxRichTextParagraphLayoutBox::AddParagraphs(const wxString& text
 
     wxRichTextRange range(-1, -1);
     size_t i = 0;
-    size_t len = text.length();
+    size_t len = text.Length();
     wxString line;
     while (i < len)
     {
@@ -2266,7 +2264,7 @@ bool wxRichTextParagraph::InsertText(long pos, const wxString& text)
                                text + textObject->GetText().Mid(posInString);
             textObject->SetText(newText);
 
-            int textLength = text.length();
+            int textLength = text.Length();
 
             textObject->SetRange(wxRichTextRange(textObject->GetRange().GetStart(),
                                                  textObject->GetRange().GetEnd() + textLength));
@@ -2760,7 +2758,7 @@ bool wxRichTextParagraph::FindWrapPosition(const wxRichTextRange& range, wxDC& d
         int spacePos = plainText.Find(wxT(' '), true);
         if (spacePos != wxNOT_FOUND)
         {
-            int positionsFromEndOfString = plainText.length() - spacePos - 1;
+            int positionsFromEndOfString = plainText.Length() - spacePos - 1;
             breakPosition = breakPosition - positionsFromEndOfString;
         }
     }
@@ -3048,7 +3046,7 @@ bool wxRichTextPlainText::Draw(wxDC& dc, const wxRichTextRange& range, const wxR
 
     return true;
 }
-
+ 
 bool wxRichTextPlainText::DrawTabbedString(wxDC& dc,const wxRect& rect,wxString& str, wxCoord& x, wxCoord& y, bool selected)
 {
     wxArrayInt tab_array =  GetAttributes().GetTabs();
@@ -3061,7 +3059,7 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc,const wxRect& rect,wxString&
     dc.SetMapMode(wxMM_LOMETRIC );
     int num_tabs = tab_array.GetCount();
     for( int i = 0; i < num_tabs; ++i){
-       tab_array[i] = dc.LogicalToDeviceXRel(tab_array[i]);
+       tab_array[i] = dc.LogicalToDeviceXRel(tab_array[i]);         
     }
     dc.SetMapMode(map_mode );
     int next_tab_pos = -1;
@@ -3077,7 +3075,7 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc,const wxRect& rect,wxString&
         dc.SetTextForeground(GetAttributes().GetTextColour());
         dc.SetBackgroundMode(wxTRANSPARENT);
     }
-    while(str.Find(wxT('\t')) >= 0){// the string has a tab
+    while(str.Find(wxT('\t')) >= 0){// the string has a tab 
         // break up the string at the Tab
         wxString stringChunk = str.BeforeFirst(wxT('\t'));
         str = str.AfterFirst(wxT('\t'));
@@ -3091,18 +3089,18 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc,const wxRect& rect,wxString&
                 if(selected){
                     w = next_tab_pos - x;
                     wxRect selRect(x, rect.y, w, rect.GetHeight());
-                    dc.DrawRectangle(selRect);
+                    dc.DrawRectangle(selRect);   
                 }
                 dc.DrawText(stringChunk, x, y);
                 x = next_tab_pos;
             }
         }
     }
-
+    
     dc.GetTextExtent(str, & w, & h);
     if(selected){
         wxRect selRect(x, rect.y, w, rect.GetHeight());
-        dc.DrawRectangle(selRect);
+        dc.DrawRectangle(selRect);   
     }
     dc.DrawText(str, x, y);
     x += w;
@@ -3149,27 +3147,23 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
     wxString stringChunk = m_text.Mid(startPos, (size_t) len);
     wxCoord w, h;
     int width = 0;
-    if(stringChunk.Find(wxT('\t')) >= 0){// the string has a tab
+    if(stringChunk.Find(wxT('\t')) >= 0){// the string has a tab 
         wxArrayInt tab_array =  GetAttributes().GetTabs();
-        if(tab_array.IsEmpty())
-        {
-            // create a default tab list at 10 mm each.
-            for( int i = 0; i < 20; ++i)
-            {
+        if(tab_array.IsEmpty()){// create a default tab list at 10 mm each.
+            for( int i = 0; i < 20; ++i){
                 tab_array.Add(i*100);
             }
         }
         int map_mode = dc.GetMapMode();
         dc.SetMapMode(wxMM_LOMETRIC );
         int num_tabs = tab_array.GetCount();
-        for( int i = 0; i < num_tabs; ++i)
-        {
-            tab_array[i] = dc.LogicalToDeviceXRel(tab_array[i]);
+        for( int i = 0; i < num_tabs; ++i){
+            tab_array[i] = dc.LogicalToDeviceXRel(tab_array[i]);         
         }
         dc.SetMapMode(map_mode );
         int next_tab_pos = -1;
-
-        while(stringChunk.Find(wxT('\t')) >= 0){// the string has a tab
+        
+        while(stringChunk.Find(wxT('\t')) >= 0){// the string has a tab 
             // break up the string at the Tab
             wxString stringFragment = stringChunk.BeforeFirst(wxT('\t'));
             stringChunk = stringChunk.AfterFirst(wxT('\t'));
@@ -3180,7 +3174,7 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
             for( int i = 0; i < num_tabs && not_found; ++i){
                 next_tab_pos = tab_array.Item(i);
                 if( next_tab_pos > absolute_width){
-                    not_found = false;
+                    not_found = false;                  
                     width = next_tab_pos - position.x;
                 }
             }
@@ -3189,7 +3183,7 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
     dc.GetTextExtent(stringChunk, & w, & h, & descent);
     width += w;
     size = wxSize(width, dc.GetCharHeight());
-
+    
     return true;
 }
 
@@ -3198,7 +3192,7 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
 wxRichTextObject* wxRichTextPlainText::DoSplit(long pos)
 {
     int index = pos - GetRange().GetStart();
-    if (index < 0 || index >= (int) m_text.length())
+    if (index < 0 || index >= (int) m_text.Length())
         return NULL;
 
     wxString firstPart = m_text.Mid(0, index);
@@ -3218,7 +3212,7 @@ wxRichTextObject* wxRichTextPlainText::DoSplit(long pos)
 /// Calculate range
 void wxRichTextPlainText::CalculateRange(long start, long& end)
 {
-    end = start + m_text.length() - 1;
+    end = start + m_text.Length() - 1;
     m_range.SetRange(start, end);
 }
 
@@ -3343,7 +3337,7 @@ bool wxRichTextBuffer::InsertTextWithUndo(long pos, const wxString& text, wxRich
     action->SetPosition(pos);
 
     // Set the range we'll need to delete in Undo
-    action->SetRange(wxRichTextRange(pos, pos + text.length() - 1));
+    action->SetRange(wxRichTextRange(pos, pos + text.Length() - 1));
 
     SubmitAction(action);
 
@@ -4928,7 +4922,7 @@ bool wxRichTextAttr::GetFontAttributes(const wxFont& font)
 wxRichTextAttr wxRichTextAttr::Combine(const wxRichTextAttr& attr,
                                const wxRichTextAttr& attrDef,
                                const wxTextCtrlBase *text)
-{
+{    
     wxColour colFg = attr.GetTextColour();
     if ( !colFg.Ok() )
     {
@@ -4951,19 +4945,19 @@ wxRichTextAttr wxRichTextAttr::Combine(const wxRichTextAttr& attr,
 
     if (attr.HasWeight())
         newAttr.SetFontWeight(attr.GetFontWeight());
-
+    
     if (attr.HasSize())
         newAttr.SetFontSize(attr.GetFontSize());
-
+    
     if (attr.HasItalic())
         newAttr.SetFontStyle(attr.GetFontStyle());
-
+    
     if (attr.HasUnderlined())
         newAttr.SetFontUnderlined(attr.GetFontUnderlined());
-
+    
     if (attr.HasFaceName())
         newAttr.SetFontFaceName(attr.GetFontFaceName());
-
+    
     if (attr.HasAlignment())
         newAttr.SetAlignment(attr.GetAlignment());
     else if (attrDef.HasAlignment())
@@ -4983,33 +4977,33 @@ wxRichTextAttr wxRichTextAttr::Combine(const wxRichTextAttr& attr,
         newAttr.SetRightIndent(attr.GetRightIndent());
     else if (attrDef.HasRightIndent())
         newAttr.SetRightIndent(attrDef.GetRightIndent());
-
+    
     // NEW ATTRIBUTES
-
+    
     if (attr.HasParagraphSpacingAfter())
         newAttr.SetParagraphSpacingAfter(attr.GetParagraphSpacingAfter());
-
+    
     if (attr.HasParagraphSpacingBefore())
         newAttr.SetParagraphSpacingBefore(attr.GetParagraphSpacingBefore());
 
     if (attr.HasLineSpacing())
         newAttr.SetLineSpacing(attr.GetLineSpacing());
-
+        
     if (attr.HasCharacterStyleName())
         newAttr.SetCharacterStyleName(attr.GetCharacterStyleName());
-
+        
     if (attr.HasParagraphStyleName())
         newAttr.SetParagraphStyleName(attr.GetParagraphStyleName());
-
+        
     if (attr.HasBulletStyle())
         newAttr.SetBulletStyle(attr.GetBulletStyle());
 
     if (attr.HasBulletNumber())
         newAttr.SetBulletNumber(attr.GetBulletNumber());
-
+        
     if (attr.HasBulletSymbol())
         newAttr.SetBulletSymbol(attr.GetBulletSymbol());
-
+        
     return newAttr;
 }
 
@@ -5065,7 +5059,7 @@ void wxTextAttrEx::operator= (const wxTextAttr& attr)
 wxTextAttrEx wxTextAttrEx::CombineEx(const wxTextAttrEx& attr,
                                const wxTextAttrEx& attrDef,
                                const wxTextCtrlBase *text)
-{
+{    
     wxTextAttrEx newAttr;
 
     // If attr specifies the complete font, just use that font, overriding all
@@ -5171,33 +5165,33 @@ wxTextAttrEx wxTextAttrEx::CombineEx(const wxTextAttrEx& attr,
         newAttr.SetRightIndent(attr.GetRightIndent());
     else if (attrDef.HasRightIndent())
         newAttr.SetRightIndent(attrDef.GetRightIndent());
-
+    
     // NEW ATTRIBUTES
-
+    
     if (attr.HasParagraphSpacingAfter())
         newAttr.SetParagraphSpacingAfter(attr.GetParagraphSpacingAfter());
-
+    
     if (attr.HasParagraphSpacingBefore())
         newAttr.SetParagraphSpacingBefore(attr.GetParagraphSpacingBefore());
 
     if (attr.HasLineSpacing())
         newAttr.SetLineSpacing(attr.GetLineSpacing());
-
+        
     if (attr.HasCharacterStyleName())
         newAttr.SetCharacterStyleName(attr.GetCharacterStyleName());
-
+        
     if (attr.HasParagraphStyleName())
         newAttr.SetParagraphStyleName(attr.GetParagraphStyleName());
-
+        
     if (attr.HasBulletStyle())
         newAttr.SetBulletStyle(attr.GetBulletStyle());
 
     if (attr.HasBulletNumber())
         newAttr.SetBulletNumber(attr.GetBulletNumber());
-
+        
     if (attr.HasBulletSymbol())
         newAttr.SetBulletSymbol(attr.GetBulletSymbol());
-
+        
     return newAttr;
 }
 
@@ -5286,7 +5280,7 @@ bool wxRichTextPlainTextHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputSt
     wxString text = buffer->GetText();
     wxCharBuffer buf = text.ToAscii();
 
-    stream.Write((const char*) buf, text.length());
+    stream.Write((const char*) buf, text.Length());
     return true;
 }
 #endif // wxUSE_STREAMS
@@ -5485,7 +5479,7 @@ bool wxRichTextImageBlock::WriteHex(wxOutputStream& stream)
         hex = wxDecToHex(m_data[i]);
         wxCharBuffer buf = hex.ToAscii();
 
-        stream.Write((const char*) buf, hex.length());
+        stream.Write((const char*) buf, hex.Length());
     }
 
     return true;

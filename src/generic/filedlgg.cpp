@@ -355,7 +355,7 @@ wxString wxFileData::GetHint() const
     else if (IsDrive())
         s += _("<DRIVE>");
     else // plain file
-        s += wxString::Format(wxPLURAL("%ld byte", "%ld bytes", m_size),
+        s += wxString::Format(_("%ld bytes"),
                               wxLongLong(m_size).ToString().c_str());
 
     s += wxT(' ');
@@ -821,8 +821,8 @@ void wxFileCtrl::OnListEndLabelEdit( wxListEvent &event )
     wxASSERT( fd );
 
     if ((event.GetLabel().empty()) ||
-        (event.GetLabel() == wxT(".")) ||
-        (event.GetLabel() == wxT("..")) ||
+        (event.GetLabel() == _(".")) ||
+        (event.GetLabel() == _("..")) ||
         (event.GetLabel().First( wxFILE_SEP_PATH ) != wxNOT_FOUND))
     {
         wxMessageDialog dialog(this, _("Illegal directory name."), _("Error"), wxOK | wxICON_ERROR );

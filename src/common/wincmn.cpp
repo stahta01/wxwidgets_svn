@@ -83,8 +83,6 @@
     extern const unsigned int gtk_micro_version;
 #endif
 
-#include "wx/platinfo.h"
-
 // Windows List
 WXDLLIMPEXP_DATA_CORE(wxWindowList) wxTopLevelWindows;
 
@@ -293,6 +291,11 @@ wxWindowBase::~wxWindowBase()
     // reset the dangling pointer our parent window may keep to us
     if ( m_parent )
     {
+        if ( m_parent->GetDefaultItem() == this )
+        {
+            m_parent->SetDefaultItem(NULL);
+        }
+
         m_parent->RemoveChild(this);
     }
 
@@ -398,7 +401,7 @@ void wxWindowBase::Fit()
 {
     if ( !GetChildren().empty() )
     {
-        SetSize(GetBestSize());
+        SetClientSize(GetBestSize());
     }
     //else: do nothing if we have no children
 }
@@ -1654,6 +1657,13 @@ void wxWindowBase::SetSizer(wxSizer *sizer, bool deleteOld)
         delete m_windowSizer;
 
     m_windowSizer = sizer;
+    
+    #ifdef __WXGTK__
+    if (m_windowSizer)
+    {
+        m_windowSizer->SetLayoutDirection(this->GetLayoutDirection());
+    }
+    #endif // __WXGTK__
 
     SetAutoLayout( sizer != NULL );
 }
@@ -2166,35 +2176,69 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 #endif // __WXDEBUG__
 
 #if wxUSE_MSGDLG
-        // don't translate these strings, they're for diagnostics purposes only
-        wxString msg;
-        msg.Printf(_T("wxWidgets Library (%s port)\n")
-                   _T("Version %d.%d.%d%s%s, compiled at %s %s%s\n")
-                   _T("Copyright (c) 1995-2006 wxWidgets team"),
-                   wxPlatformInfo().GetPortIdName().c_str(),
-                   wxMAJOR_VERSION,
-                   wxMINOR_VERSION,
-                   wxRELEASE_NUMBER,
+        // don't translate these strings
+        wxString port;
+
+#ifdef __WXUNIVERSAL__
+        port = _T("Univ/");
+#endif // __WXUNIVERSAL__
+
+        switch ( wxGetOsVersion() )
+        {
+            case wxMOTIF_X:            port += _T("Motif"); break;
+            case wxMAC:
+            case wxMAC_DARWIN:         port += _T("Mac"); break;
+            case wxBEOS:               port += _T("BeOS"); break;
+            case wxGTK:
+            case wxGTK_WIN32:
+            case wxGTK_OS2:
+            case wxGTK_BEOS:           port += _T("GTK"); break;
+            case wxWINDOWS:
+            case wxPENWINDOWS:
+            case wxWINDOWS_NT:
+            case wxWIN32S:
+            case wxWIN95:
+            case wxWIN386:             port += _T("MS Windows"); break;
+            case wxMGL_UNIX:
+            case wxMGL_X:
+            case wxMGL_WIN32:
+            case wxMGL_OS2:            port += _T("MGL"); break;
+            case wxWINDOWS_OS2:
+            case wxOS2_PM:             port += _T("OS/2"); break;
+            case wxPALMOS:             port += _T("Palm OS"); break;
+            case wxWINDOWS_CE:         port += _T("Windows CE (generic)"); break;
+            case wxWINDOWS_POCKETPC:   port += _T("Windows CE PocketPC"); break;
+            case wxWINDOWS_SMARTPHONE: port += _T("Windows CE Smartphone"); break;
+            default:            port += _T("unknown"); break;
+        }
+
+        wxMessageBox(wxString::Format(
+                                      _T(
+                                        "       wxWidgets Library (%s port)\nVersion %d.%d.%d%s%s, compiled at %s %s%s\n   Copyright (c) 1995-2006 wxWidgets team"
+                                        ),
+                                      port.c_str(),
+                                      wxMAJOR_VERSION,
+                                      wxMINOR_VERSION,
+                                      wxRELEASE_NUMBER,
 #if wxUSE_UNICODE
-                   L" (Unicode)",
+                                      L" (Unicode)",
 #else
-                   wxEmptyString,
+                                      "",
 #endif
 #ifdef __WXDEBUG__
-                   _T(" Debug build"),
+                                      _T(" Debug build"),
 #else
-                   wxEmptyString,
+                                      wxEmptyString,
 #endif
-                   __TDATE__,
-                   __TTIME__,
+                                      __TDATE__,
+                                      __TTIME__,
 #ifdef __WXGTK__
-                   wxString::Format(_T("\nagainst GTK+ %d.%d.%d. Runtime GTK+ version: %d.%d.%d"), GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION, gtk_major_version, gtk_minor_version, gtk_micro_version).c_str()
+                                      wxString::Format(_T("\nagainst GTK+ %d.%d.%d. Runtime GTK+ version: %d.%d.%d"), GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION, gtk_major_version, gtk_minor_version, gtk_micro_version).c_str()
 #else
-                   wxEmptyString
+                                      ""
 #endif
-                   );
-
-        wxMessageBox(msg, _T("wxWidgets information"),
+                                     ),
+                     _T("wxWidgets information"),
                      wxICON_INFORMATION | wxOK,
                      (wxWindow *)this);
     }
@@ -2302,16 +2346,10 @@ struct WXDLLEXPORT wxWindowNext
     wxWindow *win;
     wxWindowNext *next;
 } *wxWindowBase::ms_winCaptureNext = NULL;
-wxWindow *wxWindowBase::ms_winCaptureCurrent = NULL;
-bool wxWindowBase::ms_winCaptureChanging = false;
 
 void wxWindowBase::CaptureMouse()
 {
-    wxLogTrace(_T("mousecapture"), _T("CaptureMouse(%p)"), wx_static_cast(void*, this));
-
-    wxASSERT_MSG( !ms_winCaptureChanging, _T("recursive CaptureMouse call?") );
-
-    ms_winCaptureChanging = true;
+    wxLogTrace(_T("mousecapture"), _T("CaptureMouse(%p)"), this);
 
     wxWindow *winOld = GetCapture();
     if ( winOld )
@@ -2327,28 +2365,19 @@ void wxWindowBase::CaptureMouse()
     //else: no mouse capture to save
 
     DoCaptureMouse();
-    ms_winCaptureCurrent = (wxWindow*)this;
-
-    ms_winCaptureChanging = false;
 }
 
 void wxWindowBase::ReleaseMouse()
 {
-    wxLogTrace(_T("mousecapture"), _T("ReleaseMouse(%p)"), wx_static_cast(void*, this));
-
-    wxASSERT_MSG( !ms_winCaptureChanging, _T("recursive ReleaseMouse call?") );
+    wxLogTrace(_T("mousecapture"), _T("ReleaseMouse(%p)"), this);
 
     wxASSERT_MSG( GetCapture() == this, wxT("attempt to release mouse, but this window hasn't captured it") );
 
-    ms_winCaptureChanging = true;
-
     DoReleaseMouse();
-    ms_winCaptureCurrent = NULL;
 
     if ( ms_winCaptureNext )
     {
         ((wxWindowBase*)ms_winCaptureNext->win)->DoCaptureMouse();
-        ms_winCaptureCurrent = ms_winCaptureNext->win;
 
         wxWindowNext *item = ms_winCaptureNext;
         ms_winCaptureNext = item->next;
@@ -2356,49 +2385,9 @@ void wxWindowBase::ReleaseMouse()
     }
     //else: stack is empty, no previous capture
 
-    ms_winCaptureChanging = false;
-
     wxLogTrace(_T("mousecapture"),
         (const wxChar *) _T("After ReleaseMouse() mouse is captured by %p"),
-        wx_static_cast(void*, GetCapture()));
-}
-
-static void DoNotifyWindowAboutCaptureLost(wxWindow *win)
-{
-    wxMouseCaptureLostEvent event(win->GetId());
-    event.SetEventObject(win);
-    if ( !win->GetEventHandler()->ProcessEvent(event) )
-    {
-        wxFAIL_MSG( _T("window that captured the mouse didn't process wxEVT_MOUSE_CAPTURE_LOST") );
-    }
-}
-
-/* static */
-void wxWindowBase::NotifyCaptureLost()
-{
-    // don't do anything if capture lost was expected, i.e. resulted from
-    // a wx call to ReleaseMouse or CaptureMouse:
-    if ( ms_winCaptureChanging )
-        return;
-
-    // if the capture was lost unexpectedly, notify every window that has
-    // capture (on stack or current) about it and clear the stack:
-
-    if ( ms_winCaptureCurrent )
-    {
-        DoNotifyWindowAboutCaptureLost(ms_winCaptureCurrent);
-        ms_winCaptureCurrent = NULL;
-    }
-
-    while ( ms_winCaptureNext )
-    {
-        wxWindowNext *item = ms_winCaptureNext;
-        ms_winCaptureNext = item->next;
-
-        DoNotifyWindowAboutCaptureLost(item->win);
-
-        delete item;
-    }
+        GetCapture());
 }
 
 #if wxUSE_HOTKEY
