@@ -483,7 +483,7 @@ void wxRichTextFontPage::UpdatePreview()
 
 bool wxRichTextFontPage::ShowToolTips()
 {
-    return wxRichTextFormattingDialog::ShowToolTips();
+    return true;
 }
 
 /*!

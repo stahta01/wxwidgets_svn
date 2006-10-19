@@ -1280,8 +1280,9 @@ bool wxDirExists(const wxChar *pszPathName)
 // Get a temporary filename, opening and closing the file.
 wxChar *wxGetTempFileName(const wxString& prefix, wxChar *buf)
 {
-    wxString filename;
-    if ( !wxGetTempFileName(prefix, filename) )
+#if wxUSE_FILE
+    wxString filename = wxFileName::CreateTempFileName(prefix);
+    if ( filename.empty() )
         return NULL;
 
     if ( buf )
@@ -1290,20 +1291,19 @@ wxChar *wxGetTempFileName(const wxString& prefix, wxChar *buf)
         buf = MYcopystring(filename);
 
     return buf;
+#else
+    wxUnusedVar(prefix);
+    wxUnusedVar(buf);
+    // wxFileName::CreateTempFileName needs wxFile class enabled
+    return NULL;
+#endif
 }
 
 bool wxGetTempFileName(const wxString& prefix, wxString& buf)
 {
-#if wxUSE_FILE
-    buf = wxFileName::CreateTempFileName(prefix);
+    buf = wxGetTempFileName(prefix);
 
     return !buf.empty();
-#else // !wxUSE_FILE
-    wxUnusedVar(prefix);
-    wxUnusedVar(buf);
-
-    return false;
-#endif // wxUSE_FILE/!wxUSE_FILE
 }
 
 // Get first file name matching given wild card.

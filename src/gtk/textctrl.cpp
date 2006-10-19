@@ -16,6 +16,7 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
+    #include "wx/panel.h"
     #include "wx/settings.h"
     #include "wx/math.h"
 #endif
@@ -28,6 +29,7 @@
 #include <ctype.h>
 
 #include "wx/gtk/private.h"
+#include <gdk/gdkkeysyms.h>
 
 // ----------------------------------------------------------------------------
 // helpers
@@ -1844,10 +1846,7 @@ void wxTextCtrl::Freeze()
                               G_CALLBACK (gtk_text_exposed_callback), this);
             gtk_widget_set_sensitive(m_widget, false);
             g_object_ref(m_buffer);
-            GtkTextBuffer* buf_new = gtk_text_buffer_new(NULL);
-            gtk_text_view_set_buffer(GTK_TEXT_VIEW(m_text), buf_new);
-            // gtk_text_view_set_buffer adds its own reference
-            g_object_unref(buf_new);
+            gtk_text_view_set_buffer(GTK_TEXT_VIEW(m_text), gtk_text_buffer_new(NULL));
         }
     }
 }

@@ -239,54 +239,40 @@ void wxClientDisplayRect(int *x, int *y, int *width, int *height)
     wxDisplaySize(width, height);
 }
 
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
-}
-
 
 // Configurable display in wxX11 and wxMotif
-static Display *gs_currentDisplay = NULL;
+static WXDisplay *gs_currentDisplay = NULL;
 static wxString gs_displayName;
 
 WXDisplay *wxGetDisplay()
 {
-    return (WXDisplay *)gs_currentDisplay;
+    if (gs_currentDisplay)
+        return gs_currentDisplay;
+    return wxApp::GetDisplay();
 }
 
-// close the current display
-void wxCloseDisplay()
+bool wxSetDisplay(const wxString& display_name)
 {
-    if ( gs_currentDisplay )
-    {
-        if ( XCloseDisplay(gs_currentDisplay) != 0 )
-        {
-            wxLogWarning(_("Failed to close the display \"%s\""),
-                         gs_displayName.c_str());
-        }
+    gs_displayName = display_name;
 
+    if ( display_name.empty() )
+    {
         gs_currentDisplay = NULL;
-        gs_displayName.clear();
+
+        return true;
     }
-}
-
-bool wxSetDisplay(const wxString& displayName)
-{
-    Display *
-        dpy = XOpenDisplay(displayName.empty() ? NULL : displayName.mb_str());
-
-    if ( !dpy )
+    else
     {
-        wxLogError(_("Failed to open display \"%s\"."), displayName.c_str());
-        return false;
+        Display* display = XOpenDisplay((char*) display_name.c_str());
+
+        if (display)
+        {
+            gs_currentDisplay = (WXDisplay*) display;
+            return true;
+        }
+        else
+            return false;
     }
-
-    wxCloseDisplay();
-
-    gs_currentDisplay = dpy;
-    gs_displayName = displayName;
-
-    return true;
 }
 
 wxString wxGetDisplayName()
@@ -294,20 +280,10 @@ wxString wxGetDisplayName()
     return gs_displayName;
 }
 
-#include "wx/module.h"
-
-// the module responsible for closing the X11 display at the program end
-class wxX11DisplayModule : public wxModule
+wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 {
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit() { wxCloseDisplay(); }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxX11DisplayModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxX11DisplayModule, wxModule)
+    return wxGenericFindWindowAtPoint(pt);
+}
 
 // ----------------------------------------------------------------------------
 // Some colour manipulation routines

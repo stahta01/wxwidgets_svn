@@ -248,9 +248,9 @@ static pascal OSStatus KeyboardEventHandler( EventHandlerCallRef handler , Event
 
 wxWindow* g_MacLastWindow = NULL ;
 
-EventMouseButton g_lastButton = 0 ;
+static EventMouseButton lastButton = 0 ;
 
-void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
+static void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
 {
     UInt32 modifiers = cEvent.GetParameter<UInt32>(kEventParamKeyModifiers, typeUInt32) ;
     Point screenMouseLocation = cEvent.GetParameter<Point>(kEventParamMouseLocation) ;
@@ -274,19 +274,19 @@ void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
         button = kEventMouseButtonSecondary ;
 
     // otherwise we report double clicks by connecting a left click with a ctrl-left click
-    if ( clickCount > 1 && button != g_lastButton )
+    if ( clickCount > 1 && button != lastButton )
         clickCount = 1 ;
 
     // we must make sure that our synthetic 'right' button corresponds in
     // mouse down, moved and mouse up, and does not deliver a right down and left up
 
     if ( cEvent.GetKind() == kEventMouseDown )
-        g_lastButton = button ;
+        lastButton = button ;
 
     if ( button == 0 )
-        g_lastButton = 0 ;
-    else if ( g_lastButton )
-        button = g_lastButton ;
+        lastButton = 0 ;
+    else if ( lastButton )
+        button = lastButton ;
 
     // determine the correct down state, wx does not want a 'down' for a mouseUp event,
     // while mac delivers this button

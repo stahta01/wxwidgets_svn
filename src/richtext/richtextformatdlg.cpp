@@ -38,6 +38,7 @@
 
 #include "wx/bookctrl.h"
 #include "wx/colordlg.h"
+#include "wx/fontenum.h"
 #include "wx/settings.h"
 #include "wx/module.h"
 #include "wx/imaglist.h"
@@ -51,14 +52,12 @@
 #include "../../src/richtext/richtexttabspage.cpp"
 #include "../../src/richtext/richtextbulletspage.cpp"
 #include "../../src/richtext/richtextstylepage.cpp"
-#include "../../src/richtext/richtextliststylepage.cpp"
 #else
 #include "richtextfontpage.cpp"
 #include "richtextindentspage.cpp"
 #include "richtexttabspage.cpp"
 #include "richtextbulletspage.cpp"
 #include "richtextstylepage.cpp"
-#include "richtextliststylepage.cpp"
 #endif
 
 #if 0 // def __WXMAC__
@@ -66,8 +65,6 @@
 #else
 #define wxRICHTEXT_USE_TOOLBOOK false
 #endif
-
-bool wxRichTextFormattingDialog::sm_showToolTips = false;
 
 IMPLEMENT_CLASS(wxRichTextFormattingDialog, wxPropertySheetDialog)
 
@@ -290,12 +287,6 @@ wxPanel* wxRichTextFormattingDialogFactory::CreatePage(int page, wxString& title
         title = _("Bullets");
         return page;
     }
-    else if (page == wxRICHTEXT_FORMAT_LIST_STYLE)
-    {
-        wxRichTextListStylePage* page = new wxRichTextListStylePage(dialog->GetBookCtrl(), wxID_ANY);
-        title = _("List Style");
-        return page;
-    }
     else
         return NULL;
 }
@@ -308,10 +299,9 @@ int wxRichTextFormattingDialogFactory::GetPageId(int i) const
         wxRICHTEXT_FORMAT_FONT,
         wxRICHTEXT_FORMAT_INDENTS_SPACING,
         wxRICHTEXT_FORMAT_BULLETS,
-        wxRICHTEXT_FORMAT_TABS,
-        wxRICHTEXT_FORMAT_LIST_STYLE };
+        wxRICHTEXT_FORMAT_TABS };
 
-    if (i < 0 || i > 5)
+    if (i < 0 || i > 4)
         return -1;
 
     return pages[i];
@@ -320,7 +310,7 @@ int wxRichTextFormattingDialogFactory::GetPageId(int i) const
 /// Get the number of available page identifiers
 int wxRichTextFormattingDialogFactory::GetPageIdCount() const
 {
-    return 6;
+    return 5;
 }
 
 /// Set the sheet style, called at the start of wxRichTextFormattingDialog::Create
@@ -352,8 +342,7 @@ bool wxRichTextFormattingDialogFactory::CreateButtons(wxRichTextFormattingDialog
     // If using a toolbook, also follow Mac style and don't create buttons
     int flags = wxOK|wxCANCEL;
 #ifndef __WXWINCE__
-    if (dialog->GetWindowStyleFlag() & wxRICHTEXT_FORMAT_HELP_BUTTON)
-        flags |= wxHELP;
+    flags |= wxHELP;
 #endif
 
     if (!useToolBook)
@@ -552,7 +541,9 @@ int wxRichTextFontListBox::SetFaceNameSelection(const wxString& name)
 /// Updates the font list
 void wxRichTextFontListBox::UpdateFonts()
 {
-    wxArrayString facenames = wxRichTextCtrl::GetAvailableFontNames();
+    wxFontEnumerator enumerator;
+    enumerator.EnumerateFacenames();
+    wxArrayString facenames = enumerator.GetFacenames();
     m_faceNames = facenames;
     m_faceNames.Sort();
 

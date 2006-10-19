@@ -5357,7 +5357,6 @@ public:
         wxRichTextBuffer::CleanUpHandlers();
         wxRichTextDecimalToRoman(-1);
         wxRichTextParagraph::ClearDefaultTabs();
-        wxRichTextCtrl::ClearAvailableFontNames();
     };
 };
 

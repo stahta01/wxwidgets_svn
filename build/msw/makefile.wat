@@ -196,8 +196,7 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_richtextxml.obj &
 	$(OBJS)\monodll_richtexthtml.obj &
 	$(OBJS)\monodll_richtextformatdlg.obj &
-	$(OBJS)\monodll_richtextsymboldlg.obj &
-	$(OBJS)\monodll_richtextstyledlg.obj
+	$(OBJS)\monodll_richtextsymboldlg.obj
 !endif
 ____CORE_SRC_FILENAMES_OBJECTS =
 !ifeq USE_GUI 1
@@ -805,8 +804,7 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_richtextxml.obj &
 	$(OBJS)\monolib_richtexthtml.obj &
 	$(OBJS)\monolib_richtextformatdlg.obj &
-	$(OBJS)\monolib_richtextsymboldlg.obj &
-	$(OBJS)\monolib_richtextstyledlg.obj
+	$(OBJS)\monolib_richtextsymboldlg.obj
 !endif
 ____CORE_SRC_FILENAMES_1_OBJECTS =
 !ifeq USE_GUI 1
@@ -3759,8 +3757,7 @@ RICHTEXTDLL_OBJECTS =  &
 	$(OBJS)\richtextdll_richtextxml.obj &
 	$(OBJS)\richtextdll_richtexthtml.obj &
 	$(OBJS)\richtextdll_richtextformatdlg.obj &
-	$(OBJS)\richtextdll_richtextsymboldlg.obj &
-	$(OBJS)\richtextdll_richtextstyledlg.obj
+	$(OBJS)\richtextdll_richtextsymboldlg.obj
 RICHTEXTLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -3777,8 +3774,7 @@ RICHTEXTLIB_OBJECTS =  &
 	$(OBJS)\richtextlib_richtextxml.obj &
 	$(OBJS)\richtextlib_richtexthtml.obj &
 	$(OBJS)\richtextlib_richtextformatdlg.obj &
-	$(OBJS)\richtextlib_richtextsymboldlg.obj &
-	$(OBJS)\richtextlib_richtextstyledlg.obj
+	$(OBJS)\richtextlib_richtextsymboldlg.obj
 GLDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -5490,9 +5486,6 @@ $(OBJS)\monodll_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\richtext
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
@@ -7521,9 +7514,6 @@ $(OBJS)\monolib_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\richtext
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
@@ -12922,9 +12912,6 @@ $(OBJS)\richtextdll_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\rich
 $(OBJS)\richtextdll_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
 
-$(OBJS)\richtextdll_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
-
 $(OBJS)\richtextlib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
@@ -12947,9 +12934,6 @@ $(OBJS)\richtextlib_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\rich
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
 $(OBJS)\richtextlib_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
-
-$(OBJS)\richtextlib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
 $(OBJS)\gldll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp

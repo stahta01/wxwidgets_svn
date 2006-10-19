@@ -12,7 +12,6 @@
 #ifndef _WX_INIT_H_
 #define _WX_INIT_H_
 
-#include "wx/defs.h"
 #include "wx/wxchar.h"
 
 // ----------------------------------------------------------------------------

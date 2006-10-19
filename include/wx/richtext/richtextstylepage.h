@@ -13,6 +13,20 @@
 #define _RICHTEXTSTYLEPAGE_H_
 
 /*!
+ * Includes
+ */
+
+////@begin includes
+////@end includes
+
+/*!
+ * Forward declarations
+ */
+
+////@begin forward declarations
+////@end forward declarations
+
+/*!
  * Control identifiers
  */
 

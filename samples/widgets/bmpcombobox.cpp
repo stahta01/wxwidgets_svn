@@ -46,18 +46,18 @@
 #include "wx/sizer.h"
 #include "wx/icon.h"
 #include "wx/dir.h"
-#include "wx/msgdlg.h"
 #include "wx/filename.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
 #include "wx/bmpcbox.h"
+
 
 #include "widgets.h"
 
 #include "icons/bmpcombobox.xpm"
 
 // Images loaded from file are reduced this width and height, if larger
-#define IMG_SIZE_TRUNC  256
+#define IMG_SIZE_TRUNC  150
 
 
 // ----------------------------------------------------------------------------
@@ -152,16 +152,13 @@ protected:
                                               wxWindowID id,
                                               wxTextCtrl **ppText);
 
-#if wxUSE_IMAGE
-    void RescaleImage(wxImage& image, int w, int h);
-#endif
-
     // the controls
     // ------------
 
     // the checkboxes for styles
     wxCheckBox *m_chkSort,
-               *m_chkReadonly;
+               *m_chkReadonly,
+               *m_chkScaleimages;
 
     // the combobox itself and the sizer it is in
     wxBitmapComboBox *m_combobox;
@@ -237,7 +234,8 @@ BitmapComboBoxWidgetsPage::BitmapComboBoxWidgetsPage(WidgetsBookCtrl *book,
 {
     // init everything
     m_chkSort =
-    m_chkReadonly = (wxCheckBox *)NULL;
+    m_chkReadonly =
+    m_chkScaleimages = (wxCheckBox *)NULL;
 
     m_combobox = (wxBitmapComboBox *)NULL;
     m_sizerCombo = (wxSizer *)NULL;
@@ -294,6 +292,8 @@ void BitmapComboBoxWidgetsPage::CreateContent()
     box = new wxStaticBox(this, wxID_ANY, _T("Demo options"));
 
     wxSizer *sizerOptions = new wxStaticBoxSizer(box, wxVERTICAL);
+
+    m_chkScaleimages = CreateCheckBoxAndAddToSizer(sizerOptions, _T("&Scale loaded images to fit"));
 
     sizerRow = CreateSizerWithSmallTextAndLabel(_T("Control &height:"),
                                                 BitmapComboBoxPage_ChangeHeight,
@@ -382,6 +382,7 @@ void BitmapComboBoxWidgetsPage::Reset()
 {
     m_chkSort->SetValue(false);
     m_chkReadonly->SetValue(true);
+    m_chkScaleimages->SetValue(true);
 }
 
 void BitmapComboBoxWidgetsPage::CreateCombo()
@@ -558,33 +559,6 @@ void BitmapComboBoxWidgetsPage::OnButtonAddSeveralWithImages(wxCommandEvent& WXU
     }
 }
 
-#if wxUSE_IMAGE
-void BitmapComboBoxWidgetsPage::RescaleImage(wxImage& image, int w, int h)
-{
-    if ( image.GetWidth() == w && image.GetHeight() == h )
-        return;
-
-    if ( w <= 0 || h <= 0 )
-        return;
-
-    static bool isFirstScale = true;
-
-    if ( isFirstScale && m_combobox->GetCount() > 0 )
-    {
-        wxMessageBox( wxT("wxBitmapComboBox normally only supports images of one size. ")
-                      wxT("However, for demonstration purposes, loaded bitmaps are scaled to fit ")
-                      wxT("using wxImage::Rescale."),
-                      wxT("Notice"),
-                      wxOK,
-                      this );
-
-        isFirstScale = false;
-    }
-
-    image.Rescale(w, h);
-}
-#endif
-
 void BitmapComboBoxWidgetsPage::LoadWidgetImages( wxArrayString* strings, wxImageList* images )
 {
     wxFileName fn;
@@ -642,7 +616,8 @@ void BitmapComboBoxWidgetsPage::LoadWidgetImages( wxArrayString* strings, wxImag
             wxASSERT(fn.FileExists());
             wxImage image(fn.GetFullPath());
             wxASSERT(image.Ok());
-            RescaleImage(image, foundSize.x, foundSize.y);
+            if ( m_chkScaleimages->GetValue() && foundSize.x > 0 )
+                image.Rescale(foundSize.x, foundSize.y);
             wxBitmap bmp(image);
             wxASSERT( bmp.Ok() );
 #else
@@ -769,8 +744,8 @@ wxBitmap BitmapComboBoxWidgetsPage::LoadBitmap(const wxString& filepath)
     // Have some reasonable maximum size
     if ( foundSize.x <= 0 )
     {
-        foundSize.x = IMG_SIZE_TRUNC;
-        foundSize.y = IMG_SIZE_TRUNC;
+        foundSize.x = 256;
+        foundSize.y = 256;
     }
 
     wxImage image(filepath);
@@ -790,7 +765,7 @@ wxBitmap BitmapComboBoxWidgetsPage::LoadBitmap(const wxString& filepath)
             if ( h > foundSize.y )
                 h = foundSize.y;
 
-            RescaleImage(image, w, h);
+            image.Rescale(w, h);
         }
 
         return wxBitmap(image);
@@ -828,8 +803,6 @@ wxBitmap BitmapComboBoxWidgetsPage::QueryBitmap(wxString* pStr)
 
         bitmap = LoadBitmap(filepath);
     }
-
-    wxLogDebug(wxT("%i, %i"),bitmap.GetWidth(), bitmap.GetHeight());
 
     ::wxSetCursor( *wxSTANDARD_CURSOR );
 

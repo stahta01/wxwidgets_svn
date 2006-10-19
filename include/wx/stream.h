@@ -58,7 +58,7 @@ public:
 
     // error testing
     wxStreamError GetLastError() const { return m_lasterror; }
-    virtual bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
+    bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
     bool operator!() const { return !IsOk(); }
 
     // reset the stream state

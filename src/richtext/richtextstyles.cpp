@@ -389,6 +389,7 @@ bool wxRichTextStyleSheet::operator==(const wxRichTextStyleSheet& WXUNUSED(sheet
 IMPLEMENT_CLASS(wxRichTextStyleListBox, wxHtmlListBox)
 
 BEGIN_EVENT_TABLE(wxRichTextStyleListBox, wxHtmlListBox)
+    EVT_LISTBOX(wxID_ANY, wxRichTextStyleListBox::OnSelect)
     EVT_LEFT_DOWN(wxRichTextStyleListBox::OnLeftDown)
     EVT_LEFT_DCLICK(wxRichTextStyleListBox::OnLeftDoubleClick)
     EVT_IDLE(wxRichTextStyleListBox::OnIdle)
@@ -463,8 +464,6 @@ void wxRichTextStyleListBox::UpdateStyles()
 {
     if (GetStyleSheet())
     {
-        SetSelection(wxNOT_FOUND);
-        
         if (GetStyleType() == wxRICHTEXT_STYLE_ALL)
             SetItemCount(GetStyleSheet()->GetParagraphStyleCount()+GetStyleSheet()->GetCharacterStyleCount()+GetStyleSheet()->GetListStyleCount());
         else if (GetStyleType() == wxRICHTEXT_STYLE_PARAGRAPH)
@@ -473,14 +472,7 @@ void wxRichTextStyleListBox::UpdateStyles()
             SetItemCount(GetStyleSheet()->GetCharacterStyleCount());
         else if (GetStyleType() == wxRICHTEXT_STYLE_LIST)
             SetItemCount(GetStyleSheet()->GetListStyleCount());
-        
         Refresh();
-
-        if (GetItemCount() > 0)
-        {
-            SetSelection(0);
-            SendSelectedEvent();
-        }        
     }
 }
 
@@ -539,19 +531,10 @@ wxString wxRichTextStyleListBox::CreateHTML(wxRichTextStyleDefinition* def) cons
 
     str << wxT("<td nowrap>");
 
-#ifdef __WXMSW__
-    int size = 3;
-#else
     int size = 4;
-#endif
 
-    int stdFontSize = 12;
-    int thisFontSize = ((def->GetStyle().GetFlags() & wxTEXT_ATTR_FONT_SIZE) != 0) ? def->GetStyle().GetFontSize() : stdFontSize;
-
-    if (thisFontSize < stdFontSize)
-        size ++;
-    else if (thisFontSize > stdFontSize)
-        size --;
+    // Standard size is 12, say
+    size += (def->GetStyle().HasFont() ? def->GetStyle().GetFontSize() : 12) - 12;
 
     str += wxT("<font");
 
@@ -608,6 +591,18 @@ int wxRichTextStyleListBox::ConvertTenthsMMToPixels(wxDC& dc, int units) const
     double pixels = ((double) units * (double)ppi) / 254.1;
 
     return (int) pixels;
+}
+
+/// React to selection
+void wxRichTextStyleListBox::OnSelect(wxCommandEvent& WXUNUSED(event))
+{
+#if 0
+    wxRichTextStyleDefinition* def = GetStyle(event.GetSelection());
+    if (def)
+    {
+        wxMessageBox(def->GetName());
+    }
+#endif
 }
 
 void wxRichTextStyleListBox::OnLeftDown(wxMouseEvent& event)
@@ -731,43 +726,27 @@ bool wxRichTextStyleListCtrl::Create(wxWindow* parent, wxWindowID id, const wxPo
     wxControl::Create(parent, id, pos, size, style);
     
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-    if (size != wxDefaultSize)
-        SetBestFittingSize(size);
     
-    bool showSelector = ((style & wxRICHTEXTSTYLELIST_HIDE_TYPE_SELECTOR) == 0);
+    m_styleListBox = new wxRichTextStyleListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER);
     
-    m_styleListBox = new wxRichTextStyleListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, showSelector ? wxSIMPLE_BORDER : wxNO_BORDER);
-
+    wxArrayString choices;
+    choices.Add(_("All styles"));
+    choices.Add(_("Paragraph styles"));
+    choices.Add(_("Character styles"));
+    choices.Add(_("List styles"));
+    
+    m_styleChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, choices);
+    
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
+    boxSizer->Add(m_styleListBox, 1, wxALL|wxEXPAND, 5);
+    boxSizer->Add(m_styleChoice, 0, wxALL|wxEXPAND, 5);
     
-    if (showSelector)
-    {    
-        wxArrayString choices;
-        choices.Add(_("All styles"));
-        choices.Add(_("Paragraph styles"));
-        choices.Add(_("Character styles"));
-        choices.Add(_("List styles"));
-    
-        m_styleChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, choices);
-    
-        boxSizer->Add(m_styleListBox, 1, wxALL|wxEXPAND, 5);
-        boxSizer->Add(m_styleChoice, 0, wxALL|wxEXPAND, 5);
-    }
-    else
-    {
-        boxSizer->Add(m_styleListBox, 1, wxALL|wxEXPAND, 0);
-    }
-    
-    SetSizer(boxSizer);
-    Layout();
+    SetSizer(boxSizer);    
 
     m_dontUpdate = true;
-
-    if (m_styleChoice)
-    {    
-        int i = StyleTypeToIndex(m_styleListBox->GetStyleType());
-        m_styleChoice->SetSelection(i);
-    }
+    
+    int i = StyleTypeToIndex(m_styleListBox->GetStyleType());
+    m_styleChoice->SetSelection(i);
     
     m_dontUpdate = false;
     
@@ -776,7 +755,6 @@ bool wxRichTextStyleListCtrl::Create(wxWindow* parent, wxWindowID id, const wxPo
 
 wxRichTextStyleListCtrl::~wxRichTextStyleListCtrl()
 {
-    
 }
 
 /// React to style type choice
