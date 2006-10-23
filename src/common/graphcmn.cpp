@@ -48,8 +48,6 @@ static inline double DegToRad(double deg)
 
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxGraphicsPath, wxObject)
-
 wxPoint2DDouble wxGraphicsPath::GetCurrentPoint()
 {
     wxDouble x,y;
@@ -151,8 +149,6 @@ void wxGraphicsPath::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDo
 //-----------------------------------------------------------------------------
 // wxGraphicsContext Convenience Methods
 //-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxGraphicsContext, wxObject)
 
 void wxGraphicsContext::DrawPath( const wxGraphicsPath *path, int fillStyle )
 {
@@ -1093,7 +1089,7 @@ bool wxGCDC::DoBlit(
     wxCoord wwdest = LogicalToDeviceXRel(width);
     wxCoord hhdest = LogicalToDeviceYRel(height);
 
-    wxMemoryDC* memdc = wxDynamicCast(source,wxMemoryDC);
+    wxMemoryDC* memdc = dynamic_cast<wxMemoryDC*>(source);
     if ( memdc && logical_func == wxCOPY )
     {
         wxBitmap blit = memdc->GetSelectedBitmap();

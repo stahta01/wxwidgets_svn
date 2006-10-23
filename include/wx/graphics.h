@@ -26,7 +26,7 @@ class WXDLLEXPORT wxWindowDC;
  * in direction of positive y axis.
  */
  
-class WXDLLEXPORT wxGraphicsPath : public wxObject
+class WXDLLEXPORT wxGraphicsPath
 {
 public :
     wxGraphicsPath() {}
@@ -83,14 +83,7 @@ public :
 
     void AddArc( const wxPoint2DDouble& c, wxDouble r, wxDouble startAngle, wxDouble endAngle, bool clockwise);
 	
-	// returns the native path
-	virtual void * GetNativePath() const = 0;
-	
-	// give the native path returned by GetNativePath() back (there might be some deallocations necessary)
-	virtual void UnGetNativePath(void *p) = 0;
-
     DECLARE_NO_COPY_CLASS(wxGraphicsPath)
-    DECLARE_ABSTRACT_CLASS(wxGraphicsPath)
 };
 
 /*
@@ -127,7 +120,7 @@ public :
 } ;
 */
 
-class WXDLLEXPORT wxGraphicsContext : public wxObject
+class WXDLLEXPORT wxGraphicsContext
 {
 public:
     wxGraphicsContext() {}
@@ -266,7 +259,6 @@ public:
      // wrappers using wxPoint2DDouble TODO
 
     DECLARE_NO_COPY_CLASS(wxGraphicsContext)
-    DECLARE_ABSTRACT_CLASS(wxGraphicsContext)
 };
 
 #endif

@@ -527,10 +527,6 @@ SOURCE=..\..\src\common\file.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\common\fileback.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\common\fileconf.cpp
 # End Source File
 # Begin Source File
@@ -1500,10 +1496,6 @@ SOURCE=..\..\include\wx\ffile.h
 # Begin Source File
 
 SOURCE=..\..\include\wx\file.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\wx\fileback.h
 # End Source File
 # Begin Source File
 

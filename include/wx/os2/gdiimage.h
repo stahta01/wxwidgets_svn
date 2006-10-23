@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/gdiimage.h
+// Name:        include/wx/os2/gdiimage.h
 // Purpose:     wxGDIImage class: base class for wxBitmap, wxIcon, wxCursor
 //              under OS/2
 // Author:      David Webster (adapted from msw version by Vadim Zeitlin)
@@ -44,8 +44,8 @@ public:
     bool IsOk() const
     {
         if (m_hHandle == 0)
-            return false;
-        return true;
+            return FALSE;
+        return TRUE;
     }
 
     void SetSize( int nW
@@ -226,8 +226,8 @@ public:
         pData->m_uId = uId;
     }
     // forward some of base class virtuals to wxGDIImageRefData
-    bool             FreeResource(bool bForce = false);
-    virtual WXHANDLE GetResourceHandle() const;
+    bool             FreeResource(bool bForce = FALSE);
+    virtual WXHANDLE GetResourceHandle();
 
 protected:
     // create the data for the derived class here

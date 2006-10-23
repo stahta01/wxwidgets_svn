@@ -105,7 +105,7 @@ public:
     //
     bool     RealizeResource(void);
     bool     FreeResource(bool bForce = false);
-    virtual WXHANDLE GetResourceHandle(void) const;
+    WXHANDLE GetResourceHandle(void);
     bool     IsFree(void) const;
     void     Unshare(void);
 

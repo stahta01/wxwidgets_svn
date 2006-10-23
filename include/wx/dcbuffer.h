@@ -41,57 +41,62 @@ class WXDLLEXPORT wxBufferedDC : public wxMemoryDC
 {
 public:
     // Default ctor, must subsequently call Init for two stage construction.
-    wxBufferedDC()
-        : m_dc(NULL),
-          m_buffer(NULL),
-          m_style(0)
+    wxBufferedDC() : m_dc( 0 ), m_buffer(NULL), m_style(0)
     {
     }
 
     // Construct a wxBufferedDC using a user supplied buffer.
     wxBufferedDC(wxDC *dc,
-                 const wxBitmap& buffer = wxNullBitmap,
+                 const wxBitmap &buffer = wxNullBitmap,
                  int style = wxBUFFER_CLIENT_AREA)
-        : m_dc(NULL),
-          m_buffer(NULL)
+        : m_dc( dc ),
+          m_buffer( &buffer ),
+          m_style(style)
     {
-        Init(dc, buffer, style);
+        UseBuffer();
     }
 
     // Construct a wxBufferedDC with an internal buffer of 'area'
     // (where area is usually something like the size of the window
     // being buffered)
-    wxBufferedDC(wxDC *dc, const wxSize& area, int style = wxBUFFER_CLIENT_AREA)
-        : m_dc(NULL),
-          m_buffer(NULL)
+    wxBufferedDC(wxDC *dc, const wxSize &area, int style = wxBUFFER_CLIENT_AREA)
+        : m_dc( dc ),
+          m_buffer(NULL),
+          m_style(style)
 
     {
-        Init(dc, area, style);
+        UseBuffer(area.x, area.y);
     }
+
+    // default copy ctor ok.
 
     // The usually desired  action in the dtor is to blit the buffer.
     virtual ~wxBufferedDC()
     {
-        if ( m_dc )
-            UnMask();
+        if ( m_dc ) UnMask();
     }
 
-    // These reimplement the actions of the ctors for two stage creation
+    // These reimplement the actions of the ctors for two stage creation, but
+    // are not used by the ctors themselves to save a few cpu cycles.
     void Init(wxDC *dc,
-              const wxBitmap& buffer = wxNullBitmap,
+              const wxBitmap &buffer=wxNullBitmap,
               int style = wxBUFFER_CLIENT_AREA)
     {
-        InitCommon(dc, style);
-
+        wxASSERT_MSG( m_dc == 0 && m_buffer == NULL,
+                      _T("wxBufferedDC already initialised") );
+        m_dc = dc;
         m_buffer = &buffer;
-
+        m_style = style;
         UseBuffer();
     }
 
     void Init(wxDC *dc, const wxSize &area, int style = wxBUFFER_CLIENT_AREA)
     {
-        InitCommon(dc, style);
-
+        wxASSERT_MSG( m_dc == 0 && m_buffer == NULL,
+                      _T("wxBufferedDC already initialised") );
+        m_dc = dc;
+        m_buffer = NULL;
+        m_style = style;
         UseBuffer(area.x, area.y);
     }
 
@@ -103,16 +108,17 @@ public:
     // blitting to) is destroyed.
     void UnMask()
     {
-        wxCHECK_RET( m_dc, _T("No underlying DC in wxBufferedDC") );
+        wxASSERT_MSG( m_dc != 0,
+                      _T("No underlying DC associated with wxBufferedDC (anymore)") );
 
-        wxCoord x = 0,
-                y = 0;
+        wxCoord x=0, y=0;
 
-        if ( m_style & wxBUFFER_CLIENT_AREA )
+        if (m_style & wxBUFFER_CLIENT_AREA)
             GetDeviceOrigin(&x, &y);
 
-        m_dc->Blit(0, 0, m_buffer->GetWidth(), m_buffer->GetHeight(),
-                   this, -x, -y );
+        m_dc->Blit( 0, 0,
+                    m_buffer->GetWidth(), m_buffer->GetHeight(), this,
+                    -x, -y );
         m_dc = NULL;
     }
 
@@ -121,19 +127,6 @@ public:
     int GetStyle() const { return m_style; }
 
 private:
-    // common part of Init()s
-    void InitCommon(wxDC *dc, int style)
-    {
-        wxASSERT_MSG( !m_dc && !m_buffer, _T("wxBufferedDC already initialised") );
-        wxCHECK_RET( dc, _T("can't associate NULL DC with wxBufferedDC") );
-
-        m_dc = dc;
-        m_style = style;
-
-        // inherit the same layout direction as the original DC
-        SetLayoutDirection(dc->GetLayoutDirection());
-    }
-
     // check that the bitmap is valid and use it
     void UseBuffer(wxCoord w = -1, wxCoord h = -1);
 
@@ -265,5 +258,6 @@ inline wxDC* wxAutoBufferedPaintDCFactory(wxWindow* window)
     else
         return new wxBufferedPaintDC(window);
 }
+            
 
 #endif  // _WX_DCBUFFER_H_

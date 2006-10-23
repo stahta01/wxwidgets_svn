@@ -204,7 +204,6 @@ MONODLL_OBJECTS =  \
 	$(OBJS)\monodll_extended.o \
 	$(OBJS)\monodll_ffile.o \
 	$(OBJS)\monodll_file.o \
-	$(OBJS)\monodll_fileback.o \
 	$(OBJS)\monodll_fileconf.o \
 	$(OBJS)\monodll_filefn.o \
 	$(OBJS)\monodll_filename.o \
@@ -318,7 +317,6 @@ MONOLIB_OBJECTS =  \
 	$(OBJS)\monolib_extended.o \
 	$(OBJS)\monolib_ffile.o \
 	$(OBJS)\monolib_file.o \
-	$(OBJS)\monolib_fileback.o \
 	$(OBJS)\monolib_fileconf.o \
 	$(OBJS)\monolib_filefn.o \
 	$(OBJS)\monolib_filename.o \
@@ -434,7 +432,6 @@ BASEDLL_OBJECTS =  \
 	$(OBJS)\basedll_extended.o \
 	$(OBJS)\basedll_ffile.o \
 	$(OBJS)\basedll_file.o \
-	$(OBJS)\basedll_fileback.o \
 	$(OBJS)\basedll_fileconf.o \
 	$(OBJS)\basedll_filefn.o \
 	$(OBJS)\basedll_filename.o \
@@ -533,7 +530,6 @@ BASELIB_OBJECTS =  \
 	$(OBJS)\baselib_extended.o \
 	$(OBJS)\baselib_ffile.o \
 	$(OBJS)\baselib_file.o \
-	$(OBJS)\baselib_fileback.o \
 	$(OBJS)\baselib_fileconf.o \
 	$(OBJS)\baselib_filefn.o \
 	$(OBJS)\baselib_filename.o \
@@ -948,7 +944,6 @@ XRCDLL_OBJECTS =  \
 	$(OBJS)\xrcdll_xh_radbx.o \
 	$(OBJS)\xrcdll_xh_scrol.o \
 	$(OBJS)\xrcdll_xh_scwin.o \
-	$(OBJS)\xrcdll_xh_htmllbox.o \
 	$(OBJS)\xrcdll_xh_sizer.o \
 	$(OBJS)\xrcdll_xh_slidr.o \
 	$(OBJS)\xrcdll_xh_spin.o \
@@ -1012,7 +1007,6 @@ XRCLIB_OBJECTS =  \
 	$(OBJS)\xrclib_xh_radbx.o \
 	$(OBJS)\xrclib_xh_scrol.o \
 	$(OBJS)\xrclib_xh_scwin.o \
-	$(OBJS)\xrclib_xh_htmllbox.o \
 	$(OBJS)\xrclib_xh_sizer.o \
 	$(OBJS)\xrclib_xh_slidr.o \
 	$(OBJS)\xrclib_xh_spin.o \
@@ -1257,7 +1251,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_xh_radbx.o \
 	$(OBJS)\monodll_xh_scrol.o \
 	$(OBJS)\monodll_xh_scwin.o \
-	$(OBJS)\monodll_xh_htmllbox.o \
 	$(OBJS)\monodll_xh_sizer.o \
 	$(OBJS)\monodll_xh_slidr.o \
 	$(OBJS)\monodll_xh_spin.o \
@@ -1343,7 +1336,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_helpwin.o \
 	$(OBJS)\monodll_automtn.o \
 	$(OBJS)\monodll_uuid.o \
-	$(OBJS)\monodll_collpaneg.o \
 	$(OBJS)\monodll_statusbr.o \
 	$(OBJS)\monodll_prntdlgg.o \
 	$(OBJS)\monodll_accel.o \
@@ -1563,7 +1555,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_automtn.o \
 	$(OBJS)\monodll_uuid.o \
 	$(OBJS)\monodll_accel.o \
-	$(OBJS)\monodll_collpaneg.o \
 	$(OBJS)\monodll_colrdlgg.o \
 	$(OBJS)\monodll_dirdlgg.o \
 	$(OBJS)\monodll_fdrepdlg.o \
@@ -1866,7 +1857,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_xh_radbx.o \
 	$(OBJS)\monolib_xh_scrol.o \
 	$(OBJS)\monolib_xh_scwin.o \
-	$(OBJS)\monolib_xh_htmllbox.o \
 	$(OBJS)\monolib_xh_sizer.o \
 	$(OBJS)\monolib_xh_slidr.o \
 	$(OBJS)\monolib_xh_spin.o \
@@ -1952,7 +1942,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_helpwin.o \
 	$(OBJS)\monolib_automtn.o \
 	$(OBJS)\monolib_uuid.o \
-	$(OBJS)\monolib_collpaneg.o \
 	$(OBJS)\monolib_statusbr.o \
 	$(OBJS)\monolib_prntdlgg.o \
 	$(OBJS)\monolib_accel.o \
@@ -2172,7 +2161,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_automtn.o \
 	$(OBJS)\monolib_uuid.o \
 	$(OBJS)\monolib_accel.o \
-	$(OBJS)\monolib_collpaneg.o \
 	$(OBJS)\monolib_colrdlgg.o \
 	$(OBJS)\monolib_dirdlgg.o \
 	$(OBJS)\monolib_fdrepdlg.o \
@@ -2482,7 +2470,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_helpwin.o \
 	$(OBJS)\coredll_automtn.o \
 	$(OBJS)\coredll_uuid.o \
-	$(OBJS)\coredll_collpaneg.o \
 	$(OBJS)\coredll_statusbr.o \
 	$(OBJS)\coredll_prntdlgg.o \
 	$(OBJS)\coredll_accel.o \
@@ -2702,7 +2689,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_automtn.o \
 	$(OBJS)\coredll_uuid.o \
 	$(OBJS)\coredll_accel.o \
-	$(OBJS)\coredll_collpaneg.o \
 	$(OBJS)\coredll_colrdlgg.o \
 	$(OBJS)\coredll_dirdlgg.o \
 	$(OBJS)\coredll_fdrepdlg.o \
@@ -2931,7 +2917,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_helpwin.o \
 	$(OBJS)\corelib_automtn.o \
 	$(OBJS)\corelib_uuid.o \
-	$(OBJS)\corelib_collpaneg.o \
 	$(OBJS)\corelib_statusbr.o \
 	$(OBJS)\corelib_prntdlgg.o \
 	$(OBJS)\corelib_accel.o \
@@ -3151,7 +3136,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_automtn.o \
 	$(OBJS)\corelib_uuid.o \
 	$(OBJS)\corelib_accel.o \
-	$(OBJS)\corelib_collpaneg.o \
 	$(OBJS)\corelib_colrdlgg.o \
 	$(OBJS)\corelib_dirdlgg.o \
 	$(OBJS)\corelib_fdrepdlg.o \
@@ -4618,9 +4602,6 @@ $(OBJS)\monodll_ffile.o: ../../src/common/ffile.cpp
 $(OBJS)\monodll_file.o: ../../src/common/file.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\monodll_fileback.o: ../../src/common/fileback.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\monodll_fileconf.o: ../../src/common/fileconf.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -5200,9 +5181,6 @@ $(OBJS)\monodll_xh_scrol.o: ../../src/xrc/xh_scrol.cpp
 $(OBJS)\monodll_xh_scwin.o: ../../src/xrc/xh_scwin.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\monodll_xh_htmllbox.o: ../../src/xrc/xh_htmllbox.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\monodll_xh_sizer.o: ../../src/xrc/xh_sizer.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -5549,11 +5527,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\monodll_uuid.o: ../../src/msw/ole/uuid.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\monodll_collpaneg.o: ../../src/generic/collpaneg.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 endif
 
@@ -6663,9 +6636,6 @@ $(OBJS)\monolib_ffile.o: ../../src/common/ffile.cpp
 $(OBJS)\monolib_file.o: ../../src/common/file.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\monolib_fileback.o: ../../src/common/fileback.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\monolib_fileconf.o: ../../src/common/fileconf.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
@@ -7245,9 +7215,6 @@ $(OBJS)\monolib_xh_scrol.o: ../../src/xrc/xh_scrol.cpp
 $(OBJS)\monolib_xh_scwin.o: ../../src/xrc/xh_scwin.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\monolib_xh_htmllbox.o: ../../src/xrc/xh_htmllbox.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\monolib_xh_sizer.o: ../../src/xrc/xh_sizer.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
@@ -7594,11 +7561,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\monolib_uuid.o: ../../src/msw/ole/uuid.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\monolib_collpaneg.o: ../../src/generic/collpaneg.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 endif
 
@@ -8711,9 +8673,6 @@ $(OBJS)\basedll_ffile.o: ../../src/common/ffile.cpp
 $(OBJS)\basedll_file.o: ../../src/common/file.cpp
 	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\basedll_fileback.o: ../../src/common/fileback.cpp
-	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\basedll_fileconf.o: ../../src/common/fileconf.cpp
 	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -8958,9 +8917,6 @@ $(OBJS)\baselib_ffile.o: ../../src/common/ffile.cpp
 	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\baselib_file.o: ../../src/common/file.cpp
-	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\baselib_fileback.o: ../../src/common/fileback.cpp
 	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\baselib_fileconf.o: ../../src/common/fileconf.cpp
@@ -9654,11 +9610,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\coredll_uuid.o: ../../src/msw/ole/uuid.cpp
-	$(CXX) -c -o $@ $(COREDLL_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\coredll_collpaneg.o: ../../src/generic/collpaneg.cpp
 	$(CXX) -c -o $@ $(COREDLL_CXXFLAGS) $(CPPDEPS) $<
 endif
 
@@ -11004,11 +10955,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\corelib_uuid.o: ../../src/msw/ole/uuid.cpp
-	$(CXX) -c -o $@ $(CORELIB_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\corelib_collpaneg.o: ../../src/generic/collpaneg.cpp
 	$(CXX) -c -o $@ $(CORELIB_CXXFLAGS) $(CPPDEPS) $<
 endif
 
@@ -12482,9 +12428,6 @@ $(OBJS)\xrcdll_xh_scrol.o: ../../src/xrc/xh_scrol.cpp
 $(OBJS)\xrcdll_xh_scwin.o: ../../src/xrc/xh_scwin.cpp
 	$(CXX) -c -o $@ $(XRCDLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\xrcdll_xh_htmllbox.o: ../../src/xrc/xh_htmllbox.cpp
-	$(CXX) -c -o $@ $(XRCDLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\xrcdll_xh_sizer.o: ../../src/xrc/xh_sizer.cpp
 	$(CXX) -c -o $@ $(XRCDLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -12645,9 +12588,6 @@ $(OBJS)\xrclib_xh_scrol.o: ../../src/xrc/xh_scrol.cpp
 	$(CXX) -c -o $@ $(XRCLIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\xrclib_xh_scwin.o: ../../src/xrc/xh_scwin.cpp
-	$(CXX) -c -o $@ $(XRCLIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\xrclib_xh_htmllbox.o: ../../src/xrc/xh_htmllbox.cpp
 	$(CXX) -c -o $@ $(XRCLIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\xrclib_xh_sizer.o: ../../src/xrc/xh_sizer.cpp

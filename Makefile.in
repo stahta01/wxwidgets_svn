@@ -252,7 +252,6 @@ ALL_BASE_HEADERS =  \
 	wx/features.h \
 	wx/ffile.h \
 	wx/file.h \
-	wx/fileback.h \
 	wx/fileconf.h \
 	wx/filefn.h \
 	wx/filename.h \
@@ -384,7 +383,6 @@ ALL_PORTS_BASE_HEADERS =  \
 	wx/features.h \
 	wx/ffile.h \
 	wx/file.h \
-	wx/fileback.h \
 	wx/fileconf.h \
 	wx/filefn.h \
 	wx/filename.h \
@@ -536,7 +534,6 @@ ALL_BASE_SOURCES =  \
 	src/common/extended.c \
 	src/common/ffile.cpp \
 	src/common/file.cpp \
-	src/common/fileback.cpp \
 	src/common/fileconf.cpp \
 	src/common/filefn.cpp \
 	src/common/filename.cpp \
@@ -685,7 +682,6 @@ MONODLL_OBJECTS =  \
 	monodll_extended.o \
 	monodll_ffile.o \
 	monodll_file.o \
-	monodll_fileback.o \
 	monodll_fileconf.o \
 	monodll_filefn.o \
 	monodll_filename.o \
@@ -778,7 +774,6 @@ MONOLIB_OBJECTS =  \
 	monolib_extended.o \
 	monolib_ffile.o \
 	monolib_file.o \
-	monolib_fileback.o \
 	monolib_fileconf.o \
 	monolib_filefn.o \
 	monolib_filename.o \
@@ -873,7 +868,6 @@ BASEDLL_OBJECTS =  \
 	basedll_extended.o \
 	basedll_ffile.o \
 	basedll_file.o \
-	basedll_fileback.o \
 	basedll_fileconf.o \
 	basedll_filefn.o \
 	basedll_filename.o \
@@ -951,7 +945,6 @@ BASELIB_OBJECTS =  \
 	baselib_extended.o \
 	baselib_ffile.o \
 	baselib_file.o \
-	baselib_fileback.o \
 	baselib_fileconf.o \
 	baselib_filefn.o \
 	baselib_filename.o \
@@ -1304,7 +1297,6 @@ XRCDLL_OBJECTS =  \
 	xrcdll_xh_radbx.o \
 	xrcdll_xh_scrol.o \
 	xrcdll_xh_scwin.o \
-	xrcdll_xh_htmllbox.o \
 	xrcdll_xh_sizer.o \
 	xrcdll_xh_slidr.o \
 	xrcdll_xh_spin.o \
@@ -1364,7 +1356,6 @@ XRCLIB_OBJECTS =  \
 	xrclib_xh_radbx.o \
 	xrclib_xh_scrol.o \
 	xrclib_xh_scwin.o \
-	xrclib_xh_htmllbox.o \
 	xrclib_xh_sizer.o \
 	xrclib_xh_slidr.o \
 	xrclib_xh_spin.o \
@@ -3022,7 +3013,6 @@ COND_USE_GUI_1_ALL_GUI_HEADERS =  \
 	wx/xrc/xh_radbx.h \
 	wx/xrc/xh_scrol.h \
 	wx/xrc/xh_scwin.h \
-	wx/xrc/xh_htmllbox.h \
 	wx/xrc/xh_sizer.h \
 	wx/xrc/xh_slidr.h \
 	wx/xrc/xh_spin.h \
@@ -3326,7 +3316,6 @@ COND_USE_GUI_1___MONOLIB_GUI_SRC_OBJECTS =  \
 	monodll_xh_radbx.o \
 	monodll_xh_scrol.o \
 	monodll_xh_scwin.o \
-	monodll_xh_htmllbox.o \
 	monodll_xh_sizer.o \
 	monodll_xh_slidr.o \
 	monodll_xh_spin.o \
@@ -3481,7 +3470,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS =  \
 COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS =  \
 	$(__LOWLEVEL_SRC_OBJECTS_1) \
 	monodll_accel.o \
-	monodll_collpaneg.o \
 	monodll_colrdlgg.o \
 	monodll_dirdlgg.o \
 	monodll_fdrepdlg.o \
@@ -4074,7 +4062,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS =  \
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS)
 COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS =  \
 	monodll_accel.o \
-	monodll_collpaneg.o \
 	monodll_colrdlgg.o \
 	monodll_dirdlgg.o \
 	monodll_fdrepdlg.o \
@@ -4093,7 +4080,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS =  \
 	monodll_checklst.o \
 	monodll_choice.o \
 	monodll_colordlg.o \
-	monodll_collpane.o \
 	monodll_combobox.o \
 	monodll_control.o \
 	monodll_clrpicker.o \
@@ -4280,7 +4266,6 @@ COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS =  \
 	monodll_tabg.o
 @COND_TOOLKIT_MOTIF@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS)
 COND_TOOLKIT_MSW___GUI_SRC_OBJECTS =  \
-	monodll_collpaneg.o \
 	monodll_statusbr.o \
 	monodll_prntdlgg.o \
 	monodll_accel.o \
@@ -4332,7 +4317,6 @@ COND_TOOLKIT_MSW___GUI_SRC_OBJECTS =  \
 @COND_TOOLKIT_MSW@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_MSW___GUI_SRC_OBJECTS)
 COND_TOOLKIT_PM___GUI_SRC_OBJECTS =  \
 	monodll_caret.o \
-	monodll_collpaneg.o \
 	monodll_colrdlgg.o \
 	monodll_dirdlgg.o \
 	monodll_fdrepdlg.o \
@@ -4413,7 +4397,6 @@ COND_TOOLKIT_PM___GUI_SRC_OBJECTS =  \
 	monodll_window.o
 @COND_TOOLKIT_PM@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_PM___GUI_SRC_OBJECTS)
 COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS =  \
-	monodll_collpaneg.o \
 	monodll_statusbr.o \
 	monodll_prntdlgg.o \
 	monodll_accel.o \
@@ -5074,7 +5057,6 @@ COND_USE_GUI_1___MONOLIB_GUI_SRC_OBJECTS_1 =  \
 	monolib_xh_radbx.o \
 	monolib_xh_scrol.o \
 	monolib_xh_scwin.o \
-	monolib_xh_htmllbox.o \
 	monolib_xh_sizer.o \
 	monolib_xh_slidr.o \
 	monolib_xh_spin.o \
@@ -5229,7 +5211,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_1 =  \
 COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_1 =  \
 	$(__LOWLEVEL_SRC_OBJECTS_3) \
 	monolib_accel.o \
-	monolib_collpaneg.o \
 	monolib_colrdlgg.o \
 	monolib_dirdlgg.o \
 	monolib_fdrepdlg.o \
@@ -5823,7 +5804,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_1 =  \
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_1 =  \
 	monolib_accel.o \
-	monolib_collpaneg.o \
 	monolib_colrdlgg.o \
 	monolib_dirdlgg.o \
 	monolib_fdrepdlg.o \
@@ -5842,7 +5822,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_1 =  \
 	monolib_checklst.o \
 	monolib_choice.o \
 	monolib_colordlg.o \
-	monolib_collpane.o \
 	monolib_combobox.o \
 	monolib_control.o \
 	monolib_clrpicker.o \
@@ -6029,7 +6008,6 @@ COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_1 =  \
 	monolib_tabg.o
 @COND_TOOLKIT_MOTIF@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_1 =  \
-	monolib_collpaneg.o \
 	monolib_statusbr.o \
 	monolib_prntdlgg.o \
 	monolib_accel.o \
@@ -6081,7 +6059,6 @@ COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_1 =  \
 @COND_TOOLKIT_MSW@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_PM___GUI_SRC_OBJECTS_1 =  \
 	monolib_caret.o \
-	monolib_collpaneg.o \
 	monolib_colrdlgg.o \
 	monolib_dirdlgg.o \
 	monolib_fdrepdlg.o \
@@ -6162,7 +6139,6 @@ COND_TOOLKIT_PM___GUI_SRC_OBJECTS_1 =  \
 	monolib_window.o
 @COND_TOOLKIT_PM@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_PM___GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS_1 =  \
-	monolib_collpaneg.o \
 	monolib_statusbr.o \
 	monolib_prntdlgg.o \
 	monolib_accel.o \
@@ -7190,7 +7166,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_2 =  \
 COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_2 =  \
 	$(__LOWLEVEL_SRC_OBJECTS_5) \
 	coredll_accel.o \
-	coredll_collpaneg.o \
 	coredll_colrdlgg.o \
 	coredll_dirdlgg.o \
 	coredll_fdrepdlg.o \
@@ -7784,7 +7759,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_2 =  \
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_2 =  \
 	coredll_accel.o \
-	coredll_collpaneg.o \
 	coredll_colrdlgg.o \
 	coredll_dirdlgg.o \
 	coredll_fdrepdlg.o \
@@ -7803,7 +7777,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_2 =  \
 	coredll_checklst.o \
 	coredll_choice.o \
 	coredll_colordlg.o \
-	coredll_collpane.o \
 	coredll_combobox.o \
 	coredll_control.o \
 	coredll_clrpicker.o \
@@ -7990,7 +7963,6 @@ COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_2 =  \
 	coredll_tabg.o
 @COND_TOOLKIT_MOTIF@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_2 =  \
-	coredll_collpaneg.o \
 	coredll_statusbr.o \
 	coredll_prntdlgg.o \
 	coredll_accel.o \
@@ -8042,7 +8014,6 @@ COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_2 =  \
 @COND_TOOLKIT_MSW@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_PM___GUI_SRC_OBJECTS_2 =  \
 	coredll_caret.o \
-	coredll_collpaneg.o \
 	coredll_colrdlgg.o \
 	coredll_dirdlgg.o \
 	coredll_fdrepdlg.o \
@@ -8123,7 +8094,6 @@ COND_TOOLKIT_PM___GUI_SRC_OBJECTS_2 =  \
 	coredll_window.o
 @COND_TOOLKIT_PM@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_PM___GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS_2 =  \
-	coredll_collpaneg.o \
 	coredll_statusbr.o \
 	coredll_prntdlgg.o \
 	coredll_accel.o \
@@ -8623,7 +8593,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_3 =  \
 COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_3 =  \
 	$(__LOWLEVEL_SRC_OBJECTS_7) \
 	corelib_accel.o \
-	corelib_collpaneg.o \
 	corelib_colrdlgg.o \
 	corelib_dirdlgg.o \
 	corelib_fdrepdlg.o \
@@ -9217,7 +9186,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_3 =  \
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_GTK_TOOLKIT_VERSION____GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_3 =  \
 	corelib_accel.o \
-	corelib_collpaneg.o \
 	corelib_colrdlgg.o \
 	corelib_dirdlgg.o \
 	corelib_fdrepdlg.o \
@@ -9236,7 +9204,6 @@ COND_TOOLKIT_GTK_TOOLKIT_VERSION_2___GUI_SRC_OBJECTS_3 =  \
 	corelib_checklst.o \
 	corelib_choice.o \
 	corelib_colordlg.o \
-	corelib_collpane.o \
 	corelib_combobox.o \
 	corelib_control.o \
 	corelib_clrpicker.o \
@@ -9423,7 +9390,6 @@ COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_3 =  \
 	corelib_tabg.o
 @COND_TOOLKIT_MOTIF@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_3 =  \
-	corelib_collpaneg.o \
 	corelib_statusbr.o \
 	corelib_prntdlgg.o \
 	corelib_accel.o \
@@ -9475,7 +9441,6 @@ COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_3 =  \
 @COND_TOOLKIT_MSW@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_MSW___GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_PM___GUI_SRC_OBJECTS_3 =  \
 	corelib_caret.o \
-	corelib_collpaneg.o \
 	corelib_colrdlgg.o \
 	corelib_dirdlgg.o \
 	corelib_fdrepdlg.o \
@@ -9556,7 +9521,6 @@ COND_TOOLKIT_PM___GUI_SRC_OBJECTS_3 =  \
 	corelib_window.o
 @COND_TOOLKIT_PM@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_PM___GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS_3 =  \
-	corelib_collpaneg.o \
 	corelib_statusbr.o \
 	corelib_prntdlgg.o \
 	corelib_accel.o \
@@ -12133,9 +12097,6 @@ monodll_ffile.o: $(srcdir)/src/common/ffile.cpp $(MONODLL_ODEP)
 monodll_file.o: $(srcdir)/src/common/file.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/file.cpp
 
-monodll_fileback.o: $(srcdir)/src/common/fileback.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/fileback.cpp
-
 monodll_fileconf.o: $(srcdir)/src/common/fileconf.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/fileconf.cpp
 
@@ -12381,9 +12342,6 @@ monodll_graphicc.o: $(srcdir)/src/generic/graphicc.cpp $(MONODLL_ODEP)
 
 monodll_artgtk.o: $(srcdir)/src/gtk/artgtk.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/gtk/artgtk.cpp
-
-monodll_collpane.o: $(srcdir)/src/gtk/collpane.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/gtk/collpane.cpp
 
 monodll_clrpicker.o: $(srcdir)/src/gtk/clrpicker.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/gtk/clrpicker.cpp
@@ -12759,9 +12717,6 @@ monodll_xh_scrol.o: $(srcdir)/src/xrc/xh_scrol.cpp $(MONODLL_ODEP)
 
 monodll_xh_scwin.o: $(srcdir)/src/xrc/xh_scwin.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/xrc/xh_scwin.cpp
-
-monodll_xh_htmllbox.o: $(srcdir)/src/xrc/xh_htmllbox.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/xrc/xh_htmllbox.cpp
 
 monodll_xh_sizer.o: $(srcdir)/src/xrc/xh_sizer.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/xrc/xh_sizer.cpp
@@ -14421,21 +14376,6 @@ monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monodll_accel.o: $(srcdir)/src/os2/accel.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/os2/accel.cpp
-
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@monodll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@monodll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@monodll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monodll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_USE_GUI_1_WXUNIV_1@monodll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONODLL_ODEP)
-@COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
 
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@monodll_colrdlgg.o: $(srcdir)/src/generic/colrdlgg.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/generic/colrdlgg.cpp
@@ -16204,9 +16144,6 @@ monolib_ffile.o: $(srcdir)/src/common/ffile.cpp $(MONOLIB_ODEP)
 monolib_file.o: $(srcdir)/src/common/file.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/file.cpp
 
-monolib_fileback.o: $(srcdir)/src/common/fileback.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/fileback.cpp
-
 monolib_fileconf.o: $(srcdir)/src/common/fileconf.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/fileconf.cpp
 
@@ -16452,9 +16389,6 @@ monolib_graphicc.o: $(srcdir)/src/generic/graphicc.cpp $(MONOLIB_ODEP)
 
 monolib_artgtk.o: $(srcdir)/src/gtk/artgtk.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/gtk/artgtk.cpp
-
-monolib_collpane.o: $(srcdir)/src/gtk/collpane.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/gtk/collpane.cpp
 
 monolib_clrpicker.o: $(srcdir)/src/gtk/clrpicker.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/gtk/clrpicker.cpp
@@ -16830,9 +16764,6 @@ monolib_xh_scrol.o: $(srcdir)/src/xrc/xh_scrol.cpp $(MONOLIB_ODEP)
 
 monolib_xh_scwin.o: $(srcdir)/src/xrc/xh_scwin.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_scwin.cpp
-
-monolib_xh_htmllbox.o: $(srcdir)/src/xrc/xh_htmllbox.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_htmllbox.cpp
 
 monolib_xh_sizer.o: $(srcdir)/src/xrc/xh_sizer.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_sizer.cpp
@@ -18492,21 +18423,6 @@ monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monolib_accel.o: $(srcdir)/src/os2/accel.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/os2/accel.cpp
-
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@monolib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@monolib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@monolib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monolib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_USE_GUI_1_WXUNIV_1@monolib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(MONOLIB_ODEP)
-@COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
 
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@monolib_colrdlgg.o: $(srcdir)/src/generic/colrdlgg.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/generic/colrdlgg.cpp
@@ -20278,9 +20194,6 @@ basedll_ffile.o: $(srcdir)/src/common/ffile.cpp $(BASEDLL_ODEP)
 basedll_file.o: $(srcdir)/src/common/file.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/common/file.cpp
 
-basedll_fileback.o: $(srcdir)/src/common/fileback.cpp $(BASEDLL_ODEP)
-	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/common/fileback.cpp
-
 basedll_fileconf.o: $(srcdir)/src/common/fileconf.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/common/fileconf.cpp
 
@@ -20844,9 +20757,6 @@ baselib_ffile.o: $(srcdir)/src/common/ffile.cpp $(BASELIB_ODEP)
 
 baselib_file.o: $(srcdir)/src/common/file.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/common/file.cpp
-
-baselib_fileback.o: $(srcdir)/src/common/fileback.cpp $(BASELIB_ODEP)
-	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/common/fileback.cpp
 
 baselib_fileconf.o: $(srcdir)/src/common/fileconf.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/common/fileconf.cpp
@@ -21498,9 +21408,6 @@ coredll_graphicc.o: $(srcdir)/src/generic/graphicc.cpp $(COREDLL_ODEP)
 
 coredll_artgtk.o: $(srcdir)/src/gtk/artgtk.cpp $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/gtk/artgtk.cpp
-
-coredll_collpane.o: $(srcdir)/src/gtk/collpane.cpp $(COREDLL_ODEP)
-	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/gtk/collpane.cpp
 
 coredll_clrpicker.o: $(srcdir)/src/gtk/clrpicker.cpp $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/gtk/clrpicker.cpp
@@ -22929,21 +22836,6 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@coredll_accel.o: $(srcdir)/src/os2/accel.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/os2/accel.cpp
-
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@coredll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@coredll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@coredll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@coredll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_USE_GUI_1_WXUNIV_1@coredll_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(COREDLL_ODEP)
-@COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
 
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@coredll_colrdlgg.o: $(srcdir)/src/generic/colrdlgg.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/generic/colrdlgg.cpp
@@ -24427,9 +24319,6 @@ corelib_graphicc.o: $(srcdir)/src/generic/graphicc.cpp $(CORELIB_ODEP)
 corelib_artgtk.o: $(srcdir)/src/gtk/artgtk.cpp $(CORELIB_ODEP)
 	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/gtk/artgtk.cpp
 
-corelib_collpane.o: $(srcdir)/src/gtk/collpane.cpp $(CORELIB_ODEP)
-	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/gtk/collpane.cpp
-
 corelib_clrpicker.o: $(srcdir)/src/gtk/clrpicker.cpp $(CORELIB_ODEP)
 	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/gtk/clrpicker.cpp
 
@@ -25857,21 +25746,6 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@corelib_accel.o: $(srcdir)/src/os2/accel.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/os2/accel.cpp
-
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@corelib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@corelib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@corelib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@corelib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
-
-@COND_USE_GUI_1_WXUNIV_1@corelib_collpaneg.o: $(srcdir)/src/generic/collpaneg.cpp $(CORELIB_ODEP)
-@COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/collpaneg.cpp
 
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@corelib_colrdlgg.o: $(srcdir)/src/generic/colrdlgg.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_GTK_TOOLKIT_VERSION_2_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/generic/colrdlgg.cpp
@@ -28171,9 +28045,6 @@ xrcdll_xh_scrol.o: $(srcdir)/src/xrc/xh_scrol.cpp $(XRCDLL_ODEP)
 xrcdll_xh_scwin.o: $(srcdir)/src/xrc/xh_scwin.cpp $(XRCDLL_ODEP)
 	$(CXXC) -c -o $@ $(XRCDLL_CXXFLAGS) $(srcdir)/src/xrc/xh_scwin.cpp
 
-xrcdll_xh_htmllbox.o: $(srcdir)/src/xrc/xh_htmllbox.cpp $(XRCDLL_ODEP)
-	$(CXXC) -c -o $@ $(XRCDLL_CXXFLAGS) $(srcdir)/src/xrc/xh_htmllbox.cpp
-
 xrcdll_xh_sizer.o: $(srcdir)/src/xrc/xh_sizer.cpp $(XRCDLL_ODEP)
 	$(CXXC) -c -o $@ $(XRCDLL_CXXFLAGS) $(srcdir)/src/xrc/xh_sizer.cpp
 
@@ -28332,9 +28203,6 @@ xrclib_xh_scrol.o: $(srcdir)/src/xrc/xh_scrol.cpp $(XRCLIB_ODEP)
 
 xrclib_xh_scwin.o: $(srcdir)/src/xrc/xh_scwin.cpp $(XRCLIB_ODEP)
 	$(CXXC) -c -o $@ $(XRCLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_scwin.cpp
-
-xrclib_xh_htmllbox.o: $(srcdir)/src/xrc/xh_htmllbox.cpp $(XRCLIB_ODEP)
-	$(CXXC) -c -o $@ $(XRCLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_htmllbox.cpp
 
 xrclib_xh_sizer.o: $(srcdir)/src/xrc/xh_sizer.cpp $(XRCLIB_ODEP)
 	$(CXXC) -c -o $@ $(XRCLIB_CXXFLAGS) $(srcdir)/src/xrc/xh_sizer.cpp

@@ -64,25 +64,12 @@ Major new features in 2.7 release
 2.7.2
 -----
 
-All:
-
-- Added wxFFile overload to wxFileName::CreateTemporaryFileName().
-- Added wxBackingFile and wxBackedInputStream
-
 All (GUI): 
 
 - wxMemoryDC constructor now optionally accepts a wxBitmap parameter,
   calling SelectObject itself if a valid bitmap is passed.
 - Reverted wxBuffered[Paint]DC to pre 2.7.1 state, added
   wxAutoBufferedPaintDC and wxAutoBufferedPaintDCFactory.
-- Renamed wxProgressDialog::UpdatePulse() to just Pulse()
-- Added wxCollapsiblePane (Francesco Montorsi)
-- Added wxSimpleHtmlListBox (Francesco Montorsi)
-
-Unix Ports:
-
-- Added autopackage for wxGTK and an example of using autopackage for a wx
-  program (Francesco Montorsi)
 
 
 

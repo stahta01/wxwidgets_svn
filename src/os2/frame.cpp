@@ -704,20 +704,13 @@ void wxFrame::PositionToolBar()
                           ,vTHeight
                          );
     }
-    else if (pToolBar->GetWindowStyleFlag() & wxTB_BOTTOM)
+    else if (pToolBar->GetWindowStyleFlag() & wxTB_BOTTOM )
     {
-        wxCoord                     vSwidth = 0;
-        wxCoord                     vSheight = 0;
-
-        if (m_frameStatusBar)
-            m_frameStatusBar->GetSize( &vSwidth
-                                      ,&vSheight
-                                     );
         vWidth = (wxCoord)(vRect.xRight - vRect.xLeft);
         pToolBar->SetSize( vRect.xLeft - vFRect.xLeft
-                          ,vFRect.yTop - vRect.yBottom - vTHeight - vSheight
+                          ,vRect.yBottom - vTHeight      // assuming the vRect contains the client coordinates
                           ,vWidth
-                          ,vTHeight
+                          ,vHeight
                          );
     }
     else
@@ -1115,13 +1108,6 @@ MRESULT EXPENTRY wxFrameMainWndProc( HWND   hWnd,
                             pSWP[i].cx   = vRectl.xRight - vRectl.xLeft;
                             pSWP[i].cy   = vRectl.yTop - vRectl.yBottom - (nHeight + nHeight2);
                         }
-                        else if (pWnd->m_frameToolBar && pWnd->m_frameToolBar->GetWindowStyleFlag() & wxTB_BOTTOM)
-                        {
-                            pSWP[i].x    = vRectl.xLeft;
-                            pSWP[i].y    = vRectl.yBottom + nHeight + nHeight2;
-                            pSWP[i].cx   = vRectl.xRight - vRectl.xLeft;
-                            pSWP[i].cy   = vRectl.yTop - vRectl.yBottom - (nHeight + nHeight2);
-                         }
                         else
                         {
                             pSWP[i].x    = vRectl.xLeft + nWidth;

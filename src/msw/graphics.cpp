@@ -137,6 +137,7 @@ static GDILoader gGDILoader;
 
 class WXDLLEXPORT wxGDIPlusPath : public wxGraphicsPath
 {
+    DECLARE_NO_COPY_CLASS(wxGDIPlusPath)
 public :
     wxGDIPlusPath();
     ~wxGDIPlusPath();
@@ -181,25 +182,18 @@ public :
     virtual void AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r )  ;
 */
 
-	// returns the native path
-	virtual void * GetNativePath() const { return m_path; }
-	
-	// give the native path returned by GetNativePath() back (there might be some deallocations necessary)
-	virtual void UnGetNativePath(void * WXUNUSED(path)) {}
-
+    GraphicsPath* GetPath() const;
 private :
     GraphicsPath* m_path;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxGDIPlusPath)
 };
 
 class WXDLLEXPORT wxGDIPlusContext : public wxGraphicsContext
 {
-public:
-    wxGDIPlusContext( HDC hdc );
-    wxGDIPlusContext( HWND hwnd );
-    wxGDIPlusContext( Graphics* gr);
-    wxGDIPlusContext();
+    DECLARE_NO_COPY_CLASS(wxGDIPlusContext)
 
+public:
+    wxGDIPlusContext( WXHDC hdc );
+    wxGDIPlusContext();
     virtual ~wxGDIPlusContext();
 
     virtual void Clip( const wxRegion &region );
@@ -238,9 +232,6 @@ public:
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const;
 
 private:
-    void    Init();
-    void    SetDefaults();
-
     Graphics* m_context;
     vector<GraphicsState> m_stateStack;
     GraphicsState m_state1;
@@ -260,10 +251,7 @@ private:
     Font* m_font;
     // wxPen m_pen;
     // wxBrush m_brush;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxGDIPlusContext)
 };
-
-IMPLEMENT_DYNAMIC_CLASS(wxGDIPlusPath,wxGraphicsPath)
 
 wxGDIPlusPath::wxGDIPlusPath()
 {
@@ -273,6 +261,11 @@ wxGDIPlusPath::wxGDIPlusPath()
 wxGDIPlusPath::~wxGDIPlusPath()
 {
     delete m_path;
+}
+
+GraphicsPath* wxGDIPlusPath::GetPath() const
+{
+    return m_path;
 }
 
 //
@@ -343,59 +336,30 @@ void wxGDIPlusPath::AddRectangle( wxDouble x, wxDouble y, wxDouble w, wxDouble h
     m_path->AddRectangle(RectF(x,y,w,h));
 }
 
+//
+//
+//
+/*
+// closes the current subpath
+void wxGDIPlusPath::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r ) 
+{
+//    CGPathAddArcToPoint( m_path, NULL , x1, y1, x2, y2, r); 
+}
+
+*/
+
 //-----------------------------------------------------------------------------
 // wxGDIPlusContext implementation
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxGDIPlusContext,wxGraphicsContext)
-
-wxGDIPlusContext::wxGDIPlusContext( HDC hdc  )
-{
-    Init();
-    m_context = new Graphics( hdc);
-    SetDefaults();
-}
-
-wxGDIPlusContext::wxGDIPlusContext( HWND hwnd  )
-{
-    Init();
-    m_context = new Graphics( hwnd);
-    SetDefaults();
-}
-
-wxGDIPlusContext::wxGDIPlusContext( Graphics* gr  )
-{
-    Init();
-    m_context = gr;
-    SetDefaults();
-}
-
-void wxGDIPlusContext::Init()
+wxGDIPlusContext::wxGDIPlusContext( WXHDC hdc  )
 {
     gGDILoader.EnsureIsLoaded();
-    m_context = NULL;
-    m_state1 = 0;
-    m_state2= 0;
-
-    m_pen = NULL;
-    m_penTransparent = true;
-    m_penImage = NULL;
-    m_penBrush = NULL;
-
-    m_brush = NULL;
-    m_brushTransparent = true;
-    m_brushImage = NULL;
-    m_brushPath = NULL;
-
-    m_textBrush = NULL;
-    m_font = NULL;
-}
-
-void wxGDIPlusContext::SetDefaults()
-{
+    m_context = new Graphics( (HDC) hdc);
     m_context->SetSmoothingMode(SmoothingModeHighQuality);
     m_state1 = m_context->Save();
     m_state2 = m_context->Save();
+
     // set defaults
 
     m_penTransparent = false;
@@ -430,35 +394,37 @@ wxGDIPlusContext::~wxGDIPlusContext()
 }
 
 
-void wxGDIPlusContext::Clip( const wxRegion &region )
+void wxGDIPlusContext::Clip( const wxRegion & WXUNUSED(region) )
 {
-    m_context->SetClip((HRGN)region.GetHRGN(),CombineModeIntersect);
+// TODO
 }
 
 void wxGDIPlusContext::Clip( wxDouble x, wxDouble y, wxDouble w, wxDouble h )
 {
-    m_context->SetClip(RectF(x,y,w,h),CombineModeIntersect);
+// TODO
 }
 	
 void wxGDIPlusContext::ResetClip()
 {
-    m_context->ResetClip();
+// TODO
 }
 
-void wxGDIPlusContext::StrokePath( const wxGraphicsPath *path )
+void wxGDIPlusContext::StrokePath( const wxGraphicsPath *p )
 {
     if ( m_penTransparent )
         return;
 
-    m_context->DrawPath( m_pen , (GraphicsPath*) path->GetNativePath() );
+    const wxGDIPlusPath* path = dynamic_cast< const wxGDIPlusPath*>( p );
+    m_context->DrawPath( m_pen , path->GetPath() );
 }
 
-void wxGDIPlusContext::FillPath( const wxGraphicsPath *path , int fillStyle )
+void wxGDIPlusContext::FillPath( const wxGraphicsPath *p , int fillStyle )
 {
     if ( !m_brushTransparent )
     {
-        ((GraphicsPath*) path->GetNativePath())->SetFillMode( fillStyle == wxODDEVEN_RULE ? FillModeAlternate : FillModeWinding);
-        m_context->FillPath( m_brush , (GraphicsPath*) path->GetNativePath());
+        const wxGDIPlusPath* path = dynamic_cast< const wxGDIPlusPath*>( p );
+        path->GetPath()->SetFillMode( fillStyle == wxODDEVEN_RULE ? FillModeAlternate : FillModeWinding);
+        m_context->FillPath( m_brush , path->GetPath() );
     }
 }
 
@@ -991,12 +957,12 @@ wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc)
 
 wxGraphicsContext* wxGraphicsContext::Create( wxWindow * window )
 {
-    return new wxGDIPlusContext( (HWND) window->GetHWND() );
+	return NULL; // TODO
 }
 
 wxGraphicsContext* wxGraphicsContext::CreateFromNative( void * context )
 {
-    return new wxGDIPlusContext( (Graphics*) context );
+	return NULL; // TODO
 }
 
 

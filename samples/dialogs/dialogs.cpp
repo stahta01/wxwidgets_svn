@@ -1070,7 +1070,33 @@ void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
 {
-    static const int max = 100;
+    #if wxUSE_STOPWATCH && wxUSE_LONGLONG
+    // check the performance
+    int countrandomnumbers = 0, count = 0;
+    wxTimeSpan tsTest(0,0,0,250);
+    wxDateTime DT2, DT1 = wxDateTime::UNow();
+    srand(0);
+    while(1)
+    {
+        rand();
+        ++countrandomnumbers;
+        if ( countrandomnumbers == 1000 )
+        {
+            srand(0);
+            countrandomnumbers = 0;
+            ++count;
+            DT2 = wxDateTime::UNow();
+            wxTimeSpan ts = DT2.Subtract( DT1 );
+            if ( ts.IsLongerThan( tsTest ) )
+            {
+                break;
+            }
+        }
+    }
+    const int max = 40 * count;
+    #else
+    static const int max = 10;
+    #endif // wxUSE_STOPWATCH && wxUSE_LONGLONG
 
     wxProgressDialog dialog(_T("Progress dialog example"),
                             _T("An informative message"),
@@ -1082,48 +1108,53 @@ void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
                             // wxPD_AUTO_HIDE | -- try this as well
                             wxPD_ELAPSED_TIME |
                             wxPD_ESTIMATED_TIME |
-                            wxPD_REMAINING_TIME
-                            | wxPD_SMOOTH // - makes indeterminate mode bar on WinXP very small
-                            );
+                            wxPD_REMAINING_TIME |
+                            wxPD_SMOOTH);
 
     bool cont = true;
-    for ( int i = 0; i <= max; i++ )
+    bool skip = false;
+    // each skip will move progress about quarter forward
+    for ( int i = 0; i <= max; i = wxMin(i+(skip?int(max/4):1), max+1), skip = false )
     {
-        wxMilliSleep(200);
+        #if wxUSE_STOPWATCH && wxUSE_LONGLONG
+        // do (almost) the same operations as we did for the performance test
+        srand(0);
+        for ( int j = 0; j < 1000; j++ )
+        {
+            rand();
+            if ( j == 999 )
+            {
+                DT2 = wxDateTime::UNow();
+                wxTimeSpan ts = DT2.Subtract( DT1 );
+                if ( ts.IsLongerThan( tsTest ) )
+                {
+                    // nothing to do
+                }
+            }
+        }
+        #else
+        wxSleep(1);
+        #endif
 
         wxString msg;
-
-        // test both modes of wxProgressDialog behaviour: start in
-        // indeterminate mode but switch to the determinate one later
-        const bool determinate = i > max/2;
 
         if ( i == max )
         {
             msg = _T("That's all, folks!");
         }
-        else if ( !determinate )
+        else if ( i > max / 2 )
         {
-            msg = _T("Testing indeterminate mode");
-        }
-        else if ( determinate )
-        {
-            msg = _T("Now in standard determinate mode");
+            msg = _T("Only a half left (very long message)!");
         }
 
-        // will be set to true if "Skip" button was pressed
-        bool skip = false;
-        if ( determinate )
+#if wxUSE_STOPWATCH && wxUSE_LONGLONG
+        if ( (i % (max/100)) == 0 ) // // only 100 updates, this makes it much faster
         {
             cont = dialog.Update(i, msg, &skip);
         }
-        else
-        {
-            cont = dialog.Pulse(msg, &skip);
-        }
-
-        // each skip will move progress about quarter forward
-        if ( skip )
-            i += max/4;
+#else
+        cont = dialog.Update(i, msg, &skip);
+#endif
 
         if ( !cont )
         {

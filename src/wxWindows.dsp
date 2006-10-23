@@ -519,10 +519,6 @@ SOURCE=.\common\file.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\fileback.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\fileconf.cpp
 # End Source File
 # Begin Source File
@@ -1012,10 +1008,6 @@ SOURCE=.\generic\choicdgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\clrpickerg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\collpaneg.cpp
 # End Source File
 # Begin Source File
 
@@ -1939,10 +1931,6 @@ SOURCE=.\xrc\xh_html.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xrc\xh_htmllbox.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\xrc\xh_hyperlink.cpp
 # End Source File
 # Begin Source File
@@ -2588,10 +2576,6 @@ SOURCE=..\include\wx\ffile.h
 # Begin Source File
 
 SOURCE=..\include\wx\file.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\fileback.h
 # End Source File
 # Begin Source File
 
@@ -3528,10 +3512,6 @@ SOURCE=..\include\wx\xrc\xh_grid.h
 # Begin Source File
 
 SOURCE=..\include\wx\xrc\xh_html.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xrc\xh_htmllbox.h
 # End Source File
 # Begin Source File
 

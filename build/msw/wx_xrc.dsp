@@ -1050,10 +1050,6 @@ SOURCE=..\..\include\wx\xrc\xh_html.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\wx\xrc\xh_htmllbox.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\wx\xrc\xh_hyperlink.h
 # End Source File
 # Begin Source File
@@ -1263,10 +1259,6 @@ SOURCE=..\..\src\xrc\xh_grid.cpp
 # Begin Source File
 
 SOURCE=..\..\src\xrc\xh_html.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\xrc\xh_htmllbox.cpp
 # End Source File
 # Begin Source File
 

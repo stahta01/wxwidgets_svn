@@ -52,6 +52,14 @@ wxObject *wxOwnerDrawnComboBoxXmlHandler::DoCreateResource()
         // need to build the list of strings from children
         m_insideBox = true;
         CreateChildrenPrivately(NULL, GetParamNode(wxT("content")));
+        wxString *strings = (wxString *) NULL;
+        if (strList.GetCount() > 0)
+        {
+            strings = new wxString[strList.GetCount()];
+            int count = strList.GetCount();
+            for (int i = 0; i < count; i++)
+                strings[i]=strList[i];
+        }
 
         XRC_MAKE_INSTANCE(control, wxOwnerDrawnComboBox)
 
@@ -59,21 +67,24 @@ wxObject *wxOwnerDrawnComboBoxXmlHandler::DoCreateResource()
                         GetID(),
                         GetText(wxT("value")),
                         GetPosition(), GetSize(),
-                        strList,
+                        strList.GetCount(),
+                        strings,
                         GetStyle(),
                         wxDefaultValidator,
                         GetName());
 
-        wxSize sizeBtn=GetSize(wxT("buttonsize"));
+        wxSize ButtonSize=GetSize(wxT("buttonsize"));
 
-        if (sizeBtn != wxDefaultSize)
-            control->SetButtonPosition(sizeBtn.GetWidth(), sizeBtn.GetHeight());
+        if (ButtonSize != wxDefaultSize)
+        control->SetButtonPosition(ButtonSize.GetWidth(), ButtonSize.GetHeight());
 
         if (selection != -1)
             control->SetSelection(selection);
 
         SetupWindow(control);
 
+        if (strings != NULL)
+            delete[] strings;
         strList.Clear();    // dump the strings
 
         return control;

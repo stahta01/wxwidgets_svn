@@ -436,9 +436,6 @@
 // Set to 1 to compile wxZipInput/OutputStream classes.
 #define wxUSE_ZIPSTREAM     1
 
-// Set to 1 to compile wxBackingFile and wxBackedInputStream
-#define wxUSE_BACKINGFILE   1
-
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG
 #define wxUSE_ZLIB          1
@@ -564,7 +561,7 @@
 //
 // Recommended setting: 1
 #ifndef wxUSE_GRAPHICS_CONTEXT
-#define wxUSE_GRAPHICS_CONTEXT 0
+#define wxUSE_GRAPHICS_CONTEXT 1
 #endif
 
 // ----------------------------------------------------------------------------

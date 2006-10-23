@@ -304,7 +304,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/extended.c
     src/common/ffile.cpp
     src/common/file.cpp
-    src/common/fileback.cpp
     src/common/fileconf.cpp
     src/common/filefn.cpp
     src/common/filename.cpp
@@ -388,7 +387,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/features.h
     wx/ffile.h
     wx/file.h
-    wx/fileback.h
     wx/fileconf.h
     wx/filefn.h
     wx/filename.h
@@ -950,7 +948,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="GTK_SRC" hints="files">
     <!-- Generic implementations used by wxGTK: -->
     src/generic/accel.cpp
-    src/generic/collpaneg.cpp
     src/generic/colrdlgg.cpp
     src/generic/dirdlgg.cpp
     src/generic/fdrepdlg.cpp
@@ -971,7 +968,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/gtk/checklst.cpp
     src/gtk/choice.cpp
     src/gtk/colordlg.cpp
-    src/gtk/collpane.cpp
     src/gtk/combobox.cpp
     src/gtk/control.cpp
     src/gtk/clrpicker.cpp
@@ -1514,7 +1510,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 </set>
 
 <set var="MSW_SRC" hints="files">
-    src/generic/collpaneg.cpp
     src/generic/statusbr.cpp
     src/generic/prntdlgg.cpp
     src/msw/accel.cpp
@@ -1860,7 +1855,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="OS2_SRC" hints="files">
     <!-- Generic implementations used by wxOS2: -->
     src/generic/caret.cpp
-    src/generic/collpaneg.cpp
     src/generic/colrdlgg.cpp
     src/generic/dirdlgg.cpp
     src/generic/fdrepdlg.cpp
@@ -2517,7 +2511,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 
 <set var="UNIV_SRC" hints="files">
     src/generic/accel.cpp
-    src/generic/collpaneg.cpp
     src/generic/colrdlgg.cpp
     src/generic/dirdlgg.cpp
     src/generic/fdrepdlg.cpp
@@ -2963,7 +2956,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/xrc/xh_radbx.cpp
     src/xrc/xh_scrol.cpp
     src/xrc/xh_scwin.cpp
-    src/xrc/xh_htmllbox.cpp
     src/xrc/xh_sizer.cpp
     src/xrc/xh_slidr.cpp
     src/xrc/xh_spin.cpp
@@ -3020,7 +3012,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/xrc/xh_radbx.h
     wx/xrc/xh_scrol.h
     wx/xrc/xh_scwin.h
-    wx/xrc/xh_htmllbox.h
     wx/xrc/xh_sizer.h
     wx/xrc/xh_slidr.h
     wx/xrc/xh_spin.h

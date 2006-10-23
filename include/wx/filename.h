@@ -32,10 +32,6 @@
 class WXDLLIMPEXP_BASE wxFile;
 #endif
 
-#if wxUSE_FFILE
-class WXDLLIMPEXP_BASE wxFFile;
-#endif
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -270,29 +266,14 @@ public:
     void AssignHomeDir();
     static wxString GetHomeDir();
 
-#if wxUSE_FILE || wxUSE_FFILE
-        // get a temp file name starting with the specified prefix
-    void AssignTempFileName(const wxString& prefix);
-    static wxString CreateTempFileName(const wxString& prefix);
-#endif // wxUSE_FILE
-
 #if wxUSE_FILE
         // get a temp file name starting with the specified prefix and open the
         // file passed to us using this name for writing (atomically if
         // possible)
-    void AssignTempFileName(const wxString& prefix, wxFile *fileTemp);
+    void AssignTempFileName(const wxString& prefix, wxFile *fileTemp = NULL);
     static wxString CreateTempFileName(const wxString& prefix,
-                                       wxFile *fileTemp);
+                                       wxFile *fileTemp = NULL);
 #endif // wxUSE_FILE
-
-#if wxUSE_FFILE
-        // get a temp file name starting with the specified prefix and open the
-        // file passed to us using this name for writing (atomically if
-        // possible)
-    void AssignTempFileName(const wxString& prefix, wxFFile *fileTemp);
-    static wxString CreateTempFileName(const wxString& prefix,
-                                       wxFFile *fileTemp);
-#endif // wxUSE_FFILE
 
     // directory creation and removal.
     bool Mkdir( int perm = 0777, int flags = 0);

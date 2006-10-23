@@ -43,13 +43,22 @@ wxObject *wxChoiceXmlHandler::DoCreateResource()
         // need to build the list of strings from children
         m_insideBox = true;
         CreateChildrenPrivately(NULL, GetParamNode(wxT("content")));
+        wxString *strings = (wxString *) NULL;
+        if (strList.GetCount() > 0)
+        {
+            strings = new wxString[strList.GetCount()];
+            int count = strList.GetCount();
+            for (int i = 0; i < count; i++)
+                strings[i]=strList[i];
+        }
 
         XRC_MAKE_INSTANCE(control, wxChoice)
 
         control->Create(m_parentAsWindow,
                         GetID(),
                         GetPosition(), GetSize(),
-                        strList,
+                        strList.GetCount(),
+                        strings,
                         GetStyle(),
                         wxDefaultValidator,
                         GetName());
@@ -59,6 +68,8 @@ wxObject *wxChoiceXmlHandler::DoCreateResource()
 
         SetupWindow(control);
 
+        if (strings != NULL)
+            delete[] strings;
         strList.Clear();    // dump the strings
 
         return control;

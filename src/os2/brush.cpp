@@ -212,7 +212,7 @@ bool wxBrush::RealizeResource()
     return false;
 } // end of wxBrush::RealizeResource
 
-WXHANDLE wxBrush::GetResourceHandle() const
+WXHANDLE wxBrush::GetResourceHandle()
 {
     if (!M_BRUSHDATA)
         return 0;

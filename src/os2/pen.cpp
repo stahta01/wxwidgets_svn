@@ -304,7 +304,7 @@ bool wxPen::RealizeResource()
     return false;
 } // end of wxPen::RealizeResource
 
-WXHANDLE wxPen::GetResourceHandle() const
+WXHANDLE wxPen::GetResourceHandle()
 {
     if (!M_PENDATA)
         return 0;

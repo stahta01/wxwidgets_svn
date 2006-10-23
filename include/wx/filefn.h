@@ -309,15 +309,6 @@ enum wxFileKind
         #endif
     #endif
 
-    #if wxHAS_HUGE_FILES
-        // wxFile is present and supports large files. Currently wxFFile
-        // doesn't have large file support with any Windows compiler (even
-        // Win64 ones).
-        #if wxUSE_FILE
-            #define WXFILE_LARGEFILE 1
-        #endif
-    #endif
-        
     // It's a private define, undefine it so nobody gets tempted to use it
     #undef wxHAS_HUGE_FILES
 #else // Unix platforms using configure
@@ -326,14 +317,6 @@ enum wxFileKind
         #define wxFileOffsetFmtSpec wxLongLongFmtSpec
         wxCOMPILE_TIME_ASSERT( sizeof(off_t) == sizeof(wxLongLong_t),
                                 BadFileSizeType );
-        // wxFile is present and supports large files
-        #ifdef wxUSE_FILE
-            #define WXFILE_LARGEFILE
-        #endif
-        // wxFFile is present and supports large files
-        #if SIZEOF_LONG == 8 || defined HAVE_FSEEKO
-            #define WXFFILE_LARGEFILE
-        #endif
     #else
         #define wxFileOffsetFmtSpec _T("")
     #endif
@@ -371,12 +354,6 @@ enum wxFileKind
 
     #define wxHAVE_NATIVE_LSTAT
 #endif // platforms
-
-#ifdef O_BINARY
-    #define wxO_BINARY O_BINARY
-#else
-    #define wxO_BINARY 0
-#endif
 
 // if the platform doesn't have symlinks, define wxLstat to be the same as
 // wxStat to avoid #ifdefs in the code using it

@@ -241,7 +241,7 @@ bool wxGDIImage::FreeResource( bool WXUNUSED(bForce) )
     return true;
 }
 
-WXHANDLE wxGDIImage::GetResourceHandle() const
+WXHANDLE wxGDIImage::GetResourceHandle()
 {
     return GetHandle();
 }

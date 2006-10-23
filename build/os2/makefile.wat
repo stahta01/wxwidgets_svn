@@ -122,7 +122,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_debugrpt.obj &
 	$(OBJS)\monodll_dbgrptg.obj &
 	$(OBJS)\monodll_dbgrid.obj &
-	$(OBJS)\monodll_xh_animatctrl.obj &
 	$(OBJS)\monodll_xh_bmp.obj &
 	$(OBJS)\monodll_xh_bmpcbox.obj &
 	$(OBJS)\monodll_xh_bmpbt.obj &
@@ -157,7 +156,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_xh_radbx.obj &
 	$(OBJS)\monodll_xh_scrol.obj &
 	$(OBJS)\monodll_xh_scwin.obj &
-	$(OBJS)\monodll_xh_htmllbox.obj &
 	$(OBJS)\monodll_xh_sizer.obj &
 	$(OBJS)\monodll_xh_slidr.obj &
 	$(OBJS)\monodll_xh_spin.obj &
@@ -187,15 +185,13 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_richtextxml.obj &
 	$(OBJS)\monodll_richtexthtml.obj &
 	$(OBJS)\monodll_richtextformatdlg.obj &
-	$(OBJS)\monodll_richtextsymboldlg.obj &
-	$(OBJS)\monodll_richtextstyledlg.obj
+	$(OBJS)\monodll_richtextsymboldlg.obj
 !endif
 ____CORE_SRC_FILENAMES_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_caret.obj &
-	$(OBJS)\monodll_collpaneg.obj &
 	$(OBJS)\monodll_colrdlgg.obj &
 	$(OBJS)\monodll_dirdlgg.obj &
 	$(OBJS)\monodll_fdrepdlg.obj &
@@ -395,7 +391,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_accel.obj &
-	$(OBJS)\monodll_collpaneg.obj &
 	$(OBJS)\monodll_colrdlgg.obj &
 	$(OBJS)\monodll_dirdlgg.obj &
 	$(OBJS)\monodll_fdrepdlg.obj &
@@ -655,7 +650,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_debugrpt.obj &
 	$(OBJS)\monolib_dbgrptg.obj &
 	$(OBJS)\monolib_dbgrid.obj &
-	$(OBJS)\monolib_xh_animatctrl.obj &
 	$(OBJS)\monolib_xh_bmp.obj &
 	$(OBJS)\monolib_xh_bmpcbox.obj &
 	$(OBJS)\monolib_xh_bmpbt.obj &
@@ -690,7 +684,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_xh_radbx.obj &
 	$(OBJS)\monolib_xh_scrol.obj &
 	$(OBJS)\monolib_xh_scwin.obj &
-	$(OBJS)\monolib_xh_htmllbox.obj &
 	$(OBJS)\monolib_xh_sizer.obj &
 	$(OBJS)\monolib_xh_slidr.obj &
 	$(OBJS)\monolib_xh_spin.obj &
@@ -720,15 +713,13 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_richtextxml.obj &
 	$(OBJS)\monolib_richtexthtml.obj &
 	$(OBJS)\monolib_richtextformatdlg.obj &
-	$(OBJS)\monolib_richtextsymboldlg.obj &
-	$(OBJS)\monolib_richtextstyledlg.obj
+	$(OBJS)\monolib_richtextsymboldlg.obj
 !endif
 ____CORE_SRC_FILENAMES_1_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_caret.obj &
-	$(OBJS)\monolib_collpaneg.obj &
 	$(OBJS)\monolib_colrdlgg.obj &
 	$(OBJS)\monolib_dirdlgg.obj &
 	$(OBJS)\monolib_fdrepdlg.obj &
@@ -928,7 +919,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_accel.obj &
-	$(OBJS)\monolib_collpaneg.obj &
 	$(OBJS)\monolib_colrdlgg.obj &
 	$(OBJS)\monolib_dirdlgg.obj &
 	$(OBJS)\monolib_fdrepdlg.obj &
@@ -1189,7 +1179,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_caret.obj &
-	$(OBJS)\coredll_collpaneg.obj &
 	$(OBJS)\coredll_colrdlgg.obj &
 	$(OBJS)\coredll_dirdlgg.obj &
 	$(OBJS)\coredll_fdrepdlg.obj &
@@ -1389,7 +1378,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_accel.obj &
-	$(OBJS)\coredll_collpaneg.obj &
 	$(OBJS)\coredll_colrdlgg.obj &
 	$(OBJS)\coredll_dirdlgg.obj &
 	$(OBJS)\coredll_fdrepdlg.obj &
@@ -1571,7 +1559,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_caret.obj &
-	$(OBJS)\corelib_collpaneg.obj &
 	$(OBJS)\corelib_colrdlgg.obj &
 	$(OBJS)\corelib_dirdlgg.obj &
 	$(OBJS)\corelib_fdrepdlg.obj &
@@ -1771,7 +1758,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_accel.obj &
-	$(OBJS)\corelib_collpaneg.obj &
 	$(OBJS)\corelib_colrdlgg.obj &
 	$(OBJS)\corelib_dirdlgg.obj &
 	$(OBJS)\corelib_fdrepdlg.obj &
@@ -3215,7 +3201,6 @@ XRCDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(CXXFLAGS)
 XRCDLL_OBJECTS =  &
 	$(OBJS)\xrcdll_dummy.obj &
-	$(OBJS)\xrcdll_xh_animatctrl.obj &
 	$(OBJS)\xrcdll_xh_bmp.obj &
 	$(OBJS)\xrcdll_xh_bmpcbox.obj &
 	$(OBJS)\xrcdll_xh_bmpbt.obj &
@@ -3250,7 +3235,6 @@ XRCDLL_OBJECTS =  &
 	$(OBJS)\xrcdll_xh_radbx.obj &
 	$(OBJS)\xrcdll_xh_scrol.obj &
 	$(OBJS)\xrcdll_xh_scwin.obj &
-	$(OBJS)\xrcdll_xh_htmllbox.obj &
 	$(OBJS)\xrcdll_xh_sizer.obj &
 	$(OBJS)\xrcdll_xh_slidr.obj &
 	$(OBJS)\xrcdll_xh_spin.obj &
@@ -3279,7 +3263,6 @@ XRCLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 XRCLIB_OBJECTS =  &
 	$(OBJS)\xrclib_dummy.obj &
-	$(OBJS)\xrclib_xh_animatctrl.obj &
 	$(OBJS)\xrclib_xh_bmp.obj &
 	$(OBJS)\xrclib_xh_bmpcbox.obj &
 	$(OBJS)\xrclib_xh_bmpbt.obj &
@@ -3314,7 +3297,6 @@ XRCLIB_OBJECTS =  &
 	$(OBJS)\xrclib_xh_radbx.obj &
 	$(OBJS)\xrclib_xh_scrol.obj &
 	$(OBJS)\xrclib_xh_scwin.obj &
-	$(OBJS)\xrclib_xh_htmllbox.obj &
 	$(OBJS)\xrclib_xh_sizer.obj &
 	$(OBJS)\xrclib_xh_slidr.obj &
 	$(OBJS)\xrclib_xh_spin.obj &
@@ -3381,8 +3363,7 @@ RICHTEXTDLL_OBJECTS =  &
 	$(OBJS)\richtextdll_richtextxml.obj &
 	$(OBJS)\richtextdll_richtexthtml.obj &
 	$(OBJS)\richtextdll_richtextformatdlg.obj &
-	$(OBJS)\richtextdll_richtextsymboldlg.obj &
-	$(OBJS)\richtextdll_richtextstyledlg.obj
+	$(OBJS)\richtextdll_richtextsymboldlg.obj
 RICHTEXTLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXPM__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -3399,8 +3380,7 @@ RICHTEXTLIB_OBJECTS =  &
 	$(OBJS)\richtextlib_richtextxml.obj &
 	$(OBJS)\richtextlib_richtexthtml.obj &
 	$(OBJS)\richtextlib_richtextformatdlg.obj &
-	$(OBJS)\richtextlib_richtextsymboldlg.obj &
-	$(OBJS)\richtextlib_richtextstyledlg.obj
+	$(OBJS)\richtextlib_richtextsymboldlg.obj
 GLDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXPM__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -4913,9 +4893,6 @@ $(OBJS)\monodll_dbgrptg.obj :  .AUTODEPEND ..\..\src\generic\dbgrptg.cpp
 $(OBJS)\monodll_dbgrid.obj :  .AUTODEPEND ..\..\src\common\dbgrid.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_xh_animatctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_animatctrl.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_xh_bmp.obj :  .AUTODEPEND ..\..\src\xrc\xh_bmp.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -5018,9 +4995,6 @@ $(OBJS)\monodll_xh_scrol.obj :  .AUTODEPEND ..\..\src\xrc\xh_scrol.cpp
 $(OBJS)\monodll_xh_scwin.obj :  .AUTODEPEND ..\..\src\xrc\xh_scwin.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_xh_htmllbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_htmllbox.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_xh_sizer.obj :  .AUTODEPEND ..\..\src\xrc\xh_sizer.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -5111,19 +5085,11 @@ $(OBJS)\monodll_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\richtext
 $(OBJS)\monodll_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xtixml.obj :  .AUTODEPEND ..\..\src\common\xtixml.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_collpaneg.obj :  .AUTODEPEND ..\..\src\generic\collpaneg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_colrdlgg.obj :  .AUTODEPEND ..\..\src\generic\colrdlgg.cpp
@@ -6729,9 +6695,6 @@ $(OBJS)\monolib_dbgrptg.obj :  .AUTODEPEND ..\..\src\generic\dbgrptg.cpp
 $(OBJS)\monolib_dbgrid.obj :  .AUTODEPEND ..\..\src\common\dbgrid.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_xh_animatctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_animatctrl.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_xh_bmp.obj :  .AUTODEPEND ..\..\src\xrc\xh_bmp.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -6834,9 +6797,6 @@ $(OBJS)\monolib_xh_scrol.obj :  .AUTODEPEND ..\..\src\xrc\xh_scrol.cpp
 $(OBJS)\monolib_xh_scwin.obj :  .AUTODEPEND ..\..\src\xrc\xh_scwin.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_xh_htmllbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_htmllbox.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_xh_sizer.obj :  .AUTODEPEND ..\..\src\xrc\xh_sizer.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -6927,19 +6887,11 @@ $(OBJS)\monolib_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\richtext
 $(OBJS)\monolib_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xtixml.obj :  .AUTODEPEND ..\..\src\common\xtixml.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_collpaneg.obj :  .AUTODEPEND ..\..\src\generic\collpaneg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_colrdlgg.obj :  .AUTODEPEND ..\..\src\generic\colrdlgg.cpp
@@ -8720,11 +8672,6 @@ $(OBJS)\coredll_win32.obj :  .AUTODEPEND ..\..\src\univ\themes\win32.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_collpaneg.obj :  .AUTODEPEND ..\..\src\generic\collpaneg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\coredll_colrdlgg.obj :  .AUTODEPEND ..\..\src\generic\colrdlgg.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -9905,11 +9852,6 @@ $(OBJS)\corelib_mono.obj :  .AUTODEPEND ..\..\src\univ\themes\mono.cpp
 
 $(OBJS)\corelib_win32.obj :  .AUTODEPEND ..\..\src\univ\themes\win32.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_collpaneg.obj :  .AUTODEPEND ..\..\src\generic\collpaneg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_colrdlgg.obj :  .AUTODEPEND ..\..\src\generic\colrdlgg.cpp
@@ -11243,9 +11185,6 @@ $(OBJS)\xmllib_xtixml.obj :  .AUTODEPEND ..\..\src\common\xtixml.cpp
 $(OBJS)\xrcdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
-$(OBJS)\xrcdll_xh_animatctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_animatctrl.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
-
 $(OBJS)\xrcdll_xh_bmp.obj :  .AUTODEPEND ..\..\src\xrc\xh_bmp.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
@@ -11348,9 +11287,6 @@ $(OBJS)\xrcdll_xh_scrol.obj :  .AUTODEPEND ..\..\src\xrc\xh_scrol.cpp
 $(OBJS)\xrcdll_xh_scwin.obj :  .AUTODEPEND ..\..\src\xrc\xh_scwin.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
-$(OBJS)\xrcdll_xh_htmllbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_htmllbox.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
-
 $(OBJS)\xrcdll_xh_sizer.obj :  .AUTODEPEND ..\..\src\xrc\xh_sizer.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
@@ -11406,9 +11342,6 @@ $(OBJS)\xrcdll_xmlrsall.obj :  .AUTODEPEND ..\..\src\xrc\xmlrsall.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrclib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
-
-$(OBJS)\xrclib_xh_animatctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_animatctrl.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_bmp.obj :  .AUTODEPEND ..\..\src\xrc\xh_bmp.cpp
@@ -11511,9 +11444,6 @@ $(OBJS)\xrclib_xh_scrol.obj :  .AUTODEPEND ..\..\src\xrc\xh_scrol.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_scwin.obj :  .AUTODEPEND ..\..\src\xrc\xh_scwin.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
-
-$(OBJS)\xrclib_xh_htmllbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_htmllbox.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_sizer.obj :  .AUTODEPEND ..\..\src\xrc\xh_sizer.cpp
@@ -11630,9 +11560,6 @@ $(OBJS)\richtextdll_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\rich
 $(OBJS)\richtextdll_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
 
-$(OBJS)\richtextdll_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
-
 $(OBJS)\richtextlib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
@@ -11655,9 +11582,6 @@ $(OBJS)\richtextlib_richtextformatdlg.obj :  .AUTODEPEND ..\..\src\richtext\rich
 	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
 $(OBJS)\richtextlib_richtextsymboldlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextsymboldlg.cpp
-	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
-
-$(OBJS)\richtextlib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtextstyledlg.cpp
 	$(CXX) -bt=os2 -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
 $(OBJS)\gldll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp

@@ -1803,7 +1803,7 @@ static bool wxCheckWin32Permission(const wxString& path, DWORD access)
 
 bool wxIsWritable(const wxString &path)
 {
-#if defined( __UNIX__ ) || defined(__OS2__)
+#if defined( __UNIX__ )
     // access() will take in count also symbolic links
     return access(wxConvFile.cWX2MB(path), W_OK) == 0;
 #elif defined( __WINDOWS__ )
@@ -1817,7 +1817,7 @@ bool wxIsWritable(const wxString &path)
 
 bool wxIsReadable(const wxString &path)
 {
-#if defined( __UNIX__ ) || defined(__OS2__)
+#if defined( __UNIX__ )
     // access() will take in count also symbolic links
     return access(wxConvFile.cWX2MB(path), R_OK) == 0;
 #elif defined( __WINDOWS__ )
@@ -1831,7 +1831,7 @@ bool wxIsReadable(const wxString &path)
 
 bool wxIsExecutable(const wxString &path)
 {
-#if defined( __UNIX__ ) || defined(__OS2__)
+#if defined( __UNIX__ )
     // access() will take in count also symbolic links
     return access(wxConvFile.cWX2MB(path), X_OK) == 0;
 #elif defined( __WINDOWS__ )
@@ -1840,79 +1840,6 @@ bool wxIsExecutable(const wxString &path)
     wxUnusedVar(path);
     // TODO
     return false;
-#endif
-}
-
-// Return the type of an open file
-//
-// Some file types on some platforms seem seekable but in fact are not.
-// The main use of this function is to allow such cases to be detected
-// (IsSeekable() is implemented as wxGetFileKind() == wxFILE_KIND_DISK).
-//
-// This is important for the archive streams, which benefit greatly from
-// being able to seek on a stream, but which will produce corrupt archives
-// if they unknowingly seek on a non-seekable stream.
-//
-// wxFILE_KIND_DISK is a good catch all return value, since other values
-// disable features of the archive streams. Some other value must be returned
-// for a file type that appears seekable but isn't.
-//
-// Known examples:
-//   *  Pipes on Windows
-//   *  Files on VMS with a record format other than StreamLF
-//
-wxFileKind wxGetFileKind(int fd)
-{
-#if defined __WXMSW__ && !defined __WXWINCE__ && defined wxGetOSFHandle
-    switch (::GetFileType(wxGetOSFHandle(fd)) & ~FILE_TYPE_REMOTE)
-    {
-        case FILE_TYPE_CHAR:
-            return wxFILE_KIND_TERMINAL;
-        case FILE_TYPE_DISK:
-            return wxFILE_KIND_DISK;
-        case FILE_TYPE_PIPE:
-            return wxFILE_KIND_PIPE;
-    }
-
-    return wxFILE_KIND_UNKNOWN;
-
-#elif defined(__UNIX__)
-    if (isatty(fd))
-        return wxFILE_KIND_TERMINAL;
-
-    struct stat st;
-    fstat(fd, &st);
-
-    if (S_ISFIFO(st.st_mode))
-        return wxFILE_KIND_PIPE;
-    if (!S_ISREG(st.st_mode))
-        return wxFILE_KIND_UNKNOWN;
-
-    #if defined(__VMS__)
-        if (st.st_fab_rfm != FAB$C_STMLF)
-            return wxFILE_KIND_UNKNOWN;
-    #endif
-
-    return wxFILE_KIND_DISK;
-
-#else
-    #define wxFILEKIND_STUB
-    (void)fd;
-    return wxFILE_KIND_DISK;
-#endif
-}
-
-wxFileKind wxGetFileKind(FILE *fp)
-{
-    // Note: The watcom rtl dll doesn't have fileno (the static lib does).
-    //       Should be fixed in version 1.4.
-#if defined(wxFILEKIND_STUB) || wxONLY_WATCOM_EARLIER_THAN(1,4)
-    (void)fp;
-    return wxFILE_KIND_DISK;
-#elif defined __WINDOWS__ && !defined __CYGWIN__
-    return fp ? wxGetFileKind(_fileno(fp)) : wxFILE_KIND_UNKNOWN;
-#else
-    return fp ? wxGetFileKind(fileno(fp)) : wxFILE_KIND_UNKNOWN;
 #endif
 }
 
@@ -2046,6 +1973,77 @@ bool wxMatchWild( const wxString& pat, const wxString& text, bool dot_special )
             }
         }
     }
+}
+
+// Return the type of an open file
+//
+// Some file types on some platforms seem seekable but in fact are not.
+// The main use of this function is to allow such cases to be detected
+// (IsSeekable() is implemented as wxGetFileKind() == wxFILE_KIND_DISK).
+//
+// This is important for the archive streams, which benefit greatly from
+// being able to seek on a stream, but which will produce corrupt archives
+// if they unknowingly seek on a non-seekable stream.
+//
+// wxFILE_KIND_DISK is a good catch all return value, since other values
+// disable features of the archive streams. Some other value must be returned
+// for a file type that appears seekable but isn't.
+//
+// Known examples:
+//   *  Pipes on Windows
+//   *  Files on VMS with a record format other than StreamLF
+//
+wxFileKind wxGetFileKind(int fd)
+{
+#if defined __WXMSW__ && !defined __WXWINCE__ && defined wxGetOSFHandle
+    switch (::GetFileType(wxGetOSFHandle(fd)) & ~FILE_TYPE_REMOTE)
+    {
+        case FILE_TYPE_CHAR:
+            return wxFILE_KIND_TERMINAL;
+        case FILE_TYPE_DISK:
+            return wxFILE_KIND_DISK;
+        case FILE_TYPE_PIPE:
+            return wxFILE_KIND_PIPE;
+    }
+
+    return wxFILE_KIND_UNKNOWN;
+
+#elif defined(__UNIX__)
+    if (isatty(fd))
+        return wxFILE_KIND_TERMINAL;
+
+    struct stat st;
+    fstat(fd, &st);
+
+    if (S_ISFIFO(st.st_mode))
+        return wxFILE_KIND_PIPE;
+    if (!S_ISREG(st.st_mode))
+        return wxFILE_KIND_UNKNOWN;
+
+    #if defined(__VMS__)
+        if (st.st_fab_rfm != FAB$C_STMLF)
+            return wxFILE_KIND_UNKNOWN;
+    #endif
+
+    return wxFILE_KIND_DISK;
+
+#else
+    #define wxFILEKIND_STUB
+    (void)fd;
+    return wxFILE_KIND_DISK;
+#endif
+}
+
+wxFileKind wxGetFileKind(FILE *fp)
+{
+    // Note: The watcom rtl dll doesn't have fileno (the static lib does).
+    //       Should be fixed in version 1.4.
+#if defined(wxFILEKIND_STUB) || wxONLY_WATCOM_EARLIER_THAN(1,4)
+    (void)fp;
+    return wxFILE_KIND_DISK;
+#else
+    return fp ? wxGetFileKind(fileno(fp)) : wxFILE_KIND_UNKNOWN;
+#endif
 }
 
 #ifdef __VISUALC__
