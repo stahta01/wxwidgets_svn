@@ -547,14 +547,6 @@ SOURCE=..\..\src\common\filesys.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\common\filtall.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\common\filtfind.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\common\fmapbase.cpp
 # End Source File
 # Begin Source File

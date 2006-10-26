@@ -65,7 +65,7 @@ public:
     virtual bool TransferDataToWindow();
 
     /// Get attributes for selected level
-    wxRichTextAttr* GetAttributesForSelection();
+    wxTextAttrEx* GetAttributesForSelection();
 
     /// Update for symbol-related controls
     void OnSymbolUpdate( wxUpdateUIEvent& event );
@@ -117,31 +117,22 @@ public:
     /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTLISTSTYLEPAGE_PARENTHESESCTRL
     void OnParenthesesctrlUpdate( wxUpdateUIEvent& event );
 
-    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_RICHTEXTLISTSTYLEPAGE_RIGHTPARENTHESISCTRL
-    void OnRightParenthesisCtrlClick( wxCommandEvent& event );
-
-    /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTLISTSTYLEPAGE_RIGHTPARENTHESISCTRL
-    void OnRightParenthesisCtrlUpdate( wxUpdateUIEvent& event );
-
-    /// wxEVT_COMMAND_COMBOBOX_SELECTED event handler for ID_RICHTEXTLISTSTYLEPAGE_BULLETALIGNMENTCTRL
-    void OnBulletAlignmentCtrlSelected( wxCommandEvent& event );
-
     /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTLISTSTYLEPAGE_SYMBOLSTATIC
     void OnSymbolstaticUpdate( wxUpdateUIEvent& event );
 
-    /// wxEVT_COMMAND_COMBOBOX_SELECTED event handler for ID_RICHTEXTLISTSTYLEPAGE_SYMBOLCTRL
+    /// wxEVT_COMMAND_COMBOBOX_SELECTED event handler for ID_RICHTEXTBULLETSPAGE_SYMBOLCTRL
     void OnSymbolctrlSelected( wxCommandEvent& event );
 
-    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_RICHTEXTLISTSTYLEPAGE_SYMBOLCTRL
+    /// wxEVT_COMMAND_TEXT_UPDATED event handler for ID_RICHTEXTBULLETSPAGE_SYMBOLCTRL
     void OnSymbolctrlUpdated( wxCommandEvent& event );
 
-    /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTLISTSTYLEPAGE_SYMBOLCTRL
+    /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTBULLETSPAGE_SYMBOLCTRL
     void OnSymbolctrlUIUpdate( wxUpdateUIEvent& event );
 
-    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_RICHTEXTLISTSTYLEPAGE_CHOOSE_SYMBOL
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_RICHTEXTBULLETSPAGE_CHOOSE_SYMBOL
     void OnChooseSymbolClick( wxCommandEvent& event );
 
-    /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTLISTSTYLEPAGE_CHOOSE_SYMBOL
+    /// wxEVT_UPDATE_UI event handler for ID_RICHTEXTBULLETSPAGE_CHOOSE_SYMBOL
     void OnChooseSymbolUpdate( wxUpdateUIEvent& event );
 
     /// wxEVT_COMMAND_COMBOBOX_SELECTED event handler for ID_RICHTEXTLISTSTYLEPAGE_SYMBOLFONTCTRL
@@ -217,8 +208,6 @@ public:
     wxListBox* m_styleListBox;
     wxCheckBox* m_periodCtrl;
     wxCheckBox* m_parenthesesCtrl;
-    wxCheckBox* m_rightParenthesisCtrl;
-    wxComboBox* m_bulletAlignmentCtrl;
     wxComboBox* m_symbolCtrl;
     wxComboBox* m_symbolFontCtrl;
     wxComboBox* m_bulletNameCtrl;
@@ -244,11 +233,9 @@ public:
         ID_RICHTEXTLISTSTYLEPAGE_STYLELISTBOX = 10620,
         ID_RICHTEXTLISTSTYLEPAGE_PERIODCTRL = 10627,
         ID_RICHTEXTLISTSTYLEPAGE_PARENTHESESCTRL = 10626,
-        ID_RICHTEXTLISTSTYLEPAGE_RIGHTPARENTHESISCTRL = 10602,
-        ID_RICHTEXTLISTSTYLEPAGE_BULLETALIGNMENTCTRL = 10603,
         ID_RICHTEXTLISTSTYLEPAGE_SYMBOLSTATIC = 10621,
-        ID_RICHTEXTLISTSTYLEPAGE_SYMBOLCTRL = 10622,
-        ID_RICHTEXTLISTSTYLEPAGE_CHOOSE_SYMBOL = 10623,
+        ID_RICHTEXTBULLETSPAGE_SYMBOLCTRL = 10622,
+        ID_RICHTEXTBULLETSPAGE_CHOOSE_SYMBOL = 10623,
         ID_RICHTEXTLISTSTYLEPAGE_SYMBOLFONTCTRL = 10625,
         ID_RICHTEXTLISTSTYLEPAGE_NAMESTATIC = 10600,
         ID_RICHTEXTLISTSTYLEPAGE_NAMECTRL = 10601,

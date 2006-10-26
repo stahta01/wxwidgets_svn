@@ -14,7 +14,7 @@
 
 #include "wx/overlay.h"
 
-#ifdef wxHAS_NATIVE_OVERLAY
+#if wxHAS_NATIVE_OVERLAY
 
 #if defined(__WXMAC__)
     #include "wx/mac/carbon/private/overlay.h"

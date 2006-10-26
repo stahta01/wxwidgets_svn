@@ -44,6 +44,10 @@
 // constants
 // ----------------------------------------------------------------------------
 
+// Milliseconds to wait for two mouse-ups after focus inorder
+// to trigger a double-click.
+#define DOUBLE_CLICK_CONVERSION_TRESHOLD        500
+
 #define DEFAULT_DROPBUTTON_WIDTH                19
 
 #define BMP_BUTTON_MARGIN                       4
@@ -340,50 +344,20 @@ public:
                                                 style)
     #endif
     {
-        m_inShow = 0;
     }
 
 #if USES_WXPOPUPTRANSIENTWINDOW
-    virtual bool Show( bool show );
     virtual bool ProcessLeftDown(wxMouseEvent& event);
     virtual void OnDismiss();
 #endif
 
-private:
-    wxByte      m_inShow;
 };
 
 
 #if USES_WXPOPUPTRANSIENTWINDOW
-bool wxComboPopupWindow::Show( bool show )
+bool wxComboPopupWindow::ProcessLeftDown(wxMouseEvent& event )
 {
-    // Guard against recursion
-    if ( m_inShow )
-        return wxComboPopupWindowBase::Show(show);
-
-    m_inShow++;
-
-    wxASSERT( IsKindOf(CLASSINFO(wxPopupTransientWindow)) );
-
-    wxPopupTransientWindow* ptw = (wxPopupTransientWindow*) this;
-    wxComboCtrlBase* combo = (wxComboCtrlBase*) GetParent();
-
-    if ( show != ptw->IsShown() )
-    {
-        if ( show )
-            ptw->Popup(combo->GetPopupControl()->GetControl());
-        else
-            ptw->Dismiss();
-    }
-
-    m_inShow--;
-
-    return true;
-}
-
-bool wxComboPopupWindow::ProcessLeftDown(wxMouseEvent& event)
-{
-    return wxPopupTransientWindow::ProcessLeftDown(event);
+    return wxComboPopupWindowBase::ProcessLeftDown(event);
 }
 
 // First thing that happens when a transient popup closes is that this method gets called.
@@ -413,7 +387,6 @@ public:
         m_combo = parent;
     }
 
-    void OnSizeEvent( wxSizeEvent& event );
     void OnKeyEvent(wxKeyEvent& event);
 #if USES_WXDIALOG
     void OnActivate( wxActivateEvent& event );
@@ -432,14 +405,8 @@ BEGIN_EVENT_TABLE(wxComboPopupWindowEvtHandler, wxEvtHandler)
 #if USES_WXDIALOG
     EVT_ACTIVATE(wxComboPopupWindowEvtHandler::OnActivate)
 #endif
-    EVT_SIZE(wxComboPopupWindowEvtHandler::OnSizeEvent)
 END_EVENT_TABLE()
 
-
-void wxComboPopupWindowEvtHandler::OnSizeEvent( wxSizeEvent& WXUNUSED(event) )
-{
-    // Block the event so that the popup control does not get auto-resized.
-}
 
 void wxComboPopupWindowEvtHandler::OnKeyEvent( wxKeyEvent& event )
 {
@@ -654,7 +621,7 @@ void wxComboPopupExtraEventHandler::OnMouseEvent( wxMouseEvent& event )
          evtType == wxEVT_RIGHT_DOWN )
     {
         // Block motion and click events outside the popup
-        if ( !isInside || !m_combo->IsPopupShown() )
+        if ( !isInside )
         {
             event.Skip(false);
             return;
@@ -662,10 +629,11 @@ void wxComboPopupExtraEventHandler::OnMouseEvent( wxMouseEvent& event )
     }
     else if ( evtType == wxEVT_LEFT_UP )
     {
-        if ( !m_combo->IsPopupShown() )
+        // Don't let left-down events in if outside
+        if ( evtType == wxEVT_LEFT_DOWN )
         {
-            event.Skip(false);
-            return;
+            if ( !isInside )
+                return;
         }
 
         if ( !m_beenInside )
@@ -720,7 +688,7 @@ void wxComboCtrlBase::Init()
 {
     m_winPopup = (wxWindow *)NULL;
     m_popup = (wxWindow *)NULL;
-    m_popupWinState = Hidden;
+    m_isPopupShown = false;
     m_btn = (wxWindow*) NULL;
     m_text = (wxTextCtrl*) NULL;
     m_popupInterface = (wxComboPopup*) NULL;
@@ -1244,7 +1212,7 @@ void wxComboCtrlBase::DrawButton( wxDC& dc, const wxRect& rect, bool paintBg )
     int drawState = m_btnState;
 
 #ifdef __WXGTK__
-    if ( GetPopupWindowState() >= Animating )
+    if ( m_isPopupShown )
         drawState |= wxCONTROL_PRESSED;
 #endif
 
@@ -1397,7 +1365,7 @@ bool wxComboCtrlBase::HandleButtonMouseEvent( wxMouseEvent& event,
             Refresh();
         }
     }
-    else if ( type == wxEVT_LEFT_DOWN || type == wxEVT_LEFT_DCLICK )
+    else if ( type == wxEVT_LEFT_DOWN )
     {
         if ( flags & (wxCC_MF_ON_CLICK_AREA|wxCC_MF_ON_BUTTON) )
         {
@@ -1438,7 +1406,7 @@ bool wxComboCtrlBase::HandleButtonMouseEvent( wxMouseEvent& event,
             m_btnState &= ~(wxCONTROL_CURRENT);
 
             // Mouse hover ends
-            if ( IsPopupWindowState(Hidden) )
+            if ( !m_isPopupShown )
             {
                 m_btnState &= ~(wxCONTROL_PRESSED);
                 Refresh();
@@ -1461,7 +1429,7 @@ bool wxComboCtrlBase::PreprocessMouseEvent( wxMouseEvent& event,
 #if USES_WXPOPUPWINDOW || USES_WXDIALOG
     if ( m_popupWinType != POPUPWIN_WXPOPUPTRANSIENTWINDOW )
     {
-        if ( IsPopupWindowState(Visible) &&
+        if ( m_isPopupShown &&
              ( evtType == wxEVT_LEFT_DOWN || evtType == wxEVT_RIGHT_DOWN ) )
         {
             HidePopup();
@@ -1487,7 +1455,7 @@ void wxComboCtrlBase::HandleNormalMouseEvent( wxMouseEvent& event )
     if ( (evtType == wxEVT_LEFT_DOWN || evtType == wxEVT_LEFT_DCLICK) &&
          (m_windowStyle & wxCB_READONLY) )
     {
-        if ( GetPopupWindowState() >= Animating )
+        if ( m_isPopupShown )
         {
     #if USES_WXPOPUPWINDOW
             // Click here always hides the popup.
@@ -1513,7 +1481,7 @@ void wxComboCtrlBase::HandleNormalMouseEvent( wxMouseEvent& event )
         }
     }
     else
-    if ( IsPopupShown() )
+    if ( m_isPopupShown )
     {
         // relay (some) mouse events to the popup
         if ( evtType == wxEVT_MOUSEWHEEL )
@@ -1709,10 +1677,7 @@ void wxComboCtrlBase::OnButtonClick()
 void wxComboCtrlBase::ShowPopup()
 {
     EnsurePopupControl();
-    wxCHECK_RET( !IsPopupWindowState(Visible), wxT("popup window already shown") );
-
-    if ( IsPopupWindowState(Animating) )
-        return;
+    wxCHECK_RET( !IsPopupShown(), wxT("popup window already shown") );
 
     SetFocus();
 
@@ -1828,27 +1793,22 @@ void wxComboCtrlBase::ShowPopup()
     else
         popupX = 0;
 
-    int showFlags = CanDeferShow;
-
     if ( spaceBelow < szp.y )
     {
         popupY = scrPos.y - szp.y;
-        showFlags |= ShowAbove;
     }
 
-#if INSTALL_TOPLEV_HANDLER
-    // Put top level window event handler into place
-    if ( m_popupWinType == POPUPWIN_WXPOPUPWINDOW )
-    {
-        if ( !m_toplevEvtHandler )
-            m_toplevEvtHandler = new wxComboFrameEventHandler(this);
+    // Move to position
+    //wxLogDebug(wxT("popup scheduled position1: %i,%i"),ptp.x,ptp.y);
+    //wxLogDebug(wxT("popup position1: %i,%i"),winPopup->GetPosition().x,winPopup->GetPosition().y);
 
-        wxWindow* toplev = ::wxGetTopLevelParent( this );
-        wxASSERT( toplev );
-        ((wxComboFrameEventHandler*)m_toplevEvtHandler)->OnPopup();
-        toplev->PushEventHandler( m_toplevEvtHandler );
-    }
-#endif
+    // Some platforms (GTK) may need these two to be separate
+    winPopup->SetSize( szp.x, szp.y );
+    winPopup->Move( popupX, popupY );
+
+    //wxLogDebug(wxT("popup position2: %i,%i"),winPopup->GetPosition().x,winPopup->GetPosition().y);
+
+    m_popup = popup;
 
     // Set string selection (must be this way instead of SetStringSelection)
     if ( m_text )
@@ -1865,69 +1825,51 @@ void wxComboCtrlBase::ShowPopup()
     }
 
     // This must be after SetStringValue
-    m_popupWinState = Animating;
+    m_isPopupShown = true;
 
-    wxRect popupWinRect( popupX, popupY, szp.x, szp.y );
-
-    m_popup = popup;
-    if ( (m_iFlags & wxCC_IFLAG_DISABLE_POPUP_ANIM) ||
-         AnimateShow( popupWinRect, showFlags ) )
-    {
-        DoShowPopup( popupWinRect, showFlags );
-    }
-}
-
-bool wxComboCtrlBase::AnimateShow( const wxRect& WXUNUSED(rect), int WXUNUSED(flags) )
-{
-    return true;
-}
-
-void wxComboCtrlBase::DoShowPopup( const wxRect& rect, int WXUNUSED(flags) )
-{
-    wxWindow* winPopup = m_winPopup;
-
-    if ( IsPopupWindowState(Animating) )
-    {
-        // Make sure the popup window is shown in the right position.
-        // Should not matter even if animation already did this.
-
-        // Some platforms (GTK) may like SetSize and Move to be separate
-        // (though the bug was probably fixed).
-        winPopup->SetSize( rect );
-
+    // Show it
+#if USES_WXPOPUPTRANSIENTWINDOW
+    if ( m_popupWinType == POPUPWIN_WXPOPUPTRANSIENTWINDOW )
+        ((wxPopupTransientWindow*)winPopup)->Popup(popup);
+    else
+#endif
         winPopup->Show();
 
-        m_popupWinState = Visible;
-    }
-    else if ( IsPopupWindowState(Hidden) )
+#if INSTALL_TOPLEV_HANDLER
+    // Put top level window event handler into place
+    if ( m_popupWinType == POPUPWIN_WXPOPUPWINDOW )
     {
-        // Animation was aborted
+        if ( !m_toplevEvtHandler )
+            m_toplevEvtHandler = new wxComboFrameEventHandler(this);
 
-        wxASSERT( !winPopup->IsShown() );
-
-        m_popupWinState = Hidden;
+        wxWindow* toplev = ::wxGetTopLevelParent( this );
+        wxASSERT( toplev );
+        ((wxComboFrameEventHandler*)m_toplevEvtHandler)->OnPopup();
+        toplev->PushEventHandler( m_toplevEvtHandler );
     }
+#endif
+
 }
 
 void wxComboCtrlBase::OnPopupDismiss()
-{
+{ 
     // Just in case, avoid double dismiss
-    if ( IsPopupWindowState(Hidden) )
+    if ( !m_isPopupShown )
         return;
 
     // NB: Focus setting is really funny, atleast on wxMSW. First of all,
     //     we need to have SetFocus at the end. Otherwise wxTextCtrl may
     //     freeze until focus goes somewhere else. Second, wxTreeCtrl as
     //     popup, when dismissing, "steals" focus back to itself unless
-    //     SetFocus is called also here, exactly before m_popupWinState
+    //     SetFocus is called also here, exactly before m_isPopupShown
     //     is set to false. Which is truly weird since SetFocus is just
     //     wxWindowMSW method and does not call event handler or anything like
-    //     that (ie. does not care about m_popupWinState).
+    //     that (ie. does not care about m_isPopupShown).
 
     SetFocus();
 
     // This should preferably be set before focus.
-    m_popupWinState = Hidden;
+    m_isPopupShown = false;
 
     // Inform popup control itself
     m_popupInterface->OnDismiss();
@@ -1945,10 +1887,7 @@ void wxComboCtrlBase::OnPopupDismiss()
     }
 #endif
 
-    m_timeCanAcceptClick = ::wxGetLocalTimeMillis();
-
-    if ( m_popupWinType == POPUPWIN_WXPOPUPTRANSIENTWINDOW )
-        m_timeCanAcceptClick += 150;
+    m_timeCanAcceptClick = ::wxGetLocalTimeMillis() + 150;
 
     // If cursor not on dropdown button, then clear its state
     // (technically not required by all ports, but do it for all just in case)
@@ -1973,14 +1912,19 @@ void wxComboCtrlBase::OnPopupDismiss()
 void wxComboCtrlBase::HidePopup()
 {
     // Should be able to call this without popup interface
-    if ( IsPopupWindowState(Hidden) )
+    //wxCHECK_RET( m_popupInterface, _T("no popup interface") );
+    if ( !m_isPopupShown )
         return;
 
     // transfer value and show it in textctrl, if any
-    if ( !IsPopupWindowState(Animating) )
-        SetValue( m_popupInterface->GetStringValue() );
+    SetValue( m_popupInterface->GetStringValue() );
 
-    m_winPopup->Hide();
+#if USES_WXPOPUPTRANSIENTWINDOW
+    if ( m_popupWinType == POPUPWIN_WXPOPUPTRANSIENTWINDOW )
+        ((wxPopupTransientWindow*)m_winPopup)->Dismiss();
+    else
+#endif
+        m_winPopup->Hide();
 
     OnPopupDismiss();
 }

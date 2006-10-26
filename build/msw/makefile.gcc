@@ -209,8 +209,6 @@ MONODLL_OBJECTS =  \
 	$(OBJS)\monodll_filefn.o \
 	$(OBJS)\monodll_filename.o \
 	$(OBJS)\monodll_filesys.o \
-	$(OBJS)\monodll_filtall.o \
-	$(OBJS)\monodll_filtfind.o \
 	$(OBJS)\monodll_fmapbase.o \
 	$(OBJS)\monodll_fs_zip.o \
 	$(OBJS)\monodll_hash.o \
@@ -325,8 +323,6 @@ MONOLIB_OBJECTS =  \
 	$(OBJS)\monolib_filefn.o \
 	$(OBJS)\monolib_filename.o \
 	$(OBJS)\monolib_filesys.o \
-	$(OBJS)\monolib_filtall.o \
-	$(OBJS)\monolib_filtfind.o \
 	$(OBJS)\monolib_fmapbase.o \
 	$(OBJS)\monolib_fs_zip.o \
 	$(OBJS)\monolib_hash.o \
@@ -443,8 +439,6 @@ BASEDLL_OBJECTS =  \
 	$(OBJS)\basedll_filefn.o \
 	$(OBJS)\basedll_filename.o \
 	$(OBJS)\basedll_filesys.o \
-	$(OBJS)\basedll_filtall.o \
-	$(OBJS)\basedll_filtfind.o \
 	$(OBJS)\basedll_fmapbase.o \
 	$(OBJS)\basedll_fs_zip.o \
 	$(OBJS)\basedll_hash.o \
@@ -544,8 +538,6 @@ BASELIB_OBJECTS =  \
 	$(OBJS)\baselib_filefn.o \
 	$(OBJS)\baselib_filename.o \
 	$(OBJS)\baselib_filesys.o \
-	$(OBJS)\baselib_filtall.o \
-	$(OBJS)\baselib_filtfind.o \
 	$(OBJS)\baselib_fmapbase.o \
 	$(OBJS)\baselib_fs_zip.o \
 	$(OBJS)\baselib_hash.o \
@@ -1420,7 +1412,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_datacmn.o \
 	$(OBJS)\monodll_dcbase.o \
 	$(OBJS)\monodll_dcbufcmn.o \
-	$(OBJS)\monodll_dcgraph.o \
 	$(OBJS)\monodll_dlgcmn.o \
 	$(OBJS)\monodll_dndcmn.o \
 	$(OBJS)\monodll_dobjcmn.o \
@@ -1643,7 +1634,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  \
 	$(OBJS)\monodll_datacmn.o \
 	$(OBJS)\monodll_dcbase.o \
 	$(OBJS)\monodll_dcbufcmn.o \
-	$(OBJS)\monodll_dcgraph.o \
 	$(OBJS)\monodll_dlgcmn.o \
 	$(OBJS)\monodll_dndcmn.o \
 	$(OBJS)\monodll_dobjcmn.o \
@@ -2033,7 +2023,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_datacmn.o \
 	$(OBJS)\monolib_dcbase.o \
 	$(OBJS)\monolib_dcbufcmn.o \
-	$(OBJS)\monolib_dcgraph.o \
 	$(OBJS)\monolib_dlgcmn.o \
 	$(OBJS)\monolib_dndcmn.o \
 	$(OBJS)\monolib_dobjcmn.o \
@@ -2256,7 +2245,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  \
 	$(OBJS)\monolib_datacmn.o \
 	$(OBJS)\monolib_dcbase.o \
 	$(OBJS)\monolib_dcbufcmn.o \
-	$(OBJS)\monolib_dcgraph.o \
 	$(OBJS)\monolib_dlgcmn.o \
 	$(OBJS)\monolib_dndcmn.o \
 	$(OBJS)\monolib_dobjcmn.o \
@@ -2567,7 +2555,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_datacmn.o \
 	$(OBJS)\coredll_dcbase.o \
 	$(OBJS)\coredll_dcbufcmn.o \
-	$(OBJS)\coredll_dcgraph.o \
 	$(OBJS)\coredll_dlgcmn.o \
 	$(OBJS)\coredll_dndcmn.o \
 	$(OBJS)\coredll_dobjcmn.o \
@@ -2790,7 +2777,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  \
 	$(OBJS)\coredll_datacmn.o \
 	$(OBJS)\coredll_dcbase.o \
 	$(OBJS)\coredll_dcbufcmn.o \
-	$(OBJS)\coredll_dcgraph.o \
 	$(OBJS)\coredll_dlgcmn.o \
 	$(OBJS)\coredll_dndcmn.o \
 	$(OBJS)\coredll_dobjcmn.o \
@@ -3018,7 +3004,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_datacmn.o \
 	$(OBJS)\corelib_dcbase.o \
 	$(OBJS)\corelib_dcbufcmn.o \
-	$(OBJS)\corelib_dcgraph.o \
 	$(OBJS)\corelib_dlgcmn.o \
 	$(OBJS)\corelib_dndcmn.o \
 	$(OBJS)\corelib_dobjcmn.o \
@@ -3241,7 +3226,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  \
 	$(OBJS)\corelib_datacmn.o \
 	$(OBJS)\corelib_dcbase.o \
 	$(OBJS)\corelib_dcbufcmn.o \
-	$(OBJS)\corelib_dcgraph.o \
 	$(OBJS)\corelib_dlgcmn.o \
 	$(OBJS)\corelib_dndcmn.o \
 	$(OBJS)\corelib_dobjcmn.o \
@@ -4657,12 +4641,6 @@ $(OBJS)\monodll_filename.o: ../../src/common/filename.cpp
 $(OBJS)\monodll_filesys.o: ../../src/common/filesys.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\monodll_filtall.o: ../../src/common/filtall.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\monodll_filtfind.o: ../../src/common/filtfind.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\monodll_fmapbase.o: ../../src/common/fmapbase.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -6043,11 +6021,6 @@ $(OBJS)\monodll_dcbufcmn.o: ../../src/common/dcbufcmn.cpp
 endif
 
 ifeq ($(USE_GUI),1)
-$(OBJS)\monodll_dcgraph.o: ../../src/common/dcgraph.cpp
-	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
 $(OBJS)\monodll_dlgcmn.o: ../../src/common/dlgcmn.cpp
 	$(CXX) -c -o $@ $(MONODLL_CXXFLAGS) $(CPPDEPS) $<
 endif
@@ -6716,12 +6689,6 @@ $(OBJS)\monolib_filename.o: ../../src/common/filename.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\monolib_filesys.o: ../../src/common/filesys.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\monolib_filtall.o: ../../src/common/filtall.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\monolib_filtfind.o: ../../src/common/filtfind.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\monolib_fmapbase.o: ../../src/common/fmapbase.cpp
@@ -8104,11 +8071,6 @@ $(OBJS)\monolib_dcbufcmn.o: ../../src/common/dcbufcmn.cpp
 endif
 
 ifeq ($(USE_GUI),1)
-$(OBJS)\monolib_dcgraph.o: ../../src/common/dcgraph.cpp
-	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
 $(OBJS)\monolib_dlgcmn.o: ../../src/common/dlgcmn.cpp
 	$(CXX) -c -o $@ $(MONOLIB_CXXFLAGS) $(CPPDEPS) $<
 endif
@@ -8782,12 +8744,6 @@ $(OBJS)\basedll_filename.o: ../../src/common/filename.cpp
 $(OBJS)\basedll_filesys.o: ../../src/common/filesys.cpp
 	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\basedll_filtall.o: ../../src/common/filtall.cpp
-	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\basedll_filtfind.o: ../../src/common/filtfind.cpp
-	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\basedll_fmapbase.o: ../../src/common/fmapbase.cpp
 	$(CXX) -c -o $@ $(BASEDLL_CXXFLAGS) $(CPPDEPS) $<
 
@@ -9035,12 +8991,6 @@ $(OBJS)\baselib_filename.o: ../../src/common/filename.cpp
 	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\baselib_filesys.o: ../../src/common/filesys.cpp
-	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\baselib_filtall.o: ../../src/common/filtall.cpp
-	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\baselib_filtfind.o: ../../src/common/filtfind.cpp
 	$(CXX) -c -o $@ $(BASELIB_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\baselib_fmapbase.o: ../../src/common/fmapbase.cpp
@@ -10182,11 +10132,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\coredll_dcbufcmn.o: ../../src/common/dcbufcmn.cpp
-	$(CXX) -c -o $@ $(COREDLL_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\coredll_dcgraph.o: ../../src/common/dcgraph.cpp
 	$(CXX) -c -o $@ $(COREDLL_CXXFLAGS) $(CPPDEPS) $<
 endif
 
@@ -11537,11 +11482,6 @@ endif
 
 ifeq ($(USE_GUI),1)
 $(OBJS)\corelib_dcbufcmn.o: ../../src/common/dcbufcmn.cpp
-	$(CXX) -c -o $@ $(CORELIB_CXXFLAGS) $(CPPDEPS) $<
-endif
-
-ifeq ($(USE_GUI),1)
-$(OBJS)\corelib_dcgraph.o: ../../src/common/dcgraph.cpp
 	$(CXX) -c -o $@ $(CORELIB_CXXFLAGS) $(CPPDEPS) $<
 endif
 

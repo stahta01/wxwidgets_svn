@@ -32,7 +32,7 @@
 
 #include "wx/private/overlay.h"
 
-#ifdef wxHAS_NATIVE_OVERLAY
+#if wxHAS_NATIVE_OVERLAY
 
 // ============================================================================
 // implementation

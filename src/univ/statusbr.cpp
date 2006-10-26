@@ -110,8 +110,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
 
     // prepare the DC
     wxDC& dc = renderer->GetDC();
-    dc.SetFont(GetFont());
-    dc.SetTextForeground(GetForegroundColour());
+    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
     // do draw the fields
     int flags = IsEnabled() ? 0 : (int)wxCONTROL_DISABLED;

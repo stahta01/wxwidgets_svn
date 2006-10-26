@@ -150,8 +150,6 @@ public:
 
     virtual bool IsTopLevel() const { return false; }
 
-    virtual bool Destroy();
-
     void OnActivate( wxActivateEvent& event );
     void OnMenuHighlight( wxMenuEvent& event );
 

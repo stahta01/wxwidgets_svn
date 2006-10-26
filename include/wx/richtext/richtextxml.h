@@ -17,7 +17,6 @@
  */
 
 #include "wx/richtext/richtextbuffer.h"
-#include "wx/richtext/richtextstyles.h"
 
 #if wxUSE_RICHTEXT && wxUSE_XML
 
@@ -38,11 +37,9 @@ public:
 #if wxUSE_STREAMS
     /// Recursively export an object
     bool ExportXML(wxOutputStream& stream, wxMBConv* convMem, wxMBConv* convFile, wxRichTextObject& obj, int level);
-    bool ExportStyleDefinition(wxOutputStream& stream, wxMBConv* convMem, wxMBConv* convFile, wxRichTextStyleDefinition* def, int level);
 
     /// Recursively import an object
     bool ImportXML(wxRichTextBuffer* buffer, wxXmlNode* node);
-    bool ImportStyleDefinition(wxRichTextStyleSheet* sheet, wxXmlNode* node);
 
     /// Create style parameters
     wxString CreateStyle(const wxTextAttrEx& attr, bool isPara = false);

@@ -1131,7 +1131,7 @@ bool wxFileName::Normalize(int flags,
 
     format = GetFormat(format);
 
-    // set up the directory to use for making the path absolute later
+    // make the path absolute
     if ( (flags & wxPATH_NORM_ABSOLUTE) && !IsAbsolute(format) )
     {
         if ( cwd.empty() )
@@ -1141,6 +1141,20 @@ bool wxFileName::Normalize(int flags,
         else // cwd provided
         {
             curDir.AssignDir(cwd);
+        }
+
+        // the path may be not absolute because it doesn't have the volume name
+        // but in this case we shouldn't modify the directory components of it
+        // but just set the current volume
+        if ( !HasVolume() && curDir.HasVolume() )
+        {
+            SetVolume(curDir.GetVolume());
+
+            if ( !m_relative )
+            {
+                // yes, it was the case - we don't need curDir then
+                curDir.Clear();
+            }
         }
     }
 
@@ -1152,17 +1166,7 @@ bool wxFileName::Normalize(int flags,
             wxString dir = dirs[0u];
             if ( !dir.empty() && dir[0u] == _T('~') )
             {
-                // to make the path absolute use the home directory
                 curDir.AssignDir(wxGetUserHome(dir.c_str() + 1));
-
-                // if we are expanding the tilde, then this path
-                // *should* be already relative (since we checked for
-                // the tilde only in the first char of the first dir);
-                // if m_relative==false, it's because it was initialized
-                // from a string which started with /~; in that case
-                // we reach this point but then need m_relative=true
-                // for relative->absolute expansion later
-                m_relative = true;
 
                 dirs.RemoveAt(0u);
             }
@@ -1172,34 +1176,14 @@ bool wxFileName::Normalize(int flags,
     // transform relative path into abs one
     if ( curDir.IsOk() )
     {
-        // this path may be relative because it doesn't have the volume name
-        // and still have m_relative=true; in this case we shouldn't modify
-        // our directory components but just set the current volume
-        if ( !HasVolume() && curDir.HasVolume() )
-        {
-            SetVolume(curDir.GetVolume());
-
-            if ( !m_relative )
-        {
-                // yes, it was the case - we don't need curDir then
-                curDir.Clear();
-            }
-        }
-
-        // finally, prepend curDir to the dirs array
         wxArrayString dirsNew = curDir.GetDirs();
-        WX_PREPEND_ARRAY(dirs, dirsNew);
-
-        // if we used e.g. tilde expansion previously and wxGetUserHome didn't
-        // return for some reason an absolute path, then curDir maybe not be absolute!
-        if ( curDir.IsAbsolute(format) )
+        size_t count = dirs.GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
-            // we have prepended an absolute path and thus we are now an absolute
-            // file name too
-            m_relative = false;
+            dirsNew.Add(dirs[n]);
         }
-        // else if (flags & wxPATH_NORM_ABSOLUTE):
-        //   should we warn the user that we didn't manage to make the path absolute?
+
+        dirs = dirsNew;
     }
 
     // now deal with ".", ".." and the rest
@@ -1264,6 +1248,11 @@ bool wxFileName::Normalize(int flags,
         m_name.MakeLower();
         m_ext.MakeLower();
     }
+
+    // we do have the path now
+    //
+    // NB: need to do this before (maybe) calling Assign() below
+    m_relative = false;
 
 #if defined(__WIN32__)
     if ( (flags & wxPATH_NORM_LONG) && (format == wxPATH_DOS) )

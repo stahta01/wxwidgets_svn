@@ -72,7 +72,7 @@ void wxGenericDragImage::Init()
     m_windowDC = (wxDC*) NULL;
     m_window = (wxWindow*) NULL;
     m_fullScreen = false;
-#ifdef wxHAS_NATIVE_OVERLAY
+#if wxHAS_NATIVE_OVERLAY
     m_dcOverlay = NULL;
 #else
     m_pBackingBitmap = (wxBitmap*) NULL;
@@ -288,7 +288,7 @@ bool wxGenericDragImage::BeginDrag(const wxPoint& hotspot,
         }
     }
 
-#ifndef wxHAS_NATIVE_OVERLAY
+#if !wxHAS_NATIVE_OVERLAY
     wxBitmap* backing = (m_pBackingBitmap ? m_pBackingBitmap : (wxBitmap*) & m_backingBitmap);
 
     if (!backing->Ok() || (backing->GetWidth() < clientSize.x || backing->GetHeight() < clientSize.y))
@@ -356,7 +356,7 @@ bool wxGenericDragImage::EndDrag()
 
     if (m_windowDC)
     {
-#ifdef wxHAS_NATIVE_OVERLAY
+#if wxHAS_NATIVE_OVERLAY
         m_overlay.Reset();
 #else
         m_windowDC->DestroyClippingRegion();
@@ -365,7 +365,7 @@ bool wxGenericDragImage::EndDrag()
         m_windowDC = (wxDC*) NULL;
     }
 
-#ifndef wxHAS_NATIVE_OVERLAY
+#if !wxHAS_NATIVE_OVERLAY
     m_repairBitmap = wxNullBitmap;
 #endif
 
@@ -409,7 +409,7 @@ bool wxGenericDragImage::Show()
         // This is where we restore the backing bitmap, in case
         // something has changed on the window.
 
-#ifndef wxHAS_NATIVE_OVERLAY
+#if !wxHAS_NATIVE_OVERLAY
         wxBitmap* backing = (m_pBackingBitmap ? m_pBackingBitmap : (wxBitmap*) & m_backingBitmap);
         wxMemoryDC memDC;
         memDC.SelectObject(* backing);
@@ -460,7 +460,7 @@ bool wxGenericDragImage::RedrawImage(const wxPoint& oldPos, const wxPoint& newPo
     if (!m_windowDC)
         return false;
 
-#ifdef wxHAS_NATIVE_OVERLAY
+#if wxHAS_NATIVE_OVERLAY
     wxDCOverlay dcoverlay( m_overlay, (wxWindowDC*) m_windowDC ) ;
     if ( eraseOld )
         dcoverlay.Clear() ;

@@ -309,8 +309,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/filefn.cpp
     src/common/filename.cpp
     src/common/filesys.cpp
-    src/common/filtall.cpp
-    src/common/filtfind.cpp
     src/common/fmapbase.cpp
     src/common/fs_zip.cpp
     src/common/hash.cpp
@@ -575,7 +573,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/datacmn.cpp
     src/common/dcbase.cpp
     src/common/dcbufcmn.cpp
-    src/common/dcgraph.cpp
     src/common/dlgcmn.cpp
     src/common/dndcmn.cpp
     src/common/dobjcmn.cpp

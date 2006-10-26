@@ -21,6 +21,9 @@
     #include "wx/msw/microwin.h"
 #endif
 
+// Include fixes for MSLU:
+#include "wx/msw/mslu.h"
+
 #include "wx/log.h"
 
 class WXDLLEXPORT wxFont;

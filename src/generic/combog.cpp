@@ -436,7 +436,7 @@ bool wxGenericComboCtrl::PerformAction(const wxControlAction& action,
     bool processed = false;
     if ( action == wxACTION_COMBOBOX_POPUP )
     {
-        if ( !IsPopupShown() )
+        if ( !m_isPopupShown )
         {
             ShowPopup();
 
@@ -445,7 +445,7 @@ bool wxGenericComboCtrl::PerformAction(const wxControlAction& action,
     }
     else if ( action == wxACTION_COMBOBOX_DISMISS )
     {
-        if ( IsPopupShown() )
+        if ( m_isPopupShown )
         {
             HidePopup();
 

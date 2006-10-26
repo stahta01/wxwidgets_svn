@@ -31,13 +31,13 @@
     #include "wx/dcclient.h"
     #include "wx/settings.h"
     #include "wx/dialog.h"
-    #include "wx/stopwatch.h"
 #endif
 
 #include "wx/dcbuffer.h"
+
 #include "wx/combo.h"
 
-#include "wx/msw/registry.h"
+
 #include "wx/msw/uxtheme.h"
 
 // Change to #if 1 to include tmschema.h for easier testing of theme
@@ -70,12 +70,6 @@
 #define TEXTCTRLXADJUST_CLASSIC     1
 #define TEXTCTRLYADJUST_CLASSIC     2
 
-#define COMBOBOX_ANIMATION_RESOLUTION   10
-
-#define COMBOBOX_ANIMATION_DURATION     200  // In milliseconds
-
-#define wxMSW_DESKTOP_USERPREFERENCESMASK_COMBOBOXANIM    (1<<26)
-
 
 // ============================================================================
 // implementation
@@ -85,7 +79,6 @@
 BEGIN_EVENT_TABLE(wxComboCtrl, wxComboCtrlBase)
     EVT_PAINT(wxComboCtrl::OnPaintEvent)
     EVT_MOUSE_EVENTS(wxComboCtrl::OnMouseEvent)
-    EVT_TIMER(wxID_ANY, wxComboCtrl::OnTimerEvent)
 END_EVENT_TABLE()
 
 
@@ -535,113 +528,6 @@ void wxComboCtrl::OnMouseEvent( wxMouseEvent& event )
     HandleNormalMouseEvent(event);
 
 }
-
-#if wxUSE_COMBOCTRL_POPUP_ANIMATION
-static wxUint32 GetUserPreferencesMask()
-{
-    static wxUint32 userPreferencesMask = 0;
-    static bool valueSet = false;
-
-    if ( valueSet )
-        return userPreferencesMask;
-
-    wxRegKey key(wxRegKey::HKCU, wxT("Control Panel\\Desktop"));
-    if( key.Open(wxRegKey::Read) )
-    {
-        wxMemoryBuffer buf;
-        if ( key.QueryValue(wxT("UserPreferencesMask"), buf) )
-        {
-            if ( buf.GetDataLen() >= 4 )
-            {
-                wxByte* p = (wxByte*) buf.GetData();
-                userPreferencesMask = p[3] + (p[2]<<8) + (p[1]<<16) + (p[0]<<24);
-            }
-        }
-    }
-
-    valueSet = true;
-
-    return userPreferencesMask;
-}
-#endif
-
-#if wxUSE_COMBOCTRL_POPUP_ANIMATION
-void wxComboCtrl::OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
-{
-    bool stopTimer = false;
-
-    wxWindow* popup = GetPopupControl()->GetControl();
-
-    // Popup was hidden before it was fully shown?
-    if ( IsPopupWindowState(Hidden) )
-    {
-        stopTimer = true;
-    }
-    else
-    {
-        wxLongLong t = ::wxGetLocalTimeMillis();
-        const wxRect& rect = m_animRect;
-        wxWindow* win = GetPopupWindow();
-
-        int pos = (int) (t-m_animStart).GetLo();
-        if ( pos < COMBOBOX_ANIMATION_DURATION )
-        {
-            int height = rect.height;
-            //int h0 = rect.height;
-            int h = (((pos*256)/COMBOBOX_ANIMATION_DURATION)*height)/256;
-            int y = (height - h);
-            if ( y < 0 )
-                y = 0;
-
-            if ( m_animFlags & ShowAbove )
-            {
-                win->SetSize( rect.x, rect.y + height - h, rect.width, h );
-            }
-            else
-            {
-                popup->Move( 0, -y );
-                win->SetSize( rect.x, rect.y, rect.width, h );
-            }
-        }
-        else
-        {
-            stopTimer = true;
-        }
-    }
-
-    if ( stopTimer )
-    {
-        popup->Move( 0, 0 );
-        m_animTimer.Stop();
-        DoShowPopup( m_animRect, m_animFlags );
-    }
-}
-#endif
-
-#if wxUSE_COMBOCTRL_POPUP_ANIMATION
-bool wxComboCtrl::AnimateShow( const wxRect& rect, int flags )
-{
-    if ( GetUserPreferencesMask() & wxMSW_DESKTOP_USERPREFERENCESMASK_COMBOBOXANIM )
-    {
-        m_animStart = ::wxGetLocalTimeMillis();
-        m_animRect = rect;
-        m_animFlags = flags;
-
-        wxWindow* win = GetPopupWindow();
-        win->SetSize( rect.x, rect.y, rect.width, 0 );
-        win->Show();
-
-        m_animTimer.SetOwner( this, wxID_ANY );
-        m_animTimer.Start( COMBOBOX_ANIMATION_RESOLUTION, wxTIMER_CONTINUOUS );
-
-        OnTimerEvent(*((wxTimerEvent*)NULL));  // Event is never used, so we can give NULL
-
-        return false;
-    }
-
-    return true;
-}
-#endif
 
 wxCoord wxComboCtrl::GetNativeTextIndent() const
 {

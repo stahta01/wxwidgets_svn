@@ -433,10 +433,6 @@ SOURCE=.\common\dcbufcmn.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dcgraph.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\debugrpt.cpp
 # End Source File
 # Begin Source File
@@ -544,14 +540,6 @@ SOURCE=.\common\filepickercmn.cpp
 # Begin Source File
 
 SOURCE=.\common\filesys.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\filtall.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\filtfind.cpp
 # End Source File
 # Begin Source File
 

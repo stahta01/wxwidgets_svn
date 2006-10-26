@@ -60,7 +60,6 @@
 #include "wx/univ/inphand.h"
 #include "wx/univ/colschem.h"
 
-// ----------------------------------------------------------------------------
 // wxMetalRenderer: draw the GUI elements in Metal style
 // ----------------------------------------------------------------------------
 
@@ -143,35 +142,86 @@ private:
 // wxMetalTheme
 // ----------------------------------------------------------------------------
 
-class wxMetalTheme : public wxDelegateTheme
+class wxMetalTheme : public wxTheme
 {
 public:
-    wxMetalTheme() : wxDelegateTheme(_T("win32")), m_renderer(NULL) {}
-    ~wxMetalTheme() { delete m_renderer; }
+    wxMetalTheme();
+    virtual ~wxMetalTheme();
 
-protected:
-    virtual wxRenderer *GetRenderer()
+    virtual wxRenderer *GetRenderer();
+    virtual wxArtProvider *GetArtProvider();
+    virtual wxInputHandler *GetInputHandler(const wxString& control,
+                                            wxInputConsumer *consumer);
+    virtual wxColourScheme *GetColourScheme();
+
+private:
+    bool GetOrCreateTheme()
     {
-        if ( !m_renderer )
-        {
-            m_renderer = new wxMetalRenderer(m_theme->GetRenderer(),
-                                             GetColourScheme());
-        }
-
-        return m_renderer;
+        if ( !m_win32Theme )
+            m_win32Theme = wxTheme::Create( wxT("win32") );
+        return m_win32Theme != NULL;
     }
 
-    wxRenderer *m_renderer;
+    wxTheme *m_win32Theme;
+    wxMetalRenderer *m_renderer;
 
     WX_DECLARE_THEME(Metal)
 };
 
-WX_IMPLEMENT_THEME(wxMetalTheme, Metal, wxTRANSLATE("Metal theme"));
-
-
 // ============================================================================
 // implementation
 // ============================================================================
+
+WX_IMPLEMENT_THEME(wxMetalTheme, Metal, wxTRANSLATE("Metal theme"));
+
+// ----------------------------------------------------------------------------
+// wxMetalTheme
+// ----------------------------------------------------------------------------
+
+wxMetalTheme::wxMetalTheme()
+{
+    m_win32Theme = NULL;
+    m_renderer = NULL;
+}
+
+wxMetalTheme::~wxMetalTheme()
+{
+    delete m_win32Theme;
+    delete m_renderer;
+}
+
+wxRenderer *wxMetalTheme::GetRenderer()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    if ( !m_renderer )
+        m_renderer = new wxMetalRenderer(m_win32Theme->GetRenderer(),
+                                         m_win32Theme->GetColourScheme());
+
+    return m_renderer;
+}
+
+wxArtProvider *wxMetalTheme::GetArtProvider()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetArtProvider();
+}
+
+wxInputHandler *wxMetalTheme::GetInputHandler(const wxString& control,
+                                              wxInputConsumer *consumer)
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetInputHandler(control, consumer);
+}
+
+wxColourScheme *wxMetalTheme::GetColourScheme()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetColourScheme();
+}
 
 // ----------------------------------------------------------------------------
 // wxMetalRenderer

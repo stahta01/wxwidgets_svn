@@ -126,11 +126,8 @@ bool wxButton::Create(wxWindow *parent,
         return false;
 
     SetLabel(label);
-
-    if (bitmap.Ok())
-        SetImageLabel(bitmap); // SetBestSize called by SetImageLabel()
-    else
-        SetBestSize(size);
+    SetImageLabel(bitmap);
+    // SetBestSize(size); -- called by SetImageLabel()
 
     CreateInputHandler(wxINP_HANDLER_BUTTON);
 

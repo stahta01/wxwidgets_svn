@@ -330,7 +330,7 @@ int wxFileDialog::ShowModal()
         }
     }
 
-    if (HasFdFlag(wxFD_SAVE))
+    if (HasFlag(wxFD_SAVE))
     {
         myData.saveMode = true;
 
@@ -403,7 +403,7 @@ int wxFileDialog::ShowModal()
             if (err != noErr)
                 break;
 
-            if (HasFdFlag(wxFD_SAVE))
+            if (HasFlag(wxFD_SAVE))
                 thePath = wxMacFSRefToPath( &theFSRef, navReply.saveFileName );
             else
                 thePath = wxMacFSRefToPath( &theFSRef );
