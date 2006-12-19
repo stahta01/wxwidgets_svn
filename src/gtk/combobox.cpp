@@ -200,7 +200,6 @@ gtkcombobox_changed_callback( GtkWidget *WXUNUSED(widget), wxComboBox *combo )
     combo->GetEventHandler()->ProcessEvent( event );
 }
 }
-
 #endif
 
 //-----------------------------------------------------------------------------
@@ -349,7 +348,6 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
         g_signal_connect_after (m_widget, "changed",
                             G_CALLBACK (gtkcombobox_changed_callback), this);
-                            
     }
     else
 #endif
@@ -373,9 +371,15 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
                             this);
         g_signal_connect_after (entry, "changed",
                             G_CALLBACK (gtkcombo_text_changed_callback), this);
+
+        // This is required for tool bar support
+        // Doesn't currently work
+//        wxSize setsize = GetSize();
+//        gtk_widget_set_size_request( m_widget, setsize.x, setsize.y );
     }
 
     SetInitialSize(size); // need this too because this is a wxControlWithItems
+
 
     return true;
 }

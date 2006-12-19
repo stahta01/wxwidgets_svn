@@ -31,10 +31,6 @@ public:
     // returns DirectFB event buffer used by wx
     static wxIDirectFBEventBufferPtr GetDirectFBEventBuffer();
 
-    // wxYield implementation: iterate the loop as long as there are any
-    // pending events
-    void Yield();
-
 protected:
     virtual void WakeUp();
     virtual void OnNextIteration();

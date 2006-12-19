@@ -75,7 +75,6 @@ _treeList = [
         'BitmapComboBox',
         'I18N',
         'Img2PyArtProvider',
-        'SearchCtrl',        
         ]),
 
     # managed windows == things with a (optional) caption you can close
@@ -133,7 +132,6 @@ _treeList = [
         'RadioButton',
         'SashWindow',
         'ScrolledWindow',
-        'SearchCtrl',        
         'Slider',
         'SpinButton',
         'SpinCtrl',
@@ -1219,7 +1217,7 @@ class wxPythonDemo(wx.Frame):
 
         # Make a Demo menu
         menu = wx.Menu()
-        for item in _treeList[:-1]:
+        for item in _treeList:
             submenu = wx.Menu()
             for childItem in item[1]:
                 mi = submenu.Append(-1, childItem)

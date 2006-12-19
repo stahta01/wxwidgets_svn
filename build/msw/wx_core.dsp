@@ -778,10 +778,6 @@ SOURCE=..\..\src\common\sizer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\common\srchcmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\common\statbar.cpp
 # End Source File
 # Begin Source File
@@ -4678,10 +4674,6 @@ SOURCE=..\..\src\generic\splitter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\generic\srchctlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\generic\statusbr.cpp
 
 !IF  "$(CFG)" == "core - Win32 DLL Universal Unicode Release"
@@ -8361,10 +8353,6 @@ SOURCE=..\..\include\wx\generic\splitter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\wx\generic\srchctlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\wx\generic\statusbr.h
 # End Source File
 # Begin Source File
@@ -9274,10 +9262,6 @@ SOURCE=..\..\include\wx\splash.h
 # Begin Source File
 
 SOURCE=..\..\include\wx\splitter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\wx\srchctrl.h
 # End Source File
 # Begin Source File
 

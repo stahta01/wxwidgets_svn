@@ -726,6 +726,7 @@ void wxMonoRenderer::DrawButtonLabel(wxDC& dc,
                                      int indexAccel,
                                      wxRect *rectBounds)
 {
+    dc.SetTextForeground(m_penFg.GetColour());
     dc.DrawLabel(label, image, rect, alignment, indexAccel, rectBounds);
 
     if ( flags & wxCONTROL_DISABLED )

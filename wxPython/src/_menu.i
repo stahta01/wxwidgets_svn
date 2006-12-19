@@ -369,7 +369,7 @@ public:
     // turn off this typemap
     %typemap(out) wxMenuItem*;    
 
-    wxMenuItem(wxMenu* parentMenu=NULL, int id=wxID_SEPARATOR,
+    wxMenuItem(wxMenu* parentMenu=NULL, int id=wxID_ANY,
                const wxString& text = wxPyEmptyString,
                const wxString& help = wxPyEmptyString,
                wxItemKind kind = wxITEM_NORMAL,
@@ -378,9 +378,6 @@ public:
 
     // Turn it back on again
     %typemap(out) wxEvtHandler* { $result = wxPyMake_wxObject($1, $owner); }
-
-    // Make Destroy a NOP.  The destruction will be handled by SWIG.
-    %pythoncode { def Destroy(self): pass }
 
     
     // the menu we're in

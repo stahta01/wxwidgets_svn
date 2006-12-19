@@ -68,7 +68,7 @@ Deprecated methods since 2.6.x and their replacements
   wxFS_SEEKABLE flags is deprecated. You can still seek, but use the flag.
 - Constructor wxZipInputStream(const wxString& archive, const wxString& file)
   deprecated in favour of wxFileSystem (other zip ctors are not deprecated).
-
+ 
 
 
 Major new features in 2.8 release
@@ -84,28 +84,7 @@ Major new features in 2.8 release
 - Further functionality including wxAnimationCtrl (moved from contrib/src/anim
   and enhanced), wxSimpleHtmlListBox, wxHyperlinkCtrl, wxColourPickerCtrl,
   wxDirPickerCtrl, wxFilePickerCtrl, wxFontPickerCtrl, wxCollapsiblePane,
-  wxSearchCtrl, wxAboutBox, wxTreebook, tar streams.
-
-
-2.8.1
------
-
-All:
-
-- Fix compilation with wxUSE_STL=1
-- wxGrid::GetBestSize() returns same size the grid would have after AutoSize()
-
-wxMSW:
-
-- Fixed compilation with Borland C++ in Unicode mode but without MSLU
-
-wxGTK:
-
-- Don't crash if command line is not valid UTF-8 (Unicode build only)
-
-wxUniv:
-
-- It is now possible to set background colour of wxStaticText
+  wxAboutBox, wxTreebook, tar streams.
 
 
 2.8.0
@@ -113,7 +92,6 @@ wxUniv:
 
 All:
 
-- Added wxSearchCtrl (Vince Harron)
 - wxCSConv("UTF-16/32") now behaves correctly, i.e. same as wxMBConvUTF16/32
 - wxArrayString::Alloc() now works as reserve() and doesn't clear array contents
 - Fixed long standing bug in wxFileConfig groups renaming (Antti Koivisto).
@@ -147,7 +125,7 @@ All:
 - Added wxFilterFSHandler and wxArchiveFSHandler.
 - Added wxString::ToLongLong() and ToULongLong().
 
-All (GUI):
+All (GUI): 
 
 - wxMemoryDC constructor now optionally accepts a wxBitmap parameter,
   calling SelectObject itself if a valid bitmap is passed.

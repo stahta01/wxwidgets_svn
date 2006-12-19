@@ -72,7 +72,7 @@ private:
     void TestEmbeddedZerosUTF16BEInput();
     void TestEmbeddedZerosUTF32LEInput();
     void TestEmbeddedZerosUTF32BEInput();
-    void TestInput(const wxMBConv& conv,
+    void TestInput(wxFontEncoding encoding,
                    const void* encodedText,
                    size_t encodedSize );
 #endif // wxUSE_UNICODE
@@ -222,38 +222,34 @@ const static unsigned char txtUtf32be[16] =
 
 void TextStreamTestCase::TestUTF8Input()
 {
-    TestInput(wxConvUTF8, txtUtf8, sizeof(txtUtf8));
-    TestInput(wxCSConv(wxFONTENCODING_UTF8), txtUtf8, sizeof(txtUtf8));
+    TestInput(wxFONTENCODING_UTF8, txtUtf8, sizeof(txtUtf8));
 }
 
 void TextStreamTestCase::TestEmbeddedZerosUTF16LEInput()
 {
-    TestInput(wxMBConvUTF16LE(), txtUtf16le, sizeof(txtUtf16le));
-    TestInput(wxCSConv(wxFONTENCODING_UTF16LE), txtUtf16le, sizeof(txtUtf16le));
+    TestInput(wxFONTENCODING_UTF16LE, txtUtf16le, sizeof(txtUtf16le));
 }
 
 void TextStreamTestCase::TestEmbeddedZerosUTF16BEInput()
 {
-    TestInput(wxMBConvUTF16BE(), txtUtf16be, sizeof(txtUtf16be));
-    TestInput(wxCSConv(wxFONTENCODING_UTF16BE), txtUtf16be, sizeof(txtUtf16be));
+    TestInput(wxFONTENCODING_UTF16BE, txtUtf16be, sizeof(txtUtf16be));
 }
 
 void TextStreamTestCase::TestEmbeddedZerosUTF32LEInput()
 {
-    TestInput(wxMBConvUTF32LE(), txtUtf32le, sizeof(txtUtf32le));
-    TestInput(wxCSConv(wxFONTENCODING_UTF32LE), txtUtf32le, sizeof(txtUtf32le));
+    TestInput(wxFONTENCODING_UTF32LE, txtUtf32le, sizeof(txtUtf32le));
 }
 
 void TextStreamTestCase::TestEmbeddedZerosUTF32BEInput()
 {
-    TestInput(wxMBConvUTF32BE(), txtUtf32be, sizeof(txtUtf32be));
-    TestInput(wxCSConv(wxFONTENCODING_UTF32BE), txtUtf32be, sizeof(txtUtf32be));
+    TestInput(wxFONTENCODING_UTF32BE, txtUtf32be, sizeof(txtUtf32be));
 }
 
-void TextStreamTestCase::TestInput(const wxMBConv& conv,
+void TextStreamTestCase::TestInput(wxFontEncoding encoding,
                                    const void *encodedText,
                                    size_t encodedSize)
 {
+    wxCSConv conv(encoding);
     wxMemoryInputStream byteIn(encodedText, encodedSize);
     wxTextInputStream textIn(byteIn, wxT("\n"), conv);
 

@@ -2,8 +2,9 @@
 // Name:        wx/generic/srchctlg.h
 // Purpose:     generic wxSearchCtrl class
 // Author:      Vince Harron
+// Modified by:
 // Created:     2006-02-19
-// RCS-ID:      $Id$
+// RCS-ID:      
 // Copyright:   Vince Harron
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -13,10 +14,36 @@
 
 #if wxUSE_SEARCHCTRL
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "srchctlg.h"
+#endif
+
 #include "wx/bitmap.h"
+
+// ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxSearchButton;
 class WXDLLEXPORT wxSearchTextCtrl;
+
+class WXDLLEXPORT wxSearchCtrlBase : public wxTextCtrlBase
+{
+public:
+    wxSearchCtrlBase() {}
+    virtual ~wxSearchCtrlBase() {}
+
+    // search control 
+    virtual void SetMenu( wxMenu* menu ) = 0;
+    virtual wxMenu* GetMenu() = 0;
+
+
+    // get/set options
+    virtual void SetSearchButtonVisible( bool show ) = 0;
+    virtual bool GetSearchButtonVisible() const = 0;
+
+    virtual void SetCancelButtonVisible( bool show ) = 0;
+    virtual bool GetCancelButtonVisible() const = 0;
+protected:
+};
 
 // ----------------------------------------------------------------------------
 // wxSearchCtrl is a combination of wxTextCtrl and wxSearchButton
@@ -37,7 +64,7 @@ public:
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxSearchCtrlNameStr);
 
-    virtual ~wxSearchCtrl();
+    ~wxSearchCtrl();
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxString& value = wxEmptyString,
@@ -51,14 +78,14 @@ public:
     // --------------------------
     virtual void SetMenu( wxMenu* menu );
     virtual wxMenu* GetMenu();
-
+    
     // get/set search options
     // ----------------------
-    virtual void ShowSearchButton( bool show );
-    virtual bool IsSearchButtonVisible() const;
+    virtual void SetSearchButtonVisible( bool show );
+    virtual bool GetSearchButtonVisible() const;
 
-    virtual void ShowCancelButton( bool show );
-    virtual bool IsCancelButtonVisible() const;
+    virtual void SetCancelButtonVisible( bool show );
+    virtual bool GetCancelButtonVisible() const;
 
     // accessors
     // ---------
@@ -212,8 +239,7 @@ protected:
     virtual void OnSearchButton( wxCommandEvent& event );
 
     void OnSetFocus( wxFocusEvent& event );
-    void OnSize( wxSizeEvent& event );
-    
+
 private:
     friend class wxSearchButton;
 

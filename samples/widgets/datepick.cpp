@@ -223,9 +223,7 @@ void DatePickerWidgetsPage::OnButtonReset(wxCommandEvent& WXUNUSED(event))
 
 void DatePickerWidgetsPage::OnButtonSet(wxCommandEvent& WXUNUSED(event))
 {
-    long day = 0,
-         month = 0,
-         year = 0;
+    long day, month, year;
     if ( m_day->GetValue().ToLong(&day) &&
          m_month->GetValue().ToLong(&month) &&
          m_year->GetValue().ToLong(&year) )

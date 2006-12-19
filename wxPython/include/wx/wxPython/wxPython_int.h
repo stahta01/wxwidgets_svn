@@ -79,7 +79,6 @@
 #include <wx/filepicker.h>
 #include <wx/fontpicker.h>    
 #include <wx/collpane.h>
-#include <wx/srchctrl.h>
 
 
 #ifdef _MSC_VER

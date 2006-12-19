@@ -257,8 +257,6 @@ void wxStdRenderer::DrawButtonLabel(wxDC& dc,
                                     int indexAccel,
                                     wxRect *rectBounds)
 {
-    wxDCTextColourChanger clrChanger(dc);
-
     wxRect rectLabel = rect;
     if ( !label.empty() && (flags & wxCONTROL_DISABLED) )
     {
@@ -269,13 +267,13 @@ void wxStdRenderer::DrawButtonLabel(wxDC& dc,
         }
 
         // draw shadow of the text
-        clrChanger.Set(m_penHighlight.GetColour());
+        dc.SetTextForeground(m_penHighlight.GetColour());
         wxRect rectShadow = rect;
         rectShadow.Offset(1, 1);
         dc.DrawLabel(label, rectShadow, alignment, indexAccel);
 
         // make the main label text grey
-        clrChanger.Set(m_penDarkGrey.GetColour());
+        dc.SetTextForeground(m_penDarkGrey.GetColour());
 
         if ( flags & wxCONTROL_FOCUSED )
         {

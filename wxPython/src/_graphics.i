@@ -466,8 +466,7 @@ identity matrix.)", "");
 
     DocDeclStr(
         virtual bool , IsEqual( const wxGraphicsMatrix& t) const,
-        "Returns ``True`` if the elements of the transformation matrix are
-equal", "");
+        "Returns ``True`` if the elements of the transformation matrix are equal", "");
 
 
     DocDeclStr(
@@ -565,8 +564,8 @@ points and an end point", "");
         "Adds an arc of a circle centering at (x,y) with radius (r) from
 startAngle to endAngle", "");
     virtual void AddArc( wxDouble x, wxDouble y, wxDouble r,
-                         wxDouble startAngle, wxDouble endAngle, bool clockwise=true );
-    void AddArc( const wxPoint2D& c, wxDouble r, wxDouble startAngle, wxDouble endAngle, bool clockwise=true);
+                         wxDouble startAngle, wxDouble endAngle, bool clockwise );
+    void AddArc( const wxPoint2D& c, wxDouble r, wxDouble startAngle, wxDouble endAngle, bool clockwise);
 
 
     DocDeclStr(
@@ -587,8 +586,8 @@ point and an end point", "");
 
     DocDeclStr(
         virtual void , AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r ) ,
-        "Appends an arc to two tangents connecting (current) to (x1,y1) and
-(x1,y1) to (x2,y2), also a straight line from (current) to (x1,y1)", "");
+        "Appends an arc to two tangents connecting (current) to (x1,y1) and (x1,y1)
+to (x2,y2), also a straight line from (current) to (x1,y1)", "");
 
 
     DocDeclStr(
@@ -622,8 +621,7 @@ returned by GetNativePath is newly allocated each time).", "");
 
     DocDeclStr(
         wxRect2D , GetBox() const,
-        "Gets the bounding box enclosing all points (possibly including control
-points)", "");
+        "Gets the bounding box enclosing all points (possibly including control points)", "");
 
 
     %nokwargs Contains;
@@ -677,9 +675,9 @@ public:
     %newobject CreateFromNative;
     DocDeclStr(
         static wxGraphicsContext* , CreateFromNative( void * context ) ,
-        "Creates a wx.GraphicsContext from a native context. This native
-context must be eg a CGContextRef for Core Graphics, a Graphics
-pointer for GDIPlus or a cairo_t pointer for Cairo.", "");
+        "Creates a wx.GraphicsContext from a native context. This native context
+must be eg a CGContextRef for Core Graphics, a Graphics pointer for
+GDIPlus or a cairo_t pointer for Cairo.", "");
     
 
     %newobject CreateFromNative;
@@ -716,8 +714,8 @@ with color c1 to (x2,y2) with color c2.", "");
         virtual wxGraphicsBrush ,
         CreateRadialGradientBrush( wxDouble xo, wxDouble yo, wxDouble xc, wxDouble yc, wxDouble radius,
                                    const wxColour &oColor, const wxColour &cColor),
-        "Creates a native brush, having a radial gradient originating at point
-(xo,yc) with color oColour and ends on a circle around (xc,yc) with
+        "Creates a native brush, having a radial gradient originating at 
+point (xo,yc) with color oColour and ends on a circle around (xc,yc) with
 radius r and color cColour.", "");
 
 
@@ -737,13 +735,12 @@ values. The defaults result in an identity matrix.", "");
 
     DocDeclStr(
         virtual void , PushState(),
-        "Push the current state of the context, (ie the transformation matrix)
-on a stack", "");
+        "push the current state of the context, ie the transformation matrix on a stack", "");
 
 
     DocDeclStr(
         virtual void , PopState(),
-        "Pops a stored state from the stack", "");
+        "pops a stored state from the stack", "");
 
 
     DocDeclStrName(

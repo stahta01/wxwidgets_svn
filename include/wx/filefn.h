@@ -295,8 +295,8 @@ enum wxFileKind
                     #define   wxOpen       _wopen
                 #endif
                 #define   wxAccess     _waccess
-                #define   wxMkDir      _wmkdir
-                #define   wxRmDir      _wrmdir
+                #define   wxMkDir      _mkdir
+                #define   wxRmDir      _rmdir
                 #ifdef wxHAS_HUGE_FILES
                     #define   wxStat       _wstati64
                 #else

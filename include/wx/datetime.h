@@ -1928,9 +1928,7 @@ inline wxLongLong wxTimeSpan::GetSeconds() const
 
 inline int wxTimeSpan::GetMinutes() const
 {
-    // explicit cast to int suppresses a warning with CodeWarrior and possibly
-    // others (changing the return type to long from int is impossible in 2.8)
-    return (int)((GetSeconds() / 60l).GetLo());
+    return (GetSeconds() / 60l).GetLo();
 }
 
 inline int wxTimeSpan::GetHours() const

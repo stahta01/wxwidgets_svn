@@ -8396,7 +8396,7 @@ class Window(EvtHandler):
         Raise(self)
 
         Raises the window to the top of the window hierarchy.  In current
-        version of wxWidgets this works both for managed and child windows.
+        version of wxWidgets this works both for manage and child windows.
         """
         return _core_.Window_Raise(*args, **kwargs)
 
@@ -8405,7 +8405,7 @@ class Window(EvtHandler):
         Lower(self)
 
         Lowers the window to the bottom of the window hierarchy.  In current
-        version of wxWidgets this works both for managed and child windows.
+        version of wxWidgets this works both for manage and child windows.
         """
         return _core_.Window_Lower(*args, **kwargs)
 
@@ -10358,6 +10358,7 @@ class Window(EvtHandler):
         self.GetEventHandler().ProcessEvent(wx.SizeEvent((-1,-1)))
 
     AcceleratorTable = property(GetAcceleratorTable,SetAcceleratorTable,doc="See `GetAcceleratorTable` and `SetAcceleratorTable`") 
+    AdjustedBestSize = property(GetAdjustedBestSize,doc="See `GetAdjustedBestSize`") 
     AutoLayout = property(GetAutoLayout,SetAutoLayout,doc="See `GetAutoLayout` and `SetAutoLayout`") 
     BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
     BackgroundStyle = property(GetBackgroundStyle,SetBackgroundStyle,doc="See `GetBackgroundStyle` and `SetBackgroundStyle`") 
@@ -11040,14 +11041,13 @@ class MenuItem(Object):
     __repr__ = _swig_repr
     def __init__(self, *args, **kwargs): 
         """
-        __init__(self, Menu parentMenu=None, int id=ID_SEPARATOR, String text=EmptyString, 
+        __init__(self, Menu parentMenu=None, int id=ID_ANY, String text=EmptyString, 
             String help=EmptyString, int kind=ITEM_NORMAL, 
             Menu subMenu=None) -> MenuItem
         """
         _core_.MenuItem_swiginit(self,_core_.new_MenuItem(*args, **kwargs))
     __swig_destroy__ = _core_.delete_MenuItem
     __del__ = lambda self : None;
-    def Destroy(self): pass 
     def GetMenu(*args, **kwargs):
         """GetMenu(self) -> Menu"""
         return _core_.MenuItem_GetMenu(*args, **kwargs)

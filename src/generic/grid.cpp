@@ -4623,33 +4623,6 @@ void wxGrid::CalcWindowSizes()
     int cw, ch;
     GetClientSize( &cw, &ch );
 
-    // this block of code tries to work around the following problem: the grid
-    // could have been just resized to have enough space to show the full grid
-    // window contents without the scrollbars, but its client size could be
-    // not big enough because the grid has the scrollbars right now and so the
-    // scrollbars would remain even though we don't need them any more
-    //
-    // to prevent this from happening, check if we have enough space for
-    // everything without the scrollbars and explicitly disable them then
-    wxSize size = GetSize() - GetWindowBorderSize();
-    if ( size != wxSize(cw, ch) )
-    {
-        // check if we have enough space for grid window after accounting for
-        // the fixed size elements
-        size.x -= m_rowLabelWidth;
-        size.y -= m_colLabelHeight;
-
-        const wxSize vsize = m_gridWin->GetVirtualSize();
-
-        if ( size.x >= vsize.x && size.y >= vsize.y )
-        {
-            // yes, we do, so remove the scrollbars and use the new client size
-            // (which should be the same as full window size - borders now)
-            SetScrollbars(0, 0, 0, 0);
-            GetClientSize(&cw, &ch);
-        }
-    }
-
     if ( m_cornerLabelWin && m_cornerLabelWin->IsShown() )
         m_cornerLabelWin->SetSize( 0, 0, m_rowLabelWidth, m_colLabelHeight );
 
@@ -10679,22 +10652,46 @@ void wxGrid::AutoSizeColLabelSize( int col )
 
 wxSize wxGrid::DoGetBestSize() const
 {
+    // don't set sizes, only calculate them
     wxGrid *self = (wxGrid *)this;  // const_cast
 
-    // we do the same as in AutoSize() here with the exception that we don't
-    // change the column/row sizes, only calculate them
-    wxSize size(self->SetOrCalcColumnSizes(true) - m_rowLabelWidth + m_extraWidth,
-                self->SetOrCalcRowSizes(true) - m_colLabelHeight + m_extraHeight);
-    wxSize sizeFit(GetScrollX(size.x) * GetScrollLineX(),
-                   GetScrollY(size.y) * GetScrollLineY());
+    int width, height;
+    width = self->SetOrCalcColumnSizes(true);
+    height = self->SetOrCalcRowSizes(true);
+
+    if (!width)
+        width = 100;
+    if (!height)
+        height = 80;
+
+    // Round up to a multiple the scroll rate
+    // NOTE: this still doesn't get rid of the scrollbars;
+    // is there any magic incantation for that?
+    int xpu, ypu;
+    GetScrollPixelsPerUnit(&xpu, &ypu);
+    if (xpu)
+        width  += 1 + xpu - (width  % xpu);
+    if (ypu)
+        height += 1 + ypu - (height % ypu);
+
+    // limit to 1/4 of the screen size
+    int maxwidth, maxheight;
+    wxDisplaySize( &maxwidth, &maxheight );
+    maxwidth /= 2;
+    maxheight /= 2;
+    if ( width > maxwidth )
+        width = maxwidth;
+    if ( height > maxheight )
+        height = maxheight;
+
+    wxSize best(width, height);
 
     // NOTE: This size should be cached, but first we need to add calls to
     // InvalidateBestSize everywhere that could change the results of this
     // calculation.
     // CacheBestSize(size);
 
-    return wxSize(sizeFit.x + m_rowLabelWidth, sizeFit.y + m_colLabelHeight)
-            + GetWindowBorderSize();
+    return best;
 }
 
 void wxGrid::Fit()
