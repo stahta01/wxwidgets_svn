@@ -1,7 +1,8 @@
 
-  Welcome to wxWidgets/Wine
+  Welcome to wxWidgets/Wine 2.8.0
 
-You have downloaded the WINE port of the wxWidgets GUI library.
+You have downloaded version 2.8.0 of the WINE port of 
+the wxWidgets GUI library.
 
 Information on how to install can be found in the file
 install.txt.

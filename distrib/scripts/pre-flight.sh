@@ -42,7 +42,7 @@ else
     cvs update -d -P
 fi
 #copy setup0.h setup.h for msw
-rm include/wx/msw/setup.h
+find . -name setup.h | xargs rm -rf
 cp include/wx/msw/setup0.h include/wx/msw/setup.h
 
 # this is where we will store the wxAll tarball we create

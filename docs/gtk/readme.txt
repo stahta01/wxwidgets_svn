@@ -1,7 +1,8 @@
-   Welcome to wxWidgets for GTK+
-   -----------------------------
+   Welcome to wxWidgets 2.8.0 for GTK+
+   -----------------------------------
 
-You have downloaded the GTK+ port of the wxWidgets GUI library.
+You have downloaded version 2.8 of the GTK+ port of the 
+wxWidgets GUI library.
 
 It is recommended to use at least GTK+ 2.2.3 to get the
 most out of wxWidgets and some features are only available

@@ -185,6 +185,22 @@ bool MyApp::OnInit()
 
   TexPathList.Add(::wxGetCwd());
 
+#ifdef NO_GUI
+  if (InputFile.empty() || OutputFile.empty())
+  {
+      wxSTD cout << "Tex2RTF: input or output file is missing.\n";
+      ShowOptions();
+      exit(1);
+  }
+#endif
+
+  if (!InputFile.empty())
+  {
+      TexPathList.EnsureFileAccessible(InputFile);
+  }
+  if (InputFile.empty() || OutputFile.empty())
+      isInteractive = true;
+
   int i;
   for (i = n; i < argc;)
   {
@@ -282,11 +298,6 @@ bool MyApp::OnInit()
     {
       i ++;
       ShowVersion();
-#ifdef NO_GUI
-      exit(1);
-#else
-      return false;
-#endif
     }
     else
     {
@@ -301,22 +312,6 @@ bool MyApp::OnInit()
 #endif
     }
   }
-
-#ifdef NO_GUI
-  if (InputFile.empty() || OutputFile.empty())
-  {
-      wxSTD cout << "Tex2RTF: input or output file is missing.\n";
-      ShowOptions();
-      exit(1);
-  }
-#endif
-
-  if (!InputFile.empty())
-  {
-      TexPathList.EnsureFileAccessible(InputFile);
-  }
-  if (InputFile.empty() || OutputFile.empty())
-      isInteractive = true;
 
 #if defined(__WXMSW__) && !defined(NO_GUI)
   wxDDEInitialize();
@@ -628,7 +623,6 @@ void ShowOptions(void)
     OnInform(_T("    -sync"));
     OnInform(_T("    -checkcurlybraces"));
     OnInform(_T("    -checksyntax"));
-    OnInform(_T("    -version"));
     OnInform(_T("    -macros <filename>"));
     OnInform(_T("    -winhelp"));
     OnInform(_T("    -rtf"));

@@ -1,7 +1,8 @@
 
-  Welcome to wxWidgets/Motif
+  Welcome to wxWidgets/Motif 2.8.0
 
-You have downloaded the Motif port of the wxWidgets GUI library.
+You have downloaded version 2.8.0 of the Motif port of
+the wxWidgets GUI library.
 
 More information about the wxWidgets project as a whole
 can be found at:

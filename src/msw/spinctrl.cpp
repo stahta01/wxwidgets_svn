@@ -111,6 +111,7 @@ wxCONSTRUCTOR_6( wxSpinCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 #endif
 
+//pmg EVT_KILL_FOCUS
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
 
@@ -268,17 +269,15 @@ void wxSpinCtrl::OnSetFocus(wxFocusEvent& event)
 
 void wxSpinCtrl::NormalizeValue()
 {
-    const int value = GetValue();
-    const bool changed = value != m_oldValue;
-
-    // notice that we have to call SetValue() even if the value didn't change
-    // because otherwise we could be left with empty buddy control when value
-    // is 0, see comment in SetValue()
-    SetValue(value);
-
-    if ( changed )
+    int value = GetValue();
+    SetValue( value );
+    if (value != m_oldValue)
     {
-        SendSpinUpdate(value);
+        wxCommandEvent event( wxEVT_COMMAND_SPINCTRL_UPDATED, GetId() );
+        event.SetEventObject( this );
+        event.SetInt( value );
+        GetEventHandler()->ProcessEvent( event );
+        m_oldValue = value;
     }
 }
 
@@ -295,11 +294,6 @@ bool wxSpinCtrl::Create(wxWindow *parent,
                         int min, int max, int initial,
                         const wxString& name)
 {
-    // this should be in ctor/init function but I don't want to add one to 2.8
-    // to avoid problems with default ctor which can be inlined in the user
-    // code and so might not get this fix without recompilation
-    m_oldValue = INT_MIN;
-
     // before using DoGetBestSize(), have to set style to let the base class
     // know whether this is a horizontal or vertical control (we're always
     // vertical)
@@ -374,7 +368,7 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     SetRange(min, max);
     SetValue(initial);
-
+    
     m_oldValue = initial;
 
     // subclass the text ctrl to be able to intercept some events
@@ -455,7 +449,7 @@ void  wxSpinCtrl::SetValue(int val)
         // current value in the control, so do it manually
         ::SetWindowText(GetBuddyHwnd(), wxString::Format(_T("%d"), val));
     }
-
+    
     m_oldValue = GetValue();
 }
 
@@ -547,27 +541,25 @@ void wxSpinCtrl::DoSetToolTip(wxToolTip *tip)
 #endif // wxUSE_TOOLTIPS
 
 // ----------------------------------------------------------------------------
-// events processing and generation
+// event processing
 // ----------------------------------------------------------------------------
-
-void wxSpinCtrl::SendSpinUpdate(int value)
-{
-    wxCommandEvent event(wxEVT_COMMAND_SPINCTRL_UPDATED, GetId());
-    event.SetEventObject(this);
-    event.SetInt(value);
-
-    (void)GetEventHandler()->ProcessEvent(event);
-
-    m_oldValue = value;
-}
 
 void wxSpinCtrl::OnSpinChange(wxSpinEvent& eventSpin)
 {
-    const int value = eventSpin.GetPosition();
-    if ( value != m_oldValue )
+    wxCommandEvent event(wxEVT_COMMAND_SPINCTRL_UPDATED, GetId());
+    event.SetEventObject(this);
+    int value = eventSpin.GetPosition();
+    event.SetInt( value );
+    
+    if (value != m_oldValue)
+        (void)GetEventHandler()->ProcessEvent(event);
+
+    if ( eventSpin.GetSkipped() )
     {
-        SendSpinUpdate(value);
+        event.Skip();
     }
+    
+    m_oldValue = value;
 }
 
 // ----------------------------------------------------------------------------

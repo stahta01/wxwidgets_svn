@@ -99,22 +99,14 @@ protected:
     // the handler for wxSpinButton events
     void OnSpinChange(wxSpinEvent& event);
 
-    // handle processing of special keys
+    // Handle processing of special keys
     void OnChar(wxKeyEvent& event);
     void OnSetFocus(wxFocusEvent& event);
     void OnKillFocus(wxFocusEvent& event);
 
-    // generate spin control update event with the given value
-    void SendSpinUpdate(int value);
-
-    // called to ensure that the value is in the correct range
-    virtual void NormalizeValue();
-
-
-    // the value of the control before the latest change (which might not have
-    // changed anything in fact -- this is why we need this field)
     int m_oldValue;
-
+    virtual void NormalizeValue();
+   
     // the data for the "buddy" text ctrl
     WXHWND     m_hwndBuddy;
     WXFARPROC  m_wndProcBuddy;

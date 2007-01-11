@@ -52,6 +52,8 @@ public:
                     const wxValidator& validator = wxDefaultValidator,
                     const wxString& name = wxButtonNameStr);
 
+    virtual void DoSetToolTip( wxToolTip *tip );
+
 public:     // public API
 
     // margin between the text control and the picker
@@ -105,16 +107,12 @@ public:     // public API
     wxControl *GetPickerCtrl()
         { return m_picker; }
 
-    // methods that derived class must/may override
+public:     // methods that derived class must/may override
+
     virtual void UpdatePickerFromTextCtrl() = 0;
     virtual void UpdateTextCtrlFromPicker() = 0;
 
-protected:
-    // overridden base class methods
-#if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip(wxToolTip *tip);
-#endif // wxUSE_TOOLTIPS
-
+protected:        // utility functions
 
     // event handlers
     void OnTextCtrlDelete(wxWindowDestroyEvent &);

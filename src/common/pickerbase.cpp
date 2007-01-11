@@ -124,9 +124,7 @@ void wxPickerBase::PostCreation()
     SetMinSize( m_sizer->GetMinSize() );
 }
 
-#if wxUSE_TOOLTIPS
-
-void wxPickerBase::DoSetToolTip(wxToolTip *tip)
+void wxPickerBase::DoSetToolTip( wxToolTip *tip )
 {
     // don't set the tooltip on us but rather on our two child windows
     // as otherwise it would appear only when the cursor is placed on the
@@ -137,7 +135,7 @@ void wxPickerBase::DoSetToolTip(wxToolTip *tip)
     m_text->SetToolTip(tip ? new wxToolTip(tip->GetTip()) : NULL);
 }
 
-#endif // wxUSE_TOOLTIPS
+
 
 // ----------------------------------------------------------------------------
 // wxPickerBase - event handlers
