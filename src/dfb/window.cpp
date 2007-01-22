@@ -492,15 +492,6 @@ void wxWindowDFB::DoMoveWindow(int x, int y, int width, int height)
     {
         // queue both former and new position of the window for repainting:
         wxWindow *parent = GetParent();
-
-        // only refresh the visible parts:
-        if ( !CanBeOutsideClientArea() )
-        {
-            wxRect parentClient(parent->GetClientSize());
-            oldpos.Intersect(parentClient);
-            newpos.Intersect(parentClient);
-        }
-
         parent->RefreshRect(oldpos);
         parent->RefreshRect(newpos);
     }
@@ -691,11 +682,6 @@ void wxWindowDFB::DoRefreshRect(const wxRect& rect)
     r.Offset(GetPosition());
     r.Offset(parent->GetClientAreaOrigin());
 
-    // normal windows cannot extend out of its parent's client area, so don't
-    // refresh any hidden parts:
-    if ( !CanBeOutsideClientArea() )
-        r.Intersect(parent->GetClientRect());
-
     parent->DoRefreshRect(r);
 }
 
@@ -777,10 +763,6 @@ void wxWindowDFB::PaintWindow(const wxRect& rect)
 
     m_updateRegion.Clear();
 
-    // client area portion of 'rect':
-    wxRect rectClientOnly(rect);
-    rectClientOnly.Intersect(clientRect);
-
     // paint the children:
     wxPoint origin = GetClientAreaOrigin();
     wxWindowList& children = GetChildren();
@@ -795,12 +777,7 @@ void wxWindowDFB::PaintWindow(const wxRect& rect)
         // compute child's area to repaint
         wxRect childrect(child->GetRect());
         childrect.Offset(origin);
-
-        if ( child->CanBeOutsideClientArea() )
-            childrect.Intersect(rect);
-        else
-            childrect.Intersect(rectClientOnly);
-
+        childrect.Intersect(rect);
         if ( childrect.IsEmpty() )
             continue;
 
