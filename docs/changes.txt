@@ -2,43 +2,90 @@
                              wxWidgets Change Log
 -------------------------------------------------------------------------------
 
-INCOMPATIBLE CHANGES SINCE 2.8.x
+INCOMPATIBLE CHANGES SINCE 2.6.x
 ================================
 
 Changes in behaviour not resulting in compilation errors, please read this!
 ---------------------------------------------------------------------------
 
+- For all wxInputStreams, Eof() becomes true after an attempt has been made
+  to read _past_ the end of file.
+- wxFileName::DirExists() checks if the path of the file is a directory, not
+  if the whole name is a directory.
+- wxDialog::CreateButtonSizer() may return NULL now, please see the manual.
+- wxStaticBoxSizer now deletes the associated wxStaticBox when it is deleted.
+- wxArray::Alloc() now works as reserve() and does not clear the array any more
+- Windows calling CaptureMouse() are now required to handle the
+  wxEVT_MOUSE_CAPTURE_LOST event and not call ReleaseMouse() in this case.
+- wxInputStream::GetC() now returns an int in the range 0 - 255 on success
+  instead of a char the range -128 - 127.
+
+
 Changes in behaviour which may result in compilation errors
 -----------------------------------------------------------
 
-Deprecated methods and their replacements
------------------------------------------
+- Some classes (notably wxBitmap and wxImage) don't define operator==() as it
+  used to work in somewhat unexpected way as it compared only internal pointers
+  and not the object data. The code using it will have to be updated:
+  * If the object was compared with wxNullXXX, use IsOk() method instead
+  * If valid object need to be compared, use IsSameAs() to reproduce the old
+    behaviour or change the code to avoid comparing bitmaps &c.
+- wxFontData::GetColour() now returns a const colour.
+- wxDC objects can't be created directly now (this never worked, now it doesn't
+  even compile).
+- wxCHECK family of macros now must be followed by a semicolon.
+- wxMBConv::cMB2WC() and cWC2MB() take size of the input buffer and return
+  length of the converted string in all cases now.
+- wxHtmlWindow::OnCellClicked() now returns bool.
+- wxHtmlCell::OnMouseClick() was deprecated and replaced with
+  wxHtmlCell::ProcessMouseClick(); old code overriding OnMouseClick() will
+  continue to work with WXWIN_COMPATIBILITY_2_6, but should be rewritten to
+  use ProcessMouseClick().
+- wxHtmlCell::GetCursor() was deprecated and replaced with
+  wxHtmlCell::GetMouseCursor(); old code overriding GetCursor() will
+  continue to work with WXWIN_COMPATIBILITY_2_6, but should be rewritten to
+  use GetMouseCursor().
+- wxHtmlCell::AdjustPagebreak() signature has changed, update your code if you
+  override it.
+- wxFontEnumerator::GetFacenames() and GetEncodings() now return arrays and
+  not pointers to arrays.
+- SetDefaultItem() method was moved from wxPanel to wxTopLevelWindow
+- wxDialog::OnOK/OnCancel() don't exist any more, use SetAffirmative/EscapeId()
+- wxPathList doesn't derive from (deprecated) wxStringList any more
+- wxGLContext class has no 1:1 coupling to a wxGLCanvas class any more.
+  As a consequence, the class interface changed largely. Code updates, if
+  any are required at all, are easy to accomplish though.
 
-Major new features in this release
-----------------------------------
+
+Deprecated methods since 2.6.x and their replacements
+-----------------------------------------------------
+
+- wxGetWorkingDirectory() deprecated in favour of wxGetCwd().
+- wxDC::BeginDrawing() and wxDC::EndDrawing() deprecated, don't use them.
+- wxWindowBase::GetBestFittingSize --> wxWindowBase::GetEffectiveMinSize.
+- wxWindowBase::SetBestFittingSize --> wxWindowBase::SetInitialSize.
+- Seeking on a zip stream returned from wxFileSystem without using the new
+  wxFS_SEEKABLE flags is deprecated. You can still seek, but use the flag.
+- Constructor wxZipInputStream(const wxString& archive, const wxString& file)
+  deprecated in favour of wxFileSystem (other zip ctors are not deprecated).
+- wx{Dir|File}Dialog::{Set|Get}Style deprecated in favour of the generic
+  wxWindow::{Set|Get}WindowStyle()
 
 
-2.9.0
------
+Major new features in 2.8 release
+---------------------------------
 
-All:
-
-- Added wxEventBlocker class (Francesco Montorsi)
-- Added wxFile/DirPickerCtrl::Get/SetFile/DirName() (Francesco Montorsi)
-- Added wxSizerFlags::Top() and Bottom()
-
-wxGTK:
-
-- Implemented support for underlined fonts in wxStaticText
-- wxTopLevelWindow::SetSizeHints size increments now work
-- wxTopLevelWindow::GetSize() returns the size including the WM decorations
-- wxTopLevelWindow::GetClientSize() returns 0x0 when the window is minimized
-- Added support for colour cursors (Pascal Monasse)
-
-wxMSW:
-
-- Fixed infinite loop in wxThread::Wait() in console applications
-- Return the restored window size from GetSize() when window is minimized
+- New AUI library supporting docking windows and much more.
+- New rich text control library implementing a generic wxRichTextCtrl,
+  using only the wxWidgets API. Also includes formatting dialogs, conversion
+  to HTML, and printing classes.
+- New wxComboCtrl class giving the ability to create custom, graphical
+  comboboxes. Associated classes include wxOwnerDrawnComboBox, wxComboPopup
+  and wxBitmapComboBox.
+- Further functionality including wxAnimationCtrl (moved from contrib/src/anim
+  and enhanced), wxSimpleHtmlListBox, wxHyperlinkCtrl, wxColourPickerCtrl,
+  wxDirPickerCtrl, wxFilePickerCtrl, wxFontPickerCtrl, wxCollapsiblePane,
+  wxSearchCtrl, wxAboutBox, wxTreebook, tar streams.
 
 
 2.8.2
@@ -46,29 +93,35 @@ wxMSW:
 
 All:
 
-- Added wxSizerFlags::Shaped() and FixedMinSize() methods
-- Added wxCSConv::IsOk() (Manuel Martin)
-- Added wxDateTime::GetDateOnly()
-- Made wxTextFile work with unseekable files again (David Hart)
-- Added wxCONFIG_USE_SUBDIR flag to wxFileConfig (Giuseppe Bilotta)
-- Added wxSearchCtrl::[Get|Set]DescriptiveText
+- Added wxSizerFlags::Shaped(), FixedMinSize(), Top() and Bottom() methods.
+- Added wxCSConv::IsOk() (Manuel Martin).
+- Added wxDateTime::GetDateOnly().
+- Made wxTextFile work with unseekable files again (David Hart).
+- Added wxCONFIG_USE_SUBDIR flag to wxFileConfig (Giuseppe Bilotta).
+- Added wxSearchCtrl::[Get|Set]DescriptiveText.
+- Added wxToolBar::SetTool[Normal|Disabled]Bitmap for wxMSW, wxGTK and wxMac.
+- Added wxRICHTEXT_SETSTYLE_REMOVE flag for removing styles, and
+  wxRICHTEXT_HITTEST_OUTSIDE for more accurate hit-testing.
+- Fixed a crash when writing wxRichTextCtrl styles.
 
 wxMSW
 
-- Fix lack of spin control update event when control lost focus
-- Corrected drawing of bitmaps for disabled menu items
+- Fix lack of spin control update event when control lost focus.
+- Corrected drawing of bitmaps for disabled menu items.
 
 wxMac
 
-- Added support for the wxFRAME_FLOAT_ON_PARENT style
+- Added support for the wxFRAME_FLOAT_ON_PARENT style.
+- Now takes window variants into account when rendering buttons.
 
 wxX11:
 
-- Don't crash in wxWindow dtor if the window hadn't been really Create()d
+- Don't crash in wxWindow dtor if the window hadn't been really Create()d.
+- Update wxChoice value when SetSelection() is called.
 
 wxUniv:
 
-- Fixed wxComboBox always sorted
+- Fixed wxComboBox always sorted.
 
 
 2.8.1
@@ -76,25 +129,25 @@ wxUniv:
 
 All:
 
-- Fix compilation with wxUSE_STL=1
-- wxGrid::GetBestSize() returns same size the grid would have after AutoSize()
-- Added wxTreeCtrl::CollapseAll[Children]() and IsEmpty() (Francesco Montorsi)
-- Several RTL-related positioning fixes (Diaa Sami)
-- Fix wxConfig::DeleteGroup() for arguments with trailing slash (David Hart)
-- Fix memory leak in wxGrid::ShowCellEditControl() (Christian Sturmlechner)
+- Fix compilation with wxUSE_STL=1.
+- wxGrid::GetBestSize() returns same size the grid would have after AutoSize().
+- Added wxTreeCtrl::CollapseAll[Children]() and IsEmpty() (Francesco Montorsi).
+- Several RTL-related positioning fixes (Diaa Sami).
+- Fix wxConfig::DeleteGroup() for arguments with trailing slash (David Hart).
+- Fix memory leak in wxGrid::ShowCellEditControl() (Christian Sturmlechner).
 
 wxMSW:
 
-- Fixed compilation with Borland C++ in Unicode mode but without MSLU
-- Show taskbar icon menu on right button release, not press
+- Fixed compilation with Borland C++ in Unicode mode but without MSLU.
+- Show taskbar icon menu on right button release, not press.
 
 wxGTK:
 
-- Don't crash if command line is not valid UTF-8 (Unicode build only)
+- Don't crash if command line is not valid UTF-8 (Unicode build only).
 
 wxUniv:
 
-- It is now possible to set background colour of wxStaticText
+- It is now possible to set background colour of wxStaticText.
 
 
 2.8.0
@@ -102,27 +155,27 @@ wxUniv:
 
 All:
 
-- Added wxSearchCtrl (Vince Harron)
-- wxCSConv("UTF-16/32") now behaves correctly, i.e. same as wxMBConvUTF16/32
+- Added wxSearchCtrl (Vince Harron).
+- wxCSConv("UTF-16/32") now behaves correctly, i.e. same as wxMBConvUTF16/32.
 - wxArrayString::Alloc() now works as reserve() and doesn't clear array contents
 - Fixed long standing bug in wxFileConfig groups renaming (Antti Koivisto).
 - New option wxFS_READ | wxFS_SEEKABLE for wxFileSystem::OpenFile() to return
   a stream that is seekable.
-- Fixed bug in wxCalendarCtrl::HitTest() when clicking on month change arrows
+- Fixed bug in wxCalendarCtrl::HitTest() when clicking on month change arrows.
 - Added wxWindow::GetWindowBorderSize() and corrected wxTreeCtrl::GetBestSize()
-  for a control with borders (Tim Kosse)
+  for a control with borders (Tim Kosse).
 
 wxMSW:
 
 - Fixed version script problems when using configure with cygwin/mingw32.
 - Use system default paper size for printing instead of A4.
-- Fix (harmless) assert in virtual list control under Vista
+- Fix (harmless) assert in virtual list control under Vista.
 - Fix colours when converting wxBitmap with alpha to wxImage (nusi).
 
 wxGTK:
 
-- Allow dynamically changing most of text control styles
-- Enable use of libgnomeprintui by default in configure
+- Allow dynamically changing most of text control styles.
+- Enable use of libgnomeprintui by default in configure.
 
 
 2.7.2

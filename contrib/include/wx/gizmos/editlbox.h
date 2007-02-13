@@ -38,7 +38,7 @@ public:
                       const wxString& name = wxT("editableListBox"));
 
     void SetStrings(const wxArrayString& strings);
-    void GetStrings(wxArrayString& strings) const;
+    void GetStrings(wxArrayString& strings);
 
     wxListCtrl* GetListCtrl()       { return m_listCtrl; }
     wxBitmapButton* GetDelButton()  { return m_bDel; }

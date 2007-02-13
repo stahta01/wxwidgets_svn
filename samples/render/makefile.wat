@@ -93,7 +93,7 @@ PLUGINSUFFIX = u
 __renddll___depname =
 !ifeq SHARED 1
 __renddll___depname = &
-	$(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_VERSION_NODOT)_wat.dll
+	$(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_RELEASE_NODOT)_wat.dll
 !endif
 __DEBUGINFO =
 !ifeq BUILD debug
@@ -235,8 +235,7 @@ __GDIPLUS_LIB_p = gdiplus.lib
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
+WX_RELEASE_NODOT = 28
 OBJS = &
 	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
@@ -276,7 +275,7 @@ clean : .SYMBOLIC
 	-if exist $(OBJS)\*.ilk del $(OBJS)\*.ilk
 	-if exist $(OBJS)\*.pch del $(OBJS)\*.pch
 	-if exist $(OBJS)\render.exe del $(OBJS)\render.exe
-	-if exist $(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_VERSION_NODOT)_wat.dll del $(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_VERSION_NODOT)_wat.dll
+	-if exist $(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_RELEASE_NODOT)_wat.dll del $(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_RELEASE_NODOT)_wat.dll
 
 $(OBJS)\render.exe :  $(RENDER_OBJECTS) $(OBJS)\render_sample.res
 	@%create $(OBJS)\render.lbc
@@ -291,7 +290,7 @@ $(OBJS)\render.exe :  $(RENDER_OBJECTS) $(OBJS)\render_sample.res
 	wlink @$(OBJS)\render.lbc
 
 !ifeq SHARED 1
-$(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_VERSION_NODOT)_wat.dll :  $(RENDDLL_OBJECTS)
+$(OBJS)\renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(WX_RELEASE_NODOT)_wat.dll :  $(RENDDLL_OBJECTS)
 	@%create $(OBJS)\renddll.lbc
 	@%append $(OBJS)\renddll.lbc option quiet
 	@%append $(OBJS)\renddll.lbc name $^@

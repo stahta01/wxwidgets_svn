@@ -353,9 +353,6 @@ bool MyApp::LoadImages()
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(_T("Drawing sample"),
                                  wxPoint(50, 50), wxSize(550, 340));

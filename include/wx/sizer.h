@@ -75,10 +75,13 @@ public:
     // some shortcuts for Align()
     wxSizerFlags& Centre() { return Align(wxCENTRE); }
     wxSizerFlags& Center() { return Centre(); }
-    wxSizerFlags& Top() { return Align(wxALIGN_TOP); }
     wxSizerFlags& Left() { return Align(wxALIGN_LEFT); }
     wxSizerFlags& Right() { return Align(wxALIGN_RIGHT); }
+
+#if wxABI_VERSION >= 20802
+    wxSizerFlags& Top() { return Align(wxALIGN_TOP); }
     wxSizerFlags& Bottom() { return Align(wxALIGN_BOTTOM); }
+#endif // wxABI 2.8.2+
 
     // default border size used by Border() below
     static int GetDefaultBorder()
@@ -155,6 +158,7 @@ public:
 #endif
     }
 
+#if wxABI_VERSION >= 20802
     // setters for the others flags
     wxSizerFlags& Shaped()
     {
@@ -169,6 +173,7 @@ public:
 
         return *this;
     }
+#endif // wx 2.8.2+
 
     // accessors for wxSizer only
     int GetProportion() const { return m_proportion; }
@@ -549,8 +554,6 @@ public:
     void SetVirtualSizeHints( wxWindow *window );
 
     wxSizerItemList& GetChildren()
-        { return m_children; }
-    const wxSizerItemList& GetChildren() const
         { return m_children; }
 
     void SetDimension( int x, int y, int width, int height );

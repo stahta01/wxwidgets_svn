@@ -16,10 +16,6 @@
 
 #if wxUSE_SOCKETS
 
-#ifdef __VMS
-#include <sys/socket.h>
-#endif
-
 #include "wx/hash.h"
 
 // forward declarations

@@ -32,7 +32,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
     #include "wx/window.h"
 
     #include "wx/menu.h"

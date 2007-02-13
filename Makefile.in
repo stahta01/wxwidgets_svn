@@ -68,10 +68,9 @@ wx_top_builddir = @wx_top_builddir@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.9
-WX_RELEASE_NODOT = 29
+WX_RELEASE = 2.8
+WX_RELEASE_NODOT = 28
 WX_VERSION = $(WX_RELEASE).0
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
 LIBDIRNAME = $(wx_top_builddir)/lib
 WXREGEX_CFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) $(____SHARED) \
 	$(CPPFLAGS) $(CFLAGS)
@@ -1525,10 +1524,10 @@ LOCALE_MSW_LINGUAS =  it
 @COND_WXUNIV_1@WXUNIVNAME = univ
 @COND_PLATFORM_WIN32_0@WXDLLNAMEPREFIX = wx_base$(WXBASEPORT)
 @COND_PLATFORM_WIN32_1@WXDLLNAMEPREFIX = \
-@COND_PLATFORM_WIN32_1@	wxbase$(WXBASEPORT)$(WX_VERSION_NODOT)
+@COND_PLATFORM_WIN32_1@	wxbase$(WXBASEPORT)$(WX_RELEASE_NODOT)
 @COND_PLATFORM_WIN32_0@WXDLLNAMEPREFIXGUI = wx_$(PORTNAME)$(WXUNIVNAME)
 @COND_PLATFORM_WIN32_1@WXDLLNAMEPREFIXGUI = \
-@COND_PLATFORM_WIN32_1@	wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)
+@COND_PLATFORM_WIN32_1@	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)
 @COND_PLATFORM_WIN32_0@WXDLLVERSIONTAG = -$(WX_RELEASE)
 @COND_PLATFORM_WIN32_1@WXDLLVERSIONTAG = 
 COND_WXUSE_REGEX_BUILTIN___wxregex___depname = \
@@ -1590,8 +1589,8 @@ COND_WXUSE_EXPAT_BUILTIN___wxexpat___depname = \
 @COND_MONOLITHIC_1@EXTRALIBS_FOR_BASE = $(EXTRALIBS) $(EXTRALIBS_GUI)
 @COND_MONOLITHIC_0@EXTRALIBS_FOR_GUI = $(EXTRALIBS_GUI)
 @COND_MONOLITHIC_1@EXTRALIBS_FOR_GUI = 
-@COND_PLATFORM_UNIX_0@PLUGIN_VERSION0 = $(WX_VERSION_NODOT)
-@COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_VERSION)
+@COND_PLATFORM_UNIX_0@PLUGIN_VERSION0 = $(WX_RELEASE_NODOT)
+@COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_RELEASE)
 @COND_PLATFORM_UNIX_0@PLUGVERDELIM = 
 @COND_PLATFORM_UNIX_1@PLUGVERDELIM = -
 @COND_BUILD_DEBUG_UNICODE_0@PLUGINSUFFIX = d
@@ -1756,9 +1755,7 @@ COND_TOOLKIT_DFB_LOWLEVEL_HDR =  \
 	wx/dfb/dfbptr.h \
 	wx/dfb/evtloop.h \
 	wx/dfb/font.h \
-	wx/dfb/nonownedwnd.h \
 	wx/dfb/pen.h \
-	wx/dfb/popupwin.h \
 	wx/dfb/private.h \
 	wx/dfb/region.h \
 	wx/dfb/toplevel.h \
@@ -2980,7 +2977,6 @@ COND_USE_GUI_1_ALL_GUI_HEADERS =  \
 	wx/menuitem.h \
 	wx/metafile.h \
 	wx/minifram.h \
-	wx/nonownedwnd.h \
 	wx/notebook.h \
 	wx/ownerdrw.h \
 	wx/paper.h \
@@ -3470,7 +3466,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS =  \
 	monodll_fontcmn.o \
 	monodll_fontenumcmn.o \
 	monodll_fontmap.o \
-	monodll_fontutilcmn.o \
 	monodll_framecmn.o \
 	monodll_gaugecmn.o \
 	monodll_gbsizer.o \
@@ -3646,7 +3641,6 @@ COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS =  \
 	monodll_fontcmn.o \
 	monodll_fontenumcmn.o \
 	monodll_fontmap.o \
-	monodll_fontutilcmn.o \
 	monodll_framecmn.o \
 	monodll_gaugecmn.o \
 	monodll_gbsizer.o \
@@ -3754,7 +3748,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS =  \
 	monodll_font.o \
 	monodll_fontenum.o \
 	monodll_fontmgr.o \
-	monodll_nonownedwnd.o \
 	monodll_overlay.o \
 	monodll_pen.o \
 	monodll_region.o \
@@ -4588,7 +4581,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_1 =  \
 	monodll_font.o \
 	monodll_fontenum.o \
 	monodll_fontmgr.o \
-	monodll_nonownedwnd.o \
 	monodll_overlay.o \
 	monodll_pen.o \
 	monodll_region.o \
@@ -5255,7 +5247,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_1 =  \
 	monolib_fontcmn.o \
 	monolib_fontenumcmn.o \
 	monolib_fontmap.o \
-	monolib_fontutilcmn.o \
 	monolib_framecmn.o \
 	monolib_gaugecmn.o \
 	monolib_gbsizer.o \
@@ -5431,7 +5422,6 @@ COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_1 =  \
 	monolib_fontcmn.o \
 	monolib_fontenumcmn.o \
 	monolib_fontmap.o \
-	monolib_fontutilcmn.o \
 	monolib_framecmn.o \
 	monolib_gaugecmn.o \
 	monolib_gbsizer.o \
@@ -5539,7 +5529,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_2 =  \
 	monolib_font.o \
 	monolib_fontenum.o \
 	monolib_fontmgr.o \
-	monolib_nonownedwnd.o \
 	monolib_overlay.o \
 	monolib_pen.o \
 	monolib_region.o \
@@ -6374,7 +6363,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_3 =  \
 	monolib_font.o \
 	monolib_fontenum.o \
 	monolib_fontmgr.o \
-	monolib_nonownedwnd.o \
 	monolib_overlay.o \
 	monolib_pen.o \
 	monolib_region.o \
@@ -7270,7 +7258,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_2 =  \
 	coredll_fontcmn.o \
 	coredll_fontenumcmn.o \
 	coredll_fontmap.o \
-	coredll_fontutilcmn.o \
 	coredll_framecmn.o \
 	coredll_gaugecmn.o \
 	coredll_gbsizer.o \
@@ -7446,7 +7433,6 @@ COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_2 =  \
 	coredll_fontcmn.o \
 	coredll_fontenumcmn.o \
 	coredll_fontmap.o \
-	coredll_fontutilcmn.o \
 	coredll_framecmn.o \
 	coredll_gaugecmn.o \
 	coredll_gbsizer.o \
@@ -7554,7 +7540,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_4 =  \
 	coredll_font.o \
 	coredll_fontenum.o \
 	coredll_fontmgr.o \
-	coredll_nonownedwnd.o \
 	coredll_overlay.o \
 	coredll_pen.o \
 	coredll_region.o \
@@ -8389,7 +8374,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_5 =  \
 	coredll_font.o \
 	coredll_fontenum.o \
 	coredll_fontmgr.o \
-	coredll_nonownedwnd.o \
 	coredll_overlay.o \
 	coredll_pen.o \
 	coredll_region.o \
@@ -8729,7 +8713,6 @@ COND_USE_GUI_1_WXUNIV_0___CORE_SRC_OBJECTS_3 =  \
 	corelib_fontcmn.o \
 	corelib_fontenumcmn.o \
 	corelib_fontmap.o \
-	corelib_fontutilcmn.o \
 	corelib_framecmn.o \
 	corelib_gaugecmn.o \
 	corelib_gbsizer.o \
@@ -8905,7 +8888,6 @@ COND_USE_GUI_1_WXUNIV_1___CORE_SRC_OBJECTS_3 =  \
 	corelib_fontcmn.o \
 	corelib_fontenumcmn.o \
 	corelib_fontmap.o \
-	corelib_fontutilcmn.o \
 	corelib_framecmn.o \
 	corelib_gaugecmn.o \
 	corelib_gbsizer.o \
@@ -9013,7 +8995,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_6 =  \
 	corelib_font.o \
 	corelib_fontenum.o \
 	corelib_fontmgr.o \
-	corelib_nonownedwnd.o \
 	corelib_overlay.o \
 	corelib_pen.o \
 	corelib_region.o \
@@ -9848,7 +9829,6 @@ COND_TOOLKIT_DFB___LOWLEVEL_SRC_OBJECTS_7 =  \
 	corelib_font.o \
 	corelib_fontenum.o \
 	corelib_fontmgr.o \
-	corelib_nonownedwnd.o \
 	corelib_overlay.o \
 	corelib_pen.o \
 	corelib_region.o \
@@ -11252,14 +11232,6 @@ COND_TOOLKIT_MSW___ADVANCED_PLATFORM_SRC_OBJECTS_9 =  \
 @COND_TOOLKIT_X11@__ADVANCED_PLATFORM_SRC_OBJECTS_9 = \
 @COND_TOOLKIT_X11@	advlib_taskbarcmn.o advlib_joystick.o advlib_sound.o \
 @COND_TOOLKIT_X11@	advlib_taskbarx11.o
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1@__htmldll_library_link_DEP \
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1@	= $(__htmldll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1@__htmldll_library_link_LIBR \
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1@	= -L$(LIBDIRNAME)
-COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1___htmldll_library_link_LIBR_0 \
-	= \
-	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1@__htmldll_library_link_LIBR_0 = $(COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_HTML_1___htmldll_library_link_LIBR_0)
 @COND_WXUNIV_1@__WXUNIV_DEFINE_p_58 = --define __WXUNIVERSAL__
 @COND_USE_EXCEPTIONS_0@__EXCEPTIONS_DEFINE_p_57 = --define wxNO_EXCEPTIONS
 @COND_USE_RTTI_0@__RTTI_DEFINE_p_57 = --define wxNO_RTTI
@@ -11909,8 +11881,8 @@ distclean: clean
 @COND_USE_PCH_1@.pch/wxprec_xmllib/wx/wxprec.h.gch: 
 @COND_USE_PCH_1@	$(BK_MAKE_PCH) .pch/wxprec_xmllib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(XMLLIB_CXXFLAGS)
 
-@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(XRCDLL_OBJECTS) $(__xrcdll___win32rc) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__htmldll_library_link_DEP) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(SHARED_LD_CXX) $@ $(XRCDLL_OBJECTS) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) $(__htmldll_library_link_LIBR) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xrcdll___macinstnamecmd) $(__xrcdll___importlib) $(__xrcdll___soname_flags) $(WXMACVERSION_CMD)  $(LIBS) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(__htmldll_library_link_LIBR_0) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(XRCDLL_OBJECTS) $(__xrcdll___win32rc) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__htmldll___depname) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
+@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(SHARED_LD_CXX) $@ $(XRCDLL_OBJECTS) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xrcdll___macinstnamecmd) $(__xrcdll___importlib) $(__xrcdll___soname_flags) $(WXMACVERSION_CMD)  $(LIBS) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(__xrcdll___so_symlinks_cmd)
 
@@ -11977,8 +11949,8 @@ distclean: clean
 @COND_USE_PCH_1@.pch/wxprec_auilib/wx/wxprec.h.gch: 
 @COND_USE_PCH_1@	$(BK_MAKE_PCH) .pch/wxprec_auilib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(AUILIB_CXXFLAGS)
 
-@COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(RICHTEXTDLL_OBJECTS) $(__richtextdll___win32rc) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__advdll___depname) $(__htmldll_library_link_DEP) $(__xmldll___depname) $(__coredll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@	$(SHARED_LD_CXX) $@ $(RICHTEXTDLL_OBJECTS) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) $(__htmldll_library_link_LIBR) -L$(LIBDIRNAME) $(LDFLAGS)   -L$(LIBDIRNAME) $(__richtextdll___macinstnamecmd) $(__richtextdll___importlib) $(__richtextdll___soname_flags) $(WXMACVERSION_CMD)  $(LIBS) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX) $(__htmldll_library_link_LIBR_0) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(RICHTEXTDLL_OBJECTS) $(__richtextdll___win32rc) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__advdll___depname) $(__htmldll___depname) $(__xmldll___depname) $(__coredll___depname) $(__basedll___depname)
+@COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@	$(SHARED_LD_CXX) $@ $(RICHTEXTDLL_OBJECTS) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) -L$(LIBDIRNAME) $(LDFLAGS)   -L$(LIBDIRNAME) $(__richtextdll___macinstnamecmd) $(__richtextdll___importlib) $(__richtextdll___soname_flags) $(WXMACVERSION_CMD)  $(LIBS) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX) -lwx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_RICHTEXT_1@	$(__richtextdll___so_symlinks_cmd)
 
@@ -14881,9 +14853,6 @@ monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@monodll_fontmgr.o: $(srcdir)/src/dfb/fontmgr.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/dfb/fontmgr.cpp
 
-@COND_TOOLKIT_DFB_USE_GUI_1@monodll_nonownedwnd.o: $(srcdir)/src/dfb/nonownedwnd.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/dfb/nonownedwnd.cpp
-
 @COND_TOOLKIT_DFB_USE_GUI_1@monodll_overlay.o: $(srcdir)/src/dfb/overlay.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/dfb/overlay.cpp
 
@@ -16179,9 +16148,6 @@ monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 
 @COND_USE_GUI_1@monodll_fontmap.o: $(srcdir)/src/common/fontmap.cpp $(MONODLL_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/fontmap.cpp
-
-@COND_USE_GUI_1@monodll_fontutilcmn.o: $(srcdir)/src/common/fontutilcmn.cpp $(MONODLL_ODEP)
-@COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/fontutilcmn.cpp
 
 @COND_USE_GUI_1@monodll_framecmn.o: $(srcdir)/src/common/framecmn.cpp $(MONODLL_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/framecmn.cpp
@@ -19006,9 +18972,6 @@ monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@monolib_fontmgr.o: $(srcdir)/src/dfb/fontmgr.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/dfb/fontmgr.cpp
 
-@COND_TOOLKIT_DFB_USE_GUI_1@monolib_nonownedwnd.o: $(srcdir)/src/dfb/nonownedwnd.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/dfb/nonownedwnd.cpp
-
 @COND_TOOLKIT_DFB_USE_GUI_1@monolib_overlay.o: $(srcdir)/src/dfb/overlay.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/dfb/overlay.cpp
 
@@ -20304,9 +20267,6 @@ monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 
 @COND_USE_GUI_1@monolib_fontmap.o: $(srcdir)/src/common/fontmap.cpp $(MONOLIB_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/fontmap.cpp
-
-@COND_USE_GUI_1@monolib_fontutilcmn.o: $(srcdir)/src/common/fontutilcmn.cpp $(MONOLIB_ODEP)
-@COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/fontutilcmn.cpp
 
 @COND_USE_GUI_1@monolib_framecmn.o: $(srcdir)/src/common/framecmn.cpp $(MONOLIB_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/framecmn.cpp
@@ -23512,9 +23472,6 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@coredll_fontmgr.o: $(srcdir)/src/dfb/fontmgr.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/dfb/fontmgr.cpp
 
-@COND_TOOLKIT_DFB_USE_GUI_1@coredll_nonownedwnd.o: $(srcdir)/src/dfb/nonownedwnd.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/dfb/nonownedwnd.cpp
-
 @COND_TOOLKIT_DFB_USE_GUI_1@coredll_overlay.o: $(srcdir)/src/dfb/overlay.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/dfb/overlay.cpp
 
@@ -24774,9 +24731,6 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 
 @COND_USE_GUI_1@coredll_fontmap.o: $(srcdir)/src/common/fontmap.cpp $(COREDLL_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/common/fontmap.cpp
-
-@COND_USE_GUI_1@coredll_fontutilcmn.o: $(srcdir)/src/common/fontutilcmn.cpp $(COREDLL_ODEP)
-@COND_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/common/fontutilcmn.cpp
 
 @COND_USE_GUI_1@coredll_framecmn.o: $(srcdir)/src/common/framecmn.cpp $(COREDLL_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $(srcdir)/src/common/framecmn.cpp
@@ -26473,9 +26427,6 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@corelib_fontmgr.o: $(srcdir)/src/dfb/fontmgr.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/dfb/fontmgr.cpp
 
-@COND_TOOLKIT_DFB_USE_GUI_1@corelib_nonownedwnd.o: $(srcdir)/src/dfb/nonownedwnd.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/dfb/nonownedwnd.cpp
-
 @COND_TOOLKIT_DFB_USE_GUI_1@corelib_overlay.o: $(srcdir)/src/dfb/overlay.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_DFB_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/dfb/overlay.cpp
 
@@ -27735,9 +27686,6 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 
 @COND_USE_GUI_1@corelib_fontmap.o: $(srcdir)/src/common/fontmap.cpp $(CORELIB_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/common/fontmap.cpp
-
-@COND_USE_GUI_1@corelib_fontutilcmn.o: $(srcdir)/src/common/fontutilcmn.cpp $(CORELIB_ODEP)
-@COND_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/common/fontutilcmn.cpp
 
 @COND_USE_GUI_1@corelib_framecmn.o: $(srcdir)/src/common/framecmn.cpp $(CORELIB_ODEP)
 @COND_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $(srcdir)/src/common/framecmn.cpp

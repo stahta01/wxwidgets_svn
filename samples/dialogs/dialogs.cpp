@@ -238,9 +238,6 @@ MyCanvas *myCanvas = (MyCanvas *) NULL;
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_IMAGE
     wxInitAllImageHandlers();
 #endif

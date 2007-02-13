@@ -125,7 +125,7 @@ gtk_wx_list_store_get_type (void)
 
     if (!list_store_type)
     {
-        const GTypeInfo list_store_info =
+        static const GTypeInfo list_store_info =
         {
             sizeof (GtkWxListStoreClass),
             NULL,   /* base_init */
@@ -492,7 +492,7 @@ gtk_wx_cell_renderer_get_type (void)
 
     if (!cell_wx_type)
     {
-        const GTypeInfo cell_wx_info =
+        static const GTypeInfo cell_wx_info =
         {
             sizeof (GtkWxCellRendererClass),
             NULL, /* base_init */

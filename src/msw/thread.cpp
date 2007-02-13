@@ -86,6 +86,16 @@
     #define THREAD_CALLCONV WINAPI
 #endif
 
+// this is a hack to allow the code here to know whether wxEventLoop is
+// currently running: as wxBase doesn't have event loop at all, we can't simple
+// use "wxEventLoop::GetActive() != NULL" test, so instead wxEventLoop uses
+// this variable to indicate whether it is active
+//
+// the proper solution is to use wxAppTraits to abstract the base/GUI-dependent
+// operation of waiting for the thread to terminate and is already implemented
+// in cvs HEAD, this is just a backwards compatible hack for 2.8
+WXDLLIMPEXP_DATA_BASE(int) wxRunningEventLoopCount = 0;
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -755,15 +765,25 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
 #if !defined(QS_ALLPOSTMESSAGE)
 #define QS_ALLPOSTMESSAGE 0
 #endif
-        wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-        if ( traits )
+        if ( !wxRunningEventLoopCount )
         {
-            result = traits->WaitForThread(m_hThread);
+            // don't ask for Windows messages if we don't have a running event
+            // loop to process them as otherwise we'd enter an infinite loop
+            // with MsgWaitForMultipleObjects() always returning WAIT_OBJECT_0
+            // + 1 because the message would remain forever in the queue
+            result = ::WaitForSingleObject(&m_hThread, INFINITE);
         }
-        else // can't wait for the thread
+        else // wait for thread termination without blocking the GUI
         {
-            // so kill it below
-            result = 0xFFFFFFFF;
+            result = ::MsgWaitForMultipleObjects
+                     (
+                       1,              // number of objects to wait for
+                       &m_hThread,     // the objects
+                       false,          // don't wait for all objects
+                       INFINITE,       // no timeout
+                       QS_ALLINPUT |   // return as soon as there are any events
+                       QS_ALLPOSTMESSAGE
+                     );
         }
 
         switch ( result )
@@ -789,6 +809,9 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
                 //     the system might dead lock then
                 if ( wxThread::IsMain() )
                 {
+                    wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits()
+                                                   : NULL;
+
                     if ( traits && !traits->DoMessageFromThreadWait() )
                     {
                         // WM_QUIT received: kill the thread

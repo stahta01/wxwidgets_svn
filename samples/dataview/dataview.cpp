@@ -365,9 +365,6 @@ IMPLEMENT_APP  (MyApp)
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     MyFrame *frame = new MyFrame(NULL, wxT("wxDataViewCtrl feature test"), 10, 10, 800, 340);
     frame->Show(true);
 

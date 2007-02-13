@@ -2225,7 +2225,6 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                     // generate the drag end event
                     wxTreeEvent event(wxEVT_COMMAND_TREE_END_DRAG, this, htItem);
                     event.m_pointDrag = wxPoint(x, y);
-
                     (void)GetEventHandler()->ProcessEvent(event);
 
                     // if we don't do it, the tree seems to think that 2 items

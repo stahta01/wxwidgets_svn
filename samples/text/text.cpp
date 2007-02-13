@@ -425,9 +425,6 @@ enum
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL,
             _T("Text wxWidgets sample"), 50, 50, 700, 550);

@@ -225,26 +225,6 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
     return evtLoop->Dispatch();
 }
 
-DWORD wxGUIAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    // if we don't have a running event loop, we shouldn't wait for the
-    // messages as we never remove them from the message queue and so we enter
-    // an infinite loop as MsgWaitForMultipleObjects() keeps returning
-    // WAIT_OBJECT_0 + 1
-    if ( !wxEventLoop::GetActive() )
-        return DoSimpleWaitForThread(hThread);
-
-    return ::MsgWaitForMultipleObjects
-             (
-               1,                   // number of objects to wait for
-               (HANDLE *)&hThread,  // the objects
-               false,               // wait for any objects, not all
-               INFINITE,            // no timeout
-               QS_ALLINPUT |        // return as soon as there are any events
-               QS_ALLPOSTMESSAGE
-             );
-}
-
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
 {
     OSVERSIONINFO info;

@@ -47,8 +47,6 @@ class WXDLLIMPEXP_BASE wxEvtHandler;
 
 typedef int wxEventType;
 
-#define wxEVT_ANY           ((wxEventType)-1)
-
 // this is used to make the event table entry type safe, so that for an event
 // handler only a function with proper parameter list can be given.
 #define wxStaticCastEvent(type, val) wx_static_cast(type, val)
@@ -469,7 +467,6 @@ private:
     DECLARE_NO_COPY_CLASS(wxPropagateOnce)
 };
 
-
 #if wxUSE_GUI
 
 
@@ -855,15 +852,10 @@ public:
     // should occur for each delta.
     int GetWheelDelta() const { return m_wheelDelta; }
 
-    // Gets the axis the wheel operation concerns, 0 being the y axis as on
-    // most mouse wheels, 1 is the x axis for things like MightyMouse scrolls
-    // or horizontal trackpad scrolling
-    int GetWheelAxis() const { return m_wheelAxis; }
-
     // Returns the configured number of lines (or whatever) to be scrolled per
     // wheel action.  Defaults to one.
     int GetLinesPerAction() const { return m_linesPerAction; }
-    
+
     // Is the system set to do page scrolling?
     bool IsPageScroll() const { return ((unsigned int)m_linesPerAction == UINT_MAX); }
 
@@ -882,8 +874,7 @@ public:
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
-    
-    int           m_wheelAxis;
+
     int           m_wheelRotation;
     int           m_wheelDelta;
     int           m_linesPerAction;
@@ -2404,7 +2395,7 @@ public:
     virtual bool ProcessEvent(wxEvent& event);
 
     // add an event to be processed later
-    virtual void AddPendingEvent(wxEvent& event);
+    void AddPendingEvent(wxEvent& event);
 
     void ProcessPendingEvents();
 
@@ -2578,30 +2569,6 @@ typedef void (wxEvtHandler::*wxEventFunction)(wxEvent&);
     (wxObjectEventFunction)wxStaticCastEvent(wxEventFunction, &func)
 
 #if wxUSE_GUI
-
-// ----------------------------------------------------------------------------
-// wxEventBlocker: helper class to temporarily disable event handling for a window
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_CORE wxEventBlocker : public wxEvtHandler
-{
-public:
-    wxEventBlocker(wxWindow *win, wxEventType type = wxEVT_ANY);
-    virtual ~wxEventBlocker();
-
-    void Block(wxEventType type)
-    {
-        m_eventsToBlock.push_back(type);
-    }
-
-    virtual bool ProcessEvent(wxEvent& event);
-
-protected:
-    wxArrayInt m_eventsToBlock;
-    wxWindow *m_window;
-
-    DECLARE_NO_COPY_CLASS(wxEventBlocker)
-};
 
 typedef void (wxEvtHandler::*wxCommandEventFunction)(wxCommandEvent&);
 typedef void (wxEvtHandler::*wxScrollEventFunction)(wxScrollEvent&);

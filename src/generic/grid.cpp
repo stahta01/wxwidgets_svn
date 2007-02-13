@@ -2475,7 +2475,7 @@ void wxGridCellAttr::GetSize( int *num_rows, int *num_cols ) const
 // NULL (because the table has a type that the grid does not have in its
 // registry), then the grid's default editor or renderer is used.
 
-wxGridCellRenderer* wxGridCellAttr::GetRenderer(const wxGrid* grid, int row, int col) const
+wxGridCellRenderer* wxGridCellAttr::GetRenderer(wxGrid* grid, int row, int col) const
 {
     wxGridCellRenderer *renderer = NULL;
 
@@ -2519,7 +2519,7 @@ wxGridCellRenderer* wxGridCellAttr::GetRenderer(const wxGrid* grid, int row, int
 }
 
 // same as above, except for s/renderer/editor/g
-wxGridCellEditor* wxGridCellAttr::GetEditor(const wxGrid* grid, int row, int col) const
+wxGridCellEditor* wxGridCellAttr::GetEditor(wxGrid* grid, int row, int col) const
 {
     wxGridCellEditor *editor = NULL;
 
@@ -5075,7 +5075,7 @@ bool wxGrid::Redimension( wxGridTableMessage& msg )
     return result;
 }
 
-wxArrayInt wxGrid::CalcRowLabelsExposed( const wxRegion& reg ) const
+wxArrayInt wxGrid::CalcRowLabelsExposed( const wxRegion& reg )
 {
     wxRegionIterator iter( reg );
     wxRect r;
@@ -5126,7 +5126,7 @@ wxArrayInt wxGrid::CalcRowLabelsExposed( const wxRegion& reg ) const
     return rowlabels;
 }
 
-wxArrayInt wxGrid::CalcColLabelsExposed( const wxRegion& reg ) const
+wxArrayInt wxGrid::CalcColLabelsExposed( const wxRegion& reg )
 {
     wxRegionIterator iter( reg );
     wxRect r;
@@ -5180,7 +5180,7 @@ wxArrayInt wxGrid::CalcColLabelsExposed( const wxRegion& reg ) const
     return colLabels;
 }
 
-wxGridCellCoordsArray wxGrid::CalcCellsExposed( const wxRegion& reg ) const
+wxGridCellCoordsArray wxGrid::CalcCellsExposed( const wxRegion& reg )
 {
     wxRegionIterator iter( reg );
     wxRect r;
@@ -8124,7 +8124,7 @@ void wxGrid::DrawTextRectangle(wxDC& dc,
 // Split multi-line text up into an array of strings.
 // Any existing contents of the string array are preserved.
 //
-void wxGrid::StringToLines( const wxString& value, wxArrayString& lines ) const
+void wxGrid::StringToLines( const wxString& value, wxArrayString& lines )
 {
     int startPos = 0;
     int pos;
@@ -8158,7 +8158,7 @@ void wxGrid::StringToLines( const wxString& value, wxArrayString& lines ) const
 
 void wxGrid::GetTextBoxSize( const wxDC& dc,
                              const wxArrayString& lines,
-                             long *width, long *height ) const
+                             long *width, long *height )
 {
     long w = 0;
     long h = 0;
@@ -8505,7 +8505,7 @@ void wxGrid::SaveEditControlValue()
 //  coordinates for mouse events etc.
 //
 
-void wxGrid::XYToCell( int x, int y, wxGridCellCoords& coords ) const
+void wxGrid::XYToCell( int x, int y, wxGridCellCoords& coords )
 {
     int row = YToRow(y);
     int col = XToCol(x);
@@ -8587,18 +8587,19 @@ static int CoordToRowOrCol(int coord, int defaultDist, int minDist,
     return i_max;
 }
 
-int wxGrid::YToRow( int y ) const
+int wxGrid::YToRow( int y )
 {
     return CoordToRowOrCol(y, m_defaultRowHeight,
                            m_minAcceptableRowHeight, m_rowBottoms, m_numRows, false);
 }
 
-int wxGrid::XToCol( int x, bool clipToMinMax ) const
+int wxGrid::XToCol( int x, bool clipToMinMax )
 {
     if (x < 0)
         return clipToMinMax && (m_numCols > 0) ? GetColAt( 0 ) : -1;
 
-    wxASSERT_MSG(m_defaultColWidth > 0, wxT("Default column width can not be zero"));
+    if (!m_defaultColWidth)
+        m_defaultColWidth = 1;
 
     int maxPos = x / m_defaultColWidth;
     int minPos = 0;
@@ -8664,7 +8665,7 @@ int wxGrid::XToCol( int x, bool clipToMinMax ) const
 //    (b) resizing rows/columns (the thing for which edge detection is
 //        relevant at all) is enabled.
 //
-int wxGrid::YToEdgeOfRow( int y ) const
+int wxGrid::YToEdgeOfRow( int y )
 {
     int i;
     i = internalYToRow(y);
@@ -8686,7 +8687,7 @@ int wxGrid::YToEdgeOfRow( int y ) const
 // -1 if not near an edge
 // See comment at YToEdgeOfRow for conditions on edge detection.
 //
-int wxGrid::XToEdgeOfCol( int x ) const
+int wxGrid::XToEdgeOfCol( int x )
 {
     int i;
     i = internalXToCol(x);
@@ -8704,7 +8705,7 @@ int wxGrid::XToEdgeOfCol( int x ) const
     return -1;
 }
 
-wxRect wxGrid::CellToRect( int row, int col ) const
+wxRect wxGrid::CellToRect( int row, int col )
 {
     wxRect rect( -1, -1, -1, -1 );
 
@@ -8739,7 +8740,7 @@ wxRect wxGrid::CellToRect( int row, int col ) const
     return rect;
 }
 
-bool wxGrid::IsVisible( int row, int col, bool wholeCellVisible ) const
+bool wxGrid::IsVisible( int row, int col, bool wholeCellVisible )
 {
     // get the cell rectangle in logical coords
     //
@@ -9317,7 +9318,7 @@ bool wxGrid::MoveCursorRightBlock( bool expandSelection )
 // ------ Label values and formatting
 //
 
-void wxGrid::GetRowLabelAlignment( int *horiz, int *vert ) const
+void wxGrid::GetRowLabelAlignment( int *horiz, int *vert )
 {
     if ( horiz )
         *horiz = m_rowLabelHorizAlign;
@@ -9325,7 +9326,7 @@ void wxGrid::GetRowLabelAlignment( int *horiz, int *vert ) const
         *vert  = m_rowLabelVertAlign;
 }
 
-void wxGrid::GetColLabelAlignment( int *horiz, int *vert ) const
+void wxGrid::GetColLabelAlignment( int *horiz, int *vert )
 {
     if ( horiz )
         *horiz = m_colLabelHorizAlign;
@@ -9333,12 +9334,12 @@ void wxGrid::GetColLabelAlignment( int *horiz, int *vert ) const
         *vert  = m_colLabelVertAlign;
 }
 
-int wxGrid::GetColLabelTextOrientation() const
+int wxGrid::GetColLabelTextOrientation()
 {
     return m_colLabelTextOrientation;
 }
 
-wxString wxGrid::GetRowLabelValue( int row ) const
+wxString wxGrid::GetRowLabelValue( int row )
 {
     if ( m_table )
     {
@@ -9352,7 +9353,7 @@ wxString wxGrid::GetRowLabelValue( int row ) const
     }
 }
 
-wxString wxGrid::GetColLabelValue( int col ) const
+wxString wxGrid::GetColLabelValue( int col )
 {
     if ( m_table )
     {
@@ -9657,24 +9658,24 @@ void wxGrid::EnableGridLines( bool enable )
     }
 }
 
-int wxGrid::GetDefaultRowSize() const
+int wxGrid::GetDefaultRowSize()
 {
     return m_defaultRowHeight;
 }
 
-int wxGrid::GetRowSize( int row ) const
+int wxGrid::GetRowSize( int row )
 {
     wxCHECK_MSG( row >= 0 && row < m_numRows, 0, _T("invalid row index") );
 
     return GetRowHeight(row);
 }
 
-int wxGrid::GetDefaultColSize() const
+int wxGrid::GetDefaultColSize()
 {
     return m_defaultColWidth;
 }
 
-int wxGrid::GetColSize( int col ) const
+int wxGrid::GetColSize( int col )
 {
     wxCHECK_MSG( col >= 0 && col < m_numCols, 0, _T("invalid column index") );
 
@@ -9738,30 +9739,30 @@ void wxGrid::SetDefaultEditor(wxGridCellEditor *editor)
 }
 
 // ----------------------------------------------------------------------------
-// access to the default attributes
+// access to the default attrbiutes
 // ----------------------------------------------------------------------------
 
-wxColour wxGrid::GetDefaultCellBackgroundColour() const
+wxColour wxGrid::GetDefaultCellBackgroundColour()
 {
     return m_defaultCellAttr->GetBackgroundColour();
 }
 
-wxColour wxGrid::GetDefaultCellTextColour() const
+wxColour wxGrid::GetDefaultCellTextColour()
 {
     return m_defaultCellAttr->GetTextColour();
 }
 
-wxFont wxGrid::GetDefaultCellFont() const
+wxFont wxGrid::GetDefaultCellFont()
 {
     return m_defaultCellAttr->GetFont();
 }
 
-void wxGrid::GetDefaultCellAlignment( int *horiz, int *vert ) const
+void wxGrid::GetDefaultCellAlignment( int *horiz, int *vert )
 {
     m_defaultCellAttr->GetAlignment(horiz, vert);
 }
 
-bool wxGrid::GetDefaultCellOverflow() const
+bool wxGrid::GetDefaultCellOverflow()
 {
     return m_defaultCellAttr->GetOverflow();
 }
@@ -9780,7 +9781,7 @@ wxGridCellEditor *wxGrid::GetDefaultEditor() const
 // access to cell attributes
 // ----------------------------------------------------------------------------
 
-wxColour wxGrid::GetCellBackgroundColour(int row, int col) const
+wxColour wxGrid::GetCellBackgroundColour(int row, int col)
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     wxColour colour = attr->GetBackgroundColour();
@@ -9789,7 +9790,7 @@ wxColour wxGrid::GetCellBackgroundColour(int row, int col) const
     return colour;
 }
 
-wxColour wxGrid::GetCellTextColour( int row, int col ) const
+wxColour wxGrid::GetCellTextColour( int row, int col )
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     wxColour colour = attr->GetTextColour();
@@ -9798,7 +9799,7 @@ wxColour wxGrid::GetCellTextColour( int row, int col ) const
     return colour;
 }
 
-wxFont wxGrid::GetCellFont( int row, int col ) const
+wxFont wxGrid::GetCellFont( int row, int col )
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     wxFont font = attr->GetFont();
@@ -9807,14 +9808,14 @@ wxFont wxGrid::GetCellFont( int row, int col ) const
     return font;
 }
 
-void wxGrid::GetCellAlignment( int row, int col, int *horiz, int *vert ) const
+void wxGrid::GetCellAlignment( int row, int col, int *horiz, int *vert )
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     attr->GetAlignment(horiz, vert);
     attr->DecRef();
 }
 
-bool wxGrid::GetCellOverflow( int row, int col ) const
+bool wxGrid::GetCellOverflow( int row, int col )
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     bool allow = attr->GetOverflow();
@@ -9823,14 +9824,14 @@ bool wxGrid::GetCellOverflow( int row, int col ) const
     return allow;
 }
 
-void wxGrid::GetCellSize( int row, int col, int *num_rows, int *num_cols ) const
+void wxGrid::GetCellSize( int row, int col, int *num_rows, int *num_cols )
 {
     wxGridCellAttr *attr = GetCellAttr(row, col);
     attr->GetSize( num_rows, num_cols );
     attr->DecRef();
 }
 
-wxGridCellRenderer* wxGrid::GetCellRenderer(int row, int col) const
+wxGridCellRenderer* wxGrid::GetCellRenderer(int row, int col)
 {
     wxGridCellAttr* attr = GetCellAttr(row, col);
     wxGridCellRenderer* renderer = attr->GetRenderer(this, row, col);
@@ -9839,7 +9840,7 @@ wxGridCellRenderer* wxGrid::GetCellRenderer(int row, int col) const
     return renderer;
 }
 
-wxGridCellEditor* wxGrid::GetCellEditor(int row, int col) const
+wxGridCellEditor* wxGrid::GetCellEditor(int row, int col)
 {
     wxGridCellAttr* attr = GetCellAttr(row, col);
     wxGridCellEditor* editor = attr->GetEditor(this, row, col);
@@ -9861,7 +9862,7 @@ bool wxGrid::IsReadOnly(int row, int col) const
 // attribute support: cache, automatic provider creation, ...
 // ----------------------------------------------------------------------------
 
-bool wxGrid::CanHaveAttributes() const
+bool wxGrid::CanHaveAttributes()
 {
     if ( !m_table )
     {
@@ -10312,8 +10313,7 @@ void wxGrid::SetRowSize( int row, int height )
 
 void wxGrid::SetDefaultColSize( int width, bool resizeExistingCols )
 {
-    // we dont allow zero default column width
-    m_defaultColWidth = wxMax( wxMax( width, m_minAcceptableColWidth ), 1 );
+    m_defaultColWidth = wxMax( width, m_minAcceptableColWidth );
 
     if ( resizeExistingCols )
     {
@@ -10869,7 +10869,7 @@ void wxGrid::DeselectCell( int row, int col )
         m_selection->ToggleCellSelection(row, col);
 }
 
-bool wxGrid::IsSelection() const
+bool wxGrid::IsSelection()
 {
     return ( m_selection && (m_selection->IsSelection() ||
              ( m_selectingTopLeft != wxGridNoCellCoords &&
@@ -10953,7 +10953,7 @@ void wxGrid::ClearSelection()
 // in device coords clipped to the client size of the grid window.
 //
 wxRect wxGrid::BlockToDeviceRect( const wxGridCellCoords &topLeft,
-                                  const wxGridCellCoords &bottomRight ) const
+                                  const wxGridCellCoords &bottomRight )
 {
     wxRect rect( wxGridNoCellRect );
     wxRect cellRect;

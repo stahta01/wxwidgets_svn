@@ -635,9 +635,6 @@ void CheckSupportForAllDataTypes(wxDb *pDb)
 
 bool DatabaseDemoApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     DbConnectInf    = NULL;
     Contact         = NULL;
 
