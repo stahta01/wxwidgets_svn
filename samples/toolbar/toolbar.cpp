@@ -269,9 +269,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame((wxFrame *) NULL, wxID_ANY,
                                  _T("wxToolBar Sample"),
@@ -585,6 +582,19 @@ MyFrame::MyFrame(wxFrame* parent,
 
     m_textWindow = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 }
+
+#if USE_GENERIC_TBAR
+
+wxToolBar* MyFrame::OnCreateToolBar(long style,
+                                    wxWindowID id,
+                                    const wxString& name)
+{
+    return (wxToolBar *)new wxToolBarSimple(this, id,
+                                            wxDefaultPosition, wxDefaultSize,
+                                            style, name);
+}
+
+#endif // USE_GENERIC_TBAR
 
 void MyFrame::LayoutChildren()
 {

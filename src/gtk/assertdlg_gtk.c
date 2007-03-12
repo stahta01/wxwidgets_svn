@@ -248,7 +248,7 @@ GtkType gtk_assert_dialog_get_type (void)
 
     if (!assert_dialog_type)
     {
-        const GTypeInfo assert_dialog_info =
+        static const GTypeInfo assert_dialog_info =
         {
             sizeof (GtkAssertDialogClass),
             NULL,           /* base_init */

@@ -380,6 +380,9 @@ wxEvent::wxEvent(const wxEvent &src)
 
 wxCommandEvent::wxCommandEvent(wxEventType commandType, int theId)
               : wxEvent(theId, commandType)
+#if WXWIN_COMPATIBILITY_2_4
+              , m_commandString(this)
+#endif
 {
     m_clientData = (char *) NULL;
     m_clientObject = (wxClientData *) NULL;
@@ -536,7 +539,6 @@ wxMouseEvent::wxMouseEvent(wxEventType commandType)
     m_wheelRotation = 0;
     m_wheelDelta = 0;
     m_linesPerAction = 0;
-    m_wheelAxis = 0;
 }
 
 void wxMouseEvent::Assign(const wxMouseEvent& event)
@@ -558,7 +560,6 @@ void wxMouseEvent::Assign(const wxMouseEvent& event)
     m_wheelRotation = event.m_wheelRotation;
     m_wheelDelta = event.m_wheelDelta;
     m_linesPerAction = event.m_linesPerAction;
-    m_wheelAxis = event.m_wheelAxis;
 }
 
 // return true if was a button dclick event
@@ -1457,40 +1458,6 @@ wxWindow* wxFindFocusDescendant(wxWindow* ancestor)
         focusWin = (wxWindow*) NULL;
 
     return focusWin;
-}
-
-// ----------------------------------------------------------------------------
-// wxEventBlocker
-// ----------------------------------------------------------------------------
-
-wxEventBlocker::wxEventBlocker(wxWindow *win, wxEventType type)
-{
-    wxCHECK_RET(win, wxT("Null window given to wxEventBlocker"));
-
-    m_window = win;
-
-    Block(type);
-    m_window->PushEventHandler(this);
-}
-
-wxEventBlocker::~wxEventBlocker()
-{
-    wxEvtHandler *popped = m_window->PopEventHandler(false);
-    wxCHECK_RET(popped == this, 
-        wxT("Don't push other event handlers into a window managed by wxEventBlocker!"));
-}
-
-bool wxEventBlocker::ProcessEvent(wxEvent& event)
-{
-    // should this event be blocked?
-    for ( size_t i = 0; i < m_eventsToBlock.size(); i++ )
-    {
-        wxEventType t = (wxEventType)m_eventsToBlock[i];
-        if ( t == wxEVT_ANY || t == event.GetEventType() )
-            return true;   // yes, it should: mark this event as processed
-    }
-
-    return false;
 }
 
 #endif // wxUSE_GUI

@@ -1547,9 +1547,8 @@ static wxString GetGtkHotKey( const wxMenuItem& item )
             default:
                 if ( code < 127 )
                 {
-                    const wxString
-                        name = wxGTK_CONV_BACK_SYS(gdk_keyval_name((guint)code));
-                    if ( !name.empty() )
+                    wxString name = wxGTK_CONV_BACK( gdk_keyval_name((guint)code) );
+                    if ( name )
                     {
                         hotkey << name;
                         break;

@@ -60,14 +60,14 @@ public:
     wxMultiCellItemHandle( int row, int column, int height = 1, int width = 1, wxSize size = wxDefaultSize, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
     wxMultiCellItemHandle( int row, int column, wxSize size, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
     wxMultiCellItemHandle( int row, int column, wxResizable style, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
-    int             GetColumn() const;
-    int             GetRow() const;
-    int             GetWidth() const;
-    int             GetHeight() const;
-    wxResizable     GetStyle() const;
-    wxSize          GetLocalSize() const;
-    int             GetAlignment() const;
-    wxSize          GetWeight() const;
+    int             GetColumn();
+    int             GetRow();
+    int             GetWidth();
+    int             GetHeight();
+    wxResizable     GetStyle();
+    wxSize          GetLocalSize();
+    int             GetAlignment();
+    wxSize          GetWeight();
 
 private:
     void Initialize( int row, int column, int height = 1, int width = 1, wxSize size = wxDefaultSize, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
@@ -101,7 +101,7 @@ public:
 
 private:
     void GetMinimums();
-    static int Sum(int *array, int x);
+    int Sum(int *array, int x);
 
 private:
     int *m_maxHeight;
@@ -135,11 +135,11 @@ public:
     void Add(wxWindow *win, unsigned int row, unsigned int col);
 
     void Resize(int numRows, int numCols);
-    int MaxRows() const
+    int MaxRows()
     {
         return m_maxRows;
     };
-    int MaxCols() const
+    int MaxCols()
     {
         return m_maxCols;
     };

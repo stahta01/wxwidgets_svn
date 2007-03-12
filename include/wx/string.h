@@ -717,9 +717,7 @@ public:
 
 #if wxUSE_UNICODE
     // from multibyte string
-  wxString(const char *psz,
-           const wxMBConv& conv = wxConvLibc,
-           size_t nLength = npos);
+  wxString(const char *psz, const wxMBConv& conv, size_t nLength = npos);
     // from wxWCharBuffer (i.e. return from wxGetString)
   wxString(const wxWCharBuffer& psz) : wxStringBase(psz.data()) { }
 #else // ANSI
@@ -917,9 +915,6 @@ public:
     // from wxWCharBuffer
   wxString& operator=(const wxWCharBuffer& psz)
     { (void) operator=((const wchar_t *)psz); return *this; }
-    // from C string
-  wxString& operator=(const char* psz)
-    {  return operator=(wxString(psz)); }
 #else // ANSI
     // from another kind of C string
   wxString& operator=(const unsigned char* psz);
@@ -942,7 +937,7 @@ public:
       // string += string
   wxString& operator<<(const wxString& s)
   {
-#if WXWIN_COMPATIBILITY_2_8 && !wxUSE_STL
+#if !wxUSE_STL
     wxASSERT_MSG( s.GetStringData()->IsValid(),
                   _T("did you forget to call UngetWriteBuf()?") );
 #endif
@@ -959,23 +954,15 @@ public:
       // string += buffer (i.e. from wxGetString)
 #if wxUSE_UNICODE
   wxString& operator<<(const wxWCharBuffer& s)
-    { return operator<<((const wchar_t *)s); }
-  wxString& operator+=(const wxWCharBuffer& s)
-    { return operator<<((const wchar_t *)s); }
+    { (void)operator<<((const wchar_t *)s); return *this; }
+  void operator+=(const wxWCharBuffer& s)
+    { (void)operator<<((const wchar_t *)s); }
 #else // !wxUSE_UNICODE
   wxString& operator<<(const wxCharBuffer& s)
-    { return operator<<((const char *)s); }
-  wxString& operator+=(const wxCharBuffer& s)
-    { return operator<<((const char *)s); }
+    { (void)operator<<((const char *)s); return *this; }
+  void operator+=(const wxCharBuffer& s)
+    { (void)operator<<((const char *)s); }
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
-
-#if wxUSE_UNICODE
-    // string += C string in Unicode build (with conversion)
-  wxString& operator<<(const char *s)
-    { return operator<<(wxString(s)); }
-  wxString& operator+=(const char *s)
-    { return operator+=(wxString(s)); }
-#endif // wxUSE_UNICODE
 
     // string += C string
   wxString& Append(const wxString& s)
@@ -1175,16 +1162,14 @@ public:
     // minimize the string's memory
     // only works if the data of this string is not shared
   bool Shrink();
-#if WXWIN_COMPATIBILITY_2_8 && !wxUSE_STL
-    // These are deprecated, use wxStringBuffer or wxStringBufferLength instead
-    //
+#if !wxUSE_STL
     // get writable buffer of at least nLen bytes. Unget() *must* be called
     // a.s.a.p. to put string back in a reasonable state!
-  wxDEPRECATED( wxChar *GetWriteBuf(size_t nLen) );
+  wxChar *GetWriteBuf(size_t nLen);
     // call this immediately after GetWriteBuf() has been used
-  wxDEPRECATED( void UngetWriteBuf() );
-  wxDEPRECATED( void UngetWriteBuf(size_t nLen) );
-#endif // WXWIN_COMPATIBILITY_2_8 && !wxUSE_STL
+  void UngetWriteBuf();
+  void UngetWriteBuf(size_t nLen);
+#endif
 
   // wxWidgets version 1 compatibility functions
 
@@ -1373,17 +1358,6 @@ public:
       // string += char
   wxString& operator+=(wxChar ch)
     { return (wxString&)wxStringBase::operator+=(ch); }
-
-private:
-#if !wxUSE_STL
-  // helpers for wxStringBuffer and wxStringBufferLength
-  wxChar *DoGetWriteBuf(size_t nLen);
-  void DoUngetWriteBuf();
-  void DoUngetWriteBuf(size_t nLen);
-
-  friend class WXDLLIMPEXP_BASE wxStringBuffer;
-  friend class WXDLLIMPEXP_BASE wxStringBufferLength;
-#endif
 };
 
 // notice that even though for many compilers the friend declarations above are
@@ -1396,6 +1370,11 @@ wxString WXDLLIMPEXP_BASE operator+(wxChar ch, const wxString& string);
 wxString WXDLLIMPEXP_BASE operator+(const wxString& string, const wxChar *psz);
 wxString WXDLLIMPEXP_BASE operator+(const wxChar *psz, const wxString& string);
 
+
+// define wxArrayString, for compatibility
+#if WXWIN_COMPATIBILITY_2_4 && !wxUSE_STL
+    #include "wx/arrstr.h"
+#endif
 
 #if wxUSE_STL
     // return an empty wxString (not very useful with wxUSE_STL == 1)
@@ -1472,9 +1451,9 @@ class WXDLLIMPEXP_BASE wxStringBuffer
 public:
     wxStringBuffer(wxString& str, size_t lenWanted = 1024)
         : m_str(str), m_buf(NULL)
-        { m_buf = m_str.DoGetWriteBuf(lenWanted); }
+        { m_buf = m_str.GetWriteBuf(lenWanted); }
 
-    ~wxStringBuffer() { m_str.DoUngetWriteBuf(); }
+    ~wxStringBuffer() { m_str.UngetWriteBuf(); }
 
     operator wxChar*() const { return m_buf; }
 
@@ -1491,14 +1470,14 @@ public:
     wxStringBufferLength(wxString& str, size_t lenWanted = 1024)
         : m_str(str), m_buf(NULL), m_len(0), m_lenSet(false)
     {
-        m_buf = m_str.DoGetWriteBuf(lenWanted);
+        m_buf = m_str.GetWriteBuf(lenWanted);
         wxASSERT(m_buf != NULL);
     }
 
     ~wxStringBufferLength()
     {
         wxASSERT(m_lenSet);
-        m_str.DoUngetWriteBuf(m_len);
+        m_str.UngetWriteBuf(m_len);
     }
 
     operator wxChar*() const { return m_buf; }
@@ -1601,34 +1580,6 @@ inline bool operator==(wxChar c, const wxString& s) { return s.IsSameAs(c); }
 inline bool operator==(const wxString& s, wxChar c) { return s.IsSameAs(c); }
 inline bool operator!=(wxChar c, const wxString& s) { return !s.IsSameAs(c); }
 inline bool operator!=(const wxString& s, wxChar c) { return !s.IsSameAs(c); }
-
-// comparison with C string in Unicode build
-#if wxUSE_UNICODE
-inline bool operator==(const wxString& s1, const char* s2)
-    { return s1 == wxString(s2); }
-inline bool operator==(const char* s1, const wxString& s2)
-    { return wxString(s1) == s2; }
-inline bool operator!=(const wxString& s1, const char* s2)
-    { return s1 != wxString(s2); }
-inline bool operator!=(const char* s1, const wxString& s2)
-    { return wxString(s1) != s2; }
-inline bool operator< (const wxString& s1, const char* s2)
-    { return s1 < wxString(s2); }
-inline bool operator< (const char* s1, const wxString& s2)
-    { return wxString(s1) < s2; }
-inline bool operator> (const wxString& s1, const char* s2)
-    { return s1 > wxString(s2); }
-inline bool operator> (const char* s1, const wxString& s2)
-    { return wxString(s1) > s2; }
-inline bool operator<=(const wxString& s1, const char* s2)
-    { return s1 <= wxString(s2); }
-inline bool operator<=(const char* s1, const wxString& s2)
-    { return wxString(s1) <= s2; }
-inline bool operator>=(const wxString& s1, const char* s2)
-    { return s1 >= wxString(s2); }
-inline bool operator>=(const char* s1, const wxString& s2)
-    { return wxString(s1) >= s2; }
-#endif // wxUSE_UNICODE
 
 // ---------------------------------------------------------------------------
 // Implementation only from here until the end of file

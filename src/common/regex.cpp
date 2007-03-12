@@ -249,7 +249,7 @@ wxString wxRegExImpl::GetErrorMsg(int errorcode, bool badconv) const
 
         (void)wx_regerror(errorcode, &m_RegEx, szcmbError, len);
 
-        szError = wxConvLibc.cMB2WX(szcmbError);
+        szError = wxConvertMB2WX(szcmbError);
         delete [] szcmbError;
     }
     else // regerror() returned 0

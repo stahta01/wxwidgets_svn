@@ -577,6 +577,11 @@ public:
     virtual int GetLogicalFunction() const { return m_logicalFunction; }
     virtual void SetLogicalFunction(int function) = 0;
 
+#if WXWIN_COMPATIBILITY_2_4
+    virtual void SetOptimization(bool WXUNUSED(opt)) { }
+    virtual bool GetOptimization() { return false; }
+#endif
+
     // bounding box
     // ------------
 
@@ -743,6 +748,13 @@ protected:
     virtual void DoSetClippingRegionAsRegion(const wxRegion& region) = 0;
     virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
                                      wxCoord width, wxCoord height) = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+    // this was only for confusing people, use DoGetClippingBox only
+    virtual void DoGetClippingRegion(wxCoord *x, wxCoord *y,
+                                     wxCoord *w, wxCoord *h)
+        { DoGetClippingBox(x, y, w, h); }
+#endif
 
     virtual void DoGetClippingBox(wxCoord *x, wxCoord *y,
                                   wxCoord *w, wxCoord *h) const

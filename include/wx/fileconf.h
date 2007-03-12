@@ -111,8 +111,8 @@ public:
   //
   // where file is the basename of szFile, ext is its extension
   // or .conf (Unix) or .ini (Win) if it has none
-  static wxString GetGlobalFileName(const wxString& file);
-  static wxString GetLocalFileName(const wxString& file);
+  static wxString GetGlobalFileName(const wxChar *szFile);
+  static wxString GetLocalFileName(const wxChar *szFile);
 
   // ctor & dtor
     // New constructor: one size fits all. Specify wxCONFIG_USE_LOCAL_FILE or
@@ -236,7 +236,6 @@ private:
   bool m_isDirty;                       // if true, we have unsaved changes
 
   DECLARE_NO_COPY_CLASS(wxFileConfig)
-  DECLARE_ABSTRACT_CLASS(wxFileConfig)
 };
 
 #endif

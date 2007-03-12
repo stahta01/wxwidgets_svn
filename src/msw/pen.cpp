@@ -19,51 +19,17 @@
 #include "wx/pen.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/bitmap.h"
+    #include <stdio.h>
+    #include "wx/list.h"
     #include "wx/utils.h"
+    #include "wx/app.h"
 #endif
 
 #include "wx/msw/private.h"
 
-typedef WXDWORD wxMSWDash;
-
 static int wx2msPenStyle(int wx_style);
 
-#define M_PENDATA ((wxPenRefData*)m_refData)
-
-class WXDLLEXPORT wxPenRefData : public wxGDIRefData
-{
-public:
-    wxPenRefData();
-    wxPenRefData(const wxPenRefData& data);
-    virtual ~wxPenRefData();
-
-    bool operator==(const wxPenRefData& data) const
-    {
-        // we intentionally don't compare m_hPen fields here
-        return m_style == data.m_style &&
-               m_width == data.m_width &&
-               m_join == data.m_join &&
-               m_cap == data.m_cap &&
-               m_colour == data.m_colour &&
-               (m_style != wxSTIPPLE || m_stipple.IsSameAs(data.m_stipple)) &&
-               (m_style != wxUSER_DASH ||
-                (m_nbDash == data.m_nbDash &&
-                    memcmp(m_dash, data.m_dash, m_nbDash*sizeof(wxDash)) == 0));
-    }
-
-    int           m_width;
-    int           m_style;
-    int           m_join;
-    int           m_cap;
-    wxBitmap      m_stipple;
-    int           m_nbDash;
-    wxDash *      m_dash;
-    wxColour      m_colour;
-    WXHPEN        m_hPen;
-
-    DECLARE_NO_ASSIGN_CLASS(wxPenRefData)
-};
+IMPLEMENT_DYNAMIC_CLASS(wxPen, wxGDIObject)
 
 wxPenRefData::wxPenRefData()
 {
@@ -96,8 +62,6 @@ wxPenRefData::~wxPenRefData()
 }
 
 // Pens
-
-IMPLEMENT_DYNAMIC_CLASS(wxPen, wxGDIObject)
 
 wxPen::wxPen()
 {
@@ -140,14 +104,6 @@ wxPen::wxPen(const wxBitmap& stipple, int Width)
     M_PENDATA->m_hPen = 0 ;
 
     RealizeResource();
-}
-
-bool wxPen::operator==(const wxPen& pen) const
-{
-    const wxPenRefData *penData = wx_static_cast(const wxPenRefData*, pen.m_refData);
-
-    // an invalid pen is only equal to another invalid pen
-    return m_refData ? penData && *M_PENDATA == *penData : !penData;
 }
 
 bool wxPen::RealizeResource()
@@ -314,19 +270,24 @@ bool wxPen::IsFree() const
     return (M_PENDATA && M_PENDATA->m_hPen == 0);
 }
 
-wxObjectRefData* wxPen::CreateRefData() const
+void wxPen::Unshare()
 {
-    return new wxPenRefData;
-}
-
-wxObjectRefData* wxPen::CloneRefData(const wxObjectRefData* data) const
-{
-    return new wxPenRefData(*wx_static_cast(const wxPenRefData*, data));
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxPenRefData();
+    }
+    else if (m_refData->GetRefCount() > 1)
+    {
+        wxPenRefData* ref = new wxPenRefData(*(wxPenRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
 }
 
 void wxPen::SetColour(const wxColour& col)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_colour = col;
 
@@ -335,7 +296,7 @@ void wxPen::SetColour(const wxColour& col)
 
 void wxPen::SetColour(unsigned char r, unsigned char g, unsigned char b)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_colour.Set(r, g, b);
 
@@ -344,7 +305,7 @@ void wxPen::SetColour(unsigned char r, unsigned char g, unsigned char b)
 
 void wxPen::SetWidth(int Width)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_width = Width;
 
@@ -353,7 +314,7 @@ void wxPen::SetWidth(int Width)
 
 void wxPen::SetStyle(int Style)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_style = Style;
 
@@ -362,7 +323,7 @@ void wxPen::SetStyle(int Style)
 
 void wxPen::SetStipple(const wxBitmap& Stipple)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_stipple = Stipple;
     M_PENDATA->m_style = wxSTIPPLE;
@@ -372,7 +333,7 @@ void wxPen::SetStipple(const wxBitmap& Stipple)
 
 void wxPen::SetDashes(int nb_dashes, const wxDash *Dash)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_nbDash = nb_dashes;
     M_PENDATA->m_dash = (wxDash *)Dash;
@@ -382,7 +343,7 @@ void wxPen::SetDashes(int nb_dashes, const wxDash *Dash)
 
 void wxPen::SetJoin(int Join)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_join = Join;
 
@@ -391,69 +352,11 @@ void wxPen::SetJoin(int Join)
 
 void wxPen::SetCap(int Cap)
 {
-    AllocExclusive();
+    Unshare();
 
     M_PENDATA->m_cap = Cap;
 
     RealizeResource();
-}
-
-wxColour& wxPen::GetColour() const
-{
-    return m_refData ? M_PENDATA->m_colour : wxNullColour;
-}
-
-int wxPen::GetWidth() const
-{
-    return m_refData ? M_PENDATA->m_width : 0;
-}
-
-int wxPen::GetStyle() const
-{
-    return m_refData ? M_PENDATA->m_style : 0;
-}
-
-int wxPen::GetJoin() const
-{
-    return m_refData ? M_PENDATA->m_join : 0;
-}
-
-int wxPen::GetCap() const
-{
-    return m_refData ? M_PENDATA->m_cap : 0;
-}
-
-int wxPen::GetDashes(wxDash** ptr) const
-{
-    *ptr = NULL;
-    int count = 0;
-    if (m_refData)
-    {
-        *ptr = M_PENDATA->m_dash;
-        count = M_PENDATA->m_nbDash;
-    }
-    return count;
-}
-
-wxDash* wxPen::GetDash() const
-{
-    wxDash* dash = NULL;
-    if (m_refData)
-        dash = M_PENDATA->m_dash;
-    return dash;
-}
-
-int wxPen::GetDashCount() const
-{
-    return m_refData ? M_PENDATA->m_nbDash : 0;
-}
-
-wxBitmap* wxPen::GetStipple() const
-{
-    wxBitmap* bitmap = NULL;
-    if (m_refData)
-        bitmap = &M_PENDATA->m_stipple;
-    return bitmap;
 }
 
 int wx2msPenStyle(int wx_style)

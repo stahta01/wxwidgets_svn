@@ -199,7 +199,7 @@ wxRendererGTK::DrawHeaderButton(wxWindow *win,
     int x_diff = 0;
     if (win->GetLayoutDirection() == wxLayout_RightToLeft)
         x_diff = rect.width;
-
+        
     gtk_paint_box
     (
         button->style,
@@ -334,7 +334,7 @@ wxRendererGTK::DrawSplitterSash(wxWindow *win,
         rect.height = full_size;
         rect.width = w;
     }
-
+    
     int x_diff = 0;
     if (win->GetLayoutDirection() == wxLayout_RightToLeft)
         x_diff = rect.width;
@@ -533,16 +533,12 @@ wxRendererGTK::DrawItemSelectionRect(wxWindow *win,
                         rect.width,
                         rect.height );
     }
-    else // !wxCONTROL_SELECTED
-    {
-        state = GTK_STATE_NORMAL;
-    }
 
     if (flags & wxCONTROL_CURRENT)
     {
-        gtk_paint_focus( win->m_widget->style,
+        gtk_paint_focus( win->m_widget->style, 
                          gdk_window,
-                         state,
+                         GTK_STATE_SELECTED,
                          NULL,
                          win->m_wxwindow,
                          "treeview",

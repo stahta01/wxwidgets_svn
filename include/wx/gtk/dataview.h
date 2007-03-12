@@ -21,7 +21,6 @@
 
 class WXDLLIMPEXP_CORE wxDataViewCtrl;
 
-
 // --------------------------------------------------------- 
 // wxDataViewRenderer
 // --------------------------------------------------------- 
@@ -29,26 +28,19 @@ class WXDLLIMPEXP_CORE wxDataViewCtrl;
 class wxDataViewRenderer: public wxDataViewRendererBase
 {
 public:
-    wxDataViewRenderer( const wxString &varianttype, 
-                        wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                        int align = wxDVR_DEFAULT_ALIGNMENT );
+    wxDataViewRenderer( const wxString &varianttype, wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT );
 
     // implementation
-    GtkWidget* GetGtkHandle() { return m_renderer; }
-
-    virtual void SetMode( wxDataViewCellMode mode );
-    virtual wxDataViewCellMode GetMode() const;
-
-    virtual void SetAlignment( int align );
-    virtual int GetAlignment() const;
+    void* GetGtkHandle() { return m_renderer; }
 
 protected:
-    GtkWidget   *m_renderer;
+    // holds the GTK handle
+    void*   m_renderer;
 
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxDataViewRenderer)
 };
-
+    
 // --------------------------------------------------------- 
 // wxDataViewTextRenderer
 // --------------------------------------------------------- 
@@ -57,14 +49,11 @@ class wxDataViewTextRenderer: public wxDataViewRenderer
 {
 public:
     wxDataViewTextRenderer( const wxString &varianttype = wxT("string"), 
-                            wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                            int align = wxDVR_DEFAULT_ALIGNMENT );
+                        wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT );
 
     bool SetValue( const wxVariant &value );
-    bool GetValue( wxVariant &value ) const;
-
-    void SetAlignment( int align );
-
+    bool GetValue( wxVariant &value );
+    
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxDataViewTextRenderer)
 };
@@ -77,11 +66,10 @@ class wxDataViewBitmapRenderer: public wxDataViewRenderer
 {
 public:
     wxDataViewBitmapRenderer( const wxString &varianttype = wxT("wxBitmap"), 
-                              wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                              int align = wxDVR_DEFAULT_ALIGNMENT );
+                              wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT );
 
     bool SetValue( const wxVariant &value );
-    bool GetValue( wxVariant &value ) const;
+    bool GetValue( wxVariant &value );
     
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxDataViewBitmapRenderer)
@@ -95,11 +83,10 @@ class wxDataViewToggleRenderer: public wxDataViewRenderer
 {
 public:
     wxDataViewToggleRenderer( const wxString &varianttype = wxT("bool"), 
-                              wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                              int align = wxDVR_DEFAULT_ALIGNMENT );
+                        wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT );
 
     bool SetValue( const wxVariant &value );
-    bool GetValue( wxVariant &value ) const;
+    bool GetValue( wxVariant &value );
     
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxDataViewToggleRenderer)
@@ -114,18 +101,17 @@ class wxDataViewCustomRenderer: public wxDataViewRenderer
 public:
     wxDataViewCustomRenderer( const wxString &varianttype = wxT("string"), 
                               wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                              int align = wxDVR_DEFAULT_ALIGNMENT,
                               bool no_init = false );
     virtual ~wxDataViewCustomRenderer();
-
-
+    bool Init();
+    
     virtual bool Render( wxRect cell, wxDC *dc, int state ) = 0;
-    virtual wxSize GetSize() const = 0;
-
+    virtual wxSize GetSize() = 0;
+    
     virtual bool Activate( wxRect cell,
                            wxDataViewListModel *model, unsigned int col, unsigned int row )   
                            { return false; }
-
+    
     virtual bool LeftClick( wxPoint cursor, wxRect cell, 
                            wxDataViewListModel *model, unsigned int col, unsigned int row )   
                            { return false; }
@@ -139,11 +125,6 @@ public:
     // Create DC on request
     virtual wxDC *GetDC();
     
-
-protected:
-
-    bool Init(wxDataViewCellMode mode, int align);
-
 private:
     wxDC        *m_dc;
     
@@ -160,15 +141,13 @@ class wxDataViewProgressRenderer: public wxDataViewCustomRenderer
 public:
     wxDataViewProgressRenderer( const wxString &label = wxEmptyString, 
                                 const wxString &varianttype = wxT("long"), 
-                                wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT,
-                                int align = wxDVR_DEFAULT_ALIGNMENT );
+                                wxDataViewCellMode mode = wxDATAVIEW_CELL_INERT );
     virtual ~wxDataViewProgressRenderer();
     
     bool SetValue( const wxVariant &value );
-    bool GetValue( wxVariant &value ) const;
     
     virtual bool Render( wxRect cell, wxDC *dc, int state );
-    virtual wxSize GetSize() const;
+    virtual wxSize GetSize();
     
 private:
     wxString    m_label;
@@ -186,14 +165,12 @@ class wxDataViewDateRenderer: public wxDataViewCustomRenderer
 {
 public:
     wxDataViewDateRenderer( const wxString &varianttype = wxT("datetime"), 
-                            wxDataViewCellMode mode = wxDATAVIEW_CELL_ACTIVATABLE,
-                            int align = wxDVR_DEFAULT_ALIGNMENT );
+                        wxDataViewCellMode mode = wxDATAVIEW_CELL_ACTIVATABLE );
     
     bool SetValue( const wxVariant &value );
-    bool GetValue( wxVariant &value ) const;
     
     virtual bool Render( wxRect cell, wxDC *dc, int state );
-    virtual wxSize GetSize() const;
+    virtual wxSize GetSize();
     virtual bool Activate( wxRect cell,
                            wxDataViewListModel *model, unsigned int col, unsigned int row );
     
@@ -211,19 +188,11 @@ protected:
 class WXDLLIMPEXP_CORE wxDataViewColumn: public wxDataViewColumnBase
 {
 public:
-    wxDataViewColumn( const wxString &title, wxDataViewRenderer *renderer,
-                      unsigned int model_column, int width = wxDVC_DEFAULT_WIDTH,
-                      wxAlignment align = wxALIGN_CENTER,
-                      int flags = wxDATAVIEW_COL_RESIZABLE );
-    wxDataViewColumn( const wxBitmap &bitmap, wxDataViewRenderer *renderer,
-                      unsigned int model_column, int width = wxDVC_DEFAULT_WIDTH,
-                      wxAlignment align = wxALIGN_CENTER,
-                      int flags = wxDATAVIEW_COL_RESIZABLE );
-
+    wxDataViewColumn( const wxString &title, wxDataViewRenderer *renderer, unsigned int model_column,
+        int width = 80, int flags = wxDATAVIEW_COL_RESIZABLE );
+    wxDataViewColumn( const wxBitmap &bitmap, wxDataViewRenderer *renderer, unsigned int model_column,
+        int width = 80, int flags = wxDATAVIEW_COL_RESIZABLE );
     virtual ~wxDataViewColumn();
-
-
-    // setters:
 
     virtual void SetTitle( const wxString &title );
     virtual void SetBitmap( const wxBitmap &bitmap );
@@ -233,42 +202,27 @@ public:
     virtual void SetAlignment( wxAlignment align );
     
     virtual void SetSortable( bool sortable );
+    virtual bool GetSortable();
     virtual void SetSortOrder( bool ascending );
+    virtual bool IsSortOrderAscending();
 
-    virtual void SetResizeable( bool resizeable );
-    virtual void SetHidden( bool hidden );
-
-    virtual void SetMinWidth( int minWidth );
-    virtual void SetWidth( int width );
-
-
-    // getters:
-
-    virtual wxString GetTitle() const;
-    virtual wxAlignment GetAlignment() const;
-
-    virtual bool IsSortable() const;
-    virtual bool IsSortOrderAscending() const;
-    virtual bool IsResizeable() const;
-    virtual bool IsHidden() const;
-
-    virtual int GetWidth() const;
-    virtual int GetMinWidth() const;
-
+    virtual int GetWidth();
+    
+    virtual void SetFixedWidth( int width );
+    virtual int GetFixedWidth();
+    
     // implementation
-    GtkWidget* GetGtkHandle() { return m_column; }
+    void* GetGtkHandle() { return m_column; }
 
 private:
     // holds the GTK handle
-    GtkWidget   *m_column;
+    void*   m_column;
     
     // delayed connection to mouse events
     friend class wxDataViewCtrl;
     void OnInternalIdle();
-    bool    m_isConnected;
-
-    void Init(wxAlignment align, int flags, int width);
-
+    bool    m_isConnected;  
+    
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxDataViewColumn)
 };

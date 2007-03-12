@@ -21,11 +21,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
-wxColour::wxColour(const RGBColor& col)
-{
-    FromRGBColor((WXCOLORREF *)&col);
-}
-
+static void wxComposeRGBColor( WXCOLORREF* color , int red, int blue, int green );
 static void wxComposeRGBColor( WXCOLORREF* color , int red, int blue, int green )
 {
     RGBColor* col = (RGBColor*) color;
@@ -66,12 +62,6 @@ void wxColour::FromRGBColor( WXCOLORREF* color )
     m_red = col->red >> 8;
     m_blue = col->blue >> 8;
     m_green = col->green >> 8;
-}
-
-wxColour& wxColour::operator=(const RGBColor& col)
-{
-    FromRGBColor((WXCOLORREF *)&col);
-    return *this;
 }
 
 bool wxColour::IsOk() const 

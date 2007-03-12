@@ -136,7 +136,9 @@ bool wxNativeFontInfo::GetUnderlined() const
 
 wxString wxNativeFontInfo::GetFaceName() const
 {
-    return wxGTK_CONV_BACK_SYS(pango_font_description_get_family(description));
+    wxString tmp = wxGTK_CONV_BACK( pango_font_description_get_family( description ) );
+
+    return tmp;
 }
 
 wxFontFamily wxNativeFontInfo::GetFamily() const
@@ -325,7 +327,7 @@ wxString wxNativeFontInfo::ToString() const
 {
     wxGtkString str(pango_font_description_to_string( description ));
 
-    return wxGTK_CONV_BACK_SYS(str);
+    return wxGTK_CONV_BACK(str);
 }
 
 bool wxNativeFontInfo::FromUserString(const wxString& s)
@@ -336,6 +338,36 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 wxString wxNativeFontInfo::ToUserString() const
 {
     return ToString();
+}
+
+// ----------------------------------------------------------------------------
+// wxNativeEncodingInfo
+// ----------------------------------------------------------------------------
+
+bool wxNativeEncodingInfo::FromString(const wxString& WXUNUSED(s))
+{
+    return false;
+}
+
+wxString wxNativeEncodingInfo::ToString() const
+{
+    return wxEmptyString;
+}
+
+bool wxTestFontEncoding(const wxNativeEncodingInfo& WXUNUSED(info))
+{
+    return true;
+}
+
+bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                             wxNativeEncodingInfo *info)
+{
+    // all encodings are available in GTK+ 2 because we translate text in any
+    // encoding to UTF-8 internally anyhow
+    info->facename.clear();
+    info->encoding = encoding;
+
+    return true;
 }
 
 #else // GTK+ 1.x

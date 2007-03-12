@@ -50,7 +50,6 @@
 // ----------------------------------------------------------------------------
 // ctor & dtor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxIniConfig, wxConfigBase)
 
 wxIniConfig::wxIniConfig(const wxString& strAppName,
                          const wxString& strVendor,

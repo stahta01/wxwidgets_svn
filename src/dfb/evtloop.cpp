@@ -29,7 +29,6 @@
 #include "wx/timer.h"
 #include "wx/private/socketevtdispatch.h"
 #include "wx/dfb/private.h"
-#include "wx/nonownedwnd.h"
 
 #define TRACE_EVENTS _T("events")
 
@@ -167,7 +166,7 @@ void wxEventLoop::HandleDFBEvent(const wxDFBEvent& event)
         case DFEC_WINDOW:
         {
             wxDFBWindowEvent winevent(((const DFBEvent&)event).window);
-            wxNonOwnedWindow::HandleDFBWindowEvent(winevent);
+            wxTopLevelWindowDFB::HandleDFBWindowEvent(winevent);
             break;
         }
 

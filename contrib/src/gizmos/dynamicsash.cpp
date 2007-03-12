@@ -13,8 +13,6 @@
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
-#if !wxUSE_MDI
-
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
@@ -1471,4 +1469,3 @@ wxDynamicSashReparentEvent::wxDynamicSashReparentEvent(const wxDynamicSashRepare
 
 IMPLEMENT_DYNAMIC_CLASS(wxDynamicSashReparentEvent, wxEvent)
 
-#endif  // !wxUSE_MDI

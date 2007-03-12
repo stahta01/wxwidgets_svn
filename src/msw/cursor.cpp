@@ -215,7 +215,9 @@ wxCursor::wxCursor(const wxImage& image)
         wxLogWarning(_("Failed to create cursor."));
         return;
     }
-#endif // wxUSE_WXDIB
+#else
+    HCURSOR hcursor = 0;
+#endif
 
     m_refData = new wxCursorRefData(hcursor, true /* delete it later */);
 }

@@ -1636,7 +1636,7 @@ bool wxRichTextParagraphLayoutBox::SetStyle(const wxRichTextRange& range, const 
                         // Removes the given style from the paragraph
                         wxRichTextRemoveStyle(newPara->GetAttributes(), style);
                     }
-                    else if (resetExistingStyle)
+                    if (resetExistingStyle)
                         newPara->GetAttributes() = wholeStyle;
                     else
                     {
@@ -1716,7 +1716,7 @@ bool wxRichTextParagraphLayoutBox::SetStyle(const wxRichTextRange& range, const 
                             // Removes the given style from the paragraph
                             wxRichTextRemoveStyle(child->GetAttributes(), style);
                         }
-                        else if (resetExistingStyle)
+                        if (resetExistingStyle)
                             child->GetAttributes() = characterAttributes;
                         else
                         {
@@ -4358,7 +4358,6 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc, const wxTextAttrEx& attr, c
         for (int i = 0; i < tabCount && not_found; ++i)
         {
             nextTabPos = tabArray.Item(i);
-
             // Find the next tab position.
             // Even if we're at the end of the tab array, we must still draw the chunk.
 
@@ -4495,7 +4494,6 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
             dc.GetTextExtent(stringFragment, & w, & h);
             width += w;
             int absoluteWidth = width + position.x;
-
             bool notFound = true;
             for (int i = 0; i < tabCount && notFound; ++i)
             {

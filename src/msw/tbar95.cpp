@@ -680,8 +680,8 @@ bool wxToolBar::Realize()
                         // no disabled bitmap specified but we still need to
                         // fill the space in the image list with something, so
                         // we grey out the normal bitmap
-                        wxImage
-                          imgGreyed = bmp.ConvertToImage().ConvertToGreyscale();
+                        wxImage imgGreyed;
+                        wxCreateGreyedImage(bmp.ConvertToImage(), imgGreyed);
 
 #ifdef wxREMAP_BUTTON_COLOURS
                         if ( remapValue == Remap_Buttons )
@@ -1073,7 +1073,7 @@ bool wxToolBar::Realize()
     {
         // if not set yet, have one column
         m_maxRows = 1;
-        SetRows(m_nButtons);
+        SetRows(m_nButtons);        
     }
 
     InvalidateBestSize();
@@ -1340,7 +1340,7 @@ void wxToolBar::SetToolNormalBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetNormalBitmap(bitmap);
         Realize();
-    }
+    }    
 }
 
 void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
@@ -1352,7 +1352,7 @@ void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetDisabledBitmap(bitmap);
         Realize();
-    }
+    }    
 }
 
 // ----------------------------------------------------------------------------

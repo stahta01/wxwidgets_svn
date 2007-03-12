@@ -83,42 +83,42 @@ wxMultiCellItemHandle :: wxMultiCellItemHandle( int row, int column, wxResizable
     Initialize(row, column, 1, 1, wxSize(1, 1), style, weight, align);
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetColumn() const
+int wxMultiCellItemHandle::GetColumn()
 {
     return m_column;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetRow() const
+int wxMultiCellItemHandle::GetRow()
 {
     return m_row;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetWidth() const
+int wxMultiCellItemHandle::GetWidth()
 {
     return m_width;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetHeight() const
+int wxMultiCellItemHandle::GetHeight()
 {
     return m_height;
 }
 //---------------------------------------------------------------------------
-wxResizable    wxMultiCellItemHandle :: GetStyle() const
+wxResizable    wxMultiCellItemHandle :: GetStyle()
 {
     return m_style;
 };
 //---------------------------------------------------------------------------
-wxSize wxMultiCellItemHandle :: GetLocalSize() const
+wxSize wxMultiCellItemHandle :: GetLocalSize()
 {
     return m_fixedSize;
 };
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle :: GetAlignment() const
+int wxMultiCellItemHandle :: GetAlignment()
 {
     return m_alignment;
 };
 //---------------------------------------------------------------------------
-wxSize wxMultiCellItemHandle :: GetWeight() const
+wxSize wxMultiCellItemHandle :: GetWeight()
 {
     return m_weight;
 };
@@ -510,7 +510,7 @@ void wxMultiCellSizer :: GetMinimums()
  *
  */
 
-/* static */ int wxMultiCellSizer :: Sum(int *array, int x)
+int wxMultiCellSizer :: Sum(int *array, int x)
 {
     int sum = 0;
     while (x--)

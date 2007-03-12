@@ -75,10 +75,13 @@ public:
     // some shortcuts for Align()
     wxSizerFlags& Centre() { return Align(wxCENTRE); }
     wxSizerFlags& Center() { return Centre(); }
-    wxSizerFlags& Top() { return Align(wxALIGN_TOP); }
     wxSizerFlags& Left() { return Align(wxALIGN_LEFT); }
     wxSizerFlags& Right() { return Align(wxALIGN_RIGHT); }
+
+#if wxABI_VERSION >= 20802
+    wxSizerFlags& Top() { return Align(wxALIGN_TOP); }
     wxSizerFlags& Bottom() { return Align(wxALIGN_BOTTOM); }
+#endif // wxABI 2.8.2+
 
     // default border size used by Border() below
     static int GetDefaultBorder()
@@ -155,6 +158,7 @@ public:
 #endif
     }
 
+#if wxABI_VERSION >= 20802
     // setters for the others flags
     wxSizerFlags& Shaped()
     {
@@ -169,6 +173,7 @@ public:
 
         return *this;
     }
+#endif // wx 2.8.2+
 
     // accessors for wxSizer only
     int GetProportion() const { return m_proportion; }
@@ -550,8 +555,6 @@ public:
 
     wxSizerItemList& GetChildren()
         { return m_children; }
-    const wxSizerItemList& GetChildren() const
-        { return m_children; }
 
     void SetDimension( int x, int y, int width, int height );
 
@@ -843,6 +846,70 @@ private:
 
 #endif // wxUSE_BUTTON
 
+#if WXWIN_COMPATIBILITY_2_4
+// NB: wxBookCtrlSizer and wxNotebookSizer are deprecated, they
+//     don't do anything. wxBookCtrlBase::DoGetBestSize does the job now.
+
+// ----------------------------------------------------------------------------
+// wxBookCtrlSizer
+// ----------------------------------------------------------------------------
+
+#if wxUSE_BOOKCTRL
+
+// this sizer works with wxNotebook/wxListbook/... and sizes the control to
+// fit its pages
+class WXDLLEXPORT wxBookCtrlBase;
+
+class WXDLLEXPORT wxBookCtrlSizer : public wxSizer
+{
+public:
+#if WXWIN_COMPATIBILITY_2_6
+    wxDEPRECATED( wxBookCtrlSizer(wxBookCtrlBase *bookctrl) );
+#endif // WXWIN_COMPATIBILITY_2_6
+
+    wxBookCtrlBase *GetControl() const { return m_bookctrl; }
+
+    virtual void RecalcSizes();
+    virtual wxSize CalcMin();
+
+protected:
+    // this protected ctor lets us mark the real one above as deprecated
+    // and still have warning-free build of the library itself:
+    wxBookCtrlSizer() {}
+
+    wxBookCtrlBase *m_bookctrl;
+
+private:
+    DECLARE_CLASS(wxBookCtrlSizer)
+    DECLARE_NO_COPY_CLASS(wxBookCtrlSizer)
+};
+
+
+#if wxUSE_NOTEBOOK
+
+// before wxBookCtrlBase we only had wxNotebookSizer, keep it for backwards
+// compatibility
+class WXDLLEXPORT wxNotebook;
+
+class WXDLLEXPORT wxNotebookSizer : public wxBookCtrlSizer
+{
+public:
+#if WXWIN_COMPATIBILITY_2_6
+    wxDEPRECATED( wxNotebookSizer(wxNotebook *nb) );
+#endif // WXWIN_COMPATIBILITY_2_6
+
+    wxNotebook *GetNotebook() const { return (wxNotebook *)m_bookctrl; }
+
+private:
+    DECLARE_CLASS(wxNotebookSizer)
+    DECLARE_NO_COPY_CLASS(wxNotebookSizer)
+};
+
+#endif // wxUSE_NOTEBOOK
+
+#endif // wxUSE_BOOKCTRL
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // inline functions implementation

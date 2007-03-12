@@ -91,6 +91,21 @@
     #include <SystemMgr.h>
 #endif
 
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+// on some really old systems gettimeofday() doesn't have the second argument,
+// define wxGetTimeOfDay() to hide this difference
+#ifdef HAVE_GETTIMEOFDAY
+    #ifdef WX_GETTIMEOFDAY_NO_TZ
+        struct timezone;
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday(tv)
+    #else
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday((tv), (tz))
+    #endif
+#endif // HAVE_GETTIMEOFDAY
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -264,7 +279,7 @@ wxLongLong wxGetLocalTimeMillis()
 
 #elif defined(HAVE_GETTIMEOFDAY)
     struct timeval tp;
-    if ( wxGetTimeOfDay(&tp) != -1 )
+    if ( wxGetTimeOfDay(&tp, (struct timezone *)NULL) != -1 )
     {
         val *= tp.tv_sec;
         return (val + (tp.tv_usec / 1000));

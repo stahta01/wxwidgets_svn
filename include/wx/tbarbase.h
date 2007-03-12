@@ -372,12 +372,6 @@ public:
     virtual void SetToolLongHelp(int toolid, const wxString& helpString);
     virtual wxString GetToolLongHelp(int toolid) const;
 
-    virtual void SetToolNormalBitmap(int WXUNUSED(id),
-                                     const wxBitmap& WXUNUSED(bitmap)) {}
-    virtual void SetToolDisabledBitmap(int WXUNUSED(id),
-                                       const wxBitmap& WXUNUSED(bitmap)) {}
-
-    
     // margins/packing/separation
     // --------------------------
 
@@ -603,14 +597,8 @@ private:
     DECLARE_NO_COPY_CLASS(wxToolBarBase)
 };
 
-// deprecated function for creating the image for disabled buttons, use
-// wxImage::ConvertToGreyscale() instead
-#if WXWIN_COMPATIBILITY_2_8
-
-wxDEPRECATED( bool wxCreateGreyedImage(const wxImage& in, wxImage& out) );
-
-#endif // WXWIN_COMPATIBILITY_2_8
-
+// Helper function for creating the image for disabled buttons
+bool wxCreateGreyedImage(const wxImage& in, wxImage& out) ;
 
 #endif // wxUSE_TOOLBAR
 

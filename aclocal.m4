@@ -11,7 +11,6 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-m4_include([build/aclocal/bakefile-dllar.m4])
 m4_include([build/aclocal/bakefile-lang.m4])
 m4_include([build/aclocal/bakefile.m4])
 m4_include([build/aclocal/cppunit.m4])

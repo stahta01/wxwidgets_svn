@@ -94,6 +94,13 @@ public:
                  ( m_baseInfo2 && m_baseInfo2->IsKindOf(info) ) );
     }
 
+#if WXWIN_COMPATIBILITY_2_4
+    // Initializes parent pointers and hash table for fast searching.
+    wxDEPRECATED( static void InitializeClasses() );
+    // Cleans up hash table used for fast searching.
+    wxDEPRECATED( static void CleanUpClasses() );
+#endif
+
 public:
     const wxChar            *m_className;
     int                      m_objectSize;
@@ -127,6 +134,11 @@ protected:
 };
 
 WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxChar *name);
+
+#if WXWIN_COMPATIBILITY_2_4
+inline void wxClassInfo::InitializeClasses() {}
+inline void wxClassInfo::CleanUpClasses() {}
+#endif
 
 // ----------------------------------------------------------------------------
 // Dynamic class macros
@@ -380,81 +392,12 @@ class WXDLLIMPEXP_BASE wxObjectRefData
 
 public:
     wxObjectRefData() : m_count(1) { }
+    virtual ~wxObjectRefData() { }
 
     int GetRefCount() const { return m_count; }
 
-    void IncRef() { m_count++; }
-    void DecRef();
-
-protected:
-    // this object should never be destroyed directly but only as a
-    // result of a DecRef() call:
-    virtual ~wxObjectRefData() { }
-
 private:
-    // our refcount:
     int m_count;
-};
-
-// ----------------------------------------------------------------------------
-// wxObjectDataPtr: helper class to avoid memleaks because of missing calls
-//                  to wxObjectRefData::DecRef
-// ----------------------------------------------------------------------------
-
-template <class T>
-class wxObjectDataPtr
-{
-public:
-    typedef T element_type;
-
-    wxEXPLICIT wxObjectDataPtr(T *ptr = NULL) : m_ptr(ptr) {}
-
-    // copy ctor
-    wxObjectDataPtr(const wxObjectDataPtr<T> &tocopy) 
-        : m_ptr(tocopy.m_ptr)
-    { 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-    }
-
-    ~wxObjectDataPtr() 
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-    }
-
-    T *get() const { return m_ptr; }
-    T *operator->() const { return get(); }
-
-    void reset(T *ptr)
-    {
-        if (m_ptr)
-            m_ptr->DecRef();
-        m_ptr = ptr;
-    }
-
-    wxObjectDataPtr& operator=(const wxObjectDataPtr &tocopy)
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-        m_ptr = tocopy.m_ptr; 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-        return *this;
-    }
-
-    wxObjectDataPtr& operator=(T *ptr)
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-        m_ptr = ptr; 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-        return *this;
-    }
-
-private:
-    T *m_ptr;
 };
 
 // ----------------------------------------------------------------------------
@@ -577,8 +520,7 @@ public:
 #ifdef _MSC_VER
         return (wxClassInfo*) m_classInfo;
 #else
-        wxDynamicClassInfo *nonconst = wx_const_cast(wxDynamicClassInfo *, m_classInfo);
-        return wx_static_cast(wxClassInfo *, nonconst);
+        return wx_const_cast(wxClassInfo *, m_classInfo);
 #endif
     }
 

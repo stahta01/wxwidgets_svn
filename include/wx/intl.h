@@ -592,11 +592,9 @@ inline const wxChar *wxGetTranslation(const wxChar *sz1, const wxChar *sz2,
 
 #define wxTRANSLATE(str) _T(str)
 
-inline const wxChar *wxGetTranslation(const wxChar *sz,
-                                      const wxChar *WXUNUSED(domain) = NULL)
-{
-    return sz;
-}
+// Note: use of 'inline' here can cause this symbol not to be found when compiled with gcc
+//const wxChar *wxGetTranslation(const wxChar *sz);
+#define wxGetTranslation(sz) (sz)
 
 #endif // wxUSE_INTL/!wxUSE_INTL
 
