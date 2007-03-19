@@ -355,26 +355,6 @@ void StringTestCase::Compare()
     CPPUNIT_ASSERT( s1 != neq3 );
     CPPUNIT_ASSERT( s1 != neq4 );
 
-    CPPUNIT_ASSERT( s1 == wxT("AHH") );
-    CPPUNIT_ASSERT( s1 != wxT("no") );
-    CPPUNIT_ASSERT( s1 < wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AHH") );
-    CPPUNIT_ASSERT( s1 > wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AHH") );
-
-    // test comparison with C strings in Unicode build (must work in ANSI as
-    // well, of course):
-    CPPUNIT_ASSERT( s1 == "AHH" );
-    CPPUNIT_ASSERT( s1 != "no" );
-    CPPUNIT_ASSERT( s1 < "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AHH" );
-    CPPUNIT_ASSERT( s1 > "AA" );
-    CPPUNIT_ASSERT( s1 >= "AA" );
-    CPPUNIT_ASSERT( s1 >= "AHH" );
-
 //    wxString _s1 = wxT("A\0HH");
 //    wxString _eq = wxT("A\0HH");
 //    wxString _neq1 = wxT("H\0AH");
@@ -630,25 +610,23 @@ void StringTestCase::WriteBuf()
     wxString s;
     wxStrcpy(wxStringBuffer(s, 10), _T("foo"));
 
-    CPPUNIT_ASSERT(s[0u] == _T('f') );
-    CPPUNIT_ASSERT(_T('f') == s[0u]);
-    CPPUNIT_ASSERT(_T('o') == s[1]);
-    CPPUNIT_ASSERT(_T('o') == s[2]);
-    CPPUNIT_ASSERT_EQUAL((size_t)3, s.length());
-
+    CPPUNIT_ASSERT_EQUAL(_T('f'), s[0u]);
+    CPPUNIT_ASSERT_EQUAL(_T('o'), s[1]);
+    CPPUNIT_ASSERT_EQUAL(_T('o'), s[2]);
+    CPPUNIT_ASSERT_EQUAL(3u, s.length());
 
     {
-        wxStringBufferLength buf(s, 10);
-        wxStrcpy(buf, _T("barrbaz"));
-        buf.SetLength(4);
+        wxChar *p = s.GetWriteBuf(10);
+        wxStrcpy(p, _T("barrbaz"));
+        s.UngetWriteBuf(4);
+
+        CPPUNIT_ASSERT_EQUAL(_T('b'), s[0u]);
+        CPPUNIT_ASSERT_EQUAL(_T('a'), s[1]);
+        CPPUNIT_ASSERT_EQUAL(_T('r'), s[2]);
+        CPPUNIT_ASSERT_EQUAL(_T('r'), s[3]);
+        CPPUNIT_ASSERT_EQUAL(4u, s.length());
+
+        CPPUNIT_ASSERT_EQUAL( 0, wxStrcmp(_T("barr"), s) );
     }
-
-    CPPUNIT_ASSERT(_T('b') == s[0u]);
-    CPPUNIT_ASSERT(_T('a') == s[1]);
-    CPPUNIT_ASSERT(_T('r') == s[2]);
-    CPPUNIT_ASSERT(_T('r') == s[3]);
-    CPPUNIT_ASSERT_EQUAL((size_t)4, s.length());
-
-    CPPUNIT_ASSERT_EQUAL( 0, wxStrcmp(_T("barr"), s) );
 }
 

@@ -332,14 +332,15 @@ void wxTopLevelWindowCocoa::OnCloseWindow(wxCloseEvent& event)
 // wxTopLevelWindowCocoa misc
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowCocoa::SetTitle(const wxString& title)
+void wxTopLevelWindowCocoa::SetTitle( const wxString& WXUNUSED(title))
 {
-    [m_cocoaNSWindow setTitle:wxNSStringWithWxString(title)];
+    // TODO
 }
 
 wxString wxTopLevelWindowCocoa::GetTitle() const
 {
-    return wxStringWithNSString([m_cocoaNSWindow title]);
+    // TODO
+    return wxEmptyString;
 }
 
 bool wxTopLevelWindowCocoa::ShowFullScreen(bool show, long style)

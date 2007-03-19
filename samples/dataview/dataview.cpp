@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        dataview.cpp
-// Purpose:     wxDataViewCtrl wxWidgets sample
+// Purpose:     DataVewCtrl  wxWidgets sample
 // Author:      Robert Roebling
-// Modified by: Francesco Montorsi
+// Modified by:
 // Created:     06/01/06
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
@@ -21,11 +21,6 @@
 #endif
 
 #include "wx/datetime.h"
-#include "wx/splitter.h"
-#include "wx/aboutdlg.h"
-#include "wx/choicdlg.h"
-#include "wx/numdlg.h"
-#include "wx/dataview.h"
 
 #ifndef __WXMSW__
     #include "../sample.xpm"
@@ -33,19 +28,15 @@
 
 #include "null.xpm"
 
-
-#define DEFAULT_ALIGN                   wxALIGN_LEFT
-#define DATAVIEW_DEFAULT_STYLE          (wxDV_MULTIPLE|wxDV_HORIZ_RULES|wxDV_VERT_RULES)
-
-
+#include "wx/dataview.h"
 
 // -------------------------------------
 // MyTextModel
 // -------------------------------------
 
-WX_DECLARE_OBJARRAY(wxDateTime,wxArrayDate);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(wxArrayDate)
+WX_DECLARE_LIST(wxDateTime,wxArrayDate);
+#include <wx/listimpl.cpp>
+WX_DEFINE_LIST(wxArrayDate)
 
 class MyTextModel: public wxDataViewListModel
 {
@@ -63,18 +54,18 @@ public:
             { m_progress.Add( i/10 ); }
         for (i = 0; i < 1000; i++)
             {
-                wxDateTime date( wxDateTime::Now() );
-                m_dates.Add( date );
+                wxDateTime *date = new wxDateTime( wxDateTime::Now() );
+                m_dates.Append( date );
             }
     }
 
-    virtual unsigned int GetRowCount() const
+    virtual unsigned int GetNumberOfRows()
         { return 1000; }
-    virtual unsigned int GetColumnCount() const
+    virtual unsigned int GetNumberOfCols()
         { return 7; }
 
     // as reported by wxVariant
-    virtual wxString GetColumnType( unsigned int col ) const
+    virtual wxString GetColType( unsigned int col )
         {
             if (col == 6)
                 return wxT("datetime");
@@ -88,11 +79,11 @@ public:
             return wxT("string");
         }
 
-    virtual void GetValue( wxVariant &variant, unsigned int col, unsigned int row ) const
+    virtual void GetValue( wxVariant &variant, unsigned int col, unsigned int row )
         {
             if (col == 6)
             {
-                variant = (wxDateTime) m_dates[row];
+                variant = (wxDateTime) *m_dates[row];
             } else
             if (col == 5)
             {
@@ -104,7 +95,7 @@ public:
             } else
             if (col == 3)
             {
-                variant = (bool) (m_bools[row] != 0);
+                variant = (bool) m_bools[row];
             } else
             if (col == 2)
             {
@@ -121,7 +112,7 @@ public:
         {
             if (col == 6)
             {
-                m_dates[row] = value.GetDateTime();
+                *m_dates[row] = value.GetDateTime();
             } else
             if (col == 3)
             {
@@ -158,13 +149,6 @@ public:
         m_colour = value.GetString();
         return true;
     }
-
-    bool GetValue( wxVariant &value ) const
-    {
-        value = m_colour;
-        return true;
-    }
-
     bool Render( wxRect rect, wxDC *dc, int WXUNUSED(state) )
     {
         dc->SetPen( *wxBLACK_PEN );
@@ -177,7 +161,7 @@ public:
         dc->DrawRectangle( rect );
         return true;
     }
-    wxSize GetSize() const
+    wxSize GetSize()
     {
         return wxSize(20,8);
     }
@@ -213,22 +197,10 @@ public:
         m_bitmap = wxBitmap( null_xpm );
     }
 
-    virtual unsigned int GetRowCount() const 
-    { 
-        return m_list.GetCount(); 
-    }
-
-    virtual unsigned int GetColumnCount() const 
-    { 
-        return 2; 
-    }
-
-    virtual wxString GetColumnType( unsigned int WXUNUSED(col) ) const 
-    { 
-        return wxT("string"); 
-    }
-
-    virtual void GetValue( wxVariant &variant, unsigned int col, unsigned int row ) const
+    virtual unsigned int GetNumberOfRows() { return m_list.GetCount(); }
+    virtual unsigned int GetNumberOfCols() { return 2; }
+    virtual wxString GetColType( unsigned int WXUNUSED(col) ) { return wxT("string"); }
+    virtual void GetValue( wxVariant &variant, unsigned int col, unsigned int row )
     {
         if (col == 0)
         {
@@ -244,7 +216,6 @@ public:
         tmp.Printf( wxT("item(%d;%d)"), (int)row, (int)col );
         variant = tmp;
     }
-
     virtual bool SetValue( wxVariant &variant, unsigned int col, unsigned int row )
     {
         if (col == 0)
@@ -292,14 +263,13 @@ class MyApp: public wxApp
 {
 public:
     bool OnInit(void);
-    int OnExit();
 };
 
 // -------------------------------------
 // MyFrame
 // -------------------------------------
 
-class MyFrame : public wxFrame
+class MyFrame: public wxFrame
 {
 public:
     MyFrame(wxFrame *frame, wxChar *title, int x, int y, int w, int h);
@@ -307,29 +277,10 @@ public:
 public:
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
-    void OnNewSortingFrame(wxCommandEvent& event);
-
-    void OnStyleChange(wxCommandEvent& event);
-    void OnColumnSetting(wxCommandEvent& event);
 
 private:
     wxDataViewCtrl* dataview_left;
     wxDataViewCtrl* dataview_right;
-    wxSplitterWindow *m_splitter;
-    wxPanel *m_panelLeft, *m_panelRight;
-
-    // utilities:
-
-    void CreateDataViewControls();
-
-    wxArrayInt GetFlaggedColumns(int flag);
-    wxAlignment ChooseAlign(const wxString &msg, bool onlyHorizontal);
-    void SetFlag(const wxArrayInt &idx, int flag);
-    void SetAlignment(const wxArrayInt &idx, bool header, wxAlignment align);
-    void SetWidth(const wxArrayInt &idx, bool minwidth, int width);
-
-private:
-    DECLARE_EVENT_TABLE()
 };
 
 // -------------------------------------
@@ -397,8 +348,8 @@ private:
     wxLog          *m_logOld;
     wxTextCtrl     *m_logWindow;
 
-    wxObjectDataPtr<MyUnsortedTextModel> m_unsorted_model;
-    wxObjectDataPtr<wxDataViewSortedListModel> m_sorted_model;
+    MyUnsortedTextModel        *m_unsorted_model;
+    wxDataViewSortedListModel  *m_sorted_model;
 
     DECLARE_EVENT_TABLE()
 };
@@ -407,244 +358,97 @@ private:
 // MyApp
 // -------------------------------------
 
-IMPLEMENT_APP(MyApp)
+#define DYNAMIC_QUIT   wxID_EXIT
+#define DYNAMIC_ABOUT  wxID_ABOUT
+
+IMPLEMENT_APP  (MyApp)
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
-    // build the first frame
-    MyFrame *frame = 
-        new MyFrame(NULL, wxT("wxDataViewCtrl feature test"), 10, 10, 800, 340);
+    MyFrame *frame = new MyFrame(NULL, wxT("wxDataViewCtrl feature test"), 10, 10, 800, 340);
     frame->Show(true);
 
+    MySortingFrame *frame2 = new MySortingFrame(NULL, wxT("wxDataViewCtrl sorting test"), 10, 150, 600, 500);
+    frame2->Show(true);
+
     SetTopWindow(frame);
+    
     return true;
 }
-
-int MyApp::OnExit()
-{
-    return 0;
-}
-
 
 // -------------------------------------
 // MyFrame
 // -------------------------------------
-
-enum
-{
-    // file menu
-    ID_ABOUT = wxID_ABOUT,
-    ID_NEW_SORT_FRAME = wxID_HIGHEST+1,
-    ID_EXIT = wxID_EXIT,
-
-    // dataviewctrl menu
-    ID_SINGLE_SEL_MODE = wxID_HIGHEST+2,
-    ID_MULTIPLE_SEL_MODE,
-    ID_NO_HEADER_MODE,
-    ID_HORIZ_RULES_MODE,
-    ID_VERT_RULES_MODE,
-
-    ID_RESIZEABLE_COLUMNS,
-    ID_SORTABLE_COLUMNS,
-    ID_HIDDEN_COLUMNS,
-
-    ID_CHOOSE_COLUMN_ALIGNMENT,
-    ID_CHOOSE_CONTENTS_ALIGNMENT,
-
-    ID_SET_MINWIDTH,
-    ID_SET_WIDTH
-};
-
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-
-    // file menu
-    EVT_MENU( ID_ABOUT, MyFrame::OnAbout )
-    EVT_MENU( ID_NEW_SORT_FRAME, MyFrame::OnNewSortingFrame )
-    EVT_MENU( ID_EXIT, MyFrame::OnQuit )
-
-    // dataviewctrl menu
-    EVT_COMMAND_RANGE( ID_SINGLE_SEL_MODE, ID_VERT_RULES_MODE,
-                       wxEVT_COMMAND_MENU_SELECTED, MyFrame::OnStyleChange )
-
-    EVT_COMMAND_RANGE( ID_RESIZEABLE_COLUMNS, ID_SET_WIDTH,
-                       wxEVT_COMMAND_MENU_SELECTED, MyFrame::OnColumnSetting )
-
-END_EVENT_TABLE()
 
 MyFrame::MyFrame(wxFrame *frame, wxChar *title, int x, int y, int w, int h):
   wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h))
 {
     SetIcon(wxICON(sample));
 
-    // build the menus:
-
     wxMenu *file_menu = new wxMenu;
-    file_menu->Append(ID_NEW_SORT_FRAME, _T("&New sorting frame"));
-    file_menu->AppendSeparator();
-    file_menu->Append(ID_ABOUT, _T("&About"));
-    file_menu->AppendSeparator();
-    file_menu->Append(ID_EXIT, _T("E&xit"));
 
-    wxMenu *data_menu = new wxMenu;
-    data_menu->AppendRadioItem(ID_SINGLE_SEL_MODE, _T("&Single selection mode"));
-    data_menu->AppendRadioItem(ID_MULTIPLE_SEL_MODE, _T("&Multiple selection mode"));
-    data_menu->AppendSeparator();
-    data_menu->AppendCheckItem(ID_NO_HEADER_MODE, _T("No header mode"));
-    data_menu->AppendCheckItem(ID_HORIZ_RULES_MODE, _T("Horizontal rules"));
-    data_menu->AppendCheckItem(ID_VERT_RULES_MODE, _T("Vertical rules"));
-    data_menu->AppendSeparator();
-    data_menu->Append(ID_RESIZEABLE_COLUMNS, _T("Set column(s) as resizeable..."));
-    data_menu->Append(ID_SORTABLE_COLUMNS, _T("Set column(s) as sortable..."));
-    data_menu->Append(ID_HIDDEN_COLUMNS, _T("Set column(s) as hidden..."));
-    data_menu->AppendSeparator();
-    data_menu->Append(ID_CHOOSE_COLUMN_ALIGNMENT, _T("Set column(s) title alignment..."));
-    data_menu->Append(ID_CHOOSE_CONTENTS_ALIGNMENT, _T("Set column(s) contents alignment..."));
-    data_menu->AppendSeparator();
-    data_menu->Append(ID_SET_MINWIDTH, _T("Set column(s) minimal width..."));
-    data_menu->Append(ID_SET_WIDTH, _T("Set column(s) width..."));
-
+    file_menu->Append(DYNAMIC_ABOUT, _T("&About"));
+    file_menu->Append(DYNAMIC_QUIT, _T("E&xit"));
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));
-    menu_bar->Append(data_menu, _T("&DataViewCtrl"));
-
     SetMenuBar(menu_bar);
+
+    // You used to have to do some casting for param 4, but now there are type-safe handlers
+    Connect( DYNAMIC_QUIT,  wxID_ANY,
+                    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MyFrame::OnQuit) );
+    Connect( DYNAMIC_ABOUT, wxID_ANY,
+                    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MyFrame::OnAbout) );
+
     CreateStatusBar();
 
-
-    // check the menus for the default wxDataViewCtrl style
-    data_menu->Check(ID_MULTIPLE_SEL_MODE, (DATAVIEW_DEFAULT_STYLE & wxDV_MULTIPLE) != 0);
-    data_menu->Check(ID_NO_HEADER_MODE, (DATAVIEW_DEFAULT_STYLE & wxDV_NO_HEADER) != 0);
-    data_menu->Check(ID_HORIZ_RULES_MODE, (DATAVIEW_DEFAULT_STYLE & wxDV_HORIZ_RULES) != 0);
-    data_menu->Check(ID_VERT_RULES_MODE, (DATAVIEW_DEFAULT_STYLE & wxDV_VERT_RULES) != 0);
-
-
-    // build the other controls:
-
-    m_splitter = new wxSplitterWindow( this, wxID_ANY );
-    m_splitter->SetSashGravity(0.5);
-
-    m_panelLeft = new wxPanel( m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                               wxNO_BORDER );
-    m_panelRight = new wxPanel( m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                wxNO_BORDER );
-    wxSizer *szLeft = new wxBoxSizer(wxVERTICAL);
-    wxSizer *szRight = new wxBoxSizer(wxVERTICAL);
-
-    dataview_left = NULL;
-    dataview_right = NULL;
-    CreateDataViewControls();
-
-    // left panel
-    szLeft->Add( dataview_left, 1, wxGROW|wxALL, 5 );
-    m_panelLeft->SetSizerAndFit(szLeft);
-
-    // right panel
-    wxStaticText *stattext =
-        new wxStaticText(m_panelRight, wxID_ANY,
-                wxT("This is another wxDataViewCtrl using the same wxDataViewModel ")
-                wxT("of the wxDataViewCtrl on the left but, unlike it, this window ")
-                wxT("won't react to the style/column changes done through the ")
-                wxT("'DataViewCtrl' menu"));
-    stattext->Wrap(GetClientSize().GetWidth() / 2);
-
-    szRight->Add( stattext, 0, wxALL, 5 );
-    szRight->Add( dataview_right, 1, wxGROW|wxALL, 5 );
-    m_panelRight->SetSizerAndFit(szRight);
-
-    // split the two panels
-    m_splitter->SplitVertically(m_panelLeft, m_panelRight);
-    this->SetMinSize(m_splitter->GetBestSize());
-}
-
-void MyFrame::CreateDataViewControls()
-{
-    wxDataViewCtrl *old1 = NULL, *old2 = NULL;
-
-    if (dataview_left)
-        old1 = dataview_left;
-    if (dataview_right)
-        old2 = dataview_right;
-
-    // styles:
-    long style = 0;
-    if (GetMenuBar()->FindItem(ID_MULTIPLE_SEL_MODE)->IsChecked())
-        style |= wxDV_MULTIPLE;
-    if (GetMenuBar()->FindItem(ID_NO_HEADER_MODE)->IsChecked())
-        style |= wxDV_NO_HEADER;
-    if (GetMenuBar()->FindItem(ID_HORIZ_RULES_MODE)->IsChecked())
-        style |= wxDV_HORIZ_RULES;
-    if (GetMenuBar()->FindItem(ID_VERT_RULES_MODE)->IsChecked())
-        style |= wxDV_VERT_RULES;
+    wxPanel *panel = new wxPanel( this, wxID_ANY );
 
 
     // Left wxDataViewCtrl
-    dataview_left = new wxDataViewCtrl( m_panelLeft, wxID_ANY, wxDefaultPosition,
-                                        wxDefaultSize, style );
+    dataview_left = new wxDataViewCtrl( panel, wxID_ANY );
 
+    MyTextModel *model = new MyTextModel;
+    dataview_left->AssociateModel( model );
 
-    wxObjectDataPtr<MyTextModel> model(new MyTextModel);
-    dataview_left->AssociateModel( model.get() );
+    dataview_left->AppendTextColumn( wxT("first"), 0 );
+    dataview_left->AppendTextColumn( wxT("second"), 1 );
 
-    dataview_left->AppendTextColumn( wxT("First"), 0, wxDATAVIEW_CELL_INERT, -1, 
-                                     DEFAULT_ALIGN );
-    dataview_left->AppendTextColumn( wxT("Second"), 1, wxDATAVIEW_CELL_INERT, -1,
-                                     DEFAULT_ALIGN );
-
-    wxDataViewTextRenderer *text_renderer = 
-        new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
-    wxDataViewColumn *column = new wxDataViewColumn( wxT("editable"), text_renderer, 2,
-                                                     -1, DEFAULT_ALIGN );
+    wxDataViewTextRenderer *text_renderer = new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
+    wxDataViewColumn *column = new wxDataViewColumn( wxT("editable"), text_renderer, 2 );
     dataview_left->AppendColumn( column );
 
-    dataview_left->AppendToggleColumn( wxT("fourth"), 3, wxDATAVIEW_CELL_INERT, -1, 
-                                       DEFAULT_ALIGN );
+    dataview_left->AppendToggleColumn( wxT("fourth"), 3 );
 
     MyCustomRenderer *custom_renderer = new MyCustomRenderer;
-    column = new wxDataViewColumn( wxT("custom"), custom_renderer, 4, -1, DEFAULT_ALIGN );
+    column = new wxDataViewColumn( wxT("custom"), custom_renderer, 4 );
     dataview_left->AppendColumn( column );
 
-    dataview_left->AppendProgressColumn( wxT("progress"), 5, wxDATAVIEW_CELL_INERT, -1,
-                                         DEFAULT_ALIGN );
+    dataview_left->AppendProgressColumn( wxT("progress"), 5 );
 
-    dataview_left->AppendDateColumn( wxT("date"), 6, wxDATAVIEW_CELL_INERT, -1, DEFAULT_ALIGN );
-
+    dataview_left->AppendDateColumn( wxT("date"), 6 );
 
     // Right wxDataViewCtrl using the same model
-    dataview_right = new wxDataViewCtrl( m_panelRight, wxID_ANY );
-    dataview_right->AssociateModel( model.get() );
+    dataview_right = new wxDataViewCtrl( panel, wxID_ANY );
+    dataview_right->AssociateModel( model );
 
     text_renderer = new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
     column = new wxDataViewColumn( wxT("editable"), text_renderer, 2 );
     dataview_right->AppendColumn( column );
     dataview_right->AppendTextColumn( wxT("first"), 0 );
     dataview_right->AppendTextColumn( wxT("second"), 1 );
-    wxDataViewToggleRenderer *toggle_renderer = 
-        new wxDataViewToggleRenderer( wxT("bool"), wxDATAVIEW_CELL_ACTIVATABLE );
+    wxDataViewToggleRenderer *toggle_renderer = new wxDataViewToggleRenderer( wxT("bool"), wxDATAVIEW_CELL_ACTIVATABLE );
     column = new wxDataViewColumn( wxT("bool"), toggle_renderer, 3, 30 );
     dataview_right->AppendColumn( column );
 
     dataview_right->AppendDateColumn( wxT("date"), 6 );
 
+    // layout dataview controls.
 
-    // layout the new dataview controls
-    if (old1)
-    {
-        m_panelLeft->GetSizer()->Replace(old1, dataview_left);
-        delete old1;
-
-        m_panelLeft->Layout();
-    }
-
-    if (old2)
-    {
-        m_panelRight->GetSizer()->Replace(old2, dataview_right);
-        delete old2;
-
-        m_panelRight->Layout();
-    }
+    wxBoxSizer *sizer = new wxBoxSizer( wxHORIZONTAL );
+    sizer->Add( dataview_left, 3, wxGROW );
+    sizer->Add(10,10);
+    sizer->Add( dataview_right, 2, wxGROW );
+    panel->SetSizer( sizer );
 }
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )
@@ -654,214 +458,11 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    wxAboutDialogInfo info;
-    info.SetName(_("DataView sample"));
-    info.SetDescription(_("This sample demonstrates the dataview control handling"));
-    info.SetCopyright(_T("(C) 2007 Robert Roebling"));
+    wxMessageDialog dialog(this, _T("This demonstrates the dataview control handling"),
+        _T("About DataView"), wxOK);
 
-    wxAboutBox(info);
+    dialog.ShowModal();
 }
-
-void MyFrame::OnNewSortingFrame(wxCommandEvent& WXUNUSED(event) )
-{
-    MySortingFrame *frame2 = 
-        new MySortingFrame(NULL, wxT("wxDataViewCtrl sorting test"), 10, 150, 600, 500);
-    frame2->Show(true);
-}
-
-void MyFrame::OnStyleChange(wxCommandEvent& WXUNUSED(event) )
-{
-    // recreate the wxDataViewCtrl:
-    CreateDataViewControls();
-}
-
-void MyFrame::OnColumnSetting(wxCommandEvent& event)
-{
-    wxArrayInt columns;
-    int flag = 0;
-    bool header = false, minwidth = false;
-    wxString msg;
-
-    switch (event.GetId())
-    {
-    case ID_RESIZEABLE_COLUMNS:
-        flag = wxDATAVIEW_COL_RESIZABLE;
-        columns = GetFlaggedColumns(flag);
-        break;
-    case ID_SORTABLE_COLUMNS:
-        flag = wxDATAVIEW_COL_SORTABLE;
-        columns = GetFlaggedColumns(flag);
-        break;
-    case ID_HIDDEN_COLUMNS:
-        flag = wxDATAVIEW_COL_HIDDEN;
-        columns = GetFlaggedColumns(flag);
-        break;
-
-    case ID_CHOOSE_COLUMN_ALIGNMENT:
-        msg = wxT("Select the columns whose headers' alignment will be modified.");
-        header = true;
-        break;
-    case ID_CHOOSE_CONTENTS_ALIGNMENT:
-        msg = wxT("Select the columns whose contents' alignment will be modified.");
-        header = false;
-        break;
-
-    case ID_SET_MINWIDTH:
-        msg = wxT("Please provide the new minimal width:");
-        minwidth = true;
-        break;
-    case ID_SET_WIDTH:
-        msg = wxT("Please provide the new width:");
-        minwidth = false;
-        break;
-    }
-
-    // get column titles:
-
-    wxArrayString choices;
-    for (size_t i=0; i<dataview_left->GetColumnCount(); i++)
-        choices.Add(dataview_left->GetColumn(i)->GetTitle());
-
-    // ask the user
-    wxGetMultipleChoices(
-        columns,
-        wxT("Choose the columns to which apply the change."),
-        wxT("Choose the column"),
-        choices,
-        this);
-
-    switch (event.GetId())
-    {
-    case ID_RESIZEABLE_COLUMNS:
-    case ID_SORTABLE_COLUMNS:
-    case ID_HIDDEN_COLUMNS:
-        SetFlag(columns, flag);
-        break;
-
-    case ID_CHOOSE_COLUMN_ALIGNMENT:
-    case ID_CHOOSE_CONTENTS_ALIGNMENT:
-        SetAlignment(columns, header, ChooseAlign(msg, header));
-        break;
-
-    case ID_SET_MINWIDTH:
-    case ID_SET_WIDTH:
-        {
-            int def = minwidth ? wxDVC_DEFAULT_MINWIDTH : wxDVC_DEFAULT_WIDTH;
-
-            msg << wxT("\nNOTE: all non-selected columns will be reset to a width of ") 
-                << def << wxT(" pixels.");
-
-            long ret =
-                wxGetNumberFromUser(msg, wxT("New value:"), wxT("Modify width"),
-                                    def, 0, 300, this);
-
-            if (ret != -1)
-                SetWidth(columns, minwidth, ret);
-        }
-        break;
-    }
-
-    dataview_left->Refresh();
-}
-
-wxAlignment MyFrame::ChooseAlign(const wxString &msg, bool onlyHorizontal)
-{
-    const wxString choices[] =
-    {
-        wxT("Left"),
-        wxT("Center horizontally"),
-        wxT("Right"),
-        wxT("Top"),
-        wxT("Center vertically"),
-        wxT("Bottom"),
-        wxT("Center")
-    };
-
-    wxAlignment flags[] =
-    {
-        wxALIGN_LEFT,
-        wxALIGN_CENTER_HORIZONTAL,
-        wxALIGN_RIGHT,
-        wxALIGN_TOP,
-        wxALIGN_CENTER_VERTICAL,
-        wxALIGN_BOTTOM,
-        wxALIGN_CENTER
-    };
-
-    int n = WXSIZEOF(choices);
-    if (onlyHorizontal)
-        n = 3;      // show only the first three choices
-
-    int choice = wxGetSingleChoiceIndex(
-        msg + wxT("\nNOTE: _all_ non-selected column's alignment will be reset to wxALIGN_LEFT!"),
-        wxT("Alignment"),
-        n, choices,
-        this);
-
-    if (choice == wxNOT_FOUND)
-        return wxALIGN_LEFT;
-
-    return flags[choice];
-}
-
-void MyFrame::SetFlag(const wxArrayInt &idx, int toadd)
-{
-    for (size_t i=0; i<dataview_left->GetColumnCount(); i++)
-    {
-        int current = dataview_left->GetColumn(i)->GetFlags();
-
-        if (idx.Index(i) != wxNOT_FOUND)
-            dataview_left->GetColumn(i)->SetFlags(current | toadd);
-        else
-            dataview_left->GetColumn(i)->SetFlags(current & ~toadd);
-    }
-}
-
-wxArrayInt MyFrame::GetFlaggedColumns(int flag)
-{
-    wxArrayInt ret;
-    for (size_t i=0; i<dataview_left->GetColumnCount(); i++)
-        if (dataview_left->GetColumn(i)->GetFlags() & flag)
-            ret.Add(i);
-    return ret;
-}
-
-void MyFrame::SetAlignment(const wxArrayInt &idx, bool header, wxAlignment align)
-{
-    // set to DEFAULT_ALIGN all columns except those
-    // contained in 'idx' which are set to 'align'
-
-    for (size_t i=0; i<dataview_left->GetColumnCount(); i++)
-    {
-        wxAlignment toset = DEFAULT_ALIGN;
-        if (idx.Index(i) != wxNOT_FOUND)
-            toset = align;
-
-        if (header)
-            dataview_left->GetColumn(i)->SetAlignment(toset);
-        else
-            dataview_left->GetColumn(i)->GetRenderer()->SetAlignment(toset);
-    }
-}
-
-void MyFrame::SetWidth(const wxArrayInt &idx, bool minwidth, int width)
-{
-    // set to wxDVC_DEFAULT_WIDTH wide all columns except those
-    // contained in 'idx' which are set to 'width'
-
-    for (size_t i=0; i<dataview_left->GetColumnCount(); i++)
-    {
-        int toset = minwidth ? wxDVC_DEFAULT_MINWIDTH : wxDVC_DEFAULT_WIDTH;
-        if (idx.Index(i) != wxNOT_FOUND)
-            toset = width;
-
-        if (minwidth)
-            dataview_left->GetColumn(i)->SetMinWidth(toset);
-        else
-            dataview_left->GetColumn(i)->SetWidth(toset);
-    }
-}
-
 
 // -------------------------------------
 // MySortingFrame
@@ -887,37 +488,43 @@ MySortingFrame::MySortingFrame(wxFrame *frame, wxChar *title, int x, int y, int 
     m_logOld = NULL;
     
     SetIcon(wxICON(sample));
+
+    wxMenu *file_menu = new wxMenu;
+
+    file_menu->Append(DYNAMIC_ABOUT, _T("&About"));
+    file_menu->Append(DYNAMIC_QUIT, _T("E&xit"));
+    wxMenuBar *menu_bar = new wxMenuBar;
+    menu_bar->Append(file_menu, _T("&File"));
+    SetMenuBar(menu_bar);
+
+    // You used to have to do some casting for param 4, but now there are type-safe handlers
+    Connect( DYNAMIC_QUIT,  wxID_ANY,
+                    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MySortingFrame::OnQuit) );
+    Connect( DYNAMIC_ABOUT, wxID_ANY,
+                    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MySortingFrame::OnAbout) );
+
     CreateStatusBar();
 
-    wxPanel *main = new wxPanel(this);
 
     // Left wxDataViewCtrl
-    dataview_left = new wxDataViewCtrl( main, ID_UNSORTED, wxDefaultPosition, 
-                                        wxDefaultSize, wxDV_MULTIPLE );
+    dataview_left = new wxDataViewCtrl( this, ID_UNSORTED, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE );
 
-    m_unsorted_model.reset(new MyUnsortedTextModel);
-    dataview_left->AssociateModel( m_unsorted_model.get() );
-
-    wxDataViewTextRenderer *text_renderer = 
-        new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
+    m_unsorted_model = new MyUnsortedTextModel;
+    dataview_left->AssociateModel( m_unsorted_model );
+    wxDataViewTextRenderer *text_renderer = new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
     wxDataViewColumn *column = new wxDataViewColumn( wxT("editable"), text_renderer, 0 );
     dataview_left->AppendColumn( column );
     dataview_left->AppendTextColumn( wxT("second"), 1 );
-    dataview_left->AppendColumn( new wxDataViewColumn( wxBitmap(null_xpm), 
-                                 new wxDataViewBitmapRenderer, 2, 25 ) );
-    dataview_left->AppendColumn( new wxDataViewColumn( wxT("icon"), 
-                                 new wxDataViewBitmapRenderer, 3, 25 ) );
+    dataview_left->AppendColumn( new wxDataViewColumn( wxBitmap(null_xpm), new wxDataViewBitmapRenderer, 2, 25 ) );
+    dataview_left->AppendColumn( new wxDataViewColumn( wxT("icon"), new wxDataViewBitmapRenderer, 3, 25 ) );
 
     // Right wxDataViewCtrl using the sorting model
-    dataview_right = new wxDataViewCtrl( main, ID_SORTED );
+    dataview_right = new wxDataViewCtrl( this, ID_SORTED );
     
-    m_sorted_model.reset(new wxDataViewSortedListModel( m_unsorted_model.get() ));
-    dataview_right->AssociateModel( m_sorted_model.get() );
-
+    m_sorted_model = new wxDataViewSortedListModel( m_unsorted_model );
+    dataview_right->AssociateModel( m_sorted_model );
     text_renderer = new wxDataViewTextRenderer( wxT("string"), wxDATAVIEW_CELL_EDITABLE );
-    column = new wxDataViewColumn( wxT("editable"), text_renderer, 0, -1, 
-                                   wxALIGN_CENTER,
-                                   wxDATAVIEW_COL_SORTABLE|wxDATAVIEW_COL_RESIZABLE );
+    column = new wxDataViewColumn( wxT("editable"), text_renderer, 0, -1, wxDATAVIEW_COL_SORTABLE|wxDATAVIEW_COL_RESIZABLE );
     dataview_right->AppendColumn( column );
     
     dataview_right->AppendTextColumn( wxT("second"), 1 );
@@ -932,22 +539,22 @@ MySortingFrame::MySortingFrame(wxFrame *frame, wxChar *title, int x, int y, int 
     wxBoxSizer *button_sizer = new wxBoxSizer( wxHORIZONTAL );
     button_sizer->Add( 10, 10, 1 );
     wxFlexGridSizer *left_sizer = new wxFlexGridSizer( 2 );
-    left_sizer->Add( new wxButton( main, ID_APPEND_ROW_LEFT, wxT("Append") ), 0, wxALL, 5 );
-    left_sizer->Add( new wxButton( main, ID_PREPEND_ROW_LEFT, wxT("Prepend") ), 0, wxALL, 5 );
-    left_sizer->Add( new wxButton( main, ID_INSERT_ROW_LEFT, wxT("Insert") ), 0, wxALL, 5 );
-    left_sizer->Add( new wxButton( main, ID_DELETE_ROW_LEFT, wxT("Delete second") ), 0, wxALL, 5 );
-    left_sizer->Add( new wxButton( main, ID_EDIT_ROW_LEFT, wxT("Edit") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_APPEND_ROW_LEFT, wxT("Append") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_PREPEND_ROW_LEFT, wxT("Prepend") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_INSERT_ROW_LEFT, wxT("Insert") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_DELETE_ROW_LEFT, wxT("Delete second") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_EDIT_ROW_LEFT, wxT("Edit") ), 0, wxALL, 5 );
     left_sizer->Add( 5,5 );
-    left_sizer->Add( new wxButton( main, ID_SELECT, wxT("Select third") ), 0, wxALL, 5 );
-    left_sizer->Add( new wxButton( main, ID_UNSELECT_ALL, wxT("Unselect all") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_SELECT, wxT("Select third") ), 0, wxALL, 5 );
+    left_sizer->Add( new wxButton( this, ID_UNSELECT_ALL, wxT("Unselect all") ), 0, wxALL, 5 );
     button_sizer->Add( left_sizer );
     button_sizer->Add( 10, 10, 2 );
     wxFlexGridSizer *right_sizer = new wxFlexGridSizer( 2 );
-    right_sizer->Add( new wxButton( main, ID_APPEND_ROW_RIGHT, wxT("Append") ), 0, wxALL, 5 );
-    right_sizer->Add( new wxButton( main, ID_PREPEND_ROW_RIGHT, wxT("Prepend") ), 0, wxALL, 5 );
-    right_sizer->Add( new wxButton( main, ID_INSERT_ROW_RIGHT, wxT("Insert") ), 0, wxALL, 5 );
-    right_sizer->Add( new wxButton( main, ID_DELETE_ROW_RIGHT, wxT("Delete second") ), 0, wxALL, 5 );
-    right_sizer->Add( new wxButton( main, ID_EDIT_ROW_RIGHT, wxT("Edit") ), 0, wxALL, 5 );
+    right_sizer->Add( new wxButton( this, ID_APPEND_ROW_RIGHT, wxT("Append") ), 0, wxALL, 5 );
+    right_sizer->Add( new wxButton( this, ID_PREPEND_ROW_RIGHT, wxT("Prepend") ), 0, wxALL, 5 );
+    right_sizer->Add( new wxButton( this, ID_INSERT_ROW_RIGHT, wxT("Insert") ), 0, wxALL, 5 );
+    right_sizer->Add( new wxButton( this, ID_DELETE_ROW_RIGHT, wxT("Delete second") ), 0, wxALL, 5 );
+    right_sizer->Add( new wxButton( this, ID_EDIT_ROW_RIGHT, wxT("Edit") ), 0, wxALL, 5 );
     button_sizer->Add( right_sizer );
     button_sizer->Add( 10, 10, 1 );
 
@@ -955,7 +562,7 @@ MySortingFrame::MySortingFrame(wxFrame *frame, wxChar *title, int x, int y, int 
     main_sizer->Add( top_sizer, 1, wxGROW );
     main_sizer->Add( button_sizer, 0, wxGROW );
     
-    m_logWindow = new wxTextCtrl(main, wxID_ANY, wxEmptyString,
+    m_logWindow = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxSUNKEN_BORDER);
     main_sizer->Add( 20,20 );
@@ -963,7 +570,7 @@ MySortingFrame::MySortingFrame(wxFrame *frame, wxChar *title, int x, int y, int 
 
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_logWindow));
 
-    main->SetSizer( main_sizer );
+    SetSizer( main_sizer );
 }
 
 MySortingFrame::~MySortingFrame()
@@ -1015,8 +622,7 @@ void MySortingFrame::OnHeaderClickSorted(wxDataViewEvent &event)
 
 void MySortingFrame::OnHeaderClickUnsorted(wxDataViewEvent &event)
 {
-    wxLogMessage( wxT("OnHeaderClick from unsorted list, column %s"), 
-                  event.GetDataViewColumn()->GetTitle().c_str() );
+    wxLogMessage( wxT("OnHeaderClick from unsorted list, column %s"), event.GetDataViewColumn()->GetTitle().c_str() );
 }
 
 void MySortingFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )

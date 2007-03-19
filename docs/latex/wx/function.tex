@@ -133,6 +133,7 @@ the corresponding topic.
 \helpref{wxGetMousePosition}{wxgetmouseposition}\\
 \helpref{wxGetMouseState}{wxgetmousestate}\\
 \helpref{wxGetMultipleChoices}{wxgetmultiplechoices}\\
+\helpref{wxGetMultipleChoice}{wxgetmultiplechoice}\\
 \helpref{wxGetNumberFromUser}{wxgetnumberfromuser}\\
 \helpref{wxGetOSDirectory}{wxgetosdirectory}\\
 \helpref{wxGetOsDescription}{wxgetosdescription}\\
@@ -179,7 +180,6 @@ the corresponding topic.
 \helpref{wxIsPlatformLittleEndian}{wxisplatformlittleendian}\\
 \helpref{wxIsPlatform64Bit}{wxisplatform64bit}\\
 \helpref{wxIsWild}{wxiswild}\\
-\helpref{wxJoin}{wxjoin}\\
 \helpref{wxKill}{wxkill}\\
 \helpref{wxLaunchDefaultBrowser}{wxlaunchdefaultbrowser}\\
 \helpref{wxLEAVE\_CRIT\_SECT}{wxleavecritsect}\\
@@ -239,7 +239,6 @@ the corresponding topic.
 \helpref{wxShutdown}{wxshutdown}\\
 \helpref{wxSleep}{wxsleep}\\
 \helpref{wxSnprintf}{wxsnprintf}\\
-\helpref{wxSplit}{wxsplit}\\
 \helpref{wxSplitPath}{wxsplitfunction}\\
 \helpref{wxStartTimer}{wxstarttimer}\\
 \helpref{wxStaticCast}{wxstaticcast}\\
@@ -696,23 +695,6 @@ application. See \helpref{wxCloseEvent}{wxcloseevent} and \helpref{wxApp}{wxapp}
 <wx/app.h>
 
 
-\membersection{::wxJoin}\label{wxjoin}
-
-\func{wxString}{wxJoin}{\param{const wxArrayString\&}{ arr}, \param{const wxChar}{ sep}, \param{const wxChar}{ escape = '\\'}}
-
-Concatenate all lines of the given \helpref{wxArrayString}{wxarraystring} object using the separator \arg{sep} and returns
-the result as a \helpref{wxString}{string}.
-
-If the \arg{escape} character is non-\NULL, then it's used as prefix for each occurrence of \arg{sep}
-in the strings contained in \arg{arr} before joining them which is necessary
-in order to be able to recover the original array contents from the string
-later using \helpref{wxSplit}{wxsplit}.
-
-\wxheading{Include files}
-
-<wx/arrstr.h>
-
-
 \membersection{::wxKill}\label{wxkill}
 
 \func{int}{wxKill}{\param{long}{ pid}, \param{int}{ sig = wxSIGTERM}, \param{wxKillError }{*rc = NULL}, \param{int }{flags = 0}}
@@ -1085,8 +1067,8 @@ directory doesn't exist).
 
 \wxheading{Portability}
 
-The generic Unix implementation depends on the system having
-the \texttt{statfs()} or \texttt{statvfs()} function.
+This function is implemented for Win32,
+Mac OS and generic Unix provided the system has {\tt statfs()} function.
 
 This function first appeared in wxWidgets 2.3.2.
 
@@ -1132,7 +1114,7 @@ or drive name at the beginning.
 
 \membersection{::wxDirExists}\label{functionwxdirexists}
 
-\func{bool}{wxDirExists}{\param{const wxString\& }{dirname}}
+\func{bool}{wxDirExists}{\param{const wxChar *}{dirname}}
 
 Returns true if \arg{dirname} exists and is a directory.
 
@@ -1304,27 +1286,6 @@ confuse these two functions.
 
 Sets the current working directory, returning true if the operation succeeded.
 Under MS Windows, the current drive is also changed if {\it dir} contains a drive specification.
-
-
-\membersection{::wxSplit}\label{wxsplit}
-
-\func{wxArrayString}{wxSplit}{\param{const wxString\&}{ str}, \param{const wxChar}{ sep}, \param{const wxChar}{ escape = '\\'}}
-
-Splits the given \helpref{wxString}{wxstring} object using the separator \arg{sep} and returns the
-result as a \helpref{wxArrayString}{wxarraystring}.
-
-If the \arg{escape} character is non-\NULL, then the occurrences of \arg{sep} immediately prefixed
-with \arg{escape} are not considered as separators.
-
-Note that empty tokens will be generated if there are two or more adjacent separators.
-
-\wxheading{See also}
-
-\helpref{wxJoin}{wxjoin}
-
-\wxheading{Include files}
-
-<wx/arrstr.h>
 
 
 \membersection{::wxSplitPath}\label{wxsplitfunction}
@@ -2227,6 +2188,33 @@ is centred; if false, the message is left-justified.
 <wx/textdlg.h>
 
 
+\membersection{::wxGetMultipleChoice}\label{wxgetmultiplechoice}
+
+\func{int}{wxGetMultipleChoice}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
+ \param{int }{nsel}, \param{int *}{selection},
+ \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
+ \param{bool}{ centre = true}, \param{int }{width=150}, \param{int }{height=200}}
+
+Pops up a dialog box containing a message, OK/Cancel buttons and a multiple-selection
+listbox. The user may choose one or more item(s) and press OK or Cancel.
+
+The number of initially selected choices, and array of the selected indices,
+are passed in; this array will contain the user selections on exit, with
+the function returning the number of selections. {\it selection} must be
+as big as the number of choices, in case all are selected.
+
+If Cancel is pressed, -1 is returned.
+
+{\it choices} is an array of {\it n} strings for the listbox.
+
+If {\it centre} is true, the message text (which may include new line characters)
+is centred; if false, the message is left-justified.
+
+\wxheading{Include files}
+
+<wx/choicdlg.h>
+
+
 \membersection{::wxGetSingleChoice}\label{wxgetsinglechoice}
 
 \func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message},\\
@@ -2930,12 +2918,6 @@ printed. Example of using it:
 \membersection{::wxNewId}\label{wxnewid}
 
 \func{long}{wxNewId}{\void}
-
-This function is deprecated as the ids generated by it can conflict with the
-ids defined by the user code, use \texttt{wxID\_ANY} to assign ids which are
-guaranteed to not conflict with the user-defined ids for the controls and menu
-items you create instead of using this function.
-
 
 Generates an integer identifier unique to this run of the program.
 

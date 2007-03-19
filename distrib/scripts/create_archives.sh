@@ -41,7 +41,7 @@ getfilelist(){
   filelist="base.rsp"
   contribfiles="stc.rsp contrib.rsp ogl.rsp"
   utilsfiles="tex2rtf.rsp utils.rsp utilmake.rsp"
-  commonfiles="generic.rsp generic_samples.rsp jpeg.rsp tiff.rsp xml.rsp deprecated.rsp makefile.rsp $utilsfiles $contribfiles"
+  commonfiles="generic.rsp jpeg.rsp tiff.rsp xml.rsp deprecated.rsp makefile.rsp $utilsfiles $contribfiles"
 
   if [ ! $port = "base" ]; then
     filelist="$filelist $commonfiles"
@@ -68,7 +68,7 @@ getfilelist(){
   fi
   
   if [ $port = "gtk" ] || [ $port = "all" ]; then
-    filelist="$filelist gtk.rsp"
+    filelist="$filelist gtk.rsp gtk1.rsp"
   fi
 
   if [ $port = "motif" ] || [ $port = "all" ]; then

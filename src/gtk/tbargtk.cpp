@@ -91,8 +91,8 @@ public:
         Init();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -223,7 +223,7 @@ void gtktoolwidget_size_callback( GtkWidget *widget,
 {
     // this shouldn't happen...
     if (win->GetParent()->m_wxwindow) return;
-
+    
     wxSize size = win->GetEffectiveMinSize();
     if (size.y != alloc->height)
     {
@@ -269,10 +269,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelpString, longHelpString);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 //-----------------------------------------------------------------------------
@@ -475,11 +474,11 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
                                        (const char *) NULL,
                                        posGtk
                                       );
-
+                                      
             // connect after in order to correct size_allocate events
             g_signal_connect_after (tool->GetControl()->m_widget, "size_allocate",
                           G_CALLBACK (gtktoolwidget_size_callback), tool->GetControl());
-
+                                      
             break;
     }
 
@@ -607,7 +606,7 @@ void wxToolBar::SetToolNormalBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetNormalBitmap(bitmap);
         tool->SetImage(tool->GetBitmap());
-    }
+    }    
 }
 
 void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
@@ -619,7 +618,7 @@ void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetDisabledBitmap(bitmap);
         tool->SetImage(tool->GetBitmap());
-    }
+    }    
 }
 
 // ----------------------------------------------------------------------------
@@ -630,7 +629,7 @@ void wxToolBar::OnInternalIdle()
 {
     // Check if we have to show window now
     if (GtkShowFromOnIdle()) return;
-
+    
     wxCursor cursor = m_cursor;
     if (g_globalCursor.Ok()) cursor = g_globalCursor;
 

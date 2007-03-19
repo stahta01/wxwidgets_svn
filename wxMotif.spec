@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.3
+%define ver2 2.8
+%define rel  3
 
 %define portname   motif
 %define name       wx-%{portname}
@@ -198,7 +198,6 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h

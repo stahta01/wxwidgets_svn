@@ -151,9 +151,6 @@ IMPLEMENT_APP(CheckListBoxApp)
 // init our app: create windows
 bool CheckListBoxApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     CheckListBoxFrame *pFrame = new CheckListBoxFrame
                                     (
                                      NULL,

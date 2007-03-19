@@ -60,10 +60,8 @@ public:
 
     inline wxToolBarTool( wxToolBar* pTbar
                          ,wxControl* pControl
-                         ,const wxString& label
                         ) : wxToolBarToolBase( pTbar
                                               ,pControl
-                                              ,label
                                              )
     {
     }
@@ -130,12 +128,10 @@ wxToolBarToolBase* wxToolBar::CreateTool(
 
 wxToolBarToolBase *wxToolBar::CreateTool(
   wxControl*                        pControl
-, const wxString&                   label
 )
 {
     return new wxToolBarTool( this
                              ,pControl
-                             ,label
                             );
 } // end of wxToolBarSimple::CreateTool
 

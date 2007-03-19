@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 26 February 2007                                                    *
+# Date : 1 December 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -210,8 +210,6 @@ OBJECTS_X11=accesscmn.obj,dndcmn.obj,dpycmn.obj,dseldlg.obj,\
 
 OBJECTS_X11_2=socketevtdispatch.obj
 
-OBJECTS_GTK2=fontutilcmn.obj
-
 SOURCES = \
 		anidecod.cpp,\
 		animatecmn.cpp,\
@@ -267,7 +265,6 @@ SOURCES = \
 		fontcmn.cpp,\
 		fontenumcmn.cpp,\
 		fontmap.cpp,\
-		fontutilcmn.cpp,\
 		framecmn.cpp,\
 		fs_inet.cpp,\
 		ftp.cpp,\
@@ -400,12 +397,10 @@ all : $(SOURCES)
 .else
 .ifdef __WXGTK2__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_GTK2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS_X11)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS_GTK2)
 .else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
@@ -473,7 +468,6 @@ fmapbase.obj : fmapbase.cpp
 fontcmn.obj : fontcmn.cpp
 fontenumcmn.obj : fontenumcmn.cpp
 fontmap.obj : fontmap.cpp
-fontutilcmn.obj : fontutilcmn.cpp
 framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
 ftp.obj : ftp.cpp

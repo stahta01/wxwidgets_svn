@@ -125,7 +125,7 @@ public:
                                   wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
                                   wxHeaderButtonParams* params = NULL);
     virtual int GetHeaderButtonHeight(wxWindow *win);
-
+    
     virtual void DrawTreeItemButton(wxWindow *win,
                                     wxDC& dc,
                                     const wxRect& rect,
@@ -153,12 +153,6 @@ public:
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags = 0);
-
-    virtual void DrawItemSelectionRect(wxWindow *win,
-                                       wxDC& dc,
-                                       const wxRect& rect,
-                                       int flags = 0 );
-
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 private:
@@ -333,7 +327,7 @@ wxRendererXP::DrawHeaderButton(wxWindow *win,
     // NOTE: Using the theme to draw HP_HEADERSORTARROW doesn't do anything.
     // Why?  If this can be fixed then draw the sort arrows using the theme
     // and then clear those flags before calling DrawHeaderButtonContents.
-
+    
     // Add any extras that are specified in flags and params
     return DrawHeaderButtonContents(win, dc, rect, flags, sortArrow, params);
 }
@@ -347,10 +341,10 @@ wxRendererXP::GetHeaderButtonHeight(wxWindow *win)
     {
         return m_rendererNative.GetHeaderButtonHeight(win);
     }
-
+    
     HRESULT hr;
     int value = -1;
-
+    
     hr = wxUxThemeEngine::Get()->GetThemeMetric( hTheme,
                                                  NULL,
                                                  HP_HEADERITEM,
@@ -474,40 +468,6 @@ wxRendererXP::DrawPushButton(wxWindow * win,
                             );
 
 }
-
-void
-wxRendererXP::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
-                                    wxDC& dc,
-                                    const wxRect& rect,
-                                    int flags)
-{
-    wxBrush brush;
-    if ( flags & wxCONTROL_SELECTED )
-    {
-        if ( flags & wxCONTROL_FOCUSED )
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
-        }
-        else // !focused
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
-        }
-    }
-    else // !selected
-    {
-        brush = *wxTRANSPARENT_BRUSH;
-    }
-
-    dc.SetBrush(brush);
-
-    // unlike for wxRendererGeneric, on windows we _never_ want to draw
-    // the outline of the rectangle:
-    dc.SetPen(*wxTRANSPARENT_PEN);
-
-    dc.DrawRectangle( rect );
-}
-
-
 
 // ----------------------------------------------------------------------------
 // splitter drawing

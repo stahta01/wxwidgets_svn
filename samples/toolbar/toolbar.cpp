@@ -269,9 +269,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame((wxFrame *) NULL, wxID_ANY,
                                  _T("wxToolBar Sample"),
@@ -402,14 +399,14 @@ void MyFrame::RecreateToolbar()
         combo->Append(_T("combobox"));
         combo->Append(_T("in a"));
         combo->Append(_T("toolbar"));
-        toolBar->AddControl(combo, _T("Combo Label"));
+        toolBar->AddControl(combo);
 
         wxSpinCtrl *spin = new wxSpinCtrl( toolBar, ID_SPIN, wxT("0"), wxDefaultPosition, wxSize(80,wxDefaultCoord), 0, 0, 100 );
         toolBar->AddControl( spin );
-
+        
         wxTextCtrl *text = new wxTextCtrl( toolBar, -1, wxT("text"), wxDefaultPosition, wxSize(80,wxDefaultCoord) );
         toolBar->AddControl( text );
-
+        
         wxSearchCtrl *srch = new wxSearchCtrl( toolBar, -1, wxT("xx"), wxDefaultPosition, wxSize(80,wxDefaultCoord), wxSUNKEN_BORDER );
         toolBar->AddControl( srch );
     }
@@ -585,6 +582,19 @@ MyFrame::MyFrame(wxFrame* parent,
 
     m_textWindow = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 }
+
+#if USE_GENERIC_TBAR
+
+wxToolBar* MyFrame::OnCreateToolBar(long style,
+                                    wxWindowID id,
+                                    const wxString& name)
+{
+    return (wxToolBar *)new wxToolBarSimple(this, id,
+                                            wxDefaultPosition, wxDefaultSize,
+                                            style, name);
+}
+
+#endif // USE_GENERIC_TBAR
 
 void MyFrame::LayoutChildren()
 {

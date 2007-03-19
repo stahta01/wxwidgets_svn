@@ -42,10 +42,9 @@
 #include  "wx/fileconf.h"
 #include  "wx/filefn.h"
 
-#include  "wx/stdpaths.h"
-
 #if defined(__WXMAC__)
     #include  "wx/mac/private.h"  // includes mac headers
+    #include  "wx/filename.h"     // for MacSetTypeAndCreator
 #endif
 
 #if defined(__WXMSW__)
@@ -261,77 +260,123 @@ public:
 // ----------------------------------------------------------------------------
 // static functions
 // ----------------------------------------------------------------------------
-
-// this function modifies in place the given wxFileName object if it doesn't
-// already have an extension
-//
-// note that it's slightly misnamed under Mac as there it doesn't add an
-// extension but modifies the file name instead, so you shouldn't suppose that
-// fn.HasExt() is true after it returns
-static void AddConfFileExtIfNeeded(wxFileName& fn)
-{
-    if ( !fn.HasExt() )
-    {
-#if defined( __WXMAC__ )
-        fn.SetName(fn.GetName() + wxT(" Preferences"));
-#elif defined( __UNIX__ )
-        fn.SetExt(wxT(".conf"));
-#else   // Windows
-        fn.SetExt(wxT(".ini"));
-#endif  // UNIX/Win
-    }
-}
-
 wxString wxFileConfig::GetGlobalDir()
 {
-    return wxStandardPaths::Get().GetConfigDir();
-}
+  wxString strDir;
 
-wxString wxFileConfig::GetLocalDir(int style)
-{
-    wxUnusedVar(style);
+#ifdef __VMS__ // Note if __VMS is defined __UNIX is also defined
+    strDir = wxT("sys$manager:");
+#elif defined(__WXMAC__)
+    strDir = wxMacFindFolder(  (short) kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder ) ;
+#elif defined( __UNIX__ )
+    strDir = wxT("/etc/");
+#elif defined(__OS2__)
+    ULONG aulSysInfo[QSV_MAX] = {0};
+    UINT drive;
+    APIRET rc;
 
-    wxStandardPathsBase& stdp = wxStandardPaths::Get();
-
-    // it so happens that user data directory is a subdirectory of user config
-    // directory on all supported platforms, which explains why we use it here
-    return style & wxCONFIG_USE_SUBDIR ? stdp.GetUserDataDir()
-                                       : stdp.GetUserConfigDir();
-}
-
-wxFileName wxFileConfig::GetGlobalFile(const wxString& szFile)
-{
-    wxFileName fn(GetGlobalDir(), szFile);
-
-    AddConfFileExtIfNeeded(fn);
-
-    return fn;
-}
-
-wxFileName wxFileConfig::GetLocalFile(const wxString& szFile, int style)
-{
-    wxFileName fn(GetLocalDir(style), szFile);
-
-#ifdef __UNIX__
-    if ( !(style & wxCONFIG_USE_SUBDIR) )
+    rc = DosQuerySysInfo( 1L, QSV_MAX, (PVOID)aulSysInfo, sizeof(ULONG)*QSV_MAX);
+    if (rc == 0)
     {
-        // dot-files under Unix start with, well, a dot (but OTOH they usually
-        // don't have any specific extension)
-        fn.SetName(wxT('.') + fn.GetName());
+        drive = aulSysInfo[QSV_BOOT_DRIVE - 1];
+        strDir.Printf(wxT("%c:\\OS2\\"), 'A'+drive-1);
     }
-    else // we do append ".conf" extension to config files in subdirectories
-#endif // __UNIX__
-    {
-        AddConfFileExtIfNeeded(fn);
-    }
+#elif defined(__WXSTUBS__)
+    wxFAIL_MSG( wxT("TODO") );
+#elif defined(__DOS__)
+    // There's no such thing as global cfg dir in MS-DOS, let's return
+    // current directory (FIXME_MGL?)
+    strDir = wxT(".\\");
+#elif defined(__WXWINCE__)
+    strDir = wxT("\\Windows\\");
+#else // Windows
 
-    return fn;
+    wxChar szWinDir[MAX_PATH];
+    ::GetWindowsDirectory(szWinDir, MAX_PATH);
+
+    strDir = szWinDir;
+    strDir << wxT('\\');
+#endif // Unix/Windows
+
+    return strDir;
+}
+
+wxString wxFileConfig::GetLocalDir()
+{
+    wxString strDir;
+
+#if defined(__WXMAC__) || defined(__DOS__)
+    // no local dir concept on Mac OS 9 or MS-DOS
+    strDir << GetGlobalDir() ;
+#else
+    wxGetHomeDir(&strDir);
+
+    #ifdef  __UNIX__
+        if (
+            (strDir.Last() != wxT('/'))
+        #ifdef __VMS
+            && (strDir.Last() != wxT(']'))
+        #endif
+            )
+            strDir << wxT('/');
+    #else
+        if (strDir.Last() != wxT('\\'))
+            strDir << wxT('\\');
+    #endif
+#endif
+
+    return strDir;
+}
+
+wxString wxFileConfig::GetGlobalFileName(const wxChar *szFile)
+{
+    wxString str = GetGlobalDir();
+    str << szFile;
+
+    if ( wxStrchr(szFile, wxT('.')) == NULL )
+#if defined( __WXMAC__ )
+        str << wxT(" Preferences") ;
+#elif defined( __UNIX__ )
+        str << wxT(".conf");
+#else   // Windows
+        str << wxT(".ini");
+#endif  // UNIX/Win
+
+    return str;
+}
+
+wxString wxFileConfig::GetLocalFileName(const wxChar *szFile)
+{
+#ifdef __VMS__
+    // On VMS I saw the problem that the home directory was appended
+    // twice for the configuration file. Does that also happen for
+    // other platforms?
+    wxString str = wxT( '.' );
+#else
+    wxString str = GetLocalDir();
+#endif
+
+#if defined( __UNIX__ ) && !defined( __VMS ) && !defined( __WXMAC__ )
+    str << wxT('.');
+#endif
+
+    str << szFile;
+
+#if defined(__WINDOWS__) || defined(__DOS__)
+    if ( wxStrchr(szFile, wxT('.')) == NULL )
+        str << wxT(".ini");
+#endif
+
+#ifdef __WXMAC__
+    str << wxT(" Preferences") ;
+#endif
+
+    return str;
 }
 
 // ----------------------------------------------------------------------------
 // ctor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxFileConfig, wxConfigBase)
 
 void wxFileConfig::Init()
 {
@@ -344,9 +389,9 @@ void wxFileConfig::Init()
     // It's not an error if (one of the) file(s) doesn't exist.
 
     // parse the global file
-    if ( m_fnGlobalFile.IsOk() && m_fnGlobalFile.FileExists() )
+    if ( !m_strGlobalFile.empty() && wxFile::Exists(m_strGlobalFile) )
     {
-        wxTextFile fileGlobal(m_fnGlobalFile.GetFullPath());
+        wxTextFile fileGlobal(m_strGlobalFile);
 
         if ( fileGlobal.Open(*m_conv/*ignored in ANSI build*/) )
         {
@@ -355,14 +400,14 @@ void wxFileConfig::Init()
         }
         else
         {
-            wxLogWarning(_("can't open global configuration file '%s'."), m_fnGlobalFile.GetFullPath().c_str());
+            wxLogWarning(_("can't open global configuration file '%s'."), m_strGlobalFile.c_str());
         }
     }
 
     // parse the local file
-    if ( m_fnLocalFile.IsOk() && m_fnLocalFile.FileExists() )
+    if ( !m_strLocalFile.empty() && wxFile::Exists(m_strLocalFile) )
     {
-        wxTextFile fileLocal(m_fnLocalFile.GetFullPath());
+        wxTextFile fileLocal(m_strLocalFile);
         if ( fileLocal.Open(*m_conv/*ignored in ANSI build*/) )
         {
             Parse(fileLocal, true /* local */);
@@ -370,7 +415,7 @@ void wxFileConfig::Init()
         }
         else
         {
-            wxLogWarning(_("can't open user configuration file '%s'."),  m_fnLocalFile.GetFullPath().c_str() );
+            wxLogWarning(_("can't open user configuration file '%s'."),  m_strLocalFile.c_str() );
         }
     }
 
@@ -385,34 +430,47 @@ wxFileConfig::wxFileConfig(const wxString& appName, const wxString& vendorName,
             : wxConfigBase(::GetAppName(appName), vendorName,
                            strLocal, strGlobal,
                            style),
-              m_fnLocalFile(strLocal),
-              m_fnGlobalFile(strGlobal),
+              m_strLocalFile(strLocal), m_strGlobalFile(strGlobal),
               m_conv(conv.Clone())
 {
     // Make up names for files if empty
-    if ( !m_fnLocalFile.IsOk() && (style & wxCONFIG_USE_LOCAL_FILE) )
-        m_fnLocalFile = GetLocalFile(GetAppName(), style);
+    if ( m_strLocalFile.empty() && (style & wxCONFIG_USE_LOCAL_FILE) )
+    {
+        m_strLocalFile = GetLocalFileName(GetAppName());
+#if defined(__UNIX__) && !defined(__VMS)
+        if ( style & wxCONFIG_USE_SUBDIR )
+            m_strLocalFile << wxFILE_SEP_PATH << GetAppName() << _T(".conf");
+#endif
+    }
 
-    if ( !m_fnGlobalFile.IsOk() && (style & wxCONFIG_USE_GLOBAL_FILE) )
-        m_fnGlobalFile = GetGlobalFile(GetAppName());
+    if ( m_strGlobalFile.empty() && (style & wxCONFIG_USE_GLOBAL_FILE) )
+        m_strGlobalFile = GetGlobalFileName(GetAppName());
 
     // Check if styles are not supplied, but filenames are, in which case
     // add the correct styles.
-    if ( m_fnLocalFile.IsOk() )
+    if ( !m_strLocalFile.empty() )
         SetStyle(GetStyle() | wxCONFIG_USE_LOCAL_FILE);
 
-    if ( m_fnGlobalFile.IsOk() )
+    if ( !m_strGlobalFile.empty() )
         SetStyle(GetStyle() | wxCONFIG_USE_GLOBAL_FILE);
 
     // if the path is not absolute, prepend the standard directory to it
-    // unless explicitly asked not to
+    // UNLESS wxCONFIG_USE_RELATIVE_PATH style is set
     if ( !(style & wxCONFIG_USE_RELATIVE_PATH) )
     {
-        if ( m_fnLocalFile.IsOk() )
-            m_fnLocalFile.MakeAbsolute(GetLocalDir(style));
+        if ( !m_strLocalFile.empty() && !wxIsAbsolutePath(m_strLocalFile) )
+        {
+            const wxString strLocalOrig = m_strLocalFile;
+            m_strLocalFile = GetLocalDir();
+            m_strLocalFile << strLocalOrig;
+        }
 
-        if ( m_fnGlobalFile.IsOk() )
-            m_fnGlobalFile.MakeAbsolute(GetGlobalDir());
+        if ( !m_strGlobalFile.empty() && !wxIsAbsolutePath(m_strGlobalFile) )
+        {
+            const wxString strGlobalOrig = m_strGlobalFile;
+            m_strGlobalFile = GetGlobalDir();
+            m_strGlobalFile << strGlobalOrig;
+        }
     }
 
     SetUmask(-1);
@@ -982,13 +1040,13 @@ bool wxFileConfig::DoWriteLong(const wxString& key, long lValue)
 
 bool wxFileConfig::Flush(bool /* bCurrentOnly */)
 {
-  if ( !IsDirty() || !m_fnLocalFile.GetFullPath() )
+  if ( !IsDirty() || !m_strLocalFile )
     return true;
 
   // set the umask if needed
   wxCHANGE_UMASK(m_umask);
 
-  wxTempFile file(m_fnLocalFile.GetFullPath());
+  wxTempFile file(m_strLocalFile);
 
   if ( !file.IsOpened() )
   {
@@ -1020,7 +1078,7 @@ bool wxFileConfig::Flush(bool /* bCurrentOnly */)
   ResetDirty();
 
 #if defined(__WXMAC__)
-  m_fnLocalFile.MacSetTypeAndCreator('TEXT', 'ttxt');
+  wxFileName(m_strLocalFile).MacSetTypeAndCreator('TEXT', 'ttxt');
 #endif // __WXMAC__
 
   return true;
@@ -1146,12 +1204,12 @@ bool wxFileConfig::DeleteAll()
 {
   CleanUp();
 
-  if ( m_fnLocalFile.IsOk() )
+  if ( !m_strLocalFile.empty() )
   {
-      if ( m_fnLocalFile.FileExists() && wxRemove(m_fnLocalFile.GetFullPath()) == -1 )
+      if ( wxFile::Exists(m_strLocalFile) && wxRemove(m_strLocalFile) == -1 )
       {
           wxLogSysError(_("can't delete user configuration file '%s'"),
-                        m_fnLocalFile.GetFullPath().c_str());
+                        m_strLocalFile.c_str());
           return false;
       }
   }
@@ -1174,12 +1232,10 @@ wxFileConfigLineList *wxFileConfig::LineListAppend(const wxString& str)
                 str.c_str() );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     wxFileConfigLineList *pLine = new wxFileConfigLineList(str);
 
@@ -1199,12 +1255,10 @@ wxFileConfigLineList *wxFileConfig::LineListAppend(const wxString& str)
 
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     return m_linesTail;
 }
@@ -1216,16 +1270,13 @@ wxFileConfigLineList *wxFileConfig::LineListInsert(const wxString& str,
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("    ** Inserting Line '%s' after '%s'"),
                 str.c_str(),
-                ((pLine) ? (const wxChar*)pLine->Text().c_str()
-                         : wxEmptyString) );
+                ((pLine) ? pLine->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     if ( pLine == m_linesTail )
         return LineListAppend(str);
@@ -1250,12 +1301,10 @@ wxFileConfigLineList *wxFileConfig::LineListInsert(const wxString& str,
 
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     return pNewLine;
 }
@@ -1267,12 +1316,10 @@ void wxFileConfig::LineListRemove(wxFileConfigLineList *pLine)
                 pLine->Text().c_str() );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     wxFileConfigLineList    *pPrev = pLine->Prev(),
                             *pNext = pLine->Next();
@@ -1296,12 +1343,10 @@ void wxFileConfig::LineListRemove(wxFileConfigLineList *pLine)
 
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        head: %s"),
-                ((m_linesHead) ? (const wxChar*)m_linesHead->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesHead) ? m_linesHead->Text().c_str() : wxEmptyString) );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("        tail: %s"),
-                ((m_linesTail) ? (const wxChar*)m_linesTail->Text().c_str()
-                               : wxEmptyString) );
+                ((m_linesTail) ? m_linesTail->Text().c_str() : wxEmptyString) );
 
     delete pLine;
 }
@@ -1669,8 +1714,7 @@ bool wxFileConfigGroup::DeleteSubgroup(wxFileConfigGroup *pGroup)
                 m_pLine ? wx_static_cast(void*, m_pLine->Next()) : 0 );
     wxLogTrace( FILECONF_TRACE_MASK,
                 _T("  text: '%s'"),
-                m_pLine ? (const wxChar*)m_pLine->Text().c_str()
-                        : wxEmptyString );
+                m_pLine ? m_pLine->Text().c_str() : wxEmptyString );
 
     // delete all entries...
     size_t nCount = pGroup->m_aEntries.Count();
@@ -1713,8 +1757,7 @@ bool wxFileConfigGroup::DeleteSubgroup(wxFileConfigGroup *pGroup)
         wxLogTrace( FILECONF_TRACE_MASK,
                     _T("  Removing from group '%s' : '%s'"),
                     Name().c_str(),
-                    ((m_pLine) ? (const wxChar*)m_pLine->Text().c_str()
-                               : wxEmptyString) );
+                    ((m_pLine) ? m_pLine->Text().c_str() : wxEmptyString) );
 
         // notice that we may do this test inside the previous "if"
         // because the last entry's line is surely !NULL
@@ -1946,7 +1989,7 @@ static wxString FilterInValue(const wxString& str)
 
   for ( size_t n = bQuoted ? 1 : 0; n < str.Len(); n++ ) {
     if ( str[n] == wxT('\\') ) {
-      switch ( str[++n].GetValue() ) {
+      switch ( str[++n] ) {
         case wxT('n'):
           strResult += wxT('\n');
           break;
@@ -1999,7 +2042,7 @@ static wxString FilterOutValue(const wxString& str)
 
   wxChar c;
   for ( size_t n = 0; n < str.Len(); n++ ) {
-    switch ( str[n].GetValue() ) {
+    switch ( str[n] ) {
       case wxT('\n'):
         c = wxT('n');
         break;

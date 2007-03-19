@@ -2804,20 +2804,15 @@ wxRotatePoint(double x, double y, double cos_angle, double sin_angle,
     return wxRotatePoint (wxRealPoint(x,y), cos_angle, sin_angle, p0);
 }
 
-wxImage wxImage::Rotate(double angle,
-                        const wxPoint& centre_of_rotation,
-                        bool interpolating,
-                        wxPoint *offset_after_rotation) const
+wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool interpolating, wxPoint * offset_after_rotation) const
 {
-    // screen coordinates are a mirror image of "real" coordinates
-    angle = -angle;
-
-    const bool has_alpha = HasAlpha();
-
-    const int w = GetWidth();
-    const int h = GetHeight();
-
     int i;
+    angle = -angle;     // screen coordinates are a mirror image of "real" coordinates
+
+    bool has_alpha = HasAlpha();
+
+    const int w = GetWidth(),
+              h = GetHeight();
 
     // Create pointer-based array to accelerate access to wxImage's data
     unsigned char ** data = new unsigned char * [h];
@@ -2836,6 +2831,7 @@ wxImage wxImage::Rotate(double angle,
     }
 
     // precompute coefficients for rotation formula
+    // (sine and cosine of the angle)
     const double cos_angle = cos(angle);
     const double sin_angle = sin(angle);
 
@@ -2866,14 +2862,19 @@ wxImage wxImage::Rotate(double angle,
         *offset_after_rotation = wxPoint (x1a, y1a);
     }
 
-    // the rotated (destination) image is always accessed sequentially via this
-    // pointer, there is no need for pointer-based arrays here
-    unsigned char *dst = rotated.GetData();
+    // GRG: The rotated (destination) image is always accessed
+    //      sequentially, so there is no need for a pointer-based
+    //      array here (and in fact it would be slower).
+    //
+    unsigned char * dst = rotated.GetData();
 
-    unsigned char *alpha_dst = has_alpha ? rotated.GetAlpha() : NULL;
+    unsigned char * alpha_dst = NULL;
+    if (has_alpha)
+        alpha_dst = rotated.GetAlpha();
 
-    // if the original image has a mask, use its RGB values as the blank pixel,
-    // else, fall back to default (black).
+    // GRG: if the original image has a mask, use its RGB values
+    //      as the blank pixel, else, fall back to default (black).
+    //
     unsigned char blank_r = 0;
     unsigned char blank_g = 0;
     unsigned char blank_b = 0;
@@ -2893,8 +2894,9 @@ wxImage wxImage::Rotate(double angle,
     const int rH = rotated.GetHeight();
     const int rW = rotated.GetWidth();
 
-    // do the (interpolating) test outside of the loops, so that it is done
-    // only once, instead of repeating it for each pixel.
+    // GRG: I've taken the (interpolating) test out of the loops, so that
+    //      it is done only once, instead of repeating it for each pixel.
+
     if (interpolating)
     {
         for (int y = 0; y < rH; y++)
@@ -3042,7 +3044,7 @@ wxImage wxImage::Rotate(double angle,
             }
         }
     }
-    else // not interpolating
+    else    // not interpolating
     {
         for (int y = 0; y < rH; y++)
         {
@@ -3077,7 +3079,9 @@ wxImage wxImage::Rotate(double angle,
     }
 
     delete [] data;
-    delete [] alpha;
+
+    if (has_alpha)
+        delete [] alpha;
 
     return rotated;
 }

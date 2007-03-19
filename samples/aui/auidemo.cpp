@@ -402,11 +402,11 @@ public:
         cont_sizer->Add(grid_sizer, 1, wxEXPAND | wxALL, 5);
         SetSizer(cont_sizer);
         GetSizer()->SetSizeHints(this);
-
+#if 0
         m_border_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE));
         m_sash_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_SASH_SIZE));
         m_caption_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE));
-
+#endif
         UpdateColors();
     }
 
@@ -548,9 +548,6 @@ END_EVENT_TABLE()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame* frame = new MyFrame(NULL,
                                  wxID_ANY,
                                  wxT("wxAUI Sample Application"),

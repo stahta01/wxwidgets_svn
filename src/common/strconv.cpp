@@ -15,11 +15,10 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif  //__BORLANDC__
-
 #ifndef WX_PRECOMP
+    #ifdef __WXMSW__
+        #include "wx/msw/missing.h"
+    #endif
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
@@ -30,6 +29,10 @@
 
 #if wxUSE_WCHAR_T
 
+#ifdef __WINDOWS__
+    #include "wx/msw/private.h"
+#endif
+
 #ifndef __WXWINCE__
 #include <errno.h>
 #endif
@@ -39,8 +42,6 @@
 #include <stdlib.h>
 
 #if defined(__WIN32__) && !defined(__WXMICROWIN__)
-    #include "wx/msw/private.h"
-    #include "wx/msw/missing.h"
     #define wxHAVE_WIN32_MB2WC
 #endif
 
@@ -3279,7 +3280,7 @@ wxMBConv *wxCSConv::DoCreate() const
     wxLogTrace(TRACE_STRCONV,
                wxT("creating conversion for %s"),
                (m_name ? m_name
-                       : (const wxChar*)wxFontMapperBase::GetEncodingName(m_encoding).c_str()));
+                       : wxFontMapperBase::GetEncodingName(m_encoding).c_str()));
 #endif // wxUSE_FONTMAP
 
     // check for the special case of ASCII or ISO8859-1 charset: as we have
@@ -3482,9 +3483,9 @@ wxMBConv *wxCSConv::DoCreate() const
                    m_name ? m_name
                       :
 #if wxUSE_FONTMAP
-                         (const wxChar*)wxFontMapperBase::GetEncodingDescription(m_encoding).c_str()
+                         wxFontMapperBase::GetEncodingDescription(m_encoding).c_str()
 #else // !wxUSE_FONTMAP
-                         (const wxChar*)wxString::Format(_("encoding %i"), m_encoding).c_str()
+                         wxString::Format(_("encoding %i"), m_encoding).c_str()
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
               );
 
@@ -3505,7 +3506,7 @@ void wxCSConv::CreateConvIfNeeded() const
         if ( !m_name && m_encoding == wxFONTENCODING_SYSTEM )
         {
 #if wxUSE_INTL
-            self->m_encoding = wxLocale::GetSystemEncoding();
+            self->m_name = wxStrdup(wxLocale::GetSystemEncodingName());
 #else
             // fallback to some reasonable default:
             self->m_encoding = wxFONTENCODING_ISO8859_1;

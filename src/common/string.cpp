@@ -95,16 +95,12 @@ extern const wxChar WXDLLIMPEXP_BASE *wxEmptyString = &g_strEmpty.dummy;
 
 wxSTD ostream& operator<<(wxSTD ostream& os, const wxString& str)
 {
-    return os << str.c_str();
-}
-
-wxSTD ostream& operator<<(wxSTD ostream& os, const wxCStrData& str)
-{
-#if wxUSE_UNICODE && !defined(__BORLANDC__)
-    return os << str.AsWChar();
+#ifdef __BORLANDC__
+    os << str.mb_str();
 #else
-    return os << str.AsChar();
+    os << str.c_str();
 #endif
+    return os;
 }
 
 #endif // wxUSE_STD_IOSTREAM
@@ -195,7 +191,7 @@ wxStringBase::wxStringBase(const void *pStart, const void *pEnd)
   }
 }
 
-wxStringBase::wxStringBase(size_type n, wxUniChar ch)
+wxStringBase::wxStringBase(size_type n, wxChar ch)
 {
   Init();
   append(n, ch);
@@ -304,7 +300,7 @@ bool wxStringBase::AllocBeforeWrite(size_t nLen)
   return true;
 }
 
-wxStringBase& wxStringBase::append(size_t n, wxUniChar ch)
+wxStringBase& wxStringBase::append(size_t n, wxChar ch)
 {
     size_type len = length();
 
@@ -318,7 +314,7 @@ wxStringBase& wxStringBase::append(size_t n, wxUniChar ch)
     return *this;
 }
 
-void wxStringBase::resize(size_t nSize, wxUniChar ch)
+void wxStringBase::resize(size_t nSize, wxChar ch)
 {
     size_t len = length();
 
@@ -499,7 +495,7 @@ size_t wxStringBase::find(const wxChar* sz, size_t nStart, size_t n) const
     return find(wxStringBase(sz, n), nStart);
 }
 
-size_t wxStringBase::find(wxUniChar ch, size_t nStart) const
+size_t wxStringBase::find(wxChar ch, size_t nStart) const
 {
     wxASSERT( nStart <= length() );
 
@@ -546,7 +542,7 @@ size_t wxStringBase::rfind(const wxChar* sz, size_t nStart, size_t n) const
     return rfind(wxStringBase(sz, n), nStart);
 }
 
-size_t wxStringBase::rfind(wxUniChar ch, size_t nStart) const
+size_t wxStringBase::rfind(wxChar ch, size_t nStart) const
 {
     if ( nStart == npos )
     {
@@ -654,14 +650,14 @@ size_t wxStringBase::find_first_not_of(const wxChar* sz, size_t nStart,
     return find_first_not_of(wxStringBase(sz, n), nStart);
 }
 
-size_t wxStringBase::find_first_not_of(wxUniChar ch, size_t nStart) const
+size_t wxStringBase::find_first_not_of(wxChar ch, size_t nStart) const
 {
     wxASSERT( nStart <= length() );
 
-    for ( const_iterator p = begin() + nStart; (bool)*p; ++p ) // FIXME-DMARS
+    for ( const wxChar *p = c_str() + nStart; *p; p++ )
     {
         if ( *p != ch )
-            return p - begin();
+            return p - c_str();
     }
 
     return npos;
@@ -695,7 +691,7 @@ size_t wxStringBase::find_last_not_of(const wxChar* sz, size_t nStart,
     return find_last_not_of(wxStringBase(sz, n), nStart);
 }
 
-size_t wxStringBase::find_last_not_of(wxUniChar ch, size_t nStart) const
+size_t wxStringBase::find_last_not_of(wxChar ch, size_t nStart) const
 {
     if ( nStart == npos )
     {
@@ -706,10 +702,10 @@ size_t wxStringBase::find_last_not_of(wxUniChar ch, size_t nStart) const
         wxASSERT( nStart <= length() );
     }
 
-    for ( const_iterator p = begin() + nStart; p != begin(); --p )
+    for ( const wxChar *p = c_str() + nStart; p >= c_str(); --p )
     {
         if ( *p != ch )
-            return p - begin();
+            return p - c_str();
     }
 
     return npos;
@@ -748,7 +744,7 @@ wxStringBase& wxStringBase::replace(size_t nStart, size_t nLen,
 }
 
 wxStringBase& wxStringBase::replace(size_t nStart, size_t nLen,
-                                    size_t nCount, wxUniChar ch)
+                                    size_t nCount, wxChar ch)
 {
   return replace(nStart, nLen, wxStringBase(nCount, ch).c_str());
 }
@@ -795,10 +791,9 @@ wxStringBase& wxStringBase::operator=(const wxStringBase& stringSrc)
 }
 
 // assigns a single character
-wxStringBase& wxStringBase::operator=(wxUniChar ch)
+wxStringBase& wxStringBase::operator=(wxChar ch)
 {
-  wxChar c(ch);
-  if ( !AssignCopy(1, &c) ) {
+  if ( !AssignCopy(1, &ch) ) {
     wxFAIL_MSG( _T("out of memory in wxStringBase::operator=(wxChar)") );
   }
   return *this;
@@ -1066,7 +1061,7 @@ bool wxString::Shrink()
 
 #if !wxUSE_STL
 // get the pointer to writable buffer of (at least) nLen bytes
-wxChar *wxString::DoGetWriteBuf(size_t nLen)
+wxChar *wxString::GetWriteBuf(size_t nLen)
 {
   if ( !AllocBeforeWrite(nLen) ) {
     // allocation failure handled by caller
@@ -1080,12 +1075,12 @@ wxChar *wxString::DoGetWriteBuf(size_t nLen)
 }
 
 // put string back in a reasonable state after GetWriteBuf
-void wxString::DoUngetWriteBuf()
+void wxString::UngetWriteBuf()
 {
-  DoUngetWriteBuf(wxStrlen(m_pchData));
+  UngetWriteBuf(wxStrlen(m_pchData));
 }
 
-void wxString::DoUngetWriteBuf(size_t nLen)
+void wxString::UngetWriteBuf(size_t nLen)
 {
   wxStringData * const pData = GetStringData();
 
@@ -1096,27 +1091,7 @@ void wxString::DoUngetWriteBuf(size_t nLen)
   pData->nDataLength = nLen;
   pData->Validate(true);
 }
-
-// deprecated compatibility code:
-#if WXWIN_COMPATIBILITY_2_8
-wxChar *wxString::GetWriteBuf(size_t nLen)
-{
-    return DoGetWriteBuf(nLen);
-}
-
-void wxString::UngetWriteBuf()
-{
-    DoUngetWriteBuf();
-}
-
-void wxString::UngetWriteBuf(size_t nLen)
-{
-    DoUngetWriteBuf(nLen);
-}
-#endif // WXWIN_COMPATIBILITY_2_8
-
 #endif // !wxUSE_STL
-
 
 // ---------------------------------------------------------------------------
 // data access
@@ -1168,7 +1143,7 @@ wxString operator+(const wxString& str1, const wxString& str2)
     return s;
 }
 
-wxString operator+(const wxString& str, wxUniChar ch)
+wxString operator+(const wxString& str, wxChar ch)
 {
 #if !wxUSE_STL
     wxASSERT( str.GetStringData()->IsValid() );
@@ -1180,7 +1155,7 @@ wxString operator+(const wxString& str, wxUniChar ch)
     return s;
 }
 
-wxString operator+(wxUniChar ch, const wxString& str)
+wxString operator+(wxChar ch, const wxString& str)
 {
 #if !wxUSE_STL
     wxASSERT( str.GetStringData()->IsValid() );
@@ -1420,7 +1395,7 @@ bool wxString::EndsWith(const wxChar *suffix, wxString *rest) const
     wxASSERT_MSG( suffix, _T("invalid parameter in wxString::EndssWith") );
 
     int start = length() - wxStrlen(suffix);
-    if ( start < 0 || wxStrcmp(wx_str() + start, suffix) != 0 )
+    if ( start < 0 || wxStrcmp(c_str() + start, suffix) != 0 )
         return false;
 
     if ( rest )
@@ -1448,14 +1423,14 @@ wxString wxString::Right(size_t nCount) const
 
 // get all characters after the last occurence of ch
 // (returns the whole string if ch not found)
-wxString wxString::AfterLast(wxUniChar ch) const
+wxString wxString::AfterLast(wxChar ch) const
 {
   wxString str;
   int iPos = Find(ch, true);
   if ( iPos == wxNOT_FOUND )
     str = *this;
   else
-    str = wx_str() + iPos + 1;
+    str = c_str() + iPos + 1;
 
   return str;
 }
@@ -1475,7 +1450,7 @@ wxString wxString::Left(size_t nCount) const
 
 // get all characters before the first occurence of ch
 // (returns the whole string if ch not found)
-wxString wxString::BeforeFirst(wxUniChar ch) const
+wxString wxString::BeforeFirst(wxChar ch) const
 {
   int iPos = Find(ch);
   if ( iPos == wxNOT_FOUND ) iPos = length();
@@ -1484,7 +1459,7 @@ wxString wxString::BeforeFirst(wxUniChar ch) const
 
 /// get all characters before the last occurence of ch
 /// (returns empty string if ch not found)
-wxString wxString::BeforeLast(wxUniChar ch) const
+wxString wxString::BeforeLast(wxChar ch) const
 {
   wxString str;
   int iPos = Find(ch, true);
@@ -1496,12 +1471,12 @@ wxString wxString::BeforeLast(wxUniChar ch) const
 
 /// get all characters after the first occurence of ch
 /// (returns empty string if ch not found)
-wxString wxString::AfterFirst(wxUniChar ch) const
+wxString wxString::AfterFirst(wxChar ch) const
 {
   wxString str;
   int iPos = Find(ch);
   if ( iPos != wxNOT_FOUND )
-    str = wx_str() + iPos + 1;
+    str = c_str() + iPos + 1;
 
   return str;
 }
@@ -1658,7 +1633,7 @@ wxString& wxString::Trim(bool bFromRight)
 }
 
 // adds nCount characters chPad to the string from either side
-wxString& wxString::Pad(size_t nCount, wxUniChar chPad, bool bFromRight)
+wxString& wxString::Pad(size_t nCount, wxChar chPad, bool bFromRight)
 {
     wxString s(chPad, nCount);
 
@@ -1690,7 +1665,7 @@ wxString& wxString::Truncate(size_t uiLen)
 // ---------------------------------------------------------------------------
 
 // find a character
-int wxString::Find(wxUniChar ch, bool bFromEnd) const
+int wxString::Find(wxChar ch, bool bFromEnd) const
 {
     size_type idx = bFromEnd ? find_last_of(ch) : find_first_of(ch);
 
@@ -1739,18 +1714,18 @@ bool wxStringToIntType(const wxChar *start,
 
 bool wxString::ToLong(long *val, int base) const
 {
-    return wxStringToIntType((const wxChar*)c_str(), val, base, wxStrtol);
+    return wxStringToIntType(c_str(), val, base, wxStrtol);
 }
 
 bool wxString::ToULong(unsigned long *val, int base) const
 {
-    return wxStringToIntType((const wxChar*)c_str(), val, base, wxStrtoul);
+    return wxStringToIntType(c_str(), val, base, wxStrtoul);
 }
 
 bool wxString::ToLongLong(wxLongLong_t *val, int base) const
 {
 #ifdef wxHAS_STRTOLL
-    return wxStringToIntType((const wxChar*)c_str(), val, base, wxStrtoll);
+    return wxStringToIntType(c_str(), val, base, wxStrtoll);
 #else
     // TODO: implement this ourselves
     wxUnusedVar(val);
@@ -1762,7 +1737,7 @@ bool wxString::ToLongLong(wxLongLong_t *val, int base) const
 bool wxString::ToULongLong(wxULongLong_t *val, int base) const
 {
 #ifdef wxHAS_STRTOLL
-    return wxStringToIntType((const wxChar*)c_str(), val, base, wxStrtoull);
+    return wxStringToIntType(c_str(), val, base, wxStrtoull);
 #else
     // TODO: implement this ourselves
     wxUnusedVar(val);
@@ -1797,17 +1772,13 @@ bool wxString::ToDouble(double *val) const
 // ---------------------------------------------------------------------------
 
 /* static */
-#ifdef wxNEEDS_WXSTRING_PRINTF_MIXIN
-wxString wxStringPrintfMixinBase::DoFormat(const wxChar *format, ...)
-#else
-wxString wxString::DoFormat(const wxChar *format, ...)
-#endif
+wxString wxString::Format(const wxChar *pszFormat, ...)
 {
     va_list argptr;
-    va_start(argptr, format);
+    va_start(argptr, pszFormat);
 
     wxString s;
-    s.PrintfV(format, argptr);
+    s.PrintfV(pszFormat, argptr);
 
     va_end(argptr);
 
@@ -1815,39 +1786,26 @@ wxString wxString::DoFormat(const wxChar *format, ...)
 }
 
 /* static */
-wxString wxString::FormatV(const wxString& format, va_list argptr)
+wxString wxString::FormatV(const wxChar *pszFormat, va_list argptr)
 {
     wxString s;
-    s.PrintfV(format, argptr);
+    s.PrintfV(pszFormat, argptr);
     return s;
 }
 
-#ifdef wxNEEDS_WXSTRING_PRINTF_MIXIN
-int wxStringPrintfMixinBase::DoPrintf(const wxChar *format, ...)
-#else
-int wxString::DoPrintf(const wxChar *format, ...)
-#endif
+int wxString::Printf(const wxChar *pszFormat, ...)
 {
     va_list argptr;
-    va_start(argptr, format);
+    va_start(argptr, pszFormat);
 
-#ifdef wxNEEDS_WXSTRING_PRINTF_MIXIN
-    // get a pointer to the wxString instance; we have to use dynamic_cast<>
-    // because it's the only cast that works safely for downcasting when
-    // multiple inheritance is used:
-    wxString *str = static_cast<wxString*>(this);
-#else
-    wxString *str = this;
-#endif
-
-    int iLen = str->PrintfV(format, argptr);
+    int iLen = PrintfV(pszFormat, argptr);
 
     va_end(argptr);
 
     return iLen;
 }
 
-int wxString::PrintfV(const wxString& format, va_list argptr)
+int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
 {
     int size = 1024;
 
@@ -1866,7 +1824,7 @@ int wxString::PrintfV(const wxString& format, va_list argptr)
         // only a copy
         va_list argptrcopy;
         wxVaCopy(argptrcopy, argptr);
-        int len = wxVsnprintf(buf, size, format, argptrcopy);
+        int len = wxVsnprintf(buf, size, pszFormat, argptrcopy);
         va_end(argptrcopy);
 
         // some implementations of vsnprintf() don't NUL terminate
@@ -2058,7 +2016,7 @@ match:
 }
 
 // Count the number of chars
-int wxString::Freq(wxUniChar ch) const
+int wxString::Freq(wxChar ch) const
 {
     int count = 0;
     int len = length();
@@ -2076,6 +2034,15 @@ wxString wxString::Upper() const
 
 // convert to lower case, return the copy of the string
 wxString wxString::Lower() const { wxString s(*this); return s.MakeLower(); }
+
+int wxString::sprintf(const wxChar *pszFormat, ...)
+  {
+    va_list argptr;
+    va_start(argptr, pszFormat);
+    int iLen = PrintfV(pszFormat, argptr);
+    va_end(argptr);
+    return iLen;
+  }
 
 // ============================================================================
 // ArrayString
@@ -2110,12 +2077,14 @@ wxArrayString::wxArrayString(size_t sz, const wxString* a)
 #define   ARRAY_DEFAULT_INITIAL_SIZE    (16)
 #endif
 
+#define   STRING(p)   ((wxString *)(&(p)))
+
 // ctor
 void wxArrayString::Init(bool autoSort)
 {
   m_nSize  =
   m_nCount = 0;
-  m_pItems = NULL;
+  m_pItems = (wxChar **) NULL;
   m_autoSort = autoSort;
 }
 
@@ -2165,7 +2134,7 @@ void wxArrayString::Grow(size_t nIncrement)
       m_nSize = ARRAY_DEFAULT_INITIAL_SIZE;
       if (m_nSize < nIncrement)
           m_nSize = nIncrement;
-      m_pItems = new wxString[m_nSize];
+      m_pItems = new wxChar *[m_nSize];
     }
     else {
       // otherwise when it's called for the first time, nIncrement would be 0
@@ -2178,11 +2147,10 @@ void wxArrayString::Grow(size_t nIncrement)
       if ( nIncrement < ndefIncrement )
         nIncrement = ndefIncrement;
       m_nSize += nIncrement;
-      wxString *pNew = new wxString[m_nSize];
+      wxChar **pNew = new wxChar *[m_nSize];
 
       // copy data to new location
-      for ( size_t j = 0; j < m_nCount; j++ )
-          pNew[j] = m_pItems[j];
+      memcpy(pNew, m_pItems, m_nCount*sizeof(wxChar *));
 
       // delete old memory (but do not release the strings!)
       wxDELETEA(m_pItems);
@@ -2192,15 +2160,26 @@ void wxArrayString::Grow(size_t nIncrement)
   }
 }
 
+void wxArrayString::Free()
+{
+  for ( size_t n = 0; n < m_nCount; n++ ) {
+    STRING(m_pItems[n])->GetStringData()->Unlock();
+  }
+}
+
 // deletes all the strings from the list
 void wxArrayString::Empty()
 {
+  Free();
+
   m_nCount = 0;
 }
 
 // as Empty, but also frees memory
 void wxArrayString::Clear()
 {
+  Free();
+
   m_nSize  =
   m_nCount = 0;
 
@@ -2210,6 +2189,8 @@ void wxArrayString::Clear()
 // dtor
 wxArrayString::~wxArrayString()
 {
+  Free();
+
   wxDELETEA(m_pItems);
 }
 
@@ -2223,12 +2204,11 @@ void wxArrayString::Alloc(size_t nSize)
 {
   // only if old buffer was not big enough
   if ( nSize > m_nSize ) {
-    wxString *pNew = new wxString[nSize];
+    wxChar **pNew = new wxChar *[nSize];
     if ( !pNew )
         return;
 
-    for ( size_t j = 0; j < m_nCount; j++ )
-        pNew[j] = m_pItems[j];
+    memcpy(pNew, m_pItems, m_nCount*sizeof(wxChar *));
     delete [] m_pItems;
 
     m_pItems = pNew;
@@ -2242,15 +2222,38 @@ void wxArrayString::Shrink()
   // only do it if we have some memory to free
   if( m_nCount < m_nSize ) {
     // allocates exactly as much memory as we need
-    wxString *pNew = new wxString[m_nCount];
+    wxChar **pNew = new wxChar *[m_nCount];
 
     // copy data to new location
-    for ( size_t j = 0; j < m_nCount; j++ )
-        pNew[j] = m_pItems[j];
+    memcpy(pNew, m_pItems, m_nCount*sizeof(wxChar *));
     delete [] m_pItems;
     m_pItems = pNew;
   }
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+// return a wxString[] as required for some control ctors.
+wxString* wxArrayString::GetStringArray() const
+{
+    wxString *array = 0;
+
+    if( m_nCount > 0 )
+    {
+        array = new wxString[m_nCount];
+        for( size_t i = 0; i < m_nCount; i++ )
+            array[i] = m_pItems[i];
+    }
+
+    return array;
+}
+
+void wxArrayString::Remove(size_t nIndex, size_t nRemove)
+{
+    RemoveAt(nIndex, nRemove);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // searches the array for an item (forward or backwards)
 int wxArrayString::Index(const wxChar *sz, bool bCase, bool bFromEnd) const
@@ -2284,7 +2287,7 @@ int wxArrayString::Index(const wxChar *sz, bool bCase, bool bFromEnd) const
       if ( m_nCount > 0 ) {
         size_t ui = m_nCount;
         do {
-          if ( m_pItems[--ui].IsSameAs(sz, bCase) )
+          if ( STRING(m_pItems[--ui])->IsSameAs(sz, bCase) )
             return ui;
         }
         while ( ui != 0 );
@@ -2292,7 +2295,7 @@ int wxArrayString::Index(const wxChar *sz, bool bCase, bool bFromEnd) const
     }
     else {
       for( size_t ui = 0; ui < m_nCount; ui++ ) {
-        if( m_pItems[ui].IsSameAs(sz, bCase) )
+        if( STRING(m_pItems[ui])->IsSameAs(sz, bCase) )
           return ui;
       }
     }
@@ -2331,12 +2334,17 @@ size_t wxArrayString::Add(const wxString& str, size_t nInsert)
     return (size_t)lo;
   }
   else {
+    wxASSERT( str.GetStringData()->IsValid() );
+
     Grow(nInsert);
 
     for (size_t i = 0; i < nInsert; i++)
     {
+        // the string data must not be deleted!
+        str.GetStringData()->Lock();
+
         // just append
-        m_pItems[m_nCount + i] = str;
+        m_pItems[m_nCount + i] = (wxChar *)str.c_str(); // const_cast
     }
     size_t ret = m_nCount;
     m_nCount += nInsert;
@@ -2347,18 +2355,21 @@ size_t wxArrayString::Add(const wxString& str, size_t nInsert)
 // add item at the given position
 void wxArrayString::Insert(const wxString& str, size_t nIndex, size_t nInsert)
 {
+  wxASSERT( str.GetStringData()->IsValid() );
+
   wxCHECK_RET( nIndex <= m_nCount, wxT("bad index in wxArrayString::Insert") );
   wxCHECK_RET( m_nCount <= m_nCount + nInsert,
                wxT("array size overflow in wxArrayString::Insert") );
 
   Grow(nInsert);
 
-  for (int j = m_nCount - nIndex - 1; j >= 0; j--)
-      m_pItems[nIndex + nInsert + j] = m_pItems[nIndex + j];
+  memmove(&m_pItems[nIndex + nInsert], &m_pItems[nIndex],
+          (m_nCount - nIndex)*sizeof(wxChar *));
 
   for (size_t i = 0; i < nInsert; i++)
   {
-      m_pItems[nIndex + i] = str;
+      str.GetStringData()->Lock();
+      m_pItems[nIndex + i] = (wxChar *)str.c_str();
   }
   m_nCount += nInsert;
 }
@@ -2394,7 +2405,7 @@ void wxArrayString::SetCount(size_t count)
 
     wxString s;
     while ( m_nCount < count )
-        m_pItems[m_nCount++] = s;
+        m_pItems[m_nCount++] = (wxChar *)s.c_str();
 }
 
 // removes item from array (by index)
@@ -2404,9 +2415,12 @@ void wxArrayString::RemoveAt(size_t nIndex, size_t nRemove)
   wxCHECK_RET( nIndex + nRemove <= m_nCount,
                wxT("removing too many elements in wxArrayString::Remove") );
 
-  for ( size_t j =  0; j < m_nCount - nIndex -nRemove; j++)
-      m_pItems[nIndex + j] = m_pItems[nIndex + nRemove + j];
+  // release our lock
+  for (size_t i = 0; i < nRemove; i++)
+      Item(nIndex + i).GetStringData()->Unlock();
 
+  memmove(&m_pItems[nIndex], &m_pItems[nIndex + nRemove],
+          (m_nCount - nIndex - nRemove)*sizeof(wxChar *));
   m_nCount -= nRemove;
 }
 
@@ -2487,7 +2501,7 @@ extern "C"
 
 void wxArrayString::Sort(CompareFunction2 compareFunction)
 {
-  qsort(m_pItems, m_nCount, sizeof(wxString), (wxStringCompareFn)compareFunction);
+  qsort(m_pItems, m_nCount, sizeof(wxChar *), (wxStringCompareFn)compareFunction);
 }
 
 void wxArrayString::Sort(bool reverseOrder)
@@ -2499,7 +2513,9 @@ void wxArrayString::DoSort()
 {
   wxCHECK_RET( !m_autoSort, wxT("can't use this method with sorted arrays") );
 
-  qsort(m_pItems, m_nCount, sizeof(wxString), wxStringCompareFunction);
+  // just sort the pointers using qsort() - of course it only works because
+  // wxString() *is* a pointer to its data
+  qsort(m_pItems, m_nCount, sizeof(wxChar *), wxStringCompareFunction);
 }
 
 bool wxArrayString::operator==(const wxArrayString& a) const
@@ -2526,107 +2542,4 @@ int wxCMPFUNC_CONV wxStringSortAscending(wxString* s1, wxString* s2)
 int wxCMPFUNC_CONV wxStringSortDescending(wxString* s1, wxString* s2)
 {
     return -s1->Cmp(*s2);
-}
-
-
-
-// ===========================================================================
-// wxJoin and wxSplit
-// ===========================================================================
-
-#include "wx/tokenzr.h"
-
-wxString wxJoin(const wxArrayString& arr, const wxChar sep, const wxChar escape)
-{
-    size_t count = arr.size();
-    if ( count == 0 )
-        return wxEmptyString;
-
-    wxString str;
-
-    // pre-allocate memory using the estimation of the average length of the
-    // strings in the given array: this is very imprecise, of course, but
-    // better than nothing
-    str.reserve(count*(arr[0].length() + arr[count-1].length()) / 2);
-
-    if ( escape == wxT('\0') )
-    {
-        // escaping is disabled:
-        for ( size_t i = 0; i < count; i++ )
-        {
-            if ( i )
-                str += sep;
-            str += arr[i];
-        }
-    }
-    else // use escape character
-    {
-        for ( size_t n = 0; n < count; n++ )
-        {
-            if ( n )
-                str += sep;
-
-            for ( wxString::const_iterator i = arr[n].begin(),
-                                         end = arr[n].end();
-                  i != end;
-                  ++i )
-            {
-                const wxChar ch = *i;
-                if ( ch == sep )
-                    str += escape;      // escape this separator
-                str += ch;
-            }
-        }
-    }
-
-    str.Shrink(); // release extra memory if we allocated too much
-    return str;
-}
-
-wxArrayString wxSplit(const wxString& str, const wxChar sep, const wxChar escape)
-{
-    if ( escape == wxT('\0') )
-    {
-        // simple case: we don't need to honour the escape character
-        return wxStringTokenize(str, sep, wxTOKEN_RET_EMPTY_ALL);
-    }
-
-    wxArrayString ret;
-    wxString curr;
-    wxChar prev = wxT('\0');
-
-    for ( wxString::const_iterator i = str.begin(),
-                                 end = str.end();
-          i != end;
-          ++i )
-    {
-        const wxChar ch = *i;
-
-        if ( ch == sep )
-        {
-            if ( prev == escape )
-            {
-                // remove the escape character and don't consider this
-                // occurrence of 'sep' as a real separator
-                *curr.rbegin() = sep;
-            }
-            else // real separator
-            {
-                ret.push_back(curr);
-                curr.clear();
-            }
-        }
-        else // normal character
-        {
-            curr += ch;
-        }
-
-        prev = ch;
-    }
-
-    // add the last token
-    if ( !curr.empty() || prev == sep )
-        ret.Add(curr);
-
-    return ret;
 }

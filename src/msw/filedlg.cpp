@@ -276,7 +276,13 @@ int wxFileDialog::ShowModal()
     *fileNameBuffer = wxT('\0');
     *titleBuffer    = wxT('\0');
 
+#if WXWIN_COMPATIBILITY_2_4
+    long msw_flags = 0;
+    if ( HasFdFlag(wxHIDE_READONLY) || HasFdFlag(wxFD_SAVE) )
+        msw_flags |= OFN_HIDEREADONLY;
+#else
     long msw_flags = OFN_HIDEREADONLY;
+#endif
 
     if ( HasFdFlag(wxFD_FILE_MUST_EXIST) )
         msw_flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
@@ -391,7 +397,7 @@ int wxFileDialog::ShowModal()
         }
     }
 
-    of.lpstrFilter  = (LPTSTR)filterBuffer.wx_str();
+    of.lpstrFilter  = (LPTSTR)filterBuffer.c_str();
     of.nFilterIndex = m_filterIndex + 1;
 
     //=== Setting defaultFileName >>=========================================

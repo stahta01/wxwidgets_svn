@@ -76,9 +76,6 @@ END_EVENT_TABLE()
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     m_frame = new MyFrame(NULL, _T("Client"));
     m_frame->Show(true);

@@ -109,16 +109,14 @@ public:
         return m_wdata;
     }
 
-    bool CanBeUsedWithXRCCTRL(const wxString& name)
+    bool IsRealClass(const wxString& name)
     {
         if (name == _T("tool") ||
             name == _T("unknown") ||
             name == _T("notebookpage") ||
             name == _T("separator") ||
             name == _T("sizeritem") ||
-            name == _T("wxMenuBar") ||
-            name == _T("wxMenuItem") ||
-            name == _T("wxStaticBoxSizer") )
+            name == _T("wxMenuItem"))
         {
             return false;
         }
@@ -134,7 +132,7 @@ public:
         for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
             if( w.GetName().Length() == 0 ) continue;
             file.Write(
                 _T(" ") + w.GetClass() + _T("* ") + w.GetName()
@@ -149,7 +147,7 @@ public:
         for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
             if( w.GetName().Length() == 0 ) continue;
             file.Write( _T("  ")
                         + w.GetName()

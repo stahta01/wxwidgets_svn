@@ -2466,13 +2466,7 @@ wxFontEncoding wxLocale::GetSystemEncoding()
         // (a.k.a. US-ASCII) which is arguably a bug but keep it like this for
         // backwards compatibility and just take care to not return
         // wxFONTENCODING_DEFAULT from here as this surely doesn't make sense
-        if ( enc == wxFONTENCODING_DEFAULT )
-        {
-            // we don't have wxFONTENCODING_ASCII, so use the closest one
-            return wxFONTENCODING_ISO8859_1;
-        }
-
-        if ( enc != wxFONTENCODING_MAX )
+        if ( enc != wxFONTENCODING_MAX && enc != wxFONTENCODING_DEFAULT )
         {
             return enc;
         }
@@ -2638,9 +2632,8 @@ const wxChar *wxLocale::GetString(const wxChar *szOrigString,
             wxLogTrace(TRACE_I18N,
                        _T("string \"%s\"[%ld] not found in %slocale '%s'."),
                        szOrigString, (long)n,
-                       szDomain
-                         ? (const wxChar*)wxString::Format(_T("domain '%s' "), szDomain).c_str()
-                         : _T(""),
+                       szDomain ? wxString::Format(_T("domain '%s' "), szDomain).c_str()
+                                : _T(""),
                        m_strLocale.c_str());
         }
 #endif // __WXDEBUG__

@@ -501,20 +501,15 @@ void wxGCDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord w, wxCoord h,
     if ( !m_logicalFunctionSupported )
         return;
 
-    bool fill = m_brush.GetStyle() != wxTRANSPARENT;
-
     wxGraphicsPath path = m_graphicContext->CreatePath();
     m_graphicContext->PushState();
-    m_graphicContext->Translate(x+w/2,y+h/2);
+    m_graphicContext->Translate(x+w/2.0,y+h/2.0);
     wxDouble factor = ((wxDouble) w) / h;
     m_graphicContext->Scale( factor , 1.0);
-    if ( fill && (sa!=ea) )
-        path.MoveToPoint(0,0);
+
     // since these angles (ea,sa) are measured counter-clockwise, we invert them to
     // get clockwise angles
-    path.AddArc( 0, 0, h/2 , DegToRad(-sa) , DegToRad(-ea), sa > ea );
-    if ( fill && (sa!=ea) )
-        path.AddLineToPoint(0,0);
+    path.AddArc( 0, 0, h/2.0 , DegToRad(-sa) , DegToRad(-ea), sa > ea );
     m_graphicContext->DrawPath( path );
     m_graphicContext->PopState();
 }
@@ -698,6 +693,13 @@ void wxGCDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y,
     if (w == 0 || h == 0)
         return;
 
+    if ( m_graphicContext->ShouldOffset() )
+    {
+        // if we are offsetting the entire rectangle is moved 0.5, so the
+        // border line gets off by 1
+        w -= 1;
+        h -= 1;
+    }
     m_graphicContext->DrawRoundedRectangle( x,y,w,h,radius);
 }
 
@@ -708,6 +710,13 @@ void wxGCDC::DoDrawEllipse(wxCoord x, wxCoord y, wxCoord w, wxCoord h)
     if ( !m_logicalFunctionSupported )
         return;
 
+    if ( m_graphicContext->ShouldOffset() )
+    {
+        // if we are offsetting the entire rectangle is moved 0.5, so the
+        // border line gets off by 1
+        w -= 1;
+        h -= 1;
+    }
     m_graphicContext->DrawEllipse(x,y,w,h);
 }
 
@@ -718,22 +727,11 @@ bool wxGCDC::CanDrawBitmap() const
 
 bool wxGCDC::DoBlit(
     wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
-    wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool useMask,
+    wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool WXUNUSED(useMask),
     wxCoord xsrcMask, wxCoord ysrcMask )
 {
-    return DoStretchBlit( xdest, ydest, width, height,
-        source, xsrc, ysrc, width, height, logical_func, useMask,
-        xsrcMask,ysrcMask );
-}
-
-bool wxGCDC::DoStretchBlit(
-    wxCoord xdest, wxCoord ydest, wxCoord dstWidth, wxCoord dstHeight,
-    wxDC *source, wxCoord xsrc, wxCoord ysrc, wxCoord srcWidth, wxCoord srcHeight,
-    int logical_func , bool WXUNUSED(useMask),
-    wxCoord xsrcMask, wxCoord ysrcMask )
-{
-    wxCHECK_MSG( Ok(), false, wxT("wxGCDC(cg)::DoStretchBlit - invalid DC") );
-    wxCHECK_MSG( source->Ok(), false, wxT("wxGCDC(cg)::DoStretchBlit - invalid source DC") );
+    wxCHECK_MSG( Ok(), false, wxT("wxGCDC(cg)::DoBlit - invalid DC") );
+    wxCHECK_MSG( source->Ok(), false, wxT("wxGCDC(cg)::DoBlit - invalid source DC") );
 
     if ( logical_func == wxNO_OP )
         return true;
@@ -751,8 +749,8 @@ bool wxGCDC::DoStretchBlit(
 
     wxRect subrect(source->LogicalToDeviceX(xsrc),
                    source->LogicalToDeviceY(ysrc),
-                   source->LogicalToDeviceXRel(srcWidth),
-                   source->LogicalToDeviceYRel(srcHeight));
+                   source->LogicalToDeviceXRel(width),
+                   source->LogicalToDeviceYRel(height));
 
     // if needed clip the subrect down to the size of the source DC
     wxCoord sw, sh;
@@ -769,7 +767,8 @@ bool wxGCDC::DoStretchBlit(
     if ( blit.Ok() )
     {
         m_graphicContext->DrawBitmap( blit, xdest, ydest,
-                                      dstWidth, dstHeight);
+                                      wxMin(width, blit.GetWidth()),
+                                      wxMin(height, blit.GetHeight()));
     }
     else
     {

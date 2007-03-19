@@ -28,6 +28,11 @@
 #endif
 
 #ifdef DBDEBUG_CONSOLE
+#if wxUSE_IOSTREAMH
+    #include <iostream.h>
+#else
+    #include <iostream>
+#endif
     #include "wx/ioswrap.h"
 #endif
 
@@ -38,6 +43,17 @@
 #include <string.h>
 
 #include "wx/dbtable.h"
+
+#ifdef __UNIX__
+// The HPUX preprocessor lines below were commented out on 8/20/97
+// because macros.h currently redefines DEBUG and is unneeded.
+// #  ifdef HPUX
+// #    include <macros.h>
+// #  endif
+#  ifdef LINUX
+#    include <sys/minmax.h>
+#  endif
+#endif
 
 ULONG lastTableID = 0;
 
@@ -92,6 +108,19 @@ wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumn
     if (!initialize(pwxDb, tblName, numColumns, qryTblName, qryOnly, tblPath))
         cleanup();
 }  // wxDbTable::wxDbTable()
+
+
+/***** DEPRECATED: use wxDbTable::wxDbTable() format above *****/
+#if WXWIN_COMPATIBILITY_2_4
+wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
+                    const wxChar *qryTblName, bool qryOnly, const wxString &tblPath)
+{
+    wxString tempQryTblName;
+    tempQryTblName = qryTblName;
+    if (!initialize(pwxDb, tblName, numColumns, tempQryTblName, qryOnly, tblPath))
+        cleanup();
+}  // wxDbTable::wxDbTable()
+#endif // WXWIN_COMPATIBILITY_2_4
 
 
 /********** wxDbTable::~wxDbTable() **********/

@@ -130,21 +130,16 @@ static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
 // return true if we could draw the bitmap in one way or the other, false
 // otherwise
 static bool AlphaBlt(HDC hdcDst,
-                     int x, int y, int dstWidth, int dstHeight,
-                     int srcX, int srcY, 
-                     int srcWidth, int srcHeight,
-                     HDC hdcSrc,
-                     const wxBitmap& bmp);
+                     int x, int y, int w, int h,
+                     int srcX, int srcY, HDC hdcSrc,
+                     const wxBitmap& bmpSrc);
 
 #ifdef wxHAVE_RAW_BITMAP
 
 // our (limited) AlphaBlend() replacement for Windows versions not providing it
 static void
-wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
-             int dstWidth, int dstHeight,
-             int srcX, int srcY, 
-             int srcWidth, int srcHeight,
-             const wxBitmap& bmpSrc);
+wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h,
+             int srcX, int srcY, const wxBitmap& bmp);
 
 #endif // wxHAVE_RAW_BITMAP
 
@@ -1188,7 +1183,7 @@ void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask
         MemoryHDC hdcMem;
         SelectInHDC select(hdcMem, GetHbitmapOf(bmp));
 
-        if ( AlphaBlt(GetHdc(), x, y, width, height, 0, 0, width, height, hdcMem, bmp) )
+        if ( AlphaBlt(GetHdc(), x, y, width, height, 0, 0, hdcMem, bmp) )
             return;
     }
 
@@ -2051,23 +2046,12 @@ wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
 // ---------------------------------------------------------------------------
 // bit blit
 // ---------------------------------------------------------------------------
-bool wxDC::DoBlit(wxCoord dstX, wxCoord dstY,
-                  wxCoord dstWidth, wxCoord dstHeight,
-                  wxDC *source,
-                  wxCoord srcX, wxCoord srcY,
-                  int rop, bool useMask,
-                  wxCoord srcMaskX, wxCoord srcMaskY)
-{
-    return DoStretchBlit(dstX, dstY, dstWidth, dstHeight, source, srcX, srcY, dstWidth, dstHeight, rop, useMask, srcMaskX, srcMaskY);
-}
 
-bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                         wxCoord dstWidth, wxCoord dstHeight,
-                         wxDC *source,
-                         wxCoord xsrc, wxCoord ysrc,
-                         wxCoord srcWidth, wxCoord srcHeight,
-                         int rop, bool useMask,
-                         wxCoord xsrcMask, wxCoord ysrcMask)
+bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
+                  wxCoord width, wxCoord height,
+                  wxDC *source, wxCoord xsrc, wxCoord ysrc,
+                  int rop, bool useMask,
+                  wxCoord xsrcMask, wxCoord ysrcMask)
 {
     wxCHECK_MSG( source, false, _T("wxDC::Blit(): NULL wxDC pointer") );
 
@@ -2079,8 +2063,8 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
     if ( bmpSrc.Ok() && (bmpSrc.HasAlpha() ||
             (m_selectedBitmap.Ok() && m_selectedBitmap.HasAlpha())) )
     {
-        if ( AlphaBlt(GetHdc(), xdest, ydest, dstWidth, dstHeight,
-                      xsrc, ysrc, srcWidth, srcHeight, GetHdcOf(*source), bmpSrc) )
+        if ( AlphaBlt(GetHdc(), xdest, ydest, width, height,
+                      xsrc, ysrc, GetHdcOf(*source), bmpSrc) )
             return true;
     }
 
@@ -2154,19 +2138,16 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
         if (wxSystemOptions::GetOptionInt(wxT("no-maskblt")) == 0)
 #endif
         {
-            if ( dstWidth == srcWidth && dstHeight == srcHeight )
-            {
-                success = ::MaskBlt
-                            (
+           success = ::MaskBlt
+                       (
                             GetHdc(),
-                            xdest, ydest, dstWidth, dstHeight,
+                            xdest, ydest, width, height,
                             GetHdcOf(*source),
                             xsrc, ysrc,
                             (HBITMAP)mask->GetMaskBitmap(),
                             xsrcMask, ysrcMask,
                             MAKEROP4(dwRop, DSTCOPY)
-                            ) != 0;
-            }
+                        ) != 0;
         }
 
         if ( !success )
@@ -2186,59 +2167,55 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
             dc_buffer = (HDC) dcCacheEntry2->m_dc;
 
             wxDCCacheEntry* bitmapCacheEntry = FindBitmapInCache(GetHDC(),
-                dstWidth, dstHeight);
+                width, height);
 
             buffer_bmap = (HBITMAP) bitmapCacheEntry->m_bitmap;
 #else // !wxUSE_DC_CACHEING
             // create a temp buffer bitmap and DCs to access it and the mask
             dc_mask = ::CreateCompatibleDC(GetHdcOf(*source));
             dc_buffer = ::CreateCompatibleDC(GetHdc());
-            buffer_bmap = ::CreateCompatibleBitmap(GetHdc(), dstWidth, dstHeight);
+            buffer_bmap = ::CreateCompatibleBitmap(GetHdc(), width, height);
 #endif // wxUSE_DC_CACHEING/!wxUSE_DC_CACHEING
             HGDIOBJ hOldMaskBitmap = ::SelectObject(dc_mask, (HBITMAP) mask->GetMaskBitmap());
             HGDIOBJ hOldBufferBitmap = ::SelectObject(dc_buffer, buffer_bmap);
 
             // copy dest to buffer
-            if ( !::BitBlt(dc_buffer, 0, 0, (int)dstWidth, (int)dstHeight,
+            if ( !::BitBlt(dc_buffer, 0, 0, (int)width, (int)height,
                            GetHdc(), xdest, ydest, SRCCOPY) )
             {
                 wxLogLastError(wxT("BitBlt"));
             }
 
-#ifndef __WXWINCE__
-            StretchBltModeChanger changeMode(dc_buffer, COLORONCOLOR);
-#endif
-
             // copy src to buffer using selected raster op
-            if ( !::StretchBlt(dc_buffer, 0, 0, (int)dstWidth, (int)dstHeight,
-                           GetHdcOf(*source), xsrc, ysrc, srcWidth, srcHeight, dwRop) )
+            if ( !::BitBlt(dc_buffer, 0, 0, (int)width, (int)height,
+                           GetHdcOf(*source), xsrc, ysrc, dwRop) )
             {
-                wxLogLastError(wxT("StretchBlt"));
+                wxLogLastError(wxT("BitBlt"));
             }
 
             // set masked area in buffer to BLACK (pixel value 0)
             COLORREF prevBkCol = ::SetBkColor(GetHdc(), RGB(255, 255, 255));
             COLORREF prevCol = ::SetTextColor(GetHdc(), RGB(0, 0, 0));
-            if ( !::StretchBlt(dc_buffer, 0, 0, (int)dstWidth, (int)dstHeight,
-                           dc_mask, xsrcMask, ysrcMask, srcWidth, srcHeight, SRCAND) )
+            if ( !::BitBlt(dc_buffer, 0, 0, (int)width, (int)height,
+                           dc_mask, xsrcMask, ysrcMask, SRCAND) )
             {
-                wxLogLastError(wxT("StretchBlt"));
+                wxLogLastError(wxT("BitBlt"));
             }
 
             // set unmasked area in dest to BLACK
             ::SetBkColor(GetHdc(), RGB(0, 0, 0));
             ::SetTextColor(GetHdc(), RGB(255, 255, 255));
-            if ( !::StretchBlt(GetHdc(), xdest, ydest, (int)dstWidth, (int)dstHeight,
-                           dc_mask, xsrcMask, ysrcMask, srcWidth, srcHeight, SRCAND) )
+            if ( !::BitBlt(GetHdc(), xdest, ydest, (int)width, (int)height,
+                           dc_mask, xsrcMask, ysrcMask, SRCAND) )
             {
-                wxLogLastError(wxT("StretchBlt"));
+                wxLogLastError(wxT("BitBlt"));
             }
             ::SetBkColor(GetHdc(), prevBkCol);   // restore colours to original values
             ::SetTextColor(GetHdc(), prevCol);
 
             // OR buffer to dest
             success = ::BitBlt(GetHdc(), xdest, ydest,
-                               (int)dstWidth, (int)dstHeight,
+                               (int)width, (int)height,
                                dc_buffer, 0, 0, SRCPAINT) != 0;
             if ( !success )
             {
@@ -2283,14 +2260,14 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
                 if ( hDIB > 0 )
                 {
                     // reflect ysrc
-                    ysrc = hDIB - (ysrc + dstHeight);
+                    ysrc = hDIB - (ysrc + height);
                 }
 
                 if ( ::StretchDIBits(GetHdc(),
                                      xdest, ydest,
-                                     dstWidth, dstHeight,
+                                     width, height,
                                      xsrc, ysrc,
-                                     srcWidth, srcHeight,
+                                     width, height,
                                      ds.dsBm.bmBits,
                                      (LPBITMAPINFO)&ds.dsBmih,
                                      DIB_RGB_COLORS,
@@ -2321,9 +2298,9 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
             if ( !::StretchBlt
                     (
                         GetHdc(),
-                        xdest, ydest, dstWidth, dstHeight,
+                        xdest, ydest, width, height,
                         GetHdcOf(*source),
-                        xsrc, ysrc, srcWidth, srcHeight,
+                        xsrc, ysrc, width, height,
                         dwRop
                     ) )
             {
@@ -2341,7 +2318,7 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
                     (
                         GetHdc(),
                         xdest, ydest,
-                        (int)dstWidth, (int)dstHeight,
+                        (int)width, (int)height,
                         GetHdcOf(*source),
                         xsrc, ysrc,
                         dwRop
@@ -2563,10 +2540,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 // ----------------------------------------------------------------------------
 
 static bool AlphaBlt(HDC hdcDst,
-                     int x, int y, int dstWidth, int dstHeight,
-                     int srcX, int srcY, 
-                     int srcWidth, int srcHeight,
-                     HDC hdcSrc,
+                     int x, int y, int width, int height,
+                     int srcX, int srcY, HDC hdcSrc,
                      const wxBitmap& bmp)
 {
     wxASSERT_MSG( bmp.Ok() && bmp.HasAlpha(), _T("AlphaBlt(): invalid bitmap") );
@@ -2589,8 +2564,8 @@ static bool AlphaBlt(HDC hdcDst,
         bf.SourceConstantAlpha = 0xff;
         bf.AlphaFormat = AC_SRC_ALPHA;
 
-        if ( pfnAlphaBlend(hdcDst, x, y, dstWidth, dstHeight,
-                           hdcSrc, srcX, srcY, srcWidth, srcHeight,
+        if ( pfnAlphaBlend(hdcDst, x, y, width, height,
+                           hdcSrc, srcX, srcY, width, height,
                            bf) )
         {
             // skip wxAlphaBlend() call below
@@ -2606,7 +2581,7 @@ static bool AlphaBlt(HDC hdcDst,
     // AlphaBlend() unavailable of failed: use our own (probably much slower)
     // implementation
 #ifdef wxHAVE_RAW_BITMAP
-    wxAlphaBlend(hdcDst, x, y, dstWidth, dstHeight, srcX, srcY, srcWidth, srcHeight, bmp);
+    wxAlphaBlend(hdcDst, x, y, width, height, srcX, srcY, bmp);
 
     return true;
 #else // !wxHAVE_RAW_BITMAP
@@ -2623,17 +2598,15 @@ static bool AlphaBlt(HDC hdcDst,
 
 static void
 wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
-             int dstWidth, int dstHeight,
-             int srcX, int srcY, 
-             int srcWidth, int srcHeight,
-             const wxBitmap& bmpSrc)
+             int w, int h,
+             int srcX, int srcY, const wxBitmap& bmpSrc)
 {
     // get the destination DC pixels
-    wxBitmap bmpDst(dstWidth, dstHeight, 32 /* force creating RGBA DIB */);
+    wxBitmap bmpDst(w, h, 32 /* force creating RGBA DIB */);
     MemoryHDC hdcMem;
     SelectInHDC select(hdcMem, GetHbitmapOf(bmpDst));
 
-    if ( !::BitBlt(hdcMem, 0, 0, dstWidth, dstHeight, hdcDst, xDst, yDst, SRCCOPY) )
+    if ( !::BitBlt(hdcMem, 0, 0, w, h, hdcDst, xDst, yDst, SRCCOPY) )
     {
         wxLogLastError(_T("BitBlt"));
     }
@@ -2648,17 +2621,15 @@ wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
     wxAlphaPixelData::Iterator pDst(dataDst),
                                pSrc(dataSrc);
 
+    pSrc.Offset(dataSrc, srcX, srcY);
 
-    for ( int y = 0; y < dstHeight; y++ )
+    for ( int y = 0; y < h; y++ )
     {
-        wxAlphaPixelData::Iterator pDstRowStart = pDst;
+        wxAlphaPixelData::Iterator pDstRowStart = pDst,
+                                   pSrcRowStart = pSrc;
 
-        for ( int x = 0; x < dstWidth; x++ )
+        for ( int x = 0; x < w; x++ )
         {
-            // source is point sampled, Alpha StretchBlit is ugly on Win95
-            // (but does not impact performance)
-            pSrc.MoveTo(dataSrc, srcX + (srcWidth*x/dstWidth), srcY + (srcHeight*y/dstHeight));
-
             // note that source bitmap uses premultiplied alpha (as required by
             // the real AlphaBlend)
             const unsigned beta = 255 - pSrc.Alpha();
@@ -2668,14 +2639,17 @@ wxAlphaBlend(HDC hdcDst, int xDst, int yDst,
             pDst.Green() = pSrc.Green() + (beta * pDst.Green() + 127) / 255;
 
             ++pDst;
+            ++pSrc;
         }
 
         pDst = pDstRowStart;
+        pSrc = pSrcRowStart;
         pDst.OffsetY(dataDst, 1);
+        pSrc.OffsetY(dataSrc, 1);
     }
 
     // and finally blit them back to the destination DC
-    if ( !::BitBlt(hdcDst, xDst, yDst, dstWidth, dstHeight, hdcMem, 0, 0, SRCCOPY) )
+    if ( !::BitBlt(hdcDst, xDst, yDst, w, h, hdcMem, 0, 0, SRCCOPY) )
     {
         wxLogLastError(_T("BitBlt"));
     }

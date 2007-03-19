@@ -184,10 +184,7 @@ bool wxDirData::Read(wxString *filename)
         {
             filespec += _T('\\');
         }
-        if ( !m_filespec )
-            filespec += _T("*.*");
-        else
-            filespec += m_filespec;
+        filespec += (!m_filespec ? _T("*.*") : m_filespec.c_str());
 
         m_finddata = FindFirst(filespec, PTR_TO_FINDDATA);
 

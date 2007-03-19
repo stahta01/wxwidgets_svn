@@ -856,13 +856,6 @@ public:
                                const wxFont *theFont = (const wxFont *) NULL)
                                const = 0;
 
-    wxSize GetTextExtent(const wxString& string) const
-    {
-        wxCoord w, h;
-        GetTextExtent(string, &w, &h);
-        return wxSize(w, h);
-    }
-
     // client <-> screen coords
     // ------------------------
 
@@ -1142,10 +1135,6 @@ public:
     // this just provides a simple way to customize InheritAttributes()
     // behaviour in the most common case
     virtual bool ShouldInheritColours() const { return false; }
-
-    // returns true if the window can be positioned outside of parent's client
-    // area (normal windows can't, but e.g. menubar or statusbar can):
-    virtual bool CanBeOutsideClientArea() const { return false; }
 
 protected:
     // event handling specific to wxWindow

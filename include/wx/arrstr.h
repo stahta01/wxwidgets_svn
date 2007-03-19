@@ -56,7 +56,7 @@ public:
         wxArrayStringBase::Add(string, copies);
         return size() - copies;
     }
-}
+};
 
 class WXDLLIMPEXP_BASE wxSortedArrayString : public wxSortedArrayStringBase
 {
@@ -79,6 +79,21 @@ public:
 };
 
 #else // if !wxUSE_STL
+
+// ----------------------------------------------------------------------------
+// The string array uses it's knowledge of internal structure of the wxString
+// class to optimize string storage. Normally, we would store pointers to
+// string, but as wxString is, in fact, itself a pointer (sizeof(wxString) is
+// sizeof(char *)) we store these pointers instead. The cast to "wxString *" is
+// really all we need to turn such pointer into a string!
+//
+// Of course, it can be called a dirty hack, but we use twice less memory and
+// this approach is also more speed efficient, so it's probably worth it.
+//
+// Usage notes: when a string is added/inserted, a new copy of it is created,
+// so the original string may be safely deleted. When a string is retrieved
+// from the array (operator[] or Item() method), a reference is returned.
+// ----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_BASE wxArrayString
 {
@@ -139,7 +154,7 @@ public:
         wxASSERT_MSG( nIndex < m_nCount,
                       _T("wxArrayString: index out of bounds") );
 
-        return m_pItems[nIndex];
+        return *(wxString *)&(m_pItems[nIndex]);
     }
 
     // same as Item()
@@ -152,6 +167,13 @@ public:
       return Item(Count() - 1);
   }
 
+    // return a wxString[], useful for the controls which
+    // take one in their ctor.  You must delete[] it yourself
+    // once you are done with it.  Will return NULL if the
+    // ArrayString was empty.
+#if WXWIN_COMPATIBILITY_2_4
+  wxDEPRECATED( wxString* GetStringArray() const );
+#endif
 
   // item management
     // Search the element in the array, starting from the beginning if
@@ -169,6 +191,9 @@ public:
     // remove first item matching this value
   void Remove(const wxChar *sz);
     // remove item by index
+#if WXWIN_COMPATIBILITY_2_4
+  wxDEPRECATED( void Remove(size_t nIndex, size_t nRemove = 1) );
+#endif
   void RemoveAt(size_t nIndex, size_t nRemove = 1);
 
   // sorting
@@ -258,8 +283,8 @@ public:
     { clear(); Add(v, n); }
   reference back() { return *(end() - 1); }
   const_reference back() const { return *(end() - 1); }
-  iterator begin() { return m_pItems; }
-  const_iterator begin() const { return m_pItems; }
+  iterator begin() { return (wxString *)&(m_pItems[0]); }
+  const_iterator begin() const { return (wxString *)&(m_pItems[0]); }
   size_type capacity() const { return m_nSize; }
   void clear() { Clear(); }
   bool empty() const { return IsEmpty(); }
@@ -296,13 +321,14 @@ protected:
 
 private:
   void Grow(size_t nIncrement = 0);     // makes array bigger if needed
+  void Free();                          // free all the strings stored
 
   void DoSort();                        // common part of all Sort() variants
 
   size_t  m_nSize,    // current size of the array
           m_nCount;   // current number of elements
 
-  wxString *m_pItems; // pointer to data
+  wxChar  **m_pItems; // pointer to data
 
   bool    m_autoSort; // if true, keep the array always sorted
 };
@@ -343,21 +369,4 @@ private:
     wxString* m_strings;
 };
 
-
-// ----------------------------------------------------------------------------
-// helper functions for working with arrays
-// ----------------------------------------------------------------------------
-
-// by default, these functions use the escape character to escape the
-// separators occuring inside the string to be joined, this can be disabled by
-// passing '\0' as escape
-
-WXDLLIMPEXP_BASE wxString wxJoin(const wxArrayString& arr,
-                                 const wxChar sep,
-                                 const wxChar escape = wxT('\\'));
-
-WXDLLIMPEXP_BASE wxArrayString wxSplit(const wxString& str,
-                                       const wxChar sep,
-                                       const wxChar escape = wxT('\\'));
-
-#endif // _WX_ARRSTR_H
+#endif

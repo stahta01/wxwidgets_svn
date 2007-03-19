@@ -117,7 +117,7 @@ void wxColourDialog::DialogToColourData()
 
     GdkColor clr;
     gtk_color_selection_get_current_color(sel, &clr);
-    m_data.SetColour(wxColour(clr));
+    m_data.SetColour(wxColour(clr.red >> 8, clr.green >> 8, clr.blue >> 8));
 
     // Extract custom palette:
 
@@ -131,7 +131,9 @@ void wxColourDialog::DialogToColourData()
     {
         for (int i = 0; i < wxMin(n_colors, 16); i++)
         {
-            m_data.SetCustomColour(i, wxColour(colors[i]));
+            m_data.SetCustomColour(i, wxColour(colors[i].red >> 8,
+                                               colors[i].green >> 8,
+                                               colors[i].blue >> 8));
         }
         g_free(colors);
     }

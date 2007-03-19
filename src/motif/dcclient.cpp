@@ -88,7 +88,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
 
-#define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#ifndef IS_HATCH
+    // IS_HATCH exists for WXWIN_COMPATIBILITY_2_4 only
+    // but wxMotif needs it for its internals here
+    #define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#endif
 
 // FIXME: left over after removal of wxDC::GetOptimization()
 #define GET_OPTIMIZATION false
@@ -1126,11 +1130,11 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 #if wxMOTIF_NEW_FONT_HANDLING
             XmbDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), fset, (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        wxConstCast(text.mb_str(), char), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #else
             XDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        wxConstCast(text.mb_str(), char), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #endif
     }
 

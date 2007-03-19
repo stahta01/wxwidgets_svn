@@ -193,13 +193,15 @@ bool wxPrinterDC::StartDoc(const wxString& message)
     if (!m_hDC)
         return false;
 
-    if ( ::StartDoc(GetHdc(), &docinfo) <= 0 )
+    int ret = ::StartDoc(GetHdc(), &docinfo);
+
+    if (ret <= 0)
     {
-        wxLogLastError(wxT("StartDoc"));
-        return false;
+        DWORD lastError = GetLastError();
+        wxLogDebug(wxT("wxDC::StartDoc failed with error: %ld\n"), lastError);
     }
 
-    return true;
+    return (ret > 0);
 }
 
 void wxPrinterDC::EndDoc()

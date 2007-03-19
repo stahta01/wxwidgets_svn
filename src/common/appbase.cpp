@@ -46,8 +46,6 @@
   #include  <signal.h>      // for SIGTRAP used by wxTrap()
 #endif  //Win/Unix
 
-#include <locale.h>
-
 #if wxUSE_FONTMAP
     #include "wx/fontmap.h"
 #endif // wxUSE_FONTMAP
@@ -148,10 +146,6 @@ wxAppConsole::~wxAppConsole()
 
 bool wxAppConsole::Initialize(int& argcOrig, wxChar **argvOrig)
 {
-#if wxUSE_INTL
-    GetTraits()->SetLocale();
-#endif // wxUSE_INTL
-
     // remember the command line arguments
     argc = argcOrig;
     argv = argvOrig;
@@ -162,7 +156,7 @@ bool wxAppConsole::Initialize(int& argcOrig, wxChar **argvOrig)
         // the application name is, by default, the name of its executable file
         wxFileName::SplitPath(argv[0], NULL, &m_appName, NULL);
     }
-#endif // !__WXPALMOS__
+#endif
 
     return true;
 }
@@ -242,6 +236,27 @@ wxAppTraits *wxAppConsole::GetTraits()
 
     return m_traits;
 }
+
+// we must implement CreateXXX() in wxApp itself for backwards compatibility
+#if WXWIN_COMPATIBILITY_2_4
+
+#if wxUSE_LOG
+
+wxLog *wxAppConsole::CreateLogTarget()
+{
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateLogTarget() : NULL;
+}
+
+#endif // wxUSE_LOG
+
+wxMessageOutput *wxAppConsole::CreateMessageOutput()
+{
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateMessageOutput() : NULL;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // event processing
@@ -438,6 +453,15 @@ void wxAppConsole::OnAssert(const wxChar *file,
 
 #endif // __WXDEBUG__
 
+#if WXWIN_COMPATIBILITY_2_4
+
+bool wxAppConsole::CheckBuildOptions(const wxBuildOptions& buildOptions)
+{
+    return CheckBuildOptions(buildOptions.m_signature, "your program");
+}
+
+#endif
+
 // ============================================================================
 // other classes implementations
 // ============================================================================
@@ -508,11 +532,6 @@ GSocketGUIFunctionsTable* wxConsoleAppTraitsBase::GetSocketGUIFunctionsTable()
 // ----------------------------------------------------------------------------
 // wxAppTraits
 // ----------------------------------------------------------------------------
-
-void wxAppTraitsBase::SetLocale()
-{
-    setlocale(LC_ALL, "");
-}
 
 #ifdef __WXDEBUG__
 

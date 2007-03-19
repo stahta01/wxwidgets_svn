@@ -2010,6 +2010,8 @@ wxRichTextCtrl::HitTest(const wxPoint& pt,
         return wxTE_HT_BEYOND;
     else if (hit & wxRICHTEXT_HITTEST_BEFORE|wxRICHTEXT_HITTEST_AFTER)
         return wxTE_HT_ON_TEXT;
+    else
+        return wxTE_HT_UNKNOWN;
 
     return wxTE_HT_UNKNOWN;
 }

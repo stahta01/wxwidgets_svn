@@ -88,7 +88,6 @@ allhtml: wxhtml
         nmake -f makedocs.vc html
         cd $(THISDIR)
 
-
 allhtmlhelp: htmlhelp
 #       cd $(WXDIR)\utils\dialoged\src
 #        nmake -f makefile.vc htmlhelp

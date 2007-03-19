@@ -27,9 +27,8 @@
 
 #include "wx/thread.h"
 #include "wx/timer.h"
-#include "wx/private/selectdispatcher.h"
+#include "wx/private/socketevtdispatch.h"
 #include "wx/dfb/private.h"
-#include "wx/nonownedwnd.h"
 
 #define TRACE_EVENTS _T("events")
 
@@ -141,7 +140,7 @@ void wxEventLoop::OnNextIteration()
 
 #if wxUSE_SOCKETS
     // handle any pending socket events:
-    wxSelectDispatcher::Get().RunLoop(0);
+    wxSocketEventDispatcher::Get().RunLoop();
 #endif
 }
 
@@ -167,7 +166,7 @@ void wxEventLoop::HandleDFBEvent(const wxDFBEvent& event)
         case DFEC_WINDOW:
         {
             wxDFBWindowEvent winevent(((const DFBEvent&)event).window);
-            wxNonOwnedWindow::HandleDFBWindowEvent(winevent);
+            wxTopLevelWindowDFB::HandleDFBWindowEvent(winevent);
             break;
         }
 

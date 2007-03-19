@@ -1220,7 +1220,7 @@ int WXDLLEXPORT wxVsnprintf_(wxChar *buf, size_t lenMax,
 #endif // !wxVsnprintf_
 
 #if !defined(wxSnprintf_)
-int WXDLLEXPORT wxDoSnprintf_(wxChar *buf, size_t len, const wxChar *format, ...)
+int WXDLLEXPORT wxSnprintf_(wxChar *buf, size_t len, const wxChar *format, ...)
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1236,7 +1236,7 @@ int WXDLLEXPORT wxDoSnprintf_(wxChar *buf, size_t len, const wxChar *format, ...
 #if defined(__DMC__)
     /* Digital Mars adds count to _stprintf (C99) so convert */
     #if wxUSE_UNICODE
-        int wxDoSprintf (wchar_t * __RESTRICT s, const wchar_t * __RESTRICT format, ... )
+        int wxSprintf (wchar_t * __RESTRICT s, const wchar_t * __RESTRICT format, ... )
         {
             va_list arglist;
 
@@ -1576,7 +1576,7 @@ wxString wxConvertFormat(const wxChar *format)
 
 #if defined(wxNEED_PRINTF_CONVERSION) || defined(wxNEED_WPRINTF)
 
-int wxDoScanf( const wxChar *format, ... )
+int wxScanf( const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1588,7 +1588,7 @@ int wxDoScanf( const wxChar *format, ... )
     return ret;
 }
 
-int wxDoSscanf( const wxChar *str, const wxChar *format, ... )
+int wxSscanf( const wxChar *str, const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1600,7 +1600,7 @@ int wxDoSscanf( const wxChar *str, const wxChar *format, ... )
     return ret;
 }
 
-int wxDoFscanf( FILE *stream, const wxChar *format, ... )
+int wxFscanf( FILE *stream, const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1611,7 +1611,7 @@ int wxDoFscanf( FILE *stream, const wxChar *format, ... )
     return ret;
 }
 
-int wxDoPrintf( const wxChar *format, ... )
+int wxPrintf( const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1624,7 +1624,7 @@ int wxDoPrintf( const wxChar *format, ... )
 }
 
 #ifndef wxSnprintf
-int wxDoSnprintf( wxChar *str, size_t size, const wxChar *format, ... )
+int wxSnprintf( wxChar *str, size_t size, const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1641,7 +1641,7 @@ int wxDoSnprintf( wxChar *str, size_t size, const wxChar *format, ... )
 }
 #endif // wxSnprintf
 
-int wxDoSprintf( wxChar *str, const wxChar *format, ... )
+int wxSprintf( wxChar *str, const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
@@ -1656,7 +1656,7 @@ int wxDoSprintf( wxChar *str, const wxChar *format, ... )
     return s.length();
 }
 
-int wxDoFprintf( FILE *stream, const wxChar *format, ... )
+int wxFprintf( FILE *stream, const wxChar *format, ... )
 {
     va_list argptr;
     va_start( argptr, format );
@@ -2265,34 +2265,3 @@ int wxRemove(const wxChar *path)
 }
 
 #endif
-
-// ----------------------------------------------------------------------------
-// wxUniChar
-// ----------------------------------------------------------------------------
-
-/* static */
-wxUniChar::unicode_type wxUniChar::From8bit(char c)
-{
-    // all supported charsets have the first 128 characters same as ASCII:
-    if ( (unsigned char)c < 0x80 )
-        return c;
-
-    wchar_t buf[2];
-    if ( wxConvLibc.ToWChar(buf, 2, &c, 1) != 2 )
-        return wxT('?'); // FIXME-UTF8: what to use as failure character?
-    return buf[0];
-}
-
-/* static */
-char wxUniChar::To8bit(wxUniChar::unicode_type c)
-{
-    // all supported charsets have the first 128 characters same as ASCII:
-    if ( c < 0x80 )
-        return c;
-
-    wchar_t in = c;
-    char buf[2];
-    if ( wxConvLibc.FromWChar(buf, 2, &in, 1) != 2 )
-        return '?'; // FIXME-UTF8: what to use as failure character?
-    return buf[0];
-}

@@ -340,7 +340,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/strconv.cpp
     src/common/stream.cpp
     src/common/string.cpp
-    src/common/strvararg.cpp
     src/common/sysopt.cpp
     src/common/tarstrm.cpp
     src/common/textbuf.cpp
@@ -451,7 +450,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/strconv.h
     wx/stream.h
     wx/string.h
-    wx/strvararg.h
     wx/sysopt.h
     wx/tarstrm.h
     wx/textbuf.h
@@ -601,7 +599,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/fontcmn.cpp
     src/common/fontenumcmn.cpp
     src/common/fontmap.cpp
-    src/common/fontutilcmn.cpp
     src/common/framecmn.cpp
     src/common/gaugecmn.cpp
     src/common/gbsizer.cpp
@@ -843,7 +840,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/menuitem.h
     wx/metafile.h
     wx/minifram.h
-    wx/nonownedwnd.h
     wx/notebook.h
     wx/ownerdrw.h
     wx/paper.h
@@ -930,6 +926,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/gtk/evtloop.cpp
     src/gtk/font.cpp
     src/gtk/gsockgtk.cpp
+    src/gtk/main.cpp
     src/gtk/minifram.cpp
     src/gtk/pen.cpp
     src/gtk/popupwin.cpp
@@ -1402,8 +1399,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 
 <set var="X11_LOWLEVEL_SRC" hints="files">
     $(XWIN_LOWLEVEL_SRC)
-    src/common/gsocketiohandler.cpp
-    src/common/selectdispatcher.cpp
+    src/common/socketevtdispatch.cpp
     src/generic/icon.cpp
     src/generic/timer.cpp
     src/x11/app.cpp
@@ -1497,7 +1493,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/msw/fontutil.cpp
     src/msw/gdiimage.cpp
     src/msw/gdiobj.cpp
-    src/msw/gdiplus.cpp
     src/msw/graphics.cpp
     src/msw/gsockmsw.cpp
     src/msw/icon.cpp
@@ -1823,8 +1818,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 
 <set var="DFB_LOWLEVEL_SRC" hints="files">
     src/common/fontmgrcmn.cpp
-    src/common/gsocketiohandler.cpp
-    src/common/selectdispatcher.cpp
+    src/common/socketevtdispatch.cpp
     src/generic/caret.cpp
     src/generic/colour.cpp
     src/generic/icon.cpp
@@ -1844,7 +1838,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/dfb/font.cpp
     src/dfb/fontenum.cpp
     src/dfb/fontmgr.cpp
-    src/dfb/nonownedwnd.cpp
     src/dfb/overlay.cpp
     src/dfb/pen.cpp
     src/dfb/region.cpp
@@ -1873,9 +1866,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/dfb/dfbptr.h
     wx/dfb/evtloop.h
     wx/dfb/font.h
-    wx/dfb/nonownedwnd.h
     wx/dfb/pen.h
-    wx/dfb/popupwin.h
     wx/dfb/private.h
     wx/dfb/region.h
     wx/dfb/toplevel.h
@@ -2661,7 +2652,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="ADVANCED_CMN_SRC" hints="files">
     src/common/animatecmn.cpp
     src/common/datavcmn.cpp
-    src/common/hyperlnkcmn.cpp
     src/generic/aboutdlgg.cpp
     src/generic/animateg.cpp
     src/generic/bmpcboxg.cpp
@@ -2672,7 +2662,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/generic/gridctrl.cpp
     src/generic/gridsel.cpp
     src/generic/helpext.cpp
-    src/generic/hyperlinkg.cpp
+    src/generic/hyperlink.cpp
     src/generic/laywin.cpp
     src/generic/odcombo.cpp
     src/generic/propdlg.cpp
@@ -2701,7 +2691,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/generic/gridctrl.h
     wx/generic/gridsel.h
     wx/generic/helpext.h
-    wx/generic/hyperlink.h
     wx/generic/laywin.h
     wx/generic/propdlg.h
     wx/generic/sashwin.h
@@ -2718,6 +2707,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/splash.h
     wx/taskbar.h
     wx/tipdlg.h
+    wx/wave.h
     wx/wizard.h
 </set>
 
@@ -2803,13 +2793,11 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/gtk/aboutdlg.cpp
     src/gtk/animate.cpp
     src/gtk/dataview.cpp
-    src/gtk/hyperlink.cpp
     src/gtk/taskbar.cpp
     src/gtk/eggtrayicon.c
 </set>
 <set var="ADVANCED_GTK_HDR" hints="files">
     wx/gtk/animate.h
-    wx/gtk/hyperlink.h
 </set>
 
 <set var="ADVANCED_GTK1_SRC" hints="files">

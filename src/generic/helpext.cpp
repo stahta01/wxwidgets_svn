@@ -457,15 +457,10 @@ bool wxExtHelpController::KeywordSearch(const wxString& k,
         break;
 
     default:
-        if (showAll)
-            idx = wxGetSingleChoiceIndex(_("Help Index"),
-                                         _("Help Index"),
-                                         idx, choices);
-        else
-            idx = wxGetSingleChoiceIndex(_("Relevant entries:"),
-                                         _("Entries found"),
-                                         idx, choices);
-
+        idx = wxGetSingleChoiceIndex(
+            showAll ? _("Help Index") : _("Relevant entries:"),
+            showAll ? _("Help Index") : _("Entries found"),
+            idx, choices);
         if (idx >= 0)
             rc = DisplayHelp(urls[idx]);
         break;

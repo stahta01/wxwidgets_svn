@@ -746,7 +746,7 @@ bool wxDC::DoGetPixel( wxCoord x, wxCoord y, wxColour *col ) const
     GetCPixel( XLOG2DEVMAC(x), YLOG2DEVMAC(y), &colour );
 
     // convert from Mac colour to wx
-    *col = colour;
+    col->Set( colour.red >> 8, colour.green >> 8, colour.blue >> 8);
 
     return true ;
 }
@@ -1175,26 +1175,12 @@ bool wxDC::CanDrawBitmap(void) const
     return true ;
 }
 
-bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest, wxCoord dstWidth, wxCoord dstHeight,
+bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                    wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool useMask,
                    wxCoord xsrcMask, wxCoord ysrcMask )
 {
-    return DoStretchBlit( xdest, ydest, dstWidth, dstHeight,
-                           source, xsrc, ysrc, dstWidth, dstHeight, 
-                           logical_func, useMask,
-                           xsrcMask, ysrcMask );
-}
-
-bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                         wxCoord dstWidth, wxCoord dstHeight,
-                         wxDC *source,
-                         wxCoord xsrc, wxCoord ysrc,
-                         wxCoord srcWidth, wxCoord srcHeight,
-                         int logical_func = wxCOPY, bool useMask = false,
-                         wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-{
-    wxCHECK_MSG(Ok(), false, wxT("wxDC::DoStretchBlit - invalid DC"));
-    wxCHECK_MSG(source->Ok(), false, wxT("wxDC::DoStretchBlit - invalid source DC"));
+    wxCHECK_MSG(Ok(), false, wxT("wxDC::DoBlit - invalid DC"));
+    wxCHECK_MSG(source->Ok(), false, wxT("wxDC::DoBlit - invalid source DC"));
 
     if ( logical_func == wxNO_OP )
         return true ;
@@ -1212,12 +1198,12 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
     Rect srcrect , dstrect ;
     srcrect.top = source->YLOG2DEVMAC(ysrc) ;
     srcrect.left = source->XLOG2DEVMAC(xsrc)  ;
-    srcrect.right = source->XLOG2DEVMAC(xsrc + srcWidth ) ;
-    srcrect.bottom = source->YLOG2DEVMAC(ysrc + srcHeight) ;
+    srcrect.right = source->XLOG2DEVMAC(xsrc + width ) ;
+    srcrect.bottom = source->YLOG2DEVMAC(ysrc + height) ;
     dstrect.top = YLOG2DEVMAC(ydest) ;
     dstrect.left = XLOG2DEVMAC(xdest) ;
-    dstrect.bottom = YLOG2DEVMAC(ydest + dstHeight )  ;
-    dstrect.right = XLOG2DEVMAC(xdest + dstWidth ) ;
+    dstrect.bottom = YLOG2DEVMAC(ydest + height )  ;
+    dstrect.right = XLOG2DEVMAC(xdest + width ) ;
     short mode = kUnsupportedMode ;
     bool invertDestinationFirst = false ;
 

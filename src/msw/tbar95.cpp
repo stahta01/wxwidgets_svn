@@ -148,36 +148,12 @@ public:
                             clientData, shortHelp, longHelp)
     {
         m_nSepCount = 0;
-        m_staticText = 0;
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
-        if ( IsControl() && !m_label.empty() )
-        {
-            // create a control to render the control's label
-            m_staticText = new wxStaticText
-                               (
-                                 m_tbar,
-                                 wxID_ANY,
-                                 m_label,
-                                 wxDefaultPosition,
-                                 wxDefaultSize,
-                                 wxALIGN_CENTRE | wxST_NO_AUTORESIZE
-                               );
-        }
-        else // no label
-        {
-            m_staticText = NULL;
-        }
-
         m_nSepCount = 1;
-    }
-
-    virtual ~wxToolBarTool()
-    {
-        delete m_staticText;
     }
 
     virtual void SetLabel(const wxString& label)
@@ -187,21 +163,10 @@ public:
 
         wxToolBarToolBase::SetLabel(label);
 
-        if ( m_staticText )
-            m_staticText->SetLabel(label);
-
         // we need to update the label shown in the toolbar because it has a
         // pointer to the internal buffer of the old label
         //
         // TODO: use TB_SETBUTTONINFO
-    }
-
-    wxStaticText* GetStaticText()
-    {
-        wxASSERT_MSG( IsControl(),
-                      _T("only makes sense for embedded control tools") );
-
-        return m_staticText;
     }
 
     // set/get the number of separators which we use to cover the space used by
@@ -211,7 +176,6 @@ public:
 
 private:
     size_t m_nSepCount;
-    wxStaticText *m_staticText;
 
     DECLARE_NO_COPY_CLASS(wxToolBarTool)
 };
@@ -237,10 +201,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelp, longHelp);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 // ----------------------------------------------------------------------------
@@ -526,16 +489,13 @@ bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
     // takes care of all normal items)
     for ( /* node -> first after deleted */ ; node; node = node->GetNext() )
     {
-        wxToolBarTool *tool2 = (wxToolBarTool*)node->GetData();
+        wxToolBarToolBase *tool2 = node->GetData();
         if ( tool2->IsControl() )
         {
             int x;
             wxControl *control = tool2->GetControl();
             control->GetPosition(&x, NULL);
             control->Move(x - width, wxDefaultCoord);
-
-            wxStaticText* staticText = tool2->GetStaticText();
-            staticText->Move(x - width, wxDefaultCoord);
         }
     }
 
@@ -720,8 +680,8 @@ bool wxToolBar::Realize()
                         // no disabled bitmap specified but we still need to
                         // fill the space in the image list with something, so
                         // we grey out the normal bitmap
-                        wxImage
-                          imgGreyed = bmp.ConvertToImage().ConvertToGreyscale();
+                        wxImage imgGreyed;
+                        wxCreateGreyedImage(bmp.ConvertToImage(), imgGreyed);
 
 #ifdef wxREMAP_BUTTON_COLOURS
                         if ( remapValue == Remap_Buttons )
@@ -896,7 +856,7 @@ bool wxToolBar::Realize()
                 {
                     const wxString& label = tool->GetLabel();
                     if ( !label.empty() )
-                        button.iString = (int)label.wx_str();
+                        button.iString = (int)label.c_str();
                 }
 
                 button.idCommand = tool->GetId();
@@ -984,7 +944,7 @@ bool wxToolBar::Realize()
     size_t index = 0;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext(), index++ )
     {
-        wxToolBarTool *tool = (wxToolBarTool*)node->GetData();
+        wxToolBarToolBase *tool = node->GetData();
 
         // we calculate the running y coord for vertical toolbars so we need to
         // get the items size for all items but for the horizontal ones we
@@ -1011,15 +971,7 @@ bool wxToolBar::Realize()
         }
 
         wxControl *control = tool->GetControl();
-        wxStaticText * const staticText = tool->GetStaticText();
-
         wxSize size = control->GetSize();
-        wxSize staticTextSize;
-        if ( staticText )
-        {
-            staticTextSize = staticText->GetSize();
-            staticTextSize.y += 3; // margin between control and its label
-        }
 
         // the position of the leftmost controls corner
         int left = wxDefaultCoord;
@@ -1074,36 +1026,18 @@ bool wxToolBar::Realize()
             ((wxToolBarTool *)tool)->SetSeparatorsCount(nSeparators);
 
             // adjust the controls width to exactly cover the separators
-            size.x = (nSeparators + 1)*widthSep;
-            control->SetSize(size.x, wxDefaultCoord);
+            control->SetSize((nSeparators + 1)*widthSep, wxDefaultCoord);
         }
 
-        // position the control itself correctly vertically centering it on the
-        // icon area of the toolbar
-        int height = r.bottom - r.top - staticTextSize.y;
-
+        // position the control itself correctly vertically
+        int height = r.bottom - r.top;
         int diff = height - size.y;
-        if ( diff < 0 || !HasFlag(wxTB_TEXT) )
+        if ( diff < 0 )
         {
-            // not enough room for the static text
-            if ( staticText )
-                staticText->Hide();
+            // the control is too high, resize to fit
+            control->SetSize(wxDefaultCoord, height - 2);
 
-            // recalculate height & diff without the staticText control
-            height = r.bottom - r.top;
-            diff = height - size.y;
-            if ( diff < 0 )
-            {
-                // the control is too high, resize to fit
-                control->SetSize(wxDefaultCoord, height - 2);
-
-                diff = 2;
-            }
-        }
-        else // enough space for both the control and the label
-        {
-            if ( staticText )
-                staticText->Show();
+            diff = 2;
         }
 
         int top;
@@ -1123,11 +1057,6 @@ bool wxToolBar::Realize()
         }
 
         control->Move(left, top + (diff + 1) / 2);
-        if ( staticText )
-        {
-            staticText->Move(left + (size.x - staticTextSize.x)/2,
-                             r.bottom - staticTextSize.y);
-        }
     }
 
     // the max index is the "real" number of buttons - i.e. counting even the
@@ -1144,7 +1073,7 @@ bool wxToolBar::Realize()
     {
         // if not set yet, have one column
         m_maxRows = 1;
-        SetRows(m_nButtons);
+        SetRows(m_nButtons);        
     }
 
     InvalidateBestSize();
@@ -1411,7 +1340,7 @@ void wxToolBar::SetToolNormalBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetNormalBitmap(bitmap);
         Realize();
-    }
+    }    
 }
 
 void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
@@ -1423,7 +1352,7 @@ void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
 
         tool->SetDisabledBitmap(bitmap);
         Realize();
-    }
+    }    
 }
 
 // ----------------------------------------------------------------------------
@@ -1610,18 +1539,12 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
     //     otherwise
     for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
     {
-        wxToolBarTool *tool = (wxToolBarTool*)node->GetData();
+        wxToolBarToolBase *tool = node->GetData();
         if ( tool->IsControl() )
         {
             // get the control rect in our client coords
             wxControl *control = tool->GetControl();
-            wxStaticText *staticText = tool->GetStaticText();
             wxRect rectCtrl = control->GetRect();
-            wxRect rectStaticText(0,0,0,0);
-            if ( staticText )
-            {
-                rectStaticText = staticText->GetRect();
-            }
 
             // iterate over all buttons
             TBBUTTON tbb;
@@ -1661,15 +1584,6 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
                     // Necessary in case we use a no-paint-on-size
                     // style in the parent: the controls can disappear
                     control->Refresh(false);
-                }
-                if ( staticText && rectStaticText.Intersects(rectItem) )
-                {
-                    // yes, do erase it!
-                    dc.DrawRectangle(rectItem);
-
-                    // Necessary in case we use a no-paint-on-size
-                    // style in the parent: the controls can disappear
-                    staticText->Refresh(false);
                 }
             }
         }

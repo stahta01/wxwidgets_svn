@@ -87,7 +87,7 @@ wxBEGIN_FLAGS( wxComboBoxStyle )
 
 wxEND_FLAGS( wxComboBoxStyle )
 
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxComboBox, wxChoice,"wx/combobox.h")
+IMPLEMENT_DYNAMIC_CLASS_XTI(wxComboBox, wxControl,"wx/combobox.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxComboBox)
     wxEVENT_PROPERTY( Select , wxEVT_COMMAND_COMBOBOX_SELECTED , wxCommandEvent )
@@ -108,7 +108,7 @@ wxCONSTRUCTOR_5( wxComboBox , wxWindow* , Parent , wxWindowID , Id , wxString , 
 
 #else
 
-IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxChoice)
+IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
 
 #endif
 
@@ -265,7 +265,7 @@ bool wxComboBox::MSWProcessEditMsg(WXUINT msg, WXWPARAM wParam, WXLPARAM lParam)
             {
                 if (SendMessage(GetHwnd(), CB_GETDROPPEDSTATE, 0, 0))
                     return false;
-
+            
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
 
                 const int sel = GetSelection();

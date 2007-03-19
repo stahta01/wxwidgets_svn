@@ -59,6 +59,9 @@
     #define __WXBASE__
 #endif
 
+/*  include the feature test macros */
+#include "wx/features.h"
+
 /*  suppress some Visual C++ warnings */
 #ifdef __VISUALC__
     /*  the only "real" warning here is 4244 but there are just too many of them */
@@ -667,6 +670,9 @@ enum {  wxDefaultCoord = -1 };
 /*  practice) */
 
 /*  8bit */
+#ifndef SIZEOF_CHAR
+    #define SIZEOF_CHAR 1
+#endif
 typedef signed char wxInt8;
 typedef unsigned char wxUint8;
 typedef wxUint8 wxByte;
@@ -1271,18 +1277,20 @@ enum wxAlignment
 
 enum wxStretch
 {
-    /* for compatibility only, default now, don't use explicitly any more */
-#if WXWIN_COMPATIBILITY_2_6
-    wxADJUST_MINSIZE          = 0,
-#endif
-
     wxSTRETCH_NOT             = 0x0000,
     wxSHRINK                  = 0x1000,
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
     wxSHAPED                  = 0x4000,
     wxFIXED_MINSIZE           = 0x8000,
-    wxTILE                    = 0xc000
+    wxTILE                    = 0xc000,
+
+    /* for compatibility only, default now, don't use explicitly any more */
+#if WXWIN_COMPATIBILITY_2_4
+    wxADJUST_MINSIZE          = 0x00100000
+#else
+    wxADJUST_MINSIZE          = 0
+#endif
 };
 
 /*  border flags: the values are chosen for backwards compatibility */
@@ -1884,6 +1892,12 @@ enum
     wxCAP_PROJECTING,
     wxCAP_BUTT
 };
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#else
+    /* use wxBrush::IsHatch() instead thought wxMotif still uses it in src/motif/dcclient.cpp */
+#endif
 
 /*  Logical ops */
 typedef enum
@@ -2827,10 +2841,6 @@ typedef const void* WXWidget;
 #endif
 #endif
   /*  __WXMSW__ */
-
-
-/*  include the feature test macros */
-#include "wx/features.h"
 
 /*  --------------------------------------------------------------------------- */
 /*  macro to define a class without copy ctor nor assignment operator */

@@ -72,6 +72,10 @@ protected:
   virtual bool DoWriteLong(const wxString& key, long lValue);
 
 private:
+  // no copy ctor/assignment operator
+  wxPrefConfig(const wxPrefConfig&);
+  wxPrefConfig& operator=(const wxPrefConfig&);
+
   // current path (not '/' terminated)
   wxString  m_strPath;
 
@@ -80,9 +84,6 @@ private:
 
   // current group modified ?
   bool m_modGroup;
-
-  DECLARE_NO_COPY_CLASS(wxPrefConfig)
-  DECLARE_ABSTRACT_CLASS(wxPrefConfig)
 };
 
 #endif // _PREFCONF_H_

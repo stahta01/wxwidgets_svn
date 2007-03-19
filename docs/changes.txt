@@ -2,105 +2,90 @@
                              wxWidgets Change Log
 -------------------------------------------------------------------------------
 
-INCOMPATIBLE CHANGES SINCE 2.8.x
+INCOMPATIBLE CHANGES SINCE 2.6.x
 ================================
 
 Changes in behaviour not resulting in compilation errors, please read this!
 ---------------------------------------------------------------------------
 
-- Default location of wxFileConfig files has changed under Windows, you will
-  need to update your code if you access these files directly.
+- For all wxInputStreams, Eof() becomes true after an attempt has been made
+  to read _past_ the end of file.
+- wxFileName::DirExists() checks if the path of the file is a directory, not
+  if the whole name is a directory.
+- wxDialog::CreateButtonSizer() may return NULL now, please see the manual.
+- wxStaticBoxSizer now deletes the associated wxStaticBox when it is deleted.
+- wxArray::Alloc() now works as reserve() and does not clear the array any more
+- Windows calling CaptureMouse() are now required to handle the
+  wxEVT_MOUSE_CAPTURE_LOST event and not call ReleaseMouse() in this case.
+- wxInputStream::GetC() now returns an int in the range 0 - 255 on success
+  instead of a char the range -128 - 127.
+
 
 Changes in behaviour which may result in compilation errors
 -----------------------------------------------------------
 
-- WXWIN_COMPATIBILITY_2_4 doesn't exist any more, please update your code if
-  you still relied on features deprecated since version 2.4
-
-- Return type of wxString::operator[] and wxString::iterator::operator* is no
-  longer wxChar (i.e. char or wchar_t), but wxUniChar. This is not a problem
-  in vast majority of cases because of conversion operators, but it can break
-  code that depends on the result being wxChar.
-
-- The value returned by wxString::operator[] or wxString::iterator cannot be
-  used in switch statements anymore, because it's a class instance. Code like
-  this won't compile:
-     switch (str[i]) { ... }
-  and has to be replaced with this:
-     switch (str[i].GetValue()) { ... }
-
-- Return type of wxString::c_str() is now wxCStrData struct and not
-  const wxChar*. wxCStrData is implicitly convertible to const char* and
-  const wchar_t*, so this only presents a problem if the compiler cannot
-  convert the type. In particular, Borland C++ and DigitalMars compilers
-  don't correctly convert operator?: operands to the same type and fail with
-  compilation error instead. This can be worked around by explicitly casting
-  to const wxChar*:
-     wxLogError(_("error: %s"), !err.empty() ? (const wxChar*)err.c_str() : "")
-
-- DigitalMars compiler has a bug that prevents it from using
-  wxUniChar::operator bool in conditions and it erroneously reports type
-  conversion ambiguity in expressions such as this:
-     for ( wxString::const_iterator p = s.begin(); *p; ++p )
-  This can be worked around by explicitly casting to bool:
-     for ( wxString::const_iterator p = s.begin(); (bool)*p; ++p )
-
-Deprecated methods and their replacements
------------------------------------------
-
-- wxCreateGreyedImage() deprecated, use wxImage::ConvertToGreyscale() instead.
-- wxString::GetWriteBuf() and UngetWriteBuf() deprecated, using wxStringBuffer
-  or wxStringBufferLength instead.
-
-Major new features in this release
-----------------------------------
+- Some classes (notably wxBitmap and wxImage) don't define operator==() as it
+  used to work in somewhat unexpected way as it compared only internal pointers
+  and not the object data. The code using it will have to be updated:
+  * If the object was compared with wxNullXXX, use IsOk() method instead
+  * If valid object need to be compared, use IsSameAs() to reproduce the old
+    behaviour or change the code to avoid comparing bitmaps &c.
+- wxFontData::GetColour() now returns a const colour.
+- wxDC objects can't be created directly now (this never worked, now it doesn't
+  even compile).
+- wxCHECK family of macros now must be followed by a semicolon.
+- wxMBConv::cMB2WC() and cWC2MB() take size of the input buffer and return
+  length of the converted string in all cases now.
+- wxHtmlWindow::OnCellClicked() now returns bool.
+- wxHtmlCell::OnMouseClick() was deprecated and replaced with
+  wxHtmlCell::ProcessMouseClick(); old code overriding OnMouseClick() will
+  continue to work with WXWIN_COMPATIBILITY_2_6, but should be rewritten to
+  use ProcessMouseClick().
+- wxHtmlCell::GetCursor() was deprecated and replaced with
+  wxHtmlCell::GetMouseCursor(); old code overriding GetCursor() will
+  continue to work with WXWIN_COMPATIBILITY_2_6, but should be rewritten to
+  use GetMouseCursor().
+- wxHtmlCell::AdjustPagebreak() signature has changed, update your code if you
+  override it.
+- wxFontEnumerator::GetFacenames() and GetEncodings() now return arrays and
+  not pointers to arrays.
+- SetDefaultItem() method was moved from wxPanel to wxTopLevelWindow
+- wxDialog::OnOK/OnCancel() don't exist any more, use SetAffirmative/EscapeId()
+- wxPathList doesn't derive from (deprecated) wxStringList any more
+- wxGLContext class has no 1:1 coupling to a wxGLCanvas class any more.
+  As a consequence, the class interface changed largely. Code updates, if
+  any are required at all, are easy to accomplish though.
 
 
-2.9.0
------
+Deprecated methods since 2.6.x and their replacements
+-----------------------------------------------------
 
-All:
+- wxGetWorkingDirectory() deprecated in favour of wxGetCwd().
+- wxDC::BeginDrawing() and wxDC::EndDrawing() deprecated, don't use them.
+- wxWindowBase::GetBestFittingSize --> wxWindowBase::GetEffectiveMinSize.
+- wxWindowBase::SetBestFittingSize --> wxWindowBase::SetInitialSize.
+- Seeking on a zip stream returned from wxFileSystem without using the new
+  wxFS_SEEKABLE flags is deprecated. You can still seek, but use the flag.
+- Constructor wxZipInputStream(const wxString& archive, const wxString& file)
+  deprecated in favour of wxFileSystem (other zip ctors are not deprecated).
+- wx{Dir|File}Dialog::{Set|Get}Style deprecated in favour of the generic
+  wxWindow::{Set|Get}WindowStyle()
 
-- Added wxJoin() and wxSplit() functions (Francesco Montorsi)
-- Added wxMutex::LockTimeout() (Aleksandr Napylov)
-- Added wxMemoryInputStream(wxInputStream&) ctor (Stas Sergeev)
-- Implemented wxMemoryInputStream::CanRead()
 
-All (GUI):
+Major new features in 2.8 release
+---------------------------------
 
-- Added wxDC::StretchBlit() for wxMac and wxMSW (Vince Harron)
-- Added support for labels for toolbar controls (Vince Harron)
-- Added wxEventBlocker class (Francesco Montorsi).
-- Added wxFile/DirPickerCtrl::Get/SetFile/DirName() (Francesco Montorsi).
-- Added wxSizerFlags::Top() and Bottom().
-- Slovak translation added.
-- Fixed tab-related drawing and hit-testing bugs in wxRichTextCtrl.
-- Implemented background colour in wxRichTextCtrl.
-- Fixed crashes in helpview when opening a file.
-- Set locale to the default in all ports, not just wxGTK
-- Added wxJoystick::GetButtonState/Position() (Frank C Szczerba)
-- Added wxGridUpdateLocker helper class (Evgeniy Tarassov)
-- Support wxGRID_AUTOSIZE in wxGrid::SetRow/ColLabelSize() (Evgeniy Tarassov)
-- Add support for <data> tags to wxrc
-
-wxGTK:
-
-- Native implementation for wxHyperlinkCtrl (Francesco Montorsi)
-- Implemented support for underlined fonts in wxStaticText.
-- wxTopLevelWindow::SetSizeHints size increments now work.
-- wxTopLevelWindow::GetSize() returns the size including the WM decorations.
-- wxTopLevelWindow::GetClientSize() returns 0x0 when the window is minimized.
-- Added support for colour cursors (Pascal Monasse).
-- Setting foreground colour of single line wxTextCtrl now works
-
-wxMac:
-
-- Fix duplicate (empty) help menu in non-English programs (Andreas Jacobs)
-
-wxMSW:
-
-- Fixed infinite loop in wxThread::Wait() in console applications.
-- Return the restored window size from GetSize() when window is minimized.
+- New AUI library supporting docking windows and much more.
+- New rich text control library implementing a generic wxRichTextCtrl,
+  using only the wxWidgets API. Also includes formatting dialogs, conversion
+  to HTML, and printing classes.
+- New wxComboCtrl class giving the ability to create custom, graphical
+  comboboxes. Associated classes include wxOwnerDrawnComboBox, wxComboPopup
+  and wxBitmapComboBox.
+- Further functionality including wxAnimationCtrl (moved from contrib/src/anim
+  and enhanced), wxSimpleHtmlListBox, wxHyperlinkCtrl, wxColourPickerCtrl,
+  wxDirPickerCtrl, wxFilePickerCtrl, wxFontPickerCtrl, wxCollapsiblePane,
+  wxSearchCtrl, wxAboutBox, wxTreebook, tar streams.
 
 
 2.8.3
@@ -111,13 +96,15 @@ All:
 - Shut down the sockets gracefully (Sergio Aguayo)
 - Fix extra indentation in wxHTML_ALIGN_JUSTIFY display (Chacal)
 
-wxMac:
+wxMac
 
-- Corrected top border size for wxStaticBox with empty label (nusi)
+- Corrected top border size for wxStaticBox with empty label (nusi).
+- Fixed wxFont, wxPen and wxBrush accessor bugs introduced in 2.8.2.
 
 wxMSW:
 
-- Fixed wxFileName::GetSize() for large files
+- Fixed wxFileName::GetSize() for large files.
+- Fixed wxFont and wxPen accessor bugs introduced in 2.8.2.
 
 
 2.8.2
@@ -125,12 +112,19 @@ wxMSW:
 
 All:
 
-- Added wxSizerFlags::Shaped() and FixedMinSize() methods.
+- Added wxSizerFlags::Shaped(), FixedMinSize(), Top() and Bottom() methods.
 - Added wxCSConv::IsOk() (Manuel Martin).
 - Added wxDateTime::GetDateOnly().
 - Made wxTextFile work with unseekable files again (David Hart).
 - Added wxCONFIG_USE_SUBDIR flag to wxFileConfig (Giuseppe Bilotta).
 - Added wxSearchCtrl::[Get|Set]DescriptiveText.
+- Added wxToolBar::SetTool[Normal|Disabled]Bitmap for wxMSW, wxGTK and wxMac.
+- Added wxRICHTEXT_SETSTYLE_REMOVE flag for removing styles, and
+  wxRICHTEXT_HITTEST_OUTSIDE for more accurate hit-testing.
+- Fixed a crash when writing wxRichTextCtrl styles.
+- Fixed tab-related drawing and hit-testing bugs in wxRichTextCtrl.
+- Implemented background colour in wxRichTextCtrl.
+- Fixed crashes in helpview when opening a file.
 - Fixed detection of number of processors under Linux 2.6
 - Fixed Base64 computation in wxHTTP (p_michalczyk)
 - Fix handling of wxSOCKET_REUSEADDR in wxDatagramSocket (troelsk)
@@ -150,12 +144,14 @@ wxGTK
 
 wxMac
 
-- Fix position of the centered windows (didn't take menu bar size into account)
 - Added support for the wxFRAME_FLOAT_ON_PARENT style.
+- Now takes window variants into account when rendering buttons.
+- Fix position of the centered windows (didn't take menu bar size into account)
 
 wxX11:
 
 - Don't crash in wxWindow dtor if the window hadn't been really Create()d.
+- Update wxChoice value when SetSelection() is called.
 
 wxUniv:
 
@@ -195,12 +191,12 @@ All:
 
 - Added wxSearchCtrl (Vince Harron).
 - wxCSConv("UTF-16/32") now behaves correctly, i.e. same as wxMBConvUTF16/32.
-- wxArrayString::Alloc() now works as reserve() and doesn't clear array contents.
+- wxArrayString::Alloc() now works as reserve() and doesn't clear array contents
 - Fixed long standing bug in wxFileConfig groups renaming (Antti Koivisto).
 - New option wxFS_READ | wxFS_SEEKABLE for wxFileSystem::OpenFile() to return
   a stream that is seekable.
 - Fixed bug in wxCalendarCtrl::HitTest() when clicking on month change arrows.
-- Added wxWindow::GetWindowBorderSize() and corrected wxTreeCtrl::GetBestSize().
+- Added wxWindow::GetWindowBorderSize() and corrected wxTreeCtrl::GetBestSize()
   for a control with borders (Tim Kosse).
 
 wxMSW:

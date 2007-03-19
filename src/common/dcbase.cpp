@@ -79,42 +79,6 @@ void wxDCBase::DoDrawCheckMark(wxCoord x1, wxCoord y1,
 }
 
 // ----------------------------------------------------------------------------
-// stubs for functions not implemented in all ports
-// ----------------------------------------------------------------------------
-
-bool
-wxDCBase::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                        wxCoord dstWidth, wxCoord dstHeight,
-                        wxDC *source,
-                        wxCoord xsrc, wxCoord ysrc,
-                        wxCoord srcWidth, wxCoord srcHeight,
-                        int rop,
-                        bool useMask,
-                        wxCoord xsrcMask,
-                        wxCoord ysrcMask)
-{
-    wxCHECK_MSG( srcWidth && srcHeight && dstWidth && dstHeight, false,
-                 _T("invalid blit size") );
-
-    // emulate the stretching by modifying the DC scale
-    double xscale = (double)srcWidth/dstWidth,
-           yscale = (double)srcHeight/dstHeight;
-
-    double xscaleOld, yscaleOld;
-    GetUserScale(&xscaleOld, &yscaleOld);
-    SetUserScale(xscaleOld/xscale, yscaleOld/yscale);
-
-    bool rc = DoBlit(wxCoord(xdest*xscale), wxCoord(ydest*yscale),
-                     wxCoord(dstWidth*xscale), wxCoord(dstHeight*yscale),
-                     source,
-                     xsrc, ysrc, rop, useMask, xsrcMask, ysrcMask);
-
-    SetUserScale(xscaleOld, yscaleOld);
-
-    return rc;
-}
-
-// ----------------------------------------------------------------------------
 // line/polygons
 // ----------------------------------------------------------------------------
 
@@ -642,9 +606,9 @@ void wxDCBase::DrawLabel(const wxString& text,
 
     // split the string into lines and draw each of them separately
     wxString curLine;
-    for ( wxString::const_iterator pc = text.begin(); ; ++pc )
+    for ( const wxChar *pc = text; ; pc++ )
     {
-        if ( *pc == _T('\n') || pc == text.end() )
+        if ( *pc == _T('\n') || *pc == _T('\0') )
         {
             int xRealStart = x; // init it here to avoid compielr warnings
 
@@ -682,14 +646,14 @@ void wxDCBase::DrawLabel(const wxString& text,
                 endUnderscore += xRealStart;
             }
 
-            if ( pc == text.end() )
+            if ( *pc == _T('\0') )
                 break;
 
             curLine.clear();
         }
         else // not end of line
         {
-            if ( pc - text.begin() == (size_t)indexAccel )
+            if ( pc - text.c_str() == indexAccel )
             {
                 // remeber to draw underscore here
                 GetTextExtent(curLine, &startUnderscore, NULL);
@@ -770,7 +734,7 @@ void wxDCBase::DoGradientFillLinear(const wxRect& rect,
             else
                 nB = nB1 + (nB2-nB1)*(w-x)/w;
 
-            wxColour colour(nR,nG,nB);
+	    wxColour colour(nR,nG,nB);
             SetPen(wxPen(colour, 1, wxSOLID));
             SetBrush(wxBrush(colour));
             if(nDirection == wxEAST)
@@ -807,7 +771,7 @@ void wxDCBase::DoGradientFillLinear(const wxRect& rect,
             else
                 nB = nB1 + (nB2-nB1)*(w-y)/w;
 
-            wxColour colour(nR,nG,nB);
+	    wxColour colour(nR,nG,nB);
             SetPen(wxPen(colour, 1, wxSOLID));
             SetBrush(wxBrush(colour));
             if(nDirection == wxNORTH)
@@ -1192,4 +1156,4 @@ void wxDCBase::CalculateEllipticPoints( wxList* points,
     } // not iUseAngles
 } // CalculateEllipticPoints
 
-#endif // __WXWINCE__
+#endif

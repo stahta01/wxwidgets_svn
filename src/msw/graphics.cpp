@@ -17,30 +17,29 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_GRAPHICS_CONTEXT
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcdlg.h"
-    #include "wx/image.h"
-    #include "wx/window.h"
-    #include "wx/dc.h"
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/log.h"
-    #include "wx/icon.h"
-    #include "wx/dcprint.h"
-    #include "wx/module.h"
+#include "wx/msw/wrapcdlg.h"
+#include "wx/image.h"
+#include "wx/window.h"
+#include "wx/dc.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/app.h"
+#include "wx/bitmap.h"
+#include "wx/dcmemory.h"
+#include "wx/log.h"
+#include "wx/icon.h"
+#include "wx/dcprint.h"
+#include "wx/module.h"
 #endif
 
 #include "wx/graphics.h"
-#include "wx/msw/wrapgdip.h"
 
-#include "wx/stack.h"
+#if wxUSE_GRAPHICS_CONTEXT
 
-WX_DECLARE_STACK(GraphicsState, GraphicsStates);
+#include <vector>
+
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // constants
@@ -79,6 +78,19 @@ static inline double RadToDeg(double deg) { return (deg * 180.0) / M_PI; }
 #if wxUSE_COMMON_DIALOGS && !defined(__WXMICROWIN__)
 #include <commdlg.h>
 #endif
+
+// TODO remove this dependency (gdiplus needs the macros)
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+#include "gdiplus.h"
+using namespace Gdiplus;
 
 class WXDLLIMPEXP_CORE wxGDIPlusPathData : public wxGraphicsPathData
 {
@@ -166,7 +178,7 @@ public :
     // gets the component valuess of the matrix
     virtual void Get(wxDouble* a=NULL, wxDouble* b=NULL,  wxDouble* c=NULL,
                      wxDouble* d=NULL, wxDouble* tx=NULL, wxDouble* ty=NULL) const;
-
+       
     // makes this the inverse matrix
     virtual void Invert();
 
@@ -303,13 +315,14 @@ public:
     virtual void GetTextExtent( const wxString &str, wxDouble *width, wxDouble *height,
         wxDouble *descent, wxDouble *externalLeading ) const;
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const;
+    virtual bool ShouldOffset() const;
 
 private:
     void    Init();
     void    SetDefaults();
 
     Graphics* m_context;
-    GraphicsStates m_stateStack;
+    vector<GraphicsState> m_stateStack;
     GraphicsState m_state1;
     GraphicsState m_state2;
 
@@ -952,13 +965,13 @@ void wxGDIPlusContext::Scale( wxDouble xScale , wxDouble yScale )
 void wxGDIPlusContext::PushState()
 {
     GraphicsState state = m_context->Save();
-    m_stateStack.push(state);
+    m_stateStack.push_back(state);
 }
 
 void wxGDIPlusContext::PopState()
 {
-    GraphicsState state = m_stateStack.top();
-    m_stateStack.pop();
+    GraphicsState state = m_stateStack.back();
+    m_stateStack.pop_back();
     m_context->Restore(state);
 }
 
@@ -1168,8 +1181,7 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
 
     CharacterRange* ranges = new CharacterRange[len] ;
     Region* regions = new Region[len];
-    size_t i;
-    for( i = 0 ; i < len ; ++i)
+    for( size_t i = 0 ; i < len ; ++i)
     {
         ranges[i].First = i ;
         ranges[i].Length = 1 ;
@@ -1178,11 +1190,23 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
     m_context->MeasureCharacterRanges(ws, -1 , f,layoutRect, &strFormat,1,regions) ;
 
     RectF bbox ;
-    for ( i = 0 ; i < len ; ++i)
+    for ( size_t i = 0 ; i < len ; ++i)
     {
         regions[i].GetBounds(&bbox,m_context);
         widths[i] = bbox.GetRight()-bbox.GetLeft();
     }
+}
+
+bool wxGDIPlusContext::ShouldOffset() const
+{     
+    int penwidth = 0 ;
+    if ( !m_pen.IsNull() )
+    {
+        penwidth = (int)((wxGDIPlusPenData*)m_pen.GetRefData())->GetWidth();
+        if ( penwidth == 0 )
+            penwidth = 1;
+    }
+    return ( penwidth % 2 ) == 1;
 }
 
 void* wxGDIPlusContext::GetNativeContext()

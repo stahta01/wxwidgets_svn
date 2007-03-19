@@ -1158,7 +1158,7 @@ gtk_wxwindow_commit_cb (GtkIMContext *context,
                                   window, window->m_imData->lastKeyEvent);
     }
 
-    const wxWxCharBuffer data(wxGTK_CONV_BACK_SYS(str));
+    const wxWxCharBuffer data(wxGTK_CONV_BACK(str));
     if( !data )
         return;
 
@@ -1683,9 +1683,9 @@ gtk_window_button_release_callback( GtkWidget *widget,
     event.SetId( win->GetId() );
 
     bool ret = win->GTKProcessEvent(event);
-
+    
     g_lastMouseEvent = NULL;
-
+    
     return ret;
 }
 
@@ -2551,7 +2551,7 @@ void wxWindowGTK::PostCreation()
         // FIXME: what should be done here ?
     }
 #endif
-    else if ( !IsTopLevel() ) // top level windows use their own callback
+    else
     {
         // This is needed if we want to add our windows into native
         // GTK controls, such as the toolbar. With this callback, the
@@ -3869,53 +3869,44 @@ GtkRcStyle *wxWindowGTK::CreateWidgetStyle(bool forceStyle)
             pango_font_description_copy( m_font.GetNativeFontInfo()->description );
     }
 
-    int flagsNormal = 0,
-        flagsPrelight = 0,
-        flagsActive = 0,
-        flagsInsensitive = 0;
-
     if ( m_foregroundColour.Ok() )
     {
         const GdkColor *fg = m_foregroundColour.GetColor();
 
-        style->fg[GTK_STATE_NORMAL] =
-        style->text[GTK_STATE_NORMAL] = *fg;
-        flagsNormal |= GTK_RC_FG | GTK_RC_TEXT;
+        style->fg[GTK_STATE_NORMAL] = *fg;
+        style->color_flags[GTK_STATE_NORMAL] = GTK_RC_FG;
 
-        style->fg[GTK_STATE_PRELIGHT] =
-        style->text[GTK_STATE_PRELIGHT] = *fg;
-        flagsPrelight |= GTK_RC_FG | GTK_RC_TEXT;
+        style->fg[GTK_STATE_PRELIGHT] = *fg;
+        style->color_flags[GTK_STATE_PRELIGHT] = GTK_RC_FG;
 
-        style->fg[GTK_STATE_ACTIVE] =
-        style->text[GTK_STATE_ACTIVE] = *fg;
-        flagsActive |= GTK_RC_FG | GTK_RC_TEXT;
+        style->fg[GTK_STATE_ACTIVE] = *fg;
+        style->color_flags[GTK_STATE_ACTIVE] = GTK_RC_FG;
     }
 
     if ( m_backgroundColour.Ok() )
     {
         const GdkColor *bg = m_backgroundColour.GetColor();
 
-        style->bg[GTK_STATE_NORMAL] =
+        style->bg[GTK_STATE_NORMAL] = *bg;
         style->base[GTK_STATE_NORMAL] = *bg;
-        flagsNormal |= GTK_RC_BG | GTK_RC_BASE;
+        style->color_flags[GTK_STATE_NORMAL] = (GtkRcFlags)
+            (style->color_flags[GTK_STATE_NORMAL] | GTK_RC_BG | GTK_RC_BASE);
 
-        style->bg[GTK_STATE_PRELIGHT] =
+        style->bg[GTK_STATE_PRELIGHT] = *bg;
         style->base[GTK_STATE_PRELIGHT] = *bg;
-        flagsPrelight |= GTK_RC_BG | GTK_RC_BASE;
+        style->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags)
+            (style->color_flags[GTK_STATE_PRELIGHT] | GTK_RC_BG | GTK_RC_BASE);
 
-        style->bg[GTK_STATE_ACTIVE] =
+        style->bg[GTK_STATE_ACTIVE] = *bg;
         style->base[GTK_STATE_ACTIVE] = *bg;
-        flagsActive |= GTK_RC_BG | GTK_RC_BASE;
+        style->color_flags[GTK_STATE_ACTIVE] = (GtkRcFlags)
+            (style->color_flags[GTK_STATE_ACTIVE] | GTK_RC_BG | GTK_RC_BASE);
 
-        style->bg[GTK_STATE_INSENSITIVE] =
+        style->bg[GTK_STATE_INSENSITIVE] = *bg;
         style->base[GTK_STATE_INSENSITIVE] = *bg;
-        flagsInsensitive |= GTK_RC_BG | GTK_RC_BASE;
+        style->color_flags[GTK_STATE_INSENSITIVE] = (GtkRcFlags)
+            (style->color_flags[GTK_STATE_INSENSITIVE] | GTK_RC_BG | GTK_RC_BASE);
     }
-
-    style->color_flags[GTK_STATE_NORMAL] = (GtkRcFlags)flagsNormal;
-    style->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags)flagsPrelight;
-    style->color_flags[GTK_STATE_ACTIVE] = (GtkRcFlags)flagsActive;
-    style->color_flags[GTK_STATE_INSENSITIVE] = (GtkRcFlags)flagsInsensitive;
 
     return style;
 }

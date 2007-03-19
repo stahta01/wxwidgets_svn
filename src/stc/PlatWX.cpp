@@ -1434,8 +1434,6 @@ void Platform::DebugPrintf(const char *format, ...) {
     vsprintf(buffer,format,pArguments);
     va_end(pArguments);
     Platform::DebugDisplay(buffer);
-#else
-    wxUnusedVar(format);
 #endif
 }
 

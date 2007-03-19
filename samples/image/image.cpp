@@ -1168,9 +1168,6 @@ void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     wxFrame *frame = new MyFrame();

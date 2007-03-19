@@ -385,8 +385,10 @@ public:
 
     void Clear();
 
+#if wxABI_VERSION >= 20802
     // return true if the conversion could be initilized successfully
     bool IsOk() const;
+#endif // wx 2.8.2+
 
 private:
     // common part of all ctors
@@ -522,6 +524,7 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
     #define wxConvertWX2MB(s)   wxConvCurrent->cWX2MB(s)
     #define wxConvertMB2WX(s)   wxConvCurrent->cMB2WX(s)
 
+#if wxABI_VERSION >= 20802
     // these functions should be used when the conversions really, really have
     // to succeed (usually because we pass their results to a standard C
     // function which would crash if we passed NULL to it), so these functions
@@ -534,6 +537,7 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
     // this function uses wxConvLibc and wxConvUTF8(MAP_INVALID_UTF8_TO_OCTAL)
     // if it fails
     extern WXDLLIMPEXP_BASE wxCharBuffer wxSafeConvertWX2MB(const wchar_t *ws);
+#endif // wxABI 2.8.2+
 #else // ANSI
     // no conversions to do
     #define wxConvertWX2MB(s)   (s)

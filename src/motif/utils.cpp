@@ -949,7 +949,7 @@ wxString wxXmStringToString( const XmString& xmString )
 
 XmString wxStringToXmString( const wxString& str )
 {
-    return wxStringToXmString(str.mb_str());
+    return XmStringCreateLtoR((char *)str.c_str(), XmSTRING_DEFAULT_CHARSET);
 }
 
 XmString wxStringToXmString( const char* str )

@@ -91,7 +91,7 @@ void wxVLogGeneric(wxLogLevel level, const wxChar *szFormat, va_list argptr)
     }
 }
 
-void wxDoLogGeneric(wxLogLevel level, const wxChar *szFormat, ...)
+void wxLogGeneric(wxLogLevel level, const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -108,7 +108,7 @@ void wxDoLogGeneric(wxLogLevel level, const wxChar *szFormat, ...)
     }                                                               \
   }                                                                 \
                                                                     \
-  void wxDoLog##level(const wxChar *szFormat, ...)                  \
+  void wxLog##level(const wxChar *szFormat, ...)                    \
   {                                                                 \
     va_list argptr;                                                 \
     va_start(argptr, szFormat);                                     \
@@ -145,7 +145,7 @@ void wxVLogFatalError(const wxChar *szFormat, va_list argptr)
 #endif
 }
 
-void wxDoLogFatalError(const wxChar *szFormat, ...)
+void wxLogFatalError(const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -167,7 +167,7 @@ void wxVLogVerbose(const wxChar *szFormat, va_list argptr)
     }
 }
 
-void wxDoLogVerbose(const wxChar *szFormat, ...)
+void wxLogVerbose(const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -186,7 +186,7 @@ void wxDoLogVerbose(const wxChar *szFormat, ...)
     }                                                               \
   }                                                                 \
                                                                     \
-  void wxDoLog##level(const wxChar *szFormat, ...)                  \
+  void wxLog##level(const wxChar *szFormat, ...)                    \
   {                                                                 \
     va_list argptr;                                                 \
     va_start(argptr, szFormat);                                     \
@@ -199,12 +199,12 @@ void wxDoLogVerbose(const wxChar *szFormat, ...)
     if ( wxLog::IsEnabled() && wxLog::IsAllowedTraceMask(mask) ) {
       wxString msg;
       msg << _T("(") << mask << _T(") ") << wxString::FormatV(szFormat, argptr);
-
+          
       wxLog::OnLog(wxLOG_Trace, msg, time(NULL));
     }
   }
 
-  void wxDoLogTrace(const wxChar *mask, const wxChar *szFormat, ...)
+  void wxLogTrace(const wxChar *mask, const wxChar *szFormat, ...)
   {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -222,7 +222,7 @@ void wxDoLogVerbose(const wxChar *szFormat, ...)
     }
   }
 
-  void wxDoLogTrace(wxTraceMask mask, const wxChar *szFormat, ...)
+  void wxLogTrace(wxTraceMask mask, const wxChar *szFormat, ...)
   {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -251,7 +251,7 @@ void WXDLLEXPORT wxVLogSysError(const wxChar *szFormat, va_list argptr)
     wxVLogSysError(wxSysErrorCode(), szFormat, argptr);
 }
 
-void WXDLLEXPORT wxDoLogSysError(const wxChar *szFormat, ...)
+void WXDLLEXPORT wxLogSysError(const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -268,7 +268,7 @@ void WXDLLEXPORT wxVLogSysError(long err, const wxChar *fmt, va_list argptr)
     }
 }
 
-void WXDLLEXPORT wxDoLogSysError(long lErrCode, const wxChar *szFormat, ...)
+void WXDLLEXPORT wxLogSysError(long lErrCode, const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
