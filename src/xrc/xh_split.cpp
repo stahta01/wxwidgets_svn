@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_split.cpp
+// Name:        xh_split.cpp
 // Purpose:     XRC resource for wxSplitterWindow
 // Author:      panga@freemail.hu, Vaclav Slavik
 // Created:     2003/01/26
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_split.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,15 +19,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_SPLITTER
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_split.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
-
 #include "wx/splitter.h"
+#include "wx/log.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxSplitterWindowXmlHandler, wxXmlResourceHandler)
 
@@ -32,9 +32,7 @@ wxSplitterWindowXmlHandler::wxSplitterWindowXmlHandler() : wxXmlResourceHandler(
     XRC_ADD_STYLE(wxSP_3D);
     XRC_ADD_STYLE(wxSP_3DSASH);
     XRC_ADD_STYLE(wxSP_3DBORDER);
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxSP_FULLSASH);
-#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxSP_BORDER);
     XRC_ADD_STYLE(wxSP_NOBORDER);
     XRC_ADD_STYLE(wxSP_PERMIT_UNSPLIT);
@@ -107,4 +105,4 @@ bool wxSplitterWindowXmlHandler::CanHandle(wxXmlNode *node)
      return IsOfClass(node, wxT("wxSplitterWindow"));
 }
 
-#endif // wxUSE_XRC && wxUSE_SPLITTER
+#endif // wxUSE_XRC

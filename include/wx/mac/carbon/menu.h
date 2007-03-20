@@ -12,6 +12,10 @@
 #ifndef _WX_MENU_H_
 #define _WX_MENU_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "menu.h"
+#endif
+
 class WXDLLEXPORT wxFrame;
 
 #include "wx/arrstr.h"
@@ -31,6 +35,10 @@ public:
 
     virtual ~wxMenu();
 
+    // implement base class virtuals
+    virtual wxMenuItem* DoAppend(wxMenuItem *item);
+    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
+    virtual wxMenuItem* DoRemove(wxMenuItem *item);
     virtual void Attach(wxMenuBarBase *menubar) ;
 
     virtual void Break();
@@ -60,11 +68,6 @@ public:
     WXHMENU GetHMenu() const { return m_hMenu; }
 
     short MacGetMenuId() { return m_macMenuId ; }
-
-protected:
-    virtual wxMenuItem* DoAppend(wxMenuItem *item);
-    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem* DoRemove(wxMenuItem *item);
 
 private:
     // common part of all ctors

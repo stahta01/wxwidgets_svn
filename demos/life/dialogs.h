@@ -12,6 +12,10 @@
 #ifndef _LIFE_DIALOGS_H_
 #define _LIFE_DIALOGS_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "dialogs.h"
+#endif
+
 // for compilers that support precompilation, includes "wx/wx.h"
 #include "wx/wxprec.h"
 
@@ -37,7 +41,7 @@ class LifeSamplesDialog : public wxDialog
 public:
     // ctor and dtor
     LifeSamplesDialog(wxWindow *parent);
-    virtual ~LifeSamplesDialog();
+    ~LifeSamplesDialog();
 
     // members
     const LifePattern& GetPattern();

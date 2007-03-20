@@ -11,6 +11,10 @@
 #ifndef _WX_UNIV_STATLINE_H_
 #define _WX_UNIV_STATLINE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univstatline.h"
+#endif
+
 class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
 public:
@@ -33,7 +37,7 @@ public:
                  const wxPoint &pos = wxDefaultPosition,
                  const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,
-                 const wxString &name = wxStaticLineNameStr )
+                 const wxString &name = wxStaticTextNameStr )
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -43,7 +47,7 @@ public:
                 const wxPoint &pos = wxDefaultPosition,
                 const wxSize &size = wxDefaultSize,
                 long style = wxLI_HORIZONTAL,
-                const wxString &name = wxStaticLineNameStr );
+                const wxString &name = wxStaticTextNameStr );
 
 protected:
     virtual void DoDraw(wxControlRenderer *renderer);

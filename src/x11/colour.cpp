@@ -1,23 +1,21 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart, Robert Roebling
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
-#include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/gdicmn.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
 #endif
+
+#include "wx/gdicmn.h"
+#include "wx/app.h"
 
 #include "wx/x11/private.h"
 
@@ -45,7 +43,7 @@ public:
         m_hasPixel = data.m_hasPixel;
     }
 
-    virtual ~wxColourRefData()
+    ~wxColourRefData()
     {
         FreeColour();
     }
@@ -143,6 +141,64 @@ void wxColourRefData::AllocColour( WXColormap cmap )
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour,wxGDIObject)
 
+wxColour::wxColour( unsigned char red, unsigned char green, unsigned char blue )
+{
+    m_refData = new wxColourRefData();
+#if wxUSE_NANOX
+    M_COLDATA->m_color.red = ((unsigned short)red) ;
+    M_COLDATA->m_color.green = ((unsigned short)green) ;
+    M_COLDATA->m_color.blue = ((unsigned short)blue) ;
+#else
+    M_COLDATA->m_color.red = ((unsigned short)red) << SHIFT;
+    M_COLDATA->m_color.green = ((unsigned short)green) << SHIFT;
+    M_COLDATA->m_color.blue = ((unsigned short)blue) << SHIFT;
+#endif
+    M_COLDATA->m_color.pixel = 0;
+}
+
+/* static */
+wxColour wxColour::CreateByName(const wxString& name)
+{
+    wxColour col;
+
+    Display *dpy = wxGlobalDisplay();
+    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
+    XColor xcol;
+    if ( XParseColor( dpy, (Colormap)colormap, name.mb_str(), &xcol ) )
+    {
+        wxColourRefData *refData = new wxColourRefData;
+        refData->m_colormap = colormap;
+        refData->m_color = xcol;
+        col.m_refData = refData;
+    }
+
+    return col;
+}
+
+void wxColour::InitFromName( const wxString &colourName )
+{
+    // check the cache first
+    wxColour col;
+    if ( wxTheColourDatabase )
+    {
+        col = wxTheColourDatabase->Find(colourName);
+    }
+
+    if ( !col.Ok() )
+    {
+        col = CreateByName(colourName);
+    }
+
+    if ( col.Ok() )
+    {
+        *this = col;
+    }
+    else
+    {
+        wxFAIL_MSG( wxT("wxColour: couldn't find colour") );
+    }
+}
+
 wxColour::~wxColour()
 {
 }
@@ -172,8 +228,7 @@ wxObjectRefData *wxColour::CloneRefData(const wxObjectRefData *data) const
     return new wxColourRefData(*(wxColourRefData *)data);
 }
 
-void wxColour::InitRGBA(unsigned char red, unsigned char green, unsigned char blue,
-                        unsigned char WXUNUSED(alpha))
+void wxColour::Set( unsigned char red, unsigned char green, unsigned char blue )
 {
     AllocExclusive();
 
@@ -243,22 +298,4 @@ WXColor *wxColour::GetColor() const
     wxCHECK_MSG( Ok(), (WXColor *) NULL, wxT("invalid colour") );
 
     return (WXColor*) &M_COLDATA->m_color;
-}
-
-bool wxColour::FromString(const wxChar *name)
-{
-    Display *dpy = wxGlobalDisplay();
-    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
-    XColor xcol;
-    if ( XParseColor( dpy, (Colormap)colormap, wxConvertWX2MB(name), &xcol ) )
-    {
-        UnRef();
-
-        m_refData = new wxColourRefData;
-        M_COLDATA->m_colormap = colormap;
-        M_COLDATA->m_color = xcol;
-        return true;
-    }
-
-    return wxColourBase::FromString(name);
 }

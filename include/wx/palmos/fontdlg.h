@@ -12,6 +12,10 @@
 #ifndef _WX_PALMOS_FONTDLG_H_
 #define _WX_PALMOS_FONTDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "fontdlg.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxFontDialog
 // ----------------------------------------------------------------------------
@@ -27,9 +31,14 @@ public:
 
     virtual int ShowModal();
 
+    // deprecated interface, don't use
+    wxFontDialog(wxWindow *parent, const wxFontData *data)
+        : wxFontDialogBase(parent, data) { Create(parent, data); }
+
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxFontDialog)
 };
 
 #endif
     // _WX_PALMOS_FONTDLG_H_
+

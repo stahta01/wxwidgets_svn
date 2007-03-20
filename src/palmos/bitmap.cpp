@@ -17,14 +17,16 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "bitmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#include "wx/bitmap.h"
 
 #ifndef WX_PRECOMP
     #include <stdio.h>
@@ -34,15 +36,17 @@
     #include "wx/app.h"
     #include "wx/palette.h"
     #include "wx/dcmemory.h"
+    #include "wx/bitmap.h"
     #include "wx/icon.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
 #endif
+
+#include "wx/log.h"
 
 #if wxUSE_WXDIB
 #include "wx/palmos/dib.h"
 #endif
 
+#include "wx/image.h"
 #include "wx/xpmdecod.h"
 
 #ifdef wxHAVE_RAW_BITMAP
@@ -211,6 +215,16 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
     Init();
 }
 
+// Create from XPM data
+#if wxUSE_IMAGE && wxUSE_XPM
+bool wxBitmap::CreateFromXpm(const char **data)
+#else
+bool wxBitmap::CreateFromXpm(const char **WXUNUSED(data))
+#endif
+{
+    return false;
+}
+
 wxBitmap::wxBitmap(int w, int h, int d)
 {
 }
@@ -219,7 +233,7 @@ wxBitmap::wxBitmap(int w, int h, const wxDC& dc)
 {
 }
 
-wxBitmap::wxBitmap(const void* data, long type, int width, int height, int depth)
+wxBitmap::wxBitmap(void *data, long type, int width, int height, int depth)
 {
 }
 
@@ -284,7 +298,7 @@ bool wxBitmap::LoadFile(const wxString& filename, long type)
     return false;
 }
 
-bool wxBitmap::Create(const void* data, long type, int width, int height, int depth)
+bool wxBitmap::Create(void *data, long type, int width, int height, int depth)
 {
     return false;
 }
@@ -435,7 +449,7 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
 // ----------------------------------------------------------------------------
 
 bool wxBitmapHandler::Create(wxGDIImage *image,
-                             const void* data,
+                             void *data,
                              long flags,
                              int width, int height, int depth)
 {
@@ -458,7 +472,7 @@ bool wxBitmapHandler::Save(wxGDIImage *image,
 }
 
 bool wxBitmapHandler::Create(wxBitmap *WXUNUSED(bitmap),
-                             const void* WXUNUSED(data),
+                             void *WXUNUSED(data),
                              long WXUNUSED(type),
                              int WXUNUSED(width),
                              int WXUNUSED(height),

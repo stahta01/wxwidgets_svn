@@ -12,6 +12,10 @@
 #ifndef _WX_DATAOBJ_H_BASE_
 #define _WX_DATAOBJ_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dataobjbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -76,10 +80,8 @@ public:
     #include "wx/msw/ole/dataform.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/dataform.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dataform.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dataform.h"
+    #include "wx/gtk/dataform.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dataform.h"
 #elif defined(__WXMAC__)
@@ -166,10 +168,8 @@ public:
     #include "wx/motif/dataobj.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dataobj.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dataobj.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dataobj.h"
+    #include "wx/gtk/dataobj.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dataobj.h"
 #elif defined(__WXCOCOA__)
@@ -273,12 +273,6 @@ public:
     // one if preferred == true
     void Add(wxDataObjectSimple *dataObject, bool preferred = false);
 
-    // Report the format passed to the SetData method.  This should be the
-    // format of the data object within the composite that recieved data from
-    // the clipboard or the DnD operation.  You can use this method to find
-    // out what kind of data object was recieved.
-    wxDataFormat GetReceivedFormat() const;
-
     // implement base class pure virtuals
     // ----------------------------------
     virtual wxDataFormat GetPreferredFormat(wxDataObjectBase::Direction dir = Get) const;
@@ -287,6 +281,10 @@ public:
     virtual size_t GetDataSize(const wxDataFormat& format) const;
     virtual bool GetDataHere(const wxDataFormat& format, void *buf) const;
     virtual bool SetData(const wxDataFormat& format, size_t len, const void *buf);
+
+protected:
+    // returns the pointer to the object which supports this format or NULL
+    wxDataObjectSimple *GetObject(const wxDataFormat& format) const;
 #if defined(__WXMSW__)
     virtual const void* GetSizeFromBuffer( const void* buffer, size_t* size,
                                            const wxDataFormat& format );
@@ -295,10 +293,6 @@ public:
     virtual size_t GetBufferOffset( const wxDataFormat& format );
 #endif
 
-protected:
-    // returns the pointer to the object which supports this format or NULL
-    wxDataObjectSimple *GetObject(const wxDataFormat& format) const;
-
 private:
     // the list of all (simple) data objects whose formats we support
     wxSimpleDataObjectList m_dataObjects;
@@ -306,8 +300,6 @@ private:
     // the index of the preferred one (0 initially, so by default the first
     // one is the preferred)
     size_t m_preferred;
-
-    wxDataFormat m_receivedFormat;
 
     DECLARE_NO_COPY_CLASS(wxDataObjectComposite)
 };
@@ -330,13 +322,7 @@ public:
     // ctor: you can specify the text here or in SetText(), or override
     // GetText()
     wxTextDataObject(const wxString& text = wxEmptyString)
-        : wxDataObjectSimple(
-#if wxUSE_UNICODE
-                             wxDF_UNICODETEXT
-#else
-                             wxDF_TEXT
-#endif
-                            ),
+        : wxDataObjectSimple(wxUSE_UNICODE?wxDF_UNICODETEXT:wxDF_TEXT),
           m_text(text)
         {
         }
@@ -350,8 +336,19 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    // some platforms have 2 and not 1 format for text data
-#if wxUSE_UNICODE && (defined(__WXGTK20__) || defined(__WXMAC__))
+#if wxUSE_UNICODE && defined(__WXGTK20__)
+    virtual size_t GetFormatCount(Direction WXUNUSED(dir) = Get) const { return 2; }
+    virtual void GetAllFormats(wxDataFormat *formats,
+                               wxDataObjectBase::Direction WXUNUSED(dir) = Get) const;
+
+    virtual size_t GetDataSize() const { return GetDataSize(GetPreferredFormat()); }
+    virtual bool GetDataHere(void *buf) const { return GetDataHere(GetPreferredFormat(), buf); }
+    virtual bool SetData(size_t len, const void *buf) { return SetData(GetPreferredFormat(), len, buf); }
+
+    size_t GetDataSize(const wxDataFormat& format) const;
+    bool GetDataHere(const wxDataFormat& format, void *pBuf) const;
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf);
+#elif wxUSE_UNICODE && defined(__WXMAC__)
     virtual size_t GetFormatCount(Direction WXUNUSED(dir) = Get) const { return 2; }
     virtual void GetAllFormats(wxDataFormat *formats,
                                wxDataObjectBase::Direction WXUNUSED(dir) = Get) const;
@@ -367,19 +364,13 @@ public:
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
+
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void *pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 #endif
 
 private:
@@ -429,8 +420,19 @@ public:
     // get a reference to our array
     const wxArrayString& GetFilenames() const { return m_filenames; }
 
+    // the Get() functions do nothing for us
+    virtual size_t GetDataSize() const { return 0; }
+    virtual bool GetDataHere(void *WXUNUSED(buf)) const { return false; }
+
 protected:
     wxArrayString m_filenames;
+
+private:
+    // Virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
 
     DECLARE_NO_COPY_CLASS(wxFileDataObjectBase)
 };
@@ -475,23 +477,18 @@ public:
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t size, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
 
 private:
     size_t m_size;
     void  *m_data;
+
+    // virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 
     DECLARE_NO_COPY_CLASS(wxCustomDataObject)
 };
@@ -505,10 +502,8 @@ private:
 
     // wxURLDataObject defined in msw/ole/dataobj2.h
 #else // !__WXMSW__
-    #if defined(__WXGTK20__)
+    #if defined(__WXGTK__)
         #include "wx/gtk/dataobj2.h"
-    #elif defined(__WXGTK__)
-        #include "wx/gtk1/dataobj2.h"
     #elif defined(__WXX11__)
         #include "wx/x11/dataobj2.h"
     #elif defined(__WXMOTIF__)
@@ -525,11 +520,6 @@ private:
     class WXDLLEXPORT wxURLDataObject : public wxTextDataObject
     {
     public:
-        wxURLDataObject(const wxString& url = wxEmptyString)
-            : wxTextDataObject(url)
-        {
-        }
-
         wxString GetURL() const { return GetText(); }
         void SetURL(const wxString& url) { SetText(url); }
     };

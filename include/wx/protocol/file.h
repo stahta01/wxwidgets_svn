@@ -12,11 +12,16 @@
 #ifndef __WX_PROTO_FILE_H__
 #define __WX_PROTO_FILE_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "sckfile.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_PROTOCOL_FILE
 
 #include "wx/protocol/protocol.h"
+#include "wx/url.h"
 
 class WXDLLIMPEXP_NET wxFileProto: public wxProtocol {
   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFileProto)
@@ -25,7 +30,7 @@ protected:
   wxProtocolError m_error;
 public:
   wxFileProto();
-  virtual ~wxFileProto();
+  ~wxFileProto();
 
   wxProtocolError GetError() { return m_error; }
   bool Abort() { return TRUE; }

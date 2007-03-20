@@ -60,10 +60,8 @@ public:
 
     inline wxToolBarTool( wxToolBar* pTbar
                          ,wxControl* pControl
-                         ,const wxString& label
                         ) : wxToolBarToolBase( pTbar
                                               ,pControl
-                                              ,label
                                              )
     {
     }
@@ -130,12 +128,10 @@ wxToolBarToolBase* wxToolBar::CreateTool(
 
 wxToolBarToolBase *wxToolBar::CreateTool(
   wxControl*                        pControl
-, const wxString&                   label
 )
 {
     return new wxToolBarTool( this
                              ,pControl
-                             ,label
                             );
 } // end of wxToolBarSimple::CreateTool
 
@@ -337,7 +333,7 @@ bool wxToolBar::Create( wxWindow* pParent,
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
     SetFont(*wxSMALL_FONT);
 
-    if (GetWindowStyleFlag() & (wxTB_LEFT | wxTB_RIGHT))
+    if (GetWindowStyleFlag() & wxTB_VERTICAL)
     {
         m_vLastX = 7;
         m_vLastY = 3;
@@ -379,7 +375,7 @@ bool wxToolBar::Create( wxWindow* pParent,
     int                             nWidth  = rSize.x;
     int                             nHeight = rSize.y;
 
-    if (lStyle & (wxTB_TOP | wxTB_BOTTOM))
+    if (lStyle & wxTB_HORIZONTAL)
     {
         if (nWidth <= 0)
         {
@@ -503,7 +499,7 @@ bool wxToolBar::Realize()
 
         if (pTool->IsSeparator())
         {
-            if (GetWindowStyleFlag() & (wxTB_TOP | wxTB_BOTTOM))
+            if (GetWindowStyleFlag() & wxTB_HORIZONTAL)
             {
                 pTool->m_vX = m_vLastX + nSeparatorSize;
                 pTool->m_vHeight = m_defaultHeight + m_vTextY;
@@ -524,7 +520,7 @@ bool wxToolBar::Realize()
         }
         else if (pTool->IsButton())
         {
-            if (GetWindowStyleFlag() & (wxTB_TOP | wxTB_BOTTOM))
+            if (GetWindowStyleFlag() & wxTB_HORIZONTAL)
             {
                 if (m_nCurrentRowsOrColumns >= m_maxCols)
                 {
@@ -569,7 +565,7 @@ bool wxToolBar::Realize()
         node = node->GetNext();
     }
 
-    if (GetWindowStyleFlag() & (wxTB_TOP | wxTB_BOTTOM))
+    if ( GetWindowStyleFlag() & wxTB_HORIZONTAL )
         m_maxWidth += nMaxToolWidth;
     else
         m_maxHeight += nMaxToolHeight;
@@ -622,7 +618,7 @@ void wxToolBar::OnPaint (
             vDc.SetPen(vDarkGreyPen);
             if (HasFlag(wxTB_TEXT))
             {
-                if (HasFlag(wxTB_TOP) || HasFlag(wxTB_BOTTOM))
+                if (HasFlag(wxTB_HORIZONTAL))
                 {
                     nX = pTool->m_vX;
                     nY = pTool->m_vY - (m_vTextY - 6);
@@ -639,7 +635,7 @@ void wxToolBar::OnPaint (
             {
                 nX = pTool->m_vX;
                 nY = pTool->m_vY;
-                if (HasFlag(wxTB_TOP) || HasFlag(wxTB_BOTTOM))
+                if (HasFlag(wxTB_HORIZONTAL))
                     nHeight = pTool->GetHeight() - 2;
                 else
                 {

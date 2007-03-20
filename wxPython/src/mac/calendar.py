@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 """
@@ -6,17 +6,17 @@ Classes for an interactive Calendar control.
 """
 
 import _calendar
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -25,15 +25,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -47,8 +41,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -80,9 +73,9 @@ class CalendarDateAttr(object):
     A set of customization attributes for a calendar date, which can be
     used to control the look of the Calendar object.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCalendarDateAttr instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Colour colText=wxNullColour, Colour colBack=wxNullColour, 
             Colour colBorder=wxNullColour, Font font=wxNullFont, 
@@ -90,9 +83,10 @@ class CalendarDateAttr(object):
 
         Create a CalendarDateAttr.
         """
-        _calendar.CalendarDateAttr_swiginit(self,_calendar.new_CalendarDateAttr(*args, **kwargs))
-    __swig_destroy__ = _calendar.delete_CalendarDateAttr
-    __del__ = lambda self : None;
+        newobj = _calendar.new_CalendarDateAttr(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetTextColour(*args, **kwargs):
         """SetTextColour(self, Colour colText)"""
         return _calendar.CalendarDateAttr_SetTextColour(*args, **kwargs)
@@ -161,20 +155,24 @@ class CalendarDateAttr(object):
         """GetBorder(self) -> int"""
         return _calendar.CalendarDateAttr_GetBorder(*args, **kwargs)
 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    Border = property(GetBorder,SetBorder,doc="See `GetBorder` and `SetBorder`") 
-    BorderColour = property(GetBorderColour,SetBorderColour,doc="See `GetBorderColour` and `SetBorderColour`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-_calendar.CalendarDateAttr_swigregister(CalendarDateAttr)
+
+class CalendarDateAttrPtr(CalendarDateAttr):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CalendarDateAttr
+_calendar.CalendarDateAttr_swigregister(CalendarDateAttrPtr)
 
 class CalendarEvent(_core.DateEvent):
     """Proxy of C++ CalendarEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, CalendarCtrl cal, EventType type) -> CalendarEvent"""
-        _calendar.CalendarEvent_swiginit(self,_calendar.new_CalendarEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCalendarEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, CalendarCtrl cal, wxEventType type) -> CalendarEvent"""
+        newobj = _calendar.new_CalendarEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetWeekDay(*args, **kwargs):
         """SetWeekDay(self, int wd)"""
         return _calendar.CalendarEvent_SetWeekDay(*args, **kwargs)
@@ -191,8 +189,13 @@ class CalendarEvent(_core.DateEvent):
         """returns datetime.date object"""
         return _wxdate2pydate(self.GetDate())
 
-    WeekDay = property(GetWeekDay,SetWeekDay,doc="See `GetWeekDay` and `SetWeekDay`") 
-_calendar.CalendarEvent_swigregister(CalendarEvent)
+
+class CalendarEventPtr(CalendarEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CalendarEvent
+_calendar.CalendarEvent_swigregister(CalendarEventPtr)
 
 wxEVT_CALENDAR_DOUBLECLICKED = _calendar.wxEVT_CALENDAR_DOUBLECLICKED
 wxEVT_CALENDAR_SEL_CHANGED = _calendar.wxEVT_CALENDAR_SEL_CHANGED
@@ -225,7 +228,7 @@ class CalendarCtrl(_core.Control):
 
     An item without custom attributes is drawn with the default colours
     and font and without border, but setting custom attributes with
-    `SetAttr` allows to modify its appearance. Just create a custom
+    SetAttr allows to modify its appearance. Just create a custom
     attribute object and set it for the day you want to be displayed
     specially A day may be marked as being a holiday, (even if it is not
     recognized as one by `wx.DateTime`) by using the SetHoliday method.
@@ -234,9 +237,9 @@ class CalendarCtrl(_core.Control):
     month is changed, so you will often want to update them in an
     EVT_CALENDAR_MONTH event handler.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCalendarCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, DateTime date=DefaultDateTime, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -245,7 +248,10 @@ class CalendarCtrl(_core.Control):
 
         Create and show a calendar control.
         """
-        _calendar.CalendarCtrl_swiginit(self,_calendar.new_CalendarCtrl(*args, **kwargs))
+        newobj = _calendar.new_CalendarCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -531,18 +537,13 @@ class CalendarCtrl(_core.Control):
         """returns datetime.date object"""
         return _wxdate2pydate(self.GetUpperDateLimit())
 
-    Date = property(GetDate,SetDate,doc="See `GetDate` and `SetDate`") 
-    HeaderColourBg = property(GetHeaderColourBg,doc="See `GetHeaderColourBg`") 
-    HeaderColourFg = property(GetHeaderColourFg,doc="See `GetHeaderColourFg`") 
-    HighlightColourBg = property(GetHighlightColourBg,doc="See `GetHighlightColourBg`") 
-    HighlightColourFg = property(GetHighlightColourFg,doc="See `GetHighlightColourFg`") 
-    HolidayColourBg = property(GetHolidayColourBg,doc="See `GetHolidayColourBg`") 
-    HolidayColourFg = property(GetHolidayColourFg,doc="See `GetHolidayColourFg`") 
-    LowerDateLimit = property(GetLowerDateLimit,SetLowerDateLimit,doc="See `GetLowerDateLimit` and `SetLowerDateLimit`") 
-    MonthControl = property(GetMonthControl,doc="See `GetMonthControl`") 
-    UpperDateLimit = property(GetUpperDateLimit,SetUpperDateLimit,doc="See `GetUpperDateLimit` and `SetUpperDateLimit`") 
-    YearControl = property(GetYearControl,doc="See `GetYearControl`") 
-_calendar.CalendarCtrl_swigregister(CalendarCtrl)
+
+class CalendarCtrlPtr(CalendarCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CalendarCtrl
+_calendar.CalendarCtrl_swigregister(CalendarCtrlPtr)
 cvar = _calendar.cvar
 CalendarNameStr = cvar.CalendarNameStr
 
@@ -553,10 +554,11 @@ def PreCalendarCtrl(*args, **kwargs):
     Precreate a CalendarCtrl for 2-phase creation.
     """
     val = _calendar.new_PreCalendarCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def CalendarCtrl_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     CalendarCtrl_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -570,7 +572,7 @@ def CalendarCtrl_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _calendar.CalendarCtrl_GetClassDefaultAttributes(*args, **kwargs)
+    return _calendar.CalendarCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
 def _pydate2wxdate(date):
     import datetime

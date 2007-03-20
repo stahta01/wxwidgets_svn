@@ -169,9 +169,6 @@ If there is no range or there is no upper limit, then the
         }
     }
     
-    %property(LowerLimit, GetLowerLimit, doc="See `GetLowerLimit`");
-    %property(UpperLimit, GetUpperLimit, doc="See `GetUpperLimit`");
-    %property(Value, GetValue, SetValue, doc="See `GetValue` and `SetValue`");
 };
 
 

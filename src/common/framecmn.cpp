@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/framecmn.cpp
+// Name:        common/framecmn.cpp
 // Purpose:     common (for all platforms) wxFrame functions
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "framebase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -23,15 +27,19 @@
     #pragma hdrstop
 #endif
 
-#include "wx/frame.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/frame.h"
     #include "wx/menu.h"
     #include "wx/menuitem.h"
     #include "wx/dcclient.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
 #endif // WX_PRECOMP
+
+#if wxUSE_TOOLBAR
+    #include "wx/toolbar.h"
+#endif
+#if wxUSE_STATUSBAR
+    #include "wx/statusbr.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // event table
@@ -403,7 +411,6 @@ void wxFrameBase::SetStatusBar(wxStatusBar *statBar)
 
 #endif // wxUSE_STATUSBAR
 
-#if wxUSE_MENUS || wxUSE_TOOLBAR
 void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
 {
 #if wxUSE_STATUSBAR
@@ -419,34 +426,26 @@ void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
 
     wxString help;
     if ( show )
-    {
         help = text;
 
-        // remember the old status bar text if this is the first time we're
-        // called since the menu has been opened as we're going to overwrite it
-        // in our DoGiveHelp() and we want to restore it when the menu is
-        // closed
-        //
-        // note that it would be logical to do this in OnMenuOpen() but under
-        // MSW we get an EVT_MENU_HIGHLIGHT before EVT_MENU_OPEN, strangely
-        // enough, and so this doesn't work and instead we use the ugly trick
-        // with using special m_oldStatusText value as "menu opened" (but it is
-        // arguably better than adding yet another member variable to wxFrame
-        // on all platforms)
+    // remember the old status bar text if this is the first time we're called
+    // since the menu has been opened as we're going to overwrite it in our
+    // DoGiveHelp() and we want to restore it when the menu is closed
+    //
+    // note that it would be logical to do this in OnMenuOpen() but under MSW
+    // we get an EVT_MENU_HIGHLIGHT before EVT_MENU_OPEN, strangely enough, and
+    // so this doesn't work and instead we use the ugly trick with using
+    // special m_oldStatusText value as "menu opened" (but it is arguably
+    // better than adding yet another member variable to wxFrame on all
+    // platforms)
+    if ( m_oldStatusText.empty() )
+    {
+        m_oldStatusText = statbar->GetStatusText(m_statusBarPane);
         if ( m_oldStatusText.empty() )
         {
-            m_oldStatusText = statbar->GetStatusText(m_statusBarPane);
-            if ( m_oldStatusText.empty() )
-            {
-                // use special value to prevent us from doing this the next time
-                m_oldStatusText += _T('\0');
-            }
+            // use special value to prevent us from doing this the next time
+            m_oldStatusText += _T('\0');
         }
-    }
-    else // hide the status bar text
-    {
-        // i.e. restore the old one
-        help = m_oldStatusText;
     }
 
     statbar->SetStatusText(help, m_statusBarPane);
@@ -455,7 +454,6 @@ void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
     wxUnusedVar(show);
 #endif // wxUSE_STATUSBAR
 }
-#endif // wxUSE_MENUS || wxUSE_TOOLBAR
 
 
 // ----------------------------------------------------------------------------
@@ -468,7 +466,7 @@ wxToolBar* wxFrameBase::CreateToolBar(long style,
                                       wxWindowID id,
                                       const wxString& name)
 {
-    // the main toolbar can't be recreated (unless it was explicitly deleted
+    // the main toolbar can't be recreated (unless it was explicitly deeleted
     // before)
     wxCHECK_MSG( !m_frameToolBar, (wxToolBar *)NULL,
                  wxT("recreating toolbar in wxFrame") );
@@ -529,16 +527,16 @@ void wxFrameBase::SetToolBar(wxToolBar *toolbar)
 // update all menus
 void wxFrameBase::DoMenuUpdates(wxMenu* menu)
 {
+    wxEvtHandler* source = GetEventHandler();
+    wxMenuBar* bar = GetMenuBar();
+
     if (menu)
-    {
-        wxEvtHandler* source = GetEventHandler();
         menu->UpdateUI(source);
-    }
-    else
+    else if ( bar != NULL )
     {
-        wxMenuBar* bar = GetMenuBar();
-        if (bar != NULL)
-            bar->UpdateMenus();
+        int nCount = bar->GetMenuCount();
+        for (int n = 0; n < nCount; n++)
+            bar->GetMenu(n)->UpdateUI(source);
     }
 }
 
@@ -574,3 +572,12 @@ void wxFrameBase::SetMenuBar(wxMenuBar *menubar)
 }
 
 #endif // wxUSE_MENUS
+
+#if WXWIN_COMPATIBILITY_2_2
+
+bool wxFrameBase::Command(int winid)
+{
+    return ProcessCommand(winid);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2

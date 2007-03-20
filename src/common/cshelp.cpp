@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "cshelp.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -27,17 +31,12 @@
 #if wxUSE_HELP
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/module.h"
 #endif
 
 #include "wx/tipwin.h"
+#include "wx/app.h"
+#include "wx/module.h"
 #include "wx/cshelp.h"
-
-#if wxUSE_MS_HTML_HELP
-    #include "wx/msw/helpchm.h"     // for ShowContextHelpPopup
-    #include "wx/utils.h"           // for wxGetMousePosition()
-#endif
 
 // ----------------------------------------------------------------------------
 // wxContextHelpEvtHandler private class
@@ -228,13 +227,21 @@ bool wxContextHelpEvtHandler::ProcessEvent(wxEvent& event)
 // Dispatch the help event to the relevant window
 bool wxContextHelp::DispatchEvent(wxWindow* win, const wxPoint& pt)
 {
-    wxCHECK_MSG( win, false, _T("win parameter can't be NULL") );
+    wxWindow* subjectOfHelp = win;
+    bool eventProcessed = false;
+    while (subjectOfHelp && !eventProcessed)
+    {
+        wxHelpEvent helpEvent(wxEVT_HELP, subjectOfHelp->GetId(), pt) ;
+        helpEvent.SetEventObject(subjectOfHelp);
 
-    wxHelpEvent helpEvent(wxEVT_HELP, win->GetId(), pt,
-                          wxHelpEvent::Origin_HelpButton);
-    helpEvent.SetEventObject(win);
+        eventProcessed = win->GetEventHandler()->ProcessEvent(helpEvent);
 
-    return win->GetEventHandler()->ProcessEvent(helpEvent);
+        // Go up the window hierarchy until the event is handled (or not).
+        // I.e. keep submitting ancestor windows until one is recognised
+        // by the app code that processes the ids and displays help.
+        subjectOfHelp = subjectOfHelp->GetParent();
+    }
+    return eventProcessed;
 }
 
 // ----------------------------------------------------------------------------
@@ -323,34 +330,13 @@ wxHelpProvider::~wxHelpProvider()
 {
 }
 
-wxString wxHelpProvider::GetHelpTextMaybeAtPoint(wxWindowBase *window)
-{
-    if ( m_helptextAtPoint != wxDefaultPosition ||
-            m_helptextOrigin != wxHelpEvent::Origin_Unknown )
-    {
-        wxCHECK_MSG( window, wxEmptyString, _T("window must not be NULL") );
-
-        wxPoint pt = m_helptextAtPoint;
-        wxHelpEvent::Origin origin = m_helptextOrigin;
-
-        m_helptextAtPoint = wxDefaultPosition;
-        m_helptextOrigin = wxHelpEvent::Origin_Unknown;
-
-        return window->GetHelpTextAtPoint(pt, origin);
-    }
-
-    return GetHelp(window);
-}
-
 // ----------------------------------------------------------------------------
 // wxSimpleHelpProvider
 // ----------------------------------------------------------------------------
 
-#define WINHASH_KEY(w) wxPtrToUInt(w)
-
 wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 {
-    wxSimpleHelpProviderHashMap::iterator it = m_hashWindows.find(WINHASH_KEY(window));
+    wxLongToStringHashMap::iterator it = m_hashWindows.find((long)window);
 
     if ( it == m_hashWindows.end() )
     {
@@ -364,13 +350,13 @@ wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 
 void wxSimpleHelpProvider::AddHelp(wxWindowBase *window, const wxString& text)
 {
-    m_hashWindows.erase(WINHASH_KEY(window));
-    m_hashWindows[WINHASH_KEY(window)] = text;
+    m_hashWindows.erase((long)window);
+    m_hashWindows[(long)window] = text;
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 {
-    wxSimpleHelpProviderHashMap::key_type key = (wxSimpleHelpProviderHashMap::key_type)id;
+    wxLongToStringHashMap::key_type key = (wxLongToStringHashMap::key_type)id;
     m_hashIds.erase(key);
     m_hashIds[key] = text;
 }
@@ -378,51 +364,33 @@ void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 // removes the association
 void wxSimpleHelpProvider::RemoveHelp(wxWindowBase* window)
 {
-    m_hashWindows.erase(WINHASH_KEY(window));
+    m_hashWindows.erase((long)window);
 }
 
 bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
 {
-#if wxUSE_MS_HTML_HELP || wxUSE_TIPWINDOW
-    const wxString text = GetHelpTextMaybeAtPoint(window);
+#if wxUSE_TIPWINDOW
+    static wxTipWindow* s_tipWindow = NULL;
 
+    if (s_tipWindow)
+    {
+        // Prevent s_tipWindow being nulled in OnIdle,
+        // thereby removing the chance for the window to be closed by ShowHelp
+        s_tipWindow->SetTipWindowPtr(NULL);
+        s_tipWindow->Close();
+    }
+    s_tipWindow = NULL;
+
+    wxString text = GetHelp(window);
     if ( !text.empty() )
     {
-        // use the native help popup style if it's available
-#if wxUSE_MS_HTML_HELP
-        if ( !wxCHMHelpController::ShowContextHelpPopup
-                                   (
-                                        text,
-                                        wxGetMousePosition(),
-                                        (wxWindow *)window
-                                   ) )
-#endif // wxUSE_MS_HTML_HELP
-        {
-#if wxUSE_TIPWINDOW
-            static wxTipWindow* s_tipWindow = NULL;
-
-            if ( s_tipWindow )
-            {
-                // Prevent s_tipWindow being nulled in OnIdle, thereby removing
-                // the chance for the window to be closed by ShowHelp
-                s_tipWindow->SetTipWindowPtr(NULL);
-                s_tipWindow->Close();
-            }
-
-            s_tipWindow = new wxTipWindow((wxWindow *)window, text,
-                                            100, &s_tipWindow);
-#else // !wxUSE_TIPWINDOW
-            // we tried wxCHMHelpController but it failed and we don't have
-            // wxTipWindow to fall back on, so
-            return false;
-#endif // wxUSE_TIPWINDOW
-        }
+        s_tipWindow = new wxTipWindow((wxWindow *)window, text, 100, & s_tipWindow);
 
         return true;
     }
-#else // !wxUSE_MS_HTML_HELP && !wxUSE_TIPWINDOW
+#else
     wxUnusedVar(window);
-#endif // wxUSE_MS_HTML_HELP || wxUSE_TIPWINDOW
+#endif // wxUSE_TIPWINDOW
 
     return false;
 }
@@ -438,26 +406,29 @@ wxHelpControllerHelpProvider::wxHelpControllerHelpProvider(wxHelpControllerBase*
 
 bool wxHelpControllerHelpProvider::ShowHelp(wxWindowBase *window)
 {
-    const wxString text = GetHelpTextMaybeAtPoint(window);
-
-    if ( text.empty() )
-        return false;
-
-    if ( m_helpController )
+    wxString text = GetHelp(window);
+    if ( !text.empty() )
     {
-        // if it's a numeric topic, show it
-        long topic;
-        if ( text.ToLong(&topic) )
-            return m_helpController->DisplayContextPopup(topic);
+        if (m_helpController)
+        {
+            if (text.IsNumber())
+                return m_helpController->DisplayContextPopup(wxAtoi(text));
 
-        // otherwise show the text directly
-        if ( m_helpController->DisplayTextPopup(text, wxGetMousePosition()) )
-            return true;
+            // If the help controller is capable of popping up the text...
+            else if (m_helpController->DisplayTextPopup(text, wxGetMousePosition()))
+            {
+                return true;
+            }
+            else
+            // ...else use the default method.
+                return wxSimpleHelpProvider::ShowHelp(window);
+        }
+        else
+            return wxSimpleHelpProvider::ShowHelp(window);
+
     }
 
-    // if there is no help controller or it's not capable of showing the help,
-    // fallback to the default method
-    return wxSimpleHelpProvider::ShowHelp(window);
+    return false;
 }
 
 // Convenience function for turning context id into wxString

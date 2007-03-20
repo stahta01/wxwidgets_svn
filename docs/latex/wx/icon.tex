@@ -212,8 +212,10 @@ must have mask colour set.
 
 \func{}{\destruct{wxIcon}}{\void}
 
-Destructor.
-See \helpref{reference-counted object destruction}{refcountdestruct} for more info.
+Destroys the wxIcon object and possibly the underlying icon data.
+Because reference counting is used, the icon may not actually be
+destroyed at this point - only when the reference count is zero will the
+data be deleted.
 
 If the application omits to delete the icon explicitly, the icon will be
 destroyed automatically by wxWidgets when the application exits.
@@ -275,9 +277,9 @@ true if the operation succeeded, false otherwise.
 
 \helpref{wxIcon::wxIcon}{wxiconctor}
 
-\membersection{wxIcon::IsOk}\label{wxiconisok}
+\membersection{wxIcon::Ok}\label{wxiconok}
 
-\constfunc{bool}{IsOk}{\void}
+\constfunc{bool}{Ok}{\void}
 
 Returns true if icon data is present.
 
@@ -353,7 +355,9 @@ Sets the width member (does not affect the icon data).
 
 \func{wxIcon\& }{operator $=$}{\param{const wxIcon\& }{icon}}
 
-Assignment operator, using \helpref{reference counting}{trefcount}.
+Assignment operator. This operator does not copy any data, but instead
+passes a pointer to the data in {\it icon} and increments a reference
+counter. It is a fast operation.
 
 \wxheading{Parameters}
 
@@ -362,5 +366,35 @@ Assignment operator, using \helpref{reference counting}{trefcount}.
 \wxheading{Return value}
 
 Returns 'this' object.
+
+\membersection{wxIcon::operator $==$}\label{wxiconequal}
+
+\func{bool}{operator $==$}{\param{const wxIcon\& }{icon}}
+
+Equality operator. This operator tests whether the internal data pointers are
+equal (a fast test).
+
+\wxheading{Parameters}
+
+\docparam{icon}{Icon to compare with 'this'}
+
+\wxheading{Return value}
+
+Returns true if the icons were effectively equal, false otherwise.
+
+\membersection{wxIcon::operator $!=$}\label{wxiconnotequal}
+
+\func{bool}{operator $!=$}{\param{const wxIcon\& }{icon}}
+
+Inequality operator. This operator tests whether the internal data pointers are
+unequal (a fast test).
+
+\wxheading{Parameters}
+
+\docparam{icon}{Icon to compare with 'this'}
+
+\wxheading{Return value}
+
+Returns true if the icons were unequal, false otherwise.
 
 

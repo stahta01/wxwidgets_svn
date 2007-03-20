@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/fontutil.cpp
+// Name:        unix/fontutil.cpp
 // Purpose:     Font helper functions for X11 (GDK/X)
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "fontutil.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,16 +28,14 @@
     #pragma hdrstop
 #endif
 
-#include "wx/fontutil.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/hash.h"
-    #include "wx/utils.h"
-    #include "wx/module.h"
 #endif // PCH
 
+#include "wx/fontutil.h"
 #include "wx/fontmap.h"
 #include "wx/tokenzr.h"
+#include "wx/hash.h"
+#include "wx/module.h"
 #include "wx/encinfo.h"
 
 #ifdef __WXGTK20__
@@ -70,7 +72,7 @@ wxFontStyle wxNativeFontInfo::GetStyle() const
             m_style = wxFONTSTYLE_SLANT;
             break;
     }
-
+    
     return m_style;
 }
 
@@ -99,19 +101,19 @@ wxFontWeight wxNativeFontInfo::GetWeight() const
             m_weight = wxFONTWEIGHT_BOLD;
             break;
     }
-
+    
     return m_weight;
 }
 
 bool wxNativeFontInfo::GetUnderlined() const
 {
-    return false;
+    return FALSE;
 }
 
 wxString wxNativeFontInfo::GetFaceName() const
 {
     wxString tmp = wxGTK_CONV_BACK( pango_font_description_get_family( description ) );
-
+    
     return tmp;
 }
 
@@ -131,7 +133,7 @@ wxFontEncoding wxNativeFontInfo::GetEncoding() const
 
 bool wxNativeEncodingInfo::FromString(const wxString& s)
 {
-    return false;
+    return FALSE;
 }
 
 wxString wxNativeEncodingInfo::ToString() const
@@ -141,16 +143,16 @@ wxString wxNativeEncodingInfo::ToString() const
 
 bool wxTestFontEncoding(const wxNativeEncodingInfo& info)
 {
-    return true;
+    return TRUE;
 }
 
 bool wxGetNativeFontEncoding(wxFontEncoding encoding,
                              wxNativeEncodingInfo *info)
 {
-    return false;
+    return FALSE;
 }
 
-#else
+#else 
    // __WXGTK20__
 
 #ifdef __X__
@@ -164,6 +166,7 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
         #pragma message enable nosimpint
     #endif
 
+    #include "wx/utils.h"       // for wxGetDisplay()
 #elif defined(__WXGTK__)
     // we have to declare struct tm to avoid problems with first forward
     // declaring it in C code (glib.h included from gdk.h does it) and then
@@ -212,7 +215,7 @@ return wxEmptyString;
 bool wxGetNativeFontEncoding(wxFontEncoding encoding,
                              wxNativeEncodingInfo *info)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxTestFontEncoding(const wxNativeEncodingInfo& info)
@@ -244,7 +247,7 @@ bool wxFontModule::OnInit()
 {
     g_fontHash = new wxHashTable( wxKEY_STRING );
 
-    return true;
+    return TRUE;
 }
 
 void wxFontModule::OnExit()

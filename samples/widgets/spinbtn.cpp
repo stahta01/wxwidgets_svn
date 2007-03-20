@@ -54,7 +54,7 @@
 // control ids
 enum
 {
-    SpinBtnPage_Reset = wxID_HIGHEST,
+    SpinBtnPage_Reset = 100,
     SpinBtnPage_Clear,
     SpinBtnPage_SetValue,
     SpinBtnPage_SetMinAndMax,
@@ -73,15 +73,11 @@ enum
 class SpinBtnWidgetsPage : public WidgetsPage
 {
 public:
-    SpinBtnWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    SpinBtnWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~SpinBtnWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_spinbtn; }
     virtual wxControl *GetWidget2() const { return m_spinctrl; }
-    virtual void RecreateWidget() { CreateSpin(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // event handlers
@@ -169,19 +165,11 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
+IMPLEMENT_WIDGETS_PAGE(SpinBtnWidgetsPage, _T("Spin"));
 
-IMPLEMENT_WIDGETS_PAGE(SpinBtnWidgetsPage, _T("Spin"),
-                       FAMILY_CTRLS | EDITABLE_CTRLS
-                       );
-
-SpinBtnWidgetsPage::SpinBtnWidgetsPage(WidgetsBookCtrl *book,
+SpinBtnWidgetsPage::SpinBtnWidgetsPage(wxBookCtrlBase *book,
                                        wxImageList *imaglist)
-                  : WidgetsPage(book, imaglist, spinbtn_xpm)
+                  : WidgetsPage(book)
 {
     m_chkVert = NULL;
     m_chkWrap = NULL;
@@ -190,6 +178,7 @@ SpinBtnWidgetsPage::SpinBtnWidgetsPage(WidgetsBookCtrl *book,
     m_textValue = NULL;
     m_textMin = NULL;
     m_textMax = NULL;
+    imaglist->Add(wxBitmap(spinbtn_xpm));
 
     // init everything
     m_min = 0;
@@ -200,10 +189,7 @@ SpinBtnWidgetsPage::SpinBtnWidgetsPage(WidgetsBookCtrl *book,
 
     m_spinbtn = (wxSpinButton *)NULL;
     m_sizerSpin = (wxSizer *)NULL;
-}
 
-void SpinBtnWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
@@ -266,6 +252,8 @@ void SpinBtnWidgetsPage::CreateContent()
 
     // final initializations
     SetSizer(sizerTop);
+
+    sizerTop->Fit(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -280,7 +268,7 @@ void SpinBtnWidgetsPage::Reset()
 
 void SpinBtnWidgetsPage::CreateSpin()
 {
-    int flags = ms_defaultFlags;
+    int flags = 0;
 
     bool isVert = m_chkVert->GetValue();
     if ( isVert )
@@ -351,7 +339,7 @@ void SpinBtnWidgetsPage::OnButtonSetMinAndMax(wxCommandEvent& WXUNUSED(event))
          maxNew = 0; // init to suppress compiler warning
     if ( !m_textMin->GetValue().ToLong(&minNew) ||
          !m_textMax->GetValue().ToLong(&maxNew) ||
-         minNew > maxNew )
+         minNew >= maxNew )
     {
         wxLogWarning(_T("Invalid min/max values for the spinbtn."));
 
@@ -390,7 +378,7 @@ void SpinBtnWidgetsPage::OnUpdateUIMinMaxButton(wxUpdateUIEvent& event)
     long mn, mx;
     event.Enable( m_textMin->GetValue().ToLong(&mn) &&
                   m_textMax->GetValue().ToLong(&mx) &&
-                  mn <= mx);
+                  mn < mx);
 }
 
 void SpinBtnWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
@@ -420,13 +408,13 @@ void SpinBtnWidgetsPage::OnSpinBtn(wxSpinEvent& event)
 
 void SpinBtnWidgetsPage::OnSpinBtnUp(wxSpinEvent& event)
 {
-    wxLogMessage( _T("Spin button value incremented, will be %d (was %d)"),
+    wxLogMessage( _T("Spin button value incremented, will be %ld (was %d)"),
                   event.GetInt(), m_spinbtn->GetValue() );
 }
 
 void SpinBtnWidgetsPage::OnSpinBtnDown(wxSpinEvent& event)
 {
-    wxLogMessage( _T("Spin button value decremented, will be %d (was %d)"),
+    wxLogMessage( _T("Spin button value decremented, will be %ld (was %d)"),
                   event.GetInt(), m_spinbtn->GetValue() );
 }
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/font.h
+// Name:        font.h
 // Purpose:     wxFont class
 // Author:      Julian Smart
 // Modified by:
@@ -12,7 +12,11 @@
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
 
-#include "wx/gdicmn.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "font.h"
+#endif
+
+#include <wx/gdicmn.h>
 
 // ----------------------------------------------------------------------------
 // wxFont
@@ -22,7 +26,8 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) : wxFontBase(font) { Init(); Ref(font); }
 
     wxFont(int size,
            int family,
@@ -32,6 +37,8 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -43,12 +50,16 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(pixelSize, family, style, weight,
                      underlined, face, encoding);
     }
 
     wxFont(const wxNativeFontInfo& info, WXHFONT hFont = 0)
     {
+        Init();
+
         Create(info, hFont);
     }
 
@@ -82,9 +93,8 @@ public:
 
     virtual ~wxFont();
 
-    // wxFontBase overridden functions
-    virtual wxString GetNativeFontInfoDesc() const;
-    virtual wxString GetNativeFontInfoUserDesc() const;
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -103,7 +113,7 @@ public:
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
     virtual void SetWeight(int weight);
-    virtual bool SetFaceName(const wxString& faceName);
+    virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
@@ -120,6 +130,11 @@ public:
     // for consistency with other wxMSW classes
     WXHFONT GetHFONT() const;
 
+    /*
+       virtual bool UseResource();
+       virtual bool ReleaseResource();
+     */
+
 protected:
     // real font creation function, used in all cases
     bool DoCreate(int size,
@@ -134,12 +149,14 @@ protected:
 
     virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info);
 
-    // implement wxObject virtuals which are used by AllocExclusive()
-    virtual wxObjectRefData *CreateRefData() const;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
+    // common part of all ctors
+    void Init();
+
+    void Unshare();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 
-#endif // _WX_FONT_H_
+#endif
+    // _WX_FONT_H_

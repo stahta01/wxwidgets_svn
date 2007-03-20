@@ -10,6 +10,10 @@
 #ifndef _WX_IMAGGIF_H_
 #define _WX_IMAGGIF_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "imaggif.h"
+#endif
+
 #include "wx/image.h"
 
 
@@ -33,7 +37,6 @@ public:
 #if wxUSE_STREAMS
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
     virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
-protected:
     virtual bool DoCanRead( wxInputStream& stream );
 #endif
 

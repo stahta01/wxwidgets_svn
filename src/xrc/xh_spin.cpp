@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_spin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,7 +19,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC 
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_spin.h"
 

@@ -79,16 +79,6 @@ public:
         wxVersionDLL *verDLL;
     };
 
-    // the declared type of the first EnumModulesProc() parameter changed in
-    // recent SDK versions and is no PCSTR instead of old PSTR, we know that
-    // it's const in version 11 and non-const in version 8 included with VC8
-    // (and earlier), suppose that it's only changed in version 11
-    #if defined(API_VERSION_NUMBER) && API_VERSION_NUMBER >= 11
-        typedef PCSTR NameStr_t;
-    #else
-        typedef PSTR NameStr_t;
-    #endif
-
     // TODO: fix EnumerateLoadedModules() to use EnumerateLoadedModules64()
     #ifdef __WIN64__
         typedef DWORD64 DWORD_32_64;
@@ -97,7 +87,7 @@ public:
     #endif
 
     static BOOL CALLBACK
-    EnumModulesProc(NameStr_t name, DWORD_32_64 base, ULONG size, void *data);
+    EnumModulesProc(PSTR name, DWORD_32_64 base, ULONG size, void *data);
 };
 
 // ----------------------------------------------------------------------------
@@ -191,7 +181,7 @@ wxString wxVersionDLL::GetFileVersion(const wxString& filename) const
     wxString ver;
     if ( m_dll.IsLoaded() )
     {
-        wxChar *pc = wx_const_cast(wxChar *, filename.wx_str());
+        wxChar *pc = wx_const_cast(wxChar *, filename.c_str());
 
         DWORD dummy;
         DWORD sizeVerInfo = m_pfnGetFileVersionInfoSize(pc, &dummy);
@@ -225,7 +215,7 @@ wxString wxVersionDLL::GetFileVersion(const wxString& filename) const
 
 /* static */
 BOOL CALLBACK
-wxDynamicLibraryDetailsCreator::EnumModulesProc(NameStr_t name,
+wxDynamicLibraryDetailsCreator::EnumModulesProc(PSTR name,
                                                 DWORD_32_64 base,
                                                 ULONG size,
                                                 void *data)

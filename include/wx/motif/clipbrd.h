@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/clipbrd.h
+// Name:        clipbrd.h
 // Purpose:     Clipboard functionality.
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "clipbrd.h"
+#endif
 
 #if wxUSE_CLIPBOARD
 
@@ -41,35 +45,35 @@ class WXDLLIMPEXP_CORE wxClipboard : public wxClipboardBase
 {
 public:
     wxClipboard();
-    virtual ~wxClipboard();
-
+    ~wxClipboard();
+    
     // open the clipboard before SetData() and GetData()
     virtual bool Open();
-
+    
     // close the clipboard after SetData() and GetData()
     virtual void Close();
-
+    
     // opened?
     virtual bool IsOpened() const { return m_open; }
-
+    
     // replaces the data on the clipboard with data
     virtual bool SetData( wxDataObject *data );
-
+    
     // adds data to the clipboard
     virtual bool AddData( wxDataObject *data );
-
+    
     // format available on the clipboard ?
     virtual bool IsSupported( const wxDataFormat& format );
-
+    
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );
-
+    
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear();
-
+    
     virtual void UsePrimarySelection(bool primary = true)
     { m_usePrimary = primary; }
-
+    
     // implementation from now on
     bool              m_open;
     wxDataObjectList  m_data;

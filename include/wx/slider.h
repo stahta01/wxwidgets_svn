@@ -40,12 +40,11 @@
 #define wxSL_SELRANGE        0x0800
 #define wxSL_INVERSE         0x1000
 
-#if WXWIN_COMPATIBILITY_2_6
-    // obsolete
-    #define wxSL_NOTIFY_DRAG     0x0000
-#endif // WXWIN_COMPATIBILITY_2_6
+// obsolete
+#define wxSL_NOTIFY_DRAG     0x0000
 
-extern WXDLLEXPORT_DATA(const wxChar) wxSliderNameStr[];
+
+extern WXDLLEXPORT_DATA(const wxChar*) wxSliderNameStr;
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
@@ -126,12 +125,13 @@ private:
     #include "wx/univ/slider.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/slider95.h"
+    #if WXWIN_COMPATIBILITY_2_4
+         #define wxSlider95 wxSlider
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/slider.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/slider.h"
+    #include "wx/gtk/slider.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/slider.h"
 #elif defined(__WXCOCOA__)

@@ -47,7 +47,9 @@ DocStr(wxPyApp,
 class wxPyApp : public wxEvtHandler {
 public:
 
-    %pythonAppend wxPyApp    "self._setOORInfo(self, False);" setCallbackInfo(PyApp)
+    %pythonAppend wxPyApp
+       "self._setCallbackInfo(self, PyApp, False)
+        self._setOORInfo(self, False)";
     %typemap(out) wxPyApp*;    // turn off this typemap
 
     DocStr(wxPyApp,
@@ -65,7 +67,7 @@ public:
     %typemap(out) wxPyApp* { $result = wxPyMake_wxObject($1, $owner); }
 
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class, bool incref=false);
+    void _setCallbackInfo(PyObject* self, PyObject* _class, bool incref);
 
 
     DocDeclStr(
@@ -152,11 +154,6 @@ all top level windows have been closed and destroyed.", "");
 
     
     DocDeclStr(
-        virtual wxLayoutDirection , GetLayoutDirection() const,
-        "Return the layout direction for the current locale.", "");
-    
-    
-    DocDeclStr(
         virtual void, ExitMainLoop(),
         "Exit the main GUI loop during the next iteration of the main
 loop, (i.e. it does not stop the program immediately!)", "");
@@ -228,7 +225,7 @@ explicitly from somewhere.", "");
     
     
     DocDeclStr(
-        void, SetUseBestVisual( bool flag, bool forceTrueColour = false  ),
+        void, SetUseBestVisual( bool flag ),
         "Set whether the app should try to use the best available visual on
 systems where more than one is available, (Sun, SGI, XFree86 4, etc.)", "");
     
@@ -265,13 +262,13 @@ systems where more than one is available, (Sun, SGI, XFree86 4, etc.)", "");
         "Get the current OnAssert behaviour setting.", "");
 
 
-    static bool GetMacSupportPCMenuShortcuts();  // TODO, deprecate this
+    static bool GetMacSupportPCMenuShortcuts();
     static long GetMacAboutMenuItemId();
     static long GetMacPreferencesMenuItemId();
     static long GetMacExitMenuItemId();
     static wxString GetMacHelpMenuTitleName();
 
-    static void SetMacSupportPCMenuShortcuts(bool val);  // TODO, deprecate this
+    static void SetMacSupportPCMenuShortcuts(bool val);
     static void SetMacAboutMenuItemId(long val);
     static void SetMacPreferencesMenuItemId(long val);
     static void SetMacExitMenuItemId(long val);
@@ -293,41 +290,6 @@ it wasn't found at all.  Raises an exception on non-Windows platforms.", "");
             { wxPyRaiseNotImplemented(); return 0; }
     }
 #endif
-
-    %extend {
-        DocStr(IsDisplayAvailable,
-               "Tests if it is possible to create a GUI in the current environment.
-This will mean different things on the different platforms.
-
-   * On X Windows systems this function will return ``False`` if it is
-     not able to open a connection to the X display, which can happen
-     if $DISPLAY is not set, or is not set correctly.
-
-   * On Mac OS X a ``False`` return value will mean that wx is not
-     able to access the window manager, which can happen if logged in
-     remotely or if running from the normal version of python instead
-     of the framework version, (i.e., pythonw.)
-
-   * On MS Windows...
-", "");
-        static bool IsDisplayAvailable() {
-            return wxPyTestDisplayAvailable();
-        }
-    }
-
-    
-    %property(AppName, GetAppName, SetAppName, doc="See `GetAppName` and `SetAppName`");
-    %property(AssertMode, GetAssertMode, SetAssertMode, doc="See `GetAssertMode` and `SetAssertMode`");
-    %property(ClassName, GetClassName, SetClassName, doc="See `GetClassName` and `SetClassName`");
-    %property(ExitOnFrameDelete, GetExitOnFrameDelete, SetExitOnFrameDelete, doc="See `GetExitOnFrameDelete` and `SetExitOnFrameDelete`");
-    %property(LayoutDirection, GetLayoutDirection, doc="See `GetLayoutDirection`");
-    %property(PrintMode, GetPrintMode, SetPrintMode, doc="See `GetPrintMode` and `SetPrintMode`");
-    %property(TopWindow, GetTopWindow, SetTopWindow, doc="See `GetTopWindow` and `SetTopWindow`");
-    %property(Traits, GetTraits, doc="See `GetTraits`");
-    %property(UseBestVisual, GetUseBestVisual, SetUseBestVisual, doc="See `GetUseBestVisual` and `SetUseBestVisual`");
-    %property(VendorName, GetVendorName, SetVendorName, doc="See `GetVendorName` and `SetVendorName`");
-
-    %property(Active, IsActive);
 };
 
 

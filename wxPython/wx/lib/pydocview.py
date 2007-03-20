@@ -15,7 +15,7 @@ import wx
 import wx.lib.docview
 import sys
 import getopt
-from wx.lib.rcsizer import RowColSizer
+from wxPython.lib.rcsizer import RowColSizer
 import os
 import os.path
 import time

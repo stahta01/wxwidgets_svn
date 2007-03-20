@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/stopwatch.cpp
+// Name:        common/stopwatch.cpp
 // Purpose:     wxStopWatch and other non-GUI stuff from wx/timer.h
 // Author:
 //    Original version by Julian Smart
@@ -28,19 +28,21 @@
     #pragma hdrstop
 #endif
 
-#include "wx/stopwatch.h"
-
 #ifndef WX_PRECOMP
-    #ifdef __WXMSW__
-        #include "wx/msw/wrapwin.h"
-    #endif
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif //WX_PRECOMP
 
+#include "wx/longlong.h"
+#include "wx/stopwatch.h"
+
 // ----------------------------------------------------------------------------
 // System headers
 // ----------------------------------------------------------------------------
+
+#if defined(__WIN32__)
+    #include "wx/msw/wrapwin.h"
+#endif
 
 #if defined(__WIN32__) && !defined(HAVE_FTIME) && !defined(__MWERKS__) && !defined(__WXWINCE__)
     #define HAVE_FTIME
@@ -90,6 +92,21 @@
     #include <TimeMgr.h>
     #include <SystemMgr.h>
 #endif
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+// on some really old systems gettimeofday() doesn't have the second argument,
+// define wxGetTimeOfDay() to hide this difference
+#ifdef HAVE_GETTIMEOFDAY
+    #ifdef WX_GETTIMEOFDAY_NO_TZ
+        struct timezone;
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday(tv)
+    #else
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday((tv), (tz))
+    #endif
+#endif // HAVE_GETTIMEOFDAY
 
 // ============================================================================
 // implementation
@@ -264,7 +281,7 @@ wxLongLong wxGetLocalTimeMillis()
 
 #elif defined(HAVE_GETTIMEOFDAY)
     struct timeval tp;
-    if ( wxGetTimeOfDay(&tp) != -1 )
+    if ( wxGetTimeOfDay(&tp, (struct timezone *)NULL) != -1 )
     {
         val *= tp.tv_sec;
         return (val + (tp.tv_usec / 1000));
@@ -347,11 +364,6 @@ wxLongLong wxGetLocalTimeMillis()
 #endif // time functions
 }
 
-#else // !wxUSE_LONGLONG
+#endif // wxUSE_LONGLONG
 
-double wxGetLocalTimeMillis(void)
-{
-    return (double(clock()) / double(CLOCKS_PER_SEC)) * 1000.0;
-}
 
-#endif // wxUSE_LONGLONG/!wxUSE_LONGLONG

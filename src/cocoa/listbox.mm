@@ -1,23 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/listbox.mm
+// Name:        cocoa/listbox.mm
 // Purpose:     wxListBox
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/18
-// Id:          $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
 
 #if wxUSE_LISTBOX
 
-#include "wx/listbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/app.h"
+    #include "wx/listbox.h"
 #endif //WX_PRECOMP
 
 #include "wx/cocoa/string.h"
@@ -57,26 +56,26 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID winid,
             const wxString& name)
 {
 /*
-wxLB_SINGLE
-Single-selection list.
+wxLB_SINGLE 
+Single-selection list. 
 
-wxLB_MULTIPLE
-Multiple-selection list: the user can toggle multiple items on and off.
+wxLB_MULTIPLE 
+Multiple-selection list: the user can toggle multiple items on and off. 
 
-wxLB_EXTENDED
-Extended-selection list: the user can select multiple items using the SHIFT key and the mouse or special key combinations.
+wxLB_EXTENDED 
+Extended-selection list: the user can select multiple items using the SHIFT key and the mouse or special key combinations. 
 
-wxLB_HSCROLL
-Create horizontal scrollbar if contents are too wide (Windows only).
+wxLB_HSCROLL 
+Create horizontal scrollbar if contents are too wide (Windows only). 
 
-wxLB_ALWAYS_SB
-Always show a vertical scrollbar.
+wxLB_ALWAYS_SB 
+Always show a vertical scrollbar. 
 
-wxLB_NEEDED_SB
-Only create a vertical scrollbar if needed.
+wxLB_NEEDED_SB 
+Only create a vertical scrollbar if needed. 
 
-wxLB_SORT
-The listbox contents are sorted in alphabetical order.
+wxLB_SORT 
+The listbox contents are sorted in alphabetical order. 
 */
     wxAutoNSAutoreleasePool pool;
     if(!CreateControl(parent,winid,pos,size,style,validator,name))
@@ -114,9 +113,9 @@ The listbox contents are sorted in alphabetical order.
     // NSScrollView seems to be the only reasonable solution.
     CocoaCreateNSScrollView();
     SetInitialFrameRect(pos,size);
-
+    
     // Set up extended/multiple selection flags
-    if ((style & wxLB_EXTENDED) || (style & wxLB_MULTIPLE))
+    if ((style & wxLB_EXTENDED) || (style & wxLB_MULTIPLE)) 
         //diff is that mult requires shift down for multi selection
         [GetNSTableView() setAllowsMultipleSelection:true];
 
@@ -169,7 +168,7 @@ int wxListBox::GetSelections(wxArrayInt& aSelections) const
     return [GetNSTableView() numberOfSelectedRows];
 }
 
-void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
     wxAutoNSAutoreleasePool pool;
 
@@ -185,12 +184,12 @@ void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
 void wxListBox::DoSetItems(const wxArrayString& items, void **clientData)
 {
     wxAutoNSAutoreleasePool pool;
-
+    
     // Remove everything
     [m_cocoaItems removeAllObjects];
     m_itemClientData.Clear();
     // Provide the data
-    for(unsigned int i=0; i < items.GetCount(); i++)
+    for(size_t i=0; i < items.GetCount(); i++)
     {
         [m_cocoaItems addObject: wxNSStringWithWxString(items[i])];
         m_itemClientData.Add(clientData[i]);
@@ -217,35 +216,34 @@ void wxListBox::Clear()
     [GetNSTableView() reloadData];
 }
 
-void wxListBox::Delete(unsigned int n)
+void wxListBox::Delete(int n)
 {
     [m_cocoaItems removeObjectAtIndex:n];
     m_itemClientData.RemoveAt(n);
-    [GetNSTableView() reloadData];
+    [GetNSTableView() reloadData];    
 }
 
     // accessing strings
-unsigned int wxListBox::GetCount() const
+int wxListBox::GetCount() const
 {
-    return (unsigned int)[m_cocoaItems count];
+    return [m_cocoaItems count];
 }
 
-wxString wxListBox::GetString(unsigned int n) const
+wxString wxListBox::GetString(int n) const
 {
     return wxStringWithNSString([m_cocoaItems objectAtIndex:n]);
 }
 
-void wxListBox::SetString(unsigned int n, const wxString& s)
+void wxListBox::SetString(int n, const wxString& s)
 {
     wxAutoNSAutoreleasePool pool;
     [m_cocoaItems removeObjectAtIndex:n];
     [m_cocoaItems insertObject: wxNSStringWithWxString(s) atIndex: n];
-    [GetNSTableView() reloadData];
+    [GetNSTableView() reloadData];    
 }
 
-int wxListBox::FindString(const wxString& s, bool bCase) const
+int wxListBox::FindString(const wxString& s) const
 {
-    // FIXME: use wxItemContainerImmutable::FindString for bCase parameter
     wxAutoNSAutoreleasePool pool;
     return [m_cocoaItems indexOfObject:wxNSStringWithWxString(s)];
 }
@@ -259,28 +257,28 @@ int wxListBox::GetSelection() const
 int wxListBox::DoAppend(const wxString& item)
 {
     wxAutoNSAutoreleasePool pool;
-    [m_cocoaItems addObject:wxNSStringWithWxString(item)];
-    [GetNSTableView() reloadData];
+    [m_cocoaItems addObject:wxNSStringWithWxString(item)];    
+    [GetNSTableView() reloadData];    
     m_itemClientData.Add(NULL);
     return [m_cocoaItems count];
 }
 
-void wxListBox::DoSetItemClientData(unsigned int n, void* clientData)
+void wxListBox::DoSetItemClientData(int n, void* clientData)
 {
     m_itemClientData[n] = clientData;
 }
 
-void* wxListBox::DoGetItemClientData(unsigned int n) const
+void* wxListBox::DoGetItemClientData(int n) const
 {
     return m_itemClientData[n];
 }
 
-void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxListBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
     m_itemClientData[n] = (void*) clientData;
 }
 
-wxClientData* wxListBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxListBox::DoGetItemClientObject(int n) const
 {
     return (wxClientData*) m_itemClientData[n];
 }

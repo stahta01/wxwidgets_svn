@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_text.cpp
+// Name:        xh_text.cpp
 // Purpose:     XRC resource for wxTextCtrl
 // Author:      Aleksandras Gluchovas
 // Created:     2000/03/21
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_text.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,13 +19,10 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_TEXTCTRL
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_text.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/textctrl.h"
-#endif
+#include "wx/textctrl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTextCtrlXmlHandler, wxXmlResourceHandler)
 
@@ -43,10 +44,7 @@ wxTextCtrlXmlHandler::wxTextCtrlXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxTE_CENTRE);
     XRC_ADD_STYLE(wxTE_RIGHT);
     XRC_ADD_STYLE(wxTE_DONTWRAP);
-#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTE_LINEWRAP);
-#endif // WXWIN_COMPATIBILITY_2_6
-    XRC_ADD_STYLE(wxTE_CHARWRAP);
     XRC_ADD_STYLE(wxTE_WORDWRAP);
     AddWindowStyles();
 }
@@ -76,4 +74,4 @@ bool wxTextCtrlXmlHandler::CanHandle(wxXmlNode *node)
     return IsOfClass(node, wxT("wxTextCtrl"));
 }
 
-#endif // wxUSE_XRC && wxUSE_TEXTCTRL
+#endif // wxUSE_XRC

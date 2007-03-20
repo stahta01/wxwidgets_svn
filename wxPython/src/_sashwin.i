@@ -112,13 +112,6 @@ public:
 
     // Resizes subwindows
     void SizeWindows();
-    
-    %property(DefaultBorderSize, GetDefaultBorderSize, SetDefaultBorderSize, doc="See `GetDefaultBorderSize` and `SetDefaultBorderSize`");
-    %property(ExtraBorderSize, GetExtraBorderSize, SetExtraBorderSize, doc="See `GetExtraBorderSize` and `SetExtraBorderSize`");
-    %property(MaximumSizeX, GetMaximumSizeX, SetMaximumSizeX, doc="See `GetMaximumSizeX` and `SetMaximumSizeX`");
-    %property(MaximumSizeY, GetMaximumSizeY, SetMaximumSizeY, doc="See `GetMaximumSizeY` and `SetMaximumSizeY`");
-    %property(MinimumSizeX, GetMinimumSizeX, SetMinimumSizeX, doc="See `GetMinimumSizeX` and `SetMinimumSizeX`");
-    %property(MinimumSizeY, GetMinimumSizeY, SetMinimumSizeY, doc="See `GetMinimumSizeY` and `SetMinimumSizeY`");
 };
 
 
@@ -145,10 +138,6 @@ public:
     //// dragging the top below the bottom)
     void SetDragStatus(wxSashDragStatus status);
     wxSashDragStatus GetDragStatus() const;
-
-    %property(DragRect, GetDragRect, SetDragRect, doc="See `GetDragRect` and `SetDragRect`");
-    %property(DragStatus, GetDragStatus, SetDragStatus, doc="See `GetDragStatus` and `SetDragStatus`");
-    %property(Edge, GetEdge, SetEdge, doc="See `GetEdge` and `SetEdge`");
 };
 
 
@@ -218,12 +207,6 @@ public:
 
     void SetAlignment(wxLayoutAlignment align);
     wxLayoutAlignment GetAlignment() const;
-
-    %property(Alignment, GetAlignment, SetAlignment, doc="See `GetAlignment` and `SetAlignment`");
-    %property(Flags, GetFlags, SetFlags, doc="See `GetFlags` and `SetFlags`");
-    %property(Orientation, GetOrientation, SetOrientation, doc="See `GetOrientation` and `SetOrientation`");
-    %property(RequestedLength, GetRequestedLength, SetRequestedLength, doc="See `GetRequestedLength` and `SetRequestedLength`");
-    %property(Size, GetSize, SetSize, doc="See `GetSize` and `SetSize`");
 };
 
 
@@ -240,9 +223,6 @@ public:
     // Set by the app
     void SetRect(const wxRect& rect);
     wxRect GetRect() const;
-
-    %property(Flags, GetFlags, SetFlags, doc="See `GetFlags` and `SetFlags`");
-    %property(Rect, GetRect, SetRect, doc="See `GetRect` and `SetRect`");
 };
 
 
@@ -282,9 +262,6 @@ public:
     void SetAlignment(wxLayoutAlignment alignment);
     void SetDefaultSize(const wxSize& size);
     void SetOrientation(wxLayoutOrientation orientation);
-    
-    %property(Alignment, GetAlignment, SetAlignment, doc="See `GetAlignment` and `SetAlignment`");
-    %property(Orientation, GetOrientation, SetOrientation, doc="See `GetOrientation` and `SetOrientation`");
 };
 
 

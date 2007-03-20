@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/valtext.cpp
+// Name:        valtext.cpp
 // Purpose:     wxTextValidator
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "valtext.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,8 +22,6 @@
 
 #if wxUSE_VALIDATORS && wxUSE_TEXTCTRL
 
-#include "wx/valtext.h"
-
 #ifndef WX_PRECOMP
   #include <stdio.h>
   #include "wx/textctrl.h"
@@ -27,6 +29,8 @@
   #include "wx/msgdlg.h"
   #include "wx/intl.h"
 #endif
+
+#include "wx/valtext.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -78,7 +82,7 @@ bool wxTextValidator::Copy(const wxTextValidator& val)
 static bool wxIsAlpha(const wxString& val)
 {
     int i;
-    for ( i = 0; i < (int)val.length(); i++)
+    for ( i = 0; i < (int)val.Length(); i++)
     {
         if (!wxIsalpha(val[i]))
             return false;
@@ -89,7 +93,7 @@ static bool wxIsAlpha(const wxString& val)
 static bool wxIsAlphaNumeric(const wxString& val)
 {
     int i;
-    for ( i = 0; i < (int)val.length(); i++)
+    for ( i = 0; i < (int)val.Length(); i++)
     {
         if (!wxIsalnum(val[i]))
             return false;
@@ -211,10 +215,67 @@ bool wxTextValidator::TransferFromWindow(void)
     return true;
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+
+inline void wxCopyStringListToArrayString(wxArrayString& to, const wxStringList& from)
+{
+    to.Clear();
+
+    for ( wxStringList::compatibility_iterator pNode = from.GetFirst();
+          pNode;
+          pNode = pNode->GetNext() )
+    {
+        to.Add(pNode->GetData());
+    }
+}
+
+inline void wxCopyArrayStringToStringList(wxStringList& to, const wxArrayString& from)
+{
+    to.Clear();
+
+    for(size_t i = 0; i < from.GetCount(); ++i)
+        to.Add(from[i]);
+}
+
+wxStringList& wxTextValidator::GetIncludeList()
+{
+    wxCopyArrayStringToStringList(m_includeList, m_includes);
+    return m_includeList;
+}
+
+wxStringList& wxTextValidator::GetExcludeList()
+{
+    wxCopyArrayStringToStringList(m_excludeList, m_excludes);
+    return m_excludeList;
+}
+
+void wxTextValidator::SetIncludeList(const wxStringList& list)
+{
+    wxCopyStringListToArrayString(m_includes, list);
+}
+
+void wxTextValidator::SetExcludeList(const wxStringList& list)
+{
+    wxCopyStringListToArrayString(m_excludes, list);
+}
+
+bool wxTextValidator::IsInCharIncludeList(const wxString& val)
+{
+    return IsInCharIncludes(val);
+}
+
+bool wxTextValidator::IsNotInCharExcludeList(const wxString& val)
+{
+    return IsNotInCharExcludes(val);
+}
+
+#endif //compat 2.4
+
+
 bool wxTextValidator::IsInCharIncludes(const wxString& val)
 {
     size_t i;
-    for ( i = 0; i < val.length(); i++)
+    for ( i = 0; i < val.Length(); i++)
     {
         if (m_includes.Index((wxString) val[i]) == wxNOT_FOUND)
             return false;
@@ -225,7 +286,7 @@ bool wxTextValidator::IsInCharIncludes(const wxString& val)
 bool wxTextValidator::IsNotInCharExcludes(const wxString& val)
 {
     size_t i;
-    for ( i = 0; i < val.length(); i++)
+    for ( i = 0; i < val.Length(); i++)
     {
        if (m_excludes.Index((wxString) val[i]) != wxNOT_FOUND)
             return false;
@@ -272,7 +333,7 @@ void wxTextValidator::OnChar(wxKeyEvent& event)
 static bool wxIsNumeric(const wxString& val)
 {
     int i;
-    for ( i = 0; i < (int)val.length(); i++)
+    for ( i = 0; i < (int)val.Length(); i++)
     {
         // Allow for "," (French) as well as "." -- in future we should
         // use wxSystemSettings or other to do better localisation

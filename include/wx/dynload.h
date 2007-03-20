@@ -13,6 +13,10 @@
 #ifndef _WX_DYNAMICLOADER_H__
 #define _WX_DYNAMICLOADER_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dynload.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -107,6 +111,13 @@ public:
     static wxPluginLibrary    *LoadLibrary( const wxString &libname,
                                             int flags = wxDL_DEFAULT );
     static bool                UnloadLibrary(const wxString &libname);
+
+        // This is used by wxDllLoader.  It's wrapped in the compatibility
+        // macro because it's of arguable use outside of that.
+
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( static wxPluginLibrary *GetObjectFromHandle(wxDllType handle) );
+#endif
 
         // Instance methods.
 

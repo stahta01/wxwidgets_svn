@@ -1,17 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        styles.h
 // Author:      Robert Roebling
-// RCS-ID:      $Id$
 // Created:     04/07/02
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __styles_H__
 #define __styles_H__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "styles.h"
+#endif
+
 // Include wxWidgets' headers
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+    #include <wx/wx.h>
 #endif
 
 //----------------------------------------------------------------------------

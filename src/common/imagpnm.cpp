@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagpnm.cpp
+// Name:        imagpnm.cpp
 // Purpose:     wxImage PNM handler
 // Author:      Sylvain Bougnoux
 // RCS-ID:      $Id$
@@ -7,22 +7,26 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagpnm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#  include "wx/setup.h"
 #endif
 
 #if wxUSE_IMAGE && wxUSE_PNM
 
 #include "wx/imagpnm.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
+#include "wx/log.h"
+#include "wx/intl.h"
 #include "wx/txtstrm.h"
 
 //-----------------------------------------------------------------------------
@@ -184,4 +188,4 @@ bool wxPNMHandler::DoCanRead( wxInputStream& stream )
 
 #endif // wxUSE_STREAMS
 
-#endif // wxUSE_IMAGE && wxUSE_PNM
+#endif // wxUSE_PNM

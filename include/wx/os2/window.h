@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/window.h
+// Name:        window.h
 // Purpose:     wxWindow class
 // Author:      David Webster
 // Modified by:
@@ -35,6 +35,19 @@
 // ---------------------------------------------------------------------------
 
 class WXDLLEXPORT wxButton;
+
+// ---------------------------------------------------------------------------
+// constants
+// ---------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+// they're unused by wxWidgets...
+enum
+{
+    wxKEY_SHIFT = 1,
+    wxKEY_CTRL  = 2
+};
+#endif
 
 // ---------------------------------------------------------------------------
 // wxWindow declaration for OS/2 PM
@@ -77,8 +90,8 @@ public:
                );
 
     // implement base class pure virtuals
-    virtual void     SetLabel(const wxString& label);
-    virtual wxString GetLabel(void) const;
+    virtual void     SetTitle(const wxString& rTitle);
+    virtual wxString GetTitle(void) const;
     virtual void     Raise(void);
     virtual void     Lower(void);
     virtual bool     Show(bool bShow = true);
@@ -165,7 +178,7 @@ public:
     virtual WXWidget GetHandle(void) const { return GetHWND(); }
     bool             GetUseCtl3D(void) const { return m_bUseCtl3D; }
     bool             GetTransparentBackground(void) const { return m_bBackgroundTransparent; }
-    void             SetTransparentBackground(bool bT = true) { m_bBackgroundTransparent = bT; }
+    void             SetTransparent(bool bT = true) { m_bBackgroundTransparent = bT; }
 
     // event handlers
     // --------------
@@ -558,7 +571,7 @@ public:
 // kbd code translation
 WXDLLEXPORT int wxCharCodeOS2ToWX(int nKeySym);
 WXDLLEXPORT int wxCharCodeWXToOS2( int   nId
-                                  ,bool* pbIsVirtual = NULL
+                                  ,bool* pbIsVirtual
                                  );
 
 // ----------------------------------------------------------------------------
@@ -574,4 +587,5 @@ WX_DECLARE_HASH(wxWindowOS2, wxWindowList, wxWinHashTable);
 
 extern wxWinHashTable *wxWinHandleHash;
 
-#endif // _WX_WINDOW_H_
+#endif
+    // _WX_WINDOW_H_

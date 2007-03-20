@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbarbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_TOOLBAR
@@ -32,7 +36,7 @@ class WXDLLEXPORT wxImage;
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxToolBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxToolBarNameStr;
 extern WXDLLEXPORT_DATA(const wxSize) wxDefaultSize;
 extern WXDLLEXPORT_DATA(const wxPoint) wxDefaultPosition;
 
@@ -91,10 +95,7 @@ public:
                                            : wxTOOL_STYLE_BUTTON;
     }
 
-    wxToolBarToolBase(wxToolBarBase *tbar,
-                      wxControl *control,
-                      const wxString& label)
-        : m_label(label)
+    wxToolBarToolBase(wxToolBarBase *tbar, wxControl *control)
     {
         m_tbar = tbar;
         m_control = control;
@@ -108,7 +109,7 @@ public:
         m_toolStyle = wxTOOL_STYLE_CONTROL;
     }
 
-    virtual ~wxToolBarToolBase(){}
+    ~wxToolBarToolBase(){}
 
     // accessors
     // ---------
@@ -196,6 +197,15 @@ public:
     // add tool to/remove it from a toolbar
     virtual void Detach() { m_tbar = (wxToolBarBase *)NULL; }
     virtual void Attach(wxToolBarBase *tbar) { m_tbar = tbar; }
+
+    // compatibility only, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    wxDEPRECATED( const wxBitmap& GetBitmap1() const );
+    wxDEPRECATED( const wxBitmap& GetBitmap2() const );
+
+    wxDEPRECATED( void SetBitmap1(const wxBitmap& bmp) );
+    wxDEPRECATED( void SetBitmap2(const wxBitmap& bmp) );
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     wxToolBarBase *m_tbar;  // the toolbar to which we belong (may be NULL)
@@ -319,17 +329,13 @@ public:
     virtual wxToolBarToolBase *AddTool (wxToolBarToolBase *tool);
     virtual wxToolBarToolBase *InsertTool (size_t pos, wxToolBarToolBase *tool);
 
-    // add an arbitrary control to the toolbar (notice that the control will be
-    // deleted by the toolbar and that it will also adjust its position/size)
+    // add an arbitrary control to the toolbar (notice that
+    // the control will be deleted by the toolbar and that it will also adjust
+    // its position/size)
     //
-    // the label is optional and, if specified, will be shown near the control
     // NB: the control should have toolbar as its parent
-    virtual wxToolBarToolBase *
-    AddControl(wxControl *control, const wxString& label = wxEmptyString);
-
-    virtual wxToolBarToolBase *
-    InsertControl(size_t pos, wxControl *control,
-                  const wxString& label = wxEmptyString);
+    virtual wxToolBarToolBase *AddControl(wxControl *control);
+    virtual wxToolBarToolBase *InsertControl(size_t pos, wxControl *control);
 
     // get the control with the given id or return NULL
     virtual wxControl *FindControl( int toolid );
@@ -379,12 +385,6 @@ public:
     virtual void SetToolLongHelp(int toolid, const wxString& helpString);
     virtual wxString GetToolLongHelp(int toolid) const;
 
-    virtual void SetToolNormalBitmap(int WXUNUSED(id),
-                                     const wxBitmap& WXUNUSED(bitmap)) {}
-    virtual void SetToolDisabledBitmap(int WXUNUSED(id),
-                                       const wxBitmap& WXUNUSED(bitmap)) {}
-
-    
     // margins/packing/separation
     // --------------------------
 
@@ -433,7 +433,7 @@ public:
     wxToolBarToolBase *FindById(int toolid) const;
 
     // return true if this is a vertical toolbar, otherwise false
-    bool IsVertical() const { return HasFlag(wxTB_LEFT | wxTB_RIGHT); }
+    bool IsVertical() const { return HasFlag(wxTB_VERTICAL); }
 
 
     // the old versions of the various methods kept for compatibility
@@ -572,18 +572,10 @@ protected:
                                           const wxString& shortHelp,
                                           const wxString& longHelp) = 0;
 
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label) = 0;
+    virtual wxToolBarToolBase *CreateTool(wxControl *control) = 0;
 
     // helper functions
     // ----------------
-
-    // call this from derived class ctor/Create() to ensure that we have either
-    // wxTB_HORIZONTAL or wxTB_VERTICAL style, there is a lot of existing code
-    // which randomly checks either one or the other of them and gets confused
-    // if neither is set (and making one of them 0 is not an option neither as
-    // then the existing tests would break down)
-    void FixupStyle();
 
     // un-toggle all buttons in the same radio group
     void UnToggleRadioGroup(wxToolBarToolBase *tool);
@@ -611,14 +603,8 @@ private:
     DECLARE_NO_COPY_CLASS(wxToolBarBase)
 };
 
-// deprecated function for creating the image for disabled buttons, use
-// wxImage::ConvertToGreyscale() instead
-#if WXWIN_COMPATIBILITY_2_8
-
-wxDEPRECATED( bool wxCreateGreyedImage(const wxImage& in, wxImage& out) );
-
-#endif // WXWIN_COMPATIBILITY_2_8
-
+// Helper function for creating the image for disabled buttons
+bool wxCreateGreyedImage(const wxImage& in, wxImage& out) ;
 
 #endif // wxUSE_TOOLBAR
 

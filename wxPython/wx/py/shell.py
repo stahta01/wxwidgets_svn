@@ -343,12 +343,11 @@ class Shell(editwindow.EditWindow):
     def showIntro(self, text=''):
         """Display introductory text in the shell."""
         if text:
+            if not text.endswith(os.linesep):
+                text += os.linesep
             self.write(text)
         try:
-            if self.interp.introText:
-                if text and not text.endswith(os.linesep):
-                    self.write(os.linesep)
-                self.write(self.interp.introText)
+            self.write(self.interp.introText)
         except AttributeError:
             pass
 
@@ -418,7 +417,7 @@ Platform: %s""" % \
         # commands/responses.
         if not self.CanEdit():
             return
-        key = event.GetKeyCode()
+        key = event.KeyCode()
         currpos = self.GetCurrentPos()
         stoppos = self.promptPosEnd
         # Return (Enter) needs to be ignored in this handler.
@@ -453,7 +452,7 @@ Platform: %s""" % \
     def OnKeyDown(self, event):
         """Key down event handler."""
 
-        key = event.GetKeyCode()
+        key = event.KeyCode()
         # If the auto-complete window is up let it do its thing.
         if self.AutoCompActive():
             event.Skip()

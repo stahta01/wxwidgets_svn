@@ -36,15 +36,6 @@
 #include "wx/msw/private.h"
 
 // ============================================================================
-// wxAppTraits implementation
-// ============================================================================
-
-WXDWORD wxAppTraits::DoSimpleWaitForThread(WXHANDLE hThread)
-{
-    return ::WaitForSingleObject((HANDLE)hThread, INFINITE);
-}
-
-// ============================================================================
 // wxConsoleAppTraits implementation
 // ============================================================================
 
@@ -58,7 +49,7 @@ void wxConsoleAppTraits::AlwaysYield()
     MSG msg;
     while ( ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) )
     {
-        if ( msg.message == WM_PAINT )
+        if (msg.message == WM_PAINT)
             break;
     }
 }
@@ -78,10 +69,5 @@ bool wxConsoleAppTraits::DoMessageFromThreadWait()
 {
     // nothing to process here
     return true;
-}
-
-WXDWORD wxConsoleAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    return DoSimpleWaitForThread(hThread);
 }
 

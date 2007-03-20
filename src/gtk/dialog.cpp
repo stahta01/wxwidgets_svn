@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,17 +7,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/dialog.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/frame.h"
-    #include "wx/cursor.h"
-#endif // WX_PRECOMP
-
+#include "wx/frame.h"
+#include "wx/app.h"
+#include "wx/cursor.h"
 #include "wx/evtloop.h"
 
 #include <gdk/gdk.h>
@@ -35,6 +35,13 @@ extern int g_openDialogs;
 //-----------------------------------------------------------------------------
 // wxDialog
 //-----------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(wxDialog,wxDialogBase)
+    EVT_BUTTON  (wxID_OK,       wxDialog::OnOK)
+    EVT_BUTTON  (wxID_CANCEL,   wxDialog::OnCancel)
+    EVT_BUTTON  (wxID_APPLY,    wxDialog::OnApply)
+    EVT_CLOSE   (wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog,wxTopLevelWindow)
 
@@ -69,6 +76,75 @@ bool wxDialog::Create( wxWindow *parent,
     return wxTopLevelWindow::Create(parent, id, title, pos, size, style, name);
 }
 
+void wxDialog::OnApply( wxCommandEvent &WXUNUSED(event) )
+{
+    if (Validate())
+        TransferDataFromWindow();
+}
+
+void wxDialog::OnCancel( wxCommandEvent &WXUNUSED(event) )
+{
+    if (IsModal())
+    {
+        EndModal(wxID_CANCEL);
+    }
+    else
+    {
+        SetReturnCode(wxID_CANCEL);
+        Show(false);
+    }
+}
+
+void wxDialog::OnOK( wxCommandEvent &WXUNUSED(event) )
+{
+    if (Validate() && TransferDataFromWindow())
+    {
+        if (IsModal())
+        {
+            EndModal(wxID_OK);
+        }
+        else
+        {
+            SetReturnCode(wxID_OK);
+            Show(false);
+        }
+    }
+}
+
+void wxDialog::OnPaint( wxPaintEvent& WXUNUSED(event) )
+{
+    // yes
+}
+
+void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+{
+    // We'll send a Cancel message by default,
+    // which may close the dialog.
+    // Check for looping if the Cancel event handler calls Close().
+
+    // Note that if a cancel button and handler aren't present in the dialog,
+    // nothing will happen when you close the dialog via the window manager, or
+    // via Close().
+    // We wouldn't want to destroy the dialog by default, since the dialog may have been
+    // created on the stack.
+    // However, this does mean that calling dialog->Close() won't delete the dialog
+    // unless the handler for wxID_CANCEL does so. So use Destroy() if you want to be
+    // sure to destroy the dialog.
+    // The default OnCancel (above) simply ends a modal dialog, and hides a modeless dialog.
+
+    static wxList s_closing;
+
+    if (s_closing.Member(this))
+        return;   // no loops
+
+    s_closing.Append(this);
+
+    wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+    cancelEvent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent(cancelEvent);
+    s_closing.DeleteObject(this);
+}
+
 bool wxDialog::Show( bool show )
 {
     if (!show && IsModal())
@@ -83,7 +159,7 @@ bool wxDialog::Show( bool show )
            much ugly flicker nor from within the size_allocate
            handler, because GTK 1.1.X forbids that. */
 
-        GtkOnSize();
+        GtkOnSize( m_x, m_y, m_width, m_height );
     }
 
     bool ret = wxWindow::Show( show );
@@ -118,7 +194,7 @@ int wxDialog::ShowModal()
         wxWindow *parent = wxTheApp->GetTopWindow();
         if ( parent &&
                 parent != this &&
-                    !parent->IsBeingDeleted() &&
+                    parent->IsBeingDeleted() &&
                         !(parent->GetExtraStyle() & wxWS_EX_TRANSIENT) )
         {
             m_parent = parent;
@@ -134,12 +210,11 @@ int wxDialog::ShowModal()
 
     g_openDialogs++;
 
-    // NOTE: gtk_window_set_modal internally calls gtk_grab_add() !
-    gtk_window_set_modal(GTK_WINDOW(m_widget), TRUE);
+    gtk_grab_add( m_widget );
 
     wxEventLoop().Run();
 
-    gtk_window_set_modal(GTK_WINDOW(m_widget), FALSE);
+    gtk_grab_remove( m_widget );
 
     g_openDialogs--;
 

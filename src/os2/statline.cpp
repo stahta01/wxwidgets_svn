@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/statline.cpp
+// Name:        msw/statline.cpp
 // Purpose:     OS2 version of wxStaticLine class
 // Author:      David Webster
 // Created:     10/23/99
@@ -16,18 +16,19 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "statline.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_STATLINE
-
 #include "wx/statline.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
+#if wxUSE_STATLINE
 
 #include "wx/os2/private.h"
+#include "wx/log.h"
 
 // ============================================================================
 // implementation

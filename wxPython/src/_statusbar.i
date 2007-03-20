@@ -98,25 +98,6 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    %pythoncode {
-        def GetFields(self):
-            """Return a list of field values in the status bar. """
-            return [self.GetStatusText(i) for i in range(self.GetFieldsCount())]
-            
-        def SetFields(self, items):
-            """Set the values of the statusbar fields from a list of strings. """
-            self.SetFieldsCount(len(items))
-            for i in range(len(items)):
-                self.SetStatusText(items[i], i)
-    }
-    
-    %property(BorderX, GetBorderX, doc="See `GetBorderX`");
-    %property(BorderY, GetBorderY, doc="See `GetBorderY`");
-    %property(FieldRect, GetFieldRect, doc="See `GetFieldRect`");
-    %property(Fields, GetFields, SetFields, doc="See `GetFields` and `SetFields`");
-    %property(FieldsCount, GetFieldsCount, SetFieldsCount, doc="See `GetFieldsCount` and `SetFieldsCount`");
-    %property(StatusText, GetStatusText, SetStatusText, doc="See `GetStatusText` and `SetStatusText`");
 };
 
 

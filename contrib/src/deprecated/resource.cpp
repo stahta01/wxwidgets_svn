@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/src/deprecated/resource.cpp
+// Name:        resource.cpp
 // Purpose:     Resource system
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:    wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation "resource.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -25,29 +29,30 @@
 #endif // VC++
 
 #ifndef WX_PRECOMP
-    #include "wx/panel.h"
-    #include "wx/list.h"
-    #include "wx/hash.h"
-    #include "wx/gdicmn.h"
-    #include "wx/utils.h"
-    #include "wx/types.h"
-    #include "wx/menu.h"
-    #include "wx/stattext.h"
-    #include "wx/button.h"
-    #include "wx/bmpbuttn.h"
-    #include "wx/radiobox.h"
-    #include "wx/listbox.h"
-    #include "wx/choice.h"
-    #include "wx/checkbox.h"
-    #include "wx/settings.h"
-    #include "wx/slider.h"
-    #include "wx/icon.h"
-    #include "wx/statbox.h"
-    #include "wx/statbmp.h"
-    #include "wx/gauge.h"
-    #include "wx/textctrl.h"
-    #include "wx/msgdlg.h"
-    #include "wx/intl.h"
+#include "wx/defs.h"
+#include "wx/setup.h"
+#include "wx/list.h"
+#include "wx/hash.h"
+#include "wx/gdicmn.h"
+#include "wx/utils.h"
+#include "wx/types.h"
+#include "wx/menu.h"
+#include "wx/stattext.h"
+#include "wx/button.h"
+#include "wx/bmpbuttn.h"
+#include "wx/radiobox.h"
+#include "wx/listbox.h"
+#include "wx/choice.h"
+#include "wx/checkbox.h"
+#include "wx/settings.h"
+#include "wx/slider.h"
+#include "wx/icon.h"
+#include "wx/statbox.h"
+#include "wx/statbmp.h"
+#include "wx/gauge.h"
+#include "wx/textctrl.h"
+#include "wx/msgdlg.h"
+#include "wx/intl.h"
 #endif
 
 #include "wx/treebase.h"
@@ -707,9 +712,6 @@ wxItemResource *wxResourceInterpretDialog(wxResourceTable& table, wxExpr *expr, 
     }
     dialogItem->SetStyle(windowStyle);
     dialogItem->SetValue1(isModal);
-
-#if WXWIN_COMPATIBILITY_2_6
-
 #ifdef __VMS
 #pragma message disable CODCAUUNR
 #endif
@@ -718,8 +720,6 @@ wxItemResource *wxResourceInterpretDialog(wxResourceTable& table, wxExpr *expr, 
 #ifdef __VMS
 #pragma message enable CODCAUUNR
 #endif
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
     dialogItem->SetName(name);
     dialogItem->SetTitle(title);
@@ -2106,17 +2106,13 @@ static wxResourceBitListStruct wxResourceBitListTable[] =
     { wxT("wxCB_SORT"), wxCB_SORT },
 
     /* wxGauge */
-#if WXWIN_COMPATIBILITY_2_6
     { wxT("wxGA_PROGRESSBAR"), wxGA_PROGRESSBAR },
-#endif // WXWIN_COMPATIBILITY_2_6
     { wxT("wxGA_HORIZONTAL"), wxGA_HORIZONTAL },
     { wxT("wxGA_VERTICAL"), wxGA_VERTICAL },
 
     /* wxTextCtrl */
-#if WXWIN_COMPATIBILITY_2_6
-    { wxT("wxPASSWORD"), wxTE_PASSWORD},
-    { wxT("wxPROCESS_ENTER"), wxTE_PROCESS_ENTER},
-#endif
+    { wxT("wxPASSWORD"), wxPASSWORD},
+    { wxT("wxPROCESS_ENTER"), wxPROCESS_ENTER},
     { wxT("wxTE_PASSWORD"), wxTE_PASSWORD},
     { wxT("wxTE_READONLY"), wxTE_READONLY},
     { wxT("wxTE_PROCESS_ENTER"), wxTE_PROCESS_ENTER},
@@ -2205,10 +2201,8 @@ static wxResourceBitListStruct wxResourceBitListTable[] =
     { wxT("wxTB_VERTICAL"), wxTB_VERTICAL},
     { wxT("wxTB_FLAT"), wxTB_FLAT},
 
-#if WXWIN_COMPATIBILITY_2_6
     /* wxDialog */
     { wxT("wxDIALOG_MODAL"), wxDIALOG_MODAL },
-#endif // WXWIN_COMPATIBILITY_2_6
 
     /* Generic */
     { wxT("wxVSCROLL"), wxVSCROLL },
@@ -2221,14 +2215,12 @@ static wxResourceBitListStruct wxResourceBitListTable[] =
     { wxT("wxSDI"), 0},
     { wxT("wxMDI_PARENT"), 0},
     { wxT("wxMDI_CHILD"), 0},
-    { wxT("wxTHICK_FRAME"), wxRESIZE_BORDER},
+    { wxT("wxTHICK_FRAME"), wxTHICK_FRAME},
     { wxT("wxRESIZE_BORDER"), wxRESIZE_BORDER},
     { wxT("wxSYSTEM_MENU"), wxSYSTEM_MENU},
     { wxT("wxMINIMIZE_BOX"), wxMINIMIZE_BOX},
     { wxT("wxMAXIMIZE_BOX"), wxMAXIMIZE_BOX},
-#if WXWIN_COMPATIBILITY_2_6
     { wxT("wxRESIZE_BOX"), wxRESIZE_BOX},
-#endif // WXWIN_COMPATIBILITY_2_6
     { wxT("wxDEFAULT_FRAME_STYLE"), wxDEFAULT_FRAME_STYLE},
     { wxT("wxDEFAULT_FRAME"), wxDEFAULT_FRAME_STYLE},
     { wxT("wxDEFAULT_DIALOG_STYLE"), wxDEFAULT_DIALOG_STYLE},
@@ -2330,9 +2322,7 @@ static wxResourceBitListStruct wxResourceBitListTable[] =
     { wxT("wxICON_MASK"), wxICON_MASK},
     { wxT("wxCENTRE"), wxCENTRE},
     { wxT("wxCENTER"), wxCENTRE},
-#if WXWIN_COMPATIBILITY_2_6
     { wxT("wxUSER_COLOURS"), wxUSER_COLOURS},
-#endif // WXWIN_COMPATIBILITY_2_6
     { wxT("wxVERTICAL_LABEL"), 0},
     { wxT("wxHORIZONTAL_LABEL"), 0},
 
@@ -3213,13 +3203,7 @@ bool wxLoadFromResource(wxWindow* thisWindow, wxWindow *parent, const wxString& 
         if (thisWindow->IsKindOf(CLASSINFO(wxDialog)))
         {
             wxDialog *dialogBox = (wxDialog *)thisWindow;
-            long modalStyle = isModal ?
-#if WXWIN_COMPATIBILITY_2_6
-                                        wxDIALOG_MODAL
-#else
-                                        0
-#endif // WXWIN_COMPATIBILITY_2_6
-                                      : 0;
+            long modalStyle = isModal ? wxDIALOG_MODAL : 0;
             if (!dialogBox->Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(width, height), theWindowStyle|modalStyle, name))
                 return false;
 
@@ -3295,3 +3279,4 @@ wxControl *wxCreateItem(wxWindow* thisWindow, const wxItemResource *resource, co
 #endif // VC++
 
 #endif // wxUSE_WX_RESOURCES
+

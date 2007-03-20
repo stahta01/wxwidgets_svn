@@ -43,14 +43,8 @@ MustHaveApp(wxImageList);
 //  two bitmaps, or an icon.
 class wxImageList : public wxObject {
 public:
-    // turn off this typemap
-    %typemap(out) wxImageList*;    
-
     wxImageList(int width, int height, int mask=true, int initialCount=1);
     ~wxImageList();
-    
-    // Turn it back on again
-    %typemap(out) wxImageList* { $result = wxPyMake_wxObject($1, $owner); }
 
     int Add(const wxBitmap& bitmap, const wxBitmap& mask = wxNullBitmap);
     %Rename(AddWithColourMask,int, Add(const wxBitmap& bitmap, const wxColour& maskColour));
@@ -59,7 +53,13 @@ public:
     wxBitmap GetBitmap(int index) const;
     wxIcon GetIcon(int index) const;
       
+#ifdef __WXMSW__
     bool Replace(int index, const wxBitmap& bitmap, const wxBitmap& mask = wxNullBitmap);
+#else
+//      %Rename(ReplaceIcon,bool, Replace(int index, const wxIcon& icon));
+//      int Add(const wxBitmap& bitmap);
+    bool Replace(int index, const wxBitmap& bitmap);
+#endif
 
     bool Draw(int index, wxDC& dc, int x, int x, int flags = wxIMAGELIST_DRAW_NORMAL,
               const bool solidBackground = false);
@@ -70,10 +70,8 @@ public:
 
     DocDeclA(
         void, GetSize(int index, int& OUTPUT, int& OUTPUT),
-        "GetSize(index) -> (width,height)");
+        "GetSize() -> (width,height)");
         
-    %property(ImageCount, GetImageCount, doc="See `GetImageCount`");
-    %property(Size, GetSize, doc="See `GetSize`");
 };
 
 //---------------------------------------------------------------------------

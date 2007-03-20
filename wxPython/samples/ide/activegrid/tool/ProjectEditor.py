@@ -14,6 +14,7 @@ import wx
 import wx.lib.docview
 import wx.lib.pydocview
 import wx.lib.buttons
+from wxPython.lib.rcsizer import RowColSizer
 import Service
 import copy
 import os

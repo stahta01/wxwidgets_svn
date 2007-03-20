@@ -25,104 +25,6 @@
 #include "wx/sizer.h"
 #include "wx/log.h"
 
-const long ID_QUIT       = wxID_EXIT;
-const long ID_ABOUT      = wxID_ABOUT;
-const long ID_DELETE_ALL = 100;
-const long ID_INSERT_NEW = 101;
-
-// ----------------------------------------------------------------------
-// a trivial example
-// ----------------------------------------------------------------------
-
-class MySimpleFrame;
-class MySimpleCanvas;
-
-// MySimpleCanvas
-
-class MySimpleCanvas: public wxScrolledWindow
-{
-public:
-    MySimpleCanvas() { }
-    MySimpleCanvas( wxWindow *parent, wxWindowID, const wxPoint &pos, const wxSize &size );
-
-    void OnPaint( wxPaintEvent &event );
-
-private:
-    DECLARE_DYNAMIC_CLASS(MyCanvas)
-    DECLARE_EVENT_TABLE()
-};
-
-IMPLEMENT_DYNAMIC_CLASS(MySimpleCanvas, wxScrolledWindow)
-
-BEGIN_EVENT_TABLE(MySimpleCanvas, wxScrolledWindow)
-  EVT_PAINT(      MySimpleCanvas::OnPaint)
-END_EVENT_TABLE()
-
-MySimpleCanvas::MySimpleCanvas( wxWindow *parent, wxWindowID id,
-                    const wxPoint &pos, const wxSize &size )
-    : wxScrolledWindow( parent, id, pos, size, wxSUNKEN_BORDER, _T("test canvas") )
-{
-    SetScrollRate( 10, 10 );
-    SetVirtualSize( 92, 97 );
-    SetBackgroundColour( *wxWHITE );
-}
-
-void MySimpleCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
-{
-    wxPaintDC dc(this);
-    PrepareDC( dc );
-
-    dc.SetPen( *wxRED_PEN );
-    dc.SetBrush( *wxTRANSPARENT_BRUSH );
-    dc.DrawRectangle( 0,0,92,97 );
-}
-
-// MySimpleFrame
-
-class MySimpleFrame: public wxFrame
-{
-public:
-    MySimpleFrame();
-
-    void OnQuit( wxCommandEvent &event );
-
-    MySimpleCanvas         *m_canvas;
-
-private:
-    DECLARE_DYNAMIC_CLASS(MySimpleFrame)
-    DECLARE_EVENT_TABLE()
-};
-
-
-IMPLEMENT_DYNAMIC_CLASS( MySimpleFrame, wxFrame )
-
-BEGIN_EVENT_TABLE(MySimpleFrame,wxFrame)
-  EVT_MENU    (ID_QUIT,  MySimpleFrame::OnQuit)
-END_EVENT_TABLE()
-
-MySimpleFrame::MySimpleFrame()
-       : wxFrame( (wxFrame *)NULL, wxID_ANY, _T("wxScrolledWindow sample"),
-                  wxPoint(120,120), wxSize(150,150) )
-{
-    wxMenu *file_menu = new wxMenu();
-    file_menu->Append( ID_QUIT,       _T("E&xit\tAlt-X"));
-
-    wxMenuBar *menu_bar = new wxMenuBar();
-    menu_bar->Append(file_menu, _T("&File"));
-
-    SetMenuBar( menu_bar );
-
-    m_canvas = new MySimpleCanvas( this, wxID_ANY, wxPoint(0,0), wxSize(100,100) );
-}
-
-void MySimpleFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
-{
-  Close( true );
-}
-
-// ----------------------------------------------------------------------
-// a complex example
-// ----------------------------------------------------------------------
 
 // derived classes
 
@@ -273,7 +175,6 @@ protected: // event stuff
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnScroll(wxScrollWinEvent& event);
 
     DECLARE_EVENT_TABLE()
@@ -515,7 +416,7 @@ BEGIN_EVENT_TABLE( MyAutoScrollWindow, wxScrolledWindow)
 END_EVENT_TABLE()
 
 MyAutoScrollWindow::MyAutoScrollWindow( wxWindow *parent )
-    : wxScrolledWindow( parent, -1, wxDefaultPosition, wxDefaultSize,
+    : wxScrolledWindow( parent, -1, wxDefaultPosition, wxDefaultSize, 
                         wxSUNKEN_BORDER|wxScrolledWindowStyle )
 {
     SetBackgroundColour( wxT("GREEN") );
@@ -535,11 +436,16 @@ MyAutoScrollWindow::MyAutoScrollWindow( wxWindow *parent )
                              wxDefaultPosition,
                              SMALL_BUTTON );
 
+    // We need to do this here, because wxADJUST_MINSIZE below
+    // will cause the initial size to be ignored for Best/Min size.
+    // It would be nice to fix the sizers to handle this a little
+    // more cleanly.
+
     m_button->SetSizeHints( SMALL_BUTTON.GetWidth(), SMALL_BUTTON.GetHeight() );
 
     innersizer->Add( m_button,
                      0,
-                     wxALIGN_CENTER | wxALL,
+                     wxALIGN_CENTER | wxALL | wxADJUST_MINSIZE,
                      20 );
 
     innersizer->Add( new wxStaticText( this, wxID_ANY, _T("This is just") ),
@@ -578,6 +484,11 @@ void MyAutoScrollWindow::OnResizeClick( wxCommandEvent &WXUNUSED( event ) )
 // ----------------------------------------------------------------------------
 // MyFrame
 // ----------------------------------------------------------------------------
+
+const long ID_QUIT       = wxID_EXIT;
+const long ID_ABOUT      = wxID_ABOUT;
+const long ID_DELETE_ALL = 100;
+const long ID_INSERT_NEW = 101;
 
 IMPLEMENT_DYNAMIC_CLASS( MyFrame, wxFrame )
 
@@ -668,16 +579,10 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
+  wxFrame *frame = new MyFrame();
+  frame->Show( true );
 
-    wxFrame *frame = new MyFrame();
-    frame->Show( true );
-
-    frame = new MySimpleFrame();
-    frame->Show();
-
-    return true;
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -697,7 +602,7 @@ void MyScrolledWindowDumb::OnDraw(wxDC& dc)
         CalcScrolledPosition(0, y, NULL, &yPhys);
 
         dc.DrawText(wxString::Format(_T("Line %u (logical %d, physical %d)"),
-                                     unsigned(line), y, yPhys), 0, y);
+                                     line, y, yPhys), 0, y);
         y += m_hLine;
     }
 }
@@ -726,7 +631,7 @@ void MyScrolledWindowSmart::OnDraw(wxDC& dc)
         CalcScrolledPosition(0, y, NULL, &yPhys);
 
         dc.DrawText(wxString::Format(_T("Line %u (logical %d, physical %d)"),
-                                     unsigned(line), y, yPhys), 0, y);
+                                     line, y, yPhys), 0, y);
         y += m_hLine;
     }
 }
@@ -739,7 +644,6 @@ BEGIN_EVENT_TABLE(MyAutoTimedScrollingWindow, wxScrolledWindow)
     EVT_LEFT_DOWN(MyAutoTimedScrollingWindow::OnMouseLeftDown)
     EVT_LEFT_UP(MyAutoTimedScrollingWindow::OnMouseLeftUp)
     EVT_MOTION(MyAutoTimedScrollingWindow::OnMouseMove)
-    EVT_MOUSE_CAPTURE_LOST(MyAutoTimedScrollingWindow::OnMouseCaptureLost)
     EVT_SCROLLWIN(MyAutoTimedScrollingWindow::OnScroll)
 END_EVENT_TABLE()
 
@@ -1008,12 +912,6 @@ void MyAutoTimedScrollingWindow::OnMouseMove(wxMouseEvent& event)
             CaptureMouse();
         }
     }
-}
-
-void MyAutoTimedScrollingWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& WXUNUSED(event))
-{
-    // we only capture mouse for timed scrolling, so nothing is needed here
-    // other than making sure to not call event.Skip()
 }
 
 void MyAutoTimedScrollingWindow::OnScroll(wxScrollWinEvent& event)

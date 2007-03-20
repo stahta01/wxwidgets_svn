@@ -12,37 +12,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
+    Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name core
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "aui"=.\wx_aui.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
+    Project_Dep_Name wxexpat
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name wxjpeg
@@ -54,10 +30,10 @@ Package=<4>
     Project_Dep_Name wxregex
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name wxexpat
+    Project_Dep_Name wxtiff
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name adv
+    Project_Dep_Name wxzlib
     End Project Dependency
 }}}
 
@@ -72,13 +48,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxzlib
+    Project_Dep_Name wxexpat
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name wxregex
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name wxexpat
+    Project_Dep_Name wxzlib
     End Project Dependency
 }}}
 
@@ -93,7 +69,16 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
+    Project_Dep_Name wxexpat
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxregex
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxzlib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name wxjpeg
@@ -102,7 +87,7 @@ Package=<4>
     Project_Dep_Name wxpng
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name base
+    Project_Dep_Name wxtiff
     End Project Dependency
 }}}
 
@@ -117,10 +102,19 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
+    Project_Dep_Name adv
+    End Project Dependency
+    Begin Project Dependency
     Project_Dep_Name odbc
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name wxtiff
+    Project_Dep_Name base
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name core
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxexpat
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name wxjpeg
@@ -129,7 +123,13 @@ Package=<4>
     Project_Dep_Name wxpng
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name adv
+    Project_Dep_Name wxregex
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxtiff
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxzlib
     End Project Dependency
 }}}
 
@@ -144,19 +144,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
+    Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name core
@@ -174,49 +162,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name core
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "media"=.\wx_media.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
+    Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name core
@@ -234,15 +180,6 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxzlib
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name base
     End Project Dependency
 }}}
@@ -257,15 +194,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name wxzlib
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
-    End Project Dependency
     Begin Project Dependency
     Project_Dep_Name base
     End Project Dependency
@@ -282,64 +210,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name core
+    Project_Dep_Name xml
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name xml
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "richtext"=.\wx_richtext.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name wxtiff
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxjpeg
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxpng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxexpat
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name adv
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name html
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name xml
+    Project_Dep_Name core
     End Project Dependency
 }}}
 
@@ -377,9 +254,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name wxzlib
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -429,16 +303,10 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name wxzlib
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxregex
+    Project_Dep_Name base
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name wxexpat
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name base
     End Project Dependency
 }}}
 
@@ -456,10 +324,16 @@ Package=<4>
     Project_Dep_Name xml
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name html
+    Project_Dep_Name adv
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name adv
+    Project_Dep_Name base
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name core
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name html
     End Project Dependency
 }}}
 

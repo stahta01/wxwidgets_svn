@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/uma.h
+// Name:        uma.h
 // Purpose:     Universal MacOS API
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     03/02/99
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -17,6 +17,11 @@
 void UMAInitToolbox( UInt16 inMoreMastersCalls, bool isEmbedded) ;
 void UMACleanupToolbox() ;
 long UMAGetSystemVersion() ;
+bool UMAHasAppearance() ;
+long UMAGetAppearanceVersion() ;
+bool UMAHasWindowManager() ;
+long UMAGetWindowManagerAttr() ;
+bool UMAHasAquaLayout() ;
 
 bool UMASystemIsInitialized() ;
 void UMASetSystemIsInitialized(bool val);
@@ -94,14 +99,7 @@ bool            UMAIsWindowModal( WindowRef inWindow ) ;
 
 void UMAHighlightAndActivateWindow( WindowRef inWindowRef , bool inActivate ) ;
 
-// Retrieves the Help menu handle. Warning: As a side-effect this functions also
-// creates the Help menu if it didn't exist yet.
 OSStatus UMAGetHelpMenu(
-  MenuRef *        outHelpMenu,
-  MenuItemIndex *  outFirstCustomItemIndex);      /* can be NULL */
-
-// Same as UMAGetHelpMenu, but doesn't create the Help menu if UMAGetHelpMenu hasn't been called yet.
-OSStatus UMAGetHelpMenuDontCreate(
   MenuRef *        outHelpMenu,
   MenuItemIndex *  outFirstCustomItemIndex);      /* can be NULL */
 

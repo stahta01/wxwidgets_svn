@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/clipcmn.cpp
+// Name:        common/clipcmn.cpp
 // Purpose:     common (to all ports) wxClipboard functions
 // Author:      Robert Roebling
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "clipboardbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,13 +28,10 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CLIPBOARD
-
 #include "wx/clipbrd.h"
+#include "wx/module.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/module.h"
-#endif
+#if wxUSE_CLIPBOARD
 
 static wxClipboard *gs_clipboard = NULL;
 

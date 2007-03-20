@@ -323,7 +323,7 @@ wxString RegExTestCase::quote(const wxString& arg)
     wxString str;
 
     for (size_t i = 0; i < arg.length(); i++) {
-        wxUChar ch = (wxChar)arg[i];
+        wxUChar ch = arg[i];
         const wxChar *p = wxStrchr(needEscape, ch);
 
         if (p)
@@ -331,7 +331,7 @@ wxString RegExTestCase::quote(const wxString& arg)
         else if (wxIscntrl(ch))
             str += wxString::Format(_T("\\%03o"), ch);
         else
-            str += (wxChar)ch;
+            str += ch;
     }
 
     return str.length() == arg.length() && str.find(' ') == wxString::npos ?

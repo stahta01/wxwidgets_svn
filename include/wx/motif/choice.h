@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/choice.h
+// Name:        choice.h
 // Purpose:     wxChoice class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CHOICE_H_
 #define _WX_CHOICE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+#pragma interface "choice.h"
+#endif
 
 #include "wx/clntdata.h"
 
@@ -28,8 +32,8 @@ class WXDLLEXPORT wxChoice: public wxChoiceBase
 
 public:
     wxChoice();
-    virtual ~wxChoice();
-
+    ~wxChoice();
+    
     wxChoice(wxWindow *parent, wxWindowID id,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -41,7 +45,7 @@ public:
         Init();
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
-
+    
     wxChoice(wxWindow *parent, wxWindowID id,
         const wxPoint& pos,
         const wxSize& size,
@@ -71,29 +75,30 @@ public:
         const wxString& name = wxChoiceNameStr);
 
     // implementation of wxControlWithItems
-    virtual unsigned int GetCount() const;
+    virtual int GetCount() const;
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, unsigned int pos);
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual int DoInsert(const wxString& item, int pos);
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
     virtual int GetSelection() const;
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
+    virtual int FindString(const wxString& s) const;
     virtual void Clear();
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual wxString GetString(unsigned int n) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual wxString GetString(int n) const;
 
     // implementation of wxChoiceBase
     virtual void SetSelection(int n);
     virtual void SetColumns(int n = 1 );
     virtual int GetColumns() const ;
-
-    // Original API
+    
+    // Original API    
     virtual void Command(wxCommandEvent& event);
-
+    
     void SetFocus();
-
+    
     // Implementation
     virtual void ChangeFont(bool keepOriginalSize = true);
     virtual void ChangeBackgroundColour();
@@ -112,14 +117,14 @@ protected:
     // common part of all contructors
     void Init();
 
-    unsigned int  m_noStrings;
+    size_t        m_noStrings;
     WXWidget      m_menuWidget;
     WXWidget      m_buttonWidget;
     wxWidgetArray m_widgetArray;
     WXWidget      m_formWidget;
     wxStringList  m_stringList;
     wxClientDataDictionary m_clientDataDict;
-
+     
     virtual void DoSetSize(int x, int y,
         int width, int height,
         int sizeFlags = wxSIZE_AUTO);

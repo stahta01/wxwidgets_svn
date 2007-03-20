@@ -141,9 +141,6 @@ class BaseMaskedTextCtrl( wx.TextCtrl, MaskedEditMixin ):
 ##        wx.TextCtrl.SetInsertionPoint(self, pos)
 
 
-    def IsEmpty(*args, **kw):
-        return MaskedEditMixin.IsEmpty(*args, **kw)
-
     def _GetValue(self):
         """
         Allow mixin to get the raw value of the control with this function.
@@ -239,7 +236,7 @@ class BaseMaskedTextCtrl( wx.TextCtrl, MaskedEditMixin ):
             width = self.GetSize().width
             height = self.GetBestSize().height
 ##            dbg('setting client size to:', (width, height))
-            self.SetInitialSize((width, height))
+            self.SetBestFittingSize((width, height))
 
 
     def Clear(self):

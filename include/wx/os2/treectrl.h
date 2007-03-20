@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma interface "treectrl.h"
+#endif
+
 #if wxUSE_TREECTRL
 
 #include "wx/textctrl.h"
@@ -36,11 +40,9 @@ struct WXDLLEXPORT wxTreeViewItem;
 // they're equivalent
 class wxTreeItemData;
 
-#if WXWIN_COMPATIBILITY_2_6
-    // flags for deprecated InsertItem() variant
-    #define wxTREE_INSERT_FIRST 0xFFFF0001
-    #define wxTREE_INSERT_LAST  0xFFFF0002
-#endif
+// flags for deprecated InsertItem() variant
+#define wxTREE_INSERT_FIRST 0xFFFF0001
+#define wxTREE_INSERT_LAST  0xFFFF0002
 
 // hash storing attributes for our items
 WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP(wxTreeItemAttr *, wxMapTreeAttr);
@@ -92,7 +94,7 @@ public:
     //
     // Get the total number of items in the control
     //
-    virtual unsigned int GetCount(void) const;
+    size_t GetCount(void) const;
 
     //
     // Indent is the number of pixels the children are indented relative to
@@ -274,6 +276,14 @@ public:
     // Get the parent of this item (may return NULL if root)
     //
     wxTreeItemId GetItemParent(const wxTreeItemId& rItem) const;
+
+#if WXWIN_COMPATIBILITY_2_2
+        // deprecated:  Use GetItemParent instead.
+    wxDEPRECATED( wxTreeItemId GetParent(const wxTreeItemId& item) const);
+
+        // Expose the base class method hidden by the one above. Not deprecatable.
+    wxWindow *GetParent() const { return wxControl::GetParent(); }
+#endif  // WXWIN_COMPATIBILITY_2_2
 
         // for this enumeration function you must pass in a "cookie" parameter
         // which is opaque for the application but is necessary for the library
@@ -505,6 +515,70 @@ public:
                          ,wxRect&             rRect
                          ,bool                bTextOnly = false
                         ) const;
+
+    //
+    // Deprecated
+    // ----------
+
+#if WXWIN_COMPATIBILITY_2_4
+    // These methods are deprecated and will be removed in future versions of
+    // wxWidgets, they're here for compatibility only, don't use them in new
+    // code (the comments indicate why these methods are now useless and how to
+    // replace them)
+    //
+
+    //
+    // Use Expand, Collapse, CollapseAndReset or Toggle
+    //
+    wxDEPRECATED( void ExpandItem( const wxTreeItemId& rItem
+                                  ,int                 nAction
+                                 ) );
+
+    //
+    // Use AddRoot, PrependItem or AppendItem
+    //
+    wxDEPRECATED( wxTreeItemId InsertItem( const wxTreeItemId& pParent
+                                          ,const wxString&     rsText
+                                          ,int                 nImage = -1
+                                          ,int                 nSelImage = -1
+                                          ,long                lInsertAfter = wxTREE_INSERT_LAST
+                                         ) );
+
+    //
+    // Use Set/GetImageList and Set/GetStateImageList
+    //
+    wxDEPRECATED( wxImageList* GetImageList(int nVal) const );
+    wxDEPRECATED( void SetImageList(wxImageList* pImageList, int nVal) );
+
+    //
+    // Use Set/GetItemImage directly
+    //
+    wxDEPRECATED( int GetItemSelectedImage(const wxTreeItemId& rItem) const );
+    wxDEPRECATED( void SetItemSelectedImage(const wxTreeItemId& rItem, int nImage) );
+
+    //
+    // For this enumeration function you must pass in a "cookie" parameter
+    // which is opaque for the application but is necessary for the library
+    // to make these functions reentrant (i.e. allow more than one
+    // enumeration on one and the same object simultaneously). Of course,
+    // the "cookie" passed to GetFirstChild() and GetNextChild() should be
+    // the same!
+    //
+
+    //
+    // Get the first child of this item
+    //
+    wxDEPRECATED( wxTreeItemId GetFirstChild( const wxTreeItemId& rItem
+                                             ,long&               rCookie
+                                            ) const );
+
+    //
+    // Get the next child
+    //
+    wxDEPRECATED( wxTreeItemId GetNextChild( const wxTreeItemId& rItem
+                                            ,long&               rCookie
+                                           ) const );
+#endif // WXWIN_COMPATIBILITY_2_4
 
     //
     // Implementation

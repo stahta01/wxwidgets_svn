@@ -18,7 +18,7 @@
 
 #include "wx/control.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxScrollBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxScrollBarNameStr;
 
 // ----------------------------------------------------------------------------
 // wxScrollBar: a scroll bar control
@@ -62,10 +62,8 @@ private:
     #include "wx/msw/scrolbar.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/scrolbar.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/scrolbar.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/scrolbar.h"
+    #include "wx/gtk/scrolbar.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/scrolbar.h"
 #elif defined(__WXCOCOA__)

@@ -15,6 +15,10 @@
 #ifndef _WX_DIRCTRL_H_
 #define _WX_DIRCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dirctrlg.h"
+#endif
+
 #if wxUSE_DIRDLG || wxUSE_FILEDLG
     #include "wx/imaglist.h"
 #endif
@@ -60,7 +64,7 @@ class WXDLLEXPORT wxDirItemData : public wxTreeItemData
 {
 public:
     wxDirItemData(const wxString& path, const wxString& name, bool isDir);
-    virtual ~wxDirItemData(){}
+    ~wxDirItemData(){}
     void SetNewDirName(const wxString& path);
 
     bool HasSubDirs() const;
@@ -116,8 +120,6 @@ public:
 
     // Try to expand as much of the given path as possible.
     virtual bool ExpandPath(const wxString& path);
-    // collapse the path
-    virtual bool CollapsePath(const wxString& path);
 
     // Accessors
 
@@ -148,6 +150,11 @@ public:
 
     // Helper
     virtual void SetupSections();
+
+#if WXWIN_COMPATIBILITY_2_4
+    // Parse the filter into an array of filters and an array of descriptions
+    virtual int ParseFilter(const wxString& filterStr, wxArrayString& filters, wxArrayString& descriptions);
+#endif // WXWIN_COMPATIBILITY_2_4
 
     // Find the child that matches the first part of 'path'.
     // E.g. if a child path is "/usr" and 'path' is "/usr/include"
@@ -220,7 +227,7 @@ public:
 
     void Init();
 
-    virtual ~wxDirFilterListCtrl() {}
+    ~wxDirFilterListCtrl() {}
 
     //// Operations
     void FillFilterList(const wxString& filter, int defaultFilter);

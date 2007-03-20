@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/dataobj.cpp
+// Name:        mac/dataobj.cpp
 // Purpose:     implementation of wxDataObject class
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,30 +9,41 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "dataobj.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if wxUSE_DATAOBJ
 
-#include "wx/dataobj.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/dcmemory.h"
-    #include "wx/image.h"
+#include "wx/intl.h"
 #endif
 
+#include "wx/log.h"
+#include "wx/dataobj.h"
+#include "wx/dcmemory.h"
 #include "wx/mstream.h"
+#include "wx/image.h"
 #include "wx/metafile.h"
-#include "wx/tokenzr.h"
-
 #include "wx/mac/private.h"
-
 #ifndef __DARWIN__
 #include <Scrap.h>
 #endif
 
+// ----------------------------------------------------------------------------
+// functions
+// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // wxDataFormat
@@ -44,112 +55,95 @@ wxDataFormat::wxDataFormat()
     m_format = 0;
 }
 
-wxDataFormat::wxDataFormat( wxDataFormatId vType )
+wxDataFormat::wxDataFormat(  wxDataFormatId   vType )
 {
-    SetType( vType );
+    SetType(vType);
 }
 
-wxDataFormat::wxDataFormat( const wxChar *zId )
+wxDataFormat::wxDataFormat(  const wxChar*  zId)
 {
-    SetId( zId );
+    SetId(zId);
 }
 
-wxDataFormat::wxDataFormat( const wxString& rId )
+wxDataFormat::wxDataFormat(  const wxString&   rId)
 {
-    SetId( rId );
+    SetId(rId);
 }
 
-wxDataFormat::wxDataFormat( NativeFormat vFormat )
+wxDataFormat::wxDataFormat( NativeFormat vFormat)
 {
-    SetId( vFormat );
+    SetId(vFormat);
 }
 
-void wxDataFormat::SetType( wxDataFormatId dataType )
+void wxDataFormat::SetType(  wxDataFormatId  Type )
 {
-    m_type = dataType;
+    m_type = Type;
 
-    switch (m_type)
-    {
-    case wxDF_TEXT:
+    if (m_type == wxDF_TEXT )
         m_format = kScrapFlavorTypeText;
-        break;
-
-    case wxDF_UNICODETEXT:
-        m_format = kScrapFlavorTypeUnicode;
-        break;
-
-    case wxDF_BITMAP:
-    case wxDF_METAFILE:
+    else if (m_type == wxDF_UNICODETEXT )
+        m_format = kScrapFlavorTypeUnicode ;
+    else if (m_type == wxDF_BITMAP || m_type == wxDF_METAFILE )
         m_format = kScrapFlavorTypePicture;
-        break;
+    else if (m_type == wxDF_FILENAME)
+        m_format = kDragFlavorTypeHFS ;
+    else
+    {
+       wxFAIL_MSG( wxT("invalid dataformat") );
 
-    case wxDF_FILENAME:
-        m_format = kDragFlavorTypeHFS;
-        break;
-
-    default:
-       wxFAIL_MSG( wxT("invalid data format") );
-
-       // NB: this translates to '????' ASCII but it can't be used in the code
-       // because '??' will get parsed as a trigraph!
+       // this is '????' but it can't be used in the code because ??' is
+       // parsed as a trigraph!
        m_format = 0x3f3f3f3f;
-       break;
     }
 }
 
 wxString wxDataFormat::GetId() const
 {
-    wxCHECK_MSG( !IsStandard(), wxEmptyString,
+    wxCHECK_MSG( !IsStandard(), wxEmptyString ,
                  wxT("name of predefined format cannot be retrieved") );
 
-    return m_id;
+    return m_id ;
 }
 
-void wxDataFormat::SetId( NativeFormat format )
+void wxDataFormat::SetId(  NativeFormat  format )
 {
     m_format = format;
 
-    switch (m_format)
-    {
-    case kScrapFlavorTypeText:
+    if (m_format == kScrapFlavorTypeText)
         m_type = wxDF_TEXT;
-        break;
-
-    case kScrapFlavorTypeUnicode:
+    else if (m_format == kScrapFlavorTypeUnicode )
         m_type = wxDF_UNICODETEXT;
-        break;
-
-    case kScrapFlavorTypePicture:
+    else if (m_format == kScrapFlavorTypePicture)
         m_type = wxDF_BITMAP;
-        break;
-
-    case kDragFlavorTypeHFS:
+    else if (m_format == kDragFlavorTypeHFS )
         m_type = wxDF_FILENAME;
-        break;
-
-    default:
+    else
+    {
         m_type = wxDF_PRIVATE;
-        char text[5];
-        memcpy( text, (const char*)&format, 4 );
-        text[4] = 0;
-        m_id = wxString::FromAscii( text );
-        break;
+        char text[5] ;
+        strncpy( text , (char*) &format , 4 ) ;
+        text[4] = 0 ;
+        m_id = wxString::FromAscii( text ) ;
     }
 }
 
 void wxDataFormat::SetId( const wxChar* zId )
 {
     m_type = wxDF_PRIVATE;
-    m_id = zId;
-    m_format = 'WXPR';
+    m_id = zId ;
+    m_format = 'WXPR' ;
 }
 
-bool wxDataFormat::operator==(const wxDataFormat& format) const
+bool wxDataFormat::operator==(const wxDataFormat& format) const 
 {
-    if (IsStandard() || format.IsStandard())
-        return (format.m_type == m_type);
+    if ( IsStandard() || format.IsStandard() )
+    {
+        return ( format.m_type == m_type ) ;
+    }
     else
-        return (m_id == format.m_id);
+    {
+        return ( m_id == format.m_id ) ;
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -160,33 +154,37 @@ wxDataObject::wxDataObject()
 {
 }
 
-bool wxDataObject::IsSupportedFormat( const wxDataFormat& rFormat, Direction vDir ) const
+bool wxDataObject::IsSupportedFormat(
+  const wxDataFormat&               rFormat
+, Direction                         vDir
+) const
 {
-    size_t nFormatCount = GetFormatCount( vDir );
-    bool found = false;
+    size_t                          nFormatCount = GetFormatCount(vDir);
 
     if (nFormatCount == 1)
     {
-        found = (rFormat == GetPreferredFormat());
+        return rFormat == GetPreferredFormat();
     }
     else
     {
-        wxDataFormat *pFormats = new wxDataFormat[nFormatCount];
-        GetAllFormats( pFormats, vDir );
+        wxDataFormat* pFormats = new wxDataFormat[nFormatCount];
+        GetAllFormats( pFormats
+                      ,vDir
+                     );
 
-        for (size_t n = 0; n < nFormatCount; n++)
+        size_t                      n;
+
+        for (n = 0; n < nFormatCount; n++)
         {
             if (pFormats[n] == rFormat)
-            {
-                found = true;
                 break;
-            }
         }
 
         delete [] pFormats;
-    }
 
-    return found;
+        // found?
+        return n < nFormatCount;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -194,74 +192,67 @@ bool wxDataObject::IsSupportedFormat( const wxDataFormat& rFormat, Direction vDi
 // ----------------------------------------------------------------------------
 
 #if wxUSE_UNICODE
-void wxTextDataObject::GetAllFormats( wxDataFormat *formats, wxDataObjectBase::Direction dir ) const
+void wxTextDataObject::GetAllFormats(wxDataFormat *formats, wxDataObjectBase::Direction dir) const
 {
     *formats++ = wxDataFormat( wxDF_TEXT );
     *formats = wxDataFormat( wxDF_UNICODETEXT );
 }
+
 #endif
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject
 // ----------------------------------------------------------------------------
 
-void wxFileDataObject::GetFileNames( wxCharBuffer &buf ) const
+bool wxFileDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
-    wxString filenames;
+    wxString                        sFilenames;
 
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
-        filenames += m_filenames[i];
-        filenames += wxT('\n');
+        sFilenames += m_filenames[i];
+        sFilenames += (wxChar)0;
     }
 
-    buf = filenames.fn_str();
-}
-
-bool wxFileDataObject::GetDataHere( void *pBuf ) const
-{
-    if (pBuf == NULL)
-        return false;
-
-    wxCharBuffer buf;
-    size_t buffLength;
-
-    GetFileNames( buf );
-    buffLength = strlen( buf );
-    memcpy( pBuf, (const char*)buf, buffLength + 1 );
-
-    return true;
+    memcpy(pBuf, sFilenames.mbc_str(), sFilenames.Len() + 1);
+    return TRUE;
 }
 
 size_t wxFileDataObject::GetDataSize() const
 {
-    wxCharBuffer buf;
-    size_t buffLength;
+    size_t nRes = 0;
 
-    GetFileNames( buf );
-    buffLength = strlen( buf );
+    for (size_t i = 0; i < m_filenames.GetCount(); i++)
+    {
+        nRes += m_filenames[i].Len();
+        nRes += 1;
+    }
 
-    return buffLength + 1;
+    return nRes + 1;
 }
 
-bool wxFileDataObject::SetData( size_t nSize, const void *pBuf )
+bool wxFileDataObject::SetData(
+  size_t                            WXUNUSED(nSize)
+, const void*                       pBuf
+)
 {
-    wxString filenames;
+    m_filenames.Empty();
 
-#if wxUSE_UNICODE
-    filenames = wxString( (const char*)pBuf, *wxConvFileName );
-#else
-    filenames = wxString (wxConvLocal.cWC2WX(wxConvFileName->cMB2WC( (const char*)pBuf)));
-#endif
+    // only add if this is not an empty string
+    // we can therefore clear the list by just setting an empty string
+    if ( (*(char*)pBuf) != 0 )
+        AddFile(wxString::FromAscii((char*)pBuf));
 
-    m_filenames = wxStringTokenize( filenames, wxT("\n"), wxTOKEN_STRTOK );
-
-    return true;
+    return TRUE;
 }
 
-void wxFileDataObject::AddFile( const wxString& rFilename )
+void wxFileDataObject::AddFile(
+  const wxString&                   rFilename
+)
 {
-    m_filenames.Add( rFilename );
+    m_filenames.Add(rFilename);
 }
 
 // ----------------------------------------------------------------------------
@@ -273,15 +264,16 @@ wxBitmapDataObject::wxBitmapDataObject()
     Init();
 }
 
-wxBitmapDataObject::wxBitmapDataObject( const wxBitmap& rBitmap )
-: wxBitmapDataObjectBase( rBitmap )
+wxBitmapDataObject::wxBitmapDataObject(
+  const wxBitmap& rBitmap
+)
+: wxBitmapDataObjectBase(rBitmap)
 {
     Init();
-
-    if (m_bitmap.Ok())
+    if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle();
-        m_pictCreated = false;
+        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle() ;
+        m_pictCreated = false ;
     }
 }
 
@@ -290,90 +282,74 @@ wxBitmapDataObject::~wxBitmapDataObject()
     Clear();
 }
 
-void wxBitmapDataObject::SetBitmap( const wxBitmap& rBitmap )
+void wxBitmapDataObject::SetBitmap(
+  const wxBitmap&                   rBitmap
+)
 {
     Clear();
-    wxBitmapDataObjectBase::SetBitmap( rBitmap );
-    if (m_bitmap.Ok())
+    wxBitmapDataObjectBase::SetBitmap(rBitmap);
+    if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle();
-        m_pictCreated = false;
+        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle() ;
+        m_pictCreated = false ;
     }
 }
 
-void wxBitmapDataObject::Init()
+void wxBitmapDataObject::Init() 
+{ 
+    m_pictHandle = NULL ;
+    m_pictCreated = false ;
+} 
+
+void wxBitmapDataObject::Clear() 
 {
-    m_pictHandle = NULL;
-    m_pictCreated = false;
+    if ( m_pictCreated && m_pictHandle )
+    {
+        KillPicture( (PicHandle) m_pictHandle ) ;
+    }
+    m_pictHandle = NULL ;
 }
 
-void wxBitmapDataObject::Clear()
+bool wxBitmapDataObject::GetDataHere(
+  void*                             pBuf
+) const
 {
-    if (m_pictHandle != NULL)
+    if (!m_pictHandle)
     {
-#ifndef __LP64__
-        if (m_pictCreated)
-            KillPicture( (PicHandle)m_pictHandle );
-#endif
-        m_pictHandle = NULL;
+        wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
+        return FALSE;
     }
-
-    m_pictCreated = false;
-}
-
-bool wxBitmapDataObject::GetDataHere( void *pBuf ) const
-{
-    if (m_pictHandle == NULL)
-    {
-        wxFAIL_MSG( wxT("attempt to copy empty bitmap failed") );
-        return false;
-    }
-
-    if (pBuf == NULL)
-        return false;
-
-    memcpy( pBuf, *(Handle)m_pictHandle, GetHandleSize( (Handle)m_pictHandle ) );
-
-    return true;
+    memcpy(pBuf, *(Handle)m_pictHandle, GetHandleSize((Handle)m_pictHandle));
+    return TRUE;
 }
 
 size_t wxBitmapDataObject::GetDataSize() const
 {
-    if (m_pictHandle != NULL)
-        return GetHandleSize( (Handle)m_pictHandle );
-    else
-        return 0;
+    return GetHandleSize((Handle)m_pictHandle) ;
 }
 
-bool wxBitmapDataObject::SetData( size_t nSize, const void *pBuf )
+bool wxBitmapDataObject::SetData(
+  size_t                            nSize
+, const void*                       pBuf
+)
 {
     Clear();
-
-    if ((pBuf == NULL) || (nSize == 0))
-        return false;
-
-    PicHandle picHandle = (PicHandle)NewHandle( nSize );
-    memcpy( *picHandle, pBuf, nSize );
-    m_pictHandle = picHandle;
-
+    PicHandle picHandle = (PicHandle) NewHandle( nSize ) ;
+    memcpy( *picHandle , pBuf , nSize ) ;
+    m_pictHandle = picHandle ;
     // ownership is transferred to the bitmap
-    m_pictCreated = false;
-#ifndef __LP64__
-    Rect frame;
-    wxMacGetPictureBounds( picHandle, &frame );
-#if wxUSE_METAFILE
-    wxMetafile mf;
-    mf.SetHMETAFILE( (WXHMETAFILE)m_pictHandle );
-#endif
-    wxMemoryDC mdc;
-    m_bitmap.Create( frame.right - frame.left, frame.bottom - frame.top );
-    mdc.SelectObject( m_bitmap );
-#if wxUSE_METAFILE  
-    mf.Play( &mdc );
-#endif
-    mdc.SelectObject( wxNullBitmap );
-#endif
-
+    m_pictCreated = false ;
+    Rect frame ;
+    wxMacGetPictureBounds( picHandle , &frame ) ;
+    
+    wxMetafile mf ;
+    mf.SetHMETAFILE( (WXHMETAFILE) m_pictHandle ) ;
+    wxMemoryDC mdc ;
+    m_bitmap.Create( frame.right - frame.left ,frame.bottom - frame.top ) ;
+    mdc.SelectObject(m_bitmap ) ;
+    mf.Play( &mdc ) ;
+    mdc.SelectObject( wxNullBitmap ) ;
+    
     return m_bitmap.Ok();
 }
 

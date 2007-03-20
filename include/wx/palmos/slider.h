@@ -12,6 +12,10 @@
 #ifndef _SLIDERPALM_H_
 #define _SLIDERPALM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "slider.h"
+#endif
+
 // Slider
 class WXDLLEXPORT wxSlider : public wxSliderBase
 {
@@ -33,7 +37,7 @@ public:
         Create(parent, id, value, minValue, maxValue, pos, size, style, validator, name);
     }
 
-    virtual ~wxSlider();
+    ~wxSlider();
 
     bool Create(wxWindow *parent, wxWindowID id,
             int value, int minValue, int maxValue,

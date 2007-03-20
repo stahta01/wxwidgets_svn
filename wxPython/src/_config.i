@@ -87,12 +87,12 @@ public:
     };
 
 
-    %disownarg( wxConfigBase *config );
+    %apply SWIGTYPE *DISOWN { wxConfigBase *config };
     DocDeclStr(
         static wxConfigBase *, Set(wxConfigBase *config),
         "Sets the global config object (the one returned by Get) and returns a
 reference to the previous global config object.", "");
-    %cleardisown( wxConfigBase *config );
+    %clear wxConfigBase *config;
 
     DocDeclStr(
         static wxConfigBase *, Get(bool createOnDemand = true),
@@ -371,17 +371,6 @@ time)", "");
         long , GetStyle() const,
         "", "");
     
-    %property(AppName, GetAppName, SetAppName, doc="See `GetAppName` and `SetAppName`");
-    %property(EntryType, GetEntryType, doc="See `GetEntryType`");
-    %property(FirstEntry, GetFirstEntry, doc="See `GetFirstEntry`");
-    %property(FirstGroup, GetFirstGroup, doc="See `GetFirstGroup`");
-    %property(NextEntry, GetNextEntry, doc="See `GetNextEntry`");
-    %property(NextGroup, GetNextGroup, doc="See `GetNextGroup`");
-    %property(NumberOfEntries, GetNumberOfEntries, doc="See `GetNumberOfEntries`");
-    %property(NumberOfGroups, GetNumberOfGroups, doc="See `GetNumberOfGroups`");
-    %property(Path, GetPath, SetPath, doc="See `GetPath` and `SetPath`");
-    %property(Style, GetStyle, SetStyle, doc="See `GetStyle` and `SetStyle`");
-    %property(VendorName, GetVendorName, SetVendorName, doc="See `GetVendorName` and `SetVendorName`");
 };
 
 

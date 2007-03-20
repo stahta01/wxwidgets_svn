@@ -267,9 +267,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxStatusBar sample"),
                                  wxPoint(50, 50), wxSize(450, 340));
@@ -455,7 +452,7 @@ void MyFrame::OnSetStatusFields(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnUpdateStatusBarToggle(wxUpdateUIEvent& event)
 {
-    event.Check(GetStatusBar() != NULL);
+    event.Check(GetStatusBar() != 0);
 }
 
 void MyFrame::OnStatusBarToggle(wxCommandEvent& WXUNUSED(event))
@@ -464,12 +461,17 @@ void MyFrame::OnStatusBarToggle(wxCommandEvent& WXUNUSED(event))
     if ( statbarOld )
     {
         statbarOld->Hide();
-        SetStatusBar(NULL);
+        SetStatusBar(0);
     }
     else
     {
         DoCreateStatusBar(m_statbarKind);
     }
+#ifdef __WXMSW__
+    // The following is a kludge suggested by Vadim Zeitlin (one of the wxWidgets
+    // authors) while we look for a proper fix..
+//    SendSizeEvent();
+#endif
 }
 
 void MyFrame::OnRecreateStatusBar(wxCommandEvent& WXUNUSED(event))

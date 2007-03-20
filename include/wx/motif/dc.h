@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/dc.h
+// Name:        dc.h
 // Purpose:     wxDC class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_DC_H_
 #define _WX_DC_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dc.h"
+#endif
 
 #include "wx/pen.h"
 #include "wx/brush.h"
@@ -43,7 +47,7 @@ class WXDLLEXPORT wxDC : public wxDCBase
 
 public:
     wxDC();
-    virtual ~wxDC() { }
+    ~wxDC() { }
 
     // implement base class pure virtuals
     // ----------------------------------

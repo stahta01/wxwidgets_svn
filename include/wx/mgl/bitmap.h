@@ -6,13 +6,28 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_BITMAP_H__
 #define __WX_BITMAP_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "bitmap.h"
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/string.h"
+#include "wx/palette.h"
+#include "wx/gdiobj.h"
+
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
+class WXDLLEXPORT wxMask;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxImage;
 class WXDLLEXPORT wxDC;
 class WXDLLEXPORT wxMemoryDC;
 
@@ -20,12 +35,41 @@ class MGLDevCtx;
 struct bitmap_t;
 
 //-----------------------------------------------------------------------------
+// wxMask
+//-----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxMask: public wxObject
+{
+public:
+    wxMask();
+    wxMask(const wxBitmap& bitmap, const wxColour& colour);
+    wxMask(const wxBitmap& bitmap, int paletteIndex);
+    wxMask(const wxBitmap& bitmap);
+    ~wxMask();
+
+    bool Create(const wxBitmap& bitmap, const wxColour& colour);
+    bool Create(const wxBitmap& bitmap, int paletteIndex);
+    bool Create(const wxBitmap& bitmap);
+
+    // implementation
+    wxBitmap *m_bitmap;
+
+    wxBitmap *GetBitmap() const { return m_bitmap; }
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxMask)
+};
+
+//-----------------------------------------------------------------------------
 // wxBitmap
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+class WXDLLEXPORT wxBitmapHandler : public wxBitmapHandlerBase
 {
-    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+public:
+    wxBitmapHandler() : wxBitmapHandlerBase() {}
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 };
 
 class WXDLLEXPORT wxBitmap: public wxBitmapBase
@@ -34,12 +78,16 @@ public:
     wxBitmap() {}
     wxBitmap(int width, int height, int depth = -1);
     wxBitmap(const char bits[], int width, int height, int depth = 1);
-    wxBitmap(const char* const* bits);
+    wxBitmap(const char **bits) { CreateFromXpm(bits); }
+    wxBitmap(char **bits) { CreateFromXpm((const char **)bits); }
+    wxBitmap(const wxBitmap& bmp);
     wxBitmap(const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_RESOURCE);
     wxBitmap(const wxImage& image, int depth = -1);
-    virtual ~wxBitmap() {}
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    ~wxBitmap() {}
+    wxBitmap& operator = (const wxBitmap& bmp);
+    bool operator == (const wxBitmap& bmp) const;
+    bool operator != (const wxBitmap& bmp) const;
+    bool Ok() const;
 
     bool Create(int width, int height, int depth = -1);
 
@@ -70,12 +118,12 @@ public:
     virtual void SetWidth(int width);
     virtual void SetDepth(int depth);
 
-    virtual wxColour QuantizeColour(const wxColour& colour) const;
-
     // get underlying native representation:
     bitmap_t *GetMGLbitmap_t() const;
 
 protected:
+    bool CreateFromXpm(const char **bits);
+
     // creates temporary DC for access to bitmap's data:
     MGLDevCtx *CreateTmpDC() const;
     // sets fg & bg colours for 1bit bitmaps:

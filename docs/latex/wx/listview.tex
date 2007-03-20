@@ -19,7 +19,7 @@ future some ports might implement wxListView but not the full set of wxListCtrl
 features.
 
 Other than different interface, this class is identical to wxListCtrl. In
-particular, it uses the same events, same window styles and so on.
+particular, it uses the same events, same windows styles and so on.
 
 \wxheading{Derived from}
 
@@ -63,12 +63,12 @@ Sets focus to the item with the given {\it index}.
 \constfunc{long}{GetFirstSelected}{\void}
 
 Returns the first selected item in a (presumably) multiple selection control.
-Together with \helpref{GetNextSelected}{wxlistviewgetnextselected} it can be
+Tigether with \helpref{GetNextSelected}{wxlistviewgetnextselected} it can be
 used to iterate over all selected items in the control.
 
 \wxheading{Return value}
 
-The first selected item, if any, $-1$ otherwise.
+The fisrt selected item, if any, $-1$ otherwise.
 
 
 \membersection{wxListView::GetFocusedItem}\label{wxlistviewgetfocuseditem}
@@ -97,7 +97,7 @@ Returns the next selected item or $-1$ if there are no more of them.
 
 \membersection{wxListView::IsSelected}\label{wxlistviewisselected}
 
-\constfunc{bool}{IsSelected}{\param{long }{index}}
+\func{bool}{IsSelected}{\param{long }{index}}
 
 Returns {\tt true} if the item with the given {\it index} is selected, 
 {\tt false} otherwise.

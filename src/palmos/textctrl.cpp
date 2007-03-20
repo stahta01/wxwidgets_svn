@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrl.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -26,9 +30,8 @@
 
 #if wxUSE_TEXTCTRL
 
-#include "wx/textctrl.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/textctrl.h"
     #include "wx/settings.h"
     #include "wx/brush.h"
     #include "wx/utils.h"
@@ -36,8 +39,9 @@
     #include "wx/log.h"
     #include "wx/app.h"
     #include "wx/menu.h"
-    #include "wx/module.h"
 #endif
+
+#include "wx/module.h"
 
 #if wxUSE_CLIPBOARD
     #include "wx/clipbrd.h"
@@ -134,7 +138,7 @@ wxBEGIN_FLAGS( wxTextCtrlStyle )
     wxFLAGS_MEMBER(wxTE_CENTRE)
     wxFLAGS_MEMBER(wxTE_RIGHT)
     wxFLAGS_MEMBER(wxTE_DONTWRAP)
-    wxFLAGS_MEMBER(wxTE_CHARWRAP)
+    wxFLAGS_MEMBER(wxTE_LINEWRAP)
     wxFLAGS_MEMBER(wxTE_WORDWRAP)
 
 wxEND_FLAGS( wxTextCtrlStyle )
@@ -155,11 +159,11 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_6( wxTextCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , Value , wxPoint , Position , wxSize , Size , long , WindowStyle)
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 #endif
 
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
     EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
 
@@ -229,9 +233,61 @@ wxString wxTextCtrl::GetValue() const
     return res;
 }
 
-void wxTextCtrl::DoSetValue(const wxString& value, int flags)
+void wxTextCtrl::SetValue(const wxString& value)
 {
 }
+
+#if wxUSE_RICHEDIT && (!wxUSE_UNICODE || wxUSE_UNICODE_MSLU)
+
+// TODO: using memcpy() would improve performance a lot for big amounts of text
+
+DWORD CALLBACK
+wxRichEditStreamIn(DWORD dwCookie, BYTE *buf, LONG cb, LONG *pcb)
+{
+    return 0;
+}
+
+// helper struct used to pass parameters from wxTextCtrl to wxRichEditStreamOut
+struct wxStreamOutData
+{
+    wchar_t *wpc;
+    size_t len;
+};
+
+DWORD CALLBACK
+wxRichEditStreamOut(DWORD_PTR dwCookie, BYTE *buf, LONG cb, LONG *pcb)
+{
+    return 0;
+}
+
+
+#if wxUSE_UNICODE_MSLU
+    #define UNUSED_IF_MSLU(param)
+#else
+    #define UNUSED_IF_MSLU(param) param
+#endif
+
+bool
+wxTextCtrl::StreamIn(const wxString& value,
+                     wxFontEncoding UNUSED_IF_MSLU(encoding),
+                     bool selectionOnly)
+{
+    return false;
+}
+
+#if !wxUSE_UNICODE_MSLU
+
+wxString
+wxTextCtrl::StreamOut(wxFontEncoding encoding, bool selectionOnly) const
+{
+    wxString out;
+
+    return out;
+}
+
+#endif // !wxUSE_UNICODE_MSLU
+
+#endif // wxUSE_RICHEDIT
 
 void wxTextCtrl::WriteText(const wxString& value)
 {
@@ -338,7 +394,7 @@ void wxTextCtrl::DoSetSelection(long from, long to, bool scrollCaret)
 // Working with files
 // ----------------------------------------------------------------------------
 
-bool wxTextCtrl::DoLoadFile(const wxString& file, int fileType)
+bool wxTextCtrl::LoadFile(const wxString& file)
 {
     return false;
 }

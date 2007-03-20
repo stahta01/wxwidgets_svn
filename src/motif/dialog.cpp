@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:     wxDialog class
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dialog.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -20,13 +24,9 @@
 #endif
 
 #include "wx/dialog.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-#endif
-
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/settings.h"
 #include "wx/evtloop.h"
 
 #ifdef __VMS__
@@ -66,10 +66,21 @@
 // for modal dialogs
 wxList wxModalDialogs;
 extern wxList wxModelessWindows;  // Frames and modeless dialogs
+extern wxList wxPendingDelete;
 
 #define wxUSE_INVISIBLE_RESIZE 1
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
+
+BEGIN_EVENT_TABLE(wxDialog, wxTopLevelWindow)
+  EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+  EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+  EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+  EVT_CHAR_HOOK(wxDialog::OnCharHook)
+  EVT_SYS_COLOUR_CHANGED(wxDialog::OnSysColourChanged)
+  EVT_CLOSE(wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
+
 
 wxDialog::wxDialog()
 {
@@ -98,6 +109,7 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     m_foregroundColour = *wxBLACK;
 
     Widget dialogShell = (Widget) m_mainWidget;
+    Widget shell = XtParent(dialogShell) ;
 
     SetTitle( title );
 
@@ -105,33 +117,32 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     ChangeFont(false);
 
     // Can't remember what this was about... but I think it's necessary.
-#if wxUSE_INVISIBLE_RESIZE
-    if (pos.x > -1)
-        XtVaSetValues(dialogShell, XmNx, pos.x,
-        NULL);
-    if (pos.y > -1)
-        XtVaSetValues(dialogShell, XmNy, pos.y,
-        NULL);
+    if (wxUSE_INVISIBLE_RESIZE)
+    {
+        if (pos.x > -1)
+            XtVaSetValues(dialogShell, XmNx, pos.x,
+            NULL);
+        if (pos.y > -1)
+            XtVaSetValues(dialogShell, XmNy, pos.y,
+            NULL);
 
-    if (size.x > -1)
-        XtVaSetValues(dialogShell, XmNwidth, size.x, NULL);
-    if (size.y > -1)
-        XtVaSetValues(dialogShell, XmNheight, size.y, NULL);
-#endif
+        if (size.x > -1)
+            XtVaSetValues(dialogShell, XmNwidth, size.x, NULL);
+        if (size.y > -1)
+            XtVaSetValues(dialogShell, XmNheight, size.y, NULL);
+    }
 
     // Positioning of the dialog doesn't work properly unless the dialog
     // is managed, so we manage without mapping to the screen.
     // To show, we map the shell (actually it's parent).
-#if !wxUSE_INVISIBLE_RESIZE
-    Widget shell = XtParent(dialogShell) ;
-    XtVaSetValues(shell, XmNmappedWhenManaged, False, NULL);
-#endif
+    if (!wxUSE_INVISIBLE_RESIZE)
+        XtVaSetValues(shell, XmNmappedWhenManaged, False, NULL);
 
-#if !wxUSE_INVISIBLE_RESIZE
-    XtManageChild(dialogShell);
-    SetSize(pos.x, pos.y, size.x, size.y);
-#endif
-
+    if (!wxUSE_INVISIBLE_RESIZE)
+    {
+        XtManageChild(dialogShell);
+        SetSize(pos.x, pos.y, size.x, size.y);
+    }
     XtAddEventHandler(dialogShell,ExposureMask,False,
         wxUniversalRepaintProc, (XtPointer) this);
 
@@ -140,12 +151,12 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     return true;
 }
 
-bool wxDialog::XmDoCreateTLW(wxWindow* parent,
-                             wxWindowID WXUNUSED(id),
-                             const wxString& WXUNUSED(title),
-                             const wxPoint& WXUNUSED(pos),
-                             const wxSize& WXUNUSED(size),
-                             long WXUNUSED(style),
+bool wxDialog::DoCreate(wxWindow* parent,
+                             wxWindowID id,
+                             const wxString& title,
+                             const wxPoint& pos,
+                             const wxSize& size,
+                             long style,
                              const wxString& name)
 {
     Widget parentWidget = (Widget) 0;
@@ -162,7 +173,7 @@ bool wxDialog::XmDoCreateTLW(wxWindow* parent,
     XtSetArg (args[1], XmNautoUnmanage, False);
     Widget dialogShell =
         XmCreateBulletinBoardDialog( parentWidget,
-                                     wxConstCast(name.mb_str(), char),
+                                     wxConstCast(name.c_str(), char),
                                      args, 2);
     m_mainWidget = (WXWidget) dialogShell;
 
@@ -185,12 +196,27 @@ bool wxDialog::XmDoCreateTLW(wxWindow* parent,
     return true;
 }
 
+void wxDialog::DoDestroy()
+{
+}
+
 void wxDialog::SetModal(bool flag)
 {
+#ifdef __VMS
+#pragma message disable codcauunr
+#endif
    if ( flag )
-       wxModelessWindows.DeleteObject(this);
-   else
-       wxModelessWindows.Append(this);
+        m_windowStyle |= wxDIALOG_MODAL ;
+    else
+        if ( m_windowStyle & wxDIALOG_MODAL )
+            m_windowStyle -= wxDIALOG_MODAL ;
+
+        wxModelessWindows.DeleteObject(this);
+        if (!flag)
+            wxModelessWindows.Append(this);
+#ifdef __VMS
+#pragma message enable codcauunr
+#endif
 }
 
 wxDialog::~wxDialog()
@@ -206,13 +232,10 @@ wxDialog::~wxDialog()
     }
 
     m_modalShowing = false;
-
-#if !wxUSE_INVISIBLE_RESIZE
-    if (m_mainWidget)
+    if (!wxUSE_INVISIBLE_RESIZE && m_mainWidget)
     {
         XtUnmapWidget((Widget) m_mainWidget);
     }
-#endif
 
     PreDestroy();
 
@@ -221,6 +244,23 @@ wxDialog::~wxDialog()
         wxDeleteWindowFromTable( (Widget)m_mainWidget );
         XtDestroyWidget( (Widget)m_mainWidget );
     }
+}
+
+// By default, pressing escape cancels the dialog
+void wxDialog::OnCharHook(wxKeyEvent& event)
+{
+    if (event.m_keyCode == WXK_ESCAPE)
+    {
+        // Behaviour changed in 2.0: we'll send a Cancel message
+        // to the dialog instead of Close.
+        wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+        cancelEvent.SetEventObject( this );
+        GetEventHandler()->ProcessEvent(cancelEvent);
+
+        return;
+    }
+    // We didn't process this event.
+    event.Skip();
 }
 
 void wxDialog::DoSetSize(int x, int y, int width, int height, int sizeFlags)
@@ -243,9 +283,9 @@ void wxDialog::SetTitle(const wxString& title)
     {
         wxXmString str( title );
         XtVaSetValues( (Widget)m_mainWidget,
-                       XmNtitle, title.mb_str(),
-                       XmNdialogTitle, str(),
-                       XmNiconName, title.mb_str(),
+                       XmNtitle, title.c_str(),
+                       XmNdialogTitle, str(), // Roberto Cocchi
+                       XmNiconName, title.c_str(),
                        NULL );
     }
 }
@@ -267,23 +307,21 @@ bool wxDialog::Show( bool show )
 
     if (show)
     {
-#if !wxUSE_INVISIBLE_RESIZE
-        XtMapWidget(XtParent((Widget) m_mainWidget));
-#else
-        XtManageChild((Widget)m_mainWidget) ;
-#endif
+        if (!wxUSE_INVISIBLE_RESIZE)
+            XtMapWidget(XtParent((Widget) m_mainWidget));
+        else
+            XtManageChild((Widget)m_mainWidget) ;
 
-        XRaiseWindow( XtDisplay( (Widget)m_mainWidget ),
+        XRaiseWindow( XtDisplay( (Widget)m_mainWidget ), 
                       XtWindow( (Widget)m_mainWidget) );
 
     }
     else
     {
-#if !wxUSE_INVISIBLE_RESIZE
-        XtUnmapWidget(XtParent((Widget) m_mainWidget));
-#else
-        XtUnmanageChild((Widget)m_mainWidget) ;
-#endif
+        if (!wxUSE_INVISIBLE_RESIZE)
+            XtUnmapWidget(XtParent((Widget) m_mainWidget));
+        else
+            XtUnmanageChild((Widget)m_mainWidget) ;
 
         XFlush(XtDisplay((Widget)m_mainWidget));
         XSync(XtDisplay((Widget)m_mainWidget), False);
@@ -295,6 +333,8 @@ bool wxDialog::Show( bool show )
 // Shows a dialog modally, returning a return code
 int wxDialog::ShowModal()
 {
+    m_windowStyle |= wxDIALOG_MODAL;
+
     Show(true);
 
     // after the event loop ran, the widget might already have been destroyed
@@ -338,12 +378,81 @@ void wxDialog::EndModal(int retCode)
     SetModal(false);
 }
 
+// Standard buttons
+void wxDialog::OnOK(wxCommandEvent& WXUNUSED(event))
+{
+    if ( Validate() && TransferDataFromWindow() )
+    {
+        if ( IsModal() )
+            EndModal(wxID_OK);
+        else
+        {
+            SetReturnCode(wxID_OK);
+            this->Show(false);
+        }
+    }
+}
+
+void wxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+    if (Validate())
+        TransferDataFromWindow();
+    // TODO probably need to disable the Apply button until things change again
+}
+
+void wxDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    if ( IsModal() )
+        EndModal(wxID_CANCEL);
+    else
+    {
+        SetReturnCode(wxID_CANCEL);
+        this->Show(false);
+    }
+}
+
+void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+{
+    // We'll send a Cancel message by default,
+    // which may close the dialog.
+    // Check for looping if the Cancel event handler calls Close().
+
+    // Note that if a cancel button and handler aren't present in the dialog,
+    // nothing will happen when you close the dialog via the window manager, or
+    // via Close().
+    // We wouldn't want to destroy the dialog by default, since the dialog may have been
+    // created on the stack.
+    // However, this does mean that calling dialog->Close() won't delete the dialog
+    // unless the handler for wxID_CANCEL does so. So use Destroy() if you want to be
+    // sure to destroy the dialog.
+    // The default OnCancel (above) simply ends a modal dialog, and hides a modeless dialog.
+
+    static wxList closing;
+
+    if ( closing.Member(this) )
+        return;
+
+    closing.Append(this);
+
+    wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+    cancelEvent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent(cancelEvent); // This may close the dialog
+
+    closing.DeleteObject(this);
+}
+
 // Destroy the window (delayed, if a managed window)
 bool wxDialog::Destroy()
 {
     if (!wxPendingDelete.Member(this))
         wxPendingDelete.Append(this);
     return true;
+}
+
+void wxDialog::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event))
+{
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
+    Refresh();
 }
 
 void wxDialog::ChangeFont(bool keepOriginalSize)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/combobox.h
+// Name:        combobox.h
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
@@ -8,8 +8,32 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_COMBOBOX_H_
-#define _WX_GTK_COMBOBOX_H_
+
+#ifndef __GTKCOMBOBOXH__
+#define __GTKCOMBOBOXH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
+
+#include "wx/defs.h"
+
+#if wxUSE_COMBOBOX
+
+#include "wx/object.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxComboBox;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar* wxComboBoxNameStr;
+extern WXDLLIMPEXP_BASE const wxChar* wxEmptyString;
 
 //-----------------------------------------------------------------------------
 // wxComboBox
@@ -42,7 +66,7 @@ public:
         Create(parent, id, value, pos, size, choices, style, validator, name);
     }
 
-    virtual ~wxComboBox();
+    ~wxComboBox();
 
     bool Create(wxWindow *parent, wxWindowID id,
            const wxString& value = wxEmptyString,
@@ -61,47 +85,48 @@ public:
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxComboBoxNameStr);
 
-    // From wxItemContainerImmutable:
-    virtual unsigned int GetCount() const;
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString &text);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
-    virtual void SetSelection(int n);
-    virtual int GetSelection() const;
-    wxString GetStringSelection() const; // not a virtual in parent class
+    void Clear();
+    void Delete( int n );
 
-    // From wxItemContainer:
-    virtual void Clear();
-    virtual void Delete(unsigned int n);
+    virtual int FindString( const wxString &item ) const;
+    int GetSelection() const;
+#if wxABI_VERSION >= 20602
+    int GetCurrentSelection() const;
+#endif
+    wxString GetString( int n ) const;
+    wxString GetStringSelection() const;
+    int GetCount() const;
+    int Number() const { return GetCount(); }
+    void SetSelection( int n );
+    void SetString(int n, const wxString &text);
 
-    // From wxBomboBoxBase:
-    virtual wxString GetValue() const;
-    virtual void SetValue(const wxString& value);
-    virtual void Copy();
-    virtual void Cut();
-    virtual void Paste();
-    virtual void SetInsertionPoint( long pos );
-    virtual long GetInsertionPoint() const;
+    wxString GetValue() const;
+    void SetValue(const wxString& value);
+
+    void Copy();
+    void Cut();
+    void Paste();
+    bool CanCopy() const;
+    bool CanCut() const;
+    bool CanPaste() const;
+    void SetInsertionPoint( long pos );
+    void SetInsertionPointEnd() { SetInsertionPoint( -1 ); }
+    long GetInsertionPoint() const;
     virtual wxTextPos GetLastPosition() const;
-    virtual void Replace( long from, long to, const wxString& value );
-    virtual void SetSelection( long from, long to );
-    virtual void SetEditable( bool editable );
-    virtual void SetInsertionPointEnd() { SetInsertionPoint( -1 ); }
-    virtual void Remove(long from, long to) { Replace(from, to, wxEmptyString); }
-    virtual bool IsEditable() const;
-    virtual void Undo();
-    virtual void Redo();
-    virtual void SelectAll();
-    virtual bool CanCopy() const;
-    virtual bool CanCut() const;
-    virtual bool CanPaste() const;
-    virtual bool CanUndo() const;
-    virtual bool CanRedo() const;
+    void Remove(long from, long to) { Replace(from, to, wxEmptyString); }
+    void Replace( long from, long to, const wxString& value );
+    void SetSelection( long from, long to );
+    void GetSelection( long* from, long* to ) const;
+    void SetEditable( bool editable );
+    void Undo() ;
+    void Redo() ;
+    bool CanUndo() const;
+    bool CanRedo() const;
+    void SelectAll();
+    bool IsEditable() const ;
+    bool HasSelection() const ;
 
     // implementation
-    bool HasSelection() const;
-    void GetSelection( long* from, long* to ) const;
-    int GetCurrentSelection() const;
 
     virtual void SetFocus();
 
@@ -133,6 +158,8 @@ public:
     void DisableEvents();
     void EnableEvents();
     GtkWidget* GetConnectWidget();
+    bool IsOwnGtkWindow( GdkWindow *window );
+    void DoApplyWidgetStyle(GtkRcStyle *style);
 
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
@@ -140,20 +167,14 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    // From wxWindowGTK:
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
-
-    // From wxItemContainer:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, unsigned int pos);
+    virtual int DoInsert(const wxString& item, int pos);
 
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual void DoSetItemClientData( int n, void* clientData );
+    virtual void* DoGetItemClientData( int n ) const;
+    virtual void DoSetItemClientObject( int n, wxClientData* clientData );
+    virtual wxClientData* DoGetItemClientObject( int n ) const;
 
-    // From wxControl:
     virtual wxSize DoGetBestSize() const;
 
     // Widgets that use the style->base colour for the BG colour should
@@ -165,4 +186,8 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GTK_COMBOBOX_H_
+#endif
+
+#endif
+
+  // __GTKCOMBOBOXH__

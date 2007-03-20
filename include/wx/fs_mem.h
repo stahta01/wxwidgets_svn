@@ -9,6 +9,17 @@
 #ifndef _WX_FS_MEM_H_
 #define _WX_FS_MEM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+#pragma interface "fs_mem.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_FILESYSTEM
@@ -28,7 +39,7 @@ class WXDLLIMPEXP_BASE wxMemoryFSHandlerBase : public wxFileSystemHandler
 {
 public:
     wxMemoryFSHandlerBase();
-    virtual ~wxMemoryFSHandlerBase();
+    ~wxMemoryFSHandlerBase();
 
     // Add file to list of files stored in memory. Stored data (bitmap, text or
     // raw data) will be copied into private memory stream and available under

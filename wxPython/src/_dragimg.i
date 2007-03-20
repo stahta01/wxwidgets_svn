@@ -95,8 +95,6 @@ public:
 
     // Erase and redraw simultaneously if possible
     virtual bool RedrawImage(const wxPoint& oldPos, const wxPoint& newPos, bool eraseOld, bool drawNew);
-
-    %property(ImageRect, GetImageRect, doc="See `GetImageRect`");
 };
 
 

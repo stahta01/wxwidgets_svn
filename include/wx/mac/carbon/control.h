@@ -12,7 +12,11 @@
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
 
-WXDLLEXPORT_DATA(extern const wxChar) wxControlNameStr[];
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "control.h"
+#endif
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxControlNameStr;
 
 // General item class
 class WXDLLEXPORT wxControl : public wxControlBase
@@ -21,16 +25,16 @@ class WXDLLEXPORT wxControl : public wxControlBase
 
 public:
    wxControl();
-   wxControl(wxWindow *parent, wxWindowID winid,
+   wxControl(wxWindow *parent, wxWindowID id,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize, long style = 0,
              const wxValidator& validator = wxDefaultValidator,
              const wxString& name = wxControlNameStr)
     {
-        Create(parent, winid, pos, size, style, validator, name);
+        Create(parent, id, pos, size, style, validator, name);
     }
 
-    bool Create(wxWindow *parent, wxWindowID winid,
+    bool Create(wxWindow *parent, wxWindowID id,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize, long style = 0,
             const wxValidator& validator = wxDefaultValidator,

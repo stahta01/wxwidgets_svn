@@ -9,27 +9,31 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/font.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/menu.h"
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-    #include "wx/menuitem.h"
-    #include "wx/module.h"
+  #include "wx/window.h"
+  #include "wx/font.h"
+  #include "wx/bitmap.h"
+  #include "wx/dcmemory.h"
+  #include "wx/menu.h"
+  #include "wx/utils.h"
 #endif
 
+#include "wx/settings.h"
 #include "wx/ownerdrw.h"
+#include "wx/menuitem.h"
 #include "wx/fontutil.h"
+#include "wx/module.h"
 
 #if wxUSE_OWNER_DRAWN
 
@@ -108,3 +112,4 @@ bool wxOwnerDrawn::OnDrawItem(wxDC& dc,
 
 
 #endif // wxUSE_OWNER_DRAWN
+

@@ -9,16 +9,21 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+  #pragma implementation
+  #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
-    #include "wx/log.h"
+  #include "wx/wx.h"
+  #include "wx/log.h"
 #endif
 
 #include "wx/colordlg.h"
@@ -42,9 +47,10 @@
 #include "icon4.xpm"
 #include "icon5.xpm"
 
-#ifndef __WXMSW__
-    #include "../sample.xpm"
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXPM__)
+#include "mondrian.xpm"
 #endif
+
 
 // verify that the item is ok and insult the user if it is not
 #define CHECK_ITEM( item ) if ( !item.IsOk() ) {                                 \
@@ -76,7 +82,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     MENU_LINK(SetBgColour)
     MENU_LINK(ResetStyle)
 
-    MENU_LINK(Highlight)
     MENU_LINK(Dump)
 #ifndef NO_MULTIPLE_SELECTION
     MENU_LINK(DumpSelected)
@@ -154,9 +159,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame(wxT("wxTreeCtrl Test"), 50, 50, 450, 600);
 
@@ -182,7 +184,7 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     SetBackgroundColour(wxColour(255, 255, 255));
 
     // Give it an icon
-    SetIcon(wxICON(sample));
+    SetIcon(wxICON(mondrian));
 
 #if wxUSE_MENUS
     // Make a menubar
@@ -264,11 +266,9 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     SetMenuBar(menu_bar);
 #endif // wxUSE_MENUS
 
-    m_panel = new wxPanel(this);
-
 #if wxUSE_LOG
     // create the controls
-    m_textCtrl = new wxTextCtrl(m_panel, wxID_ANY, wxT(""),
+    m_textCtrl = new wxTextCtrl(this, wxID_ANY, wxT(""),
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_MULTILINE | wxSUNKEN_BORDER);
 #endif // wxUSE_LOG
@@ -327,7 +327,7 @@ void MyFrame::CreateTreeWithDefStyle()
 
 void MyFrame::CreateTree(long style)
 {
-    m_treeCtrl = new MyTreeCtrl(m_panel, TreeTest_Ctrl,
+    m_treeCtrl = new MyTreeCtrl(this, TreeTest_Ctrl,
                                 wxDefaultPosition, wxDefaultSize,
                                 style);
     Resize();
@@ -355,20 +355,14 @@ void MyFrame::OnIdle(wxIdleEvent& event)
     if ( m_treeCtrl )
     {
         wxTreeItemId idRoot = m_treeCtrl->GetRootItem();
-        wxString status;
-        if (idRoot.IsOk())
-        {
-            wxTreeItemId idLast = m_treeCtrl->GetLastChild(idRoot);
-            status = wxString::Format(
-                _T("Root/last item is %svisible/%svisible"),
-                m_treeCtrl->IsVisible(idRoot) ? _T("") : _T("not "),
-                idLast.IsOk() && m_treeCtrl->IsVisible(idLast)
-                    ? _T("") : _T("not "));
-        }
-        else
-            status = _T("No root item");
 
-        SetStatusText(status, 1);
+        SetStatusText(wxString::Format
+                      (
+                        _T("Root/last item is %svisible/%svisible"),
+                        m_treeCtrl->IsVisible(idRoot) ? _T("") : _T("not "),
+                        m_treeCtrl->IsVisible(m_treeCtrl->GetLastChild(idRoot))
+                            ? _T("") : _T("not ")
+                      ), 1);
     }
 #endif // wxUSE_STATUSBAR
 
@@ -466,26 +460,6 @@ void MyFrame::DoSort(bool reverse)
     m_treeCtrl->DoSortChildren(item, reverse);
 }
 
-void MyFrame::OnHighlight(wxCommandEvent& WXUNUSED(event))
-{
-    wxTreeItemId id = m_treeCtrl->GetSelection();
-
-    CHECK_ITEM( id );
-
-    wxRect r;
-    if ( !m_treeCtrl->GetBoundingRect(id, r, true /* text, not full row */) )
-    {
-        wxLogMessage(_T("Failed to get bounding item rect"));
-        return;
-    }
-
-    wxClientDC dc(m_treeCtrl);
-    dc.SetBrush(*wxRED);
-    dc.SetPen(*wxTRANSPARENT_PEN);
-    dc.DrawRectangle(r);
-    m_treeCtrl->Update();
-}
-
 void MyFrame::OnDump(wxCommandEvent& WXUNUSED(event))
 {
     wxTreeItemId root = m_treeCtrl->GetSelection();
@@ -507,7 +481,7 @@ void MyFrame::OnDumpSelected(wxCommandEvent& WXUNUSED(event))
     wxArrayTreeItemIds array;
 
     size_t count = m_treeCtrl->GetSelections(array);
-    wxLogMessage(wxT("%u items selected"), unsigned(count));
+    wxLogMessage(wxT("%u items selected"), count);
 
     for ( size_t n = 0; n < count; n++ )
     {
@@ -820,9 +794,9 @@ void MyTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent,
         {
             // at depth 1 elements won't have any more children
             if ( hasChildren )
-                str.Printf(wxT("%s child %u"), wxT("Folder"), unsigned(n + 1));
+                str.Printf(wxT("%s child %d"), wxT("Folder"), n + 1);
             else
-                str.Printf(wxT("%s child %u.%u"), wxT("File"), unsigned(folder), unsigned(n + 1));
+                str.Printf(wxT("%s child %d.%d"), wxT("File"), folder, n + 1);
 
             // here we pass to AppendItem() normal and selected item images (we
             // suppose that selected image follows the normal one in the enum)
@@ -909,33 +883,18 @@ void MyTreeCtrl::GetItemsRecursively(const wxTreeItemId& idParent,
 
 void MyTreeCtrl::DoToggleIcon(const wxTreeItemId& item)
 {
-    int image = (GetItemImage(item) == TreeCtrlIcon_Folder)
-                    ? TreeCtrlIcon_File
-                    : TreeCtrlIcon_Folder;
-    SetItemImage(item, image, wxTreeItemIcon_Normal);
+    int image = GetItemImage(item) == TreeCtrlIcon_Folder ? TreeCtrlIcon_File
+                                                          : TreeCtrlIcon_Folder;
 
-    image = (GetItemImage(item) == TreeCtrlIcon_FolderSelected)
-                    ? TreeCtrlIcon_FileSelected
-                    : TreeCtrlIcon_FolderSelected;
-    SetItemImage(item, image, wxTreeItemIcon_Selected);
+    SetItemImage(item, image);
 }
 
-void MyTreeCtrl::LogEvent(const wxChar *name, const wxTreeEvent& event)
-{
-    wxTreeItemId item = event.GetItem();
-    wxString text;
-    if ( item.IsOk() )
-        text << _T('"') << GetItemText(item).c_str() << _T('"');
-    else
-        text = _T("invalid item");
-    wxLogMessage(wxT("%s(%s)"), name, text.c_str());
-}
 
 // avoid repetition
 #define TREE_EVENT_HANDLER(name)                                 \
 void MyTreeCtrl::name(wxTreeEvent& event)                        \
 {                                                                \
-    LogEvent(_T(#name), event);                                  \
+    wxLogMessage(wxT(#name));                                    \
     SetLastItem(wxTreeItemId());                                 \
     event.Skip();                                                \
 }
@@ -977,6 +936,8 @@ void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
             case WXK_MENU: key = wxT("MENU"); break;
             case WXK_PAUSE: key = wxT("PAUSE"); break;
             case WXK_CAPITAL: key = wxT("CAPITAL"); break;
+            case WXK_PRIOR: key = wxT("PRIOR"); break;
+            case WXK_NEXT: key = wxT("NEXT"); break;
             case WXK_END: key = wxT("END"); break;
             case WXK_HOME: key = wxT("HOME"); break;
             case WXK_LEFT: key = wxT("LEFT"); break;
@@ -1045,6 +1006,7 @@ void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
             case WXK_NUMPAD_UP: key = wxT("NUMPAD_UP"); break;
             case WXK_NUMPAD_RIGHT: key = wxT("NUMPAD_RIGHT"); break;
             case WXK_NUMPAD_DOWN: key = wxT("NUMPAD_DOWN"); break;
+            case WXK_NUMPAD_PRIOR: key = wxT("NUMPAD_PRIOR"); break;
             case WXK_NUMPAD_PAGEUP: key = wxT("NUMPAD_PAGEUP"); break;
             case WXK_NUMPAD_PAGEDOWN: key = wxT("NUMPAD_PAGEDOWN"); break;
             case WXK_NUMPAD_END: key = wxT("NUMPAD_END"); break;
@@ -1093,12 +1055,8 @@ void MyTreeCtrl::OnBeginDrag(wxTreeEvent& event)
     {
         m_draggedItem = event.GetItem();
 
-        wxPoint clientpt = event.GetPoint();
-        wxPoint screenpt = ClientToScreen(clientpt);
-
-        wxLogMessage(wxT("OnBeginDrag: started dragging %s at screen coords (%i,%i)"),
-                     GetItemText(m_draggedItem).c_str(),
-                     screenpt.x, screenpt.y);
+        wxLogMessage(wxT("OnBeginDrag: started dragging %s"),
+                     GetItemText(m_draggedItem).c_str());
 
         event.Allow();
     }
@@ -1208,21 +1166,43 @@ void MyTreeCtrl::OnItemMenu(wxTreeEvent& event)
     wxTreeItemId itemId = event.GetItem();
     MyTreeItemData *item = itemId.IsOk() ? (MyTreeItemData *)GetItemData(itemId)
                                          : NULL;
-    wxPoint clientpt = event.GetPoint();
-    wxPoint screenpt = ClientToScreen(clientpt);
 
-    wxLogMessage(wxT("OnItemMenu for item \"%s\" at screen coords (%i, %i)"), 
-                 item ? item->GetDesc() : _T(""), screenpt.x, screenpt.y);
+    wxLogMessage(wxT("OnItemMenu for item \"%s\""), item ? item->GetDesc()
+                                                         : _T(""));
 
-    ShowMenu(itemId, clientpt);
     event.Skip();
 }
 
 void MyTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
     wxPoint pt = event.GetPosition();
-
+    wxTreeItemId item;
+    if ( !HasFlag(wxTR_MULTIPLE) )
+        item = GetSelection();
     wxLogMessage(wxT("OnContextMenu at screen coords (%i, %i)"), pt.x, pt.y);
+
+    // check if event was generated by keyboard (MSW-specific?)
+    if ( pt.x == -1 && pt.y == -1 ) //(this is how MSW indicates it)
+    {
+        // attempt to guess where to show the menu
+        if ( item.IsOk() )
+        {
+            // if an item was clicked, show menu to the right of it
+            wxRect rect;
+            GetBoundingRect(item, rect, true /* only the label */);
+            pt = wxPoint(rect.GetRight(), rect.GetTop());
+        }
+        else
+        {
+            pt = wxPoint(0, 0);
+        }
+    }
+    else // event was generated by mouse, use supplied coords
+    {
+        pt = ScreenToClient(pt);
+    }
+
+    ShowMenu(item, pt);
 }
 
 void MyTreeCtrl::ShowMenu(wxTreeItemId id, const wxPoint& pt)
@@ -1240,8 +1220,6 @@ void MyTreeCtrl::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 #if wxUSE_MENUS
     wxMenu menu(title);
     menu.Append(TreeTest_About, wxT("&About..."));
-    menu.AppendSeparator();
-    menu.Append(TreeTest_Highlight, wxT("&Highlight item"));
     menu.Append(TreeTest_Dump, wxT("&Dump"));
 
     PopupMenu(&menu, pt);
@@ -1302,6 +1280,6 @@ void MyTreeItemData::ShowInfo(wxTreeCtrl *tree)
                  Bool2String(tree->IsSelected(GetId())),
                  Bool2String(tree->IsExpanded(GetId())),
                  Bool2String(tree->IsBold(GetId())),
-                 unsigned(tree->GetChildrenCount(GetId())),
-                 unsigned(tree->GetChildrenCount(GetId(), false)));
+                 tree->GetChildrenCount(GetId()),
+                 tree->GetChildrenCount(GetId(), false));
 }

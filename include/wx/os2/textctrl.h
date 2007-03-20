@@ -30,7 +30,7 @@ public:
     {
         Create(pParent, vId, rsValue, rPos, rSize, lStyle, rValidator, rsName);
     }
-    virtual ~wxTextCtrl();
+    ~wxTextCtrl();
 
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId
@@ -47,6 +47,7 @@ public:
     // ----------------------------------
     //
     virtual      wxString GetValue(void) const;
+    virtual void SetValue(const wxString& rsValue);
 
     virtual int      GetLineLength(long nLineNo) const;
     virtual wxString GetLineText(long nLineNo) const;
@@ -71,7 +72,7 @@ public:
                         ,long lTo
                        );
 
-    virtual bool DoLoadFile(const wxString& rsFile, int fileType);
+    virtual bool LoadFile(const wxString& rsFile);
 
     virtual void MarkDirty();
     virtual void DiscardEdits(void);
@@ -179,11 +180,6 @@ protected:
     virtual WXDWORD OS2GetStyle( long     lStyle
                                 ,WXDWORD* dwExstyle
                                ) const;
-
-    virtual void DoSetValue(const wxString &value, int flags = 0);
-
-    bool m_bSkipUpdate;
-
 private:
     bool                            m_bIsMLE;
     DECLARE_EVENT_TABLE()

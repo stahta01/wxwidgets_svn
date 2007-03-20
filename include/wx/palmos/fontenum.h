@@ -9,8 +9,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_FONTENUM_PALM_H_
-#define _WX_FONTENUM_PALM_H_
+#ifndef _WX_FONTENUM_H_
+#define _WX_FONTENUM_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fontenum.h"
+#endif
 
 /*
  * wxFontEnumerator: for gathering font information
@@ -37,4 +41,5 @@ protected:
 };
 
 #endif
-  // _WX_FONTENUM_PALM_H_
+  // _WX_FONTENUM_H_
+

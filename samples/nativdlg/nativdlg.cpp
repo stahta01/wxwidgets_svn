@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        samples/nativdlg/nativdlg.cpp
+// Name:        nativdlg.cpp
 // Purpose:     Native Windows dialog sample
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -32,9 +36,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-  if ( !wxApp::OnInit() )
-    return false;
-
   // Create the main frame window
   MyFrame   *frame = new MyFrame(NULL, wxID_ANY, _T("wxWidgets Native Dialog Sample"), wxPoint(0, 0), wxSize(300, 250));
 
@@ -85,7 +86,7 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 {
-#if ( defined(__WXPM__) || defined(__WXMSW__) ) && !defined(__WXUNIVERSAL__)
+#if ( defined(__WXOS2__) || defined(__WXMSW__) ) && !defined(__WXUNIVERSAL__)
     MyDialog dialog;
     if (dialog.LoadNativeDialog(this, _T("dialog1")))
     {
@@ -111,3 +112,5 @@ void MyDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
   EndModal(wxID_CANCEL);
 }
+
+

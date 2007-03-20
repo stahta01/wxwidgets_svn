@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statbr95.cpp
+// Name:        msw/statbr95.cpp
 // Purpose:     native implementation of wxStatusBar
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbr95.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -16,21 +20,25 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
-
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
-    #include "wx/frame.h"
-    #include "wx/settings.h"
-    #include "wx/dcclient.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
+  #include "wx/setup.h"
+  #include "wx/frame.h"
+  #include "wx/settings.h"
+  #include "wx/dcclient.h"
 #endif
+
+#if wxUSE_STATUSBAR && defined(__WIN95__) && wxUSE_NATIVE_STATUSBAR
+
+#include "wx/intl.h"
+#include "wx/log.h"
+#include "wx/statusbr.h"
 
 #include "wx/msw/private.h"
 #include <windowsx.h>
+
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 #if wxUSE_UXTHEME
     #include "wx/msw/uxtheme.h"
@@ -188,12 +196,6 @@ void wxStatusBar95::SetStatusText(const wxString& strText, int nField)
 {
     wxCHECK_RET( (nField >= 0) && (nField < m_nFields),
                  _T("invalid statusbar field index") );
-
-    if ( strText == GetStatusText(nField) )
-    {
-       // don't call StatusBar_SetText() to avoid flicker
-       return;
-    }
 
     // Get field style, if any
     int style;
@@ -411,4 +413,5 @@ wxStatusBar95::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
     return wxStatusBarBase::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATUSBAR && wxUSE_NATIVE_STATUSBAR
+#endif // __WIN95__ && wxUSE_NATIVE_STATUSBAR
+

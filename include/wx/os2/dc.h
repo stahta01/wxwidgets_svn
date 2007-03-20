@@ -84,7 +84,7 @@ public:
     wxDCCacheEntry( HPS   hPS
                    ,int   nDepth
                   );
-    virtual ~wxDCCacheEntry();
+    ~wxDCCacheEntry();
 
     WXHBITMAP                       m_hBitmap;
     HPS                             m_hPS;
@@ -100,7 +100,7 @@ class WXDLLEXPORT wxDC : public wxDCBase
 
 public:
     wxDC(void);
-    virtual ~wxDC();
+    ~wxDC();
 
     // implement base class pure virtuals
     // ----------------------------------

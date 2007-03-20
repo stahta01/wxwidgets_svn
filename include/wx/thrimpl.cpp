@@ -44,14 +44,6 @@ wxMutexError wxMutex::Lock()
     return m_internal->Lock();
 }
 
-wxMutexError wxMutex::LockTimeout(unsigned long ms)
-{
-    wxCHECK_MSG( m_internal, wxMUTEX_INVALID,
-                 _T("wxMutex::Lock(): not initialized") );
-
-    return m_internal->Lock(ms);
-}
-
 wxMutexError wxMutex::TryLock()
 {
     wxCHECK_MSG( m_internal, wxMUTEX_INVALID,
@@ -72,11 +64,19 @@ wxMutexError wxMutex::Unlock()
 // wxConditionInternal
 // --------------------------------------------------------------------------
 
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__EMX__)
 // Win32 and OS/2 don't have explicit support for the POSIX condition
 // variables and their events/event semaphores have quite different semantics,
 // so we reimplement the conditions from scratch using the mutexes and
 // semaphores
-#if defined(__WXMSW__) || defined(__OS2__) || defined(__EMX__)
+#if defined(__WXPM__) || defined(__EMX__)
+void InterlockedIncrement(LONG *num)
+{
+  ::DosEnterCritSec();
+  (*num)++;
+  ::DosExitCritSec();
+}
+#endif
 
 class wxConditionInternal
 {
@@ -115,41 +115,30 @@ wxConditionInternal::wxConditionInternal(wxMutex& mutex)
 wxCondError wxConditionInternal::Wait()
 {
     // increment the number of waiters
-    {
-        wxCriticalSectionLocker lock(m_csWaiters);
-        m_numWaiters++;
-    }
+    ::InterlockedIncrement(&m_numWaiters);
 
     m_mutex.Unlock();
 
     // a potential race condition can occur here
     //
-    // after a thread increments m_numWaiters, and unlocks the mutex and before
-    // the semaphore.Wait() is called, if another thread can cause a signal to
-    // be generated
+    // after a thread increments nwaiters, and unlocks the mutex and before the
+    // semaphore.Wait() is called, if another thread can cause a signal to be
+    // generated
     //
     // this race condition is handled by using a semaphore and incrementing the
-    // semaphore only if m_numWaiters is greater that zero since the semaphore,
+    // semaphore only if 'nwaiters' is greater that zero since the semaphore,
     // can 'remember' signals the race condition will not occur
 
     // wait ( if necessary ) and decrement semaphore
     wxSemaError err = m_semaphore.Wait();
     m_mutex.Lock();
 
-    if ( err == wxSEMA_NO_ERROR )
-        return wxCOND_NO_ERROR;
-    else if ( err == wxSEMA_TIMEOUT )
-        return wxCOND_TIMEOUT;
-    else
-        return wxCOND_MISC_ERROR;
+    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR : wxCOND_MISC_ERROR;
 }
 
 wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 {
-    {
-        wxCriticalSectionLocker lock(m_csWaiters);
-        m_numWaiters++;
-    }
+    ::InterlockedIncrement(&m_numWaiters);
 
     m_mutex.Unlock();
 
@@ -159,25 +148,25 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     wxSemaError err = m_semaphore.WaitTimeout(milliseconds);
 
-    if ( err == wxSEMA_TIMEOUT )
+    if ( err == wxSEMA_BUSY )
     {
         // another potential race condition exists here it is caused when a
-        // 'waiting' thread times out, and returns from WaitForSingleObject,
-        // but has not yet decremented m_numWaiters
+        // 'waiting' thread timesout, and returns from WaitForSingleObject, but
+        // has not yet decremented 'nwaiters'.
         //
         // at this point if another thread calls signal() then the semaphore
         // will be incremented, but the waiting thread will miss it.
         //
         // to handle this particular case, the waiting thread calls
         // WaitForSingleObject again with a timeout of 0, after locking
-        // m_csWaiters. This call does not block because of the zero
+        // 'nwaiters_mutex'. this call does not block because of the zero
         // timeout, but will allow the waiting thread to catch the missed
         // signals.
         wxCriticalSectionLocker lock(m_csWaiters);
 
-        wxSemaError err2 = m_semaphore.WaitTimeout(0);
+        err = m_semaphore.WaitTimeout(0);
 
-        if ( err2 != wxSEMA_NO_ERROR )
+        if ( err != wxSEMA_NO_ERROR )
         {
             m_numWaiters--;
         }
@@ -185,9 +174,12 @@ wxCondError wxConditionInternal::WaitTimeout(unsigned long milliseconds)
 
     m_mutex.Lock();
 
-    return err == wxSEMA_NO_ERROR ? wxCOND_NO_ERROR
-                                  : err == wxSEMA_TIMEOUT ? wxCOND_TIMEOUT
-                                                          : wxCOND_MISC_ERROR;
+    if ( err == wxSEMA_NO_ERROR )
+        return wxCOND_NO_ERROR;
+    else if ( err == wxSEMA_TIMEOUT )
+        return wxCOND_TIMEOUT;
+    else
+        return wxCOND_MISC_ERROR;
 }
 
 wxCondError wxConditionInternal::Signal()
@@ -220,8 +212,7 @@ wxCondError wxConditionInternal::Broadcast()
 
     return wxCOND_NO_ERROR;
 }
-
-#endif // MSW or OS2
+#endif
 
 // ----------------------------------------------------------------------------
 // wxCondition

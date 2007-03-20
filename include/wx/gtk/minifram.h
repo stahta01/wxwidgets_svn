@@ -10,12 +10,15 @@
 #ifndef __GTKMINIFRAMEH__
 #define __GTKMINIFRAMEH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_MINIFRAME
 
 #include "wx/object.h"
-#include "wx/bitmap.h"
 #include "wx/frame.h"
 
 //-----------------------------------------------------------------------------
@@ -39,7 +42,7 @@ public:
             const wxString& title,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = wxCAPTION | wxRESIZE_BORDER,
+            long style = wxDEFAULT_FRAME_STYLE | wxTINY_CAPTION_HORIZ,
             const wxString& name = wxFrameNameStr)
     {
         Create(parent, id, title, pos, size, style, name);
@@ -50,7 +53,7 @@ public:
             const wxString& title,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = wxCAPTION | wxRESIZE_BORDER,
+            long style = wxDEFAULT_FRAME_STYLE | wxTINY_CAPTION_HORIZ,
             const wxString& name = wxFrameNameStr);
 
     virtual void SetTitle( const wxString &title );
@@ -59,7 +62,6 @@ public:
     bool   m_isDragging;
     int    m_oldX,m_oldY;
     int    m_diffX,m_diffY;
-    wxBitmap  m_closeButton;
 };
 
 #endif

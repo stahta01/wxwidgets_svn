@@ -40,27 +40,6 @@ enum wxRegionContain
 };
 
 
-// // these constants are used with wxRegion::Combine() in the ports which have
-// // this method
-// enum wxRegionOp
-// {
-//     // Creates the intersection of the two combined regions.
-//     wxRGN_AND,
-
-//     // Creates a copy of the region
-//     wxRGN_COPY,
-
-//     // Combines the parts of first region that are not in the second one
-//     wxRGN_DIFF,
-
-//     // Creates the union of two combined regions.
-//     wxRGN_OR,
-
-//     // Creates the union of two regions except for any overlapping areas.
-//     wxRGN_XOR
-// };
-
-
 
 MustHaveApp(wxRegion);
 
@@ -93,9 +72,6 @@ public:
 
     bool IsEmpty();
 
-    // Is region equal (i.e. covers the same area as another one)?
-    bool IsEqual(const wxRegion& region) const;
-
     bool Union(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
     %Rename(UnionRect, bool, Union(const wxRect& rect));
     %Rename(UnionRegion, bool, Union(const wxRegion& region));
@@ -120,13 +96,6 @@ public:
     %Rename(UnionBitmapColour, bool, Union(const wxBitmap& bmp,
                                            const wxColour& transColour,
                                            int   tolerance = 0));
-
-
-//     bool Combine(wxCoord x, wxCoord y, wxCoord w, wxCoord h, wxRegionOp op);
-//     %Rename(CombineRect, bool , Combine(const wxRect& rect, wxRegionOp op));
-//     %Rename(CombineRegion, bool , Combine(const wxRegion& region, wxRegionOp op));
-    
-    %property(Box, GetBox, doc="See `GetBox`");    
 };
 
 
@@ -157,14 +126,6 @@ public:
             return self->operator bool();
         }
     };
-
-    %property(H, GetH, doc="See `GetH`");
-    %property(Height, GetHeight, doc="See `GetHeight`");
-    %property(Rect, GetRect, doc="See `GetRect`");
-    %property(W, GetW, doc="See `GetW`");
-    %property(Width, GetWidth, doc="See `GetWidth`");
-    %property(X, GetX, doc="See `GetX`");
-    %property(Y, GetY, doc="See `GetY`");
 };
 
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/bmpbuttn.cpp
+// Name:        univ/bmpbuttn.cpp
 // Purpose:     wxBitmapButton implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univbmpbuttn.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,10 +29,9 @@
 
 #if wxUSE_BMPBUTTON
 
-#include "wx/bmpbuttn.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dc.h"
+    #include "wx/bmpbuttn.h"
     #include "wx/validate.h"
 #endif
 
@@ -96,12 +99,14 @@ void wxBitmapButton::OnSetBitmap()
 bool wxBitmapButton::ChangeBitmap(const wxBitmap& bmp)
 {
     wxBitmap bitmap = bmp.Ok() ? bmp : m_bmpNormal;
-    if ( bitmap.IsSameAs(m_bitmap) )
-        return false;
+    if ( bitmap != m_bitmap )
+    {
+        m_bitmap = bitmap;
 
-    m_bitmap = bitmap;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool wxBitmapButton::Enable(bool enable)
@@ -153,3 +158,4 @@ void wxBitmapButton::Release()
 }
 
 #endif // wxUSE_BMPBUTTON
+

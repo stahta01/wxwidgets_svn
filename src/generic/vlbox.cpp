@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/vlbox.cpp
+// Name:        generic/vlbox.cpp
 // Purpose:     implementation of wxVListBox
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -26,17 +26,15 @@
 
 #if wxUSE_LISTBOX
 
-#include "wx/vlbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcclient.h"
-    #include "wx/listbox.h"
 #endif //WX_PRECOMP
 
+#include "wx/vlbox.h"
 #include "wx/dcbuffer.h"
 #include "wx/selstore.h"
-#include "wx/renderer.h"
+#include "wx/bitmap.h"
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -48,9 +46,6 @@ BEGIN_EVENT_TABLE(wxVListBox, wxVScrolledWindow)
     EVT_KEY_DOWN(wxVListBox::OnKeyDown)
     EVT_LEFT_DOWN(wxVListBox::OnLeftDown)
     EVT_LEFT_DCLICK(wxVListBox::OnLeftDClick)
-
-    EVT_SET_FOCUS(wxVListBox::OnSetOrKillFocus)
-    EVT_KILL_FOCUS(wxVListBox::OnSetOrKillFocus)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -62,6 +57,11 @@ IMPLEMENT_ABSTRACT_CLASS(wxVListBox, wxVScrolledWindow)
 // ----------------------------------------------------------------------------
 // wxVListBox creation
 // ----------------------------------------------------------------------------
+
+// due to ABI compatibility reasons, we need to declare double-buffer
+// outside the class
+static wxBitmap* gs_doubleBuffer = NULL;
+
 
 void wxVListBox::Init()
 {
@@ -87,10 +87,7 @@ bool wxVListBox::Create(wxWindow *parent,
     // make sure the native widget has the right colour since we do
     // transparent drawing by default
     SetBackgroundColour(GetBackgroundColour());
-
-    // leave m_colBgSel in an invalid state: it means for OnDrawBackground()
-    // to use wxRendererNative instead of painting selection bg ourselves
-    m_colBgSel = wxNullColour;
+    m_colBgSel = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 
     // flicker-free drawing requires this
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
@@ -101,6 +98,9 @@ bool wxVListBox::Create(wxWindow *parent,
 wxVListBox::~wxVListBox()
 {
     delete m_selStore;
+
+    delete gs_doubleBuffer;
+    gs_doubleBuffer = NULL;
 }
 
 void wxVListBox::SetItemCount(size_t count)
@@ -238,7 +238,7 @@ bool wxVListBox::DoSetCurrent(int current)
             // it is, indeed, only partly visible, so scroll it into view to
             // make it entirely visible
             while ( (size_t)m_current == GetLastVisibleLine() &&
-                    ScrollToLine(GetVisibleBegin()+1) ) ;
+                    ScrollToLine(GetVisibleBegin()+1) );
 
             // but in any case refresh it as even if it was only partly visible
             // before we need to redraw it entirely as its background changed
@@ -306,16 +306,6 @@ int wxVListBox::GetNextSelected(unsigned long& cookie) const
     return wxNOT_FOUND;
 }
 
-void wxVListBox::RefreshSelected()
-{
-    // only refresh those items which are currently visible and selected:
-    for ( size_t n = GetVisibleBegin(), end = GetVisibleEnd(); n < end; n++ )
-    {
-        if ( IsSelected(n) )
-            RefreshLine(n);
-    }
-}
-
 // ----------------------------------------------------------------------------
 // wxVListBox appearance parameters
 // ----------------------------------------------------------------------------
@@ -352,46 +342,41 @@ void wxVListBox::OnDrawSeparator(wxDC& WXUNUSED(dc),
 
 void wxVListBox::OnDrawBackground(wxDC& dc, const wxRect& rect, size_t n) const
 {
-    if ( m_colBgSel.IsOk() )
+    // we need to render selected and current items differently
+    const bool isSelected = IsSelected(n),
+               isCurrent = IsCurrent(n);
+    if ( isSelected || isCurrent )
     {
-        // we need to render selected and current items differently
-        const bool isSelected = IsSelected(n),
-                   isCurrent = IsCurrent(n);
-        if ( isSelected || isCurrent )
+        if ( isSelected )
         {
-            if ( isSelected )
-            {
-                dc.SetBrush(wxBrush(m_colBgSel, wxSOLID));
-            }
-            else // !selected
-            {
-                dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            }
-            dc.SetPen(*(isCurrent ? wxBLACK_PEN : wxTRANSPARENT_PEN));
-            dc.DrawRectangle(rect);
+            dc.SetBrush(wxBrush(m_colBgSel, wxSOLID));
         }
-        //else: do nothing for the normal items
-    }
-    else // use wxRendererNative for a more native look&feel:
-    {
-        int flags = 0;
-        if ( IsSelected(n) )
-            flags |= wxCONTROL_SELECTED;
-        if ( IsCurrent(n) )
-            flags |= wxCONTROL_CURRENT;
-        if ( wxWindow::FindFocus() == wx_const_cast(wxVListBox*, this) )
-            flags |= wxCONTROL_FOCUSED;
+        else // !selected
+        {
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        }
 
-        wxRendererNative::Get().DrawItemSelectionRect(
-            wx_const_cast(wxVListBox *, this), dc, rect, flags);
+        dc.SetPen(*(isCurrent ? wxBLACK_PEN : wxTRANSPARENT_PEN));
+
+        dc.DrawRectangle(rect);
     }
+    //else: do nothing for the normal items
 }
 
 void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
+    // If size is larger, recalculate double buffer bitmap
     wxSize clientSize = GetClientSize();
 
-    wxAutoBufferedPaintDC dc(this);
+    if ( !gs_doubleBuffer ||
+         clientSize.x > gs_doubleBuffer->GetWidth() ||
+         clientSize.y > gs_doubleBuffer->GetHeight() )
+    {
+        delete gs_doubleBuffer;
+        gs_doubleBuffer = new wxBitmap(clientSize.x+25,clientSize.y+25);
+    }
+
+    wxBufferedPaintDC dc(this,*gs_doubleBuffer);
 
     // the update rectangle
     wxRect rectUpdate = GetUpdateClientRect();
@@ -405,8 +390,8 @@ void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
     rectLine.width = clientSize.x;
 
     // iterate over all visible lines
-    const size_t lineMax = GetVisibleEnd();
-    for ( size_t line = GetFirstVisibleLine(); line < lineMax; line++ )
+    const size_t lineMax = GetLastVisibleLine();
+    for ( size_t line = GetFirstVisibleLine(); line <= lineMax; line++ )
     {
         const wxCoord hLine = OnGetLineHeight(line);
 
@@ -440,15 +425,6 @@ void wxVListBox::OnPaint(wxPaintEvent& WXUNUSED(event))
         rectLine.y += hLine;
     }
 }
-
-void wxVListBox::OnSetOrKillFocus(wxFocusEvent& WXUNUSED(event))
-{
-    // we need to repaint the selection when we get the focus since
-    // wxRendererNative in general draws the focused selection differently
-    // from the unfocused selection (see OnDrawItem):
-    RefreshSelected();
-}
-
 
 // ============================================================================
 // wxVListBox keyboard/mouse handling
@@ -572,11 +548,13 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
             break;
 
         case WXK_PAGEDOWN:
+        case WXK_NEXT:
             PageDown();
             current = GetFirstVisibleLine();
             break;
 
         case WXK_PAGEUP:
+        case WXK_PRIOR:
             if ( m_current == (int)GetFirstVisibleLine() )
             {
                 PageUp();
@@ -670,7 +648,7 @@ void wxVListBox::OnLeftDClick(wxMouseEvent& eventMouse)
         {
             OnLeftDown(eventMouse);
         }
-
+    
     }
 }
 
@@ -678,6 +656,8 @@ void wxVListBox::OnLeftDClick(wxMouseEvent& eventMouse)
 // ----------------------------------------------------------------------------
 // use the same default attributes as wxListBox
 // ----------------------------------------------------------------------------
+
+#include "wx/listbox.h"
 
 //static
 wxVisualAttributes

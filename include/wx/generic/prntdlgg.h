@@ -13,6 +13,10 @@
 #ifndef __PRINTDLGH_G_
 #define __PRINTDLGH_G_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "prntdlgg.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -86,8 +90,7 @@ public:
     virtual bool TransferTo( wxPrintData &data );
     virtual bool TransferFrom( const wxPrintData &data );
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const { return true; }
+    virtual bool Ok() const { return true; }
 
     const wxString& GetPrinterCommand() const { return m_printerCommand; }
     const wxString& GetPrinterOptions() const { return m_printerOptions; }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/brush.h
+// Name:        brush.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,11 +7,25 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_BRUSH_H_
-#define _WX_GTK_BRUSH_H_
 
-class WXDLLIMPEXP_CORE wxBitmap;
-class WXDLLIMPEXP_CORE wxColour;
+#ifndef __GTKBRUSHH__
+#define __GTKBRUSHH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/string.h"
+#include "wx/gdiobj.h"
+#include "wx/bitmap.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxBrush;
 
 //-----------------------------------------------------------------------------
 // wxBrush
@@ -24,10 +38,14 @@ public:
 
     wxBrush( const wxColour &colour, int style = wxSOLID );
     wxBrush( const wxBitmap &stippleBitmap );
-    virtual ~wxBrush();
+    ~wxBrush();
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_refData != NULL; }
+    wxBrush( const wxBrush &brush )
+        : wxBrushBase()
+        { Ref(brush); }
+    wxBrush& operator = ( const wxBrush& brush ) { Ref(brush); return *this; }
+
+    bool Ok() const { return m_refData != NULL; }
 
     bool operator == ( const wxBrush& brush ) const;
     bool operator != (const wxBrush& brush) const { return !(*this == brush); }
@@ -41,7 +59,7 @@ public:
     void SetStyle( int style );
     void SetStipple( const wxBitmap& stipple );
 
-protected:
+private:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
@@ -49,4 +67,4 @@ protected:
     DECLARE_DYNAMIC_CLASS(wxBrush)
 };
 
-#endif // _WX_GTK_BRUSH_H_
+#endif // __GTKBRUSHH__

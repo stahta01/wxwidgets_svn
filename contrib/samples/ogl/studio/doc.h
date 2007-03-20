@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/doc.h
+// Name:        doc.h
 // Purpose:     Document classes
 // Author:      Julian Smart
 // Modified by:
@@ -12,11 +12,15 @@
 #ifndef _STUDIO_DOC_H_
 #define _STUDIO_DOC_H_
 
-#include "wx/docview.h"
-#include "wx/cmdproc.h"
-#include "wx/string.h"
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface
+#endif
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/docview.h>
+#include <wx/cmdproc.h>
+#include <wx/string.h>
+
+#include <wx/ogl/ogl.h> // base header of OGL, includes and adjusts wx/deprecated/setup.h
 
 #include "shapes.h"
 

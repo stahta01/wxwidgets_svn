@@ -21,6 +21,10 @@
 
 #include "wx/defs.h"
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "dbtable.h"
+#endif
+
 #include "wx/db.h"
 
 #include "wx/variant.h"
@@ -179,6 +183,14 @@ public:
     wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
               const wxString &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY,
               const wxString &tblPath=wxEmptyString);
+
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED(
+        wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
+                  const wxChar *qryTblName, bool qryOnly,
+                  const wxString &tblPath)
+    );
+#endif // WXWIN_COMPATIBILITY_2_4
 
     virtual ~wxDbTable();
 

@@ -21,6 +21,8 @@
     #include "wx/wx.h"
 #endif // WX_PRECOMP
 
+#include "wx/tokenzr.h"
+
 // ----------------------------------------------------------------------------
 // test class
 // ----------------------------------------------------------------------------
@@ -36,46 +38,57 @@ private:
         CPPUNIT_TEST( PChar );
         CPPUNIT_TEST( Format );
         CPPUNIT_TEST( Constructors );
+#if wxUSE_WCHAR_T
+        CPPUNIT_TEST( ConstructorsWithConversion );
+        CPPUNIT_TEST( Conversion );
+        CPPUNIT_TEST( ConversionUTF7 );
+        CPPUNIT_TEST( ConversionUTF8 );
+#endif // wxUSE_WCHAR_T
         CPPUNIT_TEST( Extraction );
-        CPPUNIT_TEST( Trim );
         CPPUNIT_TEST( Find );
+        CPPUNIT_TEST( Tokenizer );
+        CPPUNIT_TEST( TokenizerGetPosition );
         CPPUNIT_TEST( Replace );
         CPPUNIT_TEST( Match );
         CPPUNIT_TEST( CaseChanges );
         CPPUNIT_TEST( Compare );
         CPPUNIT_TEST( CompareNoCase );
-        CPPUNIT_TEST( Contains );
         CPPUNIT_TEST( ToLong );
         CPPUNIT_TEST( ToULong );
-#ifdef wxLongLong_t
-        CPPUNIT_TEST( ToLongLong );
-        CPPUNIT_TEST( ToULongLong );
-#endif // wxLongLong_t
         CPPUNIT_TEST( ToDouble );
-        CPPUNIT_TEST( WriteBuf );
     CPPUNIT_TEST_SUITE_END();
 
     void String();
     void PChar();
     void Format();
     void Constructors();
+#if wxUSE_WCHAR_T
+    void ConstructorsWithConversion();
+    void Conversion();
+    void ConversionUTF7();
+    void ConversionUTF8();
+#endif // wxUSE_WCHAR_T
     void Extraction();
-    void Trim();
     void Find();
+    void SingleTokenizerTest( wxChar *str, wxChar *delims, size_t count , wxStringTokenizerMode mode );
+    void Tokenizer();
+    void TokenizerGetPosition();
     void Replace();
     void Match();
     void CaseChanges();
     void Compare();
     void CompareNoCase();
-    void Contains();
     void ToLong();
     void ToULong();
-#ifdef wxLongLong_t
-    void ToLongLong();
-    void ToULongLong();
-#endif // wxLongLong_t
     void ToDouble();
-    void WriteBuf();
+
+#if wxUSE_WCHAR_T
+    // test if converting s using the given encoding gives ws and vice versa
+    //
+    // if either of the first 2 arguments is NULL, the conversion is supposed
+    // to fail
+    void DoTestConversion(const char *s, const wchar_t *w, wxCSConv& conv);
+#endif // wxUSE_WCHAR_T
 
     DECLARE_NO_COPY_CLASS(StringTestCase)
 };
@@ -135,15 +148,6 @@ void StringTestCase::Format()
     CPPUNIT_ASSERT( s1 == wxString::Format(_T("%03d"), 18) );
     s2.Printf(_T("Number 18: %s\n"), s1.c_str());
     CPPUNIT_ASSERT( s2 == wxString::Format(_T("Number 18: %s\n"), s1.c_str()) );
-
-    static const size_t lengths[] = { 1, 512, 1024, 1025, 2048, 4096, 4097 };
-    for ( size_t n = 0; n < WXSIZEOF(lengths); n++ )
-    {
-        const size_t len = lengths[n];
-
-        wxString s(_T('Z'), len);
-        CPPUNIT_ASSERT_EQUAL( len, wxString::Format(_T("%s"), s.c_str()).length());
-    }
 }
 
 void StringTestCase::Constructors()
@@ -164,6 +168,165 @@ void StringTestCase::Constructors()
     TEST_CTOR((start, end), _T("really"));
 }
 
+#if wxUSE_WCHAR_T
+void StringTestCase::ConstructorsWithConversion()
+{
+    // the string "Déjà" in UTF-8 and wchar_t:
+    const unsigned char utf8Buf[] = {0x44,0xC3,0xA9,0x6A,0xC3,0xA0,0};
+    const wchar_t wchar[] = {0x44,0xE9,0x6A,0xE0,0};
+    const unsigned char utf8subBuf[] = {0x44,0xC3,0xA9,0x6A,0}; // just "Déj"
+    const char *utf8 = (char *)utf8Buf;
+    const char *utf8sub = (char *)utf8subBuf;
+
+    wxString s1(utf8, wxConvUTF8);
+    wxString s2(wchar, wxConvUTF8);
+
+#if wxUSE_UNICODE
+    CPPUNIT_ASSERT( s1 == wchar );
+    CPPUNIT_ASSERT( s2 == wchar );
+#else
+    CPPUNIT_ASSERT( s1 == utf8 );
+    CPPUNIT_ASSERT( s2 == utf8 );
+#endif
+
+    wxString sub(utf8sub, wxConvUTF8); // "Dej" substring
+    wxString s3(utf8, wxConvUTF8, 4);
+    wxString s4(wchar, wxConvUTF8, 3);
+
+    CPPUNIT_ASSERT( s3 == sub );
+    CPPUNIT_ASSERT( s4 == sub );
+
+#if wxUSE_UNICODE
+    CPPUNIT_ASSERT ( wxString("\t[pl]open.format.Sformatuj dyskietkê=gfloppy %f", 
+                               wxConvUTF8) == wxT("") ); //should stop at pos 35 
+#endif
+}
+
+void StringTestCase::Conversion()
+{
+#if wxUSE_UNICODE
+        wxString szTheString(L"The\0String", wxConvLibc, 10);
+        wxCharBuffer theBuffer = szTheString.mb_str();
+
+        CPPUNIT_ASSERT( memcmp(theBuffer.data(), "The\0String", 11) == 0 );
+
+        wxString szTheString2("The\0String", wxConvLocal, 10);
+        CPPUNIT_ASSERT( szTheString2.length() == 11 );
+        CPPUNIT_ASSERT( wxTmemcmp(szTheString2.c_str(), L"The\0String", 11) == 0 );
+#else
+        wxString szTheString(wxT("TheString"));
+        szTheString.insert(3, 1, '\0');
+        wxWCharBuffer theBuffer = szTheString.wc_str(wxConvLibc);
+
+        CPPUNIT_ASSERT( memcmp(theBuffer.data(), L"The\0String", 11 * sizeof(wchar_t)) == 0 );
+
+        wxString szLocalTheString(wxT("TheString"));
+        szLocalTheString.insert(3, 1, '\0');
+        wxWCharBuffer theLocalBuffer = szLocalTheString.wc_str(wxConvLocal);
+
+        CPPUNIT_ASSERT( memcmp(theLocalBuffer.data(), L"The\0String", 11 * sizeof(wchar_t)) == 0 );
+#endif
+}
+
+#if !wxUSE_UNICODE
+// in case wcscmp is missing
+//
+static int wx_wcscmp(const wchar_t *s1, const wchar_t *s2)
+{
+    while (*s1 == *s2 && *s1 != 0)
+    {
+        s1++;
+        s2++;
+    }
+    return *s1 - *s2;
+}
+#endif
+
+void
+StringTestCase::DoTestConversion(const char *s,
+                                 const wchar_t *ws,
+                                 wxCSConv& conv)
+{
+#if wxUSE_UNICODE
+    if ( ws )
+    {
+        wxCharBuffer buf(wxString(ws).mb_str(conv));
+
+        CPPUNIT_ASSERT( strcmp(buf, s) == 0 );
+    }
+#else // wxUSE_UNICODE
+    if ( s )
+    {
+        wxWCharBuffer wbuf(wxString(s).wc_str(conv));
+
+        if ( ws )
+            CPPUNIT_ASSERT( wx_wcscmp(wbuf, ws) == 0 );
+        else
+            CPPUNIT_ASSERT( !*wbuf );
+    }
+#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+}
+
+struct StringConversionData
+{
+    const char *str;
+    const wchar_t *wcs;
+};
+
+void StringTestCase::ConversionUTF7()
+{
+    static const StringConversionData utf7data[] =
+    {
+        { "+-", L"+" },
+        { "+--", L"+-" },
+        //\u isn't recognized on MSVC 6
+#if !defined(_MSC_VER)
+#if !defined(__GNUC__) || (__GNUC__ >= 3)
+        { "+AKM-", L"\u00a3" },
+#endif
+#endif
+        // Windows accepts invalid UTF-7 strings and so does our UTF-7
+        // conversion code -- this is wrong IMO but the way it is for now
+        //
+        // notice that converting "+" still behaves as expected because the
+        // result is just an empty string, i.e. the same as if there were an
+        // error, but converting "a+" results in "a" while it really should
+        // fail
+        { "+", NULL },
+        { "a+", L"a" },
+    };
+
+    wxCSConv conv(_T("utf-7"));
+    for ( size_t n = 0; n < WXSIZEOF(utf7data); n++ )
+    {
+        const StringConversionData& d = utf7data[n];
+        DoTestConversion(d.str, d.wcs, conv);
+    }
+}
+
+void StringTestCase::ConversionUTF8()
+{
+    static const StringConversionData utf8data[] =
+    {
+        //\u isn't recognized on MSVC 6
+#if !defined(_MSC_VER)
+#if !defined(__GNUC__) || (__GNUC__ >= 3)
+        { "\xc2\xa3", L"\u00a3" },
+#endif
+#endif
+        { "\xc2", NULL },
+    };
+
+    wxCSConv conv(_T("utf-8"));
+    for ( size_t n = 0; n < WXSIZEOF(utf8data); n++ )
+    {
+        const StringConversionData& d = utf8data[n];
+        DoTestConversion(d.str, d.wcs, conv);
+    }
+}
+
+#endif // wxUSE_WCHAR_T
+
 
 void StringTestCase::Extraction()
 {
@@ -179,10 +342,11 @@ void StringTestCase::Extraction()
 
     wxString rest;
 
-    #define TEST_STARTS_WITH(prefix, correct_rest, result)                    \
-        CPPUNIT_ASSERT_EQUAL(result, s.StartsWith(prefix, &rest));            \
-        if ( result )                                                         \
-            CPPUNIT_ASSERT_EQUAL(wxString(correct_rest), rest)
+    #define TEST_STARTS_WITH( prefix , correct_rest, result ) \
+        CPPUNIT_ASSERT( \
+            ( s.StartsWith( prefix, &rest ) == result ) && \
+            ( ( result == false ) || ( wxStrcmp( correct_rest , rest ) == 0 ) ) \
+        )
 
     TEST_STARTS_WITH( _T("Hello"),           _T(", world!"),      true  );
     TEST_STARTS_WITH( _T("Hello, "),         _T("world!"),        true  );
@@ -193,41 +357,6 @@ void StringTestCase::Extraction()
     TEST_STARTS_WITH( _T("Hi"),              _T(""),              false );
 
     #undef TEST_STARTS_WITH
-
-    #define TEST_ENDS_WITH(suffix, correct_rest, result)                      \
-        CPPUNIT_ASSERT_EQUAL(result, s.EndsWith(suffix, &rest));              \
-        if ( result )                                                         \
-            CPPUNIT_ASSERT_EQUAL(wxString(correct_rest), rest)
-
-    TEST_ENDS_WITH( _T(""),                 _T("Hello, world!"), true  );
-    TEST_ENDS_WITH( _T("!"),                _T("Hello, world"),  true  );
-    TEST_ENDS_WITH( _T(", world!"),         _T("Hello"),         true  );
-    TEST_ENDS_WITH( _T("ello, world!"),     _T("H"),             true  );
-    TEST_ENDS_WITH( _T("Hello, world!"),    _T(""),              true  );
-    TEST_ENDS_WITH( _T("very long string"), _T(""),              false );
-    TEST_ENDS_WITH( _T("?"),                _T(""),              false );
-    TEST_ENDS_WITH( _T("Hello, world"),     _T(""),              false );
-    TEST_ENDS_WITH( _T("Gello, world!"),    _T(""),              false );
-
-    #undef TEST_ENDS_WITH
-}
-
-void StringTestCase::Trim()
-{
-    #define TEST_TRIM( str , dir , result )  \
-        CPPUNIT_ASSERT( wxString(str).Trim(dir) == result )
-
-    TEST_TRIM( _T("  Test  "),  true, _T("  Test") );
-    TEST_TRIM( _T("    "),      true, _T("")       );
-    TEST_TRIM( _T(" "),         true, _T("")       );
-    TEST_TRIM( _T(""),          true, _T("")       );
-
-    TEST_TRIM( _T("  Test  "),  false, _T("Test  ") );
-    TEST_TRIM( _T("    "),      false, _T("")       );
-    TEST_TRIM( _T(" "),         false, _T("")       );
-    TEST_TRIM( _T(""),          false, _T("")       );
-
-    #undef TEST_TRIM
 }
 
 void StringTestCase::Find()
@@ -240,6 +369,98 @@ void StringTestCase::Find()
     TEST_FIND( _T("Well, hello world"),  9, wxString::npos );
 
     #undef TEST_FIND
+}
+
+void StringTestCase::SingleTokenizerTest( wxChar *str, wxChar *delims, size_t count , wxStringTokenizerMode mode )
+{
+    wxStringTokenizer tkz( str, delims, mode);
+    CPPUNIT_ASSERT( tkz.CountTokens() == count );
+
+    wxChar *buf, *s = NULL, *last;
+
+    if ( tkz.GetMode() == wxTOKEN_STRTOK )
+    {
+        buf = new wxChar[wxStrlen(str) + 1];
+        wxStrcpy(buf, str);
+        s = wxStrtok(buf, delims, &last);
+    }
+    else
+    {
+        buf = NULL;
+    }
+
+    size_t count2 = 0;
+    while ( tkz.HasMoreTokens() )
+    {
+        wxString token = tkz.GetNextToken();
+        if ( buf )
+        {
+            CPPUNIT_ASSERT( token == s );
+            s = wxStrtok(NULL, delims, &last);
+        }
+        count2++;
+    }
+
+    CPPUNIT_ASSERT( count2 == count );
+    if ( buf )
+    {
+        delete [] buf;
+    }
+}
+
+void StringTestCase::Tokenizer()
+{
+    SingleTokenizerTest( _T(""),                                           _T(" "),              0, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello, world"),                               _T(" "),              2, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello,   world  "),                           _T(" "),              2, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello, world"),                               _T(","),              2, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello, world!"),                              _T(",!"),             2, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello,, world!"),                             _T(",!"),             3, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("Hello, world!"),                              _T(",!"),             3, wxTOKEN_RET_EMPTY_ALL );
+    SingleTokenizerTest( _T("username:password:uid:gid:gecos:home:shell"), _T(":"),              7, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("1 \t3\t4  6   "),                             wxDEFAULT_DELIMITERS, 4, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("1 \t3\t4  6   "),                             wxDEFAULT_DELIMITERS, 6, wxTOKEN_RET_EMPTY     );
+    SingleTokenizerTest( _T("1 \t3\t4  6   "),                             wxDEFAULT_DELIMITERS, 9, wxTOKEN_RET_EMPTY_ALL );
+    SingleTokenizerTest( _T("01/02/99"),                                   _T("/-"),             3, wxTOKEN_DEFAULT       );
+    SingleTokenizerTest( _T("01-02/99"),                                   _T("/-"),             3, wxTOKEN_RET_DELIMS    );
+}
+
+// call this with the string to tokenize, delimeters to use and the expected
+// positions (i.e. results of GetPosition()) after each GetNextToken() call,
+// terminate positions with 0
+static void DoTokenizerGetPosition(const wxChar *s, 
+                                   const wxChar *delims, int pos, ...)
+{
+    wxStringTokenizer tkz(s, delims);
+
+    CPPUNIT_ASSERT( tkz.GetPosition() == 0 );
+
+    va_list ap;
+    va_start(ap, pos);
+
+    for ( ;; )
+    {
+        if ( !pos )
+        {
+            CPPUNIT_ASSERT( !tkz.HasMoreTokens() );
+            break;
+        }
+
+        tkz.GetNextToken();
+
+        CPPUNIT_ASSERT( tkz.GetPosition() == (size_t)pos );
+
+        pos = va_arg(ap, int);
+    }
+
+    va_end(ap);
+}
+
+void StringTestCase::TokenizerGetPosition()
+{
+    DoTokenizerGetPosition(_T("foo"), _T("_"), 3, 0);
+    DoTokenizerGetPosition(_T("foo_bar"), _T("_"), 4, 7, 0);
+    DoTokenizerGetPosition(_T("foo_bar_"), _T("_"), 4, 8, 0);
 }
 
 void StringTestCase::Replace()
@@ -355,26 +576,6 @@ void StringTestCase::Compare()
     CPPUNIT_ASSERT( s1 != neq3 );
     CPPUNIT_ASSERT( s1 != neq4 );
 
-    CPPUNIT_ASSERT( s1 == wxT("AHH") );
-    CPPUNIT_ASSERT( s1 != wxT("no") );
-    CPPUNIT_ASSERT( s1 < wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AHH") );
-    CPPUNIT_ASSERT( s1 > wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AHH") );
-
-    // test comparison with C strings in Unicode build (must work in ANSI as
-    // well, of course):
-    CPPUNIT_ASSERT( s1 == "AHH" );
-    CPPUNIT_ASSERT( s1 != "no" );
-    CPPUNIT_ASSERT( s1 < "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AHH" );
-    CPPUNIT_ASSERT( s1 > "AA" );
-    CPPUNIT_ASSERT( s1 >= "AA" );
-    CPPUNIT_ASSERT( s1 >= "AHH" );
-
 //    wxString _s1 = wxT("A\0HH");
 //    wxString _eq = wxT("A\0HH");
 //    wxString _neq1 = wxT("H\0AH");
@@ -442,152 +643,61 @@ void StringTestCase::CompareNoCase()
     CPPUNIT_CNCNEQ_ASSERT( s1, neq3 );
 }
 
-void StringTestCase::Contains()
-{
-    static const struct ContainsData
-    {
-        const wxChar *hay;
-        const wxChar *needle;
-        bool contains;
-    } containsData[] =
-    {
-        { _T(""),       _T(""),         true  },
-        { _T(""),       _T("foo"),      false },
-        { _T("foo"),    _T(""),         true  },
-        { _T("foo"),    _T("f"),        true  },
-        { _T("foo"),    _T("o"),        true  },
-        { _T("foo"),    _T("oo"),       true  },
-        { _T("foo"),    _T("ooo"),      false },
-        { _T("foo"),    _T("oooo"),     false },
-        { _T("foo"),    _T("fooo"),     false },
-    };
-
-    for ( size_t n = 0; n < WXSIZEOF(containsData); n++ )
-    {
-        const ContainsData& cd = containsData[n];
-        CPPUNIT_ASSERT_EQUAL( cd.contains, wxString(cd.hay).Contains(cd.needle) );
-    }
-}
-
-// flags used in ToLongData.flags
-enum
-{
-    Number_Ok       = 0,
-    Number_Invalid  = 1,
-    Number_Unsigned = 2,    // if not specified, works for signed conversion
-    Number_Signed   = 4,    // if not specified, works for unsigned
-    Number_LongLong = 8,    // only for long long tests
-    Number_Long     = 16,   // only for long tests
-};
-
-static const struct ToLongData
-{
-    const wxChar *str;
-#ifdef wxLongLong_t
-    wxLongLong_t value;
-#else
-    long value;
-#endif // wxLongLong_t
-    int flags;
-
-    long LValue() const { return value; }
-    unsigned long ULValue() const { return value; }
-#ifdef wxLongLong_t
-    wxLongLong_t LLValue() const { return value; }
-    wxULongLong_t ULLValue() const { return (wxULongLong_t)value; }
-#endif // wxLongLong_t
-
-    bool IsOk() const { return !(flags & Number_Invalid); }
-} longData[] =
-{
-    { _T("1"), 1, Number_Ok },
-    { _T("0"), 0, Number_Ok },
-    { _T("a"), 0, Number_Invalid },
-    { _T("12345"), 12345, Number_Ok },
-    { _T("--1"), 0, Number_Invalid },
-
-    { _T("-1"), -1, Number_Signed | Number_Long },
-    // this is surprizing but consistent with strtoul() behaviour
-    { _T("-1"), ULONG_MAX, Number_Unsigned | Number_Long },
-
-    // this must overflow, even with 64 bit long
-    { _T("922337203685477580711"), 0, Number_Invalid },
-
-#ifdef wxLongLong_t
-    { _T("2147483648"), wxLL(2147483648), Number_LongLong },
-    { _T("-2147483648"), wxLL(-2147483648), Number_LongLong | Number_Signed },
-    { _T("9223372036854775808"), wxULL(9223372036854775808), Number_LongLong |
-                                                             Number_Unsigned },
-#endif // wxLongLong_t
-};
-
 void StringTestCase::ToLong()
 {
     long l;
-    for ( size_t n = 0; n < WXSIZEOF(longData); n++ )
+    static const struct ToLongData
+    {
+        const wxChar *str;
+        long value;
+        bool ok;
+    } longData[] =
+    {
+        { _T("1"), 1, true },
+        { _T("0"), 0, true },
+        { _T("a"), 0, false },
+        { _T("12345"), 12345, true },
+        { _T("-1"), -1, true },
+        { _T("--1"), 0, false },
+    };
+
+    size_t n;
+    for ( n = 0; n < WXSIZEOF(longData); n++ )
     {
         const ToLongData& ld = longData[n];
-
-        if ( ld.flags & (Number_LongLong | Number_Unsigned) )
-            continue;
-
-        CPPUNIT_ASSERT_EQUAL( ld.IsOk(), wxString(ld.str).ToLong(&l) );
-        if ( ld.IsOk() )
-            CPPUNIT_ASSERT_EQUAL( ld.LValue(), l );
+        CPPUNIT_ASSERT_EQUAL( ld.ok, wxString(ld.str).ToLong(&l) );
+        if ( ld.ok )
+            CPPUNIT_ASSERT_EQUAL( ld.value, l );
     }
 }
 
 void StringTestCase::ToULong()
 {
     unsigned long ul;
-    for ( size_t n = 0; n < WXSIZEOF(longData); n++ )
+    static const struct ToULongData
     {
-        const ToLongData& ld = longData[n];
+        const wxChar *str;
+        unsigned long value;
+        bool ok;
+    } ulongData[] =
+    {
+        { _T("1"), 1, true },
+        { _T("0"), 0, true },
+        { _T("a"), 0, false },
+        { _T("12345"), 12345, true },
+        // this is surprizing but consistent with strtoul() behaviour
+        { _T("-1"), ULONG_MAX, true },
+    };
 
-        if ( ld.flags & (Number_LongLong | Number_Signed) )
-            continue;
-
-        CPPUNIT_ASSERT_EQUAL( ld.IsOk(), wxString(ld.str).ToULong(&ul) );
-        if ( ld.IsOk() )
-            CPPUNIT_ASSERT_EQUAL( ld.ULValue(), ul );
+    size_t n;
+    for ( n = 0; n < WXSIZEOF(ulongData); n++ )
+    {
+        const ToULongData& uld = ulongData[n];
+        CPPUNIT_ASSERT_EQUAL( uld.ok, wxString(uld.str).ToULong(&ul) );
+        if ( uld.ok )
+            CPPUNIT_ASSERT_EQUAL( uld.value, ul );
     }
 }
-
-#ifdef wxLongLong_t
-
-void StringTestCase::ToLongLong()
-{
-    wxLongLong_t l;
-    for ( size_t n = 0; n < WXSIZEOF(longData); n++ )
-    {
-        const ToLongData& ld = longData[n];
-
-        if ( ld.flags & (Number_Long | Number_Unsigned) )
-            continue;
-
-        CPPUNIT_ASSERT_EQUAL( ld.IsOk(), wxString(ld.str).ToLongLong(&l) );
-        if ( ld.IsOk() )
-            CPPUNIT_ASSERT_EQUAL( ld.LLValue(), l );
-    }
-}
-
-void StringTestCase::ToULongLong()
-{
-    wxULongLong_t ul;
-    for ( size_t n = 0; n < WXSIZEOF(longData); n++ )
-    {
-        const ToLongData& ld = longData[n];
-
-        if ( ld.flags & (Number_Long | Number_Signed) )
-            continue;
-
-        CPPUNIT_ASSERT_EQUAL( ld.IsOk(), wxString(ld.str).ToULongLong(&ul) );
-        if ( ld.IsOk() )
-            CPPUNIT_ASSERT_EQUAL( ld.ULLValue(), ul );
-    }
-}
-
-#endif // wxLongLong_t
 
 void StringTestCase::ToDouble()
 {
@@ -624,31 +734,3 @@ void StringTestCase::ToDouble()
             CPPUNIT_ASSERT_EQUAL( ld.value, d );
     }
 }
-
-void StringTestCase::WriteBuf()
-{
-    wxString s;
-    wxStrcpy(wxStringBuffer(s, 10), _T("foo"));
-
-    CPPUNIT_ASSERT(s[0u] == _T('f') );
-    CPPUNIT_ASSERT(_T('f') == s[0u]);
-    CPPUNIT_ASSERT(_T('o') == s[1]);
-    CPPUNIT_ASSERT(_T('o') == s[2]);
-    CPPUNIT_ASSERT_EQUAL((size_t)3, s.length());
-
-
-    {
-        wxStringBufferLength buf(s, 10);
-        wxStrcpy(buf, _T("barrbaz"));
-        buf.SetLength(4);
-    }
-
-    CPPUNIT_ASSERT(_T('b') == s[0u]);
-    CPPUNIT_ASSERT(_T('a') == s[1]);
-    CPPUNIT_ASSERT(_T('r') == s[2]);
-    CPPUNIT_ASSERT(_T('r') == s[3]);
-    CPPUNIT_ASSERT_EQUAL((size_t)4, s.length());
-
-    CPPUNIT_ASSERT_EQUAL( 0, wxStrcmp(_T("barr"), s) );
-}
-

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/gdiimage.cpp
+// Name:        msw/gdiimage.cpp
 // Purpose:     wxGDIImage implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,20 +17,24 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "gdiimage.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
-    #include "wx/app.h"
 #endif // WX_PRECOMP
 
 #include "wx/os2/private.h"
+#include "wx/app.h"
 #include "wx/os2/gdiimage.h"
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxGDIImageHandlerList)
+WX_DEFINE_LIST(wxGDIImageHandlerList);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -113,14 +117,14 @@ public:
 
     // creating and saving icons is not supported
     virtual bool Create( wxGDIImage* WXUNUSED(pImage)
-                        ,const void* WXUNUSED(pData)
+                        ,void*       WXUNUSED(pData)
                         ,long        WXUNUSED(lFlags)
                         ,int         WXUNUSED(nWidth)
                         ,int         WXUNUSED(nHeight)
                         ,int         WXUNUSED(nDepth) = 1
                        )
     {
-        return false;
+        return(FALSE);
     }
 
     virtual bool Save( wxGDIImage*     WXUNUSED(pImage)
@@ -128,7 +132,7 @@ public:
                       ,int             WXUNUSED(nType)
                      )
     {
-        return false;
+        return(FALSE);
     }
     virtual bool Load( wxGDIImage*     pImage
                       ,const wxString& rName
@@ -139,7 +143,7 @@ public:
                      )
     {
         wxIcon*                     pIcon = wxDynamicCast(pImage, wxIcon);
-        wxCHECK_MSG(pIcon, false, _T("wxIconHandler only works with icons"));
+        wxCHECK_MSG(pIcon, FALSE, _T("wxIconHandler only works with icons"));
 
         return LoadIcon( pIcon
                         ,rName
@@ -241,7 +245,7 @@ bool wxGDIImage::FreeResource( bool WXUNUSED(bForce) )
     return true;
 }
 
-WXHANDLE wxGDIImage::GetResourceHandle() const
+WXHANDLE wxGDIImage::GetResourceHandle()
 {
     return GetHandle();
 }
@@ -395,7 +399,7 @@ bool wxBMPFileHandler::LoadFile( wxBitmap*       pBitmap,
                                  int             WXUNUSED(nDesiredWidth),
                                  int             WXUNUSED(nDesiredHeight) )
 {
-#if defined(wxUSE_IMAGE_LOADING_IN_OS2) && wxUSE_IMAGE_LOADING_IN_OS2
+#if wxUSE_IMAGE_LOADING_IN_OS2
     wxPalette* pPalette = NULL;
 
     bool bSuccess = false; /* wxLoadIntoBitmap( WXSTRINGCAST rName
@@ -422,7 +426,7 @@ bool wxBMPFileHandler::SaveFile( wxBitmap*        pBitmap,
                                  int              WXUNUSED(nType),
                                  const wxPalette* pPal )
 {
-#if defined(wxUSE_IMAGE_LOADING_IN_OS2) && wxUSE_IMAGE_LOADING_IN_OS2
+#if wxUSE_IMAGE_LOADING_IN_OS2
     wxPalette* pActualPalette = (wxPalette *)pPal;
 
     if (!pActualPalette)
@@ -450,7 +454,7 @@ bool wxICOFileHandler::LoadIcon( wxIcon*         pIcon,
                                  int             WXUNUSED(nDesiredWidth),
                                  int             WXUNUSED(nDesiredHeight) )
 {
-#if defined(wxUSE_RESOURCE_LOADING_IN_OS2) && wxUSE_RESOURCE_LOADING_IN_OS2
+#if wxUSE_RESOURCE_LOADING_IN_OS2
     pIcon->UnRef();
 
     return false;

@@ -12,6 +12,10 @@
 #ifndef _WX_PALMOS_TOPLEVEL_H_
 #define _WX_PALMOS_TOPLEVEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowPalm
 // ----------------------------------------------------------------------------
@@ -46,10 +50,6 @@ public:
     virtual ~wxTopLevelWindowPalm();
 
     // implement base class pure virtuals
-
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
-
     virtual void Maximize(bool maximize = true);
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
@@ -126,3 +126,4 @@ protected:
 };
 
 #endif // _WX_PALMOS_TOPLEVEL_H_
+

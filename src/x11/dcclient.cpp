@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/dcclient.cpp
+// Name:        x11/dcclient.cpp
 // Purpose:     wxClientDC class
 // Author:      Julian Smart, Robert Roebling
 // Modified by:
@@ -9,23 +9,21 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#include "wx/dcclient.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/window.h"
-    #include "wx/dcmemory.h"
-    #include "wx/math.h"
-    #include "wx/image.h"
-    #include "wx/module.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
 #endif
 
+#include "wx/dcclient.h"
+#include "wx/dcmemory.h"
+#include "wx/window.h"
+#include "wx/app.h"
+#include "wx/image.h"
+#include "wx/module.h"
 #include "wx/fontutil.h"
 
 #include "wx/x11/private.h"
+
+#include "wx/math.h"
 
 #if wxUSE_UNICODE
 #include "glib.h"
@@ -165,7 +163,7 @@ static void wxFreePoolGC( GC gc )
 
 IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
 
-void wxWindowDC::Init()
+wxWindowDC::wxWindowDC()
 {
     m_display = (WXDisplay *) NULL;
     m_penGC = (WXGC *) NULL;
@@ -178,7 +176,7 @@ void wxWindowDC::Init()
     m_owner = (wxWindow *)NULL;
 
 #if wxUSE_UNICODE
-    m_context = wxTheApp->GetPangoContext();
+    m_context = (PangoContext *)NULL;
     m_fontdesc = (PangoFontDescription *)NULL;
 #endif
 }
@@ -187,8 +185,15 @@ wxWindowDC::wxWindowDC( wxWindow *window )
 {
     wxASSERT_MSG( window, wxT("DC needs a window") );
 
-    Init();
-
+    m_display = (WXDisplay *) NULL;
+    m_penGC = (WXGC *) NULL;
+    m_brushGC = (WXGC *) NULL;
+    m_textGC = (WXGC *) NULL;
+    m_bgGC = (WXGC *) NULL;
+    m_cmap = (WXColormap *) NULL;
+    m_owner = (wxWindow *)NULL;
+    m_isMemDC = false;
+    m_isScreenDC = false;
     m_font = window->GetFont();
 
     m_window = (WXWindow*) window->GetMainWindow();
@@ -205,6 +210,7 @@ wxWindowDC::wxWindowDC( wxWindow *window )
     m_display = (WXDisplay *) wxGlobalDisplay();
 
 #if wxUSE_UNICODE
+    m_context = wxTheApp->GetPangoContext();
     m_fontdesc = window->GetFont().GetNativeFontInfo()->description;
 #endif
 
@@ -1168,31 +1174,31 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
     WXPixmap mask = NULL;
     if (use_bitmap.GetMask()) mask = use_bitmap.GetMask()->GetBitmap();
 
-    bool setClipMask = false;
+    bool b_setClipMask = false;
 
     if (!m_currentClippingRegion.IsNull() || (useMask && mask))
     {
         // XSetClipMask() call is necessary (because of clip region and/or transparent mask)
-        setClipMask = true;
+        b_setClipMask = true;
         Pixmap new_pixmap = 0;
-
+  
         if (!m_currentClippingRegion.IsNull())
         {
             // clipping necessary => create new_pixmap
             Display *xdisplay = (Display*) m_display;
             int xscreen = DefaultScreen( xdisplay );
             Window xroot = RootWindow( xdisplay, xscreen );
-
+    
             new_pixmap = XCreatePixmap( xdisplay, xroot, ww, hh, 1 );
             GC gc = XCreateGC( xdisplay, new_pixmap, 0, NULL );
-
+    
             XSetForeground( xdisplay, gc, BlackPixel(xdisplay,xscreen) );
-
+            
             XSetFillStyle( xdisplay, gc, FillSolid );
             XFillRectangle( xdisplay, new_pixmap, gc, 0, 0, ww, hh );
-
+    
             XSetForeground( xdisplay, gc, WhitePixel(xdisplay,xscreen) );
-
+    
             if (useMask && mask)
             {
                 // transparent mask => call XSetStipple
@@ -1200,14 +1206,14 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                 XSetTSOrigin( xdisplay, gc, 0, 0);
                 XSetStipple( xdisplay, gc, (Pixmap) mask);
             }
-
+    
             wxCoord clip_x, clip_y, clip_w, clip_h;
             m_currentClippingRegion.GetBox(clip_x, clip_y, clip_w, clip_h);
             XFillRectangle( xdisplay, new_pixmap, gc, clip_x-xx, clip_y-yy, clip_w, clip_h );
-
+    
             XFreeGC( xdisplay, gc );
         }
-
+  
         if (is_mono)
         {
             if (new_pixmap)
@@ -1224,7 +1230,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                 XSetClipMask( (Display*) m_display, (GC) m_penGC, (Pixmap) mask );
             XSetClipOrigin( (Display*) m_display, (GC) m_penGC, xx, yy );
         }
-
+  
         if (new_pixmap)
             XFreePixmap( (Display*) m_display, new_pixmap );
     }
@@ -1239,7 +1245,7 @@ void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
             (GC) m_penGC, 0, 0, ww, hh, xx, yy );
 
     // remove mask again if any
-    if (setClipMask)
+    if (b_setClipMask)
     {
         if (is_mono)
         {
@@ -1585,7 +1591,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 #endif
     {
         XDrawString( (Display*) m_display, (Window) m_window,
-            (GC) m_textGC, x, y + XFontStructGetAscent(xfont), text.c_str(), text.length() );
+            (GC) m_textGC, x, y + XFontStructGetAscent(xfont), text.c_str(), text.Len() );
     }
 
 #if 0
@@ -1661,7 +1667,7 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
     int direction, ascent, descent2;
     XCharStruct overall;
 
-    XTextExtents( xfont, (char*) string.c_str(), string.length(), &direction,
+    XTextExtents( xfont, (char*) string.c_str(), string.Len(), &direction,
         &ascent, &descent2, &overall);
 
     if (width)
@@ -1683,10 +1689,10 @@ wxCoord wxWindowDC::GetCharWidth() const
     PangoLayout *layout = pango_layout_new( m_context );
 
     if (m_fontdesc)
-        pango_layout_set_font_description(layout, m_fontdesc);
+	pango_layout_set_font_description(layout, m_fontdesc);
     else
-        pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
-
+	pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
+	
     pango_layout_set_text(layout, "H", 1 );
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
@@ -1717,10 +1723,10 @@ wxCoord wxWindowDC::GetCharHeight() const
     PangoLayout *layout = pango_layout_new( m_context );
 
     if (m_fontdesc)
-        pango_layout_set_font_description(layout, m_fontdesc);
+	pango_layout_set_font_description(layout, m_fontdesc);
     else
-        pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
-
+	pango_layout_set_font_description(layout, this->GetFont().GetNativeFontInfo()->description);
+	
     pango_layout_set_text(layout, "H", 1 );
     int w,h;
     pango_layout_get_pixel_size(layout, &w, &h);
@@ -1778,7 +1784,9 @@ void wxWindowDC::SetFont( const wxFont &font )
     wxCHECK_RET( Ok(), wxT("invalid dc") );
 
     m_font = font;
-
+    
+    return;
+    
 #if wxUSE_UNICODE
     m_fontdesc = font.GetNativeFontInfo()->description;
 #endif
@@ -2159,12 +2167,6 @@ void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoo
 
     if (!m_window) return;
 
-    if (width <= 0)
-        width = 1;
-
-    if (height <= 0)
-        height = 1;
-
     wxRect rect;
     rect.x = XLOG2DEV(x);
     rect.y = YLOG2DEV(y);
@@ -2362,15 +2364,8 @@ wxPaintDC::wxPaintDC(wxWindow* window)
 class wxDCModule : public wxModule
 {
 public:
-    // we must be cleaned up before wxDisplayModule which closes the global
-    // display
-    wxDCModule()
-    {
-        AddDependency(wxClassInfo::FindClass(_T("wxX11DisplayModule")));
-    }
-
-    bool OnInit() { wxInitGCPool(); return true; }
-    void OnExit() { wxCleanUpGCPool(); }
+    bool OnInit();
+    void OnExit();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDCModule)
@@ -2378,3 +2373,13 @@ private:
 
 IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 
+bool wxDCModule::OnInit()
+{
+    wxInitGCPool();
+    return true;
+}
+
+void wxDCModule::OnExit()
+{
+    wxCleanUpGCPool();
+}

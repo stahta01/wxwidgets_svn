@@ -173,7 +173,7 @@ public:
     void WriteText(const wxString& text);
 
 public:
-    unsigned m_count;
+    size_t   m_count;
     MyFrame *m_frame;
 };
 
@@ -266,7 +266,7 @@ public:
 
 public:
     MyFrame *m_frame;
-    unsigned m_count;
+    size_t   m_count;
 };
 
 MyWorkerThread::MyWorkerThread(MyFrame *frame)
@@ -363,9 +363,6 @@ MyApp::MyApp()
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // uncomment this to get some debugging messages from the trace code
     // on the console (or just set WXTRACE env variable to include "thread")
     //wxLog::AddTraceMask("thread");
@@ -497,7 +494,7 @@ MyThread *MyFrame::CreateThread()
 
 void MyFrame::OnStartThreads(wxCommandEvent& WXUNUSED(event) )
 {
-    static long s_num;
+    static long s_num = 10;
 
     s_num = wxGetNumberFromUser(_T("How many threads to start: "), _T(""),
                                 _T("wxThread sample"), s_num, 1, 10000, this);
@@ -508,7 +505,7 @@ void MyFrame::OnStartThreads(wxCommandEvent& WXUNUSED(event) )
         return;
     }
 
-    unsigned count = unsigned(s_num), n;
+    size_t count = (size_t)s_num, n;
 
     wxArrayThread threads;
 
@@ -650,7 +647,7 @@ void MyFrame::OnIdle(wxIdleEvent& event)
         m_nRunning = nRunning;
         m_nCount = nCount;
 
-        wxLogStatus(this, wxT("%u threads total, %u running."), unsigned(nCount), unsigned(nRunning));
+        wxLogStatus(this, wxT("%u threads total, %u running."), nCount, nRunning);
     }
     //else: avoid flicker - don't print anything
 

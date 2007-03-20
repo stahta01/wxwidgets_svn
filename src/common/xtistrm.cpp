@@ -9,25 +9,29 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xtistrm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_EXTENDED_RTTI
-
-#include "wx/xtistrm.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/hash.h"
-    #include "wx/event.h"
+#include "wx/hash.h"
+#include "wx/object.h"
 #endif
 
 #include "wx/tokenzr.h"
 #include "wx/txtstrm.h"
+#include "wx/event.h"
+
+#if wxUSE_EXTENDED_RTTI
+
+#include "wx/xtistrm.h"
 
 #include "wx/beforestd.h"
 #include <map>
@@ -840,8 +844,8 @@ void wxCodeDepersister::SetConnect(int eventSourceObjectID,
     }
 }
 
-#include "wx/arrimpl.cpp"
+#include <wx/arrimpl.cpp>
 
 WX_DEFINE_OBJARRAY(wxxVariantArray);
 
-#endif // wxUSE_EXTENDED_RTTI
+#endif

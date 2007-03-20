@@ -47,7 +47,7 @@
 
 class WXDLLEXPORT wxBitmap;
 
-extern WXDLLEXPORT_DATA(const wxChar) wxButtonNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxButtonNameStr;
 
 // ----------------------------------------------------------------------------
 // wxButton: a push button
@@ -86,10 +86,8 @@ protected:
     #include "wx/msw/button.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/button.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/button.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/button.h"
+    #include "wx/gtk/button.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/button.h"
 #elif defined(__WXCOCOA__)

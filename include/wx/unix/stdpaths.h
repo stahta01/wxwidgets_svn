@@ -19,10 +19,6 @@
 class WXDLLIMPEXP_BASE wxStandardPaths : public wxStandardPathsBase
 {
 public:
-    // tries to determine the installation prefix automatically (Linux only right
-    // now) and returns /usr/local if it failed
-    void DetectPrefix();
-
     // set the program installation directory which is /usr/local by default
     //
     // under some systems (currently only Linux) the program directory can be
@@ -33,20 +29,18 @@ public:
     // get the program installation prefix
     //
     // if the prefix had been previously by SetInstallPrefix, returns that
-    // value, otherwise calls DetectPrefix()
+    // value, otherwise tries to determine it automatically (Linux only right
+    // now) and returns /usr/local if it failed
     wxString GetInstallPrefix() const;
 
 
     // implement base class pure virtuals
-    virtual wxString GetExecutablePath() const;
     virtual wxString GetConfigDir() const;
     virtual wxString GetUserConfigDir() const;
     virtual wxString GetDataDir() const;
     virtual wxString GetLocalDataDir() const;
     virtual wxString GetUserDataDir() const;
     virtual wxString GetPluginsDir() const;
-    virtual wxString GetLocalizedResourcesDir(const wxChar *lang,
-                                              ResourceCat category) const;
 
 private:
     wxString m_prefix;

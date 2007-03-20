@@ -1,10 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/settings.cpp
+// Name:        settings.h
 // Author:      Vaclav Slavik, Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "settings.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,13 +19,10 @@
 #endif
 
 #include "wx/settings.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/colour.h"
-    #include "wx/font.h"
-    #include "wx/gdicmn.h"
-    #include "wx/module.h"
-#endif
+#include "wx/colour.h"
+#include "wx/font.h"
+#include "wx/gdicmn.h"
+#include "wx/module.h"
 
 // ----------------------------------------------------------------------------
 // global data
@@ -31,7 +33,7 @@ static wxFont *gs_fontDefault = NULL;
 class wxSystemSettingsModule : public wxModule
 {
 public:
-    virtual bool OnInit() { return true; }
+    virtual bool OnInit() { return TRUE; }
     virtual void OnExit()
     {
         delete gs_fontDefault;
@@ -48,7 +50,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxSystemSettingsModule, wxModule)
 
 wxColour wxSystemSettingsNative::GetColour(wxSystemColour WXUNUSED(index))
 {
-    // overridden by wxSystemSettings::GetColour in wxUniversal
+    // not implemented, the mean is in wxUniversal
     return wxColour(0,0,0);
 }
 
@@ -68,21 +70,18 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
         case wxSYS_DEFAULT_GUI_FONT:
         {
             if ( !gs_fontDefault )
-                gs_fontDefault = new wxFont(10, wxSWISS, wxNORMAL, wxNORMAL, false, "Arial");
+                gs_fontDefault = new wxFont(10, wxSWISS, wxNORMAL, wxNORMAL, FALSE, "Arial");
             return *gs_fontDefault;
         }
         default:
-        {
-        }
+            return wxNullFont;
     }
-
-    return wxNullFont;
 }
 
 int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(win))
 {
     int val;
-
+    
     switch (index)
     {
         case wxSYS_SCREEN_X:
@@ -93,27 +92,22 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
             return val;
         case wxSYS_VSCROLL_X:
         case wxSYS_HSCROLL_Y:
-            return 15;
+            return 15; 
+            break;
         default:
-        {
-        }
+            return -1;  // unsupported metric
     }
-
-    return -1;  // unsupported metric
 }
 
 bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
 {
     switch (index)
     {
-        case wxSYS_CAN_ICONIZE_FRAME:
+        case wxSYS_CAN_ICONIZE_FRAME: 
+            return FALSE; break;
         case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        case wxSYS_TABLET_PRESENT:
-            return false;
-
+            return FALSE; break;
         default:
-            wxFAIL_MSG( _T("unknown feature") );
+            return FALSE;
     }
-
-    return false;
 }

@@ -9,8 +9,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GENERIC_SPLITTER_H_
-#define _WX_GENERIC_SPLITTER_H_
+#ifndef __SPLITTERH_G__
+#define __SPLITTERH_G__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "splitter.h"
+#endif
 
 #include "wx/window.h"                      // base class declaration
 #include "wx/containr.h"                    // wxControlContainer
@@ -226,7 +230,7 @@ protected:
 
     // send the given event, return false if the event was processed and vetoed
     // by the user code
-    bool DoSendEvent(wxSplitterEvent& event);
+    inline bool DoSendEvent(wxSplitterEvent& event);
 
     // common part of all ctors
     void Init();
@@ -403,4 +407,4 @@ typedef void (wxEvtHandler::*wxSplitterEventFunction)(wxSplitterEvent&);
 #define EVT_SPLITTER_UNSPLIT(id, fn) \
     wx__DECLARE_SPLITTEREVT(UNSPLIT, id, fn)
 
-#endif // _WX_GENERIC_SPLITTER_H_
+#endif // __SPLITTERH_G__

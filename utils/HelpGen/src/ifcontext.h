@@ -78,7 +78,7 @@ public:
 public:
 
     spInterFileContext();
-    virtual ~spInterFileContext();
+    ~spInterFileContext();
 
     void AddFile( const wxString& fname, const wxString& content );
 

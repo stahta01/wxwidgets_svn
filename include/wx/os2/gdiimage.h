@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/gdiimage.h
+// Name:        include/wx/os2/gdiimage.h
 // Purpose:     wxGDIImage class: base class for wxBitmap, wxIcon, wxCursor
 //              under OS/2
 // Author:      David Webster (adapted from msw version by Vadim Zeitlin)
@@ -15,6 +15,10 @@
 
 #ifndef _WX_OS2_GDIIMAGE_H_
 #define _WX_OS2_GDIIMAGE_H_
+
+#ifdef __GNUG__
+    #pragma interface "gdiimage.h"
+#endif
 
 #include "wx/gdiobj.h"          // base class
 #include "wx/gdicmn.h"          // wxBITMAP_TYPE_INVALID
@@ -44,8 +48,8 @@ public:
     bool IsOk() const
     {
         if (m_hHandle == 0)
-            return false;
-        return true;
+            return FALSE;
+        return TRUE;
     }
 
     void SetSize( int nW
@@ -107,7 +111,7 @@ public:
 
     // real handler operations: to implement in derived classes
     virtual bool Create( wxGDIImage* pImage
-                        ,const void* pData
+                        ,void*       pData
                         ,long        lFlags
                         ,int         nWidth
                         ,int         nHeight
@@ -187,8 +191,7 @@ public:
         pData->m_hHandle = hHandle;
     }
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return GetHandle() != 0; }
+    bool Ok() const { return GetHandle() != 0; }
 
     int GetWidth() const { return IsNull() ? 0 : GetGDIImageData()->m_nWidth; }
     int GetHeight() const { return IsNull() ? 0 : GetGDIImageData()->m_nHeight; }
@@ -226,8 +229,8 @@ public:
         pData->m_uId = uId;
     }
     // forward some of base class virtuals to wxGDIImageRefData
-    bool             FreeResource(bool bForce = false);
-    virtual WXHANDLE GetResourceHandle() const;
+    bool             FreeResource(bool bForce = FALSE);
+    virtual WXHANDLE GetResourceHandle();
 
 protected:
     // create the data for the derived class here

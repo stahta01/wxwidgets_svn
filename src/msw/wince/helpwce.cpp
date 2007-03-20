@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/wince/helpwce.cpp
+// Name:        helpwce.h
 // Purpose:     Help system: Windows CE help implementation
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "helpwce.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -22,11 +26,11 @@
 #include "wx/msw/wince/helpwce.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/msw/missing.h"
     #include "wx/intl.h"
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/msw/missing.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxWinceHelpController, wxHelpControllerBase)
 
@@ -38,7 +42,7 @@ bool wxWinceHelpController::Initialize(const wxString& filename)
 
 bool wxWinceHelpController::LoadFile(const wxString& file)
 {
-    if (!file.empty())
+    if (!file.IsEmpty())
         m_helpFile = file;
     return true;
 }
@@ -93,7 +97,7 @@ wxString wxWinceHelpController::GetValidFilename(const wxString& file) const
     wxSplitPath(file, & path, & name, & ext);
 
     wxString fullName;
-    if (path.empty())
+    if (path.IsEmpty())
         fullName = name + wxT(".htm");
     else if (path.Last() == wxT('\\'))
         fullName = path + name + wxT(".htm");
@@ -109,10 +113,10 @@ wxString wxWinceHelpController::GetValidFilename(const wxString& file) const
 // View URL
 bool wxWinceHelpController::ViewURL(const wxString& topic)
 {
-    if (m_helpFile.empty()) return false;
+    if (m_helpFile.IsEmpty()) return false;
 
     wxString url( wxT("file:") + GetValidFilename(m_helpFile) );
-    if (!topic.empty())
+    if (!topic.IsEmpty())
         url = url + wxT("#") + topic;
 
     return CreateProcess(wxT("peghelp.exe"),
@@ -121,3 +125,4 @@ bool wxWinceHelpController::ViewURL(const wxString& topic)
 }
 
 #endif // wxUSE_HELP
+

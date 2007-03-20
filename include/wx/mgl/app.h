@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/app.h
+// Name:        app.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -10,9 +10,12 @@
 #ifndef __WX_APP_H__
 #define __WX_APP_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "app.h"
+#endif
+
 #include "wx/frame.h"
 #include "wx/icon.h"
-#include "wx/vidmode.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -30,7 +33,7 @@ class WXDLLEXPORT wxApp: public wxAppBase
 {
 public:
     wxApp();
-    virtual ~wxApp();
+    ~wxApp();
 
     /* override for altering the way wxGTK intializes the GUI
      * (palette/visual/colorcube). under wxMSW, OnInitGui() does nothing by
@@ -41,7 +44,7 @@ public:
     // override base class (pure) virtuals
     virtual bool Initialize(int& argc, wxChar **argv);
     virtual void CleanUp();
-
+    
     virtual void Exit();
     virtual void WakeUpIdle();
     virtual bool Yield(bool onlyIfNeeded = FALSE);
@@ -57,3 +60,4 @@ private:
 };
 
 #endif // __WX_APP_H__
+

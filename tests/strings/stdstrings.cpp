@@ -44,7 +44,6 @@ private:
         CPPUNIT_TEST( StdReplace );
         CPPUNIT_TEST( StdRFind );
         CPPUNIT_TEST( StdResize );
-        CPPUNIT_TEST( StdRiter );
         CPPUNIT_TEST( StdSubstr );
     CPPUNIT_TEST_SUITE_END();
 
@@ -60,7 +59,6 @@ private:
     void StdReplace();
     void StdRFind();
     void StdResize();
-    void StdRiter();
     void StdSubstr();
 
     DECLARE_NO_COPY_CLASS(StdStringTestCase)
@@ -216,18 +214,18 @@ void StdStringTestCase::StdFind()
     CPPUNIT_ASSERT( s1.find(s2) == 6u );
     CPPUNIT_ASSERT( s1.find(s2, 7) == wxString::npos );
     CPPUNIT_ASSERT( s1.find(s2, 6) == 6u );
-
+    
     //                   0          1          2
     //                   0123456 78901234567 8901234567
     //wxString _s1 = _T("abcdefg\0ABCDEFGabc\0ABCabcABC");
     //wxString _s2 = _T("g\0AB");
     wxString _s1 = _T("abcdefgABCDEFGabcABCabcABC");
     wxString _s2 = _T("gAB");
-
+    
     _s1.insert(7, 1, '\0');
     _s1.insert(18, 1, '\0');
     _s2.insert(1, 1, '\0');
-
+    
     CPPUNIT_ASSERT( _s1.find(_T('A')) == 8u );
     CPPUNIT_ASSERT( _s1.find(_T('A'), 8) == 8u );
     CPPUNIT_ASSERT( _s1.find(_T('Z')) == wxString::npos );
@@ -412,7 +410,7 @@ void StdStringTestCase::StdRFind()
 //    wxString s1 = _T("abcde\0fgABCDE\0FGabcABCabcABC");
 //    wxString s2 = _T("gAB");
 //    wxString s3 = _T("ab");
-
+    
     s1.insert(5,1,'\0');
     s1.insert(13,1,'\0');
 
@@ -446,26 +444,6 @@ void StdStringTestCase::StdResize()
     CPPUNIT_ASSERT( s4 == _T("abcABCdefDEFWW") );
 }
 
-void StdStringTestCase::StdRiter()
-{
-    const wxString s(_T("fozbar"));
-
-    wxString::const_reverse_iterator ri(s.rbegin());
-    CPPUNIT_ASSERT( _T('r') == *ri );
-    CPPUNIT_ASSERT( _T('a') == *++ri );
-    CPPUNIT_ASSERT( _T('r') == *--ri );
-
-    ri = s.rend();
-    ri--;
-    CPPUNIT_ASSERT( _T('f') == *ri );
-
-    --ri;
-    CPPUNIT_ASSERT( _T('o') == *ri );
-
-    wxString::const_iterator i = ri.base();
-    CPPUNIT_ASSERT( _T('z') == *i );
-}
-
 void StdStringTestCase::StdSubstr()
 {
     wxString s1 = _T("abcdefgABCDEFG");
@@ -475,6 +453,11 @@ void StdStringTestCase::StdSubstr()
     CPPUNIT_ASSERT( s1.substr( 1, 20 ) == _T("bcdefgABCDEFG") );
     CPPUNIT_ASSERT( s1.substr( 14, 30 ) == _T("") );
 
+
+//								    1
+//						012 34567 89012 3456
+//    wxString s1 = _T("abc\0defg\0ABCD\0EFG");
+
     s1.insert(3,1,'\0');
     s1.insert(8,1,'\0');
     s1.insert(13,1,'\0');
@@ -483,7 +466,7 @@ void StdStringTestCase::StdSubstr()
     s2.insert(2,1,'\0');
     s2.insert(7,1,'\0');
     s2.insert(12,1,'\0');
-
+    
     CPPUNIT_ASSERT( s1.substr( 0, 17 ) == s1 );
     CPPUNIT_ASSERT( s1.substr( 1, 17 ) == s2 );
     CPPUNIT_ASSERT( s1.substr( 1, 20 ) == s2 );

@@ -12,6 +12,10 @@
 #ifndef _WX_STATBMP_H_
 #define _WX_STATBMP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "statbmp.h"
+#endif
+
 #include "wx/icon.h"
 
 class WXDLLEXPORT wxStaticBitmap: public wxStaticBitmapBase
@@ -53,10 +57,9 @@ class WXDLLEXPORT wxStaticBitmap: public wxStaticBitmapBase
 
   // overriden base class virtuals
   virtual bool AcceptsFocus() const { return FALSE; }
+  virtual  wxSize DoGetBestSize() const ;
 
  protected:
-    virtual wxSize DoGetBestSize() const;
-
     wxBitmap m_bitmap;
     DECLARE_EVENT_TABLE() 
 };

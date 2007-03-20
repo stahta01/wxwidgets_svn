@@ -1,16 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/fs_inet.cpp
+// Name:        fs_inet.cpp
 // Purpose:     HTTP and FTP file system
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// RCS-ID:      $Id$
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fs_inet.h"
+#endif
 
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if !wxUSE_SOCKETS
@@ -21,13 +24,13 @@
 #if wxUSE_FILESYSTEM && wxUSE_FS_INET
 
 #ifndef WXPRECOMP
-    #include "wx/module.h"
 #endif
 
 #include "wx/wfstream.h"
 #include "wx/url.h"
 #include "wx/filesys.h"
 #include "wx/fs_inet.h"
+#include "wx/module.h"
 
 // ----------------------------------------------------------------------------
 // Helper classes
@@ -40,7 +43,7 @@ public:
     wxTemporaryFileInputStream(const wxString& filename) :
         wxFileInputStream(filename), m_filename(filename) {}
 
-    virtual ~wxTemporaryFileInputStream()
+    ~wxTemporaryFileInputStream()
     {
         // NB: copied from wxFileInputStream dtor, we need to do it before
         //     wxRemoveFile
@@ -140,26 +143,12 @@ class wxFileSystemInternetModule : public wxModule
     DECLARE_DYNAMIC_CLASS(wxFileSystemInternetModule)
 
     public:
-        wxFileSystemInternetModule() :
-           wxModule(),
-           m_handler(NULL)
-        {
-        }
-
         virtual bool OnInit()
         {
-            m_handler = new wxInternetFSHandler;
-            wxFileSystem::AddHandler(m_handler);
+            wxFileSystem::AddHandler(new wxInternetFSHandler);
             return true;
         }
-
-        virtual void OnExit() 
-        {
-            delete wxFileSystem::RemoveHandler(m_handler);
-        }
-
-    private:
-        wxFileSystemHandler* m_handler;
+        virtual void OnExit() {}
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxFileSystemInternetModule, wxModule)

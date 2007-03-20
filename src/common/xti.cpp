@@ -10,24 +10,28 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xti.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/hash.h"
+#include "wx/object.h"
 #endif
 
 #if wxUSE_EXTENDED_RTTI
 
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/list.h"
-    #include "wx/hash.h"
-#endif
-
 #include "wx/xti.h"
 #include "wx/xml/xml.h"
 #include "wx/tokenzr.h"
+#include "wx/list.h"
 #include <string.h>
 
 #include "wx/beforestd.h"
@@ -763,5 +767,4 @@ void wxGenericPropertyAccessor::GetProperty(const wxObject *object, wxxVariant& 
     wxASSERT_MSG( dynobj , wxT("cannot call wxDynamicClassInfo::SetProperty on an object other than wxDynamicObject") ) ;
     value = dynobj->GetProperty( m_propertyName ) ;
 }
-
-#endif // wxUSE_EXTENDED_RTTI
+#endif

@@ -30,14 +30,6 @@
 //---------------------------------------------------------------------------
 %newgroup;
 
-enum {
-    wxACCEL_ALT,
-    wxACCEL_CTRL,
-    wxACCEL_SHIFT,
-    wxACCEL_NORMAL,
-    wxACCEL_CMD,
-};
-
 DocStr(wxAcceleratorEntry,
 "A class used to define items in an `wx.AcceleratorTable`.  wxPython
 programs can choose to use wx.AcceleratorEntry objects, but using a
@@ -53,8 +45,8 @@ public:
         "Construct a wx.AcceleratorEntry.",
         "
     :param flags: A bitmask of wx.ACCEL_ALT, wx.ACCEL_SHIFT,
-                wx.ACCEL_CTRL, wx.ACCEL_CMD,  or wx.ACCEL_NORMAL
-                used to specify which modifier keys are held down.
+                wx.ACCEL_CTRL or wx.ACCEL_NORMAL used to specify
+                which modifier keys are held down.
     :param keyCode: The keycode to be detected
     :param cmdID: The menu or control command ID to use for the
                 accellerator event.
@@ -70,12 +62,6 @@ public:
 //     void SetMenuItem(wxMenuItem *item);
 //     wxMenuItem *GetMenuItem() const;
 
-    %newobject Create;
-    DocDeclStr(
-        static wxAcceleratorEntry *, Create(const wxString& str),
-        "Create accelerator corresponding to the specified string, or None if
-it coulnd't be parsed.", "");
-    
     DocDeclStr(
         int , GetFlags(),
         "Get the AcceleratorEntry's flags.", "");
@@ -87,29 +73,6 @@ it coulnd't be parsed.", "");
     DocDeclStr(
         int , GetCommand(),
         "Get the AcceleratorEntry's command ID.", "");
-    
-    DocDeclStr(
-        bool , IsOk() const,
-        "", "");
-    
-    
-    DocDeclStr(
-        wxString , ToString() const,
-        "Returns a string representation for the this accelerator.  The string
-is formatted using the <flags>-<keycode> format where <flags> maybe a
-hyphen-separed list of \"shift|alt|ctrl\"
-", "");
-    
-
-    DocDeclStr(
-        bool , FromString(const wxString &str),
-        "Returns true if the given string correctly initialized this object.", "");
-    
-    
-    %property(Command, GetCommand, doc="See `GetCommand`");
-    %property(Flags, GetFlags, doc="See `GetFlags`");
-    %property(KeyCode, GetKeyCode, doc="See `GetKeyCode`");
-    
 };
 
 
@@ -130,7 +93,7 @@ convenient way to program some event handling. For example, you can
 use an accelerator table to make a hotkey generate an event no matter
 which window within a frame has the focus.
 
-For example::
+Foe example::
 
     aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID),
                                   (wx.ACCEL_CTRL, ord('H'), helpID),
@@ -154,13 +117,13 @@ items or or of 3-tuples (flags, keyCode, cmdID)
     wxAcceleratorTable(int n, const wxAcceleratorEntry* entries);
     ~wxAcceleratorTable();
 
-    bool IsOk() const;
-    %pythoncode { Ok = IsOk }
+    bool Ok() const;
 };
 
 
  
 %immutable;
+// See also wxPy_ReinitStockObjects in helpers.cpp
 const wxAcceleratorTable wxNullAcceleratorTable;
 %mutable;
 

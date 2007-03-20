@@ -37,9 +37,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     dialog = new MyDialog(NULL, wxID_ANY, wxT("wxTaskBarIcon Test Dialog"), wxDefaultPosition, wxSize(365, 290));
 
@@ -54,6 +51,7 @@ BEGIN_EVENT_TABLE(MyDialog, wxDialog)
     EVT_BUTTON(wxID_EXIT, MyDialog::OnExit)
     EVT_CLOSE(MyDialog::OnCloseWindow)
 END_EVENT_TABLE()
+
 
 
 MyDialog::MyDialog(wxWindow* parent, const wxWindowID id, const wxString& title,
@@ -110,12 +108,8 @@ void MyDialog::Init(void)
 enum {
     PU_RESTORE = 10001,
     PU_NEW_ICON,
-    PU_OLD_ICON,
     PU_EXIT,
-    PU_CHECKMARK,
-    PU_SUB1,
-    PU_SUB2,
-    PU_SUBMAIN
+    PU_CHECKMARK
 };
 
 
@@ -123,12 +117,9 @@ BEGIN_EVENT_TABLE(MyTaskBarIcon, wxTaskBarIcon)
     EVT_MENU(PU_RESTORE, MyTaskBarIcon::OnMenuRestore)
     EVT_MENU(PU_EXIT,    MyTaskBarIcon::OnMenuExit)
     EVT_MENU(PU_NEW_ICON,MyTaskBarIcon::OnMenuSetNewIcon)
-    EVT_MENU(PU_OLD_ICON,MyTaskBarIcon::OnMenuSetOldIcon)
     EVT_MENU(PU_CHECKMARK,MyTaskBarIcon::OnMenuCheckmark)
     EVT_UPDATE_UI(PU_CHECKMARK,MyTaskBarIcon::OnMenuUICheckmark)
     EVT_TASKBAR_LEFT_DCLICK  (MyTaskBarIcon::OnLeftButtonDClick)
-    EVT_MENU(PU_SUB1, MyTaskBarIcon::OnMenuSub)
-    EVT_MENU(PU_SUB2, MyTaskBarIcon::OnMenuSub)
 END_EVENT_TABLE()
 
 void MyTaskBarIcon::OnMenuRestore(wxCommandEvent& )
@@ -147,7 +138,6 @@ void MyTaskBarIcon::OnMenuCheckmark(wxCommandEvent& )
 {
        check =!check;
 }
-
 void MyTaskBarIcon::OnMenuUICheckmark(wxUpdateUIEvent &event)
 {
        event.Check( check );
@@ -161,45 +151,16 @@ void MyTaskBarIcon::OnMenuSetNewIcon(wxCommandEvent&)
         wxMessageBox(wxT("Could not set new icon."));
 }
 
-void MyTaskBarIcon::OnMenuSetOldIcon(wxCommandEvent&)
-{
-    if (IsIconInstalled())
-    {
-        RemoveIcon();
-    }
-    else
-    {
-        wxMessageBox(wxT("wxTaskBarIcon Sample - icon already is the old version"));
-    }
-}
-
-void MyTaskBarIcon::OnMenuSub(wxCommandEvent&)
-{
-    wxMessageBox(wxT("You clicked on a submenu!"));
-}
-
 // Overridables
 wxMenu *MyTaskBarIcon::CreatePopupMenu()
 {
-    // Try creating menus different ways
-    // TODO: Probably try calling SetBitmap with some XPMs here
     wxMenu *menu = new wxMenu;
+    
     menu->Append(PU_RESTORE, _T("&Restore TBTest"));
-    menu->AppendSeparator();
-    menu->Append(PU_OLD_ICON, _T("&Restore Old Icon"));    
-    menu->Append(PU_NEW_ICON, _T("&Set New Icon"));
-    menu->AppendSeparator();
-    menu->Append(PU_CHECKMARK, _T("Checkmark"),wxT(""), wxITEM_CHECK);
-    menu->AppendSeparator();
-    wxMenu *submenu = new wxMenu;
-    submenu->Append(PU_SUB1, _T("One submenu"));
-    submenu->AppendSeparator();
-    submenu->Append(PU_SUB2, _T("Another submenu"));
-    menu->Append(PU_SUBMAIN, _T("Submenu"), submenu);
-#ifndef __WXMAC_OSX__ /*Mac has built-in quit menu*/
-    menu->AppendSeparator();
+    menu->Append(PU_NEW_ICON,_T("&Set New Icon"));
+    menu->Append(PU_CHECKMARK,  _T("Checkmark"),wxT( "" ), wxITEM_CHECK );
     menu->Append(PU_EXIT,    _T("E&xit"));
-#endif
+
     return menu;
 }
 

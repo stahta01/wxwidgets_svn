@@ -22,12 +22,12 @@
 
 #if wxUSE_SPINBTN 
 
-#include "wx/containr.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "spinctlg.h"
+#endif
 
 class WXDLLEXPORT wxSpinButton;
 class WXDLLEXPORT wxTextCtrl;
-class WXDLLEXPORT wxSpinCtrlText;
-class WXDLLEXPORT wxSpinCtrlButton;
 
 // ----------------------------------------------------------------------------
 // wxSpinCtrl is a combination of wxTextCtrl and wxSpinButton
@@ -80,6 +80,7 @@ public:
     // forward these functions to all subcontrols
     virtual bool Enable(bool enable = TRUE);
     virtual bool Show(bool show = TRUE);
+    virtual void SetFocus();
 
     // get the subcontrols
     wxTextCtrl *GetText() const { return m_text; }
@@ -92,8 +93,6 @@ public:
     // TRUE or return FALSE if the text ctrl doesn't contain a number or if the
     // number is out of range
     bool GetTextValue(int *val) const;
-
-    WX_DECLARE_CONTROL_CONTAINER();
 
 protected:
     // override the base class virtuals involved into geometry calculations
@@ -108,12 +107,7 @@ private:
     wxTextCtrl *m_text;
     wxSpinButton *m_btn;
     
-    friend class wxSpinCtrlText;
-    friend class wxSpinCtrlButton;
-    
-    int            m_oldValue;
 private:
-    DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxSpinCtrl)
 };
 

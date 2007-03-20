@@ -34,8 +34,6 @@
     #define _WIN32_IE 0x0600
 #endif // !defined(_WIN32_IE)
 
-#include "wx/msw/wrapwin.h"
-
 #include <commctrl.h>
 
 // define things which might be missing from our commctrl.h
@@ -51,12 +49,10 @@ inline void wxSetCCUnicodeFormat(HWND WXUNUSED_IN_WINCE(hwnd))
 #endif // __WXWINCE__/!__WXWINCE__
 }
 
-#if wxUSE_GUI
 // Return the default font for the common controls
 //
 // this is implemented in msw/settings.cpp
-class wxFont;
 extern wxFont wxGetCCDefaultFont();
-#endif
 
 #endif // _WX_MSW_WRAPCCTL_H_
+

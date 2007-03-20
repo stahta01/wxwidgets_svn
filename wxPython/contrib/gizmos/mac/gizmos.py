@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 """
@@ -7,17 +7,17 @@ Various *gizmo* classes: `DynamicSashWindow`, `EditableListBox`,
 """
 
 import _gizmos
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -26,15 +26,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -48,8 +42,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -67,37 +60,59 @@ wxEVT_DYNAMIC_SASH_SPLIT = _gizmos.wxEVT_DYNAMIC_SASH_SPLIT
 wxEVT_DYNAMIC_SASH_UNIFY = _gizmos.wxEVT_DYNAMIC_SASH_UNIFY
 class DynamicSashSplitEvent(_core.CommandEvent):
     """Proxy of C++ DynamicSashSplitEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDynamicSashSplitEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, Object target) -> DynamicSashSplitEvent"""
-        _gizmos.DynamicSashSplitEvent_swiginit(self,_gizmos.new_DynamicSashSplitEvent(*args, **kwargs))
-_gizmos.DynamicSashSplitEvent_swigregister(DynamicSashSplitEvent)
+        newobj = _gizmos.new_DynamicSashSplitEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class DynamicSashSplitEventPtr(DynamicSashSplitEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DynamicSashSplitEvent
+_gizmos.DynamicSashSplitEvent_swigregister(DynamicSashSplitEventPtr)
 cvar = _gizmos.cvar
 DynamicSashNameStr = cvar.DynamicSashNameStr
 EditableListBoxNameStr = cvar.EditableListBoxNameStr
+TreeListCtrlNameStr = cvar.TreeListCtrlNameStr
 StaticPictureNameStr = cvar.StaticPictureNameStr
 
 class DynamicSashUnifyEvent(_core.CommandEvent):
     """Proxy of C++ DynamicSashUnifyEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDynamicSashUnifyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, Object target) -> DynamicSashUnifyEvent"""
-        _gizmos.DynamicSashUnifyEvent_swiginit(self,_gizmos.new_DynamicSashUnifyEvent(*args, **kwargs))
-_gizmos.DynamicSashUnifyEvent_swigregister(DynamicSashUnifyEvent)
+        newobj = _gizmos.new_DynamicSashUnifyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class DynamicSashUnifyEventPtr(DynamicSashUnifyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DynamicSashUnifyEvent
+_gizmos.DynamicSashUnifyEvent_swigregister(DynamicSashUnifyEventPtr)
 
 class DynamicSashWindow(_core.Window):
     """Proxy of C++ DynamicSashWindow class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDynamicSashWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=wxCLIP_CHILDREN|wxDS_MANAGE_SCROLLBARS|wxDS_DRAG_CORNER, 
             String name=DynamicSashNameStr) -> DynamicSashWindow
         """
-        _gizmos.DynamicSashWindow_swiginit(self,_gizmos.new_DynamicSashWindow(*args, **kwargs))
+        newobj = _gizmos.new_DynamicSashWindow(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -116,11 +131,18 @@ class DynamicSashWindow(_core.Window):
         """GetVScrollBar(self, Window child) -> ScrollBar"""
         return _gizmos.DynamicSashWindow_GetVScrollBar(*args, **kwargs)
 
-_gizmos.DynamicSashWindow_swigregister(DynamicSashWindow)
+
+class DynamicSashWindowPtr(DynamicSashWindow):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DynamicSashWindow
+_gizmos.DynamicSashWindow_swigregister(DynamicSashWindowPtr)
 
 def PreDynamicSashWindow(*args, **kwargs):
     """PreDynamicSashWindow() -> DynamicSashWindow"""
     val = _gizmos.new_PreDynamicSashWindow(*args, **kwargs)
+    val.thisown = 1
     return val
 
 EVT_DYNAMIC_SASH_SPLIT = wx.PyEventBinder( wxEVT_DYNAMIC_SASH_SPLIT, 1 )
@@ -131,16 +153,19 @@ EL_ALLOW_EDIT = _gizmos.EL_ALLOW_EDIT
 EL_ALLOW_DELETE = _gizmos.EL_ALLOW_DELETE
 class EditableListBox(_windows.Panel):
     """Proxy of C++ EditableListBox class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxEditableListBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=wxEL_ALLOW_NEW|wxEL_ALLOW_EDIT|wxEL_ALLOW_DELETE, 
             String name=EditableListBoxNameStr) -> EditableListBox
         """
-        _gizmos.EditableListBox_swiginit(self,_gizmos.new_EditableListBox(*args, **kwargs))
+        newobj = _gizmos.new_EditableListBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def SetStrings(*args, **kwargs):
@@ -175,25 +200,27 @@ class EditableListBox(_windows.Panel):
         """GetEditButton(self) -> BitmapButton"""
         return _gizmos.EditableListBox_GetEditButton(*args, **kwargs)
 
-    DelButton = property(GetDelButton,doc="See `GetDelButton`") 
-    DownButton = property(GetDownButton,doc="See `GetDownButton`") 
-    EditButton = property(GetEditButton,doc="See `GetEditButton`") 
-    ListCtrl = property(GetListCtrl,doc="See `GetListCtrl`") 
-    NewButton = property(GetNewButton,doc="See `GetNewButton`") 
-    Strings = property(GetStrings,SetStrings,doc="See `GetStrings` and `SetStrings`") 
-    UpButton = property(GetUpButton,doc="See `GetUpButton`") 
-_gizmos.EditableListBox_swigregister(EditableListBox)
+
+class EditableListBoxPtr(EditableListBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = EditableListBox
+_gizmos.EditableListBox_swigregister(EditableListBoxPtr)
 
 class RemotelyScrolledTreeCtrl(_controls.TreeCtrl):
     """Proxy of C++ RemotelyScrolledTreeCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxRemotelyScrolledTreeCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=TR_HAS_BUTTONS) -> RemotelyScrolledTreeCtrl
         """
-        _gizmos.RemotelyScrolledTreeCtrl_swiginit(self,_gizmos.new_RemotelyScrolledTreeCtrl(*args, **kwargs))
+        newobj = _gizmos.new_RemotelyScrolledTreeCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def HideVScrollbar(*args, **kwargs):
@@ -220,21 +247,28 @@ class RemotelyScrolledTreeCtrl(_controls.TreeCtrl):
         """GetCompanionWindow(self) -> Window"""
         return _gizmos.RemotelyScrolledTreeCtrl_GetCompanionWindow(*args, **kwargs)
 
-    CompanionWindow = property(GetCompanionWindow,SetCompanionWindow,doc="See `GetCompanionWindow` and `SetCompanionWindow`") 
-    ScrolledWindow = property(GetScrolledWindow,doc="See `GetScrolledWindow`") 
-_gizmos.RemotelyScrolledTreeCtrl_swigregister(RemotelyScrolledTreeCtrl)
+
+class RemotelyScrolledTreeCtrlPtr(RemotelyScrolledTreeCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = RemotelyScrolledTreeCtrl
+_gizmos.RemotelyScrolledTreeCtrl_swigregister(RemotelyScrolledTreeCtrlPtr)
 
 class TreeCompanionWindow(_core.Window):
     """Proxy of C++ TreeCompanionWindow class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyTreeCompanionWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0) -> TreeCompanionWindow
         """
-        _gizmos.TreeCompanionWindow_swiginit(self,_gizmos.new_TreeCompanionWindow(*args, **kwargs))
-        self._setOORInfo(self);TreeCompanionWindow._setCallbackInfo(self, self, TreeCompanionWindow)
+        newobj = _gizmos.new_TreeCompanionWindow(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setOORInfo(self);self._setCallbackInfo(self, TreeCompanionWindow)
 
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
@@ -248,36 +282,59 @@ class TreeCompanionWindow(_core.Window):
         """SetTreeCtrl(self, RemotelyScrolledTreeCtrl treeCtrl)"""
         return _gizmos.TreeCompanionWindow_SetTreeCtrl(*args, **kwargs)
 
-    TreeCtrl = property(GetTreeCtrl,SetTreeCtrl,doc="See `GetTreeCtrl` and `SetTreeCtrl`") 
-_gizmos.TreeCompanionWindow_swigregister(TreeCompanionWindow)
+
+class TreeCompanionWindowPtr(TreeCompanionWindow):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeCompanionWindow
+_gizmos.TreeCompanionWindow_swigregister(TreeCompanionWindowPtr)
 
 class ThinSplitterWindow(_windows.SplitterWindow):
     """Proxy of C++ ThinSplitterWindow class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxThinSplitterWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=wxSP_3D|wxCLIP_CHILDREN) -> ThinSplitterWindow
         """
-        _gizmos.ThinSplitterWindow_swiginit(self,_gizmos.new_ThinSplitterWindow(*args, **kwargs))
+        newobj = _gizmos.new_ThinSplitterWindow(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
-_gizmos.ThinSplitterWindow_swigregister(ThinSplitterWindow)
+
+class ThinSplitterWindowPtr(ThinSplitterWindow):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ThinSplitterWindow
+_gizmos.ThinSplitterWindow_swigregister(ThinSplitterWindowPtr)
 
 class SplitterScrolledWindow(_windows.ScrolledWindow):
     """Proxy of C++ SplitterScrolledWindow class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSplitterScrolledWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0) -> SplitterScrolledWindow
         """
-        _gizmos.SplitterScrolledWindow_swiginit(self,_gizmos.new_SplitterScrolledWindow(*args, **kwargs))
+        newobj = _gizmos.new_SplitterScrolledWindow(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
-_gizmos.SplitterScrolledWindow_swigregister(SplitterScrolledWindow)
+
+class SplitterScrolledWindowPtr(SplitterScrolledWindow):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SplitterScrolledWindow
+_gizmos.SplitterScrolledWindow_swigregister(SplitterScrolledWindowPtr)
 
 LED_ALIGN_LEFT = _gizmos.LED_ALIGN_LEFT
 LED_ALIGN_RIGHT = _gizmos.LED_ALIGN_RIGHT
@@ -286,14 +343,17 @@ LED_ALIGN_MASK = _gizmos.LED_ALIGN_MASK
 LED_DRAW_FADED = _gizmos.LED_DRAW_FADED
 class LEDNumberCtrl(_core.Control):
     """Proxy of C++ LEDNumberCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxLEDNumberCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=wxLED_ALIGN_LEFT|wxLED_DRAW_FADED) -> LEDNumberCtrl
         """
-        _gizmos.LEDNumberCtrl_swiginit(self,_gizmos.new_LEDNumberCtrl(*args, **kwargs))
+        newobj = _gizmos.new_LEDNumberCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -306,11 +366,7 @@ class LEDNumberCtrl(_core.Control):
         return _gizmos.LEDNumberCtrl_Create(*args, **kwargs)
 
     def GetAlignment(*args, **kwargs):
-        """
-        GetAlignment(self) -> int
-
-        Get the control alignment (left/right/centre, top/bottom/centre)
-        """
+        """GetAlignment(self) -> int"""
         return _gizmos.LEDNumberCtrl_GetAlignment(*args, **kwargs)
 
     def GetDrawFaded(*args, **kwargs):
@@ -333,60 +389,48 @@ class LEDNumberCtrl(_core.Control):
         """SetValue(self, String Value, bool Redraw=True)"""
         return _gizmos.LEDNumberCtrl_SetValue(*args, **kwargs)
 
-    Alignment = property(GetAlignment,SetAlignment,doc="See `GetAlignment` and `SetAlignment`") 
-    DrawFaded = property(GetDrawFaded,SetDrawFaded,doc="See `GetDrawFaded` and `SetDrawFaded`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_gizmos.LEDNumberCtrl_swigregister(LEDNumberCtrl)
+
+class LEDNumberCtrlPtr(LEDNumberCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = LEDNumberCtrl
+_gizmos.LEDNumberCtrl_swigregister(LEDNumberCtrlPtr)
 
 def PreLEDNumberCtrl(*args, **kwargs):
     """PreLEDNumberCtrl() -> LEDNumberCtrl"""
     val = _gizmos.new_PreLEDNumberCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
-#---------------------------------------------------------------------------
-
-DEFAULT_COL_WIDTH = _gizmos.DEFAULT_COL_WIDTH
-TL_MODE_NAV_FULLTREE = _gizmos.TL_MODE_NAV_FULLTREE
-TL_MODE_NAV_EXPANDED = _gizmos.TL_MODE_NAV_EXPANDED
-TL_MODE_NAV_VISIBLE = _gizmos.TL_MODE_NAV_VISIBLE
-TL_MODE_NAV_LEVEL = _gizmos.TL_MODE_NAV_LEVEL
-TL_MODE_FIND_EXACT = _gizmos.TL_MODE_FIND_EXACT
-TL_MODE_FIND_PARTIAL = _gizmos.TL_MODE_FIND_PARTIAL
-TL_MODE_FIND_NOCASE = _gizmos.TL_MODE_FIND_NOCASE
+TL_ALIGN_LEFT = _gizmos.TL_ALIGN_LEFT
+TL_ALIGN_RIGHT = _gizmos.TL_ALIGN_RIGHT
+TL_ALIGN_CENTER = _gizmos.TL_ALIGN_CENTER
 TREE_HITTEST_ONITEMCOLUMN = _gizmos.TREE_HITTEST_ONITEMCOLUMN
-wx.TREE_HITTEST_ONITEMCOLUMN = TREE_HITTEST_ONITEMCOLUMN 
-TR_COLUMN_LINES = _gizmos.TR_COLUMN_LINES
-TR_VIRTUAL = _gizmos.TR_VIRTUAL
-wx.TR_COLUMN_LINES = TR_COLUMN_LINES
-wxTR_VIRTUAL = TR_VIRTUAL    
-
-#// Compatibility aliases for old names/values
-TL_ALIGN_LEFT   = wx.ALIGN_LEFT
-TL_ALIGN_RIGHT  = wx.ALIGN_RIGHT
-TL_ALIGN_CENTER = wx.ALIGN_CENTER
-
-TL_SEARCH_VISIBLE = TL_MODE_NAV_VISIBLE
-TL_SEARCH_LEVEL   = TL_MODE_NAV_LEVEL
-TL_SEARCH_FULL    = TL_MODE_FIND_EXACT
-TL_SEARCH_PARTIAL = TL_MODE_FIND_PARTIAL
-TL_SEARCH_NOCASE  = TL_MODE_FIND_NOCASE
-
-TR_DONT_ADJUST_MAC = 0
-wx.TR_DONT_ADJUST_MAC = TR_DONT_ADJUST_MAC
-
+TL_SEARCH_VISIBLE = _gizmos.TL_SEARCH_VISIBLE
+TL_SEARCH_LEVEL = _gizmos.TL_SEARCH_LEVEL
+TL_SEARCH_FULL = _gizmos.TL_SEARCH_FULL
+TL_SEARCH_PARTIAL = _gizmos.TL_SEARCH_PARTIAL
+TL_SEARCH_NOCASE = _gizmos.TL_SEARCH_NOCASE
+TR_DONT_ADJUST_MAC = _gizmos.TR_DONT_ADJUST_MAC
+wx.TR_DONT_ADJUST_MAC = TR_DONT_ADJUST_MAC 
 class TreeListColumnInfo(_core.Object):
     """Proxy of C++ TreeListColumnInfo class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTreeListColumnInfo instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, String text=EmptyString, int width=DEFAULT_COL_WIDTH, 
-            int flag=ALIGN_LEFT, int image=-1, bool shown=True, 
-            bool edit=False) -> TreeListColumnInfo
+        __init__(self, String text=EmptyString, int image=-1, size_t width=100, 
+            bool shown=True, int alignment=TL_ALIGN_LEFT) -> TreeListColumnInfo
         """
-        _gizmos.TreeListColumnInfo_swiginit(self,_gizmos.new_TreeListColumnInfo(*args, **kwargs))
-    __swig_destroy__ = _gizmos.delete_TreeListColumnInfo
-    __del__ = lambda self : None;
+        newobj = _gizmos.new_TreeListColumnInfo(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def GetShown(*args, **kwargs):
+        """GetShown(self) -> bool"""
+        return _gizmos.TreeListColumnInfo_GetShown(*args, **kwargs)
+
     def GetAlignment(*args, **kwargs):
         """GetAlignment(self) -> int"""
         return _gizmos.TreeListColumnInfo_GetAlignment(*args, **kwargs)
@@ -407,13 +451,9 @@ class TreeListColumnInfo(_core.Object):
         """GetWidth(self) -> size_t"""
         return _gizmos.TreeListColumnInfo_GetWidth(*args, **kwargs)
 
-    def IsEditable(*args, **kwargs):
-        """IsEditable(self) -> bool"""
-        return _gizmos.TreeListColumnInfo_IsEditable(*args, **kwargs)
-
-    def IsShown(*args, **kwargs):
-        """IsShown(self) -> bool"""
-        return _gizmos.TreeListColumnInfo_IsShown(*args, **kwargs)
+    def SetShown(*args, **kwargs):
+        """SetShown(self, bool shown)"""
+        return _gizmos.TreeListColumnInfo_SetShown(*args, **kwargs)
 
     def SetAlignment(*args, **kwargs):
         """SetAlignment(self, int alignment)"""
@@ -435,37 +475,30 @@ class TreeListColumnInfo(_core.Object):
         """SetWidth(self, size_t with)"""
         return _gizmos.TreeListColumnInfo_SetWidth(*args, **kwargs)
 
-    def SetEditable(*args, **kwargs):
-        """SetEditable(self, bool edit)"""
-        return _gizmos.TreeListColumnInfo_SetEditable(*args, **kwargs)
 
-    def SetShown(*args, **kwargs):
-        """SetShown(self, bool shown)"""
-        return _gizmos.TreeListColumnInfo_SetShown(*args, **kwargs)
-
-    Alignment = property(GetAlignment,SetAlignment,doc="See `GetAlignment` and `SetAlignment`") 
-    Image = property(GetImage,SetImage,doc="See `GetImage` and `SetImage`") 
-    SelectedImage = property(GetSelectedImage,SetSelectedImage,doc="See `GetSelectedImage` and `SetSelectedImage`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-    Width = property(GetWidth,SetWidth,doc="See `GetWidth` and `SetWidth`") 
-    Editable = property(IsEditable,SetEditable) 
-    Shown = property(IsShown,SetShown) 
-_gizmos.TreeListColumnInfo_swigregister(TreeListColumnInfo)
-TreeListCtrlNameStr = cvar.TreeListCtrlNameStr
+class TreeListColumnInfoPtr(TreeListColumnInfo):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeListColumnInfo
+_gizmos.TreeListColumnInfo_swigregister(TreeListColumnInfoPtr)
 
 class TreeListCtrl(_core.Control):
     """Proxy of C++ TreeListCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyTreeListCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=TR_DEFAULT_STYLE, 
             Validator validator=DefaultValidator, 
             String name=TreeListCtrlNameStr) -> TreeListCtrl
         """
-        _gizmos.TreeListCtrl_swiginit(self,_gizmos.new_TreeListCtrl(*args, **kwargs))
-        self._setOORInfo(self);TreeListCtrl._setCallbackInfo(self, self, TreeListCtrl)
+        newobj = _gizmos.new_TreeListCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setOORInfo(self);self._setCallbackInfo(self, TreeListCtrl)
 
     def Create(*args, **kwargs):
         """
@@ -539,10 +572,7 @@ class TreeListCtrl(_core.Control):
         return _gizmos.TreeListCtrl_AssignButtonsImageList(*args, **kwargs)
 
     def AddColumn(*args, **kwargs):
-        """
-        AddColumn(self, String text, int width=DEFAULT_COL_WIDTH, int flag=ALIGN_LEFT, 
-            int image=-1, bool shown=True, bool edit=False)
-        """
+        """AddColumn(self, String text)"""
         return _gizmos.TreeListCtrl_AddColumn(*args, **kwargs)
 
     def AddColumnInfo(*args, **kwargs):
@@ -550,11 +580,7 @@ class TreeListCtrl(_core.Control):
         return _gizmos.TreeListCtrl_AddColumnInfo(*args, **kwargs)
 
     def InsertColumn(*args, **kwargs):
-        """
-        InsertColumn(self, int before, String text, int width=DEFAULT_COL_WIDTH, 
-            int flag=ALIGN_LEFT, int image=-1, bool shown=True, 
-            bool edit=False)
-        """
+        """InsertColumn(self, size_t before, String text)"""
         return _gizmos.TreeListCtrl_InsertColumn(*args, **kwargs)
 
     def InsertColumnInfo(*args, **kwargs):
@@ -569,6 +595,14 @@ class TreeListCtrl(_core.Control):
         """GetColumnCount(self) -> size_t"""
         return _gizmos.TreeListCtrl_GetColumnCount(*args, **kwargs)
 
+    def SetColumnWidth(*args, **kwargs):
+        """SetColumnWidth(self, size_t column, size_t width)"""
+        return _gizmos.TreeListCtrl_SetColumnWidth(*args, **kwargs)
+
+    def GetColumnWidth(*args, **kwargs):
+        """GetColumnWidth(self, size_t column) -> int"""
+        return _gizmos.TreeListCtrl_GetColumnWidth(*args, **kwargs)
+
     def SetMainColumn(*args, **kwargs):
         """SetMainColumn(self, size_t column)"""
         return _gizmos.TreeListCtrl_SetMainColumn(*args, **kwargs)
@@ -577,62 +611,45 @@ class TreeListCtrl(_core.Control):
         """GetMainColumn(self) -> size_t"""
         return _gizmos.TreeListCtrl_GetMainColumn(*args, **kwargs)
 
-    def SetColumn(*args, **kwargs):
-        """SetColumn(self, int column, TreeListColumnInfo colInfo)"""
-        return _gizmos.TreeListCtrl_SetColumn(*args, **kwargs)
-
-    def GetColumn(*args, **kwargs):
-        """GetColumn(self, int column) -> TreeListColumnInfo"""
-        return _gizmos.TreeListCtrl_GetColumn(*args, **kwargs)
-
     def SetColumnText(*args, **kwargs):
-        """SetColumnText(self, int column, String text)"""
+        """SetColumnText(self, size_t column, String text)"""
         return _gizmos.TreeListCtrl_SetColumnText(*args, **kwargs)
 
     def GetColumnText(*args, **kwargs):
-        """GetColumnText(self, int column) -> String"""
+        """GetColumnText(self, size_t column) -> String"""
         return _gizmos.TreeListCtrl_GetColumnText(*args, **kwargs)
 
-    def SetColumnWidth(*args, **kwargs):
-        """SetColumnWidth(self, int column, int width)"""
-        return _gizmos.TreeListCtrl_SetColumnWidth(*args, **kwargs)
+    def SetColumn(*args, **kwargs):
+        """SetColumn(self, size_t column, TreeListColumnInfo info)"""
+        return _gizmos.TreeListCtrl_SetColumn(*args, **kwargs)
 
-    def GetColumnWidth(*args, **kwargs):
-        """GetColumnWidth(self, int column) -> int"""
-        return _gizmos.TreeListCtrl_GetColumnWidth(*args, **kwargs)
+    def GetColumn(*args, **kwargs):
+        """GetColumn(self, size_t column) -> TreeListColumnInfo"""
+        return _gizmos.TreeListCtrl_GetColumn(*args, **kwargs)
 
     def SetColumnAlignment(*args, **kwargs):
-        """SetColumnAlignment(self, int column, int flag)"""
+        """SetColumnAlignment(self, size_t column, int align)"""
         return _gizmos.TreeListCtrl_SetColumnAlignment(*args, **kwargs)
 
     def GetColumnAlignment(*args, **kwargs):
-        """GetColumnAlignment(self, int column) -> int"""
+        """GetColumnAlignment(self, size_t column) -> int"""
         return _gizmos.TreeListCtrl_GetColumnAlignment(*args, **kwargs)
 
     def SetColumnImage(*args, **kwargs):
-        """SetColumnImage(self, int column, int image)"""
+        """SetColumnImage(self, size_t column, int image)"""
         return _gizmos.TreeListCtrl_SetColumnImage(*args, **kwargs)
 
     def GetColumnImage(*args, **kwargs):
-        """GetColumnImage(self, int column) -> int"""
+        """GetColumnImage(self, size_t column) -> int"""
         return _gizmos.TreeListCtrl_GetColumnImage(*args, **kwargs)
 
-    def SetColumnShown(*args, **kwargs):
-        """SetColumnShown(self, int column, bool shown=True)"""
-        return _gizmos.TreeListCtrl_SetColumnShown(*args, **kwargs)
+    def ShowColumn(*args, **kwargs):
+        """ShowColumn(self, size_t column, bool shown)"""
+        return _gizmos.TreeListCtrl_ShowColumn(*args, **kwargs)
 
     def IsColumnShown(*args, **kwargs):
-        """IsColumnShown(self, int column) -> bool"""
+        """IsColumnShown(self, size_t column) -> bool"""
         return _gizmos.TreeListCtrl_IsColumnShown(*args, **kwargs)
-
-    ShowColumn = SetColumnShown 
-    def SetColumnEditable(*args, **kwargs):
-        """SetColumnEditable(self, int column, bool edit=True)"""
-        return _gizmos.TreeListCtrl_SetColumnEditable(*args, **kwargs)
-
-    def IsColumnEditable(*args, **kwargs):
-        """IsColumnEditable(self, int column) -> bool"""
-        return _gizmos.TreeListCtrl_IsColumnEditable(*args, **kwargs)
 
     def GetItemText(*args, **kwargs):
         """GetItemText(self, TreeItemId item, int column=-1) -> String"""
@@ -668,22 +685,6 @@ class TreeListCtrl(_core.Control):
 
     GetPyData = GetItemPyData 
     SetPyData = SetItemPyData 
-    def GetItemBold(*args, **kwargs):
-        """GetItemBold(self, TreeItemId item) -> bool"""
-        return _gizmos.TreeListCtrl_GetItemBold(*args, **kwargs)
-
-    def GetItemTextColour(*args, **kwargs):
-        """GetItemTextColour(self, TreeItemId item) -> Colour"""
-        return _gizmos.TreeListCtrl_GetItemTextColour(*args, **kwargs)
-
-    def GetItemBackgroundColour(*args, **kwargs):
-        """GetItemBackgroundColour(self, TreeItemId item) -> Colour"""
-        return _gizmos.TreeListCtrl_GetItemBackgroundColour(*args, **kwargs)
-
-    def GetItemFont(*args, **kwargs):
-        """GetItemFont(self, TreeItemId item) -> Font"""
-        return _gizmos.TreeListCtrl_GetItemFont(*args, **kwargs)
-
     def SetItemHasChildren(*args, **kwargs):
         """SetItemHasChildren(self, TreeItemId item, bool has=True)"""
         return _gizmos.TreeListCtrl_SetItemHasChildren(*args, **kwargs)
@@ -704,15 +705,30 @@ class TreeListCtrl(_core.Control):
         """SetItemFont(self, TreeItemId item, Font font)"""
         return _gizmos.TreeListCtrl_SetItemFont(*args, **kwargs)
 
+    def GetItemBold(*args, **kwargs):
+        """GetItemBold(self, TreeItemId item) -> bool"""
+        return _gizmos.TreeListCtrl_GetItemBold(*args, **kwargs)
+
+    def GetItemTextColour(*args, **kwargs):
+        """GetItemTextColour(self, TreeItemId item) -> Colour"""
+        return _gizmos.TreeListCtrl_GetItemTextColour(*args, **kwargs)
+
+    def GetItemBackgroundColour(*args, **kwargs):
+        """GetItemBackgroundColour(self, TreeItemId item) -> Colour"""
+        return _gizmos.TreeListCtrl_GetItemBackgroundColour(*args, **kwargs)
+
+    def GetItemFont(*args, **kwargs):
+        """GetItemFont(self, TreeItemId item) -> Font"""
+        return _gizmos.TreeListCtrl_GetItemFont(*args, **kwargs)
+
     def IsVisible(*args, **kwargs):
         """IsVisible(self, TreeItemId item) -> bool"""
         return _gizmos.TreeListCtrl_IsVisible(*args, **kwargs)
 
-    def HasChildren(*args, **kwargs):
-        """HasChildren(self, TreeItemId item) -> bool"""
-        return _gizmos.TreeListCtrl_HasChildren(*args, **kwargs)
+    def ItemHasChildren(*args, **kwargs):
+        """ItemHasChildren(self, TreeItemId item) -> bool"""
+        return _gizmos.TreeListCtrl_ItemHasChildren(*args, **kwargs)
 
-    ItemHasChildren = HasChildren 
     def IsExpanded(*args, **kwargs):
         """IsExpanded(self, TreeItemId item) -> bool"""
         return _gizmos.TreeListCtrl_IsExpanded(*args, **kwargs)
@@ -754,12 +770,8 @@ class TreeListCtrl(_core.Control):
         return _gizmos.TreeListCtrl_GetNextChild(*args, **kwargs)
 
     def GetLastChild(*args, **kwargs):
-        """GetLastChild(self, TreeItemId item) -> PyObject"""
+        """GetLastChild(self, TreeItemId item) -> TreeItemId"""
         return _gizmos.TreeListCtrl_GetLastChild(*args, **kwargs)
-
-    def GetPrevChild(*args, **kwargs):
-        """GetPrevChild(self, TreeItemId item, void cookie) -> PyObject"""
-        return _gizmos.TreeListCtrl_GetPrevChild(*args, **kwargs)
 
     def GetNextSibling(*args, **kwargs):
         """GetNextSibling(self, TreeItemId item) -> TreeItemId"""
@@ -769,37 +781,21 @@ class TreeListCtrl(_core.Control):
         """GetPrevSibling(self, TreeItemId item) -> TreeItemId"""
         return _gizmos.TreeListCtrl_GetPrevSibling(*args, **kwargs)
 
-    def GetNext(*args, **kwargs):
-        """GetNext(self, TreeItemId item) -> TreeItemId"""
-        return _gizmos.TreeListCtrl_GetNext(*args, **kwargs)
-
-    def GetPrev(*args, **kwargs):
-        """GetPrev(self, TreeItemId item) -> TreeItemId"""
-        return _gizmos.TreeListCtrl_GetPrev(*args, **kwargs)
-
-    def GetFirstExpandedItem(*args, **kwargs):
-        """GetFirstExpandedItem(self) -> TreeItemId"""
-        return _gizmos.TreeListCtrl_GetFirstExpandedItem(*args, **kwargs)
-
-    def GetNextExpanded(*args, **kwargs):
-        """GetNextExpanded(self, TreeItemId item) -> TreeItemId"""
-        return _gizmos.TreeListCtrl_GetNextExpanded(*args, **kwargs)
-
-    def GetPrevExpanded(*args, **kwargs):
-        """GetPrevExpanded(self, TreeItemId item) -> TreeItemId"""
-        return _gizmos.TreeListCtrl_GetPrevExpanded(*args, **kwargs)
-
     def GetFirstVisibleItem(*args, **kwargs):
-        """GetFirstVisibleItem(self, bool fullRow=False) -> TreeItemId"""
+        """GetFirstVisibleItem(self) -> TreeItemId"""
         return _gizmos.TreeListCtrl_GetFirstVisibleItem(*args, **kwargs)
 
     def GetNextVisible(*args, **kwargs):
-        """GetNextVisible(self, TreeItemId item, bool fullRow=False) -> TreeItemId"""
+        """GetNextVisible(self, TreeItemId item) -> TreeItemId"""
         return _gizmos.TreeListCtrl_GetNextVisible(*args, **kwargs)
 
     def GetPrevVisible(*args, **kwargs):
-        """GetPrevVisible(self, TreeItemId item, bool fullRow=False) -> TreeItemId"""
+        """GetPrevVisible(self, TreeItemId item) -> TreeItemId"""
         return _gizmos.TreeListCtrl_GetPrevVisible(*args, **kwargs)
+
+    def GetNext(*args, **kwargs):
+        """GetNext(self, TreeItemId item) -> TreeItemId"""
+        return _gizmos.TreeListCtrl_GetNext(*args, **kwargs)
 
     def AddRoot(*args, **kwargs):
         """AddRoot(self, String text, int image=-1, int selectedImage=-1, TreeItemData data=None) -> TreeItemId"""
@@ -841,11 +837,10 @@ class TreeListCtrl(_core.Control):
         """DeleteChildren(self, TreeItemId item)"""
         return _gizmos.TreeListCtrl_DeleteChildren(*args, **kwargs)
 
-    def DeleteRoot(*args, **kwargs):
-        """DeleteRoot(self)"""
-        return _gizmos.TreeListCtrl_DeleteRoot(*args, **kwargs)
+    def DeleteAllItems(*args, **kwargs):
+        """DeleteAllItems(self)"""
+        return _gizmos.TreeListCtrl_DeleteAllItems(*args, **kwargs)
 
-    DeleteAllItems = DeleteRoot 
     def Expand(*args, **kwargs):
         """Expand(self, TreeItemId item)"""
         return _gizmos.TreeListCtrl_Expand(*args, **kwargs)
@@ -875,14 +870,11 @@ class TreeListCtrl(_core.Control):
         return _gizmos.TreeListCtrl_UnselectAll(*args, **kwargs)
 
     def SelectItem(*args, **kwargs):
-        """
-        SelectItem(self, TreeItemId item, TreeItemId last=(wxTreeItemId *) NULL, 
-            bool unselect_others=True)
-        """
+        """SelectItem(self, TreeItemId item, bool unselect_others=True, bool extended_select=False)"""
         return _gizmos.TreeListCtrl_SelectItem(*args, **kwargs)
 
     def SelectAll(*args, **kwargs):
-        """SelectAll(self)"""
+        """SelectAll(self, bool extended_select=False)"""
         return _gizmos.TreeListCtrl_SelectAll(*args, **kwargs)
 
     def EnsureVisible(*args, **kwargs):
@@ -902,10 +894,13 @@ class TreeListCtrl(_core.Control):
         return _gizmos.TreeListCtrl_GetBoundingRect(*args, **kwargs)
 
     def EditLabel(*args, **kwargs):
-        """EditLabel(self, TreeItemId item, int column=-1)"""
+        """EditLabel(self, TreeItemId item)"""
         return _gizmos.TreeListCtrl_EditLabel(*args, **kwargs)
 
-    Edit = EditLabel 
+    def Edit(*args, **kwargs):
+        """Edit(self, TreeItemId item)"""
+        return _gizmos.TreeListCtrl_Edit(*args, **kwargs)
+
     def SortChildren(*args, **kwargs):
         """SortChildren(self, TreeItemId item)"""
         return _gizmos.TreeListCtrl_SortChildren(*args, **kwargs)
@@ -913,10 +908,6 @@ class TreeListCtrl(_core.Control):
     def FindItem(*args, **kwargs):
         """FindItem(self, TreeItemId item, String str, int flags=0) -> TreeItemId"""
         return _gizmos.TreeListCtrl_FindItem(*args, **kwargs)
-
-    def SetDragItem(*args, **kwargs):
-        """SetDragItem(self, TreeItemId item=(wxTreeItemId *) NULL)"""
-        return _gizmos.TreeListCtrl_SetDragItem(*args, **kwargs)
 
     def GetHeaderWindow(*args, **kwargs):
         """GetHeaderWindow(self) -> Window"""
@@ -926,25 +917,18 @@ class TreeListCtrl(_core.Control):
         """GetMainWindow(self) -> ScrolledWindow"""
         return _gizmos.TreeListCtrl_GetMainWindow(*args, **kwargs)
 
-    ButtonsImageList = property(GetButtonsImageList,SetButtonsImageList,doc="See `GetButtonsImageList` and `SetButtonsImageList`") 
-    ColumnCount = property(GetColumnCount,doc="See `GetColumnCount`") 
-    Count = property(GetCount,doc="See `GetCount`") 
-    HeaderWindow = property(GetHeaderWindow,doc="See `GetHeaderWindow`") 
-    ImageList = property(GetImageList,SetImageList,doc="See `GetImageList` and `SetImageList`") 
-    Indent = property(GetIndent,SetIndent,doc="See `GetIndent` and `SetIndent`") 
-    LineSpacing = property(GetLineSpacing,SetLineSpacing,doc="See `GetLineSpacing` and `SetLineSpacing`") 
-    MainColumn = property(GetMainColumn,SetMainColumn,doc="See `GetMainColumn` and `SetMainColumn`") 
-    MainWindow = property(GetMainWindow,doc="See `GetMainWindow`") 
-    Next = property(GetNext,doc="See `GetNext`") 
-    RootItem = property(GetRootItem,doc="See `GetRootItem`") 
-    Selection = property(GetSelection,doc="See `GetSelection`") 
-    Selections = property(GetSelections,doc="See `GetSelections`") 
-    StateImageList = property(GetStateImageList,SetStateImageList,doc="See `GetStateImageList` and `SetStateImageList`") 
-_gizmos.TreeListCtrl_swigregister(TreeListCtrl)
+
+class TreeListCtrlPtr(TreeListCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeListCtrl
+_gizmos.TreeListCtrl_swigregister(TreeListCtrlPtr)
 
 def PreTreeListCtrl(*args, **kwargs):
     """PreTreeListCtrl() -> TreeListCtrl"""
     val = _gizmos.new_PreTreeListCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 SCALE_HORIZONTAL = _gizmos.SCALE_HORIZONTAL
@@ -953,15 +937,18 @@ SCALE_UNIFORM = _gizmos.SCALE_UNIFORM
 SCALE_CUSTOM = _gizmos.SCALE_CUSTOM
 class StaticPicture(_core.Control):
     """Proxy of C++ StaticPicture class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticPicture instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Bitmap label=wxNullBitmap, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, String name=StaticPictureNameStr) -> StaticPicture
         """
-        _gizmos.StaticPicture_swiginit(self,_gizmos.new_StaticPicture(*args, **kwargs))
+        newobj = _gizmos.new_StaticPicture(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -993,11 +980,7 @@ class StaticPicture(_core.Control):
         return _gizmos.StaticPicture_SetAlignment(*args, **kwargs)
 
     def GetAlignment(*args, **kwargs):
-        """
-        GetAlignment(self) -> int
-
-        Get the control alignment (left/right/centre, top/bottom/centre)
-        """
+        """GetAlignment(self) -> int"""
         return _gizmos.StaticPicture_GetAlignment(*args, **kwargs)
 
     def SetScale(*args, **kwargs):
@@ -1016,15 +999,18 @@ class StaticPicture(_core.Control):
         """GetCustomScale(self, float OUTPUT, float OUTPUT)"""
         return _gizmos.StaticPicture_GetCustomScale(*args, **kwargs)
 
-    Alignment = property(GetAlignment,SetAlignment,doc="See `GetAlignment` and `SetAlignment`") 
-    Bitmap = property(GetBitmap,SetBitmap,doc="See `GetBitmap` and `SetBitmap`") 
-    Icon = property(GetIcon,SetIcon,doc="See `GetIcon` and `SetIcon`") 
-    Scale = property(GetScale,SetScale,doc="See `GetScale` and `SetScale`") 
-_gizmos.StaticPicture_swigregister(StaticPicture)
+
+class StaticPicturePtr(StaticPicture):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticPicture
+_gizmos.StaticPicture_swigregister(StaticPicturePtr)
 
 def PreStaticPicture(*args, **kwargs):
     """PreStaticPicture() -> StaticPicture"""
     val = _gizmos.new_PreStaticPicture(*args, **kwargs)
+    val.thisown = 1
     return val
 
 

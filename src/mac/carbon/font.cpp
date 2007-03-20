@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/font.cpp
+// Name:        font.cpp
 // Purpose:     wxFont class
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,35 +9,30 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#include "wx/font.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/intl.h"
-    #include "wx/gdicmn.h"
-    #include "wx/log.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "font.h"
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/string.h"
+#include "wx/font.h"
 #include "wx/fontutil.h"
-#include "wx/graphics.h"
+#include "wx/gdicmn.h"
+#include "wx/utils.h"
+
+#include "wx/fontutil.h"
 
 #include "wx/mac/private.h"
-
 #ifndef __DARWIN__
 #include <ATSUnicode.h>
 #endif
 
-
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-
 
 class WXDLLEXPORT wxFontRefData: public wxGDIRefData
 {
     friend class WXDLLEXPORT wxFont;
-
 public:
     wxFontRefData()
         : m_fontId(0)
@@ -45,10 +40,10 @@ public:
         , m_family(wxDEFAULT)
         , m_style(wxNORMAL)
         , m_weight(wxNORMAL)
-        , m_underlined(false)
+        , m_underlined(FALSE)
         , m_faceName(wxT("applicationfont"))
         , m_encoding(wxFONTENCODING_DEFAULT)
-        , m_macFontFamily(0)
+        , m_macFontNum(0)
         , m_macFontSize(0)
         , m_macFontStyle(0)
         , m_macATSUStyle(0)
@@ -68,7 +63,7 @@ public:
         , m_underlined(data.m_underlined)
         , m_faceName(data.m_faceName)
         , m_encoding(data.m_encoding)
-        , m_macFontFamily(data.m_macFontFamily)
+        , m_macFontNum(data.m_macFontNum)
         , m_macFontSize(data.m_macFontSize)
         , m_macFontStyle(data.m_macFontStyle)
         , m_macATSUStyle(0)
@@ -93,7 +88,7 @@ public:
         , m_underlined(underlined)
         , m_faceName(faceName)
         , m_encoding(encoding)
-        , m_macFontFamily(0)
+        , m_macFontNum(0)
         , m_macFontSize(0)
         , m_macFontStyle(0)
         , m_macATSUStyle(0)
@@ -103,15 +98,9 @@ public:
     }
 
     virtual ~wxFontRefData();
-
-    void SetNoAntiAliasing( bool no = true )
-    { m_noAA = no; }
-
-    bool GetNoAntiAliasing() const
-    { return m_noAA; }
-
-    void MacFindFont();
-
+    void SetNoAntiAliasing( bool no = TRUE ) { m_noAA = no; }
+    bool GetNoAntiAliasing() const { return m_noAA; }
+    
 protected:
     // common part of all ctors
     void Init(int size,
@@ -132,32 +121,31 @@ protected:
     wxString        m_faceName;
     wxFontEncoding  m_encoding;
     bool            m_noAA;      // No anti-aliasing
-
+    
 public:
-    FMFontFamily    m_macFontFamily;
-    FMFontSize      m_macFontSize;
-    FMFontStyle     m_macFontStyle;
-
+    short           m_macFontNum;
+    short           m_macFontSize;
+    Style           m_macFontStyle;
+    
     // ATSU Font Information
-
+    
     // this is split into an ATSU font id that may
     // contain some styles (special bold fonts etc) and
     // these are the additional qd styles that are not
     // included in the ATSU font id
     ATSUStyle       m_macATSUStyle ;
     ATSUFontID      m_macATSUFontID;
-    FMFontStyle     m_macATSUAdditionalQDStyles ;
-
+    Style           m_macATSUAdditionalQDStyles ;
+    
     // for true themeing support we must store the correct font
     // information here, as this speeds up and optimizes rendering
     ThemeFontID     m_macThemeFontID ;
-
+   
     wxNativeFontInfo  m_info;
+
+public:
+    void        MacFindFont() ;
 };
-
-#define M_FONTDATA ((wxFontRefData*)m_refData)
-
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -167,12 +155,12 @@ public:
 // ----------------------------------------------------------------------------
 
 void wxFontRefData::Init(int pointSize,
-    int family,
-    int style,
-    int weight,
-    bool underlined,
-    const wxString& faceName,
-    wxFontEncoding encoding)
+                         int family,
+                         int style,
+                         int weight,
+                         bool underlined,
+                         const wxString& faceName,
+                         wxFontEncoding encoding)
 {
     m_style = style;
     m_pointSize = pointSize;
@@ -183,15 +171,15 @@ void wxFontRefData::Init(int pointSize,
     m_faceName = faceName;
     m_encoding = encoding;
 
-    m_macFontFamily = 0 ;
+    m_macFontNum = 0 ;
     m_macFontSize = 0;
     m_macFontStyle = 0;
     m_macATSUFontID = 0;
     m_macATSUAdditionalQDStyles = 0 ;
     m_macATSUStyle = NULL ;
-
+    
     m_macThemeFontID = kThemeCurrentPortFont ;
-    m_noAA = false;
+    m_noAA = FALSE;
 }
 
 wxFontRefData::~wxFontRefData()
@@ -205,15 +193,11 @@ wxFontRefData::~wxFontRefData()
 
 void wxFontRefData::MacFindFont()
 {
-    OSStatus status ;
-
-    Str255 qdFontName ;
-    if ( m_macThemeFontID != kThemeCurrentPortFont )
+    if ( m_macThemeFontID != kThemeCurrentPortFont ) 
     {
-        Style style ;
-        GetThemeFont( m_macThemeFontID, GetApplicationScript(), qdFontName, &m_macFontSize, &style );
-        m_macFontStyle = style ;
-        m_faceName = wxMacMakeStringFromPascal( qdFontName );
+        Str255 fontName ;
+    	GetThemeFont(m_macThemeFontID , GetApplicationScript() , fontName , &m_macFontSize , &m_macFontStyle ) ;
+        m_faceName = wxMacMakeStringFromPascal( fontName ) ;
         if ( m_macFontStyle & bold )
             m_weight = wxBOLD ;
         else
@@ -222,145 +206,140 @@ void wxFontRefData::MacFindFont()
             m_style = wxITALIC ;
         if ( m_macFontStyle & underline )
             m_underlined = true ;
+        ::GetFNum( fontName, &m_macFontNum);
         m_pointSize = m_macFontSize ;
-#ifndef __LP64__
-        m_macFontFamily = FMGetFontFamilyFromName( qdFontName );
-#endif
     }
     else
     {
-        if ( m_faceName.empty() )
+        if( m_faceName.Length() == 0 )
         {
-            if ( m_family == wxDEFAULT )
+            switch( m_family )
             {
-#ifndef __LP64__
-                m_macFontFamily = GetAppFont();
-                FMGetFontFamilyName(m_macFontFamily,qdFontName);
-                m_faceName = wxMacMakeStringFromPascal( qdFontName );
+                case wxDEFAULT :
+                    m_macFontNum = ::GetAppFont() ;
+                    break ;
+                case wxSCRIPT :
+                case wxROMAN :
+                case wxDECORATIVE :
+#ifdef __WXMAC_OSX__
+                    ::GetFNum( "\pTimes" , &m_macFontNum) ;
+#else
+                    ::GetFNum( "\pTimes" , &m_macFontNum) ;
 #endif
-            }
-            else
-            {
-                switch ( m_family )
-                {
-                    case wxSCRIPT :
-                    case wxROMAN :
-                    case wxDECORATIVE :
-                        m_faceName = wxT("Times");
-                        break ;
-
-                    case wxSWISS :
-                        m_faceName =  wxT("Lucida Grande");
-                        break ;
-
-                    case wxMODERN :
-                        m_faceName =  wxT("Monaco");
-                        break ;
-
-                    default:
-                        m_faceName =  wxT("Times");
-                        break ;
-                }
-#ifndef __LP64__
-                wxMacStringToPascal( m_faceName , qdFontName );
-                m_macFontFamily = FMGetFontFamilyFromName( qdFontName );
-                if ( m_macFontFamily == kInvalidFontFamily )
-                {
-                    wxLogDebug( wxT("ATSFontFamilyFindFromName failed for %s"), m_faceName.c_str() );
-                    m_macFontFamily = GetAppFont();
-                }
+                    break ;
+                case wxSWISS :
+#ifdef __WXMAC_OSX__
+                    ::GetFNum( "\pLucida Grande" , &m_macFontNum) ;
+#else
+                    ::GetFNum( "\pGeneva" , &m_macFontNum) ;
 #endif
+                    break ;
+                case wxMODERN :
+#ifdef __WXMAC_OSX__
+                    ::GetFNum( "\pMonaco" , &m_macFontNum) ;
+#else
+                    ::GetFNum( "\pMonaco" , &m_macFontNum) ;
+#endif
+                    break ;
             }
+            Str255 name ;
+            ::GetFontName( m_macFontNum , name ) ;
+            m_faceName = wxMacMakeStringFromPascal( name ) ;
         }
         else
         {
-#ifndef __LP64__
             if ( m_faceName == wxT("systemfont") )
-                m_macFontFamily = GetSysFont();
+                m_macFontNum = ::GetSysFont() ;
             else if ( m_faceName == wxT("applicationfont") )
-                m_macFontFamily = GetAppFont();
+                m_macFontNum = ::GetAppFont() ;
             else
-#else
-            if ( m_faceName == wxT("systemfont") )
-                m_faceName =  wxT("Lucida Grande");
-            else if ( m_faceName == wxT("applicationfont") )
-                m_faceName =  wxT("Lucida Grande");
-#endif
             {
-                wxMacCFStringHolder cf( m_faceName, wxLocale::GetSystemEncoding() );
-                ATSFontFamilyRef atsfamily = ATSFontFamilyFindFromName( cf , kATSOptionFlagsDefault );
-                
-                // ATSFontFamilyRef is an unsigned type, so check against max
-                // for an invalid value, not -1.
-                if ( atsfamily == 0xffffffff  )
-                {
-                    wxLogDebug( wxT("ATSFontFamilyFindFromName failed for ") + m_faceName );
-                    m_macFontFamily = GetAppFont();
-                }
-                else
-                    m_macFontFamily = FMGetFontFamilyFromATSFontFamilyRef( atsfamily );
+                Str255 fontname ;
+                wxMacStringToPascal( m_faceName , fontname ) ;
+                ::GetFNum( fontname, &m_macFontNum);
             }
         }
 
         m_macFontStyle = 0;
         if (m_weight == wxBOLD)
              m_macFontStyle |= bold;
-        if (m_style == wxITALIC || m_style == wxSLANT)
+        if (m_style == wxITALIC || m_style == wxSLANT) 
             m_macFontStyle |= italic;
-        if (m_underlined)
+        if (m_underlined) 
             m_macFontStyle |= underline;
         m_macFontSize = m_pointSize ;
     }
 
     // we try to get as much styles as possible into ATSU
 
+    Fixed atsuSize = IntToFixed( m_macFontSize ) ;
 
-    // ATSUFontID and FMFont are equivalent
-    FMFontStyle intrinsicStyle = 0 ;
-#ifndef __LP64__
-    status = FMGetFontFromFontFamilyInstance( m_macFontFamily , m_macFontStyle , &m_macATSUFontID , &intrinsicStyle);
-    wxASSERT_MSG( status == noErr , wxT("couldn't get an ATSUFont from font family") );
-#endif
-    m_macATSUAdditionalQDStyles = m_macFontStyle & (~intrinsicStyle );
+    Style atsuStyle = normal ;
+    verify_noerr(::ATSUFONDtoFontID(m_macFontNum, atsuStyle , (UInt32*)&m_macATSUFontID) ); 
+    if ( m_macFontStyle & bold )
+    {
+        ATSUFontID test ;
+        if ( ::ATSUFONDtoFontID(m_macFontNum, atsuStyle | bold , &test) == noErr )
+        {
+            atsuStyle |= bold ;
+            m_macATSUFontID = test ;
+        }
+    }
+    if ( m_macFontStyle & italic )
+    {
+        ATSUFontID test ;
+        if ( ::ATSUFONDtoFontID(m_macFontNum, atsuStyle | italic , &test) == noErr )
+        {
+            atsuStyle |= italic ;
+            m_macATSUFontID = test ;
+        }
+    }
+    if ( m_macFontStyle & underline )
+    {
+        ATSUFontID test ;
+        if ( ::ATSUFONDtoFontID(m_macFontNum, atsuStyle | underline , &test) == noErr )
+        {
+            atsuStyle |= underline ;
+            m_macATSUFontID = test ;
+        }
+    }
+    
+    m_macATSUAdditionalQDStyles = m_macFontStyle & (~atsuStyle ) ;
 
     if ( m_macATSUStyle )
     {
         ::ATSUDisposeStyle((ATSUStyle)m_macATSUStyle);
         m_macATSUStyle = NULL ;
     }
-
-    status = ::ATSUCreateStyle((ATSUStyle *)&m_macATSUStyle);
-    wxASSERT_MSG( status == noErr , wxT("couldn't create ATSU style") );
-
+    OSStatus status = ::ATSUCreateStyle((ATSUStyle *)&m_macATSUStyle) ;
+    wxASSERT_MSG( status == noErr , wxT("couldn't create ATSU style") ) ;
     ATSUAttributeTag atsuTags[] =
     {
-        kATSUFontTag ,
-        kATSUSizeTag ,
-        kATSUVerticalCharacterTag,
-        kATSUQDBoldfaceTag ,
-        kATSUQDItalicTag ,
-        kATSUQDUnderlineTag ,
-        kATSUQDCondensedTag ,
-        kATSUQDExtendedTag ,
-    };
-    ByteCount atsuSizes[sizeof(atsuTags) / sizeof(ATSUAttributeTag)] =
+            kATSUFontTag ,
+            kATSUSizeTag ,
+            kATSUVerticalCharacterTag,
+            kATSUQDBoldfaceTag ,
+            kATSUQDItalicTag ,
+            kATSUQDUnderlineTag ,
+            kATSUQDCondensedTag ,
+            kATSUQDExtendedTag ,
+    } ;
+    ByteCount atsuSizes[sizeof(atsuTags)/sizeof(ATSUAttributeTag)] =
     {
-        sizeof( ATSUFontID ) ,
-        sizeof( Fixed ) ,
-        sizeof( ATSUVerticalCharacterType),
-        sizeof( Boolean ) ,
-        sizeof( Boolean ) ,
-        sizeof( Boolean ) ,
-        sizeof( Boolean ) ,
-        sizeof( Boolean ) ,
-    };
-
+            sizeof( ATSUFontID ) ,
+            sizeof( Fixed ) ,
+            sizeof( ATSUVerticalCharacterType),
+            sizeof( Boolean ) ,
+            sizeof( Boolean ) ,
+            sizeof( Boolean ) ,
+            sizeof( Boolean ) ,
+            sizeof( Boolean ) ,
+    } ;
     Boolean kTrue = true ;
     Boolean kFalse = false ;
 
-    Fixed atsuSize = IntToFixed( m_macFontSize );
     ATSUVerticalCharacterType kHorizontal = kATSUStronglyHorizontal;
-    ATSUAttributeValuePtr    atsuValues[sizeof(atsuTags) / sizeof(ATSUAttributeTag)] =
+    ATSUAttributeValuePtr    atsuValues[sizeof(atsuTags)/sizeof(ATSUAttributeTag)] =
     {
             &m_macATSUFontID ,
             &atsuSize ,
@@ -370,25 +349,25 @@ void wxFontRefData::MacFindFont()
             (m_macATSUAdditionalQDStyles & underline) ? &kTrue : &kFalse ,
             (m_macATSUAdditionalQDStyles & condense) ? &kTrue : &kFalse ,
             (m_macATSUAdditionalQDStyles & extend) ? &kTrue : &kFalse ,
-    };
-
-    status = ::ATSUSetAttributes(
-        (ATSUStyle)m_macATSUStyle,
-        sizeof(atsuTags) / sizeof(ATSUAttributeTag) ,
+    } ;
+    status = ::ATSUSetAttributes((ATSUStyle)m_macATSUStyle, sizeof(atsuTags)/sizeof(ATSUAttributeTag) ,
         atsuTags, atsuSizes, atsuValues);
 
-    wxASSERT_MSG( status == noErr , wxT("couldn't modify ATSU style") );
+    wxASSERT_MSG( status == noErr , wxT("couldn't Modify ATSU style") ) ;
 }
 
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
 
+void wxFont::Init()
+{
+}
+
 bool wxFont::Create(const wxNativeFontInfo& info)
 {
-    return Create(
-        info.pointSize, info.family, info.style, info.weight,
-        info.underlined, info.faceName, info.encoding );
+    return Create(info.pointSize, info.family, info.style, info.weight,
+                  info.underlined, info.faceName, info.encoding);
 }
 
 wxFont::wxFont(const wxString& fontdesc)
@@ -399,36 +378,30 @@ wxFont::wxFont(const wxString& fontdesc)
 }
 
 bool wxFont::Create(int pointSize,
-    int family,
-    int style,
-    int weight,
-    bool underlined,
-    const wxString& faceName,
-    wxFontEncoding encoding)
+                    int family,
+                    int style,
+                    int weight,
+                    bool underlined,
+                    const wxString& faceName,
+                    wxFontEncoding encoding)
 {
     UnRef();
-
-    m_refData = new wxFontRefData(
-        pointSize, family, style, weight,
-        underlined, faceName, encoding);
+    m_refData = new wxFontRefData(pointSize, family, style, weight,
+                                  underlined, faceName, encoding);
 
     RealizeResource();
 
-    return true;
+    return TRUE;
 }
 
-bool wxFont::MacCreateThemeFont(wxUint16 themeFontID)
+bool wxFont::MacCreateThemeFont(wxUint16 themeFontID )
 {
     UnRef();
-
-    m_refData = new wxFontRefData(
-        12, wxDEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
-        false, wxEmptyString, wxFONTENCODING_DEFAULT );
-
+    m_refData = new wxFontRefData(12, wxDEFAULT , wxFONTSTYLE_NORMAL , wxFONTWEIGHT_NORMAL ,false, wxEmptyString, wxFONTENCODING_DEFAULT);
     M_FONTDATA->m_macThemeFontID = themeFontID ;
     RealizeResource();
 
-    return true;
+    return TRUE;
 }
 
 wxFont::~wxFont()
@@ -437,33 +410,37 @@ wxFont::~wxFont()
 
 bool wxFont::RealizeResource()
 {
-    M_FONTDATA->MacFindFont();
-
-    return true;
+    M_FONTDATA->MacFindFont() ;
+    return TRUE;
 }
 
 void wxFont::SetEncoding(wxFontEncoding encoding)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_encoding = encoding;
 
     RealizeResource();
 }
 
-wxObjectRefData* wxFont::CreateRefData() const
+void wxFont::Unshare()
 {
-    return new wxFontRefData;
-}
-
-wxObjectRefData* wxFont::CloneRefData(const wxObjectRefData* data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData*, data));
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxFontRefData();
+    }
+    else
+    {
+        wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
 }
 
 void wxFont::SetPointSize(int pointSize)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_pointSize = pointSize;
 
@@ -472,7 +449,7 @@ void wxFont::SetPointSize(int pointSize)
 
 void wxFont::SetFamily(int family)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_family = family;
 
@@ -481,7 +458,7 @@ void wxFont::SetFamily(int family)
 
 void wxFont::SetStyle(int style)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_style = style;
 
@@ -490,27 +467,25 @@ void wxFont::SetStyle(int style)
 
 void wxFont::SetWeight(int weight)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_weight = weight;
 
     RealizeResource();
 }
 
-bool wxFont::SetFaceName(const wxString& faceName)
+void wxFont::SetFaceName(const wxString& faceName)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_faceName = faceName;
 
     RealizeResource();
-
-    return wxFontBase::SetFaceName(faceName);
 }
 
 void wxFont::SetUnderlined(bool underlined)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_underlined = underlined;
 
@@ -519,7 +494,7 @@ void wxFont::SetUnderlined(bool underlined)
 
 void wxFont::SetNoAntiAliasing( bool no )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetNoAntiAliasing( no );
 
@@ -535,123 +510,95 @@ void wxFont::SetNoAntiAliasing( bool no )
 int wxFont::GetPointSize() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_pointSize;
-}
-
-wxSize wxFont::GetPixelSize() const
-{
-#if wxUSE_GRAPHICS_CONTEXT
-    // TODO: consider caching the value
-    wxGraphicsContext* dc = wxGraphicsContext::CreateFromNative((CGContextRef) NULL);
-    dc->SetFont(*(wxFont *)this,*wxBLACK);
-    wxDouble width, height = 0;
-    dc->GetTextExtent( wxT("g"), &width, &height, NULL, NULL);
-    return wxSize((int)width, (int)height);
-#else
-    wxFontBase::GetPixelSize();
-#endif
 }
 
 int wxFont::GetFamily() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_family;
 }
 
 int wxFont::GetStyle() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_style;
 }
 
 int wxFont::GetWeight() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_weight;
 }
 
 bool wxFont::GetUnderlined() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , false, wxT("invalid font") );
-
     return M_FONTDATA->m_underlined;
 }
 
 wxString wxFont::GetFaceName() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , wxEmptyString , wxT("invalid font") );
-
     return M_FONTDATA->m_faceName;
 }
 
 wxFontEncoding wxFont::GetEncoding() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , wxFONTENCODING_DEFAULT , wxT("invalid font") );
-
     return M_FONTDATA->m_encoding;
 }
 
 bool wxFont::GetNoAntiAliasing() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , false, wxT("invalid font") );
-
     return M_FONTDATA->m_noAA;
 }
 
 short wxFont::MacGetFontNum() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
-    return M_FONTDATA->m_macFontFamily;
+    return M_FONTDATA->m_macFontNum;
 }
 
 short wxFont::MacGetFontSize() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_macFontSize;
 }
 
 wxByte wxFont::MacGetFontStyle() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_macFontStyle;
 }
 
 wxUint32 wxFont::MacGetATSUFontID() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_macATSUFontID;
 }
 
-void * wxFont::MacGetATSUStyle() const
+void* wxFont::MacGetATSUStyle() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , NULL, wxT("invalid font") );
-
     return M_FONTDATA->m_macATSUStyle;
 }
 
 wxUint32 wxFont::MacGetATSUAdditionalQDStyles() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_macATSUAdditionalQDStyles;
 }
 
-wxUint16 wxFont::MacGetThemeFontID() const
+wxUint16 wxFont::MacGetThemeFontID() const 
 {
     wxCHECK_MSG( M_FONTDATA != NULL , 0, wxT("invalid font") );
-
     return M_FONTDATA->m_macThemeFontID;
 }
 
-const wxNativeFontInfo * wxFont::GetNativeFontInfo() const
+
+const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
     wxCHECK_MSG( M_FONTDATA != NULL , NULL, wxT("invalid font") );
     wxCHECK_MSG( Ok(), NULL, wxT("invalid font") );
@@ -660,3 +607,4 @@ const wxNativeFontInfo * wxFont::GetNativeFontInfo() const
 
     return &(M_FONTDATA->m_info);
 }
+

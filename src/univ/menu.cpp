@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/menu.cpp
+// Name:        univ/menu.cpp
 // Purpose:     wxMenuItem, wxMenu and wxMenuBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,37 +17,38 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univmenuitem.h"
+    #pragma implementation "univmenu.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_MENUS
-
-#include "wx/menu.h"
-#include "wx/stockitem.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dynarray.h"
     #include "wx/control.h"      // for FindAccelIndex()
+    #include "wx/menu.h"
     #include "wx/settings.h"
     #include "wx/accel.h"
     #include "wx/log.h"
-    #include "wx/frame.h"
-    #include "wx/dcclient.h"
 #endif // WX_PRECOMP
+
+#if wxUSE_MENUS
 
 #include "wx/popupwin.h"
 #include "wx/evtloop.h"
+#include "wx/dcclient.h"
+#include "wx/frame.h"
 
 #include "wx/univ/renderer.h"
 
 #ifdef __WXMSW__
     #include "wx/msw/private.h"
 #endif // __WXMSW__
-
-typedef wxMenuItemList::compatibility_iterator wxMenuItemIter;
 
 // ----------------------------------------------------------------------------
 // wxMenuInfo contains all extra information about top level menus we need
@@ -123,13 +124,16 @@ class wxPopupMenuWindow : public wxPopupTransientWindow
 public:
     wxPopupMenuWindow(wxWindow *parent, wxMenu *menu);
 
-    virtual ~wxPopupMenuWindow();
+    ~wxPopupMenuWindow();
 
     // override the base class version to select the first item initially
     virtual void Popup(wxWindow *focus = NULL);
 
     // override the base class version to dismiss any open submenus
     virtual void Dismiss();
+
+    // notify the menu when the window disappears from screen
+    virtual void OnDismiss();
 
     // called when a submenu is dismissed
     void OnSubmenuDismiss(bool dismissParent);
@@ -148,13 +152,13 @@ public:
     }
 
     // find the menu item at given position
-    wxMenuItemIter GetMenuItemFromPoint(const wxPoint& pt) const;
+    wxMenuItemList::compatibility_iterator GetMenuItemFromPoint(const wxPoint& pt) const;
 
     // refresh the given item
     void RefreshItem(wxMenuItem *item);
 
     // preselect the first item
-    void SelectFirst() { SetCurrentItem(m_menu->GetMenuItems().GetFirst()); }
+    void SelectFirst() { SetCurrent(m_menu->GetMenuItems().GetFirst()); }
 
     // process the key event, return true if done
     bool ProcessKeyDown(int key);
@@ -173,9 +177,6 @@ protected:
         WithMouse
     };
 
-    // notify the menu when the window disappears from screen
-    virtual void OnDismiss();
-
     // draw the menu inside this window
     virtual void DoDraw(wxControlRenderer *renderer);
 
@@ -188,11 +189,12 @@ protected:
     // reset the current item and node
     void ResetCurrent();
 
-    // set the current node and item without refreshing anything
-    void SetCurrentItem(wxMenuItemIter node);
+    // set the current node and item withotu refreshing anything
+    void SetCurrent(wxMenuItemList::compatibility_iterator node);
+    virtual bool SetCurrent(bool doit = true){return wxPopupTransientWindow::SetCurrent(doit);};
 
     // change the current item refreshing the old and new items
-    void ChangeCurrent(wxMenuItemIter node);
+    void ChangeCurrent(wxMenuItemList::compatibility_iterator node);
 
     // activate item, i.e. call either ClickItem() or OpenSubmenu() depending
     // on what it is, return true if something was done (i.e. it's not a
@@ -222,23 +224,23 @@ protected:
     bool HasOpenSubmenu() const { return m_hasOpenSubMenu; }
 
     // get previous node after the current one
-    wxMenuItemIter GetPrevNode() const;
+    wxMenuItemList::compatibility_iterator GetPrevNode() const;
 
     // get previous node before the given one, wrapping if it's the first one
-    wxMenuItemIter GetPrevNode(wxMenuItemIter node) const;
+    wxMenuItemList::compatibility_iterator GetPrevNode(wxMenuItemList::compatibility_iterator node) const;
 
     // get next node after the current one
-    wxMenuItemIter GetNextNode() const;
+    wxMenuItemList::compatibility_iterator GetNextNode() const;
 
     // get next node after the given one, wrapping if it's the last one
-    wxMenuItemIter GetNextNode(wxMenuItemIter node) const;
+    wxMenuItemList::compatibility_iterator GetNextNode(wxMenuItemList::compatibility_iterator node) const;
 
 private:
     // the menu we show
     wxMenu *m_menu;
 
     // the menu node corresponding to the current item
-    wxMenuItemIter m_nodeCurrent;
+    wxMenuItemList::compatibility_iterator m_nodeCurrent;
 
     // do we currently have an opened submenu?
     bool m_hasOpenSubMenu;
@@ -337,19 +339,23 @@ wxPopupMenuWindow::~wxPopupMenuWindow()
 
 void wxPopupMenuWindow::ResetCurrent()
 {
-    SetCurrentItem(wxMenuItemIter());
+#if wxUSE_STL
+    SetCurrent(wxMenuItemList::compatibility_iterator());
+#else
+    SetCurrent((wxwxMenuItemListNode *)NULL);
+#endif
 }
 
-void wxPopupMenuWindow::SetCurrentItem(wxMenuItemIter node)
+void wxPopupMenuWindow::SetCurrent(wxMenuItemList::compatibility_iterator node)
 {
     m_nodeCurrent = node;
 }
 
-void wxPopupMenuWindow::ChangeCurrent(wxMenuItemIter node)
+void wxPopupMenuWindow::ChangeCurrent(wxMenuItemList::compatibility_iterator node)
 {
-    if ( !m_nodeCurrent || !node || (node != m_nodeCurrent) )
+    if ( node != m_nodeCurrent )
     {
-        wxMenuItemIter nodeOldCurrent = m_nodeCurrent;
+        wxMenuItemList::compatibility_iterator nodeOldCurrent = m_nodeCurrent;
 
         m_nodeCurrent = node;
 
@@ -373,15 +379,15 @@ void wxPopupMenuWindow::ChangeCurrent(wxMenuItemIter node)
     }
 }
 
-wxMenuItemIter wxPopupMenuWindow::GetPrevNode() const
+wxMenuItemList::compatibility_iterator wxPopupMenuWindow::GetPrevNode() const
 {
     // return the last node if there had been no previously selected one
     return m_nodeCurrent ? GetPrevNode(m_nodeCurrent)
-                         : wxMenuItemIter(m_menu->GetMenuItems().GetLast());
+                         : m_menu->GetMenuItems().GetLast();
 }
 
-wxMenuItemIter
-wxPopupMenuWindow::GetPrevNode(wxMenuItemIter node) const
+wxMenuItemList::compatibility_iterator
+wxPopupMenuWindow::GetPrevNode(wxMenuItemList::compatibility_iterator node) const
 {
     if ( node )
     {
@@ -396,15 +402,15 @@ wxPopupMenuWindow::GetPrevNode(wxMenuItemIter node) const
     return node;
 }
 
-wxMenuItemIter wxPopupMenuWindow::GetNextNode() const
+wxMenuItemList::compatibility_iterator wxPopupMenuWindow::GetNextNode() const
 {
     // return the first node if there had been no previously selected one
     return m_nodeCurrent ? GetNextNode(m_nodeCurrent)
-                         : wxMenuItemIter(m_menu->GetMenuItems().GetFirst());
+                         : m_menu->GetMenuItems().GetFirst();
 }
 
-wxMenuItemIter
-wxPopupMenuWindow::GetNextNode(wxMenuItemIter node) const
+wxMenuItemList::compatibility_iterator
+wxPopupMenuWindow::GetNextNode(wxMenuItemList::compatibility_iterator node) const
 {
     if ( node )
     {
@@ -507,7 +513,7 @@ void wxPopupMenuWindow::DismissAndNotify()
 // wxPopupMenuWindow geometry
 // ----------------------------------------------------------------------------
 
-wxMenuItemIter
+wxMenuItemList::compatibility_iterator
 wxPopupMenuWindow::GetMenuItemFromPoint(const wxPoint& pt) const
 {
     // we only use the y coord normally, but still check x in case the point is
@@ -515,7 +521,7 @@ wxPopupMenuWindow::GetMenuItemFromPoint(const wxPoint& pt) const
     if ( wxWindow::HitTest(pt) == wxHT_WINDOW_INSIDE )
     {
         wxCoord y = 0;
-        for ( wxMenuItemIter node = m_menu->GetMenuItems().GetFirst();
+        for ( wxMenuItemList::compatibility_iterator node = m_menu->GetMenuItems().GetFirst();
               node;
               node = node->GetNext() )
         {
@@ -529,7 +535,11 @@ wxPopupMenuWindow::GetMenuItemFromPoint(const wxPoint& pt) const
         }
     }
 
-    return wxMenuItemIter();
+#if wxUSE_STL
+    return wxMenuItemList::compatibility_iterator();
+#else
+    return NULL;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -563,7 +573,7 @@ void wxPopupMenuWindow::DoDraw(wxControlRenderer *renderer)
 
     wxCoord y = 0;
     const wxMenuGeometryInfo& gi = m_menu->GetGeometryInfo();
-    for ( wxMenuItemIter node = m_menu->GetMenuItems().GetFirst();
+    for ( wxMenuItemList::compatibility_iterator node = m_menu->GetMenuItems().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -723,7 +733,7 @@ bool wxPopupMenuWindow::ProcessLeftDown(wxMouseEvent& event)
 
 void wxPopupMenuWindow::OnLeftUp(wxMouseEvent& event)
 {
-    wxMenuItemIter node = GetMenuItemFromPoint(event.GetPosition());
+    wxMenuItemList::compatibility_iterator node = GetMenuItemFromPoint(event.GetPosition());
     if ( node )
     {
         ActivateItem(node->GetData(), WithMouse);
@@ -757,13 +767,13 @@ void wxPopupMenuWindow::OnMouseMove(wxMouseEvent& event)
 
 void wxPopupMenuWindow::ProcessMouseMove(const wxPoint& pt)
 {
-    wxMenuItemIter node = GetMenuItemFromPoint(pt);
+    wxMenuItemList::compatibility_iterator node = GetMenuItemFromPoint(pt);
 
     // don't reset current to NULL here, we only do it when the mouse leaves
     // the window (see below)
     if ( node )
     {
-        if ( !m_nodeCurrent || (node != m_nodeCurrent) )
+        if ( node != m_nodeCurrent )
         {
             ChangeCurrent(node);
 
@@ -848,7 +858,11 @@ void wxPopupMenuWindow::OnMouseLeave(wxMouseEvent& event)
 
         if ( resetCurrent )
         {
-            ChangeCurrent(wxMenuItemIter());
+#if wxUSE_STL
+            ChangeCurrent(wxMenuItemList::compatibility_iterator());
+#else
+            ChangeCurrent(NULL);
+#endif
         }
     }
 
@@ -926,8 +940,9 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
             {
                 bool up = key == WXK_UP;
 
-                wxMenuItemIter nodeStart = up ? GetPrevNode() : GetNextNode(),
-                               node = nodeStart;
+                wxMenuItemList::compatibility_iterator nodeStart = up ? GetPrevNode()
+                                                     : GetNextNode(),
+                                     node = nodeStart;
                 while ( node && node->GetData()->IsSeparator() )
                 {
                     node = up ? GetPrevNode(node) : GetNextNode(node);
@@ -936,7 +951,11 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
                     {
                         // nothing but separators and disabled items in this
                         // menu, break out
-                        node = wxMenuItemIter();
+#if wxUSE_STL
+                        node = wxMenuItemList::compatibility_iterator();
+#else
+                        node = NULL;
+#endif
                     }
                 }
 
@@ -970,7 +989,7 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
                 // we want to start from the item after this one because
                 // if we're already on the item with the given accel we want to
                 // go to the next one, not to stay in place
-                wxMenuItemIter nodeStart = GetNextNode();
+                wxMenuItemList::compatibility_iterator nodeStart = GetNextNode();
 
                 // do we have more than one item with this accel?
                 bool notUnique = false;
@@ -980,15 +999,19 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
 
                 // loop through all items searching for the item with this
                 // accel
-                wxMenuItemIter nodeFound,
-                               node = nodeStart;
+                wxMenuItemList::compatibility_iterator node = nodeStart,
+#if wxUSE_STL
+                                                       nodeFound = wxMenuItemList::compatibility_iterator();
+#else
+                                                       nodeFound = NULL;
+#endif
                 for ( ;; )
                 {
                     item = node->GetData();
 
                     int idxAccel = item->GetAccelIndex();
                     if ( idxAccel != -1 &&
-                         (wxChar)wxTolower(item->GetLabel()[(size_t)idxAccel])
+                         wxTolower(item->GetLabel()[(size_t)idxAccel])
                             == chAccel )
                     {
                         // ok, found an item with this accel
@@ -1144,7 +1167,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
         {
             // we need to update its end item
             item->SetRadioGroupStart(m_startRadioGroup);
-            wxMenuItemIter node = GetMenuItems().Item(m_startRadioGroup);
+            wxMenuItemList::compatibility_iterator node = GetMenuItems().Item(m_startRadioGroup);
 
             if ( node )
             {
@@ -1429,7 +1452,7 @@ bool wxMenu::ProcessAccelEvent(const wxKeyEvent& event)
     }
 
     // try our submenus
-    for ( wxMenuItemIter node = GetMenuItems().GetFirst();
+    for ( wxMenuItemList::compatibility_iterator node = GetMenuItems().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -1543,7 +1566,6 @@ void wxMenuItem::SetText(const wxString& text)
     if ( text != m_text )
     {
         // first call the base class version to change m_text
-        // (and also check if we don't have a stock menu item)
         wxMenuItemBase::SetText(text);
 
         UpdateAccelInfo();
@@ -1618,7 +1640,7 @@ void wxMenuItem::Check(bool check)
         }
 
         // also uncheck all the other items in this radio group
-        wxMenuItemIter node = items.Item(start);
+        wxMenuItemList::compatibility_iterator node = items.Item(start);
         for ( int n = start; n <= end && node; n++ )
         {
             if ( n != pos )
@@ -2330,7 +2352,8 @@ int wxMenuBar::FindNextItemForAccel(int idxStart, int key, bool *unique) const
 
         int idxAccel = info.GetAccelIndex();
         if ( idxAccel != -1 &&
-             (wxChar)wxTolower(info.GetLabel()[(size_t)idxAccel]) == chAccel )
+             wxTolower(info.GetLabel()[(size_t)idxAccel])
+                == chAccel )
         {
             // ok, found an item with this accel
             if ( idxFound == -1 )
@@ -2473,7 +2496,7 @@ void wxMenuBar::OnDismiss()
 
 bool wxMenuBar::ReleaseMouseCapture()
 {
-#ifdef __WXX11__
+#if __WXX11__
     // With wxX11, when a menu is closed by clicking away from it, a control
     // under the click will still get an event, even though the menu has the
     // capture (bug?). So that control may already have taken the capture by
@@ -2589,3 +2612,4 @@ void wxWindow::DismissPopupMenu()
 }
 
 #endif // wxUSE_MENUS
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/tglbtn.cpp
+// Name:        wx/gtk/tglbtn.cpp
 // Purpose:     Definition of the wxToggleButton class, which implements a
 //              toggle button under wxGTK.
 // Author:      John Norris, minor changes by Axel Schlueter
@@ -13,17 +13,17 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TOGGLEBTN
-
 #include "wx/tglbtn.h"
+#include "wx/button.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/button.h"
-#endif
+#if wxUSE_TOGGLEBTN
 
 #include "wx/gtk/private.h"
 
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 extern bool      g_blockEventsOnDrag;
+extern wxCursor   g_globalCursor;
 
 extern "C" {
 static void gtk_togglebutton_clicked_callback(GtkWidget *WXUNUSED(widget), wxToggleButton *cb)
@@ -70,18 +70,22 @@ bool wxToggleBitmapButton::Create(wxWindow *parent, wxWindowID id,
         return false;
     }
 
+    m_bitmap = label;
+
     // Create the gtk widget.
     m_widget = gtk_toggle_button_new();
 
     if (style & wxNO_BORDER)
-        gtk_button_set_relief( GTK_BUTTON(m_widget), GTK_RELIEF_NONE );
+       gtk_button_set_relief( GTK_BUTTON(m_widget), GTK_RELIEF_NONE );
 
-    m_bitmap = label;
-    OnSetBitmap();
+    if (m_bitmap.Ok())
+    {
+        OnSetBitmap();
+    }
 
-    g_signal_connect (m_widget, "clicked",
-                      G_CALLBACK (gtk_togglebutton_clicked_callback),
-                      this);
+    gtk_signal_connect(GTK_OBJECT(m_widget), "clicked",
+                      GTK_SIGNAL_FUNC(gtk_togglebutton_clicked_callback),
+                      (gpointer *)this);
 
     m_parent->DoAddChild(this);
 
@@ -112,7 +116,7 @@ bool wxToggleBitmapButton::GetValue() const
 {
     wxCHECK_MSG(m_widget != NULL, false, wxT("invalid toggle button"));
 
-    return gtk_toggle_button_get_active((GtkToggleButton*)m_widget);
+    return GTK_TOGGLE_BUTTON(m_widget)->active;
 }
 
 void wxToggleBitmapButton::SetLabel(const wxBitmap& label)
@@ -129,17 +133,21 @@ void wxToggleBitmapButton::OnSetBitmap()
 {
     if (!m_bitmap.Ok()) return;
 
-    GtkWidget* image = ((GtkBin*)m_widget)->child;
-    if (image == NULL)
+    GdkBitmap *mask = (GdkBitmap *) NULL;
+    if (m_bitmap.GetMask()) mask = m_bitmap.GetMask()->GetBitmap();
+
+    GtkWidget *child = BUTTON_CHILD(m_widget);
+    if (child == NULL)
     {
         // initial bitmap
-        image = gtk_image_new_from_pixbuf(m_bitmap.GetPixbuf());
-        gtk_widget_show(image);
-        gtk_container_add((GtkContainer*)m_widget, image);
+        GtkWidget *pixmap = gtk_pixmap_new(m_bitmap.GetPixmap(), mask);
+        gtk_widget_show(pixmap);
+        gtk_container_add(GTK_CONTAINER(m_widget), pixmap);
     }
     else
     {   // subsequent bitmaps
-        gtk_image_set_from_pixbuf((GtkImage*)image, m_bitmap.GetPixbuf());
+        GtkPixmap *g_pixmap = GTK_PIXMAP(child);
+        gtk_pixmap_set(g_pixmap, m_bitmap.GetPixmap(), mask);
     }
 }
 
@@ -148,7 +156,7 @@ bool wxToggleBitmapButton::Enable(bool enable /*=true*/)
     if (!wxControl::Enable(enable))
         return false;
 
-    gtk_widget_set_sensitive(GTK_BIN(m_widget)->child, enable);
+    gtk_widget_set_sensitive(BUTTON_CHILD(m_widget), enable);
 
     return true;
 }
@@ -156,14 +164,36 @@ bool wxToggleBitmapButton::Enable(bool enable /*=true*/)
 void wxToggleBitmapButton::DoApplyWidgetStyle(GtkRcStyle *style)
 {
     gtk_widget_modify_style(m_widget, style);
-    gtk_widget_modify_style(GTK_BIN(m_widget)->child, style);
+    gtk_widget_modify_style(BUTTON_CHILD(m_widget), style);
 }
 
-GdkWindow *
-wxToggleBitmapButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxToggleBitmapButton::IsOwnGtkWindow(GdkWindow *window)
 {
-    return GTK_BUTTON(m_widget)->event_window;
+    return window == TOGGLE_BUTTON_EVENT_WIN(m_widget);
 }
+
+void wxToggleBitmapButton::OnInternalIdle()
+{
+    wxCursor cursor = m_cursor;
+
+    if (g_globalCursor.Ok())
+        cursor = g_globalCursor;
+
+    GdkWindow *win = TOGGLE_BUTTON_EVENT_WIN(m_widget);
+    if ( win && cursor.Ok() )
+    {
+      /* I now set the cursor the anew in every OnInternalIdle call
+         as setting the cursor in a parent window also effects the
+         windows above so that checking for the current cursor is
+         not possible. */
+
+        gdk_window_set_cursor(win, cursor.GetCursor());
+    }
+
+    if (wxUpdateUIEvent::CanUpdate(this))
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+}
+
 
 // Get the "best" size for this control.
 wxSize wxToggleBitmapButton::DoGetBestSize() const
@@ -207,20 +237,19 @@ bool wxToggleButton::Create(wxWindow *parent, wxWindowID id,
     m_blockEvent = false;
 
     if (!PreCreation(parent, pos, size) ||
-        !CreateBase(parent, id, pos, size, style, validator, name ))
-    {
+        !CreateBase(parent, id, pos, size, style, validator, name )) {
         wxFAIL_MSG(wxT("wxToggleButton creation failed"));
         return false;
     }
 
+    wxControl::SetLabel(label);
+
     // Create the gtk widget.
-    m_widget = gtk_toggle_button_new_with_mnemonic("");
+    m_widget = gtk_toggle_button_new_with_label( wxGTK_CONV( m_label ) );
 
-    SetLabel(label);
-
-    g_signal_connect (m_widget, "clicked",
-                      G_CALLBACK (gtk_togglebutton_clicked_callback),
-                      this);
+    gtk_signal_connect(GTK_OBJECT(m_widget), "clicked",
+                       GTK_SIGNAL_FUNC(gtk_togglebutton_clicked_callback),
+                       (gpointer *)this);
 
     m_parent->DoAddChild(this);
 
@@ -260,11 +289,7 @@ void wxToggleButton::SetLabel(const wxString& label)
 
     wxControl::SetLabel(label);
 
-    const wxString labelGTK = GTKConvertMnemonics(label);
-
-    gtk_button_set_label(GTK_BUTTON(m_widget), wxGTK_CONV(labelGTK));
-
-    ApplyWidgetStyle( false );
+    gtk_label_set(GTK_LABEL(BUTTON_CHILD(m_widget)), wxGTK_CONV( GetLabel() ) );
 }
 
 bool wxToggleButton::Enable(bool enable /*=true*/)
@@ -272,7 +297,7 @@ bool wxToggleButton::Enable(bool enable /*=true*/)
     if (!wxControl::Enable(enable))
         return false;
 
-    gtk_widget_set_sensitive(GTK_BIN(m_widget)->child, enable);
+    gtk_widget_set_sensitive(BUTTON_CHILD(m_widget), enable);
 
     return true;
 }
@@ -280,14 +305,36 @@ bool wxToggleButton::Enable(bool enable /*=true*/)
 void wxToggleButton::DoApplyWidgetStyle(GtkRcStyle *style)
 {
     gtk_widget_modify_style(m_widget, style);
-    gtk_widget_modify_style(GTK_BIN(m_widget)->child, style);
+    gtk_widget_modify_style(BUTTON_CHILD(m_widget), style);
 }
 
-GdkWindow *
-wxToggleButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+bool wxToggleButton::IsOwnGtkWindow(GdkWindow *window)
 {
-    return GTK_BUTTON(m_widget)->event_window;
+    return window == TOGGLE_BUTTON_EVENT_WIN(m_widget);
 }
+
+void wxToggleButton::OnInternalIdle()
+{
+    wxCursor cursor = m_cursor;
+
+    if (g_globalCursor.Ok())
+        cursor = g_globalCursor;
+
+    GdkWindow *win = TOGGLE_BUTTON_EVENT_WIN(m_widget);
+    if ( win && cursor.Ok() )
+    {
+      /* I now set the cursor the anew in every OnInternalIdle call
+         as setting the cursor in a parent window also effects the
+         windows above so that checking for the current cursor is
+         not possible. */
+
+        gdk_window_set_cursor(win, cursor.GetCursor());
+    }
+
+    if (wxUpdateUIEvent::CanUpdate(this))
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+}
+
 
 // Get the "best" size for this control.
 wxSize wxToggleButton::DoGetBestSize() const
@@ -311,3 +358,4 @@ wxToggleButton::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 }
 
 #endif // wxUSE_TOGGLEBTN
+

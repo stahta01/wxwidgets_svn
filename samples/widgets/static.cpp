@@ -51,7 +51,7 @@
 // control ids
 enum
 {
-    StaticPage_Reset = wxID_HIGHEST,
+    StaticPage_Reset = 100,
     StaticPage_BoxText,
     StaticPage_LabelText
 };
@@ -139,14 +139,10 @@ END_EVENT_TABLE()
 class StaticWidgetsPage : public WidgetsPage
 {
 public:
-    StaticWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    StaticWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~StaticWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_statText; }
-    virtual void RecreateWidget() { CreateStatic(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // event handlers
@@ -207,14 +203,14 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-IMPLEMENT_WIDGETS_PAGE(StaticWidgetsPage, _T("Static"),
-                       (int)wxPlatform(GENERIC_CTRLS).If(wxOS_WINDOWS,NATIVE_CTRLS)
-                       );
+IMPLEMENT_WIDGETS_PAGE(StaticWidgetsPage, _T("Static"));
 
-StaticWidgetsPage::StaticWidgetsPage(WidgetsBookCtrl *book,
+StaticWidgetsPage::StaticWidgetsPage(wxBookCtrlBase *book,
                                      wxImageList *imaglist)
-                  : WidgetsPage(book, imaglist, statbox_xpm)
+                  : WidgetsPage(book)
 {
+    imaglist->Add(wxBitmap(statbox_xpm));
+
     // init everything
     m_chkVert =
     m_chkAutoResize = (wxCheckBox *)NULL;
@@ -230,10 +226,7 @@ StaticWidgetsPage::StaticWidgetsPage(WidgetsBookCtrl *book,
     m_staticBox = (wxStaticBox *)NULL;
     m_sizerStatBox = (wxStaticBoxSizer *)NULL;
     m_sizerStatic = (wxSizer *)NULL;
-}
 
-void StaticWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
@@ -307,6 +300,8 @@ void StaticWidgetsPage::CreateContent()
     Reset();
 
     SetSizer(sizerTop);
+
+    sizerTop->Fit(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -338,7 +333,7 @@ void StaticWidgetsPage::CreateStatic()
     }
 
     int flagsBox = 0,
-        flagsText = ms_defaultFlags;
+        flagsText = 0;
 
     if ( !m_chkAutoResize->GetValue() )
     {

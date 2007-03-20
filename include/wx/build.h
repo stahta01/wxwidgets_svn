@@ -77,15 +77,15 @@
 #endif
 
 // WXWIN_COMPATIBILITY macros affect presence of virtual functions
-#if WXWIN_COMPATIBILITY_2_6
-    #define __WX_BO_WXWIN_COMPAT_2_6 ",compatible with 2.6"
+#if WXWIN_COMPATIBILITY_2_2
+    #define __WX_BO_WXWIN_COMPAT_2_2 ",compatible with 2.2"
 #else
-    #define __WX_BO_WXWIN_COMPAT_2_6
+    #define __WX_BO_WXWIN_COMPAT_2_2
 #endif
-#if WXWIN_COMPATIBILITY_2_8
-    #define __WX_BO_WXWIN_COMPAT_2_8 ",compatible with 2.8"
+#if WXWIN_COMPATIBILITY_2_4
+    #define __WX_BO_WXWIN_COMPAT_2_4 ",compatible with 2.4"
 #else
-    #define __WX_BO_WXWIN_COMPAT_2_8
+    #define __WX_BO_WXWIN_COMPAT_2_4
 #endif
 
 // deriving wxWin containers from STL ones changes them completely:
@@ -101,7 +101,7 @@
     " (" __WX_BO_DEBUG "," __WX_BO_UNICODE \
      __WX_BO_COMPILER \
      __WX_BO_STL \
-     __WX_BO_WXWIN_COMPAT_2_6 __WX_BO_WXWIN_COMPAT_2_8 \
+     __WX_BO_WXWIN_COMPAT_2_2 __WX_BO_WXWIN_COMPAT_2_4 \
      ")"
 
 
@@ -112,14 +112,37 @@
 // Use this macro to check build options. Adding it to a file in DLL will
 // ensure that the DLL checks build options in same way IMPLEMENT_APP() does.
 #define WX_CHECK_BUILD_OPTIONS(libName)                                 \
-    static struct wxBuildOptionsChecker                                 \
+    static bool wxCheckBuildOptions()                                   \
     {                                                                   \
-        wxBuildOptionsChecker()                                         \
-        {                                                               \
-            wxAppConsole::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, \
-                                            libName);                   \
-        }                                                               \
-    } gs_buildOptionsCheck;
+        wxAppConsole::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE,     \
+                                        libName);                       \
+        return true;                                                    \
+    }                                                                   \
+    static bool gs_buildOptionsCheck = wxCheckBuildOptions();
 
+
+#if WXWIN_COMPATIBILITY_2_4
+
+// ----------------------------------------------------------------------------
+// wxBuildOptions
+// ----------------------------------------------------------------------------
+
+// NB: Don't use this class in new code, it relies on the ctor being always
+//     inlined. WX_BUILD_OPTIONS_SIGNATURE always works.
+class wxBuildOptions
+{
+public:
+    // the ctor must be inline to get the compilation settings of the code
+    // which included this header
+    wxBuildOptions() : m_signature(WX_BUILD_OPTIONS_SIGNATURE) {}
+
+private:
+    const char *m_signature;
+
+    // actually only CheckBuildOptions() should be our friend but well...
+    friend class wxAppConsole;
+};
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 #endif // _WX_BUILD_H_

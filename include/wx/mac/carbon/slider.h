@@ -12,11 +12,15 @@
 #ifndef _WX_SLIDER_H_
 #define _WX_SLIDER_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "slider.h"
+#endif
+
 #include "wx/control.h"
 #include "wx/slider.h"
 #include "wx/stattext.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxSliderNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
 
 // Slider
 class WXDLLEXPORT wxSlider: public wxSliderBase
@@ -37,7 +41,7 @@ public:
         Create(parent, id, value, minValue, maxValue, pos, size, style, validator, name);
     }
 
-    virtual ~wxSlider();
+    ~wxSlider();
 
     bool Create(wxWindow *parent, wxWindowID id,
                 int value, int minValue, int maxValue,
@@ -79,14 +83,14 @@ public:
                                  int maxW = -1, int maxH = -1,
                                  int incW = -1, int incH = -1 );
 
-    void Command(wxCommandEvent& event);
-    virtual wxInt32 MacControlHit(WXEVENTHANDLERREF handler, WXEVENTREF event);
-    void MacHandleControlClick(WXWidget control, wxInt16 controlpart, bool mouseStillDown);
-
 protected:
     virtual wxSize DoGetBestSize() const;
     virtual void   DoSetSize(int x, int y, int w, int h, int sizeFlags);
     virtual void   DoMoveWindow(int x, int y, int w, int h);
+
+    void Command(wxCommandEvent& event);
+    virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
+    void                     MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
 
     // Common processing to invert slider values based on wxSL_INVERSE
     virtual int ValueInvertOrNot(int value) const;

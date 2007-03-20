@@ -43,9 +43,6 @@ public:
     // modify the tip as soon as it is read. If return wxEmptyString, then 
     // the tip is skipped, and the next one is read.
     virtual wxString PreprocessTip(const wxString& tip);
-
-    %property(CurrentTip, GetCurrentTip, doc="See `GetCurrentTip`");
-    %property(Tip, GetTip, doc="See `GetTip`");
 };
 
 
@@ -69,7 +66,7 @@ IMP_PYCALLBACK_STRING_STRING(wxPyTipProvider, wxTipProvider, PreprocessTip);
 // Now let SWIG know about it
 class wxPyTipProvider : public wxTipProvider {
 public:
-    %pythonAppend wxPyTipProvider setCallbackInfo(PyTipProvider)
+    %pythonAppend wxPyTipProvider "self._setCallbackInfo(self, PyTipProvider)"
     wxPyTipProvider(size_t currentTip);
 
     void _setCallbackInfo(PyObject* self, PyObject* _class);

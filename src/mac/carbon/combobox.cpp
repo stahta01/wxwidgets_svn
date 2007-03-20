@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/combobox.cpp
+// Name:        combobox.cpp
 // Purpose:     wxComboBox class
-// Author:      Stefan Csomor, Dan "Bud" Keith (composite combobox)
+// Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
@@ -9,38 +9,30 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_COMBOBOX
 
 #include "wx/combobox.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/button.h"
-    #include "wx/menu.h"
-    #include "wx/containr.h"
-    #include "wx/toplevel.h"
-#endif
-
+#include "wx/button.h"
+#include "wx/menu.h"
 #include "wx/mac/uma.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxComboBox, wxControl)
-
-BEGIN_EVENT_TABLE(wxComboBox, wxControl)
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxComboBox)
-END_EVENT_TABLE()
+// composite combobox implementation by Dan "Bud" Keith bud@otsys.com
 
 
 static int nextPopUpMenuId = 1000 ;
-
 MenuHandle NewUniqueMenu()
 {
-    MenuHandle handle = UMANewMenu(nextPopUpMenuId, wxString(wxT("Menu")), wxFont::GetDefaultEncoding() );
-    nextPopUpMenuId++ ;
-
-    return handle ;
+  MenuHandle handle = NewMenu( nextPopUpMenuId , "\pMenu" ) ;
+  nextPopUpMenuId++ ;
+  return handle ;
 }
 
 
@@ -59,6 +51,7 @@ static const int    TEXTFOCUSBORDER = 3 ;
 static const wxCoord MARGIN = 2;
 static const int    TEXTFOCUSBORDER = 0 ;
 #endif
+static const int    POPUPHEIGHT = 23;
 
 
 // ----------------------------------------------------------------------------
@@ -72,7 +65,6 @@ public:
         : wxTextCtrl( cb , 1 )
     {
         m_cb = cb;
-        SetTriggerOnSetValue( false );
     }
 
 protected:
@@ -97,7 +89,7 @@ protected:
         if (m_cb->GetEventHandler()->ProcessEvent(kevt))
             // If the event was handled and not skipped then we're done
             return;
-
+        
         if ( event.GetKeyCode() == WXK_RETURN )
         {
             wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_cb->GetId());
@@ -105,20 +97,25 @@ protected:
             event.SetInt( m_cb->GetSelection() );
             event.SetEventObject( m_cb );
 
-            // This will invoke the dialog default action,
-            // such as the clicking the default button.
+            // This will invoke the dialog default action, such
+            // as the clicking the default button.
+
             if (!m_cb->GetEventHandler()->ProcessEvent( event ))
             {
-                wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-                if ( tlw && tlw->GetDefaultItem() )
+                wxWindow *parent = GetParent();
+                while( parent && !parent->IsTopLevel() && parent->GetDefaultItem() == NULL ) {
+                    parent = parent->GetParent() ;
+                }
+                if ( parent && parent->GetDefaultItem() )
                 {
-                    wxButton *def = wxDynamicCast(tlw->GetDefaultItem(), wxButton);
+                    wxButton *def = wxDynamicCast(parent->GetDefaultItem(),
+                                                          wxButton);
                     if ( def && def->IsEnabled() )
                     {
-                        wxCommandEvent event( wxEVT_COMMAND_BUTTON_CLICKED, def->GetId() );
+                        wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, def->GetId() );
                         event.SetEventObject(def);
                         def->Command(event);
-                    }
+                   }
                 }
 
                 return;
@@ -143,14 +140,14 @@ protected:
         if (! m_cb->GetEventHandler()->ProcessEvent(event))
             event.Skip();
     }
-
+    
     void OnText( wxCommandEvent& event )
     {
         event.SetEventObject(m_cb);
         event.SetId(m_cb->GetId());
         if (! m_cb->GetEventHandler()->ProcessEvent(event))
             event.Skip();
-    }
+    }        
 
 private:
     wxComboBox *m_cb;
@@ -159,21 +156,20 @@ private:
 };
 
 BEGIN_EVENT_TABLE(wxComboBoxText, wxTextCtrl)
-    EVT_KEY_DOWN(wxComboBoxText::OnKeyDown)
-    EVT_CHAR(wxComboBoxText::OnChar)
-    EVT_KEY_UP(wxComboBoxText::OnKeyUp)
-    EVT_TEXT(wxID_ANY, wxComboBoxText::OnText)
+    EVT_KEY_DOWN( wxComboBoxText::OnKeyDown)
+    EVT_CHAR(     wxComboBoxText::OnChar)
+    EVT_KEY_UP(   wxComboBoxText::OnKeyUp)
+    EVT_TEXT( -1, wxComboBoxText::OnText)
 END_EVENT_TABLE()
 
 class wxComboBoxChoice : public wxChoice
 {
 public:
-    wxComboBoxChoice( wxComboBox *cb, int style )
+    wxComboBoxChoice(wxComboBox *cb, int style)
         : wxChoice( cb , 1 , wxDefaultPosition , wxDefaultSize , 0 , NULL , style & (wxCB_SORT) )
     {
         m_cb = cb;
     }
-
     int GetPopupWidth() const
     {
         switch ( GetWindowVariant() )
@@ -181,7 +177,6 @@ public:
             case wxWINDOW_VARIANT_NORMAL :
             case wxWINDOW_VARIANT_LARGE :
                 return 24 ;
-
             default :
                 return 21 ;
         }
@@ -206,26 +201,22 @@ protected:
         TextEvent.SetEventObject( m_cb );
         m_cb->ProcessCommand( TextEvent );
     }
-
     virtual wxSize DoGetBestSize() const
     {
         wxSize sz = wxChoice::DoGetBestSize() ;
         if (! m_cb->HasFlag(wxCB_READONLY) )
             sz.x = GetPopupWidth() ;
-
         return sz ;
     }
 
 private:
     wxComboBox *m_cb;
 
-    friend class wxComboBox;
-
     DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxComboBoxChoice, wxChoice)
-    EVT_CHOICE(wxID_ANY, wxComboBoxChoice::OnChoice)
+    EVT_CHOICE(-1, wxComboBoxChoice::OnChoice)
 END_EVENT_TABLE()
 
 wxComboBox::~wxComboBox()
@@ -236,18 +227,16 @@ wxComboBox::~wxComboBox()
     // delete the controls now, don't leave them alive even though they would
     // still be eventually deleted by our parent - but it will be too late, the
     // user code expects them to be gone now
-    if (m_text != NULL)
-    {
+    if (m_text != NULL) {
         delete m_text;
         m_text = NULL;
     }
-
-    if (m_choice != NULL)
-    {
+    if (m_choice != NULL) {
         delete m_choice;
         m_choice = NULL;
     }
 }
+
 
 // ----------------------------------------------------------------------------
 // geometry
@@ -257,7 +246,6 @@ wxSize wxComboBox::DoGetBestSize() const
 {
     if (!m_choice && !m_text)
         return GetSize();
-
     wxSize size = m_choice->GetBestSize();
 
     if ( m_text != NULL )
@@ -265,7 +253,6 @@ wxSize wxComboBox::DoGetBestSize() const
         wxSize  sizeText = m_text->GetBestSize();
         if (sizeText.y > size.y)
             size.y = sizeText.y;
-
         size.x = m_choice->GetPopupWidth() + sizeText.x + MARGIN;
         size.x += TEXTFOCUSBORDER ;
         size.y += 2 * TEXTFOCUSBORDER ;
@@ -275,13 +262,12 @@ wxSize wxComboBox::DoGetBestSize() const
         // clipping is too tight
         size.y += 1 ;
     }
-
     return size;
 }
 
 void wxComboBox::DoMoveWindow(int x, int y, int width, int height)
 {
-    wxControl::DoMoveWindow( x, y, width , height );
+    wxControl::DoMoveWindow(x, y, width , height );
 
     if ( m_text == NULL )
     {
@@ -292,12 +278,13 @@ void wxComboBox::DoMoveWindow(int x, int y, int width, int height)
     else
     {
         wxCoord wText = width - m_choice->GetPopupWidth() - MARGIN;
-        m_text->SetSize(TEXTFOCUSBORDER, TEXTFOCUSBORDER, wText, -1);
-
+        m_text->SetSize(TEXTFOCUSBORDER, TEXTFOCUSBORDER, wText, -1 );
         // put it at an inset of 1 to have outer area shadows drawn as well
         m_choice->SetSize(TEXTFOCUSBORDER + wText + MARGIN - 1 , TEXTFOCUSBORDER, m_choice->GetPopupWidth() , -1);
     }
 }
+
+
 
 // ----------------------------------------------------------------------------
 // operations forwarded to the subcontrols
@@ -322,30 +309,34 @@ bool wxComboBox::Show(bool show)
     return true;
 }
 
+void wxComboBox::SetFocus()
+{
+    if ( m_text != NULL) {
+        m_text->SetFocus();
+    }
+}
+
+
 void wxComboBox::DelegateTextChanged( const wxString& value )
 {
     SetStringSelection( value );
 }
+
 
 void wxComboBox::DelegateChoice( const wxString& value )
 {
     SetStringSelection( value );
 }
 
-void wxComboBox::Init()
-{
-    m_container.SetContainerWindow(this);
-}
 
-bool wxComboBox::Create(wxWindow *parent,
-    wxWindowID id,
-    const wxString& value,
-    const wxPoint& pos,
-    const wxSize& size,
-    const wxArrayString& choices,
-    long style,
-    const wxValidator& validator,
-    const wxString& name)
+bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
+           const wxString& value,
+           const wxPoint& pos,
+           const wxSize& size,
+           const wxArrayString& choices,
+           long style,
+           const wxValidator& validator,
+           const wxString& name)
 {
     wxCArrayString chs( choices );
 
@@ -353,16 +344,15 @@ bool wxComboBox::Create(wxWindow *parent,
                    chs.GetStrings(), style, validator, name );
 }
 
-bool wxComboBox::Create(wxWindow *parent,
-    wxWindowID id,
-    const wxString& value,
-    const wxPoint& pos,
-    const wxSize& size,
-    int n,
-    const wxString choices[],
-    long style,
-    const wxValidator& validator,
-    const wxString& name)
+
+bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
+           const wxString& value,
+           const wxPoint& pos,
+           const wxSize& size,
+           int n, const wxString choices[],
+           long style,
+           const wxValidator& validator,
+           const wxString& name)
 {
     if ( !wxControl::Create(parent, id, wxDefaultPosition, wxDefaultSize, style ,
                             validator, name) )
@@ -393,10 +383,9 @@ bool wxComboBox::Create(wxWindow *parent,
         m_choice->DoAppend( choices[ i ] );
     }
 
-    // Needed because it is a wxControlWithItems
-    SetInitialSize(size);
+    SetBestSize(size);   // Needed because it is a wxControlWithItems
     SetStringSelection(value);
-
+    
     return true;
 }
 
@@ -405,14 +394,18 @@ wxString wxComboBox::GetValue() const
     wxString        result;
 
     if ( m_text == NULL )
+    {
         result = m_choice->GetString( m_choice->GetSelection() );
+    }
     else
+    {
         result = m_text->GetValue();
+    }
 
     return result;
 }
 
-unsigned int wxComboBox::GetCount() const
+int wxComboBox::GetCount() const
 {
     return m_choice->GetCount() ;
 }
@@ -426,23 +419,28 @@ void wxComboBox::SetValue(const wxString& value)
 }
 
 // Clipboard operations
-
 void wxComboBox::Copy()
 {
     if ( m_text != NULL )
+    {
         m_text->Copy();
+    }
 }
 
 void wxComboBox::Cut()
 {
     if ( m_text != NULL )
+    {
         m_text->Cut();
+    }
 }
 
 void wxComboBox::Paste()
 {
     if ( m_text != NULL )
+    {
         m_text->Paste();
+    }
 }
 
 void wxComboBox::SetEditable(bool editable)
@@ -468,46 +466,39 @@ void wxComboBox::SetEditable(bool editable)
 
 void wxComboBox::SetInsertionPoint(long pos)
 {
-    if ( m_text )
-        m_text->SetInsertionPoint(pos);
+    // TODO
 }
 
 void wxComboBox::SetInsertionPointEnd()
 {
-    if ( m_text )
-        m_text->SetInsertionPointEnd();
+    // TODO
 }
 
 long wxComboBox::GetInsertionPoint() const
 {
-    if ( m_text )
-        return m_text->GetInsertionPoint();
+    // TODO
     return 0;
 }
 
 wxTextPos wxComboBox::GetLastPosition() const
 {
-    if ( m_text )
-        return m_text->GetLastPosition();
+    // TODO
     return 0;
 }
 
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
-    if ( m_text )
-        m_text->Replace(from,to,value);
+    // TODO
 }
 
 void wxComboBox::Remove(long from, long to)
 {
-    if ( m_text )
-        m_text->Remove(from,to);
+    // TODO
 }
 
 void wxComboBox::SetSelection(long from, long to)
 {
-    if ( m_text )
-        m_text->SetSelection(from,to);
+    // TODO
 }
 
 int wxComboBox::DoAppend(const wxString& item)
@@ -515,27 +506,27 @@ int wxComboBox::DoAppend(const wxString& item)
     return m_choice->DoAppend( item ) ;
 }
 
-int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+int wxComboBox::DoInsert(const wxString& item, int pos)
 {
     return m_choice->DoInsert( item , pos ) ;
 }
 
-void wxComboBox::DoSetItemClientData(unsigned int n, void* clientData)
+void wxComboBox::DoSetItemClientData(int n, void* clientData)
 {
     return m_choice->DoSetItemClientData( n , clientData ) ;
 }
 
-void* wxComboBox::DoGetItemClientData(unsigned int n) const
+void* wxComboBox::DoGetItemClientData(int n) const
 {
     return m_choice->DoGetItemClientData( n ) ;
 }
 
-void wxComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxComboBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
-    return m_choice->DoSetItemClientObject(n, clientData);
+    return m_choice->DoSetItemClientObject( n , clientData ) ;
 }
 
-wxClientData* wxComboBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxComboBox::DoGetItemClientObject(int n) const
 {
     return m_choice->DoGetItemClientObject( n ) ;
 }
@@ -544,15 +535,15 @@ void wxComboBox::FreeData()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int count = GetCount();
-        for ( unsigned int n = 0; n < count; n++ )
+        size_t count = GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
             SetClientObject( n, NULL );
         }
     }
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int n)
 {
     // force client object deletion
     if( HasClientObjectData() )
@@ -576,31 +567,33 @@ void wxComboBox::SetSelection(int n)
     m_choice->SetSelection( n );
 
     if ( m_text != NULL )
-        m_text->SetValue(GetString(n));
+    {
+        m_text->SetValue( GetString( n ) );
+    }
 }
 
-int wxComboBox::FindString(const wxString& s, bool bCase) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    return m_choice->FindString( s, bCase );
+    return m_choice->FindString( s );
 }
 
-wxString wxComboBox::GetString(unsigned int n) const
+wxString wxComboBox::GetString(int n) const
 {
     return m_choice->GetString( n );
 }
 
 wxString wxComboBox::GetStringSelection() const
 {
-    int sel = GetSelection();
-    if (sel != wxNOT_FOUND)
-        return wxString(this->GetString((unsigned int)sel));
+    int sel = GetSelection ();
+    if (sel > -1)
+        return wxString(this->GetString (sel));
     else
         return wxEmptyString;
 }
 
-void wxComboBox::SetString(unsigned int n, const wxString& s)
+void wxComboBox::SetString(int n, const wxString& s)
 {
-    m_choice->SetString( n , s );
+    m_choice->SetString( n , s ) ;
 }
 
 bool wxComboBox::IsEditable() const
@@ -666,18 +659,15 @@ bool wxComboBox::CanRedo() const
         return false;
 }
 
-wxInt32 wxComboBox::MacControlHit( WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF WXUNUSED(event) )
+wxInt32 wxComboBox::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF WXUNUSED(event) )
 {
-/*
-    For consistency with other platforms, clicking in the text area does not constitute a selection
+    /* For consistency with other platforms, clicking in the text area does not constitute a selection
     wxCommandEvent event(wxEVT_COMMAND_COMBOBOX_SELECTED, m_windowId );
     event.SetInt(GetSelection());
     event.SetEventObject(this);
     event.SetString(GetStringSelection());
-    ProcessCommand(event);
-*/
-
+    ProcessCommand(event);*/
     return noErr ;
 }
 
-#endif // wxUSE_COMBOBOX
+#endif

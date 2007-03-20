@@ -3,16 +3,17 @@
 
 set -o errexit
 
+# read the config variables from the file given on the command line
+. $1
 
-coHost=$1
-host=$2
-reltag=$3
-pyver=$4
+coHost=$2
+host=$3
+reltag=$4
+shift;shift;shift;shift
+pyver=$@
 
-if [ $buildansi = yes ]; then
-    CHARTYPE=both
-else
-    CHARTYPE=unicode
+if [ $pyver = config ]; then
+    pyver=$PYVER
 fi
 
 
@@ -28,7 +29,7 @@ function TestOnline {
 }
 
 
-if [ $skiprpm != yes ]; then
+if [ $skiplinux != yes ]; then
 
     startedCoHost=no
     hostAvailable=no
@@ -82,7 +83,7 @@ if [ $skiprpm != yes ]; then
     
     echo "Running build script on $host..."
     cmd=./do-build-rpm
-    ssh root@$host "cd $LINUX_BUILD && $cmd $reltag $skipclean $VERSION $pyver $CHARTYPE"
+    ssh root@$host "cd $LINUX_BUILD && $cmd $reltag $skipclean $VERSION $pyver"
     
     echo "Fetching the results..."
     scp "root@$host:$LINUX_BUILD/wxPython*.i[0-9]86.rpm"  $STAGING_DIR

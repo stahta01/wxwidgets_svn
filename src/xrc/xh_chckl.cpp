@@ -1,12 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_chckl.cpp
-// Purpose:     XRC resource for wxCheckListBox
+// Name:        xh_chckl.cpp
+// Purpose:     XRC resource for wxCheckList
 // Author:      Bob Mitchell
 // Created:     2000/03/21
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Bob Mitchell and Verant Interactive
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_chckl.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -15,15 +19,14 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_CHECKLISTBOX
+#if wxUSE_XRC
+
+#if wxUSE_CHECKLISTBOX
 
 #include "wx/xrc/xh_chckl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/checklst.h"
-#endif
+#include "wx/checklst.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBoxXmlHandler, wxXmlResourceHandler)
 
@@ -38,32 +41,48 @@ wxCheckListBoxXmlHandler::wxCheckListBoxXmlHandler()
     XRC_ADD_STYLE(wxLB_ALWAYS_SB);
     XRC_ADD_STYLE(wxLB_NEEDED_SB);
     XRC_ADD_STYLE(wxLB_SORT);
-
+    
     AddWindowStyles();
 }
 
 wxObject *wxCheckListBoxXmlHandler::DoCreateResource()
 {
-    if (m_class == wxT("wxCheckListBox"))
+    if (m_class == wxT("wxCheckListBox")
+#if WXWIN_COMPATIBILITY_2_4
+        || m_class == wxT("wxCheckList")
+#endif
+       )
     {
+#if WXWIN_COMPATIBILITY_2_4
+        if (m_class == wxT("wxCheckList"))
+            wxLogDebug(wxT("'wxCheckList' name is deprecated, use 'wxCheckListBox' instead."));
+#endif
         // need to build the list of strings from children
         m_insideBox = true;
         CreateChildrenPrivately(NULL, GetParamNode(wxT("content")));
+        wxString *strings = (wxString *) NULL;
+        if (strList.GetCount() > 0)
+        {
+            strings = new wxString[strList.GetCount()];
+            int count = strList.GetCount();
+            for(int i = 0; i < count; i++)
+                strings[i] = strList[i];
+        }
 
         XRC_MAKE_INSTANCE(control, wxCheckListBox)
 
         control->Create(m_parentAsWindow,
                         GetID(),
                         GetPosition(), GetSize(),
-                        strList,
+                        strList.GetCount(),
+                        strings,
                         GetStyle(),
                         wxDefaultValidator,
                         GetName());
 
         // step through children myself (again.)
         wxXmlNode *n = GetParamNode(wxT("content"));
-        if (n)
-            n = n->GetChildren();
+        if (n) n = n->GetChildren();
         int i = 0;
         while (n)
         {
@@ -83,6 +102,8 @@ wxObject *wxCheckListBoxXmlHandler::DoCreateResource()
 
         SetupWindow(control);
 
+        if (strings != NULL)
+            delete[] strings;
         strList.Clear();    // dump the strings
 
         return control;
@@ -95,7 +116,7 @@ wxObject *wxCheckListBoxXmlHandler::DoCreateResource()
         // add to the list
         wxString str = GetNodeContent(m_node);
         if (m_resource->GetFlags() & wxXRC_USE_LOCALE)
-            str = wxGetTranslation(str, m_resource->GetDomain());
+            str = wxGetTranslation(str);
         strList.Add(str);
         return NULL;
     }
@@ -104,7 +125,12 @@ wxObject *wxCheckListBoxXmlHandler::DoCreateResource()
 bool wxCheckListBoxXmlHandler::CanHandle(wxXmlNode *node)
 {
     return (IsOfClass(node, wxT("wxCheckListBox")) ||
+#if WXWIN_COMPATIBILITY_2_4
+            IsOfClass(node, wxT("wxCheckList")) ||
+#endif
            (m_insideBox && node->GetName() == wxT("item")));
 }
 
-#endif // wxUSE_XRC && wxUSE_CHECKLISTBOX
+#endif // wxUSE_CHECKLISTBOX
+
+#endif // wxUSE_XRC

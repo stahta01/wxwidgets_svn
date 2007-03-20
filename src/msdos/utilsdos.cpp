@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msdos/utils.cpp
+// Name:        utils.cpp
 // Purpose:     DOS implementations of utility functions
 // Author:      Vaclav Slavik, M.J.Wetherell
 // Id:          $Id$
@@ -16,17 +16,14 @@
 #endif
 
 #include "wx/utils.h"
+#include "wx/string.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-#endif
-
+#include "wx/intl.h"
 #include "wx/apptrait.h"
+#include "wx/log.h"
 #include "wx/process.h"
 #include "wx/confbase.h"        // for wxExpandEnvVars()
+#include "wx/app.h"
 #include "wx/cmdline.h"
 #include "wx/filename.h"
 #include "wx/wfstream.h"
@@ -88,12 +85,12 @@ bool wxGetEnv(const wxString& var, wxString *value)
     // wxGetenv is defined as getenv()
     wxChar *p = wxGetenv(var);
     if ( !p )
-        return false;
+        return FALSE;
 
     if ( value )
         *value = p;
 
-    return true;
+    return TRUE;
 }
 
 bool wxSetEnv(const wxString& variable, const wxChar *value)
@@ -210,6 +207,17 @@ wxChar *wxGetUserHome(const wxString& user)
         return _T("");
 }
 
+#if WXWIN_COMPATIBILITY_2_2
+void wxFatalError(const wxString &msg, const wxString &title)
+{
+    wxFprintf( stderr, _("Error ") );
+    if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+    if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+    wxFprintf( stderr, wxT(".\n") );
+    exit(3); // the same exit code as for abort()
+}
+#endif // WXWIN_COMPATIBILITY_2_2
+
 // returns %UserName%, $USER or just "user"
 //
 bool wxGetUserId(wxChar *buf, int n)
@@ -236,7 +244,7 @@ bool wxGetUserName(wxChar *buf, int n)
 bool wxGetHostName(wxChar *buf, int n)
 {
     const wxChar *host = wxGetenv(_T("ComputerName"));
-
+    
     if (!host)
         host = wxGetenv(_T("HOSTNAME"));
 
@@ -321,7 +329,7 @@ long wxExecute(const wxString& command, int flags, wxProcess *process)
 #if wxUSE_STREAMS
 
 // A wxFFileInputStream that deletes the file in it's destructor
-//
+// 
 class wxTempFileInStream : public wxFFileInputStream
 {
 public:
@@ -329,7 +337,7 @@ public:
         : wxFFileInputStream(name, _T("rt"))
     { }
 
-    virtual ~wxTempFileInStream()
+    ~wxTempFileInStream()
     {
         m_file->Close();
         wxRemoveFile(m_file->GetName());
@@ -467,29 +475,27 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
     return result;
 }
 
+//----------------------------------------------------------------------------
+// Traits for console apps
+//----------------------------------------------------------------------------
+
+wxToolkitInfo& wxConsoleAppTraits::GetToolkitInfo()
+{
+    static wxToolkitInfo info;
+    info.versionMajor = _osmajor;
+    info.versionMinor = _osminor;
+    info.name = _T("wxBase");
+    info.os = wxDOS;
+    return info;
+}
 
 //----------------------------------------------------------------------------
-// OS-related
+// OS Description
 //----------------------------------------------------------------------------
 
 wxString wxGetOsDescription()
 {
     wxString osname(_T("DOS"));
     return osname;
-}
-
-wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
-{
-    if ( verMaj )
-        *verMaj = _osmajor;
-    if ( verMin )
-        *verMin = _osminor;
-
-    return wxOS_DOS;
-}
-
-bool wxIsPlatform64Bit()
-{
-    return false;
 }
 

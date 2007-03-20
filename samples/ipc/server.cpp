@@ -66,9 +66,6 @@ END_EVENT_TABLE()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     m_frame = new MyFrame(NULL, _T("Server"));
     m_frame->Show(true);
@@ -168,7 +165,7 @@ void MyFrame::Enable()
     GetStart()->Enable(m_server == NULL);
     GetServername()->Enable(m_server == NULL);
     GetAdvise()->Enable(m_server && m_server->CanAdvise());
-    GetDisconnect()->Enable(m_server && m_server->IsConnected());
+    GetDisconnect()->Enable(m_server && m_server->IsConnected() != NULL);
 }
 
 void MyFrame::OnClose(wxCloseEvent& event)

@@ -12,6 +12,10 @@
 #ifndef _WX_LISTBOX_H_
 #define _WX_LISTBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listbox.h"
+#endif
+
 #if wxUSE_LISTBOX
 
 // ----------------------------------------------------------------------------
@@ -79,16 +83,28 @@ public:
 
     // implement base class pure virtuals
     virtual void Clear();
-    virtual void Delete(unsigned int n);
+    virtual void Delete(int n);
 
-    virtual unsigned int GetCount() const;
-    virtual wxString GetString(unsigned int n) const;
-    virtual void SetString(unsigned int n, const wxString& s);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
+    virtual int GetCount() const;
+    virtual wxString GetString(int n) const;
+    virtual void SetString(int n, const wxString& s);
+    virtual int FindString(const wxString& s) const;
 
     virtual bool IsSelected(int n) const;
+    virtual void DoSetSelection(int n, bool select);
     virtual int GetSelection() const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
+
+    virtual int DoAppend(const wxString& item);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
+    virtual void DoSetItems(const wxArrayString& items, void **clientData);
+
+    virtual void DoSetFirstItem(int n);
+
+    virtual void DoSetItemClientData(int n, void* clientData);
+    virtual void* DoGetItemClientData(int n) const;
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(int n) const;
 
     // wxCheckListBox support
 #if wxUSE_OWNER_DRAWN
@@ -105,22 +121,13 @@ public:
     int GetItemIndex(wxOwnerDrawn *item) const { return m_aItems.Index(item); }
 #endif // wxUSE_OWNER_DRAWN
 
-    // Windows-specific code to update the horizontal extent of the listbox, if
-    // necessary. If s is non-empty, the horizontal extent is increased to the
-    // length of this string if it's currently too short, otherwise the maximum
-    // extent of all strings is used. In any case calls InvalidateBestSize()
+    // Windows-specific code to set the horizontal extent of the listbox, if
+    // necessary. If s is non-NULL, it's used to calculate the horizontal
+    // extent. Otherwise, all strings are used.
     virtual void SetHorizontalExtent(const wxString& s = wxEmptyString);
 
     // Windows callbacks
     bool MSWCommand(WXUINT param, WXWORD id);
-    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
-    // under XP when using "transition effect for menus and tooltips" if we
-    // return true for WM_PRINTCLIENT here then it causes noticable slowdown
-    virtual bool MSWShouldPropagatePrintChild()
-    {
-        return false;
-    }
 
     virtual wxVisualAttributes GetDefaultAttributes() const
     {
@@ -134,24 +141,22 @@ public:
     }
 
 protected:
-    virtual void DoSetSelection(int n, bool select);
-    virtual int DoAppend(const wxString& item);
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
-    virtual void DoSetItems(const wxArrayString& items, void **clientData);
-    virtual void DoSetFirstItem(int n);
-    virtual void DoSetItemClientData(unsigned int n, void* clientData);
-    virtual void* DoGetItemClientData(unsigned int n) const;
-    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
-    virtual int DoListHitTest(const wxPoint& point) const;
+    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
     // free memory (common part of Clear() and dtor)
     void Free();
 
-    unsigned int m_noItems;
+    int m_noItems;
     int m_selected;
 
     virtual wxSize DoGetBestSize() const;
+
+    // under XP when using "transition effect for menus and tooltips" if we
+    // return true for WM_PRINTCLIENT here then it causes noticable slowdown
+    virtual bool MSWShouldPropagatePrintChild()
+    {
+        return false;
+    }
 
 #if wxUSE_OWNER_DRAWN
     // control items

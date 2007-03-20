@@ -11,6 +11,10 @@
 #ifndef __WX_TIMER_H__
 #define __WX_TIMER_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "timer.h"
+#endif
+
 //-----------------------------------------------------------------------------
 // wxTimer
 //-----------------------------------------------------------------------------
@@ -23,7 +27,7 @@ public:
     wxTimer() { Init(); }
     wxTimer(wxEvtHandler *owner, int timerid = -1) : wxTimerBase(owner, timerid)
         { Init(); }
-    virtual ~wxTimer();
+    ~wxTimer();
 
     virtual bool Start(int millisecs = -1, bool oneShot = false);
     virtual void Stop();

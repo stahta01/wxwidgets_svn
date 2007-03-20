@@ -30,7 +30,7 @@ MAKE_CONST_WXSTRING(DefaultTimeSpanFormat);
     $1 = new wxDateTime::TimeZone((wxDateTime::TZ)PyInt_AsLong($input));
     temp = true;
 }
-%typemap(freearg) wxDateTime::TimeZone& {
+%typemap(python,freearg) wxDateTime::TimeZone& {
     if (temp$argnum) delete $1;
 }
 
@@ -42,7 +42,7 @@ MAKE_CONST_WXSTRING(DefaultTimeSpanFormat);
 
 // Convert a wxLongLong to a Python Long by getting the hi/lo dwords, then
 // shifting and oring them together
-%typemap(out) wxLongLong {
+%typemap(python, out) wxLongLong {
     PyObject *hi, *lo, *shifter, *shifted;
     hi = PyLong_FromLong( $1.GetHi() );
     lo = PyLong_FromLong( $1.GetLo() );
@@ -78,7 +78,7 @@ public:
         GMT_6, GMT_5, GMT_4, GMT_3, GMT_2, GMT_1,
         GMT0,
         GMT1, GMT2, GMT3, GMT4, GMT5, GMT6,
-        GMT7, GMT8, GMT9, GMT10, GMT11, GMT12, GMT13,
+        GMT7, GMT8, GMT9, GMT10, GMT11, GMT12,
 
         // Europe
         WET = GMT0,                         // Western Europe Time
@@ -108,14 +108,10 @@ public:
         // Australia
 
         A_WST = GMT8,                       // Western Standard Time
-        A_CST = GMT13 + 1,                  // Central Standard Time (+9.5)
+        A_CST = GMT12 + 1,                  // Central Standard Time (+9.5)
         A_EST = GMT10,                      // Eastern Standard Time
         A_ESST = GMT11,                     // Eastern Summer Time
 
-        // New Zealand
-        NZST = GMT12,                       // Standard Time
-        NZDT = GMT13,                       // Daylight Saving Time
-        
         // Universal Coordinated Time = the new and politically correct name
         // for GMT
         UTC = GMT0
@@ -464,10 +460,6 @@ public:
         // resets time to 00:00:00, doesn't change the date
     wxDateTime& ResetTime();
 
-        // get the date part of this object only, i.e. the object which has the
-        // same date as this one but time of 00:00:00
-    wxDateTime GetDateOnly() const;
-    
         // the following functions don't change the values of the other
         // fields, i.e. SetMinute() won't change either hour or seconds value
 
@@ -625,10 +617,8 @@ public:
 
         // is the date valid (True even for non initialized objects)?
     inline bool IsValid() const;
-    %pythoncode { IsOk = IsValid }
-    %pythoncode { Ok = IsOk }
-   
-    %pythoncode { def __nonzero__(self): return self.IsOk() };
+    %pythoncode { Ok = IsValid }
+    %pythoncode { def __nonzero__(self): return self.Ok() };
 
     
         // get the number of seconds since the Unix epoch - returns (time_t)-1
@@ -893,32 +883,6 @@ public:
         else:
             return "INVALID DateTime"
     }
-
-    %property(Day, GetDay, SetDay, doc="See `GetDay` and `SetDay`");
-    %property(DayOfYear, GetDayOfYear, doc="See `GetDayOfYear`");
-    %property(Hour, GetHour, SetHour, doc="See `GetHour` and `SetHour`");
-    %property(JDN, GetJDN, SetJDN, doc="See `GetJDN` and `SetJDN`");
-    %property(JulianDayNumber, GetJulianDayNumber, doc="See `GetJulianDayNumber`");
-    %property(LastMonthDay, GetLastMonthDay, doc="See `GetLastMonthDay`");
-    %property(LastWeekDay, GetLastWeekDay, doc="See `GetLastWeekDay`");
-    %property(MJD, GetMJD, doc="See `GetMJD`");
-    %property(Millisecond, GetMillisecond, SetMillisecond, doc="See `GetMillisecond` and `SetMillisecond`");
-    %property(Minute, GetMinute, SetMinute, doc="See `GetMinute` and `SetMinute`");
-    %property(ModifiedJulianDayNumber, GetModifiedJulianDayNumber, doc="See `GetModifiedJulianDayNumber`");
-    %property(Month, GetMonth, SetMonth, doc="See `GetMonth` and `SetMonth`");
-    %property(NextWeekDay, GetNextWeekDay, doc="See `GetNextWeekDay`");
-    %property(PrevWeekDay, GetPrevWeekDay, doc="See `GetPrevWeekDay`");
-    %property(RataDie, GetRataDie, doc="See `GetRataDie`");
-    %property(Second, GetSecond, SetSecond, doc="See `GetSecond` and `SetSecond`");
-    %property(Ticks, GetTicks, doc="See `GetTicks`");
-    %property(Week, GetWeek, doc="See `GetWeek`");
-    %property(WeekDay, GetWeekDay, doc="See `GetWeekDay`");
-    %property(WeekDayInSameWeek, GetWeekDayInSameWeek, doc="See `GetWeekDayInSameWeek`");
-    %property(WeekOfMonth, GetWeekOfMonth, doc="See `GetWeekOfMonth`");
-    %property(WeekOfYear, GetWeekOfYear, doc="See `GetWeekOfYear`");
-    %property(Year, GetYear, SetYear, doc="See `GetYear` and `SetYear`");
-    %property(YearDay, GetYearDay, doc="See `GetYearDay`");
-    
 };
 
 //---------------------------------------------------------------------------
@@ -931,16 +895,9 @@ public:
 class wxTimeSpan
 {
 public:
-
-    // TODO:  Need an input typemap for wxLongLong...
-    
-    
-        // return the timespan for the given number of milliseconds
-    static wxTimeSpan Milliseconds(/*wxLongLong*/ long ms);
-    static wxTimeSpan Millisecond(); 
     
         // return the timespan for the given number of seconds
-    static wxTimeSpan Seconds(/*wxLongLong*/ long sec);
+    static wxTimeSpan Seconds(long sec);
     static wxTimeSpan Second();
 
         // return the timespan for the given number of minutes
@@ -967,8 +924,8 @@ public:
         // milliseconds)
     wxTimeSpan(long hours = 0,
                long minutes = 0,
-               /*wxLongLong*/ long seconds = 0,
-               /*wxLongLong*/ long milliseconds = 0);
+               long seconds = 0,
+               long milliseconds = 0);
 
     ~wxTimeSpan();
 
@@ -1073,13 +1030,6 @@ public:
      def __str__(self):
          return self.Format().encode(wx.GetDefaultPyEncoding())
      }
-
-    %property(Days, GetDays, doc="See `GetDays`");
-    %property(Hours, GetHours, doc="See `GetHours`");
-    %property(Milliseconds, GetMilliseconds, doc="See `GetMilliseconds`");
-    %property(Minutes, GetMinutes, doc="See `GetMinutes`");
-    %property(Seconds, GetSeconds, doc="See `GetSeconds`");
-    %property(Weeks, GetWeeks, doc="See `GetWeeks`");
 };
 
 
@@ -1205,12 +1155,6 @@ public:
         bool __eq__(const wxDateSpan* other) { return other ? (*self == *other) : false; }
         bool __ne__(const wxDateSpan* other) { return other ? (*self != *other) : true;  }
     }
-
-    %property(Days, GetDays, SetDays, doc="See `GetDays` and `SetDays`");
-    %property(Months, GetMonths, SetMonths, doc="See `GetMonths` and `SetMonths`");
-    %property(TotalDays, GetTotalDays, doc="See `GetTotalDays`");
-    %property(Weeks, GetWeeks, SetWeeks, doc="See `GetWeeks` and `SetWeeks`");
-    %property(Years, GetYears, SetYears, doc="See `GetYears` and `SetYears`");
 };
 
 

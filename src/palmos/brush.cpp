@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "brush.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -29,7 +33,6 @@
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/brush.h"
-    #include "wx/colour.h"
 #endif // WX_PRECOMP
 
 // ----------------------------------------------------------------------------
@@ -66,9 +69,14 @@ wxBrush::~wxBrush()
 // wxBrush house keeping stuff
 // ----------------------------------------------------------------------------
 
+wxBrush& wxBrush::operator=(const wxBrush& brush)
+{
+    return *this;
+}
+
 bool wxBrush::operator==(const wxBrush& brush) const
 {
-    return false;
+    return FALSE;
 }
 
 wxObjectRefData *wxBrush::CreateRefData() const
@@ -109,18 +117,20 @@ WXHANDLE wxBrush::GetResourceHandle() const
 // wxBrush setters
 // ----------------------------------------------------------------------------
 
-void wxBrush::SetColour(const wxColour& WXUNUSED(col))
+void wxBrush::SetColour(const wxColour& col)
 {
 }
 
-void wxBrush::SetColour(unsigned char WXUNUSED(r), unsigned char WXUNUSED(g), unsigned char WXUNUSED(b))
+void wxBrush::SetColour(unsigned char r, unsigned char g, unsigned char b)
 {
 }
 
-void wxBrush::SetStyle(int WXUNUSED(style))
+void wxBrush::SetStyle(int style)
 {
 }
 
-void wxBrush::SetStipple(const wxBitmap& WXUNUSED(stipple))
+void wxBrush::SetStipple(const wxBitmap& stipple)
 {
 }
+
+

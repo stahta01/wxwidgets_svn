@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/utils.cpp
+// Name:        utils.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -15,14 +15,11 @@
 #endif
 
 #include "wx/utils.h"
+#include "wx/string.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
+#include "wx/intl.h"
 #include "wx/apptrait.h"
+#include "wx/log.h"
 #include "wx/process.h"
 
 #include <stdarg.h>
@@ -42,28 +39,9 @@
 // misc.
 //----------------------------------------------------------------------------
 
-// Get free memory in bytes, or -1 if cannot determine amount (e.g. on UNIX)
-wxMemorySize wxGetFreeMemory()
-{
-    // TODO - probably should be extracted to
-    //        src/msdos/utilsdos.cpp and src/unix/utilsunx.cpp
-    //        to avoid code duplication
-    return -1;
-}
-
 void wxBell()
 {
     // FIXME_MGL
-}
-
-bool wxGetKeyState(wxKeyCode key)
-{
-    wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key !=
-        WXK_MBUTTON, wxT("can't use wxGetKeyState() for mouse buttons"));
-
-    // TODO
-
-    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -112,15 +90,55 @@ int wxDisplayDepth()
     return g_displayDC->getBitsPerPixel();
 }
 
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
-{
-    if ( verMaj )
-        *verMaj = MGL_RELEASE_MAJOR;
-    if ( verMin )
-        *verMin = MGL_RELEASE_MINOR;
+#if wxUSE_GUI
 
-    return wxPORT_MGL;
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+{
+    static wxToolkitInfo info;
+    info.shortName = _T("mgluniv");
+    info.name = _T("wxMGL");
+    info.versionMajor = MGL_RELEASE_MAJOR;
+    info.versionMinor = MGL_RELEASE_MINOR;
+    info.os = wxGTK;
+#if defined(__UNIX__)
+    info.os = wxMGL_UNIX;
+#elif defined(__OS2__)
+    info.os = wxMGL_OS2;
+#elif defined(__WIN32__)
+    info.os = wxMGL_WIN32;
+#elif defined(__DOS__)
+    info.os = wxMGL_DOS;
+#else
+    #error Platform not supported by wxMGL!
+#endif
+    return info;
 }
+
+#endif
+
+#if 0
+wxToolkitInfo& wxConsoleAppTraits::GetToolkitInfo()
+{
+    static wxToolkitInfo info;
+    info.shortName = _T("mglbase");
+    info.versionMajor = MGL_RELEASE_MAJOR;
+    info.versionMinor = MGL_RELEASE_MINOR;
+    info.name = _T("wxBase");
+    info.os = wxGTK;
+#if defined(__UNIX__)
+    info.os = wxMGL_UNIX;
+#elif defined(__OS2__)
+    info.os = wxMGL_OS2;
+#elif defined(__WIN32__)
+    info.os = wxMGL_WIN32;
+#elif defined(__DOS__)
+    info.os = wxMGL_DOS;
+#else
+    #error Platform not supported by wxMGL!
+#endif
+    return info;
+}
+#endif
 
 void wxGetMousePosition(int* x, int* y)
 {
@@ -156,7 +174,6 @@ wxMouseState wxGetMouseState()
 
     return ms;
 }
-
 
 #ifdef __UNIX__
 

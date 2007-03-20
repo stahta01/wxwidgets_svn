@@ -18,11 +18,9 @@ MAKEARGS = CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" \
 	TARGET_CPU="$(TARGET_CPU)" DEBUG_INFO="$(DEBUG_INFO)" \
 	DEBUG_FLAG="$(DEBUG_FLAG)" DEBUG_RUNTIME_LIBS="$(DEBUG_RUNTIME_LIBS)" \
 	MONOLITHIC="$(MONOLITHIC)" USE_GUI="$(USE_GUI)" USE_HTML="$(USE_HTML)" \
-	USE_MEDIA="$(USE_MEDIA)" USE_XRC="$(USE_XRC)" USE_AUI="$(USE_AUI)" \
-	USE_RICHTEXT="$(USE_RICHTEXT)" USE_OPENGL="$(USE_OPENGL)" \
-	USE_ODBC="$(USE_ODBC)" USE_QA="$(USE_QA)" \
-	USE_EXCEPTIONS="$(USE_EXCEPTIONS)" USE_RTTI="$(USE_RTTI)" \
-	USE_THREADS="$(USE_THREADS)" USE_GDIPLUS="$(USE_GDIPLUS)" \
+	USE_XRC="$(USE_XRC)" USE_OPENGL="$(USE_OPENGL)" USE_ODBC="$(USE_ODBC)" \
+	USE_QA="$(USE_QA)" USE_EXCEPTIONS="$(USE_EXCEPTIONS)" \
+	USE_RTTI="$(USE_RTTI)" USE_THREADS="$(USE_THREADS)" \
 	OFFICIAL_BUILD="$(OFFICIAL_BUILD)" VENDOR="$(VENDOR)" \
 	WX_FLAVOUR="$(WX_FLAVOUR)" WX_LIB_FLAVOUR="$(WX_LIB_FLAVOUR)" CFG="$(CFG)" \
 	CPPUNIT_CFLAGS="$(CPPUNIT_CFLAGS)" CPPUNIT_LIBS="$(CPPUNIT_LIBS)" \
@@ -34,7 +32,7 @@ MAKEARGS = CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" \
 
 ### Targets: ###
 
-all: sub_access sub_animate sub_artprov sub_aui sub_calendar sub_caret sub_checklst sub_collpane sub_config sub_combo sub_console sub_controls sub_dataview sub_db sub_dialogs sub_dialup sub_display sub_dnd sub_docview sub_docvwmdi sub_dragimag sub_drawing sub_dynamic sub_erase sub_event sub_exec sub_except sub_font sub_grid sub_help sub_htlbox sub_html sub_image sub_internat sub_ipc sub_joytest sub_keyboard sub_layout sub_listbox sub_listctrl sub_mdi sub_mediaplayer sub_memcheck sub_menu sub_minifram sub_minimal sub_mobile sub_multimon sub_nativdlg sub_notebook sub_oleauto sub_opengl sub_ownerdrw sub_png sub_popup sub_printing sub_propsize sub_regtest sub_render sub_richtext sub_rotate sub_sashtest sub_scroll sub_scrollsub sub_shaped sub_sockets sub_sound sub_splash sub_splitter sub_statbar sub_taskbar sub_text sub_thread sub_toolbar sub_treectrl sub_typetest sub_validate sub_vscroll sub_widgets sub_wizard sub_mfc
+all: sub_access sub_artprov sub_calendar sub_caret sub_checklst sub_config sub_console sub_controls sub_db sub_dialogs sub_dialup sub_display sub_dnd sub_docview sub_docvwmdi sub_dragimag sub_drawing sub_dynamic sub_erase sub_event sub_exec sub_except sub_font sub_grid sub_help sub_htlbox sub_html sub_image sub_internat sub_ipc sub_joytest sub_keyboard sub_layout sub_listbox sub_listctrl sub_mdi sub_mediaplayer sub_memcheck sub_menu sub_minifram sub_minimal sub_mobile sub_multimon sub_nativdlg sub_notebook sub_oleauto sub_opengl sub_ownerdrw sub_png sub_popup sub_printing sub_propsize sub_regtest sub_render sub_richedit sub_rotate sub_sashtest sub_scroll sub_scrollsub sub_shaped sub_sockets sub_sound sub_splash sub_splitter sub_statbar sub_taskbar sub_text sub_thread sub_toolbar sub_treectrl sub_typetest sub_validate sub_vscroll sub_widgets sub_wizard sub_mfc
 
 clean: 
 	-if exist .\*.obj del .\*.obj
@@ -43,13 +41,7 @@ clean:
 	cd access
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
-	cd animate
-	$(MAKE) -f makefile.vc $(MAKEARGS) clean
-	cd "$(MAKEDIR)"
 	cd artprov
-	$(MAKE) -f makefile.vc $(MAKEARGS) clean
-	cd "$(MAKEDIR)"
-	cd aui
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
 	cd calendar
@@ -61,22 +53,13 @@ clean:
 	cd checklst
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
-	cd collpane
-	$(MAKE) -f makefile.vc $(MAKEARGS) clean
-	cd "$(MAKEDIR)"
 	cd config
-	$(MAKE) -f makefile.vc $(MAKEARGS) clean
-	cd "$(MAKEDIR)"
-	cd combo
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
 	cd console
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
 	cd controls
-	$(MAKE) -f makefile.vc $(MAKEARGS) clean
-	cd "$(MAKEDIR)"
-	cd dataview
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
 	cd db
@@ -217,7 +200,7 @@ clean:
 	cd render
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
-	cd richtext
+	cd richedit
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd "$(MAKEDIR)"
 	cd rotate
@@ -289,18 +272,8 @@ sub_access:
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
-sub_animate: 
-	cd animate
-	$(MAKE) -f makefile.vc $(MAKEARGS) all
-	cd "$(MAKEDIR)"
-
 sub_artprov: 
 	cd artprov
-	$(MAKE) -f makefile.vc $(MAKEARGS) all
-	cd "$(MAKEDIR)"
-
-sub_aui: 
-	cd aui
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
@@ -319,18 +292,8 @@ sub_checklst:
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
-sub_collpane: 
-	cd collpane
-	$(MAKE) -f makefile.vc $(MAKEARGS) all
-	cd "$(MAKEDIR)"
-
 sub_config: 
 	cd config
-	$(MAKE) -f makefile.vc $(MAKEARGS) all
-	cd "$(MAKEDIR)"
-
-sub_combo: 
-	cd combo
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
@@ -341,11 +304,6 @@ sub_console:
 
 sub_controls: 
 	cd controls
-	$(MAKE) -f makefile.vc $(MAKEARGS) all
-	cd "$(MAKEDIR)"
-
-sub_dataview: 
-	cd dataview
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
@@ -579,8 +537,8 @@ sub_render:
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 
-sub_richtext: 
-	cd richtext
+sub_richedit: 
+	cd richedit
 	$(MAKE) -f makefile.vc $(MAKEARGS) all
 	cd "$(MAKEDIR)"
 

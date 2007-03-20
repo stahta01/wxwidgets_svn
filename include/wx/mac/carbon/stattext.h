@@ -12,6 +12,10 @@
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "stattext.h"
+#endif
+
 class WXDLLEXPORT wxStaticText: public wxStaticTextBase
 {
 public:
@@ -38,11 +42,10 @@ public:
   void SetLabel( const wxString &str ) ;
   bool SetFont( const wxFont &font );
 
-    virtual bool AcceptsFocus() const { return FALSE; }
-
 protected :
 
   virtual wxSize DoGetBestSize() const ;
+  virtual bool AcceptsFocus() const { return FALSE; }
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticText)
 };

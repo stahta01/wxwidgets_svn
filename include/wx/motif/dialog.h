@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/dialog.h
+// Name:        dialog.h
 // Purpose:     wxDialog class
 // Author:      Julian Smart
 // Modified by:
@@ -12,14 +12,21 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dialog.h"
+#endif
+
 class WXDLLEXPORT wxEventLoop;
 
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase
 {
+    DECLARE_DYNAMIC_CLASS(wxDialog)
+
 public:
     wxDialog();
 
+    // Constructor with no modal flag - the new convention.
     wxDialog(wxWindow *parent, wxWindowID id,
         const wxString& title,
         const wxPoint& pos = wxDefaultPosition,
@@ -37,7 +44,7 @@ public:
         long style = wxDEFAULT_DIALOG_STYLE,
         const wxString& name = wxDialogNameStr);
 
-    virtual ~wxDialog();
+    ~wxDialog();
 
     virtual bool Destroy();
 
@@ -48,7 +55,7 @@ public:
     void SetModal(bool flag);
 
     virtual bool IsModal() const
-    { return m_modalShowing; }
+    { return ((GetWindowStyleFlag() & wxDIALOG_MODAL) == wxDIALOG_MODAL); }
 
     virtual int ShowModal();
     virtual void EndModal(int retCode);
@@ -57,11 +64,22 @@ public:
     virtual void ChangeFont(bool keepOriginalSize = true);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
-    WXWidget GetTopWidget() const { return m_mainWidget; }
-    WXWidget GetClientWidget() const { return m_mainWidget; }
+    inline WXWidget GetTopWidget() const { return m_mainWidget; }
+    inline WXWidget GetClientWidget() const { return m_mainWidget; }
+
+    // Standard buttons
+    void OnOK(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+    // Responds to colour changes
+    void OnSysColourChanged(wxSysColourChangedEvent& event);
+
+    void OnCharHook(wxKeyEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
 
 private:
-    virtual bool XmDoCreateTLW(wxWindow* parent,
+    virtual bool DoCreate(wxWindow* parent,
                                wxWindowID id,
                                const wxString& title,
                                const wxPoint& pos,
@@ -76,14 +94,20 @@ private:
 
 protected:
     virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO);
+        int width, int height,
+        int sizeFlags = wxSIZE_AUTO);
 
     virtual void DoSetClientSize(int width, int height);
 
+#if wxCHECK_VERSION(2,7,0)
+    #error "Remove DoDestroy(), it was only kept for binary backwards compatibility"
+#endif
+
+    virtual void DoDestroy();
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxDialog)
+    DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_DIALOG_H_
+#endif
+// _WX_DIALOG_H_

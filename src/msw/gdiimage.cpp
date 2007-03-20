@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/gdiimage.cpp
+// Name:        msw/gdiimage.cpp
 // Purpose:     wxGDIImage implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "gdiimage.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,12 +31,13 @@
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
 
+#include "wx/app.h"
+
+#include "wx/bitmap.h"
 #include "wx/msw/gdiimage.h"
 
 #if wxUSE_WXDIB
@@ -104,7 +109,7 @@ public:
 
     // creating and saving icons is not supported
     virtual bool Create(wxGDIImage *WXUNUSED(image),
-                        const void* WXUNUSED(data),
+                        void *WXUNUSED(data),
                         long WXUNUSED(flags),
                         int WXUNUSED(width),
                         int WXUNUSED(height),
@@ -567,10 +572,12 @@ bool wxICOResourceHandler::LoadIcon(wxIcon *icon,
 
 wxSize wxGetHiconSize(HICON WXUNUSED_IN_WINCE(hicon))
 {
-    wxSize size;
+    // default icon size on this hardware
+    // usually 32x32 but can be other (smaller) on pocket devices
+    wxSize size(::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
 
 #ifndef __WXWINCE__
-    if ( hicon )
+    if ( hicon && wxGetOsVersion() != wxWIN32S )
     {
         ICONINFO info;
         if ( !::GetIconInfo(hicon, &info) )
@@ -594,16 +601,10 @@ wxSize wxGetHiconSize(HICON WXUNUSED_IN_WINCE(hicon))
                 ::DeleteObject(info.hbmColor);
         }
     }
-
-    if ( !size.x )
-#endif // !__WXWINCE__
-    {
-        // use default icon size on this hardware
-        size.x = ::GetSystemMetrics(SM_CXICON);
-        size.y = ::GetSystemMetrics(SM_CYICON);
-    }
+#endif
 
     return size;
 }
 
 #endif // __WXMICROWIN__
+

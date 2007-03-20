@@ -30,22 +30,12 @@ public:
             return self->GetClassInfo()->GetClassName();
         }
 
-        %pythonPrepend Destroy "args[0].this.own(False)"
         DocStr(Destroy,
                "Deletes the C++ object this Python object is a proxy for.", "");
         void Destroy() {
             delete self;
         }
     }
-
-    DocDeclStr(
-        bool , IsSameAs(const wxObject& p) const,
-        "For wx.Objects that use C++ reference counting internally, this method
-can be used to determine if two objects are referencing the same data
-object.", "");
-    
-
-    %property(ClassName, GetClassName, doc="See `GetClassName`");
 };
 
 

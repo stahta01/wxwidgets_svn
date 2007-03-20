@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/gauge.cpp
+// Name:        gauge.cpp
 // Purpose:     wxGauge class
 // Author:      David Webster
 // Modified by:
@@ -11,38 +11,38 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_GAUGE
-
-#include "wx/gauge.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/scrolwin.h"
+#include "wx/defs.h"
+#include "wx/utils.h"
+#include "wx/scrolwin.h"
 #endif
 
 #include "wx/os2/private.h"
+#include "wx/gauge.h"
 
 static WXFARPROC fnWndProcGauge = (WXFARPROC)NULL;
 extern void  wxAssociateWinWithHandle( HWND         hWnd
                                       ,wxWindowOS2* pWin
                                      );
 
-IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxGaugeBase)
+IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
 
-MRESULT EXPENTRY wxGaugeWndProc( HWND hWnd,
-                                 UINT uMessage,
-                                 MPARAM wParam,
-                                 MPARAM lParam )
+MRESULT EXPENTRY wxGaugeWndProc(
+  HWND                              hWnd
+, UINT                              uMessage
+, MPARAM                            wParam
+, MPARAM                            lParam
+)
 {
     wxGauge*                        pGauge = (wxGauge *)::WinQueryWindowULong( hWnd
                                                                               ,QWL_USER
                                                                              );
-    HPS hPS;
-    RECTL vRect;
-    RECTL vRect2;
-    RECTL vRect3;
-    double dPixelToRange = 0.0;
-    double dRange = 0.0;
+    HPS                             hPS;
+    RECTL                           vRect;
+    RECTL                           vRect2;
+    RECTL                           vRect3;
+    double                          dPixelToRange = 0.0;
+    double                          dRange = 0.0;
 
     switch (uMessage )
     {
@@ -130,21 +130,23 @@ MRESULT EXPENTRY wxGaugeWndProc( HWND hWnd,
            );
 } // end of wxGaugeWndProc
 
-bool wxGauge::Create( wxWindowOS2* pParent,
-                      wxWindowID vId,
-                      int nRange,
-                      const wxPoint& rPos,
-                      const wxSize& rSize,
-                      long lStyle,
-                      const wxValidator& rValidator,
-                      const wxString& rsName )
+bool wxGauge::Create(
+  wxWindowOS2*                      pParent
+, wxWindowID                        vId
+, int                               nRange
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+, long                              lStyle
+, const wxValidator&                rValidator
+, const wxString&                   rsName
+)
 {
-    int nX       = rPos.x;
-    int nY       = rPos.y;
-    int nWidth   = rSize.x;
-    int nHeight  = rSize.y;
-    long lMsStyle = 0L;
-    SWP vSwp;
+    int                             nX       = rPos.x;
+    int                             nY       = rPos.y;
+    int                             nWidth   = rSize.x;
+    int                             nHeight  = rSize.y;
+    long                            lMsStyle = 0L;
+    SWP                             vSwp;
 
     SetName(rsName);
 #if wxUSE_VALIDATORS
@@ -159,7 +161,7 @@ bool wxGauge::Create( wxWindowOS2* pParent,
     m_nGaugePos   = 0;
     m_windowStyle = lStyle;
 
-    if (vId == wxID_ANY)
+    if (vId == -1)
         m_windowId = (int)NewControlId();
     else
         m_windowId = vId;
@@ -216,7 +218,7 @@ bool wxGauge::Create( wxWindowOS2* pParent,
     m_nHeight = nHeight;
     ::WinShowWindow((HWND)GetHWND(), TRUE);
     delete pTextFont;
-    return true;
+    return TRUE;
 } // end of wxGauge::Create
 
 int wxGauge::GetBezelFace() const
@@ -239,10 +241,12 @@ int wxGauge::GetValue() const
     return m_nGaugePos;
 } // end of wxGauge::GetValue
 
-bool wxGauge::SetBackgroundColour( const wxColour& rColour )
+bool wxGauge::SetBackgroundColour(
+  const wxColour&                   rColour
+)
 {
     if (!wxControl::SetBackgroundColour(rColour))
-        return false;
+        return FALSE;
 
     LONG                            lColor = (LONG)rColour.GetPixel();
 
@@ -251,19 +255,23 @@ bool wxGauge::SetBackgroundColour( const wxColour& rColour )
                       ,sizeof(LONG)
                       ,(PVOID)&lColor
                      );
-    return true;
+    return TRUE;
 } // end of wxGauge::SetBackgroundColour
 
-void wxGauge::SetBezelFace( int WXUNUSED(nWidth) )
+void wxGauge::SetBezelFace(
+  int                               WXUNUSED(nWidth)
+)
 {
 } // end of wxGauge::SetBezelFace
 
-bool wxGauge::SetForegroundColour( const wxColour& rColour )
+bool wxGauge::SetForegroundColour(
+  const wxColour&                   rColour
+)
 {
     if (!wxControl::SetForegroundColour(rColour))
-        return false;
+        return FALSE;
 
-    LONG lColor = (LONG)rColour.GetPixel();
+    LONG                            lColor = (LONG)rColour.GetPixel();
 
     ::WinSetPresParam( GetHwnd()
                       ,PP_FOREGROUNDCOLOR
@@ -271,21 +279,27 @@ bool wxGauge::SetForegroundColour( const wxColour& rColour )
                       ,(PVOID)&lColor
                      );
 
-    return true;
+    return TRUE;
 } // end of wxGauge::SetForegroundColour
 
-void wxGauge::SetRange( int nRange )
+void wxGauge::SetRange(
+  int                               nRange
+)
 {
     m_nRangeMax = nRange;
 } // end of wxGauge::SetRange
 
-void wxGauge::SetShadowWidth( int WXUNUSED(nWidth) )
+void wxGauge::SetShadowWidth(
+  int                               WXUNUSED(nWidth)
+)
 {
 } // end of wxGauge::SetShadowWidth
 
-void wxGauge::SetValue( int nPos )
+void wxGauge::SetValue(
+  int                               nPos
+)
 {
-    RECT vRect;
+    RECT                            vRect;
 
     m_nGaugePos = nPos;
     ::WinQueryWindowRect(GetHwnd(), &vRect);
@@ -296,5 +310,3 @@ wxSize wxGauge::DoGetBestSize() const
 {
     return wxSize(m_nWidth,m_nHeight);
 }
-
-#endif // wxUSE_GAUGE

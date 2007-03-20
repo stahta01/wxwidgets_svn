@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,13 +9,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "accel.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #include "wx/accel.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-#endif
+#include "wx/string.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
@@ -25,7 +26,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
 WX_DECLARE_LIST(wxAcceleratorEntry, wxAccelList);
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxAccelList)
+WX_DEFINE_LIST(wxAccelList);
 
 // ----------------------------------------------------------------------------
 // wxAccelRefData: the data used by wxAcceleratorTable
@@ -36,7 +37,7 @@ class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
     friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
-    virtual ~wxAcceleratorRefData();
+    ~wxAcceleratorRefData();
 
     wxAccelList m_accels;
 };
@@ -77,7 +78,7 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
     }
 }
 
-bool wxAcceleratorTable::IsOk() const
+bool wxAcceleratorTable::Ok() const
 {
     return (m_refData != NULL);
 }
@@ -93,8 +94,7 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
         if ((event.m_keyCode == entry->GetKeyCode()) &&
            (((entry->GetFlags() & wxACCEL_CTRL) == 0) || event.ControlDown()) &&
            (((entry->GetFlags() & wxACCEL_SHIFT) == 0) || event.ShiftDown()) &&
-           (((entry->GetFlags() & wxACCEL_ALT) == 0) || event.AltDown()) && 
-           (((entry->GetFlags() & wxACCEL_CMD) == 0) || event.CmdDown()))
+           (((entry->GetFlags() & wxACCEL_ALT) == 0) || event.AltDown() || event.MetaDown()))
         {
             return entry->GetCommand();
         }
@@ -103,3 +103,5 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
 
     return -1;
 }
+
+

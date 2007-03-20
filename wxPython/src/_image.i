@@ -28,13 +28,6 @@ enum {
 };
 
 
-// Constants for wxImage::Scale() for determining the level of quality
-enum
-{
-    wxIMAGE_QUALITY_NORMAL = 0,
-    wxIMAGE_QUALITY_HIGH = 1
-};
-
 //---------------------------------------------------------------------------
 %newgroup
 
@@ -53,19 +46,14 @@ public:
     //bool LoadFile(wxImage* image, wxInputStream& stream);
     //bool SaveFile(wxImage* image, wxOutputStream& stream);
     //virtual int GetImageCount( wxInputStream& stream );
+    //bool CanRead( wxInputStream& stream );
 
     bool CanRead( const wxString& name );
-    %Rename(CanReadStream, bool, CanRead( wxInputStream& stream ));
-    
+
     void SetName(const wxString& name);
     void SetExtension(const wxString& extension);
     void SetType(long type);
     void SetMimeType(const wxString& mimetype);
-
-    %property(Extension, GetExtension, SetExtension, doc="See `GetExtension` and `SetExtension`");
-    %property(MimeType, GetMimeType, SetMimeType, doc="See `GetMimeType` and `SetMimeType`");
-    %property(Name, GetName, SetName, doc="See `GetName` and `SetName`");
-    %property(Type, GetType, SetType, doc="See `GetType` and `SetType`");
 };
 
 
@@ -95,8 +83,8 @@ the following methods::
 To activate your handler create an instance of it and pass it to
 `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
 `SetExtension` from your constructor.
-", "");
 
+", "");
 class wxPyImageHandler: public wxImageHandler {
 public:
     %pythonAppend wxPyImageHandler() "self._SetSelf(self)"
@@ -165,6 +153,7 @@ key value from a RGB tripple.", "");
 
 //---------------------------------------------------------------------------
 
+
 DocStr(wxImage,
 "A platform-independent image class.  An image can be created from
 data, or using `wx.Bitmap.ConvertToImage`, or loaded from a file in a
@@ -230,7 +219,6 @@ public:
     double saturation;
     double value;
 };
-
 
 
 class wxImage : public wxObject {
@@ -407,60 +395,19 @@ initialized to black. Otherwise, the image data will be uninitialized.", "");
     
 
     DocDeclStr(
-        wxImage , Scale( int width, int height, int quality = wxIMAGE_QUALITY_NORMAL ),
+        wxImage , Scale( int width, int height ),
         "Returns a scaled version of the image. This is also useful for scaling
 bitmaps in general as the only other way to scale bitmaps is to blit a
-`wx.MemoryDC` into another `wx.MemoryDC`.  The ``quality`` parameter
-specifies what method to use for resampling the image.  It can be
-either wx.IMAGE_QUALITY_NORMAL, which uses the normal default scaling
-method of pixel replication, or wx.IMAGE_QUALITY_HIGH which uses
-bicubic and box averaging resampling methods for upsampling and
-downsampling respectively.", "
-
-It should be noted that although using wx.IMAGE_QUALITY_HIGH produces
-much nicer looking results it is a slower method.  Downsampling will
-use the box averaging method which seems to operate very fast.  If you
-are upsampling larger images using this method you will most likely
-notice that it is a bit slower and in extreme cases it will be quite
-substantially slower as the bicubic algorithm has to process a lot of
-data.
-
-It should also be noted that the high quality scaling may not work as
-expected when using a single mask colour for transparency, as the
-scaling will blur the image and will therefore remove the mask
-partially. Using the alpha channel will work.
+`wx.MemoryDC` into another `wx.MemoryDC`.", "
 
 :see: `Rescale`");
-
-    
-    wxImage ResampleBox(int width, int height) const;
-    wxImage ResampleBicubic(int width, int height) const;
-
-    DocDeclStr(
-        wxImage , Blur(int radius),
-        "Blurs the image in both horizontal and vertical directions by the
-specified pixel ``radius``. This should not be used when using a
-single mask colour for transparency.", "");
-    
-    DocDeclStr(
-        wxImage , BlurHorizontal(int radius),
-        "Blurs the image in the horizontal direction only. This should not be
-used when using a single mask colour for transparency.
-", "");
-    
-    DocDeclStr(
-        wxImage , BlurVertical(int radius),
-        "Blurs the image in the vertical direction only. This should not be
-used when using a single mask colour for transparency.", "");
-    
-
     
     DocDeclStr(
         wxImage , ShrinkBy( int xFactor , int yFactor ) const ,
         "Return a version of the image scaled smaller by the given factors.", "");
     
     DocDeclStr(
-        wxImage& , Rescale(int width, int height, int quality = wxIMAGE_QUALITY_NORMAL),
+        wxImage& , Rescale(int width, int height),
         "Changes the size of the image in-place by scaling it: after a call to
 this function, the image will have the given width and height.
 
@@ -669,9 +616,8 @@ object, using a MIME type string to specify the image file format.", "",
     
 
     DocDeclStr(
-        bool , IsOk(),
+        bool , Ok(),
         "Returns true if image data is present.", "");
-    %pythoncode { Ok = IsOk }
     
     DocDeclStr(
         int , GetWidth(),
@@ -914,14 +860,6 @@ indicates the orientation.", "");
                         byte r2, byte g2, byte b2 ),
         "Replaces the colour specified by ``(r1,g1,b1)`` by the colour
 ``(r2,g2,b2)``.", "");
-
-    DocDeclStr(
-        wxImage , ConvertToGreyscale( double lr = 0.299,
-                                      double lg = 0.587,
-                                      double lb = 0.114 ) const,
-        "Convert to greyscale image. Uses the luminance component (Y) of the
-image.  The luma value (YUV) is calculated using (R * lr) + (G * lg) + (B * lb),
-defaults to ITU-T BT.601", "");
     
 
     DocDeclStr(
@@ -1037,25 +975,13 @@ range -1.0..1.0 where -1.0 is -360 degrees and 1.0 is 360 degrees", "");
         "Converts a color in HSV color space to RGB color space.", "");
     
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-    
-    %property(AlphaBuffer, GetAlphaBuffer, SetAlphaBuffer, doc="See `GetAlphaBuffer` and `SetAlphaBuffer`");
-    %property(AlphaData, GetAlphaData, SetAlphaData, doc="See `GetAlphaData` and `SetAlphaData`");
-    %property(Data, GetData, SetData, doc="See `GetData` and `SetData`");
-    %property(DataBuffer, GetDataBuffer, SetDataBuffer, doc="See `GetDataBuffer` and `SetDataBuffer`");
-    %property(Height, GetHeight, doc="See `GetHeight`");
-    %property(MaskBlue, GetMaskBlue, doc="See `GetMaskBlue`");
-    %property(MaskGreen, GetMaskGreen, doc="See `GetMaskGreen`");
-    %property(MaskRed, GetMaskRed, doc="See `GetMaskRed`");
-    %property(Width, GetWidth, doc="See `GetWidth`");
-    
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
-
 
 
 // Make an image from buffer objects.  Not that this is here instead of in the
 // wxImage class (as a constructor) because there is already another one with
-// the exact same signature, so there woudl be ambiguities in the generated
+// the exact same signature, so there would be ambiguities in the generated
 // C++.  Doing it as an independent factory function like this accomplishes
 // the same thing however.
 %newobject _ImageFromBuffer;
@@ -1125,6 +1051,7 @@ def ImageFromBuffer(width, height, dataBuffer, alphaBuffer=None):
 
 
 
+// See also wxPy_ReinitStockObjects in helpers.cpp
 %immutable;
 const wxImage    wxNullImage;
 %mutable;
@@ -1263,12 +1190,7 @@ public:
 };
 
 
-
-#if 0
-%{
-#include <wx/imagiff.h>
-%}
-
+#if wxUSE_IFF
 DocStr(wxIFFHandler,
 "A `wx.ImageHandler` for IFF image files.", "");
 class wxIFFHandler : public wxImageHandler {
@@ -1276,19 +1198,6 @@ public:
     wxIFFHandler();
 };
 #endif
-
-
-%{
-#include <wx/imagtga.h>
-%}
-
-DocStr(wxTGAHandler,
-"A `wx.ImageHandler` for TGA image files.", "");
-class wxTGAHandler : public wxImageHandler {
-public:
-    wxTGAHandler();
-};
-
 
 //---------------------------------------------------------------------------
 

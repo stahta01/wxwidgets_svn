@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#ifdef __GNUG__
+    #pragma interface "bitmap.h"
+#endif
+
 #include "wx/os2/private.h"
 #include "wx/os2/gdiimage.h"
 #include "wx/gdicmn.h"
@@ -38,7 +42,6 @@ class WXDLLEXPORT wxBitmapRefData : public wxGDIImageRefData
 {
 public:
     wxBitmapRefData();
-    wxBitmapRefData(const wxBitmapRefData &tocopy);
     virtual ~wxBitmapRefData() { Free(); }
 
     virtual void Free();
@@ -71,11 +74,7 @@ public:
 
     // Copy constructors
     inline wxBitmap(const wxBitmap& rBitmap)
-        : wxGDIImage(rBitmap)
-    {
-        Init();
-        SetHandle(rBitmap.GetHandle());
-    }
+      { Init(); Ref(rBitmap); SetHandle(rBitmap.GetHandle()); }
 
     // Initialize with raw data
     wxBitmap( const char bits[]
@@ -85,14 +84,8 @@ public:
             );
 
     // Initialize with XPM data
-    wxBitmap(const char* const* bits);
-#ifdef wxNEEDS_CHARPP
-    // needed for old GCC
-    wxBitmap(char** data)
-    {
-        *this = wxBitmap(wx_const_cast(const char* const*, data));
-    }
-#endif
+    wxBitmap(const char** ppData) { CreateFromXpm(ppData); }
+    wxBitmap(char** ppData) { CreateFromXpm((const char**)ppData); }
 
     // Load a resource
     wxBitmap( int             nId
@@ -105,7 +98,7 @@ public:
                    )
     { Init(); }
     // New constructor for generalised creation from data
-    wxBitmap( const void* pData
+    wxBitmap( void* pData
              ,long  lType
              ,int   nWidth
              ,int   nHeight
@@ -122,6 +115,13 @@ public:
     // the copy ctor but the resulting bitmap is invalid!
     inline wxBitmap(const wxIcon& rIcon)
       { Init(); CopyFromIcon(rIcon); }
+
+    wxBitmap& operator=(const wxBitmap& rBitmap)
+    {
+        if ( m_refData != rBitmap.m_refData )
+            Ref(rBitmap);
+        return(*this);
+    }
 
     wxBitmap& operator=(const wxIcon& rIcon)
     {
@@ -153,7 +153,7 @@ public:
                         ,int nHeight
                         ,int nDepth = -1
                        );
-    virtual bool Create( const void* pData
+    virtual bool Create( void* pData
                         ,long  lType
                         ,int   nWidth
                         ,int   nHeight
@@ -188,6 +188,12 @@ public:
 
     void SetMask(wxMask* pMask) ;
 
+    inline bool operator==(const wxBitmap& rBitmap) const
+      { return m_refData == rBitmap.m_refData; }
+
+    inline bool operator!=(const wxBitmap& rBitmap) const
+      { return m_refData != rBitmap.m_refData; }
+
     // Implementation
 public:
     inline void SetHBITMAP(WXHBITMAP hBmp)
@@ -214,11 +220,9 @@ protected:
     inline virtual wxGDIImageRefData* CreateData() const
         { return new wxBitmapRefData; }
 
+    // creates the bitmap from XPM data, supposed to be called from ctor
+    bool CreateFromXpm(const char** ppData);
     bool CreateFromImage(const wxImage& image, int depth);
-
-   // ref counting code
-    virtual wxObjectRefData *CreateRefData() const;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
 private:
     bool CopyFromIconOrCursor(const wxGDIImage& rIcon);
@@ -235,7 +239,6 @@ class WXDLLEXPORT wxMask : public wxObject
 {
 public:
     wxMask();
-    wxMask( const wxMask& tocopy);
 
     // Construct a mask from a bitmap and a colour indicating the transparent
     // area
@@ -300,7 +303,7 @@ public:
     // keep wxBitmapHandler derived from wxGDIImageHandler compatible with the
     // old class which worked only with bitmaps
     virtual bool Create( wxBitmap* pBitmap
-                        ,const void* pData
+                        ,void*     pData
                         ,long      lFlags
                         ,int       nWidth
                         ,int       nHeight
@@ -325,7 +328,7 @@ public:
                          );
 
     virtual bool Create( wxGDIImage* pImage
-                        ,const void* pData
+                        ,void*       pData
                         ,long        lFlags
                         ,int         nWidth
                         ,int         nHeight

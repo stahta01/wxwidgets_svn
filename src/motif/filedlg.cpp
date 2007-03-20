@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/filedlg.cpp
+// Name:        filedlg.cpp
 // Purpose:     wxFileDialog
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "filedlgmot.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,15 +22,12 @@
 #define XtWindow XTWINDOW
 #endif
 
+#include "wx/defs.h"
+#include "wx/utils.h"
 #include "wx/filedlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-#endif
-
+#include "wx/intl.h"
+#include "wx/app.h"
+#include "wx/settings.h"
 #include "wx/tokenzr.h"
 #include "wx/stockitem.h"
 
@@ -117,8 +118,8 @@ static wxString ParseWildCard( const wxString& wild )
 
 wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
                            const wxString& defaultDir, const wxString& defaultFileName, const wxString& wildCard,
-                           long style, const wxPoint& pos, const wxSize& sz, const wxString& name)
-             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos, sz, name)
+                           long style, const wxPoint& pos)
+             :wxFileDialogBase(parent, message, defaultDir, defaultFileName, wildCard, style, pos)
 {
     m_filterIndex = 1;
 }
@@ -234,7 +235,7 @@ int wxFileDialog::ShowModal()
 
     if (!m_message.IsNull())
         XtVaSetValues(shell,
-                      XmNtitle, wxConstCast(m_message.mb_str(), char),
+                      XmNtitle, wxConstCast(m_message.c_str(), char),
                       NULL);
 
     if (!m_wildCard.empty())
@@ -247,7 +248,7 @@ int wxFileDialog::ShowModal()
         else
             filter = wildCard;
 
-        XmTextSetString(filterWidget, wxConstCast(filter.mb_str(), char));
+        XmTextSetString(filterWidget, wxConstCast(filter.c_str(), char));
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -276,7 +277,7 @@ int wxFileDialog::ShowModal()
     if (!entirePath.empty())
     {
         XmTextSetString(selectionWidget,
-                        wxConstCast(entirePath.mb_str(), char));
+                        wxConstCast(entirePath.c_str(), char));
     }
 
     XtAddCallback(fileSel, XmNcancelCallback,

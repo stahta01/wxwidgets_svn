@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/notebook.cpp
-// Purpose:     generic implementation of wxNotebook
+// Name:        notebook.cpp
+// Purpose:     implementation of wxNotebook
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
@@ -17,25 +17,29 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "notebook.h"
+#endif
+
+#ifdef __VMS
+#pragma message disable unscomzer
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_NOTEBOOK
+#ifndef __WXPALMOS__
 
+#include  "wx/string.h"
+#include  "wx/log.h"
+#include  "wx/settings.h"
+#include  "wx/generic/imaglist.h"
 #include  "wx/notebook.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/log.h"
-    #include  "wx/dcclient.h"
-    #include  "wx/settings.h"
-#endif
-
-#include  "wx/imaglist.h"
+#include  "wx/dcclient.h"
 #include  "wx/generic/tabg.h"
 
 // ----------------------------------------------------------------------------
@@ -83,25 +87,25 @@ class WXDLLEXPORT wxNotebookTabView: public wxTabView
 {
 DECLARE_DYNAMIC_CLASS(wxNotebookTabView)
 public:
-    wxNotebookTabView(wxNotebook* notebook, long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
-    virtual ~wxNotebookTabView(void);
+  wxNotebookTabView(wxNotebook* notebook, long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
+  ~wxNotebookTabView(void);
 
-    // Called when a tab is activated
-    virtual void OnTabActivate(int activateId, int deactivateId);
-    // Allows vetoing
-    virtual bool OnTabPreActivate(int activateId, int deactivateId);
+  // Called when a tab is activated
+  virtual void OnTabActivate(int activateId, int deactivateId);
+  // Allows vetoing
+  virtual bool OnTabPreActivate(int activateId, int deactivateId);
 
-    // map integer ids used by wxTabView to wxNotebookPage pointers
-    int GetId(wxNotebookPage *page);
-    wxNotebookPage *GetPage(int id) { return m_idToPage[id]; }
+  // map integer ids used by wxTabView to wxNotebookPage pointers
+  int GetId(wxNotebookPage *page);
+  wxNotebookPage *GetPage(int id) { return m_idToPage[id]; }
 
 protected:
-    wxNotebook* m_notebook;
+  wxNotebook* m_notebook;
 
 private:
-    wxIntToNotebookPageHashMap m_idToPage;
-    wxNotebookPageToIntHashMap m_pageToId;
-    int m_nextid;
+  wxIntToNotebookPageHashMap m_idToPage;
+  wxNotebookPageToIntHashMap m_pageToId;
+  int m_nextid;
 };
 
 static int GetPageId(wxTabView *tabview, wxNotebookPage *page)
@@ -150,9 +154,6 @@ bool wxNotebook::Create(wxWindow *parent,
     // base init
     SetName(name);
 
-    if ( (style & wxBK_ALIGN_MASK) == wxBK_DEFAULT )
-        style |= wxBK_TOP;
-
     m_windowId = id == wxID_ANY ? NewControlId() : id;
 
     if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, wxDefaultValidator, name))
@@ -190,12 +191,6 @@ int wxNotebook::SetSelection(size_t nPage)
 
     // TODO
     return 0;
-}
-
-int wxNotebook::ChangeSelection(size_t nPage)
-{
-    // FIXME: currently it does generate events too
-    return SetSelection(nPage);
 }
 
 #if 0
@@ -236,7 +231,7 @@ wxString wxNotebook::GetPageText(size_t nPage) const
         return wxEmptyString;
 }
 
-int wxNotebook::GetPageImage(size_t WXUNUSED_UNLESS_DEBUG(nPage)) const
+int wxNotebook::GetPageImage(size_t nPage) const
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
@@ -244,8 +239,7 @@ int wxNotebook::GetPageImage(size_t WXUNUSED_UNLESS_DEBUG(nPage)) const
     return 0;
 }
 
-bool wxNotebook::SetPageImage(size_t WXUNUSED_UNLESS_DEBUG(nPage),
-                              int WXUNUSED(nImage))
+bool wxNotebook::SetPageImage(size_t nPage, int nImage)
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
@@ -254,19 +248,19 @@ bool wxNotebook::SetPageImage(size_t WXUNUSED_UNLESS_DEBUG(nPage),
 }
 
 // set the size (the same for all pages)
-void wxNotebook::SetPageSize(const wxSize& WXUNUSED(size))
+void wxNotebook::SetPageSize(const wxSize& size)
 {
     // TODO
 }
 
 // set the padding between tabs (in pixels)
-void wxNotebook::SetPadding(const wxSize& WXUNUSED(padding))
+void wxNotebook::SetPadding(const wxSize& padding)
 {
     // TODO
 }
 
 // set the size of the tabs for wxNB_FIXEDWIDTH controls
-void wxNotebook::SetTabSize(const wxSize& WXUNUSED(sz))
+void wxNotebook::SetTabSize(const wxSize& sz)
 {
     // TODO
 }
@@ -295,17 +289,17 @@ bool wxNotebook::DeletePage(size_t nPage)
 
     if (m_pages.GetCount() == 0)
     {
-        m_nSelection = -1;
-        m_tabView->SetTabSelection(-1, false);
+      m_nSelection = -1;
+      m_tabView->SetTabSelection(-1, false);
     }
     else if (m_nSelection > -1)
     {
-        m_nSelection = -1;
+      m_nSelection = -1;
 
-        m_tabView->SetTabSelection(GetPageId(m_tabView, GetPage(0)), false);
+      m_tabView->SetTabSelection(GetPageId(m_tabView, GetPage(0)), false);
 
-        if (m_nSelection != 0)
-            ChangePage(-1, 0);
+      if (m_nSelection != 0)
+        ChangePage(-1, 0);
     }
 
     RefreshLayout(false);
@@ -411,7 +405,7 @@ bool wxNotebook::InsertPage(size_t nPage,
                             wxNotebookPage *pPage,
                             const wxString& strText,
                             bool bSelect,
-                            int WXUNUSED(imageId))
+                            int imageId)
 {
     wxASSERT( pPage != NULL );
     wxCHECK( IS_VALID_PAGE(nPage) || nPage == GetPageCount(), false );
@@ -698,15 +692,15 @@ wxNotebookTabView::~wxNotebookTabView(void)
 
 int wxNotebookTabView::GetId(wxNotebookPage *page)
 {
-    int& id = m_pageToId[page];
+  int& id = m_pageToId[page];
 
-    if (!id)
-    {
-        id = m_nextid++;
-        m_idToPage[id] = page;
-    }
+  if (!id)
+  {
+    id = m_nextid++;
+    m_idToPage[id] = page;
+  }
 
-    return id;
+  return id;
 }
 
 // Called when a tab is activated
@@ -759,4 +753,4 @@ bool wxNotebookTabView::OnTabPreActivate(int activateId, int deactivateId)
   return retval;
 }
 
-#endif // wxUSE_NOTEBOOK
+#endif // __WXPALMOS__

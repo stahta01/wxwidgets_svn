@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/button.cpp
+// Name:        button.cpp
 // Purpose:     wxButton
 // Author:      David Webster
 // Modified by:
@@ -12,17 +12,15 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/button.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/button.h"
     #include "wx/brush.h"
     #include "wx/panel.h"
     #include "wx/bmpbuttn.h"
     #include "wx/settings.h"
     #include "wx/dcscreen.h"
     #include "wx/scrolwin.h"
-    #include "wx/toplevel.h"
 #endif
 
 #include "wx/stockitem.h"
@@ -91,7 +89,7 @@ bool wxButton::Create( wxWindow*          pParent,
                                       );
     if (m_hWnd == 0)
     {
-        return false;
+        return FALSE;
     }
 
     //
@@ -117,16 +115,16 @@ bool wxButton::Create( wxWindow*          pParent,
 
 wxButton::~wxButton()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxPanel*                        pPanel = wxDynamicCast(GetParent(), wxPanel);
 
-    if (tlw)
+    if (pPanel)
     {
-        if (tlw->GetDefaultItem() == this)
+        if (pPanel->GetDefaultItem() == this)
         {
             //
             // Don't leave the panel with invalid default item
             //
-            tlw->SetDefaultItem(NULL);
+            pPanel->SetDefaultItem(NULL);
         }
     }
 } // end of wxButton::~wxButton
@@ -233,14 +231,14 @@ bool wxButton::SendClickEvent()
 
 void wxButton::SetDefault()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxWindow*                       pParent = GetParent();
 
-    wxCHECK_RET( tlw, _T("button without top level window?") );
+    wxCHECK_RET( pParent, _T("button without parent?") );
 
     //
     // Set this one as the default button both for wxWidgets and Windows
     //
-    wxWindow*                       pWinOldDefault = tlw->SetDefaultItem(this);
+    wxWindow*                       pWinOldDefault = pParent->SetDefaultItem(this);
 
     SetDefaultStyle( wxDynamicCast(pWinOldDefault, wxButton), false);
     SetDefaultStyle( this, true );
@@ -248,26 +246,26 @@ void wxButton::SetDefault()
 
 void wxButton::SetTmpDefault()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxWindow*                       pParent = GetParent();
 
-    wxCHECK_RET( tlw, _T("button without top level window?") );
+    wxCHECK_RET( pParent, _T("button without parent?") );
 
-    wxWindow*                       pWinOldDefault = tlw->GetDefaultItem();
+    wxWindow*                       pWinOldDefault = pParent->GetDefaultItem();
 
-    tlw->SetTmpDefaultItem(this);
+    pParent->SetTmpDefaultItem(this);
     SetDefaultStyle( wxDynamicCast(pWinOldDefault, wxButton), false);
     SetDefaultStyle( this, true );
 } // end of wxButton::SetTmpDefault
 
 void wxButton::UnsetTmpDefault()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxWindow*                       pParent = GetParent();
 
-    wxCHECK_RET( tlw, _T("button without top level window?") );
+    wxCHECK_RET( pParent, _T("button without parent?") );
 
-    tlw->SetTmpDefaultItem(NULL);
+    pParent->SetTmpDefaultItem(NULL);
 
-    wxWindow*                       pWinOldDefault = tlw->GetDefaultItem();
+    wxWindow*                       pWinOldDefault = pParent->GetDefaultItem();
 
     SetDefaultStyle( this, false );
     SetDefaultStyle( wxDynamicCast(pWinOldDefault, wxButton), true );

@@ -3,15 +3,10 @@
 
 set -o errexit
 
+# read the config variables from the file given on the command line
+. $1
 
-PYVER=$1
-
-if [ $buildansi = yes ]; then
-    CHARTYPE=both
-else
-    CHARTYPE=unicode
-fi
-
+PYVER=$2
 
 if [ $skipwin != yes ]; then
     # test if the target machine is online
@@ -22,21 +17,19 @@ if [ $skipwin != yes ]; then
 	return 0
     fi
 
-    echo "Copying source, docs and build script..."
+    echo "Copying source file and build script..."
     scp $STAGING_DIR/wxPython-src-$VERSION.tar.bz2 \
-	$STAGING_DIR/wxPython-docs-$VERSION.tar.bz2 \
 	distrib/all/do-build-windows \
 	$WIN_HOST:$WIN_BUILD
     
      echo "Running build script on $WIN_HOST..."
      wxdir=$WIN_BUILD/wxPython-src-$VERSION
      cmd=./do-build-windows
-     ssh $WIN_HOST "cd $WIN_BUILD && $cmd $wxdir $WIN_BUILD $skipclean $VERSION $PYVER $CHARTYPE && rm $cmd"
+     ssh $WIN_HOST "cd $WIN_BUILD && $cmd $wxdir $WIN_BUILD $skipclean $VERSION $PYVER && rm $cmd"
 
      echo "Fetching the results..."
      scp "$WIN_HOST:$WIN_BUILD/wxPython*-win32*"  $STAGING_DIR
      ssh $WIN_HOST "rm $WIN_BUILD/wxPython*-win32*"
-     ssh $WIN_HOST "rm -rf $WIN_BUILD/*"
 
      echo "Done!"
 fi

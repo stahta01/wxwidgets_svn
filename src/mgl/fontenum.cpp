@@ -1,18 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/fontenum.cpp
+// Name:        src/unix/fontenum.cpp
 // Purpose:     wxFontEnumerator class for MGL
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
 
 // ============================================================================
 // declarations
@@ -22,17 +15,25 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/fontenum.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fontenum.h"
 #endif
 
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#include "wx/defs.h"
+#include "wx/dynarray.h"
+#include "wx/string.h"
+#include "wx/utils.h"
+
+#include "wx/fontenum.h"
 #include "wx/encinfo.h"
 #include "wx/fontutil.h"
-#include "wx/private/fontmgr.h"
 
 #include <mgraph.h>
 
@@ -48,25 +49,25 @@
 bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
                                           bool fixedWidthOnly)
 {
-    bool found = false;
-    const wxFontBundleList& list = wxFontsManager::Get()->GetBundles();
-    wxFontBundleList::Node *node;
-    wxFontBundle *f = NULL;
+    bool found = FALSE;
+    wxMGLFontFamilyList *list = wxTheFontsManager->GetFamilyList();
+    wxMGLFontFamilyList::Node *node;
+    wxMGLFontFamily *f = NULL;
     wxNativeEncodingInfo info;
 
     if ( encoding != wxFONTENCODING_SYSTEM )
         wxGetNativeFontEncoding(encoding, &info);
-
-    for (node = list.GetFirst(); node; node = node->GetNext())
+     
+    for (node = list->GetFirst(); node; node = node->GetNext())
     {
         f = node->GetData();
         info.facename = f->GetName();
-        if ( (!fixedWidthOnly || f->IsFixed()) &&
+        if ( (!fixedWidthOnly || f->GetInfo()->isFixed) &&
              (encoding == wxFONTENCODING_SYSTEM || wxTestFontEncoding(info)) )
         {
-            found = true;
+            found = TRUE;
             if ( !OnFacename(f->GetName()) )
-                return true;
+                return TRUE;
         }
     }
 
@@ -75,7 +76,7 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
 
 bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 {
-    static wxFontEncoding encodings[] =
+    static wxFontEncoding encodings[] = 
     {
         wxFONTENCODING_ISO8859_1,
         wxFONTENCODING_ISO8859_2,
@@ -101,11 +102,11 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
         wxFONTENCODING_CP1256,
         wxFONTENCODING_CP1257,
         wxFONTENCODING_KOI8,
-
+        
         wxFONTENCODING_SYSTEM
     };
-
-    static const char *encodingNames[] =
+    
+    static const char *encodingNames[] = 
     {
         "iso88590-1",
         "iso88590-2",
@@ -131,18 +132,18 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
         "koi-8",
         NULL
     };
-
+    
     wxNativeEncodingInfo info;
     info.facename = family;
-
+    
     for (size_t i = 0; encodings[i] != wxFONTENCODING_SYSTEM; i++)
     {
         if ( !wxGetNativeFontEncoding(encodings[i], &info) ||
-             !wxTestFontEncoding(info) )
+             !wxTestFontEncoding(info) ) 
             continue;
         if ( !OnFontEncoding(family, encodingNames[i]) )
             break;
     }
 
-    return true;
+    return TRUE;
 }

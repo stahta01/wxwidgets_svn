@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "wxole.h"
+#endif
+
 #include "wx/defs.h"
 #include "wxole.h"
 
@@ -65,7 +69,7 @@ class wxOleInputStream : public wxInputStream
 public:
 
   wxOleInputStream( GNOME_Stream stream );
-  virtual ~wxOleInputStream();
+  ~wxOleInputStream();
 
   bool Ok() const { return m_error; }
 

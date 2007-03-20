@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/droptgt.cpp
+// Name:        ole/droptgt.cpp
 // Purpose:     wxDropTarget implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,21 +17,23 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "droptgt.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if defined(__BORLANDC__)
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/setup.h"
 
 #if wxUSE_OLE && wxUSE_DRAG_AND_DROP
 
-#ifndef WX_PRECOMP
-    #include "wx/msw/wrapwin.h"
-    #include "wx/log.h"
-#endif
-
 #include "wx/msw/private.h"
+#include "wx/log.h"
 
 #ifdef __WXWINCE__
     #include <winreg.h>
@@ -40,6 +42,9 @@
 
 #ifdef __WIN32__
     #if !defined(__GNUWIN32__) || wxUSE_NORLANDER_HEADERS
+        #if wxCHECK_W32API_VERSION( 1, 0 )
+            #include "wx/msw/wrapwin.h"
+        #endif
         #include <shlobj.h>            // for DROPFILES structure
     #endif
 #else
@@ -80,7 +85,7 @@ protected:
     HWND          m_hwnd;         // window we're associated with
 
     // get default drop effect for given keyboard flags
-    static DWORD GetDropEffect(DWORD flags, wxDragResult defaultAction, DWORD pdwEffect);
+    static inline DWORD GetDropEffect(DWORD flags, wxDragResult defaultAction);
 
     DECLARE_NO_COPY_CLASS(wxIDropTarget)
 };
@@ -99,39 +104,16 @@ static DWORD ConvertDragResultToEffect(wxDragResult result);
 // Name    : static wxIDropTarget::GetDropEffect
 // Purpose : determine the drop operation from keyboard/mouse state.
 // Returns : DWORD combined from DROPEFFECT_xxx constants
-// Params  : [in] DWORD flags                 kbd & mouse flags as passed to
-//                                            IDropTarget methods
-//           [in] wxDragResult defaultAction  the default action of the drop target
-//           [in] DWORD pdwEffect             the supported actions of the drop 
-//                                            source passed to IDropTarget methods
+// Params  : [in] DWORD flags       kbd & mouse flags as passed to
+//                                  IDropTarget methods
 // Notes   : We do "move" normally and "copy" if <Ctrl> is pressed,
 //           which is the standard behaviour (currently there is no
 //           way to redefine it)
-DWORD wxIDropTarget::GetDropEffect(DWORD flags,
-                                   wxDragResult defaultAction,
-                                   DWORD pdwEffect)
+DWORD wxIDropTarget::GetDropEffect(DWORD flags, wxDragResult defaultAction)
 {
-    DWORD effectiveAction;
-    if ( defaultAction == wxDragCopy )
-        effectiveAction = flags & MK_SHIFT ? DROPEFFECT_MOVE : DROPEFFECT_COPY;
-    else
-        effectiveAction = flags & MK_CONTROL ? DROPEFFECT_COPY : DROPEFFECT_MOVE;
-
-    if ( !(effectiveAction & pdwEffect) )
-    {
-        // the action is not supported by drag source, fall back to something
-        // that it does support
-        if ( pdwEffect & DROPEFFECT_MOVE )
-            effectiveAction = DROPEFFECT_MOVE;
-        else if ( pdwEffect & DROPEFFECT_COPY )
-            effectiveAction = DROPEFFECT_COPY;
-        else if ( pdwEffect & DROPEFFECT_LINK )
-            effectiveAction = DROPEFFECT_LINK;
-        else
-            effectiveAction = DROPEFFECT_NONE;
-    }
-
-    return effectiveAction;
+  if (defaultAction == wxDragCopy)
+    return flags & MK_SHIFT ? DROPEFFECT_MOVE : DROPEFFECT_COPY;
+  return flags & MK_CONTROL ? DROPEFFECT_COPY : DROPEFFECT_MOVE;
 }
 
 wxIDropTarget::wxIDropTarget(wxDropTarget *pTarget)
@@ -154,12 +136,10 @@ IMPLEMENT_IUNKNOWN_METHODS(wxIDropTarget)
 // Name    : wxIDropTarget::DragEnter
 // Purpose : Called when the mouse enters the window (dragging something)
 // Returns : S_OK
-// Params  : [in]    IDataObject *pIDataSource : source data
-//           [in]    DWORD        grfKeyState  : kbd & mouse state
-//           [in]    POINTL       pt           : mouse coordinates
-//           [in/out]DWORD       *pdwEffect    : effect flag
-//                                               In:  Supported effects
-//                                               Out: Resulting effect
+// Params  : [in] IDataObject *pIDataSource : source data
+//           [in] DWORD        grfKeyState  : kbd & mouse state
+//           [in] POINTL       pt           : mouse coordinates
+//           [out]DWORD       *pdwEffect    : effect flag
 // Notes   :
 STDMETHODIMP wxIDropTarget::DragEnter(IDataObject *pIDataSource,
                                       DWORD        grfKeyState,
@@ -212,7 +192,7 @@ STDMETHODIMP wxIDropTarget::DragEnter(IDataObject *pIDataSource,
     // give some visual feedback
     *pdwEffect = ConvertDragResultToEffect(
         m_pTarget->OnEnter(pt.x, pt.y, ConvertDragEffectToResult(
-            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction(), *pdwEffect))
+            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction()))
                     )
                  );
 
@@ -223,9 +203,9 @@ STDMETHODIMP wxIDropTarget::DragEnter(IDataObject *pIDataSource,
 // Purpose : Indicates that the mouse was moved inside the window represented
 //           by this drop target.
 // Returns : S_OK
-// Params  : [in]    DWORD   grfKeyState     kbd & mouse state
-//           [in]    POINTL  pt              mouse coordinates
-//           [in/out]LPDWORD pdwEffect       current effect flag
+// Params  : [in] DWORD   grfKeyState     kbd & mouse state
+//           [in] POINTL  pt              mouse coordinates
+//           [out]LPDWORD pdwEffect       effect flag
 // Notes   : We're called on every WM_MOUSEMOVE, so this function should be
 //           very efficient.
 STDMETHODIMP wxIDropTarget::DragOver(DWORD   grfKeyState,
@@ -237,7 +217,7 @@ STDMETHODIMP wxIDropTarget::DragOver(DWORD   grfKeyState,
     wxDragResult result;
     if ( m_pIDataObject ) {
         result = ConvertDragEffectToResult(
-            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction(), *pdwEffect));
+            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction()));
     }
     else {
         // can't accept data anyhow normally
@@ -278,10 +258,10 @@ STDMETHODIMP wxIDropTarget::DragLeave()
 // Purpose : Instructs the drop target to paste data that was just now
 //           dropped on it.
 // Returns : S_OK
-// Params  : [in]    IDataObject *pIDataSource     the data to paste
-//           [in]    DWORD        grfKeyState      kbd & mouse state
-//           [in]    POINTL       pt               where the drop occurred?
-//           [in/out]DWORD       *pdwEffect        operation effect
+// Params  : [in] IDataObject *pIDataSource     the data to paste
+//           [in] DWORD        grfKeyState      kbd & mouse state
+//           [in] POINTL       pt               where the drop occurred?
+//           [ouy]DWORD       *pdwEffect        operation effect
 // Notes   :
 STDMETHODIMP wxIDropTarget::Drop(IDataObject *pIDataSource,
                                  DWORD        grfKeyState,
@@ -293,6 +273,9 @@ STDMETHODIMP wxIDropTarget::Drop(IDataObject *pIDataSource,
     // TODO I don't know why there is this parameter, but so far I assume
     //      that it's the same we've already got in DragEnter
     wxASSERT( m_pIDataObject == pIDataSource );
+
+    // by default, nothing happens
+    *pdwEffect = DROPEFFECT_NONE;
 
     // we need client coordinates to pass to wxWin functions
     if ( !ScreenToClient(m_hwnd, (POINT *)&pt) )
@@ -307,20 +290,15 @@ STDMETHODIMP wxIDropTarget::Drop(IDataObject *pIDataSource,
 
         // and now it has the data
         wxDragResult rc = ConvertDragEffectToResult(
-            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction(), *pdwEffect));
+            GetDropEffect(grfKeyState, m_pTarget->GetDefaultAction()));
         rc = m_pTarget->OnData(pt.x, pt.y, rc);
         if ( wxIsDragResultOk(rc) ) {
             // operation succeeded
             *pdwEffect = ConvertDragResultToEffect(rc);
         }
-        else {
-            *pdwEffect = DROPEFFECT_NONE;
-        }
+        //else: *pdwEffect is already DROPEFFECT_NONE
     }
-    else {
-        // OnDrop() returned false, no need to copy data
-        *pdwEffect = DROPEFFECT_NONE;
-    }
+    //else: OnDrop() returned false, no need to copy data
 
     // release the held object
     RELEASE_AND_NULL(m_pIDataObject);
@@ -572,4 +550,5 @@ static DWORD ConvertDragResultToEffect(wxDragResult result)
     }
 }
 
-#endif // wxUSE_OLE && wxUSE_DRAG_AND_DROP
+#endif
+ // wxUSE_DRAG_AND_DROP

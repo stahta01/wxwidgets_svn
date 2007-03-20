@@ -9,24 +9,29 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "tabctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#if wxUSE_TAB_DIALOG
 
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
-    #include "wx/wx.h"
-    #include "wx/app.h"
+#include "wx/wx.h"
 #endif
+
+#if defined(__WIN95__)
 
 #include "wx/msw/private.h"
 
+#include <commctrl.h>
+
 #include "wx/tabctrl.h"
+#include "wx/app.h"
 #include "wx/msw/imaglist.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabCtrl, wxControl)
@@ -429,4 +434,4 @@ void wxMapBitmap(HBITMAP hBitmap, int width, int height)
 }
 #endif
 
-#endif // wxUSE_TAB_DIALOG
+#endif // __WIN95__

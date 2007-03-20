@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/statbar.cpp
+// Name:        common/statbar.cpp
 // Purpose:     wxStatusBarBase implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,18 +28,15 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATUSBAR
-
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
+    #include "wx/statusbr.h"
 #endif //WX_PRECOMP
+
+#if wxUSE_STATUSBAR
 
 #include "wx/listimpl.cpp"
 WX_DEFINE_LIST(wxListString)
-
-const wxChar wxStatusBarNameStr[] = wxT("statusBar");
 
 // ============================================================================
 // wxStatusBarBase implementation
@@ -222,21 +223,12 @@ wxArrayInt wxStatusBarBase::CalculateAbsWidths(wxCoord widthTotal) const
     {
         if ( m_nFields )
         {
-            // Default: all fields have the same width. This is not always
-            // possible to do exactly (if widthTotal is not divisible by
-            // m_nFields) - if that happens, we distribute the extra pixels
-            // among all fields:
-            int widthToUse = widthTotal;
-
-            for ( int i = m_nFields; i > 0; i-- )
+            // default: all fields have the same width
+            int nWidth = widthTotal / m_nFields;
+            for ( int i = 0; i < m_nFields; i++ )
             {
-                // divide the unassigned width evently between the
-                // not yet processed fields:
-                int w = widthToUse / i;
-                widths.Add(w);
-                widthToUse -= w;
+                widths.Add(nWidth);
             }
-
         }
         //else: we're empty anyhow
     }
@@ -366,3 +358,4 @@ wxListString *wxStatusBarBase::GetOrCreateStatusStack(int i)
 }
 
 #endif // wxUSE_STATUSBAR
+

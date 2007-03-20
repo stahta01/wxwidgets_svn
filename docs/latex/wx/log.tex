@@ -36,7 +36,7 @@ No base class
 
 \latexignore{\rtfignore{\wxheading{Function groups}}}
 
-\membersection{Global functions}
+\membersection{Static functions}\label{staticlogfunctions}
 
 The functions in this section work with and manipulate the active log target.
 The \helpref{OnLog()}{wxlogonlog} is called by the {\it wxLogXXX()} functions
@@ -155,9 +155,7 @@ window on the corresponding error message. If you wish to enable it, please use
 \helpref{SetTimestamp}{wxlogsettimestamp}\\
 \helpref{GetTimestamp}{wxloggettimestamp}\\
 \helpref{SetTraceMask}{wxlogsettracemask}\\
-\helpref{GetTraceMask}{wxloggettracemask}\\
-\helpref{SetRepetitionCounting}{wxlogsetrepetitioncounting}\\
-\helpref{GetRepetitionCounting}{wxloggetrepetitioncounting}
+\helpref{GetTraceMask}{wxloggettracemask}
 
 %%%%% MEMBERS HERE %%%%%
 \helponly{\insertatlevel{2}{
@@ -264,7 +262,7 @@ corresponding to the log level and then calls
 
 \func{virtual void}{DoLogString}{\param{const wxChar }{*msg}, \param{time\_t }{timestamp}}
 
-Called to log the specified string. The timestamp is already included in the
+Called to log the specified string. The timestamp is already included into the
 string but still passed to this function.
 
 A simple implementation may just send the string to {\tt stdout} or, better,
@@ -323,21 +321,6 @@ and not sent to the active log target.
 \func{static wxLogLevel}{GetLogLevel}{\void}
 
 Returns the current log level limit.
-
-\membersection{wxLog::SetRepetitionCounting}\label{wxlogsetrepetitioncounting}
-
-\func{static void}{SetRepetitionCounting}{\param{bool }{ repetCounting = true}}
-
-Enables logging mode in which a log message is logged once, and in case exactly
-the same message successively repeats one or more times, only the number of 
-repetitions is logged.
-
-\membersection{wxLog::GetRepetitionCounting}\label{wxloggetrepetitioncounting}
-
-\func{static bool}{GetRepetitionCounting}{\void}
-
-Returns whether the repetition counting mode is enabled.
-
 
 \membersection{wxLog::SetTimestamp}\label{wxlogsettimestamp}
 
@@ -669,7 +652,7 @@ caller previously.
 
 \wxheading{See also}
 
-\helpref{wxTextCtrl}{wxtextctrl},\\
+\helpref{wxLogTextCtrl}{wxlogtextctrl},\\
 \helpref{wxStreamToTextRedirector}{wxstreamtotextredirector}
 
 \latexignore{\rtfignore{\wxheading{Members}}}

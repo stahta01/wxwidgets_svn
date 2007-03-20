@@ -541,10 +541,10 @@ class SetPrintout(wx.Printout):
         self.end_pg = 1
 
     def OnBeginDocument(self, start, end):
-        return super(SetPrintout, self).OnBeginDocument(start, end)
+        return self.base_OnBeginDocument(start, end)
 
     def OnEndDocument(self):
-        super(SetPrintout, self).OnEndDocument()
+        self.base_OnEndDocument()
 
     def HasPage(self, page):
         if page <= self.end_pg:
@@ -564,7 +564,7 @@ class SetPrintout(wx.Printout):
         return (str_pg, end_pg, str_pg, end_pg)
 
     def OnPreparePrinting(self):
-        super(SetPrintout, self).OnPreparePrinting()
+        self.base_OnPreparePrinting()
 
     def OnBeginPrinting(self):
         dc = self.GetDC()
@@ -581,7 +581,7 @@ class SetPrintout(wx.Printout):
         scaleY = float(h) / 1000
         self.printUserScale = min(scaleX, scaleY)
 
-        super(SetPrintout, self).OnBeginPrinting()
+        self.base_OnBeginPrinting()
 
     def GetSize(self):
         self.psizew, self.psizeh = self.GetPPIPrinter()

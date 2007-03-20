@@ -12,6 +12,10 @@
 #ifndef _WX_GAUGE_H_BASE_
 #define _WX_GAUGE_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "gaugebase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_GAUGE
@@ -28,20 +32,11 @@
 // Win32 only, is default (and only) on some other platforms
 #define wxGA_SMOOTH          0x0020
 
-#if WXWIN_COMPATIBILITY_2_6
-    // obsolete style
-    #define wxGA_PROGRESSBAR     0
-#endif // WXWIN_COMPATIBILITY_2_6
+// obsolete style
+#define wxGA_PROGRESSBAR     0
 
-// GTK and Mac always have native implementation of the indeterminate mode
-// wxMSW has native implementation only if comctl32.dll >= 6.00
-#if !defined(__WXGTK20__) && !defined(__WXMAC__) && !defined(__WXCOCOA__)
-    #define wxGAUGE_EMULATE_INDETERMINATE_MODE 1
-#else
-    #define wxGAUGE_EMULATE_INDETERMINATE_MODE 0
-#endif
 
-extern WXDLLEXPORT_DATA(const wxChar) wxGaugeNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxGaugeNameStr;
 
 // ----------------------------------------------------------------------------
 // wxGauge: a progress bar
@@ -62,20 +57,17 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxGaugeNameStr);
 
-    // determinate mode API
-
     // set/get the control range
     virtual void SetRange(int range);
     virtual int GetRange() const;
 
+    // position
     virtual void SetValue(int pos);
     virtual int GetValue() const;
 
-    // indeterminate mode API
-    virtual void Pulse();
-
     // simple accessors
     bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
+
 
     // appearance params (not implemented for most ports)
     virtual void SetShadowWidth(int w);
@@ -94,24 +86,22 @@ protected:
     // the current position
     int m_gaugePos;
 
-#if wxGAUGE_EMULATE_INDETERMINATE_MODE
-    int m_nDirection;       // can be wxRIGHT or wxLEFT
-#endif
-
     DECLARE_NO_COPY_CLASS(wxGaugeBase)
 };
 
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/gauge.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/gauge95.h"
-    #define wxGauge wxGauge95
+    #ifdef __WIN95__
+        #include "wx/msw/gauge95.h"
+        #define wxGauge wxGauge95
+    #else // !__WIN95__
+        // Gauge no longer supported on 16-bit Windows
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/gauge.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/gauge.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/gauge.h"
+    #include "wx/gtk/gauge.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/gauge.h"
 #elif defined(__WXCOCOA__)

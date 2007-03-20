@@ -37,7 +37,7 @@ class WXDLLEXPORT wxMetafileRefData: public wxGDIRefData
     friend class WXDLLEXPORT wxMetafile;
 public:
     wxMetafileRefData(void);
-    virtual ~wxMetafileRefData(void);
+    ~wxMetafileRefData(void);
 
 public:
     WXHANDLE m_metafile;
@@ -50,22 +50,33 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
 {
     DECLARE_DYNAMIC_CLASS(wxMetafile)
 public:
+    // Copy constructor
+    inline wxMetafile(const wxMetafile& metafile)
+    { Ref(metafile); }
+
     wxMetafile(const wxString& file = wxEmptyString);
-    virtual ~wxMetafile(void);
+    ~wxMetafile(void);
 
     // After this is called, the metafile cannot be used for anything
     // since it is now owned by the clipboard.
     virtual bool SetClipboard(int width = 0, int height = 0);
 
     virtual bool Play(wxDC *dc);
-    inline bool Ok() const { return IsOk(); }
-    inline bool IsOk(void) const { return (M_METAFILEDATA && (M_METAFILEDATA->m_metafile != 0)); };
+    inline bool Ok(void) const { return (M_METAFILEDATA && (M_METAFILEDATA->m_metafile != 0)); };
 
     // Implementation
     inline WXHANDLE GetHMETAFILE(void) { return M_METAFILEDATA->m_metafile; }
     void SetHMETAFILE(WXHANDLE mf) ;
     inline int GetWindowsMappingMode(void) { return M_METAFILEDATA->m_windowsMappingMode; }
     void SetWindowsMappingMode(int mm);
+
+    // Operators
+    inline wxMetafile& operator = (const wxMetafile& metafile)
+        { if (*this == metafile) return (*this); Ref(metafile); return *this; }
+    inline bool operator== (const wxMetafile& metafile) const
+        { return m_refData == metafile.m_refData; }
+    inline bool operator!= (const wxMetafile& metafile) const
+        { return m_refData != metafile.m_refData; }
 };
 
 class WXDLLEXPORT wxMetafileDC: public wxDC
@@ -81,7 +92,7 @@ public:
     // Then don't need to supply them to wxMakeMetaFilePlaceable.
     wxMetafileDC(const wxString& file, int xext, int yext, int xorg, int yorg);
 
-    virtual ~wxMetafileDC(void);
+    ~wxMetafileDC(void);
 
     // Should be called at end of drawing
     virtual wxMetafile *Close(void);

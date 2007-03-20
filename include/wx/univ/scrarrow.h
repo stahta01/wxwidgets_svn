@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_SCRARROW_H_
 #define _WX_UNIV_SCRARROW_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univscrarrow.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxScrollArrows is not a control but just a class containing the common
 // functionality of scroll arrows, whether part of scrollbars, spin ctrls or
@@ -53,9 +57,8 @@ public:
                    bool scrollbarLike = false) const;
 
     // process a mouse move, enter or leave event, possibly calling
-    // wxControlWithArrows::SetArrowState() if
-    // wxControlWithArrows::HitTestArrow() says that the mouse has left/entered
-    // an arrow
+    // wxControlWithArrows::SetArrowState() if wxControlWithArrows::HitTest()
+    // says that the mosue has left/entered an arrow
     bool HandleMouseMove(const wxMouseEvent& event) const;
 
     // process a mouse click event
@@ -82,8 +85,6 @@ private:
 class WXDLLEXPORT wxControlWithArrows
 {
 public:
-    virtual ~wxControlWithArrows() {}
-
     // get the renderer to use for drawing the arrows
     virtual wxRenderer *GetRenderer() const = 0;
 
@@ -102,7 +103,7 @@ public:
                               int flag, bool set = true) = 0;
 
     // hit testing: return on which arrow the point is (or Arrow_None)
-    virtual wxScrollArrows::Arrow HitTestArrow(const wxPoint& pt) const = 0;
+    virtual wxScrollArrows::Arrow HitTest(const wxPoint& pt) const = 0;
 
     // called when the arrow is pressed, return true to continue scrolling and
     // false to stop it

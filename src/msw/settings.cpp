@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/settings.cpp
+// Name:        msw/settings.cpp
 // Purpose:     wxSystemSettingsNative implementation for MSW
 // Author:      Julian Smart
 // Modified by:
@@ -24,22 +24,25 @@
     #pragma hdrstop
 #endif
 
-#include "wx/settings.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/gdicmn.h"
-    #include "wx/module.h"
 #endif
 
+#include "wx/settings.h"
+
 #include "wx/msw/private.h"
-#include "wx/msw/missing.h" // for SM_CXCURSOR, SM_CYCURSOR, SM_TABLETPC
 
 #ifndef SPI_GETFLATMENU
 #define SPI_GETFLATMENU                     0x1022
 #endif
 
+#include "wx/module.h"
 #include "wx/fontutil.h"
+
+#ifdef __WXWINCE__ // for SM_CXCURSOR and SM_CYCURSOR
+#include "wx/msw/wince/missing.h"
+#endif // __WXWINCE__
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -226,7 +229,7 @@ wxFont wxCreateFontFromStockObject(int index)
             // We want Windows 2000 or later to have new fonts even MS Shell Dlg
             // is returned as default GUI font for compatibility
             int verMaj;
-            if(index == DEFAULT_GUI_FONT && wxGetOsVersion(&verMaj) == wxOS_WINDOWS_NT && verMaj >= 5)
+            if(index == DEFAULT_GUI_FONT && wxGetOsVersion(&verMaj) == wxWINDOWS_NT && verMaj >= 5)
                 wxStrcpy(info.lf.lfFaceName, wxT("MS Shell Dlg 2"));
 #endif
             // Under MicroWindows we pass the HFONT as well
@@ -308,10 +311,10 @@ static const int gs_metricsMap[] =
     SM_CXBORDER,
     SM_CYBORDER,
 #ifdef SM_CXCURSOR
-    SM_CXCURSOR,
+	SM_CXCURSOR,
     SM_CYCURSOR,
 #else
-    -1, -1,
+	-1, -1,
 #endif
     SM_CXDOUBLECLK,
     SM_CYDOUBLECLK,
@@ -420,9 +423,6 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
         case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
             return true;
 
-        case wxSYS_TABLET_PRESENT:
-            return ::GetSystemMetrics(SM_TABLETPC) != 0;
-
         default:
             wxFAIL_MSG( _T("unknown system feature") );
 
@@ -447,12 +447,12 @@ extern wxFont wxGetCCDefaultFont()
     int verMaj, verMin;
     switch ( wxGetOsVersion(&verMaj, &verMin) )
     {
-        case wxOS_WINDOWS_9X:
+        case wxWIN95:
             // 4.10 is Win98
             useIconFont = verMaj == 4 && verMin >= 10;
             break;
 
-        case wxOS_WINDOWS_NT:
+        case wxWINDOWS_NT:
             // 5.0 is Win2k
             useIconFont = verMaj >= 5;
             break;

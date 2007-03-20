@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbmp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,14 +30,13 @@
 
 #if wxUSE_STATBMP
 
-#include "wx/statbmp.h"
+#include "wx/window.h"
+#include "wx/palmos/private.h"
 
 #ifndef WX_PRECOMP
     #include "wx/icon.h"
-    #include "wx/window.h"
+    #include "wx/statbmp.h"
 #endif
-
-#include "wx/palmos/private.h"
 
 // ---------------------------------------------------------------------------
 // macors

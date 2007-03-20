@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/frame.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/frame.h"
     #include "wx/app.h"
     #include "wx/menu.h"
     #include "wx/utils.h"
@@ -35,11 +38,19 @@
     #include "wx/dcclient.h"
     #include "wx/mdi.h"
     #include "wx/panel.h"
-    #include "wx/log.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
-    #include "wx/menuitem.h"
 #endif // WX_PRECOMP
+
+#if wxUSE_STATUSBAR
+    #include "wx/statusbr.h"
+    #include "wx/generic/statusbr.h"
+#endif // wxUSE_STATUSBAR
+
+#if wxUSE_TOOLBAR
+    #include "wx/toolbar.h"
+#endif // wxUSE_TOOLBAR
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #ifdef __WXUNIVERSAL__
     #include "wx/univ/theme.h"
@@ -99,14 +110,10 @@ wxBEGIN_FLAGS( wxFrameStyle )
     // frame styles
     wxFLAGS_MEMBER(wxSTAY_ON_TOP)
     wxFLAGS_MEMBER(wxCAPTION)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxTHICK_FRAME)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxSYSTEM_MENU)
     wxFLAGS_MEMBER(wxRESIZE_BORDER)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxRESIZE_BOX)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxCLOSE_BOX)
     wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
     wxFLAGS_MEMBER(wxMINIMIZE_BOX)

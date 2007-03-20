@@ -111,15 +111,10 @@ EVT_PrivacyImpactedStateChange = wx.PyEventBinder(wxEVT_PrivacyImpactedStateChan
 # IEHtmlWindowBase class, so derive from it instead of ActiveXWindow.
 class IEHtmlWindow(wx.activex.IEHtmlWindowBase):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=0, name='IEHtmlWindow', ID=-1):
-        # in case the old 'ID' param is used as a keyword
-        if ID != -1:
-            id = ID
-            
+                 size=wx.DefaultSize, style=0, name='IEHtmlWindow'):
         wx.activex.IEHtmlWindowBase.__init__(self, parent,
             wx.activex.CLSID('{8856F961-340A-11D0-A96B-00C04FD705A2}'),
             id, pos, size, style, name)
-
 
     # Methods from IEHtmlWindowBase.  Redirected from here just for
     # the sake of completeness...

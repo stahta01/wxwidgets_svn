@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/dcscreen.h
+// Name:        dcscreen.h
 // Purpose:     wxScreenDC class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DCSCREEN_H_
 #define _WX_DCSCREEN_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcscreen.h"
+#endif
 
 #include "wx/dcclient.h"
 
@@ -43,4 +47,5 @@ private:
 
 
 #endif
-    // _WX_DCSCREEN_H_
+// _WX_DCSCREEN_H_
+

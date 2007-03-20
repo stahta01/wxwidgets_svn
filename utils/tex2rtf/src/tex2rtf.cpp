@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -66,8 +70,10 @@
 #include "tex2rtf.xpm"
 #endif
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 const float versionNo = float(TEX2RTF_VERSION_NUMBER);
 
@@ -131,7 +137,6 @@ int BufSize = 500;
 
 bool Go(void);
 void ShowOptions(void);
-void ShowVersion(void);
 
 wxChar wxTex2RTFBuffer[1500];
 
@@ -182,6 +187,22 @@ bool MyApp::OnInit()
   }
 
   TexPathList.Add(::wxGetCwd());
+
+#ifdef NO_GUI
+  if (InputFile.empty() || OutputFile.empty())
+  {
+      wxSTD cout << "Tex2RTF: input or output file is missing.\n";
+      ShowOptions();
+      exit(1);
+  }
+#endif
+
+  if (!InputFile.empty())
+  {
+      TexPathList.EnsureFileAccessible(InputFile);
+  }
+  if (InputFile.empty() || OutputFile.empty())
+      isInteractive = true;
 
   int i;
   for (i = n; i < argc;)
@@ -276,21 +297,11 @@ bool MyApp::OnInit()
       i ++;
       checkSyntax = true;
     }
-    else if (wxStrcmp(argv[i], _T("-version")) == 0)
-    {
-      i ++;
-      ShowVersion();
-#ifdef NO_GUI
-      exit(1);
-#else
-      return false;
-#endif
-    }
     else
     {
       wxString buf;
       buf.Printf(_T("Invalid switch %s.\n"), argv[i]);
-      OnError(buf);
+      OnError((wxChar *)buf.c_str());
 #ifdef NO_GUI
       ShowOptions();
       exit(1);
@@ -299,22 +310,6 @@ bool MyApp::OnInit()
 #endif
     }
   }
-
-#ifdef NO_GUI
-  if (InputFile.empty() || OutputFile.empty())
-  {
-      wxSTD cout << "Tex2RTF: input or output file is missing.\n";
-      ShowOptions();
-      exit(1);
-  }
-#endif
-
-  if (!InputFile.empty())
-  {
-      TexPathList.EnsureFileAccessible(InputFile);
-  }
-  if (InputFile.empty() || OutputFile.empty())
-      isInteractive = true;
 
 #if defined(__WXMSW__) && !defined(NO_GUI)
   wxDDEInitialize();
@@ -457,13 +452,13 @@ bool MyApp::OnInit()
     if (!path.empty())
         ReadCustomMacros(path);
 
-    bool rc = Go();
-    if ( rc && runTwice )
+    Go();
+    if (runTwice)
     {
-        rc = Go();
+        Go();
     }
 #ifdef NO_GUI
-    return rc;
+    return true;
 #else
     OnExit(); // Do cleanup since OnExit won't be called now
     return false;
@@ -604,17 +599,11 @@ int MyApp::OnExit()
   return 0;
 }
 #endif
-
-void ShowVersion(void)
+void ShowOptions(void)
 {
     wxChar buf[100];
     wxSnprintf(buf, sizeof(buf), _T("Tex2RTF version %.2f"), versionNo);
     OnInform(buf);
-}
-
-void ShowOptions(void)
-{
-    ShowVersion();
     OnInform(_T("Usage: tex2rtf [input] [output] [switches]\n"));
     OnInform(_T("where valid switches are"));
 #ifndef NO_GUI
@@ -626,7 +615,6 @@ void ShowOptions(void)
     OnInform(_T("    -sync"));
     OnInform(_T("    -checkcurlybraces"));
     OnInform(_T("    -checksyntax"));
-    OnInform(_T("    -version"));
     OnInform(_T("    -macros <filename>"));
     OnInform(_T("    -winhelp"));
     OnInform(_T("    -rtf"));
@@ -701,7 +689,7 @@ void MyFrame::OnGo(wxCommandEvent& WXUNUSED(event))
 #endif // wxUSE_STATUSBAR
         wxString errBuf;
         errBuf.Printf(_T("\nErrors encountered during this pass: %lu\n"), errorCount);
-        OnInform(errBuf);
+        OnInform((wxChar *)errBuf.c_str());
       }
 
 
@@ -898,7 +886,7 @@ void ChooseInputFile(bool force)
             wxString str = wxFileNameFromPath(InputFile);
             wxString buf;
             buf.Printf(_T("Tex2RTF [%s]"), str.c_str());
-            frame->SetTitle(buf);
+            frame->SetTitle((wxChar *)buf.c_str());
             OutputFile = wxEmptyString;
         }
     }
@@ -973,7 +961,7 @@ bool Go(void)
     frame->SetTitle(buf);
   }
 
-  wxLongLong localTime = wxGetLocalTimeMillis();
+  wxStartTimer();
 #endif
 
   // Find extension-less filename
@@ -1027,7 +1015,7 @@ bool Go(void)
     {
       wxString buf;
       buf.Printf(_T("Working, pass %d...Click CLOSE to abort"), passNumber);
-      frame->SetStatusText(buf);
+      frame->SetStatusText((wxChar *)buf.c_str());
     }
 #endif
     OkToClose = false;
@@ -1075,30 +1063,30 @@ bool Go(void)
 
     wxString buf;
 #ifndef NO_GUI
-    wxLongLong elapsed = wxGetLocalTimeMillis() - localTime;
-    buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(elapsed.GetLo()/1000.0));
-    OnInform(buf);
+    long tim = wxGetElapsedTime();
+    buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(tim/1000.0));
+    OnInform((wxChar *)buf.c_str());
 
     if (errorCount)
     {
         buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform(buf);
+        OnInform((wxChar *)buf.c_str());
     }
 
 #if wxUSE_STATUSBAR
     if (isInteractive)
     {
       buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-      frame->SetStatusText(buf);
+      frame->SetStatusText((wxChar *)buf.c_str());
     }
 #endif // wxUSE_STATUSBAR
 #else
     buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-    OnInform(buf);
+    OnInform((wxChar *)buf.c_str());
     if (errorCount)
     {
         buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform(buf.c_str());
+        OnInform((wxChar *)buf.c_str());
     }
 #endif
     passNumber ++;
@@ -1119,12 +1107,13 @@ bool Go(void)
   return false;
 }
 
-void OnError(const wxString& msg)
+void OnError(const wxChar *msg)
 {
+    wxString msg_string = msg;
     errorCount++;
 
 #ifdef NO_GUI
-    wxSTD cerr << "Error: " << msg.mb_str() << "\n";
+    wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
     wxSTD cerr.flush();
 #else
     if (isInteractive && frame)
@@ -1134,7 +1123,7 @@ void OnError(const wxString& msg)
     else
     {
 #if defined(__UNIX__)
-        wxSTD cerr << "Error: " << msg.mb_str() << "\n";
+        wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
         wxSTD cerr.flush();
 #elif defined(__WXMSW__)
         wxLogError(msg);
@@ -1145,10 +1134,11 @@ void OnError(const wxString& msg)
 #endif // NO_GUI
 }
 
-void OnInform(const wxString& msg)
+void OnInform(const wxChar *msg)
 {
+    wxString msg_string = msg;
 #ifdef NO_GUI
-    wxSTD cout << msg.mb_str() << "\n";
+    wxSTD cout << msg_string.mb_str() << "\n";
     wxSTD cout.flush();
 #else
     if (isInteractive && frame)
@@ -1158,7 +1148,7 @@ void OnInform(const wxString& msg)
     else
     {
 #if defined(__UNIX__)
-        wxSTD cout << msg.mb_str() << "\n";
+        wxSTD cout << msg_string.mb_str() << "\n";
         wxSTD cout.flush();
 #elif defined(__WXMSW__)
         wxLogInfo(msg);

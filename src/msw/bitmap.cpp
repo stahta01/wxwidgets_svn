@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/bitmap.cpp
+// Name:        bitmap.cpp
 // Purpose:     wxBitmap
 // Author:      Julian Smart
 // Modified by:
@@ -17,14 +17,16 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "bitmap.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#include "wx/bitmap.h"
 
 #ifndef WX_PRECOMP
     #include <stdio.h>
@@ -34,19 +36,22 @@
     #include "wx/app.h"
     #include "wx/palette.h"
     #include "wx/dcmemory.h"
+    #include "wx/bitmap.h"
     #include "wx/icon.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/log.h"
 
 #if wxUSE_WXDIB
-    #include "wx/msw/dib.h"
+#include "wx/msw/dib.h"
 #endif
 
+#include "wx/image.h"
+#include "wx/xpmdecod.h"
+
 #ifdef wxHAVE_RAW_BITMAP
-    #include "wx/rawbmp.h"
+#include "wx/rawbmp.h"
 #endif
 
 // missing from mingw32 header
@@ -205,13 +210,8 @@ wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
     m_selectedInto = NULL;
 #endif
 
-    // (deep) copy the mask if present
+    // can't copy the mask as the other bitmap destroys it
     m_bitmapMask = NULL;
-    if (data.m_bitmapMask)
-        m_bitmapMask = new wxMask(*data.m_bitmapMask);
-
-    // FIXME: we don't copy m_hBitmap currently but we should, see wxBitmap::
-    //        CloneRefData()
 
     wxASSERT_MSG( !data.m_isDIB,
                     _T("can't copy bitmap locked for raw access!") );
@@ -245,6 +245,12 @@ void wxBitmapRefData::Free()
 // wxBitmap creation
 // ----------------------------------------------------------------------------
 
+// this function should be called from all wxBitmap ctors
+void wxBitmap::Init()
+{
+    // m_refData = NULL; done in the base class ctor
+}
+
 wxGDIImageRefData *wxBitmap::CreateData() const
 {
     return new wxBitmapRefData;
@@ -257,10 +263,6 @@ wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *dataOrig) const
     if ( !data )
         return NULL;
 
-    // FIXME: this method is backwards, it should just create a new
-    //        wxBitmapRefData using its copy ctor but instead it modifies this
-    //        bitmap itself and then returns its m_refData -- which works, of
-    //        course (except in !wxUSE_WXDIB), but is completely illogical
     wxBitmap *self = wx_const_cast(wxBitmap *, this);
 
 #if wxUSE_WXDIB
@@ -273,17 +275,8 @@ wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *dataOrig) const
     else
 #endif // wxUSE_WXDIB
     {
-        // copy the bitmap data
+        // don't copy the bitmap data, but do copy the size, depth, ...
         self->m_refData = new wxBitmapRefData(*data);
-    }
-
-    // copy also the mask
-    wxMask * const maskSrc = data->GetMask();
-    if ( maskSrc )
-    {
-        wxBitmapRefData *selfdata = wx_static_cast(wxBitmapRefData *, m_refData);
-
-        selfdata->SetMask(new wxMask(*maskSrc));
     }
 
     return m_refData;
@@ -427,6 +420,8 @@ wxBitmap::~wxBitmap()
 
 wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 {
+    Init();
+
 #ifndef __WXMICROWIN__
     wxBitmapRefData *refData = new wxBitmapRefData;
     m_refData = refData;
@@ -461,7 +456,7 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
                     reversed |= (unsigned char)(val & 0x01);
                     val >>= 1;
                 }
-                *dst++ = ~reversed;
+                *dst++ = reversed;
             }
 
             if ( padding )
@@ -489,23 +484,51 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 #endif
 }
 
+// Create from XPM data
+bool wxBitmap::CreateFromXpm(const char **data)
+{
+#if wxUSE_IMAGE && wxUSE_XPM && wxUSE_WXDIB
+    Init();
+
+    wxCHECK_MSG( data != NULL, false, wxT("invalid bitmap data") )
+
+    wxXPMDecoder decoder;
+    wxImage img = decoder.ReadData(data);
+    wxCHECK_MSG( img.Ok(), false, wxT("invalid bitmap data") )
+
+    *this = wxBitmap(img);
+    return true;
+#else
+    wxUnusedVar(data);
+    return false;
+#endif
+}
+
 wxBitmap::wxBitmap(int w, int h, int d)
 {
+    Init();
+
     (void)Create(w, h, d);
 }
 
 wxBitmap::wxBitmap(int w, int h, const wxDC& dc)
 {
+    Init();
+
     (void)Create(w, h, dc);
 }
 
-wxBitmap::wxBitmap(const void* data, long type, int width, int height, int depth)
+wxBitmap::wxBitmap(void *data, long type, int width, int height, int depth)
 {
+    Init();
+
     (void)Create(data, type, width, height, depth);
 }
 
 wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
 {
+    Init();
+
     LoadFile(filename, (int)type);
 }
 
@@ -779,6 +802,8 @@ wxImage wxBitmap::ConvertToImage() const
 // wxImage to/from conversions
 // ----------------------------------------------------------------------------
 
+#if wxUSE_WXDIB
+
 bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
 {
     return CreateFromImage(image, depth, 0);
@@ -791,8 +816,6 @@ bool wxBitmap::CreateFromImage(const wxImage& image, const wxDC& dc)
 
     return CreateFromImage(image, -1, dc.GetHDC());
 }
-
-#if wxUSE_WXDIB
 
 bool wxBitmap::CreateFromImage(const wxImage& image, int depth, WXHDC hdc)
 {
@@ -807,9 +830,8 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth, WXHDC hdc)
     wxDIB dib(image);
     if ( !dib.IsOk() )
         return false;
-
-    if ( depth == -1 )
-        depth = dib.GetDepth(); // Get depth from image if none specified
+	if (depth == -1)
+		depth = dib.GetDepth();	// Get depth from image if none specified
 
     // store the bitmap parameters
     wxBitmapRefData *refData = new wxBitmapRefData;
@@ -973,22 +995,7 @@ wxImage wxBitmap::ConvertToImage() const
     return image;
 }
 
-#else // !wxUSE_WXDIB
-
-bool
-wxBitmap::CreateFromImage(const wxImage& WXUNUSED(image),
-                          int WXUNUSED(depth),
-                          WXHDC WXUNUSED(hdc))
-{
-    return false;
-}
-
-wxImage wxBitmap::ConvertToImage() const
-{
-    return wxImage();
-}
-
-#endif // wxUSE_WXDIB/!wxUSE_WXDIB
+#endif // wxUSE_WXDIB
 
 #endif // wxUSE_IMAGE
 
@@ -1024,7 +1031,7 @@ bool wxBitmap::LoadFile(const wxString& filename, long type)
     return false;
 }
 
-bool wxBitmap::Create(const void* data, long type, int width, int height, int depth)
+bool wxBitmap::Create(void *data, long type, int width, int height, int depth)
 {
     UnRef();
 
@@ -1164,6 +1171,15 @@ wxDC *wxBitmap::GetSelectedInto() const
 
 #endif
 
+#if WXWIN_COMPATIBILITY_2_4
+
+int wxBitmap::GetQuality() const
+{
+    return 0;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 void wxBitmap::UseAlpha()
 {
     if ( GetBitmapData() )
@@ -1206,6 +1222,14 @@ void wxBitmap::SetMask(wxMask *mask)
 
     GetBitmapData()->SetMask(mask);
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxBitmap::SetQuality(int WXUNUSED(quality))
+{
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // raw bitmap access support
@@ -1326,39 +1350,6 @@ void wxBitmap::UngetRawData(wxPixelDataBase& dataBase)
 wxMask::wxMask()
 {
     m_maskBitmap = 0;
-}
-
-// Copy constructor
-wxMask::wxMask(const wxMask &mask)
-      : wxObject()
-{
-    BITMAP bmp;
-
-    HDC srcDC = CreateCompatibleDC(0);
-    HDC destDC = CreateCompatibleDC(0);
-
-    // GetBitmapDimensionEx won't work if SetBitmapDimensionEx wasn't used
-    // so we'll use GetObject() API here:
-    if (::GetObject((HGDIOBJ)mask.m_maskBitmap, sizeof(bmp), &bmp) == 0)
-    {
-        wxFAIL_MSG(wxT("Cannot retrieve the dimensions of the wxMask to copy"));
-        return;
-    }
-
-    // create our HBITMAP
-    int w = bmp.bmWidth, h = bmp.bmHeight;
-    m_maskBitmap = (WXHBITMAP)CreateCompatibleBitmap(srcDC, w, h);
-
-    // copy the mask's HBITMAP into our HBITMAP
-    SelectObject(srcDC, (HBITMAP) mask.m_maskBitmap);
-    SelectObject(destDC, (HBITMAP) m_maskBitmap);
-
-    BitBlt(destDC, 0, 0, w, h, srcDC, 0, 0, SRCCOPY);
-
-    SelectObject(srcDC, 0);
-    DeleteDC(srcDC);
-    SelectObject(destDC, 0);
-    DeleteDC(destDC);
 }
 
 // Construct a mask from a bitmap and a colour indicating
@@ -1526,13 +1517,13 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
 // ----------------------------------------------------------------------------
 
 bool wxBitmapHandler::Create(wxGDIImage *image,
-                             const void* data,
+                             void *data,
                              long flags,
                              int width, int height, int depth)
 {
     wxBitmap *bitmap = wxDynamicCast(image, wxBitmap);
 
-    return bitmap && Create(bitmap, data, flags, width, height, depth);
+    return bitmap ? Create(bitmap, data, flags, width, height, depth) : false;
 }
 
 bool wxBitmapHandler::Load(wxGDIImage *image,
@@ -1542,7 +1533,7 @@ bool wxBitmapHandler::Load(wxGDIImage *image,
 {
     wxBitmap *bitmap = wxDynamicCast(image, wxBitmap);
 
-    return bitmap && LoadFile(bitmap, name, flags, width, height);
+    return bitmap ? LoadFile(bitmap, name, flags, width, height) : false;
 }
 
 bool wxBitmapHandler::Save(wxGDIImage *image,
@@ -1551,11 +1542,11 @@ bool wxBitmapHandler::Save(wxGDIImage *image,
 {
     wxBitmap *bitmap = wxDynamicCast(image, wxBitmap);
 
-    return bitmap && SaveFile(bitmap, name, type);
+    return bitmap ? SaveFile(bitmap, name, type) : false;
 }
 
 bool wxBitmapHandler::Create(wxBitmap *WXUNUSED(bitmap),
-                             const void* WXUNUSED(data),
+                             void *WXUNUSED(data),
                              long WXUNUSED(type),
                              int WXUNUSED(width),
                              int WXUNUSED(height),

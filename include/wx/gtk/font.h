@@ -7,8 +7,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_FONT_H_
-#define _WX_GTK_FONT_H_
+#ifndef __GTKFONTH__
+#define __GTKFONTH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface
+#endif
+
+#include "wx/hash.h"
+
+// ----------------------------------------------------------------------------
+// classes
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxWindow;
+
+class WXDLLIMPEXP_CORE wxFont;
 
 // ----------------------------------------------------------------------------
 // wxFont
@@ -17,11 +33,15 @@
 class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
-    wxFont() { }
+    // ctors and such
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) : wxFontBase() { Init(); Ref(font); }
 
     // wxGTK-specific
     wxFont(const wxString& fontname)
     {
+        Init();
+
         Create(fontname);
     }
 
@@ -35,6 +55,8 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -49,7 +71,10 @@ public:
     // wxGTK-specific
     bool Create(const wxString& fontname);
 
-    virtual ~wxFont();
+    ~wxFont();
+
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -66,7 +91,7 @@ public:
     virtual void SetFamily( int family );
     virtual void SetStyle( int style );
     virtual void SetWeight( int weight );
-    virtual bool SetFaceName( const wxString& faceName );
+    virtual void SetFaceName( const wxString& faceName );
     virtual void SetUnderlined( bool underlined );
     virtual void SetEncoding(wxFontEncoding encoding);
 
@@ -76,6 +101,10 @@ public:
     // implementation from now on
     void Unshare();
 
+#ifndef __WXGTK20__
+    GdkFont* GetInternalFont(float scale = 1.0) const;
+#endif
+
     // no data :-)
 
 protected:
@@ -84,11 +113,8 @@ protected:
     // common part of all ctors
     void Init();
 
-    virtual wxObjectRefData* CreateRefData() const;
-    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
-
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 
-#endif // _WX_GTK_FONT_H_
+#endif // __GTKFONTH__

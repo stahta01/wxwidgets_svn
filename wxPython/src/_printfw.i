@@ -69,10 +69,8 @@ public:
     int GetNoCopies();
     bool GetCollate();
     int  GetOrientation();
-    bool IsOrientationReversed() const;
-    
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
+
+    bool Ok();
 
     const wxString& GetPrinterName();
     bool GetColour();
@@ -83,13 +81,11 @@ public:
     int GetQuality();
     wxPrintBin GetBin();
     wxPrintMode GetPrintMode() const;
-    int GetMedia() const;
     
     void SetNoCopies(int v);
     void SetCollate(bool flag);
     void SetOrientation(int orient);
-    void SetOrientationReversed(bool reversed);
-    
+
     void SetPrinterName(const wxString& name);
     void SetColour(bool colour);
     void SetDuplex(wxDuplexMode duplex);
@@ -98,12 +94,11 @@ public:
     void SetQuality(int quality);
     void SetBin(wxPrintBin bin);
     void SetPrintMode(wxPrintMode printMode);
-    void SetMedia(int media);
-    
+ 
     wxString GetFilename() const;
     void SetFilename( const wxString &filename );
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 
     //char* GetPrivData() const;
     //int GetPrivDataLen() const;
@@ -137,8 +132,6 @@ public:
     //       prepared to remove them...
     
     // PostScript-specific data
-// WXWIN_COMPATIBILITY_2_4
-#if 0
     const wxString& GetPrinterCommand();
     const wxString& GetPrinterOptions();
     const wxString& GetPreviewCommand();
@@ -157,21 +150,7 @@ public:
     void SetPrinterTranslateX(long x);
     void SetPrinterTranslateY(long y);
     void SetPrinterTranslation(long x, long y);
-#endif
 
-    %property(Bin, GetBin, SetBin, doc="See `GetBin` and `SetBin`");
-    %property(Collate, GetCollate, SetCollate, doc="See `GetCollate` and `SetCollate`");
-    %property(Colour, GetColour, SetColour, doc="See `GetColour` and `SetColour`");
-    %property(Duplex, GetDuplex, SetDuplex, doc="See `GetDuplex` and `SetDuplex`");
-    %property(Filename, GetFilename, SetFilename, doc="See `GetFilename` and `SetFilename`");
-    %property(NoCopies, GetNoCopies, SetNoCopies, doc="See `GetNoCopies` and `SetNoCopies`");
-    %property(Orientation, GetOrientation, SetOrientation, doc="See `GetOrientation` and `SetOrientation`");
-    %property(PaperId, GetPaperId, SetPaperId, doc="See `GetPaperId` and `SetPaperId`");
-    %property(PaperSize, GetPaperSize, SetPaperSize, doc="See `GetPaperSize` and `SetPaperSize`");
-    %property(PrintMode, GetPrintMode, SetPrintMode, doc="See `GetPrintMode` and `SetPrintMode`");
-    %property(PrinterName, GetPrinterName, SetPrinterName, doc="See `GetPrinterName` and `SetPrinterName`");
-    %property(PrivData, GetPrivData, SetPrivData, doc="See `GetPrivData` and `SetPrivData`");
-    %property(Quality, GetQuality, SetQuality, doc="See `GetQuality` and `SetQuality`");   
 };
 
 //---------------------------------------------------------------------------
@@ -206,8 +185,7 @@ public:
 
     wxPrintData& GetPrintData();
 
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
+    bool Ok();
 
     void SetDefaultInfo(bool flag);
     void SetDefaultMinMargins(bool flag);
@@ -227,25 +205,7 @@ public:
     // Use paper id in wxPrintData to set this object's paper size
     void CalculatePaperSizeFromId();
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-
-    %property(DefaultInfo, GetDefaultInfo, SetDefaultInfo, doc="See `GetDefaultInfo` and `SetDefaultInfo`");
-    %property(DefaultMinMargins, GetDefaultMinMargins, SetDefaultMinMargins, doc="See `GetDefaultMinMargins` and `SetDefaultMinMargins`");
-
-//     %property(EnableHelp, GetEnableHelp, doc="See `GetEnableHelp`");
-//     %property(EnableMargins, GetEnableMargins, doc="See `GetEnableMargins`");
-//     %property(EnableOrientation, GetEnableOrientation, doc="See `GetEnableOrientation`");
-//     %property(EnablePaper, GetEnablePaper, doc="See `GetEnablePaper`");
-//     %property(EnablePrinter, GetEnablePrinter, doc="See `GetEnablePrinter`");
-
-    %property(MarginBottomRight, GetMarginBottomRight, SetMarginBottomRight, doc="See `GetMarginBottomRight` and `SetMarginBottomRight`");
-    %property(MarginTopLeft, GetMarginTopLeft, SetMarginTopLeft, doc="See `GetMarginTopLeft` and `SetMarginTopLeft`");
-    %property(MinMarginBottomRight, GetMinMarginBottomRight, SetMinMarginBottomRight, doc="See `GetMinMarginBottomRight` and `SetMinMarginBottomRight`");
-    %property(MinMarginTopLeft, GetMinMarginTopLeft, SetMinMarginTopLeft, doc="See `GetMinMarginTopLeft` and `SetMinMarginTopLeft`");
-    %property(PaperId, GetPaperId, SetPaperId, doc="See `GetPaperId` and `SetPaperId`");
-    %property(PaperSize, GetPaperSize, SetPaperSize, doc="See `GetPaperSize` and `SetPaperSize`");
-    %property(PrintData, GetPrintData, SetPrintData, doc="See `GetPrintData` and `SetPrintData`");
-    
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 
@@ -260,17 +220,10 @@ class wxPageSetupDialog : public wxObject
 {
 public:
     wxPageSetupDialog(wxWindow* parent, wxPageSetupDialogData* data = NULL);
-    ~wxPageSetupDialog();
-    
+
     wxPageSetupDialogData& GetPageSetupData();
     wxPageSetupDialogData& GetPageSetupDialogData();
     int ShowModal();
-
-    %pythoncode { def Destroy(self): pass }
-
-    %property(PageSetupData, GetPageSetupData, doc="See `GetPageSetupData`");
-    %property(PageSetupDialogData, GetPageSetupDialogData, doc="See `GetPageSetupDialogData`");
-    
 };
 
 //---------------------------------------------------------------------------
@@ -295,10 +248,9 @@ public:
     bool GetPrintToFile() const;
 
     // WXWIN_COMPATIBILITY_2_4
-#if 0
     bool GetSetupDialog() const;
     void SetSetupDialog(bool flag);
-#endif
+
     void SetFromPage(int v);
     void SetToPage(int v);
     void SetMinPage(int v);
@@ -320,29 +272,13 @@ public:
     bool GetEnableHelp() const;
 
     // Is this data OK for showing the print dialog?
-    bool IsOk() const;
-    %pythoncode { Ok = IsOk }
+    bool Ok() const;
 
     
     wxPrintData& GetPrintData();
     void SetPrintData(const wxPrintData& printData);
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-    
-    %property(AllPages, GetAllPages, SetAllPages, doc="See `GetAllPages` and `SetAllPages`");
-    %property(Collate, GetCollate, SetCollate, doc="See `GetCollate` and `SetCollate`");
-//     %property(EnableHelp, GetEnableHelp, doc="See `GetEnableHelp`");
-//     %property(EnablePageNumbers, GetEnablePageNumbers, doc="See `GetEnablePageNumbers`");
-//     %property(EnablePrintToFile, GetEnablePrintToFile, doc="See `GetEnablePrintToFile`");
-//     %property(EnableSelection, GetEnableSelection, doc="See `GetEnableSelection`");
-    %property(FromPage, GetFromPage, SetFromPage, doc="See `GetFromPage` and `SetFromPage`");
-    %property(MaxPage, GetMaxPage, SetMaxPage, doc="See `GetMaxPage` and `SetMaxPage`");
-    %property(MinPage, GetMinPage, SetMinPage, doc="See `GetMinPage` and `SetMinPage`");
-    %property(NoCopies, GetNoCopies, SetNoCopies, doc="See `GetNoCopies` and `SetNoCopies`");
-    %property(PrintData, GetPrintData, SetPrintData, doc="See `GetPrintData` and `SetPrintData`");
-    %property(PrintToFile, GetPrintToFile, SetPrintToFile, doc="See `GetPrintToFile` and `SetPrintToFile`");
-    %property(Selection, GetSelection, SetSelection, doc="See `GetSelection` and `SetSelection`");
-    %property(ToPage, GetToPage, SetToPage, doc="See `GetToPage` and `SetToPage`");
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 
@@ -359,8 +295,6 @@ public:
     wxPrintDialog(wxWindow* parent, wxPrintDialogData* data = NULL);
 
     // TODO?: wxPrintDialog(wxWindow *parent, wxPrintData* data);
-
-    ~wxPrintDialog();
     
     virtual int ShowModal();
 
@@ -370,11 +304,6 @@ public:
     %newobject GetPrintDC;
     virtual wxDC *GetPrintDC();
 
-    %pythoncode { def Destroy(self): pass }
-    
-    %property(PrintDC, GetPrintDC, doc="See `GetPrintDC`");
-    %property(PrintData, GetPrintData, doc="See `GetPrintData`");
-    %property(PrintDialogData, GetPrintDialogData, doc="See `GetPrintDialogData`");
 };
 
 
@@ -408,9 +337,6 @@ public:
 
     bool GetAbort();
     static wxPrinterError GetLastError();
-
-    %property(Abort, GetAbort, doc="See `GetAbort`");
-    %property(PrintDialogData, GetPrintDialogData, doc="See `GetPrintDialogData`");
 };
 
 
@@ -463,6 +389,9 @@ void wxPyPrintout::GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *p
         wxPrintout::GetPageInfo(minPage, maxPage, pageFrom, pageTo);
 }
 
+void wxPyPrintout::base_GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo) {
+    wxPrintout::GetPageInfo(minPage, maxPage, pageFrom, pageTo);
+}
 
 
 IMP_PYCALLBACK_BOOL_INTINT(wxPyPrintout, wxPrintout, OnBeginDocument);
@@ -483,15 +412,11 @@ MustHaveApp(wxPyPrintout);
 %rename(Printout) wxPyPrintout;
 class wxPyPrintout  : public wxObject {
 public:
-    %pythonAppend wxPyPrintout   setCallbackInfo(Printout)
-    %typemap(out) wxPyPrintout*;    // turn off this typemap
+    %pythonAppend wxPyPrintout   "self._setCallbackInfo(self, Printout)"
 
     wxPyPrintout(const wxString& title = wxPyPrintoutTitleStr);
-    ~wxPyPrintout();      
+    //~wxPyPrintout();      wxPrintPreview object takes ownership...
     
-    // Turn it back on again
-    %typemap(out) wxPyPrintout* { $result = wxPyMake_wxObject($1, $owner); }
-
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
     
@@ -499,23 +424,6 @@ public:
     wxDC* GetDC();
     void SetDC(wxDC *dc);
 
-    
-    void FitThisSizeToPaper(const wxSize& imageSize);
-    void FitThisSizeToPage(const wxSize& imageSize);
-    void FitThisSizeToPageMargins(const wxSize& imageSize, const wxPageSetupDialogData& pageSetupData);
-    void MapScreenSizeToPaper();
-    void MapScreenSizeToPage();
-    void MapScreenSizeToPageMargins(const wxPageSetupDialogData& pageSetupData);
-    void MapScreenSizeToDevice();
-
-    wxRect GetLogicalPaperRect() const;
-    wxRect GetLogicalPageRect() const;
-    wxRect GetLogicalPageMarginsRect(const wxPageSetupDialogData& pageSetupData) const;
-
-    void SetLogicalOrigin(wxCoord x, wxCoord y);
-    void OffsetLogicalOrigin(wxCoord xoff, wxCoord yoff);
-
-    
     void SetPageSizePixels(int w, int  h);
     DocDeclA(
         void, GetPageSizePixels(int *OUTPUT, int *OUTPUT),
@@ -536,37 +444,19 @@ public:
         void, GetPPIPrinter(int *OUTPUT, int *OUTPUT),
         "GetPPIPrinter() -> (x,y)");
 
-    void SetPaperRectPixels(const wxRect& paperRectPixels);
-    wxRect GetPaperRectPixels() const;
-
     bool IsPreview();
     void SetIsPreview(bool p);
 
     
-    bool OnBeginDocument(int startPage, int endPage);
-    void OnEndDocument();
-    void OnBeginPrinting();
-    void OnEndPrinting();
-    void OnPreparePrinting();
-    bool HasPage(int page);
+    bool base_OnBeginDocument(int startPage, int endPage);
+    void base_OnEndDocument();
+    void base_OnBeginPrinting();
+    void base_OnEndPrinting();
+    void base_OnPreparePrinting();
+    bool base_HasPage(int page);
     DocDeclA(
-        void, GetPageInfo(int *OUTPUT, int *OUTPUT, int *OUTPUT, int *OUTPUT),
-        "GetPageInfo() -> (minPage, maxPage, pageFrom, pageTo)");
-    
-    %MAKE_BASE_FUNC(Printout, OnBeginDocument);
-    %MAKE_BASE_FUNC(Printout, OnEndDocument);
-    %MAKE_BASE_FUNC(Printout, OnBeginPrinting);
-    %MAKE_BASE_FUNC(Printout, OnEndPrinting);
-    %MAKE_BASE_FUNC(Printout, OnPreparePrinting);
-    %MAKE_BASE_FUNC(Printout, GetPageInfo);
-
-    
-    %property(DC, GetDC, SetDC, doc="See `GetDC` and `SetDC`");
-    %property(PPIPrinter, GetPPIPrinter, SetPPIPrinter, doc="See `GetPPIPrinter` and `SetPPIPrinter`");
-    %property(PPIScreen, GetPPIScreen, SetPPIScreen, doc="See `GetPPIScreen` and `SetPPIScreen`");
-    %property(PageSizeMM, GetPageSizeMM, SetPageSizeMM, doc="See `GetPageSizeMM` and `SetPageSizeMM`");
-    %property(PageSizePixels, GetPageSizePixels, SetPageSizePixels, doc="See `GetPageSizePixels` and `SetPageSizePixels`");
-    %property(Title, GetTitle, doc="See `GetTitle`");
+        void, base_GetPageInfo(int *OUTPUT, int *OUTPUT, int *OUTPUT, int *OUTPUT),
+        "base_GetPageInfo() -> (minPage, maxPage, pageFrom, pageTo)");
 };
 
 //---------------------------------------------------------------------------
@@ -593,24 +483,19 @@ MustHaveApp(wxPreviewFrame);
 
 class wxPreviewFrame : public wxFrame {
 public:
-    %disownarg(wxPrintPreview*);
-    
     %pythonAppend wxPreviewFrame   "self._setOORInfo(self)"
+
     wxPreviewFrame(wxPrintPreview* preview, wxFrame* parent, const wxString& title,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize&  size = wxDefaultSize,
                    long style = wxDEFAULT_FRAME_STYLE,
                    const wxString& name = wxPyFrameNameStr);
 
-    %cleardisown(wxPrintPreview*);
-
     void Initialize();
     void CreateControlBar();
     void CreateCanvas();
 
     wxPreviewControlBar* GetControlBar() const;
-
-    %property(ControlBar, GetControlBar, doc="See `GetControlBar`");
 };
 
 
@@ -659,9 +544,6 @@ public:
     void OnFirst();
     void OnLast();
     void OnGoto();
-
-    %property(PrintPreview, GetPrintPreview, doc="See `GetPrintPreview`");
-    %property(ZoomControl, GetZoomControl, SetZoomControl, doc="See `GetZoomControl` and `SetZoomControl`");    
 };
 
 
@@ -672,8 +554,6 @@ MustHaveApp(wxPrintPreview);
 
 class wxPrintPreview : public wxObject {
 public:
-    %disownarg(wxPyPrintout*);
-    
     %nokwargs wxPrintPreview;
     wxPrintPreview(wxPyPrintout* printout,
                    wxPyPrintout* printoutForPrinting,
@@ -682,8 +562,6 @@ public:
                   wxPyPrintout* printoutForPrinting,
                   wxPrintData* data);
 
-    ~wxPrintPreview();
-    
     virtual bool SetCurrentPage(int pageNum);
     int GetCurrentPage();
 
@@ -691,8 +569,6 @@ public:
     wxPyPrintout *GetPrintout();
     wxPyPrintout *GetPrintoutForPrinting();
 
-    %cleardisown(wxPyPrintout*);
-    
     void SetFrame(wxFrame *frame);
     void SetCanvas(wxPreviewCanvas *canvas);
 
@@ -719,24 +595,13 @@ public:
     int GetMaxPage();
     int GetMinPage();
 
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
+    bool Ok();
     void SetOk(bool ok);
 
     virtual bool Print(bool interactive);
     virtual void DetermineScaling();
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-    
-    %property(Canvas, GetCanvas, SetCanvas, doc="See `GetCanvas` and `SetCanvas`");
-    %property(CurrentPage, GetCurrentPage, SetCurrentPage, doc="See `GetCurrentPage` and `SetCurrentPage`");
-    %property(Frame, GetFrame, SetFrame, doc="See `GetFrame` and `SetFrame`");
-    %property(MaxPage, GetMaxPage, doc="See `GetMaxPage`");
-    %property(MinPage, GetMinPage, doc="See `GetMinPage`");
-    %property(PrintDialogData, GetPrintDialogData, doc="See `GetPrintDialogData`");
-    %property(Printout, GetPrintout, SetPrintout, doc="See `GetPrintout` and `SetPrintout`");
-    %property(PrintoutForPrinting, GetPrintoutForPrinting, doc="See `GetPrintoutForPrinting`");
-    %property(Zoom, GetZoom, SetZoom, doc="See `GetZoom` and `SetZoom`");
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 
@@ -748,14 +613,15 @@ public:
 %{
 
 #define DEC_PYCALLBACK_BOOL_PREWINDC(CBNAME)                                            \
-    bool CBNAME(wxPreviewCanvas* a, wxDC& b)
+    bool CBNAME(wxPreviewCanvas* a, wxDC& b);                                           \
+    bool base_##CBNAME(wxPreviewCanvas* a, wxDC& b)
 
 
 #define IMP_PYCALLBACK_BOOL_PREWINDC(CLASS, PCLASS, CBNAME)                             \
     bool CLASS::CBNAME(wxPreviewCanvas* a, wxDC& b) {                                   \
         bool rval=false;                                                                \
         bool found;                                                                     \
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();                                  \
+        wxPyBlock_t blocked = wxPyBeginBlockThreads();                                         \
         if ((found = wxPyCBH_findCallback(m_myInst, #CBNAME))) {                        \
             PyObject* win = wxPyMake_wxObject(a,false);                                 \
             PyObject* dc  = wxPyMake_wxObject(&b,false);                                \
@@ -767,7 +633,10 @@ public:
         if (! found)                                                                    \
             rval = PCLASS::CBNAME(a, b);                                                \
         return rval;                                                                    \
-    }                                       
+    }                                                                                   \
+    bool CLASS::base_##CBNAME(wxPreviewCanvas* a, wxDC& b) {                            \
+        return PCLASS::CBNAME(a, b);                                                    \
+    }
 
 
 
@@ -778,12 +647,12 @@ class wxPyPrintPreview : public wxPrintPreview
 public:
     wxPyPrintPreview(wxPyPrintout* printout,
                      wxPyPrintout* printoutForPrinting,
-                     wxPrintDialogData* data=NULL)
+                     wxPrintDialogData* data)
         : wxPrintPreview(printout, printoutForPrinting, data)
     {}
     wxPyPrintPreview(wxPyPrintout* printout,
                      wxPyPrintout* printoutForPrinting,
-                     wxPrintData* data)
+                     wxPrintData* data=NULL)
         : wxPrintPreview(printout, printoutForPrinting, data)
     {}
 
@@ -822,9 +691,7 @@ MustHaveApp(wxPyPrintPreview);
 class wxPyPrintPreview : public wxPrintPreview
 {
 public:
-    %disownarg(wxPyPrintout*);
-
-    %pythonAppend wxPyPrintPreview   setCallbackInfo(PyPrintPreview)
+    %pythonAppend wxPyPrintPreview   "self._setCallbackInfo(self, PyPrintPreview)"
     %nokwargs wxPyPrintPreview;
     wxPyPrintPreview(wxPyPrintout* printout,
                      wxPyPrintout* printoutForPrinting,
@@ -833,25 +700,15 @@ public:
                      wxPyPrintout* printoutForPrinting,
                      wxPrintData* data);
 
-    %cleardisown(wxPyPrintout*);
-    
     void _setCallbackInfo(PyObject* self, PyObject* _class);
     
-    bool SetCurrentPage(int pageNum);
-    bool PaintPage(wxPreviewCanvas *canvas, wxDC& dc);
-    bool DrawBlankPage(wxPreviewCanvas *canvas, wxDC& dc);
-    bool RenderPage(int pageNum);
-    void SetZoom(int percent);
-    bool Print(bool interactive);
-    void DetermineScaling();
-
-    %MAKE_BASE_FUNC(PyPrintPreview, SetCurrentPage);
-    %MAKE_BASE_FUNC(PyPrintPreview, PaintPage);
-    %MAKE_BASE_FUNC(PyPrintPreview, DrawBlankPage);
-    %MAKE_BASE_FUNC(PyPrintPreview, RenderPage);
-    %MAKE_BASE_FUNC(PyPrintPreview, SetZoom);
-    %MAKE_BASE_FUNC(PyPrintPreview, Print);
-    %MAKE_BASE_FUNC(PyPrintPreview, DetermineScaling);
+    bool base_SetCurrentPage(int pageNum);
+    bool base_PaintPage(wxPreviewCanvas *canvas, wxDC& dc);
+    bool base_DrawBlankPage(wxPreviewCanvas *canvas, wxDC& dc);
+    bool base_RenderPage(int pageNum);
+    void base_SetZoom(int percent);
+    bool base_Print(bool interactive);
+    void base_DetermineScaling();
 };
 
 
@@ -894,8 +751,7 @@ MustHaveApp(wxPyPreviewFrame);
 class wxPyPreviewFrame : public wxPreviewFrame
 {
 public:
-    %disownarg(wxPrintPreview*);
-    %pythonAppend wxPyPreviewFrame "self._setOORInfo(self);" setCallbackInfo(PyPreviewFrame) 
+    %pythonAppend wxPyPreviewFrame "self._setCallbackInfo(self, PyPreviewFrame); self._setOORInfo(self)"
 
     wxPyPreviewFrame(wxPrintPreview* preview, wxFrame* parent,
                      const wxString& title,
@@ -909,13 +765,9 @@ public:
     void SetPreviewCanvas(wxPreviewCanvas* canvas);
     void SetControlBar(wxPreviewControlBar* bar);
 
-    void Initialize();
-    void CreateCanvas();
-    void CreateControlBar();
-
-    %MAKE_BASE_FUNC(PyPreviewFrame, Initialize);
-    %MAKE_BASE_FUNC(PyPreviewFrame, CreateCanvas);
-    %MAKE_BASE_FUNC(PyPreviewFrame, CreateControlBar);
+    void base_Initialize();
+    void base_CreateCanvas();
+    void base_CreateControlBar();
 };
 
 
@@ -955,7 +807,7 @@ MustHaveApp(wxPyPreviewControlBar);
 class wxPyPreviewControlBar : public wxPreviewControlBar
 {
 public:
-    %pythonAppend wxPyPreviewControlBar   "self._setOORInfo(self);" setCallbackInfo(PyPreviewControlBar)
+    %pythonAppend wxPyPreviewControlBar   "self._setCallbackInfo(self, PyPreviewControlBar); self._setOORInfo(self)"
 
     wxPyPreviewControlBar(wxPrintPreview *preview,
                           long buttons,
@@ -969,11 +821,8 @@ public:
 
     void SetPrintPreview(wxPrintPreview* preview);
 
-    void CreateButtons();
-    void SetZoomControl(int zoom);
-
-    %MAKE_BASE_FUNC(PreviewControlBar, CreateButtons);
-    %MAKE_BASE_FUNC(PreviewControlBar, SetZoomControl);
+    void base_CreateButtons();
+    void base_SetZoomControl(int zoom);
 };
 
 //---------------------------------------------------------------------------

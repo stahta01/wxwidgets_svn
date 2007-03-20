@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------------------
-// Name:        DlgUser.cpp
+// Name:        DlgUser.h,cpp
 // Purpose:     Dialog mit Variable Gestaltung durch DlgUser.wxr
 // Author:      Mark Johnson
 // Modified by: 19991105.mj10777
@@ -8,7 +8,13 @@
 // Licence:     wxWindows license
 // RCS-ID:      $Id$
 //----------------------------------------------------------------------------------------
-
+//-- all #ifdefs that the whole Project needs. -------------------------------------------
+//----------------------------------------------------------------------------------------
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+//----------------------------------------------------------------------------------------
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 //----------------------------------------------------------------------------------------
@@ -124,13 +130,23 @@ void DlgUser::OnInit()
 //----------------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DlgUser, wxDialog)
     EVT_BUTTON(wxID_OK, DlgUser::OnOk)
+    EVT_BUTTON(wxID_CANCEL, DlgUser::OnCancel)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------------------------
 void DlgUser::OnOk(wxCommandEvent& WXUNUSED(event) )
 {
+    //canceled = false;
     s_User    = m_UserName->GetValue();
     s_Password = m_Password->GetValue();
     EndModal(wxID_OK);
 }
+
+//----------------------------------------------------------------------------------------
+//void DlgUser::OnCancel(wxCommandEvent& WXUNUSED(event) )
+// {
+//   canceled = true;
+//   EndModal(wxID_CANCEL);
+// }
+//----------------------------------------------------------------------------------------
 

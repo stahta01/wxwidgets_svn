@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/memory.cpp
+// Name:        memory.cpp
 // Purpose:     Memory checking implementation
 // Author:      Arthur Seaton, Julian Smart
 // Modified by:
@@ -9,31 +9,38 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "memory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/defs.h"
 #endif
 
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
 
-#include "wx/memory.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+// #pragma implementation
+#endif
 
 #ifndef WX_PRECOMP
-    #ifdef __WXMSW__
-        #include "wx/msw/wrapwin.h"
-    #endif
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/hash.h"
-    #include "wx/log.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/hash.h"
 #endif
 
 #if wxUSE_THREADS
-    #include "wx/thread.h"
+#include "wx/thread.h"
 #endif
 
+#include "wx/log.h"
 #include <stdlib.h>
 
 #include "wx/ioswrap.h"
@@ -45,6 +52,21 @@
 
 #include <stdarg.h>
 #include <string.h>
+
+#ifdef __WXMSW__
+#include "wx/msw/wrapwin.h"
+
+#ifdef GetClassInfo
+#undef GetClassInfo
+#endif
+
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
+#endif
+
+#include "wx/memory.h"
 
 #if wxUSE_THREADS && defined(__WXDEBUG__)
 #define USE_THREADSAFE_MEMORY_ALLOCATION 1
@@ -893,11 +915,10 @@ private:
 
 static MemoryCriticalSection memLocker;
 
-#endif // USE_THREADSAFE_MEMORY_ALLOCATION
+#endif
 
-
-#ifdef __WXDEBUG__
 #if !(defined(__WXMSW__) && (defined(WXUSINGDLL) || defined(WXMAKINGDLL_BASE)))
+#ifdef __WXDEBUG__
 #if wxUSE_GLOBAL_MEMORY_OPERATORS
 void * operator new (size_t size, wxChar * fileName, int lineNum)
 {
@@ -930,8 +951,8 @@ void operator delete[] (void * buf)
   wxDebugFree(buf, true);
 }
 #endif // wxUSE_ARRAY_MEMORY_OPERATORS
-#endif // wxUSE_GLOBAL_MEMORY_OPERATORS
 #endif // !(defined(__WXMSW__) && (defined(WXUSINGDLL) || defined(WXMAKINGDLL_BASE)))
+#endif // wxUSE_GLOBAL_MEMORY_OPERATORS
 
 // TODO: store whether this is a vector or not.
 void * wxDebugAlloc(size_t size, wxChar * fileName, int lineNum, bool isObject, bool WXUNUSED(isVect) )
@@ -1146,3 +1167,4 @@ void wxDebugContextDumpDelayCounter::DoDump()
 static wxDebugContextDumpDelayCounter wxDebugContextDumpDelayCounter_One;
 
 #endif // (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+

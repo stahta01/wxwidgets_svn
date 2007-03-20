@@ -41,10 +41,6 @@ public:
 
     void OnCloseWindow(wxCloseEvent& event);
     void OnReparent(wxCommandEvent& event);
-    void OnSetSize_150_150(wxCommandEvent &event);
-    void OnSetSize_200_200(wxCommandEvent &event);
-    void OnSetMaxSize_150_150(wxCommandEvent &event);
-    void OnSetMaxSize_300_300(wxCommandEvent &event);
     
 DECLARE_EVENT_TABLE()
 };

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imaggif.cpp
+// Name:        imaggif.cpp
 // Purpose:     wxGIFHandler
 // Author:      Vaclav Slavik & Guillermo Rodriguez Garcia
 // RCS-ID:      $Id$
@@ -7,23 +7,28 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imaggif.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#  pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#  include "wx/defs.h"
 #endif
 
 #if wxUSE_IMAGE && wxUSE_GIF
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
 #include "wx/imaggif.h"
 #include "wx/gifdecod.h"
 #include "wx/wfstream.h"
+#include "wx/log.h"
+#include "wx/intl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxGIFHandler,wxImageHandler)
 
@@ -37,12 +42,12 @@ bool wxGIFHandler::LoadFile(wxImage *image, wxInputStream& stream,
                             bool verbose, int index)
 {
     wxGIFDecoder *decod;
-    wxGIFErrorCode error;
+    int error;
     bool ok = true;
 
 //    image->Destroy();
-    decod = new wxGIFDecoder();
-    error = decod->LoadGIF(stream);
+    decod = new wxGIFDecoder(&stream, true);
+    error = decod->ReadGIF();
 
     if ((error != wxGIF_OK) && (error != wxGIF_TRUNCATED))
     {
@@ -71,9 +76,24 @@ bool wxGIFHandler::LoadFile(wxImage *image, wxInputStream& stream,
         /* go on; image data is OK */
     }
 
+    if (index != -1)
+    {
+        // We're already on index = 0 by default. So no need
+        // to call GoFrame(0) then. On top of that GoFrame doesn't
+        // accept an index of 0. (Instead GoFirstFrame() should be used)
+        // Also if the gif image has only one frame, calling GoFrame(0)
+        // fails because GoFrame() only works with gif animations.
+        // (It fails if IsAnimation() returns false)
+        // All valid reasons to NOT call GoFrame when index equals 0.
+        if (index != 0)
+        {
+            ok = decod->GoFrame(index);
+        }
+    }
+
     if (ok)
     {
-        ok = decod->ConvertToImage(index != -1 ? (size_t)index : 0, image);
+        ok = decod->ConvertToImage(image);
     }
     else
     {
@@ -96,8 +116,8 @@ bool wxGIFHandler::SaveFile( wxImage * WXUNUSED(image),
 
 bool wxGIFHandler::DoCanRead( wxInputStream& stream )
 {
-    wxGIFDecoder decod;
-    return decod.CanRead(stream);
+    wxGIFDecoder decod(&stream);
+    return decod.CanRead();
 }
 
 #endif  // wxUSE_STREAMS

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/toplevel.cpp
+// Name:        os2/toplevel.cpp
 // Purpose:     implements wxTopLevelWindow for OS/2
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "toplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,9 @@
     #pragma hdrstop
 #endif
 
-#include "wx/toplevel.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/toplevel.h"
     #include "wx/dialog.h"
     #include "wx/string.h"
     #include "wx/log.h"
@@ -36,9 +39,9 @@
     #include "wx/control.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
     #include "wx/settings.h"
-    #include "wx/module.h"        // wxSetFocusToChild()
 #endif //WX_PRECOMP
 
+#include "wx/module.h"        // wxSetFocusToChild()
 #include "wx/os2/private.h"
 
 // ----------------------------------------------------------------------------
@@ -51,10 +54,11 @@
 // ----------------------------------------------------------------------------
 
 // the name of the default wxWidgets class
-extern void wxAssociateWinWithHandle( HWND hWnd, wxWindowOS2* pWin );
-
-bool wxTopLevelWindowOS2::m_sbInitialized = false;
-wxWindow* wxTopLevelWindowOS2::m_spHiddenParent = NULL;
+extern void          wxAssociateWinWithHandle( HWND         hWnd
+                                              ,wxWindowOS2* pWin
+                                             );
+bool                 wxTopLevelWindowOS2::m_sbInitialized = false;
+wxWindow*            wxTopLevelWindowOS2::m_spHiddenParent = NULL;
 
 // ============================================================================
 // wxTopLevelWindowOS2 implementation
@@ -116,12 +120,12 @@ private:
     //
     // The HWND of the hidden parent
     //
-    static HWND m_shWnd;
+    static HWND                     m_shWnd;
 
     //
     // The class used to create it
     //
-    static const wxChar* m_szClassName;
+    static const wxChar*            m_szClassName;
     DECLARE_DYNAMIC_CLASS(wxTLWHiddenParentModule)
 }; // end of CLASS wxTLWHiddenParentModule
 
@@ -235,7 +239,7 @@ WXDWORD wxTopLevelWindowOS2::OS2GetStyle(
         lMsflags |= FCF_MINBUTTON;
     if (lStyle & wxMAXIMIZE_BOX)
         lMsflags |= FCF_MAXBUTTON;
-    if (lStyle & wxRESIZE_BORDER)
+    if (lStyle & wxTHICK_FRAME)
         lMsflags |= FCF_DLGBORDER;
     if (lStyle & wxSYSTEM_MENU)
         lMsflags |= FCF_SYSMENU;
@@ -251,7 +255,7 @@ WXDWORD wxTopLevelWindowOS2::OS2GetStyle(
     if (lStyle & wxTINY_CAPTION_HORIZ)
         lMsflags |= FCF_TASKLIST;
 
-    if ((lStyle & wxRESIZE_BORDER) == 0)
+    if ((lStyle & wxTHICK_FRAME) == 0)
         lMsflags |= FCF_BORDER;
     if (lStyle & wxFRAME_TOOL_WINDOW)
         *pdwExflags = kFrameToolWindow;
@@ -439,24 +443,26 @@ bool wxTopLevelWindowOS2::CreateDialog( ULONG           ulDlgTemplate,
     return true;
 } // end of wxTopLevelWindowOS2::CreateDialog
 
-bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
-                                       const wxPoint& rPos,
-                                       const wxSize& rSize )
+bool wxTopLevelWindowOS2::CreateFrame(
+  const wxString&                   rsTitle
+, const wxPoint&                    rPos
+, const wxSize&                     rSize
+)
 {
-    WXDWORD    lExflags;
-    WXDWORD    lFlags = OS2GetCreateWindowFlags(&lExflags);
-    long       lStyle = GetWindowStyleFlag();
-    int        nX = rPos.x;
-    int        nY = rPos.y;
-    int        nWidth = rSize.x;
-    int        nHeight = rSize.y;
-    ULONG      ulStyleFlags = 0L;
-    ERRORID    vError;
-    wxString   sError;
-    wxWindow*  pParent = GetParent();
-    HWND       hParent;
-    HWND       hFrame;
-    HWND       hClient;
+    WXDWORD                         lExflags;
+    WXDWORD                         lFlags = OS2GetCreateWindowFlags(&lExflags);
+    long                            lStyle = GetWindowStyleFlag();
+    int                             nX = rPos.x;
+    int                             nY = rPos.y;
+    int                             nWidth = rSize.x;
+    int                             nHeight = rSize.y;
+    ULONG                           ulStyleFlags = 0L;
+    ERRORID                         vError;
+    wxString                        sError;
+    wxWindow*                       pParent = GetParent();
+    HWND                            hParent;
+    HWND                            hFrame;
+    HWND                            hClient;
 
     if (pParent)
         hParent = GetHwndOf(pParent);
@@ -541,9 +547,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
                                   ,nWidth
                                   ,nHeight
                                  ))
-    {
         nX = nWidth = (int)CW_USEDEFAULT;
-    }
 
     //
     // We can't use CW_USEDEFAULT here as we're not calling CreateWindow()
@@ -553,7 +557,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     //
     if (nWidth == (int)CW_USEDEFAULT)
     {
-       //
+        //
         // The exact number doesn't matter, the dialog will be resized
         // again soon anyhow but it should be big enough to allow
         // calculation relying on "totalSize - clientSize > 0" work, i.e.
@@ -747,10 +751,12 @@ void wxTopLevelWindowOS2::DoShowWindow(
     m_bIconized = nShowCmd == SWP_MINIMIZE;
 } // end of wxTopLevelWindowOS2::DoShowWindow
 
-bool wxTopLevelWindowOS2::Show( bool bShow )
+bool wxTopLevelWindowOS2::Show(
+  bool                              bShow
+)
 {
-    int nShowCmd;
-    SWP vSwp;
+    int                             nShowCmd;
+    SWP                             vSwp;
 
     if (bShow != IsShown() )
     {
@@ -780,14 +786,14 @@ bool wxTopLevelWindowOS2::Show( bool bShow )
 
     if (bShow)
     {
-        wxActivateEvent vEvent(wxEVT_ACTIVATE, true, m_windowId);
+        wxActivateEvent             vEvent(wxEVT_ACTIVATE, true, m_windowId);
 
         ::WinQueryWindowPos(m_hFrame, &vSwp);
         m_bIconized = ( vSwp.fl & SWP_MINIMIZE ) == SWP_MINIMIZE ;
         ::WinQueryWindowPos(m_hWnd, &m_vSwpClient);
         ::WinSendMsg(m_hFrame, WM_UPDATEFRAME, (MPARAM)~0, 0);
         ::WinQueryWindowPos(m_hWnd, &vSwp);
-        ::WinEnableWindow(m_hFrame, TRUE);
+        ::WinEnableWindow(m_hFrame, true);
 
         vEvent.SetEventObject(this);
         GetEventHandler()->ProcessEvent(vEvent);
@@ -799,7 +805,7 @@ bool wxTopLevelWindowOS2::Show( bool bShow )
         //
         if (GetParent())
         {
-            HWND hWndParent = GetHwndOf(GetParent());
+            HWND                    hWndParent = GetHwndOf(GetParent());
 
             ::WinQueryWindowPos(hWndParent, &vSwp);
             m_bIconized = (vSwp.fl & SWP_MINIMIZE)==SWP_MINIMIZE;
@@ -840,17 +846,9 @@ bool wxTopLevelWindowOS2::IsMaximized() const
     return (m_vSwp.fl & SWP_MAXIMIZE) == SWP_MAXIMIZE;
 } // end of wxTopLevelWindowOS2::IsMaximized
 
-void wxTopLevelWindowOS2::SetTitle( const wxString& title)
-{
-    SetLabel(title);
-}
-
-wxString wxTopLevelWindowOS2::GetTitle() const
-{
-    return GetLabel();
-}
-
-void wxTopLevelWindowOS2::Iconize( bool bIconize )
+void wxTopLevelWindowOS2::Iconize(
+  bool                              bIconize
+)
 {
     DoShowWindow(bIconize ? SWP_MINIMIZE : SWP_RESTORE);
 } // end of wxTopLevelWindowOS2::Iconize
@@ -1028,12 +1026,14 @@ void wxTopLevelWindowOS2::SetIcons(
     }
 } // end of wxTopLevelWindowOS2::SetIcon
 
-bool wxTopLevelWindowOS2::EnableCloseButton( bool bEnable )
+bool wxTopLevelWindowOS2::EnableCloseButton(
+  bool                              bEnable
+)
 {
     //
     // Get system (a.k.a. window) menu
     //
-    HMENU hMenu = ::WinWindowFromID(m_hFrame, FID_SYSMENU);
+    HMENU                           hMenu = ::WinWindowFromID(m_hFrame, FID_SYSMENU);
 
     if (!hMenu)
     {
@@ -1120,19 +1120,20 @@ HWND wxTLWHiddenParentModule::GetHWND()
                 m_szClassName = zHIDDEN_PARENT_CLASS;
             }
         }
-        m_shWnd = ::WinCreateWindow( HWND_DESKTOP,
-                                     (PSZ)m_szClassName,
-                                     "",
-                                     0L,
-                                     (LONG)0L,
-                                     (LONG)0L,
-                                     (LONG)0L,
-                                     (LONG)0L,
-                                     NULLHANDLE,
-                                     HWND_TOP,
-                                     0L,
-                                     NULL,
-                                     NULL );
+        m_shWnd = ::WinCreateWindow( HWND_DESKTOP
+                                    ,(PSZ)m_szClassName
+                                    ,""
+                                    ,0L
+                                    ,(LONG)0L
+                                    ,(LONG)0L
+                                    ,(LONG)0L
+                                    ,(LONG)0L
+                                    ,NULLHANDLE
+                                    ,HWND_TOP
+                                    ,0L
+                                    ,NULL
+                                    ,NULL
+                                   );
         if (!m_shWnd)
         {
             wxLogLastError(_T("CreateWindow(hidden TLW parent)"));

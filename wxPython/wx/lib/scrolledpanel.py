@@ -38,7 +38,7 @@ class ScrolledPanel( wx.PyScrolledWindow ):
         wx.PyScrolledWindow.__init__(self, parent, id,
                                      pos=pos, size=size,
                                      style=style, name=name)
-        self.SetInitialSize(size)
+        self.SetBestFittingSize(size)
         self.Bind(wx.EVT_CHILD_FOCUS, self.OnChildFocus)
 
 
@@ -94,6 +94,7 @@ class ScrolledPanel( wx.PyScrolledWindow ):
         if cr.y < 0 and sppu_y > 0:
             new_vs_y = vs_y + (cr.y / sppu_y)
 
+
         # For the right and bottom edges, scroll enough to show the
         # whole control if possible, but if not just scroll such that
         # the top/left edges are still visible
@@ -113,6 +114,7 @@ class ScrolledPanel( wx.PyScrolledWindow ):
                 new_vs_y = vs_y + diff + 1
             else:
                 new_vs_y = vs_y + (cr.y / sppu_y)
+
 
         # if we need to adjust
         if new_vs_x != -1 or new_vs_y != -1:

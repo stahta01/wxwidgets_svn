@@ -9,7 +9,8 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-#include "wx/stream.h"
+#include <wx/defs.h>
+#include <wx/stream.h>
 #endif
 
 #include "wx/mmedia/sndbase.h"

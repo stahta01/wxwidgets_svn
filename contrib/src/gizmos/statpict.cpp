@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+  #pragma implementation "statpict.h"
+#endif
+
 #include "wx/wxprec.h"
 #include "wx/defs.h"
 
@@ -67,7 +71,7 @@ bool wxStaticPicture::Create(wxWindow *parent, wxWindowID id,
 
     bool ret = wxControl::Create( parent, id, pos, size, style, wxDefaultValidator, name );
 
-    SetInitialSize( size ) ;
+    SetBestSize( size ) ;
 
     return ret;
 }
@@ -89,6 +93,7 @@ void wxStaticPicture::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     wxPaintDC dc( this );
     PrepareDC( dc );
+    dc.BeginDrawing();
 
     wxSize sz = GetSize();
     wxSize bmpsz( Bitmap.GetWidth(), Bitmap.GetHeight() );
@@ -144,5 +149,7 @@ void wxStaticPicture::OnPaint(wxPaintEvent& WXUNUSED(event))
     }
     else
         dc.DrawBitmap( Bitmap, pos.x, pos.y );
+
+    dc.EndDrawing();
 }
 

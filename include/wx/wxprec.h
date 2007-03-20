@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wxprec.h
+// Name:        wxprec.h
 // Purpose:     Includes the appropriate files for precompiled headers
 // Author:      Julian Smart
 // Modified by:
@@ -14,13 +14,13 @@
 
 // check if to use precompiled headers: do it for most Windows compilers unless
 // explicitly disabled by defining NOPCH
-#if defined(__VISUALC__)   || \
-    defined(__DMC__)       || \
-    defined(__VISAGECPP__) || \
-    defined(__MWERKS__)    || \
-    defined(__WATCOMC__)   || \
-    defined(__BORLANDC__)
-         
+#if ( defined(__WXMSW__) && \
+       ( defined(__BORLANDC__)    || \
+         defined(__VISUALC__)     || \
+         defined(__DIGITALMARS__) || \
+         defined(__WATCOMC__) ) ) || \
+      defined(__VISAGECPP__) || \
+      defined(__MWERKS__)
 
     // If user did not request NOCPH and we're not building using configure
     // then assume user wants precompiled headers.
@@ -36,32 +36,18 @@
 
 #ifdef WX_PRECOMP
 
-// include "wx/chartype.h" first to ensure that UNICODE macro is correctly set
+// include <wx/wxchar.h> first to ensure that UNICODE macro is correctly set
 // _before_ including <windows.h>
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
 // include standard Windows headers
 #if defined(__WXMSW__)
     #include "wx/msw/wrapwin.h"
-    #include "wx/msw/wrapcctl.h"
-    #include "wx/msw/wrapcdlg.h"
-    #include "wx/msw/private.h"
-    #include "wx/msw/missing.h"
 #endif
 
 // include all PalmOS headers at once
 #ifdef __WXPALMOS__
 #   include <PalmOS.h>
-#endif
-
-// include <os2.h>
-#ifdef __OS2__
-#   include "wx/os2/private.h"
-#endif
-
-// include mgl headers
-#ifdef __WXMGL__
-#   include "wx/mgl/private.h"
 #endif
 
 // include the most common wx headers

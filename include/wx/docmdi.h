@@ -12,6 +12,10 @@
 #ifndef _WX_DOCMDI_H_
 #define _WX_DOCMDI_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "docmdi.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_MDI_ARCHITECTURE
@@ -65,7 +69,7 @@ public:
     wxDocMDIChildFrame(wxDocument *doc, wxView *view, wxMDIParentFrame *frame, wxWindowID id,
         const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
         long type = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
-    virtual ~wxDocMDIChildFrame();
+    ~wxDocMDIChildFrame();
 
     bool Create(wxDocument *doc,
                 wxView *view,

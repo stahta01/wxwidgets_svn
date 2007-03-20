@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/effects.h
+// Name:        effects.h
 // Purpose:     wxEffects class
 //              Draws 3D effects.
 // Author:      Julian Smart et al
@@ -13,14 +13,13 @@
 #ifndef _WX_EFFECTS_H_
 #define _WX_EFFECTS_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "effects.h"
+#endif
+
 /*
  * wxEffects: various 3D effects
  */
-
-#include "wx/object.h"
-#include "wx/colour.h"
-#include "wx/gdicmn.h"
-#include "wx/dc.h"
 
 class WXDLLEXPORT wxEffects: public wxObject
 {
@@ -62,7 +61,7 @@ public:
     void DrawSunkenEdge(wxDC& dc, const wxRect& rect, int borderSize = 1);
 
     // Tile a bitmap
-    bool TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap);
+    bool TileBitmap(const wxRect& rect, wxDC& dc, wxBitmap& bitmap);
 
 protected:
     wxColour    m_highlightColour;  // Usually white
@@ -73,3 +72,4 @@ protected:
 };
 
 #endif
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/metafile.cpp
+// Name:        msw/metafile.cpp
 // Purpose:     wxMetafileDC etc.
 // Author:      Julian Smart
 // Modified by: VZ 07.01.00: implemented wxMetaFileDataObject
@@ -17,11 +17,19 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "metafile.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+    #include "wx/setup.h"
 #endif
 
 #ifndef WX_PRECOMP
@@ -122,6 +130,8 @@ bool wxMetafile::Play(wxDC *dc)
     if (!m_refData)
         return false;
 
+    dc->BeginDrawing();
+
     if (dc->GetHDC() && M_METAFILEDATA->m_metafile)
     {
         if ( !::PlayMetaFile(GetHdcOf(*dc), (HMETAFILE)
@@ -130,6 +140,8 @@ bool wxMetafile::Play(wxDC *dc)
             wxLogLastError(_T("PlayMetaFile"));
         }
     }
+
+    dc->EndDrawing();
 
     return true;
 }
@@ -189,7 +201,7 @@ wxMetafileDC::wxMetafileDC(const wxString& file, int xext, int yext, int xorg, i
     m_minY = 10000;
     m_maxX = -10000;
     m_maxY = -10000;
-    if ( !file.empty() && wxFileExists(file) )
+    if ( !file.IsEmpty() && wxFileExists(file) )
         wxRemoveFile(file);
     m_hDC = (WXHDC) CreateMetaFile(file.empty() ? NULL : file.c_str());
 
@@ -233,16 +245,6 @@ void wxMetafileDC::GetTextExtent(const wxString& string, long *x, long *y,
         *descent = tm.tmDescent;
     if ( externalLeading )
         *externalLeading = tm.tmExternalLeading;
-}
-
-void wxMetafileDC::DoGetSize(int *width, int *height) const
-{
-    wxCHECK_RET( m_refData, _T("invalid wxMetafileDC") );
-
-    if ( width )
-        *width = M_METAFILEDATA->m_width;
-    if ( height )
-        *height = M_METAFILEDATA->m_height;
 }
 
 wxMetafile *wxMetafileDC::Close()
@@ -513,3 +515,4 @@ bool wxMetafileDataObject::SetData(size_t WXUNUSED(len), const void *buf)
 #endif // wxUSE_DRAG_AND_DROP
 
 #endif // wxUSE_METAFILE
+

@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/timer.cpp
+// Name:        mgl/timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "timer.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -20,14 +24,12 @@
 //     is in wxEventLoop::Dispatch().
 // ----------------------------------------------------------------------------
 
-#if wxUSE_TIMER
-
 #include "wx/timer.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/module.h"
-#endif
+#if wxUSE_TIMER
+
+#include "wx/log.h"
+#include "wx/module.h"
 
 // ----------------------------------------------------------------------------
 // Time input function

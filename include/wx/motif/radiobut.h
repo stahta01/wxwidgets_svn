@@ -1,23 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/radiobut.h
+// Name:        radiobut.h
 // Purpose:     wxRadioButton class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "radiobut.h"
+#endif
 
 class WXDLLEXPORT wxRadioButton: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxRadioButton)
 public:
     wxRadioButton();
-    virtual ~wxRadioButton() { RemoveFromCycle(); }
+    ~wxRadioButton() { RemoveFromCycle(); }
 
     inline wxRadioButton(wxWindow *parent, wxWindowID id,
         const wxString& label,
@@ -28,19 +32,19 @@ public:
     {
         Create(parent, id, label, pos, size, style, validator, name);
     }
-
+    
     bool Create(wxWindow *parent, wxWindowID id,
         const wxString& label,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxRadioButtonNameStr);
-
+    
     virtual void SetValue(bool val);
     virtual bool GetValue() const ;
-
+    
     void Command(wxCommandEvent& event);
-
+    
     // Implementation
     virtual void ChangeBackgroundColour();
 

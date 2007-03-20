@@ -86,8 +86,6 @@ This does not affect the compiler output, so you still need to make sure
 your environment is set up appropriately with the correct compiler in the
 PATH. Rather it affects some options passed to some of the common build
 utilities such as the resource compiler and the linker.
-
-Accepted values: AMD64, IA64.
             </description>
         </option>
     </if>
@@ -98,8 +96,8 @@ Accepted values: AMD64, IA64.
     <!-- FIXME: restore this once bakefile is fixed to not use
                 /Gm /GZ (incompatible with /O2) w/ debug-info -->
     <set var="DEBUG_INFO_DEFAULT">
-        <if cond="FORMAT in ['msvc','msvc6prj','msevc4prj','msvs2005prj']">1</if>
-        <if cond="FORMAT not in ['msvc','msvc6prj','msevc4prj','msvs2005prj']">default</if>
+        <if cond="FORMAT in ['msvc','msvc6prj','msevc4prj']">1</if>
+        <if cond="FORMAT not in ['msvc','msvc6prj','msevc4prj']">default</if>
     </set>
     -->
     <set var="DEBUG_INFO_DEFAULT">default</set>
@@ -181,35 +179,11 @@ Acts according to BUILD by default.
         </description>
     </option>
 
-    <option name="USE_MEDIA">
-        <values>0,1</values>
-        <default-value>1</default-value>
-        <description>
-            Build multimedia library (USE_GUI must be 1)?
-        </description>
-    </option>
-
     <option name="USE_XRC">
         <values>0,1</values>
         <default-value>1</default-value>
         <description>
             Build wxXRC library (USE_GUI must be 1)?
-        </description>
-    </option>
-
-    <option name="USE_AUI">
-        <values>0,1</values>
-        <default-value>1</default-value>
-        <description>
-            Build wxAUI library (USE_GUI must be 1)?
-        </description>
-    </option>
-
-    <option name="USE_RICHTEXT">
-        <values>0,1</values>
-        <default-value>1</default-value>
-        <description>
-            Build wxRichTextCtrl library (USE_GUI must be 1)?
         </description>
     </option>
 
@@ -229,14 +203,9 @@ Acts according to BUILD by default.
         </description>
     </option>
 
-    <!-- currently only VC++ can compile wxDebugReport which is in QA lib -->
-    <set var="USE_QA_DEFAULT">
-        <if cond="FORMAT in ['msvc','msvc6prj','msvs2005prj']">1</if>
-        <if cond="FORMAT not in ['msvc','msvc6prj','msvs2005prj']">0</if>
-    </set>
     <option name="USE_QA">
         <values>0,1</values>
-        <default-value>$(USE_QA_DEFAULT)</default-value>
+        <default-value>0</default-value>
         <description>
             Build quality assurance classes library (USE_GUI must be 1)?
         </description>
@@ -265,16 +234,6 @@ Acts according to BUILD by default.
             Enable threading in compiled code.
         </description>
     </option>
-
-    <if cond="FORMAT!='autoconf'">
-        <option name="USE_GDIPLUS">
-            <values>0,1</values>
-            <default-value>0</default-value>
-            <description>
-                Link with gdiplus.lib? (Needed for wxGraphicsContext, will also set wxUSE_GRAPHICS_CONTEXT)
-            </description>
-	</option>
-    </if>
 
     <option name="OFFICIAL_BUILD">
         <values>0,1</values>
@@ -355,8 +314,6 @@ to run the tests, include CppUnit library here.
         <option name="WITH_PLUGIN_SDL">
             <values>0,1</values>
         </option>
-
-        <option name="wx_top_builddir"/>
     </if>
 
 
@@ -380,7 +337,7 @@ it if SHARED=1 unless you know what you are doing.
         <set var="TOOLKIT" overwrite="0">
             <if cond="FORMAT=='msevc4prj'">WINCE</if>
             <if cond="FORMAT!='msevc4prj' and PLATFORM_WIN32=='1'">MSW</if>
-            <if cond="PLATFORM_MSDOS=='1'">MGL</if>
+            <if cond="PLATFORM_MSDOS=='1'">DOS</if>
             <if cond="PLATFORM_OS2=='1'">PM</if>
         </set>
         <set var="TOOLKIT_LOWERCASE">$(TOOLKIT.lower())</set>
@@ -393,7 +350,7 @@ it if SHARED=1 unless you know what you are doing.
         <set var="EXTRALIBS_ODBC"/>
         <set var="EXTRALIBS_GUI"/>
         <set var="EXTRALIBS_OPENGL">
-            <if cond="COMPILER=='wat' and TOOLKIT=='MSW'">opengl32.lib glu32.lib</if>
+            <if cond="COMPILER=='wat'">opengl32.lib glu32.lib</if>
             <if cond="COMPILER in ['vc','evc']">opengl32.lib glu32.lib</if>
             <if cond="COMPILER=='gcc'">-lopengl32 -lglu32</if>
         </set>
@@ -425,6 +382,12 @@ Set the version of your Mingw installation here.
         <set var="EXTRACFLAGS">$(GCCFLAGS) -DHAVE_W32API_H</set>
     </if>
 
+    <if cond="FORMAT=='cbuilderx'">
+        <set var="EXTRACFLAGS">
+            <if cond="COMPILER=='gcc'">-DHAVE_W32API_H</if>
+        </set>
+    </if>
+
 
     <!-- ================================================================== -->
     <!--            Project files - hardcode some defaults                  -->
@@ -433,10 +396,7 @@ Set the version of your Mingw installation here.
     <if cond="FORMAT_SUPPORTS_CONDITIONS=='0'">
         <set var="RUNTIME_LIBS">dynamic</set>
         <set var="OFFICIAL_BUILD">0</set>
-        <set var="USE_AUI">1</set>
-        <set var="USE_RICHTEXT">1</set>
         <set var="USE_HTML">1</set>
-        <set var="USE_MEDIA">1</set>
         <set var="USE_XRC">1</set>
         <set var="USE_OPENGL">1</set>
         <set var="USE_ODBC">1</set>
@@ -446,10 +406,22 @@ Set the version of your Mingw installation here.
         <set var="USE_EXCEPTIONS">1</set>
         <set var="USE_RTTI">1</set>
         <set var="USE_THREADS">1</set>
-        <if cond="FORMAT!='autoconf'"><set var="USE_GDIPLUS">0</set></if>
         <set var="DEBUG_INFO">$(DEBUG_INFO_DEFAULT)</set>
         <set var="DEBUG_FLAG">default</set>
         <set var="MSLU">0</set>
+    </if>
+
+
+    <!-- FIXME:
+         C++BuilderX supports only wxMSW, monolithic (sic!) static build
+         and the project can't be put into build/msw and store objects in
+         build/msw/something. This *must* be fixed! -->
+    <if cond="FORMAT=='cbuilderx'">
+        <set var="WXUNIV">0</set>
+        <set var="MONOLITHIC">1</set>
+        <set var="SRCDIR">.</set>
+        <set var="TOP_SRCDIR">$(SRCDIR)/$(WXTOPDIR)</set>
+        <set var="SHARED">0</set>
     </if>
 
 
@@ -476,13 +448,6 @@ Set the version of your Mingw installation here.
         <!-- RTTI and exceptions need separate cccrtti.lib with eVC4 -->
         <set var="USE_RTTI">0</set>
         <set var="USE_EXCEPTIONS">0</set>
-    </if>
-
-    <!-- Need for wxUniv within wxMGL: -->
-    <if cond="FORMAT!='autoconf' and TOOLKIT=='MGL'">
-        <set var="WXUNIV">1</set>
-        <set var="USE_THREADS">0</set>
-        <set var="RUNTIME_LIBS">static</set>
     </if>
 
 </makefile>

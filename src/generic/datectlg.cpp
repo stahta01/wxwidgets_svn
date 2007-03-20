@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/datectlg.cpp
+// Name:        generic/datectlg.cpp
 // Purpose:     generic wxDatePickerCtrlGeneric implementation
 // Author:      Andreas Pflug
 // Modified by:
@@ -33,6 +33,7 @@
         (defined(wxUSE_DATEPICKCTRL_GENERIC) && wxUSE_DATEPICKCTRL_GENERIC)
 
 #ifndef WX_PRECOMP
+    #include "wx/bmpbuttn.h"
     #include "wx/dialog.h"
     #include "wx/dcmemory.h"
     #include "wx/panel.h"
@@ -54,323 +55,353 @@
 #include "wx/dateevt.h"
 
 #include "wx/calctrl.h"
-#include "wx/combo.h"
+#include "wx/renderer.h"
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
+enum
+{
+    CTRLID_TXT = 101,
+    CTRLID_CAL,
+    CTRLID_BTN,
+    CTRLID_PAN
+};
+
+#ifndef DEFAULT_ITEM_WIDTH
+    #define DEFAULT_ITEM_WIDTH 100
+#endif
+
 #if defined(__WXMSW__)
+    #undef wxUSE_POPUPWIN
+    #define wxUSE_POPUPWIN    0  // Popup not working
+    #define TXTCTRL_FLAGS     wxNO_BORDER
     #define CALBORDER         0
-#else
+    #define TXTPOSY           1
+#elif defined(__WXGTK__)
+    #define TXTCTRL_FLAGS     0
     #define CALBORDER         4
+    #define TXTPOSY           0
+#else
+    #define TXTCTRL_FLAGS     0
+    #define CALBORDER         4
+    #define TXTPOSY           0
 #endif
 
 // ----------------------------------------------------------------------------
 // global variables
 // ----------------------------------------------------------------------------
 
+// this should have been a flag in wxDatePickerCtrlGeneric itself but adding it
+// there now would break backwards compatibility, so put it here as a global:
+// this shouldn't be a big problem as only one (GUI) thread normally can call
+// wxDatePickerCtrlGeneric::SetValue() and so it can be only ever used for one
+// control at a time
+//
+// if the value is not NULL, it points to the control which is inside SetValue()
+static wxDatePickerCtrlGeneric *gs_inSetValue = NULL;
 
 // ----------------------------------------------------------------------------
 // local classes
 // ----------------------------------------------------------------------------
 
-class wxCalendarComboPopup : public wxCalendarCtrl,
-                             public wxComboPopup
+// This flag indicates that combo box style drop button is to be created
+#define wxBU_COMBO          0x0400
+
+
+class wxDropdownButton : public wxBitmapButton
 {
 public:
+    wxDropdownButton() { Init(); }
+    wxDropdownButton(wxWindow *parent,
+                     wxWindowID id,
+                     const wxPoint& pos = wxDefaultPosition,
+                     const wxSize& size = wxDefaultSize,
+                     long style=0,
+                     const wxValidator& validator = wxDefaultValidator);
 
-    wxCalendarComboPopup() : wxCalendarCtrl(),
-                             wxComboPopup()
-    {
-    }
+    bool Create(wxWindow *parent,
+                wxWindowID id,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = 0,
+                const wxValidator& validator = wxDefaultValidator);
 
-    virtual void Init()
-    {
-    }
+    virtual void DoMoveWindow(int x, int y, int w, int h);
 
-    // NB: Don't create lazily since it didn't work that way before
-    //     wxComboCtrl was used, and changing behaviour would almost
-    //     certainly introduce new bugs.
-    virtual bool Create(wxWindow* parent)
-    {
-        if ( !wxCalendarCtrl::Create(parent, wxID_ANY, wxDefaultDateTime,
-                              wxPoint(0, 0), wxDefaultSize,
-                              wxCAL_SHOW_HOLIDAYS | wxBORDER_SUNKEN) )
-            return false;
+protected:
 
-        wxWindow *yearControl = wxCalendarCtrl::GetYearControl();
+    void OnSize(wxSizeEvent& event);
+    void OnMouseEnter(wxMouseEvent& event);
+    void OnMouseLeave(wxMouseEvent& event);
 
-        wxClientDC dc(yearControl);
-        dc.SetFont(yearControl->GetFont());
-        wxCoord width, dummy;
-        dc.GetTextExtent(wxT("2000"), &width, &dummy);
-        width += ConvertDialogToPixels(wxSize(20, 0)).x;
+    void RecreateBitmaps(int w, int h);
 
-        wxSize calSize = wxCalendarCtrl::GetBestSize();
-        wxSize yearSize = yearControl->GetSize();
-        yearSize.x = width;
+    wxBitmap    m_bmpNormal;
+    wxBitmap    m_bmpHot;
 
-        wxPoint yearPosition = yearControl->GetPosition();
+    int         m_borderX, m_borderY;
 
-        SetFormat(wxT("%x"));
-
-        width = yearPosition.x + yearSize.x+2+CALBORDER/2;
-        if (width < calSize.x-4)
-            width = calSize.x-4;
-
-        int calPos = (width-calSize.x)/2;
-        if (calPos == -1)
-        {
-            calPos = 0;
-            width += 2;
-        }
-        wxCalendarCtrl::SetSize(calPos, 0, calSize.x, calSize.y);
-        yearControl->SetSize(width-yearSize.x-CALBORDER/2, yearPosition.y,
-                             yearSize.x, yearSize.y);
-        wxCalendarCtrl::GetMonthControl()->Move(0, 0);
-
-        m_useSize.x = width+CALBORDER/2;
-        m_useSize.y = calSize.y-2+CALBORDER;
-
-        wxWindow* tx = m_combo->GetTextCtrl();
-        if ( !tx )
-            tx = m_combo;
-
-        tx->Connect(wxEVT_KILL_FOCUS,
-                    wxFocusEventHandler(wxCalendarComboPopup::OnKillTextFocus),
-                    NULL, this);
-
-        return true;
-    }
-
-    virtual wxSize GetAdjustedSize(int WXUNUSED(minWidth),
-                                   int WXUNUSED(prefHeight),
-                                   int WXUNUSED(maxHeight))
-    {
-        return m_useSize;
-    }
-
-    virtual wxWindow *GetControl() { return this; }
-
-    void SetDateValue(const wxDateTime& date)
-    {
-        if ( date.IsValid() )
-        {
-            m_combo->SetText(date.Format(m_format));
-        }
-        else // invalid date
-        {
-            wxASSERT_MSG( HasDPFlag(wxDP_ALLOWNONE),
-                            _T("this control must have a valid date") );
-
-            m_combo->SetText(wxEmptyString);
-        }
-
-        m_currentDate = date;
-    }
-
-    const wxDateTime& GetDateValue() const
-    {
-        return m_currentDate;
-    }
-
-    bool ParseDateTime(const wxString& s, wxDateTime* pDt)
-    {
-        wxASSERT(pDt);
-
-        if ( !s.empty() )
-        {
-            pDt->ParseFormat(s, m_format);
-            if ( !pDt->IsValid() )
-                return false;
-        }
-
-        return true;
-    }
-
-    void SendDateEvent(const wxDateTime& dt)
-    {
-        //
-        // Sends both wxCalendarEvent and wxDateEvent
-        wxWindow* datePicker = m_combo->GetParent();
-
-        wxCalendarEvent cev((wxCalendarCtrl*) this, wxEVT_CALENDAR_SEL_CHANGED);
-        cev.SetEventObject(datePicker);
-        cev.SetId(datePicker->GetId());
-        cev.SetDate(dt);
-        GetParent()->ProcessEvent(cev);
-
-        wxDateEvent event(datePicker, dt, wxEVT_DATE_CHANGED);
-        datePicker->GetParent()->ProcessEvent(event);
-    }
+    // True if DrawDropArrow should be used instead of DrawComboBoxDropButton
+    bool        m_useDropArrow;
 
 private:
 
-    void OnCalKey(wxKeyEvent & ev)
+    void Init()
     {
-        if (ev.GetKeyCode() == WXK_ESCAPE && !ev.HasModifiers())
-            Dismiss();
-        else
-            ev.Skip();
+        m_borderX = -1;
+        m_borderY = -1;
     }
-
-    void OnSelChange(wxCalendarEvent &ev)
-    {
-        m_currentDate = wxCalendarCtrl::GetDate();
-        m_combo->SetText(m_currentDate.Format(m_format));
-
-        if ( ev.GetEventType() == wxEVT_CALENDAR_DOUBLECLICKED )
-        {
-            Dismiss();
-        }
-
-        SendDateEvent(m_currentDate);
-    }
-
-    void OnKillTextFocus(wxFocusEvent &ev)
-    {
-        ev.Skip();
-
-        wxDateTime dt;
-        wxString value = m_combo->GetValue();
-        if ( !ParseDateTime(value, &dt) )
-        {
-            if ( !HasDPFlag(wxDP_ALLOWNONE) )
-                dt = m_currentDate;
-        }
-
-        if ( dt.IsValid() )
-            m_combo->SetText(dt.Format(m_format));
-        else
-            m_combo->SetText(wxEmptyString);
-
-        // notify that we had to change the date after validation
-        if ( (dt.IsValid() && (!m_currentDate.IsValid() || m_currentDate != dt)) ||
-                (!dt.IsValid() && m_currentDate.IsValid()) )
-        {
-            m_currentDate = dt;
-            SendDateEvent(dt);
-        }
-    }
-
-    bool HasDPFlag(int flag)
-    {
-        return m_combo->GetParent()->HasFlag(flag);
-    }
-
-    bool SetFormat(const wxChar *fmt)
-    {
-        m_format.clear();
-
-        wxDateTime dt;
-        dt.ParseFormat(wxT("2003-10-13"), wxT("%Y-%m-%d"));
-        wxString str(dt.Format(fmt));
-
-        const wxChar *p = str.c_str();
-        while ( *p )
-        {
-            int n=wxAtoi(p);
-            if (n == dt.GetDay())
-            {
-                m_format.Append(wxT("%d"));
-                p += 2;
-            }
-            else if (n == (int)dt.GetMonth()+1)
-            {
-                m_format.Append(wxT("%m"));
-                p += 2;
-            }
-            else if (n == dt.GetYear())
-            {
-                m_format.Append(wxT("%Y"));
-                p += 4;
-            }
-            else if (n == (dt.GetYear() % 100))
-            {
-                if ( HasDPFlag(wxDP_SHOWCENTURY) )
-                    m_format.Append(wxT("%Y"));
-                else
-                    m_format.Append(wxT("%y"));
-                p += 2;
-            }
-            else
-                m_format.Append(*p++);
-        }
-
-        if ( m_combo )
-        {
-            wxArrayString allowedChars;
-            for ( wxChar c = _T('0'); c <= _T('9'); c++ )
-                allowedChars.Add(wxString(c, 1));
-
-            const wxChar *p2 = m_format.c_str();
-            while ( *p2 )
-            {
-                if ( *p2 == '%')
-                    p2 += 2;
-                else
-                    allowedChars.Add(wxString(*p2++, 1));
-            }
-
-    #if wxUSE_VALIDATORS
-            wxTextValidator tv(wxFILTER_INCLUDE_CHAR_LIST);
-            tv.SetIncludes(allowedChars);
-            m_combo->SetValidator(tv);
-    #endif
-
-            if (m_currentDate.IsValid())
-                m_combo->SetText(m_currentDate.Format(m_format));
-        }
-
-        return true;
-    }
-
-    virtual void SetStringValue(const wxString& s)
-    {
-        wxDateTime dt;
-        if ( ParseDateTime(s, &dt) )
-            m_currentDate = dt;
-        else if ( HasDPFlag(wxDP_ALLOWNONE) )
-            m_currentDate = dt;
-    }
-
-    virtual wxString GetStringValue() const
-    {
-        if ( !m_currentDate.IsValid() ) 
-            return wxEmptyString;
-
-        return m_currentDate.Format(m_format);
-    }
-
-private:
-
-    wxSize          m_useSize;
-    wxString        m_format;
-    wxDateTime      m_currentDate;
 
     DECLARE_EVENT_TABLE()
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxDropdownButton)
 };
 
 
-BEGIN_EVENT_TABLE(wxCalendarComboPopup, wxCalendarCtrl)
-    EVT_KEY_DOWN(wxCalendarComboPopup::OnCalKey)
-    EVT_CALENDAR_SEL_CHANGED(wxID_ANY, wxCalendarComboPopup::OnSelChange)
-    EVT_CALENDAR_DAY(wxID_ANY, wxCalendarComboPopup::OnSelChange)
-    EVT_CALENDAR_MONTH(wxID_ANY, wxCalendarComboPopup::OnSelChange)
-    EVT_CALENDAR_YEAR(wxID_ANY, wxCalendarComboPopup::OnSelChange)
-    EVT_CALENDAR(wxID_ANY, wxCalendarComboPopup::OnSelChange)
+// Below, macro DROPBUT_USEDROPARROW should return false when
+// DrawComboBoxDropButton is to be used to render the entire button.
+// COMBOST is non-zero if wxBU_COMBO was set.
+
+#if defined(__WXMSW__)
+
+    #define DROPBUT_USEDROPARROW(COMBOST)   (COMBOST?false:true)
+    #define DROPBUT_DEFAULT_WIDTH           17
+
+#elif defined(__WXGTK__)
+
+    #define DROPBUT_USEDROPARROW(COMBOST)   true
+    #define DROPBUT_DEFAULT_WIDTH           19
+
+#else
+
+    #define DROPBUT_USEDROPARROW(COMBOST)   true
+    #define DROPBUT_DEFAULT_WIDTH           17
+
+#endif
+
+
+IMPLEMENT_DYNAMIC_CLASS(wxDropdownButton, wxBitmapButton)
+
+
+BEGIN_EVENT_TABLE(wxDropdownButton,wxBitmapButton)
+    EVT_ENTER_WINDOW(wxDropdownButton::OnMouseEnter)
+    EVT_LEAVE_WINDOW(wxDropdownButton::OnMouseLeave)
+    EVT_SIZE(wxDropdownButton::OnSize)
 END_EVENT_TABLE()
 
+
+wxDropdownButton::wxDropdownButton(wxWindow *parent,
+                                   wxWindowID id,
+                                   const wxPoint& pos,
+                                   const wxSize& size,
+                                   long style,
+                                   const wxValidator& validator)
+{
+    Init();
+    Create(parent, id, pos, size, style, validator);
+}
+
+
+bool wxDropdownButton::Create(wxWindow *parent,
+                              wxWindowID id,
+                              const wxPoint& pos,
+                              const wxSize& size,
+                              long style,
+                              const wxValidator& validator)
+{
+    m_marginX = 0;
+    m_marginY = 0;
+
+    m_useDropArrow = DROPBUT_USEDROPARROW(style & wxBU_COMBO);
+
+    wxBitmap chkBmp(15,15);  // arbitrary
+    if ( !wxBitmapButton::Create(parent, id, chkBmp,
+                                 pos, wxDefaultSize,
+                                 style | (m_useDropArrow ? wxBU_AUTODRAW : wxNO_BORDER),
+                                 validator) )
+        return false;
+
+    const wxSize sz = GetSize();
+    int w = chkBmp.GetWidth(),
+        h = chkBmp.GetHeight();
+    m_borderX = sz.x - m_marginX - w;
+    m_borderY = sz.y - m_marginY - h;
+
+    DoMoveWindow(pos.x, pos.y, size.x, size.y);
+
+    return true;
+}
+
+
+void wxDropdownButton::RecreateBitmaps(int w, int h)
+{
+    wxMemoryDC dc;
+
+    int borderX = m_marginX + m_borderX;
+    int borderY = m_marginY + m_borderY;
+    int bw = w - borderX;
+    int bh = h - borderY;
+
+    wxBitmap bmp(bw, bh);
+    wxBitmap bmpSel(bw, bh);
+    wxRect r(0,0,w,h);
+
+    wxRendererNative& renderer = wxRendererNative::Get();
+
+    dc.SelectObject(bmp);
+
+    if ( m_useDropArrow )
+    {
+        // Use DrawDropArrow on transparent background.
+
+        wxColour magic(255,0,255);
+        wxBrush magicBrush(magic);
+        r.x = -(borderX/2);
+        r.y = -(borderY/2);
+
+        dc.SetBrush( magicBrush );
+        dc.SetPen( *wxTRANSPARENT_PEN );
+        dc.DrawRectangle(0,0,bw,bh);
+        renderer.DrawDropArrow(this, dc, r);
+        dc.SelectObject( wxNullBitmap );
+        wxMask *mask = new wxMask( bmp, magic );
+        bmp.SetMask( mask );
+
+        dc.SelectObject(bmpSel);
+
+        dc.SetBrush( magicBrush );
+        dc.SetPen( *wxTRANSPARENT_PEN );
+        dc.DrawRectangle(0,0,bw,bh);
+        renderer.DrawDropArrow(this, dc, r, wxCONTROL_PRESSED);
+        dc.SelectObject( wxNullBitmap );
+        mask = new wxMask( bmpSel, magic );
+        bmpSel.SetMask( mask );
+    }
+    else
+    {
+        // Use DrawComboBoxDropButton for the entire button
+        // (also render extra "hot" button state).
+
+        renderer.DrawComboBoxDropButton(this, dc, r);
+
+        dc.SelectObject(bmpSel);
+
+        renderer.DrawComboBoxDropButton(this, dc, r, wxCONTROL_PRESSED);
+
+        wxBitmap bmpHot(bw,bh);
+        dc.SelectObject(bmpHot);
+        renderer.DrawComboBoxDropButton(this, dc, r, wxCONTROL_CURRENT);
+
+        m_bmpNormal = bmp;
+        m_bmpHot = bmpHot;
+    }
+
+    SetBitmapLabel(bmp);
+    SetBitmapSelected(bmpSel);
+}
+
+
+void wxDropdownButton::DoMoveWindow(int x, int y, int w, int h)
+{
+    if (w < 0)
+        w = DROPBUT_DEFAULT_WIDTH;
+
+    wxBitmapButton::DoMoveWindow(x, y, w, h);
+}
+
+
+void wxDropdownButton::OnSize(wxSizeEvent& event)
+{
+    if ( m_borderX >= 0 && m_borderY >= 0 )
+    {
+        int w, h;
+        GetClientSize(&w,&h);
+
+        if ( w > 1 && h > 1 )
+            RecreateBitmaps(w,h);
+    }
+    event.Skip();
+}
+
+
+void wxDropdownButton::OnMouseEnter(wxMouseEvent& event)
+{
+    if ( !m_useDropArrow )
+        SetBitmapLabel(m_bmpHot);
+
+    event.Skip();
+}
+
+
+void wxDropdownButton::OnMouseLeave(wxMouseEvent& event)
+{
+    if ( !m_useDropArrow )
+        SetBitmapLabel(m_bmpNormal);
+
+    event.Skip();
+}
+
+
+#if wxUSE_POPUPWIN
+
+#include "wx/popupwin.h"
+
+class wxDatePopupInternal : public wxPopupTransientWindow
+{
+public:
+    wxDatePopupInternal(wxWindow *parent) : wxPopupTransientWindow(parent) { }
+
+    void ShowAt(int x, int y)
+    {
+        Position(wxPoint(x, y), wxSize(0, 0));
+        Popup();
+    }
+
+    void Hide()
+    {
+        Dismiss();
+    }
+};
+
+#else // !wxUSE_POPUPWIN
+
+class wxDatePopupInternal : public wxDialog
+{
+public:
+    wxDatePopupInternal(wxWindow *parent)
+        : wxDialog(parent,
+                   wxID_ANY,
+                   wxEmptyString,
+                   wxDefaultPosition,
+                   wxDefaultSize,
+                   wxSIMPLE_BORDER)
+    {
+    }
+
+    void ShowAt(int x, int y)
+    {
+        Show();
+        Move(x, y);
+    }
+
+    void Hide()
+    {
+        wxDialog::Hide();
+    }
+};
+
+#endif // wxUSE_POPUPWIN/!wxUSE_POPUPWIN
 
 // ============================================================================
 // wxDatePickerCtrlGeneric implementation
 // ============================================================================
 
 BEGIN_EVENT_TABLE(wxDatePickerCtrlGeneric, wxDatePickerCtrlBase)
-    EVT_TEXT(wxID_ANY, wxDatePickerCtrlGeneric::OnText)
+    EVT_BUTTON(CTRLID_BTN, wxDatePickerCtrlGeneric::OnClick)
+    EVT_TEXT(CTRLID_TXT, wxDatePickerCtrlGeneric::OnText)
+    EVT_CHILD_FOCUS(wxDatePickerCtrlGeneric::OnChildSetFocus)
     EVT_SIZE(wxDatePickerCtrlGeneric::OnSize)
-    EVT_SET_FOCUS(wxDatePickerCtrlGeneric::OnFocus)
 END_EVENT_TABLE()
 
 #ifndef wxHAS_NATIVE_DATEPICKCTRL
@@ -394,32 +425,99 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
                   _T("wxDP_SPIN style not supported, use wxDP_DEFAULT") );
 
     if ( !wxControl::Create(parent, id, pos, size,
-                            style | wxCLIP_CHILDREN | wxWANTS_CHARS | wxBORDER_NONE,
+                            style | wxCLIP_CHILDREN | wxWANTS_CHARS,
                             validator, name) )
+
     {
         return false;
     }
 
     InheritAttributes();
 
-    m_combo = new wxComboCtrl(this, -1, wxEmptyString,
-                              wxDefaultPosition, wxDefaultSize);
+    m_txt = new wxTextCtrl(this, CTRLID_TXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, TXTCTRL_FLAGS);
 
-    m_combo->SetCtrlMainWnd(this);
+    m_txt->Connect(wxEVT_KEY_DOWN,
+                   wxKeyEventHandler(wxDatePickerCtrlGeneric::OnEditKey),
+                   NULL, this);
+    m_txt->Connect(wxEVT_KILL_FOCUS,
+                   wxFocusEventHandler(wxDatePickerCtrlGeneric::OnKillFocus),
+                   NULL, this);
 
-    m_popup = new wxCalendarComboPopup();
+    m_btn = new wxDropdownButton(this, CTRLID_BTN, wxDefaultPosition, wxDefaultSize, wxBU_COMBO);
 
-#if defined(__WXMSW__)
-    // without this keyboard navigation in month control doesn't work
-    m_combo->UseAltPopupWindow();
-#endif
-    m_combo->SetPopupControl(m_popup);
+    m_popup = new wxDatePopupInternal(this);
+    m_popup->SetFont(GetFont());
 
-    m_cal = m_popup;
+    wxPanel *panel=new wxPanel(m_popup, CTRLID_PAN,
+                               wxPoint(0, 0), wxDefaultSize,
+                               wxSUNKEN_BORDER);
+    m_cal = new wxCalendarCtrl(panel, CTRLID_CAL, wxDefaultDateTime,
+                               wxPoint(0, 0), wxDefaultSize,
+                               wxCAL_SHOW_HOLIDAYS | wxSUNKEN_BORDER);
+    m_cal->Connect(wxEVT_CALENDAR_SEL_CHANGED,
+                   wxCalendarEventHandler(wxDatePickerCtrlGeneric::OnSelChange),
+                   NULL, this);
+    m_cal->Connect(wxEVT_KEY_DOWN,
+                   wxKeyEventHandler(wxDatePickerCtrlGeneric::OnCalKey),
+                   NULL, this);
+    m_cal->Connect(wxEVT_CALENDAR_DOUBLECLICKED,
+                   wxCalendarEventHandler(wxDatePickerCtrlGeneric::OnSelChange),
+                   NULL, this);
+    m_cal->Connect(wxEVT_CALENDAR_DAY_CHANGED,
+                   wxCalendarEventHandler(wxDatePickerCtrlGeneric::OnSelChange),
+                   NULL, this);
+    m_cal->Connect(wxEVT_CALENDAR_MONTH_CHANGED,
+                   wxCalendarEventHandler(wxDatePickerCtrlGeneric::OnSelChange),
+                   NULL, this);
+    m_cal->Connect(wxEVT_CALENDAR_YEAR_CHANGED,
+                   wxCalendarEventHandler(wxDatePickerCtrlGeneric::OnSelChange),
+                   NULL, this);
 
-    m_popup->SetDateValue(date.IsValid() ? date : wxDateTime::Today());
+    wxWindow *yearControl = m_cal->GetYearControl();
 
-    SetInitialSize(size);
+    Connect(wxEVT_SET_FOCUS,
+            wxFocusEventHandler(wxDatePickerCtrlGeneric::OnSetFocus));
+
+    wxClientDC dc(yearControl);
+    dc.SetFont(yearControl->GetFont());
+    wxCoord width, dummy;
+    dc.GetTextExtent(wxT("2000"), &width, &dummy);
+    width += ConvertDialogToPixels(wxSize(20, 0)).x;
+
+    wxSize calSize = m_cal->GetBestSize();
+    wxSize yearSize = yearControl->GetSize();
+    yearSize.x = width;
+
+    wxPoint yearPosition = yearControl->GetPosition();
+
+    SetFormat(wxT("%x"));
+
+    width = yearPosition.x + yearSize.x+2+CALBORDER/2;
+    if (width < calSize.x-4)
+        width = calSize.x-4;
+
+    int calPos = (width-calSize.x)/2;
+    if (calPos == -1)
+    {
+        calPos = 0;
+        width += 2;
+    }
+    m_cal->SetSize(calPos, 0, calSize.x, calSize.y);
+    yearControl->SetSize(width-yearSize.x-CALBORDER/2, yearPosition.y,
+                         yearSize.x, yearSize.y);
+    m_cal->GetMonthControl()->Move(0, 0);
+
+
+
+    panel->SetClientSize(width+CALBORDER/2, calSize.y-2+CALBORDER);
+    m_popup->SetClientSize(panel->GetSize());
+    m_popup->Hide();
+
+    SetValue(date.IsValid() ? date : wxDateTime::Today());
+
+    SetBestFittingSize(size);
+
+    SetBackgroundColour(m_txt->GetBackgroundColour());
 
     return true;
 }
@@ -427,23 +525,38 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
 
 void wxDatePickerCtrlGeneric::Init()
 {
-    m_combo = NULL;
-    m_cal = NULL;
     m_popup = NULL;
+    m_txt = NULL;
+    m_cal = NULL;
+    m_btn = NULL;
+
+    m_dropped = false;
+    m_ignoreDrop = false;
 }
 
 wxDatePickerCtrlGeneric::~wxDatePickerCtrlGeneric()
 {
+    m_popup = NULL;
+    m_txt = NULL;
+    m_cal = NULL;
+    m_btn = NULL;
 }
 
 bool wxDatePickerCtrlGeneric::Destroy()
 {
-    if ( m_combo )
-        m_combo->Destroy();
+    if (m_cal)
+        m_cal->Destroy();
+    if (m_popup)
+        m_popup->Destroy();
+    if (m_txt)
+        m_txt->Destroy();
+    if (m_btn)
+        m_btn->Destroy();
 
-    m_combo = NULL;
-    m_cal = NULL;
     m_popup = NULL;
+    m_txt = NULL;
+    m_cal = NULL;
+    m_btn = NULL;
 
     return wxControl::Destroy();
 }
@@ -452,9 +565,63 @@ bool wxDatePickerCtrlGeneric::Destroy()
 // overridden base class methods
 // ----------------------------------------------------------------------------
 
+void wxDatePickerCtrlGeneric::DoMoveWindow(int x, int y, int w, int h)
+{
+    wxControl::DoMoveWindow(x, y, w, h);
+
+    if (m_dropped)
+        DropDown(false);
+}
+
 wxSize wxDatePickerCtrlGeneric::DoGetBestSize() const
 {
-    return m_combo->GetBestSize();
+    if (m_btn && m_txt)
+    {
+        int bh=m_btn->GetBestSize().y;
+        int eh=m_txt->GetBestSize().y;
+        return wxSize(DEFAULT_ITEM_WIDTH, bh > eh ? bh : eh);
+    }
+    return wxControl::DoGetBestSize();
+}
+
+
+bool wxDatePickerCtrlGeneric::Show(bool show)
+{
+    if ( !wxControl::Show(show) )
+    {
+        return false;
+    }
+
+    if ( !show )
+    {
+        if ( m_popup )
+        {
+            m_popup->Hide();
+            m_dropped = false;
+        }
+    }
+
+    return true;
+}
+
+
+bool wxDatePickerCtrlGeneric::Enable(bool enable)
+{
+    if ( !wxControl::Enable(enable) )
+    {
+        return false;
+    }
+
+    if ( !enable )
+    {
+        if ( m_popup )
+            m_popup->Hide();
+    }
+
+    if ( m_btn )
+        m_btn->Enable(enable);
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -468,16 +635,105 @@ wxDatePickerCtrlGeneric::SetDateRange(const wxDateTime& lowerdate,
     return m_cal->SetDateRange(lowerdate, upperdate);
 }
 
+bool wxDatePickerCtrlGeneric::SetFormat(const wxChar *fmt)
+{
+    wxDateTime dt;
+    dt.ParseFormat(wxT("2003-10-13"), wxT("%Y-%m-%d"));
+    wxString str=dt.Format(fmt);
+    wxChar *p=(wxChar*)str.c_str();
+
+    m_format=wxEmptyString;
+
+    while (*p)
+    {
+        int n=wxAtoi(p);
+        if (n == dt.GetDay())
+        {
+            m_format.Append(wxT("%d"));
+            p += 2;
+        }
+        else if (n == (int)dt.GetMonth()+1)
+        {
+            m_format.Append(wxT("%m"));
+            p += 2;
+        }
+        else if (n == dt.GetYear())
+        {
+            m_format.Append(wxT("%Y"));
+            p += 4;
+        }
+        else if (n == (dt.GetYear() % 100))
+        {
+            if (GetWindowStyle() & wxDP_SHOWCENTURY)
+                m_format.Append(wxT("%Y"));
+            else
+                m_format.Append(wxT("%y"));
+            p += 2;
+        }
+        else
+            m_format.Append(*p++);
+    }
+
+    if (m_txt)
+    {
+        wxArrayString allowedChars;
+        for ( wxChar c = _T('0'); c <= _T('9'); c++ )
+            allowedChars.Add(wxString(c, 1));
+
+        const wxChar *p = m_format.c_str();
+        while (*p)
+        {
+            if (*p == '%')
+                p += 2;
+            else
+                allowedChars.Add(wxString(*p++, 1));
+        }
+
+#if wxUSE_VALIDATORS
+        wxTextValidator tv(wxFILTER_INCLUDE_CHAR_LIST);
+        tv.SetIncludes(allowedChars);
+        m_txt->SetValidator(tv);
+#endif
+
+        if (m_currentDate.IsValid())
+            m_txt->SetValue(m_currentDate.Format(m_format));
+    }
+
+    return true;
+}
+
 
 wxDateTime wxDatePickerCtrlGeneric::GetValue() const
 {
-    return m_popup->GetDateValue();
+    return m_currentDate;
 }
 
 
 void wxDatePickerCtrlGeneric::SetValue(const wxDateTime& date)
 {
-    m_popup->SetDateValue(date);
+    if ( !m_cal ) 
+        return;
+
+    // we need to suppress the event sent from wxTextCtrl as calling our
+    // SetValue() should not result in an event being sent (wxTextCtrl is
+    // an exception to this rule)
+    gs_inSetValue = this;
+
+    if ( date.IsValid() )
+    {
+        m_txt->SetValue(date.Format(m_format));
+    }
+    else // invalid date
+    {
+        wxASSERT_MSG( HasFlag(wxDP_ALLOWNONE),
+                        _T("this control must have a valid date") );
+
+        m_txt->SetValue(wxEmptyString);
+    }
+
+    gs_inSetValue = NULL;
+
+    m_currentDate = date;
 }
 
 
@@ -501,37 +757,203 @@ wxDatePickerCtrlGeneric::SetRange(const wxDateTime &dt1, const wxDateTime &dt2)
 // event handlers
 // ----------------------------------------------------------------------------
 
+void wxDatePickerCtrlGeneric::DropDown(bool down)
+{
+    if (m_popup)
+    {
+        if (down)
+        {
+            wxDateTime dt;
+            if (!m_txt->GetValue().empty())
+                dt.ParseFormat(m_txt->GetValue(), m_format);
+
+            if (dt.IsValid())
+                m_cal->SetDate(dt);
+            else
+                m_cal->SetDate(wxDateTime::Today());
+
+            wxPoint pos=GetParent()->ClientToScreen(GetPosition());
+            m_popup->ShowAt(pos.x, pos.y + GetSize().y);
+            m_dropped = true;
+            m_cal->SetFocus();
+        }
+        else
+        {
+            if (m_dropped)
+                m_popup->Hide();
+            m_dropped = false;
+        }
+    }
+}
+
 
 void wxDatePickerCtrlGeneric::OnSize(wxSizeEvent& event)
 {
-    if ( m_combo )
-        m_combo->SetSize(GetClientSize());
+    if ( m_btn )
+    {
+        wxSize sz = GetClientSize();
+
+        wxSize bs=m_btn->GetSize();
+        int eh=m_txt->GetBestSize().y;
+
+        m_txt->SetSize(0, TXTPOSY, sz.x-bs.x, sz.y > eh ? eh-TXTPOSY : sz.y-TXTPOSY);
+        m_btn->SetSize(sz.x - bs.x, 0, bs.x, sz.y);
+    }
 
     event.Skip();
 }
 
 
+void wxDatePickerCtrlGeneric::OnChildSetFocus(wxChildFocusEvent &ev)
+{
+    ev.Skip();
+    m_ignoreDrop = false;
+
+    wxWindow  *w=(wxWindow*)ev.GetEventObject();
+    while (w)
+    {
+        if (w == m_popup)
+            return;
+        w = w->GetParent();
+    }
+
+    if (m_dropped)
+    {
+        DropDown(false);
+        if (::wxFindWindowAtPoint(::wxGetMousePosition()) == m_btn)
+            m_ignoreDrop = true;
+    }
+}
+
+
+void wxDatePickerCtrlGeneric::OnClick(wxCommandEvent& WXUNUSED(event))
+{
+    if (m_ignoreDrop)
+    {
+        m_ignoreDrop = false;
+        m_txt->SetFocus();
+    }
+    else
+    {
+        DropDown();
+        m_cal->SetFocus();
+    }
+}
+
+
+void wxDatePickerCtrlGeneric::OnSetFocus(wxFocusEvent& WXUNUSED(ev))
+{
+    if (m_txt)
+    {
+        m_txt->SetFocus();
+        m_txt->SetSelection(-1, -1); // select everything
+    }
+}
+
+
+void wxDatePickerCtrlGeneric::OnKillFocus(wxFocusEvent &ev)
+{
+    if (!m_txt)
+        return;
+    
+    ev.Skip();
+
+    wxDateTime dt;
+    dt.ParseFormat(m_txt->GetValue(), m_format);
+    if ( !dt.IsValid() )
+    {
+        if ( !HasFlag(wxDP_ALLOWNONE) )
+            dt = m_currentDate;
+    }
+
+    if(dt.IsValid())
+        m_txt->SetValue(dt.Format(m_format));
+    else
+        m_txt->SetValue(wxEmptyString);
+
+    // notify that we had to change the date after validation
+    if ( (dt.IsValid() && (!m_currentDate.IsValid() || m_currentDate != dt)) ||
+            (!dt.IsValid() && m_currentDate.IsValid()) )
+    {
+        m_currentDate = dt;
+        wxDateEvent event(this, dt, wxEVT_DATE_CHANGED);
+        GetEventHandler()->ProcessEvent(event);
+    }
+}
+
+
+void wxDatePickerCtrlGeneric::OnSelChange(wxCalendarEvent &ev)
+{
+    if (m_cal)
+    {
+        m_currentDate = m_cal->GetDate();
+        m_txt->SetValue(m_currentDate.Format(m_format));
+        if (ev.GetEventType() == wxEVT_CALENDAR_DOUBLECLICKED)
+        {
+            DropDown(false);
+            m_txt->SetFocus();
+        }
+    }
+    ev.SetEventObject(this);
+    ev.SetId(GetId());
+    GetParent()->ProcessEvent(ev);
+
+    wxDateEvent dev(this, ev.GetDate(), wxEVT_DATE_CHANGED);
+    GetParent()->ProcessEvent(dev);
+}
+
+
 void wxDatePickerCtrlGeneric::OnText(wxCommandEvent &ev)
 {
+    if ( gs_inSetValue )
+    {
+        // artificial event resulting from our own SetValue() call, ignore it
+        return;
+    }
+
     ev.SetEventObject(this);
     ev.SetId(GetId());
     GetParent()->ProcessEvent(ev);
 
     // We'll create an additional event if the date is valid.
     // If the date isn't valid, the user's probably in the middle of typing
+    wxString txt = m_txt->GetValue();
     wxDateTime dt;
-    if ( !m_popup->ParseDateTime(m_combo->GetValue(), &dt) )
-        return;
+    if (!txt.empty())
+    {
+        dt.ParseFormat(txt, m_format);
+        if (!dt.IsValid())
+            return;
+    }
 
-    m_popup->SendDateEvent(dt);
+    wxCalendarEvent cev(m_cal, wxEVT_CALENDAR_SEL_CHANGED);
+    cev.SetEventObject(this);
+    cev.SetId(GetId());
+    cev.SetDate(dt);
+
+    GetParent()->ProcessEvent(cev);
+
+    wxDateEvent dev(this, dt, wxEVT_DATE_CHANGED);
+    GetParent()->ProcessEvent(dev);
 }
 
 
-void wxDatePickerCtrlGeneric::OnFocus(wxFocusEvent& WXUNUSED(event))
+void wxDatePickerCtrlGeneric::OnEditKey(wxKeyEvent & ev)
 {
-    m_combo->SetFocus();
+    if (ev.GetKeyCode() == WXK_DOWN && !ev.HasModifiers())
+        DropDown(true);
+    else
+        ev.Skip();
 }
 
+
+void wxDatePickerCtrlGeneric::OnCalKey(wxKeyEvent & ev)
+{
+    if (ev.GetKeyCode() == WXK_ESCAPE && !ev.HasModifiers())
+        DropDown(false);
+    else
+        ev.Skip();
+}
 
 #endif // wxUSE_DATEPICKCTRL_GENERIC
 

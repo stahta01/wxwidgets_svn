@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// File:      src/os2/region.cpp
+// File:      region.cpp
 // Purpose:   Region class
 // Author:    David Webster
 // Modified by:
@@ -12,18 +12,15 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/window.h"
-    #include "wx/gdicmn.h"
-#endif
-
+#include "wx/app.h"
 #include "wx/os2/region.h"
+#include "wx/gdicmn.h"
 
+#include "wx/window.h"
 #include "wx/os2/private.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxRegion, wxGDIObject)
-IMPLEMENT_DYNAMIC_CLASS(wxRegionIterator, wxObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxRegion, wxGDIObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxRegionIterator, wxObject)
 
 //-----------------------------------------------------------------------------
 // wxRegionRefData implementation
@@ -70,7 +67,7 @@ public:
         }
     }
 
-    virtual ~wxRegionRefData()
+    ~wxRegionRefData()
     {
         ::GpiDestroyRegion(m_hPS, m_hRegion);
     }
@@ -151,8 +148,10 @@ wxRegion::wxRegion(
                                      );
 } // end of wxRegion::wxRegion
 
-wxRegion::wxRegion(const wxPoint& rTopLeft,
-                   const wxPoint& rBottomRight)
+wxRegion::wxRegion(
+  const wxPoint&                    rTopLeft
+, const wxPoint&                    rBottomRight
+)
 {
     RECTL                           vRect;
     SIZEL                           vSize = {0, 0};
@@ -186,7 +185,9 @@ wxRegion::wxRegion(const wxPoint& rTopLeft,
                                      );
 } // end of wxRegion::wxRegion
 
-wxRegion::wxRegion(const wxRect& rRect)
+wxRegion::wxRegion(
+  const wxRect&                     rRect
+)
 {
     RECTL                           vRect;
     SIZEL                           vSize = {0, 0};
@@ -221,11 +222,6 @@ wxRegion::wxRegion(const wxRect& rRect)
                                      );
 } // end of wxRegion::wxRegion
 
-wxRegion::wxRegion(size_t n, const wxPoint *points, int WXUNUSED(fillStyle))
-{
-    // TO DO
-}
-
 //
 // Destroy the region.
 //
@@ -247,12 +243,15 @@ wxObjectRefData *wxRegion::CloneData(const wxObjectRefData *data) const
 //# Modify region
 //-----------------------------------------------------------------------------
 
-bool wxRegion::DoOffset( wxCoord x, wxCoord y )
+bool wxRegion::Offset(
+  wxCoord                           x
+, wxCoord                           y
+)
 {
     if ( !x && !y )
     {
         // nothing to do
-        return true;
+        return TRUE;
     }
 
     AllocExclusive();
@@ -262,10 +261,10 @@ bool wxRegion::DoOffset( wxCoord x, wxCoord y )
     {
         wxLogLastError(_T("OffsetRgn"));
 
-        return false;
+        return FALSE;
     }
 #endif
-    return true;
+    return TRUE;
 }
 
 //
@@ -277,9 +276,26 @@ void wxRegion::Clear()
 } // end of wxRegion::Clear
 
 //
+// Combine rectangle (x, y, w, h) with this.
+//
+bool wxRegion::Combine(
+  wxCoord                           x
+, wxCoord                           y
+, wxCoord                           vWidth
+, wxCoord                           vHeight
+, wxRegionOp                        eOp
+)
+{
+    return Combine(wxRegion(x, y, vWidth, vHeight), eOp);
+} // end of wxRegion::Combine
+
+//
 // Union region with this.
 //
-bool wxRegion::DoCombine( const wxRegion& rRegion, wxRegionOp eOp )
+bool wxRegion::Combine(
+  const wxRegion&                   rRegion
+, wxRegionOp                        eOp
+)
 {
     //
     // We can't use the API functions if we don't have a valid region handle
@@ -303,7 +319,7 @@ bool wxRegion::DoCombine( const wxRegion& rRegion, wxRegionOp eOp )
             case wxRGN_AND:
             case wxRGN_DIFF:
                 // leave empty/invalid
-                return false;
+                return FALSE;
         }
     }
     else // we have a valid region
@@ -341,22 +357,30 @@ bool wxRegion::DoCombine( const wxRegion& rRegion, wxRegionOp eOp )
                                    ,lMode
                                   ) != RGN_ERROR);
     }
-    return true;
+    return TRUE;
+} // end of wxRegion::Combine
+
+bool wxRegion::Combine(
+  const wxRect&                     rRect
+, wxRegionOp                        eOp
+)
+{
+    return Combine( rRect.GetLeft()
+                   ,rRect.GetTop()
+                   ,rRect.GetWidth()
+                   ,rRect.GetHeight()
+                   ,eOp
+                  );
 } // end of wxRegion::Combine
 
 //-----------------------------------------------------------------------------
 //# Information on region
 //-----------------------------------------------------------------------------
 
-bool wxRegion::DoIsEqual(const wxRegion& WXUNUSED(region)) const
-{
-    return false;
-}
-
 //
 // Outer bounds of region
 //
-bool wxRegion::DoGetBox(
+void wxRegion::GetBox(
   wxCoord&                          x
 , wxCoord&                          y
 , wxCoord&                          vWidth
@@ -376,27 +400,32 @@ bool wxRegion::DoGetBox(
         y       = vRect.yBottom;
         vWidth  = vRect.xRight - vRect.xLeft;
         vHeight = vRect.yTop - vRect.yBottom;
-        return true;
     }
     else
     {
         x = y = vWidth = vHeight = 0L;
-        return false;
     }
 } // end of wxRegion::GetBox
+
+wxRect wxRegion::GetBox() const
+{
+    wxCoord x, y, w, h;
+    GetBox(x, y, w, h);
+    return wxRect(x, y, w, h);
+}
 
 //
 // Is region empty?
 //
-bool wxRegion::IsEmpty() const
+bool wxRegion::Empty() const
 {
-    wxCoord x;
-    wxCoord y;
-    wxCoord vWidth;
-    wxCoord vHeight;
+    wxCoord                         x;
+    wxCoord                         y;
+    wxCoord                         vWidth;
+    wxCoord                         vHeight;
 
     if (M_REGION == 0)
-        return true;
+        return TRUE;
 
     GetBox( x
            ,y
@@ -404,7 +433,7 @@ bool wxRegion::IsEmpty() const
            ,vHeight
           );
     return ((vWidth == 0) && (vHeight == 0));
-} // end of wxRegion::IsEmpty
+} // end of wxRegion::Empty
 
 //-----------------------------------------------------------------------------
 // Tests
@@ -412,17 +441,19 @@ bool wxRegion::IsEmpty() const
 //
 // Does the region contain the point pt?
 //
-wxRegionContain wxRegion::DoContainsPoint( wxCoord x, wxCoord y ) const
+wxRegionContain wxRegion::Contains(
+  const wxPoint&                    rPoint
+) const
 {
-    POINTL vPoint = { x, y };
+    POINTL                          vPoint = { rPoint.x, rPoint.y };
 
     if (!m_refData)
         return wxOutRegion;
 
-    LONG lInside = ::GpiPtInRegion( ((wxRegionRefData*)m_refData)->m_hPS,
-                                    M_REGION,
-                                    &vPoint
-                                  );
+    LONG                            lInside = ::GpiPtInRegion( ((wxRegionRefData*)m_refData)->m_hPS
+                                                              ,M_REGION
+                                                              ,&vPoint
+                                                             );
     if (lInside == PRGN_INSIDE)
         return wxInRegion;
     else
@@ -432,20 +463,26 @@ wxRegionContain wxRegion::DoContainsPoint( wxCoord x, wxCoord y ) const
 //
 // Does the region contain the rectangle (x, y, w, h)?
 //
-wxRegionContain wxRegion::DoContainsRect(const wxRect& rect) const
+wxRegionContain wxRegion::Contains(
+  wxCoord                           x
+, wxCoord                           y
+, wxCoord                           vWidth
+, wxCoord                           vHeight
+) const
 {
+    RECTL                           vRect;
+
     if (!m_refData)
         return wxOutRegion;
 
-    RECTL   vRect;
-    vRect.xLeft   = rect.x;
-    vRect.xRight  = rect.x + rect.width;
-    vRect.yTop    = rect.y + rect.height;
-    vRect.yBottom = rect.y;
+    vRect.xLeft   = x;
+    vRect.xRight  = x + vWidth;
+    vRect.yTop    = y + vHeight;
+    vRect.yBottom = y;
 
     LONG lInside = ::GpiRectInRegion( ((wxRegionRefData*)m_refData)->m_hPS,
                                       M_REGION,
-                                      &vRect
+                                      &vRect    
                                     );
     switch (lInside)
     {
@@ -454,7 +491,6 @@ wxRegionContain wxRegion::DoContainsRect(const wxRect& rect) const
         case RRGN_ERROR     :
         default             :   return wxOutRegion;
     }
-
 } // end of wxRegion::Contains
 
 //

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/button.cpp
+// Name:        button.cpp
 // Purpose:     wxButton
 // Author:      Julian Smart
 // Modified by:
@@ -9,12 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "button.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/button.h"
 
@@ -25,11 +31,6 @@
 #include <Xm/PushB.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
-#endif
-
-
-#ifndef WX_PRECOMP
-    #include "wx/toplevel.h"
 #endif
 
 #include "wx/stockitem.h"
@@ -54,11 +55,12 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& lbl,
     wxString label(lbl);
     if (label.empty() && wxIsStockID(id))
         label = wxGetStockLabel(id);
-
+    
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
 
-    wxXmString text( GetLabelText(label) );
+    wxString label1(wxStripMenuCodes(label));
+    wxXmString text( label1 );
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -78,7 +80,7 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& lbl,
         XmNlabelString, text(),
         XmNrecomputeSize, False,
         // See comment for wxButton::SetDefault
-        // XmNdefaultButtonShadowThickness, 1,
+        // XmNdefaultButtonShadowThickness, 1, 
         NULL);
 
     XtAddCallback ((Widget) m_mainWidget,
@@ -127,9 +129,9 @@ void wxButton::SetDefaultShadowThicknessAndResize()
 
 void wxButton::SetDefault()
 {
-    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-    if ( tlw )
-        tlw->SetDefaultItem(this);
+    wxWindow *parent = GetParent();
+    if ( parent )
+        parent->SetDefaultItem(this);
 
     // We initially do not set XmNdefaultShadowThickness, to have
     // small buttons.  Unfortunately, buttons are now mis-aligned. We
@@ -138,7 +140,6 @@ void wxButton::SetDefault()
     // wxButton in the same row, correction is straighforward: we set
     // resource for all wxButton in this parent (but not sub panels)
 
-    wxWindow *parent = GetParent();
     for (wxWindowList::compatibility_iterator node = parent->GetChildren().GetFirst ();
          node; node = node->GetNext ())
     {

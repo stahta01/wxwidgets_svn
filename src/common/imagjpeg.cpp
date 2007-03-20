@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagjpeg.cpp
+// Name:        imagjpeg.cpp
 // Purpose:     wxImage JPEG handler
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,24 +7,26 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagjpeg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_IMAGE && wxUSE_LIBJPEG
 
 #include "wx/imagjpeg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/intl.h"
-    #include "wx/bitmap.h"
-    #include "wx/module.h"
-#endif
+#include "wx/bitmap.h"
+#include "wx/debug.h"
+#include "wx/log.h"
+#include "wx/app.h"
 
 // A hack based on one from tif_jpeg.c to overcome the problem on Windows
 // of rpcndr.h defining boolean with a different type to the jpeg headers.
@@ -51,6 +53,8 @@ typedef boolean wxjpeg_boolean;
 
 #include "wx/filefn.h"
 #include "wx/wfstream.h"
+#include "wx/intl.h"
+#include "wx/module.h"
 
 // For memcpy
 #include <string.h>
@@ -206,21 +210,6 @@ void wx_jpeg_io_src( j_decompress_ptr cinfo, wxInputStream& infile )
     src->pub.term_source = wx_term_source;
 }
 
-static inline void wx_cmyk_to_rgb(unsigned char* rgb, const unsigned char* cmyk)
-{
-    register int k = 255 - cmyk[3];
-    register int k2 = cmyk[3];
-    register int c;
-
-    c = k + k2 * (255 - cmyk[0]) / 255;
-    rgb[0] = (unsigned char)((c > 255) ? 0 : (255 - c));
-
-    c = k + k2 * (255 - cmyk[1]) / 255;
-    rgb[1] = (unsigned char)((c > 255) ? 0 : (255 - c));
-
-    c = k + k2 * (255 - cmyk[2]) / 255;
-    rgb[2] = (unsigned char)((c > 255) ? 0 : (255 - c));
-}
 
 // temporarily disable the warning C4611 (interaction between '_setjmp' and
 // C++ object destruction is non-portable) - I don't see any dtors here
@@ -232,7 +221,9 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
 {
     struct jpeg_decompress_struct cinfo;
     struct wx_error_mgr jerr;
+    JSAMPARRAY tempbuf;
     unsigned char *ptr;
+    unsigned stride;
 
     image->Destroy();
     cinfo.err = jpeg_std_error( &jerr.pub );
@@ -257,19 +248,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     jpeg_create_decompress( &cinfo );
     wx_jpeg_io_src( &cinfo, stream );
     jpeg_read_header( &cinfo, TRUE );
-
-    int bytesPerPixel;
-    if ((cinfo.out_color_space == JCS_CMYK) || (cinfo.out_color_space == JCS_YCCK))
-    {
-        cinfo.out_color_space = JCS_CMYK;
-        bytesPerPixel = 4;
-    }
-    else // all the rest is treated as RGB
-    {
-        cinfo.out_color_space = JCS_RGB;
-        bytesPerPixel = 3;
-    }
-
+    cinfo.out_color_space = JCS_RGB;
     jpeg_start_decompress( &cinfo );
 
     image->Create( cinfo.image_width, cinfo.image_height );
@@ -280,31 +259,15 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     }
     image->SetMask( false );
     ptr = image->GetData();
+    stride = cinfo.output_width * 3;
+    tempbuf = (*cinfo.mem->alloc_sarray)
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, stride, 1 );
 
-    unsigned stride = cinfo.output_width * bytesPerPixel;
-    JSAMPARRAY tempbuf = (*cinfo.mem->alloc_sarray)
-                            ((j_common_ptr) &cinfo, JPOOL_IMAGE, stride, 1 );
-
-    while ( cinfo.output_scanline < cinfo.output_height )
-    {
+    while ( cinfo.output_scanline < cinfo.output_height ) {
         jpeg_read_scanlines( &cinfo, tempbuf, 1 );
-        if (cinfo.out_color_space == JCS_RGB)
-        {
-            memcpy( ptr, tempbuf[0], stride );
-            ptr += stride;
-        }
-        else // CMYK
-        {
-            const unsigned char* inptr = (const unsigned char*) tempbuf[0];
-            for (size_t i = 0; i < cinfo.output_width; i++)
-            {
-                wx_cmyk_to_rgb(ptr, inptr);
-                ptr += 3;
-                inptr += 4;
-            }
-        }
+        memcpy( ptr, tempbuf[0], stride );
+        ptr += stride;
     }
-
     jpeg_finish_decompress( &cinfo );
     jpeg_destroy_decompress( &cinfo );
     return true;
@@ -478,3 +441,9 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 #endif   // wxUSE_STREAMS
 
 #endif   // wxUSE_LIBJPEG
+
+
+
+
+
+

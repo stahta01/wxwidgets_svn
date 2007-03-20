@@ -18,16 +18,16 @@ GROUP_WINDOWS, GROUP_MENUS, GROUP_SIZERS, GROUP_CONTROLS = range(GROUPNUM)
 STATE_ROOT, STATE_MENUBAR, STATE_TOOLBAR, STATE_MENU, STATE_STDDLGBTN, STATE_ELSE = range(6)
 
 # Left toolbar for GUI elements
-class Tools(wx.Panel):
+class Tools(wxPanel):
     TOOL_SIZE = (30, 30)
     def __init__(self, parent):
-        if wx.Platform == '__WXGTK__':
-            wx.Panel.__init__(self, parent, -1,
-                             style=wx.RAISED_BORDER|wx.WANTS_CHARS)
+        if wxPlatform == '__WXGTK__':
+            wxPanel.__init__(self, parent, -1,
+                             style=wxRAISED_BORDER|wxWANTS_CHARS)
         else:
-            wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
+            wxPanel.__init__(self, parent, -1, style=wxWANTS_CHARS)
         # Create sizer for groups
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer = wxBoxSizer(wxVERTICAL)
         # Data to create buttons
         pullDownMenu = g.pullDownMenu
         self.groups = []
@@ -87,46 +87,40 @@ class Tools(wx.Panel):
 
              (ID_NEW.UNKNOWN, images.getToolUnknownBitmap())]
             ]
-        self.boxes = {}
         for grp in groups:
             self.AddGroup(grp[0])
             for b in grp[1:]:
                 self.AddButton(b[0], b[1], g.pullDownMenu.createMap[b[0]])
+        self.SetAutoLayout(True)
         self.SetSizerAndFit(self.sizer)
         # Allow to be resized in vertical direction only
         self.SetSizeHints(self.GetSize()[0], -1)
         # Events
-        wx.EVT_COMMAND_RANGE(self, ID_NEW.PANEL, ID_NEW.LAST,
-                          wx.wxEVT_COMMAND_BUTTON_CLICKED, g.frame.OnCreate)
-        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        wx.EVT_KEY_UP(self, self.OnKeyUp)
+        EVT_COMMAND_RANGE(self, ID_NEW.PANEL, ID_NEW.LAST,
+                          wxEVT_COMMAND_BUTTON_CLICKED, g.frame.OnCreate)
+        EVT_KEY_DOWN(self, self.OnKeyDown)
+        EVT_KEY_UP(self, self.OnKeyUp)
 
     def AddButton(self, id, image, text):
-        from wx.lib import buttons
-        button = buttons.GenBitmapButton(self, id, image, size=self.TOOL_SIZE,
-                                           style=wx.NO_BORDER|wx.WANTS_CHARS)
+        from wxPython.lib import buttons
+        button = buttons.wxGenBitmapButton(self, id, image, size=self.TOOL_SIZE,
+                                           style=wxNO_BORDER|wxWANTS_CHARS)
         button.SetBezelWidth(0)
-        wx.EVT_KEY_DOWN(button, self.OnKeyDown)
-        wx.EVT_KEY_UP(button, self.OnKeyUp)
+        EVT_KEY_DOWN(button, self.OnKeyDown)
+        EVT_KEY_UP(button, self.OnKeyUp)
         button.SetToolTipString(text)
         self.curSizer.Add(button)
         self.groups[-1][1][id] = button
 
     def AddGroup(self, name):
         # Each group is inside box
-        id = wx.NewId()
-        box = wx.StaticBox(self, id, '[+] '+name, style=wx.WANTS_CHARS)
-        box.show = True
-        box.name = name
-        box.gnum = len(self.groups)
+        box = wxStaticBox(self, -1, name, style=wxWANTS_CHARS)
         box.SetFont(g.smallerFont())
-        box.Bind(wx.EVT_LEFT_DOWN, self.OnClickBox)
-        boxSizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        boxSizer = wxStaticBoxSizer(box, wxVERTICAL)
         boxSizer.Add((0, 4))
-        self.boxes[id] = box
-        self.curSizer = wx.GridSizer(0, 3)
+        self.curSizer = wxGridSizer(0, 3)
         boxSizer.Add(self.curSizer)
-        self.sizer.Add(boxSizer, 0, wx.TOP | wx.LEFT | wx.RIGHT | wx.EXPAND, 4)
+        self.sizer.Add(boxSizer, 0, wxTOP | wxLEFT | wxRIGHT, 4)
         self.groups.append((box,{}))
 
     # Enable/disable group
@@ -134,12 +128,6 @@ class Tools(wx.Panel):
         grp = self.groups[gnum]
         grp[0].Enable(enable)
         for b in grp[1].values(): b.Enable(enable)
-
-    # Show/hide group
-    def ShowGroup(self, gnum, show = True):
-        grp = self.groups[gnum]
-        grp[0].show = show
-        for b in grp[1].values(): b.Show(show)
 
     # Enable/disable group item
     def EnableGroupItem(self, gnum, id, enable = True):
@@ -152,27 +140,19 @@ class Tools(wx.Panel):
         for id in ids:
             grp[1][id].Enable(enable)
 
-    def OnClickBox(self, evt):
-        box = self.boxes[evt.GetId()]
-        # Collapse/restore static box, change label
-        self.ShowGroup(box.gnum, not box.show)
-        if box.show: box.SetLabel('[+] ' + box.name)
-        else: box.SetLabel('[-] ' + box.name)
-        self.Layout()
-
     # Process key events
     def OnKeyDown(self, evt):
-        if evt.GetKeyCode() == wx.WXK_CONTROL:
+        if evt.GetKeyCode() == WXK_CONTROL:
             g.tree.ctrl = True
-        elif evt.GetKeyCode() == wx.WXK_SHIFT:
+        elif evt.GetKeyCode() == WXK_SHIFT:
             g.tree.shift = True
         self.UpdateIfNeeded()
         evt.Skip()
 
     def OnKeyUp(self, evt):
-        if evt.GetKeyCode() == wx.WXK_CONTROL:
+        if evt.GetKeyCode() == WXK_CONTROL:
             g.tree.ctrl = False
-        elif evt.GetKeyCode() == wx.WXK_SHIFT:
+        elif evt.GetKeyCode() == WXK_SHIFT:
             g.tree.shift = False
         self.UpdateIfNeeded()
         evt.Skip()

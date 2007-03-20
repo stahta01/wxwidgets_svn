@@ -7,11 +7,33 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_BITMAP_H_
-#define _WX_GTK_BITMAP_H_
 
+#ifndef __GTKBITMAPH__
+#define __GTKBITMAPH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/string.h"
+#include "wx/palette.h"
+#include "wx/gdiobj.h"
+
+#ifdef __WXGTK20__
 typedef struct _GdkPixbuf GdkPixbuf;
+#endif
+
 class WXDLLEXPORT wxPixelDataBase;
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxMask;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxImage;
 
 //-----------------------------------------------------------------------------
 // wxMask
@@ -26,7 +48,7 @@ public:
     wxMask( const wxBitmap& bitmap, int paletteIndex );
 #endif // wxUSE_PALETTE
     wxMask( const wxBitmap& bitmap );
-    virtual ~wxMask();
+    ~wxMask();
 
     bool Create( const wxBitmap& bitmap, const wxColour& colour );
 #if wxUSE_PALETTE
@@ -50,22 +72,19 @@ private:
 class WXDLLIMPEXP_CORE wxBitmap: public wxBitmapBase
 {
 public:
-    wxBitmap() { }
+    wxBitmap();
     wxBitmap( int width, int height, int depth = -1 );
     wxBitmap( const char bits[], int width, int height, int depth = 1 );
-    wxBitmap( const char* const* bits );
-#ifdef wxNEEDS_CHARPP
-    // needed for old GCC
-    wxBitmap(char** data)
-    {
-        *this = wxBitmap(wx_const_cast(const char* const*, data));
-    }
-#endif
+    wxBitmap( const char **bits ) { (void)CreateFromXpm(bits); }
+    wxBitmap( char **bits ) { (void)CreateFromXpm((const char **)bits); }
+    wxBitmap( const wxBitmap& bmp );
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
     wxBitmap( const wxImage& image, int depth = -1 ) { (void)CreateFromImage(image, depth); }
-    virtual ~wxBitmap();
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    ~wxBitmap();
+    wxBitmap& operator = ( const wxBitmap& bmp );
+    bool operator == ( const wxBitmap& bmp ) const;
+    bool operator != ( const wxBitmap& bmp ) const;
+    bool Ok() const;
 
     bool Create(int width, int height, int depth = -1);
 
@@ -102,15 +121,21 @@ public:
     void SetWidth( int width );
     void SetDepth( int depth );
     void SetPixmap( GdkPixmap *pixmap );
-    void SetPixbuf(GdkPixbuf* pixbuf, int depth = 0);
+    void SetBitmap( GdkBitmap *bitmap );
+#ifdef __WXGTK20__
+    void SetPixbuf(GdkPixbuf *pixbuf);
+#endif
 
     GdkPixmap *GetPixmap() const;
+    GdkBitmap *GetBitmap() const;
     bool HasPixmap() const;
+#ifdef __WXGTK20__
     bool HasPixbuf() const;
     GdkPixbuf *GetPixbuf() const;
+#endif
 
     // Basically, this corresponds to Win32 StretchBlt()
-    wxBitmap Rescale(int clipx, int clipy, int clipwidth, int clipheight, int width, int height) const;
+    wxBitmap Rescale( int clipx, int clipy, int clipwidth, int clipheight, int width, int height );
 
     // raw bitmap access support functions
     void *GetRawData(wxPixelDataBase& data, int bpp);
@@ -120,14 +145,15 @@ public:
     void UseAlpha();
 
 protected:
+    bool CreateFromXpm(const char **bits);
     bool CreateFromImage(const wxImage& image, int depth);
-
-    virtual wxObjectRefData* CreateRefData() const;
-    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
 
 private:
     // to be called from CreateFromImage only!
-    bool CreateFromImageAsPixmap(const wxImage& image, int depth);
+    bool CreateFromImageAsBitmap(const wxImage& image);
+    bool CreateFromImageAsPixmap(const wxImage& image);
+
+#ifdef __WXGTK20__
     bool CreateFromImageAsPixbuf(const wxImage& image);
 
     enum Representation
@@ -140,6 +166,7 @@ private:
     void PurgeOtherRepresentations(Representation keep);
 
     friend class wxMemoryDC;
+#endif
     friend class wxBitmapHandler;
 
 private:
@@ -152,7 +179,18 @@ private:
 
 class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
 {
-    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+public:
+    wxBitmapHandler() { }
+    virtual ~wxBitmapHandler();
+
+    virtual bool Create(wxBitmap *bitmap, void *data, long flags, int width, int height, int depth = 1);
+    virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
+        int desiredWidth, int desiredHeight);
+    virtual bool SaveFile(const wxBitmap *bitmap, const wxString& name, int type, const wxPalette *palette = NULL);
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 };
 
-#endif // _WX_GTK_BITMAP_H_
+
+#endif // __GTKBITMAPH__

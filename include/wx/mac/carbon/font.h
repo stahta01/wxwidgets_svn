@@ -12,6 +12,10 @@
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "font.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
@@ -20,7 +24,13 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font)
+        : wxFontBase()
+    {
+        Init();
+        Ref(font);
+    }
 
     wxFont(int size,
            int family,
@@ -30,11 +40,15 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
     wxFont(const wxNativeFontInfo& info)
     {
+        Init();
+
         (void)Create(info);
     }
 
@@ -54,9 +68,11 @@ public:
     
     virtual ~wxFont();
 
+    // assignment
+    wxFont& operator=(const wxFont& font);
+
     // implement base class pure virtuals
     virtual int GetPointSize() const;
-    virtual wxSize GetPixelSize() const;
     virtual int GetFamily() const;
     virtual int GetStyle() const;
     virtual int GetWeight() const;
@@ -69,7 +85,7 @@ public:
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
     virtual void SetWeight(int weight);
-    virtual bool SetFaceName(const wxString& faceName);
+    virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
@@ -99,9 +115,12 @@ public:
     void* MacGetATSUStyle() const ; 
     
 protected:
-    virtual wxObjectRefData* CreateRefData() const;
-    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
+    // common part of all ctors
+    void Init();
 
+    void Unshare();
+
+private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 

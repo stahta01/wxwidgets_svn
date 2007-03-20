@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "combobox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,20 +30,22 @@
 
 #if wxUSE_COMBOBOX
 
-#include "wx/combobox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/log.h"
     // for wxEVT_COMMAND_TEXT_ENTER
     #include "wx/textctrl.h"
-    #include "wx/brush.h"
 #endif
 
+#include "wx/combobox.h"
+#include "wx/brush.h"
 #include "wx/clipbrd.h"
 #include "wx/palmos/private.h"
 
 #if wxUSE_TOOLTIPS
+    #if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
+        #include <commctrl.h>
+    #endif
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
 
@@ -278,3 +284,4 @@ bool wxComboBox::CanRedo() const
 
 
 #endif // wxUSE_COMBOBOX
+

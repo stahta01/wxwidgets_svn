@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/statbmp.cpp
+// Name:        univ/statbmp.cpp
 // Purpose:     wxStaticBitmap implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univstatbmp.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,11 +29,10 @@
 
 #if wxUSE_STATBMP
 
-#include "wx/statbmp.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dc.h"
     #include "wx/icon.h"
+    #include "wx/statbmp.h"
     #include "wx/validate.h"
 #endif
 
@@ -61,7 +64,7 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     SetBitmap(label);
 
     // and adjust our size to fit it after this
-    SetInitialSize(size);
+    SetBestSize(size);
 
     return true;
 }
@@ -106,3 +109,4 @@ void wxStaticBitmap::DoDraw(wxControlRenderer *renderer)
 }
 
 #endif // wxUSE_STATBMP
+

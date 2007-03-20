@@ -8,6 +8,10 @@
 // License:    wxWindows license
 // -----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+#pragma implementation "vidwin.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP

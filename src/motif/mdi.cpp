@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/mdi.cpp
+// Name:        mdi.cpp
 // Purpose:     MDI classes
 // Author:      Julian Smart
 // Modified by:
@@ -8,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mdi.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,12 +22,9 @@
 #endif
 
 #include "wx/mdi.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/menu.h"
-    #include "wx/icon.h"
-    #include "wx/settings.h"
-#endif
+#include "wx/menu.h"
+#include "wx/settings.h"
+#include "wx/icon.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -302,7 +303,7 @@ void wxMDIParentFrame::OnMenuHighlight(wxMenuEvent& event)
     if (GetStatusBar())
     {
         if (event.GetMenuId() == -1)
-            SetStatusText(wxEmptyString);
+            SetStatusText("");
         else
         {
             wxMenuBar *menuBar = (wxMenuBar*) NULL;
@@ -313,7 +314,7 @@ void wxMDIParentFrame::OnMenuHighlight(wxMenuEvent& event)
             if (menuBar)
             {
                 wxString helpString(menuBar->GetHelpString(event.GetMenuId()));
-                if (!helpString.empty())
+                if (helpString != "")
                     SetStatusText(helpString);
             }
         }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/lboxcmn.cpp
+// Name:        common/lboxcmn.cpp
 // Purpose:     wxListBox class methods common to all platforms
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listboxbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,9 +30,8 @@
 
 #if wxUSE_LISTBOX
 
-#include "wx/listbox.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/listbox.h"
     #include "wx/dynarray.h"
     #include "wx/arrstr.h"
 #endif
@@ -46,10 +49,10 @@ wxListBoxBase::~wxListBoxBase()
 // adding items
 // ----------------------------------------------------------------------------
 
-void wxListBoxBase::InsertItems(unsigned int nItems, const wxString *items, unsigned int pos)
+void wxListBoxBase::InsertItems(int nItems, const wxString *items, int pos)
 {
     wxArrayString aItems;
-    for ( unsigned int n = 0; n < nItems; n++ )
+    for ( int n = 0; n < nItems; n++ )
     {
         aItems.Add(items[n]);
     }
@@ -75,9 +78,9 @@ void wxListBoxBase::Set(int nItems, const wxString* items, void **clientData)
 
 bool wxListBoxBase::SetStringSelection(const wxString& s, bool select)
 {
-    const int sel = FindString(s);
-    if ( sel == wxNOT_FOUND )
-        return false;
+    int sel = FindString(s);
+    wxCHECK_MSG( sel != wxNOT_FOUND, false,
+                 wxT("invalid string in SetStringSelection") );
 
     SetSelection(sel, select);
 

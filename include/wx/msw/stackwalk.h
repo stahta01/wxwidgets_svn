@@ -12,8 +12,6 @@
 #ifndef _WX_MSW_STACKWALK_H_
 #define _WX_MSW_STACKWALK_H_
 
-#include "wx/arrstr.h"
-
 // these structs are declared in windows headers
 struct _CONTEXT;
 struct _EXCEPTION_POINTERS;
@@ -90,7 +88,7 @@ public:
     // only
     wxStackWalker(const char * WXUNUSED(argv0) = NULL) { }
 
-    virtual void Walk(size_t skip = 1, size_t maxDepth = 200);
+    virtual void Walk(size_t skip = 1);
     virtual void WalkFromException();
 
 

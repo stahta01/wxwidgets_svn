@@ -28,6 +28,7 @@ class GridFrame : public wxFrame
     wxTextCtrl     *logWin;
     wxLogTextCtrl  *logger;
 #endif // wxUSE_LOG
+    wxString       logBuf;
 
     void SetDefaults();
 
@@ -36,7 +37,6 @@ class GridFrame : public wxFrame
     void ToggleEditing( wxCommandEvent& );
     void ToggleRowSizing( wxCommandEvent& );
     void ToggleColSizing( wxCommandEvent& );
-    void ToggleColMoving( wxCommandEvent& );
     void ToggleGridSizing( wxCommandEvent& );
     void ToggleGridDragCell ( wxCommandEvent& );
     void ToggleGridLines( wxCommandEvent& );
@@ -73,15 +73,6 @@ class GridFrame : public wxFrame
     void SelectRow(wxCommandEvent& event);
     void SelectAll(wxCommandEvent& event);
     void OnAddToSelectToggle(wxCommandEvent& event);
-    void OnShowSelection(wxCommandEvent& event);
-
-    void AutoSizeRow(wxCommandEvent& event);
-    void AutoSizeCol(wxCommandEvent& event);
-    void AutoSizeRowLabel(wxCommandEvent& event);
-    void AutoSizeColLabel(wxCommandEvent& event);
-    void AutoSizeLabelsCol(wxCommandEvent& event);
-    void AutoSizeLabelsRow(wxCommandEvent& event);
-    void AutoSizeTable(wxCommandEvent& event);
 
     void OnLabelLeftClick( wxGridEvent& );
     void OnCellLeftClick( wxGridEvent& );
@@ -115,7 +106,6 @@ public:
         ID_TOGGLEEDIT,
         ID_TOGGLEROWSIZING,
         ID_TOGGLECOLSIZING,
-        ID_TOGGLECOLMOVING,
         ID_TOGGLEGRIDSIZING,
         ID_TOGGLEGRIDDRAGCELL,
         ID_TOGGLEGRIDLINES,
@@ -147,7 +137,6 @@ public:
         ID_BUGS_TABLE,
         ID_SMALL_GRID,
         ID_SELECT_UNSELECT,
-        ID_SHOW_SELECTION,
         ID_SELECT_ALL,
         ID_SELECT_ROW,
         ID_SELECT_COL,
@@ -156,13 +145,6 @@ public:
         ID_DESELECT_ROW,
         ID_DESELECT_COL,
         ID_DESELECT_CELL,
-        ID_SIZE_ROW,
-        ID_SIZE_COL,
-        ID_SIZE_ROW_LABEL,
-        ID_SIZE_COL_LABEL,
-        ID_SIZE_LABELS_COL,
-        ID_SIZE_LABELS_ROW,
-        ID_SIZE_GRID,
 
         ID_SET_HIGHLIGHT_WIDTH,
         ID_SET_RO_HIGHLIGHT_WIDTH,

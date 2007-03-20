@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/dc.h
+// Name:        dc.h
 // Purpose:     wxDC class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -12,13 +12,16 @@
 #ifndef _WX_DC_H_BASE_
 #define _WX_DC_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dcbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers which we must include here
 // ----------------------------------------------------------------------------
 
 #include "wx/object.h"          // the base class
 
-#include "wx/intl.h"            // for wxLayoutDirection
 #include "wx/cursor.h"          // we have member variables of these classes
 #include "wx/font.h"            // so we can't do without them
 #include "wx/colour.h"
@@ -94,6 +97,8 @@ protected:
 // global variables
 // ---------------------------------------------------------------------------
 
+extern WXDLLEXPORT_DATA(int) wxPageNumber;
+
 // ---------------------------------------------------------------------------
 // wxDC is the device context - object on which any drawing is done
 // ---------------------------------------------------------------------------
@@ -133,7 +138,10 @@ public:
         ResetClipping();
     }
 
-    virtual ~wxDCBase() { }
+    ~wxDCBase() { }
+
+    virtual void BeginDrawing() { }
+    virtual void EndDrawing() { }
 
     // graphic primitives
     // ------------------
@@ -151,28 +159,6 @@ public:
     bool FloodFill(const wxPoint& pt, const wxColour& col,
                    int style = wxFLOOD_SURFACE)
         { return DoFloodFill(pt.x, pt.y, col, style); }
-
-    // fill the area specified by rect with a radial gradient, starting from
-    // initialColour in the centre of the cercle and fading to destColour.
-    void GradientFillConcentric(const wxRect& rect,
-                                const wxColour& initialColour,
-                                const wxColour& destColour)
-        { GradientFillConcentric(rect, initialColour, destColour,
-                                 wxPoint(rect.GetWidth() / 2,
-                                         rect.GetHeight() / 2)); }
-
-    void GradientFillConcentric(const wxRect& rect,
-                                const wxColour& initialColour,
-                                const wxColour& destColour,
-                                const wxPoint& circleCenter)
-        { DoGradientFillConcentric(rect, initialColour, destColour, circleCenter); }
-
-    // fill the area specified by rect with a linear gradient
-    void GradientFillLinear(const wxRect& rect,
-                            const wxColour& initialColour,
-                            const wxColour& destColour,
-                            wxDirection nDirection = wxEAST)
-        { DoGradientFillLinear(rect, initialColour, destColour, nDirection); }
 
     bool GetPixel(wxCoord x, wxCoord y, wxColour *col) const
         { return DoGetPixel(x, y, col); }
@@ -314,30 +300,6 @@ public:
                       source, srcPt.x, srcPt.y, rop, useMask, srcPtMask.x, srcPtMask.y);
     }
 
-    bool StretchBlit(wxCoord dstX, wxCoord dstY, 
-                     wxCoord dstWidth, wxCoord dstHeight,
-                     wxDC *source, 
-                     wxCoord srcX, wxCoord srcY,
-                     wxCoord srcWidth, wxCoord srcHeight,
-                     int rop = wxCOPY, bool useMask = false, 
-                     wxCoord srcMaskX = wxDefaultCoord, wxCoord srcMaskY = wxDefaultCoord)
-    {
-        return DoStretchBlit(dstX, dstY, dstWidth, dstHeight,
-                      source, srcX, srcY, srcWidth, srcHeight, rop, useMask, srcMaskX, srcMaskY);
-    }
-    bool StretchBlit(const wxPoint& dstPt, const wxSize& dstSize,
-                     wxDC *source, const wxPoint& srcPt, const wxSize& srcSize,
-                     int rop = wxCOPY, bool useMask = false, const wxPoint& srcMaskPt = wxDefaultPosition)
-    {
-        return DoStretchBlit(dstPt.x, dstPt.y, dstSize.x, dstSize.y,
-                      source, srcPt.x, srcPt.y, srcSize.x, srcSize.y, rop, useMask, srcMaskPt.x, srcMaskPt.y);
-    }
-
-    wxBitmap GetAsBitmap(const wxRect *subrect = (const wxRect *) NULL) const
-    {
-        return DoGetAsBitmap(subrect);
-    }
-
 #if wxUSE_SPLINES
     // TODO: this API needs fixing (wxPointList, why (!const) "wxList *"?)
     void DrawSpline(wxCoord x1, wxCoord y1,
@@ -407,12 +369,6 @@ public:
     virtual void StartPage() { }
     virtual void EndPage() { }
 
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( void BeginDrawing() );
-    wxDEPRECATED( void EndDrawing() );
-#endif // WXWIN_COMPATIBILITY_2_6
-
-
     // set objects to use for drawing
     // ------------------------------
 
@@ -460,26 +416,12 @@ public:
                        wxFont *theFont = NULL) const
         { DoGetTextExtent(string, x, y, descent, externalLeading, theFont); }
 
-    wxSize GetTextExtent(const wxString& string) const
-    {
-        wxCoord w, h;
-        DoGetTextExtent(string, &w, &h);
-        return wxSize(w, h);
-    }
-
     // works for single as well as multi-line strings
-    virtual void GetMultiLineTextExtent(const wxString& string,
+    virtual void GetMultiLineTextExtent(const wxString& text,
                                         wxCoord *width,
                                         wxCoord *height,
                                         wxCoord *heightLine = NULL,
-                                        wxFont *font = NULL) const;
-
-    wxSize GetMultiLineTextExtent(const wxString& string) const
-    {
-        wxCoord w, h;
-        GetMultiLineTextExtent(string, &w, &h);
-        return wxSize(w, h);
-    }
+                                        wxFont *font = NULL);
 
     // Measure cumulative width of text after each character
     bool GetPartialTextExtents(const wxString& text, wxArrayInt& widths) const
@@ -537,26 +479,25 @@ public:
     // Resolution in Pixels per inch
     virtual wxSize GetPPI() const = 0;
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const { return m_ok; }
+    virtual bool Ok() const { return m_ok; }
 
     // accessors and setters
     // ---------------------
 
-    virtual int GetBackgroundMode() const { return m_backgroundMode; }
-    virtual const wxBrush&  GetBackground() const { return m_backgroundBrush; }
-    virtual const wxBrush&  GetBrush() const { return m_brush; }
-    virtual const wxFont&   GetFont() const { return m_font; }
-    virtual const wxPen&    GetPen() const { return m_pen; }
+    int GetBackgroundMode() const { return m_backgroundMode; }
+    const wxBrush&  GetBackground() const { return m_backgroundBrush; }
+    const wxBrush&  GetBrush() const { return m_brush; }
+    const wxFont&   GetFont() const { return m_font; }
+    const wxPen&    GetPen() const { return m_pen; }
 
-    virtual const wxColour& GetTextForeground() const { return m_textForegroundColour; }
-    virtual const wxColour& GetTextBackground() const { return m_textBackgroundColour; }
+    const wxColour& GetTextForeground() const { return m_textForegroundColour; }
+    const wxColour& GetTextBackground() const { return m_textBackgroundColour; }
     virtual void SetTextForeground(const wxColour& colour)
         { m_textForegroundColour = colour; }
     virtual void SetTextBackground(const wxColour& colour)
         { m_textBackgroundColour = colour; }
 
-    virtual int GetMapMode() const { return m_mappingMode; }
+    int GetMapMode() const { return m_mappingMode; }
     virtual void SetMapMode(int mode) = 0;
 
     virtual void GetUserScale(double *x, double *y) const
@@ -593,8 +534,13 @@ public:
 
     virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp) = 0;
 
-    virtual int GetLogicalFunction() const { return m_logicalFunction; }
+    int GetLogicalFunction() const { return m_logicalFunction; }
     virtual void SetLogicalFunction(int function) = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+    virtual void SetOptimization(bool WXUNUSED(opt)) { }
+    virtual bool GetOptimization() { return false; }
+#endif
 
     // bounding box
     // ------------
@@ -685,30 +631,23 @@ public:
         if (h) *h = hh;
     }
 
-    // RTL related functions
-    // ---------------------
-
-    // get or change the layout direction (LTR or RTL) for this dc,
-    // wxLayout_Default is returned if layout direction is not supported
-    virtual wxLayoutDirection GetLayoutDirection() const
-        { return wxLayout_Default; }
-    virtual void SetLayoutDirection(wxLayoutDirection WXUNUSED(dir))
-        { }
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedDCFunc1() {}
+    virtual void ReservedDCFunc2() {}
+    virtual void ReservedDCFunc3() {}
+    virtual void ReservedDCFunc4() {}
+    virtual void ReservedDCFunc5() {}
+    virtual void ReservedDCFunc6() {}
+    virtual void ReservedDCFunc7() {}
+    virtual void ReservedDCFunc8() {}
+    virtual void ReservedDCFunc9() {}
+#endif
 
 protected:
     // the pure virtual functions which should be implemented by wxDC
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE) = 0;
-
-    virtual void DoGradientFillLinear(const wxRect& rect,
-                                      const wxColour& initialColour,
-                                      const wxColour& destColour,
-                                      wxDirection nDirection = wxEAST);
-
-    virtual void DoGradientFillConcentric(const wxRect& rect,
-                                        const wxColour& initialColour,
-                                        const wxColour& destColour,
-                                        const wxPoint& circleCenter);
 
     virtual bool DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const = 0;
 
@@ -742,25 +681,8 @@ protected:
 
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord width, wxCoord height,
-                        wxDC *source,
-                        wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY,
-                        bool useMask = false,
-                        wxCoord xsrcMask = wxDefaultCoord,
-                        wxCoord ysrcMask = wxDefaultCoord) = 0;
-
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY,
-                               bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord,
-                               wxCoord ysrcMask = wxDefaultCoord);
-
-    virtual wxBitmap DoGetAsBitmap(const wxRect *WXUNUSED(subrect)) const
-        { return wxNullBitmap; }
+                        wxDC *source, wxCoord xsrc, wxCoord ysrc,
+                        int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) = 0;
 
     virtual void DoGetSize(int *width, int *height) const = 0;
     virtual void DoGetSizeMM(int* width, int* height) const = 0;
@@ -777,6 +699,13 @@ protected:
     virtual void DoSetClippingRegionAsRegion(const wxRegion& region) = 0;
     virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
                                      wxCoord width, wxCoord height) = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+    // this was only for confusing people, use DoGetClippingBox only
+    virtual void DoGetClippingRegion(wxCoord *x, wxCoord *y,
+                                     wxCoord *w, wxCoord *h)
+        { DoGetClippingBox(x, y, w, h); }
+#endif
 
     virtual void DoGetClippingBox(wxCoord *x, wxCoord *y,
                                   wxCoord *w, wxCoord *h) const
@@ -881,26 +810,18 @@ private:
     #include "wx/msw/dc.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/dc.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dc.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/dc.h"
+    #include "wx/gtk/dc.h"
 #elif defined(__WXX11__)
     #include "wx/x11/dc.h"
 #elif defined(__WXMGL__)
     #include "wx/mgl/dc.h"
-#elif defined(__WXDFB__)
-    #include "wx/dfb/dc.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dc.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/dc.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dc.h"
-#endif
-
-#if wxUSE_GRAPHICS_CONTEXT
-    #include "wx/dcgraph.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -912,11 +833,6 @@ class WXDLLEXPORT wxDCTextColourChanger
 {
 public:
     wxDCTextColourChanger(wxDC& dc) : m_dc(dc), m_colFgOld() { }
-
-    wxDCTextColourChanger(wxDC& dc, const wxColour& col) : m_dc(dc)
-    {
-        Set(col);
-    }
 
     ~wxDCTextColourChanger()
     {
@@ -940,60 +856,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// helper class: you can use it to temporarily change the DC pen and
-// restore it automatically when the object goes out of scope
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCPenChanger
-{
-public:
-    wxDCPenChanger(wxDC& dc, const wxPen& pen) : m_dc(dc), m_penOld(dc.GetPen())
-    {
-        m_dc.SetPen(pen);
-    }
-
-    ~wxDCPenChanger()
-    {
-        if ( m_penOld.Ok() )
-            m_dc.SetPen(m_penOld);
-    }
-
-private:
-    wxDC& m_dc;
-
-    wxPen m_penOld;
-
-    DECLARE_NO_COPY_CLASS(wxDCPenChanger)
-};
-
-// ----------------------------------------------------------------------------
-// helper class: you can use it to temporarily change the DC brush and
-// restore it automatically when the object goes out of scope
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCBrushChanger
-{
-public:
-    wxDCBrushChanger(wxDC& dc, const wxBrush& brush) : m_dc(dc), m_brushOld(dc.GetBrush())
-    {
-        m_dc.SetBrush(brush);
-    }
-
-    ~wxDCBrushChanger()
-    {
-        if ( m_brushOld.Ok() )
-            m_dc.SetBrush(m_brushOld);
-    }
-
-private:
-    wxDC& m_dc;
-
-    wxBrush m_brushOld;
-
-    DECLARE_NO_COPY_CLASS(wxDCBrushChanger)
-};
-
-// ----------------------------------------------------------------------------
 // another small helper class: sets the clipping region in its ctor and
 // destroys it in the dtor
 // ----------------------------------------------------------------------------
@@ -1001,8 +863,6 @@ private:
 class WXDLLEXPORT wxDCClipper
 {
 public:
-    wxDCClipper(wxDC& dc, const wxRegion& r) : m_dc(dc)
-        { dc.SetClippingRegion(r); }
     wxDCClipper(wxDC& dc, const wxRect& r) : m_dc(dc)
         { dc.SetClippingRegion(r.x, r.y, r.width, r.height); }
     wxDCClipper(wxDC& dc, wxCoord x, wxCoord y, wxCoord w, wxCoord h) : m_dc(dc)
@@ -1016,4 +876,5 @@ private:
     DECLARE_NO_COPY_CLASS(wxDCClipper)
 };
 
-#endif // _WX_DC_H_BASE_
+#endif
+    // _WX_DC_H_BASE_

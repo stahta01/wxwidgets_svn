@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 13 February 2006                                                    *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 24 April 2003                                                       *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -13,12 +13,6 @@
 CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)
-.else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee\
-	/name=(as_is,short)/ieee=denorm/assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee\
-	/name=(as_is,short)/ieee=denorm
 .else
 .ifdef __WXGTK__
 .ifdef __WXUNIVERSAL__
@@ -34,7 +28,6 @@ CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
 .else
 CXX_DEFINE =
 CC_DEFINE =
-.endif
 .endif
 .endif
 
@@ -62,15 +55,11 @@ all : $(SOURCES)
 .ifdef __WXMOTIF__
 	library/crea [---.lib]libwx_motif_deprecated.olb $(OBJECTS)
 .else
-.ifdef __WXGTK2__
-	library/crea [---.lib]libwx_gtk2_deprecated.olb $(OBJECTS)
-.else
 .ifdef __WXGTK__
 .ifdef __WXUNIVERSAL__
 	library/crea [---.lib]libwx_gtk_univ_deprecated.olb $(OBJECTS)
 .else
 	library/crea [---.lib]libwx_gtk_deprecated.olb $(OBJECTS)
-.endif
 .endif
 .endif
 .endif

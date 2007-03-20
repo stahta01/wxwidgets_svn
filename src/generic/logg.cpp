@@ -18,11 +18,15 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "logg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
@@ -37,6 +41,7 @@
     #include "wx/textctrl.h"
     #include "wx/sizer.h"
     #include "wx/statbmp.h"
+    #include "wx/button.h"
     #include "wx/settings.h"
 #endif // WX_PRECOMP
 
@@ -46,21 +51,22 @@
 #include "wx/textfile.h"
 #include "wx/statline.h"
 #include "wx/artprov.h"
-#include "wx/collpane.h"
 
 #ifdef  __WXMSW__
-    // for OutputDebugString()
-    #include  "wx/msw/private.h"
+  // for OutputDebugString()
+  #include  "wx/msw/private.h"
 #endif // Windows
 
 #ifdef  __WXPM__
-    #include <time.h>
+  #include <time.h>
 #endif
 
 #if wxUSE_LOG_DIALOG
     #include "wx/listctrl.h"
     #include "wx/imaglist.h"
     #include "wx/image.h"
+#else // !wxUSE_LOG_DIALOG
+    #include "wx/msgdlg.h"
 #endif // wxUSE_LOG_DIALOG/!wxUSE_LOG_DIALOG
 
 #if defined(__MWERKS__) && wxUSE_UNICODE
@@ -82,18 +88,13 @@
 // allows to exclude the usage of wxDateTime
 static wxString TimeStamp(const wxChar *format, time_t t)
 {
-#if wxUSE_DATETIME
     wxChar buf[4096];
-    struct tm tm;
-    if ( !wxStrftime(buf, WXSIZEOF(buf), format, wxLocaltime_r(&t, &tm)) )
+    if ( !wxStrftime(buf, WXSIZEOF(buf), format, localtime(&t)) )
     {
         // buffer is too small?
         wxFAIL_MSG(_T("strftime() failed"));
     }
     return wxString(buf);
-#else // !wxUSE_DATETIME
-    return wxEmptyString;
-#endif // wxUSE_DATETIME/!wxUSE_DATETIME
 }
 
 
@@ -110,35 +111,26 @@ public:
 
     // event handlers
     void OnOk(wxCommandEvent& event);
+    void OnDetails(wxCommandEvent& event);
 #if wxUSE_FILE
     void OnSave(wxCommandEvent& event);
 #endif // wxUSE_FILE
     void OnListSelect(wxListEvent& event);
-    void OnListItemActivated(wxListEvent& event);
 
 private:
     // create controls needed for the details display
-    void CreateDetailsControls(wxWindow *);
-
-    // if necessary truncates the given string and adds an ellipsis
-    wxString EllipsizeString(const wxString &text)
-    {
-        if (ms_maxLength > 0 &&
-            text.length() > ms_maxLength)
-        {
-            wxString ret(text);
-            ret.Truncate(ms_maxLength);
-            ret << "...";
-            return ret;
-        }
-
-        return text;
-    }
+    void CreateDetailsControls();
 
     // the data for the listctrl
     wxArrayString m_messages;
     wxArrayInt m_severity;
     wxArrayLong m_times;
+
+    // the "toggle" button and its state
+#ifndef __SMARTPHONE__
+    wxButton *m_btnDetails;
+#endif
+    bool      m_showingDetails;
 
     // the controls which are not shown initially (but only when details
     // button is pressed)
@@ -155,20 +147,17 @@ private:
     // the translated "Details" string
     static wxString ms_details;
 
-    // the maximum length of the log message
-    static size_t ms_maxLength;
-
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxLogDialog)
 };
 
 BEGIN_EVENT_TABLE(wxLogDialog, wxDialog)
     EVT_BUTTON(wxID_OK, wxLogDialog::OnOk)
+    EVT_BUTTON(wxID_MORE,   wxLogDialog::OnDetails)
 #if wxUSE_FILE
     EVT_BUTTON(wxID_SAVE,   wxLogDialog::OnSave)
 #endif // wxUSE_FILE
     EVT_LIST_ITEM_SELECTED(wxID_ANY, wxLogDialog::OnListSelect)
-    EVT_LIST_ITEM_ACTIVATED(wxID_ANY, wxLogDialog::OnListItemActivated)
 END_EVENT_TABLE()
 
 #endif // wxUSE_LOG_DIALOG
@@ -224,7 +213,7 @@ void wxVLogStatus(wxFrame *pFrame, const wxChar *szFormat, va_list argptr)
   }
 }
 
-void wxDoLogStatus(wxFrame *pFrame, const wxChar *szFormat, ...)
+void wxLogStatus(wxFrame *pFrame, const wxChar *szFormat, ...)
 {
     va_list argptr;
     va_start(argptr, szFormat);
@@ -261,12 +250,6 @@ void wxLogGui::Flush()
 
     // do it right now to block any new calls to Flush() while we're here
     m_bHasMessages = false;
-
-    unsigned repeatCount = 0;
-    if ( wxLog::GetRepetitionCounting() )
-    {
-        repeatCount = wxLog::DoLogNumberOfRepeats();
-    }
 
     wxString appName = wxTheApp->GetAppName();
     if ( !appName.empty() )
@@ -305,8 +288,6 @@ void wxLogGui::Flush()
     {
 #if wxUSE_LOG_DIALOG
 
-        if ( repeatCount > 0 )
-            m_aMessages[nMsgCount-1] += wxString::Format(wxT(" (%s)"), m_aMessages[nMsgCount-2].c_str());
         wxLogDialog dlg(NULL,
                         m_aMessages, m_aSeverity, m_aTimes,
                         title, style);
@@ -718,7 +699,6 @@ static const size_t MARGIN = 0;
 #endif
 
 wxString wxLogDialog::ms_details;
-size_t wxLogDialog::ms_maxLength = 0;
 
 wxLogDialog::wxLogDialog(wxWindow *parent,
                          const wxArrayString& messages,
@@ -730,8 +710,6 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
                       wxDefaultPosition, wxDefaultSize,
                       wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-    // init the static variables:
-
     if ( ms_details.empty() )
     {
         // ensure that we won't loop here if wxGetTranslation()
@@ -743,11 +721,6 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
 #endif
     }
 
-    if ( ms_maxLength == 0 )
-    {
-        ms_maxLength = (2 * wxGetDisplaySize().x/3) / GetCharWidth();
-    }
-
     size_t count = messages.GetCount();
     m_messages.Alloc(count);
     m_severity.Alloc(count);
@@ -755,11 +728,14 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
 
     for ( size_t n = 0; n < count; n++ )
     {
-        m_messages.Add(messages[n]);
+        wxString msg = messages[n];
+        msg.Replace(wxT("\n"), wxT(" "));
+        m_messages.Add(msg);
         m_severity.Add(severity[n]);
         m_times.Add(times[n]);
     }
 
+    m_showingDetails = false; // not initially
     m_listctrl = (wxListCtrl *)NULL;
 
 #ifndef __SMARTPHONE__
@@ -780,7 +756,20 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
     // sizers even though our window is not resizeable to calculate the size of
     // the dialog properly
     wxBoxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+#ifndef __SMARTPHONE__
+    wxBoxSizer *sizerButtons = new wxBoxSizer(isPda ? wxHORIZONTAL : wxVERTICAL);
+#endif
     wxBoxSizer *sizerAll = new wxBoxSizer(isPda ? wxVERTICAL : wxHORIZONTAL);
+
+#ifdef __SMARTPHONE__
+    SetLeftMenu(wxID_OK);
+    SetRightMenu(wxID_MORE, ms_details + EXPAND_SUFFIX);
+#else
+    wxButton *btnOk = new wxButton(this, wxID_OK);
+    sizerButtons->Add(btnOk, 0, isPda ? wxCENTRE : wxCENTRE|wxBOTTOM, MARGIN/2);
+    m_btnDetails = new wxButton(this, wxID_MORE, ms_details + EXPAND_SUFFIX);
+    sizerButtons->Add(m_btnDetails, 0, isPda ? wxCENTRE|wxLEFT : wxCENTRE | wxTOP, MARGIN/2 - 1);
+#endif
 
     wxBitmap bitmap;
     switch ( style & wxICON_MASK )
@@ -814,45 +803,34 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
         sizerAll->Add(new wxStaticBitmap(this, wxID_ANY, bitmap), 0,
                   wxALIGN_CENTRE_VERTICAL);
 
-    // create the text sizer with a minimal size so that we are sure it won't be too small
-    wxString message = EllipsizeString(messages.Last());
-    wxSizer *szText = CreateTextSizer(message);
-    szText->SetMinSize(wxMin(300, wxGetDisplaySize().x / 3), -1);
-
-    sizerAll->Add(szText, 1,
+    const wxString& message = messages.Last();
+    sizerAll->Add(CreateTextSizer(message), 1,
                   wxALIGN_CENTRE_VERTICAL | wxLEFT | wxRIGHT, MARGIN);
-
-    wxButton *btnOk = new wxButton(this, wxID_OK);
-    sizerAll->Add(btnOk, 0, isPda ? wxCENTRE : wxCENTRE|wxBOTTOM, MARGIN/2);
+#ifndef __SMARTPHONE__
+    sizerAll->Add(sizerButtons, 0, isPda ? wxCENTRE|wxTOP|wxBOTTOM : (wxALIGN_RIGHT | wxLEFT), MARGIN);
+#endif
 
     sizerTop->Add(sizerAll, 0, wxALL | wxEXPAND, MARGIN);
 
+    SetSizer(sizerTop);
 
-    // add the details pane
+    // see comments in OnDetails()
+    //
+    // Note: Doing this, this way, triggered a nasty bug in
+    //       wxTopLevelWindowGTK::GtkOnSize which took -1 literally once
+    //       either of maxWidth or maxHeight was set.  This symptom has been
+    //       fixed there, but it is a problem that remains as long as we allow
+    //       unchecked access to the internal size members.  We really need to
+    //       encapuslate window sizes more cleanly and make it clear when -1 will
+    //       be substituted and when it will not.
+
+    wxSize size = sizerTop->Fit(this);
+    m_maxHeight = size.y;
+    SetSizeHints(size.x, size.y, m_maxWidth, m_maxHeight);
 
 #ifndef __SMARTPHONE__
-    wxCollapsiblePane *collpane = new wxCollapsiblePane(this, wxID_ANY, ms_details);
-    sizerTop->Add(collpane, 1, wxGROW|wxALL, MARGIN);
-
-    wxWindow *win = collpane->GetPane();
-    wxSizer *paneSz = new wxBoxSizer(wxVERTICAL);
-
-    CreateDetailsControls(win);
-
-    paneSz->Add(m_listctrl, 1, wxEXPAND | wxTOP, MARGIN);
-
-#if wxUSE_FILE && !defined(__SMARTPHONE__)
-    paneSz->Add(m_btnSave, 0, wxALIGN_RIGHT | wxTOP, MARGIN);
-#endif // wxUSE_FILE
-
-    win->SetSizer(paneSz);
-    paneSz->SetSizeHints(win);
-#else // __SMARTPHONE__
-    SetLeftMenu(wxID_OK);
-    SetRightMenu(wxID_MORE, ms_details + EXPAND_SUFFIX);
-#endif // __SMARTPHONE__/!__SMARTPHONE__
-
-    SetSizerAndFit(sizerTop);
+    btnOk->SetFocus();
+#endif
 
     Centre();
 
@@ -864,25 +842,29 @@ wxLogDialog::wxLogDialog(wxWindow *parent,
     }
 }
 
-void wxLogDialog::CreateDetailsControls(wxWindow *parent)
+void wxLogDialog::CreateDetailsControls()
 {
 #ifndef __SMARTPHONE__
     // create the save button and separator line if possible
 #if wxUSE_FILE
-    m_btnSave = new wxButton(parent, wxID_SAVE);
+    m_btnSave = new wxButton(this, wxID_SAVE);
 #endif // wxUSE_FILE
+
+#if wxUSE_STATLINE
+    m_statline = new wxStaticLine(this, wxID_ANY);
+#endif // wxUSE_STATLINE
 
 #endif // __SMARTPHONE__
 
     // create the list ctrl now
-    m_listctrl = new wxListCtrl(parent, wxID_ANY,
+    m_listctrl = new wxListCtrl(this, wxID_ANY,
                                 wxDefaultPosition, wxDefaultSize,
                                 wxSUNKEN_BORDER |
                                 wxLC_REPORT |
                                 wxLC_NO_HEADER |
                                 wxLC_SINGLE_SEL);
 #ifdef __WXWINCE__
-    // This makes a big aesthetic difference on WinCE but I
+    // This maks a big aesthetic difference on WinCE but I
     // don't want to risk problems on other platforms
     m_listctrl->Hide();
 #endif
@@ -959,11 +941,7 @@ void wxLogDialog::CreateDetailsControls(wxWindow *parent)
             image = -1;
         }
 
-        wxString msg = m_messages[n];
-        msg.Replace(wxT("\n"), wxT(" "));
-        msg = EllipsizeString(msg);
-
-        m_listctrl->InsertItem(n, msg, image);
+        m_listctrl->InsertItem(n, m_messages[n], image);
         m_listctrl->SetItem(n, 1, TimeStamp(fmt, (time_t)m_times[n]));
     }
 
@@ -994,23 +972,6 @@ void wxLogDialog::OnListSelect(wxListEvent& event)
     // (wrong bg colour, no scrolling...), but we still want to disable
     // selecting items - it makes no sense here
     m_listctrl->SetItemState(event.GetIndex(), 0, wxLIST_STATE_SELECTED);
-}
-
-void wxLogDialog::OnListItemActivated(wxListEvent& event)
-{
-    // show the activated item in a message box
-    // This allow the user to correctly display the logs which are longer
-    // than the listctrl and thus gets truncated or those which contains
-    // newlines.
-
-    // NB: don't do:
-    //    wxString str = m_listctrl->GetItemText(event.GetIndex());
-    // as there's a 260 chars limit on the items inside a wxListCtrl in wxMSW.
-    wxString str = m_messages[event.GetIndex()];
-
-    // wxMessageBox will nicely handle the '\n' in the string (if any) 
-    // and supports long strings
-    wxMessageBox(str, wxT("Log message"), wxOK, this);
 }
 
 void wxLogDialog::OnOk(wxCommandEvent& WXUNUSED(event))
@@ -1061,6 +1022,111 @@ void wxLogDialog::OnSave(wxCommandEvent& WXUNUSED(event))
 }
 
 #endif // wxUSE_FILE
+
+void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
+{
+    wxSizer *sizer = GetSizer();
+
+    if ( m_showingDetails )
+    {
+#ifdef __SMARTPHONE__
+        SetRightMenu(wxID_MORE, ms_details + EXPAND_SUFFIX);
+#else
+        m_btnDetails->SetLabel(ms_details + EXPAND_SUFFIX);
+#endif
+
+        sizer->Detach( m_listctrl );
+
+#ifndef __SMARTPHONE__
+
+#if wxUSE_STATLINE
+        sizer->Detach( m_statline );
+#endif // wxUSE_STATLINE
+
+#if wxUSE_FILE
+        sizer->Detach( m_btnSave );
+#endif // wxUSE_FILE
+
+#endif // __SMARTPHONE__
+    }
+    else // show details now
+    {
+#ifdef __SMARTPHONE__
+        SetRightMenu(wxID_MORE, wxString(_T("<< ")) + ms_details);
+#else
+        m_btnDetails->SetLabel(wxString(_T("<< ")) + ms_details);
+#endif
+
+        if ( !m_listctrl )
+        {
+            CreateDetailsControls();
+        }
+
+#if wxUSE_STATLINE && !defined(__SMARTPHONE__)
+        bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
+        if (!isPda)
+            sizer->Add(m_statline, 0, wxEXPAND | (wxALL & ~wxTOP), MARGIN);
+#endif // wxUSE_STATLINE
+
+        sizer->Add(m_listctrl, 1, wxEXPAND | (wxALL & ~wxTOP), MARGIN);
+
+        // VZ: this doesn't work as this becomes the initial (and not only
+        //     minimal) listctrl height as well - why?
+#if 0
+        // allow the user to make the dialog shorter than its initial height -
+        // without this it wouldn't work as the list ctrl would have been
+        // incompressible
+        sizer->SetItemMinSize(m_listctrl, 100, 3*GetCharHeight());
+#endif // 0
+
+#if wxUSE_FILE && !defined(__SMARTPHONE__)
+        sizer->Add(m_btnSave, 0, wxALIGN_RIGHT | (wxALL & ~wxTOP), MARGIN);
+#endif // wxUSE_FILE
+    }
+
+    m_showingDetails = !m_showingDetails;
+
+    // in any case, our size changed - relayout everything and set new hints
+    // ---------------------------------------------------------------------
+
+    // we have to reset min size constraints or Fit() would never reduce the
+    // dialog size when collapsing it and we have to reset max constraint
+    // because it wouldn't expand it otherwise
+
+    m_minHeight =
+    m_maxHeight = -1;
+
+    // wxSizer::FitSize() is private, otherwise we might use it directly...
+    wxSize sizeTotal = GetSize(),
+           sizeClient = GetClientSize();
+
+    wxSize size = sizer->GetMinSize();
+    size.x += sizeTotal.x - sizeClient.x;
+    size.y += sizeTotal.y - sizeClient.y;
+
+    // we don't want to allow expanding the dialog in vertical direction as
+    // this would show the "hidden" details but we can resize the dialog
+    // vertically while the details are shown
+    if ( !m_showingDetails )
+        m_maxHeight = size.y;
+
+    SetSizeHints(size.x, size.y, m_maxWidth, m_maxHeight);
+
+#ifdef __WXWINCE__
+    if (m_showingDetails)
+        m_listctrl->Show();
+#endif
+
+    // don't change the width when expanding/collapsing
+    SetSize(wxDefaultCoord, size.y);
+
+#ifdef __WXGTK__
+    // VS: this is necessary in order to force frame redraw under
+    // WindowMaker or fvwm2 (and probably other broken WMs).
+    // Otherwise, detailed list wouldn't be displayed.
+    Show();
+#endif // wxGTK
+}
 
 wxLogDialog::~wxLogDialog()
 {
@@ -1155,3 +1221,4 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 }
 
 #endif // wxUSE_LOG && wxUSE_TEXTCTRL
+

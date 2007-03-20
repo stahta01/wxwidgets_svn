@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,20 +22,20 @@
 
 #if wxUSE_LISTBOX
 
-#include "wx/listbox.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/settings.h"
-    #include "wx/brush.h"
-    #include "wx/font.h"
-    #include "wx/dc.h"
-    #include "wx/utils.h"
-    #include "wx/log.h"
-    #include "wx/window.h"
+#include "wx/listbox.h"
+#include "wx/settings.h"
+#include "wx/brush.h"
+#include "wx/font.h"
+#include "wx/dc.h"
+#include "wx/utils.h"
 #endif
 
+#include "wx/window.h"
 #include "wx/palmos/private.h"
+
+#include "wx/dynarray.h"
+#include "wx/log.h"
 
 #if wxUSE_OWNER_DRAWN
     #include  "wx/ownerdrw.h"
@@ -110,7 +114,7 @@ public:
     wxListBoxItem(const wxString& str = wxEmptyString);
 };
 
-wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, false)
+wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, FALSE)
 {
     // no bitmaps/checkmarks
     SetMarginWidth(0);
@@ -177,7 +181,7 @@ void wxListBox::DoSetFirstItem(int N)
 {
 }
 
-void wxListBox::Delete(unsigned int n)
+void wxListBox::Delete(int N)
 {
 }
 
@@ -188,6 +192,11 @@ int wxListBox::DoAppend(const wxString& item)
 
 void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
 {
+}
+
+int wxListBox::FindString(const wxString& s) const
+{
+    return wxNOT_FOUND;
 }
 
 void wxListBox::Clear()
@@ -207,21 +216,21 @@ bool wxListBox::IsSelected(int N) const
     return false;
 }
 
-wxClientData* wxListBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxListBox::DoGetItemClientObject(int n) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }
 
-void *wxListBox::DoGetItemClientData(unsigned int n) const
+void *wxListBox::DoGetItemClientData(int n) const
 {
     return (void *)NULL;
 }
 
-void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxListBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
 }
 
-void wxListBox::DoSetItemClientData(unsigned int n, void *clientData)
+void wxListBox::DoSetItemClientData(int n, void *clientData)
 {
 }
 
@@ -238,23 +247,25 @@ int wxListBox::GetSelection() const
 }
 
 // Find string for position
-wxString wxListBox::GetString(unsigned int n) const
+wxString wxListBox::GetString(int N) const
 {
-    return wxEmptyString;
+    wxString result;
+
+    return result;
 }
 
 void
-wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+wxListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
 }
 
-void wxListBox::SetString(unsigned int n, const wxString& s)
+void wxListBox::SetString(int N, const wxString& s)
 {
 }
 
-unsigned int wxListBox::GetCount() const
+int wxListBox::GetCount() const
 {
-    return 0;
+    return m_noItems;
 }
 
 // ----------------------------------------------------------------------------

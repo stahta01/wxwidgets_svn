@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/url.cpp
+// Name:        url.cpp
 // Purpose:     URL parser
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -9,23 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "url.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_URL
 
+#include "wx/string.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/module.h"
 #include "wx/url.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/module.h"
-#endif
 
 #include <string.h>
 #include <ctype.h>
@@ -333,7 +334,7 @@ void wxURL::SetDefaultProxy(const wxString& url_proxy)
             return;
 
         wxString hostname = tmp_str(0, pos),
-        port = tmp_str(pos+1, tmp_str.length()-pos);
+        port = tmp_str(pos+1, tmp_str.Length()-pos);
         wxIPV4address addr;
 
         if (!addr.Hostname(hostname))
@@ -376,7 +377,7 @@ void wxURL::SetProxy(const wxString& url_proxy)
             return;
 
         hostname = tmp_str(0, pos);
-        port = tmp_str(pos+1, tmp_str.length()-pos);
+        port = tmp_str(pos+1, tmp_str.Length()-pos);
 
         addr.Hostname(hostname);
         addr.Service(port);
@@ -441,5 +442,84 @@ void wxURLModule::OnExit()
 
 #endif // wxUSE_SOCKETS
 
+// ---------------------------------------------------------------------------
+//
+//                        wxURL Compatibility
+//
+// ---------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+#include "wx/url.h"
+
+wxString wxURL::GetProtocolName() const
+{
+    return m_scheme;
+}
+
+wxString wxURL::GetHostName() const
+{
+    return m_server;
+}
+
+wxString wxURL::GetPath() const
+{
+    return m_path;
+}
+
+//Note that this old code really doesn't convert to a URI that well and looks
+//more like a dirty hack than anything else...
+
+wxString wxURL::ConvertToValidURI(const wxString& uri, const wxChar* delims)
+{
+  wxString out_str;
+  wxString hexa_code;
+  size_t i;
+
+  for (i = 0; i < uri.Len(); i++)
+  {
+    wxChar c = uri.GetChar(i);
+
+    if (c == wxT(' '))
+    {
+      // GRG, Apr/2000: changed to "%20" instead of '+'
+
+      out_str += wxT("%20");
+    }
+    else
+    {
+      // GRG, Apr/2000: modified according to the URI definition (RFC 2396)
+      //
+      // - Alphanumeric characters are never escaped
+      // - Unreserved marks are never escaped
+      // - Delimiters must be escaped if they appear within a component
+      //     but not if they are used to separate components. Here we have
+      //     no clear way to distinguish between these two cases, so they
+      //     are escaped unless they are passed in the 'delims' parameter
+      //     (allowed delimiters).
+
+      static const wxChar marks[] = wxT("-_.!~*()'");
+
+      if ( !wxIsalnum(c) && !wxStrchr(marks, c) && !wxStrchr(delims, c) )
+      {
+        hexa_code.Printf(wxT("%%%02X"), c);
+        out_str += hexa_code;
+      }
+      else
+      {
+        out_str += c;
+      }
+    }
+  }
+
+  return out_str;
+}
+
+wxString wxURL::ConvertFromURI(const wxString& uri)
+{
+    return wxURI::Unescape(uri);
+}
+
+#endif //WXWIN_COMPATIBILITY_2_4
 
 #endif // wxUSE_URL

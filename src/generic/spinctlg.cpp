@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinctlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -183,7 +187,7 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     m_btn->SetRange(min, max);
     m_btn->SetValue(initial);
-    SetInitialSize(size);
+    SetBestSize(size);
     Move(pos);
 
     // have to disable this window to avoid interfering it with message

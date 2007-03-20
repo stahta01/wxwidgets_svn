@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/paper.cpp
+// Name:        paper.cpp
 // Purpose:     Paper size classes
 // Author:      Julian Smart
 // Modified by:
@@ -9,31 +9,36 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "paper.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
 
+
 #ifndef WX_PRECOMP
-    #if defined(__WXMSW__)
-        #include "wx/msw/wrapcdlg.h"
-    #endif // MSW
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-    #include "wx/intl.h"
-    #include "wx/module.h"
+#include "wx/utils.h"
+#include "wx/settings.h"
+#include "wx/intl.h"
 #endif
 
 #include "wx/paper.h"
+#include "wx/module.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef __WXMSW__
+    #include "wx/msw/wrapcdlg.h"
     #ifndef __WIN32__
         #include <print.h>
     #endif
@@ -161,7 +166,7 @@ void wxPrintPaperDatabase::CreateDatabase()
     WXADDPAPER(wxPAPER_A2,                 DMPAPER_A2,                 wxTRANSLATE("A2 420 x 594 mm"), 4200, 5940);
     WXADDPAPER(wxPAPER_A3_TRANSVERSE,      DMPAPER_A3_TRANSVERSE,      wxTRANSLATE("A3 Transverse 297 x 420 mm"), 2970, 4200);
     WXADDPAPER(wxPAPER_A3_EXTRA_TRANSVERSE,DMPAPER_A3_EXTRA_TRANSVERSE,wxTRANSLATE("A3 Extra Transverse 322 x 445 mm"), 3220, 4450);
-
+    
     WXADDPAPER(wxPAPER_DBL_JAPANESE_POSTCARD, 69,                       wxTRANSLATE("Japanese Double Postcard 200 x 148 mm"), 2000, 1480);
     WXADDPAPER(wxPAPER_A6,                  70,                         wxTRANSLATE("A6 105 x 148 mm"), 1050, 1480);
     WXADDPAPER(wxPAPER_JENV_KAKU2,          71,                         wxTRANSLATE("Japanese Envelope Kaku #2"), 2400, 3320);
@@ -211,7 +216,7 @@ void wxPrintPaperDatabase::CreateDatabase()
     WXADDPAPER(wxPAPER_PENV_7_ROTATED,      115,                        wxTRANSLATE("PRC Envelope #7 Rotated 230 x 160 mm"), 2300, 1600);
     WXADDPAPER(wxPAPER_PENV_8_ROTATED,      116,                        wxTRANSLATE("PRC Envelope #8 Rotated 309 x 120 mm"), 3090, 1200);
     WXADDPAPER(wxPAPER_PENV_9_ROTATED,      117,                        wxTRANSLATE("PRC Envelope #9 Rotated 324 x 229 mm"), 3240, 2290);
-    WXADDPAPER(wxPAPER_PENV_10_ROTATED,     118,                        wxTRANSLATE("PRC Envelope #10 Rotated 458 x 324 mm"), 4580, 3240);
+    WXADDPAPER(wxPAPER_PENV_10_ROTATED,     118,                        wxTRANSLATE("PRC Envelope #10 Rotated 458 x 324 m"), 4580, 3240);
 }
 
 void wxPrintPaperDatabase::ClearDatabase()
@@ -371,3 +376,4 @@ void wxPrintPaperModule::OnExit()
 }
 
 #endif // wxUSE_PRINTING_ARCHITECTURE
+

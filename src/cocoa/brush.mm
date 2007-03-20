@@ -6,17 +6,15 @@
 // Created:     2003/07/03
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/brush.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
-    #include "wx/colour.h"
+    #include "wx/brush.h"
 #endif //WX_PRECOMP
+#include "wx/colour.h"
 
 #import <AppKit/NSColor.h>
 
@@ -96,7 +94,7 @@ bool wxBrushRefData::operator==(const wxBrushRefData& data) const
     // don't compare our NSColor
     return m_style == data.m_style &&
            m_colour == data.m_colour &&
-           m_stipple.IsSameAs(data.m_stipple);
+           m_stipple == data.m_stipple;
 }
 
 void wxBrushRefData::DoSetStipple(const wxBitmap& stipple)
@@ -217,3 +215,4 @@ WX_NSColor wxBrush::GetNSColor()
         return [NSColor clearColor];
     return M_BRUSHDATA->GetNSColor();
 }
+

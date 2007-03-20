@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/topluniv.cpp
+// Name:        topluniv.cpp
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
@@ -14,49 +14,30 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtoplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#include "wx/toplevel.h"
+#include "wx/defs.h"
 
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
     #include "wx/settings.h"
-    #include "wx/bitmap.h"
-    #include "wx/image.h"
-    #include "wx/frame.h"
 #endif
 
+#include "wx/toplevel.h"
 #include "wx/univ/renderer.h"
+#include "wx/bitmap.h"
+#include "wx/image.h"
 #include "wx/cshelp.h"
 #include "wx/evtloop.h"
-
-// ----------------------------------------------------------------------------
-// wxStdTLWInputHandler: handles focus, resizing and titlebar buttons clicks
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStdTLWInputHandler : public wxStdInputHandler
-{
-public:
-    wxStdTLWInputHandler(wxInputHandler *inphand);
-
-    virtual bool HandleMouse(wxInputConsumer *consumer,
-                             const wxMouseEvent& event);
-    virtual bool HandleMouseMove(wxInputConsumer *consumer, const wxMouseEvent& event);
-    virtual bool HandleActivation(wxInputConsumer *consumer, bool activated);
-
-private:
-    // the window (button) which has capture or NULL and the last hittest result
-    wxTopLevelWindow *m_winCapture;
-    long              m_winHitTest;
-    long              m_winPressed;
-    bool              m_borderCursorOn;
-    wxCursor          m_origCursor;
-};
 
 
 // ----------------------------------------------------------------------------
@@ -80,15 +61,6 @@ int wxTopLevelWindow::ms_canIconize = -1;
 
 void wxTopLevelWindow::Init()
 {
-    // once-only ms_drawDecorations initialization
-    if ( ms_drawDecorations == -1 )
-    {
-        ms_drawDecorations =
-            !wxSystemSettings::HasFeature(wxSYS_CAN_DRAW_FRAME_DECORATIONS) ||
-            wxGetEnv(wxT("WXDECOR"), NULL);
-    }
-
-    m_usingNativeDecorations = ms_drawDecorations == 0;
     m_isActive = false;
     m_windowStyle = 0;
     m_pressedButton = 0;
@@ -106,7 +78,21 @@ bool wxTopLevelWindow::Create(wxWindow *parent,
     long styleOrig = 0,
          exstyleOrig = 0;
 
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations == -1 )
+    {
+        ms_drawDecorations = 
+            !wxSystemSettings::HasFeature(wxSYS_CAN_DRAW_FRAME_DECORATIONS) 
+            || wxGetEnv(wxT("WXDECOR"), NULL);
+        // FIXME -- wxUniv should provide a way to force non-native decorations!
+        //          $WXDECOR is just a hack in absence of better wxUniv solution
+    }
+
+    if ( ms_canIconize == -1 )
+    {
+        ms_canIconize = wxSystemSettings::HasFeature(wxSYS_CAN_ICONIZE_FRAME);
+    }
+
+    if ( ms_drawDecorations )
     {
         CreateInputHandler(wxINP_HANDLER_TOPLEVEL);
 
@@ -114,16 +100,17 @@ bool wxTopLevelWindow::Create(wxWindow *parent,
         exstyleOrig = GetExtraStyle();
         style &= ~(wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX |
                    wxSYSTEM_MENU | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW |
-                   wxRESIZE_BORDER);
-        style |= wxBORDER_NONE;
-        SetExtraStyle(exstyleOrig & ~wxWS_EX_CONTEXTHELP);
+                   wxTHICK_FRAME);
+        style |= wxSIMPLE_BORDER;
+        SetExtraStyle(exstyleOrig &
+                      ~(wxFRAME_EX_CONTEXTHELP | wxDIALOG_EX_CONTEXTHELP));
     }
 
     if ( !wxTopLevelWindowNative::Create(parent, id, title, pos,
                                          size, style, name) )
         return false;
 
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
         m_windowStyle = styleOrig;
         m_exStyle = exstyleOrig;
@@ -136,7 +123,7 @@ bool wxTopLevelWindow::ShowFullScreen(bool show, long style)
 {
     if ( show == IsFullScreen() ) return false;
 
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
         if ( show )
         {
@@ -155,38 +142,13 @@ bool wxTopLevelWindow::ShowFullScreen(bool show, long style)
     return wxTopLevelWindowNative::ShowFullScreen(show, style);
 }
 
-/* static */
-void wxTopLevelWindow::UseNativeDecorationsByDefault(bool native)
-{
-    ms_drawDecorations = !native;
-}
-
-void wxTopLevelWindow::UseNativeDecorations(bool native)
-{
-    wxASSERT_MSG( !m_windowStyle, _T("must be called before Create()") );
-
-    m_usingNativeDecorations = native;
-}
-
-bool wxTopLevelWindow::IsUsingNativeDecorations() const
-{
-    return m_usingNativeDecorations;
-}
-
 long wxTopLevelWindow::GetDecorationsStyle() const
 {
     long style = 0;
 
     if ( m_windowStyle & wxCAPTION )
     {
-        if ( ms_canIconize == -1 )
-        {
-            ms_canIconize = wxSystemSettings::HasFeature(wxSYS_CAN_ICONIZE_FRAME);
-        }
-
-        style |= wxTOPLEVEL_TITLEBAR;
-        if ( m_windowStyle & wxCLOSE_BOX )
-            style |= wxTOPLEVEL_BUTTON_CLOSE;
+        style |= wxTOPLEVEL_TITLEBAR | wxTOPLEVEL_BUTTON_CLOSE;
         if ( (m_windowStyle & wxMINIMIZE_BOX) && ms_canIconize )
             style |= wxTOPLEVEL_BUTTON_ICONIZE;
         if ( m_windowStyle & wxMAXIMIZE_BOX )
@@ -197,13 +159,13 @@ long wxTopLevelWindow::GetDecorationsStyle() const
                 style |= wxTOPLEVEL_BUTTON_MAXIMIZE;
         }
 #if wxUSE_HELP
-        if ( m_exStyle & wxWS_EX_CONTEXTHELP)
+        if ( m_exStyle & (wxFRAME_EX_CONTEXTHELP | wxDIALOG_EX_CONTEXTHELP))
             style |= wxTOPLEVEL_BUTTON_HELP;
 #endif
     }
     if ( (m_windowStyle & (wxSIMPLE_BORDER | wxNO_BORDER)) == 0 )
         style |= wxTOPLEVEL_BORDER;
-    if ( m_windowStyle & (wxRESIZE_BORDER | wxRESIZE_BORDER) )
+    if ( m_windowStyle & (wxRESIZE_BORDER | wxTHICK_FRAME) )
         style |= wxTOPLEVEL_RESIZEABLE;
 
     if ( IsMaximized() )
@@ -229,7 +191,7 @@ void wxTopLevelWindow::RefreshTitleBar()
 
 wxPoint wxTopLevelWindow::GetClientAreaOrigin() const
 {
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
         int w, h;
         wxTopLevelWindowNative::DoGetClientSize(&w, &h);
@@ -247,7 +209,7 @@ wxPoint wxTopLevelWindow::GetClientAreaOrigin() const
 
 void wxTopLevelWindow::DoGetClientSize(int *width, int *height) const
 {
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
         int w, h;
         wxTopLevelWindowNative::DoGetClientSize(&w, &h);
@@ -266,7 +228,7 @@ void wxTopLevelWindow::DoGetClientSize(int *width, int *height) const
 
 void wxTopLevelWindow::DoSetClientSize(int width, int height)
 {
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
         wxSize size = m_renderer->GetFrameTotalSize(wxSize(width, height),
                                                GetDecorationsStyle());
@@ -278,14 +240,17 @@ void wxTopLevelWindow::DoSetClientSize(int width, int height)
 
 void wxTopLevelWindow::OnNcPaint(wxNcPaintEvent& event)
 {
-    if ( m_usingNativeDecorations || !m_renderer )
-    {
+    if ( !ms_drawDecorations || !m_renderer )
         event.Skip();
-    }
-    else // we're drawing the decorations ourselves
+    else
     {
         // get the window rect
-        wxRect rect(GetSize());
+        wxRect rect;
+        wxSize size = GetSize();
+        rect.x =
+        rect.y = 0;
+        rect.width = size.x;
+        rect.height = size.y;
 
         wxWindowDC dc(this);
         m_renderer->DrawFrameTitleBar(dc, rect,
@@ -305,15 +270,26 @@ long wxTopLevelWindow::HitTest(const wxPoint& pt) const
     return m_renderer->HitTestFrame(rect, pt+GetClientAreaOrigin(), GetDecorationsStyle());
 }
 
-wxSize wxTopLevelWindow::GetMinSize() const
+int wxTopLevelWindow::GetMinWidth() const
 {
-    wxSize size = wxTopLevelWindowNative::GetMinSize();
-    if ( !m_usingNativeDecorations )
+    if ( ms_drawDecorations )
     {
-        size.IncTo(m_renderer->GetFrameMinSize(GetDecorationsStyle()));
+        return wxMax(wxTopLevelWindowNative::GetMinWidth(),
+                     m_renderer->GetFrameMinSize(GetDecorationsStyle()).x);
     }
+    else
+        return wxTopLevelWindowNative::GetMinWidth();
+}
 
-    return size;
+int wxTopLevelWindow::GetMinHeight() const
+{
+    if ( ms_drawDecorations )
+    {
+        return wxMax(wxTopLevelWindowNative::GetMinHeight(),
+                     m_renderer->GetFrameMinSize(GetDecorationsStyle()).y);
+    }
+    else
+        return wxTopLevelWindowNative::GetMinHeight();
 }
 
 // ----------------------------------------------------------------------------
@@ -324,7 +300,7 @@ void wxTopLevelWindow::SetIcons(const wxIconBundle& icons)
 {
     wxTopLevelWindowNative::SetIcons(icons);
 
-    if ( !m_usingNativeDecorations && m_renderer )
+    if ( ms_drawDecorations && m_renderer )
     {
         wxSize size = m_renderer->GetFrameIconSize();
         const wxIcon& icon = icons.GetIcon( size );
@@ -339,14 +315,12 @@ void wxTopLevelWindow::SetIcons(const wxIconBundle& icons)
                 m_titlebarIcon = wxNullIcon;
             else if ( bmp1.GetWidth() == size.x && bmp1.GetHeight() == size.y )
                 m_titlebarIcon = icon;
-#if wxUSE_IMAGE
             else
             {
                 wxImage img = bmp1.ConvertToImage();
                 img.Rescale(size.x, size.y);
                 m_titlebarIcon.CopyFromBitmap(wxBitmap(img));
             }
-#endif // wxUSE_IMAGE
         }
     }
 }
@@ -380,10 +354,14 @@ static bool wxGetResizingCursor(long hitTestResult, wxCursor& cursor)
                 break;
             default:
                 return false;
+                #if 0
+                // not rachable due to earlier return
+                break;
+                #endif
         }
         return true;
     }
-
+    
     return false;
 }
 
@@ -407,7 +385,7 @@ class wxInteractiveMoveHandler : public wxEvtHandler
 {
 public:
     wxInteractiveMoveHandler(wxInteractiveMoveData& data) : m_data(data) {}
-
+    
 private:
     DECLARE_EVENT_TABLE()
     void OnMouseMove(wxMouseEvent& event);
@@ -426,7 +404,7 @@ BEGIN_EVENT_TABLE(wxInteractiveMoveHandler, wxEvtHandler)
 END_EVENT_TABLE()
 
 
-static inline LINKAGEMODE
+static inline LINKAGEMODE 
 void wxApplyResize(wxInteractiveMoveData& data, const wxPoint& diff)
 {
     if ( data.m_flags & wxINTERACTIVE_RESIZE_W )
@@ -447,7 +425,7 @@ void wxApplyResize(wxInteractiveMoveData& data, const wxPoint& diff)
     {
         data.m_rect.height += diff.y;
     }
-
+    
     if ( data.m_minSize.x != wxDefaultCoord && data.m_rect.width < data.m_minSize.x )
     {
         if ( data.m_flags & wxINTERACTIVE_RESIZE_W )
@@ -507,7 +485,7 @@ void wxInteractiveMoveHandler::OnMouseDown(wxMouseEvent& WXUNUSED(event))
 void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
 {
     wxPoint diff(wxDefaultCoord,wxDefaultCoord);
-
+    
     switch ( event.GetKeyCode() )
     {
         case WXK_UP:    diff = wxPoint(0, -16); break;
@@ -522,7 +500,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
             m_data.m_evtLoop->Exit();
             return;
     }
-
+    
     if ( diff.x != wxDefaultCoord )
     {
         if ( m_data.m_flags & wxINTERACTIVE_WAIT_FOR_INPUT )
@@ -536,14 +514,14 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
 
             if ( m_data.m_flags & wxINTERACTIVE_MOVE )
             {
-                m_data.m_pos = m_data.m_window->GetPosition() +
+                m_data.m_pos = m_data.m_window->GetPosition() + 
                                wxPoint(m_data.m_window->GetSize().x/2, 8);
             }
         }
 
         wxPoint warp;
         bool changeCur = false;
-
+        
         if ( m_data.m_flags & wxINTERACTIVE_MOVE )
         {
             m_data.m_rect.Offset(diff);
@@ -552,7 +530,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
         }
         else /* wxINTERACTIVE_RESIZE */
         {
-            if ( !(m_data.m_flags &
+            if ( !(m_data.m_flags & 
                   (wxINTERACTIVE_RESIZE_N | wxINTERACTIVE_RESIZE_S)) )
             {
                 if ( diff.y < 0 )
@@ -569,7 +547,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
                     changeCur = true;
                 }
             }
-            if ( !(m_data.m_flags &
+            if ( !(m_data.m_flags & 
                   (wxINTERACTIVE_RESIZE_W | wxINTERACTIVE_RESIZE_E)) )
             {
                 if ( diff.x < 0 )
@@ -634,17 +612,17 @@ void wxTopLevelWindow::InteractiveMove(int flags)
     wxASSERT_MSG( !((flags & wxINTERACTIVE_MOVE) && (flags & wxINTERACTIVE_RESIZE)),
                   wxT("can't move and resize window at the same time") );
 
-    wxASSERT_MSG( !(flags & wxINTERACTIVE_RESIZE) ||
-                  (flags & wxINTERACTIVE_WAIT_FOR_INPUT) ||
+    wxASSERT_MSG( !(flags & wxINTERACTIVE_RESIZE) || 
+                  (flags & wxINTERACTIVE_WAIT_FOR_INPUT) || 
                   (flags & wxINTERACTIVE_RESIZE_DIR),
                   wxT("direction of resizing not specified") );
 
     wxInteractiveMoveData data;
     wxEventLoop loop;
-
+    
     SetFocus();
 
-#ifndef __WXGTK__
+#ifndef __WXGTK__    
     if ( flags & wxINTERACTIVE_WAIT_FOR_INPUT )
     {
         wxCursor sizingCursor(wxCURSOR_SIZING);
@@ -780,7 +758,7 @@ bool wxTopLevelWindow::PerformAction(const wxControlAction& action,
 void wxTopLevelWindow::OnSystemMenu(wxCommandEvent& event)
 {
     bool ret = true;
-
+    
     switch (event.GetId())
     {
         case wxID_CLOSE_FRAME:
@@ -809,26 +787,18 @@ void wxTopLevelWindow::OnSystemMenu(wxCommandEvent& event)
         default:
             ret = false;
     }
-
+    
     if ( !ret )
         event.Skip();
 }
 
-/* static */
-wxInputHandler *
-wxTopLevelWindow::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdTLWInputHandler s_handler(handlerDef);
-
-    return &s_handler;
-}
 
 // ============================================================================
-// wxStdTLWInputHandler: handles focus, resizing and titlebar buttons clicks
+// wxStdFrameInputHandler: handles focus, resizing and titlebar buttons clicks
 // ============================================================================
 
-wxStdTLWInputHandler::wxStdTLWInputHandler(wxInputHandler *inphand)
-                    : wxStdInputHandler(inphand)
+wxStdFrameInputHandler::wxStdFrameInputHandler(wxInputHandler *inphand)
+            : wxStdInputHandler(inphand)
 {
     m_winCapture = NULL;
     m_winHitTest = 0;
@@ -836,8 +806,8 @@ wxStdTLWInputHandler::wxStdTLWInputHandler(wxInputHandler *inphand)
     m_borderCursorOn = false;
 }
 
-bool wxStdTLWInputHandler::HandleMouse(wxInputConsumer *consumer,
-                                       const wxMouseEvent& event)
+bool wxStdFrameInputHandler::HandleMouse(wxInputConsumer *consumer,
+                                         const wxMouseEvent& event)
 {
     // the button has 2 states: pressed and normal with the following
     // transitions between them:
@@ -897,8 +867,8 @@ bool wxStdTLWInputHandler::HandleMouse(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouse(consumer, event);
 }
 
-bool wxStdTLWInputHandler::HandleMouseMove(wxInputConsumer *consumer,
-                                           const wxMouseEvent& event)
+bool wxStdFrameInputHandler::HandleMouseMove(wxInputConsumer *consumer,
+                                             const wxMouseEvent& event)
 {
     if ( event.GetEventObject() == m_winCapture )
     {
@@ -948,8 +918,8 @@ bool wxStdTLWInputHandler::HandleMouseMove(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool wxStdTLWInputHandler::HandleActivation(wxInputConsumer *consumer,
-                                            bool activated)
+bool wxStdFrameInputHandler::HandleActivation(wxInputConsumer *consumer,
+                                              bool activated)
 {
     if ( m_borderCursorOn )
     {

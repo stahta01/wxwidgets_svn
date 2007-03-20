@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "notebook.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,26 +22,28 @@
 
 #if wxUSE_NOTEBOOK
 
-#include "wx/notebook.h"
-
+// wxWidgets
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
-    #include "wx/string.h"
-    #include "wx/dc.h"
-    #include "wx/log.h"
-    #include "wx/event.h"
-    #include "wx/app.h"
-    #include "wx/dcclient.h"
-    #include "wx/dcmemory.h"
-    #include "wx/control.h"
+  #include  "wx/string.h"
+  #include  "wx/dc.h"
 #endif  // WX_PRECOMP
 
-#include "wx/imaglist.h"
-#include "wx/sysopt.h"
+#include  "wx/log.h"
+#include  "wx/imaglist.h"
+#include  "wx/event.h"
+#include  "wx/control.h"
+#include  "wx/notebook.h"
+#include  "wx/app.h"
+#include  "wx/sysopt.h"
+#include  "wx/dcclient.h"
+#include  "wx/dcmemory.h"
 
-#include "wx/msw/private.h"
+#include  "wx/msw/private.h"
 
-#include <windowsx.h>
+#include  <windowsx.h>
+
+#include <commctrl.h>
+
 #include "wx/msw/winundef.h"
 
 #if wxUSE_UXTHEME
@@ -101,7 +107,7 @@ LRESULT APIENTRY _EXPORT wxNotebookWndProc(HWND hwnd,
 // event table
 // ----------------------------------------------------------------------------
 
-#include "wx/listimpl.cpp"
+#include <wx/listimpl.cpp>
 
 WX_DEFINE_LIST( wxNotebookPageInfoList )
 
@@ -109,7 +115,7 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
 
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
+    EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
 
@@ -151,11 +157,9 @@ wxBEGIN_FLAGS( wxNotebookStyle )
     wxFLAGS_MEMBER(wxHSCROLL)
 
     wxFLAGS_MEMBER(wxNB_FIXEDWIDTH)
-    wxFLAGS_MEMBER(wxBK_DEFAULT)
-    wxFLAGS_MEMBER(wxBK_TOP)
-    wxFLAGS_MEMBER(wxBK_LEFT)
-    wxFLAGS_MEMBER(wxBK_RIGHT)
-    wxFLAGS_MEMBER(wxBK_BOTTOM)
+    wxFLAGS_MEMBER(wxNB_LEFT)
+    wxFLAGS_MEMBER(wxNB_RIGHT)
+    wxFLAGS_MEMBER(wxNB_BOTTOM)
     wxFLAGS_MEMBER(wxNB_NOPAGETHEME)
     wxFLAGS_MEMBER(wxNB_FLAT)
 
@@ -227,15 +231,15 @@ const wxNotebookPageInfoList& wxNotebook::GetPageInfos() const
 // common part of all ctors
 void wxNotebook::Init()
 {
-    m_imageList = NULL;
-    m_nSelection = wxNOT_FOUND;
+  m_imageList = NULL;
+  m_nSelection = -1;
 
 #if wxUSE_UXTHEME
-    m_hbrBackground = NULL;
+  m_hbrBackground = NULL;
 #endif // wxUSE_UXTHEME
 
 #if USE_NOTEBOOK_ANTIFLICKER
-    m_hasSubclassedUpdown = false;
+  m_hasSubclassedUpdown = false;
 #endif // USE_NOTEBOOK_ANTIFLICKER
 }
 
@@ -266,15 +270,6 @@ bool wxNotebook::Create(wxWindow *parent,
                         long style,
                         const wxString& name)
 {
-    if ( (style & wxBK_ALIGN_MASK) == wxBK_DEFAULT )
-    {
-#if defined(__POCKETPC__)
-        style |= wxBK_BOTTOM | wxNB_FLAT;
-#else
-        style |= wxBK_TOP;
-#endif
-    }
-
 #ifdef __WXWINCE__
     // Not sure why, but without this style, there is no border
     // around the notebook tabs.
@@ -282,22 +277,21 @@ bool wxNotebook::Create(wxWindow *parent,
         style |= wxBORDER_SUNKEN;
 #endif
 
-#if !wxUSE_UXTHEME
+    if ( (style & (wxNB_TOP | wxNB_BOTTOM | wxNB_LEFT | wxNB_RIGHT)) == 0 )
+        style |= wxNB_TOP;
+
+#if !wxUSE_UXTHEME 
     // ComCtl32 notebook tabs simply don't work unless they're on top if we have uxtheme, we can
     // work around it later (after control creation), but if we don't have uxtheme, we have to clear
     // those styles
     const int verComCtl32 = wxApp::GetComCtl32Version();
     if ( verComCtl32 == 600 )
     {
-        style &= ~(wxBK_BOTTOM | wxBK_LEFT | wxBK_RIGHT);
+        style &= ~(wxNB_BOTTOM | wxNB_LEFT | wxNB_RIGHT);
     }
 #endif //wxUSE_UXTHEME
 
-#if defined(__WINE__) && wxUSE_UNICODE
-    LPCTSTR className = L"SysTabControl32";
-#else
     LPCTSTR className = WC_TABCONTROL;
-#endif
 
 #if USE_NOTEBOOK_ANTIFLICKER
     // SysTabCtl32 class has natively CS_HREDRAW and CS_VREDRAW enabled and it
@@ -356,17 +350,17 @@ bool wxNotebook::Create(wxWindow *parent,
         // create backing store
         UpdateBgBrush();
     }
-
+    
     // comctl32.dll 6.0 doesn't support non-top tabs with visual styles (the
     // control is simply not rendered correctly), so we disable themes
     // if possible, otherwise we simply clear the styles.
     // It's probably not possible to have UXTHEME without ComCtl32 6 or better, but lets
     // check it anyway.
     const int verComCtl32 = wxApp::GetComCtl32Version();
-    if ( verComCtl32 == 600 )
+    if ( verComCtl32 == 600 ) 
     {
         // check if we use themes at all -- if we don't, we're still okay
-        if ( wxUxThemeEngine::GetIfActive() && (style & (wxBK_BOTTOM|wxBK_LEFT|wxBK_RIGHT)))
+        if ( wxUxThemeEngine::GetIfActive() && (style & (wxNB_BOTTOM|wxNB_LEFT|wxNB_RIGHT)))
         {
             wxUxThemeEngine::GetIfActive()->SetWindowTheme((HWND)this->GetHandle(), L"", L"");
             SetBackgroundColour(GetThemeBackgroundColour());    //correct the background color for the new non-themed control
@@ -400,11 +394,11 @@ WXDWORD wxNotebook::MSWGetStyle(long style, WXDWORD *exstyle) const
     if ( style & wxNB_FIXEDWIDTH )
         tabStyle |= TCS_FIXEDWIDTH;
 
-    if ( style & wxBK_BOTTOM )
+    if ( style & wxNB_BOTTOM )
         tabStyle |= TCS_RIGHT;
-    else if ( style & wxBK_LEFT )
+    else if ( style & wxNB_LEFT )
         tabStyle |= TCS_VERTICAL;
-    else if ( style & wxBK_RIGHT )
+    else if ( style & wxNB_RIGHT )
         tabStyle |= TCS_VERTICAL | TCS_RIGHT;
 
     // ex style
@@ -432,71 +426,38 @@ wxNotebook::~wxNotebook()
 
 size_t wxNotebook::GetPageCount() const
 {
-    // consistency check
-    wxASSERT( (int)m_pages.Count() == TabCtrl_GetItemCount(GetHwnd()) );
+  // consistency check
+  wxASSERT( (int)m_pages.Count() == TabCtrl_GetItemCount(GetHwnd()) );
 
-    return m_pages.Count();
+  return m_pages.Count();
 }
 
 int wxNotebook::GetRowCount() const
 {
-    return TabCtrl_GetRowCount(GetHwnd());
+  return TabCtrl_GetRowCount(GetHwnd());
 }
 
 int wxNotebook::SetSelection(size_t nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("notebook page out of range") );
+  wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("notebook page out of range") );
 
-    if ( m_nSelection == wxNOT_FOUND || nPage != (size_t)m_nSelection )
+  if ( int(nPage) != m_nSelection )
+  {
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
+    event.SetSelection(nPage);
+    event.SetOldSelection(m_nSelection);
+    event.SetEventObject(this);
+    if ( !GetEventHandler()->ProcessEvent(event) || event.IsAllowed() )
     {
-        if ( SendPageChangingEvent(nPage) )
-        {
-            // program allows the page change
-            SendPageChangedEvent(m_nSelection, nPage);
+      // program allows the page change
+      event.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
+      (void)GetEventHandler()->ProcessEvent(event);
 
-            TabCtrl_SetCurSel(GetHwnd(), nPage);
-        }
+      TabCtrl_SetCurSel(GetHwnd(), nPage);
     }
+  }
 
-    return m_nSelection;
-}
-
-void wxNotebook::UpdateSelection(int selNew)
-{
-    if ( m_nSelection != wxNOT_FOUND )
-        m_pages[m_nSelection]->Show(false);
-
-    if ( selNew != wxNOT_FOUND )
-    {
-        wxNotebookPage *pPage = m_pages[selNew];
-        pPage->Show(true);
-    }
-
-    // Changing the page should give the focus to it but, as per bug report
-    // http://sf.net/tracker/index.php?func=detail&aid=1150659&group_id=9863&atid=109863,
-    // we should not set the focus to it directly since it erroneously
-    // selects radio buttons and breaks keyboard handling for a notebook's
-    // scroll buttons. So give focus to the notebook and not the page.
-
-    // but don't do this is the notebook is hidden
-    if ( ::IsWindowVisible(GetHwnd()) )
-        SetFocus();
-
-    m_nSelection = selNew;
-}
-
-int wxNotebook::ChangeSelection(size_t nPage)
-{
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("notebook page out of range") );
-
-    if ( m_nSelection == wxNOT_FOUND || nPage != (size_t)m_nSelection )
-    {
-        TabCtrl_SetCurSel(GetHwnd(), nPage);
-
-        UpdateSelection(nPage);
-    }
-
-    return m_nSelection;
+  return m_nSelection;
 }
 
 bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
@@ -505,7 +466,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
     TC_ITEM tcItem;
     tcItem.mask = TCIF_TEXT;
-    tcItem.pszText = (wxChar *)strText.wx_str();
+    tcItem.pszText = (wxChar *)strText.c_str();
 
     if ( !HasFlag(wxNB_MULTILINE) )
         return TabCtrl_SetItem(GetHwnd(), nPage, &tcItem) != 0;
@@ -527,51 +488,50 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
 wxString wxNotebook::GetPageText(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxEmptyString, wxT("notebook page out of range") );
+  wxCHECK_MSG( IS_VALID_PAGE(nPage), wxEmptyString, wxT("notebook page out of range") );
 
-    wxChar buf[256];
-    TC_ITEM tcItem;
-    tcItem.mask = TCIF_TEXT;
-    tcItem.pszText = buf;
-    tcItem.cchTextMax = WXSIZEOF(buf);
+  wxChar buf[256];
+  TC_ITEM tcItem;
+  tcItem.mask = TCIF_TEXT;
+  tcItem.pszText = buf;
+  tcItem.cchTextMax = WXSIZEOF(buf);
 
-    wxString str;
-    if ( TabCtrl_GetItem(GetHwnd(), nPage, &tcItem) )
-        str = tcItem.pszText;
+  wxString str;
+  if ( TabCtrl_GetItem(GetHwnd(), nPage, &tcItem) )
+    str = tcItem.pszText;
 
-    return str;
+  return str;
 }
 
 int wxNotebook::GetPageImage(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("notebook page out of range") );
+  wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, wxT("notebook page out of range") );
 
-    TC_ITEM tcItem;
-    tcItem.mask = TCIF_IMAGE;
+  TC_ITEM tcItem;
+  tcItem.mask = TCIF_IMAGE;
 
-    return TabCtrl_GetItem(GetHwnd(), nPage, &tcItem) ? tcItem.iImage
-                                                      : wxNOT_FOUND;
+  return TabCtrl_GetItem(GetHwnd(), nPage, &tcItem) ? tcItem.iImage : -1;
 }
 
 bool wxNotebook::SetPageImage(size_t nPage, int nImage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, wxT("notebook page out of range") );
+  wxCHECK_MSG( IS_VALID_PAGE(nPage), false, wxT("notebook page out of range") );
 
-    TC_ITEM tcItem;
-    tcItem.mask = TCIF_IMAGE;
-    tcItem.iImage = nImage;
+  TC_ITEM tcItem;
+  tcItem.mask = TCIF_IMAGE;
+  tcItem.iImage = nImage;
 
-    return TabCtrl_SetItem(GetHwnd(), nPage, &tcItem) != 0;
+  return TabCtrl_SetItem(GetHwnd(), nPage, &tcItem) != 0;
 }
 
 void wxNotebook::SetImageList(wxImageList* imageList)
 {
-    wxNotebookBase::SetImageList(imageList);
+  wxNotebookBase::SetImageList(imageList);
 
-    if ( imageList )
-    {
-        (void) TabCtrl_SetImageList(GetHwnd(), GetHimagelistOf(imageList));
-    }
+  if ( imageList )
+  {
+    (void) TabCtrl_SetImageList(GetHwnd(), (HIMAGELIST)imageList->GetHIMAGELIST());
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -630,29 +590,26 @@ void wxNotebook::SetTabSize(const wxSize& sz)
 
 wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
 {
-    // we can't use TabCtrl_AdjustRect here because it only works for wxNB_TOP
     wxSize sizeTotal = sizePage;
 
+    // We need to make getting tab size part of the wxWidgets API.
     wxSize tabSize;
-    if ( GetPageCount() > 0 )
+    if (GetPageCount() > 0)
     {
         RECT rect;
-        TabCtrl_GetItemRect(GetHwnd(), 0, &rect);
+        TabCtrl_GetItemRect((HWND) GetHWND(), 0, & rect);
         tabSize.x = rect.right - rect.left;
         tabSize.y = rect.bottom - rect.top;
     }
-
-    // add an extra margin in both directions
-    const int MARGIN = 8;
-    if ( IsVertical() )
+    if ( HasFlag(wxNB_LEFT) || HasFlag(wxNB_RIGHT) )
     {
-        sizeTotal.x += MARGIN;
-        sizeTotal.y += tabSize.y + MARGIN;
+        sizeTotal.x += tabSize.x + 8;
+        sizeTotal.y += 8;
     }
-    else // horizontal layout
+    else
     {
-        sizeTotal.x += tabSize.x + MARGIN;
-        sizeTotal.y += MARGIN;
+        sizeTotal.x += 8;
+        sizeTotal.y += tabSize.y + 8;
     }
 
     return sizeTotal;
@@ -685,12 +642,12 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
     if ( m_pages.IsEmpty() )
     {
         // no selection any more, the notebook becamse empty
-        m_nSelection = wxNOT_FOUND;
+        m_nSelection = -1;
     }
     else // notebook still not empty
     {
         int selNew = TabCtrl_GetCurSel(GetHwnd());
-        if ( selNew != wxNOT_FOUND )
+        if (selNew != -1)
         {
             // No selection change, just refresh the current selection.
             // Because it could be that the slection index changed
@@ -711,7 +668,7 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
 
             // m_nSelection must be always valid so reset it before calling
             // SetSelection()
-            m_nSelection = wxNOT_FOUND;
+            m_nSelection = -1;
             SetSelection(selNew);
         }
         else
@@ -726,19 +683,19 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
 // remove all pages
 bool wxNotebook::DeleteAllPages()
 {
-    size_t nPageCount = GetPageCount();
-    size_t nPage;
-    for ( nPage = 0; nPage < nPageCount; nPage++ )
-        delete m_pages[nPage];
+  size_t nPageCount = GetPageCount();
+  size_t nPage;
+  for ( nPage = 0; nPage < nPageCount; nPage++ )
+    delete m_pages[nPage];
 
-    m_pages.Clear();
+  m_pages.Clear();
 
-    TabCtrl_DeleteAllItems(GetHwnd());
+  TabCtrl_DeleteAllItems(GetHwnd());
 
-    m_nSelection = wxNOT_FOUND;
+  m_nSelection = -1;
 
-    InvalidateBestSize();
-    return true;
+  InvalidateBestSize();
+  return true;
 }
 
 // same as AddPage() but does it at given position
@@ -773,7 +730,7 @@ bool wxNotebook::InsertPage(size_t nPage,
     if ( !strText.empty() )
     {
         tcItem.mask |= TCIF_TEXT;
-        tcItem.pszText = (wxChar *)strText.wx_str(); // const_cast
+        tcItem.pszText = (wxChar *)strText.c_str(); // const_cast
     }
 
     // hide the page: unless it is selected, it shouldn't be shown (and if it
@@ -797,15 +754,6 @@ bool wxNotebook::InsertPage(size_t nPage,
         wxLogError(wxT("Can't create the notebook page '%s'."), strText.c_str());
 
         return false;
-    }
-
-    // need to update the bg brush when the first page is added
-    // so the first panel gets the correct themed background
-    if ( m_pages.empty() )
-    {
-#if wxUSE_UXTHEME
-        UpdateBgBrush();
-#endif // wxUSE_UXTHEME
     }
 
     // succeeded: save the pointer to the page
@@ -833,13 +781,13 @@ bool wxNotebook::InsertPage(size_t nPage,
 
     // some page should be selected: either this one or the first one if there
     // is still no selection
-    int selNew = wxNOT_FOUND;
+    int selNew = -1;
     if ( bSelect )
         selNew = nPage;
-    else if ( m_nSelection == wxNOT_FOUND )
+    else if ( m_nSelection == -1 )
         selNew = 0;
 
-    if ( selNew != wxNOT_FOUND )
+    if ( selNew != -1 )
         SetSelection(selNew);
 
     InvalidateBestSize();
@@ -859,15 +807,13 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
         *flags = 0;
 
         if ((hitTestInfo.flags & TCHT_NOWHERE) == TCHT_NOWHERE)
-            *flags |= wxBK_HITTEST_NOWHERE;
+            *flags |= wxNB_HITTEST_NOWHERE;
         if ((hitTestInfo.flags & TCHT_ONITEM) == TCHT_ONITEM)
-            *flags |= wxBK_HITTEST_ONITEM;
+            *flags |= wxNB_HITTEST_ONITEM;
         if ((hitTestInfo.flags & TCHT_ONITEMICON) == TCHT_ONITEMICON)
-            *flags |= wxBK_HITTEST_ONICON;
+            *flags |= wxNB_HITTEST_ONICON;
         if ((hitTestInfo.flags & TCHT_ONITEMLABEL) == TCHT_ONITEMLABEL)
-            *flags |= wxBK_HITTEST_ONLABEL;
-        if ( item == wxNOT_FOUND && GetPageSize().Contains(pt) )
-            *flags |= wxBK_HITTEST_ONPAGE;
+            *flags |= wxNB_HITTEST_ONLABEL;
     }
 
     return item;
@@ -901,6 +847,8 @@ LRESULT APIENTRY _EXPORT wxNotebookWndProc(HWND hwnd,
                             hwnd, message, wParam, lParam);
 }
 
+
+
 void wxNotebook::OnEraseBackground(wxEraseEvent& WXUNUSED(event))
 {
     // do nothing here
@@ -915,15 +863,12 @@ void wxNotebook::OnPaint(wxPaintEvent& WXUNUSED(event))
     wxBitmap bmp(rc.right, rc.bottom);
     memdc.SelectObject(bmp);
 
-    const wxLayoutDirection dir = dc.GetLayoutDirection();
-    memdc.SetLayoutDirection(dir);
-
     // if there is no special brush just use the solid background colour
 #if wxUSE_UXTHEME
     HBRUSH hbr = (HBRUSH)m_hbrBackground;
 #else
     HBRUSH hbr = 0;
-#endif
+#endif    
     wxBrush brush;
     if ( !hbr )
     {
@@ -935,10 +880,7 @@ void wxNotebook::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     MSWDefWindowProc(WM_PAINT, (WPARAM)memdc.GetHDC(), 0);
 
-    // For some reason in RTL mode, source offset has to be -1, otherwise the
-    // right border (physical) remains unpainted.
-    const wxCoord ofs = dir == wxLayout_RightToLeft ? -1 : 0;
-    dc.Blit(ofs, 0, rc.right, rc.bottom, &memdc, ofs, 0);
+    dc.Blit(0, 0, rc.right, rc.bottom, &memdc, 0, 0);
 }
 
 #endif // USE_NOTEBOOK_ANTIFLICKER
@@ -1076,14 +1018,54 @@ void wxNotebook::OnSize(wxSizeEvent& event)
 
 void wxNotebook::OnSelChange(wxNotebookEvent& event)
 {
-    // is it our tab control?
-    if ( event.GetEventObject() == this )
+  // is it our tab control?
+  if ( event.GetEventObject() == this )
+  {
+      int sel = event.GetOldSelection();
+      if ( sel != -1 )
+        m_pages[sel]->Show(false);
+
+      sel = event.GetSelection();
+      if ( sel != -1 )
+      {
+        wxNotebookPage *pPage = m_pages[sel];
+        pPage->Show(true);
+      }
+
+      // Changing the page should give the focus to it but, as per bug report
+      // http://sf.net/tracker/index.php?func=detail&aid=1150659&group_id=9863&atid=109863,
+      // we should not set the focus to it directly since it erroneously
+      // selects radio buttons and breaks keyboard handling for a notebook's
+      // scroll buttons. So give focus to the notebook and not the page.
+
+      // but don't do this is the notebook is hidden
+      if ( ::IsWindowVisible(GetHwnd()) )
+          SetFocus();
+
+      m_nSelection = sel;
+  }
+
+  // we want to give others a chance to process this message as well
+  event.Skip();
+}
+
+bool wxNotebook::MSWTranslateMessage(WXMSG *wxmsg)
+{
+    const MSG * const msg = (MSG *)wxmsg;
+
+    // intercept TAB, CTRL+TAB and CTRL+SHIFT+TAB for processing by wxNotebook.
+    // TAB will be passed to the currently selected page, CTRL+TAB and
+    // CTRL+SHIFT+TAB will be processed by the notebook itself. do not
+    // intercept SHIFT+TAB. This goes to the parent of the notebook which will
+    // process it.
+    if ( msg->message == WM_KEYDOWN && msg->wParam == VK_TAB &&
+            msg->hwnd == GetHwnd() &&
+                (wxIsCtrlDown() || !wxIsShiftDown()) )
     {
-        UpdateSelection(event.GetSelection());
+        return MSWProcessMessage(wxmsg);
     }
 
-    // we want to give others a chance to process this message as well
-    event.Skip();
+    return false;
 }
 
 void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
@@ -1121,7 +1103,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
         {
             // no, it doesn't come from child, case (b) or (c): forward to a
             // page but only if direction is backwards (TAB) or from ourselves,
-            if ( m_nSelection != wxNOT_FOUND &&
+            if ( m_nSelection != -1 &&
                     (!event.GetDirection() || isFromSelf) )
             {
                 // so that the page knows that the event comes from it's parent

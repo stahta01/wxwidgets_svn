@@ -17,8 +17,7 @@ class Interpreter(InteractiveInterpreter):
     revision = __revision__
     
     def __init__(self, locals=None, rawin=None, 
-                 stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
-                 showInterpIntro=True):
+                 stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr):
         """Create an interactive interpreter object."""
         InteractiveInterpreter.__init__(self, locals=locals)
         self.stdin = stdin
@@ -28,11 +27,10 @@ class Interpreter(InteractiveInterpreter):
             import __builtin__
             __builtin__.raw_input = rawin
             del __builtin__
-        if showInterpIntro:
-            copyright = 'Type "help", "copyright", "credits" or "license"'
-            copyright += ' for more information.'
-            self.introText = 'Python %s on %s%s%s' % \
-                             (sys.version, sys.platform, os.linesep, copyright)
+        copyright = 'Type "help", "copyright", "credits" or "license"'
+        copyright += ' for more information.'
+        self.introText = 'Python %s on %s%s%s' % \
+                         (sys.version, sys.platform, os.linesep, copyright)
         try:
             sys.ps1
         except AttributeError:

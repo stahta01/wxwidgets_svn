@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/menuitem.h
+// Name:        menuitem.h
 // Purpose:     wxMenuItem class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_MOTIF_MENUITEM_H
 #define _WX_MOTIF_MENUITEM_H
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "menuitem.h"
+#endif
 
 #include "wx/bitmap.h"
 
@@ -30,8 +34,8 @@ public:
                const wxString& help = wxEmptyString,
                wxItemKind kind = wxITEM_NORMAL,
                wxMenu *subMenu = (wxMenu *)NULL);
-    virtual ~wxMenuItem();
-
+    ~wxMenuItem();
+    
     // accessors (some more are inherited from wxOwnerDrawn or are below)
     virtual void SetText(const wxString& label);
     virtual void Enable(bool enable = true);
@@ -42,26 +46,25 @@ public:
     //     JJ
     virtual void SetBitmap(const wxBitmap& bitmap) { m_bitmap = bitmap; }
     virtual const wxBitmap& GetBitmap() const { return m_bitmap; }
-
+    
     // implementation from now on
-    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu,
-                     size_t index);
+    void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu);
     void DestroyItem(bool full);
-
+    
     WXWidget GetButtonWidget() const { return m_buttonWidget; }
-
+    
     wxMenuBar* GetMenuBar() const { return m_menuBar; }
     void SetMenuBar(wxMenuBar* menuBar) { m_menuBar = menuBar; }
-
+    
     wxMenu* GetTopMenu() const { return m_topMenu; }
     void SetTopMenu(wxMenu* menu) { m_topMenu = menu; }
-
+    
 private:
     WXWidget    m_buttonWidget;
     wxMenuBar*  m_menuBar;
     wxMenu*     m_topMenu;        // Top-level menu e.g. popup-menu
     wxBitmap  m_bitmap; // Bitmap for menuitem, if any
-
+    
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
 };
 

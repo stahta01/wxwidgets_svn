@@ -26,7 +26,6 @@
 
 // for all others, include the necessary headers
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
     #include "wx/stattext.h"
     #include "wx/log.h"
     #include "wx/app.h"
@@ -52,7 +51,6 @@ enum
 {
     Wizard_Quit = wxID_EXIT,
     Wizard_RunModal = wxID_HIGHEST,
-    Wizard_RunNoSizer,
     Wizard_RunModeless,
     Wizard_About = wxID_ABOUT
 };
@@ -79,8 +77,6 @@ public:
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnRunWizard(wxCommandEvent& event);
-    void OnRunWizardNoSizer(wxCommandEvent& event);
-    void OnRunWizardModeless(wxCommandEvent& event);
     void OnWizardCancel(wxWizardEvent& event);
     void OnWizardFinished(wxWizardEvent& event);
 
@@ -96,9 +92,8 @@ private:
 class MyWizard : public wxWizard
 {
 public:
-    MyWizard(wxFrame *frame, bool useSizer = true);
-
-    wxWizardPage *GetFirstPage() const { return m_page1; }
+    MyWizard(wxFrame *frame);
+    void RunIt(bool modal);
 
 private:
     wxWizardPageSimple *m_page1;
@@ -269,27 +264,14 @@ public:
 
 #if wxUSE_CHECKLISTBOX
         static const wxChar *aszChoices[] =
-        {
-            _T("Zeroth"),
-            _T("First"),
-            _T("Second"),
-            _T("Third"),
-            _T("Fourth"),
-            _T("Fifth"),
-            _T("Sixth"),
-            _T("Seventh"),
-            _T("Eighth"),
-            _T("Nineth")
-        };
+            { _T("Zeroth"), _T("First"), _T("Second"), _T("Third"), _T("Fourth"), _T("Fifth"), _T("Sixth"), _T("Seventh"), _T("Eighth"), _T("Nineth") };
+        wxString *astrChoices = new wxString[WXSIZEOF(aszChoices)];
+        unsigned int ui;
+        for ( ui = 0; ui < WXSIZEOF(aszChoices); ui++ )
+            astrChoices[ui] = aszChoices[ui];
 
-        m_checklistbox = new wxCheckListBox
-                             (
-                                this,
-                                wxID_ANY,
-                                wxDefaultPosition,
-                                wxSize(100,100),
-                                wxArrayString(WXSIZEOF(aszChoices), aszChoices)
-                             );
+        m_checklistbox = new wxCheckListBox(this, wxID_ANY, wxDefaultPosition, wxSize(100,100),
+            WXSIZEOF(aszChoices), astrChoices);
 
         mainSizer->Add(
             m_checklistbox,
@@ -332,8 +314,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Wizard_Quit,         MyFrame::OnQuit)
     EVT_MENU(Wizard_About,        MyFrame::OnAbout)
     EVT_MENU(Wizard_RunModal,     MyFrame::OnRunWizard)
-    EVT_MENU(Wizard_RunNoSizer,   MyFrame::OnRunWizardNoSizer)
-    EVT_MENU(Wizard_RunModeless,  MyFrame::OnRunWizardModeless)
+    EVT_MENU(Wizard_RunModeless,  MyFrame::OnRunWizard)
 
     EVT_WIZARD_CANCEL(wxID_ANY,   MyFrame::OnWizardCancel)
     EVT_WIZARD_FINISHED(wxID_ANY, MyFrame::OnWizardFinished)
@@ -353,9 +334,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     MyFrame *frame = new MyFrame(_T("wxWizard Sample"));
 
     // and show it (the frames, unlike simple controls, are not shown when
@@ -370,8 +348,8 @@ bool MyApp::OnInit()
 // MyWizard
 // ----------------------------------------------------------------------------
 
-MyWizard::MyWizard(wxFrame *frame, bool useSizer)
-        : wxWizard(frame,wxID_ANY,_T("Absolutely Useless Wizard"),
+MyWizard::MyWizard(wxFrame *frame)
+         :wxWizard(frame,wxID_ANY,_T("Absolutely Useless Wizard"),
                    wxBitmap(wiztest_xpm),wxDefaultPosition,
                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
@@ -399,10 +377,26 @@ MyWizard::MyWizard(wxFrame *frame, bool useSizer)
     m_page1->SetNext(page2);
     page3->SetPrev(page2);
 
-    if ( useSizer )
+    // allow the wizard to size itself around the pages
+    GetPageAreaSizer()->Add(m_page1);
+}
+
+void MyWizard::RunIt(bool modal)
+{
+    if ( modal )
     {
-        // allow the wizard to size itself around the pages
-        GetPageAreaSizer()->Add(m_page1);
+        if ( RunWizard(m_page1) )
+        {
+            // Success
+        }
+
+        Destroy();
+    }
+    else
+    {
+        FinishLayout();
+        ShowPage(m_page1);
+        Show(true);
     }
 }
 
@@ -416,8 +410,7 @@ MyFrame::MyFrame(const wxString& title)
 {
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(Wizard_RunModal, _T("&Run wizard modal...\tCtrl-R"));
-    menuFile->Append(Wizard_RunNoSizer, _T("Run wizard &without sizer..."));
-    menuFile->Append(Wizard_RunModeless, _T("Run wizard &modeless..."));
+    menuFile->Append(Wizard_RunModeless, _T("&Run wizard modeless..."));
     menuFile->AppendSeparator();
     menuFile->Append(Wizard_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
@@ -451,25 +444,11 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
                  _T("About wxWizard sample"), wxOK | wxICON_INFORMATION, this);
 }
 
-void MyFrame::OnRunWizard(wxCommandEvent& WXUNUSED(event))
-{
-    MyWizard wizard(this);
-
-    wizard.RunWizard(wizard.GetFirstPage());
-}
-
-void MyFrame::OnRunWizardNoSizer(wxCommandEvent& WXUNUSED(event))
-{
-    MyWizard wizard(this, false);
-
-    wizard.RunWizard(wizard.GetFirstPage());
-}
-
-void MyFrame::OnRunWizardModeless(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnRunWizard(wxCommandEvent& event)
 {
     MyWizard *wizard = new MyWizard(this);
-    wizard->ShowPage(wizard->GetFirstPage());
-    wizard->Show(true);
+
+    wizard->RunIt( event.GetId() == Wizard_RunModal );
 }
 
 void MyFrame::OnWizardFinished(wxWizardEvent& WXUNUSED(event))

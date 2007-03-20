@@ -3,6 +3,11 @@
 // Purpose:     wxHtml testing example
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma implementation
+    #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -102,9 +107,6 @@
    // `Main program' equivalent: the program execution "starts" here
    bool MyApp::OnInit()
    {
-       if ( !wxApp::OnInit() )
-           return false;
-
       wxInitAllImageHandlers();
 #if wxUSE_STREAMS && wxUSE_ZIPSTREAM && wxUSE_ZLIB
       wxFileSystem::AddHandler(new wxZipFSHandler);

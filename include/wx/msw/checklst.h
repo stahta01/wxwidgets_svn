@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef   __CHECKLST__H_
 #define   __CHECKLST__H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "checklst.h"
+#endif
 
 #if !wxUSE_OWNER_DRAWN
   #error  "wxCheckListBox class requires owner-drawn functionality."
@@ -56,13 +60,13 @@ public:
                 const wxString& name = wxListBoxNameStr);
 
   // override base class virtuals
-  virtual void Delete(unsigned int n);
+  virtual void Delete(int n);
 
   virtual bool SetFont( const wxFont &font );
 
   // items may be checked
-  virtual bool IsChecked(unsigned int uiIndex) const;
-  virtual void Check(unsigned int uiIndex, bool bCheck = true);
+  virtual bool IsChecked(size_t uiIndex) const;
+  virtual void Check(size_t uiIndex, bool bCheck = true);
 
   // return the index of the item at this position or wxNOT_FOUND
   int HitTest(const wxPoint& pt) const { return DoHitTestItem(pt.x, pt.y); }
@@ -71,12 +75,12 @@ public:
   // accessors
   size_t GetItemHeight() const { return m_nItemHeight; }
 
+protected:
   // we create our items ourselves and they have non-standard size,
   // so we need to override these functions
   virtual wxOwnerDrawn *CreateLboxItem(size_t n);
   virtual bool          MSWOnMeasure(WXMEASUREITEMSTRUCT *item);
 
-protected:
   // this can't be called DoHitTest() because wxWindow already has this method
   int DoHitTestItem(wxCoord x, wxCoord y) const;
 

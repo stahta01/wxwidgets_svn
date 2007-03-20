@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/xtixml.cpp
+// Name:        src/common/xtistrm.cpp
 // Purpose:     streaming runtime metadata information
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,28 +9,31 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xtistrm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_EXTENDED_RTTI
-
-#include "wx/xtixml.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/hash.h"
-    #include "wx/event.h"
+#include "wx/hash.h"
+#include "wx/object.h"
 #endif
 
 #include "wx/xml/xml.h"
 #include "wx/tokenzr.h"
 #include "wx/txtstrm.h"
+#include "wx/event.h"
+
+#if wxUSE_EXTENDED_RTTI
 
 #include "wx/xtistrm.h"
+#include "wx/xtixml.h"
 
 #include "wx/beforestd.h"
 #include <map>
@@ -535,4 +538,4 @@ int wxXmlReader::ReadObject( const wxString &name , wxDepersister *callbacks)
     return wxInvalidObjectID ;
 }
 
-#endif // wxUSE_EXTENDED_RTTI
+#endif

@@ -12,6 +12,10 @@
 #ifndef __PANEDRAWPL_G__
 #define __PANEDRAWPL_G__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "panedrawpl.h"
+#endif
+
 #include "wx/fl/controlbar.h"
 
 /*

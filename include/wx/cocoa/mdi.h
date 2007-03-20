@@ -156,7 +156,7 @@ class wxMDIClientWindow: public wxWindow
 public:
     wxMDIClientWindow();
     wxMDIClientWindow( wxMDIParentFrame *parent, long style = 0 );
-    virtual ~wxMDIClientWindow();
+    ~wxMDIClientWindow();
     virtual bool CreateClient( wxMDIParentFrame *parent, long style = 0 );
 };
 

@@ -200,7 +200,7 @@ void SimpleTransientPopup::OnMouse(wxMouseEvent &event)
     rect.SetWidth(1000000);
     wxColour colour(*wxLIGHT_GREY);
 
-    if (rect.Contains(event.GetPosition()))
+    if (rect.Inside(event.GetPosition()))
     {       
         colour = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
     wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnMouse pos(%d, %d)"), long(event.GetEventObject()), event.GetX(), event.GetY());
@@ -229,7 +229,7 @@ void SimpleTransientPopup::OnButton(wxCommandEvent& event)
 
 void SimpleTransientPopup::OnSpinCtrl(wxSpinEvent& event)
 {
-    wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnSpinCtrl ID %d Value %d"), long(this), event.GetId(), event.GetInt());
+    wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnSpinCtrl ID %d Value %ld"), long(this), event.GetId(), event.GetInt());
     event.Skip();
 }
 
@@ -289,9 +289,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     m_frame = new MyFrame(_T("Popup wxWidgets App"));
 

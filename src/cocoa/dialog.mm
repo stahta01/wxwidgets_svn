@@ -4,18 +4,16 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2002/12/15
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   2002 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/app.h"
+    #include "wx/dialog.h"
     #include "wx/settings.h"
 #endif //WX_PRECOMP
 
@@ -32,6 +30,13 @@
 static wxWindowList wxModalDialogs;
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
+
+BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
+  EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+  EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+  EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+  EVT_CLOSE(wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
 
 WX_IMPLEMENT_COCOA_OWNER(wxDialog,NSPanel,NSWindow,NSWindow)
 
@@ -169,3 +174,62 @@ void wxDialog::EndModal(int retCode)
     SetReturnCode(retCode);
     Show(false);
 }
+
+void wxDialog::OnCloseWindow(wxCloseEvent& event)
+{
+    // We'll send a Cancel message by default,
+    // which may close the dialog.
+    // Check for looping if the Cancel event handler calls Close().
+
+    // Note that if a cancel button and handler aren't present in the dialog,
+    // nothing will happen when you close the dialog via the window manager, or
+    // via Close().
+    // We wouldn't want to destroy the dialog by default, since the dialog may have been
+    // created on the stack.
+    // However, this does mean that calling dialog->Close() won't delete the dialog
+    // unless the handler for wxID_CANCEL does so. So use Destroy() if you want to be
+    // sure to destroy the dialog.
+    // The default OnCancel (above) simply ends a modal dialog, and hides a modeless dialog.
+    // ALWAYS VETO THIS EVENT!!!!
+    event.Veto();
+
+    static wxList closing;
+
+    if ( closing.Member(this) )
+    {
+        wxLogDebug(wxT("WARNING: Attempting to recursively call Close for dialog"));
+        return;
+    }
+
+    closing.Append(this);
+
+    wxLogTrace(wxTRACE_COCOA,wxT("Sending Cancel Event"));
+    wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+    cancelEvent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent(cancelEvent); // This may close the dialog
+
+    closing.DeleteObject(this);
+}
+
+// Standard buttons
+void wxDialog::OnOK(wxCommandEvent& event)
+{
+    if ( Validate() && TransferDataFromWindow() )
+    {
+        EndModal(wxID_OK);
+    }
+}
+
+void wxDialog::OnApply(wxCommandEvent& event)
+{
+    if (Validate())
+        TransferDataFromWindow();
+    // TODO probably need to disable the Apply button until things change again
+}
+
+void wxDialog::OnCancel(wxCommandEvent& event)
+{
+    wxLogTrace(wxTRACE_COCOA,wxT("Cancelled!"));
+    EndModal(wxID_CANCEL);
+}
+

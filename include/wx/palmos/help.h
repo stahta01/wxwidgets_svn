@@ -12,6 +12,10 @@
 #ifndef _WX_HELP_H_
 #define _WX_HELP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "help.h"
+#endif
+
 #include "wx/wx.h"
 
 #if wxUSE_HELP
@@ -23,8 +27,8 @@ class WXDLLEXPORT wxPalmHelpController: public wxHelpControllerBase
     DECLARE_CLASS(wxPalmHelpController)
 
 public:
-    wxPalmHelpController() {}
-    virtual ~wxPalmHelpController() {}
+    wxPalmHelpController() {};
+    ~wxPalmHelpController() {};
 
     // Must call this to set the filename
     virtual bool Initialize(const wxString& file);

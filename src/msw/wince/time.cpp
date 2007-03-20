@@ -2,9 +2,9 @@
 // Name:        src/msw/wince/time.cpp
 // Purpose:     Implements missing time functionality for WinCE
 // Author:      Marco Cavallini (MCK) - wx@koansoftware.com
-// Modified by: Vadim Zeitlin for VC8 support
+// Modified by:
 // Created:     31-08-2003
-// RCS-ID:      $Id$
+// RCS-ID:
 // Copyright:   (c) Marco Cavallini
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -29,30 +29,6 @@
 #endif
 
 #include "wx/msw/wince/time.h"
-
-#if defined(__VISUALC__) && (__VISUALC__ >= 1400)
-
-// VC8 does provide the time functions but not the standard ones
-#include <altcecrt.h>
-
-time_t __cdecl time(time_t *t)
-{
-    __time64_t t64;
-    if ( !_time64(&t64) )
-        return (time_t)-1;
-
-    if ( t )
-        *t = (time_t)t64;
-
-    return (time_t)t64;
-}
-
-time_t __cdecl mktime(struct tm *t)
-{
-    return (time_t)_mktime64(t);
-}
-
-#else // !VC8
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                         //
@@ -469,9 +445,12 @@ label:
 				continue;
 			case 'z':
 				{
-				int		diff = -timezone;
+				int		diff;
 				char const *	sign;
 
+				if (t->tm_isdst < 0)
+					continue;
+                continue;
 				if (diff < 0) {
 					sign = "-";
 					diff = -diff;
@@ -521,22 +500,18 @@ strftime(char * const s, const size_t maxsize, const char *format, const struct 
 extern "C"
 {
 
-/* Not needed in VS Studio 2005 */
-
-size_t wcsftime(wchar_t *s,
-                const size_t maxsize,
-                const wchar_t *format,
-                const struct tm *t)
+size_t wcsftime(wchar_t* const s, const size_t maxsize, const wchar_t *format, const struct tm * const t)
 {
-    wxCharBuffer sBuf(maxsize/sizeof(wchar_t));
-
+    char sBuf[256];
+    sBuf[0] = 0;
+    
     wxString formatStr(format);
     wxCharBuffer bufFormatStr(formatStr.mb_str());
-
-    size_t sz = strftime(sBuf.data(), maxsize/sizeof(wchar_t), bufFormatStr, t);
-
-    wxMB2WC(s, sBuf, maxsize);
-
+    
+    size_t sz = strftime(sBuf, maxsize, bufFormatStr, t);
+    
+    wxMB2WC(s, sBuf, strlen(sBuf));
+    
     return sz;
 }
 
@@ -759,4 +734,3 @@ time_t __cdecl mktime(struct tm *t)
 
 } // extern "C"
 
-#endif // VC8/!VC8

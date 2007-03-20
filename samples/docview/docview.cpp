@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation "docview.h"
+#endif
+
 /*
 * Purpose:  Document/view architecture demo for wxWidgets class library
 *           Run with no arguments for multiple top-level windows, -single
@@ -55,9 +59,6 @@ MyApp::MyApp(void)
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     //// Find out if we're:
     ////  multiple window: multiple windows, each view in a separate frame
     ////  single window:   one view (within the main frame) and one document at a time, as in Windows Write.

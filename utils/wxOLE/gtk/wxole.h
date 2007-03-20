@@ -9,6 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma interface "wxole.h"
+#endif
+
 #ifndef _WX_OLE_H_
 #define _WX_OLE_H_
 
@@ -44,7 +48,7 @@ class wxOleServerEnv : public wxObject
 public:
   
   wxOleServerEnv( const wxString &name, const wxString &version );
-  virtual ~wxOleServerEnv();
+  ~wxOleServerEnv();
 
 private:
 
@@ -68,7 +72,7 @@ class wxOleServer : public wxObject
 public:
   
   wxOleServer( const wxString &id );
-  virtual ~wxOleServer();
+  ~wxOleServer();
   
   virtual wxOleControl *CreateOleControl();
   
@@ -91,7 +95,7 @@ class wxOleControl : public wxFrame
 public:
   
     wxOleControl( wxWindowID id, long style = 0, const wxString &name = wxOleNameStr );
-    virtual ~wxOleControl();
+    ~wxOleControl();
     bool Create( wxWindowID id, long style = 0, const wxString &name = wxOleNameStr );
 
 protected:

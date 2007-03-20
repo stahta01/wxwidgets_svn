@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,16 +33,14 @@
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #if wxUSE_STREAMS
-        #include "wx/stream.h"
-    #endif
-    #include "wx/module.h"
 #endif
 
+#include "wx/stream.h"
 #include "wx/process.h"
 
 #include "wx/apptrait.h"
 
+#include "wx/module.h"
 
 #include "wx/msw/private.h"
 
@@ -485,16 +487,16 @@ size_t wxPipeOutputStream::OnSysWrite(const void *buffer, size_t len)
 #if wxUSE_IPC
 
 // connect to the given server via DDE and ask it to execute the command
-bool
-wxExecuteDDE(const wxString& ddeServer,
-             const wxString& ddeTopic,
-             const wxString& ddeCommand)
+static bool wxExecuteDDE(const wxString& ddeServer,
+                         const wxString& ddeTopic,
+                         const wxString& ddeCommand)
 {
     bool ok wxDUMMY_INITIALIZE(false);
 
     wxDDEClient client;
-    wxConnectionBase *
-        conn = client.MakeConnection(wxEmptyString, ddeServer, ddeTopic);
+    wxConnectionBase *conn = client.MakeConnection(wxEmptyString,
+                                                   ddeServer,
+                                                   ddeTopic);
     if ( !conn )
     {
         ok = false;
@@ -723,13 +725,13 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
                     // Win32 allows for null
 #ifdef __WXWINCE__
                  (wxChar *)
-                 moduleName.wx_str(),// application name
+                 moduleName.c_str(), // application name
                  (wxChar *)
-                 arguments.wx_str(), // arguments
+                 arguments.c_str(),  // arguments
 #else
                  NULL,               // application name (use only cmd line)
                  (wxChar *)
-                 command.wx_str(),   // full command line
+                 command.c_str(),    // full command line
 #endif
                  NULL,               // security attributes: defaults for both
                  NULL,               //   the process and its main thread
@@ -954,3 +956,4 @@ long wxExecute(wxChar **argv, int flags, wxProcess *handler)
 
     return wxExecute(command, flags, handler);
 }
+

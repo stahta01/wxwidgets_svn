@@ -102,9 +102,8 @@ uninitialised bitmap (`wx.Bitmap.Ok` returns False).", "");
     
 
     DocDeclStr(
-        bool , IsOk(),
+        bool , Ok(),
         "Returns True if the brush is initialised and valid.", "");
-    %pythoncode { Ok = IsOk }
 
 
 #ifdef __WXMAC__
@@ -112,12 +111,7 @@ uninitialised bitmap (`wx.Bitmap.Ok` returns False).", "");
     void MacSetTheme(short macThemeBrush);
 #endif
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-
-    %property(Colour, GetColour, SetColour, doc="See `GetColour` and `SetColour`");
-    %property(Stipple, GetStipple, SetStipple, doc="See `GetStipple` and `SetStipple`");
-    %property(Style, GetStyle, SetStyle, doc="See `GetStyle` and `SetStyle`");
-
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 //---------------------------------------------------------------------------

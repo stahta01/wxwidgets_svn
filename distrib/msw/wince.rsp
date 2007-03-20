@@ -7,9 +7,6 @@ samples/access/access.vcw
 samples/artprov/artprov.vcp
 samples/artprov/artprov.vcw
 
-samples/aui/auidemo.vcp
-samples/aui/auidemo.vcw
-
 samples/calendar/arttest.vcp
 samples/calendar/arttest.vcw
 
@@ -116,10 +113,10 @@ samples/internat/internat.vcw
 samples/keyboard/keyboard.vcp
 samples/keyboard/keyboard.vcw
 
-samples/ipc/ipc_ipcclient.vcp
-samples/ipc/ipc_ipcclient.vcw
-samples/ipc/ipc_ipcserver.vcp
-samples/ipc/ipc_ipcserver.vcw
+samples/ipc/ipc_client.vcp
+samples/ipc/ipc_client.vcw
+samples/ipc/ipc_server.vcp
+samples/ipc/ipc_server.vcw
 
 samples/joytest/joytest.vcp
 samples/joytest/joytest.vcw
@@ -196,9 +193,6 @@ samples/render/render_render.vcw
 
 samples/richedit/richedit.vcp
 samples/richedit/richedit.vcw
-
-samples/richtext/richtext.vcp
-samples/richtext/richtext.vcw
 
 samples/rotate/rotate.vcp
 samples/rotate/rotate.vcw
@@ -404,6 +398,9 @@ contrib/build/svg/svg.vcp
 contrib/build/svg/svg.vcw
 contrib/samples/svg/svgtest.vcp
 contrib/samples/svg/svgtest.vcw
+
+utils/configtool/src/configtool.vcp
+utils/configtool/src/configtool.vcw
 
 tests/*.vcp
 tests/*.vcw

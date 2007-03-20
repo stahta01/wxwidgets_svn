@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_DND_H_
 #define _WX_DND_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
 #include "wx/defs.h"
 
@@ -41,7 +46,7 @@ class WXDLLEXPORT wxDropTarget: public wxObject
 public:
     
     wxDropTarget();
-    virtual ~wxDropTarget();
+    ~wxDropTarget();
     
     virtual void OnEnter() { }
     virtual void OnLeave() { }
@@ -143,7 +148,7 @@ public:
     wxDropSource( wxWindow *win );
     wxDropSource( wxDataObject &data, wxWindow *win );
     
-    virtual ~wxDropSource(void);
+    ~wxDropSource(void);
     
     void SetData( wxDataObject &data  );
     wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly);

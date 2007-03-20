@@ -133,7 +133,7 @@ class BaseMaskedComboBox( wx.ComboBox, MaskedEditMixin ):
             self.SetClientSize(self._CalcSize())
             width = self.GetSize().width
             height = self.GetBestSize().height
-            self.SetInitialSize((width, height))
+            self.SetBestFittingSize((width, height))
 
 
         if value:
@@ -189,7 +189,7 @@ class BaseMaskedComboBox( wx.ComboBox, MaskedEditMixin ):
             width = self.GetSize().width
             height = self.GetBestSize().height
 ##            dbg('setting client size to:', (width, height))
-            self.SetInitialSize((width, height))
+            self.SetBestFittingSize((width, height))
 
 
     def _GetSelection(self):
@@ -222,10 +222,6 @@ class BaseMaskedComboBox( wx.ComboBox, MaskedEditMixin ):
     def _SetInsertionPoint(self, pos):
 ##        dbg('MaskedComboBox::_SetInsertionPoint(%d)' % pos)
         self.SetInsertionPoint(pos)
-
-
-    def IsEmpty(*args, **kw):
-        return MaskedEditMixin.IsEmpty(*args, **kw)
 
 
     def _GetValue(self):

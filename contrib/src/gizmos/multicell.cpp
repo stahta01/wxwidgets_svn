@@ -4,12 +4,16 @@
 // Author:      Jonathan Bayer
 // Modified by:
 // Created:
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) Jonathan Bayer
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // This was inspired by the gbsizer class written by Alex Andruschak
+
+#ifdef __GNUG__
+    #pragma implementation "multicell.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -33,8 +37,8 @@
 
 //---------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxMultiCellSizer, wxSizer);
-IMPLEMENT_ABSTRACT_CLASS(wxMultiCellItemHandle, wxObject);
+IMPLEMENT_ABSTRACT_CLASS(wxMultiCellSizer, wxSizer)
+IMPLEMENT_ABSTRACT_CLASS(wxMultiCellItemHandle, wxObject)
 
 //---------------------------------------------------------------------------
 // wxMultiCellItemHandle
@@ -83,45 +87,45 @@ wxMultiCellItemHandle :: wxMultiCellItemHandle( int row, int column, wxResizable
     Initialize(row, column, 1, 1, wxSize(1, 1), style, weight, align);
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetColumn() const
+int wxMultiCellItemHandle::GetColumn()
 {
     return m_column;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetRow() const
+int wxMultiCellItemHandle::GetRow()
 {
     return m_row;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetWidth() const
+int wxMultiCellItemHandle::GetWidth()
 {
     return m_width;
 }
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle::GetHeight() const
+int wxMultiCellItemHandle::GetHeight()
 {
     return m_height;
 }
 //---------------------------------------------------------------------------
-wxResizable    wxMultiCellItemHandle :: GetStyle() const
+wxResizable    wxMultiCellItemHandle :: GetStyle()
 {
     return m_style;
-};
+}
 //---------------------------------------------------------------------------
-wxSize wxMultiCellItemHandle :: GetLocalSize() const
+wxSize wxMultiCellItemHandle :: GetLocalSize()
 {
     return m_fixedSize;
-};
+}
 //---------------------------------------------------------------------------
-int wxMultiCellItemHandle :: GetAlignment() const
+int wxMultiCellItemHandle :: GetAlignment()
 {
     return m_alignment;
-};
+}
 //---------------------------------------------------------------------------
-wxSize wxMultiCellItemHandle :: GetWeight() const
+wxSize wxMultiCellItemHandle :: GetWeight()
 {
     return m_weight;
-};
+}
 
 
 
@@ -198,7 +202,7 @@ bool wxMultiCellSizer::EnableGridLines(wxWindow *win)
     return true;
 }
 //---------------------------------------------------------------------------
-bool wxMultiCellSizer::SetGridPen(const wxPen *pen)
+bool wxMultiCellSizer::SetGridPen(wxPen *pen)
 {
     m_pen = pen;
     return true;
@@ -510,7 +514,7 @@ void wxMultiCellSizer :: GetMinimums()
  *
  */
 
-/* static */ int wxMultiCellSizer :: Sum(int *array, int x)
+int wxMultiCellSizer :: Sum(int *array, int x)
 {
     int sum = 0;
     while (x--)
@@ -651,3 +655,4 @@ void wxMultiCellCanvas :: CalculateConstraints()
 }
 
 /*** End of File ***/
+

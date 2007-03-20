@@ -31,8 +31,8 @@ import imageutils
 
 class GenButtonEvent(wx.PyCommandEvent):
     """Event sent from the generic buttons when the button is activated. """
-    def __init__(self, eventType, id):
-        wx.PyCommandEvent.__init__(self, eventType, id)
+    def __init__(self, eventType, ID):
+        wx.PyCommandEvent.__init__(self, eventType, ID)
         self.isDown = False
         self.theButton = None
 
@@ -56,14 +56,14 @@ class GenButton(wx.PyControl):
 
     labelDelta = 1
 
-    def __init__(self, parent, id=-1, label='',
+    def __init__(self, parent, ID=-1, label='',
                  pos = wx.DefaultPosition, size = wx.DefaultSize,
                  style = 0, validator = wx.DefaultValidator,
                  name = "genbutton"):
         cstyle = style
         if cstyle == 0:
             cstyle = wx.BORDER_NONE
-        wx.PyControl.__init__(self, parent, id, pos, size, cstyle, validator, name)
+        wx.PyControl.__init__(self, parent, ID, pos, size, cstyle, validator, name)
 
         self.up = True
         self.hasFocus = False
@@ -77,7 +77,7 @@ class GenButton(wx.PyControl):
 
         self.SetLabel(label)
         self.InheritAttributes()
-        self.SetInitialSize(size)
+        self.SetBestFittingSize(size)
         self.InitColours()
 
         self.Bind(wx.EVT_LEFT_DOWN,        self.OnLeftDown)
@@ -92,16 +92,15 @@ class GenButton(wx.PyControl):
         self.Bind(wx.EVT_PAINT,            self.OnPaint)
 
 
-    def SetInitialSize(self, size=None):
+    def SetBestSize(self, size=None):
         """
         Given the current font and bezel width settings, calculate
         and set a good size.
         """
         if size is None:
             size = wx.DefaultSize            
-        wx.PyControl.SetInitialSize(self, size)
-    SetBestSize = SetInitialSize
-    
+        wx.PyControl.SetBestFittingSize(self, size)
+
 
     def DoGetBestSize(self):
         """
@@ -198,9 +197,7 @@ class GenButton(wx.PyControl):
         self.InitColours()
 
     def SetDefault(self):
-        tlw = wx.GetTopLevelParent(self)
-        if hasattr(tlw, 'SetDefaultItem'):
-            tlw.SetDefaultItem(self)
+        self.GetParent().SetDefaultItem(self)
         
     def _GetLabelSize(self):
         """ used internally """
@@ -258,25 +255,16 @@ class GenButton(wx.PyControl):
         dc.DrawRectangle(bw+2,bw+2,  w-bw*2-4, h-bw*2-4)
         dc.SetLogicalFunction(wx.COPY)
 
+
     def OnPaint(self, event):
         (width, height) = self.GetClientSizeTuple()
         x1 = y1 = 0
         x2 = width-1
         y2 = height-1
-
-        dc = wx.PaintDC(self)
-        brush = self.GetBackgroundBrush(dc)
-        if brush is not None:
-            dc.SetBackground(brush)
-            dc.Clear()
-
-        self.DrawBezel(dc, x1, y1, x2, y2)
-        self.DrawLabel(dc, width, height)
-        if self.hasFocus and self.useFocusInd:
-            self.DrawFocusIndicator(dc, width, height)
-
-
-    def GetBackgroundBrush(self, dc):
+        
+        dc = wx.BufferedPaintDC(self)
+        brush = None
+        
         if self.up:
             colBg = self.GetBackgroundColour()
             brush = wx.Brush(colBg, wx.SOLID)
@@ -295,10 +283,15 @@ class GenButton(wx.PyControl):
                     colBg = self.GetParent().GetBackgroundColour()
                     brush = wx.Brush(colBg, wx.SOLID)
         else:
-            # this line assumes that a pressed button should be hilighted with
-            # a solid colour even if the background is supposed to be transparent
             brush = wx.Brush(self.faceDnClr, wx.SOLID)
-        return brush
+        if brush is not None:
+            dc.SetBackground(brush)
+            dc.Clear()
+                    
+        self.DrawBezel(dc, x1, y1, x2, y2)
+        self.DrawLabel(dc, width, height)
+        if self.hasFocus and self.useFocusInd:
+            self.DrawFocusIndicator(dc, width, height)
 
 
     def OnLeftDown(self, event):
@@ -354,14 +347,14 @@ class GenButton(wx.PyControl):
 
 
     def OnKeyDown(self, event):
-        if self.hasFocus and event.GetKeyCode() == ord(" "):
+        if self.hasFocus and event.KeyCode() == ord(" "):
             self.up = False
             self.Refresh()
         event.Skip()
 
 
     def OnKeyUp(self, event):
-        if self.hasFocus and event.GetKeyCode() == ord(" "):
+        if self.hasFocus and event.KeyCode() == ord(" "):
             self.up = True
             self.Notify()
             self.Refresh()
@@ -373,7 +366,7 @@ class GenButton(wx.PyControl):
 class GenBitmapButton(GenButton):
     """A generic bitmap button."""
 
-    def __init__(self, parent, id=-1, bitmap=wx.NullBitmap,
+    def __init__(self, parent, ID=-1, bitmap=wx.NullBitmap,
                  pos = wx.DefaultPosition, size = wx.DefaultSize,
                  style = 0, validator = wx.DefaultValidator,
                  name = "genbutton"):
@@ -381,7 +374,7 @@ class GenBitmapButton(GenButton):
         self.bmpFocus = None
         self.bmpSelected = None
         self.SetBitmapLabel(bitmap)
-        GenButton.__init__(self, parent, id, "", pos, size, style, validator, name)
+        GenButton.__init__(self, parent, ID, "", pos, size, style, validator, name)
 
 
     def GetBitmapLabel(self):
@@ -448,11 +441,11 @@ class GenBitmapButton(GenButton):
 
 class GenBitmapTextButton(GenBitmapButton):
     """A generic bitmapped button with text label"""
-    def __init__(self, parent, id=-1, bitmap=wx.NullBitmap, label='',
+    def __init__(self, parent, ID=-1, bitmap=wx.NullBitmap, label='',
                  pos = wx.DefaultPosition, size = wx.DefaultSize,
                  style = 0, validator = wx.DefaultValidator,
                  name = "genbutton"):
-        GenBitmapButton.__init__(self, parent, id, bitmap, pos, size, style, validator, name)
+        GenBitmapButton.__init__(self, parent, ID, bitmap, pos, size, style, validator, name)
         self.SetLabel(label)
 
 
@@ -558,7 +551,7 @@ class __ToggleMixin:
         event.Skip()
 
     def OnKeyUp(self, event):
-        if self.hasFocus and event.GetKeyCode() == ord(" "):
+        if self.hasFocus and event.KeyCode() == ord(" "):
             self.up = not self.up
             self.Notify()
             self.Refresh()
@@ -581,35 +574,4 @@ class GenBitmapTextToggleButton(__ToggleMixin, GenBitmapTextButton):
 
 #----------------------------------------------------------------------
 
-class ThemedGenButton(GenButton):
-    " A themed generic button, and base class for the other themed buttons "
-    def DrawBezel(self, dc, x1, y1, x2, y2):
-        rect = wx.Rect(x1, y1, x2, y2)
-        if self.up:
-            state = 0
-        else:
-            state = wx.CONTROL_PRESSED
-        wx.RendererNative.Get().DrawPushButton(self, dc, rect, state)
- 
-class ThemedGenBitmapButton(ThemedGenButton, GenBitmapButton):
-    """A themed generic bitmap button."""
-    pass
 
-class ThemedGenBitmapTextButton(ThemedGenButton, GenBitmapTextButton):
-    """A themed generic bitmapped button with text label"""
-    pass
-    
-class ThemedGenToggleButton(ThemedGenButton, GenToggleButton):
-    """A themed generic toggle button"""
-    pass
-
-class ThemedGenBitmapToggleButton(ThemedGenButton, GenBitmapToggleButton):
-    """A themed generic toggle bitmap button"""
-    pass
-
-class ThemedGenBitmapTextToggleButton(ThemedGenButton, GenBitmapTextToggleButton):
-    """A themed generic toggle bitmap button with text label"""
-    pass
-
-
-#----------------------------------------------------------------------

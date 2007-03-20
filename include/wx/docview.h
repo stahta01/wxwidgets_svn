@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/docview.h
+// Name:        docview.h
 // Purpose:     Doc/View classes
 // Author:      Julian Smart
 // Modified by:
@@ -12,11 +12,16 @@
 #ifndef _WX_DOCH__
 #define _WX_DOCH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "docview.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_DOC_VIEW_ARCHITECTURE
 
 #include "wx/list.h"
+#include "wx/cmndata.h"
 #include "wx/string.h"
 #include "wx/frame.h"
 
@@ -64,7 +69,7 @@ class WXDLLEXPORT wxDocument : public wxEvtHandler
 {
 public:
     wxDocument(wxDocument *parent = (wxDocument *) NULL);
-    virtual ~wxDocument();
+    ~wxDocument();
 
     // accessors
     void SetFilename(const wxString& filename, bool notifyViews = false);
@@ -125,8 +130,7 @@ public:
 
     virtual bool AddView(wxView *view);
     virtual bool RemoveView(wxView *view);
-    wxList& GetViews() { return m_documentViews; }
-    const wxList& GetViews() const { return m_documentViews; }
+    wxList& GetViews() const { return (wxList&) m_documentViews; }
     wxView *GetFirstView() const;
 
     virtual void UpdateAllViews(wxView *sender = (wxView *) NULL, wxObject *hint = (wxObject *) NULL);
@@ -174,7 +178,7 @@ class WXDLLEXPORT wxView: public wxEvtHandler
 public:
     //  wxView(wxDocument *doc = (wxDocument *) NULL);
     wxView();
-    virtual ~wxView();
+    ~wxView();
 
     wxDocument *GetDocument() const { return m_viewDocument; }
     virtual void SetDocument(wxDocument *doc);
@@ -248,7 +252,7 @@ public:
                   wxClassInfo *viewClassInfo = (wxClassInfo *)NULL,
                   long flags = wxDEFAULT_TEMPLATE_FLAGS);
 
-    virtual ~wxDocTemplate();
+    ~wxDocTemplate();
 
     // By default, these two member functions dynamically creates document and
     // view using dynamic instance construction. Override these if you need a
@@ -314,7 +318,7 @@ class WXDLLEXPORT wxDocManager: public wxEvtHandler
 {
 public:
     wxDocManager(long flags = wxDEFAULT_DOCMAN_FLAGS, bool initialize = true);
-    virtual ~wxDocManager();
+    ~wxDocManager();
 
     virtual bool Initialize();
 
@@ -423,10 +427,8 @@ public:
     // Get the current document manager
     static wxDocManager* GetDocumentManager() { return sm_docManager; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetHistoryFilesCount() instead
     wxDEPRECATED( size_t GetNoHistoryFiles() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     long              m_flags;
@@ -444,12 +446,10 @@ protected:
     DECLARE_NO_COPY_CLASS(wxDocManager)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
 inline size_t wxDocManager::GetNoHistoryFiles() const
 {
     return GetHistoryFilesCount();
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ----------------------------------------------------------------------------
 // A default child frame
@@ -467,7 +467,7 @@ public:
                     const wxSize& size = wxDefaultSize,
                     long type = wxDEFAULT_FRAME_STYLE,
                     const wxString& name = wxT("frame"));
-    virtual ~wxDocChildFrame(){}
+    ~wxDocChildFrame(){}
 
     // Extend event processing to search the view's event table
     virtual bool ProcessEvent(wxEvent& event);
@@ -498,24 +498,14 @@ private:
 class WXDLLEXPORT wxDocParentFrame : public wxFrame
 {
 public:
-    wxDocParentFrame();
     wxDocParentFrame(wxDocManager *manager,
                      wxFrame *frame,
                      wxWindowID id,
                      const wxString& title,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
-                     long style = wxDEFAULT_FRAME_STYLE,
-                     const wxString& name = wxFrameNameStr);
-
-    bool Create(wxDocManager *manager,
-                wxFrame *frame,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxDEFAULT_FRAME_STYLE,
-                const wxString& name = wxFrameNameStr);
+                     long type = wxDEFAULT_FRAME_STYLE,
+                     const wxString& name = wxT("frame"));
 
     // Extend event processing to search the document manager's event table
     virtual bool ProcessEvent(wxEvent& event);
@@ -530,7 +520,6 @@ protected:
     wxDocManager *m_docManager;
 
 private:
-    typedef wxFrame base_type;
     DECLARE_CLASS(wxDocParentFrame)
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxDocParentFrame)
@@ -569,7 +558,7 @@ class WXDLLEXPORT wxFileHistory : public wxObject
 {
 public:
     wxFileHistory(size_t maxFiles = 9, wxWindowID idBase = wxID_FILE1);
-    virtual ~wxFileHistory();
+    ~wxFileHistory();
 
     // Operations
     virtual void AddFileToHistory(const wxString& file);
@@ -594,14 +583,8 @@ public:
 
     const wxList& GetMenus() const { return m_fileMenus; }
 
-    // Set/get base id
-    void SetBaseId(wxWindowID baseId) { m_idBase = baseId; }
-    wxWindowID GetBaseId() const { return m_idBase; }
-
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetCount() instead
     wxDEPRECATED( size_t GetNoHistoryFiles() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     // Last n files
@@ -621,12 +604,10 @@ private:
     DECLARE_NO_COPY_CLASS(wxFileHistory)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
 inline size_t wxFileHistory::GetNoHistoryFiles() const
 {
     return m_fileHistoryN;
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 #if wxUSE_STD_IOSTREAM
 // For compatibility with existing file formats:

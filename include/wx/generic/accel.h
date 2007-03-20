@@ -10,6 +10,10 @@
 #ifndef _WX_GENERIC_ACCEL_H_
 #define _WX_GENERIC_ACCEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "accel.h"
+#endif
+
 class WXDLLEXPORT wxKeyEvent;
 
 // ----------------------------------------------------------------------------
@@ -23,8 +27,20 @@ public:
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
     virtual ~wxAcceleratorTable();
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    wxAcceleratorTable(const wxAcceleratorTable& accel)
+        : wxObject()
+        { Ref(accel); }
+    wxAcceleratorTable& operator=(const wxAcceleratorTable& accel)
+      { if ( m_refData != accel.m_refData ) Ref(accel); return *this; }
+
+#if WXWIN_COMPATIBILITY_2_4
+    bool operator==(const wxAcceleratorTable& accel) const
+        { return m_refData == accel.m_refData; }
+    bool operator!=(const wxAcceleratorTable& accel) const
+        { return !(*this == accel); }
+#endif
+
+    bool Ok() const;
 
     void Add(const wxAcceleratorEntry& entry);
     void Remove(const wxAcceleratorEntry& entry);

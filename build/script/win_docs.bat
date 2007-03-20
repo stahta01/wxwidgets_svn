@@ -1,47 +1,25 @@
-rem Uncomment the next line to set the version; used also in wxWidgets.iss
-SET WXW_VER=2.8.2
-if (%WXW_VER%)==() SET WXW_VER=CVS
-
-echo docs building for %WXW_VER%
 
 rem  This builds the docs in %WXWIN% in a number of formats 
 rem  and a clean inno setup in a second tree
-rem  it uses a number of tools nmake, gnuwin32 zip & dos2unix, ghostscript, MS word, cvsNT
+rem  it uses a number of tools nmake, gnuwin32 zip, ghostscript, MS word, cvsNT
 rem  cvs is in the path already from CVSNT install
 rem  writes a log file in c:\
 
-echo Building wxWidgets-%WXW_VER% docs... > c:\temp.log
+echo Building wxWidgets docs... > c:\temp.log
 
 set WXWIN=c:\wx\wxWidgets
 set DAILY=c:\daily
-set PATH=%PATH%;C:\wx\wxw26b\utils\tex2rtf\src\vc_based;C:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
+set PATH=%PATH%;C:\wx\wxWidg~1.3\utils\tex2rtf\src\vc_based;C:\wx\GnuWin32\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
 set PATH=%PATH%;C:\Program Files\gs\gs8.51\lib;C:\Program Files\gs\gs8.51\bin
 echo %PATH% >> c:\temp.log
 
-rem update wxwidgets (holds docs) and inno (cvs wxMSW setup.exe only)
+rem update wxwidgets (holds docs) and inno (cvs wxMSW module only)
 c:
 cd %WXWIN%
 cvs up -P -d
-
-rem now inno
 cd \wx\inno\wxWidgets
-del c*.*
-if exist include\wx\msw\setup.h del include\wx\msw\setup.h
-if exist include\wx\univ\setup.h del include\wx\univ\setup.h
 cvs up -P
-dos2unix configure
-dos2unix config.guess
-dos2unix config.sub
-copy include\wx\msw\setup0.h include\wx\msw\setup.h
-copy include\wx\univ\setup0.h include\wx\univ\setup.h
 echo CVS update  >>  c:\temp.log
-
-rem add bakefile build...
-rem just build the formats not in the CVS to keep down the .#makefile...
-set PATH=%PATH%;C:\wx\Bakefile\src
-cd \wx\inno\wxWidgets\build\bakefiles
-del .bakefile_gen.state
-bakefile_gen -f dmars,dmars,msevc4prj,dmars_smake >> c:\temp.log
 
 
 rem add nmake to the path and build the docs
@@ -53,9 +31,6 @@ nmake -f makedocs.vc cleandocs
 nmake -f makedocs.vc alldocs
 
 del %DAILY%\in\*.p*
-mkdir %WXWIN%\docs\pdf
-mkdir %WXWIN%\docs\htmlhelp
-mkdir %WXWIN%\docs\htb
 echo starting word >>  c:\temp.log
 start /WAIT winword /mwx_ps
 
@@ -75,38 +50,28 @@ call ps2pdf ogl.ps >> c:\temp.log
 call ps2pdf svg.ps >> c:\temp.log
 call ps2pdf tex2rtf.ps >> c:\temp.log
 
-echo Zipping
-cd %WXWIN%
-del %DAILY%\*.zip
-zip %DAILY%\wxWidgets-%WXW_VER%-CHM.zip docs\htmlhelp\wx.chm utils/tex2rtf/docs/*.chm docs/htmlhelp/*.chm
-zip %DAILY%\wxWidgets-%WXW_VER%-HTB.zip docs\htb\*.htb utils/tex2rtf/docs/*.htb 
-zip %DAILY%\wxWidgets-%WXW_VER%-HLP.zip docs\winhelp\wx.hlp docs\winhelp\wx.cnt utils/tex2rtf/docs/*.HLP utils/tex2rtf/docs/*.cnt docs/winhelp/*.hlp docs/winhelp/*.cnt
-zip -r %DAILY%\wxWidgets-%WXW_VER%-HTML.zip docs\html\* -x CVS -x *.con -x *.hh* -x *.ref -x *.htx -x *.cn1 -x docs\html\CVS\*
-
-cd %DAILY%\
-mkdir docs
-mkdir docs\pdf
-del docs\pdf\*.pdf
-move in\*.pdf docs\pdf
-zip wxWidgets-%WXW_VER%-PDF.zip docs\pdf\*.pdf
-
-rem copy chm to inno
-cd %WXWIN%
-mkdir c:\wx\inno\wxWidgets\docs\htmlhelp
-copy docs\htmlhelp\wx.chm \wx\inno\wxWidgets\docs\htmlhelp\wx.chm
 cd %WXWIN%\build\script
 iscc wxwidgets.iss >> c:\temp.log
 
-rem echo setting S
+
+echo Zipping
+cd %WXWIN%
+del %DAILY%\*.zip
+zip %DAILY%\wx-docs-chm.ZIP docs\htmlhelp\wx.chm
+zip %DAILY%\wx-docs-pdf.ZIP %DAILY%\in\wx.pdf
+zip %DAILY%\wx-docs-hlp.ZIP docs\winhelp\wx.hlp docs\winhelp\wx.cnt
+zip %DAILY%\wx-docs-extra-hlp.ZIP utils/tex2rtf/docs/*.HLP utils/tex2rtf/docs/*.cnt docs/winhelp/*.hlp docs/winhelp/*.cnt -x  docs/winhelp/wx.hlp docs/winhelp/wx.*
+zip %DAILY%\wx-docs-extra-chm.ZIP utils/tex2rtf/docs/*.chm docs/htmlhelp/*.chm 
+cd %DAILY%\in
+zip %DAILY%\wx-docs-extra-pdf.ZIP *.pdf -x wx.pdf
+
+
+echo setting S
 rem echo yes > net use s: /delete
-rem net use s: \\biolpc22\bake 
-rem net use >> c:\temp.log
+net use s: \\biolpc22\bake 
 
-rem copy %DAILY%\*.ZIP s:\bkl-cronjob\archives\win
-rem copy %DAILY%\*.exe s:\bkl-cronjob\archives\win\*.exe
-rem dir s: /od >> c:\temp.log
+copy %DAILY%\*.ZIP s:\bkl-cronjob\archives\win
+copy %DAILY%\*.exe s:\bkl-cronjob\archives\win\*.EXE
 
-echo docs built for %WXW_VER%
-echo docs built for %WXW_VER% >> c:\temp.log
 
 

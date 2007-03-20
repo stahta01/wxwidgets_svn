@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      Julian Smart
 // Modified by:
@@ -9,13 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#if defined(__BORLANDC__)
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -24,16 +17,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include "wx/setup.h"
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/window.h" // for wxTopLevelWindows
-    #include "wx/cursor.h"
-    #include "wx/msgdlg.h"
-#endif
-
+#include "wx/app.h"
 #include "wx/apptrait.h"
+#include "wx/msgdlg.h"
+#include "wx/cursor.h"
+#include "wx/window.h" // for wxTopLevelWindows
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -83,61 +73,18 @@ void wxFlushEvents()
 
 bool wxCheckForInterrupt(wxWindow *wnd)
 {
-    wxFAIL_MSG(wxT("wxCheckForInterrupt not yet implemented."));
-    return false;
+    wxASSERT_MSG(FALSE, wxT("wxCheckForInterrupt not yet implemented."));
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
 // wxExecute stuff
 // ----------------------------------------------------------------------------
 
-WX_DECLARE_HASH_MAP( int, wxEndProcessData*, wxIntegerHash, wxIntegerEqual, wxProcMap );
-
-static wxProcMap *gs_procmap;
-
 int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
-    if (!gs_procmap) gs_procmap = new wxProcMap();
-    (*gs_procmap)[fd] = proc_data;
-    return 1;
-}
-
-void wxCheckForFinishedChildren()
-{
-    wxProcMap::iterator it;
-    if (!gs_procmap) return;
-    if (gs_procmap->size() == 0) {
-      // Map empty, delete it.
-      delete gs_procmap;
-      gs_procmap = NULL;
-      return;
-    }
-    for (it = gs_procmap->begin();it != gs_procmap->end(); ++it)
-    {
-        wxEndProcessData *proc_data = it->second;
-        int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
-        int status = 0;
-        // has the process really terminated?
-        int rc = waitpid(pid, &status, WNOHANG);
-        if (rc == 0)
-            continue;       // no, it didn't exit yet, continue waiting
-
-        // set exit code to -1 if something bad happened
-        proc_data->exitcode = rc != -1 && WIFEXITED(status) ?
-                   WEXITSTATUS(status) : -1;
-
-        // child exited, end waiting
-        close(it->first);
-
-        // don't call us again!
-        gs_procmap->erase(it->first);
-
-        wxHandleProcessTermination(proc_data);
-
-        // Iterator is invalid. Handle any further children in subsequent
-        // calls.
-        break;
-    }
+    // TODO
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -154,21 +101,16 @@ void wxBell()
 }
 #endif
 
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
 {
-    // get X protocol version
-    Display *display = wxGlobalDisplay();
-    if (display)
-    {
-        if ( verMaj )
-            *verMaj = ProtocolVersion (display);
-        if ( verMin )
-            *verMin = ProtocolRevision (display);
-    }
-
-    return wxPORT_X11;
+    static wxToolkitInfo info;
+    info.shortName = _T("x11univ");
+    info.name = _T("wxX11");
+    info.versionMajor = 0;
+    info.versionMinor = 0;
+    info.os = wxX11;
+    return info;
 }
-
 
 // ----------------------------------------------------------------------------
 // display info
@@ -194,7 +136,7 @@ void wxGetMousePosition( int* x, int* y )
 #endif
 };
 
-// Return true if we have a colour display
+// Return TRUE if we have a colour display
 bool wxColourDisplay()
 {
     return wxDisplayDepth() > 1;
@@ -240,57 +182,40 @@ void wxClientDisplayRect(int *x, int *y, int *width, int *height)
     wxDisplaySize(width, height);
 }
 
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
-}
-
 
 // Configurable display in wxX11 and wxMotif
-static Display *gs_currentDisplay = NULL;
+static WXDisplay *gs_currentDisplay = NULL;
 static wxString gs_displayName;
 
 WXDisplay *wxGetDisplay()
 {
-    return (WXDisplay *)gs_currentDisplay;
+    if (gs_currentDisplay)
+        return gs_currentDisplay;
+    return wxApp::GetDisplay();
 }
 
-// close the current display
-void wxCloseDisplay()
+bool wxSetDisplay(const wxString& display_name)
 {
-    if ( gs_currentDisplay )
-    {
-        if ( XCloseDisplay(gs_currentDisplay) != 0 )
-        {
-            wxLogWarning(_("Failed to close the display \"%s\""),
-                         gs_displayName.c_str());
-        }
+    gs_displayName = display_name;
 
+    if ( display_name.IsEmpty() )
+    {
         gs_currentDisplay = NULL;
-        gs_displayName.clear();
+
+        return TRUE;
     }
-}
-
-bool wxSetDisplay(const wxString& displayName)
-{
-    Display *dpy = XOpenDisplay
-                   (
-                    displayName.empty() ? NULL
-                                        : (const char *)displayName.mb_str()
-                   );
-
-    if ( !dpy )
+    else
     {
-        wxLogError(_("Failed to open display \"%s\"."), displayName.c_str());
-        return false;
+        Display* display = XOpenDisplay((char*) display_name.c_str());
+
+        if (display)
+        {
+            gs_currentDisplay = (WXDisplay*) display;
+            return TRUE;
+        }
+        else
+            return FALSE;
     }
-
-    wxCloseDisplay();
-
-    gs_currentDisplay = dpy;
-    gs_displayName = displayName;
-
-    return true;
 }
 
 wxString wxGetDisplayName()
@@ -298,20 +223,10 @@ wxString wxGetDisplayName()
     return gs_displayName;
 }
 
-#include "wx/module.h"
-
-// the module responsible for closing the X11 display at the program end
-class wxX11DisplayModule : public wxModule
+wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 {
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit() { wxCloseDisplay(); }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxX11DisplayModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxX11DisplayModule, wxModule)
+    return wxGenericFindWindowAtPoint(pt);
+}
 
 // ----------------------------------------------------------------------------
 // Some colour manipulation routines
@@ -436,20 +351,20 @@ wxString wxGetXEventName(XEvent& event)
     return str;
 #else
     int type = event.xany.type;
-    static char* event_name[] = {
-        "", "unknown(-)",                                         // 0-1
-        "KeyPress", "KeyRelease", "ButtonPress", "ButtonRelease", // 2-5
-        "MotionNotify", "EnterNotify", "LeaveNotify", "FocusIn",  // 6-9
-        "FocusOut", "KeymapNotify", "Expose", "GraphicsExpose",   // 10-13
-        "NoExpose", "VisibilityNotify", "CreateNotify",           // 14-16
-        "DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",// 17-20
-        "ReparentNotify", "ConfigureNotify", "ConfigureRequest",  // 21-23
-        "GravityNotify", "ResizeRequest", "CirculateNotify",      // 24-26
-        "CirculateRequest", "PropertyNotify", "SelectionClear",   // 27-29
-        "SelectionRequest", "SelectionNotify", "ColormapNotify",  // 30-32
-        "ClientMessage", "MappingNotify",                         // 33-34
-        "unknown(+)"};                                            // 35
-        type = wxMin(35, type); type = wxMax(1, type);
+	    static char* event_name[] = {
+		"", "unknown(-)",                                         // 0-1
+		"KeyPress", "KeyRelease", "ButtonPress", "ButtonRelease", // 2-5
+		"MotionNotify", "EnterNotify", "LeaveNotify", "FocusIn",  // 6-9
+		"FocusOut", "KeymapNotify", "Expose", "GraphicsExpose",   // 10-13
+		"NoExpose", "VisibilityNotify", "CreateNotify",           // 14-16
+		"DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",// 17-20
+		"ReparentNotify", "ConfigureNotify", "ConfigureRequest",  // 21-23
+		"GravityNotify", "ResizeRequest", "CirculateNotify",      // 24-26
+		"CirculateRequest", "PropertyNotify", "SelectionClear",   // 27-29
+		"SelectionRequest", "SelectionNotify", "ColormapNotify",  // 30-32
+		"ClientMessage", "MappingNotify",                         // 33-34
+		"unknown(+)"};                                            // 35
+	    type = wxMin(35, type); type = wxMax(1, type);
         return wxString::FromAscii(event_name[type]);
 #endif
 }

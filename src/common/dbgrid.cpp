@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dbgrid.cpp
+// Name:        dbgrid.cpp
 // Purpose:     Displays a wxDbTable in a wxGrid.
 // Author:      Roger Gammans, Paul Gammans
 // Modified by:
@@ -11,24 +11,30 @@
 // Branched From : dbgrid.cpp,v 1.18 2000/12/19 13:00:58
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dbgrid.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_ODBC && wxUSE_GRID
+
+#if wxUSE_ODBC
+#if wxUSE_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
     #include "wx/dc.h"
-    #include "wx/app.h"
 #endif // WX_PRECOMP
 
 #include "wx/generic/gridctrl.h"
 #include "wx/dbgrid.h"
 
 // DLL options compatibility check:
+#include "wx/app.h"
 WX_CHECK_BUILD_OPTIONS("wxDbGrid")
 
 
@@ -203,12 +209,11 @@ bool wxDbGridTableBase::AssignDbTable(wxDbTable *tab, int count, bool takeOwners
 {
     wxDbGridCellAttrProvider *provider;
 
-    wxGridUpdateLocker locker(GetView());
-
     //Remove Information from grid about old data
     if (GetView())
     {
         wxGrid *grid = GetView();
+        grid->BeginBatch();
         grid->ClearSelection();
         if (grid->IsCellEditControlEnabled())
         {
@@ -251,6 +256,7 @@ bool wxDbGridTableBase::AssignDbTable(wxDbTable *tab, int count, bool takeOwners
         wxGrid * grid = GetView();
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, m_rowtotal);
         grid->ProcessTableMessage(msg);
+        grid->EndBatch();
     }
     m_dbowner = takeOwnership;
     m_rowmodified = false;
@@ -272,7 +278,7 @@ wxString wxDbGridTableBase::GetTypeName(int WXUNUSED(row), int col)
                 case SQL_C_CHAR:
 #ifdef SQL_C_WCHAR
                 case SQL_C_WCHAR:
-#endif
+#endif                 
                     return wxGRID_VALUE_STRING;
                 case SQL_C_SHORT:
                 case SQL_C_SSHORT:
@@ -646,8 +652,7 @@ void wxDbGridTableBase::SetValueAsBool(int row, int col, bool value)
 
 void wxDbGridTableBase::ValidateRow(int row)
 {
-    wxLogDebug(wxT("ValidateRow(%i) currently on row (%i). Array count = %lu"),
-               row, m_row, (unsigned long)m_keys.GetCount());
+    wxLogDebug(wxT("ValidateRow(%i) currently on row (%i). Array count = %i"),row,m_row,m_keys.GetCount());
 
     if (row == m_row)
          return;
@@ -724,4 +729,6 @@ bool wxDbGridTableBase::Writeback() const
 
 WX_DEFINE_EXPORTED_OBJARRAY(keyarray)
 
-#endif  // wxUSE_GRID && wxUSE_ODBC
+#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_ODBC
+

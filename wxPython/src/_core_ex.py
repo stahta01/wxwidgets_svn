@@ -30,24 +30,6 @@ if RELEASE_VERSION != _core_.RELEASE_VERSION:
     import warnings
     warnings.warn("wxPython/wxWidgets release number mismatch")
 
-
-def version():
-    """Returns a string containing version and port info"""
-    ctype = wx.USE_UNICODE and 'unicode' or 'ansi'
-    if wx.Platform == '__WXMSW__':
-        port = 'msw'
-    elif wx.Platform == '__WXMAC__':
-        port = 'mac'
-    elif wx.Platform == '__WXGTK__':
-        port = 'gtk'
-        if 'gtk2' in wx.PlatformInfo:
-            port = 'gtk2'
-    else:
-        port = '?'
-
-    return "%s (%s-%s)" % (wx.VERSION_STRING, port, ctype)
-                       
-    
 #----------------------------------------------------------------------------
 
 # Set wxPython's default string<-->unicode conversion encoding from
@@ -67,10 +49,7 @@ if default == 'ascii':
     import locale
     import codecs
     try:
-        if hasattr(locale, 'getpreferredencoding'):
-            default = locale.getpreferredencoding()
-        else:
-            default = locale.getdefaultlocale()[1]
+        default = locale.getdefaultlocale()[1]
         codecs.lookup(default)
     except (ValueError, LookupError, TypeError):
         default = _sys.getdefaultencoding()
@@ -148,7 +127,7 @@ def CallAfter(callable, *args, **kw):
     method calls from non-GUI threads.  Any extra positional or
     keyword args are passed on to the callable when it is called.
 
-    :see: `wx.CallLater`
+    :see: `wx.FutureCall`
     """
     app = wx.GetApp()
     assert app is not None, 'No wx.App created yet'
@@ -167,7 +146,7 @@ def CallAfter(callable, *args, **kw):
 #----------------------------------------------------------------------------
 
 
-class CallLater:
+class FutureCall:
     """
     A convenience class for `wx.Timer`, that calls the given callable
     object once after the given amount of milliseconds, passing any
@@ -178,7 +157,7 @@ class CallLater:
     then there is no need to hold a reference to this object.  It will
     hold a reference to itself while the timer is running (the timer
     has a reference to self.Notify) but the cycle will be broken when
-    the timer completes, automatically cleaning up the wx.CallLater
+    the timer completes, automatically cleaning up the wx.FutureCall
     object.
 
     :see: `wx.CallAfter`
@@ -264,12 +243,7 @@ class CallLater:
             # if it wasn't restarted, then cleanup
             wx.CallAfter(self.Stop)
 
-    Interval = property(GetInterval)
-    Result = property(GetResult)
 
-
-class FutureCall(CallLater):
-    """A compatibility alias for `CallLater`."""
 
 #----------------------------------------------------------------------------
 # Control which items in this module should be documented by epydoc.
@@ -282,7 +256,7 @@ class FutureCall(CallLater):
 class __DocFilter:
     """
     A filter for epydoc that only allows non-Ptr classes and
-    functions, in order to reduce the clutter in the API docs.
+    fucntions, in order to reduce the clutter in the API docs.
     """
     def __init__(self, globals):
         self._globals = globals
@@ -290,13 +264,9 @@ class __DocFilter:
     def __call__(self, name):
         import types
         obj = self._globals.get(name, None)
-
-        # only document classes and function
         if type(obj) not in [type, types.ClassType, types.FunctionType, types.BuiltinFunctionType]:
             return False
-
-        # skip other things that are private or will be documented as part of somethign else
-        if name.startswith('_') or name.startswith('EVT') or name.endswith('_swigregister')  or name.endswith('Ptr') :
+        if name.startswith('_') or name.endswith('Ptr') or name.startswith('EVT'):
             return False
 
         # skip functions that are duplicates of static functions in a class
@@ -305,7 +275,7 @@ class __DocFilter:
             methname = name.split('_')[1]
             if hasattr(cls, methname) and type(getattr(cls, methname)) is types.FunctionType:
                 return False
-            
+
         return True
 
 #----------------------------------------------------------------------------
@@ -317,6 +287,11 @@ from _gdi import *
 from _windows import *
 from _controls import *
 from _misc import *
+
+
+# Fixup the stock objects since they can't be used yet.  (They will be
+# restored in wx.PyApp.OnInit.)
+_core_._wxPyFixStockObjects()
 
 #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------

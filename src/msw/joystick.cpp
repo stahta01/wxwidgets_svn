@@ -9,22 +9,22 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "joystick.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_JOYSTICK
 
 #include "wx/joystick.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/window.h"
-#endif
-
+#include "wx/string.h"
+#include "wx/window.h"
 #include "wx/msw/private.h"
 
 #if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
@@ -36,6 +36,7 @@
 #define NO_JOYGETPOSEX
 #endif
 
+#include "wx/window.h"
 #include "wx/msw/registry.h"
 
 #include <regstr.h>
@@ -86,26 +87,6 @@ wxPoint wxJoystick::GetPosition() const
         return wxPoint(0,0);
 }
 
-int wxJoystick::GetPosition(unsigned axis) const
-{
-    switch (axis) {
-    case 0:
-        return GetPosition().x;
-    case 1:
-        return GetPosition().y;
-    case 2:
-        return GetZPosition();
-    case 3:
-        return GetRudderPosition();
-    case 4:
-        return GetUPosition();
-    case 5:
-        return GetVPosition();
-    default:
-        return 0;
-    }
-}
-
 int wxJoystick::GetZPosition() const
 {
     JOYINFO joyInfo;
@@ -145,14 +126,6 @@ int wxJoystick::GetButtonState() const
     }
     else
         return 0;
-}
-
-bool wxJoystick::GetButtonState(unsigned id) const
-{
-    if (id > sizeof(int) * 8)
-        return false;
-
-    return (GetButtonState() & (1 << id)) != 0;
 }
 
 /**
@@ -326,8 +299,9 @@ int wxJoystick::GetProductId() const
 
 wxString wxJoystick::GetProductName() const
 {
-    wxString str;
-#ifndef __WINE__
+#ifdef __WINE__
+    return wxEmptyString;
+#else
     JOYCAPS joyCaps;
     if (joyGetDevCaps(m_joystick, &joyCaps, sizeof(joyCaps)) != JOYERR_NOERROR)
         return wxEmptyString;
@@ -335,6 +309,7 @@ wxString wxJoystick::GetProductName() const
     wxRegKey key1(wxString::Format(wxT("HKEY_LOCAL_MACHINE\\%s\\%s\\%s"),
                    REGSTR_PATH_JOYCONFIG, joyCaps.szRegKey, REGSTR_KEY_JOYCURR));
 
+    wxString str;
     key1.QueryValue(wxString::Format(wxT("Joystick%d%s"),
                                      m_joystick + 1, REGSTR_VAL_JOYOEMNAME),
                     str);
@@ -342,8 +317,9 @@ wxString wxJoystick::GetProductName() const
     wxRegKey key2(wxString::Format(wxT("HKEY_LOCAL_MACHINE\\%s\\%s"),
                                         REGSTR_PATH_JOYOEM, str.c_str()));
     key2.QueryValue(REGSTR_VAL_JOYOEMNAME, str);
-#endif
+
     return str;
+#endif
 }
 
 int wxJoystick::GetXMin() const

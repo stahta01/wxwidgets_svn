@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/checklst.h
+// Name:        checklst.h
 // Purpose:     wxCheckListBox class - a listbox with checkable items
 //              Note: this is an optional class.
 // Author:      Stefan Csomor
@@ -10,22 +10,22 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MAC_CHECKLST_H_
-#define _WX_MAC_CHECKLST_H_
+#ifndef _WX_CHECKLST_H_
+#define _WX_CHECKLST_H_
 
-class wxMacCheckListControl
-{
-public :
-    virtual bool            MacIsChecked(unsigned int n) const = 0;
-    virtual void            MacCheck(unsigned int n, bool bCheck = true) = 0;
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "checklst.h"
+#endif
 
-    virtual ~wxMacCheckListControl() { }
-};
+#if !defined(__MWERKS__) && !defined(__UNIX__)
+typedef   unsigned int  size_t;
+#endif
 
 class WXDLLEXPORT wxCheckListBox : public wxCheckListBoxBase
 {
+  DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 public:
-    // ctors
+  // ctors
     wxCheckListBox() { Init(); }
     wxCheckListBox(wxWindow *parent,
                    wxWindowID id,
@@ -74,17 +74,27 @@ public:
                 const wxString& name = wxListBoxNameStr);
 
     // items may be checked
-    bool  IsChecked(unsigned int uiIndex) const;
-    void  Check(unsigned int uiIndex, bool bCheck = true);
+    bool  IsChecked(size_t uiIndex) const;
+    void  Check(size_t uiIndex, bool bCheck = TRUE);
 
-    wxMacCheckListControl* GetPeer() const;
+
+    // override all methods which add/delete items to update m_checks array as
+    // well
+    virtual void Delete(int n);
+    // the array containing the checked status of the items
+    wxArrayInt m_checks;
 
 protected:
+    virtual int DoAppend(const wxString& item);
+    virtual void DoInsertItems(const wxArrayString& items, int pos);
+    virtual void DoSetItems(const wxArrayString& items, void **clientData);
+    virtual void DoClear();
+    // common part of all ctors
     void Init();
-
 private:
+
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
 
-#endif // _WX_MAC_CHECKLST_H_
+#endif
+    // _WX_CHECKLST_H_

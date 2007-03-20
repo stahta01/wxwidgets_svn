@@ -1,25 +1,23 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/cursor.cpp
+// Name:        cursor.cpp
 // Purpose:     wxCursor class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "cursor.h"
+#endif
 
 #include "wx/cursor.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/icon.h"
-    #include "wx/gdicmn.h"
-#endif
+#include "wx/gdicmn.h"
+#include "wx/icon.h"
+#include "wx/app.h"
+#include "wx/utils.h"
 
 #include "wx/x11/private.h"
 
@@ -36,7 +34,7 @@ class wxCursorRefData: public wxObjectRefData
 public:
 
     wxCursorRefData();
-    virtual ~wxCursorRefData();
+    ~wxCursorRefData();
 
     WXCursor     m_cursor;
     WXDisplay   *m_display;
@@ -71,14 +69,14 @@ wxCursor::wxCursor( int cursorId )
 
 #if wxUSE_NANOX
     // TODO Create some standard cursors from bitmaps.
-
-
+    
+    
 #else
     // !wxUSE_NANOX
-
+    
     M_CURSORDATA->m_display = wxGlobalDisplay();
     wxASSERT_MSG( M_CURSORDATA->m_display, wxT("No display") );
-
+    
     int x_cur = XC_left_ptr;
     switch (cursorId)
     {
@@ -130,6 +128,12 @@ wxCursor::wxCursor(const char bits[], int width, int  height,
    wxFAIL_MSG( wxT("wxCursor creation from bits not yet implemented") );
 }
 
+
+wxCursor::wxCursor( const wxCursor &cursor )
+{
+    Ref( cursor );
+}
+
 #if wxUSE_IMAGE
 wxCursor::wxCursor( const wxImage & image )
 {
@@ -141,7 +145,27 @@ wxCursor::~wxCursor()
 {
 }
 
-bool wxCursor::IsOk() const
+wxCursor& wxCursor::operator = ( const wxCursor& cursor )
+{
+    if (*this == cursor)
+        return (*this);
+
+    Ref( cursor );
+
+    return *this;
+}
+
+bool wxCursor::operator == ( const wxCursor& cursor ) const
+{
+    return m_refData == cursor.m_refData;
+}
+
+bool wxCursor::operator != ( const wxCursor& cursor ) const
+{
+    return m_refData != cursor.m_refData;
+}
+
+bool wxCursor::Ok() const
 {
     return (m_refData != NULL);
 }
@@ -182,7 +206,7 @@ void wxEndBusyCursor()
         wxTheApp->ProcessIdle();
 }
 
-void wxBeginBusyCursor( const wxCursor *WXUNUSED(cursor) )
+void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )
 {
     if (gs_busyCount++ > 0)
         return;

@@ -6,7 +6,7 @@
 // Created:     2003/08/11
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_COCOA_ICON_H__
@@ -24,6 +24,10 @@ class WXDLLEXPORT wxIcon: public wxGDIObject
 public:
     wxIcon();
 
+    // Copy constructors
+    wxIcon(const wxIcon& icon)
+    {   Ref(icon); }
+
     wxIcon(const char **data) { CreateFromXpm(data); }
     wxIcon(char **data) { CreateFromXpm((const char**)data); }
     wxIcon(const char bits[], int width , int height );
@@ -33,13 +37,15 @@ public:
     {
         LoadFile(loc.GetFileName(), wxBITMAP_TYPE_ICON);
     }
-    virtual ~wxIcon();
+    ~wxIcon();
 
     bool LoadFile(const wxString& name, wxBitmapType flags /* = wxBITMAP_TYPE_ICON_RESOURCE */ ,
         int desiredWidth /* = -1 */ , int desiredHeight = -1);
     bool LoadFile(const wxString& name, wxBitmapType flags = wxBITMAP_TYPE_ICON_RESOURCE )
     {   return LoadFile( name , flags , -1 , -1 ) ; }
 
+    wxIcon& operator=(const wxIcon& icon)
+    {   if (this != &icon) Ref(icon); return *this; }
     bool operator==(const wxIcon& icon) const
     {   return m_refData == icon.m_refData; }
     bool operator!=(const wxIcon& icon) const { return !(*this == icon); }
@@ -49,8 +55,7 @@ public:
     // ctors, assignment operators...), but it's ok to have such function
     void CopyFromBitmap(const wxBitmap& bmp);
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    bool Ok() const;
     int GetWidth() const;
     int GetHeight() const;
 
@@ -58,5 +63,4 @@ public:
     bool CreateFromXpm(const char **bits);
 };
 
-#endif
-    // _WX_COCOA_ICON_H__
+#endif // _WX_COCOA_ICON_H__

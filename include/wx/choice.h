@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "choicebase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CHOICE
@@ -26,7 +30,7 @@
 // global data
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxChoiceNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxChoiceNameStr;
 
 // ----------------------------------------------------------------------------
 // wxChoice allows to select one of a non-modifiable list of strings
@@ -39,13 +43,6 @@ public:
     virtual ~wxChoiceBase();
 
     // all generic methods are in wxControlWithItems
-
-    // get the current selection: this can only be different from the normal
-    // selection if the popup items list is currently opened and the user
-    // selected some item in it but didn't close the list yet; otherwise (and
-    // currently always on platforms other than MSW) this is the same as
-    // GetSelection()
-    virtual int GetCurrentSelection() const { return GetSelection(); }
 
     // set/get the number of columns in the control (as they're not supported on
     // most platforms, they do nothing by default)
@@ -71,10 +68,8 @@ private:
     #include "wx/msw/choice.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/choice.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/choice.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/choice.h"
+    #include "wx/gtk/choice.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/choice.h"
 #elif defined(__WXCOCOA__)
@@ -85,4 +80,5 @@ private:
 
 #endif // wxUSE_CHOICE
 
-#endif // _WX_CHOICE_H_BASE_
+#endif
+    // _WX_CHOICE_H_BASE_

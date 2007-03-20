@@ -6,16 +6,14 @@
 // Created:     2003/08/11
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/icon.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/bitmap.h"
+    #include "wx/icon.h"
 #endif //WX_PRECOMP
+#include "wx/bitmap.h"
 
 #include "wx/cocoa/autorelease.h"
 
@@ -46,7 +44,7 @@ protected:
 
 wxIconRefData::wxIconRefData()
 {
-    m_ok = false;
+    m_ok = FALSE;
     m_width = 0;
     m_height = 0;
     m_depth = 0;
@@ -118,7 +116,7 @@ bool wxIcon::LoadFile(const wxString& filename, wxBitmapType type,
     M_ICONDATA->m_numColors = 0;
     M_ICONDATA->m_quality = 0;
 
-    return false;
+    return FALSE;
 }
 
 void wxIcon::CopyFromBitmap(const wxBitmap& bitmap)
@@ -134,7 +132,7 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bitmap)
     M_ICONDATA->m_quality = 0;
 }
 
-bool wxIcon::IsOk() const
+bool wxIcon::Ok() const
 {
     return m_refData && M_ICONDATA->m_ok;
 }
@@ -159,3 +157,4 @@ WX_NSImage wxIcon::GetNSImage() const
         return nil;
     return M_ICONDATA->m_cocoaNSImage;
 }
+

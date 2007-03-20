@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/artstd.cpp
+// Name:        artstd.cpp
 // Purpose:     stock wxArtProvider instance with native GTK+ stock icons
 // Author:      Vaclav Slavik
 // Modified by:
@@ -20,14 +20,10 @@
     #pragma hdrstop
 #endif
 
-#if !defined(__WXUNIVERSAL__)
+#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
 
 #include "wx/artprov.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/module.h"
-#endif
-
+#include "wx/module.h"
 #include "wx/gtk/private.h"
 
 #include <gtk/gtk.h>
@@ -54,7 +50,7 @@ protected:
 
 /*static*/ void wxArtProvider::InitNativeProvider()
 {
-    Push(new wxGTK2ArtProvider);
+    wxArtProvider::PushProvider(new wxGTK2ArtProvider);
 }
 
 // ----------------------------------------------------------------------------
@@ -65,12 +61,12 @@ static const char *wxArtIDToStock(const wxArtID& id)
 {
     #define ART(wxid, gtkid) \
            if (id == wxid) return gtkid;
-
+    
     ART(wxART_ERROR,                               GTK_STOCK_DIALOG_ERROR)
     ART(wxART_INFORMATION,                         GTK_STOCK_DIALOG_INFO)
     ART(wxART_WARNING,                             GTK_STOCK_DIALOG_WARNING)
     ART(wxART_QUESTION,                            GTK_STOCK_DIALOG_QUESTION)
-
+    
     //ART(wxART_HELP_SIDE_PANEL,                     )
     ART(wxART_HELP_SETTINGS,                       GTK_STOCK_SELECT_FONT)
     //ART(wxART_HELP_BOOK,                           )
@@ -125,9 +121,9 @@ static const char *wxArtIDToStock(const wxArtID& id)
     ART(wxART_FIND,                                GTK_STOCK_FIND)
     ART(wxART_FIND_AND_REPLACE,                    GTK_STOCK_FIND_AND_REPLACE)
 #endif
-
+    
     return NULL;
-
+    
     #undef ART
 }
 
@@ -178,8 +174,8 @@ static GtkIconSize FindClosestIconSize(const wxSize& size)
         // only use larger bitmaps, scaling down looks better than scaling up:
         if (size.x > s_sizes[i].x || size.y > s_sizes[i].y)
             continue;
-
-        unsigned dist = (size.x - s_sizes[i].x) * (size.x - s_sizes[i].x) +
+        
+        unsigned dist = (size.x - s_sizes[i].x) * (size.x - s_sizes[i].x) + 
                         (size.y - s_sizes[i].y) * (size.y - s_sizes[i].y);
         if (dist == 0)
             return s_sizes[i].icon;
@@ -187,7 +183,7 @@ static GtkIconSize FindClosestIconSize(const wxSize& size)
         {
             distance = dist;
             best = s_sizes[i].icon;
-        }
+        }            
     }
     return best;
 }
@@ -200,17 +196,17 @@ static GdkPixbuf *CreateStockIcon(const char *stockid, GtkIconSize size)
     // FIXME: This code is not 100% correct, because stock pixmap are
     //        context-dependent and may be affected by theme engine, the
     //        correct value can only be obtained for given GtkWidget object.
-    //
+    //        
     //        Fool-proof implementation of stock bitmaps would extend wxBitmap
     //        with "stock-id" representation (in addition to pixmap and pixbuf
     //        ones) and would convert it to pixbuf when rendered.
-
+    
     if (gs_gtkStyle == NULL)
     {
         GtkWidget *widget = gtk_button_new();
         gs_gtkStyle = gtk_rc_get_style(widget);
         wxASSERT( gs_gtkStyle != NULL );
-        g_object_ref(gs_gtkStyle);
+        g_object_ref(G_OBJECT(gs_gtkStyle));
         gtk_widget_destroy(widget);
     }
 
@@ -233,7 +229,7 @@ static GdkPixbuf *CreateThemeIcon(const char *iconname,
     {
         gtk_icon_size_lookup(iconsize, &size.x, &size.y);
     }
-
+    
     return gtk_icon_theme_load_icon(
                     gtk_icon_theme_get_default(),
                     iconname,
@@ -248,7 +244,7 @@ wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
 {
     wxCharBuffer stockid = wxArtIDToStock(id);
     GtkIconSize stocksize = (size == wxDefaultSize) ?
-                                wxArtClientToIconSize(client) :
+                                wxArtClientToIconSize(client) : 
                                 FindClosestIconSize(size);
 
     // we must have some size, this is arbitrary
@@ -262,9 +258,10 @@ wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
     GdkPixbuf *pixbuf = CreateStockIcon(stockid, stocksize);
 
 #ifdef __WXGTK24__
-    if (!pixbuf && !gtk_check_version(2,4,0))
+    if (!gtk_check_version(2,4,0))
     {
-        pixbuf = CreateThemeIcon(stockid, stocksize, size);
+        if (!pixbuf)
+            pixbuf = CreateThemeIcon(stockid, stocksize, size);
     }
 #endif
 
@@ -276,14 +273,18 @@ wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
                                                 GDK_INTERP_BILINEAR);
         if (p2)
         {
-            g_object_unref (pixbuf);
+            gdk_pixbuf_unref(pixbuf);
             pixbuf = p2;
         }
     }
+    
+    if (!pixbuf)
+        return wxNullBitmap;
 
     wxBitmap bmp;
-    if (pixbuf != NULL)
-        bmp.SetPixbuf(pixbuf);
+    bmp.SetWidth(gdk_pixbuf_get_width(pixbuf));
+    bmp.SetHeight(gdk_pixbuf_get_height(pixbuf));
+    bmp.SetPixbuf(pixbuf);
 
     return bmp;
 }
@@ -300,7 +301,7 @@ public:
     {
         if (gs_gtkStyle)
         {
-            g_object_unref(gs_gtkStyle);
+            g_object_unref(G_OBJECT(gs_gtkStyle));
             gs_gtkStyle = NULL;
         }
     }
@@ -310,4 +311,4 @@ public:
 
 IMPLEMENT_DYNAMIC_CLASS(wxArtGtkModule, wxModule)
 
-#endif // !defined(__WXUNIVERSAL__)
+#endif // defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)

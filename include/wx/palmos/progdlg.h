@@ -12,6 +12,10 @@
 #ifndef _PREFCONF_H_
 #define _PREFCONF_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "progdlg.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_PROGRESSDLG
@@ -27,7 +31,7 @@ public:
                      int maximum = 100,
                      wxWindow *parent = NULL,
                      int style = wxPD_APP_MODAL | wxPD_AUTO_HIDE);
-    virtual ~wxProgressDialog();
+    ~wxProgressDialog();
 
     virtual bool Update(int value, const wxString& newmsg = wxEmptyString, bool *skip = NULL);
     void Resume();

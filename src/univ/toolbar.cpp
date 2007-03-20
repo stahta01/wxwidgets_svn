@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtoolbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,43 +31,17 @@
 
 #if wxUSE_TOOLBAR
 
-#include "wx/toolbar.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/app.h"
-    #include "wx/log.h"
-    #include "wx/frame.h"
-    #include "wx/dc.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/univ/renderer.h"
 
-// ----------------------------------------------------------------------------
-// wxStdToolbarInputHandler: translates SPACE and ENTER keys and the left mouse
-// click into button press/release actions
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStdToolbarInputHandler : public wxStdInputHandler
-{
-public:
-    wxStdToolbarInputHandler(wxInputHandler *inphand);
-
-    virtual bool HandleKey(wxInputConsumer *consumer,
-                           const wxKeyEvent& event,
-                           bool pressed);
-    virtual bool HandleMouse(wxInputConsumer *consumer,
-                             const wxMouseEvent& event);
-    virtual bool HandleMouseMove(wxInputConsumer *consumer, const wxMouseEvent& event);
-    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event);
-    virtual bool HandleActivation(wxInputConsumer *consumer, bool activated);
-
-private:
-    wxWindow            *m_winCapture;
-    wxToolBarToolBase   *m_toolCapture;
-    wxToolBarToolBase   *m_toolLast;
-};
+#include "wx/frame.h"
+#include "wx/toolbar.h"
+#include "wx/image.h"
+#include "wx/log.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -104,8 +82,8 @@ public:
         m_underMouse = false;
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         // no position yet
         m_x =
@@ -154,7 +132,7 @@ private:
 // wxToolBar implementation
 // ============================================================================
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl);
 
 // ----------------------------------------------------------------------------
 // wxToolBar creation
@@ -190,11 +168,9 @@ bool wxToolBar::Create(wxWindow *parent,
         return false;
     }
 
-    FixupStyle();
-
     CreateInputHandler(wxINP_HANDLER_TOOLBAR);
 
-    SetInitialSize(size);
+    SetBestSize(size);
 
     return true;
 }
@@ -290,15 +266,59 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos),
 
 void wxToolBar::DoEnableTool(wxToolBarToolBase *tool, bool enable)
 {
-#if wxUSE_IMAGE
     // created disabled-state bitmap on demand
     if ( !enable && !tool->GetDisabledBitmap().Ok() )
     {
-        wxImage image(tool->GetNormalBitmap().ConvertToImage());
+        wxImage image( tool->GetNormalBitmap().ConvertToImage() );
 
-        tool->SetDisabledBitmap(image.ConvertToGreyscale());
+        // TODO: don't hardcode 180
+        unsigned char bg_red = 180;
+        unsigned char bg_green = 180;
+        unsigned char bg_blue = 180;
+
+        unsigned char mask_red = image.GetMaskRed();
+        unsigned char mask_green = image.GetMaskGreen();
+        unsigned char mask_blue = image.GetMaskBlue();
+
+        bool has_mask = image.HasMask();
+
+        int x,y;
+        for (y = 0; y < image.GetHeight(); y++)
+        {
+            for (x = 0; x < image.GetWidth(); x++)
+            {
+                unsigned char red = image.GetRed(x,y);
+                unsigned char green = image.GetGreen(x,y);
+                unsigned char blue = image.GetBlue(x,y);
+                if (!has_mask || red != mask_red || green != mask_green || blue != mask_blue)
+                {
+                    red = (unsigned char)((((wxInt32) red  - bg_red) >> 1) + bg_red);
+                    green = (unsigned char)((((wxInt32) green  - bg_green) >> 1) + bg_green);
+                    blue = (unsigned char)((((wxInt32) blue  - bg_blue) >> 1) + bg_blue);
+                    image.SetRGB( x, y, red, green, blue );
+                }
+            }
+        }
+
+        for (y = 0; y < image.GetHeight(); y++)
+        {
+            for (x = y % 2; x < image.GetWidth(); x += 2)
+            {
+                unsigned char red = image.GetRed(x,y);
+                unsigned char green = image.GetGreen(x,y);
+                unsigned char blue = image.GetBlue(x,y);
+                if (!has_mask || red != mask_red || green != mask_green || blue != mask_blue)
+                {
+                    red = (unsigned char)((((wxInt32) red  - bg_red) >> 1) + bg_red);
+                    green = (unsigned char)((((wxInt32) green  - bg_green) >> 1) + bg_green);
+                    blue = (unsigned char)((((wxInt32) blue  - bg_blue) >> 1) + bg_blue);
+                    image.SetRGB( x, y, red, green, blue );
+                }
+            }
+        }
+
+        tool->SetDisabledBitmap(image);
     }
-#endif // wxUSE_IMAGE
 
     RefreshTool(tool);
 }
@@ -328,10 +348,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelp, longHelp);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 // ----------------------------------------------------------------------------
@@ -359,17 +378,8 @@ wxRect wxToolBar::GetToolRect(wxToolBarToolBase *toolBase) const
     {
         if (tool->IsButton())
         {
-            if(!HasFlag(wxTB_TEXT))
-            {
-                rect.width = m_defaultWidth;
-                rect.height = m_defaultHeight;
-            }
-            else
-            {
-                rect.width = m_defaultWidth +
-                    GetFont().GetPointSize() * tool->GetLabel().length();
-                rect.height = m_defaultHeight;
-            }
+            rect.width = m_defaultWidth;
+            rect.height = m_defaultHeight;
         }
         else if (tool->IsSeparator())
         {
@@ -386,17 +396,8 @@ wxRect wxToolBar::GetToolRect(wxToolBarToolBase *toolBase) const
     {
         if (tool->IsButton())
         {
-            if(!HasFlag(wxTB_TEXT))
-            {
-                rect.width = m_defaultWidth;
-                rect.height = m_defaultHeight;
-            }
-            else
-            {
-                rect.width = m_defaultWidth +
-                    GetFont().GetPointSize() * tool->GetLabel().length();
-                rect.height = m_defaultHeight;
-            }
+            rect.width = m_defaultWidth;
+            rect.height = m_defaultHeight;
         }
         else if (tool->IsSeparator())
         {
@@ -424,18 +425,9 @@ bool wxToolBar::Realize()
     m_needsLayout = true;
     DoLayout();
 
-    SetInitialSize(wxDefaultSize);
+    SetBestSize(wxDefaultSize);
 
     return true;
-}
-
-void wxToolBar::SetWindowStyleFlag( long style )
-{
-    wxToolBarBase::SetWindowStyleFlag(style);
-
-    m_needsLayout = true;
-
-    Refresh();
 }
 
 void wxToolBar::DoLayout()
@@ -447,8 +439,7 @@ void wxToolBar::DoLayout()
     wxCoord x = m_xMargin,
             y = m_yMargin;
 
-    wxCoord widthTool = 0, maxWidthTool = 0;
-    wxCoord heightTool = 0, maxHeightTool = 0;
+    const wxCoord widthTool = IsVertical() ? m_defaultHeight : m_defaultWidth;
     wxCoord margin = IsVertical() ? m_xMargin : m_yMargin;
     wxCoord *pCur = IsVertical() ? &y : &x;
 
@@ -465,32 +456,6 @@ void wxToolBar::DoLayout()
         // TODO ugly number fiddling
         if (tool->IsButton())
         {
-            if (IsVertical())
-            {
-                widthTool = m_defaultHeight;
-                heightTool = m_defaultWidth;
-                if(HasFlag(wxTB_TEXT))
-                    heightTool += GetFont().GetPointSize() * tool->GetLabel().length();
-            }
-            else
-            {
-                widthTool = m_defaultWidth;
-                if(HasFlag(wxTB_TEXT))
-                    widthTool += GetFont().GetPointSize() * tool->GetLabel().length();
-
-                heightTool = m_defaultHeight;
-            }
-
-            if(widthTool > maxWidthTool) // Record max width of tool
-            {
-                maxWidthTool = widthTool;
-            }
-
-            if(heightTool > maxHeightTool) // Record max width of tool
-            {
-                maxHeightTool = heightTool;
-            }
-
             *pCur += widthTool;
         }
         else if (tool->IsSeparator())
@@ -511,26 +476,8 @@ void wxToolBar::DoLayout()
     }
 
     // calculate the total toolbar size
-    wxCoord xMin, yMin;
-
-    if(!HasFlag(wxTB_TEXT))
-    {
-        xMin = m_defaultWidth + 2*m_xMargin;
-        yMin = m_defaultHeight + 2*m_yMargin;
-    }
-    else
-    {
-        if (IsVertical())
-        {
-            xMin = heightTool + 2*m_xMargin;
-            yMin = widthTool + 2*m_xMargin;
-        }
-        else
-        {
-            xMin = maxWidthTool + 2*m_xMargin;
-            yMin = heightTool + 2*m_xMargin;
-        }
-    }
+    wxCoord xMin = m_defaultWidth + 2*m_xMargin,
+            yMin = m_defaultHeight + 2*m_yMargin;
 
     m_maxWidth = x < xMin ? xMin : x;
     m_maxHeight = y < yMin ? yMin : y;
@@ -606,7 +553,7 @@ void wxToolBar::DoDraw(wxControlRenderer *renderer)
     // prepare the variables used below
     wxDC& dc = renderer->GetDC();
     wxRenderer *rend = renderer->GetRenderer();
-    dc.SetFont(GetFont());
+    // dc.SetFont(GetFont()); -- uncomment when we support labels
 
     // draw the border separating us from the menubar (if there is no menubar
     // we probably shouldn't draw it?)
@@ -672,28 +619,14 @@ void wxToolBar::DoDraw(wxControlRenderer *renderer)
         wxBitmap bitmap;
         if ( !tool->IsSeparator() )
         {
-            label = tool->GetLabel();
+            // label = tool->GetLabel();
             bitmap = tool->GetBitmap();
         }
         //else: leave both the label and the bitmap invalid to draw a separator
 
         if ( !tool->IsControl() )
         {
-            int tbStyle = 0;
-            if(HasFlag(wxTB_TEXT))
-            {
-                tbStyle |= wxTB_TEXT;
-            }
-
-            if(HasFlag(wxTB_VERTICAL))
-            {
-                tbStyle |= wxTB_VERTICAL;
-            }
-            else
-            {
-                tbStyle |= wxTB_HORIZONTAL;
-            }
-            rend->DrawToolBarButton(dc, label, bitmap, rectTool, flags, tool->GetStyle(), tbStyle);
+            rend->DrawToolBarButton(dc, label, bitmap, rectTool, flags, tool->GetStyle());
         }
         else // control
         {
@@ -720,8 +653,8 @@ bool wxToolBar::PerformAction(const wxControlAction& action,
         PerformAction( wxACTION_BUTTON_RELEASE, numArg );
 
         PerformAction( wxACTION_BUTTON_CLICK, numArg );
-
-        // Write by Danny Raynor to change state again.
+                        
+        // Write by Danny Raynor to change state again.                
         // Check button still pressed or not
         if ( tool->CanBeToggled() && tool->IsToggled() )
         {
@@ -729,10 +662,10 @@ bool wxToolBar::PerformAction(const wxControlAction& action,
         }
 
         if( tool->IsInverted() )
-        {
-            PerformAction( wxACTION_TOOLBAR_RELEASE, numArg );
+        {        
+            PerformAction( wxACTION_TOOLBAR_RELEASE, numArg );      
         }
-
+    
         // Set mouse leave toolbar button range (If still in the range,
         // toolbar button would get focus again
         PerformAction( wxACTION_TOOLBAR_LEAVE, numArg );
@@ -800,14 +733,6 @@ bool wxToolBar::PerformAction(const wxControlAction& action,
         return wxControl::PerformAction(action, numArg, strArg);
 
     return true;
-}
-
-/* static */
-wxInputHandler *wxToolBar::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdToolbarInputHandler s_handler(handlerDef);
-
-    return &s_handler;
 }
 
 // ============================================================================

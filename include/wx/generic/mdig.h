@@ -12,6 +12,10 @@
 #ifndef _WX_MDIG_H_
 #define _WX_MDIG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "mdig.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -20,7 +24,8 @@
 #include "wx/panel.h"
 #include "wx/notebook.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxFrameNameStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxStatusLineNameStr;
 
 
 //-----------------------------------------------------------------------------
@@ -47,7 +52,7 @@ public:
                      long style = wxDEFAULT_FRAME_STYLE | wxVSCROLL | wxHSCROLL,
                      const wxString& name = wxFrameNameStr);
 
-    virtual ~wxGenericMDIParentFrame();
+    ~wxGenericMDIParentFrame();
     bool Create( wxWindow *parent,
                  wxWindowID winid,
                  const wxString& title,
@@ -229,7 +234,7 @@ class WXDLLEXPORT wxGenericMDIClientWindow: public wxNotebook
 public:
     wxGenericMDIClientWindow();
     wxGenericMDIClientWindow( wxGenericMDIParentFrame *parent, long style = 0 );
-    virtual ~wxGenericMDIClientWindow();
+    ~wxGenericMDIClientWindow();
     virtual bool CreateClient( wxGenericMDIParentFrame *parent, long style = wxVSCROLL | wxHSCROLL );
 
     virtual int SetSelection(size_t nPage);

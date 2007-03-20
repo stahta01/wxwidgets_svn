@@ -12,6 +12,10 @@
 #ifndef _WX_VALTEXTH__
 #define _WX_VALTEXTH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "valtext.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_VALIDATORS && wxUSE_TEXTCTRL
@@ -37,7 +41,7 @@ public:
     wxTextValidator(long style = wxFILTER_NONE, wxString *val = 0);
     wxTextValidator(const wxTextValidator& val);
 
-    virtual ~wxTextValidator(){}
+    ~wxTextValidator(){}
 
     // Make a clone of this validator (or return NULL) - currently necessary
     // if you're passing a reference to a validator.
@@ -60,6 +64,16 @@ public:
     inline long GetStyle() const { return m_validatorStyle; }
     inline void SetStyle(long style) { m_validatorStyle = style; }
 
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( void SetIncludeList(const wxStringList& list) );
+    wxDEPRECATED( wxStringList& GetIncludeList() );
+
+    wxDEPRECATED( void SetExcludeList(const wxStringList& list) );
+    wxDEPRECATED( wxStringList& GetExcludeList() );
+
+    wxDEPRECATED( bool IsInCharIncludeList(const wxString& val) );
+    wxDEPRECATED( bool IsNotInCharExcludeList(const wxString& val) );
+#endif
 
     void SetIncludes(const wxArrayString& includes) { m_includes = includes; }
     inline wxArrayString& GetIncludes() { return m_includes; }
@@ -79,6 +93,10 @@ DECLARE_EVENT_TABLE()
 protected:
     long            m_validatorStyle;
     wxString *      m_stringValue;
+#if WXWIN_COMPATIBILITY_2_4
+    wxStringList    m_includeList;
+    wxStringList    m_excludeList;
+#endif
     wxArrayString   m_includes;
     wxArrayString   m_excludes;
 

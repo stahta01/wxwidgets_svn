@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/bitmap.h
+// Name:        include/wx/cocoa/bitmap.h
 // Purpose:     wxBitmap class
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/07/19
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_BITMAP_H__
@@ -43,7 +43,7 @@ public:
     // Construct a mask from a mono bitmap (copies the bitmap).
     wxMask(const wxBitmap& bitmap);
 
-    virtual ~wxMask();
+    ~wxMask();
 
     bool Create(const wxBitmap& bitmap, const wxColour& colour);
     bool Create(const wxBitmap& bitmap, int paletteIndex);
@@ -68,14 +68,19 @@ class WXDLLEXPORT wxBitmap: public wxGDIObject
 public:
     // Platform-specific default constructor
     wxBitmap();
+    // Copy constructors
+    wxBitmap(const wxBitmap& bitmap)
+    :   wxGDIObject()
+    {   Ref(bitmap); }
     // Initialize with raw data.
     wxBitmap(const char bits[], int width, int height, int depth = 1);
     // Initialize with XPM data
-    wxBitmap(const char* const* bits);
+    wxBitmap(const char **bits) { CreateFromXpm(bits); }
+    wxBitmap(char **bits) { CreateFromXpm((const char**)bits); }
     // Load a file or resource
     wxBitmap(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_BMP_RESOURCE);
     // Constructor for generalised creation from data
-    wxBitmap(const void* data, wxBitmapType type, int width, int height, int depth = 1);
+    wxBitmap(void *data, wxBitmapType type, int width, int height, int depth = 1);
     // If depth is omitted, will create a bitmap compatible with the display
     wxBitmap(int width, int height, int depth = -1);
     // Convert from wxImage:
@@ -85,17 +90,19 @@ public:
     wxBitmap(const wxIcon& icon) { CopyFromIcon(icon); }
 
     // destructor
-    virtual ~wxBitmap();
-
+    ~wxBitmap();
+  
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------
 public:
+    // Initialize with XPM data
+    bool CreateFromXpm(const char **bits);
     // Initialize from wxImage
     bool CreateFromImage(const wxImage& image, int depth=-1);
 
     virtual bool Create(int width, int height, int depth = -1);
-    virtual bool Create(const void* data, wxBitmapType type, int width, int height, int depth = 1);
+    virtual bool Create(void *data, wxBitmapType type, int width, int height, int depth = 1);
     virtual bool LoadFile(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_BMP_RESOURCE);
     virtual bool SaveFile(const wxString& name, wxBitmapType type, const wxPalette *cmap = NULL) const;
 
@@ -107,8 +114,7 @@ public:
     // get the given part of bitmap
     wxBitmap GetSubBitmap( const wxRect& rect ) const;
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    bool Ok() const;
     int GetWidth() const;
     int GetHeight() const;
     int GetDepth() const;
@@ -131,6 +137,13 @@ public:
     void SetMask(wxMask *mask) ;
 
     int GetBitmapType() const;
+  
+    inline wxBitmap& operator = (const wxBitmap& bitmap)
+    {   if (*this == bitmap) return (*this); Ref(bitmap); return *this; }
+    inline bool operator == (const wxBitmap& bitmap) const
+    {   return m_refData == bitmap.m_refData; }
+    inline bool operator != (const wxBitmap& bitmap) const
+    {   return m_refData != bitmap.m_refData; }
 
     // wxObjectRefData
     wxObjectRefData *CreateRefData() const;
@@ -145,10 +158,4 @@ public:
     static void CleanUpHandlers() { }
 };
 
-class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
-{
-    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
-};
-
-#endif
-    // __WX_COCOA_BITMAP_H__
+#endif // __WX_COCOA_BITMAP_H__

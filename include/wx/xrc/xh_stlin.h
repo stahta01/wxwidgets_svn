@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_stlin.h
+// Name:        xh_stlin.h
 // Purpose:     XML resource handler for wxStaticLine
 // Author:      Vaclav Slavik
 // Created:     2000/09/00
@@ -11,20 +11,23 @@
 #ifndef _WX_XH_STLIN_H_
 #define _WX_XH_STLIN_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_stlin.h"
+#endif
+
 #include "wx/xrc/xmlres.h"
 
-#if wxUSE_XRC && wxUSE_STATLINE
+#if wxUSE_STATLINE
 
 class WXDLLIMPEXP_XRC wxStaticLineXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxStaticLineXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxStaticLineXmlHandler)
 public:
     wxStaticLineXmlHandler();
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC && wxUSE_STATLINE
+#endif
 
 #endif // _WX_XH_STLIN_H_

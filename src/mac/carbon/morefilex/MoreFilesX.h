@@ -1483,7 +1483,7 @@ FSGetVolMountInfo(
 #pragma mark FSVolumeMount
 
 OSErr
-FSVolumeMountX(
+FSVolumeMount(
 	const void *volMountInfo,
 	FSVolumeRefNum *volRefNum);
 

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "caret.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -88,11 +92,10 @@ void wxCaret::InitGeneric()
 {
     m_hasFocus = true;
     m_blinkedOut = true;
-#ifndef wxHAS_CARET_USING_OVERLAYS
+
     m_xOld =
     m_yOld = -1;
     m_bmpUnderCaret.Create(m_width, m_height);
-#endif
 }
 
 wxCaret::~wxCaret()
@@ -131,9 +134,6 @@ void wxCaret::DoHide()
 
 void wxCaret::DoMove()
 {
-#ifdef wxHAS_CARET_USING_OVERLAYS
-    m_overlay.Reset();
-#endif
     if ( IsVisible() )
     {
         if ( !m_blinkedOut )
@@ -158,12 +158,8 @@ void wxCaret::DoSize()
         m_countVisible = 0;
         DoHide();
     }
-#ifdef wxHAS_CARET_USING_OVERLAYS
-    m_overlay.Reset();
-#else
     // Change bitmap size
     m_bmpUnderCaret = wxBitmap(m_width, m_height);
-#endif
     if (countVisible > 0)
     {
         m_countVisible = countVisible;
@@ -216,18 +212,6 @@ void wxCaret::Blink()
 void wxCaret::Refresh()
 {
     wxClientDC dcWin(GetWindow());
-// this is the new code, switch to 0 if this gives problems
-#ifdef wxHAS_CARET_USING_OVERLAYS
-    wxDCOverlay dcOverlay( m_overlay, &dcWin, m_x, m_y, m_width , m_height );
-    if ( m_blinkedOut )
-    {
-        dcOverlay.Clear();
-    }
-    else
-    {
-        DoDraw( &dcWin );
-    }
-#else
     wxMemoryDC dcMem;
     dcMem.SelectObject(m_bmpUnderCaret);
     if ( m_blinkedOut )
@@ -263,7 +247,6 @@ void wxCaret::Refresh()
         // and draw the caret there
         DoDraw(&dcWin);
     }
-#endif
 }
 
 void wxCaret::DoDraw(wxDC *dc)

@@ -12,7 +12,6 @@ __cvsid__ = "$Id$"
 __revision__ = "$Revision$"[11:-2]
 
 import wx
-import os
 
 class App(wx.App):
     """PyShell standalone application."""

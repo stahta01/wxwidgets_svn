@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/radiobox.h
+// Name:        radiobox.h
 // Purpose:     wxRadioBox class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "radiobox.h"
+#endif
 
 // List box item
 class WXDLLEXPORT wxBitmap ;
@@ -41,7 +45,7 @@ public:
          Create(parent, id, title, pos, size, choices,
                 majorDim, style, val, name);
      }
-    virtual ~wxRadioBox();
+    ~wxRadioBox();
     bool Create(wxWindow *parent, wxWindowID id, const wxString& title,
              const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
              int n = 0, const wxString choices[] = NULL,
@@ -54,35 +58,26 @@ public:
              const wxValidator& val = wxDefaultValidator,
              const wxString& name = wxRadioBoxNameStr);
 
-    // Enabling
-    virtual bool Enable(bool enable = true);
-    virtual bool Enable(unsigned int item, bool enable = true);
-    virtual bool IsItemEnabled(unsigned int WXUNUSED(n)) const
-    {
-        /* TODO */
-        return true;
-    }
-
-    // Showing
-    virtual bool Show(bool show = true);
-    virtual bool Show(unsigned int item, bool show = true);
-    virtual bool IsItemShown(unsigned int WXUNUSED(n)) const
-    {
-        /* TODO */
-        return true;
-    }
-
-    // Specific functions (in wxWidgets2 reference)
+// Specific functions (in wxWidgets2 reference)
     virtual void SetSelection(int item);
     virtual int GetSelection() const;
 
-    virtual unsigned int GetCount() const { return m_noItems; }
+    inline virtual int GetCount() const { return m_noItems; } ;
 
-    virtual wxString GetString(unsigned int item) const;
-    virtual void SetString(unsigned int item, const wxString& label);
+    virtual wxString GetString(int item) const;
+    virtual void SetString(int item, const wxString& label) ;
 
+    virtual bool Enable(int item, bool enable = true);
+    virtual bool Show(int item, bool show = true);
+
+    virtual int GetColumnCount() const ;
+    virtual int GetRowCount() const ;
+
+
+    virtual bool Enable(bool enable = true);
     virtual wxString GetLabel() const;
     virtual void SetLabel(const wxString& label) ;
+    virtual bool Show(bool show = true);
 
 // Other external functions
     void Command(wxCommandEvent& event);
@@ -93,11 +88,11 @@ public:
     inline void SetNumberOfRowsOrCols(int n) { m_noRowsOrCols = n; }
 
     void OnRadioButton( wxCommandEvent& event ) ;
-
 protected:
-    wxRadioButton    *m_radioButtonCycle;
+    wxRadioButton        *m_radioButtonCycle;
 
-    unsigned int      m_noItems;
+    int               m_majorDim ;
+    int               m_noItems;
     int               m_noRowsOrCols;
 
 // Internal functions

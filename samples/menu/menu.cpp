@@ -55,7 +55,7 @@
     #define USE_LOG_WINDOW 0
 #endif
 
-#if wxUSE_OWNER_DRAWN || defined(__WXGTK__)
+#if wxUSE_OWNER_DRAWN
 #include "copy.xpm"
 #endif
 
@@ -84,8 +84,7 @@ protected:
     void OnQuit(wxCommandEvent& event);
 #if USE_LOG_WINDOW
     void OnClearLog(wxCommandEvent& event);
-    void OnClearLogUpdateUI(wxUpdateUIEvent& event);
-#endif // USE_LOG_WINDOW
+#endif
 
     void OnAbout(wxCommandEvent& event);
 
@@ -201,7 +200,7 @@ enum
 {
     Menu_File_Quit = wxID_EXIT,
 #if USE_LOG_WINDOW
-    Menu_File_ClearLog = 100,
+    Menu_File_ClearLog,
 #endif
 
     Menu_MenuBar_Toggle = 200,
@@ -267,7 +266,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_File_Quit,     MyFrame::OnQuit)
 #if USE_LOG_WINDOW
     EVT_MENU(Menu_File_ClearLog, MyFrame::OnClearLog)
-    EVT_UPDATE_UI(Menu_File_ClearLog, MyFrame::OnClearLogUpdateUI)
 #endif
 
     EVT_MENU(Menu_Help_About, MyFrame::OnAbout)
@@ -344,9 +342,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame;
 
@@ -383,69 +378,15 @@ MyFrame::MyFrame()
     // create the menubar
     wxMenu *fileMenu = new wxMenu;
 
-    wxMenu *stockSubMenu = new wxMenu;
-    stockSubMenu->Append(wxID_ADD);
-    stockSubMenu->Append(wxID_APPLY);
-    stockSubMenu->Append(wxID_BOLD);
-    stockSubMenu->Append(wxID_CANCEL);
-    stockSubMenu->Append(wxID_CLEAR);
-    stockSubMenu->Append(wxID_CLOSE);
-    stockSubMenu->Append(wxID_COPY);
-    stockSubMenu->Append(wxID_CUT);
-    stockSubMenu->Append(wxID_DELETE);
-    stockSubMenu->Append(wxID_FIND);
-    stockSubMenu->Append(wxID_REPLACE);
-    stockSubMenu->Append(wxID_BACKWARD);
-    stockSubMenu->Append(wxID_DOWN);
-    stockSubMenu->Append(wxID_FORWARD);
-    stockSubMenu->Append(wxID_UP);
-    stockSubMenu->Append(wxID_HELP);
-    stockSubMenu->Append(wxID_HOME);
-    stockSubMenu->Append(wxID_INDENT);
-    stockSubMenu->Append(wxID_INDEX);
-    stockSubMenu->Append(wxID_ITALIC);
-    stockSubMenu->Append(wxID_JUSTIFY_CENTER);
-    stockSubMenu->Append(wxID_JUSTIFY_FILL);
-    stockSubMenu->Append(wxID_JUSTIFY_LEFT);
-    stockSubMenu->Append(wxID_JUSTIFY_RIGHT);
-    stockSubMenu->Append(wxID_NEW);
-    stockSubMenu->Append(wxID_NO);
-    stockSubMenu->Append(wxID_OK);
-    stockSubMenu->Append(wxID_OPEN);
-    stockSubMenu->Append(wxID_PASTE);
-    stockSubMenu->Append(wxID_PREFERENCES);
-    stockSubMenu->Append(wxID_PRINT);
-    stockSubMenu->Append(wxID_PREVIEW);
-    stockSubMenu->Append(wxID_PROPERTIES);
-    stockSubMenu->Append(wxID_EXIT);
-    stockSubMenu->Append(wxID_REDO);
-    stockSubMenu->Append(wxID_REFRESH);
-    stockSubMenu->Append(wxID_REMOVE);
-    stockSubMenu->Append(wxID_REVERT_TO_SAVED);
-    stockSubMenu->Append(wxID_SAVE);
-    stockSubMenu->Append(wxID_SAVEAS);
-    stockSubMenu->Append(wxID_STOP);
-    stockSubMenu->Append(wxID_UNDELETE);
-    stockSubMenu->Append(wxID_UNDERLINE);
-    stockSubMenu->Append(wxID_UNDO);
-    stockSubMenu->Append(wxID_UNINDENT);
-    stockSubMenu->Append(wxID_YES);
-    stockSubMenu->Append(wxID_ZOOM_100);
-    stockSubMenu->Append(wxID_ZOOM_FIT);
-    stockSubMenu->Append(wxID_ZOOM_IN);
-    stockSubMenu->Append(wxID_ZOOM_OUT);
-    fileMenu->AppendSubMenu(stockSubMenu, _T("&Standard items demo"));
-
 #if USE_LOG_WINDOW
     wxMenuItem *item = new wxMenuItem(fileMenu, Menu_File_ClearLog,
                                       _T("Clear &log\tCtrl-L"));
-#if wxUSE_OWNER_DRAWN || defined(__WXGTK__)
+#if wxUSE_OWNER_DRAWN
     item->SetBitmap(copy_xpm);
 #endif
     fileMenu->Append(item);
     fileMenu->AppendSeparator();
-#endif // USE_LOG_WINDOW
-
+#endif
     fileMenu->Append(Menu_File_Quit, _T("E&xit\tAlt-X"), _T("Quit menu sample"));
 
     wxMenu *menubarMenu = new wxMenu;
@@ -634,21 +575,11 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 }
 
 #if USE_LOG_WINDOW
-
 void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
 {
     m_textctrl->Clear();
 }
-
-void MyFrame::OnClearLogUpdateUI(wxUpdateUIEvent& event)
-{
-    // if we only enable this item when the log window is empty, we never see
-    // it in the disable state as a message is logged whenever the menu is
-    // opened, so we disable it if there is not "much" text in the window
-    event.Enable( m_textctrl->GetNumberOfLines() > 5 );
-}
-
-#endif // USE_LOG_WINDOW
+#endif
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {

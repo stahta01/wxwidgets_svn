@@ -9,23 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "msgdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_MSGDLG && defined(__WXGTK20__) && !defined(__WXGPE__)
 
 #include "wx/msgdlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-#endif
-
 #include "wx/gtk/private.h"
 #include <gtk/gtk.h>
+
+#include "wx/intl.h"
 
 IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
 
@@ -45,10 +46,7 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
 
     if (style & wxYES_NO)
     {
-        if (style & wxCANCEL)
-            buttons = GTK_BUTTONS_NONE;
-        else
-            buttons = GTK_BUTTONS_YES_NO;
+        buttons = GTK_BUTTONS_YES_NO;
     }
 
     if (style & wxOK)
@@ -84,14 +82,8 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
     if (style & wxYES_NO)
     {
         if (style & wxCANCEL)
-        {
-            gtk_dialog_add_button(GTK_DIALOG(m_widget), GTK_STOCK_NO,
-                                  GTK_RESPONSE_NO);
             gtk_dialog_add_button(GTK_DIALOG(m_widget), GTK_STOCK_CANCEL,
                                   GTK_RESPONSE_CANCEL);
-            gtk_dialog_add_button(GTK_DIALOG(m_widget), GTK_STOCK_YES,
-                                  GTK_RESPONSE_YES);
-        }
         if (style & wxNO_DEFAULT)
             gtk_dialog_set_default_response(GTK_DIALOG(m_widget), GTK_RESPONSE_NO);
         else
@@ -138,4 +130,5 @@ int wxMessageDialog::ShowModal()
 }
 
 
-#endif // wxUSE_MSGDLG && defined(__WXGTK20__) && !defined(__WXGPE__)
+#endif // wxUSE_MSGDLG && defined(__WXGTK20__)
+

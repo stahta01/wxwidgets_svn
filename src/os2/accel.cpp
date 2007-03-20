@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/accel.cpp
+// Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
 // Author:      David Webster
 // Modified by:
@@ -12,14 +12,15 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/accel.h"
-
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/window.h"
-    #include "wx/app.h"
-    #include "wx/frame.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/window.h"
+#include "wx/app.h"
+#include "wx/frame.h"
 #endif
+
+#include "wx/os2/accel.h"
 
 #include "wx/os2/private.h"
 
@@ -31,7 +32,7 @@ class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
     friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
-    virtual ~wxAcceleratorRefData();
+    ~wxAcceleratorRefData();
 
     inline HACCEL GetHACCEL() const { return m_hAccel; }
 protected:
@@ -43,7 +44,7 @@ protected:
 
 wxAcceleratorRefData::wxAcceleratorRefData()
 {
-    m_ok = false;
+    m_ok = FALSE;
     m_hAccel = 0;
 } // end of wxAcceleratorRefData::wxAcceleratorRefData
 
@@ -168,10 +169,10 @@ wxAcceleratorTable::wxAcceleratorTable(
     M_ACCELDATA->m_ok = (M_ACCELDATA->m_hAccel != 0);
 } // end of wxAcceleratorTable::wxAcceleratorTable
 
-bool wxAcceleratorTable::IsOk() const
+bool wxAcceleratorTable::Ok() const
 {
     return(M_ACCELDATA && (M_ACCELDATA->m_ok));
-} // end of wxAcceleratorTable::IsOk
+} // end of wxAcceleratorTable::Ok
 
 void wxAcceleratorTable::SetHACCEL(WXHACCEL hAccel)
 {
@@ -188,11 +189,13 @@ WXHACCEL wxAcceleratorTable::GetHACCEL() const
     return (WXHACCEL) M_ACCELDATA->m_hAccel;
 }
 
-bool wxAcceleratorTable::Translate( WXHWND  hWnd,
-                                    WXMSG*  pWxmsg ) const
+bool wxAcceleratorTable::Translate(
+  WXHWND                            hWnd
+, WXMSG*                            pWxmsg
+) const
 {
-    PQMSG pMsg = (PQMSG)pWxmsg;
-    BOOL  rc = FALSE;
+    PQMSG                           pMsg = (PQMSG)pWxmsg;
+    BOOL                            rc = FALSE;
 
     rc = ::WinTranslateAccel( vHabmain
                              ,(HWND)hWnd

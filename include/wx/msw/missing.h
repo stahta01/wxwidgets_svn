@@ -96,59 +96,7 @@
     #define VK_OEM_PERIOD   0xBE
 #endif
 
-#ifndef SM_TABLETPC
-    #define SM_TABLETPC 86
-#endif
-
-#ifndef INKEDIT_CLASS
-#   define INKEDIT_CLASSW  L"INKEDIT"
-#   ifdef UNICODE
-#       define INKEDIT_CLASS   INKEDIT_CLASSW
-#   else
-#       define INKEDIT_CLASS   "INKEDIT"
-#   endif
-#endif
-
-#ifndef EM_SETINKINSERTMODE
-#   define EM_SETINKINSERTMODE (WM_USER + 0x0204)
-#endif
-
-#ifndef EM_SETUSEMOUSEFORINPUT
-#define EM_SETUSEMOUSEFORINPUT (WM_USER + 0x224)
-#endif
-
-#ifndef TPM_RECURSE
-#define TPM_RECURSE 1
-#endif
-
-
-#ifndef WS_EX_LAYOUTRTL
-#define WS_EX_LAYOUTRTL 0x00400000
-#endif
-
-#ifndef WS_EX_COMPOSITED
-#define WS_EX_COMPOSITED 0x02000000L
-#endif
-
-#ifndef WS_EX_LAYERED
-#define WS_EX_LAYERED 0x00080000
-#endif
-
-#ifndef LWA_ALPHA
-#define LWA_ALPHA 2
-#endif
-
-#ifndef QS_ALLPOSTMESSAGE
-#define QS_ALLPOSTMESSAGE 0
-#endif
-
-/*
- * The following are required for VC++ 5 when the PSDK is not available.
- */
-
-#if defined __VISUALC__ && __VISUALC__ <= 1100
-
-#ifndef VER_NT_WORKSTATION
+#ifdef __DMC__
 
 typedef struct _OSVERSIONINFOEXA {
     DWORD dwOSVersionInfoSize;
@@ -185,30 +133,12 @@ typedef OSVERSIONINFOA OSVERSIONINFO,*POSVERSIONINFO,*LPOSVERSIONINFO;
 typedef OSVERSIONINFOEXA OSVERSIONINFOEX,*POSVERSIONINFOEX,*LPOSVERSIONINFOEX;
 #endif
 
-#endif // defined VER_NT_WORKSTATION
+#endif // defined __DMC__
 
 #ifndef CP_SYMBOL
     #define CP_SYMBOL 42
 #endif
 
-// NMLVCUSTOMDRAW originally didn't have the iSubItem member. It was added
-// with IE4, as was IPN_FIRST which is used as a test :-(.
-//
-#ifndef IPN_FIRST
-
-typedef struct wxtagNMLVCUSTOMDRAW_ {
-    NMCUSTOMDRAW nmcd;
-    COLORREF     clrText;
-    COLORREF     clrTextBk;
-    int          iSubItem;
-} wxNMLVCUSTOMDRAW_, *wxLPNMLVCUSTOMDRAW_;
-
-#define NMLVCUSTOMDRAW wxNMLVCUSTOMDRAW_
-#define LPNMLVCUSTOMDRAW wxLPNMLVCUSTOMDRAW_
-
-#endif // defined IPN_FIRST
-
-#endif // defined __VISUALC__ && __VISUALC__ <= 1100
 
 // ----------------------------------------------------------------------------
 // ListView common control
@@ -237,10 +167,6 @@ typedef struct wxtagNMLVCUSTOMDRAW_ {
 
 #if !defined(CCS_VERT)
 #define CCS_VERT                0x00000080L
-#endif
-
-#if !defined(CCS_RIGHT)
-#define CCS_RIGHT               (CCS_VERT|CCS_BOTTOM)
 #endif
 
 #if !defined(TB_SETDISABLEDIMAGELIST)
@@ -286,30 +212,14 @@ typedef struct wxtagNMLVCUSTOMDRAW_ {
 
 #ifdef __DMC__
 
-typedef struct _OSVERSIONINFOEX {
-    DWORD dwOSVersionInfoSize;
-    DWORD dwMajorVersion;
-    DWORD dwMinorVersion;
-    DWORD dwBuildNumber;
-    DWORD dwPlatformId;
-    TCHAR szCSDVersion[ 128 ];
-    WORD  wServicePackMajor;
-    WORD  wServicePackMinor;
-    WORD  wSuiteMask;
-    BYTE  wProductType;
-    BYTE  wReserved;
-} OSVERSIONINFOEX;
-
-#ifndef _TrackMouseEvent
-    #define _TrackMouseEvent TrackMouseEvent
+#ifdef __DMC__
+    #ifndef _TrackMouseEvent
+        #define _TrackMouseEvent TrackMouseEvent
+    #endif
 #endif
 
 #ifndef LVM_SETEXTENDEDLISTVIEWSTYLE
     #define LVM_SETEXTENDEDLISTVIEWSTYLE (0x1000 + 54)
-#endif
-
-#ifndef LVM_GETSUBITEMRECT
-    #define LVM_GETSUBITEMRECT           (0x1000 + 56)
 #endif
 
 #ifndef LVCF_IMAGE
@@ -329,97 +239,14 @@ typedef struct _OSVERSIONINFOEX {
     #define ListView_GetHeader(w) (HWND)SendMessage((w),LVM_GETHEADER,0,0)
 #endif
 
-#ifndef ListView_GetSubItemRect
-    #define ListView_GetSubItemRect(w, i, s, c, p) (HWND)SendMessage(w,LVM_GETSUBITEMRECT,i, ((p) ? ((((LPRECT)(p))->top = s), (((LPRECT)(p))->left = c), (LPARAM)(p)) : (LPARAM)(LPRECT)NULL))
-#endif
-
 #ifndef LVM_GETHEADER
     #define LVM_GETHEADER (LVM_FIRST+31)
-#endif
-
-#ifndef HDLAYOUT
-    #define HDLAYOUT HD_LAYOUT
-#endif
-
-#ifndef HDITEM
-    #define HDITEM HD_ITEM
-#endif
-
-#ifndef NMHEADER
-    #define NMHEADER HD_NOTIFY
-#endif
-
-#ifndef HDS_HOTTRACK
-    #define HDS_HOTTRACK 4
-#endif
-
-#ifndef HDS_FULLDRAG
-    #define HDS_FULLDRAG 128
-#endif
-
-#ifndef HDN_BEGINDRAG
-    #define HDN_BEGINDRAG (HDN_FIRST - 11)
-#endif
-
-#ifndef HDN_ENDDRAG
-    #define HDN_ENDDRAG (HDN_FIRST - 10)
 #endif
 
 #ifndef LVSICF_NOSCROLL
     #define LVSICF_NOINVALIDATEALL  0x0001
     #define LVSICF_NOSCROLL         0x0002
 #endif
-
-#ifndef CP_SYMBOL
-    #define CP_SYMBOL 42
-#endif
-
-// ----------------------------------------------------------------------------
-// wxDisplay
-// ----------------------------------------------------------------------------
-
-// The windows headers with Digital Mars lack some typedefs.
-// typedef them as my_XXX and then #define to rename to XXX in case
-// a newer version of Digital Mars fixes the headers
-// (or up to date PSDK is in use with older version)
-// also we use any required definition (MONITOR_DEFAULTTONULL) to recognize
-// whether whole missing block needs to be included
-
-#ifndef MONITOR_DEFAULTTONULL
-
-    #define HMONITOR_DECLARED
-    DECLARE_HANDLE(HMONITOR);
-    typedef BOOL(CALLBACK* my_MONITORENUMPROC)(HMONITOR,HDC,LPRECT,LPARAM);
-    #define MONITORENUMPROC my_MONITORENUMPROC
-    typedef struct my_tagMONITORINFO {
-        DWORD cbSize;
-        RECT rcMonitor;
-        RECT rcWork;
-        DWORD dwFlags;
-    } my_MONITORINFO,*my_LPMONITORINFO;
-    #define MONITORINFO my_MONITORINFO
-    #define LPMONITORINFO my_LPMONITORINFO
-
-    typedef struct my_MONITORINFOEX : public my_tagMONITORINFO
-    {
-        TCHAR       szDevice[CCHDEVICENAME];
-    } my_MONITORINFOEX, *my_LPMONITORINFOEX;
-    #define MONITORINFOEX my_MONITORINFOEX
-    #define LPMONITORINFOEX my_LPMONITORINFOEX
-
-    #ifndef MONITOR_DEFAULTTONULL
-        #define MONITOR_DEFAULTTONULL 0
-    #endif // MONITOR_DEFAULTTONULL
-
-    #ifndef MONITORINFOF_PRIMARY
-        #define MONITORINFOF_PRIMARY 1
-    #endif // MONITORINFOF_PRIMARY
-
-    #ifndef DDENUM_ATTACHEDSECONDARYDEVICES
-        #define DDENUM_ATTACHEDSECONDARYDEVICES 1
-    #endif
-
-#endif // MONITOR_DEFAULTTONULL
 
 // ----------------------------------------------------------------------------
 // Tree control
@@ -461,19 +288,6 @@ typedef struct _OSVERSIONINFOEX {
 #ifdef __WXWINCE__
     #include "wx/msw/wince/missing.h"
 #endif
-
- /*
-  * The following are specifically required for Wine
-  */
-
-#ifdef __WINE__
-    #ifndef ENUM_CURRENT_SETTINGS
-        #define ENUM_CURRENT_SETTINGS   ((DWORD)-1)
-    #endif
-    #ifndef BROADCAST_QUERY_DENY
-        #define BROADCAST_QUERY_DENY    1112363332
-    #endif
-#endif  // defined __WINE__
 
 #endif
     // _WX_MISSING_H_

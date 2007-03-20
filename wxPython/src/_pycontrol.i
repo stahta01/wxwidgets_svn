@@ -34,6 +34,7 @@ public:
                 const wxString& name = wxPyControlNameStr)
         : wxControl(parent, id, pos, size, style, validator, name) {}
 
+    void SetBestSize(const wxSize& size) { wxControl::SetBestSize(size); }
 
     bool DoEraseBackground(wxDC* dc) {
 #ifdef __WXMSW__
@@ -118,7 +119,7 @@ MustHaveApp(wxPyControl);
 class wxPyControl : public wxControl
 {
 public:
-    %pythonAppend wxPyControl         "self._setOORInfo(self);"  setCallbackInfo(PyControl)
+    %pythonAppend wxPyControl         "self._setOORInfo(self); self._setCallbackInfo(self, PyControl)"
     %pythonAppend wxPyControl()       ""
 
     wxPyControl(wxWindow* parent, const wxWindowID id=-1,
@@ -132,66 +133,44 @@ public:
     
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    %pythoncode { SetBestSize = wx.Window.SetInitialSize }
+    void SetBestSize(const wxSize& size);
     bool DoEraseBackground(wxDC* dc);
     
-    void DoMoveWindow(int x, int y, int width, int height);
-    void DoSetSize(int x, int y, int width, int height,
+    void base_DoMoveWindow(int x, int y, int width, int height);
+    void base_DoSetSize(int x, int y, int width, int height,
                         int sizeFlags = wxSIZE_AUTO);
-    void DoSetClientSize(int width, int height);
-    void DoSetVirtualSize( int x, int y );
+    void base_DoSetClientSize(int width, int height);
+    void base_DoSetVirtualSize( int x, int y );
 
     DocDeclA(
-        void, DoGetSize( int *OUTPUT, int *OUTPUT ) const,
-        "DoGetSize() -> (width, height)");
+        void, base_DoGetSize( int *OUTPUT, int *OUTPUT ) const,
+        "base_DoGetSize() -> (width, height)");
     DocDeclA(
-        void, DoGetClientSize( int *OUTPUT, int *OUTPUT ) const,
-        "DoGetClientSize() -> (width, height)");
+        void, base_DoGetClientSize( int *OUTPUT, int *OUTPUT ) const,
+        "base_DoGetClientSize() -> (width, height)");
     DocDeclA(
-        void, DoGetPosition( int *OUTPUT, int *OUTPUT ) const,
-        "DoGetPosition() -> (x,y)");
+        void, base_DoGetPosition( int *OUTPUT, int *OUTPUT ) const,
+        "base_DoGetPosition() -> (x,y)");
 
-    wxSize DoGetVirtualSize() const;
-    wxSize DoGetBestSize() const;
+    wxSize base_DoGetVirtualSize() const;
+    wxSize base_DoGetBestSize() const;
 
-    void InitDialog();
-    bool TransferDataToWindow();
-    bool TransferDataFromWindow();
-    bool Validate();
+    void base_InitDialog();
+    bool base_TransferDataToWindow();
+    bool base_TransferDataFromWindow();
+    bool base_Validate();
 
-    bool AcceptsFocus() const;
-    bool AcceptsFocusFromKeyboard() const;
-    wxSize GetMaxSize() const;
+    bool base_AcceptsFocus() const;
+    bool base_AcceptsFocusFromKeyboard() const;
+    wxSize base_GetMaxSize() const;
 
-    void AddChild(wxWindow* child);
-    void RemoveChild(wxWindow* child);
+    void base_AddChild(wxWindow* child);
+    void base_RemoveChild(wxWindow* child);
 
-    bool ShouldInheritColours() const;
-    wxVisualAttributes GetDefaultAttributes();
+    bool base_ShouldInheritColours() const;
+    wxVisualAttributes base_GetDefaultAttributes();
 
-    void OnInternalIdle();
-
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoMoveWindow);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoSetSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoSetClientSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoSetVirtualSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoGetSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoGetClientSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoGetPosition);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoGetVirtualSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, DoGetBestSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, InitDialog);
-    %MAKE_BASE_FUNC(PyScrolledWindow, TransferDataToWindow);
-    %MAKE_BASE_FUNC(PyScrolledWindow, TransferDataFromWindow);
-    %MAKE_BASE_FUNC(PyScrolledWindow, Validate);
-    %MAKE_BASE_FUNC(PyScrolledWindow, AcceptsFocus);
-    %MAKE_BASE_FUNC(PyScrolledWindow, AcceptsFocusFromKeyboard);
-    %MAKE_BASE_FUNC(PyScrolledWindow, GetMaxSize);
-    %MAKE_BASE_FUNC(PyScrolledWindow, AddChild);
-    %MAKE_BASE_FUNC(PyScrolledWindow, RemoveChild);
-    %MAKE_BASE_FUNC(PyScrolledWindow, ShouldInheritColours);
-    %MAKE_BASE_FUNC(PyScrolledWindow, GetDefaultAttributes);
-    %MAKE_BASE_FUNC(PyScrolledWindow, OnInternalIdle);
+    void base_OnInternalIdle();
 
 };
 

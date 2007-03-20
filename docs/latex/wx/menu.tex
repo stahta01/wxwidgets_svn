@@ -89,7 +89,6 @@ not be used in the new code, it is provided for backwards compatibility only.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
 \membersection{wxMenu::wxMenu}\label{wxmenuctor}
 
 \func{}{wxMenu}{\param{const wxString\& }{title = ""}, \param{long}{ style = 0}}
@@ -110,7 +109,6 @@ Constructs a wxMenu object.
 
 \docparam{style}{If set to {\tt wxMENU\_TEAROFF}, the menu will be detachable (wxGTK only).}
 
-
 \membersection{wxMenu::\destruct{wxMenu}}\label{wxmenudtor}
 
 \func{}{\destruct{wxMenu}}{\void}
@@ -124,10 +122,9 @@ parent window. Re-use in this context means popping up the menu on
 a different window from last time, which causes an implicit destruction
 and recreation of internal data structures.
 
-
 \membersection{wxMenu::Append}\label{wxmenuappend}
 
-\func{wxMenuItem*}{Append}{\param{int}{ id}, \param{const wxString\& }{ item = ""}, \param{const wxString\& }{helpString = ""},\rtfsp
+\func{wxMenuItem*}{Append}{\param{int}{ id}, \param{const wxString\& }{ item}, \param{const wxString\& }{helpString = ""},\rtfsp
 \param{wxItemKind}{ kind = wxITEM\_NORMAL}}
 
 Adds a string item to the end of the menu.
@@ -201,7 +198,6 @@ characters listed in the table below (again, case doesn't matter):
 \helpref{wxMenu::AppendSeparator}{wxmenuappendseparator},\rtfsp
 \helpref{wxMenu::AppendCheckItem}{wxmenuappendcheckitem},\rtfsp
 \helpref{wxMenu::AppendRadioItem}{wxmenuappendradioitem},\rtfsp
-\helpref{wxMenu::AppendSubMenu}{wxmenuappendsubmenu},\rtfsp
 \helpref{wxMenu::Insert}{wxmenuinsert},\rtfsp
 \helpref{wxMenu::SetLabel}{wxmenusetlabel}, \helpref{wxMenu::GetHelpString}{wxmenugethelpstring},\rtfsp
 \helpref{wxMenu::SetHelpString}{wxmenusethelpstring}, \helpref{wxMenuItem}{wxmenuitem}
@@ -216,7 +212,6 @@ implements the following methods:
 \end{twocollist}}
 }
 
-
 \membersection{wxMenu::AppendCheckItem}\label{wxmenuappendcheckitem}
 
 \func{wxMenuItem*}{AppendCheckItem}{\param{int}{ id},\rtfsp
@@ -229,7 +224,6 @@ Adds a checkable item to the end of the menu.
 \helpref{wxMenu::Append}{wxmenuappend},\rtfsp
 \helpref{wxMenu::InsertCheckItem}{wxmenuinsertcheckitem}
 
-
 \membersection{wxMenu::AppendRadioItem}\label{wxmenuappendradioitem}
 
 \func{wxMenuItem*}{AppendRadioItem}{\param{int}{ id},\rtfsp
@@ -239,11 +233,13 @@ Adds a radio item to the end of the menu. All consequent radio items form a
 group and when an item in the group is checked, all the others are
 automatically unchecked.
 
+{\bf NB:} Currently only implemented under Windows and GTK, use
+{\tt\#if wxHAS\_RADIO\_MENU\_ITEMS} to test for availability of this feature.
+
 \wxheading{See also}
 
 \helpref{wxMenu::Append}{wxmenuappend},\rtfsp
 \helpref{wxMenu::InsertRadioItem}{wxmenuinsertradioitem}
-
 
 \membersection{wxMenu::AppendSeparator}\label{wxmenuappendseparator}
 
@@ -256,22 +252,11 @@ Adds a separator to the end of the menu.
 \helpref{wxMenu::Append}{wxmenuappend},\rtfsp
 \helpref{wxMenu::InsertSeparator}{wxmenuinsertseparator}
 
-
-\membersection{wxMenu::AppendSubMenu}\label{wxmenuappendsubmenu}
-
-\func{wxMenuItem *}{AppendSubMenu}{\param{wxMenu *}{submenu}, \param{const wxString\& }{text}, \param{const wxString\& }{help = wxEmptyString}}
-
-Adds the given \arg{submenu} to this menu. \arg{text} is the text shown in the
-menu for it and \arg{help} is the help string shown in the status bar when the
-submenu item is selected.
-
-
 \membersection{wxMenu::Break}\label{wxmenubreak}
 
 \func{void}{Break}{\void}
 
 Inserts a break in a menu, causing the next appended item to appear in a new column.
-
 
 \membersection{wxMenu::Check}\label{wxmenucheck}
 
@@ -288,7 +273,6 @@ Checks or unchecks the menu item.
 \wxheading{See also}
 
 \helpref{wxMenu::IsChecked}{wxmenuischecked}
-
 
 \membersection{wxMenu::Delete}\label{wxmenudelete}
 
@@ -312,7 +296,6 @@ delete a submenu.
 \helpref{wxMenu::Destroy}{wxmenudestroy},\rtfsp
 \helpref{wxMenu::Remove}{wxmenuremove}
 
-
 \membersection{wxMenu::Destroy}\label{wxmenudestroy}
 
 \func{void}{Destroy}{\param{int }{id}}
@@ -335,7 +318,6 @@ be deleted. Use \helpref{Remove}{wxmenuremove} if you want to keep the submenu
 \helpref{wxMenu::Deletes}{wxmenudelete},\rtfsp
 \helpref{wxMenu::Remove}{wxmenuremove}
 
-
 \membersection{wxMenu::Enable}\label{wxmenuenable}
 
 \func{void}{Enable}{\param{int}{ id}, \param{const bool}{ enable}}
@@ -351,7 +333,6 @@ Enables or disables (greys out) a menu item.
 \wxheading{See also}
 
 \helpref{wxMenu::IsEnabled}{wxmenuisenabled}
-
 
 \membersection{wxMenu::FindItem}\label{wxmenufinditem}
 
@@ -391,13 +372,11 @@ before matching.
 \pythonnote{The name of this method in wxPython is {\tt FindItemById} 
 and it does not support the second parameter.}
 
-
 \membersection{wxMenu::FindItemByPosition}\label{wxmenufinditembyposition}
 
 \constfunc{wxMenuItem*}{FindItemByPosition}{\param{size\_t }{position}}
 
 Returns the wxMenuItem given a position in the menu.
-
 
 \membersection{wxMenu::GetHelpString}\label{wxmenugethelpstring}
 
@@ -418,7 +397,6 @@ item was not found.
 
 \helpref{wxMenu::SetHelpString}{wxmenusethelpstring}, \helpref{wxMenu::Append}{wxmenuappend}
 
-
 \membersection{wxMenu::GetLabel}\label{wxmenugetlabel}
 
 \constfunc{wxString}{GetLabel}{\param{int}{ id}}
@@ -437,21 +415,18 @@ The item label, or the empty string if the item was not found.
 
 \helpref{wxMenu::SetLabel}{wxmenusetlabel}
 
-
 \membersection{wxMenu::GetMenuItemCount}\label{wxmenugetmenuitemcount}
 
 \constfunc{size\_t}{GetMenuItemCount}{\void}
 
 Returns the number of items in the menu.
 
-
 \membersection{wxMenu::GetMenuItems}\label{wxmenugetmenuitems}
 
 \constfunc{wxMenuItemList\&}{GetMenuItems}{\void}
 
 Returns the list of items in the menu. wxMenuItemList is a pseudo-template
-list class containing wxMenuItem pointers, see \helpref{wxList}{wxlist}.
-
+list class containing wxMenuItem pointers.
 
 \membersection{wxMenu::GetTitle}\label{wxmenugettitle}
 
@@ -469,13 +444,12 @@ menubar.
 
 \helpref{wxMenu::SetTitle}{wxmenusettitle}
 
-
 \membersection{wxMenu::Insert}\label{wxmenuinsert}
 
 \func{wxMenuItem*}{Insert}{\param{size\_t }{pos}, \param{wxMenuItem *}{item}}
 
 \func{wxMenuItem*}{Insert}{\param{size\_t }{pos}, \param{int}{ id},\rtfsp
-\param{const wxString\& }{ item = ""}, \param{const wxString\& }{helpString = ""},\rtfsp
+\param{const wxString\& }{ item}, \param{const wxString\& }{helpString = ""},\rtfsp
 \param{wxItemKind}{ kind = wxITEM\_NORMAL}}
 
 Inserts the given {\it item} before the position {\it pos}. Inserting the item
@@ -486,7 +460,6 @@ as appending it.
 
 \helpref{wxMenu::Append}{wxmenuappend},\rtfsp
 \helpref{wxMenu::Prepend}{wxmenuprepend}
-
 
 \membersection{wxMenu::InsertCheckItem}\label{wxmenuinsertcheckitem}
 
@@ -500,7 +473,6 @@ Inserts a checkable item at the given position.
 \helpref{wxMenu::Insert}{wxmenuinsert},\rtfsp
 \helpref{wxMenu::AppendCheckItem}{wxmenuappendcheckitem}
 
-
 \membersection{wxMenu::InsertRadioItem}\label{wxmenuinsertradioitem}
 
 \func{wxMenuItem*}{InsertRadioItem}{\param{size\_t }{pos}, \param{int}{ id},\rtfsp
@@ -513,7 +485,6 @@ Inserts a radio item at the given position.
 \helpref{wxMenu::Insert}{wxmenuinsert},\rtfsp
 \helpref{wxMenu::AppendRadioItem}{wxmenuappendradioitem}
 
-
 \membersection{wxMenu::InsertSeparator}\label{wxmenuinsertseparator}
 
 \func{wxMenuItem*}{InsertSeparator}{\param{size\_t }{pos}}
@@ -524,7 +495,6 @@ Inserts a separator at the given position.
 
 \helpref{wxMenu::Insert}{wxmenuinsert},\rtfsp
 \helpref{wxMenu::AppendSeparator}{wxmenuappendseparator}
-
 
 \membersection{wxMenu::IsChecked}\label{wxmenuischecked}
 
@@ -544,7 +514,6 @@ true if the menu item is checked, false otherwise.
 
 \helpref{wxMenu::Check}{wxmenucheck}
 
-
 \membersection{wxMenu::IsEnabled}\label{wxmenuisenabled}
 
 \constfunc{bool}{IsEnabled}{\param{int}{ id}}
@@ -563,13 +532,12 @@ true if the menu item is enabled, false otherwise.
 
 \helpref{wxMenu::Enable}{wxmenuenable}
 
-
 \membersection{wxMenu::Prepend}\label{wxmenuprepend}
 
 \func{wxMenuItem*}{Prepend}{\param{wxMenuItem *}{item}}
 
 \func{wxMenuItem*}{Prepend}{\param{int}{ id},\rtfsp
-\param{const wxString\& }{ item = ""}, \param{const wxString\& }{helpString = ""},\rtfsp
+\param{const wxString\& }{ item}, \param{const wxString\& }{helpString = ""},\rtfsp
 \param{wxItemKind}{ kind = wxITEM\_NORMAL}}
 
 Inserts the given {\it item} at position $0$, i.e. before all the other
@@ -579,7 +547,6 @@ existing items.
 
 \helpref{wxMenu::Append}{wxmenuappend},\rtfsp
 \helpref{wxMenu::Insert}{wxmenuinsert}
-
 
 \membersection{wxMenu::PrependCheckItem}\label{wxmenuprependcheckitem}
 
@@ -593,7 +560,6 @@ Inserts a checkable item at position $0$.
 \helpref{wxMenu::Prepend}{wxmenuprepend},\rtfsp
 \helpref{wxMenu::AppendCheckItem}{wxmenuappendcheckitem}
 
-
 \membersection{wxMenu::PrependRadioItem}\label{wxmenuprependradioitem}
 
 \func{wxMenuItem*}{PrependRadioItem}{\param{int}{ id},\rtfsp
@@ -606,7 +572,6 @@ Inserts a radio item at position $0$.
 \helpref{wxMenu::Prepend}{wxmenuprepend},\rtfsp
 \helpref{wxMenu::AppendRadioItem}{wxmenuappendradioitem}
 
-
 \membersection{wxMenu::PrependSeparator}\label{wxmenuprependseparator}
 
 \func{wxMenuItem*}{PrependSeparator}{\void}
@@ -617,7 +582,6 @@ Inserts a separator at position $0$.
 
 \helpref{wxMenu::Prepend}{wxmenuprepend},\rtfsp
 \helpref{wxMenu::AppendSeparator}{wxmenuappendseparator}
-
 
 \membersection{wxMenu::Remove}\label{wxmenuremove}
 
@@ -639,7 +603,6 @@ object. This allows to reuse the same item later by adding it back to the menu
 
 The item which was detached from the menu.
 
-
 \membersection{wxMenu::SetHelpString}\label{wxmenusethelpstring}
 
 \func{void}{SetHelpString}{\param{int}{ id}, \param{const wxString\& }{helpString}}
@@ -656,7 +619,6 @@ Sets an item's help string.
 
 \helpref{wxMenu::GetHelpString}{wxmenugethelpstring}
 
-
 \membersection{wxMenu::SetLabel}\label{wxmenusetlabel}
 
 \func{void}{SetLabel}{\param{int}{ id}, \param{const wxString\& }{label}}
@@ -672,7 +634,6 @@ Sets the label of a menu item.
 \wxheading{See also}
 
 \helpref{wxMenu::Append}{wxmenuappend}, \helpref{wxMenu::GetLabel}{wxmenugetlabel}
-
 
 \membersection{wxMenu::SetTitle}\label{wxmenusettitle}
 
@@ -693,7 +654,6 @@ menubar.
 \wxheading{See also}
 
 \helpref{wxMenu::GetTitle}{wxmenugettitle}
-
 
 \membersection{wxMenu::UpdateUI}\label{wxmenuupdateui}
 
@@ -739,7 +699,6 @@ menu shortcuts may cease to work.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
 \membersection{wxMenuBar::wxMenuBar}\label{wxmenubarctor}
 
 \func{}{wxMenuBar}{\param{long }{style = 0}}
@@ -767,13 +726,11 @@ Use \helpref{wxMenuBar::Append}{wxmenubarappend} instead.}
 \perlnote{wxPerl only supports the first constructor: 
 use \helpref{wxMenuBar::Append}{wxmenubarappend} instead.}
 
-
 \membersection{wxMenuBar::\destruct{wxMenuBar}}\label{wxmenubardtor}
 
 \func{void}{\destruct{wxMenuBar}}{\void}
 
 Destructor, destroying the menu bar and removing it from the parent frame (if any).
-
 
 \membersection{wxMenuBar::Append}\label{wxmenubarappend}
 
@@ -795,7 +752,6 @@ true on success, false if an error occurred.
 
 \helpref{wxMenuBar::Insert}{wxmenubarinsert}
 
-
 \membersection{wxMenuBar::Check}\label{wxmenubarcheck}
 
 \func{void}{Check}{\param{int}{ id}, \param{const bool}{ check}}
@@ -812,7 +768,6 @@ Checks or unchecks a menu item.
 
 Only use this when the menu bar has been associated
 with a frame; otherwise, use the wxMenu equivalent call.
-
 
 \membersection{wxMenuBar::Enable}\label{wxmenubarenable}
 
@@ -831,7 +786,6 @@ Enables or disables (greys out) a menu item.
 Only use this when the menu bar has been
 associated with a frame; otherwise, use the wxMenu equivalent call.
 
-
 \membersection{wxMenuBar::EnableTop}\label{wxmenubarenabletop}
 
 \func{void}{EnableTop}{\param{int}{ pos}, \param{const bool}{ enable}}
@@ -849,7 +803,6 @@ Enables or disables a whole menu.
 Only use this when the menu bar has been
 associated with a frame.
 
-
 \membersection{wxMenuBar::FindMenu}\label{wxmenubarfindmenu}
 
 \constfunc{int}{FindMenu}{\param{const wxString\& }{title}}
@@ -858,7 +811,6 @@ Returns the index of the menu with the given {\it title} or {\tt wxNOT\_FOUND} i
 such menu exists in this menubar. The {\it title} parameter may specify either
 the menu title (with accelerator characters, i.e. {\tt "\&File"}) or just the
 menu label ({\tt "File"}) indifferently.
-
 
 \membersection{wxMenuBar::FindMenuItem}\label{wxmenubarfindmenuitem}
 
@@ -881,7 +833,6 @@ The menu item identifier, or {\tt wxNOT\_FOUND} if none was found.
 Any special menu codes are stripped out of source and target strings
 before matching.
 
-
 \membersection{wxMenuBar::FindItem}\label{wxmenubarfinditem}
 
 \constfunc{wxMenuItem *}{FindItem}{\param{int}{ id}, \param{wxMenu}{ **menu = NULL}}
@@ -897,7 +848,6 @@ Finds the menu item object associated with the given menu item identifier.
 \wxheading{Return value}
 
 The found menu item object, or NULL if one was not found.
-
 
 \membersection{wxMenuBar::GetHelpString}\label{wxmenubargethelpstring}
 
@@ -918,7 +868,6 @@ was not found.
 
 \helpref{wxMenuBar::SetHelpString}{wxmenubarsethelpstring}
 
-
 \membersection{wxMenuBar::GetLabel}\label{wxmenubargetlabel}
 
 \constfunc{wxString}{GetLabel}{\param{int}{ id}}
@@ -936,7 +885,6 @@ The menu item label, or the empty string if the item was not found.
 \wxheading{Remarks}
 
 Use only after the menubar has been associated with a frame.
-
 
 \membersection{wxMenuBar::GetLabelTop}\label{wxmenubargetlabeltop}
 
@@ -962,20 +910,17 @@ Use only after the menubar has been associated with a frame.
 
 \helpref{wxMenuBar::SetLabelTop}{wxmenubarsetlabeltop}
 
-
 \membersection{wxMenuBar::GetMenu}\label{wxmenubargetmenu}
 
 \constfunc{wxMenu*}{GetMenu}{\param{int}{ menuIndex}}
 
 Returns the menu at {\it menuIndex} (zero-based).
 
-
 \membersection{wxMenuBar::GetMenuCount}\label{wxmenubargetmenucount}
 
 \constfunc{int}{GetMenuCount}{\void}
 
 Returns the number of menus in this menubar.
-
 
 \membersection{wxMenuBar::Insert}\label{wxmenubarinsert}
 
@@ -1002,7 +947,6 @@ true on success, false if an error occurred.
 
 \helpref{wxMenuBar::Append}{wxmenubarappend}
 
-
 \membersection{wxMenuBar::IsChecked}\label{wxmenubarischecked}
 
 \constfunc{bool}{IsChecked}{\param{int}{ id}}
@@ -1016,7 +960,6 @@ Determines whether an item is checked.
 \wxheading{Return value}
 
 true if the item was found and is checked, false otherwise.
-
 
 \membersection{wxMenuBar::IsEnabled}\label{wxmenubarisenabled}
 
@@ -1032,13 +975,11 @@ Determines whether an item is enabled.
 
 true if the item was found and is enabled, false otherwise.
 
-
 \membersection{wxMenuBar::Refresh}\label{wxmenubarrefresh}
 
 \func{void}{Refresh}{\void}
 
 Redraw the menu bar
-
 
 \membersection{wxMenuBar::Remove}\label{wxmenubarremove}
 
@@ -1052,7 +993,6 @@ dynamically.
 \wxheading{See also}
 
 \helpref{wxMenuBar::Replace}{wxmenubarreplace}
-
 
 \membersection{wxMenuBar::Replace}\label{wxmenubarreplace}
 
@@ -1078,7 +1018,6 @@ responsible for deleting it.
 \helpref{wxMenuBar::Insert}{wxmenubarinsert},\rtfsp
 \helpref{wxMenuBar::Remove}{wxmenubarremove}
 
-
 \membersection{wxMenuBar::SetHelpString}\label{wxmenubarsethelpstring}
 
 \func{void}{SetHelpString}{\param{int}{ id}, \param{const wxString\& }{helpString}}
@@ -1094,7 +1033,6 @@ Sets the help string associated with a menu item.
 \wxheading{See also}
 
 \helpref{wxMenuBar::GetHelpString}{wxmenubargethelpstring}
-
 
 \membersection{wxMenuBar::SetLabel}\label{wxmenubarsetlabel}
 
@@ -1115,7 +1053,6 @@ Use only after the menubar has been associated with a frame.
 \wxheading{See also}
 
 \helpref{wxMenuBar::GetLabel}{wxmenubargetlabel}
-
 
 \membersection{wxMenuBar::SetLabelTop}\label{wxmenubarsetlabeltop}
 

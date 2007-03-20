@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/radiobut.cpp
+// Name:        radiobut.cpp
 // Purpose:     wxRadioButton
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "radiobut.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -16,11 +20,10 @@
 #define XtDisplay XTDISPLAY
 #endif
 
-#include "wx/radiobut.h"
+#include "wx/defs.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-#endif
+#include "wx/radiobut.h"
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -55,7 +58,7 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
     Widget parentWidget = (Widget) parent->GetClientWidget();
     Display* dpy = XtDisplay(parentWidget);
 
-    wxString label1(GetLabelText(label));
+    wxString label1(wxStripMenuCodes(label));
 
     wxXmString text( label1 );
 
@@ -141,15 +144,14 @@ void wxRadioButton::ChangeBackgroundColour()
     wxWindow::ChangeBackgroundColour();
 
     // What colour should this be?
-    wxColour colour = *wxBLACK;
-    WXPixel selectPixel = colour.AllocColour(XtDisplay((Widget)m_mainWidget));
+    int selectPixel = wxBLACK->AllocColour(XtDisplay((Widget)m_mainWidget));
 
     XtVaSetValues ((Widget) GetMainWidget(),
           XmNselectColor, selectPixel,
           NULL);
 }
 
-void wxRadioButtonCallback (Widget WXUNUSED(w), XtPointer clientData,
+void wxRadioButtonCallback (Widget w, XtPointer clientData,
                             XmToggleButtonCallbackStruct * cbs)
 {
     if (!cbs->set)

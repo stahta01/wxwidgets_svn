@@ -24,6 +24,8 @@
 %import core.i
 %pythoncode { wx = _core }
 
+%include __controls_rename.i
+
 MAKE_CONST_WXSTRING_NOSWIG(PanelNameStr);
 MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 MAKE_CONST_WXSTRING_NOSWIG(ControlNameStr);
@@ -59,10 +61,8 @@ MAKE_CONST_WXSTRING_NOSWIG(ControlNameStr);
 %include _cshelp.i
 %include _dragimg.i
 %include _datectrl.i
-%include _hyperlink.i
-%include _picker.i
-%include _collpane.i
-%include _srchctrl.i
+
+
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

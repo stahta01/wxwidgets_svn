@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#  pragma implementation "ifcontext.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -20,6 +24,9 @@
 #include "wx/wx.h"
 #endif
 
+#ifndef __DARWIN__
+#  include <malloc.h>
+#endif
 #include <stdio.h>
 
 #include "ifcontext.h"

@@ -12,6 +12,10 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "app.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/gdicmn.h"
@@ -26,6 +30,11 @@ class WXDLLEXPORT wxWindowMac;
 class WXDLLEXPORT wxApp ;
 class WXDLLEXPORT wxKeyEvent;
 class WXDLLEXPORT wxLog;
+
+#define wxPRINT_WINDOWS         1
+#define wxPRINT_POSTSCRIPT      2
+
+WXDLLEXPORT_DATA(extern wxApp*) wxTheApp;
 
 // Force an exit from main loop
 void WXDLLEXPORT wxExit();
@@ -42,6 +51,13 @@ class WXDLLEXPORT wxApp: public wxAppBase
     wxApp();
     virtual ~wxApp() {}
 
+    virtual int MainLoop();
+    virtual void ExitMainLoop();
+    virtual bool Pending() ;
+    virtual bool Dispatch() ;
+
+    virtual void Exit();
+
     virtual bool Yield(bool onlyIfNeeded = FALSE);
     virtual void WakeUpIdle();
 
@@ -57,9 +73,8 @@ class WXDLLEXPORT wxApp: public wxAppBase
     void OnEndSession(wxCloseEvent& event);
     void OnQueryEndSession(wxCloseEvent& event);
 
-    void                  MacDoOneEvent() ;
-
 protected:
+    bool                  m_showOnInit;
     int                   m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
 
 public:
@@ -69,23 +84,26 @@ public:
     virtual bool Initialize(int& argc, wxChar **argv);
     virtual void CleanUp();
 
+    bool IsExiting() { return !m_keepGoing ; }
+
     // the installed application event handler
     WXEVENTHANDLERREF    MacGetEventHandler() { return m_macEventHandler ; }
     WXEVENTHANDLERREF    MacGetCurrentEventHandlerCallRef() { return m_macCurrentEventHandlerCallRef ; }
     void MacSetCurrentEvent( WXEVENTREF event , WXEVENTHANDLERCALLREF handler )
     { m_macCurrentEvent = event ; m_macCurrentEventHandlerCallRef = handler ; }
 
-    // adding a CFType object to be released only at the end of the current event cycle (increases the
-    // refcount of the object passed), needed in case we are in the middle of an event concering an object
-    // we want to delete and cannot do it immediately
-    void                  MacAddToAutorelease( void* cfrefobj );
 public:
+    static long           sm_lastMessageTime;
     static wxWindow*      s_captureWindow ;
+    static int            s_lastMouseDown ; // 0 = none , 1 = left , 2 = right
+    static WXHRGN         s_macCursorRgn ;
     static long           s_lastModifiers ;
 
     int                   m_nCmdShow;
 
 private:
+    bool                  m_keepGoing ;
+
     // mac specifics
 
     WXEVENTHANDLERREF     m_macEventHandler ;
@@ -96,11 +114,28 @@ private:
 #endif
 
 public:
+    static bool           s_macSupportPCMenuShortcuts ;
     static long           s_macAboutMenuItemId ;
     static long           s_macPreferencesMenuItemId ;
     static long           s_macExitMenuItemId ;
     static wxString       s_macHelpMenuTitleName ;
 
+    static bool           s_macHasAppearance ;
+    static long           s_macAppearanceVersion ;
+    static bool           s_macHasNavigation ;
+    static bool           s_macNavigationVersion ;
+    static bool           s_macHasWindowManager ;
+    static long           s_macWindowManagerVersion ;
+    static bool           s_macHasMenuManager ;
+    static long           s_macMenuManagerVersion ;
+    static bool           s_macHasDialogManager ;
+    static long           s_macDialogManagerVersion ;
+    
+    WXHRGN                m_macCursorRgn ;
+    WXHRGN                m_macSleepRgn ;
+    WXHRGN                m_macHelpRgn ;
+
+    void                  MacDoOneEvent() ;
     WXEVENTREF            MacGetCurrentEvent() { return m_macCurrentEvent ; }
     void                  MacHandleOneEvent( WXEVENTREF ev ) ;
 

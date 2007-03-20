@@ -12,6 +12,10 @@
 #ifndef _WX_DCPRINT_H_
 #define _WX_DCPRINT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dcprint.h"
+#endif
+
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #include "wx/dc.h"
@@ -33,8 +37,6 @@ public:
     virtual void EndDoc();
     virtual void StartPage();
     virtual void EndPage();
-
-    wxRect GetPaperRect();
 
 protected:
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,

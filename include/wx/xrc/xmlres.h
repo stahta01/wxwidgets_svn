@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xmlres.h
+// Name:        xmlres.h
 // Purpose:     XML resources
 // Author:      Vaclav Slavik
 // Created:     2000/03/05
@@ -10,6 +10,10 @@
 
 #ifndef _WX_XMLRES_H_
 #define _WX_XMLRES_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xmlres.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -24,8 +28,6 @@
 #include "wx/bitmap.h"
 #include "wx/icon.h"
 #include "wx/artprov.h"
-#include "wx/colour.h"
-#include "wx/animate.h"
 
 #include "wx/xml/xml.h"
 
@@ -70,18 +72,12 @@ class wxXmlResourceModule;
 class WXDLLIMPEXP_XRC wxXmlResourceDataRecord
 {
 public:
-    wxXmlResourceDataRecord() : Doc(NULL) {
-#if wxUSE_DATETIME
-        Time = wxDateTime::Now();
-#endif
-    }
+    wxXmlResourceDataRecord() : Doc(NULL), Time(wxDateTime::Now()) {}
     ~wxXmlResourceDataRecord() {delete Doc;}
 
     wxString File;
     wxXmlDocument *Doc;
-#if wxUSE_DATETIME
     wxDateTime Time;
-#endif
 };
 
 
@@ -105,37 +101,33 @@ public:
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
     //              translatable strings will be translated via _()
-    //              using the given domain if specified
     //        wxXRC_NO_SUBCLASSING
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
     //        wxXRC_NO_RELOADING
     //              don't check the modification time of the XRC files and
     //              reload them if they have changed on disk
-    wxXmlResource(int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain=wxEmptyString);
+    wxXmlResource(int flags = wxXRC_USE_LOCALE);
 
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
     //              translatable strings will be translated via _()
-    //              using the given domain if specified
     //        wxXRC_NO_SUBCLASSING
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
-    wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain=wxEmptyString);
+    wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE);
 
     // Destructor.
-    virtual ~wxXmlResource();
+    ~wxXmlResource();
 
-    wxXmlNode *GetFirstRoot();
-    
     // Loads resources from XML files that match given filemask.
     // This method understands VFS (see filesys.h).
     bool Load(const wxString& filemask);
 
+#if wxABI_VERSION > 20601
     // Unload resource from the given XML file (wildcards not allowed)
     bool Unload(const wxString& filename);
+#endif // wxABI_VERSION
 
     // Initialize handlers for all supported controls/windows. This will
     // make the executable quite big because it forces linking against
@@ -219,13 +211,10 @@ public:
     bool AttachUnknownControl(const wxString& name, wxWindow *control,
                               wxWindow *parent = NULL);
 
-    // Returns a numeric ID that is equivalent to the string ID used in an XML
-    // resource. If an unknown str_id is requested (i.e. other than wxID_XXX
-    // or integer), a new record is created which associates the given string
-    // with a number. If value_if_not_found == wxID_NONE, the number is obtained via
-    // wxWindow::NewControlId(). Otherwise value_if_not_found is used.
-    // Macro XRCID(name) is provided for convenient use in event tables.
-    static int GetXRCID(const wxChar *str_id, int value_if_not_found = wxID_NONE);
+    // Returns a numeric ID that is equivalent to the string id used in an XML
+    // resource. To be used in event tables.
+    // Macro XRCID is provided for convenience
+    static int GetXRCID(const wxChar *str_id);
 
     // Returns version information (a.b.c.d = d+ 256*c + 256^2*b + 256^3*a).
     long GetVersion() const { return m_version; }
@@ -249,10 +238,6 @@ public:
     // Set flags after construction.
     void SetFlags(int flags) { m_flags = flags; }
 
-    // Get/Set the domain to be passed to the translation functions, defaults to NULL.
-    wxChar* GetDomain() const { return m_domain; }
-    void SetDomain(const wxChar* domain);
-    
 protected:
     // Scans the resources list for unloaded files and loads them. Also reloads
     // files that have been modified since last loading.
@@ -270,6 +255,7 @@ protected:
                                 wxObject *instance = NULL,
                                 wxXmlResourceHandler *handlerToUse = NULL);
 
+#if wxABI_VERSION > 20601
     // Helper of Load() and Unload(): returns the URL corresponding to the
     // given file if it's indeed a file, otherwise returns the original string
     // unmodified
@@ -280,6 +266,8 @@ protected:
     // Another helper: detect if the filename is a ZIP or XRS file
     static bool IsArchive(const wxString& filename);
 #endif // wxUSE_FILESYSTEM
+
+#endif // wxABI_VERSION
 
 private:
     long m_version;
@@ -292,9 +280,6 @@ private:
     wxFileSystem& GetCurFileSystem() { return m_curFileSystem; }
 #endif
 
-    // domain to pass to translation functions, if any.
-    wxChar* m_domain;
-    
     friend class wxXmlResourceHandler;
     friend class wxXmlResourceModule;
 
@@ -379,7 +364,8 @@ protected:
 
     // Returns true if the node has a property class equal to classname,
     // e.g. <object class="wxDialog">.
-    bool IsOfClass(wxXmlNode *node, const wxString& classname);
+    bool IsOfClass(wxXmlNode *node, const wxString& classname)
+        { return node->GetPropVal(wxT("class"), wxEmptyString) == classname; }
 
     // Gets node content from wxXML_ENTITY_NODE
     // The problem is, <tag>content<tag> is represented as
@@ -430,7 +416,7 @@ protected:
     float GetFloat(const wxString& param, float defaultv = 0);
 
     // Gets colour in HTML syntax (#RRGGBB).
-    wxColour GetColour(const wxString& param, const wxColour& defaultv = wxNullColour);
+    wxColour GetColour(const wxString& param);
 
     // Gets the size (may be in dialog units).
     wxSize GetSize(const wxString& param = wxT("size"),
@@ -452,11 +438,6 @@ protected:
     wxIcon GetIcon(const wxString& param = wxT("icon"),
                    const wxArtClient& defaultArtClient = wxART_OTHER,
                    wxSize size = wxDefaultSize);
-
-#if wxUSE_ANIMATIONCTRL
-    // Gets an animation.
-    wxAnimation GetAnimation(const wxString& param = wxT("animation"));
-#endif
 
     // Gets a font.
     wxFont GetFont(const wxString& param = wxT("font"));
@@ -517,6 +498,13 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
+#if WXWIN_COMPATIBILITY_2_4
+    #define ADD_STYLE         XRC_ADD_STYLE
+    #define wxTheXmlResource  wxXmlResource::Get()
+    #define XMLID             XRCID
+    #define XMLCTRL           XRCCTRL
+    #define GetXMLID          GetXRCID
+#endif
 
 #endif // wxUSE_XRC
 

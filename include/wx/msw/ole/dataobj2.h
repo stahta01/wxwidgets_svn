@@ -122,8 +122,7 @@ private:
 class WXDLLEXPORT wxURLDataObject : public wxDataObjectComposite
 {
 public:
-    // initialize with URL in ctor or use SetURL later
-    wxURLDataObject(const wxString& url = wxEmptyString);
+    wxURLDataObject();
 
     // return the URL as string
     wxString GetURL() const;

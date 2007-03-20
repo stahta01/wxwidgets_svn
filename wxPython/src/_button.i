@@ -271,10 +271,6 @@ public:
         wxBitmap , GetBitmapSelected(),
         "Returns the bitmap for the selected state.", "");
     
-    DocDeclStr(
-        wxBitmap , GetBitmapHover(),
-        "Returns the bitmap used when the mouse is over the button, may be invalid.", "");
-   
 
     DocDeclStr(
         void , SetBitmapDisabled(const wxBitmap& bitmap),
@@ -295,25 +291,11 @@ public:
         void , SetBitmapLabel(const wxBitmap& bitmap),
         "Sets the bitmap label for the button.  This is the bitmap used for the
 unselected state, and for all other states if no other bitmaps are provided.", "");
+    
 
-    
-    DocDeclStr(
-        void , SetBitmapHover(const wxBitmap& hover),
-        "Sets the bitmap to be shown when the mouse is over the button.  This function
-is new since wxWidgets version 2.7.0 and the hover bitmap is currently only
-supported in wxMSW.", "");
-    
     void SetMargins(int x, int y);
     int GetMarginX() const;
     int GetMarginY() const;
-    
-    %property(BitmapDisabled, GetBitmapDisabled, SetBitmapDisabled, doc="See `GetBitmapDisabled` and `SetBitmapDisabled`");
-    %property(BitmapFocus, GetBitmapFocus, SetBitmapFocus, doc="See `GetBitmapFocus` and `SetBitmapFocus`");
-    %property(BitmapHover, GetBitmapHover, SetBitmapHover, doc="See `GetBitmapHover` and `SetBitmapHover`");
-    %property(BitmapLabel, GetBitmapLabel, SetBitmapLabel, doc="See `GetBitmapLabel` and `SetBitmapLabel`");
-    %property(BitmapSelected, GetBitmapSelected, SetBitmapSelected, doc="See `GetBitmapSelected` and `SetBitmapSelected`");
-    %property(MarginX, GetMarginX, doc="See `GetMarginX`");
-    %property(MarginY, GetMarginY, doc="See `GetMarginY`");
 };
 
 

@@ -14,6 +14,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "wxpoem.h"
+#endif
+
 // Define a new application
 class MyApp: public wxApp
 {
@@ -29,7 +33,7 @@ class MyCanvas: public wxWindow
 {
 public:
     MyCanvas(wxFrame *frame);
-    virtual ~MyCanvas();
+    ~MyCanvas();
 
     void OnPaint(wxPaintEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
@@ -47,7 +51,7 @@ class MainWindow: public wxFrame
 public:
     MyCanvas *canvas;
     MainWindow(wxFrame *frame, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style);
-    virtual ~MainWindow();
+    ~MainWindow();
 
     void OnCloseWindow(wxCloseEvent& event);
     void OnChar(wxKeyEvent& event);

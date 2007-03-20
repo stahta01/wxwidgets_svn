@@ -57,43 +57,21 @@
 // #undef the macros defined in winsows.h which conflict with code elsewhere
 #include "wx/msw/winundef.h"
 
-// Types DWORD_PTR, ULONG_PTR and so on are used for 64-bit compatability 
-// in the WINAPI SDK (they are an integral type that is the size of a
-// pointer) on MSVC 7 and later. However, they are not available in older 
-// Platform SDKs, and since they are typedefs and not #defines we simply 
-// overwrite them if there is a chance that they're not defined
-#if !defined(_MSC_VER) || (_MSC_VER < 1300)
+
+// types DWORD_PTR, ULONG_PTR and so on might be not defined in old headers but
+// unfortunately I don't know of any standard way to test for this (as they're
+// typedefs and not #defines), so simply overwrite them in any case in Win32
+// mode -- and if compiling for Win64 they'd better have new headers anyhow
+//
+// this is ugly but what else can we do? even testing for compiler version
+// wouldn't help as you can perfectly well be using an older compiler (VC6)
+// with newer SDK headers
+#if !defined(__WIN64__) && !defined(__WXWINCE__)
     #define UINT_PTR unsigned int
     #define LONG_PTR long
     #define ULONG_PTR unsigned long
     #define DWORD_PTR unsigned long
-#endif // !defined(_MSC_VER) || _MSC_VER < 1300
-
-// ----------------------------------------------------------------------------
-// Fix the functions wrongly implemented in unicows.dll
-// ----------------------------------------------------------------------------
-
-#if wxUSE_UNICODE_MSLU
-
-#if wxUSE_GUI
-
-WXDLLEXPORT int wxMSLU_DrawStateW(WXHDC dc, WXHBRUSH br, WXFARPROC outputFunc,
-                                  WXLPARAM lData, WXWPARAM wData,
-                                  int x, int y, int cx, int cy,
-                                  unsigned int flags);
-#define DrawStateW(dc, br, func, ld, wd, x, y, cx, cy, flags) \
-    wxMSLU_DrawStateW((WXHDC)dc,(WXHBRUSH)br,(WXFARPROC)func, \
-                      ld, wd, x, y, cx, cy, flags)
-
-WXDLLEXPORT int wxMSLU_GetOpenFileNameW(void *ofn);
-#define GetOpenFileNameW(ofn) wxMSLU_GetOpenFileNameW((void*)ofn)
-
-WXDLLEXPORT int wxMSLU_GetSaveFileNameW(void *ofn);
-#define GetSaveFileNameW(ofn) wxMSLU_GetSaveFileNameW((void*)ofn)
-
-#endif // wxUSE_GUI
-
-#endif // wxUSE_UNICODE_MSLU
+#endif // !__WIN64__
 
 #endif // _WX_WRAPWIN_H_
 

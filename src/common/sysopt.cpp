@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/sysopt.cpp
+// Name:        common/sysopt.cpp
 // Purpose:     wxSystemOptions
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "sysopt.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,14 +30,13 @@
 
 #if wxUSE_SYSTEM_OPTIONS
 
-#include "wx/sysopt.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
     #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/arrstr.h"
 #endif
+
+#include "wx/string.h"
+#include "wx/sysopt.h"
+#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // private globals
@@ -69,33 +72,11 @@ void wxSystemOptions::SetOption(const wxString& name, int value)
 
 wxString wxSystemOptions::GetOption(const wxString& name)
 {
-    wxString val;
-
     int idx = gs_optionNames.Index(name, false);
-    if ( idx != wxNOT_FOUND )
-    {
-        val = gs_optionValues[idx];
-    }
-    else // not set explicitely
-    {
-        // look in the environment: first for a variable named "wx_appname_name"
-        // which can be set to affect the behaviour or just this application
-        // and then for "wx_name" which can be set to change the option globally
-        wxString var(name);
-        var.Replace(_T("."), _T("_"));  // '.'s not allowed in env var names
-
-        wxString appname;
-        if ( wxTheApp )
-            appname = wxTheApp->GetAppName();
-
-        if ( !appname.empty() )
-            val = wxGetenv(_T("wx_") + appname + _T('_') + var);
-
-        if ( val.empty() )
-            val = wxGetenv(_T("wx_") + var);
-    }
-
-    return val;
+    if (idx == wxNOT_FOUND)
+        return wxEmptyString;
+    else
+        return gs_optionValues[idx];
 }
 
 int wxSystemOptions::GetOptionInt(const wxString& name)
@@ -105,7 +86,8 @@ int wxSystemOptions::GetOptionInt(const wxString& name)
 
 bool wxSystemOptions::HasOption(const wxString& name)
 {
-    return !GetOption(name).empty();
+    return gs_optionNames.Index(name, false) != wxNOT_FOUND;
 }
 
 #endif // wxUSE_SYSTEM_OPTIONS
+

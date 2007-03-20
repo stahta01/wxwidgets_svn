@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/textctrl.cpp
+// Name:        textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "textctrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,18 +28,16 @@
 #define XtParent XTPARENT
 #endif
 
+#include "wx/defs.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
 
 #include "wx/textctrl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-#endif
-
+#include "wx/settings.h"
 #include "wx/filefn.h"
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -63,9 +65,9 @@ static void wxTextWindowGainFocusProc(Widget w, XtPointer clientData, XmAnyCallb
 static void wxTextWindowLoseFocusProc(Widget w, XtPointer clientData, XmAnyCallbackStruct *cbs);
 static void wxTextWindowActivateProc(Widget w, XtPointer clientData, XmAnyCallbackStruct *ptr);
 
-    IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+    IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 
-    BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+    BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
         EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
         EVT_CHAR(wxTextCtrl::OnChar)
 
@@ -138,14 +140,14 @@ bool wxTextCtrl::Create(wxWindow *parent,
         XtSetArg (args[count], (String) wxFont::GetFontTag(),
                   m_font.GetFontType( XtDisplay(parentWidget) ) ); ++count;
         XtSetArg (args[count], XmNwordWrap, wantWordWrap); ++count;
-        XtSetArg (args[count], XmNvalue, value.mb_str()); ++count;
+        XtSetArg (args[count], XmNvalue, value.c_str()); ++count;    
         XtSetArg (args[count], XmNeditable,
                   style & wxTE_READONLY ? False : True); ++count;
         XtSetArg (args[count], XmNeditMode, XmMULTI_LINE_EDIT ); ++count;
 
         m_mainWidget =
             (WXWidget) XmCreateScrolledText(parentWidget,
-                                            wxConstCast(name.mb_str(), char),
+                                            wxConstCast(name.c_str(), char),
                                             args, count);
 
         XtManageChild ((Widget) m_mainWidget);
@@ -154,11 +156,11 @@ bool wxTextCtrl::Create(wxWindow *parent,
     {
         m_mainWidget = (WXWidget)XtVaCreateManagedWidget
                                  (
-                                  wxConstCast(name.mb_str(), char),
+                                  wxConstCast(name.c_str(), char),
                                   xmTextWidgetClass,
                                   parentWidget,
                                   wxFont::GetFontTag(), m_font.GetFontType( XtDisplay(parentWidget) ),
-                                  XmNvalue, value.mb_str(),
+                                  XmNvalue, value.c_str(),
                                   XmNeditable, (style & wxTE_READONLY) ?
                                       False : True,
                                   NULL
@@ -167,8 +169,8 @@ bool wxTextCtrl::Create(wxWindow *parent,
 #if 0
         // TODO: Is this relevant? What does it do?
         int noCols = 2;
-        if (!value.IsNull() && (value.length() > (unsigned int) noCols))
-            noCols = value.length();
+        if (!value.IsNull() && (value.Length() > (unsigned int) noCols))
+            noCols = value.Length();
         XtVaSetValues((Widget) m_mainWidget,
                       XmNcolumns, noCols,
                       NULL);
@@ -240,23 +242,20 @@ wxString wxTextCtrl::GetValue() const
     return str;
 }
 
-void wxTextCtrl::DoSetValue(const wxString& text, int flags)
+void wxTextCtrl::SetValue(const wxString& text)
 {
     m_inSetValue = true;
 
-    XmTextSetString ((Widget) m_mainWidget, wxConstCast(text.mb_str(), char));
+    XmTextSetString ((Widget) m_mainWidget, wxConstCast(text.c_str(), char));
     XtVaSetValues ((Widget) m_mainWidget,
                    XmNcursorPosition, text.length(),
                    NULL);
 
     SetInsertionPoint(text.length());
     XmTextShowPosition ((Widget) m_mainWidget, text.length());
-    m_modified = true;
+    m_modified = TRUE;
 
     m_inSetValue = false;
-
-    if ( flags & SetValue_SendEvent )
-        SendTextUpdatedEvent();
 }
 
 // Clipboard operations
@@ -365,7 +364,7 @@ wxTextPos wxTextCtrl::GetLastPosition() const
 void wxTextCtrl::Replace(long from, long to, const wxString& value)
 {
     XmTextReplace ((Widget) m_mainWidget, (XmTextPosition) from, (XmTextPosition) to,
-        wxConstCast(value.mb_str(), char));
+        wxConstCast(value.c_str(), char));
 }
 
 void wxTextCtrl::Remove(long from, long to)
@@ -388,7 +387,7 @@ void wxTextCtrl::WriteText(const wxString& text)
 {
     long textPosition = GetInsertionPoint() + text.length();
     XmTextInsert ((Widget) m_mainWidget, GetInsertionPoint(),
-                  wxConstCast(text.mb_str(), char));
+                  wxConstCast(text.c_str(), char));
     XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
     SetInsertionPoint(textPosition);
     XmTextShowPosition ((Widget) m_mainWidget, textPosition);
@@ -399,7 +398,7 @@ void wxTextCtrl::AppendText(const wxString& text)
 {
     wxTextPos textPosition = GetLastPosition() + text.length();
     XmTextInsert ((Widget) m_mainWidget, GetLastPosition(),
-                  wxConstCast(text.mb_str(), char));
+                  wxConstCast(text.c_str(), char));
     XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
     SetInsertionPoint(textPosition);
     XmTextShowPosition ((Widget) m_mainWidget, textPosition);
@@ -493,7 +492,7 @@ void wxTextCtrl::ShowPosition(long pos)
 int wxTextCtrl::GetLineLength(long lineNo) const
 {
     wxString str = GetLineText (lineNo);
-    return (int) str.length();
+    return (int) str.Length();
 }
 
 wxString wxTextCtrl::GetLineText(long lineNo) const
@@ -503,7 +502,7 @@ wxString wxTextCtrl::GetLineText(long lineNo) const
 
     if (s)
     {
-        wxString buf;
+        wxString buf("");
         long i;
         int currentLine = 0;
         for (i = 0; currentLine != lineNo && s[i]; i++ )
@@ -554,7 +553,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
         textStruct->doit = True;
         if (isascii(event.m_keyCode) && (textStruct->text->length == 1))
         {
-            textStruct->text->ptr[0] = (char)((event.m_keyCode == WXK_RETURN) ? 10 : event.m_keyCode);
+            textStruct->text->ptr[0] = ((event.m_keyCode == WXK_RETURN) ? 10 : event.m_keyCode);
         }
     }
 }

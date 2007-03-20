@@ -18,22 +18,18 @@
 
 #if wxUSE_CHECKLISTBOX && wxUSE_OWNER_DRAWN
 
-#include "wx/checklst.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/log.h"
-    #include "wx/window.h"
-    #include "wx/dcmemory.h"
-    #include "wx/dcscreen.h"
-    #include "wx/settings.h"
-    #include "wx/listbox.h"
-    #include "wx/bitmap.h"
-    #include "wx/colour.h"
-    #include "wx/font.h"
-#endif
-
+#include "wx/object.h"
+#include "wx/colour.h"
+#include "wx/font.h"
+#include "wx/bitmap.h"
+#include "wx/window.h"
+#include "wx/listbox.h"
 #include "wx/ownerdrw.h"
+#include "wx/settings.h"
+#include "wx/dcmemory.h"
+#include "wx/dcscreen.h"
+#include "wx/checklst.h"
+#include "wx/log.h"
 
 #define INCL_PM
 #include <os2.h>
@@ -62,7 +58,9 @@ public:
     //
     // ctor
     //
-    wxCheckListBoxItem(wxCheckListBox* pParent, size_t nIndex);
+    wxCheckListBoxItem( wxCheckListBox* pParent,
+                        size_t          nIndex
+                      );
 
     //
     // Drawing functions
@@ -88,7 +86,8 @@ private:
 
 
 
-wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox* pParent, size_t nIndex)
+wxCheckListBoxItem::wxCheckListBoxItem ( wxCheckListBox* pParent,
+                                         size_t nIndex)
                    :wxOwnerDrawn( wxEmptyString, true /* checkable */ )
 {
     m_bChecked = false;
@@ -185,7 +184,7 @@ bool wxCheckListBoxItem::OnDrawItem ( wxDC& rDc,
 //
 // Change the state of the item and redraw it
 //
-void wxCheckListBoxItem::Check( bool bCheck )
+void wxCheckListBoxItem::Check ( bool bCheck )
 {
     m_bChecked = bCheck;
 
@@ -271,9 +270,9 @@ wxCheckListBox::wxCheckListBox ( wxWindow* pParent,
             lStyle | wxLB_OWNERDRAW, rVal, rsName );
 } // end of wxCheckListBox::wxCheckListBox
 
-void wxCheckListBox::Delete(unsigned int n)
+void wxCheckListBox::Delete( int n )
 {
-    wxCHECK_RET( IsValid(n),
+    wxCHECK_RET( n >= 0 && n < m_nNumItems,
                  wxT("invalid index in wxCheckListBox::Delete") );
     wxListBox::Delete(n);
 
@@ -284,12 +283,12 @@ void wxCheckListBox::Delete(unsigned int n)
     m_aItems.RemoveAt(n);
 } // end of wxCheckListBox::Delete
 
-void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxCheckListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
     // pos is validated in wxListBox
     wxListBox::DoInsertItems( items, pos );
-    unsigned int n = items.GetCount();
-    for (unsigned int i = 0; i < n; i++)
+    int n = items.GetCount();
+    for (int i = 0; i < n; i++)
     {
         wxOwnerDrawn* pNewItem = CreateItem((size_t)(pos + i));
 
@@ -305,7 +304,7 @@ void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
 
 bool wxCheckListBox::SetFont ( const wxFont& rFont )
 {
-    for (unsigned int i = 0; i < m_aItems.GetCount(); i++)
+    for (size_t i = 0; i < m_aItems.GetCount(); i++)
         m_aItems[i]->SetFont(rFont);
     wxListBox::SetFont(rFont);
     return true;
@@ -321,7 +320,7 @@ bool wxCheckListBox::SetFont ( const wxFont& rFont )
 //
 // Create a check list box item
 //
-wxOwnerDrawn* wxCheckListBox::CreateItem(size_t nIndex)
+wxOwnerDrawn* wxCheckListBox::CreateItem ( size_t nIndex )
 {
     wxCheckListBoxItem* pItem = new wxCheckListBoxItem( this, nIndex );
     return pItem;
@@ -361,12 +360,12 @@ long wxCheckListBox::OS2OnMeasure ( WXMEASUREITEMSTRUCT* pItem )
 // Check items
 // -----------
 //
-bool wxCheckListBox::IsChecked(unsigned int uiIndex) const
+bool wxCheckListBox::IsChecked ( size_t uiIndex) const
 {
     return GetItem(uiIndex)->IsChecked();
 } // end of wxCheckListBox::IsChecked
 
-void wxCheckListBox::Check(unsigned int uiIndex, bool bCheck)
+void wxCheckListBox::Check ( size_t uiIndex, bool bCheck )
 {
     GetItem(uiIndex)->Check(bCheck);
 } // end of wxCheckListBox::Check
@@ -409,7 +408,7 @@ void wxCheckListBox::OnLeftClick ( wxMouseEvent& rEvent )
 
         size_t nItem = (size_t)(nY / vHeight);
 
-        if (nItem < m_nNumItems)
+        if (nItem < (size_t)m_nNumItems)
             GetItem(nItem)->Toggle();
         //
         // else: it's not an error, just click outside of client zone

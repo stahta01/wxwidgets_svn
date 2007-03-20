@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_STATLINE_H_
 #define _WX_MSW_STATLINE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface
+#endif
+
 // ----------------------------------------------------------------------------
 // wxStaticLine
 // ----------------------------------------------------------------------------
@@ -27,7 +31,7 @@ public:
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
-                  const wxString &name = wxStaticLineNameStr )
+                  const wxString &name = wxStaticTextNameStr )
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -37,7 +41,7 @@ public:
                  const wxPoint &pos = wxDefaultPosition,
                  const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,
-                 const wxString &name = wxStaticLineNameStr );
+                 const wxString &name = wxStaticTextNameStr );
 
     // overriden base class virtuals
     virtual bool AcceptsFocus() const { return FALSE; }

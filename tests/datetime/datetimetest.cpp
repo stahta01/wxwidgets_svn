@@ -20,18 +20,7 @@
 #ifndef WX_PRECOMP
 #endif // WX_PRECOMP
 
-#if wxUSE_DATETIME
-
 #include "wx/datetime.h"
-#include "wx/ioswrap.h"
-
-// need this to be able to use CPPUNIT_ASSERT_EQUAL with wxDateTime objects
-static wxSTD ostream& operator<<(wxSTD ostream& ostr, const wxDateTime& dt)
-{
-    ostr << dt.FormatISODate() << _T(" ") << dt.FormatISOTime();
-
-    return ostr;
-}
 
 // to test Today() meaningfully we must be able to change the system date which
 // is not usually the case, but if we're under Win32 we can try it -- define
@@ -185,13 +174,10 @@ private:
         CPPUNIT_TEST( TestTimeWDays );
         CPPUNIT_TEST( TestTimeDST );
         CPPUNIT_TEST( TestTimeFormat );
-        CPPUNIT_TEST( TestTimeSpanFormat );
         CPPUNIT_TEST( TestTimeTicks );
-        CPPUNIT_TEST( TestParceRFC822 );
-        CPPUNIT_TEST( TestDateParse );
+        CPPUNIT_TEST( TestTimeParse );
         CPPUNIT_TEST( TestTimeArithmetics );
         CPPUNIT_TEST( TestDSTBug );
-        CPPUNIT_TEST( TestDateOnly );
     CPPUNIT_TEST_SUITE_END();
 
     void TestLeapYears();
@@ -201,13 +187,10 @@ private:
     void TestTimeWDays();
     void TestTimeDST();
     void TestTimeFormat();
-    void TestTimeSpanFormat();
     void TestTimeTicks();
-    void TestParceRFC822();
-    void TestDateParse();
+    void TestTimeParse();
     void TestTimeArithmetics();
     void TestDSTBug();
-    void TestDateOnly();
 
     DECLARE_NO_COPY_CLASS(DateTimeTestCase)
 };
@@ -592,7 +575,6 @@ void DateTimeTestCase::TestTimeFormat()
     {
         CompareNone,        // don't try comparing
         CompareBoth,        // dates and times should be identical
-        CompareYear,        // don't compare centuries (fails for 2 digit years)
         CompareDate,        // dates only
         CompareTime         // time only
     };
@@ -603,9 +585,9 @@ void DateTimeTestCase::TestTimeFormat()
         const wxChar *format;
     } formatTestFormats[] =
     {
-       { CompareYear, _T("---> %c") }, // %c could use 2 digit years
+       { CompareBoth, _T("---> %c") },
        { CompareDate, _T("Date is %A, %d of %B, in year %Y") },
-       { CompareYear, _T("Date is %x, time is %X") }, // %x could use 2 digits
+       { CompareBoth, _T("Date is %x, time is %X") },
        { CompareTime, _T("Time is %H:%M:%S or %I:%M:%S %p") },
        { CompareNone, _T("The day of year: %j, the week of year: %W") },
        { CompareDate, _T("ISO date without separators: %Y%m%d") },
@@ -613,33 +595,30 @@ void DateTimeTestCase::TestTimeFormat()
 
     static const Date formatTestDates[] =
     {
-        { 29, wxDateTime::May, 1976, 18, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        { 31, wxDateTime::Dec, 1999, 23, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        {  6, wxDateTime::Feb, 1937, 23, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        {  6, wxDateTime::Feb, 1856, 23, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        {  6, wxDateTime::Feb, 1857, 23, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        { 29, wxDateTime::May, 2076, 18, 30, 00, 0.0, wxDateTime::Inv_WeekDay },
-        { 29, wxDateTime::Feb, 2400, 02, 15, 25, 0.0, wxDateTime::Inv_WeekDay },
+        { 29, wxDateTime::May, 1976, 18, 30, 00, 0.0, wxDateTime::Inv_WeekDay, 0, 0 },
+        { 31, wxDateTime::Dec, 1999, 23, 30, 00, 0.0, wxDateTime::Inv_WeekDay, 0, 0 },
 #if 0
-        // Need to add support for BCE dates.
-        { 01, wxDateTime::Jan,  -52, 03, 16, 47, 0.0, wxDateTime::Inv_WeekDay },
+        // this test can't work for other centuries because it uses two digit
+        // years in formats, so don't even try it
+        { 29, wxDateTime::May, 2076, 18, 30, 00, 0.0, wxDateTime::Inv_WeekDay, 0, 0 },
+        { 29, wxDateTime::Feb, 2400, 02, 15, 25, 0.0, wxDateTime::Inv_WeekDay, 0, 0 },
+        { 01, wxDateTime::Jan,  -52, 03, 16, 47, 0.0, wxDateTime::Inv_WeekDay, 0, 0 },
 #endif
     };
 
-    for ( size_t d = 0; d < WXSIZEOF(formatTestDates); d++ )
+    for ( size_t d = 0; d < WXSIZEOF(formatTestDates) + 1; d++ )
     {
-        wxDateTime dt = formatTestDates[d].DT();
+        wxDateTime dt = d == 0 ? wxDateTime::Now() : formatTestDates[d - 1].DT();
         for ( size_t n = 0; n < WXSIZEOF(formatTestFormats); n++ )
         {
-            const wxChar *fmt = formatTestFormats[n].format;
-            wxString s = dt.Format(fmt);
+            wxString s = dt.Format(formatTestFormats[n].format);
 
             // what can we recover?
-            CompareKind kind = formatTestFormats[n].compareKind;
+            int kind = formatTestFormats[n].compareKind;
 
             // convert back
             wxDateTime dt2;
-            const wxChar *result = dt2.ParseFormat(s, fmt);
+            const wxChar *result = dt2.ParseFormat(s, formatTestFormats[n].format);
             if ( !result )
             {
                 // converion failed - should it have?
@@ -652,18 +631,8 @@ void DateTimeTestCase::TestTimeFormat()
 
                 switch ( kind )
                 {
-                    case CompareYear:
-                        if ( dt2.GetCentury() != dt.GetCentury() )
-                        {
-                            CPPUNIT_ASSERT_EQUAL(dt.GetYear() % 100,
-                                                 dt2.GetYear() % 100);
-
-                            dt2.SetYear(dt.GetYear());
-                        }
-                        // fall through and compare everything
-
                     case CompareBoth:
-                        CPPUNIT_ASSERT_EQUAL( dt, dt2 );
+                        CPPUNIT_ASSERT( dt2 == dt );
                         break;
 
                     case CompareDate:
@@ -673,44 +642,9 @@ void DateTimeTestCase::TestTimeFormat()
                     case CompareTime:
                         CPPUNIT_ASSERT( dt.IsSameTime(dt2) );
                         break;
-
-                    case CompareNone:
-                        wxFAIL_MSG( _T("unexpected") );
-                        break;
                 }
             }
         }
-    }
-}
-
-void DateTimeTestCase::TestTimeSpanFormat()
-{
-    static const struct TimeSpanFormatTestData
-    {
-        long h, min, sec, msec;
-        const wxChar *fmt;
-        const wxChar *result;
-    } testSpans[] =
-    {
-        {   12, 34, 56, 789, _T("%H:%M:%S.%l"),   _T("12:34:56.789")          },
-        {    1,  2,  3,   0, _T("%H:%M:%S"),      _T("01:02:03")              },
-        {    1,  2,  3,   0, _T("%S"),            _T("3723")                  },
-        {   -1, -2, -3,   0, _T("%S"),            _T("-3723")                 },
-        {   -1, -2, -3,   0, _T("%H:%M:%S"),      _T("-01:02:03")             },
-        {   26,  0,  0,   0, _T("%H"),            _T("26")                    },
-        {   26,  0,  0,   0, _T("%D, %H"),        _T("1, 02")                 },
-        {  -26,  0,  0,   0, _T("%H"),            _T("-26")                   },
-        {  -26,  0,  0,   0, _T("%D, %H"),        _T("-1, 02")                },
-        {  219,  0,  0,   0, _T("%H"),            _T("219")                   },
-        {  219,  0,  0,   0, _T("%D, %H"),        _T("9, 03")                 },
-        {  219,  0,  0,   0, _T("%E, %D, %H"),    _T("1, 2, 03")              },
-    };
-
-    for ( size_t n = 0; n < WXSIZEOF(testSpans); n++ )
-    {
-        const TimeSpanFormatTestData& td = testSpans[n];
-        wxTimeSpan ts(td.h, td.min, td.sec, td.msec);
-        CPPUNIT_ASSERT_EQUAL( wxString(td.result), ts.Format(td.fmt) );
     }
 }
 
@@ -736,12 +670,12 @@ void DateTimeTestCase::TestTimeTicks()
     }
 }
 
-// test parsing dates in RFC822 format
-void DateTimeTestCase::TestParceRFC822()
+// test text -> wxDateTime conversion
+void DateTimeTestCase::TestTimeParse()
 {
     static const struct ParseTestData
     {
-        const wxChar *rfc822;
+        const wxChar *format;
         Date date;              // NB: this should be in UTC
         bool good;
     } parseTestDates[] =
@@ -765,56 +699,15 @@ void DateTimeTestCase::TestParceRFC822()
 
     for ( size_t n = 0; n < WXSIZEOF(parseTestDates); n++ )
     {
+        const wxChar *format = parseTestDates[n].format;
+
         wxDateTime dt;
-        if ( dt.ParseRfc822Date(parseTestDates[n].rfc822) )
+        if ( dt.ParseRfc822Date(format) )
         {
             CPPUNIT_ASSERT( parseTestDates[n].good );
 
             wxDateTime dtReal = parseTestDates[n].date.DT().FromUTC();
-            CPPUNIT_ASSERT_EQUAL( dtReal, dt );
-        }
-        else // failed to parse
-        {
-            CPPUNIT_ASSERT( !parseTestDates[n].good );
-        }
-    }
-}
-
-// test parsing dates in free format
-void DateTimeTestCase::TestDateParse()
-{
-    static const struct ParseTestData
-    {
-        const wxChar *str;
-        Date date;              // NB: this should be in UTC
-        bool good;
-    } parseTestDates[] =
-    {
-        { _T("21 Mar 2006"), { 21, wxDateTime::Mar, 2006 }, true },
-        { _T("29 Feb 1976"), { 29, wxDateTime::Feb, 1976 }, true },
-        { _T("Feb 29 1976"), { 29, wxDateTime::Feb, 1976 }, true },
-        { _T("31/03/06"),    { 31, wxDateTime::Mar,    6 }, true },
-        { _T("31/03/2006"),  { 31, wxDateTime::Mar, 2006 }, true },
-
-        // some invalid ones too
-        { _T("29 Feb 2006") },
-        { _T("31/04/06") },
-        { _T("bloordyblop") }
-    };
-
-    // special cases
-    wxDateTime dt;
-    CPPUNIT_ASSERT( dt.ParseDate(_T("today")) );
-    CPPUNIT_ASSERT_EQUAL( wxDateTime::Today(), dt );
-
-    for ( size_t n = 0; n < WXSIZEOF(parseTestDates); n++ )
-    {
-        wxDateTime dt;
-        if ( dt.ParseDate(parseTestDates[n].str) )
-        {
-            CPPUNIT_ASSERT( parseTestDates[n].good );
-
-            CPPUNIT_ASSERT_EQUAL( parseTestDates[n].date.DT(), dt );
+            CPPUNIT_ASSERT( dt == dtReal );
         }
         else // failed to parse
         {
@@ -922,20 +815,3 @@ void DateTimeTestCase::TestDSTBug()
 #endif // CHANGE_SYSTEM_DATE
 }
 
-void DateTimeTestCase::TestDateOnly()
-{
-    wxDateTime dt(19, wxDateTime::Jan, 2007, 15, 01, 00);
-
-    static const wxDateTime::wxDateTime_t DATE_ZERO = 0;
-    CPPUNIT_ASSERT_EQUAL( DATE_ZERO, dt.GetDateOnly().GetHour() );
-    CPPUNIT_ASSERT_EQUAL( DATE_ZERO, dt.GetDateOnly().GetMinute() );
-    CPPUNIT_ASSERT_EQUAL( DATE_ZERO, dt.GetDateOnly().GetSecond() );
-    CPPUNIT_ASSERT_EQUAL( DATE_ZERO, dt.GetDateOnly().GetMillisecond() );
-
-    dt.ResetTime();
-    CPPUNIT_ASSERT_EQUAL( wxDateTime(19, wxDateTime::Jan, 2007), dt );
-
-    CPPUNIT_ASSERT_EQUAL( wxDateTime::Today(), wxDateTime::Now().GetDateOnly() );
-}
-
-#endif // wxUSE_DATETIME

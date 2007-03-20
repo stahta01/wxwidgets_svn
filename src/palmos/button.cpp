@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "button.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,10 +30,9 @@
 
 #if wxUSE_BUTTON
 
-#include "wx/button.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/button.h"
     #include "wx/brush.h"
     #include "wx/panel.h"
     #include "wx/bmpbuttn.h"
@@ -169,7 +172,7 @@ bool wxButton::Create(wxWindow *parent,
     // take the stock label
     wxString palmLabel = label;
     if( palmLabel.empty() && wxIsStockID(id) )
-        palmLabel = wxGetStockLabel(id, wxSTOCK_NOFLAGS);
+        palmLabel = wxGetStockLabel(id, false);
 
     if(!wxControl::Create(parent, id, palmPos, palmSize, style, validator, name))
         return false;
@@ -235,3 +238,4 @@ void wxButton::Command(wxCommandEvent &event)
 }
 
 #endif // wxUSE_BUTTON
+

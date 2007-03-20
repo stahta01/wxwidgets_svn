@@ -4,7 +4,7 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,8 +30,6 @@ class wxCocoaNSWindow
 public:
     void AssociateNSWindow(WX_NSWindow cocoaNSWindow);
     void DisassociateNSWindow(WX_NSWindow cocoaNSWindow);
-    virtual bool Cocoa_canBecomeKeyWindow(bool &canBecome)
-    {   return false; }
     virtual bool Cocoa_canBecomeMainWindow(bool &canBecome)
     {   return false; }
     virtual bool CocoaDelegate_windowShouldClose(void) = 0;

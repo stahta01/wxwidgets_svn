@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/window.cpp
+// Name:        univ/window.cpp
 // Purpose:     implementation of extra wxWindow methods for wxUniv port
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univwindow.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,19 +28,18 @@
     #pragma hdrstop
 #endif
 
-#include "wx/window.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/window.h"
     #include "wx/dcclient.h"
     #include "wx/dcmemory.h"
     #include "wx/event.h"
     #include "wx/scrolbar.h"
     #include "wx/menu.h"
     #include "wx/frame.h"
-    #include "wx/log.h"
 #endif // WX_PRECOMP
 
+#include "wx/log.h"
 #include "wx/univ/colschem.h"
 #include "wx/univ/renderer.h"
 #include "wx/univ/theme.h"
@@ -61,29 +64,6 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// scrollbars class
-// ----------------------------------------------------------------------------
-
-// This is scrollbar class used to implement wxWindow's "built-in" scrollbars;
-// unlike the standard wxScrollBar class, this one is positioned outside of its
-// parent's client area
-class wxWindowScrollBar : public wxScrollBar
-{
-public:
-    wxWindowScrollBar(wxWindow *parent,
-                      wxWindowID id,
-                      const wxPoint& pos = wxDefaultPosition,
-                      const wxSize& size = wxDefaultSize,
-                      long style = wxSB_HORIZONTAL)
-        : wxScrollBar(parent, id, pos, size, style)
-    {
-    }
-
-    virtual bool CanBeOutsideClientArea() const { return true; }
-};
-
-
-// ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
@@ -94,8 +74,6 @@ public:
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowGTK)
 #elif defined(__WXMGL__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowMGL)
-#elif defined(__WXDFB__)
-    IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowDFB)
 #elif defined(__WXX11__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowX11)
 #elif defined(__WXPM__)
@@ -125,10 +103,8 @@ END_EVENT_TABLE()
 
 void wxWindow::Init()
 {
-#if wxUSE_SCROLLBAR
     m_scrollbarVert =
     m_scrollbarHorz = (wxScrollBar *)NULL;
-#endif // wxUSE_SCROLLBAR
 
     m_isCurrent = false;
 
@@ -147,26 +123,20 @@ bool wxWindow::Create(wxWindow *parent,
 {
     long actualStyle = style;
 
-    // we add wxCLIP_CHILDREN to get the same ("natural") behaviour under MSW
-    // as under the other platforms
-    actualStyle |= wxCLIP_CHILDREN;
-
+    // FIXME: may need this on other platforms
+#ifdef __WXMSW__
     actualStyle &= ~wxVSCROLL;
     actualStyle &= ~wxHSCROLL;
-
-#ifdef __WXMSW__
-    // without this, borders (non-client areas in general) are not repainted
-    // correctly when resizing; apparently, native NC areas are fully repainted
-    // even without this style by MSW, but wxUniv implements client area
-    // itself, so it doesn't work correctly for us
-    //
-    // FIXME: this is very expensive, we need to fix the (commented-out) code
-    //        in OnSize() instead
-    actualStyle |= wxFULL_REPAINT_ON_RESIZE;
 #endif
 
-    if ( !wxWindowNative::Create(parent, id, pos, size, actualStyle, name) )
+    // we add wxCLIP_CHILDREN to get the same ("natural") behaviour under MSW
+    // as under the other platforms
+    if ( !wxWindowNative::Create(parent, id, pos, size,
+                                 actualStyle | wxCLIP_CHILDREN,
+                                 name) )
+    {
         return false;
+    }
 
     // Set full style again, including those we didn't want present
     // when calling the base window Create().
@@ -178,11 +148,9 @@ bool wxWindow::Create(wxWindow *parent,
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( true );
 #endif
-#if wxUSE_SCROLLBAR
-        m_scrollbarVert = new wxWindowScrollBar(this, wxID_ANY,
-                                                wxDefaultPosition, wxDefaultSize,
-                                                wxSB_VERTICAL);
-#endif // wxUSE_SCROLLBAR
+        m_scrollbarVert = new wxScrollBar(this, wxID_ANY,
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxSB_VERTICAL);
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( false );
 #endif
@@ -194,23 +162,19 @@ bool wxWindow::Create(wxWindow *parent,
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( true );
 #endif
-#if wxUSE_SCROLLBAR
-        m_scrollbarHorz = new wxWindowScrollBar(this, wxID_ANY,
-                                                wxDefaultPosition, wxDefaultSize,
-                                                wxSB_HORIZONTAL);
-#endif // wxUSE_SCROLLBAR
+        m_scrollbarHorz = new wxScrollBar(this, wxID_ANY,
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxSB_HORIZONTAL);
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( false );
 #endif
     }
 
-#if wxUSE_SCROLLBAR
     if (m_scrollbarHorz || m_scrollbarVert)
     {
         // position it/them
         PositionScrollbars();
     }
-#endif // wxUSE_SCROLLBAR
 
     return true;
 }
@@ -218,14 +182,6 @@ bool wxWindow::Create(wxWindow *parent,
 wxWindow::~wxWindow()
 {
     m_isBeingDeleted = true;
-
-#if wxUSE_SCROLLBAR
-    // clear pointers to scrollbar before deleting the children: they are
-    // children and so will be deleted by DestroyChildren() call below and if
-    // any code using the scrollbars would be called in the process or from
-    // ~wxWindowBase, the app would crash:
-    m_scrollbarVert = m_scrollbarHorz = NULL;
-#endif
 
     // we have to destroy our children before we're destroyed because our
     // children suppose that we're of type wxWindow, not just wxWindowNative,
@@ -272,9 +228,13 @@ void wxWindow::OnNcPaint(wxNcPaintEvent& WXUNUSED(event))
     if ( m_renderer )
     {
         // get the window rect
-        wxRect rect(GetSize());
+        wxRect rect;
+        wxSize size = GetSize();
+        rect.x =
+        rect.y = 0;
+        rect.width = size.x;
+        rect.height = size.y;
 
-#if wxUSE_SCROLLBAR
         // if the scrollbars are outside the border, we must adjust the rect to
         // exclude them
         if ( !m_renderer->AreScrollbarsInsideBorder() )
@@ -287,7 +247,6 @@ void wxWindow::OnNcPaint(wxNcPaintEvent& WXUNUSED(event))
             if ( scrollbar )
                 rect.height -= scrollbar->GetSize().y;
         }
-#endif // wxUSE_SCROLLBAR
 
         // get the DC and draw the border on it
         wxWindowDC dc(this);
@@ -325,7 +284,6 @@ void wxWindow::OnErase(wxEraseEvent& event)
 
     DoDrawBackground(*event.GetDC());
 
-#if wxUSE_SCROLLBAR
     // if we have both scrollbars, we also have a square in the corner between
     // them which we must paint
     if ( m_scrollbarVert && m_scrollbarHorz )
@@ -345,7 +303,6 @@ void wxWindow::OnErase(wxEraseEvent& event)
             m_renderer->DrawScrollCorner(*event.GetDC(), rectCorner);
         }
     }
-#endif // wxUSE_SCROLLBAR
 }
 
 bool wxWindow::DoDrawBackground(wxDC& dc)
@@ -386,7 +343,7 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
     }
     else
     {
-        // Draw background ourselves
+        // Draw background ouselves
         EraseBackground( dc, rect );
     }
 
@@ -428,35 +385,33 @@ void wxWindow::DoDraw(wxControlRenderer * WXUNUSED(renderer))
 {
 }
 
-void wxWindow::Refresh(bool eraseBackground, const wxRect *rect)
+void wxWindow::Refresh(bool eraseBackground, const wxRect *rectClient)
 {
-    wxRect rectClient; // the same rectangle in client coordinates
-    wxPoint origin = GetClientAreaOrigin();
+    wxRect rectWin;
+    wxPoint pt = GetClientAreaOrigin();
 
     wxSize size = GetClientSize();
 
-    if ( rect )
+    if ( rectClient )
     {
-        // the rectangle passed as argument is in client coordinates
-        rectClient = *rect;
+        rectWin = *rectClient;
 
         // don't refresh anything beyond the client area (scrollbars for
         // example)
-        if ( rectClient.GetRight() > size.x )
-            rectClient.SetRight(size.x);
-        if ( rectClient.GetBottom() > size.y )
-            rectClient.SetBottom(size.y);
+        if ( rectWin.GetRight() > size.x )
+            rectWin.SetRight(size.x);
+        if ( rectWin.GetBottom() > size.y )
+            rectWin.SetBottom(size.y);
 
+        rectWin.Offset(pt);
     }
     else // refresh the entire client area
     {
-        // x,y is already set to 0 by default
-        rectClient.SetSize(size);
+        rectWin.x = pt.x;
+        rectWin.y = pt.y;
+        rectWin.width = size.x;
+        rectWin.height = size.y;
     }
-
-    // convert refresh rectangle to window coordinates:
-    wxRect rectWin(rectClient);
-    rectWin.Offset(origin);
 
     // debugging helper
 #ifdef WXDEBUG_REFRESH
@@ -479,30 +434,16 @@ void wxWindow::Refresh(bool eraseBackground, const wxRect *rect)
     wxWindowNative::Refresh(eraseBackground, &rectWin);
 
     // Refresh all sub controls if any.
-    wxWindowList& children = GetChildren();
-    for ( wxWindowList::iterator i = children.begin(); i != children.end(); ++i )
+    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    while ( node )
     {
-        wxWindow *child = *i;
-        // only refresh subcontrols if they are visible:
-        if ( child->IsTopLevel() || !child->IsShown() || child->IsFrozen() )
-            continue;
+        wxWindow *win = node->GetData();
+        // Only refresh sub controls when it is visible
+        // and when it is in the update region.
+        if(!win->IsKindOf(CLASSINFO(wxTopLevelWindow)) && win->IsShown() && wxRegion(rectWin).Contains(win->GetRect()) != wxOutRegion)
+            win->Refresh(eraseBackground, &rectWin);
 
-        // ...and when the subcontrols are in the update region:
-        wxRect childrect(child->GetRect());
-        childrect.Intersect(rectClient);
-        if ( childrect.IsEmpty() )
-            continue;
-
-        // refresh the subcontrol now:
-        childrect.Offset(-child->GetPosition());
-        // NB: We must call wxWindowNative version because we need to refresh
-        //     the entire control, not just its client area, and this is why we
-        //     don't account for child client area origin here neither. Also
-        //     note that we don't pass eraseBackground to the child, but use
-        //     true instead: this is because we can't be sure that
-        //     eraseBackground=false is safe for children as well and not only
-        //     for the parent.
-        child->wxWindowNative::Refresh(eraseBackground, &childrect);
+        node = node->GetNext();
     }
 }
 
@@ -533,7 +474,8 @@ bool wxWindow::Enable(bool enable)
 
 bool wxWindow::IsFocused() const
 {
-    return FindFocus() == this;
+    wxWindow *self = wxConstCast(this, wxWindow);
+    return self->FindFocus() == self;
 }
 
 bool wxWindow::IsPressed() const
@@ -595,12 +537,10 @@ void wxWindow::OnSize(wxSizeEvent& event)
 {
     event.Skip();
 
-#if wxUSE_SCROLLBAR
     if ( m_scrollbarVert || m_scrollbarHorz )
     {
         PositionScrollbars();
     }
-#endif // wxUSE_SCROLLBAR
 
 #if 0   // ndef __WXMSW__
     // Refresh the area (strip) previously occupied by the border
@@ -757,16 +697,21 @@ void wxWindow::DoGetClientSize(int *width, int *height) const
     if ( m_renderer )
         rectBorder = m_renderer->GetBorderDimensions(GetBorder());
 
+    bool inside = m_renderer->AreScrollbarsInsideBorder();
+
     if ( width )
     {
-#if wxUSE_SCROLLBAR
         // in any case, take account of the scrollbar
         if ( m_scrollbarVert )
             w -= m_scrollbarVert->GetSize().x;
-#endif // wxUSE_SCROLLBAR
 
-        // account for the left and right borders
-        *width = w - rectBorder.x - rectBorder.width;
+        // if we don't have scrollbar or if it is outside the border (and not
+        // blended into it), take account of the right border as well
+        if ( !m_scrollbarVert || inside )
+            w -= rectBorder.width;
+
+        // and always account for the left border
+        *width = w - rectBorder.x;
 
         // we shouldn't return invalid width
         if ( *width < 0 )
@@ -775,12 +720,13 @@ void wxWindow::DoGetClientSize(int *width, int *height) const
 
     if ( height )
     {
-#if wxUSE_SCROLLBAR
         if ( m_scrollbarHorz )
             h -= m_scrollbarHorz->GetSize().y;
-#endif // wxUSE_SCROLLBAR
 
-        *height = h - rectBorder.y - rectBorder.height;
+        if ( !m_scrollbarHorz || inside )
+            h -= rectBorder.height;
+
+        *height = h - rectBorder.y;
 
         // we shouldn't return invalid height
         if ( *height < 0 )
@@ -798,18 +744,17 @@ void wxWindow::DoSetClientSize(int width, int height)
     // and the scrollbars (as they may be offset into the border, use the
     // scrollbar position, not size - this supposes that PositionScrollbars()
     // had been called before)
+    bool inside = m_renderer->AreScrollbarsInsideBorder();
     wxSize size = GetSize();
-#if wxUSE_SCROLLBAR
     if ( m_scrollbarVert )
         width += size.x - m_scrollbarVert->GetPosition().x;
-#endif // wxUSE_SCROLLBAR
-    width += rectBorder.width;
+    if ( !m_scrollbarVert || inside )
+        width += rectBorder.width;
 
-#if wxUSE_SCROLLBAR
     if ( m_scrollbarHorz )
         height += size.y - m_scrollbarHorz->GetPosition().y;
-#endif // wxUSE_SCROLLBAR
-    height += rectBorder.height;
+    if ( !m_scrollbarHorz || inside )
+        height += rectBorder.height;
 
     wxWindowNative::DoSetClientSize(width, height);
 }
@@ -817,8 +762,6 @@ void wxWindow::DoSetClientSize(int width, int height)
 wxHitTest wxWindow::DoHitTest(wxCoord x, wxCoord y) const
 {
     wxHitTest ht = wxWindowNative::DoHitTest(x, y);
-
-#if wxUSE_SCROLLBAR
     if ( ht == wxHT_WINDOW_INSIDE )
     {
         if ( m_scrollbarVert && x >= m_scrollbarVert->GetPosition().x )
@@ -833,7 +776,6 @@ wxHitTest wxWindow::DoHitTest(wxCoord x, wxCoord y) const
                                                   : wxHT_WINDOW_HORZ_SCROLLBAR;
         }
     }
-#endif // wxUSE_SCROLLBAR
 
     return ht;
 }
@@ -846,18 +788,15 @@ wxHitTest wxWindow::DoHitTest(wxCoord x, wxCoord y) const
 
 void wxWindow::RefreshScrollbars()
 {
-#if wxUSE_SCROLLBAR
     if ( m_scrollbarHorz )
         m_scrollbarHorz->Refresh();
 
     if ( m_scrollbarVert )
         m_scrollbarVert->Refresh();
-#endif // wxUSE_SCROLLBAR
 }
 
 void wxWindow::PositionScrollbars()
 {
-#if wxUSE_SCROLLBAR
     // do not use GetClientSize/Rect as it relies on the scrollbars being
     // correctly positioned
 
@@ -903,7 +842,6 @@ void wxWindow::PositionScrollbars()
     }
 
     RefreshScrollbars();
-#endif // wxUSE_SCROLLBAR
 }
 
 void wxWindow::SetScrollbar(int orient,
@@ -912,7 +850,6 @@ void wxWindow::SetScrollbar(int orient,
                             int range,
                             bool refresh)
 {
-#if wxUSE_SCROLLBAR
     wxASSERT_MSG( pageSize <= range,
                     _T("page size can't be greater than range") );
 
@@ -926,10 +863,10 @@ void wxWindow::SetScrollbar(int orient,
 #if wxUSE_TWO_WINDOWS
             SetInsertIntoMain( true );
 #endif
-            scrollbar = new wxWindowScrollBar(this, wxID_ANY,
-                                              wxDefaultPosition, wxDefaultSize,
-                                              orient & wxVERTICAL ? wxSB_VERTICAL
-                                                                  : wxSB_HORIZONTAL);
+            scrollbar = new wxScrollBar(this, wxID_ANY,
+                                        wxDefaultPosition, wxDefaultSize,
+                                        orient & wxVERTICAL ? wxSB_VERTICAL
+                                                            : wxSB_HORIZONTAL);
 #if wxUSE_TWO_WINDOWS
             SetInsertIntoMain( false );
 #endif
@@ -993,18 +930,10 @@ void wxWindow::SetScrollbar(int orient,
         (void)GetEventHandler()->ProcessEvent(event);
 #endif
     }
-#else
-    wxUnusedVar(orient);
-    wxUnusedVar(pos);
-    wxUnusedVar(pageSize);
-    wxUnusedVar(range);
-    wxUnusedVar(refresh);
-#endif // wxUSE_SCROLLBAR
 }
 
 void wxWindow::SetScrollPos(int orient, int pos, bool WXUNUSED(refresh))
 {
-#if wxUSE_SCROLLBAR
     wxScrollBar *scrollbar = GetScrollbar(orient);
 
     if (scrollbar)
@@ -1016,43 +945,24 @@ void wxWindow::SetScrollPos(int orient, int pos, bool WXUNUSED(refresh))
     if ( refresh )
         Refresh();
 #endif
-#else
-    wxUnusedVar(orient);
-    wxUnusedVar(pos);
-#endif // wxUSE_SCROLLBAR
 }
 
 int wxWindow::GetScrollPos(int orient) const
 {
-#if wxUSE_SCROLLBAR
     wxScrollBar *scrollbar = GetScrollbar(orient);
     return scrollbar ? scrollbar->GetThumbPosition() : 0;
-#else
-    wxUnusedVar(orient);
-    return 0;
-#endif // wxUSE_SCROLLBAR
 }
 
 int wxWindow::GetScrollThumb(int orient) const
 {
-#if wxUSE_SCROLLBAR
     wxScrollBar *scrollbar = GetScrollbar(orient);
     return scrollbar ? scrollbar->GetThumbSize() : 0;
-#else
-    wxUnusedVar(orient);
-    return 0;
-#endif // wxUSE_SCROLLBAR
 }
 
 int wxWindow::GetScrollRange(int orient) const
 {
-#if wxUSE_SCROLLBAR
     wxScrollBar *scrollbar = GetScrollbar(orient);
     return scrollbar ? scrollbar->GetRange() : 0;
-#else
-    wxUnusedVar(orient);
-    return 0;
-#endif // wxUSE_SCROLLBAR
 }
 
 void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
@@ -1089,10 +999,8 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
          node; node = node->GetNext())
     {
         wxWindow *child = node->GetData();
-#if wxUSE_SCROLLBAR
         if ( child == m_scrollbarVert || child == m_scrollbarHorz )
             continue;
-#endif // wxUSE_SCROLLBAR
 
         // VS: Scrolling children has non-trivial semantics. If rect=NULL then
         //     it is easy: we scroll all children. Otherwise it gets
@@ -1102,30 +1010,24 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         //          and scrolling direction
         //       2. if scrolling in both axes, scroll all children
 
-        bool shouldMove = false;
-
         if ( rect && (dx * dy == 0 /* moving in only one of x, y axis */) )
         {
             wxRect childRect = child->GetRect();
             if ( dx == 0 && (childRect.GetLeft() <= rect->GetRight() ||
                              childRect.GetRight() >= rect->GetLeft()) )
             {
-                shouldMove = true;
+                child->Move(child->GetPosition() + offset);
             }
             else if ( dy == 0 && (childRect.GetTop() <= rect->GetBottom() ||
                                   childRect.GetBottom() >= rect->GetTop()) )
             {
-                shouldMove = true;
+                child->Move(child->GetPosition() + offset);
             }
-            // else: child outside of scrolling shaft, don't move
         }
-        else // scrolling in both axes or rect=NULL
+        else
         {
-            shouldMove = true;
+            child->Move(child->GetPosition() + offset);
         }
-
-        if ( shouldMove )
-            child->Move(child->GetPosition() + offset, wxSIZE_ALLOW_MINUS_ONE);
     }
 #endif // wxX11/!wxX11
 }
@@ -1340,7 +1242,6 @@ void wxWindow::OnKeyDown(wxKeyEvent& event)
             }
 #endif // wxUSE_MENUS
 
-#if wxUSE_BUTTON
             // if it wasn't in a menu, try to find a button
             if ( command != -1 )
             {
@@ -1356,7 +1257,6 @@ void wxWindow::OnKeyDown(wxKeyEvent& event)
                     }
                 }
             }
-#endif // wxUSE_BUTTON
 
             // don't propagate accels from the child frame to the parent one
             break;
@@ -1468,3 +1368,4 @@ WXLRESULT wxWindow::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
 }
 
 #endif // __WXMSW__
+

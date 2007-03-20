@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "web.h"
+#endif
+
 #ifndef _WX_WEB_H_
 #define _WX_WEB_H_
 

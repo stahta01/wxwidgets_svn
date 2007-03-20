@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/tbarbase.cpp
+// Name:        common/tbarbase.cpp
 // Purpose:     wxToolBarBase implementation
 // Author:      Julian Smart
 // Modified by: VZ at 11.12.99 (wxScrollableToolBar split off)
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tbarbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,16 +30,18 @@
 
 #if wxUSE_TOOLBAR
 
-#include "wx/toolbar.h"
-
 #ifndef WX_PRECOMP
     #include "wx/control.h"
-    #include "wx/frame.h"
-    #include "wx/settings.h"
-    #if WXWIN_COMPATIBILITY_2_8
-        #include "wx/image.h"
-    #endif // WXWIN_COMPATIBILITY_2_8
 #endif
+
+#include "wx/frame.h"
+
+#if wxUSE_IMAGE
+    #include "wx/image.h"
+    #include "wx/settings.h"
+#endif // wxUSE_IMAGE
+
+#include "wx/toolbar.h"
 
 // ----------------------------------------------------------------------------
 // wxWidgets macros
@@ -111,6 +117,30 @@ bool wxToolBarToolBase::SetLongHelp(const wxString& help)
     return true;
 }
 
+#if WXWIN_COMPATIBILITY_2_2
+
+const wxBitmap& wxToolBarToolBase::GetBitmap1() const
+{
+    return GetNormalBitmap();
+}
+
+const wxBitmap& wxToolBarToolBase::GetBitmap2() const
+{
+    return GetDisabledBitmap();
+}
+
+void wxToolBarToolBase::SetBitmap1(const wxBitmap& bmp)
+{
+    SetNormalBitmap(bmp);
+}
+
+void wxToolBarToolBase::SetBitmap2(const wxBitmap& bmp)
+{
+    SetDisabledBitmap(bmp);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 // ----------------------------------------------------------------------------
 // wxToolBarBase adding/deleting items
 // ----------------------------------------------------------------------------
@@ -123,15 +153,6 @@ wxToolBarBase::wxToolBarBase()
     m_toolPacking = m_toolSeparation = 0;
     m_defaultWidth = 16;
     m_defaultHeight = 15;
-}
-
-void wxToolBarBase::FixupStyle()
-{
-    if ( !HasFlag(wxTB_TOP | wxTB_LEFT | wxTB_RIGHT | wxTB_BOTTOM) )
-    {
-        // this is the default
-        m_windowStyle |= wxTB_TOP;
-    }
 }
 
 wxToolBarToolBase *wxToolBarBase::DoAddTool(int id,
@@ -197,16 +218,12 @@ wxToolBarBase::InsertTool(size_t pos, wxToolBarToolBase *tool)
     return tool;
 }
 
-wxToolBarToolBase *
-wxToolBarBase::AddControl(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBarBase::AddControl(wxControl *control)
 {
-    return InsertControl(GetToolsCount(), control, label);
+    return InsertControl(GetToolsCount(), control);
 }
 
-wxToolBarToolBase *
-wxToolBarBase::InsertControl(size_t pos,
-                             wxControl *control,
-                             const wxString& label)
+wxToolBarToolBase *wxToolBarBase::InsertControl(size_t pos, wxControl *control)
 {
     wxCHECK_MSG( control, (wxToolBarToolBase *)NULL,
                  _T("toolbar: can't insert NULL control") );
@@ -217,7 +234,7 @@ wxToolBarBase::InsertControl(size_t pos,
     wxCHECK_MSG( pos <= GetToolsCount(), (wxToolBarToolBase *)NULL,
                  _T("invalid position in wxToolBar::InsertControl()") );
 
-    wxToolBarToolBase *tool = CreateTool(control, label);
+    wxToolBarToolBase *tool = CreateTool(control);
 
     if ( !InsertTool(pos, tool) )
     {
@@ -388,14 +405,14 @@ void wxToolBarBase::UnToggleRadioGroup(wxToolBarToolBase *tool)
     wxToolBarToolsList::compatibility_iterator nodeNext = node->GetNext();
     while ( nodeNext )
     {
-        wxToolBarToolBase *toolNext = nodeNext->GetData();
+        wxToolBarToolBase *tool = nodeNext->GetData();
 
-        if ( !toolNext->IsButton() || toolNext->GetKind() != wxITEM_RADIO )
+        if ( !tool->IsButton() || tool->GetKind() != wxITEM_RADIO )
             break;
 
-        if ( toolNext->Toggle(false) )
+        if ( tool->Toggle(false) )
         {
-            DoToggleTool(toolNext, false);
+            DoToggleTool(tool, false);
         }
 
         nodeNext = nodeNext->GetNext();
@@ -404,14 +421,14 @@ void wxToolBarBase::UnToggleRadioGroup(wxToolBarToolBase *tool)
     wxToolBarToolsList::compatibility_iterator nodePrev = node->GetPrevious();
     while ( nodePrev )
     {
-        wxToolBarToolBase *toolNext = nodePrev->GetData();
+        wxToolBarToolBase *tool = nodePrev->GetData();
 
-        if ( !toolNext->IsButton() || toolNext->GetKind() != wxITEM_RADIO )
+        if ( !tool->IsButton() || tool->GetKind() != wxITEM_RADIO )
             break;
 
-        if ( toolNext->Toggle(false) )
+        if ( tool->Toggle(false) )
         {
-            DoToggleTool(toolNext, false);
+            DoToggleTool(tool, false);
         }
 
         nodePrev = nodePrev->GetPrevious();
@@ -649,10 +666,6 @@ void wxToolBarBase::UpdateWindowUI(long flags)
 {
     wxWindowBase::UpdateWindowUI(flags);
 
-    // don't waste time updating state of tools in a hidden toolbar
-    if ( !IsShown() )
-        return;
-
     // There is no sense in updating the toolbar UI
     // if the parent window is about to get destroyed
     wxWindow *tlw = wxGetTopLevelParent( this );
@@ -684,19 +697,73 @@ void wxToolBarBase::UpdateWindowUI(long flags)
     }
 }
 
-#if WXWIN_COMPATIBILITY_2_8
-
-bool wxCreateGreyedImage(const wxImage& in, wxImage& out)
-{
 #if wxUSE_IMAGE
-    out = in.ConvertToGreyscale();
-    if ( out.Ok() )
-        return true;
-#endif // wxUSE_IMAGE
 
-    return false;
+/*
+ * Make a greyed-out image suitable for disabled buttons.
+ * This code is adapted from wxNewBitmapButton in FL.
+ */
+
+bool wxCreateGreyedImage(const wxImage& src, wxImage& dst)
+{
+    dst = src.Copy();
+
+    unsigned char rBg, gBg, bBg;
+    if ( src.HasMask() )
+    {
+        src.GetOrFindMaskColour(&rBg, &gBg, &bBg);
+        dst.SetMaskColour(rBg, gBg, bBg);
+    }
+    else // assuming the pixels along the edges are of the background color
+    {
+        rBg = src.GetRed(0, 0);
+        gBg = src.GetGreen(0, 0);
+        bBg = src.GetBlue(0, 0);
+    }
+
+    const wxColour colBg(rBg, gBg, bBg);
+
+    const wxColour colDark = wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW);
+    const wxColour colLight = wxSystemSettings::GetColour(wxSYS_COLOUR_3DHIGHLIGHT);
+
+    // Second attempt, just making things monochrome
+    const int width = src.GetWidth();
+    const int height = src.GetHeight();
+
+    for ( int x = 0; x < width; x++ )
+    {
+        for ( int y = 0; y < height; y++ )
+        {
+            const int r = src.GetRed(x, y);
+            const int g = src.GetGreen(x, y);
+            const int b = src.GetBlue(x, y);
+
+            if ( r == rBg && g == gBg && b == bBg )
+            {
+                // Leave the background colour as-is
+                continue;
+            }
+
+            // Change light things to the background colour
+            wxColour col;
+            if ( r >= (colLight.Red() - 50) &&
+                    g >= (colLight.Green() - 50) &&
+                        b >= (colLight.Blue() - 50) )
+            {
+                col = colBg;
+            }
+            else // Change dark things to really dark
+            {
+                col = colDark;
+            }
+
+            dst.SetRGB(x, y, col.Red(), col.Green(), col.Blue());
+        }
+    }
+
+    return true;
 }
 
-#endif // WXWIN_COMPATIBILITY_2_8
+#endif // wxUSE_IMAGE
 
 #endif // wxUSE_TOOLBAR

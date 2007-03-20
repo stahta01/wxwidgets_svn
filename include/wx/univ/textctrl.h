@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univtextctrl.h"
+#endif
+
 class WXDLLEXPORT wxCaret;
 class WXDLLEXPORT wxTextCtrlCommandProcessor;
 
@@ -66,14 +70,13 @@ class WXDLLEXPORT wxTextCtrlCommandProcessor;
 // wxTextCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase,
-                               public wxScrollHelper
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase, public wxScrollHelper
 {
 public:
     // creation
     // --------
 
-    wxTextCtrl() : wxScrollHelper(this) { Init(); }
+    wxTextCtrl() { Init(); }
 
     wxTextCtrl(wxWindow *parent,
                wxWindowID id,
@@ -83,7 +86,6 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxTextCtrlNameStr)
-        : wxScrollHelper(this) 
     {
         Init();
 
@@ -105,6 +107,7 @@ public:
     // ----------------------------------
 
     virtual wxString GetValue() const;
+    virtual void SetValue(const wxString& value);
 
     virtual int GetLineLength(wxTextCoord lineNo) const;
     virtual wxString GetLineText(wxTextCoord lineNo) const;
@@ -218,16 +221,13 @@ public:
     virtual void CalcUnscrolledPosition(int x, int y, int *xx, int *yy) const;
     virtual void CalcScrolledPosition(int x, int y, int *xx, int *yy) const;
 
+    // ensure we have correct default border
+    virtual wxBorder GetDefaultBorder() const { return wxBORDER_SUNKEN; }
+
     // perform an action
     virtual bool PerformAction(const wxControlAction& action,
                                long numArg = -1,
                                const wxString& strArg = wxEmptyString);
-
-    static wxInputHandler *GetStdInputHandler(wxInputHandler *handlerDef);
-    virtual wxInputHandler *DoGetStdInputHandler(wxInputHandler *handlerDef)
-    {
-        return GetStdInputHandler(handlerDef);
-    }
 
     // override these methods to handle the caret
     virtual bool SetFont(const wxFont &font);
@@ -241,26 +241,13 @@ public:
     // only for wxStdTextCtrlInputHandler
     void RefreshSelection();
 
-    // override wxScrollHelper method to prevent (auto)scrolling beyond the end
-    // of line
-    virtual bool SendAutoScrollEvents(wxScrollWinEvent& event) const;
-
-    // idle processing
-    virtual void OnInternalIdle();
-
 protected:
-    // ensure we have correct default border
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_SUNKEN; }
-
     // override base class methods
     virtual void DoDrawBorder(wxDC& dc, const wxRect& rect);
     virtual void DoDraw(wxControlRenderer *renderer);
 
     // calc the size from the text extent
     virtual wxSize DoGetBestClientSize() const;
-
-    // implements Set/ChangeValue()
-    virtual void DoSetValue(const wxString& value, int flags = 0);
 
     // common part of all ctors
     void Init();
@@ -440,6 +427,10 @@ protected:
     void OnChar(wxKeyEvent& event);
     void OnSize(wxSizeEvent& event);
 
+    // overrdie wxScrollHelper method to prevent (auto)scrolling beyond the end
+    // of line
+    virtual bool SendAutoScrollEvents(wxScrollWinEvent& event) const;
+
     // return the struct containing control-type dependent data
     struct wxTextSingleLineData& SData() { return *m_data.sdata; }
     struct wxTextMultiLineData& MData() { return *m_data.mdata; }
@@ -453,6 +444,8 @@ protected:
     bool DoCut();
     bool DoPaste();
 
+    // idle processing
+    virtual void OnInternalIdle();
 private:
     // all these methods are for multiline text controls only
 
@@ -528,6 +521,33 @@ private:
     DECLARE_DYNAMIC_CLASS(wxTextCtrl)
 
     friend class wxWrappedLineData;
+};
+
+// ----------------------------------------------------------------------------
+// wxStdTextCtrlInputHandler: this control handles only the mouse/kbd actions
+// common to Win32 and GTK, platform-specific things are implemented elsewhere
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxStdTextCtrlInputHandler : public wxStdInputHandler
+{
+public:
+    wxStdTextCtrlInputHandler(wxInputHandler *inphand);
+
+    virtual bool HandleKey(wxInputConsumer *consumer,
+                           const wxKeyEvent& event,
+                           bool pressed);
+    virtual bool HandleMouse(wxInputConsumer *consumer,
+                             const wxMouseEvent& event);
+    virtual bool HandleMouseMove(wxInputConsumer *consumer,
+                                 const wxMouseEvent& event);
+    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event);
+
+protected:
+    // get the position of the mouse click
+    static wxTextPos HitTest(const wxTextCtrl *text, const wxPoint& pos);
+
+    // capture data
+    wxTextCtrl *m_winCapture;
 };
 
 #endif // _WX_UNIV_TEXTCTRL_H_

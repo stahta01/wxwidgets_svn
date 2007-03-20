@@ -140,11 +140,10 @@ On MacOS the cursor is resized to 16x16 if it was larger.",
 #endif
     
     DocDeclStr(
-        bool , IsOk(),
+        bool , Ok(),
         "", "");
-    %pythoncode { Ok = IsOk }
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 
     
 #ifdef __WXMSW__

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/toplevel.h
+// Name:        wx/mac/toplevel.h
 // Purpose:     wxTopLevelWindowMac is the Mac implementation of wxTLW
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_MSW_TOPLEVEL_H_
 #define _WX_MSW_TOPLEVEL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
 
 #if wxUSE_SYSTEM_OPTIONS
     #define wxMAC_WINDOW_PLAIN_TRANSITION _T("mac.window-plain-transition")
@@ -56,9 +60,9 @@ public:
     virtual void RequestUserAttention(int flags = wxUSER_ATTENTION_INFO);
 
     // implement base class pure virtuals
-    virtual void Maximize(bool maximize = true);
+    virtual void Maximize(bool maximize = TRUE);
     virtual bool IsMaximized() const;
-    virtual void Iconize(bool iconize = true);
+    virtual void Iconize(bool iconize = TRUE);
     virtual bool IsIconized() const;
     virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
@@ -68,10 +72,6 @@ public:
 
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL) ;
     virtual bool IsFullScreen() const ;
-
-    virtual bool SetTransparent(wxByte alpha);
-    virtual bool CanSetTransparent();
-
 
     // implementation from now on
     // --------------------------
@@ -88,19 +88,18 @@ public:
     virtual void MacActivate( long timestamp , bool inIsActivating ) ;
     virtual void MacPerformUpdates() ;
 
-    virtual void SetTitle( const wxString& title);
-    virtual wxString GetTitle() const;
-
     virtual void Raise();
     virtual void Lower();
-    virtual bool Show( bool show = true );
-
+    virtual void SetTitle( const wxString& title);
+    virtual bool Show( bool show = TRUE );
     virtual void SetExtraStyle(long exStyle) ;
 
     virtual void MacSetBackgroundBrush( const wxBrush &brush ) ;
 
+    bool MacUsesCompositing() { return m_macUsesCompositing; } 
     virtual void MacInstallTopLevelWindowEventHandler() ;
 
+    void MacSetMetalAppearance( bool on ) ;
     bool MacGetMetalAppearance() const ;
 
     void MacChangeWindowAttributes( wxUint32 attributesToSet , wxUint32 attributesToClear ) ;
@@ -125,7 +124,8 @@ protected:
     // should the frame be maximized when it will be shown? set by Maximize()
     // when it is called while the frame is hidden
     bool m_maximizeOnShow;
- 
+    bool m_macUsesCompositing ;
+
     WXWindow m_macWindow ;
 
     wxWindowMac* m_macFocus ;
@@ -133,12 +133,6 @@ protected:
 
     static wxTopLevelWindowMac *s_macDeactivateWindow;
 private :
-    // KH: We cannot let this be called directly since the metal appearance is now managed by an
-    // extra style. Calling this function directly can result in blank white window backgrounds.
-    // This is because the ExtraStyle flags get out of sync with the metal appearance and the metal
-    // logic & checks cease to work as expected. To set the metal appearance, use SetExtraStyle.
-    void MacSetMetalAppearance( bool on ) ;
-
     WXEVENTHANDLERREF    m_macEventHandler ;
 
     DECLARE_EVENT_TABLE()
@@ -148,3 +142,4 @@ private :
 extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
 
 #endif // _WX_MSW_TOPLEVEL_H_
+

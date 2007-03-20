@@ -26,7 +26,6 @@
             test.cpp
             archive/archivetest.cpp
             archive/ziptest.cpp
-            archive/tartest.cpp
             arrays/arrays.cpp
             datetime/datetimetest.cpp
             fileconf/fileconftest.cpp
@@ -38,23 +37,17 @@
             hashes/hashes.cpp
             lists/lists.cpp
             longlong/longlongtest.cpp
-            mbconv/convautotest.cpp
             mbconv/mbconvtest.cpp
             regex/regextest.cpp
             regex/wxregextest.cpp
             scopeguard/scopeguardtest.cpp
             strings/strings.cpp
             strings/stdstrings.cpp
-            strings/tokenizer.cpp
-            strings/unichar.cpp
             strings/unicode.cpp
-            strings/vararg.cpp
             strings/crt.cpp
-            strings/vsnprintf.cpp
             streams/bstream.cpp
             streams/datastreamtest.cpp
             streams/ffilestream.cpp
-            streams/fileback.cpp
             streams/filestream.cpp
             streams/largefile.cpp
             streams/memstream.cpp
@@ -62,7 +55,6 @@
             streams/tempfile.cpp
             streams/textstreamtest.cpp
             streams/zlibstream.cpp
-            textfile/textfiletest.cpp
             uris/uris.cpp
         </sources>
         <wx-lib>net</wx-lib>
@@ -91,18 +83,5 @@
     <wx-data id="data">
         <files>testdata.fc</files>
     </wx-data>
-
-
-
-    <!-- BENCHMARKS -->
-
-    <exe id="printfbench" template="wx_sample_console,wx_test"
-                          template_append="wx_append_base">
-        <sources>
-            benchmarks/printfbench.cpp
-        </sources>
-        <wx-lib>base</wx-lib>
-    </exe>
-
 
 </makefile>

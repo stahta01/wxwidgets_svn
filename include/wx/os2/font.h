@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/font.h
+// Name:        font.h
 // Purpose:     wxFont class
 // Author:      David Webster
 // Modified by:
@@ -25,7 +25,8 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& rFont) { Init(); Ref(rFont); }
 
     wxFont( int             nSize
            ,int             nFamily
@@ -36,6 +37,8 @@ public:
            ,wxFontEncoding  vEncoding = wxFONTENCODING_DEFAULT
           )
     {
+        Init();
+
         (void)Create( nSize
                      ,nFamily
                      ,nStyle
@@ -51,6 +54,8 @@ public:
           )
 
     {
+        Init();
+
         (void)Create( rInfo
                      ,hFont
                     );
@@ -73,6 +78,11 @@ public:
     virtual ~wxFont();
 
     //
+    // Assignment
+    //
+    wxFont& operator=(const wxFont& rFont);
+
+    //
     // Implement base class pure virtuals
     //
     virtual int               GetPointSize(void) const;
@@ -88,7 +98,7 @@ public:
     virtual void SetFamily(int nFamily);
     virtual void SetStyle(int nStyle);
     virtual void SetWeight(int nWeight);
-    virtual bool SetFaceName(const wxString& rsFaceName);
+    virtual void SetFaceName(const wxString& rsFaceName);
     virtual void SetUnderlined(bool bUnderlined);
     virtual void SetEncoding(wxFontEncoding vEncoding);
 
@@ -105,7 +115,7 @@ public:
     //
     virtual bool     IsFree(void) const;
     virtual bool     RealizeResource(void);
-    virtual WXHANDLE GetResourceHandle(void) const;
+    virtual WXHANDLE GetResourceHandle(void);
     virtual bool     FreeResource(bool bForce = false);
 
     WXHFONT GetHFONT(void) const;
@@ -113,6 +123,10 @@ public:
 protected:
     virtual void DoSetNativeFontInfo(const wxNativeFontInfo& rInfo);
 
+    //
+    // Common part of all ctors
+    //
+    void Init(void);
     void Unshare(void);
 
 private:

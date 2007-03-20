@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "inpcons.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -22,10 +26,6 @@
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#ifndef WX_PRECOMP
-    #include "wx/window.h"
-#endif // WX_PRECOMP
 
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
@@ -59,15 +59,9 @@ void wxInputConsumer::OnActivate(wxActivateEvent& event)
 // input processing
 // ----------------------------------------------------------------------------
 
-wxInputHandler *
-wxInputConsumer::DoGetStdInputHandler(wxInputHandler * WXUNUSED(handlerDef))
-{
-    return NULL;
-}
-
 void wxInputConsumer::CreateInputHandler(const wxString& inphandler)
 {
-    m_inputHandler = wxTheme::Get()->GetInputHandler(inphandler, this);
+    m_inputHandler = wxTheme::Get()->GetInputHandler(inphandler);
 }
 
 void wxInputConsumer::OnKeyDown(wxKeyEvent& event)
@@ -112,3 +106,4 @@ bool wxInputConsumer::PerformAction(const wxControlAction& WXUNUSED(action),
 {
     return false;
 }
+

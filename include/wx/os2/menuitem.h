@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/menuitem.h
+// Name:        menuitem.h
 // Purpose:     wxMenuItem class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -12,11 +12,15 @@
 #ifndef   _MENUITEM_H
 #define   _MENUITEM_H
 
+#ifdef __GNUG__
+#pragma interface "menuitem.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 // an exception to the general rule that a normal header doesn't include other
 // headers - only because ownerdrw.h is not always included and I don't want
@@ -67,8 +71,8 @@ public:
     virtual void SetText(const wxString& rStrName);
     virtual void SetCheckable(bool bCheckable);
 
-    virtual void Enable(bool bDoEnable = true);
-    virtual void Check(bool bDoCheck = true);
+    virtual void Enable(bool bDoEnable = TRUE);
+    virtual void Check(bool bDoCheck = TRUE);
     virtual bool IsChecked(void) const;
 
     //

@@ -12,6 +12,10 @@
 #ifndef _WX_ICON_H_
 #define _WX_ICON_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "icon.h"
+#endif
+
 #include "wx/bitmap.h"
 
 // Icon
@@ -19,6 +23,13 @@ class WXDLLEXPORT wxIcon: public wxGDIObject
 {
 public:
     wxIcon();
+
+    // Copy constructors
+    wxIcon(const wxIcon& icon)
+        : wxGDIObject()
+    {
+        Ref(icon);
+    }
 
     wxIcon(const char **data);
     wxIcon(char **data);
@@ -29,21 +40,24 @@ public:
     {
       LoadFile(loc.GetFileName(), wxBITMAP_TYPE_ICON);
     }
-    virtual ~wxIcon();
+    ~wxIcon();
 
     bool LoadFile(const wxString& name, wxBitmapType flags /* = wxBITMAP_TYPE_ICON_RESOURCE */ ,
       int desiredWidth /* = -1 */ , int desiredHeight = -1);
     bool LoadFile(const wxString& name ,wxBitmapType flags = wxBITMAP_TYPE_ICON_RESOURCE )
       { return LoadFile( name , flags , -1 , -1 ) ; }
 
+    wxIcon& operator=(const wxIcon& icon)
+    { if (this != &icon) Ref(icon); return *this; }
+    bool operator==(const wxIcon& icon) const { return m_refData == icon.m_refData; }
+    bool operator!=(const wxIcon& icon) const { return !(*this == icon); }
 
     // create from bitmap (which should have a mask unless it's monochrome):
     // there shouldn't be any implicit bitmap -> icon conversion (i.e. no
     // ctors, assignment operators...), but it's ok to have such function
     void CopyFromBitmap(const wxBitmap& bmp);
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    bool Ok() const;
     int GetWidth() const;
     int GetHeight() const;
     int GetDepth() const;

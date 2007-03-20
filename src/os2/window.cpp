@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/window.cpp
+// Name:        windows.cpp
 // Purpose:     wxWindow
 // Author:      David Webster
 // Modified by:
@@ -14,13 +14,13 @@
 //
 #include "wx/wxprec.h"
 
-#include "wx/window.h"
-
 #ifndef WX_PRECOMP
     #define INCL_DOS
     #define INCL_PM
     #include <os2.h>
+    #include "wx/window.h"
     #include "wx/accel.h"
+    #include "wx/setup.h"
     #include "wx/menu.h"
     #include "wx/dc.h"
     #include "wx/dcclient.h"
@@ -44,10 +44,6 @@
     #include "wx/statusbr.h"
     #include "wx/toolbar.h"
     #include "wx/settings.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/textctrl.h"
-    #include "wx/menuitem.h"
     #include <stdio.h>
 #endif
 
@@ -58,6 +54,9 @@
 #if     wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
 #endif
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #include "wx/os2/private.h"
 
@@ -72,6 +71,12 @@
 #if wxUSE_CARET
     #include "wx/caret.h"
 #endif // wxUSE_CARET
+
+#include "wx/intl.h"
+#include "wx/log.h"
+
+
+#include "wx/textctrl.h"
 
 #include <string.h>
 
@@ -406,7 +411,9 @@ bool wxWindowOS2::Create( wxWindow*       pParent,
         pParent->AddChild(this);
         hParent = GetWinHwnd(pParent);
 
-        if (pParent->IsKindOf(CLASSINFO(wxScrolledWindow)))
+        if ( pParent->IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
+             pParent->IsKindOf(CLASSINFO(wxScrolledWindow))
+           )
             ulCreateFlags |= WS_CLIPSIBLINGS;
     }
 
@@ -570,15 +577,15 @@ void wxWindowOS2::Lower()
     ::WinSetWindowPos(GetHwnd(), HWND_BOTTOM, 0, 0, 0, 0, SWP_ZORDER | SWP_DEACTIVATE);
 } // end of wxWindowOS2::Lower
 
-void wxWindowOS2::SetLabel( const wxString& label )
+void wxWindowOS2::SetTitle( const wxString& rTitle )
 {
-    ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
-} // end of wxWindowOS2::SetLabel
+    ::WinSetWindowText(GetHwnd(), (PSZ)rTitle.c_str());
+} // end of wxWindowOS2::SetTitle
 
-wxString wxWindowOS2::GetLabel() const
+wxString wxWindowOS2::GetTitle() const
 {
     return wxGetWindowText(GetHWND());
-} // end of wxWindowOS2::GetLabel
+} // end of wxWindowOS2::GetTitle
 
 void wxWindowOS2::DoCaptureMouse()
 {
@@ -1298,7 +1305,7 @@ void wxWindowOS2::DoGetPosition(
     //
     // Return parameters assume wxWidgets coordinate system
     //
-    HWND                            hWnd;
+    HWND                            hWnd = GetHwnd();
     SWP                             vSwp;
     POINTL                          vPoint;
     wxWindow*                       pParent = GetParent();
@@ -1546,7 +1553,9 @@ void wxWindowOS2::DoMoveWindow(
         // which will cause the scrollbars to be displayed via the SetScrollbar
         // call in CWindow.
         //
-        if (IsKindOf(CLASSINFO(wxScrolledWindow)))
+        if ( IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
+             IsKindOf(CLASSINFO(wxScrolledWindow))
+           )
         {
             int                     nAdjustWidth  = 0;
             int                     nAdjustHeight = 0;
@@ -1674,7 +1683,6 @@ void wxWindowOS2::DoSetClientSize( int nWidth,
     int nY;
 
     GetPosition(&nX, &nY);
-
     DoMoveWindow( nX, nY, nWidth, nHeight );
 
     wxSize size( nWidth, nHeight );
@@ -1738,7 +1746,7 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
 
     hPS = ::WinGetPS(GetHwnd());
 
-    l = rString.length();
+    l = rString.Length();
     if (l > 0L)
     {
         pStr = (PCH)rString.c_str();
@@ -1746,12 +1754,12 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
         //
         // In world coordinates.
         //
-        bRc = ::GpiQueryTextBox( hPS,
-                                 l,
-                                 pStr,
-                                 TXTBOX_COUNT,// return maximum information
-                                 avPoint      // array of coordinates points
-                                );
+        bRc = ::GpiQueryTextBox( hPS
+                                ,l
+                                ,pStr
+                                ,TXTBOX_COUNT // return maximum information
+                                ,avPoint      // array of coordinates points
+                               );
         if (bRc)
         {
             vPtMin.x = avPoint[0].x;
@@ -1839,7 +1847,9 @@ bool wxWindowOS2::IsMouseInWindow() const
 // ---------------------------------------------------------------------------
 //
 #if wxUSE_MENUS_NATIVE
-bool wxWindowOS2::DoPopupMenu( wxMenu* pMenu, int nX, int nY )
+bool wxWindowOS2::DoPopupMenu( wxMenu* pMenu,
+                               int nX,
+                               int nY )
 {
     HWND hWndOwner = GetHwnd();
     HWND hWndParent = GetHwnd();
@@ -2021,13 +2031,9 @@ bool wxWindowOS2::OS2ProcessMessage( WXMSG* pMsg )
                         }
                         else
                         {
-                            wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-                            wxButton*   pBtn = NULL;
-
-                            if (tlw)
-                            {
-                                pBtn = wxDynamicCast(tlw->GetDefaultItem(), wxButton);
-                            }
+                            wxButton*   pBtn = wxDynamicCast( GetDefaultItem()
+                                                             ,wxButton
+                                                            );
 
                             if (pBtn && pBtn->IsEnabled())
                             {
@@ -2710,7 +2716,7 @@ MRESULT wxWindowOS2::OS2WindowProc( WXUINT uMsg,
                     }
                     // break;
 
-                case LN_ENTER:
+                case LN_ENTER:   /* dups as CBN_EFCHANGE */
                     {
                         HWND                hWnd = HWNDFROMMP(lParam);
                         wxWindowOS2*        pWin = wxFindWinFromHandle(hWnd);
@@ -2918,7 +2924,7 @@ void wxAssociateWinWithHandle(
 
     if (pOldWin && (pOldWin != pWin))
     {
-        wxString  Newstr(pWin->GetClassInfo()->GetClassName());
+        wxString Newstr(pWin->GetClassInfo()->GetClassName());
         wxString Oldstr(pOldWin->GetClassInfo()->GetClassName());
         wxLogError( _T("Bug! New window of class %s has same HWND %X as old window of class %s"),
                     Newstr.c_str(),
@@ -3577,6 +3583,7 @@ bool wxWindowOS2::HandlePaint()
          wxLogLastError(wxT("CreateRectRgn"));
          return false;
     }
+
     // Get all the rectangles from the region, convert the individual
     // rectangles to "the other" coordinate system and reassemble a
     // region from the rectangles, to be feed into m_updateRegion.
@@ -3617,6 +3624,7 @@ bool wxWindowOS2::HandlePaint()
             delete [] pUpdateRects;
         }
     }
+
     m_updateRegion = wxRegion(hRgn, hPS);
 
     vEvent.SetEventObject(this);
@@ -3738,6 +3746,7 @@ bool wxWindowOS2::HandleEraseBkgnd( WXHDC hDC )
 
     vDC.m_hPS = (HPS)hDC; // this is really a PS
     vDC.SetWindow((wxWindow*)this);
+    vDC.BeginDrawing();
 
     wxEraseEvent vEvent(m_windowId, &vDC);
 
@@ -3745,16 +3754,19 @@ bool wxWindowOS2::HandleEraseBkgnd( WXHDC hDC )
 
     rc = GetEventHandler()->ProcessEvent(vEvent);
 
+    vDC.EndDrawing();
     vDC.m_hPS = NULLHANDLE;
     return true;
 } // end of wxWindowOS2::HandleEraseBkgnd
 
-void wxWindowOS2::OnEraseBackground(wxEraseEvent& rEvent)
+void wxWindowOS2::OnEraseBackground(
+  wxEraseEvent&                     rEvent
+)
 {
-    RECTL   vRect;
-    HPS     hPS = rEvent.GetDC()->GetHPS();
-    APIRET  rc;
-    LONG    lColor = m_backgroundColour.GetPixel();
+    RECTL                           vRect;
+    HPS                             hPS = rEvent.m_dc->m_hPS;
+    APIRET                          rc;
+    LONG                            lColor = m_backgroundColour.GetPixel();
 
     rc = ::WinQueryWindowRect(GetHwnd(), &vRect);
     rc = ::WinFillRect(hPS, &vRect, lColor);
@@ -3807,15 +3819,25 @@ bool wxWindowOS2::HandleGetMinMaxInfo( PSWP pSwp )
     switch(pSwp->fl)
     {
         case SWP_MAXIMIZE:
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
             ::WinGetMaxPosition(GetHwnd(), pSwp);
             m_maxWidth = pSwp->cx;
             m_maxHeight = pSwp->cy;
+#endif
             break;
 
         case SWP_MINIMIZE:
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
             ::WinGetMinPosition(GetHwnd(), pSwp, &vPoint);
             m_minWidth = pSwp->cx;
             m_minHeight = pSwp->cy;
+#else
+            wxUnusedVar(vPoint);
+#endif
             break;
 
         default:
@@ -3874,7 +3896,7 @@ bool wxWindowOS2::HandleSysCommand( WXWPARAM wParam,
 // ---------------------------------------------------------------------------
 // mouse events
 // ---------------------------------------------------------------------------
-//TODO: check against MSW
+//TODO!!! check against MSW
 void wxWindowOS2::InitMouseEvent(
   wxMouseEvent&                     rEvent
 , int                               nX
@@ -4255,39 +4277,39 @@ int wxWindowOS2::GetOS2ParentHeight( wxWindowOS2* pParent )
 {
     if (pParent)
     {
-    //
-    // Case 1
-    //
+        //
+        // Case 1
+        //
         if (pParent->IsKindOf(CLASSINFO(wxDialog)))
             return(pParent->GetClientSize().y);
 
-    //
-    // Case 2 -- if we are one of the separately built standard Frame
-    //           children, like a statusbar, menubar, or toolbar we want to
-    //           use the frame, itself, for positioning.  Otherwise we are
-    //           child window and want to use the Frame's client.
-    //
+        //
+        // Case 2 -- if we are one of the separately built standard Frame
+        //           children, like a statusbar, menubar, or toolbar we want to
+        //           use the frame, itself, for positioning.  Otherwise we are
+        //           child window and want to use the Frame's client.
+        //
         else if (pParent->IsKindOf(CLASSINFO(wxFrame)))
         {
             if (IsKindOf(CLASSINFO(wxStatusBar)) ||
                 IsKindOf(CLASSINFO(wxMenuBar))   ||
                 IsKindOf(CLASSINFO(wxToolBar))
-               )
+                )
             {
                 if (IsKindOf(CLASSINFO(wxToolBar)))
                 {
-                    wxFrame*        pFrame = wxDynamicCast(GetParent(), wxFrame);
+                    wxFrame*            pFrame = wxDynamicCast(GetParent(), wxFrame);
 
                     if (pFrame->GetToolBar() == this)
                         return(pParent->GetSize().y);
                     else
-                        return(pParent->GetClientSize().y);
+                      return(pParent->GetClientSize().y);
                 }
                 else
                     return(pParent->GetSize().y);
             }
             else
-                return(pParent->GetClientSize().y);
+              return(pParent->GetClientSize().y);
         }
         //
         // Case -- this is for any window that is the sole child of a Frame.
@@ -4377,8 +4399,8 @@ int wxCharCodeOS2ToWX(
         case VK_CTRL:       nId = WXK_CONTROL; break;
         case VK_PAUSE:      nId = WXK_PAUSE; break;
         case VK_SPACE:      nId = WXK_SPACE; break;
-        case VK_PAGEUP:     nId = WXK_PAGEUP; break;
-        case VK_PAGEDOWN:   nId = WXK_PAGEDOWN; break;
+        case VK_PAGEUP:     nId = WXK_PRIOR; break;
+        case VK_PAGEDOWN:   nId = WXK_NEXT; break;
         case VK_ESC:        nId = WXK_ESCAPE; break;
         case VK_END:        nId = WXK_END; break;
         case VK_HOME :      nId = WXK_HOME; break;
@@ -4440,16 +4462,15 @@ int wxCharCodeWXToOS2( int nId,
 {
     int nKeySym = 0;
 
-    if ( bIsVirtual )
-        *bIsVirtual = true;
+    *bIsVirtual = true;
     switch (nId)
     {
         case WXK_CLEAR:     nKeySym = VK_CLEAR; break;
         case WXK_SHIFT:     nKeySym = VK_SHIFT; break;
         case WXK_CONTROL:   nKeySym = VK_CTRL; break;
         case WXK_PAUSE:     nKeySym = VK_PAUSE; break;
-        case WXK_PAGEUP:    nKeySym = VK_PAGEUP; break;
-        case WXK_PAGEDOWN:  nKeySym = VK_PAGEDOWN; break;
+        case WXK_PRIOR:     nKeySym = VK_PAGEUP; break;
+        case WXK_NEXT :     nKeySym = VK_PAGEDOWN; break;
         case WXK_END:       nKeySym = VK_END; break;
         case WXK_HOME :     nKeySym = VK_HOME; break;
         case WXK_LEFT :     nKeySym = VK_LEFT; break;
@@ -4487,8 +4508,7 @@ int wxCharCodeWXToOS2( int nId,
         case WXK_SCROLL:    nKeySym = VK_SCRLLOCK; break;
         default:
         {
-            if ( bIsVirtual )
-                *bIsVirtual = false;
+            *bIsVirtual = false;
             nKeySym = nId;
             break;
         }
@@ -4496,28 +4516,46 @@ int wxCharCodeWXToOS2( int nId,
     return nKeySym;
 } // end of wxCharCodeWXToOS2
 
-
 bool wxGetKeyState(wxKeyCode key)
 {
+    bool bVirtual;
+
     wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key !=
         WXK_MBUTTON, wxT("can't use wxGetKeyState() for mouse buttons"));
 
-    const LONG vk = wxCharCodeWXToOS2(key);
-    // if the requested key is a LED key, return true if the led is pressed
-    if ( key == WXK_NUMLOCK || key == WXK_CAPITAL || key == WXK_SCROLL )
+    const LONG vk = wxCharCodeWXToOS2(key, &bVirtual);
+    //If the requested key is a LED key, return true if the led is pressed
+    if (key == WXK_NUMLOCK || key == WXK_CAPITAL || key == WXK_SCROLL)
     {
-        // low order bit means LED is highlighted and high order one means the
-        // key is down; for compatibility with the other ports return true if
-        // either one is set
+        // low order bit means LED is highlightedm high order one means the
+        // key is down; for compat with other ports we want both
         return ::WinGetKeyState(HWND_DESKTOP, vk) != 0;
-
     }
-    else // normal key
+    else
     {
+        //normal key
+        //high order means key is down, so We want only the high order bit
         return IsKeyDown(vk);
     }
 }
 
+
+wxMouseState wxGetMouseState()
+{
+    wxMouseState ms;
+    wxPoint pt = wxGetMousePosition();
+
+    ms.SetX(pt.x);
+    ms.SetY(pt.y);
+    ms.SetLeftDown(IsKeyDown(VK_BUTTON1));
+    ms.SetMiddleDown(IsKeyDown(VK_BUTTON3));
+    ms.SetRightDown(IsKeyDown(VK_BUTTON2));
+    ms.SetControlDown(IsCtrlDown());
+    ms.SetShiftDown(IsShiftDown());
+    ms.SetAltDown(IsKeyDown(VK_ALT)|IsKeyDown(VK_ALTGRAF));
+    ms.SetMetaDown(IsKeyDown(VK_ALTGRAF));
+    return ms;
+}
 
 wxWindow* wxGetActiveWindow()
 {
@@ -5028,21 +5066,25 @@ static void TranslateKbdEventToMouse(
 
 // Find the wxWindow at the current mouse position, returning the mouse
 // position.
-wxWindow* wxFindWindowAtPointer(wxPoint& WXUNUSED(rPt))
+wxWindow* wxFindWindowAtPointer(
+  wxPoint&                          WXUNUSED(rPt)
+)
 {
     return wxFindWindowAtPoint(wxGetMousePosition());
 }
 
-wxWindow* wxFindWindowAtPoint(const wxPoint& rPt)
+wxWindow* wxFindWindowAtPoint(
+  const wxPoint&                    rPt
+)
 {
-    POINTL vPt2;
+    POINTL                          vPt2;
 
     vPt2.x = rPt.x;
     vPt2.y = rPt.y;
 
-    HWND      hWndHit = ::WinWindowFromPoint(HWND_DESKTOP, &vPt2, FALSE);
-    wxWindow* pWin = wxFindWinFromHandle((WXHWND)hWndHit) ;
-    HWND      hWnd = hWndHit;
+    HWND                            hWndHit = ::WinWindowFromPoint(HWND_DESKTOP, &vPt2, FALSE);
+    wxWindow*                       pWin = wxFindWinFromHandle((WXHWND)hWndHit) ;
+    HWND                            hWnd = hWndHit;
 
     //
     // Try to find a window with a wxWindow associated with it
@@ -5058,28 +5100,11 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& rPt)
 // Get the current mouse position.
 wxPoint wxGetMousePosition()
 {
-    POINTL vPt;
+    POINTL                          vPt;
 
     ::WinQueryPointerPos(HWND_DESKTOP, &vPt);
     return wxPoint(vPt.x, vPt.y);
 }
-
-wxMouseState wxGetMouseState()
-{
-    wxMouseState ms;
-    wxPoint pt = wxGetMousePosition();
-    ms.SetX(pt.x);
-    ms.SetY(pt.y);
-    ms.SetLeftDown(IsKeyDown(VK_BUTTON1));
-    ms.SetMiddleDown(IsKeyDown(VK_BUTTON3));
-    ms.SetRightDown(IsKeyDown(VK_BUTTON2));
-    ms.SetControlDown(IsCtrlDown());
-    ms.SetShiftDown(IsShiftDown());
-    ms.SetAltDown(IsKeyDown(VK_ALT)|IsKeyDown(VK_ALTGRAF));
-    ms.SetMetaDown(IsKeyDown(VK_ALTGRAF));
-    return ms;
-}
-
 
 wxWindowOS2* FindWindowForMouseEvent( wxWindow* pWin,
                                       short*    WXUNUSED(pnX),

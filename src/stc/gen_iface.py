@@ -488,9 +488,7 @@ methodOverrideMap = {
 
     'SetHotspotActiveFore' : ('SetHotspotActiveForeground', 0, 0, 0),
     'SetHotspotActiveBack' : ('SetHotspotActiveBackground', 0, 0, 0),
-    
-    'GetCaretLineBack' : ('GetCaretLineBackground', 0, 0, 0),
-    'SetCaretLineBack' : ('SetCaretLineBackground', 0, 0, 0),
+
 
     'ReplaceTarget' :
     (0,

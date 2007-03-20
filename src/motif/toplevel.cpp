@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/toplevel.cpp
+// Name:        motif/toplevel.cpp
 // Purpose:     wxTopLevelWindow Motif implementation
 // Author:      Mattia Barbon
 // Modified by:
@@ -17,14 +17,15 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/toplevel.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-#endif
+#include "wx/app.h"
 
 #ifdef __VMS__
 #define XtDisplay XTDISPLAY
@@ -68,7 +69,14 @@ static void wxTLWEventHandler( Widget wid,
 
 void wxTopLevelWindowMotif::PreDestroy()
 {
-    wxModelessWindows.DeleteObject(this);
+#ifdef __VMS
+#pragma message disable codcauunr
+#endif
+   if ( (GetWindowStyleFlag() & wxDIALOG_MODAL) != wxDIALOG_MODAL )
+        wxModelessWindows.DeleteObject(this);
+#ifdef __VMS
+#pragma message enable codcauunr
+#endif
 
     m_icons.m_icons.Empty();
 
@@ -113,7 +121,7 @@ bool wxTopLevelWindowMotif::Create( wxWindow *parent, wxWindowID id,
 
     m_windowId = ( id > -1 ) ? id : NewControlId();
 
-    bool retval = XmDoCreateTLW( parent, id, title, pos, size, style, name );
+    bool retval = DoCreate( parent, id, title, pos, size, style, name );
 
     if( !retval ) return false;
 
@@ -157,7 +165,7 @@ bool wxTopLevelWindowMotif::Create( wxWindow *parent, wxWindowID id,
             ( m_windowStyle & wxTINY_CAPTION_HORIZ ) ||
             ( m_windowStyle & wxTINY_CAPTION_VERT ) )
             decor |= MWM_DECOR_TITLE;
-        if( m_windowStyle & wxRESIZE_BORDER )
+        if( m_windowStyle & wxTHICK_FRAME )
             decor |= MWM_DECOR_BORDER;
         if( m_windowStyle & wxMINIMIZE_BOX )
             decor |= MWM_DECOR_MINIMIZE;
@@ -266,8 +274,8 @@ WXWidget wxTopLevelWindowMotif::GetShellWidget() const
     return (WXWidget) GetShell( this );
 }
 
-bool wxTopLevelWindowMotif::ShowFullScreen( bool WXUNUSED(show),
-                                            long WXUNUSED(style) )
+bool wxTopLevelWindowMotif::ShowFullScreen( bool show,
+                                            long style )
 {
     // TODO, see wxGTK
     return false;
@@ -314,7 +322,7 @@ bool wxTopLevelWindowMotif::IsIconized() const
                    XmNiconic, &iconic,
                    NULL );
 
-    return (iconic == True);
+    return iconic;
 }
 
 void wxTopLevelWindowMotif::Maximize( bool maximize )
@@ -426,3 +434,4 @@ void wxTLWEventHandler( Widget wid,
 
     *continueToDispatch = True;
 }
+

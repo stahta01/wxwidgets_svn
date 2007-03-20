@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/dialog.h"
     #include "wx/utils.h"
     #include "wx/frame.h"
     #include "wx/app.h"
@@ -35,6 +38,7 @@
     #include "wx/log.h"
 #endif
 
+#include "wx/log.h"
 #include "wx/evtloop.h"
 #include "wx/ptr_scpd.h"
 
@@ -71,14 +75,10 @@ wxBEGIN_FLAGS( wxDialogStyle )
     wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
     wxFLAGS_MEMBER(wxSTAY_ON_TOP)
     wxFLAGS_MEMBER(wxCAPTION)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxTHICK_FRAME)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxSYSTEM_MENU)
     wxFLAGS_MEMBER(wxRESIZE_BORDER)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxRESIZE_BOX)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxCLOSE_BOX)
     wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
     wxFLAGS_MEMBER(wxMINIMIZE_BOX)
@@ -99,6 +99,14 @@ wxCONSTRUCTOR_6( wxDialog , wxWindow* , Parent , wxWindowID , Id , wxString , Ti
 #else
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
 #endif
+
+BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
+    EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+    EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+    EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+
+    EVT_CLOSE(wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxDialogModalData
@@ -182,3 +190,23 @@ void wxDialog::EndModal(int retCode)
 {
 }
 
+// ----------------------------------------------------------------------------
+// wxWin event handlers
+// ----------------------------------------------------------------------------
+
+// Standard buttons
+void wxDialog::OnOK(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void wxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void wxDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+{
+}

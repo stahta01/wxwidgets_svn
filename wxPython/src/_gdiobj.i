@@ -22,6 +22,9 @@ public:
     wxGDIObject();
     ~wxGDIObject();
 
+    bool GetVisible();
+    void SetVisible( bool visible );
+
     bool IsNull();
 
 };

@@ -6,8 +6,13 @@
 // Created:     04/22/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Neis (2003)
+//
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+    #pragma implementation "thread.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -18,19 +23,15 @@
 
 #if wxUSE_THREADS
 
-#include "wx/thread.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/module.h"
-#endif //WX_PRECOMP
-
-#include "wx/apptrait.h"
-#include "wx/utils.h"
-
 #include <stdio.h>
+
+#include "wx/app.h"
+#include "wx/apptrait.h"
+#include "wx/module.h"
+#include "wx/intl.h"
+#include "wx/utils.h"
+#include "wx/log.h"
+#include "wx/thread.h"
 
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSPROCESS
@@ -96,8 +97,7 @@ public:
     bool IsOk() const { return m_vMutex != NULL; }
 
     wxMutexError Lock() { return LockTimeout(SEM_INDEFINITE_WAIT); }
-    wxMutexError Lock(unsigned long ms) { return LockTimeout(ms); }
-    wxMutexError TryLock();
+    wxMutexError TryLock() { return LockTimeout(SEM_IMMEDIATE_RETURN); }
     wxMutexError Unlock();
 
 private:
@@ -128,14 +128,6 @@ wxMutexInternal::~wxMutexInternal()
     }
 }
 
-wxMutexError wxMutexInternal::TryLock()
-{
-    const wxMutexError rc = LockTimeout( SEM_IMMEDIATE_RETURN );
-
-    // we have a special return code for timeout in this case
-    return rc == wxMUTEX_TIMEOUT ? wxMUTEX_BUSY : rc;
-}
-
 wxMutexError wxMutexInternal::LockTimeout(ULONG ulMilliseconds)
 {
     APIRET                          ulrc;
@@ -145,7 +137,6 @@ wxMutexError wxMutexInternal::LockTimeout(ULONG ulMilliseconds)
     switch (ulrc)
     {
         case ERROR_TIMEOUT:
-            return wxMUTEX_TIMEOUT;
         case ERROR_TOO_MANY_SEM_REQUESTS:
             return wxMUTEX_BUSY;
 
@@ -394,9 +385,11 @@ private:
     unsigned int                    m_nPriority;  // thread priority in "wx" units
 };
 
-void wxThreadInternal::OS2ThreadStart( void * pParam )
+void wxThreadInternal::OS2ThreadStart(
+  void * pParam
+)
 {
-    DWORD dwRet;
+    DWORD                           dwRet;
     bool bWasCancelled;
 
     wxThread *pThread = (wxThread *)pParam;

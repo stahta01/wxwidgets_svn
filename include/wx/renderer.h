@@ -29,10 +29,6 @@ class WXDLLEXPORT wxDC;
 class WXDLLEXPORT wxWindow;
 
 #include "wx/gdicmn.h" // for wxPoint
-#include "wx/colour.h"
-#include "wx/font.h"
-#include "wx/bitmap.h"
-#include "wx/string.h"
 
 // some platforms have their own renderers, others use the generic one
 #if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXGTK__)
@@ -51,11 +47,9 @@ enum
     wxCONTROL_DISABLED   = 0x00000001,  // control is disabled
     wxCONTROL_FOCUSED    = 0x00000002,  // currently has keyboard focus
     wxCONTROL_PRESSED    = 0x00000004,  // (button) is pressed
-    wxCONTROL_SPECIAL    = 0x00000008,  // control-specific bit:
-    wxCONTROL_ISDEFAULT  = wxCONTROL_SPECIAL, // only for the buttons
-    wxCONTROL_ISSUBMENU  = wxCONTROL_SPECIAL, // only for the menu items
-    wxCONTROL_EXPANDED   = wxCONTROL_SPECIAL, // only for the tree items
-    wxCONTROL_SIZEGRIP   = wxCONTROL_SPECIAL, // only for the status bar panes
+    wxCONTROL_ISDEFAULT  = 0x00000008,  // only applies to the buttons
+    wxCONTROL_ISSUBMENU  = wxCONTROL_ISDEFAULT, // only for menu items
+    wxCONTROL_EXPANDED   = wxCONTROL_ISDEFAULT, // only for the tree items
     wxCONTROL_CURRENT    = 0x00000010,  // mouse is currently over the control
     wxCONTROL_SELECTED   = 0x00000020,  // selected item in e.g. listbox
     wxCONTROL_CHECKED    = 0x00000040,  // (check/radio button) is checked
@@ -91,30 +85,6 @@ struct WXDLLEXPORT wxSplitterRenderParams
     // true if the splitter changes its appearance when the mouse is over it
     const bool isHotSensitive;
 };
-
-
-// extra optional parameters for DrawHeaderButton
-struct WXDLLEXPORT wxHeaderButtonParams
-{
-    wxHeaderButtonParams()
-        : m_labelAlignment(wxALIGN_LEFT)
-    { }
-
-    wxColour    m_arrowColour;
-    wxColour    m_selectionColour;
-    wxString    m_labelText;
-    wxFont      m_labelFont;
-    wxColour    m_labelColour;
-    wxBitmap    m_labelBitmap;
-    int         m_labelAlignment;
-};
-
-enum wxHeaderSortIconType {
-    wxHDR_SORT_ICON_NONE,        // Header button has no sort arrow
-    wxHDR_SORT_ICON_UP,          // Header button an an up sort arrow icon
-    wxHDR_SORT_ICON_DOWN         // Header button an a down sort arrow icon
-};
-
 
 // wxRendererNative interface version
 struct WXDLLEXPORT wxRendererVersion
@@ -157,29 +127,11 @@ public:
     // drawing functions
     // -----------------
 
-    // draw the header control button (used by wxListCtrl) Returns optimal
-    // width for the label contents.
-    virtual int  DrawHeaderButton(wxWindow *win,
+    // draw the header control button (used by wxListCtrl)
+    virtual void DrawHeaderButton(wxWindow *win,
                                   wxDC& dc,
                                   const wxRect& rect,
-                                  int flags = 0,
-                                  wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                  wxHeaderButtonParams* params=NULL) = 0;
-
-
-    // Draw the contents of a header control button (label, sort arrows, etc.)
-    // Normally only called by DrawHeaderButton.
-    virtual int  DrawHeaderButtonContents(wxWindow *win,
-                                          wxDC& dc,
-                                          const wxRect& rect,
-                                          int flags = 0,
-                                          wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                          wxHeaderButtonParams* params=NULL) = 0;
-
-    // Returns the default height of a header button, either a fixed platform
-    // height if available, or a generic height based on the window's font.
-    virtual int GetHeaderButtonHeight(wxWindow *win) = 0;
-
+                                  int flags = 0) = 0;
 
     // draw the expanded/collapsed icon for a tree control item
     virtual void DrawTreeItemButton(wxWindow *win,
@@ -217,34 +169,6 @@ public:
                                wxDC& dc,
                                const wxRect& rect,
                                int flags = 0) = 0;
-
-    // draw check button
-    //
-    // flags may use wxCONTROL_CHECKED, wxCONTROL_UNDETERMINED and wxCONTROL_CURRENT
-    virtual void DrawCheckBox(wxWindow *win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0) = 0;
-
-    // draw blank button
-    //
-    // flags may use wxCONTROL_PRESSED, wxCONTROL_CURRENT and wxCONTROL_ISDEFAULT
-    virtual void DrawPushButton(wxWindow *win,
-                                wxDC& dc,
-                                const wxRect& rect,
-                                int flags = 0) = 0;
-
-    // draw rectangle indicating that an item in e.g. a list control
-    // has been selected or focused
-    //
-    // flags may use
-    // wxCONTROL_SELECTED (item is selected, e.g. draw background)
-    // wxCONTROL_CURRENT (item is the current item, e.g. dotted border)
-    // wxCONTROL_FOCUSED (the whole control has focus, e.g. blue background vs. grey otherwise)
-    virtual void DrawItemSelectionRect(wxWindow *win,
-                                       wxDC& dc,
-                                       const wxRect& rect,
-                                       int flags = 0) = 0;
 
     // geometry functions
     // ------------------
@@ -309,24 +233,11 @@ public:
         : m_rendererNative(rendererNative) { }
 
 
-    virtual int  DrawHeaderButton(wxWindow *win,
+    virtual void DrawHeaderButton(wxWindow *win,
                                   wxDC& dc,
                                   const wxRect& rect,
-                                  int flags = 0,
-                                  wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                  wxHeaderButtonParams* params = NULL)
-        { return m_rendererNative.DrawHeaderButton(win, dc, rect, flags, sortArrow, params); }
-
-    virtual int  DrawHeaderButtonContents(wxWindow *win,
-                                          wxDC& dc,
-                                          const wxRect& rect,
-                                          int flags = 0,
-                                          wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                          wxHeaderButtonParams* params = NULL)
-        { return m_rendererNative.DrawHeaderButtonContents(win, dc, rect, flags, sortArrow, params); }
-
-    virtual int GetHeaderButtonHeight(wxWindow *win)
-        { return m_rendererNative.GetHeaderButtonHeight(win); }
+                                  int flags = 0)
+        { m_rendererNative.DrawHeaderButton(win, dc, rect, flags); }
 
     virtual void DrawTreeItemButton(wxWindow *win,
                                     wxDC& dc,
@@ -361,24 +272,6 @@ public:
                                int flags = 0)
         { m_rendererNative.DrawDropArrow(win, dc, rect, flags); }
 
-    virtual void DrawCheckBox(wxWindow *win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0 )
-        { m_rendererNative.DrawCheckBox( win, dc, rect, flags ); }
-
-    virtual void DrawPushButton(wxWindow *win,
-                                wxDC& dc,
-                                const wxRect& rect,
-                                int flags = 0 )
-        { m_rendererNative.DrawPushButton( win, dc, rect, flags ); }
-
-    virtual void DrawItemSelectionRect(wxWindow *win,
-                                       wxDC& dc,
-                                       const wxRect& rect,
-                                       int flags = 0 )
-        { m_rendererNative.DrawItemSelectionRect( win, dc, rect, flags ); }
-
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win)
         { return m_rendererNative.GetSplitterParams(win); }
 
@@ -407,3 +300,4 @@ wxRendererNative& wxRendererNative::GetDefault()
 #endif // !wxHAS_NATIVE_RENDERER
 
 #endif // _WX_RENDERER_H_
+

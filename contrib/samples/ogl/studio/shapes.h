@@ -1,23 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/shapes.h
+// Name:        shapes.h
 // Purpose:     Shape classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _STUDIO_SHAPES_H_
 #define _STUDIO_SHAPES_H_
 
-#include "wx/docview.h"
-#include "wx/string.h"
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
-#include "wx/ogl/basicp.h"
-#include "wx/ogl/linesp.h"
-#include "wx/ogl/drawn.h"
+#if defined(__GNUG__) && !defined(__APPLE__)
+// #pragma interface
+#endif
+
+#include <wx/docview.h>
+#include <wx/string.h>
+#include <wx/ogl/ogl.h> // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/linesp.h>
+#include <wx/ogl/drawn.h>
 
 class csDiagramDocument;
 

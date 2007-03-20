@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "notebookbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -45,7 +49,7 @@ wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage) const
     // default because not all ports implement this
     wxSize sizeTotal = sizePage;
 
-    if ( HasFlag(wxBK_LEFT) || HasFlag(wxBK_RIGHT) )
+    if ( HasFlag(wxNB_LEFT) || HasFlag(wxNB_RIGHT) )
     {
         sizeTotal.x += 90;
         sizeTotal.y += 10;
@@ -59,26 +63,5 @@ wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage) const
     return sizeTotal;
 }
 
-// ----------------------------------------------------------------------------
-// events
-// ----------------------------------------------------------------------------
-
-bool wxNotebookBase::SendPageChangingEvent(int nPage)
-{
-    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, GetId());
-    event.SetSelection(nPage);
-    event.SetOldSelection(GetSelection());
-    event.SetEventObject(this);
-    return !GetEventHandler()->ProcessEvent(event) || event.IsAllowed();
-}
-
-void wxNotebookBase::SendPageChangedEvent(int nPageOld, int nPageNew)
-{
-    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, GetId());
-    event.SetSelection(nPageNew == -1 ? GetSelection() : nPageNew);
-    event.SetOldSelection(nPageOld);
-    event.SetEventObject(this);
-    GetEventHandler()->ProcessEvent(event);
-}
-
 #endif // wxUSE_NOTEBOOK
+

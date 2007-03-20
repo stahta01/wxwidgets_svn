@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __WX_DCMEMORY_H__
 #define __WX_DCMEMORY_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcmemory.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/dcclient.h"
@@ -23,13 +28,13 @@ class WXDLLEXPORT wxMemoryDC;
 // wxMemoryDC
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxMemoryDC : public wxDC, public wxMemoryDCBase
+class WXDLLEXPORT wxMemoryDC : public wxDC
 {
 public:
-    wxMemoryDC() { Init(); }
-    wxMemoryDC(wxBitmap& bitmap) { Init(); SelectObject(bitmap); }
+    wxMemoryDC();
     wxMemoryDC(wxDC *dc); // Create compatible DC
-    virtual ~wxMemoryDC();
+    ~wxMemoryDC();
+    virtual void SelectObject(const wxBitmap& bitmap);
 
     // these get reimplemented for mono-bitmaps to behave
     // more like their Win32 couterparts. They now interpret
@@ -45,12 +50,7 @@ public:
     
     wxBitmap GetSelectedObject() const { return m_selected; }
 
-protected:
-    virtual void DoSelect(const wxBitmap& bitmap);
-
 private:
-    void Init();
-
     DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 

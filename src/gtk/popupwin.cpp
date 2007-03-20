@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/popupwin.cpp
+// Name:        popupwin.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,25 +7,32 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "popupwin.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if wxUSE_POPUPWIN
 
 #include "wx/popupwin.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/frame.h"
-    #include "wx/cursor.h"
-#endif // WX_PRECOMP
+#include "wx/frame.h"
+#include "wx/app.h"
+#include "wx/cursor.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "wx/gtk/private.h" //for idle stuff
 #include "wx/gtk/win_gtk.h"
+
+//-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 
 //-----------------------------------------------------------------------------
 // "button_press"
@@ -36,16 +43,13 @@ static gint gtk_popup_button_press (GtkWidget *widget, GdkEvent *gdk_event, wxPo
 {
     GtkWidget *child = gtk_get_event_widget (gdk_event);
 
-    /* Ignore events sent out before we connected to the signal */
-    if (win->m_time >= ((GdkEventButton*)gdk_event)->time)
-        return FALSE;
-
-    /*  We don't ask for button press events on the grab widget, so
-     *  if an event is reported directly to the grab widget, it must
-     *  be on a window outside the application (and thus we remove
-     *  the popup window). Otherwise, we check if the widget is a child
-     *  of the grab widget, and only remove the popup window if it
-     *  is not. */
+  /* We don't ask for button press events on the grab widget, so
+   *  if an event is reported directly to the grab widget, it must
+   *  be on a window outside the application (and thus we remove
+   *  the popup window). Otherwise, we check if the widget is a child
+   *  of the grab widget, and only remove the popup window if it
+   *  is not.
+   */
     if (child != widget)
     {
         while (child)
@@ -75,7 +79,8 @@ static gint gtk_dialog_focus_callback( GtkWidget *widget, GtkDirectionType WXUNU
     if (g_isIdle)
         wxapp_install_idle_handler();
 
-    /* This disables GTK's tab traversal */
+    // This disables GTK's tab traversal
+    gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "focus" );
     return TRUE;
 }
 }
@@ -119,7 +124,7 @@ gtk_dialog_realized_callback( GtkWidget * WXUNUSED(widget), wxPopupWindow *win )
     gdk_window_set_decorations( win->m_widget->window, (GdkWMDecoration)decor);
     gdk_window_set_functions( win->m_widget->window, (GdkWMFunction)func);
 
-    gtk_window_set_resizable(GTK_WINDOW(win->m_widget), FALSE);
+    gtk_window_set_policy(GTK_WINDOW(win->m_widget), 0, 0, 1);
 
     return FALSE;
 }
@@ -167,13 +172,13 @@ wxPopupWindow::~wxPopupWindow()
 
 bool wxPopupWindow::Create( wxWindow *parent, int style )
 {
-    m_needParent = false;
+    m_needParent = FALSE;
 
     if (!PreCreation( parent, wxDefaultPosition, wxDefaultSize ) ||
         !CreateBase( parent, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("popup") ))
     {
         wxFAIL_MSG( wxT("wxPopupWindow creation failed") );
-        return false;
+        return FALSE;
     }
 
     // Unlike windows, top level windows are created hidden by default.
@@ -191,8 +196,8 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
 
     GTK_WIDGET_UNSET_FLAGS( m_widget, GTK_CAN_FOCUS );
 
-    g_signal_connect (m_widget, "delete_event",
-                      G_CALLBACK (gtk_dialog_delete_callback), this);
+    gtk_signal_connect( GTK_OBJECT(m_widget), "delete_event",
+        GTK_SIGNAL_FUNC(gtk_dialog_delete_callback), (gpointer)this );
 
     m_wxwindow = gtk_pizza_new();
     gtk_widget_show( m_wxwindow );
@@ -206,19 +211,17 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
 
     /*  we cannot set MWM hints  before the widget has
         been realized, so we do this directly after realization */
-    g_signal_connect (m_widget, "realize",
-                      G_CALLBACK (gtk_dialog_realized_callback), this);
+    gtk_signal_connect( GTK_OBJECT(m_widget), "realize",
+                        GTK_SIGNAL_FUNC(gtk_dialog_realized_callback), (gpointer) this );
 
     // disable native tab traversal
-    g_signal_connect (m_widget, "focus",
-                      G_CALLBACK (gtk_dialog_focus_callback), this);
+    gtk_signal_connect( GTK_OBJECT(m_widget), "focus",
+        GTK_SIGNAL_FUNC(gtk_dialog_focus_callback), (gpointer)this );
 
-    m_time = gtk_get_current_event_time();
+    gtk_signal_connect (GTK_OBJECT(m_widget), "button_press_event",
+        GTK_SIGNAL_FUNC(gtk_popup_button_press), (gpointer)this );
 
-    g_signal_connect (m_widget, "button_press_event",
-                      G_CALLBACK (gtk_popup_button_press), this);
-
-    return true;
+    return TRUE;
 }
 
 void wxPopupWindow::DoMoveWindow(int WXUNUSED(x), int WXUNUSED(y), int WXUNUSED(width), int WXUNUSED(height) )
@@ -232,7 +235,7 @@ void wxPopupWindow::DoSetSize( int x, int y, int width, int height, int sizeFlag
     wxASSERT_MSG( (m_wxwindow != NULL), wxT("invalid dialog") );
 
     if (m_resizing) return; /* I don't like recursions */
-    m_resizing = true;
+    m_resizing = TRUE;
 
     int old_x = m_x;
     int old_y = m_y;
@@ -283,28 +286,34 @@ void wxPopupWindow::DoSetSize( int x, int y, int width, int height, int sizeFlag
         {
             /* we set the position here and when showing the dialog
                for the first time in idle time */
-            // Where does that happen in idle time? I do not see it anywhere - MR
-            gtk_window_move( GTK_WINDOW(m_widget), m_x, m_y );
+            gtk_widget_set_uposition( m_widget, m_x, m_y );
         }
     }
 
     if ((m_width != old_width) || (m_height != old_height))
     {
-        gtk_widget_set_size_request( m_widget, m_width, m_height );
+        gtk_widget_set_usize( m_widget, m_width, m_height );
 
         /* actual resizing is deferred to GtkOnSize in idle time and
            when showing the dialog */
-        m_sizeSet = false;
+        m_sizeSet = FALSE;
 
     }
 
-    m_resizing = false;
+    m_resizing = FALSE;
 }
 
-void wxPopupWindow::GtkOnSize()
+void wxPopupWindow::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y), int width, int height )
 {
-    if (m_sizeSet) return;
+    // due to a bug in gtk, x,y are always 0
+    // m_x = x;
+    // m_y = y;
+
+    if ((m_height == height) && (m_width == width) && (m_sizeSet)) return;
     if (!m_wxwindow) return;
+
+    m_width = width;
+    m_height = height;
 
     /* FIXME: is this a hack? */
     /* Since for some reason GTK will revert to using maximum size ever set
@@ -325,7 +334,7 @@ void wxPopupWindow::GtkOnSize()
                                    (GdkWindowHints) flag );
 
 
-    m_sizeSet = true;
+    m_sizeSet = TRUE;
 
     wxSizeEvent event( wxSize(m_width,m_height), GetId() );
     event.SetEventObject( this );
@@ -335,7 +344,7 @@ void wxPopupWindow::GtkOnSize()
 void wxPopupWindow::OnInternalIdle()
 {
     if (!m_sizeSet && GTK_WIDGET_REALIZED(m_wxwindow))
-        GtkOnSize();
+        GtkOnSize( m_x, m_y, m_width, m_height );
 
     wxWindow::OnInternalIdle();
 }
@@ -349,7 +358,7 @@ bool wxPopupWindow::Show( bool show )
            much ugly flicker nor from within the size_allocate
            handler, because GTK 1.1.X forbids that. */
 
-        GtkOnSize();
+        GtkOnSize( m_x, m_y, m_width, m_height );
     }
 
     bool ret = wxWindow::Show( show );

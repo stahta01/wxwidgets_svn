@@ -33,13 +33,6 @@
 #    if defined(__MACH__)
 #        define __WXMAC_OSX__
 #        define __WXMAC_CARBON__
-#        include <AvailabilityMacros.h>
-#        ifndef MAC_OS_X_VERSION_10_4
-#           define MAC_OS_X_VERSION_10_4 1040
-#        endif
-#        ifndef MAC_OS_X_VERSION_10_5
-#           define MAC_OS_X_VERSION_10_5 1050
-#        endif
 #        ifdef __WXMAC_XCODE__
 #            include <unistd.h>
 #            include "wx/mac/carbon/config_xcode.h"
@@ -79,12 +72,6 @@
 #endif
 
 #if defined(__PALMOS__)
-#   if __PALMOS__ == 0x06000000
-#       define __WXPALMOS6__
-#   endif
-#   if __PALMOS__ == 0x05000000
-#       define __WXPALMOS5__
-#   endif
 #   ifndef __WXPALMOS__
 #       define __WXPALMOS__
 #   endif
@@ -129,6 +116,11 @@
 #    ifndef __WIN32__
 #        define __WIN32__
 #    endif
+
+    /* this means Win95-style UI, i.e. Win9x/NT 4+: always true now */
+#    if !defined(__WIN95__)
+#        define __WIN95__
+#    endif
 #endif /* Win32 */
 
 #if defined(__WXMSW__) || defined(__WIN32__)
@@ -136,6 +128,12 @@
 #       define __WINDOWS__
 #   endif
 #endif
+
+#ifdef __WINE__
+#   ifndef __WIN95__
+#       define __WIN95__
+#   endif
+#endif /* WINE */
 
 /* detect MS SmartPhone */
 #if defined( WIN32_PLATFORM_WFSP )
@@ -180,10 +178,6 @@
 #   ifndef __WXWINCE__
 #       define __WXWINCE__
 #   endif
-#endif
-
-#if defined(__POCKETPC__) || defined(__SMARTPHONE__) || defined(__WXGPE__)
-#   define __WXHANDHELD__
 #endif
 
 /*
@@ -264,8 +258,6 @@
 #   define wxWATCOM_VERSION(major,minor) 0
 #   define wxCHECK_WATCOM_VERSION(major,minor) 0
 #   define wxONLY_WATCOM_EARLIER_THAN(major,minor) 0
-#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
-#   error "Only Open Watcom is supported in this release"
 #else
 #   define wxWATCOM_VERSION(major,minor) ( major * 100 + minor * 10 + 1100 )
 #   define wxCHECK_WATCOM_VERSION(major,minor) ( __WATCOMC__ >= wxWATCOM_VERSION(major,minor) )
@@ -419,16 +411,14 @@
        __DARWIN__ for Darwin related corrections (wxMac, wxMotif)
      */
 #elif defined(__OS2__)
-
-    /* wxOS2 vs. non wxOS2 ports on OS2 platform */
-#    if !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__)
-#        ifndef __WXPM__
-#            define __WXPM__
-#        endif
-#    endif
-
 #    if defined(__IBMCPP__)
 #        define __VISAGEAVER__ __IBMCPP__
+#    endif
+#    ifndef __WXOS2__
+#        define __WXOS2__
+#    endif
+#    ifndef __WXPM__
+#        define __WXPM__
 #    endif
 
     /* Place other OS/2 compiler environment defines here */
@@ -467,7 +457,7 @@
 #        define __VISUALC__ _MSC_VER
 #    elif defined(__BCPLUSPLUS__) && !defined(__BORLANDC__)
 #        define __BORLANDC__
-#    elif defined(__WATCOMC__)
+#      elif defined(__WATCOMC__)
 #    elif defined(__SC__)
 #        define __SYMANTECC__
 #    endif  /* compiler */
@@ -497,10 +487,6 @@
 #    else
 #         define __SYMANTEC__
 #    endif
-#endif
-
-#ifdef __INTEL_COMPILER
-#   define __INTELC__
 #endif
 
 /*
@@ -535,19 +521,15 @@
     #define wxCHECK_GCC_VERSION( major, minor ) 0
 #endif
 
-#if defined(__BORLANDC__) || (defined(__GNUC__) && __GNUC__ < 3)
-#define wxNEEDS_CHARPP
-#endif
-
 /*
    This macro can be used to check that the version of mingw32 compiler is
    at least maj.min
  */
 #if ( defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || \
     ( defined( __CYGWIN__ ) && defined( __WINDOWS__ ) ) || \
-      wxCHECK_WATCOM_VERSION(1,0) ) && \
+      (defined(__WATCOMC__) && __WATCOMC__ >= 1200) ) && \
     !defined(__DOS__) && \
-    !defined(__WXPM__) && \
+    !defined(__WXOS2__) && \
     !defined(__WXMOTIF__) && \
     !defined(__WXGTK__) && \
     !defined(__WXX11__) && \
@@ -565,10 +547,8 @@
 #endif
 
 #if defined (__WXMAC__)
-#    if ( !defined(__MACH__) || ( defined(__BIG_ENDIAN__) && __BIG_ENDIAN__ ) )
+#    if !defined(WORDS_BIGENDIAN) && ( !defined(__MACH__) || ( defined(__BIG_ENDIAN__) && __BIG_ENDIAN__ ) )
 #        define WORDS_BIGENDIAN 1
-#    else
-#        undef WORDS_BIGENDIAN
 #    endif
 #endif
 

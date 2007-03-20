@@ -12,6 +12,10 @@
 #ifndef _MIMETYPE_IMPL_H
 #define _MIMETYPE_IMPL_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "mimetype.h"
+#endif
+
 #include "wx/mimetype.h"
 
 #if wxUSE_MIMETYPE
@@ -26,7 +30,7 @@ class WXDLLEXPORT wxMimeTypesManagerImpl
 public:
     // ctor and dtor
     wxMimeTypesManagerImpl();
-    virtual ~wxMimeTypesManagerImpl();
+    ~wxMimeTypesManagerImpl();
 
     // load all data into memory - done when it is needed for the first time
     void Initialize(int mailcapStyles = wxMAILCAP_ALL,
@@ -66,7 +70,7 @@ public:
         // file type
     wxString GetExtension(size_t index) { return m_aExtensions[index]; }
 
-protected:
+private:
     void InitIfNeeded();
 
     wxArrayString m_aTypes,         // MIME types
@@ -104,8 +108,6 @@ protected:
                                  const wxArrayString& icondirs);
     void LoadKDELinkFilesFromDir(const wxString& dirbase,
                                  const wxArrayString& icondirs);
-    void LoadKDEApp(const wxString& filename);
-    void LoadKDEAppsFilesFromDir(const wxString& dirname);
     void GetKDEMimeInfo(const wxString& sExtraDir);
 
     // write KDE
@@ -124,20 +126,20 @@ protected:
 
     // functions used to do associations
 
-    virtual int AddToMimeData(const wxString& strType,
+    int AddToMimeData(const wxString& strType,
                       const wxString& strIcon,
                       wxMimeTypeCommands *entry,
                       const wxArrayString& strExtensions,
                       const wxString& strDesc,
                       bool replaceExisting = TRUE);
 
-    virtual bool DoAssociation(const wxString& strType,
+    bool DoAssociation(const wxString& strType,
                        const wxString& strIcon,
                        wxMimeTypeCommands *entry,
                        const wxArrayString& strExtensions,
                        const wxString& strDesc);
 
-    virtual bool WriteMimeInfo(int nIndex, bool delete_mime );
+    bool WriteMimeInfo(int nIndex, bool delete_mime );
 
     // give it access to m_aXXX variables
     friend class WXDLLEXPORT wxFileTypeImpl;

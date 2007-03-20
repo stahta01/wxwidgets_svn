@@ -25,6 +25,8 @@
 %import core.i
 %pythoncode { wx = _core }
 
+%include __misc_rename.i
+
 
 MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 
@@ -48,7 +50,5 @@ MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 %include _clipbrd.i
 %include _display.i
 %include _stdpaths.i
-%include _power.i
-%include _about.i
 
 //---------------------------------------------------------------------------

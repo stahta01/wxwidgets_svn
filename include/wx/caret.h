@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/caret.h
+// Name:        caret.h
 // Purpose:     wxCaretBase class - the interface of wxCaret
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -15,6 +15,10 @@
 #include "wx/defs.h"
 
 #if wxUSE_CARET
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "caret.h"
+#endif
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -205,19 +209,6 @@ private:
 // avoid overdrawing the caret
 // ----------------------------------------------------------------------------
 
-#ifdef wxHAS_CARET_USING_OVERLAYS
-
-// we don't need to hide the caret if it's rendered using overlays
-class WXDLLEXPORT wxCaretSuspend
-{
-public:
-    wxCaretSuspend(wxWindow *WXUNUSED(win)) {}
-
-    DECLARE_NO_COPY_CLASS(wxCaretSuspend)
-};
-
-#else // !wxHAS_CARET_USING_OVERLAYS
-
 class WXDLLEXPORT wxCaretSuspend
 {
 public:
@@ -245,8 +236,7 @@ private:
     DECLARE_NO_COPY_CLASS(wxCaretSuspend)
 };
 
-#endif // wxHAS_CARET_USING_OVERLAYS/!wxHAS_CARET_USING_OVERLAYS
-
 #endif // wxUSE_CARET
 
 #endif // _WX_CARET_H_BASE_
+

@@ -40,8 +40,6 @@ public:
     virtual void CocoaNotification_menuDidRemoveItem(WX_NSNotification notification) {}
     virtual void CocoaNotification_menuDidSendAction(WX_NSNotification notification) {}
     virtual void CocoaNotification_menuWillSendAction(WX_NSNotification notification) {}
-    virtual ~wxCocoaNSMenu() { }
-
 protected:
     static struct objc_object *sm_cocoaObserver;
 };

@@ -9,6 +9,10 @@
 // Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "joystick.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_JOYSTICK
@@ -26,18 +30,6 @@ wxPoint wxJoystick::GetPosition() const
 {
     // TODO
     return wxPoint(0, 0);
-}
-
-int wxJoystick::GetPosition(unsigned axis) const
-{
-    // TODO
-    return 0;
-}
-
-bool wxJoystick::GetButtonState(unsigned id) const
-{
-    // TODO
-    return false;
 }
 
 int wxJoystick::GetZPosition() const
@@ -102,7 +94,7 @@ bool wxJoystick::IsOk() const
     return FALSE;
 }
 
-int wxJoystick::GetNumberJoysticks()
+int wxJoystick::GetNumberJoysticks() const
 {
     // TODO
     return 0;

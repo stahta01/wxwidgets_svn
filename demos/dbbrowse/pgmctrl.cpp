@@ -8,7 +8,13 @@
 // Copyright:   (c) Mark Johnson, Berlin Germany
 // Licence:     wxWindows license
 //----------------------------------------------------------------------------------------
-
+//-- all #ifdefs that the whole Project needs. -------------------------------------------
+//----------------------------------------------------------------------------------------
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+//----------------------------------------------------------------------------------------
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 //----------------------------------------------------------------------------------------
@@ -169,7 +175,7 @@ void PgmCtrl::OnSelChanged(wxMouseEvent& WXUNUSED(event))
         //--------------------------------------------------------------------------------------
         if (Temp1.Contains(_T("ODBC-")))
         {
-            Temp1 = Temp1.Mid(5);
+            Temp1 = Temp1.Mid(5,wxSTRING_MAXLEN);
             for (i=0;i<pDoc->i_DSN;i++)
             {
                 if (Temp1 == (pDoc->p_DSN+i)->Dsn)
@@ -213,7 +219,7 @@ void PgmCtrl::OnRightSelect(wxTreeEvent& WXUNUSED(event))
         //--------------------------------------------------------------------------------------
         if (Temp1.Contains(_T("ODBC-")))
         {
-            Temp1 = Temp1.Mid(5);
+            Temp1 = Temp1.Mid(5,wxSTRING_MAXLEN);
             for (i=0;i<pDoc->i_DSN;i++)
             {
                 if (Temp1 == (pDoc->p_DSN+i)->Dsn)

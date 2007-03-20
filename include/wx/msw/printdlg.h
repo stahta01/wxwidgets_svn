@@ -12,6 +12,10 @@
 #ifndef _WX_PRINTDLG_H_
 #define _WX_PRINTDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "printdlg.h"
+#endif
+
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #include "wx/dialog.h"
@@ -34,8 +38,7 @@ public:
     virtual bool TransferTo( wxPrintData &data );
     virtual bool TransferFrom( const wxPrintData &data );
     
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
+    virtual bool Ok() const;
     
     void* GetDevMode() const { return m_devMode; }
     void SetDevMode(void* data) { m_devMode = data; }
@@ -68,12 +71,11 @@ public:
 
     wxPrintDialogData& GetPrintDialogData() { return m_printDialogData; }
     wxPrintData& GetPrintData() { return m_printDialogData.GetPrintData(); }
-
     virtual wxDC *GetPrintDC();
 
 private:
     wxPrintDialogData m_printDialogData;
-    wxPrinterDC*      m_printerDC;
+    wxDC*             m_printerDC;
     bool              m_destroyDC;
     wxWindow*         m_dialogParent;
     

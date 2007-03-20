@@ -15,19 +15,25 @@
 #ifndef _WX_DIRDLGG_H_
 #define _WX_DIRDLGG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dirdlgg.h"
+#endif
+
 class WXDLLEXPORT wxGenericDirCtrl;
 class WXDLLEXPORT wxTextCtrl;
 class WXDLLEXPORT wxTreeEvent;
 
 // we may be included directly as well as from wx/dirdlg.h (FIXME)
-extern WXDLLEXPORT_DATA(const wxChar) wxDirDialogNameStr[];
-extern WXDLLEXPORT_DATA(const wxChar) wxDirSelectorPromptStr[];
-
+extern WXDLLEXPORT_DATA(const wxChar*) wxDirDialogNameStr;
+extern WXDLLEXPORT_DATA(const wxChar*) wxDirSelectorPromptStr;
 #ifndef wxDD_DEFAULT_STYLE
+
 #ifdef __WXWINCE__
-    #define wxDD_DEFAULT_STYLE      wxDEFAULT_DIALOG_STYLE
+    #define wxDD_DEFAULT_STYLE \
+        (wxDEFAULT_DIALOG_STYLE | wxDD_NEW_DIR_BUTTON)
 #else
-    #define wxDD_DEFAULT_STYLE      (wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
+    #define wxDD_DEFAULT_STYLE \
+        (wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxDD_NEW_DIR_BUTTON)
 #endif
 #endif
 
@@ -37,34 +43,30 @@ extern WXDLLEXPORT_DATA(const wxChar) wxDirSelectorPromptStr[];
 // wxGenericDirDialog
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxGenericDirDialog : public wxDirDialogBase
+class WXDLLEXPORT wxGenericDirDialog : public wxDialog
 {
 public:
-    wxGenericDirDialog() : wxDirDialogBase() { }
+    wxGenericDirDialog() : wxDialog() { }
 
     wxGenericDirDialog(wxWindow* parent,
                        const wxString& title = wxDirSelectorPromptStr,
                        const wxString& defaultPath = wxEmptyString,
                        long style = wxDD_DEFAULT_STYLE,
                        const wxPoint& pos = wxDefaultPosition,
-                       const wxSize& sz = wxDefaultSize,//Size(450, 550),
-                       const wxString& name = wxDirDialogNameStr);
-
-    bool Create(wxWindow* parent,
-                const wxString& title = wxDirSelectorPromptStr,
-                const wxString& defaultPath = wxEmptyString,
-                long style = wxDD_DEFAULT_STYLE,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& sz = wxDefaultSize,//Size(450, 550),
+                       const wxSize& sz = wxSize(450, 550),
                        const wxString& name = wxDirDialogNameStr);
 
     //// Accessors
+    void SetMessage(const wxString& message) { m_message = message; }
     void SetPath(const wxString& path);
+    void SetStyle(long style) { m_dialogStyle = style; }
+
+    wxString GetMessage() const { return m_message; }
     wxString GetPath() const;
+    long GetStyle() const { return m_dialogStyle; }
 
     //// Overrides
     virtual int ShowModal();
-    virtual void EndModal(int retCode);
 
     // this one is specific to wxGenericDirDialog
     wxTextCtrl* GetInputCtrl() const { return m_input; }
@@ -79,6 +81,9 @@ protected:
     void OnGoHome(wxCommandEvent& event);
     void OnShowHidden(wxCommandEvent& event);
 
+    wxString          m_message;
+    long              m_dialogStyle;
+    wxString          m_path;
     wxGenericDirCtrl* m_dirCtrl;
     wxTextCtrl*       m_input;
 

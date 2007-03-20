@@ -22,13 +22,11 @@
 
 #if wxUSE_FILEDLG
 
-#include "wx/filedlg.h"
-
 #ifndef WX_PRECOMP
     #include "wx/msgdlg.h"
+    #include "wx/filedlg.h"
     #include "wx/app.h"
 #endif
-
 #include "wx/filename.h"
 
 #include "wx/cocoa/autorelease.h"
@@ -48,17 +46,11 @@ IMPLEMENT_CLASS(wxCocoaFileDialog, wxFileDialogBase)
 // wxFileDialog
 // ----------------------------------------------------------------------------
 
-wxFileDialog::wxFileDialog(wxWindow *parent,
-                           const wxString& message,
-                           const wxString& defaultDir,
-                           const wxString& defaultFileName,
-                           const wxString& wildCard,
-                           long style,
-                           const wxPoint& pos,
-                           const wxSize& sz,
-                           const wxString& name)
-            : wxFileDialogBase(parent, message, defaultDir, defaultFileName,
-                               wildCard, style, pos, sz, name)
+wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
+        const wxString& defaultDir, const wxString& defaultFileName,
+        const wxString& wildCard, long style, const wxPoint& pos)
+:   wxFileDialogBase(parent, message, defaultDir, defaultFileName,
+        wildCard, style, pos)
 {
     wxTopLevelWindows.Append(this);
 
@@ -75,7 +67,7 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
 
     //If the user requests to save - use a NSSavePanel
     //else use a NSOpenPanel
-    if (HasFlag(wxFD_SAVE))
+    if (m_dialogStyle & wxSAVE)
     {
         SetNSPanel([NSSavePanel savePanel]);
 
@@ -94,12 +86,12 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
         // dialogs are all that useful, anyway :)
         //
     }
-    else //m_dialogStyle & wxFD_OPEN
+    else //m_dialogStyle & wxOPEN
     {
         SetNSPanel([NSOpenPanel openPanel]);
         [m_cocoaNSWindow setTitle:wxNSStringWithWxString(message)];
 
-        [(NSOpenPanel*)m_cocoaNSWindow setAllowsMultipleSelection:(HasFlag(wxFD_MULTIPLE))];
+        [(NSOpenPanel*)m_cocoaNSWindow setAllowsMultipleSelection:(m_dialogStyle & wxMULTIPLE)];
         [(NSOpenPanel*)m_cocoaNSWindow setResolvesAliases:YES];
         [(NSOpenPanel*)m_cocoaNSWindow setCanChooseFiles:YES];
         [(NSOpenPanel*)m_cocoaNSWindow setCanChooseDirectories:NO];
@@ -202,7 +194,7 @@ int wxFileDialog::ShowModal()
 
     int nResult;
 
-    if (HasFlag(wxFD_SAVE))
+    if (m_dialogStyle & wxSAVE)
     {
         nResult = [GetNSSavePanel()
                     runModalForDirectory:wxNSStringWithWxString(m_dir)
@@ -214,7 +206,7 @@ int wxFileDialog::ShowModal()
             m_path = m_fileNames[0];
         }
     }
-    else //m_dialogStyle & wxFD_OPEN
+    else //m_dialogStyle & wxOPEN
     {
         nResult = [(NSOpenPanel*)m_cocoaNSWindow
                     runModalForDirectory:wxNSStringWithWxString(m_dir)
@@ -236,3 +228,4 @@ int wxFileDialog::ShowModal()
 }
 
 #endif // wxUSE_FILEDLG
+

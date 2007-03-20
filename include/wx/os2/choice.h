@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/choice.h
+// Name:        choice.h
 // Purpose:     wxChoice class
 // Author:      David Webster
 // Modified by:
@@ -12,10 +12,7 @@
 #ifndef _WX_CHOICE_H_
 #define _WX_CHOICE_H_
 
-// ----------------------------------------------------------------------------
 // Choice item
-// ----------------------------------------------------------------------------
-
 class WXDLLEXPORT wxChoice: public wxChoiceBase
 {
   DECLARE_DYNAMIC_CLASS(wxChoice)
@@ -93,15 +90,23 @@ public:
     //
     // Implement base class virtuals
     //
-    virtual void     Delete(unsigned int n);
+    virtual int      DoAppend(const wxString& rsItem);
+    virtual int      DoInsert(const wxString& rsItem, int pos);
+    virtual void     Delete(int n);
     virtual void     Clear(void);
 
-    virtual unsigned int GetCount() const;
-    virtual int      GetSelection(void) const;
+    virtual int      GetCount(void) const;
+    virtual int      GetSelection(void) const ;
+#if wxABI_VERSION >= 20602
+    virtual int GetCurrentSelection() const {return GetSelection();}
+#endif
     virtual void     SetSelection(int n);
 
-    virtual wxString GetString(unsigned int n) const;
-    virtual void     SetString(unsigned int n, const wxString& rsStr);
+    virtual int      FindString(const wxString& rsStr) const;
+    virtual wxString GetString(int n) const ;
+    virtual void     SetString( int n
+                               ,const wxString& rsStr
+                              );
 
     //
     // OS2 only
@@ -115,12 +120,14 @@ public:
                                   );
 
 protected:
-    virtual int           DoAppend(const wxString& rsItem);
-    virtual int           DoInsert(const wxString& rsItem, unsigned int pos);
-    virtual void          DoSetItemClientData(unsigned int n, void* pClientData);
-    virtual void*         DoGetItemClientData(unsigned int n) const;
-    virtual void          DoSetItemClientObject(unsigned int n, wxClientData* pClientData);
-    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+    virtual void          DoSetItemClientData( int   n
+                                              ,void* pClientData
+                                             );
+    virtual void*         DoGetItemClientData(int n) const;
+    virtual void          DoSetItemClientObject( int           n
+                                                ,wxClientData* pClientData
+                                               );
+    virtual wxClientData* DoGetItemClientObject(int n) const;
     virtual wxSize        DoGetBestSize(void) const;
     virtual void          DoSetSize( int nX
                                     ,int nY

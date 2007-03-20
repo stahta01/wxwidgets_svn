@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/msgout.cpp
+// Name:        common/msgout.cpp
 // Purpose:     wxMessageOutput implementation
 // Author:      Mattia Barbon
 // Modified by:
@@ -17,6 +17,17 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma implementation "msgout.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,7 +40,6 @@
     #include "wx/ffile.h"
     #include "wx/app.h"
     #include "wx/intl.h"
-    #include "wx/log.h"
     #if wxUSE_GUI
         #include "wx/msgdlg.h"
     #endif // wxUSE_GUI
@@ -37,6 +47,8 @@
 
 #include "wx/msgout.h"
 #include "wx/apptrait.h"
+#include "wx/log.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -95,7 +107,7 @@ static inline bool IsInConsole()
 
 #endif // __WINDOWS__
 
-void wxMessageOutputBest::DoPrintf(const wxChar* format, ...)
+void wxMessageOutputBest::Printf(const wxChar* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -120,7 +132,7 @@ void wxMessageOutputBest::DoPrintf(const wxChar* format, ...)
 // wxMessageOutputStderr
 // ----------------------------------------------------------------------------
 
-void wxMessageOutputStderr::DoPrintf(const wxChar* format, ...)
+void wxMessageOutputStderr::Printf(const wxChar* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -136,7 +148,7 @@ void wxMessageOutputStderr::DoPrintf(const wxChar* format, ...)
 // wxMessageOutputDebug
 // ----------------------------------------------------------------------------
 
-void wxMessageOutputDebug::DoPrintf(const wxChar* format, ...)
+void wxMessageOutputDebug::Printf(const wxChar* format, ...)
 {
     wxString out;
 
@@ -175,7 +187,7 @@ void wxMessageOutputDebug::DoPrintf(const wxChar* format, ...)
 // wxMessageOutputLog
 // ----------------------------------------------------------------------------
 
-void wxMessageOutputLog::DoPrintf(const wxChar* format, ...)
+void wxMessageOutputLog::Printf(const wxChar* format, ...)
 {
     wxString out;
 
@@ -198,7 +210,7 @@ void wxMessageOutputLog::DoPrintf(const wxChar* format, ...)
 
 #if wxUSE_GUI
 
-void wxMessageOutputMessageBox::DoPrintf(const wxChar* format, ...)
+void wxMessageOutputMessageBox::Printf(const wxChar* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -220,3 +232,4 @@ void wxMessageOutputMessageBox::DoPrintf(const wxChar* format, ...)
 }
 
 #endif // wxUSE_GUI
+

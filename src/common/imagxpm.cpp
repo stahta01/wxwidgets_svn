@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagxpm.cpp
+// Name:        imagxpm.cpp
 // Purpose:     wxXPMHandler
 // Author:      Vaclav Slavik, Robert Roebling
 // RCS-ID:      $Id$
@@ -62,23 +62,28 @@ license is as follows:
 %
 */
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "imagxpm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#  pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#  include "wx/defs.h"
 #endif
 
 #if wxUSE_XPM
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/utils.h"
-#endif
-
 #include "wx/imagxpm.h"
 #include "wx/wfstream.h"
+#include "wx/log.h"
+#include "wx/intl.h"
+#include "wx/utils.h"
 #include "wx/xpmdecod.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxXPMHandler,wxImageHandler)
@@ -144,7 +149,7 @@ bool wxXPMHandler::SaveFile(wxImage * image,
         sName << wxT("_xpm");
     }
 
-    if ( !sName.empty() )
+    if ( !sName.IsEmpty() )
         sName = wxString(wxT("/* XPM */\nstatic char *")) + sName;
     else
         sName = wxT("/* XPM */\nstatic char *xpm_data");
@@ -210,7 +215,7 @@ bool wxXPMHandler::SaveFile(wxImage * image,
     }
 
     tmp = wxT("/* pixels */\n");
-    stream.Write( (const char*) tmp.ToAscii(), tmp.length() );
+    stream.Write( (const char*) tmp.ToAscii(), tmp.Length() );
 
     unsigned char *data = image->GetData();
     for (j = 0; j < image->GetHeight(); j++)

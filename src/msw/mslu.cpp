@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/mslu.cpp
+// Name:        msw/mslu.cpp
 // Purpose:     Fixes for bugs in MSLU
 // Author:      Vaclav Slavik
 // Modified by:
@@ -9,15 +9,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
-    #include <dir.h>
+#pragma hdrstop
+#include <dir.h>
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/utils.h"
 #endif
 
@@ -30,7 +35,7 @@
 bool WXDLLIMPEXP_BASE wxUsingUnicowsDll()
 {
 #if wxUSE_UNICODE_MSLU
-    return (wxGetOsVersion() == wxOS_WINDOWS_9X);
+    return (wxGetOsVersion() == wxWIN95);
 #else
     return false;
 #endif
@@ -65,7 +70,7 @@ bool WXDLLIMPEXP_BASE wxUsingUnicowsDll()
     #include <direct.h>
 #endif
 
-// Undef redirection macros defined in wx/msw/wrapwin.h:
+// Undef redirection macros defined in wx/msw/mslu.h:
 #undef DrawStateW
 #undef GetOpenFileNameW
 #undef GetSaveFileNameW
@@ -120,7 +125,7 @@ static void wxFixOPENFILENAME(LPOPENFILENAME ofn)
             ofn->nFileOffset = wxStrlen(ofn->lpstrFile)+1;
         }
     }
-#endif // OFN_EXPLORER
+#endif
 }
 
 WXDLLEXPORT int wxMSLU_GetOpenFileNameW(void *ofn)
@@ -222,7 +227,7 @@ WXDLLIMPEXP_BASE int wxMSLU__wstat(const wxChar *name, struct _stat *buffer)
 }
 
 #ifdef __BORLANDC__
-//here _stati64 is defined as stati64, see wx/filefn.h
+//here _stati64 is defined as stati64, see msw/mslu.h line 62 
 #undef _stati64
 WXDLLIMPEXP_BASE int wxMSLU__wstati64(const wxChar *name, struct _stati64 *buffer)
  {

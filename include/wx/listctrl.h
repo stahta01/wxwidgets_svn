@@ -12,6 +12,10 @@
 #ifndef _WX_LISTCTRL_H_BASE_
 #define _WX_LISTCTRL_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listctrlbase.h"
+#endif
+
 #include "wx/defs.h" // headers should include this before first wxUSE_XXX check
 
 #if wxUSE_LISTCTRL
@@ -22,7 +26,7 @@
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxListCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxListCtrlNameStr;
 
 // ----------------------------------------------------------------------------
 // include the wxListCtrl class declaration
@@ -30,8 +34,6 @@ extern WXDLLEXPORT_DATA(const wxChar) wxListCtrlNameStr[];
 
 #if defined(__WIN32__) && !defined(__WXUNIVERSAL__)
     #include "wx/msw/listctrl.h"
-#elif defined(__WXMAC__)
-    #include "wx/mac/carbon/listctrl.h"
 #else
     #include "wx/generic/listctrl.h"
 #endif
@@ -84,7 +86,7 @@ public:
         { return GetNextSelected(-1); }
 
     // return true if the item is selected
-    bool IsSelected(long index) const
+    bool IsSelected(long index)
         { return GetItemState(index, wxLIST_STATE_SELECTED) != 0; }
 
     // columns

@@ -12,6 +12,10 @@
 #ifndef _WX_PRINTWIN_H_
 #define _WX_PRINTWIN_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "printwin.h"
+#endif
+
 #include "wx/prntbase.h"
 
 // ---------------------------------------------------------------------------
@@ -29,8 +33,7 @@ public:
     virtual bool Print(wxWindow *parent,
                        wxPrintout *printout,
                        bool prompt = true);
-
-    virtual wxDC *PrintDialog(wxWindow *parent);
+    virtual wxDC* PrintDialog(wxWindow *parent);
     virtual bool Setup(wxWindow *parent);
 
 private:

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/radiobut.cpp
+// Name:        msw/radiobut.cpp
 // Purpose:     wxRadioButton
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "radiobut.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,9 +30,8 @@
 
 #if wxUSE_RADIOBTN
 
-#include "wx/radiobut.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/radiobut.h"
     #include "wx/settings.h"
     #include "wx/dcscreen.h"
 #endif
@@ -165,7 +168,7 @@ void wxRadioButton::SetValue(bool value)
     // buttons in the same group: Windows doesn't do it automatically
     if ( m_isChecked )
     {
-        // If another radiobutton in the group currently has the focus, we have to
+        // If another radiobutton in the group currently has the focus, we have to 
         // set it to this radiobutton, else the old readiobutton will be reselected
         // automatically, if a parent window loses the focus and regains it.
         bool shouldSetFocus = false;
@@ -190,7 +193,7 @@ void wxRadioButton::SetValue(bool value)
                     // A wxRB_SINGLE button isn't part of this group
                     break;
                 }
-
+                
                 if (btn)
                 {
                     if (btn == pFocusWnd)
@@ -297,7 +300,7 @@ wxSize wxRadioButton::DoGetBestSize() const
     int wRadio, hRadio;
     if ( !str.empty() )
     {
-        GetTextExtent(GetLabelText(str), &wRadio, &hRadio);
+        GetTextExtent(wxStripMenuCodes(str), &wRadio, &hRadio);
         wRadio += s_radioSize + GetCharWidth();
 
         if ( hRadio < s_radioSize )
@@ -314,14 +317,5 @@ wxSize wxRadioButton::DoGetBestSize() const
     return best;
 }
 
-WXDWORD wxRadioButton::MSWGetStyle(long style, WXDWORD *exstyle) const
-{
-    WXDWORD styleMSW = wxControl::MSWGetStyle(style, exstyle);
-
-    if ( style & wxRB_GROUP )
-        styleMSW |= WS_GROUP;
-
-    return styleMSW;
-}
-
 #endif // wxUSE_RADIOBTN
+

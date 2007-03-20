@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        life/dialogs.cpp
+// Name:        dialogs.cpp
 // Purpose:     Life! dialogs
 // Author:      Guillermo Rodriguez Garcia, <guille@iies.es>
 // Modified by:
@@ -12,6 +12,10 @@
 // ==========================================================================
 // headers, declarations, constants
 // ==========================================================================
+
+#ifdef __GNUG__
+    #pragma implementation "dialogs.h"
+#endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -86,7 +90,7 @@ LifeSamplesDialog::LifeSamplesDialog(wxWindow *parent)
     if (isPDA &&
         wxSystemSettings::GetMetric(wxSYS_SCREEN_X) < wxSystemSettings::GetMetric(wxSYS_SCREEN_Y))
     {
-        listSize = wxSize(wxDefaultCoord, 50);
+        listSize = wxSize(-1, 50);
         screenIsHorizontal = false;
     }
 
@@ -128,16 +132,21 @@ LifeSamplesDialog::LifeSamplesDialog(wxWindow *parent)
         sizer3->Add( new wxStaticLine(this, wxID_ANY), 0, wxGROW | wxLEFT | wxRIGHT, 10 );
 #endif // wxUSE_STATLINE
     sizer3->Add( sizer2, 1, wxGROW | wxALL, 5 );
+#if wxUSE_STATLINE
+    if (!isPDA)
+        sizer3->Add( new wxStaticLine(this, wxID_ANY), 0, wxGROW | wxLEFT | wxRIGHT, 10 );
+#endif // wxUSE_STATLINE
 
-    wxSizer *sizerBtns = CreateButtonSizer(wxOK|wxCANCEL);
-    if ( sizerBtns )
-    {
-        sizer3->Add(sizerBtns, wxSizerFlags().Expand().Border());
-    }
+#if defined(__SMARTPHONE__)
+    SetLeftMenu(wxID_CANCEL);
+    SetRightMenu(wxID_OK);
+#endif
 
     // activate
     SetSizer(sizer3);
-#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
+
+#if !defined(__POCKETPC__) && !defined(__SMARTPHONE__)
+    sizer3->Add( CreateButtonSizer(wxOK | wxCANCEL), 0, wxCENTRE | wxALL, isPDA ? 2 : 10 );
     sizer3->SetSizeHints(this);
     sizer3->Fit(this);
     Centre(wxBOTH | wxCENTRE_ON_SCREEN);
@@ -194,20 +203,24 @@ LifeAboutDialog::LifeAboutDialog(wxWindow *parent)
 <guille@iies.es>\n\n\
 Portions of the code are based in XLife;\n\
 XLife is (c) 1989 by Jon Bennett et al.")),
-                                  0, wxCENTRE | wxRIGHT|wxLEFT|wxTOP, 20 );
+                                  0, wxCENTRE | wxALL, 20 );
+#if wxUSE_STATLINE
+    sizer->Add( new wxStaticLine(this, wxID_ANY), 0, wxGROW | wxLEFT | wxRIGHT, 5 );
+#endif // wxUSE_STATLINE
 
-    // buttons if any
-    wxSizer *sizerBtns = CreateButtonSizer(wxOK);
-    if ( sizerBtns )
-    {
-        sizer->Add(sizerBtns, wxSizerFlags().Expand().Border());
-    }
+#if ! (defined(__SMARTPHONE__) || defined(__POCKETPC__))
+    sizer->Add( CreateButtonSizer(wxOK), 0, wxCENTRE | wxALL, 10 );
+#endif
 
     // activate
     SetSizer(sizer);
-#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
+
+#if ! (defined(__SMARTPHONE__) || defined(__POCKETPC__))
     sizer->SetSizeHints(this);
     sizer->Fit(this);
     Centre(wxBOTH | wxCENTRE_ON_SCREEN);
 #endif
 }
+
+
+

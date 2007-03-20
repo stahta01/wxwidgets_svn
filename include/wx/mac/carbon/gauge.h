@@ -12,9 +12,13 @@
 #ifndef _WX_GAUGE_H_
 #define _WX_GAUGE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "gauge.h"
+#endif
+
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxGaugeNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxGaugeNameStr;
 
 // Group box
 class WXDLLEXPORT wxGauge: public wxGaugeBase
@@ -45,9 +49,6 @@ class WXDLLEXPORT wxGauge: public wxGaugeBase
     virtual void SetRange(int range);
     virtual void SetValue(int pos);
     virtual int  GetValue() const ;
-
-    void Pulse();
-
  protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxGauge)
 };

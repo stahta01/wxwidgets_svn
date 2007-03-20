@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dynarray.cpp
+// Name:        dynarray.cpp
 // Purpose:     implementation of wxBaseArray class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -13,17 +13,18 @@
 // headers
 // ============================================================================
 
-// For compilers that support precompilation, includes "wx.h".
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dynarray.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/intl.h"
-#endif //WX_PRECOMP
+#include "wx/dynarray.h"
+#include "wx/intl.h"
 
 #include <stdlib.h>
 #include <string.h> // for memmove
@@ -244,6 +245,23 @@ void name::Clear()                                                          \
   wxDELETEA(m_pItems);                                                      \
 }                                                                           \
                                                                             \
+/* pre-allocates memory (frees the previous data!) */                       \
+void name::Alloc(size_t nSize)                                              \
+{                                                                           \
+  /* only if old buffer was not big enough */                               \
+  if ( nSize > m_nSize ) {                                                  \
+    wxDELETEA(m_pItems);                                                    \
+    m_nSize  = 0;                                                           \
+    m_pItems = new T[nSize];                                                \
+    /* only alloc if allocation succeeded */                                \
+    if ( m_pItems ) {                                                       \
+        m_nSize  = nSize;                                                   \
+    }                                                                       \
+  }                                                                         \
+                                                                            \
+  m_nCount = 0;                                                             \
+}                                                                           \
+                                                                            \
 /* minimizes the memory usage by freeing unused memory */                   \
 void name::Shrink()                                                         \
 {                                                                           \
@@ -396,23 +414,12 @@ void name::insert(iterator it, const_iterator first, const_iterator last)   \
         _WX_DEFINE_BASEARRAY_COMMON(T, name)                                \
         _WX_DEFINE_BASEARRAY_NOCOMMON(T, name)
 
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-    #pragma warning(disable: 1572)
-#endif
-
 _WX_DEFINE_BASEARRAY(const void *, wxBaseArrayPtrVoid)
-_WX_DEFINE_BASEARRAY(char,         wxBaseArrayChar)
 _WX_DEFINE_BASEARRAY(short,        wxBaseArrayShort)
 _WX_DEFINE_BASEARRAY(int,          wxBaseArrayInt)
 _WX_DEFINE_BASEARRAY(long,         wxBaseArrayLong)
 _WX_DEFINE_BASEARRAY(size_t,       wxBaseArraySizeT)
 _WX_DEFINE_BASEARRAY(double,       wxBaseArrayDouble)
-
-#ifdef __INTELC__
-    #pragma warning(pop)
-#endif
 
 #if wxUSE_STL
 #include "wx/arrstr.h"

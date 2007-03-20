@@ -5,7 +5,6 @@ tests/Makefile.in
 samples/Makefile.in
 samples/access/Makefile.in
 samples/artprov/Makefile.in
-samples/aui/Makefile.in
 samples/calendar/Makefile.in
 samples/caret/Makefile.in
 samples/checklst/Makefile.in
@@ -68,7 +67,6 @@ samples/propsize/Makefile.in
 samples/regtest/Makefile.in
 samples/render/Makefile.in
 samples/richedit/Makefile.in
-samples/richtext/Makefile.in
 samples/rotate/Makefile.in
 samples/sashtest/Makefile.in
 samples/scroll/Makefile.in
@@ -117,6 +115,8 @@ utils/emulator/Makefile.in
 utils/emulator/src/Makefile.in
 utils/helpview/Makefile.in
 utils/helpview/src/Makefile.in
+utils/configtool/Makefile.in
+utils/configtool/src/Makefile.in
 utils/wxrc/Makefile.in
 
 contrib/Makefile.in

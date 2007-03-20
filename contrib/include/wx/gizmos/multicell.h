@@ -15,6 +15,10 @@
 #ifndef __WX_MULTICELL_H__
 #define __WX_MULTICELL_H__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "multicell.h"
+#endif
+
 #include "wx/gizmos/gizmos.h"
 
 // ----------------------------------------------------------------------------
@@ -60,14 +64,14 @@ public:
     wxMultiCellItemHandle( int row, int column, int height = 1, int width = 1, wxSize size = wxDefaultSize, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
     wxMultiCellItemHandle( int row, int column, wxSize size, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
     wxMultiCellItemHandle( int row, int column, wxResizable style, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
-    int             GetColumn() const;
-    int             GetRow() const;
-    int             GetWidth() const;
-    int             GetHeight() const;
-    wxResizable     GetStyle() const;
-    wxSize          GetLocalSize() const;
-    int             GetAlignment() const;
-    wxSize          GetWeight() const;
+    int             GetColumn();
+    int             GetRow();
+    int             GetWidth();
+    int             GetHeight();
+    wxResizable     GetStyle();
+    wxSize          GetLocalSize();
+    int             GetAlignment();
+    wxSize          GetWeight();
 
 private:
     void Initialize( int row, int column, int height = 1, int width = 1, wxSize size = wxDefaultSize, wxResizable style = wxNOT_RESIZABLE, wxSize weight = wxSize(1,1), int align = wxALIGN_NOT);
@@ -96,12 +100,12 @@ public:
     bool SetColumnWidth(int column, int colSize = 5, bool expandable = false);
     bool SetRowHeight(int row, int rowSize = 5, bool expandable = false);
     bool EnableGridLines(wxWindow *win);
-    bool SetGridPen(const wxPen *pen);
+    bool SetGridPen(wxPen *pen);
     void OnPaint(wxDC& dc);
 
 private:
     void GetMinimums();
-    static int Sum(int *array, int x);
+    int Sum(int *array, int x);
 
 private:
     int *m_maxHeight;
@@ -113,7 +117,7 @@ private:
     int m_maxWeights;
     wxSize m_defaultCellSize;
     wxWindow *m_win; // usually used for debugging
-    const wxPen *m_pen;
+    wxPen *m_pen;
 
     void DrawGridLines(wxDC& dc);
     void Initialize(wxSize size);
@@ -135,11 +139,11 @@ public:
     void Add(wxWindow *win, unsigned int row, unsigned int col);
 
     void Resize(int numRows, int numCols);
-    int MaxRows() const
+    int MaxRows()
     {
         return m_maxRows;
     };
-    int MaxCols() const
+    int MaxCols()
     {
         return m_maxCols;
     };

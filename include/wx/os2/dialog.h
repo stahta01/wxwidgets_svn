@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/dialog.h
+// Name:        dialog.h
 // Purpose:     wxDialog class
 // Author:      David Webster
 // Modified by:
@@ -14,7 +14,7 @@
 
 #include "wx/panel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
 class WXDLLEXPORT wxDialogModalData;
 
@@ -66,13 +66,32 @@ public:
     virtual bool Show(bool show = true);
 
     //
+    // Event handlers
+    //
+    void OnCharHook(wxKeyEvent& rEvent);
+    void OnCloseWindow(wxCloseEvent& rEvent);
+
+    //
+    // Standard buttons
+    //
+    void     OnOK(wxCommandEvent& rEvent);
+    void     OnApply(wxCommandEvent& rEvent);
+    void     OnCancel(wxCommandEvent& rEvent);
+
+    //
+    // Responds to colour changes
+    //
+    void     OnSysColourChanged(wxSysColourChangedEvent& rEvent);
+
+    //
     // Callbacks
     //
     virtual MRESULT OS2WindowProc( WXUINT   uMessage
                                   ,WXWPARAM wParam
                                   ,WXLPARAM lParam
                                  );
-#if WXWIN_COMPATIBILITY_2_6
+    // obsolete methods
+    // ----------------
 
     // Constructor with a modal flag, but no window id - the old convention
     wxDEPRECATED( wxDialog( wxWindow*       pParent
@@ -92,8 +111,6 @@ public:
     // use IsModal()
     wxDEPRECATED( bool IsModalShowing() const );
 
-#endif // WXWIN_COMPATIBILITY_2_6
-
 protected:
     //
     // find the window to use as parent for this dialog if none has been
@@ -107,6 +124,9 @@ protected:
     // Common part of all ctors
     //
     void Init(void);
+
+    // end either modal or modeless dialog
+    void EndDialog(int rc);
 
 private:
     wxWindow*                       m_pOldFocus;
@@ -122,7 +142,9 @@ private:
     class wxWindowDisabler*         m_pWindowDisabler;
 
     DECLARE_DYNAMIC_CLASS(wxDialog)
+    DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxDialog)
 }; // end of CLASS wxDialog
 
 #endif // _WX_DIALOG_H_
+

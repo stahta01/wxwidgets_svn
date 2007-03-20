@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "control.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -25,10 +29,9 @@
 
 #if wxUSE_CONTROLS
 
-#include "wx/control.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/control.h"
     #include "wx/dcclient.h"
 #endif
 
@@ -55,6 +58,8 @@ WX_FORWARD_TO_INPUT_CONSUMER(wxControl)
 void wxControl::Init()
 {
     m_indexAccel = -1;
+
+    m_inputHandler = (wxInputHandler *)NULL;
 }
 
 bool wxControl::Create(wxWindow *parent,

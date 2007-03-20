@@ -3,10 +3,15 @@
 // Purpose:
 // Author:      Robert Roebling
 // Created:     01/02/97
-// RCS-ID:      $Id$
+// Id:
 // Copyright:   (c) 1998 Robert Roebling and Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "paletteg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -33,7 +38,7 @@ class wxPaletteRefData: public wxObjectRefData
   public:
 
     wxPaletteRefData(void);
-    virtual ~wxPaletteRefData(void);
+    ~wxPaletteRefData(void);
 
     int m_count;
     wxPaletteEntry *m_entries;
@@ -66,21 +71,36 @@ wxPalette::wxPalette(int n, const unsigned char *red, const unsigned char *green
     Create(n, red, green, blue);
 }
 
+wxPalette::wxPalette(const wxPalette& palette)
+    : wxPaletteBase()
+{
+    Ref(palette);
+}
+
 wxPalette::~wxPalette()
 {
 }
 
-bool wxPalette::IsOk() const
+wxPalette& wxPalette::operator = (const wxPalette& palette)
 {
-    return (m_refData != NULL);
+    if (*this == palette) return (*this);
+    Ref(palette);
+    return *this;
 }
 
-int wxPalette::GetColoursCount() const
+bool wxPalette::operator == (const wxPalette& palette)
 {
-    if (m_refData)
-        return M_PALETTEDATA->m_count;
-    
-    return 0;    
+    return m_refData == palette.m_refData;
+}
+
+bool wxPalette::operator != (const wxPalette& palette)
+{
+    return m_refData != palette.m_refData;
+}
+
+bool wxPalette::Ok(void) const
+{
+    return (m_refData != NULL);
 }
 
 bool wxPalette::Create(int n,
@@ -105,11 +125,11 @@ bool wxPalette::Create(int n,
     return true;
 }
 
-int wxPalette::GetPixel( unsigned char red,
-                         unsigned char green,
-                         unsigned char blue ) const
+int wxPalette::GetPixel( const unsigned char red,
+                         const unsigned char green,
+                         const unsigned char blue ) const
 {
-    if (!m_refData) return wxNOT_FOUND;
+    if (!m_refData) return false;
 
     int closest = 0;
     double d,distance = 1000.0; // max. dist is 256
@@ -143,3 +163,5 @@ bool wxPalette::GetRGB(int pixel,
 }
 
 #endif // wxUSE_PALETTE
+
+

@@ -12,6 +12,10 @@
 #ifndef _WX_REGEX_H_
 #define _WX_REGEX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "regex.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_REGEX
@@ -98,9 +102,11 @@ public:
     //
     // may only be called after successful call to Compile()
     bool Matches(const wxChar *text, int flags = 0) const;
+#if wxABI_VERSION >= 20603
     bool Matches(const wxChar *text, int flags, size_t len) const;
     bool Matches(const wxString& text, int flags = 0) const
         { return Matches(text.c_str(), flags, text.length()); }
+#endif
 
     // get the start index and the length of the match of the expression
     // (index 0) or a bracketed subexpression (index != 0)

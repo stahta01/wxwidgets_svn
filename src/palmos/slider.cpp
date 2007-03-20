@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "slider.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,13 +22,13 @@
 
 #if wxUSE_SLIDER
 
-#include "wx/slider.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/brush.h"
-    #include "wx/toplevel.h"
+#include "wx/utils.h"
+#include "wx/brush.h"
+#include "wx/slider.h"
 #endif
+
+#include "wx/toplevel.h"
 
 #include <Form.h>
 #include <Control.h>
@@ -73,7 +77,7 @@ wxBEGIN_FLAGS( wxSliderStyle )
 
 wxEND_FLAGS( wxSliderStyle )
 
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSlider, wxControl,"wx/slider.h")
+IMPLEMENT_DYNAMIC_CLASS_XTI(wxSlider, wxControl,"wx/scrolbar.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxSlider)
     wxEVENT_RANGE_PROPERTY( Scroll , wxEVT_SCROLL_TOP , wxEVT_SCROLL_ENDSCROLL , wxScrollEvent )
@@ -155,7 +159,7 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
     if(slider==NULL)
         return false;
 
-    SetInitialSize(size);
+    SetInitialBestSize(size);
     Show();
     return true;
 }

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/urlmsw.cpp
+// Name:        msw/urlmsw.cpp
 // Purpose:     MS-Windows native URL support based on WinINet
 // Author:      Hajo Kirchhoff
 // Modified by:
@@ -18,15 +18,8 @@
 
 #if wxUSE_URL_NATIVE
 
-#ifndef WX_PRECOMP
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/module.h"
-#endif
-
 #if !wxUSE_PROTOCOL_HTTP
-#include "wx/protocol/protocol.h"
+#include <wx/protocol/protocol.h>
 
 // empty http protocol replacement (for now)
 // so that wxUSE_URL_NATIVE can be used with
@@ -55,7 +48,7 @@ protected:
 // the only "reason for being" for this class is to tell
 // wxURL that there is someone dealing with the http protocol
 IMPLEMENT_DYNAMIC_CLASS(wxHTTPDummyProto, wxProtocol)
-IMPLEMENT_PROTOCOL(wxHTTPDummyProto, wxT("http"), NULL, false)
+IMPLEMENT_PROTOCOL(wxHTTPDummyProto, wxT("http"), NULL, FALSE)
 USE_PROTOCOL(wxHTTPDummyProto)
 
 #endif // !wxUSE_PROTOCOL_HTTP
@@ -66,6 +59,10 @@ USE_PROTOCOL(wxHTTPDummyProto)
     #pragma comment(lib, "wininet.lib")
 #endif
 
+#include "wx/string.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/module.h"
 #include "wx/url.h"
 
 #include <string.h>
@@ -121,7 +118,7 @@ class /*WXDLLIMPEXP_NET */ wxWinINetInputStream : public wxInputStream
 {
 public:
     wxWinINetInputStream(HINTERNET hFile=0);
-    virtual ~wxWinINetInputStream();
+    ~wxWinINetInputStream();
 
     void Attach(HINTERNET hFile);
 
@@ -233,3 +230,4 @@ wxInputStream *wxWinINetURL::GetInputStream(wxURL *owner)
 }
 
 #endif // wxUSE_URL_NATIVE
+

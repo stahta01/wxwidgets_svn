@@ -1,21 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/pen.cpp
+// Name:        pen.cpp
 // Purpose:     wxPen
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "pen.h"
+#endif
 
 #include "wx/wxprec.h"
 
+#include "wx/utils.h"
 #include "wx/pen.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxPen, wxGDIObject)
 
@@ -59,7 +60,7 @@ wxPen::~wxPen()
 wxPen::wxPen(const wxColour& col, int Width, int Style)
 {
     m_refData = new wxPenRefData;
-
+    
     M_PENDATA->m_colour = col;
     M_PENDATA->m_width = Width;
     M_PENDATA->m_style = Style;
@@ -67,14 +68,14 @@ wxPen::wxPen(const wxColour& col, int Width, int Style)
     M_PENDATA->m_cap = wxCAP_ROUND ;
     M_PENDATA->m_nbDash = 0 ;
     M_PENDATA->m_dash = 0 ;
-
+    
     RealizeResource();
 }
 
 wxPen::wxPen(const wxBitmap& stipple, int Width)
 {
     m_refData = new wxPenRefData;
-
+    
     M_PENDATA->m_stipple = stipple;
     M_PENDATA->m_width = Width;
     M_PENDATA->m_style = wxSTIPPLE;
@@ -82,96 +83,103 @@ wxPen::wxPen(const wxBitmap& stipple, int Width)
     M_PENDATA->m_cap = wxCAP_ROUND ;
     M_PENDATA->m_nbDash = 0 ;
     M_PENDATA->m_dash = 0 ;
-
+    
     RealizeResource();
 }
 
-wxObjectRefData* wxPen::CreateRefData() const
+void wxPen::Unshare()
 {
-    return new wxPenRefData;
-}
-
-wxObjectRefData* wxPen::CloneRefData(const wxObjectRefData* data) const
-{
-    return new wxPenRefData(*wx_static_cast(const wxPenRefData*, data));
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxPenRefData();
+    }
+    else
+    {
+        wxPenRefData* ref = new wxPenRefData(*(wxPenRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
 }
 
 void wxPen::SetColour(const wxColour& col)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_colour = col;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetColour(unsigned char r, unsigned char g, unsigned char b)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_colour.Set(r, g, b);
-
+    
     RealizeResource();
 }
 
 void wxPen::SetWidth(int Width)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_width = Width;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetStyle(int Style)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_style = Style;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetStipple(const wxBitmap& Stipple)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_stipple = Stipple;
     M_PENDATA->m_style = wxSTIPPLE;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetDashes(int nb_dashes, const wxDash *Dash)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_nbDash = nb_dashes;
     M_PENDATA->m_dash = (wxDash *)Dash;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetJoin(int Join)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_join = Join;
-
+    
     RealizeResource();
 }
 
 void wxPen::SetCap(int Cap)
 {
-    AllocExclusive();
-
+    Unshare();
+    
     M_PENDATA->m_cap = Cap;
-
+    
     RealizeResource();
 }
 
 bool wxPen::RealizeResource()
 {
     // nothing to do here for mac
-    return true;
+    return TRUE;
 }
+
+

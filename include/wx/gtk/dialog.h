@@ -11,6 +11,10 @@
 #ifndef __GTKDIALOGH__
 #define __GTKDIALOGH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/defs.h"
 
 //-----------------------------------------------------------------------------
@@ -23,7 +27,7 @@ class WXDLLIMPEXP_CORE wxDialog;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxDialogNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar *wxDialogNameStr;
 
 //-----------------------------------------------------------------------------
 // wxDialog
@@ -45,7 +49,16 @@ public:
             const wxSize &size = wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE,
             const wxString &name = wxDialogNameStr );
-    virtual ~wxDialog() {}
+    ~wxDialog() {}
+
+    void OnApply( wxCommandEvent &event );
+    void OnCancel( wxCommandEvent &event );
+    void OnOK( wxCommandEvent &event );
+    void OnPaint( wxPaintEvent& event );
+    void OnCloseWindow( wxCloseEvent& event );
+    /*
+       void OnCharHook( wxKeyEvent& event );
+     */
 
     virtual bool Show( bool show = TRUE );
     virtual int ShowModal();
@@ -58,10 +71,12 @@ public:
 
     bool       m_modalShowing;
 
-private:
+protected:
     // common part of all ctors
     void Init();
 
+private:
+    DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxDialog)
 };
 

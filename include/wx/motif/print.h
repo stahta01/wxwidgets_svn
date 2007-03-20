@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/print.h
+// Name:        print.h
 // Purpose:     wxPrinter, wxPrintPreview classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PRINT_H_
 #define _WX_PRINT_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "print.h"
+#endif
 
 #include "wx/prntbase.h"
 
@@ -21,11 +25,11 @@
 class WXDLLEXPORT wxPrinter: public wxPrinterBase
 {
     DECLARE_DYNAMIC_CLASS(wxPrinter)
-
+        
 public:
     wxPrinter(wxPrintData *data = NULL);
-    virtual ~wxPrinter();
-
+    ~wxPrinter();
+    
     virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true);
     virtual bool PrintDialog(wxWindow *parent);
     virtual bool Setup(wxWindow *parent);
@@ -39,11 +43,11 @@ public:
 class WXDLLEXPORT wxPrintPreview: public wxPrintPreviewBase
 {
     DECLARE_CLASS(wxPrintPreview)
-
+        
 public:
     wxPrintPreview(wxPrintout *printout, wxPrintout *printoutForPrinting = NULL, wxPrintData *data = NULL);
-    virtual ~wxPrintPreview();
-
+    ~wxPrintPreview();
+    
     virtual bool Print(bool interactive);
     virtual void DetermineScaling();
 };

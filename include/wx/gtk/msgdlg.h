@@ -12,13 +12,17 @@
 #ifndef __MSGDLG_H__
 #define __MSGDLG_H__
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "msgdlg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/dialog.h"
 
 // type is an 'or' (|) of wxOK, wxCANCEL, wxYES_NO
 // Returns wxYES/NO/OK/CANCEL
 
-WXDLLEXPORT_DATA(extern const wxChar) wxMessageBoxCaptionStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
 
 class WXDLLEXPORT wxMessageDialog: public wxDialog, public wxMessageDialogBase
 {
@@ -27,7 +31,7 @@ public:
                     const wxString& caption = wxMessageBoxCaptionStr,
                     long style = wxOK|wxCENTRE,
                     const wxPoint& pos = wxDefaultPosition);
-    virtual ~wxMessageDialog();
+    ~wxMessageDialog();
 
     int ShowModal();
     virtual bool Show( bool WXUNUSED(show) = true ) { return false; };

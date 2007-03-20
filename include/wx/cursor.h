@@ -20,16 +20,12 @@
     #include "wx/msw/cursor.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/cursor.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/cursor.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/cursor.h"
+    #include "wx/gtk/cursor.h"
 #elif defined(__WXX11__)
     #include "wx/x11/cursor.h"
 #elif defined(__WXMGL__)
     #include "wx/mgl/cursor.h"
-#elif defined(__WXDFB__)
-    #include "wx/dfb/cursor.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/cursor.h"
 #elif defined(__WXCOCOA__)

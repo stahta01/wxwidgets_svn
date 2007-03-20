@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "bitmap.h"
+#endif
+
 #include "wx/palette.h"
 
 // Bitmap
@@ -34,12 +38,10 @@ class WXDLLEXPORT wxPixelDataBase;
 class WXDLLEXPORT wxMask: public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxMask)
+    DECLARE_NO_COPY_CLASS(wxMask)
 
 public:
     wxMask();
-
-    // Copy constructor
-    wxMask(const wxMask& mask);
 
     // Construct a mask from a bitmap and a colour indicating
     // the transparent area
@@ -48,10 +50,10 @@ public:
     // Construct a mask from a mono bitmap (black meaning show pixels, white meaning transparent)
     wxMask(const wxBitmap& bitmap);
     
-    // implementation helper only : construct a mask from a 32 bit memory buffer
+    // implementation helper only : construct a mask from a 8 bit memory buffer
     wxMask(const wxMemoryBuffer& buf, int width , int height , int bytesPerRow ) ;
 
-    virtual ~wxMask();
+    ~wxMask();
 
     bool Create(const wxBitmap& bitmap, const wxColour& colour);
     bool Create(const wxBitmap& bitmap);
@@ -80,10 +82,22 @@ private:
 
 };
 
-class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+class WXDLLEXPORT wxBitmapHandler: public wxBitmapHandlerBase
 {
-    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+public:
+    wxBitmapHandler() { }
+    virtual ~wxBitmapHandler();
+
+    virtual bool Create(wxBitmap *bitmap, void *data, long flags, int width, int height, int depth = 1);
+    virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
+        int desiredWidth, int desiredHeight);
+    virtual bool SaveFile(const wxBitmap *bitmap, const wxString& name, int type, const wxPalette *palette = NULL);
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 };
+
+#define M_BITMAPHANDLERDATA ((wxBitmapRefData *)bitmap->GetRefData())
 
 class WXDLLEXPORT wxBitmap: public wxBitmapBase
 {
@@ -94,17 +108,26 @@ class WXDLLEXPORT wxBitmap: public wxBitmapBase
 public:
     wxBitmap(); // Platform-specific
 
+    // Copy constructors
+    wxBitmap(const wxBitmap& bitmap)
+        : wxBitmapBase()
+    {
+        Ref(bitmap);
+    }
+
     // Initialize with raw data.
     wxBitmap(const char bits[], int width, int height, int depth = 1);
 
     // Initialize with XPM data
-    wxBitmap(const char* const* bits);
+    bool CreateFromXpm(const char **bits);
+    wxBitmap(const char **bits);
+    wxBitmap(char **bits);
 
     // Load a file or resource
     wxBitmap(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_PICT_RESOURCE);
 
     // Constructor for generalised creation from data
-    wxBitmap(const void* data, wxBitmapType type, int width, int height, int depth = 1);
+    wxBitmap(void *data, wxBitmapType type, int width, int height, int depth = 1);
 
     // If depth is omitted, will create a bitmap compatible with the display
     wxBitmap(int width, int height, int depth = -1);
@@ -115,7 +138,7 @@ public:
     // Convert from wxIcon
     wxBitmap(const wxIcon& icon) { CopyFromIcon(icon); }
 
-    virtual ~wxBitmap();
+    ~wxBitmap();
 
     wxImage ConvertToImage() const;
 
@@ -123,7 +146,7 @@ public:
     wxBitmap GetSubBitmap( const wxRect& rect ) const;
 
     virtual bool Create(int width, int height, int depth = -1);
-    virtual bool Create(const void* data, wxBitmapType type, int width, int height, int depth = 1);
+    virtual bool Create(void *data, wxBitmapType type, int width, int height, int depth = 1);
     // virtual bool Create( WXHICON icon) ;
     virtual bool LoadFile(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_BMP_RESOURCE);
     virtual bool SaveFile(const wxString& name, wxBitmapType type, const wxPalette *cmap = NULL) const;
@@ -134,8 +157,7 @@ public:
     // copies the contents and mask of the given (colour) icon to the bitmap
     virtual bool CopyFromIcon(const wxIcon& icon);
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    bool Ok() const;
     int GetWidth() const;
     int GetHeight() const;
     int GetDepth() const;
@@ -144,6 +166,13 @@ public:
     void SetDepth(int d);
     void SetOk(bool isOk);
 
+#if WXWIN_COMPATIBILITY_2_4
+    // these functions do nothing and are only there for backwards
+    // compatibility
+    wxDEPRECATED( int GetQuality() const );
+    wxDEPRECATED( void SetQuality(int quality) );
+#endif // WXWIN_COMPATIBILITY_2_4
+
 #if wxUSE_PALETTE
     wxPalette* GetPalette() const;
     void SetPalette(const wxPalette& palette);
@@ -151,6 +180,10 @@ public:
 
     wxMask *GetMask() const;
     void SetMask(wxMask *mask) ;
+
+    inline wxBitmap& operator = (const wxBitmap& bitmap) { if (*this == bitmap) return (*this); Ref(bitmap); return *this; }
+    inline bool operator == (const wxBitmap& bitmap) const { return m_refData == bitmap.m_refData; }
+    inline bool operator != (const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
 
     static void InitStandardHandlers();
 
@@ -176,11 +209,6 @@ public:
     // makes sure that no cached images will be constructed until terminated
     void *BeginRawAccess() ;
     void EndRawAccess() ;
-
-protected:
-    // ref counting code
-    virtual wxObjectRefData *CreateRefData() const;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 };
 #endif
   // _WX_BITMAP_H_

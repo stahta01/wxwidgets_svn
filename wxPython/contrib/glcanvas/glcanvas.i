@@ -35,6 +35,9 @@
 MAKE_CONST_WXSTRING2(GLCanvasNameStr, wxT("GLCanvas"));
 MAKE_CONST_WXSTRING_NOSWIG(EmptyString);
 
+
+%include _glcanvas_rename.i
+
 //---------------------------------------------------------------------------
 
 class wxPalette;
@@ -46,7 +49,9 @@ MustHaveApp(wxGLContext);
 class wxGLContext : public wxObject {
 public:
 #ifndef __WXMAC__  
-    wxGLContext(wxGLCanvas *win, const wxGLContext* other = NULL);
+    wxGLContext(bool isRGB, wxGLCanvas *win,
+                const wxPalette& palette = wxNullPalette,
+                const wxGLContext* other = NULL);
 #else
     %extend {
         wxGLContext(bool isRGB, wxGLCanvas *win,
@@ -60,9 +65,18 @@ public:
 #endif
     ~wxGLContext();
 
-#ifndef __WXMAC__  
-    void SetCurrent(const wxGLCanvas& win);
+    void SetCurrent();
+    void SetColour(const wxString& colour);
+    void SwapBuffers();
+
+#ifdef __WXGTK__
+    void SetupPixelFormat();
+    void SetupPalette(const wxPalette& palette);
+    wxPalette CreateDefaultPalette();
+    wxPalette* GetPalette();
 #endif
+
+    wxWindow* GetWindow();
 };
 
 //---------------------------------------------------------------------------
@@ -131,11 +145,8 @@ public:
                     int *attribList = NULL,
                     const wxPalette& palette = wxNullPalette ));
 
-    %nokwargs SetCurrent;
+
     void SetCurrent();
-#ifndef __WXMAC__
-    void SetCurrent(const wxGLContext& RC);
-#endif
     void SetColour(const wxString& colour);
     void SwapBuffers();
 
@@ -147,8 +158,6 @@ public:
     wxPalette CreateDefaultPalette();
     wxPalette* GetPalette();
 #endif
-
-    %property(Context, GetContext, doc="See `GetContext`");
 };
 
 

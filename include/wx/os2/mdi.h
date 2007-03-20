@@ -38,7 +38,7 @@ public:
       Create(parent, id, title, pos, size, style, name);
   }
 
-  virtual ~wxMDIParentFrame();
+  ~wxMDIParentFrame();
 
   bool Create(wxWindow *parent,
            wxWindowID id,
@@ -120,7 +120,7 @@ public:
       Create(parent, id, title, pos, size, style, name);
   }
 
-  virtual ~wxMDIChildFrame();
+  ~wxMDIChildFrame();
 
   bool Create(wxMDIParentFrame *parent,
            wxWindowID id,

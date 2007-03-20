@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/font.h
+// Name:        font.h
 // Purpose:     wxFont class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "font.h"
+#endif
 
 class wxXFont;
 
@@ -19,7 +23,8 @@ class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) { Init(); Ref(font); }
 
     wxFont(int size,
         int family,
@@ -29,6 +34,8 @@ public:
         const wxString& face = wxEmptyString,
         wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -53,6 +60,9 @@ public:
 
     virtual ~wxFont();
 
+    // assignment
+    wxFont& operator=(const wxFont& font);
+
     // implement base class pure virtuals
     virtual int GetPointSize() const;
     virtual int GetFamily() const;
@@ -69,7 +79,7 @@ public:
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
     virtual void SetWeight(int weight);
-    virtual bool SetFaceName(const wxString& faceName);
+    virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
@@ -103,6 +113,9 @@ public:
 protected:
     virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
 
+    // common part of all ctors
+    void Init();
+
     void Unshare();
 
 private:
@@ -110,4 +123,4 @@ private:
 };
 
 #endif
-    // _WX_FONT_H_
+// _WX_FONT_H_

@@ -21,7 +21,6 @@ class WXDLLIMPEXP_BASE wxStandardPaths : public wxStandardPathsBase
 public:
     void SetInstallPrefix(const wxString& prefix) { m_prefix = prefix; }
     wxString GetInstallPrefix() const { return m_prefix; }
-    virtual wxString GetExecutablePath() const { return m_prefix; }
     virtual wxString GetConfigDir() const { return m_prefix; }
     virtual wxString GetUserConfigDir() const { return m_prefix; }
     virtual wxString GetDataDir() const { return m_prefix; }

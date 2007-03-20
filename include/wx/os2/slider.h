@@ -43,7 +43,7 @@ public:
                ,rsName
               );
     }
-    virtual ~wxSlider();
+    ~wxSlider();
 
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId

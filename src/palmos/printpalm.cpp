@@ -17,12 +17,18 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printpalm.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
+
+#include "wx/defs.h"
 
 // Don't use the Windows printer if we're in wxUniv mode and using
 // the PostScript architecture
@@ -36,12 +42,12 @@
     #include "wx/app.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/dcprint.h"
 #endif
 
 #include "wx/palmos/printpalm.h"
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
+#include "wx/log.h"
 #include "wx/palmos/private.h"
 
 // ---------------------------------------------------------------------------
@@ -118,7 +124,6 @@ bool wxPalmPrintPreview::Print(bool interactive)
 
 void wxPalmPrintPreview::DetermineScaling()
 {
-    // TODO
 }
 
 #endif

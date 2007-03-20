@@ -12,6 +12,10 @@
 #ifndef _WX_REPARENT_H_
 #define _WX_REPARENT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "reparent.h"
+#endif
+
 #include "wx/window.h"
 
 /*
@@ -57,7 +61,7 @@ class WXDLLIMPEXP_CORE wxAdoptedWindow: public wxWindow
   public:
     wxAdoptedWindow();
     wxAdoptedWindow(WXWindow window);
-    virtual ~wxAdoptedWindow();
+    ~wxAdoptedWindow();
 
     void SetHandle(WXWindow window) { m_mainWindow = window; m_clientWindow = window; }
     WXWindow GetHandle() const { return GetMainWindow(); }

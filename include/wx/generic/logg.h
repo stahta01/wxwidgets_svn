@@ -12,6 +12,10 @@
 #ifndef   _WX_LOGG_H_
 #define   _WX_LOGG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "logg.h"
+#endif
+
 #if wxUSE_GUI
 
 // ----------------------------------------------------------------------------
@@ -28,11 +32,10 @@ class WXDLLEXPORT wxLogTextCtrl : public wxLog
 public:
     wxLogTextCtrl(wxTextCtrl *pTextCtrl);
 
-protected:
+private:
     // implement sink function
     virtual void DoLogString(const wxChar *szString, time_t t);
 
-private:
     // the control we use
     wxTextCtrl *m_pTextCtrl;
 
@@ -90,7 +93,7 @@ public:
                 bool bShow = true,        // show window immediately?
                 bool bPassToOld = true);  // pass messages to the old target?
 
-    virtual ~wxLogWindow();
+    ~wxLogWindow();
 
     // window operations
         // show/hide the log window

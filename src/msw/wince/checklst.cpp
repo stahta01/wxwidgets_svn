@@ -21,16 +21,18 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_CHECKLISTBOX
 
+#ifndef WX_PRECOMP
+#endif
+
 #include "wx/checklst.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
-#endif
+// include <commctrl.h> "properly"
+#include "wx/msw/wrapcctl.h"
 
 // ============================================================================
 // implementation
@@ -116,7 +118,7 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
     m_itemsClientData.SetCount(n);
 
     // now we can compute our best size correctly, so do it if necessary
-    SetInitialSize(size);
+    SetBestSize(size);
 
     return true;
 }
@@ -152,9 +154,10 @@ void wxCheckListBox::OnSize(wxSizeEvent& event)
 // misc overloaded methods
 // -----------------------
 
-void wxCheckListBox::Delete(unsigned int n)
+void wxCheckListBox::Delete(int n)
 {
-    wxCHECK_RET( IsValid( n ), _T("invalid index in wxCheckListBox::Delete") );
+    wxCHECK_RET( n >= 0 && n < GetCount(),
+                 _T("invalid index in wxCheckListBox::Delete") );
 
     if ( !ListView_DeleteItem(GetHwnd(), n) )
     {
@@ -166,17 +169,17 @@ void wxCheckListBox::Delete(unsigned int n)
 // check items
 // -----------
 
-bool wxCheckListBox::IsChecked(unsigned int uiIndex) const
+bool wxCheckListBox::IsChecked(size_t uiIndex) const
 {
-    wxCHECK_MSG( IsValid( uiIndex ), false,
+    wxCHECK_MSG( uiIndex < (size_t)GetCount(), false,
                  _T("invalid index in wxCheckListBox::IsChecked") );
 
     return (ListView_GetCheckState(((HWND)GetHWND()), uiIndex) != 0);
 }
 
-void wxCheckListBox::Check(unsigned int uiIndex, bool bCheck)
+void wxCheckListBox::Check(size_t uiIndex, bool bCheck)
 {
-    wxCHECK_RET( IsValid( uiIndex ),
+    wxCHECK_RET( uiIndex < (size_t)GetCount(),
                  _T("invalid index in wxCheckListBox::Check") );
 
     ListView_SetCheckState(((HWND)GetHWND()), uiIndex, bCheck)
@@ -187,7 +190,7 @@ void wxCheckListBox::Check(unsigned int uiIndex, bool bCheck)
 
 void wxCheckListBox::Clear()
 {
-    unsigned int n = GetCount();
+    int n = GetCount();
 
     while ( n > 0 )
     {
@@ -201,15 +204,15 @@ void wxCheckListBox::Clear()
                  _T("broken wxCheckListBox::Clear()") );
 }
 
-unsigned int wxCheckListBox::GetCount() const
+int wxCheckListBox::GetCount() const
 {
-    return (unsigned int)ListView_GetItemCount( (HWND)GetHWND() );
+    return ListView_GetItemCount( (HWND)GetHWND() );
 }
 
 int wxCheckListBox::GetSelection() const
 {
     int i;
-    for (i = 0; (unsigned int)i < GetCount(); i++)
+    for (i = 0; i < GetCount(); i++)
     {
         int selState = ListView_GetItemState(GetHwnd(), i, LVIS_SELECTED);
         if (selState == LVIS_SELECTED)
@@ -222,7 +225,7 @@ int wxCheckListBox::GetSelection() const
 int wxCheckListBox::GetSelections(wxArrayInt& aSelections) const
 {
     int i;
-    for (i = 0; (unsigned int)i < GetCount(); i++)
+    for (i = 0; i < GetCount(); i++)
     {
         int selState = ListView_GetItemState(GetHwnd(), i, LVIS_SELECTED);
         if (selState == LVIS_SELECTED)
@@ -232,7 +235,7 @@ int wxCheckListBox::GetSelections(wxArrayInt& aSelections) const
     return aSelections.GetCount();
 }
 
-wxString wxCheckListBox::GetString(unsigned int n) const
+wxString wxCheckListBox::GetString(int n) const
 {
     const int bufSize = 513;
     wxChar buf[bufSize];
@@ -248,9 +251,9 @@ bool wxCheckListBox::IsSelected(int n) const
     return (selState == LVIS_SELECTED);
 }
 
-void wxCheckListBox::SetString(unsigned int n, const wxString& s)
+void wxCheckListBox::SetString(int n, const wxString& s)
 {
-    wxCHECK_RET( IsValid( n ),
+    wxCHECK_RET( n < GetCount(),
                  _T("invalid index in wxCheckListBox::SetString") );
     wxChar *buf = new wxChar[s.length()+1];
     wxStrcpy(buf, s.c_str());
@@ -260,7 +263,7 @@ void wxCheckListBox::SetString(unsigned int n, const wxString& s)
 
 int wxCheckListBox::DoAppend(const wxString& item)
 {
-    int n = (int)GetCount();
+    int n = GetCount();
     LVITEM newItem;
     wxZeroMemory(newItem);
     newItem.iItem = n;
@@ -271,22 +274,22 @@ int wxCheckListBox::DoAppend(const wxString& item)
     return ret;
 }
 
-void* wxCheckListBox::DoGetItemClientData(unsigned int n) const
+void* wxCheckListBox::DoGetItemClientData(int n) const
 {
     return m_itemsClientData.Item(n);
 }
 
-wxClientData* wxCheckListBox::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxCheckListBox::DoGetItemClientObject(int n) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }
 
-void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+void wxCheckListBox::DoInsertItems(const wxArrayString& items, int pos)
 {
-    wxCHECK_RET( IsValidInsert( pos ),
+    wxCHECK_RET( pos >= 0 && pos <= GetCount(),
                  wxT("invalid index in wxListBox::InsertItems") );
 
-    for( unsigned int i = 0; i < items.GetCount(); i++ )
+    for( size_t i = 0; i < items.GetCount(); i++ )
     {
         LVITEM newItem;
         wxZeroMemory(newItem);
@@ -309,12 +312,12 @@ void wxCheckListBox::DoSetFirstItem(int n)
     ListView_Scroll( (HWND)GetHWND(), 0, ppt.y );
 }
 
-void wxCheckListBox::DoSetItemClientData(unsigned int n, void* clientData)
+void wxCheckListBox::DoSetItemClientData(int n, void* clientData)
 {
     m_itemsClientData.Item(n) = clientData;
 }
 
-void wxCheckListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxCheckListBox::DoSetItemClientObject(int n, wxClientData* clientData)
 {
     DoSetItemClientData(n, clientData);
 }
@@ -323,7 +326,7 @@ void wxCheckListBox::DoSetItems(const wxArrayString& items, void **clientData)
 {
     ListView_SetItemCount( GetHwnd(), GetCount() + items.GetCount() );
 
-    for( unsigned int i = 0; i < items.GetCount(); i++ )
+    for( size_t i = 0; i < items.GetCount(); i++ )
     {
         int pos = Append(items[i]);
         if( pos >= 0 && clientData )

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "msgdlgg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,7 +33,6 @@
     #include "wx/icon.h"
     #include "wx/sizer.h"
     #include "wx/app.h"
-    #include "wx/settings.h"
 #endif
 
 #include <stdio.h>
@@ -38,9 +41,10 @@
 #define __WX_COMPILING_MSGDLGG_CPP__ 1
 #include "wx/msgdlg.h"
 #include "wx/artprov.h"
+#include "wx/settings.h"
 
 #if wxUSE_STATLINE
-    #include "wx/statline.h"
+  #include "wx/statline.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -70,7 +74,6 @@ wxGenericMessageDialog::wxGenericMessageDialog( wxWindow *parent,
 
     wxBoxSizer *icon_text = new wxBoxSizer( wxHORIZONTAL );
 
-#if wxUSE_STATBMP
     // 1) icon
     if (style & wxICON_MASK)
     {
@@ -103,22 +106,22 @@ wxGenericMessageDialog::wxGenericMessageDialog( wxWindow *parent,
         else
             icon_text->Add( icon, 0, wxCENTER );
     }
-#endif // wxUSE_STATBMP
 
-#if wxUSE_STATTEXT
     // 2) text
     icon_text->Add( CreateTextSizer( message ), 0, wxALIGN_CENTER | wxLEFT, 10 );
 
     topsizer->Add( icon_text, 1, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
-#endif // wxUSE_STATTEXT
 
-    // 3) buttons
+#if wxUSE_STATLINE
+    // 3) static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif // wxUSE_STATLINE
+
+    // 4) buttons
     int center_flag = wxEXPAND;
-    if (style & wxYES_NO)
-        center_flag = wxALIGN_CENTRE;
-    wxSizer *sizerBtn = CreateSeparatedButtonSizer(style & ButtonSizerFlags);
-    if ( sizerBtn )
-        topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
+    if (style & wxYES_NO) center_flag = wxALIGN_CENTRE;
+    topsizer->Add( CreateButtonSizer( style & (wxOK|wxCANCEL|wxYES_NO|wxYES_DEFAULT|wxNO_DEFAULT) ),
+                   0, center_flag | wxALL, 10 );
 
     SetAutoLayout( true );
     SetSizer( topsizer );
@@ -157,3 +160,4 @@ void wxGenericMessageDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 }
 
 #endif // wxUSE_MSGDLG && !defined(__WXGTK20__)
+

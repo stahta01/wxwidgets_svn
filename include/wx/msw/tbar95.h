@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_TBAR95_H_
 #define _WX_MSW_TBAR95_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbar95.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 #include "wx/dynarray.h"
@@ -54,9 +58,6 @@ public:
 
     virtual void SetRows(int nRows);
 
-    virtual void SetToolNormalBitmap(int id, const wxBitmap& bitmap);
-    virtual void SetToolDisabledBitmap(int id, const wxBitmap& bitmap);
-
     // implementation only from now on
     // -------------------------------
 
@@ -72,11 +73,6 @@ public:
     void SetFocus() {}
 
     static WXHBITMAP MapBitmap(WXHBITMAP bitmap, int width, int height);
-
-    // override WndProc mainly to process WM_SIZE
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
-
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 protected:
     // common part of all ctors
@@ -104,12 +100,14 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    // override WndProc mainly to process WM_SIZE
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
     // return the appropriate size and flags for the toolbar control
     virtual wxSize DoGetBestSize() const;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
     // handlers for various events
     bool HandleSize(WXWPARAM wParam, WXLPARAM lParam);
@@ -122,9 +120,6 @@ protected:
     // create m_disabledImgList (but doesn't fill it), set it to NULL if it is
     // unneeded
     void CreateDisabledImageList();
-
-    // get the Windows toolbar style of this control
-    long GetMSWToolbarStyle() const;
 
 
     // the big bitmap containing all bitmaps of the toolbar buttons

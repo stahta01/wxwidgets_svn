@@ -84,8 +84,6 @@
 #    define WXMAKINGDLL_GL
 #    define WXMAKINGDLL_XML
 #    define WXMAKINGDLL_XRC
-#    define WXMAKINGDLL_AUI
-#    define WXMAKINGDLL_RICHTEXT
 #    define WXMAKINGDLL_MEDIA
 #endif /* WXMAKINGDLL */
 
@@ -203,22 +201,6 @@
 #    define WXDLLIMPEXP_XRC WXIMPORT
 #else /* not making nor using DLL */
 #    define WXDLLIMPEXP_XRC
-#endif
-
-#ifdef WXMAKINGDLL_AUI
-#    define WXDLLIMPEXP_AUI WXEXPORT
-#elif defined(WXUSINGDLL)
-#    define WXDLLIMPEXP_AUI WXIMPORT
-#else /* not making nor using DLL */
-#    define WXDLLIMPEXP_AUI
-#endif
-
-#ifdef WXMAKINGDLL_RICHTEXT
-#    define WXDLLIMPEXP_RICHTEXT WXEXPORT
-#elif defined(WXUSINGDLL)
-#    define WXDLLIMPEXP_RICHTEXT WXIMPORT
-#else /* not making nor using DLL */
-#    define WXDLLIMPEXP_RICHTEXT
 #endif
 
 #ifdef WXMAKINGDLL_MEDIA

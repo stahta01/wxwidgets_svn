@@ -11,6 +11,11 @@
 // Last modified: 22nd July 1998 - ported to wxWidgets 2.0
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -124,7 +129,7 @@ const wxColour& FortyApp::TextColour()
 {
     if (!m_textColour)
     {
-        m_textColour = new wxColour(*wxBLACK);
+        m_textColour = new wxColour(_T("BLACK"));
     }
 
     return *m_textColour;
@@ -304,6 +309,10 @@ FortyFrame::ToggleCardSize(wxCommandEvent& event)
 // stAboutDialog
 //----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(FortyAboutDialog,wxDialog)
+    EVT_BUTTON(wxID_CLOSE, wxDialog::OnOK)
+END_EVENT_TABLE()
+
 FortyAboutDialog::FortyAboutDialog( wxWindow *parent, wxWindowID id, const wxString &title,
     const wxPoint &position, const wxSize& size, long style ) :
     wxDialog( parent, id, title, position, size, style )
@@ -363,7 +372,6 @@ bool FortyAboutDialog::AddControls(wxWindow* parent)
     wxButton *item2 = new wxButton( parent, wxID_CLOSE );
     item2->SetDefault();
     item2->SetFocus();
-    SetAffirmativeId(wxID_CLOSE);
 
     item0->Add( item2, 0, wxALIGN_RIGHT|wxALL, 5 );
 
@@ -375,3 +383,4 @@ bool FortyAboutDialog::AddControls(wxWindow* parent)
 
     return true;
 }
+

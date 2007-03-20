@@ -22,7 +22,6 @@ public:
     // turn off this typemap
     %typemap(out) wxEvtHandler*;    
 
-    %pythonAppend wxEvtHandler         "self._setOORInfo(self)"
     wxEvtHandler();
 
     // Turn it back on again
@@ -73,7 +72,6 @@ public:
         }
     }
 
-    %pythonAppend _setOORInfo   "args[0].this.own(False)";
     %extend {
         void _setOORInfo(PyObject* _self, bool incref=true) {
             if (_self && _self != Py_None) {
@@ -129,9 +127,6 @@ public:
             return event.Unbind(self, id, id2)              
     }
 
-    %property(EvtHandlerEnabled, GetEvtHandlerEnabled, SetEvtHandlerEnabled, doc="See `GetEvtHandlerEnabled` and `SetEvtHandlerEnabled`");
-    %property(NextHandler, GetNextHandler, SetNextHandler, doc="See `GetNextHandler` and `SetNextHandler`");
-    %property(PreviousHandler, GetPreviousHandler, SetPreviousHandler, doc="See `GetPreviousHandler` and `SetPreviousHandler`");
     
 };
 

@@ -1,5 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/themes/metal.cpp
+// Name:        univ/themes/metal.cpp
 // Purpose:     wxUniversal theme implementing Win32-like LNF
 // Author:      Vadim Zeitlin, Robert Roebling
 // Modified by:
@@ -24,10 +23,6 @@
     #pragma hdrstop
 #endif
 
-#include "wx/univ/theme.h"
-
-#if wxUSE_THEME_METAL
-
 #ifndef WX_PRECOMP
     #include "wx/timer.h"
     #include "wx/intl.h"
@@ -45,22 +40,25 @@
     #include "wx/textctrl.h"
     #include "wx/toolbar.h"
 
-    #include "wx/menu.h"
-    #include "wx/settings.h"
-    #include "wx/toplevel.h"
+    #ifdef __WXMSW__
+        // for COLOR_* constants
+        #include "wx/msw/private.h"
+    #endif
 #endif // WX_PRECOMP
 
 #include "wx/notebook.h"
 #include "wx/spinbutt.h"
+#include "wx/settings.h"
+#include "wx/menu.h"
 #include "wx/artprov.h"
+#include "wx/toplevel.h"
 
 #include "wx/univ/scrtimer.h"
 #include "wx/univ/renderer.h"
-#include "wx/univ/inpcons.h"
 #include "wx/univ/inphand.h"
 #include "wx/univ/colschem.h"
+#include "wx/univ/theme.h"
 
-// ----------------------------------------------------------------------------
 // wxMetalRenderer: draw the GUI elements in Metal style
 // ----------------------------------------------------------------------------
 
@@ -143,42 +141,92 @@ private:
 // wxMetalTheme
 // ----------------------------------------------------------------------------
 
-class wxMetalTheme : public wxDelegateTheme
+WX_DEFINE_ARRAY_PTR(wxInputHandler *, wxArrayHandlers);
+
+class wxMetalTheme : public wxTheme
 {
 public:
-    wxMetalTheme() : wxDelegateTheme(_T("win32")), m_renderer(NULL) {}
-    ~wxMetalTheme() { delete m_renderer; }
+    wxMetalTheme();
+    virtual ~wxMetalTheme();
 
-protected:
-    virtual wxRenderer *GetRenderer()
+    virtual wxRenderer *GetRenderer();
+    virtual wxArtProvider *GetArtProvider();
+    virtual wxInputHandler *GetInputHandler(const wxString& control);
+    virtual wxColourScheme *GetColourScheme();
+private:
+    bool GetOrCreateTheme()
     {
-        if ( !m_renderer )
-        {
-            m_renderer = new wxMetalRenderer(m_theme->GetRenderer(),
-                                             GetColourScheme());
-        }
-
-        return m_renderer;
+        if ( !m_win32Theme )
+            m_win32Theme = wxTheme::Create( wxT("win32") );
+        return m_win32Theme != NULL;
     }
-
-    wxRenderer *m_renderer;
+private:
+    wxTheme *m_win32Theme;
+    wxMetalRenderer *m_renderer;
 
     WX_DECLARE_THEME(Metal)
 };
 
-WX_IMPLEMENT_THEME(wxMetalTheme, Metal, wxTRANSLATE("Metal theme"));
-
-
 // ============================================================================
 // implementation
 // ============================================================================
+
+WX_IMPLEMENT_THEME(wxMetalTheme, Metal, wxTRANSLATE("Metal theme"));
+
+// ----------------------------------------------------------------------------
+// wxMetalTheme
+// ----------------------------------------------------------------------------
+
+wxMetalTheme::wxMetalTheme()
+{
+    m_win32Theme = NULL;
+    m_renderer = NULL;
+}
+
+wxMetalTheme::~wxMetalTheme()
+{
+    delete m_win32Theme;
+    delete m_renderer;
+}
+
+wxRenderer *wxMetalTheme::GetRenderer()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    if ( !m_renderer )
+        m_renderer = new wxMetalRenderer(m_win32Theme->GetRenderer(),
+                                         m_win32Theme->GetColourScheme());
+
+    return m_renderer;
+}
+
+wxArtProvider *wxMetalTheme::GetArtProvider()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetArtProvider();
+}
+
+wxInputHandler *wxMetalTheme::GetInputHandler(const wxString& control)
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetInputHandler(control);
+}
+
+wxColourScheme *wxMetalTheme::GetColourScheme()
+{
+    if ( !GetOrCreateTheme() )
+        return 0;
+    return m_win32Theme->GetColourScheme();
+}
 
 // ----------------------------------------------------------------------------
 // wxMetalRenderer
 // ----------------------------------------------------------------------------
 
 wxMetalRenderer::wxMetalRenderer(wxRenderer *renderer, wxColourScheme *scheme)
-               : wxDelegateRenderer(renderer)
+    : wxDelegateRenderer(renderer)
 {
     // init colours and pens
     m_penBlack = wxPen(wxSCHEME_COLOUR(scheme, SHADOW_DARK), 0, wxSOLID);
@@ -544,5 +592,3 @@ void wxMetalRenderer::DrawMetal(wxDC &dc, const wxRect &rect )
        dc.DrawRectangle( rect.x, y, rect.width, 1 );
     }
 }
-
-#endif // wxUSE_THEME_METAL

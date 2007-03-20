@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/textctrl.h
+// Name:        textctrl.h
 // Purpose:     wxTextCtrl class
 // Author:      Stefan Csomor
 // Modified by:
@@ -12,126 +12,135 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "textctrl.h"
+#endif
+
 #if wxUSE_SYSTEM_OPTIONS
-    // set this to 'true' if you want to use the 'classic' MLTE-based implementation
-    // instead of the HIView-based implementation in 10.3 and upwards, the former
-    // has more features (backgrounds etc.), but may show redraw artefacts and other
-    // problems depending on your usage; hence, the default is 'false'.
-    #define wxMAC_TEXTCONTROL_USE_MLTE wxT("mac.textcontrol-use-mlte")
+    // set this to true if you want to use the 'classic' mlte based implementation
+    // instead of the HIView based implementation in 10.3 and upwards, the former
+    // has more features (backgrounds etc.) but may show redraw artefacts and other 
+    // problems depending on your usage, default is 'false'
+    #define wxMAC_TEXTCONTROL_USE_MLTE _T("mac.textcontrol-use-mlte")
 #endif
 
 #include "wx/control.h"
-#include "wx/textctrl.h"
 
-class wxMacTextControl;
+WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlNameStr;
 
+class wxMacTextControl ;
 
+// Single-line text item
 class WXDLLEXPORT wxTextCtrl: public wxTextCtrlBase
 {
   DECLARE_DYNAMIC_CLASS(wxTextCtrl)
 
 public:
-    wxTextCtrl()
-    { Init(); }
+  // creation
+  // --------
+  wxTextCtrl() { Init(); }
+  ~wxTextCtrl();
+  wxTextCtrl(wxWindow *parent, wxWindowID id,
+             const wxString& value = wxEmptyString,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize, long style = 0,
+             const wxValidator& validator = wxDefaultValidator,
+             const wxString& name = wxTextCtrlNameStr)
+  {
+      Init();
 
-    wxTextCtrl(wxWindow *parent,
-        wxWindowID id,
-        const wxString& value = wxEmptyString,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxTextCtrlNameStr)
-    {
-        Init();
-        Create(parent, id, value, pos, size, style, validator, name);
-    }
+      Create(parent, id, value, pos, size, style, validator, name);
+  }
 
-    virtual ~wxTextCtrl();
+  bool Create(wxWindow *parent, wxWindowID id,
+              const wxString& value = wxEmptyString,
+              const wxPoint& pos = wxDefaultPosition,
+              const wxSize& size = wxDefaultSize, long style = 0,
+              const wxValidator& validator = wxDefaultValidator,
+              const wxString& name = wxTextCtrlNameStr);
 
-    bool Create(wxWindow *parent,
-        wxWindowID id,
-        const wxString& value = wxEmptyString,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = 0,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxTextCtrlNameStr);
+  // accessors
+  // ---------
+  virtual wxString GetValue() const ;
+  virtual void SetValue(const wxString& value);
 
-    // accessors
-    // ---------
-    virtual wxString GetValue() const;
+  virtual int GetLineLength(long lineNo) const;
+  virtual wxString GetLineText(long lineNo) const;
+  virtual int GetNumberOfLines() const;
 
-    virtual int GetLineLength(long lineNo) const;
-    virtual wxString GetLineText(long lineNo) const;
-    virtual int GetNumberOfLines() const;
+  virtual bool IsModified() const;
+  virtual bool IsEditable() const;
 
-    virtual bool IsModified() const;
-    virtual bool IsEditable() const;
+  // If the return values from and to are the same, there is no selection.
+  virtual void GetSelection(long* from, long* to) const;
 
-    // If the return values from and to are the same, there is no selection.
-    virtual void GetSelection(long* from, long* to) const;
+  // operations
+  // ----------
 
-    // operations
-    // ----------
+  // editing
 
-    // editing
-    virtual void Clear();
-    virtual void Replace(long from, long to, const wxString& value);
-    virtual void Remove(long from, long to);
+  virtual void Clear();
+  virtual void Replace(long from, long to, const wxString& value);
+  virtual void Remove(long from, long to);
 
-    // sets/clears the dirty flag
-    virtual void MarkDirty();
-    virtual void DiscardEdits();
+  // load the controls contents from the file
+  virtual bool LoadFile(const wxString& file);
 
-    // set the max number of characters which may be entered
-    // in a single line text control
-    virtual void SetMaxLength(unsigned long len);
+  // sets/clears the dirty flag
+  virtual void MarkDirty();
+  virtual void DiscardEdits();
 
-    // text control under some platforms supports the text styles: these
-    // methods apply the given text style to the given selection or to
-    // set/get the style which will be used for all appended text
-    virtual bool SetFont( const wxFont &font );
-    virtual bool SetStyle(long start, long end, const wxTextAttr& style);
-    virtual bool SetDefaultStyle(const wxTextAttr& style);
+  // set the max number of characters which may be entered in a single line
+  // text control
+  virtual void SetMaxLength(unsigned long len) ;
 
-    // writing text inserts it at the current position;
-    // appending always inserts it at the end
-    virtual void WriteText(const wxString& text);
-    virtual void AppendText(const wxString& text);
+  // text control under some platforms supports the text styles: these
+  // methods allow to apply the given text style to the given selection or to
+  // set/get the style which will be used for all appended text
+  virtual bool SetFont( const wxFont &font ) ;
+  virtual bool SetStyle(long start, long end, const wxTextAttr& style);
+  virtual bool SetDefaultStyle(const wxTextAttr& style);
 
-    // translate between the position (which is just an index into the textctrl
-    // considering all its contents as a single strings) and (x, y) coordinates
-    // which represent column and line.
-    virtual long XYToPosition(long x, long y) const;
-    virtual bool PositionToXY(long pos, long *x, long *y) const;
+  // writing text inserts it at the current position, appending always
+  // inserts it at the end
+  virtual void WriteText(const wxString& text);
+  virtual void AppendText(const wxString& text);
 
-    virtual void ShowPosition(long pos);
+  // translate between the position (which is just an index in the text ctrl
+  // considering all its contents as a single strings) and (x, y) coordinates
+  // which represent column and line.
+  virtual long XYToPosition(long x, long y) const;
+  virtual bool PositionToXY(long pos, long *x, long *y) const;
 
-    // Clipboard operations
-    virtual void Copy();
-    virtual void Cut();
-    virtual void Paste();
+  virtual void ShowPosition(long pos);
 
-    virtual bool CanCopy() const;
-    virtual bool CanCut() const;
-    virtual bool CanPaste() const;
+  // Clipboard operations
+  virtual void Copy();
+  virtual void Cut();
+  virtual void Paste();
 
-    // Undo/redo
-    virtual void Undo();
-    virtual void Redo();
+  virtual bool CanCopy() const;
+  virtual bool CanCut() const;
+  virtual bool CanPaste() const;
 
-    virtual bool CanUndo() const;
-    virtual bool CanRedo() const;
+  // Undo/redo
+  virtual void Undo();
+  virtual void Redo();
 
-    // Insertion point
-    virtual void SetInsertionPoint(long pos);
-    virtual void SetInsertionPointEnd();
-    virtual long GetInsertionPoint() const;
-    virtual wxTextPos GetLastPosition() const;
+  virtual bool CanUndo() const;
+  virtual bool CanRedo() const;
 
-    virtual void SetSelection(long from, long to);
-    virtual void SetEditable(bool editable);
+  // Insertion point
+  virtual void SetInsertionPoint(long pos);
+  virtual void SetInsertionPointEnd();
+  virtual long GetInsertionPoint() const;
+  virtual wxTextPos GetLastPosition() const;
+
+  virtual void SetSelection(long from, long to);
+  virtual void SetEditable(bool editable);
+
+    // Implementation from now on
+    // --------------------------
 
     // Implementation
     // --------------
@@ -150,7 +159,7 @@ public:
     void OnRedo(wxCommandEvent& event);
     void OnDelete(wxCommandEvent& event);
     void OnSelectAll(wxCommandEvent& event);
-
+    
     void OnUpdateCut(wxUpdateUIEvent& event);
     void OnUpdateCopy(wxUpdateUIEvent& event);
     void OnUpdatePaste(wxUpdateUIEvent& event);
@@ -159,67 +168,45 @@ public:
     void OnUpdateDelete(wxUpdateUIEvent& event);
     void OnUpdateSelectAll(wxUpdateUIEvent& event);
 
-    void OnEraseBackground(wxEraseEvent& event);
+    void OnEraseBackground(wxEraseEvent& event) ;
     void OnContextMenu(wxContextMenuEvent& event);
 
-    virtual bool MacCanFocus() const
-    { return true; }
+    virtual bool MacCanFocus() const { return true ; }
+    virtual bool MacSetupCursor( const wxPoint& pt ) ;
 
-    virtual bool MacSetupCursor( const wxPoint& pt );
-
-    virtual void MacVisibilityChanged();
-    virtual void MacEnabledStateChanged();
-    virtual void MacSuperChangedPosition();
-    virtual void MacCheckSpelling(bool check);
-
+    virtual void         MacVisibilityChanged() ;
+    virtual void         MacEnabledStateChanged() ;
+    virtual void         MacSuperChangedPosition() ;
 #ifndef __WXMAC_OSX__
-    virtual void MacControlUserPaneDrawProc(wxInt16 part);
-    virtual wxInt16 MacControlUserPaneHitTestProc(wxInt16 x, wxInt16 y);
-    virtual wxInt16 MacControlUserPaneTrackingProc(wxInt16 x, wxInt16 y, void* actionProc);
-    virtual void MacControlUserPaneIdleProc();
-    virtual wxInt16 MacControlUserPaneKeyDownProc(wxInt16 keyCode, wxInt16 charCode, wxInt16 modifiers);
-    virtual void MacControlUserPaneActivateProc(bool activating);
-    virtual wxInt16 MacControlUserPaneFocusProc(wxInt16 action);
-    virtual void MacControlUserPaneBackgroundProc(void* info);
+    virtual void            MacControlUserPaneDrawProc(wxInt16 part) ;
+    virtual wxInt16         MacControlUserPaneHitTestProc(wxInt16 x, wxInt16 y) ;
+    virtual wxInt16         MacControlUserPaneTrackingProc(wxInt16 x, wxInt16 y, void* actionProc) ;
+    virtual void            MacControlUserPaneIdleProc() ;
+    virtual wxInt16         MacControlUserPaneKeyDownProc(wxInt16 keyCode, wxInt16 charCode, wxInt16 modifiers) ;
+    virtual void            MacControlUserPaneActivateProc(bool activating) ;
+    virtual wxInt16         MacControlUserPaneFocusProc(wxInt16 action) ;
+    virtual void            MacControlUserPaneBackgroundProc(void* info) ;
 #endif
 
-    wxMacTextControl * GetPeer() const
-    { return (wxMacTextControl*) m_peer; }
-
+  wxMacTextControl*         GetPeer() const { return (wxMacTextControl*) m_peer ; }
 protected:
     // common part of all ctors
     void Init();
 
-    virtual wxSize DoGetBestSize() const;
+  virtual wxSize            DoGetBestSize() const;
 
-    virtual void CreatePeer(const wxString& str, const wxPoint& pos, const wxSize& size, long style );
-	
-    virtual void DoSetValue(const wxString& value, int flags = 0);
+  bool  m_editable ;
 
-    bool  m_editable;
+  // flag is set to true when the user edits the controls contents
+  bool m_dirty;
 
-    // flag is set to true when the user edits the controls contents
-    bool m_dirty;
-
+  unsigned long  m_maxLength ;
   // need to make this public because of the current implementation via callbacks
-    unsigned long  m_maxLength;
-
-    bool GetTriggerOnSetValue() const
-    {
-        return m_triggerOnSetValue;
-    }
-
-    void SetTriggerOnSetValue(bool trigger)
-    {
-        m_triggerOnSetValue = trigger;
-    }
-
-    bool m_triggerOnSetValue ;
-
 private :
   wxMenu  *m_privateContextMenu;
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_TEXTCTRL_H_
+#endif
+    // _WX_TEXTCTRL_H_

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
@@ -9,20 +9,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
-#endif
-
+#include "wx/gdicmn.h"
 #include "wx/msw/private.h"
+#include "wx/colour.h"
 
 #include <string.h>
 
@@ -30,17 +30,28 @@
 
 template<> void wxStringReadValue(const wxString &s , wxColour &data )
 {
-    if ( !data.Set(s) )
+    // copied from VS xrc
+    unsigned long tmp = 0;
+
+    if (s.Length() != 7 || s[0u] != wxT('#')
+        || wxSscanf(s.c_str(), wxT("#%lX"), &tmp) != 1)
     {
         wxLogError(_("String To Colour : Incorrect colour specification : %s"),
             s.c_str() );
         data = wxNullColour;
     }
+    else
+    {
+        data = wxColour((unsigned char) ((tmp & 0xFF0000) >> 16) ,
+            (unsigned char) ((tmp & 0x00FF00) >> 8),
+            (unsigned char) ((tmp & 0x0000FF)));
+    }
 }
 
 template<> void wxStringWriteValue(wxString &s , const wxColour &data )
 {
-    s = data.GetAsString(wxC2S_HTML_SYNTAX);
+    s = wxString::Format(wxT("#%02X%02X%02X"),
+        data.Red(), data.Green(), data.Blue() );
 }
 
 wxTO_STRING_IMP( wxColour )
@@ -54,7 +65,7 @@ wxBEGIN_PROPERTIES_TABLE(wxColour)
     wxREADONLY_PROPERTY( Blue, unsigned char, Blue, EMPTY_MACROVALUE , 0 /*flags*/, wxT("Helpstring"), wxT("group"))
 wxEND_PROPERTIES_TABLE()
 
-wxDIRECT_CONSTRUCTOR_3( wxColour, unsigned char, Red, unsigned char, Green, unsigned char, Blue )
+wxCONSTRUCTOR_3( wxColour, unsigned char, Red, unsigned char, Green, unsigned char, Blue )
 
 wxBEGIN_HANDLERS_TABLE(wxColour)
 wxEND_HANDLERS_TABLE()
@@ -68,23 +79,53 @@ void wxColour::Init()
 {
     m_isInit = false;
     m_pixel = 0;
-    m_alpha =
     m_red =
     m_blue =
     m_green = 0;
+}
+
+wxColour::wxColour(const wxColour& col)
+         :wxObject()
+{
+    *this = col;
+}
+
+wxColour& wxColour::operator=(const wxColour& col)
+{
+    m_red = col.m_red;
+    m_green = col.m_green;
+    m_blue = col.m_blue;
+    m_isInit = col.m_isInit;
+    m_pixel = col.m_pixel;
+    return *this;
+}
+
+void wxColour::InitFromName(const wxString& name)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(name);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
 }
 
 wxColour::~wxColour()
 {
 }
 
-void wxColour::InitRGBA(unsigned char r, unsigned char g, unsigned char b,
-                        unsigned char a)
+void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
 {
     m_red = r;
     m_green = g;
     m_blue = b;
-    m_alpha = a;
     m_isInit = true;
     m_pixel = PALETTERGB(m_red, m_green, m_blue);
 }
+

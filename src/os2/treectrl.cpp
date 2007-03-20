@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/treectrl.cpp
+// Name:        src/msw/treectrl.cpp
 // Purpose:     wxTreeCtrl
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin to be less MSW-specific on 10.10.98
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,18 +30,14 @@
 
 #if wxUSE_TREECTRL
 
-#include "wx/treectrl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-#endif
-
 #include "wx/os2/private.h"
 
+#include "wx/app.h"
+#include "wx/log.h"
+#include "wx/dynarray.h"
 #include "wx/imaglist.h"
+#include "wx/settings.h"
+#include "wx/os2/treectrl.h"
 
 // a macro to hide the ugliness of nested casts
 #define HITEM(item)     (HTREEITEM)(WXHTREEITEM)(item)
@@ -496,17 +496,16 @@ void wxTreeCtrl::DoSetItem (
     }
 } // end of wxTreeCtrl::DoSetItem
 
-unsigned int wxTreeCtrl::GetCount () const
+size_t wxTreeCtrl::GetCount () const
 {
-    CNRINFO  vCnrInfo;
+    CNRINFO                         vCnrInfo;
 
     ::WinSendMsg( GetHWND()
                  ,CM_QUERYCNRINFO
                  ,MPFROMP(&vCnrInfo)
                  ,(MPARAM)(USHORT)sizeof(CNRINFO)
                 );
-
-    return (unsigned int)vCnrInfo.cRecords;
+    return (size_t)vCnrInfo.cRecords;
 } // end of wxTreeCtrl::GetCount
 
 unsigned int wxTreeCtrl::GetIndent () const
@@ -544,6 +543,30 @@ wxImageList* wxTreeCtrl::GetImageList () const
 {
     return m_pImageListNormal;
 } // end of wxTreeCtrl::GetImageList
+
+#if WXWIN_COMPATIBILITY_2_4
+
+wxImageList* wxTreeCtrl::GetImageList(int nVal) const
+{
+    return GetImageList();
+}
+
+void wxTreeCtrl::SetImageList(wxImageList* pImageList, int nVal)
+{
+    SetImageList(pImageList);
+}
+
+int wxTreeCtrl::GetItemSelectedImage(const wxTreeItemId& rItem) const
+{
+    return GetItemImage(rItem, wxTreeItemIcon_Selected);
+}
+
+void wxTreeCtrl::SetItemSelectedImage(const wxTreeItemId& rItem, int nImage)
+{
+    SetItemImage(rItem, nImage, wxTreeItemIcon_Selected);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 wxImageList* wxTreeCtrl::GetStateImageList () const
 {
@@ -1069,7 +1092,7 @@ bool wxTreeCtrl::IsVisible (
     vWxRectContainer.SetTop(vRectContainer.yTop);
     vWxRectContainer.SetRight(vRectContainer.xRight);
     vWxRectContainer.SetBottom(vRectContainer.yBottom);
-    return (vWxRectContainer.Contains(wxPoint(vWxRectRecord.x, vWxRectRecord.y)));
+    return (vWxRectContainer.Inside(wxPoint(vWxRectRecord.x, vWxRectRecord.y)));
 } // end of wxTreeCtrl::IsVisible
 
 bool wxTreeCtrl::ItemHasChildren (
@@ -1479,6 +1502,28 @@ wxTreeItemId wxTreeCtrl::DoInsertItem (
     return wxTreeItemId((long)pRecord->m_ulItemId);
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+
+// for compatibility only
+wxTreeItemId wxTreeCtrl::InsertItem (
+  const wxTreeItemId&               rParent
+, const wxString&                   rsText
+, int                               nImage
+, int                               nSelImage
+, long                              lInsertAfter
+)
+{
+    return DoInsertItem( rParent
+                        ,wxTreeItemId(lInsertAfter)
+                        ,rsText
+                        ,nImage
+                        ,nSelImage
+                        ,NULL
+                       );
+} // end of wxTreeCtrl::InsertItem
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 wxTreeItemId wxTreeCtrl::AddRoot (
   const wxString&                   rsText
 , int                               nImage
@@ -1718,6 +1763,20 @@ void wxTreeCtrl::Toggle (
              ,wxTREE_EXPAND_TOGGLE
             );
 } // end of wxTreeCtrl::Toggle
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxTreeCtrl::ExpandItem (
+  const wxTreeItemId&               rItem
+, int                               nAction
+)
+{
+    DoExpand( rItem
+             ,nAction
+            );
+} // end of wxTreeCtrl::ExpandItem
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 void wxTreeCtrl::Unselect ()
 {
@@ -2068,5 +2127,14 @@ MRESULT wxTreeCtrl::OS2WindowProc (
                                       );
     return mRc;
 } // end of wxTreeCtrl::OS2WindowProc
+
+#if WXWIN_COMPATIBILITY_2_2
+
+wxTreeItemId wxTreeCtrl::GetParent(const wxTreeItemId& item) const
+{
+    return GetItemParent( item );
+}
+
+#endif  // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_TREECTRL

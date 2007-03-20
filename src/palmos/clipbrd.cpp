@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "clipbrd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,9 +28,11 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CLIPBOARD
+#ifndef WX_PRECOMP
+    #include "wx/setup.h"
+#endif
 
-#include "wx/clipbrd.h"
+#if wxUSE_CLIPBOARD
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -36,20 +42,25 @@
     #include "wx/bitmap.h"
     #include "wx/utils.h"
     #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/dataobj.h"
 #endif
 
 #if wxUSE_METAFILE
     #include "wx/metafile.h"
 #endif
 
+#include "wx/log.h"
+#include "wx/clipbrd.h"
+
 #include <string.h>
 
 #include "wx/palmos/private.h"
 
 #if wxUSE_WXDIB
-    #include "wx/palmos/dib.h"
+#include "wx/palmos/dib.h"
+#endif
+
+#if wxUSE_DATAOBJ
+    #include "wx/dataobj.h"
 #endif
 
 #if wxUSE_OLE && !defined(__WXWINCE__)
@@ -72,7 +83,7 @@
 // old-style clipboard functions
 // ---------------------------------------------------------------------------
 
-static bool gs_wxClipboardIsOpen = false;
+static bool gs_wxClipboardIsOpen = FALSE;
 
 bool wxOpenClipboard()
 {
@@ -139,8 +150,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxClipboard, wxObject)
 
 wxClipboard::wxClipboard()
 {
-    m_clearOnExit = false;
-    m_isOpened = false;
+    m_clearOnExit = FALSE;
+    m_isOpened = FALSE;
 }
 
 wxClipboard::~wxClipboard()
@@ -196,3 +207,4 @@ bool wxClipboard::GetData( wxDataObject& data )
 }
 
 #endif // wxUSE_CLIPBOARD
+

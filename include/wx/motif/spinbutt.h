@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/spinbutt.h
+// Name:        spinbutt.h
 // Purpose:     wxSpinButton class
 // Author:      Julian Smart
 // Modified by:
@@ -12,17 +12,21 @@
 #ifndef _WX_SPINBUTT_H_
 #define _WX_SPINBUTT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "spinbutt.h"
+#endif
+
 class WXDLLEXPORT wxArrowButton; // internal
 
 class WXDLLEXPORT wxSpinButton : public wxSpinButtonBase
 {
     DECLARE_DYNAMIC_CLASS(wxSpinButton)
-
+        
 public:
     wxSpinButton() : m_up( 0 ), m_down( 0 ), m_pos( 0 ) { }
-
+    
     wxSpinButton(wxWindow *parent,
-        wxWindowID id = wxID_ANY,
+        wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxSP_VERTICAL,
@@ -33,24 +37,24 @@ public:
     {
         Create(parent, id, pos, size, style, name);
     }
-    virtual ~wxSpinButton();
-
+    ~wxSpinButton();
+    
     bool Create(wxWindow *parent,
-        wxWindowID id = wxID_ANY,
+        wxWindowID id = -1,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxSP_VERTICAL,
         const wxString& name = "wxSpinButton");
-
+       
     // accessors
     int GetValue() const;
     int GetMin() const { return m_min; }
     int GetMax() const { return m_max; }
-
+    
     // operations
     void SetValue(int val);
     void SetRange(int minVal, int maxVal);
-
+    
     // Implementation
     virtual void Command(wxCommandEvent& event)
         { (void)ProcessCommand(event); };

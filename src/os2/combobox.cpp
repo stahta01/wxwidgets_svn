@@ -167,7 +167,7 @@ bool wxComboBox::Create(
     int nEditHeight;
     wxGetCharSize( GetHWND(), NULL, &nEditHeight, &vFont );
     nEditHeight = EDIT_HEIGHT_FROM_CHAR_HEIGHT(nEditHeight);
-    SetInitialSize(wxSize(-1,nEditHeight+4));   // +2x2 for the border
+    SetBestFittingSize(wxSize(-1,nEditHeight+4));   // +2x2 for the border
 
     if (!rsValue.empty())
     {

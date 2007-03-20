@@ -12,6 +12,10 @@
 #ifndef _WX_DC_H_
 #define _WX_DC_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dc.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/dc.h"
 
@@ -31,7 +35,7 @@ class wxDCCacheEntry: public wxObject
 public:
     wxDCCacheEntry(WXHBITMAP hBitmap, int w, int h, int depth);
     wxDCCacheEntry(WXHDC hDC, int depth);
-    virtual ~wxDCCacheEntry();
+    ~wxDCCacheEntry();
 
     WXHBITMAP   m_bitmap;
     WXHDC       m_dc;
@@ -45,7 +49,7 @@ class WXDLLEXPORT wxDC : public wxDCBase
 {
 public:
     wxDC();
-    virtual ~wxDC();
+    ~wxDC();
 
     // implement base class pure virtuals
     // ----------------------------------

@@ -10,6 +10,10 @@
 #ifndef __GTKSLIDERH__
 #define __GTKSLIDERH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 // ----------------------------------------------------------------------------
 // wxSlider
 // ----------------------------------------------------------------------------
@@ -17,7 +21,7 @@
 class WXDLLIMPEXP_CORE wxSlider : public wxSliderBase
 {
 public:
-    wxSlider();
+    wxSlider() { }
     wxSlider(wxWindow *parent,
              wxWindowID id,
              int value, int minValue, int maxValue,
@@ -60,12 +64,12 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
     
     // implementation
-    double m_pos;
-    int m_scrollEventType;
-    bool m_needThumbRelease;
+    bool IsOwnGtkWindow( GdkWindow *window );
+    void GtkDisableEvents();
+    void GtkEnableEvents();
 
-protected:
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
+    GtkAdjustment  *m_adjust;
+    float           m_oldPos;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxSlider)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/artstd.cpp
+// Name:        artstd.cpp
 // Purpose:     stock wxArtProvider instance with default wxWin art
 // Author:      Vaclav Slavik
 // Modified by:
@@ -21,10 +21,13 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/image.h"
+    #if WXWIN_COMPATIBILITY_2_2
+        #include "wx/app.h"
+    #endif
 #endif
 
 #include "wx/artprov.h"
+#include "wx/image.h"
 
 // ----------------------------------------------------------------------------
 // wxDefaultArtProvider
@@ -74,7 +77,7 @@ protected:
 
 /*static*/ void wxArtProvider::InitStdProvider()
 {
-    wxArtProvider::Push(new wxDefaultArtProvider);
+    wxArtProvider::PushProvider(new wxDefaultArtProvider);
 }
 
 #if !defined(__WXGTK20__) || defined(__WXUNIVERSAL__)

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/dataobj2.h
+// Name:        include/wx/motif/dataobj2.h
 // Purpose:     declaration of standard wxDataObjectSimple-derived classes
 // Author:      Mattia Barbon
 // Created:     27.04.03
@@ -10,6 +10,10 @@
 
 #ifndef _WX_MOTIF_DATAOBJ2_H_
 #define _WX_MOTIF_DATAOBJ2_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dataobj.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
@@ -42,3 +46,4 @@ public:
 };
 
 #endif // _WX_MOTIF_DATAOBJ2_H_
+

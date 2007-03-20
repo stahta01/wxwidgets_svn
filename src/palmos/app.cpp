@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,7 +29,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
     #include "wx/frame.h"
     #include "wx/app.h"
     #include "wx/utils.h"
@@ -39,13 +42,15 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
+    #include "wx/dynarray.h"
     #include "wx/wxchar.h"
+    #include "wx/icon.h"
     #include "wx/log.h"
-    #include "wx/module.h"
 #endif
 
 #include "wx/apptrait.h"
 #include "wx/filename.h"
+#include "wx/module.h"
 #include "wx/dynlib.h"
 
 #if wxUSE_TOOLTIPS
@@ -62,6 +67,8 @@
 // ---------------------------------------------------------------------------
 // global variables
 // ---------------------------------------------------------------------------
+
+extern wxList WXDLLEXPORT wxPendingDelete;
 
 // NB: all "NoRedraw" classes must have the same names as the "normal" classes
 //     with NR suffix - wxWindow::MSWCreate() supposes this
@@ -113,10 +120,20 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
     return false;
 }
 
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
 {
-    // TODO: how to get PalmOS GUI system version ?
-    return wxPORT_PALMOS;
+    static wxToolkitInfo info;
+    wxToolkitInfo& baseInfo = wxAppTraits::GetToolkitInfo();
+    info.versionMajor = baseInfo.versionMajor;
+    info.versionMinor = baseInfo.versionMinor;
+    info.os = baseInfo.os;
+    info.shortName = _T("palmos");
+    info.name = _T("wxPalmOS");
+#ifdef __WXUNIVERSAL__
+    info.shortName << _T("univ");
+    info.name << _T("/wxUniversal");
+#endif
+    return info;
 }
 
 // ===========================================================================

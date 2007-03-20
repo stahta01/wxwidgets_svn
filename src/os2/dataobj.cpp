@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dataobj.cpp
+// Name:        os2/dataobj.cpp
 // Purpose:     implementation of wx[I]DataObject class
 // Author:      David Webster
 // Modified by:
@@ -17,22 +17,27 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+  #pragma implementation "dataobj.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#ifndef WX_PRECOMP
+    #include "wx/defs.h"
+    #include "wx/intl.h"
+    #include "wx/log.h"
+#endif
 
 #if wxUSE_DATAOBJ
 
 #include "wx/dataobj.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/image.h"
-#endif
-
 #include "wx/mstream.h"
+#include "wx/image.h"
 
-#include "wx/os2/private.h"
+#define INCL_DOS
+#include <os2.h>
 
 // ----------------------------------------------------------------------------
 // functions
@@ -97,7 +102,7 @@ bool CIDataObject::GetData ( const wxDataFormat& rFormat,
 {
     QueryGetData(rFormat);
     if (rFormat.GetType() == wxDF_INVALID)
-        return false;
+        return FALSE;
 
     ULONG                           ulSize = m_pDataObject->GetDataSize(rFormat);
 
@@ -106,7 +111,7 @@ bool CIDataObject::GetData ( const wxDataFormat& rFormat,
         //
         // It probably means that the method is just not implemented
         //
-        return false;
+        return FALSE;
     }
     if (rFormat.GetType() == wxDF_PRIVATE)
     {
@@ -118,7 +123,7 @@ bool CIDataObject::GetData ( const wxDataFormat& rFormat,
     }
 
     if (ulSize > ulLen) // not enough room to copy
-        return false;
+        return FALSE;
 
     //
     // Copy the data
@@ -230,7 +235,7 @@ bool wxFileDataObject::GetDataHere( void* pBuf ) const
         sFilenames += (wxChar)0;
     }
 
-    memcpy(pBuf, sFilenames.mbc_str(), sFilenames.length() + 1);
+    memcpy(pBuf, sFilenames.mbc_str(), sFilenames.Len() + 1);
     return true;
 }
 
@@ -240,7 +245,7 @@ size_t wxFileDataObject::GetDataSize() const
 
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
-        nRes += m_filenames[i].length();
+        nRes += m_filenames[i].Len();
         nRes += 1;
     }
 
@@ -302,13 +307,16 @@ bool wxBitmapDataObject::GetDataHere( void* pBuf ) const
     if (!m_pngSize)
     {
         wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
-        return false;
+        return FALSE;
     }
     memcpy(pBuf, m_pngData, m_pngSize);
     return true;
 }
 
-bool wxBitmapDataObject::SetData( size_t nSize, const void* pBuf)
+bool wxBitmapDataObject::SetData(
+  size_t                            nSize
+, const void*                       pBuf
+)
 {
     Clear();
     m_pngSize = nSize;
@@ -323,7 +331,7 @@ bool wxBitmapDataObject::SetData( size_t nSize, const void* pBuf)
 
     if (!vHandler.LoadFile(&vImage, vMstream))
     {
-        return false;
+        return FALSE;
     }
 
     m_bitmap = wxBitmap(vImage);

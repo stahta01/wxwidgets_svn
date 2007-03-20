@@ -68,8 +68,8 @@
         #define    _MBSTATE_T
     #endif
 
-    /* CW8.3+ has ssize_t */
-    #if defined(__MACH__) && __MWERKS__ >= 0x3003
+    /* CW9 has ssize_t */
+    #if defined(__MACH__) && __MWERKS__ >= 0x3200
         #define HAVE_SSIZE_T
     #endif
 

@@ -22,11 +22,9 @@ enum
 {
     // lay out the toolbar horizontally
     wxTB_HORIZONTAL  = wxHORIZONTAL,    // == 0x0004
-    wxTB_TOP         = wxTB_HORIZONTAL,
 
     // lay out the toolbar vertically
     wxTB_VERTICAL    = wxVERTICAL,      // == 0x0008
-    wxTB_LEFT        = wxTB_VERTICAL,
 
     // show 3D buttons (wxToolBarSimple only)
     wxTB_3DBUTTONS   = 0x0010,
@@ -51,16 +49,7 @@ enum
 
     // show the text and the icons alongside, not vertically stacked (Win32/GTK)
     wxTB_HORZ_LAYOUT = 0x0800,
-    wxTB_HORZ_TEXT   = wxTB_HORZ_LAYOUT | wxTB_TEXT,
-
-    // don't show the toolbar short help tooltips
-    wxTB_NO_TOOLTIPS = 0x1000,
-
-    // lay out toolbar at the bottom of the window
-    wxTB_BOTTOM       = 0x2000,
-
-    // lay out toolbar at the right edge of the window
-    wxTB_RIGHT        = 0x4000
+    wxTB_HORZ_TEXT   = wxTB_HORZ_LAYOUT | wxTB_TEXT
 };
 
 #if wxUSE_TOOLBAR
@@ -74,12 +63,12 @@ enum
        #include "wx/msw/tbar95.h"
     #elif defined(__WXWINCE__)
        #include "wx/msw/wince/tbarwce.h"
+    #elif defined(__WXMSW__)
+       #include "wx/msw/tbarmsw.h"
     #elif defined(__WXMOTIF__)
        #include "wx/motif/toolbar.h"
-    #elif defined(__WXGTK20__)
-        #include "wx/gtk/tbargtk.h"
     #elif defined(__WXGTK__)
-        #include "wx/gtk1/tbargtk.h"
+        #include "wx/gtk/tbargtk.h"
     #elif defined(__WXMAC__)
        #include "wx/mac/toolbar.h"
     #elif defined(__WXCOCOA__)

@@ -12,6 +12,10 @@
 #ifndef _WX_SPLASH_H_
 #define _WX_SPLASH_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "splash.h"
+#endif
+
 #include "wx/bitmap.h"
 #include "wx/timer.h"
 #include "wx/frame.h"
@@ -43,7 +47,7 @@ public:
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
                    long style = wxSIMPLE_BORDER|wxFRAME_NO_TASKBAR|wxSTAY_ON_TOP);
-    virtual ~wxSplashScreen();
+    ~wxSplashScreen();
 
     void OnCloseWindow(wxCloseEvent& event);
     void OnNotify(wxTimerEvent& event);

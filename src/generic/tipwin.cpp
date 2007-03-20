@@ -17,22 +17,29 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx/wx.h".
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tipwin.h"
+#endif
+
+// For compilers that support precompilatixon, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_TIPWINDOW
-
-#include "wx/tipwin.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
-    #include "wx/timer.h"
-    #include "wx/settings.h"
 #endif // WX_PRECOMP
+#ifdef __WXGTK__
+    #include <gtk/gtk.h>
+#endif
+#include "wx/tipwin.h"
+
+#if wxUSE_TIPWINDOW
+
+#include "wx/timer.h"
+#include "wx/settings.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -153,7 +160,8 @@ wxTipWindow::wxTipWindow(wxWindow *parent,
     Position(wxPoint(x, y), wxSize(0,0));
     Popup(m_view);
     #ifdef __WXGTK__
-        m_view->CaptureMouse();
+        if (!GTK_WIDGET_HAS_GRAB(m_widget))
+            gtk_grab_add( m_widget );
     #endif
 #else
     Move(x, y);
@@ -169,8 +177,8 @@ wxTipWindow::~wxTipWindow()
     }
     #ifdef wxUSE_POPUPWIN
         #ifdef __WXGTK__
-            if ( m_view->HasCapture() )
-                m_view->ReleaseMouse();
+            if (GTK_WIDGET_HAS_GRAB(m_widget))
+                gtk_grab_remove( m_widget );
         #endif
     #endif
 }
@@ -223,8 +231,8 @@ void wxTipWindow::Close()
 #if wxUSE_POPUPWIN
     Show(false);
     #ifdef __WXGTK__
-        if ( m_view->HasCapture() )
-            m_view->ReleaseMouse();
+        if (GTK_WIDGET_HAS_GRAB(m_widget))
+            gtk_grab_remove( m_widget );
     #endif
     Destroy();
 #else
@@ -357,7 +365,7 @@ void wxTipWindowView::OnMouseMove(wxMouseEvent& event)
     const wxRect& rectBound = m_parent->m_rectBound;
 
     if ( rectBound.width &&
-            !rectBound.Contains(ClientToScreen(event.GetPosition())) )
+            !rectBound.Inside(ClientToScreen(event.GetPosition())) )
     {
         // mouse left the bounding rect, disappear
         m_parent->Close();

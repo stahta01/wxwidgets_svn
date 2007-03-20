@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/accel.cpp
+// Name:        generic/accel.cpp
 // Purpose:     generic implementation of wxAcceleratorTable class
 // Author:      Robert Roebling
 // Modified:    VZ pn 31.05.01: use typed lists, Unicode cleanup, Add/Remove
@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "accel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,8 +30,8 @@
 #if wxUSE_ACCEL
 
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
     #include "wx/event.h"
+    #include "wx/list.h"
 #endif // WX_PRECOMP
 
 #include "wx/accel.h"
@@ -40,7 +44,7 @@
 
 WX_DECLARE_LIST(wxAcceleratorEntry, wxAccelList);
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxAccelList)
+WX_DEFINE_LIST(wxAccelList);
 
 // ----------------------------------------------------------------------------
 // wxAccelRefData: the data used by wxAcceleratorTable
@@ -107,7 +111,7 @@ wxAcceleratorTable::~wxAcceleratorTable()
 {
 }
 
-bool wxAcceleratorTable::IsOk() const
+bool wxAcceleratorTable::Ok() const
 {
     return m_refData != NULL;
 }
@@ -138,8 +142,8 @@ void wxAcceleratorTable::Remove(const wxAcceleratorEntry& entry)
         const wxAcceleratorEntry *entryCur = node->GetData();
 
         // given entry contains only the information of the accelerator key
-        // because it was set that way during creation so do not use the
-        // comparison operator which also checks the command field
+        // because it was set that way in wxGetAccelFromString()
+        // so do not perform full ( *entryCur == entry ) comparison
         if ((entryCur->GetKeyCode() == entry.GetKeyCode()) &&
             (entryCur->GetFlags() == entry.GetFlags()))
         {
@@ -218,3 +222,4 @@ wxObjectRefData *wxAcceleratorTable::CloneRefData(const wxObjectRefData *data) c
 }
 
 #endif // wxUSE_ACCEL
+

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        srx/x11/popupwin.cpp
+// Name:        popupwin.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,18 +7,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "popupwin.h"
+#endif
+
+#include "wx/defs.h"
+#include "wx/log.h"
 
 #if wxUSE_POPUPWIN
 
 #include "wx/popupwin.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-#endif
+#include "wx/app.h"
+#include "wx/settings.h"
 
 #include "wx/x11/private.h"
 #include "X11/Xatom.h"
@@ -40,13 +40,13 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     if (!CreateBase( parent, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("popup") ))
     {
         wxFAIL_MSG( wxT("wxPopupWindow creation failed") );
-        return false;
+        return FALSE;
     }
 
     // All dialogs should really have this style
     m_windowStyle = style;
     m_windowStyle |= wxTAB_TRAVERSAL;
-
+    
     wxPoint pos( 20,20 );
     wxSize size( 20,20 );
     wxPoint pos2 = pos;
@@ -60,74 +60,74 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     Visual *xvisual = DefaultVisual( xdisplay, xscreen );
     Window xparent = RootWindow( xdisplay, xscreen );
     Colormap cm = DefaultColormap( xdisplay, xscreen);
-
+    
 #if wxUSE_TWO_WINDOWS
-    bool need_two_windows =
+    bool need_two_windows = 
         ((( wxSUNKEN_BORDER | wxRAISED_BORDER | wxSIMPLE_BORDER | wxHSCROLL | wxVSCROLL ) & m_windowStyle) != 0);
 #else
-    bool need_two_windows = false;
+    bool need_two_windows = FALSE;
 #endif
 
 #if wxUSE_NANOX
     long xattributes_mask = 0;
 #else
-
+    
     XSetWindowAttributes xattributes;
     long xattributes_mask = 0;
 
     m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
     m_backgroundColour.CalcPixel( (WXColormap) cm);
-
+    
     m_foregroundColour = *wxBLACK;
     m_foregroundColour.CalcPixel( (WXColormap) cm);
-
+    
     xattributes_mask |= CWBackPixel;
     xattributes.background_pixel = m_backgroundColour.GetPixel();
-
+    
     xattributes_mask |= CWBorderPixel;
     xattributes.border_pixel = BlackPixel( xdisplay, xscreen );
-
+    
     xattributes_mask |= CWOverrideRedirect | CWSaveUnder;
     xattributes.override_redirect = True;
     xattributes.save_under = True;
-
+    
     xattributes_mask |= CWEventMask;
 #endif
-
+    
     if (need_two_windows)
     {
 #if !wxUSE_NANOX
-        xattributes.event_mask =
+        xattributes.event_mask = 
             ExposureMask | StructureNotifyMask | ColormapChangeMask;
 #endif
-
-        Window xwindow = XCreateWindow( xdisplay, xparent, pos.x, pos.y, size.x, size.y,
+        
+        Window xwindow = XCreateWindow( xdisplay, xparent, pos.x, pos.y, size.x, size.y, 
             0, DefaultDepth(xdisplay,xscreen), InputOutput, xvisual, xattributes_mask, &xattributes );
 
-#if wxUSE_NANOX
+#if wxUSE_NANOX    
         XSelectInput( xdisplay, xwindow,
           ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
           ButtonMotionMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask |
           KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
           PropertyChangeMask );
 #endif
-
+    
         // Set background to None which will prevent X11 from clearing the
         // background comletely.
         XSetWindowBackgroundPixmap( xdisplay, xwindow, None );
-
+    
         m_mainWindow = (WXWindow) xwindow;
         wxAddWindowToTable( xwindow, (wxWindow*) this );
-
+        
         // XMapWindow( xdisplay, xwindow );
-#if !wxUSE_NANOX
-        xattributes.event_mask =
+#if !wxUSE_NANOX    
+        xattributes.event_mask = 
             ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
             ButtonMotionMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask |
             KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
             PropertyChangeMask | VisibilityChangeMask ;
 #endif
-
+        
         if (HasFlag( wxSUNKEN_BORDER) || HasFlag( wxRAISED_BORDER))
         {
             pos2.x = 2;
@@ -146,40 +146,40 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
             pos2.x = 0;
             pos2.y = 0;
         }
-
-        xwindow = XCreateWindow( xdisplay, xwindow, pos2.x, pos2.y, size2.x, size2.y,
+        
+        xwindow = XCreateWindow( xdisplay, xwindow, pos2.x, pos2.y, size2.x, size2.y, 
             0, DefaultDepth(xdisplay,xscreen), InputOutput, xvisual, xattributes_mask, &xattributes );
-
+    
         // Set background to None which will prevent X11 from clearing the
         // background comletely.
         XSetWindowBackgroundPixmap( xdisplay, xwindow, None );
-
-#if wxUSE_NANOX
+    
+#if wxUSE_NANOX    
         XSelectInput( xdisplay, xwindow,
             ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
             ButtonMotionMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask |
             KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
             PropertyChangeMask );
 #endif
-
+    
         m_clientWindow = (WXWindow) xwindow;
         wxAddClientWindowToTable( xwindow, (wxWindow*) this );
-
-        m_isShown = false;
+        
+        m_isShown = FALSE;
         XMapWindow( xdisplay, xwindow );
     }
     else
     {
         // One window
 #if !wxUSE_NANOX
-        xattributes.event_mask =
+        xattributes.event_mask = 
             ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
             ButtonMotionMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask |
             KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
             PropertyChangeMask | VisibilityChangeMask ;
 #endif
-
-        Window xwindow = XCreateWindow( xdisplay, xparent, pos.x, pos.y, size.x, size.y,
+        
+        Window xwindow = XCreateWindow( xdisplay, xparent, pos.x, pos.y, size.x, size.y, 
             0, DefaultDepth(xdisplay,xscreen), InputOutput, xvisual, xattributes_mask, &xattributes );
 
 #if wxUSE_NANOX
@@ -189,16 +189,16 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
           KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
           PropertyChangeMask );
 #endif
-
+        
         // Set background to None which will prevent X11 from clearing the
         // background comletely.
         XSetWindowBackgroundPixmap( xdisplay, xwindow, None );
-
+    
         m_mainWindow = (WXWindow) xwindow;
         m_clientWindow = (WXWindow) xwindow;
         wxAddWindowToTable( xwindow, (wxWindow*) this );
-
-        m_isShown = false;
+        
+        m_isShown = FALSE;
         // XMapWindow( xdisplay, xwindow );
     }
 
@@ -214,8 +214,8 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     wm_hints.initial_state = NormalState;
     XSetWMHints( xdisplay, (Window) m_mainWindow, &wm_hints);
 #endif
-
-    return true;
+    
+    return TRUE;
 }
 
 void wxPopupWindow::DoMoveWindow(int x, int y, int width, int height )
@@ -233,7 +233,7 @@ bool wxPopupWindow::Show( bool show )
     bool ret = wxWindowX11::Show( show );
 
     Raise();
-
+    
     return ret;
 }
 

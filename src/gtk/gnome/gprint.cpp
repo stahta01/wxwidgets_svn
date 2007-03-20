@@ -8,6 +8,10 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -15,23 +19,18 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_LIBGNOMEPRINT
-
 #include "wx/gtk/gnome/gprint.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/dcmemory.h"
-    #include "wx/icon.h"
-    #include "wx/math.h"
-    #include "wx/image.h"
-    #include "wx/module.h"
-#endif
+#if wxUSE_LIBGNOMEPRINT
 
+#include "wx/math.h"
 #include "wx/fontutil.h"
 #include "wx/gtk/private.h"
+#include "wx/module.h"
 #include "wx/dynlib.h"
-#include "wx/paper.h"
+#include "wx/dcmemory.h"
+#include "wx/log.h"
+#include "wx/icon.h"
 
 #include <libgnomeprint/gnome-print.h>
 #include <libgnomeprint/gnome-print-pango.h>
@@ -42,8 +41,8 @@
 
 static const double RAD2DEG  = 180.0 / M_PI;
 
-#include "wx/link.h"
-wxFORCE_LINK_THIS_MODULE(gnome_print)
+#include "wx/html/forcelnk.h"
+FORCE_LINK_ME(gnome_print)
 
 //----------------------------------------------------------------------------
 // wxGnomePrintLibrary
@@ -171,8 +170,6 @@ public:
 
     wxDL_METHOD_DEFINE( GtkWidget*, gnome_print_job_preview_new,
         (GnomePrintJob *gpm, const guchar *title), (gpm, title), NULL )
-
-    DECLARE_NO_COPY_CLASS(wxGnomePrintLibrary)
 };
 
 wxGnomePrintLibrary::wxGnomePrintLibrary()
@@ -284,7 +281,7 @@ wxGnomePrintNativeData::wxGnomePrintNativeData()
 
 wxGnomePrintNativeData::~wxGnomePrintNativeData()
 {
-    g_object_unref (m_config);
+    g_object_unref (G_OBJECT (m_config));
 }
 
 bool wxGnomePrintNativeData::TransferTo( wxPrintData &data )
@@ -312,14 +309,14 @@ wxPrintPreviewBase *wxGnomePrintFactory::CreatePrintPreview( wxPrintout *preview
                                                     wxPrintout *printout,
                                                     wxPrintDialogData *data )
 {
-    return new wxGnomePrintPreview( preview, printout, data );
+    return new wxPostScriptPrintPreview( preview, printout, data );
 }
 
 wxPrintPreviewBase *wxGnomePrintFactory::CreatePrintPreview( wxPrintout *preview,
                                                     wxPrintout *printout,
                                                     wxPrintData *data )
 {
-    return new wxGnomePrintPreview( preview, printout, data );
+    return new wxPostScriptPrintPreview( preview, printout, data );
 }
 
 wxPrintDialogBase *wxGnomePrintFactory::CreatePrintDialog( wxWindow *parent,
@@ -355,11 +352,6 @@ bool wxGnomePrintFactory::HasPrintSetupDialog()
 wxDialog *wxGnomePrintFactory::CreatePrintSetupDialog( wxWindow *parent, wxPrintData *data )
 {
     return NULL;
-}
-
-wxDC* wxGnomePrintFactory::CreatePrinterDC( const wxPrintData& data )
-{
-    return new wxGnomePrintDC(data);
 }
 
 bool wxGnomePrintFactory::HasOwnPrintToFile()
@@ -716,9 +708,8 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     if (!dc)
     {
         gs_lgp->gnome_print_job_close( job );
-        g_object_unref (job);
-        if (sm_lastError != wxPRINTER_CANCELLED)
-            sm_lastError = wxPRINTER_ERROR;
+        g_object_unref (G_OBJECT (job));
+        sm_lastError = wxPRINTER_ERROR;
         return false;
     }
 
@@ -735,10 +726,9 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     int w, h;
     dc->GetSize(&w, &h);
     printout->SetPageSizePixels((int)w, (int)h);
-    printout->SetPaperRectPixels(wxRect(0, 0, w, h));
-    int mw, mh;
-    dc->GetSizeMM(&mw, &mh);
-    printout->SetPageSizeMM((int)mw, (int)mh);
+    dc->GetSizeMM(&w, &h);
+    printout->SetPageSizeMM((int)w, (int)h);
+
     printout->OnPreparePrinting();
 
     // Get some parameters from the printout, if defined
@@ -749,7 +739,7 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     if (maxPage == 0)
     {
         gs_lgp->gnome_print_job_close( job );
-        g_object_unref (job);
+        g_object_unref (G_OBJECT (job));
         sm_lastError = wxPRINTER_ERROR;
         return false;
     }
@@ -794,20 +784,15 @@ bool wxGnomePrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt )
     gs_lgp->gnome_print_job_close( job );
     if (m_native_preview)
     {
-        const wxCharBuffer title(wxGTK_CONV_SYS(_("Print preview")));
-        GtkWidget *preview = gs_lgp->gnome_print_job_preview_new
-                                     (
-                                        job,
-                                        (const guchar *)title.data()
-                                     );
-        gtk_widget_show(preview);
+        wxString title( _("Print preview") );
+        gtk_widget_show( gs_lgp->gnome_print_job_preview_new( job, (const guchar*)(const char*)wxGTK_CONV(title) ));
     }
     else
     {
         gs_lgp->gnome_print_job_print( job );
     }
 
-    g_object_unref (job);
+    g_object_unref (G_OBJECT (job));
     delete dc;
 
     return (sm_lastError == wxPRINTER_NO_ERROR);
@@ -845,11 +830,9 @@ wxGnomePrintDC::wxGnomePrintDC( wxGnomePrinter *printer )
     m_printer = printer;
 
     m_gpc = printer->GetPrintContext();
-    m_job = NULL; // only used and destroyed when created with wxPrintData
 
     m_layout = gs_lgp->gnome_print_pango_create_layout( m_gpc );
     m_fontdesc = pango_font_description_from_string( "Sans 12" );
-    m_context = NULL;
 
     m_currentRed = 0;
     m_currentBlue = 0;
@@ -857,43 +840,13 @@ wxGnomePrintDC::wxGnomePrintDC( wxGnomePrinter *printer )
 
     m_signX =  1;  // default x-axis left to right
     m_signY = -1;  // default y-axis bottom up -> top down
-
-    GetSize( NULL, &m_deviceOffsetY );
-}
-
-wxGnomePrintDC::wxGnomePrintDC( const wxPrintData& data )
-{
-    m_printer = NULL;
-    m_printData = data;
-
-    wxGnomePrintNativeData *native =
-        (wxGnomePrintNativeData*) m_printData.GetNativeData();
-
-    GnomePrintJob *job = gs_lgp->gnome_print_job_new( native->GetPrintConfig() );
-    m_gpc = gs_lgp->gnome_print_job_get_context (job);
-    m_job = job; // only used and destroyed when created with wxPrintData
-
-    m_layout = gs_lgp->gnome_print_pango_create_layout( m_gpc );
-    m_fontdesc = pango_font_description_from_string( "Sans 12" );
-    m_context = NULL;
-
-    m_currentRed = 0;
-    m_currentBlue = 0;
-    m_currentGreen = 0;
-
-    m_signX =  1;  // default x-axis left to right
-    m_signY = -1;  // default y-axis bottom up -> top down
-
-    GetSize( NULL, &m_deviceOffsetY );
 }
 
 wxGnomePrintDC::~wxGnomePrintDC()
 {
-    if (m_job)
-        g_object_unref (m_job);
 }
 
-bool wxGnomePrintDC::IsOk() const
+bool wxGnomePrintDC::Ok() const
 {
     return true;
 }
@@ -957,25 +910,25 @@ void wxGnomePrintDC::DoDrawArc(wxCoord x1,wxCoord y1,wxCoord x2,wxCoord y2,wxCoo
         while (alpha2 > 360)  alpha2 -= 360;
     }
 
-    if (m_brush.GetStyle() != wxTRANSPARENT)
-    {
-        SetBrush( m_brush );
-        gs_lgp->gnome_print_moveto ( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc) );
-        gs_lgp->gnome_print_arcto( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc), XLOG2DEVREL((int)radius), alpha1, alpha2, 0 );
+        if (m_brush.GetStyle() != wxTRANSPARENT)
+        {
+            SetBrush( m_brush );
+            gs_lgp->gnome_print_moveto ( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc) );
+            gs_lgp->gnome_print_arcto( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc), XLOG2DEVREL((int)radius), alpha1, alpha2, 0 );
 
-        gs_lgp->gnome_print_fill( m_gpc );
-    }
+            gs_lgp->gnome_print_fill( m_gpc );
+        }
 
-    if (m_pen.GetStyle() != wxTRANSPARENT)
-    {
-        SetPen (m_pen);
-        gs_lgp->gnome_print_newpath( m_gpc );
-        gs_lgp->gnome_print_moveto ( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc) );
-        gs_lgp->gnome_print_arcto( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc), XLOG2DEVREL((int)radius), alpha1, alpha2, 0 );
-        gs_lgp->gnome_print_closepath( m_gpc );
+        if (m_pen.GetStyle() != wxTRANSPARENT)
+        {
+            SetPen (m_pen);
+            gs_lgp->gnome_print_newpath( m_gpc );
+            gs_lgp->gnome_print_moveto ( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc) );
+            gs_lgp->gnome_print_arcto( m_gpc, XLOG2DEV(xc), YLOG2DEV(yc), XLOG2DEVREL((int)radius), alpha1, alpha2, 0 );
+            gs_lgp->gnome_print_closepath( m_gpc );
 
-        gs_lgp->gnome_print_stroke( m_gpc );
-    }
+            gs_lgp->gnome_print_stroke( m_gpc );
+        }
 
     CalcBoundingBox (x1, y1);
     CalcBoundingBox (x2, y2);
@@ -1206,7 +1159,7 @@ void wxGnomePrintDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width,
     }
 }
 
-void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
+void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y, 
                                         wxCoord width, wxCoord height)
 {
     double r = 4 * (sqrt (2) - 1) / 3;
@@ -1216,22 +1169,22 @@ void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
             halfHR = r * halfH;
     wxCoord halfWI = (wxCoord) halfW,
             halfHI = (wxCoord) halfH;
-
+            
     gs_lgp->gnome_print_newpath( m_gpc );
-
+    
     // Approximate an ellipse using four cubic splines, clockwise from 0 deg */
     gs_lgp->gnome_print_moveto( m_gpc,
-                XLOG2DEV(x + width),
+                XLOG2DEV(x + width), 
                 YLOG2DEV(y + halfHI) );
     gs_lgp->gnome_print_curveto( m_gpc,
                 XLOG2DEV(x + width),
                 YLOG2DEV(y + (wxCoord) rint (halfH + halfHR)),
-                XLOG2DEV(x + (wxCoord) rint(halfW + halfWR)),
+                XLOG2DEV(x + (wxCoord) rint(halfW + halfWR)), 
                 YLOG2DEV(y + height),
-                XLOG2DEV(x + halfWI),
+                XLOG2DEV(x + halfWI), 
                 YLOG2DEV(y + height) );
     gs_lgp->gnome_print_curveto( m_gpc,
-                XLOG2DEV(x + (wxCoord) rint(halfW - halfWR)),
+                XLOG2DEV(x + (wxCoord) rint(halfW - halfWR)), 
                 YLOG2DEV(y + height),
                 XLOG2DEV(x),
                 YLOG2DEV(y + (wxCoord) rint (halfH + halfHR)),
@@ -1248,7 +1201,7 @@ void wxGnomePrintDC::makeEllipticalPath(wxCoord x, wxCoord y,
                 XLOG2DEV(x + width),
                 YLOG2DEV(y + (wxCoord) rint(halfH - halfHR)),
                 XLOG2DEV(x + width), YLOG2DEV(y + halfHI) );
-
+                
     gs_lgp->gnome_print_closepath(m_gpc);
 }
 
@@ -1580,7 +1533,7 @@ void wxGnomePrintDC::SetPen( const wxPen& pen )
         case wxSHORT_DASH:    gs_lgp->gnome_print_setdash( m_gpc, 2, short_dashed, 0 ); break;
         case wxLONG_DASH:     gs_lgp->gnome_print_setdash( m_gpc, 2, wxCoord_dashed, 0 ); break;
         case wxDOT_DASH:      gs_lgp->gnome_print_setdash( m_gpc, 4, dotted_dashed, 0 );  break;
-        case wxUSER_DASH:
+        case wxUSER_DASH: 
         {
             // It may be noted that libgnomeprint between at least
             // versions 2.8.0 and 2.12.1 makes a copy of the dashes
@@ -1677,6 +1630,8 @@ void wxGnomePrintDC::DestroyClippingRegion()
 
 bool wxGnomePrintDC::StartDoc(const wxString& message)
 {
+    SetDeviceOrigin( 0,0 );
+
     return true;
 }
 
@@ -1788,6 +1743,7 @@ void wxGnomePrintDC::DoGetSize(int* width, int* height) const
       (wxGnomePrintNativeData*) m_printData.GetNativeData();
 
     // Query page size. This seems to omit the margins
+    // right now, although it shouldn't
     double pw,ph;
     gs_lgp->gnome_print_job_get_page_size( native->GetPrintJob(), &pw, &ph );
 
@@ -1833,14 +1789,13 @@ void wxGnomePrintDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
     ComputeScaleAndOrigin();
 }
 
-void wxGnomePrintDC::SetLogicalOrigin( wxCoord x, wxCoord y )
-{
-    wxDC::SetLogicalOrigin( x, y );
-}
-
 void wxGnomePrintDC::SetDeviceOrigin( wxCoord x, wxCoord y )
 {
-    wxDC::SetDeviceOrigin( x, y );
+    int h = 0;
+    int w = 0;
+    GetSize( &w, &h );
+
+    wxDC::SetDeviceOrigin( x, h-y );
 }
 
 void wxGnomePrintDC::SetResolution(int ppi)
@@ -1878,97 +1833,6 @@ void wxGnomePrintModule::OnExit()
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxGnomePrintModule, wxModule)
-
-// ----------------------------------------------------------------------------
-// Print preview
-// ----------------------------------------------------------------------------
-
-IMPLEMENT_CLASS(wxGnomePrintPreview, wxPrintPreviewBase)
-
-void wxGnomePrintPreview::Init(wxPrintout * WXUNUSED(printout),
-                                    wxPrintout * WXUNUSED(printoutForPrinting))
-{
-    DetermineScaling();
-}
-
-wxGnomePrintPreview::wxGnomePrintPreview(wxPrintout *printout,
-                                                   wxPrintout *printoutForPrinting,
-                                                   wxPrintDialogData *data)
-                        : wxPrintPreviewBase(printout, printoutForPrinting, data)
-{
-    Init(printout, printoutForPrinting);
-}
-
-wxGnomePrintPreview::wxGnomePrintPreview(wxPrintout *printout,
-                                                   wxPrintout *printoutForPrinting,
-                                                   wxPrintData *data)
-                        : wxPrintPreviewBase(printout, printoutForPrinting, data)
-{
-    Init(printout, printoutForPrinting);
-}
-
-wxGnomePrintPreview::~wxGnomePrintPreview()
-{
-}
-
-bool wxGnomePrintPreview::Print(bool interactive)
-{
-    if (!m_printPrintout)
-        return false;
-
-    wxPrinter printer(& m_printDialogData);
-    return printer.Print(m_previewFrame, m_printPrintout, interactive);
-}
-
-void wxGnomePrintPreview::DetermineScaling()
-{
-    wxPaperSize paperType = m_printDialogData.GetPrintData().GetPaperId();
-    if (paperType == wxPAPER_NONE)
-        paperType = wxPAPER_NONE;
-
-    wxPrintPaperType *paper = wxThePrintPaperDatabase->FindPaperType(paperType);
-    if (!paper)
-        paper = wxThePrintPaperDatabase->FindPaperType(wxPAPER_A4);
-
-    if (paper)
-    {
-        wxSize ScreenPixels = wxGetDisplaySize();
-        wxSize ScreenMM = wxGetDisplaySizeMM();
-
-        m_previewPrintout->SetPPIScreen( (int) ((ScreenPixels.GetWidth() * 25.4) / ScreenMM.GetWidth()),
-                                         (int) ((ScreenPixels.GetHeight() * 25.4) / ScreenMM.GetHeight()) );
-        m_previewPrintout->SetPPIPrinter(wxGnomePrintDC::GetResolution(), wxGnomePrintDC::GetResolution());
-
-        wxSize sizeDevUnits(paper->GetSizeDeviceUnits());
-
-        // TODO: get better resolution information from wxGnomePrintDC, if possible.
-
-        sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxGnomePrintDC::GetResolution() / 72.0);
-        sizeDevUnits.y = (wxCoord)((float)sizeDevUnits.y * wxGnomePrintDC::GetResolution() / 72.0);
-        wxSize sizeTenthsMM(paper->GetSize());
-        wxSize sizeMM(sizeTenthsMM.x / 10, sizeTenthsMM.y / 10);
-
-        // If in landscape mode, we need to swap the width and height.
-        if ( m_printDialogData.GetPrintData().GetOrientation() == wxLANDSCAPE )
-        {
-            m_pageWidth = sizeDevUnits.y;
-            m_pageHeight = sizeDevUnits.x;
-            m_previewPrintout->SetPageSizeMM(sizeMM.y, sizeMM.x);
-        }
-        else
-        {
-            m_pageWidth = sizeDevUnits.x;
-            m_pageHeight = sizeDevUnits.y;
-            m_previewPrintout->SetPageSizeMM(sizeMM.x, sizeMM.y);
-        }
-        m_previewPrintout->SetPageSizePixels(m_pageWidth, m_pageHeight);
-        m_previewPrintout->SetPaperRectPixels(wxRect(0, 0, m_pageWidth, m_pageHeight));
-
-        // At 100%, the page should look about page-size on the screen.
-        m_previewScaleX = (float)0.8 * 72.0 / (float)wxGnomePrintDC::GetResolution();
-        m_previewScaleY = m_previewScaleX;
-    }
-}
 
 #endif
     // wxUSE_LIBGNOMEPRINT

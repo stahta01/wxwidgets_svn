@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/registry.cpp
+// Name:        msw/registry.cpp
 // Purpose:     implementation of registry classes and functions
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -12,24 +12,27 @@
 //              - add high level functions (RegisterOleServer, ...)
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "registry.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include  "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/msw/wrapwin.h"
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
-#include "wx/file.h"
-#include "wx/wfstream.h"
+// other wxWidgets headers
+#include  "wx/string.h"
+#include  "wx/intl.h"
+#include  "wx/log.h"
+#include  "wx/file.h"
+#include  "wx/wfstream.h"
 
 // Windows headers
+#include  "wx/msw/wrapwin.h"
+
 #ifdef __WXWINCE__
 #include "wx/msw/private.h"
 #include <winbase.h>
@@ -51,18 +54,6 @@
 typedef unsigned char *RegString;
 typedef BYTE* RegBinary;
 
-#ifndef HKEY_PERFORMANCE_DATA
-    #define HKEY_PERFORMANCE_DATA ((HKEY)0x80000004)
-#endif
-
-#ifndef HKEY_CURRENT_CONFIG
-    #define HKEY_CURRENT_CONFIG ((HKEY)0x80000005)
-#endif
-
-#ifndef HKEY_DYN_DATA
-    #define HKEY_DYN_DATA ((HKEY)0x80000006)
-#endif
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -81,9 +72,15 @@ aStdKeys[] =
   { HKEY_CURRENT_USER,      wxT("HKEY_CURRENT_USER"),      wxT("HKCU") },
   { HKEY_LOCAL_MACHINE,     wxT("HKEY_LOCAL_MACHINE"),     wxT("HKLM") },
   { HKEY_USERS,             wxT("HKEY_USERS"),             wxT("HKU")  }, // short name?
+#ifndef __WXWINCE__
   { HKEY_PERFORMANCE_DATA,  wxT("HKEY_PERFORMANCE_DATA"),  wxT("HKPD") },
+#endif
+#ifdef HKEY_CURRENT_CONFIG
   { HKEY_CURRENT_CONFIG,    wxT("HKEY_CURRENT_CONFIG"),    wxT("HKCC") },
+#endif
+#ifdef HKEY_DYN_DATA
   { HKEY_DYN_DATA,          wxT("HKEY_DYN_DATA"),          wxT("HKDD") }, // short name?
+#endif
 };
 
 // the registry name separator (perhaps one day MS will change it to '/' ;-)
@@ -967,7 +964,7 @@ bool wxRegKey::SetValue(const wxChar *szValue, const wxString& strValue)
 {
   if ( CONST_CAST Open() ) {
       m_dwLastError = RegSetValueEx((HKEY) m_hKey, szValue, (DWORD) RESERVED, REG_SZ,
-                                    (RegString)strValue.wx_str(),
+                                    (RegString)strValue.c_str(),
                                     (strValue.Len() + 1)*sizeof(wxChar));
       if ( m_dwLastError == ERROR_SUCCESS )
         return true;
@@ -1413,8 +1410,9 @@ const wxChar *GetFullName(const wxRegKey *pKey, const wxChar *szValue)
   return s_str.c_str();
 }
 
-inline void RemoveTrailingSeparator(wxString& str)
+void RemoveTrailingSeparator(wxString& str)
 {
   if ( !str.empty() && str.Last() == REG_SEPARATOR )
     str.Truncate(str.Len() - 1);
 }
+

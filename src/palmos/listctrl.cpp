@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "listctrl.h"
+    #pragma implementation "listctrlbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -31,12 +36,39 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/settings.h"
-    #include "wx/dcclient.h"
-    #include "wx/textctrl.h"
 #endif
 
+#include "wx/textctrl.h"
 #include "wx/imaglist.h"
 #include "wx/listctrl.h"
+#include "wx/dcclient.h"
+
+// ----------------------------------------------------------------------------
+// events
+// ----------------------------------------------------------------------------
+
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_DRAG)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_RDRAG)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_END_LABEL_EDIT)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ITEM)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_GET_INFO)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_SET_INFO)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_SELECTED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_DESELECTED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_KEY_DOWN)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_INSERT_ITEM)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_RIGHT_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_BEGIN_DRAG)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_DRAGGING)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_END_DRAG)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_ACTIVATED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_FOCUSED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_CACHE_HINT)
 
 #if wxUSE_EXTENDED_RTTI
 WX_DEFINE_FLAGS( wxListCtrlStyle )
@@ -257,11 +289,13 @@ bool wxListCtrl::SetItemImage(long item, int image, int WXUNUSED(selImage))
     return false;
 }
 
+#if wxABI_VERSION >= 20603
 // Sets the item image
 bool wxListCtrl::SetItemColumnImage(long item, long column, int image)
 {
     return false;
 }
+#endif
 
 // Gets the item text
 wxString wxListCtrl::GetItemText(long item) const
@@ -601,14 +635,6 @@ int wxListCtrl::OnGetItemImage(long WXUNUSED(item)) const
     return -1;
 }
 
-int wxListCtrl::OnGetItemColumnImage(long item, long column) const
-{
-    if (!column)
-        return OnGetItemImage(item);
-
-    return -1;
-}
-
 wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_DEBUG(item)) const
 {
     // no attributes by default
@@ -651,3 +677,4 @@ static void wxDeleteInternalData(wxListCtrl* ctl, long itemId)
 }
 
 #endif // wxUSE_LISTCTRL
+

@@ -26,17 +26,15 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
-// This setting determines the compatibility with 2.6 API: set it to 0 to
-// flag all cases of using deprecated functions.
+// This setting determines the compatibility with 2.0 API: set it to 1 to
+// enable it
 //
-// Default is 1 but please try building your code with 0 as the default will
-// change to 0 in the next version and the deprecated functions will disappear
-// in the version after it completely.
+// Default is 0.
 //
-// Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 0
+// Recommended setting: 0 (please update your code instead!)
+#define WXWIN_COMPATIBILITY_2_2 0
 
-// This setting determines the compatibility with 2.8 API: set it to 0 to
+// This setting determines the compatibility with 2.2 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
 // Default is 1 but please try building your code with 0 as the default will
@@ -44,7 +42,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_8 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
 // Set to 0 for accurate dialog units, else 1 to be as per 2.1.16 and before.
 // If migrating between versions, your dialogs may seem to shrink.
@@ -173,7 +171,7 @@
 // Default is 1
 //
 // Recommended setting: 1 for win32 else 0
-#if defined(__WIN32__) || defined(__WATCOMC__)
+#if defined(__WIN32__)
     #define wxUSE_WCHAR_T 1
 #else
     #define wxUSE_WCHAR_T 0
@@ -259,38 +257,6 @@
 #else
     #define wxUSE_STD_IOSTREAM 0
 #endif
-
-// Enable conversion to standard C++ string if 1.
-//
-// Default is 1 for most compilers.
-//
-// Currently the Digital Mars and Watcom compilers come without standard C++
-// library headers by default, wxUSE_STD_STRING can be set to 1 if you do have
-// them (e.g. from STLPort).
-//
-// VC++ 5.0 does include standard C++ library header, however they produce
-// many warnings that can't be turned off when compiled at warning level 4.
-#if defined(__DMC__) || defined(__WATCOMC__) \
-        || (defined(_MSC_VER) && _MSC_VER < 1200)
-    #define wxUSE_STD_STRING  0
-#else
-    #define wxUSE_STD_STRING  1
-#endif
-
-// Support for positional parameters (e.g. %1$d, %2$s ...) in wxVsnprintf.
-// Note that if the system's implementation does not support positional
-// parameters, setting this to 1 forces the use of the wxWidgets implementation
-// of wxVsnprintf. The standard vsnprintf() supports positional parameters on
-// many Unix systems but usually doesn't under Windows.
-//
-// Positional parameters are very useful when translating a program since using
-// them in formatting strings allow translators to correctly reorder the
-// translated sentences.
-//
-// Default is 1
-//
-// Recommended setting: 1 if you want to support multiple languages
-#define wxUSE_PRINTF_POS_PARAMS      0
 
 // ----------------------------------------------------------------------------
 // non GUI features selection
@@ -454,17 +420,11 @@
 // Set to 1 to enable virtual ZIP filesystem (requires wxUSE_FILESYSTEM)
 #define wxUSE_FS_ZIP 1
 
-// Set to 1 to enable virtual archive filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_ARCHIVE    1
-
 // wxArchive classes for accessing archives such as zip and tar
 #define wxUSE_ARCHIVE_STREAMS 1
 
 // Set to 1 to compile wxZipInput/OutputStream classes.
 #define wxUSE_ZIPSTREAM 1
-
-// Set to 1 to compile wxTarInput/OutputStream classes.
-#define wxUSE_TARSTREAM     1
 
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG
@@ -511,15 +471,6 @@
 // Define this to use wxURL class.
 #define wxUSE_URL 1
 
-// Support for wxVariant class used in several places throughout the library,
-// notably in wxDataViewCtrl API.
-//
-// Default is 1.
-//
-// Recommended setting: 1 unless you want to reduce the library size as much as
-// possible in which case setting this to 0 can gain up to 100KB.
-#define wxUSE_VARIANT 1
-
 // Support for regular expression matching via wxRegEx class: enable this to
 // use POSIX regular expressions in your code. You need to compile regex
 // library from src/regex to use it under Windows.
@@ -540,7 +491,7 @@
 //
 // Default is 1.
 //
-// Recommended setting: 1
+// Recommended setting: 1 
 #define wxUSE_MEDIACTRL     1
 
 // Use QuickTime
@@ -574,28 +525,6 @@
 #  define wxUSE_XML       1
 #else
 #  define wxUSE_XML       0
-#endif
-
-// Use wxWidget's AUI docking system
-//
-// Default is 1
-//
-// Recommended setting: 1
-#define wxUSE_AUI       1
-
-
-// Enable the new wxGraphicsPath and wxGraphicsContext classes for an advanced
-// 2D drawing API.  (Still somewhat experimental)
-//
-// Please note that on Windows you will need to link with gdiplus.lib (use
-// USE_GDIPLUS=1 for makefile builds) and distribute gdiplus.dll with your
-// application if you want it to be runnable on pre-XP systems.
-//
-// Default is 0
-//
-// Recommended setting: 1
-#ifndef wxUSE_GRAPHICS_CONTEXT
-#define wxUSE_GRAPHICS_CONTEXT 0
 #endif
 
 // Set to 1 to compile MS Windows XP theme engine support
@@ -642,39 +571,30 @@
 // Default is 1
 //
 // Recommended setting: 1
-#define wxUSE_ANIMATIONCTRL    1    // wxAnimationCtrl
-#define wxUSE_BUTTON           1    // wxButton
-#define wxUSE_BMPBUTTON        1    // wxBitmapButton
-#define wxUSE_CALENDARCTRL     1    // wxCalendarCtrl
-#define wxUSE_CHECKBOX         1    // wxCheckBox
-#define wxUSE_CHECKLISTBOX     1    // wxCheckListBox
-#define wxUSE_CHOICE           1    // wxChoice
-#define wxUSE_COLLPANE         1    // wxCollapsiblePane
-#define wxUSE_COLOURPICKERCTRL 1    // wxColourPickerCtrl
-#define wxUSE_COMBOBOX         1    // wxComboBox
-#define wxUSE_DATAVIEWCTRL     1    // wxDataViewCtrl
-#define wxUSE_DATEPICKCTRL     1    // wxDatePickerCtrl
-#define wxUSE_DIRPICKERCTRL    1    // wxDirPickerCtrl
-#define wxUSE_FILEPICKERCTRL   1    // wxFilePickerCtrl
-#define wxUSE_FONTPICKERCTRL   1    // wxFontPickerCtrl
-#define wxUSE_GAUGE            1    // wxGauge
-#define wxUSE_HYPERLINKCTRL    1    // wxHyperlinkCtrl
-#define wxUSE_LISTBOX          1    // wxListBox
-#define wxUSE_LISTCTRL         1    // wxListCtrl
-#define wxUSE_RADIOBOX         1    // wxRadioBox
-#define wxUSE_RADIOBTN         1    // wxRadioButton
-#define wxUSE_SCROLLBAR        1    // wxScrollBar
-#define wxUSE_SEARCHCTRL       1    // wxSearchCtrl
-#define wxUSE_SLIDER           1    // wxSlider
-#define wxUSE_SPINBTN          1    // wxSpinButton
-#define wxUSE_SPINCTRL         1    // wxSpinCtrl
-#define wxUSE_STATBOX          1    // wxStaticBox
-#define wxUSE_STATLINE         1    // wxStaticLine
-#define wxUSE_STATTEXT         1    // wxStaticText
-#define wxUSE_STATBMP          1    // wxStaticBitmap
-#define wxUSE_TEXTCTRL         1    // wxTextCtrl
-#define wxUSE_TOGGLEBTN        1    // wxToggleButton
-#define wxUSE_TREECTRL         1    // wxTreeCtrl
+#define wxUSE_BUTTON       1    // wxButton
+#define wxUSE_BMPBUTTON    1    // wxBitmapButton
+#define wxUSE_CALENDARCTRL 1    // wxCalendarCtrl
+#define wxUSE_CHECKBOX     1    // wxCheckBox
+#define wxUSE_CHECKLISTBOX 1    // wxCheckListBox
+#define wxUSE_CHOICE       1    // wxChoice
+#define wxUSE_COMBOBOX     1    // wxComboBox
+#define wxUSE_DATEPICKCTRL 1    // wxDatePickerCtrl
+#define wxUSE_GAUGE        1    // wxGauge
+#define wxUSE_LISTBOX      1    // wxListBox
+#define wxUSE_LISTCTRL     1    // wxListCtrl
+#define wxUSE_RADIOBOX     1    // wxRadioBox
+#define wxUSE_RADIOBTN     1    // wxRadioButton
+#define wxUSE_SCROLLBAR    1    // wxScrollBar
+#define wxUSE_SLIDER       1    // wxSlider
+#define wxUSE_SPINBTN      1    // wxSpinButton
+#define wxUSE_SPINCTRL     1    // wxSpinCtrl
+#define wxUSE_STATBOX      1    // wxStaticBox
+#define wxUSE_STATLINE     1    // wxStaticLine
+#define wxUSE_STATTEXT     1    // wxStaticText
+#define wxUSE_STATBMP      1    // wxStaticBitmap
+#define wxUSE_TEXTCTRL     1    // wxTextCtrl
+#define wxUSE_TOGGLEBTN    0    // requires wxButton // currently not supported
+#define wxUSE_TREECTRL     1    // wxTreeCtrl
 
 // Use a status bar class? Depending on the value of wxUSE_NATIVE_STATUSBAR
 // below either wxStatusBar95 or a generic wxStatusBar will be used.
@@ -729,22 +649,6 @@
 // Recommended setting: 1
 #define wxUSE_CHOICEBOOK 1
 
-// wxTreebook control is similar to wxNotebook but uses wxTreeCtrl instead of
-// the tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TREEBOOK 1
-
-// wxToolbook control is similar to wxNotebook but uses wxToolBar instead of
-// tabs
-//
-// Default is 1.
-//
-// Recommended setting: 1
-#define wxUSE_TOOLBOOK 1
-
 // wxTabDialog is a generic version of wxNotebook but it is incompatible with
 // the new class. It shouldn't be used in new code.
 //
@@ -753,42 +657,13 @@
 // Recommended setting: 0 (use wxNotebook)
 #define wxUSE_TAB_DIALOG 0
 
-// wxGrid class
+// wxGrid class.
 //
-// Default is 1, set to 0 to cut down compilation time and binaries size if you
-// don't use it.
-//
-// Recommended setting: 1
-//
+// Default is 1.
 #define wxUSE_GRID 1
 
 // wxProperty[Value/Form/List] classes, used by Dialog Editor
 #define wxUSE_PROPSHEET 1
-
-// wxComboCtrl and related classes: combobox with custom popup window and
-// not necessarily a listbox.
-//
-// Default is 1.
-//
-// Recommended setting: 1 but can be safely set to 0 except for wxUniv where it
-//                      it used by wxComboBox
-#define wxUSE_COMBOCTRL 1
-
-// wxOwnerDrawnComboBox is a custom combobox allowing to paint the combobox
-// items.
-//
-// Default is 1.
-//
-// Recommended setting: 1 but can be safely set to 0, except where it is
-//                      needed as a base class for generic wxBitmapComboBox.
-#define wxUSE_ODCOMBOBOX 1
-
-// wxBitmapComboBox a combobox that can have images in front of text items.
-//
-// Default is 1.
-//
-// Recommended setting: 1 but can be safely set to 0
-#define wxUSE_BITMAPCOMBOBOX 1
 
 // ----------------------------------------------------------------------------
 // Miscellaneous GUI stuff
@@ -862,6 +737,10 @@
 
 // wxDC cacheing implementation
 #define wxUSE_DC_CACHEING 1
+
+// Set this to 1 to enable the use of DIB's for wxBitmap to support
+// bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
+#define wxUSE_DIB_FOR_BITMAP 0
 
 // ----------------------------------------------------------------------------
 // common dialogs
@@ -949,14 +828,6 @@
 // wizards
 #define wxUSE_WIZARDDLG 1
 
-// Compile in wxAboutBox() function showing the standard "About" dialog.
-//
-// Default is 1
-//
-// Recommended setting: 1 but can be set to 0 to save some space if you don't
-//                      use this function
-#define wxUSE_ABOUTDLG 1
-
 // ----------------------------------------------------------------------------
 // Metafiles support
 // ----------------------------------------------------------------------------
@@ -1031,14 +902,6 @@
 #else
     #define wxUSE_GLCANVAS 0
 #endif
-
-// wxRichTextCtrl allows editing of styled text.
-//
-// Default is 1.
-//
-// Recommended setting: 1, set to 0 if you want compile a
-// smaller library.
-#define wxUSE_RICHTEXT       1
 
 // wxTreeLayout class
 #define wxUSE_TREELAYOUT 1
@@ -1120,7 +983,7 @@
 #define wxUSE_WXHTML_HELP 1
 
 // Use resources
-#define wxUSE_RESOURCES 0
+#define wxUSE_RESOURCES 1
 
 // Window layout constraint system
 #define wxUSE_CONSTRAINTS 1

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/ole/oleutils.cpp
+// Name:        ole/oleutils.cpp
 // Purpose:     implementation of OLE helper functions
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,18 +17,21 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "oleutils.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if defined(__BORLANDC__)
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#include  "wx/setup.h"
+#include  "wx/log.h"
 
 #if wxUSE_OLE
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
 
 #ifndef __CYGWIN10__
 
@@ -110,9 +113,9 @@ wxBasicString::wxBasicString(const char *sz)
 wxBasicString::wxBasicString(const wxString& str)
 {
 #if wxUSE_UNICODE
-    m_wzBuf = new OLECHAR[str.length() + 1];
-    memcpy(m_wzBuf, str.c_str(), str.length()*2);
-    m_wzBuf[str.length()] = L'\0';
+    m_wzBuf = new OLECHAR[str.Length() + 1];
+    memcpy(m_wzBuf, str.c_str(), str.Length()*2);
+    m_wzBuf[str.Length()] = L'\0';
 #else
     Init(str.c_str());
 #endif
@@ -307,3 +310,4 @@ void wxLogRelease(const char *szInterface, ULONG cRef)
 
 #endif
   // wxUSE_OLE
+

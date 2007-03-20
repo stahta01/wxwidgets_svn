@@ -4,12 +4,10 @@
  * Missing time functions and structures for use under WinCE
  */
 
-#ifndef _WX_MSW_WINCE_TIME_H_
-#define _WX_MSW_WINCE_TIME_H_
+#ifndef __WINCE_TIME_
+#define __WINCE_TIME_
 
 #ifndef _TM_DEFINED
-
-#define _TM_DEFINED
 
 struct tm {
         int tm_sec;     /* seconds after the minute - [0,59] */
@@ -26,14 +24,11 @@ struct tm {
 extern "C"
 {
 
+struct tm * __cdecl localtime(const time_t *);
+
 time_t __cdecl time(time_t *);
 
 time_t __cdecl mktime(struct tm *);
-
-// VC8 CRT provides the other functions
-#if !defined(__VISUALC__) || (__VISUALC__ < 1400)
-
-struct tm * __cdecl localtime(const time_t *);
 
 struct tm * __cdecl gmtime(const time_t *);
 
@@ -41,13 +36,11 @@ struct tm * __cdecl gmtime(const time_t *);
 
 size_t __cdecl wcsftime(wchar_t *, size_t, const wchar_t *, const struct tm *);
 
-extern long timezone;
-
-#endif // !VC8
-
 }
+
+extern long timezone;
 
 #endif // !_TM_DEFINED
 
-#endif // _WX_MSW_WINCE_TIME_H_
+#endif // __WINCE_TIME_
 

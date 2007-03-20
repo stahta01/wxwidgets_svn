@@ -4,7 +4,7 @@
 // Author:      Markus Greither and Vadim Zeitlin
 // Modified by:
 // Created:     23/03/2001
-// RCS-ID:      $Id$
+// RCS-ID:
 // Copyright:   (c) Markus Greither
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "mswfdrepdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,14 +31,12 @@
 #if wxUSE_FINDREPLDLG
 
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcdlg.h"
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif
 
+#include "wx/msw/wrapcdlg.h"
 #include "wx/fdrepdlg.h"
-
-#include "wx/msw/mslu.h"
 
 // ----------------------------------------------------------------------------
 // functions prototypes
@@ -541,3 +543,4 @@ void wxFindReplaceDialog::DoGetClientSize(int *width, int *height) const
 }
 
 #endif // wxUSE_FINDREPLDLG
+

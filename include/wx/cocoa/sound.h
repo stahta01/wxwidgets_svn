@@ -29,7 +29,7 @@ public:
     :   m_cocoaNSSound(NULL)
     {   LoadWAV(data,size,true); }
     wxSound(const wxSound& sound); // why not?
-    virtual ~wxSound();
+    ~wxSound();
 
 public:
     bool Create(const wxString& fileName, bool isResource = false);

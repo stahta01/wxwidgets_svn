@@ -1,8 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/clipbrd.cpp
+// Name:        clipbrd.cpp
 // Purpose:     Clipboard functionality
-// Author:      Stefan Csomor;
-//              Generalized clipboard implementation by Matthew Flatt
+// Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
@@ -10,63 +9,63 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "clipbrd.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_CLIPBOARD
 
-#include "wx/clipbrd.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/frame.h"
-    #include "wx/bitmap.h"
-#endif
-
+#include "wx/app.h"
+#include "wx/frame.h"
+#include "wx/bitmap.h"
+#include "wx/utils.h"
 #include "wx/metafile.h"
+#include "wx/clipbrd.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 #ifndef __DARWIN__
 #include <Scrap.h>
 #endif
-
 #include "wx/mac/uma.h"
 
 #define wxUSE_DATAOBJ 1
 
 #include <string.h>
 
-
 // the trace mask we use with wxLogTrace() - call
 // wxLog::AddTraceMask(TRACE_CLIPBOARD) to enable the trace messages from here
 // (there will be a *lot* of them!)
-static const wxChar *TRACE_CLIPBOARD = wxT("clipboard");
+static const wxChar *TRACE_CLIPBOARD = _T("clipboard");
 
-
-void * wxGetClipboardData( wxDataFormat dataFormat, long *len )
+void *wxGetClipboardData(wxDataFormat dataFormat, long *len)
 {
-    OSStatus err = noErr;
-    void * data = NULL;
+#if !TARGET_CARBON
+    OSErr err = noErr ;
+#else
+    OSStatus err = noErr ;
+#endif
+    void * data = NULL ;
     Size byteCount;
 
     switch (dataFormat.GetType())
     {
     case wxDF_OEMTEXT:
         dataFormat = wxDF_TEXT;
-        break;
+        // fall through
 
     case wxDF_TEXT:
+        break;
     case wxDF_UNICODETEXT:
         break;
-
-    case wxDF_BITMAP:
-    case wxDF_METAFILE:
-        break;
-
+    case wxDF_BITMAP :
+    case wxDF_METAFILE :
+        break ;
     default:
-        // custom datatype
-        break;
+        // custom data type
+        break ;
     }
 
 #if TARGET_CARBON
@@ -77,119 +76,120 @@ void * wxGetClipboardData( wxDataFormat dataFormat, long *len )
     {
         ScrapFlavorFlags    flavorFlags;
 
-        err = GetScrapFlavorFlags( scrapRef, dataFormat.GetFormatId(), &flavorFlags );
-        if (err == noErr)
+        if (( err = GetScrapFlavorFlags( scrapRef, dataFormat.GetFormatId(), &flavorFlags )) == noErr)
         {
-            err = GetScrapFlavorSize( scrapRef, dataFormat.GetFormatId(), &byteCount );
-            if (err == noErr)
+            if (( err = GetScrapFlavorSize( scrapRef, dataFormat.GetFormatId(), &byteCount )) == noErr)
             {
-                Size allocSize = byteCount;
+                Size allocSize = byteCount ;
                 if ( dataFormat.GetType() == wxDF_TEXT )
-                    allocSize += 1;
+                    allocSize += 1 ;
                 else if ( dataFormat.GetType() == wxDF_UNICODETEXT )
-                    allocSize += 2;
+                    allocSize += 2 ;
 
-                data = new char[ allocSize ];
+                data = new char[ allocSize ] ;
 
                 if (( err = GetScrapFlavorData( scrapRef, dataFormat.GetFormatId(), &byteCount , data )) == noErr )
                 {
-                    *len = allocSize;
+                    *len = allocSize ;
                     if ( dataFormat.GetType() == wxDF_TEXT )
-                        ((char*)data)[ byteCount ] = 0;
+                        ((char*)data)[byteCount] = 0 ;
                     if ( dataFormat.GetType() == wxDF_UNICODETEXT )
                     {
                         // "data" format is UTF16, so 2 bytes = one character
                         // wxChar size depends on platform, so just clear last 2 bytes
-                        ((char*)data)[ byteCount + 0 ] =
-                        ((char*)data)[ byteCount + 1 ] = 0;
+                        ((char*)data)[byteCount]   = 0;
+                        ((char*)data)[byteCount+1] = 0;
                     }
                 }
                 else
                 {
-                    delete [] (char*)data;
-                    data = NULL;
+                    delete[] ((char *)data) ;
+                    data = NULL ;
                 }
             }
         }
     }
 
 #else
-    long offset;
-    Handle datahandle = NewHandle( 0 );
-    HLock( datahandle );
-    err = (OSStatus)GetScrap( datahandle, dataFormat.GetFormatId(), &offset );
-    HUnlock( datahandle );
+    long offset ;
+    Handle datahandle = NewHandle(0) ;
+    HLock( datahandle ) ;
+    GetScrap( datahandle , dataFormat.GetFormatId() , &offset ) ;
+    HUnlock( datahandle ) ;
     if ( GetHandleSize( datahandle ) > 0 )
     {
-        byteCount = GetHandleSize( datahandle );
-        Size allocSize = byteCount;
+        byteCount = GetHandleSize( datahandle ) ;
+        Size allocSize = byteCount ;
         if ( dataFormat.GetType() == wxDF_TEXT )
-            allocSize += 1;
+            allocSize += 1 ;
         else if ( dataFormat.GetType() == wxDF_UNICODETEXT )
-            allocSize += 2;
+            allocSize += 2 ;
 
-        data = new char[ allocSize ];
+        data = new char[ allocSize ] ;
 
-        memcpy( (char*) data, (char*) *datahandle, byteCount );
+        memcpy( (char*) data , (char*) *datahandle , byteCount ) ;
         if ( dataFormat.GetType() == wxDF_TEXT )
-            ((char*)data)[ byteCount ] = 0;
-        else if ( dataFormat.GetType() == wxDF_UNICODETEXT )
-            ((wxChar*)data)[ byteCount / 2 ] = 0;
-        *len = byteCount;
+            ((char*)data)[byteCount] = 0 ;
+        if ( dataFormat.GetType() == wxDF_UNICODETEXT )
+            ((wxChar*)data)[byteCount/2] = 0 ;
+        *len = byteCount ;
     }
-
-    DisposeHandle( datahandle );
+    DisposeHandle( datahandle ) ;
 #endif
-
-    if (err != noErr)
+    if ( err )
     {
-        wxLogSysError(wxT("Failed to get clipboard data."));
+        wxLogSysError(_("Failed to get clipboard data."));
 
-        return NULL;
+        return NULL ;
     }
 
-    if (dataFormat.GetType() == wxDF_TEXT)
-        wxMacConvertNewlines10To13( (char*)data );
+    if ( dataFormat.GetType() == wxDF_TEXT )
+    {
+        wxMacConvertNewlines10To13( (char*) data ) ;
+    }
 
     return data;
 }
+
+
+/*
+ * Generalized clipboard implementation by Matthew Flatt
+ */
 
 IMPLEMENT_DYNAMIC_CLASS(wxClipboard, wxObject)
 
 wxClipboard::wxClipboard()
 {
-    m_open = false;
-    m_data = NULL;
+    m_open = false ;
+    m_data = NULL ;
 }
 
 wxClipboard::~wxClipboard()
 {
-    if (m_data != NULL)
+    if (m_data)
     {
         delete m_data;
-        m_data = NULL;
+        m_data = (wxDataObject*) NULL;
     }
 }
 
 void wxClipboard::Clear()
 {
-    if (m_data != NULL)
+    if (m_data)
     {
         delete m_data;
-        m_data = NULL;
+        m_data = (wxDataObject*) NULL;
     }
-
 #if TARGET_CARBON
-    OSStatus err;
-    err = ClearCurrentScrap();
+    OSStatus err ;
+    err = ClearCurrentScrap( );
 #else
-    OSErr err;
-    err = ZeroScrap();
+    OSErr err ;
+    err = ZeroScrap( );
 #endif
-
-    if (err != noErr)
+    if ( err )
     {
-        wxLogSysError( wxT("Failed to empty the clipboard.") );
+        wxLogSysError(_("Failed to empty the clipboard."));
     }
 }
 
@@ -201,10 +201,8 @@ bool wxClipboard::Flush()
 bool wxClipboard::Open()
 {
     wxCHECK_MSG( !m_open, false, wxT("clipboard already open") );
-
-    m_open = true;
-
-    return true;
+    m_open = true ;
+    return true ;
 }
 
 bool wxClipboard::IsOpened() const
@@ -215,18 +213,19 @@ bool wxClipboard::IsOpened() const
 bool wxClipboard::SetData( wxDataObject *data )
 {
     wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
+
     wxCHECK_MSG( data, false, wxT("data is invalid") );
 
     Clear();
-
-    // as we can only store one wxDataObject,
-    // this is the same in this implementation
+    // as we can only store one wxDataObject, this is the same in this
+    // implementation
     return AddData( data );
 }
 
 bool wxClipboard::AddData( wxDataObject *data )
 {
     wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
+
     wxCHECK_MSG( data, false, wxT("data is invalid") );
 
     // we can only store one wxDataObject
@@ -253,64 +252,58 @@ bool wxClipboard::AddData( wxDataObject *data )
                         array[i].GetId().c_str() );
         }
 
-        size_t sz = data->GetDataSize( array[ i ] );
-        void* buf = malloc( sz + 1 );
-        if ( buf != NULL )
+        size_t sz = data->GetDataSize( array[i] ) ;
+        void* buf = malloc( sz + 1 ) ;
+        if ( buf )
         {
             // empty the buffer because in some case GetDataHere does not fill buf
-            memset( buf, 0, sz + 1 );
-            data->GetDataHere( array[ i ], buf );
-            OSType mactype = 0;
+            memset(buf, 0, sz+1);
+            data->GetDataHere( array[i] , buf ) ;
+            OSType mactype = 0 ;
             switch ( array[i].GetType() )
             {
-            case wxDF_TEXT:
-            case wxDF_OEMTEXT:
-                mactype = kScrapFlavorTypeText;
-                sz -= 1;
-                break;
-
-#if wxUSE_UNICODE
-            case wxDF_UNICODETEXT:
-                mactype = kScrapFlavorTypeUnicode;
-                sz -= 2;
-                break;
-#endif
-
-#if wxUSE_DRAG_AND_DROP
+               case wxDF_TEXT:
+               case wxDF_OEMTEXT:
+                    mactype = kScrapFlavorTypeText ;
+                    sz -= 1;
+               break ;
+    #if wxUSE_UNICODE
+               case wxDF_UNICODETEXT :
+                    mactype = kScrapFlavorTypeUnicode ;
+                    sz -= 2;
+               break ;
+    #endif
+    #if wxUSE_DRAG_AND_DROP
             case wxDF_METAFILE:
-                mactype = kScrapFlavorTypePicture;
-                break;
-#endif
-
-            case wxDF_BITMAP:
-            case wxDF_DIB:
-                mactype = kScrapFlavorTypePicture;
-                break;
-
-            default:
-                mactype = (OSType)(array[ i ].GetFormatId());
-                break;
+                    mactype = kScrapFlavorTypePicture ;
+               break ;
+    #endif
+               case wxDF_BITMAP:
+               case wxDF_DIB:
+                    mactype = kScrapFlavorTypePicture ;
+                    break ;
+               default:
+                    mactype = (OSType)(array[i].GetFormatId());
+                    break ;
             }
-
-            UMAPutScrap( sz , mactype , buf );
-            free( buf );
+            UMAPutScrap( sz , mactype , buf ) ;
+            free( buf ) ;
         }
     }
 
-    delete [] array;
+    delete[] array;
 
-    return true;
+    return true ;
 }
 
 void wxClipboard::Close()
 {
     wxCHECK_RET( m_open, wxT("clipboard not open") );
 
-    m_open = false;
+    m_open = false ;
 
-    // Get rid of cached object.
-    // If this is not done, copying data from
-    // another application will only work once
+    // Get rid of cached object.  If this is not done copying from another application will
+    // only work once
     if (m_data)
     {
         delete m_data;
@@ -321,10 +314,9 @@ void wxClipboard::Close()
 bool wxClipboard::IsSupported( const wxDataFormat &dataFormat )
 {
     if ( m_data )
-        return m_data->IsSupported( dataFormat );
-
-    bool hasData = false;
-
+    {
+        return m_data->IsSupported( dataFormat ) ;
+    }
 #if TARGET_CARBON
     OSStatus err = noErr;
     ScrapRef scrapRef;
@@ -332,113 +324,111 @@ bool wxClipboard::IsSupported( const wxDataFormat &dataFormat )
     err = GetCurrentScrap( &scrapRef );
     if ( err != noTypeErr && err != memFullErr )
     {
-        ScrapFlavorFlags flavorFlags;
-        Size byteCount;
+        ScrapFlavorFlags    flavorFlags;
+        Size                byteCount;
 
-        err = GetScrapFlavorFlags( scrapRef, dataFormat.GetFormatId(), &flavorFlags );
-        if (err == noErr)
+        if (( err = GetScrapFlavorFlags( scrapRef, dataFormat.GetFormatId(), &flavorFlags )) == noErr)
         {
-            err = GetScrapFlavorSize( scrapRef, dataFormat.GetFormatId(), &byteCount );
-            if (err == noErr)
-                hasData = true;
+            if (( err = GetScrapFlavorSize( scrapRef, dataFormat.GetFormatId(), &byteCount )) == noErr)
+            {
+                return true ;
+            }
         }
         else if ( dataFormat.GetType() == wxDF_UNICODETEXT )
         {
-            err = GetScrapFlavorFlags( scrapRef, 'TEXT', &flavorFlags );
-            if (err == noErr)
+            if (( err = GetScrapFlavorFlags( scrapRef, 'TEXT', &flavorFlags )) == noErr)
             {
-                err = GetScrapFlavorSize( scrapRef, 'TEXT', &byteCount );
-                if (err == noErr)
-                    hasData = true;
+                if (( err = GetScrapFlavorSize( scrapRef, 'TEXT', &byteCount )) == noErr)
+                {
+                    return true ;
+                }
             }
         }
     }
+    return false;
 
 #else
-
-    long offset = 0;
-    Handle datahandle = NewHandle( 0 );
-    HLock( datahandle );
-    GetScrap( datahandle, dataFormat.GetFormatId(), &offset );
-    HUnlock( datahandle );
-    hasData = GetHandleSize( datahandle ) > 0;
-    DisposeHandle( datahandle );
+    long offset ;
+    Handle datahandle = NewHandle(0) ;
+    HLock( datahandle ) ;
+    GetScrap( datahandle , dataFormat.GetFormatId() , &offset ) ;
+    HUnlock( datahandle ) ;
+    bool hasData = GetHandleSize( datahandle ) > 0 ;
+    DisposeHandle( datahandle ) ;
+    return hasData ;
 #endif
-
-    return hasData;
 }
 
 bool wxClipboard::GetData( wxDataObject& data )
 {
     wxCHECK_MSG( m_open, false, wxT("clipboard not open") );
 
-    size_t formatcount = data.GetFormatCount() + 1;
-    wxDataFormat *array = new wxDataFormat[ formatcount ];
+    size_t formatcount = data.GetFormatCount() + 1 ;
+    wxDataFormat *array = new wxDataFormat[ formatcount  ];
     array[0] = data.GetPreferredFormat();
     data.GetAllFormats( &array[1] );
 
-    bool transferred = false;
+    bool transferred = false ;
 
     if ( m_data )
     {
-        for (size_t i = 0; !transferred && i < formatcount; i++)
-        {
-            wxDataFormat format = array[ i ];
-            if ( m_data->IsSupported( format ) )
-            {
-                int dataSize = m_data->GetDataSize( format );
-                transferred = true;
+      for (size_t i = 0; !transferred && i < formatcount ; i++)
+      {
+          wxDataFormat format = array[i] ;
+          if ( m_data->IsSupported( format ) )
+          {
+            int size = m_data->GetDataSize( format );
+            transferred = true ;
 
-                if (dataSize == 0)
-                {
-                    data.SetData( format, 0, 0 );
-                }
-                else
-                {
-                    char *d = new char[ dataSize ];
-                    m_data->GetDataHere( format, (void*)d );
-                    data.SetData( format, dataSize, d );
-                    delete [] d;
-                }
+            if (size == 0)
+            {
+              data.SetData(format , 0 , 0 ) ;
             }
-        }
+            else
+            {
+              char *d = new char[size];
+              m_data->GetDataHere( format , (void*) d );
+              data.SetData( format , size , d ) ;
+              delete[] d ;
+            }
+          }
+       }
     }
 
     // get formats from wxDataObjects
     if ( !transferred )
     {
-        for (size_t i = 0; !transferred && i < formatcount; i++)
-        {
-            wxDataFormat format = array[ i ];
+      for (size_t i = 0; !transferred && i < formatcount ; i++)
+      {
+          wxDataFormat format = array[i] ;
 
-            switch ( format.GetType() )
-            {
-                // NOTE: this is usable for all data types
-                case wxDF_TEXT:
-                case wxDF_UNICODETEXT:
-                case wxDF_OEMTEXT:
-                case wxDF_BITMAP:
-                case wxDF_METAFILE:
-                default:
-                {
-                    long len;
-                    char* s = (char*)wxGetClipboardData( format, &len );
-                    if (s != NULL)
-                    {
-                        data.SetData( format, len, s );
-                        delete [] s;
+          switch ( format.GetType() )
+          {
+              // NOTE: this is usable for all data types
+              case wxDF_TEXT :
+              case wxDF_UNICODETEXT:
+              case wxDF_OEMTEXT :
+              case wxDF_BITMAP :
+              case wxDF_METAFILE :
+              default :
+              {
+                  long len ;
+                  char* s = (char*)wxGetClipboardData(format, &len );
+                  if ( s )
+                  {
+                    data.SetData( format , len , s ) ;
+                    delete [] s;
 
-                        transferred = true;
-                    }
-                }
-                break;
-            }
-        }
+                    transferred = true ;
+                  }
+              }
+              break ;
+          }
+       }
     }
 
-    delete [] array;
-
-    return transferred;
+    delete[] array ;
+    return transferred ;
 }
 
 #endif

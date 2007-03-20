@@ -9,6 +9,10 @@
 #ifndef __WX_FONT_H__
 #define __WX_FONT_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "font.h"
+#endif
+
 #include "wx/hash.h"
 
 // ----------------------------------------------------------------------------
@@ -30,10 +34,13 @@ class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) { Init(); Ref(font); }
 
     wxFont(const wxNativeFontInfo& info)
     {
+        Init();
+
         (void)Create(info);  
     }
 
@@ -45,6 +52,8 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -58,7 +67,10 @@ public:
 
     bool Create(const wxNativeFontInfo& fontinfo);
 
-    virtual ~wxFont() {}
+    ~wxFont() {}
+
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -75,17 +87,16 @@ public:
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
     virtual void SetWeight(int weight);
-    virtual bool SetFaceName(const wxString& faceName);
+    virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
-
-    // Unofficial API, don't use
-    virtual void SetNoAntiAliasing(bool no = true);
-    virtual bool GetNoAntiAliasing() const;
 
     struct font_t *GetMGLfont_t(float scale, bool antialiased);
 
 protected:
+    // common part of all ctors
+    void Init() {}
+
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;

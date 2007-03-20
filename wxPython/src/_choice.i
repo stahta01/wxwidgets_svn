@@ -86,10 +86,6 @@ function.", "");
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-
-    %property(CurrentSelection, GetCurrentSelection, doc="See `GetCurrentSelection`");
-    
 };
 
 //---------------------------------------------------------------------------

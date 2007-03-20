@@ -12,6 +12,10 @@
 #ifndef _WX_WXFSTREAM_H__
 #define _WX_WXFSTREAM_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "wfstream.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_STREAMS
@@ -34,12 +38,11 @@ public:
     wxFileInputStream(const wxString& ifileName);
     wxFileInputStream(wxFile& file);
     wxFileInputStream(int fd);
-    virtual ~wxFileInputStream();
+    ~wxFileInputStream();
 
     wxFileOffset GetLength() const;
 
-    bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
+    bool Ok() const { return m_file->IsOpened(); }
     bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
 
 protected:
@@ -68,8 +71,7 @@ public:
     bool Close() { return m_file_destroy ? m_file->Close() : true; }
     wxFileOffset GetLength() const;
 
-    bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
+    bool Ok() const { return m_file->IsOpened(); }
     bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
 
 protected:
@@ -135,12 +137,11 @@ public:
     wxFFileInputStream(const wxString& fileName, const wxChar *mode = _T("rb"));
     wxFFileInputStream(wxFFile& file);
     wxFFileInputStream(FILE *file);
-    virtual ~wxFFileInputStream();
+    ~wxFFileInputStream();
 
     wxFileOffset GetLength() const;
 
-    bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
+    bool Ok() const { return m_file->IsOpened(); }
     bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
 
 protected:
@@ -169,8 +170,7 @@ public:
     bool Close() { return m_file_destroy ? m_file->Close() : true; }
     wxFileOffset GetLength() const;
 
-    bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const ;
+    bool Ok() const { return m_file->IsOpened(); }
     bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
 
 protected:

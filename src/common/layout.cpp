@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/layout.cpp
+// Name:        layout.cpp
 // Purpose:     Constraint layout system classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // =============================================================================
@@ -17,28 +17,36 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "layout.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_CONSTRAINTS
 
-#include "wx/layout.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/msgdlg.h"
-    #include "wx/intl.h"
+  #include "wx/window.h"
+  #include "wx/utils.h"
+  #include "wx/dialog.h"
+  #include "wx/msgdlg.h"
+  #include "wx/intl.h"
 #endif
 
+#include "wx/layout.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxIndividualLayoutConstraint, wxObject)
-IMPLEMENT_DYNAMIC_CLASS(wxLayoutConstraints, wxObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxIndividualLayoutConstraint, wxObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxLayoutConstraints, wxObject)
+
 
 
 inline void wxGetAsIs(wxWindowBase* win, int* w, int* h)
@@ -47,7 +55,7 @@ inline void wxGetAsIs(wxWindowBase* win, int* w, int* h)
     // The old way.  Works for me.
     win->GetSize(w, h);
 #endif
-
+    
 #if 0
     // Vadim's change.  Breaks wxPython's LayoutAnchors
     win->GetBestSize(w, h);

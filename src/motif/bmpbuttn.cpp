@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/bmpbuttn.cpp
+// Name:        bmpbuttn.cpp
 // Purpose:     wxBitmapButton
 // Author:      Julian Smart
 // Modified by:
@@ -9,12 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpbuttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XtScreen XTSCREEN
 #endif
+
+#include "wx/defs.h"
 
 #include "wx/bmpbuttn.h"
 
@@ -75,7 +81,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
         xmPushButtonWidgetClass, parentWidget,
 #endif
         // See comment for wxButton::SetDefault
-        // XmNdefaultButtonShadowThickness, 1,
+        // XmNdefaultButtonShadowThickness, 1, 
         XmNrecomputeSize, False,
         NULL);
 
@@ -124,13 +130,13 @@ void wxBitmapButton::SetBitmapSelected(const wxBitmap& sel)
     m_bmpSelectedOriginal = sel;
 
     DoSetBitmap();
-}
+};
 
 void wxBitmapButton::SetBitmapFocus(const wxBitmap& focus)
 {
     m_bmpFocus = focus;
     // Not used in Motif
-}
+};
 
 void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
 {
@@ -138,7 +144,7 @@ void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
     m_bmpDisabledOriginal = disabled;
 
     DoSetBitmap();
-}
+};
 
 void wxBitmapButton::DoSetBitmap()
 {
@@ -152,7 +158,7 @@ void wxBitmapButton::DoSetBitmap()
         // in the current widget background colour.
         if (m_bmpNormalOriginal.GetMask())
         {
-            WXPixel backgroundPixel;
+            int backgroundPixel;
             XtVaGetValues((Widget) m_mainWidget,
                           XmNbackground, &backgroundPixel,
                           NULL);
@@ -177,7 +183,7 @@ void wxBitmapButton::DoSetBitmap()
         {
             if (m_bmpDisabledOriginal.GetMask())
             {
-                WXPixel backgroundPixel;
+                int backgroundPixel;
                 XtVaGetValues((Widget) m_mainWidget,
                               XmNbackground, &backgroundPixel,
                               NULL);
@@ -202,7 +208,7 @@ void wxBitmapButton::DoSetBitmap()
         {
             if (m_bmpSelectedOriginal.GetMask())
             {
-                WXPixel backgroundPixel;
+                int backgroundPixel;
                 XtVaGetValues((Widget) m_mainWidget,
                               XmNarmColor, &backgroundPixel,
                               NULL);
@@ -263,3 +269,4 @@ wxSize wxBitmapButton::DoGetBestSize() const
 
     return ret;
 }
+

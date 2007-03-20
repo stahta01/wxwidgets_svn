@@ -10,7 +10,6 @@
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxTextCtrl" name="TEXT">
-              <value></value>
               <size>250,100</size>
               <style>wxTE_MULTILINE</style>
             </object>
@@ -23,17 +22,23 @@
         <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
+        <object class="wxStaticLine"/>
+        <flag>wxEXPAND</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
+              <label>OK</label>
+              <default>1</default>
             </object>
+            <flag>wxRIGHT</flag>
+            <border>10</border>
           </object>
-          <object class="button">
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
+              <label>Cancel</label>
             </object>
           </object>
         </object>
@@ -186,21 +191,24 @@
         <option>1</option>
         <flag>wxEXPAND</flag>
       </object>
-      <object class="spacer">
-        <size>0,10</size>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
+              <label>OK</label>
+              <default>1</default>
             </object>
+            <flag>wxRIGHT</flag>
+            <border>10</border>
           </object>
-          <object class="button">
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
+              <label>Cancel</label>
             </object>
           </object>
         </object>
@@ -225,21 +233,24 @@
         <flag>wxALL|wxEXPAND</flag>
         <border>5</border>
       </object>
-      <object class="spacer">
-        <size>0,10</size>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
+              <label>OK</label>
+              <default>1</default>
             </object>
+            <flag>wxRIGHT</flag>
+            <border>10</border>
           </object>
-          <object class="button">
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
+              <label>Cancel</label>
             </object>
           </object>
         </object>
@@ -250,7 +261,7 @@
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
   </object>
   <object class="wxDialog" name="DIALOG_STYLES">
-    <title>Window Styles</title>
+    <title>Window styles</title>
     <centered>1</centered>
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
@@ -288,21 +299,24 @@
         <flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
         <border>5</border>
       </object>
-      <object class="spacer">
-        <size>0,10</size>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <flag>wxEXPAND</flag>
       </object>
       <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
+              <label>OK</label>
+              <default>1</default>
             </object>
+            <flag>wxRIGHT</flag>
+            <border>10</border>
           </object>
-          <object class="button">
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
+              <label>Cancel</label>
             </object>
           </object>
         </object>
@@ -336,7 +350,7 @@
               <orient>wxVERTICAL</orient>
               <object class="sizeritem">
                 <object class="wxSpinCtrl" name="SPIN">
-                  <size>60,-1</size>
+                  <size>20,-1d</size>
                 </object>
                 <flag>wxBOTTOM</flag>
                 <border>5</border>
@@ -367,23 +381,25 @@
         </object>
         <option>1</option>
         <flag>wxEXPAND</flag>
-        <border>0</border>
-      </object>
-      <object class="spacer">
-        <size>0,10</size>
       </object>
       <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
+        <object class="wxStaticLine"/>
+        <flag>wxEXPAND</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
+              <label>OK</label>
+              <default>1</default>
             </object>
+            <flag>wxRIGHT</flag>
+            <border>10</border>
           </object>
-          <object class="button">
+          <object class="sizeritem">
             <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
+              <label>Cancel</label>
             </object>
           </object>
         </object>
@@ -492,223 +508,6 @@
           <growablecols>1</growablecols>
         </object>
         <flag>wxEXPAND</flag>
-      </object>
-    </object>
-  </object>
-  <object class="wxDialog" name="PYTHON_OPTIONS">
-    <title>Python Module Config</title>
-    <object class="wxBoxSizer">
-      <orient>wxVERTICAL</orient>
-      <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxVERTICAL</orient>
-          <object class="sizeritem">
-            <object class="wxCheckBox" name="AutoGenerateCB">
-              <label>Autogenerate Python module when saving XRC</label>
-            </object>
-            <flag>wxBOTTOM|wxLEFT|wxRIGHT</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxCheckBox" name="EmbedCB">
-              <label>Embed resources in the Python module</label>
-            </object>
-            <flag>wxBOTTOM|wxLEFT|wxRIGHT</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxCheckBox" name="GettextCB">
-              <label>Generate gettext strings</label>
-            </object>
-            <flag>wxBOTTOM|wxLEFT|wxRIGHT</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxCheckBox" name="MakeXRSFileCB">
-              <label>Generate and use compressed XRS file</label>
-              <enabled>0</enabled>
-              <hidden>1</hidden>
-            </object>
-            <flag>wxBOTTOM|wxLEFT|wxRIGHT</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticText">
-              <label>Filename:</label>
-            </object>
-            <flag>wxALL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxTextCtrl" name="FileNameTC">
-                  <size>500,-1</size>
-                </object>
-                <flag>wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE_VERTICAL</flag>
-                <border>5</border>
-              </object>
-              <object class="sizeritem">
-                <object class="wxButton" name="BrowseBtn">
-                  <label>Browse...</label>
-                </object>
-                <flag>wxBOTTOM|wxRIGHT</flag>
-                <border>5</border>
-              </object>
-            </object>
-            <flag>wxEXPAND</flag>
-          </object>
-        </object>
-        <flag>wxALL</flag>
-        <border>10</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticLine"/>
-        <flag>wxEXPAND</flag>
-      </object>
-      <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
-          <object class="spacer">
-            <size>1,10</size>
-            <option>1</option>
-          </object>
-          <object class="sizeritem">
-            <object class="wxButton" name="GenerateBtn">
-              <label>Generate module</label>
-              <default>1</default>
-            </object>
-          </object>
-          <object class="spacer">
-            <size>10,1</size>
-          </object>
-          <object class="sizeritem">
-            <object class="wxButton" name="SaveOptsBtn">
-              <label>Save options</label>
-              <style></style>
-            </object>
-          </object>
-          <object class="spacer">
-            <size>10,1</size>
-          </object>
-          <object class="sizeritem">
-            <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-            </object>
-          </object>
-        </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_HORIZONTAL</flag>
-        <border>10</border>
-      </object>
-    </object>
-  </object>
-  <object class="wxDialog" name="DIALOG_PREFS">
-    <title>XRCed Preferences</title>
-    <object class="wxBoxSizer">
-      <orient>wxVERTICAL</orient>
-      <object class="sizeritem">
-        <object class="wxStaticBoxSizer">
-          <label>Defaults for new containes</label>
-          <orient>wxVERTICAL</orient>
-          <object class="sizeritem">
-            <object class="wxFlexGridSizer">
-              <cols>2</cols>
-              <rows>2</rows>
-              <object class="sizeritem">
-                <object class="wxCheckBox" name="check_proportion_panel">
-                  <label>proportion</label>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxSpinCtrl" name="spin_proportion_panel">
-                  <size>50,-1</size>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxCheckBox" name="check_flag_panel">
-                  <label>flag</label>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxTextCtrl" name="text_flag_panel">
-                  <size>150,-1</size>
-                </object>
-              </object>
-              <hgap>10</hgap>
-            </object>
-          </object>
-        </object>
-        <flag>wxALL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticBoxSizer">
-          <label>Defaults for new controls</label>
-          <orient>wxVERTICAL</orient>
-          <object class="sizeritem">
-            <object class="wxFlexGridSizer">
-              <cols>2</cols>
-              <rows>2</rows>
-              <object class="sizeritem">
-                <object class="wxCheckBox" name="check_proportion_control">
-                  <label>proportion</label>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxSpinCtrl" name="spin_proportion_control">
-                  <size>50,-1</size>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxCheckBox" name="check_flag_control">
-                  <label>flag</label>
-                </object>
-              </object>
-              <object class="sizeritem">
-                <object class="wxTextCtrl" name="text_flag_control">
-                  <size>150,-1</size>
-                </object>
-              </object>
-              <hgap>10</hgap>
-            </object>
-          </object>
-        </object>
-        <flag>wxALL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxRadioBox" name="radio_allow_exec">
-          <label>Execution of comment directives</label>
-          <content>
-            <item>ask</item>
-            <item>always</item>
-            <item>never</item>
-          </content>
-        </object>
-        <flag>wxALL|wxALIGN_CENTRE_HORIZONTAL</flag>
-        <border>5</border>
-      </object>
-      <object class="spacer">
-        <size>0,10</size>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStdDialogButtonSizer">
-          <object class="button">
-            <object class="wxButton" name="wxID_OK">
-              <label></label>
-              <label>&amp;Ok</label>
-            </object>
-          </object>
-          <object class="button">
-            <object class="wxButton" name="wxID_CANCEL">
-              <label></label>
-              <label>&amp;Cancel</label>
-            </object>
-          </object>
-        </object>
-        <flag>wxALL|wxALIGN_CENTRE_HORIZONTAL</flag>
-        <border>10</border>
       </object>
     </object>
   </object>

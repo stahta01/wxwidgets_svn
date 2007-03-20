@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/NSWindow.mm
+// Name:        cocoa/NSWindow.mm
 // Purpose:     wxCocoaNSWindow
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
@@ -193,21 +193,11 @@ wxMenuBar* wxCocoaNSWindow::GetAppMenuBar(wxCocoaNSWindow *win)
 {
 }
 
-- (BOOL)canBecomeKeyWindow;
 - (BOOL)canBecomeMainWindow;
 @end // wxPoserNSwindow
 
 WX_IMPLEMENT_POSER(wxPoserNSWindow);
 @implementation wxPoserNSWindow : NSWindow
-
-- (BOOL)canBecomeKeyWindow
-{
-    bool canBecome = false;
-    wxCocoaNSWindow *tlw = wxCocoaNSWindow::GetFromCocoa(self);
-    if(!tlw || !tlw->Cocoa_canBecomeKeyWindow(canBecome))
-        canBecome = [super canBecomeKeyWindow];
-    return canBecome;
-}
 
 - (BOOL)canBecomeMainWindow
 {
@@ -219,3 +209,4 @@ WX_IMPLEMENT_POSER(wxPoserNSWindow);
 }
 
 @end // implementation wxPoserNSWindow
+

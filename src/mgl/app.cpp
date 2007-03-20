@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/app.cpp
+// Name:        app.cpp
 // Author:      Vaclav Slavik
 //              based on GTK and MSW implementations
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "app.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -14,7 +18,6 @@
     #pragma hdrstop
 #endif
 
-#include "wx/app.h"
 
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
@@ -22,17 +25,17 @@
     #include "wx/dialog.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/module.h"
 #endif
 
+#include "wx/app.h"
 #include "wx/evtloop.h"
+#include "wx/module.h"
 #include "wx/fontutil.h"
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
 #include "wx/univ/colschem.h"
 #include "wx/sysopt.h"
 #include "wx/mgl/private.h"
-#include "wx/private/fontmgr.h"
 
 //-----------------------------------------------------------------------------
 // wxApp::Exit()
@@ -125,7 +128,7 @@ class wxRootWindow : public wxWindow
             SetMGLwindow_t(MGL_wmGetRootWindow(g_winMng));
             SetBackgroundColour(wxTHEME_COLOUR(DESKTOP));
         }
-        virtual ~wxRootWindow()
+        ~wxRootWindow()
         {
             // we don't want to delete MGL_WM's rootWnd
             m_wnd = NULL;
@@ -284,8 +287,14 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
         return false;
     }
 
+    // must do it before calling wxAppBase::Initialize(), because fonts are
+    // needed by stock lists which are created there
+    wxTheFontsManager = new wxFontsManager;
+
     if ( !wxAppBase::Initialize(argc, argv) )
     {
+        delete wxTheFontsManager;
+        wxTheFontsManager = NULL;
         MGL_exit();
         return false;
     }
@@ -308,7 +317,8 @@ struct wxMGLFinalCleanup: public wxModule
 
     void OnExit()
     {
-        wxFontsManager::CleanUp();
+        delete wxTheFontsManager;
+        wxTheFontsManager = (wxFontsManager*) NULL;
 
         wxDestroyMGL_WM();
         MGL_exit();
@@ -323,3 +333,4 @@ void wxApp::CleanUp()
 
     wxModule::RegisterModule(new wxMGLFinalCleanup);
 }
+

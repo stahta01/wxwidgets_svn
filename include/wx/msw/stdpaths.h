@@ -20,21 +20,16 @@ class WXDLLIMPEXP_BASE wxStandardPaths : public wxStandardPathsBase
 {
 public:
     // implement base class pure virtuals
-    virtual wxString GetExecutablePath() const;
     virtual wxString GetConfigDir() const;
     virtual wxString GetUserConfigDir() const;
     virtual wxString GetDataDir() const;
     virtual wxString GetUserDataDir() const;
     virtual wxString GetUserLocalDataDir() const;
     virtual wxString GetPluginsDir() const;
-    virtual wxString GetDocumentsDir() const;
 
 protected:
     // get the path corresponding to the given standard CSIDL_XXX constant
     static wxString DoGetDirectory(int csidl);
-
-    // return the directory of the application itself
-    static wxString GetAppDir();
 };
 
 // ----------------------------------------------------------------------------

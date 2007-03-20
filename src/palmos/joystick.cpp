@@ -9,17 +9,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "joystick.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_JOYSTICK
-
-#include "wx/joystick.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/window.h"
+#ifdef __BORLANDC__
+#pragma hdrstop
 #endif
+
+#include "wx/string.h"
+#include "wx/window.h"
+#include "wx/palmos/joystick.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -28,23 +31,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
 wxJoystick::wxJoystick(int joystick)
 {
-}
+};
 
 wxPoint wxJoystick::GetPosition() const
 {
     return wxPoint(0, 0);
-}
-
-int wxJoystick::GetPosition(unsigned axis) const
-{
-    // TODO
-    return 0;
-}
-
-bool wxJoystick::GetButtonState(unsigned id) const
-{
-    // TODO
-    return false;
 }
 
 int wxJoystick::GetZPosition() const
@@ -258,4 +249,3 @@ bool wxJoystick::ReleaseCapture()
     return false;
 }
 
-#endif  // wxUSE_JOYSTICK

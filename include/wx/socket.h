@@ -12,6 +12,10 @@
 #ifndef _WX_SOCKET_H_
 #define _WX_SOCKET_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "socket.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_SOCKETS
@@ -108,8 +112,7 @@ public:
   bool Destroy();
 
   // state
-  inline bool Ok() const { return IsOk(); }
-  inline bool IsOk() const { return (m_socket != NULL); };
+  inline bool Ok() const { return (m_socket != NULL); };
   inline bool Error() const { return m_error; };
   inline bool IsConnected() const { return m_connected; };
   inline bool IsData() { return WaitForRead(0, 0); };
@@ -122,7 +125,6 @@ public:
   // addresses
   virtual bool GetLocal(wxSockAddress& addr_man) const;
   virtual bool GetPeer(wxSockAddress& addr_man) const;
-  virtual bool SetLocal(wxIPV4address& local);
 
   // base IO
   virtual bool  Close();
@@ -203,7 +205,6 @@ private:
   wxList        m_states;           // stack of states
   bool          m_interrupt;        // interrupt ongoing wait operations?
   bool          m_beingDeleted;     // marked for delayed deletion?
-  wxIPV4address m_localAddress;     // bind to local address?
 
   // pushback buffer
   void         *m_unread;           // pushback buffer
@@ -220,7 +221,7 @@ private:
   // the initialization count, GSocket is initialized if > 0
   static size_t m_countInit;
 
-  DECLARE_NO_COPY_CLASS(wxSocketBase)
+    DECLARE_NO_COPY_CLASS(wxSocketBase)
 };
 
 
@@ -233,7 +234,7 @@ class WXDLLIMPEXP_NET wxSocketServer : public wxSocketBase
   DECLARE_CLASS(wxSocketServer)
 
 public:
-  wxSocketServer(const wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
+  wxSocketServer(wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
 
   wxSocketBase* Accept(bool wait = true);
   bool AcceptWith(wxSocketBase& socket, bool wait = true);
@@ -257,12 +258,8 @@ public:
   virtual ~wxSocketClient();
 
   virtual bool Connect(wxSockAddress& addr, bool wait = true);
-  bool Connect(wxSockAddress& addr, wxSockAddress& local, bool wait = true);
 
   bool WaitOnConnect(long seconds = -1, long milliseconds = 0);
-
-private:
-  virtual bool DoConnect(wxSockAddress& addr, wxSockAddress* local, bool wait = true);
 
   DECLARE_NO_COPY_CLASS(wxSocketClient)
 };
@@ -279,12 +276,12 @@ class WXDLLIMPEXP_NET wxDatagramSocket : public wxSocketBase
   DECLARE_CLASS(wxDatagramSocket)
 
 public:
-  wxDatagramSocket(const wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
+  wxDatagramSocket(wxSockAddress& addr, wxSocketFlags flags = wxSOCKET_NONE);
 
   wxDatagramSocket& RecvFrom( wxSockAddress& addr,
                               void* buf,
                               wxUint32 nBytes );
-  wxDatagramSocket& SendTo( const wxSockAddress& addr,
+  wxDatagramSocket& SendTo( wxSockAddress& addr,
                             const void* buf,
                             wxUint32 nBytes );
 

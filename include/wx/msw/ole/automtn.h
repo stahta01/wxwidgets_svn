@@ -12,9 +12,9 @@
 #ifndef _WX_AUTOMTN_H_
 #define _WX_AUTOMTN_H_
 
-#include "wx/defs.h"
-
-#if wxUSE_OLE_AUTOMATION
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "automtn.h"
+#endif
 
 #include "wx/object.h"
 #include "wx/variant.h"
@@ -35,7 +35,7 @@ class WXDLLEXPORT wxAutomationObject: public wxObject
 {
 public:
     wxAutomationObject(WXIDISPATCH* dispatchPtr = NULL);
-    virtual ~wxAutomationObject();
+    ~wxAutomationObject();
 
     // Set/get dispatch pointer
     inline void SetDispatchPtr(WXIDISPATCH* dispatchPtr) { m_dispatchPtr = dispatchPtr; };
@@ -96,6 +96,6 @@ public:
     DECLARE_NO_COPY_CLASS(wxAutomationObject)
 };
 
-#endif // wxUSE_OLE_AUTOMATION
 
-#endif // _WX_AUTOMTN_H_
+#endif
+    // _WX_AUTOMTN_H_

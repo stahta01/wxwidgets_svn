@@ -11,6 +11,10 @@
 #ifndef _WX_OS2_STATLINE_H_
 #define _WX_OS2_STATLINE_H_
 
+#ifdef __GNUG__
+    #pragma interface
+#endif
+
 // ----------------------------------------------------------------------------
 // wxStaticLine
 // ----------------------------------------------------------------------------
@@ -26,7 +30,7 @@ public:
                  ,const wxPoint&  rPos = wxDefaultPosition
                  ,const wxSize&   rSize = wxDefaultSize
                  ,long            lStyle = wxLI_HORIZONTAL
-                 ,const wxString& rsName = wxStaticLineNameStr
+                 ,const wxString& rsName = wxStaticTextNameStr
                 )
     {
         Create(pParent, vId, rPos, rSize, lStyle, rsName);
@@ -37,7 +41,7 @@ public:
                  ,const wxPoint&  rPos = wxDefaultPosition
                  ,const wxSize&   rSize = wxDefaultSize
                  ,long            lStyle = wxLI_HORIZONTAL
-                 ,const wxString& rsName = wxStaticLineNameStr
+                 ,const wxString& rsName = wxStaticTextNameStr
                 );
 
     inline bool          IsVertical(void) const { return((GetWindowStyleFlag() & wxLI_VERTICAL) != 0); }
