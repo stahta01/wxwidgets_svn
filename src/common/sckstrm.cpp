@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/sckstrm.cpp
+// Name:        sckstrm.h
 // Purpose:     wxSocket*Stream
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -8,23 +8,26 @@
 // Copyright:   (c)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sckstrm.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+  #include "wx/defs.h"
 #endif
 
 #if wxUSE_SOCKETS && wxUSE_STREAMS
 
-#include "wx/sckstrm.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/stream.h"
-#endif
-
+#include "wx/stream.h"
 #include "wx/socket.h"
+#include "wx/sckstrm.h"
 
 // ---------------------------------------------------------------------------
 // wxSocketOutputStream
@@ -41,35 +44,11 @@ wxSocketOutputStream::~wxSocketOutputStream()
 
 size_t wxSocketOutputStream::OnSysWrite(const void *buffer, size_t size)
 {
-    size_t ret = m_o_socket->Write((const char *)buffer, size).LastCount();
-    m_lasterror = m_o_socket->Error() ? wxSTREAM_WRITE_ERROR : wxSTREAM_NO_ERROR;
-    return ret;
-    
-    // Patch 1476893 caused Advise to hang, needs further investigation
-#if 0
-    const char *buf = (const char *)buffer;
-    size_t count = 0;
+  size_t ret = m_o_socket->Write((const char *)buffer, size).LastCount();
 
-    while ( count < size && m_o_socket->WaitForWrite() )
-    {
-        const size_t ret = m_o_socket->Write(buf, size - count).LastCount();
+  m_lasterror = m_o_socket->Error() ? wxSTREAM_WRITE_ERROR : wxSTREAM_NO_ERROR;
 
-        buf += ret;
-        count += ret;
-
-        if ( m_o_socket->Error() )
-        {
-            if (m_o_socket->LastError() != wxSOCKET_WOULDBLOCK)
-            {
-                m_lasterror = wxSTREAM_WRITE_ERROR;
-                return count;
-            }
-        }
-    }
-
-    m_lasterror = wxSTREAM_NO_ERROR;
-    return count;
-#endif
+  return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,35 +66,11 @@ wxSocketInputStream::~wxSocketInputStream()
 
 size_t wxSocketInputStream::OnSysRead(void *buffer, size_t size)
 {
-    size_t ret = m_i_socket->Read((char *)buffer, size).LastCount();
-    m_lasterror = m_i_socket->Error() ? wxSTREAM_READ_ERROR : wxSTREAM_NO_ERROR;
-    return ret;
-    
-    // Patch 1476893 caused Advise to hang, needs further investigation
-#if 0
-    char *buf = (char *)buffer;
-    size_t count = 0;
+  size_t ret = m_i_socket->Read((char *)buffer, size).LastCount();
 
-    while ( count < size && m_i_socket->WaitForRead() )
-    {
-        const size_t ret = m_i_socket->Read(buf, size - count).LastCount();
+  m_lasterror = m_i_socket->Error() ? wxSTREAM_READ_ERROR : wxSTREAM_NO_ERROR;
 
-        buf += ret;
-        count += ret;
-
-        if ( m_i_socket->Error() )
-        {
-            if (m_i_socket->LastError() != wxSOCKET_WOULDBLOCK)
-            {
-                m_lasterror = wxSTREAM_READ_ERROR;
-                return count;
-            }
-        }
-    }
-
-    m_lasterror = wxSTREAM_NO_ERROR;
-    return count;
-#endif
+  return ret;
 }
 
 // ---------------------------------------------------------------------------

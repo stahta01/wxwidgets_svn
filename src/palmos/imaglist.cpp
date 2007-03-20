@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "imaglist.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,9 +34,10 @@
     #include "wx/dc.h"
     #include "wx/string.h"
     #include "wx/dcmemory.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
 #endif
+
+#include "wx/log.h"
+#include "wx/intl.h"
 
 #include "wx/palmos/imaglist.h"
 #include "wx/palmos/private.h"
@@ -134,3 +139,4 @@ bool wxImageList::Draw(int index,
 {
     return false;
 }
+

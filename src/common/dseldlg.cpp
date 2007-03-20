@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dseldlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,16 +28,18 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_DIRDLG
+#ifndef WX_PRECOMP
+#endif //WX_PRECOMP
 
 #include "wx/dirdlg.h"
 
-#ifndef WX_PRECOMP
-#endif //WX_PRECOMP
+#if wxUSE_DIRDLG
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+const wxChar *wxDirSelectorPromptStr = wxT("Select a directory");
 
 wxString wxDirSelector(const wxString& message,
                        const wxString& defaultPath,
@@ -53,3 +59,4 @@ wxString wxDirSelector(const wxString& message,
 }
 
 #endif // wxUSE_DIRDLG
+

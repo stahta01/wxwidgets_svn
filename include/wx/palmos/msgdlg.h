@@ -12,14 +12,18 @@
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "msgdlg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/dialog.h"
 
 /*
  * Message box dialog
  */
 
-WXDLLEXPORT_DATA(extern const wxChar) wxMessageBoxCaptionStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
 
 class WXDLLEXPORT wxMessageDialog: public wxDialog, public wxMessageDialogBase
 {

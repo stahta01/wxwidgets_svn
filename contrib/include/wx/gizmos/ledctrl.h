@@ -1,6 +1,10 @@
 #ifndef _WX_LEDNUMBERCTRL_H_
 #define _WX_LEDNUMBERCTRL_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "wxLEDNumberCtrl.h"
+#endif
+
 #include "wx/gizmos/gizmos.h"
 
 #include <wx/window.h>
@@ -20,7 +24,7 @@ enum wxLEDValueAlign
     wxLED_ALIGN_RIGHT  = 0x02,
     wxLED_ALIGN_CENTER = 0x04,
 
-    wxLED_ALIGN_MASK   = 0x07
+    wxLED_ALIGN_MASK   = 0x04
 };
 
 #define wxLED_DRAW_FADED 0x08

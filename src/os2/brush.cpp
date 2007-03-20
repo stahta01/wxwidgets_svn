@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/brush.cpp
+// Name:        brush.cpp
 // Purpose:     wxBrush
 // Author:      David Webster
 // Modified by:
@@ -13,12 +13,13 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/brush.h"
-    #include "wx/log.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/brush.h"
+#include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
@@ -34,7 +35,9 @@ wxBrushRefData::wxBrushRefData()
     memset(&m_vBundle, '\0', sizeof(AREABUNDLE));
 } // end of wxBrushRefData::wxBrushRefData
 
-wxBrushRefData::wxBrushRefData(const wxBrushRefData& rData)
+wxBrushRefData::wxBrushRefData(
+  const wxBrushRefData&             rData
+)
 {
     m_nStyle   = rData.m_nStyle;
     m_vStipple = rData.m_vStipple;
@@ -52,10 +55,14 @@ wxBrushRefData::~wxBrushRefData()
 //
 wxBrush::wxBrush()
 {
+    if ( wxTheBrushList )
+        wxTheBrushList->AddBrush(this);
 } // end of wxBrush::wxBrush
 
 wxBrush::~wxBrush()
 {
+    if ( wxTheBrushList )
+        wxTheBrushList->RemoveBrush(this);
 } // end of wxBrush::~wxBrush
 
 wxBrush::wxBrush(
@@ -71,9 +78,14 @@ wxBrush::wxBrush(
     memset(&M_BRUSHDATA->m_vBundle, '\0', sizeof(AREABUNDLE));
 
     RealizeResource();
+
+    if ( wxTheBrushList )
+        wxTheBrushList->AddBrush(this);
 } // end of wxBrush::wxBrush
 
-wxBrush::wxBrush(const wxBitmap& rStipple)
+wxBrush::wxBrush(
+  const wxBitmap&                   rStipple
+)
 {
     m_refData = new wxBrushRefData;
 
@@ -83,6 +95,9 @@ wxBrush::wxBrush(const wxBitmap& rStipple)
     memset(&M_BRUSHDATA->m_vBundle, '\0', sizeof(AREABUNDLE));
 
     RealizeResource();
+
+    if ( wxTheBrushList )
+        wxTheBrushList->AddBrush(this);
 } // end of wxBrush::wxBrush
 
 bool wxBrush::RealizeResource()
@@ -124,7 +139,7 @@ bool wxBrush::RealizeResource()
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
             wxLogError(_T("Unable to set current color table to RGB mode. Error: %s\n"), sError.c_str());
-            return false;
+            return FALSE;
         }
 
         if (M_BRUSHDATA->m_nStyle==wxTRANSPARENT)
@@ -209,10 +224,10 @@ bool wxBrush::RealizeResource()
         }
         return bOk;
     }
-    return false;
+    return FALSE;
 } // end of wxBrush::RealizeResource
 
-WXHANDLE wxBrush::GetResourceHandle() const
+WXHANDLE wxBrush::GetResourceHandle()
 {
     if (!M_BRUSHDATA)
         return 0;
@@ -226,7 +241,7 @@ bool wxBrush::FreeResource( bool WXUNUSED(bForce) )
         M_BRUSHDATA->m_hBrush = 0;
         return true;
     }
-    else return false;
+    else return FALSE;
 } // end of wxBrush::FreeResource
 
 bool wxBrush::IsFree() const
@@ -251,21 +266,32 @@ void wxBrush::Unshare()
     }
 } // end of wxBrush::Unshare
 
-void wxBrush::SetColour( const wxColour& rColour )
+void wxBrush::SetColour(
+  const wxColour&                   rColour
+)
 {
     Unshare();
     M_BRUSHDATA->m_vColour = rColour;
     RealizeResource();
 }
 
-void wxBrush::SetColour(unsigned char cRed, unsigned char cGreen, unsigned char cBlue)
+void wxBrush::SetColour(
+  unsigned char                     cRed
+, unsigned char                     cGreen
+, unsigned char                     cBlue
+)
 {
     Unshare();
-    M_BRUSHDATA->m_vColour.Set( cRed, cGreen, cBlue );
+    M_BRUSHDATA->m_vColour.Set( cRed
+                               ,cGreen
+                               ,cBlue
+                              );
     RealizeResource();
 } // end of wxBrush::SetColour
 
-void wxBrush::SetStyle(int nStyle)
+void wxBrush::SetStyle(
+  int                               nStyle
+)
 {
     Unshare();
     M_BRUSHDATA->m_nStyle = nStyle;
@@ -291,16 +317,3 @@ void wxBrush::SetPS(
     M_BRUSHDATA->m_hBrush = hPS;
     RealizeResource();
 } // end of WxWinGdi_CPen::SetPS
-
-
-bool wxBrush::operator == (
-    const wxBrush& brush
-) const
-{
-    if (m_refData == brush.m_refData) return true;
-
-    if (!m_refData || !brush.m_refData) return false;
-
-    return ( *(wxBrushRefData*)m_refData == *(wxBrushRefData*)brush.m_refData );
-} // end of wxBrush::operator ==
-

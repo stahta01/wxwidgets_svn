@@ -98,24 +98,9 @@ USE_GUI = 1
 USE_HTML = 1
 !endif
 
-# Build multimedia library (USE_GUI must be 1)? [0,1]
-!ifndef USE_MEDIA
-USE_MEDIA = 1
-!endif
-
 # Build wxXRC library (USE_GUI must be 1)? [0,1]
 !ifndef USE_XRC
 USE_XRC = 1
-!endif
-
-# Build wxAUI library (USE_GUI must be 1)? [0,1]
-!ifndef USE_AUI
-USE_AUI = 1
-!endif
-
-# Build wxRichTextCtrl library (USE_GUI must be 1)? [0,1]
-!ifndef USE_RICHTEXT
-USE_RICHTEXT = 1
 !endif
 
 # Build OpenGL canvas library (USE_GUI must be 1)? [0,1]
@@ -146,11 +131,6 @@ USE_RTTI = 1
 # Enable threading in compiled code. [0,1]
 !ifndef USE_THREADS
 USE_THREADS = 1
-!endif
-
-# Link with gdiplus.lib? (Needed for wxGraphicsContext, will also set wxUSE_GRAPHICS_CONTEXT) [0,1]
-!ifndef USE_GDIPLUS
-USE_GDIPLUS = 0
 !endif
 
 # Is this official build by wxWidgets developers? [0,1]

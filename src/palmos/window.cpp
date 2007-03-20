@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/palmos/window.cpp
+// Name:        src/palmos/windows.cpp
 // Purpose:     wxWindow
 // Author:      William Osborne - minimal working wxPalmOS port
 // Modified by: Wlodzimierz ABX Skiba - more than minimal functionality
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "window.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,10 @@
     #pragma hdrstop
 #endif
 
-#include "wx/window.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/window.h"
     #include "wx/accel.h"
+    #include "wx/setup.h"
     #include "wx/menu.h"
     #include "wx/dc.h"
     #include "wx/dcclient.h"
@@ -42,16 +46,13 @@
     #include "wx/msgdlg.h"
     #include "wx/settings.h"
     #include "wx/statbox.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/textctrl.h"
-    #include "wx/menuitem.h"
-    #include "wx/module.h"
 #endif
 
 #if wxUSE_OWNER_DRAWN && !defined(__WXUNIVERSAL__)
     #include "wx/ownerdrw.h"
 #endif
+
+#include "wx/module.h"
 
 #if wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
@@ -60,6 +61,9 @@
 #if wxUSE_ACCESSIBILITY
     #include "wx/access.h"
 #endif
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -73,8 +77,13 @@
     #include "wx/spinctrl.h"
 #endif // wxUSE_SPINCTRL
 
+#include "wx/intl.h"
+#include "wx/log.h"
+
+#include "wx/textctrl.h"
 #include "wx/notebook.h"
 #include "wx/listctrl.h"
+#include "wx/window.h"
 
 #include <Window.h>
 
@@ -231,16 +240,6 @@ wxWindow *wxWindowPalm::FindItemByWinHandle(WXWINHANDLE handle, bool controlOnly
     return NULL;
 }
 
-bool wxGetKeyState(wxKeyCode key)
-{
-    wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key !=
-        WXK_MBUTTON, wxT("can't use wxGetKeyState() for mouse buttons"));
-
-    // TODO
-
-    return false;
-}
-
 // ----------------------------------------------------------------------------
 // constructors and such
 // ----------------------------------------------------------------------------
@@ -322,11 +321,11 @@ void wxWindowPalm::Lower()
 {
 }
 
-void wxWindowPalm::SetLabel( const wxString& WXUNUSED(label))
+void wxWindowPalm::SetTitle( const wxString& title)
 {
 }
 
-wxString wxWindowPalm::GetLabel() const
+wxString wxWindowPalm::GetTitle() const
 {
     return wxEmptyString;
 }
@@ -756,3 +755,5 @@ bool wxWindowPalm::UnregisterHotKey(int hotkeyId)
 }
 
 #endif // wxUSE_HOTKEY
+
+

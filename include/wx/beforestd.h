@@ -37,9 +37,6 @@
         // 'expression' : signed/unsigned mismatch
         #pragma warning(disable:4018)
 
-        // 'identifier' : unreferenced formal parameter
-        #pragma warning(disable:4100)
-
         // 'conversion' : conversion from 'type1' to 'type2',
         // possible loss of data
         #pragma warning(disable:4244)

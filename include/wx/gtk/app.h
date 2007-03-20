@@ -7,8 +7,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_APP_H_
-#define _WX_GTK_APP_H_
+#ifndef __GTKAPPH__
+#define __GTKAPPH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/frame.h"
+#include "wx/icon.h"
+#include "wx/strconv.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -43,18 +51,15 @@ public:
     static bool InitialzeVisual();
 
 #ifdef __WXDEBUG__
-    virtual void OnAssertFailure(const wxChar *file,
-                                 int line,
-                                 const wxChar *func,
-                                 const wxChar *cond,
-                                 const wxChar *msg);
+    virtual void OnAssert(const wxChar *file, int line, const wxChar *cond, const wxChar *msg);
 
     bool IsInAssert() const { return m_isInAssert; }
 #endif // __WXDEBUG__
 
-    guint m_idleTag;
-    // temporarily disable idle events
-    void SuspendIdleCallback();
+    gint            m_idleTag;
+    void RemoveIdleTag();
+    
+    unsigned char  *m_colorCube;
 
     // Used by the the wxGLApp and wxGLCanvas class for GL-based X visual
     // selection.
@@ -74,4 +79,4 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GTK_APP_H_
+#endif // __GTKAPPH__

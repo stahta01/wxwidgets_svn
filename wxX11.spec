@@ -1,6 +1,6 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
+%define ver  2.6.4
+%define ver2 2.6
 %define rel  1
 
 # Configurable settings (use --with(out) unicode on rpmbuild cmd line):
@@ -149,9 +149,7 @@ wx/clntdata.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
-wx/convauto.h
 wx/containr.h
-wx/cpp.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -174,8 +172,6 @@ wx/filename.h
 wx/filesys.h
 wx/fontenc.h
 wx/fontmap.h
-wx/fs_arc.h
-wx/fs_filter.h
 wx/fs_mem.h
 wx/fs_zip.h
 wx/hash.h
@@ -191,7 +187,6 @@ wx/ipc.h
 wx/ipcbase.h
 wx/isql.h
 wx/isqlext.h
-wx/link.h
 wx/list.h
 wx/listimpl.cpp
 wx/log.h
@@ -206,8 +201,6 @@ wx/msgout.h
 wx/mstream.h
 wx/object.h
 wx/platform.h
-wx/platinfo.h
-wx/power.h
 wx/process.h
 wx/ptr_scpd.h
 wx/recguard.h
@@ -223,9 +216,7 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/strvararg.h
 wx/sysopt.h
-wx/tarstrm.h
 wx/textbuf.h
 wx/textfile.h
 wx/thread.h
@@ -253,7 +244,6 @@ wx/unix/apptrait.h
 wx/unix/execute.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
-wx/unix/private.h
 wx/unix/stackwalk.h
 wx/unix/stdpaths.h
 wx/fs_inet.h

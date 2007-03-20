@@ -38,7 +38,7 @@ class WXDLLEXPORT wxTabCtrl: public wxControl
     {
         Create(parent, id, pos, size, style, name);
     }
-    virtual ~wxTabCtrl();
+    ~wxTabCtrl();
 
 // Accessors
 

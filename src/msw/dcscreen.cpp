@@ -9,14 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcscreen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#include "wx/dcscreen.h"
 
 #ifndef WX_PRECOMP
    #include "wx/string.h"
@@ -25,7 +27,9 @@
 
 #include "wx/msw/private.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxDC)
+#include "wx/dcscreen.h"
+
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
 // Create a DC representing the whole screen
 wxScreenDC::wxScreenDC()
@@ -36,3 +40,11 @@ wxScreenDC::wxScreenDC()
     // DrawText() to OPAQUE as required, otherwise always TRANSPARENT
     ::SetBkMode( GetHdc(), TRANSPARENT );
 }
+
+void wxScreenDC::DoGetSize(int *width, int *height) const
+{
+    // skip wxWindowDC version because it doesn't work without a valid m_canvas
+    // (which we don't have)
+    wxDC::DoGetSize(width, height);
+}
+

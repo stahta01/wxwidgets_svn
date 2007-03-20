@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/app.h
+// Name:        app.h
 // Purpose:     wxApp class
 // Author:      Julian Smart
 // Modified by:
@@ -9,8 +9,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_X11_APP_H_
-#define _WX_X11_APP_H_
+#ifndef _WX_APP_H_
+#define _WX_APP_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "app.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -36,9 +40,11 @@ class WXDLLEXPORT wxXVisualInfo;
 
 class WXDLLEXPORT wxApp : public wxAppBase
 {
+    DECLARE_DYNAMIC_CLASS(wxApp)
+
 public:
     wxApp();
-    virtual ~wxApp();
+    ~wxApp();
 
     // override base class (pure) virtuals
     // -----------------------------------
@@ -59,6 +65,9 @@ public:
 #ifdef __WXDEBUG__
     virtual void OnAssert(const wxChar *file, int line, const wxChar* cond, const wxChar *msg);
 #endif // __WXDEBUG__
+
+protected:
+    bool                  m_showOnInit;
 
 public:
     // Implementation
@@ -91,6 +100,10 @@ public:
         return m_visualInfo;
     }
 
+    // We need this before creating the app
+    static   WXDisplay* GetDisplay() { return ms_display; }
+    static   WXDisplay* ms_display;
+
 public:
     static long           sm_lastMessageTime;
     bool                  m_showIconic;
@@ -101,13 +114,14 @@ public:
 #endif
 
 protected:
+    bool                  m_keepGoing;
+
     WXWindow              m_topLevelWidget;
     WXColormap            m_mainColormap;
     long                  m_maxRequestSize;
 
-    DECLARE_DYNAMIC_CLASS(wxApp)
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_X11_APP_H_
+#endif // _WX_APP_H_
 

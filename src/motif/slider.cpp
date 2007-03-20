@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/slider.cpp
+// Name:        slider.cpp
 // Purpose:     wxSlider
 // Author:      Julian Smart
 // Modified by:
@@ -9,16 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "slider.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
 
 #if wxUSE_SLIDER
 
 #include "wx/slider.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-#endif
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -34,7 +37,7 @@
 
 #include "wx/motif/private.h"
 
-static void wxSliderCallback (Widget widget, XtPointer clientData, XmScaleCallbackStruct * cbs);
+void wxSliderCallback (Widget widget, XtPointer clientData, XmScaleCallbackStruct * cbs);
 
 IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
 
@@ -90,7 +93,21 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     m_mainWidget = (WXWidget) sliderWidget;
 
-    XtAddCallback (sliderWidget, XmNvalueChangedCallback, (XtCallbackProc) wxSliderCallback, (XtPointer) this);
+#ifdef __VMS__
+#pragma message disable codcauunr
+   // VMS gives here the compiler warning :
+   // statement either is unreachable or causes unreachable code
+#endif
+    if(style & wxSL_NOTIFY_DRAG)
+        XtAddCallback (sliderWidget, XmNdragCallback,
+        (XtCallbackProc) wxSliderCallback, (XtPointer) this);
+    else
+        XtAddCallback (sliderWidget, XmNvalueChangedCallback,
+        (XtCallbackProc) wxSliderCallback, (XtPointer) this);
+#ifdef __VMS__
+#pragma message enable codcauunr
+#endif
+
     XtAddCallback (sliderWidget, XmNdragCallback, (XtCallbackProc) wxSliderCallback, (XtPointer) this);
 
     ChangeFont(false);

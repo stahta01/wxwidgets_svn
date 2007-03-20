@@ -50,9 +50,7 @@ BUILD = debug
 # This does not affect the compiler output, so you still need to make sure
 # your environment is set up appropriately with the correct compiler in the
 # PATH. Rather it affects some options passed to some of the common build
-# utilities such as the resource compiler and the linker.
-# 
-# Accepted values: AMD64, IA64. 
+# utilities such as the resource compiler and the linker. 
 TARGET_CPU = $(CPU)
 
 # Should debugging info be included in the executables? The default value
@@ -77,17 +75,8 @@ USE_GUI = 1
 # Build wxHTML library (USE_GUI must be 1)? [0,1]
 USE_HTML = 1
 
-# Build multimedia library (USE_GUI must be 1)? [0,1]
-USE_MEDIA = 1
-
 # Build wxXRC library (USE_GUI must be 1)? [0,1]
 USE_XRC = 1
-
-# Build wxAUI library (USE_GUI must be 1)? [0,1]
-USE_AUI = 1
-
-# Build wxRichTextCtrl library (USE_GUI must be 1)? [0,1]
-USE_RICHTEXT = 1
 
 # Build OpenGL canvas library (USE_GUI must be 1)? [0,1]
 USE_OPENGL = 0
@@ -96,7 +85,7 @@ USE_OPENGL = 0
 USE_ODBC = 0
 
 # Build quality assurance classes library (USE_GUI must be 1)? [0,1]
-USE_QA = 1
+USE_QA = 0
 
 # Enable exceptions in compiled code. [0,1]
 USE_EXCEPTIONS = 1
@@ -106,9 +95,6 @@ USE_RTTI = 1
 
 # Enable threading in compiled code. [0,1]
 USE_THREADS = 1
-
-# Link with gdiplus.lib? (Needed for wxGraphicsContext, will also set wxUSE_GRAPHICS_CONTEXT) [0,1]
-USE_GDIPLUS = 0
 
 # Is this official build by wxWidgets developers? [0,1]
 OFFICIAL_BUILD = 0

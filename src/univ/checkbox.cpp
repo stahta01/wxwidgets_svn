@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univcheckbox.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,10 +29,9 @@
 
 #if wxUSE_CHECKBOX
 
-#include "wx/checkbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
+    #include "wx/checkbox.h"
     #include "wx/validate.h"
 
     #include "wx/button.h" // for wxACTION_BUTTON_XXX
@@ -38,22 +41,6 @@
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
 #include "wx/univ/colschem.h"
-
-// ----------------------------------------------------------------------------
-// wxStdCheckboxInputHandler: handles the mouse events for the check and radio
-// boxes (handling the keyboard input is simple, but its handling differs a
-// lot between GTK and MSW, so a new class should be derived for this)
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStdCheckboxInputHandler : public wxStdInputHandler
-{
-public:
-    wxStdCheckboxInputHandler(wxInputHandler *inphand);
-
-    // we have to override this one as wxStdButtonInputHandler version works
-    // only with the buttons
-    virtual bool HandleActivation(wxInputConsumer *consumer, bool activated);
-};
 
 // ============================================================================
 // implementation
@@ -84,7 +71,7 @@ bool wxCheckBox::Create(wxWindow *parent,
         return false;
 
     SetLabel(label);
-    SetInitialSize(size);
+    SetBestSize(size);
 
     CreateInputHandler(wxINP_HANDLER_CHECKBOX);
 
@@ -339,20 +326,12 @@ bool wxCheckBox::PerformAction(const wxControlAction& action,
     return true;
 }
 
-/* static */
-wxInputHandler *wxCheckBox::CreateStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdCheckboxInputHandler s_handler(handlerDef);
-
-    return &s_handler;
-}
-
 // ----------------------------------------------------------------------------
 // wxStdCheckboxInputHandler
 // ----------------------------------------------------------------------------
 
-wxStdCheckboxInputHandler::wxStdCheckboxInputHandler(wxInputHandler *def)
-                         : wxStdInputHandler(wxButton::GetStdInputHandler(def))
+wxStdCheckboxInputHandler::wxStdCheckboxInputHandler(wxInputHandler *inphand)
+                         : wxStdButtonInputHandler(inphand)
 {
 }
 

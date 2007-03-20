@@ -184,7 +184,7 @@ void ZipPipeTestCase::runTest()
             out.Write(in);
     }
 
-    TestInputStream in(out, m_id % ((m_options & PipeIn) ? 4 : 3));
+    TestInputStream in(out, (m_options & PipeIn) ? m_id % 3 : 0);
     wxZipInputStream zip(in);
 
     auto_ptr<wxZipEntry> entry(zip.GetNextEntry());

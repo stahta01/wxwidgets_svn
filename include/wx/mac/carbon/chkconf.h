@@ -31,23 +31,7 @@
  */
 
 #ifndef wxMAC_USE_CORE_GRAPHICS
-    #define wxMAC_USE_CORE_GRAPHICS 1
-#endif
-
-/*
- * wxMAC_USE_CORE_GRAPHICS is now implemented in terms of wxUSE_GRAPHICS_CONTEXT
- */
- 
-#if wxMAC_USE_CORE_GRAPHICS 
-	#undef wxUSE_GRAPHICS_CONTEXT
-	#define wxUSE_GRAPHICS_CONTEXT 1
-#endif
-
-/*
- * check graphics context option
- */
-#if wxUSE_GRAPHICS_CONTEXT && !wxMAC_USE_CORE_GRAPHICS
-#   error "wxUSE_GRAPHICS_CONTEXT on wxMac requires wxMAC_USE_CORE_GRAPHICS"
+    #define wxMAC_USE_CORE_GRAPHICS 0
 #endif
 
 /*
@@ -55,7 +39,7 @@
  */
 
 #ifndef wxMAC_USE_NATIVE_TOOLBAR
-    #define wxMAC_USE_NATIVE_TOOLBAR 1
+    #define wxMAC_USE_NATIVE_TOOLBAR 0
 #endif
 
 #endif

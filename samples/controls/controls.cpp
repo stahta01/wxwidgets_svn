@@ -19,12 +19,13 @@
     #include "wx/wx.h"
 #endif
 
+#if !defined( __WXMSW__ ) || defined( __WIN95__ )
 #include "wx/spinbutt.h"
+#endif
 #include "wx/tglbtn.h"
 #include "wx/bookctrl.h"
 #include "wx/imaglist.h"
 #include "wx/artprov.h"
-#include "wx/cshelp.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -75,6 +76,7 @@ public:
     MyPanel(wxFrame *frame, int x, int y, int w, int h);
     virtual ~MyPanel();
 
+    void OnSize( wxSizeEvent& event );
     void OnIdle( wxIdleEvent &event );
     void OnListBox( wxCommandEvent &event );
     void OnListBoxDoubleClick( wxCommandEvent &event );
@@ -190,7 +192,6 @@ public:
 #endif // wxUSE_TOOLTIPS
 
     void OnEnableAll(wxCommandEvent& event);
-    void OnContextHelp(wxCommandEvent& event);
 
     void OnIdle( wxIdleEvent& event );
     void OnIconized( wxIconizeEvent& event );
@@ -293,9 +294,7 @@ public:
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxRadioBoxNameStr)
         : wxRadioBox(parent, id, title, pos, size, n, choices, majorDim,
-                     style, validator, name)
-    {
-    }
+                     style, validator, name) { SetForegroundColour(*wxRED); }
 
 protected:
     void OnFocusGot(wxFocusEvent& event)
@@ -380,8 +379,7 @@ enum
     CONTROLS_ENABLE_TOOLTIPS,
 
     // panel menu
-    CONTROLS_ENABLE_ALL,
-    CONTROLS_CONTEXT_HELP
+    CONTROLS_ENABLE_ALL
 };
 
 bool MyApp::OnInit()
@@ -398,10 +396,6 @@ bool MyApp::OnInit()
         wxSscanf(wxString(argv[1]), wxT("%d"), &x);
         wxSscanf(wxString(argv[2]), wxT("%d"), &y);
     }
-
-#if wxUSE_HELP
-    wxHelpProvider::Set( new wxSimpleHelpProvider );
-#endif // wxUSE_HELP
 
     // Create the main frame window
     MyFrame *frame = new MyFrame(_T("Controls wxWidgets App"), x, y);
@@ -444,7 +438,6 @@ const int  ID_COMBO_APPEND      = 144;
 const int  ID_COMBO_DELETE      = 145;
 const int  ID_COMBO_FONT        = 146;
 const int  ID_COMBO_ENABLE      = 147;
-const int  ID_COMBO_SET_TEXT    = 148;
 
 const int  ID_RADIOBOX          = 160;
 const int  ID_RADIOBOX_SEL_NUM  = 161;
@@ -487,9 +480,8 @@ const int  ID_SIZER_CHECK4      = 204;
 const int  ID_SIZER_CHECK14     = 205;
 const int  ID_SIZER_CHECKBIG    = 206;
 
-const int  ID_HYPERLINK         = 300;
-
 BEGIN_EVENT_TABLE(MyPanel, wxPanel)
+EVT_SIZE      (                         MyPanel::OnSize)
 EVT_IDLE      (                         MyPanel::OnIdle)
 EVT_BOOKCTRL_PAGE_CHANGING(ID_BOOK,     MyPanel::OnPageChanging)
 EVT_BOOKCTRL_PAGE_CHANGED(ID_BOOK,      MyPanel::OnPageChanged)
@@ -523,7 +515,6 @@ EVT_BUTTON    (ID_COMBO_CLEAR,          MyPanel::OnComboButtons)
 EVT_BUTTON    (ID_COMBO_APPEND,         MyPanel::OnComboButtons)
 EVT_BUTTON    (ID_COMBO_DELETE,         MyPanel::OnComboButtons)
 EVT_BUTTON    (ID_COMBO_FONT,           MyPanel::OnComboButtons)
-EVT_BUTTON    (ID_COMBO_SET_TEXT,       MyPanel::OnComboButtons)
 EVT_CHECKBOX  (ID_COMBO_ENABLE,         MyPanel::OnComboButtons)
 EVT_RADIOBOX  (ID_RADIOBOX,             MyPanel::OnRadio)
 EVT_BUTTON    (ID_RADIOBOX_SEL_NUM,     MyPanel::OnRadioButtons)
@@ -632,6 +623,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     m_text = new wxTextCtrl(this, wxID_ANY, _T("This is the log window.\n"),
                             wxPoint(0, 250), wxSize(100, 50), wxTE_MULTILINE);
+    m_text->SetBackgroundColour(wxT("wheat"));
 
     m_logTargetOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_text));
 
@@ -753,6 +745,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxButton *button = new MyButton( panel, ID_LISTBOX_FONT, _T("Set &Italic font"), wxPoint(340,130), wxSize(140,30) );
 
     button->SetDefault();
+    button->SetForegroundColour(*wxBLUE);
 
 #if wxUSE_TOOLTIPS
     button->SetToolTip( _T("Press here to set italic font") );
@@ -779,6 +772,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     SetChoiceClientData(wxT("choice"), m_choiceSorted);
 
     m_choice->SetSelection(2);
+    m_choice->SetBackgroundColour( wxT("red") );
     (void)new wxButton( panel, ID_CHOICE_SEL_NUM, _T("Select #&2"), wxPoint(180,30), wxSize(140,30) );
     (void)new wxButton( panel, ID_CHOICE_SEL_STR, _T("&Select 'This'"), wxPoint(340,30), wxSize(140,30) );
     (void)new wxButton( panel, ID_CHOICE_CLEAR, _T("&Clear"), wxPoint(180,80), wxSize(140,30) );
@@ -796,7 +790,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     m_combo = new MyComboBox( panel, ID_COMBO, _T("This"),
                               wxPoint(20,25), wxSize(120, wxDefaultCoord),
                               5, choices,
-                              wxTE_PROCESS_ENTER);
+                              wxCB_READONLY | wxPROCESS_ENTER);
+    m_combo->SetBackgroundColour(*wxBLUE);
 
     (void)new wxButton( panel, ID_COMBO_SEL_NUM, _T("Select #&2"), wxPoint(180,30), wxSize(140,30) );
     (void)new wxButton( panel, ID_COMBO_SEL_STR, _T("&Select 'This'"), wxPoint(340,30), wxSize(140,30) );
@@ -804,7 +799,6 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     (void)new wxButton( panel, ID_COMBO_APPEND, _T("&Append 'Hi!'"), wxPoint(340,80), wxSize(140,30) );
     (void)new wxButton( panel, ID_COMBO_DELETE, _T("D&elete selected item"), wxPoint(180,130), wxSize(140,30) );
     (void)new wxButton( panel, ID_COMBO_FONT, _T("Set &Italic font"), wxPoint(340,130), wxSize(140,30) );
-    (void)new wxButton( panel, ID_COMBO_SET_TEXT, _T("Set 'Hi!' at #2"), wxPoint(340,180), wxSize(140,30) );
     (void)new wxCheckBox( panel, ID_COMBO_ENABLE, _T("&Disable"), wxPoint(20,130), wxSize(140,30) );
     m_book->AddPage(panel, _T("wxComboBox"), false, Image_Combo);
 
@@ -817,42 +811,20 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     };
 
     panel = new wxPanel(m_book);
-#if wxUSE_TOOLTIPS
-    wxRadioBox *radio2 =
-#endif // wxUSE_TOOLTIPS
-        new MyRadioBox( panel, ID_RADIOBOX, _T("&That"), wxPoint(10,160), wxDefaultSize, WXSIZEOF(choices2), choices2, 1, wxRA_SPECIFY_ROWS );
+    (void)new MyRadioBox( panel, ID_RADIOBOX, _T("&That"), wxPoint(10,160), wxDefaultSize, WXSIZEOF(choices2), choices2, 1, wxRA_SPECIFY_ROWS );
     m_radio = new wxRadioBox( panel, ID_RADIOBOX, _T("T&his"), wxPoint(10,10), wxDefaultSize, WXSIZEOF(choices), choices, 1, wxRA_SPECIFY_COLS );
+    m_radio->SetForegroundColour(*wxRED);
 
 #if wxUSE_TOOLTIPS
     m_combo->SetToolTip(_T("This is a natural\ncombobox - can you believe me?"));
-    radio2->SetToolTip(_T("Ever seen a radiobox?"));
-
-    //m_radio->SetToolTip(_T("Tooltip for the entire radiobox"));
-    for ( unsigned int nb = 0; nb < WXSIZEOF(choices); nb++ )
-    {
-        m_radio->SetItemToolTip(nb, _T("tooltip for\n") + choices[nb]);
-    }
-
-    // remove the tooltip for one of the items
-    m_radio->SetItemToolTip(2, _T(""));
+    m_radio->SetToolTip(_T("Ever seen a radiobox?"));
 #endif // wxUSE_TOOLTIPS
-
-#if wxUSE_HELP
-    for( unsigned int item = 0; item < WXSIZEOF(choices); ++item )
-        m_radio->SetItemHelpText( item, wxString::Format( _T("Help text for \"%s\""), choices[item].c_str() ) );
-
-    // erase help text for the second item
-    m_radio->SetItemHelpText( 1, _T("") );
-    // set default help text for control
-    m_radio->SetHelpText( _T("Default helptext for wxRadioBox") );
-#endif // wxUSE_HELP
 
     (void)new wxButton( panel, ID_RADIOBOX_SEL_NUM, _T("Select #&2"), wxPoint(180,30), wxSize(140,30) );
     (void)new wxButton( panel, ID_RADIOBOX_SEL_STR, _T("&Select 'This'"), wxPoint(180,80), wxSize(140,30) );
     m_fontButton = new wxButton( panel, ID_SET_FONT, _T("Set &more Italic font"), wxPoint(340,30), wxSize(140,30) );
     (void)new wxButton( panel, ID_RADIOBOX_FONT, _T("Set &Italic font"), wxPoint(340,80), wxSize(140,30) );
     (void)new wxCheckBox( panel, ID_RADIOBOX_ENABLE, _T("&Disable"), wxPoint(340,130), wxDefaultSize );
-
     wxRadioButton *rb = new wxRadioButton( panel, ID_RADIOBUTTON_1, _T("Radiobutton1"), wxPoint(210,170), wxDefaultSize, wxRB_GROUP );
     rb->SetValue( false );
     (void)new wxRadioButton( panel, ID_RADIOBUTTON_2, _T("&Radiobutton2"), wxPoint(340,170), wxDefaultSize );
@@ -870,6 +842,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxBoxSizer *sz = new wxBoxSizer( wxVERTICAL );
     gauge_sizer->Add( sz );
     m_gauge = new wxGauge( panel, wxID_ANY, 200, wxDefaultPosition, wxSize(155, 30), wxGA_HORIZONTAL|wxNO_BORDER );
+    m_gauge->SetBackgroundColour(*wxGREEN);
+    m_gauge->SetForegroundColour(*wxRED);
     sz->Add( m_gauge, 0, wxALL, 10 );
     m_slider = new wxSlider( panel, ID_SLIDER, 0, 0, 200,
                              wxDefaultPosition, wxSize(155,wxDefaultCoord),
@@ -908,7 +882,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
                             _T("This is also supposed to demonstrate how ")
                             _T("to use static controls with line wrapping."),
                             wxDefaultPosition,
-                            wxSize(240, wxDefaultCoord)
+                            wxSize(240, -1)
                           );
 #endif
     wrapping_sizer->Add( m_wrappingText );
@@ -941,8 +915,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 #endif // wxUSE_SPINBTN
 
 #if wxUSE_SPINCTRL
-    m_spinctrl = new wxSpinCtrl( panel, ID_SPINCTRL, wxEmptyString, wxPoint(200, 160), wxSize(80, wxDefaultCoord) );
-    m_spinctrl->SetRange(-10,30);
+    m_spinctrl = new wxSpinCtrl( panel, ID_SPINCTRL, _T(""), wxPoint(200, 160), wxSize(80, wxDefaultCoord) );
+    m_spinctrl->SetRange(10,30);
     m_spinctrl->SetValue(15);
 #endif // wxUSE_SPINCTRL
 
@@ -964,8 +938,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxBitmap bitmap( 100, 100 );
     wxMemoryDC dc;
     dc.SelectObject( bitmap );
-    dc.SetBackground(*wxGREEN);
-    dc.SetPen(*wxRED_PEN);
+    dc.SetPen(*wxGREEN_PEN);
     dc.Clear();
     dc.DrawEllipse(5, 5, 90, 90);
     dc.DrawText(_T("Bitmap"), 30, 40);
@@ -1010,6 +983,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     m_book->AddPage(panel, _T("wxBitmapXXX"));
 
     // sizer
+
     panel = new wxPanel(m_book);
     panel->SetAutoLayout( true );
 
@@ -1065,12 +1039,16 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     panel->SetSizer( sizer );
 
     m_book->AddPage(panel, _T("wxSizer"));
+}
 
-    // set the sizer for the panel itself
-    sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(m_book, wxSizerFlags().Border().Expand());
-    sizer->Add(m_text, wxSizerFlags(1).Border().Expand());
-    SetSizer(sizer);
+void MyPanel::OnSize( wxSizeEvent& WXUNUSED(event) )
+{
+    int x = 0;
+    int y = 0;
+    GetClientSize( &x, &y );
+
+    if (m_book) m_book->SetSize( 2, 2, x-4, y*2/3-4 );
+    if (m_text) m_text->SetSize( 2, y*2/3+2, x-4, y/3-4 );
 }
 
 void MyPanel::OnIdle(wxIdleEvent& event)
@@ -1078,13 +1056,6 @@ void MyPanel::OnIdle(wxIdleEvent& event)
     static const int INVALID_SELECTION = -2;
 
     static int s_selCombo = INVALID_SELECTION;
-
-    if (!m_combo || !m_choice)
-    {
-        event.Skip();
-        return;
-    }
-
     int sel = m_combo->GetSelection();
     if ( sel != s_selCombo )
     {
@@ -1188,6 +1159,8 @@ void MyPanel::OnChangeColour(wxCommandEvent& WXUNUSED(event))
 
 void MyPanel::OnListBox( wxCommandEvent &event )
 {
+//    GetParent()->Move(100, 100);
+
     if (event.GetInt() == -1)
     {
         m_text->AppendText( _T("ListBox has no selections anymore\n") );
@@ -1200,15 +1173,9 @@ void MyPanel::OnListBox( wxCommandEvent &event )
     m_text->AppendText( _T("ListBox event selection string is: '") );
     m_text->AppendText( event.GetString() );
     m_text->AppendText( _T("'\n") );
-
-    // can't use GetStringSelection() with multiple selections, there could be
-    // more than one of them
-    if ( !listbox->HasFlag(wxLB_MULTIPLE) )
-    {
-        m_text->AppendText( _T("ListBox control selection string is: '") );
-        m_text->AppendText( listbox->GetStringSelection() );
-        m_text->AppendText( _T("'\n") );
-    }
+    m_text->AppendText( _T("ListBox control selection string is: '") );
+    m_text->AppendText( listbox->GetStringSelection() );
+    m_text->AppendText( _T("'\n") );
 
     wxStringClientData *obj = ((wxStringClientData *)event.GetClientObject());
     m_text->AppendText( _T("ListBox event client data string is: '") );
@@ -1219,7 +1186,7 @@ void MyPanel::OnListBox( wxCommandEvent &event )
 
     m_text->AppendText( _T("'\n") );
     m_text->AppendText( _T("ListBox control client data string is: '") );
-    obj = (wxStringClientData *)listbox->GetClientObject(event.GetInt());
+    obj = (wxStringClientData *)listbox->GetClientObject(listbox->GetSelection());
     if (obj)
         m_text->AppendText( obj->GetData() );
     else
@@ -1307,32 +1274,35 @@ void MyPanel::OnListBoxButtons( wxCommandEvent &event )
 }
 
 #if wxUSE_CHOICE
-
-static const wxChar *GetDataString(wxClientData *data)
-{
-    return data ? wx_static_cast(wxStringClientData *, data)->GetData().c_str()
-                : _T("none");
-}
-
 void MyPanel::OnChoice( wxCommandEvent &event )
 {
     wxChoice *choice = event.GetId() == ID_CHOICE ? m_choice
                                                   : m_choiceSorted;
 
-    const int sel = choice->GetSelection();
+    m_text->AppendText( _T("Choice event selection string is: '") );
+    m_text->AppendText( event.GetString() );
+    m_text->AppendText( _T("'\n") );
+    m_text->AppendText( _T("Choice control selection string is: '") );
+    m_text->AppendText( choice->GetStringSelection() );
+    m_text->AppendText( _T("'\n") );
 
-    wxClientData *dataEvt = event.GetClientObject(),
-                 *dataCtrl = choice->GetClientObject(sel);
+    wxStringClientData *obj = ((wxStringClientData *)event.GetClientObject());
+    m_text->AppendText( _T("Choice event client data string is: '") );
 
-    wxLogMessage(_T("EVT_CHOICE: item %d/%d (event/control), ")
-                 _T("string \"%s\"/\"%s\", ")
-                 _T("data \"%s\"/\"%s\""),
-                 (int)event.GetInt(),
-                 sel,
-                 event.GetString().c_str(),
-                 choice->GetStringSelection().c_str(),
-                 GetDataString(dataEvt),
-                 GetDataString(dataCtrl));
+    if (obj)
+       m_text->AppendText( obj->GetData() );
+    else
+       m_text->AppendText( wxString(_T("none")) );
+
+    m_text->AppendText( _T("'\n") );
+    m_text->AppendText( _T("Choice control client data string is: '") );
+    obj = (wxStringClientData *)choice->GetClientObject(choice->GetSelection());
+
+    if (obj)
+       m_text->AppendText( obj->GetData() );
+    else
+       m_text->AppendText( wxString(_T("none")) );
+    m_text->AppendText( _T("'\n") );
 }
 
 void MyPanel::OnChoiceButtons( wxCommandEvent &event )
@@ -1391,9 +1361,6 @@ void MyPanel::OnChoiceButtons( wxCommandEvent &event )
 
 void MyPanel::OnCombo( wxCommandEvent &event )
 {
-    if (!m_combo)
-        return;
-    
     wxLogMessage(_T("EVT_COMBOBOX: item %d/%d (event/control), string \"%s\"/\"%s\""),
                  (int)event.GetInt(),
                  m_combo->GetSelection(),
@@ -1456,11 +1423,6 @@ void MyPanel::OnComboButtons( wxCommandEvent &event )
                 m_combo->SetFont( *wxITALIC_FONT );
                 break;
             }
-        case ID_COMBO_SET_TEXT:
-            {
-                m_combo->SetString( 2, wxT("Hi!") );
-                break;
-            }
     }
 }
 
@@ -1486,20 +1448,27 @@ void MyPanel::OnRadioButtons( wxCommandEvent &event )
     switch (event.GetId())
     {
         case ID_RADIOBOX_ENABLE:
-            m_radio->Enable( event.GetInt() == 0 );
-            break;
-
+            {
+                m_radio->Enable( event.GetInt() == 0 );
+                break;
+            }
         case ID_RADIOBOX_SEL_NUM:
-            m_radio->SetSelection( 2 );
-            break;
-
+            {
+                m_radio->SetSelection( 2 );
+                break;
+            }
         case ID_RADIOBOX_SEL_STR:
-            m_radio->SetStringSelection( _T("This") );
-            break;
-
+            {
+                m_radio->SetStringSelection( _T("This") );
+                break;
+            }
         case ID_RADIOBOX_FONT:
-            m_radio->SetFont( *wxITALIC_FONT );
-            break;
+            {
+                    m_radio->SetForegroundColour(*wxGREEN);
+
+                m_radio->SetFont( *wxITALIC_FONT );
+                break;
+            }
     }
 }
 
@@ -1545,7 +1514,7 @@ void MyPanel::OnSpinCtrl(wxSpinEvent& event)
     if ( m_spinctrl )
     {
         wxString s;
-        s.Printf( _T("Spin ctrl changed: now %d (from event: %d)\n"),
+        s.Printf( _T("Spin ctrl changed: now %d (from event: %ld)\n"),
                  m_spinctrl->GetValue(), event.GetInt() );
         m_text->AppendText(s);
     }
@@ -1556,7 +1525,7 @@ void MyPanel::OnSpinCtrlUp(wxSpinEvent& event)
     if ( m_spinctrl )
     {
         m_text->AppendText( wxString::Format(
-            _T("Spin up: %d (from event: %d)\n"),
+            _T("Spin up: %d (from event: %ld)\n"),
             m_spinctrl->GetValue(), event.GetInt() ) );
     }
 }
@@ -1566,7 +1535,7 @@ void MyPanel::OnSpinCtrlDown(wxSpinEvent& event)
     if ( m_spinctrl )
     {
         m_text->AppendText( wxString::Format(
-            _T("Spin down: %d (from event: %d)\n"),
+            _T("Spin down: %d (from event: %ld)\n"),
             m_spinctrl->GetValue(), event.GetInt() ) );
     }
 }
@@ -1739,7 +1708,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #endif // wxUSE_TOOLTIPS
 
     EVT_MENU(CONTROLS_ENABLE_ALL, MyFrame::OnEnableAll)
-    EVT_MENU(CONTROLS_CONTEXT_HELP, MyFrame::OnContextHelp)
 
     EVT_ICONIZE(MyFrame::OnIconized)
     EVT_MAXIMIZE(MyFrame::OnMaximized)
@@ -1750,10 +1718,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame(const wxChar *title, int x, int y)
-       : wxFrame(NULL, wxID_ANY, title, wxPoint(x, y), wxSize(700, 450))
+       : wxFrame(NULL, wxID_ANY, title, wxPoint(x, y), wxSize(500, 430))
 {
-    SetHelpText( _T("Controls sample demonstrating various widgets") );
-
     // Give it an icon
     // The wxICON() macros loads an icon from a resource under Windows
     // and uses an #included XPM image under GTK+ and Motif
@@ -1786,8 +1752,6 @@ MyFrame::MyFrame(const wxChar *title, int x, int y)
     wxMenu *panel_menu = new wxMenu;
     panel_menu->Append(CONTROLS_ENABLE_ALL, _T("&Disable all\tCtrl-E"),
                        _T("Enable/disable all panel controls"), true);
-    panel_menu->Append(CONTROLS_CONTEXT_HELP, _T("&Context help...\tCtrl-H"),
-                       _T("Get context help for a control"));
     menu_bar->Append(panel_menu, _T("&Panel"));
 
     SetMenuBar(menu_bar);
@@ -1797,6 +1761,8 @@ MyFrame::MyFrame(const wxChar *title, int x, int y)
 #endif // wxUSE_STATUSBAR
 
     m_panel = new MyPanel( this, 10, 10, 300, 100 );
+
+    SetSizeHints( 500, 425 );
 }
 
 void MyFrame::OnQuit (wxCommandEvent& WXUNUSED(event) )
@@ -1806,10 +1772,13 @@ void MyFrame::OnQuit (wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::OnAbout( wxCommandEvent& WXUNUSED(event) )
 {
+    SetSize(800, 600);
+#if 0
     wxBusyCursor bc;
 
     wxMessageDialog dialog(this, _T("This is a control sample"), _T("About Controls"), wxOK );
     dialog.ShowModal();
+#endif
 }
 
 void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
@@ -1857,12 +1826,6 @@ void MyFrame::OnEnableAll(wxCommandEvent& WXUNUSED(event))
 
     s_enable = !s_enable;
     m_panel->Enable(s_enable);
-}
-
-void MyFrame::OnContextHelp(wxCommandEvent& WXUNUSED(event))
-{
-    // starts a local event loop
-    wxContextHelp chelp(this);
 }
 
 void MyFrame::OnMove( wxMoveEvent& event )

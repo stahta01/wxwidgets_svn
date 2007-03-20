@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dcclient.cpp
+// Name:        dcclient.cpp
 // Purpose:     wxClientDC class
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,15 +28,13 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dcclient.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/log.h"
-    #include "wx/window.h"
-#endif
+#include "wx/string.h"
+#include "wx/log.h"
+#include "wx/window.h"
 
 #include "wx/msw/private.h"
+
+#include "wx/dcclient.h"
 
 // ----------------------------------------------------------------------------
 // array/list types
@@ -355,3 +357,4 @@ wxPaintDCEx::~wxPaintDCEx()
     // prevent the base class dtor from ReleaseDC()ing it again
     m_hDC = 0;
 }
+

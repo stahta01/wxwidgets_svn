@@ -21,25 +21,23 @@ BCCDIR = $(MAKEDIR)\..
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
+WX_RELEASE_NODOT = 26
 OBJS = \
 	bcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
 LIBDIRNAME = .\..\lib\bcc_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = \
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 TEST_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
-	$(__OPTIMIZEFLAG) $(__THREADSFLAG_1) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
+	$(__OPTIMIZEFLAG) $(__THREADSFLAG_0) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
 	$(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) \
 	$(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p) $(__MSLU_DEFINE_p) \
-	$(__GFXCTX_DEFINE_p) -I$(SETUPHDIR) -I.\..\include -I. $(__DLLFLAG_p) \
-	-DwxUSE_GUI=0 $(CPPUNIT_CFLAGS) -Hu -H=$(OBJS)\testprec_test.csm $(CPPFLAGS) \
-	$(CXXFLAGS)
+	-I$(SETUPHDIR) -I.\..\include -I. $(__DLLFLAG_p) -DwxUSE_GUI=0 \
+	$(CPPUNIT_CFLAGS) -Hu -H=$(OBJS)\testprec_test.csm $(CPPFLAGS) $(CXXFLAGS)
 TEST_OBJECTS =  \
 	$(OBJS)\test_dummy.obj \
 	$(OBJS)\test_test.obj \
 	$(OBJS)\test_archivetest.obj \
 	$(OBJS)\test_ziptest.obj \
-	$(OBJS)\test_tartest.obj \
 	$(OBJS)\test_arrays.obj \
 	$(OBJS)\test_datetimetest.obj \
 	$(OBJS)\test_fileconftest.obj \
@@ -51,23 +49,17 @@ TEST_OBJECTS =  \
 	$(OBJS)\test_hashes.obj \
 	$(OBJS)\test_lists.obj \
 	$(OBJS)\test_longlongtest.obj \
-	$(OBJS)\test_convautotest.obj \
 	$(OBJS)\test_mbconvtest.obj \
 	$(OBJS)\test_regextest.obj \
 	$(OBJS)\test_wxregextest.obj \
 	$(OBJS)\test_scopeguardtest.obj \
 	$(OBJS)\test_strings.obj \
 	$(OBJS)\test_stdstrings.obj \
-	$(OBJS)\test_tokenizer.obj \
-	$(OBJS)\test_unichar.obj \
 	$(OBJS)\test_unicode.obj \
-	$(OBJS)\test_vararg.obj \
 	$(OBJS)\test_crt.obj \
-	$(OBJS)\test_vsnprintf.obj \
 	$(OBJS)\test_bstream.obj \
 	$(OBJS)\test_datastreamtest.obj \
 	$(OBJS)\test_ffilestream.obj \
-	$(OBJS)\test_fileback.obj \
 	$(OBJS)\test_filestream.obj \
 	$(OBJS)\test_largefile.obj \
 	$(OBJS)\test_memstream.obj \
@@ -75,31 +67,20 @@ TEST_OBJECTS =  \
 	$(OBJS)\test_tempfile.obj \
 	$(OBJS)\test_textstreamtest.obj \
 	$(OBJS)\test_zlibstream.obj \
-	$(OBJS)\test_textfiletest.obj \
 	$(OBJS)\test_uris.obj
 TEST_GUI_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
-	$(__OPTIMIZEFLAG) $(__THREADSFLAG_1) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
+	$(__OPTIMIZEFLAG) $(__THREADSFLAG_0) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
 	$(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) \
 	$(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p) $(__MSLU_DEFINE_p) \
-	$(__GFXCTX_DEFINE_p) -I$(SETUPHDIR) -I.\..\include -I. $(__DLLFLAG_p) \
-	-I.\..\samples -DNOPCH $(CPPUNIT_CFLAGS) -Hu \
-	-H=$(OBJS)\testprec_test_gui.csm $(CPPFLAGS) $(CXXFLAGS)
+	-I$(SETUPHDIR) -I.\..\include -I. $(__DLLFLAG_p) -I.\..\samples -DNOPCH \
+	$(CPPUNIT_CFLAGS) -Hu -H=$(OBJS)\testprec_test_gui.csm $(CPPFLAGS) \
+	$(CXXFLAGS)
 TEST_GUI_OBJECTS =  \
 	$(OBJS)\test_gui_dummy.obj \
 	$(OBJS)\test_gui_test.obj \
 	$(OBJS)\test_gui_rect.obj \
 	$(OBJS)\test_gui_size.obj \
 	$(OBJS)\test_gui_point.obj
-PRINTFBENCH_CXXFLAGS = $(__RUNTIME_LIBS) -I$(BCCDIR)\include $(__DEBUGINFO) \
-	$(__OPTIMIZEFLAG) $(__THREADSFLAG_1) -D__WXMSW__ $(__WXUNIV_DEFINE_p) \
-	$(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) \
-	$(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p) $(__MSLU_DEFINE_p) \
-	$(__GFXCTX_DEFINE_p) -I$(SETUPHDIR) -I.\..\include -I. $(__DLLFLAG_p) \
-	-DwxUSE_GUI=0 $(CPPUNIT_CFLAGS) -Hu -H=$(OBJS)\testprec_printfbench.csm \
-	$(CPPFLAGS) $(CXXFLAGS)
-PRINTFBENCH_OBJECTS =  \
-	$(OBJS)\printfbench_dummy.obj \
-	$(OBJS)\printfbench_printfbench.obj
 
 ### Conditionally set variables: ###
 
@@ -167,24 +148,12 @@ __UNICODE_DEFINE_p_3 = -d_UNICODE
 !if "$(MSLU)" == "1"
 __MSLU_DEFINE_p_3 = -dwxUSE_UNICODE_MSLU=1
 !endif
-!if "$(USE_GDIPLUS)" == "1"
-__GFXCTX_DEFINE_p_3 = -dwxUSE_GRAPHICS_CONTEXT=1
-!endif
 !if "$(SHARED)" == "1"
 __DLLFLAG_p_3 = -dWXUSINGDLL
 !endif
 !if "$(MONOLITHIC)" == "0"
 __WXLIB_CORE_p = \
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
-!endif
-!if "$(USE_GUI)" == "1"
-__LIB_TIFF_p = wxtiff$(WXDEBUGFLAG).lib
-!endif
-!if "$(USE_GUI)" == "1"
-__LIB_JPEG_p = wxjpeg$(WXDEBUGFLAG).lib
-!endif
-!if "$(USE_GUI)" == "1"
-__LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
 !endif
 !if "$(BUILD)" == "debug"
 __OPTIMIZEFLAG = -Od
@@ -199,10 +168,10 @@ __THREADSFLAG =
 __THREADSFLAG = mt
 !endif
 !if "$(USE_THREADS)" == "0"
-__THREADSFLAG_1 = 
+__THREADSFLAG_0 = 
 !endif
 !if "$(USE_THREADS)" == "1"
-__THREADSFLAG_1 = -tWM
+__THREADSFLAG_0 = -tWM
 !endif
 !if "$(RUNTIME_LIBS)" == "dynamic"
 __RUNTIME_LIBS = -tWR
@@ -211,10 +180,10 @@ __RUNTIME_LIBS = -tWR
 __RUNTIME_LIBS = 
 !endif
 !if "$(RUNTIME_LIBS)" == "dynamic"
-__RUNTIME_LIBS_1 = i
+__RUNTIME_LIBS_0 = i
 !endif
 !if "$(RUNTIME_LIBS)" == "static"
-__RUNTIME_LIBS_1 = 
+__RUNTIME_LIBS_0 = 
 !endif
 !if "$(WXUNIV)" == "1"
 __WXUNIV_DEFINE_p = -D__WXUNIVERSAL__
@@ -240,9 +209,6 @@ __UNICODE_DEFINE_p = -D_UNICODE
 !if "$(MSLU)" == "1"
 __MSLU_DEFINE_p = -DwxUSE_UNICODE_MSLU=1
 !endif
-!if "$(USE_GDIPLUS)" == "1"
-__GFXCTX_DEFINE_p = -DwxUSE_GRAPHICS_CONTEXT=1
-!endif
 !if "$(SHARED)" == "1"
 __DLLFLAG_p = -DWXUSINGDLL
 !endif
@@ -254,11 +220,17 @@ __WXLIB_BASE_p = \
 __WXLIB_MONO_p = \
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 !endif
+!if "$(USE_GUI)" == "1"
+__LIB_TIFF_p = wxtiff$(WXDEBUGFLAG).lib
+!endif
+!if "$(USE_GUI)" == "1"
+__LIB_JPEG_p = wxjpeg$(WXDEBUGFLAG).lib
+!endif
+!if "$(USE_GUI)" == "1"
+__LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
+!endif
 !if "$(MSLU)" == "1"
 __UNICOWS_LIB_p = unicows.lib
-!endif
-!if "$(USE_GDIPLUS)" == "1"
-__GDIPLUS_LIB_p = gdiplus.lib
 !endif
 !if "$(BUILD)" == "debug" && "$(DEBUG_INFO)" == "default"
 __DEBUGINFO = -v
@@ -280,7 +252,7 @@ $(OBJS):
 
 ### Targets: ###
 
-all: $(OBJS)\test.exe $(__test_gui___depname) data $(OBJS)\printfbench.exe
+all: $(OBJS)\test.exe $(__test_gui___depname) data
 
 clean: 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -298,33 +270,22 @@ clean:
 	-if exist $(OBJS)\test_gui.ild del $(OBJS)\test_gui.ild
 	-if exist $(OBJS)\test_gui.ilf del $(OBJS)\test_gui.ilf
 	-if exist $(OBJS)\test_gui.ils del $(OBJS)\test_gui.ils
-	-if exist $(OBJS)\printfbench.exe del $(OBJS)\printfbench.exe
-	-if exist $(OBJS)\printfbench.tds del $(OBJS)\printfbench.tds
-	-if exist $(OBJS)\printfbench.ilc del $(OBJS)\printfbench.ilc
-	-if exist $(OBJS)\printfbench.ild del $(OBJS)\printfbench.ild
-	-if exist $(OBJS)\printfbench.ilf del $(OBJS)\printfbench.ilf
-	-if exist $(OBJS)\printfbench.ils del $(OBJS)\printfbench.ils
 
 $(OBJS)\test.exe: $(OBJS)\test_dummy.obj  $(TEST_OBJECTS)
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) -ap $(CPPUNIT_LIBS) @&&|
-	c0x32.obj $(TEST_OBJECTS),$@,, $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG)$(__RUNTIME_LIBS_1).lib,,
+	c0x32.obj $(TEST_OBJECTS),$@,, $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG)$(__RUNTIME_LIBS_0).lib,,
 |
 
 !if "$(USE_GUI)" == "1"
 $(OBJS)\test_gui.exe: $(OBJS)\test_gui_dummy.obj  $(TEST_GUI_OBJECTS)  $(OBJS)\test_gui_sample.res
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) $(CPPUNIT_LIBS) -ap @&&|
-	c0x32.obj $(TEST_GUI_OBJECTS),$@,, $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG)$(__RUNTIME_LIBS_1).lib,, $(OBJS)\test_gui_sample.res
+	c0x32.obj $(TEST_GUI_OBJECTS),$@,, $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib  import32.lib cw32$(__THREADSFLAG)$(__RUNTIME_LIBS_0).lib,, $(OBJS)\test_gui_sample.res
 |
 !endif
 
 data: 
 	if not exist $(OBJS) mkdir $(OBJS)
 	for %f in (testdata.fc) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
-
-$(OBJS)\printfbench.exe: $(OBJS)\printfbench_dummy.obj  $(PRINTFBENCH_OBJECTS)
-	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(__DEBUGINFO)  -L$(LIBDIRNAME) -ap $(CPPUNIT_LIBS) @&&|
-	c0x32.obj $(PRINTFBENCH_OBJECTS),$@,, $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) ole2w32.lib oleacc.lib odbc32.lib import32.lib cw32$(__THREADSFLAG)$(__RUNTIME_LIBS_1).lib,,
-|
 
 $(OBJS)\test_dummy.obj: .\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) -H $**
@@ -336,9 +297,6 @@ $(OBJS)\test_archivetest.obj: .\archive\archivetest.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_ziptest.obj: .\archive\ziptest.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_tartest.obj: .\archive\tartest.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_arrays.obj: .\arrays\arrays.cpp
@@ -374,9 +332,6 @@ $(OBJS)\test_lists.obj: .\lists\lists.cpp
 $(OBJS)\test_longlongtest.obj: .\longlong\longlongtest.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
-$(OBJS)\test_convautotest.obj: .\mbconv\convautotest.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
 $(OBJS)\test_mbconvtest.obj: .\mbconv\mbconvtest.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
@@ -395,22 +350,10 @@ $(OBJS)\test_strings.obj: .\strings\strings.cpp
 $(OBJS)\test_stdstrings.obj: .\strings\stdstrings.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
-$(OBJS)\test_tokenizer.obj: .\strings\tokenizer.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_unichar.obj: .\strings\unichar.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
 $(OBJS)\test_unicode.obj: .\strings\unicode.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
-$(OBJS)\test_vararg.obj: .\strings\vararg.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
 $(OBJS)\test_crt.obj: .\strings\crt.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_vsnprintf.obj: .\strings\vsnprintf.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_bstream.obj: .\streams\bstream.cpp
@@ -420,9 +363,6 @@ $(OBJS)\test_datastreamtest.obj: .\streams\datastreamtest.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_ffilestream.obj: .\streams\ffilestream.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
-$(OBJS)\test_fileback.obj: .\streams\fileback.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_filestream.obj: .\streams\filestream.cpp
@@ -446,14 +386,11 @@ $(OBJS)\test_textstreamtest.obj: .\streams\textstreamtest.cpp
 $(OBJS)\test_zlibstream.obj: .\streams\zlibstream.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
-$(OBJS)\test_textfiletest.obj: .\textfile\textfiletest.cpp
-	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
-
 $(OBJS)\test_uris.obj: .\uris\uris.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_CXXFLAGS) $**
 
 $(OBJS)\test_gui_sample.res: .\..\samples\sample.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include    -d__WXMSW__ $(__WXUNIV_DEFINE_p_3) $(__DEBUG_DEFINE_p_3) $(__EXCEPTIONS_DEFINE_p_3) $(__RTTI_DEFINE_p_3) $(__THREAD_DEFINE_p_3) $(__UNICODE_DEFINE_p_3) $(__MSLU_DEFINE_p_3) $(__GFXCTX_DEFINE_p_3) -i$(SETUPHDIR) -i.\..\include -i. $(__DLLFLAG_p_3) -i.\..\samples -dNOPCH $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include    -d__WXMSW__ $(__WXUNIV_DEFINE_p_3) $(__DEBUG_DEFINE_p_3) $(__EXCEPTIONS_DEFINE_p_3) $(__RTTI_DEFINE_p_3) $(__THREAD_DEFINE_p_3) $(__UNICODE_DEFINE_p_3) $(__MSLU_DEFINE_p_3) -i$(SETUPHDIR) -i.\..\include -i. $(__DLLFLAG_p_3) -i.\..\samples -dNOPCH $**
 
 $(OBJS)\test_gui_dummy.obj: .\dummy.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_GUI_CXXFLAGS) -H $**
@@ -469,10 +406,4 @@ $(OBJS)\test_gui_size.obj: .\geometry\size.cpp
 
 $(OBJS)\test_gui_point.obj: .\geometry\point.cpp
 	$(CXX) -q -c -P -o$@ $(TEST_GUI_CXXFLAGS) $**
-
-$(OBJS)\printfbench_dummy.obj: .\dummy.cpp
-	$(CXX) -q -c -P -o$@ $(PRINTFBENCH_CXXFLAGS) -H $**
-
-$(OBJS)\printfbench_printfbench.obj: .\benchmarks\printfbench.cpp
-	$(CXX) -q -c -P -o$@ $(PRINTFBENCH_CXXFLAGS) $**
 

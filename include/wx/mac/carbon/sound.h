@@ -13,6 +13,10 @@
 #ifndef _WX_SOUND_H_
 #define _WX_SOUND_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "sound.h"
+#endif
+
 #if wxUSE_SOUND
 
 #include "wx/object.h"
@@ -23,7 +27,7 @@ public:
   wxSound();
   wxSound(const wxString& fileName, bool isResource = FALSE);
   wxSound(int size, const wxByte* data);
-  virtual ~wxSound();
+  ~wxSound();
 
 public:
   bool  Create(const wxString& fileName, bool isResource = FALSE);

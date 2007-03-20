@@ -53,27 +53,6 @@ wxStandardPathsBase& wxStandardPathsBase::Get()
     return traits->GetStandardPaths();
 }
 
-wxString wxStandardPathsBase::GetExecutablePath() const
-{
-    if ( !wxTheApp || !wxTheApp->argv )
-        return wxEmptyString;
-
-    wxString argv0 = wxTheApp->argv[0];
-    if (wxIsAbsolutePath(argv0))
-        return argv0;
-
-    // Search PATH.environment variable...
-    wxPathList pathlist;
-    pathlist.AddEnvList(wxT("PATH"));
-    wxString path = pathlist.FindAbsoluteValidPath(argv0);
-    if ( path.empty() )
-        return argv0;       // better than nothing
-
-    wxFileName filename(path);
-    filename.Normalize();
-    return filename.GetFullPath();
-}
-
 wxStandardPathsBase& wxAppTraitsBase::GetStandardPaths()
 {
     return gs_stdPaths;
@@ -92,17 +71,6 @@ wxString wxStandardPathsBase::GetLocalDataDir() const
 wxString wxStandardPathsBase::GetUserLocalDataDir() const
 {
     return GetUserDataDir();
-}
-
-wxString wxStandardPathsBase::GetDocumentsDir() const
-{
-    return wxFileName::GetHomeDir();
-}
-
-// return the temporary directory for the current user
-wxString wxStandardPathsBase::GetTempDir() const
-{
-    return wxFileName::GetTempDir();
 }
 
 /* static */

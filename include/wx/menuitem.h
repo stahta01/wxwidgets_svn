@@ -64,7 +64,7 @@ public:
     //     any), i.e. it may contain '&' or '_' or "\t..." and thus is
     //     different from the item's label which only contains the text shown
     //     in the menu
-    virtual void SetText(const wxString& str);
+    virtual void SetText(const wxString& str) { m_text = str; }
     wxString GetLabel() const { return GetLabelFromText(m_text); }
     const wxString& GetText() const { return m_text; }
 
@@ -92,7 +92,7 @@ public:
     void Toggle() { Check(!m_isChecked); }
 
     // help string (displayed in the status bar by default)
-    void SetHelp(const wxString& str);
+    void SetHelp(const wxString& str) { m_help = str; }
     const wxString& GetHelp() const { return m_help; }
 
 #if wxUSE_ACCEL
@@ -163,10 +163,8 @@ private:
     #include "wx/msw/menuitem.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/menuitem.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/menuitem.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/menuitem.h"
+    #include "wx/gtk/menuitem.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menuitem.h"
 #elif defined(__WXCOCOA__)

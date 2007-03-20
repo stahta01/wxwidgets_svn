@@ -24,7 +24,7 @@ class WXDLLEXPORT wxOS2Printer: public wxPrinterBase
 
  public:
   wxOS2Printer(wxPrintData *data = NULL);
-  virtual ~wxOS2Printer();
+  ~wxOS2Printer();
 
   virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = TRUE);
   virtual wxDC* PrintDialog(wxWindow *parent);
@@ -43,7 +43,7 @@ class WXDLLEXPORT wxOS2PrintPreview: public wxPrintPreviewBase
 
  public:
   wxOS2PrintPreview(wxPrintout *printout, wxPrintout *printoutForPrinting = NULL, wxPrintData *data = NULL);
-  virtual ~wxOS2PrintPreview();
+  ~wxOS2PrintPreview();
 
   virtual bool Print(bool interactive);
   virtual void DetermineScaling();

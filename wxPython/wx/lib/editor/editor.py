@@ -241,8 +241,9 @@ class Editor(wx.ScrolledWindow):
         if not odc:
             odc = wx.ClientDC(self)
 
-        dc = wx.BufferedDC(odc)
-        if dc.IsOk():
+        bmp = wx.EmptyBitmap(max(1,self.bw), max(1,self.bh))
+        dc = wx.BufferedDC(odc, bmp)
+        if dc.Ok():
             dc.SetFont(self.font)
             dc.SetBackgroundMode(wx.SOLID)
             dc.SetTextBackground(self.bgColor)
@@ -551,13 +552,12 @@ class Editor(wx.ScrolledWindow):
 
 
     def AdjustScrollbars(self):
-        if self:
-            for i in range(2):
-                self.SetCharDimensions()
-                self.scroller.SetScrollbars(
-                    self.fw, self.fh,
-                    self.CalcMaxLineLen()+3, max(self.LinesInFile()+1, self.sh),
-                    self.sx, self.sy)
+        for i in range(2):
+            self.SetCharDimensions()
+            self.scroller.SetScrollbars(
+                self.fw, self.fh,
+                self.CalcMaxLineLen()+3, max(self.LinesInFile()+1, self.sh),
+                self.sx, self.sy)
 
 #------------ backspace, delete, return
 
@@ -941,7 +941,7 @@ class Editor(wx.ScrolledWindow):
         self.AdjustScrollbars()
 
     def OnChar(self, event):
-        key = event.GetKeyCode()
+        key = event.KeyCode()
         filters = [self.AltKey,
                    self.MoveSpecialControlKey,
                    self.ControlKey,

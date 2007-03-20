@@ -32,12 +32,7 @@ enum
     wxACCEL_NORMAL  = 0x0000,   // no modifiers
     wxACCEL_ALT     = 0x0001,   // hold Alt key down
     wxACCEL_CTRL    = 0x0002,   // hold Ctrl key down
-    wxACCEL_SHIFT   = 0x0004,   // hold Shift key down
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-    wxACCEL_CMD      = 0x0008   // Command key on OS X
-#else
-    wxACCEL_CMD      = wxACCEL_CTRL
-#endif
+    wxACCEL_SHIFT   = 0x0004    // hold Shift key down
 };
 
 // ----------------------------------------------------------------------------
@@ -61,10 +56,6 @@ public:
         , m_command(entry.m_command)
         , m_item(entry.m_item)
         { }
-
-    // create accelerator corresponding to the specified string, return NULL if
-    // string couldn't be parsed or a pointer to be deleted by the caller
-    static wxAcceleratorEntry *Create(const wxString& str);
 
     wxAcceleratorEntry& operator=(const wxAcceleratorEntry& entry)
     {
@@ -104,31 +95,7 @@ public:
     bool MatchesEvent(const wxKeyEvent& event) const;
 #endif
 
-    bool IsOk() const
-    {
-        return m_flags != 0 &&
-               m_keyCode != 0;
-    }
-
-
-    // string <-> wxAcceleratorEntry conversion
-    // ----------------------------------------
-
-    // returns a wxString for the this accelerator.
-    // this function formats it using the <flags>-<keycode> format
-    // where <flags> maybe a hyphen-separed list of "shift|alt|ctrl"
-    wxString ToString() const;
-
-    // returns true if the given string correctly initialized this object
-    // (i.e. if IsOk() returns true after this call)
-    bool FromString(const wxString& str);
-
-
 private:
-    // common part of Create() and FromString()
-    static bool ParseAccel(const wxString& str, int *flags, int *keycode);
-
-
     int m_flags;    // combination of wxACCEL_XXX constants
     int m_keyCode;  // ASCII or virtual keycode
     int m_command;  // Command id to generate
@@ -151,10 +118,8 @@ private:
     #include "wx/msw/accel.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/accel.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/accel.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/accel.h"
+    #include "wx/gtk/accel.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/accel.h"
 #elif defined(__WXCOCOA__)

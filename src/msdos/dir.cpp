@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msdos/dir.cpp
-// Purpose:     wxDir implementation for DOS
-// Author:      derived from wxPalmOS code
+// Name:        src/palmos/dir.cpp
+// Purpose:     wxDir implementation for PalmOS
+// Author:      William Osborne - minimal working wxPalmOS port
 // Modified by:
 // Created:     10.13.04
 // RCS-ID:      $Id$
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -63,7 +67,7 @@
 // ----------------------------------------------------------------------------
 
 /* static */
-bool wxDir::Exists(const wxString& WXUNUSED(dir))
+bool wxDir::Exists(const wxString& dir)
 {
     return false;
 }
@@ -72,11 +76,11 @@ bool wxDir::Exists(const wxString& WXUNUSED(dir))
 // wxDir construction/destruction
 // ----------------------------------------------------------------------------
 
-wxDir::wxDir(const wxString& WXUNUSED(dirname))
+wxDir::wxDir(const wxString& dirname)
 {
 }
 
-bool wxDir::Open(const wxString& WXUNUSED(dirname))
+bool wxDir::Open(const wxString& dirname)
 {
     return false;
 }
@@ -88,7 +92,9 @@ bool wxDir::IsOpened() const
 
 wxString wxDir::GetName() const
 {
-    return wxEmptyString;
+    wxString name;
+
+    return name;
 }
 
 wxDir::~wxDir()
@@ -99,14 +105,15 @@ wxDir::~wxDir()
 // wxDir enumerating
 // ----------------------------------------------------------------------------
 
-bool wxDir::GetFirst(wxString *WXUNUSED(filename),
-                     const wxString& WXUNUSED(filespec),
-                     int WXUNUSED(flags)) const
+bool wxDir::GetFirst(wxString *filename,
+                     const wxString& filespec,
+                     int flags) const
 {
     return false;
 }
 
-bool wxDir::GetNext(wxString *WXUNUSED(filename)) const
+bool wxDir::GetNext(wxString *filename) const
 {
     return false;
 }
+

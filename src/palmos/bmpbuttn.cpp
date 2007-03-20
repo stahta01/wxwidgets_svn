@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "bmpbuttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,9 +22,8 @@
 
 #if wxUSE_BMPBUTTON
 
-#include "wx/bmpbuttn.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/bmpbuttn.h"
     #include "wx/log.h"
     #include "wx/dcmemory.h"
 #endif
@@ -128,3 +131,4 @@ wxSize wxBitmapButton::DoGetBestSize() const
 }
 
 #endif // wxUSE_BMPBUTTON
+

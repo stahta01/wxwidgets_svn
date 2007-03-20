@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/menuitem.cpp
+// Name:        menuitem.cpp
 // Purpose:     wxMenuItem implementation
 // Author:      David Webster
 // Modified by:
@@ -13,22 +13,26 @@
 // headers & declarations
 // ============================================================================
 
+#ifdef __GNUG__
+    #pragma implementation "menuitem.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
-
-#include "wx/menuitem.h"
-#include "wx/stockitem.h"
 
 #ifndef WX_PRECOMP
     #include "wx/font.h"
     #include "wx/bitmap.h"
     #include "wx/settings.h"
+    #include "wx/font.h"
     #include "wx/window.h"
     #include "wx/accel.h"
     #include "wx/menu.h"
     #include "wx/string.h"
-    #include "wx/log.h"
 #endif
+
+#include "wx/menuitem.h"
+#include "wx/log.h"
 
 #if wxUSE_ACCEL
     #include "wx/accel.h"
@@ -373,18 +377,10 @@ void wxMenuItem::SetText( const wxString& rText )
     if (m_text == sText)
         return;
 
-    // wxMenuItemBase will do stock ID checks
     wxMenuItemBase::SetText(sText);
-
-    // m_text could now be different from 'text' if we are a stock menu item,
-    // so use only m_text below
-
-    OWNER_DRAWN_ONLY(wxOwnerDrawn::SetName(m_text));
+    OWNER_DRAWN_ONLY(wxOwnerDrawn::SetName(sText));
 #if  wxUSE_OWNER_DRAWN
-    if (rText.IsEmpty())
-        SetAccelString(m_text.AfterFirst(_T('\t')));
-    else
-        SetAccelString(rText.AfterFirst(_T('\t')));
+    SetAccelString(rText.AfterFirst(_T('\t')));
 #endif // wxUSE_OWNER_DRAWN
 
     HWND                            hMenu = GetHmenuOf(m_parentMenu);
@@ -427,7 +423,7 @@ void wxMenuItem::SetText( const wxString& rText )
 #endif  //owner drawn
         {
             uFlagsOld |= MIS_TEXT;
-            pData = (BYTE*)m_text.c_str();
+            pData = (BYTE*)sText.c_str();
         }
 
         //

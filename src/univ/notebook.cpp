@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/notebook.cpp
+// Name:        univ/notebook.cpp
 // Purpose:     wxNotebook implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,14 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univnotebook.h"
+#endif
+
+#ifdef __VMS
+#pragma message disable unscomzer
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,39 +33,12 @@
 
 #if wxUSE_NOTEBOOK
 
-#include "wx/notebook.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dcmemory.h"
-#endif
-
 #include "wx/imaglist.h"
+#include "wx/notebook.h"
 #include "wx/spinbutt.h"
+#include "wx/dcmemory.h"
 
 #include "wx/univ/renderer.h"
-
-// ----------------------------------------------------------------------------
-// wxStdNotebookInputHandler: translates SPACE and ENTER keys and the left mouse
-// click into button press/release actions
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStdNotebookInputHandler : public wxStdInputHandler
-{
-public:
-    wxStdNotebookInputHandler(wxInputHandler *inphand);
-
-    virtual bool HandleKey(wxInputConsumer *consumer,
-                           const wxKeyEvent& event,
-                           bool pressed);
-    virtual bool HandleMouse(wxInputConsumer *consumer,
-                             const wxMouseEvent& event);
-    virtual bool HandleMouseMove(wxInputConsumer *consumer, const wxMouseEvent& event);
-    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event);
-    virtual bool HandleActivation(wxInputConsumer *consumer, bool activated);
-
-protected:
-    void HandleFocusChange(wxInputConsumer *consumer);
-};
 
 // ----------------------------------------------------------------------------
 // macros
@@ -144,16 +125,13 @@ bool wxNotebook::Create(wxWindow *parent,
                         long style,
                         const wxString& name)
 {
-    if ( (style & wxBK_ALIGN_MASK) == wxBK_DEFAULT )
-        style |= wxBK_TOP;
-
     if ( !wxControl::Create(parent, id, pos, size, style,
                             wxDefaultValidator, name) )
         return false;
 
     m_sizePad = GetRenderer()->GetTabPadding();
 
-    SetInitialSize(size);
+    SetBestSize(size);
 
     CreateInputHandler(wxINP_HANDLER_NOTEBOOK);
 
@@ -196,7 +174,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
 int wxNotebook::GetPageImage(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
@@ -233,9 +211,9 @@ wxNotebook::~wxNotebook()
 // wxNotebook page switching
 // ----------------------------------------------------------------------------
 
-int wxNotebook::DoSetSelection(size_t nPage, int flags)
+int wxNotebook::SetSelection(size_t nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     if ( (size_t)nPage == m_sel )
     {
@@ -243,13 +221,15 @@ int wxNotebook::DoSetSelection(size_t nPage, int flags)
         return m_sel;
     }
 
-    if ( flags & SetSelection_SendEvent )
+    // event handling
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
+    event.SetSelection(nPage);
+    event.SetOldSelection(m_sel);
+    event.SetEventObject(this);
+    if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
     {
-        if ( !SendPageChangingEvent(nPage) )
-        {
-            // program doesn't allow the page change
-            return m_sel;
-        }
+        // program doesn't allow the page change
+        return m_sel;
     }
 
     // we need to change m_sel first, before calling RefreshTab() below as
@@ -295,11 +275,9 @@ int wxNotebook::DoSetSelection(size_t nPage, int flags)
         m_pages[m_sel]->Show();
     }
 
-    if ( flags & SetSelection_SendEvent )
-    {
-        // event handling
-        SendPageChangedEvent(selOld);
-    }
+    // event handling
+    event.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
+    GetEventHandler()->ProcessEvent(event);
 
     return selOld;
 }
@@ -608,10 +586,10 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
 int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
 {
     if ( flags )
-        *flags = wxBK_HITTEST_NOWHERE;
+        *flags = wxNB_HITTEST_NOWHERE;
 
     // first check that it is in this window at all
-    if ( !GetClientRect().Contains(pt) )
+    if ( !GetClientRect().Inside(pt) )
     {
         return -1;
     }
@@ -649,12 +627,12 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
     {
         GetTabSize(n, &rectTabs.width, &rectTabs.height);
 
-        if ( rectTabs.Contains(pt) )
+        if ( rectTabs.Inside(pt) )
         {
             if ( flags )
             {
                 // TODO: be more precise
-                *flags = wxBK_HITTEST_ONITEM;
+                *flags = wxNB_HITTEST_ONITEM;
             }
 
             return n;
@@ -680,14 +658,14 @@ bool wxNotebook::IsVertical() const
 wxDirection wxNotebook::GetTabOrientation() const
 {
     long style = GetWindowStyle();
-    if ( style & wxBK_BOTTOM )
+    if ( style & wxNB_BOTTOM )
         return wxBOTTOM;
-    else if ( style & wxBK_RIGHT )
+    else if ( style & wxNB_RIGHT )
         return wxRIGHT;
-    else if ( style & wxBK_LEFT )
+    else if ( style & wxNB_LEFT )
         return wxLEFT;
 
-    // wxBK_TOP == 0 so we don't have to test for it
+    // wxNB_TOP == 0 so we don't have to test for it
     return wxTOP;
 }
 
@@ -1342,14 +1320,6 @@ bool wxNotebook::PerformAction(const wxControlAction& action,
     return true;
 }
 
-/* static */
-wxInputHandler *wxNotebook::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdNotebookInputHandler s_handler(handlerDef);
-
-    return &s_handler;
-}
-
 // ----------------------------------------------------------------------------
 // wxStdNotebookInputHandler
 // ----------------------------------------------------------------------------
@@ -1461,3 +1431,4 @@ void wxStdNotebookInputHandler::HandleFocusChange(wxInputConsumer *consumer)
 }
 
 #endif // wxUSE_NOTEBOOK
+

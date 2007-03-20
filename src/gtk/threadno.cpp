@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/threadno.cpp
+// Name:        thread.cpp
 // Purpose:     Solaris thread support
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -9,17 +9,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/thread.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/module.h"
-#endif
-
 #include "wx/wx.h"
+#include "wx/module.h"
+#include "wx/log.h"
 
 wxMutex::wxMutex()
 {
@@ -69,7 +69,7 @@ void wxCondition::Wait(wxMutex& WXUNUSED(mutex))
 bool wxCondition::Wait(wxMutex& WXUNUSED(mutex), unsigned long WXUNUSED(sec),
         unsigned long WXUNUSED(nsec))
 {
-    return false;
+    return FALSE;
 }
 
 void wxCondition::Signal()
@@ -128,17 +128,17 @@ unsigned long wxThread::GetID() const
 
 bool wxThread::IsMain()
 {
-    return true;
+    return TRUE;
 }
 
 bool wxThread::IsRunning() const
 {
-    return false;
+    return FALSE;
 }
 
 bool wxThread::IsAlive() const
 {
-    return false;
+    return FALSE;
 }
 
 void wxThread::SetPriority(int WXUNUSED(prio)) { }
@@ -170,7 +170,7 @@ bool wxThreadModule::OnInit()
 {
     wxMainMutex = new wxMutex();
     wxMainMutex->Lock();
-    return true;
+    return TRUE;
 }
 
 void wxThreadModule::OnExit()

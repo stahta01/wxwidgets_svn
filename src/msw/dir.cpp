@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -184,10 +188,7 @@ bool wxDirData::Read(wxString *filename)
         {
             filespec += _T('\\');
         }
-        if ( !m_filespec )
-            filespec += _T("*.*");
-        else
-            filespec += m_filespec;
+        filespec += (!m_filespec ? _T("*.*") : m_filespec.c_str());
 
         m_finddata = FindFirst(filespec, PTR_TO_FINDDATA);
 
@@ -199,7 +200,7 @@ bool wxDirData::Read(wxString *filename)
 #ifdef __WIN32__
         DWORD err = ::GetLastError();
 
-        if ( err != ERROR_FILE_NOT_FOUND && err != ERROR_NO_MORE_FILES )
+        if ( err != ERROR_FILE_NOT_FOUND )
         {
             wxLogSysError(err, _("Can not enumerate files in directory '%s'"),
                           m_dirname.c_str());
@@ -377,15 +378,9 @@ extern bool
 wxGetDirectoryTimes(const wxString& dirname,
                     FILETIME *ftAccess, FILETIME *ftCreate, FILETIME *ftMod)
 {
-#ifdef __WXWINCE__
-    // FindFirst() is going to fail
-    wxASSERT_MSG( !dirname.empty(),
-                  _T("incorrect directory name format in wxGetDirectoryTimes") );
-#else
     // FindFirst() is going to fail
     wxASSERT_MSG( !dirname.empty() && dirname.Last() != _T('\\'),
                   _T("incorrect directory name format in wxGetDirectoryTimes") );
-#endif
 
     FIND_STRUCT fs;
     FIND_DATA fd = FindFirst(dirname, &fs);

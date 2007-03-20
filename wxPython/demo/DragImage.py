@@ -58,11 +58,6 @@ class DragCanvas(wx.ScrolledWindow):
         shape.fullscreen = True
         self.shapes.append(shape)
 
-        bmp = images.getTheKidBitmap()
-        shape = DragShape(bmp)
-        shape.pos = (200, 5)
-        self.shapes.append(shape)
-
         # Make a shape from some text
         text = "Some Text"
         bg_colour = wx.Colour(57, 115, 57)  # matches the bg image
@@ -88,6 +83,11 @@ class DragCanvas(wx.ScrolledWindow):
         shape.text = "Some dragging text"
         self.shapes.append(shape)
 
+
+        bmp = images.getTheKidBitmap()
+        shape = DragShape(bmp)
+        shape.pos = (200, 5)
+        self.shapes.append(shape)
 
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -150,7 +150,7 @@ class DragCanvas(wx.ScrolledWindow):
         dc = evt.GetDC()
 
         if not dc:
-            dc = wx.ClientDC(self)
+            dc = wxClientDC(self)
             rect = self.GetUpdateRegion().GetBox()
             dc.SetClippingRect(rect)
         self.TileBackground(dc)
@@ -185,8 +185,10 @@ class DragCanvas(wx.ScrolledWindow):
         self.dragImage.EndDrag()
         self.dragImage = None
 
+        dc = wx.ClientDC(self)
+
         if self.hiliteShape:
-            self.RefreshRect(self.hiliteShape.GetRect())
+            self.hiliteShape.Draw(dc)
             self.hiliteShape = None
 
         # reposition and draw the shape
@@ -210,9 +212,8 @@ class DragCanvas(wx.ScrolledWindow):
             )
             
         self.dragShape.shown = True
-        self.RefreshRect(self.dragShape.GetRect())
+        self.dragShape.Draw(dc)
         self.dragShape = None
-
 
     # The mouse is moving
     def OnMotion(self, evt):

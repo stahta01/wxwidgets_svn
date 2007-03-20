@@ -19,6 +19,7 @@
 class WXDLLIMPEXP_BASE wxConsoleAppTraits : public wxConsoleAppTraitsBase
 {
 public:
+    virtual wxToolkitInfo& GetToolkitInfo();
 };
 
 #if wxUSE_GUI
@@ -26,7 +27,7 @@ public:
 class WXDLLIMPEXP_CORE wxGUIAppTraits : public wxGUIAppTraitsBase
 {
 public:
-    virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
+    virtual wxToolkitInfo& GetToolkitInfo();
 
     // wxThread helpers
     // ----------------
@@ -36,9 +37,6 @@ public:
 
     // Clean up message queue.
     virtual void TerminateGui(unsigned long ulHab);
-#ifdef __WXGTK__
-    virtual wxString GetDesktopEnvironment() const;
-#endif
 };
 
 #endif // wxUSE_GUI

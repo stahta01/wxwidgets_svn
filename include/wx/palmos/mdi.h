@@ -12,9 +12,14 @@
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "mdi.h"
+#endif
+
 #include "wx/frame.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxStatusLineNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
 
 class WXDLLEXPORT wxMDIClientWindow;
 class WXDLLEXPORT wxMDIChildFrame;
@@ -38,7 +43,7 @@ public:
         Create(parent, id, title, pos, size, style, name);
     }
 
-    virtual ~wxMDIParentFrame();
+    ~wxMDIParentFrame();
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -127,7 +132,7 @@ public:
         Create(parent, id, title, pos, size, style, name);
     }
 
-    virtual ~wxMDIChildFrame();
+    ~wxMDIChildFrame();
 
     bool Create(wxMDIParentFrame *parent,
                 wxWindowID id,

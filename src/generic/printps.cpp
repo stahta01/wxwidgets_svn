@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/printps.cpp
+// Name:        printps.cpp
 // Purpose:     Postscript print/preview framework
 // Author:      Julian Smart
 // Modified by:
@@ -9,13 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -23,6 +16,19 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printps.h"
+#endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE && wxUSE_POSTSCRIPT && (!defined(__WXMSW__) || wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
 
@@ -34,10 +40,10 @@
     #include "wx/intl.h"
     #include "wx/progdlg.h"
     #include "wx/log.h"
-    #include "wx/dcprint.h"
 #endif
 
 #include "wx/generic/printps.h"
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
 #include "wx/generic/prntdlgg.h"
 #include "wx/generic/progdlgg.h"
@@ -122,10 +128,8 @@ bool wxPostScriptPrinter::Print(wxWindow *parent, wxPrintout *printout, bool pro
     int w, h;
     dc->GetSize(&w, &h);
     printout->SetPageSizePixels((int)w, (int)h);
-    printout->SetPaperRectPixels(wxRect(0, 0, w, h));
-    int mw, mh;
-    dc->GetSizeMM(&mw, &mh);
-    printout->SetPageSizeMM((int)mw, (int)mh);
+    dc->GetSizeMM(&w, &h);
+    printout->SetPageSizeMM((int)w, (int)h);
 
     // Create an abort window
     wxBeginBusyCursor();
@@ -351,19 +355,18 @@ void wxPostScriptPrintPreview::DetermineScaling()
             m_pageWidth = sizeDevUnits.y;
             m_pageHeight = sizeDevUnits.x;
             m_previewPrintout->SetPageSizeMM(sizeMM.y, sizeMM.x);
+            m_previewPrintout->SetPageSizePixels(m_pageWidth, m_pageHeight);
         }
         else
         {
             m_pageWidth = sizeDevUnits.x;
             m_pageHeight = sizeDevUnits.y;
             m_previewPrintout->SetPageSizeMM(sizeMM.x, sizeMM.y);
+            m_previewPrintout->SetPageSizePixels(m_pageWidth, m_pageHeight);
         }
-        m_previewPrintout->SetPageSizePixels(m_pageWidth, m_pageHeight);
-        m_previewPrintout->SetPaperRectPixels(wxRect(0, 0, m_pageWidth, m_pageHeight));
 
         // At 100%, the page should look about page-size on the screen.
-        m_previewScaleX = (float)0.8 * 72.0 / (float)wxPostScriptDC::GetResolution();
-        m_previewScaleY = m_previewScaleX;
+        m_previewScale = (float)0.8 * 72.0 / (float)wxPostScriptDC::GetResolution();
     }
 }
 

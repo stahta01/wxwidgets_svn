@@ -12,6 +12,10 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "app.h"
+#endif
+
 #include "wx/event.h"
 #include "wx/icon.h"
 
@@ -49,6 +53,13 @@ public:
 #if wxUSE_EXCEPTIONS
     virtual bool OnExceptionInMainLoop();
 #endif // wxUSE_EXCEPTIONS
+
+    // deprecated functions, use wxEventLoop directly instead
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( void DoMessage(WXMSG *pMsg) );
+    wxDEPRECATED( bool DoMessage() );
+    wxDEPRECATED( bool ProcessMessage(WXMSG* pMsg) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 protected:
     int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statline.cpp
+// Name:        msw/statline.cpp
 // Purpose:     MSW version of wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statline.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,10 +31,8 @@
 
 #if wxUSE_STATLINE
 
-#ifndef WX_PRECOMP
-    #include "wx/msw/private.h"
-    #include "wx/msw/missing.h"
-#endif
+#include "wx/msw/private.h"
+#include "wx/msw/missing.h"
 
 // ============================================================================
 // implementation
@@ -129,3 +131,4 @@ WXDWORD wxStaticLine::MSWGetStyle(long style, WXDWORD *exstyle) const
 }
 
 #endif // wxUSE_STATLINE
+

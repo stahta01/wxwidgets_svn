@@ -127,7 +127,7 @@ Functions to retrieve current state and miscellaneous info.
 \helpref{IsDisconnected}{wxsocketbaseisdisconnected}\\
 \helpref{LastCount}{wxsocketbaselastcount}\\
 \helpref{LastError}{wxsocketbaselasterror}\\
-\helpref{IsOk}{wxsocketbaseisok}\\
+\helpref{Ok}{wxsocketbaseok}\\
 \helpref{SaveState}{wxsocketbasesavestate}\\
 \helpref{RestoreState}{wxsocketbaserestorestate}
 
@@ -161,8 +161,7 @@ Functions that allow applications to customize socket IO as needed.
 
 \helpref{GetFlags}{wxsocketbasegetflags}\\
 \helpref{SetFlags}{wxsocketbasesetflags}\\
-\helpref{SetTimeout}{wxsocketbasesettimeout}\\
-\helpref{SetLocal}{wxsocketbasesetlocal}\\
+\helpref{SetTimeout}{wxsocketbasesettimeout}
 
 \membersection{Handling socket events}\label{socketevents}
 
@@ -414,11 +413,11 @@ be sent to the application. If {\it notify} is false; no events
 will be sent.
 
 % 
-% IsOk
+% Ok
 %
-\membersection{wxSocketBase::IsOk}\label{wxsocketbaseisok}
+\membersection{wxSocketBase::Ok}\label{wxsocketbaseok}
 
-\constfunc{bool}{IsOk}{\void}
+\constfunc{bool}{Ok}{\void}
 
 Returns true if the socket is initialized and ready and false in other
 cases.
@@ -561,12 +560,8 @@ The {\bf wxSOCKET\_REUSEADDR} flag controls the use of the SO\_REUSEADDR standar
 setsockopt() flag. This flag allows the socket to bind to a port that is already in use.
 This is mostly used on UNIX-based systems to allow rapid starting and stopping of a server - 
 otherwise you may have to wait several minutes for the port to become available.
-wxSOCKET\_REUSEADDR can also be used with socket clients to (re)bind to a particular local port
-for an outgoing connection.
-This option can have surprising platform dependent behavior, so check the documentation for
-your platform's implementation of setsockopt(). Note that on BSD-based systems (e.g. Mac OS X),
-use of wxSOCKET\_REUSEADDR implies SO\_REUSEPORT in addition to SO\_REUSEADDR to be consistent
-with Windows.
+This option can have surprising platform dependent behavior, check the documentation for
+your platform's implementation of setsockopt().
 
 So:
 
@@ -581,20 +576,7 @@ the data.
 {\bf wxSOCKET\_BLOCK} has nothing to do with the previous flags and
 it controls whether the GUI blocks.
 
-{\bf wxSOCKET\_REUSEADDR} controls special platform-specific behavior for
-reusing local addresses/ports.
-
-%
-% SetLocal
-%
-\membersection{wxSocketBase::SetLocal}\label{wxsocketbasesetlocal}
-
-\func{bool}{SetLocal}{\param{wxIPV4address\&}{ local}}
-
-This function allows you to set the local address and port,
-useful when an application needs to reuse a particular port. When
-a local port is set for a \helpref{wxSocketClient}{wxsocketclient},
-{\bf bind} will be called before {\bf connect}.
+{\bf wxSOCKET\_REUSEADDR} controls special platform-specific behavior for wxServerSocket.
 
 %
 % SetNotify
@@ -1036,9 +1018,6 @@ Destructor. Please see \helpref{wxSocketBase::Destroy}{wxsocketbasedestroy}.
 
 \func{bool}{Connect}{\param{wxSockAddress\&}{ address}, \param{bool}{ wait = true}}
 
-\func{bool}{Connect}{\param{wxSockAddress\&}{ address}, \param{wxSockAddress\&}{ local},
-\param{bool}{ wait = true}}
-
 Connects to a server using the specified address.
 
 If {\it wait} is true, Connect will wait until the connection
@@ -1054,10 +1033,6 @@ and {\bf wxSOCKET\_LOST} events (for connection failure).
 \wxheading{Parameters}
 
 \docparam{address}{Address of the server.}
-
-\docparam{local}{Bind to the specified local address and port before connecting.
-The local address and port can also be set using \helpref{SetLocal}{wxsocketbasesetlocal},
-and then using the 2-parameter Connect method.}
 
 \docparam{wait}{If true, waits for the connection to complete.}
 

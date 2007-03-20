@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_STATBMP_H_
 #define _WX_UNIV_STATBMP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univstatbmp.h"
+#endif
+
 #include "wx/bitmap.h"
 
 // ----------------------------------------------------------------------------
@@ -60,11 +64,10 @@ public:
     wxIcon GetIcon() const;
 
     virtual bool HasTransparentBackground() { return true; }
-
-protected:
+    
+private:
     virtual void DoDraw(wxControlRenderer *renderer);
 
-private:
     // the bitmap which we show
     wxBitmap m_bitmap;
 

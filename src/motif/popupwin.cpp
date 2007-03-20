@@ -1,22 +1,23 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/popupwin.cpp
+// Name:        popupwin.cpp
 // Purpose:     wxPopupWindow implementation
 // Author:      Mattia barbon
 // Modified by:
 // Created:     28.08.03
 // RCS-ID:      $Id$
 // Copyright:   (c) Mattia barbon
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "popup.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/popupwin.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-#endif
+#include "wx/app.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint

@@ -139,7 +139,7 @@ protected:
 
 public:
     RipperDocGen();
-    virtual ~RipperDocGen();
+    ~RipperDocGen();
 
     // should be called onece to set user-code provided,
     // parser for specific source code language

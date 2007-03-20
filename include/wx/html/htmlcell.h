@@ -8,8 +8,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLCELL_H_
 #define _WX_HTMLCELL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmlcell.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -20,7 +25,6 @@
 #include "wx/window.h"
 
 
-class WXDLLIMPEXP_HTML wxHtmlWindowInterface;
 class WXDLLIMPEXP_HTML wxHtmlLinkInfo;
 class WXDLLIMPEXP_HTML wxHtmlCell;
 class WXDLLIMPEXP_HTML wxHtmlContainerCell;
@@ -146,13 +150,6 @@ enum
 };
 
 
-// Superscript/subscript/normal script mode of a cell
-enum wxHtmlScriptMode
-{
-    wxHTML_SCRIPT_NORMAL,
-    wxHTML_SCRIPT_SUB,
-    wxHTML_SCRIPT_SUP
-};
 
 
 // ---------------------------------------------------------------------------
@@ -184,10 +181,6 @@ public:
     int GetHeight() const {return m_Height;}
     int GetDescent() const {return m_Descent;}
 
-    void SetScriptMode(wxHtmlScriptMode mode, long previousBase);
-    wxHtmlScriptMode GetScriptMode() const { return m_ScriptMode; }
-    long GetScriptBaseline() { return m_ScriptBaseline; }
-
     // Formatting cells are not visible on the screen, they only alter
     // renderer's state.
     bool IsFormattingCell() const { return m_Width == 0 && m_Height == 0; }
@@ -202,12 +195,7 @@ public:
         { return m_Link; }
 
     // Returns cursor to be used when mouse is over the cell:
-    virtual wxCursor GetMouseCursor(wxHtmlWindowInterface *window) const;
-
-#if WXWIN_COMPATIBILITY_2_6
-    // this was replaced by GetMouseCursor, don't use in new code!
     virtual wxCursor GetCursor() const;
-#endif
 
     // return next cell among parent's cells
     wxHtmlCell *GetNext() const {return m_Next;}
@@ -250,23 +238,12 @@ public:
     //   returns pointer to anchor news
     virtual const wxHtmlCell* Find(int condition, const void* param) const;
 
-
     // This function is called when mouse button is clicked over the cell.
-    // Returns true if a link is clicked, false otherwise.
     //
-    // 'window' is pointer to wxHtmlWindowInterface of the window which
-    // generated the event.
+    // Parent is pointer to wxHtmlWindow that generated the event
     // HINT: if this handling is not enough for you you should use
     //       wxHtmlWidgetCell
-    virtual bool ProcessMouseClick(wxHtmlWindowInterface *window,
-                                   const wxPoint& pos,
-                                   const wxMouseEvent& event);
-
-#if WXWIN_COMPATIBILITY_2_6
-    // this was replaced by ProcessMouseClick, don't use in new code!
-    virtual void OnMouseClick(wxWindow *window,
-                              int x, int y, const wxMouseEvent& event);
-#endif
+    virtual void OnMouseClick(wxWindow *parent, int x, int y, const wxMouseEvent& event);
 
     // This method used to adjust pagebreak position. The parameter is variable
     // that contains y-coordinate of page break (= horizontal line that should
@@ -277,7 +254,8 @@ public:
     // Returned value : true if pagebreak was modified, false otherwise
     // Usage : while (container->AdjustPagebreak(&p)) {}
     virtual bool AdjustPagebreak(int *pagebreak,
-                                 wxArrayInt& known_pagebreaks) const;
+                                 int *known_pagebreaks = NULL,
+                                 int number_of_pages = 0) const;
 
     // Sets cell's behaviour on pagebreaks (see AdjustPagebreak). Default
     // is true - the cell can be split on two pages
@@ -299,14 +277,8 @@ public:
     virtual wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y,
                                   unsigned flags = wxHTML_FIND_EXACT) const;
 
-    // Returns absolute position of the cell on HTML canvas.
-    // If rootCell is provided, then it's considered to be the root of the
-    // hierarchy and the returned value is relative to it.
-    wxPoint GetAbsPos(wxHtmlCell *rootCell = NULL) const;
-
-    // Returns root cell of the hierarchy (i.e. grand-grand-...-parent that
-    // doesn't have a parent itself)
-    wxHtmlCell *GetRootCell() const;
+    // Returns absolute position of the cell on HTML canvas
+    wxPoint GetAbsPos() const;
 
     // Returns first (last) terminal cell inside this cell. It may return NULL,
     // but it is rare -- only if there are no terminals in the tree.
@@ -330,26 +302,21 @@ public:
         { return wxEmptyString; }
 
 protected:
-    // pointer to the next cell
     wxHtmlCell *m_Next;
-    // pointer to parent cell
+            // pointer to the next cell
     wxHtmlContainerCell *m_Parent;
-
-    // dimensions of fragment (m_Descent is used to position text & images)
+            // pointer to parent cell
     long m_Width, m_Height, m_Descent;
-    // position where the fragment is drawn:
+            // dimensions of fragment
+            // m_Descent is used to position text&images..
     long m_PosX, m_PosY;
-
-    // superscript/subscript/normal:
-    wxHtmlScriptMode m_ScriptMode;
-    long m_ScriptBaseline;
-
-    // destination address if this fragment is hypertext link, NULL otherwise
+            // position where the fragment is drawn
     wxHtmlLinkInfo *m_Link;
-    // true if this cell can be placed on pagebreak, false otherwise
+            // destination address if this fragment is hypertext link, NULL otherwise
     bool m_CanLiveOnPagebreak;
-    // unique identifier of the cell, generated from "id" property of tags
+            // true if this cell can be placed on pagebreak, false otherwise
     wxString m_id;
+            // unique identifier of the cell, generated from "id" property of tags
 
     DECLARE_ABSTRACT_CLASS(wxHtmlCell)
     DECLARE_NO_COPY_CLASS(wxHtmlCell)
@@ -371,18 +338,18 @@ protected:
 class WXDLLIMPEXP_HTML wxHtmlWordCell : public wxHtmlCell
 {
 public:
-    wxHtmlWordCell(const wxString& word, const wxDC& dc);
+    wxHtmlWordCell(const wxString& word, wxDC& dc);
     void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
               wxHtmlRenderingInfo& info);
-    virtual wxCursor GetMouseCursor(wxHtmlWindowInterface *window) const;
+    wxCursor GetCursor() const;
     wxString ConvertToText(wxHtmlSelection *sel) const;
     bool IsLinebreakAllowed() const { return m_allowLinebreak; }
 
     void SetPreviousWord(wxHtmlWordCell *cell);
 
 protected:
-    void SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const;
-    void Split(const wxDC& dc,
+    void SetSelectionPrivPos(wxDC& dc, wxHtmlSelection *s) const;
+    void Split(wxDC& dc,
                const wxPoint& selFrom, const wxPoint& selTo,
                unsigned& pos1, unsigned& pos2) const;
 
@@ -403,15 +370,14 @@ class WXDLLIMPEXP_HTML wxHtmlContainerCell : public wxHtmlCell
 {
 public:
     wxHtmlContainerCell(wxHtmlContainerCell *parent);
-    virtual ~wxHtmlContainerCell();
+    ~wxHtmlContainerCell();
 
     virtual void Layout(int w);
     virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
                       wxHtmlRenderingInfo& info);
     virtual void DrawInvisible(wxDC& dc, int x, int y,
                                wxHtmlRenderingInfo& info);
-/*    virtual bool AdjustPagebreak(int *pagebreak, int *known_pagebreaks = NULL, int number_of_pages = 0) const;*/
-    virtual bool AdjustPagebreak(int *pagebreak, wxArrayInt& known_pagebreaks) const;
+    virtual bool AdjustPagebreak(int *pagebreak, int *known_pagebreaks = NULL, int number_of_pages = 0) const;
 
     // insert cell at the end of m_Cells list
     void InsertCell(wxHtmlCell *cell);
@@ -447,20 +413,12 @@ public:
     void SetBorder(const wxColour& clr1, const wxColour& clr2) {m_UseBorder = true; m_BorderColour1 = clr1, m_BorderColour2 = clr2;}
     virtual wxHtmlLinkInfo* GetLink(int x = 0, int y = 0) const;
     virtual const wxHtmlCell* Find(int condition, const void* param) const;
-
-#if WXWIN_COMPATIBILITY_2_6
-    // this was replaced by ProcessMouseClick, don't use in new code!
-    virtual void OnMouseClick(wxWindow *window,
-                              int x, int y, const wxMouseEvent& event);
-#endif
-    virtual bool ProcessMouseClick(wxHtmlWindowInterface *window,
-                                   const wxPoint& pos,
-                                   const wxMouseEvent& event);
+    virtual void OnMouseClick(wxWindow *parent, int x, int y, const wxMouseEvent& event);
 
     virtual wxHtmlCell* GetFirstChild() const { return m_Cells; }
-
-    // returns last child cell:
-    wxHtmlCell* GetLastChild() const { return m_LastCell; }
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( wxHtmlCell* GetFirstCell() const );
+#endif
 
     // see comment in wxHtmlCell about this method
     virtual bool IsTerminalCell() const { return false; }
@@ -474,7 +432,7 @@ public:
 
     // Removes indentation on top or bottom of the container (i.e. above or
     // below first/last terminal cell). For internal use only.
-    virtual void RemoveExtraSpacing(bool top, bool bottom);
+    void RemoveExtraSpacing(bool top, bool bottom);
 
     // Returns the maximum possible length of the container.
     // Call Layout at least once before using GetMaxTotalWidth()
@@ -516,6 +474,12 @@ protected:
     DECLARE_ABSTRACT_CLASS(wxHtmlContainerCell)
     DECLARE_NO_COPY_CLASS(wxHtmlContainerCell)
 };
+
+#if WXWIN_COMPATIBILITY_2_4
+inline wxHtmlCell* wxHtmlContainerCell::GetFirstCell() const
+    { return GetFirstChild(); }
+#endif
+
 
 
 
@@ -585,7 +549,7 @@ public:
     // it's width according to parent container's width
     // (w is percent of parent's width)
     wxHtmlWidgetCell(wxWindow *wnd, int w = 0);
-    virtual ~wxHtmlWidgetCell() { m_Wnd->Destroy(); }
+    ~wxHtmlWidgetCell() { m_Wnd->Destroy(); }
     virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
                       wxHtmlRenderingInfo& info);
     virtual void DrawInvisible(wxDC& dc, int x, int y,

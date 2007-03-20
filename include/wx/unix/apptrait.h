@@ -23,6 +23,8 @@ public:
     virtual bool IsWriteFDOfEndProcessPipe(wxExecuteData& execData, int fd);
     virtual void DetachWriteFDOfEndProcessPipe(wxExecuteData& execData);
     virtual int WaitForChild(wxExecuteData& execData);
+
+    virtual wxToolkitInfo& GetToolkitInfo();
 };
 
 #if wxUSE_GUI
@@ -38,16 +40,7 @@ public:
 #if defined(__WXMAC__) || defined(__WXCOCOA__)
     virtual wxStandardPathsBase& GetStandardPaths();
 #endif
-    virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
-
-#ifdef __WXGTK__
-    virtual void SetLocale();
-    virtual wxString GetDesktopEnvironment() const;
-#endif
-
-#if defined(__WXDEBUG__) && defined(__WXGTK20__)
-    virtual bool ShowAssertDialog(const wxString& msg);
-#endif
+    virtual wxToolkitInfo& GetToolkitInfo();
 };
 
 #endif // wxUSE_GUI

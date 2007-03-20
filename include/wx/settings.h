@@ -132,8 +132,7 @@ enum wxSystemMetric
 enum wxSystemFeature
 {
     wxSYS_CAN_DRAW_FRAME_DECORATIONS = 1,
-    wxSYS_CAN_ICONIZE_FRAME,
-    wxSYS_TABLET_PRESENT
+    wxSYS_CAN_ICONIZE_FRAME
 };
 
 // values for different screen designs
@@ -198,6 +197,13 @@ public:
     // Value
     static wxSystemScreenType ms_screen;
 
+#if WXWIN_COMPATIBILITY_2_4
+    // the backwards compatible versions of wxSystemSettingsNative functions,
+    // don't use these methods in the new code!
+    wxDEPRECATED(static wxColour GetSystemColour(int index));
+    wxDEPRECATED(static wxFont GetSystemFont(int index));
+    wxDEPRECATED(static int GetSystemMetric(int index));
+#endif
 };
 
 #endif

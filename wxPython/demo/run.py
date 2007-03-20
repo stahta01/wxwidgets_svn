@@ -17,12 +17,11 @@ directory within its own frame window.  Just specify the module name
 on the command line.
 """
 
-import wx
-import wx.lib.mixins.inspect
+import wx                  # This module uses the new wx namespace
 import sys, os
 
 # stuff for debugging
-print "wx.version:", wx.version()
+print "wx.VERSION_STRING = %s (%s)" % (wx.VERSION_STRING, wx.USE_UNICODE and 'unicode' or 'ansi')
 print "pid:", os.getpid()
 ##raw_input("Press Enter...")
 
@@ -40,7 +39,7 @@ class Log:
     write = WriteText
 
 
-class RunDemoApp(wx.App, wx.lib.mixins.inspect.InspectionMixin):
+class RunDemoApp(wx.App):
     def __init__(self, name, module, useShell):
         self.name = name
         self.demoModule = module
@@ -52,15 +51,14 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspect.InspectionMixin):
         wx.Log_SetActiveTarget(wx.LogStderr())
 
         self.SetAssertMode(assertMode)
-        self.Init()  # InspectionMixin
 
         frame = wx.Frame(None, -1, "RunDemo: " + self.name, pos=(50,50), size=(200,100),
-                        style=wx.DEFAULT_FRAME_STYLE, name="run a sample")
+                        style=wx.DEFAULT_FRAME_STYLE)
         frame.CreateStatusBar()
 
         menuBar = wx.MenuBar()
         menu = wx.Menu()
-        item = menu.Append(-1, "E&xit\tCtrl-Q", "Exit demo")
+        item = menu.Append(-1, "E&xit\tAlt-X", "Exit demo")
         self.Bind(wx.EVT_MENU, self.OnExitApp, item)
         menuBar.Append(menu, "&File")
 

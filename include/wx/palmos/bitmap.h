@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "bitmap.h"
+#endif
+
 #include "wx/palmos/gdiimage.h"
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
@@ -41,17 +45,21 @@ public:
     // default ctor creates an invalid bitmap, you must Create() it later
     wxBitmap() { Init(); }
 
+    // Copy constructors
+    wxBitmap(const wxBitmap& bitmap) { Init(); Ref(bitmap); }
+
     // Initialize with raw data
     wxBitmap(const char bits[], int width, int height, int depth = 1);
 
     // Initialize with XPM data
-    wxBitmap(const char* const* data);
+    wxBitmap(const char **data) { CreateFromXpm(data); }
+    wxBitmap(char **data) { CreateFromXpm((const char **)data); }
 
     // Load a file or resource
     wxBitmap(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_BMP_RESOURCE);
 
     // New constructor for generalised creation from data
-    wxBitmap(const void* data, long type, int width, int height, int depth = 1);
+    wxBitmap(void *data, long type, int width, int height, int depth = 1);
 
     // Create a new, uninitialized bitmap of the given size and depth (if it
     // is omitted, will create a bitmap compatible with the display)
@@ -76,6 +84,13 @@ public:
     // we must have this, otherwise icons are silently copied into bitmaps using
     // the copy ctor but the resulting bitmap is invalid!
     wxBitmap(const wxIcon& icon) { Init(); CopyFromIcon(icon); }
+
+    wxBitmap& operator=(const wxBitmap& bitmap)
+    {
+        if ( m_refData != bitmap.m_refData )
+            Ref(bitmap);
+        return *this;
+    }
 
     wxBitmap& operator=(const wxIcon& icon)
     {
@@ -113,7 +128,7 @@ public:
 
     virtual bool Create(int width, int height, int depth = -1);
     virtual bool Create(int width, int height, const wxDC& dc);
-    virtual bool Create(const void* data, long type, int width, int height, int depth = 1);
+    virtual bool Create(void *data, long type, int width, int height, int depth = 1);
     virtual bool LoadFile(const wxString& name, long type = wxBITMAP_TYPE_BMP_RESOURCE);
     virtual bool SaveFile(const wxString& name, int type, const wxPalette *cmap = NULL);
 
@@ -131,6 +146,9 @@ public:
 
     wxMask *GetMask() const;
     void SetMask(wxMask *mask);
+
+    bool operator==(const wxBitmap& bitmap) const { return m_refData == bitmap.m_refData; }
+    bool operator!=(const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
 
     // these functions are internal and shouldn't be used, they risk to
     // disappear in the future
@@ -154,6 +172,9 @@ protected:
     void Init();
 
     virtual wxGDIImageRefData *CreateData() const;
+
+    // creates the bitmap from XPM data, supposed to be called from ctor
+    bool CreateFromXpm(const char **bits);
 
     // creates an uninitialized bitmap, called from Create()s above
     bool DoCreate(int w, int h, int depth, WXHDC hdc);
@@ -228,7 +249,7 @@ public:
     // keep wxBitmapHandler derived from wxGDIImageHandler compatible with the
     // old class which worked only with bitmaps
     virtual bool Create(wxBitmap *bitmap,
-                        const void* data,
+                        void *data,
                         long flags,
                         int width, int height, int depth = 1);
     virtual bool LoadFile(wxBitmap *bitmap,
@@ -241,7 +262,7 @@ public:
                           const wxPalette *palette = NULL);
 
     virtual bool Create(wxGDIImage *image,
-                        const void* data,
+                        void *data,
                         long flags,
                         int width, int height, int depth = 1);
     virtual bool Load(wxGDIImage *image,

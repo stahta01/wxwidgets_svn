@@ -1,5 +1,5 @@
 // -*- c++ -*- ////////////////////////////////////////////////////////////////
-// Name:        src/unix/dialup.cpp
+// Name:        unix/dialup.cpp
 // Purpose:     Network related wxWidgets classes and functions
 // Author:      Karsten Ballüder
 // Modified by:
@@ -9,26 +9,32 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#   pragma implementation "dialup.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/setup.h"
+
 #if wxUSE_DIALUP_MANAGER
 
-#include "wx/dialup.h"
-
 #ifndef  WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/event.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/timer.h"
+#   include "wx/defs.h"
 #endif // !PCH
 
+#include "wx/string.h"
+#include "wx/event.h"
+#include "wx/dialup.h"
+#include "wx/timer.h"
 #include "wx/filefn.h"
+#include "wx/utils.h"
+#include "wx/log.h"
 #include "wx/ffile.h"
 #include "wx/process.h"
+#include "wx/intl.h"
+#include "wx/app.h"
 #include "wx/wxchar.h"
 
 #include <stdlib.h>
@@ -73,7 +79,7 @@ class WXDLLEXPORT wxDialUpManagerImpl : public wxDialUpManager
 {
 public:
    wxDialUpManagerImpl();
-   virtual ~wxDialUpManagerImpl();
+   ~wxDialUpManagerImpl();
 
    /** Could the dialup manager be initialized correctly? If this function
        returns false, no other functions will work neither, so it's a good idea
@@ -398,7 +404,7 @@ void wxDialUpManagerImpl::DisableAutoCheckOnlineStatus()
 
 void wxDialUpManagerImpl::SetWellKnownHost(const wxString& hostname, int portno)
 {
-   if(hostname.length() == 0)
+   if(hostname.Length() == 0)
    {
       m_BeaconHost = WXDIALUP_MANAGER_DEFAULT_BEACONHOST;
       m_BeaconPort = 80;
@@ -407,7 +413,7 @@ void wxDialUpManagerImpl::SetWellKnownHost(const wxString& hostname, int portno)
 
    // does hostname contain a port number?
    wxString port = hostname.After(wxT(':'));
-   if(port.length())
+   if(port.Length())
    {
       m_BeaconHost = hostname.Before(wxT(':'));
       m_BeaconPort = wxAtoi(port);
@@ -580,11 +586,9 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckConnect()
    }
    else // failed to connect
    {
-#ifdef ENETUNREACH
        if(errno == ENETUNREACH)
           return Net_No; // network is unreachable
        else
-#endif
           return Net_Unknown; // connect failed, but don't know why
    }
 }
@@ -676,9 +680,7 @@ wxDialUpManagerImpl::CheckIfconfig()
         wxString tmpfile = wxGetTempFileName( wxT("_wxdialuptest") );
         wxString cmd = wxT("/bin/sh -c \'");
         cmd << m_IfconfigPath;
-#if defined(__AIX__) || \
-    defined(__OSF__) || \
-    defined(__SOLARIS__) || defined (__SUNOS__)
+#if defined(__AIX__) || defined(__SOLARIS__) || defined (__SUNOS__)
         // need to add -a flag
         cmd << wxT(" -a");
 #elif defined(__LINUX__) || defined(__SGI__)
@@ -766,9 +768,9 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
         if (wxFileExists( wxT("SYS$SYSTEM:TCPIP$PING.EXE") ))
             m_PingPath = wxT("$SYS$SYSTEM:TCPIP$PING");
 #elif defined(__AIX__)
-        m_PingPath = _T("/etc/ping");
+        m_PingPath = _T("/etc/ping"); 
 #elif defined(__SGI__)
-        m_PingPath = _T("/usr/etc/ping");
+        m_PingPath = _T("/usr/etc/ping"); 
 #else
         if (wxFileExists( wxT("/bin/ping") ))
             m_PingPath = wxT("/bin/ping");
@@ -793,12 +795,7 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
     cmd << m_PingPath << wxT(' ');
 #if defined(__SOLARIS__) || defined (__SUNOS__)
     // nothing to add to ping command
-#elif defined(__AIX__) || \
-      defined (__BSD__) || \
-      defined(__LINUX__) || \
-      defined(__OSF__) || \
-      defined(__SGI__) || \
-      defined(__VMS)
+#elif defined(__AIX__) || defined(__LINUX__) || defined (__BSD__) || defined(__VMS) || defined(__SGI__)
     cmd << wxT("-c 1 "); // only ping once
 #elif defined(__HPUX__)
     cmd << wxT("64 1 "); // only ping once (need also specify the packet size)

@@ -18,7 +18,7 @@ class WXDLLEXPORT wxCursorRefData: public wxGDIImageRefData
 {
 public:
     wxCursorRefData();
-    virtual ~wxCursorRefData() { Free(); }
+    ~wxCursorRefData() { Free(); }
     virtual void Free(void);
     bool                            m_bDestroyCursor;
 }; // end of CLASS wxCursorRefData
@@ -32,6 +32,8 @@ class WXDLLEXPORT wxCursor: public wxBitmap
 public:
     wxCursor();
 
+    // Copy constructors
+    wxCursor(const wxCursor& rCursor) { Ref(rCursor); }
     wxCursor(const wxImage& rImage);
 
     wxCursor( const char acBits[]
@@ -48,6 +50,16 @@ public:
             );
     wxCursor(int nCursorType);
     inline ~wxCursor() { }
+
+    inline wxCursor& operator = (const wxCursor& rCursor)
+    {
+        if (*this == rCursor)
+            return (*this);
+        Ref(rCursor);
+        return *this;
+    }
+    inline bool operator == (const wxCursor& rCursor) const { return m_refData == rCursor.m_refData; }
+    inline bool operator != (const wxCursor& rCursor) const { return m_refData != rCursor.m_refData; }
 
     inline WXHCURSOR GetHCURSOR(void) const { return (M_CURSORDATA ? M_CURSORDATA->m_hCursor : 0); }
     inline void      SetHCURSOR(WXHCURSOR hCursor) { SetHandle((WXHANDLE)hCursor); }

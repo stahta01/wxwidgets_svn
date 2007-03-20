@@ -217,8 +217,6 @@ public:
     virtual void VisitParameter( spParameter& WXUNUSED(param) ) {}
 
     virtual void VisitCustomContext( spContext& WXUNUSED(ctx) ) {}
-
-    virtual ~spVisitor() { }
 };
 
 // stores one section of comments,
@@ -714,8 +712,6 @@ class SourceParserPlugin
 public:
     virtual bool CanUnderstandContext( char* cur, char* end, spContext* pOuttterCtx ) = 0;
     virtual void ParseContext( char* start, char*& cur, char* end, spContext* pOuttterCtx ) = 0;
-
-    virtual ~SourceParserPlugin() { }
 };
 
 // abstract interface for source parsers

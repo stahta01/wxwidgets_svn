@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/textctrl.cpp
+// Name:        univ/textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -117,6 +117,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univtextctrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -125,16 +129,15 @@
 
 #if wxUSE_TEXTCTRL
 
-#include "wx/textctrl.h"
+#include <ctype.h>
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
+
     #include "wx/dcclient.h"
     #include "wx/validate.h"
-    #include "wx/dataobj.h"
+    #include "wx/textctrl.h"
 #endif
-
-#include <ctype.h>
 
 #include "wx/clipbrd.h"
 
@@ -148,6 +151,10 @@
 #include "wx/univ/theme.h"
 
 #include "wx/cmdproc.h"
+
+#if wxUSE_CLIPBOARD
+#include "wx/dataobj.h"
+#endif
 
 // turn extra wxTextCtrl-specific debugging on/off
 #define WXDEBUG_TEXT
@@ -164,33 +171,6 @@
 #ifdef WXDEBUG_TEXT_REPLACE
     #include "wx/tokenzr.h"
 #endif // WXDEBUG_TEXT_REPLACE
-
-// ----------------------------------------------------------------------------
-// wxStdTextCtrlInputHandler: this control handles only the mouse/kbd actions
-// common to Win32 and GTK, platform-specific things are implemented elsewhere
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStdTextCtrlInputHandler : public wxStdInputHandler
-{
-public:
-    wxStdTextCtrlInputHandler(wxInputHandler *inphand);
-
-    virtual bool HandleKey(wxInputConsumer *consumer,
-                           const wxKeyEvent& event,
-                           bool pressed);
-    virtual bool HandleMouse(wxInputConsumer *consumer,
-                             const wxMouseEvent& event);
-    virtual bool HandleMouseMove(wxInputConsumer *consumer,
-                                 const wxMouseEvent& event);
-    virtual bool HandleFocus(wxInputConsumer *consumer, const wxFocusEvent& event);
-
-protected:
-    // get the position of the mouse click
-    static wxTextPos HitTest(const wxTextCtrl *text, const wxPoint& pos);
-
-    // capture data
-    wxTextCtrl *m_winCapture;
-};
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -227,7 +207,7 @@ static const size_t PAGE_OVERLAP_IN_LINES = 1;
 // ----------------------------------------------------------------------------
 
 // the data only used by single line text controls
-struct wxTextSingleLineData
+struct WXDLLEXPORT wxTextSingleLineData
 {
     // the position of the first visible pixel and the first visible column
     wxCoord m_ofsHorz;
@@ -251,7 +231,7 @@ struct wxTextSingleLineData
 };
 
 // the data only used by multi line text controls
-struct wxTextMultiLineData
+struct WXDLLEXPORT wxTextMultiLineData
 {
     // the lines of text
     wxArrayString m_lines;
@@ -300,7 +280,7 @@ struct wxTextMultiLineData
 };
 
 // the data only used by multi line text controls in line wrap mode
-class wxWrappedLineData
+class WXDLLEXPORT wxWrappedLineData
 {
     // these functions set all our values, so give them access to them
 friend void wxTextCtrl::LayoutLine(wxTextCoord line,
@@ -460,7 +440,7 @@ WX_DECLARE_OBJARRAY(wxWrappedLineData, wxArrayWrappedLinesData);
 #include "wx/arrimpl.cpp"
 WX_DEFINE_OBJARRAY(wxArrayWrappedLinesData);
 
-struct wxTextWrappedData : public wxTextMultiLineData
+struct WXDLLEXPORT wxTextWrappedData : public wxTextMultiLineData
 {
     // the width of the column to the right of the text rect used for the
     // indicator mark display for the wrapped lines
@@ -630,13 +610,13 @@ private:
 // implementation
 // ============================================================================
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
 
     EVT_SIZE(wxTextCtrl::OnSize)
 END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 
 // ----------------------------------------------------------------------------
 // creation
@@ -658,6 +638,9 @@ void wxTextCtrl::Init()
 
     m_heightLine =
     m_widthAvg = -1;
+
+    // init wxScrollHelper
+    SetWindow(this);
 
     // init the undo manager
     m_cmdProcessor = new wxTextCtrlCommandProcessor(this);
@@ -740,7 +723,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
 
     RecalcFontMetrics();
     SetValue(value);
-    SetInitialSize(size);
+    SetBestSize(size);
 
     m_isEditable = !(style & wxTE_READONLY);
 
@@ -778,7 +761,7 @@ wxTextCtrl::~wxTextCtrl()
 // set/get the value
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::DoSetValue(const wxString& value, int flags)
+void wxTextCtrl::SetValue(const wxString& value)
 {
     if ( IsSingleLine() && (value == GetValue()) )
     {
@@ -793,8 +776,7 @@ void wxTextCtrl::DoSetValue(const wxString& value, int flags)
         SetInsertionPoint(0);
     }
 
-    if ( flags & SetValue_SendEvent )
-        SendTextUpdatedEvent();
+    // TODO: should we generate the event or not, finally?
 }
 
 const wxArrayString& wxTextCtrl::GetLines() const
@@ -2708,7 +2690,7 @@ size_t wxTextCtrl::GetPartOfWrappedLine(const wxChar* text,
                 //else: we can just see it
 
                 // wrap at any character or only at words boundaries?
-                if ( !(GetWindowStyle() & wxTE_CHARWRAP) )
+                if ( !(GetWindowStyle() & wxTE_LINEWRAP) )
                 {
                     // find the (last) not word char before this word
                     wxTextCoord colWordStart;
@@ -3732,7 +3714,7 @@ void wxTextCtrl::RefreshTextRange(wxTextPos start, wxTextPos end)
         {
             // intermediate line or the last one but we need to refresh it
             // until the end anyhow - do it
-            posCount = wxString::npos;
+            posCount = wxSTRING_MAXLEN;
         }
         else // last line
         {
@@ -4283,6 +4265,9 @@ void wxTextCtrl::CreateCaret()
     {
         // FIXME use renderer
         caret = new wxCaret(this, 1, GetLineHeight());
+#ifndef __WXMSW__
+        caret->SetBlinkTime(0);
+#endif // __WXMSW__
     }
     else
     {
@@ -4707,7 +4692,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
         int keycode = event.GetKeyCode();
 #if wxUSE_UNICODE
         wxChar unicode = event.GetUnicodeKey();
-#endif
+#endif        
         if ( keycode == WXK_RETURN )
         {
             if ( IsSingleLine() || (GetWindowStyle() & wxTE_PROCESS_ENTER) )
@@ -4736,7 +4721,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
 
             return;
         }
-#endif
+#endif        
     }
 #ifdef __WXDEBUG__
     // Ctrl-R refreshes the control in debug mode
@@ -4745,14 +4730,6 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
 #endif // __WXDEBUG__
 
     event.Skip();
-}
-
-/* static */
-wxInputHandler *wxTextCtrl::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdTextCtrlInputHandler s_handler(handlerDef);
-
-    return &s_handler;
 }
 
 // ----------------------------------------------------------------------------
@@ -4844,12 +4821,14 @@ bool wxStdTextCtrlInputHandler::HandleKey(wxInputConsumer *consumer,
             break;
 
         case WXK_PAGEDOWN:
+        case WXK_NEXT:
             // we don't map Ctrl-PgUp/Dn to anything special - what should it
             // to? for now, it's the same as without control
             action << wxACTION_TEXT_PAGE_DOWN;
             break;
 
         case WXK_PAGEUP:
+        case WXK_PRIOR:
             action << wxACTION_TEXT_PAGE_UP;
             break;
 

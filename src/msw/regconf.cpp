@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/regconf.cpp
+// Name:        msw/regconf.cpp
 // Purpose:
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -9,24 +9,29 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "regconf.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
+
+#ifndef WX_PRECOMP
+  #include  "wx/string.h"
+  #include  "wx/intl.h"
+#endif //WX_PRECOMP
+
+#include "wx/event.h"
+#include "wx/app.h"
+#include "wx/log.h"
 
 #if wxUSE_CONFIG
 
 #include "wx/config.h"
-
-#ifndef WX_PRECOMP
-    #include  "wx/string.h"
-    #include  "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/event.h"
-    #include "wx/app.h"
-#endif //WX_PRECOMP
 
 #include "wx/msw/registry.h"
 #include "wx/msw/regconf.h"
@@ -60,7 +65,6 @@ bool TryGetValue(const wxRegKey& key, const wxString& str, long *plVal)
 // ----------------------------------------------------------------------------
 // ctor/dtor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxRegConfig, wxConfigBase)
 
 // create the config object which stores its data under HKCU\vendor\app and, if
 // style & wxCONFIG_USE_GLOBAL_FILE, under HKLM\vendor\app
@@ -76,9 +80,9 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
   // the convention is to put the programs keys under <vendor>\<appname>
   // (but it can be overriden by specifying the pathes explicitly in strLocal
   // and/or strGlobal)
-  if ( strLocal.empty() || (strGlobal.empty() && bDoUseGlobal) )
+  if ( strLocal.IsEmpty() || (strGlobal.IsEmpty() && bDoUseGlobal) )
   {
-    if ( vendorName.empty() )
+    if ( vendorName.IsEmpty() )
     {
       if ( wxTheApp )
         strRoot = wxTheApp->GetVendorName();
@@ -89,12 +93,12 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
     }
 
     // no '\\' needed if no vendor name
-    if ( !strRoot.empty() )
+    if ( !strRoot.IsEmpty() )
     {
       strRoot += '\\';
     }
 
-    if ( appName.empty() )
+    if ( appName.IsEmpty() )
     {
       wxCHECK_RET( wxTheApp, wxT("No application name in wxRegConfig ctor!") );
       strRoot << wxTheApp->GetAppName();
@@ -106,7 +110,7 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
   }
   //else: we don't need to do all the complicated stuff above
 
-  wxString str = strLocal.empty() ? strRoot : strLocal;
+  wxString str = strLocal.IsEmpty() ? strRoot : strLocal;
 
   // as we're going to change the name of these keys fairly often and as
   // there are only few of wxRegConfig objects (usually 1), we can allow
@@ -122,7 +126,7 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
 
   if ( bDoUseGlobal )
   {
-    str = strGlobal.empty() ? strRoot : strGlobal;
+    str = strGlobal.IsEmpty() ? strRoot : strGlobal;
 
     m_keyGlobalRoot.ReserveMemoryForName(MEMORY_PREALLOC);
     m_keyGlobal.ReserveMemoryForName(MEMORY_PREALLOC);
@@ -171,7 +175,7 @@ void wxRegConfig::SetPath(const wxString& strPath)
 
         // because GetPath() returns "" when we're at root, we must understand
         // empty string as "/"
-        if ( strPath.empty() || (strPath[0] == wxCONFIG_PATH_SEPARATOR) ) {
+        if ( strPath.IsEmpty() || (strPath[0] == wxCONFIG_PATH_SEPARATOR) ) {
             // absolute path
             wxSplitPath(aParts, strPath);
         }
@@ -698,20 +702,9 @@ bool wxRegConfig::DeleteEntry(const wxString& value, bool bGroupIfEmptyAlso)
 
 bool wxRegConfig::DeleteGroup(const wxString& key)
 {
-  wxConfigPathChanger path(this, RemoveTrailingSeparator(key));
+  wxConfigPathChanger path(this, key);
 
-  if ( !m_keyLocal.Exists() )
-  {
-      // nothing to do
-      return true;
-  }
-
-  if ( !LocalKey().DeleteKey(path.Name()) )
-      return false;
-
-  path.UpdateIfDeleted();
-
-  return true;
+  return m_keyLocal.Exists() ? LocalKey().DeleteKey(path.Name()) : true;
 }
 
 bool wxRegConfig::DeleteAll()
@@ -729,4 +722,5 @@ bool wxRegConfig::DeleteAll()
   return bOk;
 }
 
-#endif // wxUSE_CONFIG
+#endif
+  // wxUSE_CONFIG

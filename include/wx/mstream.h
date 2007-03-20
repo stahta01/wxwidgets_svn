@@ -25,29 +25,17 @@ class WXDLLIMPEXP_BASE wxMemoryInputStream : public wxInputStream
 public:
     wxMemoryInputStream(const void *data, size_t length);
     wxMemoryInputStream(const wxMemoryOutputStream& stream);
-    wxMemoryInputStream(wxInputStream& stream,
-                        wxFileOffset lenFile = wxInvalidOffset)
-    {
-        InitFromStream(stream, lenFile);
-    }
-    wxMemoryInputStream(wxMemoryInputStream& stream)
-    {
-        InitFromStream(stream, wxInvalidOffset);
-    }
-
     virtual ~wxMemoryInputStream();
     virtual wxFileOffset GetLength() const { return m_length; }
+    virtual bool Eof() const;
     virtual bool IsSeekable() const { return true; }
 
-    virtual char Peek();
-    virtual bool CanRead() const;
+    char Peek();
 
     wxStreamBuffer *GetInputStreamBuffer() const { return m_i_streambuf; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, compatibility only
-    wxDEPRECATED( wxStreamBuffer *InputStreamBuffer() const );
-#endif // WXWIN_COMPATIBILITY_2_6
+    wxStreamBuffer *InputStreamBuffer() const { return m_i_streambuf; }
 
 protected:
     wxStreamBuffer *m_i_streambuf;
@@ -57,13 +45,9 @@ protected:
     wxFileOffset OnSysTell() const;
 
 private:
-    // common part of ctors taking wxInputStream
-    void InitFromStream(wxInputStream& stream, wxFileOffset lenFile);
-
     size_t m_length;
 
-    // copy ctor is implemented above: it copies the other stream in this one
-    DECLARE_NO_ASSIGN_CLASS(wxMemoryInputStream)
+    DECLARE_NO_COPY_CLASS(wxMemoryInputStream)
 };
 
 class WXDLLIMPEXP_BASE wxMemoryOutputStream : public wxOutputStream
@@ -79,10 +63,8 @@ public:
 
     wxStreamBuffer *GetOutputStreamBuffer() const { return m_o_streambuf; }
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, compatibility only
-    wxDEPRECATED( wxStreamBuffer *OutputStreamBuffer() const );
-#endif // WXWIN_COMPATIBILITY_2_6
+    wxStreamBuffer *OutputStreamBuffer() const { return m_o_streambuf; }
 
 protected:
     wxStreamBuffer *m_o_streambuf;
@@ -95,13 +77,9 @@ protected:
     DECLARE_NO_COPY_CLASS(wxMemoryOutputStream)
 };
 
-#if WXWIN_COMPATIBILITY_2_6
-    inline wxStreamBuffer *wxMemoryInputStream::InputStreamBuffer() const { return m_i_streambuf; }
-    inline wxStreamBuffer *wxMemoryOutputStream::OutputStreamBuffer() const { return m_o_streambuf; }
-#endif // WXWIN_COMPATIBILITY_2_6
-
 #endif
   // wxUSE_STREAMS
 
 #endif
   // _WX_WXMMSTREAM_H__
+

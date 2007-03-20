@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dbtable.cpp
+// Name:        dbtable.cpp
 // Purpose:     Implementation of the wxDbTable class.
 // Author:      Doug Card
 // Modified by: George Tasker
@@ -11,27 +11,40 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+// SYNOPSIS START
+// SYNOPSIS STOP
+*/
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dbtable.h"
+#endif
+
 #include  "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_ODBC
-
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/log.h"
-#endif
-
 #ifdef DBDEBUG_CONSOLE
+#if wxUSE_IOSTREAMH
+    #include <iostream.h>
+#else
+    #include <iostream>
+#endif
     #include "wx/ioswrap.h"
 #endif
 
+#ifndef WX_PRECOMP
+    #include "wx/string.h"
+    #include "wx/object.h"
+    #include "wx/list.h"
+    #include "wx/utils.h"
+    #include "wx/log.h"
+#endif
 #include "wx/filefn.h"
+
+#if wxUSE_ODBC
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,20 +52,28 @@
 
 #include "wx/dbtable.h"
 
+#ifdef __UNIX__
+// The HPUX preprocessor lines below were commented out on 8/20/97
+// because macros.h currently redefines DEBUG and is unneeded.
+// #  ifdef HPUX
+// #    include <macros.h>
+// #  endif
+#  ifdef LINUX
+#    include <sys/minmax.h>
+#  endif
+#endif
+
 ULONG lastTableID = 0;
 
 
 #ifdef __WXDEBUG__
-    #include "wx/thread.h"
-
     wxList TablesInUse;
-    wxCriticalSection csTablesInUse;
 #endif
 
 
 void csstrncpyt(wxChar *target, const wxChar *source, int n)
 {
-    while ( (*target++ = *source++) != '\0' && --n != 0 )
+    while ( (*target++ = *source++) != '\0' && --n )
         ;
 
     *target = '\0';
@@ -94,6 +115,19 @@ wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumn
 }  // wxDbTable::wxDbTable()
 
 
+/***** DEPRECATED: use wxDbTable::wxDbTable() format above *****/
+#if WXWIN_COMPATIBILITY_2_4
+wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
+                    const wxChar *qryTblName, bool qryOnly, const wxString &tblPath)
+{
+    wxString tempQryTblName;
+    tempQryTblName = qryTblName;
+    if (!initialize(pwxDb, tblName, numColumns, tempQryTblName, qryOnly, tblPath))
+        cleanup();
+}  // wxDbTable::wxDbTable()
+#endif // WXWIN_COMPATIBILITY_2_4
+
+
 /********** wxDbTable::~wxDbTable() **********/
 wxDbTable::~wxDbTable()
 {
@@ -129,7 +163,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     tableName.Empty();
     queryTableName.Empty();
 
-    wxASSERT(tblName.length());
+    wxASSERT(tblName.Length());
     wxASSERT(pDb);
 
     if (!pDb)
@@ -141,12 +175,12 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
         (pDb->Dbms() == dbmsINTERBASE))
         tableName = tableName.Upper();
 
-    if (tblPath.length())
+    if (tblPath.Length())
         tablePath = tblPath;                    // Table Path - used for dBase files
     else
         tablePath.Empty();
 
-    if (qryTblName.length())                    // Name of the table/view to query
+    if (qryTblName.Length())                    // Name of the table/view to query
         queryTableName = qryTblName;
     else
         queryTableName = tblName;
@@ -160,8 +194,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
 
     wxString s;
     tableID = ++lastTableID;
-    s.Printf(wxT("wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]"),
-             tblName.c_str(), tableID, wx_static_cast(void*, pDb));
+    s.Printf(wxT("wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]"), tblName.c_str(), tableID, pDb);
 
 #ifdef __WXDEBUG__
     wxTablesInUse *tableInUse;
@@ -169,10 +202,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     tableInUse->tableName = tblName;
     tableInUse->tableID   = tableID;
     tableInUse->pDb       = pDb;
-    {
-        wxCriticalSectionLocker lock(csTablesInUse);
-        TablesInUse.Append(tableInUse);
-    }
+    TablesInUse.Append(tableInUse);
 #endif
 
     pDb->WriteSqlLog(s);
@@ -287,8 +317,7 @@ void wxDbTable::cleanup()
     wxString s;
     if (pDb)
     {
-        s.Printf(wxT("wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]"),
-                 tableName.c_str(), tableID, wx_static_cast(void*, pDb));
+        s.Printf(wxT("wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]"), tableName.c_str(), tableID, pDb);
         pDb->WriteSqlLog(s);
     }
 
@@ -298,20 +327,17 @@ void wxDbTable::cleanup()
         bool found = false;
 
         wxList::compatibility_iterator pNode;
+        pNode = TablesInUse.GetFirst();
+        while (pNode && !found)
         {
-            wxCriticalSectionLocker lock(csTablesInUse);
-            pNode = TablesInUse.GetFirst();
-            while (!found && pNode)
+            if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
             {
-                if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
-                {
-                    found = true;
-                    delete (wxTablesInUse *)pNode->GetData();
-                    TablesInUse.Erase(pNode);
-                }
-                else
-                    pNode = pNode->GetNext();
+                found = true;
+                delete (wxTablesInUse *)pNode->GetData();
+                TablesInUse.Erase(pNode);
             }
+            else
+                pNode = pNode->GetNext();
         }
         if (!found)
         {
@@ -391,7 +417,6 @@ void wxDbTable::setCbValueForColumn(int columnIndex)
     switch(colDefs[columnIndex].DbDataType)
     {
         case DB_DATA_TYPE_VARCHAR:
-        case DB_DATA_TYPE_MEMO:
             if (colDefs[columnIndex].Null)
                 colDefs[columnIndex].CbValue = SQL_NULL_DATA;
             else
@@ -460,11 +485,6 @@ bool wxDbTable::bindParams(bool forUpdate)
         {
             case DB_DATA_TYPE_VARCHAR:
                 fSqlType = pDb->GetTypeInfVarchar().FsqlType;
-                precision = colDefs[i].SzDataObj;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                fSqlType = pDb->GetTypeInfMemo().FsqlType;
                 precision = colDefs[i].SzDataObj;
                 scale = 0;
                 break;
@@ -540,17 +560,21 @@ bool wxDbTable::bindUpdateParams(void)
 /********** wxDbTable::bindCols() **********/
 bool wxDbTable::bindCols(HSTMT cursor)
 {
+    static SQLLEN cb;
+
     // Bind each column of the table to a memory address for fetching data
     UWORD i;
     for (i = 0; i < m_numCols; i++)
     {
+        cb = colDefs[i].CbValue;
         if (SQLBindCol(cursor, (UWORD)(i+1), colDefs[i].SqlCtype, (UCHAR*) colDefs[i].PtrDataObj,
-                       colDefs[i].SzDataObj, &colDefs[i].CbValue ) != SQL_SUCCESS)
+                       colDefs[i].SzDataObj, &cb ) != SQL_SUCCESS)
           return (pDb->DispAllErrors(henv, hdbc, cursor));
     }
 
     // Completed successfully
     return true;
+
 }  // wxDbTable::bindCols()
 
 
@@ -967,7 +991,7 @@ void wxDbTable::BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxStrin
 
     // Handle the case of DeleteWhere() and the where clause is blank.  It should
     // delete all records from the database in this case.
-    if (typeOfDel == DB_DEL_WHERE && (pWhereClause.length() == 0))
+    if (typeOfDel == DB_DEL_WHERE && (pWhereClause.Length() == 0))
     {
         pSqlStmt.Printf(wxT("DELETE FROM %s"),
                         pDb->SQLTableName(tableName.c_str()).c_str());
@@ -1046,7 +1070,7 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
     if (typeOfSelect == DB_SELECT_WHERE && from && wxStrlen(from))
         appendFromClause = true;
 #else
-    if (typeOfSelect == DB_SELECT_WHERE && from.length())
+    if (typeOfSelect == DB_SELECT_WHERE && from.Length())
         appendFromClause = true;
 #endif
 
@@ -1106,7 +1130,7 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
 #if wxODBC_BACKWARD_COMPATABILITY
             if (where && wxStrlen(where))   // May not want a where clause!!!
 #else
-            if (where.length())   // May not want a where clause!!!
+            if (where.Length())   // May not want a where clause!!!
 #endif
             {
                 pSqlStmt += wxT(" WHERE ");
@@ -1115,7 +1139,7 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
             break;
         case DB_SELECT_KEYFIELDS:
             BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            if (whereClause.length())
+            if (whereClause.Length())
             {
                 pSqlStmt += wxT(" WHERE ");
                 pSqlStmt += whereClause;
@@ -1123,7 +1147,7 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
             break;
         case DB_SELECT_MATCHING:
             BuildWhereClause(whereClause, DB_WHERE_MATCHING);
-            if (whereClause.length())
+            if (whereClause.Length())
             {
                 pSqlStmt += wxT(" WHERE ");
                 pSqlStmt += whereClause;
@@ -1135,7 +1159,7 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
 #if wxODBC_BACKWARD_COMPATABILITY
     if (orderBy && wxStrlen(orderBy))
 #else
-    if (orderBy.length())
+    if (orderBy.Length())
 #endif
     {
         pSqlStmt += wxT(" ORDER BY ");
@@ -1269,7 +1293,7 @@ void wxDbTable::BuildWhereClause(wxString &pWhereClause, int typeOfWhere,
             // Concatenate where phrase for the column
             wxString tStr = colDefs[colNumber].ColName;
 
-            if (qualTableName.length() && tStr.Find(wxT('.')) == wxNOT_FOUND)
+            if (qualTableName.Length() && tStr.Find(wxT('.')) == wxNOT_FOUND)
             {
                 pWhereClause += pDb->SQLTableName(qualTableName);
                 pWhereClause += wxT(".");
@@ -1288,7 +1312,7 @@ void wxDbTable::BuildWhereClause(wxString &pWhereClause, int typeOfWhere,
                 case SQL_C_WCHAR:
 #endif
                 //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-                    colValue.Printf(wxT("'%s'"), GetDb()->EscapeSqlChars((wxChar *)colDefs[colNumber].PtrDataObj).c_str());
+                    colValue.Printf(wxT("'%s'"), (UCHAR FAR *) colDefs[colNumber].PtrDataObj);
                     break;
                 case SQL_C_SHORT:
                 case SQL_C_SSHORT:
@@ -1394,9 +1418,6 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             case DB_DATA_TYPE_VARCHAR:
                 cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wxChar)) << wxT(")");
                 break;
-            case DB_DATA_TYPE_MEMO:
-                cout << pDb->GetTypeInfMemo().TypeName;
-                break;
             case DB_DATA_TYPE_INTEGER:
                 cout << pDb->GetTypeInfInteger().TypeName;
                 break;
@@ -1437,9 +1458,6 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         {
             case DB_DATA_TYPE_VARCHAR:
                 sqlStmt += pDb->GetTypeInfVarchar().TypeName;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                sqlStmt += pDb->GetTypeInfMemo().TypeName;
                 break;
             case DB_DATA_TYPE_INTEGER:
                 sqlStmt += pDb->GetTypeInfInteger().TypeName;
@@ -2220,20 +2238,6 @@ void wxDbTable::ClearMemberVar(UWORD colNumber, bool setToNull)
             pDt->second = 0;
             pDt->fraction = 0;
             break;
-        case SQL_C_DATE:
-            DATE_STRUCT *pDtd;
-            pDtd = (DATE_STRUCT *) colDefs[colNumber].PtrDataObj;
-            pDtd->year = 0;
-            pDtd->month = 0;
-            pDtd->day = 0;
-            break;
-        case SQL_C_TIME:
-            TIME_STRUCT *pDtt;
-            pDtt = (TIME_STRUCT *) colDefs[colNumber].PtrDataObj;
-            pDtt->hour = 0;
-            pDtt->minute = 0;
-            pDtt->second = 0;
-            break;
     }
 
     if (setToNull)
@@ -2289,7 +2293,7 @@ bool wxDbTable::SetColDefs(UWORD index, const wxString &fieldName, int dataType,
     if (!colDefs)  // May happen if the database connection fails
         return false;
 
-    if (fieldName.length() > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
+    if (fieldName.Length() > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
     {
         wxStrncpy(colDefs[index].ColName, fieldName, DB_MAX_COLUMN_NAME_LEN);
         colDefs[index].ColName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
@@ -2345,11 +2349,6 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
             switch (pColInfs[index].dbDataType)
             {
                 case DB_DATA_TYPE_VARCHAR:
-                   pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferSize+(1*sizeof(wxChar))];
-                   pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wxChar));
-                   pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
-                   break;
-                case DB_DATA_TYPE_MEMO:
                    pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferSize+(1*sizeof(wxChar))];
                    pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wxChar));
                    pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
@@ -2443,7 +2442,7 @@ ULONG wxDbTable::Count(const wxString &args)
 #if wxODBC_BACKWARD_COMPATABILITY
     if (from && wxStrlen(from))
 #else
-    if (from.length())
+    if (from.Length())
 #endif
         sqlStmt += from;
 
@@ -2451,7 +2450,7 @@ ULONG wxDbTable::Count(const wxString &args)
 #if wxODBC_BACKWARD_COMPATABILITY
     if (where && wxStrlen(where))
 #else
-    if (where.length())
+    if (where.Length())
 #endif
     {
         sqlStmt += wxT(" WHERE ");
@@ -2909,3 +2908,4 @@ void wxDbTable::SetKey(const GenericKey& k)
 
 
 #endif  // wxUSE_ODBC
+

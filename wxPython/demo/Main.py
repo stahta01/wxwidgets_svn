@@ -36,8 +36,8 @@ import images
 
 # For debugging
 ##wx.Trap();
-##print "wx.VERSION_STRING = %s (%s)" % (wx.VERSION_STRING, wx.USE_UNICODE and 'unicode' or 'ansi')
-##print "pid:", os.getpid()
+##print "wx.VERSION_STRING = ", wx.VERSION_STRING
+##print os.getpid();
 ##raw_input("Press Enter...")
 
 
@@ -47,35 +47,20 @@ import images
 _treeList = [
     # new stuff
     ('Recent Additions/Updates', [
-        'RichTextCtrl',
-        'Treebook',
-        'Toolbook',
-        'BitmapFromBuffer',
-        'RawBitmapAccess',
-        'DragScroller',
-        'DelayedResult',
-        'ExpandoTextCtrl',
-        'ButtonPanel',
-        'FlatNotebook',
-        'CustomTreeCtrl',
-        'AboutBox',
-        'AlphaDrawing',
-        'GraphicsContext',
-        'CollapsiblePane',
-        'ComboCtrl',
-        'OwnerDrawnComboBox',
-        'BitmapComboBox',
-        'I18N',
-        'Img2PyArtProvider',
-        'SearchCtrl',
-        'SizedControls',
-        'AUI_MDI',
+        'FoldPanelBar',
+        'GIFAnimationCtrl',
+        'HyperLinkCtrl',
+        'MultiSplitterWindow',
+        'Throbber',
+        'GetMouseState',
+        'FloatCanvas',
+        'AnalogClock',
+        'CheckListCtrlMixin',
+        'ComboTreeBox',
         ]),
 
     # managed windows == things with a (optional) caption you can close
     ('Frames and Dialogs', [
-        'AUI_DockingWindowMgr',
-        'AUI_MDI',
         'Dialog',
         'Frame',
         'MDIWindows',
@@ -85,7 +70,6 @@ _treeList = [
 
     # the common dialogs
     ('Common Dialogs', [
-        'AboutBox',
         'ColourDialog',
         'DirDialog',
         'FileDialog',
@@ -113,6 +97,7 @@ _treeList = [
         'CheckBox',
         'CheckListBox',
         'Choice',
+        'Choicebook',
         'ComboBox',
         'Gauge',
         'Grid',
@@ -121,14 +106,15 @@ _treeList = [
         'ListCtrl',
         'ListCtrl_virtual',
         'ListCtrl_edit',
+        'Listbook',
         'Menu',
+        'Notebook',
         'PopupMenu',
         'PopupWindow',
         'RadioBox',
         'RadioButton',
         'SashWindow',
         'ScrolledWindow',
-        'SearchCtrl',        
         'Slider',
         'SpinButton',
         'SpinCtrl',
@@ -144,24 +130,12 @@ _treeList = [
         'TreeCtrl',
         'Validator',
         ]),
-    
-    ('"Book" Controls', [
-        'AUI_Notebook',
-        'Choicebook',
-        'Listbook',
-        'Notebook',
-        'Toolbook',
-        'Treebook',
-        ]),
 
     ('Custom Controls', [
         'AnalogClock',
-        'ButtonPanel',
         'ColourSelect',
         'ComboTreeBox',
-        'CustomTreeCtrl',
         'Editor',
-        'FlatNotebook',
         'GenericButtons',
         'GenericDirCtrl',
         'LEDNumberCtrl',
@@ -176,22 +150,20 @@ _treeList = [
         'ActiveX_FlashWindow',
         'ActiveX_IEHtmlWindow',
         'ActiveX_PDFWindow',
-        'BitmapComboBox',
+        #'RightTextCtrl',     deprecated as we have wxTE_RIGHT now.
         'Calendar',
         'CalendarCtrl',
         'CheckListCtrlMixin',
-        'CollapsiblePane',
-        'ComboCtrl',
         'ContextHelp',
         'DatePickerCtrl',
         'DynamicSashWindow',
         'EditableListBox',
-        'ExpandoTextCtrl',
         'FancyText',
         'FileBrowseButton',
         'FloatBar',  
         'FloatCanvas',
         'FoldPanelBar',
+        'GIFAnimationCtrl',
         'HtmlWindow',
         'HyperLinkCtrl',
         'IntCtrl',
@@ -200,12 +172,9 @@ _treeList = [
         'MaskedNumCtrl',
         'MediaCtrl',
         'MultiSplitterWindow',
-        'OwnerDrawnComboBox',
-        'Pickers',
         'PyCrust',
         'PyPlot',
         'PyShell',
-        'RichTextCtrl',
         'ScrolledPanel',
         'SplitTree',
         'StyledTextCtrl_1',
@@ -225,7 +194,6 @@ _treeList = [
         'Layoutf',
         'RowColSizer',
         'ScrolledPanel',
-        'SizedControls',
         'Sizers',
         'XmlResource',
         'XmlResourceHandler',
@@ -234,7 +202,6 @@ _treeList = [
 
     # ditto
     ('Process and Events', [
-        'DelayedResult',
         'EventManager',
         'KeyEvents',
         'Process',
@@ -253,39 +220,30 @@ _treeList = [
 
     # Images
     ('Using Images', [
-        'AlphaDrawing',
-        'AnimateCtrl',
         'ArtProvider',
-        'BitmapFromBuffer',
         'Cursor',
         'DragImage',
+        'GIFAnimationCtrl',
         'Image',
         'ImageAlpha',
         'ImageFromStream',
-        'Img2PyArtProvider',
         'Mask',
-        'RawBitmapAccess',
         'Throbber',
         ]),
 
     # Other stuff
     ('Miscellaneous', [
-        'AlphaDrawing',
         'ColourDB',
         ##'DialogUnits',   # needs more explanations
-        'DragScroller',
         'DrawXXXList',
         'FileHistory',
         'FontEnumerator',
-        'GraphicsContext',
         'GLCanvas',
-        'I18N',        
         'Joystick',
         'MimeTypesManager',
         'MouseGestures',
         'OGL',
         'PrintFramework',
-        'PseudoDC',
         'ShapedWindow',
         'Sound',
         'StandardPaths',
@@ -500,14 +458,9 @@ try:
             if wx.Platform == '__WXMSW__':
                 self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 
                                   'fore:#000000,back:#FFFFFF,face:Courier New,size:9')
-            elif wx.Platform == '__WXMAC__':
-                # TODO: if this looks fine on Linux too, remove the Mac-specific case 
-                # and use this whenever OS != MSW.
-                self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 
-                                  'fore:#000000,back:#FFFFFF,face:Courier')
             else:
                 self.StyleSetSpec(stc.STC_STYLE_DEFAULT, 
-                                  'fore:#000000,back:#FFFFFF,face:Courier,size:9')
+                                  'fore:#000000,back:#FFFFFF,face:Courier,size:12')
     
             # Clear styles and revert to default.
             self.StyleClearAll()
@@ -999,7 +952,7 @@ class DemoErrorPanel(wx.Panel):
         boxInfoGrid  = wx.FlexGridSizer(0, 2, 0, 0)
         textFlags    = wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.TOP
         boxInfoGrid.Add(wx.StaticText(self, -1, "Type: "), 0, textFlags, 5 )
-        boxInfoGrid.Add(wx.StaticText(self, -1, str(demoError.exception_type)) , 0, textFlags, 5 )
+        boxInfoGrid.Add(wx.StaticText(self, -1, demoError.exception_type) , 0, textFlags, 5 )
         boxInfoGrid.Add(wx.StaticText(self, -1, "Details: ") , 0, textFlags, 5 )
         boxInfoGrid.Add(wx.StaticText(self, -1, demoError.exception_details) , 0, textFlags, 5 )
         boxInfoSizer.Add(boxInfoGrid, 0, wx.ALIGN_CENTRE | wx.ALL, 5 )
@@ -1175,7 +1128,7 @@ class wxPythonDemo(wx.Frame):
             self.tbicon = DemoTaskBarIcon(self)
         except:
             self.tbicon = None
-            
+
         wx.CallAfter(self.ShowTip)
 
         self.otherWin = None
@@ -1208,14 +1161,14 @@ class wxPythonDemo(wx.Frame):
                            wx.ITEM_CHECK)
         self.Bind(wx.EVT_MENU, self.OnToggleRedirect, item)
  
-        exitItem = menu.Append(-1, 'E&xit\tCtrl-Q', 'Get the heck outta here!')
-        self.Bind(wx.EVT_MENU, self.OnFileExit, exitItem)
-        wx.App.SetMacExitMenuItemId(exitItem.GetId())
+        item = menu.Append(-1, 'E&xit\tAlt-X', 'Get the heck outta here!')
+        self.Bind(wx.EVT_MENU, self.OnFileExit, item)
+        wx.App.SetMacExitMenuItemId(item.GetId())
         self.mainmenu.Append(menu, '&File')
 
         # Make a Demo menu
         menu = wx.Menu()
-        for item in _treeList[:-1]:
+        for item in _treeList:
             submenu = wx.Menu()
             for childItem in item[1]:
                 mi = submenu.Append(-1, childItem)
@@ -1223,6 +1176,22 @@ class wxPythonDemo(wx.Frame):
             menu.AppendMenu(wx.NewId(), item[0], submenu)
         self.mainmenu.Append(menu, '&Demo')
 
+        # Make a Demo Code menu
+        #TODO: Add new menu items
+        #       Like the option-enabled entries to select the
+        #       active module
+        #TODO: should we bother?
+
+        #menu = wx.Menu()
+        #saveID = wx.NewId()
+        #restoreID = wx.NewId()
+       # 
+        #menu.Append(saveID, '&Save\tCtrl-S', 'Save edited demo')
+        #menu.Append(restoreID, '&Delete Modified\tCtrl-R', 'Delete modified copy')
+        #self.Bind(wx.EVT_MENU, self.codePage.OnSave, id=saveID)
+        #self.Bind(wx.EVT_MENU, self.codePage.OnRestore, id=restoreID)
+        #self.mainmenu.Append(menu, 'Demo &Code')
+       # 
 
         # Make a Help menu
         menu = wx.Menu()
@@ -1232,14 +1201,11 @@ class wxPythonDemo(wx.Frame):
 
         shellItem = menu.Append(-1, 'Open Py&Shell Window\tF5',
                                 'An interactive interpreter window with the demo app and frame objects in the namesapce')
-        inspToolItem = menu.Append(-1, 'Open &Widget Inspector\tF6',
-                                'A tool that lets you browse the live widgets and sizers in an application')
         menu.AppendSeparator()
         helpItem = menu.Append(-1, '&About wxPython Demo', 'wxPython RULES!!!')
         wx.App.SetMacAboutMenuItemId(helpItem.GetId())
 
         self.Bind(wx.EVT_MENU, self.OnOpenShellWindow, shellItem)
-        self.Bind(wx.EVT_MENU, self.OnOpenWidgetInspector, inspToolItem)
         self.Bind(wx.EVT_MENU, self.OnHelpAbout, helpItem)
         self.Bind(wx.EVT_MENU, self.OnHelpFind,  findItem)
         self.Bind(wx.EVT_MENU, self.OnFindNext,  findnextItem)
@@ -1254,40 +1220,40 @@ class wxPythonDemo(wx.Frame):
         self.finddata = wx.FindReplaceData()
         self.finddata.SetFlags(wx.FR_DOWN)
 
-        if False:
+        if 0:
             # This is another way to set Accelerators, in addition to
             # using the '\t<key>' syntax in the menu items.
-            aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitItem.GetId()),
-                                          (wx.ACCEL_CTRL, ord('H'), helpItem.GetId()),
-                                          (wx.ACCEL_CTRL, ord('F'), findItem.GetId()),
-                                          (wx.ACCEL_NORMAL, wx.WXK_F3, findnextItem.GetId()),
-                                          (wx.ACCEL_NORMAL, wx.WXK_F9, shellItem.GetId()),
+            aTable = wx.AcceleratorTable([(wx.ACCEL_ALT,  ord('X'), exitID),
+                                          (wx.ACCEL_CTRL, ord('H'), helpID),
+                                          (wx.ACCEL_CTRL, ord('F'), findID),
+                                          (wx.ACCEL_NORMAL, WXK_F3, findnextID)
                                           ])
             self.SetAcceleratorTable(aTable)
 
 
         # Create a TreeCtrl
         tID = wx.NewId()
-        leftPanel = wx.Panel(splitter)
-        
-        self.filter = wx.SearchCtrl(leftPanel)
-        self.filter.ShowCancelButton(True)
-        self.filter.Bind(wx.EVT_TEXT, self.RecreateTree)
-        self.filter.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN,
-                         lambda e: self.filter.SetValue(''))
-        
         self.treeMap = {}
-        self.tree = wx.TreeCtrl(leftPanel, tID, style =
+        self.tree = wx.TreeCtrl(splitter, tID, style =
                                 wx.TR_DEFAULT_STYLE #| wx.TR_HAS_VARIABLE_ROW_HEIGHT
                                )
 
-        self.root = self.tree.AddRoot("wxPython Overview")
-        self.RecreateTree()
+        root = self.tree.AddRoot("wxPython Overview")
+        firstChild = None
+        for item in _treeList:
+            child = self.tree.AppendItem(root, item[0])
+            if not firstChild: firstChild = child
+            for childItem in item[1]:
+                theDemo = self.tree.AppendItem(child, childItem)
+                self.treeMap[childItem] = theDemo
+
+        self.tree.Expand(root)
+        self.tree.Expand(firstChild)
         self.tree.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.OnItemExpanded, id=tID)
         self.tree.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, id=tID)
         self.tree.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, id=tID)
         self.tree.Bind(wx.EVT_LEFT_DOWN, self.OnTreeLeftDown)
-        
+
         # Set up a wx.html.HtmlWindow on the Overview Notebook page
         # we put it in a panel first because there seems to be a
         # refresh bug of some sort (wxGTK) when it is directly in
@@ -1314,8 +1280,6 @@ class wxPythonDemo(wx.Frame):
         # Set up a log window
         self.log = wx.TextCtrl(splitter2, -1,
                               style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
-        if wx.Platform == "__WXMAC__":
-            self.log.MacCheckSpelling(False)
 
         # Set the wxWindows log target to be this textctrl
         #wx.Log_SetActiveTarget(wx.LogTextCtrl(self.log))
@@ -1333,12 +1297,7 @@ class wxPythonDemo(wx.Frame):
 
         # add the windows to the splitter and split it.
         splitter2.SplitHorizontally(self.nb, self.log, -160)
-        leftBox = wx.BoxSizer(wx.VERTICAL)
-        leftBox.Add(self.tree, 1, wx.EXPAND)
-        leftBox.Add(wx.StaticText(leftPanel, label = "Filter Demos:"), 0, wx.TOP|wx.LEFT, 5)
-        leftBox.Add(self.filter, 0, wx.EXPAND|wx.ALL, 5)
-        leftPanel.SetSizer(leftBox)
-        splitter.SplitVertically(leftPanel, splitter2, 220)
+        splitter.SplitVertically(self.tree, splitter2, 200)
 
         splitter.SetMinimumPaneSize(120)
         splitter2.SetMinimumPaneSize(60)
@@ -1354,7 +1313,7 @@ class wxPythonDemo(wx.Frame):
 
         # select initial items
         self.nb.SetSelection(0)
-        self.tree.SelectItem(self.root)
+        self.tree.SelectItem(root)
 
         # Load 'Main' module
         self.LoadDemo(self.overviewText)
@@ -1372,30 +1331,6 @@ class wxPythonDemo(wx.Frame):
 
 
     #---------------------------------------------
-    
-    def RecreateTree(self, evt=None):
-        self.tree.Freeze()
-        self.tree.DeleteAllItems()
-        self.root = self.tree.AddRoot("wxPython Overview")
-        firstChild = None
-        filter = self.filter.GetValue()
-        for category, items in _treeList:
-            if filter:
-                items = [item for item in items if filter.lower() in item.lower()]
-            if items:
-                child = self.tree.AppendItem(self.root, category)
-                if not firstChild: firstChild = child
-                for childItem in items:
-                    theDemo = self.tree.AppendItem(child, childItem)
-                    self.treeMap[childItem] = theDemo
-
-        self.tree.Expand(self.root)
-        if firstChild:
-            self.tree.Expand(firstChild)
-        if filter:
-            self.tree.ExpandAll()
-        self.tree.Thaw()
-    
     def WriteText(self, text):
         if text[-1:] == '\n':
             text = text[:-1]
@@ -1685,20 +1620,6 @@ class wxPythonDemo(wx.Frame):
                 evt.Skip()
             self.Bind(wx.EVT_CLOSE, CloseShell)
 
-
-    def OnOpenWidgetInspector(self, evt):
-        # Activate the widget inspection tool
-        from wx.lib.inspect import InspectionTool
-        if not InspectionTool().initialized:
-            InspectionTool().Init()
-
-        # Find a widget to be selected in the tree.  Use either the
-        # one under the cursor, if any, or this frame.
-        wnd = wx.FindWindowAtPointer()
-        if not wnd:
-            wnd = self
-        InspectionTool().Show(wnd, True)
-
         
     #---------------------------------------------
     def OnCloseWindow(self, event):
@@ -1797,8 +1718,8 @@ class MySplashScreen(wx.SplashScreen):
         frame.Show()
         if self.fc.IsRunning():
             self.Raise()
-
         
+
 class MyApp(wx.App):
     def OnInit(self):
         """

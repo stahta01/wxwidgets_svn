@@ -12,6 +12,10 @@
 #ifndef _WX_URL_H
 #define _WX_URL_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "url.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_URL
@@ -47,7 +51,7 @@ public:
 class WXDLLIMPEXP_NET wxURL : public wxURI
 {
 public:
-    wxURL(const wxString& sUrl = wxEmptyString);
+    wxURL(const wxString& sUrl);
     wxURL(const wxURI& url);
     virtual ~wxURL();
 
@@ -58,18 +62,28 @@ public:
     wxURLError GetError() const      { return m_error; }
     wxString GetURL() const          { return m_url; }
 
-    wxURLError SetURL(const wxString &url)
-        { *this = url; return m_error; }
-
-    bool IsOk() const
-        { return m_error == wxURL_NOERR; }
-
     wxInputStream *GetInputStream();
 
 #if wxUSE_PROTOCOL_HTTP
     static void SetDefaultProxy(const wxString& url_proxy);
     void SetProxy(const wxString& url_proxy);
 #endif // wxUSE_PROTOCOL_HTTP
+
+#if WXWIN_COMPATIBILITY_2_4
+    //Use the proper wxURI accessors instead
+    wxDEPRECATED( wxString GetProtocolName() const );
+    wxDEPRECATED( wxString GetHostName() const );
+    wxDEPRECATED( wxString GetPath() const );
+
+    //Use wxURI instead - this does not work that well
+    wxDEPRECATED( static wxString ConvertToValidURI(
+                        const wxString& uri,
+                        const wxChar* delims = wxT(";/?:@&=+$,")
+                  ) );
+
+    //Use wxURI::Unescape instead
+    wxDEPRECATED( static wxString ConvertFromURI(const wxString& uri) );
+#endif
 
 protected:
     static wxProtoInfo *ms_protocols;

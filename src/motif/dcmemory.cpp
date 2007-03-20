@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dcmemory.cpp
+// Name:        dcmemory.cpp
 // Purpose:     wxMemoryDC class
 // Author:      Julian Smart
 // Modified by:
@@ -9,15 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcmemory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/dcmemory.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-#endif
+#include "wx/settings.h"
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -35,7 +36,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxWindowDC)
 
-void wxMemoryDC::Init()
+wxMemoryDC::wxMemoryDC(void)
 {
     m_ok = true;
     m_display = wxGetDisplay();
@@ -52,12 +53,12 @@ void wxMemoryDC::Init()
         GCForeground | GCBackground | GCGraphicsExposures | GCLineWidth | GCSubwindowMode,
         &gcvalues);
 
-    m_backgroundPixel = gcvalues.background;
+    m_backgroundPixel = (int) gcvalues.background;
 
     SetBrush (* wxWHITE_BRUSH);
     SetPen (* wxBLACK_PEN);
     SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-}
+};
 
 wxMemoryDC::wxMemoryDC( wxDC* dc )
 {
@@ -79,17 +80,17 @@ wxMemoryDC::wxMemoryDC( wxDC* dc )
         GCForeground | GCBackground | GCGraphicsExposures | GCLineWidth | GCSubwindowMode,
         &gcvalues);
 
-    m_backgroundPixel = gcvalues.background;
+    m_backgroundPixel = (int) gcvalues.background;
 
     SetBrush (* wxWHITE_BRUSH);
     SetPen (* wxBLACK_PEN);
-}
+};
 
 wxMemoryDC::~wxMemoryDC(void)
 {
-}
+};
 
-void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
+void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
 {
     m_bitmap = bitmap;
 
@@ -112,7 +113,7 @@ void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
             GCForeground | GCBackground | GCGraphicsExposures | GCLineWidth | GCSubwindowMode,
             &gcvalues);
 
-        m_backgroundPixel = gcvalues.background;
+        m_backgroundPixel = (int) gcvalues.background;
         m_ok = true;
 
         SetBrush (* wxWHITE_BRUSH);
@@ -123,7 +124,7 @@ void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
         m_ok = false;
         m_pixmap = (WXPixmap) 0;
     };
-}
+};
 
 void wxMemoryDC::DoGetSize( int *width, int *height ) const
 {
@@ -137,4 +138,6 @@ void wxMemoryDC::DoGetSize( int *width, int *height ) const
         if (width) (*width) = 0;
         if (height) (*height) = 0;
     };
-}
+};
+
+

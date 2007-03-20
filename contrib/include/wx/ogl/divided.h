@@ -12,6 +12,10 @@
 #ifndef _OGL_DIVIDED_H_
 #define _OGL_DIVIDED_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "divided.h"
+#endif
+
 
 /*
  * Definition of a region

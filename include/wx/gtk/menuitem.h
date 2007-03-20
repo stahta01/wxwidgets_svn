@@ -10,6 +10,10 @@
 #ifndef __GTKMENUITEMH__
 #define __GTKMENUITEMH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/bitmap.h"
 
 //-----------------------------------------------------------------------------
@@ -25,7 +29,7 @@ public:
                const wxString& help = wxEmptyString,
                wxItemKind kind = wxITEM_NORMAL,
                wxMenu *subMenu = (wxMenu *)NULL);
-    virtual ~wxMenuItem();
+    ~wxMenuItem();
 
     // implement base class virtuals
     virtual void SetText( const wxString& str );
@@ -47,10 +51,6 @@ public:
     wxString GetFactoryPath() const;
 
     wxString GetHotKey() const { return m_hotKey; }
-
-    // splits given string in the label, doing & => _ translation, which is returned,
-    // and in the hotkey which is used to set given pointer
-    static wxString GTKProcessMenuItemLabel(const wxString& str, wxString *hotKey);
 
     // compatibility only, don't use in new code
     wxMenuItem(wxMenu *parentMenu,

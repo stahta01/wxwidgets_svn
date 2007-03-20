@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/palette.h
+// Name:        palette.h
 // Purpose:     wxPalette class
 // Author:      David Webster
 // Modified by:
@@ -22,7 +22,7 @@ class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
     friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData();
-    virtual ~wxPaletteRefData();
+    ~wxPaletteRefData();
 // protected:
     WXHPALETTE                      m_hPalette;
     HPS                             m_hPS;
@@ -36,22 +36,23 @@ class WXDLLEXPORT wxPalette: public wxPaletteBase
 
 public:
     wxPalette();
+    inline wxPalette(const wxPalette& rPalette) { Ref(rPalette); }
 
     wxPalette( int                  n
               ,const unsigned char* pRed
               ,const unsigned char* pGreen
               ,const unsigned char* pBlue
              );
-    virtual ~wxPalette();
+    ~wxPalette();
 
     bool Create( int                  n
                 ,const unsigned char* pRed
                 ,const unsigned char* pGreen
                 ,const unsigned char* pBlue
                );
-    int  GetPixel( unsigned char cRed
-                  ,unsigned char cGreen
-                  ,unsigned char cBlue
+    int  GetPixel( const unsigned char cRed
+                  ,const unsigned char cGreen
+                  ,const unsigned char cBlue
                  ) const;
     bool GetRGB( int            nPixel
                 ,unsigned char* pRed
@@ -59,8 +60,13 @@ public:
                 ,unsigned char* pBlue
                ) const;
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk(void) const { return (m_refData != NULL) ; }
+    virtual bool Ok(void) const { return (m_refData != NULL) ; }
+
+    inline wxPalette& operator = (const wxPalette& rPalette) { if (*this == rPalette) return (*this); Ref(rPalette); return *this; }
+    inline bool       operator == (const wxPalette& rPalette) const
+        { return m_refData == rPalette.m_refData; }
+    inline bool       operator != (const wxPalette& rPalette) const
+        { return m_refData != rPalette.m_refData; }
 
     virtual bool FreeResource(bool bForce = false);
 
@@ -71,3 +77,4 @@ public:
 
 #endif
     // _WX_PALETTE_H_
+

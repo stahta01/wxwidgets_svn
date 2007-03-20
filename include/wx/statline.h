@@ -28,7 +28,7 @@
 // ----------------------------------------------------------------------------
 
 // the default name for objects of class wxStaticLine
-extern WXDLLEXPORT_DATA(const wxChar) wxStaticLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxStaticTextNameStr;
 
 // ----------------------------------------------------------------------------
 // wxStaticLine - a line in a dialog
@@ -84,10 +84,8 @@ protected:
     #include "wx/univ/statline.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/statline.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/statline.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/statline.h"
+    #include "wx/gtk/statline.h"
 #elif defined(__WXPM__)
     #include "wx/os2/statline.h"
 #elif defined(__WXMAC__)
@@ -100,4 +98,5 @@ protected:
 
 #endif // wxUSE_STATLINE
 
-#endif // _WX_STATLINE_H_BASE_
+#endif
+    // _WX_STATLINE_H_BASE_

@@ -12,13 +12,17 @@
 #ifndef _WX_CLIPBRD_H_BASE_
 #define _WX_CLIPBRD_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "clipboardbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_CLIPBOARD
 
 
 #include "wx/object.h"
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
 class WXDLLEXPORT wxDataFormat;
 class WXDLLEXPORT wxDataObject;
@@ -92,10 +96,8 @@ public:
     #include "wx/msw/clipbrd.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/clipbrd.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/clipbrd.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/clipbrd.h"
+    #include "wx/gtk/clipbrd.h"
 #elif defined(__WXX11__)
     #include "wx/x11/clipbrd.h"
 #elif defined(__WXMGL__)

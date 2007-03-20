@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      AUTHOR
 // Modified by:
@@ -9,14 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
+#include "wx/setup.h"
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-#endif // WX_PRECOMP
-
+#include "wx/app.h"
 #include "wx/apptrait.h"
 #include "wx/display.h"
 
@@ -54,12 +49,13 @@ void wxClientDisplayRect(int *x,int *y,int *width,int *height)
         *height=768;
 }
 
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
 {
-    // We suppose that toolkit version is the same as OS version under Mac
-    wxGetOsVersion(verMaj, verMin);
-
-    return wxPORT_COCOA;
+    static wxToolkitInfo info;
+    info.shortName = _T("cocoa");
+    info.name = _T("wxCocoa");
+    // TODO: Finish this
+    return info;
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)

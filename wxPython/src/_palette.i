@@ -33,12 +33,9 @@ public:
         "GetRGB(self, int pixel) -> (R,G,B)");
 
     int GetColoursCount() const;
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
+    bool Ok();
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-
-    %property(ColoursCount, GetColoursCount, doc="See `GetColoursCount`");
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 

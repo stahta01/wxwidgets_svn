@@ -16,6 +16,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listboxbase.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_LISTBOX
@@ -30,7 +34,7 @@ class WXDLLIMPEXP_BASE wxArrayString;
 // global data
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const wxChar) wxListBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxListBoxNameStr;
 
 // ----------------------------------------------------------------------------
 // wxListBox interface is defined by the class wxListBoxBase
@@ -44,15 +48,15 @@ public:
 
     // all generic methods are in wxControlWithItems, except for the following
     // ones which are not yet implemented by wxChoice/wxComboBox
-    void Insert(const wxString& item, unsigned int pos)
-        { /* return*/ wxControlWithItems::Insert(item,pos); }
-    void Insert(const wxString& item, unsigned int pos, void *clientData)
-        { /* return*/ wxControlWithItems::Insert(item,pos,clientData); }
-    void Insert(const wxString& item, unsigned int pos, wxClientData *clientData)
-        { /* return*/ wxControlWithItems::Insert(item,pos,clientData); }
+    void Insert(const wxString& item, int pos)
+        { DoInsert(item, pos); }
+    void Insert(const wxString& item, int pos, void *clientData)
+        { DoInsert(item, pos); SetClientData(pos, clientData); }
+    void Insert(const wxString& item, int pos, wxClientData *clientData)
+        { DoInsert(item, pos); SetClientObject(pos, clientData); }
 
-    void InsertItems(unsigned int nItems, const wxString *items, unsigned int pos);
-    void InsertItems(const wxArrayString& items, unsigned int pos)
+    void InsertItems(int nItems, const wxString *items, int pos);
+    void InsertItems(const wxArrayString& items, int pos)
         { DoInsertItems(items, pos); }
 
     void Set(int n, const wxString* items, void **clientData = NULL);
@@ -103,40 +107,27 @@ public:
     // event.GetExtraLong())
     void Command(wxCommandEvent& event);
 
-    // returns the item number at a point or wxNOT_FOUND
-    int HitTest(const wxPoint& point) const { return DoListHitTest(point); }
-
-#if WXWIN_COMPATIBILITY_2_6
     // compatibility - these functions are deprecated, use the new ones
     // instead
-    wxDEPRECATED( bool Selected(int n) const );
-#endif // WXWIN_COMPATIBILITY_2_6
+    bool Selected(int n) const { return IsSelected(n); }
 
 protected:
     // NB: due to wxGTK implementation details, DoInsert() is implemented
     //     using DoInsertItems() and not the other way round
-    virtual int DoInsert(const wxString& item, unsigned int pos)
+    virtual int DoInsert(const wxString& item, int pos)
         { InsertItems(1, &item, pos); return pos; }
 
     // to be implemented in derived classes
-    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos) = 0;
+    virtual void DoInsertItems(const wxArrayString& items, int pos) = 0;
     virtual void DoSetItems(const wxArrayString& items, void **clientData) = 0;
 
     virtual void DoSetFirstItem(int n) = 0;
 
     virtual void DoSetSelection(int n, bool select) = 0;
 
-    // there is already wxWindow::DoHitTest() so call this one differently
-    virtual int DoListHitTest(const wxPoint& WXUNUSED(point)) const
-        { return wxNOT_FOUND; }
-
 
     DECLARE_NO_COPY_CLASS(wxListBoxBase)
 };
-
-#if WXWIN_COMPATIBILITY_2_6
-    inline bool wxListBoxBase::Selected(int n) const { return IsSelected(n); }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ----------------------------------------------------------------------------
 // include the platform-specific class declaration
@@ -148,10 +139,8 @@ protected:
     #include "wx/msw/listbox.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/listbox.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/listbox.h"
 #elif defined(__WXGTK__)
-  #include "wx/gtk1/listbox.h"
+    #include "wx/gtk/listbox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/listbox.h"
 #elif defined(__WXPM__)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/menu.cpp
+// Name:        menu.cpp
 // Purpose:     wxMenu, wxMenuBar, wxMenuItem
 // Author:      David Webster
 // Modified by:
@@ -9,14 +9,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "menu.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
-
-#include "wx/menu.h"
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/frame.h"
+    #include "wx/menu.h"
     #include "wx/utils.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -71,7 +74,7 @@ USHORT                              wxMenu::m_nextMenuId = 0;
 //
 void wxMenu::Init()
 {
-    m_bDoBreak = false;
+    m_bDoBreak = FALSE;
     m_nStartRadioGroup = -1;
 
     //
@@ -201,7 +204,7 @@ void wxMenu::UpdateAccel(
         //
         // Find the (new) accel for this item
         //
-        wxAcceleratorEntry*         pAccel = wxAcceleratorEntry::Create(pItem->GetText());
+        wxAcceleratorEntry*         pAccel = wxGetAccelFromString(pItem->GetText());
 
         if (pAccel)
             pAccel->m_command = pItem->GetId();
@@ -266,7 +269,7 @@ bool wxMenu::DoInsertOrAppend( wxMenuItem* pItem,
     if (m_bDoBreak)
     {
         rItem.afStyle |= MIS_BREAK;
-        m_bDoBreak = false;
+        m_bDoBreak = FALSE;
     }
 
     //
@@ -595,8 +598,10 @@ void wxMenu::SetTitle( const wxString& rLabel )
 // event processing
 // ---------------------------------------------------------------------------
 
-bool wxMenu::OS2Command( WXUINT WXUNUSED(uParam),
-                         WXWORD vId )
+bool wxMenu::OS2Command(
+  WXUINT                            WXUNUSED(uParam)
+, WXWORD                            vId
+)
 {
     //
     // Ignore commands from the menu title
@@ -612,7 +617,7 @@ bool wxMenu::OS2Command( WXUINT WXUNUSED(uParam),
                                     )
                  );
     }
-    return true;
+    return TRUE;
 } // end of wxMenu::OS2Command
 
 // ---------------------------------------------------------------------------
@@ -737,7 +742,7 @@ void wxMenuBar::Refresh()
 
 WXHMENU wxMenuBar::Create()
 {
-    HWND hFrame;
+    HWND                            hFrame;
 
     if (m_hMenu != 0 )
         return m_hMenu;
@@ -973,17 +978,19 @@ bool wxMenuBar::Insert( size_t          nPos,
     return true;
 } // end of wxMenuBar::Insert
 
-bool wxMenuBar::Append( wxMenu* pMenu,
-                        const wxString& rsTitle )
+bool wxMenuBar::Append(
+  wxMenu*                           pMenu
+, const wxString&                   rsTitle
+)
 {
-    WXHMENU hSubmenu = pMenu ? pMenu->GetHMenu() : 0;
+    WXHMENU                         hSubmenu = pMenu ? pMenu->GetHMenu() : 0;
 
-    wxCHECK_MSG(hSubmenu, false, wxT("can't append invalid menu to menubar"));
+    wxCHECK_MSG(hSubmenu, FALSE, wxT("can't append invalid menu to menubar"));
 
-    wxString sTitle = wxPMTextToLabel(rsTitle);
+    wxString                        sTitle = wxPMTextToLabel(rsTitle);
 
     if (!wxMenuBarBase::Append(pMenu, sTitle))
-        return false;
+        return FALSE;
 
     m_titles.Add(sTitle);
 
@@ -1002,7 +1009,7 @@ bool wxMenuBar::Append( wxMenu* pMenu,
 #endif // wxUSE_ACCEL
         Refresh();
     }
-    return true;
+    return TRUE;
 } // end of wxMenuBar::Append
 
 wxMenu* wxMenuBar::Remove(

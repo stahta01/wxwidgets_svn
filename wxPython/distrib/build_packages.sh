@@ -133,7 +133,7 @@ elif [ "$OSTYPE" = "darwin" ]; then
     UNIV_OPT="universal"
   fi
   
-  #sudo $WXWIN/wxPython/distrib/makedocs
+  #$WXWIN/wxPython/distrib/makedocs
   $WXWIN/wxPython/distrib/makedemo
   export TARBALLDIR=$WXWIN/wxPython/dist
   echo "distrib/mac/wxPythonOSX/build $PY_DOT_VER inplace $UNICODE_OPT $RESWIG"

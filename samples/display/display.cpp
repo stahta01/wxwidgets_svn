@@ -29,8 +29,7 @@
     #include "wx/wx.h"
 #endif
 
-#include "wx/bookctrl.h"
-#include "wx/sysopt.h"
+#include "wx/notebook.h"
 
 #include "wx/display.h"
 
@@ -71,23 +70,23 @@ public:
     void OnFullScreen(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-#if wxUSE_DISPLAY
     void OnChangeMode(wxCommandEvent& event);
     void OnResetMode(wxCommandEvent& event);
 
-    void OnDisplayChanged(wxDisplayChangedEvent& event);
-#endif // wxUSE_DISPLAY
-
     void OnLeftClick(wxMouseEvent& event);
+
+#if wxUSE_DISPLAY
+    void OnDisplayChanged(wxDisplayChangedEvent& event);
+#endif
 
 private:
 #if wxUSE_DISPLAY
     // convert video mode to textual description
     wxString VideoModeToText(const wxVideoMode& mode);
-#endif // wxUSE_DISPLAY
+#endif
 
     // GUI controls
-    wxBookCtrl *m_book;
+    wxNotebook *m_notebook;
 
     // any class wishing to process wxWidgets events must use this macro
     DECLARE_EVENT_TABLE()
@@ -110,11 +109,13 @@ public:
 enum
 {
     // menu items
-    Display_FromPoint = wxID_HIGHEST + 1,
+    Display_Quit = 1,
+
+    Display_FromPoint,
     Display_FullScreen,
 
     // controls
-    Display_ChangeMode,
+    Display_ChangeMode = 1000,
     Display_ResetMode,
     Display_CurrentMode,
 
@@ -122,7 +123,6 @@ enum
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
     // (where it is special and put into the "Apple" menu)
-    Display_Quit = wxID_EXIT,
     Display_About = wxID_ABOUT
 };
 
@@ -139,14 +139,14 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Display_FullScreen, MyFrame::OnFullScreen)
     EVT_MENU(Display_About, MyFrame::OnAbout)
 
-#if wxUSE_DISPLAY
     EVT_CHOICE(Display_ChangeMode, MyFrame::OnChangeMode)
     EVT_BUTTON(Display_ResetMode, MyFrame::OnResetMode)
 
-    EVT_DISPLAY_CHANGED(MyFrame::OnDisplayChanged)
-#endif // wxUSE_DISPLAY
-
     EVT_LEFT_UP(MyFrame::OnLeftClick)
+        
+#if wxUSE_DISPLAY
+    EVT_DISPLAY_CHANGED(MyFrame::OnDisplayChanged)
+#endif
 END_EVENT_TABLE()
 
 // Create a new application object: this macro will allow wxWidgets to create
@@ -167,13 +167,15 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
+#if !wxUSE_DISPLAY
+    wxMessageBox(_("Please recompile wxWidgets and this sample with wxUSE_DISPLAY set to 1."));
+    return false;
+#else
 
 #ifdef __WXMSW__
     if ( argc == 2 && !wxStricmp(argv[1],  _T("/dx")) )
     {
-        wxSystemOptions::SetOption(_T("msw.display.directdraw"), 1);
+        wxDisplay::UseDirectX(true);
     }
 #endif // __WXMSW__
 
@@ -189,6 +191,7 @@ bool MyApp::OnInit()
     // loop and the application will run. If we returned false here, the
     // application would exit immediately.
     return true;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -229,16 +232,18 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     CreateStatusBar();
 #endif // wxUSE_STATUSBAR
 
+#if wxUSE_DISPLAY
     // create child controls
+
     wxPanel *panel = new wxPanel(this, wxID_ANY);
 
-    m_book = new wxBookCtrl(panel, wxID_ANY);
+    m_notebook = new wxNotebook(panel, wxID_ANY);
     const size_t count = wxDisplay::GetCount();
     for ( size_t nDpy = 0; nDpy < count; nDpy++ )
     {
         wxDisplay display(nDpy);
 
-        wxWindow *page = new wxPanel(m_book, wxID_ANY);
+        wxWindow *page = new wxPanel(m_notebook, wxID_ANY);
 
         // create 2 column flex grid sizer with growable 2nd column
         wxFlexGridSizer *sizer = new wxFlexGridSizer(2, 10, 20);
@@ -263,23 +268,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
                                          r.width, r.height)
                        ));
 
-        const wxRect rc(display.GetClientArea());
-        sizer->Add(new wxStaticText(page, wxID_ANY, _T("Client area: ")));
-        sizer->Add(new wxStaticText
-                       (
-                        page,
-                        wxID_ANY,
-                        wxString::Format(_T("(%d, %d)-(%d, %d)"),
-                                         rc.x, rc.y, rc.width, rc.height)
-                       ));
 
         sizer->Add(new wxStaticText(page, wxID_ANY, _T("Name: ")));
         sizer->Add(new wxStaticText(page, wxID_ANY, display.GetName()));
 
-        wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
-        sizerTop->Add(sizer, 1, wxALL | wxEXPAND, 10);
-
-#if wxUSE_DISPLAY
         wxChoice *choiceModes = new wxChoice(page, Display_ChangeMode);
         const wxArrayVideoModes modes = display.GetModes();
         const size_t count = modes.GetCount();
@@ -299,26 +291,27 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
                                     VideoModeToText(display.GetCurrentMode())));
 
         // add it to another sizer to have borders around it and button below
+        wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+        sizerTop->Add(sizer, 1, wxALL | wxEXPAND, 10);
+
         sizerTop->Add(new wxButton(page, Display_ResetMode, _T("&Reset mode")),
                       0, wxALL | wxCENTRE, 5);
-#endif // wxUSE_DISPLAY
-
         page->SetSizer(sizerTop);
 
-        m_book->AddPage(page,
-                        wxString::Format(_T("Display %lu"),
-                                         (unsigned long)nDpy));
+        m_notebook->AddPage(page,
+                            wxString::Format(_T("Display %lu"),
+                                             (unsigned long)nDpy));
     }
 
     wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer->Add(m_book, 1, wxEXPAND);
+    sizer->Add(m_notebook, 1, wxEXPAND);
     panel->SetSizer(sizer);
     sizer->Fit(this);
     sizer->SetSizeHints(this);
+#endif
 }
 
 #if wxUSE_DISPLAY
-
 wxString MyFrame::VideoModeToText(const wxVideoMode& mode)
 {
     wxString s;
@@ -336,8 +329,7 @@ wxString MyFrame::VideoModeToText(const wxVideoMode& mode)
 
     return s;
 }
-
-#endif // wxUSE_DISPLAY
+#endif
 
 // event handlers
 
@@ -349,7 +341,7 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(_T("Demo program for wxDisplay class.\n\n(c) 2003-2006 Vadim Zeitlin"),
+    wxMessageBox(_T("Demo program for wxDisplay class.\n\n(c) 2003 Vadim Zeitlin"),
                  _T("About Display Sample"),
                  wxOK | wxICON_INFORMATION,
                  this);
@@ -369,11 +361,10 @@ void MyFrame::OnFullScreen(wxCommandEvent& event)
     ShowFullScreen(event.IsChecked());
 }
 
-#if wxUSE_DISPLAY
-
 void MyFrame::OnChangeMode(wxCommandEvent& event)
 {
-    wxDisplay dpy(m_book->GetSelection());
+#if wxUSE_DISPLAY
+    wxDisplay dpy(m_notebook->GetSelection());
 
     // you wouldn't write this in real code, would you?
     if ( !dpy.ChangeMode(((MyVideoModeClientData *)
@@ -382,19 +373,21 @@ void MyFrame::OnChangeMode(wxCommandEvent& event)
     {
         wxLogError(_T("Changing video mode failed!"));
     }
+#endif
 }
 
 void MyFrame::OnResetMode(wxCommandEvent& WXUNUSED(event))
 {
-    wxDisplay dpy(m_book->GetSelection());
+#if wxUSE_DISPLAY
+    wxDisplay dpy(m_notebook->GetSelection());
 
     dpy.ResetMode();
+#endif
 }
-
-#endif // wxUSE_DISPLAY
 
 void MyFrame::OnLeftClick(wxMouseEvent& event)
 {
+#if wxUSE_DISPLAY
     if ( HasCapture() )
     {
         // mouse events are in client coords, wxDisplay works in screen ones
@@ -410,16 +403,16 @@ void MyFrame::OnLeftClick(wxMouseEvent& event)
 
         ReleaseMouse();
     }
+#endif
 }
 
 #if wxUSE_DISPLAY
-
 void MyFrame::OnDisplayChanged(wxDisplayChangedEvent& event)
 {
     // update the current mode text
-    for ( size_t n = 0; n < m_book->GetPageCount(); n++ )
+    for ( size_t n = 0; n < m_notebook->GetPageCount(); n++ )
     {
-        wxStaticText *label = wxDynamicCast(m_book->GetPage(n)->
+        wxStaticText *label = wxDynamicCast(m_notebook->GetPage(n)->
                                                 FindWindow(Display_CurrentMode),
                                             wxStaticText);
         if ( label )
@@ -431,5 +424,5 @@ void MyFrame::OnDisplayChanged(wxDisplayChangedEvent& event)
 
     event.Skip();
 }
+#endif
 
-#endif // wxUSE_DISPLAY

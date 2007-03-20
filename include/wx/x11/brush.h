@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/brush.h
+// Name:        brush.h
 // Purpose:     wxBrush class
 // Author:      Julian Smart, Robert Roebling
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "brush.h"
+#endif
 
 #include "wx/gdiobj.h"
 
@@ -33,10 +37,12 @@ public:
 
     wxBrush( const wxColour &colour, int style = wxSOLID );
     wxBrush( const wxBitmap &stippleBitmap );
-    virtual ~wxBrush();
+    ~wxBrush();
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_refData != NULL; }
+    wxBrush( const wxBrush &brush ) { Ref(brush); }
+    wxBrush& operator = ( const wxBrush& brush ) { Ref(brush); return *this; }
+
+    bool Ok() const { return m_refData != NULL; }
 
     bool operator == ( const wxBrush& brush ) const;
     bool operator != (const wxBrush& brush) const { return !(*this == brush); }
@@ -50,7 +56,7 @@ public:
     void SetStyle( int style );
     void SetStipple( const wxBitmap& stipple );
 
-protected:
+private:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;

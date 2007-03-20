@@ -1,7 +1,7 @@
-Installing wxWidgets for Windows
+Installing wxWidgets 2.6.4
 -----------------------------------------------------------
 
-This is wxWidgets for Microsoft Windows 9x/ME, Windows NT,
+This is wxWidgets 2.6.4 for Microsoft Windows 9x/ME, Windows NT,
 Windows 2000, Windows XP and Windows CE.
 
 These installation notes can be found in docs/msw/install.txt
@@ -79,21 +79,21 @@ build ('d'). Last component of them name is name of wxWidgets component
 "Configuring the build" below). This is a typical set of release ANSI build
 libraries (release versions on left, debug on right side):
 
-  wxbase28.lib              wxbase28d.lib
-  wxbase28_net.lib          wxbase28d_net.lib
-  wxbase28_xml.lib          wxbase28d_xml.lib
-  wxmsw28_core.lib          wxmsw28d_core.lib
-  wxmsw28_html.lib          wxmsw28d_html.lib
-  wxmsw28_adv.lib           wxmsw28d_adv.lib
+  wxbase25.lib              wxbase25d.lib
+  wxbase25_net.lib          wxbase25d_net.lib
+  wxbase25_xml.lib          wxbase25d_xml.lib
+  wxmsw25_core.lib          wxmsw25d_core.lib
+  wxmsw25_html.lib          wxmsw25d_html.lib
+  wxmsw25_adv.lib           wxmsw25d_adv.lib
 
 Their Unicode debug counterparts in wxUniversal build would be
 
-  wxbase28ud.lib
-  wxbase28ud_net.lib
-  wxbase28ud_xml.lib        (notice these libs are same for wxUniv and wxMSW)
-  wxmswuniv28ud_core.lib
-  wxmswuniv28ud_html.lib
-  wxmswuniv28ud_adv.lib
+  wxbase25ud.lib
+  wxbase25ud_net.lib
+  wxbase25ud_xml.lib        (notice these libs are same for wxUniv and wxMSW)
+  wxmswuniv25ud_core.lib
+  wxmswuniv25ud_html.lib
+  wxmswuniv25ud_adv.lib
 
 These directories also contain subdirectory with wx/setup.h header. This
 subdirectory is named after port, Unicode, wxUniv and debug settings and 
@@ -132,17 +132,9 @@ Using project files (VC++ 6 and later):
    know you won't need some of the libraries (i.e. html part), you don't have
    to compile it.  It will also produce similar variations on jpeg.lib,
    png.lib, tiff.lib, zlib.lib, and regex.lib.
-
-   If you want to build DLL configurations in wx.dsw project you unfortunately
-   need to build them in the proper order (jpeg, png, tiff, zlib, regex, expat,
-   base, net, odbc, core, gl, html, media, qa, adv, dbgrid, xrc, aui, richtext)
-   manually because VC6 doesn't always respect the correct build order.
-
-   Alternatively, use the special wx_dll.dsw project which adds the
-   dependencies to force the correct order (but, because of this, doesn't work
-   for the static libraries) or simply redo the build several times until all
-   DLLs are linked correctly. Pleae notice that it's normal that dbgrid project
-   doesn't build if wxUSE_ODBC is set to 0 (default).
+   If you want to build DLLs, you have to either build them one by one in
+   proper order (jpeg, png, tiff, zlib, regex, expat, base, core, the rest
+   in any order) or to use wx_dll.dsw workspace which has correct dependencies.
 3. Open a sample project file, choose a configuration such as
    Win32 Debug using Build | Set Active Configuration..., and compile.
    The project files don't use precompiled headers, to save disk
@@ -269,18 +261,10 @@ If you receive this error add bufferoverflowu.lib to link, e.g.:
 
 See http://support.microsoft.com/?id=894573 for more information.
 
-Borland C++ compilation
+Borland C++ 5.0/5.5 compilation
 ----------------------------------------------------------------
 
-The minimum version required is 5.5 (last version supported by BC++ 5.0 was
-2.4.2), which can be downloaded for free from:
-http://www.borland.com/products/downloads/download_cbuilder.html
-
-The version 5.6 included in Borland C++ Builder 2006 works as well after the
-following small change: please remove the test for __WINDOWS__ from line 88
-of the file BCCDIR\include\stl\_threads.h.
-
-Compiling using the makefiles:
+Compiling using the makefiles (updated 24 Sept 02):
 
 1. Change directory to build\msw. Type 'make -f makefile.bcc' to
    make the wxWidgets core library. Ignore the compiler warnings.
@@ -303,11 +287,11 @@ recompile wxWidgets. The same applies if compiling using the IDE.
 Note (3): If you wish debug messages to be sent to the console in
 debug mode, edit makefile.bcc and change /aa to /Tpe in link commands.
 
-Cmpilation succeeds with CBuilderX personal edition and CBuilder6, but 
-you may have to copy make.exe from the 5.5 download to the new bin directory.
-Compiling using the IDE files for Borland C++ 5.0 and using CBuilder IDE 
-(v1-v6): not supported 
+Compiling using the IDE files for Borland C++ 5.0: not supported - please
+use version 2.4.1 (using the make utility in commandline mode works fine_
 
+Compiling using CBuilder (v1-v6): not supported - please
+use version 2.4.1 (using the make utility in commandline mode works fine_
 
 ** REMEMBER **
 
@@ -351,24 +335,11 @@ Note (4): if Watcom can't read the precompiled header when building a sample,
           try deleting .pch files in build\msw\wat_* and compiling
           the sample again.
 
-Note (5): wxUSE_STD_STRING is disabled in wx/string.h for Watcom as this
-          compiler doesn't come with standard C++ library headers by default.
-          If you install STLPort or another STL implementation, you'll need to
-          edit wx/string.h and remove the check for Digital Mars in it (search
-          for __WATCOM__).
-
-
 Metrowerks CodeWarrior compilation
 ----------------------------------------------------------------
 
-** NOTE: We don't use Metrowerks compiler any more and so depend on
-**       your contributions to keep it up to date. It is possible that
-**       the project files mentioned below are out of date due to recently
-**       added files, please add them manually if you get linking errors.
-**       The authoritative list of files is in build/bakefiles/files.bkl
-
 1. CodeWarrior Pro 7 project files in XML format are already
-   included in wxMSW-2.8.x.zip and the setup version.
+   included in wxMSW-2.6.4.zip and the setup version.
 
 2. Review the file include\wx\msw\setup.h (or include\wx\msw\setup0.h if
    you are working from the CVS version) to make sure the settings reflect
@@ -461,14 +432,17 @@ Using makefiles directly
 ----------------------------------------------------------------
 
 NOTE: The makefile.gcc makefiles are for compilation under MinGW using
-      Windows command interpreter (command.com/cmd.exe), they won't work in
-      other environments (such as UNIX or Unix-like, e.g. MSYS where you have
-      to use configure instead, see the section below)
+      native make and Windows command interpreter (command.com/cmd.exe), they
+      won't work in other environments (such as UNIX or Unix-like, e.g. MSYS;
+      you have to use configure instead)
 
 Here are the steps required using the provided makefiles:
 
 - If you are using gcc-2.95, edit build\msw\config.gcc and set the GCC_VERSION
   variable to "2.95".
+
+- If you are compiling with GCC 3.x using makefiles and with wxUSE_STL == 1
+  you need to manually add -DNO_GCC_PRAGMA to CXXFLAGS in config.gcc.
 
 - Use the makefile.gcc files for compiling wxWidgets and samples,
   e.g. to compile a debugging version of wxWidgets:
@@ -611,12 +585,6 @@ using bakefile tool according to the instructions in build\bakefiles\README:
     bakefile_gen -f dmars -b ../../samples/minimal/minimal.bkl
 
 
-Note that wxUSE_STD_STRING is disabled in wx/string.h for Digital Mars as this
-compiler doesn't come with standard C++ library headers by default. If you
-install STLPort or another STL implementation, you'll need to edit wx/string.h
-and remove the check for Digital Mars in it (search for __DMC__).
-
-
 16-bit compilation is no longer supported.
 
 Configuring the build
@@ -714,7 +682,7 @@ USE_GUI=0
   you should set wxUSE_GUI to 1 in setup.h.
 
 USE_OPENGL=1
-  Build wxmsw28_gl.lib library with OpenGL integration class wxGLCanvas.
+  Build wxmsw25_gl.lib library with OpenGL integration class wxGLCanvas.
   You must also modify your setup.h to #define wxUSE_GLCANVAS 1. Note that
   OpenGL library is always built as additional library, even in monolithic
   build!
@@ -766,9 +734,9 @@ VENDOR=<your company name>
   distribute wxWidgets DLLs with your application. Default value is 'custom'.
   This string is included as part of DLL name. wxWidgets DLLs contain compiler
   name, version information and vendor name in them. For example
-  wxmsw280_core_bcc_custom.dll is one of DLLs build using Borland C++ with
+  wxmsw250_core_bcc_custom.dll is one of DLLs build using Borland C++ with
   default settings. If you set VENDOR=mycorp, the name will change to
-  wxmsw280_core_bcc_mycorp.dll.
+  wxmsw250_core_bcc_mycorp.dll.
 
 CFG=<configuration name>
   Sets configuration name so that you can have multiple wxWidgets builds with

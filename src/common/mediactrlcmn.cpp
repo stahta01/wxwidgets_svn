@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/mediactrl.cpp
+// Name:        common/mediactrl.cpp
 // Purpose:     wxMediaCtrl common code
 // Author:      Ryan Norton <wxprojects@comcast.net>
 // Modified by:
@@ -9,8 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// TODO: Platform specific backend defaults?
-
 //===========================================================================
 // Definitions
 //===========================================================================
@@ -19,22 +17,26 @@
 // Pre-compiled header stuff
 //---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mediactrl.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
-#if wxUSE_MEDIACTRL
-
-#ifndef WX_PRECOMP
-    #include "wx/hash.h"
+#pragma hdrstop
 #endif
 
 //---------------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------------
 #include "wx/mediactrl.h"
+#include "wx/hash.h"
+
+//---------------------------------------------------------------------------
+// Compilation guard
+//---------------------------------------------------------------------------
+#if wxUSE_MEDIACTRL
 
 //===========================================================================
 //
@@ -47,9 +49,6 @@
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 IMPLEMENT_CLASS(wxMediaCtrl, wxControl)
-DEFINE_EVENT_TYPE(wxEVT_MEDIA_STATECHANGED)
-DEFINE_EVENT_TYPE(wxEVT_MEDIA_PLAY)
-DEFINE_EVENT_TYPE(wxEVT_MEDIA_PAUSE)
 IMPLEMENT_CLASS(wxMediaBackend, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(wxMediaEvent, wxEvent)
 DEFINE_EVENT_TYPE(wxEVT_MEDIA_FINISHED)
@@ -115,7 +114,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
             }
         }
 
-        SetInitialSize(size);
+        SetBestFittingSize(size);
         return true;
     }
     else
@@ -134,7 +133,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
             {
                 if (Load(fileName))
                 {
-                    SetInitialSize(size);
+                    SetBestFittingSize(size);
                     return true;
                 }
                 else
@@ -142,7 +141,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
             }
             else
             {
-                SetInitialSize(size);
+                SetBestFittingSize(size);
                 return true;
             }
         }
@@ -178,7 +177,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
             return false;
         }
 
-        SetInitialSize(size);
+        SetBestFittingSize(size);
         return true;
     }
     else
@@ -195,7 +194,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
 
             if (Load(location))
             {
-                SetInitialSize(size);
+                SetBestFittingSize(size);
                 return true;
             }
             else
@@ -233,7 +232,7 @@ bool wxMediaCtrl::DoCreate(wxClassInfo* classInfo,
 }
 
 //---------------------------------------------------------------------------
-// wxMediaCtrl::NextBackend (static)
+// wxMediaCtrl::NextBackend
 //
 //
 // Search through the RTTI hashmap one at a
@@ -244,7 +243,8 @@ bool wxMediaCtrl::DoCreate(wxClassInfo* classInfo,
 // STL isn't compatible with and will have a compilation error
 // on a wxNode, however, wxHashTable::compatibility_iterator is
 // incompatible with the old 2.4 stable version - but since
-// we're in 2.5+ only we don't need to worry about the new version
+// we're in 2.5 only we don't need to worry about this
+// static
 //---------------------------------------------------------------------------
 wxClassInfo* wxMediaCtrl::NextBackend()
 {
@@ -417,21 +417,21 @@ wxSize wxMediaCtrl::DoGetBestSize() const
     return wxSize(0,0);
 }
 
-double wxMediaCtrl::GetVolume()
+double wxMediaCtrl::GetVolume() 
 {
     if(m_imp && m_bLoaded)
         return m_imp->GetVolume();
     return 0.0;
 }
 
-bool wxMediaCtrl::SetVolume(double dVolume)
+bool wxMediaCtrl::SetVolume(double dVolume) 
 {
     if(m_imp && m_bLoaded)
         return m_imp->SetVolume(dVolume);
     return false;
 }
 
-bool wxMediaCtrl::ShowPlayerControls(wxMediaCtrlPlayerControls flags)
+bool wxMediaCtrl::ShowPlayerControls(wxMediaCtrlPlayerControls flags) 
 {
     if(m_imp)
         return m_imp->ShowPlayerControls(flags);
@@ -467,19 +467,6 @@ void wxMediaCtrl::DoMoveWindow(int x, int y, int w, int h)
     if(m_imp)
         m_imp->Move(x, y, w, h);
 }
-
-//---------------------------------------------------------------------------
-// wxMediaCtrl::MacVisibilityChanged
-//---------------------------------------------------------------------------
-#ifdef __WXMAC__
-void wxMediaCtrl::MacVisibilityChanged()
-{
-    wxControl::MacVisibilityChanged();
-
-    if(m_imp)
-        m_imp->MacVisibilityChanged();
-}
-#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
@@ -524,36 +511,12 @@ void wxMediaBackendCommonBase::QueueEvent(wxEventType evtType)
     m_ctrl->AddPendingEvent(theEvent);
 }
 
-void wxMediaBackendCommonBase::QueuePlayEvent()
-{
-    QueueEvent(wxEVT_MEDIA_STATECHANGED);
-    QueueEvent(wxEVT_MEDIA_PLAY);
-}
-
-void wxMediaBackendCommonBase::QueuePauseEvent()
-{
-    QueueEvent(wxEVT_MEDIA_STATECHANGED);
-    QueueEvent(wxEVT_MEDIA_PAUSE);
-}
-
-void wxMediaBackendCommonBase::QueueStopEvent()
-{
-    QueueEvent(wxEVT_MEDIA_STATECHANGED);
-    QueueEvent(wxEVT_MEDIA_STOP);
-}
-
-
-//
-// Force link default backends in -
-// see http://wiki.wxwidgets.org/wiki.pl?RTTI
-//
 #include "wx/html/forcelnk.h"
-
-#ifdef __WXMSW__ // MSW has huge backends so we do it seperately
-FORCE_LINK(wxmediabackend_am)
-FORCE_LINK(wxmediabackend_wmp10)
-#else
 FORCE_LINK(basewxmediabackends)
-#endif
 
+//---------------------------------------------------------------------------
+// End of compilation guard and of file
+//---------------------------------------------------------------------------
 #endif //wxUSE_MEDIACTRL
+
+

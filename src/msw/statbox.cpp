@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/statbox.cpp
+// Name:        msw/statbox.cpp
 // Purpose:     wxStaticBox
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statbox.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,28 +30,21 @@
 
 #if wxUSE_STATBOX
 
-#include "wx/statbox.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/dcclient.h"
-    #include "wx/dcmemory.h"
-    #include "wx/image.h"
 #endif
 
+#include "wx/statbox.h"
 #include "wx/notebook.h"
+#include "wx/sysopt.h"
+#include "wx/image.h"
+#include "wx/dcmemory.h"
 #include "wx/sysopt.h"
 
 #include "wx/msw/uxtheme.h"
 #include "wx/msw/private.h"
 #include "wx/msw/missing.h"
-
-// the values coincide with those in tmschema.h
-#define BP_GROUPBOX 4
-
-#define GBS_NORMAL 1
-
-#define TMT_FONT 210
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -127,9 +124,6 @@ bool wxStaticBox::Create(wxWindow *parent,
     if ( !MSWCreateControl(wxT("BUTTON"), label, pos, size) )
         return false;
 
-    // Always use LTR layout. Otherwise, the label would be mirrored.
-    SetLayoutDirection(wxLayout_LeftToRight);
-
 #ifndef __WXWINCE__
     if (!wxSystemOptions::IsFalse(wxT("msw.staticbox.optimized-paint")))
         Connect(wxEVT_PAINT, wxPaintEventHandler(wxStaticBox::OnPaint));
@@ -161,15 +155,7 @@ WXDWORD wxStaticBox::MSWGetStyle(long style, WXDWORD *exstyle) const
             *exstyle = 0;
     }
 
-    styleWin |= BS_GROUPBOX;
-
-    if ( wxTheApp->GetLayoutDirection() == wxLayout_RightToLeft )
-    {
-        // Make sure label is on the right
-        styleWin |= BS_RIGHT;
-    }
-
-    return styleWin;
+    return styleWin | BS_GROUPBOX;
 }
 
 wxSize wxStaticBox::DoGetBestSize() const
@@ -178,7 +164,7 @@ wxSize wxStaticBox::DoGetBestSize() const
     wxGetCharSize(GetHWND(), &cx, &cy, GetFont());
 
     int wBox;
-    GetTextExtent(GetLabelText(wxGetWindowText(m_hWnd)), &wBox, &cy);
+    GetTextExtent(wxStripMenuCodes(wxGetWindowText(m_hWnd)), &wBox, &cy);
 
     wBox += 3*cx;
     int hBox = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
@@ -382,7 +368,7 @@ void wxStaticBox::PaintBackground(wxDC& dc, const RECT& rc)
     ::FillRect(GetHdcOf(dc), &rc, hbr);
 }
 
-void wxStaticBox::PaintForeground(wxDC& dc, const RECT& rc)
+void wxStaticBox::PaintForeground(wxDC& dc, const RECT& WXUNUSED(rc))
 {
     MSWDefWindowProc(WM_PAINT, (WPARAM)GetHdcOf(dc), 0);
 
@@ -393,108 +379,21 @@ void wxStaticBox::PaintForeground(wxDC& dc, const RECT& rc)
     if ( m_hasFgCol && wxUxThemeEngine::GetIfActive() )
     {
         // draw over the text in default colour in our colour
+        dc.SetFont(GetFont());
+
         HDC hdc = GetHdcOf(dc);
         ::SetTextColor(hdc, GetForegroundColour().GetPixel());
 
-        const bool rtl = wxTheApp->GetLayoutDirection() == wxLayout_RightToLeft;
-        if ( rtl )
-            ::SetTextAlign(hdc, TA_RTLREADING | TA_RIGHT);
-
-        // Get dimensions of the label
-        const wxString label = GetLabel();
-        int width, height;
-        dc.GetTextExtent(wxStripMenuCodes(label, wxStrip_Mnemonics),
-                         &width, &height);
-
-        int x;
-        int y = height;
-
-        // first we need to correctly paint the background of the label
-        // as Windows ignores the brush offset when doing it
-        //
         // FIXME: value of x is hardcoded as this is what it is on my system,
         //        no idea if it's true everywhere
-        RECT dimensions = {0, 0, 0, y};
-        if ( !rtl )
-        {
-            x = 9;
-            dimensions.left = x;
-            dimensions.right = x + width;
-        }
-        else
-        {
-            x = rc.right - 7;
-            dimensions.left = x - width;
-            dimensions.right = x;
-        }
+        const int y = dc.GetCharHeight();
+        const int x = 9;
 
-        // need to adjust the rectangle to cover all the label background
-        dimensions.left -= 2;
-        dimensions.right += 2;
-        dimensions.bottom += 2;
-        PaintBackground(dc, dimensions);
+        // TODO: RTL?
+        RECT rc = { x, 0, GetSize().x, y };
 
-        // choose the correct font
-        AutoHFONT font;
-        SelectInHDC selFont;
-        if ( m_hasFont )
-        {
-            selFont.Init(hdc, GetHfontOf(GetFont()));
-        }
-        else // no font set, use the one set by the theme
-        {
-            wxUxThemeHandle hTheme(this, L"BUTTON");
-            if ( hTheme )
-            {
-                // GetThemeFont() expects its parameter to be LOGFONTW and not
-                // LOGFONTA even in ANSI programs and will happily corrupt
-                // memory after the struct end if we pass a LOGFONTA (which is
-                // smaller) to it!
-                LOGFONTW lfw;
-                if ( wxUxThemeEngine::Get()->GetThemeFont
-                                             (
-                                                hTheme,
-                                                hdc,
-                                                BP_GROUPBOX,
-                                                GBS_NORMAL,
-                                                TMT_FONT,
-                                                (LOGFONT *)&lfw
-                                             ) == S_OK )
-                {
-#if wxUSE_UNICODE
-                    // ok, no conversion necessary
-                    const LOGFONT& lf = lfw;
-#else // !wxUSE_UNICODE
-                    // most of the fields are the same in LOGFONTA and LOGFONTW
-                    LOGFONT lf;
-                    memcpy(&lf, &lfw, sizeof(lf));
-
-                    // but the face name must be converted
-                    WideCharToMultiByte(CP_ACP, 0, lfw.lfFaceName, -1,
-                                        lf.lfFaceName, sizeof(lf.lfFaceName),
-                                        NULL, NULL);
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
-
-                    font.Init(lf);
-                    if ( font )
-                        selFont.Init(hdc, font);
-                }
-            }
-        }
-
-        // now draw the text
-        if ( !rtl )
-        {
-            RECT rc2 = { x, 0, x + width, y };
-            ::DrawText(hdc, label, label.length(), &rc2,
-                       DT_SINGLELINE | DT_VCENTER);
-        }
-        else // RTL
-        {
-            RECT rc2 = { x, 0, x - width, y };
-            ::DrawText(hdc, label, label.length(), &rc2,
-                       DT_SINGLELINE | DT_VCENTER | DT_RTLREADING);
-        }
+        const wxString label = GetLabel();
+        ::DrawText(hdc, label, label.length(), &rc, DT_SINGLELINE | DT_VCENTER);
     }
 }
 
@@ -552,3 +451,4 @@ void wxStaticBox::OnPaint(wxPaintEvent& WXUNUSED(event))
 #endif // !__WXWINCE__
 
 #endif // wxUSE_STATBOX
+

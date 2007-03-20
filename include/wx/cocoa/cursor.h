@@ -1,28 +1,32 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/cursor.h
+// Name:        cursor.h
 // Purpose:     wxCursor class
 // Author:      David Elliott <dfe@cox.net>
 // Modified by:
 // Created:     2002/11/27
-// RCS-ID:      $Id$
+// RCS-ID:      
 // Copyright:   (c) David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_COCOA_CURSOR_H_
 #define _WX_COCOA_CURSOR_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "cursor.h"
+#endif
 
 #include "wx/bitmap.h"
 
 class WXDLLEXPORT wxCursorRefData: public wxObjectRefData
 {
     DECLARE_NO_COPY_CLASS(wxCursorRefData)
-
+        
     friend class WXDLLEXPORT wxBitmap;
     friend class WXDLLEXPORT wxCursor;
 public:
     wxCursorRefData();
-    virtual ~wxCursorRefData();
+    ~wxCursorRefData();
 
 protected:
     int m_width, m_height;
@@ -40,6 +44,11 @@ class WXDLLEXPORT wxCursor: public wxBitmap
 public:
   wxCursor();
 
+  // Copy constructors
+  wxCursor(const wxCursor& cursor)
+      : wxBitmap()
+  { Ref(cursor); }
+
   wxCursor(const char bits[], int width, int height, int hotSpotX = -1, int hotSpotY = -1,
     const char maskBits[] = NULL);
 
@@ -47,16 +56,16 @@ public:
    int hotSpotX = 0, int hotSpotY = 0);
 
   wxCursor(int cursor_type);
-  virtual ~wxCursor();
+  ~wxCursor();
 
-  virtual bool Ok() const { return IsOk(); }
-  virtual bool IsOk() const { return m_refData ; }
+  virtual bool Ok() const { return m_refData ; }
 
-  inline bool operator == (const wxCursor& cursor) const { return m_refData == cursor.m_refData; }
-  inline bool operator != (const wxCursor& cursor) const { return m_refData != cursor.m_refData; }
-
+  inline wxCursor& operator = (const wxCursor& cursor) { if (*this == cursor) return (*this); Ref(cursor); return *this; }
+  inline bool operator == (const wxCursor& cursor) { return m_refData == cursor.m_refData; }
+  inline bool operator != (const wxCursor& cursor) { return m_refData != cursor.m_refData; }
+  
   inline WX_NSCursor GetNSCursor() const
-  {
+  {	
     return (M_CURSORDATA ? M_CURSORDATA->m_hCursor : 0);
   }
 
@@ -64,5 +73,4 @@ public:
 
 extern WXDLLEXPORT void wxSetCursor(const wxCursor& cursor);
 
-#endif
-    // _WX_COCOA_CURSOR_H_
+#endif // _WX_COCOA_CURSOR_H_

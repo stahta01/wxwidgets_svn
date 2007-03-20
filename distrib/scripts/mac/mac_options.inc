@@ -4,7 +4,7 @@ WXPYTHON=0
 UNICODE=0
 DEBUG=0
 CARBON=1
-PORT="mac"
+COCOA=0
 STATIC=0
 
 # Process command line options.
@@ -15,8 +15,8 @@ for i in "$@"; do
 	debug)         DEBUG=1 ;;
 	wxpython)      WXPYTHON=1 ;;
 	universal)     UNIVERSAL=1 ;;
-	carbon)        PORT="mac" ;;
-	cocoa)         PORT="cocoa" ;;
+	carbon)        CARBON=1 ;;
+	cocoa)         COCOA=1 ;;
 	static)        STATIC=1 ;;
 	*)
 	    usage
@@ -25,4 +25,6 @@ for i in "$@"; do
     esac
 done
 
-OTHER_OPTS="--with-$PORT "
+if [ "$COCOA" = "1" ]; then
+  OTHER_OPTS="--with-cocoa "
+fi

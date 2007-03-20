@@ -11,6 +11,10 @@
 #ifndef _WX_GENERIC_STATLINE_H_
 #define _WX_GENERIC_STATLINE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "statline.h"
+#endif
+
 class wxStaticBox;
 
 // ----------------------------------------------------------------------------
@@ -30,7 +34,7 @@ public:
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
-                  const wxString &name = wxStaticLineNameStr )
+                  const wxString &name = wxStaticTextNameStr )
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -42,7 +46,7 @@ public:
                  const wxPoint &pos = wxDefaultPosition,
                  const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,
-                 const wxString &name = wxStaticLineNameStr );
+                 const wxString &name = wxStaticTextNameStr );
 
     // it's necessary to override this wxWindow function because we
     // will want to return the main widget for m_statbox

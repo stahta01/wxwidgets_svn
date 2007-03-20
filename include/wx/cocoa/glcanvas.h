@@ -12,8 +12,6 @@
 #ifndef _WX_COCOA_GLCANVAS_H__
 #define _WX_COCOA_GLCANVAS_H__
 
-#include "wx/window.h"
-
 // #include "wx/cocoa/NSOpenGLView.h"
 // Include gl.h from the OpenGL framework
 #include <OpenGL/gl.h>
@@ -34,7 +32,7 @@ public:
         const wxPalette& WXUNUSED(palette),
         const wxGLContext *other /* for sharing display lists */ );
 
-    virtual ~wxGLContext();
+    ~wxGLContext();
 
 
     void SetCurrent();

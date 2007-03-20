@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "radioboxbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,36 +34,20 @@
     #include "wx/radiobox.h"
 #endif //WX_PRECOMP
 
-#if wxUSE_TOOLTIPS
-    #include "wx/tooltip.h"
-#endif // wxUSE_TOOLTIPS
-
-#if wxUSE_HELP
-    #include "wx/cshelp.h"
-#endif
-
 // ============================================================================
 // implementation
 // ============================================================================
 
-void wxRadioBoxBase::SetMajorDim(unsigned int majorDim, long style)
+int wxRadioBoxBase::FindString(const wxString& s) const
 {
-    wxCHECK_RET( majorDim != 0, _T("major radiobox dimension can't be 0") );
-
-    m_majorDim = majorDim;
-
-    int minorDim = (GetCount() + m_majorDim - 1) / m_majorDim;
-
-    if ( style & wxRA_SPECIFY_COLS )
+    int count = GetCount();
+    for ( int n = 0; n < count; n++ )
     {
-        m_numCols = majorDim;
-        m_numRows = minorDim;
+        if ( GetString(n) == s )
+            return n;
     }
-    else // wxRA_SPECIFY_ROWS
-    {
-        m_numCols = minorDim;
-        m_numRows = majorDim;
-    }
+
+    return wxNOT_FOUND;
 }
 
 int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
@@ -158,123 +146,38 @@ int wxRadioBoxBase::GetNextItem(int item, wxDirection dir, long style) const
     return item;
 }
 
-#if wxUSE_TOOLTIPS
+#if WXWIN_COMPATIBILITY_2_4
 
-void wxRadioBoxBase::SetItemToolTip(unsigned int item, const wxString& text)
+// these functions are deprecated and don't do anything
+int wxRadioBoxBase::GetNumberOfRowsOrCols() const
 {
-    wxASSERT_MSG( item < GetCount(), _T("Invalid item index") );
-
-    // extend the array to have entries for all our items on first use
-    if ( !m_itemsTooltips )
-    {
-        m_itemsTooltips = new wxToolTipArray;
-        m_itemsTooltips->resize(GetCount());
-    }
-
-    wxToolTip *tooltip = (*m_itemsTooltips)[item];
-
-    bool changed = true;
-    if ( text.empty() )
-    {
-        if ( tooltip )
-        {
-            // delete the tooltip
-            delete tooltip;
-            tooltip = NULL;
-        }
-        else // nothing to do
-        {
-            changed = false;
-        }
-    }
-    else // non empty tooltip text
-    {
-        if ( tooltip )
-        {
-            // just change the existing tooltip text, don't change the tooltip
-            tooltip->SetTip(text);
-            changed = false;
-        }
-        else // no tooltip yet
-        {
-            // create the new one
-            tooltip = new wxToolTip(text);
-        }
-    }
-
-    if ( changed )
-    {
-        (*m_itemsTooltips)[item] = tooltip;
-        DoSetItemToolTip(item, tooltip);
-    }
+    return 1;
 }
 
-void
-wxRadioBoxBase::DoSetItemToolTip(unsigned int WXUNUSED(item),
-                                 wxToolTip * WXUNUSED(tooltip))
+void wxRadioBoxBase::SetNumberOfRowsOrCols(int WXUNUSED(n))
 {
-    // per-item tooltips not implemented by default
 }
 
-#endif // wxUSE_TOOLTIPS
+#endif // WXWIN_COMPATIBILITY_2_4
 
-wxRadioBoxBase::~wxRadioBoxBase()
+#if WXWIN_COMPATIBILITY_2_2
+
+int wxRadioBoxBase::Number() const
 {
-#if wxUSE_TOOLTIPS
-    if ( m_itemsTooltips )
-    {
-        const size_t n = m_itemsTooltips->size();
-        for ( size_t i = 0; i < n; i++ )
-            delete (*m_itemsTooltips)[i];
-
-        delete m_itemsTooltips;
-    }
-#endif // wxUSE_TOOLTIPS
+    return GetCount();
 }
 
-#if wxUSE_HELP
-
-// set helptext for a particular item
-void wxRadioBoxBase::SetItemHelpText(unsigned int n, const wxString& helpText)
+wxString wxRadioBoxBase::GetLabel(int n) const
 {
-    wxCHECK_RET( n < GetCount(), _T("Invalid item index") );
-
-    if ( m_itemsHelpTexts.empty() )
-    {
-        // once-only initialization of the array: reserve space for all items
-        m_itemsHelpTexts.Add(wxEmptyString, GetCount());
-    }
-
-    m_itemsHelpTexts[n] = helpText;
+    return GetString(n);
 }
 
-// retrieve helptext for a particular item
-wxString wxRadioBoxBase::GetItemHelpText( unsigned int n ) const
+void wxRadioBoxBase::SetLabel(int n, const wxString& label)
 {
-    wxCHECK_MSG( n < GetCount(), wxEmptyString, _T("Invalid item index") );
-
-    return m_itemsHelpTexts.empty() ? wxString() : m_itemsHelpTexts[n];
+    SetString(n, label);
 }
 
-// return help text for the item for which wxEVT_HELP was generated.
-wxString wxRadioBoxBase::DoGetHelpTextAtPoint(const wxWindow *derived,
-                                              const wxPoint& pt,
-                                              wxHelpEvent::Origin origin) const
-{
-    const int item = origin == wxHelpEvent::Origin_HelpButton
-                        ? GetItemFromPoint(pt)
-                        : GetSelection();
-
-    if ( item != wxNOT_FOUND )
-    {
-        wxString text = GetItemHelpText(wx_static_cast(unsigned int, item));
-        if( !text.empty() )
-            return text;
-    }
-
-    return derived->wxWindowBase::GetHelpTextAtPoint(pt, origin);
-}
-
-#endif // wxUSE_HELP
+#endif // WXWIN_COMPATIBILITY_2_2
 
 #endif // wxUSE_RADIOBOX
+

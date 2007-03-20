@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/htmlpars.cpp
+// Name:        htmlpars.cpp
 // Purpose:     wxHtmlParser class (generic parser)
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,19 +7,23 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "htmlpars.h"
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
 
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
+
 #ifndef WXPRECOMP
-    #include "wx/dynarray.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/app.h"
 #endif
 
 #include "wx/tokenzr.h"
@@ -28,6 +32,7 @@
 #include "wx/fontmap.h"
 #include "wx/html/htmldefs.h"
 #include "wx/html/htmlpars.h"
+#include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
 
 #ifdef __WXWINCE__
@@ -35,6 +40,7 @@
 #endif
 
 // DLL options compatibility check:
+#include "wx/app.h"
 WX_CHECK_BUILD_OPTIONS("wxHTML")
 
 const wxChar *wxTRACE_HTML_DEBUG = _T("htmldebug");
@@ -134,7 +140,7 @@ void wxHtmlParser::CreateDOMTree()
 {
     wxHtmlTagsCache cache(m_Source);
     m_TextPieces = new wxHtmlTextPieces;
-    CreateDOMSubTree(NULL, 0, m_Source.length(), &cache);
+    CreateDOMSubTree(NULL, 0, m_Source.Length(), &cache);
     m_CurTextPiece = 0;
 }
 
@@ -271,7 +277,7 @@ void wxHtmlParser::DoParsing()
 {
     m_CurTag = m_Tags;
     m_CurTextPiece = 0;
-    DoParsing(0, m_Source.length());
+    DoParsing(0, m_Source.Length());
 }
 
 void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
@@ -350,7 +356,7 @@ void wxHtmlParser::AddTagHandler(wxHtmlTagHandler *handler)
     handler->SetParser(this);
 }
 
-void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, const wxString& tags)
+void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
 {
     wxStringTokenizer tokenizer(tags, wxT(", "));
     wxString key;
@@ -431,26 +437,11 @@ bool wxHtmlParser::RestoreState()
     return true;
 }
 
-wxString wxHtmlParser::GetInnerSource(const wxHtmlTag& tag)
-{
-    return GetSource()->Mid(tag.GetBeginPos(),
-                            tag.GetEndPos1() - tag.GetBeginPos());
-}
-
 //-----------------------------------------------------------------------------
 // wxHtmlTagHandler
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxHtmlTagHandler,wxObject)
-
-void wxHtmlTagHandler::ParseInnerSource(const wxString& source)
-{
-    // It is safe to temporarily change the source being parsed,
-    // provided we restore the state back after parsing
-    m_Parser->SetSourceAndSaveState(source);
-    m_Parser->DoParsing();
-    m_Parser->RestoreState();
-}
 
 
 //-----------------------------------------------------------------------------

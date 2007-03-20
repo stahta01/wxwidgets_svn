@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/toplevel.mm
+// Name:        cocoa/toplevel.mm
 // Purpose:     implements wxTopLevelWindow for Cocoa
-// Author:      David Elliott
+// Author:      David Elliott 
 // Modified by:
 // Created:     2002/11/27
 // RCS-ID:      $Id$
@@ -19,11 +19,9 @@
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
-
-#include "wx/toplevel.h"
-
 #ifndef WX_PRECOMP
     #include "wx/window.h"
+    #include "wx/toplevel.h"
     #include "wx/menuitem.h"
     #include "wx/frame.h"
     #include "wx/log.h"
@@ -95,7 +93,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
     wxTopLevelWindows.Append(this);
 
     if(!CreateBase(parent,winid,pos,size,style,wxDefaultValidator,name))
-        return false;
+        return FALSE;
 
     if ( parent )
         parent->AddChild(this);
@@ -107,7 +105,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
     // Create frame and check and handle default position and size
     int realx,
         realy;
-
+    
     // WX has no set default position - the carbon port caps the low
     // end at 20, 50.  Here we do the same, except instead of setting
     // it to 20 and 50, we set it to 100 and 100 if the values are too low
@@ -115,7 +113,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
         realx = 100;
     else
         realx = pos.x;
-
+        
     if (pos.y < 50)
         realy = 100;
     else
@@ -126,7 +124,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
 
     // NOTE: y-origin needs to be flipped.
     NSRect cocoaRect = [NSWindow
-                        contentRectForFrameRect:NSMakeRect(realx,realy,realw,realh)
+                        contentRectForFrameRect:NSMakeRect(realx,realy,realw,realh) 
                         styleMask:cocoaStyle];
 
     m_cocoaNSWindow = NULL;
@@ -145,7 +143,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
     if(style & wxSTAY_ON_TOP)
         [m_cocoaNSWindow setLevel:NSFloatingWindowLevel];
     [m_cocoaNSWindow setTitle:wxNSStringWithWxString(title)];
-    return true;
+    return TRUE;
 }
 
 wxTopLevelWindowCocoa::~wxTopLevelWindowCocoa()
@@ -213,7 +211,7 @@ void wxTopLevelWindowCocoa::CocoaDelegate_windowDidBecomeKey(void)
 {
     DeactivatePendingWindow();
     wxLogTrace(wxTRACE_COCOA,wxT("wxTopLevelWindowCocoa=%p::CocoaDelegate_windowDidBecomeKey"),this);
-    wxActivateEvent event(wxEVT_ACTIVATE, true, GetId());
+    wxActivateEvent event(wxEVT_ACTIVATE, TRUE, GetId());
     event.SetEventObject(this);
     GetEventHandler()->ProcessEvent(event);
 }
@@ -221,7 +219,7 @@ void wxTopLevelWindowCocoa::CocoaDelegate_windowDidBecomeKey(void)
 void wxTopLevelWindowCocoa::CocoaDelegate_windowDidResignKey(void)
 {
     wxLogTrace(wxTRACE_COCOA,wxT("wxTopLevelWindowCocoa=%p::CocoaDelegate_windowDidResignKey"),this);
-    wxActivateEvent event(wxEVT_ACTIVATE, false, GetId());
+    wxActivateEvent event(wxEVT_ACTIVATE, FALSE, GetId());
     event.SetEventObject(this);
     GetEventHandler()->ProcessEvent(event);
 }
@@ -266,7 +264,7 @@ void wxTopLevelWindowCocoa::Maximize(bool maximize)
 
 bool wxTopLevelWindowCocoa::IsMaximized() const
 {
-    return false ;
+    return false ; 
 }
 
 void wxTopLevelWindowCocoa::Iconize(bool iconize)
@@ -275,7 +273,7 @@ void wxTopLevelWindowCocoa::Iconize(bool iconize)
 
 bool wxTopLevelWindowCocoa::IsIconized() const
 {
-    return false;
+    return FALSE;
 }
 
 void wxTopLevelWindowCocoa::Restore()
@@ -332,24 +330,14 @@ void wxTopLevelWindowCocoa::OnCloseWindow(wxCloseEvent& event)
 // wxTopLevelWindowCocoa misc
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowCocoa::SetTitle(const wxString& title)
-{
-    [m_cocoaNSWindow setTitle:wxNSStringWithWxString(title)];
-}
-
-wxString wxTopLevelWindowCocoa::GetTitle() const
-{
-    return wxStringWithNSString([m_cocoaNSWindow title]);
-}
-
 bool wxTopLevelWindowCocoa::ShowFullScreen(bool show, long style)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxTopLevelWindowCocoa::IsFullScreen() const
 {
-    return false;
+    return FALSE;
 }
 
 void wxTopLevelWindowCocoa::CocoaSetWxWindowSize(int width, int height)
@@ -395,3 +383,4 @@ void wxTopLevelWindowCocoa::DoGetPosition(int *x, int *y) const
         *y=(int)cocoaRect.origin.y;
     wxLogTrace(wxTRACE_COCOA_TopLevelWindow_Size,wxT("wxTopLevelWindow=%p::DoGetPosition = (%d,%d)"),this,(int)cocoaRect.origin.x,(int)cocoaRect.origin.y);
 }
+

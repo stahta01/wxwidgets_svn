@@ -13,10 +13,15 @@
 #ifndef _WX_OBJECTH__
 #define _WX_OBJECTH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "object.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
+#include "wx/defs.h"
 #include "wx/memory.h"
 
 class WXDLLIMPEXP_BASE wxObject;
@@ -32,6 +37,15 @@ class WXDLLIMPEXP_BASE wxObject;
 // ----------------------------------------------------------------------------
 // conditional compilation
 // ----------------------------------------------------------------------------
+
+// this shouldn't be needed any longer as <wx/msw/private.h> does it but it
+// doesn't hurt neither
+#ifdef GetClassName
+#undef GetClassName
+#endif
+#ifdef GetClassInfo
+#undef GetClassInfo
+#endif
 
 class WXDLLIMPEXP_BASE wxClassInfo;
 class WXDLLIMPEXP_BASE wxHashTable;
@@ -64,9 +78,7 @@ public:
 
     ~wxClassInfo();
 
-    wxObject *CreateObject() const
-        { return m_objectConstructor ? (*m_objectConstructor)() : 0; }
-    bool IsDynamic() const { return (NULL != m_objectConstructor); }
+    wxObject *CreateObject() { return m_objectConstructor ? (*m_objectConstructor)() : 0; }
 
     const wxChar       *GetClassName() const { return m_className; }
     const wxChar       *GetBaseClassName1() const
@@ -77,8 +89,7 @@ public:
     const wxClassInfo  *GetBaseClass2() const { return m_baseInfo2; }
     int                 GetSize() const { return m_objectSize; }
 
-    wxObjectConstructorFn      GetConstructor() const
-        { return m_objectConstructor; }
+    wxObjectConstructorFn      GetConstructor() const { return m_objectConstructor; }
     static const wxClassInfo  *GetFirst() { return sm_first; }
     const wxClassInfo         *GetNext() const { return m_next; }
     static wxClassInfo        *FindClass(const wxChar *className);
@@ -93,6 +104,14 @@ public:
                  ( m_baseInfo1 && m_baseInfo1->IsKindOf(info) ) ||
                  ( m_baseInfo2 && m_baseInfo2->IsKindOf(info) ) );
     }
+
+#if WXWIN_COMPATIBILITY_2_4
+    // Initializes parent pointers and hash table for fast searching.
+    wxDEPRECATED( static void InitializeClasses() );
+    // Cleans up hash table used for fast searching.
+    wxDEPRECATED( static void CleanUpClasses() );
+#endif
+    static void     CleanUp();
 
 public:
     const wxChar            *m_className;
@@ -127,6 +146,11 @@ protected:
 };
 
 WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxChar *name);
+
+#if WXWIN_COMPATIBILITY_2_4
+inline void wxClassInfo::InitializeClasses() {}
+inline void wxClassInfo::CleanUpClasses() {}
+#endif
 
 // ----------------------------------------------------------------------------
 // Dynamic class macros
@@ -342,9 +366,8 @@ inline void* wxCheckCast(void *ptr)
     #define _WX_WANT_DELETE_VOID_CONSTCHAR_SIZET
 #endif
 
-// Only VC++ 6 and CodeWarrior get overloaded delete that matches new
-#if (defined(__VISUALC__) && (__VISUALC__ >= 1200)) || \
-        (defined(__MWERKS__) && (__MWERKS__ >= 0x2400))
+// Only VC++ 6.0 and CodeWarrior compilers get overloaded delete that matches new
+#if ( defined(__VISUALC__) && (__VISUALC__ >= 1200) ) || (defined(__MWERKS__) && (__MWERKS__ >= 0x2400))
     #define _WX_WANT_DELETE_VOID_WXCHAR_INT
 #endif
 
@@ -371,93 +394,6 @@ inline void* wxCheckCast(void *ptr)
 #endif // __WXDEBUG__ && wxUSE_MEMORY_TRACING
 
 // ----------------------------------------------------------------------------
-// wxObjectRefData: ref counted data meant to be stored in wxObject
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxObjectRefData
-{
-    friend class WXDLLIMPEXP_BASE wxObject;
-
-public:
-    wxObjectRefData() : m_count(1) { }
-
-    int GetRefCount() const { return m_count; }
-
-    void IncRef() { m_count++; }
-    void DecRef();
-
-protected:
-    // this object should never be destroyed directly but only as a
-    // result of a DecRef() call:
-    virtual ~wxObjectRefData() { }
-
-private:
-    // our refcount:
-    int m_count;
-};
-
-// ----------------------------------------------------------------------------
-// wxObjectDataPtr: helper class to avoid memleaks because of missing calls
-//                  to wxObjectRefData::DecRef
-// ----------------------------------------------------------------------------
-
-template <class T>
-class wxObjectDataPtr
-{
-public:
-    typedef T element_type;
-
-    wxEXPLICIT wxObjectDataPtr(T *ptr = NULL) : m_ptr(ptr) {}
-
-    // copy ctor
-    wxObjectDataPtr(const wxObjectDataPtr<T> &tocopy) 
-        : m_ptr(tocopy.m_ptr)
-    { 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-    }
-
-    ~wxObjectDataPtr() 
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-    }
-
-    T *get() const { return m_ptr; }
-    T *operator->() const { return get(); }
-
-    void reset(T *ptr)
-    {
-        if (m_ptr)
-            m_ptr->DecRef();
-        m_ptr = ptr;
-    }
-
-    wxObjectDataPtr& operator=(const wxObjectDataPtr &tocopy)
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-        m_ptr = tocopy.m_ptr; 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-        return *this;
-    }
-
-    wxObjectDataPtr& operator=(T *ptr)
-    { 
-        if (m_ptr) 
-            m_ptr->DecRef(); 
-        m_ptr = ptr; 
-        if (m_ptr)
-            m_ptr->IncRef(); 
-        return *this;
-    }
-
-private:
-    T *m_ptr;
-};
-
-// ----------------------------------------------------------------------------
 // wxObject: the root class of wxWidgets object hierarchy
 // ----------------------------------------------------------------------------
 
@@ -465,22 +401,24 @@ class WXDLLIMPEXP_BASE wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxObject)
 
+private:
+    void InitFrom(const wxObject& other);
+
 public:
     wxObject() { m_refData = NULL; }
     virtual ~wxObject() { UnRef(); }
 
     wxObject(const wxObject& other)
     {
-         m_refData = other.m_refData;
-         if (m_refData)
-             m_refData->m_count++;
+        InitFrom(other);
     }
 
     wxObject& operator=(const wxObject& other)
     {
         if ( this != &other )
         {
-            Ref(other);
+            UnRef();
+            InitFrom(other);
         }
         return *this;
     }
@@ -530,11 +468,19 @@ public:
     // destroy a reference
     void UnRef();
 
-    // Make sure this object has only one reference
-    void UnShare() { AllocExclusive(); }
 
-    // check if this object references the same data as the other one
-    bool IsSameAs(const wxObject& o) const { return m_refData == o.m_refData; }
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedObjectFunc1() {}
+    virtual void ReservedObjectFunc2() {}
+    virtual void ReservedObjectFunc3() {}
+    virtual void ReservedObjectFunc4() {}
+    virtual void ReservedObjectFunc5() {}
+    virtual void ReservedObjectFunc6() {}
+    virtual void ReservedObjectFunc7() {}
+    virtual void ReservedObjectFunc8() {}
+    virtual void ReservedObjectFunc9() {}
+#endif
 
 protected:
     // ensure that our data is not shared with anybody else: if we have no
@@ -542,8 +488,8 @@ protected:
     // it is copied using CloneRefData(), otherwise nothing is done
     void AllocExclusive();
 
-    // both methods must be implemented if AllocExclusive() is used, not pure
-    // virtual only because of the backwards compatibility reasons
+    // both methods must be implemented if Unshare() is used, not pure virtual
+    // only because of the backwards compatibility reasons
 
     // create a new m_refData
     virtual wxObjectRefData *CreateRefData() const;
@@ -553,6 +499,25 @@ protected:
 
     wxObjectRefData *m_refData;
 };
+
+// ----------------------------------------------------------------------------
+// wxObjectRefData: ref counted data meant to be stored in wxObject
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxObjectRefData
+{
+    friend class WXDLLIMPEXP_BASE wxObject;
+
+public:
+    wxObjectRefData() : m_count(1) { }
+    virtual ~wxObjectRefData() { }
+
+    int GetRefCount() const { return m_count; }
+
+private:
+    int m_count;
+};
+
 
 inline wxObject *wxCheckDynamicCast(wxObject *obj, wxClassInfo *classInfo)
 {
@@ -566,7 +531,7 @@ class WXDLLIMPEXP_BASE wxDynamicObject : public wxObject
 public:
     // instantiates this object with an instance of its superclass
     wxDynamicObject(wxObject* superClassInstance, const wxDynamicClassInfo *info) ;
-    virtual ~wxDynamicObject();
+    ~wxDynamicObject();
 
     void SetProperty (const wxChar *propertyName, const wxxVariant &value);
     wxxVariant GetProperty (const wxChar *propertyName) const ;
@@ -577,8 +542,7 @@ public:
 #ifdef _MSC_VER
         return (wxClassInfo*) m_classInfo;
 #else
-        wxDynamicClassInfo *nonconst = wx_const_cast(wxDynamicClassInfo *, m_classInfo);
-        return wx_static_cast(wxClassInfo *, nonconst);
+        return wx_const_cast(wxClassInfo *, m_classInfo);
 #endif
     }
 
@@ -604,24 +568,24 @@ private :
 // more debugging macros
 // ----------------------------------------------------------------------------
 
+#ifdef __WXDEBUG__
+    #ifndef WXDEBUG_NEW
+        #define WXDEBUG_NEW new(__TFILE__,__LINE__)
+    #endif
+#else // !__WXDEBUG__
+    #define WXDEBUG_NEW new
+#endif
+
 // Redefine new to be the debugging version. This doesn't work with all
 // compilers, in which case you need to use WXDEBUG_NEW explicitly if you wish
 // to use the debugging version.
 
-#ifdef __WXDEBUG__
-    #define WXDEBUG_NEW new(__TFILE__,__LINE__)
+#if defined(__WXDEBUG__) && wxUSE_GLOBAL_MEMORY_OPERATORS && wxUSE_DEBUG_NEW_ALWAYS
+    #define new new(__TFILE__,__LINE__)
+#elif (defined(__WXDEBUG__) && defined(__VISUALC__) && !wxUSE_GLOBAL_MEMORY_OPERATORS && wxUSE_DEBUG_NEW_ALWAYS)
+    // Including this file redefines new and allows leak reports to contain line numbers
+    #include "wx/msw/msvcrt.h"
+#endif
 
-    #if wxUSE_DEBUG_NEW_ALWAYS
-        #if wxUSE_GLOBAL_MEMORY_OPERATORS
-            #define new WXDEBUG_NEW
-        #elif defined(__VISUALC__)
-            // Including this file redefines new and allows leak reports to
-            // contain line numbers
-            #include "wx/msw/msvcrt.h"
-        #endif
-    #endif // wxUSE_DEBUG_NEW_ALWAYS
-#else // !__WXDEBUG__
-    #define WXDEBUG_NEW new
-#endif // __WXDEBUG__/!__WXDEBUG__
+#endif  // _WX_OBJECTH__
 
-#endif // _WX_OBJECTH__

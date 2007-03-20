@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "radiobut.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,9 +30,8 @@
 
 #if wxUSE_RADIOBTN
 
-#include "wx/radiobut.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/radiobut.h"
     #include "wx/settings.h"
     #include "wx/dcscreen.h"
 #endif

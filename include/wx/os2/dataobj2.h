@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/dataobj2.h
+// Name:        mac/dataobj2.h
 // Purpose:     declaration of standard wxDataObjectSimple-derived classes
 // Author:      Stefan Csomor (adapted from Robert Roebling's gtk port
 // Modified by:
@@ -9,14 +9,18 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_OS2_DATAOBJ2_H_
-#define _WX_OS2_DATAOBJ2_H_
+#ifndef _WX_MAC_DATAOBJ2_H_
+#define _WX_MAC_DATAOBJ2_H_
+
+#ifdef __GNUG__
+    #pragma interface "dataobj.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapDataObject : public wxBitmapDataObjectBase
+class wxBitmapDataObject : public wxBitmapDataObjectBase
 {
 public:
     // ctors
@@ -24,7 +28,7 @@ public:
     wxBitmapDataObject(const wxBitmap& bitmap);
 
     // destr
-    virtual ~wxBitmapDataObject();
+    ~wxBitmapDataObject();
 
     // override base class virtual to update PNG data too
     virtual void SetBitmap(const wxBitmap& bitmap);
@@ -82,4 +86,5 @@ private:
     { return(wxDataObjectSimple::SetData(rFormat, nLen, pBuf)); }
 };
 
-#endif // _WX_OS2_DATAOBJ2_H_
+#endif // _WX_MAC_DATAOBJ2_H_
+

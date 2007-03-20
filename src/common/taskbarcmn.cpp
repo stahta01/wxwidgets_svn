@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////
-// File:        src/common/taskbarcmn.cpp
+// File:        taskbarcmn.cpp
 // Purpose:     Common parts of wxTaskBarIcon class
 // Author:      Julian Smart
 // Modified by:
@@ -9,23 +9,23 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "taskbar.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+#include "wx/defs.h"
 
 #ifdef wxHAS_TASK_BAR_ICON
 
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/menu.h"
-#endif
-
 // DLL options compatibility check:
+#include "wx/app.h"
 WX_CHECK_BUILD_OPTIONS("wxAdvanced")
 
+
+#include "wx/menu.h"
 #include "wx/taskbar.h"
 
 DEFINE_EVENT_TYPE( wxEVT_TASKBAR_MOVE )
@@ -38,7 +38,7 @@ DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_DCLICK )
 
 
 BEGIN_EVENT_TABLE(wxTaskBarIconBase, wxEvtHandler)
-    EVT_TASKBAR_CLICK(wxTaskBarIconBase::OnRightButtonDown)
+    EVT_TASKBAR_RIGHT_DOWN(wxTaskBarIconBase::OnRightButtonDown)
 END_EVENT_TABLE()
 
 void wxTaskBarIconBase::OnRightButtonDown(wxTaskBarIconEvent& WXUNUSED(event))

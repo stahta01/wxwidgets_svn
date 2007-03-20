@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/statusbr.h
-// Purpose:     native implementation of wxStatusBar.
-//              Optional: can use generic version instead.
+// Name:        statusbr.h
+// Purpose:     native implementation of wxStatusBar. Optional; can use generic
+//              version instead.
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
@@ -10,34 +10,44 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_STATBAR_H_
-#define _WX_STATBAR_H_
+#ifndef   _WX_STATBAR_H_
+#define   _WX_STATBAR_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "statbrma.h"
+#endif
 
 class WXDLLEXPORT wxStatusBarMac : public wxStatusBarGeneric
 {
-    DECLARE_DYNAMIC_CLASS(wxStatusBarMac)
+  DECLARE_DYNAMIC_CLASS(wxStatusBarMac)
 
-    wxStatusBarMac();
-    wxStatusBarMac(wxWindow *parent, wxWindowID id = wxID_ANY,
-           long style = wxST_SIZEGRIP,
-           const wxString& name = wxStatusBarNameStr);
+  wxStatusBarMac();
+   wxStatusBarMac(wxWindow *parent, wxWindowID id,
+           long style = 0,
+           const wxString& name = wxPanelNameStr)
+  {
+      Create(parent, id, style, name);
+  }
 
-    virtual ~wxStatusBarMac();
+  ~wxStatusBarMac();
 
-    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
-              long style = wxST_SIZEGRIP,
-              const wxString& name = wxStatusBarNameStr);
+  bool Create(wxWindow *parent, wxWindowID id,
+              long style ,
+              const wxString& name = wxPanelNameStr) ;
 
-    virtual void DrawFieldText(wxDC& dc, int i);
-    virtual void DrawField(wxDC& dc, int i);
-    virtual void SetStatusText(const wxString& text, int number = 0);
+  virtual void DrawFieldText(wxDC& dc, int i);
+  virtual void DrawField(wxDC& dc, int i);
+  virtual void SetStatusText(const wxString& text, int number = 0) ;
+  ////////////////////////////////////////////////////////////////////////
+  // Implementation
 
-    // Implementation
-    virtual void MacHiliteChanged();
-    void OnPaint(wxPaintEvent& event);
+  virtual void        MacHiliteChanged() ;
 
+  void OnPaint(wxPaintEvent& event);
 protected:
-    DECLARE_EVENT_TABLE()
+
+  DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_STATBAR_H_
+#endif
+    // _WX_STATBAR_H_

@@ -18,10 +18,7 @@
 #include "wx/unix/execute.h"
 #include "wx/stdpaths.h"
 #include "wx/apptrait.h"
-#include "wx/thread.h"
 #include "wx/process.h"
-
-#include <sys/wait.h>
 
 // Use polling instead of Mach ports, which doesn't work on Intel
 // due to task_for_pid security issues.
@@ -35,7 +32,6 @@
 
 #if USE_POLLING
 
-#if wxUSE_THREADS
 class wxProcessTerminationEventHandler: public wxEvtHandler
 {
   public:
@@ -94,7 +90,7 @@ void* wxProcessTerminationThread::Entry()
             break;
         }
     }
-
+    
     return NULL;
 }
 
@@ -103,9 +99,9 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     if (pid < 1)
         return -1;
 
-    wxProcessTerminationEventHandler* handler = new wxProcessTerminationEventHandler(proc_data);
+    wxProcessTerminationEventHandler* handler = new wxProcessTerminationEventHandler(proc_data);    
     wxProcessTerminationThread* thread = new wxProcessTerminationThread(proc_data, handler);
-
+    
     if (thread->Create() != wxTHREAD_NO_ERROR)
     {
         wxLogDebug(wxT("Could not create termination detection thread."));
@@ -115,20 +111,14 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     }
 
     thread->Run();
-
+    
     return 0;
 }
-#else // !wxUSE_THREADS
-int wxAddProcessCallbackForPid(wxEndProcessData*, int)
-{
-    wxLogDebug(wxT("Could not create termination detection thread."));
-    return -1;
-}
-#endif // wxUSE_THREADS/!wxUSE_THREADS
 
-#else // !USE_POLLING
+#else
 
 #include <CoreFoundation/CFMachPort.h>
+#include <sys/wait.h>
 extern "C" {
 #include <mach/mach.h>
 }
@@ -141,13 +131,13 @@ void wxMAC_MachPortEndProcessDetect(CFMachPortRef port, void *data)
     int rc = waitpid(abs(proc_data->pid), &status, WNOHANG);
     if(!rc)
     {
-        wxLogDebug(wxT("Mach port was invalidated, but process hasn't terminated!"));
-        return;
+    	wxLogDebug(wxT("Mach port was invalidated, but process hasn't terminated!"));
+    	return;
     }
     if((rc != -1) && WIFEXITED(status))
-        proc_data->exitcode = WEXITSTATUS(status);
+    	proc_data->exitcode = WEXITSTATUS(status);
     else
-        proc_data->exitcode = -1;
+    	proc_data->exitcode = -1;
     wxHandleProcessTermination(proc_data);
 }
 
@@ -210,7 +200,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
         wxLogDebug(wxT("Couldn't create runloopsource"));
         return -1;
     }
-
+    
     CFRelease(CFMachPortForProcess);
 
     CFRunLoopAddSource(CFRunLoopGetCurrent(),runloopsource,kCFRunLoopDefaultMode);
@@ -219,17 +209,14 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     return 0;
 }
 
-#endif // USE_POLLING/!USE_POLLING
+#endif
+  // USE_POLLING
 
-// NOTE: This doesn't really belong here but this was a handy file to
+// NOTE: This doens't really belong here but this was a handy file to
 // put it in because it's already compiled for wxCocoa and wxMac GUI lib.
-#if wxUSE_GUI
-
 static wxStandardPathsCF gs_stdPaths;
 wxStandardPathsBase& wxGUIAppTraits::GetStandardPaths()
 {
     return gs_stdPaths;
 }
-
-#endif // wxUSE_GUI
 

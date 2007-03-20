@@ -1387,8 +1387,7 @@ class DocManager(wx.EvtHandler):
         for document in self._docs[::-1]:  # Close in lifo (reverse) order.  We clone the list to make sure we go through all docs even as they are deleted
             if not self.CloseDocument(document, force):
                 return False
-            if document:
-                document.DeleteAllViews() # Implicitly delete the document when the last view is removed
+            document.DeleteAllViews() # Implicitly delete the document when the last view is removed
         return True
 
 

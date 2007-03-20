@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_frame.h
-// Purpose:     XML resource handler for wxFrame
+// Name:        xh_frame.h
+// Purpose:     XML resource handler for dialogs
 // Author:      Vaclav Slavik & Aleks.
 // Created:     2000/03/05
 // RCS-ID:      $Id$
@@ -11,20 +11,20 @@
 #ifndef _WX_XH_FRAME_H_
 #define _WX_XH_FRAME_H_
 
-#include "wx/xrc/xmlres.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_frame.h"
+#endif
 
-#if wxUSE_XRC
+#include "wx/xrc/xmlres.h"
 
 class WXDLLIMPEXP_XRC wxFrameXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxFrameXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxFrameXmlHandler)
 public:
     wxFrameXmlHandler();
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC
 
 #endif // _WX_XH_FRAME_H_

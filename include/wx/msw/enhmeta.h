@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_ENHMETA_H_
 #define _WX_MSW_ENHMETA_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "enhmeta.h"
+#endif
+
 #include "wx/dc.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -39,8 +43,7 @@ public:
     bool Play(wxDC *dc, wxRect *rectBound = (wxRect *)NULL);
 
     // accessors
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_hMF != 0; }
+    bool Ok() const { return m_hMF != 0; }
 
     wxSize GetSize() const;
     int GetWidth() const { return GetSize().x; }
@@ -87,14 +90,7 @@ public:
     // obtain a pointer to the new metafile (caller should delete it)
     wxEnhMetaFile *Close();
 
-protected:
-    virtual void DoGetSize(int *width, int *height) const;
-
 private:
-    // size passed to ctor and returned by DoGetSize()
-    int m_width,
-        m_height;
-
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxEnhMetaFileDC)
 };
 

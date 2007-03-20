@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/icon.cpp
+// Name:        icon.cpp
 // Purpose:     wxIcon class
 // Author:      David Webster
 // Modified by:
@@ -13,22 +13,24 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#include "wx/icon.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
+    #include "wx/icon.h"
     #include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
 #include "assert.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxGDIObject)
+#include "wx/icon.h"
+
+    IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxGDIObject)
 
 // ============================================================================
 // implementation
@@ -71,7 +73,7 @@ wxIcon::wxIcon( const wxString& rIconFile,
     // So we have a modified name where replace the last three characters
     // with os2.  Also need the extension.
     //
-    wxString sOs2Name = rIconFile.Mid(0, rIconFile.length() - 3);
+    wxString sOs2Name = rIconFile.Mid(0, rIconFile.Length() - 3);
 
     sOs2Name += wxT("Os2.ico");
     LoadFile( sOs2Name
@@ -120,20 +122,21 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
                           );
     }
 
-    BITMAPINFOHEADER2 vHeader;
-    SIZEL             vSize = {0, 0};
-    DEVOPENSTRUC      vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC               hDCSrc = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
-    HDC               hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
-    HPS               hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
-    HPS               hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
-    POINTL            vPoint[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()},
-                                    {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
-                                  };
-    POINTL            vPointMask[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight() * 2},
-                                        {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
-                                    };
-    POINTERINFO       vIconInfo;
+    BITMAPINFOHEADER2               vHeader;
+    SIZEL                           vSize = {0, 0};
+    DEVOPENSTRUC                    vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
+    HDC                             hDCSrc = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
+    HDC                             hDCDst = ::DevOpenDC(vHabmain, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&vDop, NULLHANDLE);
+    HPS                             hPSSrc = ::GpiCreatePS(vHabmain, hDCSrc, &vSize, PU_PELS | GPIA_ASSOC);
+    HPS                             hPSDst = ::GpiCreatePS(vHabmain, hDCDst, &vSize, PU_PELS | GPIA_ASSOC);
+    POINTL                          vPoint[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()},
+                                                  {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
+                                                };
+    POINTL                          vPointMask[4] = { {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight() * 2},
+                                                      {0, 0}, {rBmp.GetWidth(), rBmp.GetHeight()}
+                                                    };
+
+    POINTERINFO                     vIconInfo;
 
     memset(&vIconInfo, '\0', sizeof(POINTERINFO));
     vIconInfo.fPointer = FALSE;  // we want an icon, not a pointer
@@ -227,6 +230,10 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
 
     vIconInfo.hbmPointer = hBmpMask;
 
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
+
     HICON hIcon = ::WinCreatePointerIndirect( HWND_DESKTOP, &vIconInfo);
 
     if (!hIcon)
@@ -242,6 +249,7 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
                 ,rBmp.GetHeight()
                );
     }
+#endif
 
     if (!rBmp.GetMask())
     {

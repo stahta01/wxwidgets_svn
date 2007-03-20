@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "fsvolume.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,19 +29,19 @@
 
 #if wxUSE_FSVOLUME
 
-#include "wx/volume.h"
-
 #ifndef WX_PRECOMP
     #if wxUSE_GUI
         #include "wx/icon.h"
     #endif
     #include "wx/intl.h"
-    #include "wx/hashmap.h"
 #endif // WX_PRECOMP
 
 #include "wx/dir.h"
+#include "wx/hashmap.h"
 #include "wx/dynlib.h"
 #include "wx/arrimpl.cpp"
+
+#include "wx/volume.h"
 
 #include <shellapi.h>
 #include <shlobj.h>
@@ -145,19 +149,17 @@ static unsigned GetBasicFlags(const wxChar* filename)
     }
 
     //-----------------------------------------------------------------------
-    // The following most likely will not modify anything not set above,
+    // The following will most likely will not modify anything not set above,
     // and will not work at all for network shares or empty CD ROM drives.
     // But it is a good check if the Win API ever gets better about reporting
     // this information.
     //-----------------------------------------------------------------------
     SHFILEINFO fi;
-    long rc = SHGetFileInfo(filename, 0, &fi, sizeof(fi), SHGFI_ATTRIBUTES);
+    long rc;
+    rc = SHGetFileInfo(filename, 0, &fi, sizeof(fi), SHGFI_ATTRIBUTES );
     if (!rc)
     {
-        // this error is not fatal, so don't show a message to the user about
-        // it, otherwise it would appear every time a generic directory picker
-        // dialog is used and there is a connected network drive
-        wxLogLastError(_T("SHGetFileInfo"));
+        wxLogError(_("Cannot read typename from '%s'!"), filename);
     }
     else
     {
@@ -264,7 +266,7 @@ static void BuildListFromNN(wxArrayString& list, NETRESOURCE* pResSrc,
                 {
                     wxString filename(pRes->lpRemoteName);
 
-                    if (!filename.empty())
+                    if (filename.Len())
                     {
                         if (filename.Last() != '\\')
                             filename.Append('\\');

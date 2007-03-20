@@ -12,8 +12,11 @@
 #ifndef __PROGDLGH_G__
 #define __PROGDLGH_G__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "progdlgg.h"
+#endif
+
 #include "wx/defs.h"
-#include "wx/progdlg.h"
 
 #if wxUSE_PROGRESSDLG
 
@@ -45,7 +48,7 @@ public:
    /* Destructor.
        Re-enables event handling for other windows.
    */
-   virtual ~wxProgressDialog();
+   ~wxProgressDialog();
 
    /* Update the status bar to the new value.
        @param value new value
@@ -53,13 +56,6 @@ public:
        @returns true if ABORT button has not been pressed
    */
    virtual bool Update(int value, const wxString& newmsg = wxEmptyString, bool *skip = NULL);
-
-    /* Switches the dialog to use a gauge in indeterminate mode and calls
-       wxGauge::Pulse() to show to the user a bit of progress */
-    virtual bool Pulse(const wxString& newmsg = wxEmptyString, bool *skip = NULL);
-
-    // Must provide overload to avoid hiding it (and warnings about it)
-    virtual void Update() { wxDialog::Update(); }
 
    /* Can be called to continue after the cancel button has been pressed, but
        the program decided to continue the operation (e.g., user didn't
@@ -87,12 +83,6 @@ private:
    // create the label with given text and another one to show the time nearby
    // as the next windows in the sizer, returns the created control
    wxStaticText *CreateLabel(const wxString& text, wxSizer *sizer);
-
-    // updates the label message
-   void UpdateMessage(const wxString &newmsg);
-
-   // common part of Update() and Pulse(), returns true if not cancelled
-   bool DoAfterUpdate(bool *skip);
 
    // shortcuts for enabling buttons
    void EnableClose();
@@ -164,6 +154,10 @@ private:
     class WXDLLEXPORT wxWindowDisabler *m_winDisabler;
 
     DECLARE_EVENT_TABLE()
+private:
+    // Virtual function hiding supression
+    virtual void Update() { wxDialog::Update(); }
+
     DECLARE_NO_COPY_CLASS(wxProgressDialog)
 };
 

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "accel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -33,7 +37,7 @@ class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
     friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
-    virtual ~wxAcceleratorRefData();
+    ~wxAcceleratorRefData();
 
     inline HACCEL GetHACCEL() const { return m_hAccel; }
 protected:
@@ -71,7 +75,7 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
 {
 }
 
-bool wxAcceleratorTable::IsOk() const
+bool wxAcceleratorTable::Ok() const
 {
     return false;
 }

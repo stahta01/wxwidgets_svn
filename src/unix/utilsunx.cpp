@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/unix/utilsunx.cpp
+// Name:        unix/utilsunx.cpp
 // Purpose:     generic Unix implementation of many wx functions
 // Author:      Vadim Zeitlin
 // Id:          $Id$
@@ -15,43 +15,34 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include <pwd.h>
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/utils.h"
+#include "wx/defs.h"
+#include "wx/string.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-#endif
-
+#include "wx/intl.h"
+#include "wx/log.h"
+#include "wx/app.h"
 #include "wx/apptrait.h"
 
+#include "wx/utils.h"
 #include "wx/process.h"
 #include "wx/thread.h"
 
 #include "wx/wfstream.h"
 
 #include "wx/unix/execute.h"
-#include "wx/unix/private.h"
 
-#include <pwd.h>
-
-#ifdef HAVE_SYS_SELECT_H
-#   include <sys/select.h>
-#endif
-
-#define HAS_PIPE_INPUT_STREAM (wxUSE_STREAMS && wxUSE_FILE)
-
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
 
 // define this to let wxexec.cpp know that we know what we're doing
 #define _WX_USED_BY_WXEXECUTE_
 #include "../common/execcmn.cpp"
 
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
 #if wxUSE_BASE
 
@@ -132,12 +123,6 @@
     #include <sys/utsname.h> // for uname()
 #endif // HAVE_UNAME
 
-// Used by wxGetFreeMemory().
-#ifdef __SGI__
-    #include <sys/sysmp.h>
-    #include <sys/sysinfo.h>   // for SAGET and MINFO structures
-#endif
-
 // ----------------------------------------------------------------------------
 // conditional compilation
 // ----------------------------------------------------------------------------
@@ -151,17 +136,21 @@
      defined(__osf__) || defined(__EMX__))
     extern "C"
     {
-        #ifdef __EMX__
-            /* I copied this from the XFree86 diffs. AV. */
-            #define INCL_DOSPROCESS
-            #include <os2.h>
-            inline void usleep(unsigned long delay)
-            {
-                DosSleep(delay ? (delay/1000l) : 1l);
-            }
-        #else // Unix
+        #ifdef __SUN__
             int usleep(unsigned int usec);
-        #endif // __EMX__/Unix
+        #else // !Sun
+            #ifdef __EMX__
+                /* I copied this from the XFree86 diffs. AV. */
+                #define INCL_DOSPROCESS
+                #include <os2.h>
+                inline void usleep(unsigned long delay)
+                {
+                    DosSleep(delay ? (delay/1000l) : 1l);
+                }
+            #else // !Sun && !EMX
+                void usleep(unsigned long usec);
+            #endif
+        #endif // Sun/EMX/Something else
     };
 
     #define HAVE_USLEEP 1
@@ -262,8 +251,7 @@ long wxMacExecute(wxChar **argv,
 long wxExecute( const wxString& command, int flags, wxProcess *process )
 {
     wxCHECK_MSG( !command.empty(), 0, wxT("can't exec empty command") );
-
-    wxLogTrace(wxT("exec"), wxT("Executing \"%s\""), command.c_str());
+    wxLogDebug(wxString(wxT("Launching: ")) + command);
 
 #if wxUSE_THREADS
     // fork() doesn't mix well with POSIX threads: on many systems the program
@@ -285,7 +273,7 @@ long wxExecute( const wxString& command, int flags, wxProcess *process )
     // split the command line in arguments
     do
     {
-        argument = wxEmptyString;
+        argument=wxT("");
         quotechar = wxT('\0');
 
         // eat leading whitespace:
@@ -406,11 +394,23 @@ bool wxShutdown(wxShutdownFlags wFlags)
     return system(wxString::Format(_T("init %c"), level).mb_str()) == 0;
 }
 
+wxPowerType wxGetPowerType()
+{
+    // TODO
+    return wxPOWER_UNKNOWN;
+}
+
+wxBatteryState wxGetBatteryState()
+{
+    // TODO
+    return wxBATTERY_UNKNOWN_STATE;
+}
+
 // ----------------------------------------------------------------------------
 // wxStream classes to support IO redirection in wxExecute
 // ----------------------------------------------------------------------------
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
 
 bool wxPipeInputStream::CanRead() const
 {
@@ -425,10 +425,8 @@ bool wxPipeInputStream::CanRead() const
     const int fd = m_file->fd();
 
     fd_set readfds;
-
-    wxFD_ZERO(&readfds);
-    wxFD_SET(fd, &readfds);
-
+    FD_ZERO(&readfds);
+    FD_SET(fd, &readfds);
     switch ( select(fd + 1, &readfds, NULL, NULL, &tv) )
     {
         case -1:
@@ -450,13 +448,19 @@ bool wxPipeInputStream::CanRead() const
     }
 }
 
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
 // ----------------------------------------------------------------------------
 // wxExecute: the real worker function
 // ----------------------------------------------------------------------------
 
-long wxExecute(wxChar **argv, int flags, wxProcess *process)
+#ifdef __VMS
+    #pragma message disable codeunreachable
+#endif
+               
+long wxExecute(wxChar **argv,
+               int flags,
+               wxProcess *process)
 {
     // for the sync execution, we return -1 to indicate failure, but for async
     // case we return 0 which is never a valid PID
@@ -473,7 +477,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
     while (argv[mb_argc])
     {
-        wxWX2MBbuf mb_arg = wxSafeConvertWX2MB(argv[mb_argc]);
+        wxWX2MBbuf mb_arg = wxConvertWX2MB(argv[mb_argc]);
         mb_argv[mb_argc] = strdup(mb_arg);
         mb_argc++;
     }
@@ -605,7 +609,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
         }
 
         execvp (*mb_argv, mb_argv);
-
+       
         fprintf(stderr, "execvp(");
         // CS changed ppc to ppc_ as ppc is not available under mac os CW Mach-O
         for ( char **ppc_ = mb_argv; *ppc_; ppc_++ )
@@ -634,16 +638,16 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
         // prepare for IO redirection
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
         // the input buffer bufOut is connected to stdout, this is why it is
         // called bufOut and not bufIn
         wxStreamTempInputBuffer bufOut,
                                 bufErr;
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
         if ( process && process->IsRedirected() )
         {
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
             wxOutputStream *inStream =
                 new wxFileOutputStream(pipeIn.Detach(wxPipe::Write));
 
@@ -660,7 +664,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
             execData.bufOut = &bufOut;
             execData.bufErr = &bufErr;
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
         }
 
         if ( pipeIn.IsOk() )
@@ -673,10 +677,12 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
         return traits->WaitForChild(execData);
     }
 
-#if !defined(__VMS) && !defined(__INTEL_COMPILER)
     return ERROR_RETURN_CODE;
-#endif
 }
+
+#ifdef __VMS
+    #pragma message enable codeunreachable
+#endif
 
 #undef ERROR_RETURN_CODE
 #undef ARGS_CLEANUP
@@ -722,7 +728,7 @@ char *wxGetUserHome( const wxString &user )
         }
         if ((ptr = wxGetenv(wxT("USER"))) != NULL || (ptr = wxGetenv(wxT("LOGNAME"))) != NULL)
         {
-            who = getpwnam(wxSafeConvertWX2MB(ptr));
+            who = getpwnam(wxConvertWX2MB(ptr));
         }
 
         // We now make sure the the user exists!
@@ -736,41 +742,12 @@ char *wxGetUserHome( const wxString &user )
       who = getpwnam (user.mb_str());
     }
 
-    return wxSafeConvertMB2WX(who ? who->pw_dir : 0);
+    return wxConvertMB2WX(who ? who->pw_dir : 0);
 }
 
 // ----------------------------------------------------------------------------
 // network and user id routines
 // ----------------------------------------------------------------------------
-
-// private utility function which returns output of the given command, removing
-// the trailing newline
-static wxString wxGetCommandOutput(const wxString &cmd)
-{
-    FILE *f = popen(cmd.ToAscii(), "r");
-    if ( !f )
-    {
-        wxLogSysError(_T("Executing \"%s\" failed"), cmd.c_str());
-        return wxEmptyString;
-    }
-
-    wxString s;
-    char buf[256];
-    while ( !feof(f) )
-    {
-        if ( !fgets(buf, sizeof(buf), f) )
-            break;
-
-        s += wxString::FromAscii(buf);
-    }
-
-    pclose(f);
-
-    if ( !s.empty() && s.Last() == _T('\n') )
-        s.RemoveLast();
-
-    return s;
-}
 
 // retrieve either the hostname or FQDN depending on platform (caller must
 // check whether it's one or the other, this is why this function is for
@@ -787,17 +764,11 @@ static bool wxGetHostNameInternal(wxChar *buf, int sz)
     bool ok = uname(&uts) != -1;
     if ( ok )
     {
-        wxStrncpy(buf, wxSafeConvertMB2WX(uts.nodename), sz - 1);
+        wxStrncpy(buf, wxConvertMB2WX(uts.nodename), sz - 1);
         buf[sz] = wxT('\0');
     }
 #elif defined(HAVE_GETHOSTNAME)
-    char cbuf[sz];
-    bool ok = gethostname(cbuf, sz) != -1;
-    if ( ok )
-    {
-        wxStrncpy(buf, wxSafeConvertMB2WX(cbuf), sz - 1);
-        buf[sz] = wxT('\0');
-    }
+    bool ok = gethostname(buf, sz) != -1;
 #else // no uname, no gethostname
     wxFAIL_MSG(wxT("don't know host name for this machine"));
 
@@ -839,7 +810,7 @@ bool wxGetFullHostName(wxChar *buf, int sz)
     {
         if ( !wxStrchr(buf, wxT('.')) )
         {
-            struct hostent *host = gethostbyname(wxSafeConvertWX2MB(buf));
+            struct hostent *host = gethostbyname(wxConvertWX2MB(buf));
             if ( !host )
             {
                 wxLogSysError(_("Cannot get the official hostname"));
@@ -849,7 +820,7 @@ bool wxGetFullHostName(wxChar *buf, int sz)
             else
             {
                 // the canonical name
-                wxStrncpy(buf, wxSafeConvertMB2WX(host->h_name), sz);
+                wxStrncpy(buf, wxConvertMB2WX(host->h_name), sz);
             }
         }
         //else: it's already a FQDN (BSD behaves this way)
@@ -865,7 +836,7 @@ bool wxGetUserId(wxChar *buf, int sz)
     *buf = wxT('\0');
     if ((who = getpwuid(getuid ())) != NULL)
     {
-        wxStrncpy (buf, wxSafeConvertMB2WX(who->pw_name), sz - 1);
+        wxStrncpy (buf, wxConvertMB2WX(who->pw_name), sz - 1);
         return true;
     }
 
@@ -874,73 +845,45 @@ bool wxGetUserId(wxChar *buf, int sz)
 
 bool wxGetUserName(wxChar *buf, int sz)
 {
-#ifdef HAVE_PW_GECOS
     struct passwd *who;
 
     *buf = wxT('\0');
     if ((who = getpwuid (getuid ())) != NULL)
     {
+        // pw_gecos field in struct passwd is not standard
+#ifdef HAVE_PW_GECOS
        char *comma = strchr(who->pw_gecos, ',');
        if (comma)
            *comma = '\0'; // cut off non-name comment fields
-       wxStrncpy (buf, wxSafeConvertMB2WX(who->pw_gecos), sz - 1);
+       wxStrncpy (buf, wxConvertMB2WX(who->pw_gecos), sz - 1);
+#else // !HAVE_PW_GECOS
+       wxStrncpy (buf, wxConvertMB2WX(who->pw_name), sz - 1);
+#endif // HAVE_PW_GECOS/!HAVE_PW_GECOS
        return true;
     }
 
     return false;
-#else // !HAVE_PW_GECOS
-    return wxGetUserId(buf, sz);
-#endif // HAVE_PW_GECOS/!HAVE_PW_GECOS
 }
 
-bool wxIsPlatform64Bit()
-{
-    wxString machine = wxGetCommandOutput(wxT("uname -m"));
-
-    // NOTE: these tests are not 100% reliable!
-    return machine.Contains(wxT("AMD64")) ||
-           machine.Contains(wxT("IA64")) ||
-           machine.Contains(wxT("x64")) ||
-           machine.Contains(wxT("X64")) ||
-           machine.Contains(wxT("alpha")) ||
-           machine.Contains(wxT("hppa64")) ||
-           machine.Contains(wxT("ppc64"));
-}
-
-// these functions are in mac/utils.cpp for wxMac
+// this function is in mac/utils.cpp for wxMac
 #ifndef __WXMAC__
-
-wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
-{
-    // get OS version
-    int major, minor;
-    wxString release = wxGetCommandOutput(wxT("uname -r"));
-    if ( !release.empty() && wxSscanf(release, wxT("%d.%d"), &major, &minor) != 2 )
-    {
-        // unrecognized uname string format
-        major =
-        minor = -1;
-    }
-
-    if ( verMaj )
-        *verMaj = major;
-    if ( verMin )
-        *verMin = minor;
-
-    // try to understand which OS are we running
-    wxString kernel = wxGetCommandOutput(wxT("uname -s"));
-    if ( kernel.empty() )
-        kernel = wxGetCommandOutput(wxT("uname -o"));
-
-    if ( kernel.empty() )
-        return wxOS_UNKNOWN;
-
-    return wxPlatformInfo::GetOperatingSystemId(kernel);
-}
 
 wxString wxGetOsDescription()
 {
-    return wxGetCommandOutput(wxT("uname -s -r -m"));
+    FILE *f = popen("uname -s -r -m", "r");
+    if (f)
+    {
+        char buf[256];
+        size_t c = fread(buf, 1, sizeof(buf) - 1, f);
+        pclose(f);
+        // Trim newline from output.
+        if (c && buf[c - 1] == '\n')
+            --c;
+        buf[c] = '\0';
+        return wxString::FromAscii( buf );
+    }
+    wxFAIL_MSG( _T("uname failed") );
+    return _T("");
 }
 
 #endif // !__WXMAC__
@@ -962,43 +905,16 @@ wxMemorySize wxGetFreeMemory()
         char buf[1024];
         if ( fgets(buf, WXSIZEOF(buf), fp) && fgets(buf, WXSIZEOF(buf), fp) )
         {
-            // /proc/meminfo changed its format in kernel 2.6
-            if ( wxPlatformInfo().CheckOSVersion(2, 6) )
-            {
-                unsigned long cached, buffers;
-                sscanf(buf, "MemFree: %ld", &memFree);
-
-                fgets(buf, WXSIZEOF(buf), fp);
-                sscanf(buf, "Buffers: %lu", &buffers);
-
-                fgets(buf, WXSIZEOF(buf), fp);
-                sscanf(buf, "Cached: %lu", &cached);
-
-                // add to "MemFree" also the "Buffers" and "Cached" values as
-                // free(1) does as otherwise the value never makes sense: for
-                // kernel 2.6 it's always almost 0
-                memFree += buffers + cached;
-
-                // values here are always expressed in kB and we want bytes
-                memFree *= 1024;
-            }
-            else // Linux 2.4 (or < 2.6, anyhow)
-            {
-                long memTotal, memUsed;
-                sscanf(buf, "Mem: %ld %ld %ld", &memTotal, &memUsed, &memFree);
-            }
+            long memTotal, memUsed;
+            sscanf(buf, "Mem: %ld %ld %ld", &memTotal, &memUsed, &memFree);
         }
 
         fclose(fp);
 
         return (wxMemorySize)memFree;
     }
-#elif defined(__SGI__)
-    struct rminfo realmem;
-    if ( sysmp(MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0 )
-        return ((wxMemorySize)realmem.physmem * sysconf(_SC_PAGESIZE));
-#elif defined(_SC_AVPHYS_PAGES)
-    return ((wxMemorySize)sysconf(_SC_AVPHYS_PAGES))*sysconf(_SC_PAGESIZE);
+#elif defined(__SUN__) && defined(_SC_AVPHYS_PAGES)
+    return (wxMemorySize)(sysconf(_SC_AVPHYS_PAGES)*sysconf(_SC_PAGESIZE));
 //#elif defined(__FREEBSD__) -- might use sysctl() to find it out, probably
 #endif
 
@@ -1006,7 +922,7 @@ wxMemorySize wxGetFreeMemory()
     return -1;
 }
 
-bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspaceSize_t *pFree)
+bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
 {
 #if defined(HAVE_STATFS) || defined(HAVE_STATVFS)
     // the case to "char *" is needed for AIX 4.3
@@ -1021,19 +937,19 @@ bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspace
     // under Solaris we also have to use f_frsize field instead of f_bsize
     // which is in general a multiple of f_frsize
 #ifdef HAVE_STATVFS
-    wxDiskspaceSize_t blockSize = fs.f_frsize;
+    wxLongLong blockSize = fs.f_frsize;
 #else // HAVE_STATFS
-    wxDiskspaceSize_t blockSize = fs.f_bsize;
+    wxLongLong blockSize = fs.f_bsize;
 #endif // HAVE_STATVFS/HAVE_STATFS
 
     if ( pTotal )
     {
-        *pTotal = wxDiskspaceSize_t(fs.f_blocks) * blockSize;
+        *pTotal = wxLongLong(fs.f_blocks) * blockSize;
     }
 
     if ( pFree )
     {
-        *pFree = wxDiskspaceSize_t(fs.f_bavail) * blockSize;
+        *pFree = wxLongLong(fs.f_bavail) * blockSize;
     }
 
     return true;
@@ -1159,6 +1075,40 @@ bool wxHandleFatalExceptions(bool doit)
 
 #endif // wxUSE_ON_FATAL_EXCEPTION
 
+// ----------------------------------------------------------------------------
+// error and debug output routines (deprecated, use wxLog)
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_2
+
+void wxDebugMsg( const char *format, ... )
+{
+  va_list ap;
+  va_start( ap, format );
+  vfprintf( stderr, format, ap );
+  fflush( stderr );
+  va_end(ap);
+}
+
+void wxError( const wxString &msg, const wxString &title )
+{
+  wxFprintf( stderr, _("Error ") );
+  if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+  if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+  wxFprintf( stderr, wxT(".\n") );
+}
+
+void wxFatalError( const wxString &msg, const wxString &title )
+{
+  wxFprintf( stderr, _("Error ") );
+  if (!title.IsNull()) wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title) );
+  if (!msg.IsNull()) wxFprintf( stderr, wxT(": %s"), WXSTRINGCAST(msg) );
+  wxFprintf( stderr, wxT(".\n") );
+  exit(3); // the same exit code as for abort()
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 #endif // wxUSE_BASE
 
 #if wxUSE_GUI
@@ -1261,7 +1211,7 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
         {
             bool idle = true;
 
-#if HAS_PIPE_INPUT_STREAM
+#if wxUSE_STREAMS
             if ( execData.bufOut )
             {
                 execData.bufOut->Update();
@@ -1273,7 +1223,7 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
                 execData.bufErr->Update();
                 idle = false;
             }
-#endif // HAS_PIPE_INPUT_STREAM
+#endif // wxUSE_STREAMS
 
             // don't consume 100% of the CPU while we're sitting in this
             // loop

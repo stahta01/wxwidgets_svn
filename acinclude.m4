@@ -132,7 +132,7 @@ AC_DEFUN([WX_CPP_NEW_HEADERS],
     AC_LANG_SAVE
     AC_LANG_CPLUSPLUS
 
-    AC_CHECK_HEADER(iostream,,, [ ])
+    AC_CHECK_HEADERS(iostream)
 
     if test "$ac_cv_header_iostream" = "yes" ; then
       ifelse([$1], , :, [$1])
@@ -225,72 +225,6 @@ AC_DEFUN([WX_CPP_EXPLICIT],
   if test "$wx_cv_explicit" = "yes"; then
     AC_DEFINE(HAVE_EXPLICIT)
   fi
-])
-
-dnl ---------------------------------------------------------------------------
-dnl WX_CHECK_FUNCS(FUNCTIONS...,
-dnl                [ACTION-IF-FOUND],
-dnl                [ACTION-IF-NOT-FOUND],
-dnl                [EXTRA-DEFINES-AND-INCLUDES],
-dnl                [EXTRA-TEST-CODE])
-dnl
-dnl Checks that the functions listed in FUNCTIONS exist in the headers and the
-dnl libs. For each function, if it is found then defines 'HAVE_FUNCTION' and
-dnl executes ACTION-IF-FOUND, otherwise executes ACTION-IF-NOT-FOUND.
-dnl
-dnl The code from EXTRA-DEFINES-AND-INCLUDES is inserted into the test before
-dnl the default headers are included, and EXTRA-TEST-CODE is inserted into
-dnl the main() function after the default test for existence.
-dnl
-dnl Examples:
-dnl   # the simple case
-dnl   WX_CHECK_FUNCS(stat)
-dnl   # use break to finish the loop early
-dnl   WX_CHECK_FUNCS(mkstemp mktemp, break)
-dnl   # extra defines
-dnl   WX_CHECK_FUNCS(strtok_r, [], [], [#define _RREENTRANT])
-dnl   # extra includes
-dnl   WX_CHECK_FUNCS(swprintf, [], [], [#include <wchar.h>])
-dnl   # checking the signature with extra test code
-dnl   WX_CHECK_FUNCS(gettimeofday, [], [], [#include <sys/time.h>]
-dnl     [struct timeval tv; struct timezone tz; gettimeofday(&tv, &tz)])
-dnl ---------------------------------------------------------------------------
-
-AC_DEFUN([WX_CHECK_FUNCS],
-[
-  for wx_func in $1
-  do
-    AC_CACHE_CHECK(
-      [for $wx_func],
-      [wx_cv_func_$wx_func],
-      [
-        AC_LINK_IFELSE(
-          [
-            AC_LANG_PROGRAM(
-              [
-                $4
-                AC_INCLUDES_DEFAULT
-              ],
-              [
-                #ifndef $wx_func
-                  &$wx_func;
-                #endif
-                $5
-              ])
-          ],
-          [eval wx_cv_func_$wx_func=yes],
-          [eval wx_cv_func_$wx_func=no])
-      ])
-
-    if eval test \$wx_cv_func_$wx_func = yes
-    then
-      AC_DEFINE_UNQUOTED([HAVE_`echo $wx_func | tr 'a-z' 'A-Z'`])
-      $2
-    else
-      :
-      $3
-    fi
-  done
 ])
 
 dnl ---------------------------------------------------------------------------
@@ -401,11 +335,10 @@ AC_DEFUN([WX_ARG_SYS_WITH],
         ])
 
 dnl this macro checks for a command line argument and caches the result
-dnl usage: WX_ARG_WITH(option, helpmessage, variable-name, [withstring])
+dnl usage: WX_ARG_WITH(option, helpmessage, variable-name)
 AC_DEFUN([WX_ARG_WITH],
         [
-          withstring=$4
-          AC_MSG_CHECKING([for --${withstring:-with}-$1])
+          AC_MSG_CHECKING([for --with-$1])
           no_cache=0
           AC_ARG_WITH($1, [$2],
                       [
@@ -446,7 +379,7 @@ dnl message when running configure instead of the default "checking for
 dnl --enable-foo" one whih is useful for the options enabled by default
 AC_DEFUN([WX_ARG_ENABLE],
         [
-          enablestring=$4
+	  enablestring=$4
           AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
           no_cache=0
           AC_ARG_ENABLE($1, [$2],
@@ -481,47 +414,6 @@ AC_DEFUN([WX_ARG_ENABLE],
         ])
 
 
-dnl Like WX_ARG_ENABLE but accepts a parameter.
-dnl
-dnl Usage:
-dnl   WX_ARG_ENABLE_PARAM(option, helpmessage, variable-name, enablestring)
-dnl
-dnl Example:
-dnl   WX_ARG_ENABLE_PARAM(foo, [[  --enable-foo[=bar] use foo]], wxUSE_FOO)
-dnl
-dnl  --enable-foo       wxUSE_FOO=yes
-dnl  --disable-foo      wxUSE_FOO=no
-dnl  --enable-foo=bar   wxUSE_FOO=bar
-dnl  <not given>        value from configarg.cache or wxUSE_FOO=no
-dnl
-AC_DEFUN([WX_ARG_ENABLE_PARAM],
-        [
-          enablestring=$4
-          AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
-          no_cache=0
-          AC_ARG_ENABLE($1, [$2],
-                        [
-                          wx_cv_use_$1="$3='$enableval'"
-                        ],
-                        [
-                          LINE=`grep "$3" ${wx_arg_cache_file}`
-                          if test "x$LINE" != x ; then
-                            eval "DEFAULT_$LINE"
-                            wx_cv_use_$1='$3='$DEFAULT_$3
-                          else
-                            no_cache=1
-                            wx_cv_use_$1="$3=no"
-                          fi
-                        ])
-
-          eval "$wx_cv_use_$1"
-          if test "$no_cache" != 1; then
-            echo $wx_cv_use_$1 >> ${wx_arg_cache_file}.tmp
-          fi
-
-          AC_MSG_RESULT([$$3])
-        ])
-
 dnl ===========================================================================
 dnl Linker features test
 dnl ===========================================================================
@@ -535,80 +427,81 @@ dnl call WX_VERSIONED_SYMBOLS(versionfile)
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([WX_VERSIONED_SYMBOLS],
 [
-    case "${host}" in
-        *-*-cygwin* | *-*-mingw* )
-            dnl although ld does support version script option on these
-            dnl platforms, it doesn't make much sense to use it under Win32
-            dnl and, moreover, this breaks linking because of a bug in handling
-            dnl paths in -Wl,--version-script,path option (if we ever do need
-            dnl to use it for cygwin/mingw32, keep in mind that replacing last
-            dnl comma with the equal sign works) so
-            dnl simply disable it
-            wx_cv_version_script=no
-            ;;
+  found_versioning=no
 
-        *)
-            AC_CACHE_CHECK([if the linker accepts --version-script], wx_cv_version_script,
-            [
-                echo "VER_1 { *; };" >conftest.sym
-                echo "int main() { return 0; }" >conftest.cpp
+  dnl FIXME - doesn't work, Solaris linker doesn't accept wildcards
+  dnl         in the script.
+  dnl dnl Check for known non-gcc cases:
+  dnl case "${host}" in
+  dnl   *-*-solaris2* )
+  dnl     if test "x$GCC" != "xyes" ; then
+  dnl         LDFLAGS_VERSIONING="-M $1"
+  dnl         found_versioning=yes
+  dnl     fi
+  dnl   ;;
+  dnl esac
+  
+  dnl Generic check for GCC or GCC-like behaviour (Intel C++, GCC):
+  if test $found_versioning = no ; then
+      AC_CACHE_CHECK([if the linker accepts --version-script], wx_cv_version_script,
+      [
+        echo "VER_1 { *; };" >conftest.sym
+        echo "int main() { return 0; }" >conftest.cpp
+  
+        if AC_TRY_COMMAND([
+                $CXX -o conftest.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
+                -Wl,--version-script,conftest.sym >/dev/null 2>conftest.stderr]) ; then
+          if test -s conftest.stderr ; then
+              wx_cv_version_script=no
+          else
+              wx_cv_version_script=yes
+          fi
+        else
+          wx_cv_version_script=no
+        fi
 
-                if AC_TRY_COMMAND([
-                        $CXX -o conftest.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                        -Wl,--version-script,conftest.sym >/dev/null 2>conftest.stderr]) ; then
-                  if test -s conftest.stderr ; then
-                      wx_cv_version_script=no
-                  else
-                      wx_cv_version_script=yes
-                  fi
-                else
-                  wx_cv_version_script=no
-                fi
+        dnl There's a problem in some old linkers with --version-script that
+        dnl can cause linking to fail when you have objects with vtables in
+        dnl libs 3 deep.  This is known to happen in netbsd and openbsd with
+        dnl ld 2.11.2.
+        dnl 
+        dnl To test for this we need to make some shared libs and
+        dnl unfortunately we can't be sure of the right way to do that. If the
+        dnl first two compiles don't succeed then it looks like the test isn't
+        dnl working and the result is ignored, but if OTOH the first two
+        dnl succeed but the third does not then the bug has been detected and
+        dnl the --version-script flag is dropped.
+        if test $wx_cv_version_script = yes
+        then
+          echo "struct B { virtual ~B() { } }; \
+                struct D : public B { }; \
+                void F() { D d; }" > conftest.cpp
 
-                dnl There's a problem in some old linkers with --version-script that
-                dnl can cause linking to fail when you have objects with vtables in
-                dnl libs 3 deep.  This is known to happen in netbsd and openbsd with
-                dnl ld 2.11.2.
-                dnl
-                dnl To test for this we need to make some shared libs and
-                dnl unfortunately we can't be sure of the right way to do that. If the
-                dnl first two compiles don't succeed then it looks like the test isn't
-                dnl working and the result is ignored, but if OTOH the first two
-                dnl succeed but the third does not then the bug has been detected and
-                dnl the --version-script flag is dropped.
-                if test $wx_cv_version_script = yes
-                then
-                  echo "struct B { virtual ~B() { } }; \
-                        struct D : public B { }; \
-                        void F() { D d; }" > conftest.cpp
-
-                  if AC_TRY_COMMAND([
-                        $CXX -shared -fPIC -o conftest1.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                        -Wl,--version-script,conftest.sym >/dev/null 2>/dev/null]) &&
-                     AC_TRY_COMMAND([
-                        $CXX -shared -fPIC -o conftest2.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                        -Wl,--version-script,conftest.sym conftest1.output >/dev/null 2>/dev/null])
-                  then
-                    if AC_TRY_COMMAND([
-                          $CXX -shared -fPIC -o conftest3.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                          -Wl,--version-script,conftest.sym conftest2.output conftest1.output >/dev/null 2>/dev/null])
-                    then
-                      wx_cv_version_script=yes
-                    else
-                      wx_cv_version_script=no
-                    fi
-                  fi
-                fi
-
-                rm -f conftest.output conftest.stderr conftest.sym conftest.cpp
-                rm -f conftest1.output conftest2.output conftest3.output
-            ])
-
-            if test $wx_cv_version_script = yes ; then
-                LDFLAGS_VERSIONING="-Wl,--version-script,$1"
+          if AC_TRY_COMMAND([
+                $CXX -shared -fPIC -o conftest1.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
+                -Wl,--version-script,conftest.sym >/dev/null 2>/dev/null]) &&
+             AC_TRY_COMMAND([
+                $CXX -shared -fPIC -o conftest2.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
+                -Wl,--version-script,conftest.sym conftest1.output >/dev/null 2>/dev/null])
+          then
+            if AC_TRY_COMMAND([
+                  $CXX -shared -fPIC -o conftest3.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
+                  -Wl,--version-script,conftest.sym conftest2.output conftest1.output >/dev/null 2>/dev/null])
+            then
+              wx_cv_version_script=yes
+            else
+              wx_cv_version_script=no
             fi
-            ;;
-    esac
+          fi
+        fi
+
+        rm -f conftest.output conftest.stderr conftest.sym conftest.cpp
+        rm -f conftest1.output conftest2.output conftest3.output
+      ])
+      if test $wx_cv_version_script = yes ; then
+        LDFLAGS_VERSIONING="-Wl,--version-script,$1"
+      fi
+  fi
 ])
 
 

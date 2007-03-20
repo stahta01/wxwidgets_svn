@@ -15,6 +15,14 @@
 #define _MYFRAME_H_
 
 //-----------------------------------------------------------------------------
+// GCC interface
+//-----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "myframe.h"
+#endif
+
+//-----------------------------------------------------------------------------
 // Headers
 //-----------------------------------------------------------------------------
 
@@ -48,7 +56,6 @@ private:
     void OnPlatformPropertyToolOrMenuCommand(wxCommandEvent& event);
     void OnArtProviderToolOrMenuCommand(wxCommandEvent& event);
     void OnVariableExpansionToolOrMenuCommand(wxCommandEvent& event);
-    void OnAnimationCtrlPlay(wxCommandEvent& event);
 
     // Any class wishing to process wxWidgets events must use this macro
     DECLARE_EVENT_TABLE()

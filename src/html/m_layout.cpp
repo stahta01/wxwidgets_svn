@@ -1,23 +1,29 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_layout.cpp
+// Name:        m_layout.cpp
 // Purpose:     wxHtml module for basic paragraphs/layout handling
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
+#endif
 
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
+
+#if wxUSE_HTML && wxUSE_STREAMS
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_HTML && wxUSE_STREAMS
-
 #ifndef WXPRECOMP
-    #include "wx/image.h"
 #endif
+
+#include "wx/image.h"
 
 #include "wx/html/forcelnk.h"
 #include "wx/html/m_templ.h"
@@ -71,8 +77,8 @@ public:
     wxHtmlPageBreakCell() {}
 
     bool AdjustPagebreak(int* pagebreak,
-                         wxArrayInt& known_pagebreaks) const;
-
+                         int* known_pagebreaks = NULL,
+                         int number_of_pages = 0) const;
     void Draw(wxDC& WXUNUSED(dc),
               int WXUNUSED(x), int WXUNUSED(y),
               int WXUNUSED(view_y1), int WXUNUSED(view_y2),
@@ -88,7 +94,7 @@ extern "C" int wxCMPFUNC_CONV wxInteger_compare(void const* i0, void const* i1)
     return *(int*)i0 - *(int*)i1;
 }
 
-bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_pagebreaks) const
+bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, int* known_pagebreaks, int number_of_pages) const
 {
     // When we are counting pages, 'known_pagebreaks' is non-NULL.
     // That's the only time we change 'pagebreak'. Otherwise, pages
@@ -100,10 +106,10 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // vertical position. Otherwise we'd be setting a pagebreak above
     // the current cell, which is incorrect, or duplicating a
     // pagebreak that has already been set.
-    if( known_pagebreaks.Count() == 0 || *pagebreak <= m_PosY)
-    {
+    if(NULL == known_pagebreaks || *pagebreak <= m_PosY)
+        {
         return false;
-    }
+        }
 
     // m_PosY is only the vertical offset from the parent. The pagebreak
     // required here is the total page offset, so m_PosY must be added
@@ -116,20 +122,20 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // is known to be sorted in strictly increasing order. '1 + number_of_pages'
     // is used as a bsearch() argument because the array contains a leading
     // zero plus one element for each page.
-    int where = known_pagebreaks.Index( total_height);
+    int* where = (int*) bsearch(&total_height, known_pagebreaks,
+                                1 + number_of_pages, sizeof(int),
+                                wxInteger_compare);
     // Add a pagebreak only if there isn't one already set here.
-    if( wxNOT_FOUND != where)
-    {
+    if(NULL != where)
+        {
         return false;
-    }
+        }
     else
-    {
+        {
         *pagebreak = m_PosY;
         return true;
-    }
+        }
 }
-
-
 
 TAG_HANDLER_BEGIN(P, "P")
     TAG_HANDLER_CONSTR(P) { }
@@ -286,24 +292,21 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
 
     TAG_HANDLER_PROC(tag)
     {
-        wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
-        if (winIface)
+        if (m_WParser->GetWindow())
         {
-            wxString title = m_WParser->GetSource()->Mid(
-                                    tag.GetBeginPos(),
-                                    tag.GetEndPos1()-tag.GetBeginPos());
-#if !wxUSE_UNICODE && wxUSE_WCHAR_T
-            const wxFontEncoding enc = m_WParser->GetInputEncoding();
-            if ( enc != wxFONTENCODING_DEFAULT )
+            wxHtmlWindow *wfr = (wxHtmlWindow*)(m_WParser->GetWindow());
+            if (wfr)
             {
-                // need to convert to the current one
-                title = wxString(title.wc_str(wxCSConv(enc)), wxConvLocal);
+                wxString title = m_WParser->GetSource()->Mid(
+                                        tag.GetBeginPos(),
+                                        tag.GetEndPos1()-tag.GetBeginPos());
+#if !wxUSE_UNICODE && wxUSE_WCHAR_T
+                wxCSConv conv(m_WParser->GetInputEncoding());
+                title = wxString(title.wc_str(conv), wxConvLocal);
+#endif
+                title = m_WParser->GetEntitiesParser()->Parse(title);
+                wfr->OnSetTitle(title);
             }
-#endif // !wxUSE_UNICODE
-
-            title = m_WParser->GetEntitiesParser()->Parse(title);
-
-            winIface->SetHTMLWindowTitle(title);
         }
         return true;
     }
@@ -329,11 +332,6 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
         if (tag.GetParamAsColour(wxT("LINK"), &clr))
             m_WParser->SetLinkColor(clr);
 
-        wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
-        // the rest of this function requires a window:
-        if ( !winIface )
-            return false;
-
         if (tag.HasParam(wxT("BACKGROUND")))
         {
             wxFSFile *fileBgImage = m_WParser->OpenURL
@@ -349,8 +347,8 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
 #if !defined(__WXMSW__) || wxUSE_WXDIB
                     wxImage image(*is);
                     if ( image.Ok() )
-                        winIface->SetHTMLBackgroundImage(image);
-#endif
+                        m_WParser->GetWindow()->SetBackgroundImage(image);
+#endif                    
                 }
             }
         }
@@ -359,7 +357,8 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
         {
             m_WParser->GetContainer()->InsertCell(
                 new wxHtmlColourCell(clr, wxHTML_CLR_BACKGROUND));
-            winIface->SetHTMLBackgroundColour(clr);
+            if (m_WParser->GetWindow() != NULL)
+                m_WParser->GetWindow()->SetBackgroundColour(clr);
         }
 
         return false;
@@ -398,43 +397,6 @@ TAG_HANDLER_END(BLOCKQUOTE)
 
 
 
-TAG_HANDLER_BEGIN(SUBSUP, "SUB,SUP")
-
-    TAG_HANDLER_PROC(tag)
-    {
-        bool issub = (tag.GetName() == wxT("SUB"));
-        wxHtmlScriptMode oldmode = m_WParser->GetScriptMode();
-        int oldbase = m_WParser->GetScriptBaseline();
-        int oldsize = m_WParser->GetFontSize();
-
-        wxHtmlContainerCell *cont = m_WParser->GetContainer();
-        wxHtmlCell *c = cont->GetLastChild();
-
-        m_WParser->SetScriptMode(issub ? wxHTML_SCRIPT_SUB : wxHTML_SCRIPT_SUP);
-        m_WParser->SetScriptBaseline(
-                oldbase + c ? c->GetScriptBaseline() : 0);
-
-        // select smaller font
-        m_WParser->SetFontSize(m_WParser->GetFontSize()-2);
-        cont->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        ParseInner(tag);
-
-        // restore font size
-        m_WParser->SetFontSize(oldsize);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-
-        // restore base and alignment
-        m_WParser->SetScriptBaseline(oldbase);
-        m_WParser->SetScriptMode(oldmode);
-
-        return true;
-    }
-
-TAG_HANDLER_END(SUBSUP)
-
-
 // Tag handler for tags that we have to ignore, otherwise non-text data
 // would show up as text:
 TAG_HANDLER_BEGIN(DoNothing, "SCRIPT")
@@ -448,8 +410,6 @@ TAG_HANDLER_END(DoNothing)
 
 
 
-
-
 TAGS_MODULE_BEGIN(Layout)
 
     TAGS_MODULE_ADD(P)
@@ -459,7 +419,6 @@ TAGS_MODULE_BEGIN(Layout)
     TAGS_MODULE_ADD(TITLE)
     TAGS_MODULE_ADD(BODY)
     TAGS_MODULE_ADD(BLOCKQUOTE)
-    TAGS_MODULE_ADD(SUBSUP)
     TAGS_MODULE_ADD(DoNothing)
 
 TAGS_MODULE_END(Layout)

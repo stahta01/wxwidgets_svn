@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/app.mm
+// Name:        cocoa/app.mm
 // Purpose:     wxApp
 // Author:      David Elliott
 // Modified by:
@@ -10,15 +10,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/app.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
+    #include "wx/app.h"
     #include "wx/dc.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/module.h"
 #endif
+
+#include "wx/module.h"
 
 #include "wx/cocoa/ObjcPose.h"
 #include "wx/cocoa/autorelease.h"
@@ -77,12 +77,12 @@ WX_IMPLEMENT_POSER(wxPoserNSApplication);
     If nil is returned then idle event processing occurs until the user
     does not request anymore idle events or until a real event comes through.
 
-    RN: Even though Apple documentation states that nil can be passed in place
+    RN: Even though Apple documentation states that nil can be passed in place 
     of [NSDate distantPast] in the untilDate parameter, this causes Jaguar (10.2)
-    to get stuck in some kind of loop deep within nextEventMatchingMask:, thus we
+    to get stuck in some kind of loop deep within nextEventMatchingMask:, thus we 
     need to explicitly pass [NSDate distantPast] instead.
 */
-
+   
 - (NSEvent *)nextEventMatchingMask:(unsigned int)mask untilDate:(NSDate *)expiration inMode:(NSString *)mode dequeue:(BOOL)flag
 {
     // Get the same events except don't block
@@ -232,8 +232,11 @@ wxApp::wxApp()
 {
     m_topWindow = NULL;
 
+#if WXWIN_COMPATIBILITY_2_2
+    m_wantDebugOutput = TRUE;
+#endif
 #ifdef __WXDEBUG__
-    m_isInAssert = false;
+    m_isInAssert = FALSE;
 #endif // __WXDEBUG__
 
     argc = 0;
@@ -263,7 +266,7 @@ bool wxApp::OnInitGui()
 {
     wxAutoNSAutoreleasePool pool;
     if(!wxAppBase::OnInitGui())
-        return false;
+        return FALSE;
 
     // Create the app using the sharedApplication method
     m_cocoaApp = [NSApplication sharedApplication];
@@ -276,7 +279,7 @@ bool wxApp::OnInitGui()
     wxMenuBarManager::CreateInstance();
 
     wxDC::CocoaInitializeTextSystem();
-    return true;
+    return TRUE;
 }
 
 bool wxApp::CallOnInit()
@@ -288,9 +291,9 @@ bool wxApp::CallOnInit()
 bool wxApp::OnInit()
 {
     if(!wxAppBase::OnInit())
-        return false;
+        return FALSE;
 
-    return true;
+    return TRUE;
 }
 
 void wxApp::Exit()
@@ -359,8 +362,9 @@ void wxApp::WakeUpIdle()
 #ifdef __WXDEBUG__
 void wxApp::OnAssert(const wxChar *file, int line, const wxChar* cond, const wxChar *msg)
 {
-    m_isInAssert = true;
+    m_isInAssert = TRUE;
     wxAppBase::OnAssert(file, line, cond, msg);
-    m_isInAssert = false;
+    m_isInAssert = FALSE;
 }
 #endif // __WXDEBUG__
+

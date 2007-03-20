@@ -1,11 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/pen.cpp
+// Name:        pen.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "pen.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -15,12 +20,8 @@
 #endif
 
 #include "wx/pen.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/bitmap.h"
-    #include "wx/colour.h"
-#endif
-
+#include "wx/bitmap.h"
+#include "wx/colour.h"
 #include "wx/mgl/private.h"
 
 //-----------------------------------------------------------------------------
@@ -29,37 +30,21 @@
 
 class wxPenRefData: public wxObjectRefData
 {
-public:
-    wxPenRefData();
-    wxPenRefData(const wxPenRefData& data);
+    public:
+        wxPenRefData();
+        wxPenRefData(const wxPenRefData& data);
 
-    bool operator==(const wxPenRefData& data) const
-    {
-        // we intentionally don't compare m_hPen fields here
-        return m_style == data.m_style &&
-               m_width == data.m_width &&
-               memcmp(&m_pixPattern,
-                      &data.m_pixPattern, sizeof(m_pixPattern)) == 0 &&
-               m_capStyle == data.m_capStyle &&
-               m_joinStyle == data.m_joinStyle &&
-               m_colour == data.m_colour &&
-               (m_style != wxSTIPPLE || m_stipple.IsSameAs(data.m_stipple)) &&
-               (m_style != wxUSER_DASH ||
-                (m_dash == data.m_dash &&
-                    memcmp(m_dash, data.m_dash, m_countDashes*sizeof(wxDash)) == 0));
-    }
+        int            m_width;
+        int            m_style;
+        wxColour       m_colour;
+        wxBitmap       m_stipple;
+        pixpattern24_t m_pixPattern;
 
-    int            m_width;
-    int            m_style;
-    wxColour       m_colour;
-    wxBitmap       m_stipple;
-    pixpattern24_t m_pixPattern;
-
-    // not used by wxMGL, but we want to preserve values
-    int            m_joinStyle;
-    int            m_capStyle;
-    int            m_countDashes;
-    wxDash        *m_dash;
+        // not used by wxMGL, but we want to preserve values
+        int            m_joinStyle;
+        int            m_capStyle;
+        int            m_countDashes;
+        wxDash        *m_dash;
 };
 
 wxPenRefData::wxPenRefData()
@@ -113,7 +98,7 @@ wxPen::wxPen(const wxColour &colour, int width, int style)
 wxPen::wxPen(const wxBitmap& stipple, int width)
 {
     wxCHECK_RET( stipple.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8,
+    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     m_refData = new wxPenRefData();
@@ -123,13 +108,21 @@ wxPen::wxPen(const wxBitmap& stipple, int width)
     wxBitmapToPixPattern(stipple, &(M_PENDATA->m_pixPattern), NULL);
 }
 
+wxPen::wxPen(const wxPen& pen)
+{
+    Ref(pen);
+}
+
+wxPen& wxPen::operator = (const wxPen& pen)
+{
+    if (*this == pen) return (*this);
+    Ref(pen);
+    return *this;
+}
+
 bool wxPen::operator == (const wxPen& pen) const
 {
-    if (m_refData == pen.m_refData) return true;
-
-    if (!m_refData || !pen.m_refData) return false;
-
-    return ( *(wxPenRefData*)m_refData == *(wxPenRefData*)pen.m_refData );
+    return m_refData == pen.m_refData;
 }
 
 bool wxPen::operator != (const wxPen& pen) const
@@ -150,7 +143,7 @@ void wxPen::SetDashes(int number_of_dashes, const wxDash *dash)
     M_PENDATA->m_dash = (wxDash *)dash; /* TODO */
 }
 
-void wxPen::SetColour(unsigned char red, unsigned char green, unsigned char blue)
+void wxPen::SetColour(int red, int green, int blue)
 {
     AllocExclusive();
     M_PENDATA->m_colour.Set(red, green, blue);
@@ -177,7 +170,7 @@ void wxPen::SetStyle(int style)
 void wxPen::SetStipple(const wxBitmap& stipple)
 {
     wxCHECK_RET( stipple.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8,
+    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     AllocExclusive();
@@ -191,20 +184,20 @@ void wxPen::SetWidth(int width)
     M_PENDATA->m_width = width;
 }
 
-int wxPen::GetDashes(wxDash **ptr) const
+int wxPen::GetDashes(wxDash **ptr) const 
 {
-     *ptr = (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*) NULL);
+     *ptr = (M_PENDATA ? (wxDash*)M_PENDATA->m_dash : (wxDash*) NULL); 
      return (M_PENDATA ? M_PENDATA->m_countDashes : 0);
 }
 
-int wxPen::GetDashCount() const
-{
-    return (M_PENDATA->m_countDashes);
+int wxPen::GetDashCount() const 
+{ 
+    return (M_PENDATA->m_countDashes); 
 }
 
-wxDash* wxPen::GetDash() const
-{
-    return (wxDash*)M_PENDATA->m_dash;
+wxDash* wxPen::GetDash() const 
+{ 
+    return (wxDash*)M_PENDATA->m_dash; 
 }
 
 int wxPen::GetCap() const
@@ -257,7 +250,7 @@ void* wxPen::GetPixPattern() const
 }
 
 
-bool wxPen::IsOk() const
+bool wxPen::Ok() const
 {
     return (m_refData != NULL);
 }
@@ -271,3 +264,4 @@ wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }
+

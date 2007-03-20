@@ -17,11 +17,11 @@ rm -r docs/api/*
 
 # build the docs
 export PTYHONPATH=$PWD
-/opt/python/bin/epydoc --name "wxPython $VERSION" \
+/opt/python/bin/epydoc --name wxPython \
     --html \
     --output docs/api \
     --ignore-param-mismatch \
-    --inheritance none \
+    --inheritance grouped \
     --no-expand-subpackages \
     --no-private \
     --css docs/wxPython-epydoc.css \
@@ -43,11 +43,6 @@ export PTYHONPATH=$PWD
 #    --debug \
 #    --inheritance grouped \
 #    --inheritance none \
-
-
-
-python docs/bin/BuildAPIHelpBook.py wxpyapi docs/api
-
 
 # TODO: 
 #   1. Should rebuild the top-level docs too (but we need more of them first!)

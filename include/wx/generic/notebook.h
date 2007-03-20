@@ -11,6 +11,10 @@
 #ifndef _WX_NOTEBOOK_H_
 #define _WX_NOTEBOOK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "notebook.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -52,7 +56,7 @@ public:
               long style = 0,
               const wxString& name = wxNotebookNameStr);
     // dtor
-  virtual ~wxNotebook();
+  ~wxNotebook();
 
   // accessors
   // ---------
@@ -67,9 +71,6 @@ public:
   //  void AdvanceSelection(bool bForward = true);
     // get the currently selected page
   int GetSelection() const { return m_nSelection; }
-
-    // changes selected page without sending events
-  int ChangeSelection(size_t nPage);
 
     // set/get the title of a page
   bool SetPageText(size_t nPage, const wxString& strText);

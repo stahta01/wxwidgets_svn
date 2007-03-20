@@ -12,6 +12,10 @@
 #ifndef _WX_HELPVIEW_H_
 #define _WX_HELPVIEW_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "help.cpp"
+#endif
+
 #define hvVERSION 1.04
 
 #if wxUSE_IPC
@@ -65,7 +69,7 @@ class hvConnection : public wxConnection
 {
 public:
     hvConnection();
-    virtual ~hvConnection();
+    ~hvConnection();
 
     bool OnExecute(const wxString& topic, wxChar*data, int size, wxIPCFormat format);
     wxChar *OnRequest(const wxString& topic, const wxString& item, int *size, wxIPCFormat format);

@@ -10,10 +10,20 @@
 #ifndef __GTKDCCLIENTH__
 #define __GTKDCCLIENTH__
 
-#include "wx/dc.h"
-#include "wx/region.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
 
-class WXDLLIMPEXP_CORE wxWindow;
+#include "wx/dc.h"
+#include "wx/window.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxWindowDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxClientDC;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC
@@ -69,10 +79,6 @@ protected:
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
                                 wxFont *theFont = (wxFont *) NULL) const;
-    virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
-    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
-    virtual void DoSetClippingRegionAsRegion( const wxRegion &region );
-
 
 public:
     virtual wxCoord GetCharWidth() const;
@@ -90,17 +96,14 @@ public:
     virtual void SetBackgroundMode( int mode );
     virtual void SetPalette( const wxPalette& palette );
 
+    virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
     virtual void DestroyClippingRegion();
+    virtual void DoSetClippingRegionAsRegion( const wxRegion &region  );
 
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;
     virtual int GetDepth() const;
 
-    // overrriden here for RTL
-    virtual void SetDeviceOrigin( wxCoord x, wxCoord y );
-    virtual void SetAxisOrientation( bool xLeftRight, bool yBottomUp );
-
-// protected:
     // implementation
     // --------------
 
@@ -117,16 +120,17 @@ public:
     wxRegion      m_paintClippingRegion;
 
     // PangoContext stuff for GTK 2.0
+#ifdef __WXGTK20__
     PangoContext *m_context;
     PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
+#endif
 
     void SetUpDC();
     void Destroy();
-    
     virtual void ComputeScaleAndOrigin();
 
-    virtual GdkWindow *GetGDKWindow() const { return m_window; }
+    GdkWindow *GetWindow() { return m_window; }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxWindowDC)

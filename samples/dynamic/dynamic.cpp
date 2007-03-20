@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -66,9 +71,6 @@ IMPLEMENT_APP  (MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame(NULL, _T("Dynamic wxWidgets App"), 50, 50, 450, 340);
 

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "basic.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,11 +21,11 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #if wxUSE_PROLOGIO
-#include "wx/deprecated/wxexpr.h"
+#include <wx/deprecated/wxexpr.h>
 #endif
 
 #ifdef new
@@ -684,12 +688,12 @@ bool wxShape::GetPerimeterPoint(double WXUNUSED(x1), double WXUNUSED(y1),
   return false;
 }
 
-void wxShape::SetPen(const wxPen *the_pen)
+void wxShape::SetPen(wxPen *the_pen)
 {
   m_pen = the_pen;
 }
 
-void wxShape::SetBrush(const wxBrush *the_brush)
+void wxShape::SetBrush(wxBrush *the_brush)
 {
   m_brush = the_brush;
 }
@@ -3284,3 +3288,4 @@ wxBrush wxShape::GetBackgroundBrush()
     }
     return * g_oglWhiteBackgroundBrush;
 }
+

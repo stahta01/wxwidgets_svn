@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/nativdlg.cpp
+// Name:        nativdlg.cpp
 // Purpose:     Native dialog loading code (part of wxWindow)
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,7 +34,9 @@
     #include "wx/wx.h"
 #endif
 
+#if defined(__WIN95__)
 #include "wx/spinbutt.h"
+#endif
 #include "wx/msw/private.h"
 
 // ---------------------------------------------------------------------------
@@ -146,14 +152,20 @@ wxWindow* wxWindow::GetWindowChild(wxWindowID id)
     wxWindow* win = GetWindowChild1(id);
     if ( !win )
     {
-        HWND hwnd = ::GetDlgItem(GetHwnd(), id);
-        if ( hwnd )
+        HWND hWnd = ::GetDlgItem((HWND) GetHWND(), id);
+
+        if (hWnd)
         {
-            win = CreateWindowFromHWND(this, (WXHWND) hwnd);
+            wxWindow* child = CreateWindowFromHWND(this, (WXHWND) hWnd);
+            if (child)
+            {
+                child->AddChild(this);
+                return child;
+            }
         }
     }
 
-    return win;
+    return NULL;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,7 +271,7 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
         win = new wxScrollBar;
     }
 #endif
-#if wxUSE_SPINBTN
+#if defined(__WIN95__) && wxUSE_SPINBTN
     else if (str == wxT("MSCTLS_UPDOWN32"))
     {
         win = new wxSpinButton;
@@ -328,3 +340,4 @@ void wxWindow::AdoptAttributesFromHWND(void)
     if (style & WS_HSCROLL)
         m_windowStyle |= wxHSCROLL;
 }
+

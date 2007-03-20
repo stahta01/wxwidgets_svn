@@ -12,7 +12,9 @@
 #ifndef _WX_ACCEL_H_
 #define _WX_ACCEL_H_
 
-class WXDLLIMPEXP_CORE wxWindow;
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "accel.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // the accel table has all accelerators for a given window or menu
@@ -22,7 +24,10 @@ class WXDLLEXPORT wxAcceleratorTable : public wxObject
 {
 public:
     // default ctor
-    wxAcceleratorTable() { }
+    wxAcceleratorTable() : wxObject() { }
+
+    // copy ctor
+    wxAcceleratorTable(const wxAcceleratorTable& accel) : wxObject(accel) { Ref(accel); }
 
     // load from .rc resource (Windows specific)
     wxAcceleratorTable(const wxString& resource);
@@ -30,8 +35,18 @@ public:
     // initialize from array
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    wxAcceleratorTable& operator=(const wxAcceleratorTable& accel)
+    {
+        if ( *this != accel )
+            Ref(accel);
+        return *this;
+    }
+
+    bool operator==(const wxAcceleratorTable& accel) const;
+    bool operator!=(const wxAcceleratorTable& accel) const
+        { return !(*this == accel); }
+
+    bool Ok() const;
     void SetHACCEL(WXHACCEL hAccel);
     WXHACCEL GetHACCEL() const;
 

@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "panelg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,9 +34,10 @@
     #include "wx/colour.h"
     #include "wx/settings.h"
     #include "wx/log.h"
-    #include "wx/panel.h"
-    #include "wx/containr.h"
 #endif
+
+#include "wx/containr.h"
+#include "wx/panel.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -97,7 +102,7 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxPanel, wxWindow)
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxPanel)
 
 // ----------------------------------------------------------------------------
 // wxPanel creation
@@ -148,7 +153,7 @@ void wxPanel::OnSize(wxSizeEvent& event)
     if (GetAutoLayout())
         Layout();
 #if wxUSE_CONSTRAINTS
-#if defined(__WXPM__) && 0
+#if defined(__WXPM__)
     else
     {
         // Need to properly move child windows under OS/2
@@ -164,11 +169,8 @@ void wxPanel::OnSize(wxSizeEvent& event)
         else
         {
             SWP                     vSwp;
-            int                     nYDiff;
 
             ::WinQueryWindowPos(GetHWND(), &vSwp);
-            nYDiff = pWinSwp->cy - vSwp.cy;
-            MoveChildren(nYDiff);
             pWinSwp->cx = vSwp.cx;
             pWinSwp->cy = vSwp.cy;
         }
@@ -178,3 +180,4 @@ void wxPanel::OnSize(wxSizeEvent& event)
 
     event.Skip();
 }
+

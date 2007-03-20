@@ -12,7 +12,10 @@
 #ifndef _WX_DIR_H_
 #define _WX_DIR_H_
 
-#include "wx/longlong.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dir.h"
+#endif
+
 #include "wx/string.h"
 
 class WXDLLIMPEXP_BASE wxArrayString;
@@ -138,16 +141,6 @@ public:
                               wxArrayString *files,
                               const wxString& filespec = wxEmptyString,
                               int flags = wxDIR_DEFAULT);
-
-    // check if there any files matching the given filespec under the given
-    // directory (i.e. searches recursively), return the file path if found or
-    // empty string otherwise
-    static wxString FindFirst(const wxString& dirname,
-                              const wxString& filespec,
-                              int flags = wxDIR_DEFAULT);
-
-    // returns the size of all directories recursively found in given path
-    static wxULongLong GetTotalSize(const wxString &dir, wxArrayString *filesSkipped = NULL);
 
 private:
     friend class wxDirData;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/toolbar.h
+// Name:        toolbar.h
 // Purpose:     wxToolBar class
 // Author:      Stefan Csomor
 // Modified by:
@@ -12,12 +12,16 @@
 #ifndef _WX_TOOLBAR_H_
 #define _WX_TOOLBAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "toolbar.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 #include "wx/tbarbase.h"
 #include "wx/dynarray.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxToolBar: public wxToolBarBase
 {
@@ -37,7 +41,7 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
     Init();
     Create(parent, id, pos, size, style, name);
   }
-  virtual ~wxToolBar();
+  ~wxToolBar();
 
   bool Create(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
             long style = wxNO_BORDER|wxTB_HORIZONTAL,
@@ -50,6 +54,8 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
     virtual bool Show(bool show = true);
     virtual bool IsShown() const;
+    virtual void DoGetSize(int *width, int *height) const;
+    virtual wxSize DoGetBestSize() const ;
     virtual bool Realize();
 
     virtual void SetToolBitmapSize(const wxSize& size);
@@ -57,10 +63,7 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
     virtual void SetRows(int nRows);
 
-    virtual void SetToolNormalBitmap(int id, const wxBitmap& bitmap);
-    virtual void SetToolDisabledBitmap(int id, const wxBitmap& bitmap);
-
-    // Add all the buttons
+  // Add all the buttons
 
     virtual wxString MacGetToolTipString( wxPoint &where ) ;
     void OnPaint(wxPaintEvent& event) ;
@@ -76,8 +79,7 @@ protected:
     // common part of all ctors
     void Init();
 
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual wxSize DoGetBestSize() const;
+    // implement base class pure virtuals
     virtual bool DoInsertTool(size_t pos, wxToolBarToolBase *tool);
     virtual bool DoDeleteTool(size_t pos, wxToolBarToolBase *tool);
 
@@ -93,13 +95,12 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     DECLARE_EVENT_TABLE()
-#if wxMAC_USE_NATIVE_TOOLBAR
-    bool m_macUsesNativeToolbar ;
-    void* m_macHIToolbarRef ;
+#if wxMAC_USE_NATIVE_TOOLBAR    
+	bool m_macUsesNativeToolbar ;
+	void* m_macHIToolbarRef ;
 #endif
 };
 

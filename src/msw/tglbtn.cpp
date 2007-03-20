@@ -2,8 +2,8 @@
 // Name:        src/msw/tglbtn.cpp
 // Purpose:     Definition of the wxToggleButton class, which implements a
 //              toggle button under wxMSW.
-// Author:      John Norris, minor changes by Axel Schlueter
-//              and William Gallafent.
+// Author: John Norris, minor changes by Axel Schlueter
+// and William Gallafent.
 // Modified by:
 // Created:     08.02.01
 // RCS-ID:      $Id$
@@ -12,7 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
-// declarations
+// declatations
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -25,9 +25,9 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TOGGLEBTN
-
 #include "wx/tglbtn.h"
+
+#if wxUSE_TOGGLEBTN
 
 #ifndef WX_PRECOMP
     #include "wx/button.h"
@@ -114,7 +114,7 @@ wxSize wxToggleButton::DoGetBestSize() const
 {
    wxString label = wxGetWindowText(GetHWND());
    int wBtn;
-   GetTextExtent(GetLabelText(label), &wBtn, NULL);
+   GetTextExtent(wxStripMenuCodes(label), &wBtn, NULL);
 
    int wChar, hChar;
    wxGetCharSize(GetHWND(), &wChar, &hChar, GetFont());
@@ -125,19 +125,18 @@ wxSize wxToggleButton::DoGetBestSize() const
    // the button height is proportional to the height of the font used
    int hBtn = BUTTON_HEIGHT_FROM_CHAR_HEIGHT(hChar);
 
+   wxSize sz(wBtn, hBtn);
+
 #if wxUSE_BUTTON
-   // make all buttons of at least standard size unless wxBU_EXACTFIT is given
    if ( !HasFlag(wxBU_EXACTFIT) )
    {
-       const wxSize szMin = wxButton::GetDefaultSize();
-       if ( wBtn < szMin.x )
-           wBtn = szMin.x;
-       if ( hBtn < szMin.y )
-           hBtn = szMin.y;
+       sz = wxButton::GetDefaultSize();
+       if (wBtn > sz.x)
+           sz.x = wBtn;
+       if (hBtn > sz.y)
+           sz.y = hBtn;
    }
 #endif // wxUSE_BUTTON
-
-   wxSize sz(wBtn, hBtn);
 
    CacheBestSize(sz);
    return sz;
@@ -168,3 +167,4 @@ void wxToggleButton::Command(wxCommandEvent & event)
 }
 
 #endif // wxUSE_TOGGLEBTN
+

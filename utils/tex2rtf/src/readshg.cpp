@@ -14,6 +14,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -107,7 +111,7 @@ int   ParseSHG( const wxChar* fileName, HotSpot **hotspots)
 
 // Convert Windows .SHG file to HTML map file
 
-bool SHGToMap(const wxChar *filename, const wxChar *defaultFile)
+bool SHGToMap(wxChar *filename, wxChar *defaultFile)
 {
   // Test the SHG parser
   HotSpot *hotspots = NULL;

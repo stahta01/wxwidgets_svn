@@ -7,8 +7,21 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_CLIPBOARD_H_
-#define _WX_GTK_CLIPBOARD_H_
+
+#ifndef __GTKCLIPBOARDH__
+#define __GTKCLIPBOARDH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#if wxUSE_CLIPBOARD
+
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/dataobj.h"
+#include "wx/control.h"
+#include "wx/module.h"
 
 // ----------------------------------------------------------------------------
 // wxClipboard
@@ -18,7 +31,7 @@ class WXDLLIMPEXP_CORE wxClipboard : public wxClipboardBase
 {
 public:
     wxClipboard();
-    virtual ~wxClipboard();
+    ~wxClipboard();
 
     // open the clipboard before SetData() and GetData()
     virtual bool Open();
@@ -68,4 +81,8 @@ private:
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 };
 
-#endif // _WX_GTK_CLIPBOARD_H_
+#endif
+   // wxUSE_CLIPBOARD
+
+#endif
+    // __GTKCLIPBOARDH__

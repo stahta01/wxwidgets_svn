@@ -38,10 +38,20 @@ public:
                        ,const wxAcceleratorEntry vaEntries[]
                       ); // Load from array
 
-    virtual ~wxAcceleratorTable();
+    // Copy constructors
+    inline wxAcceleratorTable(const wxAcceleratorTable& rAccel) { Ref(rAccel); }
+    inline wxAcceleratorTable(const wxAcceleratorTable* pAccel) { if (pAccel) Ref(*pAccel); }
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    ~wxAcceleratorTable();
+
+    inline wxAcceleratorTable& operator = (const wxAcceleratorTable& rAccel)
+    { if (*this == rAccel) return (*this); Ref(rAccel); return *this; };
+    inline bool operator== (const wxAcceleratorTable& rAccel) const
+    { return m_refData == rAccel.m_refData; };
+    inline bool operator!= (const wxAcceleratorTable& rAccel) const
+    { return m_refData != rAccel.m_refData; };
+
+    bool Ok() const;
     void SetHACCEL(WXHACCEL hAccel);
     WXHACCEL GetHACCEL(void) const;
 

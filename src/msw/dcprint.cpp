@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,28 +28,27 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
-#include "wx/dcprint.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcdlg.h"
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/window.h"
     #include "wx/dcmemory.h"
-    #include "wx/math.h"
 #endif
+
+#if wxUSE_PRINTING_ARCHITECTURE
 
 #include "wx/msw/private.h"
 
 #if wxUSE_WXDIB
-    #include "wx/msw/dib.h"
+#include "wx/msw/dib.h"
 #endif
 
+#include "wx/dcprint.h"
 #include "wx/printdlg.h"
 #include "wx/msw/printdlg.h"
+#include "wx/math.h"
 
+#include "wx/msw/wrapcdlg.h"
 #ifndef __WIN32__
     #include <print.h>
 #endif
@@ -54,12 +57,6 @@
 #if defined(__GNUWIN32__) || !defined(GDI_ERROR)
     #undef GDI_ERROR
     #define GDI_ERROR ((int)-1)
-#endif
-
-#if defined(__WXUNIVERSAL__) && wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW
-    #define wxUSE_PS_PRINTING 1
-#else
-    #define wxUSE_PS_PRINTING 0
 #endif
 
 // ----------------------------------------------------------------------------
@@ -187,19 +184,23 @@ bool wxPrinterDC::StartDoc(const wxString& message)
     else
         docinfo.lpszOutput = (const wxChar *) filename;
 
+#if defined(__WIN95__)
     docinfo.lpszDatatype = NULL;
     docinfo.fwType = 0;
+#endif
 
     if (!m_hDC)
         return false;
 
-    if ( ::StartDoc(GetHdc(), &docinfo) <= 0 )
+    int ret = ::StartDoc(GetHdc(), &docinfo);
+
+    if (ret <= 0)
     {
-        wxLogLastError(wxT("StartDoc"));
-        return false;
+        DWORD lastError = GetLastError();
+        wxLogDebug(wxT("wxDC::StartDoc failed with error: %ld\n"), lastError);
     }
 
-    return true;
+    return (ret > 0);
 }
 
 void wxPrinterDC::EndDoc()
@@ -218,21 +219,6 @@ void wxPrinterDC::EndPage()
     if (m_hDC)
         ::EndPage((HDC) m_hDC);
 }
-
-
-wxRect wxPrinterDC::GetPaperRect()
-
-{
-    if (!Ok()) return wxRect(0, 0, 0, 0);
-    int w = ::GetDeviceCaps((HDC) m_hDC, PHYSICALWIDTH);
-    int h = ::GetDeviceCaps((HDC) m_hDC, PHYSICALHEIGHT);
-    int x = -::GetDeviceCaps((HDC) m_hDC, PHYSICALOFFSETX);
-    int y = -::GetDeviceCaps((HDC) m_hDC, PHYSICALOFFSETY);
-    return wxRect(x, y, w, h);
-}
-
-
-#if !wxUSE_PS_PRINTING
 
 // Returns default device and port names
 static bool wxGetDefaultDeviceName(wxString& deviceName, wxString& portName)
@@ -292,46 +278,66 @@ static bool wxGetDefaultDeviceName(wxString& deviceName, wxString& portName)
     return ( !deviceName.empty() );
 }
 
-#endif // !wxUSE_PS_PRINTING
-
 // Gets an HDC for the specified printer configuration
 WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
 {
-#if wxUSE_PS_PRINTING
-    // TODO
-    wxUnusedVar(printDataConst);
+#if defined(__WXUNIVERSAL__) && (!defined(__WXMSW__) || wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
+
+#if 0
+    wxPostScriptPrintNativeData *data =
+        (wxPostScriptPrintNativeData *) printDataConst.GetNativeData();
+    // FIXME: how further ???
+#else
     return 0;
-#else // native Windows printing
+#endif
+
+#else // Postscript vs. native Windows
+
     wxWindowsPrintNativeData *data =
         (wxWindowsPrintNativeData *) printDataConst.GetNativeData();
 
     data->TransferFrom( printDataConst );
 
-    wxString deviceName = printDataConst.GetPrinterName();
-    if ( deviceName.empty() )
-    {
-        // Retrieve the default device name
-        wxString portName;
-        if ( !wxGetDefaultDeviceName(deviceName, portName) )
-        {
-            return 0; // Could not get default device name
-        }
-    }
+    wxChar* driverName = (wxChar*) NULL;
 
+    wxString devNameStr = printDataConst.GetPrinterName();
+    wxChar* portName = (wxChar*) NULL; // Obsolete in WIN32
+
+    const wxChar* deviceName;
+    if ( !devNameStr )
+        deviceName = (wxChar*) NULL;
+    else
+        deviceName = devNameStr.c_str();
+
+    LPDEVMODE lpDevMode = (LPDEVMODE) NULL;
 
     HGLOBAL hDevMode = (HGLOBAL)(DWORD) data->GetDevMode();
 
-    DEVMODE *lpDevMode = hDevMode ? (DEVMODE *)::GlobalLock(hDevMode) : NULL;
+    if ( hDevMode )
+        lpDevMode = (DEVMODE*) GlobalLock(hDevMode);
 
-    HDC hDC = ::CreateDC(NULL, deviceName, NULL, lpDevMode);
-    if ( !hDC )
-        wxLogLastError(_T("CreateDC(printer)"));
+    if ( !devNameStr )
+    {
+        // Retrieve the default device name
+        wxString portName;
+        if ( !wxGetDefaultDeviceName(devNameStr, portName) )
+        {
+            return 0; // Could not get default device name
+        }
+        deviceName = devNameStr.c_str();
+    }
 
-    if ( lpDevMode )
-        ::GlobalUnlock(hDevMode);
+#ifdef __WIN32__
+    HDC hDC = CreateDC(driverName, deviceName, portName, (DEVMODE *) lpDevMode);
+#else
+    HDC hDC = CreateDC(driverName, deviceName, portName, (LPSTR) lpDevMode);
+#endif
+
+    if (hDevMode && lpDevMode)
+        GlobalUnlock(hDevMode);
 
     return (WXHDC) hDC;
-#endif // PostScript/Windows printing
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -397,8 +403,7 @@ void wxPrinterDC::DoDrawBitmap(const wxBitmap& bmp,
     {
         // no support for StretchDIBits() or an error occurred if we got here
         wxMemoryDC memDC;
-
-        memDC.SelectObjectAsSource(bmp);
+        memDC.SelectObject(bmp);
 
         Blit(x, y, width, height, &memDC, 0, 0, wxCOPY, useMask);
 

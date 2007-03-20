@@ -62,6 +62,7 @@ BASE_CMN_SRC = \
 ../../src/common/filename.cpp \
 ../../src/common/filesys.cpp \
 ../../src/common/fmapbase.cpp \
+../../src/common/fs_zip.cpp \
 ../../src/common/hash.cpp \
 ../../src/common/hashmap.cpp \
 ../../src/common/init.cpp \
@@ -75,7 +76,6 @@ BASE_CMN_SRC = \
 ../../src/common/module.cpp \
 ../../src/common/mstream.cpp \
 ../../src/common/object.cpp \
-../../src/common/platinfo.cpp \
 ../../src/common/process.cpp \
 ../../src/common/regex.cpp \
 ../../src/common/stdpbase.cpp \
@@ -135,7 +135,7 @@ PALMOS_LOWLEVEL_SRC = \
 ../../src/palmos/brush.cpp \
 ../../src/palmos/caret.cpp \
 ../../src/palmos/clipbrd.cpp \
-../../src/generic/colour.cpp \
+../../src/palmos/colour.cpp \
 ../../src/palmos/cursor.cpp \
 ../../src/palmos/data.cpp \
 ../../src/palmos/dc.cpp \
@@ -144,13 +144,15 @@ PALMOS_LOWLEVEL_SRC = \
 ../../src/palmos/dcprint.cpp \
 ../../src/palmos/dcscreen.cpp \
 ../../src/palmos/dib.cpp \
+../../src/palmos/display.cpp \
 ../../src/palmos/enhmeta.cpp \
 ../../src/palmos/evtloop.cpp \
 ../../src/palmos/font.cpp \
 ../../src/palmos/fontenum.cpp \
 ../../src/palmos/fontutil.cpp \
 ../../src/palmos/gdiimage.cpp \
-../../src/generic/icon.cpp \
+../../src/palmos/gdiobj.cpp \
+../../src/palmos/icon.cpp \
 ../../src/palmos/minifram.cpp \
 ../../src/palmos/palette.cpp \
 ../../src/palmos/pen.cpp \
@@ -222,7 +224,6 @@ GUI_CMN_SRC = \
 ../../src/common/bookctrl.cpp \
 ../../src/common/choiccmn.cpp \
 ../../src/common/clipcmn.cpp \
-../../src/common/colourcmn.cpp \
 ../../src/common/cmdproc.cpp \
 ../../src/common/cmndata.cpp \
 ../../src/common/containr.cpp \
@@ -239,11 +240,9 @@ GUI_CMN_SRC = \
 ../../src/common/dpycmn.cpp \
 ../../src/common/dseldlg.cpp \
 ../../src/common/effects.cpp \
-../../src/common/evtloopcmn.cpp \
 ../../src/common/fddlgcmn.cpp \
 ../../src/common/fldlgcmn.cpp \
 ../../src/common/fontcmn.cpp \
-../../src/common/fontenumcmn.cpp \
 ../../src/common/fontmap.cpp \
 ../../src/common/framecmn.cpp \
 ../../src/common/gaugecmn.cpp \

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/toplevel.cpp
+// Name:        x11/toplevel.cpp
 // Purpose:     implements wxTopLevelWindow for X11
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,19 +28,18 @@
     #pragma hdrstop
 #endif
 
-#include "wx/toplevel.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/toplevel.h"
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/frame.h"
     #include "wx/menu.h"
     #include "wx/statusbr.h"
-    #include "wx/settings.h"
 #endif //WX_PRECOMP
 
+#include "wx/settings.h"
 #include "wx/x11/private.h"
 #include "X11/Xutil.h"
 
@@ -51,20 +54,20 @@ bool wxMWMIsRunning(Window w);
 void wxTopLevelWindowX11::Init()
 {
     m_iconized =
-    m_maximizeOnShow = false;
+    m_maximizeOnShow = FALSE;
 
     // unlike (almost?) all other windows, frames are created hidden
-    m_isShown = false;
+    m_isShown = FALSE;
 
     // Data to save/restore when calling ShowFullScreen
     m_fsStyle = 0;
-    m_fsIsMaximized = false;
-    m_fsIsShowing = false;
-
-    m_needResizeInIdle = false;
-
-    m_x = wxDefaultCoord;
-    m_y = wxDefaultCoord;
+    m_fsIsMaximized = FALSE;
+    m_fsIsShowing = FALSE;
+    
+    m_needResizeInIdle = FALSE;
+    
+    m_x = -1;
+    m_y = -1;
     m_width = 20;
     m_height = 20;
 }
@@ -85,45 +88,45 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
 
     SetName(name);
 
-    m_windowId = id == wxID_ANY ? NewControlId() : id;
+    m_windowId = id == -1 ? NewControlId() : id;
 
     if (parent)
         parent->AddChild(this);
 
     wxTopLevelWindows.Append(this);
-
+    
     Display *xdisplay = wxGlobalDisplay();
     int xscreen = DefaultScreen( xdisplay );
     Visual *xvisual = DefaultVisual( xdisplay, xscreen );
     Window xparent = RootWindow( xdisplay, xscreen );
     Colormap cm = DefaultColormap( xdisplay, xscreen );
-
+    
     if (GetExtraStyle() & wxTOPLEVEL_EX_DIALOG)
         m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
     else
         m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
     m_backgroundColour.CalcPixel( (WXColormap) cm );
-    m_hasBgCol = true;
-
+    m_hasBgCol = TRUE;
+	
     m_x = pos.x;
     if (m_x < -1)
         m_x = 10;
-
+        
     m_y = pos.y;
     if (m_y < 0)
         m_y = 10;
-
+        
     m_width = size.x;
     if (m_width < 0)
         m_width = 500;
-
+        
     m_height = size.y;
     if (m_height < 0)
         m_height = 380;
-
+    
 #if !wxUSE_NANOX
     XSetWindowAttributes xattributes;
-
+    
     long xattributes_mask =
         CWBorderPixel | CWBackPixel;
 
@@ -135,27 +138,27 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
         xattributes_mask |= CWOverrideRedirect;
         xattributes.override_redirect = True;
     }
-
+    
     if (!HasFlag( wxFULL_REPAINT_ON_RESIZE ))
     {
         xattributes_mask |= CWBitGravity;
         xattributes.bit_gravity = NorthWestGravity;
     }
-
+    
     xattributes_mask |= CWEventMask;
-    xattributes.event_mask =
+    xattributes.event_mask = 
         ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
         ButtonMotionMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask |
         KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
         PropertyChangeMask;
-
+        
     Window xwindow = XCreateWindow( xdisplay, xparent, m_x, m_y, m_width, m_height,
                                     0, DefaultDepth(xdisplay,xscreen), InputOutput, xvisual, xattributes_mask, &xattributes );
 #else
     long backColor, foreColor;
     backColor = GR_RGB(m_backgroundColour.Red(), m_backgroundColour.Green(), m_backgroundColour.Blue());
     foreColor = GR_RGB(m_foregroundColour.Red(), m_foregroundColour.Green(), m_foregroundColour.Blue());
-
+    
     Window xwindow = XCreateWindowWithColor( xdisplay, xparent, m_x, m_y, m_width, m_height,
                                     0, 0, InputOutput, xvisual, backColor, foreColor);
 #endif
@@ -214,11 +217,11 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
     size_hints.height = m_height;
     size_hints.win_gravity = NorthWestGravity;
     XSetWMNormalHints( xdisplay, xwindow, &size_hints);
-
+    
     XWMHints wm_hints;
     wm_hints.flags = InputHint | StateHint;
     if (GetParent())
-    {
+    {  
         wm_hints.flags |= WindowGroupHint;
         wm_hints.window_group = (Window) GetParent()->GetMainWindow();
     }
@@ -232,12 +235,12 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
     XSetWMProtocols( xdisplay, xwindow, wm_protocols, 2);
 
 #endif
-
+    
     wxSetWMDecorations( xwindow, style);
 
     SetTitle(title);
-
-    return true;
+    
+    return TRUE;
 }
 
 wxTopLevelWindowX11::~wxTopLevelWindowX11()
@@ -260,7 +263,7 @@ wxTopLevelWindowX11::~wxTopLevelWindowX11()
 void wxTopLevelWindowX11::OnInternalIdle()
 {
     wxWindow::OnInternalIdle();
-
+    
     // Do this only after the last idle event so that
     // all windows have been updated before a new
     // round of size events is sent
@@ -269,8 +272,8 @@ void wxTopLevelWindowX11::OnInternalIdle()
         wxSizeEvent event( GetClientSize(), GetId() );
         event.SetEventObject( this );
         GetEventHandler()->ProcessEvent( event );
-
-        m_needResizeInIdle = false;
+        
+        m_needResizeInIdle = FALSE;
     }
 }
 
@@ -283,15 +286,15 @@ bool wxTopLevelWindowX11::Show(bool show)
     if (show)
     {
         wxSizeEvent event(GetSize(), GetId());
-
+        
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
-
-        m_needResizeInIdle = false;
+        
+        m_needResizeInIdle = FALSE;
     }
 
     bool ret = wxWindowX11::Show(show);
-
+    
     return ret;
 }
 
@@ -307,7 +310,7 @@ void wxTopLevelWindowX11::Maximize(bool maximize)
 bool wxTopLevelWindowX11::IsMaximized() const
 {
     // TODO
-    return true;
+    return TRUE;
 }
 
 void wxTopLevelWindowX11::Iconize(bool iconize)
@@ -316,7 +319,7 @@ void wxTopLevelWindowX11::Iconize(bool iconize)
     {
         if (XIconifyWindow(wxGlobalDisplay(),
             (Window) GetMainWindow(), DefaultScreen(wxGlobalDisplay())) != 0)
-            m_iconized = true;
+            m_iconized = TRUE;
     }
 }
 
@@ -331,7 +334,7 @@ void wxTopLevelWindowX11::Restore()
     if (m_iconized && GetMainWindow())
     {
         XMapWindow(wxGlobalDisplay(), (Window) GetMainWindow());
-        m_iconized = false;
+        m_iconized = FALSE;
     }
 }
 
@@ -344,24 +347,24 @@ bool wxTopLevelWindowX11::ShowFullScreen(bool show, long style)
     if (show)
     {
         if (IsFullScreen())
-            return false;
+            return FALSE;
 
-        m_fsIsShowing = true;
+        m_fsIsShowing = TRUE;
         m_fsStyle = style;
 
         // TODO
 
-        return true;
+        return TRUE;
     }
     else
     {
         if (!IsFullScreen())
-            return false;
+            return FALSE;
 
-        m_fsIsShowing = false;
+        m_fsIsShowing = FALSE;
 
         // TODO
-        return true;
+        return TRUE;
     }
 }
 
@@ -411,7 +414,7 @@ bool wxTopLevelWindowX11::SetShape(const wxRegion& region)
 void wxTopLevelWindowX11::SetTitle(const wxString& title)
 {
     m_title = title;
-
+    
     if (GetMainWindow())
     {
 #if wxUSE_UNICODE
@@ -468,12 +471,12 @@ void wxTopLevelWindowX11::DoSetClientSize(int width, int height)
 
     m_width = width;
     m_height = height;
-
+    
     if (m_width == old_width && m_height == old_height)
         return;
-
+        
     // wxLogDebug("DoSetClientSize: %s (%ld) %dx%d", GetClassInfo()->GetClassName(), GetId(), width, height);
-
+    
 #if !wxUSE_NANOX
     XSizeHints size_hints;
     size_hints.flags = PSize;
@@ -481,7 +484,7 @@ void wxTopLevelWindowX11::DoSetClientSize(int width, int height)
     size_hints.height = height;
     XSetWMNormalHints( wxGlobalDisplay(), (Window) GetMainWindow(), &size_hints );
 #endif
-
+    
     wxWindowX11::DoSetClientSize(width, height);
 }
 
@@ -492,24 +495,24 @@ void wxTopLevelWindowX11::DoSetSize(int x, int y, int width, int height, int siz
     int old_width = m_width;
     int old_height = m_height;
 
-    if (x != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+    if (x != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
         m_x = x;
-
-    if (y != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+        
+    if (y != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
         m_y = y;
-
-    if (width != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+        
+    if (width != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
         m_width = width;
-
-    if (height != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+        
+    if (height != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
         m_height = height;
-
+        
     if (m_x == old_x && m_y == old_y && m_width == old_width && m_height == old_height)
         return;
-
+    
     // wxLogDebug("DoSetSize: %s (%ld) %d, %d %dx%d", GetClassInfo()->GetClassName(), GetId(), x, y, width, height);
 
-#if !wxUSE_NANOX
+#if !wxUSE_NANOX    
     XSizeHints size_hints;
     size_hints.flags = 0;
     size_hints.flags |= PPosition;
@@ -522,7 +525,7 @@ void wxTopLevelWindowX11::DoSetSize(int x, int y, int width, int height, int siz
 #endif
 
     wxWindowX11::DoSetSize(x, y, width, height, sizeFlags);
-
+    
 #if 0
     Display *display = wxGlobalDisplay();
     Window root = RootWindowOfScreen(DefaultScreenOfDisplay(display));
@@ -552,20 +555,20 @@ void wxTopLevelWindowX11::DoSetSize(int x, int y, int width, int height, int siz
     windowChanges.stack_mode = 0;
     int valueMask = CWX | CWY | CWWidth | CWHeight;
 
-    if (x != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+    if (x != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
     {
         valueMask |= CWX;
     }
-    if (y != wxDefaultCoord || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+    if (y != -1 || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
     {
         valueMask |= CWY;
     }
-    if (width != wxDefaultCoord)
+    if (width != -1)
     {
         windowChanges.width = wxMax(1, width);
         valueMask |= CWWidth;
     }
-    if (height != wxDefaultCoord)
+    if (height != -1)
     {
         windowChanges.height = wxMax(1, height);
         valueMask |= CWHeight;
@@ -652,7 +655,7 @@ void wxTopLevelWindowX11::DoGetPosition(int *x, int *y) const
 #define MWM_INPUT_FULL_APPLICATION_MODAL 3
 #define MWM_INPUT_APPLICATION_MODAL MWM_INPUT_PRIMARY_APPLICATION_MODAL
 
-#define MWM_TEAROFF_WINDOW (1L<<0)
+#define MWM_TEAROFF_WINDOW	(1L<<0)
 
 #endif
 
@@ -697,10 +700,10 @@ bool wxSetWMDecorations(Window w, long style)
         // The default dialog style doesn't include any kind
         // of border, which is a bit odd. Anyway, inclusion
         // of a caption surely implies a border.
-        style |= wxRESIZE_BORDER;
+        style |= wxTHICK_FRAME;
     }
 
-    if (style & wxRESIZE_BORDER)
+    if (style & wxTHICK_FRAME)
     {
         wmProp.props |= GR_WM_PROPS_APPFRAME ;
         wmProp.flags |= GR_WM_FLAGS_PROPS ;
@@ -722,7 +725,7 @@ bool wxSetWMDecorations(Window w, long style)
         wmProp.flags |= GR_WM_FLAGS_PROPS ;
     }
 
-    if (((style & wxBORDER) != wxBORDER) && ((style & wxRESIZE_BORDER) != wxRESIZE_BORDER)
+    if (((style & wxBORDER) != wxBORDER) && ((style & wxTHICK_FRAME) != wxTHICK_FRAME)
         && ((style & wxRESIZE_BORDER) != wxRESIZE_BORDER))
     {
         wmProp.props |= GR_WM_PROPS_NODECORATE ;
@@ -730,18 +733,18 @@ bool wxSetWMDecorations(Window w, long style)
     }
 
     GrSetWMProperties(w, & wmProp);
-
+    
 #else
 
     Atom mwm_wm_hints = XInternAtom(wxGlobalDisplay(),"_MOTIF_WM_HINTS", False);
     if (mwm_wm_hints == 0)
-       return false;
-
+       return FALSE;
+    
     MwmHints hints;
     hints.flags = MWM_HINTS_DECORATIONS | MWM_HINTS_FUNCTIONS;
     hints.decorations = 0;
     hints.functions = 0;
-
+    
     if ((style & wxSIMPLE_BORDER) || (style & wxNO_BORDER))
     {
         // leave zeros
@@ -753,25 +756,25 @@ bool wxSetWMDecorations(Window w, long style)
 
         if ((style & wxCAPTION) != 0)
             hints.decorations |= MWM_DECOR_TITLE;
-
+            
         if ((style & wxSYSTEM_MENU) != 0)
             hints.decorations |= MWM_DECOR_MENU;
-
+        
         if ((style & wxCLOSE_BOX) != 0)
             hints.functions |= MWM_FUNC_CLOSE;
-
+        
         if ((style & wxMINIMIZE_BOX) != 0)
         {
             hints.functions |= MWM_FUNC_MINIMIZE;
             hints.decorations |= MWM_DECOR_MINIMIZE;
         }
-
+        
         if ((style & wxMAXIMIZE_BOX) != 0)
         {
             hints.functions |= MWM_FUNC_MAXIMIZE;
             hints.decorations |= MWM_DECOR_MAXIMIZE;
         }
-
+        
         if ((style & wxRESIZE_BORDER) != 0)
         {
             hints.functions |= MWM_FUNC_RESIZE;
@@ -780,11 +783,13 @@ bool wxSetWMDecorations(Window w, long style)
     }
 
     XChangeProperty(wxGlobalDisplay(),
-                    w,
-                    mwm_wm_hints, mwm_wm_hints,
-                    32, PropModeReplace,
-                    (unsigned char *) &hints, PROP_MOTIF_WM_HINTS_ELEMENTS);
+		    w,
+		    mwm_wm_hints, mwm_wm_hints,
+		    32, PropModeReplace,
+		    (unsigned char *) &hints, PROP_MOTIF_WM_HINTS_ELEMENTS);
 
 #endif
-    return true;
+    return TRUE;
 }
+
+

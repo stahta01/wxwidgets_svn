@@ -1,20 +1,23 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:         wx/matrix.h
-// Purpose:      wxTransformMatrix class. NOT YET USED
-// Author:       Chris Breeze, Julian Smart
+// Name:        matrix.h
+// Purpose:     wxTransformMatrix class. NOT YET USED
+// Author:      Chris Breeze, Julian Smart
 // Modified by:  Klaas Holwerda
-// Created:      01/02/97
-// RCS-ID:       $Id$
-// Copyright:    (c) Julian Smart, Chris Breeze
-// Licence:      wxWindows licence
+// Created:     01/02/97
+// RCS-ID:      $Id$
+// Copyright:   (c) Julian Smart, Chris Breeze
+// Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MATRIXH__
 #define _WX_MATRIXH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "matrix.h"
+#endif
+
 //! headerfiles="matrix.h wx/object.h"
 #include "wx/object.h"
-#include "wx/math.h"
 
 //! codefiles="matrix.cpp"
 
@@ -49,8 +52,8 @@ public:
     void SetValue(int col, int row, double value);
 
     void operator = (const wxTransformMatrix& mat);
-    bool operator == (const wxTransformMatrix& mat) const;
-    bool operator != (const wxTransformMatrix& mat) const;
+    bool operator == (const wxTransformMatrix& mat);
+    bool operator != (const wxTransformMatrix& mat);
 
     //multiply every element by t
     wxTransformMatrix&          operator*=(const double& t);
@@ -215,15 +218,15 @@ inline double wxTransformMatrix::TransformY(double y) const
 inline bool wxTransformMatrix::IsIdentity1(void) const
 {
     return
-    ( wxIsSameDouble(m_matrix[0][0], 1.0) &&
-      wxIsSameDouble(m_matrix[1][1], 1.0) &&
-      wxIsSameDouble(m_matrix[2][2], 1.0) &&
-      wxIsSameDouble(m_matrix[1][0], 0.0) &&
-      wxIsSameDouble(m_matrix[2][0], 0.0) &&
-      wxIsSameDouble(m_matrix[0][1], 0.0) &&
-      wxIsSameDouble(m_matrix[2][1], 0.0) &&
-      wxIsSameDouble(m_matrix[0][2], 0.0) &&
-      wxIsSameDouble(m_matrix[1][2], 0.0) );
+     (m_matrix[0][0] == 1.0 &&
+      m_matrix[1][1] == 1.0 &&
+      m_matrix[2][2] == 1.0 &&
+      m_matrix[1][0] == 0.0 &&
+      m_matrix[2][0] == 0.0 &&
+      m_matrix[0][1] == 0.0 &&
+      m_matrix[2][1] == 0.0 &&
+      m_matrix[0][2] == 0.0 &&
+      m_matrix[1][2] == 0.0) ;
 }
 
 // Calculates the determinant of a 2 x 2 matrix
@@ -232,4 +235,5 @@ inline double wxCalculateDet(double a11, double a21, double a12, double a22)
     return a11 * a22 - a12 * a21;
 }
 
-#endif // _WX_MATRIXH__
+#endif
+    // _WX_MATRIXH__

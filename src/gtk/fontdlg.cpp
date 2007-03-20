@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/fontdlg.cpp
+// Name:        gtk/fontdlg.cpp
 // Purpose:     wxFontDialog
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,22 +7,34 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "fontdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_FONTDLG && !defined(__WXGPE__)
+#include "wx/defs.h"
+
+#if wxUSE_FONTDLG
+
+#ifndef __WXGPE__
 
 #include "wx/fontdlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/utils.h"
-    #include "wx/msgdlg.h"
-#endif
-
 #include "wx/fontutil.h"
+#include "wx/utils.h"
+#include "wx/intl.h"
+#include "wx/debug.h"
+#include "wx/msgdlg.h"
 
 #include "wx/gtk/private.h"
+
+//-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+extern bool g_isIdle;
 
 //-----------------------------------------------------------------------------
 // "delete_event"
@@ -32,7 +44,8 @@ extern "C" {
 static
 bool gtk_fontdialog_delete_callback( GtkWidget *WXUNUSED(widget), GdkEvent *WXUNUSED(event), wxDialog *win )
 {
-    // don't need to install idle handler, its done from "event" signal
+    if (g_isIdle)
+        wxapp_install_idle_handler();
 
 /*
     printf( "OnDelete from " );
@@ -43,7 +56,7 @@ bool gtk_fontdialog_delete_callback( GtkWidget *WXUNUSED(widget), GdkEvent *WXUN
 
     win->Close();
 
-    return true;
+    return TRUE;
 }
 }
 
@@ -60,8 +73,21 @@ void gtk_fontdialog_ok_callback( GtkWidget *WXUNUSED(widget), wxFontDialog *dial
 
     GtkFontSelectionDialog *fontdlg = GTK_FONT_SELECTION_DIALOG(dialog->m_widget);
 
-    wxGtkString fontname(gtk_font_selection_dialog_get_font_name(fontdlg));
+#ifndef __WXGTK20__
+    GdkFont *gfont = gtk_font_selection_dialog_get_font(fontdlg);
+
+    if (!gfont)
+    {
+        wxMessageBox(_("Please choose a valid font."), _("Error"),
+                     wxOK | wxICON_ERROR);
+        return;
+    }
+#endif
+
+    gchar *fontname = gtk_font_selection_dialog_get_font_name(fontdlg);
     dialog->SetChosenFont( fontname);
+
+    g_free( fontname );
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
     event.SetEventObject( dialog );
@@ -94,14 +120,14 @@ IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
 
 bool wxFontDialog::DoCreate(wxWindow *parent)
 {
-    m_needParent = false;
+    m_needParent = FALSE;
 
     if (!PreCreation( parent, wxDefaultPosition, wxDefaultSize ) ||
         !CreateBase( parent, -1, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE,
                      wxDefaultValidator, wxT("fontdialog") ))
     {
         wxFAIL_MSG( wxT("wxFontDialog creation failed") );
-        return false;
+        return FALSE;
     }
 
     wxString m_message( _("Choose font") );
@@ -113,14 +139,24 @@ bool wxFontDialog::DoCreate(wxWindow *parent)
 
     GtkFontSelectionDialog *sel = GTK_FONT_SELECTION_DIALOG(m_widget);
 
-    g_signal_connect (sel->ok_button, "clicked",
-                      G_CALLBACK (gtk_fontdialog_ok_callback), this);
+    gtk_signal_connect( GTK_OBJECT(sel->ok_button), "clicked",
+      GTK_SIGNAL_FUNC(gtk_fontdialog_ok_callback), (gpointer*)this );
 
-    g_signal_connect (sel->cancel_button, "clicked",
-                      G_CALLBACK (gtk_fontdialog_cancel_callback), this);
+#ifndef __WXGTK20__
+    // strange way to internationalize
+    gtk_label_set( GTK_LABEL( BUTTON_CHILD(sel->ok_button) ), _("OK") );
+#endif
 
-    g_signal_connect (m_widget, "delete_event",
-                      G_CALLBACK (gtk_fontdialog_delete_callback), this);
+    gtk_signal_connect( GTK_OBJECT(sel->cancel_button), "clicked",
+      GTK_SIGNAL_FUNC(gtk_fontdialog_cancel_callback), (gpointer*)this );
+
+#ifndef __WXGTK20__
+    // strange way to internationalize
+    gtk_label_set( GTK_LABEL( BUTTON_CHILD(sel->cancel_button) ), _("Cancel") );
+#endif
+
+    gtk_signal_connect( GTK_OBJECT(m_widget), "delete_event",
+        GTK_SIGNAL_FUNC(gtk_fontdialog_delete_callback), (gpointer)this );
 
     wxFont font = m_fontData.GetInitialFont();
     if( font.Ok() )
@@ -130,7 +166,13 @@ bool wxFontDialog::DoCreate(wxWindow *parent)
         if ( info )
         {
 
+#ifdef __WXGTK20__
             const wxString& fontname = info->ToString();
+#else
+            const wxString& fontname = info->GetXFontName();
+            if ( !fontname )
+                font.GetInternalFont();
+#endif
             gtk_font_selection_dialog_set_font_name(sel, wxGTK_CONV(fontname));
         }
         else
@@ -140,7 +182,7 @@ bool wxFontDialog::DoCreate(wxWindow *parent)
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 wxFontDialog::~wxFontDialog()
@@ -152,4 +194,7 @@ void wxFontDialog::SetChosenFont(const char *fontname)
     m_fontData.SetChosenFont(wxFont( wxString::FromAscii(fontname) ));
 }
 
-#endif // wxUSE_FONTDLG && !__WXGPE__
+#endif // wxUSE_FONTDLG
+
+#endif // GPE
+

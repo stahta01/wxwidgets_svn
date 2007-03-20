@@ -12,6 +12,10 @@
 #ifndef _WX_GENERIC_PANEL_H_
 #define _WX_GENERIC_PANEL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "panelg.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers and forward declarations
 // ----------------------------------------------------------------------------
@@ -21,7 +25,7 @@
 
 class WXDLLEXPORT wxControlContainer;
 
-extern WXDLLEXPORT_DATA(const wxChar) wxPanelNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxPanelNameStr;
 
 // ----------------------------------------------------------------------------
 // wxPanel contains other controls and implements TAB traversal between them
@@ -58,8 +62,7 @@ public:
     }
 
     // Pseudo ctor
-    bool Create(wxWindow *parent,
-                wxWindowID winid = wxID_ANY,
+    bool Create(wxWindow *parent, wxWindowID winid,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxTAB_TRAVERSAL | wxNO_BORDER,

@@ -85,22 +85,12 @@ docs/tech/*.htm
 
 src/common/*.cpp
 src/common/extended.c
-src/common/unzip.c
-src/common/unzip.h
 src/common/*.inc
 src/common/base.rc
 
 src/generic/*.cpp
-src/generic/*.c
-src/generic/*.inc
 
 src/html/*.cpp
-src/html/*.h
-src/html/bitmaps/*.xpm
-
-src/richtext/*.cpp
-
-src/aui/*.cpp
 
 src/unix/*.cpp
 src/unix/*.c
@@ -170,8 +160,6 @@ include/wx/html/*.h
 include/wx/html/msw/*.bmp
 include/wx/html/msw/*.ico
 include/wx/html/msw/*.rc
-include/wx/richtext/*.h
-include/wx/aui/*.h
 lib/dummy
 
 tools/gettext/*.*
@@ -220,10 +208,6 @@ samples/artprov/*.rc
 samples/artprov/*.wav
 samples/artprov/*.pro
 samples/artprov/*.bkl
-
-samples/richtext/*.cpp
-samples/richtext/makefile*
-samples/richtext/*.bkl
 
 samples/calendar/*.cpp
 samples/calendar/*.h
@@ -753,6 +737,8 @@ samples/ipc/client.b32
 samples/ipc/server.b32
 samples/ipc/client.bcc
 samples/ipc/server.bcc
+samples/ipc/client.dos
+samples/ipc/server.dos
 samples/ipc/client.g95
 samples/ipc/server.g95
 samples/ipc/*.rc
@@ -977,7 +963,7 @@ samples/opengl/penguin/*.xbm
 samples/opengl/penguin/*.xpm
 samples/opengl/penguin/*.pro
 samples/opengl/penguin/make*.*
-samples/opengl/penguin/penguin.dxf.gz
+samples/opengl/penguin/penguin.lwo
 samples/opengl/penguin/*.bkl
 
 samples/png/*.cpp
@@ -1041,15 +1027,18 @@ samples/render/*.rc
 samples/render/*.pro
 samples/render/*.bkl
 
-samples/richtext/*.cpp
-samples/richtext/*.h
-samples/richtext/makefile*
-samples/richtext/*.rc
-samples/richtext/*.pro
-samples/richtext/*.bkl
-samples/richtext/readme.txt
-samples/richtext/todo.txt
-samples/richtext/bitmaps/*.xpm
+samples/richedit/*.cpp
+samples/richedit/*.h
+samples/richedit/makefile*
+samples/richedit/*.xbm
+samples/richedit/*.xpm
+samples/richedit/*.ico
+samples/richedit/*.bmp
+samples/richedit/*.rc
+samples/richedit/*.pro
+samples/richedit/*.bkl
+samples/richedit/README
+samples/richedit/TODO
 
 samples/rotate/*.cpp
 samples/rotate/*.h
@@ -1145,6 +1134,8 @@ samples/sockets/client.wat
 samples/sockets/server.wat
 samples/sockets/client.vc
 samples/sockets/server.vc
+samples/sockets/client.dos
+samples/sockets/server.dos
 samples/sockets/client.b32
 samples/sockets/server.b32
 samples/sockets/client.bcc

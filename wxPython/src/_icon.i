@@ -65,8 +65,7 @@ public:
         void SetHandle(long handle) { self->SetHandle((WXHANDLE)handle); }
     }
 #endif
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
+    bool Ok();
     int GetWidth();
     int GetHeight();
     int GetDepth();
@@ -78,12 +77,7 @@ public:
 #endif
     void CopyFromBitmap(const wxBitmap& bmp);
 
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-    
-    %property(Depth, GetDepth, SetDepth, doc="See `GetDepth` and `SetDepth`");
-    %property(Height, GetHeight, SetHeight, doc="See `GetHeight` and `SetHeight`");
-    %property(Width, GetWidth, SetWidth, doc="See `GetWidth` and `SetWidth`");
-
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 };
 
 //---------------------------------------------------------------------------
@@ -107,7 +101,7 @@ public:
 
     // returns True if this object is valid/initialized
     bool IsOk() const;
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
+    %pythoncode { def __nonzero__(self): return self.Ok() }
 
     // set/get the icon file name
     void SetFileName(const wxString& filename);
@@ -130,10 +124,6 @@ public:
 #endif
         }
     }
-
-    %property(FileName, GetFileName, SetFileName, doc="See `GetFileName` and `SetFileName`");
-    %property(Index, GetIndex, SetIndex, doc="See `GetIndex` and `SetIndex`");
-    
 };
 
 
@@ -169,8 +159,6 @@ public:
     // returns the icon with size wxSYS_ICON_[XY]; if no such icon exists,
     // returns the first icon in the bundle
     const wxIcon& GetIcon( const wxSize& size ) const;
-
-    %property(Icon, GetIcon, doc="See `GetIcon`");
 };
 
 //---------------------------------------------------------------------------

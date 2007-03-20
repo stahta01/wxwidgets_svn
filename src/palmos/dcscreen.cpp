@@ -9,19 +9,23 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcscreen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#include "wx/dcscreen.h"
 
 #ifndef WX_PRECOMP
    #include "wx/string.h"
    #include "wx/window.h"
 #endif
+
+#include "wx/dcscreen.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
@@ -33,3 +37,4 @@ wxScreenDC::wxScreenDC()
 void wxScreenDC::DoGetSize(int *width, int *height) const
 {
 }
+

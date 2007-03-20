@@ -12,6 +12,10 @@
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "clipbrd.h"
+#endif
+
 #if wxUSE_CLIPBOARD
 
 #include "wx/list.h"
@@ -54,7 +58,7 @@ class WXDLLEXPORT wxClipboard : public wxObject
 
 public:
     wxClipboard();
-    virtual ~wxClipboard();
+    ~wxClipboard();
 
     // open the clipboard before SetData() and GetData()
     virtual bool Open();

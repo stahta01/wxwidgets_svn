@@ -10,6 +10,10 @@
 #ifndef _WX_GTK_TBARGTK_H_
 #define _WX_GTK_TBARGTK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tbargtk.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 // ----------------------------------------------------------------------------
@@ -25,7 +29,7 @@ public:
                wxWindowID id,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
-               long style = wxTB_HORIZONTAL,
+               long style = 0,
                const wxString& name = wxToolBarNameStr )
     {
         Init();
@@ -52,12 +56,9 @@ public:
 
     virtual void SetWindowStyleFlag( long style );
 
-    virtual void SetToolNormalBitmap(int id, const wxBitmap& bitmap);
-    virtual void SetToolDisabledBitmap(int id, const wxBitmap& bitmap);
-
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation from now on
     // --------------------------
 
@@ -73,8 +74,6 @@ protected:
 
     // set the GTK toolbar style and orientation
     void GtkSetStyle();
-
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
     // implement base class pure virtuals
     virtual bool DoInsertTool(size_t pos, wxToolBarToolBase *tool);
@@ -92,8 +91,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelpString,
                                           const wxString& longHelpString);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxToolBar)

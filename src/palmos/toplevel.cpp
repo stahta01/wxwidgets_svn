@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "toplevel.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,27 +28,26 @@
     #pragma hdrstop
 #endif
 
-#include "wx/toplevel.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/toplevel.h"
     #include "wx/dialog.h"
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/frame.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
-    #include "wx/button.h"
-    #include "wx/checkbox.h"
-    #include "wx/radiobut.h"
-    #include "wx/slider.h"
-    #include "wx/module.h"
 #endif //WX_PRECOMP
 
+#include "wx/module.h"
 #include "wx/display.h"
 
 // controls for sending select event
+#include "wx/button.h"
+#include "wx/checkbox.h"
+#include "wx/radiobut.h"
 #include "wx/tglbtn.h"
+#include "wx/slider.h"
 #include "wx/datectrl.h"
 
 #include <Window.h>
@@ -224,15 +227,6 @@ bool wxTopLevelWindowPalm::ShowFullScreen(bool show, long style)
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowPalm misc
 // ----------------------------------------------------------------------------
-
-void wxTopLevelWindowPalm::SetTitle( const wxString& WXUNUSED(title))
-{
-}
-
-wxString wxTopLevelWindowPalm::GetTitle() const
-{
-    return wxEmptyString;
-}
 
 void wxTopLevelWindowPalm::SetIcon(const wxIcon& icon)
 {

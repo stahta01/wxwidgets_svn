@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "control.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,22 +30,21 @@
 
 #if wxUSE_CONTROLS
 
-#include "wx/control.h"
-
 #ifndef WX_PRECOMP
     #include "wx/event.h"
     #include "wx/app.h"
     #include "wx/dcclient.h"
     #include "wx/log.h"
     #include "wx/settings.h"
-    #include "wx/button.h"
-    #include "wx/checkbox.h"
-    #include "wx/radiobut.h"
-    #include "wx/slider.h"
-    #include "wx/toplevel.h"
 #endif
 
+#include "wx/control.h"
+#include "wx/toplevel.h"
+#include "wx/button.h"
+#include "wx/checkbox.h"
 #include "wx/tglbtn.h"
+#include "wx/radiobut.h"
+#include "wx/slider.h"
 
 #include <Control.h>
 #include <Form.h>
@@ -152,7 +155,7 @@ bool wxControl::PalmCreateControl(int style,
 
     m_palmControl = true;
 
-    SetInitialSize(size);
+    SetInitialBestSize(size);
     SetLabel(label);
     Show();
     return true;
@@ -202,7 +205,7 @@ bool wxControl::PalmCreateField(const wxString& label,
 
     m_palmField = true;
 
-    SetInitialSize(size);
+    SetInitialBestSize(size);
     SetLabel(label);
     Show();
     return true;
@@ -391,7 +394,7 @@ void wxControl::SetFieldLabel(const wxString& label)
     if(field==NULL)
         return;
 
-    uint16_t newSize = label.length() + 1;
+    uint16_t newSize = label.Length() + 1;
     MemHandle strHandle = FldGetTextHandle(field);
     FldSetTextHandle(field, NULL );
     if (strHandle)

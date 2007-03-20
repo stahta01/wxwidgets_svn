@@ -10,16 +10,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/intl.h"
-    #if wxUSE_GUI
-        #include "wx/font.h"
-    #endif
 #endif
-
 #include "wx/mac/corefoundation/cfstring.h"
+
+#if wxUSE_GUI
+    #include "wx/font.h"
+#endif
 
 #ifdef __DARWIN__
     #include <CoreServices/CoreServices.h>
@@ -105,10 +104,9 @@ wxUint32 wxMacGetSystemEncFromFontEnc(wxFontEncoding encoding)
 #if wxUSE_GUI
         encoding = wxFont::GetDefaultEncoding() ;
 #else
-        encoding = wxFONTENCODING_SYSTEM; // to be set below
+        encoding = wxLocale::GetSystemEncoding() ;
 #endif
     }
-
     if ( encoding == wxFONTENCODING_SYSTEM )
     {
         enc = CFStringGetSystemEncoding();
@@ -635,7 +633,7 @@ wxFontEncoding wxMacGetFontEncFromSystemEnc(wxUint32 encoding)
 // converts this string into a carbon foundation string with optional pc 2 mac encoding
 void wxMacCFStringHolder::Assign( const wxString &st , wxFontEncoding encoding )
 {
-    Release() ;
+    Release() ; 
     if (st.IsEmpty())
     {
         m_cfs = CFSTR("") ;
@@ -686,10 +684,8 @@ wxString wxMacCFStringHolder::AsString(wxFontEncoding encoding)
     unibuf[cflen] = 0 ;
     wxMBConvUTF16 converter ;
     noChars = converter.MB2WC( NULL , (const char*)unibuf , 0 ) ;
-    wxASSERT_MSG( noChars != wxCONV_FAILED, _T("Unable to count the number of characters in this string!") );
     buf = new wxChar[ noChars + 1 ] ;
-    noChars = converter.MB2WC( buf , (const char*)unibuf , noChars + 1 ) ;
-    wxASSERT_MSG( noChars != wxCONV_FAILED, _T("Conversion of string failed!") );
+    converter.MB2WC( buf , (const char*)unibuf , noChars ) ;
     delete[] unibuf ;
 #endif
 #else
@@ -709,49 +705,3 @@ wxString wxMacCFStringHolder::AsString(wxFontEncoding encoding)
     return result ;
 }
 
-
-wxMacUniCharBuffer::wxMacUniCharBuffer( const wxString &str )
-{
-    m_chars = str.length() ;
-    m_ubuf = NULL ;
-
-#if SIZEOF_WCHAR_T == 4
-    wxMBConvUTF16 converter ;
-#if wxUSE_UNICODE
-    size_t unicharlen = converter.WC2MB( NULL , str.wc_str() , 0 ) ;
-    m_ubuf = (UniChar*) malloc( unicharlen + 2 ) ;
-    converter.WC2MB( (char*) m_ubuf , str.wc_str(), unicharlen + 2 ) ;
-#else
-    const wxWCharBuffer wchar = str.wc_str( wxConvLocal ) ;
-    size_t unicharlen = converter.WC2MB( NULL , wchar.data() , 0 ) ;
-    m_ubuf = (UniChar*) malloc( unicharlen + 2 ) ;
-    converter.WC2MB( (char*) m_ubuf , wchar.data() , unicharlen + 2 ) ;
-#endif
-    m_chars = unicharlen / 2 ;
-#else // SIZEOF_WCHAR_T is then 2
-#if wxUSE_UNICODE
-    m_ubuf = malloc( m_chars * 2 + 2 ) ;
-    memcpy( m_ubuf , (UniChar*) str.wc_str() , m_chars * 2 + 2 ) ;
-#else
-    wxWCharBuffer wchar = str.wc_str( wxConvLocal ) ;
-    m_chars = wxWcslen( wchar.data() ) ;
-    m_ubuf = malloc( m_chars * 2 + 2 ) ;
-    memcpy( m_ubuf , (UniChar*) wchar.data() , m_chars * 2 + 2 ) ;
-#endif
-#endif
-}
-
-wxMacUniCharBuffer::~wxMacUniCharBuffer()
-{
-    free( m_ubuf ) ;
-}
-
-UniCharArrayPtr wxMacUniCharBuffer::GetBuffer() 
-{
-    return m_ubuf ;
-}
-   
-UniCharCount wxMacUniCharBuffer::GetChars()
-{
-    return m_chars ;
-}

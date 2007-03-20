@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/private.h
+// Name:        private.h
 // Purpose:     Private declarations: as this header is only included by
 //              wxWidgets itself, it may contain identifiers which don't start
 //              with "wx".
@@ -20,6 +20,9 @@
     // Extra prototypes and symbols not defined by MicroWindows
     #include "wx/msw/microwin.h"
 #endif
+
+// Include fixes for MSLU:
+#include "wx/msw/mslu.h"
 
 #include "wx/log.h"
 
@@ -163,7 +166,6 @@ extern LONG APIENTRY _EXPORT
 // Intel, Visual Age.
 #if defined(__WXWINCE__)
     #define wxGetOSFHandle(fd) ((HANDLE)fd)
-    #define wxOpenOSFHandle(h, flags) ((int)wxPtrToUInt(h))
 #elif defined(__CYGWIN__)
     #define wxGetOSFHandle(fd) ((HANDLE)get_osfhandle(fd))
 #elif defined(__VISUALC__) \
@@ -173,8 +175,6 @@ extern LONG APIENTRY _EXPORT
    || defined(__MINGW32__) \
    || (defined(__MWERKS__) && defined(__MSL__))
     #define wxGetOSFHandle(fd) ((HANDLE)_get_osfhandle(fd))
-    #define wxOpenOSFHandle(h, flags) (_open_osfhandle(wxPtrToUInt(h), flags))
-    #define wx_fdopen _fdopen
 #endif
 
 // close the handle in the class dtor
@@ -210,8 +210,8 @@ struct WinStruct : public T
 
 #if wxUSE_GUI
 
-#include "wx/gdicmn.h"
-#include "wx/colour.h"
+#include <wx/gdicmn.h>
+#include <wx/colour.h>
 
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
@@ -335,7 +335,9 @@ inline RECT wxGetWindowRect(HWND hwnd)
     RECT rect;
 
     if ( !::GetWindowRect(hwnd, &rect) )
+    {
         wxLogLastError(_T("GetWindowRect"));
+    }
 
     return rect;
 }
@@ -345,7 +347,9 @@ inline RECT wxGetClientRect(HWND hwnd)
     RECT rect;
 
     if ( !::GetClientRect(hwnd, &rect) )
+    {
         wxLogLastError(_T("GetClientRect"));
+    }
 
     return rect;
 }
@@ -406,48 +410,28 @@ private:
 // dtor
 class SelectInHDC
 {
-private:
-    void DoInit(HGDIOBJ hgdiobj) { m_hgdiobj = ::SelectObject(m_hdc, hgdiobj); }
-
 public:
-    SelectInHDC() : m_hdc(NULL) { }
-    SelectInHDC(HDC hdc, HGDIOBJ hgdiobj) : m_hdc(hdc) { DoInit(hgdiobj); }
+    SelectInHDC(HDC hdc, HGDIOBJ hgdiobj) : m_hdc(hdc)
+        { m_hgdiobj = ::SelectObject(hdc, hgdiobj); }
 
-    void Init(HDC hdc, HGDIOBJ hgdiobj)
-    {
-        wxASSERT_MSG( !m_hdc, _T("initializing twice?") );
+   ~SelectInHDC() { ::SelectObject(m_hdc, m_hgdiobj); }
 
-        m_hdc = hdc;
-
-        DoInit(hgdiobj);
-    }
-
-    ~SelectInHDC() { if ( m_hdc ) ::SelectObject(m_hdc, m_hgdiobj); }
-
-    // return true if the object was successfully selected
-    operator bool() const { return m_hgdiobj != 0; }
+   // return true if the object was successfully selected
+   operator bool() const { return m_hgdiobj != 0; }
 
 private:
-    HDC m_hdc;
-    HGDIOBJ m_hgdiobj;
+   HDC m_hdc;
+   HGDIOBJ m_hgdiobj;
 
-    DECLARE_NO_COPY_CLASS(SelectInHDC)
+   DECLARE_NO_COPY_CLASS(SelectInHDC)
 };
 
 // a class which cleans up any GDI object
 class AutoGDIObject
 {
 protected:
-    AutoGDIObject() { m_gdiobj = NULL; }
     AutoGDIObject(HGDIOBJ gdiobj) : m_gdiobj(gdiobj) { }
     ~AutoGDIObject() { if ( m_gdiobj ) ::DeleteObject(m_gdiobj); }
-
-    void InitGdiobj(HGDIOBJ gdiobj)
-    {
-        wxASSERT_MSG( !m_gdiobj, _T("initializing twice?") );
-
-        m_gdiobj = gdiobj;
-    }
 
     HGDIOBJ GetObject() const { return m_gdiobj; }
 
@@ -457,7 +441,7 @@ private:
 
 // TODO: all this asks for using a AutoHandler<T, CreateFunc> template...
 
-// a class for temporary brushes
+// a class for temporary pens
 class AutoHBRUSH : private AutoGDIObject
 {
 public:
@@ -465,22 +449,6 @@ public:
         : AutoGDIObject(::CreateSolidBrush(col)) { }
 
     operator HBRUSH() const { return (HBRUSH)GetObject(); }
-};
-
-// a class for temporary fonts
-class AutoHFONT : private AutoGDIObject
-{
-private:
-public:
-    AutoHFONT()
-        : AutoGDIObject() { }
-
-    AutoHFONT(const LOGFONT& lf)
-        : AutoGDIObject(::CreateFontIndirect(&lf)) { }
-
-    void Init(const LOGFONT& lf) { InitGdiobj(::CreateFontIndirect(&lf)); }
-
-    operator HFONT() const { return (HFONT)GetObject(); }
 };
 
 // a class for temporary pens
@@ -551,41 +519,6 @@ private:
     DECLARE_NO_COPY_CLASS(HDCClipper)
 };
 
-// set the given map mode for the life time of this object
-//
-// NB: SetMapMode() is not supported by CE so we also define a helper macro
-//     to avoid using it there
-#ifdef __WXWINCE__
-    #define wxCHANGE_HDC_MAP_MODE(hdc, mm)
-#else // !__WXWINCE__
-    class HDCMapModeChanger
-    {
-    public:
-        HDCMapModeChanger(HDC hdc, int mm)
-            : m_hdc(hdc)
-        {
-            m_modeOld = ::SetMapMode(hdc, mm);
-            if ( !m_modeOld )
-                wxLogLastError(_T("SelectClipRgn"));
-        }
-
-        ~HDCMapModeChanger()
-        {
-            if ( m_modeOld )
-                ::SetMapMode(m_hdc, m_modeOld);
-        }
-
-    private:
-        HDC m_hdc;
-        int m_modeOld;
-
-        DECLARE_NO_COPY_CLASS(HDCMapModeChanger)
-    };
-
-    #define wxCHANGE_HDC_MAP_MODE(hdc, mm) \
-        HDCMapModeChanger wxMAKE_UNIQUE_NAME(wxHDCMapModeChanger)(hdc, mm)
-#endif // __WXWINCE__/!__WXWINCE__
-
 // smart buffeer using GlobalAlloc/GlobalFree()
 class GlobalPtr
 {
@@ -623,7 +556,9 @@ public:
     {
         m_ptr = GlobalLock(hGlobal);
         if ( !m_ptr )
+        {
             wxLogLastError(_T("GlobalLock"));
+        }
     }
 
     ~GlobalPtrLock()
@@ -824,8 +759,7 @@ enum wxWinVersion
     wxWinVersion_2003 = 0x0502,
 
     wxWinVersion_6 = 0x0600,
-    wxWinVersion_Vista = wxWinVersion_6,
-    wxWinVersion_NT6 = wxWinVersion_6
+    wxWinVersion_NT6 = 0x0600
 };
 
 WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();

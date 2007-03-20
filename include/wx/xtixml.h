@@ -12,6 +12,10 @@
 #ifndef _WX_XTIXMLH__
 #define _WX_XTIXMLH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xtixml.h"
+#endif
+
 #include "wx/wx.h"
 
 #if wxUSE_EXTENDED_RTTI
@@ -25,7 +29,7 @@ class WXDLLIMPEXP_XML wxXmlWriter : public wxWriter
 public :
 
     wxXmlWriter( wxXmlNode * parent ) ;
-    virtual ~wxXmlWriter() ;
+    ~wxXmlWriter() ;
 
     //
     // streaming callbacks
@@ -84,7 +88,7 @@ class WXDLLIMPEXP_XML wxXmlReader : public wxReader
 {
 public:
     wxXmlReader(wxXmlNode *parent) { m_parent = parent ; }
-    virtual ~wxXmlReader() {}
+    ~wxXmlReader() {}
 
     // Reads a component from XML.  The return value is the root object ID, which can
     // then be used to ask the depersister about that object

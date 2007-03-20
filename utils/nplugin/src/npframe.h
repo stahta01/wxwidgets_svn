@@ -34,7 +34,7 @@ public:
       Create(data);
   }
 
-  virtual ~wxPluginFrame(void);
+  ~wxPluginFrame(void);
 
   bool Create(const wxPluginData& data);
 

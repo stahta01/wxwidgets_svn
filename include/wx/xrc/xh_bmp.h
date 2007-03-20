@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_bmp.h
+// Name:        xh_bmp.h
 // Purpose:     XML resource handler for wxBitmap and wxIcon
 // Author:      Vaclav Slavik
 // Created:     2000/09/00
@@ -11,14 +11,16 @@
 #ifndef _WX_XH_BMP_H_
 #define _WX_XH_BMP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_bmp.h"
+#endif
+
 #include "wx/xrc/xmlres.h"
 
-#if wxUSE_XRC
 
 class WXDLLIMPEXP_XRC wxBitmapXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxBitmapXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxBitmapXmlHandler)
 public:
     wxBitmapXmlHandler();
     virtual wxObject *DoCreateResource();
@@ -27,14 +29,12 @@ public:
 
 class WXDLLIMPEXP_XRC wxIconXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxIconXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxIconXmlHandler)
 public:
     wxIconXmlHandler();
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC
 
 #endif // _WX_XH_BMP_H_

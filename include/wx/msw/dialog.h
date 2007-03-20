@@ -12,15 +12,19 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dialog.h"
+#endif
+
 #include "wx/panel.h"
 
-extern WXDLLEXPORT_DATA(const wxChar) wxDialogNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxDialogNameStr;
 
 class WXDLLEXPORT wxDialogModalData;
 
 #if wxUSE_TOOLBAR && (defined(__SMARTPHONE__) || defined(__POCKETPC__))
 class WXDLLEXPORT wxToolBar;
-extern WXDLLEXPORT_DATA(const wxChar) wxToolBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxToolBarNameStr;
 #endif
 
 // Dialog boxes
@@ -85,6 +89,18 @@ public:
 
     virtual void Raise();
 
+    // event handlers
+    void OnCharHook(wxKeyEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
+
+    // Standard buttons
+    void OnOK(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+    // Responds to colour changes
+    void OnSysColourChanged(wxSysColourChangedEvent& event);
+
 #ifdef __POCKETPC__
     // Responds to the OK button in a PocketPC titlebar. This
     // can be overridden, or you can change the id used for
@@ -96,7 +112,9 @@ public:
     // Windows callbacks
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
-#if WXWIN_COMPATIBILITY_2_6
+    // obsolete methods
+    // ----------------
+
     // use the other ctor
     wxDEPRECATED( wxDialog(wxWindow *parent,
              const wxString& title, bool modal,
@@ -109,7 +127,6 @@ public:
 
     // use IsModal()
     wxDEPRECATED( bool IsModalShowing() const );
-#endif // WXWIN_COMPATIBILITY_2_6
 
 protected:
     // find the window to use as parent for this dialog if none has been
@@ -120,6 +137,17 @@ protected:
 
     // common part of all ctors
     void Init();
+
+    // end either modal or modeless dialog
+    void EndDialog(int rc);
+
+    // emulate click of a button with the given id if it's present in the dialog
+    //
+    // return true if button was "clicked" or false if we don't have it
+    bool EmulateButtonClickIfPresent(int id);
+
+    // handle Escape here
+    virtual bool MSWProcessMessage(WXMSG* pMsg);
 
 private:
     wxWindow*   m_oldFocus;
@@ -133,6 +161,7 @@ private:
     wxDialogModalData *m_modalData;
 
     DECLARE_DYNAMIC_CLASS(wxDialog)
+    DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxDialog)
 };
 

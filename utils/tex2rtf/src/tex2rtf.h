@@ -44,6 +44,7 @@ class MyFrame: public wxFrame
 { public:
     wxTextCtrl *textWindow;
     MyFrame(wxFrame *frame, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size);
+    void OnMenuCommand(int id);
 
     void OnCloseWindow(wxCloseEvent& event);
     void OnExit(wxCommandEvent& event);
@@ -73,7 +74,7 @@ class Tex2RTFConnection: public wxDDEConnection
 {
  public:
   Tex2RTFConnection(wxChar *buf, int size);
-  virtual ~Tex2RTFConnection(void){}
+  ~Tex2RTFConnection(void){};
   bool OnExecute(const wxString& topic, wxChar *data, int size, wxIPCFormat format);
   wxChar *OnRequest(const wxString& topic, const wxString& item, int *size, wxIPCFormat format);
 };

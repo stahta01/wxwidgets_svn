@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 """
@@ -8,17 +8,17 @@ languages are built-in.
 """
 
 import _stc
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -27,15 +27,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -49,8 +43,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -114,15 +107,12 @@ STC_MARKNUM_FOLDEROPEN = _stc.STC_MARKNUM_FOLDEROPEN
 STC_MASK_FOLDERS = _stc.STC_MASK_FOLDERS
 STC_MARGIN_SYMBOL = _stc.STC_MARGIN_SYMBOL
 STC_MARGIN_NUMBER = _stc.STC_MARGIN_NUMBER
-STC_MARGIN_BACK = _stc.STC_MARGIN_BACK
-STC_MARGIN_FORE = _stc.STC_MARGIN_FORE
 STC_STYLE_DEFAULT = _stc.STC_STYLE_DEFAULT
 STC_STYLE_LINENUMBER = _stc.STC_STYLE_LINENUMBER
 STC_STYLE_BRACELIGHT = _stc.STC_STYLE_BRACELIGHT
 STC_STYLE_BRACEBAD = _stc.STC_STYLE_BRACEBAD
 STC_STYLE_CONTROLCHAR = _stc.STC_STYLE_CONTROLCHAR
 STC_STYLE_INDENTGUIDE = _stc.STC_STYLE_INDENTGUIDE
-STC_STYLE_CALLTIP = _stc.STC_STYLE_CALLTIP
 STC_STYLE_LASTPREDEFINED = _stc.STC_STYLE_LASTPREDEFINED
 STC_STYLE_MAX = _stc.STC_STYLE_MAX
 STC_CHARSET_ANSI = _stc.STC_CHARSET_ANSI
@@ -157,7 +147,6 @@ STC_INDIC_DIAGONAL = _stc.STC_INDIC_DIAGONAL
 STC_INDIC_STRIKE = _stc.STC_INDIC_STRIKE
 STC_INDIC_HIDDEN = _stc.STC_INDIC_HIDDEN
 STC_INDIC_BOX = _stc.STC_INDIC_BOX
-STC_INDIC_ROUNDBOX = _stc.STC_INDIC_ROUNDBOX
 STC_INDIC0_MASK = _stc.STC_INDIC0_MASK
 STC_INDIC1_MASK = _stc.STC_INDIC1_MASK
 STC_INDIC2_MASK = _stc.STC_INDIC2_MASK
@@ -214,9 +203,6 @@ STC_CARET_EVEN = _stc.STC_CARET_EVEN
 STC_SEL_STREAM = _stc.STC_SEL_STREAM
 STC_SEL_RECTANGLE = _stc.STC_SEL_RECTANGLE
 STC_SEL_LINES = _stc.STC_SEL_LINES
-STC_ALPHA_TRANSPARENT = _stc.STC_ALPHA_TRANSPARENT
-STC_ALPHA_OPAQUE = _stc.STC_ALPHA_OPAQUE
-STC_ALPHA_NOALPHA = _stc.STC_ALPHA_NOALPHA
 STC_KEYWORDSET_MAX = _stc.STC_KEYWORDSET_MAX
 STC_MOD_INSERTTEXT = _stc.STC_MOD_INSERTTEXT
 STC_MOD_DELETETEXT = _stc.STC_MOD_DELETETEXT
@@ -327,9 +313,8 @@ STC_LEX_SMALLTALK = _stc.STC_LEX_SMALLTALK
 STC_LEX_FLAGSHIP = _stc.STC_LEX_FLAGSHIP
 STC_LEX_CSOUND = _stc.STC_LEX_CSOUND
 STC_LEX_FREEBASIC = _stc.STC_LEX_FREEBASIC
-STC_LEX_INNOSETUP = _stc.STC_LEX_INNOSETUP
-STC_LEX_OPAL = _stc.STC_LEX_OPAL
-STC_LEX_SPICE = _stc.STC_LEX_SPICE
+STC_LEX_ASP = _stc.STC_LEX_ASP
+STC_LEX_PHP = _stc.STC_LEX_PHP
 STC_LEX_AUTOMATIC = _stc.STC_LEX_AUTOMATIC
 STC_P_DEFAULT = _stc.STC_P_DEFAULT
 STC_P_COMMENTLINE = _stc.STC_P_COMMENTLINE
@@ -367,28 +352,6 @@ STC_C_WORD2 = _stc.STC_C_WORD2
 STC_C_COMMENTDOCKEYWORD = _stc.STC_C_COMMENTDOCKEYWORD
 STC_C_COMMENTDOCKEYWORDERROR = _stc.STC_C_COMMENTDOCKEYWORDERROR
 STC_C_GLOBALCLASS = _stc.STC_C_GLOBALCLASS
-STC_TCL_DEFAULT = _stc.STC_TCL_DEFAULT
-STC_TCL_COMMENT = _stc.STC_TCL_COMMENT
-STC_TCL_COMMENTLINE = _stc.STC_TCL_COMMENTLINE
-STC_TCL_NUMBER = _stc.STC_TCL_NUMBER
-STC_TCL_WORD_IN_QUOTE = _stc.STC_TCL_WORD_IN_QUOTE
-STC_TCL_IN_QUOTE = _stc.STC_TCL_IN_QUOTE
-STC_TCL_OPERATOR = _stc.STC_TCL_OPERATOR
-STC_TCL_IDENTIFIER = _stc.STC_TCL_IDENTIFIER
-STC_TCL_SUBSTITUTION = _stc.STC_TCL_SUBSTITUTION
-STC_TCL_SUB_BRACE = _stc.STC_TCL_SUB_BRACE
-STC_TCL_MODIFIER = _stc.STC_TCL_MODIFIER
-STC_TCL_EXPAND = _stc.STC_TCL_EXPAND
-STC_TCL_WORD = _stc.STC_TCL_WORD
-STC_TCL_WORD2 = _stc.STC_TCL_WORD2
-STC_TCL_WORD3 = _stc.STC_TCL_WORD3
-STC_TCL_WORD4 = _stc.STC_TCL_WORD4
-STC_TCL_WORD5 = _stc.STC_TCL_WORD5
-STC_TCL_WORD6 = _stc.STC_TCL_WORD6
-STC_TCL_WORD7 = _stc.STC_TCL_WORD7
-STC_TCL_WORD8 = _stc.STC_TCL_WORD8
-STC_TCL_COMMENT_BOX = _stc.STC_TCL_COMMENT_BOX
-STC_TCL_BLOCK_COMMENT = _stc.STC_TCL_BLOCK_COMMENT
 STC_H_DEFAULT = _stc.STC_H_DEFAULT
 STC_H_TAG = _stc.STC_H_TAG
 STC_H_TAGUNKNOWN = _stc.STC_H_TAGUNKNOWN
@@ -590,7 +553,6 @@ STC_PROPS_COMMENT = _stc.STC_PROPS_COMMENT
 STC_PROPS_SECTION = _stc.STC_PROPS_SECTION
 STC_PROPS_ASSIGNMENT = _stc.STC_PROPS_ASSIGNMENT
 STC_PROPS_DEFVAL = _stc.STC_PROPS_DEFVAL
-STC_PROPS_KEY = _stc.STC_PROPS_KEY
 STC_L_DEFAULT = _stc.STC_L_DEFAULT
 STC_L_COMMAND = _stc.STC_L_COMMAND
 STC_L_TAG = _stc.STC_L_TAG
@@ -1060,7 +1022,6 @@ STC_AU3_PREPROCESSOR = _stc.STC_AU3_PREPROCESSOR
 STC_AU3_SPECIAL = _stc.STC_AU3_SPECIAL
 STC_AU3_EXPAND = _stc.STC_AU3_EXPAND
 STC_AU3_COMOBJ = _stc.STC_AU3_COMOBJ
-STC_AU3_UDF = _stc.STC_AU3_UDF
 STC_APDL_DEFAULT = _stc.STC_APDL_DEFAULT
 STC_APDL_COMMENT = _stc.STC_APDL_COMMENT
 STC_APDL_COMMENTBLOCK = _stc.STC_APDL_COMMENTBLOCK
@@ -1274,38 +1235,6 @@ STC_CSOUND_KRATE_VAR = _stc.STC_CSOUND_KRATE_VAR
 STC_CSOUND_IRATE_VAR = _stc.STC_CSOUND_IRATE_VAR
 STC_CSOUND_GLOBAL_VAR = _stc.STC_CSOUND_GLOBAL_VAR
 STC_CSOUND_STRINGEOL = _stc.STC_CSOUND_STRINGEOL
-STC_INNO_DEFAULT = _stc.STC_INNO_DEFAULT
-STC_INNO_COMMENT = _stc.STC_INNO_COMMENT
-STC_INNO_KEYWORD = _stc.STC_INNO_KEYWORD
-STC_INNO_PARAMETER = _stc.STC_INNO_PARAMETER
-STC_INNO_SECTION = _stc.STC_INNO_SECTION
-STC_INNO_PREPROC = _stc.STC_INNO_PREPROC
-STC_INNO_PREPROC_INLINE = _stc.STC_INNO_PREPROC_INLINE
-STC_INNO_COMMENT_PASCAL = _stc.STC_INNO_COMMENT_PASCAL
-STC_INNO_KEYWORD_PASCAL = _stc.STC_INNO_KEYWORD_PASCAL
-STC_INNO_KEYWORD_USER = _stc.STC_INNO_KEYWORD_USER
-STC_INNO_STRING_DOUBLE = _stc.STC_INNO_STRING_DOUBLE
-STC_INNO_STRING_SINGLE = _stc.STC_INNO_STRING_SINGLE
-STC_INNO_IDENTIFIER = _stc.STC_INNO_IDENTIFIER
-STC_OPAL_SPACE = _stc.STC_OPAL_SPACE
-STC_OPAL_COMMENT_BLOCK = _stc.STC_OPAL_COMMENT_BLOCK
-STC_OPAL_COMMENT_LINE = _stc.STC_OPAL_COMMENT_LINE
-STC_OPAL_INTEGER = _stc.STC_OPAL_INTEGER
-STC_OPAL_KEYWORD = _stc.STC_OPAL_KEYWORD
-STC_OPAL_SORT = _stc.STC_OPAL_SORT
-STC_OPAL_STRING = _stc.STC_OPAL_STRING
-STC_OPAL_PAR = _stc.STC_OPAL_PAR
-STC_OPAL_BOOL_CONST = _stc.STC_OPAL_BOOL_CONST
-STC_OPAL_DEFAULT = _stc.STC_OPAL_DEFAULT
-STC_SPICE_DEFAULT = _stc.STC_SPICE_DEFAULT
-STC_SPICE_IDENTIFIER = _stc.STC_SPICE_IDENTIFIER
-STC_SPICE_KEYWORD = _stc.STC_SPICE_KEYWORD
-STC_SPICE_KEYWORD2 = _stc.STC_SPICE_KEYWORD2
-STC_SPICE_KEYWORD3 = _stc.STC_SPICE_KEYWORD3
-STC_SPICE_NUMBER = _stc.STC_SPICE_NUMBER
-STC_SPICE_DELIMITER = _stc.STC_SPICE_DELIMITER
-STC_SPICE_VALUE = _stc.STC_SPICE_VALUE
-STC_SPICE_COMMENTLINE = _stc.STC_SPICE_COMMENTLINE
 STC_CMD_REDO = _stc.STC_CMD_REDO
 STC_CMD_SELECTALL = _stc.STC_CMD_SELECTALL
 STC_CMD_UNDO = _stc.STC_CMD_UNDO
@@ -1399,14 +1328,17 @@ STC_CMD_WORDRIGHTEND = _stc.STC_CMD_WORDRIGHTEND
 STC_CMD_WORDRIGHTENDEXTEND = _stc.STC_CMD_WORDRIGHTENDEXTEND
 class StyledTextCtrl(_core.Control):
     """Proxy of C++ StyledTextCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStyledTextCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=ID_ANY, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, String name=STCNameStr) -> StyledTextCtrl
         """
-        _stc.StyledTextCtrl_swiginit(self,_stc.new_StyledTextCtrl(*args, **kwargs))
+        newobj = _stc.new_StyledTextCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1819,14 +1751,6 @@ class StyledTextCtrl(_core.Control):
         """
         return _stc.StyledTextCtrl_MarkerAddSet(*args, **kwargs)
 
-    def MarkerSetAlpha(*args, **kwargs):
-        """
-        MarkerSetAlpha(self, int markerNumber, int alpha)
-
-        Set the alpha used for a marker that is drawn in the text area, not the margin.
-        """
-        return _stc.StyledTextCtrl_MarkerSetAlpha(*args, **kwargs)
-
     def SetMarginType(*args, **kwargs):
         """
         SetMarginType(self, int margin, int marginType)
@@ -2002,22 +1926,6 @@ class StyledTextCtrl(_core.Control):
         Set the background colour of the selection and whether to use this setting.
         """
         return _stc.StyledTextCtrl_SetSelBackground(*args, **kwargs)
-
-    def GetSelAlpha(*args, **kwargs):
-        """
-        GetSelAlpha(self) -> int
-
-        Get the alpha of the selection.
-        """
-        return _stc.StyledTextCtrl_GetSelAlpha(*args, **kwargs)
-
-    def SetSelAlpha(*args, **kwargs):
-        """
-        SetSelAlpha(self, int alpha)
-
-        Set the alpha of the selection.
-        """
-        return _stc.StyledTextCtrl_SetSelAlpha(*args, **kwargs)
 
     def SetCaretForeground(*args, **kwargs):
         """
@@ -2215,21 +2123,21 @@ class StyledTextCtrl(_core.Control):
         """
         return _stc.StyledTextCtrl_SetCaretLineVisible(*args, **kwargs)
 
-    def GetCaretLineBackground(*args, **kwargs):
+    def GetCaretLineBack(*args, **kwargs):
         """
-        GetCaretLineBackground(self) -> Colour
+        GetCaretLineBack(self) -> Colour
 
         Get the colour of the background of the line containing the caret.
         """
-        return _stc.StyledTextCtrl_GetCaretLineBackground(*args, **kwargs)
+        return _stc.StyledTextCtrl_GetCaretLineBack(*args, **kwargs)
 
-    def SetCaretLineBackground(*args, **kwargs):
+    def SetCaretLineBack(*args, **kwargs):
         """
-        SetCaretLineBackground(self, Colour back)
+        SetCaretLineBack(self, Colour back)
 
         Set the colour of the background of the line containing the caret.
         """
-        return _stc.StyledTextCtrl_SetCaretLineBackground(*args, **kwargs)
+        return _stc.StyledTextCtrl_SetCaretLineBack(*args, **kwargs)
 
     def StyleSetChangeable(*args, **kwargs):
         """
@@ -3127,14 +3035,6 @@ class StyledTextCtrl(_core.Control):
         Set the foreground colour for the highlighted part of the call tip.
         """
         return _stc.StyledTextCtrl_CallTipSetForegroundHighlight(*args, **kwargs)
-
-    def CallTipUseStyle(*args, **kwargs):
-        """
-        CallTipUseStyle(self, int tabSize)
-
-        Enable use of STYLE_CALLTIP and set call tip tab size in pixels.
-        """
-        return _stc.StyledTextCtrl_CallTipUseStyle(*args, **kwargs)
 
     def VisibleFromDocLine(*args, **kwargs):
         """
@@ -4763,22 +4663,6 @@ class StyledTextCtrl(_core.Control):
         """
         return _stc.StyledTextCtrl_SelectionDuplicate(*args, **kwargs)
 
-    def SetCaretLineBackAlpha(*args, **kwargs):
-        """
-        SetCaretLineBackAlpha(self, int alpha)
-
-        Set background alpha of the caret line.
-        """
-        return _stc.StyledTextCtrl_SetCaretLineBackAlpha(*args, **kwargs)
-
-    def GetCaretLineBackAlpha(*args, **kwargs):
-        """
-        GetCaretLineBackAlpha(self) -> int
-
-        Get the background alpha of the caret line.
-        """
-        return _stc.StyledTextCtrl_GetCaretLineBackAlpha(*args, **kwargs)
-
     def StartRecord(*args, **kwargs):
         """
         StartRecord(self)
@@ -5273,111 +5157,38 @@ class StyledTextCtrl(_core.Control):
         self.AppendTextRaw(text)
 
 
-    GetCaretLineBack = GetCaretLineBackground
-    SetCaretLineBack = SetCaretLineBackground
 
-    Anchor = property(GetAnchor,SetAnchor,doc="See `GetAnchor` and `SetAnchor`") 
-    BackSpaceUnIndents = property(GetBackSpaceUnIndents,SetBackSpaceUnIndents,doc="See `GetBackSpaceUnIndents` and `SetBackSpaceUnIndents`") 
-    BufferedDraw = property(GetBufferedDraw,SetBufferedDraw,doc="See `GetBufferedDraw` and `SetBufferedDraw`") 
-    CaretForeground = property(GetCaretForeground,SetCaretForeground,doc="See `GetCaretForeground` and `SetCaretForeground`") 
-    CaretLineBack = property(GetCaretLineBack,SetCaretLineBack,doc="See `GetCaretLineBack` and `SetCaretLineBack`") 
-    CaretLineBackAlpha = property(GetCaretLineBackAlpha,SetCaretLineBackAlpha,doc="See `GetCaretLineBackAlpha` and `SetCaretLineBackAlpha`") 
-    CaretLineBackground = property(GetCaretLineBackground,SetCaretLineBackground,doc="See `GetCaretLineBackground` and `SetCaretLineBackground`") 
-    CaretLineVisible = property(GetCaretLineVisible,SetCaretLineVisible,doc="See `GetCaretLineVisible` and `SetCaretLineVisible`") 
-    CaretPeriod = property(GetCaretPeriod,SetCaretPeriod,doc="See `GetCaretPeriod` and `SetCaretPeriod`") 
-    CaretSticky = property(GetCaretSticky,SetCaretSticky,doc="See `GetCaretSticky` and `SetCaretSticky`") 
-    CaretWidth = property(GetCaretWidth,SetCaretWidth,doc="See `GetCaretWidth` and `SetCaretWidth`") 
-    CodePage = property(GetCodePage,SetCodePage,doc="See `GetCodePage` and `SetCodePage`") 
-    ControlCharSymbol = property(GetControlCharSymbol,SetControlCharSymbol,doc="See `GetControlCharSymbol` and `SetControlCharSymbol`") 
-    CurLine = property(GetCurLine,doc="See `GetCurLine`") 
-    CurLineRaw = property(GetCurLineRaw,doc="See `GetCurLineRaw`") 
-    CurLineUTF8 = property(GetCurLineUTF8,doc="See `GetCurLineUTF8`") 
-    CurrentLine = property(GetCurrentLine,doc="See `GetCurrentLine`") 
-    CurrentPos = property(GetCurrentPos,SetCurrentPos,doc="See `GetCurrentPos` and `SetCurrentPos`") 
-    DocPointer = property(GetDocPointer,SetDocPointer,doc="See `GetDocPointer` and `SetDocPointer`") 
-    EOLMode = property(GetEOLMode,SetEOLMode,doc="See `GetEOLMode` and `SetEOLMode`") 
-    EdgeColour = property(GetEdgeColour,SetEdgeColour,doc="See `GetEdgeColour` and `SetEdgeColour`") 
-    EdgeColumn = property(GetEdgeColumn,SetEdgeColumn,doc="See `GetEdgeColumn` and `SetEdgeColumn`") 
-    EdgeMode = property(GetEdgeMode,SetEdgeMode,doc="See `GetEdgeMode` and `SetEdgeMode`") 
-    EndAtLastLine = property(GetEndAtLastLine,SetEndAtLastLine,doc="See `GetEndAtLastLine` and `SetEndAtLastLine`") 
-    EndStyled = property(GetEndStyled,doc="See `GetEndStyled`") 
-    FirstVisibleLine = property(GetFirstVisibleLine,doc="See `GetFirstVisibleLine`") 
-    HighlightGuide = property(GetHighlightGuide,SetHighlightGuide,doc="See `GetHighlightGuide` and `SetHighlightGuide`") 
-    Indent = property(GetIndent,SetIndent,doc="See `GetIndent` and `SetIndent`") 
-    IndentationGuides = property(GetIndentationGuides,SetIndentationGuides,doc="See `GetIndentationGuides` and `SetIndentationGuides`") 
-    LastKeydownProcessed = property(GetLastKeydownProcessed,SetLastKeydownProcessed,doc="See `GetLastKeydownProcessed` and `SetLastKeydownProcessed`") 
-    LayoutCache = property(GetLayoutCache,SetLayoutCache,doc="See `GetLayoutCache` and `SetLayoutCache`") 
-    Length = property(GetLength,doc="See `GetLength`") 
-    Lexer = property(GetLexer,SetLexer,doc="See `GetLexer` and `SetLexer`") 
-    LineCount = property(GetLineCount,doc="See `GetLineCount`") 
-    MarginLeft = property(GetMarginLeft,SetMarginLeft,doc="See `GetMarginLeft` and `SetMarginLeft`") 
-    MarginRight = property(GetMarginRight,SetMarginRight,doc="See `GetMarginRight` and `SetMarginRight`") 
-    MaxLineState = property(GetMaxLineState,doc="See `GetMaxLineState`") 
-    ModEventMask = property(GetModEventMask,SetModEventMask,doc="See `GetModEventMask` and `SetModEventMask`") 
-    Modify = property(GetModify,doc="See `GetModify`") 
-    MouseDownCaptures = property(GetMouseDownCaptures,SetMouseDownCaptures,doc="See `GetMouseDownCaptures` and `SetMouseDownCaptures`") 
-    MouseDwellTime = property(GetMouseDwellTime,SetMouseDwellTime,doc="See `GetMouseDwellTime` and `SetMouseDwellTime`") 
-    Overtype = property(GetOvertype,SetOvertype,doc="See `GetOvertype` and `SetOvertype`") 
-    PasteConvertEndings = property(GetPasteConvertEndings,SetPasteConvertEndings,doc="See `GetPasteConvertEndings` and `SetPasteConvertEndings`") 
-    PrintColourMode = property(GetPrintColourMode,SetPrintColourMode,doc="See `GetPrintColourMode` and `SetPrintColourMode`") 
-    PrintMagnification = property(GetPrintMagnification,SetPrintMagnification,doc="See `GetPrintMagnification` and `SetPrintMagnification`") 
-    PrintWrapMode = property(GetPrintWrapMode,SetPrintWrapMode,doc="See `GetPrintWrapMode` and `SetPrintWrapMode`") 
-    ReadOnly = property(GetReadOnly,SetReadOnly,doc="See `GetReadOnly` and `SetReadOnly`") 
-    STCCursor = property(GetSTCCursor,SetSTCCursor,doc="See `GetSTCCursor` and `SetSTCCursor`") 
-    STCFocus = property(GetSTCFocus,SetSTCFocus,doc="See `GetSTCFocus` and `SetSTCFocus`") 
-    ScrollWidth = property(GetScrollWidth,SetScrollWidth,doc="See `GetScrollWidth` and `SetScrollWidth`") 
-    SearchFlags = property(GetSearchFlags,SetSearchFlags,doc="See `GetSearchFlags` and `SetSearchFlags`") 
-    SelAlpha = property(GetSelAlpha,SetSelAlpha,doc="See `GetSelAlpha` and `SetSelAlpha`") 
-    SelectedText = property(GetSelectedText,doc="See `GetSelectedText`") 
-    SelectedTextRaw = property(GetSelectedTextRaw,doc="See `GetSelectedTextRaw`") 
-    SelectedTextUTF8 = property(GetSelectedTextUTF8,doc="See `GetSelectedTextUTF8`") 
-    Selection = property(GetSelection,doc="See `GetSelection`") 
-    SelectionEnd = property(GetSelectionEnd,SetSelectionEnd,doc="See `GetSelectionEnd` and `SetSelectionEnd`") 
-    SelectionMode = property(GetSelectionMode,SetSelectionMode,doc="See `GetSelectionMode` and `SetSelectionMode`") 
-    SelectionStart = property(GetSelectionStart,SetSelectionStart,doc="See `GetSelectionStart` and `SetSelectionStart`") 
-    Status = property(GetStatus,SetStatus,doc="See `GetStatus` and `SetStatus`") 
-    StyleBits = property(GetStyleBits,SetStyleBits,doc="See `GetStyleBits` and `SetStyleBits`") 
-    StyleBitsNeeded = property(GetStyleBitsNeeded,doc="See `GetStyleBitsNeeded`") 
-    TabIndents = property(GetTabIndents,SetTabIndents,doc="See `GetTabIndents` and `SetTabIndents`") 
-    TabWidth = property(GetTabWidth,SetTabWidth,doc="See `GetTabWidth` and `SetTabWidth`") 
-    TargetEnd = property(GetTargetEnd,SetTargetEnd,doc="See `GetTargetEnd` and `SetTargetEnd`") 
-    TargetStart = property(GetTargetStart,SetTargetStart,doc="See `GetTargetStart` and `SetTargetStart`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-    TextLength = property(GetTextLength,doc="See `GetTextLength`") 
-    TextRaw = property(GetTextRaw,SetTextRaw,doc="See `GetTextRaw` and `SetTextRaw`") 
-    TextUTF8 = property(GetTextUTF8,SetTextUTF8,doc="See `GetTextUTF8` and `SetTextUTF8`") 
-    TwoPhaseDraw = property(GetTwoPhaseDraw,SetTwoPhaseDraw,doc="See `GetTwoPhaseDraw` and `SetTwoPhaseDraw`") 
-    UndoCollection = property(GetUndoCollection,SetUndoCollection,doc="See `GetUndoCollection` and `SetUndoCollection`") 
-    UseAntiAliasing = property(GetUseAntiAliasing,SetUseAntiAliasing,doc="See `GetUseAntiAliasing` and `SetUseAntiAliasing`") 
-    UseHorizontalScrollBar = property(GetUseHorizontalScrollBar,SetUseHorizontalScrollBar,doc="See `GetUseHorizontalScrollBar` and `SetUseHorizontalScrollBar`") 
-    UseTabs = property(GetUseTabs,SetUseTabs,doc="See `GetUseTabs` and `SetUseTabs`") 
-    UseVerticalScrollBar = property(GetUseVerticalScrollBar,SetUseVerticalScrollBar,doc="See `GetUseVerticalScrollBar` and `SetUseVerticalScrollBar`") 
-    ViewEOL = property(GetViewEOL,SetViewEOL,doc="See `GetViewEOL` and `SetViewEOL`") 
-    ViewWhiteSpace = property(GetViewWhiteSpace,SetViewWhiteSpace,doc="See `GetViewWhiteSpace` and `SetViewWhiteSpace`") 
-    WrapMode = property(GetWrapMode,SetWrapMode,doc="See `GetWrapMode` and `SetWrapMode`") 
-    WrapStartIndent = property(GetWrapStartIndent,SetWrapStartIndent,doc="See `GetWrapStartIndent` and `SetWrapStartIndent`") 
-    WrapVisualFlags = property(GetWrapVisualFlags,SetWrapVisualFlags,doc="See `GetWrapVisualFlags` and `SetWrapVisualFlags`") 
-    WrapVisualFlagsLocation = property(GetWrapVisualFlagsLocation,SetWrapVisualFlagsLocation,doc="See `GetWrapVisualFlagsLocation` and `SetWrapVisualFlagsLocation`") 
-    XOffset = property(GetXOffset,SetXOffset,doc="See `GetXOffset` and `SetXOffset`") 
-    Zoom = property(GetZoom,SetZoom,doc="See `GetZoom` and `SetZoom`") 
-_stc.StyledTextCtrl_swigregister(StyledTextCtrl)
+class StyledTextCtrlPtr(StyledTextCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StyledTextCtrl
+_stc.StyledTextCtrl_swigregister(StyledTextCtrlPtr)
 cvar = _stc.cvar
 STCNameStr = cvar.STCNameStr
 
 def PreStyledTextCtrl(*args, **kwargs):
     """PreStyledTextCtrl() -> StyledTextCtrl"""
     val = _stc.new_PreStyledTextCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class StyledTextEvent(_core.CommandEvent):
     """Proxy of C++ StyledTextEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventType commandType=0, int id=0) -> StyledTextEvent"""
-        _stc.StyledTextEvent_swiginit(self,_stc.new_StyledTextEvent(*args, **kwargs))
-    __swig_destroy__ = _stc.delete_StyledTextEvent
-    __del__ = lambda self : None;
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStyledTextEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType commandType=0, int id=0) -> StyledTextEvent"""
+        newobj = _stc.new_StyledTextEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_stc.delete_StyledTextEvent):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def SetPosition(*args, **kwargs):
         """SetPosition(self, int pos)"""
         return _stc.StyledTextEvent_SetPosition(*args, **kwargs)
@@ -5550,30 +5361,17 @@ class StyledTextEvent(_core.CommandEvent):
         """GetAlt(self) -> bool"""
         return _stc.StyledTextEvent_GetAlt(*args, **kwargs)
 
-    Alt = property(GetAlt,doc="See `GetAlt`") 
-    Control = property(GetControl,doc="See `GetControl`") 
-    DragAllowMove = property(GetDragAllowMove,SetDragAllowMove,doc="See `GetDragAllowMove` and `SetDragAllowMove`") 
-    DragResult = property(GetDragResult,SetDragResult,doc="See `GetDragResult` and `SetDragResult`") 
-    DragText = property(GetDragText,SetDragText,doc="See `GetDragText` and `SetDragText`") 
-    FoldLevelNow = property(GetFoldLevelNow,SetFoldLevelNow,doc="See `GetFoldLevelNow` and `SetFoldLevelNow`") 
-    FoldLevelPrev = property(GetFoldLevelPrev,SetFoldLevelPrev,doc="See `GetFoldLevelPrev` and `SetFoldLevelPrev`") 
-    Key = property(GetKey,SetKey,doc="See `GetKey` and `SetKey`") 
-    LParam = property(GetLParam,SetLParam,doc="See `GetLParam` and `SetLParam`") 
-    Length = property(GetLength,SetLength,doc="See `GetLength` and `SetLength`") 
-    Line = property(GetLine,SetLine,doc="See `GetLine` and `SetLine`") 
-    LinesAdded = property(GetLinesAdded,SetLinesAdded,doc="See `GetLinesAdded` and `SetLinesAdded`") 
-    ListType = property(GetListType,SetListType,doc="See `GetListType` and `SetListType`") 
-    Margin = property(GetMargin,SetMargin,doc="See `GetMargin` and `SetMargin`") 
-    Message = property(GetMessage,SetMessage,doc="See `GetMessage` and `SetMessage`") 
-    ModificationType = property(GetModificationType,SetModificationType,doc="See `GetModificationType` and `SetModificationType`") 
-    Modifiers = property(GetModifiers,SetModifiers,doc="See `GetModifiers` and `SetModifiers`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-    Shift = property(GetShift,doc="See `GetShift`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-    WParam = property(GetWParam,SetWParam,doc="See `GetWParam` and `SetWParam`") 
-    X = property(GetX,SetX,doc="See `GetX` and `SetX`") 
-    Y = property(GetY,SetY,doc="See `GetY` and `SetY`") 
-_stc.StyledTextEvent_swigregister(StyledTextEvent)
+    def Clone(*args, **kwargs):
+        """Clone(self) -> Event"""
+        return _stc.StyledTextEvent_Clone(*args, **kwargs)
+
+
+class StyledTextEventPtr(StyledTextEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StyledTextEvent
+_stc.StyledTextEvent_swigregister(StyledTextEventPtr)
 
 wxEVT_STC_CHANGE = _stc.wxEVT_STC_CHANGE
 wxEVT_STC_STYLENEEDED = _stc.wxEVT_STC_STYLENEEDED
@@ -5626,7 +5424,6 @@ EVT_STC_ZOOM = wx.PyEventBinder( wxEVT_STC_ZOOM, 1 )
 EVT_STC_HOTSPOT_CLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_CLICK, 1 )
 EVT_STC_HOTSPOT_DCLICK = wx.PyEventBinder( wxEVT_STC_HOTSPOT_DCLICK, 1 )
 EVT_STC_CALLTIP_CLICK = wx.PyEventBinder( wxEVT_STC_CALLTIP_CLICK, 1 )
-EVT_STC_AUTOCOMP_SELECTION = wx.PyEventBinder( wxEVT_STC_AUTOCOMP_SELECTION, 1 )
 
 
 

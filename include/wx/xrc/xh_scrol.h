@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_scrol.h
+// Name:        xh_scrol.h
 // Purpose:     XML resource handler for wxScrollBar
 // Author:      Brian Gavin
 // Created:     2000/09/09
@@ -11,9 +11,14 @@
 #ifndef _WX_XH_SCROL_H_
 #define _WX_XH_SCROL_H_
 
-#include "wx/xrc/xmlres.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_scrol.h"
+#endif
 
-#if wxUSE_XRC && wxUSE_SCROLLBAR
+#include "wx/xrc/xmlres.h"
+#include "wx/defs.h"
+
+
 
 class WXDLLIMPEXP_XRC wxScrollBarXmlHandler : public wxXmlResourceHandler
 {
@@ -31,6 +36,5 @@ public:
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC && wxUSE_SCROLLBAR
 
 #endif // _WX_XH_SCROL_H_

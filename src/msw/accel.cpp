@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "accel.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -47,7 +51,7 @@ class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
     friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
-    virtual ~wxAcceleratorRefData();
+    ~wxAcceleratorRefData();
 
     inline HACCEL GetHACCEL() const { return m_hAccel; }
 protected:
@@ -130,7 +134,17 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
     M_ACCELDATA->m_ok = (M_ACCELDATA->m_hAccel != 0);
 }
 
-bool wxAcceleratorTable::IsOk() const
+bool wxAcceleratorTable::operator==(const wxAcceleratorTable& accel) const
+{
+    const wxAcceleratorRefData *
+        accelData = (wxAcceleratorRefData *)accel.m_refData;
+
+    return m_refData ? (accelData &&
+                           M_ACCELDATA->m_hAccel == accelData->m_hAccel)
+                     : !accelData;
+}
+
+bool wxAcceleratorTable::Ok() const
 {
     return (M_ACCELDATA && (M_ACCELDATA->m_ok));
 }
@@ -152,13 +166,6 @@ WXHACCEL wxAcceleratorTable::GetHACCEL() const
 
 bool wxAcceleratorTable::Translate(wxWindow *window, WXMSG *wxmsg) const
 {
-#if 0
-    // calling TranslateAccelerator() with child window doesn't do anything so
-    // it's probably a bug
-    wxASSERT_MSG( window->IsTopLevel(),
-                    _T("TranslateAccelerator() needs a top level window") );
-#endif
-
     MSG *msg = (MSG *)wxmsg;
     return Ok() && ::TranslateAccelerator(GetHwndOf(window), GetHaccel(), msg);
 }

@@ -68,23 +68,20 @@ __init__ as a plain old wx.Control is not very useful.", "");
     
 
     DocDeclStr(
-        int , GetAlignment() const,
-        "Get the control alignment (left/right/centre, top/bottom/centre)", "");
-    
-
-    DocDeclStr(
-        wxString , GetLabelText() const,
-        "Get just the text of the label, without mnemonic characters ('&')", "");
-    
-
-    
-    DocDeclStr(
         void , Command(wxCommandEvent& event),
         "Simulates the effect of the user issuing a command to the item.
 
 :see: `wx.CommandEvent`
 ", "");
    
+    DocDeclStr(
+        wxString , GetLabel(),
+        "Return a control's text.", "");
+    
+    DocDeclStr(
+        void , SetLabel(const wxString& label),
+        "Sets the item's text.", "");
+
 
 //     DocDeclStr(
 //         bool , GetAdjustMinSizeFlag(),
@@ -102,10 +99,6 @@ __init__ as a plain old wx.Control is not very useful.", "");
     
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    %property(Alignment, GetAlignment, doc="See `GetAlignment`");
-    %property(LabelText, GetLabelText, doc="See `GetLabelText`");
-
 };
 
 
@@ -164,7 +157,7 @@ need to add a lot of items.", "",
         DocStr(Insert,
                "Insert an item into the control before the item at the ``pos`` index,
 optionally associating some data object with the item.", "");
-        int Insert(const wxString& item, /*unsigned*/ int pos, PyObject* clientData=NULL) {
+        int Insert(const wxString& item, int pos, PyObject* clientData=NULL) {
             if (clientData) {
                 wxPyClientData* data = new wxPyClientData(clientData);
                 return self->Insert(item, pos, data);
@@ -179,7 +172,7 @@ optionally associating some data object with the item.", "");
         "Removes all items from the control.", "");
     
     DocDeclStr(
-        virtual void , Delete(/*unsigned*/ int n),
+        virtual void , Delete(int n),
         "Deletes the item at the zero-based index 'n' from the control. Note
 that it is an error (signalled by a `wx.PyAssertionError` exception if
 enabled) to remove an item with the index negative or greater or equal
@@ -191,7 +184,7 @@ than the number of items in the control.", "");
      %extend {
         DocStr(GetClientData,
                "Returns the client data associated with the given item, (if any.)", "");
-        PyObject* GetClientData(/*unsigned*/ int n) {
+        PyObject* GetClientData(int n) {
             wxPyClientData* data = (wxPyClientData*)self->GetClientObject(n);
             if (data) {
                 Py_INCREF(data->m_obj);
@@ -204,7 +197,7 @@ than the number of items in the control.", "");
 
         DocStr(SetClientData,
                "Associate the given client data with the item at position n.", "");
-        void SetClientData(/*unsigned*/ int n, PyObject* clientData) {
+        void SetClientData(int n, PyObject* clientData) {
             wxPyClientData* data = new wxPyClientData(clientData);
             self->SetClientObject(n, data);
         }
@@ -213,7 +206,7 @@ than the number of items in the control.", "");
 
     
     DocDeclStr(
-        virtual /*unsigned*/ int , GetCount() const,
+        virtual int , GetCount() const,
         "Returns the number of items in the control.", "");
     
     DocDeclStr(
@@ -221,7 +214,7 @@ than the number of items in the control.", "");
         "Returns True if the control is empty or False if it has some items.", "");
     
     DocDeclStr(
-        virtual wxString , GetString(/*unsigned*/ int n) const,
+        virtual wxString , GetString(int n) const,
         "Returns the label of the item with the given index.", "");
     
     DocDeclStr(
@@ -229,7 +222,7 @@ than the number of items in the control.", "");
         "", "");
     
     DocDeclStr(
-        virtual void , SetString(/*unsigned*/ int n, const wxString& s),
+        virtual void , SetString(int n, const wxString& s),
         "Sets the label for the given item.", "");
     
     DocDeclStr(
@@ -263,23 +256,6 @@ is selected.", "");
 slightly more natural for controls which support multiple selection.", "");
     
 
-    %pythoncode {
-        def GetItems(self):
-            """Return a list of the strings in the control"""
-            return [self.GetString(i) for i in xrange(self.GetCount())]
-            
-        def SetItems(self, items):
-            """Clear and set the strings in the control from a list"""
-            self.Clear()
-            for i in items:
-                self.Append(i)        
-    }
-    
-    %property(Count, GetCount, doc="See `GetCount`");
-    %property(Items, GetItems, SetItems, doc="See `GetItems` and `SetItems`");
-    %property(Selection, GetSelection, SetSelection, doc="See `GetSelection` and `SetSelection`");
-    %property(StringSelection, GetStringSelection, SetStringSelection, doc="See `GetStringSelection` and `SetStringSelection`");
-    %property(Strings, GetStrings, doc="See `GetStrings`");
     
 };
 

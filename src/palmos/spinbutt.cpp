@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinbutt.h"
+    #pragma implementation "spinbutbase.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,13 +29,13 @@
     #pragma hdrstop
 #endif
 
+#ifndef WX_PRECOMP
+#include "wx/app.h"
+#endif
+
 #if wxUSE_SPINBTN
 
 #include "wx/spinbutt.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
@@ -148,3 +153,4 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
 
 #endif
     // wxUSE_SPINCTN
+

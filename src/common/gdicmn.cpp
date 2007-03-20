@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/gdicmn.cpp
+// Name:        gdicmn.cpp
 // Purpose:     Common GDI classes
 // Author:      Julian Smart
 // Modified by:
@@ -9,52 +9,61 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "gdicmn.h"
+#endif
+
+#ifdef __VMS
+#define XtDisplay XTDISPLAY
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
+#include "wx/event.h"
 #include "wx/gdicmn.h"
-#include "wx/gdiobj.h"
+#include "wx/brush.h"
+#include "wx/pen.h"
+#include "wx/bitmap.h"
+#include "wx/icon.h"
+#include "wx/cursor.h"
+#include "wx/font.h"
+#include "wx/palette.h"
+#include "wx/app.h"
+#include "wx/dc.h"
+#include "wx/utils.h"
+#include "wx/settings.h"
+#include "wx/hashmap.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/pen.h"
-    #include "wx/brush.h"
-    #include "wx/palette.h"
-    #include "wx/icon.h"
-    #include "wx/cursor.h"
-    #include "wx/settings.h"
-    #include "wx/bitmap.h"
-    #include "wx/colour.h"
-    #include "wx/font.h"
+#include "wx/log.h"
+#include <string.h>
+
+#if defined(__WXMSW__)
+#include "wx/msw/wrapwin.h"
 #endif
 
-
-IMPLEMENT_DYNAMIC_CLASS(wxGDIObject, wxObject)
-
-
-WXDLLIMPEXP_DATA_CORE(wxBrushList*) wxTheBrushList;
-WXDLLIMPEXP_DATA_CORE(wxFontList*)  wxTheFontList;
-WXDLLIMPEXP_DATA_CORE(wxPenList*)   wxThePenList;
-
-WXDLLIMPEXP_DATA_CORE(wxColourDatabase*) wxTheColourDatabase;
-
-WXDLLIMPEXP_DATA_CORE(wxBitmap)  wxNullBitmap;
-WXDLLIMPEXP_DATA_CORE(wxBrush)   wxNullBrush;
-WXDLLIMPEXP_DATA_CORE(wxColour)  wxNullColour;
-WXDLLIMPEXP_DATA_CORE(wxCursor)  wxNullCursor;
-WXDLLIMPEXP_DATA_CORE(wxFont)    wxNullFont;
-WXDLLIMPEXP_DATA_CORE(wxIcon)    wxNullIcon;
-WXDLLIMPEXP_DATA_CORE(wxPen)     wxNullPen;
-#if wxUSE_PALETTE
-WXDLLIMPEXP_DATA_CORE(wxPalette) wxNullPalette;
+#ifdef __WXMOTIF__
+#ifdef __VMS__
+#pragma message disable nosimpint
+#endif
+#include <Xm/Xm.h>
+#ifdef __VMS__
+#pragma message enable nosimpint
+#endif
 #endif
 
-const wxSize wxDefaultSize(wxDefaultCoord, wxDefaultCoord);
-const wxPoint wxDefaultPosition(wxDefaultCoord, wxDefaultCoord);
+#ifdef __WXX11__
+#include "X11/Xlib.h"
+#endif
+
+#ifdef __WXMAC__
+#include "wx/mac/private.h"
+#include "wx/mac/uma.h"
+#endif
 
 #if wxUSE_EXTENDED_RTTI
 
@@ -85,6 +94,8 @@ template<> void wxStringWriteValue(wxString &s , const wxSize &data )
 wxCUSTOM_TYPE_INFO(wxSize, wxToStringConverter<wxSize> , wxFromStringConverter<wxSize>)
 
 #endif
+
+IMPLEMENT_ABSTRACT_CLASS(wxDCBase, wxObject)
 
 wxRect::wxRect(const wxPoint& point1, const wxPoint& point2)
 {
@@ -183,17 +194,12 @@ wxRect& wxRect::Inflate(wxCoord dx, wxCoord dy)
     return *this;
 }
 
-bool wxRect::Contains(int cx, int cy) const
+bool wxRect::Inside(int cx, int cy) const
 {
     return ( (cx >= x) && (cy >= y)
           && ((cy - y) < height)
           && ((cx - x) < width)
           );
-}
-
-bool wxRect::Contains(const wxRect& rect) const
-{
-    return Contains(rect.GetTopLeft()) && Contains(rect.GetBottomRight());
 }
 
 wxRect& wxRect::Intersect(const wxRect& rect)
@@ -327,7 +333,7 @@ void wxColourDatabase::Initialize()
         {wxT("ORANGE RED"), 255, 0, 127},
         {wxT("ORCHID"), 219, 112, 219},
         {wxT("PALE GREEN"), 143, 188, 143},
-        {wxT("PINK"), 255, 192, 203},
+        {wxT("PINK"), 188, 143, 234},
         {wxT("PLUM"), 234, 173, 234},
         {wxT("PURPLE"), 176, 0, 255},
         {wxT("RED"), 255, 0, 0},
@@ -407,6 +413,8 @@ wxColour wxColourDatabase::Find(const wxString& colour) const
     wxColourDatabase * const self = wxConstCast(this, wxColourDatabase);
     self->Initialize();
 
+    // first look among the existing colours
+
     // make the comparaison case insensitive and also match both grey and gray
     wxString colName = colour;
     colName.MakeUpper();
@@ -420,12 +428,48 @@ wxColour wxColourDatabase::Find(const wxString& colour) const
     if ( it != m_map->end() )
         return *(it->second);
 
-    // we did not find any result in existing colours:
-    // we won't use wxString -> wxColour conversion because the
-    // wxColour::Set(const wxString &) function which does that conversion
-    // internally uses this function (wxColourDatabase::Find) and we want
-    // to avoid infinite recursion !
+    // if we didn't find it, query the system, maybe it knows about it
+#if defined(__WXGTK__) || defined(__X__)
+    wxColour col = wxColour::CreateByName(colour);
+
+    if ( col.Ok() )
+    {
+        // cache it
+        self->AddColour(colour, col);
+    }
+
+    return col;
+#elif defined(__X__)
+    // TODO: move this to wxColour::CreateByName()
+    XColor xcolour;
+
+#ifdef __WXMOTIF__
+    Display *display = XtDisplay((Widget) wxTheApp->GetTopLevelWidget()) ;
+#endif
+#ifdef __WXX11__
+    Display* display = (Display*) wxGetDisplay();
+#endif
+    /* MATTHEW: [4] Use wxGetMainColormap */
+    if (!XParseColor(display, (Colormap) wxTheApp->GetMainColormap((WXDisplay*) display), colour.ToAscii() ,&xcolour))
+        return NULL;
+
+#if wxUSE_NANOX
+    unsigned char r = (unsigned char)(xcolour.red);
+    unsigned char g = (unsigned char)(xcolour.green);
+    unsigned char b = (unsigned char)(xcolour.blue);
+#else
+    unsigned char r = (unsigned char)(xcolour.red >> 8);
+    unsigned char g = (unsigned char)(xcolour.green >> 8);
+    unsigned char b = (unsigned char)(xcolour.blue >> 8);
+#endif
+
+    wxColour col(r, g, b);
+    AddColour(colour, col);
+
+    return col;
+#else // other platform
     return wxNullColour;
+#endif // platforms
 }
 
 wxString wxColourDatabase::FindName(const wxColour& colour) const
@@ -448,7 +492,6 @@ wxString wxColourDatabase::FindName(const wxColour& colour) const
 // deprecated wxColourDatabase methods
 // ----------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_6
 wxColour *wxColourDatabase::FindColour(const wxString& name)
 {
     // This function is deprecated, use Find() instead.
@@ -477,209 +520,10 @@ wxColour *wxColourDatabase::FindColour(const wxString& name)
 
     return new wxColour(s_col);
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 // ============================================================================
 // stock objects
 // ============================================================================
-
-static wxStockGDI gs_wxStockGDI_instance;
-wxStockGDI* wxStockGDI::ms_instance = &gs_wxStockGDI_instance;
-wxObject* wxStockGDI::ms_stockObject[ITEMCOUNT];
-
-wxStockGDI::wxStockGDI()
-{
-}
-
-wxStockGDI::~wxStockGDI()
-{
-}
-
-void wxStockGDI::DeleteAll()
-{
-    for (unsigned i = 0; i < ITEMCOUNT; i++)
-    {
-        delete ms_stockObject[i];
-        ms_stockObject[i] = NULL;
-    }
-}
-
-const wxBrush* wxStockGDI::GetBrush(Item item)
-{
-    wxBrush* brush = wx_static_cast(wxBrush*, ms_stockObject[item]);
-    if (brush == NULL)
-    {
-        switch (item)
-        {
-        case BRUSH_BLACK:
-            brush = new wxBrush(*GetColour(COLOUR_BLACK), wxSOLID);
-            break;
-        case BRUSH_BLUE:
-            brush = new wxBrush(*GetColour(COLOUR_BLUE), wxSOLID);
-            break;
-        case BRUSH_CYAN:
-            brush = new wxBrush(*GetColour(COLOUR_CYAN), wxSOLID);
-            break;
-        case BRUSH_GREEN:
-            brush = new wxBrush(*GetColour(COLOUR_GREEN), wxSOLID);
-            break;
-        case BRUSH_GREY:
-            brush = new wxBrush(wxColour(wxT("GREY")), wxSOLID);
-            break;
-        case BRUSH_LIGHTGREY:
-            brush = new wxBrush(*GetColour(COLOUR_LIGHTGREY), wxSOLID);
-            break;
-        case BRUSH_MEDIUMGREY:
-            brush = new wxBrush(wxColour(wxT("MEDIUM GREY")), wxSOLID);
-            break;
-        case BRUSH_RED:
-            brush = new wxBrush(*GetColour(COLOUR_RED), wxSOLID);
-            break;
-        case BRUSH_TRANSPARENT:
-            brush = new wxBrush(*GetColour(COLOUR_BLACK), wxTRANSPARENT);
-            break;
-        case BRUSH_WHITE:
-            brush = new wxBrush(*GetColour(COLOUR_WHITE), wxSOLID);
-            break;
-        default:
-            wxFAIL;
-        }
-        ms_stockObject[item] = brush;
-    }
-    return brush;
-}
-
-const wxColour* wxStockGDI::GetColour(Item item)
-{
-    wxColour* colour = wx_static_cast(wxColour*, ms_stockObject[item]);
-    if (colour == NULL)
-    {
-        switch (item)
-        {
-        case COLOUR_BLACK:
-            colour = new wxColour(0, 0, 0);
-            break;
-        case COLOUR_BLUE:
-            colour = new wxColour(0, 0, 255);
-            break;
-        case COLOUR_CYAN:
-            colour = new wxColour(wxT("CYAN"));
-            break;
-        case COLOUR_GREEN:
-            colour = new wxColour(0, 255, 0);
-            break;
-        case COLOUR_LIGHTGREY:
-            colour = new wxColour(wxT("LIGHT GREY"));
-            break;
-        case COLOUR_RED:
-            colour = new wxColour(255, 0, 0);
-            break;
-        case COLOUR_WHITE:
-            colour = new wxColour(255, 255, 255);
-            break;
-        default:
-            wxFAIL;
-        }
-        ms_stockObject[item] = colour;
-    }
-    return colour;
-}
-
-const wxCursor* wxStockGDI::GetCursor(Item item)
-{
-    wxCursor* cursor = wx_static_cast(wxCursor*, ms_stockObject[item]);
-    if (cursor == NULL)
-    {
-        switch (item)
-        {
-        case CURSOR_CROSS:
-            cursor = new wxCursor(wxCURSOR_CROSS);
-            break;
-        case CURSOR_HOURGLASS:
-            cursor = new wxCursor(wxCURSOR_WAIT);
-            break;
-        case CURSOR_STANDARD:
-            cursor = new wxCursor(wxCURSOR_ARROW);
-            break;
-        default:
-            wxFAIL;
-        }
-        ms_stockObject[item] = cursor;
-    }
-    return cursor;
-}
-
-const wxFont* wxStockGDI::GetFont(Item item)
-{
-    wxFont* font = wx_static_cast(wxFont*, ms_stockObject[item]);
-    if (font == NULL)
-    {
-        switch (item)
-        {
-        case FONT_ITALIC:
-            font = new wxFont(GetFont(FONT_NORMAL)->GetPointSize(), wxROMAN, wxITALIC, wxNORMAL);
-            break;
-        case FONT_NORMAL:
-            font = new wxFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-            break;
-        case FONT_SMALL:
-            font = new wxFont(GetFont(FONT_NORMAL)->GetPointSize() - 2, wxSWISS, wxNORMAL, wxNORMAL);
-            break;
-        case FONT_SWISS:
-            font = new wxFont(GetFont(FONT_NORMAL)->GetPointSize(), wxSWISS, wxNORMAL, wxNORMAL);
-            break;
-        default:
-            wxFAIL;
-        }
-        ms_stockObject[item] = font;
-    }
-    return font;
-}
-
-const wxPen* wxStockGDI::GetPen(Item item)
-{
-    wxPen* pen = wx_static_cast(wxPen*, ms_stockObject[item]);
-    if (pen == NULL)
-    {
-        switch (item)
-        {
-        case PEN_BLACK:
-            pen = new wxPen(*GetColour(COLOUR_BLACK), 1, wxSOLID);
-            break;
-        case PEN_BLACKDASHED:
-            pen = new wxPen(*GetColour(COLOUR_BLACK), 1, wxSHORT_DASH);
-            break;
-        case PEN_CYAN:
-            pen = new wxPen(*GetColour(COLOUR_CYAN), 1, wxSOLID);
-            break;
-        case PEN_GREEN:
-            pen = new wxPen(*GetColour(COLOUR_GREEN), 1, wxSOLID);
-            break;
-        case PEN_GREY:
-            pen = new wxPen(wxColour(wxT("GREY")), 1, wxSOLID);
-            break;
-        case PEN_LIGHTGREY:
-            pen = new wxPen(*GetColour(COLOUR_LIGHTGREY), 1, wxSOLID);
-            break;
-        case PEN_MEDIUMGREY:
-            pen = new wxPen(wxColour(wxT("MEDIUM GREY")), 1, wxSOLID);
-            break;
-        case PEN_RED:
-            pen = new wxPen(*GetColour(COLOUR_RED), 1, wxSOLID);
-            break;
-        case PEN_TRANSPARENT:
-            pen = new wxPen(*GetColour(COLOUR_BLACK), 1, wxTRANSPARENT);
-            break;
-        case PEN_WHITE:
-            pen = new wxPen(*GetColour(COLOUR_WHITE), 1, wxSOLID);
-            break;
-        default:
-            wxFAIL;
-        }
-        ms_stockObject[item] = pen;
-    }
-    return pen;
-}
 
 void wxInitializeStockLists()
 {
@@ -688,6 +532,148 @@ void wxInitializeStockLists()
     wxTheBrushList = new wxBrushList;
     wxThePenList = new wxPenList;
     wxTheFontList = new wxFontList;
+    wxTheBitmapList = new wxBitmapList;
+}
+
+void wxInitializeStockObjects ()
+{
+#ifdef __WXMOTIF__
+#endif
+#ifdef __X__
+  // TODO
+  //  wxFontPool = new XFontPool;
+#endif
+
+  // why under MSW fonts shouldn't have the standard system size?
+/*
+#ifdef __WXMSW__
+  static const int sizeFont = 10;
+#else
+#endif
+*/
+#if defined(__WXMAC__)
+    // retrieve size of system font for all stock fonts
+    int sizeFont = 12;
+
+    Str255 fontName ;
+    SInt16 fontSize ;
+    Style fontStyle ;
+
+    GetThemeFont(kThemeSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
+    sizeFont = fontSize ;
+#ifdef __WXMAC_CLASSIC__
+    wxNORMAL_FONT = new wxFont (fontSize, wxMODERN, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal(fontName) );
+#else
+    wxNORMAL_FONT = new wxFont () ;
+    wxNORMAL_FONT->MacCreateThemeFont( kThemeSystemFont );
+#endif
+#elif defined(__WXPM__)
+    static const int sizeFont = 12;
+#else
+    wxNORMAL_FONT = new wxFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+    static const int sizeFont = wxNORMAL_FONT->GetPointSize();
+#endif
+
+#if defined(__WXPM__)
+    /*
+    // Basic OS/2 has a fairly limited number of fonts and these are as good
+    // as I can do to get something that looks halfway "wx" normal
+    */
+    wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxBOLD);
+    wxSMALL_FONT = new wxFont (sizeFont - 4, wxSWISS, wxNORMAL, wxNORMAL); /* Helv */
+    wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
+    wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL); /* Helv */
+#elif defined(__WXMAC__)
+    wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL); /* Helv */
+    wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
+#ifdef __WXMAC_CLASSIC__
+  GetThemeFont(kThemeSmallSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
+    wxSMALL_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal( fontName ) );
+#else
+    wxSMALL_FONT = new wxFont () ;
+    wxSMALL_FONT->MacCreateThemeFont( kThemeSmallSystemFont );
+#endif
+#else
+    wxSMALL_FONT = new wxFont (sizeFont - 2, wxSWISS, wxNORMAL, wxNORMAL);
+    wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
+    wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL);
+#endif
+
+    wxRED_PEN = new wxPen (wxT("RED"), 1, wxSOLID);
+    wxCYAN_PEN = new wxPen (wxT("CYAN"), 1, wxSOLID);
+    wxGREEN_PEN = new wxPen (wxT("GREEN"), 1, wxSOLID);
+    wxBLACK_PEN = new wxPen (wxT("BLACK"), 1, wxSOLID);
+    wxWHITE_PEN = new wxPen (wxT("WHITE"), 1, wxSOLID);
+    wxTRANSPARENT_PEN = new wxPen (wxT("BLACK"), 1, wxTRANSPARENT);
+    wxBLACK_DASHED_PEN = new wxPen (wxT("BLACK"), 1, wxSHORT_DASH);
+    wxGREY_PEN = new wxPen (wxT("GREY"), 1, wxSOLID);
+    wxMEDIUM_GREY_PEN = new wxPen (wxT("MEDIUM GREY"), 1, wxSOLID);
+    wxLIGHT_GREY_PEN = new wxPen (wxT("LIGHT GREY"), 1, wxSOLID);
+
+    wxBLUE_BRUSH = new wxBrush (wxT("BLUE"), wxSOLID);
+    wxGREEN_BRUSH = new wxBrush (wxT("GREEN"), wxSOLID);
+    wxWHITE_BRUSH = new wxBrush (wxT("WHITE"), wxSOLID);
+    wxBLACK_BRUSH = new wxBrush (wxT("BLACK"), wxSOLID);
+    wxTRANSPARENT_BRUSH = new wxBrush (wxT("BLACK"), wxTRANSPARENT);
+    wxCYAN_BRUSH = new wxBrush (wxT("CYAN"), wxSOLID);
+    wxRED_BRUSH = new wxBrush (wxT("RED"), wxSOLID);
+    wxGREY_BRUSH = new wxBrush (wxT("GREY"), wxSOLID);
+    wxMEDIUM_GREY_BRUSH = new wxBrush (wxT("MEDIUM GREY"), wxSOLID);
+    wxLIGHT_GREY_BRUSH = new wxBrush (wxT("LIGHT GREY"), wxSOLID);
+
+    wxBLACK = new wxColour (wxT("BLACK"));
+    wxWHITE = new wxColour (wxT("WHITE"));
+    wxRED = new wxColour (wxT("RED"));
+    wxBLUE = new wxColour (wxT("BLUE"));
+    wxGREEN = new wxColour (wxT("GREEN"));
+    wxCYAN = new wxColour (wxT("CYAN"));
+    wxLIGHT_GREY = new wxColour (wxT("LIGHT GREY"));
+
+    wxSTANDARD_CURSOR = new wxCursor (wxCURSOR_ARROW);
+    wxHOURGLASS_CURSOR = new wxCursor (wxCURSOR_WAIT);
+    wxCROSS_CURSOR = new wxCursor (wxCURSOR_CROSS);
+}
+
+void wxDeleteStockObjects ()
+{
+    wxDELETE(wxNORMAL_FONT);
+    wxDELETE(wxSMALL_FONT);
+    wxDELETE(wxITALIC_FONT);
+    wxDELETE(wxSWISS_FONT);
+
+    wxDELETE(wxRED_PEN);
+    wxDELETE(wxCYAN_PEN);
+    wxDELETE(wxGREEN_PEN);
+    wxDELETE(wxBLACK_PEN);
+    wxDELETE(wxWHITE_PEN);
+    wxDELETE(wxTRANSPARENT_PEN);
+    wxDELETE(wxBLACK_DASHED_PEN);
+    wxDELETE(wxGREY_PEN);
+    wxDELETE(wxMEDIUM_GREY_PEN);
+    wxDELETE(wxLIGHT_GREY_PEN);
+
+    wxDELETE(wxBLUE_BRUSH);
+    wxDELETE(wxGREEN_BRUSH);
+    wxDELETE(wxWHITE_BRUSH);
+    wxDELETE(wxBLACK_BRUSH);
+    wxDELETE(wxTRANSPARENT_BRUSH);
+    wxDELETE(wxCYAN_BRUSH);
+    wxDELETE(wxRED_BRUSH);
+    wxDELETE(wxGREY_BRUSH);
+    wxDELETE(wxMEDIUM_GREY_BRUSH);
+    wxDELETE(wxLIGHT_GREY_BRUSH);
+
+    wxDELETE(wxBLACK);
+    wxDELETE(wxWHITE);
+    wxDELETE(wxRED);
+    wxDELETE(wxBLUE);
+    wxDELETE(wxGREEN);
+    wxDELETE(wxCYAN);
+    wxDELETE(wxLIGHT_GREY);
+
+    wxDELETE(wxSTANDARD_CURSOR);
+    wxDELETE(wxHOURGLASS_CURSOR);
+    wxDELETE(wxCROSS_CURSOR);
 }
 
 void wxDeleteStockLists()
@@ -695,30 +681,57 @@ void wxDeleteStockLists()
     wxDELETE(wxTheBrushList);
     wxDELETE(wxThePenList);
     wxDELETE(wxTheFontList);
+    wxDELETE(wxTheBitmapList);
 }
 
 // ============================================================================
 // wxTheXXXList stuff (semi-obsolete)
 // ============================================================================
 
-wxGDIObjListBase::wxGDIObjListBase()
+wxBitmapList::~wxBitmapList ()
 {
+    wxList::compatibility_iterator node = GetFirst ();
+    while (node)
+    {
+        wxBitmap *bitmap = (wxBitmap *) node->GetData ();
+        wxList::compatibility_iterator next = node->GetNext ();
+        if (bitmap->GetVisible())
+            delete bitmap;
+        node = next;
+    }
 }
 
-wxGDIObjListBase::~wxGDIObjListBase()
+// Pen and Brush lists
+wxPenList::~wxPenList ()
 {
-    for (wxList::compatibility_iterator node = list.GetFirst(); node; node = node->GetNext())
+    wxList::compatibility_iterator node = GetFirst ();
+    while (node)
     {
-        delete wx_static_cast(wxObject*, node->GetData());
+        wxPen *pen = (wxPen *) node->GetData ();
+        wxList::compatibility_iterator next = node->GetNext ();
+        if (pen->GetVisible())
+            delete pen;
+        node = next;
     }
+}
+
+void wxPenList::AddPen (wxPen * pen)
+{
+    Append (pen);
+}
+
+void wxPenList::RemovePen (wxPen * pen)
+{
+    DeleteObject (pen);
 }
 
 wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, int style)
 {
-    for (wxList::compatibility_iterator node = list.GetFirst(); node; node = node->GetNext())
+    for (wxList::compatibility_iterator node = GetFirst (); node; node = node->GetNext ())
     {
         wxPen *each_pen = (wxPen *) node->GetData ();
-        if (
+        if (each_pen &&
+                each_pen->GetVisible() &&
                 each_pen->GetWidth () == width &&
                 each_pen->GetStyle () == style &&
                 each_pen->GetColour ().Red () == colour.Red () &&
@@ -727,23 +740,48 @@ wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, int style)
             return each_pen;
     }
 
-    wxPen* pen = NULL;
-    wxPen penTmp(colour, width, style);
-    if (penTmp.Ok())
+    wxPen *pen = new wxPen (colour, width, style);
+    if ( !pen->Ok() )
     {
-        pen = new wxPen(penTmp);
-        list.Append(pen);
+        // don't save the invalid pens in the list
+        delete pen;
+
+        return NULL;
     }
+
+    AddPen(pen);
+
+    // we'll delete it ourselves later
+    pen->SetVisible(true);
 
     return pen;
 }
 
+wxBrushList::~wxBrushList ()
+{
+    wxList::compatibility_iterator node = GetFirst ();
+    while (node)
+    {
+        wxBrush *brush = (wxBrush *) node->GetData ();
+        wxList::compatibility_iterator next = node->GetNext ();
+        if (brush && brush->GetVisible())
+            delete brush;
+        node = next;
+    }
+}
+
+void wxBrushList::AddBrush (wxBrush * brush)
+{
+    Append (brush);
+}
+
 wxBrush *wxBrushList::FindOrCreateBrush (const wxColour& colour, int style)
 {
-    for (wxList::compatibility_iterator node = list.GetFirst(); node; node = node->GetNext())
+    for (wxList::compatibility_iterator node = GetFirst (); node; node = node->GetNext ())
     {
         wxBrush *each_brush = (wxBrush *) node->GetData ();
-        if (
+        if (each_brush &&
+                each_brush->GetVisible() &&
                 each_brush->GetStyle () == style &&
                 each_brush->GetColour ().Red () == colour.Red () &&
                 each_brush->GetColour ().Green () == colour.Green () &&
@@ -751,15 +789,54 @@ wxBrush *wxBrushList::FindOrCreateBrush (const wxColour& colour, int style)
             return each_brush;
     }
 
-    wxBrush* brush = NULL;
-    wxBrush brushTmp(colour, style);
-    if (brushTmp.Ok())
+    wxBrush *brush = new wxBrush (colour, style);
+
+    if ( !brush->Ok() )
     {
-        brush = new wxBrush(brushTmp);
-        list.Append(brush);
+        // don't put the brushes we failed to create into the list
+        delete brush;
+
+        return NULL;
     }
 
+    AddBrush(brush);
+
+    // we'll delete it ourselves later
+    brush->SetVisible(true);
+
     return brush;
+}
+
+void wxBrushList::RemoveBrush (wxBrush * brush)
+{
+    DeleteObject (brush);
+}
+
+wxFontList::~wxFontList ()
+{
+    wxList::compatibility_iterator node = GetFirst ();
+    while (node)
+    {
+        // Only delete objects that are 'visible', i.e.
+        // that have been created using FindOrCreate...,
+        // where the pointers are expected to be shared
+        // (and therefore not deleted by any one part of an app).
+        wxFont *font = (wxFont *) node->GetData ();
+        wxList::compatibility_iterator next = node->GetNext ();
+        if (font->GetVisible())
+            delete font;
+        node = next;
+    }
+}
+
+void wxFontList::AddFont (wxFont * font)
+{
+    Append (font);
+}
+
+void wxFontList::RemoveFont (wxFont * font)
+{
+    DeleteObject (font);
 }
 
 wxFont *wxFontList::FindOrCreateFont(int pointSize,
@@ -770,12 +847,13 @@ wxFont *wxFontList::FindOrCreateFont(int pointSize,
                                      const wxString& facename,
                                      wxFontEncoding encoding)
 {
-    wxFont *font;
+    wxFont *font = (wxFont *)NULL;
     wxList::compatibility_iterator node;
-    for (node = list.GetFirst(); node; node = node->GetNext())
+    for ( node = GetFirst(); node; node = node->GetNext() )
     {
         font = (wxFont *)node->GetData();
-        if (
+        if ( font->GetVisible() &&
+             font->Ok() &&
              font->GetPointSize () == pointSize &&
              font->GetStyle () == style &&
              font->GetWeight () == weight &&
@@ -820,26 +898,30 @@ wxFont *wxFontList::FindOrCreateFont(int pointSize,
         }
     }
 
-    // font not found, create the new one
-    font = NULL;
-    wxFont fontTmp(pointSize, family, style, weight, underline, facename, encoding);
-    if (fontTmp.Ok())
+    if ( !node )
     {
-        font = new wxFont(fontTmp);
-        list.Append(font);
+        // font not found, create the new one
+        font = new wxFont(pointSize, family, style, weight,
+                          underline, facename, encoding);
+
+        AddFont(font);
+
+        // and mark it as being cacheable
+        font->SetVisible(true);
     }
 
     return font;
 }
 
-#if WXWIN_COMPATIBILITY_2_6
-void wxBrushList::AddBrush(wxBrush*) { }
-void wxBrushList::RemoveBrush(wxBrush*) { }
-void wxFontList::AddFont(wxFont*) { }
-void wxFontList::RemoveFont(wxFont*) { }
-void wxPenList::AddPen(wxPen*) { }
-void wxPenList::RemovePen(wxPen*) { }
-#endif
+void wxBitmapList::AddBitmap(wxBitmap *bitmap)
+{
+    Append(bitmap);
+}
+
+void wxBitmapList::RemoveBitmap(wxBitmap *bitmap)
+{
+    DeleteObject(bitmap);
+}
 
 wxSize wxGetDisplaySize()
 {
@@ -872,3 +954,4 @@ wxResourceCache::~wxResourceCache ()
         node = node->GetNext ();
     }
 }
+

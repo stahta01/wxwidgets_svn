@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/mainfrm.h
+// Name:        mainfrm.h
 // Purpose:     Studio main window class
 // Author:      Julian Smart
 // Modified by:
 // Created:     27/7/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _STUDIO_MAINFRM_H_
 #define _STUDIO_MAINFRM_H_
 
-#include "wx/docmdi.h"
+#include <wx/docmdi.h>
 
 class wxSashLayoutWindow;
 class wxSashEvent;
@@ -52,3 +52,4 @@ DECLARE_EVENT_TABLE()
 
 #endif
   // _STUDIO_MAINFRM_H_
+

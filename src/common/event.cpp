@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/event.cpp
+// Name:        event.cpp
 // Purpose:     Event classes
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
+// Some older compilers (such as EMX) cannot handle
+// #pragma interface/implementation correctly, iff
+// #pragma implementation is used in _two_ translation
+// units (as created by e.g. event.cpp compiled for
+// libwx_base and event.cpp compiled for libwx_gui_core).
+// So we must not use those pragmas for those compilers in
+// such files.
+    #pragma implementation "event.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,22 +35,28 @@
     #pragma hdrstop
 #endif
 
-#include "wx/event.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
+    #include "wx/defs.h"
     #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/stopwatch.h"
-    #include "wx/module.h"
+    #include "wx/list.h"
 
     #if wxUSE_GUI
         #include "wx/control.h"
+        #include "wx/utils.h"
         #include "wx/dc.h"
         #include "wx/textctrl.h"
-        #include "wx/validate.h"
     #endif // wxUSE_GUI
 #endif
+
+#include "wx/event.h"
+#include "wx/module.h"
+
+#if wxUSE_GUI
+    #include "wx/validate.h"
+#if wxUSE_STOPWATCH
+    #include "wx/stopwatch.h"
+#endif
+#endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -86,8 +103,6 @@
     IMPLEMENT_DYNAMIC_CLASS(wxHelpEvent, wxCommandEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxContextMenuEvent, wxCommandEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxMouseCaptureChangedEvent, wxEvent)
-    IMPLEMENT_DYNAMIC_CLASS(wxMouseCaptureLostEvent, wxEvent)
-    IMPLEMENT_DYNAMIC_CLASS(wxClipboardTextEvent, wxCommandEvent)
 #endif // wxUSE_GUI
 
 #if wxUSE_BASE
@@ -232,6 +247,14 @@ DEFINE_EVENT_TYPE(wxEVT_SCROLL_THUMBTRACK)
 DEFINE_EVENT_TYPE(wxEVT_SCROLL_THUMBRELEASE)
 DEFINE_EVENT_TYPE(wxEVT_SCROLL_CHANGED)
 
+// see comments in wx/event.h, near wxEVT_SCROLL_ENDSCROLL declaration
+#if wxCHECK_VERSION(2, 7, 0)
+    #error "Remove the lines below, not needed any more"
+#endif
+#undef wxEVT_SCROLL_ENDSCROLL
+extern WXDLLIMPEXP_CORE const wxEventType wxEVT_SCROLL_ENDSCROLL;
+const wxEventType wxEVT_SCROLL_ENDSCROLL = wxEVT_SCROLL_CHANGED;
+
 // Scroll events from wxWindow
 DEFINE_EVENT_TYPE(wxEVT_SCROLLWIN_TOP)
 DEFINE_EVENT_TYPE(wxEVT_SCROLLWIN_BOTTOM)
@@ -260,7 +283,6 @@ DEFINE_EVENT_TYPE(wxEVT_SHOW)
 DEFINE_EVENT_TYPE(wxEVT_ICONIZE)
 DEFINE_EVENT_TYPE(wxEVT_MAXIMIZE)
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_CAPTURE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_CAPTURE_LOST)
 DEFINE_EVENT_TYPE(wxEVT_PAINT)
 DEFINE_EVENT_TYPE(wxEVT_ERASE_BACKGROUND)
 DEFINE_EVENT_TYPE(wxEVT_NC_PAINT)
@@ -284,11 +306,6 @@ DEFINE_EVENT_TYPE(wxEVT_MEASURE_ITEM)
 DEFINE_EVENT_TYPE(wxEVT_COMPARE_ITEM)
 DEFINE_EVENT_TYPE(wxEVT_INIT_DIALOG)
 DEFINE_EVENT_TYPE(wxEVT_UPDATE_UI)
-
-// Clipboard events
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_COPY)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_CUT)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_PASTE)
 
 // Generic command events
 // Note: a click is a higher-level event than button down/up
@@ -380,6 +397,9 @@ wxEvent::wxEvent(const wxEvent &src)
 
 wxCommandEvent::wxCommandEvent(wxEventType commandType, int theId)
               : wxEvent(theId, commandType)
+#if WXWIN_COMPATIBILITY_2_4
+              , m_commandString(this)
+#endif
 {
     m_clientData = (char *) NULL;
     m_clientObject = (wxClientData *) NULL;
@@ -536,7 +556,6 @@ wxMouseEvent::wxMouseEvent(wxEventType commandType)
     m_wheelRotation = 0;
     m_wheelDelta = 0;
     m_linesPerAction = 0;
-    m_wheelAxis = 0;
 }
 
 void wxMouseEvent::Assign(const wxMouseEvent& event)
@@ -558,7 +577,6 @@ void wxMouseEvent::Assign(const wxMouseEvent& event)
     m_wheelRotation = event.m_wheelRotation;
     m_wheelDelta = event.m_wheelDelta;
     m_linesPerAction = event.m_linesPerAction;
-    m_wheelAxis = event.m_wheelAxis;
 }
 
 // return true if was a button dclick event
@@ -738,12 +756,10 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
 #endif
 }
 
-#if WXWIN_COMPATIBILITY_2_6
 long wxKeyEvent::KeyCode() const
 {
     return m_keyCode;
 }
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindowCreateEvent::wxWindowCreateEvent(wxWindow *win)
 {
@@ -761,23 +777,6 @@ wxChildFocusEvent::wxChildFocusEvent(wxWindow *win)
                  : wxCommandEvent(wxEVT_CHILD_FOCUS)
 {
     SetEventObject(win);
-}
-
-// ----------------------------------------------------------------------------
-// wxHelpEvent
-// ----------------------------------------------------------------------------
-
-/* static */
-wxHelpEvent::Origin wxHelpEvent::GuessOrigin(Origin origin)
-{
-    if ( origin == Origin_Unknown )
-    {
-        // assume that the event comes from the help button if it's not from
-        // keyboard and that pressing F1 always results in the help event
-        origin = wxGetKeyState(WXK_F1) ? Origin_Keyboard : Origin_HelpButton;
-    }
-
-    return origin;
 }
 
 #endif // wxUSE_GUI
@@ -1010,7 +1009,6 @@ wxEvtHandler::wxEvtHandler()
     m_eventsLocker = new wxCriticalSection;
 #  endif
 #endif
-    
     // no client data (yet)
     m_clientData = NULL;
     m_clientDataType = wxClientData_None;
@@ -1044,8 +1042,6 @@ wxEvtHandler::~wxEvtHandler()
         delete m_dynamicEvents;
     };
 
-    if (m_pendingEvents)
-        m_pendingEvents->DeleteContents(true);
     delete m_pendingEvents;
 
 #if wxUSE_THREADS
@@ -1124,18 +1120,18 @@ void wxEvtHandler::AddPendingEvent(wxEvent& event)
 
     wxLEAVE_CRIT_SECT(*wxPendingEventsLocker);
 
-    // 3) Inform the system that new pending events are somewhere,
+    // 3) Inform the system that new pending events are somwehere,
     //    and that these should be processed in idle time.
     wxWakeUpIdle();
 }
 
 void wxEvtHandler::ProcessPendingEvents()
 {
-    // this method is only called by wxApp if this handler does have
-    // pending events
+    // this method is only called by wxApp if this handler does have pending
+    // events
     wxCHECK_RET( m_pendingEvents,
                  wxT("Please call wxApp::ProcessPendingEvents() instead") );
-    
+
     wxENTER_CRIT_SECT( Lock() );
 
     // we leave the loop once we have processed all events that were present at
@@ -1149,16 +1145,11 @@ void wxEvtHandler::ProcessPendingEvents()
     {
         wxEvent *event = (wxEvent *)node->GetData();
 
-        // It's importan we remove event from list before processing it.
-        // Else a nested event loop, for example from a modal dialog, might
-        // process the same event again.
-
         m_pendingEvents->Erase(node);
 
         wxLEAVE_CRIT_SECT( Lock() );
 
         ProcessEvent(*event);
-
         delete event;
 
         wxENTER_CRIT_SECT( Lock() );
@@ -1368,10 +1359,6 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
         wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
-        // get next node before (maybe) calling the event handler as it could
-        // call Disconnect() invalidating the current node
-        node = node->GetNext();
-
         if ((event.GetEventType() == entry->m_eventType) && (entry->m_fn != 0))
         {
             wxEvtHandler *handler =
@@ -1386,6 +1373,8 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
                 return true;
             }
         }
+
+        node = node->GetNext();
     }
 
     return false;
@@ -1457,40 +1446,6 @@ wxWindow* wxFindFocusDescendant(wxWindow* ancestor)
         focusWin = (wxWindow*) NULL;
 
     return focusWin;
-}
-
-// ----------------------------------------------------------------------------
-// wxEventBlocker
-// ----------------------------------------------------------------------------
-
-wxEventBlocker::wxEventBlocker(wxWindow *win, wxEventType type)
-{
-    wxCHECK_RET(win, wxT("Null window given to wxEventBlocker"));
-
-    m_window = win;
-
-    Block(type);
-    m_window->PushEventHandler(this);
-}
-
-wxEventBlocker::~wxEventBlocker()
-{
-    wxEvtHandler *popped = m_window->PopEventHandler(false);
-    wxCHECK_RET(popped == this, 
-        wxT("Don't push other event handlers into a window managed by wxEventBlocker!"));
-}
-
-bool wxEventBlocker::ProcessEvent(wxEvent& event)
-{
-    // should this event be blocked?
-    for ( size_t i = 0; i < m_eventsToBlock.size(); i++ )
-    {
-        wxEventType t = (wxEventType)m_eventsToBlock[i];
-        if ( t == wxEVT_ANY || t == event.GetEventType() )
-            return true;   // yes, it should: mark this event as processed
-    }
-
-    return false;
 }
 
 #endif // wxUSE_GUI

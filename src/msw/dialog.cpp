@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dialog.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,10 +28,8 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcdlg.h"
+    #include "wx/dialog.h"
     #include "wx/utils.h"
     #include "wx/frame.h"
     #include "wx/app.h"
@@ -35,16 +37,22 @@
     #include "wx/settings.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/toolbar.h"
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/log.h"
 #include "wx/evtloop.h"
 #include "wx/ptr_scpd.h"
+
+#include "wx/msw/wrapcdlg.h"
 
 #if defined(__SMARTPHONE__) && defined(__WXWINCE__)
     #include "wx/msw/wince/resources.h"
 #endif // __SMARTPHONE__ && __WXWINCE__
+
+#if wxUSE_TOOLBAR && defined(__POCKETPC__)
+#include "wx/toolbar.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -79,14 +87,10 @@ wxBEGIN_FLAGS( wxDialogStyle )
     wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
     wxFLAGS_MEMBER(wxSTAY_ON_TOP)
     wxFLAGS_MEMBER(wxCAPTION)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxTHICK_FRAME)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxSYSTEM_MENU)
     wxFLAGS_MEMBER(wxRESIZE_BORDER)
-#if WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxRESIZE_BOX)
-#endif // WXWIN_COMPATIBILITY_2_6
     wxFLAGS_MEMBER(wxCLOSE_BOX)
     wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
     wxFLAGS_MEMBER(wxMINIMIZE_BOX)
@@ -107,6 +111,16 @@ wxCONSTRUCTOR_6( wxDialog , wxWindow* , Parent , wxWindowID , Id , wxString , Ti
 #else
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
 #endif
+
+BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
+    EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+    EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+    EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+
+    EVT_SYS_COLOUR_CHANGED(wxDialog::OnSysColourChanged)
+
+    EVT_CLOSE(wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxDialogModalData
@@ -186,8 +200,6 @@ bool wxDialog::Create(wxWindow *parent,
     return true;
 }
 
-#if WXWIN_COMPATIBILITY_2_6
-
 // deprecated ctor
 wxDialog::wxDialog(wxWindow *parent,
                    const wxString& title,
@@ -209,8 +221,6 @@ void wxDialog::SetModal(bool WXUNUSED(flag))
     // nothing to do, obsolete method
 }
 
-#endif // WXWIN_COMPATIBILITY_2_6
-
 wxDialog::~wxDialog()
 {
     m_isBeingDeleted = true;
@@ -223,14 +233,10 @@ wxDialog::~wxDialog()
 // showing the dialogs
 // ----------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_6
-
 bool wxDialog::IsModalShowing() const
 {
     return IsModal();
 }
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -366,9 +372,86 @@ void wxDialog::EndModal(int retCode)
     Hide();
 }
 
+void wxDialog::EndDialog(int rc)
+{
+    if ( IsModal() )
+        EndModal(rc);
+    else
+        Hide();
+}
+
 // ----------------------------------------------------------------------------
 // wxWin event handlers
 // ----------------------------------------------------------------------------
+
+bool wxDialog::EmulateButtonClickIfPresent(int id)
+{
+    wxButton *btn = wxDynamicCast(FindWindow(id), wxButton);
+
+    if ( !btn || !btn->IsEnabled() || !btn->IsShown() )
+        return false;
+
+    btn->MSWCommand(BN_CLICKED, 0 /* unused */);
+    return true;
+}
+
+// Standard buttons
+void wxDialog::OnOK(wxCommandEvent& WXUNUSED(event))
+{
+  if ( Validate() && TransferDataFromWindow() )
+  {
+      EndDialog(wxID_OK);
+  }
+}
+
+void wxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+    if ( Validate() )
+        TransferDataFromWindow();
+
+    // TODO probably need to disable the Apply button until things change again
+}
+
+void wxDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    EndDialog(wxID_CANCEL);
+}
+
+void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+{
+    // We'll send a Cancel message by default, which may close the dialog.
+    // Check for looping if the Cancel event handler calls Close().
+
+    // Note that if a cancel button and handler aren't present in the dialog,
+    // nothing will happen when you close the dialog via the window manager, or
+    // via Close(). We wouldn't want to destroy the dialog by default, since
+    // the dialog may have been created on the stack. However, this does mean
+    // that calling dialog->Close() won't delete the dialog unless the handler
+    // for wxID_CANCEL does so. So use Destroy() if you want to be sure to
+    // destroy the dialog. The default OnCancel (above) simply ends a modal
+    // dialog, and hides a modeless dialog.
+
+    // VZ: this is horrible and MT-unsafe. Can't we reuse some of these global
+    //     lists here? don't dare to change it now, but should be done later!
+    static wxList closing;
+
+    if ( closing.Member(this) )
+        return;
+
+    closing.Append(this);
+
+    wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+    cancelEvent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent(cancelEvent); // This may close the dialog
+
+    closing.DeleteObject(this);
+}
+
+void wxDialog::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event))
+{
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
+    Refresh();
+}
 
 #ifdef __POCKETPC__
 // Responds to the OK button in a PocketPC titlebar. This
@@ -410,6 +493,36 @@ wxToolBar *wxDialog::OnCreateToolBar(long style,
 // ---------------------------------------------------------------------------
 // dialog Windows messages processing
 // ---------------------------------------------------------------------------
+
+bool wxDialog::MSWProcessMessage(WXMSG* pMsg)
+{
+    const MSG * const msg = wx_reinterpret_cast(MSG *, pMsg);
+    if ( msg->message == WM_KEYDOWN && msg->wParam == VK_ESCAPE )
+    {
+        int idCancel = GetEscapeId();
+        switch ( idCancel )
+        {
+            case wxID_NONE:
+                // don't handle Esc specially at all
+                break;
+
+            case wxID_ANY:
+                // this value is special: it means translate Esc to wxID_CANCEL
+                // but if there is no such button, then fall back to wxID_OK
+                if ( EmulateButtonClickIfPresent(wxID_CANCEL) )
+                    return true;
+                idCancel = wxID_OK;
+                // fall through
+
+            default:
+                // translate Esc to button press for the button with given id
+                if ( EmulateButtonClickIfPresent(idCancel) )
+                    return true;
+        }
+    }
+
+    return wxDialogBase::MSWProcessMessage(pMsg);
+}
 
 WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
@@ -495,3 +608,4 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
 
     return rc;
 }
+

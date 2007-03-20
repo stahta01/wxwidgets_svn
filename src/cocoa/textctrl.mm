@@ -1,20 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/textctrl.mm
+// Name:        cocoa/textctrl.mm
 // Purpose:     wxTextCtrl
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/textctrl.h"
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/textctrl.h"
     #include "wx/log.h"
 #endif //WX_PRECOMP
 
@@ -28,8 +26,8 @@
 
 #include <math.h>
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
 END_EVENT_TABLE()
 WX_IMPLEMENT_COCOA_OWNER(wxTextCtrl,NSTextField,NSControl,NSView)
 
@@ -135,13 +133,10 @@ void wxTextCtrl::Replace(long, long, wxString const&)
 {
 }
 
-void wxTextCtrl::DoSetValue(wxString const& value, int flags)
+void wxTextCtrl::SetValue(wxString const& value)
 {
     wxAutoNSAutoreleasePool pool;
     [GetNSTextField() setStringValue: wxNSStringWithWxString(value)];
-
-    if ( flags & SetValue_SendEvent )
-        SendTextUpdatedEvent();
 }
 
 void wxTextCtrl::WriteText(wxString const&)
@@ -225,3 +220,4 @@ wxSize wxTextCtrl::DoGetBestSize() const
     wxLogTrace(wxTRACE_COCOA_Window_Size,wxT("wxTextCtrl=%p::DoGetBestSize()==(%d,%d)"),this,size.x,size.y);
     return size;
 }
+

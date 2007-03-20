@@ -4,9 +4,9 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/02/15
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_STATTEXT_H__
@@ -52,8 +52,7 @@ protected:
 // Implementation
 // ------------------------------------------------------------------------
 public:
-    virtual void SetLabel(const wxString& label);
-    virtual wxString GetLabel() const;
+    void SetLabel(const wxString& label);
 };
 
 #endif // __WX_COCOA_STATTEXT_H__

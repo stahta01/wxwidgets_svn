@@ -1,17 +1,42 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/gauge.h
+// Name:        gauge.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_GAUGE_H_
-#define _WX_GTK_GAUGE_H_
+
+#ifndef __GTKGAUGEH__
+#define __GTKGAUGEH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+
+#if wxUSE_GAUGE
+
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
 
 //-----------------------------------------------------------------------------
-// wxGauge
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxGauge;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar* wxGaugeNameStr;
+
+//-----------------------------------------------------------------------------
+// wxGaugeBox
 //-----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_CORE wxGauge: public wxControl
@@ -43,32 +68,29 @@ public:
 
     void SetShadowWidth( int WXUNUSED(w) ) { }
     void SetBezelFace( int WXUNUSED(w) ) { }
-    int GetShadowWidth() const { return 0; };
-    int GetBezelFace() const { return 0; };
-
-    // determinate mode API
     void SetRange( int r );
     void SetValue( int pos );
-
+    int GetShadowWidth() const { return 0; };
+    int GetBezelFace() const { return 0; };
     int GetRange() const;
     int GetValue() const;
 
-    // indeterminate mode API
-    virtual void Pulse();
-
     bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
-
+    
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
-    virtual wxVisualAttributes GetDefaultAttributes() const;
-
+    
     // implementation
     // -------------
 
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
+
+    // obsolete functions, don't use
+#if WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return true; }
+#endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // common part of all ctors
@@ -79,9 +101,12 @@ protected:
 
     virtual wxSize DoGetBestSize() const;
 
+    virtual wxVisualAttributes GetDefaultAttributes() const;
+
 private:
     DECLARE_DYNAMIC_CLASS(wxGauge)
 };
 
 #endif
-    // _WX_GTK_GAUGE_H_
+
+#endif // __GTKGAUGEH__

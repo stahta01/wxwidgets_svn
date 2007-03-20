@@ -58,7 +58,7 @@ IMP_PYCALLBACK_BOOL_DR(wxPyDropSource, wxDropSource, GiveFeedback);
 %rename(DropSource) wxPyDropSource;
 class wxPyDropSource {
 public:
-    %pythonAppend wxPyDropSource setCallbackInfo(DropSource)
+    %pythonAppend wxPyDropSource "self._setCallbackInfo(self, DropSource, 0)"
 #ifndef __WXGTK__
      wxPyDropSource(wxWindow *win,
                     const wxCursor &copy = wxNullCursor,
@@ -71,7 +71,7 @@ public:
                    const wxIcon& none = wxNullIcon);
 #endif
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref=0);
+    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref);
     ~wxPyDropSource();
 
     // set the data which is transfered by drag and drop
@@ -84,10 +84,7 @@ public:
 
     wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly);
 
-    bool GiveFeedback(wxDragResult effect);
-    %MAKE_BASE_FUNC(DropSource, GiveFeedback);
-
-    %property(DataObject, GetDataObject, SetData, doc="See `GetDataObject` and `SetData`");
+    bool base_GiveFeedback(wxDragResult effect);
 };
 
 
@@ -138,9 +135,9 @@ IMP_PYCALLBACK_BOOL_INTINT(wxPyDropTarget, wxDropTarget, OnDrop);
 class wxPyDropTarget // : public wxDropTarget
 {
 public:
-    %pythonAppend wxPyDropTarget      setCallbackInfo(DropTarget)
-
-    %disownarg( wxDataObject *dataObject );
+    %pythonAppend wxPyDropTarget
+       "self._setCallbackInfo(self, DropTarget)"
+    %apply SWIGTYPE *DISOWN { wxDataObject *dataObject };
 
     wxPyDropTarget(wxDataObject *dataObject = NULL);
     void _setCallbackInfo(PyObject* self, PyObject* _class);
@@ -151,19 +148,13 @@ public:
     wxDataObject *GetDataObject();
     void SetDataObject(wxDataObject *dataObject);
 
-    %cleardisown( wxDataObject *dataObject );
+    %clear wxDataObject *dataObject;
 
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
 
-    %MAKE_BASE_FUNC(DropTarget, OnEnter);
-    %MAKE_BASE_FUNC(DropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(DropTarget, OnLeave);
-    %MAKE_BASE_FUNC(DropTarget, OnDrop);
-
-    
     // may be called *only* from inside OnData() and will fill m_dataObject
     // with the data from the drop source if it returns True
     bool GetData();
@@ -177,9 +168,6 @@ public:
     // returns default action for drag and drop or
     // wxDragNone if this not specified
     wxDragResult GetDefaultAction();
-    
-    %property(DataObject, GetDataObject, SetDataObject, doc="See `GetDataObject` and `SetDataObject`");
-    %property(DefaultAction, GetDefaultAction, SetDefaultAction, doc="See `GetDefaultAction` and `SetDefaultAction`");
 };
 
 
@@ -219,24 +207,17 @@ IMP_PYCALLBACK_BOOL_INTINT(wxPyTextDropTarget, wxTextDropTarget, OnDrop);
 %rename(TextDropTarget) wxPyTextDropTarget;
 class wxPyTextDropTarget : public wxPyDropTarget {
 public:
-    %pythonAppend wxPyTextDropTarget   setCallbackInfo(TextDropTarget)
+    %pythonAppend wxPyTextDropTarget   "self._setCallbackInfo(self, TextDropTarget)"
 
     wxPyTextDropTarget();
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
-    wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-    %MAKE_BASE_FUNC(TextDropTarget, OnDropText);
-    %MAKE_BASE_FUNC(TextDropTarget, OnEnter);
-    %MAKE_BASE_FUNC(TextDropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(TextDropTarget, OnLeave);
-    %MAKE_BASE_FUNC(TextDropTarget, OnDrop);
-    %MAKE_BASE_FUNC(TextDropTarget, OnData);    
+    //bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnData(wxCoord x, wxCoord y, wxDragResult def);
 };
 
 //---------------------------------------------------------------------------
@@ -288,24 +269,17 @@ IMP_PYCALLBACK_BOOL_INTINT(wxPyFileDropTarget, wxFileDropTarget, OnDrop);
 class wxPyFileDropTarget : public wxPyDropTarget
 {
 public:
-    %pythonAppend wxPyFileDropTarget   setCallbackInfo(FileDropTarget)
+    %pythonAppend wxPyFileDropTarget   "self._setCallbackInfo(self, FileDropTarget)"
 
     wxPyFileDropTarget();
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
-    wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
-    void OnLeave();
-    bool OnDrop(wxCoord x, wxCoord y);
-    wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-    
-    %MAKE_BASE_FUNC(FileDropTarget, OnDropFiles);
-    %MAKE_BASE_FUNC(FileDropTarget, OnEnter);
-    %MAKE_BASE_FUNC(FileDropTarget, OnDragOver);
-    %MAKE_BASE_FUNC(FileDropTarget, OnLeave);
-    %MAKE_BASE_FUNC(FileDropTarget, OnDrop);
-    %MAKE_BASE_FUNC(FileDropTarget, OnData);    
+//    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) = 0;
+    wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    wxDragResult base_OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    void base_OnLeave();
+    bool base_OnDrop(wxCoord x, wxCoord y);
+    wxDragResult base_OnData(wxCoord x, wxCoord y, wxDragResult def);
 };
 
 

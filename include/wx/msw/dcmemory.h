@@ -12,21 +12,24 @@
 #ifndef _WX_DCMEMORY_H_
 #define _WX_DCMEMORY_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcmemory.h"
+#endif
+
 #include "wx/dcclient.h"
 
-class WXDLLEXPORT wxMemoryDC : public wxDC, public wxMemoryDCBase
+class WXDLLEXPORT wxMemoryDC : public wxDC
 {
 public:
-    wxMemoryDC() { CreateCompatible(NULL); Init(); }
-    wxMemoryDC(wxBitmap& bitmap) { CreateCompatible(NULL); Init(); SelectObject(bitmap); }
+    wxMemoryDC();
     wxMemoryDC(wxDC *dc); // Create compatible DC
 
+    virtual void SelectObject(const wxBitmap& bitmap);
 
 protected:
     // override some base class virtuals
     virtual void DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
     virtual void DoGetSize(int* width, int* height) const;
-    virtual void DoSelect(const wxBitmap& bitmap);
 
     // create DC compatible with the given one or screen if dc == NULL
     bool CreateCompatible(wxDC *dc);

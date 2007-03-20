@@ -72,11 +72,7 @@ class SimpleGrid(gridlib.Grid): ##, mixins.GridAutoEditMixin):
         self.SetCellEditor(0, 4, editor)
         self.SetCellValue(0, 4, "Limited text")
 
-        renderer = gridlib.GridCellAutoWrapStringRenderer()
-        self.SetCellRenderer(15,0, renderer)
-        self.SetCellValue(15,0, "The text in this cell will be rendered with word-wrapping")
 
-        
         # test all the events
         self.Bind(gridlib.EVT_GRID_CELL_LEFT_CLICK, self.OnCellLeftClick)
         self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnCellRightClick)
@@ -234,7 +230,7 @@ class SimpleGrid(gridlib.Grid): ##, mixins.GridAutoEditMixin):
 class TestFrame(wx.Frame):
     def __init__(self, parent, log):
         wx.Frame.__init__(self, parent, -1, "Simple Grid Demo", size=(640,480))
-        self.grid = SimpleGrid(self, log)
+        grid = SimpleGrid(self, log)
 
 
 
@@ -245,9 +241,6 @@ if __name__ == '__main__':
     app = wx.PySimpleApp()
     frame = TestFrame(None, sys.stdout)
     frame.Show(True)
-    #import wx.py
-    #shell = wx.py.shell.ShellFrame(frame, locals={'wx':wx, 'frame':frame})
-    #shell.Show()
     app.MainLoop()
 
 

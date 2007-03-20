@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/mimetype.h
+// Name:        wx/mac/mimetype.h
 // Purpose:     Mac Carbon implementation for wx mime-related classes
 // Author:      Ryan Norton
 // Modified by:
@@ -12,6 +12,10 @@
 #ifndef _MIMETYPE_IMPL_H
 #define _MIMETYPE_IMPL_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "mimetype.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/mimetype.h"
 
@@ -19,11 +23,11 @@
 class wxMimeTypesManagerImpl
 {
 public :
-    //kinda kooky but in wxMimeTypesManager::EnsureImpl it doesn't call
+    //kinda kooky but in wxMimeTypesManager::EnsureImpl it doesn't call 
     //intialize, so we do it ourselves
     wxMimeTypesManagerImpl() : m_hIC(NULL) { Initialize(); }
     ~wxMimeTypesManagerImpl() { ClearData(); }
-
+ 
     // load all data into memory - done when it is needed for the first time
     void Initialize(int mailcapStyles = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxEmptyString);
@@ -48,20 +52,20 @@ public :
     wxFileType *Associate(const wxFileTypeInfo& ftInfo);
     // remove association
     bool Unassociate(wxFileType *ft);
-
+    
 private:
     wxArrayFileTypeInfo m_fallbacks;
-    void*  m_hIC;
-    void** m_hDatabase;
-    long   m_lCount;
-
+    void* 				m_hIC;
+    void** 				m_hDatabase;
+    long				m_lCount;
+    
     void* pReserved1;
     void* pReserved2;
     void* pReserved3;
     void* pReserved4;
     void* pReserved5;
     void* pReserved6;
-
+    
     friend class wxFileTypeImpl;
 };
 
@@ -71,7 +75,7 @@ public:
     //kind of nutty, but mimecmn.cpp creates one with an empty new
     wxFileTypeImpl() : m_manager(NULL) {}
     ~wxFileTypeImpl() {} //for those broken compilers
-
+    
     // implement accessor functions
     bool GetExtensions(wxArrayString& extensions);
     bool GetMimeType(wxString *mimeType) const;
@@ -99,15 +103,15 @@ public:
     bool SetDefaultIcon(const wxString& strIcon = wxEmptyString, int index = 0);
 
  private:
-    void Init(wxMimeTypesManagerImpl *manager, long lIndex)
+    void Init(wxMimeTypesManagerImpl *manager, long lIndex) 
     { m_manager=(manager); m_lIndex=(lIndex); }
 
     // helper function
     wxString GetCommand(const wxString& verb) const;
-
+    
     wxMimeTypesManagerImpl *m_manager;
-    long                    m_lIndex;
-
+    long                    m_lIndex; 
+    
     void* pReserved1;
     void* pReserved2;
     void* pReserved3;
@@ -119,4 +123,4 @@ public:
 };
 
 #endif
-    //_MIMETYPE_H
+  //_MIMETYPE_H

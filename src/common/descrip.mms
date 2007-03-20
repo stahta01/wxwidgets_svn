@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 26 February 2007                                                    *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 9 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -18,11 +18,6 @@ CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
 	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
 .else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm
-.else
 .ifdef __WXX11__
 CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)
@@ -31,7 +26,6 @@ CC_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
 .else
 CXX_DEFINE =
 CC_DEFINE =
-.endif
 .endif
 .endif
 .endif
@@ -50,8 +44,6 @@ LEX=flex
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
-		anidecod.obj,\
-		animatecmn.obj,\
 		appbase.obj,\
 		appcmn.obj,\
 		artprov.obj,\
@@ -66,8 +58,6 @@ OBJECTS = \
 		cmndata.obj,\
 		config.obj,\
 		containr.obj,\
-		convauto.obj,\
-		colourcmn.obj,\
 		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
@@ -78,23 +68,19 @@ OBJECTS = \
 		dbgrid.obj,\
 		dbtable.obj,\
 		dcbase.obj,\
-		dcbufcmn.obj,\
 		dircmn.obj,\
 		dlgcmn.obj,\
 		dobjcmn.obj,\
 		docmdi.obj,\
 		docview.obj,\
-		dpycmn.obj,\
 		dynarray.obj,\
 		dynlib.obj,\
 		encconv.obj,\
 		event.obj,\
-		evtloopcmn.obj,\
 		extended.obj,\
 		fddlgcmn.obj,\
 		ffile.obj,\
 		file.obj,\
-		fileback.obj,\
 		fileconf.obj,\
 		filename.obj,\
 		filefn.obj,\
@@ -102,14 +88,12 @@ OBJECTS = \
 		fldlgcmn.obj,\
 		fmapbase.obj,\
 		fontcmn.obj,\
-		fontenumcmn.obj,\
 		fontmap.obj,\
 		framecmn.obj
 
 OBJECTS1=fs_inet.obj,\
+		fs_zip.obj,\
 		ftp.obj,\
-		gaugecmn.obj,\
-		gbsizer.obj,\
 		gdicmn.obj,\
 		gifdecod.obj,\
 		hash.obj,\
@@ -128,7 +112,6 @@ OBJECTS1=fs_inet.obj,\
 		imagpcx.obj,\
 		imagpng.obj,\
 		imagpnm.obj,\
-		imagtga.obj,\
 		imagtiff.obj,\
 		imagxpm.obj,\
 		intl.obj,\
@@ -147,13 +130,11 @@ OBJECTS1=fs_inet.obj,\
 		nbkbase.obj,\
 		object.obj,\
 		paper.obj,\
-		platinfo.obj,\
 		popupcmn.obj,\
 		prntbase.obj,\
 		process.obj,\
 		protocol.obj,\
 		quantize.obj,\
-		radiocmn.obj,\
 		rendcmn.obj,\
 		sckaddr.obj,\
 		sckfile.obj,\
@@ -169,9 +150,8 @@ OBJECTS1=fs_inet.obj,\
 		strconv.obj,\
 		stream.obj,\
 		string.obj,\
-		sysopt.obj
-
-OBJECTS2=tbarbase.obj,\
+		sysopt.obj,\
+		tbarbase.obj,\
 		textbuf.obj,\
 		textcmn.obj,\
 		textfile.obj,\
@@ -180,8 +160,9 @@ OBJECTS2=tbarbase.obj,\
 		toplvcmn.obj,\
 		treebase.obj,\
 		txtstrm.obj,\
-		url.obj,\
-		utilscmn.obj,\
+		url.obj
+
+OBJECTS2=utilscmn.obj,\
 		rgncmn.obj,\
 		uri.obj,\
 		valgen.obj,\
@@ -193,28 +174,16 @@ OBJECTS2=tbarbase.obj,\
 		wincmn.obj,\
 		xpmdecod.obj,\
 		zipstrm.obj,\
-		zstream.obj,\
-		clrpickercmn.obj,\
-		filepickercmn.obj,\
-		fontpickercmn.obj,\
-		pickerbase.obj,\
-		listctrlcmn.obj
+		zstream.obj
 
-OBJECTS_MOTIF=radiocmn.obj,combocmn.obj
+OBJECTS_MOTIF=gaugecmn.obj,radiocmn.obj
 
 OBJECTS_X11=accesscmn.obj,dndcmn.obj,dpycmn.obj,dseldlg.obj,\
-	dynload.obj,effects.obj,fddlgcmn.obj,fs_mem.obj,\
+	dynload.obj,effects.obj,fddlgcmn.obj,fs_mem.obj,gaugecmn.obj,\
 	gbsizer.obj,geometry.obj,matrix.obj,radiocmn.obj,\
-	regex.obj,taskbarcmn.obj,xti.obj,xtistrm.obj,xtixml.obj,\
-	combocmn.obj
-
-OBJECTS_X11_2=socketevtdispatch.obj
-
-OBJECTS_GTK2=fontutilcmn.obj
+	regex.obj,taskbarcmn.obj,xti.obj,xtistrm.obj,xtixml.obj
 
 SOURCES = \
-		anidecod.cpp,\
-		animatecmn.cpp,\
 		appbase.cpp,\
 		appcmn.cpp,\
 		artprov.cpp,\
@@ -229,8 +198,6 @@ SOURCES = \
 		cmndata.cpp,\
 		config.cpp,\
 		containr.cpp,\
-		convauto.cpp,\
-		colourcmn.cpp,\
 		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
@@ -241,23 +208,19 @@ SOURCES = \
 		dbgrid.cpp,\
 		dbtable.cpp,\
 		dcbase.cpp,\
-		dcbufcmn.cpp,\
 		dircmn.cpp,\
 		dlgcmn.cpp,\
 		dobjcmn.cpp,\
 		docmdi.cpp,\
 		docview.cpp,\
-		dpycmn.cpp,\
 		dynarray.cpp,\
 		dynlib.cpp,\
 		encconv.cpp,\
 		event.cpp,\
-		evtloopcmn.cpp,\
 		extended.c,\
 		ffile.cpp,\
 		fddlgcmn.cpp,\
 		file.cpp,\
-		fileback.cpp,\
 		fileconf.cpp,\
 		filename.cpp,\
 		filefn.cpp,\
@@ -265,14 +228,12 @@ SOURCES = \
 		fldlgcmn.cpp,\
 		fmapbase.cpp,\
 		fontcmn.cpp,\
-		fontenumcmn.cpp,\
 		fontmap.cpp,\
-		fontutilcmn.cpp,\
 		framecmn.cpp,\
 		fs_inet.cpp,\
+		fs_zip.cpp,\
 		ftp.cpp,\
 		gaugecmn.cpp,\
-		gbsizer.cpp,\
 		gdicmn.cpp,\
 		gifdecod.cpp,\
 		hash.cpp,\
@@ -291,7 +252,6 @@ SOURCES = \
 		imagpcx.cpp,\
 		imagpng.cpp,\
 		imagpnm.cpp,\
-		imagtga.cpp,\
 		imagtiff.cpp,\
 		imagxpm.cpp,\
 		intl.cpp,\
@@ -299,7 +259,6 @@ SOURCES = \
 		layout.cpp,\
 		lboxcmn.cpp,\
 		list.cpp,\
-		listctrlcmn.cpp,\
 		log.cpp,\
 		longlong.cpp,\
 		memory.cpp,\
@@ -311,13 +270,11 @@ SOURCES = \
 		nbkbase.cpp,\
 		object.cpp,\
 		paper.cpp,\
-		platinfo.cpp,\
 		popupcmn.cpp,\
 		prntbase.cpp,\
 		process.cpp,\
 		protocol.cpp,\
 		quantize.cpp,\
-		radiocmn.cpp,\
 		rendcmn.cpp,\
 		rgncmn.cpp,\
 		sckaddr.cpp,\
@@ -326,7 +283,6 @@ SOURCES = \
 		sckstrm.cpp,\
 		sizer.cpp,\
 		socket.cpp,\
-		socketevtdispatch.cpp,\
 		settcmn.cpp,\
 		statbar.cpp,\
 		stdpbase.cpp,\
@@ -357,10 +313,6 @@ SOURCES = \
 		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp,\
-		clrpickercmn.cpp,\
-		filepickercmn.cpp,\
-		fontpickercmn.cpp,\
-		pickerbase.cpp,\
 		accesscmn.cpp,\
 		dndcmn.cpp,\
 		dpycmn.cpp,\
@@ -392,36 +344,20 @@ all : $(SOURCES)
 	library [--.lib]libwx_motif.olb $(OBJECTS_MOTIF)
 .else
 .ifdef __WXGTK__
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
 	library [--.lib]libwx_gtk.olb $(OBJECTS)
 	library [--.lib]libwx_gtk.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk.olb $(OBJECTS2)
-	library [--.lib]libwx_gtk.olb $(OBJECTS_X11)
-.else
-.ifdef __WXGTK2__
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_GTK2)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS_X11)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS_GTK2)
 .else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11_2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS1)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11)
-	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11_2)
-.endif
 .endif
 .endif
 .endif
 
-anidecod.obj : anidecod.cpp
-animatecmn.obj : animatecmn.cpp
 appbase.obj : appbase.cpp
 appcmn.obj : appcmn.cpp
 artprov.obj : artprov.cpp
@@ -436,8 +372,6 @@ cmdproc.obj : cmdproc.cpp
 cmndata.obj : cmndata.cpp
 config.obj : config.cpp
 containr.obj : containr.cpp
-convauto.obj : convauto.cpp
-colourcmn.obj : colourcmn.cpp
 cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
@@ -448,7 +382,6 @@ db.obj : db.cpp
 dbgrid.obj : dbgrid.cpp
 dbtable.obj : dbtable.cpp
 dcbase.obj : dcbase.cpp
-dcbufcmn.obj : dcbufcmn.cpp
 dircmn.obj : dircmn.cpp
 dlgcmn.obj : dlgcmn.cpp
 dobjcmn.obj : dobjcmn.cpp
@@ -458,12 +391,10 @@ dynarray.obj : dynarray.cpp
 dynlib.obj : dynlib.cpp
 encconv.obj : encconv.cpp
 event.obj : event.cpp
-evtloopcmn.obj : evtloopcmn.cpp
 extended.obj : extended.c
 ffile.obj : ffile.cpp
 fddlgcmn.obj : fddlgcmn.cpp
 file.obj : file.cpp
-fileback.obj : fileback.cpp
 fileconf.obj : fileconf.cpp
 filefn.obj : filefn.cpp
 filename.obj : filename.cpp
@@ -471,14 +402,12 @@ filesys.obj : filesys.cpp
 fldlgcmn.obj : fldlgcmn.cpp
 fmapbase.obj : fmapbase.cpp
 fontcmn.obj : fontcmn.cpp
-fontenumcmn.obj : fontenumcmn.cpp
 fontmap.obj : fontmap.cpp
-fontutilcmn.obj : fontutilcmn.cpp
 framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
+fs_zip.obj : fs_zip.cpp
 ftp.obj : ftp.cpp
 gaugecmn.obj : gaugecmn.cpp
-gbsizer.obj : gbsizer.cpp
 gdicmn.obj : gdicmn.cpp
 gifdecod.obj : gifdecod.cpp
 hash.obj : hash.cpp
@@ -497,7 +426,6 @@ imagjpeg.obj : imagjpeg.cpp
 imagpcx.obj : imagpcx.cpp
 imagpng.obj : imagpng.cpp
 imagpnm.obj : imagpnm.cpp
-imagtga.obj : imagtga.cpp
 imagtiff.obj : imagtiff.cpp
 imagxpm.obj : imagxpm.cpp
 intl.obj : intl.cpp
@@ -516,13 +444,11 @@ mstream.obj : mstream.cpp
 nbkbase.obj : nbkbase.cpp
 object.obj : object.cpp
 paper.obj : paper.cpp
-platinfo.obj : platinfo.cpp
 popupcmn.obj : popupcmn.cpp
 prntbase.obj : prntbase.cpp
 process.obj : process.cpp
 protocol.obj : protocol.cpp
 quantize.obj : quantize.cpp
-radiocmn.obj : radiocmn.cpp
 rendcmn.obj : rendcmn.cpp
 rgncmn.obj : rgncmn.cpp
 sckaddr.obj : sckaddr.cpp
@@ -531,7 +457,6 @@ sckipc.obj : sckipc.cpp
 sckstrm.obj : sckstrm.cpp
 sizer.obj : sizer.cpp
 socket.obj : socket.cpp
-socketevtdispatch.obj : socketevtdispatch.cpp
 settcmn.obj : settcmn.cpp
 statbar.obj : statbar.cpp
 stdpbase.obj : stdpbase.cpp
@@ -580,10 +505,3 @@ xti.obj : xti.cpp
 xtistrm.obj : xtistrm.cpp
 xtixml.obj : xtixml.cpp
 uri.obj : uri.cpp
-dpycmn.obj : dpycmn.cpp
-combocmn.obj : combocmn.cpp
-clrpickercmn.obj : clrpickercmn.cpp
-filepickercmn.obj : filepickercmn.cpp
-fontpickercmn.obj : fontpickercmn.cpp
-pickerbase.obj : pickerbase.cpp
-listctrlcmn.obj : listctrlcmn.cpp

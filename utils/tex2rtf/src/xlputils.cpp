@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,8 +28,10 @@
 #include "tex2rtf.h"
 #include <ctype.h>
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 long currentBlockId = -1;
 static TexChunk *descriptionItemArg = NULL;

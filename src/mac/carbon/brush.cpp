@@ -1,21 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/brush.cpp
+// Name:        brush.cpp
 // Purpose:     wxBrush
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     1998-01-01
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "brush.h"
+#endif
 
 #include "wx/wxprec.h"
 
+#include "wx/utils.h"
 #include "wx/brush.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-#endif
 
 #include "wx/mac/private.h"
 
@@ -24,38 +25,24 @@ IMPLEMENT_DYNAMIC_CLASS(wxBrush, wxGDIObject)
 class WXDLLEXPORT wxBrushRefData: public wxGDIRefData
 {
     friend class WXDLLEXPORT wxBrush;
-
 public:
     wxBrushRefData();
     wxBrushRefData(const wxBrushRefData& data);
-    virtual ~wxBrushRefData();
-
-    bool operator == ( const wxBrushRefData& brush ) const
-    {
-        return m_style == brush.m_style &&
-                m_stipple.IsSameAs(brush.m_stipple) &&
-                m_colour == brush.m_colour &&
-                m_macBrushKind == brush.m_macBrushKind &&
-                m_macThemeBrush == brush.m_macThemeBrush &&
-                m_macThemeBackground == brush.m_macThemeBackground &&
-                EqualRect(&m_macThemeBackgroundExtent, &brush.m_macThemeBackgroundExtent);
-    }
-
+    ~wxBrushRefData();
 
 protected:
     wxMacBrushKind m_macBrushKind ;
     int           m_style;
     wxBitmap      m_stipple ;
     wxColour      m_colour;
-
+    
     ThemeBrush    m_macThemeBrush ;
-
+    
     ThemeBackgroundKind m_macThemeBackground ;
     Rect         m_macThemeBackgroundExtent ;
 };
 
 #define M_BRUSHDATA ((wxBrushRefData *)m_refData)
-
 
 wxBrushRefData::wxBrushRefData()
     : m_style(wxSOLID)
@@ -79,6 +66,7 @@ wxBrushRefData::~wxBrushRefData()
 {
 }
 
+// Brushes
 wxBrush::wxBrush()
 {
 }
@@ -103,7 +91,7 @@ wxBrush::wxBrush(const wxBitmap& stipple)
 
     M_BRUSHDATA->m_colour = *wxBLACK;
     M_BRUSHDATA->m_stipple = stipple;
-
+    
     if (M_BRUSHDATA->m_stipple.GetMask())
         M_BRUSHDATA->m_style = wxSTIPPLE_MASK_OPAQUE;
     else
@@ -112,7 +100,7 @@ wxBrush::wxBrush(const wxBitmap& stipple)
     RealizeResource();
 }
 
-wxBrush::wxBrush( ThemeBrush macThemeBrush )
+wxBrush::wxBrush(ThemeBrush macThemeBrush ) 
 {
     m_refData = new wxBrushRefData;
 
@@ -121,20 +109,24 @@ wxBrush::wxBrush( ThemeBrush macThemeBrush )
 
     RealizeResource();
 }
-
-wxObjectRefData* wxBrush::CreateRefData() const
+void wxBrush::Unshare()
 {
-    return new wxBrushRefData;
-}
-
-wxObjectRefData* wxBrush::CloneRefData(const wxObjectRefData* data) const
-{
-    return new wxBrushRefData(*wx_static_cast(const wxBrushRefData*, data));
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxBrushRefData();
+    }
+    else
+    {
+        wxBrushRefData* ref = new wxBrushRefData(*(wxBrushRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
 }
 
 void wxBrush::SetColour(const wxColour& col)
 {
-    AllocExclusive();
+    Unshare();
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushColour;
     M_BRUSHDATA->m_colour = col;
 
@@ -143,7 +135,7 @@ void wxBrush::SetColour(const wxColour& col)
 
 void wxBrush::SetColour(unsigned char r, unsigned char g, unsigned char b)
 {
-    AllocExclusive();
+    Unshare();
 
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushColour;
     M_BRUSHDATA->m_colour.Set(r, g, b);
@@ -153,7 +145,7 @@ void wxBrush::SetColour(unsigned char r, unsigned char g, unsigned char b)
 
 void wxBrush::SetStyle(int Style)
 {
-    AllocExclusive();
+    Unshare();
 
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushColour;
     M_BRUSHDATA->m_style = Style;
@@ -163,7 +155,7 @@ void wxBrush::SetStyle(int Style)
 
 void wxBrush::SetStipple(const wxBitmap& Stipple)
 {
-    AllocExclusive();
+    Unshare();
 
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushColour;
     M_BRUSHDATA->m_stipple = Stipple;
@@ -173,79 +165,67 @@ void wxBrush::SetStipple(const wxBitmap& Stipple)
 
 void wxBrush::MacSetTheme(ThemeBrush macThemeBrush)
 {
-    AllocExclusive();
+    Unshare();
 
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushTheme;
     M_BRUSHDATA->m_macThemeBrush = macThemeBrush;
-
     RGBColor color ;
     GetThemeBrushAsColor( macThemeBrush , 32, true, &color );
-    M_BRUSHDATA->m_colour = color;
-
+    M_BRUSHDATA->m_colour.Set( color.red >> 8 , color.green >> 8 , color.blue >> 8 ) ;
+    
     RealizeResource();
 }
 
 void wxBrush::MacSetThemeBackground(unsigned long macThemeBackground, const WXRECTPTR extent)
 {
-    AllocExclusive();
+    Unshare();
 
     M_BRUSHDATA->m_macBrushKind = kwxMacBrushThemeBackground;
     M_BRUSHDATA->m_macThemeBackground = macThemeBackground;
-    M_BRUSHDATA->m_macThemeBackgroundExtent = *(Rect*)extent;
-
+    M_BRUSHDATA->m_macThemeBackgroundExtent = *(Rect*)extent ;
     RealizeResource();
 }
 
 bool wxBrush::RealizeResource()
 {
-    return true;
+    return TRUE;
 }
 
-unsigned long wxBrush::MacGetThemeBackground(WXRECTPTR extent) const
+unsigned long wxBrush::MacGetThemeBackground( WXRECTPTR extent)  const 
 {
-    if ( M_BRUSHDATA && M_BRUSHDATA->m_macBrushKind == kwxMacBrushThemeBackground )
-    {
-        if ( extent )
-            *(Rect*)extent = M_BRUSHDATA->m_macThemeBackgroundExtent;
-
-        return M_BRUSHDATA->m_macThemeBackground;
-    }
-    else
-    {
-        return 0;
-    }
+  if ( M_BRUSHDATA && M_BRUSHDATA->m_macBrushKind == kwxMacBrushThemeBackground )
+  {
+    if ( extent )
+      *(Rect*)extent = M_BRUSHDATA->m_macThemeBackgroundExtent ;
+    return M_BRUSHDATA->m_macThemeBackground ;
+  }
+  else
+  {
+    return 0 ;  
+  }
 }
 
-short wxBrush::MacGetTheme() const
-{
-    return (M_BRUSHDATA ? ((M_BRUSHDATA->m_macBrushKind == kwxMacBrushTheme) ? M_BRUSHDATA->m_macThemeBrush : kThemeBrushBlack) : kThemeBrushBlack);
+short wxBrush::MacGetTheme() const 
+{ 
+    return (M_BRUSHDATA ? ( M_BRUSHDATA->m_macBrushKind == kwxMacBrushTheme ? M_BRUSHDATA->m_macThemeBrush : kThemeBrushBlack) : kThemeBrushBlack); 
 }
 
-wxColour& wxBrush::GetColour() const
+wxColour& wxBrush::GetColour() const 
 {
     return (M_BRUSHDATA ? M_BRUSHDATA->m_colour : wxNullColour);
 }
 
-int wxBrush::GetStyle() const
-{
-    return (M_BRUSHDATA ? M_BRUSHDATA->m_style : 0);
+int wxBrush::GetStyle() const 
+{ 
+    return (M_BRUSHDATA ? M_BRUSHDATA->m_style : 0); 
 }
 
-wxBitmap *wxBrush::GetStipple() const
-{
-    return (M_BRUSHDATA ? & M_BRUSHDATA->m_stipple : 0);
+wxBitmap *wxBrush::GetStipple() const 
+{ 
+    return (M_BRUSHDATA ? & M_BRUSHDATA->m_stipple : 0); 
 }
 
-wxMacBrushKind wxBrush::MacGetBrushKind() const
-{
-    return (M_BRUSHDATA ? M_BRUSHDATA->m_macBrushKind : kwxMacBrushColour);
-}
-
-bool wxBrush::operator == ( const wxBrush& brush ) const
-{
-    if (m_refData == brush.m_refData) return true;
-
-    if (!m_refData || !brush.m_refData) return false;
-
-    return ( *(wxBrushRefData*)m_refData == *(wxBrushRefData*)brush.m_refData );
+wxMacBrushKind wxBrush::MacGetBrushKind()  const 
+{ 
+    return (M_BRUSHDATA ? M_BRUSHDATA->m_macBrushKind : kwxMacBrushColour); 
 }

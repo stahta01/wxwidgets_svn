@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "containr.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -28,13 +32,17 @@
     #include "wx/log.h"
     #include "wx/event.h"
     #include "wx/window.h"
-    #include "wx/scrolbar.h"
-    #include "wx/radiobut.h"
-    #include "wx/containr.h"
 #endif //WX_PRECOMP
 
-// trace mask for focus messages
-#define TRACE_FOCUS _T("focus")
+#include "wx/containr.h"
+
+#ifdef __WXMAC__
+    #include "wx/scrolbar.h"
+#endif
+
+#ifdef __WXMSW__
+    #include "wx/radiobut.h"
+#endif
 
 // ============================================================================
 // implementation
@@ -43,7 +51,10 @@
 wxControlContainer::wxControlContainer(wxWindow *winParent)
 {
     m_winParent = winParent;
-    m_winLastFocused = NULL;
+
+    m_winLastFocused =
+    m_winTmpDefault =
+    m_winDefault = NULL;
     m_inSetFocus = false;
 }
 
@@ -68,17 +79,18 @@ bool wxControlContainer::AcceptsFocus() const
         while ( node )
         {
             wxWindow *child = node->GetData();
-            node = node->GetNext();
 
-#ifdef __WXMAC__
-            if ( m_winParent->MacIsWindowScrollbar( child ) )
-                continue;
-            hasRealChildren = true ;
-#endif
             if ( child->AcceptsFocus() )
             {
                 return true;
             }
+
+#ifdef __WXMAC__
+            wxScrollBar *sb = wxDynamicCast( child , wxScrollBar ) ;
+            if ( sb == NULL || !m_winParent->MacIsWindowScrollbar( sb ) )
+                hasRealChildren = true ;
+#endif
+            node = node->GetNext();
         }
 
 #ifdef __WXMAC__
@@ -121,13 +133,13 @@ void wxControlContainer::SetLastFocus(wxWindow *win)
 
         if ( win )
         {
-            wxLogTrace(TRACE_FOCUS, _T("Set last focus to %s(%s)"),
+            wxLogTrace(_T("focus"), _T("Set last focus to %s(%s)"),
                        win->GetClassInfo()->GetClassName(),
                        win->GetLabel().c_str());
         }
         else
         {
-            wxLogTrace(TRACE_FOCUS, _T("No more last focus"));
+            wxLogTrace(_T("focus"), _T("No more last focus"));
         }
     }
 
@@ -275,49 +287,6 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
 
     const wxWindowList& children = m_winParent->GetChildren();
 
-    // if we have exactly one notebook-like child window (actually it could be
-    // any window that returns true from its HasMultiplePages()), then
-    // [Shift-]Ctrl-Tab and Ctrl-PageUp/Down keys should iterate over its pages
-    // even if the focus is outside of the control because this is how the
-    // standard MSW properties dialogs behave and we do it under other platforms
-    // as well because it seems like a good idea -- but we can always put this
-    // block inside "#ifdef __WXMSW__" if it's not suitable there
-    if ( event.IsWindowChange() && !goingDown )
-    {
-        // check if we have a unique notebook-like child
-        wxWindow *bookctrl = NULL;
-        for ( wxWindowList::const_iterator i = children.begin(),
-                                         end = children.end();
-              i != end;
-              ++i )
-        {
-            wxWindow * const window = *i;
-            if ( window->HasMultiplePages() )
-            {
-                if ( bookctrl )
-                {
-                    // this is the second book-like control already so don't do
-                    // anything as we don't know which one should have its page
-                    // changed
-                    bookctrl = NULL;
-                    break;
-                }
-
-                bookctrl = window;
-            }
-        }
-
-        if ( bookctrl )
-        {
-            // make sure that we don't bubble up the event again from the book
-            // control resulting in infinite recursion
-            wxNavigationKeyEvent eventCopy(event);
-            eventCopy.SetEventObject(m_winParent);
-            if ( bookctrl->GetEventHandler()->ProcessEvent(eventCopy) )
-                return;
-        }
-    }
-
     // there is not much to do if we don't have children and we're not
     // interested in "notebook page change" events here
     if ( !children.GetCount() || event.IsWindowChange() )
@@ -334,7 +303,7 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
     }
 
     // where are we going?
-    const bool forward = event.GetDirection();
+    bool forward = event.GetDirection();
 
     // the node of the children list from which we should start looking for the
     // next acceptable child
@@ -351,8 +320,11 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
 
         // start from first or last depending on where we're going
         node = forward ? children.GetFirst() : children.GetLast();
+
+        // we want to cycle over all nodes
+        start_node = wxWindowList::compatibility_iterator();
     }
-    else // going up
+    else
     {
         // try to find the child which has the focus currently
 
@@ -378,6 +350,10 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
             // ok, we found the focus - now is it our child?
             start_node = children.Find( winFocus );
         }
+        else
+        {
+            start_node = wxWindowList::compatibility_iterator();
+        }
 
         if ( !start_node && m_winLastFocused )
         {
@@ -398,10 +374,10 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
     }
 
     // we want to cycle over all elements passing by NULL
-    for ( ;; )
+    for( ;; )
     {
-        // don't go into infinite loop
-        if ( start_node && node && node == start_node )
+        // if it is the starting node then break
+        if( node && start_node && node == start_node )
             break;
 
         // Have we come to the last or first item on the panel?
@@ -415,7 +391,7 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
 
             if ( !goingDown )
             {
-                // Check if our (maybe grand) parent is another panel: if this
+                // Check if our (may be grand) parent is another panel: if this
                 // is the case, they will know what to do with this navigation
                 // key and so give them the chance to process it instead of
                 // looping inside this panel (normally, the focus will go to
@@ -543,6 +519,12 @@ void wxControlContainer::HandleOnWindowDestroy(wxWindowBase *child)
 {
     if ( child == m_winLastFocused )
         m_winLastFocused = NULL;
+
+    if ( child == m_winDefault )
+        m_winDefault = NULL;
+
+    if ( child == m_winTmpDefault )
+        m_winTmpDefault = NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -551,8 +533,8 @@ void wxControlContainer::HandleOnWindowDestroy(wxWindowBase *child)
 
 bool wxControlContainer::DoSetFocus()
 {
-    wxLogTrace(TRACE_FOCUS, _T("SetFocus on wxPanel 0x%p."),
-               m_winParent->GetHandle());
+    wxLogTrace(_T("focus"), _T("SetFocus on wxPanel 0x%08lx."),
+               (unsigned long)m_winParent->GetHandle());
 
     if (m_inSetFocus)
         return true;
@@ -592,8 +574,8 @@ bool wxControlContainer::DoSetFocus()
 
 void wxControlContainer::HandleOnFocus(wxFocusEvent& event)
 {
-    wxLogTrace(TRACE_FOCUS, _T("OnFocus on wxPanel 0x%p, name: %s"),
-               m_winParent->GetHandle(),
+    wxLogTrace(_T("focus"), _T("OnFocus on wxPanel 0x%08lx, name: %s"),
+               (unsigned long)m_winParent->GetHandle(),
                m_winParent->GetName().c_str() );
 
     DoSetFocus();
@@ -622,9 +604,9 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
         // It might happen that the window got reparented
         if ( (*childLastFocused)->GetParent() == win )
         {
-            wxLogTrace(TRACE_FOCUS,
-                       _T("SetFocusToChild() => last child (0x%p)."),
-                       (*childLastFocused)->GetHandle());
+            wxLogTrace(_T("focus"),
+                       _T("SetFocusToChild() => last child (0x%08lx)."),
+                       (unsigned long)(*childLastFocused)->GetHandle());
 
             // not SetFocusFromKbd(): we're restoring focus back to the old
             // window and not setting it as the result of a kbd action
@@ -643,13 +625,7 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
     while ( node )
     {
         wxWindow *child = node->GetData();
-        node = node->GetNext();
 
-#ifdef __WXMAC__
-        if ( child->GetParent()->MacIsWindowScrollbar( child ) )
-            continue;
-#endif
-        
         if ( child->AcceptsFocusFromKeyboard() && !child->IsTopLevel() )
         {
 #ifdef __WXMSW__
@@ -664,15 +640,18 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
             }
 #endif
 
-            wxLogTrace(TRACE_FOCUS,
-                       _T("SetFocusToChild() => first child (0x%p)."),
-                       child->GetHandle());
+            wxLogTrace(_T("focus"),
+                       _T("SetFocusToChild() => first child (0x%08lx)."),
+                       (unsigned long)child->GetHandle());
 
             *childLastFocused = child;
             child->SetFocusFromKbd();
             return true;
         }
+
+        node = node->GetNext();
     }
 
     return false;
 }
+

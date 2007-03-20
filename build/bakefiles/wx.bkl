@@ -24,7 +24,7 @@
     <!-- ...and when there are multiple libraries: -->
     <include file="multilib.bkl"/>
 
-    <if cond="FORMAT in ['msvc6prj','msevc4prj','msvs2005prj']">
+    <if cond="FORMAT in ['msvc6prj','msevc4prj']">
         <set var="MSVC6PRJ_MERGED_TARGETS">
             <if cond="MONOLITHIC=='0'">$(MSVC6PRJ_MERGED_TARGETS_MULTILIB)</if>
             <if cond="MONOLITHIC=='1'">$(MSVC6PRJ_MERGED_TARGETS_MONOLIB)</if>
@@ -40,7 +40,7 @@
     <subproject id="samples">
         <installable>no</installable>
         <dir cond="FORMAT=='autoconf'">samples</dir>
-        <dir cond="FORMAT!='autoconf' and TOOLKIT in ['PM','MSW','MGL','MOTIF']">../../samples</dir>
+        <dir cond="FORMAT!='autoconf' and TOOLKIT in ['PM','MSW','MGL']">../../samples</dir>
     </subproject>
 
     <if cond="FORMAT=='autoconf'">
@@ -97,7 +97,7 @@
                 $(INSTALL_DIR) $(DESTDIR)$(BINDIR)
                 $(INSTALL_DIR) $(DESTDIR)$(LIBDIR)/wx/config
                 $(INSTALL_PROGRAM) lib/wx/config/$(TOOLCHAIN_FULLNAME) $(DESTDIR)$(LIBDIR)/wx/config
-                (cd $(DESTDIR)$(BINDIR) &amp;&amp; rm -f wx-config &amp;&amp; $(LN_S) $(LIBDIR)/wx/config/$(TOOLCHAIN_FULLNAME) wx-config)
+                (cd $(DESTDIR)$(BINDIR) &amp;&amp; rm -f wx-config &amp;&amp; $(LN_S) $(DESTDIR)$(LIBDIR)/wx/config/$(TOOLCHAIN_FULLNAME) wx-config)
             </command>
         </action>
 
@@ -168,7 +168,7 @@
 
 
     <!-- copy setup.h on DOS/OS2/Windows: -->
-    <if cond="FORMAT!='autoconf' and TOOLKIT in ['PM','MSW','MGL','MOTIF']">
+    <if cond="FORMAT!='autoconf' and TOOLKIT in ['PM','MSW','MGL']">
         <mkdir id="libdir">
             <dir>$(LIBDIRNAME)</dir>
         </mkdir>

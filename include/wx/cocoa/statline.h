@@ -4,9 +4,9 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/18
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_STATLINE_H__
@@ -30,7 +30,7 @@ public:
     wxStaticLine(wxWindow *parent, wxWindowID winid = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = 0, const wxString& name = wxStaticLineNameStr)
+            long style = 0, const wxString& name = wxStaticTextNameStr)
     {
         Create(parent, winid, pos, size, style, name);
     }
@@ -38,7 +38,7 @@ public:
     bool Create(wxWindow *parent, wxWindowID winid = wxID_ANY,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = 0, const wxString& name = wxStaticLineNameStr);
+            long style = 0, const wxString& name = wxStaticTextNameStr);
     virtual ~wxStaticLine();
 
 // ------------------------------------------------------------------------

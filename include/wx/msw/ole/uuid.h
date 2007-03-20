@@ -14,7 +14,10 @@
 #ifndef   _WX_OLEUUID_H
 #define   _WX_OLEUUID_H
 
-#include "wx/chartype.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "uuid.h"
+#endif
+#include "wx/wxchar.h"
 // ------------------------------------------------------------------
 // UUID (Universally Unique IDentifier) definition
 // ------------------------------------------------------------------

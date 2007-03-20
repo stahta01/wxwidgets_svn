@@ -74,10 +74,7 @@ public:
         for ( size_t n = 0; n < WXSIZEOF(m_fds); n++ )
         {
             if ( m_fds[n] != INVALID_FD )
-            {
                 close(m_fds[n]);
-                m_fds[n] = INVALID_FD;
-            }
         }
     }
 
@@ -88,7 +85,7 @@ private:
     int m_fds[2];
 };
 
-#if wxUSE_STREAMS && wxUSE_FILE
+#if wxUSE_STREAMS
 
 #include "wx/wfstream.h"
 
@@ -108,7 +105,7 @@ public:
     virtual bool CanRead() const;
 };
 
-#endif // wxUSE_STREAMS && wxUSE_FILE
+#endif // wxUSE_STREAMS
 
 #endif // _WX_UNIX_PIPE_H_
 

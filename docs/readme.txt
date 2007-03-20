@@ -1,5 +1,5 @@
-wxWidgets 2.8.1
----------------------------------------------------------
+wxWidgets 2.6.4
+---------------
 
 Welcome to wxWidgets, a sophisticated cross-platform C++
 framework for writing advanced GUI applications using
@@ -22,7 +22,7 @@ for a list of important documents and samples.
 Changes in this release
 -----------------------
 
-Please see changes.txt and "Changes since 2.6" in the manual
+Please see changes.txt and "Changes since 2.4" in the manual
 for details.
 
 Platforms supported
@@ -30,7 +30,8 @@ Platforms supported
 
 wxWidgets currently supports the following platforms:
 
-- Windows 95/98/ME, NT, 2000, XP, Vista, Pocket PC/Mobile, Smartphone
+- Windows 95/98/ME, Windows NT, Windows 2000, Windows XP,
+  Pocket PC, Smartphone
 - Most Unix variants with GTK+ 1 and GTK+ 2
 - Most Unix variants with X11 (beta)
 - Most Unix variants with Motif/Lesstif
@@ -43,10 +44,9 @@ Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) for details.
 See also http://www.wxwidgets.org/platform.htm.
 
-Note that 2.6 series were the last to fully support GTK+ 1.2, and Mac OS
-9/Mac OS 10.2 and below. wxWidgets 2.7 and above focuses on GTK+ 2 and Mac OS
-10.3 and above and compatibility with earlier systems is not guaranteed any
-more.
+The 2.6 series is the last to fully support GTK+ 1.2, and Mac OS
+9/Mac OS 10.2 and below. wxWidgets 2.7 and above will focus on
+GTK+ 2, and Mac OS 10.3 and above.
 
 Files
 -----
@@ -146,12 +146,7 @@ The main wxWidgets ftp site is at:
 
   ftp://biolpc22.york.ac.uk/pub
 
-A wxWidgets CD-ROM with the latest distribution plus an HTML
-front-end and hundreds of MB of compilers, utilities and other
-material may be ordered from the CD-ROM page: see the wxWidgets
-web site.
-
 Have fun!
 
-The wxWidgets Team, January 2007
+The wxWidgets Team, March 2007
 

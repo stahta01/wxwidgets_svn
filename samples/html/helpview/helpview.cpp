@@ -5,6 +5,11 @@
 // standalone help browser.
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma implementation "help.cpp"
+#pragma interface "help.cpp"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -53,9 +58,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #ifdef __WXMOTIF__
     delete wxLog::SetActiveTarget(new wxLogStderr); // So dialog boxes aren't used
 #endif
@@ -83,8 +85,6 @@ bool MyApp::OnInit()
 #endif
 
     help -> DisplayContents();
-
-    SetTopWindow(help->GetFrame());
 
     return true;
 }

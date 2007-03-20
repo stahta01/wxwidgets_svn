@@ -65,7 +65,7 @@ True on success.", "");
     
 
 
-    %disownarg( wxDataObject *data );
+    %apply SWIGTYPE *DISOWN { wxDataObject *data };
     
     DocDeclStr(
         virtual bool , AddData( wxDataObject *data ),
@@ -84,8 +84,8 @@ do not delete the data explicitly.
 
 :see: `wx.DataObject`", "");
     
-    %cleardisown( wxDataObject *data );
-    
+
+    %clear wxDataObject *data;
     
     DocDeclStr(
         virtual bool , IsSupported( const wxDataFormat& format ),
@@ -122,7 +122,7 @@ normal clipboard, if primary is True.", "");
     DocDeclStr(
         static wxClipboard *, Get(),
         "Returns global instance (wxTheClipboard) of the object.", "");
-
+    
 };
 
 

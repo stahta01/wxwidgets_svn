@@ -25,8 +25,6 @@
 #include "wx/file.h"
 #include "wx/app.h"
 #include "wx/log.h"
-#include "wx/apptrait.h"
-#include "wx/platinfo.h"
 
 // without this pragma, the stupid compiler precompiles #defines below so that
 // changing them doesn't "take place" later!
@@ -67,7 +65,6 @@
     #define TEST_LOCALE
     #define TEST_LOG
     #define TEST_MIME
-    #define TEST_MODULE
     #define TEST_PATHLIST
     #define TEST_ODBC
     #define TEST_PRINTF
@@ -88,7 +85,7 @@
     #define TEST_WCHAR
     #define TEST_ZIP
 #else // #if TEST_ALL
-    #define TEST_STDPATHS
+    #define TEST_DIR
 #endif
 
 // some tests are interactive, define this to run them
@@ -136,7 +133,7 @@ static wxString MakePrintable(const wxChar *s)
 
 static void ShowCmdLine(const wxCmdLineParser& parser)
 {
-    wxString s = _T("Command line parsed successfully:\nInput files: ");
+    wxString s = _T("Input files: ");
 
     size_t count = parser.GetParamCount();
     for ( size_t param = 0; param < count; param++ )
@@ -720,24 +717,6 @@ static void TestFileCopy()
     wxPuts(wxEmptyString);
 }
 
-static void TestTempFile()
-{
-    wxPuts(_T("*** wxTempFile test ***"));
-
-    wxTempFile tmpFile;
-    if ( tmpFile.Open(_T("test2")) && tmpFile.Write(_T("the answer is 42")) )
-    {
-        if ( tmpFile.Commit() )
-            wxPuts(_T("File committed."));
-        else
-            wxPuts(_T("ERROR: could't commit temp file."));
-
-        wxRemoveFile(_T("test2"));
-    }
-
-    wxPuts(wxEmptyString);
-}
-
 #endif // TEST_FILE
 
 // ----------------------------------------------------------------------------
@@ -918,8 +897,8 @@ static void TestFileNameCwd()
 
 #ifdef TEST_FILETIME
 
-#include "wx/filename.h"
-#include "wx/datetime.h"
+#include <wx/filename.h>
+#include <wx/datetime.h>
 
 static void TestFileGetTimes()
 {
@@ -1403,80 +1382,6 @@ static void TestMimeAssociate()
 #endif // TEST_MIME
 
 // ----------------------------------------------------------------------------
-// module dependencies feature
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_MODULE
-
-#include "wx/module.h"
-
-class wxTestModule : public wxModule
-{
-protected:
-    virtual bool OnInit() { wxPrintf(_T("Load module: %s\n"), GetClassInfo()->GetClassName()); return true; }
-    virtual void OnExit() { wxPrintf(_T("Unload module: %s\n"), GetClassInfo()->GetClassName()); }
-};
-
-class wxTestModuleA : public wxTestModule
-{
-public:
-    wxTestModuleA();
-private:
-    DECLARE_DYNAMIC_CLASS(wxTestModuleA)
-};
-
-class wxTestModuleB : public wxTestModule
-{
-public:
-    wxTestModuleB();
-private:
-    DECLARE_DYNAMIC_CLASS(wxTestModuleB)
-};
-
-class wxTestModuleC : public wxTestModule
-{
-public:
-    wxTestModuleC();
-private:
-    DECLARE_DYNAMIC_CLASS(wxTestModuleC)
-};
-
-class wxTestModuleD : public wxTestModule
-{
-public:
-    wxTestModuleD();
-private:
-    DECLARE_DYNAMIC_CLASS(wxTestModuleD)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxTestModuleC, wxModule)
-wxTestModuleC::wxTestModuleC()
-{
-    AddDependency(CLASSINFO(wxTestModuleD));
-}
-
-IMPLEMENT_DYNAMIC_CLASS(wxTestModuleA, wxModule)
-wxTestModuleA::wxTestModuleA()
-{
-    AddDependency(CLASSINFO(wxTestModuleB));
-    AddDependency(CLASSINFO(wxTestModuleD));
-}
-
-IMPLEMENT_DYNAMIC_CLASS(wxTestModuleD, wxModule)
-wxTestModuleD::wxTestModuleD()
-{
-}
-
-IMPLEMENT_DYNAMIC_CLASS(wxTestModuleB, wxModule)
-wxTestModuleB::wxTestModuleB()
-{
-    AddDependency(CLASSINFO(wxTestModuleD));
-    AddDependency(CLASSINFO(wxTestModuleC));
-}
-
-#endif // TEST_MODULE
-
-// ----------------------------------------------------------------------------
 // misc information functions
 // ----------------------------------------------------------------------------
 
@@ -1484,7 +1389,6 @@ wxTestModuleB::wxTestModuleB()
 
 #include "wx/utils.h"
 
-#if TEST_INTERACTIVE
 static void TestDiskInfo()
 {
     wxPuts(_T("*** Testing wxGetDiskSpace() ***"));
@@ -1513,7 +1417,6 @@ static void TestDiskInfo()
         }
     }
 }
-#endif // TEST_INTERACTIVE
 
 static void TestOsInfo()
 {
@@ -1524,27 +1427,10 @@ static void TestOsInfo()
     wxPrintf(_T("Running under: %s, version %d.%d\n"),
             wxGetOsDescription().c_str(), major, minor);
 
-    wxPrintf(_T("%ld free bytes of memory left.\n"), wxGetFreeMemory().ToLong());
+    wxPrintf(_T("%ld free bytes of memory left.\n"), wxGetFreeMemory());
 
     wxPrintf(_T("Host name is %s (%s).\n"),
            wxGetHostName().c_str(), wxGetFullHostName().c_str());
-
-    wxPuts(wxEmptyString);
-}
-
-static void TestPlatformInfo()
-{
-    wxPuts(_T("*** Testing wxPlatformInfo functions ***\n"));
-
-    // get this platform
-    wxPlatformInfo plat;
-
-    wxPrintf(_T("Operating system family name is: %s\n"), plat.GetOperatingSystemFamilyName().c_str());
-    wxPrintf(_T("Operating system name is: %s\n"), plat.GetOperatingSystemIdName().c_str());
-    wxPrintf(_T("Port ID name is: %s\n"), plat.GetPortIdName().c_str());
-    wxPrintf(_T("Port ID short name is: %s\n"), plat.GetPortIdShortName().c_str());
-    wxPrintf(_T("Architecture is: %s\n"), plat.GetArchName().c_str());
-    wxPrintf(_T("Endianness is: %s\n"), plat.GetEndiannessName().c_str());
 
     wxPuts(wxEmptyString);
 }
@@ -1668,7 +1554,7 @@ static void TestRegExInteractive()
 
 #ifdef TEST_ODBC
 
-#include "wx/db.h"
+#include <wx/db.h>
 
 static void TestDbOpen()
 {
@@ -2227,9 +2113,9 @@ static void TestScopeGuard()
     wxON_BLOCK_EXIT2(function2, 3.14, 'p');
 
     Object obj;
-    wxON_BLOCK_EXIT_OBJ0(obj, Object::method0);
-    wxON_BLOCK_EXIT_OBJ1(obj, Object::method1, 7);
-    wxON_BLOCK_EXIT_OBJ2(obj, Object::method2, 2.71, 'e');
+    wxON_BLOCK_EXIT_OBJ0(obj, &Object::method0);
+    wxON_BLOCK_EXIT_OBJ1(obj, &Object::method1, 7);
+    wxON_BLOCK_EXIT_OBJ2(obj, &Object::method2, 2.71, 'e');
 
     wxScopeGuard dismissed = wxMakeGuard(function0);
     dismissed.Dismiss();
@@ -2798,18 +2684,7 @@ static void TestStandardPaths()
     wxPrintf(_T("Data dir (sys local):\t%s\n"), stdp.GetLocalDataDir().c_str());
     wxPrintf(_T("Data dir (user):\t%s\n"), stdp.GetUserDataDir().c_str());
     wxPrintf(_T("Data dir (user local):\t%s\n"), stdp.GetUserLocalDataDir().c_str());
-    wxPrintf(_T("Documents dir:\t\t%s\n"), stdp.GetDocumentsDir().c_str());
-    wxPrintf(_T("Executable path:\t%s\n"), stdp.GetExecutablePath().c_str());
     wxPrintf(_T("Plugins dir:\t\t%s\n"), stdp.GetPluginsDir().c_str());
-    wxPrintf(_T("Resources dir:\t\t%s\n"), stdp.GetResourcesDir().c_str());
-    wxPrintf(_T("Localized res. dir:\t%s\n"),
-             stdp.GetLocalizedResourcesDir(_T("fr")).c_str());
-    wxPrintf(_T("Message catalogs dir:\t%s\n"),
-             stdp.GetLocalizedResourcesDir
-                  (
-                    _T("fr"),
-                    wxStandardPaths::ResourceCat_Messages
-                  ).c_str());
 }
 
 #endif // TEST_STDPATHS
@@ -2833,13 +2708,11 @@ static void TestFileStream()
         fsOut.Write("foo", 3);
     }
 
+    wxFileInputStream fsIn(filename);
+    wxPrintf(_T("File stream size: %u\n"), fsIn.GetSize());
+    while ( !fsIn.Eof() )
     {
-        wxFileInputStream fsIn(filename);
-        wxPrintf(_T("File stream size: %u\n"), fsIn.GetSize());
-        while ( !fsIn.Eof() )
-        {
-            wxPutchar(fsIn.GetC());
-        }
+        wxPutchar(fsIn.GetC());
     }
 
     if ( !wxRemoveFile(filename) )
@@ -4323,7 +4196,6 @@ int main(int argc, char **argv)
     TestFileRead();
     TestTextFileRead();
     TestFileCopy();
-    TestTempFile();
 #endif // TEST_FILE
 
 #ifdef TEST_FILENAME
@@ -4368,19 +4240,20 @@ int main(int argc, char **argv)
     wxLog::AddTraceMask(_T("mime"));
     #if TEST_ALL
         TestMimeEnum();
-    #endif
         TestMimeOverride();
         TestMimeAssociate();
+    #endif
     TestMimeFilename();
 #endif // TEST_MIME
 
 #ifdef TEST_INFO_FUNCTIONS
-    TestOsInfo();
-    TestPlatformInfo();
-    TestUserInfo();
+    #if TEST_ALL
+        TestOsInfo();
+        TestUserInfo();
 
-    #if TEST_INTERACTIVE
-        TestDiskInfo();
+        #if TEST_INTERACTIVE
+            TestDiskInfo();
+        #endif
     #endif
 #endif // TEST_INFO_FUNCTIONS
 

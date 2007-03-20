@@ -159,9 +159,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxWidgets Sound Sample"));
 
@@ -987,7 +984,7 @@ void MyFrame::OnSelectFile(wxCommandEvent& WXUNUSED(event))
 #if wxUSE_FILEDLG
     wxFileDialog dlg(this, _T("Choose a sound file"),
                      wxEmptyString, wxEmptyString,
-                     _T("WAV files (*.wav)|*.wav"), wxFD_OPEN|wxFD_CHANGE_DIR);
+                     _T("WAV files (*.wav)|*.wav"), wxOPEN|wxCHANGE_DIR);
     if ( dlg.ShowModal() == wxID_OK )
     {
         m_soundFile = dlg.GetPath();

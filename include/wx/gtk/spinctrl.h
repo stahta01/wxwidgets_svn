@@ -8,8 +8,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_SPINCTRL_H_
-#define _WX_GTK_SPINCTRL_H_
+#ifndef __GTKSPINCTRLH__
+#define __GTKSPINCTRLH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+
+#if wxUSE_SPINCTRL
+
+#include "wx/control.h"
 
 //-----------------------------------------------------------------------------
 // wxSpinCtrl
@@ -18,7 +28,7 @@
 class WXDLLIMPEXP_CORE wxSpinCtrl : public wxControl
 {
 public:
-    wxSpinCtrl();
+    wxSpinCtrl() {}
     wxSpinCtrl(wxWindow *parent,
                wxWindowID id = -1,
                const wxString& value = wxEmptyString,
@@ -55,14 +65,15 @@ public:
     // implementation
     void OnChar( wxKeyEvent &event );
     
+    bool IsOwnGtkWindow( GdkWindow *window );
     void GtkDisableEvents();
     void GtkEnableEvents();
 
-    int m_pos;
+    GtkAdjustment  *m_adjust;
+    float           m_oldPos;
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
     // Widgets that use the style->base colour for the BG colour should
     // override this and return true.
@@ -73,4 +84,8 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GTK_SPINCTRL_H_
+#endif
+    // wxUSE_SPINCTRL
+
+#endif
+    // __GTKSPINCTRLH__

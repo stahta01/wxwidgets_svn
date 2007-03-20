@@ -12,6 +12,10 @@
 #ifndef _WX_IMAGLIST_H_
 #define _WX_IMAGLIST_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "imaglist.h"
+#endif
+
 #include "wx/bitmap.h"
 
 /*
@@ -62,7 +66,7 @@ public:
   {
     Create(width, height, mask, initialCount);
   }
-  virtual ~wxImageList();
+  ~wxImageList();
 
 
   // Attributes

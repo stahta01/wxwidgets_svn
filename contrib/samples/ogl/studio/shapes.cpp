@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/shapes.cpp
+// Name:        shapes.cpp
 // Purpose:     Implements Studio shapes
 // Author:      Julian Smart
 // Modified by:
@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -17,14 +21,14 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
 #endif
 
-#include "wx/ogl/ogl.h" // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/ogl/ogl.h> // base header of OGL, includes and adjusts wx/deprecated/setup.h
 
 #include "studio.h"
 #include "doc.h"
@@ -1195,3 +1199,4 @@ void ShapeEditMenu::OnCommand(wxCommandEvent& event)
 {
     studioShapeEditProc(*this, event);
 }
+

@@ -269,10 +269,8 @@ size_t TestInputStream::OnSysRead(void *buffer, size_t size)
     }
 
     if (((m_eoftype & AtLast) != 0 && m_pos >= m_size) || count < size)
-        if ((m_eoftype & WithError) != 0)
-            m_lasterror = wxSTREAM_READ_ERROR;
-        else
-            m_lasterror = wxSTREAM_EOF;
+        m_lasterror = (m_eoftype & WithError) != 0 ?
+                        wxSTREAM_READ_ERROR : wxSTREAM_EOF;
 
     return count;
 }
@@ -477,7 +475,7 @@ void ArchiveTestCase<ClassFactoryT>::runTest()
     // check archive could be created
     CPPUNIT_ASSERT(out.GetLength() > 0);
 
-    TestInputStream in(out, m_id % ((m_options & PipeIn) ? 4 : 3));
+    TestInputStream in(out, (m_options & PipeIn) ? m_id % 3 : 0);
 
     TestIterator(in);
     in.Rewind();
@@ -1248,8 +1246,7 @@ void CorruptionTestCase::ExtractArchive(wxInputStream& in)
         while (arc->IsOk())
             arc->Read(buf, sizeof(buf));
 
-        auto_ptr<wxArchiveEntry> next(arc->GetNextEntry());
-        entry = next;
+        entry = auto_ptr<wxArchiveEntry>(arc->GetNextEntry());
     }
 }
 
@@ -1405,11 +1402,6 @@ template class ArchiveTestCase<wxArchiveClassFactory>;
 #if wxUSE_ZIPSTREAM
 #include "wx/zipstrm.h"
 template class ArchiveTestCase<wxZipClassFactory>;
-#endif
-
-#if wxUSE_TARSTREAM
-#include "wx/tarstrm.h"
-template class ArchiveTestCase<wxTarClassFactory>;
 #endif
 
 #endif // wxUSE_STREAMS && wxUSE_ARCHIVE_STREAMS

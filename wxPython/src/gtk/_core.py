@@ -1,18 +1,18 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 import _core_
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -21,15 +21,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -43,8 +37,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -102,7 +95,6 @@ CENTRE_ON_SCREEN = _core_.CENTRE_ON_SCREEN
 CENTER_ON_SCREEN = _core_.CENTER_ON_SCREEN
 CLIP_CHILDREN = _core_.CLIP_CHILDREN
 CLIP_SIBLINGS = _core_.CLIP_SIBLINGS
-WINDOW_STYLE_MASK = _core_.WINDOW_STYLE_MASK
 ALWAYS_SHOW_SB = _core_.ALWAYS_SHOW_SB
 RETAINED = _core_.RETAINED
 BACKINGSTORE = _core_.BACKINGSTORE
@@ -134,8 +126,6 @@ SB_VERTICAL = _core_.SB_VERTICAL
 RB_USE_CHECKBOX = _core_.RB_USE_CHECKBOX
 ST_SIZEGRIP = _core_.ST_SIZEGRIP
 ST_NO_AUTORESIZE = _core_.ST_NO_AUTORESIZE
-ST_DOTS_MIDDLE = _core_.ST_DOTS_MIDDLE
-ST_DOTS_END = _core_.ST_DOTS_END
 FLOOD_SURFACE = _core_.FLOOD_SURFACE
 FLOOD_BORDER = _core_.FLOOD_BORDER
 ODDEVEN_RULE = _core_.ODDEVEN_RULE
@@ -194,18 +184,14 @@ ID_REDO = _core_.ID_REDO
 ID_HELP = _core_.ID_HELP
 ID_PRINT = _core_.ID_PRINT
 ID_PRINT_SETUP = _core_.ID_PRINT_SETUP
-ID_PAGE_SETUP = _core_.ID_PAGE_SETUP
 ID_PREVIEW = _core_.ID_PREVIEW
 ID_ABOUT = _core_.ID_ABOUT
 ID_HELP_CONTENTS = _core_.ID_HELP_CONTENTS
 ID_HELP_COMMANDS = _core_.ID_HELP_COMMANDS
 ID_HELP_PROCEDURES = _core_.ID_HELP_PROCEDURES
 ID_HELP_CONTEXT = _core_.ID_HELP_CONTEXT
-ID_HELP_INDEX = _core_.ID_HELP_INDEX
-ID_HELP_SEARCH = _core_.ID_HELP_SEARCH
 ID_CLOSE_ALL = _core_.ID_CLOSE_ALL
 ID_PREFERENCES = _core_.ID_PREFERENCES
-ID_EDIT = _core_.ID_EDIT
 ID_CUT = _core_.ID_CUT
 ID_COPY = _core_.ID_COPY
 ID_PASTE = _core_.ID_PASTE
@@ -225,7 +211,6 @@ ID_VIEW_SORTDATE = _core_.ID_VIEW_SORTDATE
 ID_VIEW_SORTNAME = _core_.ID_VIEW_SORTNAME
 ID_VIEW_SORTSIZE = _core_.ID_VIEW_SORTSIZE
 ID_VIEW_SORTTYPE = _core_.ID_VIEW_SORTTYPE
-ID_FILE = _core_.ID_FILE
 ID_FILE1 = _core_.ID_FILE1
 ID_FILE2 = _core_.ID_FILE2
 ID_FILE3 = _core_.ID_FILE3
@@ -277,6 +262,27 @@ ID_ZOOM_OUT = _core_.ID_ZOOM_OUT
 ID_UNDELETE = _core_.ID_UNDELETE
 ID_REVERT_TO_SAVED = _core_.ID_REVERT_TO_SAVED
 ID_HIGHEST = _core_.ID_HIGHEST
+OPEN = _core_.OPEN
+SAVE = _core_.SAVE
+HIDE_READONLY = _core_.HIDE_READONLY
+OVERWRITE_PROMPT = _core_.OVERWRITE_PROMPT
+FILE_MUST_EXIST = _core_.FILE_MUST_EXIST
+MULTIPLE = _core_.MULTIPLE
+CHANGE_DIR = _core_.CHANGE_DIR
+ACCEL_ALT = _core_.ACCEL_ALT
+ACCEL_CTRL = _core_.ACCEL_CTRL
+ACCEL_SHIFT = _core_.ACCEL_SHIFT
+ACCEL_NORMAL = _core_.ACCEL_NORMAL
+PD_AUTO_HIDE = _core_.PD_AUTO_HIDE
+PD_APP_MODAL = _core_.PD_APP_MODAL
+PD_CAN_ABORT = _core_.PD_CAN_ABORT
+PD_ELAPSED_TIME = _core_.PD_ELAPSED_TIME
+PD_ESTIMATED_TIME = _core_.PD_ESTIMATED_TIME
+PD_REMAINING_TIME = _core_.PD_REMAINING_TIME
+PD_SMOOTH = _core_.PD_SMOOTH
+PD_CAN_SKIP = _core_.PD_CAN_SKIP
+DD_NEW_DIR_BUTTON = _core_.DD_NEW_DIR_BUTTON
+DD_DEFAULT_STYLE = _core_.DD_DEFAULT_STYLE
 MENU_TEAROFF = _core_.MENU_TEAROFF
 MB_DOCKABLE = _core_.MB_DOCKABLE
 NO_FULL_REPAINT_ON_RESIZE = _core_.NO_FULL_REPAINT_ON_RESIZE
@@ -669,18 +675,11 @@ HT_MAX = _core_.HT_MAX
 MOD_NONE = _core_.MOD_NONE
 MOD_ALT = _core_.MOD_ALT
 MOD_CONTROL = _core_.MOD_CONTROL
-MOD_ALTGR = _core_.MOD_ALTGR
 MOD_SHIFT = _core_.MOD_SHIFT
-MOD_META = _core_.MOD_META
 MOD_WIN = _core_.MOD_WIN
-MOD_CMD = _core_.MOD_CMD
-MOD_ALL = _core_.MOD_ALL
 UPDATE_UI_NONE = _core_.UPDATE_UI_NONE
 UPDATE_UI_RECURSE = _core_.UPDATE_UI_RECURSE
 UPDATE_UI_FROMIDLE = _core_.UPDATE_UI_FROMIDLE
-Layout_Default = _core_.Layout_Default
-Layout_LeftToRight = _core_.Layout_LeftToRight
-Layout_RightToLeft = _core_.Layout_RightToLeft
 #---------------------------------------------------------------------------
 
 class Object(object):
@@ -688,9 +687,9 @@ class Object(object):
     The base class for most wx objects, although in wxPython not
     much functionality is needed nor exposed.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxObject instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def GetClassName(*args, **kwargs):
         """
         GetClassName(self) -> String
@@ -705,22 +704,19 @@ class Object(object):
 
         Deletes the C++ object this Python object is a proxy for.
         """
-        args[0].this.own(False)
         return _core_.Object_Destroy(*args, **kwargs)
 
-    def IsSameAs(*args, **kwargs):
-        """
-        IsSameAs(self, Object p) -> bool
 
-        For wx.Objects that use C++ reference counting internally, this method
-        can be used to determine if two objects are referencing the same data
-        object.
-        """
-        return _core_.Object_IsSameAs(*args, **kwargs)
-
-    ClassName = property(GetClassName,doc="See `GetClassName`") 
-_core_.Object_swigregister(Object)
+class ObjectPtr(Object):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Object
+_core_.Object_swigregister(ObjectPtr)
 _wxPySetDictionary = _core_._wxPySetDictionary
+
+_wxPyFixStockObjects = _core_._wxPyFixStockObjects
+
 cvar = _core_.cvar
 EmptyString = cvar.EmptyString
 
@@ -744,7 +740,6 @@ BITMAP_TYPE_PICT = _core_.BITMAP_TYPE_PICT
 BITMAP_TYPE_ICON = _core_.BITMAP_TYPE_ICON
 BITMAP_TYPE_ANI = _core_.BITMAP_TYPE_ANI
 BITMAP_TYPE_IFF = _core_.BITMAP_TYPE_IFF
-BITMAP_TYPE_TGA = _core_.BITMAP_TYPE_TGA
 BITMAP_TYPE_MACCURSOR = _core_.BITMAP_TYPE_MACCURSOR
 BITMAP_TYPE_ANY = _core_.BITMAP_TYPE_ANY
 CURSOR_NONE = _core_.CURSOR_NONE
@@ -787,20 +782,27 @@ class Size(object):
     properties.  In most places in wxPython where a wx.Size is
     expected a (width, height) tuple can be used instead.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSize instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     width = property(_core_.Size_width_get, _core_.Size_width_set)
     height = property(_core_.Size_height_get, _core_.Size_height_set)
     x = width; y = height 
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int w=0, int h=0) -> Size
 
         Creates a size object.
         """
-        _core_.Size_swiginit(self,_core_.new_Size(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Size
-    __del__ = lambda self : None;
+        newobj = _core_.new_Size(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_Size):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def __eq__(*args, **kwargs):
         """
         __eq__(self, PyObject other) -> bool
@@ -850,22 +852,6 @@ class Size(object):
         than the corresponding dimensions of the size.
         """
         return _core_.Size_DecTo(*args, **kwargs)
-
-    def IncBy(*args, **kwargs):
-        """IncBy(self, int dx, int dy)"""
-        return _core_.Size_IncBy(*args, **kwargs)
-
-    def DecBy(*args, **kwargs):
-        """DecBy(self, int dx, int dy)"""
-        return _core_.Size_DecBy(*args, **kwargs)
-
-    def Scale(*args, **kwargs):
-        """
-        Scale(self, float xscale, float yscale)
-
-        Scales the dimensions of this object by the given factors.
-        """
-        return _core_.Size_Scale(*args, **kwargs)
 
     def Set(*args, **kwargs):
         """
@@ -929,7 +915,13 @@ class Size(object):
     __safe_for_unpickling__ = True
     def __reduce__(self):                return (wx.Size, self.Get())
 
-_core_.Size_swigregister(Size)
+
+class SizePtr(Size):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Size
+_core_.Size_swigregister(SizePtr)
 
 #---------------------------------------------------------------------------
 
@@ -939,19 +931,26 @@ class RealPoint(object):
     point x and y properties.  In wxPython most places that expect a
     wx.RealPoint can also accept a (x,y) tuple.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxRealPoint instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     x = property(_core_.RealPoint_x_get, _core_.RealPoint_x_set)
     y = property(_core_.RealPoint_y_get, _core_.RealPoint_y_set)
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, double x=0.0, double y=0.0) -> RealPoint
 
         Create a wx.RealPoint object
         """
-        _core_.RealPoint_swiginit(self,_core_.new_RealPoint(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_RealPoint
-    __del__ = lambda self : None;
+        newobj = _core_.new_RealPoint(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_RealPoint):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def __eq__(*args, **kwargs):
         """
         __eq__(self, PyObject other) -> bool
@@ -1013,7 +1012,13 @@ class RealPoint(object):
     __safe_for_unpickling__ = True
     def __reduce__(self):                return (wx.RealPoint, self.Get())
 
-_core_.RealPoint_swigregister(RealPoint)
+
+class RealPointPtr(RealPoint):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = RealPoint
+_core_.RealPoint_swigregister(RealPointPtr)
 
 #---------------------------------------------------------------------------
 
@@ -1023,19 +1028,26 @@ class Point(object):
     and y properties.  Most places in wxPython that expect a wx.Point can
     also accept a (x,y) tuple.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPoint instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     x = property(_core_.Point_x_get, _core_.Point_x_set)
     y = property(_core_.Point_y_get, _core_.Point_y_set)
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int x=0, int y=0) -> Point
 
         Create a wx.Point object
         """
-        _core_.Point_swiginit(self,_core_.new_Point(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Point
-    __del__ = lambda self : None;
+        newobj = _core_.new_Point(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_Point):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def __eq__(*args, **kwargs):
         """
         __eq__(self, PyObject other) -> bool
@@ -1113,7 +1125,13 @@ class Point(object):
     __safe_for_unpickling__ = True
     def __reduce__(self):                return (wx.Point, self.Get())
 
-_core_.Point_swigregister(Point)
+
+class PointPtr(Point):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Point
+_core_.Point_swigregister(PointPtr)
 
 #---------------------------------------------------------------------------
 
@@ -1123,17 +1141,24 @@ class Rect(object):
     width and height properties.  In wxPython most palces that expect a
     wx.Rect can also accept a (x,y,width,height) tuple.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxRect instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int x=0, int y=0, int width=0, int height=0) -> Rect
 
         Create a new Rect object.
         """
-        _core_.Rect_swiginit(self,_core_.new_Rect(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Rect
-    __del__ = lambda self : None;
+        newobj = _core_.new_Rect(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_Rect):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def GetX(*args, **kwargs):
         """GetX(self) -> int"""
         return _core_.Rect_GetX(*args, **kwargs)
@@ -1201,22 +1226,6 @@ class Rect(object):
     def SetBottomRight(*args, **kwargs):
         """SetBottomRight(self, Point p)"""
         return _core_.Rect_SetBottomRight(*args, **kwargs)
-
-    def GetTopRight(*args, **kwargs):
-        """GetTopRight(self) -> Point"""
-        return _core_.Rect_GetTopRight(*args, **kwargs)
-
-    def SetTopRight(*args, **kwargs):
-        """SetTopRight(self, Point p)"""
-        return _core_.Rect_SetTopRight(*args, **kwargs)
-
-    def GetBottomLeft(*args, **kwargs):
-        """GetBottomLeft(self) -> Point"""
-        return _core_.Rect_GetBottomLeft(*args, **kwargs)
-
-    def SetBottomLeft(*args, **kwargs):
-        """SetBottomLeft(self, Point p)"""
-        return _core_.Rect_SetBottomLeft(*args, **kwargs)
 
     def GetLeft(*args, **kwargs):
         """GetLeft(self) -> int"""
@@ -1306,7 +1315,7 @@ class Rect(object):
         """
         Offset(self, Point pt)
 
-        Same as `OffsetXY` but uses dx,dy from Point
+        Same as OffsetXY but uses dx,dy from Point
         """
         return _core_.Rect_Offset(*args, **kwargs)
 
@@ -1358,37 +1367,21 @@ class Rect(object):
         """
         return _core_.Rect___ne__(*args, **kwargs)
 
-    def ContainsXY(*args, **kwargs):
+    def InsideXY(*args, **kwargs):
         """
-        ContainsXY(self, int x, int y) -> bool
+        InsideXY(self, int x, int y) -> bool
 
-        Return True if the point is inside the rect.
+        Return True if the point is (not strcitly) inside the rect.
         """
-        return _core_.Rect_ContainsXY(*args, **kwargs)
+        return _core_.Rect_InsideXY(*args, **kwargs)
 
-    def Contains(*args, **kwargs):
+    def Inside(*args, **kwargs):
         """
-        Contains(self, Point pt) -> bool
+        Inside(self, Point pt) -> bool
 
-        Return True if the point is inside the rect.
+        Return True if the point is (not strcitly) inside the rect.
         """
-        return _core_.Rect_Contains(*args, **kwargs)
-
-    def ContainsRect(*args, **kwargs):
-        """
-        ContainsRect(self, Rect rect) -> bool
-
-        Returns ``True`` if the given rectangle is completely inside this
-        rectangle or touches its boundary.
-        """
-        return _core_.Rect_ContainsRect(*args, **kwargs)
-
-    #Inside = wx._deprecated(Contains, "Use `Contains` instead.")
-    #InsideXY = wx._deprecated(ContainsXY, "Use `ContainsXY` instead.")
-    #InsideRect = wx._deprecated(ContainsRect, "Use `ContainsRect` instead.")
-    Inside = Contains
-    InsideXY = ContainsXY
-    InsideRect = ContainsRect
+        return _core_.Rect_Inside(*args, **kwargs)
 
     def Intersects(*args, **kwargs):
         """
@@ -1398,16 +1391,6 @@ class Rect(object):
         """
         return _core_.Rect_Intersects(*args, **kwargs)
 
-    def CenterIn(*args, **kwargs):
-        """
-        CenterIn(self, Rect r, int dir=BOTH) -> Rect
-
-        Center this rectangle within the one passed to the method, which is
-        usually, but not necessarily, the larger one.
-        """
-        return _core_.Rect_CenterIn(*args, **kwargs)
-
-    CentreIn = CenterIn 
     x = property(_core_.Rect_x_get, _core_.Rect_x_set)
     y = property(_core_.Rect_y_get, _core_.Rect_y_set)
     width = property(_core_.Rect_width_get, _core_.Rect_width_set)
@@ -1443,22 +1426,13 @@ class Rect(object):
     __safe_for_unpickling__ = True
     def __reduce__(self):                return (wx.Rect, self.Get())
 
-    Bottom = property(GetBottom,SetBottom,doc="See `GetBottom` and `SetBottom`") 
-    BottomRight = property(GetBottomRight,SetBottomRight,doc="See `GetBottomRight` and `SetBottomRight`") 
-    BottomLeft = property(GetBottomLeft,SetBottomLeft,doc="See `GetBottomLeft` and `SetBottomLeft`") 
-    Height = property(GetHeight,SetHeight,doc="See `GetHeight` and `SetHeight`") 
-    Left = property(GetLeft,SetLeft,doc="See `GetLeft` and `SetLeft`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-    Right = property(GetRight,SetRight,doc="See `GetRight` and `SetRight`") 
-    Size = property(GetSize,SetSize,doc="See `GetSize` and `SetSize`") 
-    Top = property(GetTop,SetTop,doc="See `GetTop` and `SetTop`") 
-    TopLeft = property(GetTopLeft,SetTopLeft,doc="See `GetTopLeft` and `SetTopLeft`") 
-    TopRight = property(GetTopRight,SetTopRight,doc="See `GetTopRight` and `SetTopRight`") 
-    Width = property(GetWidth,SetWidth,doc="See `GetWidth` and `SetWidth`") 
-    X = property(GetX,SetX,doc="See `GetX` and `SetX`") 
-    Y = property(GetY,SetY,doc="See `GetY` and `SetY`") 
-    Empty = property(IsEmpty,doc="See `IsEmpty`") 
-_core_.Rect_swigregister(Rect)
+
+class RectPtr(Rect):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Rect
+_core_.Rect_swigregister(RectPtr)
 
 def RectPP(*args, **kwargs):
     """
@@ -1467,6 +1441,7 @@ def RectPP(*args, **kwargs):
     Create a new Rect object from Points representing two corners.
     """
     val = _core_.new_RectPP(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def RectPS(*args, **kwargs):
@@ -1476,6 +1451,7 @@ def RectPS(*args, **kwargs):
     Create a new Rect from a position and size.
     """
     val = _core_.new_RectPS(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def RectS(*args, **kwargs):
@@ -1485,16 +1461,17 @@ def RectS(*args, **kwargs):
     Create a new Rect from a size only.
     """
     val = _core_.new_RectS(*args, **kwargs)
+    val.thisown = 1
     return val
 
 
 def IntersectRect(*args, **kwargs):
-  """
+    """
     IntersectRect(Rect r1, Rect r2) -> Rect
 
     Calculate and return the intersection of r1 and r2.
     """
-  return _core_.IntersectRect(*args, **kwargs)
+    return _core_.IntersectRect(*args, **kwargs)
 #---------------------------------------------------------------------------
 
 class Point2D(object):
@@ -1502,17 +1479,18 @@ class Point2D(object):
     wx.Point2Ds represent a point or a vector in a 2d coordinate system
     with floating point values.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPoint2D instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, double x=0.0, double y=0.0) -> Point2D
 
         Create a w.Point2D object.
         """
-        _core_.Point2D_swiginit(self,_core_.new_Point2D(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Point2D
-    __del__ = lambda self : None;
+        newobj = _core_.new_Point2D(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetFloor(*args, **kwargs):
         """
         GetFloor() -> (x,y)
@@ -1634,11 +1612,13 @@ class Point2D(object):
     __safe_for_unpickling__ = True
     def __reduce__(self):                return (wx.Point2D, self.Get())
 
-    Floor = property(GetFloor,doc="See `GetFloor`") 
-    Rounded = property(GetRounded,doc="See `GetRounded`") 
-    VectorAngle = property(GetVectorAngle,SetVectorAngle,doc="See `GetVectorAngle` and `SetVectorAngle`") 
-    VectorLength = property(GetVectorLength,SetVectorLength,doc="See `GetVectorLength` and `SetVectorLength`") 
-_core_.Point2D_swigregister(Point2D)
+
+class Point2DPtr(Point2D):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Point2D
+_core_.Point2D_swigregister(Point2DPtr)
 
 def Point2DCopy(*args, **kwargs):
     """
@@ -1647,6 +1627,7 @@ def Point2DCopy(*args, **kwargs):
     Create a w.Point2D object.
     """
     val = _core_.new_Point2DCopy(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Point2DFromPoint(*args, **kwargs):
@@ -1656,261 +1637,8 @@ def Point2DFromPoint(*args, **kwargs):
     Create a w.Point2D object.
     """
     val = _core_.new_Point2DFromPoint(*args, **kwargs)
+    val.thisown = 1
     return val
-
-#---------------------------------------------------------------------------
-
-Inside = _core_.Inside
-OutLeft = _core_.OutLeft
-OutRight = _core_.OutRight
-OutTop = _core_.OutTop
-OutBottom = _core_.OutBottom
-class Rect2D(object):
-    """
-    wx.Rect2D is a rectangle, with position and size, in a 2D coordinate system
-    with floating point component values.
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, wxDouble x=0.0, wxDouble y=0.0, wxDouble w=0.0, wxDouble h=0.0) -> Rect2D
-
-        wx.Rect2D is a rectangle, with position and size, in a 2D coordinate system
-        with floating point component values.
-        """
-        _core_.Rect2D_swiginit(self,_core_.new_Rect2D(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Rect2D
-    __del__ = lambda self : None;
-    def GetPosition(*args, **kwargs):
-        """GetPosition(self) -> Point2D"""
-        return _core_.Rect2D_GetPosition(*args, **kwargs)
-
-    def GetSize(*args, **kwargs):
-        """GetSize(self) -> Size"""
-        return _core_.Rect2D_GetSize(*args, **kwargs)
-
-    def GetLeft(*args, **kwargs):
-        """GetLeft(self) -> wxDouble"""
-        return _core_.Rect2D_GetLeft(*args, **kwargs)
-
-    def SetLeft(*args, **kwargs):
-        """SetLeft(self, wxDouble n)"""
-        return _core_.Rect2D_SetLeft(*args, **kwargs)
-
-    def MoveLeftTo(*args, **kwargs):
-        """MoveLeftTo(self, wxDouble n)"""
-        return _core_.Rect2D_MoveLeftTo(*args, **kwargs)
-
-    def GetTop(*args, **kwargs):
-        """GetTop(self) -> wxDouble"""
-        return _core_.Rect2D_GetTop(*args, **kwargs)
-
-    def SetTop(*args, **kwargs):
-        """SetTop(self, wxDouble n)"""
-        return _core_.Rect2D_SetTop(*args, **kwargs)
-
-    def MoveTopTo(*args, **kwargs):
-        """MoveTopTo(self, wxDouble n)"""
-        return _core_.Rect2D_MoveTopTo(*args, **kwargs)
-
-    def GetBottom(*args, **kwargs):
-        """GetBottom(self) -> wxDouble"""
-        return _core_.Rect2D_GetBottom(*args, **kwargs)
-
-    def SetBottom(*args, **kwargs):
-        """SetBottom(self, wxDouble n)"""
-        return _core_.Rect2D_SetBottom(*args, **kwargs)
-
-    def MoveBottomTo(*args, **kwargs):
-        """MoveBottomTo(self, wxDouble n)"""
-        return _core_.Rect2D_MoveBottomTo(*args, **kwargs)
-
-    def GetRight(*args, **kwargs):
-        """GetRight(self) -> wxDouble"""
-        return _core_.Rect2D_GetRight(*args, **kwargs)
-
-    def SetRight(*args, **kwargs):
-        """SetRight(self, wxDouble n)"""
-        return _core_.Rect2D_SetRight(*args, **kwargs)
-
-    def MoveRightTo(*args, **kwargs):
-        """MoveRightTo(self, wxDouble n)"""
-        return _core_.Rect2D_MoveRightTo(*args, **kwargs)
-
-    def GetLeftTop(*args, **kwargs):
-        """GetLeftTop(self) -> Point2D"""
-        return _core_.Rect2D_GetLeftTop(*args, **kwargs)
-
-    def SetLeftTop(*args, **kwargs):
-        """SetLeftTop(self, Point2D pt)"""
-        return _core_.Rect2D_SetLeftTop(*args, **kwargs)
-
-    def MoveLeftTopTo(*args, **kwargs):
-        """MoveLeftTopTo(self, Point2D pt)"""
-        return _core_.Rect2D_MoveLeftTopTo(*args, **kwargs)
-
-    def GetLeftBottom(*args, **kwargs):
-        """GetLeftBottom(self) -> Point2D"""
-        return _core_.Rect2D_GetLeftBottom(*args, **kwargs)
-
-    def SetLeftBottom(*args, **kwargs):
-        """SetLeftBottom(self, Point2D pt)"""
-        return _core_.Rect2D_SetLeftBottom(*args, **kwargs)
-
-    def MoveLeftBottomTo(*args, **kwargs):
-        """MoveLeftBottomTo(self, Point2D pt)"""
-        return _core_.Rect2D_MoveLeftBottomTo(*args, **kwargs)
-
-    def GetRightTop(*args, **kwargs):
-        """GetRightTop(self) -> Point2D"""
-        return _core_.Rect2D_GetRightTop(*args, **kwargs)
-
-    def SetRightTop(*args, **kwargs):
-        """SetRightTop(self, Point2D pt)"""
-        return _core_.Rect2D_SetRightTop(*args, **kwargs)
-
-    def MoveRightTopTo(*args, **kwargs):
-        """MoveRightTopTo(self, Point2D pt)"""
-        return _core_.Rect2D_MoveRightTopTo(*args, **kwargs)
-
-    def GetRightBottom(*args, **kwargs):
-        """GetRightBottom(self) -> Point2D"""
-        return _core_.Rect2D_GetRightBottom(*args, **kwargs)
-
-    def SetRightBottom(*args, **kwargs):
-        """SetRightBottom(self, Point2D pt)"""
-        return _core_.Rect2D_SetRightBottom(*args, **kwargs)
-
-    def MoveRightBottomTo(*args, **kwargs):
-        """MoveRightBottomTo(self, Point2D pt)"""
-        return _core_.Rect2D_MoveRightBottomTo(*args, **kwargs)
-
-    def GetCentre(*args, **kwargs):
-        """GetCentre(self) -> Point2D"""
-        return _core_.Rect2D_GetCentre(*args, **kwargs)
-
-    def SetCentre(*args, **kwargs):
-        """SetCentre(self, Point2D pt)"""
-        return _core_.Rect2D_SetCentre(*args, **kwargs)
-
-    def MoveCentreTo(*args, **kwargs):
-        """MoveCentreTo(self, Point2D pt)"""
-        return _core_.Rect2D_MoveCentreTo(*args, **kwargs)
-
-    def GetOutcode(*args, **kwargs):
-        """GetOutcode(self, Point2D pt) -> int"""
-        return _core_.Rect2D_GetOutcode(*args, **kwargs)
-
-    def Contains(*args, **kwargs):
-        """Contains(self, Point2D pt) -> bool"""
-        return _core_.Rect2D_Contains(*args, **kwargs)
-
-    def ContainsRect(*args, **kwargs):
-        """ContainsRect(self, Rect2D rect) -> bool"""
-        return _core_.Rect2D_ContainsRect(*args, **kwargs)
-
-    def IsEmpty(*args, **kwargs):
-        """IsEmpty(self) -> bool"""
-        return _core_.Rect2D_IsEmpty(*args, **kwargs)
-
-    def HaveEqualSize(*args, **kwargs):
-        """HaveEqualSize(self, Rect2D rect) -> bool"""
-        return _core_.Rect2D_HaveEqualSize(*args, **kwargs)
-
-    def Inset(*args):
-        """
-        Inset(self, wxDouble x, wxDouble y)
-        Inset(self, wxDouble left, wxDouble top, wxDouble right, wxDouble bottom)
-        """
-        return _core_.Rect2D_Inset(*args)
-
-    def Offset(*args, **kwargs):
-        """Offset(self, Point2D pt)"""
-        return _core_.Rect2D_Offset(*args, **kwargs)
-
-    def ConstrainTo(*args, **kwargs):
-        """ConstrainTo(self, Rect2D rect)"""
-        return _core_.Rect2D_ConstrainTo(*args, **kwargs)
-
-    def Interpolate(*args, **kwargs):
-        """Interpolate(self, int widthfactor, int heightfactor) -> Point2D"""
-        return _core_.Rect2D_Interpolate(*args, **kwargs)
-
-    def Intersect(*args, **kwargs):
-        """Intersect(self, Rect2D otherRect)"""
-        return _core_.Rect2D_Intersect(*args, **kwargs)
-
-    def CreateIntersection(*args, **kwargs):
-        """CreateIntersection(self, Rect2D otherRect) -> Rect2D"""
-        return _core_.Rect2D_CreateIntersection(*args, **kwargs)
-
-    def Intersects(*args, **kwargs):
-        """Intersects(self, Rect2D rect) -> bool"""
-        return _core_.Rect2D_Intersects(*args, **kwargs)
-
-    def Union(*args, **kwargs):
-        """Union(self, Rect2D otherRect)"""
-        return _core_.Rect2D_Union(*args, **kwargs)
-
-    def CreateUnion(*args, **kwargs):
-        """CreateUnion(self, Rect2D otherRect) -> Rect2D"""
-        return _core_.Rect2D_CreateUnion(*args, **kwargs)
-
-    def Scale(*args):
-        """
-        Scale(self, wxDouble f)
-        Scale(self, int num, int denum)
-        """
-        return _core_.Rect2D_Scale(*args)
-
-    def __eq__(*args, **kwargs):
-        """
-        __eq__(self, PyObject other) -> bool
-
-        Test for equality of wx.Rect2D objects.
-        """
-        return _core_.Rect2D___eq__(*args, **kwargs)
-
-    def __ne__(*args, **kwargs):
-        """
-        __ne__(self, PyObject other) -> bool
-
-        Test for inequality of wx.Rect2D objects.
-        """
-        return _core_.Rect2D___ne__(*args, **kwargs)
-
-    x = property(_core_.Rect2D_x_get, _core_.Rect2D_x_set)
-    y = property(_core_.Rect2D_y_get, _core_.Rect2D_y_set)
-    width = property(_core_.Rect2D_width_get, _core_.Rect2D_width_set)
-    height = property(_core_.Rect2D_height_get, _core_.Rect2D_height_set)
-    def Set(*args, **kwargs):
-        """Set(self, wxDouble x=0, wxDouble y=0, wxDouble width=0, wxDouble height=0)"""
-        return _core_.Rect2D_Set(*args, **kwargs)
-
-    def Get(*args, **kwargs):
-        """
-        Get() -> (x,y, width, height)
-
-        Return x, y, width and height y properties as a tuple.
-        """
-        return _core_.Rect2D_Get(*args, **kwargs)
-
-    def __str__(self):                   return str(self.Get())
-    def __repr__(self):                  return 'wx.Rect2D'+str(self.Get())
-    def __len__(self):                   return len(self.Get())
-    def __getitem__(self, index):        return self.Get()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.x = val
-        elif index == 1: self.y = val
-        elif index == 2: self.width = val
-        elif index == 3: self.height = val                        
-        else: raise IndexError
-    def __nonzero__(self):               return self.Get() != (0.0, 0.0, 0.0, 0.0)
-    __safe_for_unpickling__ = True
-    def __reduce__(self):                return (wx.Rect2D, self.Get())
-
-_core_.Rect2D_swigregister(Rect2D)
 
 #---------------------------------------------------------------------------
 
@@ -1919,13 +1647,20 @@ FromCurrent = _core_.FromCurrent
 FromEnd = _core_.FromEnd
 class InputStream(object):
     """Proxy of C++ InputStream class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyInputStream instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, PyObject p) -> InputStream"""
-        _core_.InputStream_swiginit(self,_core_.new_InputStream(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_InputStream
-    __del__ = lambda self : None;
+        newobj = _core_.new_InputStream(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_InputStream):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def close(*args, **kwargs):
         """close(self)"""
         return _core_.InputStream_close(*args, **kwargs)
@@ -1990,15 +1725,21 @@ class InputStream(object):
         """TellI(self) -> long"""
         return _core_.InputStream_TellI(*args, **kwargs)
 
-_core_.InputStream_swigregister(InputStream)
+
+class InputStreamPtr(InputStream):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = InputStream
+_core_.InputStream_swigregister(InputStreamPtr)
 DefaultPosition = cvar.DefaultPosition
 DefaultSize = cvar.DefaultSize
 
 class OutputStream(object):
     """Proxy of C++ OutputStream class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxOutputStream instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def write(*args, **kwargs):
         """write(self, PyObject obj)"""
         return _core_.OutputStream_write(*args, **kwargs)
@@ -2007,29 +1748,40 @@ class OutputStream(object):
         """LastWrite(self) -> size_t"""
         return _core_.OutputStream_LastWrite(*args, **kwargs)
 
-_core_.OutputStream_swigregister(OutputStream)
+
+class OutputStreamPtr(OutputStream):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = OutputStream
+_core_.OutputStream_swigregister(OutputStreamPtr)
 
 #---------------------------------------------------------------------------
 
 class FSFile(Object):
     """Proxy of C++ FSFile class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxFSFile instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, InputStream stream, String loc, String mimetype, String anchor, 
             DateTime modif) -> FSFile
         """
-        _core_.FSFile_swiginit(self,_core_.new_FSFile(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_FSFile
-    __del__ = lambda self : None;
+        newobj = _core_.new_FSFile(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self.thisown = 0   # It will normally be deleted by the user of the wx.FileSystem
+
+    def __del__(self, destroy=_core_.delete_FSFile):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def GetStream(*args, **kwargs):
         """GetStream(self) -> InputStream"""
         return _core_.FSFile_GetStream(*args, **kwargs)
-
-    def DetachStream(*args, **kwargs):
-        """DetachStream(self)"""
-        return _core_.FSFile_DetachStream(*args, **kwargs)
 
     def GetMimeType(*args, **kwargs):
         """GetMimeType(self) -> String"""
@@ -2047,30 +1799,38 @@ class FSFile(Object):
         """GetModificationTime(self) -> DateTime"""
         return _core_.FSFile_GetModificationTime(*args, **kwargs)
 
-    Anchor = property(GetAnchor,doc="See `GetAnchor`") 
-    Location = property(GetLocation,doc="See `GetLocation`") 
-    MimeType = property(GetMimeType,doc="See `GetMimeType`") 
-    ModificationTime = property(GetModificationTime,doc="See `GetModificationTime`") 
-    Stream = property(GetStream,doc="See `GetStream`") 
-_core_.FSFile_swigregister(FSFile)
+
+class FSFilePtr(FSFile):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = FSFile
+_core_.FSFile_swigregister(FSFilePtr)
 
 class CPPFileSystemHandler(object):
     """Proxy of C++ CPPFileSystemHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-    __swig_destroy__ = _core_.delete_CPPFileSystemHandler
-    __del__ = lambda self : None;
-_core_.CPPFileSystemHandler_swigregister(CPPFileSystemHandler)
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxFileSystemHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+
+class CPPFileSystemHandlerPtr(CPPFileSystemHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CPPFileSystemHandler
+_core_.CPPFileSystemHandler_swigregister(CPPFileSystemHandlerPtr)
 
 class FileSystemHandler(CPPFileSystemHandler):
     """Proxy of C++ FileSystemHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyFileSystemHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> FileSystemHandler"""
-        _core_.FileSystemHandler_swiginit(self,_core_.new_FileSystemHandler(*args, **kwargs))
-        FileSystemHandler._setCallbackInfo(self, self, FileSystemHandler)
+        newobj = _core_.new_FileSystemHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setCallbackInfo(self, FileSystemHandler)
 
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
@@ -2112,22 +1872,30 @@ class FileSystemHandler(CPPFileSystemHandler):
         """GetMimeTypeFromExt(self, String location) -> String"""
         return _core_.FileSystemHandler_GetMimeTypeFromExt(*args, **kwargs)
 
-    Anchor = property(GetAnchor,doc="See `GetAnchor`") 
-    LeftLocation = property(GetLeftLocation,doc="See `GetLeftLocation`") 
-    MimeTypeFromExt = property(GetMimeTypeFromExt,doc="See `GetMimeTypeFromExt`") 
-    Protocol = property(GetProtocol,doc="See `GetProtocol`") 
-    RightLocation = property(GetRightLocation,doc="See `GetRightLocation`") 
-_core_.FileSystemHandler_swigregister(FileSystemHandler)
+
+class FileSystemHandlerPtr(FileSystemHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = FileSystemHandler
+_core_.FileSystemHandler_swigregister(FileSystemHandlerPtr)
 
 class FileSystem(Object):
     """Proxy of C++ FileSystem class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxFileSystem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> FileSystem"""
-        _core_.FileSystem_swiginit(self,_core_.new_FileSystem(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_FileSystem
-    __del__ = lambda self : None;
+        newobj = _core_.new_FileSystem(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_FileSystem):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def ChangePathTo(*args, **kwargs):
         """ChangePathTo(self, String location, bool is_dir=False)"""
         return _core_.FileSystem_ChangePathTo(*args, **kwargs)
@@ -2153,11 +1921,6 @@ class FileSystem(Object):
         return _core_.FileSystem_AddHandler(*args, **kwargs)
 
     AddHandler = staticmethod(AddHandler)
-    def RemoveHandler(*args, **kwargs):
-        """RemoveHandler(CPPFileSystemHandler handler) -> CPPFileSystemHandler"""
-        return _core_.FileSystem_RemoveHandler(*args, **kwargs)
-
-    RemoveHandler = staticmethod(RemoveHandler)
     def CleanUpHandlers(*args, **kwargs):
         """CleanUpHandlers()"""
         return _core_.FileSystem_CleanUpHandlers(*args, **kwargs)
@@ -2173,36 +1936,40 @@ class FileSystem(Object):
         return _core_.FileSystem_URLToFileName(*args, **kwargs)
 
     URLToFileName = staticmethod(URLToFileName)
-    Path = property(GetPath,doc="See `GetPath`") 
-_core_.FileSystem_swigregister(FileSystem)
+
+class FileSystemPtr(FileSystem):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = FileSystem
+_core_.FileSystem_swigregister(FileSystemPtr)
 
 def FileSystem_AddHandler(*args, **kwargs):
-  """FileSystem_AddHandler(CPPFileSystemHandler handler)"""
-  return _core_.FileSystem_AddHandler(*args, **kwargs)
+    """FileSystem_AddHandler(CPPFileSystemHandler handler)"""
+    return _core_.FileSystem_AddHandler(*args, **kwargs)
 
-def FileSystem_RemoveHandler(*args, **kwargs):
-  """FileSystem_RemoveHandler(CPPFileSystemHandler handler) -> CPPFileSystemHandler"""
-  return _core_.FileSystem_RemoveHandler(*args, **kwargs)
-
-def FileSystem_CleanUpHandlers(*args):
-  """FileSystem_CleanUpHandlers()"""
-  return _core_.FileSystem_CleanUpHandlers(*args)
+def FileSystem_CleanUpHandlers(*args, **kwargs):
+    """FileSystem_CleanUpHandlers()"""
+    return _core_.FileSystem_CleanUpHandlers(*args, **kwargs)
 
 def FileSystem_FileNameToURL(*args, **kwargs):
-  """FileSystem_FileNameToURL(String filename) -> String"""
-  return _core_.FileSystem_FileNameToURL(*args, **kwargs)
+    """FileSystem_FileNameToURL(String filename) -> String"""
+    return _core_.FileSystem_FileNameToURL(*args, **kwargs)
 
 def FileSystem_URLToFileName(*args, **kwargs):
-  """FileSystem_URLToFileName(String url) -> String"""
-  return _core_.FileSystem_URLToFileName(*args, **kwargs)
+    """FileSystem_URLToFileName(String url) -> String"""
+    return _core_.FileSystem_URLToFileName(*args, **kwargs)
 
 class InternetFSHandler(CPPFileSystemHandler):
     """Proxy of C++ InternetFSHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxInternetFSHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> InternetFSHandler"""
-        _core_.InternetFSHandler_swiginit(self,_core_.new_InternetFSHandler(*args, **kwargs))
+        newobj = _core_.new_InternetFSHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def CanOpen(*args, **kwargs):
         """CanOpen(self, String location) -> bool"""
         return _core_.InternetFSHandler_CanOpen(*args, **kwargs)
@@ -2211,15 +1978,24 @@ class InternetFSHandler(CPPFileSystemHandler):
         """OpenFile(self, FileSystem fs, String location) -> FSFile"""
         return _core_.InternetFSHandler_OpenFile(*args, **kwargs)
 
-_core_.InternetFSHandler_swigregister(InternetFSHandler)
+
+class InternetFSHandlerPtr(InternetFSHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = InternetFSHandler
+_core_.InternetFSHandler_swigregister(InternetFSHandlerPtr)
 
 class ZipFSHandler(CPPFileSystemHandler):
     """Proxy of C++ ZipFSHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxZipFSHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> ZipFSHandler"""
-        _core_.ZipFSHandler_swiginit(self,_core_.new_ZipFSHandler(*args, **kwargs))
+        newobj = _core_.new_ZipFSHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def CanOpen(*args, **kwargs):
         """CanOpen(self, String location) -> bool"""
         return _core_.ZipFSHandler_CanOpen(*args, **kwargs)
@@ -2236,20 +2012,26 @@ class ZipFSHandler(CPPFileSystemHandler):
         """FindNext(self) -> String"""
         return _core_.ZipFSHandler_FindNext(*args, **kwargs)
 
-_core_.ZipFSHandler_swigregister(ZipFSHandler)
+
+class ZipFSHandlerPtr(ZipFSHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ZipFSHandler
+_core_.ZipFSHandler_swigregister(ZipFSHandlerPtr)
 
 
 def __wxMemoryFSHandler_AddFile_wxImage(*args, **kwargs):
-  """__wxMemoryFSHandler_AddFile_wxImage(String filename, Image image, long type)"""
-  return _core_.__wxMemoryFSHandler_AddFile_wxImage(*args, **kwargs)
+    """__wxMemoryFSHandler_AddFile_wxImage(String filename, Image image, long type)"""
+    return _core_.__wxMemoryFSHandler_AddFile_wxImage(*args, **kwargs)
 
 def __wxMemoryFSHandler_AddFile_wxBitmap(*args, **kwargs):
-  """__wxMemoryFSHandler_AddFile_wxBitmap(String filename, Bitmap bitmap, long type)"""
-  return _core_.__wxMemoryFSHandler_AddFile_wxBitmap(*args, **kwargs)
+    """__wxMemoryFSHandler_AddFile_wxBitmap(String filename, Bitmap bitmap, long type)"""
+    return _core_.__wxMemoryFSHandler_AddFile_wxBitmap(*args, **kwargs)
 
 def __wxMemoryFSHandler_AddFile_Data(*args, **kwargs):
-  """__wxMemoryFSHandler_AddFile_Data(String filename, PyObject data)"""
-  return _core_.__wxMemoryFSHandler_AddFile_Data(*args, **kwargs)
+    """__wxMemoryFSHandler_AddFile_Data(String filename, PyObject data)"""
+    return _core_.__wxMemoryFSHandler_AddFile_Data(*args, **kwargs)
 def MemoryFSHandler_AddFile(filename, dataItem, imgType=-1):
     """
     Add 'file' to the memory filesystem.  The dataItem parameter can
@@ -2269,11 +2051,14 @@ def MemoryFSHandler_AddFile(filename, dataItem, imgType=-1):
 
 class MemoryFSHandler(CPPFileSystemHandler):
     """Proxy of C++ MemoryFSHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMemoryFSHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> MemoryFSHandler"""
-        _core_.MemoryFSHandler_swiginit(self,_core_.new_MemoryFSHandler(*args, **kwargs))
+        newobj = _core_.new_MemoryFSHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def RemoveFile(*args, **kwargs):
         """RemoveFile(String filename)"""
         return _core_.MemoryFSHandler_RemoveFile(*args, **kwargs)
@@ -2296,17 +2081,21 @@ class MemoryFSHandler(CPPFileSystemHandler):
         """FindNext(self) -> String"""
         return _core_.MemoryFSHandler_FindNext(*args, **kwargs)
 
-_core_.MemoryFSHandler_swigregister(MemoryFSHandler)
+
+class MemoryFSHandlerPtr(MemoryFSHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MemoryFSHandler
+_core_.MemoryFSHandler_swigregister(MemoryFSHandlerPtr)
 
 def MemoryFSHandler_RemoveFile(*args, **kwargs):
-  """MemoryFSHandler_RemoveFile(String filename)"""
-  return _core_.MemoryFSHandler_RemoveFile(*args, **kwargs)
+    """MemoryFSHandler_RemoveFile(String filename)"""
+    return _core_.MemoryFSHandler_RemoveFile(*args, **kwargs)
 
 IMAGE_ALPHA_TRANSPARENT = _core_.IMAGE_ALPHA_TRANSPARENT
 IMAGE_ALPHA_THRESHOLD = _core_.IMAGE_ALPHA_THRESHOLD
 IMAGE_ALPHA_OPAQUE = _core_.IMAGE_ALPHA_OPAQUE
-IMAGE_QUALITY_NORMAL = _core_.IMAGE_QUALITY_NORMAL
-IMAGE_QUALITY_HIGH = _core_.IMAGE_QUALITY_HIGH
 #---------------------------------------------------------------------------
 
 class ImageHandler(Object):
@@ -2315,9 +2104,9 @@ class ImageHandler(Object):
     image creation from data. It is used within `wx.Image` and is not
     normally seen by the application.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxImageHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def GetName(*args, **kwargs):
         """GetName(self) -> String"""
         return _core_.ImageHandler_GetName(*args, **kwargs)
@@ -2338,10 +2127,6 @@ class ImageHandler(Object):
         """CanRead(self, String name) -> bool"""
         return _core_.ImageHandler_CanRead(*args, **kwargs)
 
-    def CanReadStream(*args, **kwargs):
-        """CanReadStream(self, InputStream stream) -> bool"""
-        return _core_.ImageHandler_CanReadStream(*args, **kwargs)
-
     def SetName(*args, **kwargs):
         """SetName(self, String name)"""
         return _core_.ImageHandler_SetName(*args, **kwargs)
@@ -2358,11 +2143,13 @@ class ImageHandler(Object):
         """SetMimeType(self, String mimetype)"""
         return _core_.ImageHandler_SetMimeType(*args, **kwargs)
 
-    Extension = property(GetExtension,SetExtension,doc="See `GetExtension` and `SetExtension`") 
-    MimeType = property(GetMimeType,SetMimeType,doc="See `GetMimeType` and `SetMimeType`") 
-    Name = property(GetName,SetName,doc="See `GetName` and `SetName`") 
-    Type = property(GetType,SetType,doc="See `GetType` and `SetType`") 
-_core_.ImageHandler_swigregister(ImageHandler)
+
+class ImageHandlerPtr(ImageHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ImageHandler
+_core_.ImageHandler_swigregister(ImageHandlerPtr)
 
 class PyImageHandler(ImageHandler):
     """
@@ -2389,10 +2176,11 @@ class PyImageHandler(ImageHandler):
     `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
     `SetExtension` from your constructor.
 
+
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyImageHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PyImageHandler
 
@@ -2419,23 +2207,36 @@ class PyImageHandler(ImageHandler):
         `wx.Image_AddHandler`.  Be sure to call `SetName`, `SetType`, and
         `SetExtension` from your constructor.
 
+
         """
-        _core_.PyImageHandler_swiginit(self,_core_.new_PyImageHandler(*args, **kwargs))
+        newobj = _core_.new_PyImageHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._SetSelf(self)
 
     def _SetSelf(*args, **kwargs):
         """_SetSelf(self, PyObject self)"""
         return _core_.PyImageHandler__SetSelf(*args, **kwargs)
 
-_core_.PyImageHandler_swigregister(PyImageHandler)
+
+class PyImageHandlerPtr(PyImageHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyImageHandler
+_core_.PyImageHandler_swigregister(PyImageHandlerPtr)
 
 class ImageHistogram(object):
     """Proxy of C++ ImageHistogram class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxImageHistogram instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> ImageHistogram"""
-        _core_.ImageHistogram_swiginit(self,_core_.new_ImageHistogram(*args, **kwargs))
+        newobj = _core_.new_ImageHistogram(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def MakeKey(*args, **kwargs):
         """
         MakeKey(byte r, byte g, byte b) -> unsigned long
@@ -2480,15 +2281,21 @@ class ImageHistogram(object):
         """
         return _core_.ImageHistogram_GetCountColour(*args, **kwargs)
 
-_core_.ImageHistogram_swigregister(ImageHistogram)
+
+class ImageHistogramPtr(ImageHistogram):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ImageHistogram
+_core_.ImageHistogram_swigregister(ImageHistogramPtr)
 
 def ImageHistogram_MakeKey(*args, **kwargs):
-  """
+    """
     ImageHistogram_MakeKey(byte r, byte g, byte b) -> unsigned long
 
     Get the key in the histogram for the given RGB values
     """
-  return _core_.ImageHistogram_MakeKey(*args, **kwargs)
+    return _core_.ImageHistogram_MakeKey(*args, **kwargs)
 
 class Image_RGBValue(object):
     """
@@ -2497,19 +2304,28 @@ class Image_RGBValue(object):
     `wx.Image.RGBtoHSV`, which converts between HSV color space and RGB
     color space.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxImage_RGBValue instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, byte r=0, byte g=0, byte b=0) -> Image_RGBValue
 
         Constructor.
         """
-        _core_.Image_RGBValue_swiginit(self,_core_.new_Image_RGBValue(*args, **kwargs))
+        newobj = _core_.new_Image_RGBValue(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     red = property(_core_.Image_RGBValue_red_get, _core_.Image_RGBValue_red_set)
     green = property(_core_.Image_RGBValue_green_get, _core_.Image_RGBValue_green_set)
     blue = property(_core_.Image_RGBValue_blue_get, _core_.Image_RGBValue_blue_set)
-_core_.Image_RGBValue_swigregister(Image_RGBValue)
+
+class Image_RGBValuePtr(Image_RGBValue):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Image_RGBValue
+_core_.Image_RGBValue_swigregister(Image_RGBValuePtr)
 
 class Image_HSVValue(object):
     """
@@ -2518,19 +2334,28 @@ class Image_HSVValue(object):
     `wx.Image.RGBtoHSV`, which +converts between HSV color space and RGB
     color space.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxImage_HSVValue instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, double h=0.0, double s=0.0, double v=0.0) -> Image_HSVValue
 
         Constructor.
         """
-        _core_.Image_HSVValue_swiginit(self,_core_.new_Image_HSVValue(*args, **kwargs))
+        newobj = _core_.new_Image_HSVValue(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     hue = property(_core_.Image_HSVValue_hue_get, _core_.Image_HSVValue_hue_set)
     saturation = property(_core_.Image_HSVValue_saturation_get, _core_.Image_HSVValue_saturation_set)
     value = property(_core_.Image_HSVValue_value_get, _core_.Image_HSVValue_value_set)
-_core_.Image_HSVValue_swigregister(Image_HSVValue)
+
+class Image_HSVValuePtr(Image_HSVValue):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Image_HSVValue
+_core_.Image_HSVValue_swigregister(Image_HSVValuePtr)
 
 class Image(Object):
     """
@@ -2559,17 +2384,24 @@ class Image(Object):
     with `HasAlpha`. Note that currently only images loaded from PNG files
     with transparency information will have an alpha channel.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxImage instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, String name, long type=BITMAP_TYPE_ANY, int index=-1) -> Image
 
         Loads an image from a file.
         """
-        _core_.Image_swiginit(self,_core_.new_Image(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Image
-    __del__ = lambda self : None;
+        newobj = _core_.new_Image(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_Image):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Create(*args, **kwargs):
         """
         Create(self, int width, int height, bool clear=True)
@@ -2585,60 +2417,17 @@ class Image(Object):
 
         Destroys the image data.
         """
-        args[0].this.own(False)
         return _core_.Image_Destroy(*args, **kwargs)
 
     def Scale(*args, **kwargs):
         """
-        Scale(self, int width, int height, int quality=IMAGE_QUALITY_NORMAL) -> Image
+        Scale(self, int width, int height) -> Image
 
         Returns a scaled version of the image. This is also useful for scaling
         bitmaps in general as the only other way to scale bitmaps is to blit a
-        `wx.MemoryDC` into another `wx.MemoryDC`.  The ``quality`` parameter
-        specifies what method to use for resampling the image.  It can be
-        either wx.IMAGE_QUALITY_NORMAL, which uses the normal default scaling
-        method of pixel replication, or wx.IMAGE_QUALITY_HIGH which uses
-        bicubic and box averaging resampling methods for upsampling and
-        downsampling respectively.
+        `wx.MemoryDC` into another `wx.MemoryDC`.
         """
         return _core_.Image_Scale(*args, **kwargs)
-
-    def ResampleBox(*args, **kwargs):
-        """ResampleBox(self, int width, int height) -> Image"""
-        return _core_.Image_ResampleBox(*args, **kwargs)
-
-    def ResampleBicubic(*args, **kwargs):
-        """ResampleBicubic(self, int width, int height) -> Image"""
-        return _core_.Image_ResampleBicubic(*args, **kwargs)
-
-    def Blur(*args, **kwargs):
-        """
-        Blur(self, int radius) -> Image
-
-        Blurs the image in both horizontal and vertical directions by the
-        specified pixel ``radius``. This should not be used when using a
-        single mask colour for transparency.
-        """
-        return _core_.Image_Blur(*args, **kwargs)
-
-    def BlurHorizontal(*args, **kwargs):
-        """
-        BlurHorizontal(self, int radius) -> Image
-
-        Blurs the image in the horizontal direction only. This should not be
-        used when using a single mask colour for transparency.
-
-        """
-        return _core_.Image_BlurHorizontal(*args, **kwargs)
-
-    def BlurVertical(*args, **kwargs):
-        """
-        BlurVertical(self, int radius) -> Image
-
-        Blurs the image in the vertical direction only. This should not be
-        used when using a single mask colour for transparency.
-        """
-        return _core_.Image_BlurVertical(*args, **kwargs)
 
     def ShrinkBy(*args, **kwargs):
         """
@@ -2650,7 +2439,7 @@ class Image(Object):
 
     def Rescale(*args, **kwargs):
         """
-        Rescale(self, int width, int height, int quality=IMAGE_QUALITY_NORMAL) -> Image
+        Rescale(self, int width, int height) -> Image
 
         Changes the size of the image in-place by scaling it: after a call to
         this function, the image will have the given width and height.
@@ -2914,15 +2703,14 @@ class Image(Object):
         """
         return _core_.Image_LoadMimeStream(*args, **kwargs)
 
-    def IsOk(*args, **kwargs):
+    def Ok(*args, **kwargs):
         """
-        IsOk(self) -> bool
+        Ok(self) -> bool
 
         Returns true if image data is present.
         """
-        return _core_.Image_IsOk(*args, **kwargs)
+        return _core_.Image_Ok(*args, **kwargs)
 
-    Ok = IsOk 
     def GetWidth(*args, **kwargs):
         """
         GetWidth(self) -> int
@@ -3163,16 +2951,6 @@ class Image(Object):
         """
         return _core_.Image_Replace(*args, **kwargs)
 
-    def ConvertToGreyscale(*args, **kwargs):
-        """
-        ConvertToGreyscale(self, double lr=0.299, double lg=0.587, double lb=0.114) -> Image
-
-        Convert to greyscale image. Uses the luminance component (Y) of the
-        image.  The luma value (YUV) is calculated using (R * lr) + (G * lg) + (B * lb),
-        defaults to ITU-T BT.601
-        """
-        return _core_.Image_ConvertToGreyscale(*args, **kwargs)
-
     def ConvertToMono(*args, **kwargs):
         """
         ConvertToMono(self, byte r, byte g, byte b) -> Image
@@ -3300,17 +3078,14 @@ class Image(Object):
         return _core_.Image_HSVtoRGB(*args, **kwargs)
 
     HSVtoRGB = staticmethod(HSVtoRGB)
-    def __nonzero__(self): return self.IsOk() 
-    AlphaBuffer = property(GetAlphaBuffer,SetAlphaBuffer,doc="See `GetAlphaBuffer` and `SetAlphaBuffer`") 
-    AlphaData = property(GetAlphaData,SetAlphaData,doc="See `GetAlphaData` and `SetAlphaData`") 
-    Data = property(GetData,SetData,doc="See `GetData` and `SetData`") 
-    DataBuffer = property(GetDataBuffer,SetDataBuffer,doc="See `GetDataBuffer` and `SetDataBuffer`") 
-    Height = property(GetHeight,doc="See `GetHeight`") 
-    MaskBlue = property(GetMaskBlue,doc="See `GetMaskBlue`") 
-    MaskGreen = property(GetMaskGreen,doc="See `GetMaskGreen`") 
-    MaskRed = property(GetMaskRed,doc="See `GetMaskRed`") 
-    Width = property(GetWidth,doc="See `GetWidth`") 
-_core_.Image_swigregister(Image)
+    def __nonzero__(self): return self.Ok() 
+
+class ImagePtr(Image):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Image
+_core_.Image_swigregister(ImagePtr)
 
 def ImageFromMime(*args, **kwargs):
     """
@@ -3320,6 +3095,7 @@ def ImageFromMime(*args, **kwargs):
     'image/jpeg') to specify image type.
     """
     val = _core_.new_ImageFromMime(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ImageFromStream(*args, **kwargs):
@@ -3330,6 +3106,7 @@ def ImageFromStream(*args, **kwargs):
     object.
     """
     val = _core_.new_ImageFromStream(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ImageFromStreamMime(*args, **kwargs):
@@ -3340,6 +3117,7 @@ def ImageFromStreamMime(*args, **kwargs):
     object, specifying the image format with a MIME type string.
     """
     val = _core_.new_ImageFromStreamMime(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def EmptyImage(*args, **kwargs):
@@ -3350,6 +3128,7 @@ def EmptyImage(*args, **kwargs):
     pixels to black.
     """
     val = _core_.new_EmptyImage(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ImageFromBitmap(*args, **kwargs):
@@ -3359,6 +3138,7 @@ def ImageFromBitmap(*args, **kwargs):
     Construct an Image from a `wx.Bitmap`.
     """
     val = _core_.new_ImageFromBitmap(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ImageFromData(*args, **kwargs):
@@ -3370,6 +3150,7 @@ def ImageFromData(*args, **kwargs):
     must be width*height*3.
     """
     val = _core_.new_ImageFromData(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ImageFromDataWithAlpha(*args, **kwargs):
@@ -3382,82 +3163,83 @@ def ImageFromDataWithAlpha(*args, **kwargs):
     alpha data must be width*height bytes.
     """
     val = _core_.new_ImageFromDataWithAlpha(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Image_CanRead(*args, **kwargs):
-  """
+    """
     Image_CanRead(String filename) -> bool
 
     Returns True if the image handlers can read this file.
     """
-  return _core_.Image_CanRead(*args, **kwargs)
+    return _core_.Image_CanRead(*args, **kwargs)
 
 def Image_GetImageCount(*args, **kwargs):
-  """
+    """
     Image_GetImageCount(String filename, long type=BITMAP_TYPE_ANY) -> int
 
     If the image file contains more than one image and the image handler
     is capable of retrieving these individually, this function will return
     the number of available images.
     """
-  return _core_.Image_GetImageCount(*args, **kwargs)
+    return _core_.Image_GetImageCount(*args, **kwargs)
 
 def Image_CanReadStream(*args, **kwargs):
-  """
+    """
     Image_CanReadStream(InputStream stream) -> bool
 
     Returns True if the image handlers can read an image file from the
     data currently on the input stream, or a readable Python file-like
     object.
     """
-  return _core_.Image_CanReadStream(*args, **kwargs)
+    return _core_.Image_CanReadStream(*args, **kwargs)
 
 def Image_AddHandler(*args, **kwargs):
-  """Image_AddHandler(ImageHandler handler)"""
-  return _core_.Image_AddHandler(*args, **kwargs)
+    """Image_AddHandler(ImageHandler handler)"""
+    return _core_.Image_AddHandler(*args, **kwargs)
 
 def Image_InsertHandler(*args, **kwargs):
-  """Image_InsertHandler(ImageHandler handler)"""
-  return _core_.Image_InsertHandler(*args, **kwargs)
+    """Image_InsertHandler(ImageHandler handler)"""
+    return _core_.Image_InsertHandler(*args, **kwargs)
 
 def Image_RemoveHandler(*args, **kwargs):
-  """Image_RemoveHandler(String name) -> bool"""
-  return _core_.Image_RemoveHandler(*args, **kwargs)
+    """Image_RemoveHandler(String name) -> bool"""
+    return _core_.Image_RemoveHandler(*args, **kwargs)
 
-def Image_GetHandlers(*args):
-  """Image_GetHandlers() -> PyObject"""
-  return _core_.Image_GetHandlers(*args)
+def Image_GetHandlers(*args, **kwargs):
+    """Image_GetHandlers() -> PyObject"""
+    return _core_.Image_GetHandlers(*args, **kwargs)
 
-def Image_GetImageExtWildcard(*args):
-  """
+def Image_GetImageExtWildcard(*args, **kwargs):
+    """
     Image_GetImageExtWildcard() -> String
 
     Iterates all registered wxImageHandler objects, and returns a string
     containing file extension masks suitable for passing to file open/save
     dialog boxes.
     """
-  return _core_.Image_GetImageExtWildcard(*args)
+    return _core_.Image_GetImageExtWildcard(*args, **kwargs)
 
 def Image_RGBtoHSV(*args, **kwargs):
-  """
+    """
     Image_RGBtoHSV(Image_RGBValue rgb) -> Image_HSVValue
 
     Converts a color in RGB color space to HSV color space.
     """
-  return _core_.Image_RGBtoHSV(*args, **kwargs)
+    return _core_.Image_RGBtoHSV(*args, **kwargs)
 
 def Image_HSVtoRGB(*args, **kwargs):
-  """
+    """
     Image_HSVtoRGB(Image_HSVValue hsv) -> Image_RGBValue
 
     Converts a color in HSV color space to RGB color space.
     """
-  return _core_.Image_HSVtoRGB(*args, **kwargs)
+    return _core_.Image_HSVtoRGB(*args, **kwargs)
 
 
 def _ImageFromBuffer(*args, **kwargs):
-  """_ImageFromBuffer(int width, int height, buffer data, buffer alpha=None) -> Image"""
-  return _core_._ImageFromBuffer(*args, **kwargs)
+    """_ImageFromBuffer(int width, int height, buffer data, buffer alpha=None) -> Image"""
+    return _core_._ImageFromBuffer(*args, **kwargs)
 def ImageFromBuffer(width, height, dataBuffer, alphaBuffer=None):
     """
     Creates a `wx.Image` from the data in dataBuffer.  The dataBuffer
@@ -3511,16 +3293,25 @@ BMP_1BPP = _core_.BMP_1BPP
 BMP_1BPP_BW = _core_.BMP_1BPP_BW
 class BMPHandler(ImageHandler):
     """A `wx.ImageHandler` for \*.bmp bitmap files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBMPHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> BMPHandler
 
         A `wx.ImageHandler` for \*.bmp bitmap files.
         """
-        _core_.BMPHandler_swiginit(self,_core_.new_BMPHandler(*args, **kwargs))
-_core_.BMPHandler_swigregister(BMPHandler)
+        newobj = _core_.new_BMPHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class BMPHandlerPtr(BMPHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BMPHandler
+_core_.BMPHandler_swigregister(BMPHandlerPtr)
 NullImage = cvar.NullImage
 IMAGE_OPTION_FILENAME = cvar.IMAGE_OPTION_FILENAME
 IMAGE_OPTION_BMP_FORMAT = cvar.IMAGE_OPTION_BMP_FORMAT
@@ -3540,154 +3331,231 @@ IMAGE_OPTION_PNG_BITDEPTH = cvar.IMAGE_OPTION_PNG_BITDEPTH
 
 class ICOHandler(BMPHandler):
     """A `wx.ImageHandler` for \*.ico icon files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxICOHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> ICOHandler
 
         A `wx.ImageHandler` for \*.ico icon files.
         """
-        _core_.ICOHandler_swiginit(self,_core_.new_ICOHandler(*args, **kwargs))
-_core_.ICOHandler_swigregister(ICOHandler)
+        newobj = _core_.new_ICOHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class ICOHandlerPtr(ICOHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ICOHandler
+_core_.ICOHandler_swigregister(ICOHandlerPtr)
 
 class CURHandler(ICOHandler):
     """A `wx.ImageHandler` for \*.cur cursor files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCURHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> CURHandler
 
         A `wx.ImageHandler` for \*.cur cursor files.
         """
-        _core_.CURHandler_swiginit(self,_core_.new_CURHandler(*args, **kwargs))
-_core_.CURHandler_swigregister(CURHandler)
+        newobj = _core_.new_CURHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class CURHandlerPtr(CURHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CURHandler
+_core_.CURHandler_swigregister(CURHandlerPtr)
 
 class ANIHandler(CURHandler):
     """A `wx.ImageHandler` for \*.ani animated cursor files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxANIHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> ANIHandler
 
         A `wx.ImageHandler` for \*.ani animated cursor files.
         """
-        _core_.ANIHandler_swiginit(self,_core_.new_ANIHandler(*args, **kwargs))
-_core_.ANIHandler_swigregister(ANIHandler)
+        newobj = _core_.new_ANIHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class ANIHandlerPtr(ANIHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ANIHandler
+_core_.ANIHandler_swigregister(ANIHandlerPtr)
 
 class PNGHandler(ImageHandler):
     """A `wx.ImageHandler` for PNG image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPNGHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PNGHandler
 
         A `wx.ImageHandler` for PNG image files.
         """
-        _core_.PNGHandler_swiginit(self,_core_.new_PNGHandler(*args, **kwargs))
-_core_.PNGHandler_swigregister(PNGHandler)
+        newobj = _core_.new_PNGHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class PNGHandlerPtr(PNGHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PNGHandler
+_core_.PNGHandler_swigregister(PNGHandlerPtr)
 
 class GIFHandler(ImageHandler):
     """A `wx.ImageHandler` for GIF image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGIFHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> GIFHandler
 
         A `wx.ImageHandler` for GIF image files.
         """
-        _core_.GIFHandler_swiginit(self,_core_.new_GIFHandler(*args, **kwargs))
-_core_.GIFHandler_swigregister(GIFHandler)
+        newobj = _core_.new_GIFHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class GIFHandlerPtr(GIFHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GIFHandler
+_core_.GIFHandler_swigregister(GIFHandlerPtr)
 
 class PCXHandler(ImageHandler):
     """A `wx.ImageHandler` for PCX imager files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPCXHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PCXHandler
 
         A `wx.ImageHandler` for PCX imager files.
         """
-        _core_.PCXHandler_swiginit(self,_core_.new_PCXHandler(*args, **kwargs))
-_core_.PCXHandler_swigregister(PCXHandler)
+        newobj = _core_.new_PCXHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class PCXHandlerPtr(PCXHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PCXHandler
+_core_.PCXHandler_swigregister(PCXHandlerPtr)
 
 class JPEGHandler(ImageHandler):
     """A `wx.ImageHandler` for JPEG/JPG image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxJPEGHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> JPEGHandler
 
         A `wx.ImageHandler` for JPEG/JPG image files.
         """
-        _core_.JPEGHandler_swiginit(self,_core_.new_JPEGHandler(*args, **kwargs))
-_core_.JPEGHandler_swigregister(JPEGHandler)
+        newobj = _core_.new_JPEGHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class JPEGHandlerPtr(JPEGHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = JPEGHandler
+_core_.JPEGHandler_swigregister(JPEGHandlerPtr)
 
 class PNMHandler(ImageHandler):
     """A `wx.ImageHandler` for PNM image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPNMHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PNMHandler
 
         A `wx.ImageHandler` for PNM image files.
         """
-        _core_.PNMHandler_swiginit(self,_core_.new_PNMHandler(*args, **kwargs))
-_core_.PNMHandler_swigregister(PNMHandler)
+        newobj = _core_.new_PNMHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class PNMHandlerPtr(PNMHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PNMHandler
+_core_.PNMHandler_swigregister(PNMHandlerPtr)
 
 class XPMHandler(ImageHandler):
     """A `wx.ImageHandler` for XPM image."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxXPMHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> XPMHandler
 
         A `wx.ImageHandler` for XPM image.
         """
-        _core_.XPMHandler_swiginit(self,_core_.new_XPMHandler(*args, **kwargs))
-_core_.XPMHandler_swigregister(XPMHandler)
+        newobj = _core_.new_XPMHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class XPMHandlerPtr(XPMHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XPMHandler
+_core_.XPMHandler_swigregister(XPMHandlerPtr)
 
 class TIFFHandler(ImageHandler):
     """A `wx.ImageHandler` for TIFF image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTIFFHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> TIFFHandler
 
         A `wx.ImageHandler` for TIFF image files.
         """
-        _core_.TIFFHandler_swiginit(self,_core_.new_TIFFHandler(*args, **kwargs))
-_core_.TIFFHandler_swigregister(TIFFHandler)
+        newobj = _core_.new_TIFFHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
 
-class TGAHandler(ImageHandler):
-    """A `wx.ImageHandler` for TGA image files."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self) -> TGAHandler
-
-        A `wx.ImageHandler` for TGA image files.
-        """
-        _core_.TGAHandler_swiginit(self,_core_.new_TGAHandler(*args, **kwargs))
-_core_.TGAHandler_swigregister(TGAHandler)
+class TIFFHandlerPtr(TIFFHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TIFFHandler
+_core_.TIFFHandler_swigregister(TIFFHandlerPtr)
 
 QUANTIZE_INCLUDE_WINDOWS_COLOURS = _core_.QUANTIZE_INCLUDE_WINDOWS_COLOURS
 QUANTIZE_FILL_DESTINATION_IMAGE = _core_.QUANTIZE_FILL_DESTINATION_IMAGE
 class Quantize(object):
     """Performs quantization, or colour reduction, on a wxImage."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxQuantize instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def Quantize(*args, **kwargs):
         """
         Quantize(Image src, Image dest, int desiredNoColours=236, int flags=wxQUANTIZE_INCLUDE_WINDOWS_COLOURS|wxQUANTIZE_FILL_DESTINATION_IMAGE) -> bool
@@ -3699,29 +3567,36 @@ class Quantize(object):
         return _core_.Quantize_Quantize(*args, **kwargs)
 
     Quantize = staticmethod(Quantize)
-_core_.Quantize_swigregister(Quantize)
+
+class QuantizePtr(Quantize):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Quantize
+_core_.Quantize_swigregister(QuantizePtr)
 
 def Quantize_Quantize(*args, **kwargs):
-  """
+    """
     Quantize_Quantize(Image src, Image dest, int desiredNoColours=236, int flags=wxQUANTIZE_INCLUDE_WINDOWS_COLOURS|wxQUANTIZE_FILL_DESTINATION_IMAGE) -> bool
 
     Reduce the colours in the source image and put the result into the
     destination image, setting the palette in the destination if
     needed. Both images may be the same, to overwrite the source image.
     """
-  return _core_.Quantize_Quantize(*args, **kwargs)
+    return _core_.Quantize_Quantize(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class EvtHandler(Object):
     """Proxy of C++ EvtHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxEvtHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> EvtHandler"""
-        _core_.EvtHandler_swiginit(self,_core_.new_EvtHandler(*args, **kwargs))
-        self._setOORInfo(self)
-
+        newobj = _core_.new_EvtHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetNextHandler(*args, **kwargs):
         """GetNextHandler(self) -> EvtHandler"""
         return _core_.EvtHandler_GetNextHandler(*args, **kwargs)
@@ -3763,14 +3638,12 @@ class EvtHandler(Object):
         return _core_.EvtHandler_Connect(*args, **kwargs)
 
     def Disconnect(*args, **kwargs):
-        """Disconnect(self, int id, int lastId=-1, EventType eventType=wxEVT_NULL) -> bool"""
+        """Disconnect(self, int id, int lastId=-1, wxEventType eventType=wxEVT_NULL) -> bool"""
         return _core_.EvtHandler_Disconnect(*args, **kwargs)
 
     def _setOORInfo(*args, **kwargs):
         """_setOORInfo(self, PyObject _self, bool incref=True)"""
-        val = _core_.EvtHandler__setOORInfo(*args, **kwargs)
-        args[0].this.own(False)
-        return val
+        return _core_.EvtHandler__setOORInfo(*args, **kwargs)
 
     def Bind(self, event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY):
         """
@@ -3811,10 +3684,13 @@ class EvtHandler(Object):
             id  = source.GetId()
         return event.Unbind(self, id, id2)              
 
-    EvtHandlerEnabled = property(GetEvtHandlerEnabled,SetEvtHandlerEnabled,doc="See `GetEvtHandlerEnabled` and `SetEvtHandlerEnabled`") 
-    NextHandler = property(GetNextHandler,SetNextHandler,doc="See `GetNextHandler` and `SetNextHandler`") 
-    PreviousHandler = property(GetPreviousHandler,SetPreviousHandler,doc="See `GetPreviousHandler` and `SetPreviousHandler`") 
-_core_.EvtHandler_swigregister(EvtHandler)
+
+class EvtHandlerPtr(EvtHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = EvtHandler
+_core_.EvtHandler_swigregister(EvtHandlerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -3847,6 +3723,7 @@ class PyEventBinder(object):
             success += target.Disconnect(id1, id2, et)
         return success != 0
 
+    
     def _getEvtType(self):
         """
         Make it easy to get to the default wxEventType typeID for this
@@ -3856,7 +3733,6 @@ class PyEventBinder(object):
     
     typeId = property(_getEvtType)
 
-    
     def __call__(self, *args):
         """
         For backwards compatibility with the old EVT_* functions.
@@ -3897,10 +3773,9 @@ def EVT_COMMAND_RANGE(win, id1, id2, cmd, func):
 EVENT_PROPAGATE_NONE = _core_.EVENT_PROPAGATE_NONE
 EVENT_PROPAGATE_MAX = _core_.EVENT_PROPAGATE_MAX
 
-def NewEventType(*args):
-  """NewEventType() -> EventType"""
-  return _core_.NewEventType(*args)
-wxEVT_ANY = _core_.wxEVT_ANY
+def NewEventType(*args, **kwargs):
+    """NewEventType() -> wxEventType"""
+    return _core_.NewEventType(*args, **kwargs)
 wxEVT_NULL = _core_.wxEVT_NULL
 wxEVT_FIRST = _core_.wxEVT_FIRST
 wxEVT_USER_FIRST = _core_.wxEVT_USER_FIRST
@@ -3979,6 +3854,7 @@ wxEVT_CLOSE_WINDOW = _core_.wxEVT_CLOSE_WINDOW
 wxEVT_END_SESSION = _core_.wxEVT_END_SESSION
 wxEVT_QUERY_END_SESSION = _core_.wxEVT_QUERY_END_SESSION
 wxEVT_ACTIVATE_APP = _core_.wxEVT_ACTIVATE_APP
+wxEVT_POWER = _core_.wxEVT_POWER
 wxEVT_ACTIVATE = _core_.wxEVT_ACTIVATE
 wxEVT_CREATE = _core_.wxEVT_CREATE
 wxEVT_DESTROY = _core_.wxEVT_DESTROY
@@ -3986,7 +3862,6 @@ wxEVT_SHOW = _core_.wxEVT_SHOW
 wxEVT_ICONIZE = _core_.wxEVT_ICONIZE
 wxEVT_MAXIMIZE = _core_.wxEVT_MAXIMIZE
 wxEVT_MOUSE_CAPTURE_CHANGED = _core_.wxEVT_MOUSE_CAPTURE_CHANGED
-wxEVT_MOUSE_CAPTURE_LOST = _core_.wxEVT_MOUSE_CAPTURE_LOST
 wxEVT_PAINT = _core_.wxEVT_PAINT
 wxEVT_ERASE_BACKGROUND = _core_.wxEVT_ERASE_BACKGROUND
 wxEVT_NC_PAINT = _core_.wxEVT_NC_PAINT
@@ -4010,9 +3885,6 @@ wxEVT_UPDATE_UI = _core_.wxEVT_UPDATE_UI
 wxEVT_SIZING = _core_.wxEVT_SIZING
 wxEVT_MOVING = _core_.wxEVT_MOVING
 wxEVT_HIBERNATE = _core_.wxEVT_HIBERNATE
-wxEVT_COMMAND_TEXT_COPY = _core_.wxEVT_COMMAND_TEXT_COPY
-wxEVT_COMMAND_TEXT_CUT = _core_.wxEVT_COMMAND_TEXT_CUT
-wxEVT_COMMAND_TEXT_PASTE = _core_.wxEVT_COMMAND_TEXT_PASTE
 wxEVT_COMMAND_LEFT_CLICK = _core_.wxEVT_COMMAND_LEFT_CLICK
 wxEVT_COMMAND_LEFT_DCLICK = _core_.wxEVT_COMMAND_LEFT_DCLICK
 wxEVT_COMMAND_RIGHT_CLICK = _core_.wxEVT_COMMAND_RIGHT_CLICK
@@ -4035,7 +3907,7 @@ EVT_ERASE_BACKGROUND = wx.PyEventBinder( wxEVT_ERASE_BACKGROUND )
 EVT_CHAR = wx.PyEventBinder( wxEVT_CHAR )
 EVT_KEY_DOWN = wx.PyEventBinder( wxEVT_KEY_DOWN )
 EVT_KEY_UP = wx.PyEventBinder( wxEVT_KEY_UP )
-EVT_HOTKEY = wx.PyEventBinder( wxEVT_HOTKEY, 1)
+EVT_HOTKEY = wx.PyEventBinder( wxEVT_HOTKEY, 1) 
 EVT_CHAR_HOOK = wx.PyEventBinder( wxEVT_CHAR_HOOK )
 EVT_MENU_OPEN = wx.PyEventBinder( wxEVT_MENU_OPEN )
 EVT_MENU_CLOSE = wx.PyEventBinder( wxEVT_MENU_CLOSE )
@@ -4046,7 +3918,7 @@ EVT_KILL_FOCUS = wx.PyEventBinder( wxEVT_KILL_FOCUS )
 EVT_CHILD_FOCUS = wx.PyEventBinder( wxEVT_CHILD_FOCUS )
 EVT_ACTIVATE = wx.PyEventBinder( wxEVT_ACTIVATE )
 EVT_ACTIVATE_APP = wx.PyEventBinder( wxEVT_ACTIVATE_APP )
-EVT_HIBERNATE = wx.PyEventBinder( wxEVT_HIBERNATE )
+EVT_HIBERNATE = wx.PyEventBinder( wxEVT_HIBERNATE )     
 EVT_END_SESSION = wx.PyEventBinder( wxEVT_END_SESSION )
 EVT_QUERY_END_SESSION = wx.PyEventBinder( wxEVT_QUERY_END_SESSION )
 EVT_DROP_FILES = wx.PyEventBinder( wxEVT_DROP_FILES )
@@ -4063,7 +3935,6 @@ EVT_WINDOW_CREATE = wx.PyEventBinder( wxEVT_CREATE )
 EVT_WINDOW_DESTROY = wx.PyEventBinder( wxEVT_DESTROY )
 EVT_SET_CURSOR = wx.PyEventBinder( wxEVT_SET_CURSOR )
 EVT_MOUSE_CAPTURE_CHANGED = wx.PyEventBinder( wxEVT_MOUSE_CAPTURE_CHANGED )
-EVT_MOUSE_CAPTURE_LOST = wx.PyEventBinder( wxEVT_MOUSE_CAPTURE_LOST )         
 
 EVT_LEFT_DOWN = wx.PyEventBinder( wxEVT_LEFT_DOWN )
 EVT_LEFT_UP = wx.PyEventBinder( wxEVT_LEFT_UP )
@@ -4096,11 +3967,11 @@ EVT_MOUSE_EVENTS = wx.PyEventBinder([ wxEVT_LEFT_DOWN,
 
 
 # Scrolling from wxWindow (sent to wxScrolledWindow)
-EVT_SCROLLWIN = wx.PyEventBinder([ wxEVT_SCROLLWIN_TOP,
+EVT_SCROLLWIN = wx.PyEventBinder([ wxEVT_SCROLLWIN_TOP, 
                                   wxEVT_SCROLLWIN_BOTTOM,
                                   wxEVT_SCROLLWIN_LINEUP,
                                   wxEVT_SCROLLWIN_LINEDOWN,
-                                  wxEVT_SCROLLWIN_PAGEUP,
+                                  wxEVT_SCROLLWIN_PAGEUP, 
                                   wxEVT_SCROLLWIN_PAGEDOWN,
                                   wxEVT_SCROLLWIN_THUMBTRACK,
                                   wxEVT_SCROLLWIN_THUMBRELEASE,
@@ -4116,14 +3987,14 @@ EVT_SCROLLWIN_THUMBTRACK = wx.PyEventBinder( wxEVT_SCROLLWIN_THUMBTRACK )
 EVT_SCROLLWIN_THUMBRELEASE = wx.PyEventBinder( wxEVT_SCROLLWIN_THUMBRELEASE )
 
 # Scrolling from wx.Slider and wx.ScrollBar
-EVT_SCROLL = wx.PyEventBinder([ wxEVT_SCROLL_TOP,
-                               wxEVT_SCROLL_BOTTOM,
-                               wxEVT_SCROLL_LINEUP,
-                               wxEVT_SCROLL_LINEDOWN,
-                               wxEVT_SCROLL_PAGEUP,
-                               wxEVT_SCROLL_PAGEDOWN,
-                               wxEVT_SCROLL_THUMBTRACK,
-                               wxEVT_SCROLL_THUMBRELEASE,
+EVT_SCROLL = wx.PyEventBinder([ wxEVT_SCROLL_TOP, 
+                               wxEVT_SCROLL_BOTTOM, 
+                               wxEVT_SCROLL_LINEUP, 
+                               wxEVT_SCROLL_LINEDOWN, 
+                               wxEVT_SCROLL_PAGEUP, 
+                               wxEVT_SCROLL_PAGEDOWN, 
+                               wxEVT_SCROLL_THUMBTRACK, 
+                               wxEVT_SCROLL_THUMBRELEASE, 
                                wxEVT_SCROLL_CHANGED,
                                ])
 
@@ -4137,15 +4008,15 @@ EVT_SCROLL_THUMBTRACK = wx.PyEventBinder( wxEVT_SCROLL_THUMBTRACK )
 EVT_SCROLL_THUMBRELEASE = wx.PyEventBinder( wxEVT_SCROLL_THUMBRELEASE )
 EVT_SCROLL_CHANGED = wx.PyEventBinder( wxEVT_SCROLL_CHANGED )
 EVT_SCROLL_ENDSCROLL = EVT_SCROLL_CHANGED
-
+     
 # Scrolling from wx.Slider and wx.ScrollBar, with an id
-EVT_COMMAND_SCROLL = wx.PyEventBinder([ wxEVT_SCROLL_TOP,
-                                       wxEVT_SCROLL_BOTTOM,
-                                       wxEVT_SCROLL_LINEUP,
-                                       wxEVT_SCROLL_LINEDOWN,
-                                       wxEVT_SCROLL_PAGEUP,
-                                       wxEVT_SCROLL_PAGEDOWN,
-                                       wxEVT_SCROLL_THUMBTRACK,
+EVT_COMMAND_SCROLL = wx.PyEventBinder([ wxEVT_SCROLL_TOP, 
+                                       wxEVT_SCROLL_BOTTOM, 
+                                       wxEVT_SCROLL_LINEUP, 
+                                       wxEVT_SCROLL_LINEDOWN, 
+                                       wxEVT_SCROLL_PAGEUP, 
+                                       wxEVT_SCROLL_PAGEDOWN, 
+                                       wxEVT_SCROLL_THUMBTRACK, 
                                        wxEVT_SCROLL_THUMBRELEASE,
                                        wxEVT_SCROLL_CHANGED,
                                        ], 1)
@@ -4198,9 +4069,6 @@ EVT_UPDATE_UI_RANGE = wx.PyEventBinder( wxEVT_UPDATE_UI, 2)
 
 EVT_CONTEXT_MENU = wx.PyEventBinder( wxEVT_CONTEXT_MENU )
 
-EVT_TEXT_CUT   =  wx.PyEventBinder( wxEVT_COMMAND_TEXT_CUT )
-EVT_TEXT_COPY  =  wx.PyEventBinder( wxEVT_COMMAND_TEXT_COPY )
-EVT_TEXT_PASTE =  wx.PyEventBinder( wxEVT_COMMAND_TEXT_PASTE )
 
 
 #---------------------------------------------------------------------------
@@ -4211,14 +4079,18 @@ class Event(Object):
     callback or member function. wx.Event is an abstract base class for
     other event classes
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-    __swig_destroy__ = _core_.delete_Event
-    __del__ = lambda self : None;
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __del__(self, destroy=_core_.delete_Event):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def SetEventType(*args, **kwargs):
         """
-        SetEventType(self, EventType typ)
+        SetEventType(self, wxEventType typ)
 
         Sets the specific type of the event.
         """
@@ -4226,7 +4098,7 @@ class Event(Object):
 
     def GetEventType(*args, **kwargs):
         """
-        GetEventType(self) -> EventType
+        GetEventType(self) -> wxEventType
 
         Returns the identifier of the given event type, such as
         ``wxEVT_COMMAND_BUTTON_CLICKED``.
@@ -4291,13 +4163,14 @@ class Event(Object):
         """
         Skip(self, bool skip=True)
 
-        This method can be used inside an event handler to control whether
-        further event handlers bound to this event will be called after the
-        current one returns. Without Skip() (or equivalently if Skip(False) is
-        used), the event will not be processed any more. If Skip(True) is
-        called, the event processing system continues searching for a further
-        handler function for this event, even though it has been processed
-        already in the current handler.
+        Called by an event handler, it controls whether additional event
+        handlers bound to this event will be called after the current event
+        handler returns.  Skip(false) (the default setting) will prevent
+        additional event handlers from being called and control will be
+        returned to the sender of the event immediately after the current
+        handler has finished.  Skip(True) will cause the event processing
+        system to continue searching for a handler function for this event.
+
         """
         return _core_.Event_Skip(*args, **kwargs)
 
@@ -4344,12 +4217,13 @@ class Event(Object):
         """Clone(self) -> Event"""
         return _core_.Event_Clone(*args, **kwargs)
 
-    EventObject = property(GetEventObject,SetEventObject,doc="See `GetEventObject` and `SetEventObject`") 
-    EventType = property(GetEventType,SetEventType,doc="See `GetEventType` and `SetEventType`") 
-    Id = property(GetId,SetId,doc="See `GetId` and `SetId`") 
-    Skipped = property(GetSkipped,doc="See `GetSkipped`") 
-    Timestamp = property(GetTimestamp,SetTimestamp,doc="See `GetTimestamp` and `SetTimestamp`") 
-_core_.Event_swigregister(Event)
+
+class EventPtr(Event):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Event
+_core_.Event_swigregister(EventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -4359,9 +4233,9 @@ class PropagationDisabler(object):
     create an instance of this class and then whe it is destroyed the
     propogation of the event will be restored.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPropagationDisabler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Event event) -> PropagationDisabler
 
@@ -4369,10 +4243,23 @@ class PropagationDisabler(object):
         create an instance of this class and then whe it is destroyed the
         propogation of the event will be restored.
         """
-        _core_.PropagationDisabler_swiginit(self,_core_.new_PropagationDisabler(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_PropagationDisabler
-    __del__ = lambda self : None;
-_core_.PropagationDisabler_swigregister(PropagationDisabler)
+        newobj = _core_.new_PropagationDisabler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_PropagationDisabler):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
+
+class PropagationDisablerPtr(PropagationDisabler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PropagationDisabler
+_core_.PropagationDisabler_swigregister(PropagationDisablerPtr)
 
 class PropagateOnce(object):
     """
@@ -4380,9 +4267,9 @@ class PropagateOnce(object):
     event.  Simply create an instance of this class and then whe it is
     destroyed the propogation of the event will be restored.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPropagateOnce instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Event event) -> PropagateOnce
 
@@ -4390,10 +4277,23 @@ class PropagateOnce(object):
         event.  Simply create an instance of this class and then whe it is
         destroyed the propogation of the event will be restored.
         """
-        _core_.PropagateOnce_swiginit(self,_core_.new_PropagateOnce(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_PropagateOnce
-    __del__ = lambda self : None;
-_core_.PropagateOnce_swigregister(PropagateOnce)
+        newobj = _core_.new_PropagateOnce(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_PropagateOnce):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
+
+class PropagateOncePtr(PropagateOnce):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PropagateOnce
+_core_.PropagateOnce_swigregister(PropagateOncePtr)
 
 #---------------------------------------------------------------------------
 
@@ -4403,17 +4303,20 @@ class CommandEvent(Event):
     originate from a variety of simple controls, as well as menus and
     toolbars.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCommandEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int winid=0) -> CommandEvent
+        __init__(self, wxEventType commandType=wxEVT_NULL, int winid=0) -> CommandEvent
 
         This event class contains information about command events, which
         originate from a variety of simple controls, as well as menus and
         toolbars.
         """
-        _core_.CommandEvent_swiginit(self,_core_.new_CommandEvent(*args, **kwargs))
+        newobj = _core_.new_CommandEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetSelection(*args, **kwargs):
         """
         GetSelection(self) -> int
@@ -4481,7 +4384,7 @@ class CommandEvent(Event):
 
     def GetInt(*args, **kwargs):
         """
-        GetInt(self) -> int
+        GetInt(self) -> long
 
         Returns the integer identifier corresponding to a listbox, choice or
         radiobox selection (only if the event was a selection, not a
@@ -4512,13 +4415,13 @@ class CommandEvent(Event):
         """Clone(self) -> Event"""
         return _core_.CommandEvent_Clone(*args, **kwargs)
 
-    ClientData = property(GetClientData,SetClientData,doc="See `GetClientData` and `SetClientData`") 
-    ClientObject = property(GetClientObject,SetClientObject,doc="See `GetClientObject` and `SetClientObject`") 
-    ExtraLong = property(GetExtraLong,SetExtraLong,doc="See `GetExtraLong` and `SetExtraLong`") 
-    Int = property(GetInt,SetInt,doc="See `GetInt` and `SetInt`") 
-    Selection = property(GetSelection,doc="See `GetSelection`") 
-    String = property(GetString,SetString,doc="See `GetString` and `SetString`") 
-_core_.CommandEvent_swigregister(CommandEvent)
+
+class CommandEventPtr(CommandEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CommandEvent
+_core_.CommandEvent_swigregister(CommandEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -4529,18 +4432,21 @@ class NotifyEvent(CommandEvent):
     allows that change to be prevented from happening.  The event handler
     can call `Veto` or `Allow` to tell the control what to do.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNotifyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int winid=0) -> NotifyEvent
+        __init__(self, wxEventType commandType=wxEVT_NULL, int winid=0) -> NotifyEvent
 
         An instance of this class (or one of its derived classes) is sent from
         a control when the control's state is being changed and the control
         allows that change to be prevented from happening.  The event handler
         can call `Veto` or `Allow` to tell the control what to do.
         """
-        _core_.NotifyEvent_swiginit(self,_core_.new_NotifyEvent(*args, **kwargs))
+        newobj = _core_.new_NotifyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def Veto(*args, **kwargs):
         """
         Veto(self)
@@ -4573,7 +4479,13 @@ class NotifyEvent(CommandEvent):
         """
         return _core_.NotifyEvent_IsAllowed(*args, **kwargs)
 
-_core_.NotifyEvent_swigregister(NotifyEvent)
+
+class NotifyEventPtr(NotifyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = NotifyEvent
+_core_.NotifyEvent_swigregister(NotifyEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -4584,14 +4496,17 @@ class ScrollEvent(CommandEvent):
     instnaces of this event class, but send the `wx.ScrollWinEvent`
     instead.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxScrollEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int winid=0, int pos=0, 
+        __init__(self, wxEventType commandType=wxEVT_NULL, int winid=0, int pos=0, 
             int orient=0) -> ScrollEvent
         """
-        _core_.ScrollEvent_swiginit(self,_core_.new_ScrollEvent(*args, **kwargs))
+        newobj = _core_.new_ScrollEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetOrientation(*args, **kwargs):
         """
         GetOrientation(self) -> int
@@ -4617,9 +4532,13 @@ class ScrollEvent(CommandEvent):
         """SetPosition(self, int pos)"""
         return _core_.ScrollEvent_SetPosition(*args, **kwargs)
 
-    Orientation = property(GetOrientation,SetOrientation,doc="See `GetOrientation` and `SetOrientation`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-_core_.ScrollEvent_swigregister(ScrollEvent)
+
+class ScrollEventPtr(ScrollEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ScrollEvent
+_core_.ScrollEvent_swigregister(ScrollEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -4628,16 +4547,19 @@ class ScrollWinEvent(Event):
     A wx.ScrollWinEvent holds information about scrolling and is sent from
     scrolling windows.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxScrollWinEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int pos=0, int orient=0) -> ScrollWinEvent
+        __init__(self, wxEventType commandType=wxEVT_NULL, int pos=0, int orient=0) -> ScrollWinEvent
 
         A wx.ScrollWinEvent holds information about scrolling and is sent from
         scrolling windows.
         """
-        _core_.ScrollWinEvent_swiginit(self,_core_.new_ScrollWinEvent(*args, **kwargs))
+        newobj = _core_.new_ScrollWinEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetOrientation(*args, **kwargs):
         """
         GetOrientation(self) -> int
@@ -4665,9 +4587,13 @@ class ScrollWinEvent(Event):
         """SetPosition(self, int pos)"""
         return _core_.ScrollWinEvent_SetPosition(*args, **kwargs)
 
-    Orientation = property(GetOrientation,SetOrientation,doc="See `GetOrientation` and `SetOrientation`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-_core_.ScrollWinEvent_swigregister(ScrollWinEvent)
+
+class ScrollWinEventPtr(ScrollWinEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ScrollWinEvent
+_core_.ScrollWinEvent_swigregister(ScrollWinEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -4698,11 +4624,11 @@ class MouseEvent(Event):
     underlying GUI behaviour is (which is platform-dependent). The same
     applies, of course, to other mouse buttons as well.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMouseEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType mouseType=wxEVT_NULL) -> MouseEvent
+        __init__(self, wxEventType mouseType=wxEVT_NULL) -> MouseEvent
 
         Constructs a wx.MouseEvent.  Valid event types are:
 
@@ -4720,7 +4646,10 @@ class MouseEvent(Event):
             * wxEVT_MOTION
             * wxEVT_MOUSEWHEEL 
         """
-        _core_.MouseEvent_swiginit(self,_core_.new_MouseEvent(*args, **kwargs))
+        newobj = _core_.new_MouseEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def IsButton(*args, **kwargs):
         """
         IsButton(self) -> bool
@@ -5052,16 +4981,6 @@ class MouseEvent(Event):
         """
         return _core_.MouseEvent_GetWheelDelta(*args, **kwargs)
 
-    def GetWheelAxis(*args, **kwargs):
-        """
-        GetWheelAxis(self) -> int
-
-        Gets the axis the wheel operation concerns, 0 being the y axis as on
-        most mouse wheels, 1 is the x axis for things like MightyMouse scrolls
-        or horizontal trackpad scrolling.
-        """
-        return _core_.MouseEvent_GetWheelAxis(*args, **kwargs)
-
     def GetLinesPerAction(*args, **kwargs):
         """
         GetLinesPerAction(self) -> int
@@ -5092,15 +5011,13 @@ class MouseEvent(Event):
     m_wheelRotation = property(_core_.MouseEvent_m_wheelRotation_get, _core_.MouseEvent_m_wheelRotation_set)
     m_wheelDelta = property(_core_.MouseEvent_m_wheelDelta_get, _core_.MouseEvent_m_wheelDelta_set)
     m_linesPerAction = property(_core_.MouseEvent_m_linesPerAction_get, _core_.MouseEvent_m_linesPerAction_set)
-    Button = property(GetButton,doc="See `GetButton`") 
-    LinesPerAction = property(GetLinesPerAction,doc="See `GetLinesPerAction`") 
-    LogicalPosition = property(GetLogicalPosition,doc="See `GetLogicalPosition`") 
-    Position = property(GetPosition,doc="See `GetPosition`") 
-    WheelDelta = property(GetWheelDelta,doc="See `GetWheelDelta`") 
-    WheelRotation = property(GetWheelRotation,doc="See `GetWheelRotation`") 
-    X = property(GetX,doc="See `GetX`") 
-    Y = property(GetY,doc="See `GetY`") 
-_core_.MouseEvent_swigregister(MouseEvent)
+
+class MouseEventPtr(MouseEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MouseEvent
+_core_.MouseEvent_swigregister(MouseEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5112,15 +5029,18 @@ class SetCursorEvent(Event):
     current position of the mouse within the window. Use the `SetCursor`
     method to specify the cursor you want to be displayed.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSetCursorEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int x=0, int y=0) -> SetCursorEvent
 
         Construct a new `wx.SetCursorEvent`.
         """
-        _core_.SetCursorEvent_swiginit(self,_core_.new_SetCursorEvent(*args, **kwargs))
+        newobj = _core_.new_SetCursorEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetX(*args, **kwargs):
         """
         GetX(self) -> int
@@ -5161,10 +5081,13 @@ class SetCursorEvent(Event):
         """
         return _core_.SetCursorEvent_HasCursor(*args, **kwargs)
 
-    Cursor = property(GetCursor,SetCursor,doc="See `GetCursor` and `SetCursor`") 
-    X = property(GetX,doc="See `GetX`") 
-    Y = property(GetY,doc="See `GetY`") 
-_core_.SetCursorEvent_swigregister(SetCursorEvent)
+
+class SetCursorEventPtr(SetCursorEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SetCursorEvent
+_core_.SetCursorEvent_swigregister(SetCursorEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5231,31 +5154,19 @@ class KeyEvent(Event):
     work under Windows.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxKeyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType eventType=wxEVT_NULL) -> KeyEvent
+        __init__(self, wxEventType eventType=wxEVT_NULL) -> KeyEvent
 
         Construct a new `wx.KeyEvent`.  Valid event types are:
             * 
         """
-        _core_.KeyEvent_swiginit(self,_core_.new_KeyEvent(*args, **kwargs))
-    def GetModifiers(*args, **kwargs):
-        """
-        GetModifiers(self) -> int
-
-        Returns a bitmask of the current modifier settings.  Can be used to
-        check if the key event has exactly the given modifiers without having
-        to explicitly check that the other modifiers are not down.  For
-        example::
-
-            if event.GetModifers() == wx.MOD_CONTROL:
-                DoSomething()
-
-        """
-        return _core_.KeyEvent_GetModifiers(*args, **kwargs)
-
+        newobj = _core_.new_KeyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def ControlDown(*args, **kwargs):
         """
         ControlDown(self) -> bool
@@ -5331,6 +5242,7 @@ class KeyEvent(Event):
         """
         return _core_.KeyEvent_GetKeyCode(*args, **kwargs)
 
+    KeyCode = GetKeyCode 
     def GetUnicodeKey(*args, **kwargs):
         """
         GetUnicodeKey(self) -> int
@@ -5341,15 +5253,6 @@ class KeyEvent(Event):
         return _core_.KeyEvent_GetUnicodeKey(*args, **kwargs)
 
     GetUniChar = GetUnicodeKey 
-    def SetUnicodeKey(*args, **kwargs):
-        """
-        SetUnicodeKey(self, int uniChar)
-
-        Set the Unicode value of the key event, but only if this is a Unicode
-        build of wxPython.
-        """
-        return _core_.KeyEvent_SetUnicodeKey(*args, **kwargs)
-
     def GetRawKeyCode(*args, **kwargs):
         """
         GetRawKeyCode(self) -> unsigned int
@@ -5415,15 +5318,13 @@ class KeyEvent(Event):
     m_scanCode = property(_core_.KeyEvent_m_scanCode_get, _core_.KeyEvent_m_scanCode_set)
     m_rawCode = property(_core_.KeyEvent_m_rawCode_get, _core_.KeyEvent_m_rawCode_set)
     m_rawFlags = property(_core_.KeyEvent_m_rawFlags_get, _core_.KeyEvent_m_rawFlags_set)
-    KeyCode = property(GetKeyCode,doc="See `GetKeyCode`") 
-    Modifiers = property(GetModifiers,doc="See `GetModifiers`") 
-    Position = property(GetPosition,doc="See `GetPosition`") 
-    RawKeyCode = property(GetRawKeyCode,doc="See `GetRawKeyCode`") 
-    RawKeyFlags = property(GetRawKeyFlags,doc="See `GetRawKeyFlags`") 
-    UnicodeKey = property(GetUnicodeKey,SetUnicodeKey,doc="See `GetUnicodeKey` and `SetUnicodeKey`") 
-    X = property(GetX,doc="See `GetX`") 
-    Y = property(GetY,doc="See `GetY`") 
-_core_.KeyEvent_swigregister(KeyEvent)
+
+class KeyEventPtr(KeyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = KeyEvent
+_core_.KeyEvent_swigregister(KeyEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5445,15 +5346,18 @@ class SizeEvent(Event):
     invalidate the entire window.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSizeEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Size sz=DefaultSize, int winid=0) -> SizeEvent
 
         Construct a new ``wx.SizeEvent``.
         """
-        _core_.SizeEvent_swiginit(self,_core_.new_SizeEvent(*args, **kwargs))
+        newobj = _core_.new_SizeEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetSize(*args, **kwargs):
         """
         GetSize(self) -> Size
@@ -5477,9 +5381,13 @@ class SizeEvent(Event):
 
     m_size = property(_core_.SizeEvent_m_size_get, _core_.SizeEvent_m_size_set)
     m_rect = property(_core_.SizeEvent_m_rect_get, _core_.SizeEvent_m_rect_set)
-    Rect = property(GetRect,SetRect,doc="See `GetRect` and `SetRect`") 
-    Size = property(GetSize,SetSize,doc="See `GetSize` and `SetSize`") 
-_core_.SizeEvent_swigregister(SizeEvent)
+
+class SizeEventPtr(SizeEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SizeEvent
+_core_.SizeEvent_swigregister(SizeEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5488,15 +5396,18 @@ class MoveEvent(Event):
     This event object is sent for EVT_MOVE event bindings when a window is
     moved to a new position.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMoveEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Point pos=DefaultPosition, int winid=0) -> MoveEvent
 
         Constructor.
         """
-        _core_.MoveEvent_swiginit(self,_core_.new_MoveEvent(*args, **kwargs))
+        newobj = _core_.new_MoveEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetPosition(*args, **kwargs):
         """
         GetPosition(self) -> Point
@@ -5520,9 +5431,13 @@ class MoveEvent(Event):
     m_pos =  property(GetPosition, SetPosition)
     m_rect = property(GetRect, SetRect)
 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-    Rect = property(GetRect,SetRect,doc="See `GetRect` and `SetRect`") 
-_core_.MoveEvent_swigregister(MoveEvent)
+
+class MoveEventPtr(MoveEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MoveEvent
+_core_.MoveEvent_swigregister(MoveEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5542,21 +5457,39 @@ class PaintEvent(Event):
     scrolled units.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPaintEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, int Id=0) -> PaintEvent"""
-        _core_.PaintEvent_swiginit(self,_core_.new_PaintEvent(*args, **kwargs))
-_core_.PaintEvent_swigregister(PaintEvent)
+        newobj = _core_.new_PaintEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class PaintEventPtr(PaintEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PaintEvent
+_core_.PaintEvent_swigregister(PaintEventPtr)
 
 class NcPaintEvent(Event):
     """Proxy of C++ NcPaintEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNcPaintEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, int winid=0) -> NcPaintEvent"""
-        _core_.NcPaintEvent_swiginit(self,_core_.new_NcPaintEvent(*args, **kwargs))
-_core_.NcPaintEvent_swigregister(NcPaintEvent)
+        newobj = _core_.new_NcPaintEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class NcPaintEventPtr(NcPaintEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = NcPaintEvent
+_core_.NcPaintEvent_swigregister(NcPaintEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5572,15 +5505,18 @@ class EraseEvent(Event):
     `wx.ClientDC` and draw on that.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxEraseEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int Id=0, DC dc=None) -> EraseEvent
 
         Constructor
         """
-        _core_.EraseEvent_swiginit(self,_core_.new_EraseEvent(*args, **kwargs))
+        newobj = _core_.new_EraseEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetDC(*args, **kwargs):
         """
         GetDC(self) -> DC
@@ -5591,8 +5527,13 @@ class EraseEvent(Event):
         """
         return _core_.EraseEvent_GetDC(*args, **kwargs)
 
-    DC = property(GetDC,doc="See `GetDC`") 
-_core_.EraseEvent_swigregister(EraseEvent)
+
+class EraseEventPtr(EraseEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = EraseEvent
+_core_.EraseEvent_swigregister(EraseEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5607,15 +5548,18 @@ class FocusEvent(Event):
     done from the program itself using `wx.Window.SetFocus`.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxFocusEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0) -> FocusEvent
+        __init__(self, wxEventType type=wxEVT_NULL, int winid=0) -> FocusEvent
 
         Constructor
         """
-        _core_.FocusEvent_swiginit(self,_core_.new_FocusEvent(*args, **kwargs))
+        newobj = _core_.new_FocusEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetWindow(*args, **kwargs):
         """
         GetWindow(self) -> Window
@@ -5632,42 +5576,49 @@ class FocusEvent(Event):
         """SetWindow(self, Window win)"""
         return _core_.FocusEvent_SetWindow(*args, **kwargs)
 
-    Window = property(GetWindow,SetWindow,doc="See `GetWindow` and `SetWindow`") 
-_core_.FocusEvent_swigregister(FocusEvent)
+
+class FocusEventPtr(FocusEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = FocusEvent
+_core_.FocusEvent_swigregister(FocusEventPtr)
 
 #---------------------------------------------------------------------------
 
 class ChildFocusEvent(CommandEvent):
     """
-    A child focus event is sent to a (parent-)window when one of its child
-    windows gains focus, so that the window could restore the focus back
-    to its corresponding child if it loses it now and regains later.
-
-    Notice that child window is the direct child of the window receiving
-    the event, and so may not be the actual widget recieving focus if it
-    is further down the containment heirarchy.  Use `wx.Window.FindFocus`
-    to get the widget that is actually receiving focus.
+    wx.ChildFocusEvent notifies the parent that a child has received the
+    focus.  Unlike `wx.FocusEvent` it is propagated up the window
+    heirarchy.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxChildFocusEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window win=None) -> ChildFocusEvent
 
         Constructor
         """
-        _core_.ChildFocusEvent_swiginit(self,_core_.new_ChildFocusEvent(*args, **kwargs))
+        newobj = _core_.new_ChildFocusEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetWindow(*args, **kwargs):
         """
         GetWindow(self) -> Window
 
-        The window, or (grand)parent of the window which has just received the
-        focus.
+        The window which has just received the focus.
         """
         return _core_.ChildFocusEvent_GetWindow(*args, **kwargs)
 
-    Window = property(GetWindow,doc="See `GetWindow`") 
-_core_.ChildFocusEvent_swigregister(ChildFocusEvent)
+
+class ChildFocusEventPtr(ChildFocusEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ChildFocusEvent
+_core_.ChildFocusEvent_swigregister(ChildFocusEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5688,15 +5639,18 @@ class ActivateEvent(Event):
     doing so can result in strange effects.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxActivateEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType type=wxEVT_NULL, bool active=True, int Id=0) -> ActivateEvent
+        __init__(self, wxEventType type=wxEVT_NULL, bool active=True, int Id=0) -> ActivateEvent
 
         Constructor
         """
-        _core_.ActivateEvent_swiginit(self,_core_.new_ActivateEvent(*args, **kwargs))
+        newobj = _core_.new_ActivateEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetActive(*args, **kwargs):
         """
         GetActive(self) -> bool
@@ -5706,8 +5660,13 @@ class ActivateEvent(Event):
         """
         return _core_.ActivateEvent_GetActive(*args, **kwargs)
 
-    Active = property(GetActive,doc="See `GetActive`") 
-_core_.ActivateEvent_swigregister(ActivateEvent)
+
+class ActivateEventPtr(ActivateEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ActivateEvent
+_core_.ActivateEvent_swigregister(ActivateEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5719,16 +5678,25 @@ class InitDialogEvent(Event):
     done before the user begins editing the form. The default handler
     calls `wx.Window.TransferDataToWindow`.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxInitDialogEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int Id=0) -> InitDialogEvent
 
         Constructor
         """
-        _core_.InitDialogEvent_swiginit(self,_core_.new_InitDialogEvent(*args, **kwargs))
-_core_.InitDialogEvent_swigregister(InitDialogEvent)
+        newobj = _core_.new_InitDialogEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class InitDialogEventPtr(InitDialogEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = InitDialogEvent
+_core_.InitDialogEvent_swigregister(InitDialogEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5741,15 +5709,18 @@ class MenuEvent(Event):
     The default handler for wx.EVT_MENU_HIGHLIGHT displays menu item help
     text in the first field of the status bar.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMenuEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0, Menu menu=None) -> MenuEvent
+        __init__(self, wxEventType type=wxEVT_NULL, int winid=0, Menu menu=None) -> MenuEvent
 
         Constructor
         """
-        _core_.MenuEvent_swiginit(self,_core_.new_MenuEvent(*args, **kwargs))
+        newobj = _core_.new_MenuEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetMenuId(*args, **kwargs):
         """
         GetMenuId(self) -> int
@@ -5778,9 +5749,13 @@ class MenuEvent(Event):
         """
         return _core_.MenuEvent_GetMenu(*args, **kwargs)
 
-    Menu = property(GetMenu,doc="See `GetMenu`") 
-    MenuId = property(GetMenuId,doc="See `GetMenuId`") 
-_core_.MenuEvent_swigregister(MenuEvent)
+
+class MenuEventPtr(MenuEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MenuEvent
+_core_.MenuEvent_swigregister(MenuEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5807,15 +5782,18 @@ class CloseEvent(Event):
     `wx.Window.Close` function to return ``True`` or ``False`` depending
     on whether the close instruction was honored or not.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCloseEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0) -> CloseEvent
+        __init__(self, wxEventType type=wxEVT_NULL, int winid=0) -> CloseEvent
 
         Constructor.
         """
-        _core_.CloseEvent_swiginit(self,_core_.new_CloseEvent(*args, **kwargs))
+        newobj = _core_.new_CloseEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetLoggingOff(*args, **kwargs):
         """
         SetLoggingOff(self, bool logOff)
@@ -5869,22 +5847,30 @@ class CloseEvent(Event):
         """
         return _core_.CloseEvent_CanVeto(*args, **kwargs)
 
-    LoggingOff = property(GetLoggingOff,SetLoggingOff,doc="See `GetLoggingOff` and `SetLoggingOff`") 
-_core_.CloseEvent_swigregister(CloseEvent)
+
+class CloseEventPtr(CloseEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CloseEvent
+_core_.CloseEvent_swigregister(CloseEventPtr)
 
 #---------------------------------------------------------------------------
 
 class ShowEvent(Event):
     """An EVT_SHOW event is sent when a window is shown or hidden."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxShowEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int winid=0, bool show=False) -> ShowEvent
 
         An EVT_SHOW event is sent when a window is shown or hidden.
         """
-        _core_.ShowEvent_swiginit(self,_core_.new_ShowEvent(*args, **kwargs))
+        newobj = _core_.new_ShowEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetShow(*args, **kwargs):
         """SetShow(self, bool show)"""
         return _core_.ShowEvent_SetShow(*args, **kwargs)
@@ -5893,8 +5879,13 @@ class ShowEvent(Event):
         """GetShow(self) -> bool"""
         return _core_.ShowEvent_GetShow(*args, **kwargs)
 
-    Show = property(GetShow,SetShow,doc="See `GetShow` and `SetShow`") 
-_core_.ShowEvent_swigregister(ShowEvent)
+
+class ShowEventPtr(ShowEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ShowEvent
+_core_.ShowEvent_swigregister(ShowEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5903,16 +5894,19 @@ class IconizeEvent(Event):
     An EVT_ICONIZE event is sent when a frame is iconized (minimized) or
     restored.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxIconizeEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int id=0, bool iconized=True) -> IconizeEvent
 
         An EVT_ICONIZE event is sent when a frame is iconized (minimized) or
         restored.
         """
-        _core_.IconizeEvent_swiginit(self,_core_.new_IconizeEvent(*args, **kwargs))
+        newobj = _core_.new_IconizeEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def Iconized(*args, **kwargs):
         """
         Iconized(self) -> bool
@@ -5922,22 +5916,37 @@ class IconizeEvent(Event):
         """
         return _core_.IconizeEvent_Iconized(*args, **kwargs)
 
-_core_.IconizeEvent_swigregister(IconizeEvent)
+
+class IconizeEventPtr(IconizeEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = IconizeEvent
+_core_.IconizeEvent_swigregister(IconizeEventPtr)
 
 #---------------------------------------------------------------------------
 
 class MaximizeEvent(Event):
     """An EVT_MAXIMIZE event is sent when a frame is maximized or restored."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMaximizeEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int id=0) -> MaximizeEvent
 
         An EVT_MAXIMIZE event is sent when a frame is maximized or restored.
         """
-        _core_.MaximizeEvent_swiginit(self,_core_.new_MaximizeEvent(*args, **kwargs))
-_core_.MaximizeEvent_swigregister(MaximizeEvent)
+        newobj = _core_.new_MaximizeEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class MaximizeEventPtr(MaximizeEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MaximizeEvent
+_core_.MaximizeEvent_swigregister(MaximizeEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5957,9 +5966,9 @@ class DropFilesEvent(Event):
     events.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDropFilesEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def GetPosition(*args, **kwargs):
         """
         GetPosition(self) -> Point
@@ -5984,10 +5993,13 @@ class DropFilesEvent(Event):
         """
         return _core_.DropFilesEvent_GetFiles(*args, **kwargs)
 
-    Files = property(GetFiles,doc="See `GetFiles`") 
-    NumberOfFiles = property(GetNumberOfFiles,doc="See `GetNumberOfFiles`") 
-    Position = property(GetPosition,doc="See `GetPosition`") 
-_core_.DropFilesEvent_swigregister(DropFilesEvent)
+
+class DropFilesEventPtr(DropFilesEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DropFilesEvent
+_core_.DropFilesEvent_swigregister(DropFilesEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6046,15 +6058,18 @@ class UpdateUIEvent(CommandEvent):
     is about to be shown, and not in idle time.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxUpdateUIEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int commandId=0) -> UpdateUIEvent
 
         Constructor
         """
-        _core_.UpdateUIEvent_swiginit(self,_core_.new_UpdateUIEvent(*args, **kwargs))
+        newobj = _core_.new_UpdateUIEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetChecked(*args, **kwargs):
         """
         GetChecked(self) -> bool
@@ -6070,14 +6085,6 @@ class UpdateUIEvent(CommandEvent):
         Returns ``True`` if the UI element should be enabled.
         """
         return _core_.UpdateUIEvent_GetEnabled(*args, **kwargs)
-
-    def GetShown(*args, **kwargs):
-        """
-        GetShown(self) -> bool
-
-        Returns ``True`` if the UI element should be shown.
-        """
-        return _core_.UpdateUIEvent_GetShown(*args, **kwargs)
 
     def GetText(*args, **kwargs):
         """
@@ -6114,15 +6121,6 @@ class UpdateUIEvent(CommandEvent):
         """
         return _core_.UpdateUIEvent_GetSetEnabled(*args, **kwargs)
 
-    def GetSetShown(*args, **kwargs):
-        """
-        GetSetShown(self) -> bool
-
-        Returns ``True`` if the application has called `Show`. For wxWidgets
-        internal use only.
-        """
-        return _core_.UpdateUIEvent_GetSetShown(*args, **kwargs)
-
     def Check(*args, **kwargs):
         """
         Check(self, bool check)
@@ -6138,14 +6136,6 @@ class UpdateUIEvent(CommandEvent):
         Enable or disable the UI element.
         """
         return _core_.UpdateUIEvent_Enable(*args, **kwargs)
-
-    def Show(*args, **kwargs):
-        """
-        Show(self, bool show)
-
-        Show or hide the UI element.
-        """
-        return _core_.UpdateUIEvent_Show(*args, **kwargs)
 
     def SetText(*args, **kwargs):
         """
@@ -6246,14 +6236,16 @@ class UpdateUIEvent(CommandEvent):
         return _core_.UpdateUIEvent_GetMode(*args, **kwargs)
 
     GetMode = staticmethod(GetMode)
-    Checked = property(GetChecked,Check,doc="See `GetChecked`") 
-    Enabled = property(GetEnabled,Enable,doc="See `GetEnabled`") 
-    Shown = property(GetShown,Show,doc="See `GetShown`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-_core_.UpdateUIEvent_swigregister(UpdateUIEvent)
+
+class UpdateUIEventPtr(UpdateUIEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = UpdateUIEvent
+_core_.UpdateUIEvent_swigregister(UpdateUIEventPtr)
 
 def UpdateUIEvent_SetUpdateInterval(*args, **kwargs):
-  """
+    """
     UpdateUIEvent_SetUpdateInterval(long updateInterval)
 
     Sets the interval between updates in milliseconds. Set to -1 to
@@ -6266,19 +6258,19 @@ def UpdateUIEvent_SetUpdateInterval(*args, **kwargs):
     at appropriate points in your application, such as when a dialog is
     about to be shown.
     """
-  return _core_.UpdateUIEvent_SetUpdateInterval(*args, **kwargs)
+    return _core_.UpdateUIEvent_SetUpdateInterval(*args, **kwargs)
 
-def UpdateUIEvent_GetUpdateInterval(*args):
-  """
+def UpdateUIEvent_GetUpdateInterval(*args, **kwargs):
+    """
     UpdateUIEvent_GetUpdateInterval() -> long
 
     Returns the current interval between updates in milliseconds. -1
     disables updates, 0 updates as frequently as possible.
     """
-  return _core_.UpdateUIEvent_GetUpdateInterval(*args)
+    return _core_.UpdateUIEvent_GetUpdateInterval(*args, **kwargs)
 
 def UpdateUIEvent_CanUpdate(*args, **kwargs):
-  """
+    """
     UpdateUIEvent_CanUpdate(Window win) -> bool
 
     Returns ``True`` if it is appropriate to update (send UI update events
@@ -6295,20 +6287,20 @@ def UpdateUIEvent_CanUpdate(*args, **kwargs):
     interval.
 
     """
-  return _core_.UpdateUIEvent_CanUpdate(*args, **kwargs)
+    return _core_.UpdateUIEvent_CanUpdate(*args, **kwargs)
 
-def UpdateUIEvent_ResetUpdateTime(*args):
-  """
+def UpdateUIEvent_ResetUpdateTime(*args, **kwargs):
+    """
     UpdateUIEvent_ResetUpdateTime()
 
     Used internally to reset the last-updated time to the current time. It
     is assumed that update events are normally sent in idle time, so this
     is called at the end of idle processing.
     """
-  return _core_.UpdateUIEvent_ResetUpdateTime(*args)
+    return _core_.UpdateUIEvent_ResetUpdateTime(*args, **kwargs)
 
 def UpdateUIEvent_SetMode(*args, **kwargs):
-  """
+    """
     UpdateUIEvent_SetMode(int mode)
 
     Specify how wxWidgets will send update events: to all windows, or only
@@ -6325,17 +6317,17 @@ def UpdateUIEvent_SetMode(*args, **kwargs):
         =============================   ==========================================
 
     """
-  return _core_.UpdateUIEvent_SetMode(*args, **kwargs)
+    return _core_.UpdateUIEvent_SetMode(*args, **kwargs)
 
-def UpdateUIEvent_GetMode(*args):
-  """
+def UpdateUIEvent_GetMode(*args, **kwargs):
+    """
     UpdateUIEvent_GetMode() -> int
 
     Returns a value specifying how wxWidgets will send update events: to
     all windows, or only to those which specify that they will process the
     events.
     """
-  return _core_.UpdateUIEvent_GetMode(*args)
+    return _core_.UpdateUIEvent_GetMode(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -6352,16 +6344,25 @@ class SysColourChangedEvent(Event):
     pass the event on to the window's children explicitly.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSysColourChangedEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> SysColourChangedEvent
 
         Constructor
         """
-        _core_.SysColourChangedEvent_swiginit(self,_core_.new_SysColourChangedEvent(*args, **kwargs))
-_core_.SysColourChangedEvent_swigregister(SysColourChangedEvent)
+        newobj = _core_.new_SysColourChangedEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class SysColourChangedEventPtr(SysColourChangedEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SysColourChangedEvent
+_core_.SysColourChangedEvent_swigregister(SysColourChangedEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6375,15 +6376,18 @@ class MouseCaptureChangedEvent(Event):
 
     This event is implemented under Windows only.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMouseCaptureChangedEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int winid=0, Window gainedCapture=None) -> MouseCaptureChangedEvent
 
         Constructor
         """
-        _core_.MouseCaptureChangedEvent_swiginit(self,_core_.new_MouseCaptureChangedEvent(*args, **kwargs))
+        newobj = _core_.new_MouseCaptureChangedEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetCapturedWindow(*args, **kwargs):
         """
         GetCapturedWindow(self) -> Window
@@ -6393,49 +6397,13 @@ class MouseCaptureChangedEvent(Event):
         """
         return _core_.MouseCaptureChangedEvent_GetCapturedWindow(*args, **kwargs)
 
-    CapturedWindow = property(GetCapturedWindow,doc="See `GetCapturedWindow`") 
-_core_.MouseCaptureChangedEvent_swigregister(MouseCaptureChangedEvent)
 
-#---------------------------------------------------------------------------
-
-class MouseCaptureLostEvent(Event):
-    """
-    A mouse capture lost event is sent to a window that obtained mouse
-    capture, which was subsequently loss due to "external" event, for
-    example when a dialog box is shown or if another application captures
-    the mouse.
-
-    If this happens, this event is sent to all windows that are on the
-    capture stack (i.e. a window that called `wx.Window.CaptureMouse`, but
-    didn't call `wx.Window.ReleaseMouse` yet). The event is *not* sent
-    if the capture changes because of a call to CaptureMouse or
-    ReleaseMouse.
-
-    This event is currently emitted under Windows only.
-
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, int winid=0) -> MouseCaptureLostEvent
-
-        A mouse capture lost event is sent to a window that obtained mouse
-        capture, which was subsequently loss due to "external" event, for
-        example when a dialog box is shown or if another application captures
-        the mouse.
-
-        If this happens, this event is sent to all windows that are on the
-        capture stack (i.e. a window that called `wx.Window.CaptureMouse`, but
-        didn't call `wx.Window.ReleaseMouse` yet). The event is *not* sent
-        if the capture changes because of a call to CaptureMouse or
-        ReleaseMouse.
-
-        This event is currently emitted under Windows only.
-
-        """
-        _core_.MouseCaptureLostEvent_swiginit(self,_core_.new_MouseCaptureLostEvent(*args, **kwargs))
-_core_.MouseCaptureLostEvent_swigregister(MouseCaptureLostEvent)
+class MouseCaptureChangedEventPtr(MouseCaptureChangedEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MouseCaptureChangedEvent
+_core_.MouseCaptureChangedEvent_swigregister(MouseCaptureChangedEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6446,12 +6414,21 @@ class DisplayChangedEvent(Event):
 
     This event is implemented under Windows only.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDisplayChangedEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> DisplayChangedEvent"""
-        _core_.DisplayChangedEvent_swiginit(self,_core_.new_DisplayChangedEvent(*args, **kwargs))
-_core_.DisplayChangedEvent_swigregister(DisplayChangedEvent)
+        newobj = _core_.new_DisplayChangedEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class DisplayChangedEventPtr(DisplayChangedEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DisplayChangedEvent
+_core_.DisplayChangedEvent_swigregister(DisplayChangedEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6463,9 +6440,9 @@ class PaletteChangedEvent(Event):
 
     This event is implemented under Windows only.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPaletteChangedEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int id=0) -> PaletteChangedEvent
 
@@ -6475,7 +6452,10 @@ class PaletteChangedEvent(Event):
 
         This event is implemented under Windows only.
         """
-        _core_.PaletteChangedEvent_swiginit(self,_core_.new_PaletteChangedEvent(*args, **kwargs))
+        newobj = _core_.new_PaletteChangedEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetChangedWindow(*args, **kwargs):
         """SetChangedWindow(self, Window win)"""
         return _core_.PaletteChangedEvent_SetChangedWindow(*args, **kwargs)
@@ -6484,8 +6464,13 @@ class PaletteChangedEvent(Event):
         """GetChangedWindow(self) -> Window"""
         return _core_.PaletteChangedEvent_GetChangedWindow(*args, **kwargs)
 
-    ChangedWindow = property(GetChangedWindow,SetChangedWindow,doc="See `GetChangedWindow` and `SetChangedWindow`") 
-_core_.PaletteChangedEvent_swigregister(PaletteChangedEvent)
+
+class PaletteChangedEventPtr(PaletteChangedEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PaletteChangedEvent
+_core_.PaletteChangedEvent_swigregister(PaletteChangedEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6496,15 +6481,18 @@ class QueryNewPaletteEvent(Event):
 
     This event is implemented under Windows only.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxQueryNewPaletteEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int winid=0) -> QueryNewPaletteEvent
 
         Constructor.
         """
-        _core_.QueryNewPaletteEvent_swiginit(self,_core_.new_QueryNewPaletteEvent(*args, **kwargs))
+        newobj = _core_.new_QueryNewPaletteEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetPaletteRealized(*args, **kwargs):
         """
         SetPaletteRealized(self, bool realized)
@@ -6517,8 +6505,13 @@ class QueryNewPaletteEvent(Event):
         """GetPaletteRealized(self) -> bool"""
         return _core_.QueryNewPaletteEvent_GetPaletteRealized(*args, **kwargs)
 
-    PaletteRealized = property(GetPaletteRealized,SetPaletteRealized,doc="See `GetPaletteRealized` and `SetPaletteRealized`") 
-_core_.QueryNewPaletteEvent_swigregister(QueryNewPaletteEvent)
+
+class QueryNewPaletteEventPtr(QueryNewPaletteEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = QueryNewPaletteEvent
+_core_.QueryNewPaletteEvent_swigregister(QueryNewPaletteEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6532,11 +6525,14 @@ class NavigationKeyEvent(Event):
     the focus in certain ways, although it's probably easier to just call
     `wx.Window.Navigate`.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNavigationKeyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> NavigationKeyEvent"""
-        _core_.NavigationKeyEvent_swiginit(self,_core_.new_NavigationKeyEvent(*args, **kwargs))
+        newobj = _core_.new_NavigationKeyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetDirection(*args, **kwargs):
         """
         GetDirection(self) -> bool
@@ -6625,9 +6621,13 @@ class NavigationKeyEvent(Event):
     IsForward = _core_.NavigationKeyEvent_IsForward
     WinChange = _core_.NavigationKeyEvent_WinChange
     FromTab = _core_.NavigationKeyEvent_FromTab
-    CurrentFocus = property(GetCurrentFocus,SetCurrentFocus,doc="See `GetCurrentFocus` and `SetCurrentFocus`") 
-    Direction = property(GetDirection,SetDirection,doc="See `GetDirection` and `SetDirection`") 
-_core_.NavigationKeyEvent_swigregister(NavigationKeyEvent)
+
+class NavigationKeyEventPtr(NavigationKeyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = NavigationKeyEvent
+_core_.NavigationKeyEvent_swigregister(NavigationKeyEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6636,16 +6636,19 @@ class WindowCreateEvent(CommandEvent):
     The EVT_WINDOW_CREATE event is sent as soon as the window object (the
     underlying GUI object) exists.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxWindowCreateEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window win=None) -> WindowCreateEvent
 
         The EVT_WINDOW_CREATE event is sent as soon as the window object (the
         underlying GUI object) exists.
         """
-        _core_.WindowCreateEvent_swiginit(self,_core_.new_WindowCreateEvent(*args, **kwargs))
+        newobj = _core_.new_WindowCreateEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetWindow(*args, **kwargs):
         """
         GetWindow(self) -> Window
@@ -6654,8 +6657,13 @@ class WindowCreateEvent(CommandEvent):
         """
         return _core_.WindowCreateEvent_GetWindow(*args, **kwargs)
 
-    Window = property(GetWindow,doc="See `GetWindow`") 
-_core_.WindowCreateEvent_swigregister(WindowCreateEvent)
+
+class WindowCreateEventPtr(WindowCreateEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = WindowCreateEvent
+_core_.WindowCreateEvent_swigregister(WindowCreateEventPtr)
 
 class WindowDestroyEvent(CommandEvent):
     """
@@ -6669,9 +6677,9 @@ class WindowDestroyEvent(CommandEvent):
     handle its own wx.WindowDestroyEvent, but it can be used to get
     notification of the destruction of another window.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxWindowDestroyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window win=None) -> WindowDestroyEvent
 
@@ -6685,7 +6693,10 @@ class WindowDestroyEvent(CommandEvent):
         handle its own wx.WindowDestroyEvent, but it can be used to get
         notification of the destruction of another window.
         """
-        _core_.WindowDestroyEvent_swiginit(self,_core_.new_WindowDestroyEvent(*args, **kwargs))
+        newobj = _core_.new_WindowDestroyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetWindow(*args, **kwargs):
         """
         GetWindow(self) -> Window
@@ -6694,8 +6705,13 @@ class WindowDestroyEvent(CommandEvent):
         """
         return _core_.WindowDestroyEvent_GetWindow(*args, **kwargs)
 
-    Window = property(GetWindow,doc="See `GetWindow`") 
-_core_.WindowDestroyEvent_swigregister(WindowDestroyEvent)
+
+class WindowDestroyEventPtr(WindowDestroyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = WindowDestroyEvent
+_core_.WindowDestroyEvent_swigregister(WindowDestroyEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6704,15 +6720,18 @@ class ContextMenuEvent(CommandEvent):
     This class is used for context menu events (EVT_CONTECT_MENU,) sent to
     give the application a chance to show a context (popup) menu.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxContextMenuEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0, Point pt=DefaultPosition) -> ContextMenuEvent
+        __init__(self, wxEventType type=wxEVT_NULL, int winid=0, Point pt=DefaultPosition) -> ContextMenuEvent
 
         Constructor.
         """
-        _core_.ContextMenuEvent_swiginit(self,_core_.new_ContextMenuEvent(*args, **kwargs))
+        newobj = _core_.new_ContextMenuEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetPosition(*args, **kwargs):
         """
         GetPosition(self) -> Point
@@ -6730,8 +6749,13 @@ class ContextMenuEvent(CommandEvent):
         """
         return _core_.ContextMenuEvent_SetPosition(*args, **kwargs)
 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-_core_.ContextMenuEvent_swigregister(ContextMenuEvent)
+
+class ContextMenuEventPtr(ContextMenuEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ContextMenuEvent
+_core_.ContextMenuEvent_swigregister(ContextMenuEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -6753,15 +6777,18 @@ class IdleEvent(Event):
     which should receive idle events.  Then idle events will only be sent
     to those windows and not to any others.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxIdleEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> IdleEvent
 
         Constructor
         """
-        _core_.IdleEvent_swiginit(self,_core_.new_IdleEvent(*args, **kwargs))
+        newobj = _core_.new_IdleEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def RequestMore(*args, **kwargs):
         """
         RequestMore(self, bool needMore=True)
@@ -6834,10 +6861,16 @@ class IdleEvent(Event):
         return _core_.IdleEvent_CanSend(*args, **kwargs)
 
     CanSend = staticmethod(CanSend)
-_core_.IdleEvent_swigregister(IdleEvent)
+
+class IdleEventPtr(IdleEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = IdleEvent
+_core_.IdleEvent_swigregister(IdleEventPtr)
 
 def IdleEvent_SetMode(*args, **kwargs):
-  """
+    """
     IdleEvent_SetMode(int mode)
 
     Static method for specifying how wxWidgets will send idle events: to
@@ -6854,20 +6887,20 @@ def IdleEvent_SetMode(*args, **kwargs):
         =========================   ========================================
 
     """
-  return _core_.IdleEvent_SetMode(*args, **kwargs)
+    return _core_.IdleEvent_SetMode(*args, **kwargs)
 
-def IdleEvent_GetMode(*args):
-  """
+def IdleEvent_GetMode(*args, **kwargs):
+    """
     IdleEvent_GetMode() -> int
 
     Static method returning a value specifying how wxWidgets will send
     idle events: to all windows, or only to those which specify that they
     will process the events.
     """
-  return _core_.IdleEvent_GetMode(*args)
+    return _core_.IdleEvent_GetMode(*args, **kwargs)
 
 def IdleEvent_CanSend(*args, **kwargs):
-  """
+    """
     IdleEvent_CanSend(Window win) -> bool
 
     Returns ``True`` if it is appropriate to send idle events to this
@@ -6880,32 +6913,7 @@ def IdleEvent_CanSend(*args, **kwargs):
     wx.IDLE_PROCESS_ALL. You can change the mode to only send idle events
     to windows with the wx.WS_EX_PROCESS_IDLE extra window style set.
     """
-  return _core_.IdleEvent_CanSend(*args, **kwargs)
-
-#---------------------------------------------------------------------------
-
-class ClipboardTextEvent(CommandEvent):
-    """
-    A Clipboard Text event is sent when a window intercepts a text
-    copy/cut/paste message, i.e. the user has cut/copied/pasted data
-    from/into a text control via ctrl-C/X/V, ctrl/shift-del/insert, a
-    popup menu command, etc.  NOTE : under windows these events are *NOT*
-    generated automatically for a Rich Edit text control.
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0) -> ClipboardTextEvent
-
-        A Clipboard Text event is sent when a window intercepts a text
-        copy/cut/paste message, i.e. the user has cut/copied/pasted data
-        from/into a text control via ctrl-C/X/V, ctrl/shift-del/insert, a
-        popup menu command, etc.  NOTE : under windows these events are *NOT*
-        generated automatically for a Rich Edit text control.
-        """
-        _core_.ClipboardTextEvent_swiginit(self,_core_.new_ClipboardTextEvent(*args, **kwargs))
-_core_.ClipboardTextEvent_swigregister(ClipboardTextEvent)
+    return _core_.IdleEvent_CanSend(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -6920,15 +6928,22 @@ class PyEvent(Event):
     :see: `wx.PyCommandEvent`
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, int winid=0, EventType eventType=wxEVT_NULL) -> PyEvent"""
-        _core_.PyEvent_swiginit(self,_core_.new_PyEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, int winid=0, wxEventType eventType=wxEVT_NULL) -> PyEvent"""
+        newobj = _core_.new_PyEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._SetSelf(self)
 
-    __swig_destroy__ = _core_.delete_PyEvent
-    __del__ = lambda self : None;
+    def __del__(self, destroy=_core_.delete_PyEvent):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def _SetSelf(*args, **kwargs):
         """_SetSelf(self, PyObject self)"""
         return _core_.PyEvent__SetSelf(*args, **kwargs)
@@ -6937,7 +6952,13 @@ class PyEvent(Event):
         """_GetSelf(self) -> PyObject"""
         return _core_.PyEvent__GetSelf(*args, **kwargs)
 
-_core_.PyEvent_swigregister(PyEvent)
+
+class PyEventPtr(PyEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyEvent
+_core_.PyEvent_swigregister(PyEventPtr)
 
 class PyCommandEvent(CommandEvent):
     """
@@ -6951,15 +6972,22 @@ class PyCommandEvent(CommandEvent):
     :see: `wx.PyEvent`
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventType eventType=wxEVT_NULL, int id=0) -> PyCommandEvent"""
-        _core_.PyCommandEvent_swiginit(self,_core_.new_PyCommandEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyCommandEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType eventType=wxEVT_NULL, int id=0) -> PyCommandEvent"""
+        newobj = _core_.new_PyCommandEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._SetSelf(self)
 
-    __swig_destroy__ = _core_.delete_PyCommandEvent
-    __del__ = lambda self : None;
+    def __del__(self, destroy=_core_.delete_PyCommandEvent):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def _SetSelf(*args, **kwargs):
         """_SetSelf(self, PyObject self)"""
         return _core_.PyCommandEvent__SetSelf(*args, **kwargs)
@@ -6968,7 +6996,13 @@ class PyCommandEvent(CommandEvent):
         """_GetSelf(self) -> PyObject"""
         return _core_.PyCommandEvent__GetSelf(*args, **kwargs)
 
-_core_.PyCommandEvent_swigregister(PyCommandEvent)
+
+class PyCommandEventPtr(PyCommandEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyCommandEvent
+_core_.PyCommandEvent_swigregister(PyCommandEventPtr)
 
 class DateEvent(CommandEvent):
     """
@@ -6977,11 +7011,14 @@ class DateEvent(CommandEvent):
     for `wx.calendar.CalendarEvent`.  Bind these event types with
     EVT_DATE_CHANGED.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, Window win, DateTime dt, EventType type) -> DateEvent"""
-        _core_.DateEvent_swiginit(self,_core_.new_DateEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDateEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, Window win, DateTime dt, wxEventType type) -> DateEvent"""
+        newobj = _core_.new_DateEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetDate(*args, **kwargs):
         """
         GetDate(self) -> DateTime
@@ -6999,30 +7036,16 @@ class DateEvent(CommandEvent):
         """
         return _core_.DateEvent_SetDate(*args, **kwargs)
 
-    Date = property(GetDate,SetDate,doc="See `GetDate` and `SetDate`") 
-_core_.DateEvent_swigregister(DateEvent)
+
+class DateEventPtr(DateEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DateEvent
+_core_.DateEvent_swigregister(DateEventPtr)
 
 wxEVT_DATE_CHANGED = _core_.wxEVT_DATE_CHANGED
 EVT_DATE_CHANGED = wx.PyEventBinder( wxEVT_DATE_CHANGED, 1 )
-
-class EventBlocker(EvtHandler):
-    """Helper class to temporarily disable event handling for a window."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window win, EventType type=wxEVT_ANY) -> EventBlocker
-
-        Helper class to temporarily disable event handling for a window.
-        """
-        _core_.EventBlocker_swiginit(self,_core_.new_EventBlocker(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_EventBlocker
-    __del__ = lambda self : None;
-    def Block(*args, **kwargs):
-        """Block(self, EventType type)"""
-        return _core_.EventBlocker_Block(*args, **kwargs)
-
-_core_.EventBlocker_swigregister(EventBlocker)
 
 #---------------------------------------------------------------------------
 
@@ -7037,21 +7060,29 @@ class PyApp(EvtHandler):
     The ``wx.PyApp`` class is an *implementation detail*, please use the
     `wx.App` class (or some other derived class) instead.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyApp instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PyApp
 
         Create a new application object, starting the bootstrap process.
         """
-        _core_.PyApp_swiginit(self,_core_.new_PyApp(*args, **kwargs))
-        self._setOORInfo(self, False);PyApp._setCallbackInfo(self, self, PyApp)
+        newobj = _core_.new_PyApp(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setCallbackInfo(self, PyApp, False)
+        self._setOORInfo(self, False)
 
-    __swig_destroy__ = _core_.delete_PyApp
-    __del__ = lambda self : None;
+    def __del__(self, destroy=_core_.delete_PyApp):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def _setCallbackInfo(*args, **kwargs):
-        """_setCallbackInfo(self, PyObject self, PyObject _class, bool incref=False)"""
+        """_setCallbackInfo(self, PyObject self, PyObject _class, bool incref)"""
         return _core_.PyApp__setCallbackInfo(*args, **kwargs)
 
     def GetAppName(*args, **kwargs):
@@ -7185,14 +7216,6 @@ class PyApp(EvtHandler):
         """
         return _core_.PyApp_Exit(*args, **kwargs)
 
-    def GetLayoutDirection(*args, **kwargs):
-        """
-        GetLayoutDirection(self) -> int
-
-        Return the layout direction for the current locale.
-        """
-        return _core_.PyApp_GetLayoutDirection(*args, **kwargs)
-
     def ExitMainLoop(*args, **kwargs):
         """
         ExitMainLoop(self)
@@ -7286,7 +7309,7 @@ class PyApp(EvtHandler):
 
     def SetUseBestVisual(*args, **kwargs):
         """
-        SetUseBestVisual(self, bool flag, bool forceTrueColour=False)
+        SetUseBestVisual(self, bool flag)
 
         Set whether the app should try to use the best available visual on
         systems where more than one is available, (Sun, SGI, XFree86 4, etc.)
@@ -7393,149 +7416,101 @@ class PyApp(EvtHandler):
         return _core_.PyApp_GetComCtl32Version(*args, **kwargs)
 
     GetComCtl32Version = staticmethod(GetComCtl32Version)
-    def IsDisplayAvailable(*args, **kwargs):
-        """
-        IsDisplayAvailable() -> bool
 
-        Tests if it is possible to create a GUI in the current environment.
-        This will mean different things on the different platforms.
+class PyAppPtr(PyApp):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyApp
+_core_.PyApp_swigregister(PyAppPtr)
 
-           * On X Windows systems this function will return ``False`` if it is
-             not able to open a connection to the X display, which can happen
-             if $DISPLAY is not set, or is not set correctly.
-
-           * On Mac OS X a ``False`` return value will mean that wx is not
-             able to access the window manager, which can happen if logged in
-             remotely or if running from the normal version of python instead
-             of the framework version, (i.e., pythonw.)
-
-           * On MS Windows...
-
-        """
-        return _core_.PyApp_IsDisplayAvailable(*args, **kwargs)
-
-    IsDisplayAvailable = staticmethod(IsDisplayAvailable)
-    AppName = property(GetAppName,SetAppName,doc="See `GetAppName` and `SetAppName`") 
-    AssertMode = property(GetAssertMode,SetAssertMode,doc="See `GetAssertMode` and `SetAssertMode`") 
-    ClassName = property(GetClassName,SetClassName,doc="See `GetClassName` and `SetClassName`") 
-    ExitOnFrameDelete = property(GetExitOnFrameDelete,SetExitOnFrameDelete,doc="See `GetExitOnFrameDelete` and `SetExitOnFrameDelete`") 
-    LayoutDirection = property(GetLayoutDirection,doc="See `GetLayoutDirection`") 
-    PrintMode = property(GetPrintMode,SetPrintMode,doc="See `GetPrintMode` and `SetPrintMode`") 
-    TopWindow = property(GetTopWindow,SetTopWindow,doc="See `GetTopWindow` and `SetTopWindow`") 
-    Traits = property(GetTraits,doc="See `GetTraits`") 
-    UseBestVisual = property(GetUseBestVisual,SetUseBestVisual,doc="See `GetUseBestVisual` and `SetUseBestVisual`") 
-    VendorName = property(GetVendorName,SetVendorName,doc="See `GetVendorName` and `SetVendorName`") 
-    Active = property(IsActive) 
-_core_.PyApp_swigregister(PyApp)
-
-def PyApp_IsMainLoopRunning(*args):
-  """
+def PyApp_IsMainLoopRunning(*args, **kwargs):
+    """
     PyApp_IsMainLoopRunning() -> bool
 
     Returns True if we're running the main loop, i.e. if the events can
     currently be dispatched.
     """
-  return _core_.PyApp_IsMainLoopRunning(*args)
+    return _core_.PyApp_IsMainLoopRunning(*args, **kwargs)
 
-def PyApp_GetMacSupportPCMenuShortcuts(*args):
-  """PyApp_GetMacSupportPCMenuShortcuts() -> bool"""
-  return _core_.PyApp_GetMacSupportPCMenuShortcuts(*args)
+def PyApp_GetMacSupportPCMenuShortcuts(*args, **kwargs):
+    """PyApp_GetMacSupportPCMenuShortcuts() -> bool"""
+    return _core_.PyApp_GetMacSupportPCMenuShortcuts(*args, **kwargs)
 
-def PyApp_GetMacAboutMenuItemId(*args):
-  """PyApp_GetMacAboutMenuItemId() -> long"""
-  return _core_.PyApp_GetMacAboutMenuItemId(*args)
+def PyApp_GetMacAboutMenuItemId(*args, **kwargs):
+    """PyApp_GetMacAboutMenuItemId() -> long"""
+    return _core_.PyApp_GetMacAboutMenuItemId(*args, **kwargs)
 
-def PyApp_GetMacPreferencesMenuItemId(*args):
-  """PyApp_GetMacPreferencesMenuItemId() -> long"""
-  return _core_.PyApp_GetMacPreferencesMenuItemId(*args)
+def PyApp_GetMacPreferencesMenuItemId(*args, **kwargs):
+    """PyApp_GetMacPreferencesMenuItemId() -> long"""
+    return _core_.PyApp_GetMacPreferencesMenuItemId(*args, **kwargs)
 
-def PyApp_GetMacExitMenuItemId(*args):
-  """PyApp_GetMacExitMenuItemId() -> long"""
-  return _core_.PyApp_GetMacExitMenuItemId(*args)
+def PyApp_GetMacExitMenuItemId(*args, **kwargs):
+    """PyApp_GetMacExitMenuItemId() -> long"""
+    return _core_.PyApp_GetMacExitMenuItemId(*args, **kwargs)
 
-def PyApp_GetMacHelpMenuTitleName(*args):
-  """PyApp_GetMacHelpMenuTitleName() -> String"""
-  return _core_.PyApp_GetMacHelpMenuTitleName(*args)
+def PyApp_GetMacHelpMenuTitleName(*args, **kwargs):
+    """PyApp_GetMacHelpMenuTitleName() -> String"""
+    return _core_.PyApp_GetMacHelpMenuTitleName(*args, **kwargs)
 
 def PyApp_SetMacSupportPCMenuShortcuts(*args, **kwargs):
-  """PyApp_SetMacSupportPCMenuShortcuts(bool val)"""
-  return _core_.PyApp_SetMacSupportPCMenuShortcuts(*args, **kwargs)
+    """PyApp_SetMacSupportPCMenuShortcuts(bool val)"""
+    return _core_.PyApp_SetMacSupportPCMenuShortcuts(*args, **kwargs)
 
 def PyApp_SetMacAboutMenuItemId(*args, **kwargs):
-  """PyApp_SetMacAboutMenuItemId(long val)"""
-  return _core_.PyApp_SetMacAboutMenuItemId(*args, **kwargs)
+    """PyApp_SetMacAboutMenuItemId(long val)"""
+    return _core_.PyApp_SetMacAboutMenuItemId(*args, **kwargs)
 
 def PyApp_SetMacPreferencesMenuItemId(*args, **kwargs):
-  """PyApp_SetMacPreferencesMenuItemId(long val)"""
-  return _core_.PyApp_SetMacPreferencesMenuItemId(*args, **kwargs)
+    """PyApp_SetMacPreferencesMenuItemId(long val)"""
+    return _core_.PyApp_SetMacPreferencesMenuItemId(*args, **kwargs)
 
 def PyApp_SetMacExitMenuItemId(*args, **kwargs):
-  """PyApp_SetMacExitMenuItemId(long val)"""
-  return _core_.PyApp_SetMacExitMenuItemId(*args, **kwargs)
+    """PyApp_SetMacExitMenuItemId(long val)"""
+    return _core_.PyApp_SetMacExitMenuItemId(*args, **kwargs)
 
 def PyApp_SetMacHelpMenuTitleName(*args, **kwargs):
-  """PyApp_SetMacHelpMenuTitleName(String val)"""
-  return _core_.PyApp_SetMacHelpMenuTitleName(*args, **kwargs)
+    """PyApp_SetMacHelpMenuTitleName(String val)"""
+    return _core_.PyApp_SetMacHelpMenuTitleName(*args, **kwargs)
 
-def PyApp_GetComCtl32Version(*args):
-  """
+def PyApp_GetComCtl32Version(*args, **kwargs):
+    """
     PyApp_GetComCtl32Version() -> int
 
     Returns 400, 470, 471, etc. for comctl32.dll 4.00, 4.70, 4.71 or 0 if
     it wasn't found at all.  Raises an exception on non-Windows platforms.
     """
-  return _core_.PyApp_GetComCtl32Version(*args)
-
-def PyApp_IsDisplayAvailable(*args):
-  """
-    PyApp_IsDisplayAvailable() -> bool
-
-    Tests if it is possible to create a GUI in the current environment.
-    This will mean different things on the different platforms.
-
-       * On X Windows systems this function will return ``False`` if it is
-         not able to open a connection to the X display, which can happen
-         if $DISPLAY is not set, or is not set correctly.
-
-       * On Mac OS X a ``False`` return value will mean that wx is not
-         able to access the window manager, which can happen if logged in
-         remotely or if running from the normal version of python instead
-         of the framework version, (i.e., pythonw.)
-
-       * On MS Windows...
-
-    """
-  return _core_.PyApp_IsDisplayAvailable(*args)
+    return _core_.PyApp_GetComCtl32Version(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 
-def Exit(*args):
-  """
+def Exit(*args, **kwargs):
+    """
     Exit()
 
     Force an exit of the application.  Convenience for wx.GetApp().Exit()
     """
-  return _core_.Exit(*args)
+    return _core_.Exit(*args, **kwargs)
 
-def Yield(*args):
-  """
+def Yield(*args, **kwargs):
+    """
     Yield() -> bool
 
     Yield to other apps/messages.  Convenience for wx.GetApp().Yield()
     """
-  return _core_.Yield(*args)
+    return _core_.Yield(*args, **kwargs)
 
-def YieldIfNeeded(*args):
-  """
+def YieldIfNeeded(*args, **kwargs):
+    """
     YieldIfNeeded() -> bool
 
     Yield to other apps/messages.  Convenience for wx.GetApp().Yield(True)
     """
-  return _core_.YieldIfNeeded(*args)
+    return _core_.YieldIfNeeded(*args, **kwargs)
 
 def SafeYield(*args, **kwargs):
-  """
+    """
     SafeYield(Window win=None, bool onlyIfNeeded=False) -> bool
 
     This function is similar to `wx.Yield`, except that it disables the
@@ -7546,45 +7521,45 @@ def SafeYield(*args, **kwargs):
 
     :Returns: the result of the call to `wx.Yield`.
     """
-  return _core_.SafeYield(*args, **kwargs)
+    return _core_.SafeYield(*args, **kwargs)
 
-def WakeUpIdle(*args):
-  """
+def WakeUpIdle(*args, **kwargs):
+    """
     WakeUpIdle()
 
     Cause the message queue to become empty again, so idle events will be
     sent.
     """
-  return _core_.WakeUpIdle(*args)
+    return _core_.WakeUpIdle(*args, **kwargs)
 
 def PostEvent(*args, **kwargs):
-  """
+    """
     PostEvent(EvtHandler dest, Event event)
 
     Send an event to a window or other wx.EvtHandler to be processed
     later.
     """
-  return _core_.PostEvent(*args, **kwargs)
+    return _core_.PostEvent(*args, **kwargs)
 
-def App_CleanUp(*args):
-  """
+def App_CleanUp(*args, **kwargs):
+    """
     App_CleanUp()
 
     For internal use only, it is used to cleanup after wxWidgets when
     Python shuts down.
     """
-  return _core_.App_CleanUp(*args)
+    return _core_.App_CleanUp(*args, **kwargs)
 
-def GetApp(*args):
-  """
+def GetApp(*args, **kwargs):
+    """
     GetApp() -> PyApp
 
     Return a reference to the current wx.App object.
     """
-  return _core_.GetApp(*args)
+    return _core_.GetApp(*args, **kwargs)
 
 def SetDefaultPyEncoding(*args, **kwargs):
-  """
+    """
     SetDefaultPyEncoding(string encoding)
 
     Sets the encoding that wxPython will use when it needs to convert a
@@ -7596,16 +7571,16 @@ def SetDefaultPyEncoding(*args, **kwargs):
     see http://www.alanwood.net/demos/charsetdiffs.html for differences
     between the common latin/roman encodings.
     """
-  return _core_.SetDefaultPyEncoding(*args, **kwargs)
+    return _core_.SetDefaultPyEncoding(*args, **kwargs)
 
-def GetDefaultPyEncoding(*args):
-  """
+def GetDefaultPyEncoding(*args, **kwargs):
+    """
     GetDefaultPyEncoding() -> string
 
     Gets the current encoding that wxPython will use when it needs to
     convert a Python string or unicode object to or from a wxString.
     """
-  return _core_.GetDefaultPyEncoding(*args)
+    return _core_.GetDefaultPyEncoding(*args, **kwargs)
 #----------------------------------------------------------------------
 
 class PyOnDemandOutputWindow:
@@ -7634,7 +7609,7 @@ class PyOnDemandOutputWindow:
                                  style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.AppendText(st)
         self.frame.Show(True)
-        self.frame.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        EVT_CLOSE(self.frame, self.OnCloseWindow)
         
 
     def OnCloseWindow(self, event):
@@ -7676,7 +7651,7 @@ class PyOnDemandOutputWindow:
 #----------------------------------------------------------------------
 
 _defRedirect = (wx.Platform == '__WXMSW__' or wx.Platform == '__WXMAC__')
-        
+
 class App(wx.PyApp):
     """
     The ``wx.App`` class represents the application and is used to:
@@ -7734,26 +7709,22 @@ class App(wx.PyApp):
             initialization to ensure that the system, toolkit and
             wxWidgets are fully initialized.
         """
-        
         wx.PyApp.__init__(self)
 
-        # make sure we can create a GUI
-        if not self.IsDisplayAvailable():
-            
-            if wx.Platform == "__WXMAC__":
-                msg = """This program needs access to the screen.
-Please run with 'pythonw', not 'python', and only when you are logged
-in on the main display of your Mac."""
-                
-            elif wx.Platform == "__WXGTK__":
-                msg ="Unable to access the X Display, is $DISPLAY set properly?"
+        if wx.Platform == "__WXMAC__":
+            try:
+                import MacOS
+                if not MacOS.WMAvailable():
+                    print """\
+This program needs access to the screen. Please run with 'pythonw',
+not 'python', and only when you are logged in on the main display of
+your Mac."""
+                    _sys.exit(1)
+            except SystemExit:
+                raise
+            except:
+                pass
 
-            else:
-                msg = "Unable to create GUI"
-                # TODO: more description is needed for wxMSW...
-
-            raise SystemExit(msg)
-        
         # This has to be done before OnInit
         self.SetUseBestVisual(useBestVisual)
 
@@ -7779,30 +7750,18 @@ in on the main display of your Mac."""
         # Use Python's install prefix as the default  
         wx.StandardPaths.Get().SetInstallPrefix(_sys.prefix)
 
-        # Until the new native control for wxMac is up to par, still use the generic one.
-        wx.SystemOptions.SetOptionInt("mac.listctrl.always_use_generic", 1)
-
         # This finishes the initialization of wxWindows and then calls
         # the OnInit that should be present in the derived class
         self._BootstrapApp()
 
-
-    def OnPreInit(self):
-        """
-        Things that must be done after _BootstrapApp has done its
-        thing, but would be nice if they were already done by the time
-        that OnInit is called.
-        """
-        wx.StockGDI._initStockObjects()
-        
 
     def __del__(self, destroy=wx.PyApp.__del__):
         self.RestoreStdio()  # Just in case the MainLoop was overridden
         destroy(self)
 
     def Destroy(self):
-        self.this.own(False)
         wx.PyApp.Destroy(self)
+        self.thisown = 0
 
     def SetTopWindow(self, frame):
         """Set the \"main\" top level window"""
@@ -7931,13 +7890,20 @@ _sys.__wxPythonCleanup = __wxPyCleanup()
 
 class EventLoop(object):
     """Proxy of C++ EventLoop class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxEventLoop instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> EventLoop"""
-        _core_.EventLoop_swiginit(self,_core_.new_EventLoop(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_EventLoop
-    __del__ = lambda self : None;
+        newobj = _core_.new_EventLoop(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_EventLoop):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Run(*args, **kwargs):
         """Run(self) -> int"""
         return _core_.EventLoop_Run(*args, **kwargs)
@@ -7968,34 +7934,24 @@ class EventLoop(object):
         return _core_.EventLoop_SetActive(*args, **kwargs)
 
     SetActive = staticmethod(SetActive)
-_core_.EventLoop_swigregister(EventLoop)
 
-def EventLoop_GetActive(*args):
-  """EventLoop_GetActive() -> EventLoop"""
-  return _core_.EventLoop_GetActive(*args)
+class EventLoopPtr(EventLoop):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = EventLoop
+_core_.EventLoop_swigregister(EventLoopPtr)
+
+def EventLoop_GetActive(*args, **kwargs):
+    """EventLoop_GetActive() -> EventLoop"""
+    return _core_.EventLoop_GetActive(*args, **kwargs)
 
 def EventLoop_SetActive(*args, **kwargs):
-  """EventLoop_SetActive(EventLoop loop)"""
-  return _core_.EventLoop_SetActive(*args, **kwargs)
-
-class EventLoopActivator(object):
-    """Proxy of C++ EventLoopActivator class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventLoop evtLoop) -> EventLoopActivator"""
-        _core_.EventLoopActivator_swiginit(self,_core_.new_EventLoopActivator(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_EventLoopActivator
-    __del__ = lambda self : None;
-_core_.EventLoopActivator_swigregister(EventLoopActivator)
+    """EventLoop_SetActive(EventLoop loop)"""
+    return _core_.EventLoop_SetActive(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
-ACCEL_ALT = _core_.ACCEL_ALT
-ACCEL_CTRL = _core_.ACCEL_CTRL
-ACCEL_SHIFT = _core_.ACCEL_SHIFT
-ACCEL_NORMAL = _core_.ACCEL_NORMAL
-ACCEL_CMD = _core_.ACCEL_CMD
 class AcceleratorEntry(object):
     """
     A class used to define items in an `wx.AcceleratorTable`.  wxPython
@@ -8005,17 +7961,24 @@ class AcceleratorEntry(object):
 
     :see: `wx.AcceleratorTable`
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxAcceleratorEntry instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int flags=0, int keyCode=0, int cmdID=0) -> AcceleratorEntry
 
         Construct a wx.AcceleratorEntry.
         """
-        _core_.AcceleratorEntry_swiginit(self,_core_.new_AcceleratorEntry(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_AcceleratorEntry
-    __del__ = lambda self : None;
+        newobj = _core_.new_AcceleratorEntry(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_AcceleratorEntry):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Set(*args, **kwargs):
         """
         Set(self, int flags, int keyCode, int cmd)
@@ -8025,16 +7988,6 @@ class AcceleratorEntry(object):
         """
         return _core_.AcceleratorEntry_Set(*args, **kwargs)
 
-    def Create(*args, **kwargs):
-        """
-        Create(String str) -> AcceleratorEntry
-
-        Create accelerator corresponding to the specified string, or None if
-        it coulnd't be parsed.
-        """
-        return _core_.AcceleratorEntry_Create(*args, **kwargs)
-
-    Create = staticmethod(Create)
     def GetFlags(*args, **kwargs):
         """
         GetFlags(self) -> int
@@ -8059,42 +8012,13 @@ class AcceleratorEntry(object):
         """
         return _core_.AcceleratorEntry_GetCommand(*args, **kwargs)
 
-    def IsOk(*args, **kwargs):
-        """IsOk(self) -> bool"""
-        return _core_.AcceleratorEntry_IsOk(*args, **kwargs)
 
-    def ToString(*args, **kwargs):
-        """
-        ToString(self) -> String
-
-        Returns a string representation for the this accelerator.  The string
-        is formatted using the <flags>-<keycode> format where <flags> maybe a
-        hyphen-separed list of "shift|alt|ctrl"
-
-        """
-        return _core_.AcceleratorEntry_ToString(*args, **kwargs)
-
-    def FromString(*args, **kwargs):
-        """
-        FromString(self, String str) -> bool
-
-        Returns true if the given string correctly initialized this object.
-        """
-        return _core_.AcceleratorEntry_FromString(*args, **kwargs)
-
-    Command = property(GetCommand,doc="See `GetCommand`") 
-    Flags = property(GetFlags,doc="See `GetFlags`") 
-    KeyCode = property(GetKeyCode,doc="See `GetKeyCode`") 
-_core_.AcceleratorEntry_swigregister(AcceleratorEntry)
-
-def AcceleratorEntry_Create(*args, **kwargs):
-  """
-    AcceleratorEntry_Create(String str) -> AcceleratorEntry
-
-    Create accelerator corresponding to the specified string, or None if
-    it coulnd't be parsed.
-    """
-  return _core_.AcceleratorEntry_Create(*args, **kwargs)
+class AcceleratorEntryPtr(AcceleratorEntry):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = AcceleratorEntry
+_core_.AcceleratorEntry_swigregister(AcceleratorEntryPtr)
 
 class AcceleratorTable(Object):
     """
@@ -8103,9 +8027,9 @@ class AcceleratorTable(Object):
     button commands are supported; on GTK, only menu commands are
     supported.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxAcceleratorTable instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(entries) -> AcceleratorTable
 
@@ -8114,39 +8038,64 @@ class AcceleratorTable(Object):
 
         :see: `wx.AcceleratorEntry`
         """
-        _core_.AcceleratorTable_swiginit(self,_core_.new_AcceleratorTable(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_AcceleratorTable
-    __del__ = lambda self : None;
-    def IsOk(*args, **kwargs):
-        """IsOk(self) -> bool"""
-        return _core_.AcceleratorTable_IsOk(*args, **kwargs)
+        newobj = _core_.new_AcceleratorTable(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_AcceleratorTable):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
 
-    Ok = IsOk 
-_core_.AcceleratorTable_swigregister(AcceleratorTable)
+    def Ok(*args, **kwargs):
+        """Ok(self) -> bool"""
+        return _core_.AcceleratorTable_Ok(*args, **kwargs)
+
+
+class AcceleratorTablePtr(AcceleratorTable):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = AcceleratorTable
+_core_.AcceleratorTable_swigregister(AcceleratorTablePtr)
 
 
 def GetAccelFromString(*args, **kwargs):
-  """GetAccelFromString(String label) -> AcceleratorEntry"""
-  return _core_.GetAccelFromString(*args, **kwargs)
+    """GetAccelFromString(String label) -> AcceleratorEntry"""
+    return _core_.GetAccelFromString(*args, **kwargs)
 #---------------------------------------------------------------------------
 
 class VisualAttributes(object):
     """struct containing all the visual attributes of a control"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxVisualAttributes instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> VisualAttributes
 
         struct containing all the visual attributes of a control
         """
-        _core_.VisualAttributes_swiginit(self,_core_.new_VisualAttributes(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_VisualAttributes
-    __del__ = lambda self : None;
+        newobj = _core_.new_VisualAttributes(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_core_.delete_VisualAttributes):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     font = property(_core_.VisualAttributes_font_get, _core_.VisualAttributes_font_set)
     colFg = property(_core_.VisualAttributes_colFg_get, _core_.VisualAttributes_colFg_set)
     colBg = property(_core_.VisualAttributes_colBg_get, _core_.VisualAttributes_colBg_set)
-_core_.VisualAttributes_swigregister(VisualAttributes)
+
+class VisualAttributesPtr(VisualAttributes):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = VisualAttributes
+_core_.VisualAttributes_swigregister(VisualAttributesPtr)
 NullAcceleratorTable = cvar.NullAcceleratorTable
 PanelNameStr = cvar.PanelNameStr
 
@@ -8163,16 +8112,19 @@ class Window(EvtHandler):
     appear on screen themselves.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, String name=PanelNameStr) -> Window
 
         Construct and show a generic Window.
         """
-        _core_.Window_swiginit(self,_core_.new_Window(*args, **kwargs))
+        newobj = _core_.new_Window(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -8208,7 +8160,6 @@ class Window(EvtHandler):
         Returns True if the window has either been successfully deleted, or it
         has been added to the list of windows pending real deletion.
         """
-        args[0].this.own(False)
         return _core_.Window_Destroy(*args, **kwargs)
 
     def DestroyChildren(*args, **kwargs):
@@ -8227,6 +8178,22 @@ class Window(EvtHandler):
         Is the window in the process of being deleted?
         """
         return _core_.Window_IsBeingDeleted(*args, **kwargs)
+
+    def SetTitle(*args, **kwargs):
+        """
+        SetTitle(self, String title)
+
+        Sets the window's title. Applicable only to frames and dialogs.
+        """
+        return _core_.Window_SetTitle(*args, **kwargs)
+
+    def GetTitle(*args, **kwargs):
+        """
+        GetTitle(self) -> String
+
+        Gets the window's title. Applicable only to frames and dialogs.
+        """
+        return _core_.Window_GetTitle(*args, **kwargs)
 
     def SetLabel(*args, **kwargs):
         """
@@ -8332,32 +8299,6 @@ class Window(EvtHandler):
         return _core_.Window_PrevControlId(*args, **kwargs)
 
     PrevControlId = staticmethod(PrevControlId)
-    def GetLayoutDirection(*args, **kwargs):
-        """
-        GetLayoutDirection(self) -> int
-
-        Get the layout direction (LTR or RTL) for this window.  Returns
-        ``wx.Layout_Default`` if layout direction is not supported.
-        """
-        return _core_.Window_GetLayoutDirection(*args, **kwargs)
-
-    def SetLayoutDirection(*args, **kwargs):
-        """
-        SetLayoutDirection(self, int dir)
-
-        Set the layout direction (LTR or RTL) for this window.
-        """
-        return _core_.Window_SetLayoutDirection(*args, **kwargs)
-
-    def AdjustForLayoutDirection(*args, **kwargs):
-        """
-        AdjustForLayoutDirection(self, int x, int width, int widthTotal) -> int
-
-        Mirror coordinates for RTL layout if this window uses it and if the
-        mirroring is not done automatically like Win32.
-        """
-        return _core_.Window_AdjustForLayoutDirection(*args, **kwargs)
-
     def SetSize(*args, **kwargs):
         """
         SetSize(self, Size size)
@@ -8420,22 +8361,21 @@ class Window(EvtHandler):
         """
         return _core_.Window_MoveXY(*args, **kwargs)
 
-    def SetInitialSize(*args, **kwargs):
+    def SetBestFittingSize(*args, **kwargs):
         """
-        SetInitialSize(self, Size size=DefaultSize)
+        SetBestFittingSize(self, Size size=DefaultSize)
 
         A 'Smart' SetSize that will fill in default size components with the
         window's *best size* values.  Also set's the minsize for use with sizers.
         """
-        return _core_.Window_SetInitialSize(*args, **kwargs)
+        return _core_.Window_SetBestFittingSize(*args, **kwargs)
 
-    SetBestFittingSize = wx._deprecated(SetInitialSize, 'Use `SetInitialSize`') 
     def Raise(*args, **kwargs):
         """
         Raise(self)
 
         Raises the window to the top of the window hierarchy.  In current
-        version of wxWidgets this works both for managed and child windows.
+        version of wxWidgets this works both for manage and child windows.
         """
         return _core_.Window_Raise(*args, **kwargs)
 
@@ -8444,7 +8384,7 @@ class Window(EvtHandler):
         Lower(self)
 
         Lowers the window to the bottom of the window hierarchy.  In current
-        version of wxWidgets this works both for managed and child windows.
+        version of wxWidgets this works both for manage and child windows.
         """
         return _core_.Window_Lower(*args, **kwargs)
 
@@ -8488,10 +8428,7 @@ class Window(EvtHandler):
         """
         GetPosition(self) -> Point
 
-        Get the window's position.  Notice that the position is in client
-        coordinates for child windows and screen coordinates for the top level
-        ones, use `GetScreenPosition` if you need screen coordinates for all
-        kinds of windows.
+        Get the window's position.
         """
         return _core_.Window_GetPosition(*args, **kwargs)
 
@@ -8499,37 +8436,9 @@ class Window(EvtHandler):
         """
         GetPositionTuple() -> (x,y)
 
-        Get the window's position.  Notice that the position is in client
-        coordinates for child windows and screen coordinates for the top level
-        ones, use `GetScreenPosition` if you need screen coordinates for all
-        kinds of windows.
+        Get the window's position.
         """
         return _core_.Window_GetPositionTuple(*args, **kwargs)
-
-    def GetScreenPosition(*args, **kwargs):
-        """
-        GetScreenPosition(self) -> Point
-
-        Get the position of the window in screen coordinantes.
-        """
-        return _core_.Window_GetScreenPosition(*args, **kwargs)
-
-    def GetScreenPositionTuple(*args, **kwargs):
-        """
-        GetScreenPositionTuple() -> (x,y)
-
-        Get the position of the window in screen coordinantes.
-        """
-        return _core_.Window_GetScreenPositionTuple(*args, **kwargs)
-
-    def GetScreenRect(*args, **kwargs):
-        """
-        GetScreenRect(self) -> Rect
-
-        Returns the size and position of the window in screen coordinantes as
-        a `wx.Rect` object.
-        """
-        return _core_.Window_GetScreenRect(*args, **kwargs)
 
     def GetSize(*args, **kwargs):
         """
@@ -8551,7 +8460,7 @@ class Window(EvtHandler):
         """
         GetRect(self) -> Rect
 
-        Returns the size and position of the window as a `wx.Rect` object.
+        Returns the size and position of the window as a wx.Rect object.
         """
         return _core_.Window_GetRect(*args, **kwargs)
 
@@ -8637,23 +8546,29 @@ class Window(EvtHandler):
         """
         return _core_.Window_CacheBestSize(*args, **kwargs)
 
-    def GetEffectiveMinSize(*args, **kwargs):
+    def GetBestFittingSize(*args, **kwargs):
         """
-        GetEffectiveMinSize(self) -> Size
+        GetBestFittingSize(self) -> Size
 
         This function will merge the window's best size into the window's
         minimum size, giving priority to the min size components, and returns
         the results.
 
         """
-        return _core_.Window_GetEffectiveMinSize(*args, **kwargs)
+        return _core_.Window_GetBestFittingSize(*args, **kwargs)
 
-    GetBestFittingSize = wx._deprecated(GetEffectiveMinSize, 'Use `GetEffectiveMinSize` instead.') 
-    def GetAdjustedBestSize(self):
-        s = self.GetBestSize()
-        return wx.Size(max(s.width,  self.GetMinWidth()),
-                       max(s.height, self.GetMinHeight()))
-    GetAdjustedBestSize = wx._deprecated(GetAdjustedBestSize, 'Use `GetEffectiveMinSize` instead.')
+    def GetAdjustedBestSize(*args, **kwargs):
+        """
+        GetAdjustedBestSize(self) -> Size
+
+        This method is similar to GetBestSize, except in one
+        thing. GetBestSize should return the minimum untruncated size of the
+        window, while this method will return the largest of BestSize and any
+        user specified minimum size. ie. it is the minimum size the window
+        should currently be drawn at, not the minimal size it can possibly
+        tolerate.
+        """
+        return _core_.Window_GetAdjustedBestSize(*args, **kwargs)
 
     def Center(*args, **kwargs):
         """
@@ -8669,6 +8584,16 @@ class Window(EvtHandler):
         return _core_.Window_Center(*args, **kwargs)
 
     Centre = Center 
+    def CenterOnScreen(*args, **kwargs):
+        """
+        CenterOnScreen(self, int dir=BOTH)
+
+        Center on screen (only works for top level windows)
+        """
+        return _core_.Window_CenterOnScreen(*args, **kwargs)
+
+    CenterOnScreen = wx._deprecated(CenterOnScreen) 
+    CentreOnScreen = CenterOnScreen 
     def CenterOnParent(*args, **kwargs):
         """
         CenterOnParent(self, int dir=BOTH)
@@ -8839,14 +8764,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_GetVirtualSizeTuple(*args, **kwargs)
 
-    def GetWindowBorderSize(*args, **kwargs):
-        """
-        GetWindowBorderSize(self) -> Size
-
-        Return the size of the left/right and top/bottom borders.
-        """
-        return _core_.Window_GetWindowBorderSize(*args, **kwargs)
-
     def GetBestVirtualSize(*args, **kwargs):
         """
         GetBestVirtualSize(self) -> Size
@@ -8912,16 +8829,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_IsEnabled(*args, **kwargs)
 
-    def IsShownOnScreen(*args, **kwargs):
-        """
-        IsShownOnScreen(self) -> bool
-
-        Returns ``True`` if the window is physically visible on the screen,
-        i.e. it is shown and all its parents up to the toplevel window are
-        shown as well.
-        """
-        return _core_.Window_IsShownOnScreen(*args, **kwargs)
-
     def SetWindowStyleFlag(*args, **kwargs):
         """
         SetWindowStyleFlag(self, long style)
@@ -8959,15 +8866,6 @@ class Window(EvtHandler):
         windows are only available on X platforms.
         """
         return _core_.Window_IsRetained(*args, **kwargs)
-
-    def ToggleWindowStyle(*args, **kwargs):
-        """
-        ToggleWindowStyle(self, int flag) -> bool
-
-        Turn the flag on if it had been turned off before and vice versa,
-        returns True if the flag is turned on by this function call.
-        """
-        return _core_.Window_ToggleWindowStyle(*args, **kwargs)
 
     def SetExtraStyle(*args, **kwargs):
         """
@@ -9065,6 +8963,31 @@ class Window(EvtHandler):
         it.
         """
         return _core_.Window_AcceptsFocusFromKeyboard(*args, **kwargs)
+
+    def GetDefaultItem(*args, **kwargs):
+        """
+        GetDefaultItem(self) -> Window
+
+        Get the default child of this parent, i.e. the one which is activated
+        by pressing <Enter> such as the OK button on a wx.Dialog.
+        """
+        return _core_.Window_GetDefaultItem(*args, **kwargs)
+
+    def SetDefaultItem(*args, **kwargs):
+        """
+        SetDefaultItem(self, Window child) -> Window
+
+        Set this child as default, return the old default.
+        """
+        return _core_.Window_SetDefaultItem(*args, **kwargs)
+
+    def SetTmpDefaultItem(*args, **kwargs):
+        """
+        SetTmpDefaultItem(self, Window win)
+
+        Set this child as temporary default
+        """
+        return _core_.Window_SetTmpDefaultItem(*args, **kwargs)
 
     def Navigate(*args, **kwargs):
         """
@@ -9168,14 +9091,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_RemoveChild(*args, **kwargs)
 
-    def SetDoubleBuffered(*args, **kwargs):
-        """
-        SetDoubleBuffered(self, bool on)
-
-        Currently wxGTK2 only.
-        """
-        return _core_.Window_SetDoubleBuffered(*args, **kwargs)
-
     def FindWindowById(*args, **kwargs):
         """
         FindWindowById(self, long winid) -> Window
@@ -9206,16 +9121,14 @@ class Window(EvtHandler):
         SetEventHandler(self, EvtHandler handler)
 
         Sets the event handler for this window.  An event handler is an object
-        that is capable of processing the events sent to a window.  (In other
-        words, is able to dispatch the events to handler function.)  By
-        default, the window is its own event handler, but an application may
-        wish to substitute another, for example to allow central
-        implementation of event-handling for a variety of different window
-        classes.
+        that is capable of processing the events sent to a window. By default,
+        the window is its own event handler, but an application may wish to
+        substitute another, for example to allow central implementation of
+        event-handling for a variety of different window classes.
 
         It is usually better to use `wx.Window.PushEventHandler` since this sets
         up a chain of event handlers, where an event not handled by one event
-        handler is handed off to the next one in the chain.
+        handler is handed to the next one in the chain.
         """
         return _core_.Window_SetEventHandler(*args, **kwargs)
 
@@ -9225,19 +9138,15 @@ class Window(EvtHandler):
 
         Pushes this event handler onto the event handler stack for the window.
         An event handler is an object that is capable of processing the events
-        sent to a window.  (In other words, is able to dispatch the events to
-        handler function.)  By default, the window is its own event handler,
-        but an application may wish to substitute another, for example to
-        allow central implementation of event-handling for a variety of
-        different window classes.
+        sent to a window. By default, the window is its own event handler, but
+        an application may wish to substitute another, for example to allow
+        central implementation of event-handling for a variety of different
+        window classes.
 
         wx.Window.PushEventHandler allows an application to set up a chain of
         event handlers, where an event not handled by one event handler is
-        handed to the next one in the chain.  Use `wx.Window.PopEventHandler`
-        to remove the event handler.  Ownership of the handler is *not* given
-        to the window, so you should be sure to pop the handler before the
-        window is destroyed and either let PopEventHandler destroy it, or call
-        its Destroy method yourself.
+        handed to the next one in the chain. Use `wx.Window.PopEventHandler` to
+        remove the event handler.
         """
         return _core_.Window_PushEventHandler(*args, **kwargs)
 
@@ -9247,7 +9156,7 @@ class Window(EvtHandler):
 
         Removes and returns the top-most event handler on the event handler
         stack.  If deleteHandler is True then the wx.EvtHandler object will be
-        destroyed after it is popped, and ``None`` will be returned instead.
+        destroyed after it is popped.
         """
         return _core_.Window_PopEventHandler(*args, **kwargs)
 
@@ -9256,7 +9165,7 @@ class Window(EvtHandler):
         RemoveEventHandler(self, EvtHandler handler) -> bool
 
         Find the given handler in the event handler chain and remove (but not
-        delete) it from the event handler chain, returns True if it was found
+        delete) it from the event handler chain, return True if it was found
         and False otherwise (this also results in an assert failure so this
         function should only be called when the handler is supposed to be
         there.)
@@ -9444,13 +9353,7 @@ class Window(EvtHandler):
         mouse and when the mouse is released the capture returns to the window
         which had had captured it previously and it is only really released if
         there were no previous window. In particular, this means that you must
-        release the mouse as many times as you capture it, unless the window
-        receives the `wx.MouseCaptureLostEvent` event.
-         
-        Any application which captures the mouse in the beginning of some
-        operation *must* handle `wx.MouseCaptureLostEvent` and cancel this
-        operation when it receives the event. The event handler must not
-        recapture mouse.
+        release the mouse as many times as you capture it.
         """
         return _core_.Window_CaptureMouse(*args, **kwargs)
 
@@ -9506,7 +9409,7 @@ class Window(EvtHandler):
         window instead of waiting for the EVT_PAINT event to happen, (normally
         this would usually only happen when the flow of control returns to the
         event loop.)  Notice that this function doesn't refresh the window and
-        does nothing if the window has been already repainted.  Use `Refresh`
+        does nothing if the window has been already repainted.  Use Refresh
         first if you want to immediately redraw the window (or some portion of
         it) unconditionally.
         """
@@ -9539,16 +9442,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_Freeze(*args, **kwargs)
 
-    def IsFrozen(*args, **kwargs):
-        """
-        IsFrozen(self) -> bool
-
-        Returns ``True`` if the window has been frozen and not thawed yet.
-
-        :see: `Freeze` and `Thaw`
-        """
-        return _core_.Window_IsFrozen(*args, **kwargs)
-
     def Thaw(*args, **kwargs):
         """
         Thaw(self)
@@ -9568,17 +9461,6 @@ class Window(EvtHandler):
         scroll position.
         """
         return _core_.Window_PrepareDC(*args, **kwargs)
-
-    def IsDoubleBuffered(*args, **kwargs):
-        """
-        IsDoubleBuffered(self) -> bool
-
-        Returns ``True`` if the window contents is double-buffered by the
-        system, i.e. if any drawing done on the window is really done on a
-        temporary backing surface and transferred to the screen all at once
-        later.
-        """
-        return _core_.Window_IsDoubleBuffered(*args, **kwargs)
 
     def GetUpdateRegion(*args, **kwargs):
         """
@@ -9962,10 +9844,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_PopupMenu(*args, **kwargs)
 
-    def HasMultiplePages(*args, **kwargs):
-        """HasMultiplePages(self) -> bool"""
-        return _core_.Window_HasMultiplePages(*args, **kwargs)
-
     def GetHandle(*args, **kwargs):
         """
         GetHandle(self) -> long
@@ -10112,7 +9990,7 @@ class Window(EvtHandler):
 
         Sets the help text to be used as context-sensitive help for this
         window.  Note that the text is actually stored by the current
-        `wx.HelpProvider` implementation, and not in the window object itself.
+        wxHelpProvider implementation, and not in the window object itself.
         """
         return _core_.Window_SetHelpText(*args, **kwargs)
 
@@ -10125,25 +10003,13 @@ class Window(EvtHandler):
         """
         return _core_.Window_SetHelpTextForId(*args, **kwargs)
 
-    def GetHelpTextAtPoint(*args, **kwargs):
-        """
-        GetHelpTextAtPoint(self, Point pt, wxHelpEvent::Origin origin) -> String
-
-        Get the help string associated with the given position in this window.
-
-        Notice that pt may be invalid if event origin is keyboard or unknown
-        and this method should return the global window help text then
-
-        """
-        return _core_.Window_GetHelpTextAtPoint(*args, **kwargs)
-
     def GetHelpText(*args, **kwargs):
         """
         GetHelpText(self) -> String
 
         Gets the help text to be used as context-sensitive help for this
         window.  Note that the text is actually stored by the current
-        `wx.HelpProvider` implementation, and not in the window object itself.
+        wxHelpProvider implementation, and not in the window object itself.
         """
         return _core_.Window_GetHelpText(*args, **kwargs)
 
@@ -10228,13 +10094,9 @@ class Window(EvtHandler):
         SetAutoLayout(self, bool autoLayout)
 
         Determines whether the Layout function will be called automatically
-        when the window is resized.  lease note that this only happens for the
-        windows usually used to contain children, namely `wx.Panel` and
-        `wx.TopLevelWindow` (and the classes deriving from them).
-
-        This method is called implicitly by `SetSizer` but if you use
-        `SetConstraints` you should call it manually or otherwise the window
-        layout won't be correctly updated when its size changes.
+        when the window is resized.  It is called implicitly by SetSizer but
+        if you use SetConstraints you should call it manually or otherwise the
+        window layout won't be correctly updated when its size changes.
         """
         return _core_.Window_SetAutoLayout(*args, **kwargs)
 
@@ -10350,32 +10212,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_ShouldInheritColours(*args, **kwargs)
 
-    def CanSetTransparent(*args, **kwargs):
-        """
-        CanSetTransparent(self) -> bool
-
-        Returns ``True`` if the platform supports setting the transparency for
-        this window.  Note that this method will err on the side of caution,
-        so it is possible that this will return ``False`` when it is in fact
-        possible to set the transparency.
-
-        NOTE: On X-windows systems the X server must have the composite
-        extension loaded, and there must be a composite manager program (such
-        as xcompmgr) running.
-        """
-        return _core_.Window_CanSetTransparent(*args, **kwargs)
-
-    def SetTransparent(*args, **kwargs):
-        """
-        SetTransparent(self, byte alpha) -> bool
-
-        Attempt to set the transparency of this window to the ``alpha`` value,
-        returns True on success.  The ``alpha`` value is an integer in the
-        range of 0 to 255, where 0 is fully transparent and 255 is fully
-        opaque.
-        """
-        return _core_.Window_SetTransparent(*args, **kwargs)
-
     def PostCreate(self, pre):
         """
         Phase 3 of the 2-phase create <wink!>
@@ -10385,76 +10221,20 @@ class Window(EvtHandler):
         self.thisown = pre.thisown
         pre.thisown = 0
         if hasattr(self, '_setOORInfo'):
-            try:
-                self._setOORInfo(self)
-            except TypeError:
-                pass
+            self._setOORInfo(self)
         if hasattr(self, '_setCallbackInfo'):
-            try:
-                self._setCallbackInfo(self, pre.__class__)
-            except TypeError:
-                pass
+            self._setCallbackInfo(self, self.__class__)
 
     def SendSizeEvent(self):
-        self.GetEventHandler().ProcessEvent(wx.SizeEvent((-1,-1)))
+        self.GetEventhandler().ProcessEvent(wx.SizeEvent((-1,-1)))
 
-    AcceleratorTable = property(GetAcceleratorTable,SetAcceleratorTable,doc="See `GetAcceleratorTable` and `SetAcceleratorTable`") 
-    AutoLayout = property(GetAutoLayout,SetAutoLayout,doc="See `GetAutoLayout` and `SetAutoLayout`") 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    BackgroundStyle = property(GetBackgroundStyle,SetBackgroundStyle,doc="See `GetBackgroundStyle` and `SetBackgroundStyle`") 
-    EffectiveMinSize = property(GetEffectiveMinSize,doc="See `GetEffectiveMinSize`") 
-    BestSize = property(GetBestSize,doc="See `GetBestSize`") 
-    BestVirtualSize = property(GetBestVirtualSize,doc="See `GetBestVirtualSize`") 
-    Border = property(GetBorder,doc="See `GetBorder`") 
-    Caret = property(GetCaret,SetCaret,doc="See `GetCaret` and `SetCaret`") 
-    CharHeight = property(GetCharHeight,doc="See `GetCharHeight`") 
-    CharWidth = property(GetCharWidth,doc="See `GetCharWidth`") 
-    Children = property(GetChildren,doc="See `GetChildren`") 
-    ClientAreaOrigin = property(GetClientAreaOrigin,doc="See `GetClientAreaOrigin`") 
-    ClientRect = property(GetClientRect,SetClientRect,doc="See `GetClientRect` and `SetClientRect`") 
-    ClientSize = property(GetClientSize,SetClientSize,doc="See `GetClientSize` and `SetClientSize`") 
-    Constraints = property(GetConstraints,SetConstraints,doc="See `GetConstraints` and `SetConstraints`") 
-    ContainingSizer = property(GetContainingSizer,SetContainingSizer,doc="See `GetContainingSizer` and `SetContainingSizer`") 
-    Cursor = property(GetCursor,SetCursor,doc="See `GetCursor` and `SetCursor`") 
-    DefaultAttributes = property(GetDefaultAttributes,doc="See `GetDefaultAttributes`") 
-    DropTarget = property(GetDropTarget,SetDropTarget,doc="See `GetDropTarget` and `SetDropTarget`") 
-    EventHandler = property(GetEventHandler,SetEventHandler,doc="See `GetEventHandler` and `SetEventHandler`") 
-    ExtraStyle = property(GetExtraStyle,SetExtraStyle,doc="See `GetExtraStyle` and `SetExtraStyle`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    ForegroundColour = property(GetForegroundColour,SetForegroundColour,doc="See `GetForegroundColour` and `SetForegroundColour`") 
-    GrandParent = property(GetGrandParent,doc="See `GetGrandParent`") 
-    Handle = property(GetHandle,doc="See `GetHandle`") 
-    HelpText = property(GetHelpText,SetHelpText,doc="See `GetHelpText` and `SetHelpText`") 
-    Id = property(GetId,SetId,doc="See `GetId` and `SetId`") 
-    Label = property(GetLabel,SetLabel,doc="See `GetLabel` and `SetLabel`") 
-    LayoutDirection = property(GetLayoutDirection,SetLayoutDirection,doc="See `GetLayoutDirection` and `SetLayoutDirection`") 
-    MaxHeight = property(GetMaxHeight,doc="See `GetMaxHeight`") 
-    MaxSize = property(GetMaxSize,SetMaxSize,doc="See `GetMaxSize` and `SetMaxSize`") 
-    MaxWidth = property(GetMaxWidth,doc="See `GetMaxWidth`") 
-    MinHeight = property(GetMinHeight,doc="See `GetMinHeight`") 
-    MinSize = property(GetMinSize,SetMinSize,doc="See `GetMinSize` and `SetMinSize`") 
-    MinWidth = property(GetMinWidth,doc="See `GetMinWidth`") 
-    Name = property(GetName,SetName,doc="See `GetName` and `SetName`") 
-    Parent = property(GetParent,doc="See `GetParent`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-    Rect = property(GetRect,SetRect,doc="See `GetRect` and `SetRect`") 
-    ScreenPosition = property(GetScreenPosition,doc="See `GetScreenPosition`") 
-    ScreenRect = property(GetScreenRect,doc="See `GetScreenRect`") 
-    Size = property(GetSize,SetSize,doc="See `GetSize` and `SetSize`") 
-    Sizer = property(GetSizer,SetSizer,doc="See `GetSizer` and `SetSizer`") 
-    ThemeEnabled = property(GetThemeEnabled,SetThemeEnabled,doc="See `GetThemeEnabled` and `SetThemeEnabled`") 
-    ToolTip = property(GetToolTip,SetToolTip,doc="See `GetToolTip` and `SetToolTip`") 
-    UpdateClientRect = property(GetUpdateClientRect,doc="See `GetUpdateClientRect`") 
-    UpdateRegion = property(GetUpdateRegion,doc="See `GetUpdateRegion`") 
-    Validator = property(GetValidator,SetValidator,doc="See `GetValidator` and `SetValidator`") 
-    VirtualSize = property(GetVirtualSize,SetVirtualSize,doc="See `GetVirtualSize` and `SetVirtualSize`") 
-    WindowStyle = property(GetWindowStyle,SetWindowStyle,doc="See `GetWindowStyle` and `SetWindowStyle`") 
-    WindowStyleFlag = property(GetWindowStyleFlag,SetWindowStyleFlag,doc="See `GetWindowStyleFlag` and `SetWindowStyleFlag`") 
-    WindowVariant = property(GetWindowVariant,SetWindowVariant,doc="See `GetWindowVariant` and `SetWindowVariant`") 
-    Shown = property(IsShown,Show,doc="See `IsShown` and `Show`") 
-    Enabled = property(IsEnabled,Enable,doc="See `IsEnabled` and `Enable`") 
-    TopLevel = property(IsTopLevel,doc="See `IsTopLevel`") 
-_core_.Window_swigregister(Window)
+
+class WindowPtr(Window):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Window
+_core_.Window_swigregister(WindowPtr)
 
 def PreWindow(*args, **kwargs):
     """
@@ -10463,53 +10243,54 @@ def PreWindow(*args, **kwargs):
     Precreate a Window for 2-phase creation.
     """
     val = _core_.new_PreWindow(*args, **kwargs)
+    val.thisown = 1
     return val
 
-def Window_NewControlId(*args):
-  """
+def Window_NewControlId(*args, **kwargs):
+    """
     Window_NewControlId() -> int
 
     Generate a control id for the controls which were not given one.
     """
-  return _core_.Window_NewControlId(*args)
+    return _core_.Window_NewControlId(*args, **kwargs)
 
 def Window_NextControlId(*args, **kwargs):
-  """
+    """
     Window_NextControlId(int winid) -> int
 
     Get the id of the control following the one with the given
     autogenerated) id
     """
-  return _core_.Window_NextControlId(*args, **kwargs)
+    return _core_.Window_NextControlId(*args, **kwargs)
 
 def Window_PrevControlId(*args, **kwargs):
-  """
+    """
     Window_PrevControlId(int winid) -> int
 
     Get the id of the control preceding the one with the given
     autogenerated) id
     """
-  return _core_.Window_PrevControlId(*args, **kwargs)
+    return _core_.Window_PrevControlId(*args, **kwargs)
 
-def Window_FindFocus(*args):
-  """
+def Window_FindFocus(*args, **kwargs):
+    """
     Window_FindFocus() -> Window
 
     Returns the window or control that currently has the keyboard focus,
     or None.
     """
-  return _core_.Window_FindFocus(*args)
+    return _core_.Window_FindFocus(*args, **kwargs)
 
-def Window_GetCapture(*args):
-  """
+def Window_GetCapture(*args, **kwargs):
+    """
     Window_GetCapture() -> Window
 
     Returns the window which currently captures the mouse or None
     """
-  return _core_.Window_GetCapture(*args)
+    return _core_.Window_GetCapture(*args, **kwargs)
 
 def Window_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Window_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -10523,7 +10304,7 @@ def Window_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _core_.Window_GetClassDefaultAttributes(*args, **kwargs)
+    return _core_.Window_GetClassDefaultAttributes(*args, **kwargs)
 
 def DLG_PNT(win, point_or_x, y=None):
     """
@@ -10547,7 +10328,7 @@ def DLG_SZE(win, size_width, height=None):
 
 
 def FindWindowById(*args, **kwargs):
-  """
+    """
     FindWindowById(long id, Window parent=None) -> Window
 
     Find the first window in the application with the given id. If parent
@@ -10555,10 +10336,10 @@ def FindWindowById(*args, **kwargs):
     boxes; if non-None, the search will be limited to the given window
     hierarchy. The search is recursive in both cases.
     """
-  return _core_.FindWindowById(*args, **kwargs)
+    return _core_.FindWindowById(*args, **kwargs)
 
 def FindWindowByName(*args, **kwargs):
-  """
+    """
     FindWindowByName(String name, Window parent=None) -> Window
 
     Find a window by its name (as given in a window constructor or Create
@@ -10569,10 +10350,10 @@ def FindWindowByName(*args, **kwargs):
 
     If no window with such name is found, wx.FindWindowByLabel is called.
     """
-  return _core_.FindWindowByName(*args, **kwargs)
+    return _core_.FindWindowByName(*args, **kwargs)
 
 def FindWindowByLabel(*args, **kwargs):
-  """
+    """
     FindWindowByLabel(String label, Window parent=None) -> Window
 
     Find a window by its label. Depending on the type of window, the label
@@ -10581,14 +10362,14 @@ def FindWindowByLabel(*args, **kwargs):
     non-None, the search will be limited to the given window
     hierarchy. The search is recursive in both cases.
     """
-  return _core_.FindWindowByLabel(*args, **kwargs)
+    return _core_.FindWindowByLabel(*args, **kwargs)
 
 def Window_FromHWND(*args, **kwargs):
-  """Window_FromHWND(Window parent, unsigned long _hWnd) -> Window"""
-  return _core_.Window_FromHWND(*args, **kwargs)
+    """Window_FromHWND(Window parent, unsigned long _hWnd) -> Window"""
+    return _core_.Window_FromHWND(*args, **kwargs)
 
-def GetTopLevelWindows(*args):
-  """
+def GetTopLevelWindows(*args, **kwargs):
+    """
     GetTopLevelWindows() -> PyObject
 
     Returns a list of the the application's top-level windows, (frames,
@@ -10597,16 +10378,19 @@ def GetTopLevelWindows(*args):
     are closed or new top-level windows are created.
 
     """
-  return _core_.GetTopLevelWindows(*args)
+    return _core_.GetTopLevelWindows(*args, **kwargs)
 #---------------------------------------------------------------------------
 
 class Validator(EvtHandler):
     """Proxy of C++ Validator class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxValidator instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> Validator"""
-        _core_.Validator_swiginit(self,_core_.new_Validator(*args, **kwargs))
+        newobj = _core_.new_Validator(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Clone(*args, **kwargs):
@@ -10643,48 +10427,64 @@ class Validator(EvtHandler):
         return _core_.Validator_SetBellOnError(*args, **kwargs)
 
     SetBellOnError = staticmethod(SetBellOnError)
-    Window = property(GetWindow,SetWindow,doc="See `GetWindow` and `SetWindow`") 
-_core_.Validator_swigregister(Validator)
 
-def Validator_IsSilent(*args):
-  """Validator_IsSilent() -> bool"""
-  return _core_.Validator_IsSilent(*args)
+class ValidatorPtr(Validator):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Validator
+_core_.Validator_swigregister(ValidatorPtr)
+
+def Validator_IsSilent(*args, **kwargs):
+    """Validator_IsSilent() -> bool"""
+    return _core_.Validator_IsSilent(*args, **kwargs)
 
 def Validator_SetBellOnError(*args, **kwargs):
-  """Validator_SetBellOnError(int doIt=True)"""
-  return _core_.Validator_SetBellOnError(*args, **kwargs)
+    """Validator_SetBellOnError(int doIt=True)"""
+    return _core_.Validator_SetBellOnError(*args, **kwargs)
 
 class PyValidator(Validator):
     """Proxy of C++ PyValidator class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyValidator instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> PyValidator"""
-        _core_.PyValidator_swiginit(self,_core_.new_PyValidator(*args, **kwargs))
-        self._setOORInfo(self);PyValidator._setCallbackInfo(self, self, PyValidator)
+        newobj = _core_.new_PyValidator(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        
+        self._setCallbackInfo(self, PyValidator, 1)
+        self._setOORInfo(self)
 
     def _setCallbackInfo(*args, **kwargs):
-        """_setCallbackInfo(self, PyObject self, PyObject _class, int incref=1)"""
+        """_setCallbackInfo(self, PyObject self, PyObject _class, int incref=True)"""
         return _core_.PyValidator__setCallbackInfo(*args, **kwargs)
 
-_core_.PyValidator_swigregister(PyValidator)
+
+class PyValidatorPtr(PyValidator):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyValidator
+_core_.PyValidator_swigregister(PyValidatorPtr)
 
 #---------------------------------------------------------------------------
 
 class Menu(EvtHandler):
     """Proxy of C++ Menu class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMenu instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, String title=EmptyString, long style=0) -> Menu"""
-        _core_.Menu_swiginit(self,_core_.new_Menu(*args, **kwargs))
+        newobj = _core_.new_Menu(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Append(*args, **kwargs):
-        """
-        Append(self, int id, String text=EmptyString, String help=EmptyString, 
-            int kind=ITEM_NORMAL) -> MenuItem
-        """
+        """Append(self, int id, String text, String help=EmptyString, int kind=ITEM_NORMAL) -> MenuItem"""
         return _core_.Menu_Append(*args, **kwargs)
 
     def AppendSeparator(*args, **kwargs):
@@ -10703,29 +10503,21 @@ class Menu(EvtHandler):
         """AppendMenu(self, int id, String text, Menu submenu, String help=EmptyString) -> MenuItem"""
         return _core_.Menu_AppendMenu(*args, **kwargs)
 
-    def AppendSubMenu(*args, **kwargs):
-        """AppendSubMenu(self, Menu submenu, String text, String help=EmptyString) -> MenuItem"""
-        return _core_.Menu_AppendSubMenu(*args, **kwargs)
-
     def AppendItem(*args, **kwargs):
         """AppendItem(self, MenuItem item) -> MenuItem"""
         return _core_.Menu_AppendItem(*args, **kwargs)
-
-    def InsertItem(*args, **kwargs):
-        """InsertItem(self, size_t pos, MenuItem item) -> MenuItem"""
-        return _core_.Menu_InsertItem(*args, **kwargs)
-
-    def PrependItem(*args, **kwargs):
-        """PrependItem(self, MenuItem item) -> MenuItem"""
-        return _core_.Menu_PrependItem(*args, **kwargs)
 
     def Break(*args, **kwargs):
         """Break(self)"""
         return _core_.Menu_Break(*args, **kwargs)
 
+    def InsertItem(*args, **kwargs):
+        """InsertItem(self, size_t pos, MenuItem item) -> MenuItem"""
+        return _core_.Menu_InsertItem(*args, **kwargs)
+
     def Insert(*args, **kwargs):
         """
-        Insert(self, size_t pos, int id, String text=EmptyString, String help=EmptyString, 
+        Insert(self, size_t pos, int id, String text, String help=EmptyString, 
             int kind=ITEM_NORMAL) -> MenuItem
         """
         return _core_.Menu_Insert(*args, **kwargs)
@@ -10746,11 +10538,12 @@ class Menu(EvtHandler):
         """InsertMenu(self, size_t pos, int id, String text, Menu submenu, String help=EmptyString) -> MenuItem"""
         return _core_.Menu_InsertMenu(*args, **kwargs)
 
+    def PrependItem(*args, **kwargs):
+        """PrependItem(self, MenuItem item) -> MenuItem"""
+        return _core_.Menu_PrependItem(*args, **kwargs)
+
     def Prepend(*args, **kwargs):
-        """
-        Prepend(self, int id, String text=EmptyString, String help=EmptyString, 
-            int kind=ITEM_NORMAL) -> MenuItem
-        """
+        """Prepend(self, int id, String text, String help=EmptyString, int kind=ITEM_NORMAL) -> MenuItem"""
         return _core_.Menu_Prepend(*args, **kwargs)
 
     def PrependSeparator(*args, **kwargs):
@@ -10773,15 +10566,9 @@ class Menu(EvtHandler):
         """Remove(self, int id) -> MenuItem"""
         return _core_.Menu_Remove(*args, **kwargs)
 
-    def RemoveItem(self, item):
+    def RemoveItem(*args, **kwargs):
         """RemoveItem(self, MenuItem item) -> MenuItem"""
-        #// The return object is always the parameter, so return that 
-        #// proxy instead of the new one
-        val = _core_.Menu_RemoveItem(self, item)
-        item.this.own(val.this.own())
-        val.this.disown()
-        return item
-
+        return _core_.Menu_RemoveItem(*args, **kwargs)
 
     def Delete(*args, **kwargs):
         """Delete(self, int id) -> bool"""
@@ -10797,15 +10584,22 @@ class Menu(EvtHandler):
 
         Deletes the C++ object this Python object is a proxy for.
         """
-        args[0].this.own(False)
         return _core_.Menu_Destroy(*args, **kwargs)
 
     def DestroyId(*args, **kwargs):
-        """DestroyId(self, int id) -> bool"""
+        """
+        DestroyId(self, int id) -> bool
+
+        Deletes the C++ object this Python object is a proxy for.
+        """
         return _core_.Menu_DestroyId(*args, **kwargs)
 
     def DestroyItem(*args, **kwargs):
-        """DestroyItem(self, MenuItem item) -> bool"""
+        """
+        DestroyItem(self, MenuItem item) -> bool
+
+        Deletes the C++ object this Python object is a proxy for.
+        """
         return _core_.Menu_DestroyItem(*args, **kwargs)
 
     def GetMenuItemCount(*args, **kwargs):
@@ -10916,27 +10710,27 @@ class Menu(EvtHandler):
         """GetParent(self) -> Menu"""
         return _core_.Menu_GetParent(*args, **kwargs)
 
-    EventHandler = property(GetEventHandler,SetEventHandler,doc="See `GetEventHandler` and `SetEventHandler`") 
-    HelpString = property(GetHelpString,SetHelpString,doc="See `GetHelpString` and `SetHelpString`") 
-    InvokingWindow = property(GetInvokingWindow,SetInvokingWindow,doc="See `GetInvokingWindow` and `SetInvokingWindow`") 
-    MenuBar = property(GetMenuBar,doc="See `GetMenuBar`") 
-    MenuItemCount = property(GetMenuItemCount,doc="See `GetMenuItemCount`") 
-    MenuItems = property(GetMenuItems,doc="See `GetMenuItems`") 
-    Parent = property(GetParent,SetParent,doc="See `GetParent` and `SetParent`") 
-    Style = property(GetStyle,doc="See `GetStyle`") 
-    Title = property(GetTitle,SetTitle,doc="See `GetTitle` and `SetTitle`") 
-_core_.Menu_swigregister(Menu)
+
+class MenuPtr(Menu):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Menu
+_core_.Menu_swigregister(MenuPtr)
 DefaultValidator = cvar.DefaultValidator
 
 #---------------------------------------------------------------------------
 
 class MenuBar(Window):
     """Proxy of C++ MenuBar class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMenuBar instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, long style=0) -> MenuBar"""
-        _core_.MenuBar_swiginit(self,_core_.new_MenuBar(*args, **kwargs))
+        newobj = _core_.new_MenuBar(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Append(*args, **kwargs):
@@ -11039,10 +10833,6 @@ class MenuBar(Window):
         """Detach(self)"""
         return _core_.MenuBar_Detach(*args, **kwargs)
 
-    def UpdateMenus(*args, **kwargs):
-        """UpdateMenus(self)"""
-        return _core_.MenuBar_UpdateMenus(*args, **kwargs)
-
     def SetAutoWindowMenu(*args, **kwargs):
         """SetAutoWindowMenu(bool enable)"""
         return _core_.MenuBar_SetAutoWindowMenu(*args, **kwargs)
@@ -11053,48 +10843,38 @@ class MenuBar(Window):
         return _core_.MenuBar_GetAutoWindowMenu(*args, **kwargs)
 
     GetAutoWindowMenu = staticmethod(GetAutoWindowMenu)
-    def GetMenus(self):
-        """Return a list of (menu, label) items for the menus in the MenuBar. """
-        return [(self.GetMenu(i), self.GetLabelTop(i)) 
-                for i in range(self.GetMenuCount())]
-        
-    def SetMenus(self, items):
-        """Clear and add new menus to the MenuBar from a list of (menu, label) items. """
-        for i in range(self.GetMenuCount()-1, -1, -1):
-            self.Remove(i)
-        for m, l in items:
-            self.Append(m, l)
 
-    Frame = property(GetFrame,doc="See `GetFrame`") 
-    Menu = property(GetMenu,doc="See `GetMenu`") 
-    MenuCount = property(GetMenuCount,doc="See `GetMenuCount`") 
-    Menus = property(GetMenus,SetMenus,doc="See `GetMenus` and `SetMenus`") 
-_core_.MenuBar_swigregister(MenuBar)
+class MenuBarPtr(MenuBar):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MenuBar
+_core_.MenuBar_swigregister(MenuBarPtr)
 
 def MenuBar_SetAutoWindowMenu(*args, **kwargs):
-  """MenuBar_SetAutoWindowMenu(bool enable)"""
-  return _core_.MenuBar_SetAutoWindowMenu(*args, **kwargs)
+    """MenuBar_SetAutoWindowMenu(bool enable)"""
+    return _core_.MenuBar_SetAutoWindowMenu(*args, **kwargs)
 
-def MenuBar_GetAutoWindowMenu(*args):
-  """MenuBar_GetAutoWindowMenu() -> bool"""
-  return _core_.MenuBar_GetAutoWindowMenu(*args)
+def MenuBar_GetAutoWindowMenu(*args, **kwargs):
+    """MenuBar_GetAutoWindowMenu() -> bool"""
+    return _core_.MenuBar_GetAutoWindowMenu(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class MenuItem(Object):
     """Proxy of C++ MenuItem class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxMenuItem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, Menu parentMenu=None, int id=ID_SEPARATOR, String text=EmptyString, 
+        __init__(self, Menu parentMenu=None, int id=ID_ANY, String text=EmptyString, 
             String help=EmptyString, int kind=ITEM_NORMAL, 
             Menu subMenu=None) -> MenuItem
         """
-        _core_.MenuItem_swiginit(self,_core_.new_MenuItem(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_MenuItem
-    __del__ = lambda self : None;
-    def Destroy(self): pass 
+        newobj = _core_.new_MenuItem(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetMenu(*args, **kwargs):
         """GetMenu(self) -> Menu"""
         return _core_.MenuItem_GetMenu(*args, **kwargs)
@@ -11265,29 +11045,21 @@ class MenuItem(Object):
         """ResetOwnerDrawn(self)"""
         return _core_.MenuItem_ResetOwnerDrawn(*args, **kwargs)
 
-    Accel = property(GetAccel,SetAccel,doc="See `GetAccel` and `SetAccel`") 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    Bitmap = property(GetBitmap,SetBitmap,doc="See `GetBitmap` and `SetBitmap`") 
-    DisabledBitmap = property(GetDisabledBitmap,SetDisabledBitmap,doc="See `GetDisabledBitmap` and `SetDisabledBitmap`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    Help = property(GetHelp,SetHelp,doc="See `GetHelp` and `SetHelp`") 
-    Id = property(GetId,SetId,doc="See `GetId` and `SetId`") 
-    Kind = property(GetKind,SetKind,doc="See `GetKind` and `SetKind`") 
-    Label = property(GetLabel,doc="See `GetLabel`") 
-    MarginWidth = property(GetMarginWidth,SetMarginWidth,doc="See `GetMarginWidth` and `SetMarginWidth`") 
-    Menu = property(GetMenu,SetMenu,doc="See `GetMenu` and `SetMenu`") 
-    SubMenu = property(GetSubMenu,SetSubMenu,doc="See `GetSubMenu` and `SetSubMenu`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-_core_.MenuItem_swigregister(MenuItem)
+
+class MenuItemPtr(MenuItem):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = MenuItem
+_core_.MenuItem_swigregister(MenuItemPtr)
 
 def MenuItem_GetLabelFromText(*args, **kwargs):
-  """MenuItem_GetLabelFromText(String text) -> String"""
-  return _core_.MenuItem_GetLabelFromText(*args, **kwargs)
+    """MenuItem_GetLabelFromText(String text) -> String"""
+    return _core_.MenuItem_GetLabelFromText(*args, **kwargs)
 
-def MenuItem_GetDefaultMarginWidth(*args):
-  """MenuItem_GetDefaultMarginWidth() -> int"""
-  return _core_.MenuItem_GetDefaultMarginWidth(*args)
+def MenuItem_GetDefaultMarginWidth(*args, **kwargs):
+    """MenuItem_GetDefaultMarginWidth() -> int"""
+    return _core_.MenuItem_GetDefaultMarginWidth(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -11298,9 +11070,9 @@ class Control(Window):
     A control is generally a small window which processes user input
     and/or displays one or more item of data.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxControl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, Validator validator=DefaultValidator, 
@@ -11309,7 +11081,10 @@ class Control(Window):
         Create a Control.  Normally you should only call this from a subclass'
         __init__ as a plain old wx.Control is not very useful.
         """
-        _core_.Control_swiginit(self,_core_.new_Control(*args, **kwargs))
+        newobj = _core_.new_Control(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -11322,22 +11097,6 @@ class Control(Window):
         """
         return _core_.Control_Create(*args, **kwargs)
 
-    def GetAlignment(*args, **kwargs):
-        """
-        GetAlignment(self) -> int
-
-        Get the control alignment (left/right/centre, top/bottom/centre)
-        """
-        return _core_.Control_GetAlignment(*args, **kwargs)
-
-    def GetLabelText(*args, **kwargs):
-        """
-        GetLabelText(self) -> String
-
-        Get just the text of the label, without mnemonic characters ('&')
-        """
-        return _core_.Control_GetLabelText(*args, **kwargs)
-
     def Command(*args, **kwargs):
         """
         Command(self, CommandEvent event)
@@ -11348,6 +11107,22 @@ class Control(Window):
 
         """
         return _core_.Control_Command(*args, **kwargs)
+
+    def GetLabel(*args, **kwargs):
+        """
+        GetLabel(self) -> String
+
+        Return a control's text.
+        """
+        return _core_.Control_GetLabel(*args, **kwargs)
+
+    def SetLabel(*args, **kwargs):
+        """
+        SetLabel(self, String label)
+
+        Sets the item's text.
+        """
+        return _core_.Control_SetLabel(*args, **kwargs)
 
     def GetClassDefaultAttributes(*args, **kwargs):
         """
@@ -11367,9 +11142,13 @@ class Control(Window):
         return _core_.Control_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Alignment = property(GetAlignment,doc="See `GetAlignment`") 
-    LabelText = property(GetLabelText,doc="See `GetLabelText`") 
-_core_.Control_swigregister(Control)
+
+class ControlPtr(Control):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Control
+_core_.Control_swigregister(ControlPtr)
 ControlNameStr = cvar.ControlNameStr
 
 def PreControl(*args, **kwargs):
@@ -11379,10 +11158,11 @@ def PreControl(*args, **kwargs):
     Precreate a Control control for 2-phase creation
     """
     val = _core_.new_PreControl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Control_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Control_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -11396,7 +11176,7 @@ def Control_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _core_.Control_GetClassDefaultAttributes(*args, **kwargs)
+    return _core_.Control_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -11416,9 +11196,9 @@ class ItemContainer(object):
     optionally, client data associated with them.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxItemContainer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def Append(*args, **kwargs):
         """
         Append(self, String item, PyObject clientData=None) -> int
@@ -11569,22 +11349,13 @@ class ItemContainer(object):
         """
         return _core_.ItemContainer_Select(*args, **kwargs)
 
-    def GetItems(self):
-        """Return a list of the strings in the control"""
-        return [self.GetString(i) for i in xrange(self.GetCount())]
-        
-    def SetItems(self, items):
-        """Clear and set the strings in the control from a list"""
-        self.Clear()
-        for i in items:
-            self.Append(i)        
 
-    Count = property(GetCount,doc="See `GetCount`") 
-    Items = property(GetItems,SetItems,doc="See `GetItems` and `SetItems`") 
-    Selection = property(GetSelection,SetSelection,doc="See `GetSelection` and `SetSelection`") 
-    StringSelection = property(GetStringSelection,SetStringSelection,doc="See `GetStringSelection` and `SetStringSelection`") 
-    Strings = property(GetStrings,doc="See `GetStrings`") 
-_core_.ItemContainer_swigregister(ItemContainer)
+class ItemContainerPtr(ItemContainer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ItemContainer
+_core_.ItemContainer_swigregister(ItemContainerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -11594,29 +11365,32 @@ class ControlWithItems(Control,ItemContainer):
     wx.Control class, and is used for the base class of various controls
     that have items.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-_core_.ControlWithItems_swigregister(ControlWithItems)
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxControlWithItems instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+
+class ControlWithItemsPtr(ControlWithItems):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ControlWithItems
+_core_.ControlWithItems_swigregister(ControlWithItemsPtr)
 
 #---------------------------------------------------------------------------
 
 class SizerItem(Object):
     """
     The wx.SizerItem class is used to track the position, size and other
-    attributes of each item managed by a `wx.Sizer`. It is not usually
-    necessary to use this class because the sizer elements can also be
-    identified by their positions or window or sizer references but
-    sometimes it may be more convenient to use wx.SizerItem directly.
-    Also, custom classes derived from `wx.PySizer` will probably need to
-    use the collection of wx.SizerItems held by wx.Sizer when calculating
-    layout.
+    attributes of each item managed by a `wx.Sizer`. In normal usage user
+    code should never need to deal directly with a wx.SizerItem, but
+    custom classes derived from `wx.PySizer` will probably need to use the
+    collection of wx.SizerItems held by wx.Sizer when calculating layout.
 
     :see: `wx.Sizer`, `wx.GBSizerItem`
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSizerItem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> SizerItem
 
@@ -11629,9 +11403,10 @@ class SizerItem(Object):
 
         :see: `wx.SizerItemSpacer`, `wx.SizerItemWindow`, `wx.SizerItemSizer`
         """
-        _core_.SizerItem_swiginit(self,_core_.new_SizerItem(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_SizerItem
-    __del__ = lambda self : None;
+        newobj = _core_.new_SizerItem(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def DeleteWindows(*args, **kwargs):
         """
         DeleteWindows(self)
@@ -11903,20 +11678,13 @@ class SizerItem(Object):
         """
         return _core_.SizerItem_SetUserData(*args, **kwargs)
 
-    Border = property(GetBorder,SetBorder,doc="See `GetBorder` and `SetBorder`") 
-    Flag = property(GetFlag,SetFlag,doc="See `GetFlag` and `SetFlag`") 
-    MinSize = property(GetMinSize,doc="See `GetMinSize`") 
-    MinSizeWithBorder = property(GetMinSizeWithBorder,doc="See `GetMinSizeWithBorder`") 
-    Position = property(GetPosition,doc="See `GetPosition`") 
-    Proportion = property(GetProportion,SetProportion,doc="See `GetProportion` and `SetProportion`") 
-    Ratio = property(GetRatio,SetRatio,doc="See `GetRatio` and `SetRatio`") 
-    Rect = property(GetRect,doc="See `GetRect`") 
-    Size = property(GetSize,doc="See `GetSize`") 
-    Sizer = property(GetSizer,SetSizer,doc="See `GetSizer` and `SetSizer`") 
-    Spacer = property(GetSpacer,SetSpacer,doc="See `GetSpacer` and `SetSpacer`") 
-    UserData = property(GetUserData,SetUserData,doc="See `GetUserData` and `SetUserData`") 
-    Window = property(GetWindow,SetWindow,doc="See `GetWindow` and `SetWindow`") 
-_core_.SizerItem_swigregister(SizerItem)
+
+class SizerItemPtr(SizerItem):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SizerItem
+_core_.SizerItem_swigregister(SizerItemPtr)
 
 def SizerItemWindow(*args, **kwargs):
     """
@@ -11926,6 +11694,7 @@ def SizerItemWindow(*args, **kwargs):
     Constructs a `wx.SizerItem` for tracking a window.
     """
     val = _core_.new_SizerItemWindow(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def SizerItemSpacer(*args, **kwargs):
@@ -11936,6 +11705,7 @@ def SizerItemSpacer(*args, **kwargs):
     Constructs a `wx.SizerItem` for tracking a spacer.
     """
     val = _core_.new_SizerItemSpacer(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def SizerItemSizer(*args, **kwargs):
@@ -11946,6 +11716,7 @@ def SizerItemSizer(*args, **kwargs):
     Constructs a `wx.SizerItem` for tracking a subsizer
     """
     val = _core_.new_SizerItemSizer(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class Sizer(Object):
@@ -11953,8 +11724,8 @@ class Sizer(Object):
     wx.Sizer is the abstract base class used for laying out subwindows in
     a window.  You cannot use wx.Sizer directly; instead, you will have to
     use one of the sizer classes derived from it such as `wx.BoxSizer`,
-    `wx.StaticBoxSizer`, `wx.GridSizer`, `wx.FlexGridSizer` and
-    `wx.GridBagSizer`.
+    `wx.StaticBoxSizer`, `wx.NotebookSizer`, `wx.GridSizer`,  `wx.FlexGridSizer`
+    and `wx.GridBagSizer`.
 
     The concept implemented by sizers in wxWidgets is closely related to
     layout tools in other GUI toolkits, such as Java's AWT, the GTK
@@ -11978,11 +11749,9 @@ class Sizer(Object):
     more space than on Windows, then the initial size of a dialog using a
     sizer will automatically be bigger on Mac than on Windows.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-    __swig_destroy__ = _core_.delete_Sizer
-    __del__ = lambda self : None;
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def _setOORInfo(*args, **kwargs):
         """_setOORInfo(self, PyObject _self)"""
         return _core_.Sizer__setOORInfo(*args, **kwargs)
@@ -12055,57 +11824,6 @@ class Sizer(Object):
         """_SetItemMinSize(self, PyObject item, Size size)"""
         return _core_.Sizer__SetItemMinSize(*args, **kwargs)
 
-    def _ReplaceWin(*args, **kwargs):
-        """_ReplaceWin(self, Window oldwin, Window newwin, bool recursive=False) -> bool"""
-        return _core_.Sizer__ReplaceWin(*args, **kwargs)
-
-    def _ReplaceSizer(*args, **kwargs):
-        """_ReplaceSizer(self, Sizer oldsz, Sizer newsz, bool recursive=False) -> bool"""
-        return _core_.Sizer__ReplaceSizer(*args, **kwargs)
-
-    def _ReplaceItem(*args, **kwargs):
-        """_ReplaceItem(self, size_t index, SizerItem newitem) -> bool"""
-        return _core_.Sizer__ReplaceItem(*args, **kwargs)
-
-    def Replace(self, olditem, item, recursive=False):
-        """
-        Detaches the given ``olditem`` from the sizer and replaces it with
-        ``item`` which can be a window, sizer, or `wx.SizerItem`.  The
-        detached child is destroyed only if it is not a window, (because
-        windows are owned by their parent, not the sizer.)  The
-        ``recursive`` parameter can be used to search for the given
-        element recursivly in subsizers.
-
-        This method does not cause any layout or resizing to take place,
-        call `Layout` to do so.
-
-        Returns ``True`` if the child item was found and removed.
-        """
-        if isinstance(olditem, wx.Window):
-            return self._ReplaceWin(olditem, item, recursive)
-        elif isinstnace(olditem, wx.Sizer):
-            return self._ReplaceSizer(olditem, item, recursive)
-        elif isinstnace(olditem, int):
-            return self._ReplaceItem(olditem, item)
-        else:
-            raise TypeError("Expected Window, Sizer, or integer for first parameter.")
-
-    def SetContainingWindow(*args, **kwargs):
-        """
-        SetContainingWindow(self, Window window)
-
-        Set (or unset) the window this sizer is used in.
-        """
-        return _core_.Sizer_SetContainingWindow(*args, **kwargs)
-
-    def GetContainingWindow(*args, **kwargs):
-        """
-        GetContainingWindow(self) -> Window
-
-        Get the window this sizer is used in.
-        """
-        return _core_.Sizer_GetContainingWindow(*args, **kwargs)
-
     def SetItemMinSize(self, item, *args):
         """
         SetItemMinSize(self, item, Size size)
@@ -12157,55 +11875,14 @@ class Sizer(Object):
                 item = (item, )
             self.Add(*item)
 
-    def AddSpacer(self, *args, **kw):
-        """AddSpacer(int size) --> SizerItem
-
-        Add a spacer that is (size,size) pixels.
-        """
-        if args and type(args[0]) == int:
-            return self.Add( (args[0],args[0] ), 0)
-        else: # otherwise stay compatible with old AddSpacer
-            return self.Add(*args, **kw)
-    def PrependSpacer(self, *args, **kw):
-        """PrependSpacer(int size) --> SizerItem
-
-        Prepend a spacer that is (size, size) pixels."""
-        if args and type(args[0]) == int:
-            return self.Prepend( (args[0],args[0] ), 0)
-        else: # otherwise stay compatible with old PrependSpacer
-            return self.Prepend(*args, **kw)
-    def InsertSpacer(self, index, *args, **kw):
-        """InsertSpacer(int index, int size) --> SizerItem
-
-        Insert a spacer at position index that is (size, size) pixels."""
-        if args and type(args[0]) == int:
-            return self.Insert( index, (args[0],args[0] ), 0)
-        else: # otherwise stay compatible with old InsertSpacer
-            return self.Insert(index, *args, **kw)
-
-                   
-    def AddStretchSpacer(self, prop=1):
-        """AddStretchSpacer(int prop=1) --> SizerItem
-
-        Add a stretchable spacer."""
-        return self.Add((0,0), prop)
-    def PrependStretchSpacer(self, prop=1):
-        """PrependStretchSpacer(int prop=1) --> SizerItem
-
-        Prepend a stretchable spacer."""
-        return self.Prepend((0,0), prop)
-    def InsertStretchSpacer(self, index, prop=1):
-        """InsertStretchSpacer(int index, int prop=1) --> SizerItem
-
-        Insert a stretchable spacer."""
-        return self.Insert(index, (0,0), prop)
-
-            
     # for backwards compatibility only, please do not use in new code
     def AddWindow(self, *args, **kw):
         """Compatibility alias for `Add`."""
         return self.Add(*args, **kw)
     def AddSizer(self, *args, **kw):
+        """Compatibility alias for `Add`."""
+        return self.Add(*args, **kw)
+    def AddSpacer(self, *args, **kw):
         """Compatibility alias for `Add`."""
         return self.Add(*args, **kw)
 
@@ -12215,11 +11892,17 @@ class Sizer(Object):
     def PrependSizer(self, *args, **kw):
         """Compatibility alias for `Prepend`."""
         return self.Prepend(*args, **kw)
+    def PrependSpacer(self, *args, **kw):
+        """Compatibility alias for `Prepend`."""
+        return self.Prepend(*args, **kw)
 
     def InsertWindow(self, *args, **kw):
         """Compatibility alias for `Insert`."""
         return self.Insert(*args, **kw)
     def InsertSizer(self, *args, **kw):
+        """Compatibility alias for `Insert`."""
+        return self.Insert(*args, **kw)
+    def InsertSpacer(self, *args, **kw):
         """Compatibility alias for `Insert`."""
         return self.Insert(*args, **kw)
 
@@ -12417,7 +12100,7 @@ class Sizer(Object):
         """
         IsShown(self, item)
 
-        Determines if the item is currently shown. To make a sizer
+        Determines if the item is currently shown. sizer.  To make a sizer
         item disappear or reappear, use Show followed by `Layout`.  The *item*
         parameter can be either a window, a sizer, or the zero-based index of
         the item.
@@ -12438,12 +12121,13 @@ class Sizer(Object):
         """
         return _core_.Sizer_ShowItems(*args, **kwargs)
 
-    Children = property(GetChildren,doc="See `GetChildren`") 
-    ContainingWindow = property(GetContainingWindow,SetContainingWindow,doc="See `GetContainingWindow` and `SetContainingWindow`") 
-    MinSize = property(GetMinSize,SetMinSize,doc="See `GetMinSize` and `SetMinSize`") 
-    Position = property(GetPosition,doc="See `GetPosition`") 
-    Size = property(GetSize,doc="See `GetSize`") 
-_core_.Sizer_swigregister(Sizer)
+
+class SizerPtr(Sizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Sizer
+_core_.Sizer_swigregister(SizerPtr)
 
 class PySizer(Sizer):
     """
@@ -12487,23 +12171,32 @@ class PySizer(Sizer):
 
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPySizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> PySizer
 
         Creates a wx.PySizer.  Must be called from the __init__ in the derived
         class.
         """
-        _core_.PySizer_swiginit(self,_core_.new_PySizer(*args, **kwargs))
-        self._setOORInfo(self);PySizer._setCallbackInfo(self, self, PySizer)
+        newobj = _core_.new_PySizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setCallbackInfo(self, PySizer);self._setOORInfo(self)
 
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
         return _core_.PySizer__setCallbackInfo(*args, **kwargs)
 
-_core_.PySizer_swigregister(PySizer)
+
+class PySizerPtr(PySizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PySizer
+_core_.PySizer_swigregister(PySizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -12515,9 +12208,9 @@ class BoxSizer(Sizer):
     its items in a simple row or column, depending on the orientation
     parameter passed to the constructor.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBoxSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int orient=HORIZONTAL) -> BoxSizer
 
@@ -12525,7 +12218,10 @@ class BoxSizer(Sizer):
         or ``wx.HORIZONTAL`` for creating either a column sizer or a row
         sizer.
         """
-        _core_.BoxSizer_swiginit(self,_core_.new_BoxSizer(*args, **kwargs))
+        newobj = _core_.new_BoxSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def GetOrientation(*args, **kwargs):
@@ -12544,8 +12240,13 @@ class BoxSizer(Sizer):
         """
         return _core_.BoxSizer_SetOrientation(*args, **kwargs)
 
-    Orientation = property(GetOrientation,SetOrientation,doc="See `GetOrientation` and `SetOrientation`") 
-_core_.BoxSizer_swigregister(BoxSizer)
+
+class BoxSizerPtr(BoxSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BoxSizer
+_core_.BoxSizer_swigregister(BoxSizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -12556,9 +12257,9 @@ class StaticBoxSizer(BoxSizer):
     manages.  Note that this static box must be created separately and
     passed to the sizer constructor.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticBoxSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, StaticBox box, int orient=HORIZONTAL) -> StaticBoxSizer
 
@@ -12566,7 +12267,10 @@ class StaticBoxSizer(BoxSizer):
         *orient* as parameters - orient can be either of ``wx.VERTICAL`` or
         ``wx.HORIZONTAL``.
         """
-        _core_.StaticBoxSizer_swiginit(self,_core_.new_StaticBoxSizer(*args, **kwargs))
+        newobj = _core_.new_StaticBoxSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def GetStaticBox(*args, **kwargs):
@@ -12577,8 +12281,13 @@ class StaticBoxSizer(BoxSizer):
         """
         return _core_.StaticBoxSizer_GetStaticBox(*args, **kwargs)
 
-    StaticBox = property(GetStaticBox,doc="See `GetStaticBox`") 
-_core_.StaticBoxSizer_swigregister(StaticBoxSizer)
+
+class StaticBoxSizerPtr(StaticBoxSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticBoxSizer
+_core_.StaticBoxSizer_swigregister(StaticBoxSizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -12599,9 +12308,9 @@ class GridSizer(Sizer):
     then use the `wx.GridBagSizer`.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGridSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int rows=1, int cols=0, int vgap=0, int hgap=0) -> GridSizer
 
@@ -12611,7 +12320,10 @@ class GridSizer(Sizer):
         the sizer, thus making the sizer grow dynamically. *vgap* and *hgap*
         define extra space between all children.
         """
-        _core_.GridSizer_swiginit(self,_core_.new_GridSizer(*args, **kwargs))
+        newobj = _core_.new_GridSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def SetCols(*args, **kwargs):
@@ -12650,7 +12362,7 @@ class GridSizer(Sizer):
         """
         GetCols(self) -> int
 
-        Returns the number of columns in the sizer.
+        Returns the number of columns in the sizer, as specified in the constructor.
         """
         return _core_.GridSizer_GetCols(*args, **kwargs)
 
@@ -12658,7 +12370,7 @@ class GridSizer(Sizer):
         """
         GetRows(self) -> int
 
-        Returns the number of rows in the sizer.
+        Returns the number of rows in the sizer, as specified in the constructor.
         """
         return _core_.GridSizer_GetRows(*args, **kwargs)
 
@@ -12696,11 +12408,13 @@ class GridSizer(Sizer):
             cols = (nitems + rows - 1) / rows
         return (rows, cols)
 
-    Cols = property(GetCols,SetCols,doc="See `GetCols` and `SetCols`") 
-    HGap = property(GetHGap,SetHGap,doc="See `GetHGap` and `SetHGap`") 
-    Rows = property(GetRows,SetRows,doc="See `GetRows` and `SetRows`") 
-    VGap = property(GetVGap,SetVGap,doc="See `GetVGap` and `SetVGap`") 
-_core_.GridSizer_swigregister(GridSizer)
+
+class GridSizerPtr(GridSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GridSizer
+_core_.GridSizer_swigregister(GridSizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -12724,9 +12438,9 @@ class FlexGridSizer(GridSizer):
 
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxFlexGridSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int rows=1, int cols=0, int vgap=0, int hgap=0) -> FlexGridSizer
 
@@ -12736,7 +12450,10 @@ class FlexGridSizer(GridSizer):
         the sizer, thus making the sizer grow dynamically. *vgap* and *hgap*
         define extra space between all children.
         """
-        _core_.FlexGridSizer_swiginit(self,_core_.new_FlexGridSizer(*args, **kwargs))
+        newobj = _core_.new_FlexGridSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def AddGrowableRow(*args, **kwargs):
@@ -12832,6 +12549,8 @@ class FlexGridSizer(GridSizer):
             ==========================  =================================================
 
         Note that this method does not trigger relayout.
+
+
         """
         return _core_.FlexGridSizer_SetNonFlexibleGrowMode(*args, **kwargs)
 
@@ -12864,11 +12583,13 @@ class FlexGridSizer(GridSizer):
         """
         return _core_.FlexGridSizer_GetColWidths(*args, **kwargs)
 
-    ColWidths = property(GetColWidths,doc="See `GetColWidths`") 
-    FlexibleDirection = property(GetFlexibleDirection,SetFlexibleDirection,doc="See `GetFlexibleDirection` and `SetFlexibleDirection`") 
-    NonFlexibleGrowMode = property(GetNonFlexibleGrowMode,SetNonFlexibleGrowMode,doc="See `GetNonFlexibleGrowMode` and `SetNonFlexibleGrowMode`") 
-    RowHeights = property(GetRowHeights,doc="See `GetRowHeights`") 
-_core_.FlexGridSizer_swigregister(FlexGridSizer)
+
+class FlexGridSizerPtr(FlexGridSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = FlexGridSizer
+_core_.FlexGridSizer_swigregister(FlexGridSizerPtr)
 
 class StdDialogButtonSizer(BoxSizer):
     """
@@ -12879,11 +12600,14 @@ class StdDialogButtonSizer(BoxSizer):
     will take care of the rest.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStdDialogButtonSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> StdDialogButtonSizer"""
-        _core_.StdDialogButtonSizer_swiginit(self,_core_.new_StdDialogButtonSizer(*args, **kwargs))
+        newobj = _core_.new_StdDialogButtonSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def AddButton(*args, **kwargs):
         """
         AddButton(self, wxButton button)
@@ -12935,12 +12659,13 @@ class StdDialogButtonSizer(BoxSizer):
         """GetHelpButton(self) -> wxButton"""
         return _core_.StdDialogButtonSizer_GetHelpButton(*args, **kwargs)
 
-    AffirmativeButton = property(GetAffirmativeButton,SetAffirmativeButton,doc="See `GetAffirmativeButton` and `SetAffirmativeButton`") 
-    ApplyButton = property(GetApplyButton,doc="See `GetApplyButton`") 
-    CancelButton = property(GetCancelButton,SetCancelButton,doc="See `GetCancelButton` and `SetCancelButton`") 
-    HelpButton = property(GetHelpButton,doc="See `GetHelpButton`") 
-    NegativeButton = property(GetNegativeButton,SetNegativeButton,doc="See `GetNegativeButton` and `SetNegativeButton`") 
-_core_.StdDialogButtonSizer_swigregister(StdDialogButtonSizer)
+
+class StdDialogButtonSizerPtr(StdDialogButtonSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StdDialogButtonSizer
+_core_.StdDialogButtonSizer_swigregister(StdDialogButtonSizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -12952,9 +12677,9 @@ class GBPosition(object):
     integers to a wx.GBPosition, so you can use the more pythonic
     representation of the position nearly transparently in Python code.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGBPosition instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int row=0, int col=0) -> GBPosition
 
@@ -12964,9 +12689,10 @@ class GBPosition(object):
         integers to a wx.GBPosition, so you can use the more pythonic
         representation of the position nearly transparently in Python code.
         """
-        _core_.GBPosition_swiginit(self,_core_.new_GBPosition(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_GBPosition
-    __del__ = lambda self : None;
+        newobj = _core_.new_GBPosition(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetRow(*args, **kwargs):
         """GetRow(self) -> int"""
         return _core_.GBPosition_GetRow(*args, **kwargs)
@@ -13023,7 +12749,13 @@ class GBPosition(object):
     row = property(GetRow, SetRow)
     col = property(GetCol, SetCol)
 
-_core_.GBPosition_swigregister(GBPosition)
+
+class GBPositionPtr(GBPosition):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GBPosition
+_core_.GBPosition_swigregister(GBPositionPtr)
 
 class GBSpan(object):
     """
@@ -13034,9 +12766,9 @@ class GBSpan(object):
     nearly transparently in Python code.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGBSpan instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int rowspan=1, int colspan=1) -> GBSpan
 
@@ -13044,9 +12776,10 @@ class GBSpan(object):
         colspan. The default is (1,1). (Meaning that the item occupies one
         cell in each direction.
         """
-        _core_.GBSpan_swiginit(self,_core_.new_GBSpan(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_GBSpan
-    __del__ = lambda self : None;
+        newobj = _core_.new_GBSpan(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetRowspan(*args, **kwargs):
         """GetRowspan(self) -> int"""
         return _core_.GBSpan_GetRowspan(*args, **kwargs)
@@ -13103,7 +12836,13 @@ class GBSpan(object):
     rowspan = property(GetRowspan, SetRowspan)
     colspan = property(GetColspan, SetColspan)
 
-_core_.GBSpan_swigregister(GBSpan)
+
+class GBSpanPtr(GBSpan):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GBSpan
+_core_.GBSpan_swigregister(GBSpanPtr)
 
 class GBSizerItem(SizerItem):
     """
@@ -13112,9 +12851,9 @@ class GBSizerItem(SizerItem):
     and how many rows or columns it spans.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGBSizerItem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> GBSizerItem
 
@@ -13125,9 +12864,10 @@ class GBSizerItem(SizerItem):
         You will probably never need to create a wx.GBSizerItem directly as they
         are created automatically when the sizer's Add method is called.
         """
-        _core_.GBSizerItem_swiginit(self,_core_.new_GBSizerItem(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_GBSizerItem
-    __del__ = lambda self : None;
+        newobj = _core_.new_GBSizerItem(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetPos(*args, **kwargs):
         """
         GetPos(self) -> GBPosition
@@ -13209,11 +12949,13 @@ class GBSizerItem(SizerItem):
         """
         return _core_.GBSizerItem_SetGBSizer(*args, **kwargs)
 
-    EndPos = property(GetEndPos,doc="See `GetEndPos`") 
-    GBSizer = property(GetGBSizer,SetGBSizer,doc="See `GetGBSizer` and `SetGBSizer`") 
-    Pos = property(GetPos,SetPos,doc="See `GetPos` and `SetPos`") 
-    Span = property(GetSpan,SetSpan,doc="See `GetSpan` and `SetSpan`") 
-_core_.GBSizerItem_swigregister(GBSizerItem)
+
+class GBSizerItemPtr(GBSizerItem):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GBSizerItem
+_core_.GBSizerItem_swigregister(GBSizerItemPtr)
 DefaultSpan = cvar.DefaultSpan
 
 def GBSizerItemWindow(*args, **kwargs):
@@ -13224,6 +12966,7 @@ def GBSizerItemWindow(*args, **kwargs):
     Construct a `wx.GBSizerItem` for a window.
     """
     val = _core_.new_GBSizerItemWindow(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def GBSizerItemSizer(*args, **kwargs):
@@ -13234,6 +12977,7 @@ def GBSizerItemSizer(*args, **kwargs):
     Construct a `wx.GBSizerItem` for a sizer
     """
     val = _core_.new_GBSizerItemSizer(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def GBSizerItemSpacer(*args, **kwargs):
@@ -13244,6 +12988,7 @@ def GBSizerItemSpacer(*args, **kwargs):
     Construct a `wx.GBSizerItem` for a spacer.
     """
     val = _core_.new_GBSizerItemSpacer(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class GridBagSizer(FlexGridSizer):
@@ -13256,16 +13001,19 @@ class GridBagSizer(FlexGridSizer):
     positioned at, adjusted for spanning.
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGridBagSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, int vgap=0, int hgap=0) -> GridBagSizer
 
         Constructor, with optional parameters to specify the gap between the
         rows and columns.
         """
-        _core_.GridBagSizer_swiginit(self,_core_.new_GridBagSizer(*args, **kwargs))
+        newobj = _core_.new_GridBagSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Add(*args, **kwargs):
@@ -13370,16 +13118,6 @@ class GridBagSizer(FlexGridSizer):
         """
         return _core_.GridBagSizer_FindItem(*args)
 
-    def GetItem(self, item):
-        gbsi = None
-        si = wx.FlexGridSizer.GetItem(self, item)
-        if not si:
-            return None
-        if type(item) is not int:
-            gbsi = self.FindItem(item)
-        if gbsi: return gbsi
-        return si
-
     def FindItemAtPosition(*args, **kwargs):
         """
         FindItemAtPosition(self, GBPosition pos) -> GBSizerItem
@@ -13425,7 +13163,13 @@ class GridBagSizer(FlexGridSizer):
         """
         return _core_.GridBagSizer_CheckForIntersectionPos(*args, **kwargs)
 
-_core_.GridBagSizer_swigregister(GridBagSizer)
+
+class GridBagSizerPtr(GridBagSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GridBagSizer
+_core_.GridBagSizer_swigregister(GridBagSizerPtr)
 
 #---------------------------------------------------------------------------
 
@@ -13457,9 +13201,9 @@ class IndividualLayoutConstraint(Object):
     `wx.LayoutConstraints` instance and use the individual contstraints
     that it contains.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxIndividualLayoutConstraint instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def Set(*args, **kwargs):
         """
         Set(self, int rel, Window otherW, int otherE, int val=0, int marg=wxLAYOUT_DEFAULT_MARGIN)
@@ -13634,15 +13378,13 @@ class IndividualLayoutConstraint(Object):
         """
         return _core_.IndividualLayoutConstraint_GetEdge(*args, **kwargs)
 
-    Done = property(GetDone,SetDone,doc="See `GetDone` and `SetDone`") 
-    Margin = property(GetMargin,SetMargin,doc="See `GetMargin` and `SetMargin`") 
-    MyEdge = property(GetMyEdge,doc="See `GetMyEdge`") 
-    OtherEdge = property(GetOtherEdge,doc="See `GetOtherEdge`") 
-    OtherWindow = property(GetOtherWindow,doc="See `GetOtherWindow`") 
-    Percent = property(GetPercent,doc="See `GetPercent`") 
-    Relationship = property(GetRelationship,SetRelationship,doc="See `GetRelationship` and `SetRelationship`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_core_.IndividualLayoutConstraint_swigregister(IndividualLayoutConstraint)
+
+class IndividualLayoutConstraintPtr(IndividualLayoutConstraint):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = IndividualLayoutConstraint
+_core_.IndividualLayoutConstraint_swigregister(IndividualLayoutConstraintPtr)
 
 class LayoutConstraints(Object):
     """
@@ -13676,8 +13418,8 @@ class LayoutConstraints(Object):
     :see: `wx.IndividualLayoutConstraint`, `wx.Window.SetConstraints`
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxLayoutConstraints instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     left = property(_core_.LayoutConstraints_left_get)
     top = property(_core_.LayoutConstraints_top_get)
     right = property(_core_.LayoutConstraints_right_get)
@@ -13686,11 +13428,12 @@ class LayoutConstraints(Object):
     height = property(_core_.LayoutConstraints_height_get)
     centreX = property(_core_.LayoutConstraints_centreX_get)
     centreY = property(_core_.LayoutConstraints_centreY_get)
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> LayoutConstraints"""
-        _core_.LayoutConstraints_swiginit(self,_core_.new_LayoutConstraints(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_LayoutConstraints
-    __del__ = lambda self : None;
+        newobj = _core_.new_LayoutConstraints(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SatisfyConstraints(*args, **kwargs):
         """SatisfyConstraints(Window win) -> (areSatisfied, noChanges)"""
         return _core_.LayoutConstraints_SatisfyConstraints(*args, **kwargs)
@@ -13699,7 +13442,13 @@ class LayoutConstraints(Object):
         """AreSatisfied(self) -> bool"""
         return _core_.LayoutConstraints_AreSatisfied(*args, **kwargs)
 
-_core_.LayoutConstraints_swigregister(LayoutConstraints)
+
+class LayoutConstraintsPtr(LayoutConstraints):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = LayoutConstraints
+_core_.LayoutConstraints_swigregister(LayoutConstraintsPtr)
 
 #----------------------------------------------------------------------------
 
@@ -13733,24 +13482,6 @@ if RELEASE_VERSION != _core_.RELEASE_VERSION:
     import warnings
     warnings.warn("wxPython/wxWidgets release number mismatch")
 
-
-def version():
-    """Returns a string containing version and port info"""
-    ctype = wx.USE_UNICODE and 'unicode' or 'ansi'
-    if wx.Platform == '__WXMSW__':
-        port = 'msw'
-    elif wx.Platform == '__WXMAC__':
-        port = 'mac'
-    elif wx.Platform == '__WXGTK__':
-        port = 'gtk'
-        if 'gtk2' in wx.PlatformInfo:
-            port = 'gtk2'
-    else:
-        port = '?'
-
-    return "%s (%s-%s)" % (wx.VERSION_STRING, port, ctype)
-                       
-    
 #----------------------------------------------------------------------------
 
 # Set wxPython's default string<-->unicode conversion encoding from
@@ -13770,10 +13501,7 @@ if default == 'ascii':
     import locale
     import codecs
     try:
-        if hasattr(locale, 'getpreferredencoding'):
-            default = locale.getpreferredencoding()
-        else:
-            default = locale.getdefaultlocale()[1]
+        default = locale.getdefaultlocale()[1]
         codecs.lookup(default)
     except (ValueError, LookupError, TypeError):
         default = _sys.getdefaultencoding()
@@ -13851,7 +13579,7 @@ def CallAfter(callable, *args, **kw):
     method calls from non-GUI threads.  Any extra positional or
     keyword args are passed on to the callable when it is called.
 
-    :see: `wx.CallLater`
+    :see: `wx.FutureCall`
     """
     app = wx.GetApp()
     assert app is not None, 'No wx.App created yet'
@@ -13870,7 +13598,7 @@ def CallAfter(callable, *args, **kw):
 #----------------------------------------------------------------------------
 
 
-class CallLater:
+class FutureCall:
     """
     A convenience class for `wx.Timer`, that calls the given callable
     object once after the given amount of milliseconds, passing any
@@ -13881,7 +13609,7 @@ class CallLater:
     then there is no need to hold a reference to this object.  It will
     hold a reference to itself while the timer is running (the timer
     has a reference to self.Notify) but the cycle will be broken when
-    the timer completes, automatically cleaning up the wx.CallLater
+    the timer completes, automatically cleaning up the wx.FutureCall
     object.
 
     :see: `wx.CallAfter`
@@ -13967,12 +13695,7 @@ class CallLater:
             # if it wasn't restarted, then cleanup
             wx.CallAfter(self.Stop)
 
-    Interval = property(GetInterval)
-    Result = property(GetResult)
 
-
-class FutureCall(CallLater):
-    """A compatibility alias for `CallLater`."""
 
 #----------------------------------------------------------------------------
 # Control which items in this module should be documented by epydoc.
@@ -13985,7 +13708,7 @@ class FutureCall(CallLater):
 class __DocFilter:
     """
     A filter for epydoc that only allows non-Ptr classes and
-    functions, in order to reduce the clutter in the API docs.
+    fucntions, in order to reduce the clutter in the API docs.
     """
     def __init__(self, globals):
         self._globals = globals
@@ -13993,13 +13716,9 @@ class __DocFilter:
     def __call__(self, name):
         import types
         obj = self._globals.get(name, None)
-
-        # only document classes and function
         if type(obj) not in [type, types.ClassType, types.FunctionType, types.BuiltinFunctionType]:
             return False
-
-        # skip other things that are private or will be documented as part of somethign else
-        if name.startswith('_') or name.startswith('EVT') or name.endswith('_swigregister')  or name.endswith('Ptr') :
+        if name.startswith('_') or name.endswith('Ptr') or name.startswith('EVT'):
             return False
 
         # skip functions that are duplicates of static functions in a class
@@ -14008,7 +13727,7 @@ class __DocFilter:
             methname = name.split('_')[1]
             if hasattr(cls, methname) and type(getattr(cls, methname)) is types.FunctionType:
                 return False
-            
+
         return True
 
 #----------------------------------------------------------------------------
@@ -14020,6 +13739,11 @@ from _gdi import *
 from _windows import *
 from _controls import *
 from _misc import *
+
+
+# Fixup the stock objects since they can't be used yet.  (They will be
+# restored in wx.PyApp.OnInit.)
+_core_._wxPyFixStockObjects()
 
 #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------

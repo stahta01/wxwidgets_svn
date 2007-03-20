@@ -53,7 +53,7 @@ class TexMacroDef: public wxObject
   int macroId;
 
   TexMacroDef(int the_id, const wxChar *the_name, int n, bool ig, bool forbidLevel = FORBID_OK);
-  virtual ~TexMacroDef(void);
+  ~TexMacroDef(void);
 };
 
 #define CHUNK_TYPE_MACRO    1
@@ -135,7 +135,7 @@ class TexTopic: public wxObject
   wxChar *filename;
   wxStringList *keywords;
   TexTopic(wxChar *f = NULL);
-  virtual ~TexTopic(void);
+  ~TexTopic(void);
 };
 extern wxHashTable TopicTable;
 void AddKeyWordForTopic(wxChar *topic, wxChar *entry, wxChar *filename = NULL);
@@ -356,10 +356,10 @@ void DefaultOnMacro(int macroId, int no_args, bool start);
 bool DefaultOnArgument(int macroId, int arg_no, bool start);
 
 // Called on error
-void OnError(const wxString& msg);
+void OnError(const wxChar *msg);
 
 // Called for information
-void OnInform(const wxString& msg);
+void OnInform(const wxChar *msg);
 
 // Special yield wrapper
 void Tex2RTFYield(bool force = false);
@@ -377,7 +377,7 @@ void ForceTopicName(const wxChar *name);
 void ResetTopicCounter(void);
 
 // Parse unit eg. 14, 12pt, 34cm and return value in points.
-int ParseUnitArgument(const wxChar *unitArg);
+int ParseUnitArgument(wxChar *unitArg);
 
 // Set small, large, normal etc. point sizes for reference size
 void SetFontSizes(int pointSize);
@@ -403,7 +403,7 @@ class TexRef: public wxObject
   wxChar *sectionNumber; // Section or figure number (as a string)
   wxChar *sectionName; // name e.g. 'section'
   TexRef(const wxChar *label, const wxChar *file, const wxChar *section, const wxChar *sectionN = NULL);
-  virtual ~TexRef(void);
+  ~TexRef(void);
 };
 
 /*
@@ -483,11 +483,11 @@ class BibEntry: public wxObject
 extern wxList BibList;
 extern wxStringList CitationList;
 
-bool ReadBib(const wxChar *filename);
+bool ReadBib(wxChar *filename);
 void OutputBib(void);
 void ResolveBibReferences(void);
-void AddCitation(const wxChar *citeKey);
-TexRef *FindReference(const wxChar *key);
+void AddCitation(wxChar *citeKey);
+TexRef *FindReference(wxChar *key);
 
 /*
  * Ability to customize, or at least suppress unknown macro errors
@@ -515,7 +515,7 @@ public:
         else
             macroBody = NULL;
     }
-    virtual ~CustomMacro();
+    ~CustomMacro();
 };
 
 bool ReadCustomMacros(const wxString& filename);
@@ -537,7 +537,7 @@ class ColourTableEntry: public wxObject
   unsigned int blue;
 
   ColourTableEntry(const wxChar *theName, unsigned int r,  unsigned int g,  unsigned int b);
-  virtual ~ColourTableEntry(void);
+  ~ColourTableEntry(void);
 };
 
 extern wxList ColourTable;

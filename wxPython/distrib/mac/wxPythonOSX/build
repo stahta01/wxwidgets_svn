@@ -257,7 +257,6 @@ if [ $skipconfig != yes -a $universal != yes ]; then
 	--enable-sound \
 	--enable-display \
 	--enable-geometry \
-	--enable-graphics_ctx \
 	$DEBUG_FLAG \
 	--enable-precomp=no \
 	--enable-optimise \
@@ -279,6 +278,7 @@ if [ $skipbuild != yes ]; then
         $WXDIR/distrib/scripts/mac/macbuild wxpython universal $CHARTYPE
     else
         make $MAKEJOBS
+        make $MAKEJOBS -C contrib/src/animate
         make $MAKEJOBS -C contrib/src/gizmos
         make $MAKEJOBS -C contrib/src/stc
     fi
@@ -308,6 +308,7 @@ if [ $skipinstall != yes ]; then
     cd $WXBLD
     if [ $universal != yes ]; then
         make                        prefix=$INSTALLROOT$PREFIX install
+        make -C contrib/src/animate prefix=$INSTALLROOT$PREFIX install
         make -C contrib/src/gizmos  prefix=$INSTALLROOT$PREFIX install
         make -C contrib/src/stc     prefix=$INSTALLROOT$PREFIX install
     fi

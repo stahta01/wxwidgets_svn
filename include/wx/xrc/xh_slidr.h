@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_slidr.h
+// Name:        xh_slidr.h
 // Purpose:     XML resource handler for wxSlider
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -11,9 +11,14 @@
 #ifndef _WX_XH_SLIDR_H_
 #define _WX_XH_SLIDR_H_
 
-#include "wx/xrc/xmlres.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_slidr.h"
+#endif
 
-#if wxUSE_XRC && wxUSE_SLIDER
+#include "wx/xrc/xmlres.h"
+#include "wx/defs.h"
+
+#if wxUSE_SLIDER
 
 class WXDLLIMPEXP_XRC wxSliderXmlHandler : public wxXmlResourceHandler
 {
@@ -31,6 +36,6 @@ public:
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC && wxUSE_SLIDER
+#endif
 
-#endif // _WX_XH_SLIDR_H_
+#endif // _WX_XH_SLIDER_H_

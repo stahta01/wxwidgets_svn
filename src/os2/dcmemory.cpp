@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dcmemory.cpp
+// Name:        dcmemory.cpp
 // Purpose:     wxMemoryDC class
 // Author:      David Webster
 // Modified by:
@@ -12,15 +12,15 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/dcmemory.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/log.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
+
+#include "wx/dcmemory.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxDC)
 
@@ -28,11 +28,19 @@ IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxDC)
 // Memory DC
 /////////////////////////////////////////////////////////////////////////////
 
+wxMemoryDC::wxMemoryDC(void)
+{
+    CreateCompatible(NULL);
+    Init();
+} // end of wxMemoryDC::wxMemoryDC
+
 wxMemoryDC::wxMemoryDC(
   wxDC*                             pOldDC
 )
 {
+    pOldDC->BeginDrawing();
     CreateCompatible(pOldDC);
+    pOldDC->EndDrawing();
     Init();
 } // end of wxMemoryDC::wxMemoryDC
 
@@ -92,16 +100,16 @@ bool wxMemoryDC::CreateCompatible( wxDC* WXUNUSED(pDC) )
         {
             m_hPS = NULLHANDLE;
             m_hDC = NULLHANDLE;
-            m_ok  = false;
-            m_bOwnsDC = false;
+            m_ok  = FALSE;
+            m_bOwnsDC = FALSE;
         }
     }
     else
     {
         m_hPS = NULLHANDLE;
         m_hDC = NULLHANDLE;
-        m_ok  = false;
-        m_bOwnsDC = false;
+        m_ok  = FALSE;
+        m_bOwnsDC = FALSE;
     }
 
     //
@@ -112,7 +120,7 @@ bool wxMemoryDC::CreateCompatible( wxDC* WXUNUSED(pDC) )
     return m_ok;
 } // end of wxMemoryDC::CreateCompatible
 
-void wxMemoryDC::DoSelect(
+void wxMemoryDC::SelectObject(
   const wxBitmap&                   rBitmap
 )
 {
@@ -159,7 +167,6 @@ void wxMemoryDC::DoSelect(
                    );
         m_vSelectedBitmap.SetSelectedInto(NULL);
     }
-
     m_vSelectedBitmap = rBitmap;
 
 

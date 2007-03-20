@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/font.cpp
+// Name:        font.cpp
 // Purpose:     wxFont class
 // Author:      David Webster
 // Modified by:
@@ -20,13 +20,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/font.h"
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
+    #include "wx/setup.h"
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
+    #include "wx/font.h"
     #include "wx/log.h"
 #endif // WX_PRECOMP
 
@@ -51,7 +51,7 @@ class WXDLLEXPORT wxFontRefData: public wxGDIRefData
 public:
     wxFontRefData()
     {
-        Init(-1, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false,
+        Init(-1, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, FALSE,
              wxEmptyString, wxFONTENCODING_DEFAULT);
     }
 
@@ -196,13 +196,12 @@ public:
             m_nWeight = nWeight;
     }
 
-    inline bool SetFaceName(const wxString& sFaceName)
+    inline void SetFaceName(const wxString& sFaceName)
     {
         if (m_bNativeFontInfoOk)
-            return m_vNativeFontInfo.SetFaceName(sFaceName);
+            m_vNativeFontInfo.SetFaceName(sFaceName);
         else
             m_sFaceName = sFaceName;
-        return true;
     }
 
     inline void SetUnderlined(bool bUnderlined)
@@ -297,8 +296,6 @@ protected:
     bool                            m_bInternalPS; // Internally generated PS?
 }; // end of CLASS wxFontRefData
 
-#define M_FONTDATA ((wxFontRefData*)m_refData)
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -327,10 +324,10 @@ void wxFontRefData::Init(
     m_vEncoding   = vEncoding;
     m_hFont       = 0;
 
-    m_bNativeFontInfoOk = false;
+    m_bNativeFontInfoOk = FALSE;
 
     m_nFontId     = 0;
-    m_bTemporary  = false;
+    m_bTemporary  = FALSE;
     m_pFM         = (PFONTMETRICS)NULL;
     m_hPS         = NULLHANDLE;
     m_nNumFonts   = 0;
@@ -363,7 +360,7 @@ void wxFontRefData::Init(
         m_hPS = (HPS)hPS;
 
     m_nFontId     = 0;
-    m_bTemporary  = false;
+    m_bTemporary  = FALSE;
     m_pFM         = (PFONTMETRICS)NULL;
     m_nNumFonts   = 0;
 } // end of wxFontRefData::Init
@@ -693,12 +690,11 @@ void wxNativeFontInfo::SetUnderlined(
         fa.fsSelection |= FATTR_SEL_UNDERSCORE;
 } // end of wxNativeFontInfo::SetUnderlined
 
-bool wxNativeFontInfo::SetFaceName(
-  const wxString&                   sFacename
+void wxNativeFontInfo::SetFaceName(
+  wxString                          sFacename
 )
 {
     wxStrncpy((wxChar*)fa.szFacename, sFacename, WXSIZEOF(fa.szFacename));
-    return true;
 } // end of wxNativeFontInfo::SetFaceName
 
 void wxNativeFontInfo::SetFamily(
@@ -787,56 +783,56 @@ bool wxNativeFontInfo::FromString( const wxString& rsStr )
     wxString                        sToken = vTokenizer.GetNextToken();
 
     if (sToken != _T('0'))
-        return false;
+        return FALSE;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fm.lEmHeight = lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.lAveCharWidth = lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.fsSelection = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.fsType = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.fsFontUse = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.idRegistry = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.usCodePage = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fa.lMatch = lVal;
 
     sToken = vTokenizer.GetNextToken();
     if (!sToken.ToLong(&lVal))
-        return false;
+        return FALSE;
     fn.usWeightClass = (USHORT)lVal;
 
     sToken = vTokenizer.GetNextToken();
     if(!sToken)
-        return false;
+        return FALSE;
     wxStrcpy((wxChar*)fa.szFacename, sToken.c_str());
     return true;
 } // end of wxNativeFontInfo::FromString
@@ -864,6 +860,10 @@ wxString wxNativeFontInfo::ToString() const
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
+
+void wxFont::Init()
+{
+} // end of wxFont::Init
 
 bool wxFont::Create( const wxNativeFontInfo& rInfo,
                      WXHFONT hFont )
@@ -950,7 +950,7 @@ bool wxFont::FreeResource( bool WXUNUSED(bForce) )
     return false;
 } // end of wxFont::FreeResource
 
-WXHANDLE wxFont::GetResourceHandle() const
+WXHANDLE wxFont::GetResourceHandle()
 {
     return GetHFONT();
 } // end of wxFont::GetResourceHandle
@@ -1028,17 +1028,15 @@ void wxFont::SetWeight(
     RealizeResource();
 } // end of wxFont::SetWeight
 
-bool wxFont::SetFaceName(
+void wxFont::SetFaceName(
   const wxString&                   rsFaceName
 )
 {
     Unshare();
 
-    bool refdataok = M_FONTDATA->SetFaceName(rsFaceName);
+    M_FONTDATA->SetFaceName(rsFaceName);
 
     RealizeResource();
-
-    return refdataok && wxFontBase::SetFaceName(rsFaceName);
 } // end of wxFont::SetFaceName
 
 void wxFont::SetUnderlined(
@@ -1110,14 +1108,14 @@ int wxFont::GetWeight() const
 
 bool wxFont::GetUnderlined() const
 {
-    wxCHECK_MSG( Ok(), false, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), FALSE, wxT("invalid font") );
 
     return M_FONTDATA->GetUnderlined();
 } // end of wxFont::GetUnderlined
 
 wxString wxFont::GetFaceName() const
 {
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), wxT(""), wxT("invalid font") );
 
     return M_FONTDATA->GetFaceName();
 } // end of wxFont::GetFaceName
@@ -1138,14 +1136,19 @@ const wxNativeFontInfo* wxFont::GetNativeFontInfo() const
 //
 // Internal use only method to set the FONTMETRICS array
 //
-void wxFont::SetFM( PFONTMETRICS pFM, int nNumFonts )
+void wxFont::SetFM(
+  PFONTMETRICS                      pFM
+, int                               nNumFonts
+)
 {
     M_FONTDATA->SetFM(pFM);
     M_FONTDATA->SetNumFonts(nNumFonts);
 } // end of wxFont::SetFM
 
 
-void wxFont::SetPS( HPS hPS )
+void wxFont::SetPS(
+  HPS                               hPS
+)
 {
     Unshare();
 

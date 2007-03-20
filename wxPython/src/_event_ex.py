@@ -31,6 +31,7 @@ class PyEventBinder(object):
             success += target.Disconnect(id1, id2, et)
         return success != 0
 
+    
     def _getEvtType(self):
         """
         Make it easy to get to the default wxEventType typeID for this
@@ -40,7 +41,6 @@ class PyEventBinder(object):
     
     typeId = property(_getEvtType)
 
-    
     def __call__(self, *args):
         """
         For backwards compatibility with the old EVT_* functions.

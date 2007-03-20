@@ -12,6 +12,10 @@
 #ifndef _WX_MSW_REGISTRY_H_
 #define _WX_MSW_REGISTRY_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "registry.h"
+#endif
+
 class WXDLLIMPEXP_BASE wxOutputStream;
 
 // ----------------------------------------------------------------------------
@@ -48,11 +52,16 @@ public:
     HKCR,       // classes root
     HKCU,       // current user
     HKLM,       // local machine
-    HKUSR,      // users
-    HKPD,       // performance data (WinNT/2K only)
-    HKCC,       // current config
-    HKDD,       // dynamic data (Win95/98 only)
-    HKMAX
+    HKUSR       // users
+#ifndef __WXWINCE__
+    ,
+    HKPD        // performance data (WinNT/2K only)
+#endif
+#if WINVER >= 0x0400
+    ,
+    HKCC,       // current config (starting from Win95/NT 4.0)
+    HKDD        // dynamic data (Win95/98 only)
+#endif  // Winver
   };
 
   // access mode for the key

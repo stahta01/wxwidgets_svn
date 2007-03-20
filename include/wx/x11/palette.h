@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/palette.h
+// Name:        palette.h
 // Purpose:     wxPalette class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_PALETTE_H_
 #define _WX_PALETTE_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "palette.h"
+#endif
 
 #include "wx/gdiobj.h"
 #include "wx/list.h"
@@ -37,7 +41,7 @@ class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
     friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData();
-    virtual ~wxPaletteRefData();
+    ~wxPaletteRefData();
 
 protected:
     wxList  m_palettes;
@@ -51,15 +55,19 @@ class WXDLLEXPORT wxPalette: public wxPaletteBase
 
 public:
     wxPalette();
+    wxPalette(const wxPalette& palette) { Ref(palette); }
 
     wxPalette(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
-    virtual ~wxPalette();
+    ~wxPalette();
     bool Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
-    int GetPixel(unsigned char red, unsigned char green, unsigned char blue) const;
+    int GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const;
     bool GetRGB(int pixel, unsigned char *red, unsigned char *green, unsigned char *blue) const;
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const { return (m_refData != NULL) ; }
+    virtual bool Ok() const { return (m_refData != NULL) ; }
+
+    wxPalette& operator = (const wxPalette& palette) { if (*this == palette) return (*this); Ref(palette); return *this; }
+    bool operator == (const wxPalette& palette) const { return m_refData == palette.m_refData; }
+    bool operator != (const wxPalette& palette) const { return m_refData != palette.m_refData; }
 
     // X-specific
     WXColormap GetXColormap(WXDisplay* display = NULL) const;

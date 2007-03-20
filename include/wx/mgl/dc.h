@@ -11,6 +11,10 @@
 #ifndef _WX_DC_H_
 #define _WX_DC_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dc.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/region.h"
 
@@ -51,7 +55,7 @@ class WXDLLEXPORT wxDC : public wxDCBase
 
 public:
     wxDC();
-    virtual ~wxDC();
+    ~wxDC();
 
     // implement base class pure virtuals
     // ----------------------------------
@@ -101,35 +105,63 @@ public:
 
     wxCoord XDEV2LOG(wxCoord x) const
     {
-        return wxRound((double)(x - m_deviceOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
+        wxCoord new_x = x - m_deviceOriginX;
+        if (new_x > 0)
+            return (wxCoord)((double)(new_x) / m_scaleX + 0.5) * m_signX + m_logicalOriginX;
+        else
+            return (wxCoord)((double)(new_x) / m_scaleX - 0.5) * m_signX + m_logicalOriginX;
     }
     wxCoord XDEV2LOGREL(wxCoord x) const
     {
-        return wxRound((double)(x) / m_scaleX);
+        if (x > 0)
+            return (wxCoord)((double)(x) / m_scaleX + 0.5);
+        else
+            return (wxCoord)((double)(x) / m_scaleX - 0.5);
     }
     wxCoord YDEV2LOG(wxCoord y) const
     {
-        return wxRound((double)(y - m_deviceOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
+        wxCoord new_y = y - m_deviceOriginY;
+        if (new_y > 0)
+            return (wxCoord)((double)(new_y) / m_scaleY + 0.5) * m_signY + m_logicalOriginY;
+        else
+            return (wxCoord)((double)(new_y) / m_scaleY - 0.5) * m_signY + m_logicalOriginY;
     }
     wxCoord YDEV2LOGREL(wxCoord y) const
     {
-        return wxRound((double)(y) / m_scaleY);
+        if (y > 0)
+            return (wxCoord)((double)(y) / m_scaleY + 0.5);
+        else
+            return (wxCoord)((double)(y) / m_scaleY - 0.5);
     }
     wxCoord XLOG2DEV(wxCoord x) const
     {
-        return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX;
+        wxCoord new_x = x - m_logicalOriginX;
+        if (new_x > 0)
+            return (wxCoord)((double)(new_x) * m_scaleX + 0.5) * m_signX + m_deviceOriginX;
+        else
+            return (wxCoord)((double)(new_x) * m_scaleX - 0.5) * m_signX + m_deviceOriginX;
     }
     wxCoord XLOG2DEVREL(wxCoord x) const
     {
-        return wxRound((double)(x) * m_scaleX);
+        if (x > 0)
+            return (wxCoord)((double)(x) * m_scaleX + 0.5);
+        else
+            return (wxCoord)((double)(x) * m_scaleX - 0.5);
     }
     wxCoord YLOG2DEV(wxCoord y) const
     {
-        return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY;
+        wxCoord new_y = y - m_logicalOriginY;
+        if (new_y > 0)
+            return (wxCoord)((double)(new_y) * m_scaleY + 0.5) * m_signY + m_deviceOriginY;
+        else
+            return (wxCoord)((double)(new_y) * m_scaleY - 0.5) * m_signY + m_deviceOriginY;
     }
     wxCoord YLOG2DEVREL(wxCoord y) const
     {
-        return wxRound((double)(y) * m_scaleY);
+        if (y > 0)
+            return (wxCoord)((double)(y) * m_scaleY + 0.5);
+        else
+            return (wxCoord)((double)(y) * m_scaleY - 0.5);
     }
 
     MGLDevCtx *GetMGLDC() const { return m_MGLDC; }

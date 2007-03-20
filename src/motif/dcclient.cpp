@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dcclient.cpp
+// Name:        dcclient.cpp
 // Purpose:     wxClientDC class
 // Author:      Julian Smart
 // Modified by:
@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*
-  About pens, brushes, and the m_autoSetting flag:
+  About pens, brushes, and the autoSetting flag:
 
   Under X, pens and brushes control some of the same X drawing
   parameters.  Therefore, it is impossible to independently maintain
@@ -18,9 +18,9 @@
   the current logical function. The m_currentFill, etc. instance
   variables remember state across the brush and pen.
 
-  Since pens are used more than brushes, the m_autoSetting flag is used to
+  Since pens are used more than brushes, the autoSetting flag is used to
   indicate that a brush was recently used, and SetPen must be called to
-  reinstall the current pen's parameters. If m_autoSetting includes 0x2, then the
+  reinstall the current pen's parameters. If autoSetting includes 0x2, then the
   pens color may need to be set based on XOR.
 
   There is, unfortunately, some confusion between setting the current pen/brush
@@ -36,19 +36,20 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcclient.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/dcclient.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/window.h"
-    #include "wx/dcmemory.h"
-    #include "wx/math.h"
-    #include "wx/image.h"
-#endif
+#include "wx/dcmemory.h"
+#include "wx/window.h"
+#include "wx/app.h"
+#include "wx/image.h"
+#include "wx/log.h"
+#include "wx/math.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -88,7 +89,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
 
-#define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#ifndef IS_HATCH
+    // IS_HATCH exists for WXWIN_COMPATIBILITY_2_4 only
+    // but wxMotif needs it for its internals here
+    #define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#endif
 
 // FIXME: left over after removal of wxDC::GetOptimization()
 #define GET_OPTIMIZATION false
@@ -148,6 +153,7 @@ void wxWindowDC::Init()
     m_display = (WXDisplay*) NULL;
     m_pixmap = (WXPixmap) 0;
     m_autoSetting = 0;
+    m_oldFont = (WXFont) 0;
     m_ok = false;
     m_clipRegion = (WXRegion) 0;
 }
@@ -191,7 +197,7 @@ wxWindowDC::wxWindowDC( wxWindow *window )
             &gcvalues);
     }
 
-    m_backgroundPixel = gcvalues.background;
+    m_backgroundPixel = (int) gcvalues.background;
 
     SetBackground(wxBrush(m_window->GetBackgroundColour(), wxSOLID));
 }
@@ -442,8 +448,8 @@ void wxWindowDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord 
 
         for (i = 0; i < n; i++)
         {
-            xpoints[i].x = (short)XLOG2DEV (points[i].x + xoffset);
-            xpoints[i].y = (short)YLOG2DEV (points[i].y + yoffset);
+            xpoints[i].x = XLOG2DEV (points[i].x + xoffset);
+            xpoints[i].y = YLOG2DEV (points[i].y + yoffset);
         }
         XDrawLines ((Display*) m_display, (Pixmap) m_pixmap, (GC) m_gc, xpoints, n, 0);
 
@@ -451,8 +457,8 @@ void wxWindowDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord 
         {
             for (i = 0; i < n; i++)
             {
-                xpoints[i].x = (short)XLOG2DEV_2 (points[i].x + xoffset);
-                xpoints[i].y = (short)YLOG2DEV_2 (points[i].y + yoffset);
+                xpoints[i].x = XLOG2DEV_2 (points[i].x + xoffset);
+                xpoints[i].y = YLOG2DEV_2 (points[i].y + yoffset);
             }
             XDrawLines ((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(),(GC) m_gcBacking, xpoints, n, 0);
         }
@@ -470,10 +476,10 @@ void wxWindowDC::DoDrawPolygon( int n, wxPoint points[],
     int i;
     for (i = 0; i < n; i++)
     {
-        xpoints1[i].x = (short)XLOG2DEV (points[i].x + xoffset);
-        xpoints1[i].y = (short)YLOG2DEV (points[i].y + yoffset);
-        xpoints2[i].x = (short)XLOG2DEV_2 (points[i].x + xoffset);
-        xpoints2[i].y = (short)YLOG2DEV_2 (points[i].y + yoffset);
+        xpoints1[i].x = XLOG2DEV (points[i].x + xoffset);
+        xpoints1[i].y = YLOG2DEV (points[i].y + yoffset);
+        xpoints2[i].x = XLOG2DEV_2 (points[i].x + xoffset);
+        xpoints2[i].y = YLOG2DEV_2 (points[i].y + yoffset);
         CalcBoundingBox (points[i].x + xoffset, points[i].y + yoffset);
     }
 
@@ -793,13 +799,13 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest,
     // foreground colour. [m_textForegroundColour] Background pixels (0)
     // will be painted with backgound colour (m_textBackgroundColour)
     // Using ::SetPen is horribly slow, so avoid doing it
-    WXPixel oldBackgroundPixel = -1;
-    WXPixel oldForegroundPixel = -1;
+    int oldBackgroundPixel = -1;
+    int oldForegroundPixel = -1;
 
     if (m_textBackgroundColour.Ok())
     {
         oldBackgroundPixel = m_backgroundPixel;
-        WXPixel pixel = m_textBackgroundColour.AllocColour(m_display);
+        int pixel = m_textBackgroundColour.AllocColour(m_display);
 
         XSetBackground ((Display*) m_display, (GC) m_gc, pixel);
         if (m_window && m_window->GetBackingPixmap())
@@ -814,7 +820,7 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest,
             CalculatePixel( m_textForegroundColour,
                             m_textForegroundColour, true);
 
-        WXPixel pixel = m_textForegroundColour.GetPixel();
+        int pixel = m_textForegroundColour.GetPixel();
         if (pixel > -1)
             SetForegroundPixelWithLogicalFunction(pixel);
     }
@@ -1052,7 +1058,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 
         if (!sameColour || !GET_OPTIMIZATION)
         {
-            WXPixel pixel = m_textBackgroundColour.AllocColour(m_display);
+            int pixel = m_textBackgroundColour.AllocColour(m_display);
             m_currentColour = m_textBackgroundColour;
 
             // Set the GC to the required colour
@@ -1085,8 +1091,8 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 
         if (!sameColour || !GET_OPTIMIZATION)
         {
-            WXPixel pixel = CalculatePixel(m_textForegroundColour,
-                                           m_currentColour, false);
+            int pixel = CalculatePixel(m_textForegroundColour,
+                                       m_currentColour, false);
 
             // Set the GC to the required colour
             if (pixel > -1)
@@ -1126,11 +1132,11 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 #if wxMOTIF_NEW_FONT_HANDLING
             XmbDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), fset, (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        wxConstCast(text.mb_str(), char), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #else
             XDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        wxConstCast(text.mb_str(), char), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #endif
     }
 
@@ -1157,10 +1163,10 @@ void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y,
 
     wxCHECK_RET( Ok(), "invalid dc" );
 
-    WXPixel oldBackgroundPixel = -1;
-    WXPixel oldForegroundPixel = -1;
-    WXPixel foregroundPixel = -1;
-    WXPixel backgroundPixel = -1;
+    int oldBackgroundPixel = -1;
+    int oldForegroundPixel = -1;
+    int foregroundPixel = -1;
+    int backgroundPixel = -1;
 
     if (m_textBackgroundColour.Ok())
     {
@@ -1318,7 +1324,7 @@ wxCoord wxWindowDC::GetCharWidth() const
 {
     wxCHECK_MSG( Ok(), 0, "invalid dc" );
     wxCHECK_MSG( m_font.Ok(), 0, "invalid font" );
-
+    
     int width;
 
     wxGetTextExtent (m_display, m_font, m_userScaleY * m_logicalScaleY,
@@ -1410,7 +1416,7 @@ void wxWindowDC::SetFont( const wxFont &font )
 #endif
 }
 
-void wxWindowDC::SetForegroundPixelWithLogicalFunction(WXPixel pixel)
+void wxWindowDC::SetForegroundPixelWithLogicalFunction(int pixel)
 {
     if (m_logicalFunction == wxXOR)
     {
@@ -1430,12 +1436,12 @@ void wxWindowDC::SetForegroundPixelWithLogicalFunction(WXPixel pixel)
     }
 }
 
-WXPixel wxWindowDC::CalculatePixel(wxColour& colour, wxColour& curCol,
+int wxWindowDC::CalculatePixel(wxColour& colour, wxColour& curCol,
                                bool roundToWhite) const
 {
     const unsigned char wp = (unsigned char)255;
 
-    WXPixel pixel = -1;
+    int pixel = -1;
     if(!m_colour) // Mono display
     {
         unsigned char red = colour.Red ();
@@ -1447,16 +1453,16 @@ WXPixel wxWindowDC::CalculatePixel(wxColour& colour, wxColour& curCol,
            ((red != 0 || blue != 0 || green != 0) && roundToWhite))
         {
             curCol = *wxWHITE;
-            pixel = WhitePixel((Display*) m_display,
-                               DefaultScreen((Display*) m_display));
+            pixel = (int)WhitePixel((Display*) m_display,
+                                    DefaultScreen((Display*) m_display));
             curCol.SetPixel(pixel);
             colour.SetPixel(pixel);
         }
         else
         {
             curCol = *wxBLACK;
-            pixel = BlackPixel((Display*) m_display,
-                               DefaultScreen((Display*) m_display));
+            pixel = (int)BlackPixel((Display*) m_display,
+                                    DefaultScreen((Display*) m_display));
             curCol.SetPixel(pixel);
             colour.SetPixel(pixel);
         }
@@ -1577,7 +1583,7 @@ void wxWindowDC::SetPen( const wxPen &pen )
             {
                 int factor = scaled_width == 0 ? 1 : scaled_width;
                 for (int i = 0; i < req_nb_dash; i++)
-                    real_req_dash[i] = (wxX11Dash)(req_dash[i] * factor);
+                    real_req_dash[i] = req_dash[i] * factor;
                 XSetDashes ((Display*) m_display, (GC) m_gc, 0, real_req_dash, req_nb_dash);
 
                 if (m_window && m_window->GetBackingPixmap())
@@ -1686,7 +1692,7 @@ void wxWindowDC::SetPen( const wxPen &pen )
             XSetStipple ((Display*) m_display,(GC) m_gcBacking, myStipple);
     }
     else if (m_currentStipple.Ok()
-        && ((!m_currentStipple.IsSameAs(oldStipple)) || !GET_OPTIMIZATION))
+        && ((m_currentStipple != oldStipple) || !GET_OPTIMIZATION))
     {
         XSetStipple ((Display*) m_display, (GC) m_gc, (Pixmap) m_currentStipple.GetDrawable());
 
@@ -1713,7 +1719,7 @@ void wxWindowDC::SetPen( const wxPen &pen )
     if (!sameColour || !GET_OPTIMIZATION
         || ((m_logicalFunction == wxXOR) || (m_autoSetting & 0x2)))
     {
-        WXPixel pixel = -1;
+        int pixel = -1;
         if (m_pen.GetStyle () == wxTRANSPARENT)
             pixel = m_backgroundPixel;
         else
@@ -1880,7 +1886,7 @@ void wxWindowDC::SetBrush( const wxBrush &brush )
     // must test m_logicalFunction, because it involves background!
     if (!sameColour || !GET_OPTIMIZATION || m_logicalFunction == wxXOR)
     {
-        WXPixel pixel = CalculatePixel(m_brush.GetColour(), m_currentColour, true);
+        int pixel = CalculatePixel(m_brush.GetColour(), m_currentColour, true);
 
         if (pixel > -1)
             SetForegroundPixelWithLogicalFunction(pixel);
@@ -2062,8 +2068,7 @@ void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y,
 {
     wxDC::DoSetClippingRegion( x, y, width, height );
 
-    wxRegion temp(XLOG2DEV(x), YLOG2DEV(y),
-                  XLOG2DEVREL(width), YLOG2DEVREL(height));
+    wxRegion temp(x, y, width, height);
 
     SetDCClipping(temp.GetX11Region());
 
@@ -2072,10 +2077,10 @@ void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y,
     if (m_window && m_window->GetBackingPixmap())
     {
         XRectangle rects[1];
-        rects[0].x = (short)XLOG2DEV_2(x);
-        rects[0].y = (short)YLOG2DEV_2(y);
-        rects[0].width = (unsigned short)XLOG2DEVREL(width);
-        rects[0].height = (unsigned short)YLOG2DEVREL(height);
+        rects[0].x = XLOG2DEV_2(x);
+        rects[0].y = YLOG2DEV_2(y);
+        rects[0].width = XLOG2DEVREL(width);
+        rects[0].height = YLOG2DEVREL(height);
         XSetClipRectangles((Display*) m_display, (GC) m_gcBacking,
                            0, 0, rects, 1, Unsorted);
     }
@@ -2083,19 +2088,21 @@ void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y,
 
 void wxWindowDC::DoSetClippingRegionAsRegion( const wxRegion& region )
 {
+    wxRect box = region.GetBox();
+
+    wxDC::DoSetClippingRegion( box.x, box.y, box.width, box.height );
+
     SetDCClipping(region.GetX11Region());
 
     // Needs to work differently for Pixmap: without this,
     // there's a nasty (Display*) m_display bug. 8/12/94
     if (m_window && m_window->GetBackingPixmap())
     {
-        wxRect box = region.GetBox();
-
         XRectangle rects[1];
-        rects[0].x = (short)XLOG2DEV_2(box.x);
-        rects[0].y = (short)YLOG2DEV_2(box.y);
-        rects[0].width = (unsigned short)XLOG2DEVREL(box.width);
-        rects[0].height = (unsigned short)YLOG2DEVREL(box.height);
+        rects[0].x = XLOG2DEV_2(box.x);
+        rects[0].y = YLOG2DEV_2(box.y);
+        rects[0].width = XLOG2DEVREL(box.width);
+        rects[0].height = YLOG2DEVREL(box.height);
         XSetClipRectangles((Display*) m_display, (GC) m_gcBacking,
                            0, 0, rects, 1, Unsorted);
     }
@@ -2167,7 +2174,7 @@ static void XCopyRemote(Display *src_display, Display *dest_display,
     static const int CACHE_SIZE = 256;
 
     unsigned int i, j;
-    Pixel cachesrc[CACHE_SIZE], cachedest[CACHE_SIZE];
+    unsigned long cachesrc[CACHE_SIZE], cachedest[CACHE_SIZE];
     int k, cache_pos, all_cache;
 
     if (!cache || !*cache)
@@ -2185,7 +2192,7 @@ static void XCopyRemote(Display *src_display, Display *dest_display,
 
     for (i = 0; i < w; i++)
         for (j = 0; j < h; j++) {
-            Pixel pixel;
+            unsigned long pixel;
             XColor xcol;
 
             pixel = XGetPixel(image, i, j);

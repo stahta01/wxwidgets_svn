@@ -19,6 +19,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma implementation "ftp.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -87,7 +91,7 @@ wxFTP::wxFTP()
     m_passwd << wxGetUserId() << wxT('@') << wxGetFullHostName();
 
     SetNotify(0);
-    SetFlags(wxSOCKET_NOWAIT);
+    SetFlags(wxSOCKET_NONE);
     m_bPassive = true;
     SetDefaultTimeout(60); // Default is Sixty Seconds
     m_bEncounteredError = false;
@@ -434,20 +438,19 @@ wxString wxFTP::Pwd()
     if ( CheckCommand(wxT("PWD"), '2') )
     {
         // the result is at least that long if CheckCommand() succeeded
-        wxString::const_iterator p = m_lastResult.begin() + LEN_CODE + 1;
+        const wxChar *p = m_lastResult.c_str() + LEN_CODE + 1;
         if ( *p != _T('"') )
         {
-            wxLogDebug(_T("Missing starting quote in reply for PWD: %s"),
-                       wxString(p, m_lastResult.end()));
+            wxLogDebug(_T("Missing starting quote in reply for PWD: %s"), p);
         }
         else
         {
-            for ( ++p; (bool)*p; ++p ) // FIXME-DMARS
+            for ( p++; *p; p++ )
             {
                 if ( *p == _T('"') )
                 {
                     // check if the quote is doubled
-                    ++p;
+                    p++;
                     if ( !*p || *p != _T('"') )
                     {
                         // no, this is the end
@@ -642,8 +645,8 @@ wxSocketBase *wxFTP::AcceptIfActive(wxSocketBase *sock)
     return sock;
 }
 
-wxString wxFTP::GetPortCmdArgument(const wxIPV4address& addrLocal,
-                                   const wxIPV4address& addrNew)
+wxString wxFTP::GetPortCmdArgument(wxIPV4address addrLocal,
+                                   wxIPV4address addrNew)
 {
     // Just fills in the return value with the local IP
     // address of the current socket.  Also it fill in the
@@ -862,7 +865,7 @@ bool wxFTP::FileExists(const wxString& fileName)
     if ( GetList(fileList, fileName, false) )
     {
         // Some ftp-servers (Ipswitch WS_FTP Server 1.0.5 does this)
-        // displays this behaviour when queried on a nonexistent file:
+        // displays this behaviour when queried on a non-existing file:
         // NLST this_file_does_not_exist
         // 150 Opening ASCII data connection for directory listing
         // (no data transferred)

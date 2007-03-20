@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -34,11 +38,11 @@
     #include "wx/dcmemory.h"
     #include "wx/log.h"
     #include "wx/icon.h"
-    #include "wx/dcprint.h"
-    #include "wx/module.h"
 #endif
 
 #include "wx/sysopt.h"
+#include "wx/dcprint.h"
+#include "wx/module.h"
 #include "wx/dynload.h"
 
 #ifdef wxHAVE_RAW_BITMAP
@@ -497,3 +501,4 @@ private:
 IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 
 #endif // wxUSE_DC_CACHEING
+

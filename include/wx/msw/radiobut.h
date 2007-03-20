@@ -12,6 +12,10 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "radiobut.h"
+#endif
+
 class WXDLLEXPORT wxRadioButton: public wxControl
 {
 public:
@@ -49,8 +53,6 @@ public:
     virtual bool MSWCommand(WXUINT param, WXWORD id);
     virtual void Command(wxCommandEvent& event);
     virtual bool HasTransparentBackground() { return true; }
-
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 protected:
     virtual wxSize DoGetBestSize() const;

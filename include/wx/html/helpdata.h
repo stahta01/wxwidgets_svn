@@ -12,6 +12,10 @@
 #ifndef _WX_HELPDATA_H_
 #define _WX_HELPDATA_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "helpdata.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_HTML
@@ -97,6 +101,29 @@ struct WXDLLIMPEXP_HTML wxHtmlHelpDataItem
 WX_DECLARE_USER_EXPORTED_OBJARRAY(wxHtmlHelpDataItem, wxHtmlHelpDataItems,
                                   WXDLLIMPEXP_HTML);
 
+#if WXWIN_COMPATIBILITY_2_4
+// old interface to contents and index:
+struct wxHtmlContentsItem
+{
+    wxHtmlContentsItem();
+    wxHtmlContentsItem(const wxHtmlHelpDataItem& d);
+    wxHtmlContentsItem& operator=(const wxHtmlContentsItem& d);
+    ~wxHtmlContentsItem();
+
+    int m_Level;
+    int m_ID;
+    wxChar *m_Name;
+    wxChar *m_Page;
+    wxHtmlBookRecord *m_Book;
+
+    // returns full filename of m_Page, i.e. with book's basePath prepended
+    wxString GetFullPath() const { return m_Book->GetFullPath(m_Page); }
+
+private:
+    bool m_autofree;
+};
+#endif
+
 
 //------------------------------------------------------------------------------
 // wxHtmlSearchEngine
@@ -108,7 +135,7 @@ class WXDLLIMPEXP_HTML wxHtmlSearchEngine : public wxObject
 {
 public:
     wxHtmlSearchEngine() : wxObject() {}
-    virtual ~wxHtmlSearchEngine() {}
+    ~wxHtmlSearchEngine() {}
 
     // Sets the keyword we will be searching for
     virtual void LookFor(const wxString& keyword, bool case_sensitive, bool whole_words_only);
@@ -145,6 +172,9 @@ public:
     const wxString& GetName() { return m_Name; }
 
     const wxHtmlHelpDataItem *GetCurItem() const { return m_CurItem; }
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( wxHtmlContentsItem* GetContentsItem() );
+#endif
 
 private:
     wxHtmlHelpData* m_Data;
@@ -167,7 +197,7 @@ class WXDLLIMPEXP_HTML wxHtmlHelpData : public wxObject
 
 public:
     wxHtmlHelpData();
-    virtual ~wxHtmlHelpData();
+    ~wxHtmlHelpData();
 
     // Sets directory where temporary files are stored.
     // These temp files are index & contents file in binary (much faster to read)
@@ -197,6 +227,14 @@ public:
     const wxHtmlHelpDataItems& GetContentsArray() const { return m_contents; }
     const wxHtmlHelpDataItems& GetIndexArray() const { return m_index; }
 
+#if WXWIN_COMPATIBILITY_2_4
+    // deprecated interface, new interface is arrays-based (see above)
+    wxDEPRECATED( wxHtmlContentsItem* GetContents() );
+    wxDEPRECATED( int GetContentsCnt() );
+    wxDEPRECATED( wxHtmlContentsItem* GetIndex() );
+    wxDEPRECATED( int GetIndexCnt() );
+#endif
+
 protected:
     wxString m_tempPath;
 
@@ -205,6 +243,15 @@ protected:
 
     wxHtmlHelpDataItems m_contents; // list of all available books and pages
     wxHtmlHelpDataItems m_index; // list of index itesm
+
+#if WXWIN_COMPATIBILITY_2_4
+    // deprecated data structures, set only if GetContents(), GetIndex()
+    // called
+    wxHtmlContentsItem* m_cacheContents;
+    wxHtmlContentsItem* m_cacheIndex;
+private:
+    void CleanCompatibilityData();
+#endif
 
 protected:
     // Imports .hhp files (MS HTML Help Workshop)

@@ -1,13 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/wince/net.cpp
-// Purpose:
-// Author:
-// Modified by:
-// Created:
-// RCS-ID:      $Id$
-// Copyright:   Copyright 1998, Ben Goetter.  All rights reserved.
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+// Copyright 1998, Ben Goetter.  All rights reserved.
 
 /*
  patch holes in winsock
@@ -21,6 +12,10 @@
 
 */
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "net.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -28,10 +23,7 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/msw/wrapwin.h"
-#endif
-
+#include "wx/msw/wrapwin.h"
 #include <tchar.h>
 #include <winsock.h>
 #include <string.h>
@@ -183,3 +175,4 @@ struct protoent * WINSOCKAPI getprotobynumber(int proto)
   ++pr;
  } return NULL;
 }
+

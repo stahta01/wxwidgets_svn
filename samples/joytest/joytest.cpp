@@ -43,9 +43,6 @@ int nButtons = 0;
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxJoystick stick(wxJOYSTICK1);
     if (!stick.IsOk())
     {
@@ -89,7 +86,7 @@ bool MyApp::OnInit()
 
 #if wxUSE_STATUSBAR
     frame->CreateStatusBar();
-    frame->SetStatusText(wxString::Format(wxT("Device [%s] (PID:[%i] MID:[%i]) Ready... # of joysticks:[%i]"), stick.GetProductName().c_str(), stick.GetProductId(), stick.GetManufacturerId(), wxJoystick::GetNumberJoysticks()));
+    frame->SetStatusText(wxString::Format(wxT("Device [%s] (PID:[%i] MID:[%i]) Ready... # of joysticks:[%i]"), stick.GetProductName().c_str(), stick.GetProductId(), stick.GetManufacturerId(), stick.GetNumberJoysticks()));
 #endif // wxUSE_STATUSBAR
 
     frame->CenterOnScreen();

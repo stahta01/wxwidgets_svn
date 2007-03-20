@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -29,15 +33,14 @@
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #if wxUSE_STREAMS
-        #include "wx/stream.h"
-    #endif
-    #include "wx/module.h"
 #endif
 
+#include "wx/stream.h"
 #include "wx/process.h"
 
 #include "wx/apptrait.h"
+
+#include "wx/module.h"
 
 #include <ctype.h>
 
@@ -96,3 +99,4 @@ long wxExecute(wxChar **argv, int flags, wxProcess *handler)
 {
     return 0;
 }
+

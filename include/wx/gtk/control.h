@@ -7,11 +7,23 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_CONTROL_H_
-#define _WX_GTK_CONTROL_H_
+#ifndef __GTKCONTROLH__
+#define __GTKCONTROLH__
 
-typedef struct _GtkLabel GtkLabel;
-typedef struct _GtkFrame GtkFrame;
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/window.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxControl;
 
 //-----------------------------------------------------------------------------
 // wxControl
@@ -43,34 +55,20 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxControlNameStr);
 
+    // this function will filter out '&' characters and will put the accelerator
+    // char (the one immediately after '&') into m_chAccel (TODO not yet)
     virtual void SetLabel( const wxString &label );
     virtual wxString GetLabel() const;
-
+    
     virtual wxVisualAttributes GetDefaultAttributes() const;
-
-    virtual void OnInternalIdle();
 
 protected:
     virtual wxSize DoGetBestSize() const;
     void PostCreation(const wxSize& size);
 
-    // sets the label to the given string and also sets it for the given widget
-    void GTKSetLabelForLabel(GtkLabel *w, const wxString& label);
-
-    // GtkFrame helpers
-    GtkWidget* GTKCreateFrame(const wxString& label);
-    void GTKSetLabelForFrame(GtkFrame *w, const wxString& label);
-    void GTKFrameApplyWidgetStyle(GtkFrame* w, GtkRcStyle* rc);
-    void GTKFrameSetMnemonicWidget(GtkFrame* w, GtkWidget* widget);
-
-    // remove mnemonics ("&"s) from the label
-    static wxString GTKRemoveMnemonics(const wxString& label);
-
-    // converts wx label to GTK+ label, i.e. basically replace "&"s with "_"s
-    //
-    // for GTK+ 1 (which doesn't support mnemonics) this is the same as
-    // GTKRemoveMnemonics()
-    static wxString GTKConvertMnemonics(const wxString &label);
+#ifdef __WXGTK20__
+    wxString PrepareLabelMnemonics( const wxString &label ) const;
+#endif
 
     // These are used by GetDefaultAttributes
     static wxVisualAttributes
@@ -95,11 +93,11 @@ protected:
     // override this and return true.
     virtual bool UseGTKStyleBase() const { return false; }
 
-    // this field contains the label in wx format, i.e. with "&" mnemonics
-    wxString m_label;
+    wxString   m_label;
+    char       m_chAccel;  // enabled to avoid breaking binary compatibility later on
 
 private:
     DECLARE_DYNAMIC_CLASS(wxControl)
 };
 
-#endif // _WX_GTK_CONTROL_H_
+#endif // __GTKCONTROLH__

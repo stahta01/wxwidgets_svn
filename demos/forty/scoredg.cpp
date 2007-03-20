@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -181,7 +186,7 @@ ScoreDialog::ScoreDialog(wxWindow* parent, ScoreFile* file) :
     ScoreCanvas* list = new ScoreCanvas(this, m_scoreFile, wxDefaultPosition, sz);
 #endif
 
-    list->SetInitialSize(sz);
+    list->SetBestFittingSize(sz);
 
     // locate and resize with sizers
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );

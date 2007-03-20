@@ -10,6 +10,10 @@
 #ifndef _WX_ENCCONV_H_
 #define _WX_ENCCONV_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "encconv.h"
+#endif
+
 #include "wx/defs.h"
 
 #include "wx/object.h"
@@ -54,7 +58,7 @@ class WXDLLIMPEXP_BASE wxEncodingConverter : public wxObject
     public:
 
             wxEncodingConverter();
-            virtual ~wxEncodingConverter() { if (m_Table) delete[] m_Table; }
+            ~wxEncodingConverter() { if (m_Table) delete[] m_Table; }
 
             // Initialize conversion. Both output or input encoding may
             // be wxFONTENCODING_UNICODE, but only if wxUSE_WCHAR_T is set to 1.

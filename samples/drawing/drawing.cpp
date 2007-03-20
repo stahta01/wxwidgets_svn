@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma implementation
+    #pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -33,19 +38,6 @@
 #include "wx/colordlg.h"
 #include "wx/image.h"
 #include "wx/artprov.h"
-
-#define wxTEST_GRAPHICS 1
-
-#if wxTEST_GRAPHICS
-#include "wx/graphics.h"
-#if wxUSE_GRAPHICS_CONTEXT == 0
-#undef wxTEST_GRAPHICS
-#define wxTEST_GRAPHICS 0
-#endif
-#else
-#undef wxUSE_GRAPHICS_CONTEXT
-#define wxUSE_GRAPHICS_CONTEXT 0
-#endif
 
 // ----------------------------------------------------------------------------
 // ressources
@@ -70,16 +62,10 @@ enum ScreenToShow
     Show_Brushes,
     Show_Polygons,
     Show_Mask,
-    Show_Mask_Stretch,
     Show_Ops,
     Show_Regions,
     Show_Circles,
-    Show_Splines,
-#if wxUSE_GRAPHICS_CONTEXT
-    Show_Alpha,
-#endif
-    Show_Gradient,
-    Show_Max
+    Show_Splines
 };
 
 // ----------------------------------------------------------------------------
@@ -131,9 +117,6 @@ public:
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnClip(wxCommandEvent& event);
-#if wxUSE_GRAPHICS_CONTEXT
-    void OnGraphicContext(wxCommandEvent& event);
-#endif
     void OnShow(wxCommandEvent &event);
     void OnOption(wxCommandEvent &event);
 
@@ -174,31 +157,18 @@ public:
 
     // set or remove the clipping region
     void Clip(bool clip) { m_clip = clip; Refresh(); }
-#if wxUSE_GRAPHICS_CONTEXT
-    void UseGraphicContext(bool use) { m_useContext = use; Refresh(); }
-#endif
 
 protected:
-    enum DrawMode
-    {
-        Draw_Normal,
-        Draw_Stretch
-    };
-
     void DrawTestLines( int x, int y, int width, wxDC &dc );
     void DrawTestPoly(wxDC& dc);
     void DrawTestBrushes(wxDC& dc);
     void DrawText(wxDC& dc);
-    void DrawImages(wxDC& dc, DrawMode mode);
+    void DrawImages(wxDC& dc);
     void DrawWithLogicalOps(wxDC& dc);
-#if wxUSE_GRAPHICS_CONTEXT
-    void DrawAlpha(wxDC& dc);
-#endif
     void DrawRegions(wxDC& dc);
     void DrawCircles(wxDC& dc);
     void DrawSplines(wxDC& dc);
     void DrawDefault(wxDC& dc);
-    void DrawGradients(wxDC& dc);
 
     void DrawRegionsHelper(wxDC& dc, wxCoord x, bool firstTime);
 
@@ -209,9 +179,6 @@ private:
     wxBitmap     m_smile_bmp;
     wxIcon       m_std_icon;
     bool         m_clip;
-#if wxUSE_GRAPHICS_CONTEXT
-    bool         m_useContext ;
-#endif
 
     DECLARE_EVENT_TABLE()
 };
@@ -234,21 +201,13 @@ enum
     File_ShowBrushes,
     File_ShowPolygons,
     File_ShowMask,
-    File_ShowMaskStretch,
     File_ShowOps,
     File_ShowRegions,
     File_ShowCircles,
     File_ShowSplines,
-#if wxUSE_GRAPHICS_CONTEXT
-    File_ShowAlpha,
-#endif
-    File_ShowGradients,
-    MenuShow_Last = File_ShowGradients,
+    MenuShow_Last = File_ShowSplines,
 
     File_Clip,
-#if wxUSE_GRAPHICS_CONTEXT
-    File_GraphicContext,
-#endif
 
     MenuOption_First,
 
@@ -318,7 +277,6 @@ bool MyApp::LoadImages()
     wxPathList pathList;
     pathList.Add(_T("."));
     pathList.Add(_T(".."));
-    pathList.Add(_T("../.."));
 
     wxString path = pathList.FindValidPath(_T("pat4.bmp"));
     if ( !path )
@@ -362,9 +320,6 @@ bool MyApp::LoadImages()
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(_T("Drawing sample"),
                                  wxPoint(50, 50), wxSize(550, 340));
@@ -430,9 +385,6 @@ MyCanvas::MyCanvas(MyFrame *parent)
     m_smile_bmp = wxBitmap(smile_xpm);
     m_std_icon = wxArtProvider::GetIcon(wxART_INFORMATION);
     m_clip = false;
-#if wxUSE_GRAPHICS_CONTEXT
-    m_useContext = false;
-#endif
 }
 
 void MyCanvas::DrawTestBrushes(wxDC& dc)
@@ -564,7 +516,7 @@ void MyCanvas::DrawDefault(wxDC& dc)
     // mark the origin
     dc.DrawCircle(0, 0, 10);
 
-#if !defined(wxMAC_USE_CORE_GRAPHICS) || !wxMAC_USE_CORE_GRAPHICS
+#if !wxMAC_USE_CORE_GRAPHICS
     // GetPixel and FloodFill not supported by Mac OS X CoreGraphics
     // (FloodFill uses Blit from a non-wxMemoryDC)
     //flood fill using brush, starting at 1,1 and replacing whatever colour we find there
@@ -844,7 +796,7 @@ static const struct
     { wxT("wxXOR"),          wxXOR           },
 };
 
-void MyCanvas::DrawImages(wxDC& dc, DrawMode mode)
+void MyCanvas::DrawImages(wxDC& dc)
 {
     dc.DrawText(_T("original image"), 0, 0);
     dc.DrawBitmap(*gs_bmpNoMask, 0, 20, 0);
@@ -866,15 +818,7 @@ void MyCanvas::DrawImages(wxDC& dc, DrawMode mode)
 
         dc.DrawText(rasterOperations[n].name, x, y - 20);
         memDC.SelectObject(*gs_bmpWithColMask);
-        if ( mode == Draw_Stretch )
-        {
-            dc.StretchBlit(x, y, cx, cy, &memDC, 0, 0, cx/2, cy/2,
-                           rasterOperations[n].rop, true);
-        }
-        else
-        {
-            dc.Blit(x, y, cx, cy, &memDC, 0, 0, rasterOperations[n].rop, true);
-        }
+        dc.Blit(x, y, cx, cy, &memDC, 0, 0, rasterOperations[n].rop, true);
     }
 }
 
@@ -914,63 +858,12 @@ void MyCanvas::DrawWithLogicalOps(wxDC& dc)
     }
 }
 
-#if wxUSE_GRAPHICS_CONTEXT
-#ifdef __WXGTK20__
-void MyCanvas::DrawAlpha(wxDC& no_dc)
-#else
-void MyCanvas::DrawAlpha(wxDC& dc)
-#endif
-{
-#ifdef __WXGTK__
-    wxGCDC dc( this );
-    PrepareDC( dc );
-#endif
-
-    wxDouble margin = 20 ;
-    wxDouble width = 180 ;
-    wxDouble radius = 30 ;
-
-    dc.SetPen( wxPen( wxColour( 128, 0, 0, 255 ),12, wxSOLID));
-    dc.SetBrush( wxBrush( wxColour( 255, 0, 0, 255),wxSOLID));
-
-    wxRect r(margin,margin+width*0.66,width,width) ;
-
-    dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
-    dc.SetPen( wxPen( wxColour( 0, 0, 128, 255 ),12, wxSOLID));
-    dc.SetBrush( wxBrush( wxColour( 0, 0, 255, 255),wxSOLID));
-
-    r.Offset( width * 0.8 , - width * 0.66 ) ;
-
-    dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
-    dc.SetPen( wxPen( wxColour( 128, 128, 0, 255 ),12, wxSOLID));
-    dc.SetBrush( wxBrush( wxColour( 192, 192, 0, 255),wxSOLID));
-
-    r.Offset( width * 0.8 , width *0.5 ) ;
-
-    dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
-    dc.SetPen( *wxTRANSPARENT_PEN ) ;
-    dc.SetBrush( wxBrush( wxColour(255,255,128,128) ) );
-    dc.DrawRoundedRectangle( 0 , margin + width / 2 , width * 3 , 100 , radius) ;
-
-    dc.SetTextForeground( wxColour(255,255,0,128) );
-    dc.SetFont( wxFont( 40, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_NORMAL ) );
-    dc.DrawText( wxT("Hello!"), 120, 80 );
-}
-
-#endif
-
 void MyCanvas::DrawCircles(wxDC& dc)
 {
     int x = 100,
         y = 100,
         r = 20;
 
-    dc.SetPen( *wxRED_PEN );
-    dc.SetBrush( *wxGREEN_BRUSH );
-
     dc.DrawText(_T("Some circles"), 0, y);
     dc.DrawCircle(x, y, r);
     dc.DrawCircle(x + 2*r, y, r);
@@ -993,36 +886,6 @@ void MyCanvas::DrawCircles(wxDC& dc)
     dc.DrawEllipticArc(x + r, y, 2*r, r, 90, 180);
     dc.DrawEllipticArc(x + 3*r, y, 2*r, r, 180, 270);
     dc.DrawEllipticArc(x + 5*r, y, 2*r, r, 270, 360);
-
-    // same as above, just transparent brush
-
-    dc.SetPen( *wxRED_PEN );
-    dc.SetBrush( *wxTRANSPARENT_BRUSH );
-
-    y += 2*r;
-    dc.DrawText(_T("Some circles"), 0, y);
-    dc.DrawCircle(x, y, r);
-    dc.DrawCircle(x + 2*r, y, r);
-    dc.DrawCircle(x + 4*r, y, r);
-
-    y += 2*r;
-    dc.DrawText(_T("And ellipses"), 0, y);
-    dc.DrawEllipse(x - r, y, 2*r, r);
-    dc.DrawEllipse(x + r, y, 2*r, r);
-    dc.DrawEllipse(x + 3*r, y, 2*r, r);
-
-    y += 2*r;
-    dc.DrawText(_T("And arcs"), 0, y);
-    dc.DrawArc(x - r, y, x + r, y, x, y);
-    dc.DrawArc(x + 4*r, y, x + 2*r, y, x + 3*r, y);
-    dc.DrawArc(x + 5*r, y, x + 5*r, y, x + 6*r, y);
-
-    y += 2*r;
-    dc.DrawEllipticArc(x - r, y, 2*r, r, 0, 90);
-    dc.DrawEllipticArc(x + r, y, 2*r, r, 90, 180);
-    dc.DrawEllipticArc(x + 3*r, y, 2*r, r, 180, 270);
-    dc.DrawEllipticArc(x + 5*r, y, 2*r, r, 270, 360);
-
 }
 
 void MyCanvas::DrawSplines(wxDC& dc)
@@ -1113,54 +976,6 @@ void MyCanvas::DrawSplines(wxDC& dc)
 #endif
 }
 
-void MyCanvas::DrawGradients(wxDC& dc)
-{
-    static const int TEXT_HEIGHT = 15;
-
-    // LHS: linear
-    wxRect r(10, 10, 50, 50);
-    dc.DrawText(_T("wxRIGHT"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillLinear(r, *wxWHITE, *wxBLUE, wxRIGHT);
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("wxLEFT"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillLinear(r, *wxWHITE, *wxBLUE, wxLEFT);
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("wxDOWN"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillLinear(r, *wxWHITE, *wxBLUE, wxDOWN);
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("wxUP"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillLinear(r, *wxWHITE, *wxBLUE, wxUP);
-
-
-    // RHS: concentric
-    r = wxRect(200, 10, 50, 50);
-    dc.DrawText(_T("Blue inside"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillConcentric(r, *wxBLUE, *wxWHITE);
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("White inside"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillConcentric(r, *wxWHITE, *wxBLUE);
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("Blue in top left corner"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillConcentric(r, *wxBLUE, *wxWHITE, wxPoint(0, 0));
-
-    r.Offset(0, r.height + 10);
-    dc.DrawText(_T("Blue in bottom right corner"), r.x, r.y);
-    r.Offset(0, TEXT_HEIGHT);
-    dc.GradientFillConcentric(r, *wxBLUE, *wxWHITE, wxPoint(r.width, r.height));
-}
-
 void MyCanvas::DrawRegions(wxDC& dc)
 {
     dc.DrawText(_T("You should see a red rect partly covered by a cyan one ")
@@ -1218,15 +1033,7 @@ void MyCanvas::DrawRegionsHelper(wxDC& dc, wxCoord x, bool firstTime)
 
 void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
-    wxPaintDC pdc(this);
-
-#if wxUSE_GRAPHICS_CONTEXT
-     wxGCDC gdc( pdc ) ;
-    wxDC &dc = m_useContext ? (wxDC&) gdc : (wxDC&) pdc ;
-#else
-    wxDC &dc = pdc ;
-#endif
-
+    wxPaintDC dc(this);
     PrepareDC(dc);
 
     m_owner->PrepareDC(dc);
@@ -1297,28 +1104,11 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
             break;
 
         case Show_Mask:
-            DrawImages(dc, Draw_Normal);
-            break;
-
-        case Show_Mask_Stretch:
-            DrawImages(dc, Draw_Stretch);
+            DrawImages(dc);
             break;
 
         case Show_Ops:
             DrawWithLogicalOps(dc);
-            break;
-
-#if wxUSE_GRAPHICS_CONTEXT
-        case Show_Alpha:
-            DrawAlpha(dc);
-            break;
-#endif
-
-        case Show_Gradient:
-            DrawGradients(dc);
-            break;
-
-        default:
             break;
     }
 }
@@ -1352,9 +1142,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU      (File_Quit,     MyFrame::OnQuit)
     EVT_MENU      (File_About,    MyFrame::OnAbout)
     EVT_MENU      (File_Clip,     MyFrame::OnClip)
-#if wxUSE_GRAPHICS_CONTEXT
-    EVT_MENU      (File_GraphicContext, MyFrame::OnGraphicContext)
-#endif
 
     EVT_MENU_RANGE(MenuShow_First,   MenuShow_Last,   MyFrame::OnShow)
 
@@ -1376,20 +1163,12 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFile->Append(File_ShowBrushes, _T("&Brushes screen\tF4"));
     menuFile->Append(File_ShowPolygons, _T("&Polygons screen\tF5"));
     menuFile->Append(File_ShowMask, _T("&Mask screen\tF6"));
-    menuFile->Append(File_ShowMaskStretch, _T("1/&2 scaled mask\tShift-F6"));
     menuFile->Append(File_ShowOps, _T("&ROP screen\tF7"));
     menuFile->Append(File_ShowRegions, _T("Re&gions screen\tF8"));
     menuFile->Append(File_ShowCircles, _T("&Circles screen\tF9"));
-#if wxUSE_GRAPHICS_CONTEXT
-    menuFile->Append(File_ShowAlpha, _T("&Alpha screen\tF10"));
-#endif
-    menuFile->Append(File_ShowSplines, _T("&Splines screen\tF11"));
-    menuFile->Append(File_ShowGradients, _T("&Gradients screen\tF12"));
+    menuFile->Append(File_ShowSplines, _T("&Splines screen"));
     menuFile->AppendSeparator();
     menuFile->AppendCheckItem(File_Clip, _T("&Clip\tCtrl-C"), _T("Clip/unclip drawing"));
-#if wxUSE_GRAPHICS_CONTEXT
-    menuFile->AppendCheckItem(File_GraphicContext, _T("&Use GraphicContext\tCtrl-Y"), _T("Use GraphicContext"));
-#endif
     menuFile->AppendSeparator();
     menuFile->Append(File_About, _T("&About...\tCtrl-A"), _T("Show about dialog"));
     menuFile->AppendSeparator();
@@ -1489,13 +1268,6 @@ void MyFrame::OnClip(wxCommandEvent& event)
 {
     m_canvas->Clip(event.IsChecked());
 }
-
-#if wxUSE_GRAPHICS_CONTEXT
-void MyFrame::OnGraphicContext(wxCommandEvent& event)
-{
-    m_canvas->UseGraphicContext(event.IsChecked());
-}
-#endif
 
 void MyFrame::OnShow(wxCommandEvent& event)
 {

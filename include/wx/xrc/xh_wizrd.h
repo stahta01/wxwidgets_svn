@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_wizrd.h
+// Name:        xh_wizrd.h
 // Purpose:     XML resource handler for wxWizard
 // Author:      Vaclav Slavik
 // Created:     2003/03/02
@@ -9,19 +9,21 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_XH_WIZRD_H_
-#define _WX_XH_WIZRD_H_
+#define _WX_XH_WIZRDL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_wizrd.h"
+#endif
 
 #include "wx/xrc/xmlres.h"
 
-#if wxUSE_XRC && wxUSE_WIZARDDLG
+#if wxUSE_WIZARDDLG
 
-class WXDLLEXPORT wxWizard;
-class WXDLLEXPORT wxWizardPageSimple;
+#include "wx/wizard.h"
 
 class WXDLLIMPEXP_XRC wxWizardXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxWizardXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxWizardXmlHandler)
 public:
     wxWizardXmlHandler();
     virtual wxObject *DoCreateResource();
@@ -32,6 +34,6 @@ private:
     wxWizardPageSimple *m_lastSimplePage;
 };
 
-#endif // wxUSE_XRC && wxUSE_WIZARDDLG
+#endif
 
-#endif // _WX_XH_WIZRD_H_
+#endif // _WX_XH_PANEL_H_

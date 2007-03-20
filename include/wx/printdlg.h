@@ -12,6 +12,10 @@
 #ifndef _WX_PRINTDLG_H_BASE_
 #define _WX_PRINTDLG_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "printdlg.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -55,7 +59,7 @@ class WXDLLEXPORT wxPrintDialog : public wxObject
 public:
     wxPrintDialog(wxWindow *parent, wxPrintDialogData* data = NULL);
     wxPrintDialog(wxWindow *parent, wxPrintData* data);
-    virtual ~wxPrintDialog();
+    ~wxPrintDialog();
 
     virtual int ShowModal();
 
@@ -101,7 +105,7 @@ class WXDLLEXPORT wxPageSetupDialog: public wxObject
 {
 public:
     wxPageSetupDialog(wxWindow *parent, wxPageSetupDialogData *data = NULL);
-    virtual ~wxPageSetupDialog();
+    ~wxPageSetupDialog();
 
     int ShowModal();
     wxPageSetupDialogData& GetPageSetupDialogData();

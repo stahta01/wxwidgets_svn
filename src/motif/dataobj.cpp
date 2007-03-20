@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dataobj.cpp
+// Name:        dataobj.cpp
 // Purpose:     wxDataObject class
 // Author:      Julian Smart
 // Id:          $Id$
@@ -7,17 +7,20 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dataobj.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
 
 #if wxUSE_CLIPBOARD
 
 #include "wx/dataobj.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/utils.h"
-#endif
+#include "wx/app.h"
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -107,7 +110,7 @@ wxString wxDataFormat::GetId() const
 {
     char *t = XGetAtomName ((Display*) wxGetDisplay(), m_format);
     wxString ret( t );  // this will convert from ascii to Unicode
-    if (t)
+    if (t) 
         XFree( t );
     return ret;
 }

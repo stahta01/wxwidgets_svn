@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/dcprint.h
+// Name:        dcprint.h
 // Purpose:     wxPrinterDC class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_DCPRINT_H_
 #define _WX_DCPRINT_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcprint.h"
+#endif
 
 #include "wx/dc.h"
 #include "wx/cmndata.h"
@@ -25,19 +29,19 @@ class WXDLLEXPORT wxPrinterDC: public wxDC
 
   // Create a printer DC
   wxPrinterDC(const wxPrintData& printdata );
-  virtual ~wxPrinterDC();
+  ~wxPrinterDC();
 
     virtual bool StartDoc( const wxString& WXUNUSED(message) ) ;
     virtual void EndDoc(void) ;
     virtual void StartPage(void) ;
     virtual void EndPage(void) ;
-
-    wxRect GetPaperRect();
-
     wxPrintData& GetPrintData() { return m_printData; }
     virtual wxSize GetPPI() const;
- protected:
     virtual void DoGetSize( int *width, int *height ) const;
+#if wxMAC_USE_CORE_GRAPHICS
+    void MacSetCGContext( void * cg ) ;
+#endif    
+ protected:
     wxPrintData   m_printData ;
     wxNativePrinterDC* m_nativePrinterDC ;
 #endif // wxUSE_PRINTING_ARCHITECTURE

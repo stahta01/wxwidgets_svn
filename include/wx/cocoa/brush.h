@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/brush.h
+// Name:        include/wx/cocoa/brush.h
 // Purpose:     wxBrush class
 // Author:      David Elliott <dfe@cox.net>
 // Modified by:
@@ -31,20 +31,27 @@ public:
     wxBrush();
     wxBrush(const wxColour& col, int style = wxSOLID);
     wxBrush(const wxBitmap& stipple);
-    virtual ~wxBrush();
+    wxBrush(const wxBrush& brush)
+    :   wxBrushBase()
+    {   Ref(brush); }
+    ~wxBrush();
 
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------
-    virtual void SetColour(const wxColour& col) ;
-    virtual void SetColour(unsigned char r, unsigned char g, unsigned char b) ;
-    virtual void SetStyle(int style) ;
-    virtual void SetStipple(const wxBitmap& stipple) ;
+    virtual void SetColour(const wxColour& col)  ;
+    virtual void SetColour(unsigned char r, unsigned char g, unsigned char b)  ;
+    virtual void SetStyle(int style)  ;
+    virtual void SetStipple(const wxBitmap& stipple)  ;
+
+    // assignment
+    wxBrush& operator = (const wxBrush& brush)
+    {   if (*this == brush) return (*this); Ref(brush); return *this; }
 
     // comparison
-    bool operator == (const wxBrush& brush) const
+    bool operator == (const wxBrush& brush)
     {   return m_refData == brush.m_refData; }
-    bool operator != (const wxBrush& brush) const
+    bool operator != (const wxBrush& brush)
     {   return m_refData != brush.m_refData; }
 
     // accessors
@@ -52,8 +59,7 @@ public:
     virtual int GetStyle() const;
     wxBitmap *GetStipple() const;
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const
+    virtual bool Ok() const
     {   return (m_refData != NULL); }
 
     // wxObjectRefData

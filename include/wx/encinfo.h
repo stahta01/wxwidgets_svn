@@ -53,14 +53,15 @@ struct WXDLLEXPORT wxNativeEncodingInfo
 #elif defined(_WX_X_FONTLIKE)
     wxString xregistry,
              xencoding;
-#elif defined(wxHAS_UTF8_FONTS)
-    // ports using UTF-8 for text don't need encoding information for fonts
+#elif defined(__WXGTK20__)
+    // No way to specify this in Pango as this
+    // seems to be handled internally.
 #elif defined(__WXMGL__)
     int      mglEncoding;
 #else
     #error "Unsupported toolkit"
 #endif
-#endif // !__WXPALMOS__
+#endif
     // this struct is saved in config by wxFontMapper, so it should know to
     // serialise itself (implemented in platform-specific code)
     bool FromString(const wxString& s);

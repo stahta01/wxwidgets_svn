@@ -12,6 +12,10 @@
 #ifndef   _REGCONF_H
 #define   _REGCONF_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "regconf.h"
+#endif
+
 #ifndef   _REGISTRY_H
   #include "wx/msw/registry.h"
 #endif
@@ -95,15 +99,16 @@ protected:
   virtual bool DoWriteLong(const wxString& key, long lValue);
 
 private:
+  // no copy ctor/assignment operator
+  wxRegConfig(const wxRegConfig&);
+  wxRegConfig& operator=(const wxRegConfig&);
+
   // these keys are opened during all lifetime of wxRegConfig object
   wxRegKey  m_keyLocalRoot,  m_keyLocal,
             m_keyGlobalRoot, m_keyGlobal;
 
   // current path (not '/' terminated)
   wxString  m_strPath;
-
-  DECLARE_NO_COPY_CLASS(wxRegConfig)
-  DECLARE_ABSTRACT_CLASS(wxRegConfig)
 };
 
 #endif  //_REGCONF_H

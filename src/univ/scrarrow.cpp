@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univscrarrow.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -24,7 +28,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
 #endif
 
 #include "wx/univ/scrtimer.h"
@@ -46,9 +49,7 @@ struct wxScrollArrowCaptureData
         m_arrowPressed = wxScrollArrows::Arrow_None;
         m_window = NULL;
         m_btnCapture = -1;
-#if wxUSE_TIMER
         m_timerScroll = NULL;
-#endif // wxUSE_TIMER
     }
 
     ~wxScrollArrowCaptureData()
@@ -56,9 +57,7 @@ struct wxScrollArrowCaptureData
         if ( m_window )
             m_window->ReleaseMouse();
 
-#if wxUSE_TIMER
         delete m_timerScroll;
-#endif // wxUSE_TIMER
     }
 
     // the arrow being held pressed (may be Arrow_None)
@@ -70,17 +69,13 @@ struct wxScrollArrowCaptureData
     // the window which has captured the mouse
     wxWindow *m_window;
 
-#if wxUSE_TIMER
     // the timer for generating the scroll events
     wxScrollTimer *m_timerScroll;
-#endif
 };
 
 // ----------------------------------------------------------------------------
 // wxScrollArrowTimer: a wxScrollTimer which calls OnArrow()
 // ----------------------------------------------------------------------------
-
-#if wxUSE_TIMER
 
 class wxScrollArrowTimer : public wxScrollTimer
 {
@@ -103,8 +98,6 @@ protected:
     wxControlWithArrows *m_control;
     wxScrollArrows::Arrow m_arrow;
 };
-
-#endif // wxUSE_TIMER
 
 // ============================================================================
 // implementation of wxScrollArrows
@@ -174,10 +167,9 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
     }
     else // Moving() or Entering(), treat them the same here
     {
-        arrow = m_control->HitTestArrow(event.GetPosition());
+        arrow = m_control->HitTest(event.GetPosition());
     }
 
-#if wxUSE_TIMER
     if ( m_captureData && m_captureData->m_timerScroll)
     {
         // the mouse is captured, we may want to pause scrolling if it goes
@@ -211,7 +203,6 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
 
         return false;
     }
-#endif // wxUSE_TIMER
 
     // reset the wxCONTROL_CURRENT flag for the arrows which don't have the
     // mouse and set it for the one which has
@@ -235,7 +226,7 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
     {
         if ( !m_captureData )
         {
-            Arrow arrow = m_control->HitTestArrow(event.GetPosition());
+            Arrow arrow = m_control->HitTest(event.GetPosition());
             if ( arrow == Arrow_None )
             {
                 // mouse pressed over something else
@@ -255,28 +246,22 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
             m_captureData->m_window = m_control->GetWindow();
             m_captureData->m_window->CaptureMouse();
 
-#if wxUSE_TIMER
-            // start scrolling
+            // start scrolling                       
             wxScrollArrowTimer *tmpTimerScroll =
                 new wxScrollArrowTimer(m_control, arrow);
-#endif // wxUSE_TIMER
 
-            // Because in some cases wxScrollArrowTimer can cause
-            // m_captureData to be destructed we need to test if it
+            // Because in some cases wxScrollArrowTimer can cause 
+            // m_captureData to be destructed we need to test if it 
             // is still valid before using.
             if (m_captureData)
             {
-#if wxUSE_TIMER
                 m_captureData->m_timerScroll = tmpTimerScroll;
-#endif // wxUSE_TIMER
 
                 m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, true);
             }
             else
             {
-#if wxUSE_TIMER
                 delete tmpTimerScroll;
-#endif // wxUSE_TIMER
             }
         }
         //else: mouse already captured, nothing to do
@@ -299,3 +284,4 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
 
     return true;
 }
+

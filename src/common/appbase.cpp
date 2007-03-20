@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/appbase.cpp
+// Name:        common/base/appbase.cpp
 // Purpose:     implements wxAppConsole class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -25,16 +25,13 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #ifdef __WXMSW__
-        #include  "wx/msw/wrapwin.h"  // includes windows.h for MessageBox()
-    #endif
-    #include "wx/list.h"
     #include "wx/app.h"
     #include "wx/intl.h"
+    #include "wx/list.h"
     #include "wx/log.h"
-    #include "wx/utils.h"
 #endif //WX_PRECOMP
 
+#include "wx/utils.h"
 #include "wx/apptrait.h"
 #include "wx/cmdline.h"
 #include "wx/confbase.h"
@@ -46,7 +43,9 @@
   #include  <signal.h>      // for SIGTRAP used by wxTrap()
 #endif  //Win/Unix
 
-#include <locale.h>
+#if defined(__WXMSW__)
+  #include  "wx/msw/wrapwin.h"  // includes windows.h for MessageBox()
+#endif
 
 #if wxUSE_FONTMAP
     #include "wx/fontmap.h"
@@ -94,7 +93,6 @@
     static
     void ShowAssertDialog(const wxChar *szFile,
                           int nLine,
-                          const wxChar *szFunc,
                           const wxChar *szCond,
                           const wxChar *szMsg,
                           wxAppTraits *traits = NULL);
@@ -148,10 +146,6 @@ wxAppConsole::~wxAppConsole()
 
 bool wxAppConsole::Initialize(int& argcOrig, wxChar **argvOrig)
 {
-#if wxUSE_INTL
-    GetTraits()->SetLocale();
-#endif // wxUSE_INTL
-
     // remember the command line arguments
     argc = argcOrig;
     argv = argvOrig;
@@ -162,7 +156,7 @@ bool wxAppConsole::Initialize(int& argcOrig, wxChar **argvOrig)
         // the application name is, by default, the name of its executable file
         wxFileName::SplitPath(argv[0], NULL, &m_appName, NULL);
     }
-#endif // !__WXPALMOS__
+#endif
 
     return true;
 }
@@ -213,6 +207,10 @@ int wxAppConsole::OnExit()
     delete wxConfigBase::Set((wxConfigBase *) NULL);
 #endif // wxUSE_CONFIG
 
+    // use Set(NULL) and not Get() to avoid creating a message output object on
+    // demand when we just want to delete it
+    delete wxMessageOutput::Set(NULL);
+
     return 0;
 }
 
@@ -243,6 +241,27 @@ wxAppTraits *wxAppConsole::GetTraits()
     return m_traits;
 }
 
+// we must implement CreateXXX() in wxApp itself for backwards compatibility
+#if WXWIN_COMPATIBILITY_2_4
+
+#if wxUSE_LOG
+
+wxLog *wxAppConsole::CreateLogTarget()
+{
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateLogTarget() : NULL;
+}
+
+#endif // wxUSE_LOG
+
+wxMessageOutput *wxAppConsole::CreateMessageOutput()
+{
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateMessageOutput() : NULL;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 // ----------------------------------------------------------------------------
 // event processing
 // ----------------------------------------------------------------------------
@@ -253,7 +272,7 @@ void wxAppConsole::ProcessPendingEvents()
     if ( !wxPendingEventsLocker )
         return;
 #endif
-
+    
     // ensure that we're the only thread to modify the pending events list
     wxENTER_CRIT_SECT( *wxPendingEventsLocker );
 
@@ -273,7 +292,7 @@ void wxAppConsole::ProcessPendingEvents()
         // In ProcessPendingEvents(), new handlers might be add
         // and we can safely leave the critical section here.
         wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
-
+        
         handler->ProcessPendingEvents();
 
         wxENTER_CRIT_SECT( *wxPendingEventsLocker );
@@ -303,6 +322,17 @@ wxAppConsole::HandleEvent(wxEvtHandler *handler,
 {
     // by default, simply call the handler
     (handler->*func)(event);
+}
+
+bool
+wxAppConsole::OnExceptionInMainLoop()
+{
+    throw;
+
+    // some compilers are too stupid to know that we never return after throw
+#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
+    return false;
+#endif
 }
 
 #endif // wxUSE_EXCEPTIONS
@@ -419,24 +449,24 @@ bool wxAppConsole::CheckBuildOptions(const char *optionsSignature,
 
 #ifdef __WXDEBUG__
 
-void wxAppConsole::OnAssertFailure(const wxChar *file,
-                                   int line,
-                                   const wxChar *func,
-                                   const wxChar *cond,
-                                   const wxChar *msg)
-{
-    ShowAssertDialog(file, line, func, cond, msg, GetTraits());
-}
-
 void wxAppConsole::OnAssert(const wxChar *file,
                             int line,
                             const wxChar *cond,
                             const wxChar *msg)
 {
-    OnAssertFailure(file, line, NULL, cond, msg);
+    ShowAssertDialog(file, line, cond, msg, GetTraits());
 }
 
 #endif // __WXDEBUG__
+
+#if WXWIN_COMPATIBILITY_2_4
+
+bool wxAppConsole::CheckBuildOptions(const wxBuildOptions& buildOptions)
+{
+    return CheckBuildOptions(buildOptions.m_signature, "your program");
+}
+
+#endif
 
 // ============================================================================
 // other classes implementations
@@ -509,98 +539,12 @@ GSocketGUIFunctionsTable* wxConsoleAppTraitsBase::GetSocketGUIFunctionsTable()
 // wxAppTraits
 // ----------------------------------------------------------------------------
 
-#if wxUSE_INTL
-void wxAppTraitsBase::SetLocale()
-{
-    setlocale(LC_ALL, "");
-}
-#endif
-
 #ifdef __WXDEBUG__
 
-bool wxAppTraitsBase::ShowAssertDialog(const wxString& msgOriginal)
+bool wxAppTraitsBase::ShowAssertDialog(const wxString& msg)
 {
-    wxString msg = msgOriginal;
-
-#if wxUSE_STACKWALKER
-#if !defined(__WXMSW__)
-    // on Unix stack frame generation may take some time, depending on the
-    // size of the executable mainly... warn the user that we are working
-    wxFprintf(stderr, wxT("[Debug] Generating a stack trace... please wait"));
-    fflush(stderr);
-#endif
-
-    const wxString stackTrace = GetAssertStackTrace();
-    if ( !stackTrace.empty() )
-        msg << _T("\n\nCall stack:\n") << stackTrace;
-#endif // wxUSE_STACKWALKER
-
     return DoShowAssertDialog(msg);
 }
-
-#if wxUSE_STACKWALKER
-wxString wxAppTraitsBase::GetAssertStackTrace()
-{
-    wxString stackTrace;
-
-    class StackDump : public wxStackWalker
-    {
-    public:
-        StackDump() { }
-
-        const wxString& GetStackTrace() const { return m_stackTrace; }
-
-    protected:
-        virtual void OnStackFrame(const wxStackFrame& frame)
-        {
-            m_stackTrace << wxString::Format
-                            (
-                              _T("[%02d] "),
-                              wx_truncate_cast(int, frame.GetLevel())
-                            );
-
-            wxString name = frame.GetName();
-            if ( !name.empty() )
-            {
-                m_stackTrace << wxString::Format(_T("%-40s"), name.c_str());
-            }
-            else
-            {
-                m_stackTrace << wxString::Format(_T("%p"), frame.GetAddress());
-            }
-
-            if ( frame.HasSourceLocation() )
-            {
-                m_stackTrace << _T('\t')
-                             << frame.GetFileName()
-                             << _T(':')
-                             << frame.GetLine();
-            }
-
-            m_stackTrace << _T('\n');
-        }
-
-    private:
-        wxString m_stackTrace;
-    };
-
-    // don't show more than maxLines or we could get a dialog too tall to be
-    // shown on screen: 20 should be ok everywhere as even with 15 pixel high
-    // characters it is still only 300 pixels...
-    static const int maxLines = 20;
-
-    StackDump dump;
-    dump.Walk(2, maxLines); // don't show OnAssert() call itself
-    stackTrace = dump.GetStackTrace();
-
-    const int count = stackTrace.Freq(wxT('\n'));
-    for ( int i = 0; i < count - maxLines; i++ )
-        stackTrace = stackTrace.BeforeLast(wxT('\n'));
-
-    return stackTrace;
-}
-#endif // wxUSE_STACKWALKER
-
 
 #endif // __WXDEBUG__
 
@@ -658,10 +602,19 @@ void wxTrap()
 #endif // Win/Unix
 }
 
+void wxAssert(int cond,
+              const wxChar *szFile,
+              int nLine,
+              const wxChar *szCond,
+              const wxChar *szMsg)
+{
+    if ( !cond )
+        wxOnAssert(szFile, nLine, szCond, szMsg);
+}
+
 // this function is called when an assert fails
 void wxOnAssert(const wxChar *szFile,
                 int nLine,
-                const char *szFunc,
                 const wxChar *szCond,
                 const wxChar *szMsg)
 {
@@ -680,19 +633,16 @@ void wxOnAssert(const wxChar *szFile,
 
     s_bInAssert = true;
 
-    // __FUNCTION__ is always in ASCII, convert it to wide char if needed
-    const wxString strFunc = wxString::FromAscii(szFunc);
-
     if ( !wxTheApp )
     {
         // by default, show the assert dialog box -- we can't customize this
         // behaviour
-        ShowAssertDialog(szFile, nLine, strFunc, szCond, szMsg);
+        ShowAssertDialog(szFile, nLine, szCond, szMsg);
     }
     else
     {
         // let the app process it as it wants
-        wxTheApp->OnAssertFailure(szFile, nLine, strFunc, szCond, szMsg);
+        wxTheApp->OnAssert(szFile, nLine, szCond, szMsg);
     }
 
     s_bInAssert = false;
@@ -756,11 +706,73 @@ bool DoShowAssertDialog(const wxString& msg)
     return false;
 }
 
+#if wxUSE_STACKWALKER
+static wxString GetAssertStackTrace()
+{
+    wxString stackTrace;
+
+    class StackDump : public wxStackWalker
+    {
+    public:
+        StackDump() { }
+
+        const wxString& GetStackTrace() const { return m_stackTrace; }
+
+    protected:
+        virtual void OnStackFrame(const wxStackFrame& frame)
+        {
+            m_stackTrace << wxString::Format(_T("[%02lu] "),
+                                             (unsigned long)frame.GetLevel());
+
+            wxString name = frame.GetName();
+            if ( !name.empty() )
+            {
+                m_stackTrace << wxString::Format(_T("%-40s"), name.c_str());
+            }
+            else
+            {
+                m_stackTrace << wxString::Format
+                                (
+                                    _T("0x%08lx"),
+                                    (unsigned long)frame.GetAddress()
+                                );
+            }
+
+            if ( frame.HasSourceLocation() )
+            {
+                m_stackTrace << _T('\t')
+                             << frame.GetFileName()
+                             << _T(':')
+                             << frame.GetLine();
+            }
+
+            m_stackTrace << _T('\n');
+        }
+
+    private:
+        wxString m_stackTrace;
+    };
+
+    StackDump dump;
+    dump.Walk(5); // don't show OnAssert() call itself
+    stackTrace = dump.GetStackTrace();
+
+    // don't show more than maxLines or we could get a dialog too tall to be
+    // shown on screen: 20 should be ok everywhere as even with 15 pixel high
+    // characters it is still only 300 pixels...
+    static const int maxLines = 20;
+    const int count = stackTrace.Freq(wxT('\n'));
+    for ( int i = 0; i < count - maxLines; i++ )
+        stackTrace = stackTrace.BeforeLast(wxT('\n'));
+
+    return stackTrace;
+}
+#endif // wxUSE_STACKWALKER
+
 // show the assert modal dialog
 static
 void ShowAssertDialog(const wxChar *szFile,
                       int nLine,
-                      const wxChar *szFunc,
                       const wxChar *szCond,
                       const wxChar *szMsg,
                       wxAppTraits *traits)
@@ -776,11 +788,6 @@ void ShowAssertDialog(const wxChar *szFile,
     // the failed assert
     msg.Printf(wxT("%s(%d): assert \"%s\" failed"), szFile, nLine, szCond);
 
-    // add the function name, if any
-    if ( szFunc && *szFunc )
-        msg << _T(" in ") << szFunc << _T("()");
-
-    // and the message itself
     if ( szMsg )
     {
         msg << _T(": ") << szMsg;
@@ -789,6 +796,14 @@ void ShowAssertDialog(const wxChar *szFile,
     {
         msg << _T('.');
     }
+
+#if wxUSE_STACKWALKER
+    const wxString stackTrace = GetAssertStackTrace();
+    if ( !stackTrace.empty() )
+    {
+        msg << _T("\n\nCall stack:\n") << stackTrace;
+    }
+#endif // wxUSE_STACKWALKER
 
 #if wxUSE_THREADS
     // if we are not in the main thread, output the assert directly and trap
@@ -830,3 +845,4 @@ void ShowAssertDialog(const wxChar *szFile,
 }
 
 #endif // __WXDEBUG__
+

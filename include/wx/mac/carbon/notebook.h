@@ -11,6 +11,10 @@
 #ifndef _WX_NOTEBOOK_H_
 #define _WX_NOTEBOOK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "notebook.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -28,6 +32,9 @@ class WXDLLEXPORT wxWindow;
 // wxNotebook
 // ----------------------------------------------------------------------------
 
+// @@@ this class should really derive from wxTabCtrl, but the interface is not
+//     exactly the same, so I can't do it right now and instead we reimplement
+//     part of wxTabCtrl here
 class wxNotebook : public wxNotebookBase
 {
 public:
@@ -50,19 +57,16 @@ public:
               long style = 0,
               const wxString& name = wxNotebookNameStr);
     // dtor
-  virtual ~wxNotebook();
+  ~wxNotebook();
 
   // accessors
   // ---------
     // set the currently selected page, return the index of the previously
     // selected one (or -1 on error)
     // NB: this function will _not_ generate wxEVT_NOTEBOOK_PAGE_xxx events
-  int SetSelection(size_t nPage) { return DoSetSelection(nPage, SetSelection_SendEvent); }
+  int SetSelection(size_t nPage);
     // get the currently selected page
   int GetSelection() const { return m_nSelection; }
-
-    // changes selected page without sending events
-  int ChangeSelection(size_t nPage) { return DoSetSelection(nPage); }
 
     // set/get the title of a page
   bool SetPageText(size_t nPage, const wxString& strText);
@@ -79,14 +83,24 @@ public:
   virtual void SetPadding(const wxSize& padding);
     // sets the size of the tabs (assumes all tabs are the same size)
   virtual void SetTabSize(const wxSize& sz);
-
-  // hit test
+    // hit test
   virtual int HitTest(const wxPoint& pt, long *flags = NULL) const;
-  
-  // calculate size for wxNotebookSizer
+
+    // calculate size for wxNotebookSizer
   wxSize CalcSizeFromPage(const wxSize& sizePage) const;
   wxRect GetPageRect() const ;
+/*
+    // get number of pages in the dialog
+  int GetPageCount() const;
 
+    // cycle thru the tabs
+  void AdvanceSelection(bool bForward = true);
+
+
+    // currently it's always 1 because wxGTK doesn't support multi-row
+    // tab controls
+  int GetRowCount() const;
+*/
   // operations
   // ----------
     // remove all pages
@@ -97,7 +111,10 @@ public:
                   const wxString& strText,
                   bool bSelect = false,
                   int imageId = -1);
-
+/*
+    // get the panel which represents the given page
+  wxNotebookPage *GetPage(int nPage) { return m_aPages[nPage]; }
+*/
   // callbacks
   // ---------
   void OnSize(wxSizeEvent& event);
@@ -117,18 +134,15 @@ public:
   // base class virtuals
   // -------------------
   virtual void Command(wxCommandEvent& event);
-    virtual wxInt32 MacControlHit(WXEVENTHANDLERREF handler, WXEVENTREF event);
-
 protected:
   virtual wxNotebookPage *DoRemovePage(size_t page) ;
+  virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
   // common part of all ctors
   void Init();
 
   // helper functions
   void ChangePage(int nOldSel, int nSel); // change pages
   void MacSetupTabs();
-
-  int DoSetSelection(size_t nPage, int flags = 0);
 
   // the icon indices
   wxArrayInt m_images;

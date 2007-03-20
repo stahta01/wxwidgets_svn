@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "plot.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -123,7 +127,7 @@ wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY )
 IMPLEMENT_CLASS(wxPlotOnOffCurve, wxObject)
 
 #include "wx/arrimpl.cpp"
-WX_DEFINE_OBJARRAY(wxArrayPlotOnOff);
+WX_DEFINE_OBJARRAY(wxArrayPlotOnOff)
 
 wxPlotOnOffCurve::wxPlotOnOffCurve( int offsetY )
 {
@@ -781,7 +785,10 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 
     mainsizer->Add( m_plotAndTitleSizer, 1, wxEXPAND );
 
-    SetSizerAndFit( mainsizer );
+    SetAutoLayout( true );
+    SetSizer( mainsizer );
+    mainsizer->Fit(this);
+    mainsizer->SetSizeHints(this);
 
     SetTargetWindow( m_area );
 

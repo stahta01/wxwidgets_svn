@@ -1,11 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/brush.cpp
+// Name:        brush.cpp
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "brush.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -16,7 +20,7 @@
 
 #include "wx/brush.h"
 #include "wx/mgl/private.h"
-#include "wx/dcmemory.h"
+#include "wx/mgl/dcmemory.h"
 
 
 // ---------------------------------------------------------------------------
@@ -26,31 +30,31 @@
 // This function converts wxBitmap into pixpattern24_t representation
 // (used by wxBrush and wxPen)
 
-void wxBitmapToPixPattern(const wxBitmap& bitmap,
+void wxBitmapToPixPattern(const wxBitmap& bitmap, 
                           pixpattern24_t *pix, pattern_t *mask)
 {
     wxMemoryDC mem;
     MGLDevCtx *dc;
     int x, y;
-
+    
     if ( pix != NULL )
     {
-        mem.SelectObjectAsSource(bitmap);
+        mem.SelectObject(bitmap);
         dc = mem.GetMGLDC();
         wxCurrentDCSwitcher curDC(dc);
         dc->beginPixel();
         for (y = 0; y < 8; y++)
             for (x = 0; x < 8; x++)
-                dc->unpackColorFast(dc->getPixelFast(x, y),
+                dc->unpackColorFast(dc->getPixelFast(x, y), 
                                     pix->p[y][x][2],
-                                    pix->p[y][x][1],
+                                    pix->p[y][x][1], 
                                     pix->p[y][x][0]);
         dc->endPixel();
     }
 
     if ( mask && bitmap.GetMask() )
     {
-        mem.SelectObjectAsSource(bitmap.GetMask()->GetBitmap());
+        mem.SelectObject(*bitmap.GetMask()->GetBitmap());
         dc = mem.GetMGLDC();
         wxCurrentDCSwitcher curDC(dc);
         dc->beginPixel();
@@ -59,7 +63,7 @@ void wxBitmapToPixPattern(const wxBitmap& bitmap,
             mask->p[y] = 0;
             for (x = 0; x < 8; x++)
                 if ( dc->getPixelFast(x, y) != 0 )
-                    mask->p[y] = (uchar)(mask->p[y] | (1 << (7 - x)));
+                    mask->p[y] |= 1 << (7 - x);
         }
         dc->endPixel();
     }
@@ -75,13 +79,6 @@ class wxBrushRefData: public wxObjectRefData
 public:
     wxBrushRefData();
     wxBrushRefData(const wxBrushRefData& data);
-
-    bool operator == (const wxBrushRefData& data) const
-    {
-        return (m_style == data.m_style &&
-                m_stipple.IsSameAs(data.m_stipple) &&
-                m_colour == data.m_colour);
-    }
 
     int            m_style;
     wxColour       m_colour;
@@ -134,29 +131,37 @@ wxBrush::wxBrush(const wxColour &colour, int style)
 wxBrush::wxBrush(const wxBitmap &stippleBitmap)
 {
     wxCHECK_RET( stippleBitmap.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stippleBitmap.GetWidth() == 8 && stippleBitmap.GetHeight() == 8,
+    wxCHECK_RET( stippleBitmap.GetWidth() == 8 && stippleBitmap.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     m_refData = new wxBrushRefData();
     M_BRUSHDATA->m_colour = *wxBLACK;
-
+    
     M_BRUSHDATA->m_stipple = stippleBitmap;
-    wxBitmapToPixPattern(stippleBitmap, &(M_BRUSHDATA->m_pixPattern),
+    wxBitmapToPixPattern(stippleBitmap, &(M_BRUSHDATA->m_pixPattern), 
                                         &(M_BRUSHDATA->m_maskPattern));
 
     if (M_BRUSHDATA->m_stipple.GetMask())
-        M_BRUSHDATA->m_style = wxSTIPPLE_MASK_OPAQUE;
-    else
-        M_BRUSHDATA->m_style = wxSTIPPLE;
+		M_BRUSHDATA->m_style = wxSTIPPLE_MASK_OPAQUE;
+	else
+		M_BRUSHDATA->m_style = wxSTIPPLE;
+}
+
+wxBrush::wxBrush(const wxBrush &brush)
+{
+    Ref(brush);
+}
+
+wxBrush& wxBrush::operator = (const wxBrush& brush)
+{
+    if (*this == brush) return (*this);
+    Ref(brush);
+    return *this;
 }
 
 bool wxBrush::operator == (const wxBrush& brush) const
 {
-    if (m_refData == brush.m_refData) return true;
-
-    if (!m_refData || !brush.m_refData) return false;
-
-    return *(wxBrushRefData*)m_refData == *(wxBrushRefData*)brush.m_refData;
+    return m_refData == brush.m_refData;
 }
 
 bool wxBrush::operator != (const wxBrush& brush) const
@@ -164,7 +169,7 @@ bool wxBrush::operator != (const wxBrush& brush) const
     return m_refData != brush.m_refData;
 }
 
-bool wxBrush::IsOk() const
+bool wxBrush::Ok() const
 {
     return ((m_refData) && M_BRUSHDATA->m_colour.Ok());
 }
@@ -239,7 +244,7 @@ void wxBrush::SetStipple(const wxBitmap& stipple)
     AllocExclusive();
 
     wxCHECK_RET( stipple.Ok(), _T("invalid bitmap") );
-    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8,
+    wxCHECK_RET( stipple.GetWidth() == 8 && stipple.GetHeight() == 8, 
                   _T("stipple bitmap must be 8x8") );
 
     M_BRUSHDATA->m_stipple = stipple;
@@ -261,3 +266,4 @@ wxObjectRefData *wxBrush::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBrushRefData(*(wxBrushRefData *)data);
 }
+

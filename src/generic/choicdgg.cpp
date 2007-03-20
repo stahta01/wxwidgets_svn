@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/choicdgg.cpp
+// Name:        choicdgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by: 03.11.00: VZ to add wxArrayString and multiple sel functions
@@ -12,6 +12,10 @@
 // ============================================================================
 // declarations
 // ============================================================================
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicdgg.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -32,15 +36,16 @@
     #include "wx/dialog.h"
     #include "wx/button.h"
     #include "wx/listbox.h"
-    #include "wx/checklst.h"
     #include "wx/stattext.h"
     #include "wx/intl.h"
     #include "wx/sizer.h"
     #include "wx/arrstr.h"
 #endif
 
-#include "wx/statline.h"
-#include "wx/settings.h"
+#if wxUSE_STATLINE
+    #include "wx/statline.h"
+#endif
+
 #include "wx/generic/choicdgg.h"
 
 // ----------------------------------------------------------------------------
@@ -48,6 +53,20 @@
 // ----------------------------------------------------------------------------
 
 #define wxID_LISTBOX 3000
+
+// ---------------------------------------------------------------------------
+// macros
+// ---------------------------------------------------------------------------
+
+/* Macro for avoiding #ifdefs when value have to be different depending on size of
+   device we display on - take it from something like wxDesktopPolicy in the future
+ */
+
+#if defined(__SMARTPHONE__)
+    #define wxLARGESMALL(large,small) small
+#else
+    #define wxLARGESMALL(large,small) large
+#endif
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -242,8 +261,13 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
                                const wxPoint& pos,
                                long styleLbox)
 {
+#if defined(__SMARTPHONE__) || defined(__POCKETPC__)
+    styleDlg &= ~wxBORDER_MASK;
+    styleDlg &= ~wxRESIZE_BORDER;
+    styleDlg &= ~wxCAPTION;
+#endif
+
 #ifdef __WXMAC__
-    // FIXME: why??
     if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg & (~wxCANCEL) ) )
         return false;
 #else
@@ -254,33 +278,52 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
     // 1) text message
-    topsizer->
-        Add(CreateTextSizer(message), wxSizerFlags().Expand().TripleBorder());
-
+#ifdef __WXMAC__
+    // align text and list at least on mac
+    topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(15,0) );
+#else
+    topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(10,0) );
+#endif
+    
     // 2) list box
-    m_listbox = CreateList(n, choices, styleLbox);
-
+    m_listbox = new wxListBox( this, wxID_LISTBOX,
+                               wxDefaultPosition, wxDefaultSize,
+                               n, choices,
+                               styleLbox );
     if ( n > 0 )
         m_listbox->SetSelection(0);
 
-    topsizer->
-        Add(m_listbox, wxSizerFlags().Expand().Proportion(1).TripleBorder(wxLEFT | wxRIGHT));
+    topsizer->Add( m_listbox, 1, wxEXPAND|wxLEFT|wxRIGHT, wxLARGESMALL(15,0) );
 
-    // 3) buttons if any
-    wxSizer *
-        buttonSizer = CreateSeparatedButtonSizer(styleDlg & ButtonSizerFlags);
-    if ( buttonSizer )
-    {
-        topsizer->Add(buttonSizer, wxSizerFlags().Expand().DoubleBorder());
-    }
+    // smart phones does not support or do not waste space for wxButtons
+#ifdef __SMARTPHONE__
+
+    SetRightMenu(wxID_CANCEL, _("Cancel"));
+
+#else // __SMARTPHONE__/!__SMARTPHONE__
+
+    // Mac Human Interface Guidelines recommend not to use static lines as grouping elements
+#ifndef __WXMAC__
+#if wxUSE_STATLINE
+    // 3) static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif
+#endif
+
+    // 4) buttons
+    topsizer->Add( CreateButtonSizer( styleDlg & (wxOK|wxCANCEL) ), 0, wxEXPAND | wxALL, 10 );
+
+#endif // !__SMARTPHONE__
 
     SetSizer( topsizer );
 
+#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
     if ( styleDlg & wxCENTRE )
         Centre(wxBOTH);
+#endif
 
     m_listbox->SetFocus();
 
@@ -300,29 +343,13 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
                   styleDlg, pos, styleLbox);
 }
 
-wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-	wxSize size = wxDefaultSize;
-	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
-		size = wxSize(300, 200);
-    return new wxListBox( this, wxID_LISTBOX,
-                          wxDefaultPosition, size,
-                          n, choices,
-                          styleLbox );
-}
-
 // ----------------------------------------------------------------------------
 // wxSingleChoiceDialog
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxSingleChoiceDialog, wxDialog)
     EVT_BUTTON(wxID_OK, wxSingleChoiceDialog::OnOK)
-#ifndef __SMARTPHONE__
     EVT_LISTBOX_DCLICK(wxID_LISTBOX, wxSingleChoiceDialog::OnListBoxDClick)
-#endif
-#ifdef __WXWINCE__
-    EVT_JOY_BUTTON_DOWN(wxSingleChoiceDialog::OnJoystickButtonDown)
-#endif
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxSingleChoiceDialog, wxDialog)
@@ -397,24 +424,14 @@ void wxSingleChoiceDialog::SetSelection(int sel)
 
 void wxSingleChoiceDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
-    DoChoice();
+    m_selection = m_listbox->GetSelection();
+    m_stringSelection = m_listbox->GetStringSelection();
+    if ( m_listbox->HasClientUntypedData() )
+        SetClientData(m_listbox->GetClientData(m_selection));
+    EndModal(wxID_OK);
 }
 
-#ifndef __SMARTPHONE__
 void wxSingleChoiceDialog::OnListBoxDClick(wxCommandEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-#ifdef __WXWINCE__
-void wxSingleChoiceDialog::OnJoystickButtonDown(wxJoystickEvent& WXUNUSED(event))
-{
-    DoChoice();
-}
-#endif
-
-void wxSingleChoiceDialog::DoChoice()
 {
     m_selection = m_listbox->GetSelection();
     m_stringSelection = m_listbox->GetStringSelection();
@@ -439,17 +456,10 @@ bool wxMultiChoiceDialog::Create( wxWindow *parent,
                                   long style,
                                   const wxPoint& pos )
 {
-    long styleLbox;
-#if wxUSE_CHECKLISTBOX
-    styleLbox = wxLB_ALWAYS_SB;
-#else
-    styleLbox = wxLB_ALWAYS_SB | wxLB_EXTENDED;
-#endif
-
     if ( !wxAnyChoiceDialog::Create(parent, message, caption,
                                     n, choices,
                                     style, pos,
-                                    styleLbox) )
+                                    wxLB_ALWAYS_SB | wxLB_EXTENDED) )
         return false;
 
     return true;
@@ -469,30 +479,6 @@ bool wxMultiChoiceDialog::Create( wxWindow *parent,
 
 void wxMultiChoiceDialog::SetSelections(const wxArrayInt& selections)
 {
-#if wxUSE_CHECKLISTBOX
-    wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
-    if (checkListBox)
-    {
-        // first clear all currently selected items
-        size_t n,
-            count = checkListBox->GetCount();
-        for ( n = 0; n < count; ++n )
-        {
-            if (checkListBox->IsChecked(n))
-                checkListBox->Check(n, false);
-        }
-
-        // now select the ones which should be selected
-        count = selections.GetCount();
-        for ( n = 0; n < count; n++ )
-        {
-            checkListBox->Check(selections[n]);
-        }
-
-        return;
-    }
-#endif
-
     // first clear all currently selected items
     size_t n,
            count = m_listbox->GetCount();
@@ -512,21 +498,6 @@ void wxMultiChoiceDialog::SetSelections(const wxArrayInt& selections)
 bool wxMultiChoiceDialog::TransferDataFromWindow()
 {
     m_selections.Empty();
-
-#if wxUSE_CHECKLISTBOX
-    wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
-    if (checkListBox)
-    {
-        size_t count = checkListBox->GetCount();
-        for ( size_t n = 0; n < count; n++ )
-        {
-            if ( checkListBox->IsChecked(n) )
-                m_selections.Add(n);
-        }
-        return true;
-    }
-#endif
-
     size_t count = m_listbox->GetCount();
     for ( size_t n = 0; n < count; n++ )
     {
@@ -536,21 +507,5 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
 
     return true;
 }
-
-#if wxUSE_CHECKLISTBOX
-
-wxListBoxBase *wxMultiChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
-{
-	wxSize size = wxDefaultSize;
-	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
-		size = wxSize(300, 200);
-
-    return new wxCheckListBox( this, wxID_LISTBOX,
-                               wxDefaultPosition, size,
-                               n, choices,
-                               styleLbox );
-}
-
-#endif // wxUSE_CHECKLISTBOX
 
 #endif // wxUSE_CHOICEDLG

@@ -52,7 +52,7 @@ private:
         CPPUNIT_TEST( FileScheme );
 #if TEST_URL
         CPPUNIT_TEST( URLCompat );
-#if 0 && wxUSE_PROTOCOL_HTTP
+#if wxUSE_PROTOCOL_HTTP
         CPPUNIT_TEST( URLProxy  );
 #endif
 #endif
@@ -73,9 +73,7 @@ private:
 
 #if TEST_URL
     void URLCompat();
-#if 0 && wxUSE_PROTOCOL_HTTP
     void URLProxy();
-#endif
 #endif
 
     DECLARE_NO_COPY_CLASS(URITestCase)
@@ -358,6 +356,9 @@ void URITestCase::URLCompat()
     CPPUNIT_ASSERT( uricopy == url );
     CPPUNIT_ASSERT( uricopy == urlcopy );
     CPPUNIT_ASSERT( uricopy == uri );
+#if WXWIN_COMPATIBILITY_2_4
+    CPPUNIT_ASSERT( wxURL::ConvertFromURI(wxT("%20%41%20")) == wxT(" A ") );
+#endif
     CPPUNIT_ASSERT( wxURI::Unescape(wxT("%20%41%20")) == wxT(" A ") );
 
     wxURI test(wxT("file:\"myf\"ile.txt"));
@@ -397,9 +398,7 @@ void URITestCase::URLCompat()
 #endif
 }
 
-// the purpose of this test is unclear, it seems to be unfinished so disabling
-// it for now
-#if 0 && wxUSE_PROTOCOL_HTTP
+#if wxUSE_PROTOCOL_HTTP
 void URITestCase::URLProxy()
 {
     wxURL url(wxT("http://www.asite.com/index.html"));

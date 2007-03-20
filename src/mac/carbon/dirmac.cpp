@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        mac/dirmac.cpp
+// Name:        msw/dir.cpp
 // Purpose:     wxDir implementation for Mac
 // Author:      Stefan Csomor
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dir.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,16 +28,36 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dir.h"
-
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif // PCH
 
+#include "wx/dir.h"
 #include "wx/filefn.h"          // for wxDirExists()
+
+#ifndef __DARWIN__
+  #include <windows.h>
+#endif
+
 #include "wx/filename.h"
 #include "wx/mac/private.h"
+
+#include "MoreFilesX.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+#ifndef MAX_PATH
+    #define MAX_PATH 260        // from VC++ headers
+#endif
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+#define M_DIR       ((wxDirData *)m_data)
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -131,7 +155,7 @@ bool wxDirData::Read(wxString *filename)
         HFSUniStr255 uniname ;
         FSRef fileRef;
         FSCatalogInfo catalogInfo;
-        ItemCount fetched = 0;
+        UInt32 fetched = 0;
 
         err = FSGetCatalogInfoBulk( m_iterator, 1, &fetched, NULL, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo , &catalogInfo , &fileRef, NULL, &uniname );
         
@@ -139,6 +163,7 @@ bool wxDirData::Read(wxString *filename)
         
         if ( errFSNoMoreItems == err )
             return false ;
+
         if ( afpAccessDenied == err )
             return false ;
 
@@ -206,7 +231,7 @@ wxDir::wxDir(const wxString& dirname)
 
 bool wxDir::Open(const wxString& dirname)
 {
-    delete m_data;
+    delete M_DIR;
     m_data = new wxDirData(dirname);
 
     return true;
@@ -222,7 +247,7 @@ wxString wxDir::GetName() const
     wxString name;
     if ( m_data )
     {
-        name = m_data->GetName();
+        name = M_DIR->GetName();
         if ( !name.empty() && (name.Last() == _T('/')) )
         {
             // chop off the last (back)slash
@@ -235,8 +260,10 @@ wxString wxDir::GetName() const
 
 wxDir::~wxDir()
 {
-    delete m_data;
-    m_data = NULL;
+    if (M_DIR != NULL) {
+        delete M_DIR;
+        m_data = NULL;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -249,10 +276,10 @@ bool wxDir::GetFirst(wxString *filename,
 {
     wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 
-    m_data->Rewind();
+    M_DIR->Rewind();
 
-    m_data->SetFileSpec(filespec);
-    m_data->SetFlags(flags);
+    M_DIR->SetFileSpec(filespec);
+    M_DIR->SetFlags(flags);
 
     return GetNext(filename);
 }
@@ -263,5 +290,5 @@ bool wxDir::GetNext(wxString *filename) const
 
     wxCHECK_MSG( filename, false, _T("bad pointer in wxDir::GetNext()") );
 
-    return m_data->Read(filename);
+    return M_DIR->Read(filename);
 }

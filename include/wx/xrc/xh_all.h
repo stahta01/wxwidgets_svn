@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_all.h
+// Name:        xh_all.h
 // Purpose:     includes all xh_*.h files
 // Author:      Vaclav Slavik
 // Created:     2000/03/05
@@ -34,10 +34,8 @@
 #include "wx/xrc/xh_sizer.h"
 #include "wx/xrc/xh_stbmp.h"
 #include "wx/xrc/xh_notbk.h"
-#include "wx/xrc/xh_odcombo.h"
 #include "wx/xrc/xh_listbk.h"
 #include "wx/xrc/xh_choicbk.h"
-#include "wx/xrc/xh_treebk.h"
 #include "wx/xrc/xh_text.h"
 #include "wx/xrc/xh_listb.h"
 #include "wx/xrc/xh_toolb.h"
@@ -53,19 +51,9 @@
 #include "wx/xrc/xh_gdctl.h"
 #include "wx/xrc/xh_frame.h"
 #include "wx/xrc/xh_scwin.h"
-#include "wx/xrc/xh_htmllbox.h"
 #include "wx/xrc/xh_split.h"
 #include "wx/xrc/xh_wizrd.h"
 #include "wx/xrc/xh_statbar.h"
 #include "wx/xrc/xh_mdi.h"
-#include "wx/xrc/xh_grid.h"
-#include "wx/xrc/xh_clrpicker.h"
-#include "wx/xrc/xh_filepicker.h"
-#include "wx/xrc/xh_fontpicker.h"
-#include "wx/xrc/xh_dirpicker.h"
-#include "wx/xrc/xh_hyperlink.h"
-#include "wx/xrc/xh_bmpcbox.h"
-#include "wx/xrc/xh_animatctrl.h"
-#include "wx/xrc/xh_collpane.h"
 
 #endif // _WX_XH_ALL_H_

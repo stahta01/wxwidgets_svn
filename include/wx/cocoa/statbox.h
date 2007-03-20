@@ -4,9 +4,9 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/18
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_STATBOX_H__
@@ -40,9 +40,6 @@ public:
             const wxSize& size = wxDefaultSize,
             long style = 0, const wxString& name = wxStaticBoxNameStr);
     virtual ~wxStaticBox();
-
-    virtual void SetLabel(const wxString& label);
-    virtual wxString GetLabel() const;
 
 // ------------------------------------------------------------------------
 // Cocoa callbacks

@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colordlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -104,10 +108,12 @@ void wxColourDialog::ColourDataToDialog()
         }
     }
 
-    wxGtkString pal(gtk_color_selection_palette_to_string(colors, n_colors));
+    gchar *pal = gtk_color_selection_palette_to_string(colors, n_colors);
 
     GtkSettings *settings = gtk_widget_get_settings(GTK_WIDGET(sel));
-    g_object_set(settings, "gtk-color-palette", pal.c_str(), NULL);
+    g_object_set(settings, "gtk-color-palette", pal, NULL);
+
+    g_free(pal);
 }
 
 void wxColourDialog::DialogToColourData()
@@ -117,7 +123,7 @@ void wxColourDialog::DialogToColourData()
 
     GdkColor clr;
     gtk_color_selection_get_current_color(sel, &clr);
-    m_data.SetColour(wxColour(clr));
+    m_data.SetColour(wxColour(clr.red >> 8, clr.green >> 8, clr.blue >> 8));
 
     // Extract custom palette:
 
@@ -131,7 +137,9 @@ void wxColourDialog::DialogToColourData()
     {
         for (int i = 0; i < wxMin(n_colors, 16); i++)
         {
-            m_data.SetCustomColour(i, wxColour(colors[i]));
+            m_data.SetCustomColour(i, wxColour(colors[i].red >> 8,
+                                               colors[i].green >> 8,
+                                               colors[i].blue >> 8));
         }
         g_free(colors);
     }

@@ -12,9 +12,13 @@
 #ifndef _WX_UXTHEME_H_
 #define _WX_UXTHEME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "uxtheme.h"
+#endif
+
 #include "wx/defs.h"
 
-#include "wx/msw/private.h"     // we use GetHwndOf()
+#include "wx/msw/wrapwin.h"
 #include "wx/msw/uxthemep.h"
 
 typedef HTHEME  (__stdcall *PFNWXUOPENTHEMEDATA)(HWND, const wchar_t *);
@@ -72,7 +76,7 @@ typedef HRESULT (__stdcall *PFNWXUENABLETHEMING)(BOOL);
 // we always define this class, even if wxUSE_UXTHEME == 0, but we just make it
 // empty in this case -- this allows to use it elsewhere without any #ifdefs
 #if wxUSE_UXTHEME
-    #include "wx/dynlib.h"
+    #include "wx/dynload.h"
 
     #define wxUX_THEME_DECLARE(type, func) type func;
 #else
@@ -202,12 +206,13 @@ private:
 class wxUxThemeHandle
 {
 public:
-    wxUxThemeHandle(const wxWindow *win, const wchar_t *classes)
+    wxUxThemeHandle(wxWindow *win, const wchar_t *classes)
     {
         wxUxThemeEngine *engine = wxUxThemeEngine::Get();
 
-        m_hTheme = engine ? (HTHEME)engine->OpenThemeData(GetHwndOf(win), classes)
-                          : NULL;
+        m_hTheme =
+            engine ? (HTHEME)engine->OpenThemeData((HWND) win->GetHWND(), classes)
+                   : NULL;
     }
 
     operator HTHEME() const { return m_hTheme; }

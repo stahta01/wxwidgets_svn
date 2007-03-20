@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/brush.h
+// Name:        brush.h
 // Purpose:     wxBrush class
 // Author:      Stefan Csomor
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "brush.h"
+#endif
 
 #include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
@@ -35,18 +39,24 @@ public:
     wxBrush(short macThemeBrush ) ;
     wxBrush(const wxColour& col, int style = wxSOLID);
     wxBrush(const wxBitmap& stipple);
-    virtual ~wxBrush();
+    wxBrush(const wxBrush& brush)
+        : wxBrushBase()
+        { Ref(brush); }
+    ~wxBrush();
 
-    virtual void SetColour(const wxColour& col) ;
-    virtual void SetColour(unsigned char r, unsigned char g, unsigned char b) ;
+    virtual void SetColour(const wxColour& col)  ;
+    virtual void SetColour(unsigned char r, unsigned char g, unsigned char b)  ;
     virtual void SetStyle(int style)  ;
     virtual void SetStipple(const wxBitmap& stipple)  ;
     virtual void MacSetTheme(short macThemeBrush) ;
     virtual void MacSetThemeBackground(unsigned long macThemeBackground ,  WXRECTPTR extent) ;
 
-    bool operator == (const wxBrush& brush) const;
-    bool operator != (const wxBrush& brush) const
-        { return !(*this == brush); }
+    wxBrush& operator = (const wxBrush& brush)
+    { if (*this == brush) return (*this); Ref(brush); return *this; }
+    bool operator == (const wxBrush& brush)
+    { return m_refData == brush.m_refData; }
+    bool operator != (const wxBrush& brush)
+    { return m_refData != brush.m_refData; }
 
     wxMacBrushKind MacGetBrushKind()  const ;
 
@@ -56,17 +66,16 @@ public:
     virtual int GetStyle() const ;
     wxBitmap *GetStipple() const ;
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const { return (m_refData != NULL) ; }
+    virtual bool Ok() const { return (m_refData != NULL) ; }
 
 // Implementation
 
     // Useful helper: create the brush resource
     bool RealizeResource();
 
-protected:
-    virtual wxObjectRefData* CreateRefData() const;
-    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
+    // When setting properties, we must make sure we're not changing
+    // another object
+    void Unshare();
 };
 
 #endif

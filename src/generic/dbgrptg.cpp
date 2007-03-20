@@ -23,26 +23,25 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_DEBUGREPORT && wxUSE_XML
-
-#include "wx/debugrpt.h"
-
 #ifndef WX_PRECOMP
     #include "wx/sizer.h"
     #include "wx/checklst.h"
     #include "wx/textctrl.h"
-    #include "wx/intl.h"
-    #include "wx/stattext.h"
-    #include "wx/filedlg.h"
-    #include "wx/valtext.h"
-    #include "wx/button.h"
 #endif // WX_PRECOMP
 
+#if wxUSE_DEBUGREPORT && wxUSE_XML
+
+#include "wx/debugrpt.h"
+
+#include "wx/intl.h"
 #include "wx/filename.h"
 #include "wx/ffile.h"
 #include "wx/mimetype.h"
 
 #include "wx/statline.h"
+#include "wx/stattext.h"
+#include "wx/filedlg.h"
+#include "wx/valtext.h"
 
 #ifdef __WXMSW__
     #include "wx/evtloop.h"     // for SetCriticalWindow()
@@ -297,7 +296,7 @@ wxDebugReportDialog::wxDebugReportDialog(wxDebugReport& dbgrpt)
                               dbgrpt.GetReportName().c_str()),
                               wxDefaultPosition,
                               wxDefaultSize,
-                              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+                              wxDEFAULT_DIALOG_STYLE | wxTHICK_FRAME),
                      m_dbgrpt(dbgrpt)
 {
     // upper part of the dialog: explanatory message
@@ -513,4 +512,4 @@ bool wxDebugReportPreviewStd::Show(wxDebugReport& dbgrpt) const
     return dlg.ShowModal() == wxID_OK && dbgrpt.GetFilesCount() != 0;
 }
 
-#endif // wxUSE_DEBUGREPORT && wxUSE_XML
+#endif // wxUSE_DEBUGREPORT

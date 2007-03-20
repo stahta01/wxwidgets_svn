@@ -12,6 +12,10 @@
 #ifndef _LIFE_APP_H_
 #define _LIFE_APP_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "life.h"
+#endif
+
 // for compilers that support precompilation, includes "wx/wx.h"
 #include "wx/wxprec.h"
 
@@ -41,7 +45,7 @@ class LifeCanvas : public wxWindow
 public:
     // ctor and dtor
     LifeCanvas(wxWindow* parent, Life* life, bool interactive = true);
-    virtual ~LifeCanvas();
+    ~LifeCanvas();
 
     // view management
     int  GetCellSize() const { return m_cellsize; };
@@ -122,7 +126,7 @@ class LifeFrame : public wxFrame
 public:
     // ctor and dtor
     LifeFrame();
-    virtual ~LifeFrame();
+    ~LifeFrame();
 
     // member functions
     void UpdateInfoText();

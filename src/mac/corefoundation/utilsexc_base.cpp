@@ -51,10 +51,10 @@
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
-//    wxMacExecute
+//	wxMacExecute
 //
 // argv is the command line split up, with the application path first
-// flags are the flags from wxExecute
+// flags are the flags from wxExecute 
 // process is the process passed from wxExecute for pipe streams etc.
 // returns -1 on error for wxEXEC_SYNC and 0 on error for wxEXEC_ASYNC
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -63,8 +63,8 @@ long wxMacExecute(wxChar **argv,
                wxProcess *process)
 {
     // Semi-macros used for return value of wxMacExecute
-    const long errorCode = ((flags & wxEXEC_SYNC) ? -1 : 0);
-    const long successCode = ((flags & wxEXEC_SYNC) ? 0 : -1); // fake PID
+	const long errorCode = ((flags & wxEXEC_SYNC) ? -1 : 0);
+	const long successCode = ((flags & wxEXEC_SYNC) ? 0 : -1); // fake PID
 
     // Obtains the number of arguments for determining the size of
     // the CFArray used to hold them
@@ -81,17 +81,18 @@ long wxMacExecute(wxChar **argv,
         wxLogDebug(wxT("wxMacExecute No file to launch!"));
         return errorCode ;
     }
-
+    
     // Path to bundle
     wxString path = *argv++;
 
     // Create a CFURL for the application path
     // Created this way because we are opening a bundle which is a directory
-    CFURLRef cfurlApp =
+    CFURLRef cfurlApp = 
         CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
-            wxMacCFStringHolder(path),
-            kDefaultPathStyle,
+            wxMacCFStringHolder(path, 
+                                wxLocale::GetSystemEncoding()),
+            kDefaultPathStyle, 
             true); //false == not a directory
 
     // Check for error from the CFURL
@@ -113,7 +114,7 @@ long wxMacExecute(wxChar **argv,
         CFRelease(cfurlApp);
         return errorCode ;
     }
-
+    
     // Get the bundle type and make sure its an 'APPL' bundle
     // Otherwise we're dealing with something else here...
     UInt32 dwBundleType, dwBundleCreator;
@@ -125,41 +126,42 @@ long wxMacExecute(wxChar **argv,
         CFRelease(cfurlApp);
         return errorCode ;
     }
-
+    
     // Create a CFArray for dealing with the command line
     // arguments to the bundle
-    CFMutableArrayRef cfaFiles = CFArrayCreateMutable(kCFAllocatorDefault,
+    CFMutableArrayRef cfaFiles = CFArrayCreateMutable(kCFAllocatorDefault, 
                                     cfiCount-1, &kCFTypeArrayCallBacks);
     if(!cfaFiles) //This should never happen
     {
-        wxLogDebug(wxT("wxMacExecute Could not create CFMutableArray"));
+        wxLogDebug(wxT("wxMacExecute Could not create CFMutableArray"));        
         CFRelease(cfbApp);
         CFRelease(cfurlApp);
         return errorCode ;
     }
-
+    
     // Loop through command line arguments to the bundle,
     // turn them into CFURLs and then put them in cfaFiles
     // For use to launch services call
         for( ; *argv != NULL ; ++argv)
         {
-        // Check for '<' as this will ring true for
+        // Check for '<' as this will ring true for 
         // CFURLCreateWithString but is generally not considered
         // typical on mac but is usually passed here from wxExecute
         if (wxStrcmp(*argv, wxT("<")) == 0)
             continue;
-
-
-        CFURLRef cfurlCurrentFile;    // CFURL to hold file path
-        wxFileName argfn(*argv);     // Filename for path
-
+            
+        
+        CFURLRef cfurlCurrentFile;	// CFURL to hold file path
+        wxFileName argfn(*argv); 	// Filename for path
+                
         if(argfn.DirExists())
         {
             // First, try creating as a directory
             cfurlCurrentFile = CFURLCreateWithFileSystemPath(
                                 kCFAllocatorDefault,
-                                wxMacCFStringHolder(*argv),
-                                kDefaultPathStyle,
+                                wxMacCFStringHolder(*argv, 
+                                wxLocale::GetSystemEncoding()),
+                                kDefaultPathStyle, 
                                 true); //true == directory
         }
         else if(argfn.FileExists())
@@ -168,26 +170,27 @@ long wxMacExecute(wxChar **argv,
             // as a regular file
             cfurlCurrentFile = CFURLCreateWithFileSystemPath(
                                 kCFAllocatorDefault,
-                                wxMacCFStringHolder(*argv),
-                                kDefaultPathStyle,
+                                wxMacCFStringHolder(*argv, 
+                                wxLocale::GetSystemEncoding()),
+                                kDefaultPathStyle, 
                                 false); //false == regular file
-        }
+        }    
         else
         {
             // Argument did not refer to
             // an entry in the local filesystem,
             // so try creating it through CFURLCreateWithString
             cfurlCurrentFile = CFURLCreateWithString(
-                                kCFAllocatorDefault,
-                                wxMacCFStringHolder(*argv),
-                                NULL);
+                    kCFAllocatorDefault,
+                wxMacCFStringHolder(*argv, wxLocale::GetSystemEncoding()),
+                    NULL);
         }
-
+        
         // Continue in the loop if the CFURL could not be created
         if(!cfurlCurrentFile)
         {
             wxLogDebug(
-                wxT("wxMacExecute Could not create CFURL for argument:%s"),
+                wxT("wxMacExecute Could not create CFURL for argument:%s"), 
                 *argv);
             continue;
         }
@@ -200,7 +203,7 @@ long wxMacExecute(wxChar **argv,
                             );
             CFRelease(cfurlCurrentFile); // array has retained it
         }
-
+    
     // Create a LSLaunchURLSpec for use with LSOpenFromURLSpec
     // Note that there are several flag options (launchFlags) such
     // as kLSLaunchDontSwitch etc. and maybe we could be more
@@ -208,10 +211,10 @@ long wxMacExecute(wxChar **argv,
     LSLaunchURLSpec launchspec;
     launchspec.appURL = cfurlApp;
     launchspec.itemURLs = cfaFiles;
-    launchspec.passThruParams = NULL; //AEDesc*
-    launchspec.launchFlags = kLSLaunchDefaults;
+    launchspec.passThruParams = NULL; //AEDesc* 
+    launchspec.launchFlags = kLSLaunchDefaults; 
     launchspec.asyncRefCon = NULL;
-
+    
     // Finally, call LSOpenFromURL spec with our arguments
     // 2nd parameter is a pointer to a CFURL that gets
     // the actual path launched by the function
@@ -221,16 +224,16 @@ long wxMacExecute(wxChar **argv,
     CFRelease(cfbApp);
     CFRelease(cfurlApp);
     CFRelease(cfaFiles);
-
+    
     // Check for error from LSOpenFromURLSpec
     if(status != noErr)
     {
-        wxLogDebug(wxT("wxMacExecute LSOpenFromURLSpec Error: %d"),
+        wxLogDebug(wxT("wxMacExecute LSOpenFromURLSpec Error: %d"), 
                    (int)status);
         return errorCode ;
     }
-
+    
     // No error from LSOpenFromURLSpec, so app was launched
-    return successCode;
+    return successCode; 
 }
 

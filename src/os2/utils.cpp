@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utils.cpp
+// Name:        utils.cpp
 // Purpose:     Various utilities
 // Author:      David Webster
 // Modified by:
@@ -12,14 +12,14 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/utils.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
+    #include "wx/setup.h"
+    #include "wx/utils.h"
+    #include "wx/app.h"
 #endif  //WX_PRECOMP
 
 #include "wx/os2/private.h"
+#include "wx/intl.h"
 #include "wx/apptrait.h"
 #include "wx/filename.h"
 
@@ -28,6 +28,7 @@
 #include <dirent.h>
 #endif
 
+#include "wx/log.h"
 
 #include <io.h>
 
@@ -59,17 +60,18 @@ static const wxChar eHOSTNAME[]  = _T("HostName");
 // functions beyond those provided by WinSock
 
 // Get full hostname (eg. DoDo.BSn-Germany.crg.de)
-bool wxGetHostName( wxChar* zBuf, int nMaxSize )
+bool wxGetHostName(
+  wxChar*                           zBuf
+, int                               nMaxSize
+)
 {
-    if (!zBuf) return false;
-
-#if defined(wxUSE_NET_API) && wxUSE_NET_API
-    char           zServer[256];
-    char           zComputer[256];
-    unsigned long  ulLevel = 0;
-    unsigned char* zBuffer = NULL;
-    unsigned long  ulBuffer = 256;
-    unsigned long* pulTotalAvail = NULL;
+#if wxUSE_NET_API
+    char                            zServer[256];
+    char                            zComputer[256];
+    unsigned long                   ulLevel = 0;
+    unsigned char*                  zBuffer = NULL;
+    unsigned long                   ulBuffer = 256;
+    unsigned long*                  pulTotalAvail = NULL;
 
     NetBios32GetInfo( (const unsigned char*)zServer
                      ,(const unsigned char*)zComputer
@@ -80,8 +82,8 @@ bool wxGetHostName( wxChar* zBuf, int nMaxSize )
                     );
     strcpy(zBuf, zServer);
 #else
-    wxChar*        zSysname;
-    const wxChar*  zDefaultHost = _T("noname");
+    wxChar*                         zSysname;
+    const wxChar*                   zDefaultHost = _T("noname");
 
     if ((zSysname = wxGetenv(_T("SYSTEM_NAME"))) == NULL &&
 	(zSysname = wxGetenv(_T("HOSTNAME"))) == NULL)
@@ -95,13 +97,9 @@ bool wxGetHostName( wxChar* zBuf, int nMaxSize )
                                );
     }
     else
-    {
         wxStrncpy(zBuf, zSysname, nMaxSize - 1);
-    }
-
     zBuf[nMaxSize] = _T('\0');
 #endif
-
     return *zBuf ? true : false;
 }
 
@@ -137,17 +135,19 @@ int wxKill(long         lPid,
 //
 // Execute a program in an Interactive Shell
 //
-bool wxShell( const wxString& rCommand )
+bool wxShell(
+  const wxString&                   rCommand
+)
 {
-    wxChar*     zShell = _T("CMD.EXE");
-    wxString    sInputs;
-    STARTDATA   SData = {0};
-    PSZ         PgmTitle = "Command Shell";
-    APIRET      rc;
-    PID         vPid = 0;
-    ULONG       ulSessID = 0;
-    UCHAR       achObjBuf[256] = {0}; //error data if DosStart fails
-    RESULTCODES vResult;
+    wxChar*                         zShell = _T("CMD.EXE");
+    wxString                        sInputs;
+    STARTDATA                       SData = {0};
+    PSZ                             PgmTitle = "Command Shell";
+    APIRET                          rc;
+    PID                             vPid = 0;
+    ULONG                           ulSessID = 0;
+    UCHAR                           achObjBuf[256] = {0}; //error data if DosStart fails
+    RESULTCODES                     vResult;
 
     SData.Length   = sizeof(STARTDATA);
     SData.Related  = SSF_RELATED_INDEPENDENT;
@@ -196,6 +196,18 @@ bool wxShutdown(wxShutdownFlags WXUNUSED(wFlags))
 {
     // TODO
     return false;
+}
+
+wxPowerType wxGetPowerType()
+{
+    // TODO
+    return wxPOWER_UNKNOWN;
+}
+
+wxBatteryState wxGetBatteryState()
+{
+    // TODO
+    return wxBATTERY_UNKNOWN_STATE;
 }
 
 // Get free memory in bytes, or -1 if cannot determine amount (e.g. on UNIX)
@@ -290,6 +302,62 @@ void wxFlushEvents()
 //  wxYield();
 }
 
+#if WXWIN_COMPATIBILITY_2_2
+
+// Output a debug mess., in a system dependent fashion.
+void wxDebugMsg(
+  const wxChar*                     zFmt ...
+)
+{
+    va_list                         vAp;
+    static wxChar                   zBuffer[512];
+
+    if (!wxTheApp->GetWantDebugOutput())
+        return ;
+    va_start(vAp, zFmt);
+    sprintf(zBuffer, zFmt, vAp) ;
+    va_end(vAp);
+}
+
+// Non-fatal error: pop up message box and (possibly) continue
+void wxError(
+  const wxString&                   rMsg
+, const wxString&                   rTitle
+)
+{
+    wxChar *wxBuffer = new wxChar[256];
+    wxSprintf(wxBuffer, "%s\nContinue?", WXSTRINGCAST rMsg);
+    if (::WinMessageBox( HWND_DESKTOP
+                        ,NULL
+                        ,(PSZ)wxBuffer
+                        ,(PSZ)WXSTRINGCAST rTitle
+                        ,0
+                        ,MB_ICONEXCLAMATION | MB_YESNO
+                       ) == MBID_YES)
+    delete[] wxBuffer;
+    wxExit();
+}
+
+// Fatal error: pop up message box and abort
+void wxFatalError(
+  const wxString&                   rMsg
+, const wxString&                   rTitle
+)
+{
+    unsigned long                   ulRc;
+
+    ulRc = ::WinMessageBox( HWND_DESKTOP
+                           ,NULL
+                           ,WXSTRINGCAST rMsg
+                           ,WXSTRINGCAST rTitle
+                           ,0
+                           ,MB_NOICON | MB_OK
+                          );
+    DosExit(EXIT_PROCESS, ulRc);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_2
+
 // Emit a beeeeeep
 void wxBell()
 {
@@ -318,13 +386,6 @@ wxString wxGetOsDescription()
     return strVer;
 }
 
-bool wxIsPlatform64Bit()
-{
-    // FIXME: No idea how to test for 64 bit processor
-    //        (Probably irrelevant anyhow, though).
-    return false;
-}
-
 void wxAppTraits::InitializeGui(unsigned long &WXUNUSED(ulHab))
 {
 }
@@ -333,28 +394,26 @@ void wxAppTraits::TerminateGui(unsigned long WXUNUSED(ulHab))
 {
 }
 
-wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
+wxToolkitInfo & wxConsoleAppTraits::GetToolkitInfo()
 {
+    static wxToolkitInfo  vInfo;
     ULONG                 ulSysInfo = 0;
     APIRET                ulrc;
 
+    vInfo.name = _T("wxBase");
     ulrc = ::DosQuerySysInfo( QSV_VERSION_MINOR,
                               QSV_VERSION_MINOR,
                               (PVOID)&ulSysInfo,
                               sizeof(ULONG)
                             );
-
     if (ulrc == 0L)
     {
-        if ( verMaj )
-            *verMaj = ulSysInfo / 10;
-        if ( verMin )
-            *verMin = ulSysInfo % 10;
+        vInfo.versionMajor = ulSysInfo / 10;
+        vInfo.versionMinor = ulSysInfo % 10;
     }
-
-    return wxOS_OS2;
+    vInfo.os = wxOS2_PM;
+    return vInfo;
 }
-
 
 // ---------------------------------------------------------------------------
 const wxChar* wxGetHomeDir(
@@ -485,9 +544,9 @@ bool wxGetDiskSpace(const wxString& path,
     }
 }
  
-wxString wxPMErrorToStr(ERRORID vError)
+wxString WXDLLEXPORT wxPMErrorToStr(ERRORID vError)
 {
-    wxString sError;
+    wxString                        sError;
 
     //
     // Remove the high order byte -- it is useless
@@ -638,7 +697,7 @@ wxString wxPMErrorToStr(ERRORID vError)
         default:
             sError = wxT("Unknown error");
     }
-    return sError;
+    return(sError);
 } // end of wxPMErrorToStr
 
 // replacement for implementation in unix/utilsunx.cpp,

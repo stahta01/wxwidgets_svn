@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/artprov.cpp
+// Name:        artprov.cpp
 // Purpose:     wxArtProvider class
 // Author:      Vaclav Slavik
 // Modified by:
@@ -13,6 +13,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "artprov.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -20,14 +24,16 @@
     #pragma hdrstop
 #endif
 
-#include "wx/artprov.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/list.h"
     #include "wx/log.h"
-    #include "wx/hashmap.h"
-    #include "wx/image.h"
-    #include "wx/module.h"
+    #include "wx/list.h"
+#endif
+
+#include "wx/artprov.h"
+#include "wx/hashmap.h"
+#include "wx/module.h"
+#if wxUSE_IMAGE
+#include "wx/image.h"
 #endif
 
 // ===========================================================================
@@ -90,29 +96,16 @@ void wxArtProviderCache::Clear()
 }
 
 
-// ============================================================================
+// ----------------------------------------------------------------------------
 // wxArtProvider class
-// ============================================================================
+// ----------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxArtProvider, wxObject)
 
 wxArtProvidersList *wxArtProvider::sm_providers = NULL;
 wxArtProviderCache *wxArtProvider::sm_cache = NULL;
 
-// ----------------------------------------------------------------------------
-// wxArtProvider ctors/dtor
-// ----------------------------------------------------------------------------
-
-wxArtProvider::~wxArtProvider()
-{
-    Remove(this);
-}
-
-// ----------------------------------------------------------------------------
-// wxArtProvider operations on provider stack
-// ----------------------------------------------------------------------------
-
-/*static*/ void wxArtProvider::CommonAddingProvider()
+/*static*/ void wxArtProvider::PushProvider(wxArtProvider *provider)
 {
     if ( !sm_providers )
     {
@@ -120,37 +113,28 @@ wxArtProvider::~wxArtProvider()
         sm_cache = new wxArtProviderCache;
     }
 
+    sm_providers->Insert(provider);
     sm_cache->Clear();
 }
 
-/*static*/ void wxArtProvider::Push(wxArtProvider *provider)
-{
-    CommonAddingProvider();
-    sm_providers->Insert(provider);
-}
-
-/*static*/ void wxArtProvider::Insert(wxArtProvider *provider)
-{
-    CommonAddingProvider();
-    sm_providers->Append(provider);
-}
-
-/*static*/ bool wxArtProvider::Pop()
+/*static*/ bool wxArtProvider::PopProvider()
 {
     wxCHECK_MSG( sm_providers, false, _T("no wxArtProvider exists") );
-    wxCHECK_MSG( !sm_providers->empty(), false, _T("wxArtProviders stack is empty") );
+    wxCHECK_MSG( sm_providers->GetCount() > 0, false, _T("wxArtProviders stack is empty") );
 
     delete sm_providers->GetFirst()->GetData();
+    sm_providers->Erase(sm_providers->GetFirst());
     sm_cache->Clear();
     return true;
 }
 
-/*static*/ bool wxArtProvider::Remove(wxArtProvider *provider)
+/*static*/ bool wxArtProvider::RemoveProvider(wxArtProvider *provider)
 {
     wxCHECK_MSG( sm_providers, false, _T("no wxArtProvider exists") );
 
     if ( sm_providers->DeleteObject(provider) )
     {
+        delete provider;
         sm_cache->Clear();
         return true;
     }
@@ -158,32 +142,12 @@ wxArtProvider::~wxArtProvider()
     return false;
 }
 
-/*static*/ bool wxArtProvider::Delete(wxArtProvider *provider)
-{
-    // provider will remove itself from the stack in its dtor
-    delete provider;
-
-    return true;
-}
-
 /*static*/ void wxArtProvider::CleanUpProviders()
 {
-    if ( sm_providers )
-    {
-        while ( !sm_providers->empty() )
-            delete *sm_providers->begin();
-
-        delete sm_providers;
-        sm_providers = NULL;
-
-        delete sm_cache;
-        sm_cache = NULL;
-    }
+    WX_CLEAR_LIST(wxArtProvidersList, *sm_providers);
+    wxDELETE(sm_providers);
+    wxDELETE(sm_cache);
 }
-
-// ----------------------------------------------------------------------------
-// wxArtProvider: retrieving bitmaps/icons
-// ----------------------------------------------------------------------------
 
 /*static*/ wxBitmap wxArtProvider::GetBitmap(const wxArtID& id,
                                              const wxArtClient& client,
@@ -280,43 +244,10 @@ wxArtProvider::~wxArtProvider()
     else if (client == wxART_BUTTON)
         return wxSize(16, 15);
     else // wxART_OTHER or perhaps a user's client, no specified size
-        return wxDefaultSize;
+        return wxDefaultSize;      
 #endif // GTK+ 2/else
 }
 
-// ----------------------------------------------------------------------------
-// deprecated wxArtProvider methods
-// ----------------------------------------------------------------------------
-
-#if WXWIN_COMPATIBILITY_2_6
-
-/* static */ void wxArtProvider::PushProvider(wxArtProvider *provider)
-{
-    Push(provider);
-}
-
-/* static */ void wxArtProvider::InsertProvider(wxArtProvider *provider)
-{
-    Insert(provider);
-}
-
-/* static */ bool wxArtProvider::PopProvider()
-{
-    return Pop();
-}
-
-/* static */ bool wxArtProvider::RemoveProvider(wxArtProvider *provider)
-{
-    // RemoveProvider() used to delete the provider being removed so this is
-    // not a typo, we must call Delete() and not Remove() here
-    return Delete(provider);
-}
-
-#endif // WXWIN_COMPATIBILITY_2_6
-
-// ============================================================================
-// wxArtProviderModule
-// ============================================================================
 
 class wxArtProviderModule: public wxModule
 {

@@ -1,19 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/button.mm
+// Name:        cocoa/button.mm
 // Purpose:     wxButton
 // Author:      David Elliott
 // Modified by:
 // Created:     2002/12/30
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2002 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/button.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
+    #include "wx/button.h"
     #include "wx/log.h"
 #endif
 
@@ -48,7 +47,7 @@ bool wxButton::Create(wxWindow *parent, wxWindowID winid,
     [m_cocoaNSView release];
 
     [GetNSButton() setBezelStyle:NSRoundedBezelStyle];
-    [GetNSButton() setTitle:wxNSStringWithWxString(GetLabelText(label))];
+    [GetNSButton() setTitle:wxNSStringWithWxString(wxStripMenuCodes(label))];
     [GetNSControl() sizeToFit];
 
     if(m_parent)
@@ -78,7 +77,7 @@ wxString wxButton::GetLabel() const
 
 void wxButton::SetLabel(const wxString& label)
 {
-    [GetNSButton() setTitle:wxNSStringWithWxString(GetLabelText(label))];
+    [GetNSButton() setTitle:wxNSStringWithWxString(wxStripMenuCodes(label))];
 }
 
 wxSize wxButton::DoGetBestSize() const
@@ -109,3 +108,4 @@ wxSize wxButtonBase::GetDefaultSize()
     // Apple HIG says OK/Cancel buttons have default width of 68.
     return wxSize(68,(int)ceil(cocoaRect.size.height));
 }
+

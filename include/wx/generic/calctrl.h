@@ -12,6 +12,10 @@
 #ifndef _WX_GENERIC_CALCTRL_H
 #define _WX_GENERIC_CALCTRL_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "calctrl.h"
+#endif
+
 #include "wx/control.h"         // the base class
 #include "wx/dcclient.h"        // for wxPaintDC
 
@@ -155,30 +159,15 @@ public:
     virtual bool Enable(bool enable = true);
     virtual bool Show(bool show = true);
 
-    virtual void SetWindowStyleFlag(long style);
-
     virtual wxVisualAttributes GetDefaultAttributes() const
         { return GetClassDefaultAttributes(GetWindowVariant()); }
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
-
-protected:
-    // override some base class virtuals
-    virtual wxSize DoGetBestSize() const;
-    virtual void DoGetPosition(int *x, int *y) const;
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual void DoSetSize(int x, int y, int width, int height, int sizeFlags);
-    virtual void DoMoveWindow(int x, int y, int width, int height);
-
 private:
     // common part of all ctors
     void Init();
-
-    // startup colours and reinitialization after colour changes in system
-    void InitColours();
 
     // event handlers
     void OnPaint(wxPaintEvent& event);
@@ -188,6 +177,13 @@ private:
     void OnMonthChange(wxCommandEvent& event);
     void OnYearChange(wxCommandEvent& event);
     void OnYearTextChange(wxCommandEvent& event);
+
+    // override some base class virtuals
+    virtual wxSize DoGetBestSize() const;
+    virtual void DoGetPosition(int *x, int *y) const;
+    virtual void DoGetSize(int *width, int *height) const;
+    virtual void DoSetSize(int x, int y, int width, int height, int sizeFlags);
+    virtual void DoMoveWindow(int x, int y, int width, int height);
 
     // (re)calc m_widthCol and m_heightRow
     void RecalcGeometry();
@@ -263,7 +259,7 @@ private:
     // OnPaint helper-methods
 
     // Highlight the [fromdate : todate] range using pen and brush
-    void HighlightRange(wxPaintDC* dc, const wxDateTime& fromdate, const wxDateTime& todate, const wxPen* pen, const wxBrush* brush);
+    void HighlightRange(wxPaintDC* dc, const wxDateTime& fromdate, const wxDateTime& todate, wxPen* pen, wxBrush* brush);
 
     // Get the "coordinates" for the date relative to the month currently displayed.
     // using (day, week): upper left coord is (1, 1), lower right coord is (7, 6)
@@ -294,9 +290,7 @@ private:
              m_colHolidayFg,
              m_colHolidayBg,
              m_colHeaderFg,
-             m_colHeaderBg,
-             m_colBackground,
-             m_colSorrounding;
+             m_colHeaderBg;
 
     // the attributes for each of the month days
     wxCalendarDateAttr *m_attrs[31];

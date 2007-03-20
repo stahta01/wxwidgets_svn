@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/dc.cpp
+// Name:        dc.cpp
 // Purpose:     wxDC class
 // Author:      Julian Smart
 // Modified by:
@@ -9,16 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/dc.h"
+#include "wx/dcmemory.h"
+#include "wx/defs.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/dcmemory.h"
-#endif
-
-IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
+    IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
 
 //-----------------------------------------------------------------------------
 // wxDC
@@ -49,7 +51,7 @@ void wxDC::DoDrawBitmap( const wxBitmap& bitmap, wxCoord x, wxCoord y, bool useM
     wxCHECK_RET( bitmap.Ok(), "invalid bitmap" );
 
     wxMemoryDC memDC;
-    memDC.SelectObjectAsSource(bitmap);
+    memDC.SelectObject(bitmap);
 
 #if 0
     // Not sure if we need this. The mask should leave the masked areas as per
@@ -214,3 +216,4 @@ void wxDC::ComputeScaleAndOrigin()
     m_scaleX = m_logicalScaleX * m_userScaleX;
     m_scaleY = m_logicalScaleY * m_userScaleY;
 }
+

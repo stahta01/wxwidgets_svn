@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/mimecmn.cpp
+// Name:        common/mimecmn.cpp
 // Purpose:     classes and functions to manage MIME types
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef    __GNUG__
+    #pragma implementation "mimetypebase.h"
+#endif
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,19 +31,19 @@
 
 #if wxUSE_MIMETYPE
 
-#include "wx/mimetype.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-    #include "wx/module.h"
+  #include "wx/string.h"
 #endif //WX_PRECOMP
 
+#include "wx/module.h"
+#include "wx/log.h"
 #include "wx/file.h"
 #include "wx/iconloc.h"
+#include "wx/intl.h"
+#include "wx/dynarray.h"
 #include "wx/confbase.h"
+
+#include "wx/mimetype.h"
 
 // other standard headers
 #include <ctype.h>
@@ -63,51 +67,6 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxMimeTypeCommands
-// ----------------------------------------------------------------------------
-
-void
-wxMimeTypeCommands::AddOrReplaceVerb(const wxString& verb, const wxString& cmd)
-{
-    int n = m_verbs.Index(verb, false /* ignore case */);
-    if ( n == wxNOT_FOUND )
-    {
-        m_verbs.Add(verb);
-        m_commands.Add(cmd);
-    }
-    else
-    {
-        m_commands[n] = cmd;
-    }
-}
-
-wxString
-wxMimeTypeCommands::GetCommandForVerb(const wxString& verb, size_t *idx) const
-{
-    wxString s;
-
-    int n = m_verbs.Index(verb);
-    if ( n != wxNOT_FOUND )
-    {
-        s = m_commands[(size_t)n];
-        if ( idx )
-            *idx = n;
-    }
-    else if ( idx )
-    {
-        // different from any valid index
-        *idx = (size_t)-1;
-    }
-
-    return s;
-}
-
-wxString wxMimeTypeCommands::GetVerbCmd(size_t n) const
-{
-    return m_verbs[n] + wxT('=') + m_commands[n];
-}
-
-// ----------------------------------------------------------------------------
 // wxFileTypeInfo
 // ----------------------------------------------------------------------------
 
@@ -126,17 +85,7 @@ wxFileTypeInfo::wxFileTypeInfo(const wxChar *mimeType,
 
     for ( ;; )
     {
-        // icc gives this warning in its own va_arg() macro, argh
-#ifdef __INTELC__
-    #pragma warning(push)
-    #pragma warning(disable: 1684)
-#endif
-
         const wxChar *ext = va_arg(argptr, const wxChar *);
-
-#ifdef __INTELC__
-    #pragma warning(pop)
-#endif
         if ( !ext )
         {
             // NULL terminates the list
@@ -498,33 +447,6 @@ bool wxFileType::SetDefaultIcon(const wxString& cmd, int index)
 #endif
 }
 
-// ----------------------------------------------------------------------------
-// wxMimeTypesManagerFactory
-// ----------------------------------------------------------------------------
-
-wxMimeTypesManagerFactory *wxMimeTypesManagerFactory::m_factory = NULL;
-
-/* static */
-void wxMimeTypesManagerFactory::Set(wxMimeTypesManagerFactory *factory)
-{
-    delete m_factory;
-
-    m_factory = factory;
-}
-
-/* static */
-wxMimeTypesManagerFactory *wxMimeTypesManagerFactory::Get()
-{
-    if ( !m_factory )
-        m_factory = new wxMimeTypesManagerFactory;
-
-    return m_factory;
-}
-
-wxMimeTypesManagerImpl *wxMimeTypesManagerFactory::CreateMimeTypesManagerImpl()
-{
-    return new wxMimeTypesManagerImpl;
-}
 
 // ----------------------------------------------------------------------------
 // wxMimeTypesManager
@@ -533,7 +455,7 @@ wxMimeTypesManagerImpl *wxMimeTypesManagerFactory::CreateMimeTypesManagerImpl()
 void wxMimeTypesManager::EnsureImpl()
 {
     if ( !m_impl )
-        m_impl = wxMimeTypesManagerFactory::Get()->CreateMimeTypesManagerImpl();
+        m_impl = new wxMimeTypesManagerImpl;
 }
 
 bool wxMimeTypesManager::IsOfType(const wxString& mimeType,
@@ -719,12 +641,10 @@ class wxMimeTypeCmnModule: public wxModule
 {
 public:
     wxMimeTypeCmnModule() : wxModule() { }
-
     virtual bool OnInit() { return true; }
     virtual void OnExit()
     {
-        wxMimeTypesManagerFactory::Set(NULL);
-
+        // this avoids false memory leak allerts:
         if ( gs_mimeTypesManager.m_impl != NULL )
         {
             delete gs_mimeTypesManager.m_impl;

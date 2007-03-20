@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/colour.h
+// Name:        colour.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,56 +7,97 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_COLOUR_H_
-#define _WX_GTK_COLOUR_H_
+
+#ifndef __GTKCOLOURH__
+#define __GTKCOLOURH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/string.h"
+#include "wx/gdiobj.h"
+#include "wx/palette.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxWindow;
+
+class WXDLLIMPEXP_CORE wxColour;
 
 //-----------------------------------------------------------------------------
 // wxColour
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxColour : public wxColourBase
+class WXDLLIMPEXP_CORE wxColour: public wxGDIObject
 {
 public:
-    // constructors
-    // ------------
+    wxColour() { }
 
-    // default
-    wxColour() {}
-    DEFINE_STD_WXCOLOUR_CONSTRUCTORS
-    wxColour(const GdkColor& gdkColor);
+    // Construct from RGB
+    wxColour( unsigned char red, unsigned char green, unsigned char blue );
+    wxColour( unsigned long colRGB ) { Set(colRGB); }
 
-    virtual ~wxColour();
+    // Implicit conversion from the colour name
+    wxColour( const wxString &colourName ) { InitFromName(colourName); }
+    wxColour( const char *colourName ) { InitFromName( wxString::FromAscii(colourName) ); }
+#if wxUSE_UNICODE
+    wxColour( const wxChar *colourName ) { InitFromName( wxString(colourName) ); }
+#endif
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_refData != NULL; }
+
+    wxColour( const wxColour& col )
+        : wxGDIObject()
+        { Ref(col); }
+    wxColour& operator = ( const wxColour& col ) { Ref(col); return *this; }
+
+    ~wxColour();
+
+    bool Ok() const { return m_refData != NULL; }
 
     bool operator == ( const wxColour& col ) const;
     bool operator != ( const wxColour& col ) const { return !(*this == col); }
 
+    void Set( unsigned char red, unsigned char green, unsigned char blue );
+    void Set( unsigned long colRGB )
+    {
+        // We don't need to know sizeof(long) here because we assume that the three
+        // least significant bytes contain the R, G and B values
+        Set((unsigned char)colRGB,
+            (unsigned char)(colRGB >> 8),
+            (unsigned char)(colRGB >> 16));
+    }
+
     unsigned char Red() const;
     unsigned char Green() const;
     unsigned char Blue() const;
-    unsigned char Alpha() const;
+
+
+    // Get colour from name or wxNullColour
+    static wxColour CreateByName(const wxString& name);
 
     // Implementation part
     void CalcPixel( GdkColormap *cmap );
     int GetPixel() const;
-#ifdef __WXGTK24__
-    const GdkColor *GetColor() const;
-#else
-    // GDK functions from old gtk2 versions take non-const color parameters,
-    // too many uses to deal with individually
     GdkColor *GetColor() const;
-#endif
+
+    void InitFromName(const wxString& colourName);
 
 protected:
-    virtual void
-    InitRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
-    virtual bool FromString(const wxChar *str);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxColour)
 };
 
-#endif // _WX_GTK_COLOUR_H_
+#endif // __GTKCOLOURH__

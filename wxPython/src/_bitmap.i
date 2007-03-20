@@ -16,28 +16,7 @@
 #include <wx/rawbmp.h>
 %}
 
-
-// Turn off the aquisition of the Global Interpreter Lock for the classes and
-// functions in this file
-%threadWrapperOff
-
 //---------------------------------------------------------------------------
-
-%{
-// See http://tinyurl.com/e5adr for what premultiplying alpha means.  It
-// appears to me that the other platforms are already doing it, so I'll just
-// automatically do it for wxMSW here.
-#ifdef __WXMSW__
-#define wxPy_premultiply(p, a)   ((p) * (a) / 0xff)
-#define wxPy_unpremultiply(p, a) ((a) ? ((p) * 0xff / (a)) : (p))    
-#else
-#define wxPy_premultiply(p, a)   (p)
-#define wxPy_unpremultiply(p, a) (p)    
-#endif
-%}
-
-//---------------------------------------------------------------------------
-
 
 %{
 #include <wx/image.h>
@@ -154,36 +133,35 @@ that a colour reduction may have to take place.", "",
 
     
     %extend {
-        %RenameDocCtor(
-            BitmapFromXPMData,
-            "Construct a Bitmap from a list of strings formatted as XPM data.", "",
-            wxBitmap(PyObject* listOfStrings))
-            {
-                char**    cArray = NULL;
-                wxBitmap* bmp;
+        DocStr(wxBitmap(PyObject* listOfStrings),
+               "Construct a Bitmap from a list of strings formatted as XPM data.", "");
+        
+        %RenameCtor(BitmapFromXPMData, wxBitmap(PyObject* listOfStrings))
+        {
+            char**    cArray = NULL;
+            wxBitmap* bmp;
 
-                cArray = ConvertListOfStrings(listOfStrings);
-                if (! cArray)
-                    return NULL;
-                bmp = new wxBitmap(cArray);
-                delete [] cArray;
-                return bmp;
-            }
+            cArray = ConvertListOfStrings(listOfStrings);
+            if (! cArray)
+                return NULL;
+            bmp = new wxBitmap(cArray);
+            delete [] cArray;
+            return bmp;
+        }
 
-       
-        %RenameDocCtor(
-            BitmapFromBits,
-            "Creates a bitmap from an array of bits.  You should only use this
+        DocStr(wxBitmap(PyObject* bits, int width, int height, int depth=1 ),
+               "Creates a bitmap from an array of bits.  You should only use this
 function for monochrome bitmaps (depth 1) in portable programs: in
 this case the bits parameter should contain an XBM image.  For other
-bit depths, the behaviour is platform dependent.", "",
-            wxBitmap(PyObject* bits, int width, int height, int depth=1 ))
-            {
-                char*      buf;
-                Py_ssize_t length;
-                PyString_AsStringAndSize(bits, &buf, &length);
-                return new wxBitmap(buf, width, height, depth);
-            }
+bit depths, the behaviour is platform dependent.", "");
+        
+        %RenameCtor(BitmapFromBits, wxBitmap(PyObject* bits, int width, int height, int depth=1 ))
+        {
+            char*       buf;
+            Py_ssize_t  length;
+            PyString_AsStringAndSize(bits, &buf, &length);
+            return new wxBitmap(buf, width, height, depth);
+        }
     }    
 
     
@@ -195,9 +173,8 @@ bit depths, the behaviour is platform dependent.", "",
     }
 #endif
 
-    bool IsOk();
-    %pythoncode { Ok = IsOk }
-
+    bool Ok();
+    
     DocDeclStr(
         int , GetWidth(),
         "Gets the width of the bitmap in pixels.", "");
@@ -241,14 +218,13 @@ file or explpicitly set for the bitmap.
 
     // MSW only?    wxBitmap GetMaskBitmap() const;
 
-    %disownarg(wxMask*);
     DocDeclStr(
         virtual void , SetMask(wxMask* mask),
         "Sets the mask for this bitmap.
 
 :see: `GetMask`, `wx.Mask`
 ", "");
-    %cleardisown(wxMask*);
+    
     
     %extend {
         DocStr(SetMaskColour,
@@ -314,97 +290,18 @@ the ``type`` parameter.", "");
     
 #ifdef __WXMSW__
     bool CopyFromCursor(const wxCursor& cursor);
+    int GetQuality();
+    void SetQuality(int q);
+    %pythoncode { GetQuality = wx._deprecated(GetQuality) }
+    %pythoncode { SetQuality = wx._deprecated(SetQuality) }
 #endif
 
+    %pythoncode { def __nonzero__(self): return self.Ok() }
+
     %extend {
-        DocStr(CopyFromBuffer,
-               "Copy data from a RGB buffer object to replace the bitmap pixel data.
-See `wxBitmapFromBuffer` for more details.", "");
-        void CopyFromBuffer(buffer data, int DATASIZE)
-        {
-            int height=self->GetHeight();
-            int width=self->GetWidth();
-
-            if (DATASIZE != width * height * 3) {
-                wxPyErr_SetString(PyExc_ValueError, "Invalid data buffer size.");
-            }
-            wxNativePixelData pixData(*self, wxPoint(0,0), wxSize(width, height));
-            if (! pixData) {
-                // raise an exception...
-                wxPyErr_SetString(PyExc_RuntimeError,
-                                  "Failed to gain raw access to bitmap data.");
-                return;
-            }
-
-            wxNativePixelData::Iterator p(pixData);
-            for (int y=0; y<height; y++) {
-                wxNativePixelData::Iterator rowStart = p;
-                for (int x=0; x<width; x++) {
-                    p.Red()   = *(data++);
-                    p.Green() = *(data++);
-                    p.Blue()  = *(data++);
-                    ++p;
-                }
-                p = rowStart;
-                p.OffsetY(pixData, 1);
-            }
-        }
-
-        DocStr(CopyFromBufferRGBA,
-               "Copy data from a RGBA buffer object to replace the bitmap pixel data.
-See `wxBitmapFromBufferRGBA` for more details.", "");
-        void CopyFromBufferRGBA(buffer data, int DATASIZE)
-        {
-            int height=self->GetHeight();
-            int width=self->GetWidth();
-            
-            if (DATASIZE != width * height * 4) {
-                wxPyErr_SetString(PyExc_ValueError, "Invalid data buffer size.");
-            }
-            wxAlphaPixelData pixData(*self, wxPoint(0,0), wxSize(width, height));
-            if (! pixData) {
-                // raise an exception...
-                wxPyErr_SetString(PyExc_RuntimeError,
-                                  "Failed to gain raw access to bitmap data.");
-                return;
-            }
-
-            pixData.UseAlpha();
-            wxAlphaPixelData::Iterator p(pixData);
-            for (int y=0; y<height; y++) {
-                wxAlphaPixelData::Iterator rowStart = p;
-                for (int x=0; x<width; x++) {
-                    byte a = data[3];
-                    p.Red()   = wxPy_premultiply(*(data++), a);
-                    p.Green() = wxPy_premultiply(*(data++), a);
-                    p.Blue()  = wxPy_premultiply(*(data++), a);
-                    p.Alpha() = a; data++;
-                    ++p;
-                }
-                p = rowStart;
-                p.OffsetY(pixData, 1);
-            }
-        }        
+        bool __eq__(const wxBitmap* other) { return other ? (*self == *other) : false; }
+        bool __ne__(const wxBitmap* other) { return other ? (*self != *other) : true;  }
     }
-
-    
-    %pythoncode { def __nonzero__(self): return self.IsOk() }
-
-    // TODO: Should these just be removed since the C++ operators are
-    // gone?  Or is using IsSameAs for wxPython ok?    
-    %extend {
-        bool __eq__(const wxBitmap* other) { return other ? self->IsSameAs(*other) : false; }
-        bool __ne__(const wxBitmap* other) { return other ? !self->IsSameAs(*other) : true;  }
-    }
-
-    %property(Depth, GetDepth, SetDepth, doc="See `GetDepth` and `SetDepth`");
-    %property(Height, GetHeight, SetHeight, doc="See `GetHeight` and `SetHeight`");
-    %property(Mask, GetMask, SetMask, doc="See `GetMask` and `SetMask`");
-    %property(Palette, GetPalette, doc="See `GetPalette`");
-    %property(Size, GetSize, SetSize, doc="See `GetSize` and `SetSize`");
-    %property(SubBitmap, GetSubBitmap, doc="See `GetSubBitmap`");
-    %property(Width, GetWidth, SetWidth, doc="See `GetWidth` and `SetWidth`");
-
 };
 
 
@@ -412,6 +309,19 @@ See `wxBitmapFromBufferRGBA` for more details.", "");
 // Factory functions for creating wxBitmaps from Python buffer objects.  They
 // use the Abstract Pixel API to be able to set RGB and A bytes directly into
 // the wxBitmap's pixel buffer.
+
+%{
+// See http://tinyurl.com/e5adr for what premultiplying alpha means.  It
+// appears to me that the other platforms are already doing it, so I'll just
+// automatically do it for wxMSW here.
+#ifdef __WXMSW__
+#define wxPy_premultiply(p, a)   ((p) * (a) / 256)
+#define wxPy_unpremultiply(p, a) ((a) ? ((p) * 256 / (a)) : (p))    
+#else
+#define wxPy_premultiply(p, a)   (p)
+#define wxPy_unpremultiply(p, a) (p)    
+#endif
+%}
 
 
 %newobject _BitmapFromBufferAlpha;
@@ -495,25 +405,21 @@ See `wxBitmapFromBufferRGBA` for more details.", "");
 def BitmapFromBuffer(width, height, dataBuffer, alphaBuffer=None):
     """
     Creates a `wx.Bitmap` from the data in dataBuffer.  The dataBuffer
-    parameter must be a Python object that implements the buffer
-    interface, such as a string, array, etc.  The dataBuffer object is
-    expected to contain a series of RGB bytes and be width*height*3
-    bytes long.  A buffer object can optionally be supplied for the
-    image's alpha channel data, and it is expected to be width*height
-    bytes long.  On Windows the RGB values are 'premultiplied' by the
-    alpha values.  (The other platforms do the multiplication
-    themselves.)
+    parameter must be a Python object that implements the buffer interface,
+    such as a string, array, etc.  The dataBuffer object is expected to
+    contain a series of RGB bytes and be width*height*3 bytes long.  A buffer
+    object can optionally be supplied for the image's alpha channel data, and
+    it is expected to be width*height bytes long.  On Windows the RGB values
+    are 'premultiplied' by the alpha values.  (The other platforms do the
+    multiplication themselves.)
 
-    Unlike `wx.ImageFromBuffer` the bitmap created with this function
-    does not share the memory buffer with the buffer object.  This is
-    because the native pixel buffer format varies on different
-    platforms, and so instead an efficient as possible copy of the
-    data is made from the buffer objects to the bitmap's native pixel
-    buffer.  For direct access to a bitmap's pixel buffer see
-    `wx.NativePixelData` and `wx.AlphaPixelData`.
+    Unlike `wx.ImageFromBuffer` the bitmap created with this function does not
+    share the memory buffer with the buffer object.  This is because the
+    native pixel buffer format varies on different platforms, and so instead
+    an efficient as possible copy of the data is made from the buffer objects
+    to the bitmap's native pixel buffer.  
 
-    :see: `wx.Bitmap`, `wx.BitmapFromBufferRGBA`, `wx.NativePixelData`,
-          `wx.AlphaPixelData`, `wx.ImageFromBuffer`
+    :see: `wx.Bitmap`, `wx.BitmapFromBufferRGBA`, `wx.ImageFromBuffer`
     """
     if alphaBuffer is not None:
         return _gdi_._BitmapFromBufferAlpha(width, height, dataBuffer, alphaBuffer)
@@ -564,227 +470,26 @@ def BitmapFromBuffer(width, height, dataBuffer, alphaBuffer=None):
 def BitmapFromBufferRGBA(width, height, dataBuffer):
     """
     Creates a `wx.Bitmap` from the data in dataBuffer.  The dataBuffer
-    parameter must be a Python object that implements the buffer
-    interface, such as a string, array, etc.  The dataBuffer object is
-    expected to contain a series of RGBA bytes (red, green, blue and
-    alpha) and be width*height*4 bytes long.  On Windows the RGB
-    values are 'premultiplied' by the alpha values.  (The other
-    platforms do the multiplication themselves.)
+    parameter must be a Python object that implements the buffer interface,
+    such as a string, array, etc.  The dataBuffer object is expected to
+    contain a series of RGBA bytes (red, green, blue and alpha) and be
+    width*height*4 bytes long.  On Windows the RGB values are 'premultiplied'
+    by the alpha values.  (The other platforms do the multiplication
+    themselves.)
 
-    Unlike `wx.ImageFromBuffer` the bitmap created with this function
-    does not share the memory buffer with the buffer object.  This is
-    because the native pixel buffer format varies on different
-    platforms, and so instead an efficient as possible copy of the
-    data is made from the buffer object to the bitmap's native pixel
-    buffer.  For direct access to a bitmap's pixel buffer see
-    `wx.NativePixelData` and `wx.AlphaPixelData`.
+    Unlike `wx.ImageFromBuffer` the bitmap created with this function does not
+    share the memory buffer with the buffer object.  This is because the
+    native pixel buffer format varies on different platforms, and so instead
+    an efficient as possible copy of the data is made from the buffer object
+    to the bitmap's native pixel buffer. 
 
-    :see: `wx.Bitmap`, `wx.BitmapFromBuffer`, `wx.NativePixelData`,
-          `wx.AlphaPixelData`, `wx.ImageFromBuffer`
+    :see: `wx.Bitmap`, `wx.BitmapFromBuffer`, `wx.ImageFromBuffer`
     """
+    if not isinstance(dataBuffer, buffer):
+        dataBuffer = buffer(dataBuffer)
     return _gdi_._BitmapFromBufferRGBA(width, height, dataBuffer)
 }
 
-
-//---------------------------------------------------------------------------
-
-class wxPixelDataBase
-{
-public:
-    // origin of the rectangular region we represent
-    wxPoint GetOrigin() const { return m_ptOrigin; }
-
-    // width and height of the region we represent
-    int GetWidth() const { return m_width; }
-    int GetHeight() const { return m_height; }
-
-    wxSize GetSize() const { return wxSize(m_width, m_height); }
-
-    // the distance between two rows
-    int GetRowStride() const { return m_stride; }
-
-    %property(Height, GetHeight, doc="See `GetHeight`");
-    %property(Origin, GetOrigin, doc="See `GetOrigin`");
-    %property(RowStride, GetRowStride, doc="See `GetRowStride`");
-    %property(Size, GetSize, doc="See `GetSize`");
-    %property(Width, GetWidth, doc="See `GetWidth`");
-};
-
-
-// Both wxNativePixelData and wxAlphaPixelData have the same interface, so
-// make a macro to declare them both.
-
-%define PIXELDATA(PixelData)
-%{
-    typedef PixelData##::Iterator PixelData##_Accessor;
-%}
-class PixelData##_Accessor;
-class PixelData : public wxPixelDataBase
-{
-public:
-    %nokwargs PixelData;
-    
-    PixelData(wxBitmap& bmp);
-    PixelData(wxBitmap& bmp, const wxRect& rect);
-    PixelData(wxBitmap& bmp, const wxPoint& pt, const wxSize& sz);
-
-    ~PixelData();
-
-    PixelData##_Accessor GetPixels() const;
-    void UseAlpha();
-
-    %extend {
-        bool __nonzero__() { return self->operator bool(); }
-    }
-
-    %pythoncode {
-    def __iter__(self):
-        """
-        Create and return an iterator object for this pixel data
-        object.  (It's really a generator but I won't tell if you
-        don't tell.)
-        """
-        width  = self.GetWidth()
-        height = self.GetHeight()
-        pixels = self.GetPixels()
-        
-        # This class is a facade over the pixels object (using the one
-        # in the enclosing scope) that only allows Get() and Set() to
-        # be called.
-        class PixelFacade(object):
-            def Get(self):
-                return pixels.Get()
-            def Set(self, *args, **kw):
-                return pixels.Set(*args, **kw)
-            def __str__(self):
-                return str(self.Get())
-            def __repr__(self):
-                return 'pixel(%d,%d): %s' % (x,y,self.Get())
-            X = property(lambda self: x)
-            Y = property(lambda self: y)
-            
-        pf = PixelFacade()        
-        for y in xrange(height):
-            for x in xrange(width):
-                # We always generate the same pf instance, but it
-                # accesses the pixels object which we use to iterate
-                # over the pixel buffer.
-                yield pf    
-                pixels.nextPixel()
-            pixels.MoveTo(self, 0, y)
-    }
-
-    %property(Pixels, GetPixels, doc="See `GetPixels`");
-};
-
-
-
-class PixelData##_Accessor
-{
-public:
-    %nokwargs PixelData##_Accessor;
-    
-    PixelData##_Accessor(PixelData& data);
-    PixelData##_Accessor(wxBitmap& bmp, PixelData& data);
-    PixelData##_Accessor();
-
-    ~PixelData##_Accessor();
-
-    void Reset(const PixelData& data);
-    bool IsOk() const;
-
-    %extend {
-        // PixelData##_Accessor& nextPixel() { return ++(*self); }
-        void nextPixel() { ++(*self); }
-    }
-
-    void Offset(const PixelData& data, int x, int y);
-    void OffsetX(const PixelData& data, int x);
-    void OffsetY(const PixelData& data, int y);
-    void MoveTo(const PixelData& data, int x, int y);
-
-// NOTE: For now I'm not wrapping the Red, Green, Blue and Alpha
-// functions because I can't hide the premultiplying needed on wxMSW
-// if only the individual components are wrapped, plus it would mean 3
-// or 4 trips per pixel from Python to C++ instead of just one.
-// Instead I've added the Set and Get functions and put the
-// premultiplying in there.
-    
-//     %extend {
-//         byte _get_Red()   { return self->Red(); }
-//         byte _get_Green() { return self->Green(); }
-//         byte _get_Blue()  { return self->Blue(); }
-
-//         void _set_Red(byte val)   { self->Red() = val; }
-//         void _set_Green(byte val) { self->Green() = val; }
-//         void _set_Blue(byte val)  { self->Blue() = val; }
-//     }
-
-//     %pythoncode {
-//         Red   = property(_get_Red,   _set_Red)
-//         Green = property(_get_Green, _set_Green)
-//         Blue  = property(_get_Blue,  _set_Blue)
-//     }
-};
-%enddef
-
-
-%pythonAppend wxAlphaPixelData::wxAlphaPixelData "self.UseAlpha()"
-
-// Make the classes
-PIXELDATA(wxNativePixelData)
-PIXELDATA(wxAlphaPixelData)    
-
-
-// Add in a few things that are different between the wxNativePixelData and
-// wxAlphaPixelData and the iterator classes and so are not included in our
-// macro...
-
-%extend wxNativePixelData_Accessor {
-    void Set(byte red, byte green, byte blue) {
-        self->Red()   = red;
-        self->Green() = green;
-        self->Blue()  = blue;
-    }
-    
-    PyObject* Get() {
-        PyObject* rv = PyTuple_New(3);
-        PyTuple_SetItem(rv, 0, PyInt_FromLong(self->Red()));
-        PyTuple_SetItem(rv, 1, PyInt_FromLong(self->Green()));
-        PyTuple_SetItem(rv, 2, PyInt_FromLong(self->Blue()));
-        return rv;            
-    }    
-}
-
-%extend wxAlphaPixelData_Accessor {
-//     byte _get_Alpha()         { return self->Alpha(); }
-//     void _set_Alpha(byte val) { self->Alpha() = val; }
-    
-//     %pythoncode {
-//         Alpha = property(_get_Alpha, _set_Alpha)
-//     }
-
-    void Set(byte red, byte green, byte blue, byte alpha) {
-        self->Red()   = wxPy_premultiply(red,   alpha);
-        self->Green() = wxPy_premultiply(green, alpha);
-        self->Blue()  = wxPy_premultiply(blue,  alpha);
-        self->Alpha() = alpha;
-    }
-    
-    PyObject* Get() {
-        PyObject* rv = PyTuple_New(4);
-        int red   = self->Red();
-        int green = self->Green();
-        int blue  = self->Blue();
-        int alpha = self->Alpha();
-            
-        PyTuple_SetItem(rv, 0, PyInt_FromLong( wxPy_unpremultiply(red,   alpha) ));
-        PyTuple_SetItem(rv, 1, PyInt_FromLong( wxPy_unpremultiply(green, alpha) ));
-        PyTuple_SetItem(rv, 2, PyInt_FromLong( wxPy_unpremultiply(blue,  alpha) ));
-        PyTuple_SetItem(rv, 3, PyInt_FromLong( alpha ));
-        return rv;            
-    }
-}
 
 
 //---------------------------------------------------------------------------
@@ -816,20 +521,17 @@ passed then BLACK is used.
     
     %extend {
         wxMask(const wxBitmap& bitmap, const wxColour& colour = wxNullColour) {
-            if ( !colour.IsOk() )
+            if ( !colour.Ok() )
                 return new wxMask(bitmap, *wxBLACK);
             else
                 return new wxMask(bitmap, colour);
         }
     }
     
-    ~wxMask();
+    //~wxMask();
 };
 
 %pythoncode { MaskColour = wx._deprecated(Mask, "wx.MaskColour is deprecated, use `wx.Mask` instead.") }
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-
-// Turn GIL acquisition back on.
-%threadWrapperOn

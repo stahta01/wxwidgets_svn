@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_bttn.cpp
+// Name:        xh_bttn.cpp
 // Purpose:     XRC resource for buttons
 // Author:      Vaclav Slavik
 // Created:     2000/03/05
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_bttn.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,13 +19,10 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_BUTTON
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_bttn.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/button.h"
-#endif
+#include "wx/button.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxButtonXmlHandler, wxXmlResourceHandler)
 
@@ -60,4 +61,4 @@ bool wxButtonXmlHandler::CanHandle(wxXmlNode *node)
     return IsOfClass(node, wxT("wxButton"));
 }
 
-#endif // wxUSE_XRC && wxUSE_BUTTON
+#endif // wxUSE_XRC

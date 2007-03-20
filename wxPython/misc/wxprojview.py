@@ -1,24 +1,16 @@
 #!/usr/bin/env python
-#----------------------------------------------------------------------
-#
-#  A little app I use on my system to help me remember which version of
-#  wx I am corrently working on.  I don't expect this to work for anybody
-#  else as it uses things that are specific to my setup.
-#
-#----------------------------------------------------------------------
 
 import wx
 import wx.lib.stattext as st
 import os
-import sys
 
 class MyFrame(wx.Frame):
-    def __init__(self, style=0):
+    def __init__(self):
         wx.Frame.__init__(self, None, title="wx Active Project",
-                          style=wx.FRAME_NO_TASKBAR | style
-                          ,name="wxprojview"
+                          style=wx.FRAME_NO_TASKBAR|wx.STAY_ON_TOP,
+                          name="wxprojview"
                           )
-        p = wx.Panel(self)
+        p = wx.Panel(self)#, style=wx.SIMPLE_BORDER)
         
         p.SetBackgroundColour("sky blue")
         self.label = st.GenStaticText(p, -1, "wx XXX")
@@ -50,12 +42,9 @@ class MyFrame(wx.Frame):
 
 
     def OnUpdateVersion(self, evt):
-        ver = '?.?'
+        ver = '??'
         if 'wxMSW' in wx.PlatformInfo:
-            info = open("c:/wxcurenv").read()
-            p1 = info.find("WXCUR=") + 6
-            p2 = info.find("\n", p1)
-            ver = info[p1:p2]
+            pass
         else:
             link = '/opt/wx/current'
             if os.path.islink(link):
@@ -105,9 +94,6 @@ class MyFrame(wx.Frame):
 app = wx.PySimpleApp()
 app.SetAppName("wxprojview")
 app.SetVendorName("Robin Dunn")
-style = wx.STAY_ON_TOP
-if len(sys.argv) > 1 and sys.argv[1] == 'nostayontop':
-    style=0
-frm = MyFrame(style)
+frm = MyFrame()
 frm.Show()
 app.MainLoop()

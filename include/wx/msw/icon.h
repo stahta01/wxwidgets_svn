@@ -12,6 +12,10 @@
 #ifndef _WX_ICON_H_
 #define _WX_ICON_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "icon.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -44,6 +48,9 @@ public:
         // default
     wxIcon() { }
 
+        // copy
+    wxIcon(const wxIcon& icon) : wxGDIImage(icon) { Ref(icon); }
+
         // from raw data
     wxIcon(const char bits[], int width, int height);
 
@@ -64,6 +71,13 @@ public:
     virtual bool LoadFile(const wxString& name,
                           long type = wxBITMAP_TYPE_ICO_RESOURCE,
                           int desiredWidth = -1, int desiredHeight = -1);
+
+    wxIcon& operator = (const wxIcon& icon)
+        { if ( *this != icon ) Ref(icon); return *this; }
+    bool operator == (const wxIcon& icon) const
+        { return m_refData == icon.m_refData; }
+    bool operator != (const wxIcon& icon) const
+        { return m_refData != icon.m_refData; }
 
     // implementation only from now on
     wxIconRefData *GetIconData() const { return (wxIconRefData *)m_refData; }

@@ -6,7 +6,7 @@
 // Created:     2003/04/01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_DCCLIENT_H__
@@ -25,7 +25,7 @@ public:
     wxWindowDC(void);
     // Create a DC corresponding to a window
     wxWindowDC(wxWindow *win);
-    virtual ~wxWindowDC(void);
+    ~wxWindowDC(void);
 
 protected:
     wxWindow *m_window;
@@ -45,7 +45,7 @@ public:
     wxClientDC(void);
     // Create a DC corresponding to a window
     wxClientDC(wxWindow *win);
-    virtual ~wxClientDC(void);
+    ~wxClientDC(void);
 protected:
 // DC stack
     virtual bool CocoaLockFocus();
@@ -59,12 +59,11 @@ public:
     wxPaintDC(void);
     // Create a DC corresponding to a window
     wxPaintDC(wxWindow *win);
-    virtual ~wxPaintDC(void);
+    ~wxPaintDC(void);
 protected:
 // DC stack
     virtual bool CocoaLockFocus();
     virtual bool CocoaUnlockFocus();
 };
 
-#endif
-    // __WX_COCOA_DCCLIENT_H__
+#endif // __WX_COCOA_DCCLIENT_H__

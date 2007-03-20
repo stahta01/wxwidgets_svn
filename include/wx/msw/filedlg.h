@@ -12,6 +12,10 @@
 #ifndef _WX_FILEDLG_H_
 #define _WX_FILEDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "filedlg.h"
+#endif
+
 //-------------------------------------------------------------------------
 // wxFileDialog
 //-------------------------------------------------------------------------
@@ -24,10 +28,8 @@ public:
                  const wxString& defaultDir = wxEmptyString,
                  const wxString& defaultFile = wxEmptyString,
                  const wxString& wildCard = wxFileSelectorDefaultWildcardStr,
-                 long style = wxFD_DEFAULT_STYLE,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& sz = wxDefaultSize,
-                 const wxString& name = wxFileDialogNameStr);
+                 long style = 0,
+                 const wxPoint& pos = wxDefaultPosition);
 
     virtual void SetPath(const wxString& path);
     virtual void GetPaths(wxArrayString& paths) const;

@@ -69,8 +69,6 @@
 		 <1>	 1/25/02	JL		MoreFilesX 1.0
 */
 
-#ifndef __LP64__
-
 #if defined(__MACH__)
 	#include <Carbon/Carbon.h>
 	#include <string.h>
@@ -220,8 +218,6 @@ BadParameter:
 
 /*****************************************************************************/ 
 
-#ifndef __LP64__ 
-
 OSErr
 FSGetVolParms(
 	FSVolumeRefNum volRefNum,
@@ -251,8 +247,6 @@ BadParameter:
 
 	return ( result );
 }
-
-#endif
 
 /*****************************************************************************/
 
@@ -2127,8 +2121,6 @@ BadParameter:
 
 /*****************************************************************************/
 
-#ifndef __LP64__ 
-
 OSErr
 FSLockRangeMoreFilesX(
 	SInt16 refNum,
@@ -2312,7 +2304,7 @@ BadParameter:
 /*****************************************************************************/
 
 OSErr
-FSVolumeMountX(
+FSVolumeMount(
 	const void *volMountInfo,
 	FSVolumeRefNum *volRefNum)
 {
@@ -2612,8 +2604,6 @@ BadParameter:
 	return ( result );
 }
 
-#endif
-
 /*****************************************************************************/
 
 #pragma mark ----- Utility Routines -----
@@ -2778,5 +2768,3 @@ BadParameter:
 }
 
 /*****************************************************************************/
-
-#endif

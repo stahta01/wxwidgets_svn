@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "servlet.cpp"
+    #pragma interface "servlet.cpp"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -65,7 +70,7 @@ class MyApp : public wxApp
 public:
 
     MyApp();
-    virtual ~MyApp();
+    ~MyApp();
 
     virtual bool OnInit();
     

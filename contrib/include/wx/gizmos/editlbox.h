@@ -11,6 +11,10 @@
 #ifndef __WX_EDITLBOX_H__
 #define __WX_EDITLBOX_H__
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+    #pragma interface "editlbox.h"
+#endif
+
 #include "wx/panel.h"
 #include "wx/gizmos/gizmos.h"
 
@@ -21,7 +25,6 @@ class WXDLLEXPORT wxListEvent;
 #define wxEL_ALLOW_NEW          0x0100
 #define wxEL_ALLOW_EDIT         0x0200
 #define wxEL_ALLOW_DELETE       0x0400
-#define wxEL_NO_REORDER         0x0800
 
 // This class provides a composite control that lets the
 // user easily enter list of strings
@@ -39,7 +42,7 @@ public:
                       const wxString& name = wxT("editableListBox"));
 
     void SetStrings(const wxArrayString& strings);
-    void GetStrings(wxArrayString& strings) const;
+    void GetStrings(wxArrayString& strings);
 
     wxListCtrl* GetListCtrl()       { return m_listCtrl; }
     wxBitmapButton* GetDelButton()  { return m_bDel; }

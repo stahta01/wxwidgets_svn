@@ -63,7 +63,6 @@ public:
     static bool IsSilent();
     static void SetBellOnError(int doIt = true);
 
-    %property(Window, GetWindow, SetWindow, doc="See `GetWindow` and `SetWindow`");
 };
 
 
@@ -79,16 +78,18 @@ IMPLEMENT_DYNAMIC_CLASS(wxPyValidator, wxValidator);
 
 class wxPyValidator : public wxValidator {
 public:
-    %pythonAppend wxPyValidator "self._setOORInfo(self);"  setCallbackInfo(PyValidator)
-        
+    %pythonAppend wxPyValidator "
+        self._setCallbackInfo(self, PyValidator, 1)
+        self._setOORInfo(self)"
     wxPyValidator();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref=1);
+    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref=true);
 };
 
 
 
 %immutable;
+// See also wxPy_ReinitStockObjects in helpers.cpp
 const wxValidator wxDefaultValidator;
 %mutable;
 

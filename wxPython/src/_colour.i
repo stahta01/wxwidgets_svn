@@ -17,18 +17,6 @@
 %newgroup;
 
 
-enum {
-    wxC2S_NAME,             // return colour name, when possible
-    wxC2S_CSS_SYNTAX,       // return colour in rgb(r,g,b) syntax
-    wxC2S_HTML_SYNTAX,      // return colour in #rrggbb syntax     
-};
-
-enum {
-    wxALPHA_TRANSPARENT,
-    wxALPHA_OPAQUE
-};
-
-
 DocStr(wxColour,
 "A colour is an object representing a combination of Red, Green, and
 Blue (RGB) intensity values, and is used to determine drawing colours,
@@ -58,7 +46,7 @@ class wxColour : public wxObject {
 public:
     
     DocCtorStr(
-        wxColour(byte red=0, byte green=0, byte blue=0, byte alpha=wxALPHA_OPAQUE),
+        wxColour(byte red=0, byte green=0, byte blue=0),
         "Constructs a colour from red, green and blue values.
 
 :see: Alternate constructors `wx.NamedColour` and `wx.ColourRGB`.
@@ -91,17 +79,12 @@ public:
         "Returns the blue intensity.", "");
     
     DocDeclStr(
-        byte , Alpha(),
-        "Returns the Alpha value.", "");
-    
-    DocDeclStr(
-        bool , IsOk(),
+        bool , Ok(),
         "Returns True if the colour object is valid (the colour has been
 initialised with RGB values).", "");
-    %pythoncode { Ok = IsOk }
     
     DocDeclStr(
-        void , Set(byte red, byte green, byte blue, byte alpha=wxALPHA_OPAQUE),
+        void , Set(byte red, byte green, byte blue),
         "Sets the RGB intensity values.", "");
 
     DocDeclStrName(
@@ -110,21 +93,10 @@ initialised with RGB values).", "");
         SetRGB);
 
     DocDeclStrName(
-        void , Set(const wxString& colourName),
+        void , InitFromName(const wxString& colourName),
         "Sets the RGB intensity values using a colour name listed in
 ``wx.TheColourDatabase``.", "",
         SetFromName);
-    
-    
-    DocDeclStr(
-        wxString , GetAsString(long flags = wxC2S_NAME | wxC2S_CSS_SYNTAX) const,
-        "Return the colour as a string.  Acceptable flags are:
-
-            =================== ==================================
-            wx.C2S_NAME          return colour name, when possible
-            wx.C2S_CSS_SYNTAX    return colour in rgb(r,g,b) syntax
-            wx.C2S_HTML_SYNTAX   return colour in #rrggbb syntax     
-            =================== ==================================", "");
     
     
     DocDeclStr(
@@ -163,31 +135,25 @@ is returned if the pixel is invalid (on X, unallocated).", "");
 
 
     %extend {
-        KeepGIL(Get);
         DocAStr(Get,
                 "Get() -> (r, g, b)",
                 "Returns the RGB intensity values as a tuple.", "");
-        PyObject* Get(bool includeAlpha=false) {
-            PyObject* rv = PyTuple_New(includeAlpha ? 4 : 3);
+        PyObject* Get() {
+            PyObject* rv = PyTuple_New(3);
             int red = -1;
             int green = -1;
             int blue = -1;
-            int alpha = wxALPHA_OPAQUE;
-            if (self->IsOk()) {
+            if (self->Ok()) {
                 red =   self->Red();
                 green = self->Green();
                 blue =  self->Blue();
-                alpha = self->Alpha();
             }
             PyTuple_SetItem(rv, 0, PyInt_FromLong(red));
             PyTuple_SetItem(rv, 1, PyInt_FromLong(green));
             PyTuple_SetItem(rv, 2, PyInt_FromLong(blue));
-            if (includeAlpha)
-                PyTuple_SetItem(rv, 3, PyInt_FromLong(alpha));                
             return rv;
         }
 
-        KeepGIL(GetRGB);
         DocStr(GetRGB,
                "Return the colour as a packed RGB value", "");
         unsigned long GetRGB() {
@@ -198,18 +164,12 @@ is returned if the pixel is invalid (on X, unallocated).", "");
 
     %pythoncode {
         asTuple = wx._deprecated(Get, "asTuple is deprecated, use `Get` instead")
-        def __str__(self):                  return str(self.Get(True))
-        def __repr__(self):                 return 'wx.Colour' + str(self.Get(True))
-        def __len__(self):                  return len(self.Get())
-        def __getitem__(self, index):       return self.Get()[index]
-        def __nonzero__(self):              return self.IsOk()
+        def __str__(self):                  return str(self.Get())
+        def __repr__(self):                 return 'wx.Colour' + str(self.Get())
+        def __nonzero__(self):              return self.Ok()
         __safe_for_unpickling__ = True
-        def __reduce__(self):               return (Colour, self.Get(True))
+        def __reduce__(self):               return (Colour, self.Get())
         }
-
-    %property(Pixel, GetPixel, doc="See `GetPixel`");
-    %property(RGB, GetRGB, SetRGB, doc="See `GetRGB` and `SetRGB`");
-    
 };
 
 %pythoncode {

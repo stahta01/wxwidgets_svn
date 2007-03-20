@@ -92,8 +92,7 @@ inline wxPyCoreAPI* wxPyGetCoreAPIPtr()
 #define wxColour_typecheck(a)                   (wxPyGetCoreAPIPtr()->p_wxColour_typecheck(a))
 
 #define wxPyCBH_setCallbackInfo(a, b, c, d)     (wxPyGetCoreAPIPtr()->p_wxPyCBH_setCallbackInfo(a,b,c,d))
-#define wxPyCBH_findCallback(a, b)              (wxPyGetCoreAPIPtr()->p_wxPyCBH_findCallback(a, b, true))
-#define wxPyCBH_findCallback2(a, b, c)          (wxPyGetCoreAPIPtr()->p_wxPyCBH_findCallback(a, b, c))
+#define wxPyCBH_findCallback(a, b)              (wxPyGetCoreAPIPtr()->p_wxPyCBH_findCallback(a, b))
 #define wxPyCBH_callCallback(a, b)              (wxPyGetCoreAPIPtr()->p_wxPyCBH_callCallback(a, b))
 #define wxPyCBH_callCallbackObj(a, b)           (wxPyGetCoreAPIPtr()->p_wxPyCBH_callCallbackObj(a, b))
 #define wxPyCBH_delete(a)                       (wxPyGetCoreAPIPtr()->p_wxPyCBH_delete(a))
@@ -118,10 +117,6 @@ inline wxPyCoreAPI* wxPyGetCoreAPIPtr()
 #define wxPySwigInstance_Check(a)               (wxPyGetCoreAPIPtr()->p_wxPySwigInstance_Check(a))
 
 #define wxPyCheckForApp()                       (wxPyGetCoreAPIPtr()->p_wxPyCheckForApp())
-
-#define wxArrayDouble2PyList_helper(a)          (wxPyGetCoreAPIPtr()->p_wxArrayDoublePyList_helper(a))
-#define wxPoint2D_LIST_helper(a,b)              (wxPyGetCoreAPIPtr()->p_wxPoint2D_LIST_helper(a, b))
-#define wxRect2D_helper(a,b)                    (wxPyGetCoreAPIPtr()->p_wxRect2D_helper(a,b))
 
 
 //----------------------------------------------------------------------

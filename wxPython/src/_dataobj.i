@@ -114,21 +114,14 @@ constants.", "");
         "Returns the platform-specific number identifying the format.", "");
     
 
-    %Rename(_GetId, wxString , GetId() const);
-    %pythoncode {
-        def GetId(self):
-            """Returns the name of a custom format (this function will fail for a
-standard format)."""
-            nolog = wx.LogNull()
-            return self._GetId()
-    }
+    DocDeclStr(
+        wxString , GetId() const,
+        "Returns the name of a custom format (this function will fail for a
+standard format).", "");
     
     DocDeclStr(
         void , SetId(const wxString& format),
         "Sets the format to be the custom format identified by the given name.", "");    
-
-    %property(Id, GetId, SetId, doc="See `GetId` and `SetId`");
-    %property(Type, GetType, SetType, doc="See `GetType` and `SetType`");
 };
 
 
@@ -237,11 +230,14 @@ data.", "");
     
 
 
-    %extend {
-        DocAStr(GetAllFormats,
-                "GetAllFormats(self, int dir=Get) -> [formats]",
-                "Returns a list of all the wx.DataFormats that this dataobject supports
+    // return all formats in the provided array (of size GetFormatCount())
+    //virtual void GetAllFormats(wxDataFormat *formats,
+    //                           Direction dir = Get) const;
+    DocAStr(GetAllFormats,
+            "GetAllFormats(self, int dir=Get) -> [formats]",
+            "Returns a list of all the wx.DataFormats that this dataobject supports
 in the given direction.", "");
+    %extend {
         PyObject* GetAllFormats(Direction dir = Get) {
             size_t count = self->GetFormatCount(dir);
             wxDataFormat* formats = new wxDataFormat[count];
@@ -266,11 +262,12 @@ in the given direction.", "");
     // True if data copied successfully, False otherwise
     // virtual bool GetDataHere(const wxDataFormat& format, void *buf) const;
 
-    %extend {
-        DocAStr(GetDataHere,
-                "GetDataHere(self, DataFormat format) -> String",
-                "Get the data bytes in the specified format, returns None on failure.", "
+    DocAStr(GetDataHere,
+            "GetDataHere(self, DataFormat format) -> String",
+            "Get the data bytes in the specified format, returns None on failure.
+", "
 :todo: This should use the python buffer interface isntead...");
+    %extend {
         PyObject* GetDataHere(const wxDataFormat& format) {
             PyObject* rval = NULL;
             size_t size = self->GetDataSize(format);            
@@ -317,11 +314,6 @@ in the given direction.", "");
         }
     }
     
-    %property(AllFormats, GetAllFormats, doc="See `GetAllFormats`");
-    %property(DataHere, GetDataHere, doc="See `GetDataHere`");
-    %property(DataSize, GetDataSize, doc="See `GetDataSize`");
-    %property(FormatCount, GetFormatCount, doc="See `GetFormatCount`");
-    %property(PreferredFormat, GetPreferredFormat, doc="See `GetPreferredFormat`");
 
 };
 
@@ -361,12 +353,12 @@ assumed that the format is supported in both directions.", "");
 
 
     
-    %extend {
-        DocAStr(GetDataHere,
-                "GetDataHere(self) -> String",
-                "Returns the data bytes from the data object as a string, returns None
+    DocAStr(GetDataHere,
+            "GetDataHere(self) -> String",
+            "Returns the data bytes from the data object as a string, returns None
 on failure.  Must be implemented in the derived class if the object
 supports rendering its data.", "");
+    %extend {
         PyObject* GetDataHere() {
             PyObject* rval = NULL;
             size_t size = self->GetDataSize();            
@@ -387,12 +379,12 @@ supports rendering its data.", "");
     }
 
     
-    %extend {
-        DocAStr(SetData,
-                "SetData(self, String data) -> bool",
-                "Copy the data value to the data object.  Must be implemented in the
+    DocAStr(SetData,
+            "SetData(self, String data) -> bool",
+            "Copy the data value to the data object.  Must be implemented in the
 derived class if the object supports setting its data.
 ", "");
+    %extend {
         bool SetData(PyObject* data) {
             bool rval;
             wxPyBlock_t blocked = wxPyBeginBlockThreads();
@@ -409,7 +401,6 @@ derived class if the object supports setting its data.
         }
     }
     
-    %property(Format, GetFormat, SetFormat, doc="See `GetFormat` and `SetFormat`");
 };
 
 
@@ -501,7 +492,7 @@ data structures.
 ");
 class wxPyDataObjectSimple : public wxDataObjectSimple {
 public:
-    %pythonAppend wxPyDataObjectSimple   setCallbackInfo(PyDataObjectSimple)
+    %pythonAppend wxPyDataObjectSimple   "self._setCallbackInfo(self, PyDataObjectSimple)"
 
     wxPyDataObjectSimple(const wxDataFormat& format = wxFormatInvalid);
     void _setCallbackInfo(PyObject* self, PyObject* _class);
@@ -529,23 +520,14 @@ class wxDataObjectComposite : public wxDataObject {
 public:
     wxDataObjectComposite();
 
-    %disownarg( wxDataObjectSimple *dataObject );
+    %apply SWIGTYPE *DISOWN { wxDataObjectSimple *dataObject };
     
     DocDeclStr(
         void , Add(wxDataObjectSimple *dataObject, bool preferred = false),
         "Adds the dataObject to the list of supported objects and it becomes
 the preferred object if preferred is True.", "");
     
-    %cleardisown( wxDataObjectSimple *dataObject );
-
-    DocDeclStr(
-        wxDataFormat , GetReceivedFormat() const,
-        "Report the format passed to the `SetData` method.  This should be the
-format of the data object within the composite that recieved data from
-the clipboard or the DnD operation.  You can use this method to find
-out what kind of data object was recieved.", "");
-    
-    %property(ReceivedFormat, GetReceivedFormat, doc="See `GetReceivedFormat`");
+    %clear wxDataObjectSimple *dataObject;
 };
 
 //---------------------------------------------------------------------------
@@ -589,8 +571,6 @@ text into the member variable. If you want to process the text on the
 fly you may wish to override this function (via
 `wx.PyTextDataObject`.)", "");
     
-    %property(Text, GetText, SetText, doc="See `GetText` and `SetText`");
-    %property(TextLength, GetTextLength, doc="See `GetTextLength`");
 };
 
 
@@ -629,7 +609,7 @@ into the data object.", "");
 
 class wxPyTextDataObject : public wxTextDataObject {
 public:
-    %pythonAppend wxPyTextDataObject   setCallbackInfo(PyTextDataObject)
+    %pythonAppend wxPyTextDataObject   "self._setCallbackInfo(self, PyTextDataObject)"
 
     wxPyTextDataObject(const wxString& text = wxPyEmptyString);
     void _setCallbackInfo(PyObject* self, PyObject* _class);
@@ -665,7 +645,6 @@ internals. Use this method to get data in bitmap form from the
 when the data object receives data. Usually there will be no reason to
 override this function.", "");
     
-    %property(Bitmap, GetBitmap, SetBitmap, doc="See `GetBitmap` and `SetBitmap`");
 };
 
 
@@ -722,7 +701,7 @@ data on demand derive from this class and overload `GetBitmap`.", "");
 
 class wxPyBitmapDataObject : public wxBitmapDataObject {
 public:
-    %pythonAppend wxPyBitmapDataObject   setCallbackInfo(PyBitmapDataObject)
+    %pythonAppend wxPyBitmapDataObject   "self._setCallbackInfo(self, PyBitmapDataObject)"
 
     wxPyBitmapDataObject(const wxBitmap& bitmap = wxNullBitmap);
     void _setCallbackInfo(PyObject* self, PyObject* _class);
@@ -755,7 +734,6 @@ public:
         void , AddFile(const wxString &filename),
         "Adds a file to the list of files represented by this data object.", "");
     
-    %property(Filenames, GetFilenames, doc="See `GetFilenames`");
 };
 
 //---------------------------------------------------------------------------
@@ -779,10 +757,10 @@ public:
     wxCustomDataObject();
     
     
+    DocAStr(SetData,
+            "SetData(self, String data) -> bool",
+            "Copy the data value to the data object.", "");
     %extend {
-        DocAStr(SetData,
-                "SetData(self, String data) -> bool",
-                "Copy the data value to the data object.", "");
         bool SetData(PyObject* data) {
             bool rval;
             wxPyBlock_t blocked = wxPyBeginBlockThreads();
@@ -805,10 +783,10 @@ public:
         "Get the size of the data.", "");
     
 
+    DocAStr(GetData,
+            "GetData(self) -> String",
+            "Returns the data bytes from the data object as a string.", "");
     %extend {
-        DocAStr(GetData,
-                "GetData(self) -> String",
-                "Returns the data bytes from the data object as a string.", "");
         PyObject* GetData() {
             PyObject* obj;
             wxPyBlock_t blocked = wxPyBeginBlockThreads();
@@ -817,10 +795,6 @@ public:
             return obj;
         }
     }
-
-    %property(Data, GetData, SetData, doc="See `GetData` and `SetData`");
-    %property(Size, GetSize, doc="See `GetSize`");
-
 };
 
 
@@ -831,7 +805,7 @@ DocStr(wxURLDataObject,
 browsers such that it is able to be dragged to or from them.", "");
 class wxURLDataObject : public wxDataObject/*Composite*/ {
 public:
-    wxURLDataObject(const wxString& url = wxPyEmptyString);
+    wxURLDataObject();
 
     DocDeclStr(
         wxString , GetURL(),
@@ -841,7 +815,6 @@ public:
         void , SetURL(const wxString& url),
         "Set the URL.", "");
     
-    %property(URL, GetURL, SetURL, doc="See `GetURL` and `SetURL`");
 };
 
 //---------------------------------------------------------------------------

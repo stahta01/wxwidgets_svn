@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/utilsgui.cpp
+// Name:        os2/utilsgui.cpp
 // Purpose:     Various utility functions only available in GUI
 // Author:      David Webster
 // Modified by:
@@ -25,14 +25,14 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/cursor.h"
-    #include "wx/font.h"
-    #include "wx/timer.h"
 #endif //WX_PRECOMP
 
 #include "wx/apptrait.h"
+#include "wx/timer.h"
 
 #include "wx/os2/private.h"     // includes <windows.h>
 
@@ -45,29 +45,31 @@
 // ----------------------------------------------------------------------------
 
 // Sleep for nSecs seconds. Attempt a Windows implementation using timers.
-static bool inTimer = false;
+static bool inTimer = FALSE;
 
 class wxSleepTimer: public wxTimer
 {
 public:
     inline void Notify()
     {
-        inTimer = false;
+        inTimer = FALSE;
         Stop();
     }
 };
 
 // Reading and writing resources (eg WIN.INI, .Xdefaults)
 #if wxUSE_RESOURCES
-bool wxWriteResource( const wxString& rSection,
-                      const wxString& rEntry,
-                      const wxString& rValue,
-                      const wxString& rFile )
+bool wxWriteResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, const wxString&                   rValue
+, const wxString&                   rFile
+)
 {
-    HAB  hab = 0;
-    HINI hIni = 0;
+    HAB                             hab = 0;
+    HINI                            hIni = 0;
 
-    if (!rFile.empty())
+    if (rFile != "")
     {
         hIni = ::PrfOpenProfile(hab, (PSZ)WXSTRINGCAST rFile);
         if (hIni != 0L)
@@ -85,7 +87,7 @@ bool wxWriteResource( const wxString& rSection,
                                         ,(PSZ)WXSTRINGCAST rEntry
                                         ,(PSZ)WXSTRINGCAST rValue
                                        ));
-    return false;
+    return FALSE;
 }
 
 bool wxWriteResource(
@@ -122,28 +124,36 @@ bool wxWriteResource(
                           );
 }
 
-bool wxWriteResource( const wxString& rSection,
-                      const wxString& rEntry,
-                      int lValue,
-                      const wxString& rFile )
+bool wxWriteResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, int                               lValue
+, const wxString&                   rFile
+)
 {
-    wxChar zBuf[50];
+    wxChar                          zBuf[50];
 
     wxSprintf(zBuf, "%d", lValue);
-    return wxWriteResource( rSection, rEntry, zBuf, rFile );
+    return wxWriteResource( rSection
+                           ,rEntry
+                           ,zBuf
+                           ,rFile
+                          );
 }
 
-bool wxGetResource( const wxString& rSection,
-                    const wxString& rEntry,
-                    wxChar** ppValue,
-                    const wxString& rFile )
+bool wxGetResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, wxChar**                          ppValue
+, const wxString&                   rFile
+)
 {
-    HAB    hab = 0;
-    HINI   hIni = 0;
-    wxChar zDefunkt[] = _T("$$default");
-    char   zBuf[1000];
+    HAB                             hab = 0;
+    HINI                            hIni = 0;
+    wxChar                          zDefunkt[] = _T("$$default");
+    char                            zBuf[1000];
 
-    if (!rFile.empty())
+    if (rFile != "")
     {
         hIni = ::PrfOpenProfile(hab, (PSZ)WXSTRINGCAST rFile);
         if (hIni != 0L)
@@ -156,13 +166,13 @@ bool wxGetResource( const wxString& rSection,
                                               ,1000
                                              );
             if (zBuf == NULL)
-                return false;
+                return FALSE;
             if (n == 0L || wxStrcmp(zBuf, zDefunkt) == 0)
-                return false;
+                return FALSE;
             zBuf[n-1] = '\0';
         }
         else
-            return false;
+            return FALSE;
     }
     else
     {
@@ -174,70 +184,100 @@ bool wxGetResource( const wxString& rSection,
                                           ,1000
                                          );
         if (zBuf == NULL)
-            return false;
+            return FALSE;
         if (n == 0L || wxStrcmp(zBuf, zDefunkt) == 0)
-            return false;
+            return FALSE;
         zBuf[n-1] = '\0';
     }
     strcpy((char*)*ppValue, zBuf);
-    return true;
+    return TRUE;
 }
 
-bool wxGetResource( const wxString& rSection,
-                    const wxString& rEntry,
-                    float* pValue,
-                    const wxString& rFile )
+bool wxGetResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, float*                            pValue
+, const wxString&                   rFile
+)
 {
-    wxChar* zStr = NULL;
+    wxChar*                         zStr = NULL;
 
     zStr = new wxChar[1000];
-    bool bSucc = wxGetResource( rSection, rEntry, (wxChar **)&zStr, rFile );
+    bool                            bSucc = wxGetResource( rSection
+                                                          ,rEntry
+                                                          ,(wxChar **)&zStr
+                                                          ,rFile
+                                                         );
 
     if (bSucc)
     {
         *pValue = (float)wxStrtod(zStr, NULL);
+        delete[] zStr;
+        return TRUE;
     }
-
-    delete[] zStr;
-    return bSucc;
+    else
+    {
+        delete[] zStr;
+        return FALSE;
+    }
 }
 
-bool wxGetResource( const wxString& rSection,
-                    const wxString& rEntry,
-                    long* pValue,
-                    const wxString& rFile )
+bool wxGetResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, long*                             pValue
+, const wxString&                   rFile
+)
 {
-    wxChar* zStr = NULL;
+    wxChar*                           zStr = NULL;
 
     zStr = new wxChar[1000];
-    bool bSucc = wxGetResource( rSection, rEntry, (wxChar **)&zStr, rFile );
+    bool                              bSucc = wxGetResource( rSection
+                                                            ,rEntry
+                                                            ,(wxChar **)&zStr
+                                                            ,rFile
+                                                           );
 
     if (bSucc)
     {
         *pValue = wxStrtol(zStr, NULL, 10);
+        delete[] zStr;
+        return TRUE;
     }
-
-    delete[] zStr;
-    return bSucc;
+    else
+    {
+        delete[] zStr;
+        return FALSE;
+    }
 }
 
-bool wxGetResource( const wxString& rSection,
-                    const wxString& rEntry,
-                    int* pValue,
-                    const wxString& rFile )
+bool wxGetResource(
+  const wxString&                   rSection
+, const wxString&                   rEntry
+, int*                              pValue
+, const wxString&                   rFile
+)
 {
-    wxChar* zStr = NULL;
+    wxChar*                         zStr = NULL;
 
     zStr = new wxChar[1000];
-    bool bSucc = wxGetResource( rSection, rEntry, (wxChar **)&zStr, rFile );
+    bool                            bSucc = wxGetResource( rSection
+                                                          ,rEntry
+                                                          ,(wxChar **)&zStr
+                                                          ,rFile
+                                                         );
 
     if (bSucc)
     {
         *pValue = (int)wxStrtol(zStr, NULL, 10);
+        delete[] zStr;
+        return TRUE;
     }
-
-    delete[] zStr;
-    return bSucc;
+    else
+    {
+        delete[] zStr;
+        return FALSE;
+    }
 }
 #endif // wxUSE_RESOURCES
 
@@ -250,7 +290,9 @@ HCURSOR gs_wxBusyCursorOld = 0;  // old cursor
 static int gs_wxBusyCursorCount = 0;
 
 // Set the cursor to the busy cursor for all windows
-void wxBeginBusyCursor(const wxCursor* pCursor)
+void wxBeginBusyCursor(
+  wxCursor*                         pCursor
+)
 {
     if ( gs_wxBusyCursorCount++ == 0 )
     {
@@ -274,7 +316,7 @@ void wxEndBusyCursor()
     }
 }
 
-// true if we're between the above two calls
+// TRUE if we're between the above two calls
 bool wxIsBusy()
 {
     return (gs_wxBusyCursorCount > 0);
@@ -282,24 +324,26 @@ bool wxIsBusy()
 
 // Check whether this window wants to process messages, e.g. Stop button
 // in long calculations.
-bool wxCheckForInterrupt( wxWindow* pWnd )
+bool wxCheckForInterrupt(
+  wxWindow*                         pWnd
+)
 {
     if(pWnd)
     {
-        QMSG vMsg;
-        HAB  hab = 0;
-        HWND hwndFilter = NULLHANDLE;
+        QMSG                        vMsg;
+        HAB                         hab = 0;
+        HWND                        hwndFilter = NULLHANDLE;
 
         while(::WinPeekMsg(hab, &vMsg, hwndFilter, 0, 0, PM_REMOVE))
         {
             ::WinDispatchMsg(hab, &vMsg);
         }
-        return true;//*** temporary?
+        return TRUE;//*** temporary?
     }
     else
     {
         wxFAIL_MSG(_T("pWnd==NULL !!!"));
-        return false;//*** temporary?
+        return FALSE;//*** temporary?
     }
 }
 
@@ -321,7 +365,7 @@ void wxGetMousePosition(
     *pY = vPt.y;
 };
 
-// Return true if we have a colour display
+// Return TRUE if we have a colour display
 bool wxColourDisplay()
 {
 #if 0
@@ -336,7 +380,7 @@ bool wxColourDisplay()
 #else
     // I don't see how the PM display could not be color. Besides, this
     // was leaking DCs and PSs!!!  MN
-    return true;
+    return TRUE;
 #endif
 }
 
@@ -438,52 +482,74 @@ void wxGUIAppTraits::TerminateGui(unsigned long ulHab)
     ::WinTerminate(ulHab);
 }
 
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
+wxToolkitInfo & wxGUIAppTraits::GetToolkitInfo()
 {
-    // How to get version of PM ? I guess, just reusing the OS version is OK.
-    (void) wxGetOsVersion(verMaj, verMin);
-    return wxPORT_OS2;
-}
+    static wxToolkitInfo	    vInfo;
+    ULONG                           ulSysInfo = 0;
+    APIRET                          ulrc;
 
+    vInfo.shortName = _T("PM");
+    vInfo.name = _T("wxOS2");
+#ifdef __WXUNIVERSAL__
+    vInfo.shortName << _T("univ");
+    vInfo.name << _T("/wxUniversal");
+#endif
+    ulrc = ::DosQuerySysInfo( QSV_VERSION_MINOR,
+                              QSV_VERSION_MINOR,
+                              (PVOID)&ulSysInfo,
+                              sizeof(ULONG)
+                            );
+    if (ulrc == 0L)
+    {
+        vInfo.versionMajor = ulSysInfo / 10;
+        vInfo.versionMinor = ulSysInfo % 10;
+    }
+    vInfo.os = wxOS2_PM;
+    return vInfo;
+}
 
 // ---------------------------------------------------------------------------
 // window information functions
 // ---------------------------------------------------------------------------
 
-wxString WXDLLEXPORT wxGetWindowText( WXHWND hWnd )
+wxString WXDLLEXPORT wxGetWindowText(
+  WXHWND                            hWnd
+)
 {
-    wxString vStr;
+    wxString                        vStr;
 
     if ( hWnd )
     {
-        long lLen = ::WinQueryWindowTextLength((HWND)hWnd) + 1;
-        ::WinQueryWindowText((HWND)hWnd, lLen, (PSZ)(wxChar*)wxStringBuffer(vStr, lLen));
+	long                lLen = ::WinQueryWindowTextLength((HWND)hWnd) + 1;
+	::WinQueryWindowText((HWND)hWnd, lLen, (PSZ)(wxChar*)wxStringBuffer(vStr, lLen));
     }
 
     return vStr;
 }
 
-wxString WXDLLEXPORT wxGetWindowClass( WXHWND hWnd )
+wxString WXDLLEXPORT wxGetWindowClass(
+  WXHWND                            hWnd
+)
 {
-    wxString vStr;
+    wxString                        vStr;
     if ( hWnd )
     {
-        int nLen = 256; // some starting value
+        int                         nLen = 256; // some starting value
 
-    for ( ;; )
-    {
-        int                     nCount = ::WinQueryClassName((HWND)hWnd, nLen, (PSZ)(wxChar*)wxStringBuffer(vStr, nLen));
+	for ( ;; )
+	{
+	    int                     nCount = ::WinQueryClassName((HWND)hWnd, nLen, (PSZ)(wxChar*)wxStringBuffer(vStr, nLen));
 
-        if (nCount == nLen )
-        {
-            // the class name might have been truncated, retry with larger
-            // buffer
-            nLen *= 2;
-        }
-        else
-        {
-            break;
-        }
+	    if (nCount == nLen )
+	    {
+		// the class name might have been truncated, retry with larger
+		// buffer
+		nLen *= 2;
+	    }
+	    else
+	    {
+		break;
+	    }
         }
     }
     return vStr;

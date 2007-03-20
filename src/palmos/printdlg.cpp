@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "printdlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -30,10 +34,10 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
-    #include "wx/dcprint.h"
 #endif
 
 #include "wx/printdlg.h"
+#include "wx/dcprint.h"
 
 #include "wx/palmos/private.h"
 

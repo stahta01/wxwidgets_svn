@@ -64,7 +64,6 @@
 - (void)dealloc
 {
     [m_image release];
-    [super dealloc];
 }
 
 - (NSSize)sizeOfLabel:(BOOL)shouldTruncateLabel
@@ -261,23 +260,8 @@ bool wxNotebook::SetPageImage(size_t nPage, int nImage)
     return true;
 }
 
+
 int wxNotebook::SetSelection(size_t nPage)
-{
-    const int pageOld = GetSelection();
-
-    if ( !SendPageChangingEvent(nPage) )
-        return pageOld;
-
-    int page = ChangeSelection(nPage);
-    if ( page != wxNOT_FOUND )
-    {
-        SendPageChangedEvent(pageOld);
-    }
-
-    return page;
-}
-
-int wxNotebook::ChangeSelection(size_t nPage)
 {
     wxAutoNSAutoreleasePool pool;
     [GetNSTabView() selectTabViewItemAtIndex:nPage];

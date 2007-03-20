@@ -643,7 +643,7 @@ class Editor:
         Only receives an event if OnKeyDown calls event.Skip() for the
         corresponding event."""
 
-        key = event.GetKeyCode()
+        key = event.KeyCode()
         if key in self.autoCompleteKeys:
             # Usually the dot (period) key activates auto completion.
             if self.window.AutoCompActive(): 
@@ -671,7 +671,7 @@ class Editor:
     def OnKeyDown(self, event):
         """Key down event handler."""
 
-        key = event.GetKeyCode()
+        key = event.KeyCode()
         # If the auto-complete window is up let it do its thing.
         if self.window.AutoCompActive():
             event.Skip()
@@ -805,7 +805,7 @@ def openMultiple(parent=None, title='Open', directory='', filename='',
 
 def saveSingle(parent=None, title='Save', directory='', filename='',
                wildcard='All Files (*.*)|*.*',
-               style=wx.SAVE | wx.OVERWRITE_PROMPT):
+               style=wx.SAVE | wx.HIDE_READONLY | wx.OVERWRITE_PROMPT):
     """File dialog wrapper function."""
     dialog = wx.FileDialog(parent, title, directory, filename,
                            wildcard, style)

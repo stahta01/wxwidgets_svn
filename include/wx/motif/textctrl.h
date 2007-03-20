@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/textctrl.h
+// Name:        textctrl.h
 // Purpose:     wxTextCtrl class
 // Author:      Julian Smart
 // Modified by:
@@ -11,6 +11,10 @@
 
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "textctrl.h"
+#endif
 
 // Single-line text item
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
@@ -43,6 +47,7 @@ public:
     // accessors
     // ---------
     virtual wxString GetValue() const;
+    virtual void SetValue(const wxString& value);
 
     virtual int GetLineLength(long lineNo) const;
     virtual wxString GetLineText(long lineNo) const;
@@ -126,9 +131,6 @@ protected:
     wxString  m_fileName;
 
     virtual wxSize DoGetBestSize() const;
-
-    virtual void DoSetValue(const wxString& value, int flags = 0);
-
 public:
     // Motif-specific
     void*     m_tempCallbackStruct;

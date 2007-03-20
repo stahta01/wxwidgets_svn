@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "colordlg.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,14 +28,15 @@
     #pragma hdrstop
 #endif
 
+#ifndef WX_PRECOMP
+    #include "wx/defs.h"
+    #include "wx/intl.h"
+#endif
+
 #if wxUSE_COLOURDLG
 
+#include "wx/cmndata.h"
 #include "wx/colordlg.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/cmndata.h"
-#endif
 
 #include <UIColor.h>
 #include <UIControls.h>

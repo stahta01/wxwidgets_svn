@@ -117,8 +117,7 @@ class ColumnSorterMixin:
         self._col = col = evt.GetColumn()
         self._colSortFlag[col] = int(not self._colSortFlag[col])
         self.GetListCtrl().SortItems(self.GetColumnSorter())
-        if wx.Platform != "__WXMAC__" or wx.SystemOptions.GetOptionInt("mac.listctrl.always_use_generic") == 1:
-            self.__updateImages(oldCol)
+        self.__updateImages(oldCol)
         evt.Skip()
 
 
@@ -249,7 +248,7 @@ class ListCtrlAutoWidthMixin:
         
         if not self:  # avoid a PyDeadObject error
             return
-
+        
         if self.GetSize().height < 32:
             return  # avoid an endless update bug when the height is small.
         
@@ -428,6 +427,7 @@ class TextEditMixin:
 
 
     def make_editor(self, col_style=wx.LIST_FORMAT_LEFT):
+        editor = wx.PreTextCtrl()
         
         style =wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RICH2
         style |= {wx.LIST_FORMAT_LEFT: wx.TE_LEFT,
@@ -435,7 +435,7 @@ class TextEditMixin:
                   wx.LIST_FORMAT_CENTRE : wx.TE_CENTRE
                   }[col_style]
         
-        editor = wx.TextCtrl(self, -1, style=style)
+        editor.Create(self, -1, style=style)
         editor.SetBackgroundColour(self.editorBgColour)
         editor.SetForegroundColour(self.editorFgColour)
         font = self.GetFont()
@@ -445,8 +445,6 @@ class TextEditMixin:
         self.curCol = 0
 
         editor.Hide()
-        if hasattr(self, 'editor'):
-            self.editor.Destroy()
         self.editor = editor
 
         self.col_style = col_style

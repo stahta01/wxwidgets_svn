@@ -12,6 +12,10 @@
 #ifndef _NOTEBOOK_H
 #define _NOTEBOOK_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+  #pragma interface "notebook.h"
+#endif
+
 #if wxUSE_NOTEBOOK
 
 // ----------------------------------------------------------------------------
@@ -86,9 +90,6 @@ public:
 
     // get the currently selected page
     int GetSelection() const { return m_nSelection; }
-
-    // changes the selected page without sending events
-    int ChangeSelection(size_t nPage);
 
     // set/get the title of a page
     bool SetPageText(size_t nPage, const wxString& strText);

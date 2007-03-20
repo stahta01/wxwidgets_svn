@@ -6,7 +6,6 @@
 
 from globals import *
 from xxx import MakeXXXFromDOM
-from tree import *
 #from panel import *
 
 # Undo/redo classes
@@ -124,21 +123,20 @@ class UndoPasteCreate:
 class UndoReplace:
     def __init__(self, item):
         self.itemIndex = g.tree.ItemFullIndex(item)
-        #self.xxx = g.tree.GetPyData(item)
-        self.elem = None
+        self.xxx = g.tree.GetPyData(item)
     def destroy(self):
-        if self.elem: self.elem.unlink()
+        if self.xxx: self.xxx.element.unlink()
     def undo(self):
         print 'Sorry, UndoReplace is not yet implemented.'
         return
         item = g.tree.ItemAtFullIndex(self.itemIndex)
         xxx = g.tree.GetPyData(item)
         # Replace with old element
-        parent = xxx.parent.node
+        parent = xxx.parent.element
         if xxx is self.xxx:   # sizeritem or notebookpage - replace child
-            parent.replaceChild(self.xxx.child.node, xxx.child.node)
+            parent.replaceChild(self.xxx.child.element, xxx.child.element)
         else:
-            parent.replaceChild(self.xxx.node, xxx.node)
+            parent.replaceChild(self.xxx.element, xxx.element)
         self.xxx.parent = xxx.parent
         xxx = self.xxx
         g.tree.SetPyData(item, xxx)
@@ -164,91 +162,6 @@ class UndoReplace:
                 g.tree.needUpdate = True
     def redo(self):
         return
-
-class UndoMove:
-    def __init__(self, oldParent, oldIndex, newParent, newIndex):
-        self.oldParent = oldParent
-        self.oldIndex = oldIndex
-        self.newParent = newParent
-        self.newIndex = newIndex
-    def destroy(self):
-        pass
-    def undo(self):
-        item = g.tree.GetFirstChild(self.newParent)[0]
-        for i in range(self.newIndex): item = g.tree.GetNextSibling(item)
-        elem = g.tree.RemoveLeaf(item)
-        nextItem = g.tree.GetFirstChild(self.oldParent)[0]
-        for i in range(self.oldIndex): nextItem = g.tree.GetNextSibling(nextItem) 
-
-        parent = g.tree.GetPyData(self.oldParent).treeObject()
-
-        # Check parent and child relationships.
-        # If parent is sizer or notebook, child is of wrong class or
-        # parent is normal window, child is child container then detach child.
-        xxx = MakeXXXFromDOM(parent, elem)
-        isChildContainer = isinstance(xxx, xxxChildContainer)
-        if isChildContainer and \
-           ((parent.isSizer and not isinstance(xxx, xxxSizerItem)) or \
-            (isinstance(parent, xxxNotebook) and not isinstance(xxx, xxxNotebookPage)) or \
-           not (parent.isSizer or isinstance(parent, xxxNotebook))):
-            elem.removeChild(xxx.child.node) # detach child
-            elem.unlink()           # delete child container
-            elem = xxx.child.node # replace
-            # This may help garbage collection
-            xxx.child.parent = None
-            isChildContainer = False
-        # Parent is sizer or notebook, child is not child container
-        if parent.isSizer and not isChildContainer and not isinstance(xxx, xxxSpacer):
-            # Create sizer item element
-            sizerItemElem = MakeEmptyDOM('sizeritem')
-            sizerItemElem.appendChild(elem)
-            elem = sizerItemElem
-        elif isinstance(parent, xxxNotebook) and not isChildContainer:
-            pageElem = MakeEmptyDOM('notebookpage')
-            pageElem.appendChild(elem)
-            elem = pageElem
-
-        selected = g.tree.InsertNode(self.oldParent, parent, elem, nextItem)
-        g.tree.EnsureVisible(selected)
-        g.tree.SelectItem(selected)
-    def redo(self):
-        item = g.tree.GetFirstChild(self.oldParent)[0]
-        for i in range(self.oldIndex): item = g.tree.GetNextSibling(item)
-        elem = g.tree.RemoveLeaf(item)
-
-        parent = g.tree.GetPyData(self.newParent).treeObject()
-
-        # Check parent and child relationships.
-        # If parent is sizer or notebook, child is of wrong class or
-        # parent is normal window, child is child container then detach child.
-        xxx = MakeXXXFromDOM(parent, elem)
-        isChildContainer = isinstance(xxx, xxxChildContainer)
-        if isChildContainer and \
-           ((parent.isSizer and not isinstance(xxx, xxxSizerItem)) or \
-            (isinstance(parent, xxxNotebook) and not isinstance(xxx, xxxNotebookPage)) or \
-           not (parent.isSizer or isinstance(parent, xxxNotebook))):
-            elem.removeChild(xxx.child.node) # detach child
-            elem.unlink()           # delete child container
-            elem = xxx.child.node # replace
-            # This may help garbage collection
-            xxx.child.parent = None
-            isChildContainer = False
-        # Parent is sizer or notebook, child is not child container
-        if parent.isSizer and not isChildContainer and not isinstance(xxx, xxxSpacer):
-            # Create sizer item element
-            sizerItemElem = MakeEmptyDOM('sizeritem')
-            sizerItemElem.appendChild(elem)
-            elem = sizerItemElem
-        elif isinstance(parent, xxxNotebook) and not isChildContainer:
-            pageElem = MakeEmptyDOM('notebookpage')
-            pageElem.appendChild(elem)
-            elem = pageElem
-
-        nextItem = g.tree.GetFirstChild(self.newParent)[0]
-        for i in range(self.newIndex): nextItem = g.tree.GetNextSibling(nextItem) 
-        selected = g.tree.InsertNode(self.newParent, parent, elem, nextItem)
-        g.tree.EnsureVisible(selected)
-        g.tree.SelectItem(selected)
 
 class UndoEdit:
     def __init__(self):

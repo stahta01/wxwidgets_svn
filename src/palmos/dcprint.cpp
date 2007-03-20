@@ -17,16 +17,16 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcprint.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_PRINTING_ARCHITECTURE
-
-#include "wx/dcprint.h"
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
@@ -36,12 +36,15 @@
     #include "wx/math.h"
 #endif
 
+#if wxUSE_PRINTING_ARCHITECTURE
+
 #include "wx/palmos/private.h"
 
 #if wxUSE_WXDIB
 #include "wx/palmos/dib.h"
 #endif
 
+#include "wx/dcprint.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -98,14 +101,6 @@ void wxPrinterDC::StartPage()
 
 void wxPrinterDC::EndPage()
 {
-}
-
-wxRect wxPrinterDC::GetPaperRect()
-{
-    // Use page rect if we can't get paper rect.
-    wxCoord w, h;
-    GetSize(&w, &h);
-    return wxRect(0, 0, w, h);
 }
 
 // Returns default device and port names

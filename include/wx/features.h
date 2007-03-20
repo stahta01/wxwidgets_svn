@@ -15,18 +15,15 @@
 #ifndef _WX_FEATURES_H_
 #define _WX_FEATURES_H_
 
-/*  radio menu items are currently not implemented in wxMotif, use this
-    symbol (kept for compatibility from the time when they were not implemented
-    under other platforms as well) to test for this */
-#if !defined(__WXMOTIF__)
+/*  radio menu items are currently only implemented in wxGTK and wxMSW */
+#if defined(__WXGTK__) || defined(__WXMSW__)
     #define wxHAS_RADIO_MENU_ITEMS
 #else
     #undef wxHAS_RADIO_MENU_ITEMS
 #endif
 
 /*  the raw keyboard codes are generated under wxGTK and wxMSW only */
-#if defined(__WXGTK__) || defined(__WXMSW__) || defined(__WXMAC__) \
-    || defined(__WXDFB__)
+#if defined(__WXGTK__) || defined(__WXMSW__) || defined(__WXMAC__)
     #define wxHAS_RAW_KEY_CODES
 #else
     #undef wxHAS_RAW_KEY_CODES
@@ -58,12 +55,6 @@
     #define wxHAS_REGEX_ADVANCED
 #else
     #undef wxHAS_REGEX_ADVANCED
-#endif
-
-/* Pango-based ports and wxDFB use UTF-8 for text and font encodings
- * internally and so their fonts can handle any encodings: */
-#if wxUSE_PANGO || defined(__WXDFB__)
-    #define wxHAS_UTF8_FONTS
 #endif
 
 #endif /*  _WX_FEATURES_H_ */

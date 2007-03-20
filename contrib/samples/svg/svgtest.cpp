@@ -36,8 +36,8 @@ USERC("svg.rc");
 #include "wx/mdi.h"
 #endif
 
-#include "wx/toolbar.h"
-#include "wx/svg/dcsvg.h"
+#include <wx/toolbar.h>
+#include <wx/svg/dcsvg.h>
 
 #include "mondrian.xpm"
 
@@ -350,7 +350,7 @@ void MyFrame::FileSavePicture (wxCommandEvent & WXUNUSED(event) )
 
     wxFileDialog dialog(this, wxT("Save Picture as"), wxEmptyString, pChild->GetTitle(),
         wxT("SVG vector picture files (*.svg)|*.svg"),
-        wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+        wxSAVE|wxOVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK)
     {

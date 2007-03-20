@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef _WX_HTMLTAG_H_
 #define _WX_HTMLTAG_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "htmltag.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -39,7 +44,7 @@ private:
 public:
     wxHtmlTagsCache() : wxObject() {m_CacheSize = 0; m_Cache = NULL;}
     wxHtmlTagsCache(const wxString& source);
-    virtual ~wxHtmlTagsCache() {free(m_Cache);}
+    ~wxHtmlTagsCache() {free(m_Cache);}
 
     // Finds parameters for tag starting at at and fills the variables
     void QueryTag(int at, int* end1, int* end2);
@@ -68,7 +73,7 @@ protected:
               wxHtmlEntitiesParser *entParser);
     friend class wxHtmlParser;
 public:
-    virtual ~wxHtmlTag();
+    ~wxHtmlTag();
 
     wxHtmlTag *GetParent() const {return m_Parent;}
     wxHtmlTag *GetFirstSibling() const;
@@ -109,6 +114,12 @@ public:
 
     // Returns string containing all params.
     wxString GetAllParams() const;
+
+#if WXWIN_COMPATIBILITY_2_2
+    // return true if this is ending tag (</something>) or false
+    // if it isn't (<something>)
+    wxDEPRECATED( bool IsEnding() const );
+#endif
 
     // return true if this there is matching ending tag
     inline bool HasEnding() const {return m_End1 >= 0;}

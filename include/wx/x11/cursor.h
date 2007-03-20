@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/cursor.h
+// Name:        cursor.h
 // Purpose:     wxCursor class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "cursor.h"
+#endif
 
 #include "wx/bitmap.h"
 
@@ -28,15 +32,18 @@ public:
 
     wxCursor();
     wxCursor( int cursorId );
+    wxCursor( const wxCursor &cursor );
 #if wxUSE_IMAGE
     wxCursor( const wxImage & image );
 #endif
     wxCursor( const char bits[], int width, int  height,
               int hotSpotX=-1, int hotSpotY=-1,
               const char maskBits[]=0, wxColour *fg=0, wxColour *bg=0 );
-    virtual ~wxCursor();
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    ~wxCursor();
+    wxCursor& operator = ( const wxCursor& cursor );
+    bool operator == ( const wxCursor& cursor ) const;
+    bool operator != ( const wxCursor& cursor ) const;
+    bool Ok() const;
 
     // implementation
 
@@ -48,4 +55,4 @@ private:
 
 
 #endif
-    // _WX_CURSOR_H_
+// _WX_CURSOR_H_

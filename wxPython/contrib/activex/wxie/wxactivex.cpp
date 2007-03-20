@@ -622,9 +622,9 @@ bool MSWVariantToVariant(VARIANTARG& va, wxVariant& vx)
     case VT_I1:
     case VT_UI1:
         if (byRef)
-            vx = (wxChar) *va.pbVal;
+            vx = (char) *va.pbVal;
         else
-            vx = (wxChar) va.bVal;
+            vx = (char) va.bVal;
         return true;
 
     // 2 byte shorts
@@ -757,9 +757,9 @@ bool VariantToMSWVariant(const wxVariant& vx, VARIANTARG& va)
     case VT_I1:
     case VT_UI1:
         if (byRef)
-            *va.pbVal = (wxChar) vx;
+            *va.pbVal = (char) vx;
         else
-            va.bVal = (wxChar) vx;
+            va.bVal = (char) vx;
         return true;
 
     // 2 byte shorts
@@ -1706,6 +1706,7 @@ void wxActiveX::OnPaint(wxPaintEvent& event)
 {
     wxLogTrace(wxT(""),wxT("repainting activex win"));
     wxPaintDC dc(this);
+    dc.BeginDrawing();
     int w, h;
     GetSize(&w, &h);
     RECT posRect;
@@ -1730,6 +1731,7 @@ void wxActiveX::OnPaint(wxPaintEvent& event)
         dc.DrawRectangle(0, 0, w, h);
         dc.SetBrush(wxNullBrush);
     }
+    dc.EndDrawing();
 }
 
 

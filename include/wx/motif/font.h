@@ -1,23 +1,25 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/font.h
+// Name:        font.h
 // Purpose:     wxFont class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONT_H_
 #define _WX_FONT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "font.h"
+#endif
+
 #if __WXMOTIF20__ && !__WXLESSTIF__
-    #define wxMOTIF_NEW_FONT_HANDLING 1
-    #define wxMOTIF_USE_RENDER_TABLE 1
+    #define wxMOTIF_NEW_FONT_HANDLING 0 // safe default, change to 1 to enable
 #else
     #define wxMOTIF_NEW_FONT_HANDLING 0
-    #define wxMOTIF_USE_RENDER_TABLE 0
 #endif
 
 class wxXFont;
@@ -27,7 +29,8 @@ class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() { }
+    wxFont() { Init(); }
+    wxFont(const wxFont& font) { Init(); Ref(font); }
 
     wxFont(int size,
         int family,
@@ -37,6 +40,8 @@ public:
         const wxString& face = wxEmptyString,
         wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
     {
+        Init();
+
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
@@ -57,6 +62,9 @@ public:
 
     virtual ~wxFont();
 
+    // assignment
+    wxFont& operator=(const wxFont& font);
+
     // implement base class pure virtuals
     virtual int GetPointSize() const;
     virtual int GetFamily() const;
@@ -71,7 +79,7 @@ public:
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
     virtual void SetWeight(int weight);
-    virtual bool SetFaceName(const wxString& faceName);
+    virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
@@ -93,18 +101,17 @@ public:
         WXDisplay* display = NULL) const;
 
     // These two are helper functions for convenient access of the above.
-#if wxMOTIF_NEW_FONT_HANDLING
-    WXFontSet GetFontSet(double scale, WXDisplay* display = NULL) const;
-#else // if !wxMOTIF_NEW_FONT_HANDLING
+#if !wxMOTIF_NEW_FONT_HANDLING
     WXFontStructPtr GetFontStruct(double scale = 1.0,
         WXDisplay* display = NULL) const;
-#endif // wxMOTIF_NEW_FONT_HANDLING
-#if wxMOTIF_USE_RENDER_TABLE
-    WXRenderTable GetRenderTable(WXDisplay* display) const;
-#else // if !wxMOTIF_USE_RENDER_TABLE
     WXFontList GetFontList(double scale = 1.0,
         WXDisplay* display = NULL) const;
-#endif // wxMOTIF_USE_RENDER_TABLE
+#else
+    WXFontSet GetFontSet(double scale, WXDisplay* display = NULL) const;
+#endif
+#if __WXMOTIF20__ // && !__WXLESSTIF__ for 2.7
+    WXRenderTable GetRenderTable(WXDisplay* display) const;
+#endif
     // returns either a XmFontList or XmRenderTable, depending
     // on Motif version
     WXFontType GetFontType(WXDisplay* display) const;
@@ -114,6 +121,11 @@ public:
 protected:
     virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
 
+    // common part of all ctors
+    void Init();
+
+    // VZ: IMHO, we don't need it at all...
+    bool RealizeResource() { return true; }
     void Unshare();
 
 private:

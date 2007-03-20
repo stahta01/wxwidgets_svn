@@ -16,8 +16,8 @@
 class FortyApp: public wxApp
 {
 public:
-    FortyApp(){}
-    virtual ~FortyApp();
+    FortyApp(){};
+    ~FortyApp();
     bool OnInit();
 
     static const wxColour& BackgroundColour();
@@ -85,6 +85,9 @@ public:
         long style = wxDEFAULT_DIALOG_STYLE );
 
     bool AddControls(wxWindow* parent);
+
+private:
+    DECLARE_EVENT_TABLE()
 };
 
 #define ID_ABOUT_HTML_WINDOW    1000

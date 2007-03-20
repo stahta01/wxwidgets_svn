@@ -12,8 +12,8 @@ The class contains optional debugging versions
 of {\bf new} and {\bf delete}, which can help trace memory allocation
 and deallocation problems.
 
-wxObject can be used to implement \helpref{reference counted}{trefcount} objects,
-such as wxPen, wxBitmap and others (see \helpref{this list}{refcountlist}).
+wxObject can be used to implement reference counted objects, such as
+wxPen, wxBitmap and others.
 
 \wxheading{See also}
 
@@ -116,16 +116,6 @@ this one or is derived from it.
   bool tmp = obj->IsKindOf(CLASSINFO(wxFrame));
 \end{verbatim}
 
-\membersection{wxObject::IsSameAs}\label{wxobjectissameas}
-
-\func{bool}{IsSameAs}{\param{const wxObject\& }{ obj}}
-
-Returns \true if this object has the same data pointer as \arg{obj}. Notice
-that \true is returned if the data pointers are \NULL in both objects.
-
-This function only does a \emph{shallow} comparison, i.e. it doesn't compare
-the objects pointed to by the data pointers of these objects.
-
 \membersection{wxObject::Ref}\label{wxobjectref}
 
 \func{void}{Ref}{\param{const wxObject\& }{clone}}
@@ -175,17 +165,6 @@ The {\bf m\_refData} member is set to NULL.
 \helpref{wxObject::SetRefData}{wxobjectsetrefdata}, \helpref{wxObject::GetRefData}{wxobjectgetrefdata},\rtfsp
 \helpref{wxObjectRefData}{wxobjectrefdata}
 
-\membersection{wxObject::UnShare}\label{wxobjectunshare}
-
-\func{void}{UnShare}{\void}
-
-Ensure that this object's data is not shared with any other object.
-
-if we have no
-data, it is created using CreateRefData() below, if we have shared data
-it is copied using CloneRefData(), otherwise nothing is done.
-
-
 \membersection{wxObject::operator new}\label{wxobjectnew}
 
 \func{void *}{new}{\param{size\_t }{size}, \param{const wxString\& }{filename = NULL}, \param{int}{ lineNum = 0}}
@@ -201,10 +180,6 @@ wxDebugContext operations.
 The {\it delete} operator is defined for debugging versions of the library only, when
 the identifier \_\_WXDEBUG\_\_ is defined. It takes over memory deallocation, allowing
 wxDebugContext operations.
-
-
-
-%% wxObjectRefData
 
 \section{\class{wxObjectRefData}}\label{wxobjectrefdata}
 
@@ -222,41 +197,23 @@ you will need to cast to your own derived class.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
+\membersection{wxObjectRefData::m\_count}\label{wxobjectrefdatamcount}
+
+\member{int}{m\_count}
+
+Reference count. When this goes to zero during a \helpref{wxObject::UnRef}{wxobjectunref}, an object
+can delete the {\bf wxObjectRefData} object.
 
 \membersection{wxObjectRefData::wxObjectRefData}\label{wxobjectrefdatactor}
 
 \func{}{wxObjectRefData}{\void}
 
-Default constructor. Initialises the internal reference count to 1.
+Default constructor. Initialises the {\bf m\_count} member to 1.
 
 \membersection{wxObjectRefData::\destruct{wxObjectRefData}}\label{wxobjectrefdatadtor}
 
 \func{}{wxObjectRefData}{\void}
 
-Destructor. It's declared {\tt protected} so that wxObjectRefData instances will never
-be destroyed directly but only as result of a \helpref{DecRef}{wxobjectrefdatadecref} call.
+Destructor.
 
-\membersection{wxObjectRefData::GetRefCount}\label{wxobjectrefdatagetrefcount}
-
-\constfunc{int}{GetRefCount}{\void}
-
-Returns the reference count associated with this shared data.
-When this goes to zero during a \helpref{DecRef}{wxobjectrefdatadecref} call, the object
-will auto-free itself.
-
-\membersection{wxObjectRefData::DecRef}\label{wxobjectrefdatadecref}
-
-\func{void}{DecRef}{\void}
-
-Decrements the reference count associated with this shared data and, if it reaches zero,
-destroys this instance of wxObjectRefData releasing its memory.
-
-Please note that after calling this function, the caller should absolutely avoid to use
-the pointer to this instance since it may not be valid anymore.
-
-\membersection{wxObjectRefData::IncRef}\label{wxobjectrefdataincref}
-
-\func{void}{IncRef}{\void}
-
-Increments the reference count associated with this shared data.
 

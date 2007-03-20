@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/statusbr.cpp
+// Name:        univ/statusbr.cpp
 // Purpose:     wxStatusBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univstatusbr.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,13 +29,13 @@
 
 #if wxUSE_STATUSBAR
 
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcclient.h"
-    #include "wx/toplevel.h"
 #endif
+
+#include "wx/statusbr.h"
+#include "wx/toplevel.h"
 
 #include "wx/univ/renderer.h"
 
@@ -86,8 +90,7 @@ wxRect wxStatusBarUniv::GetTotalFieldRect(wxCoord *borderBetweenFields)
 
     // no, don't do this - the borders are meant to be inside this rect
     // wxSize sizeBorders =
-    if ( borderBetweenFields )
-        *borderBetweenFields = m_renderer->GetStatusBarBorderBetweenFields();
+    m_renderer->GetStatusBarBorders(borderBetweenFields);
     //rect.Deflate(sizeBorders.x, sizeBorders.y);
 
     // recalc the field widths if needed
@@ -110,8 +113,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
 
     // prepare the DC
     wxDC& dc = renderer->GetDC();
-    dc.SetFont(GetFont());
-    dc.SetTextForeground(GetForegroundColour());
+    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
     // do draw the fields
     int flags = IsEnabled() ? 0 : (int)wxCONTROL_DISABLED;
@@ -131,7 +133,11 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
                  GetParent()->HasFlag(wxRESIZE_BORDER) &&
                  parentTLW && !parentTLW->IsMaximized() )
             {
-                flags |= wxCONTROL_SIZEGRIP;
+                // NB: we use wxCONTROL_ISDEFAULT for this because it doesn't
+                //     have any meaning for the status bar otherwise anyhow
+                //     (it's still ugly, of course, but there are too few flags
+                //     to squander them for things like this)
+                flags |= wxCONTROL_ISDEFAULT;
             }
 
             int style;
@@ -287,7 +293,10 @@ wxRect wxStatusBarUniv::DoGetFieldRect(int n) const
 
 wxCoord wxStatusBarUniv::GetHeight() const
 {
-    return GetCharHeight() + 2*GetBorderY();
+    wxClientDC dc(wxConstCast(this, wxStatusBarUniv));
+    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+
+    return dc.GetCharHeight() + 2*GetBorderY();
 }
 
 wxSize wxStatusBarUniv::DoGetBestSize() const
@@ -313,14 +322,13 @@ void wxStatusBarUniv::SetMinHeight(int WXUNUSED(height))
 
 int wxStatusBarUniv::GetBorderX() const
 {
-    return m_renderer->GetStatusBarBorders().x +
-           m_renderer->GetStatusBarFieldMargins().x;
+    return m_renderer->GetStatusBarBorders(NULL).x;
 }
 
 int wxStatusBarUniv::GetBorderY() const
 {
-    return m_renderer->GetStatusBarBorders().y +
-           m_renderer->GetStatusBarFieldMargins().y;
+    return m_renderer->GetStatusBarBorders(NULL).y;
 }
 
 #endif // wxUSE_STATUSBAR
+

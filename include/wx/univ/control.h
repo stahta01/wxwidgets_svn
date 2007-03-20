@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_CONTROL_H_
 #define _WX_UNIV_CONTROL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "control.h"
+#endif
+
 class WXDLLEXPORT wxControlRenderer;
 class WXDLLEXPORT wxInputHandler;
 class WXDLLEXPORT wxRenderer;
@@ -80,7 +84,7 @@ public:
     // return the accel char itself or 0 if none
     wxChar GetAccelChar() const
     {
-        return m_indexAccel == -1 ? _T('\0') : (wxChar)m_label[m_indexAccel];
+        return m_indexAccel == -1 ? _T('\0') : m_label[m_indexAccel];
     }
 
     virtual wxWindow *GetInputWindow() const { return (wxWindow*)this; }

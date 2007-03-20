@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/numdlgg.cpp
+// Name:        numdlgg.cpp
 // Purpose:     wxGetNumberFromUser implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "numdlgg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -54,6 +58,20 @@
     #define wxSpinCtrl wxTextCtrl
 #endif
 
+// ---------------------------------------------------------------------------
+// macros
+// ---------------------------------------------------------------------------
+
+/* Macro for avoiding #ifdefs when value have to be different depending on size of
+   device we display on - take it from something like wxDesktopPolicy in the future
+ */
+
+#if defined(__SMARTPHONE__)
+    #define wxLARGESMALL(large,small) small
+#else
+    #define wxLARGESMALL(large,small) large
+#endif
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -90,17 +108,17 @@ wxNumberEntryDialog::wxNumberEntryDialog(wxWindow *parent,
 #if wxUSE_STATTEXT
     // 1) text message
     topsizer->Add( CreateTextSizer( message ), 0, wxALL, 10 );
-#endif
+#endif        
 
     // 2) prompt and text ctrl
     wxBoxSizer *inputsizer = new wxBoxSizer( wxHORIZONTAL );
 
 #if wxUSE_STATTEXT
     // prompt if any
-    if (!prompt.empty())
+    if (!prompt.IsEmpty())
         inputsizer->Add( new wxStaticText( this, wxID_ANY, prompt ), 0, wxCENTER | wxLEFT, 10 );
 #endif
-
+        
     // spin ctrl
     wxString valStr;
     valStr.Printf(wxT("%ld"), m_value);
@@ -110,22 +128,34 @@ wxNumberEntryDialog::wxNumberEntryDialog(wxWindow *parent,
 #endif
     inputsizer->Add( m_spinctrl, 1, wxCENTER | wxLEFT | wxRIGHT, 10 );
     // add both
-    topsizer->Add( inputsizer, 0, wxEXPAND | wxLEFT|wxRIGHT, 5 );
+    topsizer->Add( inputsizer, 1, wxEXPAND | wxLEFT|wxRIGHT, 5 );
 
-    // 3) buttons if any
-    wxSizer *buttonSizer = CreateSeparatedButtonSizer(wxOK | wxCANCEL);
-    if ( buttonSizer )
-    {
-        topsizer->Add(buttonSizer, wxSizerFlags().Expand().DoubleBorder());
-    }
+    // smart phones does not support or do not waste space for wxButtons
+#ifdef __SMARTPHONE__
+
+    SetRightMenu(wxID_CANCEL, _("Cancel"));
+
+#else // __SMARTPHONE__/!__SMARTPHONE__
+
+#if wxUSE_STATLINE
+    // 3) static line
+    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+#endif
+
+    // 4) buttons
+    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxEXPAND | wxALL, 10 );
+
+#endif // !__SMARTPHONE__
 
     SetSizer( topsizer );
     SetAutoLayout( true );
 
+#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
     Centre( wxBOTH );
+#endif
 
     m_spinctrl->SetSelection(-1, -1);
     m_spinctrl->SetFocus();

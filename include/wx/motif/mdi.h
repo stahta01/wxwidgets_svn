@@ -1,16 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/mdi.h
+// Name:        mdi.h
 // Purpose:     MDI (Multiple Document Interface) classes.
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "mdi.h"
+#endif
 
 /*
 New MDI scheme using tabs. We can use a wxNotebook to implement the client
@@ -45,7 +49,7 @@ public:
         Create(parent, id, title, pos, size, style, name);
     }
 
-    virtual ~wxMDIParentFrame();
+    ~wxMDIParentFrame();
 
     bool Create(wxWindow *parent,
         wxWindowID id,
@@ -129,7 +133,7 @@ public:
         Create(parent, id, title, pos, size, style, name);
     }
 
-    virtual ~wxMDIChildFrame();
+    ~wxMDIChildFrame();
 
     bool Create(wxMDIParentFrame *parent,
         wxWindowID id,
@@ -152,12 +156,7 @@ public:
     void ReleaseMouse();
     void Raise();
     void Lower(void);
-    void DoSetSizeHints(int minW = wxDefaultCoord,
-                        int minH = wxDefaultCoord,
-                        int maxW = wxDefaultCoord,
-                        int maxH = wxDefaultCoord,
-                        int incW = wxDefaultCoord,
-                        int incH = wxDefaultCoord);
+    void DoSetSizeHints(int minW = -1, int minH = -1, int maxW = -1, int maxH = -1, int incW = -1, int incH = -1);
 
     // MDI operations
     virtual void Maximize();
@@ -219,7 +218,7 @@ public:
         CreateClient(parent, style);
     }
 
-    virtual ~wxMDIClientWindow();
+    ~wxMDIClientWindow();
 
     // Note: this is virtual, to allow overridden behaviour.
     virtual bool CreateClient(wxMDIParentFrame *parent, long style = wxVSCROLL | wxHSCROLL);

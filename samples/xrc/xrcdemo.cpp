@@ -8,6 +8,14 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// GCC implementation
+//-----------------------------------------------------------------------------
+
+#ifdef __GNUG__
+    #pragma implementation "xrcdemo.h"
+#endif
+
+//-----------------------------------------------------------------------------
 // Standard wxWidgets headers
 //-----------------------------------------------------------------------------
 
@@ -31,14 +39,16 @@
 #include "xrcdemo.h"
 
 //-----------------------------------------------------------------------------
-// Remaining headers: Needed wx headers, then wx/contrib headers, then app one
+// Remaining headers: Needed wx headers, then wx/contrib headers, then application headers
 //-----------------------------------------------------------------------------
 
 #include "wx/image.h"               // wxImage
 
-#include "wx/xrc/xmlres.h"          // XRC XML resources
+//-----------------------------------------------------------------------------
 
-#include "wx/cshelp.h"              // wxSimpleHelpProvider for helptext
+#include "wx/xrc/xmlres.h"          // XRC XML resouces
+
+//-----------------------------------------------------------------------------
 
 #include "myframe.h"
 
@@ -60,9 +70,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // If there is any of a certain format of image in the xrcs, then first
     // load a handler for that image type. This example uses XPMs, but if
     // you want PNGs, then add a PNG handler, etc. See wxImage::AddHandler()
@@ -81,54 +88,27 @@ bool MyApp::OnInit()
     // into one giant XRC file if you wanted, but then they become more
     // diffcult to manage, and harder to reuse in later projects.
     // The menubar
-    if (!wxXmlResource::Get()->Load(wxT("rc/menu.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/menu.xrc"));
     // The toolbar
-    if (!wxXmlResource::Get()->Load(wxT("rc/toolbar.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/toolbar.xrc"));
     // Non-derived dialog example
-    if (!wxXmlResource::Get()->Load(wxT("rc/basicdlg.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/basicdlg.xrc"));
     // Derived dialog example
-    if (!wxXmlResource::Get()->Load(wxT("rc/derivdlg.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/derivdlg.xrc"));
     // Controls property example
-    if (!wxXmlResource::Get()->Load(wxT("rc/controls.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/controls.xrc"));
     // Frame example
-    if (!wxXmlResource::Get()->Load(wxT("rc/frame.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/frame.xrc"));
     // Uncentered example
-    if (!wxXmlResource::Get()->Load(wxT("rc/uncenter.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/uncenter.xrc"));
     // Custom class example
-    if (!wxXmlResource::Get()->Load(wxT("rc/custclas.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/custclas.xrc"));
     // wxArtProvider example
-    if (!wxXmlResource::Get()->Load(wxT("rc/artprov.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/artprov.xrc"));
     // Platform property example
-    if (!wxXmlResource::Get()->Load(wxT("rc/platform.xrc")))
-        return false;
-
+    wxXmlResource::Get()->Load(wxT("rc/platform.xrc"));
     // Variable expansion example
-    if (!wxXmlResource::Get()->Load(wxT("rc/variable.xrc")))
-        return false;
-
-
-#if wxUSE_HELP
-    // Use the simple help provider to show the context-sensitive help
-    wxHelpProvider::Set( new wxSimpleHelpProvider );
-#endif // wxUSE_HELP
+    wxXmlResource::Get()->Load(wxT("rc/variable.xrc"));
 
     // Make an instance of your derived frame. Passing NULL (the default value
     // of MyFrame's constructor is NULL) as the frame doesn't have a parent

@@ -4,10 +4,10 @@
 # Created:      02.12.2002
 # RCS-ID:       $Id$
 
-import wx
-import wx.xrc as xrc
+from wxPython.wx import *
+from wxPython.xrc import *
 try:
-    import wx.wizard
+    from wxPython.wizard import *
 except:
     pass
 import sys
@@ -15,20 +15,20 @@ import sys
 # Global constants
 
 progname = 'XRCed'
-version = '0.1.8-5'
-# Minimal wxWidgets version
+version = '0.1.7-4'
+# Minimal wxWindows version
 MinWxVersion = (2,6,0)
-if wx.VERSION[:3] < MinWxVersion:
+if wxVERSION[:3] < MinWxVersion:
     print '''\
 ******************************* WARNING **************************************
-  This version of XRCed may not work correctly on your version of wxWidgets.
-  Please upgrade wxWidgets to %d.%d.%d or higher.
+  This version of XRCed may not work correctly on your version of wxWindows.
+  Please upgrade wxWindows to %d.%d.%d or higher.
 ******************************************************************************''' % MinWxVersion    
 
 # Can be changed to set other default encoding different
 #defaultEncoding = ''
 # you comment above and can uncomment this:
-defaultEncoding = wx.GetDefaultPyEncoding()
+defaultEncoding = wxGetDefaultPyEncoding()
 
 try:
     True
@@ -45,16 +45,15 @@ class Globals:
     tools = None
     undoMan = None
     testWin = None
-    testWinPos = wx.DefaultPosition
+    testWinPos = wxDefaultPosition
     currentXXX = None
     currentEncoding = defaultEncoding
-    conf = None
 
     def _makeFonts(self):
-        self._sysFont = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
-        self._labelFont = wx.Font(self._sysFont.GetPointSize(), wx.DEFAULT, wx.NORMAL, wx.BOLD)
-        self._modernFont = wx.Font(self._sysFont.GetPointSize(), wx.MODERN, wx.NORMAL, wx.NORMAL)
-        self._smallerFont = wx.Font(self._sysFont.GetPointSize()-2, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        self._sysFont = wxSystemSettings_GetFont(wxSYS_SYSTEM_FONT)
+        self._labelFont = wxFont(self._sysFont.GetPointSize(), wxDEFAULT, wxNORMAL, wxBOLD)
+        self._modernFont = wxFont(self._sysFont.GetPointSize(), wxMODERN, wxNORMAL, wxNORMAL)
+        self._smallerFont = wxFont(self._sysFont.GetPointSize()-2, wxDEFAULT, wxNORMAL, wxNORMAL)
         
     def sysFont(self):
         if not hasattr(self, "_sysFont"): self._makeFonts()

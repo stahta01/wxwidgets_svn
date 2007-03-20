@@ -12,6 +12,10 @@
 #ifndef _WX_TBAR95_H_
 #define _WX_TBAR95_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toolbar.h"
+#endif
+
 #if wxUSE_TOOLBAR
 
 #include "wx/dynarray.h"
@@ -83,8 +87,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     // return the appropriate size and flags for the toolbar control
     virtual wxSize DoGetBestSize() const;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/busyinfo.h
+// Name:        busyinfo.h
 // Purpose:     Information window (when app is busy)
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
@@ -7,15 +7,49 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __BUSYINFO_H_BASE__
-#define __BUSYINFO_H_BASE__
+#ifndef __INFOWIN_H__
+#define __INFOWIN_H__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "busyinfo.h"
+#endif
 
 #include "wx/defs.h"
 
+#include "wx/frame.h"
+
 #if wxUSE_BUSYINFO
 
-#include "wx/generic/busyinfo.h"
+class WXDLLEXPORT wxInfoFrame : public wxFrame
+{
+public:
+    wxInfoFrame(wxWindow *parent, const wxString& message);
 
-#endif // wxUSE_BUSYINFO
+private:
+    DECLARE_NO_COPY_CLASS(wxInfoFrame)
+};
 
-#endif // __BUSYINFO_H_BASE__
+
+//--------------------------------------------------------------------------------
+// wxBusyInfo
+//                  Displays progress information
+//                  Can be used in exactly same way as wxBusyCursor
+//--------------------------------------------------------------------------------
+
+class WXDLLEXPORT wxBusyInfo : public wxObject
+{
+public:
+    wxBusyInfo(const wxString& message, wxWindow *parent = NULL);
+
+    virtual ~wxBusyInfo();
+
+private:
+    wxInfoFrame *m_InfoFrame;
+
+    DECLARE_NO_COPY_CLASS(wxBusyInfo)
+};
+
+
+#endif
+
+#endif

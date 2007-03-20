@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dialog.cpp
+// Name:        dialog.cpp
 // Purpose:     wxDialog class
 // Author:      David Webster
 // Modified by:
@@ -12,18 +12,18 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/dialog.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/frame.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
+#include "wx/dialog.h"
+#include "wx/utils.h"
+#include "wx/frame.h"
+#include "wx/app.h"
+#include "wx/settings.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 #endif
 
 #include "wx/os2/private.h"
+#include "wx/log.h"
 #include "wx/evtloop.h"
 #include "wx/ptr_scpd.h"
 
@@ -34,6 +34,16 @@
 #define wxDIALOG_DEFAULT_HEIGHT 500
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
+
+BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
+    EVT_BUTTON(wxID_OK, wxDialog::OnOK)
+    EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
+    EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
+    EVT_CHAR_HOOK(wxDialog::OnCharHook)
+    EVT_SYS_COLOUR_CHANGED(wxDialog::OnSysColourChanged)
+
+    EVT_CLOSE(wxDialog::OnCloseWindow)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxDialogModalData
@@ -73,7 +83,7 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 void wxDialog::Init()
 {
     m_pOldFocus = (wxWindow *)NULL;
-    m_isShown = false;
+    m_isShown = FALSE;
     m_pWindowDisabler = (wxWindowDisabler *)NULL;
     m_modalData = NULL;
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
@@ -120,8 +130,6 @@ bool wxDialog::Create( wxWindow*       pParent,
     return true;
 } // end of wxDialog::Create
 
-#if WXWIN_COMPATIBILITY_2_6
-
 // deprecated ctor
 wxDialog::wxDialog(wxWindow *parent,
                    const wxString& title,
@@ -138,12 +146,12 @@ wxDialog::wxDialog(wxWindow *parent,
     Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h), style, name);
 }
 
-void wxDialog::SetModal(bool WXUNUSED(bFlag))
+void wxDialog::SetModal(
+  bool                              WXUNUSED(bFlag)
+)
 {
     // nothing to do, obsolete method
 } // end of wxDialog::SetModal
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxDialog::~wxDialog()
 {
@@ -153,18 +161,49 @@ wxDialog::~wxDialog()
     Show(false);
 } // end of wxDialog::~wxDialog
 
+//
+// By default, pressing escape cancels the dialog
+//
+void wxDialog::OnCharHook(
+  wxKeyEvent&                       rEvent
+)
+{
+    if (GetHWND())
+    {
+        if (rEvent.m_keyCode == WXK_ESCAPE)
+        {
+            //
+            // Behaviour changed in 2.0: we'll send a Cancel message
+            // to the dialog instead of Close.
+            //
+            wxCommandEvent          vCancelEvent( wxEVT_COMMAND_BUTTON_CLICKED
+                                                 ,wxID_CANCEL
+                                                );
+
+            vCancelEvent.SetEventObject( this );
+            GetEventHandler()->ProcessEvent(vCancelEvent);
+
+            //
+            // Ensure that there is another message for this window so the
+            // ShowModal loop will exit and won't get stuck in GetMessage().
+            //
+            ::WinPostMsg(GetHwnd(), WM_NULL, 0, 0);
+            return;
+        }
+    }
+    // We didn't process this event.
+    rEvent.Skip();
+}
+
 // ----------------------------------------------------------------------------
 // showing the dialogs
 // ----------------------------------------------------------------------------
-
-#if WXWIN_COMPATIBILITY_2_6
 
 bool wxDialog::IsModalShowing() const
 {
     return IsModal();
 } // end of wxDialog::IsModalShowing
 
-#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -188,7 +227,9 @@ wxWindow *wxDialog::FindSuitableParent() const
     return parent;
 }
 
-bool wxDialog::Show( bool bShow )
+bool wxDialog::Show(
+  bool                              bShow
+)
 {
     if ( bShow == IsShown() )
         return false;
@@ -220,14 +261,13 @@ bool wxDialog::Show( bool bShow )
 
     wxDialogBase::Show(bShow);
 
-    wxString title = GetTitle();
-    if (!title.empty())
-        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)title.c_str());
+    if (GetTitle().c_str())
+        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)GetTitle().c_str());
 
     if ( bShow )
     {
         // dialogs don't get WM_SIZE message after creation unlike most (all?)
-        // other windows and so could start their life not laid out correctly
+        // other windows and so could start their life non laid out correctly
         // if we didn't call Layout() from here
         //
         // NB: normally we should call it just the first time but doing it
@@ -282,7 +322,7 @@ int wxDialog::ShowModal()
         extern bool                     gbInOnIdle;
         bool                            bWasInOnIdle = gbInOnIdle;
 
-        gbInOnIdle = false;
+        gbInOnIdle = FALSE;
 
         // enter and run the modal loop
         {
@@ -319,10 +359,87 @@ void wxDialog::EndModal(
     Hide();
 } // end of wxDialog::EndModal
 
-MRESULT wxDialog::OS2WindowProc( WXUINT uMessage, WXWPARAM wParam, WXLPARAM lParam )
+void wxDialog::EndDialog(int rc)
 {
-    MRESULT  rc = 0;
-    bool     bProcessed = false;
+    if ( IsModal() )
+        EndModal(rc);
+    else
+        Hide();
+}
+
+// ----------------------------------------------------------------------------
+// wxWin event handlers
+// ----------------------------------------------------------------------------
+
+void wxDialog::OnApply( wxCommandEvent& WXUNUSED(rEvent) )
+{
+    if (Validate())
+        TransferDataFromWindow();
+} // end of wxDialog::OnApply
+
+// Standard buttons
+void wxDialog::OnOK( wxCommandEvent& WXUNUSED(rEvent) )
+{
+    if ( Validate() && TransferDataFromWindow() )
+    {
+        EndDialog(wxID_OK);
+    }
+} // end of wxDialog::OnOK
+
+void wxDialog::OnCancel( wxCommandEvent& WXUNUSED(rEvent) )
+{
+    EndDialog(wxID_CANCEL);
+} // end of wxDialog::OnCancel
+
+void wxDialog::OnCloseWindow( wxCloseEvent& WXUNUSED(rEvent) )
+{
+    //
+    // We'll send a Cancel message by default, which may close the dialog.
+    // Check for looping if the Cancel event handler calls Close().
+    //
+    // Note that if a cancel button and handler aren't present in the dialog,
+    // nothing will happen when you close the dialog via the window manager, or
+    // via Close().
+    // We wouldn't want to destroy the dialog by default, since the dialog may have been
+    // created on the stack.
+    // However, this does mean that calling dialog->Close() won't delete the dialog
+    // unless the handler for wxID_CANCEL does so. So use Destroy() if you want to be
+    // sure to destroy the dialog.
+    // The default OnCancel (above) simply ends a modal dialog, and hides a modeless dialog.
+    //
+
+    //
+    // Ugh???  This is not good but until I figure out a global list it'll have to do
+    //
+    static wxList closing;
+
+    if ( closing.Member(this) )
+        return;
+
+    closing.Append(this);
+
+    wxCommandEvent vCancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
+
+    vCancelEvent.SetEventObject( this );
+    GetEventHandler()->ProcessEvent(vCancelEvent); // This may close the dialog
+
+    closing.DeleteObject(this);
+} // end of wxDialog::OnCloseWindow
+
+void wxDialog::OnSysColourChanged( wxSysColourChangedEvent& WXUNUSED(rEvent) )
+{
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
+    Refresh();
+} // end of wxDialog::OnSysColourChanged
+
+MRESULT wxDialog::OS2WindowProc(
+  WXUINT                            uMessage
+, WXWPARAM                          wParam
+, WXLPARAM                          lParam
+)
+{
+    MRESULT                         rc = 0;
+    bool                            bProcessed = FALSE;
 
     switch (uMessage)
     {

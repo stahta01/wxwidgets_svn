@@ -18,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "button.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #if wxUSE_TOGGLEBTN
@@ -25,6 +29,9 @@
 #include "wx/tglbtn.h"
 #include "wx/mac/uma.h"
 // Button
+
+static const int kMacOSXHorizontalBorder = 2 ;
+static const int kMacOSXVerticalBorder = 4 ;
 
 // ----------------------------------------------------------------------------
 // macros

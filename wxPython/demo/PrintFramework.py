@@ -12,38 +12,38 @@ class MyPrintout(wx.Printout):
         self.log = log
 
     def OnBeginDocument(self, start, end):
-        self.log.WriteText("MyPrintout.OnBeginDocument\n")
-        return super(MyPrintout, self).OnBeginDocument(start, end)
+        self.log.WriteText("wx.Printout.OnBeginDocument\n")
+        return self.base_OnBeginDocument(start, end)
 
     def OnEndDocument(self):
-        self.log.WriteText("MyPrintout.OnEndDocument\n")
-        super(MyPrintout, self).OnEndDocument()
+        self.log.WriteText("wx.Printout.OnEndDocument\n")
+        self.base_OnEndDocument()
 
     def OnBeginPrinting(self):
-        self.log.WriteText("MyPrintout.OnBeginPrinting\n")
-        super(MyPrintout, self).OnBeginPrinting()
+        self.log.WriteText("wx.Printout.OnBeginPrinting\n")
+        self.base_OnBeginPrinting()
 
     def OnEndPrinting(self):
-        self.log.WriteText("MyPrintout.OnEndPrinting\n")
-        super(MyPrintout, self).OnEndPrinting()
+        self.log.WriteText("wx.Printout.OnEndPrinting\n")
+        self.base_OnEndPrinting()
 
     def OnPreparePrinting(self):
-        self.log.WriteText("MyPrintout.OnPreparePrinting\n")
-        super(MyPrintout, self).OnPreparePrinting()
+        self.log.WriteText("wx.Printout.OnPreparePrinting\n")
+        self.base_OnPreparePrinting()
 
     def HasPage(self, page):
-        self.log.WriteText("MyPrintout.HasPage: %d\n" % page)
+        self.log.WriteText("wx.Printout.HasPage: %d\n" % page)
         if page <= 2:
             return True
         else:
             return False
 
     def GetPageInfo(self):
-        self.log.WriteText("MyPrintout.GetPageInfo\n")
+        self.log.WriteText("wx.Printout.GetPageInfo\n")
         return (1, 2, 1, 2)
 
     def OnPrintPage(self, page):
-        self.log.WriteText("MyPrintout.OnPrintPage: %d\n" % page)
+        self.log.WriteText("wx.Printout.OnPrintPage: %d\n" % page)
         dc = self.GetDC()
 
         #-------------------------------------------

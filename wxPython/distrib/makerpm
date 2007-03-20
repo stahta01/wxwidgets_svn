@@ -28,7 +28,6 @@ lcport=gtk
 unicode=0
 tarname=wxPython-src
 srpmonly=0
-skipclean=0
 
 #----------------------------------------------------------------------
 # Check parameters
@@ -168,7 +167,7 @@ if [ -z "${skipcopy}" ]; then
     rm -f ChangeLog
     rm *.spec
     rm -rf distrib/msw/tmake
-    #rm -rf docs/html
+    rm -rf docs/html
     #rm -rf docs/latex
     #rm -rf contrib/docs
     #rm -rf contrib/samples
@@ -185,7 +184,7 @@ if [ -z "${skipcopy}" ]; then
     rm -f wxPython/samples/embedded/embedded.o
 
     # ports that are not supported yet
-    #cleanup cocoa    # wxMac needs some cocoa headers
+    cleanup cocoa
     cleanup mgl
     cleanup motif
     cleanup os2
@@ -282,7 +281,7 @@ fi
 #----------------------------------------------------------------------
 # Cleanup
 
-if [ "${skipclean}" = "0" ]; then
+if [ -z ${skipclean} ]; then
     echo "*** Cleaning up"
     rm -rf ${rpmtop}
     rm -rf ${builddir}

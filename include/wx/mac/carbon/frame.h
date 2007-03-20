@@ -12,12 +12,17 @@
 #ifndef _WX_FRAME_H_
 #define _WX_FRAME_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "frame.h"
+#endif
+
 #include "wx/window.h"
 #include "wx/toolbar.h"
 #include "wx/accel.h"
 #include "wx/icon.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxStatusBar;
@@ -71,6 +76,7 @@ public:
                                      wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
 
+    virtual void PositionToolBar();
     virtual void SetToolBar(wxToolBar *toolbar);
 #endif // wxUSE_TOOLBAR
 
@@ -80,24 +86,24 @@ public:
                                            long style = wxST_SIZEGRIP,
                                            wxWindowID id = 0,
                                            const wxString& name = wxStatusLineNameStr);
+
+    virtual void PositionStatusBar();
 #endif // wxUSE_STATUSBAR
+
+    // tooltip management
+#if wxUSE_TOOLTIPS
+    wxMacToolTip* GetToolTipCtrl() const { return m_hwndToolTip; }
+    void SetToolTipCtrl(wxMacToolTip *tt) { m_hwndToolTip = tt; }
+    wxMacToolTip* m_hwndToolTip ;
+#endif // tooltips
 
     // called by wxWindow whenever it gets focus
     void SetLastFocus(wxWindow *win) { m_winLastFocused = win; }
     wxWindow *GetLastFocus() const { return m_winLastFocused; }
 
-    void PositionBars();
-
 protected:
     // common part of all ctors
     void Init();
-
-#if wxUSE_TOOLBAR
-    virtual void PositionToolBar();
-#endif
-#if wxUSE_STATUSBAR
-    virtual void PositionStatusBar();
-#endif
 
     // override base class virtuals
     virtual void DoGetClientSize(int *width, int *height) const;

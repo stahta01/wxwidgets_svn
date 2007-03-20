@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# set -o xtrace
 
 function error {
     echo -----------------
@@ -83,36 +82,36 @@ echo ------------------
 echo cd $WXWIN/build/msw
 cd $WXWIN/build/msw
 nmake -f .makesetup.mk $WXWIN/lib/vc_dll/$WXLIBDIR/wx/setup.h
-if [ ! $? = 0 ]; then error 2; fi
+
 
 echo ------------------
 echo cd $WXWIN/build/msw
 cd $WXWIN/build/msw
 $WXWIN/build/msw/.mymake $BUILD_TYPE $@
-if [ ! $? = 0 ]; then error 2; fi
+if [ ! $? = 0 ]; then error; fi
 
 
 echo ------------------
 echo cd ../../contrib/build/gizmos
 cd ../../contrib/build/gizmos
 $WXWIN/build/msw/.mymake $BUILD_TYPE $@
-if [ ! $? = 0 ]; then error 2; fi
+if [ ! $? = 0 ]; then error; fi
 cd -
 
 
-# echo ------------------
-# echo cd ../../contrib/build/animate
-# cd ../../contrib/build/animate
-# $WXWIN/build/msw/.mymake $BUILD_TYPE $@
-# if [ ! $? = 0 ]; then error 2; fi
-# cd -
+#echo ------------------
+echo cd ../../contrib/build/animate
+cd ../../contrib/build/animate
+$WXWIN/build/msw/.mymake $BUILD_TYPE $@
+if [ ! $? = 0 ]; then error; fi
+cd -
 
 
 echo ------------------
 echo cd ../../contrib/build/stc
 cd ../../contrib/build/stc
 $WXWIN/build/msw/.mymake $BUILD_TYPE $@
-if [ ! $? = 0 ]; then error 2; fi
+if [ ! $? = 0 ]; then error; fi
 cd -
 
 
@@ -120,7 +119,7 @@ cd -
 # echo cd ../../contrib/build/ogl
 # cd ../../contrib/build/ogl
 # $WXWIN/build/msw/.mymake $BUILD_TYPE CPPFLAGS="-DwxUSE_DEPRECATED=0" $@
-# if [ ! $? = 0 ]; then error 2; fi
+# if [ ! $? = 0 ]; then error; fi
 # cd -
 
 

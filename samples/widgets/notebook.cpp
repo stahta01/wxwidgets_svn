@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Program:     wxWidgets Widgets Sample
 // Name:        notebook.cpp
-// Purpose:     Part of the widgets sample showing book controls
-// Author:      Vadim Zeitlin, Wlodzimierz ABX Skiba
+// Purpose:     Part of the widgets sample showing wxNotebook
+// Author:      Vadim Zeitlin
 // Created:     06.04.01
 // Id:          $Id$
-// Copyright:   (c) 2001 Vadim Zeitlin, 2006 Wlodzimierz Skiba
+// Copyright:   (c) 2001 Vadim Zeitlin
 // License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +24,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_BOOKCTRL
+#if wxUSE_NOTEBOOK
 
 // for all others, include the necessary headers
 #ifndef WX_PRECOMP
@@ -42,11 +42,11 @@
 #endif
 
 #include "wx/sizer.h"
-#include "wx/bookctrl.h"
+#include "wx/notebook.h"
 #include "wx/artprov.h"
-#include "wx/imaglist.h"
 
 #include "widgets.h"
+#include "icons/notebook.xpm"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -55,21 +55,21 @@
 // control ids
 enum
 {
-    BookPage_Reset = wxID_HIGHEST,
-    BookPage_SelectPage,
-    BookPage_AddPage,
-    BookPage_InsertPage,
-    BookPage_RemovePage,
-    BookPage_DeleteAll,
-    BookPage_InsertText,
-    BookPage_RemoveText,
-    BookPage_SelectText,
-    BookPage_NumPagesText,
-    BookPage_CurSelectText,
-    BookPage_Book
+    NotebookPage_Reset = 100,
+    NotebookPage_SelectPage,
+    NotebookPage_AddPage,
+    NotebookPage_InsertPage,
+    NotebookPage_RemovePage,
+    NotebookPage_DeleteAll,
+    NotebookPage_InsertText,
+    NotebookPage_RemoveText,
+    NotebookPage_SelectText,
+    NotebookPage_NumPagesText,
+    NotebookPage_CurSelectText,
+    NotebookPage_Notebook
 };
 
-// book orientations
+// notebook orientations
 enum Orient
 {
     Orient_Top,
@@ -80,23 +80,22 @@ enum Orient
 };
 
 // ----------------------------------------------------------------------------
-// BookWidgetsPage
+// NotebookWidgetsPage
 // ----------------------------------------------------------------------------
 
-class BookWidgetsPage : public WidgetsPage
+class NotebookWidgetsPage : public WidgetsPage
 {
 public:
-    BookWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist, char* icon[]);
-    virtual ~BookWidgetsPage();
+    NotebookWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
+    virtual ~NotebookWidgetsPage();
 
-    virtual wxControl *GetWidget() const { return m_book; }
-    virtual void RecreateWidget() { RecreateBook(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
+    virtual wxControl *GetWidget() const { return m_notebook; }
 
 protected:
     // event handlers
+    void OnPageChanging(wxNotebookEvent& event);
+    void OnPageChanged(wxNotebookEvent& event);
+
     void OnButtonReset(wxCommandEvent& event);
     void OnButtonDeleteAll(wxCommandEvent& event);
     void OnButtonSelectPage(wxCommandEvent& event);
@@ -115,17 +114,14 @@ protected:
 
     void OnUpdateUIResetButton(wxUpdateUIEvent& event);
 
-    // reset book parameters
+    // reset the wxNotebook parameters
     void Reset();
 
-    // (re)create book
-    void RecreateBook();
-    virtual wxBookCtrlBase *CreateBook(long flags) = 0;
+    // (re)create the wxNotebook
+    void CreateNotebook();
 
-#if USE_ICONS_IN_BOOK
     // create or destroy the image list
     void CreateImageList();
-#endif // USE_ICONS_IN_BOOK
 
     // create a new page
     wxWindow *CreateNewPage();
@@ -138,7 +134,7 @@ protected:
 
     // is the value in range?
     bool IsValidValue(int val) const
-        { return (val >= 0) && (val < (int) m_book->GetPageCount()); }
+        { return (val >= 0) && (val < (int) m_notebook->GetPageCount()); }
 
     // the controls
     // ------------
@@ -152,81 +148,85 @@ protected:
                *m_textRemove,
                *m_textSelect;
 
-    // the book itself and the sizer it is in
-    wxBookCtrlBase *m_book;
-    wxSizer *m_sizerBook;
+    // the notebook itself and the sizer it is in
+    wxNotebook *m_notebook;
+    wxSizer *m_sizerNotebook;
 
-#if USE_ICONS_IN_BOOK
-    // the image list for our book
+    // thei mage list for our notebook
     wxImageList *m_imageList;
-#endif // USE_ICONS_IN_BOOK
 
 private:
     DECLARE_EVENT_TABLE()
+    DECLARE_WIDGETS_PAGE(NotebookWidgetsPage)
 };
 
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(BookWidgetsPage, WidgetsPage)
-    EVT_BUTTON(BookPage_Reset, BookWidgetsPage::OnButtonReset)
-    EVT_BUTTON(BookPage_SelectPage, BookWidgetsPage::OnButtonSelectPage)
-    EVT_BUTTON(BookPage_AddPage, BookWidgetsPage::OnButtonAddPage)
-    EVT_BUTTON(BookPage_InsertPage, BookWidgetsPage::OnButtonInsertPage)
-    EVT_BUTTON(BookPage_RemovePage, BookWidgetsPage::OnButtonRemovePage)
-    EVT_BUTTON(BookPage_DeleteAll, BookWidgetsPage::OnButtonDeleteAll)
+BEGIN_EVENT_TABLE(NotebookWidgetsPage, WidgetsPage)
+    EVT_BUTTON(NotebookPage_Reset, NotebookWidgetsPage::OnButtonReset)
+    EVT_BUTTON(NotebookPage_SelectPage, NotebookWidgetsPage::OnButtonSelectPage)
+    EVT_BUTTON(NotebookPage_AddPage, NotebookWidgetsPage::OnButtonAddPage)
+    EVT_BUTTON(NotebookPage_InsertPage, NotebookWidgetsPage::OnButtonInsertPage)
+    EVT_BUTTON(NotebookPage_RemovePage, NotebookWidgetsPage::OnButtonRemovePage)
+    EVT_BUTTON(NotebookPage_DeleteAll, NotebookWidgetsPage::OnButtonDeleteAll)
 
-    EVT_UPDATE_UI(BookPage_NumPagesText, BookWidgetsPage::OnUpdateUINumPagesText)
-    EVT_UPDATE_UI(BookPage_CurSelectText, BookWidgetsPage::OnUpdateUICurSelectText)
+    EVT_UPDATE_UI(NotebookPage_NumPagesText, NotebookWidgetsPage::OnUpdateUINumPagesText)
+    EVT_UPDATE_UI(NotebookPage_CurSelectText, NotebookWidgetsPage::OnUpdateUICurSelectText)
 
-    EVT_UPDATE_UI(BookPage_SelectPage, BookWidgetsPage::OnUpdateUISelectButton)
-    EVT_UPDATE_UI(BookPage_InsertPage, BookWidgetsPage::OnUpdateUIInsertButton)
-    EVT_UPDATE_UI(BookPage_RemovePage, BookWidgetsPage::OnUpdateUIRemoveButton)
+    EVT_UPDATE_UI(NotebookPage_SelectPage, NotebookWidgetsPage::OnUpdateUISelectButton)
+    EVT_UPDATE_UI(NotebookPage_InsertPage, NotebookWidgetsPage::OnUpdateUIInsertButton)
+    EVT_UPDATE_UI(NotebookPage_RemovePage, NotebookWidgetsPage::OnUpdateUIRemoveButton)
 
-    EVT_CHECKBOX(wxID_ANY, BookWidgetsPage::OnCheckOrRadioBox)
-    EVT_RADIOBOX(wxID_ANY, BookWidgetsPage::OnCheckOrRadioBox)
+    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, NotebookWidgetsPage::OnPageChanging)
+    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, NotebookWidgetsPage::OnPageChanged)
+
+    EVT_CHECKBOX(wxID_ANY, NotebookWidgetsPage::OnCheckOrRadioBox)
+    EVT_RADIOBOX(wxID_ANY, NotebookWidgetsPage::OnCheckOrRadioBox)
 END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
 // ============================================================================
 
-BookWidgetsPage::BookWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist, char* icon[])
-                :WidgetsPage(book, imaglist, icon)
+IMPLEMENT_WIDGETS_PAGE(NotebookWidgetsPage, _T("Notebook"));
+
+NotebookWidgetsPage::NotebookWidgetsPage(wxBookCtrlBase *book,
+                                         wxImageList *imaglist)
+                  : WidgetsPage(book)
 {
+    imaglist->Add(wxBitmap(notebook_xpm));
+
     // init everything
     m_chkImages = NULL;
-#if USE_ICONS_IN_BOOK
     m_imageList = NULL;
-#endif // USE_ICONS_IN_BOOK
 
-    m_book = NULL;
-    m_radioOrient = NULL;
-    m_sizerBook = (wxSizer *)NULL;
-}
+    m_notebook = (wxNotebook *)NULL;
+    m_sizerNotebook = (wxSizer *)NULL;
 
-void BookWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
     wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
 
     // must be in sync with Orient enum
-    wxArrayString orientations;
-    orientations.Add(_T("&top"));
-    orientations.Add(_T("&bottom"));
-    orientations.Add(_T("&left"));
-    orientations.Add(_T("&right"));
+    wxString orientations[] =
+    {
+        _T("&top"),
+        _T("&bottom"),
+        _T("&left"),
+        _T("&right"),
+    };
 
-    wxASSERT_MSG( orientations.GetCount() == Orient_Max,
+    wxASSERT_MSG( WXSIZEOF(orientations) == Orient_Max,
                   _T("forgot to update something") );
 
     m_chkImages = new wxCheckBox(this, wxID_ANY, _T("Show &images"));
     m_radioOrient = new wxRadioBox(this, wxID_ANY, _T("&Tab orientation"),
                                    wxDefaultPosition, wxDefaultSize,
-                                   orientations, 1, wxRA_SPECIFY_COLS);
+                                   WXSIZEOF(orientations), orientations,
+                                   1, wxRA_SPECIFY_COLS);
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
@@ -234,7 +234,7 @@ void BookWidgetsPage::CreateContent()
     sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
     sizerLeft->Add(m_radioOrient, 0, wxALL, 5);
 
-    wxButton *btn = new wxButton(this, BookPage_Reset, _T("&Reset"));
+    wxButton *btn = new wxButton(this, NotebookPage_Reset, _T("&Reset"));
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
@@ -243,79 +243,78 @@ void BookWidgetsPage::CreateContent()
 
     wxTextCtrl *text;
     wxSizer *sizerRow = CreateSizerWithTextAndLabel(_T("Number of pages: "),
-                                                    BookPage_NumPagesText,
+                                                    NotebookPage_NumPagesText,
                                                     &text);
     text->SetEditable(false);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndLabel(_T("Current selection: "),
-                                           BookPage_CurSelectText,
+                                           NotebookPage_CurSelectText,
                                            &text);
     text->SetEditable(false);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    sizerRow = CreateSizerWithTextAndButton(BookPage_SelectPage,
+    sizerRow = CreateSizerWithTextAndButton(NotebookPage_SelectPage,
                                             _T("&Select page"),
-                                            BookPage_SelectText,
+                                            NotebookPage_SelectText,
                                             &m_textSelect);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, BookPage_AddPage, _T("&Add page"));
+    btn = new wxButton(this, NotebookPage_AddPage, _T("&Add page"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
-    sizerRow = CreateSizerWithTextAndButton(BookPage_InsertPage,
+    sizerRow = CreateSizerWithTextAndButton(NotebookPage_InsertPage,
                                             _T("&Insert page at"),
-                                            BookPage_InsertText,
+                                            NotebookPage_InsertText,
                                             &m_textInsert);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    sizerRow = CreateSizerWithTextAndButton(BookPage_RemovePage,
+    sizerRow = CreateSizerWithTextAndButton(NotebookPage_RemovePage,
                                             _T("&Remove page"),
-                                            BookPage_RemoveText,
+                                            NotebookPage_RemoveText,
                                             &m_textRemove);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, BookPage_DeleteAll, _T("&Delete All"));
+    btn = new wxButton(this, NotebookPage_DeleteAll, _T("&Delete All"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
     // right pane
-    m_sizerBook = new wxBoxSizer(wxHORIZONTAL);
+    wxSizer *sizerRight = new wxBoxSizer(wxHORIZONTAL);
+    m_notebook = new wxNotebook(this, NotebookPage_Notebook);
+    sizerRight->Add(m_notebook, 1, wxGROW | wxALL, 5);
+    sizerRight->SetMinSize(150, 0);
+    m_sizerNotebook = sizerRight; // save it to modify it later
 
-    // the 3 panes compose the window
+    // the 3 panes panes compose the window
     sizerTop->Add(sizerLeft, 0, wxGROW | (wxALL & ~wxLEFT), 10);
     sizerTop->Add(sizerMiddle, 0, wxGROW | wxALL, 10);
-    sizerTop->Add(m_sizerBook, 1, wxGROW | (wxALL & ~wxRIGHT), 10);
-
-    RecreateBook();
+    sizerTop->Add(sizerRight, 1, wxGROW | (wxALL & ~wxRIGHT), 10);
 
     // final initializations
     Reset();
-#if USE_ICONS_IN_BOOK
     CreateImageList();
-#endif // USE_ICONS_IN_BOOK
 
     SetSizer(sizerTop);
+
+    sizerTop->Fit(this);
 }
 
-BookWidgetsPage::~BookWidgetsPage()
+NotebookWidgetsPage::~NotebookWidgetsPage()
 {
-#if USE_ICONS_IN_BOOK
     delete m_imageList;
-#endif // USE_ICONS_IN_BOOK
 }
 
 // ----------------------------------------------------------------------------
 // operations
 // ----------------------------------------------------------------------------
 
-void BookWidgetsPage::Reset()
+void NotebookWidgetsPage::Reset()
 {
     m_chkImages->SetValue(true);
     m_radioOrient->SetSelection(Orient_Top);
 }
 
-#if USE_ICONS_IN_BOOK
-void BookWidgetsPage::CreateImageList()
+void NotebookWidgetsPage::CreateImageList()
 {
     if ( m_chkImages->GetValue() )
     {
@@ -330,8 +329,7 @@ void BookWidgetsPage::CreateImageList()
             m_imageList->Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_OTHER, size));
         }
 
-        if ( m_book )
-            m_book->SetImageList(m_imageList);
+        m_notebook->SetImageList(m_imageList);
     }
     else // no images
     {
@@ -343,267 +341,195 @@ void BookWidgetsPage::CreateImageList()
     }
 
     // because of the bug in wxMSW we can't use SetImageList(NULL) - although
-    // it would be logical if this removed the image list from book, under
-    // MSW it crashes instead - FIXME
+    // it would be logical if this removed the image list from notebook, under
+    // MSW it crashes instead
 }
-#endif // USE_ICONS_IN_BOOK
 
-void BookWidgetsPage::RecreateBook()
+void NotebookWidgetsPage::CreateNotebook()
 {
-    // do not recreate anything in case page content was not prepared yet
-    if(!m_radioOrient)
-        return;
-
-    int flags = ms_defaultFlags;
-
+    int flags;
     switch ( m_radioOrient->GetSelection() )
     {
         default:
-            wxFAIL_MSG( _T("unknown orientation") );
+            wxFAIL_MSG( _T("unknown notebook orientation") );
             // fall through
 
         case Orient_Top:
-            flags |= wxBK_TOP;
+            flags = wxNB_TOP;
             break;
 
         case Orient_Bottom:
-            flags |= wxBK_BOTTOM;
+            flags = wxNB_BOTTOM;
             break;
 
         case Orient_Left:
-            flags |= wxBK_LEFT;
+            flags = wxNB_LEFT;
             break;
 
         case Orient_Right:
-            flags |= wxBK_RIGHT;
+            flags = wxNB_RIGHT;
             break;
     }
 
-    wxBookCtrlBase *oldBook = m_book;
+    wxNotebook *old_note = m_notebook;
 
-    m_book = CreateBook(flags);
+    m_notebook = new wxNotebook(this, NotebookPage_Notebook,
+                                wxDefaultPosition, wxDefaultSize,
+                                flags);
 
-#if USE_ICONS_IN_BOOK
     CreateImageList();
-#endif // USE_ICONS_IN_BOOK
 
-    if ( oldBook )
+    if ( old_note )
     {
-        const int sel = oldBook->GetSelection();
+        const int sel = old_note->GetSelection();
 
-        const int count = oldBook->GetPageCount();
+        const int count = old_note->GetPageCount();
 
         // recreate the pages
         for ( int n = 0; n < count; n++ )
         {
-            m_book->AddPage(CreateNewPage(),
-                            oldBook->GetPageText(n),
-                            false,
-                            m_chkImages->GetValue() ?
-                            GetIconIndex() : -1);
+            m_notebook->AddPage(CreateNewPage(),
+                                old_note->GetPageText(n),
+                                false,
+                                m_chkImages->GetValue() ?
+                                GetIconIndex() : -1);
         }
 
-        m_sizerBook->Detach( oldBook );
-        delete oldBook;
+        m_sizerNotebook->Detach( old_note );
+        delete old_note;
 
         // restore selection
         if ( sel != -1 )
         {
-            m_book->SetSelection(sel);
+            m_notebook->SetSelection(sel);
         }
     }
 
-    m_sizerBook->Add(m_book, 1, wxGROW | wxALL, 5);
-    m_sizerBook->SetMinSize(150, 0);
-    m_sizerBook->Layout();
+    m_sizerNotebook->Add(m_notebook, 1, wxGROW | wxALL, 5);
+    m_sizerNotebook->Layout();
 }
 
 // ----------------------------------------------------------------------------
 // helpers
 // ----------------------------------------------------------------------------
 
-int BookWidgetsPage::GetTextValue(wxTextCtrl *text) const
+int NotebookWidgetsPage::GetTextValue(wxTextCtrl *text) const
 {
-    long pos = -1;
-
-    if ( !text || !text->GetValue().ToLong(&pos) )
+    long pos;
+    if ( !text->GetValue().ToLong(&pos) )
         pos = -1;
 
     return (int)pos;
 }
 
-int BookWidgetsPage::GetIconIndex() const
+int NotebookWidgetsPage::GetIconIndex() const
 {
-#if USE_ICONS_IN_BOOK
     if ( m_imageList )
     {
        int nImages = m_imageList->GetImageCount();
        if ( nImages > 0 )
        {
-           return m_book->GetPageCount() % nImages;
+           return m_notebook->GetPageCount() % nImages;
        }
     }
-#endif // USE_ICONS_IN_BOOK
 
     return -1;
 }
 
-wxWindow *BookWidgetsPage::CreateNewPage()
+wxWindow *NotebookWidgetsPage::CreateNewPage()
 {
-    return new wxTextCtrl(m_book, wxID_ANY, _T("I'm a book page"));
+    return new wxTextCtrl(m_notebook, wxID_ANY, _T("I'm a notebook page"));
 }
 
 // ----------------------------------------------------------------------------
 // event handlers
 // ----------------------------------------------------------------------------
 
-void BookWidgetsPage::OnButtonReset(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonReset(wxCommandEvent& WXUNUSED(event))
 {
     Reset();
 
-    RecreateBook();
+    CreateNotebook();
 }
 
-void BookWidgetsPage::OnButtonDeleteAll(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonDeleteAll(wxCommandEvent& WXUNUSED(event))
 {
-    m_book->DeleteAllPages();
+    m_notebook->DeleteAllPages();
 }
 
-void BookWidgetsPage::OnButtonSelectPage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& WXUNUSED(event))
 {
     int pos = GetTextValue(m_textSelect);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
 
-    m_book->SetSelection(pos);
+    m_notebook->SetSelection(pos);
 }
 
-void BookWidgetsPage::OnButtonAddPage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonAddPage(wxCommandEvent& WXUNUSED(event))
 {
-    m_book->AddPage(CreateNewPage(), _T("Added page"), false,
-                    GetIconIndex());
+    m_notebook->AddPage(CreateNewPage(), _T("Added page"), false,
+                        GetIconIndex());
 }
 
-void BookWidgetsPage::OnButtonInsertPage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonInsertPage(wxCommandEvent& WXUNUSED(event))
 {
     int pos = GetTextValue(m_textInsert);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
 
-    m_book->InsertPage(pos, CreateNewPage(), _T("Inserted page"), false,
-                       GetIconIndex());
+    m_notebook->InsertPage(pos, CreateNewPage(), _T("Inserted page"), false,
+                           GetIconIndex());
 }
 
-void BookWidgetsPage::OnButtonRemovePage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonRemovePage(wxCommandEvent& WXUNUSED(event))
 {
     int pos = GetTextValue(m_textRemove);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
 
-    m_book->DeletePage(pos);
+    m_notebook->DeletePage(pos);
 }
 
-void BookWidgetsPage::OnUpdateUISelectButton(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUISelectButton(wxUpdateUIEvent& event)
 {
     event.Enable( IsValidValue(GetTextValue(m_textSelect)) );
 }
 
-void BookWidgetsPage::OnUpdateUIInsertButton(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUIInsertButton(wxUpdateUIEvent& event)
 {
     event.Enable( IsValidValue(GetTextValue(m_textInsert)) );
 }
 
-void BookWidgetsPage::OnUpdateUIRemoveButton(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUIRemoveButton(wxUpdateUIEvent& event)
 {
     event.Enable( IsValidValue(GetTextValue(m_textRemove)) );
 }
 
-void BookWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
 {
-    if(m_chkImages && m_radioOrient)
-        event.Enable( !m_chkImages->GetValue() ||
-                      m_radioOrient->GetSelection() != wxBK_TOP );
+    event.Enable( !m_chkImages->GetValue() ||
+                  m_radioOrient->GetSelection() != wxNB_TOP );
 }
 
-void BookWidgetsPage::OnUpdateUINumPagesText(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUINumPagesText(wxUpdateUIEvent& event)
 {
-    if(m_book)
-        event.SetText( wxString::Format(_T("%u"), unsigned(m_book->GetPageCount())) );
+    event.SetText( wxString::Format(_T("%d"), m_notebook->GetPageCount()) );
 }
 
-void BookWidgetsPage::OnUpdateUICurSelectText(wxUpdateUIEvent& event)
+void NotebookWidgetsPage::OnUpdateUICurSelectText(wxUpdateUIEvent& event)
 {
-    if(m_book)
-        event.SetText( wxString::Format(_T("%d"), m_book->GetSelection()) );
+    event.SetText( wxString::Format(_T("%d"), m_notebook->GetSelection()) );
 }
 
-void BookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateBook();
+    CreateNotebook();
 }
-
-#if wxUSE_NOTEBOOK
-
-#include "icons/notebook.xpm"
-#include "wx/notebook.h"
-
-// ----------------------------------------------------------------------------
-// NotebookWidgetsPage
-// ----------------------------------------------------------------------------
-
-class NotebookWidgetsPage : public BookWidgetsPage
-{
-public:
-    NotebookWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist)
-        : BookWidgetsPage(book, imaglist, notebook_xpm)
-    {
-        RecreateBook();
-    }
-    virtual ~NotebookWidgetsPage() {}
-
-protected:
-
-    // event handlers
-    void OnPageChanging(wxNotebookEvent& event);
-    void OnPageChanged(wxNotebookEvent& event);
-
-    // (re)create book
-    virtual wxBookCtrlBase *CreateBook(long flags)
-    {
-        return new wxNotebook(this, BookPage_Book,
-                              wxDefaultPosition, wxDefaultSize,
-                              flags);
-    }
-
-private:
-    DECLARE_EVENT_TABLE()
-    DECLARE_WIDGETS_PAGE(NotebookWidgetsPage)
-};
-
-// ----------------------------------------------------------------------------
-// event table
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(NotebookWidgetsPage, BookWidgetsPage)
-    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, NotebookWidgetsPage::OnPageChanging)
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, NotebookWidgetsPage::OnPageChanged)
-END_EVENT_TABLE()
-
-#if defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#elif defined(__WXMOTIF__)
-    #define FAMILY_CTRLS GENERIC_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
-
-IMPLEMENT_WIDGETS_PAGE(NotebookWidgetsPage, _T("Notebook"),
-                       FAMILY_CTRLS | BOOK_CTRLS
-                       );
 
 void NotebookWidgetsPage::OnPageChanging(wxNotebookEvent& event)
 {
     wxLogMessage(_T("Notebook page changing from %d to %d (currently %d)."),
                  event.GetOldSelection(),
                  event.GetSelection(),
-                 m_book->GetSelection());
+                 m_notebook->GetSelection());
 
     event.Skip();
 }
@@ -613,157 +539,9 @@ void NotebookWidgetsPage::OnPageChanged(wxNotebookEvent& event)
     wxLogMessage(_T("Notebook page changed from %d to %d (currently %d)."),
                  event.GetOldSelection(),
                  event.GetSelection(),
-                 m_book->GetSelection());
+                 m_notebook->GetSelection());
 
     event.Skip();
 }
 
 #endif // wxUSE_NOTEBOOK
-
-#if wxUSE_LISTBOOK
-
-#include "icons/listbook.xpm"
-#include "wx/listbook.h"
-
-// ----------------------------------------------------------------------------
-// ListbookWidgetsPage
-// ----------------------------------------------------------------------------
-
-class ListbookWidgetsPage : public BookWidgetsPage
-{
-public:
-    ListbookWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist)
-        : BookWidgetsPage(book, imaglist, listbook_xpm)
-    {
-        RecreateBook();
-    }
-    virtual ~ListbookWidgetsPage() {}
-
-protected:
-
-    // event handlers
-    void OnPageChanging(wxListbookEvent& event);
-    void OnPageChanged(wxListbookEvent& event);
-
-    // (re)create book
-    virtual wxBookCtrlBase *CreateBook(long flags)
-    {
-        return new wxListbook(this, BookPage_Book,
-                              wxDefaultPosition, wxDefaultSize,
-                              flags);
-    }
-
-private:
-    DECLARE_EVENT_TABLE()
-    DECLARE_WIDGETS_PAGE(ListbookWidgetsPage)
-};
-
-// ----------------------------------------------------------------------------
-// event table
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(ListbookWidgetsPage, BookWidgetsPage)
-    EVT_LISTBOOK_PAGE_CHANGING(wxID_ANY, ListbookWidgetsPage::OnPageChanging)
-    EVT_LISTBOOK_PAGE_CHANGED(wxID_ANY, ListbookWidgetsPage::OnPageChanged)
-END_EVENT_TABLE()
-
-IMPLEMENT_WIDGETS_PAGE(ListbookWidgetsPage, _T("Listbook"),
-                       GENERIC_CTRLS | BOOK_CTRLS
-                       );
-
-void ListbookWidgetsPage::OnPageChanging(wxListbookEvent& event)
-{
-    wxLogMessage(_T("Listbook page changing from %d to %d (currently %d)."),
-                 event.GetOldSelection(),
-                 event.GetSelection(),
-                 m_book->GetSelection());
-
-    event.Skip();
-}
-
-void ListbookWidgetsPage::OnPageChanged(wxListbookEvent& event)
-{
-    wxLogMessage(_T("Listbook page changed from %d to %d (currently %d)."),
-                 event.GetOldSelection(),
-                 event.GetSelection(),
-                 m_book->GetSelection());
-
-    event.Skip();
-}
-
-#endif // wxUSE_LISTBOOK
-
-#if wxUSE_CHOICEBOOK
-
-#include "icons/choicebk.xpm"
-#include "wx/choicebk.h"
-
-// ----------------------------------------------------------------------------
-// ChoicebookWidgetsPage
-// ----------------------------------------------------------------------------
-
-class ChoicebookWidgetsPage : public BookWidgetsPage
-{
-public:
-    ChoicebookWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist)
-        : BookWidgetsPage(book, imaglist, choicebk_xpm)
-    {
-        RecreateBook();
-    }
-    virtual ~ChoicebookWidgetsPage() {}
-
-protected:
-
-    // event handlers
-    void OnPageChanging(wxChoicebookEvent& event);
-    void OnPageChanged(wxChoicebookEvent& event);
-
-    // (re)create book
-    virtual wxBookCtrlBase *CreateBook(long flags)
-    {
-        return new wxChoicebook(this, BookPage_Book,
-                                wxDefaultPosition, wxDefaultSize,
-                                flags);
-    }
-
-private:
-    DECLARE_EVENT_TABLE()
-    DECLARE_WIDGETS_PAGE(ChoicebookWidgetsPage)
-};
-
-// ----------------------------------------------------------------------------
-// event table
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(ChoicebookWidgetsPage, BookWidgetsPage)
-    EVT_CHOICEBOOK_PAGE_CHANGING(wxID_ANY, ChoicebookWidgetsPage::OnPageChanging)
-    EVT_CHOICEBOOK_PAGE_CHANGED(wxID_ANY, ChoicebookWidgetsPage::OnPageChanged)
-END_EVENT_TABLE()
-
-IMPLEMENT_WIDGETS_PAGE(ChoicebookWidgetsPage, _T("Choicebook"),
-                       GENERIC_CTRLS | BOOK_CTRLS
-                       );
-
-void ChoicebookWidgetsPage::OnPageChanging(wxChoicebookEvent& event)
-{
-    wxLogMessage(_T("Choicebook page changing from %d to %d (currently %d)."),
-                 event.GetOldSelection(),
-                 event.GetSelection(),
-                 m_book->GetSelection());
-
-    event.Skip();
-}
-
-void ChoicebookWidgetsPage::OnPageChanged(wxChoicebookEvent& event)
-{
-    wxLogMessage(_T("Choicebook page changed from %d to %d (currently %d)."),
-                 event.GetOldSelection(),
-                 event.GetSelection(),
-                 m_book->GetSelection());
-
-    event.Skip();
-}
-
-#endif // wxUSE_CHOICEBOOK
-
-#endif // wxUSE_BOOKCTRL

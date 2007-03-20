@@ -1,12 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_toolb.cpp
-// Purpose:     XRC resource for wxToolBar
+// Name:        xh_toolb.cpp
+// Purpose:     XRC resource for wxBoxSizer
 // Author:      Vaclav Slavik
 // Created:     2000/08/11
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_toolb.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -18,11 +22,8 @@
 #if wxUSE_XRC && wxUSE_TOOLBAR
 
 #include "wx/xrc/xh_toolb.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/toolbar.h"
-#endif
+#include "wx/toolbar.h"
+#include "wx/frame.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxToolBarXmlHandler, wxXmlResourceHandler)
 
@@ -40,12 +41,6 @@ wxToolBarXmlHandler::wxToolBarXmlHandler()
     XRC_ADD_STYLE(wxTB_NOALIGN);
     XRC_ADD_STYLE(wxTB_HORZ_LAYOUT);
     XRC_ADD_STYLE(wxTB_HORZ_TEXT);
-
-    XRC_ADD_STYLE(wxTB_TOP);
-    XRC_ADD_STYLE(wxTB_LEFT);
-    XRC_ADD_STYLE(wxTB_RIGHT);
-    XRC_ADD_STYLE(wxTB_BOTTOM);
-
     AddWindowStyles();
 }
 
@@ -85,9 +80,6 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
                                kind,
                                GetText(wxT("tooltip")),
                                GetText(wxT("longhelp")));
-
-            if ( GetBool(wxT("disabled")) )
-                m_toolbar->EnableTool(GetID(), false);
         }
         return m_toolbar; // must return non-NULL
     }
@@ -127,8 +119,6 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
         long separation = GetLong(wxT("separation"), -1);
         if (separation != -1)
             toolbar->SetToolSeparation(separation);
-        if (HasParam(wxT("bg")))
-            toolbar->SetBackgroundColour(GetColour(wxT("bg")));
 
         wxXmlNode *children_node = GetParamNode(wxT("object"));
         if (!children_node)

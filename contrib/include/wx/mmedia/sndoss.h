@@ -9,6 +9,10 @@
 #ifndef _WX_SNDOSS_H
 #define _WX_SNDOSS_H
 
+#ifdef __GNUG__
+#pragma interface "sndoss.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/string.h"
 #include "wx/mmedia/defs.h"

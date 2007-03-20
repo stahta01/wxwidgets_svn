@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "thread.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -21,24 +25,20 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_THREADS
-
-#include "wx/thread.h"
-
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/app.h"
-    #include "wx/module.h"
 #endif
 
+#if wxUSE_THREADS
+
 #include "wx/apptrait.h"
-#include "wx/scopeguard.h"
 
 #include "wx/msw/private.h"
 #include "wx/msw/missing.h"
-#include "wx/msw/seh.h"
 
-#include "wx/except.h"
+#include "wx/module.h"
+#include "wx/thread.h"
 
 // must have this symbol defined to get _beginthread/_endthread declarations
 #ifndef _MT
@@ -178,8 +178,7 @@ public:
     bool IsOk() const { return m_mutex != NULL; }
 
     wxMutexError Lock() { return LockTimeout(INFINITE); }
-    wxMutexError Lock(unsigned long ms) { return LockTimeout(ms); }
-    wxMutexError TryLock();
+    wxMutexError TryLock() { return LockTimeout(0); }
     wxMutexError Unlock();
 
 private:
@@ -197,7 +196,7 @@ wxMutexInternal::wxMutexInternal(wxMutexType WXUNUSED(mutexType))
     m_mutex = ::CreateMutex
                 (
                     NULL,       // default secutiry attributes
-                    FALSE,      // not initially locked
+                    false,      // not initially locked
                     NULL        // no name
                 );
 
@@ -216,14 +215,6 @@ wxMutexInternal::~wxMutexInternal()
             wxLogLastError(_T("CloseHandle(mutex)"));
         }
     }
-}
-
-wxMutexError wxMutexInternal::TryLock()
-{
-    const wxMutexError rc = LockTimeout(0);
-
-    // we have a special return code for timeout in this case
-    return rc == wxMUTEX_TIMEOUT ? wxMUTEX_BUSY : rc;
 }
 
 wxMutexError wxMutexInternal::LockTimeout(DWORD milliseconds)
@@ -246,7 +237,7 @@ wxMutexError wxMutexInternal::LockTimeout(DWORD milliseconds)
             break;
 
         case WAIT_TIMEOUT:
-            return wxMUTEX_TIMEOUT;
+            return wxMUTEX_BUSY;
 
         case WAIT_ABANDONED:        // checked for above
         default:
@@ -365,15 +356,13 @@ wxSemaError wxSemaphoreInternal::Post()
 #if !defined(_WIN32_WCE) || (_WIN32_WCE >= 300)
     if ( !::ReleaseSemaphore(m_semaphore, 1, NULL /* ptr to previous count */) )
     {
-        if ( GetLastError() == ERROR_TOO_MANY_POSTS )
-        {
+        if (GetLastError() == ERROR_TOO_MANY_POSTS)
             return wxSEMA_OVERFLOW;
-        }
-        else
-        {
-            wxLogLastError(_T("ReleaseSemaphore"));
-            return wxSEMA_MISC_ERROR;
-        }
+    }
+    else
+    {
+        wxLogLastError(_T("ReleaseSemaphore"));
+        return wxSEMA_MISC_ERROR;
     }
 
     return wxSEMA_NO_ERROR;
@@ -448,15 +437,8 @@ public:
     HANDLE GetHandle() const { return m_hThread; }
     DWORD  GetId() const { return m_tid; }
 
-    // the thread function forwarding to DoThreadStart
+    // thread function
     static THREAD_RETVAL THREAD_CALLCONV WinThreadStart(void *thread);
-
-    // really start the thread (if it's not already dead)
-    static THREAD_RETVAL DoThreadStart(wxThread *thread);
-
-    // call OnExit() on the thread
-    static void DoThreadOnExit(wxThread *thread);
-
 
     void KeepAlive()
     {
@@ -499,77 +481,45 @@ private:
     wxThreadInternal& m_thrImpl;
 };
 
-/* static */
-void wxThreadInternal::DoThreadOnExit(wxThread *thread)
+
+THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
 {
-    wxTRY
+    THREAD_RETVAL rc;
+
+    wxThread * const thread = (wxThread *)param;
+
+    // first of all, check whether we hadn't been cancelled already and don't
+    // start the user code at all then
+    const bool hasExited = thread->m_internal->GetState() == STATE_EXITED;
+
+    if ( hasExited )
     {
-        thread->OnExit();
+        rc = (THREAD_RETVAL)-1;
     }
-    wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
-}
-
-/* static */
-THREAD_RETVAL wxThreadInternal::DoThreadStart(wxThread *thread)
-{
-    wxON_BLOCK_EXIT1(DoThreadOnExit, thread);
-
-    THREAD_RETVAL rc = (THREAD_RETVAL)-1;
-
-    wxTRY
+    else // do run thread
     {
         // store the thread object in the TLS
         if ( !::TlsSetValue(gs_tlsThisThread, thread) )
         {
             wxLogSysError(_("Can not start thread: error writing TLS."));
 
-            return (THREAD_RETVAL)-1;
+            return (DWORD)-1;
         }
 
         rc = (THREAD_RETVAL)thread->Entry();
     }
-    wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
 
-    return rc;
-}
-
-/* static */
-THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
-{
-    THREAD_RETVAL rc = (THREAD_RETVAL)-1;
-
-    wxThread * const thread = (wxThread *)param;
-
-    // each thread has its own SEH translator so install our own a.s.a.p.
-    DisableAutomaticSETranslator();
-
-    // first of all, check whether we hadn't been cancelled already and don't
-    // start the user code at all then
-    const bool hasExited = thread->m_internal->GetState() == STATE_EXITED;
-
-    // run the thread function itself inside a SEH try/except block
-    wxSEH_TRY
-    {
-        if ( hasExited )
-            DoThreadOnExit(thread);
-        else
-            rc = DoThreadStart(thread);
-    }
-    wxSEH_HANDLE((THREAD_RETVAL)-1)
-
+    thread->OnExit();
 
     // save IsDetached because thread object can be deleted by joinable
     // threads after state is changed to STATE_EXITED.
-    const bool isDetached = thread->IsDetached();
+    bool isDetached = thread->IsDetached();
+
     if ( !hasExited )
     {
         // enter m_critsect before changing the thread state
-        //
-        // NB: can't use wxCriticalSectionLocker here as we use SEH and it's
-        //     incompatible with C++ object dtors
-        thread->m_critsect.Enter();
+        wxCriticalSectionLocker lock(thread->m_critsect);
         thread->m_internal->SetState(STATE_EXITED);
-        thread->m_critsect.Leave();
     }
 
     // the thread may delete itself now if it wants, we don't need it any more
@@ -761,16 +711,18 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
             }
         }
 
-        wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-        if ( traits )
-        {
-            result = traits->WaitForThread(m_hThread);
-        }
-        else // can't wait for the thread
-        {
-            // so kill it below
-            result = 0xFFFFFFFF;
-        }
+#if !defined(QS_ALLPOSTMESSAGE)
+#define QS_ALLPOSTMESSAGE 0
+#endif
+
+        result = ::MsgWaitForMultipleObjects
+                 (
+                   1,              // number of objects to wait for
+                   &m_hThread,     // the objects
+                   false,          // don't wait for all objects
+                   INFINITE,       // no timeout
+                   QS_ALLINPUT|QS_ALLPOSTMESSAGE   // return as soon as there are any events
+                 );
 
         switch ( result )
         {
@@ -795,6 +747,15 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
                 //     the system might dead lock then
                 if ( wxThread::IsMain() )
                 {
+                    // it looks that sometimes WAIT_OBJECT_0 + 1 is
+                    // returned but there are no messages in the thread
+                    // queue -- prevent DoMessageFromThreadWait() from
+                    // blocking inside ::GetMessage() forever in this case
+                    ::PostMessage(NULL, WM_NULL, 0, 0);
+
+                    wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits()
+                                                   : NULL;
+
                     if ( traits && !traits->DoMessageFromThreadWait() )
                     {
                         // WM_QUIT received: kill the thread
@@ -1394,3 +1355,4 @@ bool WXDLLIMPEXP_BASE wxIsWaitingForThread()
 #include "wx/thrimpl.cpp"
 
 #endif // wxUSE_THREADS
+

@@ -12,6 +12,10 @@
 #ifndef _WX_DCCLIENT_H_
 #define _WX_DCCLIENT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcclient.h"
+#endif
+
 #include "wx/dc.h"
 #include "wx/region.h"
 
@@ -32,10 +36,10 @@ class WXDLLIMPEXP_CORE wxClientDC;
 class WXDLLIMPEXP_CORE wxWindowDC : public wxDC
 {
 public:
-    wxWindowDC() { Init(); }
+    wxWindowDC();
     wxWindowDC( wxWindow *win );
 
-    virtual ~wxWindowDC();
+    ~wxWindowDC();
 
     virtual bool CanDrawBitmap() const { return true; }
     virtual bool CanGetTextExtent() const { return true; }
@@ -100,6 +104,11 @@ public:
 
     virtual wxCoord GetCharHeight() const;
     virtual wxCoord GetCharWidth() const;
+    virtual void DoGetTextExtent(const wxString& string,
+        wxCoord *x, wxCoord *y,
+        wxCoord *descent = NULL,
+        wxCoord *externalLeading = NULL,
+        wxFont *theFont = NULL) const;
 
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
@@ -107,18 +116,9 @@ public:
     virtual void DestroyClippingRegion();
     WXWindow GetWindow() const { return m_window; }
 
-    virtual void ComputeScaleAndOrigin();
-
 protected:
     // implementation
     // --------------
-    virtual void DoGetTextExtent(const wxString& string,
-        wxCoord *x, wxCoord *y,
-        wxCoord *descent = NULL,
-        wxCoord *externalLeading = NULL,
-        wxFont *theFont = NULL) const;
-
-    void Init();
 
     WXDisplay    *m_display;
     WXWindow      m_window;
@@ -140,6 +140,7 @@ protected:
 
     void SetUpDC();
     void Destroy();
+    virtual void ComputeScaleAndOrigin();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxWindowDC)

@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 """
@@ -7,17 +7,17 @@ controls on a panel, etc. to be loaded from an XML file.
 """
 
 import _xrc
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -26,15 +26,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -48,8 +42,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -70,15 +63,22 @@ XRC_NO_SUBCLASSING = _xrc.XRC_NO_SUBCLASSING
 XRC_NO_RELOADING = _xrc.XRC_NO_RELOADING
 class XmlResource(_core.Object):
     """Proxy of C++ XmlResource class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, String filemask, int flags=XRC_USE_LOCALE, String domain=wxEmptyString) -> XmlResource"""
-        _xrc.XmlResource_swiginit(self,_xrc.new_XmlResource(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxXmlResource instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, String filemask, int flags=XRC_USE_LOCALE) -> XmlResource"""
+        newobj = _xrc.new_XmlResource(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self.InitAllHandlers()
 
-    __swig_destroy__ = _xrc.delete_XmlResource
-    __del__ = lambda self : None;
+    def __del__(self, destroy=_xrc.delete_XmlResource):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Load(*args, **kwargs):
         """Load(self, String filemask) -> bool"""
         return _xrc.XmlResource_Load(*args, **kwargs)
@@ -173,7 +173,7 @@ class XmlResource(_core.Object):
         return _xrc.XmlResource_AttachUnknownControl(*args, **kwargs)
 
     def GetXRCID(*args, **kwargs):
-        """GetXRCID(String str_id, int value_if_not_found=ID_NONE) -> int"""
+        """GetXRCID(String str_id) -> int"""
         return _xrc.XmlResource_GetXRCID(*args, **kwargs)
 
     GetXRCID = staticmethod(GetXRCID)
@@ -203,18 +203,13 @@ class XmlResource(_core.Object):
         """SetFlags(self, int flags)"""
         return _xrc.XmlResource_SetFlags(*args, **kwargs)
 
-    def GetDomain(*args, **kwargs):
-        """GetDomain(self) -> String"""
-        return _xrc.XmlResource_GetDomain(*args, **kwargs)
 
-    def SetDomain(*args, **kwargs):
-        """SetDomain(self, String domain)"""
-        return _xrc.XmlResource_SetDomain(*args, **kwargs)
-
-    Domain = property(GetDomain,SetDomain,doc="See `GetDomain` and `SetDomain`") 
-    Flags = property(GetFlags,SetFlags,doc="See `GetFlags` and `SetFlags`") 
-    Version = property(GetVersion,doc="See `GetVersion`") 
-_xrc.XmlResource_swigregister(XmlResource)
+class XmlResourcePtr(XmlResource):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlResource
+_xrc.XmlResource_swigregister(XmlResourcePtr)
 cvar = _xrc.cvar
 UTF8String = cvar.UTF8String
 StyleString = cvar.StyleString
@@ -223,32 +218,32 @@ PosString = cvar.PosString
 BitmapString = cvar.BitmapString
 IconString = cvar.IconString
 FontString = cvar.FontString
-AnimationString = cvar.AnimationString
 
 def EmptyXmlResource(*args, **kwargs):
-    """EmptyXmlResource(int flags=XRC_USE_LOCALE, String domain=wxEmptyString) -> XmlResource"""
+    """EmptyXmlResource(int flags=XRC_USE_LOCALE) -> XmlResource"""
     val = _xrc.new_EmptyXmlResource(*args, **kwargs)
+    val.thisown = 1
     val.InitAllHandlers()
     return val
 
 def XmlResource_AddSubclassFactory(*args, **kwargs):
-  """XmlResource_AddSubclassFactory(XmlSubclassFactory factory)"""
-  return _xrc.XmlResource_AddSubclassFactory(*args, **kwargs)
+    """XmlResource_AddSubclassFactory(XmlSubclassFactory factory)"""
+    return _xrc.XmlResource_AddSubclassFactory(*args, **kwargs)
 
 def XmlResource_GetXRCID(*args, **kwargs):
-  """XmlResource_GetXRCID(String str_id, int value_if_not_found=ID_NONE) -> int"""
-  return _xrc.XmlResource_GetXRCID(*args, **kwargs)
+    """XmlResource_GetXRCID(String str_id) -> int"""
+    return _xrc.XmlResource_GetXRCID(*args, **kwargs)
 
-def XmlResource_Get(*args):
-  """XmlResource_Get() -> XmlResource"""
-  return _xrc.XmlResource_Get(*args)
+def XmlResource_Get(*args, **kwargs):
+    """XmlResource_Get() -> XmlResource"""
+    return _xrc.XmlResource_Get(*args, **kwargs)
 
 def XmlResource_Set(*args, **kwargs):
-  """XmlResource_Set(XmlResource res) -> XmlResource"""
-  return _xrc.XmlResource_Set(*args, **kwargs)
+    """XmlResource_Set(XmlResource res) -> XmlResource"""
+    return _xrc.XmlResource_Set(*args, **kwargs)
 
-def XRCID(str_id, value_if_not_found = wx.ID_NONE):
-    return XmlResource_GetXRCID(str_id, value_if_not_found)
+def XRCID(str_id):
+    return XmlResource_GetXRCID(str_id)
 
 def XRCCTRL(window, str_id, *ignoreargs):
     return window.FindWindowById(XRCID(str_id))
@@ -257,18 +252,27 @@ def XRCCTRL(window, str_id, *ignoreargs):
 
 class XmlSubclassFactory(object):
     """Proxy of C++ XmlSubclassFactory class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyXmlSubclassFactory instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> XmlSubclassFactory"""
-        _xrc.XmlSubclassFactory_swiginit(self,_xrc.new_XmlSubclassFactory(*args, **kwargs))
-        XmlSubclassFactory._setCallbackInfo(self, self, XmlSubclassFactory)
+        newobj = _xrc.new_XmlSubclassFactory(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setCallbackInfo(self, XmlSubclassFactory)
 
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
         return _xrc.XmlSubclassFactory__setCallbackInfo(*args, **kwargs)
 
-_xrc.XmlSubclassFactory_swigregister(XmlSubclassFactory)
+
+class XmlSubclassFactoryPtr(XmlSubclassFactory):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlSubclassFactory
+_xrc.XmlSubclassFactory_swigregister(XmlSubclassFactoryPtr)
 
 #---------------------------------------------------------------------------
 
@@ -287,14 +291,17 @@ XML_NOTATION_NODE = _xrc.XML_NOTATION_NODE
 XML_HTML_DOCUMENT_NODE = _xrc.XML_HTML_DOCUMENT_NODE
 class XmlProperty(object):
     """Proxy of C++ XmlProperty class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxXmlProperty instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, String name=EmptyString, String value=EmptyString, 
             XmlProperty next=None) -> XmlProperty
         """
-        _xrc.XmlProperty_swiginit(self,_xrc.new_XmlProperty(*args, **kwargs))
+        newobj = _xrc.new_XmlProperty(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetName(*args, **kwargs):
         """GetName(self) -> String"""
         return _xrc.XmlProperty_GetName(*args, **kwargs)
@@ -319,30 +326,40 @@ class XmlProperty(object):
         """SetNext(self, XmlProperty next)"""
         return _xrc.XmlProperty_SetNext(*args, **kwargs)
 
-    Name = property(GetName,SetName,doc="See `GetName` and `SetName`") 
-    Next = property(GetNext,SetNext,doc="See `GetNext` and `SetNext`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_xrc.XmlProperty_swigregister(XmlProperty)
+
+class XmlPropertyPtr(XmlProperty):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlProperty
+_xrc.XmlProperty_swigregister(XmlPropertyPtr)
 
 class XmlNode(object):
     """Proxy of C++ XmlNode class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxXmlNode instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, XmlNode parent=None, int type=0, String name=EmptyString, 
             String content=EmptyString, XmlProperty props=None, 
             XmlNode next=None) -> XmlNode
         """
-        _xrc.XmlNode_swiginit(self,_xrc.new_XmlNode(*args, **kwargs))
-    __swig_destroy__ = _xrc.delete_XmlNode
-    __del__ = lambda self : None;
+        newobj = _xrc.new_XmlNode(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_xrc.delete_XmlNode):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def AddChild(*args, **kwargs):
         """AddChild(self, XmlNode child)"""
         return _xrc.XmlNode_AddChild(*args, **kwargs)
 
     def InsertChild(*args, **kwargs):
-        """InsertChild(self, XmlNode child, XmlNode before_node) -> bool"""
+        """InsertChild(self, XmlNode child, XmlNode before_node)"""
         return _xrc.XmlNode_InsertChild(*args, **kwargs)
 
     def RemoveChild(*args, **kwargs):
@@ -372,18 +389,6 @@ class XmlNode(object):
     def GetContent(*args, **kwargs):
         """GetContent(self) -> String"""
         return _xrc.XmlNode_GetContent(*args, **kwargs)
-
-    def IsWhitespaceOnly(*args, **kwargs):
-        """IsWhitespaceOnly(self) -> bool"""
-        return _xrc.XmlNode_IsWhitespaceOnly(*args, **kwargs)
-
-    def GetDepth(*args, **kwargs):
-        """GetDepth(self, XmlNode grandparent=None) -> int"""
-        return _xrc.XmlNode_GetDepth(*args, **kwargs)
-
-    def GetNodeContent(*args, **kwargs):
-        """GetNodeContent(self) -> String"""
-        return _xrc.XmlNode_GetNodeContent(*args, **kwargs)
 
     def GetParent(*args, **kwargs):
         """GetParent(self) -> XmlNode"""
@@ -437,46 +442,50 @@ class XmlNode(object):
         """SetProperties(self, XmlProperty prop)"""
         return _xrc.XmlNode_SetProperties(*args, **kwargs)
 
-    Children = property(GetChildren,SetChildren,doc="See `GetChildren` and `SetChildren`") 
-    Content = property(GetContent,SetContent,doc="See `GetContent` and `SetContent`") 
-    Name = property(GetName,SetName,doc="See `GetName` and `SetName`") 
-    Next = property(GetNext,SetNext,doc="See `GetNext` and `SetNext`") 
-    Parent = property(GetParent,SetParent,doc="See `GetParent` and `SetParent`") 
-    Properties = property(GetProperties,SetProperties,doc="See `GetProperties` and `SetProperties`") 
-    Type = property(GetType,SetType,doc="See `GetType` and `SetType`") 
-_xrc.XmlNode_swigregister(XmlNode)
+
+class XmlNodePtr(XmlNode):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlNode
+_xrc.XmlNode_swigregister(XmlNodePtr)
 
 def XmlNodeEasy(*args, **kwargs):
     """XmlNodeEasy(int type, String name, String content=EmptyString) -> XmlNode"""
     val = _xrc.new_XmlNodeEasy(*args, **kwargs)
+    val.thisown = 1
     return val
 
-XML_NO_INDENTATION = _xrc.XML_NO_INDENTATION
-XMLDOC_NONE = _xrc.XMLDOC_NONE
-XMLDOC_KEEP_WHITESPACE_NODES = _xrc.XMLDOC_KEEP_WHITESPACE_NODES
 class XmlDocument(_core.Object):
     """Proxy of C++ XmlDocument class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxXmlDocument instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, String filename, String encoding=UTF8String) -> XmlDocument"""
-        _xrc.XmlDocument_swiginit(self,_xrc.new_XmlDocument(*args, **kwargs))
-    __swig_destroy__ = _xrc.delete_XmlDocument
-    __del__ = lambda self : None;
+        newobj = _xrc.new_XmlDocument(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_xrc.delete_XmlDocument):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Load(*args, **kwargs):
-        """Load(self, String filename, String encoding=UTF8String, int flags=XMLDOC_NONE) -> bool"""
+        """Load(self, String filename, String encoding=UTF8String) -> bool"""
         return _xrc.XmlDocument_Load(*args, **kwargs)
 
     def LoadFromStream(*args, **kwargs):
-        """LoadFromStream(self, InputStream stream, String encoding=UTF8String, int flags=XMLDOC_NONE) -> bool"""
+        """LoadFromStream(self, InputStream stream, String encoding=UTF8String) -> bool"""
         return _xrc.XmlDocument_LoadFromStream(*args, **kwargs)
 
     def Save(*args, **kwargs):
-        """Save(self, String filename, int indentstep=1) -> bool"""
+        """Save(self, String filename) -> bool"""
         return _xrc.XmlDocument_Save(*args, **kwargs)
 
     def SaveToStream(*args, **kwargs):
-        """SaveToStream(self, OutputStream stream, int indentstep=1) -> bool"""
+        """SaveToStream(self, OutputStream stream) -> bool"""
         return _xrc.XmlDocument_SaveToStream(*args, **kwargs)
 
     def IsOk(*args, **kwargs):
@@ -495,10 +504,6 @@ class XmlDocument(_core.Object):
         """GetFileEncoding(self) -> String"""
         return _xrc.XmlDocument_GetFileEncoding(*args, **kwargs)
 
-    def DetachRoot(*args, **kwargs):
-        """DetachRoot(self) -> XmlNode"""
-        return _xrc.XmlDocument_DetachRoot(*args, **kwargs)
-
     def SetRoot(*args, **kwargs):
         """SetRoot(self, XmlNode node)"""
         return _xrc.XmlDocument_SetRoot(*args, **kwargs)
@@ -511,34 +516,40 @@ class XmlDocument(_core.Object):
         """SetFileEncoding(self, String encoding)"""
         return _xrc.XmlDocument_SetFileEncoding(*args, **kwargs)
 
-    FileEncoding = property(GetFileEncoding,SetFileEncoding,doc="See `GetFileEncoding` and `SetFileEncoding`") 
-    Root = property(GetRoot,SetRoot,doc="See `GetRoot` and `SetRoot`") 
-    Version = property(GetVersion,SetVersion,doc="See `GetVersion` and `SetVersion`") 
-_xrc.XmlDocument_swigregister(XmlDocument)
+
+class XmlDocumentPtr(XmlDocument):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlDocument
+_xrc.XmlDocument_swigregister(XmlDocumentPtr)
 
 def XmlDocumentFromStream(*args, **kwargs):
     """XmlDocumentFromStream(InputStream stream, String encoding=UTF8String) -> XmlDocument"""
     val = _xrc.new_XmlDocumentFromStream(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def EmptyXmlDocument(*args, **kwargs):
     """EmptyXmlDocument() -> XmlDocument"""
     val = _xrc.new_EmptyXmlDocument(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
 
 class XmlResourceHandler(_core.Object):
     """Proxy of C++ XmlResourceHandler class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyXmlResourceHandler instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> XmlResourceHandler"""
-        _xrc.XmlResourceHandler_swiginit(self,_xrc.new_XmlResourceHandler(*args, **kwargs))
-        XmlResourceHandler._setCallbackInfo(self, self, XmlResourceHandler)
+        newobj = _xrc.new_XmlResourceHandler(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setCallbackInfo(self, XmlResourceHandler)
 
-    __swig_destroy__ = _xrc.delete_XmlResourceHandler
-    __del__ = lambda self : None;
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
         return _xrc.XmlResourceHandler__setCallbackInfo(*args, **kwargs)
@@ -661,10 +672,6 @@ class XmlResourceHandler(_core.Object):
         """GetFont(self, String param=FontString) -> Font"""
         return _xrc.XmlResourceHandler_GetFont(*args, **kwargs)
 
-    def GetAnimation(*args, **kwargs):
-        """GetAnimation(self, String param=AnimationString) -> wxAnimation"""
-        return _xrc.XmlResourceHandler_GetAnimation(*args, **kwargs)
-
     def SetupWindow(*args, **kwargs):
         """SetupWindow(self, Window wnd)"""
         return _xrc.XmlResourceHandler_SetupWindow(*args, **kwargs)
@@ -685,16 +692,13 @@ class XmlResourceHandler(_core.Object):
         """GetCurFileSystem(self) -> FileSystem"""
         return _xrc.XmlResourceHandler_GetCurFileSystem(*args, **kwargs)
 
-    Class = property(GetClass,doc="See `GetClass`") 
-    CurFileSystem = property(GetCurFileSystem,doc="See `GetCurFileSystem`") 
-    ID = property(GetID,doc="See `GetID`") 
-    Instance = property(GetInstance,doc="See `GetInstance`") 
-    Name = property(GetName,doc="See `GetName`") 
-    Node = property(GetNode,doc="See `GetNode`") 
-    Parent = property(GetParent,doc="See `GetParent`") 
-    ParentAsWindow = property(GetParentAsWindow,doc="See `GetParentAsWindow`") 
-    Resource = property(GetResource,doc="See `GetResource`") 
-_xrc.XmlResourceHandler_swigregister(XmlResourceHandler)
+
+class XmlResourceHandlerPtr(XmlResourceHandler):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = XmlResourceHandler
+_xrc.XmlResourceHandler_swigregister(XmlResourceHandlerPtr)
 
 #----------------------------------------------------------------------------
 # The global was removed  in favor of static accessor functions.  This is for
@@ -708,12 +712,7 @@ TheXmlResource = XmlResource_Get()
 
 
 def _my_import(name):
-    try:
-        mod = __import__(name)
-    except ImportError:
-        import traceback
-        print traceback.format_exc()
-        raise
+    mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)

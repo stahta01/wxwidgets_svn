@@ -11,6 +11,10 @@
 #ifndef __SCK_STREAM_H__
 #define __SCK_STREAM_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
 #include "wx/stream.h"
 
 #if wxUSE_SOCKETS && wxUSE_STREAMS
@@ -21,7 +25,7 @@ class WXDLLIMPEXP_NET wxSocketOutputStream : public wxOutputStream
 {
  public:
   wxSocketOutputStream(wxSocketBase& s);
-  virtual ~wxSocketOutputStream();
+  ~wxSocketOutputStream();
 
   wxFileOffset SeekO( wxFileOffset WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
     { return -1; }
@@ -40,7 +44,7 @@ class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
 {
  public:
   wxSocketInputStream(wxSocketBase& s);
-  virtual ~wxSocketInputStream();
+  ~wxSocketInputStream();
 
   wxFileOffset SeekI( wxFileOffset WXUNUSED(pos), wxSeekMode WXUNUSED(mode) )
     { return -1; }
@@ -60,7 +64,7 @@ class WXDLLIMPEXP_NET wxSocketStream : public wxSocketInputStream,
 {
  public:
   wxSocketStream(wxSocketBase& s);
-  virtual ~wxSocketStream();
+  ~wxSocketStream();
 
   DECLARE_NO_COPY_CLASS(wxSocketStream)
 };

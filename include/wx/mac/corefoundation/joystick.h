@@ -12,6 +12,10 @@
 #ifndef _WX_JOYSTICK_H_
 #define _WX_JOYSTICK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "joystick.h"
+#endif
+
 #include "wx/event.h"
 
 class WXDLLEXPORT wxJoystickThread;
@@ -28,8 +32,6 @@ class WXDLLEXPORT wxJoystick: public wxObject
     ////////////////////////////////////////////////////////////////////////////
 
     wxPoint GetPosition() const;
-    int GetPosition(unsigned axis) const;
-    bool GetButtonState(unsigned button) const;
     int GetZPosition() const;
     int GetButtonState() const;
     int GetPOVPosition() const;
@@ -44,7 +46,7 @@ class WXDLLEXPORT wxJoystick: public wxObject
     ////////////////////////////////////////////////////////////////////////////
 
     bool IsOk() const; // Checks that the joystick is functioning
-    static int GetNumberJoysticks() ;
+    int GetNumberJoysticks() const ;
     int GetManufacturerId() const ;
     int GetProductId() const ;
     wxString GetProductName() const ;

@@ -18,6 +18,7 @@ BK_DEPS = @BK_DEPS@
 BK_MAKE_PCH = @BK_MAKE_PCH@
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
+top_builddir = @top_builddir@
 LIBS = @LIBS@
 CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@
@@ -35,14 +36,13 @@ EXTRALIBS_GUI = @EXTRALIBS_GUI@
 HOST_SUFFIX = @HOST_SUFFIX@
 SAMPLES_RPATH_FLAG = @SAMPLES_RPATH_FLAG@
 SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
-wx_top_builddir = @wx_top_builddir@
 
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.9
-WX_VERSION = $(WX_RELEASE).0
-LIBDIRNAME = $(wx_top_builddir)/lib
+WX_RELEASE = 2.6
+WX_VERSION = $(WX_RELEASE).4
+LIBDIRNAME = $(top_builddir)lib
 TEST_CXXFLAGS = $(__test_PCH_INC) -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
 	-I$(srcdir) $(__DLLFLAG_p) -DwxUSE_GUI=0 $(CPPUNIT_CFLAGS) $(CPPFLAGS) \
@@ -51,7 +51,6 @@ TEST_OBJECTS =  \
 	test_test.o \
 	test_archivetest.o \
 	test_ziptest.o \
-	test_tartest.o \
 	test_arrays.o \
 	test_datetimetest.o \
 	test_fileconftest.o \
@@ -63,23 +62,17 @@ TEST_OBJECTS =  \
 	test_hashes.o \
 	test_lists.o \
 	test_longlongtest.o \
-	test_convautotest.o \
 	test_mbconvtest.o \
 	test_regextest.o \
 	test_wxregextest.o \
 	test_scopeguardtest.o \
 	test_strings.o \
 	test_stdstrings.o \
-	test_tokenizer.o \
-	test_unichar.o \
 	test_unicode.o \
-	test_vararg.o \
 	test_crt.o \
-	test_vsnprintf.o \
 	test_bstream.o \
 	test_datastreamtest.o \
 	test_ffilestream.o \
-	test_fileback.o \
 	test_filestream.o \
 	test_largefile.o \
 	test_memstream.o \
@@ -87,7 +80,6 @@ TEST_OBJECTS =  \
 	test_tempfile.o \
 	test_textstreamtest.o \
 	test_zlibstream.o \
-	test_textfiletest.o \
 	test_uris.o
 TEST_ODEP =  $(___pch_testprec_test_testprec_h_gch___depname)
 TEST_GUI_CXXFLAGS = $(__test_gui_PCH_INC) -D__WX$(TOOLKIT)__ \
@@ -102,13 +94,6 @@ TEST_GUI_OBJECTS =  \
 	test_gui_size.o \
 	test_gui_point.o
 TEST_GUI_ODEP =  $(___pch_testprec_test_gui_testprec_h_gch___depname)
-PRINTFBENCH_CXXFLAGS = $(__printfbench_PCH_INC) -D__WX$(TOOLKIT)__ \
-	$(__WXUNIV_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) \
-	$(__THREAD_DEFINE_p) -I$(srcdir) $(__DLLFLAG_p) -DwxUSE_GUI=0 \
-	$(CPPUNIT_CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
-PRINTFBENCH_OBJECTS =  \
-	printfbench_printfbench.o
-PRINTFBENCH_ODEP =  $(___pch_testprec_printfbench_testprec_h_gch___depname)
 
 ### Conditionally set variables: ###
 
@@ -168,22 +153,6 @@ COND_MONOLITHIC_0___WXLIB_NET_p = \
 COND_MONOLITHIC_0___WXLIB_CORE_p = \
 	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_0@__WXLIB_CORE_p = $(COND_MONOLITHIC_0___WXLIB_CORE_p)
-@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@__LIB_TIFF_p \
-@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	= \
-@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	-lwxtiff$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@__LIB_JPEG_p \
-@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@	= \
-@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@	-lwxjpeg$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@__LIB_PNG_p \
-@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	= \
-@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	-lwxpng$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
-@COND_PLATFORM_MAC_1@__printfbench___mac_setfilecmd = \
-@COND_PLATFORM_MAC_1@	$(SETFILE) -t APPL printfbench$(EXEEXT)
-@COND_GCC_PCH_1@__printfbench_PCH_INC = -I.pch/testprec_printfbench
-@COND_ICC_PCH_1@__printfbench_PCH_INC = -use_pch \
-@COND_ICC_PCH_1@	.pch/testprec_printfbench/testprec.h.gch
-@COND_USE_PCH_1@___pch_testprec_printfbench_testprec_h_gch___depname \
-@COND_USE_PCH_1@	= .pch/testprec_printfbench/testprec.h.gch
 COND_TOOLKIT_MAC___MACOSX_RESOURCES_p_1 = $(REZ) -d __DARWIN__ -t APPL -d \
 	__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p_4) $(__EXCEPTIONS_DEFINE_p_4) \
 	$(__RTTI_DEFINE_p_4) $(__THREAD_DEFINE_p_4) -i $(srcdir) $(__DLLFLAG_p_4) -i \
@@ -201,6 +170,15 @@ COND_MONOLITHIC_0___WXLIB_BASE_p = \
 COND_MONOLITHIC_1___WXLIB_MONO_p = \
 	-lwx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_MONOLITHIC_1@__WXLIB_MONO_p = $(COND_MONOLITHIC_1___WXLIB_MONO_p)
+@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@__LIB_TIFF_p \
+@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	= \
+@COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	-lwxtiff$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@__LIB_JPEG_p \
+@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@	= \
+@COND_USE_GUI_1_WXUSE_LIBJPEG_BUILTIN@	-lwxjpeg$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@__LIB_PNG_p \
+@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	= \
+@COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	-lwxpng$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_ZLIB_BUILTIN@__LIB_ZLIB_p = \
 @COND_WXUSE_ZLIB_BUILTIN@	-lwxzlib$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_ODBC_BUILTIN@__LIB_ODBC_p = \
@@ -213,7 +191,7 @@ COND_WXUSE_REGEX_BUILTIN___LIB_REGEX_p = \
 
 ### Targets: ###
 
-all: test$(EXEEXT) $(__test_gui___depname) $(__test_gui_bundle___depname) data printfbench$(EXEEXT)
+all: test$(EXEEXT) $(__test_gui___depname) $(__test_gui_bundle___depname) data
 
 install: all
 
@@ -227,13 +205,12 @@ clean:
 	rm -f test$(EXEEXT)
 	rm -f test_gui$(EXEEXT)
 	rm -rf test_gui.app
-	rm -f printfbench$(EXEEXT)
 
 distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 test$(EXEEXT): $(TEST_OBJECTS)
-	$(CXX) -o $@ $(TEST_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME)  $(SAMPLES_RPATH_FLAG) $(CPPUNIT_LIBS)  $(LIBS) $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+	$(CXX) -o $@ $(TEST_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME)  $(SAMPLES_RPATH_FLAG) $(CPPUNIT_LIBS)  $(LIBS) $(__WXLIB_NET_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
 	
 	$(__test___mac_setfilecmd)
 	$(SAMPLES_RPATH_POSTLINK)
@@ -242,7 +219,7 @@ test$(EXEEXT): $(TEST_OBJECTS)
 @COND_USE_PCH_1@	$(BK_MAKE_PCH) .pch/testprec_test/testprec.h.gch testprec.h $(CXX) $(TEST_CXXFLAGS)
 
 @COND_USE_GUI_1@test_gui$(EXEEXT): $(TEST_GUI_OBJECTS) $(__test_gui___win32rc)
-@COND_USE_GUI_1@	$(CXX) -o $@ $(TEST_GUI_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(SAMPLES_RPATH_FLAG) $(CPPUNIT_LIBS)   $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+@COND_USE_GUI_1@	$(CXX) -o $@ $(TEST_GUI_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(SAMPLES_RPATH_FLAG) $(CPPUNIT_LIBS)   $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI)
 @COND_USE_GUI_1@	$(__test_gui___mac_rezcmd)
 @COND_USE_GUI_1@	$(__test_gui___mac_setfilecmd)
 @COND_USE_GUI_1@	$(SAMPLES_RPATH_POSTLINK)
@@ -284,15 +261,6 @@ data:
 	esac; \
 	done
 
-printfbench$(EXEEXT): $(PRINTFBENCH_OBJECTS)
-	$(CXX) -o $@ $(PRINTFBENCH_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME)  $(SAMPLES_RPATH_FLAG) $(CPPUNIT_LIBS)  $(LIBS) $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
-	
-	$(__printfbench___mac_setfilecmd)
-	$(SAMPLES_RPATH_POSTLINK)
-
-@COND_USE_PCH_1@.pch/testprec_printfbench/testprec.h.gch: 
-@COND_USE_PCH_1@	$(BK_MAKE_PCH) .pch/testprec_printfbench/testprec.h.gch testprec.h $(CXX) $(PRINTFBENCH_CXXFLAGS)
-
 test_test.o: $(srcdir)/test.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/test.cpp
 
@@ -301,9 +269,6 @@ test_archivetest.o: $(srcdir)/archive/archivetest.cpp $(TEST_ODEP)
 
 test_ziptest.o: $(srcdir)/archive/ziptest.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/archive/ziptest.cpp
-
-test_tartest.o: $(srcdir)/archive/tartest.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/archive/tartest.cpp
 
 test_arrays.o: $(srcdir)/arrays/arrays.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/arrays/arrays.cpp
@@ -338,9 +303,6 @@ test_lists.o: $(srcdir)/lists/lists.cpp $(TEST_ODEP)
 test_longlongtest.o: $(srcdir)/longlong/longlongtest.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/longlong/longlongtest.cpp
 
-test_convautotest.o: $(srcdir)/mbconv/convautotest.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/mbconv/convautotest.cpp
-
 test_mbconvtest.o: $(srcdir)/mbconv/mbconvtest.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/mbconv/mbconvtest.cpp
 
@@ -359,23 +321,11 @@ test_strings.o: $(srcdir)/strings/strings.cpp $(TEST_ODEP)
 test_stdstrings.o: $(srcdir)/strings/stdstrings.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/stdstrings.cpp
 
-test_tokenizer.o: $(srcdir)/strings/tokenizer.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/tokenizer.cpp
-
-test_unichar.o: $(srcdir)/strings/unichar.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/unichar.cpp
-
 test_unicode.o: $(srcdir)/strings/unicode.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/unicode.cpp
 
-test_vararg.o: $(srcdir)/strings/vararg.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/vararg.cpp
-
 test_crt.o: $(srcdir)/strings/crt.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/crt.cpp
-
-test_vsnprintf.o: $(srcdir)/strings/vsnprintf.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/strings/vsnprintf.cpp
 
 test_bstream.o: $(srcdir)/streams/bstream.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/streams/bstream.cpp
@@ -385,9 +335,6 @@ test_datastreamtest.o: $(srcdir)/streams/datastreamtest.cpp $(TEST_ODEP)
 
 test_ffilestream.o: $(srcdir)/streams/ffilestream.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/streams/ffilestream.cpp
-
-test_fileback.o: $(srcdir)/streams/fileback.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/streams/fileback.cpp
 
 test_filestream.o: $(srcdir)/streams/filestream.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/streams/filestream.cpp
@@ -410,9 +357,6 @@ test_textstreamtest.o: $(srcdir)/streams/textstreamtest.cpp $(TEST_ODEP)
 test_zlibstream.o: $(srcdir)/streams/zlibstream.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/streams/zlibstream.cpp
 
-test_textfiletest.o: $(srcdir)/textfile/textfiletest.cpp $(TEST_ODEP)
-	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/textfile/textfiletest.cpp
-
 test_uris.o: $(srcdir)/uris/uris.cpp $(TEST_ODEP)
 	$(CXXC) -c -o $@ $(TEST_CXXFLAGS) $(srcdir)/uris/uris.cpp
 
@@ -430,9 +374,6 @@ test_gui_size.o: $(srcdir)/geometry/size.cpp $(TEST_GUI_ODEP)
 
 test_gui_point.o: $(srcdir)/geometry/point.cpp $(TEST_GUI_ODEP)
 	$(CXXC) -c -o $@ $(TEST_GUI_CXXFLAGS) $(srcdir)/geometry/point.cpp
-
-printfbench_printfbench.o: $(srcdir)/benchmarks/printfbench.cpp $(PRINTFBENCH_ODEP)
-	$(CXXC) -c -o $@ $(PRINTFBENCH_CXXFLAGS) $(srcdir)/benchmarks/printfbench.cpp
 
 
 # Include dependency info, if present:

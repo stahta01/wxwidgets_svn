@@ -185,6 +185,8 @@ src/makebcc.env
 src/makeprog.bcc
 src/makelib.bcc
 src/makemsc.env
+src/makeprog.msc
+src/makelib.msc
 src/makewat.env
 src/makeprog.wat
 src/makelib.wat
@@ -200,7 +202,10 @@ src/makeprog.sl
 src/makelib.sl
 src/salford.lnk
 src/maketwin.env
+src/makeprog.twn
+src/makelib.twn
 src/makefile.bcc
+src/makefile.dos
 src/makefile.vc
 src/*.bat
 
@@ -260,10 +265,13 @@ src/regex/regex.dsw
 samples/samples.dsw
 
 samples/dialogs/dialogs.dsp
+samples/dialogs/dialogs.dsw
 
 samples/minimal/minimal.dsp
+samples/minimal/minimal.dsw
 samples/minimal/minimalUniv.dsp
 
 samples/widgets/widgets.dsp
+samples/widgets/widgets.dsw
 samples/widgets/widgetsUniv.dsp
 

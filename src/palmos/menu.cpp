@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menu.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,10 +30,9 @@
 
 #if wxUSE_MENUS
 
-#include "wx/menu.h"
-
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
+    #include "wx/menu.h"
     #include "wx/utils.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -64,9 +67,9 @@ static const int idMenuTitle = -3;
 // implementation
 // ============================================================================
 
-#include "wx/listimpl.cpp"
+#include <wx/listimpl.cpp>
 
-WX_DEFINE_LIST( wxMenuInfoList )
+WX_DEFINE_LIST( wxMenuInfoList ) ;
 
 #if wxUSE_EXTENDED_RTTI
 

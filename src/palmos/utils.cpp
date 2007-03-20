@@ -29,13 +29,12 @@
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/timer.h"
 #endif  //WX_PRECOMP
 
 #include "wx/apptrait.h"
 #include "wx/dynload.h"
 #include "wx/confbase.h"
-#include "wx/power.h"
+#include "wx/timer.h"
 
 #include <MemoryMgr.h>
 #include <DLServer.h>
@@ -90,7 +89,7 @@ bool wxGetUserName(wxChar *buf, int maxSize)
         return false;
     }
 
-    wxStrncpy (buf, wxSafeConvertMB2WX(id), maxSize - 1);
+    wxStrncpy (buf, wxConvertMB2WX(id), maxSize - 1);
 
     // free the buffer
     MemPtrUnlock(id);
@@ -108,7 +107,7 @@ wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
     return NULL;
 }
 
-bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspaceSize_t *pFree)
+bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
 {
     return false;
 }
@@ -147,10 +146,6 @@ bool wxShutdown(wxShutdownFlags wFlags)
 {
     return false;
 }
-
-// ----------------------------------------------------------------------------
-// power management
-// ----------------------------------------------------------------------------
 
 wxPowerType wxGetPowerType()
 {
@@ -197,11 +192,6 @@ void wxBell()
     SndPlaySystemSound(sndWarning);
 }
 
-bool wxIsPlatform64Bit()
-{
-    return false;
-}
-
 wxString wxGetOsDescription()
 {
     wxString strOS = _T("PalmOS");
@@ -220,11 +210,12 @@ wxString wxGetOsDescription()
     return strOS;
 }
 
-wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
+wxToolkitInfo& wxAppTraits::GetToolkitInfo()
 {
-    // TODO
-
-    return wxOS_UNKNOWN;
+    static wxToolkitInfo info;
+    info.os = wxPALMOS;
+    info.name = _T("wxBase");
+    return info;
 }
 
 // ----------------------------------------------------------------------------
@@ -279,3 +270,4 @@ extern long wxCharsetToCodepage(const wxChar *name)
 }
 
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+

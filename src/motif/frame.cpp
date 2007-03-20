@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/frame.cpp
+// Name:        motif/frame.cpp
 // Purpose:     wxFrame
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "frame.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,17 +31,14 @@
 #endif
 
 #include "wx/frame.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/menu.h"
-    #include "wx/icon.h"
-    #include "wx/settings.h"
-    #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
-#endif
+#include "wx/statusbr.h"
+#include "wx/toolbar.h"
+#include "wx/menu.h"
+#include "wx/settings.h"
+#include "wx/utils.h"
+#include "wx/log.h"
+#include "wx/app.h"
+#include "wx/icon.h"
 
 #ifdef __VMS__
     #pragma message disable nosimpint
@@ -87,6 +88,7 @@ static void wxFrameMapProc(Widget frameShell, XtPointer clientData,
 // ----------------------------------------------------------------------------
 
 extern wxList wxModelessWindows;
+extern wxList wxPendingDelete;
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -186,8 +188,7 @@ bool wxFrame::Create(wxWindow *parent,
 
     PreResize();
 
-    wxSize newSize(width, height);
-    wxSizeEvent sizeEvent(newSize, GetId());
+    wxSizeEvent sizeEvent(wxSize(width, height), GetId());
     sizeEvent.SetEventObject(this);
 
     GetEventHandler()->ProcessEvent(sizeEvent);
@@ -195,11 +196,11 @@ bool wxFrame::Create(wxWindow *parent,
     return true;
 }
 
-bool wxFrame::XmDoCreateTLW(wxWindow* WXUNUSED(parent),
-                            wxWindowID WXUNUSED(id),
-                            const wxString& WXUNUSED(title),
-                            const wxPoint& WXUNUSED(pos),
-                            const wxSize& WXUNUSED(size),
+bool wxFrame::DoCreate(wxWindow* parent,
+                            wxWindowID id,
+                            const wxString& title,
+                            const wxPoint& pos,
+                            const wxSize& size,
                             long style,
                             const wxString& name)
 {
@@ -263,6 +264,10 @@ bool wxFrame::XmDoCreateTLW(wxWindow* WXUNUSED(parent),
     wxModelessWindows.Append( this );
 
     return true;
+}
+
+void wxFrame::DoDestroy()
+{
 }
 
 wxFrame::~wxFrame()
@@ -333,7 +338,7 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
     {
         int sbw, sbh;
         m_frameStatusBar->GetSize(& sbw, & sbh);
-        yy = (Dimension)(yy - sbh);
+        yy -= sbh;
     }
 #if wxUSE_TOOLBAR
     if (m_frameToolBar)
@@ -341,9 +346,9 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
         int tbw, tbh;
         m_frameToolBar->GetSize(& tbw, & tbh);
         if (m_frameToolBar->GetWindowStyleFlag() & wxTB_VERTICAL)
-            xx = (Dimension)(xx - tbw);
+            xx -= tbw;
         else
-            yy = (Dimension)(yy - tbh);
+            yy -= tbh;
     }
 #endif // wxUSE_TOOLBAR
 
@@ -388,8 +393,7 @@ void wxFrame::DoSetClientSize(int width, int height)
     }
     PreResize();
 
-    wxSize newSize(width, height);
-    wxSizeEvent sizeEvent(newSize, GetId());
+    wxSizeEvent sizeEvent(wxSize(width, height), GetId());
     sizeEvent.SetEventObject(this);
 
     GetEventHandler()->ProcessEvent(sizeEvent);
@@ -454,8 +458,8 @@ void wxFrame::SetTitle(const wxString& title)
 
     if( !title.empty() )
         XtVaSetValues( (Widget)m_frameShell,
-                       XmNtitle, title.mb_str(),
-                       XmNiconName, title.mb_str(),
+                       XmNtitle, title.c_str(),
+                       XmNiconName, title.c_str(),
                        NULL );
 }
 

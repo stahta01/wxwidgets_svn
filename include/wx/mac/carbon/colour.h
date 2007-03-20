@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/carbon/colour.h
+// Name:        colour.h
 // Purpose:     wxColour class
 // Author:      Stefan Csomor
 // Modified by:
@@ -12,73 +12,88 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "colour.h"
+#endif
+
 #include "wx/object.h"
 #include "wx/string.h"
 
-struct RGBColor;
-
 // Colour
-class WXDLLEXPORT wxColour: public wxColourBase
+class WXDLLEXPORT wxColour: public wxObject
 {
 public:
-    // constructors
-    // ------------
-
+  // ctors
     // default
-    wxColour() { Init(); }
-    DEFINE_STD_WXCOLOUR_CONSTRUCTORS
+  wxColour() { Init(); }
+    // from RGB
+  wxColour( unsigned char red, unsigned char green, unsigned char blue )
+      { Set(red, green, blue); }
+  wxColour( unsigned long colRGB )
+      { Set(colRGB); }
+
+    // implicit conversion from the colour name
+  wxColour( const wxString &colourName )
+      { InitFromName(colourName); }
+  wxColour( const wxChar *colourName )
+      { InitFromName(colourName); }
+
+    // copy ctors and assignment operators
+  wxColour( const wxColour& col );
+  wxColour& operator = ( const wxColour& col );
 
     // dtor
-    virtual ~wxColour();
+  ~wxColour();
 
-    // accessors
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+  // Set() functions
+  void Set( unsigned char red, unsigned char green, unsigned char blue );
+  void Set( unsigned long colRGB )
+  {
+    // we don't need to know sizeof(long) here because we assume that the three
+    // least significant bytes contain the R, G and B values
+    Set((unsigned char)colRGB,
+        (unsigned char)(colRGB >> 8),
+        (unsigned char)(colRGB >> 16));
+  }
 
-    unsigned char Red() const { return m_red; }
-    unsigned char Green() const { return m_green; }
-    unsigned char Blue() const { return m_blue; }
-    unsigned char Alpha() const { return m_alpha; }
+  // accessors
+  bool Ok() const {return m_isInit; }
 
-    // comparison
-    bool operator == (const wxColour& colour) const
-    {
-        return (m_isInit == colour.m_isInit
-                && m_red == colour.m_red
-                && m_green == colour.m_green
-                && m_blue == colour.m_blue
-                && m_alpha == colour.m_alpha);
-    }
-    bool operator != (const wxColour& colour) const { return !(*this == colour); }
+  unsigned char Red() const { return m_red; }
+  unsigned char Green() const { return m_green; }
+  unsigned char Blue() const { return m_blue; }
 
-    const WXCOLORREF& GetPixel() const { return m_pixel; };
+  // comparison
+  bool operator == (const wxColour& colour) const
+  {
+    return (m_isInit == colour.m_isInit
+            && m_red == colour.m_red
+            && m_green == colour.m_green
+            && m_blue == colour.m_blue);
+  }
+  bool operator != (const wxColour& colour) const { return !(*this == colour); }
 
-    // Mac-specific ctor and assignment operator from the native colour
-    wxColour(const RGBColor& col);
-    wxColour& operator=(const RGBColor& col);
+  const WXCOLORREF& GetPixel() const { return m_pixel; };
+
+    void InitFromName(const wxString& col);
 
 protected :
 
     // Helper function
     void Init();
 
-    virtual void
-    InitRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-
 private:
-    bool          m_isInit;
-    unsigned char m_red;
-    unsigned char m_blue;
-    unsigned char m_green;
-    unsigned char m_alpha;
+  bool          m_isInit;
+  unsigned char m_red;
+  unsigned char m_blue;
+  unsigned char m_green;
 
 public:
-    WXCOLORREF m_pixel ;
-    void FromRGBColor( WXCOLORREF* color ) ;
-
+  WXCOLORREF m_pixel ;
+  void Set( const WXCOLORREF* color ) ;
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxColour)
+  DECLARE_DYNAMIC_CLASS(wxColour)
 };
 
 #endif

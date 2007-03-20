@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/combobox_native.cpp
+// Name:        combobox_native.cpp
 // Purpose:     wxComboBox class
 // Author:      Julian Smart, Ian Brown
 // Modified by:
@@ -12,13 +12,12 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/setup.h"
+
 #if wxUSE_COMBOBOX
 
 #include "wx/combobox.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/arrstr.h"
-#endif
+#include "wx/arrstr.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -116,8 +115,8 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
                    (XtPointer) this);
 
     wxSize best = GetBestSize();
-    if( size.x != wxDefaultCoord ) best.x = size.x;
-    if( size.y != wxDefaultCoord ) best.y = size.y;
+    if( size.x != -1 ) best.x = size.x;
+    if( size.y != -1 ) best.y = size.y;
 
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);
@@ -167,7 +166,7 @@ wxComboBox::~wxComboBox()
         m_clientDataDict.DestroyData();
 }
 
-void wxComboBox::DoSetSize(int x, int y, int width, int WXUNUSED(height), int sizeFlags)
+void wxComboBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
     // Necessary so it doesn't call wxChoice::SetSize
     wxWindow::DoSetSize(x, y, width, DoGetBestSize().y, sizeFlags);
@@ -182,7 +181,7 @@ wxString wxComboBox::GetValue() const
     return str;
 }
 
-void wxComboBox::SetString(unsigned int n, const wxString& s)
+void wxComboBox::SetString(int n, const wxString& s)
 {
     wxXmString text(s);
     Widget listBox = GetXmList(this);
@@ -216,10 +215,10 @@ int wxComboBox::DoAppend(const wxString& item)
     return GetCount() - 1;
 }
 
-int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+int wxComboBox::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     if (pos == GetCount())
         return DoAppend(item);
@@ -232,7 +231,7 @@ int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
     return GetCount() - 1;
 }
 
-void wxComboBox::Delete(unsigned int n)
+void wxComboBox::Delete(int n)
 {
 #ifdef LESSTIF_VERSION
     XmListDeletePos (GetXmList(this), n + 1);
@@ -272,7 +271,7 @@ void wxComboBox::SetSelection (int n)
     SetValue(GetString(n));
 #else
 #if 0
-    wxXmString str(GetString(n).c_str());
+    wxXmString str( GetString(n).c_str() );
     XmComboBoxSelectItem((Widget) m_mainWidget, str());
 #endif
     XtVaSetValues( (Widget)m_mainWidget,
@@ -288,15 +287,13 @@ int wxComboBox::GetSelection (void) const
     return wxDoGetSelectionInList( GetXmList( this ) );
 }
 
-wxString wxComboBox::GetString(unsigned int n) const
+wxString wxComboBox::GetString(int n) const
 {
     return wxDoGetStringInList( GetXmList(this), n );
 }
 
-int wxComboBox::FindString(const wxString& s, bool WXUNUSED(bCase)) const
+int wxComboBox::FindString(const wxString& s) const
 {
-    // FIXME: back to base class for not supported value of bCase
-
     return wxDoFindStringInList( GetXmList( this ), s );
 }
 
@@ -345,7 +342,7 @@ wxTextPos wxComboBox::GetLastPosition() const
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
     XmTextReplace( GetXmText(this), (XmTextPosition)from, (XmTextPosition)to,
-                   wxConstCast(value.mb_str(), char) );
+                   wxConstCast(value.c_str(), char) );
 }
 
 void wxComboBox::Remove(long from, long to)

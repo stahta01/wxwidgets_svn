@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "treectrl.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -26,18 +30,13 @@
 
 #if wxUSE_TREECTRL
 
-#include "wx/treectrl.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/dynarray.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/settings.h"
-#endif
-
 #include "wx/palmos/private.h"
 
+#include "wx/app.h"
+#include "wx/log.h"
+#include "wx/dynarray.h"
 #include "wx/imaglist.h"
+#include "wx/settings.h"
 
 // macros to hide the cast ugliness
 // --------------------------------
@@ -215,9 +214,8 @@ void wxTreeCtrl::DoSetItem(wxTreeViewItem* tvItem)
 {
 }
 
-unsigned int wxTreeCtrl::GetCount() const
+size_t wxTreeCtrl::GetCount() const
 {
-    // TODO
     return 0;
 }
 
@@ -727,3 +725,4 @@ int wxTreeCtrl::GetState(const wxTreeItemId& node)
 }
 
 #endif // wxUSE_TREECTRL
+

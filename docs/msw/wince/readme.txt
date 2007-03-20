@@ -1,11 +1,11 @@
 
   =================================================
-  Welcome to wxWidgets/CE
+  Welcome to wxWidgets/CE 2.6.3
   =================================================
 
-You have downloaded the Windows CE port of the wxWidgets GUI library.
-This runs on Pocket PC 2002/2003, Smartphone 2002/2003,
-Windows CE .NET 4.x, and Windows Mobile 5.
+You have downloaded version 2.6.3 of the Windows CE port of
+the wxWidgets GUI library. This runs on Pocket PC 2002/2003,
+Smartphone 2002/2003, Windows CE .NET 4.x, and Windows Mobile 5.
 
 More information about the wxWidgets project as a whole
 can be found at:
@@ -118,7 +118,7 @@ you need to adjust the library settings of each wxWidgets and sample project.
 Edit the configuration properties for each configuration and in the Librarian,
 add a relative path ..\..\lib to each library path. For example:
 
-..\..\lib\$(PlatformName)\$(ConfigurationName)\wx_mono.lib
+..\$(PlatformName)\$(ConfigurationName)\wx_mono.lib
 
 Then, for a sample you want to compile, edit the configuration properties
 and make sure ..\..\lib\$(PlatformName)\$(ConfigurationName) is in the Linker/General/Additional

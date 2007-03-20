@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/brush.h
+// Name:        brush.h
 // Purpose:     wxBrush class
 // Author:      David Webster
 // Modified by:
@@ -24,21 +24,14 @@ class WXDLLEXPORT wxBrushRefData: public wxGDIRefData
 public:
     wxBrushRefData();
     wxBrushRefData(const wxBrushRefData& rData);
-    virtual ~wxBrushRefData();
-
-    bool operator == (const wxBrushRefData& data) const
-    {
-        return (m_nStyle == data.m_nStyle &&
-                m_vStipple.IsSameAs(data.m_vStipple) &&
-                m_vColour == data.m_vColour);
-    }
+    ~wxBrushRefData();
 
 protected:
-    int         m_nStyle;
-    wxBitmap    m_vStipple ;
-    wxColour    m_vColour;
-    WXHBRUSH    m_hBrush; // in OS/2 GPI this will be the PS the pen is associated with
-    AREABUNDLE  m_vBundle;
+    int                             m_nStyle;
+    wxBitmap                        m_vStipple ;
+    wxColour                        m_vColour;
+    WXHBRUSH                        m_hBrush; // in OS/2 GPI this will be the PS the pen is associated with
+    AREABUNDLE                      m_vBundle;
 };
 
 #define M_BRUSHDATA ((wxBrushRefData *)m_refData)
@@ -50,15 +43,22 @@ class WXDLLEXPORT wxBrush: public wxBrushBase
 
 public:
     wxBrush();
-    wxBrush(const wxColour& rCol, int nStyle = wxSOLID);
+    wxBrush( const wxColour& rCol
+            ,int             nStyle = wxSOLID
+           );
     wxBrush(const wxBitmap& rStipple);
-    virtual ~wxBrush();
+    inline wxBrush(const wxBrush& rBrush) { Ref(rBrush); }
+    ~wxBrush();
 
-    bool operator == (const wxBrush& rBrush) const;
-    inline bool operator != (const wxBrush& rBrush) const { return !(*this == rBrush); }
+    inline wxBrush& operator = (const wxBrush& rBrush) { if (*this == rBrush) return (*this); Ref(rBrush); return *this; }
+    inline bool operator == (const wxBrush& rBrush) const { return m_refData == rBrush.m_refData; }
+    inline bool operator != (const wxBrush& rBrush) const { return m_refData != rBrush.m_refData; }
 
     virtual void SetColour(const wxColour& rColour);
-    virtual void SetColour(unsigned char cRed, unsigned char cGreen, unsigned char cBrush);
+    virtual void SetColour( unsigned char cRed
+                           ,unsigned char cGreen
+                           ,unsigned char cBrush
+                          );
     virtual void SetPS(HPS hPS);
     virtual void SetStyle(int nStyle)  ;
     virtual void SetStipple(const wxBitmap& rStipple);
@@ -68,8 +68,7 @@ public:
     inline wxBitmap* GetStipple(void) const { return (M_BRUSHDATA ? & M_BRUSHDATA->m_vStipple : 0); };
     inline int       GetPS(void) const { return (M_BRUSHDATA ? M_BRUSHDATA->m_hBrush : 0); };
 
-    inline virtual bool Ok() const { return IsOk(); }
-    inline virtual bool IsOk(void) const { return (m_refData != NULL) ; }
+    inline virtual bool Ok(void) const { return (m_refData != NULL) ; }
 
     //
     // Implementation
@@ -79,7 +78,7 @@ public:
     // Useful helper: create the brush resource
     //
     bool     RealizeResource(void);
-    virtual WXHANDLE GetResourceHandle(void) const;
+    WXHANDLE GetResourceHandle(void) ;
     bool     FreeResource(bool bForce = false);
     bool     IsFree(void) const;
     void     Unshare(void);

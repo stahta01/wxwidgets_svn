@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/combobox.h
+// Name:        combobox.h
 // Purpose:     wxComboBox class
 // Author:      Julian Smart
 // Modified by:
@@ -12,6 +12,10 @@
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "combobox.h"
+#endif
+
 #include "wx/choice.h"
 
 // Combobox item
@@ -21,7 +25,7 @@ class WXDLLEXPORT wxComboBox: public wxChoice
 
 public:
     wxComboBox() { m_inSetSelection = false; }
-    virtual ~wxComboBox();
+    ~wxComboBox();
 
     inline wxComboBox(wxWindow *parent, wxWindowID id,
         const wxString& value = wxEmptyString,
@@ -71,14 +75,14 @@ public:
 
     // implementation of wxControlWithItems
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, unsigned int pos);
-    virtual void Delete(unsigned int n);
+    virtual int DoInsert(const wxString& item, int pos);
+    virtual void Delete(int n);
     virtual void Clear();
     virtual int GetSelection() const ;
     virtual void SetSelection(int n);
-    virtual int FindString(const wxString& s, bool bCase = false) const;
-    virtual wxString GetString(unsigned int n) const ;
-    virtual void SetString(unsigned int n, const wxString& s);
+    virtual int FindString(const wxString& s) const;
+    virtual wxString GetString(int n) const ;
+    virtual void SetString(int n, const wxString& s);
 
     // Text field functions
     virtual wxString GetValue() const ;

@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mac/carbon/dcprint.cpp
+// Name:        dcprint.cpp
 // Purpose:     wxPrinterDC class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "dcprint.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -15,19 +19,17 @@
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
 #endif
 
 #include "wx/dcprint.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/msgdlg.h"
-    #include "wx/math.h"
-#endif
-
+#include "wx/msgdlg.h"
+#include "wx/math.h"
 #include "wx/mac/uma.h"
 #include "wx/mac/private/print.h"
-#include "wx/graphics.h"
 
 IMPLEMENT_CLASS(wxPrinterDC, wxDC)
 
@@ -54,7 +56,7 @@ class wxMacCarbonPrinterDC : public wxNativePrinterDC
 {
 public :
     wxMacCarbonPrinterDC( wxPrintData* data ) ;
-    virtual ~wxMacCarbonPrinterDC() ;
+    ~wxMacCarbonPrinterDC() ;
     virtual bool StartDoc(  wxPrinterDC* dc , const wxString& message ) ;
     virtual void EndDoc( wxPrinterDC* dc ) ;
     virtual void StartPage( wxPrinterDC* dc ) ;
@@ -63,9 +65,7 @@ public :
     virtual void GetSize( int *w , int *h) const ;
     virtual wxSize GetPPI() const ;
 private :
-#if !wxMAC_USE_CORE_GRAPHICS
     GrafPtr m_macPrintFormerPort ;
-#endif
     wxCoord m_maxX ;
     wxCoord m_maxY ;
     wxSize  m_ppi ;
@@ -74,9 +74,8 @@ private :
 
 wxMacCarbonPrinterDC::wxMacCarbonPrinterDC( wxPrintData* data )
 {
-#if !wxMAC_USE_CORE_GRAPHICS
     ::GetPort( & m_macPrintFormerPort ) ;
-#endif
+
     m_err = noErr ;
     wxMacCarbonPrintData *native = (wxMacCarbonPrintData*) data->GetNativeData() ;
 
@@ -89,22 +88,14 @@ wxMacCarbonPrinterDC::wxMacCarbonPrinterDC( wxPrintData* data )
     m_maxY = wxCoord(rPage.bottom - rPage.top);
 
     PMResolution res;
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
-    PMPrinter printer;
-    PMSessionGetCurrentPrinter(native->m_macPrintSession, &printer);
-    PMPrinterGetOutputResolution( printer, native->m_macPrintSettings, &res) ;
-#else
     m_err = PMGetResolution((PMPageFormat) (native->m_macPageFormat), &res);
-#endif
     m_ppi = wxSize(int(res.hRes), int(res.vRes));
 }
 
 wxMacCarbonPrinterDC::~wxMacCarbonPrinterDC()
 {
-#if !wxMAC_USE_CORE_GRAPHICS
     // nothing to release from print data, as wxPrinterDC has all data in its wxPrintData member
     ::SetPort( m_macPrintFormerPort ) ;
-#endif
 }
 
 wxNativePrinterDC* wxNativePrinterDC::Create(wxPrintData* data)
@@ -119,7 +110,7 @@ bool wxMacCarbonPrinterDC::StartDoc(  wxPrinterDC* dc , const wxString& WXUNUSED
 
     wxMacCarbonPrintData *native = (wxMacCarbonPrintData*) dc->GetPrintData().GetNativeData() ;
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4 && wxMAC_USE_CORE_GRAPHICS
+#if wxMAC_USE_CORE_GRAPHICS
     {
         CFStringRef s[1] = { kPMGraphicsContextCoreGraphics };
         CFArrayRef  graphicsContextsArray = CFArrayCreate(NULL, (const void**)s, 1, &kCFTypeArrayCallBacks);
@@ -127,17 +118,10 @@ bool wxMacCarbonPrinterDC::StartDoc(  wxPrinterDC* dc , const wxString& WXUNUSED
         CFRelease(graphicsContextsArray);
     }
 #endif
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4 && wxMAC_USE_CORE_GRAPHICS
-    m_err = PMSessionBeginCGDocument(native->m_macPrintSession,
-              native->m_macPrintSettings,
-              native->m_macPageFormat);
-#else
+
     m_err = PMSessionBeginDocument(native->m_macPrintSession,
               native->m_macPrintSettings,
               native->m_macPageFormat);
-
-#endif
-
     if ( m_err != noErr )
         return false;
 
@@ -150,13 +134,7 @@ bool wxMacCarbonPrinterDC::StartDoc(  wxPrinterDC* dc , const wxString& WXUNUSED
     m_maxY = wxCoord(rPage.bottom - rPage.top);
 
     PMResolution res;
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
-    PMPrinter printer;
-    PMSessionGetCurrentPrinter(native->m_macPrintSession, &printer);
-    PMPrinterGetOutputResolution( printer, native->m_macPrintSettings, &res) ;
-#else
     m_err = PMGetResolution((PMPageFormat) (native->m_macPageFormat), &res);
-#endif
     m_ppi = wxSize(int(res.hRes), int(res.vRes));
     return true ;
 }
@@ -188,15 +166,10 @@ void wxMacCarbonPrinterDC::StartPage( wxPrinterDC* dc )
     if ( m_err == noErr )
     {
 #if wxMAC_USE_CORE_GRAPHICS
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4
-        m_err = PMSessionGetCGGraphicsContext(native->m_macPrintSession,
-                                            &pageContext );
-
-#else
         m_err = PMSessionGetGraphicsContext(native->m_macPrintSession,
                                             kPMGraphicsContextCoreGraphics,
                                             (void**) &pageContext );
-#endif
+        dc->MacSetCGContext(pageContext) ;
 #else
         m_err = PMSessionGetGraphicsContext(native->m_macPrintSession,
                                             kPMGraphicsContextQuickdraw,
@@ -219,10 +192,9 @@ void wxMacCarbonPrinterDC::StartPage( wxPrinterDC* dc )
 #if wxMAC_USE_CORE_GRAPHICS
             PMRect paperRect ;
             PMGetAdjustedPaperRect( native->m_macPageFormat , &paperRect ) ;
-            // make sure (0,0) is at the upper left of the printable area (wx conventions)
-            // Core Graphics initially has the lower left of the paper as 0,0
-            CGContextTranslateCTM( pageContext , -paperRect.left , paperRect.bottom ) ;
+            CGContextTranslateCTM( pageContext , -paperRect.left , -paperRect.top + ( rPage.bottom - rPage.top ) ) ;
             CGContextScaleCTM( pageContext , 1 , -1 ) ;
+            CGContextSaveGState( pageContext ) ;
 #else
             dc->m_macLocalOrigin.x = (int) rPage.left;
             dc->m_macLocalOrigin.y = (int) rPage.top;
@@ -231,9 +203,6 @@ void wxMacCarbonPrinterDC::StartPage( wxPrinterDC* dc )
         // since this is a non-critical error, we set the flag back
         m_err = noErr ;
     }
-#if wxMAC_USE_CORE_GRAPHICS
-    dc->SetGraphicsContext( wxGraphicsContext::CreateFromNative( pageContext ) );
-#endif
 }
 
 void wxMacCarbonPrinterDC::EndPage( wxPrinterDC* dc )
@@ -248,10 +217,6 @@ void wxMacCarbonPrinterDC::EndPage( wxPrinterDC* dc )
     {
         PMSessionEndDocument(native->m_macPrintSession);
     }
-#if wxMAC_USE_CORE_GRAPHICS
-    // the cg context we got when starting the page isn't valid anymore, so replace it
-    dc->SetGraphicsContext( wxGraphicsContext::Create() );
-#endif
 }
 
 void wxMacCarbonPrinterDC::GetSize( int *w , int *h) const
@@ -273,7 +238,7 @@ wxSize wxMacCarbonPrinterDC::GetPPI() const
 
 wxPrinterDC::wxPrinterDC(const wxPrintData& printdata)
 {
-    m_ok = false ;
+    m_ok = FALSE ;
     m_printData = printdata ;
     m_printData.ConvertToNative() ;
     m_nativePrinterDC = wxNativePrinterDC::Create( &m_printData ) ;
@@ -294,9 +259,8 @@ wxPrinterDC::wxPrinterDC(const wxPrintData& printdata)
             m_mm_to_pix_y = mm2inches * sz.y;        
         }
 #if wxMAC_USE_CORE_GRAPHICS
-        // we need at least a measuring context because people start measuring before a page
-        // gets printed at all
-        SetGraphicsContext( wxGraphicsContext::Create() );
+        // the cgContext will only be handed over page by page
+        m_graphicContext = new wxMacCGContext() ;
 #endif
     }
 }
@@ -308,9 +272,21 @@ wxSize wxPrinterDC::GetPPI() const
 
 wxPrinterDC::~wxPrinterDC(void)
 {
+#if wxMAC_USE_CORE_GRAPHICS
+    // this context was borrowed
+    ((wxMacCGContext*)(m_graphicContext))->SetNativeContext( NULL ) ;
+#endif
     delete m_nativePrinterDC ;
 }
 
+#if wxMAC_USE_CORE_GRAPHICS
+void wxPrinterDC::MacSetCGContext( void * cg ) 
+{
+    ((wxMacCGContext*)(m_graphicContext))->SetNativeContext( (CGContextRef) cg ) ;
+    m_graphicContext->SetPen( m_pen ) ;
+    m_graphicContext->SetBrush( m_brush ) ;
+}
+#endif
 bool wxPrinterDC::StartDoc( const wxString& message )
 {
     wxASSERT_MSG( Ok() , wxT("Called wxPrinterDC::StartDoc from an invalid object") ) ;
@@ -349,21 +325,6 @@ void wxPrinterDC::EndDoc(void)
         wxMessageDialog dialog( NULL , message , wxEmptyString, wxICON_HAND | wxOK) ;
         dialog.ShowModal();
     }
-}
-
-wxRect wxPrinterDC::GetPaperRect()
-{
-    wxCoord w, h;
-    GetSize(&w, &h);
-    wxRect pageRect(0, 0, w, h);
-    wxMacCarbonPrintData *native = (wxMacCarbonPrintData*) m_printData.GetNativeData() ;
-    OSStatus err = noErr ;
-    PMRect rPaper;
-    err = PMGetAdjustedPaperRect(native->m_macPageFormat, &rPaper);
-    if ( err != noErr )
-        return pageRect;
-    return wxRect(wxCoord(rPaper.left), wxCoord(rPaper.top),
-        wxCoord(rPaper.right - rPaper.left), wxCoord(rPaper.bottom - rPaper.top));
 }
 
 void wxPrinterDC::StartPage(void)

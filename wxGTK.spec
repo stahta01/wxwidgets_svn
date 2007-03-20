@@ -1,6 +1,6 @@
-%define _prefix /usr
-%define ver  2.9.0
-%define ver2 2.9
+%define _prefix /opt/gnome
+%define ver  2.6.4
+%define ver2 2.6
 %define rel  1
 
 # Configurable settings (use --with(out) {unicode,gtk2} on rpmbuild cmd line):
@@ -42,10 +42,12 @@
 %if %{unicode}
     %define wxbasename		wx-base-unicode
     %define wxbaseconfig	base-unicode-release-%{ver2}
+    %define wxbaseconfigstatic	base-unicode-release-static-%{ver2}
     %define wxbaseconfiglink	wxbaseu-%{ver2}-config
 %else
     %define wxbasename		wx-base-ansi
     %define wxbaseconfig	base-ansi-release-%{ver2}
+    %define wxbaseconfigstatic	base-ansi-release-static-%{ver2}
     %define wxbaseconfiglink	wxbase-%{ver2}-config
 %endif
 
@@ -55,16 +57,16 @@ Version: %{ver}
 Release: %{rel}
 License: wxWindows Licence
 Group: X11/Libraries
-Source: wxGTK-%{ver}.tar.bz2
+Source: wxGTK-%{ver}.tar.gz
 URL: http://www.wxwidgets.org
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{_prefix}
 BuildRoot: %{_tmppath}/%{name}-root
 Requires: %{wxbasename} = %{ver}
 %if %{portname} == gtk2
-BuildRequires: gtk+-2.0-devel
+# BuildRequires: gtk+-2.0-devel
 %else
-BuildRequires: gtk+-devel >= 1.2.0
+# BuildRequires: gtk+-devel >= 1.2.0
 %endif
 
 BuildRequires: zlib-devel, libjpeg-devel, libpng-devel, libtiff-devel
@@ -155,6 +157,18 @@ else
     export MAKE="make"
 fi
 
+mkdir obj-shared-no-gui
+cd obj-shared-no-gui
+../configure --prefix=%{_prefix} \
+			      --disable-gui \
+%if %{unicode}
+                              --enable-unicode
+%else
+                              --disable-unicode
+%endif
+$MAKE
+cd ..
+
 mkdir obj-shared
 cd obj-shared
 ../configure --prefix=%{_prefix} \
@@ -176,6 +190,19 @@ cd contrib/src
 $MAKE
 cd ../../..
 
+mkdir obj-static-no-gui
+cd obj-static-no-gui
+../configure --prefix=%{_prefix} \
+			      --disable-gui \
+      			      --disable-shared \
+%if %{unicode}
+                              --enable-unicode
+%else
+                              --disable-unicode
+%endif
+$MAKE
+cd ..
+
 mkdir obj-static
 cd obj-static
 ../configure --prefix=%{_prefix} \
@@ -186,24 +213,24 @@ cd obj-static
 %endif
 			      --disable-shared \
 %if %{unicode}
-			      --enable-unicode \
+                	      --enable-unicode \
 %else
-			      --disable-unicode \
+            		      --disable-unicode \
 			      --with-odbc \
 %endif
-			      --with-opengl
+            		      --with-opengl
 $MAKE
 
 cd contrib/src
 $MAKE
 cd ../../..
 
-make -C locale allmo
-
 %install
 rm -rf $RPM_BUILD_ROOT
-(cd obj-static; make DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} install)
-(cd obj-shared; make DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} install)
+(cd obj-static-no-gui; make DESTDIR=$RPM_BUILD_ROOT install)
+(cd obj-static; make DESTDIR=$RPM_BUILD_ROOT install)
+(cd obj-shared-no-gui; make DESTDIR=$RPM_BUILD_ROOT install)
+(cd obj-shared; make DESTDIR=$RPM_BUILD_ROOT install)
 
 # --- wxBase headers list begins here ---
 cat <<EOF >wxbase-headers.files
@@ -221,9 +248,7 @@ wx/clntdata.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
-wx/convauto.h
 wx/containr.h
-wx/cpp.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -246,8 +271,6 @@ wx/filename.h
 wx/filesys.h
 wx/fontenc.h
 wx/fontmap.h
-wx/fs_arc.h
-wx/fs_filter.h
 wx/fs_mem.h
 wx/fs_zip.h
 wx/hash.h
@@ -263,7 +286,6 @@ wx/ipc.h
 wx/ipcbase.h
 wx/isql.h
 wx/isqlext.h
-wx/link.h
 wx/list.h
 wx/listimpl.cpp
 wx/log.h
@@ -278,8 +300,6 @@ wx/msgout.h
 wx/mstream.h
 wx/object.h
 wx/platform.h
-wx/platinfo.h
-wx/power.h
 wx/process.h
 wx/ptr_scpd.h
 wx/recguard.h
@@ -295,9 +315,7 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/strvararg.h
 wx/sysopt.h
-wx/tarstrm.h
 wx/textbuf.h
 wx/textfile.h
 wx/thread.h
@@ -325,7 +343,6 @@ wx/unix/apptrait.h
 wx/unix/execute.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
-wx/unix/private.h
 wx/unix/stackwalk.h
 wx/unix/stdpaths.h
 wx/fs_inet.h
@@ -363,7 +380,6 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/confbase.h
 %{_includedir}/wx-%{ver2}/wx/config.h
 %{_includedir}/wx-%{ver2}/wx/containr.h
-%{_includedir}/wx-%{ver2}/wx/convauto.h
 %{_includedir}/wx-%{ver2}/wx/datetime.h
 %{_includedir}/wx-%{ver2}/wx/datstrm.h
 %{_includedir}/wx-%{ver2}/wx/dde.h
@@ -401,7 +417,6 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/ipcbase.h
 %{_includedir}/wx-%{ver2}/wx/isql.h
 %{_includedir}/wx-%{ver2}/wx/isqlext.h
-%{_includedir}/wx-%{ver2}/wx/link.h
 %{_includedir}/wx-%{ver2}/wx/list.h
 %{_includedir}/wx-%{ver2}/wx/listimpl.cpp
 %{_includedir}/wx-%{ver2}/wx/log.h
@@ -416,7 +431,6 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/mstream.h
 %{_includedir}/wx-%{ver2}/wx/object.h
 %{_includedir}/wx-%{ver2}/wx/platform.h
-%{_includedir}/wx-%{ver2}/wx/power.h
 %{_includedir}/wx-%{ver2}/wx/process.h
 %{_includedir}/wx-%{ver2}/wx/ptr_scpd.h
 %{_includedir}/wx-%{ver2}/wx/recguard.h
@@ -477,7 +491,6 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/unix/gsockunx.h
 %{_includedir}/wx-%{ver2}/wx/unix/mimetype.h
 %{_includedir}/wx-%{ver2}/wx/unix/pipe.h
-%{_includedir}/wx-%{ver2}/wx/unix/private.h
 %{_includedir}/wx-%{ver2}/wx/unix/stackwalk.h
 %{_includedir}/wx-%{ver2}/wx/unix/stdpaths.h
 EOF
@@ -496,14 +509,8 @@ cp -f -r $RPM_BUILD_ROOT/_save_dir/* $RPM_BUILD_ROOT%{_includedir}
 rm -rf $RPM_BUILD_ROOT/_save_dir
 
 # contrib stuff:
-(cd obj-static/contrib; make DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} install)
-(cd obj-shared/contrib; make DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} install)
-
-# utils:
-(cd obj-shared/utils/wxrc; make DESTDIR=$RPM_BUILD_ROOT prefix=%{_prefix} install)
-
-# wx-config link is created during package installation, remove it for now
-rm -f $RPM_BUILD_ROOT%{_bindir}/wx-config
+(cd obj-shared/contrib/src; make DESTDIR=$RPM_BUILD_ROOT install)
+(cd obj-shared/utils/wxrc; make DESTDIR=$RPM_BUILD_ROOT install)
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -571,47 +578,42 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %defattr(-,root,root)
 %doc COPYING.LIB *.txt
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.so.*
-%{_libdir}/libwx_%{buildname}_aui-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.so.*
 %if !%{unicode}
     %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.so.*
 %endif
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.so.*
-%{_libdir}/libwx_%{buildname}_mmedia-%{ver2}.so.*
+%{_libdir}/libwx_%{buildname}_media-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_qa-%{ver2}.so.*
-%{_libdir}/libwx_%{buildname}_richtext-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_xrc-%{ver2}.so.*
 
 %files -n wx-i18n
 %defattr(-,root,root)
-%{_datadir}/locale/*/LC_MESSAGES/*.mo
+%{_datadir}/locale/*/*/*
 
 %files devel -f core-headers.files
 %defattr(-,root,root)
 # shared libs
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.so
-%{_libdir}/libwx_%{buildname}_aui-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.so
 %if !%{unicode}
     %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.so
 %endif
 %{_libdir}/libwx_%{buildname}_gl-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.so
-%{_libdir}/libwx_%{buildname}_mmedia-%{ver2}.so
+%{_libdir}/libwx_%{buildname}_media-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_qa-%{ver2}.so
-%{_libdir}/libwx_%{buildname}_richtext-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_xrc-%{ver2}.so
 # static libs
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_aui-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.a
 %if !%{unicode}
     %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.a
 %endif
 %{_libdir}/libwx_%{buildname}_gl-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.a
+%{_libdir}/libwx_%{buildname}_media-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_qa-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_richtext-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_xrc-%{ver2}.a
 %dir %{_libdir}/wx
 %{_libdir}/wx/config/%{wxconfig}
@@ -629,12 +631,19 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %dir %{_includedir}/wx-%{ver2}
 %{_libdir}/libwx_base*-%{ver2}.so
 %{_libdir}/libwx_base*-%{ver2}.a
+%dir %{_datadir}/bakefile/presets
+%{_datadir}/bakefile/presets/wx.bkl
+%{_datadir}/bakefile/presets/wx_unix.bkl
+%{_datadir}/bakefile/presets/wx_win32.bkl
 %if %{unicode}
     %{_libdir}/libwxregexu-%{ver2}.a
 %endif
 %dir %{_libdir}/wx
+%{_libdir}/wx/config/%{wxbaseconfig}
+%{_libdir}/wx/include/%{wxbaseconfig}/wx/setup.h
+%{_libdir}/wx/config/%{wxbaseconfigstatic}
+%{_libdir}/wx/include/%{wxbaseconfigstatic}/wx/setup.h
 %{_datadir}/aclocal/*.m4
-%{_datadir}/bakefile/presets/*
 
 %files gl
 %defattr(-,root,root)
@@ -652,18 +661,6 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %{_libdir}/libwx_%{buildname}_plot-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_stc-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_svg-%{ver2}.so.*
-
-# static libs
-%{_libdir}/libwx_%{buildname}_animate-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_deprecated-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_fl-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_gizmos-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_gizmos_xrc-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_mmedia-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_ogl-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_plot-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_stc-%{ver2}.a
-%{_libdir}/libwx_%{buildname}_svg-%{ver2}.a
 
 %files contrib-devel
 %defattr(-,root,root)

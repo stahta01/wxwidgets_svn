@@ -86,8 +86,7 @@ public:
     
     // Try to expand as much of the given path as possible.
     virtual bool ExpandPath(const wxString& path);
-    // collapse the path
-    virtual bool CollapsePath(const wxString& path);
+
 
     virtual inline wxString GetDefaultPath() const;
     virtual void SetDefaultPath(const wxString& path);
@@ -134,14 +133,6 @@ leaf), done is set to True.
     // Collapse & expand the tree, thus re-creating it from scratch:
     virtual void ReCreateTree();
 
-    %property(DefaultPath, GetDefaultPath, SetDefaultPath, doc="See `GetDefaultPath` and `SetDefaultPath`");
-    %property(FilePath, GetFilePath, doc="See `GetFilePath`");
-    %property(Filter, GetFilter, SetFilter, doc="See `GetFilter` and `SetFilter`");
-    %property(FilterIndex, GetFilterIndex, SetFilterIndex, doc="See `GetFilterIndex` and `SetFilterIndex`");
-    %property(FilterListCtrl, GetFilterListCtrl, doc="See `GetFilterListCtrl`");
-    %property(Path, GetPath, SetPath, doc="See `GetPath` and `SetPath`");
-    %property(RootId, GetRootId, doc="See `GetRootId`");
-    %property(TreeCtrl, GetTreeCtrl, doc="See `GetTreeCtrl`");
 };
 
 

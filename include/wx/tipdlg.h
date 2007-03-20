@@ -12,6 +12,10 @@
 #ifndef _WX_TIPDLG_H_
 #define _WX_TIPDLG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "tipdlg.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers which we must include here
 // ----------------------------------------------------------------------------

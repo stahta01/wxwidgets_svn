@@ -1,9 +1,9 @@
 #!/usr/bin/python -u
 #----------------------------------------------------------------------
 # Name:        build-all.py
-# Purpose:     Master build script for building all the wxPython
-#              installers and such on all the build machines in
-#              my lab, and then distributing the results as needed.
+# Purpose:     Master build script for building all the installers and
+#              such on all the build machines in my lab, and then 
+#              distributing the results as needed.
 #
 #              This will replace the build-all bash script and is
 #              needed because the needs of the build have outgrown
@@ -20,14 +20,61 @@
 import sys
 import os
 import time
-from taskrunner import Job, Task, TaskRunner, Config
+from taskrunner import Job, Task, TaskRunner
 
 #----------------------------------------------------------------------
 # Configuration items
 
-CFGFILE = "./distrib/all/build-environ.cfg"
+class Config:
+    def write(self, filename="config", outfile=None):
+        if outfile is None:
+            f = file(filename, "w")
+        else:
+            f = outfile
+        for k, v in self.__dict__.items():
+            f.write('%s="%s"\n' % (k, v))
+
 config = Config()
-config.read(CFGFILE)
+
+# the local spot that we put everything when done, before possibly copying 
+# to remote hosts
+config.STAGING_DIR = "./BUILD"
+
+
+# host name of the machine to use for windows builds
+config.WIN_HOST = "beast"
+# Where is the build dir from the remote machine's perspective?
+config.WIN_BUILD = "/c/BUILD"
+
+
+# Just like the above
+config.OSX_HOST_tiger = "smallfry"
+config.OSX_HOST_panther = "bigmac"
+config.OSX_HOST_jaguar = "whopper"
+config.OSX_BUILD = "/BUILD"
+
+
+# Alsmost the same...  See below for hosts and other info
+config.LINUX_BUILD = "/tmp/BUILD"
+
+
+# Upload server locations
+config.UPLOAD_HOST = "starship.python.net"
+config.UPLOAD_DAILY_ROOT = "/home/crew/robind/public_html/wxPython/daily"
+config.UPLOAD_PREVIEW_ROOT = "/home/crew/robind/public_html/wxPython/rc"
+
+# defaults for build options
+config.KIND = "dryrun"
+config.skipsource = "no"
+config.onlysource = "no"
+config.skipdocs = "no"
+config.skipwin = "no"
+config.skiposx = "no"
+config.skiplinux = "no"
+config.skipclean = "no"
+config.skipupload = "no"
+config.skipnewdocs = "no"
+config.startcohost = "yes"
 
 #----------------------------------------------------------------------
 # Define all the build tasks
@@ -35,77 +82,74 @@ config.read(CFGFILE)
 class Job(Job):
     LOGBASE = "./tmp"
 
-#----------------------------------------------------------------------
+CFGFILE = "./tmp/config"
 
-def getTasks(config_env):
-    # Things that need to be done before any of the builds
-    initialTask = Task([
-        Job("", "distrib/all/build-setup", env=config_env),
-        Job("", "distrib/all/build-docs", env=config_env),
-        Job("", "distrib/all/build-sources", env=config_env),
-        ])
-    
-    # Build tasks.  Anything that can be done in parallel (depends greatly
-    # on the nature of the build machines configurations...) is a separate
-    # task.
-    
-##     jaguarTask = Task( Job("whopper.23", "distrib/all/build-osx",
-##                            [config.OSX_HOST_jaguar, "2.3", "ansi"], env=config_env) )
-    
-    pantherTask = Task( [ Job("bigmac.23", 
-                              "distrib/all/build-osx",
-                              [config.OSX_HOST_panther, "2.3", "both"], env=config_env),
-                          Job("bigmac.24",
-                              "distrib/all/build-osx",
-                              [config.OSX_HOST_panther, "2.4", "both"], env=config_env)
-                          ])
 
-    tigerTask =  Task([ #Job("smallfry.23",
-                        #    "distrib/all/build-osx",
-                        #    [config.OSX_HOST_tiger, "2.3", "both"], env=config_env),
-                        Job("smallfry.24",
-                            "distrib/all/build-osx",
-                            [config.OSX_HOST_tiger, "2.4", "both", "universal"], env=config_env),
-                        Job("smallfry.25",
-                            "distrib/all/build-osx",
-                            [config.OSX_HOST_tiger, "2.5", "both", "universal"], env=config_env)
+# Things that need to be done before any of the builds
+initialTask = Task([ Job("", ["distrib/all/build-setup", CFGFILE]),
+                     Job("", ["distrib/all/build-docs", CFGFILE]),
+                     Job("", ["distrib/all/build-sources", CFGFILE]),
+                     ])
+
+# Build tasks.  Anything that can be done in parallel (depends greatly
+# on the nature of the build machines configurations...) is a separate
+# task.
+
+jaguarTask =  Task( Job("whopper.23",  ["distrib/all/build-osx",
+                                        CFGFILE,
+                                        config.OSX_HOST_jaguar,
+                                        "2.3", "ansi"]) )
+
+pantherTask =  Task([ Job("bigmac.23", ["distrib/all/build-osx",
+                                        CFGFILE,
+                                        config.OSX_HOST_panther,
+                                        "2.3", "both"]),
+                      Job("bigmac.24", ["distrib/all/build-osx",
+                                        CFGFILE,
+                                        config.OSX_HOST_panther,
+                                        "2.4", "both"])
+                     ])
+
+tigerTask =  Task([ #Job("smallfry.23", ["distrib/all/build-osx",
+                    #                    CFGFILE,
+                    #                    config.OSX_HOST_tiger,
+                    #                    "2.3", "both"]),
+                    Job("smallfry.24", ["distrib/all/build-osx",
+                                        CFGFILE,
+                                        config.OSX_HOST_tiger,
+                                        "2.4", "both", "universal"]),
+                    Job("smallfry.25", ["distrib/all/build-osx",
+                                        CFGFILE,
+                                        config.OSX_HOST_tiger,
+                                        "2.5", "both", "universal"])
                     ])
 
-    
-    beastTask1 = Task(
-        [ #Job("beast.23",     "distrib/all/build-windows", ["2.3"], env=config_env),
-#          Job("co-rh9.23",    "distrib/all/build-rpm", ["beast", "co-rh9",   "rh9",   "2.3"], env=config_env),
-          Job("beast.24",     "distrib/all/build-windows", ["2.4"], env=config_env),
-#          Job("co-rh9.24",    "distrib/all/build-rpm", ["beast", "co-rh9",   "rh9",   "2.4"], env=config_env),
-          Job("beast.25",     "distrib/all/build-windows", ["2.5"], env=config_env),
-          Job("co-mdk2006.24","distrib/all/build-rpm", ["beast", "co-mdk2006", "mdk2006", "2.4"], env=config_env),
-          ])
-    
-    beastTask2 = Task(
-        [ #Job("co-fc2.23",    "distrib/all/build-rpm", ["beast", "co-fc2",     "fc2",     "2.3"], env=config_env),
-          Job("co-fc4.24",    "distrib/all/build-rpm", ["beast", "co-fc4",     "fc4",     "2.4"], env=config_env),
-          Job("co-mdk102.24", "distrib/all/build-rpm", ["beast", "co-mdk102",  "mdk102",  "2.4"], env=config_env),
-#          Job("co-mdk2006.24","distrib/all/build-rpm", ["beast", "co-mdk2006", "mdk2006", "2.4"], env=config_env),
-          ])
 
-    xavierTask = Task([
-        Job("xavier", "distrib/all/build-deb", ["xavier", "/work/chroot/dapper", "dapper"], env=config_env),
-        ])
+beastTask1 = Task([ Job("beast.23",     ["distrib/all/build-windows", CFGFILE, "2.3"]),
+                    Job("co-rh9.23",    ["distrib/all/build-rpm", CFGFILE, "beast", "co-rh9",   "rh9",   "2.3"]),
+                    Job("beast.24",     ["distrib/all/build-windows", CFGFILE, "2.4"]),
+                    Job("co-rh9.24",    ["distrib/all/build-rpm", CFGFILE, "beast", "co-rh9",   "rh9",   "2.4"]),
+                    Job("beast.25",     ["distrib/all/build-windows", CFGFILE, "2.5"]),
+                    ])
 
-    buildTasks = [ #jaguarTask,
-                   pantherTask,
-                   tigerTask,
-                   beastTask1,
-                   beastTask2,
-                   xavierTask,
-                   ]
-    
-    # Finalization.  This is for things that must wait until all the
-    # builds are done, such as copying the installers someplace, sending
-    # emails, etc.
-    finalizationTask = Task( Job("", "distrib/all/build-finalize", env=config_env) )
+beastTask2 = Task([ Job("co-fc2.23",    ["distrib/all/build-rpm", CFGFILE, "beast", "co-fc2",   "fc2",   "2.3"]),
+                    Job("co-fc4.24",    ["distrib/all/build-rpm", CFGFILE, "beast", "co-fc4",   "fc4",   "2.4"]),
+                    Job("co-mdk102.24", ["distrib/all/build-rpm", CFGFILE, "beast", "co-mdk102","mdk102","2.4"]),
+                    Job("co-mdk2006.24",["distrib/all/build-rpm", CFGFILE, "beast", "co-mdk2006","mdk2006","2.4"]),
+                    ])
 
-    return initialTask, buildTasks, finalizationTask
+
+buildTasks = [ jaguarTask,
+               pantherTask,
+               tigerTask,
+               beastTask1,
+               beastTask2,
+               ]
+
+# Finalization.  This is for things that must wait until all the
+# builds are done, such as copying the installers someplace, sending
+# emails, etc.
+finalizationTask = Task( Job("", ["distrib/all/build-finalize", CFGFILE]) )
 
 
 #----------------------------------------------------------------------
@@ -126,11 +170,9 @@ def usage():
     print "   skipdocs     Don't rebuild the docs"
     print "   skipwin      Don't do the remote Windows build"
     print "   skiposx      Don't do the remote OSX build"
-    print "   skiprpm      Don't do the remote Linux (RPM) build"
-    print "   skipdeb      Don't do the remote Linux (DEB) build"
+    print "   skiplinux    Don't do the remote Linux build"
     print "   skipclean    Don't do the cleanup step on the remote builds"
     print "   skipupload   Don't upload the builds to starship"
-    print "   ansi         Also do the ansi builds"
     print ""
     print "   nocohost     Don't start the coLinux sessions if they are"
     print "                not already online"
@@ -146,8 +188,6 @@ def main(args):
     if not os.path.isdir("wxPython") or not os.path.isdir("wx"):
         print "Please run this script from the root wxPython directory."
         sys.exit(1)
-        
-    
 
     # Check command line flags
     for flag in args:
@@ -172,20 +212,14 @@ def main(args):
         elif flag == "skiposx":
             config.skiposx = "yes"
             
-        elif flag == "skipdeb":
-            config.skipdeb = "yes"
-            
-        elif flag == "skiprpm":
-            config.skiprpm = "yes"
+        elif flag == "skiplinux":
+            config.skiplinux = "yes"
             
         elif flag == "skipclean":
             config.skipclean = "yes"
             
         elif flag == "skipupload":
             config.skipupload = "yes"
-
-        elif flag == "ansi":
-            config.buildansi = "yes"
 
         elif flag == "nocohost":
             config.startcohost = "no"
@@ -207,15 +241,12 @@ def main(args):
         file("DAILY_BUILD", "w").write(config.DAILY)
     sys.path.append('.')
     import setup
-    v = config.VERSION = setup.VERSION
-    config.VER2 = '.'.join(v.split('.')[:2])
+    config.VERSION = setup.VERSION
 
-    config_env = config.asDict()
-    config_env.update(os.environ)
-
-    initialTask, buildTasks, finalizationTask = getTasks(config_env)
-
+    # write the config file where the build scripts can find it
+    config.write(CFGFILE)
     print "Build getting started at: ", time.ctime()
+
 
     # Run the first task, which will create the docs and sources tarballs
     tr = TaskRunner(initialTask)

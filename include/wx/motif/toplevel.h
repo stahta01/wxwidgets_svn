@@ -12,6 +12,10 @@
 #ifndef __MOTIFTOPLEVELH__
 #define __MOTIFTOPLEVELH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "toplevel.h"
+#endif
+
 class WXDLLIMPEXP_CORE wxTopLevelWindowMotif : public wxTopLevelWindowBase
 {
 public:
@@ -68,8 +72,14 @@ protected:
     virtual void DoGetPosition(int* x, int* y) const;
 
 private:
+#if wxCHECK_VERSION(2,7,0)
+    // DoDestroy() is not used anywhere else, DoCreate() should also be renamed
+    // in src/motif/dialog.cpp, frame.cpp and toplevel.cp
+    #error "Remove DoDestroy() and rename DoCreate() to XmDoCreateTLW(), they were only kept for binary backwards compatibility"
+#endif
+
     // really create the Motif widget for TLW
-    virtual bool XmDoCreateTLW(wxWindow* parent,
+    virtual bool DoCreate(wxWindow* parent,
                                wxWindowID id,
                                const wxString& title,
                                const wxPoint& pos,
@@ -77,6 +87,7 @@ private:
                                long style,
                                const wxString& name) = 0;
 
+    virtual void DoDestroy() { }
 
     wxString m_title;
 };

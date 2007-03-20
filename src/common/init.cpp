@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/init.cpp
+// Name:        common/init.cpp
 // Purpose:     initialisation for the library
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -20,22 +20,26 @@
 #include "wx/wxprec.h"
 
 #ifdef    __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif  //__BORLANDC__
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/debug.h"
     #include "wx/filefn.h"
     #include "wx/log.h"
     #include "wx/thread.h"
     #include "wx/intl.h"
-    #include "wx/module.h"
 #endif
 
 #include "wx/init.h"
 
 #include "wx/ptr_scpd.h"
+#include "wx/module.h"
 #include "wx/except.h"
+#if wxUSE_FONTMAP
+#include "wx/fontmap.h"
+#endif
 
 #if defined(__WXMSW__) && defined(__WXDEBUG__)
     #include "wx/msw/msvcrt.h"
@@ -176,23 +180,13 @@ static struct InitData
 static void ConvertArgsToUnicode(int argc, char **argv)
 {
     gs_initData.argv = new wchar_t *[argc + 1];
-    int wargc = 0;
     for ( int i = 0; i < argc; i++ )
     {
-        wxWCharBuffer buf(wxConvLocal.cMB2WX(argv[i]));
-        if ( !buf )
-        {
-            wxLogWarning(_("Command line argument %d couldn't be converted to Unicode and will be ignored."),
-                         i);
-        }
-        else // converted ok
-        {
-            gs_initData.argv[wargc++] = wxStrdup(buf);
-        }
+        gs_initData.argv[i] = wxStrdup(wxConvLocal.cMB2WX(argv[i]));
     }
 
-    gs_initData.argc = wargc;
-    gs_initData.argv[wargc] = NULL;
+    gs_initData.argc = argc;
+    gs_initData.argv[argc] = NULL;
 }
 
 static void FreeConvertedArgs()
@@ -225,7 +219,7 @@ static bool DoCommonPreInit()
     // initialization simply disappear under Windows
     //
     // note that we will delete this log target below
-    delete wxLog::SetActiveTarget(new wxLogBuffer);
+    wxLog::SetActiveTarget(new wxLogBuffer);
 #endif // wxUSE_LOG
 
     return true;
@@ -329,7 +323,7 @@ bool wxEntryStart(int& argc, char **argv)
 {
     ConvertArgsToUnicode(argc, argv);
 
-    if ( !wxEntryStart(gs_initData.argc, gs_initData.argv) )
+    if ( !wxEntryStart(argc, gs_initData.argv) )
     {
         FreeConvertedArgs();
 
@@ -365,16 +359,15 @@ static void DoCommonPostCleanup()
 {
     wxModule::CleanUpModules();
 
+    wxClassInfo::CleanUp();
+
     // we can't do this in wxApp itself because it doesn't know if argv had
     // been allocated
 #if wxUSE_UNICODE
     FreeConvertedArgs();
 #endif // wxUSE_UNICODE
 
-    // use Set(NULL) and not Get() to avoid creating a message output object on
-    // demand when we just want to delete it
-    delete wxMessageOutput::Set(NULL);
-
+    // Note: check for memory leaks is now done via wxDebugContextDumpDelayCounter
 #if wxUSE_LOG
     // and now delete the last logger as well
     delete wxLog::SetActiveTarget(NULL);
@@ -458,7 +451,14 @@ int wxEntry(int& argc, char **argv)
 {
     ConvertArgsToUnicode(argc, argv);
 
-    return wxEntry(gs_initData.argc, gs_initData.argv);
+#if wxUSE_FONTMAP
+    // If we created a font mapper during the above call,
+    // it will only be the base class, so delete it to allow
+    // app traits to create mapper.
+    delete (wxFontMapperBase*) wxFontMapperBase::Set(NULL);
+#endif
+    
+    return wxEntry(argc, gs_initData.argv);
 }
 
 #endif // wxUSE_UNICODE
@@ -489,3 +489,4 @@ void wxUninitialize()
         wxEntryCleanup();
     }
 }
+

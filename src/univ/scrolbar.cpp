@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/scrolbar.cpp
+// Name:        univ/scrolbar.cpp
 // Purpose:     wxScrollBar implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univscrolbar.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,13 +29,12 @@
 
 #if wxUSE_SCROLLBAR
 
-#include "wx/scrolbar.h"
-
 #ifndef WX_PRECOMP
     #include "wx/timer.h"
+
     #include "wx/dcclient.h"
+    #include "wx/scrolbar.h"
     #include "wx/validate.h"
-    #include "wx/log.h"
 #endif
 
 #include "wx/univ/scrtimer.h"
@@ -39,6 +42,7 @@
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
 #include "wx/univ/theme.h"
+#include "wx/log.h"
 
 #define WXDEBUG_SCROLLBAR
 
@@ -146,7 +150,7 @@ bool wxScrollBar::Create(wxWindow *parent,
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
         return false;
 
-    SetInitialSize(size);
+    SetBestSize(size);
 
     // override the cursor of the target window (if any)
     SetCursor(wxCURSOR_ARROW);
@@ -298,9 +302,9 @@ wxSize wxScrollBar::DoGetBestClientSize() const
     return size;
 }
 
-wxScrollArrows::Arrow wxScrollBar::HitTestArrow(const wxPoint& pt) const
+wxScrollArrows::Arrow wxScrollBar::HitTest(const wxPoint& pt) const
 {
-    switch ( HitTestBar(pt) )
+    switch ( m_renderer->HitTestScrollbar(this, pt) )
     {
         case wxHT_SCROLLBAR_ARROW_LINE_1:
             return wxScrollArrows::Arrow_First;
@@ -311,259 +315,6 @@ wxScrollArrows::Arrow wxScrollBar::HitTestArrow(const wxPoint& pt) const
         default:
             return wxScrollArrows::Arrow_None;
     }
-}
-
-wxHitTest wxScrollBar::HitTestBar(const wxPoint& pt) const
-{
-    // we only need to work with either x or y coord depending on the
-    // orientation, choose one (but still check the other one to verify if the
-    // mouse is in the window at all)
-    const wxSize sizeArrowSB = m_renderer->GetScrollbarArrowSize();
-
-    wxCoord coord, sizeArrow, sizeTotal;
-    wxSize size = GetSize();
-    if ( GetWindowStyle() & wxVERTICAL )
-    {
-        if ( pt.x < 0 || pt.x > size.x )
-            return wxHT_NOWHERE;
-
-        coord = pt.y;
-        sizeArrow = sizeArrowSB.y;
-        sizeTotal = size.y;
-    }
-    else // horizontal
-    {
-        if ( pt.y < 0 || pt.y > size.y )
-            return wxHT_NOWHERE;
-
-        coord = pt.x;
-        sizeArrow = sizeArrowSB.x;
-        sizeTotal = size.x;
-    }
-
-    // test for the arrows first as it's faster
-    if ( coord < 0 || coord > sizeTotal )
-    {
-        return wxHT_NOWHERE;
-    }
-    else if ( coord < sizeArrow )
-    {
-        return wxHT_SCROLLBAR_ARROW_LINE_1;
-    }
-    else if ( coord > sizeTotal - sizeArrow )
-    {
-        return wxHT_SCROLLBAR_ARROW_LINE_2;
-    }
-    else
-    {
-        // calculate the thumb position in pixels
-        sizeTotal -= 2*sizeArrow;
-        wxCoord thumbStart, thumbEnd;
-        int range = GetRange();
-        if ( !range )
-        {
-            // clicking the scrollbar without range has no effect
-            return wxHT_NOWHERE;
-        }
-        else
-        {
-            GetScrollBarThumbSize(sizeTotal,
-                                  GetThumbPosition(),
-                                  GetThumbSize(),
-                                  range,
-                                  &thumbStart,
-                                  &thumbEnd);
-        }
-
-        // now compare with the thumb position
-        coord -= sizeArrow;
-        if ( coord < thumbStart )
-            return wxHT_SCROLLBAR_BAR_1;
-        else if ( coord > thumbEnd )
-            return wxHT_SCROLLBAR_BAR_2;
-        else
-            return wxHT_SCROLLBAR_THUMB;
-    }
-}
-
-/* static */
-void wxScrollBar::GetScrollBarThumbSize(wxCoord length,
-                                        int thumbPos,
-                                        int thumbSize,
-                                        int range,
-                                        wxCoord *thumbStart,
-                                        wxCoord *thumbEnd)
-{
-    // the thumb can't be made less than this number of pixels
-    static const wxCoord thumbMinWidth = 8; // FIXME: should be configurable
-
-    *thumbStart = (length*thumbPos) / range;
-    *thumbEnd = (length*(thumbPos + thumbSize)) / range;
-
-    if ( *thumbEnd - *thumbStart < thumbMinWidth )
-    {
-        // adjust the end if possible
-        if ( *thumbStart <= length - thumbMinWidth )
-        {
-            // yes, just make it wider
-            *thumbEnd = *thumbStart + thumbMinWidth;
-        }
-        else // it is at the bottom of the scrollbar
-        {
-            // so move it a bit up
-            *thumbStart = length - thumbMinWidth;
-            *thumbEnd = length;
-        }
-    }
-}
-
-wxRect wxScrollBar::GetScrollbarRect(wxScrollBar::Element elem,
-                                     int thumbPos) const
-{
-    if ( thumbPos == -1 )
-    {
-        thumbPos = GetThumbPosition();
-    }
-
-    const wxSize sizeArrow = m_renderer->GetScrollbarArrowSize();
-
-    wxSize sizeTotal = GetClientSize();
-    wxCoord *start, *width;
-    wxCoord length, arrow;
-    wxRect rect;
-    if ( IsVertical() )
-    {
-        rect.x = 0;
-        rect.width = sizeTotal.x;
-        length = sizeTotal.y;
-        start = &rect.y;
-        width = &rect.height;
-        arrow = sizeArrow.y;
-    }
-    else // horizontal
-    {
-        rect.y = 0;
-        rect.height = sizeTotal.y;
-        length = sizeTotal.x;
-        start = &rect.x;
-        width = &rect.width;
-        arrow = sizeArrow.x;
-    }
-
-    switch ( elem )
-    {
-        case wxScrollBar::Element_Arrow_Line_1:
-            *start = 0;
-            *width = arrow;
-            break;
-
-        case wxScrollBar::Element_Arrow_Line_2:
-            *start = length - arrow;
-            *width = arrow;
-            break;
-
-        case wxScrollBar::Element_Arrow_Page_1:
-        case wxScrollBar::Element_Arrow_Page_2:
-            // we don't have them at all
-            break;
-
-        case wxScrollBar::Element_Thumb:
-        case wxScrollBar::Element_Bar_1:
-        case wxScrollBar::Element_Bar_2:
-            // we need to calculate the thumb position - do it
-            {
-                length -= 2*arrow;
-                wxCoord thumbStart, thumbEnd;
-                int range = GetRange();
-                if ( !range )
-                {
-                    thumbStart =
-                    thumbEnd = 0;
-                }
-                else
-                {
-                    GetScrollBarThumbSize(length,
-                                          thumbPos,
-                                          GetThumbSize(),
-                                          range,
-                                          &thumbStart,
-                                          &thumbEnd);
-                }
-
-                if ( elem == wxScrollBar::Element_Thumb )
-                {
-                    *start = thumbStart;
-                    *width = thumbEnd - thumbStart;
-                }
-                else if ( elem == wxScrollBar::Element_Bar_1 )
-                {
-                    *start = 0;
-                    *width = thumbStart;
-                }
-                else // elem == wxScrollBar::Element_Bar_2
-                {
-                    *start = thumbEnd;
-                    *width = length - thumbEnd;
-                }
-
-                // everything is relative to the start of the shaft so far
-                *start += arrow;
-            }
-            break;
-
-        case wxScrollBar::Element_Max:
-        default:
-            wxFAIL_MSG( _T("unknown scrollbar element") );
-    }
-
-    return rect;
-}
-
-wxCoord wxScrollBar::GetScrollbarSize() const
-{
-    const wxSize sizeArrowSB = m_renderer->GetScrollbarArrowSize();
-
-    wxCoord sizeArrow, sizeTotal;
-    if ( GetWindowStyle() & wxVERTICAL )
-    {
-        sizeArrow = sizeArrowSB.y;
-        sizeTotal = GetSize().y;
-    }
-    else // horizontal
-    {
-        sizeArrow = sizeArrowSB.x;
-        sizeTotal = GetSize().x;
-    }
-
-    return sizeTotal - 2*sizeArrow;
-}
-
-
-wxCoord wxScrollBar::ScrollbarToPixel(int thumbPos)
-{
-    int range = GetRange();
-    if ( !range )
-    {
-        // the only valid position anyhow
-        return 0;
-    }
-
-    if ( thumbPos == -1 )
-    {
-        // by default use the current thumb position
-        thumbPos = GetThumbPosition();
-    }
-
-    const wxSize sizeArrow = m_renderer->GetScrollbarArrowSize();
-    return (thumbPos * GetScrollbarSize()) / range
-             + (IsVertical() ? sizeArrow.y : sizeArrow.x);
-}
-
-int wxScrollBar::PixelToScrollbar(wxCoord coord)
-{
-    const wxSize sizeArrow = m_renderer->GetScrollbarArrowSize();
-    return ((coord - (IsVertical() ? sizeArrow.y : sizeArrow.x)) *
-               GetRange() ) / GetScrollbarSize();
 }
 
 // ----------------------------------------------------------------------------
@@ -584,7 +335,7 @@ void wxScrollBar::UpdateThumb()
         {
             if ( m_elementsState[n] & wxCONTROL_DIRTY )
             {
-                wxRect rect = GetScrollbarRect((Element)n);
+                wxRect rect = GetRenderer()->GetScrollbarRect(this, (Element)n);
 
                 if ( rect.width && rect.height )
                 {
@@ -618,7 +369,9 @@ void wxScrollBar::UpdateThumb()
                         }
 #else                   // efficient version: only repaint the area occupied by
                         // the thumb previously - we can't do better than this
-                        rect = GetScrollbarRect(Element_Thumb, m_thumbPosOld);
+                        rect = GetRenderer()->GetScrollbarRect(this,
+                                                               Element_Thumb,
+                                                               m_thumbPosOld);
 #endif // 0/1
                     }
 
@@ -840,15 +593,6 @@ bool wxScrollBar::ScrollPages(int nPages)
     return true;
 }
 
-/* static */
-wxInputHandler *wxScrollBar::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdScrollBarInputHandler
-        s_handler(wxTheme::Get()->GetRenderer(), handlerDef);
-
-    return &s_handler;
-}
-
 // ============================================================================
 // scroll bar input handler
 // ============================================================================
@@ -957,7 +701,7 @@ void wxStdScrollBarInputHandler::HandleThumbMove(wxScrollBar *scrollbar,
                                                  const wxMouseEvent& event)
 {
     int thumbPos = GetMouseCoord(scrollbar, event) - m_ofsMouse;
-    thumbPos = scrollbar->PixelToScrollbar(thumbPos);
+    thumbPos = m_renderer->PixelToScrollbar(scrollbar, thumbPos);
     scrollbar->PerformAction(wxACTION_SCROLL_THUMB_MOVE, thumbPos);
 }
 
@@ -977,8 +721,10 @@ bool wxStdScrollBarInputHandler::HandleKey(wxInputConsumer *consumer,
             case WXK_LEFT:      action = wxACTION_SCROLL_LINE_UP;   break;
             case WXK_HOME:      action = wxACTION_SCROLL_START;     break;
             case WXK_END:       action = wxACTION_SCROLL_END;       break;
-            case WXK_PAGEUP:    action = wxACTION_SCROLL_PAGE_UP;   break;
-            case WXK_PAGEDOWN:  action = wxACTION_SCROLL_PAGE_DOWN; break;
+            case WXK_PAGEUP:
+            case WXK_PRIOR:     action = wxACTION_SCROLL_PAGE_UP;   break;
+            case WXK_PAGEDOWN:
+            case WXK_NEXT:      action = wxACTION_SCROLL_PAGE_DOWN; break;
         }
 
         if ( !action.IsEmpty() )
@@ -997,11 +743,15 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
 {
     // is this a click event from an acceptable button?
     int btn = event.GetButton();
-    if ( btn == wxMOUSE_BTN_LEFT )
+    if ( (btn != -1) && IsAllowedButton(btn) )
     {
         // determine which part of the window mouse is in
         wxScrollBar *scrollbar = wxStaticCast(consumer->GetInputWindow(), wxScrollBar);
-        wxHitTest ht = scrollbar->HitTestBar(event.GetPosition());
+        wxHitTest ht = m_renderer->HitTestScrollbar
+                                   (
+                                    scrollbar,
+                                    event.GetPosition()
+                                   );
 
         // when the mouse is pressed on any scrollbar element, we capture it
         // and hold capture until the same mouse button is released
@@ -1039,7 +789,7 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
                     case wxHT_SCROLLBAR_THUMB:
                         consumer->PerformAction(wxACTION_SCROLL_THUMB_DRAG);
                         m_ofsMouse = GetMouseCoord(scrollbar, event) -
-                                     scrollbar->ScrollbarToPixel();
+                                     m_renderer->ScrollbarToPixel(scrollbar);
 
                         // fall through: there is no immediate action
 
@@ -1122,7 +872,11 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
 
     if ( event.Dragging() )
     {
-        wxHitTest ht = scrollbar->HitTestBar(event.GetPosition());
+        wxHitTest ht = m_renderer->HitTestScrollbar
+                                   (
+                                    scrollbar,
+                                    event.GetPosition()
+                                   );
         if ( ht == m_htLast )
         {
             // nothing changed
@@ -1158,8 +912,6 @@ bool wxStdScrollBarInputHandler::HandleMouseMove(wxInputConsumer *consumer,
 }
 
 #endif // wxUSE_SCROLLBAR
-
-#if wxUSE_TIMER
 
 // ----------------------------------------------------------------------------
 // wxScrollTimer
@@ -1204,4 +956,3 @@ void wxScrollTimer::Notify()
     }
 }
 
-#endif // wxUSE_TIMER

@@ -9,6 +9,11 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -25,9 +30,6 @@
 #include "wx/datetime.h"
 #include "wx/image.h"
 #include "wx/bookctrl.h"
-#include "wx/artprov.h"
-#include "wx/imaglist.h"
-#include "wx/sysopt.h"
 
 #if wxUSE_COLOURDLG
     #include "wx/colordlg.h"
@@ -43,19 +45,11 @@
 
 #if wxUSE_PROGRESSDLG
 #if wxUSE_STOPWATCH && wxUSE_LONGLONG
-    #include "wx/datetime.h"      // wxDateTime
+    #include <wx/datetime.h>      // wxDateTime
 #endif
 
     #include "wx/progdlg.h"
 #endif // wxUSE_PROGRESSDLG
-
-#if wxUSE_ABOUTDLG
-    #include "wx/aboutdlg.h"
-
-    // these headers are only needed for custom about dialog
-    #include "wx/statline.h"
-    #include "wx/generic/aboutdlgg.h"
-#endif // wxUSE_ABOUTDLG
 
 #if wxUSE_BUSYINFO
     #include "wx/busyinfo.h"
@@ -163,8 +157,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #if USE_MODAL_PRESENTATION
     EVT_MENU(DIALOGS_MODAL,                         MyFrame::ModalDlg)
     EVT_MENU(DIALOGS_MODELESS,                      MyFrame::ModelessDlg)
-    EVT_MENU(DIALOGS_CENTRE_SCREEN,                 MyFrame::DlgCenteredScreen)
-    EVT_MENU(DIALOGS_CENTRE_PARENT,                 MyFrame::DlgCenteredParent)
 #endif // USE_MODAL
 
 #if wxUSE_STARTUP_TIPS
@@ -187,13 +179,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(DIALOGS_PROGRESS,                      MyFrame::ShowProgress)
 #endif // wxUSE_PROGRESSDLG
 
-#if wxUSE_ABOUTDLG
-    EVT_MENU(DIALOGS_ABOUTDLG_SIMPLE,               MyFrame::ShowSimpleAboutDialog)
-    EVT_MENU(DIALOGS_ABOUTDLG_FANCY,                MyFrame::ShowFancyAboutDialog)
-    EVT_MENU(DIALOGS_ABOUTDLG_FULL,                 MyFrame::ShowFullAboutDialog)
-    EVT_MENU(DIALOGS_ABOUTDLG_CUSTOM,               MyFrame::ShowCustomAboutDialog)
-#endif // wxUSE_ABOUTDLG
-
 #if wxUSE_BUSYINFO
     EVT_MENU(DIALOGS_BUSYINFO,                      MyFrame::ShowBusyInfo)
 #endif // wxUSE_BUSYINFO
@@ -211,8 +196,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
 #if USE_SETTINGS_DIALOG
     EVT_MENU(DIALOGS_PROPERTY_SHEET,                MyFrame::OnPropertySheet)
-    EVT_MENU(DIALOGS_PROPERTY_SHEET_TOOLBOOK,       MyFrame::OnPropertySheet)
-    EVT_MENU(DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK, MyFrame::OnPropertySheet)
 #endif
 
     EVT_MENU(DIALOGS_REQUEST,                       MyFrame::OnRequestUserAttention)
@@ -238,23 +221,20 @@ MyCanvas *myCanvas = (MyCanvas *) NULL;
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_IMAGE
     wxInitAllImageHandlers();
 #endif
 
-    m_canvasTextColour = *wxBLACK;
+    m_canvasTextColour = wxColour(_T("BLACK"));
     m_canvasFont = *wxNORMAL_FONT;
 
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL, _T("wxWidgets dialogs example"));
 
     // Make a menubar
-    wxMenu *menuDlg = new wxMenu;
+    wxMenu *file_menu = new wxMenu;
 
-    menuDlg->Append(DIALOGS_MESSAGE_BOX, _T("&Message box\tCtrl-M"));
+    file_menu->Append(DIALOGS_MESSAGE_BOX, _T("&Message box\tCtrl-M"));
 
 
 #if wxUSE_COLOURDLG || wxUSE_FONTDLG || wxUSE_CHOICEDLG
@@ -286,7 +266,7 @@ bool MyApp::OnInit()
         choices_menu->Append(DIALOGS_CHOOSE_FONT_GENERIC, _T("Choose &font (generic)"));
     #endif // USE_FONTDLG_GENERIC
 
-    menuDlg->Append(wxID_ANY,_T("&Choices and selectors"),choices_menu);
+    file_menu->Append(wxID_ANY,_T("&Choices and selectors"),choices_menu);
 #endif // wxUSE_COLOURDLG || wxUSE_FONTDLG || wxUSE_CHOICEDLG
 
 
@@ -303,7 +283,7 @@ bool MyApp::OnInit()
         entry_menu->Append(DIALOGS_NUM_ENTRY, _T("&Numeric entry\tCtrl-N"));
     #endif // wxUSE_NUMBERDLG
 
-    menuDlg->Append(wxID_ANY,_T("&Entry dialogs"),entry_menu);
+    file_menu->Append(wxID_ANY,_T("&Entry dialogs"),entry_menu);
 
 #endif // wxUSE_TEXTDLG || wxUSE_NUMBERDLG
 
@@ -323,7 +303,7 @@ bool MyApp::OnInit()
         filedlg_menu->Append(DIALOGS_FILE_SAVE_GENERIC,  _T("Sa&ve file (generic)"));
     #endif // USE_FILEDLG_GENERIC
 
-    menuDlg->Append(wxID_ANY,_T("&File operations"),filedlg_menu);
+    file_menu->Append(wxID_ANY,_T("&File operations"),filedlg_menu);
 
 #endif // wxUSE_FILEDLG
 
@@ -332,7 +312,7 @@ bool MyApp::OnInit()
 
     dir_menu->Append(DIALOGS_DIR_CHOOSE,  _T("&Choose a directory\tCtrl-D"));
     dir_menu->Append(DIALOGS_DIRNEW_CHOOSE,  _T("Choose a directory (with \"Ne&w\" button)\tShift-Ctrl-D"));
-    menuDlg->Append(wxID_ANY,_T("&Directory operations"),dir_menu);
+    file_menu->Append(wxID_ANY,_T("&Directory operations"),dir_menu);
 
     #if USE_DIRDLG_GENERIC
         dir_menu->AppendSeparator();
@@ -362,7 +342,7 @@ bool MyApp::OnInit()
        info_menu->Append(DIALOGS_LOG_DIALOG, _T("&Log dialog\tCtrl-L"));
     #endif // wxUSE_LOG_DIALOG
 
-    menuDlg->Append(wxID_ANY,_T("&Informative dialogs"),info_menu);
+    file_menu->Append(wxID_ANY,_T("&Informative dialogs"),info_menu);
 
 #endif // wxUSE_STARTUP_TIPS || wxUSE_PROGRESSDLG || wxUSE_BUSYINFO || wxUSE_LOG_DIALOG
 
@@ -371,58 +351,35 @@ bool MyApp::OnInit()
     wxMenu *find_menu = new wxMenu;
     find_menu->AppendCheckItem(DIALOGS_FIND, _T("&Find dialog\tCtrl-F"));
     find_menu->AppendCheckItem(DIALOGS_REPLACE, _T("Find and &replace dialog\tShift-Ctrl-F"));
-    menuDlg->Append(wxID_ANY,_T("&Searching"),find_menu);
+    file_menu->Append(wxID_ANY,_T("&Searching"),find_menu);
 #endif // wxUSE_FINDREPLDLG
 
 #if USE_MODAL_PRESENTATION
-    wxMenu *dialogs_menu = new wxMenu;
-    dialogs_menu->Append(DIALOGS_MODAL, _T("&Modal dialog\tCtrl-W"));
-    dialogs_menu->AppendCheckItem(DIALOGS_MODELESS, _T("Mode&less dialog\tCtrl-Z"));
-    dialogs_menu->Append(DIALOGS_CENTRE_SCREEN, _T("Centered on &screen\tShift-Ctrl-1"));
-    dialogs_menu->Append(DIALOGS_CENTRE_PARENT, _T("Centered on &parent\tShift-Ctrl-2"));
-    menuDlg->Append(wxID_ANY, _T("&Generic dialogs"), dialogs_menu);
+    wxMenu *modal_menu = new wxMenu;
+    modal_menu->Append(DIALOGS_MODAL, _T("Mo&dal dialog\tCtrl-W"));
+    modal_menu->AppendCheckItem(DIALOGS_MODELESS, _T("Modeless &dialog\tCtrl-Z"));
+    file_menu->Append(wxID_ANY,_T("&Modal/Modeless"),modal_menu);
 #endif // USE_MODAL_PRESENTATION
 
 #if USE_SETTINGS_DIALOG
-    wxMenu *sheet_menu = new wxMenu;
-    sheet_menu->Append(DIALOGS_PROPERTY_SHEET, _T("&Standard property sheet\tShift-Ctrl-P"));
-    sheet_menu->Append(DIALOGS_PROPERTY_SHEET_TOOLBOOK, _T("&Toolbook sheet\tShift-Ctrl-T"));
-
-    if (wxPlatformIs(wxPORT_MAC))
-        sheet_menu->Append(DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK, _T("Button &Toolbook sheet\tShift-Ctrl-U"));
-/*
-#ifdef __WXMAC__
-    sheet_menu->Append(DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK, _T("Button &Toolbook sheet\tShift-Ctrl-U"));
+    file_menu->Append(DIALOGS_PROPERTY_SHEET, _T("&Property Sheet Dialog\tCtrl-P"));
 #endif
-*/
-    menuDlg->Append(wxID_ANY, _T("&Property sheets"), sheet_menu);
-#endif // USE_SETTINGS_DIALOG
 
-    menuDlg->Append(DIALOGS_REQUEST, _T("&Request user attention\tCtrl-R"));
+    file_menu->Append(DIALOGS_REQUEST, _T("&Request user attention\tCtrl-R"));
 
-    menuDlg->AppendSeparator();
-    menuDlg->Append(wxID_EXIT, _T("E&xit\tAlt-X"));
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_EXIT, _T("E&xit\tAlt-X"));
 
-#if wxUSE_ABOUTDLG
-    wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(DIALOGS_ABOUTDLG_SIMPLE, _T("&About (simple)...\tF1"));
-    menuHelp->Append(DIALOGS_ABOUTDLG_FANCY, _T("About (&fancy)...\tShift-F1"));
-    menuHelp->Append(DIALOGS_ABOUTDLG_FULL, _T("About (f&ull)...\tCtrl-F1"));
-    menuHelp->Append(DIALOGS_ABOUTDLG_CUSTOM, _T("About (&custom)...\tCtrl-Shift-F1"));
-#endif // wxUSE_ABOUTDLG
-
-    wxMenuBar *menubar = new wxMenuBar;
-    menubar->Append(menuDlg, _T("&Dialogs"));
-#if wxUSE_ABOUTDLG
-    menubar->Append(menuHelp, _T("&Help"));
-#endif // wxUSE_ABOUTDLG
-
-    frame->SetMenuBar(menubar);
+    wxMenuBar *menu_bar = new wxMenuBar;
+    menu_bar->Append(file_menu, _T("&File"));
+    frame->SetMenuBar(menu_bar);
 
     myCanvas = new MyCanvas(frame);
     myCanvas->SetBackgroundColour(*wxWHITE);
 
+#ifndef __WXWINCE__
     frame->Centre(wxBOTH);
+#endif
 
     // Show the frame
     frame->Show(true);
@@ -462,10 +419,6 @@ MyFrame::MyFrame(wxWindow *parent,
         );
     }
 #endif // wxUSE_COLOURDLG
-
-#if wxUSE_STATUSBAR
-    CreateStatusBar();
-#endif // wxUSE_STATUSBAR
 }
 
 #if wxUSE_COLOURDLG
@@ -547,7 +500,7 @@ void MyFrame::ChooseFontGeneric(wxCommandEvent& WXUNUSED(event) )
     data.SetInitialFont(wxGetApp().m_canvasFont);
     data.SetColour(wxGetApp().m_canvasTextColour);
 
-    wxGenericFontDialog *dialog = new wxGenericFontDialog(this, data);
+    wxGenericFontDialog *dialog = new wxGenericFontDialog(this, &data);
     if (dialog->ShowModal() == wxID_OK)
     {
         wxFontData retData = dialog->GetFontData();
@@ -730,8 +683,8 @@ void MyFrame::FileOpen(wxCommandEvent& WXUNUSED(event) )
 #endif
                  );
 
-    dialog.CentreOnParent();
     dialog.SetDirectory(wxGetHomeDir());
+    dialog.CentreOnParent();
 
     if (dialog.ShowModal() == wxID_OK)
     {
@@ -763,7 +716,7 @@ void MyFrame::FileOpen2(wxCommandEvent& WXUNUSED(event) )
                                         wxFileSelectorDefaultWildcardStr,
                                         wxFileSelectorDefaultWildcardStr
                                     ),
-                                    wxFD_OPEN|wxFD_CHANGE_DIR|wxFD_PREVIEW,
+                                    wxCHANGE_DIR,
                                     this
                                    );
 
@@ -792,7 +745,7 @@ void MyFrame::FilesOpen(wxCommandEvent& WXUNUSED(event) )
 #endif
     wxFileDialog dialog(this, _T("Testing open multiple file dialog"),
                         wxEmptyString, wxEmptyString, wildcards,
-                        wxFD_OPEN|wxFD_MULTIPLE);
+                        wxMULTIPLE);
 
     if (dialog.ShowModal() == wxID_OK)
     {
@@ -825,7 +778,7 @@ void MyFrame::FileSave(wxCommandEvent& WXUNUSED(event) )
                         wxEmptyString,
                         _T("myletter.doc"),
                         _T("Text files (*.txt)|*.txt|Document files (*.doc)|*.doc"),
-                        wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+                        wxSAVE|wxOVERWRITE_PROMPT);
 
     dialog.SetFilterIndex(1);
 
@@ -867,14 +820,10 @@ void MyFrame::FileOpenGeneric(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::FilesOpenGeneric(wxCommandEvent& WXUNUSED(event) )
 {
-    // On PocketPC you can disable OK-only dialogs policy using system option
-    int buttons = wxSystemOptions::GetOptionInt(wxT("wince.dialog.real-ok-cancel"));
-    wxSystemOptions::SetOption(wxT("wince.dialog.real-ok-cancel"), 1);
-
     wxString wildcards = _T("All files (*.*)|*.*|C++ files (*.cpp;*.h)|*.cpp;*.h");
     wxGenericFileDialog dialog(this, _T("Testing open multiple file dialog"),
                         wxEmptyString, wxEmptyString, wildcards,
-                        wxFD_MULTIPLE);
+                        wxMULTIPLE);
 
     if (dialog.ShowModal() == wxID_OK)
     {
@@ -898,9 +847,6 @@ void MyFrame::FilesOpenGeneric(wxCommandEvent& WXUNUSED(event) )
         wxMessageDialog dialog2(this, msg, _T("Selected files"));
         dialog2.ShowModal();
     }
-
-    // restore system option
-    wxSystemOptions::SetOption(wxT("wince.dialog.real-ok-cancel"), buttons);
 }
 
 void MyFrame::FileSaveGeneric(wxCommandEvent& WXUNUSED(event) )
@@ -910,7 +856,7 @@ void MyFrame::FileSaveGeneric(wxCommandEvent& WXUNUSED(event) )
                         wxEmptyString,
                         _T("myletter.doc"),
                         _T("Text files (*.txt)|*.txt|Document files (*.doc)|*.doc"),
-                        wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+                        wxSAVE|wxOVERWRITE_PROMPT);
 
     dialog.SetFilterIndex(1);
 
@@ -939,12 +885,12 @@ void MyFrame::DoDirChoose(int style)
 
 void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
 {
-    DoDirChoose(wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+    DoDirChoose(wxDD_DEFAULT_STYLE & ~wxDD_NEW_DIR_BUTTON);
 }
 
 void MyFrame::DirChooseNew(wxCommandEvent& WXUNUSED(event) )
 {
-    DoDirChoose(wxDD_DEFAULT_STYLE & ~wxDD_DIR_MUST_EXIST);
+    DoDirChoose(wxDD_DEFAULT_STYLE | wxDD_NEW_DIR_BUTTON);
 }
 #endif // wxUSE_DIRDLG
 
@@ -997,25 +943,6 @@ void MyFrame::ModelessDlg(wxCommandEvent& event)
             m_dialog->Hide();
     }
 }
-
-void MyFrame::DlgCenteredScreen(wxCommandEvent& WXUNUSED(event))
-{
-    wxDialog dlg(this, wxID_ANY, _T("Dialog centered on screen"),
-                 wxDefaultPosition, wxSize(200, 100));
-    (new wxButton(&dlg, wxID_OK, _T("Close")))->Centre();
-    dlg.CentreOnScreen();
-    dlg.ShowModal();
-}
-
-void MyFrame::DlgCenteredParent(wxCommandEvent& WXUNUSED(event))
-{
-    wxDialog dlg(this, wxID_ANY, _T("Dialog centered on parent"),
-                 wxDefaultPosition, wxSize(200, 100));
-    (new wxButton(&dlg, wxID_OK, _T("Close")))->Centre();
-    dlg.CentreOnParent();
-    dlg.ShowModal();
-}
-
 #endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_STARTUP_TIPS
@@ -1048,9 +975,9 @@ void MyFrame::ShowTip(wxCommandEvent& WXUNUSED(event))
 #endif // wxUSE_STARTUP_TIPS
 
 #if USE_SETTINGS_DIALOG
-void MyFrame::OnPropertySheet(wxCommandEvent& event)
+void MyFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 {
-    SettingsDialog dialog(this, event.GetId());
+    SettingsDialog dialog(this);
     dialog.ShowModal();
 }
 #endif // USE_SETTINGS_DIALOG
@@ -1073,7 +1000,33 @@ void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
 {
-    static const int max = 100;
+    #if wxUSE_STOPWATCH && wxUSE_LONGLONG
+    // check the performance
+    int countrandomnumbers = 0, count = 0;
+    wxTimeSpan tsTest(0,0,0,250);
+    wxDateTime DT2, DT1 = wxDateTime::UNow();
+    srand(0);
+    while(1)
+    {
+        rand();
+        ++countrandomnumbers;
+        if ( countrandomnumbers == 1000 )
+        {
+            srand(0);
+            countrandomnumbers = 0;
+            ++count;
+            DT2 = wxDateTime::UNow();
+            wxTimeSpan ts = DT2.Subtract( DT1 );
+            if ( ts.IsLongerThan( tsTest ) )
+            {
+                break;
+            }
+        }
+    }
+    const int max = 40 * count;
+    #else
+    static const int max = 10;
+    #endif // wxUSE_STOPWATCH && wxUSE_LONGLONG
 
     wxProgressDialog dialog(_T("Progress dialog example"),
                             _T("An informative message"),
@@ -1085,48 +1038,53 @@ void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
                             // wxPD_AUTO_HIDE | -- try this as well
                             wxPD_ELAPSED_TIME |
                             wxPD_ESTIMATED_TIME |
-                            wxPD_REMAINING_TIME
-                            | wxPD_SMOOTH // - makes indeterminate mode bar on WinXP very small
-                            );
+                            wxPD_REMAINING_TIME |
+                            wxPD_SMOOTH);
 
     bool cont = true;
-    for ( int i = 0; i <= max; i++ )
+    bool skip = false;
+    // each skip will move progress about quarter forward
+    for ( int i = 0; i <= max; i = wxMin(i+(skip?int(max/4):1), max+1), skip = false )
     {
-        wxMilliSleep(200);
+        #if wxUSE_STOPWATCH && wxUSE_LONGLONG
+        // do (almost) the same operations as we did for the performance test
+        srand(0);
+        for ( int j = 0; j < 1000; j++ )
+        {
+            rand();
+            if ( j == 999 )
+            {
+                DT2 = wxDateTime::UNow();
+                wxTimeSpan ts = DT2.Subtract( DT1 );
+                if ( ts.IsLongerThan( tsTest ) )
+                {
+                    // nothing to do
+                }
+            }
+        }
+        #else
+        wxSleep(1);
+        #endif
 
         wxString msg;
-
-        // test both modes of wxProgressDialog behaviour: start in
-        // indeterminate mode but switch to the determinate one later
-        const bool determinate = i > max/2;
 
         if ( i == max )
         {
             msg = _T("That's all, folks!");
         }
-        else if ( !determinate )
+        else if ( i > max / 2 )
         {
-            msg = _T("Testing indeterminate mode");
-        }
-        else if ( determinate )
-        {
-            msg = _T("Now in standard determinate mode");
+            msg = _T("Only a half left (very long message)!");
         }
 
-        // will be set to true if "Skip" button was pressed
-        bool skip = false;
-        if ( determinate )
+#if wxUSE_STOPWATCH && wxUSE_LONGLONG
+        if ( (i % (max/100)) == 0 ) // // only 100 updates, this makes it much faster
         {
             cont = dialog.Update(i, msg, &skip);
         }
-        else
-        {
-            cont = dialog.Pulse(msg, &skip);
-        }
-
-        // each skip will move progress about quarter forward
-        if ( skip )
-            i += max/4;
+#else
+        cont = dialog.Update(i, msg, &skip);
+#endif
 
         if ( !cont )
         {
@@ -1151,110 +1109,6 @@ void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
 }
 
 #endif // wxUSE_PROGRESSDLG
-
-#if wxUSE_ABOUTDLG
-
-static void InitAboutInfoMinimal(wxAboutDialogInfo& info)
-{
-    info.SetName(_T("Dialogs Sample"));
-    info.SetVersion(wxVERSION_NUM_DOT_STRING_T);
-    info.SetDescription(_T("This sample shows different wxWidgets dialogs"));
-    info.SetCopyright(_T("(C) 1998-2006 wxWidgets dev team"));
-    info.AddDeveloper(_T("Vadim Zeitlin"));
-}
-
-static void InitAboutInfoWebsite(wxAboutDialogInfo& info)
-{
-    InitAboutInfoMinimal(info);
-
-    info.SetWebSite(_T("http://www.wxwidgets.org/"), _T("wxWidgets web site"));
-}
-
-static void InitAboutInfoAll(wxAboutDialogInfo& info)
-{
-    InitAboutInfoMinimal(info);
-
-    // we can add a second developer
-    info.AddDeveloper(_T("A.N. Other"));
-
-    // or we can add several persons at once like this
-    static const wxChar *docwriters[] =
-    {
-        _T("First D. Writer"),
-        _T("Second One"),
-    };
-
-    info.SetDocWriters(wxArrayString(WXSIZEOF(docwriters), docwriters));
-    info.SetLicence(wxString::FromAscii(
-"                wxWindows Library Licence, Version 3.1\n"
-"                ======================================\n"
-"\n"
-"  Copyright (c) 1998-2005 Julian Smart, Robert Roebling et al\n"
-"\n"
-"  Everyone is permitted to copy and distribute verbatim copies\n"
-"  of this licence document, but changing it is not allowed.\n"
-"\n"
-"                       WXWINDOWS LIBRARY LICENCE\n"
-"     TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION\n"
-"\n"
-"                    ...and so on and so forth...\n"
-    ));
-
-    info.AddTranslator(_T("Wun Ngo Wen (Martian)"));
-}
-
-void MyFrame::ShowSimpleAboutDialog(wxCommandEvent& WXUNUSED(event))
-{
-    wxAboutDialogInfo info;
-    InitAboutInfoMinimal(info);
-
-    wxAboutBox(info);
-}
-
-void MyFrame::ShowFancyAboutDialog(wxCommandEvent& WXUNUSED(event))
-{
-    wxAboutDialogInfo info;
-    InitAboutInfoWebsite(info);
-
-    wxAboutBox(info);
-}
-
-void MyFrame::ShowFullAboutDialog(wxCommandEvent& WXUNUSED(event))
-{
-    wxAboutDialogInfo info;
-    InitAboutInfoAll(info);
-
-    wxAboutBox(info);
-}
-
-// a trivial example of a custom dialog class
-class MyAboutDialog : public wxGenericAboutDialog
-{
-public:
-    MyAboutDialog(const wxAboutDialogInfo& info)
-    {
-        Create(info);
-    }
-
-    // add some custom controls
-    virtual void DoAddCustomControls()
-    {
-        AddControl(new wxStaticLine(this), wxSizerFlags().Expand());
-        AddText(_T("Some custom text"));
-        AddControl(new wxStaticLine(this), wxSizerFlags().Expand());
-    }
-};
-
-void MyFrame::ShowCustomAboutDialog(wxCommandEvent& WXUNUSED(event))
-{
-    wxAboutDialogInfo info;
-    InitAboutInfoAll(info);
-
-    MyAboutDialog dlg(info);
-    dlg.ShowModal();
-}
-
-#endif // wxUSE_ABOUTDLG
 
 #if wxUSE_BUSYINFO
 
@@ -1524,73 +1378,27 @@ IMPLEMENT_CLASS(SettingsDialog, wxPropertySheetDialog)
 BEGIN_EVENT_TABLE(SettingsDialog, wxPropertySheetDialog)
 END_EVENT_TABLE()
 
-SettingsDialog::SettingsDialog(wxWindow* win, int dialogType)
+SettingsDialog::SettingsDialog(wxWindow* win)
 {
     SetExtraStyle(wxDIALOG_EX_CONTEXTHELP|wxWS_EX_VALIDATE_RECURSIVELY);
 
-    int tabImage1 = -1;
-    int tabImage2 = -1;
-
-    bool useToolBook = (dialogType == DIALOGS_PROPERTY_SHEET_TOOLBOOK || dialogType == DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK);
-    int resizeBorder = wxRESIZE_BORDER;
-
-    if (useToolBook)
-    {
-        resizeBorder = 0;
-        tabImage1 = 0;
-        tabImage2 = 1;
-
-        int sheetStyle = wxPROPSHEET_SHRINKTOFIT;
-        if (dialogType == DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK)
-            sheetStyle |= wxPROPSHEET_BUTTONTOOLBOOK;
-        else
-            sheetStyle |= wxPROPSHEET_TOOLBOOK;
-
-        SetSheetStyle(sheetStyle);
-        SetSheetInnerBorder(0);
-        SetSheetOuterBorder(0);
-
-        // create a dummy image list with a few icons
-        const wxSize imageSize(32, 32);
-
-        m_imageList = new wxImageList(imageSize.GetWidth(), imageSize.GetHeight());
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_WARNING, wxART_OTHER, imageSize));
-        m_imageList->
-            Add(wxArtProvider::GetIcon(wxART_ERROR, wxART_OTHER, imageSize));
-    }
-    else
-        m_imageList = NULL;
-
     Create(win, wxID_ANY, _("Preferences"), wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_DIALOG_STYLE| (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, resizeBorder)
+        wxDEFAULT_DIALOG_STYLE
+#ifndef __WXWINCE__
+        |wxRESIZE_BORDER
+#endif
     );
-
-    // If using a toolbook, also follow Mac style and don't create buttons
-    if (!useToolBook)
-        CreateButtons(wxOK | wxCANCEL |
-                        (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, wxHELP)
-    );
+    CreateButtons(wxOK|wxCANCEL|wxHELP);
 
     wxBookCtrlBase* notebook = GetBookCtrl();
-    notebook->SetImageList(m_imageList);
 
     wxPanel* generalSettings = CreateGeneralSettingsPage(notebook);
     wxPanel* aestheticSettings = CreateAestheticSettingsPage(notebook);
 
-    notebook->AddPage(generalSettings, _("General"), true, tabImage1);
-    notebook->AddPage(aestheticSettings, _("Aesthetics"), false, tabImage2);
+    notebook->AddPage(generalSettings, _("General"));
+    notebook->AddPage(aestheticSettings, _("Aesthetics"));
 
     LayoutDialog();
-}
-
-SettingsDialog::~SettingsDialog()
-{
-    delete m_imageList;
 }
 
 wxPanel* SettingsDialog::CreateGeneralSettingsPage(wxWindow* parent)

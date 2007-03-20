@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      David Webster
 // Modified by:
@@ -12,17 +12,16 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/colour.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
+    #include "wx/colour.h"
 #endif
 
+#include "wx/gdicmn.h"
 #define INCL_GPI
 #define INCL_PM
 #include<os2.h>
 
-IMPLEMENT_DYNAMIC_CLASS(wxColour, wxGDIObject)
+IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
 // Colour
 
@@ -38,12 +37,25 @@ wxColour::wxColour ()
     Init();
 } // end of wxColour::wxColour
 
-wxColour::wxColour( const wxColour& rCol )
+wxColour::wxColour (
+  unsigned char                     cRed
+, unsigned char                     cGreen
+, unsigned char                     cBlue
+)
+{
+    Set(cRed, cGreen, cBlue);
+} // end of wxColour::wxColour
+
+wxColour::wxColour(
+  const wxColour&                   rCol
+)
 {
     *this = rCol;
 } // end of wxColour::wxColour
 
-wxColour& wxColour::operator= (const wxColour& rCol)
+wxColour& wxColour::operator =(
+  const wxColour&                   rCol
+)
 {
     m_cRed    = rCol.m_cRed;
     m_cGreen  = rCol.m_cGreen;
@@ -53,14 +65,34 @@ wxColour& wxColour::operator= (const wxColour& rCol)
     return *this;
 } // end of wxColour& wxColour::operator =
 
+void wxColour::InitFromName(
+  const wxString&                   sCol
+)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(sCol);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
+
+} // end of wxColour::InitFromName
+
 wxColour::~wxColour()
 {
 } // end of wxColour::~wxColour
 
-void wxColour::InitRGBA( unsigned char cRed,
-                         unsigned char cGreen,
-                         unsigned char cBlue,
-                         unsigned char WXUNUSED(calpha) )
+void wxColour::Set(
+  unsigned char                     cRed
+, unsigned char                     cGreen
+, unsigned char                     cBlue
+)
 {
     m_cRed    = cRed;
     m_cGreen  = cGreen;

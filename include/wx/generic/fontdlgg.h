@@ -12,7 +12,11 @@
 #ifndef _WX_GENERIC_FONTDLGG_H
 #define _WX_GENERIC_FONTDLGG_H
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "fontdlgg.h"
+#endif
+
+#include "wx/setup.h"
 #include "wx/gdicmn.h"
 #include "wx/font.h"
 #include "wx/dialog.h"
@@ -48,18 +52,19 @@ class WXDLLEXPORT wxGenericFontDialog : public wxFontDialogBase
 {
 public:
     wxGenericFontDialog() { Init(); }
+#if wxABI_VERSION >= 20604
     wxGenericFontDialog(wxWindow *parent)
         : wxFontDialogBase(parent) { Init(); }
+#endif
     wxGenericFontDialog(wxWindow *parent, const wxFontData& data)
         : wxFontDialogBase(parent, data) { Init(); }
     virtual ~wxGenericFontDialog();
 
     virtual int ShowModal();
 
-#if WXWIN_COMPATIBILITY_2_6
     // deprecated, for backwards compatibility only
-    wxDEPRECATED( wxGenericFontDialog(wxWindow *parent, const wxFontData *data) );
-#endif // WXWIN_COMPATIBILITY_2_6
+    wxGenericFontDialog(wxWindow *parent, const wxFontData *data)
+        : wxFontDialogBase(parent, data) { Init(); }
 
     // Internal functions
     void OnCloseWindow(wxCloseEvent& event);
@@ -74,26 +79,21 @@ public:
 #endif
 
 protected:
-
-    virtual bool DoCreate(wxWindow *parent);
-
-private:
-
     // common part of all ctors
     void Init();
 
-    void DoChangeFont();
+    virtual bool DoCreate(wxWindow *parent);
 
-    wxFont m_dialogFont;
+    wxFont dialogFont;
 
-    wxChoice *m_familyChoice;
-    wxChoice *m_styleChoice;
-    wxChoice *m_weightChoice;
-    wxChoice *m_colourChoice;
-    wxCheckBox *m_underLineCheckBox;
+    wxChoice *familyChoice;
+    wxChoice *styleChoice;
+    wxChoice *weightChoice;
+    wxChoice *colourChoice;
+    wxCheckBox *underLineCheckBox;
 
 #if !USE_SPINCTRL_FOR_POINT_SIZE
-    wxChoice   *m_pointSizeChoice;
+    wxChoice   *pointSizeChoice;
 #endif
 
     wxFontPreviewer *m_previewer;
@@ -111,10 +111,5 @@ WXDLLEXPORT int wxFontFamilyStringToInt(wxChar *family);
 WXDLLEXPORT int wxFontWeightStringToInt(wxChar *weight);
 WXDLLEXPORT int wxFontStyleStringToInt(wxChar *style);
 
-#if WXWIN_COMPATIBILITY_2_6
-    // deprecated, for backwards compatibility only
-inline wxGenericFontDialog::wxGenericFontDialog(wxWindow *parent, const wxFontData *data)
-                           :wxFontDialogBase(parent) { Init(); InitFontData(data); Create(parent); }
-#endif // WXWIN_COMPATIBILITY_2_6
-
 #endif // _WX_GENERIC_FONTDLGG_H
+

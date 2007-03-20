@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/x11/dataobj.cpp
+// Name:        dataobj.cpp
 // Purpose:     wxDataObject class
 // Author:      Julian Smart
 // Id:          $Id$
@@ -7,22 +7,21 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dataobj.h"
+#endif
+
+#include "wx/defs.h"
 
 #if wxUSE_DATAOBJ
 
 #include "wx/dataobj.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/app.h"
-    #include "wx/utils.h"
-    #include "wx/image.h"
-#endif
-
 #include "wx/mstream.h"
+#include "wx/app.h"
+#include "wx/image.h"
+#include "wx/log.h"
 
+#include "wx/utils.h"
 #include "wx/x11/private.h"
 
 //-------------------------------------------------------------------------
@@ -80,7 +79,7 @@ void wxDataFormat::SetType( wxDataFormatId type )
     PrepareFormats();
     m_type = type;
 
-    if (m_type == wxDF_TEXT || m_type == wxDF_UNICODETEXT)
+    if (m_type == wxDF_TEXT)
         m_format = g_textAtom;
     else
     if (m_type == wxDF_BITMAP)
@@ -106,7 +105,7 @@ wxString wxDataFormat::GetId() const
 #else
     char *t = XGetAtomName ((Display*) wxGetDisplay(), m_format);
     wxString ret = wxString::FromAscii( t );
-    if (t)
+    if (t) 
         XFree( t );
     return ret;
 #endif
@@ -135,7 +134,7 @@ void wxDataFormat::SetId( const wxChar *id )
     PrepareFormats();
     m_type = wxDF_PRIVATE;
     wxString tmp( id );
-    m_format = XInternAtom( (Display*) wxGetDisplay(), tmp.ToAscii(), FALSE );
+    m_format = XInternAtom( (Display*) wxGetDisplay(), tmp.ToAscii(), FALSE ); 
 #endif
 }
 
@@ -162,17 +161,17 @@ wxDataObject::wxDataObject()
 bool wxDataObject::IsSupportedFormat(const wxDataFormat& format, Direction dir) const
 {
     size_t nFormatCount = GetFormatCount(dir);
-    if ( nFormatCount == 1 )
+    if ( nFormatCount == 1 ) 
     {
         return format == GetPreferredFormat();
     }
-    else
+    else 
     {
         wxDataFormat *formats = new wxDataFormat[nFormatCount];
         GetAllFormats(formats,dir);
 
         size_t n;
-        for ( n = 0; n < nFormatCount; n++ )
+        for ( n = 0; n < nFormatCount; n++ ) 
         {
             if ( formats[n] == format )
                 break;
@@ -199,9 +198,9 @@ bool wxFileDataObject::GetDataHere(void *buf) const
         filenames += (wxChar) 0;
     }
 
-    memcpy( buf, filenames.mbc_str(), filenames.length() + 1 );
+    memcpy( buf, filenames.mbc_str(), filenames.Len() + 1 );
 
-    return true;
+    return TRUE;
 }
 
 size_t wxFileDataObject::GetDataSize() const
@@ -210,7 +209,7 @@ size_t wxFileDataObject::GetDataSize() const
 
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
-        res += m_filenames[i].length();
+        res += m_filenames[i].Len();
         res += 1;
     }
 
@@ -232,8 +231,8 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
             break;
         wxString file( filenames );  // this returns the first file
         AddFile( file );
-        pos += file.length()+1;
-        filenames += file.length()+1;
+        pos += file.Len()+1;
+        filenames += file.Len()+1;
     }
 #else // 1
     m_filenames.Empty();
@@ -283,7 +282,7 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
     }
 #endif // 0/1
 
-    return true;
+    return TRUE;
 }
 
 void wxFileDataObject::AddFile( const wxString &filename )
@@ -328,12 +327,12 @@ bool wxBitmapDataObject::GetDataHere(void *buf) const
     {
         wxFAIL_MSG( wxT("attempt to copy empty bitmap failed") );
 
-        return false;
+        return FALSE;
     }
 
     memcpy(buf, m_pngData, m_pngSize);
 
-    return true;
+    return TRUE;
 }
 
 bool wxBitmapDataObject::SetData(size_t size, const void *buf)
@@ -351,14 +350,14 @@ bool wxBitmapDataObject::SetData(size_t size, const void *buf)
     wxPNGHandler handler;
     if ( !handler.LoadFile( &image, mstream ) )
     {
-        return false;
+        return FALSE;
     }
 
     m_bitmap = image;
 
     return m_bitmap.Ok();
 #else
-    return false;
+    return FALSE;
 #endif
 }
 
@@ -383,3 +382,4 @@ void wxBitmapDataObject::DoConvertToPng()
 }
 
 #endif // wxUSE_DATAOBJ
+

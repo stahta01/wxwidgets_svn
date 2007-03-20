@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_listb.cpp
+// Name:        xh_listb.cpp
 // Purpose:     XRC resource for wxListBox
 // Author:      Bob Mitchell & Vaclav Slavik
 // Created:     2000/07/29
@@ -8,6 +8,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "xh_listb.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -15,20 +19,16 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_XRC && wxUSE_LISTBOX
+#if wxUSE_XRC
 
 #include "wx/xrc/xh_listb.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/listbox.h"
-#endif
+#include "wx/listbox.h"
+#include "wx/intl.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxListBoxXmlHandler, wxXmlResourceHandler)
 
 wxListBoxXmlHandler::wxListBoxXmlHandler()
-                   : wxXmlResourceHandler(),
-                     m_insideBox(false)
+: wxXmlResourceHandler() , m_insideBox(false)
 {
     XRC_ADD_STYLE(wxLB_SINGLE);
     XRC_ADD_STYLE(wxLB_MULTIPLE);
@@ -42,7 +42,7 @@ wxListBoxXmlHandler::wxListBoxXmlHandler()
 
 wxObject *wxListBoxXmlHandler::DoCreateResource()
 {
-    if ( m_class == wxT("wxListBox"))
+    if( m_class == wxT("wxListBox"))
     {
         // find the selection
         long selection = GetLong(wxT("selection"), -1);
@@ -50,14 +50,22 @@ wxObject *wxListBoxXmlHandler::DoCreateResource()
         // need to build the list of strings from children
         m_insideBox = true;
         CreateChildrenPrivately(NULL, GetParamNode(wxT("content")));
-        m_insideBox = false;
+        wxString *strings = (wxString *) NULL;
+        if (strList.GetCount() > 0)
+        {
+            strings = new wxString[strList.GetCount()];
+            int count = strList.GetCount();
+            for (int i = 0; i < count; i++)
+                strings[i]=strList[i];
+        }
 
         XRC_MAKE_INSTANCE(control, wxListBox)
 
         control->Create(m_parentAsWindow,
                         GetID(),
                         GetPosition(), GetSize(),
-                        strList,
+                        strList.GetCount(),
+                        strings,
                         GetStyle(),
                         wxDefaultValidator,
                         GetName());
@@ -66,6 +74,9 @@ wxObject *wxListBoxXmlHandler::DoCreateResource()
             control->SetSelection(selection);
 
         SetupWindow(control);
+
+        if (strings != NULL)
+            delete[] strings;
         strList.Clear();    // dump the strings
 
         return control;
@@ -78,7 +89,7 @@ wxObject *wxListBoxXmlHandler::DoCreateResource()
         // add to the list
         wxString str = GetNodeContent(m_node);
         if (m_resource->GetFlags() & wxXRC_USE_LOCALE)
-            str = wxGetTranslation(str, m_resource->GetDomain());
+            str = wxGetTranslation(str);
         strList.Add(str);
 
         return NULL;
@@ -91,4 +102,4 @@ bool wxListBoxXmlHandler::CanHandle(wxXmlNode *node)
            (m_insideBox && node->GetName() == wxT("item")));
 }
 
-#endif // wxUSE_XRC && wxUSE_LISTBOX
+#endif // wxUSE_XRC

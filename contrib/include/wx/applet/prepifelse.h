@@ -45,7 +45,7 @@ private:
 
 public:
     wxIfElsePrep() : wxHtmlProcessor() {}
-    virtual ~wxIfElsePrep() {}
+    ~wxIfElsePrep() {}
 	
 	// Process input text and return processed result
     wxString Process(const wxString& text) const;

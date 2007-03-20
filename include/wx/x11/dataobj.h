@@ -10,6 +10,10 @@
 #ifndef _WX_X11_DATAOBJ_H_
 #define _WX_X11_DATAOBJ_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dataobj.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxDataObject is the same as wxDataObjectBase under wxMotif
 // ----------------------------------------------------------------------------
@@ -20,7 +24,7 @@ public:
     wxDataObject();
     
 #ifdef __DARWIN__
-    virtual ~wxDataObject() { }
+    ~wxDataObject() { }
 #endif
 
     virtual bool IsSupportedFormat( const wxDataFormat& format, Direction dir = Get ) const;

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/ownerdrw.cpp
+// Name:        msw/ownerdrw.cpp
 // Purpose:     implementation of wxOwnerDrawn class
 // Author:      David Webster
 // Modified by:
@@ -9,24 +9,29 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_OWNER_DRAWN
-
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/os2/private.h"
-    #include "wx/font.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/menu.h"
-    #include "wx/utils.h"
-    #include "wx/settings.h"
-    #include "wx/menuitem.h"
+  #include "wx/window.h"
+  #include "wx/os2/private.h"
+  #include "wx/font.h"
+  #include "wx/bitmap.h"
+  #include "wx/dcmemory.h"
+  #include "wx/menu.h"
+  #include "wx/utils.h"
 #endif
 
+#if wxUSE_OWNER_DRAWN
+
+#include "wx/settings.h"
 #include "wx/ownerdrw.h"
+#include "wx/menuitem.h"
+
 
 // ============================================================================
 // implementation of wxOwnerDrawn class
@@ -42,7 +47,7 @@ wxOwnerDrawn::wxOwnerDrawn( const wxString& rsStr,
 : m_strName(rsStr)
 {
     m_bCheckable   = bCheckable;
-    m_bOwnerDrawn  = false;
+    m_bOwnerDrawn  = FALSE;
     m_nHeight      = 0;
     m_nMarginWidth = ms_nLastMarginWidth;
     if (wxNORMAL_FONT)
@@ -73,7 +78,7 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
     // placed on top of each other.
     if (!m_strAccel.empty() )
     {
-        sStr.Pad(sStr.length()%8);
+        sStr.Pad(sStr.Length()%8);
         sStr += m_strAccel;
     }
     vDC.SetFont(GetFont());

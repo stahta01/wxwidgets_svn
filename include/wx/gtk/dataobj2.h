@@ -11,6 +11,10 @@
 #ifndef _WX_GTK_DATAOBJ2_H_
 #define _WX_GTK_DATAOBJ2_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dataobj.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
 // ----------------------------------------------------------------------------
@@ -23,7 +27,7 @@ public:
     wxBitmapDataObject(const wxBitmap& bitmap);
 
     // destr
-    virtual ~wxBitmapDataObject();
+    ~wxBitmapDataObject();
 
     // override base class virtual to update PNG data too
     virtual void SetBitmap(const wxBitmap& bitmap);
@@ -34,19 +38,6 @@ public:
     virtual size_t GetDataSize() const { return m_pngSize; }
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
 
 protected:
     void Init() { m_pngData = (void *)NULL; m_pngSize = 0; }
@@ -57,6 +48,15 @@ protected:
     void       *m_pngData;
 
     void DoConvertToPng();
+
+private:
+    // virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 };
 
 // ----------------------------------------------------------------------------
@@ -74,19 +74,15 @@ public:
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    // Must provide overloads to avoid hiding them (and warnings about it)
-    virtual size_t GetDataSize(const wxDataFormat&) const
-    {
-        return GetDataSize();
-    }
-    virtual bool GetDataHere(const wxDataFormat&, void *buf) const
-    {
-        return GetDataHere(buf);
-    }
-    virtual bool SetData(const wxDataFormat&, size_t len, const void *buf)
-    {
-        return SetData(len, buf);
-    }
+
+private:
+    // virtual function hiding supression
+    size_t GetDataSize(const wxDataFormat& format) const
+        { return(wxDataObjectSimple::GetDataSize(format)); }
+    bool GetDataHere(const wxDataFormat& format, void* pBuf) const
+        { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
+    bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
+        { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
 };
 
 #endif // _WX_GTK_DATAOBJ2_H_

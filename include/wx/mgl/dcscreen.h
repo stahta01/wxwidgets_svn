@@ -10,6 +10,10 @@
 #ifndef __WX_DCSCREEN_H__
 #define __WX_DCSCREEN_H__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "dcscreen.h"
+#endif
+
 #include "wx/dcclient.h"
 
 //-----------------------------------------------------------------------------
@@ -26,7 +30,7 @@ class WXDLLEXPORT wxScreenDC: public wxDC
 {
 public:
     wxScreenDC();
-    virtual ~wxScreenDC();
+    ~wxScreenDC();
 
     static bool StartDrawingOnTop(wxWindow *WXUNUSED(window)) { return TRUE; }
     static bool StartDrawingOnTop(wxRect *WXUNUSED(rect) = NULL) { return TRUE; }

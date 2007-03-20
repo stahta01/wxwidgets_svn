@@ -1,13 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        contrib/samples/ogl/studio/view.cpp
+// Name:        view.cpp
 // Purpose:     Implements view functionality
 // Author:      Julian Smart
 // Modified by:
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef __GNUG__
+// #pragma implementation
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -17,10 +21,10 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
-#include "wx/colordlg.h"
+#include <wx/colordlg.h>
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
@@ -32,8 +36,8 @@
 #include "cspalette.h"
 #include "symbols.h"
 #include "dialogs.h"
-#include "wx/ogl/basicp.h"
-#include "wx/ogl/linesp.h"
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/linesp.h>
 
 IMPLEMENT_DYNAMIC_CLASS(csDiagramView, wxView)
 

@@ -12,6 +12,10 @@
 #ifndef _WX_TEXTCTRLCE_H_
 #define _WX_TEXTCTRLCE_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrlce.h"
+#endif
+
 #include "wx/dynarray.h"
 
 class WXDLLEXPORT wxTextCtrl;
@@ -36,7 +40,7 @@ public:
 
         Create(parent, id, value, pos, size, style, validator, name);
     }
-    virtual ~wxTextCtrl();
+    ~wxTextCtrl();
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxString& value = wxEmptyString,
@@ -50,9 +54,7 @@ public:
     // ----------------------------------
 
     virtual wxString GetValue() const;
-    virtual void SetValue(const wxString& value) { DoSetValue(value, SetValue_SendEvent); }
-
-    virtual void ChangeValue(const wxString &value) { DoSetValue(value); }
+    virtual void SetValue(const wxString& value);
 
     virtual wxString GetRange(long from, long to) const;
 
@@ -187,11 +189,9 @@ protected:
     // false if we hit the limit set by SetMaxLength() and so didn't change it
     bool AdjustSpaceLimit();
 
-    void DoSetValue(const wxString &value, int flags = 0);
-
     // replace the contents of the selection or of the entire control with the
     // given text
-    void DoWriteText(const wxString& text, int flags = SetValue_SelectionOnly);
+    void DoWriteText(const wxString& text, bool selectionOnly = true);
 
     // set the selection possibly without scrolling the caret into view
     void DoSetSelection(long from, long to, bool scrollCaret = true);

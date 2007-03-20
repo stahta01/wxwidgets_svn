@@ -400,14 +400,20 @@ class Setup(wx.Dialog):
                    flag = wx.LEFT|wx.RIGHT, border=6)
         sizer.Add(bsizer, 0, flag=wx.ALIGN_RIGHT|wx.ALL, border=6)
 
+        self.Bind(wx.EVT_SHOW, self.OnShow)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_BUTTON, self.OnButton)
 
         self.customcolours = [None] * 16
 
         self.SetSizerAndFit(sizer)
-        wx.CallAfter(self.UpdateControls)
-        
+
+
+    def OnShow(self, evt):
+        if self.IsShown():
+            self.UpdateControls()
+        evt.Skip()
+
 
     def OnClose(self, evt):
         self.Hide()

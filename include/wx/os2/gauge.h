@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/gauge.h
+// Name:        gauge.h
 // Purpose:     wxGauge class
 // Author:      David Webster
 // Modified by:
@@ -12,7 +12,9 @@
 #ifndef _WX_GAUGE_H_
 #define _WX_GAUGE_H_
 
-class WXDLLEXPORT wxGauge: public wxGaugeBase
+#include "wx/control.h"
+
+class WXDLLEXPORT wxGauge: public wxControl
 {
 public:
     inline wxGauge() { m_nRangeMax = 0; m_nGaugePos = 0; }
@@ -76,3 +78,4 @@ private:
 }; // end of CLASS wxGauge
 
 #endif // _WX_GAUGE_H_
+

@@ -79,18 +79,6 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// stream inserter for wxString
-//
-
-#include "wx/string.h"
-
-inline std::ostream& operator<<(std::ostream& o, const wxString& s)
-{
-    return o << s.mb_str();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Some more compiler warning tweaking and auto linking.
 //
 

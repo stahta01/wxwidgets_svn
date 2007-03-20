@@ -6,7 +6,7 @@
 // Created:     2003/08/17
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -21,10 +21,8 @@
 #include "wx/wxprec.h"
 
 #if wxUSE_TOOLBAR_NATIVE
-
-#include "wx/toolbar.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/toolbar.h"
     #include "wx/frame.h"
     #include "wx/log.h"
 #endif // WX_PRECOMP
@@ -60,8 +58,8 @@ public:
         CreateButtonCell();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -186,13 +184,7 @@ bool wxToolBar::Create( wxWindow *parent,
                         const wxString& name )
 {
     // Call wxControl::Create so we get a wxNonControlNSControl
-    if ( !wxToolBarBase::Create(parent, winid, pos, size, style,
-                                wxDefaultValidator, name) )
-        return false;
-
-    FixupStyle();
-
-    return true;
+    return wxToolBarBase::Create(parent,winid,pos,size,style,wxDefaultValidator,name);
 }
 
 wxToolBarToolBase *wxToolBar::CreateTool(int toolid,
@@ -208,10 +200,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int toolid,
                              clientData, shortHelpString, longHelpString);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 void wxToolBar::SetWindowStyleFlag( long style )
@@ -228,11 +219,6 @@ bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
 {
     Realize();
     return true;
-}
-
-bool wxToolBar::Cocoa_acceptsFirstMouse(bool &acceptsFirstMouse, WX_NSEvent theEvent)
-{
-    acceptsFirstMouse = true; return true;
 }
 
 bool wxToolBar::Cocoa_drawRect(const NSRect &rect)

@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+    #pragma implementation "splittree.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -489,7 +493,7 @@ wxWindow *wxDynamicSashWindowImpl::FindFrame() const
 
     win = m_window->GetParent();
     while (win && !win->IsTopLevel()
-#if defined(__WXMSW__) && wxUSE_MDI
+#ifdef __WXMSW__
            && ! wxIsKindOf(win, wxMDIChildFrame)  // not top-level but still a frame
 #endif
         )

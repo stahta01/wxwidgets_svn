@@ -9,20 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "pen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#include "wx/pen.h"
-
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/app.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/app.h"
+#include "wx/pen.h"
 #endif
 
 static int wx2msPenStyle(int wx_style);
@@ -115,3 +119,4 @@ void wxPen::SetJoin(int Join)
 void wxPen::SetCap(int Cap)
 {
 }
+

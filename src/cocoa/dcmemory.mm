@@ -6,11 +6,10 @@
 // Created:     2003/03/16
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 David Elliott
-// Licence:     wxWidgets licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/dcmemory.h"
@@ -30,7 +29,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC,wxDC)
 
-void wxMemoryDC::Init()
+wxMemoryDC::wxMemoryDC(void)
 {
     m_cocoaNSImage = NULL;
     m_ok = false;
@@ -38,7 +37,8 @@ void wxMemoryDC::Init()
 
 wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
 {
-    Init();
+    m_cocoaNSImage = NULL;
+    m_ok = false;
 }
 
 wxMemoryDC::~wxMemoryDC(void)
@@ -71,7 +71,7 @@ bool wxMemoryDC::CocoaUnlockFocus()
 
 // NOTE: The AppKit is unable to draw onto an NSBitmapImageRep so we must
 // instead copy the data to an offscreen window, then copy it back
-void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
+void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
 {
     wxAutoNSAutoreleasePool pool;
     if(m_selectedBitmap.Ok())
@@ -103,7 +103,7 @@ void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
             operation: NSCompositeCopy
             fraction: 1.0];
         [m_cocoaNSImage unlockFocus];
-
+        
         [nsimage release];
     }
 }
@@ -149,7 +149,7 @@ bool wxMemoryDC::CocoaDoBlitOnFocusedDC(wxCoord xdest, wxCoord ydest,
             width, height)
         operation: NSCompositeCopy // FIXME: raster ops
         fraction: 1.0];
-
+        
     [context restoreGraphicsState];
     return false;
 }

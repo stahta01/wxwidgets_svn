@@ -75,10 +75,6 @@ class MyApp: public wxApp
 public:
     virtual bool OnInit();
 
-    // we need to override this as the default behaviour only works when we're
-    // running wxWidgets main loop, not MFC one
-    virtual void ExitMainLoop();
-
     wxFrame *CreateFrame();
 };
 
@@ -232,24 +228,15 @@ BOOL CTheApp::OnIdle(LONG WXUNUSED(lCount))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if !START_WITH_MFC_WINDOW
-    // as we're not inside wxWidgets main loop, the default logic doesn't work
-    // in our case and we need to do this explicitly
-    SetExitOnFrameDelete(true);
+
+    // Exit app when the top level frame is deleted
+    SetExitOnFrameDelete(TRUE);
 
     (void) CreateFrame();
 #endif
 
-    return true;
-}
-
-void MyApp::ExitMainLoop()
-{
-    // instead of existing wxWidgets main loop, terminate the MFC one
-    ::PostQuitMessage(0);
+    return TRUE;
 }
 
 wxFrame *MyApp::CreateFrame()
@@ -281,7 +268,7 @@ wxFrame *MyApp::CreateFrame()
     MyCanvas *canvas = new MyCanvas(subframe, wxPoint(0, 0), wxSize(width, height));
     canvas->SetCursor(wxCursor(wxCURSOR_PENCIL));
     subframe->canvas = canvas;
-    subframe->Show(true);
+    subframe->Show(TRUE);
 
     // Return the main frame window
     return subframe;
@@ -357,7 +344,7 @@ MyChild::~MyChild()
 
 void MyChild::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void MyChild::OnNew(wxCommandEvent& WXUNUSED(event))

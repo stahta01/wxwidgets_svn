@@ -49,15 +49,12 @@
 
     #include <crtdbg.h>
 
-    #undef WXDEBUG_NEW
-    #define WXDEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-
     // this define works around a bug with inline declarations of new, see
     //
     //      http://support.microsoft.com/support/kb/articles/Q140/8/58.asp
     //
     // for the details
-    #define new  WXDEBUG_NEW
+    #define new  new( _NORMAL_BLOCK, __FILE__, __LINE__)
 
     #define wxCrtSetDbgFlag(flag) \
         _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | (flag))

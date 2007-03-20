@@ -12,9 +12,13 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "dialog.h"
+#endif
+
 #include "wx/panel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
 class WXDLLEXPORT wxDialogModalData;
 
@@ -63,6 +67,15 @@ public:
 
     virtual void Raise();
 
+    // event handlers
+    void OnCharHook(wxKeyEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
+
+    // Standard buttons
+    void OnOK(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
 protected:
     // find the window to use as parent for this dialog if none has been
     // specified explicitly by the user
@@ -82,6 +95,7 @@ private:
 
 
     DECLARE_DYNAMIC_CLASS(wxDialog)
+    DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxDialog)
 };
 

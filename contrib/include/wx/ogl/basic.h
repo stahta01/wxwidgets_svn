@@ -12,12 +12,16 @@
 #ifndef _OGL_BASIC_H_
 #define _OGL_BASIC_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "basic.h"
+#endif
+
 #ifndef wxUSE_DEPRECATED
 #define wxUSE_DEPRECATED 0
 #endif
 
 #if wxUSE_DEPRECATED
-    #include "wx/deprecated/setup.h"
+    #include <wx/deprecated/setup.h>
 #endif
 
 #ifndef wxUSE_PROLOGIO
@@ -300,8 +304,8 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   inline void SetId(long i) { m_id = i; }
   inline long GetId() const { return m_id; }
 
-  void SetPen(const wxPen *pen);
-  void SetBrush(const wxBrush *brush);
+  void SetPen(wxPen *pen);
+  void SetBrush(wxBrush *brush);
 
   virtual void Show(bool show);
   virtual bool IsShown() const { return m_visible; }
@@ -329,8 +333,8 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
 
   void AddText(const wxString& string);
 
-  inline wxPen *GetPen() const { return wx_const_cast(wxPen*, m_pen); }
-  inline wxBrush *GetBrush() const { return wx_const_cast(wxBrush*, m_brush); }
+  inline wxPen *GetPen() const { return m_pen; }
+  inline wxBrush *GetBrush() const { return m_brush; }
 
   /*
    * Region-specific functions (defaults to the default region
@@ -527,8 +531,8 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   wxShapeEvtHandler*    m_eventHandler;
   bool                  m_formatted;
   double                m_xpos, m_ypos;
-  const wxPen*          m_pen;
-  const wxBrush*        m_brush;
+  wxPen*                m_pen;
+  wxBrush*              m_brush;
   wxFont*               m_font;
   wxColour              m_textColour;
   wxString              m_textColourName;
@@ -558,7 +562,7 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   wxShape*              m_parent;      // In case it's a child
   int                   m_formatMode;
   int                   m_shadowMode;
-  const wxBrush*        m_shadowBrush;
+  wxBrush*              m_shadowBrush;
   int                   m_shadowOffsetX;
   int                   m_shadowOffsetY;
   int                   m_textMarginX;    // Gap between text and border

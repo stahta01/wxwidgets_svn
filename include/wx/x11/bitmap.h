@@ -12,6 +12,10 @@
 #ifndef _WX_BITMAP_H_
 #define _WX_BITMAP_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "bitmap.h"
+#endif
+
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/string.h"
@@ -37,7 +41,7 @@ public:
     wxMask( const wxBitmap& bitmap, const wxColour& colour );
     wxMask( const wxBitmap& bitmap, int paletteIndex );
     wxMask( const wxBitmap& bitmap );
-    virtual ~wxMask();
+    ~wxMask();
 
     bool Create( const wxBitmap& bitmap, const wxColour& colour );
     bool Create( const wxBitmap& bitmap, int paletteIndex );
@@ -62,9 +66,12 @@ private:
 // wxBitmap
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+class WXDLLEXPORT wxBitmapHandler : public wxBitmapHandlerBase
 {
-    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+public:
+    wxBitmapHandler() : wxBitmapHandlerBase() {}
+private:
+    DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 };
 
 class WXDLLIMPEXP_CORE wxBitmap: public wxBitmapBase
@@ -73,24 +80,21 @@ public:
     wxBitmap();
     wxBitmap( int width, int height, int depth = -1 );
     wxBitmap( const char bits[], int width, int height, int depth = 1 );
-    wxBitmap( const char* const* bits );
-#ifdef wxNEEDS_CHARPP
-    // needed for old GCC
-    wxBitmap(char** data)
-    {
-        *this = wxBitmap(wx_const_cast(const char* const*, data));
-    }
-#endif
+    wxBitmap( const char **bits ) { (void)CreateFromXpm(bits); }
+    wxBitmap( char **bits ) { (void)CreateFromXpm((const char **)bits); }
+    wxBitmap( const wxBitmap& bmp );
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
     virtual ~wxBitmap();
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const;
+    wxBitmap& operator = ( const wxBitmap& bmp );
+    bool operator == ( const wxBitmap& bmp ) const;
+    bool operator != ( const wxBitmap& bmp ) const;
+    bool Ok() const;
 
     static void InitStandardHandlers();
 
     bool Create(int width, int height, int depth = -1);
-    bool Create(const void* data, wxBitmapType type,
+    bool Create(void* data, wxBitmapType type,
                 int width, int height, int depth = -1);
     // create the wxBitmap using a _copy_ of the pixmap
     bool Create(WXPixmap pixmap);
@@ -138,11 +142,11 @@ public:
     WXDisplay *GetDisplay() const;
 
 protected:
-    virtual wxObjectRefData *CreateRefData() const;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
+    bool CreateFromXpm(const char **bits);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxBitmap)
 };
 
-#endif // _WX_BITMAP_H_
+#endif
+// _WX_BITMAP_H_

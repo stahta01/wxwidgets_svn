@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/print.cpp
+// Name:        print.cpp
 // Purpose:     Print framework
 // Author:      David Webster
 // Modified by:
@@ -11,14 +11,15 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/app.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/list.h"
+#include "wx/utils.h"
+#include "wx/app.h"
 #endif
+
+#if wxUSE_PRINTING_ARCHITECTURE
 
 #include "wx/os2/printos2.h"
 #include "wx/generic/prntdlgg.h"
@@ -39,15 +40,13 @@ wxOS2Printer::~wxOS2Printer()
 {
 }
 
-bool wxOS2Printer::Print(wxWindow *WXUNUSED(parent),
-                         wxPrintout *WXUNUSED(printout),
-                         bool WXUNUSED(prompt))
+bool wxOS2Printer::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
 {
     // TODO. See wxPostScriptPrinter::Print for hints.
-    return false;
+    return FALSE;
 }
 
-wxDC* wxOS2Printer::PrintDialog(wxWindow *WXUNUSED(parent))
+wxDC* wxOS2Printer::PrintDialog(wxWindow *parent)
 {
 // TODO:
 /*
@@ -57,14 +56,15 @@ wxDC* wxOS2Printer::PrintDialog(wxWindow *WXUNUSED(parent))
     return NULL;
 }
 
-bool wxOS2Printer::Setup(wxWindow *WXUNUSED(parent))
+bool wxOS2Printer::Setup(wxWindow *parent)
 {
 // TODO:
 /*
     wxPrintDialog dialog(parent, & m_printData);
+    dialog.GetPrintData().SetSetupDialog(TRUE);
     return (dialog.ShowModal() == wxID_OK);
 */
-    return false;
+    return FALSE;
 }
 
 /*
@@ -87,13 +87,13 @@ wxOS2PrintPreview::~wxOS2PrintPreview()
 {
 }
 
-bool wxOS2PrintPreview::Print(bool WXUNUSED(interactive))
+bool wxOS2PrintPreview::Print(bool interactive)
 {
     if (!m_printPrintout)
-        return false;
+        return FALSE;
 //    wxOS2Printer printer(&m_printData);
 //    return printer.Print(m_previewFrame, m_printPrintout, interactive);
-    return false;
+    return FALSE;
 }
 
 void wxOS2PrintPreview::DetermineScaling()

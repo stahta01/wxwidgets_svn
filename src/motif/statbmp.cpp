@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/statbmp.cpp
+// Name:        statbmp.cpp
 // Purpose:     wxStaticBitmap
 // Author:      Julian Smart
 // Modified by:
@@ -9,8 +9,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statbmp.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+
+#include "wx/defs.h"
 
 #include "wx/statbmp.h"
 
@@ -96,7 +102,7 @@ void wxStaticBitmap::DoSetBitmap()
         // in the current widget background colour.
         if (m_messageBitmapOriginal.GetMask())
         {
-            WXPixel backgroundPixel;
+            int backgroundPixel;
             XtVaGetValues( widget, XmNbackground, &backgroundPixel,
                 NULL);
 
@@ -129,7 +135,7 @@ void wxStaticBitmap::DoSetBitmap()
             XmNlabelType, XmSTRING,
             XmNlabelPixmap, XmUNSPECIFIED_PIXMAP,
             NULL);
-    }
+    }    
 }
 
 void wxStaticBitmap::SetBitmap(const wxBitmap& bitmap)
@@ -154,3 +160,4 @@ void wxStaticBitmap::ChangeForegroundColour()
     m_bitmapCache.SetColoursChanged();
     wxWindow::ChangeForegroundColour();
 }
+

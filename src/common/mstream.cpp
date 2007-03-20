@@ -17,22 +17,22 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "mstream.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
 
 #if wxUSE_STREAMS
 
-#include "wx/mstream.h"
-
-#ifndef   WX_PRECOMP
-    #include  "wx/stream.h"
-#endif  //WX_PRECOMP
-
 #include <stdlib.h>
+#include "wx/stream.h"
+#include "wx/mstream.h"
 
 // ============================================================================
 // implementation
@@ -54,52 +54,18 @@ wxMemoryInputStream::wxMemoryInputStream(const void *data, size_t len)
 
 wxMemoryInputStream::wxMemoryInputStream(const wxMemoryOutputStream& stream)
 {
-    const wxFileOffset lenFile = stream.GetLength();
-    if ( lenFile == wxInvalidOffset )
-    {
+    ssize_t len = (ssize_t)stream.GetLength();
+    if (len == wxInvalidOffset) {
         m_i_streambuf = NULL;
         m_lasterror = wxSTREAM_EOF;
         return;
     }
-
-    const size_t len = wx_truncate_cast(size_t, lenFile);
-    wxASSERT_MSG( len == lenFile + size_t(0), _T("huge files not supported") );
-
     m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
     m_i_streambuf->SetBufferIO(len); // create buffer
     stream.CopyTo(m_i_streambuf->GetBufferStart(), len);
     m_i_streambuf->SetIntPosition(0); // seek to start pos
     m_i_streambuf->Fixed(true);
     m_length = len;
-}
-
-void
-wxMemoryInputStream::InitFromStream(wxInputStream& stream, wxFileOffset lenFile)
-{
-    if ( lenFile == wxInvalidOffset )
-        lenFile = stream.GetLength();
-
-    if ( lenFile == wxInvalidOffset )
-    {
-        m_i_streambuf = NULL;
-        m_lasterror = wxSTREAM_EOF;
-        return;
-    }
-
-    const size_t len = wx_truncate_cast(size_t, lenFile);
-    wxASSERT_MSG( (wxFileOffset)len == lenFile, _T("huge files not supported") );
-
-    m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
-    m_i_streambuf->SetBufferIO(len); // create buffer
-    stream.Read(m_i_streambuf->GetBufferStart(), len);
-    m_i_streambuf->SetIntPosition(0); // seek to start pos
-    m_i_streambuf->Fixed(true);
-    m_length = stream.LastRead();
-}
-
-bool wxMemoryInputStream::CanRead() const
-{
-    return m_i_streambuf->GetIntPosition() != m_length;
 }
 
 wxMemoryInputStream::~wxMemoryInputStream()
@@ -119,6 +85,11 @@ char wxMemoryInputStream::Peek()
     }
 
     return buf[pos];
+}
+
+bool wxMemoryInputStream::Eof() const
+{
+    return !m_i_streambuf->GetBytesLeft();
 }
 
 size_t wxMemoryInputStream::OnSysRead(void *buffer, size_t nbytes)

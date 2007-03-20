@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/spinctrl.cpp
-// Purpose:     wxSpinCtrl class implementation for OS/2
+// Name:        msw/spinctrl.cpp
+// Purpose:     wxSpinCtrl class implementation for Win32
 // Author:      David Webster
 // Modified by:
 // Created:     10/15/99
@@ -12,6 +12,12 @@
 // ============================================================================
 // declarations
 // ============================================================================
+
+
+#ifdef __GNUG__
+    #pragma implementation "spinctrlbase.h"
+    #pragma implementation "spinctrl.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // headers
@@ -132,7 +138,7 @@ bool wxSpinCtrl::Create( wxWindow*       pParent,
     SetParent(pParent);
     m_windowStyle      = lStyle;
 
-    int lSstyle = 0L;
+    int                             lSstyle = 0L;
 
     lSstyle = WS_VISIBLE      |
               WS_TABSTOP      |

@@ -21,21 +21,6 @@
     #include "wx/gdicmn.h"
 #endif // WX_PRECOMP
 
-#include "wx/iosfwrap.h"
-
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
-
-// this operator is needed to use CPPUNIT_ASSERT_EQUAL with wxRects
-wxSTD ostream& operator<<(wxSTD ostream& os, const wxRect& r)
-{
-    os << "{"
-        << r.x << ", " << r.y << ", " << r.width << ", " << r.height
-       << "}";
-    return os;
-}
-
 // ----------------------------------------------------------------------------
 // test class
 // ----------------------------------------------------------------------------
@@ -47,13 +32,11 @@ public:
 
 private:
     CPPUNIT_TEST_SUITE( RectTestCase );
-        CPPUNIT_TEST( CentreIn );
         CPPUNIT_TEST( InflateDeflate );
         CPPUNIT_TEST( Operators );
         CPPUNIT_TEST( Union );
     CPPUNIT_TEST_SUITE_END();
 
-    void CentreIn();
     void InflateDeflate();
     void Operators();
     void Union();
@@ -66,17 +49,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION( RectTestCase );
 
 // also include in it's own registry so that these tests can be run alone
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( RectTestCase, "RectTestCase" );
-
-void RectTestCase::CentreIn()
-{
-    typedef wxRect R;
-
-    CPPUNIT_ASSERT_EQUAL( R(45, 45, 10, 10),
-                          R(0, 0, 10, 10).CentreIn(R(0, 0, 100, 100)));
-
-    CPPUNIT_ASSERT_EQUAL( R(-5, -5, 20, 20),
-                          R(0, 0, 20, 20).CentreIn(R(0, 0, 10, 10)));
-}
 
 void RectTestCase::InflateDeflate()
 {

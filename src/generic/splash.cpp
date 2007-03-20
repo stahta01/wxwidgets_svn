@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/splash.cpp
+// Name:        splash.cpp
 // Purpose:     wxSplashScreen class
 // Author:      Julian Smart
 // Modified by:
@@ -9,11 +9,15 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "splash.h"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_SPLASH
@@ -22,12 +26,13 @@
     #include <gtk/gtk.h>
 #endif
 
+#ifndef WX_PRECOMP
+#include "wx/dcmemory.h"
+#include "wx/dcclient.h"
+#endif
+
 #include "wx/splash.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
-#endif
 
 /*
  * wxSplashScreen
@@ -149,7 +154,7 @@ static void wxDrawSplashBitmap(wxDC& dc, const wxBitmap& bitmap, int WXUNUSED(x)
     }
 #endif // USE_PALETTE_IN_SPLASH
 
-    dcMem.SelectObjectAsSource(bitmap);
+    dcMem.SelectObject(bitmap);
     dc.Blit(0, 0, bitmap.GetWidth(), bitmap.GetHeight(), & dcMem, 0, 0);
     dcMem.SelectObject(wxNullBitmap);
 

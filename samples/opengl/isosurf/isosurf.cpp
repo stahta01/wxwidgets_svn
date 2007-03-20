@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -246,9 +251,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     Args(argc, argv);
 
     // Create the main frame window
@@ -275,7 +277,7 @@ bool MyApp::OnInit()
     int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
         WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
         WX_GL_DOUBLEBUFFER,
-#  if defined(__WXMAC__) || defined(__WXCOCOA__)
+#  ifdef __WXMAC__
         GL_NONE };
 #  else
         None };

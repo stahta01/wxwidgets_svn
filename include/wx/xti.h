@@ -13,6 +13,10 @@
 #ifndef _WX_XTIH__
 #define _WX_XTIH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xti.h"
+#endif
+
 // We want to support properties, event sources and events sinks through
 // explicit declarations, using templates and specialization to make the
 // effort as painless as possible.
@@ -689,7 +693,7 @@ private :
     wxString m_name ;
 } ;
 
-#include "wx/dynarray.h"
+#include <wx/dynarray.h>
 
 WX_DECLARE_OBJARRAY_WITH_DECL(wxxVariant, wxxVariantArray, class WXDLLIMPEXP_BASE);
 
@@ -768,7 +772,7 @@ class wxSetter##property : public wxSetter \
 public: \
     wxINFUNC_CLASS_TYPE_FIX(Klass) \
     wxSetter##property() : wxSetter( wxT(#setterMethod) ) {} \
-    virtual ~wxSetter##property() {} \
+    ~wxSetter##property() {} \
     void Set( wxObject *object, const wxxVariant &variantValue ) const \
 { \
     Klass *obj = dynamic_cast<Klass*>(object) ;  \
@@ -785,7 +789,7 @@ class wxGetter##property : public wxGetter \
 public : \
     wxINFUNC_CLASS_TYPE_FIX(Klass) \
     wxGetter##property() : wxGetter( wxT(#gettermethod) ) {} \
-    virtual ~wxGetter##property() {} \
+    ~wxGetter##property() {} \
     void Get( const wxObject *object , wxxVariant &result) const \
 { \
     const Klass *obj = dynamic_cast<const Klass*>(object) ;  \
@@ -799,7 +803,7 @@ class wxAdder##property : public wxAdder \
 public: \
     wxINFUNC_CLASS_TYPE_FIX(Klass) \
     wxAdder##property() : wxAdder( wxT(#addermethod) ) {} \
-    virtual ~wxAdder##property() {} \
+    ~wxAdder##property() {} \
     void Add( wxObject *object, const wxxVariant &variantValue ) const \
 { \
     Klass *obj = dynamic_cast<Klass*>(object) ;  \
@@ -816,7 +820,7 @@ class wxCollectionGetter##property : public wxCollectionGetter \
 public : \
     wxINFUNC_CLASS_TYPE_FIX(Klass) \
     wxCollectionGetter##property() : wxCollectionGetter( wxT(#gettermethod) ) {} \
-    virtual ~wxCollectionGetter##property() {} \
+    ~wxCollectionGetter##property() {} \
     void Get( const wxObject *object , wxxVariantArray &result) const \
 { \
     const Klass *obj = dynamic_cast<const Klass*>(object) ;  \
@@ -873,7 +877,7 @@ class WXDLLIMPEXP_BASE wxGenericPropertyAccessor : public wxPropertyAccessor
 {
 public :
     wxGenericPropertyAccessor( const wxString &propName ) ;
-    virtual ~wxGenericPropertyAccessor() ;
+    ~wxGenericPropertyAccessor() ;
 
     void RenameProperty( const wxString& WXUNUSED_UNLESS_DEBUG(oldName),
         const wxString& newName )
@@ -1399,28 +1403,6 @@ struct wxConstructorBridge_3 : public wxConstructorBridge
     const wxChar *klass::ms_constructorProperties[] = { wxT(#v0)  , wxT(#v1)  , wxT(#v2)  } ; \
     const int klass::ms_constructorPropertiesCount = 3 ;
 
-// direct constructor version
-
-template<typename Class,
-typename T0, typename T1, typename T2>
-struct wxDirectConstructorBridge_3 : public wxDirectConstructorBrigde
-{
-    void Create(wxObject * &o, wxxVariant *args)
-    {
-        o = new Class(
-            args[0].wxTEMPLATED_MEMBER_CALL(Get , T0) ,
-            args[1].wxTEMPLATED_MEMBER_CALL(Get , T1) ,
-            args[2].wxTEMPLATED_MEMBER_CALL(Get , T2)
-            );
-    }
-};
-
-#define wxDIRECT_CONSTRUCTOR_3(klass,t0,v0,t1,v1,t2,v2) \
-    wxDirectConstructorBridge_3<klass,t0,t1,t2> constructor##klass ; \
-    wxConstructorBridge* klass::ms_constructor = &constructor##klass ; \
-    const wxChar *klass::ms_constructorProperties[] = { wxT(#v0)  , wxT(#v1) , wxT(#v2) } ; \
-    const int klass::ms_constructorPropertiesCount = 3;
-
 // 4 params
 
 template<typename Class,
@@ -1683,7 +1665,6 @@ public:
     const wxChar       *GetIncludeName() const { return m_unitName ; }
     const wxClassInfo **GetParents() const { return m_parents; }
     int                 GetSize() const { return m_objectSize; }
-    bool                IsDynamic() const { return (NULL != m_objectConstructor); }
 
     wxObjectConstructorFn      GetConstructor() const { return m_objectConstructor; }
     static const wxClassInfo  *GetFirst() { return sm_first; }
@@ -1719,6 +1700,12 @@ public:
     // gets the streaming callback from this class or any superclass
     wxObjectStreamingCallback GetStreamingCallback() const ;
 
+#if WXWIN_COMPATIBILITY_2_4
+    // Initializes parent pointers and hash table for fast searching.
+    wxDEPRECATED( static void InitializeClasses() );
+    // Cleans up hash table used for fast searching.
+    wxDEPRECATED( static void CleanUpClasses() );
+#endif
     static void CleanUp();
 
     // returns the first property
@@ -2093,4 +2080,4 @@ template<typename collection_t> void wxArrayCollectionToVariantArray( const coll
 }
 
 
-#endif // _WX_XTIH__
+#endif

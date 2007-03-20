@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/menu.cpp
+// Name:        menu.cpp
 // Purpose:     wxMenu, wxMenuBar, wxMenuItem
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin
@@ -16,6 +16,10 @@
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "menu.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -59,25 +63,7 @@
 // other standard headers
 #include <string.h>
 
-//VC6 needs these defining, though they are in winuser.h
-#ifndef MIIM_BITMAP
-#define MIIM_STRING      0x00000040
-#define MIIM_BITMAP      0x00000080
-#define MIIM_FTYPE       0x00000100
-#define HBMMENU_CALLBACK            ((HBITMAP) -1)
-typedef struct tagMENUINFO
-{
-    DWORD   cbSize;
-    DWORD   fMask;
-    DWORD   dwStyle;
-    UINT    cyMax;
-    HBRUSH  hbrBack;
-    DWORD   dwContextHelpID;
-    DWORD   dwMenuData;
-}   MENUINFO, FAR *LPMENUINFO;
-#endif
-
-#if wxUSE_OWNER_DRAWN
+#if wxUSE_OWNER_DRAWN && defined(MIIM_BITMAP)
     #include "wx/dynlib.h"
 #endif
 
@@ -331,7 +317,7 @@ void wxMenu::UpdateAccel(wxMenuItem *item)
         }
 
         // find the (new) accel for this item
-        wxAcceleratorEntry *accel = wxAcceleratorEntry::Create(item->GetText());
+        wxAcceleratorEntry *accel = wxGetAccelFromString(item->GetText());
         if ( accel )
             accel->m_command = item->GetId();
 
@@ -453,10 +439,13 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
         {
             // try to use InsertMenuItem() as it's guaranteed to look correct
             // while our owner-drawn code is not
-#ifndef __DMC__
-            // DMC at march 2007 doesn't have HBITMAP hbmpItem tagMENUITEMINFOA /W
-            // MIIM_BITMAP only works under WinME/2000+
+
+            // first compile-time check
+
+#if defined(MIIM_BITMAP) && (_WIN32_WINNT >= 0x0500)
             WinStruct<MENUITEMINFO> mii;
+
+            // now run-time one: MIIM_BITMAP only works under WinME/2000+
             if ( wxGetWinVersion() >= wxWinVersion_98 )
             {
                 mii.fMask = MIIM_STRING | MIIM_DATA | MIIM_BITMAP;
@@ -468,7 +457,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
                 }
 
                 mii.cch = itemText.length();
-                mii.dwTypeData = wx_const_cast(wxChar *, itemText.wx_str());
+                mii.dwTypeData = wx_const_cast(wxChar *, itemText.c_str());
 
                 if (flags & MF_POPUP)
                 {
@@ -528,7 +517,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
                     pItem->ResetOwnerDrawn();
                 }
             }
-#endif // __DMC__
+#endif // MIIM_BITMAP
         }
 
         if ( !ok )
@@ -548,7 +537,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
         itemText = wxMenuItem::GetLabelFromText(itemText);
 #endif
 
-        pData = (wxChar*)itemText.wx_str();
+        pData = (wxChar*)itemText.c_str();
     }
 
     // item might have already been inserted by InsertMenuItem() above
@@ -793,12 +782,7 @@ bool wxMenu::MSWCommand(WXUINT WXUNUSED(param), WXWORD id)
     // ignore commands from the menu title
     if ( id != (WXWORD)idMenuTitle )
     {
-        // update the check item when it's clicked
-        wxMenuItem * const item = FindItem(id);
-        if ( item && item->IsCheckable() )
-            item->Toggle();
-
-        // get the checked status of the menu item: note that menuState is the
+        // get the checked status of the command: notice that menuState is the
         // old state of the menu, so the test for MF_CHECKED must be inverted
         UINT menuState = ::GetMenuState(GetHmenu(), id, MF_BYCOMMAND);
         SendEvent(id, !(menuState & MF_CHECKED));

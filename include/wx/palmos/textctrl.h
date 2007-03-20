@@ -12,6 +12,10 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrl.h"
+#endif
+
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {
 public:
@@ -31,7 +35,7 @@ public:
 
         Create(parent, id, value, pos, size, style, validator, name);
     }
-    virtual ~wxTextCtrl();
+    ~wxTextCtrl();
 
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxString& value = wxEmptyString,
@@ -45,6 +49,7 @@ public:
     // ----------------------------------
 
     virtual wxString GetValue() const;
+    virtual void SetValue(const wxString& value);
 
     virtual int GetLineLength(long lineNo) const;
     virtual wxString GetLineText(long lineNo) const;
@@ -63,8 +68,8 @@ public:
     virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
 
-    // load the control's contents from the file
-    virtual bool DoLoadFile(const wxString& file, int fileType);
+    // load the controls contents from the file
+    virtual bool LoadFile(const wxString& file);
 
     // clears the dirty flag
     virtual void MarkDirty();
@@ -177,9 +182,6 @@ public:
 protected:
     // common part of all ctors
     void Init();
-
-    virtual void DoSetValue(const wxString& value, int flags = 0);
-
 
     // intercept WM_GETDLGCODE
     virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);

@@ -12,6 +12,10 @@
 #ifndef _OGL_COMPOSIT_H_
 #define _OGL_COMPOSIT_H_
 
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "composit.h"
+#endif
+
 
 class WXDLLIMPEXP_OGL wxDivisionShape;
 class WXDLLIMPEXP_OGL wxOGLConstraint;
@@ -188,10 +192,10 @@ class WXDLLIMPEXP_OGL wxDivisionShape: public wxCompositeShape
   inline void SetHandleSide(int side) { m_handleSide = side; }
   inline int GetHandleSide() const { return m_handleSide; }
 
-  inline void SetLeftSidePen(const wxPen *pen) { m_leftSidePen = pen; }
-  inline wxPen *GetLeftSidePen() const { return wx_const_cast(wxPen*, m_leftSidePen); }
-  inline void SetTopSidePen(const wxPen *pen) { m_topSidePen = pen; }
-  inline wxPen *GetTopSidePen() const { return wx_const_cast(wxPen*, m_topSidePen); }
+  inline void SetLeftSidePen(wxPen *pen) { m_leftSidePen = pen; }
+  inline wxPen *GetLeftSidePen() const { return m_leftSidePen; }
+  inline void SetTopSidePen(wxPen *pen) { m_topSidePen = pen; }
+  inline wxPen *GetTopSidePen() const { return m_topSidePen; }
 
   void SetLeftSideColour(const wxString& colour);
   void SetTopSideColour(const wxString& colour);
@@ -214,8 +218,8 @@ class WXDLLIMPEXP_OGL wxDivisionShape: public wxCompositeShape
 
   int                   m_handleSide;       // Side at which handle is legal
 
-  const wxPen*          m_leftSidePen;
-  const wxPen*          m_topSidePen;
+  wxPen*                m_leftSidePen;
+  wxPen*                m_topSidePen;
   wxString              m_leftSideColour;
   wxString              m_topSideColour;
   wxString              m_leftSideStyle;

@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_SCROLBAR_H_
 #define _WX_UNIV_SCROLBAR_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univscrolbar.h"
+#endif
+
 class WXDLLEXPORT wxScrollTimer;
 
 #include "wx/univ/scrarrow.h"
@@ -96,13 +100,8 @@ public:
                                long numArg = 0,
                                const wxString& strArg = wxEmptyString);
 
-    static wxInputHandler *GetStdInputHandler(wxInputHandler *handlerDef);
-    virtual wxInputHandler *DoGetStdInputHandler(wxInputHandler *handlerDef)
-    {
-        return GetStdInputHandler(handlerDef);
-    }
-
-    // scrollbars around a normal window should not receive the focus
+    // The scrollbars around a normal window should not
+    // receive the focus.
     virtual bool AcceptsFocus() const;
 
     // wxScrollBar sub elements state (combination of wxCONTROL_XXX)
@@ -116,13 +115,10 @@ public:
     virtual int GetArrowState(wxScrollArrows::Arrow arrow) const;
     virtual void SetArrowFlag(wxScrollArrows::Arrow arrow, int flag, bool set);
     virtual bool OnArrow(wxScrollArrows::Arrow arrow);
-    virtual wxScrollArrows::Arrow HitTestArrow(const wxPoint& pt) const;
+    virtual wxScrollArrows::Arrow HitTest(const wxPoint& pt) const;
 
     // for wxControlRenderer::DrawScrollbar() only
     const wxScrollArrows& GetArrows() const { return m_arrows; }
-
-    // returns one of wxHT_SCROLLBAR_XXX constants
-    wxHitTest HitTestBar(const wxPoint& pt) const;
 
     // idle processing
     virtual void OnInternalIdle();
@@ -143,30 +139,6 @@ protected:
 
     // is this scrollbar attached to a window or a standalone control?
     bool IsStandalone() const;
-
-    // scrollbar geometry methods:
-
-    // gets the bounding box for a scrollbar element for the given (by default
-    // - current) thumb position
-    wxRect GetScrollbarRect(wxScrollBar::Element elem, int thumbPos = -1) const;
-
-    // returns the size of the scrollbar shaft excluding the arrows
-    wxCoord GetScrollbarSize() const;
-
-    // translate the scrollbar position (in logical units) into physical
-    // coordinate (in pixels) and the other way round
-    wxCoord ScrollbarToPixel(int thumbPos = -1);
-    int PixelToScrollbar(wxCoord coord);
-
-    // return the starting and ending positions, in pixels, of the thumb of a
-    // scrollbar with the given logical position, thumb size and range and the
-    // given physical length
-    static void GetScrollBarThumbSize(wxCoord length,
-                                      int thumbPos,
-                                      int thumbSize,
-                                      int range,
-                                      wxCoord *thumbStart,
-                                      wxCoord *thumbEnd);
 
 private:
     // total range of the scrollbar in logical units
@@ -192,15 +164,13 @@ private:
     // the object handling the arrows
     wxScrollArrows m_arrows;
 
-    friend WXDLLEXPORT class wxControlRenderer; // for geometry methods
-    friend class wxStdScrollBarInputHandler; // for geometry methods
-
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
 };
 
 // ----------------------------------------------------------------------------
-// Standard scrollbar input handler which can be used as a base class
+// common scrollbar input handler: it manages clicks on the standard scrollbar
+// elements (line arrows, bar, thumb)
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxStdScrollBarInputHandler : public wxStdInputHandler
@@ -227,10 +197,12 @@ public:
                                const wxControlAction& action);
 
 protected:
+    // the methods which must be overridden in the derived class
+
     // return true if the mouse button can be used to activate scrollbar, false
-    // if not (any button under GTK+ unlike left button only which is default)
-    virtual bool IsAllowedButton(int button) const
-        { return button == wxMOUSE_BTN_LEFT; }
+    // if not (only left mouse button can do it under Windows, any button under
+    // GTK+)
+    virtual bool IsAllowedButton(int button) = 0;
 
     // set or clear the specified flag on the scrollbar element corresponding
     // to m_htLast
@@ -253,7 +225,6 @@ protected:
 
     // generate a "thumb move" action for this mouse event
     void HandleThumbMove(wxScrollBar *scrollbar, const wxMouseEvent& event);
-
 
     // the window (scrollbar) which has capture or NULL and the flag telling if
     // the mouse is inside the element which captured it or not

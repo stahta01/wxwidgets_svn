@@ -13,6 +13,10 @@
 // declarations
 // ============================================================================
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "uxtheme.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -31,8 +35,9 @@
     #include "wx/toplevel.h"
     #include "wx/string.h"
     #include "wx/log.h"
-    #include "wx/module.h"
 #endif //WX_PRECOMP
+
+#include "wx/module.h"
 
 #include "wx/msw/uxtheme.h"
 
@@ -175,3 +180,4 @@ bool wxUxThemeEngine::Initialize()
 }
 
 #endif // wxUSE_UXTHEME
+

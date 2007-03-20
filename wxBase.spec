@@ -1,6 +1,6 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
+%define ver  2.6.4
+%define ver2 2.6
 %define rel  1
 
 # Configurable settings (use --with(out) unicode on rpmbuild command line):
@@ -91,13 +91,8 @@ cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make -C locale allmo
-make -C obj-static DESTDIR=$RPM_BUILD_ROOT prefix=%{pref} install
-make -C obj-shared DESTDIR=$RPM_BUILD_ROOT prefix=%{pref} install
-
-# we need to modify the absolute wx-config link to be relative or rpm complains
-# (and our package wouldn't be relocatable)
-ln -sf ../lib/wx/config/%{wxconfig} $RPM_BUILD_ROOT/%{pref}/bin/wx-config
+(cd obj-static ; make prefix=$RPM_BUILD_ROOT%{pref} install)
+(cd obj-shared ; make prefix=$RPM_BUILD_ROOT%{pref} install)
 
 %find_lang wxstd
 
@@ -137,15 +132,12 @@ rm -f %{_bindir}/%{wxconfiglink}
 
 %files devel
 %defattr (-,root,root)
-%{_bindir}/wx-config
 %dir %{_includedir}/wx-%{ver2}
 %{_includedir}/wx-%{ver2}/*
 %{_libdir}/libwx_base*-%{ver2}.so
 %dir %{_libdir}/wx
 %{_libdir}/wx/*
 %{_datadir}/aclocal/*.m4
-%{_datadir}/bakefile/presets/*
-%{_datadir}/locale/*/LC_MESSAGES/*.mo
 
 %files static
 %defattr (-,root,root)

@@ -9,6 +9,10 @@
 // License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "prefconf.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -82,7 +86,6 @@ know structures of Preferences of other non wxW applications.
 // ----------------------------------------------------------------------------
 // ctor/dtor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxPrefConfig, wxConfigBase)
 
 wxPrefConfig::wxPrefConfig(const wxString& appName, const wxString& vendorName,
                            const wxString& strLocal, const wxString& strGlobal,

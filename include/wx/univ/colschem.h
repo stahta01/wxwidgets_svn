@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_COLSCHEM_H_
 #define _WX_UNIV_COLSCHEM_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "colschem.h"
+#endif
+
 class WXDLLEXPORT wxWindow;
 
 #include "wx/colour.h"
@@ -53,23 +57,20 @@ public:
         SHADOW_HIGHLIGHT,
         SHADOW_IN,
         SHADOW_OUT,
-
+        
         // the titlebar background colours for the normal and focused states
         TITLEBAR,
         TITLEBAR_ACTIVE,
-
+        
         // the titlebar text colours
         TITLEBAR_TEXT,
         TITLEBAR_ACTIVE_TEXT,
-
+        
         // the default gauge fill colour
         GAUGE,
 
         // desktop background colour (only used by framebuffer ports)
         DESKTOP,
-
-        // wxFrame's background colour
-        FRAME,
 
         MAX
     };

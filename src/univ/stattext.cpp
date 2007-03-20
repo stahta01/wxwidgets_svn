@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/stattext.cpp
+// Name:        univ/stattext.cpp
 // Purpose:     wxStaticText
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "univstattext.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -25,10 +29,9 @@
 
 #if wxUSE_STATTEXT
 
-#include "wx/stattext.h"
-
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
+    #include "wx/stattext.h"
     #include "wx/validate.h"
 #endif
 
@@ -55,9 +58,9 @@ bool wxStaticText::Create(wxWindow *parent,
 {
     if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
         return false;
-
+        
     SetLabel(label);
-    SetInitialSize(size);
+    SetBestSize(size);
 
     return true;
 }
@@ -88,14 +91,6 @@ wxSize wxStaticText::DoGetBestClientSize() const
 
 void wxStaticText::DoDraw(wxControlRenderer *renderer)
 {
-    if ( UseBgCol() )
-    {
-        wxDC& dc = renderer->GetDC();
-        dc.SetBrush(GetBackgroundColour());
-        dc.SetPen(*wxTRANSPARENT_PEN);
-        dc.DrawRectangle(renderer->GetRect());
-    }
-
     renderer->DrawLabel();
 }
 

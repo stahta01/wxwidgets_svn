@@ -13,10 +13,11 @@
 #ifndef _WX_LONGLONG_H
 #define _WX_LONGLONG_H
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "longlong.h"
+#endif
+
 #include "wx/defs.h"
-
-#if wxUSE_LONGLONG
-
 #include "wx/string.h"
 
 #include <limits.h>     // for LONG_MAX
@@ -42,12 +43,7 @@
     // unknown pragma should never be an error -- except that, actually, some
     // broken compilers don't like it, so we have to disable it in this case
     // <sigh>
-    #ifdef __GNUC__
-        #warning "Your compiler does not appear to support 64 bit "\
-                 "integers, using emulation class instead.\n" \
-                 "Please report your compiler version to " \
-                 "wx-dev@lists.wxwidgets.org!"
-    #elif !(defined(__WATCOMC__) || defined(__VISAGECPP__))
+    #if !(defined(__WATCOMC__) || defined(__VISAGECPP__))
         #pragma warning "Your compiler does not appear to support 64 bit "\
                         "integers, using emulation class instead.\n" \
                         "Please report your compiler version to " \
@@ -129,24 +125,10 @@ public:
 
     // assignment operators
         // from native 64 bit integer
-#ifndef wxLongLongIsLong
     wxLongLongNative& operator=(wxLongLong_t ll)
         { m_ll = ll; return *this; }
-    wxLongLongNative& operator=(wxULongLong_t ll)
-        { m_ll = ll; return *this; }
-#endif // !wxLongLongNative
-    wxLongLongNative& operator=(const wxULongLongNative &ll);
-    wxLongLongNative& operator=(int l)
-        { m_ll = l; return *this; }
-    wxLongLongNative& operator=(long l)
-        { m_ll = l; return *this; }
-    wxLongLongNative& operator=(unsigned int l)
-        { m_ll = l; return *this; }
-    wxLongLongNative& operator=(unsigned long l)
-        { m_ll = l; return *this; }
 #if wxUSE_LONGLONG_WX
     wxLongLongNative& operator=(wxLongLongWx ll);
-    wxLongLongNative& operator=(const class wxULongLongWx &ll);
 #endif
 
 
@@ -161,10 +143,10 @@ public:
     // accessors
         // get high part
     long GetHi() const
-        { return wx_truncate_cast(long, m_ll >> 32); }
+        { return (long)(m_ll >> 32); }
         // get low part
     unsigned long GetLo() const
-        { return wx_truncate_cast(unsigned long, m_ll); }
+        { return (unsigned long)m_ll; }
 
         // get absolute value
     wxLongLongNative Abs() const { return wxLongLongNative(*this).Abs(); }
@@ -173,17 +155,19 @@ public:
         // convert to native long long
     wxLongLong_t GetValue() const { return m_ll; }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     long ToLong() const
     {
         wxASSERT_MSG( (m_ll >= LONG_MIN) && (m_ll <= LONG_MAX),
                       _T("wxLongLong to long conversion loss of precision") );
 
-        return wx_truncate_cast(long, m_ll);
+        return (long)m_ll;
     }
 
+#if wxABI_VERSION >= 20602
         // convert to double
-    double ToDouble() const { return wx_truncate_cast(double, m_ll); }
+    double ToDouble() const { return m_ll; }
+#endif // ABI >= 2.6.2
 
     // don't provide implicit conversion to wxLongLong_t or we will have an
     // ambiguity for all arithmetic operations
@@ -329,13 +313,6 @@ public:
     friend WXDLLIMPEXP_BASE
     wxString& operator<<(wxString&, const wxLongLongNative&);
 
-#if wxUSE_STREAMS
-    friend WXDLLIMPEXP_BASE
-    class wxTextOutputStream& operator<<(class wxTextOutputStream&, const wxLongLongNative&);
-    friend WXDLLIMPEXP_BASE
-    class wxTextInputStream& operator>>(class wxTextInputStream&, wxLongLongNative&);
-#endif
-
 private:
     wxLongLong_t  m_ll;
 };
@@ -357,65 +334,36 @@ public:
         m_ll |= (wxULongLong_t) lo;
     }
 
-#if wxUSE_LONGLONG_WX
-    wxULongLongNative(const class wxULongLongWx &ll);
-#endif
-
     // default copy ctor is ok
 
     // no dtor
 
     // assignment operators
         // from native 64 bit integer
-#ifndef wxLongLongIsLong
     wxULongLongNative& operator=(wxULongLong_t ll)
         { m_ll = ll; return *this; }
-    wxULongLongNative& operator=(wxLongLong_t ll)
-        { m_ll = ll; return *this; }
-#endif // !wxLongLongNative
-    wxULongLongNative& operator=(int l)
-        { m_ll = l; return *this; }
-    wxULongLongNative& operator=(long l)
-        { m_ll = l; return *this; }
-    wxULongLongNative& operator=(unsigned int l)
-        { m_ll = l; return *this; }
-    wxULongLongNative& operator=(unsigned long l)
-        { m_ll = l; return *this; }
-    wxULongLongNative& operator=(const wxLongLongNative &ll)
-        { m_ll = ll.GetValue(); return *this; }
-#if wxUSE_LONGLONG_WX
-    wxULongLongNative& operator=(wxLongLongWx ll);
-    wxULongLongNative& operator=(const class wxULongLongWx &ll);
-#endif
 
     // assignment operators from wxULongLongNative is ok
 
     // accessors
         // get high part
     unsigned long GetHi() const
-        { return wx_truncate_cast(unsigned long, m_ll >> 32); }
+        { return (unsigned long)(m_ll >> 32); }
         // get low part
     unsigned long GetLo() const
-        { return wx_truncate_cast(unsigned long, m_ll); }
+        { return (unsigned long)m_ll; }
 
         // convert to native ulong long
     wxULongLong_t GetValue() const { return m_ll; }
 
-        // convert to ulong with range checking in debug mode (only!)
+        // convert to ulong with range checking in the debug mode (only!)
     unsigned long ToULong() const
     {
         wxASSERT_MSG( m_ll <= LONG_MAX,
                       _T("wxULongLong to long conversion loss of precision") );
 
-        return wx_truncate_cast(unsigned long, m_ll);
+        return (unsigned long)m_ll;
     }
-
-        // convert to double
-#ifdef _MSC_VER
-    double ToDouble() const { return wx_truncate_cast(double, (__int64) m_ll); }
-#else
-    double ToDouble() const { return wx_truncate_cast(double, m_ll); }
-#endif
 
     // operations
         // addition
@@ -552,23 +500,9 @@ public:
     friend WXDLLIMPEXP_BASE
     wxString& operator<<(wxString&, const wxULongLongNative&);
 
-#if wxUSE_STREAMS
-    friend WXDLLIMPEXP_BASE
-    class wxTextOutputStream& operator<<(class wxTextOutputStream&, const wxULongLongNative&);
-    friend WXDLLIMPEXP_BASE
-    class wxTextInputStream& operator>>(class wxTextInputStream&, wxULongLongNative&);
-#endif
-
 private:
     wxULongLong_t  m_ll;
 };
-
-inline
-wxLongLongNative& wxLongLongNative::operator=(const wxULongLongNative &ll)
-{
-    m_ll = ll.GetValue();
-    return *this;
-}
 
 #endif // wxUSE_LONGLONG_NATIVE
 
@@ -625,34 +559,7 @@ public:
 
         return *this;
     }
-        // from int
-    wxLongLongWx& operator=(int l)
-    {
-        return operator=((long)l);
-    }
-
-    wxLongLongWx& operator=(unsigned long l)
-    {
-        m_lo = l;
-        m_hi = 0;
-
-#ifdef wxLONGLONG_TEST_MODE
-        m_ll = l;
-
-        Check();
-#endif // wxLONGLONG_TEST_MODE
-
-        return *this;
-    }
-
-    wxLongLongWx& operator=(unsigned int l)
-    {
-        return operator=((unsigned long)l);
-    }
-
-    wxLongLongWx& operator=(const class wxULongLongWx &ll);
-
-    // from double
+        // from double
     wxLongLongWx& Assign(double d);
         // can't have assignment operator from 2 longs
 
@@ -679,7 +586,7 @@ public:
         return *this;
     }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     long ToLong() const
     {
         wxASSERT_MSG( (m_hi == 0l) || (m_hi == -1l),
@@ -688,8 +595,10 @@ public:
         return (long)m_lo;
     }
 
+#if wxABI_VERSION >= 20602
         // convert to double
     double ToDouble() const;
+#endif // ABI >= 2.6.2
 
     // operations
         // addition
@@ -792,13 +701,6 @@ public:
     friend WXDLLIMPEXP_BASE
     wxString& operator<<(wxString&, const wxLongLongWx&);
 
-#if wxUSE_STREAMS
-    friend WXDLLIMPEXP_BASE
-    class wxTextOutputStream& operator<<(class wxTextOutputStream&, const wxLongLongWx&);
-    friend WXDLLIMPEXP_BASE
-    class wxTextInputStream& operator>>(class wxTextInputStream&, wxLongLongWx&);
-#endif
-
 private:
     // long is at least 32 bits, so represent our 64bit number as 2 longs
 
@@ -875,26 +777,6 @@ public:
 
         return *this;
     }
-    wxULongLongWx& operator=(long l)
-    {
-        m_lo = l;
-        m_hi = (unsigned long) ((l<0) ? -1l : 0);
-
-#ifdef wxLONGLONG_TEST_MODE
-        m_ll = (wxULongLong_t) (wxLongLong_t) l;
-
-        Check();
-#endif // wxLONGLONG_TEST_MODE
-
-        return *this;
-    }
-    wxULongLongWx& operator=(const class wxLongLongWx &ll) {
-        // Should we use an assert like it was before in the constructor?
-        // wxASSERT(ll.GetHi() >= 0);
-        m_hi = (unsigned long)ll.GetHi();
-        m_lo = ll.GetLo();
-        return *this;
-    }
 
     // can't have assignment operator from 2 longs
 
@@ -904,7 +786,7 @@ public:
         // get low part
     unsigned long GetLo() const { return m_lo; }
 
-        // convert to long with range checking in debug mode (only!)
+        // convert to long with range checking in the debug mode (only!)
     unsigned long ToULong() const
     {
         wxASSERT_MSG( m_hi == 0ul,
@@ -912,9 +794,6 @@ public:
 
         return (unsigned long)m_lo;
     }
-
-        // convert to double
-    double ToDouble() const;
 
     // operations
         // addition
@@ -1008,13 +887,6 @@ public:
     friend WXDLLIMPEXP_BASE
     wxString& operator<<(wxString&, const wxULongLongWx&);
 
-#if wxUSE_STREAMS
-    friend WXDLLIMPEXP_BASE
-    class wxTextOutputStream& operator<<(class wxTextOutputStream&, const wxULongLongWx&);
-    friend WXDLLIMPEXP_BASE
-    class wxTextInputStream& operator>>(class wxTextInputStream&, wxULongLongWx&);
-#endif
-
 private:
     // long is at least 32 bits, so represent our 64bit number as 2 longs
 
@@ -1064,17 +936,5 @@ inline wxLongLong operator-(unsigned long l, const wxULongLong& ull)
     wxULongLong ret = wxULongLong(l) - ull;
     return wxLongLong((long)ret.GetHi(),ret.GetLo());
 }
-
-#if wxUSE_LONGLONG_NATIVE && wxUSE_STREAMS
-
-WXDLLIMPEXP_BASE class wxTextOutputStream &operator<<(class wxTextOutputStream &stream, wxULongLong_t value);
-WXDLLIMPEXP_BASE class wxTextOutputStream &operator<<(class wxTextOutputStream &stream, wxLongLong_t value);
-
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &stream, wxULongLong_t &value);
-WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &stream, wxLongLong_t &value);
-
-#endif
-
-#endif // wxUSE_LONGLONG
 
 #endif // _WX_LONGLONG_H

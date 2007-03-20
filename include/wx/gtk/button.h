@@ -7,8 +7,29 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_BUTTON_H_
-#define _WX_GTK_BUTTON_H_
+#ifndef __GTKBUTTONH__
+#define __GTKBUTTONH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface
+#endif
+
+#include "wx/defs.h"
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxButton;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar *wxButtonNameStr;
 
 //-----------------------------------------------------------------------------
 // wxButton
@@ -44,6 +65,9 @@ public:
     // implementation
     // --------------
 
+    void DoApplyWidgetStyle(GtkRcStyle *style);
+    bool IsOwnGtkWindow( GdkWindow *window );
+
     // Since this wxButton doesn't derive from wxButtonBase (why?) we need
     // to override this here too...
     virtual bool ShouldInheritColours() const { return false; }
@@ -51,17 +75,11 @@ public:
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
-    // helper to allow access to protected member from GTK callback
-    void MoveWindow(int x, int y, int width, int height) { DoMoveWindow(x, y, width, height); }
-
 protected:
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxButton)
 };
 
-#endif // _WX_GTK_BUTTON_H_
+#endif // __GTKBUTTONH__

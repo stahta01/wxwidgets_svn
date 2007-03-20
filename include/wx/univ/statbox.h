@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_STATBOX_H_
 #define _WX_UNIV_STATBOX_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univstatbox.h"
+#endif
+
 class WXDLLEXPORT wxStaticBox : public wxStaticBoxBase
 {
 public:
@@ -47,16 +51,16 @@ public:
     // take account of this
     virtual wxPoint GetBoxAreaOrigin() const;
 
-    // returning true from here ensures that we act as a container window for
-    // our children
-    virtual bool IsStaticBox() const { return true; }
-
 protected:
     // draw the control
     virtual void DoDraw(wxControlRenderer *renderer);
 
     // get the size of the border
     wxRect GetBorderGeometry() const;
+
+    // returning true from here ensures that we act as a container window for
+    // our children
+    virtual bool IsStaticBox() const { return true; }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)

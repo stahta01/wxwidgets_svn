@@ -19,15 +19,14 @@
 #include "wx/object.h"
 #include "wx/gdiobj.h"
 
-// wxPaletteBase
+// wxBrushBase
 class WXDLLEXPORT wxPaletteBase: public wxGDIObject
 {
 public:
     virtual ~wxPaletteBase() { }
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const = 0;
-    virtual int GetColoursCount() const { wxFAIL_MSG( _T("not implemented") ); return 0; }
+    virtual bool Ok() const = 0;
+    virtual int GetColoursCount() const { wxFAIL_MSG( _T("not implemented") ); return 0; };
 };
 
 #if defined(__WXPALMOS__)
@@ -46,6 +45,11 @@ public:
     #include "wx/mac/palette.h"
 #elif defined(__WXPM__)
     #include "wx/os2/palette.h"
+#endif
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define wxColorMap wxPalette
+    #define wxColourMap wxPalette
 #endif
 
 #endif // wxUSE_PALETTE

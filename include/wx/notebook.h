@@ -12,6 +12,10 @@
 #ifndef _WX_NOTEBOOK_H_BASE_
 #define _WX_NOTEBOOK_H_BASE_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "notebookbase.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -26,35 +30,22 @@
 // constants
 // ----------------------------------------------------------------------------
 
-// wxNotebook hit results, use wxBK_HITTEST so other book controls can share them
-// if wxUSE_NOTEBOOK is disabled
+// wxNotebook hit results
 enum
 {
-    wxNB_HITTEST_NOWHERE = wxBK_HITTEST_NOWHERE,
-    wxNB_HITTEST_ONICON  = wxBK_HITTEST_ONICON,
-    wxNB_HITTEST_ONLABEL = wxBK_HITTEST_ONLABEL,
-    wxNB_HITTEST_ONITEM  = wxBK_HITTEST_ONITEM,
-    wxNB_HITTEST_ONPAGE  = wxBK_HITTEST_ONPAGE
+    wxNB_HITTEST_NOWHERE = 1,   // not on tab
+    wxNB_HITTEST_ONICON  = 2,   // on icon
+    wxNB_HITTEST_ONLABEL = 4,   // on label
+    wxNB_HITTEST_ONITEM  = wxNB_HITTEST_ONICON | wxNB_HITTEST_ONLABEL
 };
-
-// wxNotebook flags
-
-// use common book wxBK_* flags for describing alignment
-#define wxNB_DEFAULT          wxBK_DEFAULT
-#define wxNB_TOP              wxBK_TOP
-#define wxNB_BOTTOM           wxBK_BOTTOM
-#define wxNB_LEFT             wxBK_LEFT
-#define wxNB_RIGHT            wxBK_RIGHT
-
-#define wxNB_FIXEDWIDTH       0x0100
-#define wxNB_MULTILINE        0x0200
-#define wxNB_NOPAGETHEME      0x0400
-#define wxNB_FLAT             0x0800
-
 
 typedef wxWindow wxNotebookPage;  // so far, any window can be a page
 
-extern WXDLLEXPORT_DATA(const wxChar) wxNotebookNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxNotebookNameStr;
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define wxNOTEBOOK_NAME wxNotebookNameStr
+#endif
 
 // ----------------------------------------------------------------------------
 // wxNotebookBase: define wxNotebook interface
@@ -88,6 +79,13 @@ public:
     // set the size of the tabs for wxNB_FIXEDWIDTH controls
     virtual void SetTabSize(const wxSize& sz) = 0;
 
+    // hit test, returns which tab is hit and, optionally, where (icon, label)
+    // (not implemented on all platforms)
+    virtual int HitTest(const wxPoint& WXUNUSED(pt),
+                        long * WXUNUSED(flags) = NULL) const
+    {
+        return wxNOT_FOUND;
+    }
 
 
     // implement some base class functions
@@ -97,15 +95,14 @@ public:
     virtual wxColour GetThemeBackgroundColour() const { return wxNullColour; }
 
 
-    // send wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING/ED events
-
-    // returns false if the change to nPage is vetoed by the program
-    bool SendPageChangingEvent(int nPage);
-
-    // sends the event about page change from old to new (or GetSelection() if
-    // new is -1)
-    void SendPageChangedEvent(int nPageOld, int nPageNew = -1);
-
+#if WX_USE_RESERVED_VIRTUALS
+    // Reserved for future use
+    virtual void ReservedNotebookFunc1() {}
+    virtual void ReservedNotebookFunc2() {}
+    virtual void ReservedNotebookFunc3() {}
+    virtual void ReservedNotebookFunc4() {}
+    virtual void ReservedNotebookFunc5() {}
+#endif
 
 protected:
     DECLARE_NO_COPY_CLASS(wxNotebookBase)
@@ -124,15 +121,8 @@ public:
     {
     }
 
-    wxNotebookEvent(const wxNotebookEvent& event)
-        : wxBookCtrlBaseEvent(event)
-    {
-    }
-
-    virtual wxEvent *Clone() const { return new wxNotebookEvent(*this); }
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxNotebookEvent)
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNotebookEvent)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()
@@ -161,10 +151,8 @@ typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
     #include  "wx/msw/notebook.h"
 #elif defined(__WXMOTIF__)
     #include  "wx/generic/notebook.h"
-#elif defined(__WXGTK20__)
-    #include  "wx/gtk/notebook.h"
 #elif defined(__WXGTK__)
-    #include  "wx/gtk1/notebook.h"
+    #include  "wx/gtk/notebook.h"
 #elif defined(__WXMAC__)
     #include  "wx/mac/notebook.h"
 #elif defined(__WXCOCOA__)

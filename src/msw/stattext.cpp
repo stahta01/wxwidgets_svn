@@ -9,6 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "stattext.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -18,8 +22,6 @@
 
 #if wxUSE_STATTEXT
 
-#include "wx/stattext.h"
-
 #ifndef WX_PRECOMP
     #include "wx/event.h"
     #include "wx/app.h"
@@ -28,6 +30,7 @@
     #include "wx/settings.h"
 #endif
 
+#include "wx/stattext.h"
 #include "wx/msw/private.h"
 
 #if wxUSE_EXTENDED_RTTI
@@ -136,7 +139,7 @@ wxSize wxStaticText::DoGetBestSize() const
     dc.SetFont(font);
 
     wxCoord widthTextMax, heightTextTotal;
-    dc.GetMultiLineTextExtent(GetLabelText(), &widthTextMax, &heightTextTotal);
+    dc.GetMultiLineTextExtent(::wxStripMenuCodes(GetLabel()), &widthTextMax, &heightTextTotal);
 
 #ifdef __WXWINCE__
     if ( widthTextMax )

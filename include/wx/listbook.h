@@ -12,25 +12,32 @@
 #ifndef _WX_LISTBOOK_H_
 #define _WX_LISTBOOK_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "listbook.h"
+#endif
+
 #include "wx/defs.h"
 
 #if wxUSE_LISTBOOK
+
+// this can be defined to put a static line as separator between the list
+// control and the page area; but I think it finally looks better without it so
+// it is not enabled by default
+#define wxUSE_LINE_IN_LISTBOOK 0
+
+#if !wxUSE_STATLINE
+    #undef wxUSE_LINE_IN_LISTBOOK
+    #define wxUSE_LINE_IN_LISTBOOK 0
+#endif
 
 #include "wx/bookctrl.h"
 
 class WXDLLEXPORT wxListView;
 class WXDLLEXPORT wxListEvent;
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING;
-
-// wxListbook flags
-#define wxLB_DEFAULT          wxBK_DEFAULT
-#define wxLB_TOP              wxBK_TOP
-#define wxLB_BOTTOM           wxBK_BOTTOM
-#define wxLB_LEFT             wxBK_LEFT
-#define wxLB_RIGHT            wxBK_RIGHT
-#define wxLB_ALIGN_MASK       wxBK_ALIGN_MASK
+#if wxUSE_LINE_IN_LISTBOOK
+class WXDLLEXPORT wxStaticLine;
+#endif // wxUSE_LINE_IN_LISTBOOK
 
 // ----------------------------------------------------------------------------
 // wxListbook
@@ -65,7 +72,6 @@ public:
                 const wxString& name = wxEmptyString);
 
 
-    // overridden base class methods
     virtual int GetSelection() const;
     virtual bool SetPageText(size_t n, const wxString& strText);
     virtual wxString GetPageText(size_t n) const;
@@ -77,29 +83,36 @@ public:
                             const wxString& text,
                             bool bSelect = false,
                             int imageId = -1);
-    virtual int SetSelection(size_t n) { return DoSetSelection(n, SetSelection_SendEvent); }
-    virtual int ChangeSelection(size_t n) { return DoSetSelection(n); }
-    virtual int HitTest(const wxPoint& pt, long *flags = NULL) const;
+    virtual int SetSelection(size_t n);
     virtual void SetImageList(wxImageList *imageList);
+
+    // returns true if we have wxLB_TOP or wxLB_BOTTOM style
+    bool IsVertical() const { return HasFlag(wxLB_BOTTOM | wxLB_TOP); }
 
     virtual bool DeleteAllPages();
 
-    wxListView* GetListView() const { return (wxListView*)m_bookctrl; }
+    wxListView* GetListView() { return m_list; }
 
 protected:
     virtual wxWindow *DoRemovePage(size_t page);
 
     // get the size which the list control should have
-    virtual wxSize GetControllerSize() const;
+    wxSize GetListSize() const;
 
-    void UpdateSelectedPage(size_t newsel);
-
-    wxBookCtrlBaseEvent* CreatePageChangingEvent() const;
-    void MakeChangedEvent(wxBookCtrlBaseEvent &event);
+    // get the page area
+    wxRect GetPageRect() const;
 
     // event handlers
-    void OnListSelected(wxListEvent& event);
     void OnSize(wxSizeEvent& event);
+    void OnListSelected(wxListEvent& event);
+
+    // the list control we use for showing the pages index
+    wxListView *m_list;
+
+#if wxUSE_LINE_IN_LISTBOOK
+    // the line separating it from the page area
+    wxStaticLine *m_line;
+#endif // wxUSE_LINE_IN_LISTBOOK
 
     // the currently selected page or wxNOT_FOUND if none
     int m_selection;
@@ -125,16 +138,12 @@ public:
     {
     }
 
-    wxListbookEvent(const wxListbookEvent& event)
-        : wxBookCtrlBaseEvent(event)
-    {
-    }
-
-    virtual wxEvent *Clone() const { return new wxListbookEvent(*this); }
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxListbookEvent)
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListbookEvent)
 };
+
+extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED;
+extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING;
 
 typedef void (wxEvtHandler::*wxListbookEventFunction)(wxListbookEvent&);
 

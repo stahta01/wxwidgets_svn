@@ -3,6 +3,10 @@
 
 set -o errexit
 
+# read the config variables from the file given on the command line
+. $1
+
+
 if [ $skipdocs != yes ]; then 
     # Regenerate the reST docs
     echo "Regenerating the reST docs..."

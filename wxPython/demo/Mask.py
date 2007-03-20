@@ -26,12 +26,6 @@ logicList = [
     ('wx.XOR', wx.XOR),
 ]
 
-if 'mac-cg' in wx.PlatformInfo:
-    # that's all, folks!
-    logicList = [
-        ('wx.COPY', wx.COPY),
-    ]    
-
 import images
 
 class TestMaskWindow(wx.ScrolledWindow):

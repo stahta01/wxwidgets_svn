@@ -16,7 +16,7 @@
 
 #if wxUSE_COMBOBOX
 
-extern WXDLLEXPORT_DATA(const wxChar) wxComboBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar*) wxComboBoxNameStr;
 
 // ----------------------------------------------------------------------------
 // wxComboBoxBase: this interface defines the methods wxComboBox must implement
@@ -59,10 +59,6 @@ public:
     virtual bool CanUndo() const = 0;
     virtual bool CanRedo() const = 0;
 
-    // may return value different from GetSelection() when the combobox
-    // dropdown is shown and the user selected, but not yet accepted, a value
-    // different from the old one in it
-    virtual int GetCurrentSelection() const { return GetSelection(); }
 
     // redeclare inherited SetSelection() overload here as well to avoid
     // virtual function hiding
@@ -79,10 +75,8 @@ public:
     #include "wx/msw/combobox.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/combobox.h"
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/combobox.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/combobox.h"
+    #include "wx/gtk/combobox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/combobox.h"
 #elif defined(__WXCOCOA__)

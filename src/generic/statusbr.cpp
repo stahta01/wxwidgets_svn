@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/statusbr.cpp
+// Name:        generic/statusbr.cpp
 // Purpose:     wxStatusBarGeneric class implementation
 // Author:      Julian Smart
 // Modified by:
@@ -9,26 +9,32 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "statusbr.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_STATUSBAR
 
-#include "wx/statusbr.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/settings.h"
-    #include "wx/dcclient.h"
+#include "wx/setup.h"
+#include "wx/frame.h"
+#include "wx/settings.h"
+#include "wx/dcclient.h"
 #endif
 
 #ifdef __WXGTK20__
-    #include <gtk/gtk.h>
-    #include "wx/gtk/win_gtk.h"
+#include "wx/gtk/private.h"
+#include "wx/gtk/win_gtk.h"
 #endif
+
+#include "wx/statusbr.h"
 
 // we only have to do it here when we use wxStatusBarGeneric in addition to the
 // standard wxStatusBar class, if wxStatusBarGeneric is the same as
@@ -66,10 +72,9 @@ bool wxStatusBarGeneric::Create(wxWindow *parent,
                                 long style,
                                 const wxString& name)
 {
-    style |= wxTAB_TRAVERSAL | wxFULL_REPAINT_ON_RESIZE;
     if ( !wxWindow::Create(parent, id,
                            wxDefaultPosition, wxDefaultSize,
-                           style, name) )
+                           style | wxTAB_TRAVERSAL, name) )
         return false;
 
     // The status bar should have a themed background
@@ -81,14 +86,13 @@ bool wxStatusBarGeneric::Create(wxWindow *parent,
     SetFont(*wxSMALL_FONT);
 #endif
 
-	wxCoord y;
-	{
-		// Set the height according to the font and the border size
-		wxClientDC dc(this);
-		dc.SetFont(GetFont());
+    // Set the height according to the font and the border size
+    wxClientDC dc(this);
+    dc.SetFont(GetFont());
 
-		dc.GetTextExtent(_T("X"), NULL, &y );
-	}
+    wxCoord y;
+    dc.GetTextExtent(_T("X"), NULL, &y );
+
     int height = (int)( (11*y)/10 + 2*GetBorderY());
 
     SetSize(wxDefaultCoord, wxDefaultCoord, wxDefaultCoord, height);
@@ -149,12 +153,7 @@ void wxStatusBarGeneric::SetStatusText(const wxString& text, int number)
         wxRect rect;
         GetFieldRect(number, rect);
 
-        Refresh(true, &rect);
-
-        // it's common to show some text in the status bar before starting a
-        // relatively lengthy operation, ensure that the text is shown to the
-        // user immediately and not after the lengthy operation end
-        Update();
+        Refresh( true, &rect );
     }
 }
 
@@ -200,29 +199,16 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
     {
         int width, height;
         GetClientSize(&width, &height);
-        
-        if (GetLayoutDirection() == wxLayout_RightToLeft)
-        {
-            gtk_paint_resize_grip( m_widget->style,
-                               GTK_PIZZA(m_wxwindow)->bin_window,
-                               (GtkStateType) GTK_WIDGET_STATE (m_widget),
-                               NULL,
-                               m_widget,
-                               "statusbar",
-                               GDK_WINDOW_EDGE_SOUTH_WEST,
-                               2, 2, height-2, height-4 );
-        }
-        else
-        {
-            gtk_paint_resize_grip( m_widget->style,
+
+        gtk_paint_resize_grip( m_widget->style,
                                GTK_PIZZA(m_wxwindow)->bin_window,
                                (GtkStateType) GTK_WIDGET_STATE (m_widget),
                                NULL,
                                m_widget,
                                "statusbar",
                                GDK_WINDOW_EDGE_SOUTH_EAST,
-                               width-height-2, 2, height-2, height-4 );
-        }
+                               width-height-2, 1, height-2, height-3 );
+
     }
 #endif
 
@@ -369,7 +355,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#if defined(__WIN95__) || defined(__WXMAC__)
     wxColour mediumShadowColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 
@@ -377,13 +363,17 @@ void wxStatusBarGeneric::InitColours()
     m_hilightPen = wxPen(hilightColour, 1, wxSOLID);
 #elif defined(__WXPM__)
     m_mediumShadowPen = wxPen(wxColour(127, 127, 127), 1, wxSOLID);
-    m_hilightPen = *wxWHITE_PEN;
+    m_hilightPen = wxPen(_T("WHITE"), 1, wxSOLID);
 
-    SetBackgroundColour(*wxLIGHT_GREY);
-    SetForegroundColour(*wxBLACK);
+    wxColour                        vColour;
+
+    vColour.Set(wxString(_T("LIGHT GREY")));
+    SetBackgroundColour(vColour);
+    vColour.Set(wxString(_T("BLACK")));
+    SetForegroundColour(vColour);
 #else
-    m_mediumShadowPen = *wxGREY_PEN;
-    m_hilightPen = *wxWHITE_PEN;
+    m_mediumShadowPen = wxPen("GREY", 1, wxSOLID);
+    m_hilightPen = wxPen("WHITE", 1, wxSOLID);
 #endif
 }
 
@@ -429,24 +419,12 @@ void wxStatusBarGeneric::OnLeftDown(wxMouseEvent& event)
         int org_y = 0;
         gdk_window_get_origin( source, &org_x, &org_y );
 
-        if (GetLayoutDirection() == wxLayout_RightToLeft)
-        {
-            gtk_window_begin_resize_drag (GTK_WINDOW (ancestor),
-                                  GDK_WINDOW_EDGE_SOUTH_WEST,
-                                  1,
-                                  org_x - event.GetX() + GetSize().x ,
-                                  org_y + event.GetY(),
-                                  0);
-        }
-        else
-        {
-            gtk_window_begin_resize_drag (GTK_WINDOW (ancestor),
+        gtk_window_begin_resize_drag (GTK_WINDOW (ancestor),
                                   GDK_WINDOW_EDGE_SOUTH_EAST,
                                   1,
                                   org_x + event.GetX(),
                                   org_y + event.GetY(),
                                   0);
-        }
     }
     else
     {

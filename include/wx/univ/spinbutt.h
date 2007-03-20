@@ -12,6 +12,10 @@
 #ifndef _WX_UNIV_SPINBUTT_H_
 #define _WX_UNIV_SPINBUTT_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "univspinbutt.h"
+#endif
+
 #include "wx/univ/scrarrow.h"
 
 // ----------------------------------------------------------------------------
@@ -53,25 +57,19 @@ public:
     virtual int GetArrowState(wxScrollArrows::Arrow arrow) const;
     virtual void SetArrowFlag(wxScrollArrows::Arrow arrow, int flag, bool set);
     virtual bool OnArrow(wxScrollArrows::Arrow arrow);
-    virtual wxScrollArrows::Arrow HitTestArrow(const wxPoint& pt) const;
+    virtual wxScrollArrows::Arrow HitTest(const wxPoint& pt) const;
 
     // for wxStdSpinButtonInputHandler
     const wxScrollArrows& GetArrows() { return m_arrows; }
-
-    virtual bool PerformAction(const wxControlAction& action,
-                               long numArg = 0,
-                               const wxString& strArg = wxEmptyString);
-
-    static wxInputHandler *GetStdInputHandler(wxInputHandler *handlerDef);
-    virtual wxInputHandler *DoGetStdInputHandler(wxInputHandler *handlerDef)
-    {
-        return GetStdInputHandler(handlerDef);
-    }
 
 protected:
     virtual wxSize DoGetBestClientSize() const;
     virtual void DoDraw(wxControlRenderer *renderer);
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
+
+    virtual bool PerformAction(const wxControlAction& action,
+                               long numArg = 0,
+                               const wxString& strArg = wxEmptyString);
 
     // the common part of all ctors
     void Init();

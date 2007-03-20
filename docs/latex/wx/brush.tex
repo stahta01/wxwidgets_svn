@@ -1,14 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Name:        brush.tex
-%% Purpose:     wxPen docs
-%% Author:
-%% Modified by:
-%% Created:
-%% RCS-ID:      $Id$
-%% Copyright:   (c) wxWidgets
-%% License:     wxWindows license
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{\class{wxBrush}}\label{wxbrush}
 
 A brush is a drawing tool for filling in areas. It is used for painting
@@ -60,11 +49,10 @@ application may wish to get a pointer to a brush by using the global
 list of brushes {\bf wxTheBrushList}, and calling the member function
 \rtfsp{\bf FindOrCreateBrush}.
 
-This class uses \helpref{reference counting and copy-on-write}{trefcount}
-internally so that assignments between two instances of this class are very
-cheap. You can therefore use actual objects instead of pointers without
-efficiency problems. If an instance of this class is changed it will create
-its own data internally so that other instances, which previously shared the
+wxBrush uses a reference counting system, so assignments between brushes are very
+cheap. You can therefore use actual wxBrush objects instead of pointers without
+efficiency problems. Once one wxBrush object changes its data it will create its
+own brush data internally so that other brushes, which previously shared the
 data using the reference counting, are not affected.
 
 %TODO: an overview for wxBrush.
@@ -79,7 +67,7 @@ data using the reference counting, are not affected.
 
 \func{}{wxBrush}{\void}
 
-Default constructor. The brush will be uninitialised, and \helpref{wxBrush:IsOk}{wxbrushisok} will
+Default constructor. The brush will be uninitialised, and \helpref{wxBrush::Ok}{wxbrushok} will
 return false.
 
 \func{}{wxBrush}{\param{const wxColour\&}{ colour}, \param{int}{ style = {\tt wxSOLID}}}
@@ -96,7 +84,7 @@ Constructs a stippled brush using a bitmap.
 
 \func{}{wxBrush}{\param{const wxBrush\&}{ brush}}
 
-Copy constructor, uses \helpref{reference counting}{trefcount}.
+Copy constructor. This uses reference counting so is a cheap operation.
 
 \wxheading{Parameters}
 
@@ -136,9 +124,11 @@ If a stipple brush is created, the brush style will be set to wxSTIPPLE.
 \func{}{\destruct{wxBrush}}{\void}
 
 Destructor.
-See \helpref{reference-counted object destruction}{refcountdestruct} for more info.
 
 \wxheading{Remarks}
+
+The destructor may not delete the underlying brush object of the native windowing
+system, since wxBrush uses a reference counting system for efficiency.
 
 Although all remaining brushes are deleted when the application exits,
 the application should try to clean up all brushes itself. This is because
@@ -162,7 +152,7 @@ Returns a reference to the brush colour.
 \constfunc{wxBitmap *}{GetStipple}{\void}
 
 Gets a pointer to the stipple bitmap. If the brush does not have a wxSTIPPLE style,
-this bitmap may be non-NULL but uninitialised (\helpref{wxBitmap:IsOk}{wxbitmapisok} returns false).
+this bitmap may be non-NULL but uninitialised (\helpref{wxBitmap::Ok}{wxbitmapok} returns false).
 
 \wxheading{See also}
 
@@ -205,9 +195,9 @@ Returns true if the style of the brush is any of hatched fills.
 \helpref{wxBrush::GetStyle}{wxbrushgetstyle}
 
 
-\membersection{wxBrush::IsOk}\label{wxbrushisok}
+\membersection{wxBrush::Ok}\label{wxbrushok}
 
-\constfunc{bool}{IsOk}{\void}
+\constfunc{bool}{Ok}{\void}
 
 Returns true if the brush is initialised. It will return false if the default
 constructor has been used (for example, the brush is a member of a class, or
@@ -224,7 +214,7 @@ Sets the brush colour using a reference to a colour object.
 
 Sets the brush colour using a colour name from the colour database.
 
-\func{void}{SetColour}{\param{unsigned char}{ red}, \param{unsigned char}{ green}, \param{unsigned char}{ blue}}
+\func{void}{SetColour}{\param{const unsigned char}{ red}, \param{const unsigned char}{ green}, \param{const unsigned char}{ blue}}
 
 Sets the brush colour using red, green and blue values.
 
@@ -292,24 +282,26 @@ Sets the brush style.
 
 \func{wxBrush\&}{operator $=$}{\param{const wxBrush\& }{brush}}
 
-Assignment operator, using \helpref{reference counting}{trefcount}.
+Assignment operator, using reference counting. Returns a reference
+to `this'.
 
 
 \membersection{wxBrush::operator $==$}\label{wxbrushequals}
 
 \func{bool}{operator $==$}{\param{const wxBrush\& }{brush}}
 
-Equality operator.
-See \helpref{reference-counted object comparison}{refcountequality} for more info.
+Equality operator. Two brushes are equal if they contain pointers
+to the same underlying brush data. It does not compare each attribute,
+so two independently-created brushes using the same parameters will
+fail the test.
 
 
 \membersection{wxBrush::operator $!=$}\label{wxbrushnotequals}
 
 \func{bool}{operator $!=$}{\param{const wxBrush\& }{brush}}
 
-Inequality operator.
-See \helpref{reference-counted object comparison}{refcountequality} for more info.
-
+Inequality operator. Two brushes are not equal if they contain pointers
+to different underlying brush data. It does not compare each attribute.
 
 \section{\class{wxBrushList}}\label{wxbrushlist}
 
@@ -368,6 +360,13 @@ Constructor. The application should not construct its own brush list:
 use the object pointer {\bf wxTheBrushList}.
 
 
+\membersection{wxBrushList::AddBrush}\label{wxbrushlistaddbrush}
+
+\func{void}{AddBrush}{\param{wxBrush *}{brush}}
+
+Used internally by wxWidgets to add a brush to the list.
+
+
 \membersection{wxBrushList::FindOrCreateBrush}\label{wxbrushlistfindorcreatebrush}
 
 \func{wxBrush *}{FindOrCreateBrush}{\param{const wxColour\& }{colour}, \param{int}{ style = wxSOLID}}
@@ -380,5 +379,12 @@ to the brush list, and returns it.
 \docparam{colour}{Colour object.}
 
 \docparam{style}{Brush style. See \helpref{wxBrush::SetStyle}{wxbrushsetstyle} for a list of styles.}
+
+
+\membersection{wxBrushList::RemoveBrush}\label{wxbrushlistremovebrush}
+
+\func{void}{RemoveBrush}{\param{wxBrush *}{brush}}
+
+Used by wxWidgets to remove a brush from the list.
 
 

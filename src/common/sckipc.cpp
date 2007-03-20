@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/sckipc.cpp
+// Name:        sckipc.cpp
 // Purpose:     Interprocess communication implementation (wxSocket version)
 // Author:      Julian Smart
 // Modified by: Guilhem Lavaux (big rewrite) May 1997, 1998
@@ -22,28 +22,31 @@
 // headers
 // --------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "sckipc.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+#include "wx/log.h"
 #endif
 
 #if wxUSE_SOCKETS && wxUSE_IPC && wxUSE_STREAMS
-
-#include "wx/sckipc.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-    #include "wx/event.h"
-    #include "wx/module.h"
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 
 #include "wx/socket.h"
+#include "wx/sckipc.h"
+#include "wx/module.h"
+#include "wx/event.h"
 
 // --------------------------------------------------------------------------
 // macros and constants
@@ -164,14 +167,14 @@ wxConnectionBase *wxTCPClient::MakeConnection (const wxString& host,
                                                const wxString& serverName,
                                                const wxString& topic)
 {
-  wxSockAddress *addr = GetAddressFromName(serverName, host);
-  if ( !addr )
-      return NULL;
-
   wxSocketClient *client = new wxSocketClient(SCKIPC_FLAGS);
   wxSocketStream *stream = new wxSocketStream(*client);
   wxDataInputStream *data_is = new wxDataInputStream(*stream);
   wxDataOutputStream *data_os = new wxDataOutputStream(*stream);
+
+  wxSockAddress *addr = GetAddressFromName(serverName, host);
+  if ( !addr )
+      return NULL;
 
   bool ok = client->Connect(*addr);
   delete addr;
@@ -356,17 +359,15 @@ wxTCPConnection::wxTCPConnection(wxChar *buffer, int size)
 wxTCPConnection::~wxTCPConnection ()
 {
   Disconnect();
+  wxDELETE(m_codeci);
+  wxDELETE(m_codeco);
+  wxDELETE(m_sockstrm);
 
   if (m_sock)
   {
     m_sock->SetClientData(NULL);
     m_sock->Destroy();
   }
-
-  /* Delete after destroy */
-  wxDELETE(m_codeci);
-  wxDELETE(m_codeco);
-  wxDELETE(m_sockstrm);
 }
 
 void wxTCPConnection::Compress(bool WXUNUSED(on))
@@ -426,7 +427,6 @@ wxChar *wxTCPConnection::Request (const wxString& item, int *size, wxIPCFormat f
     size_t s;
 
     s = m_codeci->Read32();
-
     wxChar *data = GetBufferAtLeast( s );
     wxASSERT_MSG(data != NULL,
                  _T("Buffer too small in wxTCPConnection::Request") );
@@ -524,9 +524,6 @@ END_EVENT_TABLE()
 void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
 {
   wxSocketBase *sock = event.GetSocket();
-  if (!sock) {		/* No socket, no glory */
-    return ;
-  }
   wxSocketNotify evt = event.GetSocketEvent();
   wxTCPConnection *connection = (wxTCPConnection *)(sock->GetClientData());
 
@@ -565,7 +562,6 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
 
     format = (wxIPCFormat)codeci->Read8();
     size = codeci->Read32();
-    
     data = connection->GetBufferAtLeast( size );
     wxASSERT_MSG(data != NULL,
                  _T("Buffer too small in wxTCPEventHandler::Client_OnRequest") );
@@ -677,9 +673,6 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
 void wxTCPEventHandler::Server_OnRequest(wxSocketEvent &event)
 {
   wxSocketServer *server = (wxSocketServer *) event.GetSocket();
-  if (!server) {		/* No server, Then exit */
-	  return ;
-  }
   wxTCPServer *ipcserv = (wxTCPServer *) server->GetClientData();
 
   // This socket is being deleted; skip this event
@@ -691,9 +684,6 @@ void wxTCPEventHandler::Server_OnRequest(wxSocketEvent &event)
 
   // Accept the connection, getting a new socket
   wxSocketBase *sock = server->Accept();
-  if (!sock) {		/* No socket, no glory */
-	  return ;
-  }
   if (!sock->Ok())
   {
     sock->Destroy();
@@ -766,4 +756,4 @@ IMPLEMENT_DYNAMIC_CLASS(wxTCPEventHandlerModule, wxModule)
 
 
 #endif
-   // wxUSE_SOCKETS && wxUSE_IPC && wxUSE_STREAMS
+    // wxUSE_SOCKETS && wxUSE_IPC

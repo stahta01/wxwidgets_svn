@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/enhmeta.cpp
+// Name:        msw/enhmeta.cpp
 // Purpose:     implementation of wxEnhMetaFileXXX classes
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "enhmeta.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -57,7 +61,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxEnhMetaFileDC, wxDC)
 
 // we must pass NULL if the string is empty to metafile functions
 static inline const wxChar *GetMetaFileName(const wxString& fn)
-    { return !fn ? (const wxChar *)NULL : (const wxChar*)fn.c_str(); }
+    { return !fn ? (wxChar *)NULL : fn.c_str(); }
 
 // ============================================================================
 // implementation
@@ -75,7 +79,7 @@ void wxEnhMetaFile::Init()
     }
     else // have valid file name, load metafile from it
     {
-        m_hMF = (WXHANDLE)::GetEnhMetaFile(m_filename);
+        m_hMF = GetEnhMetaFile(m_filename);
         if ( !m_hMF )
             wxLogSysError(_("Failed to load metafile from file \"%s\"."),
                           m_filename.c_str());
@@ -194,9 +198,7 @@ wxEnhMetaFileDC::wxEnhMetaFileDC(const wxString& filename,
                                  int width, int height,
                                  const wxString& description)
 {
-    m_width = width;
-    m_height = height;
-
+    ScreenHDC hdcRef;
     RECT rect;
     RECT *pRect;
     if ( width && height )
@@ -217,21 +219,12 @@ wxEnhMetaFileDC::wxEnhMetaFileDC(const wxString& filename,
         pRect = (LPRECT)NULL;
     }
 
-    ScreenHDC hdcRef;
     m_hDC = (WXHDC)::CreateEnhMetaFile(hdcRef, GetMetaFileName(filename),
                                        pRect, description);
     if ( !m_hDC )
     {
         wxLogLastError(_T("CreateEnhMetaFile"));
     }
-}
-
-void wxEnhMetaFileDC::DoGetSize(int *width, int *height) const
-{
-    if ( width )
-        *width = m_width;
-    if ( height )
-        *height = m_height;
 }
 
 wxEnhMetaFile *wxEnhMetaFileDC::Close()

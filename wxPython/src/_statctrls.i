@@ -19,7 +19,6 @@
 MAKE_CONST_WXSTRING(StaticBitmapNameStr);
 MAKE_CONST_WXSTRING(StaticBoxNameStr);
 MAKE_CONST_WXSTRING(StaticTextNameStr);
-MAKE_CONST_WXSTRING(StaticLineNameStr);
 
 //---------------------------------------------------------------------------
 %newgroup
@@ -70,14 +69,14 @@ public:
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
-                  const wxString& name = wxPyStaticLineNameStr);
+                  const wxString& name = wxPyStaticTextNameStr);
     %RenameCtor(PreStaticLine, wxStaticLine());
 
     bool Create( wxWindow *parent, wxWindowID id=-1,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
-                  const wxString& name = wxPyStaticLineNameStr);
+                  const wxString& name = wxPyStaticTextNameStr);
 
     // is the line vertical?
     bool IsVertical() const;

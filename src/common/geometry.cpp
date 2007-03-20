@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/geometry.cpp
+// Name:        common/geometry.cpp
 // Purpose:     Common Geometry Classes
 // Author:      Stefan Csomor
 // Modified by:
@@ -9,23 +9,24 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "geometry.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_GEOMETRY
 
-#include "wx/geometry.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/log.h"
-#endif
-
+#include "wx/log.h"
 #include <string.h>
 
+#include "wx/geometry.h"
 #include "wx/datstrm.h"
 
 //
@@ -205,14 +206,14 @@ void wxPoint2DInt::SetVectorAngle( wxDouble degrees )
 
 wxDouble wxPoint2DDouble::GetVectorAngle() const
 {
-    if ( wxIsNullDouble(m_x) )
+    if ( m_x == 0 )
     {
         if ( m_y >= 0 )
             return 90;
         else
             return 270;
     }
-    if ( wxIsNullDouble(m_y) )
+    if ( m_y == 0 )
     {
         if ( m_x >= 0 )
             return 0;

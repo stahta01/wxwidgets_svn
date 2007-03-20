@@ -1,21 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/frame.mm
+// Name:        cocoa/frame.mm
 // Purpose:     wxFrame
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
-// RCS-ID:      $Id$
+// RCS-ID:      $Id:
 // Copyright:   (c) 2003 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
-
-#include "wx/frame.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/app.h"
+    #include "wx/frame.h"
     #include "wx/menu.h"
     #include "wx/toolbar.h"
     #include "wx/statusbr.h"
@@ -181,8 +179,6 @@ void wxFrame::UpdateFrameNSView()
     if(m_frameToolBar)
     {
         NSView *tbarNSView = m_frameToolBar->GetNSViewForSuperview();
-        // If the toolbar doesn't have a superview then set it to our
-        // content view.
         if(![tbarNSView superview])
             [m_frameNSView addSubview: tbarNSView];
         // Do this after addSubView so that SetSize can work
@@ -282,10 +278,18 @@ wxToolBar* wxFrame::CreateToolBar(long style,
                                       const wxString& name)
 {
     wxAutoNSAutoreleasePool pool;
-    return wxFrameBase::CreateToolBar(style,winid,name);
+    wxFrameBase::CreateToolBar(style,winid,name);
+    if(m_frameToolBar)
+    {
+        m_frameToolBar->CocoaRemoveFromParent();
+        m_frameToolBar->SetOwningFrame(this);
+    }
+    UpdateFrameNSView();
+    return m_frameToolBar;
 }
 #endif // wxUSE_TOOLBAR
 
 void wxFrame::PositionStatusBar()
 {
 }
+

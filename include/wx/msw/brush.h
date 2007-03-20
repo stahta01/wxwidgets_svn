@@ -12,6 +12,10 @@
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "brush.h"
+#endif
+
 #include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
@@ -28,6 +32,7 @@ public:
     wxBrush();
     wxBrush(const wxColour& col, int style = wxSOLID);
     wxBrush(const wxBitmap& stipple);
+    wxBrush(const wxBrush& brush) : wxBrushBase(brush) { Ref(brush); }
     virtual ~wxBrush();
 
     virtual void SetColour(const wxColour& col);
@@ -35,6 +40,7 @@ public:
     virtual void SetStyle(int style);
     virtual void SetStipple(const wxBitmap& stipple);
 
+    wxBrush& operator=(const wxBrush& brush);
     bool operator==(const wxBrush& brush) const;
     bool operator!=(const wxBrush& brush) const { return !(*this == brush); }
 
@@ -42,8 +48,7 @@ public:
     virtual int GetStyle() const;
     wxBitmap *GetStipple() const;
 
-    bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_refData != NULL; }
+    bool Ok() const { return m_refData != NULL; }
 
     // return the HBRUSH for this brush
     virtual WXHANDLE GetResourceHandle() const;

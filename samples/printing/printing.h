@@ -1,6 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        samples/printing.h
-
+// Name:        printing.h
 // Purpose:     Printing demo for wxWidgets
 // Author:      Julian Smart
 // Modified by:
@@ -9,6 +8,10 @@
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface
+#endif
 
 // Define a new application
 class MyApp: public wxApp
@@ -47,9 +50,6 @@ class MyFrame: public wxFrame
     void OnPrintPreviewPS(wxCommandEvent& event);
     void OnPageSetupPS(wxCommandEvent& event);
 #endif
-#ifdef __WXMAC__
-    void OnPageMargins(wxCommandEvent& event);
-#endif
 
     void OnExit(wxCommandEvent& event);
     void OnPrintAbout(wxCommandEvent& event);
@@ -72,16 +72,14 @@ DECLARE_EVENT_TABLE()
 class MyPrintout: public wxPrintout
 {
  public:
-  MyPrintout(const wxChar *title = _T("My printout")):wxPrintout(title) {}
+  MyPrintout(wxChar *title = _T("My printout")):wxPrintout(title) {}
   bool OnPrintPage(int page);
   bool HasPage(int page);
   bool OnBeginDocument(int startPage, int endPage);
   void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
 
-  void DrawPageOne();
-
-  void DrawPageTwo();
-
+  void DrawPageOne(wxDC *dc);
+  void DrawPageTwo(wxDC *dc);
 };
 
 #define WXPRINT_QUIT            100
@@ -97,7 +95,3 @@ class MyPrintout: public wxPrintout
 
 #define WXPRINT_ANGLEUP         110
 #define WXPRINT_ANGLEDOWN       111
-
-#ifdef __WXMAC__
-    #define WXPRINT_PAGE_MARGINS 112
-#endif

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/settcmn.cpp
+// Name:        common/settcmn.cpp
 // Purpose:     common (to all ports) wxWindow functions
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -15,6 +15,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "settings.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -22,10 +26,10 @@
     #pragma hdrstop
 #endif
 
-#include "wx/settings.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/defs.h"
     #include "wx/utils.h"
+    #include "wx/settings.h"
 #endif //WX_PRECOMP
 
 // ----------------------------------------------------------------------------
@@ -67,3 +71,22 @@ void wxSystemSettings::SetScreenType( wxSystemScreenType screen )
 {
     ms_screen = screen;
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+wxColour wxSystemSettings::GetSystemColour(int index)
+{
+    return GetColour((wxSystemColour)index);
+}
+
+wxFont wxSystemSettings::GetSystemFont(int index)
+{
+    return GetFont((wxSystemFont)index);
+}
+
+int wxSystemSettings::GetSystemMetric(int index)
+{
+    return GetMetric((wxSystemMetric)index);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4

@@ -26,7 +26,7 @@ class WXDLLIMPEXP_CORE wxToggleBitmapButton;
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxChar wxCheckBoxNameStr[];
+extern WXDLLIMPEXP_CORE const wxChar *wxCheckBoxNameStr;
 
 //-----------------------------------------------------------------------------
 // wxToggleBitmapButton
@@ -63,8 +63,7 @@ public:
     bool GetValue() const;
 
     // Set the label
-    virtual void SetLabel(const wxString& label) { wxControl::SetLabel(label); }
-    virtual void SetLabel(const wxBitmap& label);
+    void SetLabel(const wxBitmap& label);
     bool Enable(bool enable = TRUE);
 
     static wxVisualAttributes
@@ -75,11 +74,11 @@ public:
     wxBitmap  m_bitmap;
 
     void OnSetBitmap();
+    void DoApplyWidgetStyle(GtkRcStyle *style);
+    bool IsOwnGtkWindow(GdkWindow *window);
 
-protected:
+    virtual void OnInternalIdle();
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxToggleBitmapButton)
@@ -129,10 +128,11 @@ public:
     // implementation
     bool m_blockEvent;
 
-protected:
+    void DoApplyWidgetStyle(GtkRcStyle *style);
+    bool IsOwnGtkWindow(GdkWindow *window);
+
+    virtual void OnInternalIdle();
     virtual wxSize DoGetBestSize() const;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxToggleButton)

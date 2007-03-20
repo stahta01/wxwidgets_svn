@@ -181,7 +181,7 @@ class RegFrame : public wxFrame
 {
 public:
     // ctor & dtor
-    RegFrame(wxFrame *parent, const wxChar *title, int x, int y, int w, int h);
+    RegFrame(wxFrame *parent, wxChar *title, int x, int y, int w, int h);
     virtual ~RegFrame();
 
     // callbacks
@@ -259,10 +259,9 @@ END_EVENT_TABLE()
 #if DO_REGTEST
 
 BEGIN_EVENT_TABLE(RegTreeCtrl, wxTreeCtrl)
-    EVT_TREE_DELETE_ITEM    (Ctrl_RegTree, RegTreeCtrl::OnDeleteItem)
-    EVT_TREE_ITEM_EXPANDING (Ctrl_RegTree, RegTreeCtrl::OnItemExpanding)
-    EVT_TREE_ITEM_COLLAPSING(Ctrl_RegTree, RegTreeCtrl::OnItemExpanding)
-    EVT_TREE_SEL_CHANGED    (Ctrl_RegTree, RegTreeCtrl::OnSelChanged)
+    EVT_TREE_DELETE_ITEM   (Ctrl_RegTree, RegTreeCtrl::OnDeleteItem)
+    EVT_TREE_ITEM_EXPANDING(Ctrl_RegTree, RegTreeCtrl::OnItemExpanding)
+    EVT_TREE_SEL_CHANGED   (Ctrl_RegTree, RegTreeCtrl::OnSelChanged)
 
     EVT_TREE_BEGIN_LABEL_EDIT(Ctrl_RegTree, RegTreeCtrl::OnBeginEdit)
     EVT_TREE_END_LABEL_EDIT  (Ctrl_RegTree, RegTreeCtrl::OnEndEdit)
@@ -319,9 +318,6 @@ IMPLEMENT_APP(RegApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool RegApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main frame window and show it
     RegFrame *frame = new RegFrame(NULL, _T("wxRegTest"), 50, 50, 600, 350);
     frame->Show(true);
@@ -335,7 +331,7 @@ bool RegApp::OnInit()
 // RegFrame
 // ----------------------------------------------------------------------------
 
-RegFrame::RegFrame(wxFrame *parent, const wxChar *title, int x, int y, int w, int h)
+RegFrame::RegFrame(wxFrame *parent, wxChar *title, int x, int y, int w, int h)
         : wxFrame(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h))
 {
     // this reduces flicker effects
@@ -714,7 +710,7 @@ void RegTreeCtrl::OnSelChanged(wxTreeEvent& event)
 void RegTreeCtrl::OnItemExpanding(wxTreeEvent& event)
 {
     TreeNode *pNode = GetNode(event);
-    bool bExpanding = event.GetEventType() == wxEVT_COMMAND_TREE_ITEM_EXPANDING;
+    bool bExpanding = event.GetKeyCode() == wxTREE_EXPAND_EXPAND;
 
     // expansion might take some time
     wxSetCursor(*wxHOURGLASS_CURSOR);

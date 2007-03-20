@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/evtloop.cpp
+// Name:        gtk/evtloop.cpp
 // Purpose:     implements wxEventLoop for GTK+
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "evtloop.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,10 +29,7 @@
 #endif
 
 #include "wx/evtloop.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-#endif // WX_PRECOMP
+#include "wx/app.h"
 
 #include <gtk/gtk.h>
 
@@ -59,6 +60,8 @@ private:
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+
 wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
@@ -69,17 +72,18 @@ int wxEventLoop::Run()
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    wxEventLoopActivator activate(this);
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
 
     m_impl = new wxEventLoopImpl;
 
     gtk_main();
 
-    OnExit();
-
     int exitcode = m_impl->GetExitCode();
     delete m_impl;
     m_impl = NULL;
+
+    ms_activeLoop = oldLoop;
 
     return exitcode;
 }
@@ -103,7 +107,7 @@ bool wxEventLoop::Pending() const
     {
         // We need to remove idle callbacks or gtk_events_pending will
         // never return false.
-        wxTheApp->SuspendIdleCallback();
+        wxTheApp->RemoveIdleTag();
     }
 
     return gtk_events_pending();
@@ -111,9 +115,10 @@ bool wxEventLoop::Pending() const
 
 bool wxEventLoop::Dispatch()
 {
-    wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
+    wxCHECK_MSG( IsRunning(), FALSE, _T("can't call Dispatch() if not running") );
 
     gtk_main_iteration();
 
-    return true;
+    return TRUE;
 }
+

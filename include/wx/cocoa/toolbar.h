@@ -57,7 +57,6 @@ protected:
 // Cocoa
 // ------------------------------------------------------------------------
 protected:
-    virtual bool Cocoa_acceptsFirstMouse(bool &acceptsFirstMouse, WX_NSEvent theEvent);
     virtual bool Cocoa_drawRect(const NSRect &rect);
     virtual bool Cocoa_mouseDown(WX_NSEvent theEvent);
     virtual bool Cocoa_mouseDragged(WX_NSEvent theEvent);
@@ -103,8 +102,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelpString,
                                           const wxString& longHelpString);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     wxSize m_bestSize;
     wxFrame *m_owningFrame;

@@ -17,6 +17,10 @@
 // headers
 // ---------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "theme.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -93,12 +97,16 @@ wxThemeInfo::wxThemeInfo(Constructor c,
     {
         nameDefTheme = p;
     }
-#ifdef wxUNIV_DEFAULT_THEME
     else // use native theme by default
     {
-        nameDefTheme = wxSTRINGIZE_T(wxUNIV_DEFAULT_THEME);
+        #if defined(__WXGTK__)
+            nameDefTheme = _T("gtk");
+        #elif defined(__WXX11__)
+            nameDefTheme = _T("win32");
+        #else
+            nameDefTheme = _T("win32");
+        #endif
     }
-#endif // wxUNIV_DEFAULT_THEME
 
     wxTheme *theme = Create(nameDefTheme);
 
@@ -133,7 +141,7 @@ wxThemeInfo::wxThemeInfo(Constructor c,
         // has one
         wxArtProvider *art = ms_theme->GetArtProvider();
         if ( art )
-            wxArtProvider::Push(art);
+            wxArtProvider::PushProvider(art);
     }
 
     return themeOld;
@@ -147,58 +155,3 @@ wxTheme::~wxTheme()
 {
 }
 
-
-// ----------------------------------------------------------------------------
-// wxDelegateTheme
-// ----------------------------------------------------------------------------
-
-wxDelegateTheme::wxDelegateTheme(const wxChar *theme)
-{
-    m_themeName = theme;
-    m_theme = NULL;
-}
-
-wxDelegateTheme::~wxDelegateTheme()
-{
-    delete m_theme;
-}
-
-bool wxDelegateTheme::GetOrCreateTheme()
-{
-    if ( !m_theme )
-        m_theme = wxTheme::Create(m_themeName);
-    return m_theme != NULL;
-}
-
-wxRenderer *wxDelegateTheme::GetRenderer()
-{
-    if ( !GetOrCreateTheme() )
-        return NULL;
-
-    return m_theme->GetRenderer();
-}
-
-wxArtProvider *wxDelegateTheme::GetArtProvider()
-{
-    if ( !GetOrCreateTheme() )
-        return NULL;
-
-    return m_theme->GetArtProvider();
-}
-
-wxInputHandler *wxDelegateTheme::GetInputHandler(const wxString& control,
-                                                 wxInputConsumer *consumer)
-{
-    if ( !GetOrCreateTheme() )
-        return NULL;
-
-    return m_theme->GetInputHandler(control, consumer);
-}
-
-wxColourScheme *wxDelegateTheme::GetColourScheme()
-{
-    if ( !GetOrCreateTheme() )
-        return NULL;
-
-    return m_theme->GetColourScheme();
-}

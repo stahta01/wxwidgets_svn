@@ -16,6 +16,10 @@
 #ifndef _WX_FONTUTIL_H_
 #define _WX_FONTUTIL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "fontutil.h"
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -26,7 +30,6 @@
     #include "wx/msw/wrapwin.h"
 #endif
 
-class WXDLLIMPEXP_BASE wxArrayString;
 struct WXDLLEXPORT wxNativeEncodingInfo;
 
 #if defined(_WX_X_FONTLIKE)
@@ -65,9 +68,11 @@ enum wxXLFDField
 // functions, the user code can only get the objects of this type from
 // somewhere and pass it somewhere else (possibly save them somewhere using
 // ToString() and restore them using FromString())
-class WXDLLEXPORT wxNativeFontInfo
+//
+// NB: it is a POD currently for max efficiency but if it continues to grow
+//     further it might make sense to make it a real class with virtual methods
+struct WXDLLEXPORT wxNativeFontInfo
 {
-public:
 #if wxUSE_PANGO
     PangoFontDescription *description;
 #elif defined(_WX_X_FONTLIKE)
@@ -194,16 +199,9 @@ public:
     void SetStyle(wxFontStyle style);
     void SetWeight(wxFontWeight weight);
     void SetUnderlined(bool underlined);
-    bool SetFaceName(const wxString& facename);
+    void SetFaceName(wxString facename);
     void SetFamily(wxFontFamily family);
     void SetEncoding(wxFontEncoding encoding);
-
-    // sets the first facename in the given array which is found
-    // to be valid. If no valid facename is given, sets the
-    // first valid facename returned by wxFontEnumerator::GetFacenames().
-    // Does not return a bool since it cannot fail.
-    void SetFaceName(const wxArrayString &facenames);
-
 
     // it is important to be able to serialize wxNativeFontInfo objects to be
     // able to store them (in config file, for example)
@@ -224,12 +222,14 @@ public:
 // translate a wxFontEncoding into native encoding parameter (defined above),
 // returning true if an (exact) macth could be found, false otherwise (without
 // attempting any substitutions)
-extern bool wxGetNativeFontEncoding(wxFontEncoding encoding,
-                                    wxNativeEncodingInfo *info);
+extern WXDLLIMPEXP_CORE
+bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                             wxNativeEncodingInfo *info);
 
 // test for the existence of the font described by this facename/encoding,
 // return true if such font(s) exist, false otherwise
-extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
+extern WXDLLIMPEXP_CORE
+bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 
 // ----------------------------------------------------------------------------
 // font-related functions (X and GTK)
@@ -238,5 +238,13 @@ extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 #ifdef _WX_X_FONTLIKE
     #include "wx/unix/fontutil.h"
 #endif // X || GDK
+
+// ----------------------------------------------------------------------------
+// font-related functions (MGL)
+// ----------------------------------------------------------------------------
+
+#ifdef __WXMGL__
+    #include "wx/mgl/fontutil.h"
+#endif // __WXMGL__
 
 #endif // _WX_FONTUTIL_H_

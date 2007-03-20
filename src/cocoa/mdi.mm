@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/mdi.mm
+// Name:        cocoa/mdi.mm
 // Purpose:     wxMDIParentFrame, wxMDIChildFrame, wxMDIClientWindow
 // Author:      David Elliott
 // Modified by:
@@ -13,10 +13,9 @@
 
 #if wxUSE_MDI
 
-#include "wx/mdi.h"
-
 #ifndef WX_PRECOMP
     #include "wx/log.h"
+    #include "wx/mdi.h"
 #endif // WX_PRECOMP
 
 // #include "wx/cocoa/autorelease.h"
@@ -324,7 +323,7 @@ wxMDIClientWindow::wxMDIClientWindow()
 }
 
 wxMDIClientWindow::wxMDIClientWindow(wxMDIParentFrame *parent, long style)
-                  :wxWindow(parent, wxID_ANY)
+:   wxWindow(parent, -1)
 {
 }
 

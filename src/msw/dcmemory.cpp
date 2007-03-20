@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/dcmemory.cpp
+// Name:        dcmemory.cpp
 // Purpose:     wxMemoryDC class
 // Author:      Julian Smart
 // Modified by:
@@ -17,6 +17,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dcmemory.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,14 +28,14 @@
     #pragma hdrstop
 #endif
 
-#include "wx/dcmemory.h"
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/log.h"
 #endif
 
 #include "wx/msw/private.h"
+
+#include "wx/dcmemory.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -47,11 +51,22 @@ IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxDC)
 // wxMemoryDC
 // ----------------------------------------------------------------------------
 
+wxMemoryDC::wxMemoryDC()
+{
+    CreateCompatible(NULL);
+
+    Init();
+}
+
 wxMemoryDC::wxMemoryDC(wxDC *dc)
 {
     wxCHECK_RET( dc, _T("NULL dc in wxMemoryDC ctor") );
 
+    dc->BeginDrawing();
+
     CreateCompatible(dc);
+
+    dc->EndDrawing();
 
     Init();
 }
@@ -81,7 +96,7 @@ bool wxMemoryDC::CreateCompatible(wxDC *dc)
     return m_ok;
 }
 
-void wxMemoryDC::DoSelect( const wxBitmap& bitmap)
+void wxMemoryDC::SelectObject(const wxBitmap& bitmap)
 {
     // select old bitmap out of the device context
     if ( m_oldBitmap )
@@ -192,3 +207,4 @@ void wxMemoryDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord he
         wxDC::DoDrawRectangle(x, y, width, height);
     }
 }
+

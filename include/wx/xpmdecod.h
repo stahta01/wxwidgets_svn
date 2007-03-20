@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xpmdecod.h
+// Name:        xpmdecod.h
 // Purpose:     wxXPMDecoder, XPM reader for wxImage and wxBitmap
 // Author:      Vaclav Slavik
 // CVS-ID:      $Id$
@@ -10,9 +10,12 @@
 #ifndef _WX_XPMDECOD_H_
 #define _WX_XPMDECOD_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xpmdecod.h"
+#endif
+
 #include "wx/defs.h"
 
-#if wxUSE_IMAGE && wxUSE_XPM
 
 class WXDLLIMPEXP_CORE wxImage;
 class WXDLLIMPEXP_BASE wxInputStream;
@@ -35,13 +38,9 @@ public:
     wxImage ReadFile(wxInputStream& stream);
 #endif
     // Read directly from XPM data (as passed to wxBitmap ctor):
-    wxImage ReadData(const char* const* xpm_data);
-#ifdef __BORLANDC__
-    // needed for Borland 5.5
-    wxImage ReadData(char** xpm_data) { return ReadData(wx_const_cast(const char* const*, xpm_data)); }
-#endif
+    wxImage ReadData(const char **xpm_data);
 };
 
-#endif // wxUSE_IMAGE && wxUSE_XPM
 
-#endif  // _WX_XPM_H_
+#endif  // _WX_GIFDECOD_H_
+

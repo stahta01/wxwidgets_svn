@@ -12,6 +12,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "dndbase.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -20,12 +24,4 @@
 
 #include "wx/dnd.h"
 
-#if wxUSE_DRAG_AND_DROP
-
-bool wxIsDragResultOk(wxDragResult res)
-{
-    return res == wxDragCopy || res == wxDragMove || res == wxDragLink;
-}
-
-#endif
-
+// Not much to do here, really, but GNU need this file.

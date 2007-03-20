@@ -32,7 +32,7 @@ public:
     // pause the stop watch
     void Pause()
     {
-        if ( m_pauseCount++ == 0 )
+        if ( !m_pauseCount++ )
             m_pause = GetElapsedTime();
     }
 
@@ -42,7 +42,7 @@ public:
         wxASSERT_MSG( m_pauseCount > 0,
                       _T("Resuming stop watch which is not paused") );
 
-        if ( --m_pauseCount == 0 )
+        if ( !--m_pauseCount )
             Start(m_pause);
     }
 
@@ -66,17 +66,17 @@ private:
 
 #endif // wxUSE_STOPWATCH
 
-#if wxUSE_LONGLONG && WXWIN_COMPATIBILITY_2_6
+#if wxUSE_LONGLONG
 
-    // Starts a global timer
-    // -- DEPRECATED: use wxStopWatch instead
-    wxDEPRECATED( void WXDLLIMPEXP_BASE wxStartTimer() );
+// Starts a global timer
+// -- DEPRECATED: use wxStopWatch instead
+void WXDLLIMPEXP_BASE wxStartTimer();
 
-    // Gets elapsed milliseconds since last wxStartTimer or wxGetElapsedTime
-    // -- DEPRECATED: use wxStopWatch instead
-    wxDEPRECATED( long WXDLLIMPEXP_BASE wxGetElapsedTime(bool resetTimer = true) );
+// Gets elapsed milliseconds since last wxStartTimer or wxGetElapsedTime
+// -- DEPRECATED: use wxStopWatch instead
+long WXDLLIMPEXP_BASE wxGetElapsedTime(bool resetTimer = true);
 
-#endif // wxUSE_LONGLONG && WXWIN_COMPATIBILITY_2_6
+#endif // wxUSE_LONGLONG
 
 // ----------------------------------------------------------------------------
 // global time functions
@@ -89,24 +89,11 @@ extern long WXDLLIMPEXP_BASE wxGetLocalTime();
 extern long WXDLLIMPEXP_BASE wxGetUTCTime();
 
 #if wxUSE_LONGLONG
-    typedef wxLongLong wxMilliClock_t;
-#else
-    typedef double wxMilliClock_t;
-#endif // wxUSE_LONGLONG
-
 // Get number of milliseconds since local time 00:00:00 Jan 1st 1970
-extern wxMilliClock_t WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+extern wxLongLong WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
+#endif // wxUSE_LONGLONG
 
 #define wxGetCurrentTime() wxGetLocalTime()
 
-// on some really old systems gettimeofday() doesn't have the second argument,
-// define wxGetTimeOfDay() to hide this difference
-#ifdef HAVE_GETTIMEOFDAY
-    #ifdef WX_GETTIMEOFDAY_NO_TZ
-        #define wxGetTimeOfDay(tv)      gettimeofday(tv)
-    #else
-        #define wxGetTimeOfDay(tv)      gettimeofday((tv), NULL)
-    #endif
-#endif // HAVE_GETTIMEOFDAY
-
 #endif // _WX_STOPWATCH_H_
+

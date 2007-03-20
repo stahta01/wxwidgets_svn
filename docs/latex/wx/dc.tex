@@ -6,10 +6,8 @@ so a window can have a device context associated with it, and a printer also has
 In this way, the same piece of code may write to a number of different devices,
 if the device context is used as a parameter.
 
-Notice that wxDC is an abstract base class and can't be created directly,
-please use \helpref{wxPaintDC}{wxpaintdc}, \helpref{wxClientDC}{wxclientdc}, 
-\helpref{wxWindowDC}{wxwindowdc}, \helpref{wxScreenDC}{wxscreendc}, 
-\helpref{wxMemoryDC}{wxmemorydc} or \helpref{wxPrinterDC}{wxprinterdc}.
+Derived types of wxDC have documentation for specific features
+only, so refer to this section for most device context information.
 
 % VZ: we should really document them instead of this lame excuse, but I don't
 %     have time for it now, when it is done please remove this
@@ -17,12 +15,6 @@ Please note that in addition to the versions of the methods documented here,
 there are also versions which accept single {\tt wxPoint} parameter instead of
 two {\tt wxCoord} ones or {\tt wxPoint} and {\tt wxSize} instead of four of
 them.
-
-\wxheading{Support for Transparency / Alpha Channel}
-
-On Mac OS X when using Core Graphics (wx\_MAC\_USE\_CORE\_GRAPHICS set to 1) 
-colors with alpha are supported, so instances  {\tt wxPen} or  {\tt wxBrush} that are built from  {\tt wxColour} use
-the color's alpha values when stroking or filling.
 
 \wxheading{Derived from}
 
@@ -37,6 +29,27 @@ the color's alpha values when stroking or filling.
 \helpref{Overview}{dcoverview}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
+
+
+\membersection{wxDC::wxDC}\label{wxdcctor}
+
+\func{}{wxDC}{\void}
+
+Constructor.
+
+
+\membersection{wxDC::\destruct{wxDC}}\label{wxdcdtor}
+
+\func{}{\destruct{wxDC}}{\void}
+
+Destructor.
+
+
+\membersection{wxDC::BeginDrawing}\label{wxdcbegindrawing}
+
+\func{void}{BeginDrawing}{\void}
+
+This is deprecated and does nothing. Don't use.
 
 
 \membersection{wxDC::Blit}\label{wxdcblit}
@@ -108,7 +121,7 @@ See \helpref{wxMemoryDC}{wxmemorydc} for typical usage.
 
 \wxheading{See also}
 
-\helpref{wxDC::StretchBlit}{wxdcstretchblit}, \helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
+\helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
 
 \begin{comment}
 
@@ -546,6 +559,13 @@ wxUSE\_DC\_CACHEING preprocessor symbol for portability.
 Ends a document (only relevant when outputting to a printer).
 
 
+\membersection{wxDC::EndDrawing}\label{wxdcenddrawing}
+
+\func{void}{EndDrawing}{\void}
+
+This is deprecated and does nothing. Don't use.
+
+
 \membersection{wxDC::EndPage}\label{wxdcendpage}
 
 \func{void}{EndPage}{\void}
@@ -628,24 +648,7 @@ rectangle are returned as a tuple.}
 
 \constfunc{const wxFont\&}{GetFont}{\void}
 
-Gets the current font. Notice that even although each device context object has
-some default font after creation, this method would return a \texttt{wxNullFont} 
-initially and only after calling \helpref{wxDC::SetFont}{wxdcsetfont} a valid
-font is returned.
-
-
-\membersection{wxDC::GetLayoutDirection}\label{wxdcgetlayoutdirection}
-
-\constfunc{wxLayoutDirection}{GetLayoutDirection}{\void}
-
-Gets the current layout direction of the device context. On platforms where RTL layout
-is supported, the return value will either be \texttt{wxLayout\_LeftToRight} or 
-\texttt{wxLayout\_RightToLeft}. If RTL layout is not supported, the return value will 
-be \texttt{wxLayout\_Default}.
-
-\wxheading{See also}
-
-\helpref{SetLayoutDirection}{wxdcsetlayoutdirection}
+Gets the current font (see \helpref{wxDC::SetFont}{wxdcsetfont}).
 
 
 \membersection{wxDC::GetLogicalFunction}\label{wxdcgetlogicalfunction}
@@ -662,33 +665,6 @@ Gets the current logical function (see \helpref{wxDC::SetLogicalFunction}{wxdcse
 Gets the {\it mapping mode} for the device context (see \helpref{wxDC::SetMapMode}{wxdcsetmapmode}).
 
 
-\membersection{wxDC::GetMultiLineTextExtent}\label{wxdcgetmultilinetextextent}
-
-\constfunc{void}{GetMultiLineTextExtent}{\param{const wxString\& }{string}, \param{wxCoord *}{w},\\
-  \param{wxCoord *}{h}, \param{wxCoord *}{heightLine = NULL}, \param{wxFont *}{font = NULL}}
-
-\constfunc{wxSize}{GetMultiLineTextExtent}{\param{const wxString\& }{string}}
-
-Gets the dimensions of the string using the currently selected font.
-\rtfsp{\it string} is the text string to measure, {\it heightLine}, if non NULL,
-is where to store the height of a single line.
-
-The text extent is returned in {\it w} and {\it h} pointers (first form) or as
-a \helpref{wxSize}{wxsize} object (second form).
-
-If the optional parameter {\it font} is specified and valid, then it is used
-for the text extent calculation. Otherwise the currently selected font is.
-
-Note that this function works both with single-line and multi-line strings.
-
-\wxheading{See also}
-
-\helpref{wxFont}{wxfont},\rtfsp
-\helpref{wxDC::SetFont}{wxdcsetfont},\rtfsp
-\helpref{wxDC::GetPartialTextExtents}{wxdcgetpartialtextextents},\rtfsp
-\helpref{wxDC::GetTextExtent}{wxdcgettextextent}
-
-
 \membersection{wxDC::GetPartialTextExtents}\label{wxdcgetpartialtextextents}
 
 \constfunc{bool}{GetPartialTextExtents}{\param{const wxString\&  }{text}, 
@@ -701,11 +677,6 @@ using \helpref{GetTextExtent}{wxdcgettextextent}, however if the
 various platforms have a native API function that is faster or more
 accurate than the generic implementation then it should be used
 instead. 
-
-\wxheading{See also}
-
-\helpref{wxDC::GetMultiLineTextExtent}{wxdcgetmultilinetextextent},\rtfsp
-\helpref{wxDC::GetTextExtent}{wxdcgettextextent}
 
 \pythonnote{This method only takes the {\it text} parameter and
   returns a Python list of integers.}
@@ -792,31 +763,22 @@ Gets the current text background colour (see \helpref{wxDC::SetTextBackground}{w
 
 \membersection{wxDC::GetTextExtent}\label{wxdcgettextextent}
 
-\constfunc{void}{GetTextExtent}{\param{const wxString\& }{string}, \param{wxCoord *}{w}, \param{wxCoord *}{h},\\
+\func{void}{GetTextExtent}{\param{const wxString\& }{string}, \param{wxCoord *}{w}, \param{wxCoord *}{h},\\
   \param{wxCoord *}{descent = NULL}, \param{wxCoord *}{externalLeading = NULL}, \param{wxFont *}{font = NULL}}
 
-\constfunc{wxSize}{GetTextExtent}{\param{const wxString\& }{string}}
-
 Gets the dimensions of the string using the currently selected font.
-\rtfsp{\it string} is the text string to measure, {\it descent} is the
+\rtfsp{\it string} is the text string to measure, {\it w} and {\it h} are
+the total width and height respectively, {\it descent} is the
 dimension from the baseline of the font to the bottom of the
 descender, and {\it externalLeading} is any extra vertical space added
 to the font by the font designer (usually is zero).
 
-The text extent is returned in {\it w} and {\it h} pointers (first form) or as
-a \helpref{wxSize}{wxsize} object (second form).
+The optional parameter {\it font} specifies an alternative
+to the currently selected font: but note that this does not
+yet work under Windows, so you need to set a font for
+the device context first.
 
-If the optional parameter {\it font} is specified and valid, then it is used
-for the text extent calculation. Otherwise the currently selected font is.
-
-Note that this function only works with single-line strings.
-
-\wxheading{See also}
-
-\helpref{wxFont}{wxfont},\rtfsp
-\helpref{wxDC::SetFont}{wxdcsetfont},\rtfsp
-\helpref{wxDC::GetPartialTextExtents}{wxdcgetpartialtextextents},\rtfsp
-\helpref{wxDC::GetMultiLineTextExtent}{wxdcgetmultilinetextextent}
+See also \helpref{wxFont}{wxfont}, \helpref{wxDC::SetFont}{wxdcsetfont}.
 
 \pythonnote{The following methods are implemented in wxPython:\par
 \indented{2cm}{\begin{twocollist}
@@ -847,35 +809,6 @@ Gets the current user scale factor (set by \helpref{SetUserScale}{wxdcsetusersca
 
 \perlnote{In wxPerl this method takes no arguments and return a two element
  array {\tt ( x, y )}}
-
-
-\membersection{wxDC::GradientFillConcentric}\label{wxdcgradientfillconcentric}
-
-\func{void}{GradientFillConcentric}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}}
-
-\func{void}{GradientFillConcentric}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}, \param{const wxPoint\& }{circleCenter}}
-
-Fill the area specified by rect with a radial gradient, starting from 
-\arg{initialColour} at the centre of the circle and fading to \arg{destColour} 
-on the circle outside.
-
-\arg{circleCenter} are the relative coordinates of centre of the circle in
-the specified \arg{rect}. If not specified, the cercle is placed at the
-centre of rect.
-
-\textbf{Note: } Currently this function is very slow, don't use it for
-real-time drawing.
-
-
-\membersection{wxDC::GradientFillLinear}\label{wxdcgradientfilllinear}
-
-\func{void}{GradientFillLinear}{\param{const wxRect\&}{ rect}, \param{const wxColour\&}{ initialColour}, \param{const wxColour\&}{ destColour}, \param{wxDirection}{ nDirection = wxEAST}}
-
-Fill the area specified by \arg{rect} with a linear gradient, starting from 
-\arg{initialColour} and eventually fading to \arg{destColour}. The 
-\arg{nDirection} specifies the direction of the colour change, default is to
-use \arg{initialColour} on the left part of the rectangle and 
-\arg{destColour} on the right one.
 
 
 \membersection{wxDC::LogicalToDeviceX}\label{wxdclogicaltodevicex}
@@ -940,7 +873,7 @@ Gets the minimum horizontal extent used in drawing commands so far.
 Gets the minimum vertical extent used in drawing commands so far.
 
 
-\membersection{wxDC::IsOk}\label{wxdcisok}
+\membersection{wxDC::Ok}\label{wxdcok}
 
 \func{bool}{Ok}{\void}
 
@@ -999,7 +932,7 @@ whether text will be drawn with a background colour or not.
 Sets the current brush for the DC.
 
 If the argument is wxNullBrush, the current brush is selected out of the device
-context (leaving wxDC without any valid brush), allowing the current brush to
+context, and the original brush restored, allowing the current brush to
 be destroyed safely.
 
 See also \helpref{wxBrush}{wxbrush}.
@@ -1052,18 +985,6 @@ Sets the current font for the DC. It must be a valid font, in particular you
 should not pass {\tt wxNullFont} to this method.
 
 See also \helpref{wxFont}{wxfont}.
-
-
-\membersection{wxDC::SetLayoutDirection}\label{wxdcsetlayoutdirection}
-
-\func{void}{SetLayoutDirection}{\param{wxLayoutDirection}{ dir}}
-
-Sets the current layout direction for the device context. \arg{dir} may be either
-\texttt{wxLayout\_Default}, \texttt{wxLayout\_LeftToRight} or \texttt{wxLayout\_RightToLeft}.
-
-\wxheading{See also}
-
-\helpref{GetLayoutDirection}{wxdcgetlayoutdirection}
 
 
 \membersection{wxDC::SetLogicalFunction}\label{wxdcsetlogicalfunction}
@@ -1152,8 +1073,7 @@ See \helpref{wxPalette}{wxpalette} for further details.
 Sets the current pen for the DC.
 
 If the argument is wxNullPen, the current pen is selected out of the device
-context (leaving wxDC without any valid pen), allowing the current brush to
-be destroyed safely.
+context, and the original pen restored.
 
 See also \helpref{wxMemoryDC}{wxmemorydc} for the interpretation of colours
 when drawing into a monochrome bitmap.
@@ -1198,84 +1118,40 @@ Message is a message to show while printing.
 
 Starts a document page (only relevant when outputting to a printer).
 
+\section{\class{wxDCClipper}}\label{wxdcclipper}
 
-\membersection{wxDC::StretchBlit}\label{wxdcstretchblit}
+This is a small helper class which sets the specified DC to its constructor
+clipping region and then automatically destroys it in its destructor. Using
+it ensures that an unwanted clipping region is not left set on the DC.
 
-\func{bool}{StretchBlit}{\param{wxCoord}{ xdest}, \param{wxCoord}{ ydest}, \param{wxCoord}{ dstWidth}, \param{wxCoord}{ dstHeight},
-  \param{wxDC* }{source}, \param{wxCoord}{ xsrc}, \param{wxCoord}{ ysrc}, \param{wxCoord}{ srcWidth}, \param{wxCoord}{ srcHeight}, 
-  \param{int}{ logicalFunc = wxCOPY}, \param{bool }{useMask = false}, \param{wxCoord}{ xsrcMask = -1}, \param{wxCoord}{ ysrcMask = -1}}
+\wxheading{Derived from}
 
-Copy from a source DC to this DC, specifying the destination
-coordinates, destination size, source DC, source coordinates,
-size of source area to copy, logical function, whether to use a bitmap mask, 
-and mask source position.
+No base class
 
-\wxheading{Parameters}
+\wxheading{Include files}
 
-\docparam{xdest}{Destination device context x position.}
-
-\docparam{ydest}{Destination device context y position.}
-
-\docparam{dstWidth}{Width of destination area.}
-
-\docparam{dstHeight}{Height of destination area.}
-
-\docparam{source}{Source device context.}
-
-\docparam{xsrc}{Source device context x position.}
-
-\docparam{ysrc}{Source device context y position.}
-
-\docparam{srcWidth}{Width of source area to be copied.}
-
-\docparam{srcHeight}{Height of source area to be copied.}
-
-\docparam{logicalFunc}{Logical function to use: see \helpref{wxDC::SetLogicalFunction}{wxdcsetlogicalfunction}.}
-
-\docparam{useMask}{If true, Blit does a transparent blit using the mask that is associated with the bitmap
-selected into the source device context. The Windows implementation does the following if \texttt{MaskBlt} cannot be used:
-
-\begin{enumerate}
-\item Creates a temporary bitmap and copies the destination area into it.
-\item Copies the source area into the temporary bitmap using the specified logical function.
-\item Sets the masked area in the temporary bitmap to BLACK by ANDing the
-mask bitmap with the temp bitmap with the foreground colour set to WHITE
-and the background colour set to BLACK.
-\item Sets the unmasked area in the destination area to BLACK by ANDing the
-mask bitmap with the destination area with the foreground colour set to BLACK
-and the background colour set to WHITE.
-\item ORs the temporary bitmap with the destination area.
-\item Deletes the temporary bitmap.
-\end{enumerate}
-
-This sequence of operations ensures that the source's transparent area need not be black,
-and logical functions are supported.
-
-{\bf Note:} on Windows, blitting with masks can be speeded up considerably by compiling
-wxWidgets with the \texttt{wxUSE\_DC\_CACHE} option enabled. You can also influence whether \texttt{MaskBlt}
-or the explicit mask blitting code above is used, by using \helpref{wxSystemOptions}{wxsystemoptions} and
-setting the {\bf no-maskblt} option to 1.
-
-}
-
-\docparam{xsrcMask}{Source x position on the mask. If both xsrcMask and ysrcMask are -1, xsrc and ysrc
-will be assumed for the mask source position. Currently only implemented on Windows.}
-
-\docparam{ysrcMask}{Source y position on the mask. If both xsrcMask and ysrcMask are -1, xsrc and ysrc
-will be assumed for the mask source position. Currently only implemented on Windows.}
-
-
-\wxheading{Remarks}
-
-There is partial support for Blit in wxPostScriptDC, under X.
-
-wxDC::StretchBlit is only implemented under wxMAC and wxMSW.
-
-See \helpref{wxMemoryDC}{wxmemorydc} for typical usage.
-
-\newsince{2.9.0}
+<wx/dc.h>
 
 \wxheading{See also}
 
-\helpref{wxDC::Blit}{wxdcblit}, \helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
+\helpref{wxDC}{wxdc}
+
+\latexignore{\rtfignore{\wxheading{Members}}}
+
+
+\membersection{wxDCClipper::wxDCClipper}\label{wxdcclipperctor}
+
+\func{}{wxDCClipper}{\param{wxDC\& }{dc}, \param{wxCoord }{x},\param{wxCoord }{y},\param{wxCoord }{w},\param{wxCoord }{h},}
+
+\func{}{wxDCClipper}{\param{wxDC\& }{dc}, \param{const wxRect\&}{ rect}}
+
+Constructor: sets the clipping region for the given device context to the
+specified rectangle.
+
+
+\membersection{wxDCClipper::\destruct{wxDCClipper}}\label{wxdcclipperdtor}
+
+\func{}{\destruct{wxDCClipper}}{\void}
+
+Destructor: destroys the clipping region set in the constructor.
 

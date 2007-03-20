@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/imagbmp.h
-// Purpose:     wxImage BMP, ICO, CUR and ANI handlers
+// Name:        imagbmp.h
+// Purpose:     wxImage BMP, ICO and CUR handlers
 // Author:      Robert Roebling, Chris Elliott
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling, Chris Elliott
@@ -9,6 +9,10 @@
 
 #ifndef _WX_IMAGBMP_H_
 #define _WX_IMAGBMP_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "imagbmp.h"
+#endif
 
 #include "wx/image.h"
 
@@ -20,6 +24,13 @@
 // specified when saving a CUR file - they define the hotspot of the cursor:
 #define wxIMAGE_OPTION_CUR_HOTSPOT_X  wxT("HotSpotX")
 #define wxIMAGE_OPTION_CUR_HOTSPOT_Y  wxT("HotSpotY")
+
+#if WXWIN_COMPATIBILITY_2_4
+    // Do not use these macros, they are deprecated
+    #define wxBMP_FORMAT    wxIMAGE_OPTION_BMP_FORMAT
+    #define wxCUR_HOTSPOT_X wxIMAGE_OPTION_CUR_HOTSPOT_X
+    #define wxCUR_HOTSPOT_Y wxIMAGE_OPTION_CUR_HOTSPOT_Y
+#endif
 
 
 enum
@@ -54,9 +65,9 @@ public:
 #if wxUSE_STREAMS
     virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool DoCanRead( wxInputStream& stream );
 
 protected:
-    virtual bool DoCanRead( wxInputStream& stream );
     bool SaveDib(wxImage *image, wxOutputStream& stream, bool verbose,
                  bool IsBmp, bool IsMask);
     bool DoLoadDib(wxImage *image, int width, int height, int bpp, int ncolors,
@@ -89,9 +100,8 @@ public:
     virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
     virtual bool DoLoadFile( wxImage *image, wxInputStream& stream, bool verbose, int index );
-    virtual int GetImageCount( wxInputStream& stream );
-protected:
     virtual bool DoCanRead( wxInputStream& stream );
+    virtual int GetImageCount( wxInputStream& stream );
 #endif // wxUSE_STREAMS
 
 private:
@@ -118,7 +128,6 @@ public:
     //     formats are almost identical), but we hide this fact at
     //     the API level, since it is a mere implementation detail.
 
-protected:
 #if wxUSE_STREAMS
     virtual bool DoCanRead( wxInputStream& stream );
 #endif // wxUSE_STREAMS
@@ -145,9 +154,8 @@ public:
 #if wxUSE_STREAMS
     virtual bool SaveFile( wxImage *WXUNUSED(image), wxOutputStream& WXUNUSED(stream), bool WXUNUSED(verbose=true) ){return false ;};
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual int GetImageCount( wxInputStream& stream );
-protected:
     virtual bool DoCanRead( wxInputStream& stream );
+    virtual int GetImageCount( wxInputStream& stream );
 #endif // wxUSE_STREAMS
 
 private:

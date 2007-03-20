@@ -66,9 +66,6 @@ public:
     //
     int      SetSelection(size_t nPage);
 
-    // changes selected page without sending events
-    int ChangeSelection(size_t nPage);
-
     //
     // Get the currently selected page
     //

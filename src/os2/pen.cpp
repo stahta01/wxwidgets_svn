@@ -12,13 +12,12 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/pen.h"
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
     #include "wx/list.h"
     #include "wx/utils.h"
     #include "wx/app.h"
+    #include "wx/pen.h"
     #include "wx/log.h"
 #endif
 
@@ -61,10 +60,14 @@ wxPenRefData::~wxPenRefData()
 //
 wxPen::wxPen()
 {
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 wxPen::~wxPen()
 {
+    if (wxThePenList)
+        wxThePenList->RemovePen(this);
 } // end of wxPen::wxPen
 
 // Should implement Create
@@ -84,6 +87,9 @@ wxPen::wxPen(
     M_PENDATA->m_hPen    = 0L;
 
     RealizeResource();
+
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 wxPen::wxPen(
@@ -101,6 +107,9 @@ wxPen::wxPen(
     M_PENDATA->m_hPen     = 0;
 
     RealizeResource();
+
+    if ( wxThePenList )
+        wxThePenList->AddPen(this);
 } // end of wxPen::wxPen
 
 int wx2os2PenStyle(
@@ -304,7 +313,7 @@ bool wxPen::RealizeResource()
     return false;
 } // end of wxPen::RealizeResource
 
-WXHANDLE wxPen::GetResourceHandle() const
+WXHANDLE wxPen::GetResourceHandle()
 {
     if (!M_PENDATA)
         return 0;

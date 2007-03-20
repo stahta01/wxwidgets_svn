@@ -7,8 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
 #ifndef __GTKFILEDLGH__
 #define __GTKFILEDLGH__
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "filedlggtk.h"
+#endif
 
 #include "wx/generic/filedlgg.h"
 
@@ -26,12 +31,10 @@ public:
                  const wxString& defaultDir = wxEmptyString,
                  const wxString& defaultFile = wxEmptyString,
                  const wxString& wildCard = wxFileSelectorDefaultWildcardStr,
-                 long style = wxFD_DEFAULT_STYLE,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& sz = wxDefaultSize,
-                 const wxString& name = wxFileDialogNameStr);
+                 long style = 0,
+                 const wxPoint& pos = wxDefaultPosition);
 
-    virtual ~wxFileDialog() {}
+    virtual ~wxFileDialog();
 
     virtual wxString GetPath() const;
     virtual void GetPaths(wxArrayString& paths) const;
@@ -50,9 +53,9 @@ public:
     virtual int ShowModal();
     virtual bool Show( bool show = true );
 
+//private:
+    bool m_destroyed_by_delete;
 
-
-protected:
     // override this from wxTLW since the native
     // form doesn't have any m_wxwindow
     virtual void DoSetSize(int x, int y,

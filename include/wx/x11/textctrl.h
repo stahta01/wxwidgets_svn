@@ -19,6 +19,10 @@
 #include "wx/univ/textctrl.h"
 #else
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "textctrl.h"
+#endif
+
 #include "wx/scrolwin.h"
 #include "wx/arrstr.h"
 #include "wx/datetime.h"
@@ -116,7 +120,8 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    virtual void ChangeValue(const wxString &value);
+    virtual wxString GetValue() const;
+    virtual void SetValue(const wxString& value);
 
     virtual int GetLineLength(long lineNo) const;
     virtual wxString GetLineText(long lineNo) const;
@@ -128,6 +133,10 @@ public:
     // more readable flag testing methods
     // ----------------------------------
 
+#if 0
+    // it seems now in wxTextCtrlBase
+    bool IsSingleLine() const { return !(GetWindowStyle() & wxTE_MULTILINE); }
+#endif
     bool IsPassword() const { return (GetWindowStyle() & wxTE_PASSWORD) != 0; }
     bool WrapLines() const { return false; }
 
@@ -265,8 +274,6 @@ protected:
     void Init();
 
     virtual wxSize DoGetBestSize() const;
-
-    virtual void DoSetValue(const wxString& value, int flags = 0);
 
     friend class wxSourceUndoStep;
 

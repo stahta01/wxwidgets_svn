@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/html/m_tables.cpp
+// Name:        m_tables.cpp
 // Purpose:     wxHtml module for tables
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
@@ -7,13 +7,17 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation
 #endif
 
+#include "wx/wxprec.h"
+
+#include "wx/defs.h"
 #if wxUSE_HTML && wxUSE_STREAMS
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #ifndef WXPRECOMP
 #endif
@@ -98,10 +102,7 @@ private:
 
 public:
     wxHtmlTableCell(wxHtmlContainerCell *parent, const wxHtmlTag& tag, double pixel_scale = 1.0);
-    virtual ~wxHtmlTableCell();
-
-    virtual void RemoveExtraSpacing(bool top, bool bottom);
-
+    ~wxHtmlTableCell();
     virtual void Layout(int w);
 
     void AddRow(const wxHtmlTag& tag);
@@ -166,15 +167,6 @@ wxHtmlTableCell::~wxHtmlTableCell()
 }
 
 
-void wxHtmlTableCell::RemoveExtraSpacing(bool WXUNUSED(top),
-                                         bool WXUNUSED(bottom))
-{
-    // Don't remove any spacing in the table -- it's always desirable,
-    // because it's part of table's definition.
-    // (If wxHtmlContainerCell::RemoveExtraSpacing() was applied to tables,
-    // then upper left cell of a table would be positioned above other cells
-    // if the table was the first element on the page.)
-}
 
 void wxHtmlTableCell::ReallocCols(int cols)
 {
@@ -275,7 +267,7 @@ void wxHtmlTableCell::AddCell(wxHtmlContainerCell *cell, const wxHtmlTag& tag)
         {
             wxString wd = tag.GetParam(wxT("WIDTH"));
 
-            if (wd[wd.length()-1] == wxT('%'))
+            if (wd[wd.Length()-1] == wxT('%'))
             {
                 wxSscanf(wd.c_str(), wxT("%i%%"), &m_ColsInfo[c].width);
                 m_ColsInfo[c].units = wxHTML_UNITS_PERCENT;
@@ -680,7 +672,7 @@ TAG_HANDLER_BEGIN(TABLE, "TABLE,TR,TD,TH")
                 {
                     wxString wd = tag.GetParam(wxT("WIDTH"));
 
-                    if (wd[wd.length()-1] == wxT('%'))
+                    if (wd[wd.Length()-1] == wxT('%'))
                     {
                         int width = 0;
                         wxSscanf(wd.c_str(), wxT("%i%%"), &width);

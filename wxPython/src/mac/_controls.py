@@ -1,18 +1,18 @@
-# This file was created automatically by SWIG 1.3.29.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
 
 import _controls_
-import new
-new_instancemethod = new.instancemethod
+
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if type(value).__name__ == 'PySwigObject':
-            self.__dict__[name] = value
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    if (not static) or hasattr(self,name) or (name == "thisown"):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -21,15 +21,9 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
-    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
-
-def _swig_repr(self):
-    try: strthis = "proxy of " + self.this.__repr__()
-    except: strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
 import types
 try:
@@ -43,8 +37,7 @@ del types
 
 def _swig_setattr_nondynamic_method(set):
     def set_attr(self,name,value):
-        if (name == "thisown"): return self.this.own(value)
-        if hasattr(self,name) or (name == "this"):
+        if hasattr(self,name) or (name in ("this", "thisown")):
             set(self,name,value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
@@ -68,9 +61,9 @@ class Button(_core.Control):
     common elements of a GUI.  It may be placed on a dialog box or panel, or
     indeed almost any other window.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -83,7 +76,10 @@ class Button(_core.Control):
         ID given.  In additon, the button will be decorated with stock icons
         under GTK+ 2.
         """
-        _controls_.Button_swiginit(self,_controls_.new_Button(*args, **kwargs))
+        newobj = _controls_.new_Button(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -132,7 +128,13 @@ class Button(_core.Control):
         return _controls_.Button_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.Button_swigregister(Button)
+
+class ButtonPtr(Button):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Button
+_controls_.Button_swigregister(ButtonPtr)
 cvar = _controls_.cvar
 ButtonNameStr = cvar.ButtonNameStr
 
@@ -143,18 +145,19 @@ def PreButton(*args, **kwargs):
     Precreate a Button for 2-phase creation.
     """
     val = _controls_.new_PreButton(*args, **kwargs)
+    val.thisown = 1
     return val
 
-def Button_GetDefaultSize(*args):
-  """
+def Button_GetDefaultSize(*args, **kwargs):
+    """
     Button_GetDefaultSize() -> Size
 
     Returns the default button size for this platform.
     """
-  return _controls_.Button_GetDefaultSize(*args)
+    return _controls_.Button_GetDefaultSize(*args, **kwargs)
 
 def Button_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Button_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -168,7 +171,7 @@ def Button_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.Button_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.Button_GetClassDefaultAttributes(*args, **kwargs)
 
 class BitmapButton(Button):
     """
@@ -177,9 +180,9 @@ class BitmapButton(Button):
     the application needs more control, additional bitmaps for the selected state,
     unpressed focused state, and greyed-out state may be supplied.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBitmapButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Bitmap bitmap=wxNullBitmap, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -188,7 +191,10 @@ class BitmapButton(Button):
 
         Create and show a button with a bitmap for the label.
         """
-        _controls_.BitmapButton_swiginit(self,_controls_.new_BitmapButton(*args, **kwargs))
+        newobj = _controls_.new_BitmapButton(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -234,14 +240,6 @@ class BitmapButton(Button):
         """
         return _controls_.BitmapButton_GetBitmapSelected(*args, **kwargs)
 
-    def GetBitmapHover(*args, **kwargs):
-        """
-        GetBitmapHover(self) -> Bitmap
-
-        Returns the bitmap used when the mouse is over the button, may be invalid.
-        """
-        return _controls_.BitmapButton_GetBitmapHover(*args, **kwargs)
-
     def SetBitmapDisabled(*args, **kwargs):
         """
         SetBitmapDisabled(self, Bitmap bitmap)
@@ -275,16 +273,6 @@ class BitmapButton(Button):
         """
         return _controls_.BitmapButton_SetBitmapLabel(*args, **kwargs)
 
-    def SetBitmapHover(*args, **kwargs):
-        """
-        SetBitmapHover(self, Bitmap hover)
-
-        Sets the bitmap to be shown when the mouse is over the button.  This function
-        is new since wxWidgets version 2.7.0 and the hover bitmap is currently only
-        supported in wxMSW.
-        """
-        return _controls_.BitmapButton_SetBitmapHover(*args, **kwargs)
-
     def SetMargins(*args, **kwargs):
         """SetMargins(self, int x, int y)"""
         return _controls_.BitmapButton_SetMargins(*args, **kwargs)
@@ -297,14 +285,13 @@ class BitmapButton(Button):
         """GetMarginY(self) -> int"""
         return _controls_.BitmapButton_GetMarginY(*args, **kwargs)
 
-    BitmapDisabled = property(GetBitmapDisabled,SetBitmapDisabled,doc="See `GetBitmapDisabled` and `SetBitmapDisabled`") 
-    BitmapFocus = property(GetBitmapFocus,SetBitmapFocus,doc="See `GetBitmapFocus` and `SetBitmapFocus`") 
-    BitmapHover = property(GetBitmapHover,SetBitmapHover,doc="See `GetBitmapHover` and `SetBitmapHover`") 
-    BitmapLabel = property(GetBitmapLabel,SetBitmapLabel,doc="See `GetBitmapLabel` and `SetBitmapLabel`") 
-    BitmapSelected = property(GetBitmapSelected,SetBitmapSelected,doc="See `GetBitmapSelected` and `SetBitmapSelected`") 
-    MarginX = property(GetMarginX,doc="See `GetMarginX`") 
-    MarginY = property(GetMarginY,doc="See `GetMarginY`") 
-_controls_.BitmapButton_swigregister(BitmapButton)
+
+class BitmapButtonPtr(BitmapButton):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BitmapButton
+_controls_.BitmapButton_swigregister(BitmapButtonPtr)
 
 def PreBitmapButton(*args, **kwargs):
     """
@@ -313,6 +300,7 @@ def PreBitmapButton(*args, **kwargs):
     Precreate a BitmapButton for 2-phase creation.
     """
     val = _controls_.new_PreBitmapButton(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
@@ -331,9 +319,9 @@ class CheckBox(_core.Control):
     mixed or undetermined state. Often this is used as a "Does Not
     Apply" state.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCheckBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -342,7 +330,10 @@ class CheckBox(_core.Control):
 
         Creates and shows a CheckBox control
         """
-        _controls_.CheckBox_swiginit(self,_controls_.new_CheckBox(*args, **kwargs))
+        newobj = _controls_.new_CheckBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -441,9 +432,13 @@ class CheckBox(_core.Control):
         return _controls_.CheckBox_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    ThreeStateValue = property(Get3StateValue,Set3StateValue,doc="See `Get3StateValue` and `Set3StateValue`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.CheckBox_swigregister(CheckBox)
+
+class CheckBoxPtr(CheckBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CheckBox
+_controls_.CheckBox_swigregister(CheckBoxPtr)
 CheckBoxNameStr = cvar.CheckBoxNameStr
 
 def PreCheckBox(*args, **kwargs):
@@ -453,10 +448,11 @@ def PreCheckBox(*args, **kwargs):
     Precreate a CheckBox for 2-phase creation.
     """
     val = _controls_.new_PreCheckBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def CheckBox_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     CheckBox_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -470,7 +466,7 @@ def CheckBox_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.CheckBox_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.CheckBox_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -480,9 +476,9 @@ class Choice(_core.ControlWithItems):
     Unlike a `wx.ListBox`, only the selection is visible until the
     user pulls down the menu of choices.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxChoice instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize,
             List choices=EmptyList, long style=0, Validator validator=DefaultValidator,
@@ -490,7 +486,10 @@ class Choice(_core.ControlWithItems):
 
         Create and show a Choice control
         """
-        _controls_.Choice_swiginit(self,_controls_.new_Choice(*args, **kwargs))
+        newobj = _controls_.new_Choice(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -534,8 +533,13 @@ class Choice(_core.ControlWithItems):
         return _controls_.Choice_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    CurrentSelection = property(GetCurrentSelection,doc="See `GetCurrentSelection`") 
-_controls_.Choice_swigregister(Choice)
+
+class ChoicePtr(Choice):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Choice
+_controls_.Choice_swigregister(ChoicePtr)
 ChoiceNameStr = cvar.ChoiceNameStr
 
 def PreChoice(*args, **kwargs):
@@ -545,10 +549,11 @@ def PreChoice(*args, **kwargs):
     Precreate a Choice control for 2-phase creation.
     """
     val = _controls_.new_PreChoice(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Choice_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Choice_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -562,7 +567,7 @@ def Choice_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.Choice_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.Choice_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -575,23 +580,26 @@ class ComboBox(_core.Control,_core.ItemContainer):
     A combobox permits a single selection only. Combobox items are
     numbered from zero.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxComboBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(Window parent, int id=-1, String value=EmptyString,
+        __init__(Window parent, int id, String value=EmptyString,
             Point pos=DefaultPosition, Size size=DefaultSize,
             List choices=EmptyList, long style=0, Validator validator=DefaultValidator,
             String name=ComboBoxNameStr) -> ComboBox
 
         Constructor, creates and shows a ComboBox control.
         """
-        _controls_.ComboBox_swiginit(self,_controls_.new_ComboBox(*args, **kwargs))
+        newobj = _controls_.new_ComboBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
         """
-        Create(Window parent, int id=-1, String value=EmptyString,
+        Create(Window parent, int id, String value=EmptyString,
             Point pos=DefaultPosition, Size size=DefaultSize,
             List choices=EmptyList, long style=0, Validator validator=DefaultValidator,
             String name=ChoiceNameStr) -> bool
@@ -669,6 +677,14 @@ class ComboBox(_core.Control,_core.ItemContainer):
         """
         return _controls_.ComboBox_Replace(*args, **kwargs)
 
+    def SetSelection(*args, **kwargs):
+        """
+        SetSelection(self, int n)
+
+        Sets the item at index 'n' to be the selected item.
+        """
+        return _controls_.ComboBox_SetSelection(*args, **kwargs)
+
     def SetMark(*args, **kwargs):
         """
         SetMark(self, long from, long to)
@@ -676,9 +692,6 @@ class ComboBox(_core.Control,_core.ItemContainer):
         Selects the text between the two positions in the combobox text field.
         """
         return _controls_.ComboBox_SetMark(*args, **kwargs)
-
-    def GetMark(self):
-        return (0,0)
 
     def GetCurrentSelection(*args, **kwargs):
         """
@@ -700,6 +713,14 @@ class ComboBox(_core.Control,_core.ItemContainer):
         Select the item with the specifed string
         """
         return _controls_.ComboBox_SetStringSelection(*args, **kwargs)
+
+    def SetString(*args, **kwargs):
+        """
+        SetString(self, int n, String string)
+
+        Set the label for the n'th item (zero based) in the list.
+        """
+        return _controls_.ComboBox_SetString(*args, **kwargs)
 
     def SetEditable(*args, **kwargs):
         """SetEditable(self, bool editable)"""
@@ -817,12 +838,13 @@ class ComboBox(_core.Control,_core.ItemContainer):
         return _controls_.ComboBox_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    CurrentSelection = property(GetCurrentSelection,doc="See `GetCurrentSelection`") 
-    InsertionPoint = property(GetInsertionPoint,SetInsertionPoint,doc="See `GetInsertionPoint` and `SetInsertionPoint`") 
-    LastPosition = property(GetLastPosition,doc="See `GetLastPosition`") 
-    Mark = property(GetMark,SetMark,doc="See `GetMark` and `SetMark`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.ComboBox_swigregister(ComboBox)
+
+class ComboBoxPtr(ComboBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ComboBox
+_controls_.ComboBox_swigregister(ComboBoxPtr)
 ComboBoxNameStr = cvar.ComboBoxNameStr
 
 def PreComboBox(*args, **kwargs):
@@ -832,10 +854,11 @@ def PreComboBox(*args, **kwargs):
     Precreate a ComboBox control for 2-phase creation.
     """
     val = _controls_.new_PreComboBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ComboBox_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ComboBox_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -849,26 +872,29 @@ def ComboBox_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ComboBox_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ComboBox_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 GA_HORIZONTAL = _controls_.GA_HORIZONTAL
 GA_VERTICAL = _controls_.GA_VERTICAL
 GA_SMOOTH = _controls_.GA_SMOOTH
-GA_PROGRESSBAR = 0 # obsolete 
+GA_PROGRESSBAR = _controls_.GA_PROGRESSBAR
 class Gauge(_core.Control):
     """Proxy of C++ Gauge class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGauge instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, int range=100, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=GA_HORIZONTAL, 
             Validator validator=DefaultValidator, 
             String name=GaugeNameStr) -> Gauge
         """
-        _controls_.Gauge_swiginit(self,_controls_.new_Gauge(*args, **kwargs))
+        newobj = _controls_.new_Gauge(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -895,10 +921,6 @@ class Gauge(_core.Control):
     def GetValue(*args, **kwargs):
         """GetValue(self) -> int"""
         return _controls_.Gauge_GetValue(*args, **kwargs)
-
-    def Pulse(*args, **kwargs):
-        """Pulse(self)"""
-        return _controls_.Gauge_Pulse(*args, **kwargs)
 
     def IsVertical(*args, **kwargs):
         """IsVertical(self) -> bool"""
@@ -938,20 +960,23 @@ class Gauge(_core.Control):
         return _controls_.Gauge_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    BezelFace = property(GetBezelFace,SetBezelFace,doc="See `GetBezelFace` and `SetBezelFace`") 
-    Range = property(GetRange,SetRange,doc="See `GetRange` and `SetRange`") 
-    ShadowWidth = property(GetShadowWidth,SetShadowWidth,doc="See `GetShadowWidth` and `SetShadowWidth`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.Gauge_swigregister(Gauge)
+
+class GaugePtr(Gauge):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Gauge
+_controls_.Gauge_swigregister(GaugePtr)
 GaugeNameStr = cvar.GaugeNameStr
 
 def PreGauge(*args, **kwargs):
     """PreGauge() -> Gauge"""
     val = _controls_.new_PreGauge(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Gauge_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Gauge_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -965,21 +990,24 @@ def Gauge_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.Gauge_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.Gauge_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class StaticBox(_core.Control):
     """Proxy of C++ StaticBox class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, String name=StaticBoxNameStr) -> StaticBox
         """
-        _controls_.StaticBox_swiginit(self,_controls_.new_StaticBox(*args, **kwargs))
+        newobj = _controls_.new_StaticBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1008,19 +1036,25 @@ class StaticBox(_core.Control):
         return _controls_.StaticBox_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.StaticBox_swigregister(StaticBox)
+
+class StaticBoxPtr(StaticBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticBox
+_controls_.StaticBox_swigregister(StaticBoxPtr)
 StaticBitmapNameStr = cvar.StaticBitmapNameStr
 StaticBoxNameStr = cvar.StaticBoxNameStr
 StaticTextNameStr = cvar.StaticTextNameStr
-StaticLineNameStr = cvar.StaticLineNameStr
 
 def PreStaticBox(*args, **kwargs):
     """PreStaticBox() -> StaticBox"""
     val = _controls_.new_PreStaticBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def StaticBox_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     StaticBox_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1034,28 +1068,31 @@ def StaticBox_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.StaticBox_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.StaticBox_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class StaticLine(_core.Control):
     """Proxy of C++ StaticLine class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticLine instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=LI_HORIZONTAL, 
-            String name=StaticLineNameStr) -> StaticLine
+            String name=StaticTextNameStr) -> StaticLine
         """
-        _controls_.StaticLine_swiginit(self,_controls_.new_StaticLine(*args, **kwargs))
+        newobj = _controls_.new_StaticLine(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
         """
         Create(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=LI_HORIZONTAL, 
-            String name=StaticLineNameStr) -> bool
+            String name=StaticTextNameStr) -> bool
         """
         return _controls_.StaticLine_Create(*args, **kwargs)
 
@@ -1086,19 +1123,26 @@ class StaticLine(_core.Control):
         return _controls_.StaticLine_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.StaticLine_swigregister(StaticLine)
+
+class StaticLinePtr(StaticLine):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticLine
+_controls_.StaticLine_swigregister(StaticLinePtr)
 
 def PreStaticLine(*args, **kwargs):
     """PreStaticLine() -> StaticLine"""
     val = _controls_.new_PreStaticLine(*args, **kwargs)
+    val.thisown = 1
     return val
 
-def StaticLine_GetDefaultSize(*args):
-  """StaticLine_GetDefaultSize() -> int"""
-  return _controls_.StaticLine_GetDefaultSize(*args)
+def StaticLine_GetDefaultSize(*args, **kwargs):
+    """StaticLine_GetDefaultSize() -> int"""
+    return _controls_.StaticLine_GetDefaultSize(*args, **kwargs)
 
 def StaticLine_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     StaticLine_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1112,21 +1156,24 @@ def StaticLine_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.StaticLine_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.StaticLine_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class StaticText(_core.Control):
     """Proxy of C++ StaticText class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticText instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, String name=StaticTextNameStr) -> StaticText
         """
-        _controls_.StaticText_swiginit(self,_controls_.new_StaticText(*args, **kwargs))
+        newobj = _controls_.new_StaticText(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1166,15 +1213,22 @@ class StaticText(_core.Control):
         return _controls_.StaticText_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.StaticText_swigregister(StaticText)
+
+class StaticTextPtr(StaticText):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticText
+_controls_.StaticText_swigregister(StaticTextPtr)
 
 def PreStaticText(*args, **kwargs):
     """PreStaticText() -> StaticText"""
     val = _controls_.new_PreStaticText(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def StaticText_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     StaticText_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1188,21 +1242,24 @@ def StaticText_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.StaticText_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.StaticText_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class StaticBitmap(_core.Control):
     """Proxy of C++ StaticBitmap class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxStaticBitmap instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Bitmap bitmap=wxNullBitmap, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, String name=StaticBitmapNameStr) -> StaticBitmap
         """
-        _controls_.StaticBitmap_swiginit(self,_controls_.new_StaticBitmap(*args, **kwargs))
+        newobj = _controls_.new_StaticBitmap(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1243,15 +1300,22 @@ class StaticBitmap(_core.Control):
         return _controls_.StaticBitmap_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.StaticBitmap_swigregister(StaticBitmap)
+
+class StaticBitmapPtr(StaticBitmap):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = StaticBitmap
+_controls_.StaticBitmap_swigregister(StaticBitmapPtr)
 
 def PreStaticBitmap(*args, **kwargs):
     """PreStaticBitmap() -> StaticBitmap"""
     val = _controls_.new_PreStaticBitmap(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def StaticBitmap_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     StaticBitmap_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1265,22 +1329,25 @@ def StaticBitmap_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.StaticBitmap_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.StaticBitmap_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class ListBox(_core.ControlWithItems):
     """Proxy of C++ ListBox class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, wxArrayString choices=wxPyEmptyStringArray, 
             long style=0, Validator validator=DefaultValidator, 
             String name=ListBoxNameStr) -> ListBox
         """
-        _controls_.ListBox_swiginit(self,_controls_.new_ListBox(*args, **kwargs))
+        newobj = _controls_.new_ListBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1302,7 +1369,7 @@ class ListBox(_core.ControlWithItems):
         return _controls_.ListBox_Insert(*args, **kwargs)
 
     def InsertItems(*args, **kwargs):
-        """InsertItems(self, wxArrayString items, unsigned int pos)"""
+        """InsertItems(self, wxArrayString items, int pos)"""
         return _controls_.ListBox_InsertItems(*args, **kwargs)
 
     def Set(*args, **kwargs):
@@ -1362,14 +1429,6 @@ class ListBox(_core.ControlWithItems):
         """IsSorted(self) -> bool"""
         return _controls_.ListBox_IsSorted(*args, **kwargs)
 
-    def HitTest(*args, **kwargs):
-        """
-        HitTest(self, Point pt) -> int
-
-        Test where the given (in client coords) point lies
-        """
-        return _controls_.ListBox_HitTest(*args, **kwargs)
-
     def SetItemForegroundColour(*args, **kwargs):
         """SetItemForegroundColour(self, int item, Colour c)"""
         return _controls_.ListBox_SetItemForegroundColour(*args, **kwargs)
@@ -1400,17 +1459,23 @@ class ListBox(_core.ControlWithItems):
         return _controls_.ListBox_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Selections = property(GetSelections,doc="See `GetSelections`") 
-_controls_.ListBox_swigregister(ListBox)
+
+class ListBoxPtr(ListBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListBox
+_controls_.ListBox_swigregister(ListBoxPtr)
 ListBoxNameStr = cvar.ListBoxNameStr
 
 def PreListBox(*args, **kwargs):
     """PreListBox() -> ListBox"""
     val = _controls_.new_PreListBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ListBox_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ListBox_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1424,22 +1489,25 @@ def ListBox_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ListBox_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ListBox_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class CheckListBox(ListBox):
     """Proxy of C++ CheckListBox class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxCheckListBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, wxArrayString choices=wxPyEmptyStringArray, 
             long style=0, Validator validator=DefaultValidator, 
             String name=ListBoxNameStr) -> CheckListBox
         """
-        _controls_.CheckListBox_swiginit(self,_controls_.new_CheckListBox(*args, **kwargs))
+        newobj = _controls_.new_CheckListBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1452,22 +1520,41 @@ class CheckListBox(ListBox):
         return _controls_.CheckListBox_Create(*args, **kwargs)
 
     def IsChecked(*args, **kwargs):
-        """IsChecked(self, unsigned int index) -> bool"""
+        """IsChecked(self, int index) -> bool"""
         return _controls_.CheckListBox_IsChecked(*args, **kwargs)
 
     def Check(*args, **kwargs):
-        """Check(self, unsigned int index, int check=True)"""
+        """Check(self, int index, int check=True)"""
         return _controls_.CheckListBox_Check(*args, **kwargs)
 
-    def GetItemHeight(self):
-        raise NotImplementedError
+    def HitTest(*args, **kwargs):
+        """
+        HitTest(self, Point pt) -> int
 
-    ItemHeight = property(GetItemHeight,doc="See `GetItemHeight`") 
-_controls_.CheckListBox_swigregister(CheckListBox)
+        Test where the given (in client coords) point lies
+        """
+        return _controls_.CheckListBox_HitTest(*args, **kwargs)
+
+    def HitTestXY(*args, **kwargs):
+        """
+        HitTestXY(self, int x, int y) -> int
+
+        Test where the given (in client coords) point lies
+        """
+        return _controls_.CheckListBox_HitTestXY(*args, **kwargs)
+
+
+class CheckListBoxPtr(CheckListBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = CheckListBox
+_controls_.CheckListBox_swigregister(CheckListBoxPtr)
 
 def PreCheckListBox(*args, **kwargs):
     """PreCheckListBox() -> CheckListBox"""
     val = _controls_.new_PreCheckListBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
@@ -1490,9 +1577,9 @@ TE_DONTWRAP = _controls_.TE_DONTWRAP
 TE_CHARWRAP = _controls_.TE_CHARWRAP
 TE_WORDWRAP = _controls_.TE_WORDWRAP
 TE_BESTWRAP = _controls_.TE_BESTWRAP
+TE_LINEWRAP = _controls_.TE_LINEWRAP
 TE_RICH2 = _controls_.TE_RICH2
 TE_CAPITALIZE = _controls_.TE_CAPITALIZE
-TE_LINEWRAP = TE_CHARWRAP 
 TEXT_ALIGNMENT_DEFAULT = _controls_.TEXT_ALIGNMENT_DEFAULT
 TEXT_ALIGNMENT_LEFT = _controls_.TEXT_ALIGNMENT_LEFT
 TEXT_ALIGNMENT_CENTRE = _controls_.TEXT_ALIGNMENT_CENTRE
@@ -1518,28 +1605,29 @@ TE_HT_BELOW = _controls_.TE_HT_BELOW
 TE_HT_BEYOND = _controls_.TE_HT_BEYOND
 OutOfRangeTextCoord = _controls_.OutOfRangeTextCoord
 InvalidTextCoord = _controls_.InvalidTextCoord
-TEXT_TYPE_ANY = _controls_.TEXT_TYPE_ANY
 class TextAttr(object):
     """Proxy of C++ TextAttr class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTextAttr instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Colour colText=wxNullColour, Colour colBack=wxNullColour, 
             Font font=wxNullFont, int alignment=TEXT_ALIGNMENT_DEFAULT) -> TextAttr
         """
-        _controls_.TextAttr_swiginit(self,_controls_.new_TextAttr(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_TextAttr
-    __del__ = lambda self : None;
+        newobj = _controls_.new_TextAttr(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_controls_.delete_TextAttr):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Init(*args, **kwargs):
         """Init(self)"""
         return _controls_.TextAttr_Init(*args, **kwargs)
 
-    def Merge(*args, **kwargs):
-        """Merge(TextAttr base, TextAttr overlay) -> TextAttr"""
-        return _controls_.TextAttr_Merge(*args, **kwargs)
-
-    Merge = staticmethod(Merge)
     def SetTextColour(*args, **kwargs):
         """SetTextColour(self, Colour colText)"""
         return _controls_.TextAttr_SetTextColour(*args, **kwargs)
@@ -1649,38 +1737,34 @@ class TextAttr(object):
         return _controls_.TextAttr_Combine(*args, **kwargs)
 
     Combine = staticmethod(Combine)
-    Alignment = property(GetAlignment,SetAlignment,doc="See `GetAlignment` and `SetAlignment`") 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    Flags = property(GetFlags,SetFlags,doc="See `GetFlags` and `SetFlags`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    LeftIndent = property(GetLeftIndent,SetLeftIndent,doc="See `GetLeftIndent` and `SetLeftIndent`") 
-    LeftSubIndent = property(GetLeftSubIndent,doc="See `GetLeftSubIndent`") 
-    RightIndent = property(GetRightIndent,SetRightIndent,doc="See `GetRightIndent` and `SetRightIndent`") 
-    Tabs = property(GetTabs,SetTabs,doc="See `GetTabs` and `SetTabs`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-_controls_.TextAttr_swigregister(TextAttr)
+
+class TextAttrPtr(TextAttr):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TextAttr
+_controls_.TextAttr_swigregister(TextAttrPtr)
 TextCtrlNameStr = cvar.TextCtrlNameStr
 
-def TextAttr_Merge(*args, **kwargs):
-  """TextAttr_Merge(TextAttr base, TextAttr overlay) -> TextAttr"""
-  return _controls_.TextAttr_Merge(*args, **kwargs)
-
 def TextAttr_Combine(*args, **kwargs):
-  """TextAttr_Combine(TextAttr attr, TextAttr attrDef, TextCtrl text) -> TextAttr"""
-  return _controls_.TextAttr_Combine(*args, **kwargs)
+    """TextAttr_Combine(TextAttr attr, TextAttr attrDef, TextCtrl text) -> TextAttr"""
+    return _controls_.TextAttr_Combine(*args, **kwargs)
 
 class TextCtrl(_core.Control):
     """Proxy of C++ TextCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTextCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String value=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, Validator validator=DefaultValidator, 
             String name=TextCtrlNameStr) -> TextCtrl
         """
-        _controls_.TextCtrl_swiginit(self,_controls_.new_TextCtrl(*args, **kwargs))
+        newobj = _controls_.new_TextCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -1699,14 +1783,6 @@ class TextCtrl(_core.Control):
     def SetValue(*args, **kwargs):
         """SetValue(self, String value)"""
         return _controls_.TextCtrl_SetValue(*args, **kwargs)
-
-    def IsEmpty(*args, **kwargs):
-        """IsEmpty(self) -> bool"""
-        return _controls_.TextCtrl_IsEmpty(*args, **kwargs)
-
-    def ChangeValue(*args, **kwargs):
-        """ChangeValue(self, String value)"""
-        return _controls_.TextCtrl_ChangeValue(*args, **kwargs)
 
     def GetRange(*args, **kwargs):
         """GetRange(self, long from, long to) -> String"""
@@ -1765,11 +1841,11 @@ class TextCtrl(_core.Control):
         return _controls_.TextCtrl_Remove(*args, **kwargs)
 
     def LoadFile(*args, **kwargs):
-        """LoadFile(self, String file, int fileType=TEXT_TYPE_ANY) -> bool"""
+        """LoadFile(self, String file) -> bool"""
         return _controls_.TextCtrl_LoadFile(*args, **kwargs)
 
     def SaveFile(*args, **kwargs):
-        """SaveFile(self, String file=EmptyString, int fileType=TEXT_TYPE_ANY) -> bool"""
+        """SaveFile(self, String file=EmptyString) -> bool"""
         return _controls_.TextCtrl_SaveFile(*args, **kwargs)
 
     def MarkDirty(*args, **kwargs):
@@ -1779,10 +1855,6 @@ class TextCtrl(_core.Control):
     def DiscardEdits(*args, **kwargs):
         """DiscardEdits(self)"""
         return _controls_.TextCtrl_DiscardEdits(*args, **kwargs)
-
-    def SetModified(*args, **kwargs):
-        """SetModified(self, bool modified)"""
-        return _controls_.TextCtrl_SetModified(*args, **kwargs)
 
     def SetMaxLength(*args, **kwargs):
         """SetMaxLength(self, unsigned long len)"""
@@ -1916,14 +1988,6 @@ class TextCtrl(_core.Control):
         """SetEditable(self, bool editable)"""
         return _controls_.TextCtrl_SetEditable(*args, **kwargs)
 
-    def MacCheckSpelling(*args, **kwargs):
-        """MacCheckSpelling(self, bool check)"""
-        return _controls_.TextCtrl_MacCheckSpelling(*args, **kwargs)
-
-    def SendTextUpdatedEvent(*args, **kwargs):
-        """SendTextUpdatedEvent(self)"""
-        return _controls_.TextCtrl_SendTextUpdatedEvent(*args, **kwargs)
-
     def write(*args, **kwargs):
         """write(self, String text)"""
         return _controls_.TextCtrl_write(*args, **kwargs)
@@ -1950,22 +2014,22 @@ class TextCtrl(_core.Control):
         return _controls_.TextCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    DefaultStyle = property(GetDefaultStyle,SetDefaultStyle,doc="See `GetDefaultStyle` and `SetDefaultStyle`") 
-    InsertionPoint = property(GetInsertionPoint,SetInsertionPoint,doc="See `GetInsertionPoint` and `SetInsertionPoint`") 
-    LastPosition = property(GetLastPosition,doc="See `GetLastPosition`") 
-    NumberOfLines = property(GetNumberOfLines,doc="See `GetNumberOfLines`") 
-    Selection = property(GetSelection,SetSelection,doc="See `GetSelection` and `SetSelection`") 
-    StringSelection = property(GetStringSelection,doc="See `GetStringSelection`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.TextCtrl_swigregister(TextCtrl)
+
+class TextCtrlPtr(TextCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TextCtrl
+_controls_.TextCtrl_swigregister(TextCtrlPtr)
 
 def PreTextCtrl(*args, **kwargs):
     """PreTextCtrl() -> TextCtrl"""
     val = _controls_.new_PreTextCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def TextCtrl_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     TextCtrl_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -1979,7 +2043,7 @@ def TextCtrl_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.TextCtrl_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.TextCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
 wxEVT_COMMAND_TEXT_UPDATED = _controls_.wxEVT_COMMAND_TEXT_UPDATED
 wxEVT_COMMAND_TEXT_ENTER = _controls_.wxEVT_COMMAND_TEXT_ENTER
@@ -1987,11 +2051,14 @@ wxEVT_COMMAND_TEXT_URL = _controls_.wxEVT_COMMAND_TEXT_URL
 wxEVT_COMMAND_TEXT_MAXLEN = _controls_.wxEVT_COMMAND_TEXT_MAXLEN
 class TextUrlEvent(_core.CommandEvent):
     """Proxy of C++ TextUrlEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTextUrlEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, int winid, MouseEvent evtMouse, long start, long end) -> TextUrlEvent"""
-        _controls_.TextUrlEvent_swiginit(self,_controls_.new_TextUrlEvent(*args, **kwargs))
+        newobj = _controls_.new_TextUrlEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetMouseEvent(*args, **kwargs):
         """GetMouseEvent(self) -> MouseEvent"""
         return _controls_.TextUrlEvent_GetMouseEvent(*args, **kwargs)
@@ -2004,10 +2071,13 @@ class TextUrlEvent(_core.CommandEvent):
         """GetURLEnd(self) -> long"""
         return _controls_.TextUrlEvent_GetURLEnd(*args, **kwargs)
 
-    MouseEvent = property(GetMouseEvent,doc="See `GetMouseEvent`") 
-    URLEnd = property(GetURLEnd,doc="See `GetURLEnd`") 
-    URLStart = property(GetURLStart,doc="See `GetURLStart`") 
-_controls_.TextUrlEvent_swigregister(TextUrlEvent)
+
+class TextUrlEventPtr(TextUrlEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TextUrlEvent
+_controls_.TextUrlEvent_swigregister(TextUrlEventPtr)
 
 EVT_TEXT        = wx.PyEventBinder( wxEVT_COMMAND_TEXT_UPDATED, 1)
 EVT_TEXT_ENTER  = wx.PyEventBinder( wxEVT_COMMAND_TEXT_ENTER, 1)
@@ -2018,15 +2088,18 @@ EVT_TEXT_MAXLEN = wx.PyEventBinder( wxEVT_COMMAND_TEXT_MAXLEN, 1)
 
 class ScrollBar(_core.Control):
     """Proxy of C++ ScrollBar class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxScrollBar instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=SB_HORIZONTAL, 
             Validator validator=DefaultValidator, String name=ScrollBarNameStr) -> ScrollBar
         """
-        _controls_.ScrollBar_swiginit(self,_controls_.new_ScrollBar(*args, **kwargs))
+        newobj = _controls_.new_ScrollBar(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2064,6 +2137,13 @@ class ScrollBar(_core.Control):
         """SetThumbPosition(self, int viewStart)"""
         return _controls_.ScrollBar_SetThumbPosition(*args, **kwargs)
 
+    def SetScrollbar(*args, **kwargs):
+        """
+        SetScrollbar(self, int position, int thumbSize, int range, int pageSize, 
+            bool refresh=True)
+        """
+        return _controls_.ScrollBar_SetScrollbar(*args, **kwargs)
+
     def GetClassDefaultAttributes(*args, **kwargs):
         """
         GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
@@ -2082,20 +2162,23 @@ class ScrollBar(_core.Control):
         return _controls_.ScrollBar_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    PageSize = property(GetPageSize,doc="See `GetPageSize`") 
-    Range = property(GetRange,doc="See `GetRange`") 
-    ThumbPosition = property(GetThumbPosition,SetThumbPosition,doc="See `GetThumbPosition` and `SetThumbPosition`") 
-    ThumbSize = property(GetThumbSize,doc="See `GetThumbSize`") 
-_controls_.ScrollBar_swigregister(ScrollBar)
+
+class ScrollBarPtr(ScrollBar):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ScrollBar
+_controls_.ScrollBar_swigregister(ScrollBarPtr)
 ScrollBarNameStr = cvar.ScrollBarNameStr
 
 def PreScrollBar(*args, **kwargs):
     """PreScrollBar() -> ScrollBar"""
     val = _controls_.new_PreScrollBar(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ScrollBar_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ScrollBar_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2109,7 +2192,7 @@ def ScrollBar_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ScrollBar_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ScrollBar_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -2119,15 +2202,18 @@ SP_ARROW_KEYS = _controls_.SP_ARROW_KEYS
 SP_WRAP = _controls_.SP_WRAP
 class SpinButton(_core.Control):
     """Proxy of C++ SpinButton class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSpinButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=SP_HORIZONTAL, 
             String name=SPIN_BUTTON_NAME) -> SpinButton
         """
-        _controls_.SpinButton_swiginit(self,_controls_.new_SpinButton(*args, **kwargs))
+        newobj = _controls_.new_SpinButton(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2188,20 +2274,24 @@ class SpinButton(_core.Control):
         return _controls_.SpinButton_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Max = property(GetMax,SetMax,doc="See `GetMax` and `SetMax`") 
-    Min = property(GetMin,SetMin,doc="See `GetMin` and `SetMin`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.SpinButton_swigregister(SpinButton)
+
+class SpinButtonPtr(SpinButton):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SpinButton
+_controls_.SpinButton_swigregister(SpinButtonPtr)
 SPIN_BUTTON_NAME = cvar.SPIN_BUTTON_NAME
 SpinCtrlNameStr = cvar.SpinCtrlNameStr
 
 def PreSpinButton(*args, **kwargs):
     """PreSpinButton() -> SpinButton"""
     val = _controls_.new_PreSpinButton(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def SpinButton_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     SpinButton_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2215,20 +2305,23 @@ def SpinButton_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.SpinButton_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.SpinButton_GetClassDefaultAttributes(*args, **kwargs)
 
 class SpinCtrl(_core.Control):
     """Proxy of C++ SpinCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSpinCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String value=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=SP_ARROW_KEYS, int min=0, int max=100, 
             int initial=0, String name=SpinCtrlNameStr) -> SpinCtrl
         """
-        _controls_.SpinCtrl_swiginit(self,_controls_.new_SpinCtrl(*args, **kwargs))
+        newobj = _controls_.new_SpinCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2286,18 +2379,22 @@ class SpinCtrl(_core.Control):
         return _controls_.SpinCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Max = property(GetMax,doc="See `GetMax`") 
-    Min = property(GetMin,doc="See `GetMin`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.SpinCtrl_swigregister(SpinCtrl)
+
+class SpinCtrlPtr(SpinCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SpinCtrl
+_controls_.SpinCtrl_swigregister(SpinCtrlPtr)
 
 def PreSpinCtrl(*args, **kwargs):
     """PreSpinCtrl() -> SpinCtrl"""
     val = _controls_.new_PreSpinCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def SpinCtrl_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     SpinCtrl_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2311,15 +2408,18 @@ def SpinCtrl_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.SpinCtrl_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.SpinCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
 class SpinEvent(_core.NotifyEvent):
     """Proxy of C++ SpinEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventType commandType=wxEVT_NULL, int winid=0) -> SpinEvent"""
-        _controls_.SpinEvent_swiginit(self,_controls_.new_SpinEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSpinEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType commandType=wxEVT_NULL, int winid=0) -> SpinEvent"""
+        newobj = _controls_.new_SpinEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetPosition(*args, **kwargs):
         """GetPosition(self) -> int"""
         return _controls_.SpinEvent_GetPosition(*args, **kwargs)
@@ -2328,8 +2428,13 @@ class SpinEvent(_core.NotifyEvent):
         """SetPosition(self, int pos)"""
         return _controls_.SpinEvent_SetPosition(*args, **kwargs)
 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-_controls_.SpinEvent_swigregister(SpinEvent)
+
+class SpinEventPtr(SpinEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SpinEvent
+_controls_.SpinEvent_swigregister(SpinEventPtr)
 
 wxEVT_COMMAND_SPINCTRL_UPDATED = _controls_.wxEVT_COMMAND_SPINCTRL_UPDATED
 EVT_SPIN_UP   = wx.PyEventBinder( wx.wxEVT_SCROLL_LINEUP, 1)
@@ -2341,9 +2446,9 @@ EVT_SPINCTRL  = wx.PyEventBinder( wxEVT_COMMAND_SPINCTRL_UPDATED, 1)
 
 class RadioBox(_core.Control):
     """Proxy of C++ RadioBox class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxRadioBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -2353,7 +2458,10 @@ class RadioBox(_core.Control):
             String name=RadioBoxNameStr) -> RadioBox
         """
         if kwargs.has_key('point'): kwargs['pos'] = kwargs['point'];del kwargs['point']
-        _controls_.RadioBox_swiginit(self,_controls_.new_RadioBox(*args, **kwargs))
+        newobj = _controls_.new_RadioBox(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2384,7 +2492,7 @@ class RadioBox(_core.Control):
         return _controls_.RadioBox_SetStringSelection(*args, **kwargs)
 
     def GetCount(*args, **kwargs):
-        """GetCount(self) -> size_t"""
+        """GetCount(self) -> int"""
         return _controls_.RadioBox_GetCount(*args, **kwargs)
 
     def FindString(*args, **kwargs):
@@ -2402,48 +2510,24 @@ class RadioBox(_core.Control):
     GetItemLabel = GetString 
     SetItemLabel = SetString 
     def EnableItem(*args, **kwargs):
-        """EnableItem(self, unsigned int n, bool enable=True)"""
+        """EnableItem(self, int n, bool enable=True)"""
         return _controls_.RadioBox_EnableItem(*args, **kwargs)
 
     def ShowItem(*args, **kwargs):
-        """ShowItem(self, unsigned int n, bool show=True)"""
+        """ShowItem(self, int n, bool show=True)"""
         return _controls_.RadioBox_ShowItem(*args, **kwargs)
 
-    def IsItemEnabled(*args, **kwargs):
-        """IsItemEnabled(self, unsigned int n) -> bool"""
-        return _controls_.RadioBox_IsItemEnabled(*args, **kwargs)
-
-    def IsItemShown(*args, **kwargs):
-        """IsItemShown(self, unsigned int n) -> bool"""
-        return _controls_.RadioBox_IsItemShown(*args, **kwargs)
-
     def GetColumnCount(*args, **kwargs):
-        """GetColumnCount(self) -> unsigned int"""
+        """GetColumnCount(self) -> int"""
         return _controls_.RadioBox_GetColumnCount(*args, **kwargs)
 
     def GetRowCount(*args, **kwargs):
-        """GetRowCount(self) -> unsigned int"""
+        """GetRowCount(self) -> int"""
         return _controls_.RadioBox_GetRowCount(*args, **kwargs)
 
     def GetNextItem(*args, **kwargs):
         """GetNextItem(self, int item, int dir, long style) -> int"""
         return _controls_.RadioBox_GetNextItem(*args, **kwargs)
-
-    def SetItemToolTip(*args, **kwargs):
-        """SetItemToolTip(self, unsigned int item, String text)"""
-        return _controls_.RadioBox_SetItemToolTip(*args, **kwargs)
-
-    def GetItemToolTip(*args, **kwargs):
-        """GetItemToolTip(self, unsigned int item) -> ToolTip"""
-        return _controls_.RadioBox_GetItemToolTip(*args, **kwargs)
-
-    def SetItemHelpText(*args, **kwargs):
-        """SetItemHelpText(self, unsigned int n, String helpText)"""
-        return _controls_.RadioBox_SetItemHelpText(*args, **kwargs)
-
-    def GetItemHelpText(*args, **kwargs):
-        """GetItemHelpText(self, unsigned int n) -> String"""
-        return _controls_.RadioBox_GetItemHelpText(*args, **kwargs)
 
     def GetClassDefaultAttributes(*args, **kwargs):
         """
@@ -2463,22 +2547,24 @@ class RadioBox(_core.Control):
         return _controls_.RadioBox_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    ColumnCount = property(GetColumnCount,doc="See `GetColumnCount`") 
-    Count = property(GetCount,doc="See `GetCount`") 
-    RowCount = property(GetRowCount,doc="See `GetRowCount`") 
-    Selection = property(GetSelection,SetSelection,doc="See `GetSelection` and `SetSelection`") 
-    StringSelection = property(GetStringSelection,SetStringSelection,doc="See `GetStringSelection` and `SetStringSelection`") 
-_controls_.RadioBox_swigregister(RadioBox)
+
+class RadioBoxPtr(RadioBox):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = RadioBox
+_controls_.RadioBox_swigregister(RadioBoxPtr)
 RadioBoxNameStr = cvar.RadioBoxNameStr
 RadioButtonNameStr = cvar.RadioButtonNameStr
 
 def PreRadioBox(*args, **kwargs):
     """PreRadioBox() -> RadioBox"""
     val = _controls_.new_PreRadioBox(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def RadioBox_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     RadioBox_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2492,22 +2578,25 @@ def RadioBox_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.RadioBox_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.RadioBox_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class RadioButton(_core.Control):
     """Proxy of C++ RadioButton class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxRadioButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, Validator validator=DefaultValidator, 
             String name=RadioButtonNameStr) -> RadioButton
         """
-        _controls_.RadioButton_swiginit(self,_controls_.new_RadioButton(*args, **kwargs))
+        newobj = _controls_.new_RadioButton(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2545,16 +2634,22 @@ class RadioButton(_core.Control):
         return _controls_.RadioButton_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.RadioButton_swigregister(RadioButton)
+
+class RadioButtonPtr(RadioButton):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = RadioButton
+_controls_.RadioButton_swigregister(RadioButtonPtr)
 
 def PreRadioButton(*args, **kwargs):
     """PreRadioButton() -> RadioButton"""
     val = _controls_.new_PreRadioButton(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def RadioButton_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     RadioButton_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2568,7 +2663,7 @@ def RadioButton_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.RadioButton_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.RadioButton_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -2586,9 +2681,9 @@ SL_SELRANGE = _controls_.SL_SELRANGE
 SL_INVERSE = _controls_.SL_INVERSE
 class Slider(_core.Control):
     """Proxy of C++ Slider class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSlider instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, int value=0, int minValue=0, 
             int maxValue=100, Point pos=DefaultPosition, 
@@ -2597,7 +2692,10 @@ class Slider(_core.Control):
             String name=SliderNameStr) -> Slider
         """
         if kwargs.has_key('point'): kwargs['pos'] = kwargs['point'];del kwargs['point']
-        _controls_.Slider_swiginit(self,_controls_.new_Slider(*args, **kwargs))
+        newobj = _controls_.new_Slider(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2712,25 +2810,23 @@ class Slider(_core.Control):
         return _controls_.Slider_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    LineSize = property(GetLineSize,SetLineSize,doc="See `GetLineSize` and `SetLineSize`") 
-    Max = property(GetMax,SetMax,doc="See `GetMax` and `SetMax`") 
-    Min = property(GetMin,SetMin,doc="See `GetMin` and `SetMin`") 
-    PageSize = property(GetPageSize,SetPageSize,doc="See `GetPageSize` and `SetPageSize`") 
-    SelEnd = property(GetSelEnd,doc="See `GetSelEnd`") 
-    SelStart = property(GetSelStart,doc="See `GetSelStart`") 
-    ThumbLength = property(GetThumbLength,SetThumbLength,doc="See `GetThumbLength` and `SetThumbLength`") 
-    TickFreq = property(GetTickFreq,SetTickFreq,doc="See `GetTickFreq` and `SetTickFreq`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.Slider_swigregister(Slider)
+
+class SliderPtr(Slider):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Slider
+_controls_.Slider_swigregister(SliderPtr)
 SliderNameStr = cvar.SliderNameStr
 
 def PreSlider(*args, **kwargs):
     """PreSlider() -> Slider"""
     val = _controls_.new_PreSlider(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Slider_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Slider_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2744,7 +2840,7 @@ def Slider_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.Slider_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.Slider_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -2753,16 +2849,19 @@ EVT_TOGGLEBUTTON = wx.PyEventBinder( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, 1)
 
 class ToggleButton(_core.Control):
     """Proxy of C++ ToggleButton class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxToggleButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String label=EmptyString, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, Validator validator=DefaultValidator, 
             String name=ToggleButtonNameStr) -> ToggleButton
         """
-        _controls_.ToggleButton_swiginit(self,_controls_.new_ToggleButton(*args, **kwargs))
+        newobj = _controls_.new_ToggleButton(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -2782,6 +2881,14 @@ class ToggleButton(_core.Control):
         """GetValue(self) -> bool"""
         return _controls_.ToggleButton_GetValue(*args, **kwargs)
 
+    def SetLabel(*args, **kwargs):
+        """
+        SetLabel(self, String label)
+
+        Sets the item's text.
+        """
+        return _controls_.ToggleButton_SetLabel(*args, **kwargs)
+
     def GetClassDefaultAttributes(*args, **kwargs):
         """
         GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
@@ -2800,17 +2907,23 @@ class ToggleButton(_core.Control):
         return _controls_.ToggleButton_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.ToggleButton_swigregister(ToggleButton)
+
+class ToggleButtonPtr(ToggleButton):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ToggleButton
+_controls_.ToggleButton_swigregister(ToggleButtonPtr)
 ToggleButtonNameStr = cvar.ToggleButtonNameStr
 
 def PreToggleButton(*args, **kwargs):
     """PreToggleButton() -> ToggleButton"""
     val = _controls_.new_PreToggleButton(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ToggleButton_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ToggleButton_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -2824,27 +2937,15 @@ def ToggleButton_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ToggleButton_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ToggleButton_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
-BK_DEFAULT = _controls_.BK_DEFAULT
-BK_TOP = _controls_.BK_TOP
-BK_BOTTOM = _controls_.BK_BOTTOM
-BK_LEFT = _controls_.BK_LEFT
-BK_RIGHT = _controls_.BK_RIGHT
-BK_ALIGN_MASK = _controls_.BK_ALIGN_MASK
-BK_BUTTONBAR = _controls_.BK_BUTTONBAR
-BK_HITTEST_NOWHERE = _controls_.BK_HITTEST_NOWHERE
-BK_HITTEST_ONICON = _controls_.BK_HITTEST_ONICON
-BK_HITTEST_ONLABEL = _controls_.BK_HITTEST_ONLABEL
-BK_HITTEST_ONITEM = _controls_.BK_HITTEST_ONITEM
-BK_HITTEST_ONPAGE = _controls_.BK_HITTEST_ONPAGE
 class BookCtrlBase(_core.Control):
     """Proxy of C++ BookCtrlBase class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBookCtrlBase instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def GetPageCount(*args, **kwargs):
         """GetPageCount(self) -> size_t"""
         return _controls_.BookCtrlBase_GetPageCount(*args, **kwargs)
@@ -2897,38 +2998,6 @@ class BookCtrlBase(_core.Control):
         """CalcSizeFromPage(self, Size sizePage) -> Size"""
         return _controls_.BookCtrlBase_CalcSizeFromPage(*args, **kwargs)
 
-    def GetInternalBorder(*args, **kwargs):
-        """GetInternalBorder(self) -> unsigned int"""
-        return _controls_.BookCtrlBase_GetInternalBorder(*args, **kwargs)
-
-    def SetInternalBorder(*args, **kwargs):
-        """SetInternalBorder(self, unsigned int internalBorder)"""
-        return _controls_.BookCtrlBase_SetInternalBorder(*args, **kwargs)
-
-    def IsVertical(*args, **kwargs):
-        """IsVertical(self) -> bool"""
-        return _controls_.BookCtrlBase_IsVertical(*args, **kwargs)
-
-    def SetControlMargin(*args, **kwargs):
-        """SetControlMargin(self, int margin)"""
-        return _controls_.BookCtrlBase_SetControlMargin(*args, **kwargs)
-
-    def GetControlMargin(*args, **kwargs):
-        """GetControlMargin(self) -> int"""
-        return _controls_.BookCtrlBase_GetControlMargin(*args, **kwargs)
-
-    def SetFitToCurrentPage(*args, **kwargs):
-        """SetFitToCurrentPage(self, bool fit)"""
-        return _controls_.BookCtrlBase_SetFitToCurrentPage(*args, **kwargs)
-
-    def GetFitToCurrentPage(*args, **kwargs):
-        """GetFitToCurrentPage(self) -> bool"""
-        return _controls_.BookCtrlBase_GetFitToCurrentPage(*args, **kwargs)
-
-    def GetControlSizer(*args, **kwargs):
-        """GetControlSizer(self) -> Sizer"""
-        return _controls_.BookCtrlBase_GetControlSizer(*args, **kwargs)
-
     def DeletePage(*args, **kwargs):
         """DeletePage(self, size_t n) -> bool"""
         return _controls_.BookCtrlBase_DeletePage(*args, **kwargs)
@@ -2956,22 +3025,9 @@ class BookCtrlBase(_core.Control):
         """SetSelection(self, size_t n) -> int"""
         return _controls_.BookCtrlBase_SetSelection(*args, **kwargs)
 
-    def ChangeSelection(*args, **kwargs):
-        """ChangeSelection(self, size_t n) -> int"""
-        return _controls_.BookCtrlBase_ChangeSelection(*args, **kwargs)
-
     def AdvanceSelection(*args, **kwargs):
         """AdvanceSelection(self, bool forward=True)"""
         return _controls_.BookCtrlBase_AdvanceSelection(*args, **kwargs)
-
-    def HitTest(*args, **kwargs):
-        """
-        HitTest(Point pt) -> (tab, where)
-
-        Returns the page/tab which is hit, and flags indicating where using
-        wx.NB_HITTEST flags.
-        """
-        return _controls_.BookCtrlBase_HitTest(*args, **kwargs)
 
     def GetClassDefaultAttributes(*args, **kwargs):
         """
@@ -2991,22 +3047,17 @@ class BookCtrlBase(_core.Control):
         return _controls_.BookCtrlBase_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    ControlMargin = property(GetControlMargin,SetControlMargin,doc="See `GetControlMargin` and `SetControlMargin`") 
-    ControlSizer = property(GetControlSizer,doc="See `GetControlSizer`") 
-    CurrentPage = property(GetCurrentPage,doc="See `GetCurrentPage`") 
-    FitToCurrentPage = property(GetFitToCurrentPage,SetFitToCurrentPage,doc="See `GetFitToCurrentPage` and `SetFitToCurrentPage`") 
-    ImageList = property(GetImageList,SetImageList,doc="See `GetImageList` and `SetImageList`") 
-    InternalBorder = property(GetInternalBorder,SetInternalBorder,doc="See `GetInternalBorder` and `SetInternalBorder`") 
-    Page = property(GetPage,doc="See `GetPage`") 
-    PageCount = property(GetPageCount,doc="See `GetPageCount`") 
-    PageImage = property(GetPageImage,SetPageImage,doc="See `GetPageImage` and `SetPageImage`") 
-    PageText = property(GetPageText,SetPageText,doc="See `GetPageText` and `SetPageText`") 
-    Selection = property(GetSelection,SetSelection,doc="See `GetSelection` and `SetSelection`") 
-_controls_.BookCtrlBase_swigregister(BookCtrlBase)
+
+class BookCtrlBasePtr(BookCtrlBase):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BookCtrlBase
+_controls_.BookCtrlBase_swigregister(BookCtrlBasePtr)
 NotebookNameStr = cvar.NotebookNameStr
 
 def BookCtrlBase_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     BookCtrlBase_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -3020,18 +3071,21 @@ def BookCtrlBase_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.BookCtrlBase_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.BookCtrlBase_GetClassDefaultAttributes(*args, **kwargs)
 
 class BookCtrlBaseEvent(_core.NotifyEvent):
     """Proxy of C++ BookCtrlBaseEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBookCtrlBaseEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
+        __init__(self, wxEventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
             int nOldSel=-1) -> BookCtrlBaseEvent
         """
-        _controls_.BookCtrlBaseEvent_swiginit(self,_controls_.new_BookCtrlBaseEvent(*args, **kwargs))
+        newobj = _controls_.new_BookCtrlBaseEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetSelection(*args, **kwargs):
         """
         GetSelection(self) -> int
@@ -3053,9 +3107,13 @@ class BookCtrlBaseEvent(_core.NotifyEvent):
         """SetOldSelection(self, int nOldSel)"""
         return _controls_.BookCtrlBaseEvent_SetOldSelection(*args, **kwargs)
 
-    OldSelection = property(GetOldSelection,SetOldSelection,doc="See `GetOldSelection` and `SetOldSelection`") 
-    Selection = property(GetSelection,SetSelection,doc="See `GetSelection` and `SetSelection`") 
-_controls_.BookCtrlBaseEvent_swigregister(BookCtrlBaseEvent)
+
+class BookCtrlBaseEventPtr(BookCtrlBaseEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BookCtrlBaseEvent
+_controls_.BookCtrlBaseEvent_swigregister(BookCtrlBaseEventPtr)
 
 #---------------------------------------------------------------------------
 
@@ -3070,17 +3128,19 @@ NB_HITTEST_NOWHERE = _controls_.NB_HITTEST_NOWHERE
 NB_HITTEST_ONICON = _controls_.NB_HITTEST_ONICON
 NB_HITTEST_ONLABEL = _controls_.NB_HITTEST_ONLABEL
 NB_HITTEST_ONITEM = _controls_.NB_HITTEST_ONITEM
-NB_HITTEST_ONPAGE = _controls_.NB_HITTEST_ONPAGE
 class Notebook(BookCtrlBase):
     """Proxy of C++ Notebook class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNotebook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, String name=NotebookNameStr) -> Notebook
         """
-        _controls_.Notebook_swiginit(self,_controls_.new_Notebook(*args, **kwargs))
+        newobj = _controls_.new_Notebook(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -3101,6 +3161,19 @@ class Notebook(BookCtrlBase):
     def SetTabSize(*args, **kwargs):
         """SetTabSize(self, Size sz)"""
         return _controls_.Notebook_SetTabSize(*args, **kwargs)
+
+    def HitTest(*args, **kwargs):
+        """
+        HitTest(Point pt) -> (tab, where)
+
+        Returns the tab which is hit, and flags indicating where using
+        wx.NB_HITTEST flags.
+        """
+        return _controls_.Notebook_HitTest(*args, **kwargs)
+
+    def CalcSizeFromPage(*args, **kwargs):
+        """CalcSizeFromPage(self, Size sizePage) -> Size"""
+        return _controls_.Notebook_CalcSizeFromPage(*args, **kwargs)
 
     def GetThemeBackgroundColour(*args, **kwargs):
         """GetThemeBackgroundColour(self) -> Colour"""
@@ -3124,25 +3197,22 @@ class Notebook(BookCtrlBase):
         return _controls_.Notebook_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    def SendPageChangingEvent(*args, **kwargs):
-        """SendPageChangingEvent(self, int nPage) -> bool"""
-        return _controls_.Notebook_SendPageChangingEvent(*args, **kwargs)
 
-    def SendPageChangedEvent(*args, **kwargs):
-        """SendPageChangedEvent(self, int nPageOld, int nPageNew=-1)"""
-        return _controls_.Notebook_SendPageChangedEvent(*args, **kwargs)
-
-    RowCount = property(GetRowCount,doc="See `GetRowCount`") 
-    ThemeBackgroundColour = property(GetThemeBackgroundColour,doc="See `GetThemeBackgroundColour`") 
-_controls_.Notebook_swigregister(Notebook)
+class NotebookPtr(Notebook):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Notebook
+_controls_.Notebook_swigregister(NotebookPtr)
 
 def PreNotebook(*args, **kwargs):
     """PreNotebook() -> Notebook"""
     val = _controls_.new_PreNotebook(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def Notebook_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     Notebook_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -3156,19 +3226,28 @@ def Notebook_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.Notebook_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.Notebook_GetClassDefaultAttributes(*args, **kwargs)
 
 class NotebookEvent(BookCtrlBaseEvent):
     """Proxy of C++ NotebookEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNotebookEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
+        __init__(self, wxEventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
             int nOldSel=-1) -> NotebookEvent
         """
-        _controls_.NotebookEvent_swiginit(self,_controls_.new_NotebookEvent(*args, **kwargs))
-_controls_.NotebookEvent_swigregister(NotebookEvent)
+        newobj = _controls_.new_NotebookEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class NotebookEventPtr(NotebookEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = NotebookEvent
+_controls_.NotebookEvent_swigregister(NotebookEventPtr)
 
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED = _controls_.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING = _controls_.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
@@ -3216,14 +3295,17 @@ LB_RIGHT = _controls_.LB_RIGHT
 LB_ALIGN_MASK = _controls_.LB_ALIGN_MASK
 class Listbook(BookCtrlBase):
     """Proxy of C++ Listbook class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListbook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, String name=EmptyString) -> Listbook
         """
-        _controls_.Listbook_swiginit(self,_controls_.new_Listbook(*args, **kwargs))
+        newobj = _controls_.new_Listbook(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -3233,29 +3315,48 @@ class Listbook(BookCtrlBase):
         """
         return _controls_.Listbook_Create(*args, **kwargs)
 
+    def IsVertical(*args, **kwargs):
+        """IsVertical(self) -> bool"""
+        return _controls_.Listbook_IsVertical(*args, **kwargs)
+
     def GetListView(*args, **kwargs):
         """GetListView(self) -> ListView"""
         return _controls_.Listbook_GetListView(*args, **kwargs)
 
-    ListView = property(GetListView,doc="See `GetListView`") 
-_controls_.Listbook_swigregister(Listbook)
+
+class ListbookPtr(Listbook):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Listbook
+_controls_.Listbook_swigregister(ListbookPtr)
 
 def PreListbook(*args, **kwargs):
     """PreListbook() -> Listbook"""
     val = _controls_.new_PreListbook(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class ListbookEvent(BookCtrlBaseEvent):
     """Proxy of C++ ListbookEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListbookEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
+        __init__(self, wxEventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
             int nOldSel=-1) -> ListbookEvent
         """
-        _controls_.ListbookEvent_swiginit(self,_controls_.new_ListbookEvent(*args, **kwargs))
-_controls_.ListbookEvent_swigregister(ListbookEvent)
+        newobj = _controls_.new_ListbookEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class ListbookEventPtr(ListbookEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListbookEvent
+_controls_.ListbookEvent_swigregister(ListbookEventPtr)
 
 wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED = _controls_.wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
 wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING = _controls_.wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
@@ -3270,14 +3371,17 @@ CHB_RIGHT = _controls_.CHB_RIGHT
 CHB_ALIGN_MASK = _controls_.CHB_ALIGN_MASK
 class Choicebook(BookCtrlBase):
     """Proxy of C++ Choicebook class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxChoicebook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
             long style=0, String name=EmptyString) -> Choicebook
         """
-        _controls_.Choicebook_swiginit(self,_controls_.new_Choicebook(*args, **kwargs))
+        newobj = _controls_.new_Choicebook(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -3287,29 +3391,52 @@ class Choicebook(BookCtrlBase):
         """
         return _controls_.Choicebook_Create(*args, **kwargs)
 
+    def IsVertical(*args, **kwargs):
+        """IsVertical(self) -> bool"""
+        return _controls_.Choicebook_IsVertical(*args, **kwargs)
+
     def GetChoiceCtrl(*args, **kwargs):
         """GetChoiceCtrl(self) -> Choice"""
         return _controls_.Choicebook_GetChoiceCtrl(*args, **kwargs)
 
-    ChoiceCtrl = property(GetChoiceCtrl,doc="See `GetChoiceCtrl`") 
-_controls_.Choicebook_swigregister(Choicebook)
+    def DeleteAllPages(*args, **kwargs):
+        """DeleteAllPages(self) -> bool"""
+        return _controls_.Choicebook_DeleteAllPages(*args, **kwargs)
+
+
+class ChoicebookPtr(Choicebook):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = Choicebook
+_controls_.Choicebook_swigregister(ChoicebookPtr)
 
 def PreChoicebook(*args, **kwargs):
     """PreChoicebook() -> Choicebook"""
     val = _controls_.new_PreChoicebook(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class ChoicebookEvent(BookCtrlBaseEvent):
     """Proxy of C++ ChoicebookEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxChoicebookEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
+        __init__(self, wxEventType commandType=wxEVT_NULL, int id=0, int nSel=-1, 
             int nOldSel=-1) -> ChoicebookEvent
         """
-        _controls_.ChoicebookEvent_swiginit(self,_controls_.new_ChoicebookEvent(*args, **kwargs))
-_controls_.ChoicebookEvent_swigregister(ChoicebookEvent)
+        newobj = _controls_.new_ChoicebookEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class ChoicebookEventPtr(ChoicebookEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ChoicebookEvent
+_controls_.ChoicebookEvent_swigregister(ChoicebookEventPtr)
 
 wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED = _controls_.wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED
 wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING = _controls_.wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING
@@ -3318,142 +3445,96 @@ EVT_CHOICEBOOK_PAGE_CHANGING = wx.PyEventBinder( wxEVT_COMMAND_CHOICEBOOK_PAGE_C
 
 #---------------------------------------------------------------------------
 
-class Treebook(BookCtrlBase):
-    """Proxy of C++ Treebook class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=BK_DEFAULT, 
-            String name=EmptyString) -> Treebook
-        """
-        _controls_.Treebook_swiginit(self,_controls_.new_Treebook(*args, **kwargs))
+class BookCtrlSizer(_core.Sizer):
+    """Proxy of C++ BookCtrlSizer class"""
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxBookCtrlSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, BookCtrlBase nb) -> BookCtrlSizer"""
+        newobj = _controls_.new_BookCtrlSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
-    def Create(*args, **kwargs):
+    def RecalcSizes(*args, **kwargs):
         """
-        Create(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=BK_DEFAULT, 
-            String name=EmptyString) -> bool
+        RecalcSizes(self)
+
+        Using the sizes calculated by `CalcMin` reposition and resize all the
+        items managed by this sizer.  You should not need to call this directly as
+        it is called by `Layout`.
         """
-        return _controls_.Treebook_Create(*args, **kwargs)
+        return _controls_.BookCtrlSizer_RecalcSizes(*args, **kwargs)
 
-    def InsertSubPage(*args, **kwargs):
+    def CalcMin(*args, **kwargs):
         """
-        InsertSubPage(self, size_t pos, Window page, String text, bool select=False, 
-            int imageId=NOT_FOUND) -> bool
+        CalcMin(self) -> Size
+
+        This method is where the sizer will do the actual calculation of its
+        children's minimal sizes.  You should not need to call this directly as
+        it is called by `Layout`.
         """
-        return _controls_.Treebook_InsertSubPage(*args, **kwargs)
+        return _controls_.BookCtrlSizer_CalcMin(*args, **kwargs)
 
-    def AddSubPage(*args, **kwargs):
-        """AddSubPage(self, Window page, String text, bool select=False, int imageId=NOT_FOUND) -> bool"""
-        return _controls_.Treebook_AddSubPage(*args, **kwargs)
+    def GetControl(*args, **kwargs):
+        """GetControl(self) -> BookCtrlBase"""
+        return _controls_.BookCtrlSizer_GetControl(*args, **kwargs)
 
-    def IsNodeExpanded(*args, **kwargs):
-        """IsNodeExpanded(self, size_t pos) -> bool"""
-        return _controls_.Treebook_IsNodeExpanded(*args, **kwargs)
 
-    def ExpandNode(*args, **kwargs):
-        """ExpandNode(self, size_t pos, bool expand=True) -> bool"""
-        return _controls_.Treebook_ExpandNode(*args, **kwargs)
+class BookCtrlSizerPtr(BookCtrlSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = BookCtrlSizer
+_controls_.BookCtrlSizer_swigregister(BookCtrlSizerPtr)
 
-    def CollapseNode(*args, **kwargs):
-        """CollapseNode(self, size_t pos) -> bool"""
-        return _controls_.Treebook_CollapseNode(*args, **kwargs)
-
-    def GetPageParent(*args, **kwargs):
-        """GetPageParent(self, size_t pos) -> int"""
-        return _controls_.Treebook_GetPageParent(*args, **kwargs)
-
-    def GetTreeCtrl(*args, **kwargs):
-        """GetTreeCtrl(self) -> TreeCtrl"""
-        return _controls_.Treebook_GetTreeCtrl(*args, **kwargs)
-
-    TreeCtrl = property(GetTreeCtrl,doc="See `GetTreeCtrl`") 
-_controls_.Treebook_swigregister(Treebook)
-
-def PreTreebook(*args, **kwargs):
-    """PreTreebook() -> Treebook"""
-    val = _controls_.new_PreTreebook(*args, **kwargs)
-    return val
-
-class TreebookEvent(BookCtrlBaseEvent):
-    """Proxy of C++ TreebookEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=NOT_FOUND, 
-            int nOldSel=NOT_FOUND) -> TreebookEvent
-        """
-        _controls_.TreebookEvent_swiginit(self,_controls_.new_TreebookEvent(*args, **kwargs))
-_controls_.TreebookEvent_swigregister(TreebookEvent)
-
-wxEVT_COMMAND_TREEBOOK_PAGE_CHANGED = _controls_.wxEVT_COMMAND_TREEBOOK_PAGE_CHANGED
-wxEVT_COMMAND_TREEBOOK_PAGE_CHANGING = _controls_.wxEVT_COMMAND_TREEBOOK_PAGE_CHANGING
-wxEVT_COMMAND_TREEBOOK_NODE_COLLAPSED = _controls_.wxEVT_COMMAND_TREEBOOK_NODE_COLLAPSED
-wxEVT_COMMAND_TREEBOOK_NODE_EXPANDED = _controls_.wxEVT_COMMAND_TREEBOOK_NODE_EXPANDED
-EVT_TREEBOOK_PAGE_CHANGED= wx.PyEventBinder( wxEVT_COMMAND_TREEBOOK_PAGE_CHANGED, 1 )
-EVT_TREEBOOK_PAGE_CHANGING= wx.PyEventBinder( wxEVT_COMMAND_TREEBOOK_PAGE_CHANGING, 1)
-EVT_TREEBOOK_NODE_COLLAPSED= wx.PyEventBinder( wxEVT_COMMAND_TREEBOOK_NODE_COLLAPSED, 1 )
-EVT_TREEBOOK_NODE_EXPANDED= wx.PyEventBinder( wxEVT_COMMAND_TREEBOOK_NODE_EXPANDED, 1 )
-
-#---------------------------------------------------------------------------
-
-class Toolbook(BookCtrlBase):
-    """Proxy of C++ Toolbook class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=BK_DEFAULT, 
-            String name=EmptyString) -> Toolbook
-        """
-        _controls_.Toolbook_swiginit(self,_controls_.new_Toolbook(*args, **kwargs))
+class NotebookSizer(_core.Sizer):
+    """Proxy of C++ NotebookSizer class"""
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxNotebookSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, Notebook nb) -> NotebookSizer"""
+        newobj = _controls_.new_NotebookSizer(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
-    def Create(*args, **kwargs):
+    def RecalcSizes(*args, **kwargs):
         """
-        Create(self, Window parent, int id, Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=0, String name=wxEmptyString) -> bool
+        RecalcSizes(self)
+
+        Using the sizes calculated by `CalcMin` reposition and resize all the
+        items managed by this sizer.  You should not need to call this directly as
+        it is called by `Layout`.
         """
-        return _controls_.Toolbook_Create(*args, **kwargs)
+        return _controls_.NotebookSizer_RecalcSizes(*args, **kwargs)
 
-    def GetToolBar(*args, **kwargs):
-        """GetToolBar(self) -> ToolBarBase"""
-        return _controls_.Toolbook_GetToolBar(*args, **kwargs)
-
-    def Realize(*args, **kwargs):
-        """Realize(self)"""
-        return _controls_.Toolbook_Realize(*args, **kwargs)
-
-    ToolBar = property(GetToolBar,doc="See `GetToolBar`") 
-_controls_.Toolbook_swigregister(Toolbook)
-
-def PreToolbook(*args, **kwargs):
-    """PreToolbook() -> Toolbook"""
-    val = _controls_.new_PreToolbook(*args, **kwargs)
-    return val
-
-class ToolbookEvent(BookCtrlBaseEvent):
-    """Proxy of C++ ToolbookEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def CalcMin(*args, **kwargs):
         """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0, int nSel=NOT_FOUND, 
-            int nOldSel=NOT_FOUND) -> ToolbookEvent
+        CalcMin(self) -> Size
+
+        This method is where the sizer will do the actual calculation of its
+        children's minimal sizes.  You should not need to call this directly as
+        it is called by `Layout`.
         """
-        _controls_.ToolbookEvent_swiginit(self,_controls_.new_ToolbookEvent(*args, **kwargs))
-_controls_.ToolbookEvent_swigregister(ToolbookEvent)
+        return _controls_.NotebookSizer_CalcMin(*args, **kwargs)
 
-wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGED = _controls_.wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGED
-wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGING = _controls_.wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGING
-EVT_TOOLBOOK_PAGE_CHANGED = wx.PyEventBinder( wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGED, 1)
-EVT_TOOLBOOK_PAGE_CHANGING = wx.PyEventBinder( wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGING, 1)
+    def GetNotebook(*args, **kwargs):
+        """GetNotebook(self) -> Notebook"""
+        return _controls_.NotebookSizer_GetNotebook(*args, **kwargs)
 
+
+class NotebookSizerPtr(NotebookSizer):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = NotebookSizer
+_controls_.NotebookSizer_swigregister(NotebookSizerPtr)
+
+NotebookSizer.__init__ = wx._deprecated(NotebookSizer.__init__, "NotebookSizer is no longer needed.") 
+BookCtrlSizer.__init__ = wx._deprecated(BookCtrlSizer.__init__, "BookCtrlSizer is no longer needed.") 
 #---------------------------------------------------------------------------
 
 TOOL_STYLE_BUTTON = _controls_.TOOL_STYLE_BUTTON
@@ -3461,10 +3542,6 @@ TOOL_STYLE_SEPARATOR = _controls_.TOOL_STYLE_SEPARATOR
 TOOL_STYLE_CONTROL = _controls_.TOOL_STYLE_CONTROL
 TB_HORIZONTAL = _controls_.TB_HORIZONTAL
 TB_VERTICAL = _controls_.TB_VERTICAL
-TB_TOP = _controls_.TB_TOP
-TB_LEFT = _controls_.TB_LEFT
-TB_BOTTOM = _controls_.TB_BOTTOM
-TB_RIGHT = _controls_.TB_RIGHT
 TB_3DBUTTONS = _controls_.TB_3DBUTTONS
 TB_FLAT = _controls_.TB_FLAT
 TB_DOCKABLE = _controls_.TB_DOCKABLE
@@ -3474,12 +3551,11 @@ TB_NODIVIDER = _controls_.TB_NODIVIDER
 TB_NOALIGN = _controls_.TB_NOALIGN
 TB_HORZ_LAYOUT = _controls_.TB_HORZ_LAYOUT
 TB_HORZ_TEXT = _controls_.TB_HORZ_TEXT
-TB_NO_TOOLTIPS = _controls_.TB_NO_TOOLTIPS
 class ToolBarToolBase(_core.Object):
     """Proxy of C++ ToolBarToolBase class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxToolBarToolBase instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def GetId(*args, **kwargs):
         """GetId(self) -> int"""
         return _controls_.ToolBarToolBase_GetId(*args, **kwargs)
@@ -3601,25 +3677,19 @@ class ToolBarToolBase(_core.Object):
     SetBitmap1 = SetNormalBitmap
     SetBitmap2 = SetDisabledBitmap
 
-    Bitmap = property(GetBitmap,doc="See `GetBitmap`") 
-    ClientData = property(GetClientData,SetClientData,doc="See `GetClientData` and `SetClientData`") 
-    Control = property(GetControl,doc="See `GetControl`") 
-    DisabledBitmap = property(GetDisabledBitmap,SetDisabledBitmap,doc="See `GetDisabledBitmap` and `SetDisabledBitmap`") 
-    Id = property(GetId,doc="See `GetId`") 
-    Kind = property(GetKind,doc="See `GetKind`") 
-    Label = property(GetLabel,SetLabel,doc="See `GetLabel` and `SetLabel`") 
-    LongHelp = property(GetLongHelp,SetLongHelp,doc="See `GetLongHelp` and `SetLongHelp`") 
-    NormalBitmap = property(GetNormalBitmap,SetNormalBitmap,doc="See `GetNormalBitmap` and `SetNormalBitmap`") 
-    ShortHelp = property(GetShortHelp,SetShortHelp,doc="See `GetShortHelp` and `SetShortHelp`") 
-    Style = property(GetStyle,doc="See `GetStyle`") 
-    ToolBar = property(GetToolBar,doc="See `GetToolBar`") 
-_controls_.ToolBarToolBase_swigregister(ToolBarToolBase)
+
+class ToolBarToolBasePtr(ToolBarToolBase):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ToolBarToolBase
+_controls_.ToolBarToolBase_swigregister(ToolBarToolBasePtr)
 
 class ToolBarBase(_core.Control):
     """Proxy of C++ ToolBarBase class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxToolBarBase instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def DoAddTool(*args, **kwargs):
         """
         DoAddTool(self, int id, String label, Bitmap bitmap, Bitmap bmpDisabled=wxNullBitmap, 
@@ -3934,28 +4004,28 @@ class ToolBarBase(_core.Control):
         """GetToolsCount(self) -> size_t"""
         return _controls_.ToolBarBase_GetToolsCount(*args, **kwargs)
 
-    Margins = property(GetMargins,SetMargins,doc="See `GetMargins` and `SetMargins`") 
-    MaxCols = property(GetMaxCols,doc="See `GetMaxCols`") 
-    MaxRows = property(GetMaxRows,doc="See `GetMaxRows`") 
-    ToolBitmapSize = property(GetToolBitmapSize,SetToolBitmapSize,doc="See `GetToolBitmapSize` and `SetToolBitmapSize`") 
-    ToolMargins = property(GetToolMargins,doc="See `GetToolMargins`") 
-    ToolPacking = property(GetToolPacking,SetToolPacking,doc="See `GetToolPacking` and `SetToolPacking`") 
-    ToolSeparation = property(GetToolSeparation,SetToolSeparation,doc="See `GetToolSeparation` and `SetToolSeparation`") 
-    ToolSize = property(GetToolSize,doc="See `GetToolSize`") 
-    ToolsCount = property(GetToolsCount,doc="See `GetToolsCount`") 
-_controls_.ToolBarBase_swigregister(ToolBarBase)
+
+class ToolBarBasePtr(ToolBarBase):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ToolBarBase
+_controls_.ToolBarBase_swigregister(ToolBarBasePtr)
 
 class ToolBar(ToolBarBase):
     """Proxy of C++ ToolBar class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxToolBar instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=wxNO_BORDER|wxTB_HORIZONTAL, 
             String name=wxPyToolBarNameStr) -> ToolBar
         """
-        _controls_.ToolBar_swiginit(self,_controls_.new_ToolBar(*args, **kwargs))
+        newobj = _controls_.new_ToolBar(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -3966,13 +4036,9 @@ class ToolBar(ToolBarBase):
         """
         return _controls_.ToolBar_Create(*args, **kwargs)
 
-    def SetToolNormalBitmap(*args, **kwargs):
-        """SetToolNormalBitmap(self, int id, Bitmap bitmap)"""
-        return _controls_.ToolBar_SetToolNormalBitmap(*args, **kwargs)
-
-    def SetToolDisabledBitmap(*args, **kwargs):
-        """SetToolDisabledBitmap(self, int id, Bitmap bitmap)"""
-        return _controls_.ToolBar_SetToolDisabledBitmap(*args, **kwargs)
+    def FindToolForPosition(*args, **kwargs):
+        """FindToolForPosition(self, int x, int y) -> ToolBarToolBase"""
+        return _controls_.ToolBar_FindToolForPosition(*args, **kwargs)
 
     def GetClassDefaultAttributes(*args, **kwargs):
         """
@@ -3992,15 +4058,22 @@ class ToolBar(ToolBarBase):
         return _controls_.ToolBar_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-_controls_.ToolBar_swigregister(ToolBar)
+
+class ToolBarPtr(ToolBar):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ToolBar
+_controls_.ToolBar_swigregister(ToolBarPtr)
 
 def PreToolBar(*args, **kwargs):
     """PreToolBar() -> ToolBar"""
     val = _controls_.new_PreToolBar(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ToolBar_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ToolBar_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -4014,7 +4087,7 @@ def ToolBar_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ToolBar_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ToolBar_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -4064,7 +4137,6 @@ LIST_HITTEST_ONITEMSTATEICON = _controls_.LIST_HITTEST_ONITEMSTATEICON
 LIST_HITTEST_TOLEFT = _controls_.LIST_HITTEST_TOLEFT
 LIST_HITTEST_TORIGHT = _controls_.LIST_HITTEST_TORIGHT
 LIST_HITTEST_ONITEM = _controls_.LIST_HITTEST_ONITEM
-LIST_GETSUBITEMRECT_WHOLEITEM = _controls_.LIST_GETSUBITEMRECT_WHOLEITEM
 LIST_NEXT_ABOVE = _controls_.LIST_NEXT_ABOVE
 LIST_NEXT_ALL = _controls_.LIST_NEXT_ALL
 LIST_NEXT_BELOW = _controls_.LIST_NEXT_BELOW
@@ -4091,16 +4163,17 @@ LIST_FIND_RIGHT = _controls_.LIST_FIND_RIGHT
 
 class ListItemAttr(object):
     """Proxy of C++ ListItemAttr class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListItemAttr instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Colour colText=wxNullColour, Colour colBack=wxNullColour, 
             Font font=wxNullFont) -> ListItemAttr
         """
-        _controls_.ListItemAttr_swiginit(self,_controls_.new_ListItemAttr(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_ListItemAttr
-    __del__ = lambda self : None;
+        newobj = _controls_.new_ListItemAttr(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def SetTextColour(*args, **kwargs):
         """SetTextColour(self, Colour colText)"""
         return _controls_.ListItemAttr_SetTextColour(*args, **kwargs)
@@ -4137,32 +4210,37 @@ class ListItemAttr(object):
         """GetFont(self) -> Font"""
         return _controls_.ListItemAttr_GetFont(*args, **kwargs)
 
-    def AssignFrom(*args, **kwargs):
-        """AssignFrom(self, ListItemAttr source)"""
-        return _controls_.ListItemAttr_AssignFrom(*args, **kwargs)
-
     def Destroy(*args, **kwargs):
         """Destroy(self)"""
-        args[0].this.own(False)
         return _controls_.ListItemAttr_Destroy(*args, **kwargs)
 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-_controls_.ListItemAttr_swigregister(ListItemAttr)
+
+class ListItemAttrPtr(ListItemAttr):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListItemAttr
+_controls_.ListItemAttr_swigregister(ListItemAttrPtr)
 ListCtrlNameStr = cvar.ListCtrlNameStr
 
 #---------------------------------------------------------------------------
 
 class ListItem(_core.Object):
     """Proxy of C++ ListItem class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListItem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> ListItem"""
-        _controls_.ListItem_swiginit(self,_controls_.new_ListItem(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_ListItem
-    __del__ = lambda self : None;
+        newobj = _controls_.new_ListItem(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_controls_.delete_ListItem):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def Clear(*args, **kwargs):
         """Clear(self)"""
         return _controls_.ListItem_Clear(*args, **kwargs)
@@ -4289,30 +4367,26 @@ class ListItem(_core.Object):
     m_data = property(_controls_.ListItem_m_data_get, _controls_.ListItem_m_data_set)
     m_format = property(_controls_.ListItem_m_format_get, _controls_.ListItem_m_format_set)
     m_width = property(_controls_.ListItem_m_width_get, _controls_.ListItem_m_width_set)
-    Align = property(GetAlign,SetAlign,doc="See `GetAlign` and `SetAlign`") 
-    Attributes = property(GetAttributes,doc="See `GetAttributes`") 
-    BackgroundColour = property(GetBackgroundColour,SetBackgroundColour,doc="See `GetBackgroundColour` and `SetBackgroundColour`") 
-    Column = property(GetColumn,SetColumn,doc="See `GetColumn` and `SetColumn`") 
-    Data = property(GetData,SetData,doc="See `GetData` and `SetData`") 
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-    Id = property(GetId,SetId,doc="See `GetId` and `SetId`") 
-    Image = property(GetImage,SetImage,doc="See `GetImage` and `SetImage`") 
-    Mask = property(GetMask,SetMask,doc="See `GetMask` and `SetMask`") 
-    State = property(GetState,SetState,doc="See `GetState` and `SetState`") 
-    Text = property(GetText,SetText,doc="See `GetText` and `SetText`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-    Width = property(GetWidth,SetWidth,doc="See `GetWidth` and `SetWidth`") 
-_controls_.ListItem_swigregister(ListItem)
+
+class ListItemPtr(ListItem):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListItem
+_controls_.ListItem_swigregister(ListItemPtr)
 
 #---------------------------------------------------------------------------
 
 class ListEvent(_core.NotifyEvent):
     """Proxy of C++ ListEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventType commandType=wxEVT_NULL, int id=0) -> ListEvent"""
-        _controls_.ListEvent_swiginit(self,_controls_.new_ListEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType commandType=wxEVT_NULL, int id=0) -> ListEvent"""
+        newobj = _controls_.new_ListEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     m_code = property(_controls_.ListEvent_m_code_get, _controls_.ListEvent_m_code_set)
     m_oldItemIndex = property(_controls_.ListEvent_m_oldItemIndex_get, _controls_.ListEvent_m_oldItemIndex_set)
     m_itemIndex = property(_controls_.ListEvent_m_itemIndex_get, _controls_.ListEvent_m_itemIndex_set)
@@ -4377,19 +4451,13 @@ class ListEvent(_core.NotifyEvent):
         """SetEditCanceled(self, bool editCancelled)"""
         return _controls_.ListEvent_SetEditCanceled(*args, **kwargs)
 
-    CacheFrom = property(GetCacheFrom,doc="See `GetCacheFrom`") 
-    CacheTo = property(GetCacheTo,doc="See `GetCacheTo`") 
-    Column = property(GetColumn,doc="See `GetColumn`") 
-    Data = property(GetData,doc="See `GetData`") 
-    Image = property(GetImage,doc="See `GetImage`") 
-    Index = property(GetIndex,doc="See `GetIndex`") 
-    Item = property(GetItem,doc="See `GetItem`") 
-    KeyCode = property(GetKeyCode,doc="See `GetKeyCode`") 
-    Label = property(GetLabel,doc="See `GetLabel`") 
-    Mask = property(GetMask,doc="See `GetMask`") 
-    Point = property(GetPoint,doc="See `GetPoint`") 
-    Text = property(GetText,doc="See `GetText`") 
-_controls_.ListEvent_swigregister(ListEvent)
+
+class ListEventPtr(ListEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListEvent
+_controls_.ListEvent_swigregister(ListEventPtr)
 
 wxEVT_COMMAND_LIST_BEGIN_DRAG = _controls_.wxEVT_COMMAND_LIST_BEGIN_DRAG
 wxEVT_COMMAND_LIST_BEGIN_RDRAG = _controls_.wxEVT_COMMAND_LIST_BEGIN_RDRAG
@@ -4411,16 +4479,16 @@ wxEVT_COMMAND_LIST_COL_BEGIN_DRAG = _controls_.wxEVT_COMMAND_LIST_COL_BEGIN_DRAG
 wxEVT_COMMAND_LIST_COL_DRAGGING = _controls_.wxEVT_COMMAND_LIST_COL_DRAGGING
 wxEVT_COMMAND_LIST_COL_END_DRAG = _controls_.wxEVT_COMMAND_LIST_COL_END_DRAG
 wxEVT_COMMAND_LIST_ITEM_FOCUSED = _controls_.wxEVT_COMMAND_LIST_ITEM_FOCUSED
+wxEVT_COMMAND_LIST_GET_INFO = _controls_.wxEVT_COMMAND_LIST_GET_INFO
+wxEVT_COMMAND_LIST_SET_INFO = _controls_.wxEVT_COMMAND_LIST_SET_INFO
 EVT_LIST_BEGIN_DRAG        = wx.PyEventBinder(wxEVT_COMMAND_LIST_BEGIN_DRAG       , 1)
 EVT_LIST_BEGIN_RDRAG       = wx.PyEventBinder(wxEVT_COMMAND_LIST_BEGIN_RDRAG      , 1)
 EVT_LIST_BEGIN_LABEL_EDIT  = wx.PyEventBinder(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT , 1)
 EVT_LIST_END_LABEL_EDIT    = wx.PyEventBinder(wxEVT_COMMAND_LIST_END_LABEL_EDIT   , 1)
 EVT_LIST_DELETE_ITEM       = wx.PyEventBinder(wxEVT_COMMAND_LIST_DELETE_ITEM      , 1)
 EVT_LIST_DELETE_ALL_ITEMS  = wx.PyEventBinder(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS , 1)
-
-
-
-
+EVT_LIST_GET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_GET_INFO         , 1)
+EVT_LIST_SET_INFO          = wx.PyEventBinder(wxEVT_COMMAND_LIST_SET_INFO         , 1)
 EVT_LIST_ITEM_SELECTED     = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_SELECTED    , 1)
 EVT_LIST_ITEM_DESELECTED   = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_DESELECTED  , 1)
 EVT_LIST_KEY_DOWN          = wx.PyEventBinder(wxEVT_COMMAND_LIST_KEY_DOWN         , 1)
@@ -4436,24 +4504,26 @@ EVT_LIST_COL_DRAGGING      = wx.PyEventBinder(wxEVT_COMMAND_LIST_COL_DRAGGING   
 EVT_LIST_COL_END_DRAG      = wx.PyEventBinder(wxEVT_COMMAND_LIST_COL_END_DRAG     , 1)
 EVT_LIST_ITEM_FOCUSED      = wx.PyEventBinder(wxEVT_COMMAND_LIST_ITEM_FOCUSED     , 1)
 
-
-
-
+EVT_LIST_GET_INFO = wx._deprecated(EVT_LIST_GET_INFO)
+EVT_LIST_SET_INFO = wx._deprecated(EVT_LIST_SET_INFO)
 
 #---------------------------------------------------------------------------
 
 class ListCtrl(_core.Control):
     """Proxy of C++ ListCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyListCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=LC_ICON, 
             Validator validator=DefaultValidator, String name=ListCtrlNameStr) -> ListCtrl
         """
-        _controls_.ListCtrl_swiginit(self,_controls_.new_ListCtrl(*args, **kwargs))
-        self._setOORInfo(self);ListCtrl._setCallbackInfo(self, self, ListCtrl)
+        newobj = _controls_.new_ListCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setOORInfo(self);self._setCallbackInfo(self, ListCtrl)
 
     def Create(*args, **kwargs):
         """
@@ -4468,6 +4538,38 @@ class ListCtrl(_core.Control):
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
         return _controls_.ListCtrl__setCallbackInfo(*args, **kwargs)
+
+    def SetForegroundColour(*args, **kwargs):
+        """
+        SetForegroundColour(self, Colour col) -> bool
+
+        Sets the foreground colour of the window.  Returns True is the colour
+        was changed.  The interpretation of foreground colour is dependent on
+        the window class; it may be the text colour or other colour, or it may
+        not be used at all.
+        """
+        return _controls_.ListCtrl_SetForegroundColour(*args, **kwargs)
+
+    def SetBackgroundColour(*args, **kwargs):
+        """
+        SetBackgroundColour(self, Colour col) -> bool
+
+        Sets the background colour of the window.  Returns True if the colour
+        was changed.  The background colour is usually painted by the default
+        EVT_ERASE_BACKGROUND event handler function under Windows and
+        automatically under GTK.  Using `wx.NullColour` will reset the window
+        to the default background colour.
+
+        Note that setting the background colour may not cause an immediate
+        refresh, so you may wish to call `ClearBackground` or `Refresh` after
+        calling this function.
+
+        Using this function will disable attempts to use themes for this
+        window, if the system supports them.  Use with care since usually the
+        themes represent the appearance chosen by the user to be used for all
+        applications on the system.
+        """
+        return _controls_.ListCtrl_SetBackgroundColour(*args, **kwargs)
 
     def GetColumn(*args, **kwargs):
         """GetColumn(self, int col) -> ListItem"""
@@ -4494,10 +4596,6 @@ class ListCtrl(_core.Control):
     def GetViewRect(*args, **kwargs):
         """GetViewRect(self) -> Rect"""
         return _controls_.ListCtrl_GetViewRect(*args, **kwargs)
-
-    def GetEditControl(*args, **kwargs):
-        """GetEditControl(self) -> TextCtrl"""
-        return _controls_.ListCtrl_GetEditControl(*args, **kwargs)
 
     def GetItem(*args, **kwargs):
         """GetItem(self, long itemId, int col=0) -> ListItem"""
@@ -4569,12 +4667,10 @@ class ListCtrl(_core.Control):
         """GetItemSpacing(self) -> Size"""
         return _controls_.ListCtrl_GetItemSpacing(*args, **kwargs)
 
-    GetItemSpacing = wx._deprecated(GetItemSpacing) 
     def SetItemSpacing(*args, **kwargs):
         """SetItemSpacing(self, int spacing, bool isSmall=False)"""
         return _controls_.ListCtrl_SetItemSpacing(*args, **kwargs)
 
-    SetItemSpacing = wx._deprecated(SetItemSpacing) 
     def GetSelectedItemCount(*args, **kwargs):
         """GetSelectedItemCount(self) -> int"""
         return _controls_.ListCtrl_GetSelectedItemCount(*args, **kwargs)
@@ -4594,6 +4690,17 @@ class ListCtrl(_core.Control):
     def SetSingleStyle(*args, **kwargs):
         """SetSingleStyle(self, long style, bool add=True)"""
         return _controls_.ListCtrl_SetSingleStyle(*args, **kwargs)
+
+    def SetWindowStyleFlag(*args, **kwargs):
+        """
+        SetWindowStyleFlag(self, long style)
+
+        Sets the style of the window. Please note that some styles cannot be
+        changed after the window creation and that Refresh() might need to be
+        called after changing the others for the change to take place
+        immediately.
+        """
+        return _controls_.ListCtrl_SetWindowStyleFlag(*args, **kwargs)
 
     def GetNextItem(*args, **kwargs):
         """GetNextItem(self, long item, int geometry=LIST_NEXT_ALL, int state=LIST_STATE_DONTCARE) -> long"""
@@ -4679,16 +4786,6 @@ class ListCtrl(_core.Control):
          in the second return value (see wx.LIST_HITTEST flags.)
         """
         return _controls_.ListCtrl_HitTest(*args, **kwargs)
-
-    def HitTestSubItem(*args, **kwargs):
-        """
-        HitTestSubItem(Point point) -> (item, where, subItem)
-
-        Determines which item (if any) is at the specified point, giving  in
-        the second return value (see wx.LIST_HITTEST flags) and also the subItem, if
-        any.
-        """
-        return _controls_.ListCtrl_HitTestSubItem(*args, **kwargs)
 
     def InsertItem(*args, **kwargs):
         """InsertItem(self, ListItem info) -> long"""
@@ -4835,25 +4932,22 @@ class ListCtrl(_core.Control):
         return _controls_.ListCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    ColumnCount = property(GetColumnCount,doc="See `GetColumnCount`") 
-    CountPerPage = property(GetCountPerPage,doc="See `GetCountPerPage`") 
-    EditControl = property(GetEditControl,doc="See `GetEditControl`") 
-    FocusedItem = property(GetFocusedItem,doc="See `GetFocusedItem`") 
-    ItemCount = property(GetItemCount,SetItemCount,doc="See `GetItemCount` and `SetItemCount`") 
-    MainWindow = property(GetMainWindow,doc="See `GetMainWindow`") 
-    SelectedItemCount = property(GetSelectedItemCount,doc="See `GetSelectedItemCount`") 
-    TextColour = property(GetTextColour,SetTextColour,doc="See `GetTextColour` and `SetTextColour`") 
-    TopItem = property(GetTopItem,doc="See `GetTopItem`") 
-    ViewRect = property(GetViewRect,doc="See `GetViewRect`") 
-_controls_.ListCtrl_swigregister(ListCtrl)
+
+class ListCtrlPtr(ListCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListCtrl
+_controls_.ListCtrl_swigregister(ListCtrlPtr)
 
 def PreListCtrl(*args, **kwargs):
     """PreListCtrl() -> ListCtrl"""
     val = _controls_.new_PreListCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def ListCtrl_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     ListCtrl_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -4867,21 +4961,24 @@ def ListCtrl_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.ListCtrl_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.ListCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
 class ListView(ListCtrl):
     """Proxy of C++ ListView class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxListView instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=LC_REPORT, 
             Validator validator=DefaultValidator, String name=ListCtrlNameStr) -> ListView
         """
-        _controls_.ListView_swiginit(self,_controls_.new_ListView(*args, **kwargs))
+        newobj = _controls_.new_ListView(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -4926,12 +5023,18 @@ class ListView(ListCtrl):
         """ClearColumnImage(self, int col)"""
         return _controls_.ListView_ClearColumnImage(*args, **kwargs)
 
-    FocusedItem = property(GetFocusedItem,doc="See `GetFocusedItem`") 
-_controls_.ListView_swigregister(ListView)
+
+class ListViewPtr(ListView):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ListView
+_controls_.ListView_swigregister(ListViewPtr)
 
 def PreListView(*args, **kwargs):
     """PreListView() -> ListView"""
     val = _controls_.new_PreListView(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
@@ -4950,10 +5053,8 @@ TR_ROW_LINES = _controls_.TR_ROW_LINES
 TR_FULL_ROW_HIGHLIGHT = _controls_.TR_FULL_ROW_HIGHLIGHT
 TR_DEFAULT_STYLE = _controls_.TR_DEFAULT_STYLE
 TR_TWIST_BUTTONS = _controls_.TR_TWIST_BUTTONS
-# obsolete
-TR_MAC_BUTTONS = 0
-wxTR_AQUA_BUTTONS = 0
-
+TR_MAC_BUTTONS = _controls_.TR_MAC_BUTTONS
+TR_AQUA_BUTTONS = _controls_.TR_AQUA_BUTTONS
 TreeItemIcon_Normal = _controls_.TreeItemIcon_Normal
 TreeItemIcon_Selected = _controls_.TreeItemIcon_Selected
 TreeItemIcon_Expanded = _controls_.TreeItemIcon_Expanded
@@ -4977,13 +5078,20 @@ TREE_HITTEST_ONITEM = _controls_.TREE_HITTEST_ONITEM
 
 class TreeItemId(object):
     """Proxy of C++ TreeItemId class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTreeItemId instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self) -> TreeItemId"""
-        _controls_.TreeItemId_swiginit(self,_controls_.new_TreeItemId(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_TreeItemId
-    __del__ = lambda self : None;
+        newobj = _controls_.new_TreeItemId(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_controls_.delete_TreeItemId):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def IsOk(*args, **kwargs):
         """IsOk(self) -> bool"""
         return _controls_.TreeItemId_IsOk(*args, **kwargs)
@@ -4999,18 +5107,25 @@ class TreeItemId(object):
     m_pItem = property(_controls_.TreeItemId_m_pItem_get, _controls_.TreeItemId_m_pItem_set)
     Ok = IsOk
     def __nonzero__(self): return self.IsOk() 
-_controls_.TreeItemId_swigregister(TreeItemId)
+
+class TreeItemIdPtr(TreeItemId):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeItemId
+_controls_.TreeItemId_swigregister(TreeItemIdPtr)
 TreeCtrlNameStr = cvar.TreeCtrlNameStr
 
 class TreeItemData(object):
     """Proxy of C++ TreeItemData class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyTreeItemData instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, PyObject obj=None) -> TreeItemData"""
-        _controls_.TreeItemData_swiginit(self,_controls_.new_TreeItemData(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_TreeItemData
-    __del__ = lambda self : None;
+        newobj = _controls_.new_TreeItemData(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetData(*args, **kwargs):
         """GetData(self) -> PyObject"""
         return _controls_.TreeItemData_GetData(*args, **kwargs)
@@ -5029,12 +5144,15 @@ class TreeItemData(object):
 
     def Destroy(*args, **kwargs):
         """Destroy(self)"""
-        args[0].this.own(False)
         return _controls_.TreeItemData_Destroy(*args, **kwargs)
 
-    Data = property(GetData,SetData,doc="See `GetData` and `SetData`") 
-    Id = property(GetId,SetId,doc="See `GetId` and `SetId`") 
-_controls_.TreeItemData_swigregister(TreeItemData)
+
+class TreeItemDataPtr(TreeItemData):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeItemData
+_controls_.TreeItemData_swigregister(TreeItemDataPtr)
 
 #---------------------------------------------------------------------------
 
@@ -5079,18 +5197,18 @@ EVT_TREE_ITEM_MIDDLE_CLICK = wx.PyEventBinder(wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLI
 EVT_TREE_END_DRAG          = wx.PyEventBinder(wxEVT_COMMAND_TREE_END_DRAG         , 1)
 EVT_TREE_STATE_IMAGE_CLICK = wx.PyEventBinder(wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK, 1)
 EVT_TREE_ITEM_GETTOOLTIP   = wx.PyEventBinder(wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP,   1)
-EVT_TREE_ITEM_MENU         = wx.PyEventBinder(wxEVT_COMMAND_TREE_ITEM_MENU,         1)
+EVT_TREE_ITEM_MENU        = wx.PyEventBinder(wxEVT_COMMAND_TREE_ITEM_MENU,         1)
 
 class TreeEvent(_core.NotifyEvent):
     """Proxy of C++ TreeEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(self, EventType commandType=wxEVT_NULL, int id=0) -> TreeEvent
-        __init__(self, EventType commandType, TreeCtrl tree, TreeItemId item=NullTreeItemId) -> TreeEvent
-        """
-        _controls_.TreeEvent_swiginit(self,_controls_.new_TreeEvent(*args))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxTreeEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType commandType=wxEVT_NULL, int id=0) -> TreeEvent"""
+        newobj = _controls_.new_TreeEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetItem(*args, **kwargs):
         """GetItem(self) -> TreeItemId"""
         return _controls_.TreeEvent_GetItem(*args, **kwargs)
@@ -5151,31 +5269,32 @@ class TreeEvent(_core.NotifyEvent):
         """GetToolTip(self) -> String"""
         return _controls_.TreeEvent_GetToolTip(*args, **kwargs)
 
-    Item = property(GetItem,SetItem,doc="See `GetItem` and `SetItem`") 
-    KeyCode = property(GetKeyCode,doc="See `GetKeyCode`") 
-    KeyEvent = property(GetKeyEvent,SetKeyEvent,doc="See `GetKeyEvent` and `SetKeyEvent`") 
-    Label = property(GetLabel,SetLabel,doc="See `GetLabel` and `SetLabel`") 
-    OldItem = property(GetOldItem,SetOldItem,doc="See `GetOldItem` and `SetOldItem`") 
-    Point = property(GetPoint,SetPoint,doc="See `GetPoint` and `SetPoint`") 
-    ToolTip = property(GetToolTip,SetToolTip,doc="See `GetToolTip` and `SetToolTip`") 
-    EditCancelled = property(IsEditCancelled,SetEditCanceled,doc="See `IsEditCancelled` and `SetEditCanceled`") 
-_controls_.TreeEvent_swigregister(TreeEvent)
+
+class TreeEventPtr(TreeEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeEvent
+_controls_.TreeEvent_swigregister(TreeEventPtr)
 
 #---------------------------------------------------------------------------
 
 class TreeCtrl(_core.Control):
     """Proxy of C++ TreeCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyTreeCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=TR_DEFAULT_STYLE, 
             Validator validator=DefaultValidator, 
             String name=TreeCtrlNameStr) -> TreeCtrl
         """
-        _controls_.TreeCtrl_swiginit(self,_controls_.new_TreeCtrl(*args, **kwargs))
-        self._setOORInfo(self);TreeCtrl._setCallbackInfo(self, self, TreeCtrl)
+        newobj = _controls_.new_TreeCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setOORInfo(self);self._setCallbackInfo(self, TreeCtrl)
 
     def Create(*args, **kwargs):
         """
@@ -5193,7 +5312,7 @@ class TreeCtrl(_core.Control):
         return _controls_.TreeCtrl__setCallbackInfo(*args, **kwargs)
 
     def GetCount(*args, **kwargs):
-        """GetCount(self) -> unsigned int"""
+        """GetCount(self) -> size_t"""
         return _controls_.TreeCtrl_GetCount(*args, **kwargs)
 
     def GetIndent(*args, **kwargs):
@@ -5326,10 +5445,6 @@ class TreeCtrl(_core.Control):
         """IsBold(self, TreeItemId item) -> bool"""
         return _controls_.TreeCtrl_IsBold(*args, **kwargs)
 
-    def IsEmpty(*args, **kwargs):
-        """IsEmpty(self) -> bool"""
-        return _controls_.TreeCtrl_IsEmpty(*args, **kwargs)
-
     def GetChildrenCount(*args, **kwargs):
         """GetChildrenCount(self, TreeItemId item, bool recursively=True) -> size_t"""
         return _controls_.TreeCtrl_GetChildrenCount(*args, **kwargs)
@@ -5430,25 +5545,9 @@ class TreeCtrl(_core.Control):
         """Expand(self, TreeItemId item)"""
         return _controls_.TreeCtrl_Expand(*args, **kwargs)
 
-    def ExpandAllChildren(*args, **kwargs):
-        """ExpandAllChildren(self, TreeItemId item)"""
-        return _controls_.TreeCtrl_ExpandAllChildren(*args, **kwargs)
-
-    def ExpandAll(*args, **kwargs):
-        """ExpandAll(self)"""
-        return _controls_.TreeCtrl_ExpandAll(*args, **kwargs)
-
     def Collapse(*args, **kwargs):
         """Collapse(self, TreeItemId item)"""
         return _controls_.TreeCtrl_Collapse(*args, **kwargs)
-
-    def CollapseAllChildren(*args, **kwargs):
-        """CollapseAllChildren(self, TreeItemId item)"""
-        return _controls_.TreeCtrl_CollapseAllChildren(*args, **kwargs)
-
-    def CollapseAll(*args, **kwargs):
-        """CollapseAll(self)"""
-        return _controls_.TreeCtrl_CollapseAll(*args, **kwargs)
 
     def CollapseAndReset(*args, **kwargs):
         """CollapseAndReset(self, TreeItemId item)"""
@@ -5531,34 +5630,22 @@ class TreeCtrl(_core.Control):
         return _controls_.TreeCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
     GetClassDefaultAttributes = staticmethod(GetClassDefaultAttributes)
-    def SetQuickBestSize(*args, **kwargs):
-        """SetQuickBestSize(self, bool q)"""
-        return _controls_.TreeCtrl_SetQuickBestSize(*args, **kwargs)
 
-    def GetQuickBestSize(*args, **kwargs):
-        """GetQuickBestSize(self) -> bool"""
-        return _controls_.TreeCtrl_GetQuickBestSize(*args, **kwargs)
-
-    Count = property(GetCount,doc="See `GetCount`") 
-    EditControl = property(GetEditControl,doc="See `GetEditControl`") 
-    FirstVisibleItem = property(GetFirstVisibleItem,doc="See `GetFirstVisibleItem`") 
-    ImageList = property(GetImageList,SetImageList,doc="See `GetImageList` and `SetImageList`") 
-    Indent = property(GetIndent,SetIndent,doc="See `GetIndent` and `SetIndent`") 
-    QuickBestSize = property(GetQuickBestSize,SetQuickBestSize,doc="See `GetQuickBestSize` and `SetQuickBestSize`") 
-    RootItem = property(GetRootItem,doc="See `GetRootItem`") 
-    Selection = property(GetSelection,doc="See `GetSelection`") 
-    Selections = property(GetSelections,doc="See `GetSelections`") 
-    Spacing = property(GetSpacing,SetSpacing,doc="See `GetSpacing` and `SetSpacing`") 
-    StateImageList = property(GetStateImageList,SetStateImageList,doc="See `GetStateImageList` and `SetStateImageList`") 
-_controls_.TreeCtrl_swigregister(TreeCtrl)
+class TreeCtrlPtr(TreeCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = TreeCtrl
+_controls_.TreeCtrl_swigregister(TreeCtrlPtr)
 
 def PreTreeCtrl(*args, **kwargs):
     """PreTreeCtrl() -> TreeCtrl"""
     val = _controls_.new_PreTreeCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def TreeCtrl_GetClassDefaultAttributes(*args, **kwargs):
-  """
+    """
     TreeCtrl_GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
 
     Get the default attributes for this class.  This is useful if you want
@@ -5572,7 +5659,7 @@ def TreeCtrl_GetClassDefaultAttributes(*args, **kwargs):
     the returned font. See `wx.Window.SetWindowVariant` for more about
     this.
     """
-  return _controls_.TreeCtrl_GetClassDefaultAttributes(*args, **kwargs)
+    return _controls_.TreeCtrl_GetClassDefaultAttributes(*args, **kwargs)
 
 #---------------------------------------------------------------------------
 
@@ -5583,9 +5670,9 @@ DIRCTRL_3D_INTERNAL = _controls_.DIRCTRL_3D_INTERNAL
 DIRCTRL_EDIT_LABELS = _controls_.DIRCTRL_EDIT_LABELS
 class GenericDirCtrl(_core.Control):
     """Proxy of C++ GenericDirCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGenericDirCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, String dir=DirDialogDefaultFolderStr, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -5593,7 +5680,10 @@ class GenericDirCtrl(_core.Control):
             String filter=EmptyString, 
             int defaultFilter=0, String name=TreeCtrlNameStr) -> GenericDirCtrl
         """
-        _controls_.GenericDirCtrl_swiginit(self,_controls_.new_GenericDirCtrl(*args, **kwargs))
+        newobj = _controls_.new_GenericDirCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -5609,10 +5699,6 @@ class GenericDirCtrl(_core.Control):
     def ExpandPath(*args, **kwargs):
         """ExpandPath(self, String path) -> bool"""
         return _controls_.GenericDirCtrl_ExpandPath(*args, **kwargs)
-
-    def CollapsePath(*args, **kwargs):
-        """CollapsePath(self, String path) -> bool"""
-        return _controls_.GenericDirCtrl_CollapsePath(*args, **kwargs)
 
     def GetDefaultPath(*args, **kwargs):
         """GetDefaultPath(self) -> String"""
@@ -5690,32 +5776,34 @@ class GenericDirCtrl(_core.Control):
         """ReCreateTree(self)"""
         return _controls_.GenericDirCtrl_ReCreateTree(*args, **kwargs)
 
-    DefaultPath = property(GetDefaultPath,SetDefaultPath,doc="See `GetDefaultPath` and `SetDefaultPath`") 
-    FilePath = property(GetFilePath,doc="See `GetFilePath`") 
-    Filter = property(GetFilter,SetFilter,doc="See `GetFilter` and `SetFilter`") 
-    FilterIndex = property(GetFilterIndex,SetFilterIndex,doc="See `GetFilterIndex` and `SetFilterIndex`") 
-    FilterListCtrl = property(GetFilterListCtrl,doc="See `GetFilterListCtrl`") 
-    Path = property(GetPath,SetPath,doc="See `GetPath` and `SetPath`") 
-    RootId = property(GetRootId,doc="See `GetRootId`") 
-    TreeCtrl = property(GetTreeCtrl,doc="See `GetTreeCtrl`") 
-_controls_.GenericDirCtrl_swigregister(GenericDirCtrl)
+
+class GenericDirCtrlPtr(GenericDirCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = GenericDirCtrl
+_controls_.GenericDirCtrl_swigregister(GenericDirCtrlPtr)
 DirDialogDefaultFolderStr = cvar.DirDialogDefaultFolderStr
 
 def PreGenericDirCtrl(*args, **kwargs):
     """PreGenericDirCtrl() -> GenericDirCtrl"""
     val = _controls_.new_PreGenericDirCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 class DirFilterListCtrl(Choice):
     """Proxy of C++ DirFilterListCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDirFilterListCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, GenericDirCtrl parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0) -> DirFilterListCtrl
         """
-        _controls_.DirFilterListCtrl_swiginit(self,_controls_.new_DirFilterListCtrl(*args, **kwargs))
+        newobj = _controls_.new_DirFilterListCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -5729,195 +5817,152 @@ class DirFilterListCtrl(Choice):
         """FillFilterList(self, String filter, int defaultFilter)"""
         return _controls_.DirFilterListCtrl_FillFilterList(*args, **kwargs)
 
-_controls_.DirFilterListCtrl_swigregister(DirFilterListCtrl)
+
+class DirFilterListCtrlPtr(DirFilterListCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DirFilterListCtrl
+_controls_.DirFilterListCtrl_swigregister(DirFilterListCtrlPtr)
 
 def PreDirFilterListCtrl(*args, **kwargs):
     """PreDirFilterListCtrl() -> DirFilterListCtrl"""
     val = _controls_.new_PreDirFilterListCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
 
 class PyControl(_core.Control):
     """Proxy of C++ PyControl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxPyControl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=0, Validator validator=DefaultValidator, 
             String name=ControlNameStr) -> PyControl
         """
-        _controls_.PyControl_swiginit(self,_controls_.new_PyControl(*args, **kwargs))
-        self._setOORInfo(self);PyControl._setCallbackInfo(self, self, PyControl)
+        newobj = _controls_.new_PyControl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+        self._setOORInfo(self); self._setCallbackInfo(self, PyControl)
 
     def _setCallbackInfo(*args, **kwargs):
         """_setCallbackInfo(self, PyObject self, PyObject _class)"""
         return _controls_.PyControl__setCallbackInfo(*args, **kwargs)
 
-    SetBestSize = wx.Window.SetInitialSize 
+    def SetBestSize(*args, **kwargs):
+        """SetBestSize(self, Size size)"""
+        return _controls_.PyControl_SetBestSize(*args, **kwargs)
+
     def DoEraseBackground(*args, **kwargs):
         """DoEraseBackground(self, DC dc) -> bool"""
         return _controls_.PyControl_DoEraseBackground(*args, **kwargs)
 
-    def DoMoveWindow(*args, **kwargs):
-        """DoMoveWindow(self, int x, int y, int width, int height)"""
-        return _controls_.PyControl_DoMoveWindow(*args, **kwargs)
+    def base_DoMoveWindow(*args, **kwargs):
+        """base_DoMoveWindow(self, int x, int y, int width, int height)"""
+        return _controls_.PyControl_base_DoMoveWindow(*args, **kwargs)
 
-    def DoSetSize(*args, **kwargs):
-        """DoSetSize(self, int x, int y, int width, int height, int sizeFlags=SIZE_AUTO)"""
-        return _controls_.PyControl_DoSetSize(*args, **kwargs)
+    def base_DoSetSize(*args, **kwargs):
+        """base_DoSetSize(self, int x, int y, int width, int height, int sizeFlags=SIZE_AUTO)"""
+        return _controls_.PyControl_base_DoSetSize(*args, **kwargs)
 
-    def DoSetClientSize(*args, **kwargs):
-        """DoSetClientSize(self, int width, int height)"""
-        return _controls_.PyControl_DoSetClientSize(*args, **kwargs)
+    def base_DoSetClientSize(*args, **kwargs):
+        """base_DoSetClientSize(self, int width, int height)"""
+        return _controls_.PyControl_base_DoSetClientSize(*args, **kwargs)
 
-    def DoSetVirtualSize(*args, **kwargs):
-        """DoSetVirtualSize(self, int x, int y)"""
-        return _controls_.PyControl_DoSetVirtualSize(*args, **kwargs)
+    def base_DoSetVirtualSize(*args, **kwargs):
+        """base_DoSetVirtualSize(self, int x, int y)"""
+        return _controls_.PyControl_base_DoSetVirtualSize(*args, **kwargs)
 
-    def DoGetSize(*args, **kwargs):
-        """DoGetSize() -> (width, height)"""
-        return _controls_.PyControl_DoGetSize(*args, **kwargs)
+    def base_DoGetSize(*args, **kwargs):
+        """base_DoGetSize() -> (width, height)"""
+        return _controls_.PyControl_base_DoGetSize(*args, **kwargs)
 
-    def DoGetClientSize(*args, **kwargs):
-        """DoGetClientSize() -> (width, height)"""
-        return _controls_.PyControl_DoGetClientSize(*args, **kwargs)
+    def base_DoGetClientSize(*args, **kwargs):
+        """base_DoGetClientSize() -> (width, height)"""
+        return _controls_.PyControl_base_DoGetClientSize(*args, **kwargs)
 
-    def DoGetPosition(*args, **kwargs):
-        """DoGetPosition() -> (x,y)"""
-        return _controls_.PyControl_DoGetPosition(*args, **kwargs)
+    def base_DoGetPosition(*args, **kwargs):
+        """base_DoGetPosition() -> (x,y)"""
+        return _controls_.PyControl_base_DoGetPosition(*args, **kwargs)
 
-    def DoGetVirtualSize(*args, **kwargs):
-        """DoGetVirtualSize(self) -> Size"""
-        return _controls_.PyControl_DoGetVirtualSize(*args, **kwargs)
+    def base_DoGetVirtualSize(*args, **kwargs):
+        """base_DoGetVirtualSize(self) -> Size"""
+        return _controls_.PyControl_base_DoGetVirtualSize(*args, **kwargs)
 
-    def DoGetBestSize(*args, **kwargs):
-        """DoGetBestSize(self) -> Size"""
-        return _controls_.PyControl_DoGetBestSize(*args, **kwargs)
+    def base_DoGetBestSize(*args, **kwargs):
+        """base_DoGetBestSize(self) -> Size"""
+        return _controls_.PyControl_base_DoGetBestSize(*args, **kwargs)
 
-    def GetDefaultAttributes(*args, **kwargs):
-        """GetDefaultAttributes(self) -> VisualAttributes"""
-        return _controls_.PyControl_GetDefaultAttributes(*args, **kwargs)
+    def base_InitDialog(*args, **kwargs):
+        """base_InitDialog(self)"""
+        return _controls_.PyControl_base_InitDialog(*args, **kwargs)
 
-    def OnInternalIdle(*args, **kwargs):
-        """OnInternalIdle(self)"""
-        return _controls_.PyControl_OnInternalIdle(*args, **kwargs)
+    def base_TransferDataToWindow(*args, **kwargs):
+        """base_TransferDataToWindow(self) -> bool"""
+        return _controls_.PyControl_base_TransferDataToWindow(*args, **kwargs)
 
-    def base_DoMoveWindow(*args, **kw):
-        return PyScrolledWindow.DoMoveWindow(*args, **kw)
-    base_DoMoveWindow = wx._deprecated(base_DoMoveWindow,
-                                   "Please use PyScrolledWindow.DoMoveWindow instead.")
+    def base_TransferDataFromWindow(*args, **kwargs):
+        """base_TransferDataFromWindow(self) -> bool"""
+        return _controls_.PyControl_base_TransferDataFromWindow(*args, **kwargs)
 
-    def base_DoSetSize(*args, **kw):
-        return PyScrolledWindow.DoSetSize(*args, **kw)
-    base_DoSetSize = wx._deprecated(base_DoSetSize,
-                                   "Please use PyScrolledWindow.DoSetSize instead.")
+    def base_Validate(*args, **kwargs):
+        """base_Validate(self) -> bool"""
+        return _controls_.PyControl_base_Validate(*args, **kwargs)
 
-    def base_DoSetClientSize(*args, **kw):
-        return PyScrolledWindow.DoSetClientSize(*args, **kw)
-    base_DoSetClientSize = wx._deprecated(base_DoSetClientSize,
-                                   "Please use PyScrolledWindow.DoSetClientSize instead.")
+    def base_AcceptsFocus(*args, **kwargs):
+        """base_AcceptsFocus(self) -> bool"""
+        return _controls_.PyControl_base_AcceptsFocus(*args, **kwargs)
 
-    def base_DoSetVirtualSize(*args, **kw):
-        return PyScrolledWindow.DoSetVirtualSize(*args, **kw)
-    base_DoSetVirtualSize = wx._deprecated(base_DoSetVirtualSize,
-                                   "Please use PyScrolledWindow.DoSetVirtualSize instead.")
+    def base_AcceptsFocusFromKeyboard(*args, **kwargs):
+        """base_AcceptsFocusFromKeyboard(self) -> bool"""
+        return _controls_.PyControl_base_AcceptsFocusFromKeyboard(*args, **kwargs)
 
-    def base_DoGetSize(*args, **kw):
-        return PyScrolledWindow.DoGetSize(*args, **kw)
-    base_DoGetSize = wx._deprecated(base_DoGetSize,
-                                   "Please use PyScrolledWindow.DoGetSize instead.")
+    def base_GetMaxSize(*args, **kwargs):
+        """base_GetMaxSize(self) -> Size"""
+        return _controls_.PyControl_base_GetMaxSize(*args, **kwargs)
 
-    def base_DoGetClientSize(*args, **kw):
-        return PyScrolledWindow.DoGetClientSize(*args, **kw)
-    base_DoGetClientSize = wx._deprecated(base_DoGetClientSize,
-                                   "Please use PyScrolledWindow.DoGetClientSize instead.")
+    def base_AddChild(*args, **kwargs):
+        """base_AddChild(self, Window child)"""
+        return _controls_.PyControl_base_AddChild(*args, **kwargs)
 
-    def base_DoGetPosition(*args, **kw):
-        return PyScrolledWindow.DoGetPosition(*args, **kw)
-    base_DoGetPosition = wx._deprecated(base_DoGetPosition,
-                                   "Please use PyScrolledWindow.DoGetPosition instead.")
+    def base_RemoveChild(*args, **kwargs):
+        """base_RemoveChild(self, Window child)"""
+        return _controls_.PyControl_base_RemoveChild(*args, **kwargs)
 
-    def base_DoGetVirtualSize(*args, **kw):
-        return PyScrolledWindow.DoGetVirtualSize(*args, **kw)
-    base_DoGetVirtualSize = wx._deprecated(base_DoGetVirtualSize,
-                                   "Please use PyScrolledWindow.DoGetVirtualSize instead.")
+    def base_ShouldInheritColours(*args, **kwargs):
+        """base_ShouldInheritColours(self) -> bool"""
+        return _controls_.PyControl_base_ShouldInheritColours(*args, **kwargs)
 
-    def base_DoGetBestSize(*args, **kw):
-        return PyScrolledWindow.DoGetBestSize(*args, **kw)
-    base_DoGetBestSize = wx._deprecated(base_DoGetBestSize,
-                                   "Please use PyScrolledWindow.DoGetBestSize instead.")
+    def base_GetDefaultAttributes(*args, **kwargs):
+        """base_GetDefaultAttributes(self) -> VisualAttributes"""
+        return _controls_.PyControl_base_GetDefaultAttributes(*args, **kwargs)
 
-    def base_InitDialog(*args, **kw):
-        return PyScrolledWindow.InitDialog(*args, **kw)
-    base_InitDialog = wx._deprecated(base_InitDialog,
-                                   "Please use PyScrolledWindow.InitDialog instead.")
+    def base_OnInternalIdle(*args, **kwargs):
+        """base_OnInternalIdle(self)"""
+        return _controls_.PyControl_base_OnInternalIdle(*args, **kwargs)
 
-    def base_TransferDataToWindow(*args, **kw):
-        return PyScrolledWindow.TransferDataToWindow(*args, **kw)
-    base_TransferDataToWindow = wx._deprecated(base_TransferDataToWindow,
-                                   "Please use PyScrolledWindow.TransferDataToWindow instead.")
 
-    def base_TransferDataFromWindow(*args, **kw):
-        return PyScrolledWindow.TransferDataFromWindow(*args, **kw)
-    base_TransferDataFromWindow = wx._deprecated(base_TransferDataFromWindow,
-                                   "Please use PyScrolledWindow.TransferDataFromWindow instead.")
-
-    def base_Validate(*args, **kw):
-        return PyScrolledWindow.Validate(*args, **kw)
-    base_Validate = wx._deprecated(base_Validate,
-                                   "Please use PyScrolledWindow.Validate instead.")
-
-    def base_AcceptsFocus(*args, **kw):
-        return PyScrolledWindow.AcceptsFocus(*args, **kw)
-    base_AcceptsFocus = wx._deprecated(base_AcceptsFocus,
-                                   "Please use PyScrolledWindow.AcceptsFocus instead.")
-
-    def base_AcceptsFocusFromKeyboard(*args, **kw):
-        return PyScrolledWindow.AcceptsFocusFromKeyboard(*args, **kw)
-    base_AcceptsFocusFromKeyboard = wx._deprecated(base_AcceptsFocusFromKeyboard,
-                                   "Please use PyScrolledWindow.AcceptsFocusFromKeyboard instead.")
-
-    def base_GetMaxSize(*args, **kw):
-        return PyScrolledWindow.GetMaxSize(*args, **kw)
-    base_GetMaxSize = wx._deprecated(base_GetMaxSize,
-                                   "Please use PyScrolledWindow.GetMaxSize instead.")
-
-    def base_AddChild(*args, **kw):
-        return PyScrolledWindow.AddChild(*args, **kw)
-    base_AddChild = wx._deprecated(base_AddChild,
-                                   "Please use PyScrolledWindow.AddChild instead.")
-
-    def base_RemoveChild(*args, **kw):
-        return PyScrolledWindow.RemoveChild(*args, **kw)
-    base_RemoveChild = wx._deprecated(base_RemoveChild,
-                                   "Please use PyScrolledWindow.RemoveChild instead.")
-
-    def base_ShouldInheritColours(*args, **kw):
-        return PyScrolledWindow.ShouldInheritColours(*args, **kw)
-    base_ShouldInheritColours = wx._deprecated(base_ShouldInheritColours,
-                                   "Please use PyScrolledWindow.ShouldInheritColours instead.")
-
-    def base_GetDefaultAttributes(*args, **kw):
-        return PyScrolledWindow.GetDefaultAttributes(*args, **kw)
-    base_GetDefaultAttributes = wx._deprecated(base_GetDefaultAttributes,
-                                   "Please use PyScrolledWindow.GetDefaultAttributes instead.")
-
-    def base_OnInternalIdle(*args, **kw):
-        return PyScrolledWindow.OnInternalIdle(*args, **kw)
-    base_OnInternalIdle = wx._deprecated(base_OnInternalIdle,
-                                   "Please use PyScrolledWindow.OnInternalIdle instead.")
-
-_controls_.PyControl_swigregister(PyControl)
+class PyControlPtr(PyControl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = PyControl
+_controls_.PyControl_swigregister(PyControlPtr)
 
 def PrePyControl(*args, **kwargs):
     """PrePyControl() -> PyControl"""
     val = _controls_.new_PrePyControl(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
 
+FRAME_EX_CONTEXTHELP = _controls_.FRAME_EX_CONTEXTHELP
+DIALOG_EX_CONTEXTHELP = _controls_.DIALOG_EX_CONTEXTHELP
 wxEVT_HELP = _controls_.wxEVT_HELP
 wxEVT_DETAILED_HELP = _controls_.wxEVT_DETAILED_HELP
 EVT_HELP = wx.PyEventBinder( wxEVT_HELP, 1)
@@ -5943,17 +5988,14 @@ class HelpEvent(_core.CommandEvent):
     window. Otherwise it would be impossible to show help for container
     windows, since processing would stop after the first window found.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    Origin_Unknown = _controls_.HelpEvent_Origin_Unknown
-    Origin_Keyboard = _controls_.HelpEvent_Origin_Keyboard
-    Origin_HelpButton = _controls_.HelpEvent_Origin_HelpButton
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, EventType type=wxEVT_NULL, int winid=0, Point pt=DefaultPosition, 
-            int origin=Origin_Unknown) -> HelpEvent
-        """
-        _controls_.HelpEvent_swiginit(self,_controls_.new_HelpEvent(*args, **kwargs))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxHelpEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
+        """__init__(self, wxEventType type=wxEVT_NULL, int winid=0, Point pt=DefaultPosition) -> HelpEvent"""
+        newobj = _controls_.new_HelpEvent(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
     def GetPosition(*args, **kwargs):
         """
         GetPosition(self) -> Point
@@ -6004,23 +6046,13 @@ class HelpEvent(_core.CommandEvent):
         """
         return _controls_.HelpEvent_SetTarget(*args, **kwargs)
 
-    def GetOrigin(*args, **kwargs):
-        """
-        GetOrigin(self) -> int
 
-        Optiononal indication of the source of the event.
-        """
-        return _controls_.HelpEvent_GetOrigin(*args, **kwargs)
-
-    def SetOrigin(*args, **kwargs):
-        """SetOrigin(self, int origin)"""
-        return _controls_.HelpEvent_SetOrigin(*args, **kwargs)
-
-    Link = property(GetLink,SetLink,doc="See `GetLink` and `SetLink`") 
-    Origin = property(GetOrigin,SetOrigin,doc="See `GetOrigin` and `SetOrigin`") 
-    Position = property(GetPosition,SetPosition,doc="See `GetPosition` and `SetPosition`") 
-    Target = property(GetTarget,SetTarget,doc="See `GetTarget` and `SetTarget`") 
-_controls_.HelpEvent_swigregister(HelpEvent)
+class HelpEventPtr(HelpEvent):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = HelpEvent
+_controls_.HelpEvent_swigregister(HelpEventPtr)
 
 class ContextHelp(_core.Object):
     """
@@ -6032,7 +6064,7 @@ class ContextHelp(_core.Object):
 
     There are a couple of ways to invoke this behaviour implicitly:
 
-        * Use the wx.WS_EX_CONTEXTHELP extended style for a dialog or frame
+        * Use the wx.DIALOG_EX_CONTEXTHELP extended style for a dialog
           (Windows only). This will put a question mark in the titlebar,
           and Windows will put the application into context-sensitive help
           mode automatically, with further programming.
@@ -6040,15 +6072,15 @@ class ContextHelp(_core.Object):
         * Create a `wx.ContextHelpButton`, whose predefined behaviour is
           to create a context help object. Normally you will write your
           application so that this button is only added to a dialog for
-          non-Windows platforms (use ``wx.WS_EX_CONTEXTHELP`` on
+          non-Windows platforms (use ``wx.DIALOG_EX_CONTEXTHELP`` on
           Windows).
 
     :see: `wx.ContextHelpButton`
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxContextHelp instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window window=None, bool doNow=True) -> ContextHelp
 
@@ -6057,9 +6089,16 @@ class ContextHelp(_core.Object):
 
         If window is None, the top window is used.
         """
-        _controls_.ContextHelp_swiginit(self,_controls_.new_ContextHelp(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_ContextHelp
-    __del__ = lambda self : None;
+        newobj = _controls_.new_ContextHelp(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_controls_.delete_ContextHelp):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def BeginContextHelp(*args, **kwargs):
         """
         BeginContextHelp(self, Window window=None) -> bool
@@ -6083,7 +6122,13 @@ class ContextHelp(_core.Object):
         """
         return _controls_.ContextHelp_EndContextHelp(*args, **kwargs)
 
-_controls_.ContextHelp_swigregister(ContextHelp)
+
+class ContextHelpPtr(ContextHelp):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ContextHelp
+_controls_.ContextHelp_swigregister(ContextHelpPtr)
 
 class ContextHelpButton(BitmapButton):
     """
@@ -6100,19 +6145,28 @@ class ContextHelpButton(BitmapButton):
     :see: `wx.ContextHelp`, `wx.ContextHelpButton`
 
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxContextHelpButton instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=ID_CONTEXT_HELP, Point pos=DefaultPosition, 
             Size size=DefaultSize, long style=BU_AUTODRAW) -> ContextHelpButton
 
         Constructor, creating and showing a context help button.
         """
-        _controls_.ContextHelpButton_swiginit(self,_controls_.new_ContextHelpButton(*args, **kwargs))
+        newobj = _controls_.new_ContextHelpButton(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
-_controls_.ContextHelpButton_swigregister(ContextHelpButton)
+
+class ContextHelpButtonPtr(ContextHelpButton):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = ContextHelpButton
+_controls_.ContextHelpButton_swigregister(ContextHelpButtonPtr)
 
 class HelpProvider(object):
     """
@@ -6123,11 +6177,9 @@ class HelpProvider(object):
     The current help provider must be explicitly set by the
     application using wx.HelpProvider.Set().
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-    __swig_destroy__ = _controls_.delete_HelpProvider
-    __del__ = lambda self : None;
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxHelpProvider instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     def Set(*args, **kwargs):
         """
         Set(HelpProvider helpProvider) -> HelpProvider
@@ -6168,16 +6220,6 @@ class HelpProvider(object):
         """
         return _controls_.HelpProvider_ShowHelp(*args, **kwargs)
 
-    def ShowHelpAtPoint(*args, **kwargs):
-        """
-        ShowHelpAtPoint(self, wxWindowBase window, Point pt, int origin) -> bool
-
-        Show help for the given window (uses window.GetHelpAtPoint()
-        internally if applicable), return true if it was done or false if no
-        help available for this window.
-        """
-        return _controls_.HelpProvider_ShowHelpAtPoint(*args, **kwargs)
-
     def AddHelp(*args, **kwargs):
         """
         AddHelp(self, Window window, String text)
@@ -6209,28 +6251,33 @@ class HelpProvider(object):
 
     def Destroy(*args, **kwargs):
         """Destroy(self)"""
-        args[0].this.own(False)
         return _controls_.HelpProvider_Destroy(*args, **kwargs)
 
-_controls_.HelpProvider_swigregister(HelpProvider)
+
+class HelpProviderPtr(HelpProvider):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = HelpProvider
+_controls_.HelpProvider_swigregister(HelpProviderPtr)
 
 def HelpProvider_Set(*args, **kwargs):
-  """
+    """
     HelpProvider_Set(HelpProvider helpProvider) -> HelpProvider
 
     Sset the current, application-wide help provider. Returns the previous
     one.  Unlike some other classes, the help provider is not created on
     demand. This must be explicitly done by the application.
     """
-  return _controls_.HelpProvider_Set(*args, **kwargs)
+    return _controls_.HelpProvider_Set(*args, **kwargs)
 
-def HelpProvider_Get(*args):
-  """
+def HelpProvider_Get(*args, **kwargs):
+    """
     HelpProvider_Get() -> HelpProvider
 
     Return the current application-wide help provider.
     """
-  return _controls_.HelpProvider_Get(*args)
+    return _controls_.HelpProvider_Get(*args, **kwargs)
 
 class SimpleHelpProvider(HelpProvider):
     """
@@ -6238,9 +6285,9 @@ class SimpleHelpProvider(HelpProvider):
     supports only plain text help strings, and shows the string associated
     with the control (if any) in a tooltip.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxSimpleHelpProvider instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self) -> SimpleHelpProvider
 
@@ -6248,20 +6295,36 @@ class SimpleHelpProvider(HelpProvider):
         supports only plain text help strings, and shows the string associated
         with the control (if any) in a tooltip.
         """
-        _controls_.SimpleHelpProvider_swiginit(self,_controls_.new_SimpleHelpProvider(*args, **kwargs))
-_controls_.SimpleHelpProvider_swigregister(SimpleHelpProvider)
+        newobj = _controls_.new_SimpleHelpProvider(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+
+class SimpleHelpProviderPtr(SimpleHelpProvider):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = SimpleHelpProvider
+_controls_.SimpleHelpProvider_swigregister(SimpleHelpProviderPtr)
 
 #---------------------------------------------------------------------------
 
 class DragImage(_core.Object):
     """Proxy of C++ DragImage class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxGenericDragImage instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """__init__(self, Bitmap image, Cursor cursor=wxNullCursor) -> DragImage"""
-        _controls_.DragImage_swiginit(self,_controls_.new_DragImage(*args, **kwargs))
-    __swig_destroy__ = _controls_.delete_DragImage
-    __del__ = lambda self : None;
+        newobj = _controls_.new_DragImage(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
+    def __del__(self, destroy=_controls_.delete_DragImage):
+        """__del__(self)"""
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+
     def SetBackingBitmap(*args, **kwargs):
         """SetBackingBitmap(self, Bitmap bitmap)"""
         return _controls_.DragImage_SetBackingBitmap(*args, **kwargs)
@@ -6309,27 +6372,36 @@ class DragImage(_core.Object):
         """RedrawImage(self, Point oldPos, Point newPos, bool eraseOld, bool drawNew) -> bool"""
         return _controls_.DragImage_RedrawImage(*args, **kwargs)
 
-    ImageRect = property(GetImageRect,doc="See `GetImageRect`") 
-_controls_.DragImage_swigregister(DragImage)
+
+class DragImagePtr(DragImage):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DragImage
+_controls_.DragImage_swigregister(DragImagePtr)
 
 def DragIcon(*args, **kwargs):
     """DragIcon(Icon image, Cursor cursor=wxNullCursor) -> DragImage"""
     val = _controls_.new_DragIcon(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def DragString(*args, **kwargs):
     """DragString(String str, Cursor cursor=wxNullCursor) -> DragImage"""
     val = _controls_.new_DragString(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def DragTreeItem(*args, **kwargs):
     """DragTreeItem(TreeCtrl treeCtrl, TreeItemId id) -> DragImage"""
     val = _controls_.new_DragTreeItem(*args, **kwargs)
+    val.thisown = 1
     return val
 
 def DragListItem(*args, **kwargs):
     """DragListItem(ListCtrl listCtrl, long id) -> DragImage"""
     val = _controls_.new_DragListItem(*args, **kwargs)
+    val.thisown = 1
     return val
 
 #---------------------------------------------------------------------------
@@ -6348,9 +6420,9 @@ class DatePickerCtrl(_core.Control):
     and can also display a popup window for more user-friendly date
     selection, depending on the styles used and the platform.
     """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ wxDatePickerCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args, **kwargs):
         """
         __init__(self, Window parent, int id=-1, DateTime dt=wxDefaultDateTime, 
             Point pos=DefaultPosition, Size size=DefaultSize, 
@@ -6360,7 +6432,10 @@ class DatePickerCtrl(_core.Control):
 
         Create a new DatePickerCtrl.
         """
-        _controls_.DatePickerCtrl_swiginit(self,_controls_.new_DatePickerCtrl(*args, **kwargs))
+        newobj = _controls_.new_DatePickerCtrl(*args, **kwargs)
+        self.this = newobj.this
+        self.thisown = 1
+        del newobj.thisown
         self._setOORInfo(self)
 
     def Create(*args, **kwargs):
@@ -6430,10 +6505,13 @@ class DatePickerCtrl(_core.Control):
         """
         return _controls_.DatePickerCtrl_GetUpperLimit(*args, **kwargs)
 
-    LowerLimit = property(GetLowerLimit,doc="See `GetLowerLimit`") 
-    UpperLimit = property(GetUpperLimit,doc="See `GetUpperLimit`") 
-    Value = property(GetValue,SetValue,doc="See `GetValue` and `SetValue`") 
-_controls_.DatePickerCtrl_swigregister(DatePickerCtrl)
+
+class DatePickerCtrlPtr(DatePickerCtrl):
+    def __init__(self, this):
+        self.this = this
+        if not hasattr(self,"thisown"): self.thisown = 0
+        self.__class__ = DatePickerCtrl
+_controls_.DatePickerCtrl_swigregister(DatePickerCtrlPtr)
 DatePickerCtrlNameStr = cvar.DatePickerCtrlNameStr
 
 def PreDatePickerCtrl(*args, **kwargs):
@@ -6443,898 +6521,8 @@ def PreDatePickerCtrl(*args, **kwargs):
     Precreate a DatePickerCtrl for use in 2-phase creation.
     """
     val = _controls_.new_PreDatePickerCtrl(*args, **kwargs)
+    val.thisown = 1
     return val
-
-HL_CONTEXTMENU = _controls_.HL_CONTEXTMENU
-HL_ALIGN_LEFT = _controls_.HL_ALIGN_LEFT
-HL_ALIGN_RIGHT = _controls_.HL_ALIGN_RIGHT
-HL_ALIGN_CENTRE = _controls_.HL_ALIGN_CENTRE
-HL_DEFAULT_STYLE = _controls_.HL_DEFAULT_STYLE
-#---------------------------------------------------------------------------
-
-class HyperlinkCtrl(_core.Control):
-    """
-    A static text control that emulates a hyperlink. The link is displayed
-    in an appropriate text style, derived from the control's normal font.
-    When the mouse rolls over the link, the cursor changes to a hand and
-    the link's color changes to the active color.
-
-    Clicking on the link does not launch a web browser; instead, a
-    wx.HyperlinkEvent is fired. Use the wx.EVT_HYPERLINK to catch link
-    events.
-
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id, String label, String url, Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=HL_DEFAULT_STYLE, String name=HyperlinkCtrlNameStr) -> HyperlinkCtrl
-
-        A static text control that emulates a hyperlink. The link is displayed
-        in an appropriate text style, derived from the control's normal font.
-        When the mouse rolls over the link, the cursor changes to a hand and
-        the link's color changes to the active color.
-
-        Clicking on the link does not launch a web browser; instead, a
-        wx.HyperlinkEvent is fired. Use the wx.EVT_HYPERLINK to catch link
-        events.
-
-        """
-        _controls_.HyperlinkCtrl_swiginit(self,_controls_.new_HyperlinkCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id, String label, String url, Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=HL_DEFAULT_STYLE, String name=HyperlinkCtrlNameStr) -> bool
-        """
-        return _controls_.HyperlinkCtrl_Create(*args, **kwargs)
-
-    def GetHoverColour(*args, **kwargs):
-        """GetHoverColour(self) -> Colour"""
-        return _controls_.HyperlinkCtrl_GetHoverColour(*args, **kwargs)
-
-    def SetHoverColour(*args, **kwargs):
-        """SetHoverColour(self, Colour colour)"""
-        return _controls_.HyperlinkCtrl_SetHoverColour(*args, **kwargs)
-
-    def GetNormalColour(*args, **kwargs):
-        """GetNormalColour(self) -> Colour"""
-        return _controls_.HyperlinkCtrl_GetNormalColour(*args, **kwargs)
-
-    def SetNormalColour(*args, **kwargs):
-        """SetNormalColour(self, Colour colour)"""
-        return _controls_.HyperlinkCtrl_SetNormalColour(*args, **kwargs)
-
-    def GetVisitedColour(*args, **kwargs):
-        """GetVisitedColour(self) -> Colour"""
-        return _controls_.HyperlinkCtrl_GetVisitedColour(*args, **kwargs)
-
-    def SetVisitedColour(*args, **kwargs):
-        """SetVisitedColour(self, Colour colour)"""
-        return _controls_.HyperlinkCtrl_SetVisitedColour(*args, **kwargs)
-
-    def GetURL(*args, **kwargs):
-        """GetURL(self) -> String"""
-        return _controls_.HyperlinkCtrl_GetURL(*args, **kwargs)
-
-    def SetURL(*args, **kwargs):
-        """SetURL(self, String url)"""
-        return _controls_.HyperlinkCtrl_SetURL(*args, **kwargs)
-
-    def SetVisited(*args, **kwargs):
-        """SetVisited(self, bool visited=True)"""
-        return _controls_.HyperlinkCtrl_SetVisited(*args, **kwargs)
-
-    def GetVisited(*args, **kwargs):
-        """GetVisited(self) -> bool"""
-        return _controls_.HyperlinkCtrl_GetVisited(*args, **kwargs)
-
-    HoverColour = property(GetHoverColour,SetHoverColour,doc="See `GetHoverColour` and `SetHoverColour`") 
-    NormalColour = property(GetNormalColour,SetNormalColour,doc="See `GetNormalColour` and `SetNormalColour`") 
-    URL = property(GetURL,SetURL,doc="See `GetURL` and `SetURL`") 
-    Visited = property(GetVisited,SetVisited,doc="See `GetVisited` and `SetVisited`") 
-    VisitedColour = property(GetVisitedColour,SetVisitedColour,doc="See `GetVisitedColour` and `SetVisitedColour`") 
-_controls_.HyperlinkCtrl_swigregister(HyperlinkCtrl)
-HyperlinkCtrlNameStr = cvar.HyperlinkCtrlNameStr
-
-def PreHyperlinkCtrl(*args, **kwargs):
-    """
-    PreHyperlinkCtrl() -> HyperlinkCtrl
-
-    A static text control that emulates a hyperlink. The link is displayed
-    in an appropriate text style, derived from the control's normal font.
-    When the mouse rolls over the link, the cursor changes to a hand and
-    the link's color changes to the active color.
-
-    Clicking on the link does not launch a web browser; instead, a
-    wx.HyperlinkEvent is fired. Use the wx.EVT_HYPERLINK to catch link
-    events.
-
-    """
-    val = _controls_.new_PreHyperlinkCtrl(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_HYPERLINK = _controls_.wxEVT_COMMAND_HYPERLINK
-class HyperlinkEvent(_core.CommandEvent):
-    """Proxy of C++ HyperlinkEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, Object generator, int id, String url) -> HyperlinkEvent"""
-        _controls_.HyperlinkEvent_swiginit(self,_controls_.new_HyperlinkEvent(*args, **kwargs))
-    def GetURL(*args, **kwargs):
-        """GetURL(self) -> String"""
-        return _controls_.HyperlinkEvent_GetURL(*args, **kwargs)
-
-    def SetURL(*args, **kwargs):
-        """SetURL(self, String url)"""
-        return _controls_.HyperlinkEvent_SetURL(*args, **kwargs)
-
-    URL = property(GetURL,SetURL,doc="See `GetURL` and `SetURL`") 
-_controls_.HyperlinkEvent_swigregister(HyperlinkEvent)
-
-EVT_HYPERLINK = wx.PyEventBinder( wxEVT_COMMAND_HYPERLINK, 1 )
-
-#---------------------------------------------------------------------------
-
-PB_USE_TEXTCTRL = _controls_.PB_USE_TEXTCTRL
-class PickerBase(_core.Control):
-    """
-    Base abstract class for all pickers which support an auxiliary text
-    control. This class handles all positioning and sizing of the text
-    control like a an horizontal `wx.BoxSizer` would do, with the text
-    control on the left of the picker button and the proportion of the
-    picker fixed to value 1.
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-    def CreateBase(*args, **kwargs):
-        """
-        CreateBase(self, Window parent, int id, String text=wxEmptyString, Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=0, Validator validator=DefaultValidator, 
-            String name=wxButtonNameStr) -> bool
-        """
-        return _controls_.PickerBase_CreateBase(*args, **kwargs)
-
-    def SetInternalMargin(*args, **kwargs):
-        """
-        SetInternalMargin(self, int newmargin)
-
-        Sets the margin (in pixels) between the picker and the text control.
-        """
-        return _controls_.PickerBase_SetInternalMargin(*args, **kwargs)
-
-    def GetInternalMargin(*args, **kwargs):
-        """
-        GetInternalMargin(self) -> int
-
-        Returns the margin (in pixels) between the picker and the text
-        control.
-        """
-        return _controls_.PickerBase_GetInternalMargin(*args, **kwargs)
-
-    def SetTextCtrlProportion(*args, **kwargs):
-        """
-        SetTextCtrlProportion(self, int prop)
-
-        Sets the proportion between the text control and the picker button.
-        This is used to set relative sizes of the text contorl and the picker.
-        The value passed to this function must be >= 1.
-        """
-        return _controls_.PickerBase_SetTextCtrlProportion(*args, **kwargs)
-
-    def GetTextCtrlProportion(*args, **kwargs):
-        """
-        GetTextCtrlProportion(self) -> int
-
-        Returns the proportion between the text control and the picker.
-        """
-        return _controls_.PickerBase_GetTextCtrlProportion(*args, **kwargs)
-
-    def SetPickerCtrlProportion(*args, **kwargs):
-        """
-        SetPickerCtrlProportion(self, int prop)
-
-        Sets the proportion value of the picker.
-        """
-        return _controls_.PickerBase_SetPickerCtrlProportion(*args, **kwargs)
-
-    def GetPickerCtrlProportion(*args, **kwargs):
-        """
-        GetPickerCtrlProportion(self) -> int
-
-        Gets the proportion value of the picker.
-        """
-        return _controls_.PickerBase_GetPickerCtrlProportion(*args, **kwargs)
-
-    def IsTextCtrlGrowable(*args, **kwargs):
-        """IsTextCtrlGrowable(self) -> bool"""
-        return _controls_.PickerBase_IsTextCtrlGrowable(*args, **kwargs)
-
-    def SetTextCtrlGrowable(*args, **kwargs):
-        """SetTextCtrlGrowable(self, bool grow=True)"""
-        return _controls_.PickerBase_SetTextCtrlGrowable(*args, **kwargs)
-
-    def IsPickerCtrlGrowable(*args, **kwargs):
-        """IsPickerCtrlGrowable(self) -> bool"""
-        return _controls_.PickerBase_IsPickerCtrlGrowable(*args, **kwargs)
-
-    def SetPickerCtrlGrowable(*args, **kwargs):
-        """SetPickerCtrlGrowable(self, bool grow=True)"""
-        return _controls_.PickerBase_SetPickerCtrlGrowable(*args, **kwargs)
-
-    def HasTextCtrl(*args, **kwargs):
-        """
-        HasTextCtrl(self) -> bool
-
-        Returns true if this class has a valid text control (i.e. if the
-        wx.PB_USE_TEXTCTRL style was given when creating this control).
-        """
-        return _controls_.PickerBase_HasTextCtrl(*args, **kwargs)
-
-    def GetTextCtrl(*args, **kwargs):
-        """
-        GetTextCtrl(self) -> TextCtrl
-
-        Returns a pointer to the text control handled by this class or None if
-        the wx.PB_USE_TEXTCTRL style was not specified when this control was
-        created.
-
-        Very important: the contents of the text control could be containing
-        an invalid representation of the entity which can be chosen through
-        the picker (e.g. the user entered an invalid colour syntax because of
-        a typo). Thus you should never parse the content of the textctrl to
-        get the user's input; rather use the derived-class getter
-        (e.g. `wx.ColourPickerCtrl.GetColour`, `wx.FilePickerCtrl.GetPath`,
-        etc).
-        """
-        return _controls_.PickerBase_GetTextCtrl(*args, **kwargs)
-
-    def GetPickerCtrl(*args, **kwargs):
-        """GetPickerCtrl(self) -> Control"""
-        return _controls_.PickerBase_GetPickerCtrl(*args, **kwargs)
-
-    InternalMargin = property(GetInternalMargin,SetInternalMargin,doc="See `GetInternalMargin` and `SetInternalMargin`") 
-    PickerCtrl = property(GetPickerCtrl,doc="See `GetPickerCtrl`") 
-    PickerCtrlProportion = property(GetPickerCtrlProportion,SetPickerCtrlProportion,doc="See `GetPickerCtrlProportion` and `SetPickerCtrlProportion`") 
-    TextCtrl = property(GetTextCtrl,doc="See `GetTextCtrl`") 
-    TextCtrlProportion = property(GetTextCtrlProportion,SetTextCtrlProportion,doc="See `GetTextCtrlProportion` and `SetTextCtrlProportion`") 
-    TextCtrlGrowable = property(IsTextCtrlGrowable,SetTextCtrlGrowable,doc="See `IsTextCtrlGrowable` and `SetTextCtrlGrowable`") 
-    PickerCtrlGrowable = property(IsPickerCtrlGrowable,SetPickerCtrlGrowable,doc="See `IsPickerCtrlGrowable` and `SetPickerCtrlGrowable`") 
-_controls_.PickerBase_swigregister(PickerBase)
-
-#---------------------------------------------------------------------------
-
-CLRP_SHOW_LABEL = _controls_.CLRP_SHOW_LABEL
-CLRP_USE_TEXTCTRL = _controls_.CLRP_USE_TEXTCTRL
-CLRP_DEFAULT_STYLE = _controls_.CLRP_DEFAULT_STYLE
-class ColourPickerCtrl(PickerBase):
-    """
-    This control allows the user to select a colour. The generic
-    implementation is a button which brings up a `wx.ColourDialog` when
-    clicked. Native implementations may differ but this is usually a
-    (small) widget which give access to the colour-chooser dialog.
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id=-1, Colour col=*wxBLACK, Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=CLRP_DEFAULT_STYLE, Validator validator=DefaultValidator, 
-            String name=ColourPickerCtrlNameStr) -> ColourPickerCtrl
-
-        This control allows the user to select a colour. The generic
-        implementation is a button which brings up a `wx.ColourDialog` when
-        clicked. Native implementations may differ but this is usually a
-        (small) widget which give access to the colour-chooser dialog.
-        """
-        _controls_.ColourPickerCtrl_swiginit(self,_controls_.new_ColourPickerCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id, Colour col=*wxBLACK, Point pos=DefaultPosition, 
-            Size size=DefaultSize, long style=CLRP_DEFAULT_STYLE, 
-            Validator validator=DefaultValidator, 
-            String name=ColourPickerCtrlNameStr) -> bool
-        """
-        return _controls_.ColourPickerCtrl_Create(*args, **kwargs)
-
-    def GetColour(*args, **kwargs):
-        """
-        GetColour(self) -> Colour
-
-        Returns the currently selected colour.
-        """
-        return _controls_.ColourPickerCtrl_GetColour(*args, **kwargs)
-
-    def SetColour(*args, **kwargs):
-        """
-        SetColour(self, Colour col)
-
-        Set the displayed colour.
-        """
-        return _controls_.ColourPickerCtrl_SetColour(*args, **kwargs)
-
-    Colour = property(GetColour,SetColour,doc="See `GetColour` and `SetColour`") 
-_controls_.ColourPickerCtrl_swigregister(ColourPickerCtrl)
-ColourPickerCtrlNameStr = cvar.ColourPickerCtrlNameStr
-
-def PreColourPickerCtrl(*args, **kwargs):
-    """
-    PreColourPickerCtrl() -> ColourPickerCtrl
-
-    This control allows the user to select a colour. The generic
-    implementation is a button which brings up a `wx.ColourDialog` when
-    clicked. Native implementations may differ but this is usually a
-    (small) widget which give access to the colour-chooser dialog.
-    """
-    val = _controls_.new_PreColourPickerCtrl(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_COLOURPICKER_CHANGED = _controls_.wxEVT_COMMAND_COLOURPICKER_CHANGED
-EVT_COLOURPICKER_CHANGED = wx.PyEventBinder( wxEVT_COMMAND_COLOURPICKER_CHANGED, 1 )
-
-class ColourPickerEvent(_core.CommandEvent):
-    """Proxy of C++ ColourPickerEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, Object generator, int id, Colour col) -> ColourPickerEvent"""
-        _controls_.ColourPickerEvent_swiginit(self,_controls_.new_ColourPickerEvent(*args, **kwargs))
-    def GetColour(*args, **kwargs):
-        """GetColour(self) -> Colour"""
-        return _controls_.ColourPickerEvent_GetColour(*args, **kwargs)
-
-    def SetColour(*args, **kwargs):
-        """SetColour(self, Colour c)"""
-        return _controls_.ColourPickerEvent_SetColour(*args, **kwargs)
-
-    Colour = property(GetColour,SetColour,doc="See `GetColour` and `SetColour`") 
-_controls_.ColourPickerEvent_swigregister(ColourPickerEvent)
-
-#---------------------------------------------------------------------------
-
-FLP_OPEN = _controls_.FLP_OPEN
-FLP_SAVE = _controls_.FLP_SAVE
-FLP_OVERWRITE_PROMPT = _controls_.FLP_OVERWRITE_PROMPT
-FLP_FILE_MUST_EXIST = _controls_.FLP_FILE_MUST_EXIST
-FLP_CHANGE_DIR = _controls_.FLP_CHANGE_DIR
-DIRP_DIR_MUST_EXIST = _controls_.DIRP_DIR_MUST_EXIST
-DIRP_CHANGE_DIR = _controls_.DIRP_CHANGE_DIR
-FLP_USE_TEXTCTRL = _controls_.FLP_USE_TEXTCTRL
-FLP_DEFAULT_STYLE = _controls_.FLP_DEFAULT_STYLE
-DIRP_USE_TEXTCTRL = _controls_.DIRP_USE_TEXTCTRL
-DIRP_DEFAULT_STYLE = _controls_.DIRP_DEFAULT_STYLE
-class FilePickerCtrl(PickerBase):
-    """Proxy of C++ FilePickerCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id=-1, String path=EmptyString, 
-            String message=FileSelectorPromptStr, String wildcard=FileSelectorDefaultWildcardStr, 
-            Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=FLP_DEFAULT_STYLE, Validator validator=DefaultValidator, 
-            String name=FilePickerCtrlNameStr) -> FilePickerCtrl
-        """
-        _controls_.FilePickerCtrl_swiginit(self,_controls_.new_FilePickerCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id=-1, String path=EmptyString, 
-            String message=FileSelectorPromptStr, String wildcard=FileSelectorDefaultWildcardStr, 
-            Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=FLP_DEFAULT_STYLE, Validator validator=DefaultValidator, 
-            String name=FilePickerCtrlNameStr) -> bool
-        """
-        return _controls_.FilePickerCtrl_Create(*args, **kwargs)
-
-    def GetPath(*args, **kwargs):
-        """GetPath(self) -> String"""
-        return _controls_.FilePickerCtrl_GetPath(*args, **kwargs)
-
-    def SetPath(*args, **kwargs):
-        """SetPath(self, String str)"""
-        return _controls_.FilePickerCtrl_SetPath(*args, **kwargs)
-
-    def CheckPath(*args, **kwargs):
-        """CheckPath(self, String path) -> bool"""
-        return _controls_.FilePickerCtrl_CheckPath(*args, **kwargs)
-
-    def GetTextCtrlValue(*args, **kwargs):
-        """GetTextCtrlValue(self) -> String"""
-        return _controls_.FilePickerCtrl_GetTextCtrlValue(*args, **kwargs)
-
-    Path = property(GetPath,SetPath,doc="See `GetPath` and `SetPath`") 
-    TextCtrlValue = property(GetTextCtrlValue,doc="See `GetTextCtrlValue`") 
-_controls_.FilePickerCtrl_swigregister(FilePickerCtrl)
-FilePickerCtrlNameStr = cvar.FilePickerCtrlNameStr
-FileSelectorPromptStr = cvar.FileSelectorPromptStr
-DirPickerCtrlNameStr = cvar.DirPickerCtrlNameStr
-DirSelectorPromptStr = cvar.DirSelectorPromptStr
-FileSelectorDefaultWildcardStr = cvar.FileSelectorDefaultWildcardStr
-
-def PreFilePickerCtrl(*args, **kwargs):
-    """PreFilePickerCtrl() -> FilePickerCtrl"""
-    val = _controls_.new_PreFilePickerCtrl(*args, **kwargs)
-    return val
-
-class DirPickerCtrl(PickerBase):
-    """Proxy of C++ DirPickerCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id=-1, String path=EmptyString, 
-            String message=DirSelectorPromptStr, Point pos=DefaultPosition, 
-            Size size=DefaultSize, long style=DIRP_DEFAULT_STYLE, 
-            Validator validator=DefaultValidator, 
-            String name=DirPickerCtrlNameStr) -> DirPickerCtrl
-        """
-        _controls_.DirPickerCtrl_swiginit(self,_controls_.new_DirPickerCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id=-1, String path=EmptyString, 
-            String message=DirSelectorPromptStr, Point pos=DefaultPosition, 
-            Size size=DefaultSize, long style=DIRP_DEFAULT_STYLE, 
-            Validator validator=DefaultValidator, 
-            String name=DirPickerCtrlNameStr) -> bool
-        """
-        return _controls_.DirPickerCtrl_Create(*args, **kwargs)
-
-    def GetPath(*args, **kwargs):
-        """GetPath(self) -> String"""
-        return _controls_.DirPickerCtrl_GetPath(*args, **kwargs)
-
-    def SetPath(*args, **kwargs):
-        """SetPath(self, String str)"""
-        return _controls_.DirPickerCtrl_SetPath(*args, **kwargs)
-
-    def CheckPath(*args, **kwargs):
-        """CheckPath(self, String path) -> bool"""
-        return _controls_.DirPickerCtrl_CheckPath(*args, **kwargs)
-
-    def GetTextCtrlValue(*args, **kwargs):
-        """GetTextCtrlValue(self) -> String"""
-        return _controls_.DirPickerCtrl_GetTextCtrlValue(*args, **kwargs)
-
-    Path = property(GetPath,SetPath,doc="See `GetPath` and `SetPath`") 
-    TextCtrlValue = property(GetTextCtrlValue,doc="See `GetTextCtrlValue`") 
-_controls_.DirPickerCtrl_swigregister(DirPickerCtrl)
-
-def PreDirPickerCtrl(*args, **kwargs):
-    """PreDirPickerCtrl() -> DirPickerCtrl"""
-    val = _controls_.new_PreDirPickerCtrl(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_FILEPICKER_CHANGED = _controls_.wxEVT_COMMAND_FILEPICKER_CHANGED
-wxEVT_COMMAND_DIRPICKER_CHANGED = _controls_.wxEVT_COMMAND_DIRPICKER_CHANGED
-EVT_FILEPICKER_CHANGED = wx.PyEventBinder( wxEVT_COMMAND_FILEPICKER_CHANGED, 1 )
-EVT_DIRPICKER_CHANGED  = wx.PyEventBinder( wxEVT_COMMAND_DIRPICKER_CHANGED,  1 )
-
-class FileDirPickerEvent(_core.CommandEvent):
-    """Proxy of C++ FileDirPickerEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, EventType type, Object generator, int id, String path) -> FileDirPickerEvent"""
-        _controls_.FileDirPickerEvent_swiginit(self,_controls_.new_FileDirPickerEvent(*args, **kwargs))
-    def GetPath(*args, **kwargs):
-        """GetPath(self) -> String"""
-        return _controls_.FileDirPickerEvent_GetPath(*args, **kwargs)
-
-    def SetPath(*args, **kwargs):
-        """SetPath(self, String p)"""
-        return _controls_.FileDirPickerEvent_SetPath(*args, **kwargs)
-
-    Path = property(GetPath,SetPath,doc="See `GetPath` and `SetPath`") 
-_controls_.FileDirPickerEvent_swigregister(FileDirPickerEvent)
-
-#---------------------------------------------------------------------------
-
-FNTP_FONTDESC_AS_LABEL = _controls_.FNTP_FONTDESC_AS_LABEL
-FNTP_USEFONT_FOR_LABEL = _controls_.FNTP_USEFONT_FOR_LABEL
-FNTP_USE_TEXTCTRL = _controls_.FNTP_USE_TEXTCTRL
-FNTP_DEFAULT_STYLE = _controls_.FNTP_DEFAULT_STYLE
-class FontPickerCtrl(PickerBase):
-    """Proxy of C++ FontPickerCtrl class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id=-1, Font initial=wxNullFont, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=FNTP_DEFAULT_STYLE, Validator validator=DefaultValidator, 
-            String name=FontPickerCtrlNameStr) -> FontPickerCtrl
-        """
-        _controls_.FontPickerCtrl_swiginit(self,_controls_.new_FontPickerCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id=-1, Font initial=wxNullFont, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=FNTP_DEFAULT_STYLE, Validator validator=DefaultValidator, 
-            String name=FontPickerCtrlNameStr) -> bool
-        """
-        return _controls_.FontPickerCtrl_Create(*args, **kwargs)
-
-    def GetSelectedFont(*args, **kwargs):
-        """GetSelectedFont(self) -> Font"""
-        return _controls_.FontPickerCtrl_GetSelectedFont(*args, **kwargs)
-
-    def SetSelectedFont(*args, **kwargs):
-        """SetSelectedFont(self, Font f)"""
-        return _controls_.FontPickerCtrl_SetSelectedFont(*args, **kwargs)
-
-    def SetMaxPointSize(*args, **kwargs):
-        """SetMaxPointSize(self, unsigned int max)"""
-        return _controls_.FontPickerCtrl_SetMaxPointSize(*args, **kwargs)
-
-    def GetMaxPointSize(*args, **kwargs):
-        """GetMaxPointSize(self) -> unsigned int"""
-        return _controls_.FontPickerCtrl_GetMaxPointSize(*args, **kwargs)
-
-    MaxPointSize = property(GetMaxPointSize,SetMaxPointSize,doc="See `GetMaxPointSize` and `SetMaxPointSize`") 
-    SelectedFont = property(GetSelectedFont,SetSelectedFont,doc="See `GetSelectedFont` and `SetSelectedFont`") 
-_controls_.FontPickerCtrl_swigregister(FontPickerCtrl)
-FontPickerCtrlNameStr = cvar.FontPickerCtrlNameStr
-
-def PreFontPickerCtrl(*args, **kwargs):
-    """PreFontPickerCtrl() -> FontPickerCtrl"""
-    val = _controls_.new_PreFontPickerCtrl(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_FONTPICKER_CHANGED = _controls_.wxEVT_COMMAND_FONTPICKER_CHANGED
-EVT_FONTPICKER_CHANGED = wx.PyEventBinder( wxEVT_COMMAND_FONTPICKER_CHANGED, 1 )
-
-class FontPickerEvent(_core.CommandEvent):
-    """Proxy of C++ FontPickerEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, Object generator, int id, Font f) -> FontPickerEvent"""
-        _controls_.FontPickerEvent_swiginit(self,_controls_.new_FontPickerEvent(*args, **kwargs))
-    def GetFont(*args, **kwargs):
-        """GetFont(self) -> Font"""
-        return _controls_.FontPickerEvent_GetFont(*args, **kwargs)
-
-    def SetFont(*args, **kwargs):
-        """SetFont(self, Font c)"""
-        return _controls_.FontPickerEvent_SetFont(*args, **kwargs)
-
-    Font = property(GetFont,SetFont,doc="See `GetFont` and `SetFont`") 
-_controls_.FontPickerEvent_swigregister(FontPickerEvent)
-
-#---------------------------------------------------------------------------
-
-CP_DEFAULT_STYLE = _controls_.CP_DEFAULT_STYLE
-CP_NO_TLW_RESIZE = _controls_.CP_NO_TLW_RESIZE
-class CollapsiblePane(_core.Control):
-    """
-    A collapsable pane is a container with an embedded button-like
-    control which can be used by the user to collapse or expand the pane's
-    contents.
-
-    Once constructed you should use the `GetPane` function to access the
-    pane and add your controls inside it (i.e. use the window returned
-    from `GetPane` as the parent for the controls which must go in the
-    pane, NOT the wx.CollapsiblePane itself!).
-
-    Note that because of its nature of control which can dynamically (and
-    drastically) change its size at run-time under user-input, when
-    putting a wx.CollapsiblePane inside a `wx.Sizer` you should be careful
-    to add it with a proportion value of zero; this is because otherwise
-    all other windows with non-zero proportion values would automatically
-    get resized each time the user expands or collapses the pane window,
-    usually resulting a weird, flickering effect.
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int winid=-1, String label=EmptyString, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=CP_DEFAULT_STYLE, Validator val=DefaultValidator, 
-            String name=CollapsiblePaneNameStr) -> CollapsiblePane
-
-        Create and show a wx.CollapsiblePane
-        """
-        _controls_.CollapsiblePane_swiginit(self,_controls_.new_CollapsiblePane(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int winid=-1, String label=EmptyString, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=CP_DEFAULT_STYLE, Validator val=DefaultValidator, 
-            String name=CollapsiblePaneNameStr) -> bool
-        """
-        return _controls_.CollapsiblePane_Create(*args, **kwargs)
-
-    def Collapse(*args, **kwargs):
-        """
-        Collapse(self, bool collapse=True)
-
-        Collapses or expands the pane window.
-        """
-        return _controls_.CollapsiblePane_Collapse(*args, **kwargs)
-
-    def Expand(*args, **kwargs):
-        """
-        Expand(self)
-
-        Same as Collapse(False).
-        """
-        return _controls_.CollapsiblePane_Expand(*args, **kwargs)
-
-    def IsCollapsed(*args, **kwargs):
-        """
-        IsCollapsed(self) -> bool
-
-        Returns ``True`` if the pane window is currently hidden.
-        """
-        return _controls_.CollapsiblePane_IsCollapsed(*args, **kwargs)
-
-    def IsExpanded(*args, **kwargs):
-        """
-        IsExpanded(self) -> bool
-
-        Returns ``True`` if the pane window is currently shown.
-        """
-        return _controls_.CollapsiblePane_IsExpanded(*args, **kwargs)
-
-    def GetPane(*args, **kwargs):
-        """
-        GetPane(self) -> Window
-
-        Returns a reference to the pane window.  Use the returned `wx.Window`
-        as the parent of widgets to make them part of the collapsible area.
-        """
-        return _controls_.CollapsiblePane_GetPane(*args, **kwargs)
-
-    Expanded = property(IsExpanded) 
-    Collapsed = property(IsCollapsed) 
-_controls_.CollapsiblePane_swigregister(CollapsiblePane)
-CollapsiblePaneNameStr = cvar.CollapsiblePaneNameStr
-
-def PreCollapsiblePane(*args, **kwargs):
-    """
-    PreCollapsiblePane() -> CollapsiblePane
-
-    Precreate a wx.CollapsiblePane for 2-phase creation.
-    """
-    val = _controls_.new_PreCollapsiblePane(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_COLLPANE_CHANGED = _controls_.wxEVT_COMMAND_COLLPANE_CHANGED
-EVT_COLLAPSIBLEPANE_CHANGED = wx.PyEventBinder( wxEVT_COMMAND_COLLPANE_CHANGED, 1 )
-
-class CollapsiblePaneEvent(_core.CommandEvent):
-    """Proxy of C++ CollapsiblePaneEvent class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, Object generator, int id, bool collapsed) -> CollapsiblePaneEvent"""
-        _controls_.CollapsiblePaneEvent_swiginit(self,_controls_.new_CollapsiblePaneEvent(*args, **kwargs))
-    def GetCollapsed(*args, **kwargs):
-        """GetCollapsed(self) -> bool"""
-        return _controls_.CollapsiblePaneEvent_GetCollapsed(*args, **kwargs)
-
-    def SetCollapsed(*args, **kwargs):
-        """SetCollapsed(self, bool c)"""
-        return _controls_.CollapsiblePaneEvent_SetCollapsed(*args, **kwargs)
-
-    Collapsed = property(GetCollapsed,SetCollapsed) 
-_controls_.CollapsiblePaneEvent_swigregister(CollapsiblePaneEvent)
-
-#---------------------------------------------------------------------------
-
-class SearchCtrl(TextCtrl):
-    """
-    A search control is a composite of a `wx.TextCtrl` with optional
-    bitmap buttons and a drop-down menu.  Controls like this can typically
-    be found on a toolbar of applications that support some form of search
-    functionality.  On the Mac this control is implemented using the
-    native HISearchField control, on the other platforms a generic control
-    is used, although that may change in the future as more platforms
-    introduce native search widgets.
-
-    If you wish to use a drop-down menu with your wx.SearchCtrl then you
-    will need to manage its content and handle the menu events yourself,
-    but this is an easy thing to do.  Simply build the menu, pass it to
-    `SetMenu`, and also bind a handler for a range of EVT_MENU events.
-    This gives you the flexibility to use the drop-down menu however you
-    wish, such as for a history of searches, or as a way to select
-    different kinds of searches.  The ToolBar.py sample in the demo shows
-    one way to do this.
-
-    Since the control derives from `wx.TextCtrl` it is convenient to use
-    the styles and events designed for `wx.TextCtrl`.  For example you can
-    use the ``wx.TE_PROCESS_ENTER`` style and catch the
-    ``wx.EVT_TEXT_ENTER`` event to know when the user has pressed the
-    Enter key in the control and wishes to start a search.
-
-    """
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window parent, int id=-1, String value=wxEmptyString, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=0, Validator validator=DefaultValidator, 
-            String name=SearchCtrlNameStr) -> SearchCtrl
-
-        A search control is a composite of a `wx.TextCtrl` with optional
-        bitmap buttons and a drop-down menu.  Controls like this can typically
-        be found on a toolbar of applications that support some form of search
-        functionality.  On the Mac this control is implemented using the
-        native HISearchField control, on the other platforms a generic control
-        is used, although that may change in the future as more platforms
-        introduce native search widgets.
-
-        If you wish to use a drop-down menu with your wx.SearchCtrl then you
-        will need to manage its content and handle the menu events yourself,
-        but this is an easy thing to do.  Simply build the menu, pass it to
-        `SetMenu`, and also bind a handler for a range of EVT_MENU events.
-        This gives you the flexibility to use the drop-down menu however you
-        wish, such as for a history of searches, or as a way to select
-        different kinds of searches.  The ToolBar.py sample in the demo shows
-        one way to do this.
-
-        Since the control derives from `wx.TextCtrl` it is convenient to use
-        the styles and events designed for `wx.TextCtrl`.  For example you can
-        use the ``wx.TE_PROCESS_ENTER`` style and catch the
-        ``wx.EVT_TEXT_ENTER`` event to know when the user has pressed the
-        Enter key in the control and wishes to start a search.
-
-        """
-        _controls_.SearchCtrl_swiginit(self,_controls_.new_SearchCtrl(*args, **kwargs))
-        self._setOORInfo(self)
-
-    def Create(*args, **kwargs):
-        """
-        Create(self, Window parent, int id=-1, String value=wxEmptyString, 
-            Point pos=DefaultPosition, Size size=DefaultSize, 
-            long style=0, Validator validator=DefaultValidator, 
-            String name=SearchCtrlNameStr) -> bool
-        """
-        return _controls_.SearchCtrl_Create(*args, **kwargs)
-
-    def SetMenu(*args, **kwargs):
-        """
-        SetMenu(self, Menu menu)
-
-        Sets the search control's menu object. If there is already a menu
-        associated with the search control it is deleted.
-        """
-        return _controls_.SearchCtrl_SetMenu(*args, **kwargs)
-
-    def GetMenu(*args, **kwargs):
-        """
-        GetMenu(self) -> Menu
-
-        Returns a pointer to the search control's menu object or None if there
-        is no menu attached.
-        """
-        return _controls_.SearchCtrl_GetMenu(*args, **kwargs)
-
-    def ShowSearchButton(*args, **kwargs):
-        """
-        ShowSearchButton(self, bool show)
-
-        Sets the search button visibility value on the search control. If
-        there is a menu attached, the search button will be visible regardless
-        of the search button visibility value.  This has no effect in Mac OS X
-        v10.3
-        """
-        return _controls_.SearchCtrl_ShowSearchButton(*args, **kwargs)
-
-    def IsSearchButtonVisible(*args, **kwargs):
-        """
-        IsSearchButtonVisible(self) -> bool
-
-        Returns the search button visibility value. If there is a menu
-        attached, the search button will be visible regardless of the search
-        button visibility value.  This always returns false in Mac OS X v10.3
-        """
-        return _controls_.SearchCtrl_IsSearchButtonVisible(*args, **kwargs)
-
-    def ShowCancelButton(*args, **kwargs):
-        """
-        ShowCancelButton(self, bool show)
-
-        Shows or hides the cancel button.
-        """
-        return _controls_.SearchCtrl_ShowCancelButton(*args, **kwargs)
-
-    def IsCancelButtonVisible(*args, **kwargs):
-        """
-        IsCancelButtonVisible(self) -> bool
-
-        Indicates whether the cancel button is visible. 
-        """
-        return _controls_.SearchCtrl_IsCancelButtonVisible(*args, **kwargs)
-
-    def SetDescriptiveText(*args, **kwargs):
-        """
-        SetDescriptiveText(self, String text)
-
-        Set the text to be displayed when the user has not yet typed anything
-        in the control.
-        """
-        return _controls_.SearchCtrl_SetDescriptiveText(*args, **kwargs)
-
-    def GetDescriptiveText(*args, **kwargs):
-        """
-        GetDescriptiveText(self) -> String
-
-        Get the text to be displayed when the user has not yet typed anything
-        in the control.
-        """
-        return _controls_.SearchCtrl_GetDescriptiveText(*args, **kwargs)
-
-    def SetSearchBitmap(*args, **kwargs):
-        """
-        SetSearchBitmap(self, Bitmap ?)
-
-        Sets the bitmap to use for the search button.  This currently does not
-        work on the Mac.
-        """
-        return _controls_.SearchCtrl_SetSearchBitmap(*args, **kwargs)
-
-    def SetSearchMenuBitmap(*args, **kwargs):
-        """
-        SetSearchMenuBitmap(self, Bitmap ?)
-
-        Sets the bitmap to use for the search button when there is a drop-down
-        menu associated with the search control.  This currently does not work
-        on the Mac.
-        """
-        return _controls_.SearchCtrl_SetSearchMenuBitmap(*args, **kwargs)
-
-    def SetCancelBitmap(*args, **kwargs):
-        """
-        SetCancelBitmap(self, Bitmap ?)
-
-        Sets the bitmap to use for the cancel button.  This currently does not
-        work on the Mac.
-        """
-        return _controls_.SearchCtrl_SetCancelBitmap(*args, **kwargs)
-
-    Menu = property(GetMenu,SetMenu) 
-    SearchButtonVisible = property(IsSearchButtonVisible,ShowSearchButton) 
-    CancelButtonVisible = property(IsCancelButtonVisible,ShowCancelButton) 
-    DescriptiveText = property(GetDescriptiveText,SetDescriptiveText) 
-_controls_.SearchCtrl_swigregister(SearchCtrl)
-SearchCtrlNameStr = cvar.SearchCtrlNameStr
-
-def PreSearchCtrl(*args, **kwargs):
-    """
-    PreSearchCtrl() -> SearchCtrl
-
-    Precreate a wx.SearchCtrl for 2-phase creation.
-    """
-    val = _controls_.new_PreSearchCtrl(*args, **kwargs)
-    return val
-
-wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN = _controls_.wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN
-wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN = _controls_.wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN
-EVT_SEARCHCTRL_CANCEL_BTN = wx.PyEventBinder( wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN, 1)
-EVT_SEARCHCTRL_SEARCH_BTN = wx.PyEventBinder( wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, 1)
 
 
 

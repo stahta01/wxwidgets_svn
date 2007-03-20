@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_html.h
+// Name:        xh_html.h
 // Purpose:     XML resource handler for wxHtmlWindow
 // Author:      Bob Mitchell
 // Created:     2000/03/21
@@ -11,20 +11,25 @@
 #ifndef _WX_XH_HTML_H_
 #define _WX_XH_HTML_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xh_html.h"
+#endif
+
 #include "wx/xrc/xmlres.h"
 
-#if wxUSE_XRC && wxUSE_HTML
+#include "wx/defs.h"
+
+#if wxUSE_HTML
 
 class WXDLLIMPEXP_XRC wxHtmlWindowXmlHandler : public wxXmlResourceHandler
 {
-    DECLARE_DYNAMIC_CLASS(wxHtmlWindowXmlHandler)
-
+DECLARE_DYNAMIC_CLASS(wxHtmlWindowXmlHandler)
 public:
     wxHtmlWindowXmlHandler();
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-#endif // wxUSE_XRC && wxUSE_HTML
+#endif
 
-#endif // _WX_XH_HTML_H_
+#endif // _WX_XH_SLIDER_H_

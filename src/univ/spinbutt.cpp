@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "spinbutt.h"
+    #pragma implementation "univspinbutt.h"
+#endif
+
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -98,7 +103,7 @@ bool wxSpinButton::Create(wxWindow *parent,
                                    wxDefaultValidator, name) )
         return false;
 
-    SetInitialSize(size);
+    SetBestSize(size);
 
     CreateInputHandler(wxINP_HANDLER_SPINBTN);
 
@@ -324,14 +329,14 @@ void wxSpinButton::CalcArrowRects(wxRect *rect1, wxRect *rect2) const
     }
 }
 
-wxScrollArrows::Arrow wxSpinButton::HitTestArrow(const wxPoint& pt) const
+wxScrollArrows::Arrow wxSpinButton::HitTest(const wxPoint& pt) const
 {
     wxRect rectArrow1, rectArrow2;
     CalcArrowRects(&rectArrow1, &rectArrow2);
 
-    if ( rectArrow1.Contains(pt) )
+    if ( rectArrow1.Inside(pt) )
         return wxScrollArrows::Arrow_First;
-    else if ( rectArrow2.Contains(pt) )
+    else if ( rectArrow2.Inside(pt) )
         return wxScrollArrows::Arrow_Second;
     else
         return wxScrollArrows::Arrow_None;
@@ -353,14 +358,6 @@ bool wxSpinButton::PerformAction(const wxControlAction& action,
         return wxControl::PerformAction(action, numArg, strArg);
 
     return true;
-}
-
-/* static */
-wxInputHandler *wxSpinButton::GetStdInputHandler(wxInputHandler *handlerDef)
-{
-    static wxStdSpinButtonInputHandler s_handler(handlerDef);
-
-    return &s_handler;
 }
 
 // ----------------------------------------------------------------------------

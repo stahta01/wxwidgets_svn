@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dnd.cpp
+// Name:        dnd.cpp
 // Purpose:     wxDropTarget, wxDropSource, wxDataObject implementation
 // Author:      David Webster
 // Modified by:
@@ -9,18 +9,19 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "dnd.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if wxUSE_DRAG_AND_DROP
 
+#include "wx/window.h"
+#include "wx/app.h"
+#include "wx/gdicmn.h"
 #include "wx/dnd.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/window.h"
-    #include "wx/gdicmn.h"
-#endif
 
 #define INCL_PM
 #define INCL_DOS
@@ -443,12 +444,17 @@ bool wxDropTarget::OnDrop (
 // wxDropSource
 //-------------------------------------------------------------------------
 
-wxDropSource::wxDropSource ( wxWindow* WXUNUSED(pWin) )
+wxDropSource::wxDropSource (
+  wxWindow*                         pWin
+)
 {
     Init();
 } // end of wxDropSource::wxDropSource
 
-wxDropSource::wxDropSource ( wxDataObject& rData, wxWindow* WXUNUSED(pWin) )
+wxDropSource::wxDropSource (
+  wxDataObject&                     rData
+, wxWindow*                         pWin
+)
 {
     Init();
     SetData(rData);
@@ -546,13 +552,13 @@ void wxDropSource::Init ()
     m_vDragImage.cxOffset       = 0;
     m_vDragImage.cyOffset       = 0;
 
-    HSTR    hStrType = ::DrgAddStrHandle(DRT_UNKNOWN);
-    HSTR    hStrRMF;
-    HSTR    hStrContainer;
-    wxChar  zFormats[128];
-    wxChar  zContainer[128];
-    USHORT  uSize = (USHORT)(GetDataObject()->GetDataSize(GetDataObject()->GetPreferredFormat()) + 1);
-    wxChar* pzBuffer = new wxChar[uSize];
+    HSTR                            hStrType = ::DrgAddStrHandle(DRT_UNKNOWN);
+    HSTR                            hStrRMF;
+    HSTR                            hStrContainer;
+    wxChar                          zFormats[128];
+    wxChar                          zContainer[128];
+    USHORT                          uSize = GetDataObject()->GetDataSize(GetDataObject()->GetPreferredFormat()) + 1;
+    wxChar*                         pzBuffer = new wxChar[uSize];
 
     memset(pzBuffer, '\0', GetDataObject()->GetDataSize(GetDataObject()->GetPreferredFormat()));
     pzBuffer[GetDataObject()->GetDataSize(GetDataObject()->GetPreferredFormat())] = '\0';

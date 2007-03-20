@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/control.cpp
+// Name:        control.cpp
 // Purpose:     wxControl class
 // Author:      Julian Smart
 // Modified by:
@@ -9,15 +9,18 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "control.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/control.h"
+#include "wx/defs.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/panel.h"
-#endif
+#include "wx/control.h"
+#include "wx/panel.h"
+#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -85,7 +88,7 @@ void wxControl::SetLabel(const wxString& label)
     if (!widget)
         return;
 
-    wxXmString label_str(GetLabelText(label));
+    wxXmString label_str(wxStripMenuCodes(label));
 
     XtVaSetValues (widget,
         XmNlabelString, label_str(),

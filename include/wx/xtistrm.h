@@ -12,6 +12,10 @@
 #ifndef _WX_XTISTRMH__
 #define _WX_XTISTRMH__
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "xtistrm.h"
+#endif
+
 #include "wx/wx.h"
 
 #if wxUSE_EXTENDED_RTTI
@@ -74,7 +78,7 @@ class WXDLLIMPEXP_BASE wxWriter : public wxObject
 {
 public :
     wxWriter() ;
-    virtual ~wxWriter() ;
+    ~wxWriter() ;
 
     // with this call you start writing out a new top-level object
     void WriteObject(const wxObject *object, const wxClassInfo *classInfo , wxPersister *persister , const wxString &name , wxxVariantArray &WXUNUSED(metadata)) ;
@@ -159,7 +163,7 @@ class WXDLLIMPEXP_BASE wxReader : public wxObject
 {
 public :
     wxReader() ;
-    virtual ~wxReader() ;
+    ~wxReader() ;
 
     // the only thing wxReader knows about is the class info by object ID
     wxClassInfo *GetObjectClassInfo(int objectID) ;

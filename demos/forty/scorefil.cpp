@@ -9,6 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#pragma interface
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -33,6 +38,34 @@
 
 ScoreFile::ScoreFile(const wxString& appName)
 {
+#if 0
+    wxString filename;
+    m_configFilename << "/usr/local/share/" << appName << ".scores";
+    if (access(m_configFilename, F_OK) == 0)
+    {
+        if (access(m_configFilename, R_OK | W_OK) != 0)
+        {
+            // file is not r/w - use local file instead
+            m_configFilename = wxFileConfig::GetLocalFileName(appName);
+        }
+    }
+    else
+    {
+        int fd = creat(m_configFilename, 0666);
+
+        if (fd < 0)
+        {
+            // failed to create file - use local file instead
+            m_configFilename = wxFileConfig::GetLocalFileName(appName);
+        }
+        else
+        {
+            // ensure created file has rw-rw-rw permissions
+            close(fd);
+        }
+    }
+#endif
+
     m_config = new wxConfig(appName, _T("wxWidgets"), appName, wxEmptyString,
                                 wxCONFIG_USE_LOCAL_FILE);  // only local
 }
@@ -40,6 +73,11 @@ ScoreFile::ScoreFile(const wxString& appName)
 ScoreFile::~ScoreFile()
 {
     delete m_config;
+#ifdef __WXGTK__
+    // ensure score file has rw-rw-rw permissions
+    // (wxFileConfig sets them to rw-------)
+    chmod(m_configFilename, 0666);
+#endif
 }
 
 

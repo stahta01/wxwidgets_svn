@@ -6,7 +6,7 @@
 // Created:     2003/08/02 (stubs from 22.03.2003)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_PEN_H__
@@ -28,19 +28,23 @@ public:
     wxPen();
     wxPen(const wxColour& col, int width = 1, int style = wxSOLID);
     wxPen(const wxBitmap& stipple, int width);
-    virtual ~wxPen();
+    wxPen(const wxPen& pen)
+        : wxGDIObject()
+        { Ref(pen); }
+    ~wxPen();
 
     // wxObjectRefData
     wxObjectRefData *CreateRefData() const;
     wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
-    inline bool operator == (const wxPen& pen) const
+    inline wxPen& operator = (const wxPen& pen)
+    {   if (*this == pen) return (*this); Ref(pen); return *this; }
+    inline bool operator == (const wxPen& pen)
     {   return m_refData == pen.m_refData; }
-    inline bool operator != (const wxPen& pen) const
+    inline bool operator != (const wxPen& pen)
     {   return m_refData != pen.m_refData; }
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const { return (m_refData != NULL) ; }
+    virtual bool Ok() const { return (m_refData != NULL) ; }
 
     void SetColour(const wxColour& col) ;
     void SetColour(unsigned char r, unsigned char g, unsigned char b)  ;

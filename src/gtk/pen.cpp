@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/pen.cpp
+// Name:        pen.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,14 +7,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "pen.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #include "wx/pen.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/colour.h"
-#endif
+#include "wx/colour.h"
 
 #include <gdk/gdk.h>
 
@@ -34,7 +36,7 @@ public:
         m_dash = (wxGTKDash*) NULL;
         m_countDashes = 0;
     }
-
+    
     wxPenRefData( const wxPenRefData& data )
         : wxObjectRefData()
     {
@@ -50,19 +52,19 @@ public:
     bool operator == (const wxPenRefData& data) const
     {
         if ( m_countDashes != data.m_countDashes )
-            return false;
+            return FALSE;
 
         if ( m_dash )
         {
             if ( !data.m_dash ||
                  memcmp(m_dash, data.m_dash, m_countDashes*sizeof(wxGTKDash)) )
             {
-                return false;
+                return FALSE;
             }
         }
         else if ( data.m_dash )
         {
-            return false;
+            return FALSE;
         }
 
 
@@ -72,7 +74,7 @@ public:
                m_capStyle == data.m_capStyle &&
                m_colour == data.m_colour;
     }
-
+            
     int        m_width;
     int        m_style;
     int        m_joinStyle;
@@ -113,60 +115,60 @@ wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 
 bool wxPen::operator == ( const wxPen& pen ) const
 {
-    if (m_refData == pen.m_refData) return true;
-
-    if (!m_refData || !pen.m_refData) return false;
-
+    if (m_refData == pen.m_refData) return TRUE;
+    
+    if (!m_refData || !pen.m_refData) return FALSE;
+    
     return ( *(wxPenRefData*)m_refData == *(wxPenRefData*)pen.m_refData );
 }
 
 void wxPen::SetColour( const wxColour &colour )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_colour = colour;
 }
 
 void wxPen::SetDashes( int number_of_dashes, const wxDash *dash )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_countDashes = number_of_dashes;
     M_PENDATA->m_dash = (wxGTKDash *)dash;
 }
 
-void wxPen::SetColour( unsigned char red, unsigned char green, unsigned char blue )
+void wxPen::SetColour( int red, int green, int blue )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_colour.Set( red, green, blue );
 }
 
 void wxPen::SetCap( int capStyle )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_capStyle = capStyle;
 }
 
 void wxPen::SetJoin( int joinStyle )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_joinStyle = joinStyle;
 }
 
 void wxPen::SetStyle( int style )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_style = style;
 }
 
 void wxPen::SetWidth( int width )
 {
     AllocExclusive();
-
+    
     M_PENDATA->m_width = width;
 }
 
@@ -220,3 +222,4 @@ wxColour &wxPen::GetColour() const
 
     return M_PENDATA->m_colour;
 }
+

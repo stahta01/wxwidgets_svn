@@ -10,6 +10,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,8 +29,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 /*
  * Variables accessible from clients
@@ -283,13 +289,13 @@ void ForbidWarning(TexMacroDef *def)
     case FORBID_WARN:
     {
       informBuf.Printf(_T("Warning: it is recommended that command %s is not used."), def->name);
-      OnInform(informBuf);
+      OnInform((const wxChar *)informBuf.c_str());
       break;
     }
     case FORBID_ABSOLUTELY:
     {
       informBuf.Printf(_T("Error: command %s cannot be used and will lead to errors."), def->name);
-      OnInform(informBuf);
+      OnInform((const wxChar *)informBuf.c_str());
       break;
     }
     default:
@@ -312,8 +318,8 @@ TexMacroDef *MatchMacro(wxChar *buffer, int *pos, wxChar **env, bool *parseToBra
         int j = i;
         while ((isalpha(buffer[j]) || buffer[j] == '*') && ((j - i) < 39))
         {
-              macroBuf[j-i] = buffer[j];
-              j ++;
+            macroBuf[j-i] = buffer[j];
+            j ++;
         }
         macroBuf[j-i] = 0;
         def = (TexMacroDef *)MacroDefs.Get(macroBuf);
@@ -368,7 +374,7 @@ TexMacroDef *MatchMacro(wxChar *buffer, int *pos, wxChar **env, bool *parseToBra
         if ((def->no_args > 0) && ((buffer[i] == 32) || (buffer[i] == '=') || (isdigit(buffer[i]))))
         {
             if ((buffer[i] == 32) || (buffer[i] == '='))
-            i ++;
+                i ++;
 
             *parseToBrace = false;
         }
@@ -449,7 +455,7 @@ bool read_a_line(wxChar *buf)
        wxString errBuf;
        errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
            LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(), MAX_LINE_BUFFER_SIZE);
-       OnError(errBuf);
+       OnError((wxChar *)errBuf.c_str());
        return false;
     }
 
@@ -471,7 +477,7 @@ bool read_a_line(wxChar *buf)
            {
                wxString errBuf;
                errBuf.Printf(_T("An extra right Curly brace ('}') was detected at line %lu inside file %s"), LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-               OnError(errBuf);
+               OnError((wxChar *)errBuf.c_str());
 
                // Reduce the count of right Curly braces, so the mismatched count
                // isn't reported on every line that has a '}' after the first mismatch
@@ -500,7 +506,7 @@ bool read_a_line(wxChar *buf)
              wxString errBuf;
              errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                  LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError(errBuf);
+             OnError((wxChar *)errBuf.c_str());
              return false;
           }
           wxStrcat(buf, _T("\\par"));
@@ -515,7 +521,7 @@ bool read_a_line(wxChar *buf)
              wxString errBuf;
              errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                  LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError(errBuf);
+             OnError((wxChar *)errBuf.c_str());
              return false;
           }
 
@@ -540,7 +546,7 @@ bool read_a_line(wxChar *buf)
                    wxString errBuf;
                    errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                        LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-                   OnError(errBuf);
+                   OnError((wxChar *)errBuf.c_str());
                    return false;
                 }
                 buf[bufIndex++]='\\';
@@ -563,7 +569,7 @@ bool read_a_line(wxChar *buf)
               wxString errBuf;
               errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                   LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError(errBuf);
+              OnError((wxChar *)errBuf.c_str());
               return false;
             }
             buf[bufIndex++]='\\';
@@ -578,7 +584,7 @@ bool read_a_line(wxChar *buf)
               wxString errBuf;
               errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                   LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError(errBuf);
+              OnError((wxChar *)errBuf.c_str());
               return false;
             }
             // If the current character read in is a '_', we need to check
@@ -599,7 +605,7 @@ bool read_a_line(wxChar *buf)
 //                        wxString errBuf;
 //                        errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that should NOT have a '\\' before it."),
 //                            LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-//                        OnError(errBuf);
+//                        OnError((wxChar *)errBuf.c_str());
                     }
                 }
                 else
@@ -610,7 +616,7 @@ bool read_a_line(wxChar *buf)
                         wxString errBuf;
                         errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it."),
                             LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-                        OnError(errBuf);
+                        OnError((wxChar *)errBuf.c_str());
                     }
                     else if ((buf[bufIndex-1] != '\\') && (buf[0] != '%') &&  // If it is a comment line, then no warnings
                         (wxStrncmp(buf, _T("\\input"), 6))) // do not report filenames that have underscores in them
@@ -618,7 +624,7 @@ bool read_a_line(wxChar *buf)
                         wxString errBuf;
                         errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it."),
                             LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-                        OnError(errBuf);
+                        OnError((wxChar *)errBuf.c_str());
                     }
                 }
             }
@@ -643,7 +649,7 @@ bool read_a_line(wxChar *buf)
             wxString errBuf;
             errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
                           (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
-            OnError(errBuf);
+            OnError((wxChar *)errBuf.c_str());
           }
           leftCurly = 0;
           rightCurly = 0;
@@ -694,13 +700,13 @@ bool read_a_line(wxChar *buf)
     {
       wxString errBuf;
       errBuf.Printf(_T("Could not find file: %s"),fileName);
-      OnError(errBuf);
+      OnError((wxChar *)errBuf.c_str());
     }
     else
     {
       wxString informStr;
       informStr.Printf(_T("Processing: %s"),actualFile.c_str());
-      OnInform(informStr);
+      OnInform((wxChar *)informStr.c_str());
       CurrentInputIndex ++;
 
       Inputs[CurrentInputIndex] = wxFopen(actualFile, _T("r"));
@@ -758,7 +764,7 @@ bool read_a_line(wxChar *buf)
     fileNameStr.Replace(_T("\\"), _T(""));
 
     // Ignore some types of input files (e.g. macro definition files)
-    wxString fileOnly = wxFileNameFromPath(fileNameStr);
+    wxChar *fileOnly = wxFileNameFromPath((wxChar*) (const wxChar*) fileNameStr);
     currentFileName = fileOnly;
     if (IgnorableInputFiles.Member(fileOnly))
       return read_a_line(buf);
@@ -776,7 +782,7 @@ bool read_a_line(wxChar *buf)
     {
       wxString errBuf;
       errBuf.Printf(_T("Could not find file: %s"),fileName);
-      OnError(errBuf);
+      OnError((wxChar *)errBuf.c_str());
     }
     else
     {
@@ -786,7 +792,7 @@ bool read_a_line(wxChar *buf)
 
       wxString informStr;
       informStr.Printf(_T("Processing: %s"),actualFile.c_str());
-      OnInform(informStr);
+      OnInform((wxChar *)informStr.c_str());
       CurrentInputIndex ++;
 
       Inputs[CurrentInputIndex] = wxFopen(actualFile, _T("r"));
@@ -800,7 +806,7 @@ bool read_a_line(wxChar *buf)
         wxString errBuf;
         errBuf.Printf(_T("Could not open include file %s"), (const wxChar*) actualFile);
         CurrentInputIndex --;
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
     }
     bool succ = read_a_line(buf);
@@ -833,7 +839,7 @@ bool read_a_line(wxChar *buf)
                                     LineNumbers[CurrentInputIndex],
                                     currentFileName.c_str());
                   }
-                  OnError(errBuf);
+                  OnError((wxChar *)errBuf.c_str());
               }
           }
       }
@@ -853,7 +859,7 @@ bool read_a_line(wxChar *buf)
         wxString errBuf;
         errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
             (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
   }
 
@@ -951,7 +957,7 @@ void MacroError(wxChar *buffer)
 
   errBuf.Printf(_T("Could not find macro: %s at line %d, file %s"),
              macroBuf, (int)(LineNumbers[CurrentInputIndex]-1), FileNames[CurrentInputIndex]);
-  OnError(errBuf);
+  OnError((wxChar *)errBuf.c_str());
 
   if (wxStrcmp(macroBuf,_T("\\end{document}")) == 0)
   {
@@ -1255,57 +1261,57 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         }
         else
         {
-          wxChar *env = NULL;
-          bool tmpParseToBrace = true;
-          TexMacroDef *def = MatchMacro(buffer, &pos, &env, &tmpParseToBrace);
-          if (def)
-          {
-          CustomMacro *customMacro = FindCustomMacro(def->name);
-
-          TexChunk *chunk = new TexChunk(CHUNK_TYPE_MACRO, def);
-
-          chunk->no_args = def->no_args;
-//          chunk->name = copystring(def->name);
-          chunk->macroId = def->macroId;
-
-          if  (!customMacro)
-            children.Append((wxObject *)chunk);
-
-          // Eliminate newline after a \begin{} or a \\ if possible
-          if ((env || wxStrcmp(def->name, _T("\\")) == 0) && (buffer[pos] == 13))
-          {
-              pos ++;
-              if (buffer[pos] == 10)
-                pos ++;
-          }
-
-          pos = ParseMacroBody(def->name,
-                               chunk, chunk->no_args,
-                               buffer,
-                               pos,
-                               env,
-                               tmpParseToBrace,
-                               customMacroArgs);
-
-          // If custom macro, parse the body substituting the above found args.
-          if (customMacro)
-          {
-            if (customMacro->macroBody)
+            wxChar *env = NULL;
+            bool tmpParseToBrace = true;
+            TexMacroDef *def = MatchMacro(buffer, &pos, &env, &tmpParseToBrace);
+            if (def)
             {
-              wxChar macroBuf[300];
-//              wxStrcpy(macroBuf, _T("{"));
-              wxStrcpy(macroBuf, customMacro->macroBody);
-              wxStrcat(macroBuf, _T("}"));
-              ParseArg(thisArg, children, macroBuf, 0, NULL, true, chunk);
-            }
+                CustomMacro *customMacro = FindCustomMacro(def->name);
 
-//            delete chunk; // Might delete children
-          }
-        }
-        else
-        {
-          MacroError(buffer+pos);
-        }
+                TexChunk *chunk = new TexChunk(CHUNK_TYPE_MACRO, def);
+
+                chunk->no_args = def->no_args;
+//                chunk->name = copystring(def->name);
+                chunk->macroId = def->macroId;
+
+                if  (!customMacro)
+                    children.Append((wxObject *)chunk);
+
+                // Eliminate newline after a \begin{} or a \\ if possible
+                if ((env || wxStrcmp(def->name, _T("\\")) == 0) && (buffer[pos] == 13))
+                {
+                    pos ++;
+                    if (buffer[pos] == 10)
+                        pos ++;
+                }
+
+                pos = ParseMacroBody(def->name,
+                                     chunk, chunk->no_args,
+                                     buffer,
+                                     pos,
+                                     env,
+                                     tmpParseToBrace,
+                                     customMacroArgs);
+
+                // If custom macro, parse the body substituting the above found args.
+                if (customMacro)
+                {
+                    if (customMacro->macroBody)
+                    {
+                        wxChar macroBuf[300];
+//                        wxStrcpy(macroBuf, _T("{"));
+                        wxStrcpy(macroBuf, customMacro->macroBody);
+                        wxStrcat(macroBuf, _T("}"));
+                        ParseArg(thisArg, children, macroBuf, 0, NULL, true, chunk);
+                    }
+
+//                    delete chunk; // Might delete children
+                }
+            }
+            else
+            {
+                MacroError(buffer+pos);
+            }
         }
         break;
       }
@@ -1634,7 +1640,7 @@ int ParseMacroBody(const wxChar *WXUNUSED(macro_name), TexChunk *parent,
                 tmpBuffer = tmpBuffer.Mid(0,tmpBuffer.length()-4);
         }
         errBuf.Printf(_T("Missing macro argument in the line:\n\t%s\n"),tmpBuffer.c_str());
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
 
     }
@@ -1953,24 +1959,24 @@ void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode, bool childrenOnly)
 
 void TraverseDocument(void)
 {
-  TraverseFromChunk(TopLevel, NULL);
+    TraverseFromChunk(TopLevel, NULL);
 }
 
 void SetCurrentOutput(FILE *fd)
 {
-  CurrentOutput1 = fd;
-  CurrentOutput2 = NULL;
+    CurrentOutput1 = fd;
+    CurrentOutput2 = NULL;
 }
 
 void SetCurrentOutputs(FILE *fd1, FILE *fd2)
 {
-  CurrentOutput1 = fd1;
-  CurrentOutput2 = fd2;
+    CurrentOutput1 = fd1;
+    CurrentOutput2 = fd2;
 }
 
 void AddMacroDef(int the_id, const wxChar *name, int n, bool ignore, bool forbid)
 {
-  MacroDefs.Put(name, new TexMacroDef(the_id, name, n, ignore, forbid));
+    MacroDefs.Put(name, new TexMacroDef(the_id, name, n, ignore, forbid));
 }
 
 void TexInitialize(int bufSize)
@@ -3249,7 +3255,7 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
         {
            wxString informBuf;
            informBuf.Printf(_T("Warning: unresolved reference '%s'"), refName);
-           OnInform(informBuf);
+           OnInform((wxChar *)informBuf.c_str());
         }
       }
       else TexOutput(_T("??"), true);
@@ -3403,7 +3409,7 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
           {
             wxString informBuf;
             informBuf.Printf(_T("Warning: unresolved citation %s."), citeKey);
-            OnInform(informBuf);
+            OnInform((wxChar *)informBuf.c_str());
           }
         }
         citeKey = ParseMultifieldString(citeKeys, &pos);
@@ -3544,14 +3550,14 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
           {
             wxString errBuf;
             errBuf.Printf(_T(".bib file %s not found or malformed"), (const wxChar*) actualFile);
-            OnError(errBuf);
+            OnError((wxChar *)errBuf.c_str());
           }
         }
         else
         {
           wxString errBuf;
           errBuf.Printf(_T(".bib file %s not found"), fileBuf);
-          OnError(errBuf);
+          OnError((wxChar *)errBuf.c_str());
         }
         bibFile = ParseMultifieldString(allFiles, &pos);
       }

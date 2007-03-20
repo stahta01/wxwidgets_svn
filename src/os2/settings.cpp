@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/settings.cpp
+// Name:        settings.cpp
 // Purpose:     wxSettings
 // Author:      David Webster
 // Modified by:
@@ -13,17 +13,16 @@
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/pen.h"
-    #include "wx/brush.h"
-    #include "wx/gdicmn.h"
-    #include "wx/window.h"
-    #include "wx/settings.h"
-    #include "wx/module.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/pen.h"
+#include "wx/brush.h"
+#include "wx/gdicmn.h"
 #endif
 
-#include "wx/fontutil.h"
-
+#include "wx/module.h"
+#include "wx/settings.h"
+#include "wx/window.h"
 #include "wx/os2/private.h"
 
 // the module which is used to clean up wxSystemSettings data (this is a
@@ -63,7 +62,7 @@ wxArrayString wxSystemSettingsModule::sm_optionValues;
 
 bool wxSystemSettingsModule::OnInit()
 {
-    return true;
+    return TRUE;
 }
 
 void wxSystemSettingsModule::OnExit()
@@ -71,7 +70,6 @@ void wxSystemSettingsModule::OnExit()
     sm_optionNames.Clear();
     sm_optionValues.Clear();
     delete gs_fontDefault;
-    gs_fontDefault = NULL;
 }
 
 wxColour wxSystemSettingsNative::GetColour(
@@ -203,63 +201,39 @@ wxColour wxSystemSettingsNative::GetColour(
     return(vCol);
 } // end of wxSystemSettingsNative::GetColour
 
-// ----------------------------------------------------------------------------
-// fonts
-// ----------------------------------------------------------------------------
-
 wxFont wxSystemSettingsNative::GetFont(
   wxSystemFont                      index
 )
 {
-    const bool isDefaultRequested = index == wxSYS_DEFAULT_GUI_FONT;
-    if ( isDefaultRequested )
-    {
-        if ( gs_fontDefault )
-            return *gs_fontDefault;
-    }
-
-    wxFont font;
-    // FIXME: The mapping could be improved and also OS/2 system fonts
-    // should be taken into account e.g. by using PrfQueryProfileString
-    // to look for PM_System_Fonts in HINI_USERPROFILE.
-    // FIXME2: Creating a font from the native font info does not
-    // seem to work properly.
+    // TODO
     switch (index)
     {
+        case wxSYS_DEVICE_DEFAULT_FONT:
+        {
+            break;
+        }
+        case wxSYS_DEFAULT_PALETTE:
+        {
+            break;
+        }
         case wxSYS_SYSTEM_FIXED_FONT:
-        case wxSYS_OEM_FIXED_FONT:
-        case wxSYS_ANSI_FIXED_FONT:
-                font.Create(  10,
-                              wxFONTFAMILY_TELETYPE,
-                              wxFONTSTYLE_NORMAL,
-                              wxFONTWEIGHT_NORMAL   );
-                break;
-        case wxSYS_ANSI_VAR_FONT:
-                font.Create(  10,
-                              wxFONTFAMILY_MODERN,
-                              wxFONTSTYLE_NORMAL,
-                              wxFONTWEIGHT_NORMAL   );
-                break;
+        {
+            break;
+        }
         case wxSYS_SYSTEM_FONT:
-        case wxSYS_DEFAULT_GUI_FONT:
-                font.Create(  10,
-                              wxFONTFAMILY_SWISS,
-                              wxFONTSTYLE_NORMAL,
-                              wxFONTWEIGHT_NORMAL   );
-                break;
+        {
+            break;
+        }
         default:
-                wxFAIL_MSG( _T("stock font not found") );
-                return GetFont(wxSYS_ANSI_VAR_FONT);
+        case wxSYS_DEFAULT_GUI_FONT:
+        {
+            break;
+        }
     }
+    if(wxSWISS_FONT)
+         return *wxSWISS_FONT;
 
-
-    if ( isDefaultRequested )
-    {
-        // if we got here it means we hadn't cached it yet - do now
-        gs_fontDefault = new wxFont(font);
-    }
-
-    return font;
+    return wxNullFont;
 }
 
 // Get a system metric, e.g. scrollbar size
@@ -313,9 +287,6 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index,
         // TODO case wxSYS_PENWINDOWS_PRESENT:
         // TODO case wxSYS_SHOW_SOUNDS:
         // TODO case wxSYS_SWAP_BUTTONS:
-
-        default:
-            break;
     }
     return -1;  // unsupported metric
 }
@@ -327,11 +298,8 @@ bool wxSystemSettingsNative::HasFeature( wxSystemFeature index )
         case wxSYS_CAN_ICONIZE_FRAME:
             return true;
 
-        // TODO case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-        // TODO case wxSYS_TABLET_PRESENT:
-
-        default:
-            break;
+        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
+            return false;
     }
 
     return false;

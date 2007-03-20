@@ -131,7 +131,7 @@ asks wx.ArtProvider for it instead. This way the users can plug in
 their own wx.ArtProvider class and easily replace standard art with
 his/her own version. It is easy thing to do: all that is needed is
 to derive a class from wx.ArtProvider, override it's CreateBitmap
-method and register the provider with `wx.ArtProvider.Push`::
+method and register the provider with wx.ArtProvider.PushProvider::
 
     class MyArtProvider(wx.ArtProvider):
         def __init__(self):
@@ -148,7 +148,7 @@ Identifying art resources
 Every bitmap is known to wx.ArtProvider under an unique ID that is
 used when requesting a resource from it. The IDs can have one of the
 following predefined values.  Additionally, any string recognized by
-custom art providers registered using `Push` may be used.
+custom art providers registered using `PushProvider` may be used.
 
 GTK+ Note
 ---------
@@ -243,39 +243,26 @@ class wxPyArtProvider /*: public wxObject*/
 {
 public:
 
-    %pythonAppend wxPyArtProvider setCallbackInfo(ArtProvider);
+    %pythonAppend wxPyArtProvider "self._setCallbackInfo(self, ArtProvider)"
     wxPyArtProvider();
-    ~wxPyArtProvider();
     
     void _setCallbackInfo(PyObject* self, PyObject* _class);
 
-    %disownarg( wxPyArtProvider *provider );
-
     DocDeclStr(
-        static void , Push(wxPyArtProvider *provider),
+        static void , PushProvider(wxPyArtProvider *provider),
         "Add new provider to the top of providers stack.", "");
-    %pythoncode { PushProvider = Push }
-    
-    DocDeclStr(
-        static void , Insert(wxPyArtProvider *provider),
-        "Add new provider to the bottom of providers stack.", "");
-    %pythoncode { InsertProvider = Insert }
-
-    %cleardisown( wxPyArtProvider *provider );
     
 
     DocDeclStr(
-        static bool , Pop(),
+        static bool , PopProvider(),
         "Remove latest added provider and delete it.", "");
-    %pythoncode { PopProvider = Pop }
     
-    %pythonAppend Delete "args[1].thisown = 1";
+
     DocDeclStr(
-        static bool , Delete(wxPyArtProvider *provider),
+        static bool , RemoveProvider(wxPyArtProvider *provider),
         "Remove provider. The provider must have been added previously!  The
 provider is _not_ deleted.", "");
-    %pythoncode { RemoveProvider = Delete }
-
+    
 
     DocDeclStr(
         static wxBitmap , GetBitmap(const wxString& id,
@@ -299,7 +286,6 @@ topmost provider if platform_dependent = false", "");
     
     
 
-    %pythonPrepend Destroy "args[0].this.own(False)"
     %extend { void Destroy() { delete self; }}
 };
 

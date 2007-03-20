@@ -1,26 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/colour.cpp
+// Name:        colour.cpp
 // Purpose:     wxColour class
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 //// TODO: make wxColour a ref-counted object,
 //// so pixel values get shared.
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma implementation "colour.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/gdicmn.h"
 #include "wx/colour.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/gdicmn.h"
-#endif
+#include "wx/app.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -34,15 +35,20 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
-wxCOMPILE_TIME_ASSERT( sizeof(WXPixel) == sizeof(Pixel), PixelSizeIsOk );
-
 // Colour
 
 void wxColour::Init()
 {
     m_isInit = false;
-    m_red = m_blue = m_green = 0;
+    m_red =
+    m_blue =
+    m_green = 0;
     m_pixel = -1;
+}
+
+wxColour::wxColour()
+{
+    Init();
 }
 
 wxColour::wxColour(const wxColour& col)
@@ -60,12 +66,47 @@ wxColour& wxColour::operator =(const wxColour& col)
     return *this;
 }
 
+void wxColour::InitFromName(const wxString& name)
+{
+    if ( wxTheColourDatabase )
+    {
+        wxColour col = wxTheColourDatabase->Find(name);
+        if ( col.Ok() )
+        {
+            *this = col;
+            return;
+        }
+    }
+
+    // leave invalid
+    Init();
+}
+
+/* static */
+wxColour wxColour::CreateByName(const wxString& name)
+{
+    wxColour col;
+
+    Display *dpy = wxGlobalDisplay();
+    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
+    XColor xcol;
+    if ( XParseColor( dpy, (Colormap)colormap, name.mb_str(), &xcol ) )
+    {
+        col.m_red = xcol.red & 0xff;
+        col.m_green = xcol.green & 0xff;
+        col.m_blue = xcol.blue & 0xff;
+        col.m_isInit = true;
+        col.m_pixel = -1;
+    }
+
+    return col;
+}
+
 wxColour::~wxColour()
 {
 }
 
-void wxColour::InitRGBA(unsigned char r, unsigned char g, unsigned char b,
-                        unsigned char WXUNUSED(a))
+void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
 {
     m_red = r;
     m_green = g;
@@ -82,18 +123,18 @@ void wxColour::InitRGBA(unsigned char r, unsigned char g, unsigned char b,
 // TODO: can this handle mono displays? If not, we should have an extra
 // flag to specify whether this should be black or white by default.
 
-WXPixel wxColour::AllocColour(WXDisplay* display, bool realloc)
+int wxColour::AllocColour(WXDisplay* display, bool realloc)
 {
     if ((m_pixel != -1) && !realloc)
         return m_pixel;
 
     XColor color;
     color.red = (unsigned short) Red ();
-    color.red |= (unsigned short)(color.red << 8);
+    color.red |= color.red << 8;
     color.green = (unsigned short) Green ();
-    color.green |= (unsigned short)(color.green << 8);
+    color.green |= color.green << 8;
     color.blue = (unsigned short) Blue ();
-    color.blue |= (unsigned short)(color.blue << 8);
+    color.blue |= color.blue << 8;
 
     color.flags = DoRed | DoGreen | DoBlue;
 
@@ -106,7 +147,7 @@ WXPixel wxColour::AllocColour(WXDisplay* display, bool realloc)
     }
     else
     {
-        m_pixel = (WXPixel) color.pixel;
+        m_pixel = (int) color.pixel;
         return m_pixel;
     }
 }
@@ -141,14 +182,14 @@ A read-only colour will not change.
   may give better matching.
 -------------------------------------------*/
 
-WXPixel wxGetBestMatchingPixel(Display *display, XColor *desiredColor, Colormap cmap)
+int wxGetBestMatchingPixel(Display *display, XColor *desiredColor, Colormap cmap)
 {
     if (cmap == (Colormap) NULL)
         cmap = (Colormap) wxTheApp->GetMainColormap(display);
 
     int numPixVals = XDisplayCells(display, DefaultScreen (display));
     int mindist = 256 * 256 * 3;
-    Pixel bestpixel = BlackPixel (display, DefaultScreen (display));
+    int bestpixel = (int) BlackPixel (display, DefaultScreen (display));
     int red = desiredColor->red >> 8;
     int green = desiredColor->green >> 8;
     int blue = desiredColor->blue >> 8;

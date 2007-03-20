@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/textctrl.cpp
+// Name:        textctrl.cpp
 // Purpose:     wxTextCtrl
 // Author:      David Webster
 // Modified by:
@@ -16,16 +16,16 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/textctrl.h"
-
 #ifndef WX_PRECOMP
+    #include "wx/textctrl.h"
     #include "wx/scrolwin.h"
     #include "wx/settings.h"
     #include "wx/brush.h"
     #include "wx/utils.h"
     #include "wx/log.h"
-    #include "wx/app.h"
 #endif
+
+#include "wx/app.h"
 
 #if wxUSE_CLIPBOARD
     #include "wx/clipbrd.h"
@@ -55,9 +55,9 @@
 // event tables and other macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 
-BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
+BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
     EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
 
@@ -125,7 +125,6 @@ bool wxTextCtrl::Create(
 
     m_windowStyle = lStyle;
     m_bIsMLE = false;
-    m_bSkipUpdate = false;
 
     long                            lSstyle = WS_VISIBLE | WS_TABSTOP;
 
@@ -344,9 +343,8 @@ wxString wxTextCtrl::GetValue() const
     return sStr;
 } // end of wxTextCtrl::GetValue
 
-void wxTextCtrl::DoSetValue(
-  const wxString&                   rsValue,
-  int flags
+void wxTextCtrl::SetValue(
+  const wxString&                   rsValue
 )
 {
     //
@@ -357,9 +355,6 @@ void wxTextCtrl::DoSetValue(
     //
     if ((rsValue.length() > 0x400) || (rsValue != GetValue()))
     {
-        if ( flags & SetValue_SendEvent )
-            m_bSkipUpdate = true;
-
         ::WinSetWindowText(GetHwnd(), (PSZ)rsValue.c_str());
         AdjustSpaceLimit();
     }
@@ -684,12 +679,11 @@ void wxTextCtrl::SetSelection(
         ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFromChar, (USHORT)lToChar), (MPARAM)0);
 } // end of wxTextCtrl::SetSelection
 
-bool wxTextCtrl::DoLoadFile(
-  const wxString&                   rsFile,
-  int                               fileType
+bool wxTextCtrl::LoadFile(
+  const wxString&                   rsFile
 )
 {
-    if ( wxTextCtrlBase::DoLoadFile(rsFile, fileType) )
+    if ( wxTextCtrlBase::LoadFile(rsFile) )
     {
         //
         // Update the size limit if needed
@@ -698,7 +692,7 @@ bool wxTextCtrl::DoLoadFile(
         return true;
     }
     return false;
-} // end of wxTextCtrl::DoLoadFile
+} // end of wxTextCtrl::LoadFile
 
 bool wxTextCtrl::IsModified() const
 {
@@ -1100,12 +1094,6 @@ bool wxTextCtrl::OS2Command(
 
         case EN_CHANGE:
             {
-                if (m_bSkipUpdate)
-                {
-                    m_bSkipUpdate = false;
-                    break;
-                }
-
                 wxCommandEvent      vEvent( wxEVT_COMMAND_TEXT_UPDATED
                                            ,m_windowId
                                           );

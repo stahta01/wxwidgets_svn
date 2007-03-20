@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/dc.cpp
+// Name:        dc.cpp
 // Purpose:     wxDC class
 // Author:      David Webster
 // Modified by:
@@ -23,16 +23,19 @@
     #include "wx/log.h"
     #include "wx/icon.h"
     #include "wx/msgdlg.h"
-    #include "wx/dcprint.h"
+#if wxUSE_STATUSBAR
     #include "wx/statusbr.h"
-    #include "wx/module.h"
 #endif
+#endif
+
+#include "wx/module.h"
+#include "wx/dcprint.h"
 
 #include <string.h>
 
 #include "wx/os2/private.h"
 
-IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
+    IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
 
 //
 // wxWidgets uses the Microsoft convention that the origin is the UPPER left.
@@ -350,8 +353,11 @@ wxDC::wxDC(void)
     m_hPS          = NULL;
     m_bIsPaintTime = false; // True at Paint Time
 
-    m_pen.SetColour(*wxBLACK);
-    m_brush.SetColour(*wxWHITE);
+    wxColour vColor( wxT("BLACK") );
+    m_pen.SetColour(vColor);
+
+    vColor.Set( wxT("WHITE") );
+    m_brush.SetColour(vColor);
 
 } // end of wxDC::wxDC
 
@@ -656,7 +662,7 @@ void wxDC::DoDrawLine(
     }
     else
     {
-        if (m_vSelectedBitmap.Ok())
+        if (m_vSelectedBitmap != wxNullBitmap)
         {
             m_vRclPaint.yTop = m_vSelectedBitmap.GetHeight();
             m_vRclPaint.xRight = m_vSelectedBitmap.GetWidth();
@@ -768,7 +774,11 @@ void wxDC::DoDrawArc(
     vPtlArc[0].y = vYm;
     vPtlArc[1].x = vX2;
     vPtlArc[1].y = vY2;
+#if !(defined(__WATCOMC__) && __WATCOMC__ < 1240 )
+// Open Watcom 1.3 had incomplete headers
+// that's reported and should be fixed for OW 1.4
     ::GpiPointArc(m_hPS, vPtlArc); // Draws the arc
+#endif
     CalcBoundingBox( (wxCoord)(vXc - dRadius)
                     ,(wxCoord)(vYc - dRadius)
                    );
@@ -986,7 +996,7 @@ void wxDC::DoDrawRectangle(
         vY = OS2Y(vY,vHeight);
     else
     {
-        if (m_vSelectedBitmap.Ok())
+        if (m_vSelectedBitmap != wxNullBitmap)
         {
             m_vRclPaint.yTop = m_vSelectedBitmap.GetHeight();
             m_vRclPaint.xRight = m_vSelectedBitmap.GetWidth();
@@ -1076,7 +1086,7 @@ void wxDC::DoDrawRoundedRectangle(
         vY = OS2Y(vY,vHeight);
     else
     {
-        if (m_vSelectedBitmap.Ok())
+        if (m_vSelectedBitmap != wxNullBitmap)
         {
             m_vRclPaint.yTop = m_vSelectedBitmap.GetHeight();
             m_vRclPaint.xRight = m_vSelectedBitmap.GetWidth();
@@ -1743,7 +1753,7 @@ void wxDC::DrawAnyText( const wxString& rsText,
     }
     else
     {
-        if (m_vSelectedBitmap.Ok())
+        if (m_vSelectedBitmap != wxNullBitmap)
         {
             m_vRclPaint.yTop = m_vSelectedBitmap.GetHeight();
             m_vRclPaint.xRight = m_vSelectedBitmap.GetWidth();
@@ -1753,7 +1763,7 @@ void wxDC::DrawAnyText( const wxString& rsText,
             vPtlStart.y = vY;
     }
 
-    PCH pzStr = (PCH)rsText.c_str();
+    PCH                             pzStr = (PCH)rsText.c_str();
 
     ::GpiMove(m_hPS, &vPtlStart);
     lHits = ::GpiCharString( m_hPS
@@ -2020,33 +2030,73 @@ void wxDC::SetBrush(
     }
 } // end of wxDC::SetBrush
 
-void wxDC::SetBackground(const wxBrush& rBrush)
+void wxDC::SetBackground(
+  const wxBrush&                    rBrush
+)
 {
     m_backgroundBrush = rBrush;
-
-    if (m_backgroundBrush.Ok())
+    if (!m_backgroundBrush.Ok())
+        return;
+    if (m_pCanvas)
     {
-        (void)::GpiSetBackColor((HPS)m_hPS, m_backgroundBrush.GetColour().GetPixel());
+        bool                        bCustomColours = true;
+
+        //
+        // If we haven't specified wxUSER_COLOURS, don't allow the panel/dialog box to
+        // change background colours from the control-panel specified colours.
+        //
+        if (m_pCanvas->IsKindOf(CLASSINFO(wxWindow)) &&
+            ((m_pCanvas->GetWindowStyleFlag() & wxUSER_COLOURS) != wxUSER_COLOURS))
+            bCustomColours = false;
+        if (bCustomColours)
+        {
+            if (m_backgroundBrush.GetStyle()==wxTRANSPARENT)
+            {
+                m_pCanvas->SetTransparent(true);
+            }
+            else
+            {
+                //
+                // Setting the background brush of a DC
+                // doesn't affect the window background colour. However,
+                // I'm leaving in the transparency setting because it's needed by
+                // various controls (e.g. wxStaticText) to determine whether to draw
+                // transparently or not. TODO: maybe this should be a new function
+                // wxWindow::SetTransparency(). Should that apply to the child itself, or the
+                // parent?
+                // m_canvas->SetBackgroundColour(m_backgroundBrush.GetColour());
+                //
+                m_pCanvas->SetTransparent(false);
+            }
+        }
     }
+    COLORREF                        vNewColor = m_backgroundBrush.GetColour().GetPixel();
+    (void)::GpiSetBackColor((HPS)m_hPS, (LONG)vNewColor);
 } // end of wxDC::SetBackground
 
-void wxDC::SetBackgroundMode(int nMode)
+void wxDC::SetBackgroundMode(
+  int                               nMode
+)
 {
     m_backgroundMode = nMode;
 } // end of wxDC::SetBackgroundMode
 
-void wxDC::SetLogicalFunction(int nFunction)
+void wxDC::SetLogicalFunction(
+  int                               nFunction
+)
 {
     m_logicalFunction = nFunction;
     SetRop((WXHDC)m_hDC);
 } // wxDC::SetLogicalFunction
 
-void wxDC::SetRop(WXHDC hDC)
+void wxDC::SetRop(
+  WXHDC                             hDC
+)
 {
     if (!hDC || m_logicalFunction < 0)
         return;
 
-    LONG lCRop;
+    LONG                            lCRop;
     switch (m_logicalFunction)
     {
         case wxXOR:
@@ -2711,10 +2761,12 @@ bool wxDC::DoBlit( wxCoord vXdest,
     return bSuccess;
 }
 
-void wxDC::DoGetSize( int* pnWidth,
-                      int* pnHeight ) const
+void wxDC::DoGetSize(
+  int*                              pnWidth
+, int*                              pnHeight
+) const
 {
-    LONG lArray[CAPS_HEIGHT];
+    LONG                            lArray[CAPS_HEIGHT];
 
     if(::DevQueryCaps( m_hDC
                       ,CAPS_FAMILY
@@ -2782,7 +2834,10 @@ wxSize wxDC::GetPPI() const
     return ppisize;
 } // end of wxDC::GetPPI
 
-void wxDC::SetLogicalScale( double dX, double dY )
+void wxDC::SetLogicalScale(
+  double                            dX
+, double                            dY
+)
 {
     m_logicalScaleX = dX;
     m_logicalScaleY = dY;

@@ -36,8 +36,7 @@
 #include "wx/wfstream.h"
 
 #ifdef __WXMSW__
-#include "wx/msw/wrapwin.h"
-#include <winioctl.h>
+#include "winioctl.h"
 #endif
 
 using std::auto_ptr;
@@ -337,8 +336,7 @@ void GetVolumeInfo(const wxString& path)
     }
 
     // NULL means the current volume
-    const wxChar *pVol = vol.empty() ? (wxChar *)NULL
-                                     : vol.c_str();
+    const wxChar *pVol = vol.empty() ? NULL : vol.c_str();
 
     if (!::GetVolumeInformation(pVol, NULL, 0, NULL, NULL,
                                 &volumeFlags, 

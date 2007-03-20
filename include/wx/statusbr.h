@@ -12,15 +12,16 @@
 #ifndef _WX_STATUSBR_H_BASE_
 #define _WX_STATUSBR_H_BASE_
 
-#include "wx/defs.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma interface "statbar.h"
+#endif
+
+#include "wx/window.h"
 
 #if wxUSE_STATUSBAR
 
-#include "wx/window.h"
 #include "wx/list.h"
 #include "wx/dynarray.h"
-
-extern WXDLLIMPEXP_DATA_CORE(const wxChar) wxStatusBarNameStr[];
 
 WX_DECLARE_LIST(wxString, wxListString);
 
@@ -96,8 +97,6 @@ public:
 
     // don't want status bars to accept the focus at all
     virtual bool AcceptsFocus() const { return false; }
-
-    virtual bool CanBeOutsideClientArea() const { return true; }
 
 protected:
     // set the widths array to NULL

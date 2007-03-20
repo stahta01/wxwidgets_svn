@@ -46,7 +46,7 @@ public:
                ,rsName
               );
     }
-    virtual ~wxScrollBar();
+    ~wxScrollBar();
 
     bool Create( wxWindow*          pParent
                 ,wxWindowID         vId

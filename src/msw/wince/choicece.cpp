@@ -9,6 +9,7 @@
 // License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -17,6 +18,10 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "choicece.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -24,15 +29,17 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CHOICE && defined(__SMARTPHONE__) && defined(__WXWINCE__)
-
-#include "wx/choice.h"
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
+    #include "wx/choice.h"
 #endif
 
 #include "wx/spinbutt.h" // for wxSpinnerBestSize
+
+#include <commctrl.h>
+#include "wx/msw/missing.h"
+#include "wx/msw/winundef.h"
+
+#if wxUSE_CHOICE && defined(__SMARTPHONE__) && defined(__WXWINCE__)
 
 #if wxUSE_EXTENDED_RTTI
 // TODO
@@ -221,7 +228,7 @@ bool wxChoice::CreateAndInit(wxWindow *parent,
     if ( style & wxSP_WRAP )
         spiner_style |= UDS_WRAP;
 
-    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, wxEmptyString, 0) )
+    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, _T(""), 0) )
         return false;
 
     // subclass the text ctrl to be able to intercept some events
@@ -244,7 +251,7 @@ bool wxChoice::CreateAndInit(wxWindow *parent,
         sizeText.y = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
     }
 
-    SetInitialSize(size);
+    SetBestSize(size);
 
     (void)::ShowWindow(GetBuddyHwnd(), SW_SHOW);
 
@@ -344,10 +351,10 @@ int wxChoice::DoAppend(const wxString& item)
     return n;
 }
 
-int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+int wxChoice::DoInsert(const wxString& item, int pos)
 {
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into choice"));
-    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
 
     int n = (int)::SendMessage(GetBuddyHwnd(), LB_INSERTSTRING, pos, (LPARAM)item.c_str());
     if ( n == LB_ERR )
@@ -358,9 +365,9 @@ int wxChoice::DoInsert(const wxString& item, unsigned int pos)
     return n;
 }
 
-void wxChoice::Delete(unsigned int n)
+void wxChoice::Delete(int n)
 {
-    wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
+    wxCHECK_RET( n < GetCount(), wxT("invalid item index in wxChoice::Delete") );
 
     if ( HasClientObjectData() )
     {
@@ -381,8 +388,8 @@ void wxChoice::Free()
 {
     if ( HasClientObjectData() )
     {
-        unsigned int count = GetCount();
-        for ( unsigned int n = 0; n < count; n++ )
+        size_t count = GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
             delete GetClientObject(n);
         }
@@ -407,26 +414,22 @@ void wxChoice::SetSelection(int n)
 // string list functions
 // ----------------------------------------------------------------------------
 
-unsigned int wxChoice::GetCount() const
+int wxChoice::GetCount() const
 {
-    return (unsigned int)::SendMessage(GetBuddyHwnd(), LB_GETCOUNT, 0, 0);
+    return (int)::SendMessage(GetBuddyHwnd(), LB_GETCOUNT, 0, 0);
 }
 
-int wxChoice::FindString(const wxString& s, bool bCase) const
+int wxChoice::FindString(const wxString& s) const
 {
-    // back to base class search for not native search type
-    if (bCase)
-       return wxItemContainerImmutable::FindString( s, bCase );
-
     int pos = (int)::SendMessage(GetBuddyHwnd(), LB_FINDSTRINGEXACT,
                                (WPARAM)-1, (LPARAM)s.c_str());
 
     return pos == LB_ERR ? wxNOT_FOUND : pos;
 }
 
-void wxChoice::SetString(unsigned int n, const wxString& s)
+void wxChoice::SetString(int n, const wxString& s)
 {
-    wxCHECK_RET( IsValid(n),
+    wxCHECK_RET( n >= 0 && n < GetCount(),
                  wxT("invalid item index in wxChoice::SetString") );
 
     // we have to delete and add back the string as there is no way to change a
@@ -453,7 +456,7 @@ void wxChoice::SetString(unsigned int n, const wxString& s)
     //else: it's already NULL by default
 }
 
-wxString wxChoice::GetString(unsigned int n) const
+wxString wxChoice::GetString(int n) const
 {
     int len = (int)::SendMessage(GetBuddyHwnd(), LB_GETTEXTLEN, n, 0);
 
@@ -479,7 +482,7 @@ wxString wxChoice::GetString(unsigned int n) const
 // client data
 // ----------------------------------------------------------------------------
 
-void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
+void wxChoice::DoSetItemClientData( int n, void* clientData )
 {
     if ( ::SendMessage(GetHwnd(), LB_SETITEMDATA,
                        n, (LPARAM)clientData) == LB_ERR )
@@ -488,7 +491,7 @@ void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
     }
 }
 
-void* wxChoice::DoGetItemClientData(unsigned int n) const
+void* wxChoice::DoGetItemClientData( int n ) const
 {
     LPARAM rc = ::SendMessage(GetHwnd(), LB_GETITEMDATA, n, 0);
     if ( rc == LB_ERR )
@@ -502,12 +505,12 @@ void* wxChoice::DoGetItemClientData(unsigned int n) const
     return (void *)rc;
 }
 
-void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+void wxChoice::DoSetItemClientObject( int n, wxClientData* clientData )
 {
     DoSetItemClientData(n, clientData);
 }
 
-wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+wxClientData* wxChoice::DoGetItemClientObject( int n ) const
 {
     return (wxClientData *)DoGetItemClientData(n);
 }

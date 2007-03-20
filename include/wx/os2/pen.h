@@ -25,21 +25,7 @@ class WXDLLEXPORT wxPenRefData: public wxGDIRefData
 public:
     wxPenRefData();
     wxPenRefData(const wxPenRefData& rData);
-    virtual ~wxPenRefData();
-
-    bool operator==(const wxPenRefData& data) const
-    {
-        // we intentionally don't compare m_hPen fields here
-        return m_nStyle == data.m_nStyle &&
-               m_nWidth == data.m_nWidth &&
-               m_nJoin == data.m_nJoin &&
-               m_nCap == data.m_nCap &&
-               m_vColour == data.m_vColour &&
-               (m_nStyle != wxSTIPPLE || m_vStipple.IsSameAs(data.m_vStipple)) &&
-               (m_nStyle != wxUSER_DASH ||
-                (m_dash == data.m_dash &&
-                    memcmp(m_dash, data.m_dash, m_nbDash*sizeof(wxDash)) == 0));
-    }
+    ~wxPenRefData();
 
 protected:
     int                             m_nWidth;
@@ -68,21 +54,14 @@ public:
     wxPen( const wxBitmap& rStipple
           ,int             nWidth
          );
-    virtual ~wxPen();
+    ~wxPen();
 
     inline bool   operator == (const wxPen& rPen) const
-    {
-        const wxPenRefData *penData = (wxPenRefData *)rPen.m_refData;
-
-        // an invalid pen is only equal to another invalid pen
-        return m_refData ? penData && *M_PENDATA == *penData : !penData;
-    }
-
+        { return m_refData == rPen.m_refData; }
     inline bool   operator != (const wxPen& rPen) const
-        { return !(*this == rPen); }
+        { return m_refData != rPen.m_refData; }
 
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk(void) const { return (m_refData != NULL); }
+    virtual bool Ok(void) const { return (m_refData != NULL); }
 
     //
     // Override in order to recreate the pen
@@ -125,7 +104,7 @@ public:
     //
     bool     RealizeResource(void);
     bool     FreeResource(bool bForce = false);
-    virtual WXHANDLE GetResourceHandle(void) const;
+    WXHANDLE GetResourceHandle(void);
     bool     IsFree(void) const;
     void     Unshare(void);
 

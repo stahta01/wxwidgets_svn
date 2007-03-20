@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gifdecod.h
+// Name:        gifdecod.h
 // Purpose:     wxGIFDecoder, GIF reader for wxImage and wxAnimation
 // Author:      Guillermo Rodriguez Garcia <guille@iies.es>
 // Version:     3.02
@@ -8,8 +8,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GIFDECOD_H_
-#define _WX_GIFDECOD_H_
+#ifndef _WX_GIFDECOD_H
+#define _WX_GIFDECOD_H
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "gifdecod.h"
+#endif
 
 #include "wx/defs.h"
 
@@ -17,10 +21,6 @@
 
 #include "wx/stream.h"
 #include "wx/image.h"
-#include "wx/animdecod.h"
-
-// internal utility used to store a frame in 8bit-per-pixel format
-class GIFImage;
 
 
 // --------------------------------------------------------------------------
@@ -31,79 +31,130 @@ class GIFImage;
 //  Note that the error code wxGIF_TRUNCATED means that the image itself
 //  is most probably OK, but the decoder didn't reach the end of the data
 //  stream; this means that if it was not reading directly from file,
-//  the stream will not be correctly positioned.
+//  the stream will not be correctly positioned. the
 //
-enum wxGIFErrorCode
+enum
 {
-    wxGIF_OK = 0,                   // everything was OK
-    wxGIF_INVFORMAT,                // error in GIF header
-    wxGIF_MEMERR,                   // error allocating memory
-    wxGIF_TRUNCATED                 // file appears to be truncated
+    wxGIF_OK = 0,                   /* everything was OK */
+    wxGIF_INVFORMAT,                /* error in gif header */
+    wxGIF_MEMERR,                   /* error allocating memory */
+    wxGIF_TRUNCATED                 /* file appears to be truncated */
 };
+
+// Disposal method
+//  Experimental; subject to change.
+//
+enum
+{
+    wxGIF_D_UNSPECIFIED = -1,       /* not specified */
+    wxGIF_D_DONOTDISPOSE = 0,       /* do not dispose */
+    wxGIF_D_TOBACKGROUND = 1,       /* restore to background colour */
+    wxGIF_D_TOPREVIOUS = 2          /* restore to previous image */
+};
+
+
+#define MAX_BLOCK_SIZE 256          /* max. block size */
+
 
 // --------------------------------------------------------------------------
 // wxGIFDecoder class
 // --------------------------------------------------------------------------
 
-class WXDLLEXPORT wxGIFDecoder : public wxAnimationDecoder
+// internal class for storing GIF image data
+class GIFImage
 {
 public:
-    // constructor, destructor, etc.
-    wxGIFDecoder();
-    ~wxGIFDecoder();
+    // def ctor
+    GIFImage();
 
-    // get data of current frame
-    unsigned char* GetData(unsigned int frame) const;
-    unsigned char* GetPalette(unsigned int frame) const;
-    unsigned int GetNcolours(unsigned int frame) const;
-    int GetTransparentColourIndex(unsigned int frame) const;
-    wxColour GetTransparentColour(unsigned int frame) const;
+    unsigned int w;                 /* width */
+    unsigned int h;                 /* height */
+    unsigned int left;              /* x coord (in logical screen) */
+    unsigned int top;               /* y coord (in logical screen) */
+    int transparent;                /* transparent color (-1 = none) */
+    int disposal;                   /* disposal method (-1 = unspecified) */
+    long delay;                     /* delay in ms (-1 = unused) */
+    unsigned char *p;               /* bitmap */
+    unsigned char *pal;             /* palette */
+    GIFImage *next;                 /* next image */
+    GIFImage *prev;                 /* prev image */
 
-    virtual wxSize GetFrameSize(unsigned int frame) const;
-    virtual wxPoint GetFramePosition(unsigned int frame) const;
-    virtual wxAnimationDisposal GetDisposalMethod(unsigned int frame) const;
-    virtual long GetDelay(unsigned int frame) const;
+    DECLARE_NO_COPY_CLASS(GIFImage)
+};
 
-    // GIFs can contain both static images and animations
-    bool IsAnimation() const
-        { return m_nFrames > 1; }
 
-    // load function which returns more info than just Load():
-    wxGIFErrorCode LoadGIF( wxInputStream& stream );
-
-    // free all internal frames
-    void Destroy();
-
-    // implementation of wxAnimationDecoder's pure virtuals
-    virtual bool CanRead( wxInputStream& stream ) const;
-    virtual bool Load( wxInputStream& stream )
-        { return LoadGIF(stream) == wxGIF_OK; }
-
-    bool ConvertToImage(unsigned int frame, wxImage *image) const;
-
-    wxAnimationDecoder *Clone() const
-        { return new wxGIFDecoder; }
-    wxAnimationType GetType() const
-        { return wxANIMATION_TYPE_GIF; }
-
+class WXDLLEXPORT wxGIFDecoder
+{
 private:
-    // array of all frames
-    wxArrayPtrVoid m_frames;
+    // logical screen
+    unsigned int  m_screenw;        /* logical screen width */
+    unsigned int  m_screenh;        /* logical screen height */
+    int           m_background;     /* background color (-1 = none) */
+
+    // image data
+    bool          m_anim;           /* animated GIF */
+    int           m_nimages;        /* number of images */
+    int           m_image;          /* current image */
+    GIFImage      *m_pimage;        /* pointer to current image */
+    GIFImage      *m_pfirst;        /* pointer to first image */
+    GIFImage      *m_plast;         /* pointer to last image */
 
     // decoder state vars
-    int           m_restbits;       // remaining valid bits
-    unsigned int  m_restbyte;       // remaining bytes in this block
-    unsigned int  m_lastbyte;       // last byte read
-    unsigned char m_buffer[256];    // buffer for reading
-    unsigned char *m_bufp;          // pointer to next byte in buffer
+    int           m_restbits;       /* remaining valid bits */
+    unsigned int  m_restbyte;       /* remaining bytes in this block */
+    unsigned int  m_lastbyte;       /* last byte read */
+    unsigned char m_buffer[MAX_BLOCK_SIZE];     /* buffer for reading */
+    unsigned char *m_bufp;          /* pointer to next byte in buffer */
 
-    int getcode(wxInputStream& stream, int bits, int abfin);
-    wxGIFErrorCode dgif(wxInputStream& stream,
-                        GIFImage *img, int interl, int bits);
+    // input stream
+    wxInputStream *m_f;             /* input stream */
+
+private:
+    int getcode(int bits, int abfin);
+    int dgif(GIFImage *img, int interl, int bits);
+
+public:
+    // get data of current frame
+    int GetFrameIndex() const;
+    unsigned char* GetData() const;
+    unsigned char* GetPalette() const;
+    unsigned int GetWidth() const;
+    unsigned int GetHeight() const;
+    unsigned int GetLeft() const;
+    unsigned int GetTop() const;
+    int GetDisposalMethod() const;
+    int GetTransparentColour() const;
+    long GetDelay() const;
+
+    // get global data
+    unsigned int GetLogicalScreenWidth() const;
+    unsigned int GetLogicalScreenHeight() const;
+    int GetBackgroundColour() const;
+    int GetNumberOfFrames() const;
+    bool IsAnimation() const;
+
+    // move through the animation
+    bool GoFirstFrame();
+    bool GoLastFrame();
+    bool GoNextFrame(bool cyclic = false);
+    bool GoPrevFrame(bool cyclic = false);
+    bool GoFrame(int which);
+
+public:
+    // constructor, destructor, etc.
+    wxGIFDecoder(wxInputStream *s, bool anim = false);
+    ~wxGIFDecoder();
+    bool CanRead();
+    int ReadGIF();
+    void Destroy();
+
+    // convert current frame to wxImage
+    bool ConvertToImage(wxImage *image) const;
 
     DECLARE_NO_COPY_CLASS(wxGIFDecoder)
 };
 
-#endif // wxUSE_STREAM && wxUSE_GIF
 
-#endif // _WX_GIFDECOD_H_
+#endif  // wxUSE_STREAM && wxUSE_GIF
+#endif  // _WX_GIFDECOD_H
+

@@ -446,7 +446,7 @@ class SizeInfoPane(wx.Panel):
         self._minsize.SetValue(    str(win.GetMinSize()) )
         self._bestsize.SetValue(   str(win.GetBestSize()) )
         self._adjbstsize.SetValue( str(win.GetAdjustedBestSize()) )
-        self._bestfit.SetValue(    str(win.GetEffectiveMinSize()) )
+        self._bestfit.SetValue(    str(win.GetBestFittingSize()) )
 
     def Clear(self):
         self._size.SetValue("")

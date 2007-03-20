@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/statline.cpp
+// Name:        generic/statline.cpp
 // Purpose:     a generic wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -16,21 +16,20 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/wxprec.h"
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "statline.h"
+#endif
 
+#include "wx/wxprec.h"
+#if wxUSE_STATLINE
 // For compilers that support precompilation, includes "wx.h".
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATLINE
-
 #include "wx/statline.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/statbox.h"
-#endif
+#include "wx/statbox.h"
 
 // ============================================================================
 // implementation

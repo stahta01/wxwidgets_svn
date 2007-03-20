@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+#pragma implementation "pngdemo.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -27,9 +31,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-  if ( !wxApp::OnInit() )
-    return false;
-
   wxImage::AddHandler(new wxPNGHandler);
 
   // Create the main frame window

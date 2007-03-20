@@ -11,25 +11,15 @@
 #include "wx/wxprec.h"
 
 #include "wx/utils.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
+#include "wx/string.h"
 
 #include "wx/apptrait.h"
+#include "wx/intl.h"
+#include "wx/log.h"
 
 #include "wx/process.h"
 
 #include "wx/unix/execute.h"
-
-#ifdef __WXDEBUG__
-    #include "wx/gtk/assertdlg_gtk.h"
-    #if wxUSE_STACKWALKER
-        #include "wx/stackwalk.h"
-    #endif // wxUSE_STACKWALKER
-#endif // __WXDEBUG__
 
 #include <stdarg.h>
 #include <string.h>
@@ -41,6 +31,9 @@
 #include "glib.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
+#ifndef __WXGTK20__
+#include "gtk/gtkfeatures.h"
+#endif
 #include "gdk/gdkx.h"
 
 #ifdef HAVE_X11_XKBLIB_H
@@ -53,12 +46,6 @@
 
     #undef explicit
 #endif // HAVE_X11_XKBLIB_H
-
-
-#if wxUSE_DETECT_SM
-    #include "X11/Xlib.h"
-    #include "X11/SM/SMlib.h"
-#endif
 
 //-----------------------------------------------------------------------------
 // data
@@ -80,20 +67,21 @@ void wxBell()
 
 /* Don't synthesize KeyUp events holding down a key and producing
    KeyDown events with autorepeat. */
-#ifdef HAVE_X11_XKBLIB_H
+#if defined(HAVE_X11_XKBLIB_H) && !(defined(__WXGPE__))
 bool wxSetDetectableAutoRepeat( bool flag )
 {
     Bool result;
     XkbSetDetectableAutoRepeat( GDK_DISPLAY(), flag, &result );
-    return result;       /* true if keyboard hardware supports this mode */
+    return result;       /* TRUE if keyboard hardware supports this mode */
 }
 #else
 bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
 {
-    return false;
+    return FALSE;
 }
 #endif
 
+#ifdef __WXGTK20__
 // Escapes string so that it is valid Pango markup XML string:
 wxString wxEscapeStringForPangoMarkup(const wxString& str)
 {
@@ -127,6 +115,7 @@ wxString wxEscapeStringForPangoMarkup(const wxString& str)
     }
     return out;
 }
+#endif
 
 
 // ----------------------------------------------------------------------------
@@ -168,12 +157,31 @@ void wxGetMousePosition( int* x, int* y )
 
 bool wxColourDisplay()
 {
-    return true;
+    return TRUE;
 }
 
 int wxDisplayDepth()
 {
-    return gdk_drawable_get_visual( wxGetRootWindow()->window )->depth;
+    return gdk_window_get_visual( wxGetRootWindow()->window )->depth;
+}
+
+wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+{
+    static wxToolkitInfo info;
+#ifdef __WXGTK20__
+    info.shortName = _T("gtk2");
+#else
+    info.shortName = _T("gtk");
+#endif
+    info.name = _T("wxGTK");
+#ifdef __WXUNIVERSAL__
+    info.shortName << _T("univ");
+    info.name << _T("/wxUniversal");
+#endif
+    info.versionMajor = gtk_major_version;
+    info.versionMinor = gtk_minor_version;
+    info.os = wxGTK;
+    return info;
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
@@ -181,46 +189,6 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
     return wxGenericFindWindowAtPoint(pt);
 }
 
-#if !wxUSE_UNICODE
-
-wxCharBuffer wxConvertToGTK(const wxString& s, wxFontEncoding enc)
-{
-    wxWCharBuffer wbuf;
-    if ( enc == wxFONTENCODING_SYSTEM || enc == wxFONTENCODING_DEFAULT )
-    {
-        wbuf = wxConvUI->cMB2WC(s);
-    }
-    else // another encoding, use generic conversion class
-    {
-        wbuf = wxCSConv(enc).cMB2WC(s);
-    }
-
-    if ( !wbuf && !s.empty() )
-    {
-        // conversion failed, but we still want to show something to the user
-        // even if it's going to be wrong it is better than nothing
-        //
-        // we choose ISO8859-1 here arbitrarily, it's just the most common
-        // encoding probably and, also importantly here, conversion from it
-        // never fails as it's done internally by wxCSConv
-        wbuf = wxCSConv(wxFONTENCODING_ISO8859_1).cMB2WC(s);
-    }
-
-    return wxConvUTF8.cWC2MB(wbuf);
-}
-
-wxCharBuffer wxConvertFromGTK(const wxString& s, wxFontEncoding enc)
-{
-    // this conversion should never fail as GTK+ always uses UTF-8 internally
-    // so there are no complications here
-    const wxWCharBuffer wbuf(wxConvUTF8.cMB2WC(s));
-    if ( enc == wxFONTENCODING_SYSTEM )
-        return wxConvUI->cWC2MB(wbuf);
-
-    return wxCSConv(enc).cWC2MB(wbuf);
-}
-
-#endif // !wxUSE_UNICODE
 
 // ----------------------------------------------------------------------------
 // subprocess routines
@@ -269,189 +237,4 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 
     return tag;
 }
-
-
-
-// ----------------------------------------------------------------------------
-// wxPlatformInfo-related
-// ----------------------------------------------------------------------------
-
-wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
-{
-    if ( verMaj )
-        *verMaj = gtk_major_version;
-    if ( verMin )
-        *verMin = gtk_minor_version;
-
-    return wxPORT_GTK;
-}
-
-#if wxUSE_DETECT_SM
-static wxString GetSM()
-{
-    class Dpy
-    {
-    public:
-        Dpy() { m_dpy = XOpenDisplay(NULL); }
-        ~Dpy() { if ( m_dpy ) XCloseDisplay(m_dpy); }
-
-        operator Display *() const { return m_dpy; }
-    private:
-        Display *m_dpy;
-    } dpy;
-
-    if ( !dpy )
-        return wxEmptyString;
-
-    char *client_id;
-    SmcConn smc_conn = SmcOpenConnection(NULL, NULL,
-                                         999, 999,
-                                         0 /* mask */, NULL /* callbacks */,
-                                         NULL, &client_id,
-                                         0, NULL);
-
-    if ( !smc_conn )
-        return wxEmptyString;
-
-    char *vendor = SmcVendor(smc_conn);
-    wxString ret = wxString::FromAscii( vendor );
-    free(vendor);
-
-    SmcCloseConnection(smc_conn, 0, NULL);
-    free(client_id);
-
-    return ret;
-}
-#endif // wxUSE_DETECT_SM
-
-
-//-----------------------------------------------------------------------------
-// wxGUIAppTraits
-//-----------------------------------------------------------------------------
-
-#if wxUSE_INTL
-void wxGUIAppTraits::SetLocale()
-{
-    gtk_set_locale();
-}
-#endif
-
-#ifdef __WXDEBUG__
-
-#if wxUSE_STACKWALKER
-
-// private helper class
-class StackDump : public wxStackWalker
-{
-public:
-    StackDump(GtkAssertDialog *dlg) { m_dlg=dlg; }
-
-protected:
-    virtual void OnStackFrame(const wxStackFrame& frame)
-    {
-        wxString fncname = frame.GetName();
-        wxString fncargs = fncname;
-
-        size_t n = fncname.find(wxT('('));
-        if (n != wxString::npos)
-        {
-            // remove arguments from function name
-            fncname.erase(n);
-
-            // remove function name and brackets from arguments
-            fncargs = fncargs.substr(n+1, fncargs.length()-n-2);
-        }
-        else
-            fncargs = wxEmptyString;
-
-        // append this stack frame's info in the dialog
-        if (!frame.GetFileName().empty() || !fncname.empty())
-            gtk_assert_dialog_append_stack_frame(m_dlg,
-                                                fncname.mb_str(),
-                                                fncargs.mb_str(),
-                                                frame.GetFileName().mb_str(),
-                                                frame.GetLine());
-    }
-
-private:
-    GtkAssertDialog *m_dlg;
-};
-
-// the callback functions must be extern "C" to comply with GTK+ declarations
-extern "C"
-{
-    void get_stackframe_callback(StackDump *dump)
-    {
-        // skip over frames up to including wxOnAssert()
-        dump->ProcessFrames(3);
-    }
-}
-
-#endif      // wxUSE_STACKWALKER
-
-bool wxGUIAppTraits::ShowAssertDialog(const wxString& msg)
-{
-    // under GTK2 we prefer to use a dialog widget written using directly GTK+;
-    // in fact we cannot use a dialog written using wxWidgets: it would need
-    // the wxWidgets idle processing to work correctly!
-    GtkWidget *dialog = gtk_assert_dialog_new();
-    gtk_assert_dialog_set_message(GTK_ASSERT_DIALOG(dialog), msg.mb_str());
-
-#if wxUSE_STACKWALKER
-    // don't show more than maxLines or we could get a dialog too tall to be
-    // shown on screen: 20 should be ok everywhere as even with 15 pixel high
-    // characters it is still only 300 pixels...
-    static const int maxLines = 20;
-
-    // save current stack frame...
-    StackDump dump(GTK_ASSERT_DIALOG(dialog));
-    dump.SaveStack(maxLines);
-
-    // ...but process it only if the user needs it
-    gtk_assert_dialog_set_backtrace_callback(GTK_ASSERT_DIALOG(dialog),
-                                             (GtkAssertDialogStackFrameCallback)get_stackframe_callback,
-                                             &dump);
-#endif      // wxUSE_STACKWALKER
-
-    gint result = gtk_dialog_run(GTK_DIALOG (dialog));
-    bool returnCode = false;
-    switch (result)
-    {
-    case GTK_ASSERT_DIALOG_STOP:
-        wxTrap();
-        break;
-    case GTK_ASSERT_DIALOG_CONTINUE:
-        // nothing to do
-        break;
-    case GTK_ASSERT_DIALOG_CONTINUE_SUPPRESSING:
-        // no more asserts
-        returnCode = true;
-        break;
-
-    default:
-        wxFAIL_MSG( _T("unexpected return code from GtkAssertDialog") );
-    }
-
-    gtk_widget_destroy(dialog);
-    return returnCode;
-}
-
-#endif  // __WXDEBUG__
-
-wxString wxGUIAppTraits::GetDesktopEnvironment() const
-{
-#if wxUSE_DETECT_SM
-    const wxString SM = GetSM();
-
-    if (SM == wxT("GnomeSM"))
-        return wxT("GNOME");
-
-    if (SM == wxT("KDE"))
-        return wxT("KDE");
-#endif // wxUSE_DETECT_SM
-
-    return wxEmptyString;
-}
-
-
 

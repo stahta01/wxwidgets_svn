@@ -12,9 +12,13 @@
 #ifndef _WX_TABCTRL_H_
 #define _WX_TABCTRL_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "tabctrl.h"
+#endif
+
 class WXDLLIMPEXP_CORE wxImageList;
 
-// extern WXDLLEXPORT_DATA(const wxChar) wxToolBarNameStr[];
+// extern WXDLLEXPORT_DATA(const wxChar*) wxToolBarNameStr;
 
 /*
  * Flags returned by HitTest
@@ -40,7 +44,7 @@ class WXDLLEXPORT wxTabCtrl: public wxControl
     {
         Create(parent, id, pos, size, style, name);
     }
-    virtual ~wxTabCtrl();
+    ~wxTabCtrl();
 
 // Accessors
 

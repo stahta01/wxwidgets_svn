@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/tipdlg.cpp
+// Name:        tipdlg.cpp
 // Purpose:     implementation of wxTipDialog
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "tipdlg.h"
+#endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -37,11 +41,11 @@
     #include "wx/statbmp.h"
     #include "wx/stattext.h"
     #include "wx/sizer.h"
-    #include "wx/settings.h"
 #endif // WX_PRECOMP
 
 #include "wx/statline.h"
 #include "wx/artprov.h"
+#include "wx/settings.h"
 
 #include "wx/tipdlg.h"
 
@@ -210,6 +214,7 @@ wxString wxFileTipProvider::GetTip()
 
 BEGIN_EVENT_TABLE(wxTipDialog, wxDialog)
     EVT_BUTTON(wxID_NEXT_TIP, wxTipDialog::OnNextTip)
+    EVT_BUTTON(wxID_CLOSE, wxTipDialog::OnCancel)
 END_EVENT_TABLE()
 
 wxTipDialog::wxTipDialog(wxWindow *parent,
@@ -217,7 +222,10 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
                          bool showAtStartup)
            : wxDialog(parent, wxID_ANY, _("Tip of the Day"),
                       wxDefaultPosition, wxDefaultSize,
-                      wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
+                      wxDEFAULT_DIALOG_STYLE
+#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
+                      | wxRESIZE_BORDER
+#endif                      
                       )
 {
     m_tipProvider = tipProvider;
@@ -228,7 +236,6 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
     // smart phones does not support or do not waste space for wxButtons
 #ifndef __SMARTPHONE__
     wxButton *btnClose = new wxButton(this, wxID_CLOSE);
-    SetAffirmativeId(wxID_CLOSE);
 #endif
 
     m_checkbox = new wxCheckBox(this, wxID_ANY, _("&Show tips at startup"));
@@ -316,10 +323,12 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
 
     SetSizer( topsizer );
 
+#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
     Centre(wxBOTH | wxCENTER_FRAME);
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -343,3 +352,4 @@ bool wxShowTip(wxWindow *parent,
 }
 
 #endif // wxUSE_STARTUP_TIPS
+

@@ -3,7 +3,7 @@
 %% Purpose:     wxWindow documentation
 %% Author:      wxWidgets Team
 %% Modified by:
-%% Created:
+%% Created:     
 %% RCS-ID:      $Id$
 %% Copyright:   (c) wxWidgets Team
 %% License:     wxWindows license
@@ -74,7 +74,7 @@ and no longer has an effect.}
 \twocolitem{\windowstyle{wxALWAYS\_SHOW\_SB}}{If a window has scrollbars,
 disable them instead of hiding them when they are not needed (i.e. when the
 size of the window is big enough to not require the scrollbars to navigate it).
-This style is currently implemented for wxMSW, wxGTK and wxUniversal and does
+This style is currently only implemented for wxMSW and wxUniversal and does
 nothing on the other platforms.}
 \twocolitem{\windowstyle{wxCLIP\_CHILDREN}}{Use this style to eliminate flicker caused by the background being
 repainted, then children being painted over them. Windows only.}
@@ -115,8 +115,7 @@ even if the mode set by \helpref{wxUpdateUIEvent::SetMode}{wxupdateuieventsetmod
 
 \wxheading{See also}
 
-\helpref{Event handling overview}{eventhandlingoverview}\\
-\helpref{Window sizing overview}{windowsizingoverview}
+\helpref{Event handling overview}{eventhandlingoverview}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -139,13 +138,13 @@ Constructs a window, which can be a child of a frame, dialog or any other non-co
 
 \docparam{parent}{Pointer to a parent window.}
 
-\docparam{id}{Window identifier. If wxID\_ANY, will automatically create an identifier.}
+\docparam{id}{Window identifier. If -1, will automatically create an identifier.}
 
-\docparam{pos}{Window position. wxDefaultPosition indicates that wxWidgets
+\docparam{pos}{Window position. wxDefaultPosition is (-1, -1) which indicates that wxWidgets
 should generate a default position for the window. If using the wxWindow class directly, supply
 an actual position.}
 
-\docparam{size}{Window size. wxDefaultSize indicates that wxWidgets
+\docparam{size}{Window size. wxDefaultSize is (-1, -1) which indicates that wxWidgets
 should generate a default size for the window. If no suitable size can  be found, the
 window will be sized to 20x20 pixels so that the window is visible but obviously not
 correctly sized. }
@@ -204,18 +203,11 @@ Note that wxWidgets maintains the stack of windows having captured the mouse
 and when the mouse is released the capture returns to the window which had had
 captured it previously and it is only really released if there were no previous
 window. In particular, this means that you must release the mouse as many times
-as you capture it, unless the window receives
-the \helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent} event.
-
-Any application which captures the mouse in the beginning of some operation
-{\em must} handle \helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
-and cancel this operation when it receives the event. The event handler must
-not recapture mouse.
+as you capture it.
 
 \wxheading{See also}
 
 \helpref{wxWindow::ReleaseMouse}{wxwindowreleasemouse}
-\helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
 
 
 \membersection{wxWindow::Center}\label{wxwindowcenter}
@@ -623,20 +615,6 @@ The search is recursive in both cases.
 \helpref{FindWindow}{wxwindowfindwindow}
 
 
-\membersection{wxWindow::FindWindowByLabel}\label{wxwindowfindwindowbylabel}
-
-\func{static wxWindow*}{FindWindowByLabel}{\param{const wxString\&}{ label}, \param{wxWindow*}{ parent = NULL}}
-
-Find a window by its label. Depending on the type of window, the label may be a window title
-or panel item label. If {\it parent} is NULL, the search will start from all top-level
-frames and dialog boxes; if non-NULL, the search will be limited to the given window hierarchy.
-The search is recursive in both cases.
-
-\wxheading{See also}
-
-\helpref{FindWindow}{wxwindowfindwindow}
-
-
 \membersection{wxWindow::FindWindowByName}\label{wxwindowfindwindowbyname}
 
 \func{static wxWindow*}{FindWindowByName}{\param{const wxString\&}{ name}, \param{wxWindow*}{ parent = NULL}}
@@ -654,12 +632,26 @@ If no window with such name is found,
 \helpref{FindWindow}{wxwindowfindwindow}
 
 
+\membersection{wxWindow::FindWindowByLabel}\label{wxwindowfindwindowbylabel}
+
+\func{static wxWindow*}{FindWindowByLabel}{\param{const wxString\&}{ label}, \param{wxWindow*}{ parent = NULL}}
+
+Find a window by its label. Depending on the type of window, the label may be a window title
+or panel item label. If {\it parent} is NULL, the search will start from all top-level
+frames and dialog boxes; if non-NULL, the search will be limited to the given window hierarchy.
+The search is recursive in both cases.
+
+\wxheading{See also}
+
+\helpref{FindWindow}{wxwindowfindwindow}
+
+
 \membersection{wxWindow::Fit}\label{wxwindowfit}
 
 \func{virtual void}{Fit}{\void}
 
 Sizes the window so that it fits around its subwindows. This function won't do
-anything if there are no subwindows and will only really work correctly if
+anything if there are no subwindows and will only really work correctly if the
 sizers are used for the subwindows layout. Also, if the window has exactly one
 subwindow it is better (faster and the result is more precise as Fit adds some
 margin to account for fuzziness of its calculations) to call
@@ -697,10 +689,6 @@ a wxTextCtrl under wxGTK) but is not implemented on all platforms nor for all
 controls so it is mostly just a hint to wxWidgets and not a mandatory
 directive.
 
-\wxheading{See also}
-
-\helpref{wxWindowUpdateLocker}{wxwindowupdatelocker}
-
 
 \membersection{wxWindow::GetAcceleratorTable}\label{wxwindowgetacceleratortable}
 
@@ -722,8 +710,11 @@ See also \helpref{wxAccessible}{wxaccessible}.
 
 \constfunc{wxSize}{GetAdjustedBestSize}{\void}
 
-This method is deprecated, use \helpref{GetEffectiveMinSize}{wxwindowgeteffectiveminsize}
-instead.
+This method is similar to \helpref{GetBestSize}{wxwindowgetbestsize}, except
+in one thing.  GetBestSize should return the minimum untruncated size of the
+window, while this method will return the largest of BestSize and any user
+specified minimum size.  ie. it is the minimum size the window should currently
+be drawn at, not the minimal size it can possibly tolerate.
 
 
 \membersection{wxWindow::GetBackgroundColour}\label{wxwindowgetbackgroundcolour}
@@ -756,18 +747,17 @@ background, such as a tiled bitmap. Currently the style has no effect on other p
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
 \helpref{wxWindow::SetBackgroundStyle}{wxwindowsetbackgroundstyle}
 
-\membersection{wxWindow::GetEffectiveMinSize}\label{wxwindowgeteffectiveminsize}
+\membersection{wxWindow::GetBestFittingSize}\label{wxwindowgetbestfittingsize}
 
-\constfunc{wxSize}{GetEffectiveMinSize}{\void}
+\constfunc{wxSize}{GetBestFittingSize}{\void}
 
-Merges the window's best size into the min size and returns the
-result.  This is the value used by sizers to determine the appropriate
-ammount of sapce to allocate for the widget.
+Merges the window's best size into the min size and returns the result.
 
 \wxheading{See also}
 
 \helpref{wxWindow::GetBestSize}{wxwindowgetbestsize},\rtfsp
-\helpref{wxWindow::SetInitialSize}{wxwindowsetinitialsize}
+\helpref{wxWindow::SetBestFittingSize}{wxwindowsetbestfittingsize},\rtfsp
+\helpref{wxWindow::SetSizeHints}{wxwindowsetsizehints}
 
 
 \membersection{wxWindow::GetBestSize}\label{wxwindowgetbestsize}
@@ -782,6 +772,13 @@ same as the size the window would have had after calling
 \helpref{Fit}{wxwindowfit}.
 
 
+\membersection{wxWindow::GetCaret}\label{wxwindowgetcaret}
+
+\constfunc{wxCaret *}{GetCaret}{\void}
+
+Returns the \helpref{caret}{wxcaret} associated with the window.
+
+
 \membersection{wxWindow::GetCapture}\label{wxwindowgetcapture}
 
 \func{static wxWindow *}{GetCapture}{\void}
@@ -793,15 +790,7 @@ Returns the currently captured window.
 \helpref{wxWindow::HasCapture}{wxwindowhascapture},
 \helpref{wxWindow::CaptureMouse}{wxwindowcapturemouse},
 \helpref{wxWindow::ReleaseMouse}{wxwindowreleasemouse},
-\helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
 \helpref{wxMouseCaptureChangedEvent}{wxmousecapturechangedevent}
-
-
-\membersection{wxWindow::GetCaret}\label{wxwindowgetcaret}
-
-\constfunc{wxCaret *}{GetCaret}{\void}
-
-Returns the \helpref{caret}{wxcaret} associated with the window.
 
 
 \membersection{wxWindow::GetCharHeight}\label{wxwindowgetcharheight}
@@ -820,13 +809,9 @@ Returns the average character width for this window.
 
 \membersection{wxWindow::GetChildren}\label{wxwindowgetchildren}
 
-\func{wxWindowList\&}{GetChildren}{\void}
+\func{wxList\&}{GetChildren}{\void}
 
-\constfunc{const wxWindowList\&}{GetChildren}{\void}
-
-Returns a reference to the list of the window's children. \texttt{wxWindowList} 
-is a type-safe \helpref{wxList}{wxlist}-like class whose elements are of type
-\texttt{wxWindow *}.
+Returns a reference to the list of the window's children.
 
 
 \membersection{wxWindow::GetClassDefaultAttributes}\label{wxwindowgetclassdefaultattributes}
@@ -869,12 +854,9 @@ a 2-element list {\tt (width, height)}.}
 
 \constfunc{wxSize}{GetClientSize}{\void}
 
-Returns the size of the window `client area' in pixels. The client area is the
-area which may be drawn on by the programmer, excluding title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-return size is empty (both width and height are $0$).
+This gets the size of the window `client area' in pixels.
+The client area is the area which may be drawn on by the programmer,
+excluding title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1026,23 +1008,6 @@ handle, such as {\bf HWND} for Windows, {\bf Widget} for Motif, {\bf GtkWidget} 
 \perlnote{This method will return an integer in wxPerl.}
 
 
-\membersection{wxWindow::GetHelpTextAtPoint}\label{wxwindowgethelptextatpoint}
-
-\constfunc{virtual wxString}{GetHelpTextAtPoint}{\param{const wxPoint &}{point}, \param{wxHelpEvent::Origin }{origin}}
-
-Gets the help text to be used as context-sensitive help for this window. This
-method should be overridden if the help message depends on the position inside
-the window, otherwise \helpref{GetHelpText}{wxwindowgethelptext} can be used.
-
-\wxheading{Parameters}
-
-\docparam{point}{Coordinates of the mouse at the moment of help event emission.}
-
-\docparam{origin}{Help event origin, see also \helpref{wxHelpEvent::GetOrigin}{wxhelpeventgetorigin}.}
-
-\newsince{2.7.0}
-
-
 \membersection{wxWindow::GetHelpText}\label{wxwindowgethelptext}
 
 \constfunc{virtual wxString}{GetHelpText}{\void}
@@ -1054,7 +1019,7 @@ and not in the window object itself.
 
 \wxheading{See also}
 
-\helpref{SetHelpText}{wxwindowsethelptext}, \helpref{GetHelpTextAtPoint}{wxwindowgethelptextatpoint}, \helpref{wxHelpProvider}{wxhelpprovider}
+\helpref{SetHelpText}{wxwindowsethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 
 \membersection{wxWindow::GetId}\label{wxwindowgetid}
@@ -1066,7 +1031,7 @@ Returns the identifier of the window.
 \wxheading{Remarks}
 
 Each window has an integer identifier. If the application has not provided one
-(or the default wxID\_ANY) an unique identifier with a negative value will be generated.
+(or the default Id -1) an unique identifier with a negative value will be generated.
 
 \wxheading{See also}
 
@@ -1094,16 +1059,14 @@ by name.
 \constfunc{wxSize}{GetMaxSize}{\void}
 
 Returns the maximum size of the window, an indication to the sizer layout mechanism
-that this is the maximum possible size. 
+that this is the maximum possible size.
 
 \membersection{wxWindow::GetMinSize}\label{wxwindowgetminsize}
 
-\constfunc{virtual wxSize}{GetMinSize}{\void}
+\constfunc{wxSize}{GetMinSize}{\void}
 
 Returns the minimum size of the window, an indication to the sizer layout mechanism
-that this is the minimum required size. It normally just returns the value set
-by \helpref{SetMinSize}{wxwindowsetminsize}, but it can be overridden to do the
-calculation on demand.
+that this is the minimum required size.
 
 \membersection{wxWindow::GetName}\label{wxwindowgetname}
 
@@ -1140,9 +1103,9 @@ windows.
 
 \wxheading{Parameters}
 
-\docparam{x}{Receives the x position of the window if non-\NULL.}
+\docparam{x}{Receives the x position of the window.}
 
-\docparam{y}{Receives the y position of the window if non-\NULL.}
+\docparam{y}{Receives the y position of the window.}
 
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
@@ -1162,52 +1125,11 @@ method:\par
 }}
 
 
-\wxheading{See also}
-
-\helpref{GetScreenPosition}{wxwindowgetscreenposition}
-
-
 \membersection{wxWindow::GetRect}\label{wxwindowgetrect}
 
 \constfunc{virtual wxRect}{GetRect}{\void}
 
-Returns the position and size of the window as a \helpref{wxRect}{wxrect} object.
-
-\wxheading{See also}
-
-\helpref{GetScreenRect}{wxwindowgetscreenrect}
-
-
-\membersection{wxWindow::GetScreenPosition}\label{wxwindowgetscreenposition}
-
-\constfunc{virtual void}{GetScreenPosition}{\param{int* }{x}, \param{int* }{y}}
-
-\constfunc{wxPoint}{GetScreenPosition}{\void}
-
-Returns the window position in screen coordinates, whether the window is a
-child window or a top level one.
-
-\wxheading{Parameters}
-
-\docparam{x}{Receives the x position of the window on the screen if non-\NULL.}
-
-\docparam{y}{Receives the y position of the window on the screen if non-\NULL.}
-
-\wxheading{See also}
-
-\helpref{GetPosition}{wxwindowgetposition}
-
-
-\membersection{wxWindow::GetScreenRect}\label{wxwindowgetscreenrect}
-
-\constfunc{virtual wxRect}{GetScreenRect}{\void}
-
-Returns the position and size of the window on the screen as a 
-\helpref{wxRect}{wxrect} object.
-
-\wxheading{See also}
-
-\helpref{GetRect}{wxwindowgetrect}
+Returns the size and position of the window as a \helpref{wxRect}{wxrect} object.
 
 
 \membersection{wxWindow::GetScrollPos}\label{wxwindowgetscrollpos}
@@ -1249,11 +1171,8 @@ Returns the built-in scrollbar thumb size.
 
 \constfunc{wxSize}{GetSize}{\void}
 
-Returns the size of the entire window in pixels, including title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-returned size is the restored window size, not the size of the window icon.
+This gets the size of the entire window in pixels,
+including title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1294,25 +1213,20 @@ Return the sizer associated with the window by a previous call to
 
 \membersection{wxWindow::GetTextExtent}\label{wxwindowgettextextent}
 
-\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{w}, \param{int* }{h},
+\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
  \param{int* }{descent = NULL}, \param{int* }{externalLeading = NULL},
  \param{const wxFont* }{font = NULL}, \param{bool}{ use16 = {\tt false}}}
 
-\constfunc{wxSize}{GetTextExtent}{\param{const wxString\& }{string}}
-
 Gets the dimensions of the string as it would be drawn on the
 window with the currently selected font.
-
-The text extent is returned in \arg{w} and \arg{h} pointers (first form) or as a 
-\helpref{wxSize}{wxsize} object (second form).
 
 \wxheading{Parameters}
 
 \docparam{string}{String whose extent is to be measured.}
 
-\docparam{w}{Return value for width.}
+\docparam{x}{Return value for width.}
 
-\docparam{h}{Return value for height.}
+\docparam{y}{Return value for height.}
 
 \docparam{descent}{Return value for descent (optional).}
 
@@ -1334,6 +1248,17 @@ implements the following methods:\par
 \perlnote{In wxPerl this method takes only the {\tt string} and optionally
  {\tt font} parameters, and returns a 4-element list
  {\tt ( x, y, descent, externalLeading )}.}
+
+
+\membersection{wxWindow::GetTitle}\label{wxwindowgettitle}
+
+\func{virtual wxString}{GetTitle}{\void}
+
+Gets the window's title. Applicable only to frames and dialogs.
+
+\wxheading{See also}
+
+\helpref{wxWindow::SetTitle}{wxwindowsettitle}
 
 
 \membersection{wxWindow::GetToolTip}\label{wxwindowgettooltip}
@@ -1384,14 +1309,6 @@ that size.
 \helpref{GetClientSize}{wxwindowgetclientsize}
 
 
-\membersection{wxWindow::GetWindowBorderSize}\label{wxwindowgetwindowbordersize}
-
-\constfunc{wxSize}{GetWindowBorderSize}{\void}
-
-Returns the size of the left/right and top/bottom borders of this window in x
-and y components of the result respectively.
-
-
 \membersection{wxWindow::GetWindowStyleFlag}\label{wxwindowgetwindowstyleflag}
 
 \constfunc{long}{GetWindowStyleFlag}{\void}
@@ -1418,27 +1335,7 @@ Returns {\tt true} if this window has the current mouse capture.
 
 \helpref{wxWindow::CaptureMouse}{wxwindowcapturemouse},
 \helpref{wxWindow::ReleaseMouse}{wxwindowreleasemouse},
-\helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
 \helpref{wxMouseCaptureChangedEvent}{wxmousecapturechangedevent}
-
-
-\membersection{wxWindow::HasFlag}\label{wxwindowhasflag}
-
-\constfunc{bool}{HasFlag}{\param{int }{flag}}
-
-Returns \texttt{true} if the window has the given \arg{flag} bit set.
-
-
-\membersection{wxWindow::HasMultiplePages}\label{wxwindowhasmultiplepages}
-
-\constfunc{virtual bool}{HasMultiplePages}{\void}
-
-This method should be overridden to return \texttt{true} if this window has
-multiple pages. All standard class with multiple pages such as 
-\helpref{wxNotebook}{wxnotebook}, \helpref{wxListbook}{wxlistbook} and 
-\helpref{wxTreebook}{wxtreebook} already override it to return \texttt{true}
-and user-defined classes with similar behaviour should do it as well to allow
-the library to handle such windows appropriately.
 
 
 \membersection{wxWindow::HasScrollbar}\label{wxwindowhasscrollbar}
@@ -1515,19 +1412,6 @@ to the dialog via validators.
 Resets the cached best size value so it will be recalculated the next time it is needed.
 
 
-\membersection{wxWindow::IsDoubleBuffered}\label{wxwindowisdoublebuffered}
-
-\constfunc{virtual bool}{IsDoubleBuffered}{\void}
-
-Returns \true if the window contents is double-buffered by the system, i.e. if
-any drawing done on the window is really done on a temporary backing surface
-and transferred to the screen all at once later.
-
-\wxheading{See also}
-
-\helpref{wxBufferedDC}{wxbuffereddc}
-
-
 \membersection{wxWindow::IsEnabled}\label{wxwindowisenabled}
 
 \constfunc{virtual bool}{IsEnabled}{\void}
@@ -1562,18 +1446,6 @@ implements the following methods:\par
 \end{twocollist}}}
 
 
-\membersection{wxWindow::IsFrozen}\label{wxwindowisfrozen}
-
-\constfunc{virtual bool}{IsFrozen}{\void}
-
-Returns \true if the window is currently frozen by a call to 
-\helpref{Freeze()}{wxwindowfreeze}.
-
-\wxheading{See also}
-
-\helpref{Thaw()}{wxwindowthaw}
-
-
 \membersection{wxWindow::IsRetained}\label{wxwindowisretained}
 
 \constfunc{virtual bool}{IsRetained}{\void}
@@ -1590,22 +1462,6 @@ Retained windows are only available on X platforms.
 \constfunc{virtual bool}{IsShown}{\void}
 
 Returns {\tt true} if the window is shown, {\tt false} if it has been hidden.
-
-\wxheading{See also}
-
-\helpref{wxWindow::IsShownOnScreen}{wxwindowisshownonscreen}
-
-
-\membersection{wxWindow::IsShownOnScreen}\label{wxwindowisshownonscreen}
-
-\constfunc{virtual bool}{IsShownOnScreen}{\void}
-
-Returns {\tt true} if the window is physically visible on the screen, i.e. it
-is shown and all its parents up to the toplevel window are shown as well.
-
-\wxheading{See also}
-
-\helpref{wxWindow::IsShown}{wxwindowisshown}
 
 
 \membersection{wxWindow::IsTopLevel}\label{wxwindowistoplevel}
@@ -1642,7 +1498,7 @@ This is just a wrapper for \helpref{ScrollLines}{wxwindowscrolllines}$(-1)$.
 
 \func{void}{Lower}{\void}
 
-Lowers the window to the bottom of the window hierarchy (z-order).
+Lowers the window to the bottom of the window hierarchy.
 
 \wxheading{See also}
 
@@ -1685,7 +1541,7 @@ wxWindow::Move function, which is defined in the base wxWindow class
 as the call:
 
 \begin{verbatim}
-  SetSize(x, y, wxDefaultCoord, wxDefaultCoord, wxSIZE_USE_EXISTING);
+  SetSize(x, y, -1, -1, wxSIZE_USE_EXISTING);
 \end{verbatim}
 
 \wxheading{See also}
@@ -1745,23 +1601,6 @@ You may wish to call this from a text control custom keypress handler to do the 
 navigation behaviour for the tab key, since the standard default behaviour for
 a multiline text control with the wxTE\_PROCESS\_TAB style is to insert a tab
 and not navigate to the next control.
-
-
-\membersection{wxWindow::NextControlId}\label{wxwindownextcontrolid}
-
-\func{static int}{NextControlId}{\param{int }{winid}}
-
-If two controls are created consecutively using \texttt{wxID\_ANY} id, this
-function allows to retrieve the effective id of the latter control from the id
-of the former. This is useful for example to find the control following its 
-\helpref{wxStaticText}{wxstatictext} label if only the id of or pointer to the
-label is available to the caller but it is known that the two controls were
-created together.
-
-\wxheading{See also}
-
-\helpref{PrevControlId}{wxwindowprevcontrolid}
-
 
 %% VZ: wxWindow::OnXXX() functions should not be documented but I'm leaving
 %%     the old docs here in case we want to move any still needed bits to
@@ -1987,6 +1826,28 @@ created together.
 %%
 %% \helpref{wxValidator}{wxvalidator}, \helpref{wxWindow::TransferDataToWindow}{wxwindowtransferdatatowindow}
 %%
+%% \membersection{wxWindow::OnMenuCommand}\label{wxwindowonmenucommand}
+%%
+%% \func{void}{OnMenuCommand}{\param{wxCommandEvent\& }{event}}
+%%
+%% Called when a menu command is received from a menu bar.
+%%
+%% \wxheading{Parameters}
+%%
+%% \docparam{event}{The menu command event. For more information, see \helpref{wxCommandEvent}{wxcommandevent}.}
+%%
+%% \wxheading{Remarks}
+%%
+%% A function with this name doesn't actually exist; you can choose any member function to receive
+%% menu command events, using the EVT\_COMMAND macro for individual commands or EVT\_COMMAND\_RANGE for
+%% a range of commands.
+%%
+%% \wxheading{See also}
+%%
+%% \helpref{wxCommandEvent}{wxcommandevent},\rtfsp
+%% \helpref{wxWindow::OnMenuHighlight}{wxwindowonmenuhighlight},\rtfsp
+%% \helpref{Event handling overview}{eventhandlingoverview}
+%%
 %% \membersection{wxWindow::OnMenuHighlight}\label{wxwindowonmenuhighlight}
 %%
 %% \func{void}{OnMenuHighlight}{\param{wxMenuEvent\& }{event}}
@@ -2014,6 +1875,7 @@ created together.
 %% \wxheading{See also}
 %%
 %% \helpref{wxMenuEvent}{wxmenuevent},\rtfsp
+%% \helpref{wxWindow::OnMenuCommand}{wxwindowonmenucommand},\rtfsp
 %% \helpref{Event handling overview}{eventhandlingoverview}
 %%
 %%
@@ -2322,14 +2184,6 @@ implements the following methods:\par
 }
 
 
-\membersection{wxWindow::PrevControlId}\label{wxwindowprevcontrolid}
-
-\func{static int}{PrevControlId}{\param{int }{winid}}
-
-This is similar to \helpref{NextControlId}{wxwindownextcontrolid} but returns
-the id of the control created just before the one with the given \arg{winid}.
-
-
 \membersection{wxWindow::PushEventHandler}\label{wxwindowpusheventhandler}
 
 \func{void}{PushEventHandler}{\param{wxEvtHandler* }{handler}}
@@ -2366,9 +2220,9 @@ remove the event handler.
 
 \func{void}{Raise}{\void}
 
-Raises the window to the top of the window hierarchy (z-order).
+Raises the window to the top of the window hierarchy.
 
-In current version of wxWidgets this works both for managed and child windows.
+In current version of wxWidgets this works both for manage and child windows.
 
 \wxheading{See also}
 
@@ -2382,7 +2236,7 @@ In current version of wxWidgets this works both for managed and child windows.
 Causes this window, and all of its children recursively (except under wxGTK1
 where this is not implemented), to be repainted. Note that repainting doesn't
 happen immediately but only during the next event loop iteration, if you need
-to update the window immediately you should use \helpref{Update}{wxwindowupdate}
+to update the window immediately you should use \helpref{Update}{wxwindowupdate} 
 instead.
 
 \wxheading{Parameters}
@@ -2456,7 +2310,6 @@ Releases mouse input captured with \helpref{wxWindow::CaptureMouse}{wxwindowcapt
 \helpref{wxWindow::CaptureMouse}{wxwindowcapturemouse},
 \helpref{wxWindow::HasCapture}{wxwindowhascapture},
 \helpref{wxWindow::ReleaseMouse}{wxwindowreleasemouse},
-\helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
 \helpref{wxMouseCaptureChangedEvent}{wxmousecapturechangedevent}
 
 
@@ -2505,7 +2358,7 @@ handler is supposed to be there).
 
 Reparents the window, i.e the window will be removed from its
 current parent window (e.g. a non-standard toolbar in a wxFrame)
-and then re-inserted into another.
+and then re-inserted into another. Available on Windows and GTK.
 
 \wxheading{Parameters}
 
@@ -2574,7 +2427,9 @@ on top/bottom and nothing was done.
 
 \wxheading{Remarks}
 
-This function is currently only implemented under MSW and wxGTK.
+This function is currently only implemented under MSW and wxTextCtrl under
+wxGTK (it also works for wxScrolledWindow derived classes under all
+platforms).
 
 \wxheading{See also}
 
@@ -2593,14 +2448,14 @@ Physically scrolls the pixels in the window and move child windows accordingly.
 
 \docparam{dy}{Amount to scroll vertically.}
 
-\docparam{rect}{Rectangle to scroll, if it is \NULL, the whole window is
-scrolled (this is always the case under wxGTK which doesn't support this
-parameter)}
+\docparam{rect}{Rectangle to invalidate. If this is NULL, the whole window is invalidated. If you
+pass a rectangle corresponding to the area of the window exposed by the scroll, your painting handler
+can optimize painting by checking for the invalidated region. This parameter is ignored under GTK.}
 
 \wxheading{Remarks}
 
-Note that you can often use \helpref{wxScrolledWindow}{wxscrolledwindow}
-instead of using this function directly.
+Use this function to optimise your scrolling implementations, to minimise the area that must be
+redrawn. Note that it is rarely required to call this function from a user program.
 
 
 \membersection{wxWindow::SetAcceleratorTable}\label{wxwindowsetacceleratortable}
@@ -2625,21 +2480,16 @@ See also \helpref{wxAccessible}{wxaccessible}.
 \func{void}{SetAutoLayout}{\param{bool}{ autoLayout}}
 
 Determines whether the \helpref{wxWindow::Layout}{wxwindowlayout} function will
-be called automatically when the window is resized. Please note that this only
-happens for the windows usually used to contain children, namely 
-\helpref{wxPanel}{wxpanel} and \helpref{wxTopLevelWindow}{wxtoplevelwindow} 
-(and the classes deriving from them).
-
-This method is called implicitly by 
-\helpref{wxWindow::SetSizer}{wxwindowsetsizer} but if you use 
+be called automatically when the window is resized. It is called implicitly by
+\helpref{wxWindow::SetSizer}{wxwindowsetsizer} but if you use
 \helpref{wxWindow::SetConstraints}{wxwindowsetconstraints} you should call it
 manually or otherwise the window layout won't be correctly updated when its
 size changes.
 
 \wxheading{Parameters}
 
-\docparam{autoLayout}{Set this to \true if you wish the Layout function to be
-called automatically when the window is resized.}
+\docparam{autoLayout}{Set this to {\tt true} if you wish the Layout function to be called
+from within wxWindow::OnSize functions.}
 
 \wxheading{See also}
 
@@ -2705,9 +2555,9 @@ background, such as a tiled bitmap. Currently the style has no effect on other p
 \helpref{wxWindow::GetBackgroundStyle}{wxwindowgetbackgroundstyle}
 
 
-\membersection{wxWindow::SetInitialSize}\label{wxwindowsetinitialsize}
+\membersection{wxWindow::SetBestFittingSize}\label{wxwindowsetbestfittingsize}
 
-\func{void}{SetInitialSize}{\param{const wxSize\& }{size = wxDefaultSize}}
+\func{void}{SetBestFittingSize}{\param{const wxSize\& }{size = wxDefaultSize}}
 
 A {\it smart} SetSize that will fill in default size components with the
 window's {\it best} size values.  Also sets the window's minsize to
@@ -2716,15 +2566,12 @@ partial size is passed to this function then the sizers will use that
 size instead of the results of GetBestSize to determine the minimum
 needs of the window for layout.
 
-Most controls will use this to set their initial size, and their min
-size to the passed in value (if any.)
-
-
 \wxheading{See also}
 
 \helpref{wxWindow::SetSize}{wxwindowsetsize},\rtfsp
 \helpref{wxWindow::GetBestSize}{wxwindowgetbestsize},\rtfsp
-\helpref{wxWindow::GetEffectiveMinSize}{wxwindowgeteffectiveminsize}
+\helpref{wxWindow::GetBestFittingSize}{wxwindowgetbestfittingsize},\rtfsp
+\helpref{wxWindow::SetSizeHints}{wxwindowsetsizehints}
 
 
 \membersection{wxWindow::SetCaret}\label{wxwindowsetcaret}
@@ -2762,27 +2609,6 @@ implements the following methods:\par
 }
 
 
-\membersection{wxWindow::SetConstraints}\label{wxwindowsetconstraints}
-
-\func{void}{SetConstraints}{\param{wxLayoutConstraints* }{constraints}}
-
-Sets the window to have the given layout constraints. The window
-will then own the object, and will take care of its deletion.
-If an existing layout constraints object is already owned by the
-window, it will be deleted.
-
-\wxheading{Parameters}
-
-\docparam{constraints}{The constraints to set. Pass NULL to disassociate and delete the window's
-constraints.}
-
-\wxheading{Remarks}
-
-You must call \helpref{wxWindow::SetAutoLayout}{wxwindowsetautolayout} to tell a window to use
-the constraints automatically in OnSize; otherwise, you must override OnSize and call Layout()
-explicitly. When setting both a wxLayoutConstraints and a \helpref{wxSizer}{wxsizer}, only the
-sizer will have effect.
-
 \membersection{wxWindow::SetContainingSizer}\label{wxwindowsetcontainingsizer}
 
 \func{void}{SetContainingSizer}{\param{wxSizer* }{sizer}}
@@ -2813,6 +2639,89 @@ be reset back to default.
 \helpref{::wxSetCursor}{wxsetcursor}, \helpref{wxCursor}{wxcursor}
 
 
+\membersection{wxWindow::SetConstraints}\label{wxwindowsetconstraints}
+
+\func{void}{SetConstraints}{\param{wxLayoutConstraints* }{constraints}}
+
+Sets the window to have the given layout constraints. The window
+will then own the object, and will take care of its deletion.
+If an existing layout constraints object is already owned by the
+window, it will be deleted.
+
+\wxheading{Parameters}
+
+\docparam{constraints}{The constraints to set. Pass NULL to disassociate and delete the window's
+constraints.}
+
+\wxheading{Remarks}
+
+You must call \helpref{wxWindow::SetAutoLayout}{wxwindowsetautolayout} to tell a window to use
+the constraints automatically in OnSize; otherwise, you must override OnSize and call Layout()
+explicitly. When setting both a wxLayoutConstraints and a \helpref{wxSizer}{wxsizer}, only the
+sizer will have effect.
+
+\membersection{wxWindow::SetInitialBestSize}\label{wxwindowsetinitialbestsize}
+
+\func{virtual void}{SetInitialBestSize}{\param{const wxSize\& }{size}}
+
+Sets the initial window size if none is given (i.e. at least one of the
+components of the size passed to ctor/Create() is wxDefaultCoord).
+
+\membersection{wxWindow::SetMaxSize}\label{wxwindowsetmaxsize}
+
+\func{void}{SetMaxSize}{\param{const wxSize\& }{size}}
+
+Sets the maximum size of the window, to indicate to the sizer layout mechanism
+that this is the maximum possible size.
+
+\membersection{wxWindow::SetMinSize}\label{wxwindowsetminsize}
+
+\func{void}{SetMinSize}{\param{const wxSize\& }{size}}
+
+Sets the minimum size of the window, to indicate to the sizer layout mechanism
+that this is the minimum required size. You may need to call this
+if you change the window size after construction and before adding
+to its parent sizer.
+
+\membersection{wxWindow::SetOwnBackgroundColour}\label{wxwindowsetownbackgroundcolour}
+
+\func{void}{SetOwnBackgroundColour}{\param{const wxColour\& }{colour}}
+
+Sets the background colour of the window but prevents it from being inherited
+by the children of this window.
+
+\wxheading{See also}
+
+\helpref{SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
+\helpref{InheritAttributes}{wxwindowinheritattributes}
+
+
+\membersection{wxWindow::SetOwnFont}\label{wxwindowsetownfont}
+
+\func{void}{SetOwnFont}{\param{const wxFont\& }{font}}
+
+Sets the font of the window but prevents it from being inherited by the
+children of this window.
+
+\wxheading{See also}
+
+\helpref{SetFont}{wxwindowsetfont},\rtfsp
+\helpref{InheritAttributes}{wxwindowinheritattributes}
+
+
+\membersection{wxWindow::SetOwnForegroundColour}\label{wxwindowsetownforegroundcolour}
+
+\func{void}{SetOwnForegroundColour}{\param{const wxColour\& }{colour}}
+
+Sets the foreground colour of the window but prevents it from being inherited
+by the children of this window.
+
+\wxheading{See also}
+
+\helpref{SetForegroundColour}{wxwindowsetforegroundcolour},\rtfsp
+\helpref{InheritAttributes}{wxwindowinheritattributes}
+
+
 \membersection{wxWindow::SetDropTarget}\label{wxwindowsetdroptarget}
 
 \func{void}{SetDropTarget}{\param{wxDropTarget*}{ target}}
@@ -2827,13 +2736,6 @@ If the window already has a drop target, it is deleted.
 \helpref{Drag and drop overview}{wxdndoverview}
 
 
-
-\membersection{wxWindow::SetInitialBestSize}\label{wxwindowsetinitialbestsize}
-
-\func{virtual void}{SetInitialBestSize}{\param{const wxSize\& }{size}}
-
-Sets the initial window size if none is given (i.e. at least one of the
-components of the size passed to ctor/Create() is wxDefaultCoord).
 
 \membersection{wxWindow::SetEventHandler}\label{wxwindowseteventhandler}
 
@@ -2888,12 +2790,14 @@ default for the reasons explained in the
 window from being used as an implicit parent for the dialogs which were
 created without a parent. It is useful for the windows which can disappear at
 any moment as creating children of such windows results in fatal problems.}
-\twocolitem{\windowstyle{wxWS\_EX\_CONTEXTHELP}}{Under Windows, puts a query
-button on the caption. When pressed, Windows will go into a context-sensitive
-help mode and wxWidgets will send a wxEVT\_HELP event if the user clicked on an
-application window.
+\twocolitem{\windowstyle{wxFRAME\_EX\_CONTEXTHELP}}{Under Windows, puts a query button on the
+caption. When pressed, Windows will go into a context-sensitive help mode and wxWidgets will send
+a wxEVT\_HELP event if the user clicked on an application window.
 This style cannot be used together with wxMAXIMIZE\_BOX or wxMINIMIZE\_BOX, so
-these two styles are automatically turned of if this one is used.}
+you should use the style of
+{\tt wxDEFAULT\_FRAME\_STYLE \& \textasciitilde(wxMINIMIZE\_BOX | wxMAXIMIZE\_BOX)} for the
+frames having this style (the dialogs don't have minimize nor maximize box by
+default)}
 \twocolitem{\windowstyle{wxWS\_EX\_PROCESS\_IDLE}}{This window should always process idle events, even
 if the mode set by \helpref{wxIdleEvent::SetMode}{wxidleeventsetmode} is wxIDLE\_PROCESS\_SPECIFIED.}
 \twocolitem{\windowstyle{wxWS\_EX\_PROCESS\_UI\_UPDATES}}{This window should always process UI update events,
@@ -2933,12 +2837,6 @@ parent window if you don't want its font to be inherited by its children,
 use \helpref{SetOwnFont}{wxwindowsetownfont} instead in this case and
 see \helpref{InheritAttributes}{wxwindowinheritattributes} for more
 explanations.
-
-Please notice that the given font is \emph{not} automatically used for 
-\helpref{wxPaintDC}{wxpaintdc} objects associated with this window, you need to
-call \helpref{wxDC::SetFont()}{wxdcsetfont} too. However this font is used by
-any standard controls for drawing their text as well as by 
-\helpref{wxWindow::GetTextExtent()}{wxwindowgettextextent}.
 
 \wxheading{Parameters}
 
@@ -3033,22 +2931,6 @@ Sets the window's label.
 \helpref{wxWindow::GetLabel}{wxwindowgetlabel}
 
 
-\membersection{wxWindow::SetMaxSize}\label{wxwindowsetmaxsize}
-
-\func{void}{SetMaxSize}{\param{const wxSize\& }{size}}
-
-Sets the maximum size of the window, to indicate to the sizer layout mechanism
-that this is the maximum possible size.
-
-\membersection{wxWindow::SetMinSize}\label{wxwindowsetminsize}
-
-\func{void}{SetMinSize}{\param{const wxSize\& }{size}}
-
-Sets the minimum size of the window, to indicate to the sizer layout mechanism
-that this is the minimum required size. You may need to call this
-if you change the window size after construction and before adding
-to its parent sizer.
-
 \membersection{wxWindow::SetName}\label{wxwindowsetname}
 
 \func{virtual void}{SetName}{\param{const wxString\& }{name}}
@@ -3062,45 +2944,6 @@ Sets the window's name.
 \wxheading{See also}
 
 \helpref{wxWindow::GetName}{wxwindowgetname}
-
-
-\membersection{wxWindow::SetOwnBackgroundColour}\label{wxwindowsetownbackgroundcolour}
-
-\func{void}{SetOwnBackgroundColour}{\param{const wxColour\& }{colour}}
-
-Sets the background colour of the window but prevents it from being inherited
-by the children of this window.
-
-\wxheading{See also}
-
-\helpref{SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
-\helpref{InheritAttributes}{wxwindowinheritattributes}
-
-
-\membersection{wxWindow::SetOwnFont}\label{wxwindowsetownfont}
-
-\func{void}{SetOwnFont}{\param{const wxFont\& }{font}}
-
-Sets the font of the window but prevents it from being inherited by the
-children of this window.
-
-\wxheading{See also}
-
-\helpref{SetFont}{wxwindowsetfont},\rtfsp
-\helpref{InheritAttributes}{wxwindowinheritattributes}
-
-
-\membersection{wxWindow::SetOwnForegroundColour}\label{wxwindowsetownforegroundcolour}
-
-\func{void}{SetOwnForegroundColour}{\param{const wxColour\& }{colour}}
-
-Sets the foreground colour of the window but prevents it from being inherited
-by the children of this window.
-
-\wxheading{See also}
-
-\helpref{SetForegroundColour}{wxwindowsetforegroundcolour},\rtfsp
-\helpref{InheritAttributes}{wxwindowinheritattributes}
 
 
 \membersection{wxWindow::SetPalette}\label{wxwindowsetpalette}
@@ -3271,7 +3114,7 @@ and usually the scrollbar will be automatically hidden.
 
 \func{virtual void}{SetSize}{\param{const wxRect\&}{ rect}}
 
-Sets the position and size of the window in pixels.
+Sets the size and position of the window in pixels.
 
 \func{virtual void}{SetSize}{\param{int}{ width}, \param{int}{ height}}
 
@@ -3281,16 +3124,16 @@ Sets the size of the window in pixels.
 
 \wxheading{Parameters}
 
-\docparam{x}{Required x position in pixels, or wxDefaultCoord to indicate that the existing
+\docparam{x}{Required x position in pixels, or -1 to indicate that the existing
 value should be used.}
 
-\docparam{y}{Required y position in pixels, or wxDefaultCoord to indicate that the existing
+\docparam{y}{Required y position in pixels, or -1 to indicate that the existing
 value should be used.}
 
-\docparam{width}{Required width in pixels, or wxDefaultCoord to indicate that the existing
+\docparam{width}{Required width in pixels, or -1 to indicate that the existing
 value should be used.}
 
-\docparam{height}{Required height position in pixels, or wxDefaultCoord to indicate that the existing
+\docparam{height}{Required height position in pixels, or -1 to indicate that the existing
 value should be used.}
 
 \docparam{size}{\helpref{wxSize}{wxsize} object for setting the size.}
@@ -3299,15 +3142,15 @@ value should be used.}
 
 \docparam{sizeFlags}{Indicates the interpretation of other parameters. It is a bit list of the following:
 
-{\bf wxSIZE\_AUTO\_WIDTH}: a $wxDefaultCoord$ width value is taken to indicate
+{\bf wxSIZE\_AUTO\_WIDTH}: a $-1$ width value is taken to indicate
 a wxWidgets-supplied default width.\\
-{\bf wxSIZE\_AUTO\_HEIGHT}: a $wxDefaultCoord$ height value is taken to indicate
-a wxWidgets-supplied default height.\\
-{\bf wxSIZE\_AUTO}: $wxDefaultCoord$ size values are taken to indicate
+{\bf wxSIZE\_AUTO\_HEIGHT}: a $-1$ height value is taken to indicate
+a wxWidgets-supplied default width.\\
+{\bf wxSIZE\_AUTO}: -1 size values are taken to indicate
 a wxWidgets-supplied default size.\\
 {\bf wxSIZE\_USE\_EXISTING}: existing dimensions should be used
-if $wxDefaultCoord$ values are supplied.\\
-{\bf wxSIZE\_ALLOW\_MINUS\_ONE}: allow negative dimensions (ie. value of $wxDefaultCoord$) to be interpreted
+if -1 values are supplied.\\
+{\bf wxSIZE\_ALLOW\_MINUS\_ONE}: allow dimensions of $-1$ and less to be interpreted
 as real dimensions, not default values.
 {\bf wxSIZE\_FORCE}: normally, if the position and the size of the window are
 already the same as the parameters of this function, nothing is done. but with
@@ -3321,7 +3164,7 @@ The second form is a convenience for calling the first form with default
 x and y parameters, and must be used with non-default width and height values.
 
 The first form sets the position and optionally size, of the window.
-Parameters may be $wxDefaultCoord$ to indicate either that a default should be supplied
+Parameters may be -1 to indicate either that a default should be supplied
 by wxWidgets, or that the current value of the dimension should be used.
 
 \wxheading{See also}
@@ -3340,14 +3183,42 @@ implements the following methods:\par
 
 \membersection{wxWindow::SetSizeHints}\label{wxwindowsetsizehints}
 
-Use of this function for windows which are not toplevel windows
-(such as wxDialog or wxFrame) is discouraged. Please use 
-\helpref{SetMinSize}{wxwindowsetminsize} and \helpref{SetMaxSize}{wxwindowsetmaxsize}
-instead.
+\func{virtual void}{SetSizeHints}{\param{int}{ minW}, \param{int}{ minH}, \param{int}{ maxW=-1}, \param{int}{ maxH=-1},
+ \param{int}{ incW=-1}, \param{int}{ incH=-1}}
 
-\wxheading{See also}
+\func{void}{SetSizeHints}{\param{const wxSize\&}{ minSize},
+\param{const wxSize\&}{ maxSize=wxDefaultSize}, \param{const wxSize\&}{ incSize=wxDefaultSize}}
 
-\helpref{wxTopLevelWindow::SetSizeHints}{wxtoplevelwindowsetsizehints}.
+
+Allows specification of minimum and maximum window sizes, and window size increments.
+If a pair of values is not set (or set to -1), the default values will be used.
+
+\wxheading{Parameters}
+
+\docparam{minW}{Specifies the minimum width allowable.}
+
+\docparam{minH}{Specifies the minimum height allowable.}
+
+\docparam{maxW}{Specifies the maximum width allowable.}
+
+\docparam{maxH}{Specifies the maximum height allowable.}
+
+\docparam{incW}{Specifies the increment for sizing the width (Motif/Xt only).}
+
+\docparam{incH}{Specifies the increment for sizing the height (Motif/Xt only).}
+
+\docparam{minSize}{Minimum size.}
+
+\docparam{maxSize}{Maximum size.}
+
+\docparam{incSize}{Increment size (Motif/Xt only).}
+
+\wxheading{Remarks}
+
+If this function is called, the user will not be able to size the window outside the
+given bounds.
+
+The resizing increments are only significant under Motif or Xt.
 
 
 \membersection{wxWindow::SetSizer}\label{wxwindowsetsizer}
@@ -3368,7 +3239,7 @@ parameter if the {\it sizer}\/ is non-NULL and {\tt false} otherwise.
 \docparam{sizer}{The sizer to set. Pass NULL to disassociate and conditionally delete
 the window's sizer.  See below.}
 
-\docparam{deleteOld}{If true (the default), this will delete any pre-existing sizer.
+\docparam{deleteOld}{If true (the default), this will delete any prexisting sizer.
 Pass false if you wish to handle deleting the old sizer yourself.}
 
 \wxheading{Remarks}
@@ -3388,6 +3259,21 @@ only the sizer will have effect.
 
 The same as \helpref{SetSizer}{wxwindowsetsizer}, except it also sets the size hints
 for the window based on the sizer's minimum size.
+
+
+\membersection{wxWindow::SetTitle}\label{wxwindowsettitle}
+
+\func{virtual void}{SetTitle}{\param{const wxString\& }{title}}
+
+Sets the window's title. Applicable only to frames and dialogs.
+
+\wxheading{Parameters}
+
+\docparam{title}{The window's title.}
+
+\wxheading{See also}
+
+\helpref{wxWindow::GetTitle}{wxwindowgettitle}
 
 
 \membersection{wxWindow::SetThemeEnabled}\label{wxwindowsetthemeenabled}
@@ -3479,8 +3365,7 @@ Identical to \helpref{SetWindowStyleFlag}{wxwindowsetwindowstyleflag}.
 
 Sets the style of the window. Please note that some styles cannot be changed
 after the window creation and that \helpref{Refresh()}{wxwindowrefresh} might
-need to be be called after changing the others for the change to take place
-immediately.
+be called after changing the others for the change to take place immediately.
 
 See \helpref{Window styles}{windowstyles} for more information about flags.
 
@@ -3555,32 +3440,6 @@ Reenables window updating after a previous call to
 \helpref{Freeze}{wxwindowfreeze}. To really thaw the control, it must be called
 exactly the same number of times as \helpref{Freeze}{wxwindowfreeze}.
 
-\wxheading{See also}
-
-\helpref{wxWindowUpdateLocker}{wxwindowupdatelocker}
-
-
-\membersection{wxWindow::ToggleWindowStyle}\label{wxwindowtogglewindowstyle}
-
-\func{bool}{ToggleWindowStyle}{\param{int }{flag}}
-
-Turns the given \arg{flag} on if it's currently turned off and vice versa.
-This function cannot be used if the value of the flag is $0$ (which is often
-the case for default flags).
-
-Also, please notice that not all styles can be changed after the control
-creation.
-
-\wxheading{Return value}
-
-Returns \true if the style was turned on by this function, \false if it was
-switched off.
-
-\wxheading{See also}
-
-\helpref{wxWindow::SetWindowStyleFlag}{wxwindowsetwindowstyleflag},\rtfsp
-\helpref{wxWindow::HasFlag}{wxwindowhasflag}
-
 
 \membersection{wxWindow::TransferDataFromWindow}\label{wxwindowtransferdatafromwindow}
 
@@ -3646,10 +3505,9 @@ This function is currently only implemented under MSW.
 
 Calling this method immediately repaints the invalidated area of the window and
 all of its children recursively while this would usually only happen when the
-flow of control returns to the event loop. 
-Notice that this function doesn't invalidate any area of the window so
-nothing happens if nothing has been invalidated (i.e. marked as requiring
-a redraw). Use \helpref{Refresh}{wxwindowrefresh} first if you want to
+flow of control returns to the event loop. Notice that this function doesn't
+refresh the window and does nothing if the window hadn't been already
+repainted. Use \helpref{Refresh}{wxwindowrefresh} first if you want to
 immediately redraw the window unconditionally.
 
 

@@ -13,7 +13,6 @@
 #define _WX_VLBOX_H_
 
 #include "wx/vscroll.h"         // base class
-#include "wx/bitmap.h"
 
 class WXDLLEXPORT wxSelectionStore;
 
@@ -189,9 +188,6 @@ public:
     // change the background colour of the selected cells
     void SetSelectionBackground(const wxColour& col);
 
-    // refreshes only the selected items
-    void RefreshSelected();
-
 
     virtual wxVisualAttributes GetDefaultAttributes() const
     {
@@ -238,7 +234,7 @@ protected:
     void OnKeyDown(wxKeyEvent& event);
     void OnLeftDown(wxMouseEvent& event);
     void OnLeftDClick(wxMouseEvent& event);
-    void OnSetOrKillFocus(wxFocusEvent& event);
+
 
     // common part of all ctors
     void Init();
@@ -289,6 +285,7 @@ private:
 
     // the selection bg colour
     wxColour m_colBgSel;
+
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxVListBox)

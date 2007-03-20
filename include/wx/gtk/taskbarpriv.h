@@ -9,10 +9,15 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_TASKBARPRIV_H_
-#define _WX_GTK_TASKBARPRIV_H_
+#ifndef _WX_TASKBARPRIV_H_
+#define _WX_TASKBARPRIV_H_
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "taskbarpriv.h"
+#endif
 
 #include "wx/toplevel.h"
+#include "wx/bitmap.h"
 
 #ifdef __WXGTK20__
 #include <gtk/gtkversion.h>
@@ -27,8 +32,7 @@ public:
     bool IsProtocolSupported();
     
     wxEvtHandler *m_invokingWindow;
-
-protected:
+    
 #if wxUSE_MENUS_NATIVE
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
 #endif // wxUSE_MENUS_NATIVE
@@ -36,4 +40,4 @@ protected:
 
 #endif // __WXGTK20__
 #endif // GTK_CHECK_VERSION(2, 1, 0)
-#endif // _WX_GTK_TASKBARPRIV_H_
+#endif // _WX_TASKBARPRIV_H_

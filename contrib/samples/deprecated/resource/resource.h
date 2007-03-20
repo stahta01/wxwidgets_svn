@@ -9,6 +9,10 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __GNUG__
+// #pragma interface
+#endif
+
 // Define a new application
 class MyApp: public wxApp
 {

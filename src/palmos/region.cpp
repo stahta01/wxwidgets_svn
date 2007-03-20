@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/palmos/region.cpp
-// Purpose:     wxRegion implementation
+// Name:      src/palmos/region.cpp
+// Purpose:   wxRegion implementation
 // Author:      William Osborne - minimal working wxPalmOS port
 // Modified by:
-// Created:     10/13/04
-// RCS-ID:      $Id$
-// Copyright:   (c) William Osborne
-// Licence:     wxWindows licence
+// Created:   10/13/04
+// RCS-ID:    $Id$
+// Copyright: (c) William Osborne
+// Licence:   wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,18 +17,19 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "region.h"
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include "wx/region.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/gdicmn.h"
-#endif
+#include "wx/gdicmn.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxRegion, wxGDIObject)
 IMPLEMENT_DYNAMIC_CLASS(wxRegionIterator, wxObject)
@@ -92,13 +93,26 @@ void wxRegion::Clear()
 {
 }
 
-bool wxRegion::DoOffset(wxCoord x, wxCoord y)
+bool wxRegion::Offset(wxCoord x, wxCoord y)
 {
     return false;
 }
 
 // combine another region with this one
-bool wxRegion::DoCombine(const wxRegion& rgn, wxRegionOp op)
+bool wxRegion::Combine(const wxRegion& rgn, wxRegionOp op)
+{
+    return false;
+}
+
+// Combine rectangle (x, y, w, h) with this.
+bool wxRegion::Combine(wxCoord x, wxCoord y,
+                       wxCoord width, wxCoord height,
+                       wxRegionOp op)
+{
+    return false;
+}
+
+bool wxRegion::Combine(const wxRect& rect, wxRegionOp op)
 {
     return false;
 }
@@ -108,20 +122,19 @@ bool wxRegion::DoCombine(const wxRegion& rgn, wxRegionOp op)
 // ----------------------------------------------------------------------------
 
 // Outer bounds of region
-bool wxRegion::DoGetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const
+void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const
 {
-    return false;
+}
+
+wxRect wxRegion::GetBox() const
+{
+    return wxRect(0, 0, 0, 0);
 }
 
 // Is region empty?
-bool wxRegion::IsEmpty() const
+bool wxRegion::Empty() const
 {
     return true;
-}
-
-bool wxRegion::DoIsEqual(const wxRegion& region) const
-{
-    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -129,13 +142,26 @@ bool wxRegion::DoIsEqual(const wxRegion& region) const
 // ----------------------------------------------------------------------------
 
 // Does the region contain the point (x,y)?
-wxRegionContain wxRegion::DoContainsPoint(wxCoord x, wxCoord y) const
+wxRegionContain wxRegion::Contains(wxCoord x, wxCoord y) const
+{
+    return wxOutRegion;
+}
+
+// Does the region contain the point pt?
+wxRegionContain wxRegion::Contains(const wxPoint& pt) const
+{
+    return wxOutRegion;
+}
+
+// Does the region contain the rectangle (x, y, w, h)?
+wxRegionContain wxRegion::Contains(wxCoord x, wxCoord y,
+                                   wxCoord w, wxCoord h) const
 {
     return wxOutRegion;
 }
 
 // Does the region contain the rectangle rect
-wxRegionContain wxRegion::DoContainsRect(const wxRect& rect) const
+wxRegionContain wxRegion::Contains(const wxRect& rect) const
 {
     return wxOutRegion;
 }
@@ -214,3 +240,4 @@ wxCoord wxRegionIterator::GetH() const
 {
     return 0;
 }
+

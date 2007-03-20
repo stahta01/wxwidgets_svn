@@ -50,7 +50,7 @@
 // control ids
 enum
 {
-    CheckboxPage_Reset = wxID_HIGHEST,
+    CheckboxPage_Reset = 100,
     CheckboxPage_ChangeLabel,
     CheckboxPage_Check,
     CheckboxPage_Uncheck,
@@ -73,14 +73,10 @@ enum
 class CheckBoxWidgetsPage : public WidgetsPage
 {
 public:
-    CheckBoxWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
+    CheckBoxWidgetsPage(wxBookCtrlBase *book, wxImageList *imaglist);
     virtual ~CheckBoxWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_checkbox; }
-    virtual void RecreateWidget() { CreateCheckbox(); }
-
-    // lazy creation of the content
-    virtual void CreateContent();
 
 protected:
     // event handlers
@@ -151,22 +147,14 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXUNIVERSAL__)
-    #define FAMILY_CTRLS UNIVERSAL_CTRLS
-#else
-    #define FAMILY_CTRLS NATIVE_CTRLS
-#endif
+IMPLEMENT_WIDGETS_PAGE(CheckBoxWidgetsPage, wxT("CheckBox"));
 
-IMPLEMENT_WIDGETS_PAGE(CheckBoxWidgetsPage, wxT("CheckBox"), FAMILY_CTRLS );
-
-CheckBoxWidgetsPage::CheckBoxWidgetsPage(WidgetsBookCtrl *book,
+CheckBoxWidgetsPage::CheckBoxWidgetsPage(wxBookCtrlBase *book,
                                          wxImageList *imaglist)
-                  : WidgetsPage(book, imaglist, checkbox_xpm)
+                  : WidgetsPage(book)
 {
-}
+    imaglist->Add(wxBitmap(checkbox_xpm));
 
-void CheckBoxWidgetsPage::CreateContent()
-{
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
@@ -233,6 +221,8 @@ void CheckBoxWidgetsPage::CreateContent()
     Reset();
 
     SetSizer(sizerTop);
+
+    sizerTop->Fit(this);
 }
 
 void CheckBoxWidgetsPage::Reset()
@@ -253,7 +243,7 @@ void CheckBoxWidgetsPage::CreateCheckbox()
 
     delete m_checkbox;
 
-    int flags = ms_defaultFlags;
+    int flags = 0;
     if ( m_chkRight->IsChecked() )
         flags |= wxALIGN_RIGHT;
 

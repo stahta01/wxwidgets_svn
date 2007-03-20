@@ -20,6 +20,9 @@
 #include "wx/wx.h"
 #endif
 
+#ifndef __DARWIN__
+#  include <malloc.h>
+#endif
 #include <string.h>
 #include <memory.h>
 
@@ -30,7 +33,7 @@
 
 // helper functions
 
-static size_t wx_log2(size_t nr)
+static size_t log2(size_t nr)
 {
     size_t tmp = 0;
     while (nr >= 2 )
@@ -63,7 +66,7 @@ void ScriptStream::WriteBytes( const void* srcBuf, size_t count )
     if ( m_Size + count > m_Capacity )
     {
         m_Capacity =
-            (  0x2 << (wx_log2( m_Size + count ) + 1 ) );
+            (  0x2 << (log2( m_Size + count ) + 1 ) );
 
         if ( m_Capacity < 128 ) m_Capacity = 128;
 
