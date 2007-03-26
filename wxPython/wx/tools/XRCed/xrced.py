@@ -46,6 +46,8 @@ sys_path = sys.path
 # 1 adds CMD command to Help menu
 debug = 0
 
+import xxx
+
 g.helpText = """\
 <HTML><H2>Welcome to XRC<font color="blue">ed</font></H2><H3><font color="green">DON'T PANIC :)</font></H3>
 Read this note before clicking on anything!<P>
@@ -1592,7 +1594,8 @@ class PrefsDialog(wx.Dialog):
         self.PostCreate(pre)
         self.checkControls = {} # map of check IDs to (control,dict,param)
 
-        xxx = sys.modules['xxx']
+        ##xxx = sys.modules['xxx']
+        import xxx
         d = xxx.xxxSizerItem.defaults_panel
 
         self.check_proportion_panel = xrc.XRCCTRL(self, 'check_proportion_panel')
@@ -1716,12 +1719,15 @@ Please upgrade wxWidgets to %d.%d.%d or higher.''' % MinWxVersion)
         # Preferences
         conf.allowExec = conf.Read('Prefs/allowExec', 'ask')
         p = 'Prefs/sizeritem_defaults_panel'
+        import xxx
         if conf.HasEntry(p):
-            sys.modules['xxx'].xxxSizerItem.defaults_panel = ReadDictFromString(conf.Read(p))
+            ##sys.modules['xxx'].xxxSizerItem.defaults_panel = ReadDictFromString(conf.Read(p))
+            xxx.xxxSizerItem.defaults_panel = ReadDictFromString(conf.Read(p))
         p = 'Prefs/sizeritem_defaults_control'
         if conf.HasEntry(p):
-            sys.modules['xxx'].xxxSizerItem.defaults_control = ReadDictFromString(conf.Read(p))
-
+            ##sys.modules['xxx'].xxxSizerItem.defaults_control = ReadDictFromString(conf.Read(p))
+            xxx.xxxSizerItem.defaults_control = ReadDictFromString(conf.Read(p))
+            
         # Add handlers
         wx.FileSystem.AddHandler(wx.MemoryFSHandler())
         # Create main frame
@@ -1783,9 +1789,12 @@ Please upgrade wxWidgets to %d.%d.%d or higher.''' % MinWxVersion)
         # Preferences
         wc.DeleteGroup('Prefs')
         wc.Write('Prefs/allowExec', conf.allowExec)
-        v = sys.modules['xxx'].xxxSizerItem.defaults_panel
+        import xxx
+        ##v = sys.modules['xxx'].xxxSizerItem.defaults_panel
+        v = xxx.xxxSizerItem.defaults_panel
         if v: wc.Write('Prefs/sizeritem_defaults_panel', DictToString(v))
-        v = sys.modules['xxx'].xxxSizerItem.defaults_control
+        ###v = sys.modules['xxx'].xxxSizerItem.defaults_control
+        v = xxx.xxxSizerItem.defaults_control
         if v: wc.Write('Prefs/sizeritem_defaults_control', DictToString(v))
         
         wc.Flush()

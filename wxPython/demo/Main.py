@@ -70,6 +70,7 @@ _treeList = [
         'SearchCtrl',
         'SizedControls',
         'AUI_MDI',
+        'TreeMixin',
         ]),
 
     # managed windows == things with a (optional) caption you can close
@@ -214,6 +215,7 @@ _treeList = [
         'Throbber',
         'Ticker',
         'TimeCtrl',
+        'TreeMixin',
         'VListBox',
         ]),
 
@@ -1688,7 +1690,7 @@ class wxPythonDemo(wx.Frame):
 
     def OnOpenWidgetInspector(self, evt):
         # Activate the widget inspection tool
-        from wx.lib.inspect import InspectionTool
+        from wx.lib.inspection import InspectionTool
         if not InspectionTool().initialized:
             InspectionTool().Init()
 
