@@ -1,0 +1,144 @@
+///////////////////////////////////////////////////////////////////////////////
+// Name:        wx/msgout.h
+// Purpose:     wxMessageOutput class. Shows a message to the user
+// Author:      Mattia Barbon
+// Modified by:
+// Created:     17.07.02
+// RCS-ID:      $Id$
+// Copyright:   (c) Mattia Barbon
+// Licence:     wxWindows licence
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef _WX_MSGOUT_H_
+#define _WX_MSGOUT_H_
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#include "wx/defs.h"
+#include "wx/chartype.h"
+#include "wx/strvararg.h"
+
+// ----------------------------------------------------------------------------
+// wxMessageOutput is a class abstracting formatted output target, i.e.
+// something you can printf() to
+// ----------------------------------------------------------------------------
+
+// NB: VC6 has a bug that causes linker errors if you have template methods
+//     in a class using __declspec(dllimport). The solution is to split such
+//     class into two classes, one that contains the template methods and does
+//     *not* use WXDLLIMPEXP_BASE and another class that contains the rest
+//     (with DLL linkage).
+class wxMessageOutputBase
+{
+public:
+    virtual ~wxMessageOutputBase() { }
+
+    // show a message to the user
+    // void Printf(const wxChar* format, ...)  ATTRIBUTE_PRINTF_2 = 0;
+    WX_DEFINE_VARARG_FUNC_VOID(Printf, DoPrintf)
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...)  ATTRIBUTE_PRINTF_2 = 0;
+};
+
+#ifdef __VISUALC__
+    // "non dll-interface class 'wxStringPrintfMixin' used as base interface
+    // for dll-interface class 'wxString'" -- this is OK in our case
+    #pragma warning (disable:4275)
+#endif
+
+class WXDLLIMPEXP_BASE wxMessageOutput : public wxMessageOutputBase
+{
+public:
+    virtual ~wxMessageOutput() { }
+
+    // gets the current wxMessageOutput object (may be NULL during
+    // initialization or shutdown)
+    static wxMessageOutput* Get();
+
+    // sets the global wxMessageOutput instance; returns the previous one
+    static wxMessageOutput* Set(wxMessageOutput* msgout);
+
+private:
+    static wxMessageOutput* ms_msgOut;
+};
+
+#ifdef __VISUALC__
+    #pragma warning (default:4275)
+#endif
+
+// ----------------------------------------------------------------------------
+// implementation showing the message to the user in "best" possible way: uses
+// native message box if available (currently only under Windows) and stderr
+// otherwise; unlike wxMessageOutputMessageBox this class is always safe to use
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxMessageOutputBest : public wxMessageOutput
+{
+public:
+    wxMessageOutputBest() { }
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
+};
+
+// ----------------------------------------------------------------------------
+// implementation which sends output to stderr
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxMessageOutputStderr : public wxMessageOutput
+{
+public:
+    wxMessageOutputStderr() { }
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
+};
+
+// ----------------------------------------------------------------------------
+// implementation which shows output in a message box
+// ----------------------------------------------------------------------------
+
+#if wxUSE_GUI
+
+class WXDLLIMPEXP_CORE wxMessageOutputMessageBox : public wxMessageOutput
+{
+public:
+    wxMessageOutputMessageBox() { }
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
+};
+
+#endif // wxUSE_GUI
+
+// ----------------------------------------------------------------------------
+// implementation using the native way of outputting debug messages
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxMessageOutputDebug : public wxMessageOutput
+{
+public:
+    wxMessageOutputDebug() { }
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
+};
+
+// ----------------------------------------------------------------------------
+// implementation using wxLog (mainly for backwards compatibility)
+// ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_BASE wxMessageOutputLog : public wxMessageOutput
+{
+public:
+    wxMessageOutputLog() { }
+
+protected:
+    virtual void DoPrintf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
+};
+
+#endif
+    // _WX_MSGOUT_H_
