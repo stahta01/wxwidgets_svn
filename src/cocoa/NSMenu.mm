@@ -19,13 +19,21 @@
 #include "wx/cocoa/ObjcPose.h"
 
 #import <Foundation/NSNotification.h>
-#include "wx/cocoa/objc/NSMenu.h"
+#import <AppKit/NSMenu.h>
 
 // ============================================================================
-// @class WXNSMenu
+// @class wxPoserNSMenu
 // ============================================================================
+@interface wxPoserNSMenu : NSMenu
+{
+}
 
-@implementation WXNSMenu : NSMenu
+- (void)dealloc;
+
+@end // wxPoserNSMenu
+
+WX_IMPLEMENT_POSER(wxPoserNSMenu);
+@implementation wxPoserNSMenu : NSMenu
 
 - (void)dealloc
 {
@@ -35,7 +43,7 @@
     [super dealloc];
 }
 
-@end // WXNSMenu
+@end // wxPoserNSMenu
 
 // ============================================================================
 // @class wxNSMenuNotificationObserver

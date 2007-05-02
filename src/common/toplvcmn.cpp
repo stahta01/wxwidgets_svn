@@ -39,7 +39,6 @@
 BEGIN_EVENT_TABLE(wxTopLevelWindowBase, wxWindow)
     EVT_CLOSE(wxTopLevelWindowBase::OnCloseWindow)
     EVT_SIZE(wxTopLevelWindowBase::OnSize)
-    EVT_WINDOW_DESTROY(wxTopLevelWindowBase::OnChildDestroy)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -234,7 +233,7 @@ void wxTopLevelWindowBase::DoCentre(int dir)
 
     if ( rectParent.IsEmpty() )
     {
-        // we were explicitly asked to centre this window on the entire screen
+        // we were explicitely asked to centre this window on the entire screen
         // or if we have no parent anyhow and so can't centre on it
         rectParent = rectDisplay;
     }
@@ -315,26 +314,6 @@ bool wxTopLevelWindowBase::IsAlwaysMaximized() const
 }
 
 // ----------------------------------------------------------------------------
-// icons
-// ----------------------------------------------------------------------------
-
-wxIcon wxTopLevelWindowBase::GetIcon() const
-{
-    return m_icons.IsEmpty() ? wxIcon() : m_icons.GetIcon( -1 );
-}
-
-void wxTopLevelWindowBase::SetIcon(const wxIcon& icon)
-{
-    // passing wxNullIcon to SetIcon() is possible (it means that we shouldn't
-    // have any icon), but adding an invalid icon to wxIconBundle is not
-    wxIconBundle icons;
-    if ( icon.Ok() )
-        icons.AddIcon(icon);
-
-    SetIcons(icons);
-}
-
-// ----------------------------------------------------------------------------
 // event handlers
 // ----------------------------------------------------------------------------
 
@@ -387,17 +366,6 @@ void wxTopLevelWindowBase::DoLayout()
 void wxTopLevelWindowBase::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 {
     Destroy();
-}
-
-void wxTopLevelWindowBase::OnChildDestroy(wxWindowDestroyEvent& event)
-{
-    event.Skip();
-
-    wxWindow * const win = event.GetWindow();
-    if ( win == m_winDefault )
-        m_winDefault = NULL;
-    if ( win == m_winTmpDefault )
-        m_winTmpDefault = NULL;
 }
 
 bool wxTopLevelWindowBase::SendIconizeEvent(bool iconized)

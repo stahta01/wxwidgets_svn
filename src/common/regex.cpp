@@ -249,7 +249,7 @@ wxString wxRegExImpl::GetErrorMsg(int errorcode, bool badconv) const
 
         (void)wx_regerror(errorcode, &m_RegEx, szcmbError, len);
 
-        szError = wxConvLibc.cMB2WX(szcmbError);
+        szError = wxConvertMB2WX(szcmbError);
         delete [] szcmbError;
     }
     else // regerror() returned 0
@@ -634,12 +634,21 @@ bool wxRegEx::Compile(const wxString& expr, int flags)
     return true;
 }
 
-bool wxRegEx::Matches(const wxString& str, int flags) const
+bool wxRegEx::Matches(const wxChar *str, int flags, size_t len) const
+{
+    wxCHECK_MSG( IsValid(), false, _T("must successfully Compile() first") );
+    (void)len;
+
+    return m_impl->Matches(WXREGEX_CHAR(str), flags WXREGEX_IF_NEED_LEN(len));
+}
+
+bool wxRegEx::Matches(const wxChar *str, int flags) const
 {
     wxCHECK_MSG( IsValid(), false, _T("must successfully Compile() first") );
 
-    return m_impl->Matches(WXREGEX_CHAR(str), flags
-                            WXREGEX_IF_NEED_LEN(str.length()));
+    return m_impl->Matches(WXREGEX_CHAR(str),
+                           flags
+                           WXREGEX_IF_NEED_LEN(wxStrlen(str)));
 }
 
 bool wxRegEx::GetMatch(size_t *start, size_t *len, size_t index) const

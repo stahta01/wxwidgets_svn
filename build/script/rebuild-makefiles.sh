@@ -156,12 +156,12 @@ rm ${WORKDIR}/archives/htb/*.*
 
 ######### dir index.tex rootdir
 do_texrtf wx manual.tex
-#do_texrtf book book.tex
-#do_texrtf svg dcsvg.tex contrib
-#do_texrtf ogl ogl.tex contrib
-#do_texrtf mmedia mmedia.tex contrib
-#do_texrtf gizmos manual.tex contrib
-#do_texrtf fl fl.tex contrib
+do_texrtf book book.tex
+do_texrtf svg dcsvg.tex contrib
+do_texrtf ogl ogl.tex contrib
+do_texrtf mmedia mmedia.tex contrib
+do_texrtf gizmos manual.tex contrib
+do_texrtf fl fl.tex contrib
 do_util_texrtf tex2rtf tex2rtf.tex 
 
 cd ${WORKDIR}/archives/
@@ -180,11 +180,11 @@ add_win_files ()
 {
 ### starts with wx***.zip
 
-for f in `find ${WINSRCDIR}/ -maxdepth 0 -name wx\*.zip ` ; do       
+for f in `find ${WINSRCDIR}/ -name wx\*.zip ` ; do       
        cp $f ${WORKDIR}/archives/win/`basename $f | sed -e "s/.zip//"`-${CURDATE}.zip
        done
 
-for f in `find ${WINSRCDIR}/ -maxdepth 0 -name wx\*.exe ` ; do       
+for f in `find ${WINSRCDIR}/ -name wx\*.exe ` ; do       
        cp $f ${WORKDIR}/archives/win/`basename $f | sed -e "s/.exe//"`-${CURDATE}.exe
        done
 

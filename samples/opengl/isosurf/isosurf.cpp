@@ -246,14 +246,14 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     Args(argc, argv);
 
     // Create the main frame window
     frame = new MyFrame(NULL, wxT("wxWidgets OpenGL Isosurf Sample"),
         wxDefaultPosition, wxDefaultSize);
+
+    // Give it an icon
+    frame->SetIcon(wxIcon(_T("mondrian")));
 
     // Make a menubar
     wxMenu *fileMenu = new wxMenu;
@@ -312,7 +312,7 @@ MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
     : wxFrame(frame, wxID_ANY, title, pos, size, style)
 {
     m_canvas = NULL;
-    SetIcon(wxICON(sample));
+    SetIcon(wxIcon(sample_xpm));
 }
 
 MyFrame::~MyFrame()

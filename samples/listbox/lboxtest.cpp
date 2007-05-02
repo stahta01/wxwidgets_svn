@@ -322,9 +322,6 @@ END_EVENT_TABLE()
 
 bool LboxTestApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame *frame = new LboxTestFrame(_T("wxListBox sample"));
     frame->Show();
 

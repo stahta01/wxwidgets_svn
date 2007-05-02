@@ -318,9 +318,23 @@ wxWindowBase::~wxWindowBase()
 
     wxASSERT_MSG( GetChildren().GetCount() == 0, wxT("children not destroyed") );
 
-    // notify the parent about this window destruction
+    // reset the top-level parent's default item if it is this widget
     if ( m_parent )
+    {
+        wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent((wxWindow*)this),
+                                              wxTopLevelWindow);
+
+        if ( tlw && tlw->GetDefaultItem() == this )
+            tlw->SetDefaultItem(NULL);
+        if ( tlw && tlw->GetTmpDefaultItem() == this )
+            tlw->SetTmpDefaultItem(NULL);
+    }
+
+    // reset the dangling pointer our parent window may keep to us
+    if ( m_parent )
+    {
         m_parent->RemoveChild(this);
+    }
 
 #if wxUSE_CARET
     delete m_caret;
@@ -844,55 +858,18 @@ bool wxWindowBase::Show(bool show)
     }
 }
 
-bool wxWindowBase::IsEnabled() const
-{
-    return IsThisEnabled() && (IsTopLevel() || !GetParent() || GetParent()->IsEnabled());
-}
-
-void wxWindowBase::NotifyWindowOnEnableChange(bool enabled)
-{
-#ifndef wxHAS_NATIVE_ENABLED_MANAGEMENT
-    DoEnable(enabled);
-#endif // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-
-    OnEnabled(enabled);
-
-    // If we are top-level then the logic doesn't apply - otherwise
-    // showing a modal dialog would result in total greying out (and ungreying
-    // out later) of everything which would be really ugly
-    if ( IsTopLevel() )
-        return;
-
-    for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
-          node;
-          node = node->GetNext() )
-    {
-        wxWindowBase * const child = node->GetData();
-        if ( !child->IsTopLevel() && child->IsThisEnabled() )
-            child->NotifyWindowOnEnableChange(enabled);
-    }
-}
-
 bool wxWindowBase::Enable(bool enable)
 {
-    if ( enable == IsThisEnabled() )
-        return false;
-
-    m_isEnabled = enable;
-
-#ifdef wxHAS_NATIVE_ENABLED_MANAGEMENT
-    DoEnable(enable);
-#else // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-    wxWindowBase * const parent = GetParent();
-    if( !IsTopLevel() && parent && !parent->IsEnabled() )
+    if ( enable != m_isEnabled )
     {
+        m_isEnabled = enable;
+
         return true;
     }
-#endif // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-
-    NotifyWindowOnEnableChange(enable);
-
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 bool wxWindowBase::IsShownOnScreen() const
@@ -944,8 +921,6 @@ bool wxWindowBase::Reparent(wxWindowBase *newParent)
         return false;
     }
 
-    const bool oldEnabledState = IsEnabled();
-
     // unlink this window from the existing parent.
     if ( oldParent )
     {
@@ -964,14 +939,6 @@ bool wxWindowBase::Reparent(wxWindowBase *newParent)
     else
     {
         wxTopLevelWindows.Append((wxWindow *)this);
-    }
-
-    // We need to notify window (and its subwindows) if by changing the parent
-    // we also change our enabled/disabled status.
-    const bool newEnabledState = IsEnabled();
-    if ( newEnabledState != oldEnabledState )
-    {
-        NotifyWindowOnEnableChange(newEnabledState);
     }
 
     return true;
@@ -2637,18 +2604,17 @@ bool wxWindowBase::TryParent(wxEvent& event)
 // keyboard navigation
 // ----------------------------------------------------------------------------
 
-// Navigates in the specified direction inside this window
-bool wxWindowBase::DoNavigateIn(int flags)
+// Navigates in the specified direction.
+bool wxWindowBase::Navigate(int flags)
 {
-#ifdef wxHAS_NATIVE_TAB_TRAVERSAL
-    // native code doesn't process our wxNavigationKeyEvents anyhow
-    return false;
-#else // !wxHAS_NATIVE_TAB_TRAVERSAL
     wxNavigationKeyEvent eventNav;
     eventNav.SetFlags(flags);
-    eventNav.SetEventObject(FindFocus());
-    return GetEventHandler()->ProcessEvent(eventNav);
-#endif // wxHAS_NATIVE_TAB_TRAVERSAL/!wxHAS_NATIVE_TAB_TRAVERSAL
+    eventNav.SetEventObject(this);
+    if ( GetParent()->GetEventHandler()->ProcessEvent(eventNav) )
+    {
+        return true;
+    }
+    return false;
 }
 
 void wxWindowBase::DoMoveInTabOrder(wxWindow *win, MoveKind move)

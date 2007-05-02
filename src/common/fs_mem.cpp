@@ -17,11 +17,10 @@
 
 #include "wx/fs_mem.h"
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/hash.h"
-    #include "wx/wxcrtvararg.h"
     #if wxUSE_GUI
         #include "wx/bitmap.h"
         #include "wx/image.h"

@@ -627,7 +627,7 @@ if BUILD_STC:
     msg('Preparing STC...')
     location = 'contrib/stc'
     #if os.name == 'nt':
-    STC_H = opj(WXDIR, 'include/wx/stc')
+    STC_H = opj(WXDIR, 'contrib', 'include/wx/stc')
     #else:
     #    STC_H = opj(WXPREFIX, 'include/wx-%d.%d/wx/stc' % (VER_MAJOR, VER_MINOR))
 
@@ -656,10 +656,6 @@ if BUILD_STC:
                              opj(location, "_stc_gendocs.i"),
                              ] + swig_deps)
 
-    stcLibs = libs[:]
-    if not MONOLITHIC and findLib('stc', libdirs):
-        stcLibs += makeLibName('stc')
-
     ext = Extension('_stc',
                     swig_sources,
 
@@ -667,7 +663,7 @@ if BUILD_STC:
                     define_macros = defines,
 
                     library_dirs = libdirs,
-                    libraries = stcLibs,
+                    libraries = libs + makeLibName('stc'),
 
                     extra_compile_args = cflags,
                     extra_link_args = lflags,
@@ -722,19 +718,13 @@ if BUILD_GIZMOS:
                             [ '%s/_treelist.i' % location])
 
     ext = Extension('_gizmos',
-                    [ '%s/treelistctrl.cpp'        % opj(location, 'wxCode/src'),
-                      '%s/gizmos/dynamicsash.cpp'  % opj(location, 'wxCode/src'),
-                      #'%s/gizmos/editlbox.cpp'     % opj(location, 'wxCode/src'),
-                      '%s/gizmos/ledctrl.cpp'      % opj(location, 'wxCode/src'),
-                      '%s/gizmos/splittree.cpp'    % opj(location, 'wxCode/src'),
-                      '%s/gizmos/statpict.cpp'     % opj(location, 'wxCode/src'),
-                      ] + swig_sources,
+                    [ '%s/treelistctrl.cpp' % opj(location, 'wxCode/src') ] + swig_sources,
 
                     include_dirs =  includes + [ location, opj(location, 'wxCode/include') ] + CONTRIBS_INC,
                     define_macros = defines,
 
                     library_dirs = libdirs,
-                    libraries = libs,
+                    libraries = libs + makeLibName('gizmos'),
 
                     extra_compile_args = cflags,
                     extra_link_args = lflags,

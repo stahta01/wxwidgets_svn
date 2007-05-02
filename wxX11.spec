@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.4
+%define ver2 2.8
+%define rel  4
 
 # Configurable settings (use --with(out) unicode on rpmbuild cmd line):
 %define unicode 0
@@ -144,7 +144,6 @@ wx/arrstr.h
 wx/beforestd.h
 wx/buffer.h
 wx/build.h
-wx/chartype.h
 wx/chkconf.h
 wx/clntdata.h
 wx/cmdline.h
@@ -167,7 +166,6 @@ wx/encconv.h
 wx/event.h
 wx/except.h
 wx/features.h
-wx/flags.h
 wx/ffile.h
 wx/file.h
 wx/fileconf.h
@@ -225,9 +223,6 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/stringimpl.h
-wx/stringops.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h
@@ -238,7 +233,6 @@ wx/timer.h
 wx/tokenzr.h
 wx/txtstrm.h
 wx/types.h
-wx/unichar.h
 wx/uri.h
 wx/utils.h
 wx/variant.h
@@ -248,8 +242,6 @@ wx/volume.h
 wx/wfstream.h
 wx/wx.h
 wx/wxchar.h
-wx/wxcrt.h
-wx/wxcrtvararg.h
 wx/wxprec.h
 wx/xti.h
 wx/xtistrm.h

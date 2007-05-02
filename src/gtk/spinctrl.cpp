@@ -18,7 +18,6 @@
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"    // for wxEVT_COMMAND_TEXT_UPDATED
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/gtk/private.h"
@@ -37,6 +36,8 @@ extern "C" {
 static void
 gtk_value_changed(GtkSpinButton* spinbutton, wxSpinCtrl* win)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     win->m_pos = int(gtk_spin_button_get_value(spinbutton));
     if (!win->m_hasVMT || g_blockEventsOnDrag || win->m_blockScrollEvent)
         return;
@@ -63,12 +64,14 @@ extern "C" {
 static void
 gtk_changed(GtkSpinButton* spinbutton, wxSpinCtrl* win)
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!win->m_hasVMT || win->m_blockScrollEvent)
         return;
 
     wxCommandEvent event( wxEVT_COMMAND_TEXT_UPDATED, win->GetId() );
     event.SetEventObject( win );
-    event.SetString( GTK_ENTRY(spinbutton)->text );
 
     // see above
     event.SetInt(win->m_pos);
@@ -98,6 +101,9 @@ bool wxSpinCtrl::Create(wxWindow *parent, wxWindowID id,
                         int min, int max, int initial,
                         const wxString& name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {

@@ -19,7 +19,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -40,7 +40,7 @@
     #include "wx/toolbar.h"
     #include "wx/choicdlg.h"
     #include "wx/filedlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpdlg.h"

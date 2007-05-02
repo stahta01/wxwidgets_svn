@@ -753,6 +753,10 @@ bool wxWindowsPrintDialog::ConvertToNative( wxPrintDialogData &data )
         pd->Flags |= PD_PAGENUMS;
     if ( data.GetEnableHelp() )
         pd->Flags |= PD_SHOWHELP;
+#if WXWIN_COMPATIBILITY_2_4
+    if ( data.GetSetupDialog() )
+        pd->Flags |= PD_PRINTSETUP;
+#endif
 
     return true;
 }
@@ -808,7 +812,9 @@ bool wxWindowsPrintDialog::ConvertFromNative( wxPrintDialogData &data )
     data.EnableSelection( ((pd->Flags & PD_NOSELECTION) != PD_NOSELECTION) );
     data.EnablePageNumbers( ((pd->Flags & PD_NOPAGENUMS) != PD_NOPAGENUMS) );
     data.EnableHelp( ((pd->Flags & PD_SHOWHELP) == PD_SHOWHELP) );
-
+#if WXWIN_COMPATIBILITY_2_4
+    data.SetSetupDialog( ((pd->Flags & PD_PRINTSETUP) == PD_PRINTSETUP) );
+#endif
     return true;
 }
 

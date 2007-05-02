@@ -109,6 +109,97 @@
 // implementation
 // ============================================================================
 
+#if WXWIN_COMPATIBILITY_2_4
+
+wxChar *
+copystring (const wxChar *s)
+{
+    if (s == NULL) s = wxEmptyString;
+    size_t len = wxStrlen (s) + 1;
+
+    wxChar *news = new wxChar[len];
+    memcpy (news, s, len * sizeof(wxChar));    // Should be the fastest
+
+    return news;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
+// ----------------------------------------------------------------------------
+// String <-> Number conversions (deprecated)
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+WXDLLIMPEXP_DATA_BASE(const wxChar *) wxFloatToStringStr = wxT("%.2f");
+WXDLLIMPEXP_DATA_BASE(const wxChar *) wxDoubleToStringStr = wxT("%.2f");
+
+void
+StringToFloat (const wxChar *s, float *number)
+{
+    if (s && *s && number)
+        *number = (float) wxStrtod (s, (wxChar **) NULL);
+}
+
+void
+StringToDouble (const wxChar *s, double *number)
+{
+    if (s && *s && number)
+        *number = wxStrtod (s, (wxChar **) NULL);
+}
+
+wxChar *
+FloatToString (float number, const wxChar *fmt)
+{
+    static wxChar buf[256];
+
+    wxSprintf (buf, fmt, number);
+    return buf;
+}
+
+wxChar *
+DoubleToString (double number, const wxChar *fmt)
+{
+    static wxChar buf[256];
+
+    wxSprintf (buf, fmt, number);
+    return buf;
+}
+
+void
+StringToInt (const wxChar *s, int *number)
+{
+    if (s && *s && number)
+        *number = (int) wxStrtol (s, (wxChar **) NULL, 10);
+}
+
+void
+StringToLong (const wxChar *s, long *number)
+{
+    if (s && *s && number)
+        *number = wxStrtol (s, (wxChar **) NULL, 10);
+}
+
+wxChar *
+IntToString (int number)
+{
+    static wxChar buf[20];
+
+    wxSprintf (buf, wxT("%d"), number);
+    return buf;
+}
+
+wxChar *
+LongToString (long number)
+{
+    static wxChar buf[20];
+
+    wxSprintf (buf, wxT("%ld"), number);
+    return buf;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 // Array used in DecToHex conversion routine.
 static wxChar hexArray[] = wxT("0123456789ABCDEF");
 
@@ -848,6 +939,14 @@ bool wxYieldIfNeeded()
     return wxTheApp && wxTheApp->Yield(true);
 }
 
+#endif // wxUSE_BASE
+
+// ============================================================================
+// GUI-only functions from now on
+// ============================================================================
+
+#if wxUSE_GUI
+
 // Id generation
 static long wxCurrentId = 100;
 
@@ -870,14 +969,6 @@ wxRegisterId (long id)
     wxCurrentId = id + 1;
 }
 
-#endif // wxUSE_BASE
-
-// ============================================================================
-// GUI-only functions from now on
-// ============================================================================
-
-#if wxUSE_GUI
-
 // ----------------------------------------------------------------------------
 // Menu accelerators related functions
 // ----------------------------------------------------------------------------
@@ -897,6 +988,7 @@ wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
     }
     else
     {
+        // MYcopystring - for easier search...
         out = new wxChar[s.length() + 1];
         wxStrcpy(out, s.c_str());
     }

@@ -80,7 +80,6 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -107,6 +106,8 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 
     SetValue(value);
 
+    ChangeFont(false);
+
     XtAddCallback (buttonWidget, XmNselectionCallback,
                    (XtCallbackProc) wxComboBoxCallback,
                    (XtPointer) this);
@@ -118,9 +119,10 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
     if( size.x != wxDefaultCoord ) best.x = size.x;
     if( size.y != wxDefaultCoord ) best.y = size.y;
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -195,8 +197,10 @@ void wxComboBox::SetValue(const wxString& value)
 {
     m_inSetValue = true;
 
+    // Fix crash; probably an OpenMotif bug
+    const char* val = value.c_str() ? value.c_str() : "";
     XtVaSetValues( GetXmText(this),
-                   XmNvalue, value.mb_str(),
+                   XmNvalue, wxConstCast(val, char),
                    NULL);
 
     m_inSetValue = false;
@@ -341,7 +345,7 @@ wxTextPos wxComboBox::GetLastPosition() const
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
     XmTextReplace( GetXmText(this), (XmTextPosition)from, (XmTextPosition)to,
-                   wxConstCast(value.mb_str(), char) );
+                   wxConstCast(value.c_str(), char) );
 }
 
 void wxComboBox::Remove(long from, long to)
@@ -405,7 +409,7 @@ void  wxComboBoxCallback (Widget WXUNUSED(w), XtPointer clientData,
 
 void wxComboBox::ChangeFont(bool keepOriginalSize)
 {
-    if( m_font.Ok() && m_mainWidget != NULL )
+    if( m_font.Ok() )
     {
         wxDoChangeFont( GetXmText(this), m_font );
         wxDoChangeFont( GetXmList(this), m_font );

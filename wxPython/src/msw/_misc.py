@@ -316,6 +316,11 @@ def EndBusyCursor(*args):
   """EndBusyCursor()"""
   return _misc_.EndBusyCursor(*args)
 
+def GetElapsedTime(*args, **kwargs):
+  """GetElapsedTime(bool resetTimer=True) -> long"""
+  return _misc_.GetElapsedTime(*args, **kwargs)
+GetElapsedTime = wx._deprecated(GetElapsedTime) 
+
 def IsBusy(*args):
   """IsBusy() -> bool"""
   return _misc_.IsBusy(*args)
@@ -327,6 +332,10 @@ def Now(*args):
 def Shell(*args, **kwargs):
   """Shell(String command=EmptyString) -> bool"""
   return _misc_.Shell(*args, **kwargs)
+
+def StartTimer(*args):
+  """StartTimer()"""
+  return _misc_.StartTimer(*args)
 
 def GetOsVersion(*args):
   """GetOsVersion() -> (platform, major, minor)"""
@@ -1986,8 +1995,6 @@ EXEC_SYNC = _misc_.EXEC_SYNC
 EXEC_NOHIDE = _misc_.EXEC_NOHIDE
 EXEC_MAKE_GROUP_LEADER = _misc_.EXEC_MAKE_GROUP_LEADER
 EXEC_NODISABLE = _misc_.EXEC_NODISABLE
-EXEC_NOEVENTS = _misc_.EXEC_NOEVENTS
-EXEC_BLOCK = _misc_.EXEC_BLOCK
 
 def Execute(*args, **kwargs):
   """Execute(String command, int flags=EXEC_ASYNC, Process process=None) -> long"""
@@ -2714,16 +2721,6 @@ class ArtProvider(object):
         return _misc_.ArtProvider_GetIcon(*args, **kwargs)
 
     GetIcon = staticmethod(GetIcon)
-    def GetIconBundle(*args, **kwargs):
-        """
-        GetIconBundle(wxArtID id, wxArtClient client=wxART_OTHER) -> wxIconBundle
-
-        Query the providers for iconbundle with given ID and return it. Return
-        wx.NullIconBundle if no provider provides it.
-        """
-        return _misc_.ArtProvider_GetIconBundle(*args, **kwargs)
-
-    GetIconBundle = staticmethod(GetIconBundle)
     def GetSizeHint(*args, **kwargs):
         """
         GetSizeHint(String client, bool platform_dependent=False) -> Size
@@ -2747,7 +2744,6 @@ ART_CMN_DIALOG = cvar.ART_CMN_DIALOG
 ART_HELP_BROWSER = cvar.ART_HELP_BROWSER
 ART_MESSAGE_BOX = cvar.ART_MESSAGE_BOX
 ART_BUTTON = cvar.ART_BUTTON
-ART_LIST = cvar.ART_LIST
 ART_OTHER = cvar.ART_OTHER
 ART_ADD_BOOKMARK = cvar.ART_ADD_BOOKMARK
 ART_DEL_BOOKMARK = cvar.ART_DEL_BOOKMARK
@@ -2850,15 +2846,6 @@ def ArtProvider_GetIcon(*args, **kwargs):
     wx.NullIcon if no provider provides it.
     """
   return _misc_.ArtProvider_GetIcon(*args, **kwargs)
-
-def ArtProvider_GetIconBundle(*args, **kwargs):
-  """
-    ArtProvider_GetIconBundle(wxArtID id, wxArtClient client=wxART_OTHER) -> wxIconBundle
-
-    Query the providers for iconbundle with given ID and return it. Return
-    wx.NullIconBundle if no provider provides it.
-    """
-  return _misc_.ArtProvider_GetIconBundle(*args, **kwargs)
 
 def ArtProvider_GetSizeHint(*args, **kwargs):
   """
@@ -3320,25 +3307,7 @@ class FileConfig(ConfigBase):
         _misc_.FileConfig_swiginit(self,_misc_.new_FileConfig(*args, **kwargs))
     __swig_destroy__ = _misc_.delete_FileConfig
     __del__ = lambda self : None;
-    def GetGlobalFileName(*args, **kwargs):
-        """GetGlobalFileName(String szFile) -> String"""
-        return _misc_.FileConfig_GetGlobalFileName(*args, **kwargs)
-
-    GetGlobalFileName = staticmethod(GetGlobalFileName)
-    def GetLocalFileName(*args, **kwargs):
-        """GetLocalFileName(String szFile, int style=0) -> String"""
-        return _misc_.FileConfig_GetLocalFileName(*args, **kwargs)
-
-    GetLocalFileName = staticmethod(GetLocalFileName)
 _misc_.FileConfig_swigregister(FileConfig)
-
-def FileConfig_GetGlobalFileName(*args, **kwargs):
-  """FileConfig_GetGlobalFileName(String szFile) -> String"""
-  return _misc_.FileConfig_GetGlobalFileName(*args, **kwargs)
-
-def FileConfig_GetLocalFileName(*args, **kwargs):
-  """FileConfig_GetLocalFileName(String szFile, int style=0) -> String"""
-  return _misc_.FileConfig_GetLocalFileName(*args, **kwargs)
 
 class ConfigPathChanger(object):
     """
@@ -3738,6 +3707,17 @@ class DateTime(object):
         """GetLastWeekDay(self, int weekday, int month=Inv_Month, int year=Inv_Year) -> DateTime"""
         return _misc_.DateTime_GetLastWeekDay(*args, **kwargs)
 
+    def SetToTheWeek(*args, **kwargs):
+        """SetToTheWeek(self, int numWeek, int weekday=Mon, int flags=Monday_First) -> bool"""
+        return _misc_.DateTime_SetToTheWeek(*args, **kwargs)
+
+    def GetWeek(*args, **kwargs):
+        """GetWeek(self, int numWeek, int weekday=Mon, int flags=Monday_First) -> DateTime"""
+        return _misc_.DateTime_GetWeek(*args, **kwargs)
+
+    SetToTheWeek = wx._deprecated(SetToTheWeek, "SetToTheWeek is deprecated, use (static) SetToWeekOfYear instead")
+    GetWeek = wx._deprecated(GetWeek, "GetWeek is deprecated, use GetWeekOfYear instead")
+
     def SetToWeekOfYear(*args, **kwargs):
         """SetToWeekOfYear(int year, int numWeek, int weekday=Mon) -> DateTime"""
         return _misc_.DateTime_SetToWeekOfYear(*args, **kwargs)
@@ -4056,6 +4036,7 @@ class DateTime(object):
     RataDie = property(GetRataDie,doc="See `GetRataDie`") 
     Second = property(GetSecond,SetSecond,doc="See `GetSecond` and `SetSecond`") 
     Ticks = property(GetTicks,doc="See `GetTicks`") 
+    Week = property(GetWeek,doc="See `GetWeek`") 
     WeekDay = property(GetWeekDay,doc="See `GetWeekDay`") 
     WeekDayInSameWeek = property(GetWeekDayInSameWeek,doc="See `GetWeekDayInSameWeek`") 
     WeekOfMonth = property(GetWeekOfMonth,doc="See `GetWeekOfMonth`") 
@@ -5691,22 +5672,11 @@ class Clipboard(_core.Object):
         """
         UsePrimarySelection(self, bool primary=True)
 
-        On platforms supporting it (the X11 based platforms), selects the so
-        called PRIMARY SELECTION as the clipboard as opposed to the normal
-        clipboard, if primary is True.  On other platforms all clipboard
-        operations fail when using the primary selection.  This allows code
-        supporting the primary selection to be written without ill effects on
-        the other platforms.
+        On platforms supporting it (the X11 based platforms), selects the
+        so called PRIMARY SELECTION as the clipboard as opposed to the
+        normal clipboard, if primary is True.
         """
         return _misc_.Clipboard_UsePrimarySelection(*args, **kwargs)
-
-    def IsUsingPrimarySelection(*args, **kwargs):
-        """
-        IsUsingPrimarySelection(self) -> bool
-
-        Return true if we're using primary selection
-        """
-        return _misc_.Clipboard_IsUsingPrimarySelection(*args, **kwargs)
 
     def Get(*args, **kwargs):
         """

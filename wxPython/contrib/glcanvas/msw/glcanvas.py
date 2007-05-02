@@ -97,21 +97,19 @@ class GLCanvas(_core.Window):
     __repr__ = _swig_repr
     def __init__(self, *args, **kwargs): 
         """
-        __init__(self, Window parent, int id=-1, int attribList=None, Point pos=DefaultPosition, 
-            Size size=DefaultSize, 
-            long style=0, String name=GLCanvasNameStr, Palette palette=wxNullPalette) -> GLCanvas
+        __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
+            Size size=DefaultSize, long style=0, String name=GLCanvasNameStr, 
+            int attribList=None, Palette palette=wxNullPalette) -> GLCanvas
         """
         _glcanvas.GLCanvas_swiginit(self,_glcanvas.new_GLCanvas(*args, **kwargs))
         self._setOORInfo(self)
 
-    def Create(*args, **kwargs):
+    def SetCurrent(*args):
         """
-        Create(self, Window parent, int id=ID_ANY, Point pos=DefaultPosition, 
-            Size size=DefaultSize, long style=0, String name=wxGLCanvasName, 
-            int attribList=None, 
-            Palette palette=wxNullPalette) -> bool
+        SetCurrent(self)
+        SetCurrent(self, GLContext RC)
         """
-        return _glcanvas.GLCanvas_Create(*args, **kwargs)
+        return _glcanvas.GLCanvas_SetCurrent(*args)
 
     def SetColour(*args, **kwargs):
         """SetColour(self, String colour)"""
@@ -125,12 +123,9 @@ class GLCanvas(_core.Window):
         """GetContext(self) -> GLContext"""
         return _glcanvas.GLCanvas_GetContext(*args, **kwargs)
 
-    def SetCurrent(*args):
-        """
-        SetCurrent(self, GLContext context)
-        SetCurrent(self)
-        """
-        return _glcanvas.GLCanvas_SetCurrent(*args)
+    def SetupPixelFormat(*args, **kwargs):
+        """SetupPixelFormat(self, int attribList=None)"""
+        return _glcanvas.GLCanvas_SetupPixelFormat(*args, **kwargs)
 
     def SetupPalette(*args, **kwargs):
         """SetupPalette(self, Palette palette)"""

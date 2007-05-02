@@ -704,7 +704,7 @@ wxMenuItem::wxMenuItem(wxMenu *parentMenu,
                        wxMenu *subMenu)
           : wxMenuItemBase(parentMenu, id, text, help, kind, subMenu)
 {
-    Init();
+    Init(text);
 }
 
 wxMenuItem::wxMenuItem(wxMenu *parentMenu,
@@ -716,15 +716,15 @@ wxMenuItem::wxMenuItem(wxMenu *parentMenu,
           : wxMenuItemBase(parentMenu, id, text, help,
                            isCheckable ? wxITEM_CHECK : wxITEM_NORMAL, subMenu)
 {
-    Init();
+    Init(text);
 }
 
-void wxMenuItem::Init()
+void wxMenuItem::Init(const wxString& text)
 {
     m_labelWidget = (GtkWidget *) NULL;
     m_menuItem = (GtkWidget *) NULL;
 
-    DoSetText(m_text);
+    DoSetText(text);
 }
 
 wxMenuItem::~wxMenuItem()
@@ -834,9 +834,7 @@ void wxMenuItem::SetText( const wxString& string )
 void wxMenuItem::DoSetText( const wxString& str )
 {
     // '\t' is the deliminator indicating a hot key
-    wxString text;
-    text.reserve(str.length());
-
+    m_text.Empty();
     const wxChar *pc = str;
     while ( (*pc != wxT('\0')) && (*pc != wxT('\t')) )
     {
@@ -844,32 +842,30 @@ void wxMenuItem::DoSetText( const wxString& str )
         {
             // "&" is doubled to indicate "&" instead of accelerator
             ++pc;
-            text << wxT('&');
+            m_text << wxT('&');
         }
         else if (*pc == wxT('&'))
         {
-            text << wxT('_');
+            m_text << wxT('_');
         }
         else if ( *pc == wxT('_') )    // escape underscores
         {
-            text << wxT("__");
+            m_text << wxT("__");
         }
         else
         {
-            text << *pc;
+            m_text << *pc;
         }
         ++pc;
     }
 
     m_hotKey = wxEmptyString;
 
-    if ( *pc == wxT('\t') )
+    if(*pc == wxT('\t'))
     {
        pc++;
        m_hotKey = pc;
     }
-
-    m_text = text;
 }
 
 #if wxUSE_ACCEL
@@ -1434,7 +1430,7 @@ static wxString GetGtkHotKey( const wxMenuItem& item )
                 if ( code < 127 )
                 {
                     wxString name = wxGTK_CONV_BACK( gdk_keyval_name((guint)code) );
-                    if ( !name.empty() )
+                    if ( name )
                     {
                         hotkey << name;
                         break;

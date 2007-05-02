@@ -171,15 +171,14 @@ STANDARD_CURSOR   = Cursor.__new__(Cursor)
 %immutable;
 %threadWrapperOff;
 
-const wxBitmap     wxNullBitmap;
-const wxIcon       wxNullIcon;
-const wxCursor     wxNullCursor;
-const wxPen        wxNullPen;
-const wxBrush      wxNullBrush;
-const wxPalette    wxNullPalette;
-const wxFont       wxNullFont;
-const wxColour     wxNullColour;
-const wxIconBundle wxNullIconBundle;
+const wxBitmap wxNullBitmap;
+const wxIcon   wxNullIcon;
+const wxCursor wxNullCursor;
+const wxPen    wxNullPen;
+const wxBrush  wxNullBrush;
+const wxPalette wxNullPalette;
+const wxFont   wxNullFont;
+const wxColour wxNullColour;
 
 %threadWrapperOn;
 %mutable;
@@ -199,6 +198,14 @@ class wxPenList : public wxGDIObjListBase {
 public:
 
     wxPen* FindOrCreatePen(const wxColour& colour, int width, int style);
+
+    void AddPen(wxPen* pen);
+    void RemovePen(wxPen* pen);
+    %pythoncode {
+        AddPen = wx._deprecated(AddPen)
+        RemovePen = wx._deprecated(RemovePen)
+    }            
+//    int GetCount();
 };
 
 
@@ -206,6 +213,14 @@ class wxBrushList : public wxGDIObjListBase {
 public:
 
     wxBrush * FindOrCreateBrush(const wxColour& colour, int style=wxSOLID);
+
+    void AddBrush(wxBrush *brush);
+    void RemoveBrush(wxBrush *brush);
+    %pythoncode {
+        AddBrush = wx._deprecated(AddBrush)
+        RemoveBrush = wx._deprecated(RemoveBrush)
+    }
+//    int GetCount();
 };
 
 
@@ -216,6 +231,15 @@ public:
                               bool underline = false,
                               const wxString& facename = wxPyEmptyString,
                               wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
+
+    void AddFont(wxFont* font);
+    void RemoveFont(wxFont *font);
+    %pythoncode {
+        AddFont = wx._deprecated(AddFont)
+        RemoveFont = wx._deprecated(RemoveFont)
+    }
+
+//    int GetCount();
 };
 
 //---------------------------------------------------------------------------

@@ -1083,7 +1083,7 @@ static wxString ReadPathFromKDEConfig(const wxString& request)
     wxString str;
     wxArrayString output;
     if(wxExecute(wxT("kde-config --path ")+request, output) == 0 &&
-       output.GetCount() > 0)
+       output.Count() > 0)
         str = output.Item(0);
     return str;
 }
@@ -1111,7 +1111,7 @@ static wxString GetKDEThemeInFile(const wxFileName& filename)
 static wxString GetKDETheme(const wxArrayString& basedirs)
 {
     wxString theme;
-    for(size_t i = 0; i < basedirs.GetCount(); i++) {
+    for(size_t i = 0; i < basedirs.Count(); i++) {
         wxFileName filename(basedirs.Item(i), wxEmptyString);
         filename.AppendDir( wxT("share") );
         filename.AppendDir( wxT("config") );
@@ -1122,7 +1122,7 @@ static wxString GetKDETheme(const wxArrayString& basedirs)
     }
     // If $KDEDIRS and $KDEDIR were set, we try nothing more. Otherwise, we
     // try to get the configuration file with 'kde-config'.
-    if(basedirs.GetCount() > 1)
+    if(basedirs.Count() > 1)
         return theme;
     wxString paths = ReadPathFromKDEConfig(wxT("config"));
     if(! paths.IsEmpty()) {
@@ -1145,7 +1145,7 @@ static void GetKDEIconDirs(const wxArrayString& basedirs,
     if(theme.IsEmpty())
         theme = wxT("default.kde");
 
-    for(size_t i = 0; i < basedirs.GetCount(); i++) {
+    for(size_t i = 0; i < basedirs.Count(); i++) {
         wxFileName dirname(basedirs.Item(i), wxEmptyString);
         dirname.AppendDir( wxT("share") );
         dirname.AppendDir( wxT("icons") );
@@ -1157,7 +1157,7 @@ static void GetKDEIconDirs(const wxArrayString& basedirs,
     }
 
     // If $KDEDIRS and $KDEDIR were not set, use 'kde-config'
-    if(basedirs.GetCount() > 1)
+    if(basedirs.Count() > 1)
         return;
     wxString paths = ReadPathFromKDEConfig(wxT("icon"));
     if(! paths.IsEmpty()) {
@@ -1178,7 +1178,7 @@ static void GetKDEIconDirs(const wxArrayString& basedirs,
 static void GetKDEMimeDirs(const wxArrayString& basedirs,
                            wxArrayString& mimedirs)
 {
-    for(size_t i = 0; i < basedirs.GetCount(); i++) {
+    for(size_t i = 0; i < basedirs.Count(); i++) {
         wxFileName dirname(basedirs.Item(i), wxEmptyString);
         dirname.AppendDir( wxT("share") );
         dirname.AppendDir( wxT("mimelnk") );
@@ -1187,7 +1187,7 @@ static void GetKDEMimeDirs(const wxArrayString& basedirs,
     }
 
     // If $KDEDIRS and $KDEDIR were not set, use 'kde-config'
-    if(basedirs.GetCount() > 1)
+    if(basedirs.Count() > 1)
         return;
     wxString paths = ReadPathFromKDEConfig(wxT("mime"));
     if(! paths.IsEmpty()) {
@@ -1206,7 +1206,7 @@ static void GetKDEMimeDirs(const wxArrayString& basedirs,
 static void GetKDEAppsDirs(const wxArrayString& basedirs,
                            wxArrayString& appsdirs)
 {
-    for(size_t i = 0; i < basedirs.GetCount(); i++) {
+    for(size_t i = 0; i < basedirs.Count(); i++) {
         wxFileName dirname(basedirs.Item(i), wxEmptyString);
         dirname.AppendDir( wxT("share") );
         dirname.AppendDir( wxT("applnk") );
@@ -1215,7 +1215,7 @@ static void GetKDEAppsDirs(const wxArrayString& basedirs,
     }
 
     // If $KDEDIRS and $KDEDIR were not set, use 'kde-config'
-    if(basedirs.GetCount() > 1)
+    if(basedirs.Count() > 1)
         return;
     wxString paths = ReadPathFromKDEConfig(wxT("apps"));
     if(! paths.IsEmpty()) {
@@ -1425,26 +1425,13 @@ wxFileTypeImpl::SetCommand(const wxString& cmd,
     wxMimeTypeCommands *entry = new wxMimeTypeCommands();
     entry->Add(verb + wxT("=")  + cmd + wxT(" %s "));
 
-    bool ok = false;
+    bool ok = true;
     size_t nCount = strTypes.GetCount();
     for ( size_t i = 0; i < nCount; i++ )
     {
-        if ( m_manager->DoAssociation
-                        (
-                            strTypes[i],
-                            strIcon,
-                            entry,
-                            strExtensions,
-                            strDesc
-                        ) )
-        {
-            // DoAssociation() took ownership of entry, don't delete it below
-            ok = true;
-        }
+        if (!m_manager->DoAssociation(strTypes[i], strIcon, entry, strExtensions, strDesc))
+            ok = false;
     }
-
-    if ( !ok )
-        delete entry;
 
     return ok;
 }
@@ -1464,27 +1451,22 @@ bool wxFileTypeImpl::SetDefaultIcon(const wxString& strIcon, int WXUNUSED(index)
         return false;
 
     wxMimeTypeCommands *entry = new wxMimeTypeCommands();
-    bool ok = false;
+    bool ok = true;
     size_t nCount = strTypes.GetCount();
     for ( size_t i = 0; i < nCount; i++ )
     {
-        if ( m_manager->DoAssociation
-                        (
+        if ( !m_manager->DoAssociation
+                         (
                             strTypes[i],
                             strIcon,
                             entry,
                             strExtensions,
                             strDesc
-                        ) )
+                         ) )
         {
-            // we don't need to free entry now, DoAssociation() took ownership
-            // of it
-            ok = true;
+            ok = false;
         }
     }
-
-    if ( !ok )
-        delete entry;
 
     return ok;
 }
@@ -2101,10 +2083,10 @@ int wxMimeTypesManagerImpl::AddToMimeData(const wxString& strType,
     }
 
     // check data integrity
-    wxASSERT( m_aTypes.GetCount() == m_aEntries.GetCount() &&
-              m_aTypes.GetCount() == m_aExtensions.GetCount() &&
-              m_aTypes.GetCount() == m_aIcons.GetCount() &&
-              m_aTypes.GetCount() == m_aDescriptions.GetCount() );
+    wxASSERT( m_aTypes.Count() == m_aEntries.Count() &&
+              m_aTypes.Count() == m_aExtensions.Count() &&
+              m_aTypes.Count() == m_aIcons.Count() &&
+              m_aTypes.Count() == m_aDescriptions.Count() );
 
     return nIndex;
 }
@@ -2162,7 +2144,7 @@ wxFileType * wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mim
     index = wxNOT_FOUND;
     wxString strCategory = mimetype.BeforeFirst(wxT('/'));
 
-    size_t nCount = m_aTypes.GetCount();
+    size_t nCount = m_aTypes.Count();
     for ( size_t n = 0; n < nCount; n++ )
     {
         if ( (m_aTypes[n].BeforeFirst(wxT('/')) == strCategory ) &&
@@ -2871,10 +2853,10 @@ bool wxMimeTypesManagerImpl::Unassociate(wxFileType *ft)
         }
     }
     // check data integrity
-    wxASSERT( m_aTypes.GetCount() == m_aEntries.GetCount() &&
-            m_aTypes.GetCount() == m_aExtensions.GetCount() &&
-            m_aTypes.GetCount() == m_aIcons.GetCount() &&
-            m_aTypes.GetCount() == m_aDescriptions.GetCount() );
+    wxASSERT( m_aTypes.Count() == m_aEntries.Count() &&
+            m_aTypes.Count() == m_aExtensions.Count() &&
+            m_aTypes.Count() == m_aIcons.Count() &&
+            m_aTypes.Count() == m_aDescriptions.Count() );
 
     return true;
 }

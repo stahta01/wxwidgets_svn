@@ -51,24 +51,6 @@ static void wxGtkOnRemoveTag(GtkTextBuffer *buffer,
 }
 }
 
-// remove all tags starting with the given prefix from the start..end range
-static void
-wxGtkTextRemoveTagsWithPrefix(GtkTextBuffer *text_buffer,
-                              const char *prefix,
-                              GtkTextIter *start,
-                              GtkTextIter *end)
-{
-    gulong remove_handler_id = g_signal_connect
-                               (
-                                text_buffer,
-                                "remove_tag",
-                                G_CALLBACK(wxGtkOnRemoveTag),
-                                gpointer(prefix)
-                               );
-    gtk_text_buffer_remove_all_tags(text_buffer, start, end);
-    g_signal_handler_disconnect(text_buffer, remove_handler_id);
-}
-
 static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
                                        GtkTextBuffer *text_buffer,
                                        const wxTextAttr& attr,
@@ -78,10 +60,13 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
     static gchar buf[1024];
     GtkTextTag *tag;
 
+    gulong remove_handler_id = g_signal_connect (text_buffer, "remove_tag",
+            G_CALLBACK (wxGtkOnRemoveTag), gpointer("WX"));
+    gtk_text_buffer_remove_all_tags(text_buffer, start, end);
+    g_signal_handler_disconnect (text_buffer, remove_handler_id);
+
     if (attr.HasFont())
     {
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXFONT", start, end);
-
         PangoFontDescription *font_description = attr.GetFont().GetNativeFontInfo()->description;
         wxGtkString font_string(pango_font_description_to_string(font_description));
         g_snprintf(buf, sizeof(buf), "WXFONT %s", font_string.c_str());
@@ -109,8 +94,6 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
 
     if (attr.HasTextColour())
     {
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXFORECOLOR", start, end);
-
         const GdkColor *colFg = attr.GetTextColour().GetColor();
         g_snprintf(buf, sizeof(buf), "WXFORECOLOR %d %d %d",
                    colFg->red, colFg->green, colFg->blue);
@@ -124,8 +107,6 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
 
     if (attr.HasBackgroundColour())
     {
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXBACKCOLOR", start, end);
-
         const GdkColor *colBg = attr.GetBackgroundColour().GetColor();
         g_snprintf(buf, sizeof(buf), "WXBACKCOLOR %d %d %d",
                    colBg->red, colBg->green, colBg->blue);
@@ -145,7 +126,11 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
                                           gtk_text_iter_get_line(start) );
         gtk_text_iter_forward_line(&para_end);
 
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXALIGNMENT", start, end);
+        remove_handler_id = g_signal_connect (text_buffer, "remove_tag",
+                                              G_CALLBACK(wxGtkOnRemoveTag),
+                                              gpointer("WXALIGNMENT"));
+        gtk_text_buffer_remove_all_tags( text_buffer, &para_start, &para_end );
+        g_signal_handler_disconnect (text_buffer, remove_handler_id);
 
         GtkJustification align;
         switch (attr.GetAlignment())
@@ -182,7 +167,11 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
                                           gtk_text_iter_get_line(start) );
         gtk_text_iter_forward_line(&para_end);
 
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXINDENT", start, end);
+        remove_handler_id = g_signal_connect (text_buffer, "remove_tag",
+                                              G_CALLBACK(wxGtkOnRemoveTag),
+                                              gpointer("WXINDENT"));
+        gtk_text_buffer_remove_all_tags( text_buffer, &para_start, &para_end );
+        g_signal_handler_disconnect (text_buffer, remove_handler_id);
 
         // Convert indent from 1/10th of a mm into pixels
         float factor;
@@ -231,7 +220,11 @@ static void wxGtkTextApplyTagsFromAttr(GtkWidget *text,
                                           gtk_text_iter_get_line(start) );
         gtk_text_iter_forward_line(&para_end);
 
-        wxGtkTextRemoveTagsWithPrefix(text_buffer, "WXTABS", start, end);
+        remove_handler_id = g_signal_connect (text_buffer, "remove_tag",
+                                              G_CALLBACK(wxGtkOnRemoveTag),
+                                              gpointer("WXTABS"));
+        gtk_text_buffer_remove_all_tags( text_buffer, &para_start, &para_end );
+        g_signal_handler_disconnect (text_buffer, remove_handler_id);
 
         const wxArrayInt& tabs = attr.GetTabs();
 
@@ -298,6 +291,9 @@ gtk_insert_text_callback(GtkEditable *editable,
                          gint *position,
                          wxTextCtrl *win)
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     // we should only be called if we have a max len limit at all
     GtkEntry *entry = GTK_ENTRY (editable);
 
@@ -544,6 +540,9 @@ gtk_text_changed_callback( GtkWidget *widget, wxTextCtrl *win )
 
     if (!win->m_hasVMT) return;
 
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if ( win->MarkDirtyOnChange() )
         win->MarkDirty();
 
@@ -685,6 +684,9 @@ bool wxTextCtrl::Create( wxWindow *parent,
                          const wxValidator& validator,
                          const wxString &name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -709,10 +711,7 @@ bool wxTextCtrl::Create( wxWindow *parent,
         // create scrolled window
         m_widget = gtk_scrolled_window_new( NULL, NULL );
         gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( m_widget ),
-                                        GTK_POLICY_AUTOMATIC,
-                                        style & wxTE_NO_VSCROLL
-                                            ? GTK_POLICY_NEVER
-                                            : GTK_POLICY_AUTOMATIC );
+                                        GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
         // for ScrollLines/Pages
         m_scrollBar[1] = (GtkRange*)((GtkScrolledWindow*)m_widget)->vscrollbar;
 
@@ -819,6 +818,9 @@ bool wxTextCtrl::Create( wxWindow *parent,
                       G_CALLBACK (gtk_paste_clipboard_callback), this);
 
     m_cursor = wxCursor( wxCURSOR_IBEAM );
+
+    wxTextAttr attrDef(GetForegroundColour(), GetBackgroundColour(), GetFont());
+    SetDefaultStyle( attrDef );
 
     return true;
 }
@@ -998,13 +1000,7 @@ void wxTextCtrl::DoSetValue( const wxString &value, int flags )
     m_modified = false;
     DontMarkDirtyOnNextChange();
 
-    wxFontEncoding enc = m_defaultStyle.HasFont()
-                            ? m_defaultStyle.GetFont().GetEncoding()
-                            : wxFONTENCODING_SYSTEM;
-    if ( enc == wxFONTENCODING_SYSTEM )
-        enc = GetTextEncoding();
-
-    const wxCharBuffer buffer(wxGTK_CONV_ENC(value, enc));
+    const wxCharBuffer buffer(wxGTK_CONV_ENC(value, GetTextEncoding()));
     if ( !buffer )
     {
         // see comment in WriteText() as to why we must warn the user about
@@ -1025,14 +1021,6 @@ void wxTextCtrl::DoSetValue( const wxString &value, int flags )
     if ( IsMultiLine() )
     {
         gtk_text_buffer_set_text( m_buffer, buffer, strlen(buffer) );
-
-        if ( !m_defaultStyle.IsDefault() )
-        {
-            GtkTextIter start, end;
-            gtk_text_buffer_get_bounds( m_buffer, &start, &end );
-            wxGtkTextApplyTagsFromAttr(m_widget, m_buffer, m_defaultStyle,
-                                       &start, &end);
-        }
     }
     else // single line
     {
@@ -1301,9 +1289,9 @@ bool wxTextCtrl::Enable( bool enable )
 }
 
 // wxGTK-specific: called recursively by Enable,
-// to give widgets an opportunity to correct their colours after they
+// to give widgets an oppprtunity to correct their colours after they
 // have been changed by Enable
-void wxTextCtrl::OnEnabled( bool enable )
+void wxTextCtrl::OnParentEnable( bool enable )
 {
     // If we have a custom background colour, we use this colour in both
     // disabled and enabled mode, or we end up with a different colour under the
@@ -1801,12 +1789,18 @@ bool wxTextCtrl::SetStyle( long start, long end, const wxTextAttr& style )
         gtk_text_buffer_get_iter_at_offset( m_buffer, &starti, start );
         gtk_text_buffer_get_iter_at_offset( m_buffer, &endi, end );
 
-        wxGtkTextApplyTagsFromAttr( m_widget, m_buffer, style, &starti, &endi );
+        // use the attributes from style which are set in it and fall back
+        // first to the default style and then to the text control default
+        // colours for the others
+        wxTextAttr attr = wxTextAttr::Combine(style, m_defaultStyle, this);
+
+        wxGtkTextApplyTagsFromAttr( m_widget, m_buffer, attr, &starti, &endi );
 
         return true;
     }
-    //else: single line text controls don't support styles
 
+    // else single line
+    // cannot do this for GTK+'s Entry widget
     return false;
 }
 

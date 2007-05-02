@@ -23,9 +23,6 @@ public:
     virtual bool IsWriteFDOfEndProcessPipe(wxExecuteData& execData, int fd);
     virtual void DetachWriteFDOfEndProcessPipe(wxExecuteData& execData);
     virtual int WaitForChild(wxExecuteData& execData);
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
-#endif
 };
 
 #if wxUSE_GUI
@@ -37,9 +34,6 @@ public:
     virtual bool IsWriteFDOfEndProcessPipe(wxExecuteData& execData, int fd);
     virtual void DetachWriteFDOfEndProcessPipe(wxExecuteData& execData);
     virtual int WaitForChild(wxExecuteData& execData);
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
-#endif
 
 #if defined(__WXMAC__) || defined(__WXCOCOA__)
     virtual wxStandardPathsBase& GetStandardPaths();
@@ -47,10 +41,7 @@ public:
     virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
 
 #ifdef __WXGTK__
-    virtual void SetLocale();
     virtual wxString GetDesktopEnvironment() const;
-    virtual wxString GetStandardCmdLineOptions(wxArrayString& names,
-                                               wxArrayString& desc) const;
 #endif
 
 #if defined(__WXDEBUG__) && defined(__WXGTK20__)

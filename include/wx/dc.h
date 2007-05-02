@@ -101,9 +101,40 @@ protected:
 class WXDLLEXPORT wxDCBase : public wxObject
 {
 public:
-    wxDCBase();
-    virtual ~wxDCBase();
-    
+    wxDCBase()
+        : m_colour(wxColourDisplay())
+        , m_ok(true)
+        , m_clipping(false)
+        , m_isInteractive(0)
+        , m_isBBoxValid(false)
+        , m_logicalOriginX(0), m_logicalOriginY(0)
+        , m_deviceOriginX(0), m_deviceOriginY(0)
+        , m_logicalScaleX(1.0), m_logicalScaleY(1.0)
+        , m_userScaleX(1.0), m_userScaleY(1.0)
+        , m_scaleX(1.0), m_scaleY(1.0)
+        , m_signX(1), m_signY(1)
+        , m_minX(0), m_minY(0), m_maxX(0), m_maxY(0)
+        , m_clipX1(0), m_clipY1(0), m_clipX2(0), m_clipY2(0)
+        , m_logicalFunction(wxCOPY)
+        , m_backgroundMode(wxTRANSPARENT)
+        , m_mappingMode(wxMM_TEXT)
+        , m_pen()
+        , m_brush()
+        , m_backgroundBrush(*wxTRANSPARENT_BRUSH)
+        , m_textForegroundColour(*wxBLACK)
+        , m_textBackgroundColour(*wxWHITE)
+        , m_font()
+#if wxUSE_PALETTE
+        , m_palette()
+        , m_hasCustomPalette(false)
+#endif // wxUSE_PALETTE
+    {
+        ResetBoundingBox();
+        ResetClipping();
+    }
+
+    virtual ~wxDCBase() { }
+
     // graphic primitives
     // ------------------
 
@@ -282,26 +313,7 @@ public:
         return DoBlit(destPt.x, destPt.y, sz.x, sz.y,
                       source, srcPt.x, srcPt.y, rop, useMask, srcPtMask.x, srcPtMask.y);
     }
-
-    bool StretchBlit(wxCoord dstX, wxCoord dstY, 
-                     wxCoord dstWidth, wxCoord dstHeight,
-                     wxDC *source, 
-                     wxCoord srcX, wxCoord srcY,
-                     wxCoord srcWidth, wxCoord srcHeight,
-                     int rop = wxCOPY, bool useMask = false, 
-                     wxCoord srcMaskX = wxDefaultCoord, wxCoord srcMaskY = wxDefaultCoord)
-    {
-        return DoStretchBlit(dstX, dstY, dstWidth, dstHeight,
-                      source, srcX, srcY, srcWidth, srcHeight, rop, useMask, srcMaskX, srcMaskY);
-    }
-    bool StretchBlit(const wxPoint& dstPt, const wxSize& dstSize,
-                     wxDC *source, const wxPoint& srcPt, const wxSize& srcSize,
-                     int rop = wxCOPY, bool useMask = false, const wxPoint& srcMaskPt = wxDefaultPosition)
-    {
-        return DoStretchBlit(dstPt.x, dstPt.y, dstSize.x, dstSize.y,
-                      source, srcPt.x, srcPt.y, srcSize.x, srcSize.y, rop, useMask, srcMaskPt.x, srcMaskPt.y);
-    }
-
+    
     wxBitmap GetAsBitmap(const wxRect *subrect = (const wxRect *) NULL) const
     {
         return DoGetAsBitmap(subrect);
@@ -426,7 +438,7 @@ public:
                        wxCoord *x, wxCoord *y,
                        wxCoord *descent = NULL,
                        wxCoord *externalLeading = NULL,
-                       const wxFont *theFont = NULL) const
+                       wxFont *theFont = NULL) const
         { DoGetTextExtent(string, x, y, descent, externalLeading, theFont); }
 
     wxSize GetTextExtent(const wxString& string) const
@@ -441,7 +453,7 @@ public:
                                         wxCoord *width,
                                         wxCoord *height,
                                         wxCoord *heightLine = NULL,
-                                        const wxFont *font = NULL) const;
+                                        wxFont *font = NULL) const;
 
     wxSize GetMultiLineTextExtent(const wxString& string) const
     {
@@ -480,6 +492,20 @@ public:
         return wxSize(w, h);
     }
 
+    // coordinates conversions
+    // -----------------------
+
+    // This group of functions does actual conversion of the input, as you'd
+    // expect.
+    wxCoord DeviceToLogicalX(wxCoord x) const;
+    wxCoord DeviceToLogicalY(wxCoord y) const;
+    wxCoord DeviceToLogicalXRel(wxCoord x) const;
+    wxCoord DeviceToLogicalYRel(wxCoord y) const;
+    wxCoord LogicalToDeviceX(wxCoord x) const;
+    wxCoord LogicalToDeviceY(wxCoord y) const;
+    wxCoord LogicalToDeviceXRel(wxCoord x) const;
+    wxCoord LogicalToDeviceYRel(wxCoord y) const;
+
     // query DC capabilities
     // ---------------------
 
@@ -511,62 +537,50 @@ public:
     virtual void SetTextBackground(const wxColour& colour)
         { m_textBackgroundColour = colour; }
 
-
-    // coordinates conversions and transforms
-    // --------------------------------------
-
-    virtual wxCoord DeviceToLogicalX(wxCoord x) const;
-    virtual wxCoord DeviceToLogicalY(wxCoord y) const;
-    virtual wxCoord DeviceToLogicalXRel(wxCoord x) const;
-    virtual wxCoord DeviceToLogicalYRel(wxCoord y) const;
-    virtual wxCoord LogicalToDeviceX(wxCoord x) const;
-    virtual wxCoord LogicalToDeviceY(wxCoord y) const;
-    virtual wxCoord LogicalToDeviceXRel(wxCoord x) const;
-    virtual wxCoord LogicalToDeviceYRel(wxCoord y) const;
-
-    virtual void SetMapMode(int mode);
     virtual int GetMapMode() const { return m_mappingMode; }
+    virtual void SetMapMode(int mode) = 0;
 
-    virtual void SetUserScale(double x, double y);
     virtual void GetUserScale(double *x, double *y) const
     {
         if ( x ) *x = m_userScaleX;
         if ( y ) *y = m_userScaleY;
     }
+    virtual void SetUserScale(double x, double y) = 0;
 
-    virtual void SetLogicalScale(double x, double y);
     virtual void GetLogicalScale(double *x, double *y)
     {
         if ( x ) *x = m_logicalScaleX;
         if ( y ) *y = m_logicalScaleY;
     }
+    virtual void SetLogicalScale(double x, double y)
+    {
+        m_logicalScaleX = x;
+        m_logicalScaleY = y;
+    }
 
-    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
     void GetLogicalOrigin(wxCoord *x, wxCoord *y) const
         { DoGetLogicalOrigin(x, y); }
     wxPoint GetLogicalOrigin() const
         { wxCoord x, y; DoGetLogicalOrigin(&x, &y); return wxPoint(x, y); }
+    virtual void SetLogicalOrigin(wxCoord x, wxCoord y) = 0;
 
-    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
     void GetDeviceOrigin(wxCoord *x, wxCoord *y) const
         { DoGetDeviceOrigin(x, y); }
     wxPoint GetDeviceOrigin() const
         { wxCoord x, y; DoGetDeviceOrigin(&x, &y); return wxPoint(x, y); }
-        
-    virtual void SetDeviceLocalOrigin( wxCoord x, wxCoord y );
+    virtual void SetDeviceOrigin(wxCoord x, wxCoord y) = 0;
 
-    virtual void ComputeScaleAndOrigin();
+    virtual void ComputeScaleAndOrigin() {}
 
-    // this needs to overidden if the axis is inverted (such
-    // as when using Postscript, where 0,0 is the lower left
-    // corner, not the upper left).
-    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
+    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp) = 0;
 
-    // logical functions
-    // ---------------------------
-    
     virtual int GetLogicalFunction() const { return m_logicalFunction; }
     virtual void SetLogicalFunction(int function) = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+    virtual void SetOptimization(bool WXUNUSED(opt)) { }
+    virtual bool GetOptimization() { return false; }
+#endif
 
     // bounding box
     // ------------
@@ -612,7 +626,7 @@ public:
                        long *x, long *y,
                        long *descent = NULL,
                        long *externalLeading = NULL,
-                       const wxFont *theFont = NULL) const
+                       wxFont *theFont = NULL) const
     {
         wxCoord x2, y2, descent2, externalLeading2;
         DoGetTextExtent(string, &x2, &y2,
@@ -714,25 +728,10 @@ protected:
 
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord width, wxCoord height,
-                        wxDC *source,
-                        wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY,
-                        bool useMask = false,
-                        wxCoord xsrcMask = wxDefaultCoord,
-                        wxCoord ysrcMask = wxDefaultCoord) = 0;
+                        wxDC *source, wxCoord xsrc, wxCoord ysrc,
+                        int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) = 0;
 
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY,
-                               bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord,
-                               wxCoord ysrcMask = wxDefaultCoord);
-
-    virtual wxBitmap DoGetAsBitmap(const wxRect *WXUNUSED(subrect)) const
-        { return wxNullBitmap; }
+    virtual wxBitmap DoGetAsBitmap(const wxRect *WXUNUSED(subrect)) const { return wxNullBitmap; }
 
     virtual void DoGetSize(int *width, int *height) const = 0;
     virtual void DoGetSizeMM(int* width, int* height) const = 0;
@@ -749,6 +748,13 @@ protected:
     virtual void DoSetClippingRegionAsRegion(const wxRegion& region) = 0;
     virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
                                      wxCoord width, wxCoord height) = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+    // this was only for confusing people, use DoGetClippingBox only
+    virtual void DoGetClippingRegion(wxCoord *x, wxCoord *y,
+                                     wxCoord *w, wxCoord *h)
+        { DoGetClippingBox(x, y, w, h); }
+#endif
 
     virtual void DoGetClippingBox(wxCoord *x, wxCoord *y,
                                   wxCoord *w, wxCoord *h) const
@@ -779,7 +785,7 @@ protected:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const = 0;
+                                 wxFont *theFont = NULL) const = 0;
 
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
@@ -808,25 +814,15 @@ protected:
     // TODO short descriptions of what exactly they are would be nice...
 
     wxCoord m_logicalOriginX, m_logicalOriginY;
-    wxCoord m_deviceOriginX, m_deviceOriginY;           // Usually 0,0, can be change by user
-    
-    wxCoord m_deviceLocalOriginX, m_deviceLocalOriginY; // non-zero if native top-left corner
-                                                        // is not at 0,0. This was the case under
-                                                        // Mac's GrafPorts (coordinate system
-                                                        // used toplevel window's origin) and
-                                                        // e.g. for Postscript, where the native
-                                                        // origin in the bottom left corner.
+    wxCoord m_deviceOriginX, m_deviceOriginY;
+
     double m_logicalScaleX, m_logicalScaleY;
     double m_userScaleX, m_userScaleY;
-    double m_scaleX, m_scaleY;  // calculated from logical scale and user scale
+    double m_scaleX, m_scaleY;
 
     // Used by SetAxisOrientation() to invert the axes
     int m_signX, m_signY;
 
-    // what is a mm on a screen you don't know the size of?
-    double       m_mm_to_pix_x,
-                 m_mm_to_pix_y;
-                 
     // bounding and clipping boxes
     wxCoord m_minX, m_minY, m_maxX, m_maxY;
     wxCoord m_clipX1, m_clipY1, m_clipX2, m_clipY2;

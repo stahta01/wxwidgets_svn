@@ -22,22 +22,32 @@
 
 #if wxUSE_TIMER
 
-#include "wx/cocoa/private/timer.h"
+#include "wx/timer.h"
+
+#ifndef WX_PRECOMP
+#endif
+
 #include "wx/cocoa/autorelease.h"
 
 #import <Foundation/NSTimer.h>
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+IMPLEMENT_CLASS(wxTimer, wxTimerBase)
 
 // ========================================================================
 // wxNSTimerData
 // ========================================================================
 @interface wxNSTimerData : NSObject
 {
-    wxCocoaTimerImpl* m_timer;
+    wxTimer* m_timer;
 }
 
 - (id)init;
-- (id)initWithWxTimer:(wxCocoaTimerImpl*)theTimer;
-- (wxCocoaTimerImpl*)timer;
+- (id)initWithWxTimer:(wxTimer*)theTimer;
+- (wxTimer*)timer;
 - (void)onNotify:(NSTimer *)theTimer;
 @end // interface wxNSTimerData : NSObject
 
@@ -50,7 +60,7 @@
     return self;
 }
 
-- (id)initWithWxTimer:(wxCocoaTimerImpl*)theTimer;
+- (id)initWithWxTimer:(wxTimer*)theTimer;
 {
     if(!(self = [super init]))
         return nil;
@@ -58,32 +68,32 @@
     return self;
 }
 
-- (wxCocoaTimerImpl*)timer
+- (wxTimer*)timer
 {
     return m_timer;
 }
 
 - (void)onNotify:(NSTimer *)theTimer
 {
-    m_timer->Notify();
+    m_timer->Notify(); //wxTimerBase method
 }
 @end
 
 // ----------------------------------------------------------------------------
-// wxCocoaTimerImpl
+// wxTimer
 // ----------------------------------------------------------------------------
 
-wxCocoaTimerImpl::~wxCocoaTimerImpl()
+wxTimer::~wxTimer()
 {
     Stop();
 }
 
-void wxCocoaTimerImpl::Init()
+void wxTimer::Init()
 {
     m_cocoaNSTimer = NULL;
 }
 
-bool wxCocoaTimerImpl::Start(int millisecs, bool oneShot)
+bool wxTimer::Start(int millisecs, bool oneShot)
 {
     Stop();
 
@@ -101,7 +111,7 @@ bool wxCocoaTimerImpl::Start(int millisecs, bool oneShot)
     return IsRunning();
 }
 
-void wxCocoaTimerImpl::Stop()
+void wxTimer::Stop()
 {
     if (m_cocoaNSTimer)
     {
@@ -112,7 +122,7 @@ void wxCocoaTimerImpl::Stop()
     }
 }
 
-bool wxCocoaTimerImpl::IsRunning() const
+bool wxTimer::IsRunning() const
 {
     return m_cocoaNSTimer != NULL && [m_cocoaNSTimer isValid];
 }

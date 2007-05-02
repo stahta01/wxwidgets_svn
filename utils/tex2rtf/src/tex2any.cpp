@@ -25,8 +25,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 /*
  * Variables accessible from clients
@@ -283,13 +285,13 @@ void ForbidWarning(TexMacroDef *def)
     case FORBID_WARN:
     {
       informBuf.Printf(_T("Warning: it is recommended that command %s is not used."), def->name);
-      OnInform(informBuf);
+      OnInform((const wxChar *)informBuf.c_str());
       break;
     }
     case FORBID_ABSOLUTELY:
     {
       informBuf.Printf(_T("Error: command %s cannot be used and will lead to errors."), def->name);
-      OnInform(informBuf);
+      OnInform((const wxChar *)informBuf.c_str());
       break;
     }
     default:
@@ -449,7 +451,7 @@ bool read_a_line(wxChar *buf)
        wxString errBuf;
        errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
            LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(), MAX_LINE_BUFFER_SIZE);
-       OnError(errBuf);
+       OnError((wxChar *)errBuf.c_str());
        return false;
     }
 
@@ -471,7 +473,7 @@ bool read_a_line(wxChar *buf)
            {
                wxString errBuf;
                errBuf.Printf(_T("An extra right Curly brace ('}') was detected at line %lu inside file %s"), LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-               OnError(errBuf);
+               OnError((wxChar *)errBuf.c_str());
 
                // Reduce the count of right Curly braces, so the mismatched count
                // isn't reported on every line that has a '}' after the first mismatch
@@ -500,7 +502,7 @@ bool read_a_line(wxChar *buf)
              wxString errBuf;
              errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                  LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError(errBuf);
+             OnError((wxChar *)errBuf.c_str());
              return false;
           }
           wxStrcat(buf, _T("\\par"));
@@ -515,7 +517,7 @@ bool read_a_line(wxChar *buf)
              wxString errBuf;
              errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                  LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError(errBuf);
+             OnError((wxChar *)errBuf.c_str());
              return false;
           }
 
@@ -540,7 +542,7 @@ bool read_a_line(wxChar *buf)
                    wxString errBuf;
                    errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                        LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-                   OnError(errBuf);
+                   OnError((wxChar *)errBuf.c_str());
                    return false;
                 }
                 buf[bufIndex++]='\\';
@@ -563,7 +565,7 @@ bool read_a_line(wxChar *buf)
               wxString errBuf;
               errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                   LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError(errBuf);
+              OnError((wxChar *)errBuf.c_str());
               return false;
             }
             buf[bufIndex++]='\\';
@@ -578,7 +580,7 @@ bool read_a_line(wxChar *buf)
               wxString errBuf;
               errBuf.Printf(_T("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated."),
                   LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError(errBuf);
+              OnError((wxChar *)errBuf.c_str());
               return false;
             }
             // If the current character read in is a '_', we need to check
@@ -599,7 +601,7 @@ bool read_a_line(wxChar *buf)
 //                        wxString errBuf;
 //                        errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that should NOT have a '\\' before it."),
 //                            LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-//                        OnError(errBuf);
+//                        OnError((wxChar *)errBuf.c_str());
                     }
                 }
                 else
@@ -610,7 +612,7 @@ bool read_a_line(wxChar *buf)
                         wxString errBuf;
                         errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it."),
                             LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-                        OnError(errBuf);
+                        OnError((wxChar *)errBuf.c_str());
                     }
                     else if ((buf[bufIndex-1] != '\\') && (buf[0] != '%') &&  // If it is a comment line, then no warnings
                         (wxStrncmp(buf, _T("\\input"), 6))) // do not report filenames that have underscores in them
@@ -618,7 +620,7 @@ bool read_a_line(wxChar *buf)
                         wxString errBuf;
                         errBuf.Printf(_T("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it."),
                             LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
-                        OnError(errBuf);
+                        OnError((wxChar *)errBuf.c_str());
                     }
                 }
             }
@@ -643,7 +645,7 @@ bool read_a_line(wxChar *buf)
             wxString errBuf;
             errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
                           (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
-            OnError(errBuf);
+            OnError((wxChar *)errBuf.c_str());
           }
           leftCurly = 0;
           rightCurly = 0;
@@ -694,13 +696,13 @@ bool read_a_line(wxChar *buf)
     {
       wxString errBuf;
       errBuf.Printf(_T("Could not find file: %s"),fileName);
-      OnError(errBuf);
+      OnError((wxChar *)errBuf.c_str());
     }
     else
     {
       wxString informStr;
       informStr.Printf(_T("Processing: %s"),actualFile.c_str());
-      OnInform(informStr);
+      OnInform((wxChar *)informStr.c_str());
       CurrentInputIndex ++;
 
       Inputs[CurrentInputIndex] = wxFopen(actualFile, _T("r"));
@@ -758,7 +760,7 @@ bool read_a_line(wxChar *buf)
     fileNameStr.Replace(_T("\\"), _T(""));
 
     // Ignore some types of input files (e.g. macro definition files)
-    wxString fileOnly = wxFileNameFromPath(fileNameStr);
+    wxChar *fileOnly = wxFileNameFromPath((wxChar*) (const wxChar*) fileNameStr);
     currentFileName = fileOnly;
     if (IgnorableInputFiles.Member(fileOnly))
       return read_a_line(buf);
@@ -776,7 +778,7 @@ bool read_a_line(wxChar *buf)
     {
       wxString errBuf;
       errBuf.Printf(_T("Could not find file: %s"),fileName);
-      OnError(errBuf);
+      OnError((wxChar *)errBuf.c_str());
     }
     else
     {
@@ -786,7 +788,7 @@ bool read_a_line(wxChar *buf)
 
       wxString informStr;
       informStr.Printf(_T("Processing: %s"),actualFile.c_str());
-      OnInform(informStr);
+      OnInform((wxChar *)informStr.c_str());
       CurrentInputIndex ++;
 
       Inputs[CurrentInputIndex] = wxFopen(actualFile, _T("r"));
@@ -800,7 +802,7 @@ bool read_a_line(wxChar *buf)
         wxString errBuf;
         errBuf.Printf(_T("Could not open include file %s"), (const wxChar*) actualFile);
         CurrentInputIndex --;
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
     }
     bool succ = read_a_line(buf);
@@ -833,7 +835,7 @@ bool read_a_line(wxChar *buf)
                                     LineNumbers[CurrentInputIndex],
                                     currentFileName.c_str());
                   }
-                  OnError(errBuf);
+                  OnError((wxChar *)errBuf.c_str());
               }
           }
       }
@@ -853,7 +855,7 @@ bool read_a_line(wxChar *buf)
         wxString errBuf;
         errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
             (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
   }
 
@@ -951,7 +953,7 @@ void MacroError(wxChar *buffer)
 
   errBuf.Printf(_T("Could not find macro: %s at line %d, file %s"),
              macroBuf, (int)(LineNumbers[CurrentInputIndex]-1), FileNames[CurrentInputIndex]);
-  OnError(errBuf);
+  OnError((wxChar *)errBuf.c_str());
 
   if (wxStrcmp(macroBuf,_T("\\end{document}")) == 0)
   {
@@ -1634,7 +1636,7 @@ int ParseMacroBody(const wxChar *WXUNUSED(macro_name), TexChunk *parent,
                 tmpBuffer = tmpBuffer.Mid(0,tmpBuffer.length()-4);
         }
         errBuf.Printf(_T("Missing macro argument in the line:\n\t%s\n"),tmpBuffer.c_str());
-        OnError(errBuf);
+        OnError((wxChar *)errBuf.c_str());
       }
 
     }
@@ -3249,7 +3251,7 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
         {
            wxString informBuf;
            informBuf.Printf(_T("Warning: unresolved reference '%s'"), refName);
-           OnInform(informBuf);
+           OnInform((wxChar *)informBuf.c_str());
         }
       }
       else TexOutput(_T("??"), true);
@@ -3403,7 +3405,7 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
           {
             wxString informBuf;
             informBuf.Printf(_T("Warning: unresolved citation %s."), citeKey);
-            OnInform(informBuf);
+            OnInform((wxChar *)informBuf.c_str());
           }
         }
         citeKey = ParseMultifieldString(citeKeys, &pos);
@@ -3544,14 +3546,14 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
           {
             wxString errBuf;
             errBuf.Printf(_T(".bib file %s not found or malformed"), (const wxChar*) actualFile);
-            OnError(errBuf);
+            OnError((wxChar *)errBuf.c_str());
           }
         }
         else
         {
           wxString errBuf;
           errBuf.Printf(_T(".bib file %s not found"), fileBuf);
-          OnError(errBuf);
+          OnError((wxChar *)errBuf.c_str());
         }
         bibFile = ParseMultifieldString(allFiles, &pos);
       }

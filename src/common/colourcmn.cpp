@@ -23,7 +23,6 @@
     #include "wx/log.h"
     #include "wx/utils.h"
     #include "wx/gdicmn.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #if wxUSE_VARIANT

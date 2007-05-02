@@ -469,7 +469,7 @@ bool wxICOResourceHandler::LoadIcon( wxIcon*         pIcon,
 {
     HPOINTER                        hIcon;
 
-    hIcon = ::WinLoadFileIcon( rName.c_str()
+    hIcon = ::WinLoadFileIcon( (PSZ)rName.c_str()
                               ,TRUE // load for private use
                              );
 

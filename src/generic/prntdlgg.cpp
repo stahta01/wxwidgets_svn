@@ -136,8 +136,7 @@ END_EVENT_TABLE()
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintDialogData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                               wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -150,8 +149,7 @@ wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                                wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -707,9 +705,9 @@ bool wxGenericPrintSetupDialog::TransferDataToWindow()
     wxPostScriptPrintNativeData *data =
         (wxPostScriptPrintNativeData *) m_printData.GetNativeData();
 
-    if (m_printerCommandText && !data->GetPrinterCommand().empty())
+    if (m_printerCommandText && data->GetPrinterCommand())
         m_printerCommandText->SetValue(data->GetPrinterCommand());
-    if (m_printerOptionsText && !data->GetPrinterOptions().empty())
+    if (m_printerOptionsText && data->GetPrinterOptions())
         m_printerOptionsText->SetValue(data->GetPrinterOptions());
     if (m_colourCheckBox)
         m_colourCheckBox->SetValue(m_printData.GetColour());

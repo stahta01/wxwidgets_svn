@@ -96,8 +96,8 @@ public:
         m_bitmapIndex = -1;
     }
 
-    wxToolMenuBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolMenuBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         m_nSepCount = 1;
         m_bitmapIndex = -1;
@@ -151,10 +151,9 @@ wxToolBarToolBase *wxToolMenuBar::CreateTool(int id,
                              clientData, shortHelp, longHelp);
 }
 
-wxToolBarToolBase *
-wxToolMenuBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolMenuBar::CreateTool(wxControl *control)
 {
-    return new wxToolMenuBarTool(this, control, label);
+    return new wxToolMenuBarTool(this, control);
 }
 
 // ----------------------------------------------------------------------------

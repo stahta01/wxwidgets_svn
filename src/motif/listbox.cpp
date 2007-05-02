@@ -52,23 +52,21 @@ static void wxListBoxCallback(Widget w,
 class wxSizeKeeper
 {
     int m_x, m_y;
-    int m_w, m_h;
-    wxWindow* m_wnd;
+    wxWindow* m_w;
 public:
     wxSizeKeeper( wxWindow* w )
-        : m_wnd( w )
+        : m_w( w )
     {
-        m_wnd->GetSize( &m_w, &m_h );
-        m_wnd->GetPosition( &m_x, &m_y );
+        m_w->GetSize( &m_x, &m_y );
     }
 
     void Restore()
     {
         int x, y;
 
-        m_wnd->GetSize( &x, &y );
+        m_w->GetSize( &x, &y );
         if( x != m_x || y != m_y )
-            m_wnd->SetSize( m_x, m_y, m_w, m_h );
+            m_w->SetSize( -1, -1, m_x, m_y );
     }
 };
 
@@ -93,9 +91,9 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
     if( !wxControl::CreateControl( parent, id, pos, size, style,
                                    validator, name ) )
         return false;
-    PreCreation();
 
     m_noItems = (unsigned int)n;
+    m_backgroundColour = * wxWHITE;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
     Display* dpy = XtDisplay(parentWidget);
@@ -122,7 +120,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 
     Widget listWidget =
         XmCreateScrolledList(parentWidget,
-                             wxConstCast(name.mb_str(), char), args, count);
+                             wxConstCast(name.c_str(), char), args, count);
 
     m_mainWidget = (WXWidget) listWidget;
 
@@ -151,9 +149,10 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
                    (XtCallbackProc) wxListBoxCallback,
                    (XtPointer) this);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -273,10 +272,11 @@ int wxDoFindStringInList(Widget w, const wxString& s)
     bool success = XmListGetMatchPos (w, str(),
                                       &positions, &no_positions);
 
-    if (success && positions)
+    if (success)
     {
         int pos = positions[0];
-        XtFree ((char *) positions);
+        if (positions)
+            XtFree ((char *) positions);
         return pos - 1;
     }
     else

@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 19 April 2007                                                       *
+# Date : 1 December 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -54,11 +54,9 @@ OBJECTS = \
 		animatecmn.obj,\
 		appbase.obj,\
 		appcmn.obj,\
-		arrstr.obj,\
 		artprov.obj,\
 		artstd.obj,\
 		bmpbase.obj,\
-		btncmn.obj,\
 		bookctrl.obj,\
 		choiccmn.obj,\
 		clipcmn.obj,\
@@ -118,7 +116,6 @@ OBJECTS1=fs_inet.obj,\
 		hashmap.obj,\
 		helpbase.obj,\
 		http.obj,\
-		hyperlnkcmn.obj,\
 		iconbndl.obj,\
 		init.obj,\
 		imagall.obj,\
@@ -166,15 +163,12 @@ OBJECTS1=fs_inet.obj,\
 		socket.obj,\
 		settcmn.obj,\
 		statbar.obj,\
-		stattextcmn.obj,\
 		stdpbase.obj,\
 		stockitem.obj,\
 		stopwatch.obj,\
 		strconv.obj,\
 		stream.obj,\
 		string.obj,\
-		stringimpl.obj,\
-		strvararg.obj,\
 		sysopt.obj
 
 OBJECTS2=tbarbase.obj,\
@@ -189,15 +183,14 @@ OBJECTS2=tbarbase.obj,\
 		url.obj,\
 		utilscmn.obj,\
 		rgncmn.obj,\
-		unichar.obj,\
 		uri.obj,\
 		valgen.obj,\
 		validate.obj,\
 		valtext.obj,\
 		variant.obj,\
 		wfstream.obj,\
+		wxchar.obj,\
 		wincmn.obj,\
-		wxcrt.obj,\
 		xpmdecod.obj,\
 		zipstrm.obj,\
 		zstream.obj,\
@@ -217,18 +210,14 @@ OBJECTS_X11=accesscmn.obj,dndcmn.obj,dpycmn.obj,dseldlg.obj,\
 
 OBJECTS_X11_2=socketevtdispatch.obj
 
-OBJECTS_GTK2=fontutilcmn.obj
-
 SOURCES = \
 		anidecod.cpp,\
 		animatecmn.cpp,\
 		appbase.cpp,\
 		appcmn.cpp,\
-		arrstr.cpp,\
 		artprov.cpp,\
 		artstd.cpp,\
 		bmpbase.cpp,\
-		btncmn.cpp,\
 		bookctrl.cpp,\
 		choiccmn.cpp,\
 		clipcmn.cpp,\
@@ -276,7 +265,6 @@ SOURCES = \
 		fontcmn.cpp,\
 		fontenumcmn.cpp,\
 		fontmap.cpp,\
-		fontutilcmn.cpp,\
 		framecmn.cpp,\
 		fs_inet.cpp,\
 		ftp.cpp,\
@@ -288,7 +276,6 @@ SOURCES = \
 		hashmap.cpp,\
 		helpbase.cpp,\
 		http.cpp,\
-		hyperlnkcmn.cpp,\
 		iconbndl.cpp,\
 		init.cpp,\
 		imagall.cpp,\
@@ -339,16 +326,13 @@ SOURCES = \
 		socketevtdispatch.cpp,\
 		settcmn.cpp,\
 		statbar.cpp,\
-		stattextcmn.cpp,\
 		stdpbase.cpp,\
 		stockitem.cpp,\
 		stopwatch.cpp,\
 		strconv.cpp,\
 		stream.cpp,\
-		strvararg.cpp,\
 		sysopt.cpp,\
 		string.cpp,\
-		stringimpl.cpp,\
 		tbarbase.cpp,\
 		textbuf.cpp,\
 		textcmn.cpp,\
@@ -358,7 +342,6 @@ SOURCES = \
 		toplvcmn.cpp,\
 		treebase.cpp,\
 		txtstrm.cpp,\
-		unichar.cpp,\
 		url.cpp,\
 		utilscmn.cpp,\
 		valgen.cpp,\
@@ -367,7 +350,7 @@ SOURCES = \
 		variant.cpp,\
 		wfstream.cpp,\
 		wincmn.cpp,\
-		wxcrt.cpp,\
+		wxchar.cpp,\
 		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp,\
@@ -414,12 +397,10 @@ all : $(SOURCES)
 .else
 .ifdef __WXGTK2__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_GTK2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS_X11)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS_GTK2)
 .else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
@@ -438,11 +419,9 @@ anidecod.obj : anidecod.cpp
 animatecmn.obj : animatecmn.cpp
 appbase.obj : appbase.cpp
 appcmn.obj : appcmn.cpp
-arrstr.obj : arrstr.cpp
 artprov.obj : artprov.cpp
 artstd.obj : artstd.cpp
 bmpbase.obj : bmpbase.cpp
-btncmn.obj : btncmn.cpp
 bookctrl.obj : bookctrl.cpp
 choiccmn.obj : choiccmn.cpp
 clipcmn.obj : clipcmn.cpp
@@ -489,7 +468,6 @@ fmapbase.obj : fmapbase.cpp
 fontcmn.obj : fontcmn.cpp
 fontenumcmn.obj : fontenumcmn.cpp
 fontmap.obj : fontmap.cpp
-fontutilcmn.obj : fontutilcmn.cpp
 framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
 ftp.obj : ftp.cpp
@@ -501,7 +479,6 @@ hash.obj : hash.cpp
 hashmap.obj : hashmap.cpp
 helpbase.obj : helpbase.cpp
 http.obj : http.cpp
-hyperlnkcmn.obj : hyperlnkcmn.cpp
 iconbndl.obj : iconbndl.cpp
 init.obj : init.cpp
 imagall.obj : imagall.cpp
@@ -551,16 +528,13 @@ socket.obj : socket.cpp
 socketevtdispatch.obj : socketevtdispatch.cpp
 settcmn.obj : settcmn.cpp
 statbar.obj : statbar.cpp
-stattextcmn.obj : stattextcmn.cpp
 stdpbase.obj : stdpbase.cpp
 stockitem.obj : stockitem.cpp
 stopwatch.obj : stopwatch.cpp
 strconv.obj : strconv.cpp
 stream.obj : stream.cpp
-strvararg.obj : strvararg.cpp
 sysopt.obj : sysopt.cpp
 string.obj : string.cpp
-stringimpl.obj : stringimpl.cpp
 tbarbase.obj : tbarbase.cpp
 textbuf.obj : textbuf.cpp
 textcmn.obj : textcmn.cpp
@@ -570,7 +544,6 @@ tokenzr.obj : tokenzr.cpp
 toplvcmn.obj : toplvcmn.cpp
 treebase.obj : treebase.cpp
 txtstrm.obj : txtstrm.cpp
-unichar.obj : unichar.cpp
 url.obj : url.cpp
 utilscmn.obj : utilscmn.cpp
 valgen.obj : valgen.cpp
@@ -579,7 +552,7 @@ valtext.obj : valtext.cpp
 variant.obj : variant.cpp
 wfstream.obj : wfstream.cpp
 wincmn.obj : wincmn.cpp
-wxcrt.obj : wxcrt.cpp
+wxchar.obj : wxchar.cpp
 xpmdecod.obj : xpmdecod.cpp
 zipstrm.obj : zipstrm.cpp
 zstream.obj : zstream.cpp

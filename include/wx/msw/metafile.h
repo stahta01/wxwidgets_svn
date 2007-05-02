@@ -90,7 +90,7 @@ public:
     virtual void SetMapMode(int mode);
     virtual void GetTextExtent(const wxString& string, long *x, long *y,
             long *descent = NULL, long *externalLeading = NULL,
-            const wxFont *theFont = NULL, bool use16bit = false) const;
+            wxFont *theFont = NULL, bool use16bit = false) const;
 
     // Implementation
     wxMetafile *GetMetaFile() const { return m_metaFile; }

@@ -24,7 +24,6 @@
 #include "wx/colordlg.h"
 #include "wx/numdlg.h"
 
-#include "wx/artprov.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
 #include "wx/treectrl.h"
@@ -64,7 +63,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     MENU_LINK(Quit)
     MENU_LINK(About)
-    MENU_LINK(ClearLog)
 
     MENU_LINK(TogButtons)
     MENU_LINK(TogTwist)
@@ -98,7 +96,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     MENU_LINK(DeleteAll)
     MENU_LINK(Recreate)
     MENU_LINK(ToggleImages)
-    MENU_LINK(ToggleAlternateImages)
     MENU_LINK(ToggleButtons)
     MENU_LINK(SetImageSize)
     MENU_LINK(CollapseAndReset)
@@ -157,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame(wxT("wxTreeCtrl Test"), 50, 50, 450, 600);
 
@@ -194,8 +188,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
            *tree_menu = new wxMenu,
            *item_menu = new wxMenu;
 
-    file_menu->Append(TreeTest_ClearLog, wxT("&Clear log\tCtrl-L"));
-    file_menu->AppendSeparator();
     file_menu->Append(TreeTest_About, wxT("&About..."));
     file_menu->AppendSeparator();
     file_menu->Append(TreeTest_Quit, wxT("E&xit\tAlt-X"));
@@ -211,10 +203,9 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     style_menu->AppendCheckItem(TreeTest_TogFullHighlight, wxT("Toggle &full row highlight"));
     style_menu->AppendCheckItem(TreeTest_TogEdit, wxT("Toggle &edit mode"));
 #ifndef NO_MULTIPLE_SELECTION
-    style_menu->AppendCheckItem(TreeTest_ToggleSel, wxT("Toggle &selection mode\tCtrl-S"));
+    style_menu->AppendCheckItem(TreeTest_ToggleSel, wxT("Toggle &selection mode"));
 #endif // NO_MULTIPLE_SELECTION
     style_menu->AppendCheckItem(TreeTest_ToggleImages, wxT("Toggle show ima&ges"));
-    style_menu->AppendCheckItem(TreeTest_ToggleAlternateImages, wxT("Toggle alternate images"));
     style_menu->Append(TreeTest_SetImageSize, wxT("Set image si&ze..."));
     style_menu->AppendSeparator();
     style_menu->Append(TreeTest_SetFgColour, wxT("Set &foreground colour..."));
@@ -282,7 +273,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     CreateTreeWithDefStyle();
 
     menu_bar->Check(TreeTest_ToggleImages, true);
-    menu_bar->Check(TreeTest_ToggleAlternateImages, false);
 
 #if wxUSE_STATUSBAR
     // create a status bar
@@ -337,9 +327,6 @@ void MyFrame::CreateTree(long style)
     m_treeCtrl = new MyTreeCtrl(m_panel, TreeTest_Ctrl,
                                 wxDefaultPosition, wxDefaultSize,
                                 style);
-
-    GetMenuBar()->Enable(TreeTest_SelectRoot, !(style & wxTR_HIDE_ROOT));
-
     Resize();
 }
 
@@ -403,11 +390,12 @@ void MyFrame::Resize()
 {
     wxSize size = GetClientSize();
     m_treeCtrl->SetSize(0, 0, size.x, size.y
-#if wxUSE_LOG
+#if !wxUSE_LOG
+                                            );
+#else
                                             *2/3);
-    m_textCtrl->SetSize(0, 2*size.y/3, size.x, size.y/3
+    m_textCtrl->SetSize(0, 2*size.y/3, size.x, size.y/3);
 #endif
-    );
 }
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -421,11 +409,6 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
                  wxT("(c) Julian Smart 1997, Vadim Zeitlin 1998"),
                  wxT("About tree test"),
                  wxOK | wxICON_INFORMATION, this);
-}
-
-void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
-{
-    m_textCtrl->Clear();
 }
 
 void MyFrame::OnRename(wxCommandEvent& WXUNUSED(event))
@@ -536,8 +519,7 @@ void MyFrame::OnSelect(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSelectRoot(wxCommandEvent& WXUNUSED(event))
 {
-    if ( !m_treeCtrl->HasFlag(wxTR_HIDE_ROOT) )
-        m_treeCtrl->SelectItem(m_treeCtrl->GetRootItem());
+    m_treeCtrl->SelectItem(m_treeCtrl->GetRootItem());
 }
 
 void MyFrame::OnUnselect(wxCommandEvent& WXUNUSED(event))
@@ -610,14 +592,6 @@ void MyFrame::OnToggleImages(wxCommandEvent& WXUNUSED(event))
         m_treeCtrl->CreateImageList(0);
         wxGetApp().SetShowImages(true);
     }
-}
-
-void MyFrame::OnToggleAlternateImages(wxCommandEvent& WXUNUSED(event))
-{
-    bool alternateImages = m_treeCtrl->AlternateImages();
-
-    m_treeCtrl->SetAlternateImages(!alternateImages);
-    m_treeCtrl->CreateImageList(0);
 }
 
 void MyFrame::OnToggleButtons(wxCommandEvent& WXUNUSED(event))
@@ -725,8 +699,7 @@ IMPLEMENT_DYNAMIC_CLASS(MyTreeCtrl, wxTreeCtrl)
 MyTreeCtrl::MyTreeCtrl(wxWindow *parent, const wxWindowID id,
                        const wxPoint& pos, const wxSize& size,
                        long style)
-          : wxTreeCtrl(parent, id, pos, size, style),
-            m_alternateImages(false)
+          : wxTreeCtrl(parent, id, pos, size, style)
 {
     m_reverseSort = false;
 
@@ -754,29 +727,15 @@ void MyTreeCtrl::CreateImageList(int size)
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[5];
+    icons[0] = wxIcon(icon1_xpm);
+    icons[1] = wxIcon(icon2_xpm);
+    icons[2] = wxIcon(icon3_xpm);
+    icons[3] = wxIcon(icon4_xpm);
+    icons[4] = wxIcon(icon5_xpm);
 
-    if (m_alternateImages)
-    {
-        icons[TreeCtrlIcon_File] = wxIcon(icon1_xpm);
-        icons[TreeCtrlIcon_FileSelected] = wxIcon(icon2_xpm);
-        icons[TreeCtrlIcon_Folder] = wxIcon(icon3_xpm);
-        icons[TreeCtrlIcon_FolderSelected] = wxIcon(icon4_xpm);
-        icons[TreeCtrlIcon_FolderOpened] = wxIcon(icon5_xpm);
-    }
-    else
-    {
-        wxSize iconSize(size, size);
-
-        icons[TreeCtrlIcon_File] =
-        icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NORMAL_FILE, wxART_LIST, iconSize);
-        icons[TreeCtrlIcon_Folder] =
-        icons[TreeCtrlIcon_FolderSelected] =
-        icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
-    }
-
+    int sizeOrig = icons[0].GetWidth();
     for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
-        int sizeOrig = icons[0].GetWidth();
         if ( size == sizeOrig )
         {
             images->Add(icons[i]);
@@ -805,25 +764,12 @@ void MyTreeCtrl::CreateButtonsImageList(int size)
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[4];
+    icons[0] = wxIcon(icon3_xpm);   // closed
+    icons[1] = wxIcon(icon3_xpm);   // closed, selected
+    icons[2] = wxIcon(icon5_xpm);   // open
+    icons[3] = wxIcon(icon5_xpm);   // open, selected
 
-    if (m_alternateImages)
-    {
-        icons[0] = wxIcon(icon3_xpm);   // closed
-        icons[1] = wxIcon(icon3_xpm);   // closed, selected
-        icons[2] = wxIcon(icon5_xpm);   // open
-        icons[3] = wxIcon(icon5_xpm);   // open, selected
-    }
-    else
-    {
-        wxSize iconSize(size, size);
-
-        icons[0] =                                                                 // closed
-        icons[1] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);     // closed, selected
-        icons[2] =                                                                 // open
-        icons[3] = wxArtProvider::GetIcon(wxART_FOLDER_OPEN, wxART_LIST, iconSize);// open, selected
-    }
-
-   for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
+    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
         int sizeOrig = icons[i].GetWidth();
         if ( size == sizeOrig )
@@ -916,7 +862,7 @@ void MyTreeCtrl::AddTestItemsToTree(size_t numChildren,
     wxTreeItemId rootId = AddRoot(wxT("Root"),
                                   image, image,
                                   new MyTreeItemData(wxT("Root item")));
-    if ( !HasFlag(wxTR_HIDE_ROOT) && image != -1 )
+    if ( image != -1 )
     {
         SetItemImage(rootId, TreeCtrlIcon_FolderOpened, wxTreeItemIcon_Expanded);
     }
@@ -924,8 +870,7 @@ void MyTreeCtrl::AddTestItemsToTree(size_t numChildren,
     AddItemsRecursively(rootId, numChildren, depth, 0);
 
     // set some colours/fonts for testing
-    if ( !HasFlag(wxTR_HIDE_ROOT) )
-        SetItemFont(rootId, *wxITALIC_FONT);
+    SetItemFont(rootId, *wxITALIC_FONT);
 
     wxTreeItemIdValue cookie;
     wxTreeItemId id = GetFirstChild(rootId, cookie);

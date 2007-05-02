@@ -520,6 +520,8 @@ enum {
     wxLB_EXTENDED,
     wxLB_OWNERDRAW,
     wxLB_HSCROLL,
+    wxPROCESS_ENTER,
+    wxPASSWORD,
 
     wxCB_SIMPLE,
     wxCB_DROPDOWN,
@@ -536,6 +538,9 @@ enum {
     wxSB_VERTICAL,
     wxRB_USE_CHECKBOX,
     wxST_SIZEGRIP,
+    wxST_NO_AUTORESIZE,
+    wxST_DOTS_MIDDLE,
+    wxST_DOTS_END,
     
     wxFLOOD_SURFACE,
     wxFLOOD_BORDER,
@@ -552,9 +557,6 @@ enum {
     wxNO,
     wxNO_DEFAULT,
     wxYES_DEFAULT,
-    wxAPPLY,
-    wxCLOSE,
-     
     wxICON_EXCLAMATION,
     wxICON_HAND,
     wxICON_QUESTION,
@@ -800,8 +802,9 @@ enum wxStretch
     wxSHAPED,
     wxFIXED_MINSIZE,
     wxTILE,
+    wxADJUST_MINSIZE,
 };
-%pythoncode { ADJUST_MINSIZE = 0 }
+
 
 enum wxBorder
 {
@@ -904,6 +907,8 @@ enum wxKeyCode {
     WXK_MENU,
     WXK_PAUSE,
     WXK_CAPITAL,
+    WXK_PRIOR,  /* Page up */
+    WXK_NEXT,   /* Page down */
     WXK_END,
     WXK_HOME,
     WXK_LEFT,
@@ -973,7 +978,9 @@ enum wxKeyCode {
     WXK_NUMPAD_UP,
     WXK_NUMPAD_RIGHT,
     WXK_NUMPAD_DOWN,
+    WXK_NUMPAD_PRIOR,
     WXK_NUMPAD_PAGEUP,
+    WXK_NUMPAD_NEXT,
     WXK_NUMPAD_PAGEDOWN,
     WXK_NUMPAD_END,
     WXK_NUMPAD_BEGIN,
@@ -1016,13 +1023,7 @@ enum wxKeyCode {
     WXK_SPECIAL20
 };
 
-// deprecated synonymns
-%pythoncode {
-    WXK_PRIOR = WXK_PAGEUP
-    WXK_NEXT  = WXK_PAGEDOWN
-    WXK_NUMPAD_PRIOR = WXK_NUMPAD_PAGEUP
-    WXK_NUMPAD_NEXT  = WXK_NUMPAD_PAGEDOWN    
-}
+
 
 typedef enum {
     wxPAPER_NONE,               // Use specific dimensions

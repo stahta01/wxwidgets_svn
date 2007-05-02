@@ -1,10 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/cocoa/utils.cpp
 // Purpose:     Various utilities
-// Author:      David Elliott
+// Author:      AUTHOR
+// Modified by:
 // Created:     2003/??/??
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets dev team
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -18,7 +19,6 @@
 
 #include "wx/apptrait.h"
 #include "wx/display.h"
-#include "wx/cocoa/private/timer.h"
 
 #include <ctype.h>
 
@@ -60,11 +60,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     wxGetOsVersion(verMaj, verMin);
 
     return wxPORT_COCOA;
-}
-
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer* timer)
-{
-    return new wxCocoaTimerImpl(timer);
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
@@ -116,3 +111,77 @@ bool wxCheckForInterrupt(wxWindow *wnd)
 
 #endif
 
+// Reading and writing resources (eg WIN.INI, .Xdefaults)
+#if wxUSE_RESOURCES
+bool wxWriteResource(const wxString& section, const wxString& entry, const wxString& value, const wxString& file)
+{
+    // TODO
+    return false;
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, float value, const wxString& file)
+{
+    char buf[50];
+    sprintf(buf, "%.4f", value);
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, long value, const wxString& file)
+{
+    char buf[50];
+    sprintf(buf, "%ld", value);
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, int value, const wxString& file)
+{
+    char buf[50];
+    sprintf(buf, "%d", value);
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, char **value, const wxString& file)
+{
+    // TODO
+    return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, float *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (float)strtod(s, NULL);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, long *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = strtol(s, NULL, 10);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, int *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (int)strtol(s, NULL, 10);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+#endif // wxUSE_RESOURCES

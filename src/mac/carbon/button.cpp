@@ -101,19 +101,20 @@ bool wxButton::Create(wxWindow *parent,
     return true;
 }
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
-    wxWindow *btnOldDefault = wxButtonBase::SetDefault();
-
-    if ( btnOldDefault )
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxButton *btnOldDefault = NULL;
+    if ( tlw )
     {
-        // cast needed to access the protected member
-        btnOldDefault->GetPeer()->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 0 ) ;
+        btnOldDefault = wxDynamicCast(tlw->GetDefaultItem(), wxButton);
+        tlw->SetDefaultItem(this);
     }
 
-    m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 1 ) ;
+    if ( btnOldDefault )
+        btnOldDefault->m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 0 ) ;
 
-    return btnOldDefault;
+    m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 1 ) ;
 }
 
 wxSize wxButton::DoGetBestSize() const

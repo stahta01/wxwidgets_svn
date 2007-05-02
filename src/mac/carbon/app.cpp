@@ -133,12 +133,6 @@ pascal OSErr AEHandleRApp( const AppleEvent *event , AppleEvent *reply , SRefCon
     return wxTheApp->MacHandleAERApp( (AppleEvent*) event , reply) ;
 }
 
-pascal OSErr AEHandleGURL( const AppleEvent *event , AppleEvent *reply , long WXUNUSED(refcon) )
-{
-    return wxTheApp->MacHandleAEGURL((WXEVENTREF *)event , reply) ;
-}
-
-
 // AEODoc Calls MacOpenFile on each of the files passed
 
 short wxApp::MacHandleAEODoc(const WXEVENTREF event, WXEVENTREF WXUNUSED(reply))
@@ -176,31 +170,6 @@ short wxApp::MacHandleAEODoc(const WXEVENTREF event, WXEVENTREF WXUNUSED(reply))
 
         MacOpenFile(fName);
     }
-
-    return noErr;
-}
-
-// AEODoc Calls MacOpenURL on the url passed
-
-short wxApp::MacHandleAEGURL(const WXEVENTREF event, WXEVENTREF WXUNUSED(reply))
-{
-    DescType returnedType;
-    Size actualSize;
-    char url[255];
-    OSErr err = AEGetParamPtr((AppleEvent *)event, keyDirectObject, typeChar,
-                              &returnedType, url, sizeof(url)-1,
-                              &actualSize);
-    if (err != noErr)
-        return err;
-
-    url[actualSize] = '\0';    // Terminate the C string 
-
-    ProcessSerialNumber PSN ;
-    PSN.highLongOfPSN = 0 ;
-    PSN.lowLongOfPSN = kCurrentProcess ;
-    SetFrontProcess( &PSN ) ;
-
-    MacOpenURL(wxString(url, wxConvUTF8));
 
     return noErr;
 }
@@ -295,9 +264,6 @@ void wxApp::MacOpenFile(const wxString & fileName )
 #endif
 }
 
-void wxApp::MacOpenURL(const wxString & url )
-{
-}
 
 void wxApp::MacPrintFile(const wxString & fileName )
 {
@@ -485,16 +451,16 @@ wxMenu* wxFindMenuFromMacCommand( const HICommand &command , wxMenuItem* &item )
         id = wxMacCommandToId( command.commandID ) ;
         // make sure it is one of our own menus, or of the 'synthetic' apple and help menus , otherwise don't touch
         MenuItemIndex firstUserHelpMenuItem ;
-        static MenuHandle helpMenuHandle = NULL ;
-        if ( helpMenuHandle == NULL )
+        static MenuHandle mh = NULL ;
+        if ( mh == NULL )
         {
-            if ( UMAGetHelpMenuDontCreate( &helpMenuHandle , &firstUserHelpMenuItem) != noErr )
-                helpMenuHandle = NULL ;
+            if ( UMAGetHelpMenu( &mh , &firstUserHelpMenuItem) != noErr )
+                mh = NULL ;
         }
 
         // is it part of the application or the Help menu, then look for the id directly
         if ( ( GetMenuHandle( kwxMacAppleMenuId ) != NULL && command.menu.menuRef == GetMenuHandle( kwxMacAppleMenuId ) ) ||
-             ( helpMenuHandle != NULL && command.menu.menuRef == helpMenuHandle ) || 
+             ( mh != NULL && command.menu.menuRef == mh ) || 
              wxMenuBar::MacGetWindowMenuHMenu() != NULL && command.menu.menuRef == wxMenuBar::MacGetWindowMenuHMenu() )
         {
             wxMenuBar* mbar = wxMenuBar::MacGetInstalledMenuBar() ;
@@ -895,7 +861,6 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 }
 
 AEEventHandlerUPP sODocHandler = NULL ;
-AEEventHandlerUPP sGURLHandler = NULL ;
 AEEventHandlerUPP sOAppHandler = NULL ;
 AEEventHandlerUPP sPDocHandler = NULL ;
 AEEventHandlerUPP sRAppHandler = NULL ;
@@ -918,7 +883,6 @@ bool wxApp::OnInitGui()
     if (!sm_isEmbedded)
     {
         sODocHandler = NewAEEventHandlerUPP(AEHandleODoc) ;
-        sGURLHandler = NewAEEventHandlerUPP(AEHandleGURL) ;
         sOAppHandler = NewAEEventHandlerUPP(AEHandleOApp) ;
         sPDocHandler = NewAEEventHandlerUPP(AEHandlePDoc) ;
         sRAppHandler = NewAEEventHandlerUPP(AEHandleRApp) ;
@@ -926,8 +890,6 @@ bool wxApp::OnInitGui()
 
         AEInstallEventHandler( kCoreEventClass , kAEOpenDocuments ,
                                sODocHandler , 0 , FALSE ) ;
-        AEInstallEventHandler( kInternetEventClass, kAEGetURL,
-                               sGURLHandler , 0 , FALSE ) ;
         AEInstallEventHandler( kCoreEventClass , kAEOpenApplication ,
                                sOAppHandler , 0 , FALSE ) ;
         AEInstallEventHandler( kCoreEventClass , kAEPrintDocuments ,
@@ -976,8 +938,6 @@ void wxApp::CleanUp()
     {
         AERemoveEventHandler( kCoreEventClass , kAEOpenDocuments ,
                                sODocHandler , FALSE ) ;
-        AERemoveEventHandler( kInternetEventClass, kAEGetURL,
-                               sGURLHandler , FALSE ) ;
         AERemoveEventHandler( kCoreEventClass , kAEOpenApplication ,
                                sOAppHandler , FALSE ) ;
         AERemoveEventHandler( kCoreEventClass , kAEPrintDocuments ,
@@ -988,7 +948,6 @@ void wxApp::CleanUp()
                                sQuitHandler , FALSE ) ;
 
         DisposeAEEventHandlerUPP( sODocHandler ) ;
-        DisposeAEEventHandlerUPP( sGURLHandler ) ;
         DisposeAEEventHandlerUPP( sOAppHandler ) ;
         DisposeAEEventHandlerUPP( sPDocHandler ) ;
         DisposeAEEventHandlerUPP( sRAppHandler ) ;
@@ -1541,18 +1500,8 @@ bool wxApp::MacSendKeyDownEvent( wxWindow* focus , long keymessage , long modifi
             int command = ancestor->GetAcceleratorTable()->GetCommand( event );
             if (command != -1)
             {
-                wxEvtHandler * const handler = ancestor->GetEventHandler();
-
                 wxCommandEvent command_event( wxEVT_COMMAND_MENU_SELECTED, command );
-                handled = handler->ProcessEvent( command_event );
-
-                if ( !handled )
-                {
-                    // accelerators can also be used with buttons, try them too
-                    command_event.SetEventType(wxEVT_COMMAND_BUTTON_CLICKED);
-                    handled = handler->ProcessEvent( command_event );
-                }
-
+                handled = ancestor->GetEventHandler()->ProcessEvent( command_event );
                 break;
             }
 

@@ -18,7 +18,7 @@
     #include "wx/statusbr.h"
 #endif // WX_PRECOMP
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 #include "wx/gtk/win_gtk.h"
 
 // ----------------------------------------------------------------------------
@@ -65,6 +65,9 @@ static void gtk_menu_attached_callback( GtkWidget *WXUNUSED(widget), GtkWidget *
 extern "C" {
 static void gtk_menu_detached_callback( GtkWidget *WXUNUSED(widget), GtkWidget *WXUNUSED(child), wxFrame *win )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!win->m_hasVMT) return;
 
     // Raise the client area area
@@ -99,6 +102,9 @@ static void gtk_toolbar_attached_callback( GtkWidget *WXUNUSED(widget), GtkWidge
 extern "C" {
 static void gtk_toolbar_detached_callback( GtkWidget *WXUNUSED(widget), GtkWidget *WXUNUSED(child), wxFrame *win )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!win->m_hasVMT) return;
 
     // Raise the client area area
@@ -133,7 +139,7 @@ static void wxInsertChildInFrame( wxFrame* parent, wxWindow* child )
         // These are outside the client area
         wxFrame* frame = (wxFrame*) parent;
         gtk_pizza_put( GTK_PIZZA(frame->m_mainWidget),
-                         child->m_widget,
+                         GTK_WIDGET(child->m_widget),
                          child->m_x,
                          child->m_y,
                          child->m_width,
@@ -161,7 +167,7 @@ static void wxInsertChildInFrame( wxFrame* parent, wxWindow* child )
     {
         // These are inside the client area
         gtk_pizza_put( GTK_PIZZA(parent->m_wxwindow),
-                         child->m_widget,
+                         GTK_WIDGET(child->m_widget),
                          child->m_x,
                          child->m_y,
                          child->m_width,
@@ -226,7 +232,7 @@ void wxFrame::DoGetClientSize( int *width, int *height ) const
 
 #if wxUSE_STATUSBAR
         // status bar
-        if (m_frameStatusBar && m_frameStatusBar->IsShown() &&
+        if (m_frameStatusBar && m_frameStatusBar->IsShown() && 
             !(m_fsIsShowing && (m_fsSaveFlag & wxFULLSCREEN_NOSTATUSBAR) != 0))
             (*height) -= wxSTATUS_HEIGHT;
 #endif // wxUSE_STATUSBAR
@@ -282,7 +288,7 @@ void wxFrame::DoSetClientSize( int width, int height )
 
 #if wxUSE_STATUSBAR
         // status bar
-        if (m_frameStatusBar && m_frameStatusBar->IsShown() &&
+        if (m_frameStatusBar && m_frameStatusBar->IsShown() && 
             !(m_fsIsShowing && (m_fsSaveFlag & wxFULLSCREEN_NOSTATUSBAR) != 0))
             height += wxSTATUS_HEIGHT;
 #endif
@@ -334,7 +340,15 @@ void wxFrame::GtkOnSize()
        skip the part which handles m_frameMenuBar, m_frameToolBar and (most
        importantly) m_mainWidget */
 
-    ConstrainSize();
+    int minWidth = GetMinWidth(),
+        minHeight = GetMinHeight(),
+        maxWidth = GetMaxWidth(),
+        maxHeight = GetMaxHeight();
+
+    if ((minWidth != -1) && (m_width < minWidth)) m_width = minWidth;
+    if ((minHeight != -1) && (m_height < minHeight)) m_height = minHeight;
+    if ((maxWidth != -1) && (m_width > maxWidth)) m_width = maxWidth;
+    if ((maxHeight != -1) && (m_height > maxHeight)) m_height = maxHeight;
 
     if (m_mainWidget)
     {
@@ -471,7 +485,7 @@ void wxFrame::GtkOnSize()
     {
         if (!GTK_WIDGET_VISIBLE(m_frameStatusBar->m_widget))
             gtk_widget_show( m_frameStatusBar->m_widget );
-
+            
         int xx = 0 + m_miniEdge;
         int yy = m_height - wxSTATUS_HEIGHT - m_miniEdge - client_area_y_offset;
         int ww = m_width - 2*m_miniEdge;

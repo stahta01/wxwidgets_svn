@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
 #endif
 
 #include "wx/html/forcelnk.h"
@@ -35,7 +35,7 @@ static wxString LINKAGEMODE HtmlizeWhitespaces(const wxString& str)
     size_t linepos = 0;
     for (size_t i = 0; i < len; i++)
     {
-        switch ( str[i].GetValue() )
+        switch (str[i])
         {
             case wxT('<'):
                 while (i < len && str[i] != wxT('>'))

@@ -57,9 +57,6 @@ wxButton      *button     = (wxButton*) NULL;
 // main frame
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-    return false;
-
   // Create the main frame window
   main_frame = new MyMainFrame((wxFrame *) NULL, wxID_ANY, _T("wxFrame sample"),
      wxPoint(100, 100), wxSize(300, 200));
@@ -164,6 +161,7 @@ bool MyApp::InitToolbar(wxToolBar* toolBar)
 // MyMiniFrame
 
 BEGIN_EVENT_TABLE(MyMiniFrame, wxMiniFrame)
+    EVT_CLOSE  (              MyMiniFrame::OnCloseWindow)
     EVT_BUTTON (ID_REPARENT,  MyMiniFrame::OnReparent)
     EVT_MENU   (wxID_PRINT,   MyMiniFrame::OnReparent)
 END_EVENT_TABLE()
@@ -174,11 +172,11 @@ MyMiniFrame::MyMiniFrame(wxFrame* parent, wxWindowID id, const wxString& title, 
 {
 }
 
-bool MyMiniFrame::Destroy()
+void MyMiniFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 {
   // make it known that the miniframe is no more
   mini_frame_exists = false;
-  return wxMiniFrame::Destroy();
+  Destroy();
 }
 
 void MyMiniFrame::OnReparent(wxCommandEvent& WXUNUSED(event))
@@ -192,7 +190,7 @@ void MyMiniFrame::OnReparent(wxCommandEvent& WXUNUSED(event))
 // MyMainFrame
 
 BEGIN_EVENT_TABLE(MyMainFrame, wxFrame)
-    EVT_MENU   (wxID_EXIT,    MyMainFrame::OnExit)
+    EVT_CLOSE  (              MyMainFrame::OnCloseWindow)
     EVT_BUTTON (ID_REPARENT,  MyMainFrame::OnReparent)
     EVT_MENU   (wxID_PRINT,   MyMainFrame::OnReparent)
 END_EVENT_TABLE()
@@ -203,9 +201,9 @@ MyMainFrame::MyMainFrame(wxFrame* parent, wxWindowID id, const wxString& title, 
 {
 }
 
-void MyMainFrame::OnExit(wxCommandEvent&)
+void MyMainFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 {
-    Close();
+  Destroy();
 }
 
 void MyMainFrame::OnReparent(wxCommandEvent& WXUNUSED(event))

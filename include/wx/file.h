@@ -73,7 +73,7 @@ public:
     // def ctor
   wxFile() { m_fd = fd_invalid; m_error = false; }
     // open specified file (may fail, use IsOpened())
-  wxFile(const wxString& fileName, OpenMode mode = read);
+  wxFile(const wxChar *szFileName, OpenMode mode = read);
     // attach to (already opened) file
   wxFile(int lfd) { m_fd = lfd; m_error = false; }
 
@@ -97,7 +97,12 @@ public:
     // returns the number of bytes written
   size_t Write(const void *pBuf, size_t nCount);
     // returns true on success
-  bool Write(const wxString& s, const wxMBConv& conv = wxConvUTF8);
+  bool Write(const wxString& s, const wxMBConv& conv = wxConvUTF8)
+  {
+      const wxWX2MBbuf buf = s.mb_str(conv);
+      size_t size = strlen(buf);
+      return Write((const char *) buf, size) == size;
+  }
     // flush data not yet written
   bool Flush();
 

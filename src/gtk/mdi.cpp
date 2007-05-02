@@ -23,6 +23,8 @@
 #include "wx/notebook.h"
 #include "wx/gtk/private.h"
 
+#include <glib.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include "wx/gtk/win_gtk.h"
 
@@ -47,6 +49,9 @@ gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
                               gint WXUNUSED(page_num),
                               wxMDIParentFrame *parent )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     // send deactivate event to old child
 
     wxMDIChildFrame *child = parent->GetActiveChild();
@@ -245,7 +250,7 @@ wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
 
     gint i = gtk_notebook_get_current_page( notebook );
     if (i < 0) return (wxMDIChildFrame*) NULL;
-
+    
     GtkNotebookPage* page = (GtkNotebookPage*) (g_list_nth(notebook->children,i)->data);
     if (!page) return (wxMDIChildFrame*) NULL;
 
@@ -254,7 +259,7 @@ wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
     {
         if ( wxPendingDelete.Member(node->GetData()) )
             return (wxMDIChildFrame*) NULL;
-
+        
         wxMDIChildFrame *child_frame = wxDynamicCast( node->GetData(), wxMDIChildFrame );
 
         if (!child_frame)
@@ -262,7 +267,7 @@ wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
 
         if (child_frame->m_page == page)
             return child_frame;
-
+            
         node = node->GetNext();
     }
 
@@ -436,6 +441,8 @@ void wxMDIChildFrame::SetTitle( const wxString &title )
 extern "C" {
 static void gtk_page_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation* alloc, wxWindow *win )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if ((win->m_x == alloc->x) &&
         (win->m_y == alloc->y) &&
         (win->m_width == alloc->width) &&
@@ -496,6 +503,8 @@ wxMDIClientWindow::~wxMDIClientWindow()
 
 bool wxMDIClientWindow::CreateClient( wxMDIParentFrame *parent, long style )
 {
+    m_needParent = true;
+
     m_insertCallback = (wxInsertChildFunction)wxInsertChildInMDI;
 
     if (!PreCreation( parent, wxDefaultPosition, wxDefaultSize ) ||
@@ -521,4 +530,4 @@ bool wxMDIClientWindow::CreateClient( wxMDIParentFrame *parent, long style )
     return true;
 }
 
-#endif // wxUSE_MDI
+#endif

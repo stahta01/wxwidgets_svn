@@ -37,17 +37,9 @@
 #define wxIMAGE_OPTION_RESOLUTIONUNIT        wxString(_T("ResolutionUnit"))
 
 // constants used with wxIMAGE_OPTION_RESOLUTIONUNIT
-//
-// NB: don't change these values, they correspond to libjpeg constants
-enum wxImageResolution
+enum
 {
-    // Resolution not specified
-    wxIMAGE_RESOLUTION_NONE = 0,
-
-    // Resolution specified in inches
     wxIMAGE_RESOLUTION_INCHES = 1,
-
-    // Resolution specified in centimeters
     wxIMAGE_RESOLUTION_CM = 2
 };
 
@@ -119,13 +111,6 @@ protected:
     // save the stream position, call DoCanRead() and restore the position
     bool CallDoCanRead(wxInputStream& stream);
 #endif // wxUSE_STREAMS
-
-    // helper for the derived classes SaveFile() implementations: returns the
-    // values of x- and y-resolution options specified as the image options if
-    // any
-    static wxImageResolution
-    GetResolutionFromOptions(const wxImage& image, int *x, int *y);
-
 
     wxString  m_name;
     wxString  m_extension;

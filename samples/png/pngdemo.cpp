@@ -27,9 +27,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-  if ( !wxApp::OnInit() )
-    return false;
-
   wxImage::AddHandler(new wxPNGHandler);
 
   // Create the main frame window

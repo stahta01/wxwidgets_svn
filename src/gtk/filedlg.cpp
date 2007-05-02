@@ -29,6 +29,12 @@
 #include "wx/filefn.h" // ::wxGetCwd
 
 //-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+
+//-----------------------------------------------------------------------------
 // "clicked" for OK-button
 //-----------------------------------------------------------------------------
 
@@ -91,6 +97,8 @@ static void gtk_filedialog_response_callback(GtkWidget *w,
                                              gint response,
                                              wxFileDialog *dialog)
 {
+    wxapp_install_idle_handler();
+
     if (response == GTK_RESPONSE_ACCEPT)
         gtk_filedialog_ok_callback(w, dialog);
     else    // GTK_RESPONSE_CANCEL or GTK_RESPONSE_NONE
@@ -152,7 +160,7 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         return;
     }
 
-    parent = GetParentForModalDialog(parent);
+    m_needParent = false;
 
     if (!PreCreation(parent, pos, wxDefaultSize) ||
         !CreateBase(parent, wxID_ANY, pos, wxDefaultSize, style,

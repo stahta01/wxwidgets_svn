@@ -184,12 +184,12 @@ bool wxFile::Access(const wxChar *name, OpenMode mode)
 // ----------------------------------------------------------------------------
 
 // ctors
-wxFile::wxFile(const wxString& fileName, OpenMode mode)
+wxFile::wxFile(const wxChar *szFileName, OpenMode mode)
 {
     m_fd = fd_invalid;
     m_error = false;
 
-    Open(fileName, mode);
+    Open(szFileName, mode);
 }
 
 // create the file, fail if it already exists and bOverwrite
@@ -321,16 +321,6 @@ size_t wxFile::Write(const void *pBuf, size_t nCount)
     }
 
     return iRc;
-}
-
-bool wxFile::Write(const wxString& s, const wxMBConv& conv)
-{
-  const wxWX2MBbuf buf = s.mb_str(conv);
-  if ( !buf )
-      return false;
-
-  const size_t size = strlen(buf); // FIXME: use buf.length() when available
-  return Write(buf, size) == size;
 }
 
 // flush

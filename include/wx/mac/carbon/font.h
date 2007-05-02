@@ -98,9 +98,10 @@ public:
     // Returns an ATSUStyle not ATSUStyle*
     void* MacGetATSUStyle() const ; 
     
-private:
+protected:
     void Unshare();
 
+private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 

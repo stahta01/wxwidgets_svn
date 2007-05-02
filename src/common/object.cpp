@@ -288,48 +288,6 @@ wxObject *wxCreateDynamicObject(const wxChar *name)
     }
 }
 
-// iterator interface
-wxClassInfo::const_iterator::value_type
-wxClassInfo::const_iterator::operator*() const
-{
-    return (wxClassInfo*)m_node->GetData();
-}
-
-wxClassInfo::const_iterator& wxClassInfo::const_iterator::operator++()
-{
-    m_node = m_table->Next();
-    return *this;
-}
-
-const wxClassInfo::const_iterator wxClassInfo::const_iterator::operator++(int)
-{
-    wxClassInfo::const_iterator tmp = *this;
-    m_node = m_table->Next();
-    return tmp;
-}
-
-wxClassInfo::const_iterator wxClassInfo::begin_classinfo()
-{
-    sm_classTable->BeginFind();
-
-    return const_iterator(sm_classTable->Next(), sm_classTable);
-}
-
-wxClassInfo::const_iterator wxClassInfo::end_classinfo()
-{
-    return const_iterator(NULL, NULL);
-}
-
-// ----------------------------------------------------------------------------
-// wxObjectRefData
-// ----------------------------------------------------------------------------
-
-void wxObjectRefData::DecRef()
-{
-    if ( --m_count == 0 )
-        delete this;
-}
-
 
 // ----------------------------------------------------------------------------
 // wxObject
@@ -352,7 +310,7 @@ void wxObject::Ref(const wxObject& clone)
     if ( clone.m_refData )
     {
         m_refData = clone.m_refData;
-        m_refData->IncRef();
+        ++(m_refData->m_count);
     }
 }
 
@@ -362,7 +320,8 @@ void wxObject::UnRef()
     {
         wxASSERT_MSG( m_refData->m_count > 0, _T("invalid ref data count") );
 
-        m_refData->DecRef();
+        if ( --m_refData->m_count == 0 )
+            delete m_refData;
         m_refData = NULL;
     }
 }

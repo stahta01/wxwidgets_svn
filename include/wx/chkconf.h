@@ -972,16 +972,16 @@
    check consistency of the settings
  */
 
-#if WXWIN_COMPATIBILITY_2_6
-#   if !WXWIN_COMPATIBILITY_2_8
+#if WXWIN_COMPATIBILITY_2_4
+#   if !WXWIN_COMPATIBILITY_2_6
 #       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "2.6.X compatibility requires 2.8.X compatibility"
+#           error "2.4.X compatibility requires 2.6.X compatibility"
 #       else
-#           undef WXWIN_COMPATIBILITY_2_8
-#           define WXWIN_COMPATIBILITY_2_8 1
+#           undef WXWIN_COMPATIBILITY_2_6
+#           define WXWIN_COMPATIBILITY_2_6 1
 #       endif
 #   endif
-#endif /* WXWIN_COMPATIBILITY_2_6 */
+#endif /* WXWIN_COMPATIBILITY_2_4 */
 
 #if wxUSE_ARCHIVE_STREAMS
 #   if !wxUSE_DATETIME
@@ -1803,6 +1803,15 @@
 #       define wxUSE_DATAOBJ 1
 #   endif
 #endif /* wxUSE_CLIPBOARD */
+
+#if wxUSE_WX_RESOURCES && !wxUSE_PROLOGIO
+#   ifdef wxABORT_ON_CONFIG_ERROR
+#       error "wxr resources require PrologIO"
+#   else
+#       undef wxUSE_PROLOGIO
+#       define wxUSE_PROLOGIO 1
+#   endif
+#endif /* wxUSE_WX_RESOURCES */
 
 #if wxUSE_XRC && !wxUSE_XML
 #   ifdef wxABORT_ON_CONFIG_ERROR

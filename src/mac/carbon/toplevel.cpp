@@ -250,7 +250,7 @@ wxWindow* g_MacLastWindow = NULL ;
 
 EventMouseButton g_lastButton = 0 ;
 bool g_lastButtonWasFakeRight = false ;
-
+ 
 void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
 {
     UInt32 modifiers = cEvent.GetParameter<UInt32>(kEventParamKeyModifiers, typeUInt32) ;
@@ -277,6 +277,7 @@ void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
         button = kEventMouseButtonSecondary ;
         thisButtonIsFakeRight = true ;
     }
+
     // otherwise we report double clicks by connecting a left click with a ctrl-left click
     if ( clickCount > 1 && button != g_lastButton )
         clickCount = 1 ;
@@ -368,14 +369,12 @@ void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
         {
             wxevent.SetEventType( wxEVT_MOUSEWHEEL ) ;
 
-            EventMouseWheelAxis axis = cEvent.GetParameter<EventMouseWheelAxis>(kEventParamMouseWheelAxis, typeMouseWheelAxis) ;
+            // EventMouseWheelAxis axis = cEvent.GetParameter<EventMouseWheelAxis>(kEventParamMouseWheelAxis, typeMouseWheelAxis) ;
             SInt32 delta = cEvent.GetParameter<SInt32>(kEventParamMouseWheelDelta, typeSInt32) ;
 
             wxevent.m_wheelRotation = delta;
             wxevent.m_wheelDelta = 1;
             wxevent.m_linesPerAction = 1;
-            if ( axis == kEventMouseWheelAxisX )
-                wxevent.m_wheelAxis = 1;
         }
         break ;
 
@@ -601,7 +600,7 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
             if ( wxevent.GetEventType() == wxEVT_LEFT_DOWN )
             {
                 // ... that is set focus to this window
-                if (currentMouseWindow->CanAcceptFocus() && wxWindow::FindFocus()!=currentMouseWindow)
+                if (currentMouseWindow->AcceptsFocus() && wxWindow::FindFocus()!=currentMouseWindow)
                     currentMouseWindow->SetFocus();
             }
 
@@ -1043,6 +1042,12 @@ void wxTopLevelWindowMac::Restore()
 wxPoint wxTopLevelWindowMac::GetClientAreaOrigin() const
 {
     return wxPoint(0, 0) ;
+}
+
+void wxTopLevelWindowMac::SetIcon(const wxIcon& icon)
+{
+    // this sets m_icon
+    wxTopLevelWindowBase::SetIcon(icon);
 }
 
 void  wxTopLevelWindowMac::MacSetBackgroundBrush( const wxBrush &brush )

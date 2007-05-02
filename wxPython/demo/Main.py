@@ -47,6 +47,30 @@ import images
 _treeList = [
     # new stuff
     ('Recent Additions/Updates', [
+        'RichTextCtrl',
+        'Treebook',
+        'Toolbook',
+        'BitmapFromBuffer',
+        'RawBitmapAccess',
+        'DragScroller',
+        'DelayedResult',
+        'ExpandoTextCtrl',
+        'ButtonPanel',
+        'FlatNotebook',
+        'CustomTreeCtrl',
+        'AboutBox',
+        'AlphaDrawing',
+        'GraphicsContext',
+        'CollapsiblePane',
+        'ComboCtrl',
+        'OwnerDrawnComboBox',
+        'BitmapComboBox',
+        'I18N',
+        'Img2PyArtProvider',
+        'SearchCtrl',
+        'SizedControls',
+        'AUI_MDI',
+        'TreeMixin',
         ]),
 
     # managed windows == things with a (optional) caption you can close
@@ -707,7 +731,7 @@ class DemoCodePanel(wx.Panel):
                 os.makedirs(GetModifiedDirectory())
                 if not os.path.exists(GetModifiedDirectory()):
                     wx.LogMessage("BUG: Created demo directory but it still doesn't exist")
-                    raise AssertionError
+                    raise AssetionError
             except:
                 wx.LogMessage("Error creating demo directory: %s" % GetModifiedDirectory())
                 return

@@ -589,14 +589,16 @@ public:
     virtual void AddFilesToMenu(wxMenu* menu); // Single menu
 
     // Accessors
-    virtual wxString GetHistoryFile(size_t i) const { return m_fileHistory[i]; }
-    virtual size_t GetCount() const { return m_fileHistory.GetCount(); }
+    virtual wxString GetHistoryFile(size_t i) const;
+    virtual size_t GetCount() const { return m_fileHistoryN; }
 
     const wxList& GetMenus() const { return m_fileMenus; }
 
+#if wxABI_VERSION >= 20802
     // Set/get base id
     void SetBaseId(wxWindowID baseId) { m_idBase = baseId; }
     wxWindowID GetBaseId() const { return m_idBase; }
+#endif // wxABI 2.8.2+
 
 #if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetCount() instead
@@ -605,11 +607,11 @@ public:
 
 protected:
     // Last n files
-    wxArrayString     m_fileHistory;
-
+    wxChar**          m_fileHistory;
+    // Number of files saved
+    size_t            m_fileHistoryN;
     // Menus to maintain (may need several for an MDI app)
     wxList            m_fileMenus;
-
     // Max files to maintain
     size_t            m_fileMaxFiles;
 
@@ -624,7 +626,7 @@ private:
 #if WXWIN_COMPATIBILITY_2_6
 inline size_t wxFileHistory::GetNoHistoryFiles() const
 {
-    return m_fileHistory.GetCount();
+    return m_fileHistoryN;
 }
 #endif // WXWIN_COMPATIBILITY_2_6
 

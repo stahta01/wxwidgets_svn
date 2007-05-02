@@ -967,7 +967,7 @@ bool wxRegKey::SetValue(const wxChar *szValue, const wxString& strValue)
 {
   if ( CONST_CAST Open() ) {
       m_dwLastError = RegSetValueEx((HKEY) m_hKey, szValue, (DWORD) RESERVED, REG_SZ,
-                                    (RegString)strValue.wx_str(),
+                                    (RegString)strValue.c_str(),
                                     (strValue.Len() + 1)*sizeof(wxChar));
       if ( m_dwLastError == ERROR_SUCCESS )
         return true;
@@ -1125,7 +1125,7 @@ static inline bool WriteAsciiString(wxOutputStream& ostr, const wxString& s)
     wxCharBuffer name(s.mb_str());
     ostr.Write(name, strlen(name));
 #else
-    ostr.Write(s.mb_str(), s.length());
+    ostr.Write(s, s.length());
 #endif
 
     return ostr.IsOk();

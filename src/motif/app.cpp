@@ -99,14 +99,14 @@ static int wxXErrorHandler(Display *dpy, XErrorEvent *xevent)
 
 bool wxApp::Initialize(int& argcOrig, wxChar **argvOrig)
 {
-#if wxUSE_INTL
-    wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
-#endif
-
     if ( !wxAppBase::Initialize(argcOrig, argvOrig) )
         return false;
 
     wxWidgetHashTable = new wxHashTable(wxKEY_INTEGER);
+
+#if wxUSE_INTL
+    wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
+#endif
 
     return true;
 }
@@ -132,6 +132,8 @@ void wxApp::CleanUp()
 #endif
         delete it->second;
     }
+
+    delete m_perDisplayData;
 }
 
 void wxApp::Exit()
@@ -159,7 +161,7 @@ wxApp::wxApp()
 
 wxApp::~wxApp()
 {
-    delete m_perDisplayData;
+    wxApp::SetInstance(NULL);
 }
 
 int wxApp::MainLoop()
@@ -197,17 +199,10 @@ static char *fallbackResources[] = {
     wxMOTIF_STR("*sgiMode: True"),
     wxMOTIF_STR("*useSchemes: all"),
 #else // !__SGI__
-#if !wxMOTIF_USE_RENDER_TABLE
-    wxMOTIF_STR("*.fontList: -*-helvetica-medium-r-normal-*-*-120-*-*-*-*-*-*"),
-#else
-    wxMOTIF_STR("*wxDefaultRendition.fontName: -*-helvetica-medium-r-normal-*-*-120-*-*-*-*-*-*"),
-    wxMOTIF_STR("*wxDefaultRendition.fontType: FONT_IS_FONTSET"),
-    wxMOTIF_STR("*.renderTable: wxDefaultRendition"),
-#endif
-    wxMOTIF_STR("*listBox.background: white"),
-    wxMOTIF_STR("*text.background: white"),
-    wxMOTIF_STR("*comboBox.Text.background: white"),
-    wxMOTIF_STR("*comboBox.List.background: white"),
+    wxMOTIF_STR("*menuBar.marginHeight: 0"),
+    wxMOTIF_STR("*menuBar.shadowThickness: 1"),
+    wxMOTIF_STR("*background: #c0c0c0"),
+    wxMOTIF_STR("*foreground: black"),
 #endif // __SGI__/!__SGI__
     NULL
 };

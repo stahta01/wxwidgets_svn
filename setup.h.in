@@ -68,9 +68,6 @@
 /* Define this if your version of GTK+ is greater than 2.6 */
 #undef __WXGTK26__
 
-/* Define this if your version of GTK+ is greater than 2.10 */
-#undef __WXGTK210__
-
 /* Define this if you want to use GPE features */
 #undef __WXGPE__
 
@@ -151,9 +148,9 @@
 #endif
 
 
-#define WXWIN_COMPATIBILITY_2_6 0
+#define WXWIN_COMPATIBILITY_2_4 0
 
-#define WXWIN_COMPATIBILITY_2_8 0
+#define WXWIN_COMPATIBILITY_2_6 0
 
 #define wxDIALOG_UNIT_COMPATIBILITY   0
 
@@ -298,8 +295,6 @@
 
 #define wxUSE_AUI       0
 
-#define wxUSE_STC 0
-
 
 #ifndef wxUSE_GRAPHICS_CONTEXT
 #define wxUSE_GRAPHICS_CONTEXT 0
@@ -325,7 +320,6 @@
 #define wxUSE_DATAVIEWCTRL  0
 #define wxUSE_DATEPICKCTRL  0
 #define wxUSE_DIRPICKERCTRL 0
-#define wxUSE_EDITABLELISTBOX   0
 #define wxUSE_FILEPICKERCTRL 0
 #define wxUSE_FONTPICKERCTRL 0
 #define wxUSE_GAUGE         0
@@ -477,6 +471,8 @@
 
 #define wxUSE_WXHTML_HELP 0
 
+#define wxUSE_RESOURCES   0
+
 #define wxUSE_CONSTRAINTS 0
 
 
@@ -559,8 +555,6 @@
 #define wxUSE_INKEDIT 0
 
 #define wxUSE_UNICODE_MSLU 0
-
-#define wxUSE_UNICODE_UTF8 0
 
 #define wxUSE_DC_CACHEING 0
 
@@ -735,6 +729,9 @@
 #define wxUSE_OLE_AUTOMATION 0
 #define wxUSE_ACTIVEX 0
 
+/* for compatibility */
+#define wxUSE_WX_RESOURCES wxUSE_RESOURCES
+
 /*
  * Use MS HTML Help via libmspack (Unix)
  */
@@ -807,11 +804,11 @@
 /* Define if fsync() is available */
 #undef HAVE_FSYNC
 
-/* Define if round() is available */
-#undef HAVE_ROUND
-
 /* Define if you have ftime() */
 #undef HAVE_FTIME
+
+/* Define if round() is available */
+#undef HAVE_ROUND
 
 /* Define if you have support for large (64 bit size) files */
 #undef HAVE_LARGEFILE_SUPPORT
@@ -836,9 +833,6 @@
 
 /* Define if you have pthread_cancel */
 #undef HAVE_PTHREAD_CANCEL
-
-/* Define if you have pthread_mutex_timedlock */
-#undef HAVE_PTHREAD_MUTEX_TIMEDLOCK
 
 /* Define if you have pthread_attr_setstacksize */
 #undef HAVE_PTHREAD_ATTR_SETSTACKSIZE
@@ -911,6 +905,9 @@
 
 /* define if you have vsscanf function */
 #undef HAVE_VSSCANF
+
+/* The number of bytes in a char.  */
+#undef SIZEOF_CHAR
 
 /* The number of bytes in a wchar_t.  */
 #undef SIZEOF_WCHAR_T
@@ -1077,8 +1074,14 @@
 /* Define if you have the <w32api.h> header file (mingw,cygwin).  */
 #undef HAVE_W32API_H
 
+/* Define if you have the <esd.h> header file.  */
+#undef HAVE_ESD_H
+
 /* Define if you have the <sys/soundcard.h> header file. */
 #undef HAVE_SYS_SOUNDCARD_H
+
+/* Define if you have a CD-ROM interface known to mmedia.  */
+#undef HAVE_KNOWN_CDROM_INTERFACE
 
 /* Define if you have wcsrtombs() function */
 #undef HAVE_WCSRTOMBS

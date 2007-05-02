@@ -43,7 +43,7 @@ public:
 
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
 
     // implementation from now on
     virtual void Command(wxCommandEvent& event);

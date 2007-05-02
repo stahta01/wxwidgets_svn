@@ -3,7 +3,7 @@
  * Template for the set.h file for VMS                                       *
  * Created from setup.h_in                                                   *
  * Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                            *
- * Date : 17 April 2007                                                      *
+ * Date : 19 December 2006                                                   *
  *                                                                           *
  *****************************************************************************/
 
@@ -88,9 +88,6 @@
 /* Define this if your version of GTK+ is greater than 2.6 */
 #define __WXGTK26__ 1
 
-/* Define this if your version of GTK+ is greater than 2.10 */
-#define __WXGTK210__ 1
-
 #include <types.h>
 typedef pid_t GPid;
 
@@ -167,9 +164,9 @@ typedef pid_t GPid;
 #endif
 
 
-#define WXWIN_COMPATIBILITY_2_6 1
+#define WXWIN_COMPATIBILITY_2_4 1
 
-#define WXWIN_COMPATIBILITY_2_8 1
+#define WXWIN_COMPATIBILITY_2_6 1
 
 #define wxDIALOG_UNIT_COMPATIBILITY   1
 
@@ -242,7 +239,6 @@ typedef pid_t GPid;
 #define wxUSE_TEXTFILE      1
 
 #define wxUSE_INTL          1
-#include <locale.h>
 
 #define wxUSE_DATETIME      1
 
@@ -327,8 +323,6 @@ typedef pid_t GPid;
 #endif
 
 #define wxUSE_TIPWINDOW    1
-
-#define wxUSE_STC 1
 
 #define wxUSE_ANIMATIONCTRL 1
 #define wxUSE_BUTTON       1
@@ -588,8 +582,6 @@ typedef pid_t GPid;
 #define wxUSE_INKEDIT 1
 
 #define wxUSE_UNICODE_MSLU 0
-
-#define wxUSE_UNICODE_UTF8 0
 
 #define wxUSE_DC_CACHEING 1
 
@@ -856,9 +848,6 @@ typedef pid_t GPid;
 /* Define if fsync() is available */
 #define HAVE_FSYNC 1
 
-/* Define if round() is available */
-/* #undef HAVE_ROUND */
-
 /* Define if you have ftime() */
 #define HAVE_FTIME
 
@@ -889,9 +878,6 @@ typedef pid_t GPid;
 
 /* Define if you have pthread_cancel */
 #define HAVE_PTHREAD_CANCEL 1
-
-/* Define if you have pthread_mutex_timedlock */
-#undef HAVE_PTHREAD_MUTEX_TIMEDLOCK
 
 /* Define if you have pthread_attr_setstacksize */
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE 1
@@ -993,6 +979,9 @@ typedef pid_t GPid;
 
 /* define if you have vsscanf function */
 #undef HAVE_VSSCANF
+
+/* The number of bytes in a char.  */
+#define SIZEOF_CHAR 1
 
 /* The number of bytes in a wchar_t.  */
 #define SIZEOF_WCHAR_T 4

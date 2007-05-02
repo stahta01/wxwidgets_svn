@@ -414,16 +414,37 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
         jpeg_set_quality(&cinfo, image->GetOptionInt(wxIMAGE_OPTION_QUALITY), TRUE);
 
     // set the resolution fields in the output file
-    int resX, resY;
-    wxImageResolution res = GetResolutionFromOptions(*image, &resX, &resY);
-    if ( res != wxIMAGE_RESOLUTION_NONE )
+    UINT16 resX,
+           resY;
+    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONX) &&
+         image->HasOption(wxIMAGE_OPTION_RESOLUTIONY) )
+    {
+        resX = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX);
+        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY);
+    }
+    else if ( image->HasOption(wxIMAGE_OPTION_RESOLUTION) )
+    {
+        resX =
+        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTION);
+    }
+    else
+    {
+        resX =
+        resY = 0;
+    }
+
+    if ( resX && resY )
     {
         cinfo.X_density = resX;
         cinfo.Y_density = resY;
+    }
 
-        // it so happens that wxIMAGE_RESOLUTION_INCHES/CM values are the same
-        // ones as used by libjpeg, so we can assign them directly
-        cinfo.density_unit = res;
+    // sets the resolution unit field in the output file
+    // wxIMAGE_RESOLUTION_INCHES for inches
+    // wxIMAGE_RESOLUTION_CM for centimeters
+    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONUNIT) )
+    {
+        cinfo.density_unit = (UINT8)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONUNIT);
     }
 
     jpeg_start_compress(&cinfo, TRUE);

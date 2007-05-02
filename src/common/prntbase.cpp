@@ -34,7 +34,6 @@
     #include "wx/button.h"
     #include "wx/settings.h"
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
     #include "wx/stattext.h"
     #include "wx/intl.h"
     #include "wx/textdlg.h"

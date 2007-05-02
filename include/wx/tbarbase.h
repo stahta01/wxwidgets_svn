@@ -91,10 +91,7 @@ public:
                                            : wxTOOL_STYLE_BUTTON;
     }
 
-    wxToolBarToolBase(wxToolBarBase *tbar,
-                      wxControl *control,
-                      const wxString& label)
-        : m_label(label)
+    wxToolBarToolBase(wxToolBarBase *tbar, wxControl *control)
     {
         m_tbar = tbar;
         m_control = control;
@@ -319,17 +316,13 @@ public:
     virtual wxToolBarToolBase *AddTool (wxToolBarToolBase *tool);
     virtual wxToolBarToolBase *InsertTool (size_t pos, wxToolBarToolBase *tool);
 
-    // add an arbitrary control to the toolbar (notice that the control will be
-    // deleted by the toolbar and that it will also adjust its position/size)
+    // add an arbitrary control to the toolbar (notice that
+    // the control will be deleted by the toolbar and that it will also adjust
+    // its position/size)
     //
-    // the label is optional and, if specified, will be shown near the control
     // NB: the control should have toolbar as its parent
-    virtual wxToolBarToolBase *
-    AddControl(wxControl *control, const wxString& label = wxEmptyString);
-
-    virtual wxToolBarToolBase *
-    InsertControl(size_t pos, wxControl *control,
-                  const wxString& label = wxEmptyString);
+    virtual wxToolBarToolBase *AddControl(wxControl *control);
+    virtual wxToolBarToolBase *InsertControl(size_t pos, wxControl *control);
 
     // get the control with the given id or return NULL
     virtual wxControl *FindControl( int toolid );
@@ -379,12 +372,6 @@ public:
     virtual void SetToolLongHelp(int toolid, const wxString& helpString);
     virtual wxString GetToolLongHelp(int toolid) const;
 
-    virtual void SetToolNormalBitmap(int WXUNUSED(id),
-                                     const wxBitmap& WXUNUSED(bitmap)) {}
-    virtual void SetToolDisabledBitmap(int WXUNUSED(id),
-                                       const wxBitmap& WXUNUSED(bitmap)) {}
-
-    
     // margins/packing/separation
     // --------------------------
 
@@ -572,8 +559,7 @@ protected:
                                           const wxString& shortHelp,
                                           const wxString& longHelp) = 0;
 
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label) = 0;
+    virtual wxToolBarToolBase *CreateTool(wxControl *control) = 0;
 
     // helper functions
     // ----------------
@@ -611,14 +597,8 @@ private:
     DECLARE_NO_COPY_CLASS(wxToolBarBase)
 };
 
-// deprecated function for creating the image for disabled buttons, use
-// wxImage::ConvertToGreyscale() instead
-#if WXWIN_COMPATIBILITY_2_8
-
-wxDEPRECATED( bool wxCreateGreyedImage(const wxImage& in, wxImage& out) );
-
-#endif // WXWIN_COMPATIBILITY_2_8
-
+// Helper function for creating the image for disabled buttons
+bool wxCreateGreyedImage(const wxImage& in, wxImage& out) ;
 
 #endif // wxUSE_TOOLBAR
 

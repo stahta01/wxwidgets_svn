@@ -138,10 +138,6 @@
 #define LWA_ALPHA 2
 #endif
 
-#ifndef QS_ALLPOSTMESSAGE
-#define QS_ALLPOSTMESSAGE 0
-#endif
-
 /*
  * The following are required for VC++ 5 when the PSDK is not available.
  */
@@ -335,34 +331,6 @@ typedef struct _OSVERSIONINFOEX {
 
 #ifndef LVM_GETHEADER
     #define LVM_GETHEADER (LVM_FIRST+31)
-#endif
-
-#ifndef HDLAYOUT
-    #define HDLAYOUT HD_LAYOUT
-#endif
-
-#ifndef HDITEM
-    #define HDITEM HD_ITEM
-#endif
-
-#ifndef NMHEADER
-    #define NMHEADER HD_NOTIFY
-#endif
-
-#ifndef HDS_HOTTRACK
-    #define HDS_HOTTRACK 4
-#endif
-
-#ifndef HDS_FULLDRAG
-    #define HDS_FULLDRAG 128
-#endif
-
-#ifndef HDN_BEGINDRAG
-    #define HDN_BEGINDRAG (HDN_FIRST - 11)
-#endif
-
-#ifndef HDN_ENDDRAG
-    #define HDN_ENDDRAG (HDN_FIRST - 10)
 #endif
 
 #ifndef LVSICF_NOSCROLL

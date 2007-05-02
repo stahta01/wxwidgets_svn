@@ -77,9 +77,6 @@ bool WritePageHeader(wxPrintout *printout, wxDC *dc, const wxChar *text, float m
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     m_testFont.Create(10, wxSWISS, wxNORMAL, wxNORMAL);

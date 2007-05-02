@@ -42,48 +42,6 @@ IMPLEMENT_ABSTRACT_CLASS(wxDCBase, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(wxBufferedDC, wxMemoryDC)
 IMPLEMENT_ABSTRACT_CLASS(wxBufferedPaintDC, wxBufferedDC)
 
-wxDCBase::wxDCBase()
-        : m_colour(wxColourDisplay())
-        , m_ok(true)
-        , m_clipping(false)
-        , m_isInteractive(0)
-        , m_isBBoxValid(false)
-        , m_logicalOriginX(0), m_logicalOriginY(0)
-        , m_deviceOriginX(0), m_deviceOriginY(0)
-        , m_deviceLocalOriginX(0), m_deviceLocalOriginY(0)
-        , m_logicalScaleX(1.0), m_logicalScaleY(1.0)
-        , m_userScaleX(1.0), m_userScaleY(1.0)
-        , m_scaleX(1.0), m_scaleY(1.0)
-        , m_signX(1), m_signY(1)
-        , m_minX(0), m_minY(0), m_maxX(0), m_maxY(0)
-        , m_clipX1(0), m_clipY1(0), m_clipX2(0), m_clipY2(0)
-        , m_logicalFunction(wxCOPY)
-        , m_backgroundMode(wxTRANSPARENT)
-        , m_mappingMode(wxMM_TEXT)
-        , m_pen()
-        , m_brush()
-        , m_backgroundBrush(*wxTRANSPARENT_BRUSH)
-        , m_textForegroundColour(*wxBLACK)
-        , m_textBackgroundColour(*wxWHITE)
-        , m_font()
-#if wxUSE_PALETTE
-        , m_palette()
-        , m_hasCustomPalette(false)
-#endif // wxUSE_PALETTE
-{
-    m_mm_to_pix_x = (double)wxGetDisplaySize().GetWidth() /
-                    (double)wxGetDisplaySizeMM().GetWidth();
-    m_mm_to_pix_y = (double)wxGetDisplaySize().GetHeight() /
-                    (double)wxGetDisplaySizeMM().GetHeight();
-                    
-    ResetBoundingBox();
-    ResetClipping();
-}
-
-wxDCBase::~wxDCBase()
-{
-}
-
 #if WXWIN_COMPATIBILITY_2_6
 void wxDCBase::BeginDrawing()
 {
@@ -93,125 +51,6 @@ void wxDCBase::EndDrawing()
 {
 }
 #endif // WXWIN_COMPATIBILITY_2_6
-
-// ----------------------------------------------------------------------------
-// coordinate conversions and transforms
-// ----------------------------------------------------------------------------
-
-wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
-{
-    return wxRound((double)(x - m_deviceOriginX - m_deviceLocalOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
-}
-
-wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
-{
-    return wxRound((double)(y - m_deviceOriginY - m_deviceLocalOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
-}
-
-wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
-{
-    return wxRound((double)(x) / m_scaleX);
-}
-
-wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
-{
-    return wxRound((double)(y) / m_scaleY);
-}
-
-wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
-{
-    return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX + m_deviceLocalOriginX;
-}
-
-wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
-{
-    return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY + m_deviceLocalOriginY;
-}
-
-wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
-{
-    return wxRound((double)(x) * m_scaleX);
-}
-
-wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
-{
-    return wxRound((double)(y) * m_scaleY);
-}
-
-void wxDCBase::ComputeScaleAndOrigin()
-{
-    m_scaleX = m_logicalScaleX * m_userScaleX;
-    m_scaleY = m_logicalScaleY * m_userScaleY;
-}
-
-void wxDCBase::SetMapMode( int mode )
-{
-    switch (mode)
-    {
-        case wxMM_TWIPS:
-          SetLogicalScale( twips2mm*m_mm_to_pix_x, twips2mm*m_mm_to_pix_y );
-          break;
-        case wxMM_POINTS:
-          SetLogicalScale( pt2mm*m_mm_to_pix_x, pt2mm*m_mm_to_pix_y );
-          break;
-        case wxMM_METRIC:
-          SetLogicalScale( m_mm_to_pix_x, m_mm_to_pix_y );
-          break;
-        case wxMM_LOMETRIC:
-          SetLogicalScale( m_mm_to_pix_x/10.0, m_mm_to_pix_y/10.0 );
-          break;
-        default:
-        case wxMM_TEXT:
-          SetLogicalScale( 1.0, 1.0 );
-          break;
-    }
-    m_mappingMode = mode;
-}
-
-void wxDCBase::SetUserScale( double x, double y )
-{
-    // allow negative ? -> no
-    m_userScaleX = x;
-    m_userScaleY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCBase::SetLogicalScale( double x, double y )
-{
-    // allow negative ?
-    m_logicalScaleX = x;
-    m_logicalScaleY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCBase::SetLogicalOrigin( wxCoord x, wxCoord y )
-{
-    m_logicalOriginX = x * m_signX;
-    m_logicalOriginY = y * m_signY;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCBase::SetDeviceOrigin( wxCoord x, wxCoord y )
-{
-    m_deviceOriginX = x;
-    m_deviceOriginY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCBase::SetDeviceLocalOrigin( wxCoord x, wxCoord y )
-{
-    m_deviceLocalOriginX = x;
-    m_deviceLocalOriginY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCBase::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
-{
-    // only wxPostScripDC has m_signX = -1, we override SetAxisOrientation there
-    m_signX = (xLeftRight ?  1 : -1);
-    m_signY = (yBottomUp  ? -1 :  1);
-    ComputeScaleAndOrigin();
-}
 
 // ----------------------------------------------------------------------------
 // special symbols
@@ -237,42 +76,6 @@ void wxDCBase::DoDrawCheckMark(wxCoord x1, wxCoord y1,
 
     CalcBoundingBox(x1, y1);
     CalcBoundingBox(x2, y2);
-}
-
-// ----------------------------------------------------------------------------
-// stubs for functions not implemented in all ports
-// ----------------------------------------------------------------------------
-
-bool
-wxDCBase::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                        wxCoord dstWidth, wxCoord dstHeight,
-                        wxDC *source,
-                        wxCoord xsrc, wxCoord ysrc,
-                        wxCoord srcWidth, wxCoord srcHeight,
-                        int rop,
-                        bool useMask,
-                        wxCoord xsrcMask,
-                        wxCoord ysrcMask)
-{
-    wxCHECK_MSG( srcWidth && srcHeight && dstWidth && dstHeight, false,
-                 _T("invalid blit size") );
-
-    // emulate the stretching by modifying the DC scale
-    double xscale = (double)srcWidth/dstWidth,
-           yscale = (double)srcHeight/dstHeight;
-
-    double xscaleOld, yscaleOld;
-    GetUserScale(&xscaleOld, &yscaleOld);
-    SetUserScale(xscaleOld/xscale, yscaleOld/yscale);
-
-    bool rc = DoBlit(wxCoord(xdest*xscale), wxCoord(ydest*yscale),
-                     wxCoord(dstWidth*xscale), wxCoord(dstHeight*yscale),
-                     source,
-                     xsrc, ysrc, rop, useMask, xsrcMask, ysrcMask);
-
-    SetUserScale(xscaleOld, yscaleOld);
-
-    return rc;
 }
 
 // ----------------------------------------------------------------------------
@@ -668,7 +471,7 @@ void wxDCBase::GetMultiLineTextExtent(const wxString& text,
                                       wxCoord *x,
                                       wxCoord *y,
                                       wxCoord *h,
-                                      const wxFont *font) const
+                                      wxFont *font) const
 {
     wxCoord widthTextMax = 0, widthLine,
             heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
@@ -803,9 +606,9 @@ void wxDCBase::DrawLabel(const wxString& text,
 
     // split the string into lines and draw each of them separately
     wxString curLine;
-    for ( wxString::const_iterator pc = text.begin(); ; ++pc )
+    for ( const wxChar *pc = text; ; pc++ )
     {
-        if ( *pc == _T('\n') || pc == text.end() )
+        if ( *pc == _T('\n') || *pc == _T('\0') )
         {
             int xRealStart = x; // init it here to avoid compielr warnings
 
@@ -843,14 +646,14 @@ void wxDCBase::DrawLabel(const wxString& text,
                 endUnderscore += xRealStart;
             }
 
-            if ( pc == text.end() )
+            if ( *pc == _T('\0') )
                 break;
 
             curLine.clear();
         }
         else // not end of line
         {
-            if ( pc - text.begin() == indexAccel )
+            if ( pc - text.c_str() == indexAccel )
             {
                 // remeber to draw underscore here
                 GetTextExtent(curLine, &startUnderscore, NULL);
@@ -931,7 +734,7 @@ void wxDCBase::DoGradientFillLinear(const wxRect& rect,
             else
                 nB = nB1 + (nB2-nB1)*(w-x)/w;
 
-            wxColour colour(nR,nG,nB);
+	    wxColour colour(nR,nG,nB);
             SetPen(wxPen(colour, 1, wxSOLID));
             SetBrush(wxBrush(colour));
             if(nDirection == wxEAST)
@@ -968,7 +771,7 @@ void wxDCBase::DoGradientFillLinear(const wxRect& rect,
             else
                 nB = nB1 + (nB2-nB1)*(w-y)/w;
 
-            wxColour colour(nR,nG,nB);
+	    wxColour colour(nR,nG,nB);
             SetPen(wxPen(colour, 1, wxSOLID));
             SetBrush(wxBrush(colour));
             if(nDirection == wxNORTH)
@@ -1353,4 +1156,4 @@ void wxDCBase::CalculateEllipticPoints( wxList* points,
     } // not iUseAngles
 } // CalculateEllipticPoints
 
-#endif // __WXWINCE__
+#endif

@@ -66,9 +66,6 @@ IMPLEMENT_APP  (MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame(NULL, _T("Dynamic wxWidgets App"), 50, 50, 450, 340);
 

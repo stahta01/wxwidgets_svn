@@ -22,9 +22,6 @@ IMPLEMENT_APP(TestApp)
 
 bool TestApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   bool is_use_display =
                         #if wxUSE_DISPLAY
                         true

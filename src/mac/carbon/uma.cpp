@@ -645,29 +645,14 @@ static OSStatus helpMenuStatus = noErr ;
 static MenuItemIndex firstCustomItemIndex = 0 ;
 #endif
 
-static OSStatus UMAGetHelpMenu(
+OSStatus UMAGetHelpMenu(
     MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex,
-    bool             allowHelpMenuCreation);
-
-static OSStatus UMAGetHelpMenu(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex,
-    bool             allowHelpMenuCreation)
+    MenuItemIndex *  outFirstCustomItemIndex)
 {
 #if TARGET_CARBON
-    static bool s_createdHelpMenu = false ;
+    return HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
 
-    if ( !s_createdHelpMenu && !allowHelpMenuCreation )
-    {
-        return paramErr ;
-    }
-
-    OSStatus status = HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
-    s_createdHelpMenu = ( status == noErr ) ;
-    return status ;
 #else
-    wxUnusedVar( allowHelpMenuCreation ) ;
     MenuRef helpMenuHandle ;
 
     helpMenuStatus = HMGetHelpMenuHandle( &helpMenuHandle ) ;
@@ -681,20 +666,6 @@ static OSStatus UMAGetHelpMenu(
 
     return helpMenuStatus ;
 #endif
-}
-
-OSStatus UMAGetHelpMenu(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex)
-{
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , true );
-}
-
-OSStatus UMAGetHelpMenuDontCreate(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex)
-{
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , false );
 }
 
 #ifndef __LP64__

@@ -28,6 +28,11 @@
 #endif
 
 #ifdef DBDEBUG_CONSOLE
+#if wxUSE_IOSTREAMH
+    #include <iostream.h>
+#else
+    #include <iostream>
+#endif
     #include "wx/ioswrap.h"
 #endif
 
@@ -39,11 +44,15 @@
 
 #include "wx/dbtable.h"
 
-// FIXME-UTF8: get rid of this after switching to Unicode-only builds:
-#if wxUSE_UNICODE
-    #define WXSQLCAST(s) ((SQLTCHAR FAR *)(wchar_t*)(s).wchar_str())
-#else
-    #define WXSQLCAST(s) ((SQLTCHAR FAR *)(char*)(s).char_str())
+#ifdef __UNIX__
+// The HPUX preprocessor lines below were commented out on 8/20/97
+// because macros.h currently redefines DEBUG and is unneeded.
+// #  ifdef HPUX
+// #    include <macros.h>
+// #  endif
+#  ifdef LINUX
+#    include <sys/minmax.h>
+#  endif
 #endif
 
 ULONG lastTableID = 0;
@@ -99,6 +108,19 @@ wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumn
     if (!initialize(pwxDb, tblName, numColumns, qryTblName, qryOnly, tblPath))
         cleanup();
 }  // wxDbTable::wxDbTable()
+
+
+/***** DEPRECATED: use wxDbTable::wxDbTable() format above *****/
+#if WXWIN_COMPATIBILITY_2_4
+wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
+                    const wxChar *qryTblName, bool qryOnly, const wxString &tblPath)
+{
+    wxString tempQryTblName;
+    tempQryTblName = qryTblName;
+    if (!initialize(pwxDb, tblName, numColumns, tempQryTblName, qryOnly, tblPath))
+        cleanup();
+}  // wxDbTable::wxDbTable()
+#endif // WXWIN_COMPATIBILITY_2_4
 
 
 /********** wxDbTable::~wxDbTable() **********/
@@ -622,7 +644,7 @@ bool wxDbTable::execDelete(const wxString &pSqlStmt)
     RETCODE retcode;
 
     // Execute the DELETE statement
-    retcode = SQLExecDirect(hstmtDelete, WXSQLCAST(pSqlStmt), SQL_NTS);
+    retcode = SQLExecDirect(hstmtDelete, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
 
     if (retcode == SQL_SUCCESS ||
         retcode == SQL_NO_DATA_FOUND ||
@@ -644,7 +666,7 @@ bool wxDbTable::execUpdate(const wxString &pSqlStmt)
     RETCODE retcode;
 
     // Execute the UPDATE statement
-    retcode = SQLExecDirect(hstmtUpdate, WXSQLCAST(pSqlStmt), SQL_NTS);
+    retcode = SQLExecDirect(hstmtUpdate, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
 
     if (retcode == SQL_SUCCESS ||
         retcode == SQL_NO_DATA_FOUND ||
@@ -716,7 +738,7 @@ bool wxDbTable::query(int queryType, bool forUpdate, bool distinct, const wxStri
 
     // Execute the SQL SELECT statement
     int retcode;
-    retcode = SQLExecDirect(hstmt, (queryType == DB_SELECT_STATEMENT ? WXSQLCAST(pSqlStmt) : WXSQLCAST(sqlStmt)), SQL_NTS);
+    retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt.c_str() : sqlStmt.c_str()), SQL_NTS);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         return(pDb->DispAllErrors(henv, hdbc, hstmt));
 
@@ -855,7 +877,7 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
         // Prepare the insert statement for execution
         if (insertableCount)
         {
-            if (SQLPrepare(hstmtInsert, WXSQLCAST(sqlStmt), SQL_NTS) != SQL_SUCCESS)
+            if (SQLPrepare(hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
                 return(pDb->DispAllErrors(henv, hdbc, hstmtInsert));
         }
         else
@@ -1517,7 +1539,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                 //  DB2 is limited to 18 characters for index names
                 if (pDb->Dbms() == dbmsDB2)
                 {
-                    wxASSERT_MSG(!tableName.empty() && tableName.length() <= 13, wxT("DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters."));
+                    wxASSERT_MSG((tableName && wxStrlen(tableName) <= 13), wxT("DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters."));
                     sqlStmt += pDb->SQLTableName(tableName.substr(0, 13).c_str());
 //                    sqlStmt += tableName.substr(0, 13);
                 }
@@ -1570,7 +1592,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
 #endif
 
     // Execute the CREATE TABLE statement
-    RETCODE retcode = SQLExecDirect(hstmt, WXSQLCAST(sqlStmt), SQL_NTS);
+    RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
     {
         pDb->DispAllErrors(henv, hdbc, hstmt);
@@ -1610,7 +1632,7 @@ bool wxDbTable::DropTable()
     cout << endl << sqlStmt.c_str() << endl;
 #endif
 
-    RETCODE retcode = SQLExecDirect(hstmt, WXSQLCAST(sqlStmt), SQL_NTS);
+    RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
     if (retcode != SQL_SUCCESS)
     {
         // Check for "Base table not found" error and ignore
@@ -1779,7 +1801,7 @@ bool wxDbTable::CreateIndex(const wxString &indexName, bool unique, UWORD numInd
 #endif
 
     // Execute the CREATE INDEX statement
-    RETCODE retcode = SQLExecDirect(hstmt, WXSQLCAST(sqlStmt), SQL_NTS);
+    RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
     if (retcode != SQL_SUCCESS)
     {
         pDb->DispAllErrors(henv, hdbc, hstmt);
@@ -1830,7 +1852,7 @@ bool wxDbTable::DropIndex(const wxString &indexName)
 #ifdef DBDEBUG_CONSOLE
     cout << endl << sqlStmt.c_str() << endl;
 #endif
-    RETCODE retcode = SQLExecDirect(hstmt, WXSQLCAST(sqlStmt), SQL_NTS);
+    RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
     if (retcode != SQL_SUCCESS)
     {
         // Check for "Index not found" error and ignore
@@ -2477,7 +2499,7 @@ ULONG wxDbTable::Count(const wxString &args)
     }
 
     // Execute the SQL statement
-    if (SQLExecDirect(*hstmtCount, WXSQLCAST(sqlStmt), SQL_NTS) != SQL_SUCCESS)
+    if (SQLExecDirect(*hstmtCount, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
     {
         pDb->DispAllErrors(henv, hdbc, *hstmtCount);
         return(0);

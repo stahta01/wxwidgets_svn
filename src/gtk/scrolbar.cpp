@@ -57,6 +57,8 @@ extern "C" {
 static gboolean
 gtk_button_press_event(GtkRange*, GdkEventButton*, wxScrollBar* win)
 {
+    // don't need to install idle handler, its done from "event" signal
+
     win->m_mouseButtonDown = true;
     return false;
 }
@@ -96,6 +98,8 @@ extern "C" {
 static gboolean
 gtk_button_release_event(GtkRange* range, GdkEventButton*, wxScrollBar* win)
 {
+    // don't need to install idle handler, its done from "event" signal
+
     win->m_mouseButtonDown = false;
     // If thumb tracking
     if (win->m_isScrolling)
@@ -129,6 +133,9 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
            const wxPoint& pos, const wxSize& size,
            long style, const wxValidator& validator, const wxString& name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -242,7 +249,7 @@ void wxScrollBar::SetRange(int range)
 
 GdkWindow *wxScrollBar::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
 {
-    return m_widget->window;
+    return GTK_WIDGET(GTK_RANGE(m_widget))->window;
 }
 
 // static

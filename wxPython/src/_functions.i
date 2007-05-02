@@ -70,9 +70,13 @@ void wxBell();
 MustHaveApp(wxEndBusyCursor);
 void wxEndBusyCursor();
 
+long wxGetElapsedTime(bool resetTimer = true);
+%pythoncode { GetElapsedTime = wx._deprecated(GetElapsedTime) }
+    
 bool wxIsBusy();
 wxString wxNow();
 bool wxShell(const wxString& command = wxPyEmptyString);
+void wxStartTimer();
 
 
 DocDeclA(

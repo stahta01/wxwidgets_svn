@@ -101,11 +101,7 @@ static pascal void NavEventProc(
             if ( data->saveMode )
             {
                 int i = menu->menuType ;
-
-                // isolate the first extension string
-                wxString firstExtension = data->extensions[i].BeforeFirst('|').BeforeFirst(';');
-
-                wxString extension = firstExtension.AfterLast('.') ;
+                wxString extension =  data->extensions[i].AfterLast('.') ;
                 wxString sfilename ;
 
                 wxMacCFStringHolder cfString( NavDialogGetSaveFileName( ioParams->context ) , false  );
@@ -129,7 +125,7 @@ void MakeUserDataRec(OpenUserDataRec *myData , const wxString& filter )
     myData->currentfilter = 0 ;
     myData->saveMode = false ;
 
-    if ( !filter.empty() )
+    if ( filter && filter[0] )
     {
         wxString filter2(filter) ;
         int filterIndex = 0;
@@ -273,45 +269,27 @@ pascal Boolean CrossPlatformFilterCallback(
     void *callBackUD,
     NavFilterModes filterMode )
 {
+    bool display = true;
     OpenUserDataRecPtr data = (OpenUserDataRecPtr) callBackUD ;
 
     if (filterMode == kNavFilteringBrowserList)
     {
-        // We allow navigation to all folders. For files, we check against the current
-        // filter string.
-        // However, packages should be dealt with like files and not like folders. So
-        // check if a folder is a package before deciding what to do.
-        FSRef fsref;
         NavFileOrFolderInfo* theInfo = (NavFileOrFolderInfo*) info ;
-        AECoerceDesc (theItem, typeFSRef, theItem);
-        if ( AEGetDescData (theItem, &fsref, sizeof (FSRef)) != noErr)
-            return true;
-
-        if ( theInfo->isFolder )
+        if ( !theInfo->isFolder )
         {
-            // check bundle bit (using Finder Services - used by OS9 on some bundles)
-            FSCatalogInfo catalogInfo;
-            if (FSGetCatalogInfo (&fsref, kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL) != noErr)
-                return true;
-
-            // Check bundle item (using Launch Services - used by OS-X through info.plist or APP)
-            LSItemInfoRecord lsInfo;
-            if (LSCopyItemInfoForRef(&fsref, kLSRequestBasicFlagsOnly, &lsInfo ) != noErr)
-                return true;
-
-            // If it's not a bundle, then it's a normal folder and it passes our filter
-            FileInfo *fileInfo = (FileInfo *) catalogInfo.finderInfo;
-            if ( !(fileInfo->finderFlags & kHasBundle) &&
-                 !(lsInfo.flags & (kLSItemInfoIsApplication | kLSItemInfoIsPackage)) )
-                return true;
+            AECoerceDesc (theItem, typeFSRef, theItem); 
+            
+            FSRef fsref ;
+            if ( AEGetDescData (theItem, &fsref, sizeof (FSRef)) == noErr )
+            {
+                memcpy( &fsref , *theItem->dataHandle , sizeof(FSRef) ) ;
+                wxString file = wxMacFSRefToPath( &fsref ) ;
+                display = CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
+            }
         }
-
-        wxString file = wxMacFSRefToPath( &fsref ) ;
-        return CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
-
     }
 
-    return true;
+    return display;
 }
 
 int wxFileDialog::ShowModal()

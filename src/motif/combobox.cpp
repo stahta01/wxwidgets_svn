@@ -51,7 +51,6 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     m_noStrings = n;
 
@@ -81,13 +80,16 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 
     SetValue(value);
 
+    ChangeFont(false);
+
     XtAddCallback (buttonWidget, XmNselectionCallback, (XtCallbackProc) wxComboBoxCallback,
         (XtPointer) this);
     XtAddCallback (buttonWidget, XmNvalueChangedCallback, (XtCallbackProc) wxComboBoxCallback,
         (XtPointer) this);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -138,12 +140,11 @@ wxString wxComboBox::GetValue() const
 
 void wxComboBox::SetValue(const wxString& value)
 {
+    m_inSetValue = true;
     if( !value.empty() )
-    {
-        m_inSetValue = true;
-        XmComboBoxSetString((Widget)m_mainWidget, value.char_str());
-        m_inSetValue = false;
-    }
+        XmComboBoxSetString( (Widget)m_mainWidget,
+                             wxConstCast(value.c_str(), char) );
+    m_inSetValue = false;
 }
 
 void wxComboBox::SetString(unsigned int WXUNUSED(n), const wxString& WXUNUSED(s))
@@ -290,7 +291,7 @@ void wxComboBox::Replace(long from, long to, const wxString& value)
 {
     XmComboBoxReplace ((Widget) m_mainWidget, (XmTextPosition) from,
                        (XmTextPosition) to,
-                       value.char_str());
+                       wxConstCast(value.c_str(), char));
 }
 
 void wxComboBox::Remove(long from, long to)

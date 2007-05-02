@@ -32,7 +32,6 @@
     #include "wx/msgdlg.h"
     #include "wx/confbase.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/apptrait.h"

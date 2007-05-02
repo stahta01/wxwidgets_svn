@@ -23,7 +23,7 @@
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
 
-#include "wx/cocoa/objc/NSView.h"
+#import <AppKit/NSView.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSScrollView.h>
 #import <AppKit/NSColor.h>
@@ -313,6 +313,7 @@ void wxWindowCocoa::Init()
     m_wxCocoaScrollView = NULL;
     m_isBeingDeleted = false;
     m_isInPaint = false;
+    m_shouldBeEnabled = true;
 }
 
 // Constructor
@@ -327,7 +328,7 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID winid,
 
     // TODO: create the window
     m_cocoaNSView = NULL;
-    SetNSView([[WXNSView alloc] initWithFrame: MakeDefaultNSRect(size)]);
+    SetNSView([[NSView alloc] initWithFrame: MakeDefaultNSRect(size)]);
     [m_cocoaNSView release];
 
     if (m_parent)
@@ -600,9 +601,32 @@ void wxWindow::CocoaReplaceView(WX_NSView oldView, WX_NSView newView)
     [[oldView superview] replaceSubview:oldView with:newView];
 }
 
-void wxWindow::DoEnable(bool enable)
+bool wxWindow::EnableSelfAndChildren(bool enable)
 {
-	CocoaSetEnabled(enable);
+    // If the state isn't changing, don't do anything
+    if(!wxWindowBase::Enable(enable && m_shouldBeEnabled))
+        return false;
+    // Set the state of the Cocoa window
+    CocoaSetEnabled(m_isEnabled);
+    // Disable all children or (if enabling) return them to their proper state
+    for(wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        node; node = node->GetNext())
+    {
+        node->GetData()->EnableSelfAndChildren(enable);
+    }
+    return true;
+}
+
+bool wxWindow::Enable(bool enable)
+{
+    // Keep track of what the window SHOULD be doing
+    m_shouldBeEnabled = enable;
+    // If the parent is disabled for any reason, then this window will be too.
+    if(!IsTopLevel() && GetParent())
+    {
+        enable = enable && GetParent()->IsEnabled();
+    }
+    return EnableSelfAndChildren(enable);
 }
 
 bool wxWindow::Show(bool show)
@@ -833,13 +857,12 @@ void wxWindow::CocoaSetWxWindowSize(int width, int height)
 
 void wxWindow::SetLabel(const wxString& WXUNUSED(label))
 {
-    // Intentional no-op.
+    // TODO
 }
 
 wxString wxWindow::GetLabel() const
 {
-    // General Get/Set of labels is implemented in wxControlBase
-    wxLogDebug(wxT("wxWindow::GetLabel: Should be overridden if needed."));
+    // TODO
     return wxEmptyString;
 }
 
