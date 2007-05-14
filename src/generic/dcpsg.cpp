@@ -270,7 +270,6 @@ wxPostScriptDC::wxPostScriptDC ()
 
     m_signX =  1;  // default x-axis left to right
     m_signY = -1;  // default y-axis bottom up -> top down
-    
 }
 
 wxPostScriptDC::wxPostScriptDC (const wxPrintData& printData)
@@ -293,10 +292,6 @@ wxPostScriptDC::wxPostScriptDC (const wxPrintData& printData)
 
     m_printData = printData;
 
-    int h = 0;
-    GetSize( NULL, &h );
-    SetDeviceLocalOrigin( 0, h );
-    
     m_ok = true;
 }
 
@@ -1485,14 +1480,6 @@ wxCoord wxPostScriptDC::GetCharWidth() const
     return (wxCoord) (GetCharHeight() * 72.0 / 120.0);
 }
 
-void wxPostScriptDC::SetPrintData(const wxPrintData& data)
-{ 
-    m_printData = data;
-    
-    int h = 0;
-    GetSize( NULL, &h );
-    SetDeviceLocalOrigin( 0, h );
-}
 
 void wxPostScriptDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
 {
@@ -1504,29 +1491,15 @@ void wxPostScriptDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
     ComputeScaleAndOrigin();
 }
 
-void wxPostScriptDC::SetMapMode(int mode)
+void wxPostScriptDC::SetDeviceOrigin( wxCoord x, wxCoord y )
 {
-    wxDCBase::SetMapMode(mode);
-}
+    wxCHECK_RET( m_ok, wxT("invalid postscript dc") );
 
-void wxPostScriptDC::SetUserScale(double x, double y)
-{
-    wxDCBase::SetUserScale(x,y);
-}
+    int h = 0;
+    int w = 0;
+    GetSize( &w, &h );
 
-void wxPostScriptDC::SetLogicalScale(double x, double y)
-{
-    wxDCBase::SetLogicalScale(x,y);
-}
-
-void wxPostScriptDC::SetLogicalOrigin(wxCoord x, wxCoord y)
-{
-    wxDCBase::SetLogicalOrigin(x,y);
-}
-
-void wxPostScriptDC::SetDeviceOrigin(wxCoord x, wxCoord y)
-{
-    wxDCBase::SetDeviceOrigin(x,y);
+    wxDC::SetDeviceOrigin( x, h-y );
 }
 
 void wxPostScriptDC::DoGetSize(int* width, int* height) const
@@ -1862,11 +1835,11 @@ wxCoord wxPostScriptDC::GetCharHeight() const
 void wxPostScriptDC::DoGetTextExtent(const wxString& string,
                                      wxCoord *x, wxCoord *y,
                                      wxCoord *descent, wxCoord *externalLeading,
-                                     const wxFont *theFont ) const
+                                     wxFont *theFont ) const
 {
-    const wxFont *fontToUse = theFont;
+    wxFont *fontToUse = theFont;
 
-    if (!fontToUse) fontToUse = &m_font;
+    if (!fontToUse) fontToUse = (wxFont*) &m_font;
 
     wxCHECK_RET( fontToUse, wxT("GetTextExtent: no font defined") );
 
@@ -2228,30 +2201,16 @@ void wxPostScriptDC::DoGetTextExtent(const wxString& string,
 }
 
 // print postscript datas via required method (file, stream)
-#if !wxUSE_UTF8_LOCALE_ONLY
-void wxPostScriptDC::DoPsPrintfFormatWchar(const wxChar *fmt, ...)
+void wxPostScriptDC::PsPrintf( const wxChar* fmt, ... )
 {
     va_list argptr;
     va_start(argptr, fmt);
 
-    PsPrint( wxString::FormatV( fmt, argptr ) );
+    PsPrint( wxString::FormatV( fmt, argptr ).c_str() );
 }
-#endif // !wxUSE_UTF8_LOCALE_ONLY
 
-#if wxUSE_UNICODE_UTF8
-void wxPostScriptDC::DoPsPrintfFormatUtf8(const char *fmt, ...)
+void wxPostScriptDC::PsPrint( const char* psdata )
 {
-    va_list argptr;
-    va_start(argptr, fmt);
-
-    PsPrint( wxString::FormatV( fmt, argptr ) );
-}
-#endif // wxUSE_UNICODE_UTF8
-
-void wxPostScriptDC::PsPrint( const wxString& str )
-{
-    const wxWX2MBbuf psdata(str.mb_str(wxConvUTF8));
-
     wxPostScriptPrintNativeData *data =
         (wxPostScriptPrintNativeData *) m_printData.GetNativeData();
 

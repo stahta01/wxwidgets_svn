@@ -123,14 +123,6 @@ int wxControl::FindAccelIndex(const wxString& label, wxString *labelOnly)
 
 void wxControl::SetLabel(const wxString& label)
 {
-    // save original label
-    wxControlBase::SetLabel(label);
-
-    UnivDoSetLabel(label);
-}
-
-void wxControl::UnivDoSetLabel(const wxString& label)
-{
     wxString labelOld = m_label;
     m_indexAccel = FindAccelIndex(label, &m_label);
 
@@ -138,6 +130,11 @@ void wxControl::UnivDoSetLabel(const wxString& label)
     {
         Refresh();
     }
+}
+
+wxString wxControl::GetLabel() const
+{
+    return m_label;
 }
 
 #endif // wxUSE_CONTROLS

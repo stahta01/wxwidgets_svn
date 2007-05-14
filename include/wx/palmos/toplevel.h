@@ -54,7 +54,8 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
-    virtual void SetIcons(const wxIconBundle& icons);
+    virtual void SetIcon(const wxIcon& icon);
+    virtual void SetIcons(const wxIconBundle& icons );
     virtual void Restore();
 
 #ifndef __WXWINCE__

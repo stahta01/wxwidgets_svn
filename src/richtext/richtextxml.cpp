@@ -546,8 +546,7 @@ bool wxRichTextXMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream& 
         {
 #if wxUSE_INTL
             fileEncoding = wxLocale::GetSystemEncodingName();
-            // if !wxUSE_INTL, we fall back to UTF-8 or ISO-8859-1 below
-#endif
+#endif // wxUSE_INTL
         }
         else
         {

@@ -19,7 +19,7 @@
 #endif
 
 #include "wx/apptrait.h"
-#include "wx/gtk1/private/timer.h"
+
 #include "wx/process.h"
 
 #include "wx/unix/execute.h"
@@ -183,11 +183,6 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
     return tag;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxGTKTimerImpl(timer);
-}
-
 // ----------------------------------------------------------------------------
 // wxPlatformInfo-related
 // ----------------------------------------------------------------------------
@@ -206,11 +201,3 @@ wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
     return wxEmptyString;
 }
-
-#if wxUSE_INTL
-void wxGUIAppTraits::SetLocale()
-{
-    gtk_set_locale();
-}
-#endif
-

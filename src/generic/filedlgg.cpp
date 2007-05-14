@@ -996,8 +996,6 @@ bool wxGenericFileDialog::Create( wxWindow *parent,
 {
     m_bypassGenericImpl = bypassGenericImpl;
 
-    parent = GetParentForModalDialog(parent);
-
     if (!wxFileDialogBase::Create(parent, message, defaultDir, defaultFile,
                                   wildCard, style, pos, sz, name))
     {
@@ -1477,7 +1475,6 @@ void wxGenericFileDialog::HandleAction( const wxString &fn )
     {
         wxMessageBox(_("Please choose an existing file."), _("Error"),
                      wxOK | wxICON_ERROR );
-                     
         return;
     }
 

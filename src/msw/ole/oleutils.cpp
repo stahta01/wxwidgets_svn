@@ -70,7 +70,16 @@ bool IsIidFromList(REFIID riid, const IID *aIids[], size_t nCount)
 
 WXDLLEXPORT BSTR wxConvertStringToOle(const wxString& str)
 {
-    return wxBasicString(str).Get();
+/*
+    unsigned int len = strlen((const char*) str);
+    unsigned short* s = new unsigned short[len*2+2];
+    unsigned int i;
+    memset(s, 0, len*2+2);
+    for (i=0; i < len; i++)
+        s[i*2] = str[i];
+*/
+    wxBasicString bstr(str.mb_str());
+    return bstr.Get();
 }
 
 WXDLLEXPORT wxString wxConvertStringFromOle(BSTR bStr)

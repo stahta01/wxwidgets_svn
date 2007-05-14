@@ -380,8 +380,7 @@ void wxBitmapComboBox::OnDrawBackground(wxDC& dc,
 {
     if ( GetCustomPaintWidth() == 0 ||
          !(flags & wxODCB_PAINTING_SELECTED) ||
-         item < 0 ||
-         ( (flags & wxODCB_PAINTING_CONTROL) && (GetInternalFlags() & wxCC_FULL_BUTTON)) )
+         item < 0 )
     {
         wxOwnerDrawnComboBox::OnDrawBackground(dc, rect, item, flags);
         return;

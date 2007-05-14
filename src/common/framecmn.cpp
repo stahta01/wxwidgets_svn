@@ -270,7 +270,18 @@ void wxFrameBase::OnMenuOpen(wxMenuEvent& WXUNUSED(event))
 
 void wxFrameBase::OnMenuClose(wxMenuEvent& WXUNUSED(event))
 {
-    DoGiveHelp(wxEmptyString, false);
+    // do we have real status text to restore?
+    if ( !m_oldStatusText.empty() )
+    {
+        if ( m_statusBarPane >= 0 )
+        {
+            wxStatusBar *statbar = GetStatusBar();
+            if ( statbar )
+                statbar->SetStatusText(m_oldStatusText, m_statusBarPane);
+        }
+
+        m_oldStatusText.clear();
+    }
 }
 
 #endif // wxUSE_MENUS && wxUSE_STATUSBAR
@@ -354,7 +365,9 @@ bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 #if wxUSE_MENUS
     // if no help string found, we will clear the status bar text
     wxString helpString;
-    if ( menuId != wxID_SEPARATOR && menuId != -3 /* wxID_TITLE */ )
+    bool show = menuId != wxID_SEPARATOR && menuId != -2 /* wxID_TITLE */;
+
+    if ( show )
     {
         wxMenuBar *menuBar = GetMenuBar();
         if ( menuBar )
@@ -367,7 +380,7 @@ bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
         }
     }
 
-    DoGiveHelp(helpString, true);
+    DoGiveHelp(helpString, show);
 
     return !helpString.empty();
 #else // !wxUSE_MENUS
@@ -391,7 +404,7 @@ void wxFrameBase::SetStatusBar(wxStatusBar *statBar)
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_MENUS || wxUSE_TOOLBAR
-void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
+void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
 {
 #if wxUSE_STATUSBAR
     if ( m_statusBarPane < 0 )
@@ -404,9 +417,11 @@ void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
     if ( !statbar )
         return;
 
-    wxString text;
+    wxString help;
     if ( show )
     {
+        help = text;
+
         // remember the old status bar text if this is the first time we're
         // called since the menu has been opened as we're going to overwrite it
         // in our DoGiveHelp() and we want to restore it when the menu is
@@ -427,16 +442,17 @@ void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
                 m_oldStatusText += _T('\0');
             }
         }
-
-        text = help;
     }
-    else // hide help, restore the original text
+    else // hide the status bar text
     {
-        text = m_oldStatusText;
+        // i.e. restore the old one
+        help = m_oldStatusText;
+
+        // make sure we get the up to date text when showing it the next time
         m_oldStatusText.clear();
     }
 
-    statbar->SetStatusText(text, m_statusBarPane);
+    statbar->SetStatusText(help, m_statusBarPane);
 #else
     wxUnusedVar(text);
     wxUnusedVar(show);

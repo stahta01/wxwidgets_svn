@@ -76,6 +76,7 @@ wxSizerXmlHandler::wxSizerXmlHandler()
     XRC_ADD_STYLE(wxALIGN_CENTER_VERTICAL);
     XRC_ADD_STYLE(wxALIGN_CENTRE_VERTICAL);
 
+    XRC_ADD_STYLE(wxADJUST_MINSIZE);
     XRC_ADD_STYLE(wxFIXED_MINSIZE);
 }
 
@@ -144,9 +145,9 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
         wxWindow *wnd = wxDynamicCast(item, wxWindow);
 
         if (sizer)
-            sitem->AssignSizer(sizer);
+            sitem->SetSizer(sizer);
         else if (wnd)
-            sitem->AssignWindow(wnd);
+            sitem->SetWindow(wnd);
         else
             wxLogError(wxT("Error in resource."));
 
@@ -170,7 +171,7 @@ wxObject* wxSizerXmlHandler::Handle_spacer()
 
     wxSizerItem* sitem = MakeSizerItem();
     SetSizerItemAttributes(sitem);
-    sitem->AssignSpacer(GetSize());
+    sitem->SetSpacer(GetSize());
     AddSizerItem(sitem);
     return NULL;
 }

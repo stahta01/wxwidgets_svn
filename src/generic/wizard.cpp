@@ -125,16 +125,30 @@ void wxWizardPage::Init()
 }
 
 wxWizardPage::wxWizardPage(wxWizard *parent,
-                           const wxBitmap& bitmap)
+                           const wxBitmap& bitmap,
+                           const wxChar *resource)
 {
-    Create(parent, bitmap);
+    Create(parent, bitmap, resource);
 }
 
 bool wxWizardPage::Create(wxWizard *parent,
-                          const wxBitmap& bitmap)
+                          const wxBitmap& bitmap,
+                          const wxChar *resource)
 {
     if ( !wxPanel::Create(parent, wxID_ANY) )
         return false;
+
+    if ( resource != NULL )
+    {
+#if wxUSE_WX_RESOURCES
+#if 0
+       if ( !LoadFromResource(this, resource) )
+        {
+            wxFAIL_MSG(wxT("wxWizardPage LoadFromResource failed!!!!"));
+        }
+#endif
+#endif // wxUSE_RESOURCES
+    }
 
     m_bitmap = bitmap;
 
@@ -638,10 +652,7 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     bool hasNext = HasNextPage(m_page);
     if ( btnLabelWasNext != hasNext )
     {
-        if ( hasNext )
-            m_btnNext->SetLabel(_("&Next >"));
-        else
-            m_btnNext->SetLabel(_("&Finish"));
+        m_btnNext->SetLabel(hasNext ? _("&Next >") : _("&Finish"));
     }
     // nothing to do: the label was already correct
 

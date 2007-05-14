@@ -292,4 +292,9 @@ void wxBitmapButton::DrawButtonDisable( wxClientDC& rDC,
     wxDisableBitmap(rBmp, vGreyPen.GetColour().GetPixel());
 } // end of wxBitmapButton::DrawButtonDisable
 
+void wxBitmapButton::SetDefault()
+{
+    wxButton::SetDefault();
+}
+
 #endif // ndef for wxUSE_BMPBUTTON

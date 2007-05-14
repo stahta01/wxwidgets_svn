@@ -18,7 +18,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/nonownedwnd.h"
+#include "wx/window.h"
 #include "wx/iconbndl.h"
 
 // the default names for various classes
@@ -115,7 +115,7 @@ enum
 // wxTopLevelWindow: a top level (as opposed to child) window
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxTopLevelWindowBase : public wxNonOwnedWindow
+class WXDLLEXPORT wxTopLevelWindowBase : public wxWindow
 {
 public:
     // construction
@@ -145,16 +145,16 @@ public:
     virtual bool IsIconized() const = 0;
 
     // get the frame icon
-    wxIcon GetIcon() const;
+    const wxIcon& GetIcon() const { return m_icons.GetIcon( -1 ); }
 
     // get the frame icons
     const wxIconBundle& GetIcons() const { return m_icons; }
 
-    // set the frame icon: implemented in terms of SetIcons()
-    void SetIcon(const wxIcon& icon);
+    // set the frame icon
+    virtual void SetIcon(const wxIcon& icon) { m_icons = wxIconBundle( icon ); }
 
     // set the frame icons
-    virtual void SetIcons(const wxIconBundle& icons) { m_icons = icons; }
+    virtual void SetIcons(const wxIconBundle& icons ) { m_icons = icons; }
 
     // maximize the window to cover entire screen
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL) = 0;
@@ -252,6 +252,11 @@ public:
     virtual void SetMinSize(const wxSize& minSize);
     virtual void SetMaxSize(const wxSize& maxSize);
 
+    // set size hints for "window manager"
+    virtual void DoSetSizeHints( int minW, int minH,
+                                 int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
+                                 int incW = wxDefaultCoord, int incH = wxDefaultCoord );
+
 protected:
     // the frame client to screen translation should take account of the
     // toolbar which may shift the origin of the client area
@@ -289,11 +294,6 @@ protected:
     static wxSize GetDefaultSize();
     static int WidthDefault(int w) { return w == wxDefaultCoord ? GetDefaultSize().x : w; }
     static int HeightDefault(int h) { return h == wxDefaultCoord ? GetDefaultSize().y : h; }
-
-    // reset m_winDefault and m_winTmpDefault if they point to the window being
-    // destroyed
-    void OnChildDestroy(wxWindowDestroyEvent& event);
-
 
     // the frame icon
     wxIconBundle m_icons;

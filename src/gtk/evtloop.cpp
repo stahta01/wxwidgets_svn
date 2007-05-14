@@ -25,7 +25,6 @@
 #endif
 
 #include "wx/evtloop.h"
-#include "wx/ptr_scpd.h"
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -56,8 +55,6 @@ private:
 // wxEventLoop implementation
 // ============================================================================
 
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoopImpl)
-
 // ----------------------------------------------------------------------------
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
@@ -74,13 +71,17 @@ int wxEventLoop::Run()
 
     wxEventLoopActivator activate(this);
 
-    wxEventLoopImplTiedPtr impl(&m_impl, new wxEventLoopImpl);
+    m_impl = new wxEventLoopImpl;
 
     gtk_main();
 
     OnExit();
 
-    return m_impl->GetExitCode();
+    int exitcode = m_impl->GetExitCode();
+    delete m_impl;
+    m_impl = NULL;
+
+    return exitcode;
 }
 
 void wxEventLoop::Exit(int rc)
@@ -98,14 +99,14 @@ void wxEventLoop::Exit(int rc)
 
 bool wxEventLoop::Pending() const
 {
-    bool pending;
-    wxApp* app = wxTheApp;
-    if (app != NULL)
-        // app->EventsPending() avoids false positives from our idle source
-        pending = app->EventsPending();
-    else
-        pending = gtk_events_pending() != 0;
-    return pending;
+    if (wxTheApp)
+    {
+        // We need to remove idle callbacks or gtk_events_pending will
+        // never return false.
+        wxTheApp->SuspendIdleCallback();
+    }
+
+    return gtk_events_pending();
 }
 
 bool wxEventLoop::Dispatch()

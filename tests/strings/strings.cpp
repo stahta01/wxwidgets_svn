@@ -53,10 +53,7 @@ private:
 #endif // wxLongLong_t
         CPPUNIT_TEST( ToDouble );
         CPPUNIT_TEST( WriteBuf );
-        CPPUNIT_TEST( CStrDataTernaryOperator );
-        CPPUNIT_TEST( CStrDataOperators );
-        CPPUNIT_TEST( CStrDataImplicitConversion );
-        CPPUNIT_TEST( ExplicitConversion );
+        CPPUNIT_TEST( CharStr );
     CPPUNIT_TEST_SUITE_END();
 
     void String();
@@ -80,11 +77,7 @@ private:
 #endif // wxLongLong_t
     void ToDouble();
     void WriteBuf();
-    void CStrDataTernaryOperator();
-    void DoCStrDataTernaryOperator(bool cond);
-    void CStrDataOperators();
-    void CStrDataImplicitConversion();
-    void ExplicitConversion();
+    void CharStr();
 
     DECLARE_NO_COPY_CLASS(StringTestCase)
 };
@@ -185,14 +178,6 @@ void StringTestCase::Extraction()
     CPPUNIT_ASSERT( wxStrcmp( s.Mid(3).c_str() , _T("lo, world!") ) == 0 );
     CPPUNIT_ASSERT( wxStrcmp( s.substr(3, 5).c_str() , _T("lo, w") ) == 0 );
     CPPUNIT_ASSERT( wxStrcmp( s.substr(3).c_str() , _T("lo, world!") ) == 0 );
-
-#if wxUSE_UNICODE
-    static const char *germanUTF8 = "Oberfl\303\244che";
-    wxString strUnicode(wxString::FromUTF8(germanUTF8));
-
-    CPPUNIT_ASSERT( strUnicode.Mid(0, 10) == strUnicode );
-    CPPUNIT_ASSERT( strUnicode.Mid(7, 2) == "ch" );
-#endif // wxUSE_UNICODE
 
     wxString rest;
 
@@ -371,26 +356,6 @@ void StringTestCase::Compare()
     CPPUNIT_ASSERT( s1 != neq2 );
     CPPUNIT_ASSERT( s1 != neq3 );
     CPPUNIT_ASSERT( s1 != neq4 );
-
-    CPPUNIT_ASSERT( s1 == wxT("AHH") );
-    CPPUNIT_ASSERT( s1 != wxT("no") );
-    CPPUNIT_ASSERT( s1 < wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AZ") );
-    CPPUNIT_ASSERT( s1 <= wxT("AHH") );
-    CPPUNIT_ASSERT( s1 > wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AA") );
-    CPPUNIT_ASSERT( s1 >= wxT("AHH") );
-
-    // test comparison with C strings in Unicode build (must work in ANSI as
-    // well, of course):
-    CPPUNIT_ASSERT( s1 == "AHH" );
-    CPPUNIT_ASSERT( s1 != "no" );
-    CPPUNIT_ASSERT( s1 < "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AZ" );
-    CPPUNIT_ASSERT( s1 <= "AHH" );
-    CPPUNIT_ASSERT( s1 > "AA" );
-    CPPUNIT_ASSERT( s1 >= "AA" );
-    CPPUNIT_ASSERT( s1 >= "AHH" );
 
 //    wxString _s1 = wxT("A\0HH");
 //    wxString _eq = wxT("A\0HH");
@@ -647,107 +612,35 @@ void StringTestCase::WriteBuf()
     wxString s;
     wxStrcpy(wxStringBuffer(s, 10), _T("foo"));
 
-    CPPUNIT_ASSERT(s[0u] == _T('f') );
-    CPPUNIT_ASSERT(_T('f') == s[0u]);
-    CPPUNIT_ASSERT(_T('o') == s[1]);
-    CPPUNIT_ASSERT(_T('o') == s[2]);
-    CPPUNIT_ASSERT_EQUAL((size_t)3, s.length());
-
+    CPPUNIT_ASSERT_EQUAL(_T('f'), s[0u]);
+    CPPUNIT_ASSERT_EQUAL(_T('o'), s[1]);
+    CPPUNIT_ASSERT_EQUAL(_T('o'), s[2]);
+    CPPUNIT_ASSERT_EQUAL(3u, s.length());
 
     {
-        wxStringBufferLength buf(s, 10);
-        wxStrcpy(buf, _T("barrbaz"));
-        buf.SetLength(4);
+        wxChar *p = s.GetWriteBuf(10);
+        wxStrcpy(p, _T("barrbaz"));
+        s.UngetWriteBuf(4);
+
+        CPPUNIT_ASSERT_EQUAL(_T('b'), s[0u]);
+        CPPUNIT_ASSERT_EQUAL(_T('a'), s[1]);
+        CPPUNIT_ASSERT_EQUAL(_T('r'), s[2]);
+        CPPUNIT_ASSERT_EQUAL(_T('r'), s[3]);
+        CPPUNIT_ASSERT_EQUAL(4u, s.length());
+
+        CPPUNIT_ASSERT_EQUAL( 0, wxStrcmp(_T("barr"), s) );
     }
-
-    CPPUNIT_ASSERT(_T('b') == s[0u]);
-    CPPUNIT_ASSERT(_T('a') == s[1]);
-    CPPUNIT_ASSERT(_T('r') == s[2]);
-    CPPUNIT_ASSERT(_T('r') == s[3]);
-    CPPUNIT_ASSERT_EQUAL((size_t)4, s.length());
-
-    CPPUNIT_ASSERT_EQUAL( 0, wxStrcmp(_T("barr"), s) );
 }
 
 
-
-void StringTestCase::CStrDataTernaryOperator()
+static bool IsFoo(/* non-const */ char *s)
 {
-    DoCStrDataTernaryOperator(true);
-    DoCStrDataTernaryOperator(false);
+    return strcmp(s, "foo") == 0;
 }
 
-template<typename T> bool CheckStr(const wxString& expected, T s)
+void StringTestCase::CharStr()
 {
-    return expected == wxString(s);
-}
+    wxString s(_T("foo"));
 
-void StringTestCase::DoCStrDataTernaryOperator(bool cond)
-{
-    // test compilation of wxCStrData when used with operator?: (the asserts
-    // are not very important, we're testing if the code compiles at all):
-
-    wxString s("foo");
-
-    const wchar_t *wcStr = L"foo";
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? s.c_str() : wcStr)) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? s.c_str() : L"foo")) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? wcStr : s.c_str())) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? L"foo" : s.c_str())) );
-
-    const char *mbStr = "foo";
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? s.c_str() : mbStr)) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? s.c_str() : "foo")) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? mbStr : s.c_str())) );
-    CPPUNIT_ASSERT( CheckStr(s, (cond ? "foo" : s.c_str())) );
-
-    wxString empty("");
-    CPPUNIT_ASSERT( CheckStr(empty, (cond ? empty.c_str() : wxEmptyString)) );
-    CPPUNIT_ASSERT( CheckStr(empty, (cond ? wxEmptyString : empty.c_str())) );
-}
-
-void StringTestCase::CStrDataOperators()
-{
-    wxString s("hello");
-
-    CPPUNIT_ASSERT( s.c_str()[0] == 'h' );
-    CPPUNIT_ASSERT( s.c_str()[1] == 'e' );
-    CPPUNIT_ASSERT( s.c_str()[5] == '\0' );
-
-    CPPUNIT_ASSERT( *s.c_str() == 'h' );
-    CPPUNIT_ASSERT( *(s.c_str() + 2) == 'l' );
-    CPPUNIT_ASSERT( *(s.c_str() + 5) == '\0' );
-}
-
-bool CheckStrChar(const wxString& expected, char *s)
-    { return CheckStr(expected, s); }
-bool CheckStrWChar(const wxString& expected, wchar_t *s)
-    { return CheckStr(expected, s); }
-bool CheckStrConstChar(const wxString& expected, const char *s)
-    { return CheckStr(expected, s); }
-bool CheckStrConstWChar(const wxString& expected, const wchar_t *s)
-    { return CheckStr(expected, s); }
-
-void StringTestCase::CStrDataImplicitConversion()
-{
-    wxString s("foo");
-
-    CPPUNIT_ASSERT( CheckStrConstWChar(s, s.c_str()) );
-    CPPUNIT_ASSERT( CheckStrConstWChar(s, s) );
-
-    CPPUNIT_ASSERT( CheckStrConstChar(s, s.c_str()) );
-    CPPUNIT_ASSERT( CheckStrConstChar(s, s) );
-}
-
-void StringTestCase::ExplicitConversion()
-{
-    wxString s("foo");
-
-    CPPUNIT_ASSERT( CheckStr(s, s.mb_str()) );
-    CPPUNIT_ASSERT( CheckStrConstChar(s, s.mb_str()) );
-    CPPUNIT_ASSERT( CheckStrChar(s, s.char_str()) );
-
-    CPPUNIT_ASSERT( CheckStr(s, s.wc_str()) );
-    CPPUNIT_ASSERT( CheckStrConstWChar(s, s.wc_str()) );
-    CPPUNIT_ASSERT( CheckStrWChar(s, s.wchar_str()) );
+    CPPUNIT_ASSERT( IsFoo(s.char_str()) );
 }

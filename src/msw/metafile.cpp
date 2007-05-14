@@ -210,13 +210,11 @@ wxMetafileDC::~wxMetafileDC()
 }
 
 void wxMetafileDC::GetTextExtent(const wxString& string, long *x, long *y,
-                                 long *descent, long *externalLeading,
-                                 const wxFont *theFont,
-                                 bool WXUNUSED(use16bit)) const
+                                 long *descent, long *externalLeading, wxFont *theFont, bool WXUNUSED(use16bit)) const
 {
-    const wxFont *fontToUse = theFont;
+    wxFont *fontToUse = theFont;
     if (!fontToUse)
-        fontToUse = &m_font;
+        fontToUse = (wxFont*) &m_font;
 
     HDC dc = GetDC(NULL);
 

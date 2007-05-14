@@ -72,6 +72,8 @@ static void gtk_dirdialog_response_callback(GtkWidget *w,
                                              gint response,
                                              wxDirDialog *dialog)
 {
+    wxapp_install_idle_handler();
+
     if (response == GTK_RESPONSE_ACCEPT)
         gtk_dirdialog_ok_callback(w, dialog);
     else // GTK_RESPONSE_CANCEL or GTK_RESPONSE_NONE
@@ -97,8 +99,7 @@ wxDirDialog::wxDirDialog(wxWindow* parent, const wxString& title,
     if (!gtk_check_version(2,4,0))
     {
         m_message = title;
-
-        parent = GetParentForModalDialog(parent);
+        m_needParent = false;
 
         if (!PreCreation(parent, pos, wxDefaultSize) ||
             !CreateBase(parent, wxID_ANY, pos, wxDefaultSize, style,

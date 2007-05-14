@@ -175,12 +175,9 @@ public:
 
         if ( m_hFile == INVALID_HANDLE_VALUE )
         {
-            if ( mode == Read )
-                wxLogSysError(_("Failed to open '%s' for reading"),
-                              filename.c_str());
-            else
-                wxLogSysError(_("Failed to open '%s' for writing"),
-                              filename.c_str());
+            wxLogSysError(_("Failed to open '%s' for %s"),
+                          filename.c_str(),
+                          mode == Read ? _("reading") : _("writing"));
         }
     }
 

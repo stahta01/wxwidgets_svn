@@ -162,10 +162,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
         return false;
     }
 
-    // saving the label in m_labelOrig to return it verbatim
-    // later in GetLabel()
-    m_labelOrig = label;
-
     // install wxWidgets window proc for this window
     SubclassWin(m_hWnd);
 
@@ -241,7 +237,7 @@ WXDWORD wxControl::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     long msStyle = wxWindow::MSWGetStyle(style, exstyle);
 
-    if ( AcceptsFocusFromKeyboard() )
+    if ( AcceptsFocus() )
     {
         msStyle |= WS_TABSTOP;
     }

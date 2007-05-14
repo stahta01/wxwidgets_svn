@@ -158,7 +158,7 @@ WXDLLEXPORT int wxOpen( const wxChar *pathname, int flags, mode_t mode )
 // BCC 5.5 and 5.5.1 have a bug in _wopen where files are created read only
 // regardless of the mode parameter. This hack works around the problem by
 // setting the mode with _wchmod.
-//
+// 
 int wxOpen(const wchar_t *pathname, int flags, mode_t mode)
 {
     int moreflags = 0;
@@ -1058,51 +1058,6 @@ wxConcatFiles (const wxString& file1, const wxString& file2, const wxString& fil
 #endif
 }
 
-// helper of generic implementation of wxCopyFile()
-#if !(defined(__WIN32__) || defined(__OS2__) || defined(__PALMOS__)) && \
-    wxUSE_FILE
-
-static bool
-wxDoCopyFile(wxFile& fileIn,
-             const wxStructStat& fbuf,
-             const wxString& filenameDst,
-             bool overwrite)
-{
-    // reset the umask as we want to create the file with exactly the same
-    // permissions as the original one
-    wxCHANGE_UMASK(0);
-
-    // create file2 with the same permissions than file1 and open it for
-    // writing
-
-    wxFile fileOut;
-    if ( !fileOut.Create(filenameDst, overwrite, fbuf.st_mode & 0777) )
-        return false;
-
-    // copy contents of file1 to file2
-    char buf[4096];
-    for ( ;; )
-    {
-        ssize_t count = fileIn.Read(buf, WXSIZEOF(buf));
-        if ( count == wxInvalidOffset )
-            return false;
-
-        // end of file?
-        if ( !count )
-            break;
-
-        if ( fileOut.Write(buf, count) < (size_t)count )
-            return false;
-    }
-
-    // we can expect fileIn to be closed successfully, but we should ensure
-    // that fileOut was closed as some write errors (disk full) might not be
-    // detected before doing this
-    return fileIn.Close() && fileOut.Close();
-}
-
-#endif // generic implementation of wxCopyFile
-
 // Copy files
 bool
 wxCopyFile (const wxString& file1, const wxString& file2, bool overwrite)
@@ -1120,7 +1075,7 @@ wxCopyFile (const wxString& file1, const wxString& file2, bool overwrite)
         return false;
     }
 #elif defined(__OS2__)
-    if ( ::DosCopy(file1.c_str(), file2.c_str(), overwrite ? DCPY_EXISTING : 0) != 0 )
+    if ( ::DosCopy((PSZ)file1.c_str(), (PSZ)file2.c_str(), overwrite ? DCPY_EXISTING : 0) != 0 )
         return false;
 #elif defined(__PALMOS__)
     // TODO with http://www.palmos.com/dev/support/docs/protein_books/Memory_Databases_Files/
@@ -1152,49 +1107,39 @@ wxCopyFile (const wxString& file1, const wxString& file2, bool overwrite)
         return false;
     }
 
-    wxDoCopyFile(fileIn, fbuf, file2, overwrite);
+    // reset the umask as we want to create the file with exactly the same
+    // permissions as the original one
+    wxCHANGE_UMASK(0);
 
-#if defined(__WXMAC__) || defined(__WXCOCOA__)
-    // copy the resource fork of the file too if it's present
-    wxString pathRsrcOut;
-    wxFile fileRsrcIn;
+    // create file2 with the same permissions than file1 and open it for
+    // writing
 
+    wxFile fileOut;
+    if ( !fileOut.Create(file2, overwrite, fbuf.st_mode & 0777) )
+        return false;
+
+    // copy contents of file1 to file2
+    char buf[4096];
+    size_t count;
+    for ( ;; )
     {
-        // suppress error messages from this block as resource forks don't have
-        // to exist
-        wxLogNull noLog;
+        count = fileIn.Read(buf, WXSIZEOF(buf));
+        if ( fileIn.Error() )
+            return false;
 
-        // it's not enough to check for file existence: it always does on HFS
-        // but is empty for files without resources
-        if ( fileRsrcIn.Open(file1 + wxT("/..namedfork/rsrc")) &&
-                fileRsrcIn.Length() > 0 )
-        {
-            // we must be using HFS or another filesystem with resource fork
-            // support, suppose that destination file system also is HFS[-like]
-            pathRsrcOut = file2 + wxT("/..namedfork/rsrc");
-        }
-        else // check if we have resource fork in separate file (non-HFS case)
-        {
-            wxFileName fnRsrc(file1);
-            fnRsrc.SetName(wxT("._") + fnRsrc.GetName());
+        // end of file?
+        if ( !count )
+            break;
 
-            fileRsrcIn.Close();
-            if ( fileRsrcIn.Open( fnRsrc.GetFullPath() ) )
-            {
-                fnRsrc = file2;
-                fnRsrc.SetName(wxT("._") + fnRsrc.GetName());
-
-                pathRsrcOut = fnRsrc.GetFullPath();
-            }
-        }
-    }
-
-    if ( !pathRsrcOut.empty() )
-    {
-        if ( !wxDoCopyFile(fileRsrcIn, fbuf, pathRsrcOut, overwrite) )
+        if ( fileOut.Write(buf, count) < count )
             return false;
     }
-#endif // wxMac || wxCocoa
+
+    // we can expect fileIn to be closed successfully, but we should ensure
+    // that fileOut was closed as some write errors (disk full) might not be
+    // detected before doing this
+    if ( !fileIn.Close() || !fileOut.Close() )
+        return false;
 
 #if !defined(__VISAGECPP__) && !defined(__WXMAC__) || defined(__UNIX__)
     // no chmod in VA.  Should be some permission API for HPFS386 partitions
@@ -1323,7 +1268,7 @@ bool wxRmdir(const wxString& dir, int WXUNUSED(flags))
 #if defined(__VMS__)
     return false; //to be changed since rmdir exists in VMS7.x
 #elif defined(__OS2__)
-    return (::DosDeleteDir(dir.c_str()) == 0);
+    return (::DosDeleteDir((PSZ)dir.c_str()) == 0);
 #elif defined(__WXWINCE__)
     return (RemoveDirectory(dir) != 0);
 #elif defined(__WXPALMOS__)
@@ -1335,9 +1280,9 @@ bool wxRmdir(const wxString& dir, int WXUNUSED(flags))
 }
 
 // does the path exists? (may have or not '/' or '\\' at the end)
-bool wxDirExists(const wxString& pathName)
+bool wxDirExists(const wxChar *pszPathName)
 {
-    wxString strPath(pathName);
+    wxString strPath(pszPathName);
 
 #if defined(__WINDOWS__) || defined(__OS2__)
     // Windows fails to find directory named "c:\dir\" even if "c:\dir" exists,
@@ -1381,7 +1326,7 @@ bool wxDirExists(const wxString& pathName)
     return wxStat(strPath.c_str(), &st) == 0 && ((st.st_mode & S_IFMT) == S_IFDIR);
 #else
     // S_IFMT not supported in VA compilers.. st_mode is a 2byte value only
-    return wxStat(strPath.c_str(), &st) == 0 && (st.st_mode == S_IFDIR);
+    return wxStat(pszPathName, &st) == 0 && (st.st_mode == S_IFDIR);
 #endif
 
 #endif // __WIN32__/!__WIN32__
@@ -1638,7 +1583,7 @@ bool wxSetWorkingDirectory(const wxString& d)
 	if (d.length() == 2)
 	    return true;
     }
-    return (::DosSetCurrentDir(d.c_str()) == 0);
+    return (::DosSetCurrentDir((PSZ)d.c_str()) == 0);
 #elif defined(__UNIX__) || defined(__WXMAC__) || defined(__DOS__)
     return (chdir(wxFNSTRINGCAST d.fn_str()) == 0);
 #elif defined(__WINDOWS__)

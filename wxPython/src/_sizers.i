@@ -361,21 +361,14 @@ added, if needed.", "");
         wxWindow *, GetWindow(),
         "Get the window (if any) that is managed by this sizer item.", "");
 
+    DocDeclStr(
+        void , SetWindow( wxWindow *window ),
+        "Set the window to be managed by this sizer item.", "");
+
 
     DocDeclStr(
         wxSizer *, GetSizer(),
         "Get the subsizer (if any) that is managed by this sizer item.", "");
-
-    DocDeclStr(
-        wxSize , GetSpacer(),
-        "Get the size of the spacer managed by this sizer item.", "");
-
-
-
-    
-    DocDeclStr(
-        void , SetWindow( wxWindow *window ),
-        "Set the window to be managed by this sizer item.", "");
 
     %disownarg( wxSizer *sizer );
     DocDeclStr(
@@ -383,32 +376,15 @@ added, if needed.", "");
         "Set the subsizer to be managed by this sizer item.", "");
     %cleardisown( wxSizer *sizer );
 
+
+    DocDeclStr(
+        wxSize , GetSpacer(),
+        "Get the size of the spacer managed by this sizer item.", "");
+
     DocDeclStr(
         void , SetSpacer( const wxSize &size ),
         "Set the size of the spacer to be managed by this sizer item.", "");
 
-    %pythoncode {
-        SetWindow = wx._deprecated(SetWindow, "Use `AssignWindow` instead.")
-        SetSizer = wx._deprecated(SetSizer,   "Use `AssignSizer` instead.")
-        SetSpacer = wx._deprecated(SetSpacer, "Use `AssignSpacer` instead.")
-    }
-
-
-    
-    DocDeclStr(
-        void , AssignWindow(wxWindow *window),
-        "Set the window to be managed by this sizer item.", "");
-    
-    DocDeclStr(
-        void , AssignSizer(wxSizer *sizer),
-        "Set the subsizer to be managed by this sizer item.", "");
-    
-    DocDeclStr(
-        void , AssignSpacer(const wxSize& size),
-        "Set the size of the spacer to be managed by this sizer item.", "");
-    
-
-    
 
     DocDeclStr(
         void , Show( bool show ),
@@ -466,10 +442,10 @@ isn't any.", "");
     %property(Ratio, GetRatio, SetRatio, doc="See `GetRatio` and `SetRatio`");
     %property(Rect, GetRect, doc="See `GetRect`");
     %property(Size, GetSize, doc="See `GetSize`");
-    %property(Sizer, GetSizer, AssignSizer, doc="See `GetSizer` and `AssignSizer`");
-    %property(Spacer, GetSpacer, AssignSpacer, doc="See `GetSpacer` and `AssignSpacer`");
+    %property(Sizer, GetSizer, SetSizer, doc="See `GetSizer` and `SetSizer`");
+    %property(Spacer, GetSpacer, SetSpacer, doc="See `GetSpacer` and `SetSpacer`");
     %property(UserData, GetUserData, SetUserData, doc="See `GetUserData` and `SetUserData`");
-    %property(Window, GetWindow, AssignWindow, doc="See `GetWindow` and `AssignWindow`");
+    %property(Window, GetWindow, SetWindow, doc="See `GetWindow` and `SetWindow`");
 };
 
 
@@ -894,7 +870,7 @@ and removed.", "
             wxPySizerItemInfo info = wxPySizerItemTypeHelper(item, false, true);
             wxPyEndBlockThreads(blocked);
             if ( info.window )
-                return false; //self->Remove(info.window);
+                return self->Remove(info.window);
             else if ( info.sizer )
                 return self->Remove(info.sizer);
             else if ( info.gotPos )
@@ -1436,8 +1412,6 @@ sizer.", "");
         void , SetOrientation(int orient),
         "Resets the orientation of the sizer.", "");
 
-    bool IsVertical() const;
-    
     %property(Orientation, GetOrientation, SetOrientation, doc="See `GetOrientation` and `SetOrientation`");
 };
 

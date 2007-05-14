@@ -1164,6 +1164,15 @@ wxDC *wxBitmap::GetSelectedInto() const
 
 #endif
 
+#if WXWIN_COMPATIBILITY_2_4
+
+int wxBitmap::GetQuality() const
+{
+    return 0;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 void wxBitmap::UseAlpha()
 {
     if ( GetBitmapData() )
@@ -1206,6 +1215,14 @@ void wxBitmap::SetMask(wxMask *mask)
 
     GetBitmapData()->SetMask(mask);
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxBitmap::SetQuality(int WXUNUSED(quality))
+{
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // raw bitmap access support
@@ -1354,7 +1371,7 @@ wxMask::wxMask(const wxMask &mask)
     SelectObject(destDC, (HBITMAP) m_maskBitmap);
 
     BitBlt(destDC, 0, 0, w, h, srcDC, 0, 0, SRCCOPY);
-
+    
     SelectObject(srcDC, 0);
     DeleteDC(srcDC);
     SelectObject(destDC, 0);

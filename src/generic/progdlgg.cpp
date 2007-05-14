@@ -97,7 +97,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
                                    int maximum,
                                    wxWindow *parent,
                                    int style)
-                : wxDialog(GetParentForModalDialog(parent), wxID_ANY, title),
+                : wxDialog(parent, wxID_ANY, title),
                   m_skip(false),
                   m_delay(3),
                   m_hasAbortButton(false),
@@ -141,7 +141,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
 
     wxClientDC dc(this);
     dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    wxCoord widthText = 0;
+    long widthText = 0;
     dc.GetTextExtent(message, &widthText, NULL, NULL, NULL, NULL);
 
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);

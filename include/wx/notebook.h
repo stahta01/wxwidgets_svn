@@ -56,6 +56,10 @@ typedef wxWindow wxNotebookPage;  // so far, any window can be a page
 
 extern WXDLLEXPORT_DATA(const wxChar) wxNotebookNameStr[];
 
+#if WXWIN_COMPATIBILITY_2_4
+    #define wxNOTEBOOK_NAME wxNotebookNameStr
+#endif
+
 // ----------------------------------------------------------------------------
 // wxNotebookBase: define wxNotebook interface
 // ----------------------------------------------------------------------------
@@ -106,9 +110,6 @@ public:
     // new is -1)
     void SendPageChangedEvent(int nPageOld, int nPageNew = -1);
 
-    // wxBookCtrlBase overrides this method to return false but we do need
-    // focus because we have tabs
-    virtual bool AcceptsFocus() const { return wxControl::AcceptsFocus(); }
 
 protected:
     DECLARE_NO_COPY_CLASS(wxNotebookBase)

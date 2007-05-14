@@ -962,6 +962,10 @@ void wxWindowMac::Init()
     m_frozenness = 0 ;
     m_macAlpha = 255 ;
 
+#if WXWIN_COMPATIBILITY_2_4
+    m_backgroundTransparent = false;
+#endif
+
 #if wxMAC_USE_CORE_GRAPHICS
     m_cgContextRef = NULL ;
 #endif
@@ -2139,9 +2143,19 @@ bool wxWindowMac::Show(bool show)
     return true;
 }
 
-void wxWindowMac::DoEnable(bool enable)
+bool wxWindowMac::Enable(bool enable)
 {
+    wxASSERT( m_peer->Ok() ) ;
+    bool former = MacIsReallyEnabled() ;
+    if ( !wxWindowBase::Enable(enable) )
+        return false;
+
     m_peer->Enable( enable ) ;
+
+    if ( former != MacIsReallyEnabled() )
+        MacPropagateEnabledStateChanged() ;
+
+    return true;
 }
 
 //
@@ -2166,10 +2180,21 @@ void wxWindowMac::MacPropagateVisibilityChanged()
 #endif
 }
 
-void wxWindowMac::OnEnabled(bool enabled)
+void wxWindowMac::MacPropagateEnabledStateChanged()
 {
 #if !TARGET_API_MAC_OSX
     MacEnabledStateChanged() ;
+
+    wxWindowMac *child;
+    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    while ( node )
+    {
+        child = node->GetData();
+        if ( child->IsEnabled() )
+            child->MacPropagateEnabledStateChanged() ;
+
+        node = node->GetNext();
+    }
 #endif
 }
 
@@ -2609,7 +2634,7 @@ void wxWindowMac::ScrollWindow(int dx, int dy, const wxRect *rect)
 
         if ( m_peer->GetNeedsDisplay() )
         {
-            // because HIViewScrollRect does not scroll the already invalidated area we have two options:
+            // because HIViewScrollRect does not scroll the already invalidated area we have two options
             // in case there is already a pending redraw on that area
             // either immediate redraw or full invalidate
 #if 1

@@ -1593,7 +1593,7 @@ bool wxDC::DoGetPixel( wxCoord x, wxCoord y, wxColour *col ) const
         YLOG2DEVMAC(y) + m_macLocalOriginInPort.y - m_macLocalOrigin.y, &colour );
 #endif
     // convert from Mac colour to wx
-    *col = colour;
+    col->Set( colour.red >> 8, colour.green >> 8, colour.blue >> 8 );
 
     return true ;
 }
@@ -2021,22 +2021,8 @@ bool wxDC::DoBlit(
     wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool useMask,
     wxCoord xsrcMask, wxCoord ysrcMask )
 {
-    return DoStretchBlit( xdest, ydest, width, height,
-                           source, xsrc, ysrc, width, height, 
-                           logical_func, useMask,
-                           xsrcMask, ysrcMask );
-}
-
-bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                         wxCoord dstWidth, wxCoord dstHeight,
-                         wxDC *source,
-                         wxCoord xsrc, wxCoord ysrc,
-                         wxCoord srcWidth, wxCoord srcHeight,
-                         int logical_func = wxCOPY, bool useMask = false,
-                         wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-{
-    wxCHECK_MSG( Ok(), false, wxT("wxDC(cg)::DoStretchBlit - invalid DC") );
-    wxCHECK_MSG( source->Ok(), false, wxT("wxDC(cg)::DoStretchBlit - invalid source DC") );
+    wxCHECK_MSG( Ok(), false, wxT("wxDC(cg)::DoBlit - invalid DC") );
+    wxCHECK_MSG( source->Ok(), false, wxT("wxDC(cg)::DoBlit - invalid source DC") );
 
     if ( logical_func == wxNO_OP )
         return true ;
@@ -2049,13 +2035,13 @@ bool wxDC::DoStretchBlit(wxCoord xdest, wxCoord ydest,
 
     wxCoord yysrc = source->YLOG2DEVMAC(ysrc) ;
     wxCoord xxsrc = source->XLOG2DEVMAC(xsrc) ;
-    wxCoord wwsrc = source->XLOG2DEVREL(srcWidth) ;
-    wxCoord hhsrc = source->YLOG2DEVREL(srcHeight) ;
+    wxCoord wwsrc = source->XLOG2DEVREL(width) ;
+    wxCoord hhsrc = source->YLOG2DEVREL(height) ;
 
     wxCoord yydest = YLOG2DEVMAC(ydest) ;
     wxCoord xxdest = XLOG2DEVMAC(xdest) ;
-    wxCoord wwdest = XLOG2DEVREL(dstWidth) ;
-    wxCoord hhdest = YLOG2DEVREL(dstHeight) ;
+    wxCoord wwdest = XLOG2DEVREL(width) ;
+    wxCoord hhdest = YLOG2DEVREL(height) ;
 
     wxMemoryDC* memdc = dynamic_cast<wxMemoryDC*>(source) ;
     if ( memdc && logical_func == wxCOPY )
@@ -2139,7 +2125,7 @@ bool wxDC::CanGetTextExtent() const
 
 void wxDC::DoGetTextExtent( const wxString &str, wxCoord *width, wxCoord *height,
                             wxCoord *descent, wxCoord *externalLeading ,
-                            const wxFont *theFont ) const
+                            wxFont *theFont ) const
 {
     wxCHECK_RET( Ok(), wxT("wxDC(cg)::DoGetTextExtent - invalid DC") );
 
@@ -2297,45 +2283,45 @@ void wxDC::Clear(void)
         else
             return (wxCoord)((double)new_y * m_scaleY - 0.5) * m_signY + m_deviceOriginY + m_macLocalOrigin.y;
     }
-
-wxCoord wxDC::DeviceToLogicalX(wxCoord x) const
+*/ // TODO
+wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
 {
     return wxRound((double)(x - m_deviceOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
 }
 
-wxCoord wxDC::DeviceToLogicalY(wxCoord y) const
+wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
 {
     return wxRound((double)(y - m_deviceOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
 }
 
-wxCoord wxDC::DeviceToLogicalXRel(wxCoord x) const
+wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
 {
     return wxRound((double)(x) / m_scaleX);
 }
 
-wxCoord wxDC::DeviceToLogicalYRel(wxCoord y) const
+wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
 {
     return wxRound((double)(y) / m_scaleY);
 }
 
-wxCoord wxDC::LogicalToDeviceX(wxCoord x) const
+wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
 {
     return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX;
 }
 
-wxCoord wxDC::LogicalToDeviceY(wxCoord y) const
+wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
 {
     return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY;
 }
 
-wxCoord wxDC::LogicalToDeviceXRel(wxCoord x) const
+wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
 {
     return wxRound((double)(x) * m_scaleX);
 }
 
-wxCoord wxDC::LogicalToDeviceYRel(wxCoord y) const
+wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
 {
     return wxRound((double)(y) * m_scaleY);
 }
-*/ // TODO
+
 #endif // wxMAC_USE_CORE_GRAPHICS

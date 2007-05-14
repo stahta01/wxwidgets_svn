@@ -52,10 +52,6 @@ public:
     virtual WXWidget GetLabelWidget() const
         { return m_labelWidget; }
 
-    virtual void DoSetLabel(const wxString& str);
-    virtual wxString DoGetLabel() const;
-
-    virtual wxSize DoGetBestSize() const;
 protected:
     WXWidget              m_labelWidget;
 };

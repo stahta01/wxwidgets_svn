@@ -65,9 +65,9 @@
 #endif
 
 #if 0 // def __WXMAC__
-#define wxRICHTEXT_USE_TOOLBOOK 1
+#define wxRICHTEXT_USE_TOOLBOOK true
 #else
-#define wxRICHTEXT_USE_TOOLBOOK 0
+#define wxRICHTEXT_USE_TOOLBOOK false
 #endif
 
 bool wxRichTextFormattingDialog::sm_showToolTips = false;
@@ -335,20 +335,20 @@ int wxRichTextFormattingDialogFactory::GetPageIdCount() const
 /// Set the sheet style, called at the start of wxRichTextFormattingDialog::Create
 bool wxRichTextFormattingDialogFactory::SetSheetStyle(wxRichTextFormattingDialog* dialog)
 {
-#if wxRICHTEXT_USE_TOOLBOOK
-    int sheetStyle = wxPROPSHEET_SHRINKTOFIT;
+    bool useToolBook = wxRICHTEXT_USE_TOOLBOOK;
+    if (useToolBook)
+    {
+        int sheetStyle = wxPROPSHEET_SHRINKTOFIT;
 #ifdef __WXMAC__
-    sheetStyle |= wxPROPSHEET_BUTTONTOOLBOOK;
+        sheetStyle |= wxPROPSHEET_BUTTONTOOLBOOK;
 #else
-    sheetStyle |= wxPROPSHEET_TOOLBOOK;
+        sheetStyle |= wxPROPSHEET_TOOLBOOK;
 #endif
 
-    dialog->SetSheetStyle(sheetStyle);
-    dialog->SetSheetInnerBorder(0);
-    dialog->SetSheetOuterBorder(0);
-#else
-	wxUnusedVar(dialog);
-#endif // wxRICHTEXT_USE_TOOLBOOK
+        dialog->SetSheetStyle(sheetStyle);
+        dialog->SetSheetInnerBorder(0);
+        dialog->SetSheetOuterBorder(0);
+    }
 
     return true;
 }
@@ -356,16 +356,17 @@ bool wxRichTextFormattingDialogFactory::SetSheetStyle(wxRichTextFormattingDialog
 /// Create the main dialog buttons
 bool wxRichTextFormattingDialogFactory::CreateButtons(wxRichTextFormattingDialog* dialog)
 {
+    bool useToolBook = wxRICHTEXT_USE_TOOLBOOK;
+
+    // If using a toolbook, also follow Mac style and don't create buttons
     int flags = wxOK|wxCANCEL;
 #ifndef __WXWINCE__
     if (dialog->GetWindowStyleFlag() & wxRICHTEXT_FORMAT_HELP_BUTTON)
         flags |= wxHELP;
 #endif
 
-    // If using a toolbook, also follow Mac style and don't create buttons
-#if !wxRICHTEXT_USE_TOOLBOOK
-    dialog->CreateButtons(flags);
-#endif
+    if (!useToolBook)
+        dialog->CreateButtons(flags);
 
     return true;
 }
@@ -404,7 +405,7 @@ void wxRichTextFontPreviewCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
     {
         dc.SetFont(font);
         // Calculate vertical and horizontal centre
-        wxCoord w = 0, h = 0;
+        long w = 0, h = 0;
 
         wxString text(_("ABCDEFGabcdefg12345"));
         if (GetTextEffects() & wxTEXT_ATTR_EFFECT_CAPITALS)
@@ -417,13 +418,13 @@ void wxRichTextFontPreviewCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
         dc.SetTextForeground(GetForegroundColour());
         dc.SetClippingRegion(2, 2, size.x-4, size.y-4);
         dc.DrawText(text, cx, cy);
-
+        
         if (GetTextEffects() & wxTEXT_ATTR_EFFECT_STRIKETHROUGH)
         {
             dc.SetPen(wxPen(GetForegroundColour(), 1));
             dc.DrawLine(cx, (int) (cy + h/2 + 0.5), cx + w, (int) (cy + h/2 + 0.5));
         }
-
+        
         dc.DestroyClippingRegion();
     }
 }

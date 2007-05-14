@@ -372,7 +372,7 @@ AC_DEFUN([WX_ARG_SYS_WITH],
                         fi
                       ],
                       [
-                        LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
                         if test "x$LINE" != x ; then
                           eval "DEFAULT_$LINE"
                         else
@@ -416,7 +416,7 @@ AC_DEFUN([WX_ARG_WITH],
                         fi
                       ],
                       [
-                        LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
                         if test "x$LINE" != x ; then
                           eval "DEFAULT_$LINE"
                         else
@@ -458,7 +458,7 @@ AC_DEFUN([WX_ARG_ENABLE],
                           fi
                         ],
                         [
-                          LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
                           if test "x$LINE" != x ; then
                             eval "DEFAULT_$LINE"
                           else
@@ -492,8 +492,7 @@ dnl
 dnl  --enable-foo       wxUSE_FOO=yes
 dnl  --disable-foo      wxUSE_FOO=no
 dnl  --enable-foo=bar   wxUSE_FOO=bar
-dnl  <not given>        value from configarg.cache or
-dnl                     wxUSE_FOO=$DEFAULT_wxUSE_FOO
+dnl  <not given>        value from configarg.cache or wxUSE_FOO=no
 dnl
 AC_DEFUN([WX_ARG_ENABLE_PARAM],
         [
@@ -505,14 +504,14 @@ AC_DEFUN([WX_ARG_ENABLE_PARAM],
                           wx_cv_use_$1="$3='$enableval'"
                         ],
                         [
-                          LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
                           if test "x$LINE" != x ; then
                             eval "DEFAULT_$LINE"
+                            wx_cv_use_$1='$3='$DEFAULT_$3
                           else
                             no_cache=1
+                            wx_cv_use_$1="$3=no"
                           fi
-                            
-                          wx_cv_use_$1='$3='$DEFAULT_$3
                         ])
 
           eval "$wx_cv_use_$1"

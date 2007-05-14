@@ -382,15 +382,15 @@ public:
     wxLocale() { DoCommonInit(); }
 
         // the ctor has a side effect of changing current locale
-    wxLocale(const wxString& name,                               // name (for messages)
-             const wxString& shortName = wxEmptyString,      // dir prefix (for msg files)
-             const wxString& locale = wxEmptyString,     // locale (for setlocale)
+    wxLocale(const wxChar *szName,                               // name (for messages)
+             const wxChar *szShort = (const wxChar *) NULL,      // dir prefix (for msg files)
+             const wxChar *szLocale = (const wxChar *) NULL,     // locale (for setlocale)
              bool bLoadDefault = true,                           // preload wxstd.mo?
              bool bConvertEncoding = false)                      // convert Win<->Unix if necessary?
         {
             DoCommonInit();
 
-            Init(name, shortName, locale, bLoadDefault, bConvertEncoding);
+            Init(szName, szShort, szLocale, bLoadDefault, bConvertEncoding);
         }
 
     wxLocale(int language, // wxLanguage id or custom language
@@ -402,9 +402,9 @@ public:
         }
 
         // the same as a function (returns true on success)
-    bool Init(const wxString& name,
-              const wxString& shortName = wxEmptyString,
-              const wxString& locale = wxEmptyString,
+    bool Init(const wxChar *szName,
+              const wxChar *szShort = (const wxChar *) NULL,
+              const wxChar *szLocale = (const wxChar *) NULL,
               bool bLoadDefault = true,
               bool bConvertEncoding = false);
 
@@ -435,7 +435,7 @@ public:
     bool IsOk() const { return m_pszOldLocale != NULL; }
 
     // returns locale name
-    const wxString& GetLocale() const { return m_strLocale; }
+    const wxChar *GetLocale() const { return m_strLocale; }
 
     // return current locale wxLanguage value
     int GetLanguage() const { return m_language; }
@@ -462,15 +462,15 @@ public:
     // The loaded catalog will be used for message lookup by GetString().
     //
     // Returns 'true' if it was successfully loaded
-    bool AddCatalog(const wxString& domain);
-    bool AddCatalog(const wxString& domain,
-                    wxLanguage msgIdLanguage, const wxString& msgIdCharset);
+    bool AddCatalog(const wxChar *szDomain);
+    bool AddCatalog(const wxChar *szDomain,
+                    wxLanguage msgIdLanguage, const wxChar *msgIdCharset);
 
     // check if the given locale is provided by OS and C run time
     static bool IsAvailable(int lang);
 
     // check if the given catalog is loaded
-    bool IsLoaded(const wxString& domain) const;
+    bool IsLoaded(const wxChar *szDomain) const;
 
     // Retrieve the language info struct for the given language
     //
@@ -504,20 +504,20 @@ public:
     //
     // domains are searched in the last to first order, i.e. catalogs
     // added later override those added before.
-    virtual const wxString& GetString(const wxString& origString,
-                                      const wxString& domain = wxEmptyString) const;
+    virtual const wxChar *GetString(const wxChar *szOrigString,
+                                    const wxChar *szDomain = NULL) const;
     // plural form version of the same:
-    virtual const wxString& GetString(const wxString& origString,
-                                      const wxString& origString2,
-                                      size_t n,
-                                      const wxString& domain = wxEmptyString) const;
+    virtual const wxChar *GetString(const wxChar *szOrigString,
+                                    const wxChar *szOrigString2,
+                                    size_t n,
+                                    const wxChar *szDomain = NULL) const;
 
     // Returns the current short name for the locale
     const wxString& GetName() const { return m_strShort; }
 
     // return the contents of .po file header
-    wxString GetHeaderValue(const wxString& header,
-                            const wxString& domain = wxEmptyString) const;
+    wxString GetHeaderValue( const wxChar* szHeader,
+                             const wxChar* szDomain = NULL ) const;
 
     // These two methods are for internal use only. First one creates
     // ms_languagesDB if it doesn't already exist, second one destroys
@@ -527,7 +527,7 @@ public:
 
 private:
     // find catalog by name in a linked list, return NULL if !found
-    wxMsgCatalog *FindCatalog(const wxString& domain) const;
+    wxMsgCatalog  *FindCatalog(const wxChar *szDomain) const;
 
     // copy default table of languages from global static array to
     // m_langugagesInfo, called by InitLanguagesDB
@@ -562,25 +562,26 @@ private:
 extern WXDLLIMPEXP_BASE wxLocale* wxGetLocale();
 
 // get the translation of the string in the current locale
-inline const wxString& wxGetTranslation(const wxString& str,
-                                        const wxString& domain = wxEmptyString)
+inline const wxChar *
+wxGetTranslation(const wxChar *sz, const wxChar* domain = NULL)
 {
     wxLocale *pLoc = wxGetLocale();
     if (pLoc)
-        return pLoc->GetString(str, domain);
+        return pLoc->GetString(sz, domain);
     else
-        return str;
+        return sz;
 }
-inline const wxString& wxGetTranslation(const wxString& str1,
-                                        const wxString& str2,
-                                        size_t n,
-                                        const wxString& domain = wxEmptyString)
+
+inline const wxChar *
+wxGetTranslation(const wxChar *sz1, const wxChar *sz2,
+                 size_t n,
+                 const wxChar *domain = NULL)
 {
     wxLocale *pLoc = wxGetLocale();
     if (pLoc)
-        return pLoc->GetString(str1, str2, n, domain);
+        return pLoc->GetString(sz1, sz2, n, domain);
     else
-        return n == 1 ? str1 : str2;
+        return n == 1 ? sz1 : sz2;
 }
 
 #else // !wxUSE_INTL
@@ -596,21 +597,10 @@ inline const wxString& wxGetTranslation(const wxString& str1,
 
 #define wxTRANSLATE(str) _T(str)
 
-inline const wxString& wxGetTranslation(const wxString& str,
-                                        const wxString& WXUNUSED(domain) = wxEmptyString)
+inline const wxChar *
+wxGetTranslation(const wxChar *sz, const wxChar * WXUNUSED(domain) = NULL)
 {
-    return str;
-}
-
-inline const wxString& wxGetTranslation(const wxString& str1,
-                                        const wxString& str2,
-                                        size_t n,
-                                        const wxString& WXUNUSED(domain) = wxEmptyString)
-{
-    if ( n == 1 )
-        return str1;
-    else
-        return str2;
+    return sz;
 }
 
 #endif // wxUSE_INTL/!wxUSE_INTL

@@ -242,9 +242,7 @@ void MBConvTestCase::WC2CP1250()
     }
 }
 
-// Print an unsigned character array as a C unsigned character array.
-// NB: Please don't remove this function even though it's not used anywhere,
-//     it's very useful when debugging a failed test.
+// print an unsigned character array as a C unsigned character array
 wxString CByteArrayFormat( const void* data, size_t len, const wxChar* name )
 {
     const unsigned char* bytes = (unsigned char*)data;
@@ -1040,10 +1038,10 @@ void MBConvTestCase::TestStreamEncoder(
     {
         textOutputStream.PutChar( wideBuffer[i] );
     }
-    CPPUNIT_ASSERT_EQUAL( (wxFileOffset)multiBytes, memoryOutputStream.TellO() );
+    CPPUNIT_ASSERT( memoryOutputStream.TellO() == multiBytes );
     wxCharBuffer copy( memoryOutputStream.TellO() );
     memoryOutputStream.CopyTo( copy.data(), memoryOutputStream.TellO());
-    CPPUNIT_ASSERT_EQUAL( 0, memcmp( copy.data(), multiBuffer, multiBytes ) );
+    CPPUNIT_ASSERT( 0 == memcmp( copy.data(), multiBuffer, multiBytes ) );
 }
 #endif
 

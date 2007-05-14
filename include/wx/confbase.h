@@ -11,12 +11,11 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_CONFBASE_H_
-#define _WX_CONFBASE_H_
+#ifndef   _WX_CONFBASE_H_
+#define   _WX_CONFBASE_H_
 
 #include "wx/defs.h"
 #include "wx/string.h"
-#include "wx/object.h"
 
 class WXDLLIMPEXP_BASE wxArrayString;
 
@@ -73,7 +72,7 @@ enum
 // (long) type (TODO doubles and other types such as wxDate coming soon).
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxConfigBase : public wxObject
+class WXDLLIMPEXP_BASE wxConfigBase
 {
 public:
   // constants
@@ -204,12 +203,8 @@ public:
 
   // we have to provide a separate version for C strings as otherwise they
   // would be converted to bool and not to wxString as expected!
-  bool Write(const wxString& key, const char *value)
+  bool Write(const wxString& key, const wxChar *value)
     { return Write(key, wxString(value)); }
-#if wxUSE_WCHAR_T
-  bool Write(const wxString& key, const wchar_t *value)
-    { return Write(key, wxString(value)); }
-#endif
 
   // permanently writes all changes
   virtual bool Flush(bool bCurrentOnly = false) = 0;
@@ -296,8 +291,6 @@ private:
 
   // Style flag
   long              m_style;
-
-  DECLARE_ABSTRACT_CLASS(wxConfigBase)
 };
 
 // a handy little class which changes current path to the path of given entry
@@ -360,5 +353,7 @@ WXDLLIMPEXP_BASE wxString wxExpandEnvVars(const wxString &sz);
  */
 WXDLLIMPEXP_BASE void wxSplitPath(wxArrayString& aParts, const wxChar *sz);
 
-#endif // _WX_CONFBASE_H_
+
+#endif
+  // _WX_CONFIG_H_
 

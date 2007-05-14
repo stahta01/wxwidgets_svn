@@ -32,10 +32,7 @@
     #include "wx/control.h"
     #include "wx/frame.h"
     #include "wx/settings.h"
-    #if WXWIN_COMPATIBILITY_2_8
-        #include "wx/image.h"
-    #endif // WXWIN_COMPATIBILITY_2_8
-    #include "wx/menu.h"
+    #include "wx/image.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -58,12 +55,6 @@ WX_DEFINE_LIST(wxToolBarToolsList)
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxToolBarToolBase, wxObject)
-
-wxToolBarToolBase::~wxToolBarToolBase()
-{
-    delete m_dropdownMenu;
-}
-
 
 bool wxToolBarToolBase::Enable(bool enable)
 {
@@ -116,13 +107,6 @@ bool wxToolBarToolBase::SetLongHelp(const wxString& help)
     m_longHelpString = help;
 
     return true;
-}
-
-
-void wxToolBarToolBase::SetDropdownMenu(wxMenu* menu)
-{
-    delete m_dropdownMenu;
-    m_dropdownMenu = menu;
 }
 
 // ----------------------------------------------------------------------------
@@ -211,16 +195,12 @@ wxToolBarBase::InsertTool(size_t pos, wxToolBarToolBase *tool)
     return tool;
 }
 
-wxToolBarToolBase *
-wxToolBarBase::AddControl(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBarBase::AddControl(wxControl *control)
 {
-    return InsertControl(GetToolsCount(), control, label);
+    return InsertControl(GetToolsCount(), control);
 }
 
-wxToolBarToolBase *
-wxToolBarBase::InsertControl(size_t pos,
-                             wxControl *control,
-                             const wxString& label)
+wxToolBarToolBase *wxToolBarBase::InsertControl(size_t pos, wxControl *control)
 {
     wxCHECK_MSG( control, (wxToolBarToolBase *)NULL,
                  _T("toolbar: can't insert NULL control") );
@@ -231,7 +211,7 @@ wxToolBarBase::InsertControl(size_t pos,
     wxCHECK_MSG( pos <= GetToolsCount(), (wxToolBarToolBase *)NULL,
                  _T("invalid position in wxToolBar::InsertControl()") );
 
-    wxToolBarToolBase *tool = CreateTool(control, label);
+    wxToolBarToolBase *tool = CreateTool(control);
 
     if ( !InsertTool(pos, tool) )
     {
@@ -642,19 +622,13 @@ void wxToolBarBase::OnMouseEnter(int id)
     event.SetInt(id);
 
     wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-    if ( frame )
+    if( frame )
     {
         wxString help;
-        if ( id != wxID_ANY )
-        {
-           const wxToolBarToolBase * const tool = FindById(id);
-           if ( tool )
-               help = tool->GetLongHelp();
-        }
-
-        // call DoGiveHelp() even if help string is empty to avoid showing the
-        // help for the previously selected tool when another one is selected
-        frame->DoGiveHelp(help, id != wxID_ANY);
+        wxToolBarToolBase* tool = id == wxID_ANY ? (wxToolBarToolBase*)NULL : FindById(id);
+        if(tool)
+            help = tool->GetLongHelp();
+        frame->DoGiveHelp( help, id != wxID_ANY );
     }
 
     (void)GetEventHandler()->ProcessEvent(event);
@@ -668,10 +642,6 @@ void wxToolBarBase::OnMouseEnter(int id)
 void wxToolBarBase::UpdateWindowUI(long flags)
 {
     wxWindowBase::UpdateWindowUI(flags);
-
-    // don't waste time updating state of tools in a hidden toolbar
-    if ( !IsShown() )
-        return;
 
     // There is no sense in updating the toolbar UI
     // if the parent window is about to get destroyed
@@ -704,31 +674,73 @@ void wxToolBarBase::UpdateWindowUI(long flags)
     }
 }
 
-bool wxToolBarBase::SetDropdownMenu(int toolid, wxMenu* menu)
+#if wxUSE_IMAGE
+
+/*
+ * Make a greyed-out image suitable for disabled buttons.
+ * This code is adapted from wxNewBitmapButton in FL.
+ */
+
+bool wxCreateGreyedImage(const wxImage& src, wxImage& dst)
 {
-    wxToolBarToolBase * const tool = FindById(toolid);
-    wxCHECK_MSG( tool, false, _T("invalid tool id") );
+    dst = src.Copy();
 
-    wxCHECK_MSG( tool->GetKind() == wxITEM_DROPDOWN, false,
-                    _T("menu can be only associated with drop down tools") );
+    unsigned char rBg, gBg, bBg;
+    if ( src.HasMask() )
+    {
+        src.GetOrFindMaskColour(&rBg, &gBg, &bBg);
+        dst.SetMaskColour(rBg, gBg, bBg);
+    }
+    else // assuming the pixels along the edges are of the background color
+    {
+        rBg = src.GetRed(0, 0);
+        gBg = src.GetGreen(0, 0);
+        bBg = src.GetBlue(0, 0);
+    }
 
-    tool->SetDropdownMenu(menu);
+    const wxColour colBg(rBg, gBg, bBg);
+
+    const wxColour colDark = wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW);
+    const wxColour colLight = wxSystemSettings::GetColour(wxSYS_COLOUR_3DHIGHLIGHT);
+
+    // Second attempt, just making things monochrome
+    const int width = src.GetWidth();
+    const int height = src.GetHeight();
+
+    for ( int x = 0; x < width; x++ )
+    {
+        for ( int y = 0; y < height; y++ )
+        {
+            const int r = src.GetRed(x, y);
+            const int g = src.GetGreen(x, y);
+            const int b = src.GetBlue(x, y);
+
+            if ( r == rBg && g == gBg && b == bBg )
+            {
+                // Leave the background colour as-is
+                continue;
+            }
+
+            // Change light things to the background colour
+            wxColour col;
+            if ( r >= (colLight.Red() - 50) &&
+                    g >= (colLight.Green() - 50) &&
+                        b >= (colLight.Blue() - 50) )
+            {
+                col = colBg;
+            }
+            else // Change dark things to really dark
+            {
+                col = colDark;
+            }
+
+            dst.SetRGB(x, y, col.Red(), col.Green(), col.Blue());
+        }
+    }
 
     return true;
 }
 
-#if WXWIN_COMPATIBILITY_2_8
-
-bool wxCreateGreyedImage(const wxImage& in, wxImage& out)
-{
-#if wxUSE_IMAGE
-    out = in.ConvertToGreyscale();
-    if ( out.Ok() )
-        return true;
 #endif // wxUSE_IMAGE
-    return false;
-}
-
-#endif // WXWIN_COMPATIBILITY_2_8
 
 #endif // wxUSE_TOOLBAR

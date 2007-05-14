@@ -17,14 +17,14 @@
 
 #include "wx/html/htmltag.h"
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/colour.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/html/htmlpars.h"
 #include <stdio.h> // for vsscanf
 #include <stdarg.h>
+
 
 //-----------------------------------------------------------------------------
 // wxHtmlTagsCache
@@ -68,18 +68,11 @@ wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
     m_CacheSize = 0;
     m_CachePos = 0;
 
-    for ( int pos = 0; pos < lng; pos++ )
+    int pos = 0;
+    while (pos < lng)
     {
         if (src[pos] == wxT('<'))   // tag found:
         {
-            // don't cache comment tags
-            wxString::const_iterator iter = source.begin() + pos;
-            if ( wxHtmlParser::SkipCommentTag(iter, source.end()) )
-            {
-                pos = iter - source.begin();
-                continue;
-            }
-
             if (m_CacheSize % CACHE_INCREMENT == 0)
                 m_Cache = (wxHtmlCacheItem*) realloc(m_Cache, (m_CacheSize + CACHE_INCREMENT) * sizeof(wxHtmlCacheItem));
             int tg = m_CacheSize++;
@@ -176,6 +169,8 @@ wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
                 }
             }
         }
+
+        pos++;
     }
 
     // ok, we're done, now we'll free .Name members of cache - we don't need it anymore:

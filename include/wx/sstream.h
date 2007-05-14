@@ -61,13 +61,14 @@ public:
     // The stream will write data either to the provided string or to an
     // internal string which can be retrieved using GetString()
     wxStringOutputStream(wxString *pString = NULL)
-#if wxUSE_UNICODE_WCHAR
-        : m_unconv(0)
-#endif // wxUSE_UNICODE_WCHAR
     {
         m_str = pString ? pString : &m_strInternal;
         m_pos = m_str->length() / sizeof(wxChar);
     }
+
+#if wxABI_VERSION >= 20804 && wxUSE_UNICODE
+    virtual ~wxStringOutputStream();
+#endif // wx 2.8.4+
 
     // get the string containing current output
     const wxString& GetString() const { return *m_str; }
@@ -92,11 +93,6 @@ private:
 #else
     wxMBConv m_conv;
 #endif
-
-#if wxUSE_UNICODE_WCHAR
-    // unconverted data from the last call to OnSysWrite()
-    wxMemoryBuffer m_unconv;
-#endif // wxUSE_UNICODE_WCHAR
 
     DECLARE_NO_COPY_CLASS(wxStringOutputStream)
 };

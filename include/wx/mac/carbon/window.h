@@ -55,8 +55,7 @@ public:
     virtual void Lower();
 
     virtual bool Show( bool show = true );
-    virtual void DoEnable( bool enable );
-    virtual void OnEnabled( bool enabled );
+    virtual bool Enable( bool enable = true );
 
     virtual void SetFocus();
 
@@ -127,6 +126,11 @@ public:
     virtual bool CanSetTransparent();
     virtual wxByte GetTransparent() const ;
     
+#if WXWIN_COMPATIBILITY_2_4
+    bool GetTransparentBackground() const { return m_backgroundTransparent; }
+    void SetTransparent(bool t = true) { m_backgroundTransparent = t; }
+#endif
+
     // event handlers
     // --------------
     void OnSetFocus( wxFocusEvent& event );
@@ -311,7 +315,12 @@ protected:
     void                MacUpdateControlFont() ;
 
     void                MacPropagateVisibilityChanged() ;
+    void                MacPropagateEnabledStateChanged() ;
     void                MacPropagateHiliteChanged() ;
+
+#if WXWIN_COMPATIBILITY_2_4
+    bool                 m_backgroundTransparent ;
+#endif
 
     // implement the base class pure virtuals
     virtual wxSize DoGetBestSize() const;

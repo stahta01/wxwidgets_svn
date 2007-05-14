@@ -27,6 +27,7 @@
 #include "wx/toplevel.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"
     #include "wx/app.h"
     #include "wx/dialog.h"
     #include "wx/string.h"
@@ -47,10 +48,10 @@
     #if _WIN32_WCE < 400 || !defined(__WINCE_STANDARDSDK__)
         #include <aygshell.h>
     #endif
+    #include "wx/msw/wince/missing.h"
 #endif
 
 #include "wx/msw/winundef.h"
-#include "wx/msw/missing.h"
 
 #include "wx/display.h"
 
@@ -780,79 +781,6 @@ void wxTopLevelWindowMSW::SetLayoutDirection(wxLayoutDirection dir)
 }
 
 // ----------------------------------------------------------------------------
-// wxTopLevelWindowMSW geometry
-// ----------------------------------------------------------------------------
-
-#ifndef __WXWINCE__
-
-void wxTopLevelWindowMSW::DoGetPosition(int *x, int *y) const
-{
-    if ( IsIconized() )
-    {
-        WINDOWPLACEMENT wp;
-        wp.length = sizeof(WINDOWPLACEMENT);
-        if ( ::GetWindowPlacement(GetHwnd(), &wp) )
-        {
-            RECT& rc = wp.rcNormalPosition;
-
-            // the position returned by GetWindowPlacement() is in workspace
-            // coordinates except for windows with WS_EX_TOOLWINDOW style
-            if ( !HasFlag(wxFRAME_TOOL_WINDOW) )
-            {
-                // we must use the correct display for the translation as the
-                // task bar might be shown on one display but not the other one
-                int n = wxDisplay::GetFromWindow(this);
-                wxDisplay dpy(n == wxNOT_FOUND ? 0 : n);
-                const wxPoint ptOfs = dpy.GetClientArea().GetPosition() -
-                                      dpy.GetGeometry().GetPosition();
-
-                rc.left += ptOfs.x;
-                rc.top += ptOfs.y;
-            }
-
-            if ( x )
-                *x = rc.left;
-            if ( y )
-                *y = rc.top;
-
-            return;
-        }
-
-        wxLogLastError(_T("GetWindowPlacement"));
-    }
-    //else: normal case
-
-    wxTopLevelWindowBase::DoGetPosition(x, y);
-}
-
-void wxTopLevelWindowMSW::DoGetSize(int *width, int *height) const
-{
-    if ( IsIconized() )
-    {
-        WINDOWPLACEMENT wp;
-        wp.length = sizeof(WINDOWPLACEMENT);
-        if ( ::GetWindowPlacement(GetHwnd(), &wp) )
-        {
-            const RECT& rc = wp.rcNormalPosition;
-
-            if ( width )
-                *width = rc.right - rc.left;
-            if ( height )
-                *height = rc.bottom - rc.top;
-
-            return;
-        }
-
-        wxLogLastError(_T("GetWindowPlacement"));
-    }
-    //else: normal case
-
-    wxTopLevelWindowBase::DoGetSize(width, height);
-}
-
-#endif // __WXWINCE__
-
-// ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW fullscreen
 // ----------------------------------------------------------------------------
 
@@ -977,20 +905,25 @@ wxString wxTopLevelWindowMSW::GetTitle() const
     return GetLabel();
 }
 
+void wxTopLevelWindowMSW::SetIcon(const wxIcon& icon)
+{
+    SetIcons( wxIconBundle( icon ) );
+}
+
 void wxTopLevelWindowMSW::SetIcons(const wxIconBundle& icons)
 {
     wxTopLevelWindowBase::SetIcons(icons);
 
 #if !defined(__WXMICROWIN__)
-    const wxIcon& sml = icons.GetIconOfExactSize(16);
-    if( sml.Ok() )
+    const wxIcon& sml = icons.GetIcon( wxSize( 16, 16 ) );
+    if( sml.Ok() && sml.GetWidth() == 16 && sml.GetHeight() == 16 )
     {
         ::SendMessage( GetHwndOf( this ), WM_SETICON, ICON_SMALL,
                        (LPARAM)GetHiconOf(sml) );
     }
 
-    const wxIcon& big = icons.GetIconOfExactSize(32);
-    if( big.Ok() )
+    const wxIcon& big = icons.GetIcon( wxSize( 32, 32 ) );
+    if( big.Ok() && big.GetWidth() == 32 && big.GetHeight() == 32 )
     {
         ::SendMessage( GetHwndOf( this ), WM_SETICON, ICON_BIG,
                        (LPARAM)GetHiconOf(big) );

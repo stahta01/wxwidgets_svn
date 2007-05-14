@@ -19,7 +19,7 @@
     #include "wx/utils.h"
 #endif
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -35,6 +35,8 @@ extern "C" {
 static void
 gtk_value_changed(GtkSpinButton* spinbutton, wxSpinButton* win)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     const double value = gtk_spin_button_get_value(spinbutton);
     const int pos = int(value);
     const int oldPos = win->m_pos;
@@ -91,6 +93,8 @@ bool wxSpinButton::Create(wxWindow *parent,
                           long style,
                           const wxString& name)
 {
+    m_needParent = true;
+
     wxSize new_size = size,
            sizeBest = DoGetBestSize();
     new_size.x = sizeBest.x;            // override width always

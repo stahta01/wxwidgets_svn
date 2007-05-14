@@ -141,7 +141,7 @@ wxString wxHTTP::GenerateAuthString(const wxString& user, const wxString& pass) 
         } else {
             buf << wxString::Format(wxT("%c%c"), base64[((from[0] << 4) & 0x30) | ((from[1] >> 4) & 0xf)], base64[(from[1] << 2) & 0x3c]);
         }
-        buf << wxT("=");
+        buf << wxString::Format(wxT("="));
     }
 
     return buf;
@@ -309,7 +309,7 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
     m_http_response = wxAtoi(tmp_str2);
 
-    switch ( tmp_str2[0u].GetValue() )
+    switch (tmp_str2[0u])
     {
         case wxT('1'):
             /* INFORMATION / SUCCESS */

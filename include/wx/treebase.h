@@ -70,7 +70,13 @@ public:
         // invalidate the item
     void Unset() { m_pItem = 0; }
 
+#if WXWIN_COMPATIBILITY_2_4
+    // deprecated: only for compatibility, don't work on 64 bit archs
+    wxTreeItemId(long item) { m_pItem = wxUIntToPtr(item); }
+    operator long() const { return (long)wxPtrToUInt(m_pItem); }
+#else // !WXWIN_COMPATIBILITY_2_4
     operator bool() const { return IsOk(); }
+#endif // WXWIN_COMPATIBILITY_2_4/!WXWIN_COMPATIBILITY_2_4
 
     wxTreeItemIdValue m_pItem;
 };
@@ -162,11 +168,7 @@ enum wxTreeItemIcon
 
 #define wxTR_SINGLE                  0x0000     // for convenience
 #define wxTR_MULTIPLE                0x0020     // can select multiple items
-
-#if WXWIN_COMPATIBILITY_2_8
-    #define wxTR_EXTENDED            0x0040     // deprecated, don't use
-#endif // WXWIN_COMPATIBILITY_2_8
-
+#define wxTR_EXTENDED                0x0040     // TODO: allow extended selection
 #define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080     // what it says
 
 #define wxTR_EDIT_LABELS             0x0200     // can edit item labels

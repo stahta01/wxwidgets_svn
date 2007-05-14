@@ -76,7 +76,6 @@ private:
         CPPUNIT_TEST( CreateEntriesAndSubgroup );
         CPPUNIT_TEST( CreateSubgroupAndEntries );
         CPPUNIT_TEST( DeleteLastGroup );
-        CPPUNIT_TEST( DeleteAndRecreateGroup );
     CPPUNIT_TEST_SUITE_END();
 
     void Path();
@@ -94,7 +93,6 @@ private:
     void CreateEntriesAndSubgroup();
     void CreateSubgroupAndEntries();
     void DeleteLastGroup();
-    void DeleteAndRecreateGroup();
 
     static wxString ChangePath(wxFileConfig& fc, const wxChar *path)
     {
@@ -512,30 +510,6 @@ void FileConfigTestCase::DeleteLastGroup()
     // clean up
     wxLogNull noLogging;
     (void) ::wxRemoveFile(wxFileConfig::GetLocalFileName(_T("deleteconftest")));
-}
-
-void FileConfigTestCase::DeleteAndRecreateGroup()
-{
-    static const wxChar *confInitial =
-        _T("[First]\n")
-        _T("Value1=Foo\n")
-        _T("[Second]\n")
-        _T("Value2=Bar\n");
-
-    wxStringInputStream sis(confInitial);
-    wxFileConfig fc(sis);
-
-    fc.DeleteGroup(_T("Second"));
-    wxVERIFY_FILECONFIG( _T("[First]\n")
-                         _T("Value1=Foo\n"),
-                         fc );
-
-    fc.Write(_T("Second/Value2"), _T("New"));
-    wxVERIFY_FILECONFIG( _T("[First]\n")
-                         _T("Value1=Foo\n")
-                         _T("[Second]\n")
-                         _T("Value2=New\n"),
-                         fc );
 }
 
 #endif // wxUSE_FILECONFIG

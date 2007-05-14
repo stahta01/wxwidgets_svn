@@ -5187,6 +5187,11 @@ bool wxGenericListCtrl::SetItemPtrData( long item, wxUIntPtr data )
     return true;
 }
 
+bool wxGenericListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
+}
+
 wxRect wxGenericListCtrl::GetViewRect() const
 {
     return m_mainWin->GetViewRect();

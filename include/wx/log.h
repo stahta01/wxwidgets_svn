@@ -45,7 +45,6 @@ typedef unsigned long wxLogLevel;
 // ----------------------------------------------------------------------------
 
 #include "wx/string.h"
-#include "wx/strvararg.h"
 
 #if wxUSE_LOG
 
@@ -81,7 +80,7 @@ typedef unsigned long wxLogLevel;
 // ----------------------------------------------------------------------------
 
 // different standard log levels (you may also define your own)
-enum wxLogLevelValues
+enum
 {
     wxLOG_FatalError, // program can't continue, abort immediately
     wxLOG_Error,      // a serious error, user must be informed about it
@@ -472,104 +471,32 @@ WXDLLIMPEXP_BASE const wxChar* wxSysErrorMsg(unsigned long nErrCode = 0);
 // ----------------------------------------------------------------------------
 
 #define DECLARE_LOG_FUNCTION(level)                                         \
-    extern void WXDLLIMPEXP_BASE                                            \
-    wxDoLog##level##Wchar(const wxChar *format, ...);                       \
-    extern void WXDLLIMPEXP_BASE                                            \
-    wxDoLog##level##Utf8(const char *format, ...);                          \
-    WX_DEFINE_VARARG_FUNC_VOID(wxLog##level,                                \
-                               1, (const wxFormatString&),                  \
-                               wxDoLog##level##Wchar, wxDoLog##level##Utf8) \
-    DECLARE_LOG_FUNCTION_WATCOM(level)                                      \
-    extern void WXDLLIMPEXP_BASE wxVLog##level(const wxString& format,      \
-                                               va_list argptr)
-
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351;
-    // can't use WX_WATCOM_ONLY_CODE here because the macro would expand to
-    // something too big for Borland C++ to handle
-    #define DECLARE_LOG_FUNCTION_WATCOM(level)                              \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   1, (const wxString&),                    \
-                                   (wxFormatString(f1)))                    \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   1, (const wxCStrData&),                  \
-                                   (wxFormatString(f1)))                    \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   1, (const char*),                        \
-                                   (wxFormatString(f1)))                    \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   1, (const wchar_t*),                     \
-                                   (wxFormatString(f1)))
-#else
-    #define DECLARE_LOG_FUNCTION_WATCOM(level)
-#endif
-
-
+extern void WXDLLIMPEXP_BASE wxVLog##level(const wxChar *szFormat,          \
+                                           va_list argptr);                 \
+extern void WXDLLIMPEXP_BASE wxLog##level(const wxChar *szFormat,           \
+                                          ...) ATTRIBUTE_PRINTF_1
 #define DECLARE_LOG_FUNCTION2_EXP(level, argclass, arg, expdecl)            \
-    extern void expdecl wxDoLog##level##Wchar(argclass arg,                 \
-                                              const wxChar *format, ...);   \
-    extern void expdecl wxDoLog##level##Utf8(argclass arg,                  \
-                                             const char *format, ...);      \
-    WX_DEFINE_VARARG_FUNC_VOID(wxLog##level,                                \
-                               2, (argclass, const wxFormatString&),        \
-                               wxDoLog##level##Wchar, wxDoLog##level##Utf8) \
-    DECLARE_LOG_FUNCTION2_EXP_WATCOM(level, argclass, arg, expdecl)         \
-    extern void expdecl wxVLog##level(argclass arg,                         \
-                                      const wxString& format,               \
-                                      va_list argptr)
-
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351;
-    // can't use WX_WATCOM_ONLY_CODE here because the macro would expand to
-    // something too big for Borland C++ to handle
-    #define DECLARE_LOG_FUNCTION2_EXP_WATCOM(level, argclass, arg, expdecl) \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   2, (argclass, const wxString&),          \
-                                   (f1, wxFormatString(f2)))                \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   2, (argclass, const wxCStrData&),        \
-                                   (f1, wxFormatString(f2)))                \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   2, (argclass, const char*),              \
-                                   (f1, wxFormatString(f2)))                \
-        WX_VARARG_WATCOM_WORKAROUND(void, wxLog##level,                     \
-                                   2, (argclass, const wchar_t*),           \
-                                   (f1, wxFormatString(f2)))
-#else
-    #define DECLARE_LOG_FUNCTION2_EXP_WATCOM(level, argclass, arg, expdecl)
-#endif
-
-
+extern void expdecl wxVLog##level(argclass arg,                             \
+                                  const wxChar *szFormat,                   \
+                                  va_list argptr);                          \
+extern void expdecl wxLog##level(argclass arg,                              \
+                                 const wxChar *szFormat,                    \
+                                 ...) ATTRIBUTE_PRINTF_2
 #else // !wxUSE_LOG
-
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-    #define WX_WATCOM_ONLY_CODE( x )  x
-#else
-    #define WX_WATCOM_ONLY_CODE( x )
-#endif
 
 // log functions do nothing at all
 #define DECLARE_LOG_FUNCTION(level)                                         \
-    WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 1, (const wxString&))           \
-    WX_WATCOM_ONLY_CODE(                                                    \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 1, (const char*))           \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 1, (const wchar_t*))        \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 1, (const wxCStrData&))     \
-    )                                                                       \
-    inline void wxVLog##level(const wxString& WXUNUSED(format),             \
-                              va_list WXUNUSED(argptr)) { }                 \
-
+inline void wxVLog##level(const wxChar *WXUNUSED(szFormat),                 \
+                          va_list WXUNUSED(argptr)) { }                     \
+inline void wxLog##level(const wxChar *WXUNUSED(szFormat),                  \
+                         ...) { }
 #define DECLARE_LOG_FUNCTION2_EXP(level, argclass, arg, expdecl)            \
-    WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 2, (argclass, const wxString&)) \
-    WX_WATCOM_ONLY_CODE(                                                    \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 2, (argclass, const char*)) \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 2, (argclass, const wchar_t*)) \
-        WX_DEFINE_VARARG_FUNC_NOP(wxLog##level, 2, (argclass, const wxCStrData&)) \
-    )                                                                       \
-    inline void wxVLog##level(argclass WXUNUSED(arg),                       \
-                              const wxString& WXUNUSED(format),             \
-                              va_list WXUNUSED(argptr)) {}
+inline void wxVLog##level(argclass WXUNUSED(arg),                           \
+                          const wxChar *WXUNUSED(szFormat),                 \
+                          va_list WXUNUSED(argptr)) {}                      \
+inline void wxLog##level(argclass WXUNUSED(arg),                            \
+                         const wxChar *WXUNUSED(szFormat),                  \
+                         ...) { }
 
 // Empty Class to fake wxLogNull
 class WXDLLIMPEXP_BASE wxLogNull
@@ -590,12 +517,6 @@ public:
 #define DECLARE_LOG_FUNCTION2(level, argclass, arg)                         \
     DECLARE_LOG_FUNCTION2_EXP(level, argclass, arg, WXDLLIMPEXP_BASE)
 
-// VC6 produces a warning if we a macro expanding to nothing to
-// DECLARE_LOG_FUNCTION2:
-#if defined(__VISUALC__) && __VISUALC__ < 1300
-    // "not enough actual parameters for macro 'DECLARE_LOG_FUNCTION2_EXP'"
-    #pragma warning(disable:4003)
-#endif
 
 // a generic function for all levels (level is passes as parameter)
 DECLARE_LOG_FUNCTION2(Generic, wxLogLevel, level);
@@ -626,10 +547,6 @@ DECLARE_LOG_FUNCTION(SysError);
 // and another one which also takes the error code (for those broken APIs
 // that don't set the errno (like registry APIs in Win32))
 DECLARE_LOG_FUNCTION2(SysError, long, lErrCode);
-#ifdef __WATCOMC__
-// workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-DECLARE_LOG_FUNCTION2(SysError, unsigned long, lErrCode);
-#endif
 
 // debug functions do nothing in release mode
 #if wxUSE_LOG && wxUSE_LOG_DEBUG
@@ -641,21 +558,12 @@ DECLARE_LOG_FUNCTION2(SysError, unsigned long, lErrCode);
 
     // this version only logs the message if the mask had been added to the
     // list of masks with AddTraceMask()
-    DECLARE_LOG_FUNCTION2(Trace, const wxString&, mask);
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-    DECLARE_LOG_FUNCTION2(Trace, const char*, mask);
-    DECLARE_LOG_FUNCTION2(Trace, const wchar_t*, mask);
-#endif
+    DECLARE_LOG_FUNCTION2(Trace, const wxChar *, mask);
 
     // and this one does nothing if all of level bits are not set in
     // wxLog::GetActive()->GetTraceMask() -- it's deprecated in favour of
     // string identifiers
     DECLARE_LOG_FUNCTION2(Trace, wxTraceMask, mask);
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-    DECLARE_LOG_FUNCTION2(Trace, int, mask);
-#endif
 #else   //!debug || !wxUSE_LOG
     // these functions do nothing in release builds, but don't define them as
     // nothing as it could result in different code structure in debug and
@@ -678,23 +586,13 @@ DECLARE_LOG_FUNCTION2(SysError, unsigned long, lErrCode);
         #define wxLogDebug(fmt, ...) wxLogNop()
         #define wxLogTrace(mask, fmt, ...) wxLogNop()
     #else // !HAVE_VARIADIC_MACROS
-        //inline void wxLogDebug(const wxString& fmt, ...) {}
-        WX_DEFINE_VARARG_FUNC_NOP(wxLogDebug, 1, (const wxString&))
-        //inline void wxLogTrace(wxTraceMask, const wxString& fmt, ...) {}
-        //inline void wxLogTrace(const wxString&, const wxString& fmt, ...) {}
-        WX_DEFINE_VARARG_FUNC_NOP(wxLogTrace, 2, (wxTraceMask, const wxString&))
-        WX_DEFINE_VARARG_FUNC_NOP(wxLogTrace, 2, (const wxString&, const wxString&))
-        #ifdef __WATCOMC__
-        // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-        WX_DEFINE_VARARG_FUNC_NOP(wxLogTrace, 2, (const char*, const char*))
-        WX_DEFINE_VARARG_FUNC_NOP(wxLogTrace, 2, (const wchar_t*, const wchar_t*))
-        #endif
+        // note that leaving out "fmt" in the vararg functions provokes a warning
+        // from SGI CC: "the last argument of the varargs function is unnamed"
+        inline void wxLogDebug(const wxChar *fmt, ...) { wxUnusedVar(fmt); }
+        inline void wxLogTrace(wxTraceMask, const wxChar *fmt, ...) { wxUnusedVar(fmt); }
+        inline void wxLogTrace(const wxChar *, const wxChar *fmt, ...) { wxUnusedVar(fmt); }
     #endif // HAVE_VARIADIC_MACROS/!HAVE_VARIADIC_MACROS
 #endif // debug/!debug
-
-#if defined(__VISUALC__) && __VISUALC__ < 1300
-    #pragma warning(default:4003)
-#endif
 
 // wxLogFatalError helper: show the (fatal) error to the user in a safe way,
 // i.e. without using wxMessageBox() for example because it could crash
@@ -731,10 +629,6 @@ wxSafeShowMessage(const wxString& title, const wxString& text);
 // wxCocoa has additiional trace masks
 #if defined(__WXCOCOA__)
 #include "wx/cocoa/log.h"
-#endif
-
-#ifdef WX_WATCOM_ONLY_CODE
-    #undef WX_WATCOM_ONLY_CODE
 #endif
 
 #endif  // _WX_LOG_H_

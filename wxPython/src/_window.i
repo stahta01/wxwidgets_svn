@@ -787,16 +787,7 @@ window had already been in the specified state.", "");
     
     DocDeclStr(
         bool , IsEnabled() const,
-        "Returns true if the window is enabled for input, false otherwise.
-This method takes into account the enabled state of parent windows up
-to the top-level window.", "");
-
-    DocDeclStr(
-        bool , IsThisEnabled() const,
-        "Returns the internal enabled state independent of the parent(s) state,
-i.e. the state in which the window would be if all of its parents are
-enabled.  Use `IsEnabled` to get the effective window state.", "");
-    
+        "Returns true if the window is enabled for input, false otherwise.", "");
 
     DocDeclStr(
         virtual bool , IsShownOnScreen() const,
@@ -850,9 +841,6 @@ SetWindowStyleFlag()", "");
         long , GetExtraStyle() const,
         "Returns the extra style bits for the window.", "");
     
-    DocDeclStr(
-        bool , HasExtraStyle(int exFlag) const,
-        "Returns ``True`` if the given extra flag is set.", "");
 
     
     DocDeclStr(
@@ -917,41 +905,19 @@ or None.", "");
     
 
     DocDeclStr(
-        bool , CanAcceptFocus() const,
-        "Can this window have focus right now?", "");
-    
- 
-
-    DocDeclStr(
         virtual bool , AcceptsFocusFromKeyboard() const,
         "Can this window be given focus by keyboard navigation? if not, the
 only way to give it focus (provided it accepts it at all) is to click
 it.", "");
     
 
-    
-    DocDeclStr(
-        bool , CanAcceptFocusFromKeyboard() const,
-        "Can this window be assigned focus from keyboard right now?", "");
-    
-
-    DocDeclStr(
-        virtual void , SetCanFocus(bool canFocus),
-        "", "");
-    
-
-
-    DocDeclAStr(
-        virtual bool , NavigateIn(int flags = wxNavigationKeyEvent::IsForward),
-        "NavigateIn(self, int flags=NavigationKeyEvent.IsForward) -> bool",
-        "Navigates inside this window.", "");
 
 
     DocDeclAStr(
         virtual bool , Navigate(int flags = wxNavigationKeyEvent::IsForward),
         "Navigate(self, int flags=NavigationKeyEvent.IsForward) -> bool",
-        "Does keyboard navigation starting from this window to another.  This is
-equivalient to self.GetParent().NavigateIn().", "
+        "Does keyboard navigation from this window to another, by sending a
+`wx.NavigationKeyEvent`.", "
  
     :param flags: A combination of the ``IsForward`` or ``IsBackward``
         and the ``WinChange`` values in the `wx.NavigationKeyEvent`
@@ -1114,7 +1080,7 @@ handler is handed off to the next one in the chain.", "");
         void , PushEventHandler( wxEvtHandler *handler ),
         "Pushes this event handler onto the event handler stack for the window.
 An event handler is an object that is capable of processing the events
-sent to a window.  (In other words, is able to dispatch the events to
+sent to a window.  (In other words, is able to dispatch the events to a
 handler function.)  By default, the window is its own event handler,
 but an application may wish to substitute another, for example to
 allow central implementation of event-handling for a variety of

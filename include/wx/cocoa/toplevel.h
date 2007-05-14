@@ -108,7 +108,8 @@ public:
 
 
 // Things I may/may not do
-//    virtual void SetIcons(const wxIconBundle& icons);
+//    virtual void SetIcon(const wxIcon& icon);
+//    virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
 //    virtual void Clear() ;
 //    virtual void Raise();
 //    virtual void Lower();

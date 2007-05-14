@@ -57,8 +57,6 @@
     #include <TextCommon.h>
     #include <TextEncodingConverter.h>
 #endif
-
-#include "wx/mac/private/timer.h"
 #endif // wxUSE_GUI
 
 #include "wx/mac/private.h"
@@ -380,10 +378,83 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_MAC;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
+// Reading and writing resources (eg WIN.INI, .Xdefaults)
+#if wxUSE_RESOURCES
+bool wxWriteResource(const wxString& section, const wxString& entry, const wxString& value, const wxString& file)
 {
-    return new wxCarbonTimerImpl(timer);
+    // TODO
+    return false;
 }
+
+bool wxWriteResource(const wxString& section, const wxString& entry, float value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%.4f"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, long value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%ld"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, int value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%d"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, char **value, const wxString& file)
+{
+    // TODO
+    return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, float *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (float)strtod(s, NULL);
+        delete[] s;
+    }
+
+    return succ;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, long *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = strtol(s, NULL, 10);
+        delete[] s;
+    }
+
+    return succ;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, int *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (int)strtol(s, NULL, 10);
+        delete[] s;
+    }
+
+    return succ;
+}
+#endif // wxUSE_RESOURCES
 
 int gs_wxBusyCursorCount = 0;
 extern wxCursor    gMacCurrentCursor;

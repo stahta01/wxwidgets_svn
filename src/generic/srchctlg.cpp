@@ -321,14 +321,11 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
             const wxValidator& validator,
             const wxString& name)
 {
-    // force border style for more native appearance
-    style &= ~wxBORDER_MASK;
 #ifdef __WXGTK__
-    style |= wxBORDER_SUNKEN;
+    if ( !wxTextCtrlBase::Create(parent, id, pos, size, wxSUNKEN_BORDER | style, validator, name) )
 #else
-    style |= wxBORDER_SIMPLE;
+    if ( !wxTextCtrlBase::Create(parent, id, pos, size, wxSIMPLE_BORDER | style, validator, name) )
 #endif
-    if ( !wxTextCtrlBase::Create(parent, id, pos, size, style, validator, name) )
     {
         return false;
     }
@@ -338,12 +335,8 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
 
     wxSize sizeText = m_text->GetBestSize();
 
-    m_searchButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,
-                                        m_searchBitmap);
-    m_cancelButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,
-                                        m_cancelBitmap);
+    m_searchButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,m_searchBitmap);
+    m_cancelButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,m_cancelBitmap);
 
     SetForegroundColour( m_text->GetForegroundColour() );
     m_searchButton->SetForegroundColour( m_text->GetForegroundColour() );

@@ -26,14 +26,14 @@
     #include "wx/hash.h"
     #include "wx/app.h"
     #include "wx/window.h"
+    #include "wx/timer.h"
     #include "wx/module.h"
 #endif
 
-#include "wx/private/selectdispatcher.h"
+#include "wx/private/socketevtdispatch.h"
 #include "wx/unix/private.h"
 #include "wx/x11/private.h"
 #include "X11/Xlib.h"
-#include "wx/generic/private/timer.h"
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
@@ -165,7 +165,7 @@ int wxEventLoop::Run()
         while ( ! Pending() )
         {
 #if wxUSE_TIMER
-            wxGenericTimerImpl::NotifyTimers(); // TODO: is this the correct place for it?
+            wxTimer::NotifyTimers(); // TODO: is this the correct place for it?
 #endif
             if (!m_impl->SendIdleEvent())
             {
@@ -263,7 +263,7 @@ bool wxEventLoop::Dispatch()
 
 #if wxUSE_SOCKETS
     // handle any pending socket events:
-    wxSelectDispatcher::Get().RunLoop(0);
+    wxSocketEventDispatcher::Get().RunLoop();
 #endif
 
     (void) m_impl->ProcessEvent( &event );

@@ -69,27 +69,27 @@ wxString wxFileSystemHandler::GetMimeTypeFromExt(const wxString& location)
                            wxEmptyString,
                            wxEmptyString,
                            _T("JPEG image (from fallback)"),
-                           _T("jpg"), _T("jpeg"), _T("JPG"), _T("JPEG"), 0),
+                           _T("jpg"), _T("jpeg"), _T("JPG"), _T("JPEG"), NULL),
             wxFileTypeInfo(_T("image/gif"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("GIF image (from fallback)"),
-                           _T("gif"), _T("GIF"), 0),
+                           _T("gif"), _T("GIF"), NULL),
             wxFileTypeInfo(_T("image/png"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("PNG image (from fallback)"),
-                           _T("png"), _T("PNG"), 0),
+                           _T("png"), _T("PNG"), NULL),
             wxFileTypeInfo(_T("image/bmp"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("windows bitmap image (from fallback)"),
-                           _T("bmp"), _T("BMP"), 0),
+                           _T("bmp"), _T("BMP"), NULL),
             wxFileTypeInfo(_T("text/html"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("HTML document (from fallback)"),
-                           _T("htm"), _T("html"), _T("HTM"), _T("HTML"), 0),
+                           _T("htm"), _T("html"), _T("HTM"), _T("HTML"), NULL),
             // must terminate the table with this!
             wxFileTypeInfo()
         };
@@ -398,7 +398,7 @@ wxFSFile* wxFileSystem::OpenFile(const wxString& location, int flags)
     meta = 0;
     for (i = 0; i < ln; i++)
     {
-        switch ( loc[i].GetValue() )
+        switch (loc[i])
         {
             case wxT('/') : case wxT(':') : case wxT('#') :
                 meta = loc[i];

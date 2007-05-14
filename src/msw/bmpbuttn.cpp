@@ -582,6 +582,11 @@ wxBitmapButton::DrawButtonDisable( WXHDC dc,
     ::PatBlt( (HDC) dc, left, top, right, bottom, PATTERNPAINT);
 }
 
+void wxBitmapButton::SetDefault()
+{
+    wxButton::SetDefault();
+}
+
 wxSize wxBitmapButton::DoGetBestSize() const
 {
     if ( m_bmpNormal.Ok() )

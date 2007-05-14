@@ -87,7 +87,6 @@
 #    define WXMAKINGDLL_AUI
 #    define WXMAKINGDLL_RICHTEXT
 #    define WXMAKINGDLL_MEDIA
-#    define WXMAKINGDLL_STC
 #endif /* WXMAKINGDLL */
 
 /*
@@ -228,14 +227,6 @@
 #    define WXDLLIMPEXP_MEDIA WXIMPORT
 #else /* not making nor using DLL */
 #    define WXDLLIMPEXP_MEDIA
-#endif
-
-#ifdef WXMAKINGDLL_STC
-    #define WXDLLIMPEXP_STC WXEXPORT
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_STC WXIMPORT
-#else /* not making nor using DLL */
-    #define WXDLLIMPEXP_STC
 #endif
 
 /* for backwards compatibility, define suffix-less versions too */

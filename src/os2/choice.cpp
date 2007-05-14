@@ -134,7 +134,7 @@ int wxChoice::DoAppend(
     nIndex = (int)::WinSendMsg( GetHwnd()
                                ,LM_INSERTITEM
                                ,(MPARAM)nIndexType
-                               ,(MPARAM)rsItem.wx_str()
+                               ,(MPARAM)rsItem.c_str()
                               );
     return nIndex;
 } // end of wxChoice::DoAppend
@@ -157,7 +157,7 @@ int wxChoice::DoInsert( const wxString& rsItem, unsigned int pos )
     nIndex = (int)::WinSendMsg( GetHwnd()
                                ,LM_INSERTITEM
                                ,(MPARAM)nIndexType
-                               ,(MPARAM)rsItem.wx_str()
+                               ,(MPARAM)rsItem.c_str()
                               );
     return nIndex;
 } // end of wxChoice::DoInsert
@@ -232,7 +232,7 @@ void wxChoice::SetString(unsigned int n, const wxString& rsStr)
     ::WinSendMsg( GetHwnd()
                  ,LM_INSERTITEM
                  ,(MPARAM)nIndexType
-                 ,(MPARAM)rsStr.wx_str()
+                 ,(MPARAM)rsStr.c_str()
                 );
 
     if (pData)

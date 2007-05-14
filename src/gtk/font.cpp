@@ -157,8 +157,6 @@ void wxFontRefData::Init(int pointSize,
 
     m_underlined = underlined;
     m_encoding = encoding;
-    if ( m_encoding == wxFONTENCODING_DEFAULT )
-        m_encoding = wxFont::GetDefaultEncoding();
 
     m_noAA = false;
 
@@ -203,7 +201,7 @@ void wxFontRefData::InitFromNative()
     PangoFontDescription *desc = m_nativeFontInfo.description;
 
     // init fields
-    m_faceName = wxGTK_CONV_BACK_SYS(pango_font_description_get_family(desc));
+    m_faceName = wxGTK_CONV_BACK( pango_font_description_get_family( desc ) );
 
     // Pango sometimes needs to have a size
     int pango_size = pango_font_description_get_size( desc );

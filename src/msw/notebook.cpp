@@ -505,7 +505,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
     TC_ITEM tcItem;
     tcItem.mask = TCIF_TEXT;
-    tcItem.pszText = (wxChar *)strText.wx_str();
+    tcItem.pszText = (wxChar *)strText.c_str();
 
     if ( !HasFlag(wxNB_MULTILINE) )
         return TabCtrl_SetItem(GetHwnd(), nPage, &tcItem) != 0;
@@ -773,7 +773,7 @@ bool wxNotebook::InsertPage(size_t nPage,
     if ( !strText.empty() )
     {
         tcItem.mask |= TCIF_TEXT;
-        tcItem.pszText = (wxChar *)strText.wx_str(); // const_cast
+        tcItem.pszText = (wxChar *)strText.c_str(); // const_cast
     }
 
     // hide the page: unless it is selected, it shouldn't be shown (and if it
@@ -935,7 +935,7 @@ void wxNotebook::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     MSWDefWindowProc(WM_PAINT, (WPARAM)memdc.GetHDC(), 0);
 
-    // For some reason in RTL mode, source offset has to be -1, otherwise the
+    // For some reason in RTL mode, source offset has to be -1, otherwise the 
     // right border (physical) remains unpainted.
     const wxCoord ofs = dir == wxLayout_RightToLeft ? -1 : 0;
     dc.Blit(ofs, 0, rc.right, rc.bottom, &memdc, ofs, 0);

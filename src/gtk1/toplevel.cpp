@@ -327,7 +327,7 @@ gtk_frame_realized_callback( GtkWidget * WXUNUSED(widget),
 
     // reset the icon
     wxIconBundle iconsOld = win->GetIcons();
-    if ( !iconsOld.IsEmpty() )
+    if ( iconsOld.GetIcon(-1).Ok() )
     {
         win->SetIcon( wxNullIcon );
         win->SetIcons( iconsOld );
@@ -1086,14 +1086,16 @@ void wxTopLevelWindowGTK::SetTitle( const wxString &title )
     gtk_window_set_title( GTK_WINDOW(m_widget), wxGTK_CONV( title ) );
 }
 
+void wxTopLevelWindowGTK::SetIcon( const wxIcon &icon )
+{
+    SetIcons( wxIconBundle( icon ) );
+}
+
 void wxTopLevelWindowGTK::SetIcons( const wxIconBundle &icons )
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid frame") );
 
     wxTopLevelWindowBase::SetIcons( icons );
-
-    if ( icons.IsEmpty() )
-        return;
 
     GdkWindow* window = m_widget->window;
     if (!window)

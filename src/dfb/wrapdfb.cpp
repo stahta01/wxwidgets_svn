@@ -15,11 +15,6 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
 #include "wx/dfb/wrapdfb.h"
 
 //-----------------------------------------------------------------------------
@@ -112,13 +107,6 @@ wxIDirectFBSurfacePtr wxIDirectFB::GetPrimarySurface()
 //-----------------------------------------------------------------------------
 // wxIDirectFBSurface
 //-----------------------------------------------------------------------------
-
-DFBSurfacePixelFormat wxIDirectFBSurface::GetPixelFormat()
-{
-    DFBSurfacePixelFormat format = DSPF_UNKNOWN;
-    GetPixelFormat(&format);
-    return format;
-}
 
 int wxIDirectFBSurface::GetDepth()
 {

@@ -22,9 +22,9 @@
     #define M_PI 3.1415926535897932384626433832795
 #endif
 
-/* Scaling factors for various unit conversions: 1 inch = 2.54 cm */
+/* Scaling factors for various unit conversions */
 #ifndef METRIC_CONVERSION_CONSTANT
-    #define METRIC_CONVERSION_CONSTANT (1./254)
+    #define METRIC_CONVERSION_CONSTANT 0.0393700787
 #endif
 
 #ifndef mm2inches
@@ -107,9 +107,6 @@
 
     inline int wxRound(double x)
     {
-        wxASSERT_MSG( x > INT_MIN - 0.5 && x < INT_MAX + 0.5,
-                      _T("argument out of supported range") );
-
         #if defined(HAVE_ROUND)
             return int(round(x));
         #else

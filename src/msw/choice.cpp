@@ -70,7 +70,7 @@ wxBEGIN_FLAGS( wxChoiceStyle )
 
 wxEND_FLAGS( wxChoiceStyle )
 
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxChoice, wxControlWithItems,"wx/choice.h")
+IMPLEMENT_DYNAMIC_CLASS_XTI(wxChoice, wxControl,"wx/choice.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxChoice)
     wxEVENT_PROPERTY( Select , wxEVT_COMMAND_CHOICE_SELECTED , wxCommandEvent )
@@ -86,7 +86,7 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_4( wxChoice , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size )
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 #endif
 /*
     TODO PROPERTIES
@@ -220,8 +220,7 @@ wxChoice::~wxChoice()
 
 int wxChoice::DoAppend(const wxString& item)
 {
-    int n = (int)SendMessage(GetHwnd(), CB_ADDSTRING, 0,
-                             (LPARAM)item.wx_str());
+    int n = (int)SendMessage(GetHwnd(), CB_ADDSTRING, 0, (LPARAM)item.c_str());
     if ( n == CB_ERR )
     {
         wxLogLastError(wxT("SendMessage(CB_ADDSTRING)"));
@@ -243,8 +242,7 @@ int wxChoice::DoInsert(const wxString& item, unsigned int pos)
     wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
     wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
 
-    int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos,
-                             (LPARAM)item.wx_str());
+    int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos, (LPARAM)item.c_str());
     if ( n == CB_ERR )
     {
         wxLogLastError(wxT("SendMessage(CB_INSERTSTRING)"));
@@ -370,7 +368,7 @@ int wxChoice::FindString(const wxString& s, bool bCase) const
    else
    {
        int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
-                                  (WPARAM)-1, (LPARAM)s.wx_str());
+                                  (WPARAM)-1, (LPARAM)s.c_str());
 
        return pos == LB_ERR ? wxNOT_FOUND : pos;
    }
@@ -396,7 +394,7 @@ void wxChoice::SetString(unsigned int n, const wxString& s)
     }
 
     ::SendMessage(GetHwnd(), CB_DELETESTRING, n, 0);
-    ::SendMessage(GetHwnd(), CB_INSERTSTRING, n, (LPARAM)s.wx_str() );
+    ::SendMessage(GetHwnd(), CB_INSERTSTRING, n, (LPARAM)s.c_str() );
 
     if ( data )
     {
@@ -508,7 +506,7 @@ void wxChoice::DoSetSize(int x, int y,
                          int sizeFlags)
 {
     int heightOrig = height;
-
+    
     // the height which we must pass to Windows should be the total height of
     // the control including the drop down list while the height given to us
     // is, of course, just the height of the permanently visible part of it

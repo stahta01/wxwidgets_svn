@@ -119,10 +119,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
     return wxPORT_PALMOS;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxPalmOSTimerImpl(timer);
-};
 // ===========================================================================
 // wxApp implementation
 // ===========================================================================

@@ -30,6 +30,8 @@ extern "C" {
 static
 void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioButton *rb )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!rb->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
@@ -60,13 +62,16 @@ bool wxRadioButton::Create( wxWindow *parent,
                             const wxValidator& validator,
                             const wxString& name )
 {
-    m_blockEvent = false;
+    m_acceptsFocus = TRUE;
+    m_needParent = TRUE;
+
+    m_blockEvent = FALSE;
 
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxRadioButton creation failed") );
-        return false;
+        return FALSE;
     }
 
     GSList* radioButtonGroup = NULL;
