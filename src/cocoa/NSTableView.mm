@@ -22,6 +22,8 @@
     #include "wx/log.h"
 #endif // WX_PRECOMP
 
+#include "wx/cocoa/ObjcPose.h"
+
 #include "wx/cocoa/NSTableDataSource.h"
 #include "wx/cocoa/NSTableView.h"
 #import <AppKit/NSTableView.h>

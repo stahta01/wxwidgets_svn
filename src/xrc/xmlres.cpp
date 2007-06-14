@@ -29,7 +29,6 @@
     #include "wx/bitmap.h"
     #include "wx/image.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #ifndef __WXWINCE__
@@ -70,25 +69,35 @@ wxXmlResource::wxXmlResource(int flags, const wxString& domain)
 {
     m_flags = flags;
     m_version = -1;
-    SetDomain(domain);
+    m_domain = NULL;
+    if (! domain.empty() )
+        SetDomain(domain);
 }
 
 wxXmlResource::wxXmlResource(const wxString& filemask, int flags, const wxString& domain)
 {
     m_flags = flags;
     m_version = -1;
-    SetDomain(domain);
+    m_domain = NULL;
+    if (! domain.empty() )
+        SetDomain(domain);
     Load(filemask);
 }
 
 wxXmlResource::~wxXmlResource()
 {
+    if (m_domain)
+        free(m_domain);
     ClearHandlers();
 }
 
-void wxXmlResource::SetDomain(const wxString& domain)
+void wxXmlResource::SetDomain(const wxChar* domain)
 {
-    m_domain = domain;
+    if (m_domain)
+        free(m_domain);
+    m_domain = NULL;
+    if (domain && wxStrlen(domain))
+        m_domain = wxStrdup(domain);
 }
 
 

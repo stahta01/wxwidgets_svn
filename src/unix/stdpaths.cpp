@@ -94,7 +94,7 @@ wxString wxStandardPaths::GetPluginsDir() const
 }
 
 wxString
-wxStandardPaths::GetLocalizedResourcesDir(const wxString& lang,
+wxStandardPaths::GetLocalizedResourcesDir(const wxChar *lang,
                                           ResourceCat category) const
 {
     return wxStandardPathsBase::GetLocalizedResourcesDir(lang, category);
@@ -206,7 +206,7 @@ wxString wxStandardPaths::GetPluginsDir() const
 }
 
 wxString
-wxStandardPaths::GetLocalizedResourcesDir(const wxString& lang,
+wxStandardPaths::GetLocalizedResourcesDir(const wxChar *lang,
                                           ResourceCat category) const
 {
     if ( category != ResourceCat_Messages )

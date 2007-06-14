@@ -27,9 +27,8 @@ class WXDLLEXPORT wxColour;
               ChannelType alpha = wxALPHA_OPAQUE )                            \
         { Set(red, green, blue, alpha); }                                     \
     wxColour( unsigned long colRGB ) { Set(colRGB); }                         \
-    wxColour(const wxString& colourName) { Set(colourName); }                 \
-    wxColour(const char *colourName) { Set(colourName); }                     \
-    wxColour(const wchar_t *colourName) { Set(colourName); }
+    wxColour(const wxString &colourName) { Set(colourName); }                 \
+    wxColour(const wxChar *colourName) { Set(colourName); }
 
 
 // flags for wxColour -> wxString conversion (see wxColour::GetAsString)
@@ -75,6 +74,9 @@ public:
         { InitRGBA(red,green,blue, alpha); }
 
     // implemented in colourcmn.cpp
+    bool Set(const wxChar *str)
+        { return FromString(str); }
+
     bool Set(const wxString &str)
         { return FromString(str); }
 
@@ -118,7 +120,7 @@ protected:
     virtual void
     InitRGBA(ChannelType r, ChannelType g, ChannelType b, ChannelType a) = 0;
 
-    virtual bool FromString(const wxString& s);
+    virtual bool FromString(const wxChar *s);
 };
 
 

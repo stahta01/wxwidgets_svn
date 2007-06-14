@@ -108,11 +108,9 @@ public:
     virtual void SetAccel(wxAcceleratorEntry *accel);
 #endif // wxUSE_ACCEL
 
-#if WXWIN_COMPATIBILITY_2_8
     // compatibility only, use new functions in the new code
-    wxDEPRECATED( void SetName(const wxString& str) );
-    wxDEPRECATED( const wxString& GetName() const );
-#endif // WXWIN_COMPATIBILITY_2_8
+    void SetName(const wxString& str) { SetText(str); }
+    const wxString& GetName() const { return GetText(); }
 
     static wxMenuItem *New(wxMenu *parentMenu,
                            int itemid,
@@ -149,13 +147,6 @@ private:
     wxMenuItemBase(const wxMenuItemBase& item);
     wxMenuItemBase& operator=(const wxMenuItemBase& item);
 };
-
-#if WXWIN_COMPATIBILITY_2_8
-inline void wxMenuItemBase::SetName(const wxString &str)
-    { SetText(str); }
-inline const wxString& wxMenuItemBase::GetName() const
-    { return GetText(); }
-#endif // WXWIN_COMPATIBILITY_2_8
 
 // ----------------------------------------------------------------------------
 // include the real class declaration

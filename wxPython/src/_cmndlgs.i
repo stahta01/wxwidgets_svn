@@ -198,6 +198,15 @@ public:
 %}
 
 enum {
+    // These will dissappear in 2.8
+    wxOPEN,
+    wxSAVE,
+    wxOVERWRITE_PROMPT,
+    wxFILE_MUST_EXIST,
+    wxMULTIPLE,
+    wxCHANGE_DIR,
+    wxHIDE_READONLY,
+
     wxFD_OPEN,
     wxFD_SAVE,
     wxFD_OVERWRITE_PROMPT,
@@ -207,17 +216,6 @@ enum {
     wxFD_PREVIEW,
     wxFD_DEFAULT_STYLE,
 };
-
-%pythoncode {
-    %# deprecated names
-    OPEN              = FD_OPEN
-    SAVE              = FD_SAVE
-    OVERWRITE_PROMPT  = FD_OVERWRITE_PROMPT
-    FILE_MUST_EXIST   = FD_FILE_MUST_EXIST
-    MULTIPLE          = FD_MULTIPLE
-    CHANGE_DIR        = FD_CHANGE_DIR
-}
-         
 
 DocStr(wxFileDialog,
 "wx.FileDialog allows the user to select one or more files from the

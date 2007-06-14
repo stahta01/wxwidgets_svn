@@ -313,7 +313,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     //
     // Deal with the tab, extracting the Accel text
     //
-    nIndex = sFullString.Find(sTgt);
+    nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
         bFoundAccel = true;
@@ -325,7 +325,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     // Deal with the mnemonic character
     //
     sTgt = wxT("~");
-    nIndex = sFullString.Find(sTgt);
+    nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
         wxString sTmp = sFullString;
@@ -351,7 +351,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     ::GpiCharStringAt( rDC.GetHPS()
                       ,&vPntStart
                       ,sFullString.length()
-                      ,sFullString.char_str()
+                      ,(PCH)sFullString.c_str()
                      );
     if (bFoundMnemonic)
     {
@@ -389,7 +389,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
         ::GpiCharStringAt( rDC.GetHPS()
                           ,&vPntStart
                           ,sAccel.length()
-                          ,sAccel.char_str()
+                          ,(PCH)sAccel.c_str()
                          );
     }
 

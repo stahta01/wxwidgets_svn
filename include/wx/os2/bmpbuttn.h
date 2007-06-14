@@ -66,6 +66,7 @@ public:
     //
     // Implementation
     //
+    virtual void SetDefault();
     virtual bool OS2OnDraw(WXDRAWITEMSTRUCT* pItem);
 
 private:

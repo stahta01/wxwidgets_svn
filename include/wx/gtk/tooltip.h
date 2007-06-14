@@ -50,7 +50,7 @@ public:
     // this just sets the given tooltip for the specified widget
     //
     // tip must be already UTF-8 encoded
-    static void Apply(GtkWidget *w, const gchar *tip);
+    static void Apply(GtkWidget *w, const wxCharBuffer& tip);
 
 private:
     wxString     m_text;

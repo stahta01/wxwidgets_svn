@@ -70,9 +70,13 @@ void wxBell();
 MustHaveApp(wxEndBusyCursor);
 void wxEndBusyCursor();
 
+long wxGetElapsedTime(bool resetTimer = true);
+%pythoncode { GetElapsedTime = wx._deprecated(GetElapsedTime) }
+    
 bool wxIsBusy();
 wxString wxNow();
 bool wxShell(const wxString& command = wxPyEmptyString);
+void wxStartTimer();
 
 
 DocDeclA(
@@ -337,14 +341,8 @@ MustHaveApp(wxGetTopLevelParent);
 wxWindow* wxGetTopLevelParent(wxWindow *win);
 
 
-// flags for wxLaunchDefaultBrowser
-enum
-{
-    wxBROWSER_NEW_WINDOW = 1
-};
-
 DocDeclStr(
-    bool , wxLaunchDefaultBrowser(const wxString& url, int flags = 0),
+    bool , wxLaunchDefaultBrowser(const wxString& url),
     "Launches the user's default browser and tells it to open the location
 at ``url``.  Returns ``True`` if the application was successfully
 launched.", "");
@@ -451,7 +449,7 @@ public:
 };
 
 
-MustHaveApp(wxThread);
+MustHaveApp(wxThread_IsMain);
 %inline %{
     bool wxThread_IsMain() {
 #ifdef WXP_WITH_THREAD

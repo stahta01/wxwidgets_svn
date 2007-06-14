@@ -11,11 +11,10 @@ LOCALDOCDIR=.
 
 DOCSOURCES=tex2rtf.tex
 
-all: chm htb hlp html htmlhelp pdfrtf
+all: tex2rtf.chm tex2rtf.htb
 
-chm:  tex2rtf.chm
-hlp:  tex2rtf.hlp
-htb:  tex2rtf.htb
+hlp: tex2rtf.hlp
+htb: tex2rtf.htb
 html: tex2rtf.html
 htmlhelp: tex2rtf.chm
 pdfrtf: tex2rtf_rtf.rtf
@@ -39,10 +38,7 @@ tex2rtf.html:         $(DOCSOURCES) tex2rtf.ini
         -erase *.ref
         -erase *.con
         -erase *.ref
-        -mkdir html
-	-copy *.html html
-	-copy *.gif  html
 
 tex2rtf.htb:         tex2rtf_contents.html
-        -zip tex2rtf.htb tex2rtf*.html *.hhp *.hhk *.hhc *.gif
+        -zip32 tex2rtf.htb tex2rtf*.html *.hhp *.hhk *.hhc *.gif
 

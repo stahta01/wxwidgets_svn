@@ -64,7 +64,8 @@ public:
     // Useful helper: create the brush resource
     bool RealizeResource();
 
-private:
+    // When setting properties, we must make sure we're not changing
+    // another object
     void Unshare();
 };
 

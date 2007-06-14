@@ -40,6 +40,9 @@ extern bool   g_blockEventsOnDrag;
 extern "C" {
 static void gtk_choice_clicked_callback( GtkWidget *WXUNUSED(widget), wxChoice *choice )
 {
+    if (g_isIdle)
+      wxapp_install_idle_handler();
+
     if (!choice->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
@@ -94,6 +97,11 @@ bool wxChoice::Create( wxWindow *parent, wxWindowID id,
                        int n, const wxString choices[],
                        long style, const wxValidator& validator, const wxString &name )
 {
+    m_needParent = true;
+#if (GTK_MINOR_VERSION > 0)
+    m_acceptsFocus = true;
+#endif
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -373,7 +381,7 @@ void wxChoice::SetString(unsigned int n, const wxString& str)
             wxASSERT_MSG( label != NULL , wxT("wxChoice: invalid label") );
 
             gtk_label_set_text( label, wxGTK_CONV( str ) );
-            
+
             InvalidateBestSize();
 
             return;

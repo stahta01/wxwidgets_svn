@@ -25,7 +25,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/dc.h"
-    #include "wx/dcmemory.h"
     #include "wx/log.h"
 #endif
 
@@ -338,7 +337,7 @@ void wxDC::DoDrawText(const wxString& text, wxCoord x, wxCoord y)
     wxCHECK_RET( m_textForegroundColour.Ok(),
                  wxT("invalid foreground color") );
     SelectColour(m_textForegroundColour);
-    m_surface->DrawString(text.utf8_str(), -1, xx, yy, DSTF_LEFT | DSTF_TOP);
+    m_surface->DrawString(wxSTR_TO_DFB(text), -1, xx, yy, DSTF_LEFT | DSTF_TOP);
 
     // restore pen's colour, because other drawing functions expect the colour
     // to be set to the pen:
@@ -480,7 +479,7 @@ wxCoord wxDC::GetCharWidth() const
 
 void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                            wxCoord *descent, wxCoord *externalLeading,
-                           const wxFont *theFont) const
+                           wxFont *theFont) const
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
     wxCHECK_RET( m_font.Ok(), wxT("no font selected") );
@@ -497,7 +496,7 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
     DFBRectangle rect;
     wxIDirectFBFontPtr f = GetCurrentFont();
 
-    if ( f->GetStringExtents(string.utf8_str(), -1, &rect, NULL) )
+    if ( f->GetStringExtents(wxSTR_TO_DFB(string), -1, &rect, NULL) )
     {
         // VS: YDEV is corrent, it should *not* be XDEV, because font's are
         //     only scaled according to m_scaleY
@@ -528,10 +527,132 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
 // mapping modes
 // ---------------------------------------------------------------------------
 
-// FIXME_DFB: scaling affects pixel size of font, pens, brushes, which
-//            is not currently implemented here; probably makes sense to
-//            switch to Cairo instead of implementing everything for DFB
-    
+void wxDC::ComputeScaleAndOrigin()
+{
+    m_scaleX = m_logicalScaleX * m_userScaleX;
+    m_scaleY = m_logicalScaleY * m_userScaleY;
+
+    // FIXME_DFB: scaling affects pixel size of font, pens, brushes, which
+    //            is not currently implemented here; probably makes sense to
+    //            switch to Cairo instead of implementing everything for DFB
+    wxASSERT_MSG( m_scaleX == 1.0 && m_scaleY == 1.0,
+                  _T("scaling is not implemented in wxDFB") );
+}
+
+void wxDC::SetMapMode(int mode)
+{
+    #warning "move this to common code, it's shared by almost all ports!"
+    switch (mode)
+    {
+        case wxMM_TWIPS:
+          SetLogicalScale(twips2mm*m_mm_to_pix_x, twips2mm*m_mm_to_pix_y);
+          break;
+        case wxMM_POINTS:
+          SetLogicalScale(pt2mm*m_mm_to_pix_x, pt2mm*m_mm_to_pix_y);
+          break;
+        case wxMM_METRIC:
+          SetLogicalScale(m_mm_to_pix_x, m_mm_to_pix_y);
+          break;
+        case wxMM_LOMETRIC:
+          SetLogicalScale(m_mm_to_pix_x/10.0, m_mm_to_pix_y/10.0);
+          break;
+        default:
+        case wxMM_TEXT:
+          SetLogicalScale(1.0, 1.0);
+          break;
+    }
+    m_mappingMode = mode;
+}
+
+void wxDC::SetUserScale(double x, double y)
+{
+    #warning "move this to common code?"
+    // allow negative ? -> no
+    m_userScaleX = x;
+    m_userScaleY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetLogicalScale(double x, double y)
+{
+    #warning "move this to common code?"
+    // allow negative ?
+    m_logicalScaleX = x;
+    m_logicalScaleY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetLogicalOrigin( wxCoord x, wxCoord y )
+{
+    #warning "move this to common code?"
+    m_logicalOriginX = x * m_signX;   // is this still correct ?
+    m_logicalOriginY = y * m_signY;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetDeviceOrigin( wxCoord x, wxCoord y )
+{
+    #warning "move this to common code?"
+    // only wxPostScripDC has m_signX = -1, we override SetDeviceOrigin there
+    m_deviceOriginX = x;
+    m_deviceOriginY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
+{
+    #warning "move this to common code?"
+    // only wxPostScripDC has m_signX = -1, we override SetAxisOrientation there
+    m_signX = (xLeftRight ?  1 : -1);
+    m_signY = (yBottomUp  ? -1 :  1);
+    ComputeScaleAndOrigin();
+}
+
+// ---------------------------------------------------------------------------
+// coordinates transformations
+// ---------------------------------------------------------------------------
+
+wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
+{
+    return ((wxDC *)this)->XDEV2LOG(x);
+}
+
+wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
+{
+    return ((wxDC *)this)->YDEV2LOG(y);
+}
+
+wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
+{
+    return ((wxDC *)this)->XDEV2LOGREL(x);
+}
+
+wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
+{
+    return ((wxDC *)this)->YDEV2LOGREL(y);
+}
+
+wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
+{
+    return ((wxDC *)this)->XLOG2DEV(x);
+}
+
+wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
+{
+    return ((wxDC *)this)->YLOG2DEV(y);
+}
+
+wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
+{
+    return ((wxDC *)this)->XLOG2DEVREL(x);
+}
+
+wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
+{
+    return ((wxDC *)this)->YLOG2DEVREL(y);
+}
+
+
 void wxDC::DoGetSize(int *w, int *h) const
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );

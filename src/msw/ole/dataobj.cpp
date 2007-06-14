@@ -28,7 +28,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/dataobj.h"
@@ -137,7 +136,7 @@ private:
 // wxDataFormat
 // ----------------------------------------------------------------------------
 
-void wxDataFormat::SetId(const wxString& format)
+void wxDataFormat::SetId(const wxChar *format)
 {
     m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format);
     if ( !m_format )

@@ -122,8 +122,8 @@ public:
 
     // access methods:
     wxXmlNodeType GetType() const { return m_type; }
-    const wxString& GetName() const { return m_name; }
-    const wxString& GetContent() const { return m_content; }
+    wxString GetName() const { return m_name; }
+    wxString GetContent() const { return m_content; }
 
     bool IsWhitespaceOnly() const;
     int GetDepth(wxXmlNode *grandparent = NULL) const;
@@ -211,11 +211,11 @@ public:
     wxXmlNode *GetRoot() const { return m_root; }
 
     // Returns version of document (may be empty).
-    const wxString& GetVersion() const { return m_version; }
+    wxString GetVersion() const { return m_version; }
     // Returns encoding of document (may be empty).
     // Note: this is the encoding original file was saved in, *not* the
     // encoding of in-memory representation!
-    const wxString& GetFileEncoding() const { return m_fileEncoding; }
+    wxString GetFileEncoding() const { return m_fileEncoding; }
 
     // Write-access methods:
     wxXmlNode *DetachRoot() { wxXmlNode *old=m_root; m_root=NULL; return old; }

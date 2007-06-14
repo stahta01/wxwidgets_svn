@@ -234,8 +234,9 @@ public:
     virtual bool Enable(bool enable = true);
 
     // more readable flag testing methods
-    bool IsPassword() const { return HasFlag(wxTE_PASSWORD); }
-    bool WrapLines() const { return m_wrapLines; }
+    bool IsPassword() const { return (GetWindowStyle() & wxTE_PASSWORD) != 0; }
+    bool WrapLines() const
+        { return !IsSingleLine() && !(GetWindowStyle() & wxHSCROLL); }
 
     // only for wxStdTextCtrlInputHandler
     void RefreshSelection();
@@ -499,8 +500,7 @@ private:
     // flags
     bool m_isModified:1,
          m_isEditable:1,
-         m_hasCaret:1,
-         m_wrapLines:1; // can't be changed after creation
+         m_hasCaret:1;
 
     // the rectangle (in client coordinates) to draw text inside
     wxRect m_rectText;

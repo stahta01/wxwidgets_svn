@@ -83,12 +83,14 @@ static pascal void NavEventProc(
                 ::NavCustomControl(ioParams->context, kNavCtlSetLocation, (void *) &theLocation);
         }
 
-        NavMenuItemSpec  menuItem;
-        menuItem.version = kNavMenuItemSpecVersion;
-        menuItem.menuCreator = 'WXNG';
-        menuItem.menuType = data->currentfilter;
-        wxMacStringToPascal( data->name[data->currentfilter] , (StringPtr)(menuItem.menuItemName) ) ;
-        ::NavCustomControl(ioParams->context, kNavCtlSelectCustomType, &menuItem);
+        if( data->extensions.GetCount() > 0 )
+        {
+            NavMenuItemSpec  menuItem;
+            memset( &menuItem, 0, sizeof(menuItem) );
+            menuItem.version = kNavMenuItemSpecVersion;
+            menuItem.menuType = data->currentfilter;
+            ::NavCustomControl(ioParams->context, kNavCtlSelectCustomType, &menuItem);
+        }
     }
     else if ( inSelector == kNavCBPopupMenuSelect )
     {
@@ -101,18 +103,14 @@ static pascal void NavEventProc(
             if ( data->saveMode )
             {
                 int i = menu->menuType ;
-
-                // isolate the first extension string
-                wxString firstExtension = data->extensions[i].BeforeFirst('|').BeforeFirst(';');
-
-                wxString extension = firstExtension.AfterLast('.') ;
+                wxString extension =  data->extensions[i].AfterLast('.') ;
                 wxString sfilename ;
 
                 wxMacCFStringHolder cfString( NavDialogGetSaveFileName( ioParams->context ) , false  );
                 sfilename = cfString.AsString() ;
 
                 int pos = sfilename.Find('.', true) ;
-                if ( pos != wxNOT_FOUND )
+                if ( pos != wxNOT_FOUND && extension != wxT("*") )
                 {
                     sfilename = sfilename.Left(pos+1)+extension ;
                     cfString.Assign( sfilename , wxFONTENCODING_DEFAULT ) ;
@@ -129,7 +127,7 @@ void MakeUserDataRec(OpenUserDataRec *myData , const wxString& filter )
     myData->currentfilter = 0 ;
     myData->saveMode = false ;
 
-    if ( !filter.empty() )
+    if ( filter && filter[0] )
     {
         wxString filter2(filter) ;
         int filterIndex = 0;
@@ -228,34 +226,6 @@ static Boolean CheckFile( const wxString &filename , OSType type , OpenUserDataR
     return true ;
 }
 
-#if !TARGET_API_MAC_OSX
-static pascal Boolean CrossPlatformFileFilter(CInfoPBPtr myCInfoPBPtr, void *dataPtr)
-{
-    OpenUserDataRecPtr data = (OpenUserDataRecPtr) dataPtr ;
-    // return true if this item is invisible or a file
-
-    Boolean visibleFlag;
-    Boolean folderFlag;
-
-    visibleFlag = ! (myCInfoPBPtr->hFileInfo.ioFlFndrInfo.fdFlags & kIsInvisible);
-    folderFlag = (myCInfoPBPtr->hFileInfo.ioFlAttrib & 0x10);
-
-    // because the semantics of the filter proc are "true means don't show
-    // it" we need to invert the result that we return
-
-    if ( !visibleFlag )
-        return true ;
-
-    if ( !folderFlag )
-    {
-        wxString file = wxMacMakeStringFromPascal( myCInfoPBPtr->hFileInfo.ioNamePtr ) ;
-        return !CheckFile( file , myCInfoPBPtr->hFileInfo.ioFlFndrInfo.fdType , data ) ;
-    }
-
-    return false ;
-}
-#endif
-
 // end wxmac
 
 wxFileDialog::wxFileDialog(
@@ -273,45 +243,37 @@ pascal Boolean CrossPlatformFilterCallback(
     void *callBackUD,
     NavFilterModes filterMode )
 {
+    bool display = true;
     OpenUserDataRecPtr data = (OpenUserDataRecPtr) callBackUD ;
 
     if (filterMode == kNavFilteringBrowserList)
     {
-        // We allow navigation to all folders. For files, we check against the current
-        // filter string.
-        // However, packages should be dealt with like files and not like folders. So
-        // check if a folder is a package before deciding what to do.
-        FSRef fsref;
         NavFileOrFolderInfo* theInfo = (NavFileOrFolderInfo*) info ;
-        AECoerceDesc (theItem, typeFSRef, theItem);
-        if ( AEGetDescData (theItem, &fsref, sizeof (FSRef)) != noErr)
-            return true;
-
-        if ( theInfo->isFolder )
+        if ( !theInfo->isFolder )
         {
-            // check bundle bit (using Finder Services - used by OS9 on some bundles)
-            FSCatalogInfo catalogInfo;
-            if (FSGetCatalogInfo (&fsref, kFSCatInfoFinderInfo, &catalogInfo, NULL, NULL, NULL) != noErr)
-                return true;
-
-            // Check bundle item (using Launch Services - used by OS-X through info.plist or APP)
-            LSItemInfoRecord lsInfo;
-            if (LSCopyItemInfoForRef(&fsref, kLSRequestBasicFlagsOnly, &lsInfo ) != noErr)
-                return true;
-
-            // If it's not a bundle, then it's a normal folder and it passes our filter
-            FileInfo *fileInfo = (FileInfo *) catalogInfo.finderInfo;
-            if ( !(fileInfo->finderFlags & kHasBundle) &&
-                 !(lsInfo.flags & (kLSItemInfoIsApplication | kLSItemInfoIsPackage)) )
-                return true;
+            AECoerceDesc (theItem, typeFSRef, theItem); 
+            
+            FSRef fsref ;
+            if ( AEGetDescData (theItem, &fsref, sizeof (FSRef)) == noErr )
+            {
+#if 1
+                memcpy( &fsref , *theItem->dataHandle , sizeof(FSRef) ) ;
+                wxString file = wxMacFSRefToPath( &fsref ) ;
+                display = CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
+#else
+                CFStringRef itemUTI = NULL;
+                OSStatus status = LSCopyItemAttribute (&fsref, kLSRolesAll, kLSItemContentType, (CFTypeRef*)&itemUTI);
+                if (status == noErr)
+                {
+                    display = UTTypeConformsTo (itemUTI, CFSTR("public.text") );
+                    CFRelease (itemUTI);  
+                }
+#endif
+            }
         }
-
-        wxString file = wxMacFSRefToPath( &fsref ) ;
-        return CheckFile( file , theInfo->fileAndFolder.fileInfo.finderInfo.fdType , data ) ;
-
     }
 
-    return true;
+    return display;
 }
 
 int wxFileDialog::ShowModal()
@@ -361,10 +323,6 @@ int wxFileDialog::ShowModal()
         if (!numFilters)
             dialogCreateOptions.optionFlags |= kNavNoTypePopup;
 
-        // The extension is important
-        if (numFilters < 2)
-            dialogCreateOptions.optionFlags |= kNavPreserveSaveFileExtension;
-
 #if TARGET_API_MAC_OSX
         if (!(m_windowStyle & wxFD_OVERWRITE_PROMPT))
             dialogCreateOptions.optionFlags |= kNavDontConfirmReplacement;
@@ -402,7 +360,10 @@ int wxFileDialog::ShowModal()
         ::DisposeNavObjectFilterUPP(navFilterUPP);
 
     if (err != noErr)
+    {
+        ::NavDialogDispose(dialog);
         return wxID_CANCEL;
+    }
 
     NavReplyRecord navReply;
     err = ::NavDialogGetReply(dialog, &navReply);
@@ -433,6 +394,7 @@ int wxFileDialog::ShowModal()
             if (!thePath)
             {
                 ::NavDisposeReply(&navReply);
+                ::NavDialogDispose(dialog);
                 return wxID_CANCEL;
             }
 
@@ -449,6 +411,7 @@ int wxFileDialog::ShowModal()
     }
 
     ::NavDisposeReply(&navReply);
+    ::NavDialogDispose(dialog);
 
     return (err == noErr) ? wxID_OK : wxID_CANCEL;
 }

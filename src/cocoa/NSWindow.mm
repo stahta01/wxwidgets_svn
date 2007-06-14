@@ -23,11 +23,12 @@
     #include "wx/menuitem.h"
 #endif // WX_PRECOMP
 
+#include "wx/cocoa/ObjcPose.h"
 #include "wx/cocoa/NSWindow.h"
 
+#import <AppKit/NSWindow.h>
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSString.h>
-#include "wx/cocoa/objc/NSWindow.h"
 
 // ============================================================================
 // @class wxNSWindowDelegate
@@ -186,9 +187,18 @@ wxMenuBar* wxCocoaNSWindow::GetAppMenuBar(wxCocoaNSWindow *win)
 }
 
 // ============================================================================
-// @class WXNSWindow
+// @class wxPoserNSWindow
 // ============================================================================
-@implementation WXNSWindow : NSWindow
+@interface wxPoserNSWindow : NSWindow
+{
+}
+
+- (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
+@end // wxPoserNSwindow
+
+WX_IMPLEMENT_POSER(wxPoserNSWindow);
+@implementation wxPoserNSWindow : NSWindow
 
 - (BOOL)canBecomeKeyWindow
 {
@@ -208,29 +218,4 @@ wxMenuBar* wxCocoaNSWindow::GetAppMenuBar(wxCocoaNSWindow *win)
     return canBecome;
 }
 
-@end // implementation WXNSWindow
-
-// ============================================================================
-// @class WXNSPanel
-// ============================================================================
-@implementation WXNSPanel : NSPanel
-
-- (BOOL)canBecomeKeyWindow
-{
-    bool canBecome = false;
-    wxCocoaNSWindow *tlw = wxCocoaNSWindow::GetFromCocoa(self);
-    if(!tlw || !tlw->Cocoa_canBecomeKeyWindow(canBecome))
-        canBecome = [super canBecomeKeyWindow];
-    return canBecome;
-}
-
-- (BOOL)canBecomeMainWindow
-{
-    bool canBecome = false;
-    wxCocoaNSWindow *tlw = wxCocoaNSWindow::GetFromCocoa(self);
-    if(!tlw || !tlw->Cocoa_canBecomeMainWindow(canBecome))
-        canBecome = [super canBecomeMainWindow];
-    return canBecome;
-}
-
-@end // implementation WXNSPanel
+@end // implementation wxPoserNSWindow

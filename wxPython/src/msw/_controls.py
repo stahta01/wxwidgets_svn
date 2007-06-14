@@ -99,7 +99,7 @@ class Button(_core.Control):
 
     def SetDefault(*args, **kwargs):
         """
-        SetDefault(self) -> Window
+        SetDefault(self)
 
         This sets the button to be the default item for the panel or dialog box.
         """
@@ -1122,11 +1122,6 @@ def StaticLine_GetClassDefaultAttributes(*args, **kwargs):
 
 #---------------------------------------------------------------------------
 
-ST_NO_AUTORESIZE = _controls_.ST_NO_AUTORESIZE
-ST_MARKUP = _controls_.ST_MARKUP
-ST_ELLIPSIZE_START = _controls_.ST_ELLIPSIZE_START
-ST_ELLIPSIZE_MIDDLE = _controls_.ST_ELLIPSIZE_MIDDLE
-ST_ELLIPSIZE_END = _controls_.ST_ELLIPSIZE_END
 class StaticText(_core.Control):
     """Proxy of C++ StaticText class"""
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -1159,32 +1154,6 @@ class StaticText(_core.Control):
         """
         return _controls_.StaticText_Wrap(*args, **kwargs)
 
-    def IsEllipsized(*args, **kwargs):
-        """IsEllipsized(self) -> bool"""
-        return _controls_.StaticText_IsEllipsized(*args, **kwargs)
-
-    def RemoveMarkup(*args, **kwargs):
-        """
-        RemoveMarkup(String str) -> String
-
-        Removes the markup accepted by wx.StaticText when wx.ST_MARKUP is
-        used, and then returns the cleaned string.
-            
-        """
-        return _controls_.StaticText_RemoveMarkup(*args, **kwargs)
-
-    RemoveMarkup = staticmethod(RemoveMarkup)
-    def EscapeMarkup(*args, **kwargs):
-        """
-        EscapeMarkup(String str) -> String
-
-        Escapes the alls special symbols (<>"'&) present inside the given
-        string using the corresponding entities (&lt; &gt; &quot; &apos;
-        &amp;)
-        """
-        return _controls_.StaticText_EscapeMarkup(*args, **kwargs)
-
-    EscapeMarkup = staticmethod(EscapeMarkup)
     def GetClassDefaultAttributes(*args, **kwargs):
         """
         GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
@@ -1209,26 +1178,6 @@ def PreStaticText(*args, **kwargs):
     """PreStaticText() -> StaticText"""
     val = _controls_.new_PreStaticText(*args, **kwargs)
     return val
-
-def StaticText_RemoveMarkup(*args, **kwargs):
-  """
-    StaticText_RemoveMarkup(String str) -> String
-
-    Removes the markup accepted by wx.StaticText when wx.ST_MARKUP is
-    used, and then returns the cleaned string.
-        
-    """
-  return _controls_.StaticText_RemoveMarkup(*args, **kwargs)
-
-def StaticText_EscapeMarkup(*args, **kwargs):
-  """
-    StaticText_EscapeMarkup(String str) -> String
-
-    Escapes the alls special symbols (<>"'&) present inside the given
-    string using the corresponding entities (&lt; &gt; &quot; &apos;
-    &amp;)
-    """
-  return _controls_.StaticText_EscapeMarkup(*args, **kwargs)
 
 def StaticText_GetClassDefaultAttributes(*args, **kwargs):
   """
@@ -1551,9 +1500,6 @@ TE_BESTWRAP = _controls_.TE_BESTWRAP
 TE_RICH2 = _controls_.TE_RICH2
 TE_CAPITALIZE = _controls_.TE_CAPITALIZE
 TE_LINEWRAP = TE_CHARWRAP 
-PROCESS_ENTER = TE_PROCESS_ENTER
-PASSWORD = TE_PASSWORD
-
 TEXT_ALIGNMENT_DEFAULT = _controls_.TEXT_ALIGNMENT_DEFAULT
 TEXT_ALIGNMENT_LEFT = _controls_.TEXT_ALIGNMENT_LEFT
 TEXT_ALIGNMENT_CENTRE = _controls_.TEXT_ALIGNMENT_CENTRE
@@ -3840,11 +3786,11 @@ class ToolBarBase(_core.Control):
         return _controls_.ToolBarBase_InsertToolItem(*args, **kwargs)
 
     def AddControl(*args, **kwargs):
-        """AddControl(self, Control control, String label=wxEmptyString) -> ToolBarToolBase"""
+        """AddControl(self, Control control) -> ToolBarToolBase"""
         return _controls_.ToolBarBase_AddControl(*args, **kwargs)
 
     def InsertControl(*args, **kwargs):
-        """InsertControl(self, size_t pos, Control control, String label=wxEmptyString) -> ToolBarToolBase"""
+        """InsertControl(self, size_t pos, Control control) -> ToolBarToolBase"""
         return _controls_.ToolBarBase_InsertControl(*args, **kwargs)
 
     def FindControl(*args, **kwargs):

@@ -164,9 +164,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxPyHScrolledWindow;
 class wxPyVScrolledWindow;
-class wxPyHVScrolledWindow;
 class wxPyVListBox;
 class wxPyHtmlListBox;
 class wxPyPanel;

@@ -270,6 +270,9 @@ private:
     bool HandleMoving(wxRect& rect);
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
 
+    // list of disabled children before last call to our Disable()
+    wxWindowList *m_childrenDisabled;
+
     // number of calls to Freeze() minus number of calls to Thaw()
     unsigned int m_frozenness;
 

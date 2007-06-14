@@ -107,7 +107,7 @@ bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
 
 void wxSplitterWindow::Init()
 {
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 
     m_splitMode = wxSPLIT_VERTICAL;
     m_permitUnsplitAlways = true;

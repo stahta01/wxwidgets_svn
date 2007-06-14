@@ -24,6 +24,9 @@ MAKE_CONST_WXSTRING(PanelNameStr);
 %newgroup
 
 
+wxLIST_WRAPPER(wxWindowList, wxWindow);
+
+
 DocStr(wxVisualAttributes,
     "struct containing all the visual attributes of a control", "");
 
@@ -787,16 +790,7 @@ window had already been in the specified state.", "");
     
     DocDeclStr(
         bool , IsEnabled() const,
-        "Returns true if the window is enabled for input, false otherwise.
-This method takes into account the enabled state of parent windows up
-to the top-level window.", "");
-
-    DocDeclStr(
-        bool , IsThisEnabled() const,
-        "Returns the internal enabled state independent of the parent(s) state,
-i.e. the state in which the window would be if all of its parents are
-enabled.  Use `IsEnabled` to get the effective window state.", "");
-    
+        "Returns true if the window is enabled for input, false otherwise.", "");
 
     DocDeclStr(
         virtual bool , IsShownOnScreen() const,
@@ -850,9 +844,6 @@ SetWindowStyleFlag()", "");
         long , GetExtraStyle() const,
         "Returns the extra style bits for the window.", "");
     
-    DocDeclStr(
-        bool , HasExtraStyle(int exFlag) const,
-        "Returns ``True`` if the given extra flag is set.", "");
 
     
     DocDeclStr(
@@ -917,41 +908,19 @@ or None.", "");
     
 
     DocDeclStr(
-        bool , CanAcceptFocus() const,
-        "Can this window have focus right now?", "");
-    
- 
-
-    DocDeclStr(
         virtual bool , AcceptsFocusFromKeyboard() const,
         "Can this window be given focus by keyboard navigation? if not, the
 only way to give it focus (provided it accepts it at all) is to click
 it.", "");
     
 
-    
-    DocDeclStr(
-        bool , CanAcceptFocusFromKeyboard() const,
-        "Can this window be assigned focus from keyboard right now?", "");
-    
-
-    DocDeclStr(
-        virtual void , SetCanFocus(bool canFocus),
-        "", "");
-    
-
-
-    DocDeclAStr(
-        virtual bool , NavigateIn(int flags = wxNavigationKeyEvent::IsForward),
-        "NavigateIn(self, int flags=NavigationKeyEvent.IsForward) -> bool",
-        "Navigates inside this window.", "");
 
 
     DocDeclAStr(
         virtual bool , Navigate(int flags = wxNavigationKeyEvent::IsForward),
         "Navigate(self, int flags=NavigationKeyEvent.IsForward) -> bool",
-        "Does keyboard navigation starting from this window to another.  This is
-equivalient to self.GetParent().NavigateIn().", "
+        "Does keyboard navigation from this window to another, by sending a
+`wx.NavigationKeyEvent`.", "
  
     :param flags: A combination of the ``IsForward`` or ``IsBackward``
         and the ``WinChange`` values in the `wx.NavigationKeyEvent`
@@ -990,26 +959,16 @@ before win instead of putting it right after it.", "");
 
     
 
-
-
-
-
     // parent/children relations
     // -------------------------
 
 
-    //wxWindowList& GetChildren();  // TODO: Do a typemap or a wrapper for wxWindowList
-    %extend {
         DocStr(GetChildren,
-               "Returns a list of the window's children.  NOTE: Currently this is a
-copy of the child window list maintained by the window, so the return
-value of this function is only valid as long as the window's children
-do not change.", "");
-        PyObject* GetChildren() {
-            wxWindowList& list = self->GetChildren();
-            return wxPy_ConvertList(&list);
-        }
-    }
+               "Returns an object containing a list of the window's children.  The
+object provides a Python sequence-like interface over the internal
+list maintained by the window..", "");
+    wxWindowList& GetChildren(); 
+
 
     DocDeclStr(
         wxWindow *, GetParent() const,
@@ -2318,14 +2277,11 @@ MustHaveApp(wxWindow_FromHWND);
 //---------------------------------------------------------------------------
 
 DocStr(GetTopLevelWindows,
-"Returns a list of the the application's top-level windows, (frames,
-dialogs, etc.)  NOTE: Currently this is a copy of the list maintained
-by wxWidgets, and so it is only valid as long as no top-level windows
-are closed or new top-level windows are created.
-", "");
+"Returns a list-like object of the the application's top-level windows, (frames,
+dialogs, etc.)", "");
 %inline %{
-    PyObject* GetTopLevelWindows() {
-        return wxPy_ConvertList(&wxTopLevelWindows);
+    wxWindowList& GetTopLevelWindows() {
+        return wxTopLevelWindows;
     }
 %}
 

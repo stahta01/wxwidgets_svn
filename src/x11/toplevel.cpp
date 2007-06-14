@@ -373,7 +373,8 @@ void wxTopLevelWindowX11::DoSetIcon(const wxIcon& icon)
 {
     if (icon.Ok() && GetMainWindow())
     {
-#if !wxUSE_NANOX
+#if wxUSE_NANOX
+#else
         XWMHints *wmHints = XAllocWMHints();
         wmHints->icon_pixmap = (Pixmap) icon.GetPixmap();
 

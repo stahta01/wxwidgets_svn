@@ -55,8 +55,7 @@ public:
     virtual void Lower();
 
     virtual bool Show( bool show = true );
-    virtual void DoEnable( bool enable );
-    virtual void OnEnabled( bool enabled );
+    virtual bool Enable( bool enable = true );
 
     virtual void SetFocus();
 
@@ -127,6 +126,11 @@ public:
     virtual bool CanSetTransparent();
     virtual wxByte GetTransparent() const ;
     
+#if WXWIN_COMPATIBILITY_2_4
+    bool GetTransparentBackground() const { return m_backgroundTransparent; }
+    void SetTransparent(bool t = true) { m_backgroundTransparent = t; }
+#endif
+
     // event handlers
     // --------------
     void OnSetFocus( wxFocusEvent& event );
@@ -214,13 +218,8 @@ public:
     // returns true if the grandchildren need to be clipped to the children's content area
     // (e.g., splitter windows)
     virtual bool        MacClipGrandChildren() const { return false ; }
-    bool                MacIsWindowScrollbar( const wxWindow* sb ) const
+    bool                MacIsWindowScrollbar( const wxWindow* sb )
     { return ((wxWindow*)m_hScrollBar == sb || (wxWindow*)m_vScrollBar == sb) ; }
-    virtual bool IsClientAreaChild(const wxWindow *child) const
-    {
-        return !MacIsWindowScrollbar(child) &&
-               wxWindowBase::IsClientAreaChild(child);
-    }
 
     virtual void        MacInstallEventHandler(WXWidget native) ;
     void                MacPostControlCreate(const wxPoint& pos, const wxSize& size) ;
@@ -316,7 +315,12 @@ protected:
     void                MacUpdateControlFont() ;
 
     void                MacPropagateVisibilityChanged() ;
+    void                MacPropagateEnabledStateChanged() ;
     void                MacPropagateHiliteChanged() ;
+
+#if WXWIN_COMPATIBILITY_2_4
+    bool                 m_backgroundTransparent ;
+#endif
 
     // implement the base class pure virtuals
     virtual wxSize DoGetBestSize() const;

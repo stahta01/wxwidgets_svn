@@ -69,8 +69,8 @@ public:
     virtual ~wxHtmlListBox();
 
     // override some base class virtuals
-    virtual void RefreshRow(size_t line);
-    virtual void RefreshRows(size_t from, size_t to);
+    virtual void RefreshLine(size_t line);
+    virtual void RefreshLines(size_t from, size_t to);
     virtual void RefreshAll();
     virtual void SetItemCount(size_t count);
 
@@ -305,8 +305,8 @@ protected:
     // wxSimpleHtmlListBox shouldn't be allowed to call them directly!
     virtual void SetItemCount(size_t count)
         { wxHtmlListBox::SetItemCount(count); }
-    virtual void SetRowCount(size_t count)
-        { wxHtmlListBox::SetRowCount(count); }
+    virtual void SetLineCount(size_t count)
+        { wxHtmlListBox::SetLineCount(count); }
 
     virtual wxString OnGetItem(size_t n) const
         { return m_items[n]; }

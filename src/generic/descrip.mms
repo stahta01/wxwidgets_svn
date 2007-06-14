@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 12 March 2007                                                       *
+# Date : 31 October 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -92,7 +92,7 @@ OBJECTS = \
 		treebkg.obj,\
 		treectlg.obj,\
 		wizard.obj,\
-		hyperlinkg.obj,\
+		hyperlink.obj,\
 		filepickerg.obj,\
 		bmpcboxg.obj
 
@@ -160,7 +160,7 @@ SOURCES = \
 		splash.cpp,\
 		timer.cpp,\
 		vlbox.cpp,\
-		hyperlinkg.cpp,\
+		hyperlink.cpp,\
 		filepickerg.cpp,\
 		vscroll.cpp,\
 		icon.cpp,bmpcboxg.cpp
@@ -271,6 +271,6 @@ toolbkg.obj : toolbkg.cpp
 treebkg.obj : treebkg.cpp
 combog.obj : combog.cpp
 fontpickerg.obj : fontpickerg.cpp
-hyperlinkg.obj : hyperlinkg.cpp
+hyperlink.obj : hyperlink.cpp
 filepickerg.obj : filepickerg.cpp
 bmpcboxg.obj : bmpcboxg.cpp

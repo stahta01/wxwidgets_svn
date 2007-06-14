@@ -16,11 +16,6 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/log.h"
-#endif
-
 #include "wx/fileconf.h"
 #include "wx/filename.h"
 #include "wx/tokenzr.h"
@@ -36,11 +31,6 @@
 // ----------------------------------------------------------------------------
 // wxFontInstance
 // ----------------------------------------------------------------------------
-
-// This is a fake "filename" for DirectFB's builtin font (which isn't loaded
-// from a file); we can't use empty string, because that's already used for
-// "this face is not available" by wxFontsManagerBase
-#define BUILTIN_DFB_FONT_FILENAME   "/dev/null"
 
 wxFontInstance::wxFontInstance(float ptSize, bool aa,
                                const wxString& filename)
@@ -60,11 +50,7 @@ wxFontInstance::wxFontInstance(float ptSize, bool aa,
                     DFDESC_ATTRIBUTES | DFDESC_FRACT_HEIGHT);
     desc.attributes = aa ? DFFA_NONE : DFFA_MONOCHROME;
     desc.fract_height = pixSize;
-
-    if ( filename == BUILTIN_DFB_FONT_FILENAME )
-        m_font = wxIDirectFB::Get()->CreateFont(NULL, &desc);
-    else
-        m_font = wxIDirectFB::Get()->CreateFont(filename.fn_str(), &desc);
+    m_font = wxIDirectFB::Get()->CreateFont(filename.fn_str(), &desc);
 
     wxASSERT_MSG( m_font, _T("cannot create font instance") );
 }
@@ -153,12 +139,6 @@ void wxFontsManager::AddAllFonts()
     {
         wxString dir = tkn.GetNextToken();
 
-        if ( !wxDir::Exists(dir) )
-        {
-            wxLogDebug(_T("font directory %s doesn't exist"), dir);
-            continue;
-        }
-
         wxArrayString indexFiles;
         if ( !wxDir::GetAllFiles(dir, &indexFiles, _T("FontsIndex")) )
             continue;
@@ -172,23 +152,8 @@ void wxFontsManager::AddAllFonts()
 
     if ( GetBundles().empty() )
     {
-        // We can fall back to the builtin default font if no other fonts are
-        // defined:
-        wxLogTrace(_T("font"),
-                   _("no fonts found in %s, using builtin font"), path);
-
-        AddBundle
-        (
-          new wxFontBundle
-              (
-                _("Default font"),
-                BUILTIN_DFB_FONT_FILENAME,
-                wxEmptyString,
-                wxEmptyString,
-                wxEmptyString,
-                false // IsFixed
-              )
-        );
+        // wxDFB is unusable without fonts, so terminate the app
+        wxLogFatalError(_("No fonts found in %s."), path.c_str());
     }
 }
 

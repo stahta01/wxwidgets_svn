@@ -18,10 +18,6 @@
 
 #if wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
-    #include "wx/crt.h"
-#endif
-
 #include "wx/txtstrm.h"
 #include <ctype.h>
 
@@ -420,8 +416,7 @@ void wxTextOutputStream::WriteString(const wxString& string)
     }
 
 #if wxUSE_UNICODE
-    // FIXME-UTF8: use wxCharBufferWithLength if/when we have it
-    wxCharBuffer buffer = m_conv->cWC2MB(out.wc_str(), out.length(), &len);
+    wxCharBuffer buffer = m_conv->cWC2MB(out, out.length(), &len);
     m_output.Write(buffer, len);
 #else
     m_output.Write(out.c_str(), out.length() );

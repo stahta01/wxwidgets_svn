@@ -192,28 +192,6 @@ void wxStreamBuffer::ResetBuffer()
                         : m_buffer_start;
 }
 
-void wxStreamBuffer::Truncate()
-{
-    size_t new_size = m_buffer_pos - m_buffer_start;
-    if ( new_size == m_buffer_size )
-        return;
-
-    if ( !new_size )
-    {
-        FreeBuffer();
-        InitBuffer();
-        return;
-    }
-
-    char *new_start = (char *)realloc(m_buffer_start, new_size);
-    wxCHECK_RET( new_size, _T("shrinking buffer shouldn't fail") );
-
-    m_buffer_start = new_start;
-    m_buffer_size = new_size;
-    m_buffer_end = m_buffer_start + m_buffer_size;
-    m_buffer_pos = m_buffer_end;
-}
-
 // fill the buffer with as much data as possible (only for read buffers)
 bool wxStreamBuffer::FillBuffer()
 {
@@ -679,8 +657,6 @@ wxFileOffset wxStreamBuffer::Tell() const
 // wxStreamBase
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxStreamBase, wxObject)
-
 wxStreamBase::wxStreamBase()
 {
     m_lasterror = wxSTREAM_NO_ERROR;
@@ -716,8 +692,6 @@ wxFileOffset wxStreamBase::OnSysTell() const
 // ----------------------------------------------------------------------------
 // wxInputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxInputStream, wxStreamBase)
 
 wxInputStream::wxInputStream()
 {
@@ -964,8 +938,6 @@ wxFileOffset wxInputStream::TellI() const
 // wxOutputStream
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxOutputStream, wxStreamBase)
-
 wxOutputStream::wxOutputStream()
 {
 }
@@ -1015,8 +987,6 @@ void wxOutputStream::Sync()
 // ----------------------------------------------------------------------------
 // wxCountingOutputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxCountingOutputStream, wxOutputStream)
 
 wxCountingOutputStream::wxCountingOutputStream ()
 {
@@ -1080,8 +1050,6 @@ wxFileOffset wxCountingOutputStream::OnSysTell() const
 // wxFilterInputStream
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxFilterInputStream, wxInputStream)
-
 wxFilterInputStream::wxFilterInputStream()
  :  m_parent_i_stream(NULL),
     m_owns(false)
@@ -1109,8 +1077,6 @@ wxFilterInputStream::~wxFilterInputStream()
 // ----------------------------------------------------------------------------
 // wxFilterOutputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxFilterOutputStream, wxOutputStream)
 
 wxFilterOutputStream::wxFilterOutputStream()
  :  m_parent_o_stream(NULL),
@@ -1156,25 +1122,29 @@ wxString wxFilterClassFactoryBase::PopExtension(const wxString& location) const
 }
 
 wxString::size_type wxFilterClassFactoryBase::FindExtension(
-        const wxString& location) const
+        const wxChar *location) const
 {
+    size_t len = wxStrlen(location);
+
     for (const wxChar *const *p = GetProtocols(wxSTREAM_FILEEXT); *p; p++)
     {
-        if ( location.EndsWith(*p) )
-            return location.length() - wxStrlen(*p);
+        size_t l = wxStrlen(*p);
+
+        if (l <= len && wxStrcmp(*p, location + len - l) == 0)
+            return len - l;
     }
 
     return wxString::npos;
 }
 
-bool wxFilterClassFactoryBase::CanHandle(const wxString& protocol,
+bool wxFilterClassFactoryBase::CanHandle(const wxChar *protocol,
                                          wxStreamProtocolType type) const
 {
     if (type == wxSTREAM_FILEEXT)
         return FindExtension(protocol) != wxString::npos;
     else
         for (const wxChar *const *p = GetProtocols(type); *p; p++)
-            if (protocol == *p)
+            if (wxStrcmp(*p, protocol) == 0)
                 return true;
 
     return false;

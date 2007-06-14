@@ -37,7 +37,6 @@ enum Propagation_state
 
 wxEventType wxNewEventType();
 
-%constant wxEventType wxEVT_ANY;
 
 %constant wxEventType wxEVT_NULL;
 %constant wxEventType wxEVT_FIRST;
@@ -61,7 +60,6 @@ wxEventType wxNewEventType();
 %constant wxEventType wxEVT_COMMAND_COMBOBOX_SELECTED;
 %constant wxEventType wxEVT_COMMAND_TOOL_RCLICKED;
 %constant wxEventType wxEVT_COMMAND_TOOL_ENTER;
-%constant wxEventType wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED;
 
 // Mouse event types
 %constant wxEventType wxEVT_LEFT_DOWN;
@@ -355,7 +353,6 @@ EVT_TOOL_RANGE = wx.PyEventBinder( wxEVT_COMMAND_TOOL_CLICKED, 2)
 EVT_TOOL_RCLICKED = wx.PyEventBinder( wxEVT_COMMAND_TOOL_RCLICKED, 1)
 EVT_TOOL_RCLICKED_RANGE = wx.PyEventBinder( wxEVT_COMMAND_TOOL_RCLICKED, 2)
 EVT_TOOL_ENTER = wx.PyEventBinder( wxEVT_COMMAND_TOOL_ENTER, 1)
-EVT_TOOL_DROPDOWN = wx.PyEventBinder( wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, 1)
 EVT_CHECKLISTBOX = wx.PyEventBinder( wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, 1)
 
 
@@ -1089,12 +1086,6 @@ have been accumulated before scrolling.", "");
 taken, and one such action (for example, scrolling one increment)
 should occur for each delta.", "");
 
-    DocDeclStr(
-        int , GetWheelAxis() const,
-        "Gets the axis the wheel operation concerns, 0 being the y axis as on
-most mouse wheels, 1 is the x axis for things like MightyMouse scrolls
-or horizontal trackpad scrolling.", "");
-    
 
     DocDeclStr(
         int , GetLinesPerAction() const,
@@ -2682,21 +2673,6 @@ internally.", "");
 %pythoncode {
     EVT_DATE_CHANGED = wx.PyEventBinder( wxEVT_DATE_CHANGED, 1 )
 }
-
-
-//---------------------------------------------------------------------------
-
-DocStr(wxEventBlocker,
-"Helper class to temporarily disable event handling for a window.", "");
-
-class wxEventBlocker : public wxEvtHandler
-{
-public:
-    wxEventBlocker(wxWindow *win, wxEventType type = wxEVT_ANY);
-    virtual ~wxEventBlocker();
-
-    void Block(wxEventType type);
-};
 
 
 //---------------------------------------------------------------------------

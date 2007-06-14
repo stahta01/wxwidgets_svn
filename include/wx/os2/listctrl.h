@@ -150,8 +150,9 @@ public:
     // Item data
     //
     long GetItemData(long lItem) const;
-    bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+    bool SetItemData( long lItem
+                     ,long lData
+                    );
 
     //
     // Gets the item rectangle

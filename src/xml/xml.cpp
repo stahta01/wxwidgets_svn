@@ -40,7 +40,7 @@ IMPLEMENT_CLASS(wxXmlDocument, wxObject)
 
 
 // a private utility used by wxXML
-static bool wxIsWhiteOnly(const wxString& buf);
+static bool wxIsWhiteOnly(const wxChar *buf);
 
 
 //-----------------------------------------------------------------------------
@@ -418,9 +418,13 @@ bool wxXmlDocument::Save(const wxString& filename, int indentstep) const
 // converts Expat-produced string in UTF-8 into wxString using the specified
 // conv or keep in UTF-8 if conv is NULL
 static wxString CharToString(wxMBConv *conv,
-                             const char *s, size_t len = wxString::npos)
+                                    const char *s, size_t len = wxString::npos)
 {
-#if !wxUSE_UNICODE
+#if wxUSE_UNICODE
+    wxUnusedVar(conv);
+
+    return wxString(s, wxConvUTF8, len);
+#else // !wxUSE_UNICODE
     if ( conv )
     {
         // there can be no embedded NULs in this string so we don't need the
@@ -430,22 +434,19 @@ static wxString CharToString(wxMBConv *conv,
 
         return wxString(wbuf, *conv);
     }
-    // else: the string is wanted in UTF-8
-#endif // !wxUSE_UNICODE
-
-    wxUnusedVar(conv);
-    return wxString::FromUTF8(s, len);
+    else // already in UTF-8, no conversion needed
+    {
+        return wxString(s, len != wxString::npos ? len : strlen(s));
+    }
+#endif // wxUSE_UNICODE/!wxUSE_UNICODE
 }
 
 // returns true if the given string contains only whitespaces
-bool wxIsWhiteOnly(const wxString& buf)
+bool wxIsWhiteOnly(const wxChar *buf)
 {
-    for ( wxString::const_iterator i = buf.begin(); i != buf.end(); ++i )
-    {
-        wxChar c = *i;
-        if ( c != wxT(' ') && c != wxT('\t') && c != wxT('\n') && c != wxT('\r'))
+    for (const wxChar *c = buf; *c != wxT('\0'); c++)
+        if (*c != wxT(' ') && *c != wxT('\t') && *c != wxT('\n') && *c != wxT('\r'))
             return false;
-    }
     return true;
 }
 
@@ -479,7 +480,9 @@ static void StartElementHnd(void *userData, const char *name, const char **atts)
     ctx->node = node;
     ctx->lastAsText = NULL;
 }
+}
 
+extern "C" {
 static void EndElementHnd(void *userData, const char* WXUNUSED(name))
 {
     wxXmlParsingContext *ctx = (wxXmlParsingContext*)userData;
@@ -487,7 +490,9 @@ static void EndElementHnd(void *userData, const char* WXUNUSED(name))
     ctx->node = ctx->node->GetParent();
     ctx->lastAsText = NULL;
 }
+}
 
+extern "C" {
 static void TextHnd(void *userData, const char *s, int len)
 {
     wxXmlParsingContext *ctx = (wxXmlParsingContext*)userData;
@@ -510,7 +515,9 @@ static void TextHnd(void *userData, const char *s, int len)
         }
     }
 }
+}
 
+extern "C" {
 static void StartCdataHnd(void *userData)
 {
     wxXmlParsingContext *ctx = (wxXmlParsingContext*)userData;
@@ -518,7 +525,9 @@ static void StartCdataHnd(void *userData)
     ctx->lastAsText = new wxXmlNode(wxXML_CDATA_SECTION_NODE, wxT("cdata"),wxT(""));
     ctx->node->AddChild(ctx->lastAsText);
 }
+}
 
+extern "C" {
 static void CommentHnd(void *userData, const char *data)
 {
     wxXmlParsingContext *ctx = (wxXmlParsingContext*)userData;
@@ -533,7 +542,9 @@ static void CommentHnd(void *userData, const char *data)
     }
     ctx->lastAsText = NULL;
 }
+}
 
+extern "C" {
 static void DefaultHnd(void *userData, const char *s, int len)
 {
     // XML header:
@@ -551,14 +562,17 @@ static void DefaultHnd(void *userData, const char *s, int len)
             ctx->version = buf.Mid(pos + 9).BeforeFirst(buf[(size_t)pos+8]);
     }
 }
+}
 
+extern "C" {
 static int UnknownEncodingHnd(void * WXUNUSED(encodingHandlerData),
                               const XML_Char *name, XML_Encoding *info)
 {
     // We must build conversion table for expat. The easiest way to do so
     // is to let wxCSConv convert as string containing all characters to
     // wide character representation:
-    wxCSConv conv(name);
+    wxString str(name, wxConvLibc);
+    wxCSConv conv(str);
     char mbBuf[2];
     wchar_t wcBuf[10];
     size_t i;
@@ -582,8 +596,7 @@ static int UnknownEncodingHnd(void * WXUNUSED(encodingHandlerData),
 
     return 1;
 }
-
-} // extern "C"
+}
 
 bool wxXmlDocument::Load(wxInputStream& stream, const wxString& encoding, int flags)
 {

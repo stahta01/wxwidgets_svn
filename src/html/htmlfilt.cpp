@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/log.h"
     #include "wx/intl.h"
 #endif

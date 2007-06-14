@@ -59,6 +59,9 @@
     #define __WXBASE__
 #endif
 
+/*  include the feature test macros */
+#include "wx/features.h"
+
 /*  suppress some Visual C++ warnings */
 #ifdef __VISUALC__
     /*  the only "real" warning here is 4244 but there are just too many of them */
@@ -269,8 +272,6 @@ typedef int wxWindowID;
         #define HAVE_EXPLICIT
     #elif defined(__DIGITALMARS__)
         #define HAVE_EXPLICIT
-    #elif defined(__WATCOMC__)
-        #define HAVE_EXPLICIT
     #endif
 #endif /*  !HAVE_EXPLICIT */
 
@@ -436,12 +437,6 @@ typedef int wxWindowID;
     #endif /* va_copy/!va_copy */
 #endif /* wxVaCopy */
 
-#ifndef HAVE_VARIADIC_MACROS
-    #if wxCHECK_WATCOM_VERSION(1,2)
-        #define HAVE_VARIADIC_MACROS
-    #endif
-#endif /* HAVE_VARIADIC_MACROS */
-
 
 /*  ---------------------------------------------------------------------------- */
 /*  portable calling conventions macros */
@@ -513,7 +508,6 @@ typedef int wxWindowID;
 #   define ATTRIBUTE_PRINTF_5 ATTRIBUTE_PRINTF(5, 6)
 #endif /* !defined(ATTRIBUTE_PRINTF) */
 
-
 /*  Macro to issue warning when using deprecated functions with gcc3 or MSVC7: */
 #if wxCHECK_GCC_VERSION(3, 1)
     #define wxDEPRECATED(x) x __attribute__ ((deprecated))
@@ -549,60 +543,6 @@ typedef int wxWindowID;
 /*  symbolic constant used by all Find()-like functions returning positive */
 /*  integer on success as failure indicator */
 #define wxNOT_FOUND       (-1)
-
-/*  ---------------------------------------------------------------------------- */
-/*  macros dealing with comparison operators */
-/*  ---------------------------------------------------------------------------- */
-
-/*
-    Expands into m(op, args...) for each op in the set { ==, !=, <, <=, >, >= }.
- */
-#define wxFOR_ALL_COMPARISONS(m) \
-    m(==) m(!=) m(>=) m(<=) m(>) m(<)
-
-#define wxFOR_ALL_COMPARISONS_1(m, x) \
-    m(==,x) m(!=,x) m(>=,x) m(<=,x) m(>,x) m(<,x)
-
-#define wxFOR_ALL_COMPARISONS_2(m, x, y) \
-    m(==,x,y) m(!=,x,y) m(>=,x,y) m(<=,x,y) m(>,x,y) m(<,x,y)
-
-#define wxFOR_ALL_COMPARISONS_3(m, x, y, z) \
-    m(==,x,y,z) m(!=,x,y,z) m(>=,x,y,z) m(<=,x,y,z) m(>,x,y,z) m(<,x,y,z)
-
-/*
-    This is only used with wxDEFINE_COMPARISON_REV: it passes both the normal
-    and the reversed comparison operators to the macro.
- */
-#define wxFOR_ALL_COMPARISONS_3_REV(m, x, y, z) \
-    m(==,x,y,z,==) m(!=,x,y,z,!=) m(>=,x,y,z,<=) \
-    m(<=,x,y,z,>=) m(>,x,y,z,<) m(<,x,y,z,>)
-
-
-#define wxDEFINE_COMPARISON(op, T1, T2, cmp) \
-    inline bool operator op(T1 x, T2 y) { return cmp(x, y, op); }
-
-#define wxDEFINE_COMPARISON_REV(op, T1, T2, cmp, oprev) \
-    inline bool operator op(T2 y, T1 x) { return cmp(x, y, oprev); }
-
-/*
-    Define all 6 comparison operators (==, !=, <, <=, >, >=) for the given
-    types in the specified order. The implementation is provided by the cmp
-    macro. Normally wxDEFINE_ALL_COMPARISONS should be used as comparison
-    operators are usually symmetric.
- */
-#define wxDEFINE_COMPARISONS(T1, T2, cmp) \
-    wxFOR_ALL_COMPARISONS_3(wxDEFINE_COMPARISON, T1, T2, cmp)
-
-/*
-    This macro allows to define all 12 comparison operators (6 operators for
-    both orders of arguments) for the given types using the provided "cmp"
-    macro to implement the actual comparison: the macro is called with the 2
-    arguments names, the first of type T1 and the second of type T2, and the
-    comparison operator being implemented.
- */
-#define wxDEFINE_ALL_COMPARISONS(T1, T2, cmp) \
-    wxFOR_ALL_COMPARISONS_3(wxDEFINE_COMPARISON, T1, T2, cmp) \
-    wxFOR_ALL_COMPARISONS_3_REV(wxDEFINE_COMPARISON_REV, T1, T2, cmp)
 
 /*  ---------------------------------------------------------------------------- */
 /*  macros to avoid compiler warnings */
@@ -724,6 +664,9 @@ enum {  wxDefaultCoord = -1 };
 /*  practice) */
 
 /*  8bit */
+#ifndef SIZEOF_CHAR
+    #define SIZEOF_CHAR 1
+#endif
 typedef signed char wxInt8;
 typedef unsigned char wxUint8;
 typedef wxUint8 wxByte;
@@ -755,7 +698,7 @@ typedef wxUint16 wxWord;
   |short      | 16    16    16    16    16 |
   |int        | 32    64    32    32    16 |
   |long       | 64    64    32    32    32 |
-  |long long  | 64    64    64    --    -- |
+  |long long  |             64             |
   |void *     | 64    64    64    32    32 |
   +-----------+----------------------------+
 
@@ -878,32 +821,7 @@ typedef wxUint16 wxWord;
     #endif
 #endif /*  Win/!Win */
 
-/* also define C99-like sized MIN/MAX constants */
-#define wxINT8_MIN CHAR_MIN
-#define wxINT8_MAX CHAR_MAX
-
-#define wxINT16_MIN SHRT_MIN
-#define wxINT16_MAX SHRT_MAX
-
-#if SIZEOF_INT == 4
-    #define wxINT32_MIN INT_MIN
-    #define wxINT32_MAX INT_MAX
-#elif SIZEOF_LONG == 4
-    #define wxINT32_MIN LONG_MIN
-    #define wxINT32_MAX LONG_MAX
-#else
-    #error "Unknown 32 bit type"
-#endif
-
 typedef wxUint32 wxDword;
-
-#ifdef LLONG_MAX
-    #define wxINT64_MAX LLONG_MAX
-    #define wxINT64_MIN LLONG_MIN
-#else
-    #define wxINT64_MAX wxLL(9223372036854775807)
-    #define wxINT64_MIN wxLL(-9223372036854775807-1)
-#endif
 
 /*
    Define an integral type big enough to contain all of long, size_t and void *.
@@ -1141,18 +1059,6 @@ typedef float wxFloat32;
 #   endif
 #endif /* wxUSE_WCHAR_T */
 
-/*
-   This constant should be used instead of NULL in vararg functions taking
-   wxChar* arguments: passing NULL (which is the same as 0, unless the compiler
-   defines it specially, e.g. like gcc does with its __null built-in) doesn't
-   work in this case as va_arg() wouldn't interpret the integer 0 correctly
-   when trying to convert it to a pointer on architectures where sizeof(int) is
-   strictly less than sizeof(void *).
-
-   Examples of places where this must be used include wxFileTypeInfo ctor.
- */
-#define wxNullPtr ((void *)NULL)
-
 /*  ---------------------------------------------------------------------------- */
 /*  byte ordering related definition and macros */
 /*  ---------------------------------------------------------------------------- */
@@ -1365,18 +1271,20 @@ enum wxAlignment
 
 enum wxStretch
 {
-    /* for compatibility only, default now, don't use explicitly any more */
-#if WXWIN_COMPATIBILITY_2_6
-    wxADJUST_MINSIZE          = 0,
-#endif
-
     wxSTRETCH_NOT             = 0x0000,
     wxSHRINK                  = 0x1000,
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
     wxSHAPED                  = 0x4000,
     wxFIXED_MINSIZE           = 0x8000,
-    wxTILE                    = 0xc000
+    wxTILE                    = 0xc000,
+
+    /* for compatibility only, default now, don't use explicitly any more */
+#if WXWIN_COMPATIBILITY_2_4
+    wxADJUST_MINSIZE          = 0x00100000
+#else
+    wxADJUST_MINSIZE          = 0
+#endif
 };
 
 /*  border flags: the values are chosen for backwards compatibility */
@@ -1657,6 +1565,13 @@ enum wxBorder
 #define wxST_SIZEGRIP         0x0010
 
 /*
+ * wxStaticText flags
+ */
+#define wxST_NO_AUTORESIZE    0x0001
+#define wxST_DOTS_MIDDLE      0x0002
+#define wxST_DOTS_END         0x0004
+
+/*
  * wxStaticBitmap flags
  */
 #define wxBI_EXPAND           wxEXPAND
@@ -1681,8 +1596,6 @@ enum wxBorder
 #define wxNO                    0x00000008
 #define wxYES_NO                (wxYES | wxNO)
 #define wxCANCEL                0x00000010
-#define wxAPPLY                 0x00000020
-#define wxCLOSE                 0x00000040
 
 #define wxYES_DEFAULT           0x00000000  /*  has no effect (default) */
 #define wxNO_DEFAULT            0x00000080
@@ -1713,16 +1626,6 @@ enum wxBackgroundStyle
   wxBG_STYLE_SYSTEM,
   wxBG_STYLE_COLOUR,
   wxBG_STYLE_CUSTOM
-};
-
-/*
- * Key types used by (old style) lists and hashes.
- */
-enum wxKeyType
-{
-    wxKEY_NONE,
-    wxKEY_INTEGER,
-    wxKEY_STRING
 };
 
 /*  ---------------------------------------------------------------------------- */
@@ -1874,7 +1777,6 @@ enum wxItemKind
     wxITEM_NORMAL,
     wxITEM_CHECK,
     wxITEM_RADIO,
-    wxITEM_DROPDOWN,
     wxITEM_MAX
 };
 
@@ -1984,6 +1886,12 @@ enum
     wxCAP_PROJECTING,
     wxCAP_BUTT
 };
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#else
+    /* use wxBrush::IsHatch() instead thought wxMotif still uses it in src/motif/dcclient.cpp */
+#endif
 
 /*  Logical ops */
 typedef enum
@@ -2861,7 +2769,6 @@ typedef struct _GtkItemFactory    GtkItemFactory;
 typedef struct _GtkSelectionData  GtkSelectionData;
 typedef struct _GtkTextBuffer     GtkTextBuffer;
 typedef struct _GtkRange          GtkRange;
-typedef struct _GtkCellRenderer   GtkCellRenderer;
 
 typedef GtkWidget *WXWidget;
 
@@ -2928,10 +2835,6 @@ typedef const void* WXWidget;
 #endif
 #endif
   /*  __WXMSW__ */
-
-
-/*  include the feature test macros */
-#include "wx/features.h"
 
 /*  --------------------------------------------------------------------------- */
 /*  macro to define a class without copy ctor nor assignment operator */

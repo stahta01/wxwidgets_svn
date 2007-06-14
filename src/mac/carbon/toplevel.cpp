@@ -76,7 +76,6 @@ static pascal long wxShapedMacWindowDef(short varCode, WindowRef window, SInt16 
 BEGIN_EVENT_TABLE(wxTopLevelWindowMac, wxTopLevelWindowBase)
 END_EVENT_TABLE()
 
-
 // ---------------------------------------------------------------------------
 // Carbon Events
 // ---------------------------------------------------------------------------
@@ -250,7 +249,7 @@ wxWindow* g_MacLastWindow = NULL ;
 
 EventMouseButton g_lastButton = 0 ;
 bool g_lastButtonWasFakeRight = false ;
-
+ 
 void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
 {
     UInt32 modifiers = cEvent.GetParameter<UInt32>(kEventParamKeyModifiers, typeUInt32) ;
@@ -277,6 +276,7 @@ void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
         button = kEventMouseButtonSecondary ;
         thisButtonIsFakeRight = true ;
     }
+
     // otherwise we report double clicks by connecting a left click with a ctrl-left click
     if ( clickCount > 1 && button != g_lastButton )
         clickCount = 1 ;
@@ -368,14 +368,12 @@ void SetupMouseEvent( wxMouseEvent &wxevent , wxMacCarbonEvent &cEvent )
         {
             wxevent.SetEventType( wxEVT_MOUSEWHEEL ) ;
 
-            EventMouseWheelAxis axis = cEvent.GetParameter<EventMouseWheelAxis>(kEventParamMouseWheelAxis, typeMouseWheelAxis) ;
+            // EventMouseWheelAxis axis = cEvent.GetParameter<EventMouseWheelAxis>(kEventParamMouseWheelAxis, typeMouseWheelAxis) ;
             SInt32 delta = cEvent.GetParameter<SInt32>(kEventParamMouseWheelDelta, typeSInt32) ;
 
             wxevent.m_wheelRotation = delta;
             wxevent.m_wheelDelta = 1;
             wxevent.m_linesPerAction = 1;
-            if ( axis == kEventMouseWheelAxisX )
-                wxevent.m_wheelAxis = 1;
         }
         break ;
 
@@ -500,7 +498,8 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
             }
             else
             {
-                currentMouseWindow = wxFindControlFromMacControl( control ) ;
+                currentMouseWindow = (wxWindow*) wxFindControlFromMacControl( control ) ;
+#ifndef __WXUNIVERSAL__
                 if ( currentMouseWindow == NULL && cEvent.GetKind() == kEventMouseMoved )
                 {
 #if wxUSE_TOOLBAR
@@ -508,11 +507,12 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
                     // instead of its children (wxToolBarTools)
                     ControlRef parent ;
                     GetSuperControl(control, &parent );
-                    wxWindow *wxParent = wxFindControlFromMacControl( parent ) ;
+                    wxWindow *wxParent = (wxWindow*) wxFindControlFromMacControl( parent ) ;
                     if ( wxParent && wxParent->IsKindOf( CLASSINFO( wxToolBar ) ) )
                         currentMouseWindow = wxParent ;
 #endif
                 }
+#endif
             }
 
             // disabled windows must not get any input messages
@@ -567,6 +567,7 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
         if ( cEvent.GetKind() == kEventMouseDown )
         {
             ::MenuSelect( screenMouseLocation ) ;
+            ::HiliteMenu(0);
             result = noErr ;
         }
     }
@@ -601,7 +602,7 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
             if ( wxevent.GetEventType() == wxEVT_LEFT_DOWN )
             {
                 // ... that is set focus to this window
-                if (currentMouseWindow->CanAcceptFocus() && wxWindow::FindFocus()!=currentMouseWindow)
+                if (currentMouseWindow->AcceptsFocus() && wxWindow::FindFocus()!=currentMouseWindow)
                     currentMouseWindow->SetFocus();
             }
 
@@ -733,6 +734,7 @@ static pascal OSStatus wxMacTopLevelWindowEventHandler( EventHandlerCallRef hand
             wxRect r( newRect.left , newRect.top , newRect.right - newRect.left , newRect.bottom - newRect.top ) ;
             if ( attributes & kWindowBoundsChangeSizeChanged )
             {
+#ifndef __WXUNIVERSAL__
                 // according to the other ports we handle this within the OS level
                 // resize event, not within a wxSizeEvent
                 wxFrame *frame = wxDynamicCast( toplevelWindow , wxFrame ) ;
@@ -740,7 +742,7 @@ static pascal OSStatus wxMacTopLevelWindowEventHandler( EventHandlerCallRef hand
                 {
                     frame->PositionBars();
                 }
-
+#endif
                 wxSizeEvent event( r.GetSize() , toplevelWindow->GetId() ) ;
                 event.SetEventObject( toplevelWindow ) ;
 
@@ -906,22 +908,15 @@ void wxTopLevelWindowMac::Init()
     m_macFullScreenData = NULL ;
 }
 
-class wxMacDeferredWindowDeleter : public wxObject
+wxMacDeferredWindowDeleter::wxMacDeferredWindowDeleter( WindowRef windowRef )
 {
-public :
-    wxMacDeferredWindowDeleter( WindowRef windowRef )
-    {
-        m_macWindow = windowRef ;
-    }
+    m_macWindow = windowRef ;
+}
 
-    virtual ~wxMacDeferredWindowDeleter()
-    {
-        UMADisposeWindow( (WindowRef) m_macWindow ) ;
-    }
-
-protected :
-    WindowRef m_macWindow ;
-} ;
+wxMacDeferredWindowDeleter::~wxMacDeferredWindowDeleter()
+{
+    UMADisposeWindow( (WindowRef) m_macWindow ) ;
+}
 
 bool wxTopLevelWindowMac::Create(wxWindow *parent,
                                  wxWindowID id,
@@ -1045,6 +1040,12 @@ wxPoint wxTopLevelWindowMac::GetClientAreaOrigin() const
     return wxPoint(0, 0) ;
 }
 
+void wxTopLevelWindowMac::SetIcon(const wxIcon& icon)
+{
+    // this sets m_icon
+    wxTopLevelWindowBase::SetIcon(icon);
+}
+
 void  wxTopLevelWindowMac::MacSetBackgroundBrush( const wxBrush &brush )
 {
     wxTopLevelWindowBase::MacSetBackgroundBrush( brush ) ;
@@ -1055,16 +1056,19 @@ void  wxTopLevelWindowMac::MacSetBackgroundBrush( const wxBrush &brush )
     }
 }
 
+void wxTopLevelWindowMacInstallTopLevelWindowEventHandler(WindowRef window, EventHandlerRef* handler, void *ref)
+{
+    InstallWindowEventHandler(window, GetwxMacTopLevelEventHandlerUPP(),
+        GetEventTypeCount(eventList), eventList, ref, handler );
+}
+
 void wxTopLevelWindowMac::MacInstallTopLevelWindowEventHandler()
 {
     if ( m_macEventHandler != NULL )
     {
         verify_noerr( ::RemoveEventHandler( (EventHandlerRef) m_macEventHandler ) ) ;
     }
-
-    InstallWindowEventHandler(
-        MAC_WXHWND(m_macWindow), GetwxMacTopLevelEventHandlerUPP(),
-        GetEventTypeCount(eventList), eventList, this, (EventHandlerRef *)&m_macEventHandler );
+    wxTopLevelWindowMacInstallTopLevelWindowEventHandler(MAC_WXHWND(m_macWindow),(EventHandlerRef *)&m_macEventHandler,this);
 }
 
 void  wxTopLevelWindowMac::MacCreateRealWindow(
@@ -1524,6 +1528,12 @@ void wxTopLevelWindowMac::DoGetClientSize( int *width, int *height ) const
        *width = bounds.right - bounds.left ;
     if (height)
        *height = bounds.bottom - bounds.top ;
+}
+
+void wxTopLevelWindowMac::DoCentre(int dir)
+{
+    if ( m_macWindow != 0 )
+        wxTopLevelWindowBase::DoCentre(dir);
 }
 
 void wxTopLevelWindowMac::MacSetMetalAppearance( bool set )

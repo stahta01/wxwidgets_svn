@@ -22,7 +22,6 @@
     #include "wx/log.h"
 #endif // WX_PRECOMP
 
-#include "wx/cocoa/objc/objc_uniquifying.h"
 #include "wx/cocoa/NSControl.h"
 
 #import <Foundation/NSObject.h>
@@ -36,7 +35,6 @@
 
 - (void)wxNSControlAction: (id)sender;
 @end //interface wxNSControlTarget
-WX_DECLARE_GET_OBJC_CLASS(wxNSControlTarget,NSObject)
 
 @implementation wxNSControlTarget : NSObject
 
@@ -49,12 +47,11 @@ WX_DECLARE_GET_OBJC_CLASS(wxNSControlTarget,NSObject)
 }
 
 @end //implementation wxNSControlTarget
-WX_IMPLEMENT_GET_OBJC_CLASS(wxNSControlTarget,NSObject)
 
 // ============================================================================
 // wxNSControl
 // ============================================================================
 WX_IMPLEMENT_OBJC_INTERFACE(NSControl)
 
-struct objc_object *wxCocoaNSControl::sm_cocoaTarget = [[WX_GET_OBJC_CLASS(wxNSControlTarget) alloc] init];
+struct objc_object *wxCocoaNSControl::sm_cocoaTarget = [[wxNSControlTarget alloc] init];
 

@@ -323,18 +323,18 @@ void wxHtmlListBox::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-void wxHtmlListBox::RefreshRow(size_t line)
+void wxHtmlListBox::RefreshLine(size_t line)
 {
     m_cache->InvalidateRange(line, line);
 
-    wxVListBox::RefreshRow(line);
+    wxVListBox::RefreshLine(line);
 }
 
-void wxHtmlListBox::RefreshRows(size_t from, size_t to)
+void wxHtmlListBox::RefreshLines(size_t from, size_t to)
 {
     m_cache->InvalidateRange(from, to);
 
-    wxVListBox::RefreshRows(from, to);
+    wxVListBox::RefreshLines(from, to);
 }
 
 void wxHtmlListBox::RefreshAll()
@@ -364,6 +364,17 @@ void wxHtmlListBox::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
     wxCHECK_RET( cell, _T("this cell should be cached!") );
 
     wxHtmlRenderingInfo htmlRendInfo;
+
+    // draw the selected cell in selected state
+    if ( IsSelected(n) )
+    {
+        wxHtmlSelection htmlSel;
+        htmlSel.Set(wxPoint(0,0), cell, wxPoint(INT_MAX, INT_MAX), cell);
+        htmlRendInfo.SetSelection(&htmlSel);
+        if ( m_htmlRendStyle )
+            htmlRendInfo.SetStyle(m_htmlRendStyle);
+        htmlRendInfo.GetState().SetSelectionState(wxHTML_SEL_IN);
+    }
 
     // note that we can't stop drawing exactly at the window boundary as then
     // even the visible cells part could be not drawn, so always draw the
@@ -458,7 +469,7 @@ wxPoint wxHtmlListBox::GetRootCellCoords(size_t n) const
 {
     wxPoint pos(CELL_BORDER, CELL_BORDER);
     pos += GetMargins();
-    pos.y += GetRowsHeight(GetVisibleBegin(), n);
+    pos.y += GetLinesHeight(GetFirstVisibleLine(), n);
     return pos;
 }
 
@@ -645,7 +656,7 @@ void wxSimpleHtmlListBox::SetString(unsigned int n, const wxString& s)
                  wxT("invalid index in wxSimpleHtmlListBox::SetString") );
 
     m_items[n]=s; 
-    RefreshRow(n);
+    RefreshLine(n);
 }
 
 wxString wxSimpleHtmlListBox::GetString(unsigned int n) const

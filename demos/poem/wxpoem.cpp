@@ -179,8 +179,8 @@ void MainWindow::ScanBuffer(wxDC *dc, bool DrawIt, int *max_x, int *max_y)
     // See what ACTUAL char height is
     if(m_normalFont)
         dc->SetFont(*m_normalFont);
-    wxCoord xx;
-    wxCoord yy;
+    long xx;
+    long yy;
     dc->GetTextExtent(_T("X"), &xx, &yy);
     char_height = (int)yy;
 
@@ -751,13 +751,11 @@ int GetIndex()
 // Read preferences
 void MainWindow::ReadPreferences()
 {
-/* TODO: convert this code to use wxConfig
 #if wxUSE_RESOURCES
     wxGetResource(_T("wxPoem"), _T("FontSize"), &pointSize);
     wxGetResource(_T("wxPoem"), _T("X"), &XPos);
     wxGetResource(_T("wxPoem"), _T("Y"), &YPos);
 #endif
-*/
 }
 
 // Write preferences to disk
@@ -765,13 +763,11 @@ void MainWindow::WritePreferences()
 {
 #ifdef __WXMSW__
     TheMainWindow->GetPosition(&XPos, &YPos);
-/* TODO: convert this code to use wxConfig
 #if wxUSE_RESOURCES
     wxWriteResource(_T("wxPoem"), _T("FontSize"), pointSize);
     wxWriteResource(_T("wxPoem"), _T("X"), XPos);
     wxWriteResource(_T("wxPoem"), _T("Y"), YPos);
 #endif
-*/
 #endif
 }
 

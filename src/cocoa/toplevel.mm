@@ -33,10 +33,9 @@
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
 
-#include "wx/cocoa/objc/NSView.h"
-#include "wx/cocoa/objc/NSWindow.h"
+#import <AppKit/NSView.h>
+#import <AppKit/NSWindow.h>
 #import <AppKit/NSPanel.h>
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -132,18 +131,10 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
 
     m_cocoaNSWindow = NULL;
     m_cocoaNSView = NULL;
-    // NOTE: We may need to deal with the contentView becoming a wx NSView as well.
-    NSWindow *newWindow;
-    // Create a WXNSPanel or a WXNSWindow depending on what type of window is desired.
     if(style & wxFRAME_TOOL_WINDOW)
-        newWindow = [[WXNSPanel alloc] initWithContentRect:cocoaRect styleMask:cocoaStyle backing:NSBackingStoreBuffered defer:NO];
+        SetNSWindow([[NSPanel alloc] initWithContentRect:cocoaRect styleMask:cocoaStyle backing:NSBackingStoreBuffered defer:NO]);
     else
-        newWindow = [[WXNSWindow alloc] initWithContentRect:cocoaRect styleMask:cocoaStyle backing:NSBackingStoreBuffered defer:NO];
-    // Make sure the default content view is a WXNSView
-    [newWindow setContentView: [[WX_GET_OBJC_CLASS(WXNSView) alloc] initWithFrame: [[newWindow contentView] frame]]];
-    // Associate the window and view
-    SetNSWindow(newWindow);
-
+        SetNSWindow([[NSWindow alloc] initWithContentRect:cocoaRect styleMask:cocoaStyle backing:NSBackingStoreBuffered defer:NO]);
     // NOTE: SetNSWindow has retained the Cocoa object for this object.
     // Because we do not release on close, the following release matches the
     // above alloc and thus the retain count will be 1.
@@ -197,8 +188,6 @@ void wxTopLevelWindowCocoa::SetNSWindow(WX_NSWindow cocoaNSWindow)
     [cocoaNSWindow retain];
     [m_cocoaNSWindow release];
     m_cocoaNSWindow = cocoaNSWindow;
-    // NOTE: We are no longer using posing so we won't get events on the
-    // window's view unless it was explicitly created as the wx view class.
     if(m_cocoaNSWindow)
         SetNSView([m_cocoaNSWindow contentView]);
     else
@@ -343,14 +332,15 @@ void wxTopLevelWindowCocoa::OnCloseWindow(wxCloseEvent& event)
 // wxTopLevelWindowCocoa misc
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowCocoa::SetTitle(const wxString& title)
+void wxTopLevelWindowCocoa::SetTitle( const wxString& WXUNUSED(title))
 {
-    [m_cocoaNSWindow setTitle:wxNSStringWithWxString(title)];
+    // TODO
 }
 
 wxString wxTopLevelWindowCocoa::GetTitle() const
 {
-    return wxStringWithNSString([m_cocoaNSWindow title]);
+    // TODO
+    return wxEmptyString;
 }
 
 bool wxTopLevelWindowCocoa::ShowFullScreen(bool show, long style)

@@ -18,8 +18,6 @@
 #endif
 
 #include "wx/cocoa/autorelease.h"
-#include "wx/cocoa/trackingrectmanager.h"
-#include "wx/cocoa/objc/objc_uniquifying.h"
 
 #import <AppKit/NSControl.h>
 #import <AppKit/NSCell.h>
@@ -32,149 +30,16 @@
 }
 
 - (void)drawRect: (NSRect)rect;
-- (void)mouseDown:(NSEvent *)theEvent;
-- (void)mouseDragged:(NSEvent *)theEvent;
-- (void)mouseUp:(NSEvent *)theEvent;
-- (void)mouseMoved:(NSEvent *)theEvent;
-- (void)mouseEntered:(NSEvent *)theEvent;
-- (void)mouseExited:(NSEvent *)theEvent;
-- (void)rightMouseDown:(NSEvent *)theEvent;
-- (void)rightMouseDragged:(NSEvent *)theEvent;
-- (void)rightMouseUp:(NSEvent *)theEvent;
-- (void)otherMouseDown:(NSEvent *)theEvent;
-- (void)otherMouseDragged:(NSEvent *)theEvent;
-- (void)otherMouseUp:(NSEvent *)theEvent;
-- (void)resetCursorRects;
-- (void)viewDidMoveToWindow;
-- (void)viewWillMoveToWindow:(NSWindow *)newWindow;
 @end // wxNonControlNSControl
-WX_DECLARE_GET_OBJC_CLASS(wxNonControlNSControl,NSControl)
 
 @implementation wxNonControlNSControl : NSControl
-
-- (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
-{
-    bool acceptsFirstMouse = false;
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if(!win || !win->Cocoa_acceptsFirstMouse(acceptsFirstMouse, theEvent))
-        acceptsFirstMouse = [super acceptsFirstMouse:theEvent];
-    return acceptsFirstMouse;
-}
-
 - (void)drawRect: (NSRect)rect
 {
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
     if( !win || !win->Cocoa_drawRect(rect) )
         [super drawRect:rect];
 }
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseDown(theEvent) )
-        [super mouseDown:theEvent];
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseDragged(theEvent) )
-        [super mouseDragged:theEvent];
-}
-
-- (void)mouseUp:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseUp(theEvent) )
-        [super mouseUp:theEvent];
-}
-
-- (void)mouseMoved:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseMoved(theEvent) )
-        [super mouseMoved:theEvent];
-}
-
-- (void)mouseEntered:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseEntered(theEvent) )
-        [super mouseEntered:theEvent];
-}
-
-- (void)mouseExited:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_mouseExited(theEvent) )
-        [super mouseExited:theEvent];
-}
-
-- (void)rightMouseDown:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_rightMouseDown(theEvent) )
-        [super rightMouseDown:theEvent];
-}
-
-- (void)rightMouseDragged:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_rightMouseDragged(theEvent) )
-        [super rightMouseDragged:theEvent];
-}
-
-- (void)rightMouseUp:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_rightMouseUp(theEvent) )
-        [super rightMouseUp:theEvent];
-}
-
-- (void)otherMouseDown:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_otherMouseDown(theEvent) )
-        [super otherMouseDown:theEvent];
-}
-
-- (void)otherMouseDragged:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_otherMouseDragged(theEvent) )
-        [super otherMouseDragged:theEvent];
-}
-
-- (void)otherMouseUp:(NSEvent *)theEvent
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_otherMouseUp(theEvent) )
-        [super otherMouseUp:theEvent];
-}
-
-- (void)resetCursorRects
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_resetCursorRects() )
-        [super resetCursorRects];
-}
-
-- (void)viewDidMoveToWindow
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_viewDidMoveToWindow() )
-        [super viewDidMoveToWindow];
-}
-
-- (void)viewWillMoveToWindow:(NSWindow *)newWindow
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_viewWillMoveToWindow(newWindow) )
-        [super viewWillMoveToWindow:newWindow];
-}
-
 @end // wxNonControlNSControl
-WX_IMPLEMENT_GET_OBJC_CLASS(wxNonControlNSControl,NSControl)
 
 IMPLEMENT_ABSTRACT_CLASS(wxControl, wxWindow)
 BEGIN_EVENT_TABLE(wxControl, wxControlBase)
@@ -190,7 +55,7 @@ bool wxControl::Create(wxWindow *parent, wxWindowID winid,
         return false;
     wxLogTrace(wxTRACE_COCOA,wxT("Created control with id=%d"),GetId());
     m_cocoaNSView = NULL;
-    SetNSControl([[WX_GET_OBJC_CLASS(wxNonControlNSControl) alloc] initWithFrame: MakeDefaultNSRect(size)]);
+    SetNSControl([[wxNonControlNSControl alloc] initWithFrame: MakeDefaultNSRect(size)]);
     // NOTE: YES we want to release this (to match the alloc).
     // DoAddChild(this) will retain us again since addSubView doesn't.
     [m_cocoaNSView release];
@@ -200,9 +65,6 @@ bool wxControl::Create(wxWindow *parent, wxWindowID winid,
     if(m_parent)
         m_parent->CocoaAddChild(this);
     SetInitialFrameRect(pos,size);
-
-    // Controls should have a viewable-area tracking rect by default
-    m_visibleTrackingRectManager = new wxCocoaTrackingRectManager(this);
 
     return true;
 }

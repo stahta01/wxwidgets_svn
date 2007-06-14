@@ -109,7 +109,7 @@ public:
     // different under Unix for message catalog category (namely the standard
     // prefix/share/locale/lang/LC_MESSAGES)
     virtual wxString
-    GetLocalizedResourcesDir(const wxString& lang,
+    GetLocalizedResourcesDir(const wxChar *lang,
                              ResourceCat WXUNUSED(category)
                                 = ResourceCat_None) const
     {

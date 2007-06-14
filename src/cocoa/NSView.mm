@@ -4,7 +4,7 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/02/15
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2003 David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
@@ -22,12 +22,12 @@
     #include "wx/window.h"
 #endif // WX_PRECOMP
 
-#include "wx/cocoa/objc/objc_uniquifying.h"
+#include "wx/cocoa/ObjcPose.h"
 #include "wx/cocoa/NSView.h"
 
+#import <AppKit/NSView.h>
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSString.h>
-#include "wx/cocoa/objc/NSView.h"
 
 // ----------------------------------------------------------------------------
 // globals
@@ -54,10 +54,30 @@ void wxCocoaNSView::DisassociateNSView(WX_NSView cocoaNSView)
 }
 
 // ============================================================================
-// @class WXNSView
+// @class wxPoserNSView
 // ============================================================================
+@interface wxPoserNSView : NSView
+{
+}
 
-@implementation WXNSView : NSView
+- (void)drawRect: (NSRect)rect;
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+- (void)mouseMoved:(NSEvent *)theEvent;
+- (void)mouseEntered:(NSEvent *)theEvent;
+- (void)mouseExited:(NSEvent *)theEvent;
+- (void)rightMouseDown:(NSEvent *)theEvent;
+- (void)rightMouseDragged:(NSEvent *)theEvent;
+- (void)rightMouseUp:(NSEvent *)theEvent;
+- (void)otherMouseDown:(NSEvent *)theEvent;
+- (void)otherMouseDragged:(NSEvent *)theEvent;
+- (void)otherMouseUp:(NSEvent *)theEvent;
+- (void)resetCursorRects;
+@end // wxPoserNSView
+
+WX_IMPLEMENT_POSER(wxPoserNSView);
+@implementation wxPoserNSView : NSView
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
 {
@@ -166,35 +186,20 @@ void wxCocoaNSView::DisassociateNSView(WX_NSView cocoaNSView)
         [super resetCursorRects];
 }
 
-- (void)viewDidMoveToWindow
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_viewDidMoveToWindow() )
-        [super viewDidMoveToWindow];
-}
-
-- (void)viewWillMoveToWindow:(NSWindow *)newWindow
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
-    if( !win || !win->Cocoa_viewWillMoveToWindow(newWindow) )
-        [super viewWillMoveToWindow:newWindow];
-}
-
-@end // implementation WXNSView
-WX_IMPLEMENT_GET_OBJC_CLASS(WXNSView,NSView)
-
-// ============================================================================
-// @class wxNSViewNotificationObserver
-// ============================================================================
+@end // implementation wxPoserNSView
 
 @interface wxNSViewNotificationObserver : NSObject
 {
 }
 
+// FIXME: Initializing like this is a really bad idea.  If for some reason
+// we ever require posing as an NSObject we won't be able to since an instance
+// will have already been created here.  Of course, catching messages for
+// NSObject seems like a LOT of overkill, so I doubt we ever will anyway!
+void *wxCocoaNSView::sm_cocoaObserver = [[wxNSViewNotificationObserver alloc] init];
+
 - (void)notificationFrameChanged: (NSNotification *)notification;
-- (void)synthesizeMouseMovedForView: (NSView *)theView;
 @end // interface wxNSViewNotificationObserver
-WX_DECLARE_GET_OBJC_CLASS(wxNSViewNotificationObserver,NSObject)
 
 @implementation wxNSViewNotificationObserver : NSObject
 
@@ -205,15 +210,5 @@ WX_DECLARE_GET_OBJC_CLASS(wxNSViewNotificationObserver,NSObject)
     win->Cocoa_FrameChanged();
 }
 
-- (void)synthesizeMouseMovedForView: (NSView *)theView
-{
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(theView);
-    wxCHECK_RET(win,wxT("synthesizeMouseMovedForView received but no wxWindow exists"));
-    win->Cocoa_synthesizeMouseMoved();
-}
-
 @end // implementation wxNSViewNotificationObserver
-WX_IMPLEMENT_GET_OBJC_CLASS(wxNSViewNotificationObserver,NSObject)
-
-void *wxCocoaNSView::sm_cocoaObserver = [[WX_GET_OBJC_CLASS(wxNSViewNotificationObserver) alloc] init];
 

@@ -22,6 +22,7 @@
     #include "wx/frame.h"
     #include "wx/icon.h"
     #include "wx/dialog.h"
+    #include "wx/timer.h"
     #include "wx/memory.h"
     #include "wx/gdicmn.h"
     #include "wx/module.h"
@@ -32,7 +33,6 @@
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
-#include "wx/generic/private/timer.h"
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
@@ -544,7 +544,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
             if (event->type == ButtonPress)
             {
-                if ((win != wxWindow::FindFocus()) && win->CanAcceptFocus())
+                if ((win != wxWindow::FindFocus()) && win->AcceptsFocus())
                 {
                     // This might actually be done in wxWindow::SetFocus()
                     // and not here. TODO.
@@ -796,7 +796,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
 
         // Make sure we have an event loop object,
         // or Pending/Dispatch will fail
-        wxEventLoopBase * const eventLoop = wxEventLoop::GetActive();
+        wxEventLoop* eventLoop = wxEventLoop::GetActive();
         wxEventLoop* newEventLoop = NULL;
         if (!eventLoop)
         {
@@ -812,7 +812,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
             wxTheApp->Dispatch();
 
 #if wxUSE_TIMER
-        wxGenericTimerImpl::NotifyTimers();
+        wxTimer::NotifyTimers();
 #endif
         ProcessIdle();
 

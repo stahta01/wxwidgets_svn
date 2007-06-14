@@ -116,6 +116,8 @@ LB_MULTIPLE = _core_.LB_MULTIPLE
 LB_EXTENDED = _core_.LB_EXTENDED
 LB_OWNERDRAW = _core_.LB_OWNERDRAW
 LB_HSCROLL = _core_.LB_HSCROLL
+PROCESS_ENTER = _core_.PROCESS_ENTER
+PASSWORD = _core_.PASSWORD
 CB_SIMPLE = _core_.CB_SIMPLE
 CB_DROPDOWN = _core_.CB_DROPDOWN
 CB_SORT = _core_.CB_SORT
@@ -131,6 +133,9 @@ SB_HORIZONTAL = _core_.SB_HORIZONTAL
 SB_VERTICAL = _core_.SB_VERTICAL
 RB_USE_CHECKBOX = _core_.RB_USE_CHECKBOX
 ST_SIZEGRIP = _core_.ST_SIZEGRIP
+ST_NO_AUTORESIZE = _core_.ST_NO_AUTORESIZE
+ST_DOTS_MIDDLE = _core_.ST_DOTS_MIDDLE
+ST_DOTS_END = _core_.ST_DOTS_END
 FLOOD_SURFACE = _core_.FLOOD_SURFACE
 FLOOD_BORDER = _core_.FLOOD_BORDER
 ODDEVEN_RULE = _core_.ODDEVEN_RULE
@@ -146,8 +151,6 @@ YES = _core_.YES
 NO = _core_.NO
 NO_DEFAULT = _core_.NO_DEFAULT
 YES_DEFAULT = _core_.YES_DEFAULT
-APPLY = _core_.APPLY
-CLOSE = _core_.CLOSE
 ICON_EXCLAMATION = _core_.ICON_EXCLAMATION
 ICON_HAND = _core_.ICON_HAND
 ICON_QUESTION = _core_.ICON_QUESTION
@@ -331,7 +334,7 @@ EXPAND = _core_.EXPAND
 SHAPED = _core_.SHAPED
 FIXED_MINSIZE = _core_.FIXED_MINSIZE
 TILE = _core_.TILE
-ADJUST_MINSIZE = 0 
+ADJUST_MINSIZE = _core_.ADJUST_MINSIZE
 BORDER_DEFAULT = _core_.BORDER_DEFAULT
 BORDER_NONE = _core_.BORDER_NONE
 BORDER_STATIC = _core_.BORDER_STATIC
@@ -413,6 +416,8 @@ WXK_CONTROL = _core_.WXK_CONTROL
 WXK_MENU = _core_.WXK_MENU
 WXK_PAUSE = _core_.WXK_PAUSE
 WXK_CAPITAL = _core_.WXK_CAPITAL
+WXK_PRIOR = _core_.WXK_PRIOR
+WXK_NEXT = _core_.WXK_NEXT
 WXK_END = _core_.WXK_END
 WXK_HOME = _core_.WXK_HOME
 WXK_LEFT = _core_.WXK_LEFT
@@ -481,7 +486,9 @@ WXK_NUMPAD_LEFT = _core_.WXK_NUMPAD_LEFT
 WXK_NUMPAD_UP = _core_.WXK_NUMPAD_UP
 WXK_NUMPAD_RIGHT = _core_.WXK_NUMPAD_RIGHT
 WXK_NUMPAD_DOWN = _core_.WXK_NUMPAD_DOWN
+WXK_NUMPAD_PRIOR = _core_.WXK_NUMPAD_PRIOR
 WXK_NUMPAD_PAGEUP = _core_.WXK_NUMPAD_PAGEUP
+WXK_NUMPAD_NEXT = _core_.WXK_NUMPAD_NEXT
 WXK_NUMPAD_PAGEDOWN = _core_.WXK_NUMPAD_PAGEDOWN
 WXK_NUMPAD_END = _core_.WXK_NUMPAD_END
 WXK_NUMPAD_BEGIN = _core_.WXK_NUMPAD_BEGIN
@@ -518,11 +525,6 @@ WXK_SPECIAL17 = _core_.WXK_SPECIAL17
 WXK_SPECIAL18 = _core_.WXK_SPECIAL18
 WXK_SPECIAL19 = _core_.WXK_SPECIAL19
 WXK_SPECIAL20 = _core_.WXK_SPECIAL20
-WXK_PRIOR = WXK_PAGEUP
-WXK_NEXT  = WXK_PAGEDOWN
-WXK_NUMPAD_PRIOR = WXK_NUMPAD_PAGEUP
-WXK_NUMPAD_NEXT  = WXK_NUMPAD_PAGEDOWN    
-
 PAPER_NONE = _core_.PAPER_NONE
 PAPER_LETTER = _core_.PAPER_LETTER
 PAPER_LEGAL = _core_.PAPER_LEGAL
@@ -1910,73 +1912,6 @@ class Rect2D(object):
 
 _core_.Rect2D_swigregister(Rect2D)
 
-class Position(object):
-    """Proxy of C++ Position class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """__init__(self, int row=0, int col=0) -> Position"""
-        _core_.Position_swiginit(self,_core_.new_Position(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_Position
-    __del__ = lambda self : None;
-    def GetRow(*args, **kwargs):
-        """GetRow(self) -> int"""
-        return _core_.Position_GetRow(*args, **kwargs)
-
-    def GetColumn(*args, **kwargs):
-        """GetColumn(self) -> int"""
-        return _core_.Position_GetColumn(*args, **kwargs)
-
-    def GetCol(*args, **kwargs):
-        """GetCol(self) -> int"""
-        return _core_.Position_GetCol(*args, **kwargs)
-
-    def SetRow(*args, **kwargs):
-        """SetRow(self, int row)"""
-        return _core_.Position_SetRow(*args, **kwargs)
-
-    def SetColumn(*args, **kwargs):
-        """SetColumn(self, int column)"""
-        return _core_.Position_SetColumn(*args, **kwargs)
-
-    def SetCol(*args, **kwargs):
-        """SetCol(self, int column)"""
-        return _core_.Position_SetCol(*args, **kwargs)
-
-    def __eq__(*args, **kwargs):
-        """
-        __eq__(self, PyObject other) -> bool
-
-        Test for equality of wx.Position objects.
-        """
-        return _core_.Position___eq__(*args, **kwargs)
-
-    def __ne__(*args, **kwargs):
-        """
-        __ne__(self, PyObject other) -> bool
-
-        Test for inequality of wx.Position objects.
-        """
-        return _core_.Position___ne__(*args, **kwargs)
-
-    def __add__(*args):
-        """
-        __add__(self, Position p) -> Position
-        __add__(self, Size s) -> Position
-        """
-        return _core_.Position___add__(*args)
-
-    def __sub__(*args):
-        """
-        __sub__(self, Position p) -> Position
-        __sub__(self, Size s) -> Position
-        """
-        return _core_.Position___sub__(*args)
-
-    row = property(GetRow,SetRow) 
-    col = property(GetCol,SetCol) 
-_core_.Position_swigregister(Position)
-
 #---------------------------------------------------------------------------
 
 FromStart = _core_.FromStart
@@ -2062,15 +1997,51 @@ DefaultSize = cvar.DefaultSize
 class OutputStream(object):
     """Proxy of C++ OutputStream class"""
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
     __repr__ = _swig_repr
+    def __init__(self, *args, **kwargs): 
+        """__init__(self, PyObject p) -> OutputStream"""
+        _core_.OutputStream_swiginit(self,_core_.new_OutputStream(*args, **kwargs))
+    __swig_destroy__ = _core_.delete_OutputStream
+    __del__ = lambda self : None;
+    def close(*args, **kwargs):
+        """close(self)"""
+        return _core_.OutputStream_close(*args, **kwargs)
+
+    def flush(*args, **kwargs):
+        """flush(self)"""
+        return _core_.OutputStream_flush(*args, **kwargs)
+
+    def eof(*args, **kwargs):
+        """eof(self) -> bool"""
+        return _core_.OutputStream_eof(*args, **kwargs)
+
+    def seek(*args, **kwargs):
+        """seek(self, int offset, int whence=0)"""
+        return _core_.OutputStream_seek(*args, **kwargs)
+
+    def tell(*args, **kwargs):
+        """tell(self) -> int"""
+        return _core_.OutputStream_tell(*args, **kwargs)
+
     def write(*args, **kwargs):
-        """write(self, PyObject obj)"""
+        """write(self, PyObject data)"""
         return _core_.OutputStream_write(*args, **kwargs)
+
+    def PutC(*args, **kwargs):
+        """PutC(self, char c)"""
+        return _core_.OutputStream_PutC(*args, **kwargs)
 
     def LastWrite(*args, **kwargs):
         """LastWrite(self) -> size_t"""
         return _core_.OutputStream_LastWrite(*args, **kwargs)
+
+    def SeekO(*args, **kwargs):
+        """SeekO(self, unsigned long pos, int mode=FromStart) -> unsigned long"""
+        return _core_.OutputStream_SeekO(*args, **kwargs)
+
+    def TellO(*args, **kwargs):
+        """TellO(self) -> unsigned long"""
+        return _core_.OutputStream_TellO(*args, **kwargs)
 
 _core_.OutputStream_swigregister(OutputStream)
 
@@ -3560,7 +3531,6 @@ def InitAllImageHandlers():
     """
     pass
 
-IMAGE_RESOLUTION_NONE = _core_.IMAGE_RESOLUTION_NONE
 IMAGE_RESOLUTION_INCHES = _core_.IMAGE_RESOLUTION_INCHES
 IMAGE_RESOLUTION_CM = _core_.IMAGE_RESOLUTION_CM
 PNG_TYPE_COLOUR = _core_.PNG_TYPE_COLOUR
@@ -3966,7 +3936,6 @@ EVENT_PROPAGATE_MAX = _core_.EVENT_PROPAGATE_MAX
 def NewEventType(*args):
   """NewEventType() -> EventType"""
   return _core_.NewEventType(*args)
-wxEVT_ANY = _core_.wxEVT_ANY
 wxEVT_NULL = _core_.wxEVT_NULL
 wxEVT_FIRST = _core_.wxEVT_FIRST
 wxEVT_USER_FIRST = _core_.wxEVT_USER_FIRST
@@ -5117,16 +5086,6 @@ class MouseEvent(Event):
         should occur for each delta.
         """
         return _core_.MouseEvent_GetWheelDelta(*args, **kwargs)
-
-    def GetWheelAxis(*args, **kwargs):
-        """
-        GetWheelAxis(self) -> int
-
-        Gets the axis the wheel operation concerns, 0 being the y axis as on
-        most mouse wheels, 1 is the x axis for things like MightyMouse scrolls
-        or horizontal trackpad scrolling.
-        """
-        return _core_.MouseEvent_GetWheelAxis(*args, **kwargs)
 
     def GetLinesPerAction(*args, **kwargs):
         """
@@ -7071,25 +7030,6 @@ _core_.DateEvent_swigregister(DateEvent)
 wxEVT_DATE_CHANGED = _core_.wxEVT_DATE_CHANGED
 EVT_DATE_CHANGED = wx.PyEventBinder( wxEVT_DATE_CHANGED, 1 )
 
-class EventBlocker(EvtHandler):
-    """Helper class to temporarily disable event handling for a window."""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    def __init__(self, *args, **kwargs): 
-        """
-        __init__(self, Window win, EventType type=wxEVT_ANY) -> EventBlocker
-
-        Helper class to temporarily disable event handling for a window.
-        """
-        _core_.EventBlocker_swiginit(self,_core_.new_EventBlocker(*args, **kwargs))
-    __swig_destroy__ = _core_.delete_EventBlocker
-    __del__ = lambda self : None;
-    def Block(*args, **kwargs):
-        """Block(self, EventType type)"""
-        return _core_.EventBlocker_Block(*args, **kwargs)
-
-_core_.EventBlocker_swigregister(EventBlocker)
-
 #---------------------------------------------------------------------------
 
 PYAPP_ASSERT_SUPPRESS = _core_.PYAPP_ASSERT_SUPPRESS
@@ -7776,7 +7716,7 @@ class App(wx.PyApp):
 
         :param redirect: Should ``sys.stdout`` and ``sys.stderr`` be
             redirected?  Defaults to True on Windows and Mac, False
-            otherwise.  If ``filename`` is None then output will be
+            otherwise.  If `filename` is None then output will be
             redirected to a window that pops up as needed.  (You can
             control what kind of window is created for the output by
             resetting the class variable ``outputWindowClass`` to a
@@ -8190,12 +8130,58 @@ class AcceleratorTable(Object):
     Ok = IsOk 
 _core_.AcceleratorTable_swigregister(AcceleratorTable)
 
-def GetAccelFromString(label):
-    entry = AcceleratorEntry()
-    entry.FromString(label)
-    return entry
 
+def GetAccelFromString(*args, **kwargs):
+  """GetAccelFromString(String label) -> AcceleratorEntry"""
+  return _core_.GetAccelFromString(*args, **kwargs)
 #---------------------------------------------------------------------------
+
+class WindowList_iterator(object):
+    """This class serves as an iterator for a wxWindowList object."""
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_WindowList_iterator
+    __del__ = lambda self : None;
+    def next(*args, **kwargs):
+        """next(self) -> Window"""
+        return _core_.WindowList_iterator_next(*args, **kwargs)
+
+_core_.WindowList_iterator_swigregister(WindowList_iterator)
+NullAcceleratorTable = cvar.NullAcceleratorTable
+PanelNameStr = cvar.PanelNameStr
+
+class WindowList(object):
+    """
+    This class wraps a wxList-based class and gives it a Python
+    sequence-like interface.  Sequence operations supported are length,
+    index access and iteration.
+    """
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_WindowList
+    __del__ = lambda self : None;
+    def __len__(*args, **kwargs):
+        """__len__(self) -> size_t"""
+        return _core_.WindowList___len__(*args, **kwargs)
+
+    def __getitem__(*args, **kwargs):
+        """__getitem__(self, size_t index) -> Window"""
+        return _core_.WindowList___getitem__(*args, **kwargs)
+
+    def __contains__(*args, **kwargs):
+        """__contains__(self, Window obj) -> bool"""
+        return _core_.WindowList___contains__(*args, **kwargs)
+
+    def __iter__(*args, **kwargs):
+        """__iter__(self) -> WindowList_iterator"""
+        return _core_.WindowList___iter__(*args, **kwargs)
+
+    def __repr__(self):
+        return "wxWindowList: " + repr(list(self))
+
+_core_.WindowList_swigregister(WindowList)
 
 class VisualAttributes(object):
     """struct containing all the visual attributes of a control"""
@@ -8226,8 +8212,6 @@ class VisualAttributes(object):
     colFg = property(_get_colFg) 
     colBg = property(_get_colBg) 
 _core_.VisualAttributes_swigregister(VisualAttributes)
-NullAcceleratorTable = cvar.NullAcceleratorTable
-PanelNameStr = cvar.PanelNameStr
 
 WINDOW_VARIANT_NORMAL = _core_.WINDOW_VARIANT_NORMAL
 WINDOW_VARIANT_SMALL = _core_.WINDOW_VARIANT_SMALL
@@ -8988,20 +8972,8 @@ class Window(EvtHandler):
         IsEnabled(self) -> bool
 
         Returns true if the window is enabled for input, false otherwise.
-        This method takes into account the enabled state of parent windows up
-        to the top-level window.
         """
         return _core_.Window_IsEnabled(*args, **kwargs)
-
-    def IsThisEnabled(*args, **kwargs):
-        """
-        IsThisEnabled(self) -> bool
-
-        Returns the internal enabled state independent of the parent(s) state,
-        i.e. the state in which the window would be if all of its parents are
-        enabled.  Use `IsEnabled` to get the effective window state.
-        """
-        return _core_.Window_IsThisEnabled(*args, **kwargs)
 
     def IsShownOnScreen(*args, **kwargs):
         """
@@ -9078,14 +9050,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_GetExtraStyle(*args, **kwargs)
 
-    def HasExtraStyle(*args, **kwargs):
-        """
-        HasExtraStyle(self, int exFlag) -> bool
-
-        Returns ``True`` if the given extra flag is set.
-        """
-        return _core_.Window_HasExtraStyle(*args, **kwargs)
-
     def MakeModal(*args, **kwargs):
         """
         MakeModal(self, bool modal=True)
@@ -9155,14 +9119,6 @@ class Window(EvtHandler):
         """
         return _core_.Window_AcceptsFocus(*args, **kwargs)
 
-    def CanAcceptFocus(*args, **kwargs):
-        """
-        CanAcceptFocus(self) -> bool
-
-        Can this window have focus right now?
-        """
-        return _core_.Window_CanAcceptFocus(*args, **kwargs)
-
     def AcceptsFocusFromKeyboard(*args, **kwargs):
         """
         AcceptsFocusFromKeyboard(self) -> bool
@@ -9173,32 +9129,12 @@ class Window(EvtHandler):
         """
         return _core_.Window_AcceptsFocusFromKeyboard(*args, **kwargs)
 
-    def CanAcceptFocusFromKeyboard(*args, **kwargs):
-        """
-        CanAcceptFocusFromKeyboard(self) -> bool
-
-        Can this window be assigned focus from keyboard right now?
-        """
-        return _core_.Window_CanAcceptFocusFromKeyboard(*args, **kwargs)
-
-    def SetCanFocus(*args, **kwargs):
-        """SetCanFocus(self, bool canFocus)"""
-        return _core_.Window_SetCanFocus(*args, **kwargs)
-
-    def NavigateIn(*args, **kwargs):
-        """
-        NavigateIn(self, int flags=NavigationKeyEvent.IsForward) -> bool
-
-        Navigates inside this window.
-        """
-        return _core_.Window_NavigateIn(*args, **kwargs)
-
     def Navigate(*args, **kwargs):
         """
         Navigate(self, int flags=NavigationKeyEvent.IsForward) -> bool
 
-        Does keyboard navigation starting from this window to another.  This is
-        equivalient to self.GetParent().NavigateIn().
+        Does keyboard navigation from this window to another, by sending a
+        `wx.NavigationKeyEvent`.
         """
         return _core_.Window_Navigate(*args, **kwargs)
 
@@ -9228,12 +9164,11 @@ class Window(EvtHandler):
 
     def GetChildren(*args, **kwargs):
         """
-        GetChildren(self) -> PyObject
+        GetChildren(self) -> WindowList
 
-        Returns a list of the window's children.  NOTE: Currently this is a
-        copy of the child window list maintained by the window, so the return
-        value of this function is only valid as long as the window's children
-        do not change.
+        Returns an object containing a list of the window's children.  The
+        object provides a Python sequence-like interface over the internal
+        list maintained by the window..
         """
         return _core_.Window_GetChildren(*args, **kwargs)
 
@@ -10725,13 +10660,10 @@ def Window_FromHWND(*args, **kwargs):
 
 def GetTopLevelWindows(*args):
   """
-    GetTopLevelWindows() -> PyObject
+    GetTopLevelWindows() -> WindowList
 
-    Returns a list of the the application's top-level windows, (frames,
-    dialogs, etc.)  NOTE: Currently this is a copy of the list maintained
-    by wxWidgets, and so it is only valid as long as no top-level windows
-    are closed or new top-level windows are created.
-
+    Returns a list-like object of the the application's top-level windows, (frames,
+    dialogs, etc.)
     """
   return _core_.GetTopLevelWindows(*args)
 #---------------------------------------------------------------------------
@@ -10806,6 +10738,52 @@ class PyValidator(Validator):
 _core_.PyValidator_swigregister(PyValidator)
 
 #---------------------------------------------------------------------------
+
+class MenuItemList_iterator(object):
+    """This class serves as an iterator for a wxMenuItemList object."""
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_MenuItemList_iterator
+    __del__ = lambda self : None;
+    def next(*args, **kwargs):
+        """next(self) -> MenuItem"""
+        return _core_.MenuItemList_iterator_next(*args, **kwargs)
+
+_core_.MenuItemList_iterator_swigregister(MenuItemList_iterator)
+DefaultValidator = cvar.DefaultValidator
+
+class MenuItemList(object):
+    """
+    This class wraps a wxList-based class and gives it a Python
+    sequence-like interface.  Sequence operations supported are length,
+    index access and iteration.
+    """
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_MenuItemList
+    __del__ = lambda self : None;
+    def __len__(*args, **kwargs):
+        """__len__(self) -> size_t"""
+        return _core_.MenuItemList___len__(*args, **kwargs)
+
+    def __getitem__(*args, **kwargs):
+        """__getitem__(self, size_t index) -> MenuItem"""
+        return _core_.MenuItemList___getitem__(*args, **kwargs)
+
+    def __contains__(*args, **kwargs):
+        """__contains__(self, MenuItem obj) -> bool"""
+        return _core_.MenuItemList___contains__(*args, **kwargs)
+
+    def __iter__(*args, **kwargs):
+        """__iter__(self) -> MenuItemList_iterator"""
+        return _core_.MenuItemList___iter__(*args, **kwargs)
+
+    def __repr__(self):
+        return "wxMenuItemList: " + repr(list(self))
+
+_core_.MenuItemList_swigregister(MenuItemList)
 
 class Menu(EvtHandler):
     """Proxy of C++ Menu class"""
@@ -10949,7 +10927,7 @@ class Menu(EvtHandler):
         return _core_.Menu_GetMenuItemCount(*args, **kwargs)
 
     def GetMenuItems(*args, **kwargs):
-        """GetMenuItems(self) -> PyObject"""
+        """GetMenuItems(self) -> MenuItemList"""
         return _core_.Menu_GetMenuItems(*args, **kwargs)
 
     def FindItem(*args, **kwargs):
@@ -11062,7 +11040,6 @@ class Menu(EvtHandler):
     Style = property(GetStyle,doc="See `GetStyle`") 
     Title = property(GetTitle,SetTitle,doc="See `GetTitle` and `SetTitle`") 
 _core_.Menu_swigregister(Menu)
-DefaultValidator = cvar.DefaultValidator
 
 #---------------------------------------------------------------------------
 
@@ -11484,15 +11461,6 @@ class Control(Window):
         """
         return _core_.Control_Command(*args, **kwargs)
 
-    def RemoveMnemonics(*args, **kwargs):
-        """
-        RemoveMnemonics(String str) -> String
-
-        removes the mnemonics characters
-        """
-        return _core_.Control_RemoveMnemonics(*args, **kwargs)
-
-    RemoveMnemonics = staticmethod(RemoveMnemonics)
     def GetClassDefaultAttributes(*args, **kwargs):
         """
         GetClassDefaultAttributes(int variant=WINDOW_VARIANT_NORMAL) -> VisualAttributes
@@ -11524,14 +11492,6 @@ def PreControl(*args, **kwargs):
     """
     val = _core_.new_PreControl(*args, **kwargs)
     return val
-
-def Control_RemoveMnemonics(*args, **kwargs):
-  """
-    Control_RemoveMnemonics(String str) -> String
-
-    removes the mnemonics characters
-    """
-  return _core_.Control_RemoveMnemonics(*args, **kwargs)
 
 def Control_GetClassDefaultAttributes(*args, **kwargs):
   """
@@ -11969,6 +11929,53 @@ def SizerFlags_GetDefaultBorder(*args):
     """
   return _core_.SizerFlags_GetDefaultBorder(*args)
 
+#---------------------------------------------------------------------------
+
+class SizerItemList_iterator(object):
+    """This class serves as an iterator for a wxSizerItemList object."""
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_SizerItemList_iterator
+    __del__ = lambda self : None;
+    def next(*args, **kwargs):
+        """next(self) -> SizerItem"""
+        return _core_.SizerItemList_iterator_next(*args, **kwargs)
+
+_core_.SizerItemList_iterator_swigregister(SizerItemList_iterator)
+
+class SizerItemList(object):
+    """
+    This class wraps a wxList-based class and gives it a Python
+    sequence-like interface.  Sequence operations supported are length,
+    index access and iteration.
+    """
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    def __init__(self): raise AttributeError, "No constructor defined"
+    __repr__ = _swig_repr
+    __swig_destroy__ = _core_.delete_SizerItemList
+    __del__ = lambda self : None;
+    def __len__(*args, **kwargs):
+        """__len__(self) -> size_t"""
+        return _core_.SizerItemList___len__(*args, **kwargs)
+
+    def __getitem__(*args, **kwargs):
+        """__getitem__(self, size_t index) -> SizerItem"""
+        return _core_.SizerItemList___getitem__(*args, **kwargs)
+
+    def __contains__(*args, **kwargs):
+        """__contains__(self, SizerItem obj) -> bool"""
+        return _core_.SizerItemList___contains__(*args, **kwargs)
+
+    def __iter__(*args, **kwargs):
+        """__iter__(self) -> SizerItemList_iterator"""
+        return _core_.SizerItemList___iter__(*args, **kwargs)
+
+    def __repr__(self):
+        return "wxSizerItemList: " + repr(list(self))
+
+_core_.SizerItemList_swigregister(SizerItemList)
+
 class SizerItem(Object):
     """
     The wx.SizerItem class is used to track the position, size and other
@@ -12188,22 +12195,6 @@ class SizerItem(Object):
         """
         return _core_.SizerItem_GetWindow(*args, **kwargs)
 
-    def GetSizer(*args, **kwargs):
-        """
-        GetSizer(self) -> Sizer
-
-        Get the subsizer (if any) that is managed by this sizer item.
-        """
-        return _core_.SizerItem_GetSizer(*args, **kwargs)
-
-    def GetSpacer(*args, **kwargs):
-        """
-        GetSpacer(self) -> Size
-
-        Get the size of the spacer managed by this sizer item.
-        """
-        return _core_.SizerItem_GetSpacer(*args, **kwargs)
-
     def SetWindow(*args, **kwargs):
         """
         SetWindow(self, Window window)
@@ -12211,6 +12202,14 @@ class SizerItem(Object):
         Set the window to be managed by this sizer item.
         """
         return _core_.SizerItem_SetWindow(*args, **kwargs)
+
+    def GetSizer(*args, **kwargs):
+        """
+        GetSizer(self) -> Sizer
+
+        Get the subsizer (if any) that is managed by this sizer item.
+        """
+        return _core_.SizerItem_GetSizer(*args, **kwargs)
 
     def SetSizer(*args, **kwargs):
         """
@@ -12220,6 +12219,14 @@ class SizerItem(Object):
         """
         return _core_.SizerItem_SetSizer(*args, **kwargs)
 
+    def GetSpacer(*args, **kwargs):
+        """
+        GetSpacer(self) -> Size
+
+        Get the size of the spacer managed by this sizer item.
+        """
+        return _core_.SizerItem_GetSpacer(*args, **kwargs)
+
     def SetSpacer(*args, **kwargs):
         """
         SetSpacer(self, Size size)
@@ -12227,34 +12234,6 @@ class SizerItem(Object):
         Set the size of the spacer to be managed by this sizer item.
         """
         return _core_.SizerItem_SetSpacer(*args, **kwargs)
-
-    SetWindow = wx._deprecated(SetWindow, "Use `AssignWindow` instead.")
-    SetSizer = wx._deprecated(SetSizer,   "Use `AssignSizer` instead.")
-    SetSpacer = wx._deprecated(SetSpacer, "Use `AssignSpacer` instead.")
-
-    def AssignWindow(*args, **kwargs):
-        """
-        AssignWindow(self, Window window)
-
-        Set the window to be managed by this sizer item.
-        """
-        return _core_.SizerItem_AssignWindow(*args, **kwargs)
-
-    def AssignSizer(*args, **kwargs):
-        """
-        AssignSizer(self, Sizer sizer)
-
-        Set the subsizer to be managed by this sizer item.
-        """
-        return _core_.SizerItem_AssignSizer(*args, **kwargs)
-
-    def AssignSpacer(*args, **kwargs):
-        """
-        AssignSpacer(self, Size size)
-
-        Set the size of the spacer to be managed by this sizer item.
-        """
-        return _core_.SizerItem_AssignSpacer(*args, **kwargs)
 
     def Show(*args, **kwargs):
         """
@@ -12308,10 +12287,10 @@ class SizerItem(Object):
     Ratio = property(GetRatio,SetRatio,doc="See `GetRatio` and `SetRatio`") 
     Rect = property(GetRect,doc="See `GetRect`") 
     Size = property(GetSize,doc="See `GetSize`") 
-    Sizer = property(GetSizer,AssignSizer,doc="See `GetSizer` and `AssignSizer`") 
-    Spacer = property(GetSpacer,AssignSpacer,doc="See `GetSpacer` and `AssignSpacer`") 
+    Sizer = property(GetSizer,SetSizer,doc="See `GetSizer` and `SetSizer`") 
+    Spacer = property(GetSpacer,SetSpacer,doc="See `GetSpacer` and `SetSpacer`") 
     UserData = property(GetUserData,SetUserData,doc="See `GetUserData` and `SetUserData`") 
-    Window = property(GetWindow,AssignWindow,doc="See `GetWindow` and `AssignWindow`") 
+    Window = property(GetWindow,SetWindow,doc="See `GetWindow` and `SetWindow`") 
 _core_.SizerItem_swigregister(SizerItem)
 
 def SizerItemWindow(*args, **kwargs):
@@ -12818,9 +12797,10 @@ class Sizer(Object):
 
     def GetChildren(*args, **kwargs):
         """
-        GetChildren(self) -> list
+        GetChildren(self) -> SizerItemList
 
-        Returns a list of all the `wx.SizerItem` objects managed by the sizer.
+        Returns all of the `wx.SizerItem` objects managed by the sizer in a
+        list-like object.
         """
         return _core_.Sizer_GetChildren(*args, **kwargs)
 
@@ -12966,10 +12946,6 @@ class BoxSizer(Sizer):
         Resets the orientation of the sizer.
         """
         return _core_.BoxSizer_SetOrientation(*args, **kwargs)
-
-    def IsVertical(*args, **kwargs):
-        """IsVertical(self) -> bool"""
-        return _core_.BoxSizer_IsVertical(*args, **kwargs)
 
     Orientation = property(GetOrientation,SetOrientation,doc="See `GetOrientation` and `SetOrientation`") 
 _core_.BoxSizer_swigregister(BoxSizer)

@@ -37,7 +37,6 @@
     #include "wx/menu.h"
     #include "wx/math.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/sysopt.h"
@@ -1116,7 +1115,7 @@ void wxTextCtrl::DoWriteText(const wxString& value, int flags)
 
         ::SendMessage(GetHwnd(), selectionOnly ? EM_REPLACESEL : WM_SETTEXT,
                       // EM_REPLACESEL takes 1 to indicate the operation should be redoable
-                      selectionOnly ? 1 : 0, (LPARAM)valueDos.wx_str());
+                      selectionOnly ? 1 : 0, (LPARAM)valueDos.c_str());
 
         if ( !ucf.GotUpdate() && (flags & SetValue_SendEvent) )
         {

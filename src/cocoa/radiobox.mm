@@ -20,7 +20,7 @@
     #include "wx/arrstr.h"
 #endif //WX_PRECOMP
 
-#include "wx/cocoa/objc/NSView.h"
+#import <AppKit/NSView.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxRadioBox, wxControl)
 BEGIN_EVENT_TABLE(wxRadioBox, wxControl)
@@ -53,7 +53,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID winid,
 {
     if(!CreateControl(parent,winid,pos,size,style,validator,name))
         return false;
-    SetNSView([[WX_GET_OBJC_CLASS(WXNSView) alloc] initWithFrame: MakeDefaultNSRect(size)]);
+    SetNSView([[NSView alloc] initWithFrame: MakeDefaultNSRect(size)]);
     [m_cocoaNSView release];
     if(m_parent)
         m_parent->CocoaAddChild(this);

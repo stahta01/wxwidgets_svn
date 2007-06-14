@@ -54,7 +54,7 @@ public:
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxButtonNameStr);
 
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
     virtual void SetLabel( const wxString &label );
     virtual bool Enable( bool enable = TRUE );
 

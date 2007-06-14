@@ -15,11 +15,10 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif  //__BORLANDC__
-
 #ifndef WX_PRECOMP
+    #ifdef __WXMSW__
+        #include "wx/msw/missing.h"
+    #endif
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
@@ -30,6 +29,10 @@
 
 #if wxUSE_WCHAR_T
 
+#ifdef __WINDOWS__
+    #include "wx/msw/private.h"
+#endif
+
 #ifndef __WXWINCE__
 #include <errno.h>
 #endif
@@ -39,8 +42,6 @@
 #include <stdlib.h>
 
 #if defined(__WIN32__) && !defined(__WXMICROWIN__)
-    #include "wx/msw/private.h"
-    #include "wx/msw/missing.h"
     #define wxHAVE_WIN32_MB2WC
 #endif
 
@@ -476,10 +477,10 @@ size_t wxMBConvLibc::WC2MB(char *buf, const wchar_t *psz, size_t n) const
 
 #ifdef __UNIX__
 
-wxConvBrokenFileNames::wxConvBrokenFileNames(const wxString& charset)
+wxConvBrokenFileNames::wxConvBrokenFileNames(const wxChar *charset)
 {
-    if ( wxStricmp(charset, _T("UTF-8")) == 0 ||
-         wxStricmp(charset, _T("UTF8")) == 0  )
+    if ( !charset || wxStricmp(charset, _T("UTF-8")) == 0
+                  || wxStricmp(charset, _T("UTF8")) == 0  )
         m_conv = new wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA);
     else
         m_conv = new wxCSConv(charset);
@@ -1588,7 +1589,7 @@ wxMBConvUTF32swap::FromWChar(char *dst, size_t dstLen,
 class wxMBConv_iconv : public wxMBConv
 {
 public:
-    wxMBConv_iconv(const char *name);
+    wxMBConv_iconv(const wxChar *name);
     virtual ~wxMBConv_iconv();
 
     virtual size_t MB2WC(wchar_t *buf, const char *psz, size_t n) const;
@@ -1597,13 +1598,9 @@ public:
     // classify this encoding as explained in wxMBConv::GetMBNulLen() comment
     virtual size_t GetMBNulLen() const;
 
-#if wxUSE_UNICODE_UTF8
-    virtual bool IsUTF8() const;
-#endif
-
     virtual wxMBConv *Clone() const
     {
-        wxMBConv_iconv *p = new wxMBConv_iconv(m_name.ToAscii());
+        wxMBConv_iconv *p = new wxMBConv_iconv(m_name);
         p->m_minMBCharWidth = m_minMBCharWidth;
         return p;
     }
@@ -1641,7 +1638,7 @@ private:
 };
 
 // make the constructor available for unit testing
-WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_iconv( const char* name )
+WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_iconv( const wxChar* name )
 {
     wxMBConv_iconv* result = new wxMBConv_iconv( name );
     if ( !result->IsOk() )
@@ -1656,10 +1653,14 @@ WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_iconv( const char* name )
 wxString wxMBConv_iconv::ms_wcCharsetName;
 bool wxMBConv_iconv::ms_wcNeedsSwap = false;
 
-wxMBConv_iconv::wxMBConv_iconv(const char *name)
+wxMBConv_iconv::wxMBConv_iconv(const wxChar *name)
               : m_name(name)
 {
     m_minMBCharWidth = 0;
+
+    // iconv operates with chars, not wxChars, but luckily it uses only ASCII
+    // names for the charsets
+    const wxCharBuffer cname(wxString(name).ToAscii());
 
     // check for charset that represents wchar_t:
     if ( ms_wcCharsetName.empty() )
@@ -1697,13 +1698,13 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
             wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
                        nameXE.c_str());
 
-            m2w = iconv_open(nameXE.ToAscii(), name);
+            m2w = iconv_open(nameXE.ToAscii(), cname);
             if ( m2w == ICONV_T_INVALID )
             {
                 // try charset w/o bytesex info (e.g. "UCS4")
                 wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
                            nameCS.c_str());
-                m2w = iconv_open(nameCS.ToAscii(), name);
+                m2w = iconv_open(nameCS.ToAscii(), cname);
 
                 // and check for bytesex ourselves:
                 if ( m2w != ICONV_T_INVALID )
@@ -1753,7 +1754,7 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
     }
     else // we already have ms_wcCharsetName
     {
-        m2w = iconv_open(ms_wcCharsetName.ToAscii(), name);
+        m2w = iconv_open(ms_wcCharsetName.ToAscii(), cname);
     }
 
     if ( ms_wcCharsetName.empty() )
@@ -1762,12 +1763,12 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
     }
     else
     {
-        w2m = iconv_open(name, ms_wcCharsetName.ToAscii());
+        w2m = iconv_open(cname, ms_wcCharsetName.ToAscii());
         if ( w2m == ICONV_T_INVALID )
         {
             wxLogTrace(TRACE_STRCONV,
                        wxT("\"%s\" -> \"%s\" works but not the converse!?"),
-                       ms_wcCharsetName.c_str(), name);
+                       ms_wcCharsetName.c_str(), cname.data());
         }
     }
 }
@@ -1975,14 +1976,6 @@ size_t wxMBConv_iconv::GetMBNulLen() const
     return m_minMBCharWidth;
 }
 
-#if wxUSE_UNICODE_UTF8
-bool wxMBConv_iconv::IsUTF8() const
-{
-    return wxStricmp(m_name, "UTF-8") == 0 ||
-           wxStricmp(m_name, "UTF8") == 0;
-}
-#endif
-
 #endif // HAVE_ICONV
 
 
@@ -1994,7 +1987,7 @@ bool wxMBConv_iconv::IsUTF8() const
 
 // from utils.cpp
 #if wxUSE_FONTMAP
-extern WXDLLIMPEXP_BASE long wxCharsetToCodepage(const char *charset);
+extern WXDLLIMPEXP_BASE long wxCharsetToCodepage(const wxChar *charset);
 extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding);
 #endif
 
@@ -2015,7 +2008,7 @@ public:
     }
 
 #if wxUSE_FONTMAP
-    wxMBConv_win32(const char* name)
+    wxMBConv_win32(const wxChar* name)
     {
         m_CodePage = wxCharsetToCodepage(name);
         m_minMBCharWidth = 0;
@@ -2043,12 +2036,12 @@ public:
         //     http://msdn.microsoft.com/library/en-us/intl/unicode_17si.asp
         if ( m_CodePage == CP_UTF8 )
         {
-            return wxMBConvUTF8().MB2WC(buf, psz, n);
+            return wxConvUTF8.MB2WC(buf, psz, n);
         }
 
         if ( m_CodePage == CP_UTF7 )
         {
-            return wxMBConvUTF7().MB2WC(buf, psz, n);
+            return wxConvUTF7.MB2WC(buf, psz, n);
         }
 
         int flags = 0;
@@ -2738,7 +2731,7 @@ public:
     }
 
 #if wxUSE_FONTMAP
-    wxMBConv_mac(const char* name)
+    wxMBConv_mac(const wxChar* name)
     {
         Init( wxMacGetSystemEncFromFontEnc( wxFontMapperBase::Get()->CharsetToEncoding(name, false) ) );
     }
@@ -3103,7 +3096,7 @@ private:
 public:
     // temporarily just use wxEncodingConverter stuff,
     // so that it works while a better implementation is built
-    wxMBConv_wxwin(const char* name)
+    wxMBConv_wxwin(const wxChar* name)
     {
         if (name)
             m_enc = wxFontMapperBase::Get()->CharsetToEncoding(name, false);
@@ -3176,7 +3169,7 @@ private:
 };
 
 // make the constructors available for unit testing
-WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_wxwin( const char* name )
+WXDLLIMPEXP_BASE wxMBConv* new_wxMBConv_wxwin( const wxChar* name )
 {
     wxMBConv_wxwin* result = new wxMBConv_wxwin( name );
     if ( !result->IsOk() )
@@ -3201,13 +3194,13 @@ void wxCSConv::Init()
     m_deferred = true;
 }
 
-wxCSConv::wxCSConv(const wxString& charset)
+wxCSConv::wxCSConv(const wxChar *charset)
 {
     Init();
 
-    if ( !charset.empty() )
+    if ( charset )
     {
-        SetName(charset.ToAscii());
+        SetName(charset);
     }
 
 #if wxUSE_FONTMAP
@@ -3264,11 +3257,11 @@ void wxCSConv::Clear()
     m_convReal = NULL;
 }
 
-void wxCSConv::SetName(const char *charset)
+void wxCSConv::SetName(const wxChar *charset)
 {
     if (charset)
     {
-        m_name = strdup(charset);
+        m_name = wxStrdup(charset);
         m_deferred = true;
     }
 }
@@ -3287,7 +3280,7 @@ wxMBConv *wxCSConv::DoCreate() const
     wxLogTrace(TRACE_STRCONV,
                wxT("creating conversion for %s"),
                (m_name ? m_name
-                       : (const char*)wxFontMapperBase::GetEncodingName(m_encoding).mb_str()));
+                       : wxFontMapperBase::GetEncodingName(m_encoding).c_str()));
 #endif // wxUSE_FONTMAP
 
     // check for the special case of ASCII or ISO8859-1 charset: as we have
@@ -3314,13 +3307,14 @@ wxMBConv *wxCSConv::DoCreate() const
     if ( m_name )
 #endif // !wxUSE_FONTMAP
     {
+        wxString name(m_name);
 #if wxUSE_FONTMAP
         wxFontEncoding encoding(m_encoding);
 #endif
 
-        if ( m_name )
+        if ( !name.empty() )
         {
-            wxMBConv_iconv *conv = new wxMBConv_iconv(m_name);
+            wxMBConv_iconv *conv = new wxMBConv_iconv(name);
             if ( conv->IsOk() )
                 return conv;
 
@@ -3328,7 +3322,7 @@ wxMBConv *wxCSConv::DoCreate() const
 
 #if wxUSE_FONTMAP
             encoding =
-                wxFontMapperBase::Get()->CharsetToEncoding(m_name, false);
+                wxFontMapperBase::Get()->CharsetToEncoding(name, false);
 #endif // wxUSE_FONTMAP
         }
 #if wxUSE_FONTMAP
@@ -3339,7 +3333,7 @@ wxMBConv *wxCSConv::DoCreate() const
                 if ( it->second.empty() )
                     return NULL;
 
-                wxMBConv_iconv *conv = new wxMBConv_iconv(it->second.ToAscii());
+                wxMBConv_iconv *conv = new wxMBConv_iconv(it->second);
                 if ( conv->IsOk() )
                     return conv;
 
@@ -3347,19 +3341,15 @@ wxMBConv *wxCSConv::DoCreate() const
             }
 
             const wxChar** names = wxFontMapperBase::GetAllEncodingNames(encoding);
-            // CS : in case this does not return valid names (eg for MacRoman)
-            // encoding got a 'failure' entry in the cache all the same,
-            // although it just has to be created using a different method, so
-            // only store failed iconv creation attempts (or perhaps we
-            // shoulnd't do this at all ?)
+            // CS : in case this does not return valid names (eg for MacRoman) encoding
+            // got a 'failure' entry in the cache all the same, although it just has to
+            // be created using a different method, so only store failed iconv creation
+            // attempts (or perhaps we shoulnd't do this at all ?)
             if ( names[0] != NULL )
             {
                 for ( ; *names; ++names )
                 {
-                    // FIXME-UTF8: wxFontMapperBase::GetAllEncodingNames()
-                    //             will need changes that will obsolete this
-                    wxString name(*names);
-                    wxMBConv_iconv *conv = new wxMBConv_iconv(name.ToAscii());
+                    wxMBConv_iconv *conv = new wxMBConv_iconv(*names);
                     if ( conv->IsOk() )
                     {
                         gs_nameCache[encoding] = *names;
@@ -3493,9 +3483,9 @@ wxMBConv *wxCSConv::DoCreate() const
                    m_name ? m_name
                       :
 #if wxUSE_FONTMAP
-                         (const char*)wxFontMapperBase::GetEncodingDescription(m_encoding).ToAscii()
+                         wxFontMapperBase::GetEncodingDescription(m_encoding).c_str()
 #else // !wxUSE_FONTMAP
-                         (const char*)wxString::Format(_("encoding %i"), m_encoding).ToAscii()
+                         wxString::Format(_("encoding %i"), m_encoding).c_str()
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
               );
 
@@ -3516,7 +3506,7 @@ void wxCSConv::CreateConvIfNeeded() const
         if ( !m_name && m_encoding == wxFONTENCODING_SYSTEM )
         {
 #if wxUSE_INTL
-            self->m_encoding = wxLocale::GetSystemEncoding();
+            self->m_name = wxStrdup(wxLocale::GetSystemEncodingName());
 #else
             // fallback to some reasonable default:
             self->m_encoding = wxFONTENCODING_ISO8859_1;
@@ -3624,25 +3614,45 @@ size_t wxCSConv::GetMBNulLen() const
         return m_convReal->GetMBNulLen();
     }
 
-    // otherwise, we are ISO-8859-1
     return 1;
 }
 
-#if wxUSE_UNICODE_UTF8
-bool wxCSConv::IsUTF8() const
-{
-    CreateConvIfNeeded();
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
 
-    if ( m_convReal )
-    {
-        return m_convReal->IsUTF8();
-    }
-
-    // otherwise, we are ISO-8859-1
-    return false;
-}
+#ifdef __WINDOWS__
+    static wxMBConv_win32 wxConvLibcObj;
+#elif defined(__WXMAC__) && !defined(__MACH__)
+    static wxMBConv_mac wxConvLibcObj ;
+#else
+    static wxMBConvLibc wxConvLibcObj;
 #endif
 
+static wxCSConv wxConvLocalObj(wxFONTENCODING_SYSTEM);
+static wxCSConv wxConvISO8859_1Obj(wxFONTENCODING_ISO8859_1);
+static wxMBConvUTF7 wxConvUTF7Obj;
+static wxMBConvUTF8 wxConvUTF8Obj;
+#if defined(__WXMAC__) && defined(TARGET_CARBON)
+static wxMBConv_macUTF8D wxConvMacUTF8DObj;
+#endif
+WXDLLIMPEXP_DATA_BASE(wxMBConv&) wxConvLibc = wxConvLibcObj;
+WXDLLIMPEXP_DATA_BASE(wxCSConv&) wxConvLocal = wxConvLocalObj;
+WXDLLIMPEXP_DATA_BASE(wxCSConv&) wxConvISO8859_1 = wxConvISO8859_1Obj;
+WXDLLIMPEXP_DATA_BASE(wxMBConvUTF7&) wxConvUTF7 = wxConvUTF7Obj;
+WXDLLIMPEXP_DATA_BASE(wxMBConvUTF8&) wxConvUTF8 = wxConvUTF8Obj;
+WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent = &wxConvLibcObj;
+WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvUI = &wxConvLocal;
+WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvFileName = &
+#ifdef __WXOSX__
+#if defined(__WXMAC__) && defined(TARGET_CARBON)
+                                    wxConvMacUTF8DObj;
+#else
+                                    wxConvUTF8Obj;
+#endif
+#else // !__WXOSX__
+                                    wxConvLibcObj;
+#endif // __WXOSX__/!__WXOSX__
 
 #if wxUSE_UNICODE
 
@@ -3653,7 +3663,7 @@ wxWCharBuffer wxSafeConvertMB2WX(const char *s)
 
     wxWCharBuffer wbuf(wxConvLibc.cMB2WX(s));
     if ( !wbuf )
-        wbuf = wxMBConvUTF8().cMB2WX(s);
+        wbuf = wxConvUTF8.cMB2WX(s);
     if ( !wbuf )
         wbuf = wxConvISO8859_1.cMB2WX(s);
 
@@ -3674,76 +3684,14 @@ wxCharBuffer wxSafeConvertWX2MB(const wchar_t *ws)
 
 #endif // wxUSE_UNICODE
 
-// ----------------------------------------------------------------------------
-// globals
-// ----------------------------------------------------------------------------
-
-// NB: The reason why we create converted objects in this convoluted way,
-//     using a factory function instead of global variable, is that they
-//     may be used at static initialization time (some of them are used by
-//     wxString ctors and there may be a global wxString object). In other
-//     words, possibly _before_ the converter global object would be
-//     initialized.
-
-#undef wxConvLibc
-#undef wxConvUTF8
-#undef wxConvUTF7
-#undef wxConvLocal
-#undef wxConvISO8859_1
-
-#define WX_DEFINE_GLOBAL_CONV2(klass, impl_klass, name, ctor_args)      \
-    WXDLLIMPEXP_DATA_BASE(klass*) name##Ptr = NULL;                     \
-    WXDLLIMPEXP_BASE klass* wxGet_##name##Ptr()                         \
-    {                                                                   \
-        static impl_klass name##Obj ctor_args;                          \
-        return &name##Obj;                                              \
-    }                                                                   \
-    /* this ensures that all global converter objects are created */    \
-    /* by the time static initialization is done, i.e. before any */    \
-    /* thread is launched: */                                           \
-    static klass* gs_##name##instance = wxGet_##name##Ptr()
-
-#define WX_DEFINE_GLOBAL_CONV(klass, name, ctor_args) \
-    WX_DEFINE_GLOBAL_CONV2(klass, klass, name, ctor_args)
-
-#ifdef __WINDOWS__
-    WX_DEFINE_GLOBAL_CONV2(wxMBConv, wxMBConv_win32, wxConvLibc, wxEMPTY_PARAMETER_VALUE);
-#elif defined(__WXMAC__) && !defined(__MACH__)
-    WX_DEFINE_GLOBAL_CONV2(wxMBConv, wxMBConv_mac, wxConvLibc, wxEMPTY_PARAMETER_VALUE);
-#else
-    WX_DEFINE_GLOBAL_CONV2(wxMBConv, wxMBConvLibc, wxConvLibc, wxEMPTY_PARAMETER_VALUE);
-#endif
-
-WX_DEFINE_GLOBAL_CONV(wxMBConvUTF8, wxConvUTF8, wxEMPTY_PARAMETER_VALUE);
-WX_DEFINE_GLOBAL_CONV(wxMBConvUTF7, wxConvUTF7, wxEMPTY_PARAMETER_VALUE);
-
-WX_DEFINE_GLOBAL_CONV(wxCSConv, wxConvLocal, (wxFONTENCODING_SYSTEM));
-WX_DEFINE_GLOBAL_CONV(wxCSConv, wxConvISO8859_1, (wxFONTENCODING_ISO8859_1));
-
-WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent = wxGet_wxConvLibcPtr();
-WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvUI = wxGet_wxConvLocalPtr();
-
-#if defined(__WXMAC__) && defined(TARGET_CARBON)
-static wxMBConv_macUTF8D wxConvMacUTF8DObj;
-#endif
-WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvFileName =
-#ifdef __WXOSX__
-#if defined(__WXMAC__) && defined(TARGET_CARBON)
-                                    &wxConvMacUTF8DObj;
-#else
-                                    wxGet_wxConvUTF8Ptr();
-#endif
-#else // !__WXOSX__
-                                    wxGet_wxConvLibcPtr();
-#endif // __WXOSX__/!__WXOSX__
-
 #else // !wxUSE_WCHAR_T
 
-// FIXME-UTF8: remove this, wxUSE_WCHAR_T is required now
 // stand-ins in absence of wchar_t
 WXDLLIMPEXP_DATA_BASE(wxMBConv) wxConvLibc,
                                 wxConvISO8859_1,
                                 wxConvLocal,
                                 wxConvUTF8;
+
+WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent = NULL;
 
 #endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T

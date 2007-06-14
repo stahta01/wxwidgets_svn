@@ -45,6 +45,8 @@ extern "C" {
 static void
 gtkcombo_text_changed_callback( GtkWidget *WXUNUSED(widget), wxComboBox *combo )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (combo->m_ignoreNextUpdate)
     {
         combo->m_ignoreNextUpdate = false;
@@ -116,6 +118,8 @@ extern "C" {
 static void
 gtkcombo_combo_select_child_callback( GtkList *WXUNUSED(list), GtkWidget *WXUNUSED(widget), wxComboBox *combo )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!combo->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
@@ -167,6 +171,8 @@ extern "C" {
 static void
 gtkcombobox_text_changed_callback( GtkWidget *WXUNUSED(widget), wxComboBox *combo )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!combo->m_hasVMT) return;
 
     wxCommandEvent event( wxEVT_COMMAND_TEXT_UPDATED, combo->GetId() );
@@ -180,6 +186,8 @@ extern "C" {
 static void
 gtkcombobox_changed_callback( GtkWidget *WXUNUSED(widget), wxComboBox *combo )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!combo->m_hasVMT) return;
 
     if (combo->GetSelection() == -1)
@@ -242,6 +250,8 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
                          const wxString& name )
 {
     m_ignoreNextUpdate = false;
+    m_needParent = true;
+    m_acceptsFocus = true;
     m_prevSelection = 0;
 
     if (!PreCreation( parent, pos, size ) ||
@@ -339,7 +349,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
         g_signal_connect_after (m_widget, "changed",
                             G_CALLBACK (gtkcombobox_changed_callback), this);
-
+                            
     }
     else
 #endif
@@ -425,9 +435,9 @@ int wxComboBox::DoAppend( const wxString &item )
         GtkRcStyle *style = CreateWidgetStyle();
         if (style)
         {
-            gtk_widget_modify_style(list_item, style);
+            gtk_widget_modify_style( GTK_WIDGET( list_item ), style );
             GtkBin *bin = GTK_BIN( list_item );
-            GtkWidget *label = bin->child;
+            GtkWidget *label = GTK_WIDGET( bin->child );
             gtk_widget_modify_style( label, style );
             gtk_rc_style_unref( style );
         }
@@ -944,10 +954,9 @@ void wxComboBox::SetValue( const wxString& value )
 #endif
         entry = GTK_ENTRY( GTK_COMBO(m_widget)->entry );
 
+    DisableEvents();
     wxString tmp;
     if (!value.IsNull()) tmp = value;
-    
-    DisableEvents();
     gtk_entry_set_text( entry, wxGTK_CONV( tmp ) );
     EnableEvents();
 
@@ -1117,13 +1126,12 @@ void wxComboBox::Replace( long from, long to, const wxString& value )
     if (value.IsNull()) return;
     gint pos = (gint)to;
 
-#if wxUSE_UNICODE_UTF8
-    const char *utf8 = value.utf8_str();
+#if wxUSE_UNICODE
+    wxCharBuffer buffer = wxConvUTF8.cWX2MB( value );
+    gtk_editable_insert_text( GTK_EDITABLE(entry), (const char*) buffer, strlen( (const char*) buffer ), &pos );
 #else
-    wxCharBuffer buffer(value.utf8_str());
-    const char *utf8 = buffer;
+    gtk_editable_insert_text( GTK_EDITABLE(entry), value.c_str(), value.length(), &pos );
 #endif
-    gtk_editable_insert_text(GTK_EDITABLE(entry), utf8, strlen(utf8), &pos);
 }
 
 void wxComboBox::SetSelection( long from, long to )

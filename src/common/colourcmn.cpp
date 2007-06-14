@@ -23,7 +23,6 @@
     #include "wx/log.h"
     #include "wx/utils.h"
     #include "wx/gdicmn.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #if wxUSE_VARIANT
@@ -34,9 +33,9 @@ IMPLEMENT_VARIANT_OBJECT_EXPORTED(wxColour,WXDLLEXPORT)
 // wxString <-> wxColour conversions
 // ============================================================================
 
-bool wxColourBase::FromString(const wxString& str)
+bool wxColourBase::FromString(const wxChar *str)
 {
-    if ( str.empty() )
+    if ( str == NULL || str[0] == wxT('\0'))
         return false;       // invalid or empty string
 
     if ( wxStrncmp(str, wxT("RGB"), 3) == 0 ||
@@ -46,7 +45,7 @@ bool wxColourBase::FromString(const wxString& str)
         // according to http://www.w3.org/TR/REC-CSS2/syndata.html#color-units
         // values outside 0-255 range are allowed but should be clipped
         int red, green, blue;
-        if (wxSscanf(str.wx_str() + 3, wxT("(%d, %d, %d)"), &red, &green, &blue) != 3)
+        if (wxSscanf(&str[3], wxT("(%d, %d, %d)"), &red, &green, &blue) != 3)
             return false;
 
         Set((unsigned char)wxClip(red,0,255),
@@ -57,7 +56,7 @@ bool wxColourBase::FromString(const wxString& str)
     {
         // hexadecimal prefixed with # (HTML syntax)
         unsigned long tmp;
-        if (wxSscanf(str.wx_str() + 1, wxT("%lx"), &tmp) != 1)
+        if (wxSscanf(&str[1], wxT("%lx"), &tmp) != 1)
             return false;
 
         Set((unsigned char)(tmp >> 16),

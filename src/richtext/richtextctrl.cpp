@@ -392,39 +392,30 @@ void wxRichTextCtrl::OnLeftUp(wxMouseEvent& event)
 
         if (hit != wxRICHTEXT_HITTEST_NONE)
         {
-            wxRichTextEvent cmdEvent(
-                wxEVT_COMMAND_RICHTEXT_LEFT_CLICK,
-                GetId());
-            cmdEvent.SetEventObject(this);
-            cmdEvent.SetPosition(m_caretPosition+1);
-
-            if (!GetEventHandler()->ProcessEvent(cmdEvent))
+            wxTextAttrEx attr;
+            if (GetStyle(position, attr))
             {
-                wxTextAttrEx attr;
-                if (GetStyle(position, attr))
+                if (attr.HasFlag(wxTEXT_ATTR_URL))
                 {
-                    if (attr.HasFlag(wxTEXT_ATTR_URL))
+                    wxString urlTarget = attr.GetURL();
+                    if (!urlTarget.IsEmpty())
                     {
-                        wxString urlTarget = attr.GetURL();
-                        if (!urlTarget.IsEmpty())
+                        wxMouseEvent mouseEvent(event);
+
+                        long startPos = 0, endPos = 0;
+                        wxRichTextObject* obj = GetBuffer().GetLeafObjectAtPosition(position);
+                        if (obj)
                         {
-                            wxMouseEvent mouseEvent(event);
-
-                            long startPos = 0, endPos = 0;
-                            wxRichTextObject* obj = GetBuffer().GetLeafObjectAtPosition(position);
-                            if (obj)
-                            {
-                                startPos = obj->GetRange().GetStart();
-                                endPos = obj->GetRange().GetEnd();
-                            }
-
-                            wxTextUrlEvent urlEvent(GetId(), mouseEvent, startPos, endPos);
-                            InitCommandEvent(urlEvent);
-
-                            urlEvent.SetString(urlTarget);
-
-                            GetEventHandler()->ProcessEvent(urlEvent);
+                            startPos = obj->GetRange().GetStart();
+                            endPos = obj->GetRange().GetEnd();
                         }
+
+                        wxTextUrlEvent urlEvent(GetId(), mouseEvent, startPos, endPos);
+                        InitCommandEvent(urlEvent);
+
+                        urlEvent.SetString(urlTarget);
+
+                        GetEventHandler()->ProcessEvent(urlEvent);
                     }
                 }
             }
@@ -504,45 +495,23 @@ void wxRichTextCtrl::OnMoveMouse(wxMouseEvent& event)
 }
 
 /// Right-click
-void wxRichTextCtrl::OnRightClick(wxMouseEvent& WXUNUSED(event))
+void wxRichTextCtrl::OnRightClick(wxMouseEvent& event)
 {
     SetFocus();
-
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_RIGHT_CLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    GetEventHandler()->ProcessEvent(cmdEvent);
+    event.Skip();
 }
 
 /// Left-double-click
-void wxRichTextCtrl::OnLeftDClick(wxMouseEvent& WXUNUSED(event))
+void wxRichTextCtrl::OnLeftDClick(wxMouseEvent& event)
 {
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_LEFT_DCLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    if (!GetEventHandler()->ProcessEvent(cmdEvent))
-    {
-        SelectWord(GetCaretPosition()+1);
-    }
+    SelectWord(GetCaretPosition()+1);
+    event.Skip();
 }
 
 /// Middle-click
 void wxRichTextCtrl::OnMiddleClick(wxMouseEvent& event)
 {
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_MIDDLE_CLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    if (!GetEventHandler()->ProcessEvent(cmdEvent))
-        event.Skip();
+    event.Skip();
 }
 
 /// Key press
@@ -2041,6 +2010,8 @@ wxRichTextCtrl::HitTest(const wxPoint& pt,
         return wxTE_HT_BEYOND;
     else if (hit & wxRICHTEXT_HITTEST_BEFORE|wxRICHTEXT_HITTEST_AFTER)
         return wxTE_HT_ON_TEXT;
+    else
+        return wxTE_HT_UNKNOWN;
 
     return wxTE_HT_UNKNOWN;
 }

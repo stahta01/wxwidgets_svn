@@ -19,7 +19,6 @@
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/log.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/cmdline.h"
@@ -110,17 +109,14 @@ public:
         return m_wdata;
     }
 
-    bool CanBeUsedWithXRCCTRL(const wxString& name)
+    bool IsRealClass(const wxString& name)
     {
         if (name == _T("tool") ||
-            name == _T("data") ||
             name == _T("unknown") ||
             name == _T("notebookpage") ||
             name == _T("separator") ||
             name == _T("sizeritem") ||
-            name == _T("wxMenuBar") ||
-            name == _T("wxMenuItem") ||
-            name == _T("wxStaticBoxSizer") )
+            name == _T("wxMenuItem"))
         {
             return false;
         }
@@ -133,10 +129,10 @@ public:
         file.Write(_T("class ") + m_className + _T(" : public ") + m_parentClassName
                    + _T(" {\nprotected:\n"));
         size_t i;
-        for(i=0;i<m_wdata.GetCount();++i)
+        for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
             if( w.GetName().Length() == 0 ) continue;
             file.Write(
                 _T(" ") + w.GetClass() + _T("* ") + w.GetName()
@@ -148,10 +144,10 @@ public:
                    +  _T("\"), _T(\"")
                    +  m_parentClassName
                    +  _T("\"));\n"));
-        for(i=0;i<m_wdata.GetCount();++i)
+        for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
             if( w.GetName().Length() == 0 ) continue;
             file.Write( _T("  ")
                         + w.GetName()
@@ -384,7 +380,7 @@ wxArrayString XmlResApp::PrepareTempFiles()
 {
     wxArrayString flist;
 
-    for (size_t i = 0; i < parFiles.GetCount(); i++)
+    for (size_t i = 0; i < parFiles.Count(); i++)
     {
         if (flagVerbose)
             wxPrintf(_T("processing ") + parFiles[i] +  _T("...\n"));
@@ -457,9 +453,7 @@ static bool NodeContainsFilename(wxXmlNode *node)
    if ( name == _T("object") )
    {
        wxString klass = node->GetPropVal(_T("class"), wxEmptyString);
-       if (klass == _T("wxBitmap") ||
-               klass == _T("wxIcon") ||
-                klass == _T("data") )
+       if (klass == _T("wxBitmap") || klass == _T("wxIcon"))
            return true;
    }
 
@@ -514,7 +508,7 @@ void XmlResApp::FindFilesInXML(wxXmlNode *node, wxArrayString& flist, const wxSt
 
 void XmlResApp::DeleteTempFiles(const wxArrayString& flist)
 {
-    for (size_t i = 0; i < flist.GetCount(); i++)
+    for (size_t i = 0; i < flist.Count(); i++)
         wxRemoveFile(parOutputPath + wxFILE_SEP_PATH + flist[i]);
 }
 
@@ -524,7 +518,7 @@ void XmlResApp::MakePackageZIP(const wxArrayString& flist)
 {
     wxString files;
 
-    for (size_t i = 0; i < flist.GetCount(); i++)
+    for (size_t i = 0; i < flist.Count(); i++)
         files += flist[i] + _T(" ");
     files.RemoveLast();
 
@@ -615,7 +609,7 @@ _T("#include <wx/xrc/xmlres.h>\n")
 _T("#include <wx/xrc/xh_all.h>\n")
 _T("\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
         file.Write(
               FileToCppArray(parOutputPath + wxFILE_SEP_PATH + flist[i], i));
 
@@ -634,7 +628,7 @@ _T("        else wxFileSystem::AddHandler(new wxMemoryFSHandler);\n")
 _T("    }\n")
 _T("\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
     {
         wxString s;
         s.Printf(_T("    wxMemoryFSHandler::AddFile(wxT(\"XRC_resource/") + flist[i] +
@@ -642,7 +636,7 @@ _T("\n"));
         file.Write(s);
     }
 
-    for (i = 0; i < parFiles.GetCount(); i++)
+    for (i = 0; i < parFiles.Count(); i++)
     {
         file.Write(_T("    wxXmlResource::Get()->Load(wxT(\"memory:XRC_resource/") +
                    GetInternalFileName(parFiles[i], flist) + _T("\"));\n"));
@@ -666,7 +660,7 @@ _T("//\n\n")
 _T("#ifndef __")  + fileSpec + _T("_h__\n")
 _T("#define __")  + fileSpec + _T("_h__\n")
 );
-    for(size_t i=0;i<aXRCWndClassData.GetCount();++i){
+    for(size_t i=0;i<aXRCWndClassData.Count();++i){
                 aXRCWndClassData.Item(i).GenerateHeaderCode(file);
     }
     file.Write(
@@ -743,7 +737,7 @@ void XmlResApp::MakePackagePython(const wxArrayString& flist)
 
     file.Write(_T("def ") + parFuncname + _T("():\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
         file.Write(
           FileToPythonArray(parOutputPath + wxFILE_SEP_PATH + flist[i], i));
 
@@ -762,14 +756,14 @@ void XmlResApp::MakePackagePython(const wxArrayString& flist)
         );
 
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
     {
         wxString s;
         s.Printf(_T("    wx.MemoryFSHandler.AddFile('XRC_resource/") + flist[i] +
                  _T("', xml_res_file_%i)\n"), i);
         file.Write(s);
     }
-    for (i = 0; i < parFiles.GetCount(); i++)
+    for (i = 0; i < parFiles.Count(); i++)
     {
         file.Write(_T("    wx.xrc.XmlResource.Get().Load('memory:XRC_resource/") +
                    GetInternalFileName(parFiles[i], flist) + _T("')\n"));
@@ -802,7 +796,7 @@ wxArrayString XmlResApp::FindStrings()
 {
     wxArrayString arr, a2;
 
-    for (size_t i = 0; i < parFiles.GetCount(); i++)
+    for (size_t i = 0; i < parFiles.Count(); i++)
     {
         if (flagVerbose)
             wxPrintf(_T("processing ") + parFiles[i] +  _T("...\n"));

@@ -49,13 +49,6 @@ enum {
     wxCC_POPUP_ON_MOUSE_UP          = 0x0002,
     // All text is not automatically selected on click
     wxCC_NO_TEXT_AUTO_SELECT        = 0x0004,
-    // Drop-button stays down as long as popup is displayed.    
-    wxCC_BUTTON_STAYS_DOWN          = 0x0008,
-    // Drop-button covers the entire control.
-    wxCC_FULL_BUTTON                = 0x0010,
-    // Drop-button goes over the custom-border (used under WinVista).
-    wxCC_BUTTON_COVERS_BORDER       = 0x0020,
-   
 };
 
 
@@ -712,6 +705,7 @@ Nearly all of the methods of this class are overridable in Python.", "");
 
 MustHaveApp(wxPyComboPopup);
 %rename(ComboPopup) wxPyComboPopup;
+%typemap(out) wxPyComboCtrl*  { $result = wxPyMake_wxObject($1, (bool)$owner); }
 
 class wxPyComboPopup
 {
@@ -849,7 +843,6 @@ implementation returns ``False``.", "");
 is associated with.", "");
 
 };
-
 
 
 //---------------------------------------------------------------------------

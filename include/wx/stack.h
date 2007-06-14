@@ -20,10 +20,8 @@ class cls : public wxVectorBase\
 public:\
     void push(const obj& o)\
     {\
-        if ( !Alloc(size() + 1) )\
-        {\
-            wxFAIL_MSG(_T("failed to extend stack"));\
-        }\
+        bool rc = Alloc(size() + 1);\
+        wxASSERT(rc);\
         Append(new obj(o));\
     };\
 \

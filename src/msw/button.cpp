@@ -343,16 +343,18 @@ wxSize wxButtonBase::GetDefaultSize()
  */
 
 // set this button as the (permanently) default one in its panel
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+
+    wxCHECK_RET( tlw, _T("button without top level window?") );
+
     // set this one as the default button both for wxWidgets ...
-    wxWindow *winOldDefault = wxButtonBase::SetDefault();
+    wxWindow *winOldDefault = tlw->SetDefaultItem(this);
 
     // ... and Windows
     SetDefaultStyle(wxDynamicCast(winOldDefault, wxButton), false);
     SetDefaultStyle(this, true);
-
-    return winOldDefault;
 }
 
 // special version of wxGetTopLevelParent() which is safe to call when the

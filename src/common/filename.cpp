@@ -75,7 +75,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
-    #include "wx/crt.h"
 #endif
 
 #include "wx/filename.h"
@@ -176,12 +175,9 @@ public:
 
         if ( m_hFile == INVALID_HANDLE_VALUE )
         {
-            if ( mode == Read )
-                wxLogSysError(_("Failed to open '%s' for reading"),
-                              filename.c_str());
-            else
-                wxLogSysError(_("Failed to open '%s' for writing"),
-                              filename.c_str());
+            wxLogSysError(_("Failed to open '%s' for %s"),
+                          filename.c_str(),
+                          mode == Read ? _("reading") : _("writing"));
         }
     }
 
@@ -768,7 +764,7 @@ static wxString wxCreateTempImpl(
     path += _T("XXXXXX");
 
     // we need to copy the path to the buffer in which mkstemp() can modify it
-    wxCharBuffer buf(path.fn_str());
+    wxCharBuffer buf( wxConvFile.cWX2MB( path ) );
 
     // cast is safe because the string length doesn't change
     int fdTemp = mkstemp( (char*)(const char*) buf );

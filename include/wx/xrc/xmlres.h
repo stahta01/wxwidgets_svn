@@ -17,7 +17,6 @@
 
 #include "wx/string.h"
 #include "wx/dynarray.h"
-#include "wx/arrstr.h"
 #include "wx/datetime.h"
 #include "wx/list.h"
 #include "wx/gdicmn.h"
@@ -114,7 +113,7 @@ public:
     //              don't check the modification time of the XRC files and
     //              reload them if they have changed on disk
     wxXmlResource(int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
@@ -124,13 +123,13 @@ public:
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
     wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Destructor.
     virtual ~wxXmlResource();
 
     wxXmlNode *GetFirstRoot();
-
+    
     // Loads resources from XML files that match given filemask.
     // This method understands VFS (see filesys.h).
     bool Load(const wxString& filemask);
@@ -250,11 +249,10 @@ public:
     // Set flags after construction.
     void SetFlags(int flags) { m_flags = flags; }
 
-    // Get/Set the domain to be passed to the translation functions, defaults
-    // to empty string (no domain).
-    const wxString& GetDomain() const { return m_domain; }
-    void SetDomain(const wxString& domain);
-
+    // Get/Set the domain to be passed to the translation functions, defaults to NULL.
+    wxChar* GetDomain() const { return m_domain; }
+    void SetDomain(const wxChar* domain);
+    
 protected:
     // Scans the resources list for unloaded files and loads them. Also reloads
     // files that have been modified since last loading.
@@ -295,8 +293,8 @@ private:
 #endif
 
     // domain to pass to translation functions, if any.
-    wxString m_domain;
-
+    wxChar* m_domain;
+    
     friend class wxXmlResourceHandler;
     friend class wxXmlResourceModule;
 
@@ -519,6 +517,13 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
+#if WXWIN_COMPATIBILITY_2_4
+    #define ADD_STYLE         XRC_ADD_STYLE
+    #define wxTheXmlResource  wxXmlResource::Get()
+    #define XMLID             XRCID
+    #define XMLCTRL           XRCCTRL
+    #define GetXMLID          GetXRCID
+#endif
 
 #endif // wxUSE_XRC
 

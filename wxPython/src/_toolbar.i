@@ -102,11 +102,6 @@ public:
     void Detach();
     void Attach(wxToolBarBase *tbar);
 
-    // these methods are only for tools of wxITEM_DROPDOWN kind (but even such
-    // tools can have a NULL associated menu)
-    void SetDropdownMenu(wxMenu *menu);
-    wxMenu *GetDropdownMenu() const;
-
     //wxObject *GetClientData();
     %extend {
         // convert the ClientData back to a PyObject
@@ -330,10 +325,8 @@ public:
     %Rename(AddToolItem,  wxToolBarToolBase*, AddTool (wxToolBarToolBase *tool));
     %Rename(InsertToolItem,  wxToolBarToolBase*, InsertTool (size_t pos, wxToolBarToolBase *tool));
 
-    wxToolBarToolBase *AddControl(wxControl *control,
-                                  const wxString& label = wxEmptyString);
-    wxToolBarToolBase *InsertControl(size_t pos, wxControl *control,
-                                     const wxString& label = wxEmptyString);
+    wxToolBarToolBase *AddControl(wxControl *control);
+    wxToolBarToolBase *InsertControl(size_t pos, wxControl *control);
     wxControl *FindControl( int id );
 
     wxToolBarToolBase *AddSeparator();
@@ -409,10 +402,6 @@ public:
 
     size_t GetToolsCount() const;
 
-    // Set dropdown menu
-    bool SetDropdownMenu(int toolid, wxMenu *menu);
-
-    
     %property(Margins, GetMargins, SetMargins, doc="See `GetMargins` and `SetMargins`");
     %property(MaxCols, GetMaxCols, doc="See `GetMaxCols`");
     %property(MaxRows, GetMaxRows, doc="See `GetMaxRows`");

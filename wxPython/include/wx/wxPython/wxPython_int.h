@@ -253,7 +253,6 @@ bool wxRect_helper(PyObject* source, wxRect** obj);
 bool wxColour_helper(PyObject* source, wxColour** obj);
 bool wxPoint2D_helper(PyObject* source, wxPoint2D** obj);
 bool wxRect2D_helper(PyObject* source, wxRect2D** obj);
-bool wxPosition_helper(PyObject* source, wxPosition** obj);
 
 
 bool wxPySimple_typecheck(PyObject* source, const wxChar* classname, int seqLen);
@@ -353,12 +352,16 @@ class wxPyClientData;
 class wxPyUserData;
 class wxPyOORClientData;
 class wxPyCBInputStream;
+class wxPyCBOutputStream;
 
 void wxPyClientData_dtor(wxPyClientData* self);
 void wxPyUserData_dtor(wxPyUserData* self);
 void wxPyOORClientData_dtor(wxPyOORClientData* self);
 wxPyCBInputStream* wxPyCBInputStream_create(PyObject *py, bool block);
 wxPyCBInputStream* wxPyCBInputStream_copy(wxPyCBInputStream* other);
+
+wxPyCBOutputStream* wxPyCBOutputStream_create(PyObject *py, bool block);
+wxPyCBOutputStream* wxPyCBOutputStream_copy(wxPyCBOutputStream* other);
 
 //---------------------------------------------------------------------------
 // Export a C API in a struct.  Other modules will be able to load this from
@@ -435,8 +438,10 @@ struct wxPyCoreAPI {
     PyObject*           (*p_wxArrayDoublePyList_helper)(const wxArrayDouble& arr);
     wxPoint2D*          (*p_wxPoint2D_LIST_helper)(PyObject* source, size_t* npoints);
     bool                (*p_wxRect2D_helper)(PyObject* source, wxRect2D** obj);
-    bool                (*p_wxPosition_helper)(PyObject* source, wxPosition** obj);
 
+    wxPyCBOutputStream*  (*p_wxPyCBOutputStream_create)(PyObject *py, bool block);
+    wxPyCBOutputStream*  (*p_wxPyCBOutputStream_copy)(wxPyCBOutputStream* other);
+    
 };
 
 
@@ -643,9 +648,8 @@ public:
     // virtual int FilterEvent(wxEvent& event); // This one too????
 
     // For catching Apple Events
-    virtual void MacOpenFile(const wxString& fileName);
-    virtual void MacOpenURL(const wxString& url);
-    virtual void MacPrintFile(const wxString& fileName);
+    virtual void MacOpenFile(const wxString &fileName);
+    virtual void MacPrintFile(const wxString &fileName);
     virtual void MacNewFile();
     virtual void MacReopenApp();
 

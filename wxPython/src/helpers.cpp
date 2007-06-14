@@ -297,17 +297,6 @@ void wxPyApp::MacOpenFile(const wxString &fileName)
     wxPyEndBlockThreads(blocked);
 }
 
-void wxPyApp::MacOpenURL(const wxString &url)
-{
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "MacOpenURL")) {
-        PyObject* s = wx2PyString(url);
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("(O)", s));
-        Py_DECREF(s);
-    }
-    wxPyEndBlockThreads(blocked);
-}
-
 void wxPyApp::MacPrintFile(const wxString &fileName)
 {
     wxPyBlock_t blocked = wxPyBeginBlockThreads();
@@ -1090,6 +1079,21 @@ void wxPyEndBlockThreads(wxPyBlock_t blocked) {
 // wxPyInputStream and wxPyCBInputStream methods
 
 
+static PyObject* wxPyGetMethod(PyObject* py, char* name)
+{
+    if (!PyObject_HasAttrString(py, name))
+        return NULL;
+    PyObject* o = PyObject_GetAttrString(py, name);
+    if (!PyMethod_Check(o) && !PyCFunction_Check(o)) {
+        Py_DECREF(o);
+        return NULL;
+    }
+    return o;
+}
+
+
+
+
 void wxPyInputStream::close() {
     /* do nothing for now */
 }
@@ -1246,7 +1250,7 @@ void wxPyInputStream::seek(int offset, int whence) {
         m_wxis->SeekI(offset, wxSeekMode(whence));
 }
 
-int wxPyInputStream::tell(){
+int wxPyInputStream::tell() {
     if (m_wxis)
         return m_wxis->TellI();
     else return 0;
@@ -1285,9 +1289,9 @@ wxPyCBInputStream* wxPyCBInputStream::create(PyObject *py, bool block) {
     wxPyBlock_t blocked = wxPyBlock_t_default;
     if (block) blocked = wxPyBeginBlockThreads();
 
-    PyObject* read = getMethod(py, "read");
-    PyObject* seek = getMethod(py, "seek");
-    PyObject* tell = getMethod(py, "tell");
+    PyObject* read = wxPyGetMethod(py, "read");
+    PyObject* seek = wxPyGetMethod(py, "seek");
+    PyObject* tell = wxPyGetMethod(py, "tell");
 
     if (!read) {
         PyErr_SetString(PyExc_TypeError, "Not a file-like object");
@@ -1309,17 +1313,6 @@ wxPyCBInputStream* wxPyCBInputStream_create(PyObject *py, bool block) {
 
 wxPyCBInputStream* wxPyCBInputStream_copy(wxPyCBInputStream* other) {
     return new wxPyCBInputStream(*other);
-}
-
-PyObject* wxPyCBInputStream::getMethod(PyObject* py, char* name) {
-    if (!PyObject_HasAttrString(py, name))
-        return NULL;
-    PyObject* o = PyObject_GetAttrString(py, name);
-    if (!PyMethod_Check(o) && !PyCFunction_Check(o)) {
-        Py_DECREF(o);
-        return NULL;
-    }
-    return o;
 }
 
 
@@ -1405,6 +1398,196 @@ wxFileOffset wxPyCBInputStream::OnSysTell() const {
     wxPyEndBlockThreads(blocked);
     return o;
 }
+
+//----------------------------------------------------------------------
+// Output stream
+
+wxPyOutputStream::~wxPyOutputStream()
+{
+    if (m_wxos)
+        delete m_wxos;
+}
+
+void wxPyOutputStream::close()
+{
+}
+
+void wxPyOutputStream::flush()
+{
+}
+
+bool wxPyOutputStream::eof()
+{
+    return false;
+}
+
+void wxPyOutputStream::seek(int offset, int whence)
+{
+    if (m_wxos)
+        m_wxos->SeekO(offset, wxSeekMode(whence));
+}
+
+int wxPyOutputStream::tell()
+{
+    if (m_wxos)
+        return m_wxos->TellO();
+    else return 0;
+}
+
+void wxPyOutputStream::write(PyObject* data)
+{
+    if (!m_wxos)
+        return;
+    
+    // We use only strings for the streams, not unicode
+    PyObject* str = PyObject_Str(data);
+    if (! str) {
+        PyErr_SetString(PyExc_TypeError, "Unable to convert to string");
+        return;
+    }
+    m_wxos->Write(PyString_AS_STRING(str), PyString_GET_SIZE(str));
+    Py_DECREF(str);
+}
+  
+
+
+
+
+
+wxPyCBOutputStream::wxPyCBOutputStream(PyObject *w, PyObject *s, PyObject *t, bool block)
+    : wxOutputStream(), m_write(w), m_seek(s), m_tell(t), m_block(block)
+{}
+
+wxPyCBOutputStream::wxPyCBOutputStream(const wxPyCBOutputStream& other)
+{
+    m_write = other.m_write;
+    m_seek  = other.m_seek;
+    m_tell  = other.m_tell;
+    m_block = other.m_block;
+    Py_INCREF(m_write);
+    Py_INCREF(m_seek);
+    Py_INCREF(m_tell);
+}
+
+
+wxPyCBOutputStream::~wxPyCBOutputStream() {
+    wxPyBlock_t blocked = wxPyBlock_t_default;
+    if (m_block) blocked = wxPyBeginBlockThreads();
+    Py_XDECREF(m_write);
+    Py_XDECREF(m_seek);
+    Py_XDECREF(m_tell);
+    if (m_block) wxPyEndBlockThreads(blocked);
+}
+
+
+wxPyCBOutputStream* wxPyCBOutputStream::create(PyObject *py, bool block) {
+    wxPyBlock_t blocked = wxPyBlock_t_default;
+    if (block) blocked = wxPyBeginBlockThreads();
+
+    PyObject* write = wxPyGetMethod(py, "write");
+    PyObject* seek = wxPyGetMethod(py, "seek");
+    PyObject* tell = wxPyGetMethod(py, "tell");
+
+    if (!write) {
+        PyErr_SetString(PyExc_TypeError, "Not a file-like object");
+        Py_XDECREF(write);
+        Py_XDECREF(seek);
+        Py_XDECREF(tell);
+        if (block) wxPyEndBlockThreads(blocked);
+        return NULL;
+    }
+
+    if (block) wxPyEndBlockThreads(blocked);
+    return new wxPyCBOutputStream(write, seek, tell, block);
+}
+
+
+wxPyCBOutputStream* wxPyCBOutputStream_create(PyObject *py, bool block) {
+    return wxPyCBOutputStream::create(py, block);
+}
+
+wxPyCBOutputStream* wxPyCBOutputStream_copy(wxPyCBOutputStream* other) {
+    return new wxPyCBOutputStream(*other);
+}
+
+
+wxFileOffset wxPyCBOutputStream::GetLength() const {
+    wxPyCBOutputStream* self = (wxPyCBOutputStream*)this; // cast off const
+    if (m_seek && m_tell) {
+        wxFileOffset temp = self->OnSysTell();
+        wxFileOffset ret = self->OnSysSeek(0, wxFromEnd);
+        self->OnSysSeek(temp, wxFromStart);
+        return ret;
+    }
+    else
+        return wxInvalidOffset;
+}
+
+
+size_t wxPyCBOutputStream::OnSysRead(void *buffer, size_t bufsize) {
+    m_lasterror = wxSTREAM_READ_ERROR;
+    return 0;
+}
+
+size_t wxPyCBOutputStream::OnSysWrite(const void *buffer, size_t bufsize) {
+    if (bufsize == 0)
+        return 0;
+    
+    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    PyObject* arglist = PyTuple_New(1);
+    PyTuple_SET_ITEM(arglist, 0, PyString_FromStringAndSize((char*)buffer, bufsize));
+    
+    PyObject* result = PyEval_CallObject(m_write, arglist);
+    Py_DECREF(arglist);
+
+    if (result != NULL)
+        Py_DECREF(result);
+    else
+        m_lasterror = wxSTREAM_WRITE_ERROR;
+    wxPyEndBlockThreads(blocked);
+    return bufsize;
+}
+
+
+wxFileOffset wxPyCBOutputStream::OnSysSeek(wxFileOffset off, wxSeekMode mode) {
+    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    PyObject* arglist = PyTuple_New(2);
+
+    if (sizeof(wxFileOffset) > sizeof(long))
+        // wxFileOffset is a 64-bit value...
+        PyTuple_SET_ITEM(arglist, 0, PyLong_FromLongLong(off));
+    else
+        PyTuple_SET_ITEM(arglist, 0, PyInt_FromLong(off));
+
+    PyTuple_SET_ITEM(arglist, 1, PyInt_FromLong(mode));
+
+
+    PyObject* result = PyEval_CallObject(m_seek, arglist);
+    Py_DECREF(arglist);
+    Py_XDECREF(result);
+    wxPyEndBlockThreads(blocked);
+    return OnSysTell();
+}
+
+
+wxFileOffset wxPyCBOutputStream::OnSysTell() const {
+    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    PyObject* arglist = Py_BuildValue("()");
+    PyObject* result = PyEval_CallObject(m_tell, arglist);
+    Py_DECREF(arglist);
+    wxFileOffset o = 0;
+    if (result != NULL) {
+        if (PyLong_Check(result))
+            o = PyLong_AsLongLong(result);
+        else
+            o = PyInt_AsLong(result);
+        Py_DECREF(result);
+    };
+    wxPyEndBlockThreads(blocked);
+    return o;
+}
+
+
 
 //----------------------------------------------------------------------
 
@@ -1885,7 +2068,8 @@ wxString* wxString_in_helper(PyObject* source) {
     target = new wxString();
     size_t len = PyUnicode_GET_SIZE(uni);
     if (len) {
-        PyUnicode_AsWideChar((PyUnicodeObject*)uni, wxStringBuffer(*target, len), len);
+        PyUnicode_AsWideChar((PyUnicodeObject*)uni, target->GetWriteBuf(len), len);
+        target->UngetWriteBuf(len);
     }
 
     if (PyString_Check(source))
@@ -1927,7 +2111,8 @@ wxString Py2wxString(PyObject* source)
     }
     size_t len = PyUnicode_GET_SIZE(uni);
     if (len) {
-        PyUnicode_AsWideChar((PyUnicodeObject*)uni, wxStringBuffer(target, len), len);
+        PyUnicode_AsWideChar((PyUnicodeObject*)uni, target.GetWriteBuf(len), len);
+        target.UngetWriteBuf();
     }
 
     if (!PyUnicode_Check(source))
@@ -2532,17 +2717,6 @@ bool wxPoint_helper(PyObject* source, wxPoint** obj)
         return true;
     }
     return wxPyTwoIntItem_helper(source, obj, wxT("wxPoint"));
-}
-
-
-
-bool wxPosition_helper(PyObject* source, wxPosition** obj)
-{
-    if (source == Py_None) {
-        **obj = wxPosition(-1,-1);
-        return true;
-    }
-    return wxPyTwoIntItem_helper(source, obj, wxT("wxPosition"));
 }
 
 

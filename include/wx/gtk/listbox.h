@@ -7,11 +7,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_LISTBOX_H_
-#define _WX_GTK_LISTBOX_H_
-
-struct _GtkTreeEntry;
-struct _GtkTreeIter;
+#ifndef __GTKLISTBOXH__
+#define __GTKLISTBOXH__
 
 //-----------------------------------------------------------------------------
 // wxListBox
@@ -85,7 +82,7 @@ public:
     GtkWidget *GetConnectWidget();
 
 #if wxUSE_TOOLTIPS
-    void ApplyToolTip( GtkTooltips *tips, const gchar *tip );
+    void ApplyToolTip( GtkTooltips *tips, const wxChar *tip );
 #endif // wxUSE_TOOLTIPS
 
     struct _GtkTreeView   *m_treeview;
@@ -97,7 +94,7 @@ public:
 
     bool       m_blockEvent;
 
-    struct _GtkTreeEntry* GtkGetEntry(unsigned pos) const;
+    struct _GtkTreeEntry* GtkGetEntry(int pos) const;
     void GtkInsertItems(const wxArrayString& items,
                         void** clientData, unsigned int pos);
     void GtkDeselectAll();
@@ -119,19 +116,10 @@ protected:
     virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
     virtual int DoListHitTest(const wxPoint& point) const;
 
-    // get the iterator for the given index, returns false if invalid
-    bool GtkGetIteratorFor(unsigned pos, _GtkTreeIter *iter) const;
-
-    // get the index for the given iterator, return wxNOT_FOUND on failure
-    int GtkGetIndexFor(_GtkTreeIter& iter) const;
-
-    // set the specified item
-    void GtkSetItem(_GtkTreeIter& iter, const _GtkTreeEntry *entry);
-
 private:
     void Init(); //common construction
 
     DECLARE_DYNAMIC_CLASS(wxListBox)
 };
 
-#endif // _WX_GTK_LISTBOX_H_
+#endif // __GTKLISTBOXH__

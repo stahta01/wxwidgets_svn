@@ -149,8 +149,13 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
         CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
         CGContextScaleCTM( cgContext, 1, -1 );
 
-        HIShapeReplacePathInCGContext( HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn ), cgContext );
-        CGContextClip( cgContext );
+        HIShapeRef shape = HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn );
+        if ( shape != 0 )
+        {
+            HIShapeReplacePathInCGContext( shape , cgContext );
+            CFRelease( shape );
+            CGContextClip( cgContext );
+        }
         HIViewConvertRect( &headerRect, (HIViewRef) win->GetHandle(), (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
 #endif
 
@@ -370,16 +375,16 @@ wxRendererMac::DrawItemSelectionRect(wxWindow *win,
                                      const wxRect& rect,
                                      int flags )
 {
-    if ( !(flags & wxCONTROL_SELECTED) )
-        return;
-
     RGBColor selColor;
-    GetThemeBrushAsColor(flags & wxCONTROL_FOCUSED
-                            ? kThemeBrushAlternatePrimaryHighlightColor
-                            : kThemeBrushSecondaryHighlightColor,
-                         32, true, &selColor);
+    if (flags & wxCONTROL_SELECTED)
+    {
+        if (flags & wxCONTROL_FOCUSED)
+            GetThemeBrushAsColor(kThemeBrushAlternatePrimaryHighlightColor, 32, true, &selColor);
+        else
+            GetThemeBrushAsColor(kThemeBrushSecondaryHighlightColor, 32, true, &selColor);
+    }
 
-    wxBrush selBrush(selColor);
+    wxBrush selBrush = wxBrush( wxColour( selColor.red >> 8, selColor.green >> 8, selColor.blue >> 8 ), wxSOLID );
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.SetBrush( selBrush );
@@ -492,12 +497,14 @@ wxRendererMac::DrawPushButton(wxWindow *win,
                               int flags)
 {
     int kind;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_3
     if (win->GetWindowVariant() == wxWINDOW_VARIANT_SMALL || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_SMALL))
         kind = kThemeBevelButtonSmall;
     // There is no kThemeBevelButtonMini, but in this case, use Small
     else if (win->GetWindowVariant() == wxWINDOW_VARIANT_MINI || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_MINI))
         kind = kThemeBevelButtonSmall;
     else
+#endif
         kind = kThemeBevelButton;
 
     DrawMacThemeButton(win, dc, rect, flags,

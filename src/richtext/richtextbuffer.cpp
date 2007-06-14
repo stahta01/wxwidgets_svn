@@ -1634,7 +1634,7 @@ bool wxRichTextParagraphLayoutBox::SetStyle(const wxRichTextRange& range, const 
                         // Removes the given style from the paragraph
                         wxRichTextRemoveStyle(newPara->GetAttributes(), style);
                     }
-                    else if (resetExistingStyle)
+                    if (resetExistingStyle)
                         newPara->GetAttributes() = wholeStyle;
                     else
                     {
@@ -1714,7 +1714,7 @@ bool wxRichTextParagraphLayoutBox::SetStyle(const wxRichTextRange& range, const 
                             // Removes the given style from the paragraph
                             wxRichTextRemoveStyle(child->GetAttributes(), style);
                         }
-                        else if (resetExistingStyle)
+                        if (resetExistingStyle)
                             child->GetAttributes() = characterAttributes;
                         else
                         {
@@ -4356,7 +4356,6 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc, const wxTextAttrEx& attr, c
         for (int i = 0; i < tabCount && not_found; ++i)
         {
             nextTabPos = tabArray.Item(i);
-
             // Find the next tab position.
             // Even if we're at the end of the tab array, we must still draw the chunk.
 
@@ -4493,7 +4492,6 @@ bool wxRichTextPlainText::GetRangeSize(const wxRichTextRange& range, wxSize& siz
             dc.GetTextExtent(stringFragment, & w, & h);
             width += w;
             int absoluteWidth = width + position.x;
-
             bool notFound = true;
             for (int i = 0; i < tabCount && notFound; ++i)
             {
@@ -7900,7 +7898,7 @@ wxTextAttrEx wxTextAttrEx::CombineEx(const wxTextAttrEx& attr,
 
 IMPLEMENT_CLASS(wxRichTextFileHandler, wxObject)
 
-#if wxUSE_FFILE && wxUSE_STREAMS
+#if wxUSE_STREAMS
 bool wxRichTextFileHandler::LoadFile(wxRichTextBuffer *buffer, const wxString& filename)
 {
     wxFFileInputStream stream(filename);
@@ -7918,7 +7916,7 @@ bool wxRichTextFileHandler::SaveFile(wxRichTextBuffer *buffer, const wxString& f
 
     return false;
 }
-#endif // wxUSE_FFILE && wxUSE_STREAMS
+#endif // wxUSE_STREAMS
 
 /// Can we handle this filename (if using files)? By default, checks the extension.
 bool wxRichTextFileHandler::CanHandle(const wxString& filename) const
@@ -8170,6 +8168,18 @@ bool wxRichTextImageBlock::Load(wxImage& image)
     return success;
 }
 
+// Array used in DecToHex conversion routine.
+static char hexArray[] = "0123456789ABCDEF";
+
+// Convert decimal integer to 2-character hex string
+inline void wxRichTextDecToHex(int dec, char* buf)
+{
+    int firstDigit = (int)(dec/16.0);
+    int secondDigit = (int)(dec - (firstDigit*16.0));
+    buf[0] = hexArray[firstDigit];
+    buf[1] = hexArray[secondDigit];
+}
+
 // Write data in hex to a stream
 bool wxRichTextImageBlock::WriteHex(wxOutputStream& stream)
 {
@@ -8193,7 +8203,7 @@ bool wxRichTextImageBlock::WriteHex(wxOutputStream& stream)
         char* b = buf;
         for (i = 0; i < (n/2); i++)
         {
-            wxDecToHex(m_data[j], b, b+1);
+            wxRichTextDecToHex(m_data[j], b);
             b += 2; j ++;
         }
 
@@ -8216,8 +8226,8 @@ bool wxRichTextImageBlock::ReadHex(wxInputStream& stream, int length, int imageT
     int i;
     for (i = 0; i < dataSize; i ++)
     {
-        str[0] = (char)stream.GetC();
-        str[1] = (char)stream.GetC();
+        str[0] = stream.GetC();
+        str[1] = stream.GetC();
 
         m_data[i] = (unsigned char)wxHexToDec(str);
     }

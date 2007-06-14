@@ -25,15 +25,12 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/containr.h"
-#endif
-
-#ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/event.h"
     #include "wx/window.h"
     #include "wx/scrolbar.h"
     #include "wx/radiobut.h"
+    #include "wx/containr.h"
 #endif //WX_PRECOMP
 
 // trace mask for focus messages
@@ -43,58 +40,54 @@
 // implementation
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// wxControlContainerBase
-// ----------------------------------------------------------------------------
-
-void wxControlContainerBase::SetCanFocus(bool acceptsFocus)
+wxControlContainer::wxControlContainer(wxWindow *winParent)
 {
-    if ( acceptsFocus == m_acceptsFocus )
-        return;
-
-    m_acceptsFocus = acceptsFocus;
-
-    m_winParent->SetCanFocus(m_acceptsFocus);
-}
-
-// if the window has a focusable child, it shouldn't be focusable itself (think
-// of wxPanel used for grouping different controls) but if it doesn't have any
-// (focusable) children, then it should be possible to give it focus (think of
-// wxGrid or generic wxListCtrl)
-bool wxControlContainerBase::ShouldAcceptFocus() const
-{
-    // we can accept focus either if we have no children at all (in this case
-    // we're probably not used as a container) or only when at least one child
-    // accepts focus
-    wxWindowList::compatibility_iterator node = m_winParent->GetChildren().GetFirst();
-    if ( !node )
-        return true;
-
-    while ( node )
-    {
-        wxWindow *child = node->GetData();
-        node = node->GetNext();
-
-        if ( !m_winParent->IsClientAreaChild(child) )
-            continue;
-
-        if ( child->CanAcceptFocus() )
-            return false;
-    }
-
-    return true;
-}
-
-#ifndef wxHAS_NATIVE_TAB_TRAVERSAL
-
-// ----------------------------------------------------------------------------
-// generic wxControlContainer
-// ----------------------------------------------------------------------------
-
-wxControlContainer::wxControlContainer()
-{
+    m_winParent = winParent;
     m_winLastFocused = NULL;
     m_inSetFocus = false;
+}
+
+bool wxControlContainer::AcceptsFocus() const
+{
+    // if we're not shown or disabled, we can't accept focus
+    if ( m_winParent->IsShown() && m_winParent->IsEnabled() )
+    {
+        // otherwise we can accept focus either if we have no children at all
+        // (in this case we're probably not used as a container) or only when
+        // at least one child will accept focus
+        wxWindowList::compatibility_iterator node = m_winParent->GetChildren().GetFirst();
+        if ( !node )
+            return true;
+
+#ifdef __WXMAC__
+        // wxMac has eventually the two scrollbars as children, they don't count
+        // as real children in the algorithm mentioned above
+        bool hasRealChildren = false ;
+#endif
+
+        while ( node )
+        {
+            wxWindow *child = node->GetData();
+            node = node->GetNext();
+
+#ifdef __WXMAC__
+            if ( m_winParent->MacIsWindowScrollbar( child ) )
+                continue;
+            hasRealChildren = true ;
+#endif
+            if ( child->AcceptsFocus() )
+            {
+                return true;
+            }
+        }
+
+#ifdef __WXMAC__
+        if ( !hasRealChildren )
+            return true ;
+#endif
+    }
+
+    return false;
 }
 
 void wxControlContainer::SetLastFocus(wxWindow *win)
@@ -139,16 +132,12 @@ void wxControlContainer::SetLastFocus(wxWindow *win)
     }
 
     // propagate the last focus upwards so that our parent can set focus back
-    // to us if it loses it now and regains later; do *not* do this if we are
-    // a toplevel window (e.g. wxDialog) that has another frame as its parent
-    if ( !m_winParent->IsTopLevel() )
+    // to us if it loses it now and regains later
+    wxWindow *parent = m_winParent->GetParent();
+    if ( parent )
     {
-        wxWindow *parent = m_winParent->GetParent();
-        if ( parent )
-        {
-            wxChildFocusEvent eventFocus(m_winParent);
-            parent->GetEventHandler()->ProcessEvent(eventFocus);
-        }
+        wxChildFocusEvent eventFocus(m_winParent);
+        parent->GetEventHandler()->ProcessEvent(eventFocus);
     }
 }
 
@@ -515,7 +504,7 @@ void wxControlContainer::HandleOnNavigationKey( wxNavigationKeyEvent& event )
         }
 #endif // __WXMSW__
 
-        if ( child->CanAcceptFocusFromKeyboard() )
+        if ( child->AcceptsFocusFromKeyboard() )
         {
             // if we're setting the focus to a child panel we should prevent it
             // from giving it to the child which had the focus the last time
@@ -656,11 +645,12 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
         wxWindow *child = node->GetData();
         node = node->GetNext();
 
-        // skip special windows:
-        if ( !win->IsClientAreaChild(child) )
+#ifdef __WXMAC__
+        if ( child->GetParent()->MacIsWindowScrollbar( child ) )
             continue;
-
-        if ( child->CanAcceptFocusFromKeyboard() && !child->IsTopLevel() )
+#endif
+        
+        if ( child->AcceptsFocusFromKeyboard() && !child->IsTopLevel() )
         {
 #ifdef __WXMSW__
             // If a radiobutton is the first focusable child, search for the
@@ -686,5 +676,3 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
 
     return false;
 }
-
-#endif // !wxHAS_NATIVE_TAB_TRAVERSAL

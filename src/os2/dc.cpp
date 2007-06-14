@@ -1753,10 +1753,12 @@ void wxDC::DrawAnyText( const wxString& rsText,
             vPtlStart.y = vY;
     }
 
+    PCH pzStr = (PCH)rsText.c_str();
+
     ::GpiMove(m_hPS, &vPtlStart);
     lHits = ::GpiCharString( m_hPS
                             ,rsText.length()
-                            ,rsText.char_str()
+                            ,pzStr
                            );
     if (lHits != GPI_OK)
     {
@@ -2151,7 +2153,7 @@ void wxDC::DoGetTextExtent(
 , wxCoord*                          pvY
 , wxCoord*                          pvDescent
 , wxCoord*                          pvExternalLeading
-, const wxFont*                     pTheFont
+, wxFont*                           pTheFont
 ) const
 {
     POINTL                          avPoint[TXTBOX_COUNT];
@@ -2176,7 +2178,7 @@ void wxDC::DoGetTextExtent(
     //
     bRc = ::GpiQueryTextBox( m_hPS
                             ,l
-                            ,rsString.char_str()
+                            ,(PCH)rsString.c_str()
                             ,TXTBOX_COUNT // return maximum information
                             ,avPoint      // array of coordinates points
                            );
@@ -2294,9 +2296,6 @@ void wxDC::SetMapMode(
     m_nWindowExtX = (int)MS_XDEV2LOG(VIEWPORT_EXTENT);
     m_nWindowExtY = (int)MS_YDEV2LOG(VIEWPORT_EXTENT);
     // ????
-    
-    ComputeScaleAndOrigin();
-    
 }; // end of wxDC::SetMapMode
 
 void wxDC::SetUserScale( double dX,
@@ -2316,6 +2315,17 @@ void wxDC::SetAxisOrientation( bool bXLeftRight,
 
     SetMapMode(m_mappingMode);
 } // end of wxDC::SetAxisOrientation
+
+void wxDC::SetSystemScale(
+  double                            dX
+, double                            dY
+)
+{
+    m_scaleX = dX;
+    m_scaleY = dY;
+
+    SetMapMode(m_mappingMode);
+} // end of wxDC::SetSystemScale
 
 void wxDC::SetLogicalOrigin(
   wxCoord                           vX
@@ -2356,6 +2366,54 @@ void wxDC::SetDeviceOrigin(
                          ,&vRect
                         );
 }; // end of wxDC::SetDeviceOrigin
+
+// ---------------------------------------------------------------------------
+// coordinates transformations
+// ---------------------------------------------------------------------------
+
+wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
+{
+    return (wxCoord) (((x) - m_deviceOriginX)/(m_logicalScaleX*m_userScaleX*m_signX*m_scaleX) - m_logicalOriginX);
+}
+
+wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
+{
+    // axis orientation is not taken into account for conversion of a distance
+    return (wxCoord) ((x)/(m_logicalScaleX*m_userScaleX*m_scaleX));
+}
+
+wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
+{
+    return (wxCoord) (((y) - m_deviceOriginY)/(m_logicalScaleY*m_userScaleY*m_signY*m_scaleY) - m_logicalOriginY);
+}
+
+wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
+{
+    // axis orientation is not taken into account for conversion of a distance
+    return (wxCoord) ((y)/(m_logicalScaleY*m_userScaleY*m_scaleY));
+}
+
+wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
+{
+    return (wxCoord) ((x - m_logicalOriginX)*m_logicalScaleX*m_userScaleX*m_signX*m_scaleX + m_deviceOriginX);
+}
+
+wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
+{
+    // axis orientation is not taken into account for conversion of a distance
+    return (wxCoord) (x*m_logicalScaleX*m_userScaleX*m_scaleX);
+}
+
+wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
+{
+    return (wxCoord) ((y - m_logicalOriginY)*m_logicalScaleY*m_userScaleY*m_signY*m_scaleY + m_deviceOriginY);
+}
+
+wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
+{
+    // axis orientation is not taken into account for conversion of a distance
+    return (wxCoord) (y*m_logicalScaleY*m_userScaleY*m_scaleY);
+}
 
 // ---------------------------------------------------------------------------
 // bit blit

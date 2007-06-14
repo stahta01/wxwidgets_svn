@@ -427,31 +427,17 @@ _WX_DEFINE_BASEARRAY(wxString, wxBaseArrayStringBase)
 // extern "C" functions and the functions with C++ linkage and ptr_fun and
 // wxStringCompareLess can't take wxStrcmp/wxStricmp directly as arguments in
 // this case, we need the wrappers below to make this work
-struct wxStringCmp
+inline int wxStrcmpCppWrapper(const wxChar *p, const wxChar *q)
 {
-    typedef wxString first_argument_type;
-    typedef wxString second_argument_type;
-    typedef int result_type;
+    return wxStrcmp(p, q);
+}
 
-    int operator()(const wxString& s1, const wxString& s2) const
-    {
-        return s1.compare(s2);
-    }
-};
-
-struct wxStringCmpNoCase
+inline int wxStricmpCppWrapper(const wxChar *p, const wxChar *q)
 {
-    typedef wxString first_argument_type;
-    typedef wxString second_argument_type;
-    typedef int result_type;
+    return wxStricmp(p, q);
+}
 
-    int operator()(const wxString& s1, const wxString& s2) const
-    {
-        return s1.CmpNoCase(s2);
-    }
-};
-
-int wxArrayString::Index(const wxString& str, bool bCase, bool WXUNUSED(bFromEnd)) const
+int wxArrayString::Index(const wxChar* sz, bool bCase, bool WXUNUSED(bFromEnd)) const
 {
     wxArrayString::const_iterator it;
 
@@ -460,14 +446,14 @@ int wxArrayString::Index(const wxString& str, bool bCase, bool WXUNUSED(bFromEnd
         it = std::find_if(begin(), end(),
                           std::not1(
                               std::bind2nd(
-                                  wxStringCmp(), str)));
+                                  std::ptr_fun(wxStrcmpCppWrapper), sz)));
     }
     else // !bCase
     {
         it = std::find_if(begin(), end(),
                           std::not1(
                               std::bind2nd(
-                                  wxStringCmpNoCase(), str)));
+                                  std::ptr_fun(wxStricmpCppWrapper), sz)));
     }
 
     return it == end() ? wxNOT_FOUND : it - begin();
@@ -478,6 +464,8 @@ class wxStringCompareLess
 {
 public:
     wxStringCompareLess(F f) : m_f(f) { }
+    bool operator()(const wxChar* s1, const wxChar* s2)
+        { return m_f(s1, s2) < 0; }
     bool operator()(const wxString& s1, const wxString& s2)
         { return m_f(s1, s2) < 0; }
 private:
@@ -507,32 +495,33 @@ void wxArrayString::Sort(bool reverseOrder)
     }
 }
 
-int wxSortedArrayString::Index(const wxString& str, bool bCase, bool WXUNUSED(bFromEnd)) const
+int wxSortedArrayString::Index(const wxChar* sz, bool bCase, bool WXUNUSED(bFromEnd)) const
 {
     wxSortedArrayString::const_iterator it;
+    wxString s(sz);
 
     if (bCase)
-        it = std::lower_bound(begin(), end(), str,
-                              wxStringCompare(wxStringCmp()));
+        it = std::lower_bound(begin(), end(), s,
+                              wxStringCompare(wxStrcmpCppWrapper));
     else
-        it = std::lower_bound(begin(), end(), str,
-                              wxStringCompare(wxStringCmpNoCase()));
+        it = std::lower_bound(begin(), end(), s,
+                              wxStringCompare(wxStricmpCppWrapper));
 
     if (it == end())
         return wxNOT_FOUND;
 
     if (bCase)
     {
-        if (str.Cmp(*it) != 0)
+        if (wxStrcmp(it->c_str(), sz) != 0)
             return wxNOT_FOUND;
     }
     else
     {
-        if (str.CmpNoCase(*it) != 0)
+        if (wxStricmp(it->c_str(), sz) != 0)
             return wxNOT_FOUND;
     }
 
     return it - begin();
 }
 
-#endif // wxUSE_STL
+#endif

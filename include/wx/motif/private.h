@@ -14,7 +14,6 @@
 
 #include "wx/defs.h"
 #include "X11/Xlib.h"
-#include "wx/evtloop.h"
 
 class WXDLLEXPORT wxFont;
 class WXDLLEXPORT wxWindow;
@@ -107,9 +106,6 @@ extern void wxGetTextExtent(WXDisplay* display, const wxFont& font,
                             double scale,
                             const wxString& string, int* width, int* height,
                             int* ascent, int* descent);
-extern void wxGetTextExtent(const wxWindow* window, const wxString& str,
-                            int* width, int* height,
-                            int* ascent, int* descent);
 
 #define wxNO_COLORS   0x00
 #define wxBACK_COLORS 0x01
@@ -135,25 +131,16 @@ XmString wxStringToXmString( const char* string );
 // cleaning up automatically)
 class wxXmString
 {
-    void Init(const char *str)
+public:
+    wxXmString(const char* str)
     {
         m_string = XmStringCreateLtoR((char *)str, XmSTRING_DEFAULT_CHARSET);
     }
 
-public:
-    wxXmString(const char* str)
-    {
-        Init(str);
-    }
-
     wxXmString(const wxString& str)
     {
-        Init(str.mb_str());
-    }
-
-    wxXmString(const wxCStrData& str)
-    {
-        Init(str);
+        m_string = XmStringCreateLtoR((char *)str.c_str(),
+            XmSTRING_DEFAULT_CHARSET);
     }
 
     // just to avoid calling XmStringFree()
@@ -186,9 +173,11 @@ wxSize wxDoGetSingleTextCtrlBestSize( Widget textWidget,
 // event-related functions
 // ----------------------------------------------------------------------------
 
+class wxEventLoop;
+
 // executes one main loop iteration (implemented in src/motif/evtloop.cpp)
 // returns true if the loop should be exited
-bool wxDoEventLoopIteration( wxGUIEventLoop& evtLoop );
+bool wxDoEventLoopIteration( wxEventLoop& evtLoop );
 
 // Consume all events until no more left
 void wxFlushEvents(WXDisplay* display);

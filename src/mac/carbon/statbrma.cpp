@@ -79,7 +79,8 @@ void wxStatusBarMac::DrawFieldText(wxDC& dc, int i)
 
     wxString text(GetStatusText( i ));
 
-    wxCoord x, y;
+    long x, y;
+
     dc.GetTextExtent(text, &x, &y);
 
     int leftMargin = 2;

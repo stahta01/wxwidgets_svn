@@ -546,8 +546,7 @@ bool wxRichTextXMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream& 
         {
 #if wxUSE_INTL
             fileEncoding = wxLocale::GetSystemEncodingName();
-            // if !wxUSE_INTL, we fall back to UTF-8 or ISO-8859-1 below
-#endif
+#endif // wxUSE_INTL
         }
         else
         {
@@ -573,7 +572,7 @@ bool wxRichTextXMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream& 
 
     wxString s ;
     s.Printf(wxT("<?xml version=\"%s\" encoding=\"%s\"?>\n"),
-             version, fileEncoding);
+        (const wxChar*) version, (const wxChar*) fileEncoding );
     OutputString(stream, s, NULL, NULL);
     OutputString(stream, wxT("<richtext version=\"1.0.0.0\" xmlns=\"http://www.wxwidgets.org\">") , NULL, NULL);
 

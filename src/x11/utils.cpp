@@ -34,8 +34,6 @@
 #endif
 
 #include "wx/apptrait.h"
-#include "wx/generic/private/timer.h"
-#include "wx/evtloop.h"
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -171,10 +169,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_X11;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
 
 // ----------------------------------------------------------------------------
 // display info

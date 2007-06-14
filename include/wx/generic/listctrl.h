@@ -77,8 +77,10 @@ public:
     wxString GetItemText( long item ) const;
     void SetItemText( long item, const wxString& str );
     wxUIntPtr GetItemData( long item ) const;
+#if wxABI_VERSION >= 20804
     bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+#endif // wxABI 2.8.4+
+    bool SetItemData(long item, long data);
     bool GetItemRect( long item, wxRect& rect, int code = wxLIST_RECT_BOUNDS ) const;
     bool GetItemPosition( long item, wxPoint& pos ) const;
     bool SetItemPosition( long item, const wxPoint& pos ); // not supported in wxGLC
@@ -250,7 +252,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxGenericListCtrl)
 };
 
-#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && !defined(__WXMAC__)
+#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!defined(__WXMAC__) || defined(__WXUNIVERSAL__))
 /*
  * wxListCtrl has to be a real class or we have problems with
  * the run-time information.

@@ -25,10 +25,12 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"     // CHARSET_HANGUL
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
+    #include "wx/timer.h"
 #endif  //WX_PRECOMP
 
 #include "wx/msw/registry.h"
@@ -40,7 +42,6 @@
 #include "wx/confbase.h"        // for wxExpandEnvVars()
 
 #include "wx/msw/private.h"     // includes <windows.h>
-#include "wx/msw/missing.h"     // for CHARSET_HANGUL
 
 #if defined(__CYGWIN__)
     //CYGWIN gives annoying warning about runtime stuff if we don't do this
@@ -1444,7 +1445,7 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
     return (long) ret;
 }
 
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     // first get the font encoding for this charset
     if ( !name )
@@ -1463,7 +1464,7 @@ extern long wxCharsetToCodepage(const char *name)
 #include "wx/msw/registry.h"
 
 // this should work if Internet Exploiter is installed
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     if (!name)
         return GetACP();

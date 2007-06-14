@@ -799,8 +799,8 @@ def BitmapFromBuffer(width, height, dataBuffer, alphaBuffer=None):
     expected to contain a series of RGB bytes and be width*height*3
     bytes long.  A buffer object can optionally be supplied for the
     image's alpha channel data, and it is expected to be width*height
-    bytes long.  On Windows the RGB values are 'premultiplied' by the
-    alpha values.  (The other platforms do the multiplication
+    bytes long.  On Windows and Mac the RGB values are 'premultiplied'
+    by the alpha values.  (The other platforms do the multiplication
     themselves.)
 
     Unlike `wx.ImageFromBuffer` the bitmap created with this function
@@ -829,8 +829,8 @@ def BitmapFromBufferRGBA(width, height, dataBuffer):
     parameter must be a Python object that implements the buffer
     interface, such as a string, array, etc.  The dataBuffer object is
     expected to contain a series of RGBA bytes (red, green, blue and
-    alpha) and be width*height*4 bytes long.  On Windows the RGB
-    values are 'premultiplied' by the alpha values.  (The other
+    alpha) and be width*height*4 bytes long.  On Windows and Mac the
+    RGB values are 'premultiplied' by the alpha values.  (The other
     platforms do the multiplication themselves.)
 
     Unlike `wx.ImageFromBuffer` the bitmap created with this function
@@ -1267,73 +1267,19 @@ class IconBundle(object):
         _gdi_.IconBundle_swiginit(self,_gdi_.new_IconBundle(*args, **kwargs))
     __swig_destroy__ = _gdi_.delete_IconBundle
     __del__ = lambda self : None;
-    def IsOk(*args, **kwargs):
-        """IsOk(self) -> bool"""
-        return _gdi_.IconBundle_IsOk(*args, **kwargs)
-
-    def __nonzero__(self): return self.IsOk() 
     def AddIcon(*args, **kwargs):
-        """
-        AddIcon(self, Icon icon)
-
-        Adds the icon to the collection, if the collection already contains an
-        icon with the same width and height, it is replaced
-        """
+        """AddIcon(self, Icon icon)"""
         return _gdi_.IconBundle_AddIcon(*args, **kwargs)
 
     def AddIconFromFile(*args, **kwargs):
-        """
-        AddIconFromFile(self, String file, long type)
-
-        Adds all the icons contained in the file to the collection, if the
-        collection already contains icons with the same width and height, they
-        are replaced
-        """
+        """AddIconFromFile(self, String file, long type)"""
         return _gdi_.IconBundle_AddIconFromFile(*args, **kwargs)
 
     def GetIcon(*args, **kwargs):
-        """
-        GetIcon(self, Size size) -> Icon
-
-        Returns the icon with the given size; if no such icon exists, returns
-        the icon with size wxSYS_ICON_[XY]; if no such icon exists, returns
-        the first icon in the bundle
-        """
+        """GetIcon(self, Size size) -> Icon"""
         return _gdi_.IconBundle_GetIcon(*args, **kwargs)
 
-    def GetIconOfExactSize(*args, **kwargs):
-        """
-        GetIconOfExactSize(self, Size size) -> Icon
-
-        Returns the icon exactly of the specified size or wxNullIcon if no
-        icon of exactly given size are available.
-        """
-        return _gdi_.IconBundle_GetIconOfExactSize(*args, **kwargs)
-
-    def GetIconCount(*args, **kwargs):
-        """
-        GetIconCount(self) -> size_t
-
-        return the number of available icons
-        """
-        return _gdi_.IconBundle_GetIconCount(*args, **kwargs)
-
-    def GetIconByIndex(*args, **kwargs):
-        """
-        GetIconByIndex(self, size_t n) -> Icon
-
-        Return the icon at index (must be < GetIconCount())
-        """
-        return _gdi_.IconBundle_GetIconByIndex(*args, **kwargs)
-
-    def IsEmpty(*args, **kwargs):
-        """
-        IsEmpty(self) -> bool
-
-        Check if we have any icons at all
-        """
-        return _gdi_.IconBundle_IsEmpty(*args, **kwargs)
-
+    Icon = property(GetIcon,doc="See `GetIcon`") 
 _gdi_.IconBundle_swigregister(IconBundle)
 
 def IconBundleFromFile(*args, **kwargs):
@@ -2777,8 +2723,9 @@ class Locale(object):
     __del__ = lambda self : None;
     def Init1(*args, **kwargs):
         """
-        Init1(self, String name, String shortName=EmptyString, String locale=EmptyString, 
-            bool bLoadDefault=True, bool bConvertEncoding=False) -> bool
+        Init1(self, String szName, String szShort=EmptyString, String szLocale=EmptyString, 
+            bool bLoadDefault=True, 
+            bool bConvertEncoding=False) -> bool
         """
         return _gdi_.Locale_Init1(*args, **kwargs)
 
@@ -2835,7 +2782,7 @@ class Locale(object):
 
     AddCatalogLookupPathPrefix = staticmethod(AddCatalogLookupPathPrefix)
     def AddCatalog(*args, **kwargs):
-        """AddCatalog(self, String domain) -> bool"""
+        """AddCatalog(self, String szDomain) -> bool"""
         return _gdi_.Locale_AddCatalog(*args, **kwargs)
 
     def IsAvailable(*args, **kwargs):
@@ -2844,7 +2791,7 @@ class Locale(object):
 
     IsAvailable = staticmethod(IsAvailable)
     def IsLoaded(*args, **kwargs):
-        """IsLoaded(self, String domain) -> bool"""
+        """IsLoaded(self, String szDomain) -> bool"""
         return _gdi_.Locale_IsLoaded(*args, **kwargs)
 
     def GetLanguageInfo(*args, **kwargs):
@@ -2868,7 +2815,7 @@ class Locale(object):
 
     AddLanguage = staticmethod(AddLanguage)
     def GetString(*args, **kwargs):
-        """GetString(self, String origString, String domain=EmptyString) -> String"""
+        """GetString(self, String szOrigString, String szDomain=EmptyString) -> String"""
         return _gdi_.Locale_GetString(*args, **kwargs)
 
     def GetName(*args, **kwargs):
@@ -2935,11 +2882,14 @@ class PyLocale(Locale):
         return _gdi_.PyLocale__setCallbackInfo(*args, **kwargs)
 
     def GetSingularString(*args, **kwargs):
-        """GetSingularString(self, String origString, String domain=EmptyString) -> String"""
+        """GetSingularString(self, wxChar szOrigString, wxChar szDomain=None) -> wxChar"""
         return _gdi_.PyLocale_GetSingularString(*args, **kwargs)
 
     def GetPluralString(*args, **kwargs):
-        """GetPluralString(self, String origString, String origString2, size_t n, String domain=EmptyString) -> String"""
+        """
+        GetPluralString(self, wxChar szOrigString, wxChar szOrigString2, size_t n, 
+            wxChar szDomain=None) -> wxChar
+        """
         return _gdi_.PyLocale_GetPluralString(*args, **kwargs)
 
 _gdi_.PyLocale_swigregister(PyLocale)
@@ -3523,35 +3473,6 @@ class DC(_core.Object):
         position.
         """
         return _gdi_.DC_BlitPointSize(*args, **kwargs)
-
-    def StretchBlit(*args, **kwargs):
-        """
-        StretchBlit(self, int dstX, int dstY, int dstWidth, int dstHeight, DC source, 
-            int srcX, int srcY, int srcWidth, int srcHeight, 
-            int rop=COPY, bool useMask=False, 
-            int srcMaskX=wxDefaultCoord, int srcMaskY=wxDefaultCoord) -> bool
-
-        Copy from a source DC to this DC, specifying the destination
-        coordinates, destination size, source DC, source coordinates, size of
-        source area to copy, logical function, whether to use a bitmap mask,
-        and mask source position.
-        """
-        return _gdi_.DC_StretchBlit(*args, **kwargs)
-
-    def StretchBlitPointSize(*args, **kwargs):
-        """
-        StretchBlitPointSize(self, Point dstPt, Size dstSize, DC source, Point srcPt, 
-            Size srcSize, int rop=COPY, bool useMask=False, 
-            Point srcMaskPt=DefaultPosition) -> bool
-
-        Copy from a source DC to this DC, specifying the destination
-        coordinates, destination size, source DC, source coordinates, size of
-        source area to copy, logical function, whether to use a bitmap mask,
-        and mask source position.  This version is the same as `StretchBlit`
-        except `wx.Point` and `wx.Size` objects are used instead of individual
-        position and size components.
-        """
-        return _gdi_.DC_StretchBlitPointSize(*args, **kwargs)
 
     def GetAsBitmap(*args, **kwargs):
         """GetAsBitmap(self, Rect subrect=None) -> Bitmap"""
@@ -4865,7 +4786,6 @@ def MemoryDCFromDC(*args, **kwargs):
 
 BUFFER_VIRTUAL_AREA = _gdi_.BUFFER_VIRTUAL_AREA
 BUFFER_CLIENT_AREA = _gdi_.BUFFER_CLIENT_AREA
-BUFFER_USES_SHARED_BUFFER = _gdi_.BUFFER_USES_SHARED_BUFFER
 class BufferedDC(MemoryDC):
     """
     This simple class provides a simple way to avoid flicker: when drawing
@@ -5153,13 +5073,6 @@ class PrinterDC(DC):
         """__init__(self, wxPrintData printData) -> PrinterDC"""
         _gdi_.PrinterDC_swiginit(self,_gdi_.new_PrinterDC(*args, **kwargs))
 _gdi_.PrinterDC_swigregister(PrinterDC)
-
-class SVGFileDC(DC):
-    """Proxy of C++ SVGFileDC class"""
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    def __init__(self): raise AttributeError, "No constructor defined"
-    __repr__ = _swig_repr
-_gdi_.SVGFileDC_swigregister(SVGFileDC)
 
 #---------------------------------------------------------------------------
 
@@ -6444,7 +6357,6 @@ NullBrush = cvar.NullBrush
 NullPalette = cvar.NullPalette
 NullFont = cvar.NullFont
 NullColour = cvar.NullColour
-NullIconBundle = cvar.NullIconBundle
 
 class PenList(GDIObjListBase):
     """Proxy of C++ PenList class"""
@@ -6454,6 +6366,17 @@ class PenList(GDIObjListBase):
     def FindOrCreatePen(*args, **kwargs):
         """FindOrCreatePen(self, Colour colour, int width, int style) -> Pen"""
         return _gdi_.PenList_FindOrCreatePen(*args, **kwargs)
+
+    def AddPen(*args, **kwargs):
+        """AddPen(self, Pen pen)"""
+        return _gdi_.PenList_AddPen(*args, **kwargs)
+
+    def RemovePen(*args, **kwargs):
+        """RemovePen(self, Pen pen)"""
+        return _gdi_.PenList_RemovePen(*args, **kwargs)
+
+    AddPen = wx._deprecated(AddPen)
+    RemovePen = wx._deprecated(RemovePen)
 
 _gdi_.PenList_swigregister(PenList)
 
@@ -6465,6 +6388,17 @@ class BrushList(GDIObjListBase):
     def FindOrCreateBrush(*args, **kwargs):
         """FindOrCreateBrush(self, Colour colour, int style=SOLID) -> Brush"""
         return _gdi_.BrushList_FindOrCreateBrush(*args, **kwargs)
+
+    def AddBrush(*args, **kwargs):
+        """AddBrush(self, Brush brush)"""
+        return _gdi_.BrushList_AddBrush(*args, **kwargs)
+
+    def RemoveBrush(*args, **kwargs):
+        """RemoveBrush(self, Brush brush)"""
+        return _gdi_.BrushList_RemoveBrush(*args, **kwargs)
+
+    AddBrush = wx._deprecated(AddBrush)
+    RemoveBrush = wx._deprecated(RemoveBrush)
 
 _gdi_.BrushList_swigregister(BrushList)
 
@@ -6480,6 +6414,17 @@ class FontList(GDIObjListBase):
             int encoding=FONTENCODING_DEFAULT) -> Font
         """
         return _gdi_.FontList_FindOrCreateFont(*args, **kwargs)
+
+    def AddFont(*args, **kwargs):
+        """AddFont(self, Font font)"""
+        return _gdi_.FontList_AddFont(*args, **kwargs)
+
+    def RemoveFont(*args, **kwargs):
+        """RemoveFont(self, Font font)"""
+        return _gdi_.FontList_RemoveFont(*args, **kwargs)
+
+    AddFont = wx._deprecated(AddFont)
+    RemoveFont = wx._deprecated(RemoveFont)
 
 _gdi_.FontList_swigregister(FontList)
 
@@ -6618,7 +6563,6 @@ CONTROL_ISDEFAULT = _gdi_.CONTROL_ISDEFAULT
 CONTROL_ISSUBMENU = _gdi_.CONTROL_ISSUBMENU
 CONTROL_EXPANDED = _gdi_.CONTROL_EXPANDED
 CONTROL_SIZEGRIP = _gdi_.CONTROL_SIZEGRIP
-CONTROL_FLAT = _gdi_.CONTROL_FLAT
 CONTROL_CURRENT = _gdi_.CONTROL_CURRENT
 CONTROL_SELECTED = _gdi_.CONTROL_SELECTED
 CONTROL_CHECKED = _gdi_.CONTROL_CHECKED

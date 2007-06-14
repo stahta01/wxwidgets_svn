@@ -28,7 +28,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/dcclient.h"
-    #include "wx/nonownedwnd.h"
 #endif
 
 #include "wx/caret.h"
@@ -93,6 +92,25 @@ wxWindowDFB::~wxWindowDFB()
 
     if ( gs_mouseCapture == this )
         ReleaseMouse();
+
+#warning "FIXME: what to do with gs_activeFrame here and elsewhere?"
+#if 0
+    if (gs_activeFrame == this)
+    {
+        gs_activeFrame = NULL;
+        // activate next frame in Z-order:
+        if ( m_wnd->prev )
+        {
+            wxWindowDFB *win = (wxWindowDFB*)m_wnd->prev->userData;
+            win->SetFocus();
+        }
+        else if ( m_wnd->next )
+        {
+            wxWindowDFB *win = (wxWindowDFB*)m_wnd->next->userData;
+            win->SetFocus();
+        }
+    }
+#endif
 
     if ( gs_focusedWindow == this )
         DFBKillFocus();
@@ -202,6 +220,26 @@ void wxWindowDFB::SetFocus()
     //       are hidden; when the TLW becomes visible, it will set the focus
     //       to use from wxTLW::Show()
 
+    #warning "FIXME: implement in terms of DWET_{GOT,LOST}FOCUS"
+    #warning "FIXME: keep this or not? not, think multiapp core"
+#if 0
+    wxWindowDFB *active = wxGetTopLevelParent((wxWindow*)this);
+    if ( !(m_windowStyle & wxPOPUP_WINDOW) && active != gs_activeFrame )
+    {
+        if ( gs_activeFrame )
+        {
+            wxActivateEvent event(wxEVT_ACTIVATE, false, gs_activeFrame->GetId());
+            event.SetEventObject(gs_activeFrame);
+            gs_activeFrame->GetEventHandler()->ProcessEvent(event);
+        }
+
+        gs_activeFrame = active;
+        wxActivateEvent event(wxEVT_ACTIVATE, true, gs_activeFrame->GetId());
+        event.SetEventObject(gs_activeFrame);
+        gs_activeFrame->GetEventHandler()->ProcessEvent(event);
+    }
+#endif
+
     // notify the parent keeping track of focus for the kbd navigation
     // purposes that we got it
     wxChildFocusEvent eventFocus((wxWindow*)this);
@@ -261,6 +299,30 @@ bool wxWindowDFB::Show(bool show)
     // call it to force refresh of either this window (if showing) or its
     // parent area at the place of this window (if hiding):
     DoRefreshWindow();
+
+#warning "FIXME: all of this must be implemented for DFB"
+#if 0
+    DFB_wmShowWindow(m_wnd, show);
+
+    if (!show && gs_activeFrame == this)
+    {
+        // activate next frame in Z-order:
+        if ( m_wnd->prev )
+        {
+            wxWindowDFB *win = (wxWindowDFB*)m_wnd->prev->userData;
+            win->SetFocus();
+        }
+        else if ( m_wnd->next )
+        {
+            wxWindowDFB *win = (wxWindowDFB*)m_wnd->next->userData;
+            win->SetFocus();
+        }
+        else
+        {
+            gs_activeFrame = NULL;
+        }
+    }
+#endif
 
     return true;
 }
@@ -430,15 +492,6 @@ void wxWindowDFB::DoMoveWindow(int x, int y, int width, int height)
     {
         // queue both former and new position of the window for repainting:
         wxWindow *parent = GetParent();
-
-        // only refresh the visible parts:
-        if ( !CanBeOutsideClientArea() )
-        {
-            wxRect parentClient(parent->GetClientSize());
-            oldpos.Intersect(parentClient);
-            newpos.Intersect(parentClient);
-        }
-
         parent->RefreshRect(oldpos);
         parent->RefreshRect(newpos);
     }
@@ -629,11 +682,6 @@ void wxWindowDFB::DoRefreshRect(const wxRect& rect)
     r.Offset(GetPosition());
     r.Offset(parent->GetClientAreaOrigin());
 
-    // normal windows cannot extend out of its parent's client area, so don't
-    // refresh any hidden parts:
-    if ( !CanBeOutsideClientArea() )
-        r.Intersect(parent->GetClientRect());
-
     parent->DoRefreshRect(r);
 }
 
@@ -715,10 +763,6 @@ void wxWindowDFB::PaintWindow(const wxRect& rect)
 
     m_updateRegion.Clear();
 
-    // client area portion of 'rect':
-    wxRect rectClientOnly(rect);
-    rectClientOnly.Intersect(clientRect);
-
     // paint the children:
     wxPoint origin = GetClientAreaOrigin();
     wxWindowList& children = GetChildren();
@@ -733,12 +777,7 @@ void wxWindowDFB::PaintWindow(const wxRect& rect)
         // compute child's area to repaint
         wxRect childrect(child->GetRect());
         childrect.Offset(origin);
-
-        if ( child->CanBeOutsideClientArea() )
-            childrect.Intersect(rect);
-        else
-            childrect.Intersect(rectClientOnly);
-
+        childrect.Intersect(rect);
         if ( childrect.IsEmpty() )
             continue;
 

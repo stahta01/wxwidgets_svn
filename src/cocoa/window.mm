@@ -22,10 +22,8 @@
 
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
-#include "wx/cocoa/trackingrectmanager.h"
 
-#import <Foundation/NSRunLoop.h>
-#include "wx/cocoa/objc/NSView.h"
+#import <AppKit/NSView.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSScrollView.h>
 #import <AppKit/NSColor.h>
@@ -112,7 +110,6 @@ protected:
     wxWindowCocoa *m_owner;
     WX_NSView m_dummyNSView;
     virtual void Cocoa_FrameChanged(void);
-    virtual void Cocoa_synthesizeMouseMoved(void) {}
 #ifdef WXCOCOA_FILL_DUMMY_VIEW
     virtual bool Cocoa_drawRect(const NSRect& rect);
 #endif //def WXCOCOA_FILL_DUMMY_VIEW
@@ -138,7 +135,6 @@ protected:
     wxWindowCocoa *m_owner;
     WX_NSScrollView m_cocoaNSScrollView;
     virtual void Cocoa_FrameChanged(void);
-    virtual void Cocoa_synthesizeMouseMoved(void) {}
 private:
     wxWindowCocoaScrollView();
 };
@@ -149,7 +145,6 @@ private:
 @interface wxDummyNSView : NSView
 - (NSView *)hitTest:(NSPoint)aPoint;
 @end
-WX_DECLARE_GET_OBJC_CLASS(wxDummyNSView,NSView)
 
 @implementation wxDummyNSView : NSView
 - (NSView *)hitTest:(NSPoint)aPoint
@@ -158,7 +153,6 @@ WX_DECLARE_GET_OBJC_CLASS(wxDummyNSView,NSView)
 }
 
 @end
-WX_IMPLEMENT_GET_OBJC_CLASS(wxDummyNSView,NSView)
 
 // ========================================================================
 // wxWindowCocoaHider
@@ -168,7 +162,7 @@ wxWindowCocoaHider::wxWindowCocoaHider(wxWindow *owner)
 {
     wxASSERT(owner);
     wxASSERT(owner->GetNSViewForHiding());
-    m_dummyNSView = [[WX_GET_OBJC_CLASS(wxDummyNSView) alloc]
+    m_dummyNSView = [[wxDummyNSView alloc]
         initWithFrame:[owner->GetNSViewForHiding() frame]];
     [m_dummyNSView setAutoresizingMask: [owner->GetNSViewForHiding() autoresizingMask]];
     AssociateNSView(m_dummyNSView);
@@ -205,7 +199,6 @@ bool wxWindowCocoaHider::Cocoa_drawRect(const NSRect& rect)
 @interface wxFlippedNSClipView : NSClipView
 - (BOOL)isFlipped;
 @end
-WX_DECLARE_GET_OBJC_CLASS(wxFlippedNSClipView,NSClipView)
 
 @implementation wxFlippedNSClipView : NSClipView
 - (BOOL)isFlipped
@@ -214,7 +207,6 @@ WX_DECLARE_GET_OBJC_CLASS(wxFlippedNSClipView,NSClipView)
 }
 
 @end
-WX_IMPLEMENT_GET_OBJC_CLASS(wxFlippedNSClipView,NSClipView)
 
 // ========================================================================
 // wxWindowCocoaScrollView
@@ -231,7 +223,7 @@ wxWindowCocoaScrollView::wxWindowCocoaScrollView(wxWindow *owner)
 
     /* Replace the default NSClipView with a flipped one.  This ensures
        scrolling is "pinned" to the top-left instead of bottom-right. */
-    NSClipView *flippedClip = [[WX_GET_OBJC_CLASS(wxFlippedNSClipView) alloc]
+    NSClipView *flippedClip = [[wxFlippedNSClipView alloc]
         initWithFrame: [[m_cocoaNSScrollView contentView] frame]];
     [m_cocoaNSScrollView setContentView:flippedClip];
     [flippedClip release];
@@ -321,7 +313,7 @@ void wxWindowCocoa::Init()
     m_wxCocoaScrollView = NULL;
     m_isBeingDeleted = false;
     m_isInPaint = false;
-    m_visibleTrackingRectManager = NULL;
+    m_shouldBeEnabled = true;
 }
 
 // Constructor
@@ -336,7 +328,7 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID winid,
 
     // TODO: create the window
     m_cocoaNSView = NULL;
-    SetNSView([[WX_GET_OBJC_CLASS(WXNSView) alloc] initWithFrame: MakeDefaultNSRect(size)]);
+    SetNSView([[NSView alloc] initWithFrame: MakeDefaultNSRect(size)]);
     [m_cocoaNSView release];
 
     if (m_parent)
@@ -382,10 +374,6 @@ void wxWindowCocoa::CocoaRemoveFromParent(void)
 
 void wxWindowCocoa::SetNSView(WX_NSView cocoaNSView)
 {
-    // Clear the visible area tracking rect if we have one.
-    delete m_visibleTrackingRectManager;
-    m_visibleTrackingRectManager = NULL;
-
     bool need_debug = cocoaNSView || m_cocoaNSView;
     if(need_debug) wxLogTrace(wxTRACE_COCOA_RetainRelease,wxT("wxWindowCocoa=%p::SetNSView [m_cocoaNSView=%p retainCount]=%d"),this,m_cocoaNSView,[m_cocoaNSView retainCount]);
     DisassociateNSView(m_cocoaNSView);
@@ -504,65 +492,18 @@ bool wxWindowCocoa::Cocoa_mouseMoved(WX_NSEvent theEvent)
 {
     wxMouseEvent event(wxEVT_MOTION);
     InitMouseEvent(event,theEvent);
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_mouseMoved @%d,%d"),this,event.m_x,event.m_y);
+    wxLogTrace(wxTRACE_COCOA,wxT("Mouse Drag @%d,%d"),event.m_x,event.m_y);
     return GetEventHandler()->ProcessEvent(event);
-}
-
-void wxWindowCocoa::Cocoa_synthesizeMouseMoved()
-{
-    wxMouseEvent event(wxEVT_MOTION);
-    NSWindow *window = [GetNSView() window];
-    NSPoint locationInWindow = [window mouseLocationOutsideOfEventStream];
-    NSPoint cocoaPoint = [m_cocoaNSView convertPoint:locationInWindow fromView:nil];
-
-    NSPoint pointWx = CocoaTransformBoundsToWx(cocoaPoint);
-    // FIXME: Should we be adjusting for client area origin?
-    const wxPoint &clientorigin = GetClientAreaOrigin();
-    event.m_x = (wxCoord)pointWx.x - clientorigin.x;
-    event.m_y = (wxCoord)pointWx.y - clientorigin.y;
-
-    // TODO: Handle shift, control, alt, meta flags
-    event.SetEventObject(this);
-    event.SetId(GetId());
-
-    wxLogTrace(wxTRACE_COCOA,wxT("wxwin=%p Synthesized Mouse Moved @%d,%d"),this,event.m_x,event.m_y);
-    GetEventHandler()->ProcessEvent(event);
 }
 
 bool wxWindowCocoa::Cocoa_mouseEntered(WX_NSEvent theEvent)
 {
-    if(m_visibleTrackingRectManager != NULL && m_visibleTrackingRectManager->IsOwnerOfEvent(theEvent))
-    {
-        m_visibleTrackingRectManager->BeginSynthesizingEvents();
-
-        // Although we synthesize the mouse moved events we don't poll for them but rather send them only when
-        // some other event comes in.  That other event is (guess what) mouse moved events that will be sent
-        // to the NSWindow which will forward them on to the first responder.  We are not likely to be the
-        // first responder, so the mouseMoved: events are effectively discarded.
-        [[GetNSView() window] setAcceptsMouseMovedEvents:YES];
-
-        wxMouseEvent event(wxEVT_ENTER_WINDOW);
-        InitMouseEvent(event,theEvent);
-        wxLogTrace(wxTRACE_COCOA,wxT("wxwin=%p Mouse Entered @%d,%d"),this,event.m_x,event.m_y);
-        return GetEventHandler()->ProcessEvent(event);
-    }
-    else
-        return false;
+    return false;
 }
 
 bool wxWindowCocoa::Cocoa_mouseExited(WX_NSEvent theEvent)
 {
-    if(m_visibleTrackingRectManager != NULL && m_visibleTrackingRectManager->IsOwnerOfEvent(theEvent))
-    {
-        m_visibleTrackingRectManager->StopSynthesizingEvents();
-
-        wxMouseEvent event(wxEVT_LEAVE_WINDOW);
-        InitMouseEvent(event,theEvent);
-        wxLogTrace(wxTRACE_COCOA,wxT("wxwin=%p Mouse Exited @%d,%d"),this,event.m_x,event.m_y);
-        return GetEventHandler()->ProcessEvent(event);
-    }
-    else
-        return false;
+    return false;
 }
 
 bool wxWindowCocoa::Cocoa_mouseDown(WX_NSEvent theEvent)
@@ -632,9 +573,7 @@ bool wxWindowCocoa::Cocoa_otherMouseUp(WX_NSEvent theEvent)
 
 void wxWindowCocoa::Cocoa_FrameChanged(void)
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_FrameChanged"),this);
-    if(m_visibleTrackingRectManager != NULL)
-        m_visibleTrackingRectManager->RebuildTrackingRect();
+    wxLogTrace(wxTRACE_COCOA,wxT("Cocoa_FrameChanged"));
     wxSizeEvent event(GetSize(), m_windowId);
     event.SetEventObject(this);
     GetEventHandler()->ProcessEvent(event);
@@ -642,34 +581,12 @@ void wxWindowCocoa::Cocoa_FrameChanged(void)
 
 bool wxWindowCocoa::Cocoa_resetCursorRects()
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_resetCursorRects"),this);
-    if(m_visibleTrackingRectManager != NULL)
-        m_visibleTrackingRectManager->RebuildTrackingRect();
-
     if(!m_cursor.GetNSCursor())
         return false;
 
     [GetNSView() addCursorRect: [GetNSView() visibleRect]  cursor: m_cursor.GetNSCursor()];
 
     return true;
-}
-
-bool wxWindowCocoa::Cocoa_viewDidMoveToWindow()
-{
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::viewDidMoveToWindow"),this);
-    // Set up new tracking rects.  I am reasonably sure the new window must be set before doing this.
-    if(m_visibleTrackingRectManager != NULL)
-        m_visibleTrackingRectManager->BuildTrackingRect();
-    return false;
-}
-
-bool wxWindowCocoa::Cocoa_viewWillMoveToWindow(WX_NSWindow newWindow)
-{
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::viewWillMoveToWindow:%p"),this, newWindow);
-    // Clear tracking rects.  It is imperative this be done before the new window is set.
-    if(m_visibleTrackingRectManager != NULL)
-        m_visibleTrackingRectManager->ClearTrackingRect();
-    return false;
 }
 
 bool wxWindow::Close(bool force)
@@ -684,9 +601,32 @@ void wxWindow::CocoaReplaceView(WX_NSView oldView, WX_NSView newView)
     [[oldView superview] replaceSubview:oldView with:newView];
 }
 
-void wxWindow::DoEnable(bool enable)
+bool wxWindow::EnableSelfAndChildren(bool enable)
 {
-	CocoaSetEnabled(enable);
+    // If the state isn't changing, don't do anything
+    if(!wxWindowBase::Enable(enable && m_shouldBeEnabled))
+        return false;
+    // Set the state of the Cocoa window
+    CocoaSetEnabled(m_isEnabled);
+    // Disable all children or (if enabling) return them to their proper state
+    for(wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        node; node = node->GetNext())
+    {
+        node->GetData()->EnableSelfAndChildren(enable);
+    }
+    return true;
+}
+
+bool wxWindow::Enable(bool enable)
+{
+    // Keep track of what the window SHOULD be doing
+    m_shouldBeEnabled = enable;
+    // If the parent is disabled for any reason, then this window will be too.
+    if(!IsTopLevel() && GetParent())
+    {
+        enable = enable && GetParent()->IsEnabled();
+    }
+    return EnableSelfAndChildren(enable);
 }
 
 bool wxWindow::Show(bool show)
@@ -917,13 +857,12 @@ void wxWindow::CocoaSetWxWindowSize(int width, int height)
 
 void wxWindow::SetLabel(const wxString& WXUNUSED(label))
 {
-    // Intentional no-op.
+    // TODO
 }
 
 wxString wxWindow::GetLabel() const
 {
-    // General Get/Set of labels is implemented in wxControlBase
-    wxLogDebug(wxT("wxWindow::GetLabel: Should be overridden if needed."));
+    // TODO
     return wxEmptyString;
 }
 
@@ -1116,89 +1055,3 @@ wxWindow* wxFindWindowAtPointer(wxPoint& pt)
     pt = wxGetMousePosition();
     return NULL;
 }
-
-
-// ========================================================================
-// wxCocoaTrackingRectManager
-// ========================================================================
-
-wxCocoaTrackingRectManager::wxCocoaTrackingRectManager(wxWindow *window)
-:   m_window(window)
-{
-    m_isTrackingRectActive = false;
-    m_runLoopObserver = NULL;
-    BuildTrackingRect();
-}
-
-void wxCocoaTrackingRectManager::ClearTrackingRect()
-{
-    if(m_isTrackingRectActive)
-    {
-        [m_window->GetNSView() removeTrackingRect:m_trackingRectTag];
-        m_isTrackingRectActive = false;
-    }
-    // If we were doing periodic events we need to clear those too
-    StopSynthesizingEvents();
-}
-
-void wxCocoaTrackingRectManager::StopSynthesizingEvents()
-{
-    if(m_runLoopObserver != NULL)
-    {
-        CFRunLoopRemoveObserver([[NSRunLoop currentRunLoop] getCFRunLoop], m_runLoopObserver, kCFRunLoopCommonModes);
-        CFRelease(m_runLoopObserver);
-        m_runLoopObserver = NULL;
-    }
-}
-
-void wxCocoaTrackingRectManager::BuildTrackingRect()
-{
-    wxASSERT_MSG(!m_isTrackingRectActive, wxT("Tracking rect was not cleared"));
-    if([m_window->GetNSView() window] != nil)
-    {
-        m_trackingRectTag = [m_window->GetNSView() addTrackingRect:[m_window->GetNSView() visibleRect] owner:m_window->GetNSView() userData:NULL assumeInside:NO];
-        m_isTrackingRectActive = true;
-    }
-}
-
-static NSPoint s_lastScreenMouseLocation = NSZeroPoint;
-
-static void SynthesizeMouseMovedEvent(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)
-{
-    NSPoint screenMouseLocation = [NSEvent mouseLocation];
-    if(screenMouseLocation.x != s_lastScreenMouseLocation.x || screenMouseLocation.y != s_lastScreenMouseLocation.y)
-    {
-        wxCocoaNSView *win = reinterpret_cast<wxCocoaNSView*>(info);
-        win->Cocoa_synthesizeMouseMoved();
-    }
-}
-
-void wxCocoaTrackingRectManager::BeginSynthesizingEvents()
-{
-    CFRunLoopObserverContext observerContext =
-    {   0
-    ,   static_cast<wxCocoaNSView*>(m_window)
-    ,   NULL
-    ,   NULL
-    ,   NULL
-    };
-    m_runLoopObserver = CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopBeforeWaiting, TRUE, 0, SynthesizeMouseMovedEvent, &observerContext);
-    CFRunLoopAddObserver([[NSRunLoop currentRunLoop] getCFRunLoop], m_runLoopObserver, kCFRunLoopCommonModes);
-}
-
-void wxCocoaTrackingRectManager::RebuildTrackingRect()
-{
-    ClearTrackingRect();
-    BuildTrackingRect();
-}
-
-wxCocoaTrackingRectManager::~wxCocoaTrackingRectManager()
-{
-    ClearTrackingRect();
-}
-
-bool wxCocoaTrackingRectManager::IsOwnerOfEvent(NSEvent *anEvent)
-{
-    return m_isTrackingRectActive && (m_trackingRectTag == [anEvent trackingNumber]);
-}
-

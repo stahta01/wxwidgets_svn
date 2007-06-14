@@ -48,10 +48,10 @@
 #if wxUSE_BASE
     IMPLEMENT_DYNAMIC_CLASS(wxEvtHandler, wxObject)
     IMPLEMENT_ABSTRACT_CLASS(wxEvent, wxObject)
-    IMPLEMENT_DYNAMIC_CLASS(wxIdleEvent, wxEvent)
 #endif // wxUSE_BASE
 
 #if wxUSE_GUI
+    IMPLEMENT_DYNAMIC_CLASS(wxIdleEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxCommandEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxNotifyEvent, wxCommandEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxScrollEvent, wxCommandEvent)
@@ -107,26 +107,22 @@ const wxEventTableEntry wxEvtHandler::sm_eventTableEntries[] =
     { DECLARE_EVENT_TABLE_ENTRY(wxEVT_NULL, 0, 0, (wxObjectEventFunction)NULL, NULL) };
 
 
-// wxUSE_MEMORY_TRACING considers memory freed from the static objects dtors
-// leaked, so we need to manually clean up all event tables before checking for
-// the memory leaks when using it, however this breaks re-initializing the
-// library (i.e. repeated calls to wxInitialize/wxUninitialize) because the
-// event tables won't be rebuilt the next time, so disable this by default
-#if defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING 
-
+#ifdef __WXDEBUG__
+// Clear up event hash table contents or we can get problems
+// when C++ is cleaning up the static object
 class wxEventTableEntryModule: public wxModule
 {
+DECLARE_DYNAMIC_CLASS(wxEventTableEntryModule)
 public:
-    wxEventTableEntryModule() { }
-    virtual bool OnInit() { return true; }
-    virtual void OnExit() { wxEventHashTable::ClearAll(); }
-
-    DECLARE_DYNAMIC_CLASS(wxEventTableEntryModule)
+    wxEventTableEntryModule() {}
+    bool OnInit() { return true; }
+    void OnExit()
+    {
+        wxEventHashTable::ClearAll();
+    }
 };
-
 IMPLEMENT_DYNAMIC_CLASS(wxEventTableEntryModule, wxModule)
-
-#endif // __WXDEBUG__ && wxUSE_MEMORY_TRACING
+#endif
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -151,7 +147,6 @@ const wxEventType wxEVT_USER_FIRST = wxEVT_FIRST + 2000;
 DEFINE_EVENT_TYPE(wxEVT_NULL)
 DEFINE_EVENT_TYPE(wxEVT_IDLE)
 DEFINE_EVENT_TYPE(wxEVT_SOCKET)
-DEFINE_EVENT_TYPE(wxEVT_TIMER)
 
 #endif // !WXWIN_COMPATIBILITY_EVENT_TYPES
 
@@ -177,7 +172,9 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_COMBOBOX_SELECTED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOOL_RCLICKED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOOL_ENTER)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPINCTRL_UPDATED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED)
+
+// Sockets and timers send events, too
+DEFINE_EVENT_TYPE(wxEVT_TIMER)
 
 // Mouse event types
 DEFINE_EVENT_TYPE(wxEVT_LEFT_DOWN)
@@ -313,8 +310,6 @@ DEFINE_EVENT_TYPE(wxEVT_DETAILED_HELP)
 
 #if wxUSE_BASE
 
-wxIdleMode wxIdleEvent::sm_idleMode = wxIDLE_PROCESS_ALL;
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -385,6 +380,9 @@ wxEvent::wxEvent(const wxEvent &src)
 
 wxCommandEvent::wxCommandEvent(wxEventType commandType, int theId)
               : wxEvent(theId, commandType)
+#if WXWIN_COMPATIBILITY_2_4
+              , m_commandString(this)
+#endif
 {
     m_clientData = (char *) NULL;
     m_clientObject = (wxClientData *) NULL;
@@ -476,6 +474,25 @@ void wxUpdateUIEvent::ResetUpdateTime()
 }
 
 /*
+ * Idle events
+ */
+
+wxIdleMode wxIdleEvent::sm_idleMode = wxIDLE_PROCESS_ALL;
+
+// Can we send an idle event?
+bool wxIdleEvent::CanSend(wxWindow* win)
+{
+    // Don't update if we've switched global updating off
+    // and this window doesn't support updates.
+    if (win &&
+       (GetMode() == wxIDLE_PROCESS_SPECIFIED &&
+       ((win->GetExtraStyle() & wxWS_EX_PROCESS_IDLE) == 0)))
+        return false;
+
+    return true;
+}
+
+/*
  * Scroll events
  */
 
@@ -522,7 +539,6 @@ wxMouseEvent::wxMouseEvent(wxEventType commandType)
     m_wheelRotation = 0;
     m_wheelDelta = 0;
     m_linesPerAction = 0;
-    m_wheelAxis = 0;
 }
 
 void wxMouseEvent::Assign(const wxMouseEvent& event)
@@ -544,7 +560,6 @@ void wxMouseEvent::Assign(const wxMouseEvent& event)
     m_wheelRotation = event.m_wheelRotation;
     m_wheelDelta = event.m_wheelDelta;
     m_linesPerAction = event.m_linesPerAction;
-    m_wheelAxis = event.m_wheelAxis;
 }
 
 // return true if was a button dclick event
@@ -805,19 +820,24 @@ wxEventHashTable::~wxEventHashTable()
 
 void wxEventHashTable::Clear()
 {
-    for ( size_t i = 0; i < m_size; i++ )
+    size_t i;
+    for(i = 0; i < m_size; i++)
     {
         EventTypeTablePointer  eTTnode = m_eventTypeTable[i];
-        delete eTTnode;
+        if (eTTnode)
+        {
+            delete eTTnode;
+        }
     }
 
-    delete[] m_eventTypeTable;
-    m_eventTypeTable = NULL;
+    // Necessary in order to not invoke the
+    // overloaded delete operator when statics are cleaned up
+    if (m_eventTypeTable)
+        delete[] m_eventTypeTable;
 
+    m_eventTypeTable = NULL;
     m_size = 0;
 }
-
-#if defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING 
 
 // Clear all tables
 void wxEventHashTable::ClearAll()
@@ -829,8 +849,6 @@ void wxEventHashTable::ClearAll()
         table = table->m_next;
     }
 }
-
-#endif // __WXDEBUG__ && wxUSE_MEMORY_TRACING
 
 bool wxEventHashTable::HandleEvent(wxEvent &event, wxEvtHandler *self)
 {
@@ -1441,40 +1459,6 @@ wxWindow* wxFindFocusDescendant(wxWindow* ancestor)
         focusWin = (wxWindow*) NULL;
 
     return focusWin;
-}
-
-// ----------------------------------------------------------------------------
-// wxEventBlocker
-// ----------------------------------------------------------------------------
-
-wxEventBlocker::wxEventBlocker(wxWindow *win, wxEventType type)
-{
-    wxCHECK_RET(win, wxT("Null window given to wxEventBlocker"));
-
-    m_window = win;
-
-    Block(type);
-    m_window->PushEventHandler(this);
-}
-
-wxEventBlocker::~wxEventBlocker()
-{
-    wxEvtHandler *popped = m_window->PopEventHandler(false);
-    wxCHECK_RET(popped == this, 
-        wxT("Don't push other event handlers into a window managed by wxEventBlocker!"));
-}
-
-bool wxEventBlocker::ProcessEvent(wxEvent& event)
-{
-    // should this event be blocked?
-    for ( size_t i = 0; i < m_eventsToBlock.size(); i++ )
-    {
-        wxEventType t = (wxEventType)m_eventsToBlock[i];
-        if ( t == wxEVT_ANY || t == event.GetEventType() )
-            return true;   // yes, it should: mark this event as processed
-    }
-
-    return false;
 }
 
 #endif // wxUSE_GUI

@@ -28,23 +28,12 @@
 #endif //WX_PRECOMP
 
 #include "wx/apptrait.h"
-#include "wx/evtloop.h"
-#include "wx/msw/private/timer.h"
 // MBN: this is a workaround for MSVC 5: if it is not #included in
 // some wxBase file, wxRecursionGuard methods won't be exported from
 // wxBase.dll, and MSVC 5 will give linker errors
 #include "wx/recguard.h"
 
 #include "wx/msw/private.h"
-
-// ============================================================================
-// wxAppTraits implementation
-// ============================================================================
-
-WXDWORD wxAppTraits::DoSimpleWaitForThread(WXHANDLE hThread)
-{
-    return ::WaitForSingleObject((HANDLE)hThread, INFINITE);
-}
 
 // ============================================================================
 // wxConsoleAppTraits implementation
@@ -80,20 +69,5 @@ bool wxConsoleAppTraits::DoMessageFromThreadWait()
 {
     // nothing to process here
     return true;
-}
-
-wxTimerImpl *wxConsoleAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxMSWTimerImpl(timer);
-}
-
-wxEventLoopBase *wxConsoleAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop();
-}
-
-WXDWORD wxConsoleAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    return DoSimpleWaitForThread(hThread);
 }
 

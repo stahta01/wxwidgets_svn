@@ -27,7 +27,6 @@
 #include "wx/dialog.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
     #include "wx/button.h"
     #include "wx/dcclient.h"
     #include "wx/intl.h"
@@ -39,8 +38,61 @@
 
 #include "wx/statline.h"
 #include "wx/sysopt.h"
-#include "wx/private/stattext.h"
 
+#if wxUSE_STATTEXT
+
+// ----------------------------------------------------------------------------
+// wxTextWrapper
+// ----------------------------------------------------------------------------
+
+// this class is used to wrap the text on word boundary: wrapping is done by
+// calling OnStartLine() and OnOutputLine() functions
+class wxTextWrapper
+{
+public:
+    wxTextWrapper() { m_eol = false; }
+
+    // win is used for getting the font, text is the text to wrap, width is the
+    // max line width or -1 to disable wrapping
+    void Wrap(wxWindow *win, const wxString& text, int widthMax);
+
+    // we don't need it, but just to avoid compiler warnings
+    virtual ~wxTextWrapper() { }
+
+protected:
+    // line may be empty
+    virtual void OnOutputLine(const wxString& line) = 0;
+
+    // called at the start of every new line (except the very first one)
+    virtual void OnNewLine() { }
+
+private:
+    // call OnOutputLine() and set m_eol to true
+    void DoOutputLine(const wxString& line)
+    {
+        OnOutputLine(line);
+
+        m_eol = true;
+    }
+
+    // this function is a destructive inspector: when it returns true it also
+    // resets the flag to false so calling it again woulnd't return true any
+    // more
+    bool IsStartOfNewLine()
+    {
+        if ( !m_eol )
+            return false;
+
+        m_eol = false;
+
+        return true;
+    }
+
+
+    bool m_eol;
+};
+
+#endif // wxUSE_STATTEXT
 
 // ----------------------------------------------------------------------------
 // wxDialogBase
@@ -52,7 +104,11 @@ BEGIN_EVENT_TABLE(wxDialogBase, wxTopLevelWindow)
     EVT_CLOSE(wxDialogBase::OnCloseWindow)
 
     EVT_CHAR_HOOK(wxDialogBase::OnCharHook)
+
+    WX_EVENT_TABLE_CONTROL_CONTAINER(wxDialogBase)
 END_EVENT_TABLE()
+
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase, wxTopLevelWindow)
 
 void wxDialogBase::Init()
 {
@@ -64,39 +120,63 @@ void wxDialogBase::Init()
     // dialog controls from reaching the parent frame which is usually
     // undesirable and can lead to unexpected and hard to find bugs
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
-}
 
-// helper of GetParentForModalDialog()
-static bool CanBeUsedAsParent(wxWindow *parent)
-{
-    extern WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
-
-    return !parent->HasExtraStyle(wxWS_EX_TRANSIENT) &&
-                parent->IsShownOnScreen() &&
-                    !wxPendingDelete.Member(parent) &&
-                        !parent->IsBeingDeleted();
-}
-
-wxWindow *wxDialogBase::GetParentForModalDialog(wxWindow *parent) const
-{
-    // creating a parent-less modal dialog will result (under e.g. wxGTK2)
-    // in an unfocused dialog, so try to find a valid parent for it:
-    if ( parent )
-        parent = wxGetTopLevelParent(parent);
-
-    if ( !parent || !CanBeUsedAsParent(parent) )
-        parent = wxTheApp->GetTopWindow();
-
-    if ( parent && !CanBeUsedAsParent(parent) )
-    {
-        // can't use this one, it's going to disappear
-        parent = NULL;
-    }
-
-    return parent;
+    m_container.SetContainerWindow(this);
 }
 
 #if wxUSE_STATTEXT
+
+void wxTextWrapper::Wrap(wxWindow *win, const wxString& text, int widthMax)
+{
+    const wxChar *lastSpace = NULL;
+    wxString line;
+
+    const wxChar *lineStart = text.c_str();
+    for ( const wxChar *p = lineStart; ; p++ )
+    {
+        if ( IsStartOfNewLine() )
+        {
+            OnNewLine();
+
+            lastSpace = NULL;
+            line.clear();
+            lineStart = p;
+        }
+
+        if ( *p == _T('\n') || *p == _T('\0') )
+        {
+            DoOutputLine(line);
+
+            if ( *p == _T('\0') )
+                break;
+        }
+        else // not EOL
+        {
+            if ( *p == _T(' ') )
+                lastSpace = p;
+
+            line += *p;
+
+            if ( widthMax >= 0 && lastSpace )
+            {
+                int width;
+                win->GetTextExtent(line, &width, NULL);
+
+                if ( width > widthMax )
+                {
+                    // remove the last word from this line
+                    line.erase(lastSpace - lineStart, p + 1 - lineStart);
+                    DoOutputLine(line);
+
+                    // go back to the last word of this line which we didn't
+                    // output yet
+                    p = lastSpace;
+                }
+            }
+            //else: no wrapping at all or impossible to wrap
+        }
+    }
+}
 
 class wxTextSizerWrapper : public wxTextWrapper
 {
@@ -156,6 +236,45 @@ wxSizer *wxDialogBase::CreateTextSizer(const wxString& message)
     wxTextSizerWrapper wrapper(this);
 
     return wrapper.CreateSizer(text, widthMax);
+}
+
+class wxLabelWrapper : public wxTextWrapper
+{
+public:
+    void WrapLabel(wxWindow *text, int widthMax)
+    {
+        m_text.clear();
+        Wrap(text, text->GetLabel(), widthMax);
+        text->SetLabel(m_text);
+    }
+
+protected:
+    virtual void OnOutputLine(const wxString& line)
+    {
+        m_text += line;
+    }
+
+    virtual void OnNewLine()
+    {
+        m_text += _T('\n');
+    }
+
+private:
+    wxString m_text;
+};
+
+// NB: don't "factor out" the scope operator, SGI MIPSpro 7.3 (but not 7.4)
+//     gets confused if it doesn't immediately follow the class name
+void
+#if defined(__WXGTK__) && !defined(__WXUNIVERSAL__)
+wxStaticText::
+#else
+wxStaticTextBase::
+#endif
+Wrap(int width)
+{
+    wxLabelWrapper wrapper;
+    wrapper.WrapLabel(this, width);
 }
 
 #endif // wxUSE_STATTEXT
@@ -250,18 +369,6 @@ wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
     {
         no = new wxButton(this, wxID_NO);
         sizer->AddButton(no);
-    }
-
-    if (flags & wxAPPLY)
-    {
-        wxButton *apply = new wxButton(this, wxID_APPLY);
-        sizer->AddButton(apply);
-    }
-
-    if (flags & wxCLOSE)
-    {
-        wxButton *close = new wxButton(this, wxID_CLOSE);
-        sizer->AddButton(close);
     }
 
     if (flags & wxHELP)

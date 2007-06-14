@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 24 April 2007                                                       *
+# Date : 13 February 2006                                                    *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -60,8 +60,7 @@ OBJECTS =       baseunix.obj,\
 		sound.obj,\
 		sound_sdl.obj,\
 		stdpaths.obj,\
-		taskbarx11.obj,\
-		timerunx.obj
+		taskbarx11.obj
 
 SOURCES =       baseunix.cpp,\
 		dialup.cpp,\
@@ -80,8 +79,7 @@ SOURCES =       baseunix.cpp,\
 		sound.cpp,\
 		sound_sdl.cpp,\
 		stdpaths.cpp,\
-		taskbarx11.cpp,\
-		timerunx.cpp
+		taskbarx11.cpp
 
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -120,4 +118,3 @@ sound_sdl.obj : sound_sdl.cpp
 stdpaths.obj : stdpaths.cpp
 taskbarx11.obj : taskbarx11.cpp
 displayx11.obj : displayx11.cpp
-timerunx.obj : timerunx.cpp

@@ -19,8 +19,11 @@ public:
 
     wxDataFormat();
     wxDataFormat(wxDataFormatId vType);
+    wxDataFormat(const wxDataFormat& rFormat);
     wxDataFormat(const wxString& rId);
+    wxDataFormat(const wxChar* pId);
     wxDataFormat(NativeFormat vFormat);
+    ~wxDataFormat();
 
     wxDataFormat& operator=(NativeFormat vFormat)
         { SetId(vFormat); return *this; }
@@ -34,6 +37,8 @@ public:
     bool operator!=(wxDataFormatId format) const
         { return m_type != (wxDataFormatId)format; }
 
+    wxDataFormat& operator=(const wxDataFormat& format);
+
     // explicit and implicit conversions to NativeFormat which is one of
     // standard data types (implicit conversion is useful for preserving the
     // compatibility with old code)
@@ -45,7 +50,7 @@ public:
     // string ids are used for custom types - this SetId() must be used for
     // application-specific formats
     wxString GetId() const;
-    void SetId(const wxString& pId);
+    void SetId(const wxChar* pId);
 
     // implementation
     wxDataFormatId GetType() const { return m_type; }

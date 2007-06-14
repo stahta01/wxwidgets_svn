@@ -29,7 +29,6 @@
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/crt.h"
 #endif
 
 #ifdef __WINDOWS__
@@ -58,14 +57,14 @@
 // opening the file
 // ----------------------------------------------------------------------------
 
-wxFFile::wxFFile(const wxString& filename, const wxString& mode)
+wxFFile::wxFFile(const wxChar *filename, const wxChar *mode)
 {
     Detach();
 
     (void)Open(filename, mode);
 }
 
-bool wxFFile::Open(const wxString& filename, const wxString& mode)
+bool wxFFile::Open(const wxChar *filename, const wxChar *mode)
 {
     wxASSERT_MSG( !m_fp, wxT("should close or detach the old file first") );
 
@@ -162,21 +161,13 @@ size_t wxFFile::Write(const void *pBuf, size_t nCount)
     return nWritten;
 }
 
-bool wxFFile::Write(const wxString& s, const wxMBConv& conv)
-{
-  const wxWX2MBbuf buf = s.mb_str(conv);
-  if ( !buf )
-      return false;
-
-  const size_t size = strlen(buf); // FIXME: use buf.length() when available
-  return Write(buf, size) == size;
-}
-
 bool wxFFile::Flush()
 {
     if ( IsOpened() )
     {
-        if ( fflush(m_fp) != 0 )
+        // fflush returns non-zero on error
+        //
+        if ( fflush(m_fp) )
         {
             wxLogSysError(_("failed to flush the file '%s'"), m_name.c_str());
 

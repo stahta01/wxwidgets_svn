@@ -315,17 +315,6 @@ void wxMDIParentFrame::DoMenuUpdates(wxMenu* menu)
     }
 }
 
-const wxMenuItem *wxMDIParentFrame::FindItemInMenuBar(int menuId) const
-{
-    const wxMenuItem *item = wxFrame::FindItemInMenuBar(menuId);
-    if ( !item && m_currentChild )
-    {
-        item = m_currentChild->FindItemInMenuBar(menuId);
-    }
-
-    return item;
-}
-
 void wxMDIParentFrame::UpdateClientSize()
 {
     if ( GetClientWindow() )
@@ -484,6 +473,24 @@ WXLRESULT wxMDIParentFrame::MSWWindowProc(WXUINT message,
 
             // we erase background ourselves
             rc = true;
+            break;
+
+        case WM_MENUSELECT:
+            {
+                WXWORD item, flags;
+                WXHMENU hmenu;
+                UnpackMenuSelect(wParam, lParam, &item, &flags, &hmenu);
+
+                if ( m_parentFrameActive )
+                {
+                    processed = HandleMenuSelect(item, flags, hmenu);
+                }
+                else if (m_currentChild)
+                {
+                    processed = m_currentChild->
+                        HandleMenuSelect(item, flags, hmenu);
+                }
+            }
             break;
 
         case WM_SIZE:
@@ -1388,11 +1395,7 @@ static void MDISetMenu(wxWindow *win, HMENU hmenuFrame, HMENU hmenuWindow)
                             (WPARAM)hmenuFrame,
                             (LPARAM)hmenuWindow) )
         {
-#ifdef __WXDEBUG__
-            DWORD err = ::GetLastError();
-            if ( err )
-                wxLogApiError(_T("SendMessage(WM_MDISETMENU)"), err);
-#endif // __WXDEBUG__
+            wxLogLastError(_T("SendMessage(WM_MDISETMENU)"));
         }
     }
 

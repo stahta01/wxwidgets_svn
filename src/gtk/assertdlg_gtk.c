@@ -33,10 +33,8 @@ extern "C" {
    Constants
  ---------------------------------------------------------------------------- */
 
-/*
-   NB: when changing order of the columns also update the gtk_list_store_new() call
-       in gtk_assert_dialog_create_backtrace_list_model() function
- */
+// NB: when changing order of the columns also update the gtk_list_store_new() call
+//     in gtk_assert_dialog_create_backtrace_list_model() function
 #define STACKFRAME_LEVEL_COLIDX        0
 #define FUNCTION_NAME_COLIDX           1
 #define SOURCE_FILE_COLIDX             2
@@ -105,18 +103,18 @@ GtkWidget *gtk_assert_dialog_create_backtrace_list_model ()
 
     /* create list store */
     store = gtk_list_store_new (5,
-                                G_TYPE_UINT,        /* stack frame number */
-                                G_TYPE_STRING,      /* function name      */
-                                G_TYPE_STRING,      /* source file name   */
-                                G_TYPE_STRING,      /* line number        */
-                                G_TYPE_STRING);     /* function arguments */
+                                G_TYPE_UINT,        // stack frame number
+                                G_TYPE_STRING,      // function name
+                                G_TYPE_STRING,      // source file name
+                                G_TYPE_STRING,      // line number
+                                G_TYPE_STRING);     // function arguments
 
     /* create the tree view */
     treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL(store));
     g_object_unref (store);
     gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (treeview), TRUE);
 
-    /* append columns */
+    // append columns
     gtk_assert_dialog_append_text_column(treeview, "#", STACKFRAME_LEVEL_COLIDX);
     gtk_assert_dialog_append_text_column(treeview, "Function name", FUNCTION_NAME_COLIDX);
     gtk_assert_dialog_append_text_column(treeview, "Function args", FUNCTION_ARGS_COLIDX);
@@ -147,12 +145,13 @@ void gtk_assert_dialog_process_backtrace (GtkAssertDialog *dlg)
    GtkAssertDialog signal handlers
  ---------------------------------------------------------------------------- */
 
-/* GtkFileChooserDialog and GtkExpander are only available in GTK+ >= 2.4 */
-#if GTK_CHECK_VERSION(2,4,0)
+#if GTK_CHECK_VERSION(2,4,0)        // GtkFileChooserDialog and GtkExpander
+                                    // are only available in GTK+ >= 2.4
 
 void gtk_assert_dialog_expander_callback (GtkWidget *widget, GtkAssertDialog *dlg)
 {
-    /* status is not yet updated so we need to invert it to get the new one */
+    // for some reason we need to invert the return value of gtk_expander_get_expanded
+    // to get the real expanded status
     gboolean expanded = !gtk_expander_get_expanded (GTK_EXPANDER(dlg->expander));
     gtk_window_set_resizable (GTK_WINDOW (dlg), expanded);
 
@@ -181,28 +180,23 @@ void gtk_assert_dialog_save_backtrace_callback (GtkWidget *widget, GtkAssertDial
         FILE *fp;
 
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-        if ( filename )
-        {
-            msg = gtk_assert_dialog_get_message (dlg);
-            backtrace = gtk_assert_dialog_get_backtrace (dlg);
+        msg = gtk_assert_dialog_get_message (dlg);
+        backtrace = gtk_assert_dialog_get_backtrace (dlg);
 
-            /* open the file and write all info inside it */
-            fp = fopen (filename, "w");
-            if (fp)
-            {
-                fprintf (fp, "ASSERT INFO:\n%s\n\nBACKTRACE:\n%s", msg, backtrace);
-                fclose (fp);
-            }
+        /* open the file and write all info inside it */
+        fp = fopen (filename, "w");
+        if (fp && filename)
+            fprintf (fp, "ASSERT INFO:\n%s\n\nBACKTRACE:\n%s", msg, backtrace);
 
-            g_free (filename);
-            g_free (msg);
-            g_free (backtrace);
-        }
+        g_free (filename);
+        g_free (msg);
+        g_free (backtrace);
+        fclose (fp);
     }
 
     gtk_widget_destroy (dialog);
 }
-#endif /* GTK+ 2.4+ */
+#endif
 
 void gtk_assert_dialog_copy_callback (GtkWidget *widget, GtkAssertDialog *dlg)
 {
@@ -254,7 +248,7 @@ GtkType gtk_assert_dialog_get_type (void)
 
     if (!assert_dialog_type)
     {
-        const GTypeInfo assert_dialog_info =
+        static const GTypeInfo assert_dialog_info =
         {
             sizeof (GtkAssertDialogClass),
             NULL,           /* base_init */
@@ -328,7 +322,7 @@ void gtk_assert_dialog_init(GtkAssertDialog *dlg)
     else
 #endif
     {
-        /* if GtkExpander is unavailable, then use a static frame instead */
+        // if GtkExpander is unavailable, then use a static frame instead
         dlg->expander = gtk_frame_new ("Back_trace:");
         gtk_box_pack_start (GTK_BOX(vbox), dlg->expander, TRUE, TRUE, 0);
     }
@@ -484,8 +478,8 @@ void gtk_assert_dialog_set_backtrace_callback(GtkAssertDialog *assertdlg,
 
     if (gtk_check_version (2, 4, 0))
     {
-        /* we need to immediately process the stack trace as we're not using
-           an expander since GTK does not support it */
+        // we need to immediately process the stack trace as we're not using
+        // an expander since GTK does not support it
         gtk_assert_dialog_process_backtrace (assertdlg);
     }
 }

@@ -564,7 +564,7 @@ public:
     // ------------------------------------------------------------------------
 
         // default ctor does not initialize the object, use Set()!
-    wxDateTime() { m_time = wxLongLong(wxINT32_MIN, 0); }
+    wxDateTime() { m_time = wxLongLong((long)ULONG_MAX, ULONG_MAX); }
 
         // from time_t: seconds since the Epoch 00:00:00 UTC, Jan 1, 1970)
 #if (!(defined(__VISAGECPP__) && __IBMCPP__ >= 400))
@@ -639,9 +639,11 @@ public:
         // resets time to 00:00:00, doesn't change the date
     wxDateTime& ResetTime();
 
+#if wxABI_VERSION >= 20802
         // get the date part of this object only, i.e. the object which has the
         // same date as this one but time of 00:00:00
     wxDateTime GetDateOnly() const;
+#endif // wxABI 2.8.1+
 
         // the following functions don't change the values of the other
         // fields, i.e. SetMinute() won't change either hour or seconds value
@@ -1042,7 +1044,7 @@ public:
         // default, they will not change if they had valid values or will
         // default to Today() otherwise)
     const wxChar *ParseFormat(const wxChar *date,
-                              const wxString& format = wxDefaultDateTimeFormat,
+                              const wxChar *format = wxDefaultDateTimeFormat,
                               const wxDateTime& dateDef = wxDefaultDateTime);
         // parse a string containing the date/time in "free" format, this
         // function will try to make an educated guess at the string contents
@@ -1057,7 +1059,7 @@ public:
         // argument corresponds to the preferred date and time representation
         // for the current locale) and returns the string containing the
         // resulting text representation
-    wxString Format(const wxString& format = wxDefaultDateTimeFormat,
+    wxString Format(const wxChar *format = wxDefaultDateTimeFormat,
                     const TimeZone& tz = Local) const;
         // preferred date representation for the current locale
     wxString FormatDate() const { return Format(_T("%x")); }
@@ -1294,7 +1296,7 @@ public:
         // resulting text representation. Notice that only some of format
         // specifiers valid for wxDateTime are valid for wxTimeSpan: hours,
         // minutes and seconds make sense, but not "PM/AM" string for example.
-    wxString Format(const wxString& format = wxDefaultTimeSpanFormat) const;
+    wxString Format(const wxChar *format = wxDefaultTimeSpanFormat) const;
 
     // implementation
     // ------------------------------------------------------------------------

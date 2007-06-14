@@ -102,6 +102,18 @@ bool wxFileDialogBase::Create(wxWindow *parent,
     return true;
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+// Parses the filterStr, returning the number of filters.
+// Returns 0 if none or if there's a problem.
+// filterStr is in the form: "All files (*.*)|*.*|JPEG Files (*.jpeg)|*.jpg"
+int wxFileDialogBase::ParseWildcard(const wxString& filterStr,
+                                    wxArrayString& descriptions,
+                                    wxArrayString& filters)
+{
+    return ::wxParseCommonDialogsFilter(filterStr, descriptions, filters);
+}
+#endif // WXWIN_COMPATIBILITY_2_4
+
 #if WXWIN_COMPATIBILITY_2_6
 long wxFileDialogBase::GetStyle() const
 {
@@ -153,16 +165,16 @@ wxString wxFileDialogBase::AppendExtension(const wxString &filePath,
 // wxFileDialog convenience functions
 //----------------------------------------------------------------------------
 
-wxString wxDoFileSelector(const wxString& title,
-                          const wxString& defaultDir,
-                          const wxString& defaultFileName,
-                          const wxString& defaultExtension,
-                          const wxString& filter,
-                          int flags,
-                          wxWindow *parent,
-                          int x, int y)
+wxString wxFileSelector(const wxChar *title,
+                               const wxChar *defaultDir,
+                               const wxChar *defaultFileName,
+                               const wxChar *defaultExtension,
+                               const wxChar *filter,
+                               int flags,
+                               wxWindow *parent,
+                               int x, int y)
 {
-    // The defaultExtension, if non-empty, is
+    // The defaultExtension, if non-NULL, is
     // appended to the filename if the user fails to type an extension. The new
     // implementation (taken from wxFileSelectorEx) appends the extension
     // automatically, by looking at the filter specification. In fact this
@@ -174,17 +186,25 @@ wxString wxDoFileSelector(const wxString& title,
     // suitable filter.
 
     wxString filter2;
-    if ( !defaultExtension.empty() && filter.empty() )
+    if ( defaultExtension && !filter )
         filter2 = wxString(wxT("*.")) + defaultExtension;
-    else if ( !filter.empty() )
+    else if ( filter )
         filter2 = filter;
 
-    wxFileDialog fileDialog(parent, title, defaultDir,
-                            defaultFileName, filter2,
+    wxString defaultDirString;
+    if (defaultDir)
+        defaultDirString = defaultDir;
+
+    wxString defaultFilenameString;
+    if (defaultFileName)
+        defaultFilenameString = defaultFileName;
+
+    wxFileDialog fileDialog(parent, title, defaultDirString,
+                            defaultFilenameString, filter2,
                             flags, wxPoint(x, y));
 
-    // if filter is of form "All files (*)|*|..." set correct filter index
-    if ( !defaultExtension.empty() && filter2.find(wxT('|')) != wxString::npos )
+   // if filter is of form "All files (*)|*|..." set correct filter index
+    if((wxStrlen(defaultExtension) != 0) && (filter2.Find(wxT('|')) != wxNOT_FOUND))
     {
         int filterIndex = 0;
 
@@ -196,7 +216,7 @@ wxString wxDoFileSelector(const wxString& title,
             if (filters[n].Contains(defaultExtension))
             {
                 filterIndex = n;
-                break;
+                        break;
             }
         }
 
@@ -217,22 +237,22 @@ wxString wxDoFileSelector(const wxString& title,
 // wxFileSelectorEx
 //----------------------------------------------------------------------------
 
-wxString wxDoFileSelectorEx(const wxString& title,
-                            const wxString& defaultDir,
-                            const wxString& defaultFileName,
-                            int*            defaultFilterIndex,
-                            const wxString& filter,
-                            int             flags,
-                            wxWindow*       parent,
-                            int             x,
-                            int             y)
+wxString wxFileSelectorEx(const wxChar *title,
+                          const wxChar *defaultDir,
+                          const wxChar *defaultFileName,
+                          int* defaultFilterIndex,
+                          const wxChar *filter,
+                          int       flags,
+                          wxWindow* parent,
+                          int       x,
+                          int       y)
 
 {
     wxFileDialog fileDialog(parent,
-                            title,
-                            defaultDir,
-                            defaultFileName,
-                            filter,
+                            title ? title : wxEmptyString,
+                            defaultDir ? defaultDir : wxEmptyString,
+                            defaultFileName ? defaultFileName : wxEmptyString,
+                            filter ? filter : wxEmptyString,
                             flags, wxPoint(x, y));
 
     wxString filename;
@@ -252,9 +272,9 @@ wxString wxDoFileSelectorEx(const wxString& title,
 //----------------------------------------------------------------------------
 
 static wxString wxDefaultFileSelector(bool load,
-                                      const wxString& what,
-                                      const wxString& extension,
-                                      const wxString& default_name,
+                                      const wxChar *what,
+                                      const wxChar *extension,
+                                      const wxChar *default_name,
                                       wxWindow *parent)
 {
     wxString prompt;
@@ -266,13 +286,11 @@ static wxString wxDefaultFileSelector(bool load,
     prompt.Printf(str, what);
 
     wxString wild;
-    wxString ext;
-    if ( !extension.empty() )
+    const wxChar *ext = extension;
+    if ( ext )
     {
-        if ( extension[0u] == _T('.') )
-            ext = extension.substr(1);
-        else
-            ext = extension;
+        if ( *ext == wxT('.') )
+            ext++;
 
         wild.Printf(wxT("*.%s"), ext);
     }
@@ -281,7 +299,7 @@ static wxString wxDefaultFileSelector(bool load,
         wild = wxFileSelectorDefaultWildcardStr;
     }
 
-    return wxFileSelector(prompt, wxEmptyString, default_name, ext, wild,
+    return wxFileSelector(prompt, NULL, default_name, ext, wild,
                           load ? wxFD_OPEN : wxFD_SAVE, parent);
 }
 
@@ -289,10 +307,10 @@ static wxString wxDefaultFileSelector(bool load,
 // wxLoadFileSelector
 //----------------------------------------------------------------------------
 
-WXDLLEXPORT wxString wxDoLoadFileSelector(const wxString& what,
-                                          const wxString& extension,
-                                          const wxString& default_name,
-                                          wxWindow *parent)
+WXDLLEXPORT wxString wxLoadFileSelector(const wxChar *what,
+                                        const wxChar *extension,
+                                        const wxChar *default_name,
+                                        wxWindow *parent)
 {
     return wxDefaultFileSelector(true, what, extension, default_name, parent);
 }
@@ -301,10 +319,10 @@ WXDLLEXPORT wxString wxDoLoadFileSelector(const wxString& what,
 // wxSaveFileSelector
 //----------------------------------------------------------------------------
 
-WXDLLEXPORT wxString wxDoSaveFileSelector(const wxString& what,
-                                          const wxString& extension,
-                                          const wxString& default_name,
-                                          wxWindow *parent)
+WXDLLEXPORT wxString wxSaveFileSelector(const wxChar *what,
+                                        const wxChar *extension,
+                                        const wxChar *default_name,
+                                        wxWindow *parent)
 {
     return wxDefaultFileSelector(false, what, extension, default_name, parent);
 }

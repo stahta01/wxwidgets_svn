@@ -35,7 +35,6 @@
     #include "wx/window.h"
 
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
 
     #include "wx/button.h"
     #include "wx/bmpbuttn.h"
@@ -3196,9 +3195,10 @@ bool wxWin32InputHandler::HandleMouse(wxInputConsumer *control,
     // clicking on the control gives it focus
     if ( event.ButtonDown() )
     {
-        wxWindow * const win = control->GetInputWindow();
+        wxWindow *win = control->GetInputWindow();
 
-        if ( win->CanAcceptFocus() && wxWindow::FindFocus() != win )
+        if ( (wxWindow::FindFocus() != control->GetInputWindow()) &&
+             win->AcceptsFocus() )
         {
             win->SetFocus();
 

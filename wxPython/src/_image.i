@@ -27,6 +27,7 @@ enum {
     wxIMAGE_ALPHA_OPAQUE
 };
 
+
 // Constants for wxImage::Scale() for determining the level of quality
 enum
 {
@@ -642,6 +643,17 @@ string.", "",
         bool , SaveFile( const wxString& name, const wxString& mimetype ),
         "Saves an image in the named file.", "",
         SaveMimeFile);
+
+    DocDeclStrName(
+        bool , SaveFile( wxOutputStream& stream, int type ),
+        "Saves an image in the named file.", "",
+        SaveStream);
+
+    
+    DocDeclStrName(
+        bool , SaveFile( wxOutputStream& stream, const wxString& mimetype ),
+        "Saves an image in the named file.", "",
+        SaveMimeStream);
     
 
     DocDeclStrName(
@@ -1140,19 +1152,11 @@ MAKE_CONST_WXSTRING(IMAGE_OPTION_RESOLUTIONY);
 MAKE_CONST_WXSTRING(IMAGE_OPTION_RESOLUTIONUNIT);
 MAKE_CONST_WXSTRING(IMAGE_OPTION_QUALITY);
 
-// constants used with wxIMAGE_OPTION_RESOLUTIONUNIT
-enum wxImageResolution
+enum
 {
-    // Resolution not specified
-    wxIMAGE_RESOLUTION_NONE = 0,
-
-    // Resolution specified in inches
     wxIMAGE_RESOLUTION_INCHES = 1,
-
-    // Resolution specified in centimeters
     wxIMAGE_RESOLUTION_CM = 2
 };
-
 
 
 MAKE_CONST_WXSTRING(IMAGE_OPTION_BITSPERSAMPLE);

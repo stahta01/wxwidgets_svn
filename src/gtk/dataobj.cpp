@@ -58,7 +58,13 @@ wxDataFormat::wxDataFormat( wxDataFormatId type )
     SetType( type );
 }
 
-void wxDataFormat::InitFromString( const wxString &id )
+wxDataFormat::wxDataFormat( const wxChar *id )
+{
+    PrepareFormats();
+    SetId( id );
+}
+
+wxDataFormat::wxDataFormat( const wxString &id )
 {
     PrepareFormats();
     SetId( id );
@@ -132,11 +138,12 @@ void wxDataFormat::SetId( NativeFormat format )
         m_type = wxDF_PRIVATE;
 }
 
-void wxDataFormat::SetId( const wxString& id )
+void wxDataFormat::SetId( const wxChar *id )
 {
     PrepareFormats();
     m_type = wxDF_PRIVATE;
-    m_format = gdk_atom_intern( id.ToAscii(), FALSE );
+    wxString tmp( id );
+    m_format = gdk_atom_intern( (const char*) tmp.ToAscii(), FALSE );
 }
 
 void wxDataFormat::PrepareFormats()
@@ -272,12 +279,7 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
                     lenPrefix += 2;
                 }
 
-                // It would probably be nicer to use a GTK or Glib
-                // function to unescape the 8-bit strings pointed to
-                // by buf, but this does the same in wx code.
-                wxString filename_unicode = wxURI::Unescape(filename.c_str() + lenPrefix);
-                wxCharBuffer filename_8bit = filename_unicode.mb_str(wxConvISO8859_1);
-                AddFile(wxString(filename_8bit, *wxConvFileName));
+                AddFile(wxURI::Unescape(filename.c_str() + lenPrefix));
                 filename.Empty();
             }
             else if ( !filename.empty() )
@@ -294,7 +296,6 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
         }
         else
         {
-            // The string is in ISO-8859-1 according to XDND spec
             filename += *p;
         }
     }

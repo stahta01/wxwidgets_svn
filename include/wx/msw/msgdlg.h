@@ -12,25 +12,31 @@
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-class WXDLLEXPORT wxMessageDialog : public wxMessageDialogBase
+#include "wx/defs.h"
+#include "wx/dialog.h"
+
+/*
+ * Message box dialog
+ */
+
+extern WXDLLEXPORT_DATA(const wxChar) wxMessageBoxCaptionStr[];
+
+class WXDLLEXPORT wxMessageDialog: public wxDialog, public wxMessageDialogBase
 {
-public:
-    wxMessageDialog(wxWindow *parent,
-                    const wxString& message,
-                    const wxString& caption = wxMessageBoxCaptionStr,
-                    long style = wxOK|wxCENTRE,
-                    const wxPoint& WXUNUSED(pos) = wxDefaultPosition)
-        : wxMessageDialogBase(parent, message, caption, style)
-    {
-    }
-
-
-    virtual int ShowModal();
-
+DECLARE_DYNAMIC_CLASS(wxMessageDialog)
 protected:
-    DECLARE_DYNAMIC_CLASS(wxMessageDialog)
+    wxString    m_caption;
+    wxString    m_message;
+    wxWindow *  m_parent;
+public:
+    wxMessageDialog(wxWindow *parent, const wxString& message, const wxString& caption = wxMessageBoxCaptionStr,
+        long style = wxOK|wxCENTRE, const wxPoint& pos = wxDefaultPosition);
+
+    int ShowModal(void);
+
     DECLARE_NO_COPY_CLASS(wxMessageDialog)
 };
 
 
-#endif // _WX_MSGBOXDLG_H_
+#endif
+    // _WX_MSGBOXDLG_H_

@@ -88,9 +88,8 @@ public:
     void Quit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-    // UI update handlers
-    void OnCollapseUpdateUI(wxUpdateUIEvent& event);
-    void OnExpandUpdateUI(wxUpdateUIEvent& event);
+    // Menu command update functions
+    void UpdateUI(wxUpdateUIEvent& event);
 
 private:
     wxCollapsiblePane *m_collPane;
@@ -127,9 +126,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create and show the main frame
     MyFrame* frame = new MyFrame;
 
@@ -150,8 +146,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(PANE_ABOUT, MyFrame::OnAbout)
     EVT_MENU(PANE_QUIT, MyFrame::Quit)
 
-    EVT_UPDATE_UI(PANE_COLLAPSE, MyFrame::OnCollapseUpdateUI)
-    EVT_UPDATE_UI(PANE_EXPAND, MyFrame::OnExpandUpdateUI)
+    EVT_UPDATE_UI(wxID_ANY, MyFrame::UpdateUI)
 END_EVENT_TABLE()
 
 // My frame constructor
@@ -169,7 +164,7 @@ MyFrame::MyFrame()
     paneMenu->Append(PANE_COLLAPSE, _T("Collapse\tCtrl-C"));
     paneMenu->Append(PANE_EXPAND, _T("Expand\tCtrl-E"));
     paneMenu->AppendSeparator();
-    paneMenu->Append(PANE_SETLABEL, _T("Set label...\tCtrl-L"));
+    paneMenu->Append(PANE_SETLABEL, _T("Set label...\tCtrl-S"));
     paneMenu->AppendSeparator();
     paneMenu->Append(PANE_SHOWDLG, _T("Show dialog...\tCtrl-S"));
     paneMenu->AppendSeparator();
@@ -215,12 +210,7 @@ void MyFrame::OnExpand(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::OnSetLabel(wxCommandEvent& WXUNUSED(event) )
 {
-    wxString text = wxGetTextFromUser
-                    (
-                        wxT("Enter new label"),
-                        wxGetTextFromUserPromptStr,
-                        m_collPane->GetLabel()
-                    );
+    wxString text = wxGetTextFromUser(wxT("Input the new label"));
     m_collPane->SetLabel(text);
 }
 
@@ -240,14 +230,10 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
     wxAboutBox(info);
 }
 
-void MyFrame::OnCollapseUpdateUI(wxUpdateUIEvent& event)
+void MyFrame::UpdateUI(wxUpdateUIEvent& event)
 {
-    event.Enable(!m_collPane->IsCollapsed());
-}
-
-void MyFrame::OnExpandUpdateUI(wxUpdateUIEvent& event)
-{
-    event.Enable(m_collPane->IsCollapsed());
+    GetMenuBar()->Enable(PANE_COLLAPSE, !m_collPane->IsCollapsed());
+    GetMenuBar()->Enable(PANE_EXPAND, m_collPane->IsCollapsed());
 }
 
 

@@ -25,13 +25,21 @@
 
 const wxChar wxDataViewCtrlNameStr[] = wxT("dataviewCtrl");
 
+// ---------------------------------------------------------
+// wxDataViewModel
+// ---------------------------------------------------------
+
+IMPLEMENT_ABSTRACT_CLASS(wxDataViewModel, wxObject)
 
 // ---------------------------------------------------------
 // wxDataViewListModel
 // ---------------------------------------------------------
 
+IMPLEMENT_ABSTRACT_CLASS(wxDataViewListModel, wxDataViewModel)
+
 wxDataViewListModel::wxDataViewListModel()
 {
+    m_viewingColumns.DeleteContents( true );
     m_notifiers.DeleteContents( true );
 }
 
@@ -167,6 +175,28 @@ bool wxDataViewListModel::Cleared()
     return ret;
 }
 
+void wxDataViewListModel::AddViewingColumn( wxDataViewColumn *view_column, unsigned int model_column )
+{
+    m_viewingColumns.Append( new wxDataViewViewingColumn( view_column, model_column ) );
+}
+
+void wxDataViewListModel::RemoveViewingColumn( wxDataViewColumn *column )
+{
+    wxList::compatibility_iterator node = m_viewingColumns.GetFirst();
+    while (node)
+    {
+        wxDataViewViewingColumn* tmp = (wxDataViewViewingColumn*) node->GetData();
+
+        if (tmp->m_viewColumn == column)
+        {
+            m_viewingColumns.DeleteObject( tmp );
+            return;
+        }
+
+        node = node->GetNext();
+    }
+}
+
 void wxDataViewListModel::AddNotifier( wxDataViewListModelNotifier *notifier )
 {
     m_notifiers.Append( notifier );
@@ -187,7 +217,7 @@ class wxDataViewSortedListModelNotifier: public wxDataViewListModelNotifier
 public:
     wxDataViewSortedListModelNotifier( wxDataViewSortedListModel *model )
         { m_model = model; }
-        
+
     virtual bool RowAppended()
         { return m_model->ChildRowAppended(); }
 
@@ -276,6 +306,8 @@ int LINKAGEMODE wxDataViewIntermediateCmp( unsigned int row1, unsigned int row2 
 // wxDataViewSortedListModel
 // ---------------------------------------------------------
 
+IMPLEMENT_ABSTRACT_CLASS(wxDataViewSortedListModel, wxDataViewListModel)
+
 wxDataViewSortedListModel::wxDataViewSortedListModel( wxDataViewListModel *child ) :
   m_array( wxDataViewIntermediateCmp )
 {
@@ -285,26 +317,13 @@ wxDataViewSortedListModel::wxDataViewSortedListModel( wxDataViewListModel *child
 
     m_notifierOnChild = new wxDataViewSortedListModelNotifier( this );
     m_child->AddNotifier( m_notifierOnChild );
-    
-    m_child->IncRef();
 
     Resort();
 }
 
 wxDataViewSortedListModel::~wxDataViewSortedListModel()
 {
-    DetachChild();
-}
-
-void wxDataViewSortedListModel::DetachChild()
-{
-    if (m_child)
-    {
-        m_child->RemoveNotifier( m_notifierOnChild );
-        m_child->DecRef();
-    }
-    
-    m_child = NULL;
+    m_child->RemoveNotifier( m_notifierOnChild );
 }
 
 // FIXME
@@ -322,54 +341,17 @@ void wxDataViewSortedListModel::Resort()
 {
     InitStatics();
     
-    if (!m_child) return;
-    
-    unsigned int n = m_child->GetRowCount();
-    
-    unsigned int i;
-    if (n != m_array.GetCount())
-    {
-        // probably sorted for the first time -> no reordered
-        // -- just create index and leave
-        m_array.Clear();
-        for (i = 0; i < n; i++)
-            m_array.Add( i );
-        return;
-    }
-    
-    unsigned int *old_array = new unsigned int[ n ];
-
-    for (i = 0; i < n; i++)
-        old_array[i] = m_array[ i ];
-    
     m_array.Clear();
+    unsigned int n = m_child->GetNumberOfRows();
+    unsigned int i;
     for (i = 0; i < n; i++)
         m_array.Add( i );
-
-    unsigned int *order = new unsigned int[ n ];
-       
-    for (i = 0; i < n; i++)
-    {
-        unsigned int new_value = m_array[i];
-        
-        unsigned int old_pos;
-        for (old_pos = 0; old_pos < n; old_pos++)
-            if (old_array[old_pos] == new_value)
-                break;
-        order[i] = old_pos;
-    }
-    
-    delete [] old_array;
-    
-    wxDataViewListModel::RowsReordered( order );
-
-    delete [] order;
 }
 
 #if 0
 static void Dump( wxDataViewListModel *model, unsigned int col )
 {
-    unsigned int n = model->GetRowCount();
+    unsigned int n = model->GetNumberOfRows();
     unsigned int i;
     for (i = 0; i < n; i++)
     {
@@ -595,32 +577,28 @@ bool wxDataViewSortedListModel::ChildCleared()
     return wxDataViewListModel::Cleared();
 }
 
-unsigned int wxDataViewSortedListModel::GetRowCount() const
+unsigned int wxDataViewSortedListModel::GetNumberOfRows()
 {
-    if (!m_child) return 0;
-    
-    return m_child->GetRowCount();
+    return m_array.GetCount();
 }
 
-unsigned int wxDataViewSortedListModel::GetColumnCount() const
+unsigned int wxDataViewSortedListModel::GetNumberOfCols()
 {
-    if (!m_child) return 0;
-    
-    return m_child->GetColumnCount();
+    return m_child->GetNumberOfCols();
 }
 
-wxString wxDataViewSortedListModel::GetColumnType( unsigned int col ) const
+wxString wxDataViewSortedListModel::GetColType( unsigned int col )
 {
-    return m_child->GetColumnType( col );
+    return m_child->GetColType( col );
 }
 
-void wxDataViewSortedListModel::GetValue( wxVariant &variant, unsigned int col, unsigned int row ) const
+void wxDataViewSortedListModel::GetValue( wxVariant &variant, unsigned int col, unsigned int row )
 {
     unsigned int child_row = m_array[row];
     m_child->GetValue( variant, col, child_row );
 }
 
-bool wxDataViewSortedListModel::SetValue( const wxVariant &variant, unsigned int col, unsigned int row )
+bool wxDataViewSortedListModel::SetValue( wxVariant &variant, unsigned int col, unsigned int row )
 {
     unsigned int child_row = m_array[row];
     bool ret = m_child->SetValue( variant, col, child_row );
@@ -721,134 +699,10 @@ bool wxDataViewSortedListModel::Cleared()
 
 IMPLEMENT_ABSTRACT_CLASS(wxDataViewRendererBase, wxObject)
 
-wxDataViewRendererBase::wxDataViewRendererBase( const wxString &varianttype, 
-                                                wxDataViewCellMode WXUNUSED(mode),
-                                                int WXUNUSED(align) )
+wxDataViewRendererBase::wxDataViewRendererBase( const wxString &varianttype, wxDataViewCellMode mode )
 {
     m_variantType = varianttype;
-    m_editorCtrl = NULL;
-    m_row = (unsigned int) -1;
-}
-
-const wxDataViewCtrl* wxDataViewRendererBase::GetView() const
-{
-    return wx_const_cast(wxDataViewRendererBase*, this)->GetOwner()->GetOwner();
-}
-
-bool wxDataViewRendererBase::StartEditing( unsigned int row, wxRect labelRect )
-{
-    m_row = row; // remember for later
-                                     
-    unsigned int col = GetOwner()->GetModelColumn();
-    wxVariant value;
-    GetOwner()->GetOwner()->GetModel()->GetValue( value, col, row );
-    
-    m_editorCtrl = CreateEditorCtrl( GetOwner()->GetOwner()->GetMainWindow(), labelRect, value );
-    
-    wxDataViewEditorCtrlEvtHandler *handler = 
-        new wxDataViewEditorCtrlEvtHandler( m_editorCtrl, (wxDataViewRenderer*) this );
-        
-    m_editorCtrl->PushEventHandler( handler );
-    
-#if defined(__WXGTK20__) && !defined(wxUSE_GENERICDATAVIEWCTRL)
-    handler->SetFocusOnIdle();
-#else
-    m_editorCtrl->SetFocus();
-#endif
-
-    return true;
-}
-
-void wxDataViewRendererBase::CancelEditing()
-{
-    wxPendingDelete.Append( m_editorCtrl );
-    
-    GetOwner()->GetOwner()->GetMainWindow()->SetFocus();
-    
-    // m_editorCtrl->PopEventHandler( true );
-}
-
-bool wxDataViewRendererBase::FinishEditing()
-{
-    wxVariant value;
-    GetValueFromEditorCtrl( m_editorCtrl, value );
-
-    wxPendingDelete.Append( m_editorCtrl );
-    
-    GetOwner()->GetOwner()->GetMainWindow()->SetFocus();
-    
-    if (!Validate(value))
-        return false;
-        
-    unsigned int col = GetOwner()->GetModelColumn();
-    GetOwner()->GetOwner()->GetModel()->SetValue( value, col, m_row );
-    GetOwner()->GetOwner()->GetModel()->ValueChanged( col, m_row );
-    
-    // m_editorCtrl->PopEventHandler( true );
-    
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-// wxDataViewEditorCtrlEvtHandler
-//-----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(wxDataViewEditorCtrlEvtHandler, wxEvtHandler)
-    EVT_CHAR           (wxDataViewEditorCtrlEvtHandler::OnChar)
-    EVT_KILL_FOCUS     (wxDataViewEditorCtrlEvtHandler::OnKillFocus)
-    EVT_IDLE           (wxDataViewEditorCtrlEvtHandler::OnIdle)
-END_EVENT_TABLE()
-
-wxDataViewEditorCtrlEvtHandler::wxDataViewEditorCtrlEvtHandler(
-                                wxControl *editorCtrl,
-                                wxDataViewRenderer *owner )
-{
-    m_owner = owner;
-    m_editorCtrl = editorCtrl;
-
-    m_finished = false;
-}
-
-void wxDataViewEditorCtrlEvtHandler::OnIdle( wxIdleEvent &event )
-{
-    if (m_focusOnIdle)
-    {
-        m_focusOnIdle = false;
-        if (wxWindow::FindFocus() != m_editorCtrl)
-            m_editorCtrl->SetFocus();
-    }
-    
-    event.Skip();
-}
-
-void wxDataViewEditorCtrlEvtHandler::OnChar( wxKeyEvent &event )
-{
-    switch ( event.m_keyCode )
-    {
-        case WXK_RETURN:
-            m_finished = true;
-            m_owner->FinishEditing();
-            break;
-
-        case WXK_ESCAPE:
-            m_finished = true;
-            m_owner->CancelEditing();
-            break;
-
-        default:
-            event.Skip();
-    }
-}
-
-void wxDataViewEditorCtrlEvtHandler::OnKillFocus( wxFocusEvent &event )
-{
-    if (!m_finished)
-    {
-        m_finished = true;
-        m_owner->FinishEditing();
-    }
-
-    event.Skip();
+    m_mode = mode;
 }
 
 // ---------------------------------------------------------
@@ -857,31 +711,29 @@ void wxDataViewEditorCtrlEvtHandler::OnKillFocus( wxFocusEvent &event )
 
 IMPLEMENT_ABSTRACT_CLASS(wxDataViewColumnBase, wxObject)
 
-wxDataViewColumnBase::wxDataViewColumnBase(const wxString& WXUNUSED(title),
+wxDataViewColumnBase::wxDataViewColumnBase(const wxString& title,
                                            wxDataViewRenderer *renderer,
                                            unsigned int model_column,
                                            int WXUNUSED(width),
-                                           wxAlignment WXUNUSED(align),
-                                           int WXUNUSED(flags)) 
+                                           int flags ) 
 {
     m_renderer = renderer;
     m_model_column = model_column;
+    m_flags = flags;
+    m_title = title;
     m_owner = NULL;
     m_renderer->SetOwner( (wxDataViewColumn*) this );
-
-    // NOTE: the wxDataViewColumn's ctor must store the width, align, flags
-    //       parameters inside the native control!
 }
 
 wxDataViewColumnBase::wxDataViewColumnBase(const wxBitmap& bitmap,
                                            wxDataViewRenderer *renderer,
                                            unsigned int model_column,
                                            int WXUNUSED(width),
-                                           wxAlignment WXUNUSED(align),
-                                           int WXUNUSED(flags) ) 
+                                           int flags ) 
 {
     m_renderer = renderer;
     m_model_column = model_column;
+    m_flags = flags;
     m_bitmap = bitmap;
     m_owner = NULL;
     m_renderer->SetOwner( (wxDataViewColumn*) this );
@@ -891,67 +743,32 @@ wxDataViewColumnBase::~wxDataViewColumnBase()
 {
     if (m_renderer)
         delete m_renderer;
-}
 
-int wxDataViewColumnBase::GetFlags() const
-{
-    int ret = 0;
-
-    if (IsSortable())
-        ret |= wxDATAVIEW_COL_SORTABLE;
-    if (IsResizeable())
-        ret |= wxDATAVIEW_COL_RESIZABLE;
-    if (IsHidden())
-        ret |= wxDATAVIEW_COL_HIDDEN;
-
-    return ret;
-}
-
-void wxDataViewColumnBase::SetFlags(int flags)
-{
-    SetSortable((flags & wxDATAVIEW_COL_SORTABLE) != 0);
-    SetResizeable((flags & wxDATAVIEW_COL_RESIZABLE) != 0);
-    SetHidden((flags & wxDATAVIEW_COL_HIDDEN) != 0);
-}
-
-// ---------------------------------------------------------
-// wxDataViewEventListModelNotifier
-// ---------------------------------------------------------
-
-class WXDLLIMPEXP_ADV wxDataViewEventListModelNotifier: public wxDataViewListModelNotifier
-{
-public:
-    wxDataViewEventListModelNotifier( wxDataViewCtrl *ctrl ) { m_ctrl = ctrl; }
-    
-    bool SendEvent( wxEventType event_type, unsigned int row = 0, unsigned int col = 0 )
+    if (GetOwner())
     {
-        wxDataViewEvent event( event_type, m_ctrl->GetId() );
-        event.SetEventObject( m_ctrl );
-        event.SetModel( m_ctrl->GetModel() );
-        event.SetRow( row );
-        event.SetColumn( col );
-        m_ctrl->GetEventHandler()->ProcessEvent( event );
-        return true;
+        GetOwner()->GetModel()->RemoveViewingColumn( (wxDataViewColumn*) this );
     }
+}
 
-    virtual bool RowAppended()  { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROW_APPENDED ); }
-    virtual bool RowPrepended() { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROW_PREPENDED ); }
-    virtual bool RowInserted( unsigned int before )
-                                { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROW_INSERTED, before ); }
-    virtual bool RowDeleted( unsigned int row )
-                                { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROW_DELETED, row ); }
-    virtual bool RowChanged( unsigned int row )
-                                { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROW_CHANGED, row ); }
-    virtual bool ValueChanged( unsigned int col, unsigned int row )
-                                { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_VALUE_CHANGED, row, col ); }
-    virtual bool RowsReordered( unsigned int *new_order )
-                                { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_ROWS_REORDERED ); }
-    virtual bool Cleared()      { return SendEvent( wxEVT_COMMAND_DATAVIEW_MODEL_CLEARED ); }
+void wxDataViewColumnBase::SetTitle( const wxString &title )
+{
+    m_title = title;
+}
 
-private:
-    wxDataViewCtrl *m_ctrl;
-};
+wxString wxDataViewColumnBase::GetTitle()
+{
+    return m_title;
+}
 
+void wxDataViewColumnBase::SetBitmap( const wxBitmap &bitmap )
+{
+    m_bitmap = bitmap;
+}
+
+const wxBitmap &wxDataViewColumnBase::GetBitmap()
+{
+    return m_bitmap;
+}
 
 // ---------------------------------------------------------
 // wxDataViewCtrlBase
@@ -963,46 +780,15 @@ wxDataViewCtrlBase::wxDataViewCtrlBase()
 {
     m_model = NULL;
     m_cols.DeleteContents( true );
-    m_eventNotifier = NULL;
 }
 
 wxDataViewCtrlBase::~wxDataViewCtrlBase()
 {
-    // IMPORTANT: before calling DecRef() on our model (since it may 
-    //            result in a free() call), erase all columns (since
-    //            they hold a pointer to our model)
-    m_cols.Clear();
-
-    if (m_model)
-    {
-        if (m_eventNotifier)
-            m_model->RemoveNotifier( m_eventNotifier );
-        m_eventNotifier = NULL;
-    
-        m_model->DecRef();
-        m_model = NULL;
-    }
 }
 
 bool wxDataViewCtrlBase::AssociateModel( wxDataViewListModel *model )
 {
-    if (m_model)
-    {
-        if (m_eventNotifier)
-            m_model->RemoveNotifier( m_eventNotifier );
-        m_eventNotifier = NULL;
-        
-        m_model->DecRef();   // discard old model, if any
-    }
-
-    // add our own reference to the new model:
     m_model = model;
-    if (m_model)
-    {
-        m_model->IncRef(); 
-        m_eventNotifier = new wxDataViewEventListModelNotifier( (wxDataViewCtrl*) this );
-        m_model->AddNotifier( m_eventNotifier );
-    }
 
     return true;
 }
@@ -1013,93 +799,84 @@ wxDataViewListModel* wxDataViewCtrlBase::GetModel()
 }
 
 bool wxDataViewCtrlBase::AppendTextColumn( const wxString &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewTextRenderer( wxT("string"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewTextRenderer( wxT("string"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendToggleColumn( const wxString &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewToggleRenderer( wxT("bool"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewToggleRenderer( wxT("bool"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendProgressColumn( const wxString &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewProgressRenderer( wxEmptyString, wxT("long"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewProgressRenderer( wxEmptyString, wxT("long"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendDateColumn( const wxString &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewDateRenderer( wxT("datetime"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewDateRenderer( wxT("datetime"), mode), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendBitmapColumn( const wxString &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewBitmapRenderer( wxT("wxBitmap"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewBitmapRenderer( wxT("wxBitmap"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendTextColumn( const wxBitmap &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewTextRenderer( wxT("string"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewTextRenderer( wxT("string"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendToggleColumn( const wxBitmap &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewToggleRenderer( wxT("bool"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewToggleRenderer( wxT("bool"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendProgressColumn( const wxBitmap &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewProgressRenderer( wxEmptyString, wxT("long"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewProgressRenderer( wxEmptyString, wxT("long"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendDateColumn( const wxBitmap &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewDateRenderer( wxT("datetime"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewDateRenderer( wxT("datetime"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendBitmapColumn( const wxBitmap &label, unsigned int model_column,
-                            wxDataViewCellMode mode, int width, wxAlignment align, int flags )
+                            wxDataViewCellMode mode, int width )
 {
     return AppendColumn( new wxDataViewColumn( label, 
-        new wxDataViewBitmapRenderer( wxT("wxBitmap"), mode, (int)align ), 
-        model_column, width, align, flags ) );
+        new wxDataViewBitmapRenderer( wxT("wxBitmap"), mode ), model_column, width ) );
 }
 
 bool wxDataViewCtrlBase::AppendColumn( wxDataViewColumn *col )
 {
     m_cols.Append( (wxObject*) col );
     col->SetOwner( (wxDataViewCtrl*) this );
+    m_model->AddViewingColumn( col, col->GetModelColumn() );
     return true;
 }
 
-unsigned int wxDataViewCtrlBase::GetColumnCount() const
+unsigned int wxDataViewCtrlBase::GetNumberOfColumns()
 {
     return m_cols.GetCount();
 }
@@ -1129,15 +906,6 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_ROW_SELECTED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_ROW_ACTIVATED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_COLUMN_HEADER_CLICK)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_COLUMN_SORTED)
 
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROW_APPENDED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROW_PREPENDED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROW_INSERTED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROW_DELETED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROW_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_VALUE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_ROWS_REORDERED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_DATAVIEW_MODEL_CLEARED)
 
 #endif

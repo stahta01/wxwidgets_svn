@@ -43,7 +43,7 @@ public:
 
     virtual ~wxColour();
 
-    virtual bool FromString(const wxString& str);
+    virtual bool FromString(const wxChar *str);
 
     bool Ok() const { return IsOk(); }
     bool IsOk() const { return m_refData != NULL; }

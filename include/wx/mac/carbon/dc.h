@@ -141,23 +141,63 @@ public:
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
 
+    virtual void SetMapMode(int mode);
+    virtual void SetUserScale(double x, double y);
+
+    virtual void SetLogicalScale(double x, double y);
+    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
+    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
+    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
     virtual void SetLogicalFunction(int function);
 
     virtual void SetTextForeground(const wxColour& colour);
     virtual void SetTextBackground(const wxColour& colour);
 
+    virtual void ComputeScaleAndOrigin();
+
 public:
-    wxCoord XDEV2LOG(wxCoord x) const       { return DeviceToLogicalX( x ); }
-    wxCoord XDEV2LOGREL(wxCoord x) const    { return DeviceToLogicalXRel( x ); }
-    wxCoord YDEV2LOG(wxCoord y) const       { return DeviceToLogicalY( y ); }
-    wxCoord YDEV2LOGREL(wxCoord y) const    { return DeviceToLogicalYRel( y ); }
-    wxCoord XLOG2DEV(wxCoord x) const       { return LogicalToDeviceX( x ); }
-    wxCoord XLOG2DEVREL(wxCoord x) const    { return LogicalToDeviceXRel( x ); }
-    wxCoord YLOG2DEV(wxCoord y) const       { return LogicalToDeviceY( y ); }
-    wxCoord YLOG2DEVREL(wxCoord y) const    { return LogicalToDeviceYRel( y ); }
-    // probably no longer needed
-    wxCoord XLOG2DEVMAC(wxCoord x) const    { return LogicalToDeviceX( x ); }
-    wxCoord YLOG2DEVMAC(wxCoord y) const    { return LogicalToDeviceY( y ); }
+    wxCoord XDEV2LOG(wxCoord x) const
+    {
+        return wxRound((double)(x - m_deviceOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
+    }
+    wxCoord XDEV2LOGREL(wxCoord x) const
+    {
+        return wxRound((double)(x) / m_scaleX);
+    }
+    wxCoord YDEV2LOG(wxCoord y) const
+    {
+        return wxRound((double)(y - m_deviceOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
+    }
+    wxCoord YDEV2LOGREL(wxCoord y) const
+    {
+        return wxRound((double)(y) / m_scaleY);
+    }
+    wxCoord XLOG2DEV(wxCoord x) const
+    {
+        return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX;
+    }
+    wxCoord XLOG2DEVREL(wxCoord x) const
+    {
+        return wxRound((double)(x) * m_scaleX);
+    }
+    wxCoord YLOG2DEV(wxCoord y) const
+    {
+        return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY;
+    }
+    wxCoord YLOG2DEVREL(wxCoord y) const
+    {
+        return wxRound((double)(y) * m_scaleY);
+    }
+
+    wxCoord XLOG2DEVMAC(wxCoord x) const
+    {
+        return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX + m_macLocalOrigin.x;
+    }
+
+    wxCoord YLOG2DEVMAC(wxCoord y) const
+    {
+        return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY + m_macLocalOrigin.y;
+    }
 
 #if wxMAC_USE_CORE_GRAPHICS
     wxGraphicsContext* GetGraphicsContext() { return m_graphicContext; }
@@ -171,7 +211,7 @@ protected:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
@@ -214,14 +254,6 @@ protected:
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
                         int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
-
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY, bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
 
     // this is gnarly - we can't even call this function DoSetClippingRegion()
     // because of virtual function hiding

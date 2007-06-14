@@ -977,8 +977,8 @@ wxGnomePrintDC::wxGnomePrintDC( const wxPrintData& data )
     m_currentGreen = 0;
 
     m_signX =  1;  // default x-axis left to right
-    m_signY = -1;  // default y-axis bottom up -> top down
-
+    m_signY = -1;  // default y-axis bottom up -> top down    
+    
     GetSize( NULL, &m_deviceOffsetY );
 }
 
@@ -1829,7 +1829,7 @@ wxCoord wxGnomePrintDC::GetCharWidth() const
 void wxGnomePrintDC::DoGetTextExtent(const wxString& string, wxCoord *width, wxCoord *height,
                      wxCoord *descent,
                      wxCoord *externalLeading,
-                     const wxFont *theFont ) const
+                     wxFont *theFont ) const
 {
     if ( width )
         *width = 0;
@@ -2061,7 +2061,7 @@ void wxGnomePrintPreview::DetermineScaling()
         m_previewPrintout->SetPPIPrinter(wxGnomePrintDC::GetResolution(), wxGnomePrintDC::GetResolution());
 
         wxSize sizeDevUnits(paper->GetSizeDeviceUnits());
-
+        
         // TODO: get better resolution information from wxGnomePrintDC, if possible.
 
         sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxGnomePrintDC::GetResolution() / 72.0);

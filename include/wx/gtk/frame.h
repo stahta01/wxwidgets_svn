@@ -69,7 +69,6 @@ public:
     void SetToolBar(wxToolBar *toolbar);
 #endif // wxUSE_TOOLBAR
     
-    virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
     wxPoint GetClientAreaOrigin() const { return wxPoint(0, 0); }
 
     // implementation from now on
@@ -92,6 +91,7 @@ protected:
 #endif // wxUSE_STATUSBAR
 
     // override wxWindow methods to take into account tool/menu/statusbars
+    virtual void DoSetClientSize(int width, int height);
     virtual void DoGetClientSize( int *width, int *height ) const;
 
 #if wxUSE_MENUS_NATIVE
@@ -104,9 +104,6 @@ public:
     void UpdateMenuBarSize();
 
 #endif // wxUSE_MENUS_NATIVE
-
-private:
-    long m_fsSaveFlag;
 
     DECLARE_DYNAMIC_CLASS(wxFrame)
 };

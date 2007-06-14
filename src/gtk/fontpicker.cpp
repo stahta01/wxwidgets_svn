@@ -60,6 +60,9 @@ bool wxFontButton::Create( wxWindow *parent, wxWindowID id,
 {
     if (!gtk_check_version(2,4,0))
     {
+        m_needParent = true;
+        m_acceptsFocus = true;
+
         if (!PreCreation( parent, pos, size ) ||
             !wxControl::CreateBase(parent, id, pos, size, style, validator, name))
         {
@@ -82,7 +85,7 @@ bool wxFontButton::Create( wxWindow *parent, wxWindowID id,
         gtk_font_button_set_use_size(GTK_FONT_BUTTON(m_widget), usefont);
         gtk_font_button_set_use_font(GTK_FONT_BUTTON(m_widget), usefont);
 
-        gtk_widget_show(m_widget);
+        gtk_widget_show( GTK_WIDGET(m_widget) );
 
         // GtkFontButton signals
         g_signal_connect(m_widget, "font-set",

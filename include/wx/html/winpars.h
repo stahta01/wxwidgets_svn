@@ -146,7 +146,7 @@ public:
     virtual wxFont* CreateCurrentFont();
 
 protected:
-    virtual void AddText(const wxString& txt);
+    virtual void AddText(const wxChar* txt);
 
 private:
     void DoAddText(wxChar *temp, int& templen, wxChar nbsp);

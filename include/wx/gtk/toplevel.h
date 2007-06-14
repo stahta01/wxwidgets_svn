@@ -47,6 +47,7 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
+    virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons);
     virtual void Restore();
 
@@ -92,16 +93,16 @@ public:
     int           m_miniEdge,
                   m_miniTitle;
     GtkWidget    *m_mainWidget;
+    bool          m_insertInClientArea;  /* not from within OnCreateXXX */
 
     bool          m_fsIsShowing;         /* full screen */
     long          m_fsSaveGdkFunc, m_fsSaveGdkDecor;
+    long          m_fsSaveFlag;
     wxRect        m_fsSaveFrame;
 
     // m_windowStyle translated to GDK's terms
     long          m_gdkFunc,
                   m_gdkDecor;
-
-    bool m_sizeSet;
 
     // private gtk_timeout_add result for mimicing wxUSER_ATTENTION_INFO and
     // wxUSER_ATTENTION_ERROR difference, -2 for no hint, -1 for ERROR hint, rest for GtkTimeout handle.
@@ -113,39 +114,28 @@ public:
                                  int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
                                  int incW = wxDefaultCoord, int incH = wxDefaultCoord );
 
-    // return the full size of the window without WM decorations
-    void GTKDoGetSize(int *width, int *height) const;
-
-    void GtkUpdateSize() { m_sizeSet = false; }
-
 protected:
     // common part of all ctors
     void Init();
 
-    // move the window to the specified location and resize it
+    // move the window to the specified location and resize it: this is called
+    // from both DoSetSize() and DoSetClientSize()
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    // take into account WM decorations here
-    virtual void DoGetSize(int *width, int *height) const;
+    // override wxWindow methods to take into account tool/menu/statusbars
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
+                                 
+    virtual void DoSetClientSize(int width, int height);
+    virtual void DoGetClientSize( int *width, int *height ) const;
 
-    // override these methods to take into account tool/menu/statusbars
-    virtual void DoGetClientSize(int *width, int *height) const;
-
-    // this method takes the size of the window not taking account of
-    // decorations
-    void GTKDoSetSize(int width, int height);
-
-
-    // string shown in the title bar
-    wxString m_title;
+    wxString      m_title;
 
     // is the frame currently iconized?
     bool m_isIconized;
-
-    // is the frame currently grabbed explicitly by the application?
+    // is the frame currently grabbed explicitly
+    // by the application?
     bool m_grabbed;
 };
 

@@ -690,26 +690,32 @@ void wxTextCtrl::SetEditable( bool editable )
     }
 }
 
-void wxTextCtrl::DoEnable( bool enable )
+bool wxTextCtrl::Enable( bool enable )
 {
+    if (!wxWindowBase::Enable(enable))
+    {
+        // nothing to do
+        return false;
+    }
+
     if (m_windowStyle & wxTE_MULTILINE)
     {
         gtk_text_set_editable( GTK_TEXT(m_text), enable );
+        OnParentEnable(enable);
     }
     else
     {
         gtk_widget_set_sensitive( m_text, enable );
     }
+
+    return true;
 }
 
 // wxGTK-specific: called recursively by Enable,
 // to give widgets an oppprtunity to correct their colours after they
 // have been changed by Enable
-void wxTextCtrl::OnEnabled( bool enable )
+void wxTextCtrl::OnParentEnable( bool enable )
 {
-    if ( IsSingleLine() )
-        return;
-
     // If we have a custom background colour, we use this colour in both
     // disabled and enabled mode, or we end up with a different colour under the
     // text.

@@ -266,7 +266,7 @@ bool wxNotebook::SetPageText( size_t nPage,
     return (bool)::WinSendMsg( m_hWnd
                               ,BKM_SETTABTEXT
                               ,MPFROMLONG((ULONG)m_alPageId[nPage])
-                              ,MPFROMP((const char*)rsStrText.c_str())
+                              ,MPFROMP((PSZ)rsStrText.c_str())
                              );
 } // end of wxNotebook::SetPageText
 

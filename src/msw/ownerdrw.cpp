@@ -198,10 +198,7 @@ bool wxOwnerDrawn::OnMeasureItem(size_t *pwidth, size_t *pheight)
 
         dc.SetFont(GetFontToUse());
 
-        wxCoord w, h;
-        dc.GetTextExtent(str, &w, &h);
-        *pwidth = w;
-        *pheight = h;
+        dc.GetTextExtent(str, (long *)pwidth, (long *)pheight);
 
         // add space at the end of the menu for the submenu expansion arrow
         // this will also allow offsetting the accel string from the right edge
@@ -358,8 +355,7 @@ bool wxOwnerDrawn::OnDrawItem(wxDC& dc,
         SIZE sizeRect;
         ::GetTextExtentPoint32(hdc, strMenuText.c_str(), strMenuText.length(), &sizeRect);
         ::DrawState(hdc, NULL, NULL,
-                    (LPARAM)strMenuText.wx_str(),
-                    strMenuText.length(),
+                    (LPARAM)strMenuText.c_str(), strMenuText.length(),
                     xText, rc.y + (int) ((rc.GetHeight()-sizeRect.cy)/2.0), // centre text vertically
                     rc.GetWidth()-margin, sizeRect.cy,
                     DST_PREFIXTEXT |
@@ -376,8 +372,7 @@ bool wxOwnerDrawn::OnDrawItem(wxDC& dc,
             // right align accel string with right edge of menu ( offset by the
             // margin width )
             ::DrawState(hdc, NULL, NULL,
-                    (LPARAM)m_strAccel.wx_str(),
-                    m_strAccel.length(),
+                    (LPARAM)m_strAccel.c_str(), m_strAccel.length(),
                     rc.GetWidth()-16-accel_width, rc.y+(int) ((rc.GetHeight()-sizeRect.cy)/2.0),
                     0, 0,
                     DST_TEXT |

@@ -116,7 +116,7 @@ protected:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     void Init();
 

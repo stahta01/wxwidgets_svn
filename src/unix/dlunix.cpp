@@ -271,12 +271,14 @@ void *wxDynamicLibrary::RawGetSymbol(wxDllType handle, const wxString& name)
 /* static */
 void wxDynamicLibrary::Error()
 {
-    wxString err(dlerror());
+#if wxUSE_UNICODE
+    wxWCharBuffer buffer = wxConvLocal.cMB2WC( dlerror() );
+    const wxChar *err = buffer;
+#else
+    const wxChar *err = dlerror();
+#endif
 
-    if ( err.empty() )
-        err = _("Unknown dynamic library error");
-
-    wxLogError(wxT("%s"), err);
+    wxLogError(wxT("%s"), err ? err : _("Unknown dynamic library error"));
 }
 
 #endif // wxHAVE_DYNLIB_ERROR

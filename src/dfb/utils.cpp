@@ -16,7 +16,6 @@
 #endif
 
 #include "wx/utils.h"
-#include "wx/evtloop.h"
 #include "wx/apptrait.h"
 #include "wx/unix/execute.h"
 
@@ -37,12 +36,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     if ( verMin ) *verMaj = DIRECTFB_MINOR_VERSION;
 
     return wxPORT_DFB;
-}
-
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
 }
 
 // ----------------------------------------------------------------------------
